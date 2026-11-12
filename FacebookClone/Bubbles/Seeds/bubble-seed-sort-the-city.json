@@ -26,31 +26,67 @@
   },
   "chain": null,
   "style": {
-    "palette": "lilac-haze",
+    "look": "paper",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#F7F1E3",
+      "bg_bottom": "#EBDDC5",
+      "ink": "#2F2A3B",
+      "primary": "#E76F51",
+      "secondary": "#2A9D8F",
+      "accent": "#E0A93B",
+      "danger": "#C8553D"
+    },
+    "font": "rounded",
+    "motif": "city",
     "emoji": "🗺️",
-    "mood_preset": "curious"
+    "mood_preset": "playful",
+    "cover_prompt": "paper cutout diorama of a hilly city map with little houses, a bowl of noodles and a bridge, layered craft paper"
   },
   "concepts": [
     {
-      "use": "space.bins"
+      "use": "space.sort_bins"
     },
     {
-      "use": "entity.tile"
+      "use": "entity.sort_bubble",
+      "params": {
+        "rise_speed": 30,
+        "spawn_every": 1.8,
+        "max_on_screen": 4
+      }
     },
     {
-      "use": "input.select"
+      "use": "input.sort_gesture"
     },
     {
-      "use": "rule.sort_correct"
+      "use": "rule.sort_match"
     },
     {
-      "use": "rule.attempt_budget"
+      "use": "score.sort_streak"
     },
     {
-      "use": "score.count"
+      "use": "rule.lives",
+      "params": {
+        "lives": 3,
+        "grace": 0
+      }
+    },
+    {
+      "use": "behavior.speed_ramp",
+      "params": {
+        "rate": 0.15,
+        "max": 1.6,
+        "delay": 5
+      }
     },
     {
       "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid"
     }
   ],
   "glue": {},
@@ -58,29 +94,35 @@
     "groups": [
       {
         "label": "Neighborhood",
+        "emoji": "🏘️",
         "items": [
           "Mission",
           "Sunset",
           "Richmond",
-          "Noe Valley"
+          "Noe Valley",
+          "North Beach"
         ]
       },
       {
         "label": "Food",
+        "emoji": "🍜",
         "items": [
           "Sourdough",
           "Burrito",
           "Dim sum",
-          "Cioppino"
+          "Cioppino",
+          "Dungeness crab"
         ]
       },
       {
         "label": "Landmark",
+        "emoji": "🌉",
         "items": [
           "Coit Tower",
           "Ferry Building",
           "Painted houses",
-          "Golden Gate"
+          "Golden Gate",
+          "Lombard Street"
         ]
       }
     ]
@@ -96,7 +138,6 @@
     "duration_sec": 46.9,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-aiko-tanaka",
     "created_hours_ago": 40,

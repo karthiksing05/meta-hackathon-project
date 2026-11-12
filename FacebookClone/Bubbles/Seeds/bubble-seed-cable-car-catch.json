@@ -26,34 +26,89 @@
   },
   "chain": null,
   "style": {
-    "palette": "sky-glow",
+    "look": "pixel",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#7FD3F7",
+      "bg_bottom": "#C9EEFF",
+      "ink": "#1D1B33",
+      "primary": "#D7263D",
+      "secondary": "#E59500",
+      "accent": "#3A6FE0",
+      "danger": "#9B1D20"
+    },
+    "font": "pixel",
+    "motif": "city",
     "emoji": "🚋",
-    "mood_preset": "playful"
+    "mood_preset": "playful",
+    "cover_prompt": "pixel art of a red cable car climbing a steep street, blue sky, retro arcade palette"
   },
   "concepts": [
     {
-      "use": "space.stage"
+      "use": "space.timing_stage",
+      "params": {
+        "backdrop": "auto"
+      }
     },
     {
-      "use": "entity.mover"
+      "use": "entity.timing_mover",
+      "params": {
+        "motion": "slide",
+        "speed": 0.42,
+        "ramp": 0.03,
+        "max_speed": 0.9
+      }
     },
     {
       "use": "input.tap"
     },
     {
-      "use": "rule.timing_window"
+      "use": "rule.timing_window",
+      "params": {
+        "targets": 12,
+        "window": 30,
+        "narrow": 0.3,
+        "passes": 3
+      }
     },
     {
       "use": "score.precision"
     },
     {
+      "use": "rule.lives",
+      "params": {
+        "lives": 3,
+        "grace": 0
+      }
+    },
+    {
       "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid"
     }
   ],
   "glue": {},
   "content": {
     "mover": "🚋",
-    "target_label": "Stop"
+    "target_label": "Stop",
+    "stops": [
+      "Powell St",
+      "Union Square",
+      "Nob Hill",
+      "Chinatown",
+      "Russian Hill",
+      "Hyde St",
+      "Lombard St",
+      "North Beach",
+      "Aquatic Park",
+      "Fisherman's Wharf",
+      "Van Ness",
+      "California St"
+    ]
   },
   "seed": 8080,
   "studio": {
@@ -66,7 +121,6 @@
     "duration_sec": 49.6,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-omar-haddad",
     "created_hours_ago": 18,

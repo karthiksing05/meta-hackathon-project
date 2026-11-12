@@ -1,0 +1,160 @@
+{
+  "id": "trivia-thursday-sf",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Trivia Thursday: SF",
+  "one_line_rule": "Pop the right answer before the bar runs out.",
+  "formula": "answer",
+  "brief": {
+    "intent": "warm up the Thursday trivia team",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "playful"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "neon",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#0B0A1F",
+      "bg_bottom": "#1C1240",
+      "ink": "#F7F4FF",
+      "primary": "#FF2E97",
+      "secondary": "#2DE2E6",
+      "accent": "#F9F871",
+      "danger": "#FF3B30"
+    },
+    "font": "condensed",
+    "motif": "grid",
+    "emoji": "🧠",
+    "mood_preset": "playful",
+    "cover_prompt": "neon sign of a glowing brain and a question mark over a dark trivia night stage, electric pink and cyan"
+  },
+  "concepts": [
+    {
+      "use": "space.answer_stage"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.answer_key",
+      "params": {
+        "round_seconds": 10,
+        "reveal_seconds": 1.8
+      }
+    },
+    {
+      "use": "score.answer_points"
+    },
+    {
+      "use": "flow.rounds",
+      "params": {
+        "count": 6,
+        "pause": 100,
+        "pass_ratio": 0.5
+      }
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "rounds": [
+      {
+        "prompt": "The Golden Gate Bridge's official color is…",
+        "choices": [
+          "International orange",
+          "Golden yellow",
+          "Fire red",
+          "Sunset coral"
+        ],
+        "answer": 0,
+        "note": "Picked partly so the bridge stands out in the fog."
+      },
+      {
+        "prompt": "Which park is bigger?",
+        "choices": [
+          "Golden Gate Park",
+          "Central Park (NYC)"
+        ],
+        "answer": 0,
+        "note": "About 1,000 acres to 843."
+      },
+      {
+        "prompt": "Dolores Park is in which neighborhood?",
+        "choices": [
+          "Mission",
+          "Marina",
+          "Sunset",
+          "Presidio"
+        ],
+        "answer": 0
+      },
+      {
+        "prompt": "Which bridge runs from SF to Oakland?",
+        "choices": [
+          "Golden Gate",
+          "Bay Bridge",
+          "Dumbarton"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "Sourdough gets its tang from…",
+        "choices": [
+          "Lemon juice",
+          "Wild yeast & bacteria",
+          "Vinegar",
+          "Fog"
+        ],
+        "answer": 1,
+        "note": "One of those bacteria is named for the city."
+      },
+      {
+        "prompt": "Where do the sea lions lounge?",
+        "choices": [
+          "Ocean Beach",
+          "Crissy Field",
+          "Pier 39"
+        ],
+        "answer": 2
+      }
+    ]
+  },
+  "seed": 3344,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-11T21:00:00Z",
+    "duration_sec": 35.9,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-chloe-nguyen",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 22,
+    "play_count": 212,
+    "like_count": 64
+  }
+}

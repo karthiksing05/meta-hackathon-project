@@ -3,7 +3,7 @@
   "version": 1,
   "engine_version": 1,
   "title": "Bay Bubbles",
-  "one_line_rule": "Drop bubbles. Two of a kind merge into something bigger.",
+  "one_line_rule": "Let bubbles float up. Two of a kind merge into something bigger.",
   "formula": "merge",
   "brief": {
     "intent": "a calm merge game about the bay",
@@ -26,22 +26,34 @@
   },
   "chain": null,
   "style": {
+    "look": "glow",
     "palette": "mint-pop",
+    "font": "rounded",
+    "motif": "waves",
     "emoji": "🌊",
-    "mood_preset": "calm"
+    "mood_preset": "chill",
+    "cover_prompt": "dreamy glowing soap bubbles rising through calm bay water with a tiny whale inside one, pastel iridescence"
   },
   "concepts": [
     {
-      "use": "space.jar"
+      "use": "space.merge_jar",
+      "params": {
+        "rise": true
+      }
     },
     {
-      "use": "entity.orb"
+      "use": "entity.merge_orb",
+      "params": {
+        "base_radius": 17,
+        "growth": 1.25,
+        "spawn_tiers": 4
+      }
     },
     {
-      "use": "input.tap"
-    },
-    {
-      "use": "behavior.drop"
+      "use": "input.drag",
+      "params": {
+        "show_line": false
+      }
     },
     {
       "use": "rule.merge_on_touch"
@@ -50,10 +62,20 @@
       "use": "rule.overflow_fail"
     },
     {
+      "use": "rule.timer",
+      "params": {
+        "seconds": 60,
+        "outcome": "success"
+      }
+    },
+    {
       "use": "score.merge_value"
     },
     {
       "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
     }
   ],
   "glue": {},
@@ -66,6 +88,15 @@
       "🐟",
       "🦭",
       "🐋"
+    ],
+    "tier_names": [
+      "a bubble",
+      "a drop",
+      "a shell",
+      "a crab",
+      "a fish",
+      "a seal",
+      "a whale"
     ]
   },
   "seed": 6060,
@@ -79,7 +110,6 @@
     "duration_sec": 55.0,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-theo-adeyemi",
     "created_hours_ago": 60,

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Kit preview</title>
+<!--
+  Visual check for the formula kits (group, answer, time, merge) on the real runtime and host.
+  Adapted from the engine's tools/runtime-tests/preview.html.
+
+    preview.html?seed=bay-bubbles&mode=demo            live demo (needs --allow-file-access-from-files over file://)
+    preview.html?formula=merge&t=12                    deterministic still: the demo after 12 s
+    preview.html?seed=sort-the-city&t=6&skill=0.5&botseed=3
+
+  Params: seed (bubble-seed-<seed>.json) or formula (catalog example); mode (demo, play, replay,
+  poster); t (seconds of demo to step through, then draw one still and stop); skill; botseed;
+  dark=1 (force the night-bloom palette); look=<id> (another look, with its example colors unless keepcolors=1) / font=<id>; patch={"concept.id":{params}} (tweak params); poster=1 (the
+  card poster from BubbleHost.poster); debug=1 (message log).
+-->
+<link rel="stylesheet" href="../../FacebookClone/Bubbles/Runtime/web/bubble-glow.css">
+<style>
+  /* Headless Chrome's window can be wider than --window-size; pin the phone size for stills. */
+  body.phone #bubble-root { right: auto; bottom: auto; width: 390px; height: 844px; }
+  #preview-log { position: fixed; left: 8px; right: 8px; bottom: 8px; max-height: 32%; overflow: auto; z-index: 10;
+    font: 11px/1.35 ui-monospace, Menlo, monospace; color: #fff; background: rgba(20, 10, 40, 0.72); border-radius: 10px; padding: 8px; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="bubble-root" class="palette-lilac-haze"><canvas id="bubble-canvas"></canvas></div>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-runtime.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-common.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-answer.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-dodge.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-group.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-guess.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-merge.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-time.js"></script>
+<script>
+(function () {
+  "use strict";
+  const q = new URLSearchParams(location.search);
+  const debug = q.get("debug") === "1";
+  let logEl = null;
+  function note(msg) {
+    if (!debug) return;
+    if (!logEl) { logEl = document.createElement("div"); logEl.id = "preview-log"; document.body.appendChild(logEl); }
+    const line = document.createElement("div");
+    line.textContent = msg;
+    logEl.appendChild(line);
+  }
+  if (window.BubbleHost) BubbleHost.onmessage = (m) => { if (m.type !== "perf") note(JSON.stringify(Object.assign({}, m, { replay: undefined }))); };
+
+  function loadJSON(url) {
+    return new Promise((resolve, reject) => {
+      const x = new XMLHttpRequest();
+      x.open("GET", url);
+      x.onload = () => { try { resolve(JSON.parse(x.responseText)); } catch (e) { reject(e); } };
+      x.onerror = () => reject(new Error("Couldn't read " + url));
+      x.send();
+    });
+  }
+
+  async function manifest() {
+    if (q.get("formula")) return Bubble.catalog().formulas.find((x) => x.id === q.get("formula")).example;
+    return loadJSON("../../FacebookClone/Bubbles/Seeds/bubble-seed-" + (q.get("seed") || "bay-bubbles") + ".json");
+  }
+
+  async function main() {
+    if (q.get("t")) document.body.classList.add("phone");
+    const m = await manifest();
+    if (q.get("dark") === "1") m.style = Object.assign({}, m.style, { palette: "night-bloom", colors: undefined });
+    if (q.get("look")) {
+      // Try another look; its catalog example colors come along unless keepcolors=1.
+      const lk = (JSON.parse(Bubble.catalogJSON()).looks || []).find((x) => x.id === q.get("look"));
+      m.style = Object.assign({}, m.style, { look: q.get("look") });
+      if (lk && lk.example_colors && q.get("keepcolors") !== "1") m.style = Object.assign({}, m.style, { palette: "custom", colors: lk.example_colors });
+    }
+    if (q.get("font")) m.style = Object.assign({}, m.style, { font: q.get("font") });
+    if (q.get("patch")) {
+      // patch={"concept.id": {params}}: tweak params (or add a concept) for tuning stills.
+      const patch = JSON.parse(q.get("patch"));
+      m.concepts = m.concepts.map((c) => Object.assign({}, c));
+      for (const id of Object.keys(patch)) {
+        const c = m.concepts.find((x) => x.use === id);
+        if (c) c.params = Object.assign({}, c.params, patch[id]); else m.concepts.push({ use: id, params: patch[id] });
+      }
+    }
+    const v = Bubble.validate(m);
+    note("validate: " + (v.ok ? "ok" : JSON.stringify(v.errors)));
+    const mode = q.get("mode") || "demo";
+    const payload = { manifest: m, mode, player: { name: "Alex", best: null }, muted: true, insets: { top: 0, bottom: 0 } };
+    if (q.get("skill")) payload.bot_skill = Number(q.get("skill"));
+    const prep = JSON.parse(BubbleHost.prepare(payload));
+    note("prepare: " + JSON.stringify(prep));
+    if (!prep.ok) document.title = "error prepare: " + prep.error;
+    if (q.get("poster") === "1") {
+      // The card poster (BubbleHost.poster: tick 0 with g.poster), shown full size.
+      const url = BubbleHost.poster(prep.key, JSON.stringify({ width: 390, height: 844, scale: 2, type: "image/png" }));
+      document.body.innerHTML = "";
+      const img = document.createElement("img");
+      img.src = url; img.style.cssText = "position:fixed;left:0;top:0;width:390px;height:844px";
+      document.body.appendChild(img);
+      document.title = url ? "poster" : "error no poster";
+      return;
+    }
+    const act = JSON.parse(BubbleHost.activate(prep.key, JSON.stringify(payload)));
+    note("activate: " + JSON.stringify(act));
+    const host = BubbleHost._host;
+    if (q.get("botseed") && host.run) {
+      // Restart the demo run with a chosen bot seed.
+      const session = host.entry.session;
+      host.run = session.newRun({ mode: "demo", bot: true, botSkill: payload.bot_skill || 0.86, botSeed: Number(q.get("botseed")), fx: host.fx(), player: payload.player });
+      host.run.begin();
+    }
+    if (q.get("t")) {
+      // Deterministic still: step the demo tick by tick (cosmetic effects too), draw once, stop.
+      host.stopLoop();
+      const ticks = Math.round(Number(q.get("t")) * 60);
+      for (let i = 0; i < ticks && host.run && !host.run.ended; i++) {
+        host.renderT += 1 / 60;
+        host.run.step();
+        host.updateFx(1 / 60);
+        host.updateHud(false);
+      }
+      host.render(0);
+      document.title = "still " + (host.run ? host.run.tick : 0);
+    }
+  }
+
+  main().catch((e) => { note("error: " + e.message); console.error(e); document.title = "error " + e.message; });
+})();
+</script>
+</body>
+</html>

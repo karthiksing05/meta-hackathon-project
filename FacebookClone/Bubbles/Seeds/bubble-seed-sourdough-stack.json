@@ -26,33 +26,74 @@
   },
   "chain": null,
   "style": {
-    "palette": "peach-fizz",
+    "look": "clay",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#FFE9D2",
+      "bg_bottom": "#F7CFA6",
+      "ink": "#45261A",
+      "primary": "#D9883E",
+      "secondary": "#8E5B3A",
+      "accent": "#6FA877",
+      "danger": "#C8423B"
+    },
+    "font": "rounded",
+    "motif": "none",
     "emoji": "🍞",
-    "mood_preset": "silly"
+    "mood_preset": "funny",
+    "cover_prompt": "claymation tower of chunky sourdough loaves and croissants on a little plate, soft studio light"
   },
   "concepts": [
     {
-      "use": "space.stage"
+      "use": "space.timing_stage",
+      "params": {
+        "backdrop": "plain"
+      }
     },
     {
-      "use": "entity.mover"
+      "use": "entity.timing_mover",
+      "params": {
+        "motion": "swing",
+        "speed": 0.4,
+        "ramp": 0.03,
+        "max_speed": 0.9,
+        "size": 150
+      }
     },
     {
       "use": "input.tap"
     },
     {
-      "use": "rule.timing_window"
+      "use": "rule.timing_stack",
+      "params": {
+        "goal": 16,
+        "perfect": 4,
+        "piece_height": 30
+      }
     },
     {
       "use": "score.precision"
     },
     {
       "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid"
     }
   ],
   "glue": {},
   "content": {
-    "mover": "🍞"
+    "mover": "🍞",
+    "pieces": [
+      "🍞",
+      "🥖",
+      "🥐",
+      "🥯"
+    ],
+    "goal_label": "loaves"
   },
   "seed": 4242,
   "studio": {
@@ -65,7 +106,6 @@
     "duration_sec": 52.3,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-diego-ramirez",
     "created_hours_ago": 7,

@@ -1,0 +1,264 @@
+{
+  "id": "picnic-this-or-that",
+  "version": 1,
+  "engine_version": 1,
+  "title": "This or That: Picnic",
+  "one_line_rule": "Pick your side, then see who's with you.",
+  "formula": "answer",
+  "brief": {
+    "intent": "break the ice before the picnic",
+    "audience": "event:event-newcomers-picnic",
+    "mood": [
+      "warm",
+      "playful"
+    ],
+    "energy": "low",
+    "competition": "light",
+    "occasion": "icebreaker",
+    "content_sources": [
+      "RSVP answers (opted in)"
+    ]
+  },
+  "structure": {
+    "cadence": "once",
+    "scope": "event:event-newcomers-picnic",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "paper",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#FFF4E0",
+      "bg_bottom": "#FFE2C2",
+      "ink": "#3A2A2A",
+      "primary": "#F25F5C",
+      "secondary": "#3FA796",
+      "accent": "#F4A62A",
+      "danger": "#D7263D"
+    },
+    "font": "hand",
+    "motif": "leaves",
+    "emoji": "🍉",
+    "mood_preset": "warm",
+    "cover_prompt": "paper cutout picnic blanket on a sunny park hill with watermelon slices and a frisbee, layered craft paper"
+  },
+  "concepts": [
+    {
+      "use": "space.answer_stage"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.consensus",
+      "params": {
+        "reveal_seconds": 2.2
+      }
+    },
+    {
+      "use": "score.closeness"
+    },
+    {
+      "use": "flow.rounds",
+      "params": {
+        "count": 6,
+        "pause": 120,
+        "pass_ratio": 0
+      }
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid",
+      "params": {
+        "set": "hearts"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "crowd": "Picnic crew",
+    "rounds": [
+      {
+        "prompt": "What are you bringing?",
+        "choices": [
+          "Sourdough & cheese 🧀",
+          "Fruit salad 🍉"
+        ],
+        "votes": [
+          26,
+          20
+        ],
+        "voters": [
+          [
+            "Diego",
+            "Lena",
+            "Sam"
+          ],
+          [
+            "Maya",
+            "Priya"
+          ]
+        ]
+      },
+      {
+        "prompt": "Blanket spot?",
+        "choices": [
+          "Sunny hill ☀️",
+          "Under a tree 🌳",
+          "Near the courts 🎾"
+        ],
+        "votes": [
+          24,
+          17,
+          5
+        ],
+        "voters": [
+          [
+            "Sam",
+            "Omar"
+          ],
+          [
+            "Priya",
+            "Aiko"
+          ],
+          [
+            "Jordan"
+          ]
+        ]
+      },
+      {
+        "prompt": "Pick a picnic game",
+        "choices": [
+          "Frisbee 🥏",
+          "Cards 🃏",
+          "Just vibes 😌"
+        ],
+        "votes": [
+          14,
+          12,
+          20
+        ],
+        "voters": [
+          [
+            "Omar",
+            "Jordan"
+          ],
+          [
+            "Chloe",
+            "Sam"
+          ],
+          [
+            "Theo",
+            "Lena"
+          ]
+        ]
+      },
+      {
+        "prompt": "Saturday morning?",
+        "choices": [
+          "Run Lands End 🏃",
+          "Sleep in 😴"
+        ],
+        "votes": [
+          15,
+          31
+        ],
+        "voters": [
+          [
+            "Maya",
+            "Omar"
+          ],
+          [
+            "Theo",
+            "Chloe",
+            "Priya"
+          ]
+        ]
+      },
+      {
+        "prompt": "Best SF weather?",
+        "choices": [
+          "Foggy & cozy 🌁",
+          "Rare heat wave 🔥",
+          "Golden hour 🌇"
+        ],
+        "votes": [
+          11,
+          9,
+          26
+        ],
+        "voters": [
+          [
+            "Chloe"
+          ],
+          [
+            "Jordan"
+          ],
+          [
+            "Aiko",
+            "Sam",
+            "Theo"
+          ]
+        ]
+      },
+      {
+        "prompt": "After the picnic?",
+        "choices": [
+          "Tacos 🌮",
+          "Ice cream 🍦",
+          "Open mic 🎤",
+          "Nap 💤"
+        ],
+        "votes": [
+          16,
+          14,
+          7,
+          9
+        ],
+        "voters": [
+          [
+            "Diego",
+            "Jordan"
+          ],
+          [
+            "Maya",
+            "Lena"
+          ],
+          [
+            "Theo"
+          ],
+          [
+            "Priya"
+          ]
+        ]
+      }
+    ]
+  },
+  "seed": 1913,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-12T07:00:00Z",
+    "duration_sec": 38.4,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-chloe-nguyen",
+    "event_id": "event-newcomers-picnic",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 9,
+    "play_count": 37,
+    "like_count": 14
+  }
+}

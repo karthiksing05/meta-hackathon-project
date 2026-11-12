@@ -12,7 +12,10 @@
       "playful"
     ],
     "energy": "low",
-    "competition": "light"
+    "competition": "light",
+    "content_sources": [
+      "New in SF polls (opted in)"
+    ]
   },
   "structure": {
     "cadence": "endless",
@@ -26,64 +29,186 @@
   },
   "chain": null,
   "style": {
-    "palette": "mint-pop",
+    "look": "ink",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#FBF7EE",
+      "bg_bottom": "#F1EADB",
+      "ink": "#262338",
+      "primary": "#F2A541",
+      "secondary": "#7A9CC6",
+      "accent": "#E4572E",
+      "danger": "#C0392B"
+    },
+    "font": "hand",
+    "motif": "clouds",
     "emoji": "☀️",
-    "mood_preset": "playful"
+    "mood_preset": "playful",
+    "cover_prompt": "hand-drawn ink sketch of a foggy San Francisco hill with the sun peeking through, light hatching, off-white paper"
   },
   "concepts": [
     {
-      "use": "space.cards"
+      "use": "space.answer_stage"
     },
     {
       "use": "input.select"
     },
     {
-      "use": "rule.consensus"
+      "use": "rule.consensus",
+      "params": {
+        "round_seconds": 8,
+        "reveal_seconds": 2
+      }
     },
     {
       "use": "score.closeness"
     },
     {
-      "use": "flow.rounds"
+      "use": "flow.rounds",
+      "params": {
+        "count": 5,
+        "pause": 110,
+        "pass_ratio": 0.4
+      }
     },
     {
-      "use": "share.emoji_grid"
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid",
+      "params": {
+        "set": "weather"
+      }
     }
   ],
   "glue": {},
   "content": {
+    "crowd": "New in SF",
     "rounds": [
       {
         "prompt": "Weekend plan?",
         "choices": [
-          "Ocean Beach",
-          "Dolores Park"
+          "Ocean Beach 🌊",
+          "Dolores Park 🌳"
         ],
         "votes": [
           41,
           59
+        ],
+        "voters": [
+          [
+            "Jordan",
+            "Lena"
+          ],
+          [
+            "Maya",
+            "Priya",
+            "Theo"
+          ]
         ]
       },
       {
         "prompt": "Best way up a hill?",
         "choices": [
-          "Walk it",
-          "Cable car"
+          "Walk it 🚶",
+          "Cable car 🚋",
+          "Bike 🚲"
         ],
         "votes": [
-          66,
-          34
+          52,
+          31,
+          17
+        ],
+        "voters": [
+          [
+            "Sam",
+            "Aiko"
+          ],
+          [
+            "Chloe"
+          ],
+          [
+            "Omar"
+          ]
         ]
       },
       {
         "prompt": "Fog or sun?",
         "choices": [
-          "Fog",
-          "Sun"
+          "Fog 🌁",
+          "Sun ☀️"
         ],
         "votes": [
           38,
           62
+        ],
+        "voters": [
+          [
+            "Chloe",
+            "Lena"
+          ],
+          [
+            "Maya",
+            "Diego",
+            "Sam"
+          ]
+        ],
+        "note": "Summer fog usually rolls in by late afternoon."
+      },
+      {
+        "prompt": "Burrito order?",
+        "choices": [
+          "Super 🌯",
+          "Regular",
+          "Bowl 🥗",
+          "Breakfast 🍳"
+        ],
+        "votes": [
+          47,
+          22,
+          13,
+          18
+        ],
+        "voters": [
+          [
+            "Diego",
+            "Jordan"
+          ],
+          [
+            "Priya"
+          ],
+          [
+            "Lena"
+          ],
+          [
+            "Omar"
+          ]
+        ]
+      },
+      {
+        "prompt": "Where to watch the sunset?",
+        "choices": [
+          "Bernal Hill",
+          "Ocean Beach",
+          "Twin Peaks"
+        ],
+        "votes": [
+          29,
+          44,
+          27
+        ],
+        "voters": [
+          [
+            "Sam"
+          ],
+          [
+            "Jordan",
+            "Maya"
+          ],
+          [
+            "Aiko",
+            "Theo"
+          ]
         ]
       }
     ]
@@ -99,7 +224,6 @@
     "duration_sec": 44.2,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-sam-whitfield",
     "group_id": "group-newinsf",
