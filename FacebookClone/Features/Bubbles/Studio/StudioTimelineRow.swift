@@ -278,7 +278,7 @@ struct StudioConceptInfo {
     }
 
     var tint: Color {
-        let accents = BubbleGlow.lilacHaze.accents + BubbleGlow.peachFizz.accents
+        let accents = BubbleGlow.lilacHaze.accents + [GameColor.sky, GameColor.periwinkle, GameColor.violet, Color(hex: 0x8FD6FF)]
         let kinds = ["input", "space", "entity", "behavior", "rule", "feedback", "score", "flow", "content", "share", "social", "feel"]
         let index = kinds.firstIndex(of: kind) ?? 7
         return accents[index % accents.count]
