@@ -819,7 +819,10 @@
       "Use skill moments (a timing tap) on at most two bold choices; skill.miss must lead somewhere fun, not a punishment.",
       "Paper, ink and riso looks suit stories; keep the palette calm so long text reads."
     ],
-    length: { modes: ["rounds", "endless"], default: { mode: "rounds", rounds: LIMIT.depth }, knobs: {} },
+    // Unlocked stories end at their endings (the validator caps depth at 12), so the default has no
+    // number: the engine doesn't count scenes and no "12 rounds" label shows. A locked rounds length
+    // starts at the depth cap.
+    length: { modes: ["rounds", "endless"], default: { mode: "rounds" }, numbers: { rounds: LIMIT.depth }, knobs: {} },
     content: {
       describe: "start: the first scene's id. scenes: 3–40 scenes of {id (short, unique), text (≤160 chars, second person), speaker? (a first name), emoji?, choices: 1–3 of {id? (short), text (≤28 chars), to (a scene id), past? (≤32 chars, e.g. \"took the ferry\"), set? [flags], need? [flags: the choice shows only when all are set], skill? {kind: \"timing\", window: 0.15–0.4, miss: scene id for a missed tap}} } or, for an ending scene, ending: {id, title (≤40), emoji, tone: good|odd|secret} and no choices. 2–6 endings; no loops; every scene reachable; longest path ≤ 12 choices.",
       schema: {

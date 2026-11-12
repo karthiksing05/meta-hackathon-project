@@ -655,7 +655,7 @@
       }
     },
     validateContent: validateContent,
-    length: { modes: ["rounds", "lives", "endless"], default: { mode: "rounds" }, knobs: {} },
+    length: { modes: ["rounds", "lives", "endless"], default: { mode: "rounds" }, numbers: { rounds: 8, lives: 3 }, infer: { rounds: ["content:questions"] }, knobs: {} },
     poster_ticks: 60,
     tags: { category: ["learn"], mood: ["curious", "cozy"], energy: ["low"] },
     tips: [

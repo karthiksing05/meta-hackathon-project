@@ -1100,10 +1100,12 @@ types at 1.6 characters a tick (a tap finishes it), choices unlock after at leas
 an ending card holds 2.5 s. The bot reads for 1–3 s, then bolder (more skilled) bots take the boldest
 choice (timing, then flag-unlocked, then flag-setting, then not-an-ending; ties at random) and land
 timing taps more often, so skilled bots score more. Length: modes `rounds` and `endless`, default
-`rounds: 12` (the depth cap); each scene left is `lengthRound()`, except that when one round is
-left the run jumps to the nearest ending without spending it, so the engine never ends a story
-mid-scene and every run ends on an ending with its tag. The kit also emits `story.reached_<n>` at ending n, so playtest event
-counts show which endings bots found.
+`{mode: "rounds"}` with no number (an unlocked story ends at its ending, and the validator caps
+depth at 12, so no length label shows), suggesting `rounds: 12` (the depth cap) when a length is
+locked. Each scene left is `lengthRound()`, except that when one round is left the run jumps to the
+nearest ending without spending it, so the engine never ends a story mid-scene and every run ends
+on an ending with its tag. The kit draws no engine length chip. It also emits `story.reached_<n>`
+at ending n, so playtest event counts show which endings bots found.
 
 **Content:**
 
@@ -1272,7 +1274,8 @@ its own category, Studio guidance and playtest policy. Its concepts are its own 
 capped at 5; glue `score`), with the common `input.select`. Content: `{topic, subject?, lesson:
 {title, points: [2–4, ≤ 90]}, questions: [{q ≤ 90, choices: [2–4, ≤ 40, distinct], answer, explain
 ≤ 120, point?}]}`; `point` links a question to the lesson point it practices (the recap ticks it off),
-`subject` is the meter's noun phrase. Length: `rounds` (default: one per question), `lives` (each
+`subject` is the meter's noun phrase. Length: `rounds` (default: one per question, labeled from
+`content.questions`; a locked length suggests 8), `lives` (each
 wrong answer costs a life; 3 by default) and `endless` (fresh order each pass until the first miss);
 the kit calls `lengthRound()` after every question except the last of a locked rounds length (so the
 engine doesn't end the run before the recap and tag), and `lengthMiss()` on every miss. A run succeeds at `pass_ratio` mastery or better. Events:

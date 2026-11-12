@@ -408,9 +408,18 @@ final class BubbleLengthCatalog: @unchecked Sendable {
                 BubbleLengthKnob(id: "speed", concept: "flow.rounds", param: "pause", label: "Pace", min: 50, max: 130, invert: true),
                 BubbleLengthKnob(id: "difficulty", concept: "space.portrait_choices", param: "choices", label: "Faces to pick from", min: 2, max: 4, step: 1, invert: false),
             ]),
-        "story": BubbleLengthSpec(modes: [.endless, .rounds], defaultLength: .endless),
-        "nextline": BubbleLengthSpec(modes: [.rounds, .timed], defaultLength: .rounds(5)),
-        "learn": BubbleLengthSpec(modes: [.rounds, .lives, .endless], defaultLength: .rounds(8)),
+        "story": BubbleLengthSpec(
+            modes: [.rounds, .endless], defaultLength: BubbleLength(mode: .rounds),
+            numbers: [.rounds: 12]),
+        "nextline": BubbleLengthSpec(
+            modes: [.rounds, .timed, .lives], defaultLength: .rounds(5),
+            knobs: [
+                BubbleLengthKnob(id: "timer", concept: "rule.next_line", param: "round_seconds", label: "Seconds to answer", min: 4, max: 15, invert: false),
+            ]),
+        "learn": BubbleLengthSpec(
+            modes: [.rounds, .lives, .endless], defaultLength: BubbleLength(mode: .rounds),
+            numbers: [.rounds: 8, .lives: 3],
+            infer: [.rounds: ["content:questions"]]),
     ]
 
     /// Param defaults the inference reads when a manifest leaves them out.

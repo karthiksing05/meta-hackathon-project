@@ -16,7 +16,7 @@ var KitSuites = (typeof KitSuites !== "undefined" ? KitSuites : []).concat([{
     var formula = null;
     cat.formulas.forEach(function (f) { if (f.id === "story") formula = f; });
     if (!formula) { env.fail("story: formula missing"); return; }
-    if (!formula.length || formula.length.default.mode !== "rounds" || formula.length.default.rounds !== 12) env.fail("story: length default should be rounds = 12 (the depth cap)");
+    if (!formula.length || formula.length.default.mode !== "rounds" || formula.length.default.rounds || !formula.length.numbers || formula.length.numbers.rounds !== 12) env.fail("story: length default should be rounds with no number (endings end it), suggesting 12 (the depth cap) when locked");
     if (!formula.length || formula.length.modes.join(",") !== "rounds,endless") env.fail("story: length modes should be rounds and endless");
 
     function copy(x) { return JSON.parse(JSON.stringify(x)); }
