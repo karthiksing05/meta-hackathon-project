@@ -11,9 +11,10 @@ struct BubbleFeedPageActions {
     var openProfile: (User) -> Void
 }
 
-/// One full-screen page of the Bubbles tab: the Bubble's cover or poster frame, the live
-/// runtime when this page is the settled one, and the overlay (creator, title, rule, tags,
-/// "Maya's best", Pop in) with the action rail.
+/// One full-screen page of the games tab: the game's cover or poster frame, the live runtime
+/// when this page is the settled one, and a calm overlay: one meta line, creator, title and rule,
+/// one social line, and the action rail. Tapping the game plays it; a quiet "Tap to play" hint
+/// shows for the first few games.
 struct BubbleFeedPage: View {
     let item: BubbleFeedItem
     let bubble: Bubble
@@ -23,10 +24,15 @@ struct BubbleFeedPage: View {
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    @State private var showsTapHint = false
+    @State private var showsSaveTip = false
+
     private var isLive: Bool { model.isLive(item) }
     private var isTakenOver: Bool { isLive && model.isTakenOver }
     private var run: BubbleScore? { model.run(for: item, in: bubble) }
     private var failure: EngineFailure? { model.failedItemID == item.id ? model.failure : nil }
+    /// This page is settled, its game has drawn, and nobody is playing yet.
+    private var isSettled: Bool { isLive && model.isLiveRevealed && !model.isTakenOver && failure == nil }
 
     var body: some View {
         ZStack {
@@ -60,7 +66,41 @@ struct BubbleFeedPage: View {
         .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: failure)
         .clipped()
         .accessibilityElement(children: .contain)
-        .accessibilityAction(named: "Play", actions.takeOver)
+        .accessibilityAction(named: "Play", play)
+        .task(id: isSettled) { await runHints() }
+    }
+
+    /// Starts the game in place, and counts it toward retiring the "Tap to play" hint.
+    private func play() {
+        showsTapHint = false
+        FeedHints.notePlayed()
+        actions.takeOver()
+    }
+
+    /// One hint at a time, each shown once and gone on its own: "Tap to play" ~1 s after the page
+    /// settles (first few games only), then the save tip once ever, never on the first page.
+    private func runHints() async {
+        guard isSettled else {
+            showsTapHint = false
+            showsSaveTip = false
+            return
+        }
+        let animation = GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion)
+        let fade = GameMotion.resolved(GameMotion.reveal, reduceMotion: reduceMotion)
+        let isFirstPage = FeedHints.noteSettled()
+        if FeedHints.wantsTapHint {
+            guard await FeedHints.wait(1.0) else { return }
+            withAnimation(animation) { showsTapHint = true }
+            guard await FeedHints.wait(3.5) else { return }
+            withAnimation(fade) { showsTapHint = false }
+        }
+        guard !isFirstPage, SavesHintCenter.shared.isVisible else { return }
+        guard await FeedHints.wait(1.2), SavesHintCenter.shared.isVisible else { return }
+        // Counts as seen the moment it shows, so it never comes back.
+        SavesHintCenter.shared.dismiss()
+        withAnimation(animation) { showsSaveTip = true }
+        guard await FeedHints.wait(4) else { return }
+        withAnimation(fade) { showsSaveTip = false }
     }
 
     // MARK: Layers
@@ -89,111 +129,210 @@ struct BubbleFeedPage: View {
 
     private var chrome: some View {
         ZStack(alignment: .bottom) {
-            // Taps anywhere on the game take over; buttons above it keep their own taps.
+            // Taps anywhere on the game play it; buttons above it keep their own taps.
             Color.clear
                 .contentShape(Rectangle())
-                .onTapGesture(perform: actions.takeOver)
+                .onTapGesture(perform: play)
                 .accessibilityHidden(true)
             bottomScrim
-            HStack(alignment: .bottom, spacing: 12) {
-                BubbleFeedCaption(item: item, bubble: bubble, run: run, onPopIn: actions.takeOver, onOpenProfile: actions.openProfile)
-                BubbleFeedRail(bubble: bubble, actions: actions)
+            if showsTapHint {
+                FeedTapToPlayHint()
+                    .frame(maxHeight: .infinity)
+                    .offset(y: 120)
+                    .transition(.opacity.combined(with: .scale(scale: reduceMotion ? 1 : 0.92)))
+            }
+            HStack(alignment: .bottom, spacing: 8) {
+                BubbleFeedCaption(item: item, bubble: bubble, run: run, onOpenBoard: { actions.openBoard(bubble) }, onOpenProfile: actions.openProfile)
+                BubbleFeedRail(bubble: bubble, actions: actions, showsSaveTip: showsSaveTip) {
+                    withAnimation(GameMotion.resolved(GameMotion.reveal, reduceMotion: reduceMotion)) { showsSaveTip = false }
+                }
             }
             .padding(.leading, FBMetrics.screenPadding)
-            .padding(.trailing, 8)
-            .padding(.bottom, 14)
+            .padding(.trailing, 6)
+            .padding(.bottom, 12)
         }
     }
 
+    /// A soft fade to dark behind the caption, so white text reads on any game without pills.
     private var bottomScrim: some View {
         LinearGradient(
-            colors: [Color.black.opacity(0), Color.black.opacity(0.62)],
+            stops: [
+                .init(color: Color.black.opacity(0), location: 0),
+                .init(color: Color.black.opacity(0.3), location: 0.4),
+                .init(color: Color.black.opacity(0.7), location: 1),
+            ],
             startPoint: .top,
             endPoint: .bottom
         )
-        .frame(height: 360)
+        .frame(height: 320)
         .frame(maxWidth: .infinity)
         .allowsHitTesting(false)
     }
 }
 
+/// When the feed's first-run hints show. "Tap to play" retires after a few games (persisted);
+/// the save tip uses `SavesHintCenter`'s own once-ever flag.
+@MainActor
+enum FeedHints {
+    private static let playsKey = "feed.tapToPlay.plays"
+    private static let retireAfter = 3
+    private static var settledPages = 0
+
+    static var wantsTapHint: Bool {
+        UserDefaults.standard.integer(forKey: playsKey) < retireAfter
+    }
+
+    static func notePlayed() {
+        let plays = UserDefaults.standard.integer(forKey: playsKey)
+        if plays < retireAfter { UserDefaults.standard.set(plays + 1, forKey: playsKey) }
+    }
+
+    /// Counts a settled page this launch; true for the first one.
+    static func noteSettled() -> Bool {
+        settledPages += 1
+        return settledPages == 1
+    }
+
+    /// Sleeps; false when the page moved on (the task was cancelled).
+    static func wait(_ seconds: Double) async -> Bool {
+        (try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))) != nil
+    }
+}
+
+/// A small, quiet "Tap to play" pill low over the game. The hand breathes on the clock
+/// (`TimelineView`), and holds still under Reduce Motion. Taps pass through to the game.
+private struct FeedTapToPlayHint: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        HStack(spacing: 6) {
+            TimelineView(.animation(paused: reduceMotion)) { context in
+                let wave = reduceMotion ? 0 : GameMotion.loop(period: 1.4).wave(at: context.date)
+                Image(systemName: "hand.tap.fill")
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
+                    .scaleEffect(1 - 0.12 * wave)
+            }
+            Text("Tap to play")
+                .font(.fbMetaEmphasized)
+                .lineLimit(1)
+        }
+        .foregroundStyle(Color.white)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(Color.black.opacity(0.38), in: Capsule())
+        .overlay(Capsule().strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5))
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
 // MARK: - Caption
 
-/// Bottom-left: tags, creator, title and rule, whose run you're watching, and Pop in.
+/// Bottom-left: one meta line, creator, title and rule, and one social line.
 private struct BubbleFeedCaption: View {
     let item: BubbleFeedItem
     let bubble: Bubble
     let run: BubbleScore?
-    let onPopIn: () -> Void
+    let onOpenBoard: () -> Void
     let onOpenProfile: (User) -> Void
 
     @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(Router.self) private var router
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if !tags.isEmpty {
-                BubbleFeedTags(tags: tags)
+        VStack(alignment: .leading, spacing: 6) {
+            if let meta = metaText {
+                Text(meta)
+                    .font(.fbCaptionEmphasized)
+                    .foregroundStyle(Color.white.opacity(0.8))
+                    .lineLimit(1)
             }
-            BubbleFeedCaptionSlots(bubble: bubble)
             creatorRow
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
                     Text(bubble.title)
                         .font(.fbHeadline)
                         .foregroundStyle(Color.white)
                         .lineLimit(1)
                     if bubble.isMadeWithMuse {
-                        MuseBadge(compact: true)
+                        Image(systemName: "sparkles")
+                            .font(.system(size: FBIconSize.small, weight: .semibold))
+                            .foregroundStyle(GameColor.gradient)
+                            .accessibilityLabel("Made with Muse")
                     }
                 }
                 Text(bubble.rule)
                     .font(.fbBody)
-                    .foregroundStyle(Color.white.opacity(0.92))
+                    .foregroundStyle(Color.white.opacity(0.9))
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .accessibilityElement(children: .combine)
-            bestLine
-            popInButton
+            socialLine
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .shadow(color: Color.black.opacity(0.35), radius: 3, y: 1)
+        .shadow(color: Color.black.opacity(0.3), radius: 2, y: 1)
     }
 
     private var creatorRow: some View {
         Button {
             onOpenProfile(bubble.creator)
         } label: {
-            HStack(spacing: 8) {
-                AvatarView(user: bubble.creator, size: FBAvatarSize.comment)
-                    .overlay(Circle().stroke(Color.white.opacity(0.85), lineWidth: 1.5))
+            HStack(spacing: 6) {
+                AvatarView(user: bubble.creator, size: 24)
+                    .overlay(Circle().stroke(Color.white.opacity(0.8), lineWidth: 1))
                 Text(bubble.creator.isMe ? "You" : bubble.creator.name)
                     .font(.fbName)
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
                 Text("· \(bubble.createdAt.fbShort)")
                     .font(.fbMeta)
-                    .foregroundStyle(Color.white.opacity(0.8))
+                    .foregroundStyle(Color.white.opacity(0.75))
                     .lineLimit(1)
             }
+            .frame(minHeight: 28)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(bubble.creator.isMe ? "You" : bubble.creator.name), view profile")
     }
 
+    // MARK: Social line
+
+    /// One row that names a person: a friend's best to beat (opens the board) or, when no friend
+    /// has a run here, who saved it (opens the savers list).
     @ViewBuilder
-    private var bestLine: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "trophy.fill")
-                .font(.system(size: FBIconSize.small, weight: .semibold))
-                .foregroundStyle(BubbleGlow.peach)
-            Text(bestText)
-                .font(.fbMetaEmphasized)
-                .foregroundStyle(Color.white)
-                .lineLimit(1)
+    private var socialLine: some View {
+        if let run, !run.user.isMe {
+            socialButton(symbol: "trophy.fill", tint: BubbleGlow.peach, text: bestText, hint: "Opens the board", action: onOpenBoard)
+        } else if let proof = SavesSocialProof.text(for: bubble, in: bubbleStore) {
+            socialButton(symbol: "bookmark.fill", tint: Color(hex: 0x6EA8FF), text: proof, hint: SavesCopy.seeAll) {
+                router.push(.bubbleFeature(BubbleFeatureRoute(.saves, "stats", bubble.id)))
+            }
+        } else {
+            socialButton(symbol: "trophy.fill", tint: BubbleGlow.peach, text: bestText, hint: "Opens the board", action: onOpenBoard)
         }
-        .accessibilityElement(children: .combine)
+    }
+
+    private func socialButton(symbol: String, tint: Color, text: String, hint: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: symbol)
+                    .font(.system(size: FBIconSize.xs, weight: .semibold))
+                    .foregroundStyle(tint)
+                Text(text)
+                    .font(.fbMetaEmphasized)
+                    .foregroundStyle(Color.white)
+                    .lineLimit(1)
+            }
+            .frame(minHeight: 28)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(text)
+        .accessibilityHint(hint)
+        .accessibilityAddTraits(.isButton)
     }
 
     private var bestText: String {
@@ -206,57 +345,55 @@ private struct BubbleFeedCaption: View {
         return "\(name) best: \(run.score.withCommas) · beat it"
     }
 
-    private var popInButton: some View {
-        Button(action: onPopIn) {
-            HStack(spacing: 6) {
-                Image(systemName: "hand.tap.fill")
-                    .font(.system(size: FBIconSize.medium, weight: .semibold))
-                Text("Play")
-                    .font(.fbButton)
-            }
-            .foregroundStyle(BubbleGlow.ink)
-            .padding(.horizontal, 16)
-            .frame(height: 36)
-            .background(BubbleGlow.brandGradient, in: Capsule())
-            .overlay(Capsule().strokeBorder(Color.white.opacity(0.7), lineWidth: 1))
-            .bubbleGlow(BubbleGlow.pink, radius: 8, opacity: 0.45)
-            .contentShape(Capsule())
+    // MARK: Meta line
+
+    /// "Level 1 · Endless · 2 remixes": context, category, length and remix credit in one quiet
+    /// line, at most three parts.
+    private var metaText: String? {
+        var parts = contextParts
+        if bubble.category != .play {
+            parts.append(bubble.category.title)
         }
-        .gamePress()
-        .padding(.top, 4)
-        .accessibilityLabel("Play \(bubble.title)")
+        if let length = BubbleLength.display(for: bubble) {
+            parts.append(length.shortLabel)
+        }
+        if let remix = RemixCaptionCredit.text(for: bubble, in: bubbleStore) {
+            parts.append(remix)
+        }
+        let shown = parts.prefix(3)
+        return shown.isEmpty ? nil : shown.joined(separator: " · ")
     }
 
-    private var tags: [BubbleFeedTag] {
-        var tags: [BubbleFeedTag] = []
+    private var contextParts: [String] {
+        var parts: [String] = []
         if bubble.isDaily {
             let group = bubble.group?.name
-            tags.append(BubbleFeedTag(symbol: "sun.max.fill", text: group.map { "Daily \(ProductName.singular) · \($0)" } ?? "Daily \(ProductName.singular)"))
+            parts.append(group.map { "Daily \(ProductName.singular) · \($0)" } ?? "Daily \(ProductName.singular)")
         }
         if bubble.isIcebreaker {
             let event = bubble.event.map(Self.shortEventTitle) ?? "your event"
-            tags.append(BubbleFeedTag(symbol: "party.popper.fill", text: "Icebreaker for \(event)"))
+            parts.append("Icebreaker for \(event)")
         }
         if let level = bubble.levelIndex, bubble.chainID != nil {
-            tags.append(BubbleFeedTag(symbol: "link", text: "Level \(level)"))
+            parts.append("Level \(level)")
         }
         switch item.reason {
         case .nearby:
             if let place = bubbleStore.neighborhood(of: bubble.creator) {
-                tags.append(BubbleFeedTag(symbol: "location.fill", text: "New near you · \(place)"))
+                parts.append("New near you · \(place)")
             } else {
-                tags.append(BubbleFeedTag(symbol: "location.fill", text: "New near you"))
+                parts.append("New near you")
             }
         case .groupBurst:
             if !bubble.isDaily, let group = bubble.group ?? bubbleStore.boardGroups(for: bubble).first {
-                tags.append(BubbleFeedTag(symbol: "person.3.fill", text: group.name))
+                parts.append(group.name)
             }
-        case .yours where tags.isEmpty:
-            tags.append(BubbleFeedTag(symbol: "person.crop.circle", text: "Your \(ProductName.singular)"))
+        case .yours where parts.isEmpty:
+            parts.append("Your \(ProductName.singular)")
         default:
             break
         }
-        return tags
+        return parts
     }
 
     /// "Newcomers' picnic in Dolores Park" → "Newcomers' picnic".
@@ -268,56 +405,44 @@ private struct BubbleFeedCaption: View {
     }
 }
 
-private struct BubbleFeedTag: Hashable {
-    let symbol: String
-    let text: String
-}
-
-private struct BubbleFeedTags: View {
-    let tags: [BubbleFeedTag]
-
-    var body: some View {
-        FlowLayout(spacing: 6) {
-            ForEach(tags, id: \.self) { tag in
-                HStack(spacing: 4) {
-                    Image(systemName: tag.symbol)
-                        .font(.system(size: FBIconSize.xs, weight: .bold))
-                    Text(tag.text)
-                        .font(.fbCaptionEmphasized)
-                        .lineLimit(1)
-                }
-                .foregroundStyle(Color.white)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.black.opacity(0.32), in: Capsule())
-                .overlay(Capsule().strokeBorder(Color.white.opacity(0.35), lineWidth: 0.5))
-            }
-        }
-        .accessibilityElement(children: .combine)
-    }
-}
-
 // MARK: - Action rail
 
-/// Right side: save (saves are the likes), Bubble Board, Remix and float.
+/// Right side: save (saves are the likes), board, remix and share. Long-press save to see who
+/// saved it. The once-ever save tip points at the save button.
 private struct BubbleFeedRail: View {
     let bubble: Bubble
     let actions: BubbleFeedPageActions
+    let showsSaveTip: Bool
+    let onDismissSaveTip: () -> Void
 
+    @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(Router.self) private var router
     @State private var saveBounce = 0
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             BubbleFeedRailButton(
                 symbol: bubble.isSaved ? "bookmark.fill" : "bookmark",
                 label: bubble.saveCount.fbCompact,
                 tint: bubble.isSaved ? Color(hex: 0x6EA8FF) : Color.white,
                 bounce: saveBounce,
                 accessibility: bubble.isSaved ? "Unsave" : "Save",
-                value: SavesCopy.savesCount(bubble.saveCount)
+                value: SavesSocialProof.text(for: bubble, in: bubbleStore) ?? SavesCopy.savesCount(bubble.saveCount)
             ) {
                 saveBounce += 1
+                onDismissSaveTip()
                 actions.save(bubble)
+            }
+            .contextMenu {
+                Button(SavesCopy.seeAll, systemImage: "person.2", action: openSavers)
+            }
+            .accessibilityAction(named: SavesCopy.seeAll, openSavers)
+            .overlay(alignment: .trailing) {
+                if showsSaveTip {
+                    FeedSaveTip(onDismiss: onDismissSaveTip)
+                        .offset(x: -56)
+                        .transition(.opacity)
+                }
             }
             BubbleFeedRailButton(symbol: "trophy.fill", label: "Board", accessibility: "Board") {
                 actions.openBoard(bubble)
@@ -329,7 +454,39 @@ private struct BubbleFeedRail: View {
                 actions.float(bubble)
             }
         }
-        .padding(.bottom, 4)
+        .padding(.bottom, 2)
+    }
+
+    private func openSavers() {
+        router.push(.bubbleFeature(BubbleFeatureRoute(.saves, "stats", bubble.id)))
+    }
+}
+
+/// The once-ever save tip: one short line beside the save button. Tap to dismiss.
+private struct FeedSaveTip: View {
+    let onDismiss: () -> Void
+
+    var body: some View {
+        Button(action: onDismiss) {
+            HStack(spacing: 6) {
+                Image(systemName: "bookmark.fill")
+                    .font(.system(size: FBIconSize.xs, weight: .semibold))
+                    .foregroundStyle(Color(hex: 0x6EA8FF))
+                Text(SavesCopy.hintTitle)
+                    .font(.fbCaptionEmphasized)
+                    .foregroundStyle(Color.white)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .frame(width: 200, alignment: .leading)
+            .background(Color.black.opacity(0.55), in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(SavesCopy.hintTitle)
+        .accessibilityHint("Double tap to dismiss")
     }
 }
 
@@ -344,20 +501,20 @@ private struct BubbleFeedRailButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 3) {
+            VStack(spacing: 2) {
                 Image(systemName: symbol)
-                    .font(.system(size: FBIconSize.xxl, weight: .semibold))
+                    .font(.system(size: 24, weight: .semibold))
                     .foregroundStyle(tint)
                     .symbolEffect(.bounce, value: bounce)
-                    .frame(width: 44, height: 38)
+                    .frame(width: 44, height: 34)
                 Text(label)
                     .font(.fbMicroEmphasized)
-                    .foregroundStyle(Color.white)
+                    .foregroundStyle(Color.white.opacity(0.9))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
-            .frame(minWidth: 52)
-            .shadow(color: Color.black.opacity(0.4), radius: 3, y: 1)
+            .frame(minWidth: 48)
+            .shadow(color: Color.black.opacity(0.35), radius: 2, y: 1)
             .contentShape(Rectangle())
         }
         .gamePress(scale: 0.9)

@@ -1039,7 +1039,8 @@ levels of one game, not remixes.
 **Surfaces.** Remix is on the feed rail (existing), the result sheet (`RemixResultAction`: Remix,
 Share, and "Send it back to <name>" for your remix of someone's game), the Bubble page (the existing
 Remix button; Float became **Share**) and `.remix` cards ("Remix back"). Every path opens Studio in
-remix mode with the game loaded. Feed captions (`RemixCaptionCredit`) say "Remixed by Diego · from
+remix mode with the game loaded. Feed captions (`RemixCaptionCredit.text(for:in:)`, as one part of
+the page's meta line) say "Remixed by Diego · from
 Maya" when a friend made the remix, "Remix of Hill Hopper by Diego" otherwise, and "2 remixes" on an
 original. The Bubble page (`RemixDetailTree`) shows the remix count, the credit with "Open original",
 a tree of up to 2 levels and 6 nodes ("+N more") with friends ringed in blue, and "See all".
@@ -1403,7 +1404,8 @@ runtime catalog over it a few seconds after launch). Helpers for other features:
 (what a challenge, session or game night card should carry in `card.length` and pass to
 `BubblePlayRequest.length`) and `BubbleLength.of(run: replay, in: bubble)`.
 
-**Players.** Feed pages: `LengthCaptionLabel` ("Endless: beat 42" with your best). Bubble page:
+**Players.** Feed pages: the length's `shortLabel` in the caption's one meta line ("Level 1 ·
+Endless · 2 remixes"; `LengthCaptionLabel` is no longer on the feed). Bubble page:
 `LengthDetailRow` (mode, best to beat, the shared-play promise, Customize for the creator). Result
 sheet: `LengthResultLabel` ("60 seconds · 41", from the run's own `replay.length`), plus "You and
 Maya played the same 10 rounds" in a challenge, session or game night.
@@ -1457,8 +1459,9 @@ archives), but no Bubble surface shows or sets them.
 **Copy.** All strings live in `SavesCopy`. 'Saved by Diego and 37 others' (friends named first,
 'you' first when you saved it), '1.2K saves', '38 saves this week', 'Your games were saved N times
 this week', and the first-run hint 'Saving is how you show love for a game. Tap the bookmark
-anytime, even mid-game.' (once, `bubbles.saves.hintSeen` in UserDefaults; on the feed caption and
-in the player; dismissed by tap or by saving, and in the player after 12 s on screen).
+anytime, even mid-game.' (once, `bubbles.saves.hintSeen` in UserDefaults; in the player, and on the
+feed as a one-line tip beside the Save button that never shows on the first page, is marked seen as
+it appears and fades after 4 s; dismissed by tap or by saving, and in the player after 12 s on screen).
 
 **Reusable.** `SavesSocialProof.savers(for:in:limit:) -> [User]` (deterministic, friends first,
 you first when saved, never the creator, never more than `saveCount`),
@@ -1469,7 +1472,9 @@ you first when saved, never the creator, never more than `saveCount`),
 `bubbleAction = route(.saves, "stats", id)`. When one of your Bubbles' `saveCount` reaches 10, 25,
 50, 100, 250, 500 or 1000 after a save, a milestone row is added (once per number).
 
-**Who saved it.** Tapping the feed caption's 'Saved by' line pushes `feature:saves/stats/<id>`.
+**Who saved it.** The feed caption shows one social line: a friend's best to beat (opens the board)
+or, when no friend has a run, 'Saved by …' (opens the list). Long-pressing the feed's Save button
+(or the VoiceOver action 'See everyone who saved it') pushes `feature:saves/stats/<id>`.
 `SavesStatsView` lists savers friends first with Add friend for non-friends
 (`appStore.sendRequest(to:)`, then `BubbleSocialSignals.post(.addFriendFromGame, ...)`). The Bubble
 page shows the top three for your own Bubbles.
