@@ -1,17 +1,23 @@
 # Game feed recommender
 
+**Start with `docs/RANKING.md`**: the formula, how we check it, and how it compares to published
+work. This file is the longer write-up and the simulator notes.
+
 Orders the games feed (the app's games tab) after its curated opening pages. The core is
 `FacebookClone/Bubbles/Recommend/game-recs.js`: plain JS, no dependencies, the same pattern as the
 game runtime. The app runs it in JavaScriptCore through `GameRecommender.swift`. Node runs it here
 for checks and the simulator.
 
 ```sh
-node tools/recs-sim/run-node.js        # 100 checks
+node tools/recs-sim/run-node.js        # 127 checks
 tools/recs-sim/run-jsc.sh              # the same checks in JavaScriptCore (macOS)
 node tools/recs-sim/seeds-demo.js      # the real seed games through the app bridge
 node tools/recs-sim/sim.js --seeds 5   # every stage vs today's feed, synthetic people
 node tools/recs-sim/sim.js --seeds 3 --sweep calibration.lambda=0.3,0.5,0.7
 node tools/recs-sim/fb-sim.js --seeds 6  # Facebook-style ranker: IDs vs the game language (below)
+node tools/recs-sim/props.js --break   # property tests, and the same with a guard off
+node tools/recs-sim/eval-bench.js --ablate   # vs MostPop and ε-greedy: regret, learning curves, ablations
+node tools/recs-sim/interleave-sim.js  # team-draft interleaving vs today's feed and each part; --muse for Ember
 ```
 
 ## The model
