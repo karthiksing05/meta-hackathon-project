@@ -788,10 +788,64 @@ with who knows you best.
 
 ### 7.5 Remix and share (remix)
 
-Remix is on every surface and opens Studio with the game loaded. The manifest's lineage carries a
-"Remix of <title> by <name>" credit; the original creator is notified; the Bubble page shows a remix
-count and a small tree with friends highlighted; "Send it back" sends your remix to the creator's
-chat. Share always sends a playable card.
+Remixing and sharing bring people closer through self-expression built on each other's work:
+every remix credits the game it came from, its creator hears about it, and the remix can go back
+to them as a playable card. Code: `Features/Bubbles/Remix/` and `Bubbles/Studio/RemixStudio.swift`.
+
+**Credit (manifest lineage).** A remix keeps `lineage.parent` and `operators` as Studio's identity
+sets them, plus `remix_of` (the base id), `remix_of_title`, `remix_of_creator_id` (a demo-world id,
+or `"me"`) and `remix_of_creator_name` (first name; omitted when the base is your own game).
+`RemixStudio.finalize` fills them in remix mode from `request.base` and `request.social`
+(`StudioModel` puts the base creator in `social`), and an edit of a remix keeps them.
+`RemixStudio.promptLines` tells Muse: keep the core and feel, change what was asked, and give it a
+title that nods to the original. The offline remix path and the bot playtest are unchanged.
+`RemixLineage` (app side) builds on `remix_of` only: `descendants(of:in:)` (all generations),
+`root`, `tree(around:in:maxDepth:maxNodes:)` (friends' remixes first) and `credit(for:)` ("Remix of
+Hill Hopper by Diego"; "Remix of your Moving Day" for your games). Chains stay separate: they are
+levels of one game, not remixes.
+
+**Surfaces.** Remix is on the feed rail (existing), the result sheet (`RemixResultAction`: Remix,
+Share, and "Send it back to <name>" for your remix of someone's game), the Bubble page (the existing
+Remix button; Float became **Share**) and `.remix` cards ("Remix back"). Every path opens Studio in
+remix mode with the game loaded. Feed captions (`RemixCaptionCredit`) say "Remixed by Diego · from
+Maya" when a friend made the remix, "Remix of Hill Hopper by Diego" otherwise, and "2 remixes" on an
+original. The Bubble page (`RemixDetailTree`) shows the remix count, the credit with "Open original",
+a tree of up to 2 levels and 6 nodes ("+N more") with friends ringed in blue, and "See all".
+
+**Send it back.** `RemixCenter.sendBack` sends a `.remix` card to the original creator's 1:1 chat
+through `BubbleSocialHub.send(_, to: .friend(creatorID))`, posts the `remix` signal with the
+creator, and the creator replies a few seconds later.
+
+**Share.** `RemixShareSheet` lists `BubbleSocialHub.targets(kinds: [.feed, .story, .chat, .group,
+.friend])`. Feed, Group, chat and friend get a `.share` card with the Bubble's (or the play's) seed
+and length and your score from a result; Story uses `BubbleSurfaceHooks.shareToStory` with a result,
+else a story item with the featured run. Every share posts the `share` signal with the people it
+reached (a friend, a chat's members, New in SF's members, nobody for feed and story).
+
+**After publish.** `RemixScreens.didPublish` fills a missing credit, posts `remix` with the original
+creator (never you), and schedules the creator's reply in your chat plus a "played your remix"
+notification that opens the tree.
+
+**Card extras.** `.remix`: `original_id`, `remix_id` (strings). `.share` (sent by remix):
+`score` (number, optional). No result tags.
+
+**Notifications at launch.** "Diego remixed your Moving Day into Moving Day: Fourth Floor Walk-up"
+and "Maya remixed Diego's Hill Hopper into Hill Hopper: Night Hop", both `.bubbleRemix` with
+`bubbleAction` = `remix/tree/<remix id>`.
+
+**Seeds.** `remix-hill-hopper-night-hop` (Maya's remix of `hill-hopper`),
+`remix-night-hop-fog` (Diego's remix of Maya's) and `remix-moving-day-diego` (Diego's remix of your
+`moving-day`); all dodge.
+
+**FB_OPEN** (with `FB_SKIP_SPLASH=1`):
+
+| Value | Opens |
+|---|---|
+| `feature:remix/tree/hill-hopper` | The remix tree screen (pushed): count, tree, Remix, Share |
+| `feature:remix/sendback/remix-night-hop-fog` | Stages it as your remix, then the Send it back sheet |
+| `feature:remix/share/hill-hopper` | `RemixShareSheet` via `router.bubbleSheet` |
+| `remix:hill-hopper` | Studio in remix mode (existing) |
+| `FB_TAB=notifications` | "Diego remixed your Moving Day…" |
 
 ### 7.6 Adventures: stories you play (story)
 
