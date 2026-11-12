@@ -137,7 +137,9 @@ struct NextlinePlayerBanner: View {
     let score: Int
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    /// Estimated start of your run (the intro card waits for your first tap).
+    /// Whether your run has started; the intro card waits for your first tap.
+    @Environment(\.bubblePlayerStarted) private var started
+    /// When your run started. Nil while the intro card is up, so the strip waits on round 1.
     @State private var anchor: Date?
     /// Seconds you took per round, learned when your score jumps (a right answer).
     @State private var mine: [Int: Double] = [:]
@@ -149,7 +151,11 @@ struct NextlinePlayerBanner: View {
                 strip(night, timeline: timeline, now: tick.date)
             }
             .onAppear {
-                if anchor == nil { anchor = Date().addingTimeInterval(1.8) }
+                if anchor == nil, started { anchor = Date() }
+            }
+            .onChange(of: started) { _, isStarted in
+                anchor = isStarted ? Date() : nil
+                if !isStarted { mine = [:] }
             }
             .onChange(of: score) { old, new in
                 resync(old: old, new: new, timeline: timeline)

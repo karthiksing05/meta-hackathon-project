@@ -106,6 +106,19 @@ struct BubblePlayerTopBarSlots: View {
     }
 }
 
+/// True once your run has started (the intro card is gone), so banners can start their clocks.
+private struct BubblePlayerStartedKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// Set by `BubblePlayerView` on the banner slots: whether your run has started.
+    var bubblePlayerStarted: Bool {
+        get { self[BubblePlayerStartedKey.self] }
+        set { self[BubblePlayerStartedKey.self] = newValue }
+    }
+}
+
 struct BubblePlayerBannerSlots: View {
     let bubble: Bubble
     let request: BubblePlayRequest

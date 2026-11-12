@@ -123,6 +123,7 @@ struct BubblePlayerView: View {
             topBarRow(bubble)
             if !isWatchingBurst {
                 BubblePlayerBannerSlots(bubble: bubble, request: activeRequest(for: bubble), score: score)
+                    .environment(\.bubblePlayerStarted, hasStarted)
             }
         }
     }

@@ -1237,7 +1237,9 @@ has finished on the night's clock) and `winner_id` (once everyone is done).
 
 **Screens** (`NextlineScreens`, state in `QuizNightCenter.shared`): `night/<groupID or chatID>`
 (lobby), `podium/<nightID>`, `results/<bubbleID>` (latest finished night). Slots:
-`NextlineResultSummary`, `NextlinePlayerBanner` (live strip, mini leaderboard between rounds),
+`NextlineResultSummary`, `NextlinePlayerBanner` (live strip, mini leaderboard between rounds; its
+clock starts when the player sets `EnvironmentValues.bubblePlayerStarted` on the banner slots,
+which happens once the intro card is tapped),
 `NextlineGroupGameNight`, `NextlineFeaturedBanner`, `NextlineDetailRow` (Start a quiz night in…),
 `NextlineCardBody`. The groups-search Games tab opens `BubbleFeatureRoute(.nextline, "night",
 groupID)`.
