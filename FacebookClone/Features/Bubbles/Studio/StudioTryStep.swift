@@ -67,8 +67,14 @@ struct StudioTryStep: View {
         }
         .task {
             guard model.focusTweak else { return }
-            model.focusTweak = false
             try? await Task.sleep(nanoseconds: 500_000_000)
+            // Opened to Customize: its panel clears focusTweak, and the keyboard would cover it.
+            guard model.focusTweak, !LengthCustomizer.shared.scrollPending,
+                  DebugLaunch.value("FB_STUDIO_SCROLL") != "customize" else {
+                model.focusTweak = false
+                return
+            }
+            model.focusTweak = false
             isTweakFocused = true
         }
     }
