@@ -1,7 +1,7 @@
 import SwiftUI
 import PhotosUI
 
-private struct MarketplaceSellPhoto: Identifiable {
+struct MarketplaceSellPhoto: Identifiable {
     let id = UUID()
     let data: Data
 }

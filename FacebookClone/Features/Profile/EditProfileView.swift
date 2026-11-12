@@ -6,7 +6,7 @@ struct EditProfileView: View {
     @Environment(AppStore.self) private var store
     @Environment(\.dismiss) private var dismiss
 
-    private enum Field: Hashable {
+    enum Field: Hashable {
         case firstName, lastName, bio, city, hometown, work, school, website
     }
 

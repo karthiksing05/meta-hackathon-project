@@ -7,7 +7,7 @@ struct AllFriendsView: View {
     @Environment(AppStore.self) private var store
     @Environment(Router.self) private var router
 
-    private enum SortOrder: String, CaseIterable, Identifiable {
+    enum SortOrder: String, CaseIterable, Identifiable {
         case standard = "Default"
         case firstName = "First name"
         case lastName = "Last name"

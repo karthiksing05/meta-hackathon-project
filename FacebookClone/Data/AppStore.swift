@@ -622,7 +622,12 @@ final class AppStore {
     }
 
     /// Sends a request. About half the time the other person accepts a few seconds later.
+    /// If they already sent you one, this confirms it instead.
     func sendRequest(to user: User) {
+        if user.friendship == .requestReceived {
+            confirmRequest(from: user)
+            return
+        }
         user.friendship = .requestSent
         user.requestDate = Date()
         guard Bool.random() else { return }

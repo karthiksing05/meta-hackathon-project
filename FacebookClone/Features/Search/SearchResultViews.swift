@@ -82,7 +82,13 @@ struct SearchPersonRow: View {
             Text("Requested")
                 .font(.fbButton)
                 .foregroundStyle(FBColor.secondaryText)
-        case .requestReceived, .none:
+        case .requestReceived:
+            Button("Confirm") {
+                Haptics.success()
+                store.confirmRequest(from: user)
+            }
+            .buttonStyle(.fb(.primary, expand: false, height: 36))
+        case .none:
             Button("Add friend") {
                 Haptics.light()
                 store.sendRequest(to: user)

@@ -409,7 +409,15 @@ private struct GroupsMemberRow: View {
             Text("Request sent")
                 .font(.fbMeta)
                 .foregroundStyle(FBColor.secondaryText)
-        case .none, .requestReceived:
+        case .requestReceived:
+            Button {
+                Haptics.success()
+                store.confirmRequest(from: user)
+            } label: {
+                Text("Confirm")
+            }
+            .buttonStyle(.fb(.primary, expand: false))
+        case .none:
             Button {
                 Haptics.light()
                 store.sendRequest(to: user)

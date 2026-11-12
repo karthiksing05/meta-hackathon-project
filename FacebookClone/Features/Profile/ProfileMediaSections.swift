@@ -1,6 +1,6 @@
 import SwiftUI
 
-private enum ProfilePhotoTab: String, CaseIterable, Identifiable {
+enum ProfilePhotoTab: String, CaseIterable, Identifiable {
     case ofUser
     case byUser
     case albums

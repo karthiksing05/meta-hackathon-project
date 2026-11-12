@@ -1,5 +1,6 @@
 import MapKit
 import SwiftUI
+import UIKit
 
 struct EventDetailView: View {
     let event: FBEvent
