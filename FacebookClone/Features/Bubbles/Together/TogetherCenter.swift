@@ -80,6 +80,8 @@ final class TogetherCenter {
     @ObservationIgnored var stitchingSessionID: String?
     /// About-me Bubbles whose friends' plays were already scheduled.
     @ObservationIgnored private var scheduledAboutMe: Set<String> = []
+    /// Your games about you already sent to a chat this launch (the "Sent" state on the profile).
+    private(set) var sentAboutMeIDs: Set<String> = []
     @ObservationIgnored private var installed = false
 
     private init() {}
@@ -371,6 +373,7 @@ final class TogetherCenter {
                 bubbleStore.simulateRun(of: person, on: bubble, manifest: bubble.manifest) { score in
                     bubble.scores.append(score)
                     bubble.playCount += 1
+                    bubbleStore.scheduleSave()
                     guard let self, let session else { return }
                     self.announcePlay(score, in: bubble, session: session, appStore: appStore, bubbleStore: bubbleStore)
                 }
@@ -416,6 +419,7 @@ final class TogetherCenter {
                 bubbleStore.simulateRun(of: person, on: bubble, manifest: bubble.manifest, skill: skill) { score in
                     bubble.scores.append(score)
                     bubble.playCount += 1
+                    bubbleStore.scheduleSave()
                     let notification = AppNotification(
                         kind: .bubblePlayed,
                         actors: [person],
@@ -427,6 +431,32 @@ final class TogetherCenter {
                 }
             }
         }
+    }
+
+    /// Sends your game about you to New in SF crew ("How well do you know me? Play it"), so the
+    /// people you just met find out who knows you best. Posts a `share` signal with the chat's members.
+    @discardableResult
+    func sendAboutMe(_ bubble: Bubble, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
+        guard let chat = BubbleSocialCast.conversation(BubbleSocialCast.newInSFCrew, in: appStore) else { return false }
+        let me = appStore.me
+        let card = BubbleChatCard(
+            id: "card-aboutme-\(bubble.id)-\(Int(Date().timeIntervalSince1970))",
+            kind: .contribution,
+            bubbleID: bubble.id,
+            seed: bubble.manifest.seed,
+            fromUserID: me.id,
+            headline: TogetherCopy.aboutMeCardHeadline(bubble.title),
+            extras: [
+                TogetherCard.stageKey: .string(TogetherCard.Stage.aboutMe.rawValue),
+                TogetherCard.titleKey: .string(bubble.title),
+            ]
+        )
+        let target = BubbleShareTarget(kind: .chat, targetID: chat.id, title: chat.title)
+        guard BubbleSocialHub.send(card, to: target, note: TogetherCopy.aboutMeSendNote, appStore: appStore, bubbleStore: bubbleStore) else { return false }
+        sentAboutMeIDs.insert(bubble.id)
+        BubbleSocialSignals.post(.share, bubbleID: bubble.id, with: chat.participants.filter { !$0.isMe }.map(\.id))
+        scheduleAboutMePlays(bubble, appStore: appStore, bubbleStore: bubbleStore)
+        return true
     }
 
     // MARK: - Demo
@@ -469,6 +499,8 @@ enum TogetherCard {
         case published
         /// "Maya played Picnic Trivia · 520".
         case played
+        /// "How well do you know Alex? · Play": your game about you, sent to a chat.
+        case aboutMe = "about_me"
     }
 
     static func stage(of card: BubbleChatCard) -> Stage {

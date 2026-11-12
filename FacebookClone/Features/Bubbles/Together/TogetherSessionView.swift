@@ -98,7 +98,7 @@ struct TogetherSessionView: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 10) {
                 TogetherMakersStack(users: makers + invited, size: 32, limit: 5)
-                Text(TogetherCopy.makingTogether(TogetherStudio.names(makers.map { $0.isMe ? "You" : $0.firstName } + invited.map(\.firstName))))
+                Text(TogetherCopy.makingTogether(TogetherStudio.names(makers.map { $0.isMe ? TogetherCopy.you : $0.firstName } + invited.map(\.firstName))))
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                     .lineLimit(2)
@@ -164,10 +164,10 @@ struct TogetherSessionView: View {
             .accessibilityLabel(maker.name)
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 4) {
-                    Text(maker.isMe ? "You" : entry.makerName)
+                    Text(maker.isMe ? TogetherCopy.you : entry.makerName)
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
-                    Text("added \(TogetherCopy.kindNoun(entry.kind))")
+                    Text(TogetherCopy.addedKind(entry.kind))
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                     Spacer(minLength: 0)

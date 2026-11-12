@@ -130,6 +130,7 @@ struct TogetherCardView: View {
             case .contribution: contribution
             case .published: published
             case .played: played
+            case .aboutMe: aboutMe
             }
         }
         .frame(width: isPost ? nil : 264)
@@ -187,7 +188,7 @@ struct TogetherCardView: View {
                     Text(maker.isMe ? appStore.me.firstName : maker.firstName)
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
-                    Text("added \(TogetherCopy.kindNoun(kind)) to \(title)")
+                    Text(TogetherCopy.addedKind(kind, to: title))
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                         .lineLimit(2)
@@ -270,6 +271,42 @@ struct TogetherCardView: View {
                 }
             }
             .padding(12)
+        }
+    }
+
+    /// Someone's game about them, sent to the chat: play it to show how well you know them.
+    private var aboutMe: some View {
+        let bubble = bubbleStore.bubble(id: card.bubbleID)
+        let subject = bubbleStore.resolvePerson(bubble?.manifest.about?.subjectID ?? card.fromUserID)
+        return VStack(alignment: .leading, spacing: 0) {
+            header(symbol: "person.crop.circle.badge.questionmark", label: TogetherCopy.aboutMeTitle)
+            HStack(spacing: 12) {
+                AvatarView(user: subject, size: 44)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.fbHeadline)
+                        .foregroundStyle(FBColor.primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(subject.isMe ? TogetherCopy.whoKnowsYouBest : TogetherCopy.aboutMeCardDetail)
+                        .font(.fbMeta)
+                        .foregroundStyle(FBColor.secondaryText)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(12)
+            Button {
+                Haptics.light()
+                let context = BubblePlayContext(kind: .contribution, id: card.id, cardID: card.id)
+                TogetherNav.afterCovers(router) {
+                    BubbleSocialHub.play(card, router: router, context: context)
+                }
+            } label: {
+                Label(TogetherCopy.playIt, systemImage: "play.fill")
+            }
+            .buttonStyle(.fb(.primary, height: 36))
+            .disabled(bubble == nil)
+            .padding([.horizontal, .bottom], 12)
+            .accessibilityLabel("\(TogetherCopy.playIt): \(title)")
         }
     }
 

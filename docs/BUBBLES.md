@@ -809,7 +809,7 @@ game exists):
 | Key | Type | Meaning |
 |---|---|---|
 | `session_id` | String | The `TogetherSession` (also in `session_id` on the card) |
-| `stage` | String | `invite`, `contribution`, `published` or `played` |
+| `stage` | String | `invite`, `contribution`, `published`, `played` or `about_me` (your game about you, sent to a chat) |
 | `kind` | String | `question`, `words`, `scene` or `level` |
 | `ask` | String? | What the starter asked for (invite) |
 | `text` | String? | The contribution as written (contribution), or the maker's result line (played) |
@@ -857,9 +857,11 @@ subject_name, template}` from the first maker. When a game about you publishes, 
 Theo play it over the next ~12 s (Diego knows you best in the demo).
 `TogetherProfileAboutMe` (profile Bubbles tab) and the `together/profile/<id>` page list Bubbles
 whose `about.subject_id` is the person (`"me"` counts as you), "Who knows <name> best" (each
-player's best score per game, summed; for you, friends only; top 3, with Add friend for people who
-aren't friends yet, posting `add_friend_from_game`), Play it on a friend's game, and for you the
-three templates. Finishing a run of someone else's about-me game posts `about_me_play` with
+player's best score per game, summed; on your games friends only, on a friend's games your own runs
+count too; top 3, with Add friend for people who aren't friends yet, posting
+`add_friend_from_game`), Play it on a friend's game, and for you the three templates plus **Send to
+friends** on each of your games: an `about_me` card (`bubble_id` set, `stage`, `title`) goes to New
+in SF crew through `hub.send`, posting `share` with the chat's members, and friends' plays follow. Finishing a run of someone else's about-me game posts `about_me_play` with
 `[subject_id]`. `TogetherGroupMakeRow` on a Group's Games tab starts a session with the Group as the
 target and lists its sessions in progress.
 

@@ -434,4 +434,21 @@ enum TogetherCopy {
     }
     static func aboutMeBanner(_ templateTitle: String) -> String { "A game about you · \(templateTitle)" }
     static let aboutMeBannerDetail = "Your answers are the right ones. Muse writes the decoys."
+
+    // Small labels
+    static let you = "You"
+    static let seeProfile = "See profile"
+    static let startedIt = "Started it"
+    static func added(_ what: String) -> String { "Added \(what)" }
+    static func addedKind(_ kind: TogetherAskKind) -> String { "added \(kindNoun(kind))" }
+    static func addedKind(_ kind: TogetherAskKind, to title: String) -> String { "added \(kindNoun(kind)) to \(title)" }
+    static func rank(_ rank: Int) -> String { "Number \(rank)" }
+
+    // Sending a game about you
+    static let sendToFriends = "Send to friends"
+    static let sentToFriends = "Sent"
+    static let sendToFriendsHint = "Sends it to New in SF crew so friends can play"
+    static func aboutMeCardHeadline(_ title: String) -> String { title }
+    static let aboutMeSendNote = "Made a game about me. Who knows me best? 🫧"
+    static let aboutMeCardDetail = "Play to see if you know them best"
 }

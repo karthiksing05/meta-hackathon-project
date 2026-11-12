@@ -52,13 +52,13 @@ struct TogetherDetailCredits: View {
 
     private func makerRow(_ maker: BubbleMaker) -> some View {
         let user = bubbleStore.resolvePerson(maker.id)
-        let role = maker.role == "starter" ? "Started it" : nil
-        let detail = [role, maker.contribution.map { "Added \($0)" }].compactMap { $0 }.joined(separator: " · ")
+        let role = maker.role == "starter" ? TogetherCopy.startedIt : nil
+        let detail = [role, maker.contribution.map { TogetherCopy.added($0) }].compactMap { $0 }.joined(separator: " · ")
         return NavigationLink(value: Route.profile(user)) {
             HStack(spacing: 10) {
                 AvatarView(user: user, size: 32)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(isMe(maker.id) ? "You" : user.name)
+                    Text(isMe(maker.id) ? TogetherCopy.you : user.name)
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
                     if !detail.isEmpty {
@@ -77,7 +77,7 @@ struct TogetherDetailCredits: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel([isMe(maker.id) ? "You" : user.name, detail].joined(separator: ", "))
+        .accessibilityLabel([isMe(maker.id) ? TogetherCopy.you : user.name, detail].joined(separator: ", "))
     }
 
     private func aboutRow(_ about: BubbleAboutMe) -> some View {
@@ -200,13 +200,14 @@ struct TogetherAboutSection: View {
         }
     }
 
-    /// Best score per game per person (not the subject), summed; for you, friends only.
+    /// Best score per game per person (not the subject), summed. On your own games, friends only;
+    /// on a friend's games, your own runs count too, so you see where you rank.
     private var knowers: [(user: User, total: Int, games: Int, right: String?)] {
         var totals: [String: (User, Int, Int, String?)] = [:]
         for bubble in games {
             var best: [String: BubbleScore] = [:]
-            for entry in bubble.scores where entry.user.id != user.id && !entry.user.isMe {
-                if isMe && !entry.user.isFriend { continue }
+            for entry in bubble.scores where entry.user.id != user.id {
+                if isMe && (entry.user.isMe || !entry.user.isFriend) { continue }
                 if let current = best[entry.user.id], current.score >= entry.score { continue }
                 best[entry.user.id] = entry
             }
@@ -215,7 +216,9 @@ struct TogetherAboutSection: View {
                 totals[id] = (entry.user, current.1 + entry.score, current.2 + 1, current.3 ?? Self.rightLine(entry.share?.scoreText))
             }
         }
-        return totals.values.map { ($0.0, $0.1, $0.2, $0.3) }.sorted { $0.total > $1.total }
+        return totals.values.map { ($0.0, $0.1, $0.2, $0.3) }.sorted { a, b in
+            a.total != b.total ? a.total > b.total : a.user.id < b.user.id
+        }
     }
 
     var body: some View {
@@ -311,11 +314,30 @@ struct TogetherAboutSection: View {
                             .buttonStyle(.fb(.primary, height: 32))
                             .frame(width: 124)
                             .accessibilityLabel("\(TogetherCopy.playIt): \(bubble.title)")
+                        } else {
+                            sendButton(bubble)
                         }
                     }
                 }
             }
         }
+    }
+
+    /// Your game about you, sent to New in SF crew in one tap.
+    @ViewBuilder
+    private func sendButton(_ bubble: Bubble) -> some View {
+        let sent = TogetherCenter.shared.sentAboutMeIDs.contains(bubble.id)
+        Button {
+            Haptics.success()
+            TogetherCenter.shared.sendAboutMe(bubble, appStore: appStore, bubbleStore: bubbleStore)
+        } label: {
+            Label(sent ? TogetherCopy.sentToFriends : TogetherCopy.sendToFriends, systemImage: sent ? "checkmark" : "paperplane.fill")
+        }
+        .buttonStyle(.fb(sent ? .secondary : .primary, height: 32))
+        .frame(width: 124)
+        .disabled(sent)
+        .accessibilityLabel("\(sent ? TogetherCopy.sentToFriends : TogetherCopy.sendToFriends): \(bubble.title)")
+        .accessibilityHint(TogetherCopy.sendToFriendsHint)
     }
 
     private var whoKnowsBest: some View {
@@ -352,12 +374,13 @@ struct TogetherAboutSection: View {
             Text("\(rank)")
                 .font(.fbHeadline.monospacedDigit())
                 .foregroundStyle(rank == 1 ? FBColor.brandBlue : FBColor.secondaryText)
-                .frame(width: 18)
+                .frame(minWidth: 18)
+                .accessibilityLabel(TogetherCopy.rank(rank))
             NavigationLink(value: Route.profile(row.user)) {
                 HStack(spacing: 10) {
                     AvatarView(user: row.user, size: 36)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(row.user.name)
+                        Text(row.user.isMe ? TogetherCopy.you : row.user.name)
                             .font(.fbName)
                             .foregroundStyle(FBColor.primaryText)
                             .lineLimit(1)
@@ -377,12 +400,14 @@ struct TogetherAboutSection: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
     }
 
     @ViewBuilder
     private func addFriendButton(_ person: User) -> some View {
-        if person.friendship == .none {
+        if person.isMe {
+            EmptyView()
+        } else if person.friendship == .none {
             Button {
                 Haptics.light()
                 appStore.sendRequest(to: person)
@@ -430,7 +455,7 @@ struct TogetherAboutPage: View {
                         .font(.fbTitle)
                         .foregroundStyle(FBColor.primaryText)
                     NavigationLink(value: Route.profile(user)) {
-                        Text("See profile")
+                        Text(TogetherCopy.seeProfile)
                     }
                     .buttonStyle(.fb(.secondary, expand: false, height: 32))
                 }
