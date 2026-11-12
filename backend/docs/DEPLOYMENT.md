@@ -14,9 +14,12 @@ Disk:   /srv/game-platform/data/games   (api: read-write, games: read-only)
 
 Replace `yourdomain.com` below with your domain, and `OWNER` with the GitHub owner of the repo.
 
-Nothing here has been run against a real server: I had no access to Vultr, Cloudflare or GitHub.
-The Go code and tests were run locally; the Compose file, scripts and workflow were only
-syntax-checked. Do the first deployment while watching it, and use step 9 to test.
+Status: this has been deployed once for real, on a 4 vCPU / 32 GB Vultr server (Debian 12) with the
+domain `ol4ol.com`. The run for `17e4ce7` passed, and `https://api.ol4ol.com/readyz` reports the database and
+storage as ok. The fastest way through the setup is [HACKATHON_DEPLOY.md](HACKATHON_DEPLOY.md), which uses
+`root` instead of a separate `deploy` user and generates the Mongo passwords for you. This longer guide
+explains the same steps and a stricter layout. Not yet tested on the live server: Cloudflare cache rules,
+the backup timers, `deploy.sh rollback` by hand, and publishing a game end to end.
 
 ## 1. Prepare the Debian 12 server
 
@@ -192,8 +195,15 @@ git push origin backend-api:refs/heads/Prod
 
 Each push runs: gofmt + `go vet` + `go test -race` + script and Compose validation, then builds both
 images, pushes `ghcr.io/OWNER/bubbles-api:<sha>` and `bubbles-games:<sha>`, SSHes in, runs
-`deploy.sh deploy <sha>`, and checks readiness. First time only: if GHCR reports the package is not
-linked to the repo, link it under the package settings so `GITHUB_TOKEN` can pull it.
+`deploy.sh deploy <sha>`, and checks readiness.
+
+**A push or merge to `Prod` deploys to the live server by itself, with no approval step.** Only do it when the
+code is fully ready and tested. Merge into `Prod`; never reset or force-push it. `Prod` is the only branch
+that has `backend/` and the workflow today.
+
+The deploy job needs `packages: read` (it is set in the workflow) so the server can pull the images. The
+images carry a label with the repo URL so GitHub links them to the repo. If GHCR still answers `denied`, link
+each package to the repo under its settings.
 
 ## 9. Test a deployment
 

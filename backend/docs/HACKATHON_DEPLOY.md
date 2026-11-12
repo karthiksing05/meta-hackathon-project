@@ -5,8 +5,8 @@ Vultr server, so there is no extra user to create. MongoDB still has a password,
 generate it for you and write it to a file; you never type or read it.
 
 You need: the Vultr server's IP (Debian 12), a domain on Cloudflare, and the `gh` CLI logged in
-(`gh auth login`). Nothing here has been run against a real server, so watch the output and stop at the
-first error.
+(`gh auth login`). These steps have been run once on a real server (Debian 12, 4 vCPU, 32 GB) and
+produced a working deployment, but watch the output and stop at the first error.
 
 Each block says where it runs: **server** (SSH in as root) or **your PC** (PowerShell, from the repo root).
 Edit the three values marked `EDIT` once, then paste each block as is.

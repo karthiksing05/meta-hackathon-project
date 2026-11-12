@@ -1,8 +1,12 @@
 # Bubbles backend
 
 Go + Chi API, a small static server for published game packages, MongoDB 8 for metadata and social data.
-Production runs on one Vultr server behind a Cloudflare Tunnel: see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
-This folder is self-contained; the iOS app does not depend on it yet.
+Production runs on one Vultr server behind a Cloudflare Tunnel: the API is at https://api.ol4ol.com and the
+published games are at https://games.ol4ol.com. Setup steps: [docs/HACKATHON_DEPLOY.md](docs/HACKATHON_DEPLOY.md)
+(copy and paste) and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (the longer version).
+**A push or merge to the `Prod` branch deploys to production automatically**, so only do that when the code is
+ready. This folder is self-contained; the iOS app does not call the API yet (the front end builds against a
+mock first).
 
 ```
 cmd/api        the API (:8080)            cmd/games    static server for published games (:8081)
