@@ -289,6 +289,8 @@ function timerIds(rules) {
   return ids;
 }
 
+const s_isEvent = (declared, n) => declared.get(n) === 'events';
+
 // ---------- expansion ----------
 
 export function expand(manifest, lib, options = {}) {
@@ -380,6 +382,13 @@ export function expand(manifest, lib, options = {}) {
     for (const [n, kind] of declared) {
       if (n.startsWith('_') || kind === 'rule' || kind === 'timer') { rename.set(n, `${id}__${n.replace(/^_+/, '')}`); continue; }
       let final = bind[n] ?? n;
+      // An event bound explicitly onto one that already exists joins it: the fragment listens to
+      // (and may emit) that event instead of declaring its own. Payloads must match (checked below).
+      if (s_isEvent(declared, n) && bind[n] !== undefined && (gameNames.has(final) || publicOwner.has(final))) {
+        rename.set(n, final);
+        (u.joinedEvents ??= new Map()).set(final, n);
+        continue;
+      }
       if (gameNames.has(final)) {
         err('A_DUPLICATE_NAME', `${u.at}`, `the game declares '${final}', which ${frag.fragment} also provides`, { hint: `bind it, for example "bind": {"${n}": "${n}_${id}"}, or drop your own '${final}'` });
       } else if (publicOwner.has(final)) {
@@ -514,6 +523,13 @@ export function expand(manifest, lib, options = {}) {
         }
         const got = section === 'state' ? have.type : section === 'functions' ? { params: have.params, returns: have.returns } : section === 'inputs' ? have.payload || {} : have;
         if (norm(got) !== norm(want)) err('A_REQUIREMENT_TYPE', u.at, `${u.frag.fragment} needs '${final}' as ${JSON.stringify(want)}, but it is ${JSON.stringify(got)}`);
+      }
+    }
+    for (const [final, original] of u.joinedEvents || []) {
+      const mine = rewriteType(u.frag.events[original] || {}, u.rename);
+      const owner = (manifest.events || {})[final] ?? uses.find((o) => o !== u && o.out.events[final] && !o.joinedEvents?.has(final))?.out.events[final];
+      if (owner && norm(owner) !== norm(mine)) {
+        err('A_REQUIREMENT_TYPE', `${u.at}/bind/${esc(original)}`, `${u.frag.fragment}'s '${original}' has payload ${JSON.stringify(mine)}, but '${final}' has ${JSON.stringify(owner)}`);
       }
     }
     for (const c of u.frag.conflicts || []) {
