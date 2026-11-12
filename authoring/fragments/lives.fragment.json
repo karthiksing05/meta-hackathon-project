@@ -1,0 +1,41 @@
+{
+  "fragment": "lives",
+  "version": 1,
+  "describe": "The player has N lives. Each `hit` event costs one; at zero lives the game is lost.",
+  "params": {
+    "count": { "type": "int", "default": 3, "min": 1, "max": 9 }
+  },
+  "requires": {
+    "events": { "hit": {} }
+  },
+  "state": {
+    "lives": { "type": "int", "init": "@count" }
+  },
+  "events": {
+    "life_lost": {}
+  },
+  "rules": [
+    {
+      "id": "lose_life",
+      "on": "hit",
+      "when": "lives > 0",
+      "do": [ { "decr": "lives" }, { "emit": "life_lost" } ]
+    }
+  ],
+  "objectives": {
+    "lose": "lives <= 0"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": { "node": "text", "text": "= 'Lives: ' + str(lives)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      }
+    ],
+    "feedback": [
+      { "on": "life_lost", "do": [ { "shake": { "px": 6, "ms": 200 } }, { "sound": { "wave": "square", "note": "C3", "ms": 120 } } ] }
+    ]
+  },
+  "tags": { "mood": ["tense"], "energy": ["medium", "high"] },
+  "conflicts": ["sudden_death"]
+}

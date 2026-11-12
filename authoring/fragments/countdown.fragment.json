@@ -1,0 +1,48 @@
+{
+  "fragment": "countdown",
+  "version": 1,
+  "describe": "A visible clock counting down from `ms`. Emits `time_up` when it reaches zero, and can end the game then. Doesn't set the game's time_limit.",
+  "params": {
+    "ms":      { "type": "duration", "default": "@game.duration_ms", "min": 1000, "max": 600000 },
+    "on_end":  { "type": "enum", "values": ["none", "win", "lose"], "default": "none" },
+    "warn_at": { "type": "duration", "default": 5000, "min": 0, "max": 60000 }
+  },
+  "requires": {},
+  "events": {
+    "time_up": {}
+  },
+  "rules": [
+    {
+      "id": "arm",
+      "on": "start",
+      "do": [ { "after": "@ms", "emit": "time_up", "id": "_timer" } ]
+    },
+    {
+      "id": "finish",
+      "on": "time_up",
+      "include": "@on_end != 'none'",
+      "do": [ { "end": "@on_end" } ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text",
+          "text": "= str(max(0, ceil((@ms - now) / 1000.0))) + 's'",
+          "size": 18, "weight": 600,
+          "color": "= if @ms - now <= @warn_at then $danger else $ink",
+          "transition": { "color": { "ms": 200, "ease": "out" } },
+          "role": "hud"
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "time_up", "do": [ { "sound": { "wave": "triangle", "note": "G4", "ms": 200 } } ] }
+    ]
+  },
+  "tags": { "mood": ["tense", "playful"], "energy": ["medium", "high"] },
+  "conflicts": []
+}
