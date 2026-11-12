@@ -13,6 +13,8 @@ import SwiftUI
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
 ///   keys: challenge, groups-search, together, remix, story, nextline, learn, length, saves)
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
+/// - `FB_API`: `mock` (default) or `live`; picks the games API client (`GamesAPIFactory.current`).
+/// - `FB_API_URL`: overrides the live API base URL (default `https://api.ol4ol.com`).
 ///
 /// Screens can read their own `FB_*` variables for extra DEBUG-only state (keep them documented
 /// at the top of that screen's file).
