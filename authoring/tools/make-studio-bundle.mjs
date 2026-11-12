@@ -4,7 +4,7 @@
 //
 // One classic (non-module) script that defines `window.MicrogameStudio` (docs/BUBBLES.md 7.12). It
 // holds:
-//   - the expander, bubble.mjs, the async bot gate and the Studio API (authoring/expander/studio.mjs
+//   - the expander, wrap.mjs, the async bot gate and the Studio API (authoring/expander/studio.mjs
 //     and everything it imports), each ES module wrapped in its own function scope;
 //   - as data: the fragment and look library (so nothing reads disk), the engine's
 //     `microgame catalog --json`, the model-facing format rules from SPEC.md, and a few example
@@ -173,7 +173,7 @@ ${stubs.map((s) => `  __m[${JSON.stringify(s)}] = __nodeStub(${JSON.stringify(s)
 ${code}
   const DATA = ${JSON.stringify(data)};
 
-  const engineLib = () => (typeof root.BubbleMicrogame !== "undefined" ? root.BubbleMicrogame : null);
+  const engineLib = () => (typeof root.MicrogameEngine !== "undefined" ? root.MicrogameEngine : null);
   root.MicrogameStudio = __m[${JSON.stringify(entryKey)}].createStudio(DATA, {
     getEngine: () => { const L = engineLib(); return L ? L.getEngine() : null; },
     engineError: () => { const L = engineLib(); return L ? L.engineError() : "bubble-kit-microgame-engine.js isn't loaded"; },

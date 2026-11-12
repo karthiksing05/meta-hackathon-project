@@ -317,7 +317,7 @@ enum MicrogameStudioError: Error, LocalizedError {
         )
     }
 
-    /// Wraps the expanded game as a `formula: "microgame"` Bubble (authoring/expander/bubble.mjs):
+    /// Wraps the expanded game as a `formula: "microgame"` Bubble (authoring/expander/wrap.mjs):
     /// the game as text in `content.game_json`, the authoring manifest (fragment versions pinned)
     /// as text in `content.authoring_json`, and frame colors picked from the game.
     func wrap(_ e: MicrogameExpansion, id: String, brief: BubbleBrief?, emoji: String?) async throws -> BubbleManifest {

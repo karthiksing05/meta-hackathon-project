@@ -54,6 +54,28 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
         case playtested(StudioPlaytest.Report)
         case done(BubbleManifest)
         case failed(String)
+
+        /// One short, human-readable line for "Muse at work" UIs, so screens never word events
+        /// themselves. Plain sentence case, no brand words.
+        var summary: String {
+            switch self {
+            case .drafting(let attempt):
+                return attempt == 1 ? "Muse is drafting the game" : "Muse is drafting it again"
+            case .expanding:
+                return "Building and checking the game"
+            case .repairing(let round, let issues):
+                let n = issues.count
+                return "Fixing \(n) \(n == 1 ? "issue" : "issues")" + (round > 1 ? " (round \(round))" : "")
+            case .playtesting(let bots):
+                return "\(bots) test players are trying it"
+            case .playtested(let report):
+                return report.passed ? "Playtested: \(report.headline)" : "Playtest flagged: \(report.headline)"
+            case .done(let game):
+                return "\(game.title) is ready"
+            case .failed(let reason):
+                return "Couldn't finish: \(reason)"
+            }
+        }
     }
 
     enum ComposerError: Error, LocalizedError {

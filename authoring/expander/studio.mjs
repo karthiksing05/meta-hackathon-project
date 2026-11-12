@@ -8,7 +8,7 @@
 // (docs/BUBBLES.md 7.12). The Swift side is MicrogameStudio.swift.
 
 import { expand as expandManifest, translate } from './expand.mjs';
-import { wrapBubble } from './bubble.mjs';
+import { wrapGame } from './wrap.mjs';
 import { playtestAsync, DEFAULT_BOTS } from '../playtest/gate-async.mjs';
 import { sortSafe } from './stable.mjs';
 
@@ -222,7 +222,7 @@ function unwrap(v) {
 
 /**
  * data: {library: {fragments, looks}, engineCatalog, formatRules, examples: [{name, manifest}], build}
- * getEngine(): the engine (`BubbleMicrogame.getEngine()`), or null with engineError() saying why.
+ * getEngine(): the engine (`MicrogameEngine.getEngine()`), or null with engineError() saying why.
  */
 export function createStudio(data, { getEngine, engineError = () => null } = {}) {
   const { library, engineCatalog = {}, formatRules = '', examples = [], build = {} } = data;
@@ -365,7 +365,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
   }
 
   /**
-   * opts: {id, game, authoring?, title?, oneLineRule?, emoji?, brief?, style?, seed?, lineage?} (bubble.mjs).
+   * opts: {id, game, authoring?, title?, oneLineRule?, emoji?, brief?, style?, seed?, lineage?} (wrap.mjs).
    * Pins each use's fragment version in the stored authoring manifest (SPEC 2.1), so the Bubble
    * expands the same way after the library moves on.
    */
@@ -384,7 +384,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     }
     for (const k of ['oneLineRule', 'title', 'emoji']) if (opts[k] === null) delete opts[k];
     if (opts.one_line_rule && !opts.oneLineRule) opts.oneLineRule = opts.one_line_rule;
-    return JSON.stringify(wrapBubble(opts));
+    return JSON.stringify(wrapGame(opts));
   }
 
   return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, wrap });

@@ -99,7 +99,7 @@ for (const name of games) {
   const renamedParams = JSON.stringify(direct.game) !== JSON.stringify(r.game);
   if (renamedParams && !/"p0_/.test(JSON.stringify(r.game))) fail(`${name}: bundle and Node expander disagree on game.json`);
   // The app re-encodes JSON with sorted keys (Swift's JSONValue): the games must survive that.
-  const engine = context.BubbleMicrogame.getEngine();
+  const engine = context.MicrogameEngine.getEngine();
   for (const [label, g] of [['game', r.game], ['playtest game', r.playtest_game]]) {
     if (!g) continue;
     const errs = engine.validate(JSON.stringify(sortKeys(g))).filter((d) => d.severity === 'error');

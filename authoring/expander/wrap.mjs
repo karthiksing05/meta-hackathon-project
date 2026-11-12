@@ -44,9 +44,9 @@ export function styleColors(game) {
  * opts: {id, game, authoring?, title?, oneLineRule?, emoji?, brief?, style?, seed?, lineage?}
  * Title and rule default to the game's meta.
  */
-export function wrapBubble(opts) {
+export function wrapGame(opts) {
   const { id, game } = opts;
-  if (!id || !game) throw new Error('wrapBubble needs id and game');
+  if (!id || !game) throw new Error('wrapGame needs id and game');
   const meta = game.meta || {};
   const rule = opts.oneLineRule || firstSentence(meta.instructions) || 'Play!';
   return {

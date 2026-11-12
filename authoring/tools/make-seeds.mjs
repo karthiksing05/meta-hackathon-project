@@ -3,7 +3,7 @@
 // a few authoring games (expanded here) and a few engine example games, each wrapped as a
 // `formula: "microgame"` manifest. Every game must validate with zero errors first.
 //
-// Usage: node authoring/tools/make-bubble-seeds.mjs [--check]
+// Usage: node authoring/tools/make-seeds.mjs [--check]
 //   --check: exit 1 if the committed seed files differ from a fresh build.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expand, loadLibrary } from '../expander/expand.mjs';
 import { loadEngine } from '../expander/engine.mjs';
-import { wrapBubble } from '../expander/bubble.mjs';
+import { wrapGame } from '../expander/wrap.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
@@ -50,7 +50,7 @@ for (const s of SEEDS) {
   const errors = engine.validate(JSON.stringify(game)).filter((d) => d.severity === 'error');
   if (errors.length) { console.error(`${s.id}: ${errors.length} engine errors`, errors.slice(0, 3)); failed++; continue; }
 
-  const m = wrapBubble({ id: s.id, game, authoring, emoji: s.emoji, seed: 1000 + SEEDS.indexOf(s) });
+  const m = wrapGame({ id: s.id, game, authoring, emoji: s.emoji, seed: 1000 + SEEDS.indexOf(s) });
   m._seed = {
     creator_id: s.creator,
     ...(s.group ? { group_id: s.group } : {}),
@@ -69,5 +69,5 @@ for (const s of SEEDS) {
   }
 }
 if (failed) { console.error(`${failed} seed(s) failed`); process.exit(1); }
-if (stale) { console.error('run: node authoring/tools/make-bubble-seeds.mjs'); process.exit(1); }
+if (stale) { console.error('run: node authoring/tools/make-seeds.mjs'); process.exit(1); }
 if (check) console.log(`${SEEDS.length} microgame seeds are up to date`);

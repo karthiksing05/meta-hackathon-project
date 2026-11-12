@@ -10,7 +10,7 @@ Rust/WASM engine, checks it, and has bots play it before it ships. `SPEC.md` def
 | `games/` | 20 authoring manifests: the three engine fixtures (Number Merge now on `tile_slide`) and 17 originals. Action: Fog Dodge, Golden Hour, Tide Taps, Lantern Lane, Meadow Hop, Snail Patrol. Puzzle and words: Lantern Letters, Hangout Words, Postcard Pairs, Daily Garden Pairs, Chime Circle, Picnic Packers, Quiz Night. Story: Kite Day Detour, Firefly Note. Social: Friend Dash (a friend's ghost and target), Bullseye Relay (pass-and-play with a Group total) |
 | `expander/` | The expander, the source map, the engine loader and a command-line tool. `studio.mjs` is the API the app's Studio uses; `stable.mjs` makes games survive key-sorted JSON (Swift) |
 | `playtest/` | The bot playtest gate, a port of beta's `StudioPlaytest`: `gate.mjs` (Node worker threads), `gate-async.mjs` (one thread, `fork()` look-ahead, for the app), shared bots and analysis in `bots.mjs` |
-| `tools/` | `make-bubble-seeds.mjs` (the `mg-*` seed Bubbles), `make-studio-bundle.mjs` (the app's Studio bundle) and `test-studio-bundle.mjs` |
+| `tools/` | `make-seeds.mjs` (the `mg-*` seed Bubbles), `make-studio-bundle.mjs` (the app's Studio bundle) and `test-studio-bundle.mjs` |
 | `examples/snake/` | The hand expansion that checked the format against Artem's Snake |
 
 ## Running it

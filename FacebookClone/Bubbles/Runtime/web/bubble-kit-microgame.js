@@ -32,7 +32,7 @@
   const SWIPE_MAX_TICKS = 30;
   const MAX_LIVE_GAMES = 48; // engine handles kept alive at once (runs are cheap to recreate)
 
-  const lib = () => (typeof BubbleMicrogame !== "undefined" ? BubbleMicrogame : null);
+  const lib = () => (typeof MicrogameEngine !== "undefined" ? MicrogameEngine : null);
   const hasDOM = typeof document !== "undefined" && typeof Image !== "undefined";
 
   // ---- engine sessions -------------------------------------------------------------------
