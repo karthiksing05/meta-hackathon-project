@@ -46,6 +46,9 @@ struct TogetherSessionView: View {
                 }
                 contributions(session)
                 if session.bubbleID == nil {
+                    // Stitch sits right under the contributions, inside the scroll view: pinned
+                    // to the bottom of a pushed tab screen it slid under the tab bar.
+                    stitchBar(session)
                     composer(session)
                 }
             }
@@ -54,9 +57,6 @@ struct TogetherSessionView: View {
         }
         .background(FBColor.background)
         .scrollDismissesKeyboard(.interactively)
-        .safeAreaInset(edge: .bottom) {
-            if session.bubbleID == nil { stitchBar(session) }
-        }
         .toolbar {
             if let chat = BubbleSocialHub.conversation(for: session.target, appStore: appStore, bubbleStore: bubbleStore), session.target.kind != .group {
                 ToolbarItem(placement: .topBarTrailing) {
