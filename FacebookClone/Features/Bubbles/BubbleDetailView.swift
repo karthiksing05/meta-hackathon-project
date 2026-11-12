@@ -31,6 +31,7 @@ struct BubbleDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 hero(bubble)
                 titleBlock(bubble)
+                ShowcaseDetailSection(bubble: bubble, part: .sent)
                 creatorRow(bubble)
                 tags(bubble)
                 museRow(bubble)

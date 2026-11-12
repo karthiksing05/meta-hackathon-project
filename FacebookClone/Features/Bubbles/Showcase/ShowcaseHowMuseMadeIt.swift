@@ -1,21 +1,28 @@
 import SwiftUI
 
-/// The game page's Muse section: who you sent it to ("Sent to Maya, Leo and Priya"), then
-/// "How Muse made it": the brief, the building blocks, the checks and fixes, the playtest and the
+/// The game page's Muse section. `.sent` is "Sent to Maya, Leo and Priya" (near the top, so it
+/// shows when Studio lands on the page); `.made` is "How Muse made it": the brief, the building blocks, the checks and fixes, the playtest and the
 /// models. The brief and the model stamp come from the manifest, so every Muse-made game shows
 /// them; the rest comes from `MakeRecordStore`, kept when it was shared from this device.
 struct ShowcaseDetailSection: View {
+    enum Part {
+        case sent
+        case made
+    }
+
     let bubble: Bubble
+    var part: Part = .made
 
     @State private var store = MakeRecordStore.shared
 
     var body: some View {
         let record = store.record(for: bubble.id)
-        VStack(alignment: .leading, spacing: 12) {
-            if let record, !record.sentTo.isEmpty {
+        // A Group, so a part with nothing to show adds no gap to the page.
+        Group {
+            if part == .sent, let record, !record.sentTo.isEmpty {
                 ShowcaseSentBanner(record: record, title: bubble.title)
             }
-            if bubble.isMadeWithMuse {
+            if part == .made, bubble.isMadeWithMuse {
                 ShowcaseHowMuseMadeIt(bubble: bubble, record: record)
             }
         }

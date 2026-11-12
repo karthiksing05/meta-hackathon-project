@@ -143,7 +143,8 @@ private struct StudioComposeHeader: View {
         let clock = model.clockText(at: date)
         if model.isFinished { return "Made in \(clock)" }
         if model.failure != nil { return "Stopped at \(clock)" }
-        let step = model.currentEvent?.step.title ?? "Getting started"
+        // Microgame events carry the composer's own words; formula steps use the step's name.
+        let step = model.runIsMicrogame ? (model.currentEvent?.title ?? "Getting started") : (model.currentEvent?.step.title ?? "Getting started")
         return "\(clock) · \(step)"
     }
 
