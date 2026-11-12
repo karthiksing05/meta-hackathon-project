@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scrollgames.dev/schema/sg.content/1",
+  "title": "Scroll Games content",
+  "type": "object",
+  "required": ["schema", "items"],
+  "properties": {
+    "schema": { "const": "sg.content/1" },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string" }
+        },
+        "if": { "properties": { "kind": { "const": "question" } } },
+        "then": {
+          "required": ["prompt", "choices", "answer"],
+          "properties": {
+            "prompt": { "type": "string", "minLength": 1 },
+            "media_id": { "type": "string" },
+            "media_url": { "type": "string" },
+            "choices": { "type": "array", "minItems": 2, "maxItems": 6, "items": { "type": "string", "minLength": 1 } },
+            "answer": { "type": "integer", "minimum": 0, "description": "Index into choices." },
+            "clue": { "type": "string" }
+          }
+        }
+      }
+    },
+    "copy": {
+      "type": "object",
+      "properties": {
+        "intro": { "type": "string" },
+        "win": { "type": "string" },
+        "lose": { "type": "string" }
+      }
+    }
+  }
+}

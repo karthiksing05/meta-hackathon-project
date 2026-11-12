@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// The six tabs plus Facebook's bottom tab bar. Every tab stays alive so scroll
+/// The seven tabs plus Facebook's bottom tab bar. Every tab stays alive so scroll
 /// position and navigation survive tab switches. Also hosts the app-wide covers.
 struct MainTabView: View {
     @Environment(AppStore.self) private var store
@@ -74,6 +74,8 @@ private struct TabRootContainer: View {
             HomeView()
         case .video:
             VideoTabView()
+        case .games:
+            ScrollGamesHomeView()
         case .friends:
             FriendsView()
         case .marketplace:

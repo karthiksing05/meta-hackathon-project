@@ -16,6 +16,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hackathon.FacebookClone
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: ScrollGames-Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: Facebook
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES

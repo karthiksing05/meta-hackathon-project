@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scrollgames.dev/schema/sg.manifest/1",
+  "title": "Scroll Games manifest",
+  "type": "object",
+  "required": ["schema", "title", "concepts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "sg.manifest/1" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "description": { "type": "string", "maxLength": 300 },
+    "level": { "enum": ["remix", "compose", "free"] },
+    "template": { "type": "string" },
+    "seed_scope": { "enum": ["per_challenge", "daily", "per_play"] },
+    "concepts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z_]+\\.[a-z0-9_]+$" },
+          "params": { "type": "object" }
+        }
+      }
+    },
+    "glue": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "on", "script"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "on": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "script": { "type": "string", "maxLength": 8000, "description": "Rhai source defining fn on_event(ev)." }
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "palette": { "enum": ["sunset", "ocean", "forest", "midnight", "candy", "mono"] },
+        "mood": { "enum": ["playful", "calm", "intense", "cozy", "mysterious"] },
+        "emoji": { "type": "string" }
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ import SwiftUI
 enum AppTab: String, CaseIterable, Identifiable, Hashable {
     case home
     case video
+    case games
     case friends
     case marketplace
     case notifications
@@ -15,6 +16,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "Home"
         case .video: return "Video"
+        case .games: return "Games"
         case .friends: return "Friends"
         case .marketplace: return "Marketplace"
         case .notifications: return "Notifications"
@@ -26,6 +28,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "house"
         case .video: return "play.tv"
+        case .games: return "gamecontroller"
         case .friends: return "person.2"
         case .marketplace: return "storefront"
         case .notifications: return "bell"
@@ -37,6 +40,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "house.fill"
         case .video: return "play.tv.fill"
+        case .games: return "gamecontroller.fill"
         case .friends: return "person.2.fill"
         case .marketplace: return "storefront.fill"
         case .notifications: return "bell.fill"

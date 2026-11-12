@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scrollgames.dev/schema/sg.brief/1",
+  "title": "Scroll Games creator brief",
+  "type": "object",
+  "required": [
+    "intent",
+    "audience",
+    "mood",
+    "energy",
+    "competition",
+    "template",
+    "level"
+  ],
+  "properties": {
+    "intent": {
+      "type": "string",
+      "description": "What the creator wants the game to be."
+    },
+    "audience": {
+      "type": "string"
+    },
+    "mood": {
+      "type": "string",
+      "description": "Fixed at creation. One word, e.g. playful, calm, intense, cozy, mysterious."
+    },
+    "energy": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "competition": {
+      "enum": [
+        "solo",
+        "versus",
+        "daily"
+      ]
+    },
+    "content_source": {
+      "type": "object",
+      "properties": {
+        "media_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "group_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "duration_s": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 600
+        },
+        "rounds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      }
+    },
+    "title_idea": {
+      "type": "string"
+    },
+    "template": {
+      "type": "string",
+      "description": "Template id, e.g. quiz."
+    },
+    "level": {
+      "enum": [
+        "remix",
+        "compose",
+        "free"
+      ]
+    },
+    "glue_ideas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Plain-language custom mechanics to implement as glue."
+    },
+    "tone": {
+      "type": "string",
+      "description": "Optional. 2-3 words of voice for generated copy."
+    },
+    "difficulty": {
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "description": "Optional."
+    },
+    "palette": {
+      "enum": [
+        "sunset",
+        "ocean",
+        "forest",
+        "midnight",
+        "candy",
+        "mono"
+      ],
+      "description": "Optional theme palette."
+    },
+    "emoji": {
+      "type": "string",
+      "description": "Optional single emoji for the theme."
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Trip Trivia",
+  "description": "How well do you remember our trip?",
+  "level": "remix",
+  "template": "quiz",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    { "id": "flow.session", "params": {} },
+    { "id": "flow.countdown_start", "params": { "seconds": 3 } },
+    { "id": "flow.rounds", "params": { "rounds": 8, "reveal_ms": 900 } },
+    { "id": "content.question_bank", "params": {} },
+    { "id": "content.photo_prompt", "params": { "fit": "cover" } },
+    { "id": "space.choice_board", "params": { "layout": "grid" } },
+    { "id": "input.tap_choice", "params": {} },
+    { "id": "rule.round_timer", "params": { "round_ms": 10000 } },
+    { "id": "rule.single_answer", "params": {} },
+    { "id": "score.points", "params": { "per_correct": 100 } },
+    { "id": "score.time_bonus", "params": { "max_bonus": 50 } },
+    { "id": "score.streak_multiplier", "params": { "every": 3, "step": 1, "max": 3 } },
+    { "id": "feedback.flash", "params": {} },
+    { "id": "feedback.haptic", "params": {} },
+    { "id": "feedback.confetti", "params": { "min_streak": 0 } },
+    { "id": "meta.seeded_random", "params": {} },
+    { "id": "share.score_card", "params": { "headline": "Trip Trivia" } },
+    { "id": "social.beat_them", "params": {} },
+    { "id": "feel.theme", "params": { "palette": "sunset", "mood": "playful", "emoji": "🌍" } }
+  ],
+  "glue": [
+    {
+      "id": "double_final_round",
+      "on": ["round.started", "answer.correct"],
+      "script": "fn on_event(ev) {\n    let final_round = get(\"round\") == get(\"total_rounds\");\n    if !final_round { return; }\n    if ev.name == \"round.started\" {\n        set(\"banner\", \"Final round — double points!\");\n    } else if ev.name == \"answer.correct\" {\n        // score.points and score.time_bonus already ran; award the same again.\n        set(\"score\", get(\"score\") + get(\"round_points\"));\n        emit(\"glue.double_applied\", #{ round: get(\"round\") });\n    }\n}\n"
+    }
+  ],
+  "theme": { "palette": "sunset", "mood": "playful", "emoji": "🌍" }
+}

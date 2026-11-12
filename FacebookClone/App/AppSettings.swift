@@ -10,6 +10,8 @@ enum SettingsKey {
     static let activeStatus = "settings.activeStatus"
     static let pushNotifications = "settings.pushNotifications"
     static let showReactionCounts = "settings.showReactionCounts"
+    /// Scroll Games server address (see `SGConfig`).
+    static let scrollGamesBaseURL = "sg.baseURL"
 }
 
 enum AppearanceMode: String, CaseIterable, Identifiable {

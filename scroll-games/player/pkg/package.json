@@ -1,0 +1,16 @@
+{
+  "name": "sg_runtime",
+  "type": "module",
+  "description": "Scroll Games runtime: seeded, fixed-timestep, event-driven mini-game engine",
+  "version": "0.1.0",
+  "files": [
+    "sg_runtime_bg.wasm",
+    "sg_runtime.js",
+    "sg_runtime.d.ts"
+  ],
+  "main": "sg_runtime.js",
+  "types": "sg_runtime.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

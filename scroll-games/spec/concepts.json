@@ -1,0 +1,3885 @@
+[
+ {
+  "id": "input.tap_choice",
+  "kind": "input",
+  "summary": "Tap one of several answer buttons; validated and forwarded as input.choice.",
+  "status": "implemented",
+  "params": {},
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.choice"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.swipe_direction",
+  "kind": "input",
+  "summary": "Swipe up/down/left/right to answer or steer.",
+  "status": "stub",
+  "params": {
+   "min_distance": {
+    "type": "int",
+    "default": 40,
+    "min": 10,
+    "max": 200,
+    "doc": "Minimum swipe distance in points."
+   },
+   "directions": {
+    "type": "enum",
+    "default": "four",
+    "values": [
+     "two_horizontal",
+     "two_vertical",
+     "four"
+    ],
+    "doc": "Which swipe directions count."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.swipe"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.tap_target",
+  "kind": "input",
+  "summary": "Tap anywhere on the play field; reports the tap position.",
+  "status": "stub",
+  "params": {
+   "hit_slop": {
+    "type": "int",
+    "default": 8,
+    "min": 0,
+    "max": 40,
+    "doc": "Extra touch radius in points."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.tap"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.drag_drop",
+  "kind": "input",
+  "summary": "Drag an entity and drop it on a target zone.",
+  "status": "stub",
+  "params": {
+   "snap_radius": {
+    "type": "int",
+    "default": 24,
+    "min": 0,
+    "max": 120,
+    "doc": "Distance at which a dropped item snaps to a target."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.drag"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.hold_release",
+  "kind": "input",
+  "summary": "Press and hold, then release; reports the hold duration.",
+  "status": "stub",
+  "params": {
+   "max_hold_ms": {
+    "type": "duration_ms",
+    "default": 2000,
+    "min": 200,
+    "max": 10000,
+    "doc": "Longest hold that is measured."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.hold"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.text_entry",
+  "kind": "input",
+  "summary": "Type a short answer with the system keyboard.",
+  "status": "stub",
+  "params": {
+   "max_chars": {
+    "type": "int",
+    "default": 24,
+    "min": 1,
+    "max": 80,
+    "doc": "Maximum answer length."
+   },
+   "case_sensitive": {
+    "type": "bool",
+    "default": false,
+    "doc": "Compare answers case-sensitively."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.text"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.draw_stroke",
+  "kind": "input",
+  "summary": "Freehand drawing with a finger.",
+  "status": "stub",
+  "params": {
+   "brush_size": {
+    "type": "int",
+    "default": 6,
+    "min": 1,
+    "max": 40,
+    "doc": "Brush width in points."
+   },
+   "color": {
+    "type": "color",
+    "default": "#ffffff",
+    "doc": "Stroke color."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.draw"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.tilt_steer",
+  "kind": "input",
+  "summary": "Steer using device tilt.",
+  "status": "stub",
+  "params": {
+   "sensitivity": {
+    "type": "float",
+    "default": 1.0,
+    "min": 0.1,
+    "max": 5.0,
+    "doc": "Tilt-to-speed multiplier."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "input.drag"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.double_tap",
+  "kind": "input",
+  "summary": "Double tap to confirm or boost.",
+  "status": "stub",
+  "params": {
+   "window_ms": {
+    "type": "duration_ms",
+    "default": 280,
+    "min": 100,
+    "max": 600,
+    "doc": "Max gap between the two taps."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.tap"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.multi_select",
+  "kind": "input",
+  "summary": "Select several choices before submitting.",
+  "status": "stub",
+  "params": {
+   "max_selected": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 6,
+    "doc": "How many choices may be selected."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.choice"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.voice_answer",
+  "kind": "input",
+  "summary": "Speak the answer (speech recognition, opt-in).",
+  "status": "stub",
+  "params": {
+   "language": {
+    "type": "string",
+    "default": "en-US",
+    "doc": "Recognition language tag."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.text"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "input.rotary_dial",
+  "kind": "input",
+  "summary": "Spin a dial to pick a value.",
+  "status": "stub",
+  "params": {
+   "steps": {
+    "type": "int",
+    "default": 12,
+    "min": 2,
+    "max": 36,
+    "doc": "Number of dial positions."
+   }
+  },
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [
+   "input.drag"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.choice_board",
+  "kind": "space",
+  "summary": "Stacked photo card with a grid of answer buttons.",
+  "status": "implemented",
+  "params": {
+   "layout": {
+    "type": "enum",
+    "default": "grid",
+    "values": [
+     "grid",
+     "stack"
+    ],
+    "doc": "Answer button layout: 2-column grid or full-width stack."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.grid_board",
+  "kind": "space",
+  "summary": "Square grid of cells for tiles, matching and puzzles.",
+  "status": "stub",
+  "params": {
+   "cols": {
+    "type": "int",
+    "default": 6,
+    "min": 3,
+    "max": 12,
+    "doc": "Grid columns."
+   },
+   "rows": {
+    "type": "int",
+    "default": 6,
+    "min": 3,
+    "max": 12,
+    "doc": "Grid rows."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.lanes",
+  "kind": "space",
+  "summary": "Vertical lanes (runner style) the player moves between.",
+  "status": "stub",
+  "params": {
+   "lane_count": {
+    "type": "int",
+    "default": 3,
+    "min": 2,
+    "max": 6,
+    "doc": "Number of lanes."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.scrolling_world",
+  "kind": "space",
+  "summary": "Auto-scrolling side or top-down world.",
+  "status": "stub",
+  "params": {
+   "speed": {
+    "type": "float",
+    "default": 120.0,
+    "min": 20.0,
+    "max": 600.0,
+    "doc": "Scroll speed in points per second."
+   },
+   "direction": {
+    "type": "enum",
+    "default": "left",
+    "values": [
+     "left",
+     "up",
+     "down"
+    ],
+    "doc": "Scroll direction."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.free_canvas",
+  "kind": "space",
+  "summary": "Blank canvas for drawing and sandbox play.",
+  "status": "stub",
+  "params": {
+   "background": {
+    "type": "color",
+    "default": "#101018",
+    "doc": "Canvas background color."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.card_table",
+  "kind": "space",
+  "summary": "Table of face-down cards.",
+  "status": "stub",
+  "params": {
+   "cols": {
+    "type": "int",
+    "default": 4,
+    "min": 2,
+    "max": 8,
+    "doc": "Cards per row."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.word_grid",
+  "kind": "space",
+  "summary": "Letter grid for word search or Wordle style guesses.",
+  "status": "stub",
+  "params": {
+   "word_length": {
+    "type": "int",
+    "default": 5,
+    "min": 3,
+    "max": 8,
+    "doc": "Letters per word."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.timeline_strip",
+  "kind": "space",
+  "summary": "Horizontal strip for ordering events or photos.",
+  "status": "stub",
+  "params": {
+   "slots": {
+    "type": "int",
+    "default": 5,
+    "min": 3,
+    "max": 10,
+    "doc": "Number of slots."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.physics_world",
+  "kind": "space",
+  "summary": "2D physics sandbox with gravity and collisions.",
+  "status": "stub",
+  "params": {
+   "gravity": {
+    "type": "float",
+    "default": 9.8,
+    "min": 0.0,
+    "max": 30.0,
+    "doc": "Gravity strength."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.photo_stage",
+  "kind": "space",
+  "summary": "Full-bleed photo with overlay hotspots.",
+  "status": "stub",
+  "params": {
+   "fit": {
+    "type": "enum",
+    "default": "cover",
+    "values": [
+     "cover",
+     "contain"
+    ],
+    "doc": "Photo scaling."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.rhythm_track",
+  "kind": "space",
+  "summary": "Scrolling note highway for rhythm games.",
+  "status": "stub",
+  "params": {
+   "bpm": {
+    "type": "int",
+    "default": 100,
+    "min": 60,
+    "max": 200,
+    "doc": "Beats per minute."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "space.map_view",
+  "kind": "space",
+  "summary": "Simple map with draggable pins.",
+  "status": "stub",
+  "params": {
+   "zoom": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 12,
+    "doc": "Initial zoom level."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.player_avatar",
+  "kind": "entity",
+  "summary": "The player's character or cursor.",
+  "status": "stub",
+  "params": {
+   "emoji": {
+    "type": "string",
+    "default": "🙂",
+    "doc": "Avatar glyph."
+   },
+   "size": {
+    "type": "int",
+    "default": 48,
+    "min": 16,
+    "max": 128,
+    "doc": "Size in points."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.falling_object",
+  "kind": "entity",
+  "summary": "Objects that fall from the top.",
+  "status": "stub",
+  "params": {
+   "fall_speed": {
+    "type": "float",
+    "default": 160.0,
+    "min": 20.0,
+    "max": 800.0,
+    "doc": "Points per second."
+   },
+   "kind": {
+    "type": "string",
+    "default": "star",
+    "doc": "Sprite kind."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "entity.spawned"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.obstacle",
+  "kind": "entity",
+  "summary": "Hazard that hurts on contact.",
+  "status": "stub",
+  "params": {
+   "damage": {
+    "type": "int",
+    "default": 1,
+    "min": 1,
+    "max": 5,
+    "doc": "Lives lost on contact."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "entity.spawned",
+   "collision.hit"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.collectible",
+  "kind": "entity",
+  "summary": "Pickup that gives points or progress.",
+  "status": "stub",
+  "params": {
+   "value": {
+    "type": "int",
+    "default": 10,
+    "min": 1,
+    "max": 1000,
+    "doc": "Value when collected."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "entity.spawned",
+   "entity.collected"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.enemy_wave",
+  "kind": "entity",
+  "summary": "Group of enemies that arrive in waves.",
+  "status": "stub",
+  "params": {
+   "wave_size": {
+    "type": "int",
+    "default": 5,
+    "min": 1,
+    "max": 30,
+    "doc": "Enemies per wave."
+   }
+  },
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [
+   "entity.spawned",
+   "entity.destroyed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.card",
+  "kind": "entity",
+  "summary": "Flippable card with a face and a back.",
+  "status": "stub",
+  "params": {
+   "face_down": {
+    "type": "bool",
+    "default": true,
+    "doc": "Start face down."
+   }
+  },
+  "consumes": [
+   "session.started"
+  ],
+  "emits": [
+   "entity.spawned"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.tile",
+  "kind": "entity",
+  "summary": "Colored match-3 tile.",
+  "status": "stub",
+  "params": {
+   "kinds": {
+    "type": "int",
+    "default": 5,
+    "min": 3,
+    "max": 8,
+    "doc": "Distinct tile colors."
+   }
+  },
+  "consumes": [
+   "session.started"
+  ],
+  "emits": [
+   "entity.spawned"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.word_tile",
+  "kind": "entity",
+  "summary": "Single letter tile.",
+  "status": "stub",
+  "params": {
+   "alphabet": {
+    "type": "enum",
+    "default": "latin",
+    "values": [
+     "latin",
+     "emoji"
+    ],
+    "doc": "Symbol set."
+   }
+  },
+  "consumes": [
+   "session.started"
+  ],
+  "emits": [
+   "entity.spawned"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.bouncing_ball",
+  "kind": "entity",
+  "summary": "Ball that bounces off walls.",
+  "status": "stub",
+  "params": {
+   "radius": {
+    "type": "int",
+    "default": 10,
+    "min": 4,
+    "max": 60,
+    "doc": "Ball radius."
+   },
+   "elasticity": {
+    "type": "float",
+    "default": 0.9,
+    "min": 0.0,
+    "max": 1.2,
+    "doc": "Bounce energy kept."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "collision.hit"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.particle_emitter",
+  "kind": "entity",
+  "summary": "Cosmetic particle source.",
+  "status": "stub",
+  "params": {
+   "rate": {
+    "type": "int",
+    "default": 20,
+    "min": 1,
+    "max": 200,
+    "doc": "Particles per second."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.hint_giver",
+  "kind": "entity",
+  "summary": "Friendly character that offers hints.",
+  "status": "stub",
+  "params": {
+   "emoji": {
+    "type": "string",
+    "default": "🦉",
+    "doc": "Character glyph."
+   }
+  },
+  "consumes": [
+   "hint.used"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.projectile",
+  "kind": "entity",
+  "summary": "Shot fired by the player or an enemy.",
+  "status": "stub",
+  "params": {
+   "speed": {
+    "type": "float",
+    "default": 400.0,
+    "min": 50.0,
+    "max": 1500.0,
+    "doc": "Points per second."
+   }
+  },
+  "consumes": [
+   "input.tap"
+  ],
+  "emits": [
+   "entity.spawned",
+   "collision.hit"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "entity.paddle",
+  "kind": "entity",
+  "summary": "Horizontal paddle for bounce games.",
+  "status": "stub",
+  "params": {
+   "width": {
+    "type": "int",
+    "default": 80,
+    "min": 30,
+    "max": 200,
+    "doc": "Width in points."
+   }
+  },
+  "consumes": [
+   "input.drag"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.gravity",
+  "kind": "behavior",
+  "summary": "Applies constant downward acceleration.",
+  "status": "stub",
+  "params": {
+   "strength": {
+    "type": "float",
+    "default": 9.8,
+    "min": 0.0,
+    "max": 30.0,
+    "doc": "Acceleration."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.patrol",
+  "kind": "behavior",
+  "summary": "Moves back and forth along a path.",
+  "status": "stub",
+  "params": {
+   "range": {
+    "type": "int",
+    "default": 120,
+    "min": 10,
+    "max": 400,
+    "doc": "Patrol distance."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.homing",
+  "kind": "behavior",
+  "summary": "Steers toward the player.",
+  "status": "stub",
+  "params": {
+   "turn_rate": {
+    "type": "float",
+    "default": 1.5,
+    "min": 0.1,
+    "max": 6.0,
+    "doc": "Radians per second."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.spawn_wave",
+  "kind": "behavior",
+  "summary": "Spawns entities at a regular interval.",
+  "status": "stub",
+  "params": {
+   "every_ms": {
+    "type": "duration_ms",
+    "default": 1200,
+    "min": 100,
+    "max": 10000,
+    "doc": "Spawn interval."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "entity.spawned"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.spawn_rate_ramp",
+  "kind": "behavior",
+  "summary": "Speeds up spawning as time passes.",
+  "status": "stub",
+  "params": {
+   "ramp_per_min": {
+    "type": "float",
+    "default": 0.5,
+    "min": 0.0,
+    "max": 3.0,
+    "doc": "Extra spawn rate per minute."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "difficulty.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.bounce",
+  "kind": "behavior",
+  "summary": "Reflects entities off walls.",
+  "status": "stub",
+  "params": {
+   "damping": {
+    "type": "float",
+    "default": 0.95,
+    "min": 0.5,
+    "max": 1.0,
+    "doc": "Energy kept per bounce."
+   }
+  },
+  "consumes": [
+   "collision.hit"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.magnet",
+  "kind": "behavior",
+  "summary": "Pulls nearby collectibles toward the player.",
+  "status": "stub",
+  "params": {
+   "radius": {
+    "type": "int",
+    "default": 90,
+    "min": 20,
+    "max": 300,
+    "doc": "Pull radius."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.wrap_edges",
+  "kind": "behavior",
+  "summary": "Entities leaving one edge appear on the opposite edge.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.follow_finger",
+  "kind": "behavior",
+  "summary": "Entity tracks the finger position.",
+  "status": "stub",
+  "params": {
+   "smoothing": {
+    "type": "float",
+    "default": 0.2,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "0 snaps, 1 is slow."
+   }
+  },
+  "consumes": [
+   "input.drag"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.shuffle_tiles",
+  "kind": "behavior",
+  "summary": "Shuffles tiles into a random solvable layout.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "session.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.merge_adjacent",
+  "kind": "behavior",
+  "summary": "Merges equal neighbors (2048 style).",
+  "status": "stub",
+  "params": {
+   "merge_to": {
+    "type": "int",
+    "default": 2,
+    "min": 2,
+    "max": 4,
+    "doc": "Number of tiles merged at once."
+   }
+  },
+  "consumes": [
+   "input.swipe"
+  ],
+  "emits": [
+   "match.made"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.slide_to_wall",
+  "kind": "behavior",
+  "summary": "Entity slides until it hits a wall.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "input.swipe"
+  ],
+  "emits": [
+   "collision.hit"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "behavior.drift",
+  "kind": "behavior",
+  "summary": "Slow idle drift for ambient motion.",
+  "status": "stub",
+  "params": {
+   "amount": {
+    "type": "float",
+    "default": 2.0,
+    "min": 0.0,
+    "max": 20.0,
+    "doc": "Drift distance."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.round_timer",
+  "kind": "rule",
+  "summary": "Each round has a countdown; running out ends the round.",
+  "status": "implemented",
+  "params": {
+   "round_ms": {
+    "type": "duration_ms",
+    "default": 10000,
+    "min": 2000,
+    "max": 60000,
+    "doc": "Time allowed per round."
+   }
+  },
+  "consumes": [
+   "round.started",
+   "tick"
+  ],
+  "emits": [
+   "timer.expired"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.single_answer",
+  "kind": "rule",
+  "summary": "Judges the first answer of a round as correct or wrong and locks the round.",
+  "status": "implemented",
+  "params": {
+   "allow_retry": {
+    "type": "bool",
+    "default": false,
+    "doc": "If true a wrong answer dims that choice and the player may try again."
+   }
+  },
+  "consumes": [
+   "input.choice"
+  ],
+  "emits": [
+   "answer.correct",
+   "answer.wrong"
+  ],
+  "requires": [
+   "input.tap_choice"
+  ],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.lives",
+  "kind": "rule",
+  "summary": "Player has a number of lives; zero lives ends the game.",
+  "status": "stub",
+  "params": {
+   "lives": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 9,
+    "doc": "Starting lives."
+   }
+  },
+  "consumes": [
+   "answer.wrong",
+   "collision.hit",
+   "timer.expired"
+  ],
+  "emits": [
+   "lives.changed",
+   "game.over"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.hint_budget",
+  "kind": "rule",
+  "summary": "Limited number of hints per game.",
+  "status": "stub",
+  "params": {
+   "hints": {
+    "type": "int",
+    "default": 2,
+    "min": 0,
+    "max": 10,
+    "doc": "Hints available."
+   }
+  },
+  "consumes": [
+   "input.tap"
+  ],
+  "emits": [
+   "hint.used"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.no_repeat",
+  "kind": "rule",
+  "summary": "Never repeats a content item in a session.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.collision",
+  "kind": "rule",
+  "summary": "Detects overlaps between entities.",
+  "status": "stub",
+  "params": {
+   "precision": {
+    "type": "enum",
+    "default": "box",
+    "values": [
+     "box",
+     "circle"
+    ],
+    "doc": "Hit shape."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "collision.hit"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.match_pair",
+  "kind": "rule",
+  "summary": "Two flipped cards that match are cleared.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "input.tap"
+  ],
+  "emits": [
+   "pair.matched",
+   "pair.missed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.match_three",
+  "kind": "rule",
+  "summary": "Three or more same tiles in a line clear.",
+  "status": "stub",
+  "params": {
+   "min_run": {
+    "type": "int",
+    "default": 3,
+    "min": 3,
+    "max": 5,
+    "doc": "Minimum run length."
+   }
+  },
+  "consumes": [
+   "input.swipe"
+  ],
+  "emits": [
+   "match.made",
+   "match.failed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.word_valid",
+  "kind": "rule",
+  "summary": "Submitted words must be in the word list.",
+  "status": "stub",
+  "params": {
+   "min_len": {
+    "type": "int",
+    "default": 3,
+    "min": 2,
+    "max": 8,
+    "doc": "Minimum word length."
+   }
+  },
+  "consumes": [
+   "input.text"
+  ],
+  "emits": [
+   "word.submitted"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.order_sequence",
+  "kind": "rule",
+  "summary": "Items must be put in the correct order.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "input.drag"
+  ],
+  "emits": [
+   "sequence.step"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.elimination",
+  "kind": "rule",
+  "summary": "Lowest scorer is removed each round (versus).",
+  "status": "stub",
+  "params": {
+   "cut_per_round": {
+    "type": "int",
+    "default": 1,
+    "min": 1,
+    "max": 5,
+    "doc": "Players removed per round."
+   }
+  },
+  "consumes": [
+   "round.ended"
+  ],
+  "emits": [
+   "game.over"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.difficulty_ramp",
+  "kind": "rule",
+  "summary": "Raises difficulty each round.",
+  "status": "stub",
+  "params": {
+   "step": {
+    "type": "float",
+    "default": 0.1,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "Difficulty added per round."
+   }
+  },
+  "consumes": [
+   "round.ended"
+  ],
+  "emits": [
+   "difficulty.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.streak_shield",
+  "kind": "rule",
+  "summary": "A full streak absorbs the next mistake.",
+  "status": "stub",
+  "params": {
+   "streak_needed": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 10,
+    "doc": "Streak required to earn a shield."
+   }
+  },
+  "consumes": [
+   "streak.changed",
+   "answer.wrong"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.total_time_limit",
+  "kind": "rule",
+  "summary": "Whole game ends after a fixed time.",
+  "status": "stub",
+  "params": {
+   "limit_ms": {
+    "type": "duration_ms",
+    "default": 60000,
+    "min": 10000,
+    "max": 600000,
+    "doc": "Total time."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "game.over"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.wrong_penalty",
+  "kind": "rule",
+  "summary": "Wrong answers subtract points.",
+  "status": "stub",
+  "params": {
+   "penalty": {
+    "type": "int",
+    "default": 50,
+    "min": 0,
+    "max": 5000,
+    "doc": "Points lost."
+   }
+  },
+  "consumes": [
+   "answer.wrong"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.sequence_memory",
+  "kind": "rule",
+  "summary": "Player repeats a growing sequence.",
+  "status": "stub",
+  "params": {
+   "start_len": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 8,
+    "doc": "Initial sequence length."
+   }
+  },
+  "consumes": [
+   "input.tap"
+  ],
+  "emits": [
+   "sequence.step"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "rule.win_target",
+  "kind": "rule",
+  "summary": "Game ends in a win at a target score.",
+  "status": "stub",
+  "params": {
+   "target": {
+    "type": "int",
+    "default": 1000,
+    "min": 1,
+    "max": 100000,
+    "doc": "Score needed."
+   }
+  },
+  "consumes": [
+   "score.changed"
+  ],
+  "emits": [
+   "game.over"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.flash",
+  "kind": "feedback",
+  "summary": "Colored screen flash on right/wrong answers.",
+  "status": "implemented",
+  "params": {
+   "correct_color": {
+    "type": "color",
+    "default": "green",
+    "doc": "Flash color for a correct answer."
+   },
+   "wrong_color": {
+    "type": "color",
+    "default": "red",
+    "doc": "Flash color for a wrong answer or timeout."
+   }
+  },
+  "consumes": [
+   "answer.correct",
+   "answer.wrong",
+   "timer.expired"
+  ],
+  "emits": [
+   "feedback.flash"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.haptic",
+  "kind": "feedback",
+  "summary": "Haptic tap on answers (iOS shell only).",
+  "status": "implemented",
+  "params": {
+   "correct": {
+    "type": "enum",
+    "default": "success",
+    "values": [
+     "light",
+     "medium",
+     "heavy",
+     "success",
+     "warning",
+     "error"
+    ],
+    "doc": "Style for a correct answer."
+   },
+   "wrong": {
+    "type": "enum",
+    "default": "error",
+    "values": [
+     "light",
+     "medium",
+     "heavy",
+     "success",
+     "warning",
+     "error"
+    ],
+    "doc": "Style for a wrong answer."
+   }
+  },
+  "consumes": [
+   "answer.correct",
+   "answer.wrong",
+   "timer.expired"
+  ],
+  "emits": [
+   "feedback.haptic"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.confetti",
+  "kind": "feedback",
+  "summary": "Confetti burst at the end of the game or on long streaks.",
+  "status": "implemented",
+  "params": {
+   "min_streak": {
+    "type": "int",
+    "default": 0,
+    "min": 0,
+    "max": 20,
+    "doc": "Also burst when the streak reaches this value (0 = only at game over)."
+   }
+  },
+  "consumes": [
+   "game.over",
+   "streak.changed"
+  ],
+  "emits": [
+   "feedback.confetti"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.sound_cue",
+  "kind": "feedback",
+  "summary": "Short sound for correct and wrong answers.",
+  "status": "stub",
+  "params": {
+   "volume": {
+    "type": "float",
+    "default": 0.7,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "Playback volume."
+   }
+  },
+  "consumes": [
+   "answer.correct",
+   "answer.wrong"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.screen_shake",
+  "kind": "feedback",
+  "summary": "Shakes the screen on mistakes.",
+  "status": "stub",
+  "params": {
+   "intensity": {
+    "type": "float",
+    "default": 0.5,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "Shake strength."
+   }
+  },
+  "consumes": [
+   "answer.wrong",
+   "collision.hit"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.floating_score",
+  "kind": "feedback",
+  "summary": "Points float up from where they were earned.",
+  "status": "stub",
+  "params": {
+   "duration_ms": {
+    "type": "duration_ms",
+    "default": 800,
+    "min": 200,
+    "max": 3000,
+    "doc": "Float duration."
+   }
+  },
+  "consumes": [
+   "score.changed"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.pulse_timer",
+  "kind": "feedback",
+  "summary": "Timer bar pulses when time is low.",
+  "status": "stub",
+  "params": {
+   "threshold_ms": {
+    "type": "duration_ms",
+    "default": 3000,
+    "min": 500,
+    "max": 10000,
+    "doc": "Pulse when below this."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.color_wash",
+  "kind": "feedback",
+  "summary": "Slow background color shift with the streak.",
+  "status": "stub",
+  "params": {
+   "max_hue_shift": {
+    "type": "int",
+    "default": 120,
+    "min": 0,
+    "max": 360,
+    "doc": "Degrees."
+   }
+  },
+  "consumes": [
+   "streak.changed"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.emoji_burst",
+  "kind": "feedback",
+  "summary": "Emoji rain on a correct answer.",
+  "status": "stub",
+  "params": {
+   "emoji": {
+    "type": "string",
+    "default": "🎉",
+    "doc": "Emoji to burst."
+   }
+  },
+  "consumes": [
+   "answer.correct"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.voice_cheer",
+  "kind": "feedback",
+  "summary": "Spoken encouragement via text-to-speech.",
+  "status": "stub",
+  "params": {
+   "voice": {
+    "type": "string",
+    "default": "default",
+    "doc": "Voice name."
+   }
+  },
+  "consumes": [
+   "answer.correct",
+   "game.over"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.slowmo",
+  "kind": "feedback",
+  "summary": "Brief slow motion on a close call.",
+  "status": "stub",
+  "params": {
+   "factor": {
+    "type": "float",
+    "default": 0.4,
+    "min": 0.1,
+    "max": 1.0,
+    "doc": "Time scale."
+   }
+  },
+  "consumes": [
+   "answer.correct"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.vignette_low_time",
+  "kind": "feedback",
+  "summary": "Red vignette creeps in as time runs out.",
+  "status": "stub",
+  "params": {
+   "threshold_ms": {
+    "type": "duration_ms",
+    "default": 3000,
+    "min": 500,
+    "max": 10000,
+    "doc": "Start below this."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feedback.toast",
+  "kind": "feedback",
+  "summary": "Small toast message for events.",
+  "status": "stub",
+  "params": {
+   "duration_ms": {
+    "type": "duration_ms",
+    "default": 1500,
+    "min": 300,
+    "max": 5000,
+    "doc": "Visible time."
+   }
+  },
+  "consumes": [
+   "streak.changed",
+   "level.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.points",
+  "kind": "score",
+  "summary": "Adds points for every correct answer.",
+  "status": "implemented",
+  "params": {
+   "per_correct": {
+    "type": "int",
+    "default": 100,
+    "min": 0,
+    "max": 10000,
+    "doc": "Base points per correct answer (times the multiplier)."
+   }
+  },
+  "consumes": [
+   "answer.correct"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [
+   "flow.rounds"
+  ],
+  "conflicts": [
+   "score.time_attack"
+  ],
+  "content": null
+ },
+ {
+  "id": "score.time_bonus",
+  "kind": "score",
+  "summary": "Bonus for answering with time left on the clock.",
+  "status": "implemented",
+  "params": {
+   "max_bonus": {
+    "type": "int",
+    "default": 50,
+    "min": 0,
+    "max": 5000,
+    "doc": "Bonus for an instant answer; scales down to 0 as time runs out."
+   }
+  },
+  "consumes": [
+   "answer.correct"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [
+   "rule.round_timer",
+   "score.points"
+  ],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.streak_multiplier",
+  "kind": "score",
+  "summary": "Consecutive correct rounds raise the point multiplier.",
+  "status": "implemented",
+  "params": {
+   "every": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 20,
+    "doc": "Streak length per multiplier step."
+   },
+   "step": {
+    "type": "int",
+    "default": 1,
+    "min": 0,
+    "max": 5,
+    "doc": "Multiplier added per step."
+   },
+   "max": {
+    "type": "int",
+    "default": 4,
+    "min": 1,
+    "max": 10,
+    "doc": "Multiplier cap."
+   }
+  },
+  "consumes": [
+   "round.ended"
+  ],
+  "emits": [
+   "streak.changed"
+  ],
+  "requires": [
+   "score.points"
+  ],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.time_attack",
+  "kind": "score",
+  "summary": "Score is the time taken; lower is better.",
+  "status": "stub",
+  "params": {
+   "unit": {
+    "type": "enum",
+    "default": "ms",
+    "values": [
+     "ms",
+     "s"
+    ],
+    "doc": "Display unit."
+   }
+  },
+  "consumes": [
+   "session.ended"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [
+   "score.points"
+  ],
+  "content": null
+ },
+ {
+  "id": "score.distance",
+  "kind": "score",
+  "summary": "Score grows with distance travelled.",
+  "status": "stub",
+  "params": {
+   "per_meter": {
+    "type": "float",
+    "default": 1.0,
+    "min": 0.1,
+    "max": 100.0,
+    "doc": "Points per meter."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.combo_chain",
+  "kind": "score",
+  "summary": "Quick successive hits build a combo.",
+  "status": "stub",
+  "params": {
+   "window_ms": {
+    "type": "duration_ms",
+    "default": 1200,
+    "min": 300,
+    "max": 5000,
+    "doc": "Max gap between hits."
+   }
+  },
+  "consumes": [
+   "match.made",
+   "pair.matched",
+   "entity.collected"
+  ],
+  "emits": [
+   "combo.changed",
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.accuracy_percent",
+  "kind": "score",
+  "summary": "Score is the percent of correct answers.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "answer.correct",
+   "answer.wrong"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.lives_bonus",
+  "kind": "score",
+  "summary": "Bonus for each remaining life at the end.",
+  "status": "stub",
+  "params": {
+   "per_life": {
+    "type": "int",
+    "default": 200,
+    "min": 0,
+    "max": 5000,
+    "doc": "Points per life."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [
+   "rule.lives"
+  ],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.par_target",
+  "kind": "score",
+  "summary": "Beat a par score for a bonus.",
+  "status": "stub",
+  "params": {
+   "par": {
+    "type": "int",
+    "default": 500,
+    "min": 1,
+    "max": 100000,
+    "doc": "Par score."
+   },
+   "bonus": {
+    "type": "int",
+    "default": 250,
+    "min": 0,
+    "max": 10000,
+    "doc": "Bonus for beating par."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.perfect_bonus",
+  "kind": "score",
+  "summary": "Bonus for a flawless game.",
+  "status": "stub",
+  "params": {
+   "bonus": {
+    "type": "int",
+    "default": 500,
+    "min": 0,
+    "max": 10000,
+    "doc": "Flat bonus."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.collect_count",
+  "kind": "score",
+  "summary": "Score is how many items were collected.",
+  "status": "stub",
+  "params": {
+   "per_item": {
+    "type": "int",
+    "default": 10,
+    "min": 1,
+    "max": 1000,
+    "doc": "Points per item."
+   }
+  },
+  "consumes": [
+   "entity.collected"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.word_length",
+  "kind": "score",
+  "summary": "Longer valid words are worth more.",
+  "status": "stub",
+  "params": {
+   "per_letter": {
+    "type": "int",
+    "default": 10,
+    "min": 1,
+    "max": 200,
+    "doc": "Points per letter."
+   }
+  },
+  "consumes": [
+   "word.submitted"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.rhythm_accuracy",
+  "kind": "score",
+  "summary": "Points by timing grade (perfect, good, miss).",
+  "status": "stub",
+  "params": {
+   "perfect": {
+    "type": "int",
+    "default": 100,
+    "min": 0,
+    "max": 1000,
+    "doc": "Points for perfect."
+   },
+   "good": {
+    "type": "int",
+    "default": 50,
+    "min": 0,
+    "max": 1000,
+    "doc": "Points for good."
+   }
+  },
+  "consumes": [
+   "beat.hit"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "score.drawing_similarity",
+  "kind": "score",
+  "summary": "Scores how close a drawing is to a reference.",
+  "status": "stub",
+  "params": {
+   "threshold": {
+    "type": "float",
+    "default": 0.6,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "Minimum similarity for points."
+   }
+  },
+  "consumes": [
+   "input.draw"
+  ],
+  "emits": [
+   "score.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.session",
+  "kind": "flow",
+  "summary": "Session lifecycle: loading, ready, countdown, playing, paused, ended.",
+  "status": "implemented",
+  "params": {
+   "max_duration_ms": {
+    "type": "duration_ms",
+    "default": 300000,
+    "min": 10000,
+    "max": 1800000,
+    "doc": "Hard cap on play time; the game ends when it is reached."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "session.ended"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.rounds",
+  "kind": "flow",
+  "summary": "Play a fixed number of rounds, one question per round.",
+  "status": "implemented",
+  "params": {
+   "rounds": {
+    "type": "int",
+    "default": 8,
+    "min": 1,
+    "max": 50,
+    "doc": "Number of rounds (limited by available content)."
+   },
+   "reveal_ms": {
+    "type": "duration_ms",
+    "default": 900,
+    "min": 0,
+    "max": 5000,
+    "doc": "How long the answer is shown between rounds."
+   }
+  },
+  "consumes": [
+   "session.countdown",
+   "session.started",
+   "answer.correct",
+   "answer.wrong",
+   "timer.expired",
+   "tick"
+  ],
+  "emits": [
+   "round.started",
+   "round.ended",
+   "game.over"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.countdown_start",
+  "kind": "flow",
+  "summary": "3-2-1 countdown before play begins.",
+  "status": "implemented",
+  "params": {
+   "seconds": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 10,
+    "doc": "Countdown length."
+   }
+  },
+  "consumes": [],
+  "emits": [
+   "session.countdown"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.levels",
+  "kind": "flow",
+  "summary": "Sequence of levels with rising difficulty.",
+  "status": "stub",
+  "params": {
+   "levels": {
+    "type": "int",
+    "default": 5,
+    "min": 1,
+    "max": 30,
+    "doc": "Number of levels."
+   }
+  },
+  "consumes": [
+   "game.over",
+   "session.started"
+  ],
+  "emits": [
+   "level.started",
+   "level.ended"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.endless",
+  "kind": "flow",
+  "summary": "Play until the player fails.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "session.ended"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.sudden_death",
+  "kind": "flow",
+  "summary": "One mistake ends the game.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "answer.wrong",
+   "timer.expired"
+  ],
+  "emits": [
+   "game.over"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.daily_puzzle",
+  "kind": "flow",
+  "summary": "One attempt per day on a shared daily seed.",
+  "status": "stub",
+  "params": {
+   "reset_hour_utc": {
+    "type": "int",
+    "default": 0,
+    "min": 0,
+    "max": 23,
+    "doc": "Hour the puzzle resets."
+   }
+  },
+  "consumes": [
+   "session.loaded"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.best_of_n",
+  "kind": "flow",
+  "summary": "Series of games, best total wins.",
+  "status": "stub",
+  "params": {
+   "n": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 9,
+    "doc": "Number of games."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "level.started"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.practice_mode",
+  "kind": "flow",
+  "summary": "Unscored practice run.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "session.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.intermission",
+  "kind": "flow",
+  "summary": "Short break screen between rounds.",
+  "status": "stub",
+  "params": {
+   "duration_ms": {
+    "type": "duration_ms",
+    "default": 1500,
+    "min": 300,
+    "max": 8000,
+    "doc": "Break length."
+   }
+  },
+  "consumes": [
+   "round.ended"
+  ],
+  "emits": [
+   "intermission.started",
+   "intermission.ended"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.retry_once",
+  "kind": "flow",
+  "summary": "One free retry after a loss.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "session.started"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.lobby_wait",
+  "kind": "flow",
+  "summary": "Wait for friends to join a versus game.",
+  "status": "stub",
+  "params": {
+   "timeout_ms": {
+    "type": "duration_ms",
+    "default": 15000,
+    "min": 3000,
+    "max": 60000,
+    "doc": "Wait before starting alone."
+   }
+  },
+  "consumes": [
+   "session.loaded"
+  ],
+  "emits": [
+   "lobby.ready"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "flow.tutorial",
+  "kind": "flow",
+  "summary": "Optional one-round tutorial.",
+  "status": "stub",
+  "params": {
+   "skippable": {
+    "type": "bool",
+    "default": true,
+    "doc": "Allow skipping."
+   }
+  },
+  "consumes": [
+   "session.loaded"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "content.question_bank",
+  "kind": "content",
+  "summary": "Multiple-choice questions from the content file.",
+  "status": "implemented",
+  "params": {
+   "max_items": {
+    "type": "int",
+    "default": 12,
+    "min": 0,
+    "max": 100,
+    "doc": "Use at most this many questions (0 = all)."
+   }
+  },
+  "consumes": [
+   "session.loaded",
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "question"
+ },
+ {
+  "id": "content.photo_prompt",
+  "kind": "content",
+  "summary": "Shows the question's photo above the choices.",
+  "status": "implemented",
+  "params": {
+   "fit": {
+    "type": "enum",
+    "default": "cover",
+    "values": [
+     "cover",
+     "contain"
+    ],
+    "doc": "How the photo fills the card."
+   }
+  },
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [
+   "content.question_bank"
+  ],
+  "conflicts": [],
+  "content": "question"
+ },
+ {
+  "id": "content.word_list",
+  "kind": "content",
+  "summary": "Words for guessing and word-search games.",
+  "status": "stub",
+  "params": {
+   "min_len": {
+    "type": "int",
+    "default": 3,
+    "min": 2,
+    "max": 8,
+    "doc": "Shortest word."
+   },
+   "max_len": {
+    "type": "int",
+    "default": 6,
+    "min": 3,
+    "max": 12,
+    "doc": "Longest word."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "word"
+ },
+ {
+  "id": "content.emoji_set",
+  "kind": "content",
+  "summary": "Emoji sets for emoji puzzles.",
+  "status": "stub",
+  "params": {
+   "count": {
+    "type": "int",
+    "default": 8,
+    "min": 2,
+    "max": 32,
+    "doc": "Emoji used."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "emoji"
+ },
+ {
+  "id": "content.caption_guess",
+  "kind": "content",
+  "summary": "Guess which caption belongs to a photo.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "caption"
+ },
+ {
+  "id": "content.audio_clip",
+  "kind": "content",
+  "summary": "Short audio clips for name-that-tune.",
+  "status": "stub",
+  "params": {
+   "clip_ms": {
+    "type": "duration_ms",
+    "default": 5000,
+    "min": 1000,
+    "max": 15000,
+    "doc": "Clip length."
+   }
+  },
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "audio"
+ },
+ {
+  "id": "content.pair_deck",
+  "kind": "content",
+  "summary": "Pairs of matching items for memory games.",
+  "status": "stub",
+  "params": {
+   "pairs": {
+    "type": "int",
+    "default": 6,
+    "min": 2,
+    "max": 12,
+    "doc": "Number of pairs."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "pair"
+ },
+ {
+  "id": "content.image_sequence",
+  "kind": "content",
+  "summary": "Photos to put in chronological order.",
+  "status": "stub",
+  "params": {
+   "length": {
+    "type": "int",
+    "default": 4,
+    "min": 3,
+    "max": 8,
+    "doc": "Photos per round."
+   }
+  },
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "sequence"
+ },
+ {
+  "id": "content.fill_blank",
+  "kind": "content",
+  "summary": "Sentences with a missing word.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "blank"
+ },
+ {
+  "id": "content.riddle_set",
+  "kind": "content",
+  "summary": "Short riddles with free-text answers.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "riddle"
+ },
+ {
+  "id": "content.trivia_category",
+  "kind": "content",
+  "summary": "Trivia grouped by category.",
+  "status": "stub",
+  "params": {
+   "category": {
+    "type": "string",
+    "default": "general",
+    "doc": "Category filter."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "question"
+ },
+ {
+  "id": "content.user_media_pool",
+  "kind": "content",
+  "summary": "Draws on the creator's selected photos.",
+  "status": "stub",
+  "params": {
+   "max_media": {
+    "type": "int",
+    "default": 12,
+    "min": 1,
+    "max": 50,
+    "doc": "Photos used."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "media"
+ },
+ {
+  "id": "content.map_pins",
+  "kind": "content",
+  "summary": "Locations to place on a map.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "pin"
+ },
+ {
+  "id": "content.reference_drawing",
+  "kind": "content",
+  "summary": "Reference shapes to draw.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": "shape"
+ },
+ {
+  "id": "content.beatmap",
+  "kind": "content",
+  "summary": "Note timings for a rhythm track.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "session.started"
+  ],
+  "emits": [
+   "beat.hit"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": "beat"
+ },
+ {
+  "id": "social.beat_them",
+  "kind": "social",
+  "summary": "After the game, show whether you beat the challenger.",
+  "status": "implemented",
+  "params": {
+   "label": {
+    "type": "string",
+    "default": "Beat them",
+    "doc": "Button label for sending the score back."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.challenge_friend",
+  "kind": "social",
+  "summary": "Send the score as a challenge to friends.",
+  "status": "stub",
+  "params": {
+   "max_recipients": {
+    "type": "int",
+    "default": 5,
+    "min": 1,
+    "max": 20,
+    "doc": "Friends per challenge."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "challenge.sent"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.friends_leaderboard",
+  "kind": "social",
+  "summary": "Leaderboard limited to friends.",
+  "status": "stub",
+  "params": {
+   "top": {
+    "type": "int",
+    "default": 10,
+    "min": 3,
+    "max": 50,
+    "doc": "Rows shown."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.ghost_replay",
+  "kind": "social",
+  "summary": "Race the ghost of a friend's best run.",
+  "status": "stub",
+  "params": {
+   "opacity": {
+    "type": "float",
+    "default": 0.5,
+    "min": 0.1,
+    "max": 1.0,
+    "doc": "Ghost opacity."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [
+   "ghost.updated"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.async_versus",
+  "kind": "social",
+  "summary": "Both players play the same seed asynchronously.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "challenge.sent"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.coop_score",
+  "kind": "social",
+  "summary": "Group members pool one shared score.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "score.changed"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.reaction_stickers",
+  "kind": "social",
+  "summary": "Friends react to results with stickers.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.comment_on_result",
+  "kind": "social",
+  "summary": "Comment thread under a result.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.tag_friend_in_photo",
+  "kind": "social",
+  "summary": "Questions about who is in a photo.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.group_scoreboard",
+  "kind": "social",
+  "summary": "Scoreboard across a group.",
+  "status": "stub",
+  "params": {
+   "group_scope": {
+    "type": "enum",
+    "default": "group",
+    "values": [
+     "group",
+     "friends"
+    ],
+    "doc": "Who is included."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.rematch",
+  "kind": "social",
+  "summary": "One tap rematch on the same seed.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "challenge.sent"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.spectate",
+  "kind": "social",
+  "summary": "Watch a friend play live.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "social.follow_creator",
+  "kind": "social",
+  "summary": "Follow the game's creator after playing.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "share.score_card",
+  "kind": "share",
+  "summary": "Shareable score card shown at the end of the game.",
+  "status": "implemented",
+  "params": {
+   "headline": {
+    "type": "string",
+    "default": "My score",
+    "doc": "Small label above the score on the card."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "share.requested"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "share.replay_clip",
+  "kind": "share",
+  "summary": "Auto-recorded short clip of the run.",
+  "status": "stub",
+  "params": {
+   "max_seconds": {
+    "type": "int",
+    "default": 15,
+    "min": 3,
+    "max": 60,
+    "doc": "Clip length."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "share.requested"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "share.daily_streak",
+  "kind": "share",
+  "summary": "Share your daily play streak.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "share.requested"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "share.result_emoji_grid",
+  "kind": "share",
+  "summary": "Spoiler-free emoji grid of right and wrong answers.",
+  "status": "stub",
+  "params": {
+   "correct": {
+    "type": "string",
+    "default": "🟩",
+    "doc": "Correct glyph."
+   },
+   "wrong": {
+    "type": "string",
+    "default": "⬛",
+    "doc": "Wrong glyph."
+   }
+  },
+  "consumes": [
+   "answer.correct",
+   "answer.wrong"
+  ],
+  "emits": [
+   "share.requested"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "share.invite_link",
+  "kind": "share",
+  "summary": "Link that opens the game in a browser.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "share.requested"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "share.story_export",
+  "kind": "share",
+  "summary": "Export the result as a story image.",
+  "status": "stub",
+  "params": {
+   "aspect": {
+    "type": "enum",
+    "default": "9:16",
+    "values": [
+     "9:16",
+     "1:1"
+    ],
+    "doc": "Image aspect."
+   }
+  },
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "share.requested"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "share.copy_result_text",
+  "kind": "share",
+  "summary": "Copy a text summary to the clipboard.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "share.requested"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "share.qr_challenge",
+  "kind": "share",
+  "summary": "QR code for in-person challenges.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [
+   "share.requested"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.theme",
+  "kind": "feel",
+  "summary": "Palette, mood and emoji styling. Manifest theme keys take precedence.",
+  "status": "implemented",
+  "params": {
+   "palette": {
+    "type": "enum",
+    "default": "sunset",
+    "values": [
+     "sunset",
+     "ocean",
+     "forest",
+     "midnight",
+     "candy",
+     "mono"
+    ],
+    "doc": "Color palette."
+   },
+   "mood": {
+    "type": "enum",
+    "default": "playful",
+    "values": [
+     "playful",
+     "calm",
+     "intense",
+     "cozy",
+     "mysterious"
+    ],
+    "doc": "Mood, affects accents and motion."
+   },
+   "emoji": {
+    "type": "string",
+    "default": "",
+    "doc": "Emoji shown on the title and score card."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.sound_pack",
+  "kind": "feel",
+  "summary": "Choose a sound effect pack.",
+  "status": "stub",
+  "params": {
+   "pack": {
+    "type": "enum",
+    "default": "arcade",
+    "values": [
+     "arcade",
+     "soft",
+     "retro",
+     "none"
+    ],
+    "doc": "Sound set."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.music_loop",
+  "kind": "feel",
+  "summary": "Background music loop.",
+  "status": "stub",
+  "params": {
+   "track": {
+    "type": "enum",
+    "default": "chill",
+    "values": [
+     "chill",
+     "upbeat",
+     "tense"
+    ],
+    "doc": "Track."
+   },
+   "volume": {
+    "type": "float",
+    "default": 0.4,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "Volume."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.palette_cycle",
+  "kind": "feel",
+  "summary": "Palette shifts slowly during play.",
+  "status": "stub",
+  "params": {
+   "period_s": {
+    "type": "int",
+    "default": 30,
+    "min": 5,
+    "max": 300,
+    "doc": "Seconds per cycle."
+   }
+  },
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.retro_pixel",
+  "kind": "feel",
+  "summary": "Pixelated retro rendering.",
+  "status": "stub",
+  "params": {
+   "pixel_size": {
+    "type": "int",
+    "default": 3,
+    "min": 1,
+    "max": 8,
+    "doc": "Pixel scale."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.paper_texture",
+  "kind": "feel",
+  "summary": "Paper grain overlay.",
+  "status": "stub",
+  "params": {
+   "grain": {
+    "type": "float",
+    "default": 0.3,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "Grain strength."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.neon_glow",
+  "kind": "feel",
+  "summary": "Neon outlines and glow.",
+  "status": "stub",
+  "params": {
+   "glow": {
+    "type": "float",
+    "default": 0.6,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "Glow amount."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.juice_level",
+  "kind": "feel",
+  "summary": "Global amount of animation and effects.",
+  "status": "stub",
+  "params": {
+   "level": {
+    "type": "enum",
+    "default": "medium",
+    "values": [
+     "low",
+     "medium",
+     "high"
+    ],
+    "doc": "Effect amount."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.camera_zoom",
+  "kind": "feel",
+  "summary": "Subtle zoom pulses on correct answers.",
+  "status": "stub",
+  "params": {
+   "amount": {
+    "type": "float",
+    "default": 0.04,
+    "min": 0.0,
+    "max": 0.2,
+    "doc": "Zoom fraction."
+   }
+  },
+  "consumes": [
+   "answer.correct"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.font_pack",
+  "kind": "feel",
+  "summary": "Typeface for headings.",
+  "status": "stub",
+  "params": {
+   "font": {
+    "type": "enum",
+    "default": "rounded",
+    "values": [
+     "rounded",
+     "serif",
+     "mono",
+     "display"
+    ],
+    "doc": "Font family."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.cozy_mode",
+  "kind": "feel",
+  "summary": "Warm, slow-paced presentation.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "feel.dark_light",
+  "kind": "feel",
+  "summary": "Force light or dark appearance.",
+  "status": "stub",
+  "params": {
+   "appearance": {
+    "type": "enum",
+    "default": "auto",
+    "values": [
+     "auto",
+     "light",
+     "dark"
+    ],
+    "doc": "Appearance."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.seeded_random",
+  "kind": "meta",
+  "summary": "Deterministic shuffle of question and choice order from the session seed.",
+  "status": "implemented",
+  "params": {
+   "shuffle_items": {
+    "type": "bool",
+    "default": true,
+    "doc": "Shuffle question order."
+   },
+   "shuffle_choices": {
+    "type": "bool",
+    "default": true,
+    "doc": "Shuffle answer choices."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.daily_seed",
+  "kind": "meta",
+  "summary": "Seed derived from the UTC date so everyone plays the same game.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.adaptive_difficulty",
+  "kind": "meta",
+  "summary": "Adjusts difficulty to the player's skill.",
+  "status": "stub",
+  "params": {
+   "aggressiveness": {
+    "type": "float",
+    "default": 0.5,
+    "min": 0.0,
+    "max": 1.0,
+    "doc": "How fast it adapts."
+   }
+  },
+  "consumes": [
+   "round.ended"
+  ],
+  "emits": [
+   "difficulty.changed"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.analytics_events",
+  "kind": "meta",
+  "summary": "Report anonymous gameplay analytics.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "game.over"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.ab_variant",
+  "kind": "meta",
+  "summary": "Assign an A/B variant to the player.",
+  "status": "stub",
+  "params": {
+   "variants": {
+    "type": "int",
+    "default": 2,
+    "min": 2,
+    "max": 5,
+    "doc": "Number of variants."
+   }
+  },
+  "consumes": [
+   "session.loaded"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.debug_overlay",
+  "kind": "meta",
+  "summary": "Developer overlay with ticks and events.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "tick"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.content_moderation_hint",
+  "kind": "meta",
+  "summary": "Flags content the moderator should review.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "session.loaded"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.input_recorder",
+  "kind": "meta",
+  "summary": "Records inputs for server-side replay verification.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "input.raw"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.cheat_guard",
+  "kind": "meta",
+  "summary": "Rejects implausible timings.",
+  "status": "stub",
+  "params": {
+   "min_answer_ms": {
+    "type": "duration_ms",
+    "default": 250,
+    "min": 0,
+    "max": 2000,
+    "doc": "Fastest believable answer."
+   }
+  },
+  "consumes": [
+   "answer.correct"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.locale",
+  "kind": "meta",
+  "summary": "Localised strings.",
+  "status": "stub",
+  "params": {
+   "locale": {
+    "type": "string",
+    "default": "en",
+    "doc": "Locale tag."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.schema_version",
+  "kind": "meta",
+  "summary": "Pins the manifest schema version.",
+  "status": "stub",
+  "params": {
+   "version": {
+    "type": "int",
+    "default": 1,
+    "min": 1,
+    "max": 1,
+    "doc": "Schema version."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "meta.hot_seat",
+  "kind": "meta",
+  "summary": "Pass-and-play turn handling.",
+  "status": "stub",
+  "params": {
+   "players": {
+    "type": "int",
+    "default": 2,
+    "min": 2,
+    "max": 6,
+    "doc": "Players."
+   }
+  },
+  "consumes": [
+   "round.ended"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.large_text",
+  "kind": "accessibility",
+  "summary": "Larger text and buttons throughout.",
+  "status": "implemented",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.reduced_motion",
+  "kind": "accessibility",
+  "summary": "Disables non-essential animation.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.high_contrast",
+  "kind": "accessibility",
+  "summary": "High contrast colors.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.colorblind_palette",
+  "kind": "accessibility",
+  "summary": "Colorblind-safe feedback colors.",
+  "status": "stub",
+  "params": {
+   "mode": {
+    "type": "enum",
+    "default": "deuteranopia",
+    "values": [
+     "deuteranopia",
+     "protanopia",
+     "tritanopia"
+    ],
+    "doc": "Condition."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.screen_reader_labels",
+  "kind": "accessibility",
+  "summary": "Descriptive labels for VoiceOver.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.extended_time",
+  "kind": "accessibility",
+  "summary": "Extra time on timers.",
+  "status": "stub",
+  "params": {
+   "multiplier": {
+    "type": "float",
+    "default": 1.5,
+    "min": 1.0,
+    "max": 4.0,
+    "doc": "Timer multiplier."
+   }
+  },
+  "consumes": [
+   "round.started"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.one_handed",
+  "kind": "accessibility",
+  "summary": "Controls reachable with one thumb.",
+  "status": "stub",
+  "params": {
+   "side": {
+    "type": "enum",
+    "default": "right",
+    "values": [
+     "left",
+     "right"
+    ],
+    "doc": "Dominant side."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.haptics_off",
+  "kind": "accessibility",
+  "summary": "Disables haptic feedback.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.captions",
+  "kind": "accessibility",
+  "summary": "Captions for audio cues.",
+  "status": "stub",
+  "params": {},
+  "consumes": [
+   "feedback.haptic"
+  ],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.dyslexia_font",
+  "kind": "accessibility",
+  "summary": "Dyslexia-friendly typeface.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.big_targets",
+  "kind": "accessibility",
+  "summary": "Enlarged touch targets.",
+  "status": "stub",
+  "params": {
+   "min_size": {
+    "type": "int",
+    "default": 56,
+    "min": 44,
+    "max": 96,
+    "doc": "Minimum target size."
+   }
+  },
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ },
+ {
+  "id": "accessibility.pause_anytime",
+  "kind": "accessibility",
+  "summary": "Always-visible pause control.",
+  "status": "stub",
+  "params": {},
+  "consumes": [],
+  "emits": [],
+  "requires": [],
+  "conflicts": [],
+  "content": null
+ }
+]

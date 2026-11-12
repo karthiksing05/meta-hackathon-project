@@ -1,0 +1,389 @@
+{
+ "events": [
+  {
+   "name": "session.loaded",
+   "builtin": true,
+   "payload": {},
+   "doc": "Manifest and content accepted; session is Ready."
+  },
+  {
+   "name": "session.countdown",
+   "builtin": true,
+   "payload": {
+    "seconds": "int"
+   },
+   "doc": "Pre-game countdown began."
+  },
+  {
+   "name": "session.started",
+   "builtin": true,
+   "payload": {},
+   "doc": "Countdown finished (or skipped); play begins."
+  },
+  {
+   "name": "session.paused",
+   "builtin": true,
+   "payload": {},
+   "doc": "Player or host paused."
+  },
+  {
+   "name": "session.resumed",
+   "builtin": true,
+   "payload": {},
+   "doc": "Play resumed."
+  },
+  {
+   "name": "session.ended",
+   "builtin": true,
+   "payload": {
+    "score": "int"
+   },
+   "doc": "Session reached Ended."
+  },
+  {
+   "name": "tick",
+   "builtin": true,
+   "payload": {
+    "tick": "int"
+   },
+   "doc": "One fixed 60 Hz simulation step while Playing."
+  },
+  {
+   "name": "input.raw",
+   "builtin": true,
+   "payload": {
+    "type": "string",
+    "index": "int?",
+    "x": "number?",
+    "y": "number?"
+   },
+   "doc": "Raw player input from the host, before any input concept validates it."
+  },
+  {
+   "name": "input.tap",
+   "builtin": true,
+   "payload": {
+    "x": "number",
+    "y": "number"
+   },
+   "doc": "Tap on the play field (the host sends {type:tap})."
+  },
+  {
+   "name": "input.choice",
+   "builtin": false,
+   "payload": {
+    "index": "int"
+   },
+   "doc": "A valid choice tap, emitted by input.tap_choice."
+  },
+  {
+   "name": "round.started",
+   "builtin": false,
+   "payload": {
+    "round": "int"
+   },
+   "doc": "A round began."
+  },
+  {
+   "name": "round.ended",
+   "builtin": false,
+   "payload": {
+    "round": "int"
+   },
+   "doc": "A round finished (answered, wrong or timed out)."
+  },
+  {
+   "name": "answer.correct",
+   "builtin": false,
+   "payload": {
+    "round": "int",
+    "ms": "int"
+   },
+   "doc": "Correct answer; ms is time spent in the round."
+  },
+  {
+   "name": "answer.wrong",
+   "builtin": false,
+   "payload": {
+    "round": "int",
+    "index": "int"
+   },
+   "doc": "Wrong answer."
+  },
+  {
+   "name": "timer.expired",
+   "builtin": false,
+   "payload": {
+    "round": "int"
+   },
+   "doc": "Round timer ran out."
+  },
+  {
+   "name": "score.changed",
+   "builtin": false,
+   "payload": {
+    "score": "int",
+    "delta": "int"
+   },
+   "doc": "Score changed."
+  },
+  {
+   "name": "streak.changed",
+   "builtin": false,
+   "payload": {
+    "streak": "int"
+   },
+   "doc": "Streak changed."
+  },
+  {
+   "name": "feedback.flash",
+   "builtin": false,
+   "payload": {
+    "color": "string"
+   },
+   "doc": "Request a screen flash."
+  },
+  {
+   "name": "feedback.haptic",
+   "builtin": false,
+   "payload": {
+    "style": "string"
+   },
+   "doc": "Request haptic feedback (light|medium|heavy|success|warning|error)."
+  },
+  {
+   "name": "feedback.confetti",
+   "builtin": false,
+   "payload": {},
+   "doc": "Request a confetti burst."
+  },
+  {
+   "name": "game.over",
+   "builtin": false,
+   "payload": {
+    "score": "int"
+   },
+   "doc": "The game finished."
+  },
+  {
+   "name": "input.swipe",
+   "builtin": false,
+   "payload": {
+    "dir": "string"
+   },
+   "doc": "Swipe gesture."
+  },
+  {
+   "name": "input.drag",
+   "builtin": false,
+   "payload": {
+    "x": "number",
+    "y": "number",
+    "phase": "string"
+   },
+   "doc": "Drag gesture."
+  },
+  {
+   "name": "input.hold",
+   "builtin": false,
+   "payload": {
+    "ms": "int"
+   },
+   "doc": "Hold released."
+  },
+  {
+   "name": "input.text",
+   "builtin": false,
+   "payload": {
+    "text": "string"
+   },
+   "doc": "Text answer submitted."
+  },
+  {
+   "name": "input.draw",
+   "builtin": false,
+   "payload": {
+    "points": "array"
+   },
+   "doc": "Stroke completed."
+  },
+  {
+   "name": "entity.spawned",
+   "builtin": false,
+   "payload": {
+    "kind": "string"
+   },
+   "doc": "Entity created."
+  },
+  {
+   "name": "entity.destroyed",
+   "builtin": false,
+   "payload": {
+    "kind": "string"
+   },
+   "doc": "Entity removed."
+  },
+  {
+   "name": "entity.collected",
+   "builtin": false,
+   "payload": {
+    "kind": "string",
+    "value": "int"
+   },
+   "doc": "Pickup collected."
+  },
+  {
+   "name": "collision.hit",
+   "builtin": false,
+   "payload": {
+    "a": "string",
+    "b": "string"
+   },
+   "doc": "Two entities overlapped."
+  },
+  {
+   "name": "lives.changed",
+   "builtin": false,
+   "payload": {
+    "lives": "int"
+   },
+   "doc": "Lives changed."
+  },
+  {
+   "name": "hint.used",
+   "builtin": false,
+   "payload": {
+    "remaining": "int"
+   },
+   "doc": "A hint was consumed."
+  },
+  {
+   "name": "combo.changed",
+   "builtin": false,
+   "payload": {
+    "combo": "int"
+   },
+   "doc": "Combo counter changed."
+  },
+  {
+   "name": "level.started",
+   "builtin": false,
+   "payload": {
+    "level": "int"
+   },
+   "doc": "A level began."
+  },
+  {
+   "name": "level.ended",
+   "builtin": false,
+   "payload": {
+    "level": "int"
+   },
+   "doc": "A level ended."
+  },
+  {
+   "name": "match.made",
+   "builtin": false,
+   "payload": {
+    "kind": "string"
+   },
+   "doc": "A match was made."
+  },
+  {
+   "name": "match.failed",
+   "builtin": false,
+   "payload": {},
+   "doc": "An attempted match failed."
+  },
+  {
+   "name": "pair.matched",
+   "builtin": false,
+   "payload": {},
+   "doc": "Memory pair matched."
+  },
+  {
+   "name": "pair.missed",
+   "builtin": false,
+   "payload": {},
+   "doc": "Memory pair did not match."
+  },
+  {
+   "name": "word.submitted",
+   "builtin": false,
+   "payload": {
+    "word": "string",
+    "valid": "bool"
+   },
+   "doc": "A word was submitted."
+  },
+  {
+   "name": "sequence.step",
+   "builtin": false,
+   "payload": {
+    "ok": "bool"
+   },
+   "doc": "One step of an ordered sequence."
+  },
+  {
+   "name": "beat.hit",
+   "builtin": false,
+   "payload": {
+    "grade": "string"
+   },
+   "doc": "Rhythm note judged."
+  },
+  {
+   "name": "challenge.sent",
+   "builtin": false,
+   "payload": {},
+   "doc": "A challenge was sent."
+  },
+  {
+   "name": "ghost.updated",
+   "builtin": false,
+   "payload": {},
+   "doc": "Ghost position updated."
+  },
+  {
+   "name": "share.requested",
+   "builtin": false,
+   "payload": {
+    "kind": "string"
+   },
+   "doc": "Player asked to share."
+  },
+  {
+   "name": "difficulty.changed",
+   "builtin": false,
+   "payload": {
+    "level": "number"
+   },
+   "doc": "Difficulty changed."
+  },
+  {
+   "name": "lobby.ready",
+   "builtin": false,
+   "payload": {},
+   "doc": "Versus lobby ready."
+  },
+  {
+   "name": "intermission.started",
+   "builtin": false,
+   "payload": {},
+   "doc": "Break began."
+  },
+  {
+   "name": "intermission.ended",
+   "builtin": false,
+   "payload": {},
+   "doc": "Break ended."
+  },
+  {
+   "name": "glue.*",
+   "builtin": false,
+   "payload": {},
+   "doc": "Custom events emitted by glue scripts are named glue.<something> and carry a JSON object."
+  }
+ ],
+ "note": "Payloads are JSON objects. builtin events are emitted by the runtime itself. Glue may emit glue.* and feedback.* events."
+}

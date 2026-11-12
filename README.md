@@ -97,3 +97,59 @@ initials instead.
   enum in `Router.swift`. Messenger, the composer, the story creator and Reels open full screen.
 - Requirements: iOS 17+, Swift 5 language mode, no third-party dependencies.
 - Persistence: only settings and recent searches are saved. Everything else resets on relaunch.
+
+## Scroll Games
+
+A "Games" tab where anyone can describe a tiny photo-quiz mini-game, have Muse build it in seconds, play it, and challenge friends.
+
+```
+creator prompt
+  -> POST /api/briefs        Ember writes an editable brief (spec/brief.schema.json); generation starts speculatively
+  -> POST /api/games/generate (SSE)
+        Wonder plans the manifest + glue  |  Ember writes the questions   (in parallel)
+        -> sgtool validate -> one repair call if needed -> template fallback
+  -> play in a WKWebView / browser: Rust runtime compiled to wasm, JS player renders its view model
+  -> POST /api/games/:id/plays  server replays the inputs with sgtool, so scores are verified
+```
+
+| Part | Where | What it does |
+|---|---|---|
+| Spec | `scroll-games/spec` | `concepts.json` (179 concepts, 20 implemented), `events.json`, manifest/content/brief JSON schemas, `templates/` (the quiz formula) |
+| Runtime | `scroll-games/runtime` | Rust crate `sg_runtime`: deterministic seeded game core with Rhai glue. Builds the `sgtool` CLI (validate, replay) and the wasm module |
+| Player | `scroll-games/player` | Static HTML/JS player; `pkg/` is the wasm build. Served by the server at `/player/` |
+| Server | `scroll-games/server` | Go (stdlib), port 8787, JSON-file storage in `server/data/`. Calls Muse (Wonder plans, Ember writes content), meters spend |
+| iOS | `FacebookClone/Features/ScrollGames` | SwiftUI feed, create flow, result screens; the game itself runs in a `WKWebView` |
+
+The shared contracts (HTTP API, brief/manifest/content shapes, glue rules) are in `docs/scroll-games/CONTRACTS.md`.
+
+**Build the runtime** (needs rustup with the `wasm32-unknown-unknown` target and `wasm-pack`):
+
+```sh
+scroll-games/scripts/build-runtime.sh     # sgtool -> runtime/target/release/sgtool, wasm -> player/pkg
+cd scroll-games/runtime && cargo test
+```
+
+**Run the server.** Put `MUSE_API_KEY=...` in the repo-root `.env` (git-ignored; the server reads it and never logs it). Without a key it still runs, using the pre-baked template games.
+
+```sh
+cd scroll-games/server
+go run ./cmd/server            # http://localhost:8787, player at /player/?game=<id>
+go test ./...
+```
+
+Useful env vars: `SG_SPEND_CAP_USD` (default 15, usage in `data/usage.json`, see `/api/usage`), `SG_PLAN_REASONING` (default `minimal`), `SG_BRIEF_MODEL` (`ember` default, or `wonder`), `SG_SPECULATE=0` to turn off speculative generation.
+
+**Run the iOS app.** Start the server, then run the `FacebookClone` scheme in Xcode (iOS 17+ simulator reaches the server at `http://localhost:8787`; change it under the Games tab settings for a device). The Games tab falls back to labeled offline sample data when the server is unreachable.
+
+```sh
+xcodebuild -project FacebookClone.xcodeproj -scheme FacebookClone -destination 'platform=iOS Simulator,name=iPhone 16' build
+```
+
+**End-to-end test** (starts the server, uses live Muse, costs about 3 cents):
+
+```sh
+node scroll-games/scripts/e2e-test-game.mjs [--no-start] [--cache-check] [--keep-running]
+node scroll-games/scripts/browser-play-check.mjs <game_id>   # plays the same game in headless Chrome and checks the browser's POST is verified
+```
+
+It creates a brief for the Lisbon trip photos, generates the game over SSE, validates it, plays it headlessly in the wasm runtime, posts the play (asserting `verified: true`), publishes, creates a challenge, follows the `/c/<id>` redirect and prints per-stage timings and cost.
