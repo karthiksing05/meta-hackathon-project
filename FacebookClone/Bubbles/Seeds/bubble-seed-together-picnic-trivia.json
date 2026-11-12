@@ -1,0 +1,180 @@
+{
+  "id": "together-picnic-trivia",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Picnic Trivia",
+  "one_line_rule": "Answer the questions Alex, Maya and Diego wrote.",
+  "formula": "answer",
+  "brief": {
+    "intent": "a picnic quiz the New in SF crew wrote together",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "playful",
+      "warm"
+    ],
+    "energy": "medium",
+    "competition": "friendly",
+    "notes": "Stitched 4 questions from 3 makers; added 2 Muse questions to reach 6 rounds"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null,
+    "makers": [
+      {
+        "id": "me",
+        "name": "Alex",
+        "role": "starter",
+        "contribution": "a question"
+      },
+      {
+        "id": "sf-maya-okafor",
+        "name": "Maya",
+        "role": "contributor",
+        "contribution": "a question"
+      },
+      {
+        "id": "sf-diego-ramirez",
+        "name": "Diego",
+        "role": "contributor",
+        "contribution": "2 questions"
+      }
+    ]
+  },
+  "chain": null,
+  "style": {
+    "look": "paper",
+    "palette": "sky-glow",
+    "font": "rounded",
+    "motif": "leaves",
+    "emoji": "🧺",
+    "mood_preset": "playful",
+    "cover_prompt": "a picnic blanket on a sunny city hill with handwritten question cards, soft blue and lilac paper cutouts"
+  },
+  "concepts": [
+    {
+      "use": "space.answer_stage"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.answer_key",
+      "params": {
+        "round_seconds": 12,
+        "reveal_seconds": 1.8
+      }
+    },
+    {
+      "use": "score.answer_points"
+    },
+    {
+      "use": "flow.rounds",
+      "params": {
+        "count": 6,
+        "pause": 110,
+        "pass_ratio": 0.5
+      }
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "rounds": [
+      {
+        "prompt": "Which hill has the best sunset?",
+        "choices": [
+          "Twin Peaks",
+          "Bernal Hill",
+          "Tank Hill",
+          "Nob Hill"
+        ],
+        "answer": 1,
+        "note": "Maya's question"
+      },
+      {
+        "prompt": "Who's bringing the good bread Saturday?",
+        "choices": [
+          "Diego",
+          "Chloe",
+          "Maya",
+          "Priya"
+        ],
+        "answer": 2,
+        "note": "Diego's question"
+      },
+      {
+        "prompt": "Which hill has the wild parrots?",
+        "choices": [
+          "Telegraph Hill",
+          "Russian Hill",
+          "Bernal Hill",
+          "Nob Hill"
+        ],
+        "answer": 0,
+        "note": "Diego's question"
+      },
+      {
+        "prompt": "Where's our picnic on Saturday?",
+        "choices": [
+          "Crissy Field",
+          "Alamo Square",
+          "Golden Gate Park",
+          "Dolores Park"
+        ],
+        "answer": 3,
+        "note": "Alex's question"
+      },
+      {
+        "prompt": "What's the fog's local nickname?",
+        "choices": [
+          "Gary",
+          "Karl",
+          "Misty",
+          "Fogbert"
+        ],
+        "answer": 1,
+        "note": "Added by Muse"
+      },
+      {
+        "prompt": "Which beach is at the end of the N line?",
+        "choices": [
+          "Ocean Beach",
+          "Baker Beach",
+          "China Beach",
+          "Crissy Field"
+        ],
+        "answer": 0,
+        "note": "Added by Muse"
+      }
+    ]
+  },
+  "seed": 5150,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0"
+    ],
+    "created_at": "2026-11-12T17:40:00Z",
+    "duration_sec": 41.2,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "me",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 3,
+    "play_count": 18,
+    "like_count": 9,
+    "save_count": 7
+  }
+}

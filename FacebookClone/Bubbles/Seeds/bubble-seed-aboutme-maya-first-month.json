@@ -1,0 +1,160 @@
+{
+  "id": "aboutme-maya-first-month",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Maya's First Month in SF",
+  "one_line_rule": "Pick Maya's real answer each round.",
+  "formula": "answer",
+  "brief": {
+    "intent": "friends find out how Maya's first month in SF went",
+    "audience": "friends",
+    "mood": [
+      "warm",
+      "playful"
+    ],
+    "energy": "low",
+    "competition": "light"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "friends",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "ink",
+    "palette": "lilac-haze",
+    "font": "rounded",
+    "motif": "clouds",
+    "emoji": "🌁",
+    "mood_preset": "warm",
+    "cover_prompt": "a sketchbook page of a first month in a foggy hilly city: a trail by the ocean, a loaf of bread, a picnic, drawn in indigo ink"
+  },
+  "concepts": [
+    {
+      "use": "space.answer_stage"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.answer_key",
+      "params": {
+        "round_seconds": 12,
+        "reveal_seconds": 1.8,
+        "shuffle_rounds": false
+      }
+    },
+    {
+      "use": "score.answer_points"
+    },
+    {
+      "use": "flow.rounds",
+      "params": {
+        "count": 6,
+        "pause": 110,
+        "pass_ratio": 0.5
+      }
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "rounds": [
+      {
+        "prompt": "Week 1: what did Maya do first?",
+        "choices": [
+          "Rode a cable car",
+          "Ran the Lands End trail",
+          "Climbed Twin Peaks",
+          "Got lost in the fog"
+        ],
+        "answer": 1,
+        "note": "She still runs it every Saturday."
+      },
+      {
+        "prompt": "Which neighborhood did Maya move into?",
+        "choices": [
+          "Mission",
+          "Marina",
+          "Inner Richmond",
+          "Nob Hill"
+        ],
+        "answer": 2
+      },
+      {
+        "prompt": "Maya's first great SF meal?",
+        "choices": [
+          "Fresh sourdough",
+          "Dim sum",
+          "A giant burrito",
+          "Clam chowder"
+        ],
+        "answer": 0,
+        "note": "Hence the good bread at every picnic."
+      },
+      {
+        "prompt": "What surprised Maya most?",
+        "choices": [
+          "The steep hills",
+          "Wild parrots",
+          "Tiny apartments",
+          "Cold summers"
+        ],
+        "answer": 3
+      },
+      {
+        "prompt": "Where did Maya make a first friend?",
+        "choices": [
+          "A climbing gym",
+          "The New in SF picnic",
+          "The dog park",
+          "At work"
+        ],
+        "answer": 1
+      },
+      {
+        "prompt": "Week 4: Maya's best moment?",
+        "choices": [
+          "A free concert",
+          "Biking the bridge",
+          "Sunset at Lands End",
+          "A picnic in the park"
+        ],
+        "answer": 2
+      }
+    ]
+  },
+  "seed": 6060,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0"
+    ],
+    "created_at": "2026-11-11T19:10:00Z",
+    "duration_sec": 33.4,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-maya-okafor",
+    "created_hours_ago": 20,
+    "play_count": 46,
+    "like_count": 21,
+    "save_count": 15
+  },
+  "about": {
+    "subject_id": "sf-maya-okafor",
+    "subject_name": "Maya",
+    "template": "first-month"
+  }
+}
