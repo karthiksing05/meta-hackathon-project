@@ -131,7 +131,7 @@ struct QuizNightPodium: View {
                 }
             }
         }
-        .frame(height: 210)
+        .frame(minHeight: 210, alignment: .bottom)
     }
 
     private var order: [Int] { [1, 0, 2] }

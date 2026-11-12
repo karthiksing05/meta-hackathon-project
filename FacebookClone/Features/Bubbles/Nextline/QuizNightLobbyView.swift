@@ -46,8 +46,13 @@ struct QuizNightLobbyView: View {
 
     private func open() {
         if let current = nightID, center.night(id: current) != nil { return }
-        nightID = center.openNight(at: placeID)?.id
-            ?? center.openLobby(at: placeID, appStore: appStore, bubbleStore: bubbleStore)?.id
+        // A live night keeps going; otherwise reuse or create the lobby (which also applies a
+        // Bubble picked on its page with "Start a quiz night in…").
+        if let live = center.openNight(at: placeID), live.phase == .live {
+            nightID = live.id
+            return
+        }
+        nightID = center.openLobby(at: placeID, appStore: appStore, bubbleStore: bubbleStore)?.id
             ?? center.latestNight(at: placeID)?.id
     }
 
@@ -163,7 +168,7 @@ struct QuizNightLobbyView: View {
                             .font(.system(size: FBIconSize.regular, weight: .bold))
                             .foregroundStyle(Color.white, QuizNightStyle.blue)
                             .background(Circle().fill(FBColor.surface).padding(1))
-                            .transition(.scale.combined(with: .opacity))
+                            .transition(reduceMotion ? .opacity : .scale.combined(with: .opacity))
                     }
                 }
             Text(user.isMe ? NextlineCopy.you : user.firstName)

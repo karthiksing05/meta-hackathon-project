@@ -379,6 +379,7 @@ struct NextlineGroupGameNight: View {
 struct NextlineFeaturedBanner: View {
     let group: FBGroup
 
+    @Environment(AppStore.self) private var appStore
     @Environment(Router.self) private var router
 
     var body: some View {
@@ -395,7 +396,7 @@ struct NextlineFeaturedBanner: View {
                     Image(systemName: night.phase == .live ? "dot.radiowaves.left.and.right" : BubbleCategory.party.symbol)
                         .font(.system(size: FBIconSize.medium, weight: .bold))
                         .foregroundStyle(Color.white)
-                    Text(NextlineCopy.tonight(night.joined.count + 1))
+                    Text(bannerText(night))
                         .font(.fbName)
                         .foregroundStyle(Color.white)
                         .lineLimit(1)
@@ -415,8 +416,16 @@ struct NextlineFeaturedBanner: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(FBColor.surface)
-            .accessibilityLabel(NextlineCopy.tonight(night.joined.count + 1))
+            .accessibilityLabel(bannerText(night))
         }
+    }
+
+    /// 'Quiz night tonight · 4 joined' while a night is open; the winner once it's over.
+    private func bannerText(_ night: QuizNight) -> String {
+        if night.phase == .finished, let top = night.standings(me: appStore.me).first {
+            return NextlineCopy.lastWinner(top.user.isMe ? NextlineCopy.you : top.user.firstName, top.score)
+        }
+        return NextlineCopy.tonight(night.joined.count + 1)
     }
 }
 

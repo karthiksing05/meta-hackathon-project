@@ -499,6 +499,10 @@ final class QuizNightCenter {
         preferredBubble[placeID] = bubbleID
         guard let night = openLobby(at: placeID, appStore: appStore, bubbleStore: bubbleStore, instant: true),
               let i = index(night.id), let bubble = bubbleStore.bubble(id: bubbleID) else { return nil }
+        // A lobby reused from earlier may still have people on their way in.
+        for k in nights[i].members.indices where nights[i].members[k].joinedAt == nil {
+            nights[i].members[k].joinedAt = Date()
+        }
         nights[i].phase = .finished
         nights[i].isStaged = true
         nights[i].startedAt = Date().addingTimeInterval(-600)
