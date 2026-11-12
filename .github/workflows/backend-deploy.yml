@@ -18,6 +18,12 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      mongo:   # a real MongoDB, so the store's queries and aggregations are tested before anything ships
+        image: mongo:8.0
+        ports: ["27017:27017"]
+    env:
+      MONGO_TEST_URI: mongodb://127.0.0.1:27017
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

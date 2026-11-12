@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -37,6 +38,7 @@ func (s *Server) views(r *http.Request, games []model.Game) ([]model.GameView, e
 			ID: g.ID, Title: g.Title, Description: g.Description, Tags: nonNil(g.Tags), Formula: g.Formula,
 			OwnerID: g.OwnerID, OwnerUsername: g.OwnerUsername, Likes: g.Likes, Plays: g.Plays,
 			Finishes: g.Finishes, LikedByMe: liked[g.ID], RemixOf: g.RemixOf,
+			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID,
 			PackageURL: base, ManifestURL: base + g.ManifestPath, CreatedAt: g.CreatedAt,
 		}
 		if g.CoverPath != "" {
@@ -124,63 +126,19 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"items": items, "nextCursor": next})
 }
 
-func (s *Server) feedEvents(w http.ResponseWriter, r *http.Request) {
-	var in struct {
-		DeviceID string `json:"deviceId"`
-		Events   []struct {
-			GameID string  `json:"gameId"`
-			Type   string  `json:"type"`
-			Value  float64 `json:"value"`
-			At     *int64  `json:"at"` // optional client time, unix ms
-		} `json:"events"`
-	}
-	if !decode(w, r, &in) {
-		return
-	}
-	if len(in.Events) == 0 || len(in.Events) > 100 {
-		writeErr(w, 400, "send between 1 and 100 events")
-		return
-	}
-	u := userFrom(r)
-	if u == nil && (in.DeviceID == "" || len(in.DeviceID) > 64) {
-		writeErr(w, 400, "deviceId is required when not signed in")
-		return
-	}
-	now := time.Now().UTC().Truncate(time.Millisecond)
-	evs := make([]model.Event, 0, len(in.Events))
-	for _, e := range in.Events {
-		if !model.EventTypes[e.Type] || !pkgstore.ValidID(e.GameID) {
-			writeErr(w, 400, "unknown event type or game id")
-			return
-		}
-		at := now
-		if e.At != nil { // trust client time only within a sane window
-			if t := time.UnixMilli(*e.At).UTC(); t.After(now.Add(-24*time.Hour)) && t.Before(now.Add(time.Minute)) {
-				at = t
-			}
-		}
-		ev := model.Event{ID: auth.NewID(12), GameID: e.GameID, Type: e.Type, Value: e.Value, CreatedAt: at}
-		if u != nil {
-			ev.UserID = u.ID
-		} else {
-			ev.DeviceID = in.DeviceID
-		}
-		evs = append(evs, ev)
-	}
-	if err := s.Store.AddEvents(r.Context(), evs); err != nil {
-		s.serverErr(w, r, err)
-		return
-	}
-	writeJSON(w, 202, map[string]int{"accepted": len(evs)})
-}
-
 func (s *Server) gameOr404(w http.ResponseWriter, r *http.Request) (*model.Game, bool) {
 	id := chi.URLParam(r, "id")
-	if !pkgstore.ValidID(id) {
+	var g *model.Game
+	var err error
+	switch {
+	case pkgstore.ValidID(id):
+		g, err = s.Store.GameByID(r.Context(), id)
+	case slugRE.MatchString(id): // a game can also be reached by the slug from its manifest
+		g, err = s.Store.GameBySlug(r.Context(), id)
+	default:
 		writeErr(w, 404, "game not found")
 		return nil, false
 	}
-	g, err := s.Store.GameByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			writeErr(w, 404, "game not found")
@@ -249,9 +207,13 @@ func (s *Server) submitScore(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 400, "invalid score")
 		return
 	}
+	if in.Score != math.Trunc(in.Score) {
+		writeErr(w, 400, "score must be a whole number")
+		return
+	}
 	u := userFrom(r)
 	err := s.Store.SubmitScore(r.Context(), model.Score{
-		GameID: g.ID, UserID: u.ID, Username: u.Username, Score: in.Score,
+		GameID: g.ID, UserID: u.ID, Username: u.Username, Score: int64(in.Score),
 		UpdatedAt: time.Now().UTC().Truncate(time.Millisecond),
 	})
 	if err != nil {
@@ -263,9 +225,20 @@ func (s *Server) submitScore(w http.ResponseWriter, r *http.Request) {
 
 // ---- creations ----
 
-var tagRE = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,23}$`)
+var (
+	tagRE  = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,23}$`)
+	slugRE = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,63}$`)
+)
 
 type manifestMeta struct {
+	ID        string `json:"id"` // optional: kept as the game's slug when it is unique
+	Structure struct {
+		Scope        string `json:"scope"` // "group:<id>" or "event:<id>"
+		GroupID      string `json:"group_id"`
+		GroupIDCamel string `json:"groupID"`
+		EventID      string `json:"event_id"`
+		EventIDCamel string `json:"eventID"`
+	} `json:"structure"`
 	Title   string   `json:"title"`
 	Rule    string   `json:"one_line_rule"`
 	Formula string   `json:"formula"`
@@ -295,6 +268,11 @@ func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
 		if t == "" || len([]rune(t)) > 80 || len([]rune(d)) > 300 {
 			return errors.New("manifest needs a title (max 80 characters) and a one_line_rule (max 300)")
 		}
+		if slug := strings.ToLower(strings.TrimSpace(m.ID)); slugRE.MatchString(slug) {
+			if _, err := s.Store.GameBySlug(r.Context(), slug); err == nil {
+				return errors.New("a game with this manifest id already exists; use a different id")
+			}
+		}
 		return nil
 	})
 	if err != nil {
@@ -319,6 +297,10 @@ func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
 		StorageKey:  id, ManifestPath: pkg.ManifestPath, CoverPath: pkg.CoverPath, HasSource: pkg.HasSource,
 		CreatedAt: time.Now().UTC().Truncate(time.Millisecond),
 	}
+	if slug := strings.ToLower(strings.TrimSpace(m.ID)); slugRE.MatchString(slug) {
+		g.Slug = slug
+	}
+	g.GroupID, g.EventID = scopeIDs(&m)
 	if rm := m.Lineage.RemixOf; rm != "" {
 		if _, err := s.Store.GameByID(r.Context(), rm); err == nil {
 			g.RemixOf = rm
@@ -330,6 +312,37 @@ func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
 	}
 	v, _ := s.views(r, []model.Game{*g})
 	writeJSON(w, 201, v[0])
+}
+
+// scopeIDs reads the Group and Event a game belongs to from the manifest's structure block.
+func scopeIDs(m *manifestMeta) (group, event string) {
+	st := m.Structure
+	group = firstNonEmpty(st.GroupID, st.GroupIDCamel)
+	event = firstNonEmpty(st.EventID, st.EventIDCamel)
+	if kind, id, ok := strings.Cut(st.Scope, ":"); ok {
+		if kind == "group" && group == "" {
+			group = id
+		}
+		if kind == "event" && event == "" {
+			event = id
+		}
+	}
+	return clip(group), clip(event)
+}
+
+func firstNonEmpty(a, b string) string {
+	if a != "" {
+		return a
+	}
+	return b
+}
+
+func clip(s string) string {
+	s = strings.TrimSpace(s)
+	if len(s) > 64 {
+		return ""
+	}
+	return s
 }
 
 func normTags(in []string) []string {

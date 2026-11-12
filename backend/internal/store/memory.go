@@ -19,12 +19,14 @@ type Memory struct {
 	likes   map[string]bool // gameID|userID
 	scores  map[string]model.Score
 	events  []model.Event
+	eventID map[string]bool
 }
 
 func NewMemory() *Memory {
 	return &Memory{
 		users: map[string]*model.User{}, refresh: map[string]model.RefreshToken{},
 		games: map[string]*model.Game{}, likes: map[string]bool{}, scores: map[string]model.Score{},
+		eventID: map[string]bool{},
 	}
 }
 
@@ -97,6 +99,13 @@ func (m *Memory) InsertGame(ctx context.Context, g *model.Game) error {
 	if _, ok := m.games[g.ID]; ok {
 		return ErrConflict
 	}
+	if g.Slug != "" {
+		for _, x := range m.games {
+			if x.Slug == g.Slug {
+				return ErrConflict
+			}
+		}
+	}
 	c := *g
 	m.games[g.ID] = &c
 	return nil
@@ -110,6 +119,37 @@ func (m *Memory) GameByID(ctx context.Context, id string) (*model.Game, error) {
 		return &c, nil
 	}
 	return nil, ErrNotFound
+}
+
+func (m *Memory) GameBySlug(ctx context.Context, slug string) (*model.Game, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, g := range m.games {
+		if g.Slug != "" && g.Slug == slug {
+			c := *g
+			return &c, nil
+		}
+	}
+	return nil, ErrNotFound
+}
+
+func (m *Memory) AllGames(ctx context.Context, limit int) ([]model.Game, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.sorted(func(*model.Game) bool { return true }, limit, Cursor{}), nil
+}
+
+// gameFor resolves a game key (server id or slug) to the stored game. Callers hold the lock.
+func (m *Memory) gameFor(key string) *model.Game {
+	if g, ok := m.games[key]; ok {
+		return g
+	}
+	for _, g := range m.games {
+		if g.Slug != "" && g.Slug == key {
+			return g
+		}
+	}
+	return nil
 }
 
 // sorted returns games matching keep, newest first, after the cursor, up to limit.
@@ -208,21 +248,115 @@ func (m *Memory) LikedSet(ctx context.Context, userID string, ids []string) (map
 	return out, nil
 }
 
-func (m *Memory) AddEvents(ctx context.Context, evs []model.Event) error {
+func (m *Memory) AddEvents(ctx context.Context, evs []model.Event) (int, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	added := 0
 	for _, e := range evs {
+		if m.eventID[e.ID] {
+			continue
+		}
+		m.eventID[e.ID] = true
 		m.events = append(m.events, e)
-		if g, ok := m.games[e.GameID]; ok {
-			switch e.Type {
-			case "play":
+		added++
+		if g := m.gameFor(e.GameID); g != nil {
+			if e.TookOver {
 				g.Plays++
-			case "finish":
-				g.Finishes++
+			}
+			g.Finishes += int64(e.RunsFinished)
+		}
+	}
+	return added, nil
+}
+
+func (m *Memory) GameStats(ctx context.Context, since time.Time) ([]model.GameStats, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	by := map[string]*model.GameStats{}
+	for _, e := range m.events {
+		if e.CreatedAt.Before(since) {
+			continue
+		}
+		g := by[e.GameID]
+		if g == nil {
+			g = &model.GameStats{Key: e.GameID}
+			by[e.GameID] = g
+		}
+		if e.Impression {
+			g.Impressions++
+		}
+		if e.TookOver {
+			g.Takeovers++
+		}
+		g.Finishes += int64(e.RunsFinished)
+		if e.Satisfied {
+			g.Satisfied++
+		}
+		g.Replays += int64(e.Replays)
+		if e.SocialMoment {
+			g.SocialMoments++
+		}
+	}
+	out := make([]model.GameStats, 0, len(by))
+	for _, g := range by {
+		out = append(out, *g)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Key < out[j].Key })
+	return out, nil
+}
+
+func (m *Memory) Interleave(ctx context.Context, since time.Time) (model.Interleave, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	type credit struct{ a, b int }
+	sessions := map[string]*credit{}
+	for _, e := range m.events {
+		if e.CreatedAt.Before(since) || (e.Team != "A" && e.Team != "B") {
+			continue
+		}
+		k := e.Actor + "|" + e.SessionID
+		c := sessions[k]
+		if c == nil {
+			c = &credit{}
+			sessions[k] = c
+		}
+		if e.Credit {
+			if e.Team == "A" {
+				c.a++
+			} else {
+				c.b++
 			}
 		}
 	}
-	return nil
+	var out model.Interleave
+	for _, c := range sessions {
+		out.Sessions++
+		switch {
+		case c.a > c.b:
+			out.FormulaWins++
+		case c.b > c.a:
+			out.ControlWins++
+		default:
+			out.Ties++
+		}
+	}
+	return out, nil
+}
+
+func (m *Memory) ExportEvents(ctx context.Context, since time.Time, limit int) ([]model.Event, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []model.Event
+	for _, e := range m.events {
+		if !e.CreatedAt.Before(since) {
+			out = append(out, e)
+		}
+	}
+	sort.SliceStable(out, func(i, j int) bool { return out[i].CreatedAt.Before(out[j].CreatedAt) })
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
 }
 
 func (m *Memory) SubmitScore(ctx context.Context, s model.Score) error {

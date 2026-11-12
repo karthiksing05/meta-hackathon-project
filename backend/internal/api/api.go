@@ -64,6 +64,11 @@ func (s *Server) Handler() http.Handler {
 		r.With(s.optionalAuth).Post("/feed/events", s.feedEvents)
 		r.With(s.optionalAuth).Get("/search", s.search)
 
+		// recommender support: shared event log roll-ups
+		r.Get("/games/stats", s.gameStats)
+		r.Get("/experiments/interleave", s.interleave)
+		r.With(s.requireAuth).Get("/events/export", s.exportEvents)
+
 		r.Route("/games/{id}", func(r chi.Router) {
 			r.With(s.optionalAuth).Get("/", s.getGame)
 			r.With(s.requireAuth).Put("/like", s.like(true))

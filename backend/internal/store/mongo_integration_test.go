@@ -76,7 +76,9 @@ func TestMongoStore(t *testing.T) {
 	if n, _ := m.SetLike(ctx, id, "u1", false); n != 0 {
 		t.Fatalf("unlike: %d", n)
 	}
-	m.AddEvents(ctx, []model.Event{{ID: "e1", UserID: "u1", GameID: id, Type: "play", CreatedAt: now}})
+	if _, err := m.AddEvents(ctx, []model.Event{{ID: "e1", UserID: "u1", GameID: id, Type: "play", TookOver: true, CreatedAt: now}}); err != nil {
+		t.Fatal(err)
+	}
 	if g, _ := m.GameByID(ctx, id); g.Plays != 1 {
 		t.Fatalf("plays: %d", g.Plays)
 	}
@@ -91,5 +93,82 @@ func TestMongoStore(t *testing.T) {
 	}
 	if _, err := m.TakeRefresh(ctx, "h"); err != store.ErrNotFound {
 		t.Fatalf("second take: %v", err)
+	}
+}
+
+// The event log roll-ups run as aggregation pipelines, so they are checked against a real server.
+func TestMongoEventLog(t *testing.T) {
+	uri := os.Getenv("MONGO_TEST_URI")
+	if uri == "" {
+		t.Skip("MONGO_TEST_URI not set")
+	}
+	ctx := context.Background()
+	m, err := store.ConnectMongo(ctx, uri, "bubbles_test_events_"+time.Now().Format("150405"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.Close(ctx)
+	defer m.DropDatabase(ctx)
+	if err := m.EnsureIndexes(ctx); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	id := "a0123456789abcdef0123456"
+	g := &model.Game{ID: id, OwnerID: "u1", Title: "Fog", Slug: "fog", StorageKey: id, ManifestPath: "manifest.json", CreatedAt: now}
+	if err := m.InsertGame(ctx, g); err != nil {
+		t.Fatal(err)
+	}
+	// a second game may not take the same slug
+	dup := *g
+	dup.ID = "b0123456789abcdef0123456"
+	if err := m.InsertGame(ctx, &dup); err != store.ErrConflict {
+		t.Fatalf("duplicate slug: %v", err)
+	}
+	if got, err := m.GameBySlug(ctx, "fog"); err != nil || got.ID != id {
+		t.Fatalf("by slug: %v %v", got, err)
+	}
+
+	page := func(eid, actor, session, team string) model.Event {
+		return model.Event{ID: actor + "|" + eid, ClientEventID: eid, Actor: actor, GameID: "fog", SessionID: session,
+			Team: team, Impression: true, TookOver: true, RunsFinished: 1, Credit: true, Satisfied: true, CreatedAt: now}
+	}
+	evs := []model.Event{
+		page("1", "u:1", "s1", "A"), page("2", "u:1", "s1", "A"), page("3", "u:1", "s1", "B"), // formula wins s1
+		page("4", "u:2", "s1", "B"), // same session name, other person: control wins
+		{ID: "u:2|5", Actor: "u:2", GameID: "fog", Kind: "remix", SocialMoment: true, Credit: true, CreatedAt: now},
+	}
+	if n, err := m.AddEvents(ctx, evs); err != nil || n != 5 {
+		t.Fatalf("add: %d %v", n, err)
+	}
+	if n, err := m.AddEvents(ctx, evs); err != nil || n != 0 { // a resent batch is a no-op
+		t.Fatalf("resend: %d %v", n, err)
+	}
+	if g, _ := m.GameByID(ctx, id); g.Plays != 4 || g.Finishes != 4 { // slug events reach the counters once
+		t.Fatalf("counters: plays %d finishes %d", g.Plays, g.Finishes)
+	}
+
+	stats, err := m.GameStats(ctx, time.Time{})
+	if err != nil || len(stats) != 1 {
+		t.Fatalf("stats: %v %v", stats, err)
+	}
+	st := stats[0]
+	if st.Key != "fog" || st.Impressions != 4 || st.Takeovers != 4 || st.Finishes != 4 || st.Satisfied != 4 || st.SocialMoments != 1 {
+		t.Fatalf("stats row: %+v", st)
+	}
+	if old, _ := m.GameStats(ctx, now.Add(time.Hour)); len(old) != 0 {
+		t.Fatalf("since in the future: %v", old)
+	}
+
+	il, err := m.Interleave(ctx, time.Time{})
+	if err != nil || il.Sessions != 2 || il.FormulaWins != 1 || il.ControlWins != 1 || il.Ties != 0 {
+		t.Fatalf("interleave: %+v %v", il, err)
+	}
+	if none, err := m.Interleave(ctx, now.Add(time.Hour)); err != nil || none.Sessions != 0 {
+		t.Fatalf("empty interleave: %+v %v", none, err)
+	}
+
+	out, err := m.ExportEvents(ctx, time.Time{}, 3)
+	if err != nil || len(out) != 3 {
+		t.Fatalf("export limit: %d %v", len(out), err)
 	}
 }

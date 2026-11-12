@@ -124,6 +124,18 @@ func (m *Mongo) GameByID(ctx context.Context, id string) (*model.Game, error) {
 	return &g, nil
 }
 
+func (m *Mongo) GameBySlug(ctx context.Context, slug string) (*model.Game, error) {
+	var g model.Game
+	if err := m.coll(cGames).FindOne(ctx, bson.D{{Key: "slug", Value: slug}}).Decode(&g); err != nil {
+		return nil, mapErr(err)
+	}
+	return &g, nil
+}
+
+func (m *Mongo) AllGames(ctx context.Context, limit int) ([]model.Game, error) {
+	return m.findGames(ctx, bson.D{}, options.Find().SetSort(newestFirst).SetLimit(int64(limit)))
+}
+
 func cursorFilter(base bson.D, c Cursor) bson.D {
 	if c.IsZero() {
 		return base
@@ -228,23 +240,87 @@ func (m *Mongo) LikedSet(ctx context.Context, userID string, ids []string) (map[
 	return out, nil
 }
 
-func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) error {
+func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) (int, error) {
 	if len(evs) == 0 {
-		return nil
+		return 0, nil
 	}
-	docs := make([]any, len(evs))
-	plays, finishes := map[string]int64{}, map[string]int64{}
+	// Skip events already stored (a phone resending a batch) and repeats inside this batch.
+	ids := make([]string, len(evs))
 	for i, e := range evs {
-		docs[i] = e
-		switch e.Type {
-		case "play":
-			plays[e.GameID]++
-		case "finish":
-			finishes[e.GameID]++
+		ids[i] = e.ID
+	}
+	cur, err := m.coll(cEvents).Find(ctx, bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}},
+		options.Find().SetProjection(bson.D{{Key: "_id", Value: 1}}))
+	if err != nil {
+		return 0, err
+	}
+	var have []struct {
+		ID string `bson:"_id"`
+	}
+	if err := cur.All(ctx, &have); err != nil {
+		return 0, err
+	}
+	seen := map[string]bool{}
+	for _, h := range have {
+		seen[h.ID] = true
+	}
+	var docs []any
+	var fresh []model.Event
+	for _, e := range evs {
+		if seen[e.ID] {
+			continue
+		}
+		seen[e.ID] = true
+		docs = append(docs, e)
+		fresh = append(fresh, e)
+	}
+	if len(docs) == 0 {
+		return 0, nil
+	}
+	if _, err := m.coll(cEvents).InsertMany(ctx, docs, options.InsertMany().SetOrdered(false)); err != nil && !mongo.IsDuplicateKeyError(err) {
+		return 0, err
+	}
+
+	// Events may name a game by slug; resolve those to ids for the per-game counters.
+	var slugs []string
+	for _, e := range fresh {
+		if !LooksLikeID(e.GameID) {
+			slugs = append(slugs, e.GameID)
 		}
 	}
-	if _, err := m.coll(cEvents).InsertMany(ctx, docs); err != nil {
-		return err
+	idOf := map[string]string{}
+	if len(slugs) > 0 {
+		gc, err := m.coll(cGames).Find(ctx, bson.D{{Key: "slug", Value: bson.D{{Key: "$in", Value: slugs}}}},
+			options.Find().SetProjection(bson.D{{Key: "slug", Value: 1}}))
+		if err != nil {
+			return len(fresh), err
+		}
+		var rows []struct {
+			ID   string `bson:"_id"`
+			Slug string `bson:"slug"`
+		}
+		if err := gc.All(ctx, &rows); err != nil {
+			return len(fresh), err
+		}
+		for _, r := range rows {
+			idOf[r.Slug] = r.ID
+		}
+	}
+	plays, finishes := map[string]int64{}, map[string]int64{}
+	for _, e := range fresh {
+		id := e.GameID
+		if !LooksLikeID(id) {
+			id = idOf[id]
+		}
+		if id == "" {
+			continue
+		}
+		if e.TookOver {
+			plays[id]++
+		}
+		if e.RunsFinished > 0 {
+			finishes[id] += int64(e.RunsFinished)
+		}
 	}
 	var writes []mongo.WriteModel
 	for id, n := range plays {
@@ -258,10 +334,114 @@ func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) error {
 			SetUpdate(bson.D{{Key: "$inc", Value: bson.D{{Key: "finishes", Value: n}}}}))
 	}
 	if len(writes) > 0 {
-		_, err := m.coll(cGames).BulkWrite(ctx, writes)
-		return err
+		if _, err := m.coll(cGames).BulkWrite(ctx, writes); err != nil {
+			return len(fresh), err
+		}
 	}
-	return nil
+	return len(fresh), nil
+}
+
+func sinceFilter(since time.Time) bson.D {
+	if since.IsZero() {
+		return bson.D{}
+	}
+	return bson.D{{Key: "createdAt", Value: bson.D{{Key: "$gte", Value: since}}}}
+}
+
+func sumIf(field string) bson.D {
+	return bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{"$" + field, 1, 0}}}}}
+}
+
+func (m *Mongo) GameStats(ctx context.Context, since time.Time) ([]model.GameStats, error) {
+	pipe := mongo.Pipeline{
+		{{Key: "$match", Value: sinceFilter(since)}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$gameId"},
+			{Key: "impressions", Value: sumIf("impression")},
+			{Key: "takeovers", Value: sumIf("tookOver")},
+			{Key: "finishes", Value: bson.D{{Key: "$sum", Value: "$runsFinished"}}},
+			{Key: "satisfied", Value: sumIf("satisfied")},
+			{Key: "replays", Value: bson.D{{Key: "$sum", Value: "$replays"}}},
+			{Key: "socialMoments", Value: sumIf("socialMoment")},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
+	}
+	cur, err := m.coll(cEvents).Aggregate(ctx, pipe)
+	if err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		Key           string `bson:"_id"`
+		Impressions   int64  `bson:"impressions"`
+		Takeovers     int64  `bson:"takeovers"`
+		Finishes      int64  `bson:"finishes"`
+		Satisfied     int64  `bson:"satisfied"`
+		Replays       int64  `bson:"replays"`
+		SocialMoments int64  `bson:"socialMoments"`
+	}
+	if err := cur.All(ctx, &rows); err != nil {
+		return nil, err
+	}
+	out := make([]model.GameStats, len(rows))
+	for i, r := range rows {
+		out[i] = model.GameStats(r)
+	}
+	return out, nil
+}
+
+func (m *Mongo) Interleave(ctx context.Context, since time.Time) (model.Interleave, error) {
+	match := append(sinceFilter(since), bson.E{Key: "team", Value: bson.D{{Key: "$in", Value: bson.A{"A", "B"}}}})
+	credit := func(team string) bson.D {
+		return bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
+			bson.D{{Key: "$and", Value: bson.A{
+				bson.D{{Key: "$eq", Value: bson.A{"$team", team}}},
+				bson.D{{Key: "$eq", Value: bson.A{"$credit", true}}},
+			}}},
+			1, 0}}}}}
+	}
+	wins := func(x, y string) bson.D {
+		return bson.D{{Key: "$sum", Value: bson.D{{Key: "$cond", Value: bson.A{
+			bson.D{{Key: "$gt", Value: bson.A{"$" + x, "$" + y}}}, 1, 0}}}}}
+	}
+	pipe := mongo.Pipeline{
+		{{Key: "$match", Value: match}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: bson.D{{Key: "a", Value: "$actor"}, {Key: "s", Value: "$sessionId"}}},
+			{Key: "a", Value: credit("A")},
+			{Key: "b", Value: credit("B")},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "sessions", Value: bson.D{{Key: "$sum", Value: 1}}},
+			{Key: "formulaWins", Value: wins("a", "b")},
+			{Key: "controlWins", Value: wins("b", "a")},
+		}}},
+	}
+	cur, err := m.coll(cEvents).Aggregate(ctx, pipe)
+	if err != nil {
+		return model.Interleave{}, err
+	}
+	var rows []struct {
+		Sessions    int64 `bson:"sessions"`
+		FormulaWins int64 `bson:"formulaWins"`
+		ControlWins int64 `bson:"controlWins"`
+	}
+	if err := cur.All(ctx, &rows); err != nil || len(rows) == 0 {
+		return model.Interleave{}, err
+	}
+	r := rows[0]
+	return model.Interleave{Sessions: r.Sessions, FormulaWins: r.FormulaWins, ControlWins: r.ControlWins,
+		Ties: r.Sessions - r.FormulaWins - r.ControlWins}, nil
+}
+
+func (m *Mongo) ExportEvents(ctx context.Context, since time.Time, limit int) ([]model.Event, error) {
+	cur, err := m.coll(cEvents).Find(ctx, sinceFilter(since),
+		options.Find().SetSort(bson.D{{Key: "createdAt", Value: 1}, {Key: "_id", Value: 1}}).SetLimit(int64(limit)))
+	if err != nil {
+		return nil, err
+	}
+	var out []model.Event
+	return out, cur.All(ctx, &out)
 }
 
 func (m *Mongo) SubmitScore(ctx context.Context, s model.Score) error {

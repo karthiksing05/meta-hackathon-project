@@ -31,6 +31,8 @@ type Store interface {
 
 	InsertGame(ctx context.Context, g *model.Game) error
 	GameByID(ctx context.Context, id string) (*model.Game, error)
+	GameBySlug(ctx context.Context, slug string) (*model.Game, error)
+	AllGames(ctx context.Context, limit int) ([]model.Game, error) // newest first
 	GamesByOwner(ctx context.Context, ownerID string, limit int, cursor Cursor) ([]model.Game, error)
 	Feed(ctx context.Context, limit int, cursor Cursor) ([]model.Game, error)
 	Search(ctx context.Context, q, tag string, limit, offset int) ([]model.Game, error)
@@ -39,10 +41,28 @@ type Store interface {
 	SetLike(ctx context.Context, gameID, userID string, liked bool) (int64, error)
 	LikedSet(ctx context.Context, userID string, gameIDs []string) (map[string]bool, error)
 
-	AddEvents(ctx context.Context, evs []model.Event) error
+	// AddEvents stores events and returns how many were new. Events whose id was already stored
+	// (a phone resending a batch) are skipped and do not count twice.
+	AddEvents(ctx context.Context, evs []model.Event) (int, error)
+	GameStats(ctx context.Context, since time.Time) ([]model.GameStats, error)
+	Interleave(ctx context.Context, since time.Time) (model.Interleave, error)
+	ExportEvents(ctx context.Context, since time.Time, limit int) ([]model.Event, error) // oldest first
 
 	SubmitScore(ctx context.Context, s model.Score) error // keeps the user's best
 	Leaderboard(ctx context.Context, gameID string, limit int) ([]model.Score, error)
+}
+
+// LooksLikeID reports whether a game key has the shape of a server-generated id (24 lowercase hex).
+func LooksLikeID(s string) bool {
+	if len(s) != 24 {
+		return false
+	}
+	for _, c := range s {
+		if !(c >= '0' && c <= '9' || c >= 'a' && c <= 'f') {
+			return false
+		}
+	}
+	return true
 }
 
 // Cursor is a keyset position in a createdAt-descending list.

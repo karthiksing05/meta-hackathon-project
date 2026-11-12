@@ -162,9 +162,9 @@ func TestCreationFeedSearchLikesEvents(t *testing.T) {
 	if _, out := do(t, "GET", ts.URL+"/v1/games/"+id, "", nil, ""); out["plays"].(float64) != 1 || out["finishes"].(float64) != 1 {
 		t.Fatalf("counters: %v", out)
 	}
-	bad := map[string]any{"events": []map[string]any{{"gameId": id, "type": "hack"}}}
+	bad := map[string]any{"events": []map[string]any{{"gameId": id, "type": "Not Snake Case!"}}}
 	if code, _ := do(t, "POST", ts.URL+"/v1/feed/events", tok, js(bad), "application/json"); code != 400 {
-		t.Fatalf("bad event type: %d", code)
+		t.Fatalf("bad event kind: %d", code)
 	}
 
 	// leaderboard keeps the best score

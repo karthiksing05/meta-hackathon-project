@@ -39,12 +39,20 @@ treat the exact shapes as the first version and change them together with the cl
 | `POST /v1/auth/register`, `login`, `refresh`, `logout`; `GET /v1/auth/me` | none / bearer | accounts and tokens |
 | `GET /v1/feed?cursor=&limit=` | optional | newest-first games, keyset pagination |
 | `GET /v1/search?q=&tag=&cursor=&limit=` | optional | full-text and tag search |
-| `POST /v1/feed/events` | optional | batch of `view/play/finish/quit/skip/replay/like/unlike/share/remix` (anonymous needs `deviceId`) |
-| `GET /v1/games/{id}` | optional | one game |
+| `POST /v1/feed/events` | optional | batch of up to 100 events: feed pages, off-feed moments, or the older `view/play/finish/...` types (anonymous needs `deviceId`); see [Event log](#event-log-and-recommender-support) |
+| `GET /v1/games/stats?since=` | none | per-game roll-up of the event log, plus creator, Group and creation day |
+| `GET /v1/experiments/interleave?since=` | none | formula-vs-control interleaving summary across everyone's sessions |
+| `GET /v1/events/export?since=&limit=` | bearer | the event log as JSON Lines, for offline benchmarking |
+| `GET /v1/games/{id}` | optional | one game; `{id}` may also be the slug from its manifest |
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
 | `GET /v1/games/{id}/leaderboard`, `POST /v1/games/{id}/scores` | none / bearer | best score per user |
 | `POST /v1/creations` | bearer | upload a package zip (`Content-Type: application/zip`) |
 | `GET /v1/creations`, `GET /v1/creations/{id}`, `GET /v1/creations/{id}/source` | bearer | the caller's games; private editable source as a zip |
+
+Scores are whole numbers (a fractional score is rejected). A manifest `id` that is a lowercase slug
+(`hill-hopper`) is kept as the game's unique `slug`; publishing a second game with the same slug is refused (422).
+The manifest's `structure.group_id` / `structure.groupID` / `structure.scope: "group:<id>"` (and the same for events)
+are stored as `groupId` and `eventId`.
 
 Game responses carry `packageUrl`, `manifestUrl` and `coverUrl` on the games hostname
 (`GAMES_BASE_URL/{id}/...`). Mongo stores only the relative key and paths.
@@ -61,6 +69,46 @@ Publishing is validated and atomic: the upload is spooled to a private temp dir,
 symlink, hidden-file, extension, count and size (including zip-bomb) checks, then moved into place by a
 single rename. The id is server-generated (24 hex), is claimed exclusively so it can never be overwritten, and
 clients never supply paths.
+
+## Event log and recommender support
+
+Built for Kevin's recommender (`docs/RECOMMENDER_BACKEND.md` on the `recommendation` branch). The phone does
+the ranking; the server keeps the shared log and the roll-ups one phone can't compute.
+
+`POST /v1/feed/events` takes `{"deviceId": "...", "events": [ ... ]}` (`deviceId` only when not signed in). Each
+event is one of:
+
+- a **feed page**: `eventID`, `gameID`, `feedItemID` and/or `position`, plus any of `sessionID`, `day`, `ts`
+  (RFC 3339), `reason`, `team`, `score`, `propensity`, `dwellSec`, `tookOver`, `runsFinished`, `replays`, `saved`,
+  `liked`, `floated`, `openedBoard`, `addedFriend`, `remixed`, `quitMidRun`, `endedSession`, `social: [kinds]`,
+  `with: [ids]`, and an optional `satisfied` boolean;
+- an **off-feed moment**: `eventID`, `gameID`, `kind` (any short snake_case name, stored even if the server has
+  never seen it), optional `with`, `day`;
+- a **legacy** event: `gameId`, `type` (`view`, `play`, `finish`, `quit`, `skip`, `replay`, `like`, `unlike`, `share`,
+  `remix`), optional `value`, `at`.
+
+`gameID` is a server id or a slug. Sending the same `eventID` again (for the same person) is a no-op; the reply is
+`{"accepted": n, "duplicates": m}`. `team` is `A` (the formula) or `B` (the control); `formula`, `control` and
+`baseline` are accepted as aliases. Everything is validated; a bad event rejects the batch with a message naming it.
+
+Roll-ups (all count only events from `since`, RFC 3339 or unix ms, when it is given):
+
+- **stats**: `impressions` = feed pages and `view` events; `takeovers` = pages with `tookOver` and `play` events;
+  `finishes` = sum of `runsFinished`; `replays` = sum of `replays`; `socialMoments` = pages with a `social` list plus
+  off-feed moments; `satisfied` = pages that earned credit (a finish, replay, save, float, Add friend, remix or social
+  moment), or the phone's own `satisfied` flag when it sends one. Games with no events yet are listed with zeros.
+  `createdDay` is whole days since 1970-01-01. `quality` is `{botGatePassed: false, fragments: 0, reports: 0}` until
+  the manifest carries those fields.
+- **interleave**: per session (a person plus `sessionID`) that carried a `team`, each side scores one point per
+  credited page (same list as `satisfied`, excluding off-feed moments); more points wins, equal is a tie. The reply is
+  `{"baseline": {"sessions", "formulaWins", "controlWins", "ties"}}`.
+- **export**: JSON Lines, oldest first, the same field names as above (booleans only when true). `userID` is the
+  phone's own `userID` when it sent one, else the account id, else `device:<id>`. The response header `X-Next-Since`
+  is the last timestamp; pass it as `since` for the next page (the last event may repeat; dedupe on `eventID`).
+
+Not built yet: the social-moments inbox (`/v1/me/moments`) and Group Blend inputs (`/v1/groups/{id}/blend-inputs`),
+which need the challenge, session and Group data first, and the optional re-rank proxy, recs-state backup and
+generation queue. After deploying a release that adds indexes, run `deploy/dbinit.sh` once.
 
 ## Notes and limits
 
