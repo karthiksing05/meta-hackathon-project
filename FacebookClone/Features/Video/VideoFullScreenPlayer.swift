@@ -335,9 +335,11 @@ final class VideoPlaybackController {
             didFail = true
             return
         }
-        // Play sound even with the silent switch on, like the real app.
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
-        try? AVAudioSession.sharedInstance().setActive(true)
+        // Play sound even with the silent switch on, like the real app. GameSound owns the session
+        // and gives `.ambient` back on teardown.
+        if !isMuted {
+            GameSound.beginPlayback(self)
+        }
 
         let newPlayer = AVPlayer(url: url)
         newPlayer.actionAtItemEnd = .pause
@@ -428,10 +430,17 @@ final class VideoPlaybackController {
     func setMuted(_ muted: Bool) {
         isMuted = muted
         player?.isMuted = muted
+        guard player != nil else { return }
+        if muted {
+            GameSound.endPlayback(self)
+        } else {
+            GameSound.beginPlayback(self)
+        }
     }
 
     func teardown() {
         player?.pause()
+        GameSound.endPlayback(self)
         player = nil
         isPlaying = false
         isBuffering = false

@@ -92,10 +92,12 @@ final class LoopingPlayerUIView: UIView {
     func setMuted(_ muted: Bool) {
         guard let player, player.isMuted != muted else { return }
         player.isMuted = muted
-        if !muted {
-            // Play sound even when the ring/silent switch is on, like the real app.
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
-            try? AVAudioSession.sharedInstance().setActive(true)
+        // With sound, play even when the ring/silent switch is on, like the real app. GameSound
+        // owns the session and puts it back to `.ambient` once no video has sound.
+        if muted {
+            GameSound.endPlayback(self)
+        } else {
+            GameSound.beginPlayback(self)
         }
     }
 
@@ -105,6 +107,7 @@ final class LoopingPlayerUIView: UIView {
         }
         timeObserver = nil
         player?.pause()
+        GameSound.endPlayback(self)
         looper?.disableLooping()
         looper = nil
         player = nil
