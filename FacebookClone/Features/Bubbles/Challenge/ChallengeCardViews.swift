@@ -162,7 +162,7 @@ struct ChallengeScoreRow: View {
         let center = ChallengeCenter.shared
         HStack(spacing: 8) {
             column(user: appStore.me, entry: challenge.mine, isWinner: challenge.outcome == .won, isPending: false)
-            Text("vs")
+            Text(ChallengeCopy.versus)
                 .font(.fbCaptionEmphasized)
                 .foregroundStyle(FBColor.secondaryText)
             column(user: center.person(challenge.opponentID), entry: challenge.theirs, isWinner: challenge.outcome == .lost, isPending: challenge.isOpponentPlaying)
@@ -175,7 +175,7 @@ struct ChallengeScoreRow: View {
             HStack(spacing: 6) {
                 AvatarView(user: user, size: FBAvatarSize.reply)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(user.isMe ? "You" : user.firstName)
+                    Text(user.isMe ? ChallengeCopy.you : user.firstName)
                         .font(.fbCaptionEmphasized)
                         .foregroundStyle(FBColor.secondaryText)
                         .lineLimit(1)
@@ -197,7 +197,7 @@ struct ChallengeScoreRow: View {
                     Image(systemName: "crown.fill")
                         .font(.system(size: FBIconSize.small))
                         .foregroundStyle(ChallengeStyle.purple)
-                        .accessibilityLabel("Winner")
+                        .accessibilityLabel(ChallengeCopy.winner)
                 }
             }
             .padding(6)
@@ -389,7 +389,7 @@ struct ChallengeSessionCard: View {
                     if let user {
                         AvatarView(user: user, size: FBAvatarSize.tiny)
                     }
-                    Text(isMe ? "You" : (user?.firstName ?? ""))
+                    Text(isMe ? ChallengeCopy.you : (user?.firstName ?? ""))
                         .font(.fbMetaEmphasized)
                         .foregroundStyle(FBColor.primaryText)
                         .lineLimit(1)
@@ -397,7 +397,7 @@ struct ChallengeSessionCard: View {
                         Image(systemName: "crown.fill")
                             .font(.system(size: FBIconSize.xs))
                             .foregroundStyle(ChallengeStyle.purple)
-                            .accessibilityLabel("Winner")
+                            .accessibilityLabel(ChallengeCopy.winner)
                     }
                     Spacer(minLength: 4)
                     Text(row.score.withCommas)
@@ -436,7 +436,7 @@ struct ChallengeSessionCard: View {
         } else if let session {
             let waiting = session.memberIDs.filter { session.entries[$0] == nil }.compactMap { ChallengeCenter.shared.person($0)?.firstName }
             if !waiting.isEmpty {
-                Label("\(ChallengeCopy.waiting) \(waiting.joined(separator: ", "))", systemImage: "hourglass")
+                Label(ChallengeCopy.waitingNames(waiting), systemImage: "hourglass")
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                     .lineLimit(2)

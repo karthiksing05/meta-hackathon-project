@@ -105,7 +105,7 @@ struct ChallengeHeadToHeadPanel: View {
             }
             HStack(alignment: .top, spacing: 0) {
                 side(me, entry: challenge.mine, isWinner: challenge.outcome == .won, isPending: false)
-                Text("vs")
+                Text(ChallengeCopy.versus)
                     .font(.fbHeadline)
                     .foregroundStyle(FBColor.secondaryText)
                     .padding(.top, compact ? 18 : 28)
@@ -136,15 +136,15 @@ struct ChallengeHeadToHeadPanel: View {
                         .font(.system(size: FBIconSize.large))
                         .foregroundStyle(ChallengeStyle.purple)
                         .offset(y: -6)
-                        .accessibilityLabel("Winner")
+                        .accessibilityLabel(ChallengeCopy.winner)
                 }
             }
-            Text(user.isMe ? "You" : user.firstName)
+            Text(user.isMe ? ChallengeCopy.you : user.firstName)
                 .font(.fbName)
                 .foregroundStyle(FBColor.primaryText)
                 .lineLimit(1)
             Text(entry.map { $0.score.withCommas } ?? (isPending ? ChallengeCopy.waiting : "–"))
-                .font(entry == nil ? .fbMeta : .system(size: compact ? 28 : 40, weight: .bold, design: .rounded)) // Display text: a score
+                .font(entry == nil ? .fbMeta : .system(compact ? .title : .largeTitle, design: .rounded, weight: .bold)) // Display text: a score, scales with Dynamic Type
                 .monospacedDigit()
                 .foregroundStyle(isWinner ? ChallengeStyle.purple : FBColor.primaryText)
                 .contentTransition(.numericText())

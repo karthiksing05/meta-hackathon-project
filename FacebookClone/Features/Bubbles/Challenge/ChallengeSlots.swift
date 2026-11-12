@@ -65,7 +65,7 @@ struct ChallengeSessionStanding: View {
                                 .foregroundStyle(entry.userID == appStore.me.id ? ChallengeStyle.purple : FBColor.primaryText)
                         }
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(user.isMe ? "You" : user.firstName): \(entry.score)")
+                        .accessibilityLabel(ChallengeCopy.scoreLabel(user.isMe ? ChallengeCopy.you : user.firstName, entry.score))
                     }
                 }
                 Spacer(minLength: 0)
@@ -101,7 +101,7 @@ struct ChallengeResultAction: View {
                     Label(ChallengeCopy.challengeMe, systemImage: "flag.checkered")
                 }
                 .buttonStyle(.fb(.tinted, height: 44))
-                .accessibilityHint("Send this run to a friend, a chat or a Group to beat on the same course")
+                .accessibilityHint(ChallengeCopy.challengeMeHint)
             }
         }
         .sheet(isPresented: $isPicking) {
@@ -112,22 +112,28 @@ struct ChallengeResultAction: View {
     @ViewBuilder
     private func challengeActions(_ center: ChallengeCenter) -> some View {
         if let play = slot.play, let challenge = center.challenge(play.id) {
-            HStack(spacing: 8) {
-                Button {
-                    Haptics.light()
-                    center.rematch(challengeID: challenge.id)
-                    openChat(for: challenge.id)
-                } label: {
-                    Label(ChallengeCopy.challengeBack, systemImage: "arrow.triangle.2.circlepath")
+            VStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    Button {
+                        Haptics.light()
+                        center.rematch(challengeID: challenge.id)
+                        openChat(for: challenge.id)
+                    } label: {
+                        Label(ChallengeCopy.challengeBack, systemImage: "arrow.triangle.2.circlepath")
+                    }
+                    .buttonStyle(.fb(.tinted, height: 44))
+                    Button {
+                        Haptics.light()
+                        openChat(for: challenge.id)
+                    } label: {
+                        Label(ChallengeCopy.openChat, systemImage: "message.fill")
+                    }
+                    .buttonStyle(.fb(.secondary, height: 44))
                 }
-                .buttonStyle(.fb(.tinted, height: 44))
-                Button {
-                    Haptics.light()
-                    openChat(for: challenge.id)
-                } label: {
-                    Label(ChallengeCopy.openChat, systemImage: "message.fill")
+                // Met through a game: one tap turns a rival into a friend.
+                if let opponent = center.person(challenge.opponentID) {
+                    ChallengeAddFriendButton(user: opponent, bubbleID: challenge.bubbleID)
                 }
-                .buttonStyle(.fb(.secondary, height: 44))
             }
         }
     }
@@ -272,7 +278,8 @@ struct ChallengePlayerBanner: View {
             }
             .foregroundStyle(Color.white)
             .padding(.horizontal, 14)
-            .frame(height: 32)
+            .padding(.vertical, 6)
+            .frame(minHeight: 32)
             .background {
                 if isAhead {
                     Capsule().fill(ChallengeStyle.gradient)
@@ -321,7 +328,7 @@ struct ChallengeFriendButton: View {
                     .background(FBColor.tintedBlueBackground, in: Capsule())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Challenge \(user.firstName) to a game")
+            .accessibilityLabel(ChallengeCopy.challengeToGame(user.firstName))
             .sheet(isPresented: $isPicking) {
                 ChallengeGamePickerSheet(userID: user.id)
             }

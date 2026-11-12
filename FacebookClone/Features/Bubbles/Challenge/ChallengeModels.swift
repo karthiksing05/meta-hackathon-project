@@ -83,8 +83,8 @@ struct ChallengeSession: Identifiable, Hashable {
     let seed: Int
     let length: BubbleLength?
     let fromUserID: String
-    /// Everyone in it, you included.
-    let memberIDs: [String]
+    /// Everyone in it, you included (you join when you play a session you weren't counted in).
+    var memberIDs: [String]
     /// The group chat, or nil for a Group post.
     let conversationID: String?
     /// The Group, for "Challenge the Group" posts.

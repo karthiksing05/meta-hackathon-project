@@ -25,7 +25,7 @@ struct ChallengePickerSheet: View {
                 if let bubble = bubbleStore.bubble(id: bubbleID) {
                     content(bubble, draft: resolvedDraft(bubble))
                 } else {
-                    ContentUnavailableView("This Bubble popped", systemImage: "bubbles.and.sparkles", description: Text("It isn't available anymore."))
+                    ContentUnavailableView(ChallengeCopy.bubbleGone, systemImage: "bubbles.and.sparkles", description: Text(ChallengeCopy.bubbleGoneNote))
                 }
             }
             .background(FBColor.surface)
@@ -139,7 +139,7 @@ struct ChallengePreviewCard: View {
         .padding(12)
         .background(FBColor.tintedBlueBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Preview: \(ChallengeCopy.preview(score, title: bubble.title))")
+        .accessibilityLabel(ChallengeCopy.previewLabel(ChallengeCopy.preview(score, title: bubble.title)))
     }
 }
 
@@ -175,7 +175,7 @@ struct ChallengeTargetRow: View {
             }
             .buttonStyle(.fb(isSent ? .secondary : .primary, expand: false, height: 32))
             .disabled(isSent)
-            .accessibilityLabel(isSent ? "Sent to \(target.title)" : "Send challenge to \(target.title)")
+            .accessibilityLabel(isSent ? ChallengeCopy.sentTo(target.title) : ChallengeCopy.sendChallengeTo(target.title))
         }
         .padding(.horizontal, FBMetrics.screenPadding)
         .padding(.vertical, 8)

@@ -68,7 +68,7 @@ struct ChallengeGamePickerSheet: View {
         HStack(spacing: 12) {
             AvatarView(user: person, size: FBAvatarSize.compact)
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(ChallengeCopy.challenge) \(person.firstName)")
+                Text(ChallengeCopy.challengeName(person.firstName))
                     .font(.fbHeadline)
                     .foregroundStyle(FBColor.primaryText)
                 let record = center.rivalry(with: person.id)
@@ -131,7 +131,7 @@ struct ChallengeGamePickerSheet: View {
             }
             .buttonStyle(.fb(isSent ? .secondary : .primary, expand: false, height: 32))
             .disabled(isSent)
-            .accessibilityLabel(isSent ? "Challenge sent" : "Challenge \(person.firstName) in \(bubble.title)")
+            .accessibilityLabel(isSent ? ChallengeCopy.challengeSentShort : ChallengeCopy.challengeIn(person.firstName, bubble.title))
         }
         .padding(.horizontal, FBMetrics.screenPadding)
         .padding(.vertical, 6)

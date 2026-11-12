@@ -323,7 +323,6 @@ final class ChallengeCenter {
             BubbleSocialHub.send(result, to: BubbleShareTarget(kind: .chat, targetID: chat.id, title: chat.title), appStore: appStore, bubbleStore: bubbleStore)
         }
         if challenge.outcome == .won, previousOutcome != .won {
-            BubbleSocialSignals.post(.challengeWon, bubbleID: bubble.id, with: [challenge.opponentID])
             if let opponent {
                 say(ChallengeCopy.rivalConcedes(round: challenge.round), from: opponent, in: chat, after: 3.5)
             }
@@ -334,13 +333,18 @@ final class ChallengeCenter {
         guard var session = sessions[sessionID], let bubbleStore, let bubble = bubbleStore.bubble(id: session.bubbleID) else { return }
         let first = session.entries[meID] == nil
         if let current = session.entries[meID], current.score >= entry.score { return }
+        let wasFinished = session.isFinished
+        if !session.memberIDs.contains(meID) {
+            // Joining a session you weren't counted in (a finished one from before you arrived).
+            session.memberIDs.append(meID)
+        }
         session.entries[meID] = entry
         sessions[sessionID] = session
         refreshCards(sessionID: sessionID)
         if first {
             BubbleSocialSignals.post(.groupChatPlay, bubbleID: bubble.id, with: session.memberIDs.filter { $0 != meID })
         }
-        if session.isFinished {
+        if session.isFinished, !wasFinished {
             finishSession(sessionID)
         }
     }
@@ -496,7 +500,7 @@ final class ChallengeCenter {
             finishSession(sessionID)
         } else if session.entries[meID] == nil, session.entries.count == session.memberIDs.count - 1 {
             // Everyone but you: the nudge.
-            let note = AppNotification(kind: .bubbleScore, actors: [score.user], extraActorCount: max(0, session.memberIDs.count - 3), message: ChallengeCopy.everyonePlayedNote(session.title, bubble: bubble.title), bubbleID: bubble.id)
+            let note = AppNotification(kind: .bubbleScore, actors: [score.user], extraActorCount: max(0, session.memberIDs.count - 2), message: ChallengeCopy.everyonePlayedNote(session.title, bubble: bubble.title), bubbleID: bubble.id)
             note.bubbleAction = BubbleFeatureRoute(.challenge, "chat", sessionID)
             appStore.notifications.insert(note, at: 0)
             if appStore.openConversationID != session.conversationID {
@@ -594,9 +598,14 @@ final class ChallengeCenter {
         }
     }
 
-    /// Counts a finished challenge once, and moves the count if a better run flips it.
-    private func settleTally(challengeID: String) {
+    /// Counts a finished challenge once, and moves the count if a better run flips it. Posts
+    /// `challenge_won` whenever the result turns into your win: your run passing theirs, or their
+    /// run landing below yours. `announce` is false only for DEBUG staging.
+    private func settleTally(challengeID: String, announce: Bool = true) {
         guard var challenge = challenges[challengeID], let outcome = challenge.outcome, outcome != challenge.countedOutcome else { return }
+        if announce, outcome == .won {
+            BubbleSocialSignals.post(.challengeWon, bubbleID: challenge.bubbleID, with: [challenge.opponentID])
+        }
         let id = challenge.opponentID
         switch challenge.countedOutcome {
         case .won: liveWins[id, default: 0] -= 1
@@ -719,7 +728,7 @@ final class ChallengeCenter {
             rematchOf: nil, round: 0, mine: mine, theirs: theirs, isOpponentPlaying: false,
             countedOutcome: nil, resultCardID: nil, createdAt: Date()
         )
-        settleTally(challengeID: id)
+        settleTally(challengeID: id, announce: false)
         var message = Message(senderID: appStore.me.id, status: .seen)
         message.bubbleCard = card
         chat.messages.append(message)

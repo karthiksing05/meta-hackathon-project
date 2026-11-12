@@ -169,6 +169,21 @@ enum ChallengeCopy {
     static let waiting = "Waiting…"
     static let yourTurnShort = "Your turn"
     static let challengeAFriendNote = "Same course, head to head"
+    static let you = "You"
+    static let versus = "vs"
+    static let winner = "Winner"
+    static let bubbleGone = "This Bubble popped"
+    static let bubbleGoneNote = "It isn't available anymore."
+    static let challengeSentShort = "Challenge sent"
+    static let challengeMeHint = "Send this run to a friend, a chat or a Group to beat on the same course"
+    static func challengeName(_ name: String) -> String { "Challenge \(name)" }
+    static func challengeToGame(_ name: String) -> String { "Challenge \(name) to a game" }
+    static func challengeIn(_ name: String, _ title: String) -> String { "Challenge \(name) in \(title)" }
+    static func sentTo(_ title: String) -> String { "Sent to \(title)" }
+    static func sendChallengeTo(_ title: String) -> String { "Send challenge to \(title)" }
+    static func previewLabel(_ text: String) -> String { "Preview: \(text)" }
+    static func scoreLabel(_ name: String, _ score: Int) -> String { "\(name): \(score.withCommas)" }
+    static func waitingNames(_ names: [String]) -> String { "\(waiting) \(names.joined(separator: ", "))" }
 
     static let rivalIntro = [
         "Hey! Maya from New in SF 👋 Loved your picnic idea",

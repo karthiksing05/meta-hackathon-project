@@ -43,7 +43,7 @@ struct ChallengeRivalryCard: View {
                         Label(ChallengeCopy.challenge, systemImage: "flag.checkered")
                     }
                     .buttonStyle(.fb(.primary, expand: false, height: 34))
-                    .accessibilityLabel("Challenge \(user.firstName) to a game")
+                    .accessibilityLabel(ChallengeCopy.challengeToGame(user.firstName))
                 }
             }
             if !recent.isEmpty {

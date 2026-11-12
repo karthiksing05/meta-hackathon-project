@@ -777,7 +777,7 @@ same seed (`BubbleStore.simulateRun`), so their scores carry replays and verify 
 **Where it shows.** Result sheet: `ChallengeResultAction` ("Challenge Me", or "Challenge back" and
 "Open chat" after a challenge, "Rematch" and "Back to the chat" after a session) opens
 `ChallengePickerSheet` locally; `ChallengeResultHeadToHead` shows both players, scores and the winner
-(or your rank in a session). Player: `ChallengePlayerBanner` reads "Beat Maya's 41" and turns into
+(or your rank in a session), plus "Add Maya as a friend" when she isn't one yet. Player: `ChallengePlayerBanner` reads "Beat Maya's 41" and turns into
 "Ahead of Maya!" once your live score passes it (the target updates if her score lands mid-run).
 Bubble page: `ChallengeDetailRow` ("Challenge a friend", plus your latest challenge on it). Friend
 rows: `ChallengeFriendButton` opens `ChallengeGamePickerSheet` (games you've played, best first, then
@@ -809,7 +809,8 @@ on a new seed (`stableHash("rematch|<id>|<seed>")`), with `rematch_of`; they pla
 of `BubbleSocialCast.groupMembers` plus you. Each other member's bot plays on a stable delay of
 5–25 s, and the card updates live: "N of M played", a progress bar, the top three, "Your turn, Alex"
 until you play, then who's left, then the winner line and Rematch. When everyone but you has played,
-a notification and toast nudge you. When the session ends, a member cheers the winner in the chat. A
+a notification and toast nudge you. When the session ends, a member cheers the winner in the chat
+(once). Playing a session you weren't counted in (the seeded past one) adds you to its members. A
 Group target makes a "Challenge New in SF" post that fills in the same way.
 
 **Card extras** (kinds `challenge`, `session`; `share` uses `BubbleChatCardFallback`):
@@ -826,8 +827,9 @@ Group target makes a "Challenge New in SF" post that fills in the same way.
 
 **Signals.** `challenge_sent` (1:1 or group chat; with the opponents), `group_challenge` (a Group
 target), `challenge_rematch` (any rematch), `challenge_accepted` (a friend's score lands),
-`challenge_won` (your run takes the lead in a 1:1), `group_chat_play` (your first play in a
-session), `add_friend_from_game` (head-to-head screen).
+`challenge_won` (a 1:1 turns into your win: your run passes theirs, or theirs lands below yours),
+`group_chat_play` (your first play in a session), `add_friend_from_game` (result sheet after a
+challenge, and the head-to-head screen).
 
 **Verification.** Every play from a card runs `manifest.withSeed(card.seed).withLength(card.length)`,
 so your recorded `BubbleScore.replay.seed` equals the card's seed (DEBUG logs a mismatch), and
