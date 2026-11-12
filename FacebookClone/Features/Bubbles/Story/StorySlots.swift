@@ -9,6 +9,7 @@ import SwiftUI
 struct StoryResultEndings: View {
     let slot: BubbleResultSlotContext
 
+    @Environment(BubbleStore.self) private var bubbleStore
     @State private var isSharing = false
 
     var body: some View {
@@ -24,6 +25,7 @@ struct StoryResultEndings: View {
                 // Results from the Bubbles tab don't pass through the player's didFinish.
                 guard slot.result.isRecorded else { return }
                 StoryProgressStore.shared.record(slot.result.result, in: slot.bubble, request: slot.request)
+                StoryProgressStore.shared.loadFriends(for: slot.bubble, bubbleStore: bubbleStore)
             }
             .sheet(isPresented: $isSharing) {
                 StoryPathShareSheet(bubbleID: slot.bubble.id)

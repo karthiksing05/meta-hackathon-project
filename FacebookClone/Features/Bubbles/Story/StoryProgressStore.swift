@@ -257,6 +257,13 @@ final class StoryProgressStore {
         found[bubble.id] = list
         latest[bubble.id] = run
         persist()
+        // Friends' paths loaded before this run (the Bubble page, the endings screen) were picked
+        // without knowing your path. If none of them took the other path from you, drop them so
+        // the next load picks again and the "Maya took the ferry" moment shows.
+        if let cached = friends[bubble.id], !loadingFriends.contains(bubble.id),
+           !cached.contains(where: { $0.tag.first != tag.first }) {
+            friends[bubble.id] = nil
+        }
     }
 
     #if DEBUG

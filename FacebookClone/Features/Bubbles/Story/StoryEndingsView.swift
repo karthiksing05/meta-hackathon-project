@@ -27,6 +27,7 @@ struct StoryEndingsPanel: View {
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(AppStore.self) private var appStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var progress: StoryProgressStore { StoryProgressStore.shared }
 
@@ -141,7 +142,7 @@ struct StoryEndingsPanel: View {
                     .accessibilityAddTraits(.isHeader)
                 ForEach(paths) { path in
                     StoryFriendRow(path: path, story: story, isKnown: found.contains(path.tag.ending), myFirst: mine?.first, bubbleID: bubble.id)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
                 }
                 if isLoading {
                     HStack(spacing: 10) {
@@ -155,7 +156,7 @@ struct StoryEndingsPanel: View {
                     .accessibilityElement(children: .combine)
                 }
             }
-            .animation(.easeOut(duration: 0.25), value: paths.count)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.25), value: paths.count)
         }
     }
 
@@ -203,34 +204,39 @@ struct StoryFriendRow: View {
         let ending = story.ending(id: path.tag.ending)
         let otherPath = myFirst != nil && myFirst != path.tag.first
         HStack(spacing: 10) {
-            AvatarView(user: path.user, size: FBAvatarSize.comment)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(StoryCopy.took(path.user.firstName, first?.pastTense ?? StoryCopy.foundAnEnding))
-                    .font(.fbName)
-                    .foregroundStyle(FBColor.primaryText)
-                    .lineLimit(2)
-                if let ending {
-                    Text(StoryCopy.friendFound(ending, known: isKnown))
-                        .font(.fbMeta)
-                        .foregroundStyle(ending.isSecret ? FBColor.accent : FBColor.secondaryText)
+            HStack(spacing: 10) {
+                AvatarView(user: path.user, size: FBAvatarSize.comment)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(StoryCopy.took(path.user.firstName, first?.pastTense ?? StoryCopy.foundAnEnding))
+                        .font(.fbName)
+                        .foregroundStyle(FBColor.primaryText)
                         .lineLimit(2)
+                    if let ending {
+                        Text(StoryCopy.friendFound(ending, known: isKnown))
+                            .font(.fbMeta)
+                            .foregroundStyle(ending.isSecret ? FBColor.accent : FBColor.secondaryText)
+                            .lineLimit(2)
+                    }
+                }
+                Spacer(minLength: 6)
+                if otherPath {
+                    Text(StoryCopy.otherPathTag)
+                        .font(.fbMicroEmphasized)
+                        .foregroundStyle(FBColor.accent)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(FBColor.surface, in: Capsule())
+                        .fixedSize()
+                }
+                if let ending {
+                    Text(isKnown || ending.isSecret ? ending.emoji : "❔")
+                        .font(.system(size: 22)) // display emoji
+                        .accessibilityHidden(true)
                 }
             }
-            Spacer(minLength: 6)
-            if otherPath {
-                Text(StoryCopy.otherPathTag)
-                    .font(.fbMicroEmphasized)
-                    .foregroundStyle(FBColor.accent)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(FBColor.surface, in: Capsule())
-                    .fixedSize()
-            }
-            if let ending {
-                Text(isKnown || ending.isSecret ? ending.emoji : "❔")
-                    .font(.system(size: 22)) // display emoji
-                    .accessibilityHidden(true)
-            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityText(first: first, ending: ending, otherPath: otherPath))
+            // Add friend stays its own control, so VoiceOver can reach it without the row's text.
             addFriend
         }
         .padding(.vertical, 6)
@@ -241,8 +247,7 @@ struct StoryFriendRow: View {
                     .fill(FBColor.tintedBlueBackground)
             }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityText(first: first, ending: ending, otherPath: otherPath))
+        .accessibilityElement(children: .contain)
     }
 
     @ViewBuilder
