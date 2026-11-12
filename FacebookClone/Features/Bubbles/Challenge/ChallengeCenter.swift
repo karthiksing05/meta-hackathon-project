@@ -177,6 +177,12 @@ final class ChallengeCenter {
         let rematchOf = card.extras[ChallengeCardKeys.rematchOf]?.string
         var card = card
         card.seed = seed
+        // Shared play is fair play (7.9): with no run of yours to beat yet, lock everyone to the
+        // Bubble's length. A card that carries your run keeps that run's length (nil when it was
+        // unlocked), so the score to beat came from the same game.
+        if card.length == nil && mine == nil {
+            card.length = BubbleLength.locked(for: bubble)
+        }
 
         if let chat, !chat.isGroup, let opponent = chat.participants.first {
             // 1:1: a head-to-head challenge.

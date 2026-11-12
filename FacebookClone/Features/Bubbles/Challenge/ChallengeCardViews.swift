@@ -339,6 +339,9 @@ struct ChallengeSessionCard: View {
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
                         .fixedSize(horizontal: false, vertical: true)
+                    if let length = card.length {
+                        LengthChip(length: length, text: LengthCopy.sharedLine(length, with: nil), style: .tinted, locked: true)
+                    }
                     progress(played: played, members: members)
                     if !scores.isEmpty {
                         board(scores, winnerID: card.challengeWinnerID)

@@ -832,6 +832,10 @@ target), `challenge_rematch` (any rematch), `challenge_accepted` (a friend's sco
 `group_chat_play` (your first play in a session), `add_friend_from_game` (result sheet after a
 challenge, and the head-to-head screen).
 
+**Locked length.** A challenge or session card that arrives without a length and without a run of
+yours gets `card.length = BubbleLength.locked(for: bubble)` (7.9), and session cards show it as a
+locked chip ("Same for everyone: 10 rounds"). A card that carries your run keeps that run's length.
+
 **Verification.** Every play from a card runs `manifest.withSeed(card.seed).withLength(card.length)`,
 so your recorded `BubbleScore.replay.seed` equals the card's seed (DEBUG logs a mismatch), and
 `BubbleStore.verify` checks it (`BubbleRuntimePerf` "verify" lines). Friends' entries keep their bot
