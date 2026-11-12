@@ -93,6 +93,10 @@ function candidatesFor(frame, sources, rng) {
 function apply(g, action) {
   switch (action.kind) {
     case 'tap':
+      // Engine v0.1 hit-tests against the layout from the last frame() call, not the current
+      // state. A real screen draws every frame, so refresh it before tapping (main game and probe
+      // alike), or lookahead taps hit stale positions.
+      g.frame();
       g.pointer('down', action.x, action.y);
       g.pointer('up', action.x, action.y);
       break;
@@ -176,6 +180,8 @@ function playOne(engine, json, game, sources, bot, seed, maxSeconds) {
     outcome,
     score: Math.round(last.score ?? 0),
     seconds: (last.time_ms ?? steps * DT) / 1000,
+    // Enough to replay the run in the shell: same seed, same inputs at the same 60 Hz steps.
+    replay: { seed: gameSeed, dt: DT, actions: history },
   };
 }
 
