@@ -883,7 +883,8 @@ Group's Daily or first game).
 `BubbleSocialHub.send` a `BubbleChatCard(kind: .session, seed: manifest.seed, length:
 manifest.length, sessionID: nil, score: your best)` to the `.group` target, so the post lands in the
 Group feed and the challenge feature runs the shared session. Extras keys (groups-search): `origin`
-= `"groups-search"`, `group_id` = the Group id. Posts `group_challenge` with the Group's members.
+= `"groups-search"`, `group_id` = the Group id. `group_challenge` (with the session's members) is
+posted by the challenge feature when it starts the session, not again here.
 groups-search owns only the button and the post copy; challenge draws the card.
 
 **Game night**: the entry opens `GroupsSearchScreens.gameNightRoute(for: groupID)` =

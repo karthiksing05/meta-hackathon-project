@@ -32,8 +32,8 @@ enum GroupChallengeComposer {
         if let post {
             GroupGamesStore.shared.noteChallengePost(post.id, in: group.id)
         }
-        let others = GroupGamesStore.shared.memberIDs(of: group, in: bubbleStore)
-        BubbleSocialSignals.post(.groupChallenge, bubbleID: bubble.id, with: others)
+        // The challenge feature posts group_challenge (with the session's members) when it starts
+        // the session for this card, so it isn't posted again here.
         appStore.showToast(GroupsSearchCopy.challengePosted(group.name), symbol: "trophy.fill")
         return post
     }
