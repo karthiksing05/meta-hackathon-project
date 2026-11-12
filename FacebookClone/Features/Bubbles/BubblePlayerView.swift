@@ -27,7 +27,6 @@ struct BubblePlayerView: View {
     @State private var lastResult: BubbleResultContext?
     @State private var lastResultAt = Date.distantPast
     @State private var restartToken = 0
-    @State private var isMuted = false
     /// The game's session has drawn (`ready` or later from the runtime).
     @State private var isLive = false
     /// Set when the game didn't start; shows `EngineErrorCard`.
@@ -125,7 +124,7 @@ struct BubblePlayerView: View {
             playerName: appStore.me.firstName,
             bestScore: bubbleStore.bestScore(of: appStore.me, in: bubble)?.score,
             isActive: scenePhase == .active,
-            isMuted: isMuted,
+            isMuted: GameSound.isMuted,
             reducedMotion: reduceMotion,
             restartToken: restartToken,
             insetTop: safeArea.top + Self.topBarHeight,
@@ -184,9 +183,9 @@ struct BubblePlayerView: View {
                     .transition(.scale.combined(with: .opacity))
             }
             BubblePlayerTopBarSlots(bubble: bubble, request: activeRequest(for: bubble))
-            circleButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off") {
+            circleButton(GameSound.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: GameSound.isMuted ? "Turn sound on" : "Turn sound off") {
                 Haptics.light()
-                isMuted.toggle()
+                GameSound.toggleMute()
             }
         }
         .padding(.horizontal, 12)

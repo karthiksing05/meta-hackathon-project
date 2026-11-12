@@ -101,7 +101,7 @@ struct BubblesTabView: View {
             model.setVisible(visible)
         }
         .onChange(of: GameSound.isMuted) { _, _ in
-            syncMute()
+            model.applyMute()
         }
         .onChange(of: model.currentID) { _, id in
             model.pageDidChange(to: id)
@@ -235,7 +235,6 @@ struct BubblesTabView: View {
     private func appear() {
         model.configure(store: bubbleStore)
         model.setVisible(isVisible)
-        syncMute()
         #if DEBUG
         applyDebugLaunch()
         #endif
@@ -256,13 +255,6 @@ struct BubblesTabView: View {
     private func toggleMute() {
         Haptics.light()
         GameSound.toggleMute()
-        syncMute()
-    }
-
-    private func syncMute() {
-        if model.isMuted != GameSound.isMuted {
-            model.toggleMute()
-        }
     }
 
     /// Jumps to the first page and fades it in. An animated programmatic scroll doesn't draw the

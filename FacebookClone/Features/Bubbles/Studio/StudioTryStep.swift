@@ -133,7 +133,6 @@ private struct StudioPlayerCard: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var revision = 0
     @State private var lastRun: BubbleRunResult?
-    @State private var isMuted = true
     @State private var runtimeError: String?
 
     var body: some View {
@@ -144,7 +143,7 @@ private struct StudioPlayerCard: View {
             playerName: model.me?.firstName ?? "",
             bestScore: nil,
             isActive: scenePhase == .active && !model.isPopping,
-            isMuted: isMuted,
+            isMuted: GameSound.isMuted,
             reducedMotion: reduceMotion,
             onMessage: handle
         )
@@ -161,9 +160,9 @@ private struct StudioPlayerCard: View {
         }
         .overlay(alignment: .topTrailing) {
             HStack(spacing: 0) {
-                StudioCircleButton(symbol: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", accessibilityLabel: isMuted ? "Turn sound on" : "Turn sound off") {
+                StudioCircleButton(symbol: GameSound.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", accessibilityLabel: GameSound.isMuted ? "Turn sound on" : "Turn sound off") {
                     Haptics.light()
-                    isMuted.toggle()
+                    GameSound.toggleMute()
                 }
                 StudioCircleButton(symbol: "arrow.counterclockwise", accessibilityLabel: "Restart") {
                     restart()

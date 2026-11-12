@@ -36,7 +36,8 @@ final class BubbleFeedModel {
     private(set) var liveScore = 0
     /// Shows the result sheet.
     var result: BubbleResultContext?
-    var isMuted = true
+    /// The app-wide game mute (`GameSound`). Sound is on by default.
+    var isMuted: Bool { GameSound.isMuted }
     /// Poster frames by session key.
     private(set) var posters: [String: UIImage] = [:]
     /// The live page whose game didn't start (an error, a timeout or no engine), and why. The
@@ -137,8 +138,8 @@ final class BubbleFeedModel {
         }
     }
 
-    func toggleMute() {
-        isMuted.toggle()
+    /// Tells the live game about the app-wide mute after it changes.
+    func applyMute() {
         host?.command(isMuted ? "mute" : "unmute")
     }
 
