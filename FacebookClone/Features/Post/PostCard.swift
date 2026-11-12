@@ -166,6 +166,9 @@ struct PostCard: View {
         if let poll = post.poll {
             PostPollView(post: post, poll: poll)
         }
+        if let bubbleID = post.bubbleID {
+            BubblePostAttachment(post: post, bubbleID: bubbleID)
+        }
         if let shared = post.sharedPost {
             PostSharedPostView(post: shared)
                 .padding(.horizontal, FBMetrics.gutter)
@@ -197,7 +200,7 @@ struct PostCard: View {
     // MARK: State
 
     private var hasAttachments: Bool {
-        !post.media.isEmpty || post.link != nil || post.sharedPost != nil || post.poll != nil || post.lifeEvent != nil
+        !post.media.isEmpty || post.link != nil || post.sharedPost != nil || post.poll != nil || post.lifeEvent != nil || post.bubbleID != nil
     }
 
     /// Short text-only posts use a larger font, like the real feed.

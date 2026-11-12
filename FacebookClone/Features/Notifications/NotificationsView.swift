@@ -193,6 +193,14 @@ struct NotificationsView: View {
             if let actor = item.actors.first { router.push(.profile(actor)) }
             return
         }
+        if let id = item.bubbleID, item.kind.isBubble {
+            if item.kind == .bubbleDaily || item.kind == .bubbleScore {
+                router.play(id)
+            } else {
+                router.push(.bubble(id))
+            }
+            return
+        }
         if item.kind == .birthday {
             router.push(.birthdays)
             return

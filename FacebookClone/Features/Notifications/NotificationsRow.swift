@@ -35,6 +35,8 @@ struct NotificationsKindStyle {
             return NotificationsKindStyle(symbol: "flag.fill", color: FBColor.checkInRed)
         case .suggestion:
             return NotificationsKindStyle(symbol: "person.badge.plus", color: FBColor.brandBlue)
+        case .bubbleScore, .bubbleDaily, .bubbleRemix, .bubblePlayed:
+            return NotificationsKindStyle(symbol: "bubbles.and.sparkles.fill", color: BubbleGlow.pink)
         }
     }
 }
@@ -56,6 +58,8 @@ struct NotificationsAvatar: View {
     private var main: some View {
         if let actor = notification.actors.first {
             AvatarView(user: actor, size: FBAvatarSize.row)
+        } else if notification.kind.isBubble {
+            BubbleNotificationGlyph(size: FBAvatarSize.row)
         } else {
             let style = NotificationsKindStyle.style(for: notification.kind)
             SymbolBadge(symbol: style.symbol, color: style.color, size: FBAvatarSize.row)
@@ -68,6 +72,9 @@ struct NotificationsAvatar: View {
             EmptyView()
         } else if case .reaction(let type) = notification.kind {
             ReactionBadge(type: type, size: 24)
+        } else if notification.kind.isBubble {
+            BubbleNotificationGlyph(size: 24)
+                .overlay { Circle().stroke(FBColor.surface, lineWidth: 2) }
         } else {
             let style = NotificationsKindStyle.style(for: notification.kind)
             SymbolBadge(symbol: style.symbol, color: style.color, size: 24)
@@ -122,6 +129,9 @@ struct NotificationsRow: View {
 
     private var trailing: some View {
         VStack(spacing: 10) {
+            if notification.kind.isBubble, let id = notification.bubbleID {
+                BubbleNotificationThumb(bubbleID: id)
+            }
             Button(action: onMore) {
                 Image(systemName: "ellipsis")
                     .font(.system(size: FBIconSize.regular, weight: .bold))

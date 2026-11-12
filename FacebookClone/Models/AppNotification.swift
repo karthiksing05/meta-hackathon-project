@@ -20,6 +20,14 @@ enum NotificationKind: Hashable {
     case pageInvite
     case video
     case suggestion
+    /// Bubbles: someone beat my score, or I passed someone.
+    case bubbleScore
+    /// Bubbles: today's Daily Bubble in a Group is ready.
+    case bubbleDaily
+    /// Bubbles: someone remixed my Bubble.
+    case bubbleRemix
+    /// Bubbles: someone played my Bubble.
+    case bubblePlayed
 }
 
 enum FriendRequestAction: String, Hashable {
@@ -44,6 +52,8 @@ final class AppNotification: Identifiable, Hashable {
     var groupID: String?
     var eventID: String?
     var listingID: String?
+    /// Bubbles: the Bubble this notification is about.
+    var bubbleID: String?
     var thumbnailURL: URL?
     /// Friend requests answered from the notification row.
     var requestAction: FriendRequestAction?
@@ -61,6 +71,7 @@ final class AppNotification: Identifiable, Hashable {
         groupID: String? = nil,
         eventID: String? = nil,
         listingID: String? = nil,
+        bubbleID: String? = nil,
         thumbnailURL: URL? = nil
     ) {
         self.id = id
@@ -75,6 +86,7 @@ final class AppNotification: Identifiable, Hashable {
         self.groupID = groupID
         self.eventID = eventID
         self.listingID = listingID
+        self.bubbleID = bubbleID
         self.thumbnailURL = thumbnailURL
         self.requestAction = nil
     }
@@ -94,4 +106,13 @@ final class AppNotification: Identifiable, Hashable {
 
     static func == (lhs: AppNotification, rhs: AppNotification) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
+}
+
+extension NotificationKind {
+    var isBubble: Bool {
+        switch self {
+        case .bubbleScore, .bubbleDaily, .bubbleRemix, .bubblePlayed: return true
+        default: return false
+        }
+    }
 }
