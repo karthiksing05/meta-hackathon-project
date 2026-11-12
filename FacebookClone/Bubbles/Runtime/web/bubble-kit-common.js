@@ -875,7 +875,8 @@
           const last = !sdk.lengthRound({ outcome: correct ? "success" : "fail", delay: settle + (correct ? 36 : 24) });
           if (last) { st.used++; st.left = Math.max(0, st.budget - st.used); return; }
         }
-        if (p.counts === "misses" && correct) return;
+        // In lives mode only wrong tries cost a life, whatever `counts` says.
+        if ((p.counts === "misses" || L.lives) && correct) return;
         st.used++;
         st.left = Math.max(0, st.budget - st.used);
         if (st.left <= 0 && !correct) {

@@ -49,7 +49,7 @@ var KitSuites = (typeof KitSuites !== "undefined" ? KitSuites : []).concat([{
       if (f && f.length) list.push({ name: x.name, manifest: x.manifest, formula: f });
     });
 
-    var checked = 0, strictHits = {};
+    var checked = 0, strictHits = {}, failOutcomes = 0;
     list.forEach(function (item) {
       var f = item.formula, strict = STRICT.indexOf(f.id) >= 0;
       var plain = item.manifest;
@@ -88,6 +88,11 @@ var KitSuites = (typeof KitSuites !== "undefined" ? KitSuites : []).concat([{
               reached = true;
               if (r.outcome === "timeout") env.fail(at + ": rounds used up but the run didn't end");
               if (!r.events["length.end"]) env.fail(at + ": rounds used up without length.end");
+              // sdk.lengthRound(info) carries the kit's outcome: a word never found is a fail.
+              if (f.id === "guess" && r.events["guess.feedback"] && !r.events["guess.solved"] && r.outcome !== "fail") {
+                env.fail(at + ": out of tries without the word, but outcome " + r.outcome);
+              }
+              if (f.id === "guess" && r.events["guess.feedback"] && !r.events["guess.solved"]) failOutcomes++;
             }
           } else if (mode === "lives") {
             if (lives > N.lives) env.fail(at + ": " + lives + " lives lost (has " + N.lives + ")");
@@ -114,6 +119,7 @@ var KitSuites = (typeof KitSuites !== "undefined" ? KitSuites : []).concat([{
       if (!f.length) { env.fail(f.id + ": no length declaration"); return; }
       f.length.modes.forEach(function (mode) { if (!strictHits[f.id + ":" + mode]) env.fail(f.id + ": mode " + mode + " never tested"); });
     });
+    if (!failOutcomes) env.fail("guess: no rounds run used up its tries without the word (the outcome check never ran)");
     env.print("  " + checked + " length runs across " + list.length + " manifests, each replayed twice");
     if (env.report) env.report.length = { runs: checked, manifests: list.length };
   }

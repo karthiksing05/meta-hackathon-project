@@ -1446,12 +1446,13 @@
     log(message) { logOnce(this._owner + ":" + message, this._owner + ": " + message); }
     // Length contract (docs/BUBBLES.md 7.9). Every kit honors it:
     //   sdk.length         {mode, rounds, seconds, lives}, resolved from the manifest and formula
-    //   sdk.lengthRound()  call when a round/item/scene completes; false means the run is over
+    //   sdk.lengthRound(info?)  call when a round/item/scene completes; false means the run is
+    //                      over (info {delay, outcome} shapes how the last round ends it)
     //   sdk.lengthMiss()   call on a miss; true means a life absorbed it, false means apply the
     //                      kit's normal fail
     //   sdk.lengthLeft()   {rounds_left, seconds_left, lives_left} (null when not used) for HUDs
     get length() { return this._run.length; }
-    lengthRound() { return this._run.lengthRound(); }
+    lengthRound(info) { return this._run.lengthRound(isObj(info) ? info : null); }
     lengthMiss() { return this._run.lengthMiss(); }
     lengthLeft() { return this._run.lengthLeft(); }
   }
