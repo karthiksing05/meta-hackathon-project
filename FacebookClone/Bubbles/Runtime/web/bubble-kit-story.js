@@ -387,6 +387,8 @@
       sdk.state.choices = [];
       sdk.state.choices_locked = true;
       sdk.hud.label = "points";
+      // Rounds here are a depth cap on scenes, not something a reader counts: no engine chip.
+      sdk.hud.length = false;
 
       function enter(id) {
         var scene = graph.byId[id];

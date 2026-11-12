@@ -166,6 +166,8 @@
       pointsKnown: [], serial: 0
     };
     sdk.hud.label = "points";
+    // The desk shows "Question 3 of 8" or the hearts itself, so the engine's length chip is off.
+    sdk.hud.length = false;
     sdk.state.choices = [START_BOX];
     sdk.state.choices_locked = true;
 

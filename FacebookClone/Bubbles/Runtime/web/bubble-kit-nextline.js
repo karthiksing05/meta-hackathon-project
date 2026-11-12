@@ -460,6 +460,8 @@
       var len = sdk.length || { mode: "rounds" };
       var total = episodes.length;
       if (len.mode === "rounds" && len.rounds) total = Math.min(total, len.rounds);
+      // The stage shows "ROUND 2 OF 5" itself, so the engine's rounds chip would repeat it.
+      if (len.mode === "rounds") sdk.hud.length = false;
       var a = sdk.state.nextline = {
         episodes: episodes,
         total: Math.max(1, total),

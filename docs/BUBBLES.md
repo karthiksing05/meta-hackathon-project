@@ -1367,7 +1367,8 @@ length only when it has a number:
 - The engine draws a small HUD chip top left ("Round 3/10", a timer ring with seconds, lives as
   bubbles) through `g` with palette roles, only for an enforced length and never on the intro. A
   concept that shows the length itself sets `sdk.hud.length = false` (rule.timer, rule.lives and
-  flow.rounds do).
+  flow.rounds do; so do the story kit, the learn kit and the nextline kit in rounds mode, which
+  draw their own progress).
 
 **Precedence.** A manifest `length` (a locked one; a formula's unlocked default never does)
 overrides the common concepts' numbers: rule.timer runs for
