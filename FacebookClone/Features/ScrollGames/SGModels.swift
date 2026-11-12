@@ -368,7 +368,7 @@ struct SGChallenge: Decodable, Hashable {
 }
 
 enum SGFeedType: String {
-    case game, score, challenge
+    case game, score, challenge, daily
 }
 
 struct SGFeedItem: Decodable, Identifiable, Hashable {
@@ -453,13 +453,98 @@ struct SGBeat: Decodable, Hashable {
     }
 }
 
+/// The `daily` object of a play response when the play was submitted as the daily attempt.
+struct SGDailyResult: Decodable, Hashable {
+    var date: String
+    var counted: Bool
+    var streak: Int
+    var rankAmongFriends: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case date, counted, streak
+        case rankAmongFriends = "rank_among_friends"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        date = c.flex(String.self, .date) ?? ""
+        counted = c.flex(Bool.self, .counted) ?? false
+        streak = c.flex(Int.self, .streak) ?? 0
+        rankAmongFriends = c.flex(Int.self, .rankAmongFriends)
+    }
+}
+
+/// `GET /api/daily`: today's game, its shared seed and how the viewer is doing.
+struct SGDaily: Decodable, Hashable {
+    var date: String
+    var game: SGGame
+    var seed: Int
+    var resetsAt: String?
+    var myPlay: SGPlay?
+    var myStreak: Int
+    var friendsPlayed: Int
+    var myRankAmongFriends: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case date, game, seed
+        case resetsAt = "resets_at"
+        case myPlay = "my_play"
+        case myStreak = "my_streak"
+        case friendsPlayed = "friends_played"
+        case myRankAmongFriends = "my_rank_among_friends"
+    }
+
+    init(
+        date: String, game: SGGame, seed: Int, resetsAt: String?, myPlay: SGPlay? = nil,
+        myStreak: Int, friendsPlayed: Int, myRankAmongFriends: Int? = nil
+    ) {
+        self.date = date
+        self.game = game
+        self.seed = seed
+        self.resetsAt = resetsAt
+        self.myPlay = myPlay
+        self.myStreak = myStreak
+        self.friendsPlayed = friendsPlayed
+        self.myRankAmongFriends = myRankAmongFriends
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        guard let game = c.flex(SGGame.self, .game) else {
+            throw DecodingError.dataCorruptedError(forKey: .game, in: c, debugDescription: "No daily game")
+        }
+        self.game = game
+        date = c.flex(String.self, .date) ?? ""
+        seed = c.flex(Int.self, .seed) ?? 0
+        resetsAt = c.flex(String.self, .resetsAt)
+        myPlay = c.flex(SGPlay.self, .myPlay)
+        myStreak = c.flex(Int.self, .myStreak) ?? 0
+        friendsPlayed = c.flex(Int.self, .friendsPlayed) ?? 0
+        myRankAmongFriends = c.flex(Int.self, .myRankAmongFriends)
+    }
+
+    /// "Nov 12" for the card chip.
+    var shortDate: String {
+        let parser = DateFormatter()
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        parser.timeZone = TimeZone(identifier: "UTC")
+        parser.dateFormat = "yyyy-MM-dd"
+        guard let day = parser.date(from: date) else { return date }
+        parser.dateFormat = "MMM d"
+        return parser.string(from: day)
+    }
+
+    var resetDate: Date? { resetsAt.flatMap(SGDates.parse) }
+}
+
 struct SGPlayResponse: Decodable, Hashable {
     var play: SGPlay?
     var verified: Bool
     var rank: Int?
     var beat: SGBeat?
+    var daily: SGDailyResult?
 
-    enum CodingKeys: String, CodingKey { case play, verified, rank, beat }
+    enum CodingKeys: String, CodingKey { case play, verified, rank, beat, daily }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -467,6 +552,7 @@ struct SGPlayResponse: Decodable, Hashable {
         verified = c.flex(Bool.self, .verified) ?? play?.verified ?? false
         rank = c.flex(Int.self, .rank)
         beat = c.flex(SGBeat.self, .beat)
+        daily = c.flex(SGDailyResult.self, .daily)
     }
 }
 

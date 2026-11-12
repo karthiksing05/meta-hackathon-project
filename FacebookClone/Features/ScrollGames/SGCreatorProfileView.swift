@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A creator's games, with a local-only Follow button.
+/// A creator's games, with a Follow button saved on the server.
 struct SGCreatorProfileView: View {
     @Environment(SGStore.self) private var sg
     @Environment(\.dismiss) private var dismiss
@@ -24,8 +24,16 @@ struct SGCreatorProfileView: View {
                     if user.id != SGConfig.userID {
                         Button {
                             Haptics.light()
+                            let target = !following
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                                 sg.toggleFollow(user.id)
+                            }
+                            Task {
+                                do {
+                                    try await SGFollowService.setFollowing(target, userID: user.id)
+                                } catch {
+                                    if sg.isFollowing(user.id) == target { sg.toggleFollow(user.id) }
+                                }
                             }
                         } label: {
                             Label(following ? "Following" : "Follow", systemImage: following ? "checkmark" : "plus")

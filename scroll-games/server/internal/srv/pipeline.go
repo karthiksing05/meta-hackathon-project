@@ -24,23 +24,30 @@ type App struct {
 	catalog     string
 	briefSchema map[string]any
 
+	now func() time.Time // injectable clock for the daily game
+
 	jobsMu sync.Mutex
 	jobs   map[string]*genJob
 }
 
 func NewApp(cfg Config) *App {
 	_ = os.MkdirAll(cfg.DataDir, 0o755)
-	a := &App{cfg: cfg, jobs: map[string]*genJob{}}
+	a := &App{cfg: cfg, jobs: map[string]*genJob{}, now: time.Now}
 	a.budget = NewBudget(cfg.DataDir+"/usage.json", cfg.CapUSD)
 	a.muse = NewMuse(cfg, a.budget)
 	a.tool = &Tool{Path: cfg.SgtoolPath}
 	a.cache = OpenCache(cfg.DataDir)
 	a.catalog = BuildCatalogDigest(cfg.SpecDir)
 	a.briefSchema = LoadBriefSchema(cfg.SpecDir)
+	mediaDir = cfg.MediaDir
 	st, fresh := OpenStore(cfg.DataDir)
 	a.store = st
 	if fresh {
 		a.seedStore()
+	} else if st.migrateLocalMedia() {
+		st.mu.Lock()
+		st.saveLocked()
+		st.mu.Unlock()
 	}
 	return a
 }

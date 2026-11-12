@@ -3,6 +3,8 @@ package srv
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -13,9 +15,59 @@ type seedQ struct {
 	clue    string
 }
 
+type seedPhoto struct{ owner, caption string }
+
+var lisbonSeed = []seedPhoto{
+	{"u_ana", "Sunset over the Tagus from Miradouro da Graça"},
+	{"u_ben", "Yellow Tram 28 climbing through Alfama"},
+	{"u_chloe", "Pastéis de nata fresh out of the oven in Belém"},
+	{"u_me", "Jerónimos Monastery's carved cloister"},
+	{"u_dev", "Tiled facade on a side street in Bairro Alto"},
+	{"u_ana", "Group selfie at the Santa Justa Lift"},
+	{"u_ben", "Grilled sardines at a tiny tasca in Alfama"},
+	{"u_chloe", "Colourful Pena Palace on the Sintra day trip"},
+}
+var bookSeed = []seedPhoto{
+	{"u_chloe", "Our copy of Piranesi on the café table"},
+	{"u_eli", "Annotated pages from the March pick"},
+	{"u_ben", "Book club snacks: cheese board and olives"},
+	{"u_me", "The corner bookshop where we vote on the next book"},
+}
+
+// SeedPhoto is a synthetic media item (id and caption) for tooling such as cmd/genphotos.
+type SeedPhoto struct{ ID, Caption string }
+
+// SeedPhotos lists every synthetic media item in seed order (Lisbon group, then book club).
+func SeedPhotos() []SeedPhoto {
+	var out []SeedPhoto
+	for i, m := range lisbonSeed {
+		out = append(out, SeedPhoto{fmt.Sprintf("m%d", i+1), m.caption})
+	}
+	for i, m := range bookSeed {
+		out = append(out, SeedPhoto{fmt.Sprintf("m%d", i+len(lisbonSeed)+1), m.caption})
+	}
+	return out
+}
+
 func avatar(id string) string { return "https://picsum.photos/seed/sg-" + id + "/96/96" }
 
-func mediaURL(id string) string { return "https://picsum.photos/seed/sg-" + id + "/600/400" }
+func picsumURL(id string) string { return "https://picsum.photos/seed/sg-" + id + "/600/400" }
+
+// mediaDir is where generated demo photos live; set from Config.MediaDir.
+var mediaDir = "static/media"
+
+func localMediaExists(id string) bool {
+	st, err := os.Stat(filepath.Join(mediaDir, id+".jpg"))
+	return err == nil && !st.IsDir()
+}
+
+// mediaURL is the relative local URL when the generated photo exists, else the picsum fallback.
+func mediaURL(id string) string {
+	if localMediaExists(id) {
+		return "/media/" + id + ".jpg"
+	}
+	return picsumURL(id)
+}
 
 func quizContent(qs []seedQ, mediaIDs []string) json.RawMessage {
 	items := []map[string]any{}
@@ -56,22 +108,6 @@ func (a *App) seedStore() {
 			u.Friends = []string{}
 		}
 	}
-	lisbon := []struct{ owner, caption string }{
-		{"u_ana", "Sunset over the Tagus from Miradouro da Graça"},
-		{"u_ben", "Yellow Tram 28 climbing through Alfama"},
-		{"u_chloe", "Pastéis de nata fresh out of the oven in Belém"},
-		{"u_me", "Jerónimos Monastery's carved cloister"},
-		{"u_dev", "Tiled facade on a side street in Bairro Alto"},
-		{"u_ana", "Group selfie at the Santa Justa Lift"},
-		{"u_ben", "Grilled sardines at a tiny tasca in Alfama"},
-		{"u_chloe", "Colourful Pena Palace on the Sintra day trip"},
-	}
-	book := []struct{ owner, caption string }{
-		{"u_chloe", "Our copy of Piranesi on the café table"},
-		{"u_eli", "Annotated pages from the March pick"},
-		{"u_ben", "Book club snacks: cheese board and olives"},
-		{"u_me", "The corner bookshop where we vote on the next book"},
-	}
 	g1 := Group{ID: "g_lisbon", Name: "Lisbon Trip '26", MemberIDs: []string{"u_me", "u_ana", "u_ben", "u_chloe", "u_dev"}}
 	g2 := Group{ID: "g_book", Name: "Book Club", MemberIDs: []string{"u_me", "u_chloe", "u_eli", "u_ben"}}
 	add := func(g *Group, idx int, owner, caption string) {
@@ -80,11 +116,11 @@ func (a *App) seedStore() {
 			TakenAt: now.AddDate(0, -2, -idx).Truncate(time.Hour)})
 		g.MediaIDs = append(g.MediaIDs, id)
 	}
-	for i, m := range lisbon {
+	for i, m := range lisbonSeed {
 		add(&g1, i+1, m.owner, m.caption)
 	}
-	for i, m := range book {
-		add(&g2, i+9, m.owner, m.caption)
+	for i, m := range bookSeed {
+		add(&g2, i+len(lisbonSeed)+1, m.owner, m.caption)
 	}
 	s.d.Groups = []Group{g1, g2}
 

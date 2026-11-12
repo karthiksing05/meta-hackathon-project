@@ -13,13 +13,14 @@ enum SGConfig {
     }
 
     /// `<base>/player/index.html?game=<id>&seed=<seed>&challenge=<id?>&embed=ios`
-    static func playerURL(gameID: String, seed: Int, challengeID: String?) -> URL {
+    static func playerURL(gameID: String, seed: Int, challengeID: String?, dailyDate: String? = nil) -> URL {
         var components = URLComponents(url: baseURL.appendingPathComponent("player/index.html"), resolvingAgainstBaseURL: false)!
         var items = [
             URLQueryItem(name: "game", value: gameID),
             URLQueryItem(name: "seed", value: String(seed)),
         ]
         if let challengeID { items.append(URLQueryItem(name: "challenge", value: challengeID)) }
+        if let dailyDate { items.append(URLQueryItem(name: "daily", value: dailyDate)) }
         items.append(URLQueryItem(name: "embed", value: "ios"))
         components.queryItems = items
         return components.url!
@@ -76,6 +77,8 @@ actor ScrollGamesAPI {
     func groups() async throws -> [SGGroup] { try await send("GET", "/api/groups") }
 
     func feed() async throws -> [SGFeedItem] { try await send("GET", "/api/feed") }
+
+    func daily() async throws -> SGDaily { try await send("GET", "/api/daily") }
 
     func game(id: String) async throws -> SGGame {
         let envelope: GameEnvelope = try await send("GET", "/api/games/\(id)")
@@ -150,7 +153,7 @@ actor ScrollGamesAPI {
 
     // MARK: Play
 
-    func submitPlay(gameID: String, result: SGPlayResult, challengeID: String?) async throws -> SGPlayResponse {
+    func submitPlay(gameID: String, result: SGPlayResult, challengeID: String?, dailyDate: String? = nil) async throws -> SGPlayResponse {
         var fields: [String: JSONValue] = [
             "seed": .number(Double(result.seed)),
             "inputs": result.inputs,
@@ -158,6 +161,10 @@ actor ScrollGamesAPI {
             "ticks": .number(Double(result.ticks)),
         ]
         if let challengeID { fields["challenge_id"] = .string(challengeID) }
+        if let dailyDate {
+            fields["daily"] = .bool(true)
+            fields["date"] = .string(dailyDate)
+        }
         return try await send("POST", "/api/games/\(gameID)/plays", body: .object(fields))
     }
 

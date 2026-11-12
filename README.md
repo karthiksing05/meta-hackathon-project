@@ -120,7 +120,11 @@ creator prompt
 | Server | `scroll-games/server` | Go (stdlib), port 8787, JSON-file storage in `server/data/`. Calls Muse (Wonder plans, Ember writes content), meters spend |
 | iOS | `FacebookClone/Features/ScrollGames` | SwiftUI feed, create flow, result screens; the game itself runs in a `WKWebView` |
 
+**Daily game (the return loop).** `GET /api/daily` serves one game per UTC day with a seed derived from the date, so everyone plays the same run. The first verified `POST /api/games/:id/plays` with `{daily:true, date}` is the counted attempt and extends the streak; later runs that day are practice. The Games tab pins a "Today's daily" card (streak, friends played, reset countdown) above the challenges, and the player shows a "Daily" chip via `?daily=YYYY-MM-DD`.
+
 The shared contracts (HTTP API, brief/manifest/content shapes, glue rules) are in `docs/scroll-games/CONTRACTS.md`.
+
+Submission and product docs: [pitch and demo script](docs/scroll-games/PITCH.md), [project page](docs/scroll-games/PROJECT_PAGE.md), [judge Q&A](docs/scroll-games/QA_PREP.md), [judging map](docs/scroll-games/JUDGING_MAP.md), [product spec](docs/scroll-games/PRODUCT_SPEC.md).
 
 **Build the runtime** (needs rustup with the `wasm32-unknown-unknown` target and `wasm-pack`):
 

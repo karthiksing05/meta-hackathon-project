@@ -299,8 +299,8 @@ func TestEndpointsPlayAndChallenge(t *testing.T) {
 	}
 	var feed []FeedView
 	get("/api/feed", &feed)
-	if len(feed) < 8 || feed[0].Type != "challenge" || feed[0].Band != "challenge" {
-		t.Fatalf("feed head: %+v", feed[0])
+	if len(feed) < 8 || feed[0].Type != "daily" || feed[1].Type != "challenge" || feed[1].Band != "challenge" {
+		t.Fatalf("feed head: %+v %+v", feed[0], feed[1])
 	}
 	var media []Media
 	get("/api/media?group=g_lisbon", &media)

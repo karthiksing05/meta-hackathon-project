@@ -1,6 +1,7 @@
 package srv
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -53,11 +54,19 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /api/games/{id}/publish", a.publish)
 	mux.HandleFunc("POST /api/games/{id}/plays", a.postPlay)
 	mux.HandleFunc("GET /api/games/{id}/leaderboard", a.leaderboard)
+	mux.HandleFunc("GET /api/daily", a.daily)
 	mux.HandleFunc("GET /api/feed", a.feed)
 	mux.HandleFunc("POST /api/challenges", a.postChallenge)
 	mux.HandleFunc("GET /api/challenges/{id}", a.getChallenge)
 	mux.HandleFunc("GET /c/{id}", a.challengeRedirect)
 	mux.HandleFunc("GET /api/usage", a.usage)
+	mux.HandleFunc("POST /api/users/{id}/follow", a.follow)
+	mux.HandleFunc("DELETE /api/users/{id}/follow", a.unfollow)
+	media := http.StripPrefix("/media/", http.FileServer(http.Dir(a.cfg.MediaDir)))
+	mux.HandleFunc("GET /media/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+		media.ServeHTTP(w, r)
+	})
 	player := http.StripPrefix("/player/", http.FileServer(http.Dir(a.cfg.PlayerDir)))
 	mux.HandleFunc("GET /player/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-cache")
@@ -67,17 +76,54 @@ func (a *App) Handler() http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-User")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
-		sw := &statusWriter{ResponseWriter: w, status: 200}
+		var rw http.ResponseWriter = w
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			rw = &mediaRewriter{ResponseWriter: w, base: requestBase(r)}
+		}
+		sw := &statusWriter{ResponseWriter: rw, status: 200}
 		t0 := time.Now()
 		mux.ServeHTTP(sw, r)
 		log.Printf("%s %s %d %dms", r.Method, r.URL.Path, sw.status, time.Since(t0).Milliseconds())
 	})
+}
+
+// requestBase is the scheme://host the client used to reach this server.
+func requestBase(r *http.Request) string {
+	scheme := "http"
+	if p := r.Header.Get("X-Forwarded-Proto"); p != "" {
+		scheme = p
+	} else if r.TLS != nil {
+		scheme = "https"
+	}
+	return scheme + "://" + r.Host
+}
+
+// mediaRewriter makes the stored relative "/media/..." URLs absolute in API responses
+// (including SSE events) so the player and iOS clients can load them directly.
+type mediaRewriter struct {
+	http.ResponseWriter
+	base string
+}
+
+func (w *mediaRewriter) Write(p []byte) (int, error) {
+	if _, err := w.ResponseWriter.Write(bytes.ReplaceAll(p, []byte(`"/media/`), []byte(`"`+w.base+`/media/`))); err != nil {
+		return 0, err
+	}
+	return len(p), nil
+}
+
+func (w *mediaRewriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
+
+func (w *mediaRewriter) Flush() {
+	if f, ok := w.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
 }
 
 func userID(r *http.Request) string {
@@ -101,6 +147,44 @@ func (a *App) me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 200, u)
+}
+
+func (a *App) follow(w http.ResponseWriter, r *http.Request)   { a.setFollow(w, r, true) }
+func (a *App) unfollow(w http.ResponseWriter, r *http.Request) { a.setFollow(w, r, false) }
+
+// setFollow adds or removes {id} from the caller's follows list and returns the updated user.
+func (a *App) setFollow(w http.ResponseWriter, r *http.Request, on bool) {
+	target := r.PathValue("id")
+	a.store.mu.Lock()
+	defer a.store.mu.Unlock()
+	if _, ok := a.store.user(target); !ok {
+		writeErr(w, 404, "unknown user")
+		return
+	}
+	for i := range a.store.d.Users {
+		u := &a.store.d.Users[i]
+		if u.ID != userID(r) {
+			continue
+		}
+		if u.ID == target {
+			writeErr(w, 400, "cannot follow yourself")
+			return
+		}
+		next := []string{}
+		for _, f := range u.Follows {
+			if f != target {
+				next = append(next, f)
+			}
+		}
+		if on {
+			next = append(next, target)
+		}
+		u.Follows = next
+		a.store.saveLocked()
+		writeJSON(w, 200, *u)
+		return
+	}
+	writeErr(w, 404, "unknown user")
 }
 
 func (a *App) users(w http.ResponseWriter, r *http.Request) {
@@ -243,6 +327,8 @@ func (a *App) postPlay(w http.ResponseWriter, r *http.Request) {
 		Score       int             `json:"score"`
 		Ticks       int             `json:"ticks"`
 		ChallengeID string          `json:"challenge_id"`
+		Daily       bool            `json:"daily"`
+		Date        string          `json:"date"`
 	}
 	if err := decode(r, &req); err != nil {
 		writeErr(w, 400, "invalid body")
@@ -259,6 +345,14 @@ func (a *App) postPlay(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 404, "game not found")
 		return
 	}
+	today := ""
+	if req.Daily {
+		var msg string
+		if today, msg = a.checkDailyPlay(gm.ID, req.Date, req.Seed); msg != "" {
+			writeErr(w, 400, msg)
+			return
+		}
+	}
 	score, ticks, replayed := a.replayScore(&gm, req.Seed, req.Inputs)
 	verified := replayed && score == req.Score
 	if replayed && req.Ticks == 0 {
@@ -270,6 +364,12 @@ func (a *App) postPlay(w http.ResponseWriter, r *http.Request) {
 	uid := userID(r)
 	p := &Play{ID: newID("p_"), GameID: gm.ID, UserID: uid, Seed: req.Seed, Inputs: req.Inputs, Score: req.Score, Ticks: req.Ticks,
 		Verified: verified, ChallengeID: req.ChallengeID, CreatedAt: time.Now().UTC()}
+	counted := false
+	if req.Daily {
+		p.Daily, p.Date = true, today
+		counted = verified && !a.hasCountedDaily(uid, today)
+		p.Practice = !counted
+	}
 	a.store.d.Plays[p.ID] = p
 	rank := 1
 	for _, o := range a.store.d.Plays {
@@ -278,6 +378,9 @@ func (a *App) postPlay(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	resp := map[string]any{"play": p, "verified": verified, "rank": rank}
+	if req.Daily {
+		resp["daily"] = a.dailyResult(uid, p, counted)
+	}
 	if c, ok := a.store.d.Challenges[req.ChallengeID]; ok && req.ChallengeID != "" {
 		resp["beat"] = map[string]any{"user": a.store.userName(c.FromID), "score": c.Score, "won": p.Score > c.Score}
 	}
@@ -456,9 +559,10 @@ func (a *App) expandFeed(it FeedItem, viewer string) FeedView {
 }
 
 func (a *App) feed(w http.ResponseWriter, r *http.Request) {
+	uid := userID(r)
+	daily := a.dailyFeedItem(uid)
 	a.store.mu.RLock()
 	defer a.store.mu.RUnlock()
-	uid := userID(r)
 	me, ok := a.store.user(uid)
 	if !ok {
 		writeErr(w, 400, "unknown user")
@@ -471,6 +575,9 @@ func (a *App) feed(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	out := []FeedView{}
+	if daily != nil {
+		out = append(out, *daily)
+	}
 	for _, it := range orderFeed(items, me) {
 		out = append(out, a.expandFeed(it, uid))
 	}

@@ -6,6 +6,7 @@ struct GamePlayerView: UIViewRepresentable {
     let gameID: String
     let seed: Int
     var challengeID: String? = nil
+    var dailyDate: String? = nil
     var onReady: () -> Void = {}
     var onResult: (SGPlayResult) -> Void
     var onError: (String) -> Void = { _ in }
@@ -20,7 +21,7 @@ struct GamePlayerView: UIViewRepresentable {
             coordinator?.handle(type: type, body: body)
         }
         entry.webView.navigationDelegate = coordinator
-        entry.webView.load(URLRequest(url: SGConfig.playerURL(gameID: gameID, seed: seed, challengeID: challengeID)))
+        entry.webView.load(URLRequest(url: SGConfig.playerURL(gameID: gameID, seed: seed, challengeID: challengeID, dailyDate: dailyDate)))
         return entry.webView
     }
 
@@ -94,6 +95,7 @@ struct SGPlayerSurface: View {
     let gameID: String
     let seed: Int
     var challengeID: String? = nil
+    var dailyDate: String? = nil
     let onResult: (SGPlayResult) -> Void
 
     @State private var isReady = false
@@ -107,6 +109,7 @@ struct SGPlayerSurface: View {
                 gameID: gameID,
                 seed: seed,
                 challengeID: challengeID,
+                dailyDate: dailyDate,
                 onReady: { withAnimation(.easeOut(duration: 0.2)) { isReady = true } },
                 onResult: onResult,
                 onError: { errorMessage = $0 }

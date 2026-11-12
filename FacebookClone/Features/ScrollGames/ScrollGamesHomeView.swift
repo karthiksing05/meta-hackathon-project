@@ -33,6 +33,7 @@ struct ScrollGamesHomeView: View {
                     }
                     composerRow
                     FeedSeparator()
+                    dailyHero
                     challengesStrip
                     feedContent
                 }
@@ -132,6 +133,16 @@ struct ScrollGamesHomeView: View {
     }
 
     @ViewBuilder
+    private var dailyHero: some View {
+        if let daily = sg.daily {
+            SGDailyCard(daily: daily) { playDaily(daily) }
+                .padding(.horizontal, FBMetrics.gutter)
+                .padding(.vertical, FBSpacing.m)
+            FeedSeparator()
+        }
+    }
+
+    @ViewBuilder
     private var challengesStrip: some View {
         if !sg.challenges.isEmpty {
             VStack(alignment: .leading, spacing: FBSpacing.s) {
@@ -195,6 +206,11 @@ struct ScrollGamesHomeView: View {
         }
     }
 
+    private func playDaily(_ daily: SGDaily) {
+        Haptics.light()
+        playRequest = SGPlayRequest(game: daily.game, seed: daily.seed, dailyDate: daily.date)
+    }
+
     private func play(_ item: SGFeedItem) {
         guard let game = item.game else { return }
         Haptics.light()
@@ -208,6 +224,82 @@ struct ScrollGamesHomeView: View {
 }
 
 // MARK: - Cards
+
+/// "Today's daily" hero: date, game, friends played, streak, reset countdown and Play / your score.
+private struct SGDailyCard: View {
+    let daily: SGDaily
+    let onPlay: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FBSpacing.m) {
+            HStack {
+                Text("Today's daily · \(daily.shortDate)")
+                    .font(.fbCaptionEmphasized)
+                    .foregroundStyle(.white.opacity(0.9))
+                Spacer(minLength: 0)
+                Label("\(daily.myStreak)", systemImage: "flame.fill")
+                    .font(.fbName)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(.black.opacity(0.25), in: Capsule())
+                    .accessibilityLabel("\(daily.myStreak) day streak")
+            }
+            HStack(spacing: FBSpacing.m) {
+                Text(daily.game.emoji)
+                    .font(.system(size: 44)) // Display emoji
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(daily.game.title)
+                        .font(.fbTitle)
+                        .foregroundStyle(.white)
+                        .lineLimit(2)
+                    Text("\(daily.friendsPlayed) \(daily.friendsPlayed == 1 ? "friend" : "friends") played")
+                        .font(.fbMeta)
+                        .foregroundStyle(.white.opacity(0.9))
+                }
+                Spacer(minLength: 0)
+            }
+            HStack {
+                countdown
+                Spacer(minLength: 0)
+                if let play = daily.myPlay {
+                    scoreState(play)
+                } else {
+                    Button(daily.myStreak > 0 ? "Keep streak" : "Play", action: onPlay)
+                        .buttonStyle(.fb(.secondary, expand: false, height: 32))
+                }
+            }
+        }
+        .padding(FBMetrics.gutter)
+        .background(
+            SGPalette.gradient(for: daily.game.palette),
+            in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
+        )
+        .accessibilityElement(children: .contain)
+    }
+
+    private var countdown: some View {
+        TimelineView(.periodic(from: .now, by: 30)) { context in
+            let seconds = max(0, Int((daily.resetDate ?? context.date).timeIntervalSince(context.date)))
+            Label("Resets in \(seconds / 3600)h \(seconds % 3600 / 60)m", systemImage: "clock")
+                .font(.fbCaption)
+                .foregroundStyle(.white.opacity(0.9))
+        }
+    }
+
+    private func scoreState(_ play: SGPlay) -> some View {
+        VStack(alignment: .trailing, spacing: 2) {
+            Text("You scored \(play.score)")
+                .font(.fbName)
+                .foregroundStyle(.white)
+            if let rank = daily.myRankAmongFriends {
+                Text("#\(rank) among friends")
+                    .font(.fbCaption)
+                    .foregroundStyle(.white.opacity(0.9))
+            }
+        }
+    }
+}
 
 private struct SGChallengeTile: View {
     let item: SGFeedItem
@@ -303,6 +395,7 @@ private struct SGFeedCard: View {
         case .score: what = "shared a score"
         case .challenge: what = "sent a challenge"
         case .game: what = "published a game"
+        case .daily: what = "daily game"
         }
         return when.map { "\(what) · \($0)" } ?? what
     }

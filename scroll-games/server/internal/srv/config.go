@@ -14,6 +14,7 @@ type Config struct {
 	Addr           string
 	DataDir        string
 	PlayerDir      string
+	MediaDir       string // generated demo photos served at /media/
 	SpecDir        string
 	SgtoolPath     string
 	MuseBaseURL    string
@@ -39,6 +40,7 @@ func DefaultConfig() Config {
 		Addr:           ":8787",
 		DataDir:        "data",
 		PlayerDir:      "../player",
+		MediaDir:       "static/media",
 		SpecDir:        "../spec",
 		SgtoolPath:     "../runtime/target/release/sgtool",
 		MuseBaseURL:    "https://api.meta.ai/v1",

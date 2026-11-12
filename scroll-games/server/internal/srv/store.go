@@ -1,11 +1,13 @@
 package srv
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sync"
 	"time"
 )
@@ -75,6 +77,9 @@ type Play struct {
 	Ticks       int             `json:"ticks"`
 	Verified    bool            `json:"verified"`
 	ChallengeID string          `json:"challenge_id,omitempty"`
+	Daily       bool            `json:"daily,omitempty"`
+	Date        string          `json:"date,omitempty"`
+	Practice    bool            `json:"practice,omitempty"`
 	CreatedAt   time.Time       `json:"created_at"`
 }
 
@@ -110,6 +115,7 @@ type data struct {
 	Plays      map[string]*Play      `json:"plays"`
 	Challenges map[string]*Challenge `json:"challenges"`
 	Feed       []FeedItem            `json:"feed"`
+	Daily      map[string]string     `json:"daily,omitempty"` // UTC date -> pinned daily game id
 }
 
 // Store is the in-memory database with atomic JSON persistence.
@@ -139,6 +145,9 @@ func (s *Store) ensureMaps() {
 	}
 	if s.d.Challenges == nil {
 		s.d.Challenges = map[string]*Challenge{}
+	}
+	if s.d.Daily == nil {
+		s.d.Daily = map[string]string{}
 	}
 }
 
@@ -196,4 +205,37 @@ func (c *Cache) Put(k string, v any) {
 	defer c.mu.Unlock()
 	c.m[k] = raw
 	_ = writeJSONAtomic(c.path, c.m)
+}
+
+var picsumMediaRe = regexp.MustCompile(`https://picsum\.photos/seed/sg-(m\d+)/600/400`)
+
+// migrateLocalMedia rewrites picsum sg-<id> media URLs (in the media list and in stored
+// game content) to local /media URLs when the generated file exists. It reports changes.
+func (s *Store) migrateLocalMedia() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	swap := func(src []byte) []byte {
+		return picsumMediaRe.ReplaceAllFunc(src, func(m []byte) []byte {
+			id := string(picsumMediaRe.FindSubmatch(m)[1])
+			if localMediaExists(id) {
+				return []byte("/media/" + id + ".jpg")
+			}
+			return m
+		})
+	}
+	changed := false
+	for i := range s.d.Media {
+		if u := string(swap([]byte(s.d.Media[i].URL))); u != s.d.Media[i].URL {
+			s.d.Media[i].URL, changed = u, true
+		}
+	}
+	for _, g := range s.d.Games {
+		if len(g.Content) == 0 {
+			continue
+		}
+		if c := swap(g.Content); !bytes.Equal(c, g.Content) {
+			g.Content, changed = c, true
+		}
+	}
+	return changed
 }

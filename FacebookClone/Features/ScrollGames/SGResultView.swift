@@ -7,6 +7,8 @@ struct SGPlayRequest: Identifiable {
     let game: SGGame
     var seed: Int = SGConfig.randomSeed()
     var challengeID: String? = nil
+    /// UTC date (YYYY-MM-DD) when this run is the daily attempt.
+    var dailyDate: String? = nil
 }
 
 /// Full-screen play session: the player, then the result once the game ends.
@@ -17,6 +19,7 @@ struct SGPlayFlowView: View {
     @State private var attempt = 0
     @State private var seed: Int
     @State private var challengeID: String?
+    @State private var dailyDate: String?
     @State private var result: SGPlayResult?
     @State private var response: SGPlayResponse?
     @State private var isSubmitting = false
@@ -26,6 +29,7 @@ struct SGPlayFlowView: View {
         self.request = request
         _seed = State(initialValue: request.seed)
         _challengeID = State(initialValue: request.challengeID)
+        _dailyDate = State(initialValue: request.dailyDate)
     }
 
     var body: some View {
@@ -42,7 +46,7 @@ struct SGPlayFlowView: View {
                 )
                 .transition(.opacity)
             } else {
-                SGPlayerSurface(gameID: request.game.id, seed: seed, challengeID: challengeID) { finished in
+                SGPlayerSurface(gameID: request.game.id, seed: seed, challengeID: challengeID, dailyDate: dailyDate) { finished in
                     finish(finished)
                 }
                 .id(attempt)
@@ -69,9 +73,11 @@ struct SGPlayFlowView: View {
         isSubmitting = true
         let gameID = request.game.id
         let challenge = challengeID
+        let daily = dailyDate
         Task {
             do {
-                response = try await ScrollGamesAPI.shared.submitPlay(gameID: gameID, result: finished, challengeID: challenge)
+                response = try await ScrollGamesAPI.shared.submitPlay(
+                    gameID: gameID, result: finished, challengeID: challenge, dailyDate: daily)
             } catch {
                 submitError = error.localizedDescription
             }
@@ -84,7 +90,7 @@ struct SGPlayFlowView: View {
         response = nil
         submitError = nil
         challengeID = nil
-        seed = SGConfig.randomSeed()
+        if dailyDate == nil { seed = SGConfig.randomSeed() }
         attempt += 1
     }
 }
@@ -108,6 +114,9 @@ struct SGResultView: View {
         ScrollView {
             VStack(spacing: FBSpacing.l) {
                 scoreCard
+                if let daily = response?.daily {
+                    dailyLine(daily)
+                }
                 if let beat = response?.beat {
                     beatLine(beat)
                 }
@@ -189,6 +198,26 @@ struct SGResultView: View {
             Label("Not verified", systemImage: "exclamationmark.circle")
                 .font(.fbCaptionEmphasized)
                 .foregroundStyle(.white.opacity(0.85))
+        }
+    }
+
+    private func dailyLine(_ daily: SGDailyResult) -> some View {
+        VStack(spacing: FBSpacing.xs) {
+            if daily.counted {
+                Label("Streak: \(daily.streak) \(daily.streak == 1 ? "day" : "days")", systemImage: "flame.fill")
+                    .font(.fbHeadline)
+                    .foregroundStyle(FBColor.pollOrange)
+                if let rank = daily.rankAmongFriends {
+                    Text("#\(rank) among friends on today's daily")
+                        .font(.fbMeta)
+                        .foregroundStyle(FBColor.secondaryText)
+                }
+            } else {
+                Text("Practice run: your daily score is already counted.")
+                    .font(.fbMeta)
+                    .foregroundStyle(FBColor.secondaryText)
+                    .multilineTextAlignment(.center)
+            }
         }
     }
 

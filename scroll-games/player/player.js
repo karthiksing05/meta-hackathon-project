@@ -7,6 +7,7 @@ const QUERY = {
   game: params.get('game'),
   seed: params.get('seed'),
   challenge: params.get('challenge'),
+  daily: /^\d{4}-\d{2}-\d{2}$/.test(params.get('daily') || '') ? params.get('daily') : '',
   embed: params.get('embed'),
   local: params.get('local') === '1',
   api: params.get('api') || '',
@@ -59,7 +60,15 @@ function randomSeed() {
 }
 
 async function loadFromQuery() {
-  const seed = QUERY.seed != null && QUERY.seed !== '' ? Number(QUERY.seed) >>> 0 : randomSeed();
+  let seed = QUERY.seed != null && QUERY.seed !== '' ? Number(QUERY.seed) >>> 0 : null;
+  if (seed == null && QUERY.daily && !QUERY.local) {
+    try {
+      seed = (await fetchJSON(`${QUERY.api}/api/daily`)).seed >>> 0;
+    } catch (e) {
+      console.warn('[sg] could not fetch the daily seed', e);
+    }
+  }
+  if (seed == null) seed = randomSeed();
   if (QUERY.local) {
     const [manifest, content] = await Promise.all([
       fetchJSON('../spec/templates/quiz.manifest.json'),
@@ -71,6 +80,10 @@ async function loadFromQuery() {
   const body = await fetchJSON(`${QUERY.api}/api/games/${encodeURIComponent(QUERY.game)}`);
   const game = body.game || body;
   return { manifest: game.manifest, content: game.content, seed, gameId: game.id || QUERY.game };
+}
+
+function dailyLabel(date) {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 }
 
 function present(payload) {
@@ -88,6 +101,8 @@ function present(payload) {
   $('intro-title').textContent = view.title;
   $('intro-emoji').textContent = (view.theme && view.theme.emoji) || '🎮';
   $('intro-copy').textContent = (view.copy && view.copy.intro) || '';
+  $('hud-daily').hidden = !QUERY.daily;
+  $('hud-daily').textContent = QUERY.daily ? `Daily · ${dailyLabel(QUERY.daily)}` : '';
   showScreen('intro');
 }
 
@@ -288,7 +303,14 @@ async function finish() {
   const result = JSON.parse(session.result());
   showResult(view, result);
   if (iosHandler) {
-    post({ type: 'result', result, game_id: loaded.gameId, challenge_id: QUERY.challenge });
+    post({
+      type: 'result',
+      result,
+      game_id: loaded.gameId,
+      challenge_id: QUERY.challenge,
+      daily: !!QUERY.daily,
+      date: QUERY.daily || undefined,
+    });
     return;
   }
   if (QUERY.local || !loaded.gameId) return;
@@ -328,6 +350,8 @@ async function submitPlay(result) {
         score: result.score,
         ticks: result.ticks,
         challenge_id: QUERY.challenge || undefined,
+        daily: QUERY.daily ? true : undefined,
+        date: QUERY.daily || undefined,
       }),
     });
     const beat = play.beat;
@@ -338,6 +362,12 @@ async function submitPlay(result) {
       line.hidden = false;
     } else if (play.rank) {
       line.textContent = `Rank #${play.rank}`;
+      line.hidden = false;
+    }
+    if (play.daily) {
+      const streak = play.daily.streak;
+      const tag = play.daily.counted ? `Streak: ${streak} ${streak === 1 ? 'day' : 'days'}` : 'Practice run, not counted';
+      line.textContent = line.hidden ? tag : `${line.textContent} · ${tag}`;
       line.hidden = false;
     }
     await offerChallenge(play);
@@ -385,7 +415,7 @@ async function offerChallenge(play) {
 
 $('btn-play').addEventListener('click', startPlay);
 $('btn-again').addEventListener('click', () => {
-  if (loaded) present({ ...loaded, seed: QUERY.challenge ? loaded.seed : randomSeed() });
+  if (loaded) present({ ...loaded, seed: QUERY.challenge || QUERY.daily ? loaded.seed : randomSeed() });
 });
 
 // ---- confetti (canvas, no deps) ------------------------------------------------------------

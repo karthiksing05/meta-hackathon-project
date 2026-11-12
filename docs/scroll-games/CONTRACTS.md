@@ -129,8 +129,9 @@ Identity: header `X-User: u_me` (default `u_me`). Synthetic users/groups/media s
 | POST | /api/games/generate | `{prompt, brief, media_ids[]}` → **SSE** (`text/event-stream`): `event: stage` `{stage, status:"start"\|"done", ms}` for stages `plan, content, glue, validate, repair, save`; final `event: done` `{game}` or `event: error` `{message}`. `?stream=0` returns final JSON instead. |
 | GET | /api/games/:id | `{game}` where game = `{id, title, description, creator_id, status:"draft"\|"published", manifest, content, brief, created_at, gen:{ms, stages, source, cost_usd}, stats:{plays, best}}` |
 | POST | /api/games/:id/publish | → `{game, feed_item}` (moderation stub runs here: always passes, sets `moderation:"stub-pass"`) |
-| GET | /api/feed | `[{id, type:"game"\|"score"\|"challenge", actor, game, play?, challenge?, text, created_at, band}]` |
-| POST | /api/games/:id/plays | `{seed, inputs, score, ticks, challenge_id?}` → `{play, verified, rank, beat:{user,score,won}?}` (server re-runs `replay`; verified = scores match) |
+| GET | /api/daily | `{date, game, seed, resets_at, my_play?, my_streak, leaderboard_top:[{rank,user,user_id,score}], friends_played, my_rank_among_friends?}` (see Daily game) |
+| GET | /api/feed | `[{id, type:"game"\|"score"\|"challenge"\|"daily", actor, game, play?, challenge?, text, created_at, band}]` |
+| POST | /api/games/:id/plays | `{seed, inputs, score, ticks, challenge_id?, daily?, date?}` → `{play, verified, rank, beat:{user,score,won}?, daily?:{date,counted,practice,streak,rank_among_friends}}` (server re-runs `replay`; verified = scores match) |
 | GET | /api/games/:id/leaderboard | top plays |
 | POST | /api/challenges | `{game_id, play_id, to_user_ids?}` → `{challenge, url:"http://<host>:8787/c/<id>", text:"Bayan scored 840 on Lisbon Trip Trivia. Beat them?"}` |
 | GET | /api/challenges/:id | `{challenge, game}` |
@@ -169,3 +170,19 @@ Target: generate end-to-end p50 under ~10 s with live Muse, under 100 ms on cach
 - **Result extras**: `result()` also returns `warnings[]` and `logs[]`. Inputs accepted by `input()`: `choice`, `tap`, `pause`, `resume`.
 - **Replay**: `sgtool replay` request `inputs` is the `inputs` array from `result()`; error responses are `{ok:false,error}`.
 - **Player**: `?local=1` loads `../spec/templates/quiz.manifest.json` + `trip-trivia.content.json`; `?api=<origin>` overrides the API origin.
+
+## Daily game (return loop)
+- **One game per UTC day**, pinned in the store (`daily` map date -> game id) on first request so later publishes don't change it mid-day. Candidates: published games whose manifest has `seed_scope:"daily"`; if none, all published games. Sorted by id, rotated by day index (days since epoch).
+- **Seed**: `FNV-1a32("daily:" + "YYYY-MM-DD")`, the same for everyone. The runtime itself never reads `seed_scope` (it only validates the enum); the host passes the seed, and the server enforces it for daily plays.
+- **`GET /api/daily`** (viewer from `X-User`): `{date, game (trimmed), seed, resets_at (next UTC midnight, RFC 3339), my_play?, my_streak, leaderboard_top (top 5 counted plays), friends_played, my_rank_among_friends?}`.
+- **Daily plays**: `POST /api/games/:id/plays` with `daily:true` and `date` (defaults to today). 400 if `date` is not today (UTC), the game is not today's daily, or `seed` differs from the day's seed. The first *verified* daily play per user per day is the counted attempt; further daily plays are stored with `practice:true` and are excluded from the daily leaderboard, rank and streak. Response gets `daily:{date, counted, practice, streak, rank_among_friends}`.
+- **Streak**: consecutive UTC days ending today (or yesterday if today is unplayed) with a counted daily play; derived from stored plays. A missed full day resets it to 0.
+- **Feed**: a synthesized pinned item `type:"daily"`, `band:"daily"`, always first (before challenges), `game` trimmed, `play` set once played. Text: `Today's daily: <title> — N friends played. Keep your K-day streak.` (or `Start a streak.`); after playing: `You scored N on today's daily (#R among friends)`. Clients that don't know the type should skip it.
+- **Demo data**: friends get synthetic counted plays for today (created lazily, deterministic by date); a store with no daily history gives `u_me` a 3-day streak ending yesterday.
+- **Player**: `?daily=YYYY-MM-DD` shows a "Daily · Nov 12" chip in the HUD (the `embed-ios` 52px left padding is unchanged), fetches the seed from `/api/daily` if `seed` is absent, adds `daily`/`date` to the `result` message and to the browser's plays POST, shows the streak line, and keeps the daily seed on Play again (a practice run).
+- The server clock is injectable (`App.now`) for tests.
+
+## Follows and demo photos
+
+- `POST /api/users/{id}/follow` and `DELETE /api/users/{id}/follow` (caller from `X-User`) add or remove `{id}` in the caller's `follows` and return the updated user. Idempotent; 404 for an unknown user, 400 for following yourself. `GET /api/me` reflects it and the feed "creators" band reads it.
+- Demo photos live in `server/static/media/<media_id>.jpg` (generated once with `go run ./cmd/genphotos`, Muse Image, ~$0.01 each) and are served at `GET /media/<file>` with `Cache-Control: public, max-age=86400`. Stored media URLs are relative (`/media/m1.jpg`); every `/api/*` response (JSON and SSE) rewrites them to absolute `scheme://host/media/...`, so `media_url` in game content and `GET /api/media` are directly loadable. Media without a generated file keep their picsum URL.

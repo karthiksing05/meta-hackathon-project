@@ -17,6 +17,7 @@ final class SGStore {
     var isOffline = false
     var users: [String: SGUser] = [:]
     var followedCreatorIDs: Set<String> = []
+    var daily: SGDaily?
 
     private let api = ScrollGamesAPI.shared
 
@@ -25,16 +26,18 @@ final class SGStore {
     /// Challenges addressed to me, for the "Challenges for you" strip.
     var challenges: [SGFeedItem] { items.filter { $0.kind == .challenge } }
 
-    /// Everything that isn't a challenge, in feed order.
-    var feedItems: [SGFeedItem] { items.filter { $0.kind != .challenge } }
+    /// Everything that isn't a challenge or the pinned daily, in feed order.
+    var feedItems: [SGFeedItem] { items.filter { $0.kind != .challenge && $0.kind != .daily } }
 
     func refresh() async {
         if items.isEmpty { state = .loading }
         do {
             async let feed = api.feed()
             async let users = api.users()
+            async let today = api.daily()
             let loaded = try await feed
             let people = (try? await users) ?? []
+            daily = try? await today
             isOffline = false
             apply(feed: loaded, users: people)
             state = .loaded
@@ -42,6 +45,7 @@ final class SGStore {
             return
         } catch {
             isOffline = true
+            daily = SGSample.daily
             apply(feed: SGSample.feed, users: SGSample.users)
             state = items.isEmpty ? .failed(error.localizedDescription) : .loaded
         }

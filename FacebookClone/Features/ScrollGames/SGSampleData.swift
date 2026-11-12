@@ -43,6 +43,21 @@ enum SGSample {
         SGFeedItem(id: "f_sample_g3", type: "game", actor: maya, game: hike),
     ]
 
+    /// A daily dated today (UTC) with a 3-day streak, resetting at the next UTC midnight.
+    static var daily: SGDaily {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let start = calendar.startOfDay(for: Date())
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = calendar.timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        let reset = calendar.date(byAdding: .day, value: 1, to: start) ?? start
+        return SGDaily(
+            date: formatter.string(from: start), game: lisbon, seed: 20_261_112,
+            resetsAt: ISO8601DateFormatter().string(from: reset), myStreak: 3, friendsPlayed: 4)
+    }
+
     static let groups = [
         SGGroup(id: "grp_sample_trip", name: "Lisbon Trip", mediaIDs: ["m_s1", "m_s2", "m_s3", "m_s4"]),
         SGGroup(id: "grp_sample_potluck", name: "Potluck Crew", mediaIDs: ["m_s5", "m_s6", "m_s7", "m_s8"]),

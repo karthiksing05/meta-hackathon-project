@@ -105,8 +105,18 @@ func (b *Budget) Release(est int64) {
 func (b *Budget) Record(est int64, c Call) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
+	b.recordLocked(est, CostMicro(c.Model, c.PromptTokens, c.CompletionTokens), c)
+}
+
+// RecordFixed settles a reservation for per-call priced models (e.g. image generation).
+func (b *Budget) RecordFixed(est, micro int64, c Call) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	b.recordLocked(est, micro, c)
+}
+
+func (b *Budget) recordLocked(est, micro int64, c Call) {
 	b.reserved -= est
-	micro := CostMicro(c.Model, c.PromptTokens, c.CompletionTokens)
 	b.data.SpentMicro += micro
 	c.CostUSD = float64(micro) / 1e6
 	c.Time = time.Now().UTC()
