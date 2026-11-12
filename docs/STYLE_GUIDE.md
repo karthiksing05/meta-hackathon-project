@@ -303,6 +303,20 @@ Reuse these. All live in `DesignSystem/` unless noted.
 - Every tab root scrolls to top when its tab is tapped again (`router.scrollToTopSignal(for:)`).
 - Feeds support pull to refresh. Infinite lists show a skeleton at the bottom while loading.
 - Media pauses whenever its screen isn't visible (other tab selected, cover or sheet on top).
+- **System bars across iOS versions.** `FBSystemBars.configure()` runs once at launch (from
+  `RootView`). On iOS 17 and 18 it gives every navigation bar Facebook's opaque `surface`
+  background, with a hairline only while content scrolls under it. Without it those versions
+  show a grey band under the clock on grouped screens. iOS 26 keeps its own bars. A screen that
+  sets `.toolbarBackground(...)` itself (Messenger chats) keeps its look. A tab root that hides
+  its bar and needs a solid status-bar area uses `.fbStatusBarBackdrop()`. Use
+  `UIColor.dynamic(light:dark:)` and `FBUIColor` for UIKit colors so they follow dark mode.
+  `FB_LEGACY_BARS=1` (DEBUG) shows the iOS 17/18 bars on iOS 26.
+- **Never move a feed the reader didn't move.** Content that arrives while someone is scrolled
+  down waits behind the "New posts" pill and never inserts above them. Code scrolls a feed only
+  when the reader re-taps its tab, taps the pill, or starts uploading their own post. To track
+  down a jump, run with `FB_HOME_AUTOSCROLL_LOG=1` (DEBUG; `FBScrollLog`, `FBScrollProbe`): it
+  logs every offset change no finger caused, with its call stack, to the console (`[HomeScroll]`)
+  and to `tmp/home-autoscroll.log` in the app container. Release builds compile it out.
 
 ---
 

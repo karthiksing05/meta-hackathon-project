@@ -10,6 +10,21 @@ extension UIColor {
             alpha: alpha
         )
     }
+
+    /// A UIKit color that follows light and dark mode.
+    static func dynamic(light: UInt32, dark: UInt32) -> UIColor {
+        UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(hex: dark) : UIColor(hex: light)
+        }
+    }
+}
+
+/// UIKit versions of the chrome tokens, for system bars styled through `UIAppearance`
+/// (see `FBSystemBars`). `FBColor` reads the same colors, so there's one value per token.
+enum FBUIColor {
+    static let surface = UIColor.dynamic(light: 0xFFFFFF, dark: 0x242526)
+    static let divider = UIColor.dynamic(light: 0xDADDE1, dark: 0x3E4042)
+    static let primaryText = UIColor.dynamic(light: 0x050505, dark: 0xE4E6EB)
 }
 
 extension Color {
@@ -25,9 +40,7 @@ extension Color {
 
     /// A color that follows light and dark mode.
     static func dynamic(light: UInt32, dark: UInt32) -> Color {
-        Color(uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark ? UIColor(hex: dark) : UIColor(hex: light)
-        })
+        Color(uiColor: .dynamic(light: light, dark: dark))
     }
 }
 
@@ -41,18 +54,18 @@ enum FBColor {
     static let wordmark = Color.dynamic(light: 0x0866FF, dark: 0xE4E6EB)
 
     /// Cards, headers, the tab bar.
-    static let surface = Color.dynamic(light: 0xFFFFFF, dark: 0x242526)
+    static let surface = Color(uiColor: FBUIColor.surface)
     /// Grouped screens behind cards (Menu, Settings).
     static let background = Color.dynamic(light: 0xF0F2F5, dark: 0x18191A)
     /// The thick bar between posts in the feed.
     static let feedSeparator = Color.dynamic(light: 0xCED0D4, dark: 0x0F0F10)
     static let elevated = Color.dynamic(light: 0xFFFFFF, dark: 0x3A3B3C)
 
-    static let primaryText = Color.dynamic(light: 0x050505, dark: 0xE4E6EB)
+    static let primaryText = Color(uiColor: FBUIColor.primaryText)
     static let secondaryText = Color.dynamic(light: 0x65676B, dark: 0xB0B3B8)
     static let tertiaryText = Color.dynamic(light: 0x8A8D91, dark: 0x8A8D91)
 
-    static let divider = Color.dynamic(light: 0xDADDE1, dark: 0x3E4042)
+    static let divider = Color(uiColor: FBUIColor.divider)
     /// Gray circle buttons and secondary buttons.
     static let buttonGray = Color.dynamic(light: 0xE4E6EB, dark: 0x3A3B3C)
     /// Text fields and the comment bubble.

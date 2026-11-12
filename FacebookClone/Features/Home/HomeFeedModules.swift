@@ -62,8 +62,10 @@ struct HomeReelsTray: View {
                         actionTitle: "See all",
                         action: { router.openReels() }
                     )
+                    // A plain HStack (at most 12 cards): the row's height never depends on which
+                    // cards a lazy stack has loaded, so the feed can't jump when the row is rebuilt.
                     ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(spacing: 8) {
+                        HStack(spacing: 8) {
                             ForEach(reels) { reel in
                                 HomeReelCard(reel: reel) {
                                     Haptics.light()
@@ -162,8 +164,9 @@ struct HomePeopleYouMayKnow: View {
                         actionTitle: "See all",
                         action: { router.push(.friendSuggestions) }
                     )
+                    // Plain HStack for the same reason as the Reels row.
                     ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(alignment: .top, spacing: 8) {
+                        HStack(alignment: .top, spacing: 8) {
                             ForEach(people) { person in
                                 HomeSuggestionCard(person: person)
                                     .transition(.scale(scale: 0.9).combined(with: .opacity))
@@ -339,8 +342,9 @@ struct HomeSuggestedGroups: View {
                         actionTitle: "See all",
                         action: { router.push(.groups) }
                     )
+                    // Plain HStack for the same reason as the Reels row.
                     ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(alignment: .top, spacing: 8) {
+                        HStack(alignment: .top, spacing: 8) {
                             ForEach(groups) { group in
                                 HomeGroupCard(
                                     group: group,
