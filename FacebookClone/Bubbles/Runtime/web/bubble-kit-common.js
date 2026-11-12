@@ -41,7 +41,10 @@
   const clamp = B.util.clamp;
   const SOUND_CHOICES = ["none", "pop", "blip", "tick", "chime", "whoosh", "success", "fail"];
   // The run's length (sdk.length, docs/BUBBLES.md 7.9); endless and unlocked when the SDK is older.
-  function lengthOf(sdk) { return sdk.length || { mode: "endless", rounds: null, seconds: null, lives: null, locked: false }; }
+  // Only a locked length (the manifest's own) overrides these concepts' numbers: a formula's
+  // unlocked default never changes a creator's rule.timer, rule.lives or flow.rounds.
+  const UNLOCKED = Object.freeze({ mode: "endless", rounds: null, seconds: null, lives: null, locked: false });
+  function lengthOf(sdk) { const L = sdk.length; return L && L.locked ? L : UNLOCKED; }
   const ALL_ENERGY = ["low", "medium", "high"];
 
   function inZone(zone, x, y) {

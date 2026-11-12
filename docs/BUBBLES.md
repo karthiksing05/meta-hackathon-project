@@ -862,7 +862,8 @@ length only when it has a number:
   concept that shows the length itself sets `sdk.hud.length = false` (rule.timer, rule.lives and
   flow.rounds do).
 
-**Precedence.** A manifest `length` overrides the common concepts' numbers: rule.timer runs for
+**Precedence.** A manifest `length` (a locked one; a formula's unlocked default never does)
+overrides the common concepts' numbers: rule.timer runs for
 `length.seconds` (a locked length in another mode turns rule.timer off), rule.lives takes
 `length.lives` misses through `lengthMiss`, flow.rounds plays `length.rounds` rounds (content
 cycles) and has no round count in a locked timed, lives or endless run, rule.attempt_budget allows
