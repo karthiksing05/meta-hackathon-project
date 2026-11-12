@@ -146,9 +146,9 @@ struct EditProfileView: View {
     // MARK: Cards
 
     private var profilePictureCard: some View {
-        EditCard(title: "Profile picture", action: {
+        ProfileEditCard(title: "Profile picture", action: {
             PhotosPicker(selection: $avatarItem, matching: .images) {
-                EditActionLabel(title: "Edit")
+                ProfileEditActionLabel(title: "Edit")
             }
         }) {
             AvatarView(user: store.me, size: 120)
@@ -158,9 +158,9 @@ struct EditProfileView: View {
     }
 
     private var coverCard: some View {
-        EditCard(title: "Cover photo", action: {
+        ProfileEditCard(title: "Cover photo", action: {
             PhotosPicker(selection: $coverItem, matching: .images) {
-                EditActionLabel(title: "Edit")
+                ProfileEditActionLabel(title: "Edit")
             }
         }) {
             RemoteImage(url: store.me.coverURL, data: store.me.coverData)
@@ -171,11 +171,11 @@ struct EditProfileView: View {
     }
 
     private var bioCard: some View {
-        EditCard(title: "Bio", action: {
+        ProfileEditCard(title: "Bio", action: {
             Button {
                 focus = .bio
             } label: {
-                EditActionLabel(title: bio.isEmpty ? "Add" : "Edit")
+                ProfileEditActionLabel(title: bio.isEmpty ? "Add" : "Edit")
             }
             .buttonStyle(.plain)
         }) {
@@ -194,11 +194,11 @@ struct EditProfileView: View {
     }
 
     private var detailsCard: some View {
-        EditCard(title: "Details", action: {
+        ProfileEditCard(title: "Details", action: {
             Button {
                 focus = .city
             } label: {
-                EditActionLabel(title: (city.isEmpty && work.isEmpty && school.isEmpty) ? "Add" : "Edit")
+                ProfileEditActionLabel(title: (city.isEmpty && work.isEmpty && school.isEmpty) ? "Add" : "Edit")
             }
             .buttonStyle(.plain)
         }) {
@@ -236,11 +236,11 @@ struct EditProfileView: View {
     }
 
     private var nameCard: some View {
-        EditCard(title: "Name", action: {
+        ProfileEditCard(title: "Name", action: {
             Button {
                 focus = .firstName
             } label: {
-                EditActionLabel(title: "Edit")
+                ProfileEditActionLabel(title: "Edit")
             }
             .buttonStyle(.plain)
         }) {
@@ -266,7 +266,7 @@ struct EditProfileView: View {
     }
 }
 
-private struct EditActionLabel: View {
+private struct ProfileEditActionLabel: View {
     let title: String
 
     var body: some View {
@@ -276,7 +276,7 @@ private struct EditActionLabel: View {
     }
 }
 
-private struct EditCard<Action: View, Content: View>: View {
+private struct ProfileEditCard<Action: View, Content: View>: View {
     let title: String
     let action: Action
     let content: Content

@@ -35,7 +35,6 @@ struct ProfilePostsSection: View {
             detailsCard
             ProfileGap()
             featuredCard
-            ProfileGap()
             friendsCard
             ProfileGap()
             postsHeader
