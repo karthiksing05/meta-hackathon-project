@@ -116,7 +116,7 @@ struct StoryEndingsPanel: View {
                     } else {
                         Image(systemName: ending.isSecret ? "sparkles" : "questionmark")
                             .font(.system(size: FBIconSize.xs, weight: .bold))
-                        Text(ending.isSecret ? StoryCopy.secretEnding : "?")
+                        Text(ending.isSecret ? StoryCopy.secretEnding : StoryCopy.unfoundEnding(ending.number))
                     }
                 }
                 .font(.fbCaptionEmphasized)

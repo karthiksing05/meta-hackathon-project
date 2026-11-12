@@ -128,6 +128,8 @@ enum StoryCopy {
     static let notPlayedYet = "You haven't found an ending yet. Every choice counts."
     static let allFound = "You found every ending!"
     static let hiddenEnding = "Hidden ending"
+    /// An ending chip you haven't found yet: its number only, no spoiler.
+    static func unfoundEnding(_ number: Int) -> String { "Ending \(number)" }
     static let secretEnding = "Secret ending"
     static let addFriend = "Add friend"
     static let requestSent = "Request sent"
@@ -173,7 +175,7 @@ enum StoryCopy {
     static func replyHeadline(name: String, past: String) -> String { "\(name) \(past). Your move!" }
     static func replyNote(differentPath: Bool) -> String { differentPath ? "Ha, I went the other way 👀" : "Same start, different ending?" }
     static func youTook(_ past: String) -> String { "You \(past)" }
-    static func madeAdventureNotification(_ title: String) -> String { "made an adventure in New in SF: \(title). Which way would you go?" }
+    static func madeAdventureNotification(_ title: String) -> String { "made an adventure in New in SF: \(title)\(title.hasSuffix("?") || title.hasSuffix("!") ? "" : ".") Which way would you go?" }
     static func pathSentToast(_ title: String) -> String { "Path sent to \(title)" }
     static func steps(_ count: Int) -> String { count == 1 ? "1 choice" : "\(count) choices" }
 }
