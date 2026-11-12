@@ -63,6 +63,8 @@ private struct TabRootContainer: View {
             root
                 .appDestinations()
         }
+        // Feed videos pause when their own tab isn't the one on screen.
+        .environment(\.postOwningTab, tab)
     }
 
     @ViewBuilder

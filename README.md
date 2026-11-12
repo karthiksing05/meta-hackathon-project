@@ -48,17 +48,19 @@ initials instead.
 - New posts upload with a progress bar, then friends react and comment over the next few seconds
 
 **Create**
-- Post composer: audience picker, colored backgrounds, multi-photo picker, feeling/activity, tag friends, check-in, polls, posting to groups or a friend's profile, editing, discard confirmation
-- Story creator: text stories on gradient backgrounds or photo stories with captions
-- Story viewer: progress bars, tap to skip, hold to pause, swipe between people, swipe down to close, reply and quick reactions (sent to Messenger), viewer counts on your own story
+- Post composer: audience picker, colored backgrounds, multi-photo picker, feeling/activity, tag friends, check-in, polls, posting to groups or a friend's profile, sharing a post with a comment, editing, "save as draft" or discard
+- Story creator: text stories on gradient backgrounds, or photo stories with captions, text and emoji stickers
+- Story viewer: progress bars, tap to skip, hold to pause, swipe between people with a cube transition, swipe down to close, swipe up to reply, quick reactions (sent to Messenger), viewer counts on your own story
+- "+" menu: post, story, reel, live, note, event, sell something
 
 **Video and Reels**
-- Video tab with chips (For you, Live, Reels, Following, Saved), one autoplaying video at a time, mute toggle, progress and full-screen player
-- Reels: vertical paging, tap to pause, double-tap to like with a heart burst, comments, share, follow, audio title, progress bar
+- Video tab with chips (For you, Live, Reels, Following, Saved), one autoplaying video at a time (the one nearest the middle of the screen), LIVE badges, mute toggle, progress bar
+- Full-screen player with play/pause, ±10 s skip, scrubbing and auto-hiding controls
+- Reels: vertical paging, tap to pause, hold to pause, double-tap to like with a heart burst, comments, share, follow, expandable caption, scrolling audio title, progress line
 
 **Messenger**
-- Chats list with search, active-now row, notes, filters (All, Unread, Groups, Archived), pin/mute/archive/delete
-- Chat screen with grouped bubbles, timestamps, photos, big emoji, replies, reactions, unsend, typing indicator, sent/delivered/seen receipts, themes and quick-emoji settings
+- Chats list with search, active-now row, notes, filters (All, Unread, Groups, Archived), pin/mute/archive/delete/mark unread
+- Chat screen with grouped bubbles, timestamps, photos, big emoji, reply quotes, swipe to reply, reactions, unsend, typing indicator, sent/delivered/seen receipts, in-chat search, 10 themes and quick-emoji settings
 - Simulated replies, new group chats, mock audio and video calls
 
 **Friends, Profile, Notifications**
