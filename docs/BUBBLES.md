@@ -672,8 +672,8 @@ and registries. A feature edits its own files plus the small, listed shared edit
 arg)`; `BubbleFeature` keys are `challenge`, `groups-search`, `together`, `remix`, `story`,
 `nextline`, `learn`, `length`, `saves`. `BubbleFeatureRouter` (Features/Bubbles/Social) dispatches
 to each feature's `<Feature>Screens` enum: `destination`, `sheet`, `open` (notification taps and
-cards), `debugOpen`, `install` (once at launch, after `BubbleSocialCast.install`) and `didFinish`
-(after the player records one of your runs). `AppNotification.bubbleAction` routes a notification
+cards), `debugOpen`, `install` (once at launch, after `BubbleSocialCast.install`), `didFinish`
+(after the player records one of your runs) and `didPublish` (after Muse Studio publishes). `AppNotification.bubbleAction` routes a notification
 tap to a feature. DEBUG: `FB_OPEN=feature:<key>/<screen>[/<arg>]`, for example
 `FB_OPEN=feature:challenge/picker/hill-hopper`. Stub screens show a "Coming soon" placeholder.
 
@@ -748,6 +748,11 @@ on (remixes fill the base creator automatically).
 is **Quiz night**, `learn` is **Learn**, everything else is play (no chip). `BubbleCategoryChip`
 shows on feed pages, Bubble pages and Library cards; the Studio and Library formula chips list the
 new formulas.
+
+**Tests.** `tools/kits-tests` tests `story`, `nextline` and `learn` by default with the other kits.
+Feature-specific kit checks go in a new `tools/kits-tests/suite-<name>.js` that adds
+`{name, run(env)}` to `KitSuites` (env: `Bubble, print, fail, ok, quick, wanted, manifests,
+report`); both runners load every suite file. `suite-length.js` is the length feature's.
 
 **Copy.** Each feature keeps its new user-facing strings in its `<Feature>Copy` enum, so a rename
 is one place per feature. The name stays "Bubbles" for now.

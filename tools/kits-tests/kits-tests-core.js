@@ -7,7 +7,8 @@
 // and skills give sensible outcomes, and replays reproduce score, ticks, outcome and events exactly.
 var KitTests = (function () {
   "use strict";
-  var KIT_FORMULAS = ["group", "answer", "time", "merge"];
+  // story, nextline and learn: the collaboration batch's kits (docs/BUBBLES.md 7), tested by default.
+  var KIT_FORMULAS = ["group", "answer", "time", "merge", "story", "nextline", "learn"];
   var SKILLS = [0.15, 0.4, 0.7, 0.95];
 
   function stableEvents(ev) {
@@ -160,6 +161,19 @@ var KitTests = (function () {
 
     // 5. Merge physics: settling without jitter, bounds, overlaps, bit-exact replays.
     if (wanted.indexOf("merge") >= 0) mergePhysics(env, manifests, fail, report);
+
+    // 5b. Extra suites: each tools/kits-tests/suite-*.js registers one on KitSuites (length modes,
+    // story graphs…). Add a new suite file instead of editing this one. Suites never change the
+    // fingerprint below.
+    var suites = typeof KitSuites !== "undefined" ? KitSuites : [];
+    suites.slice().sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; }).forEach(function (suite) {
+      print("\n[suite " + suite.name + "]");
+      try {
+        suite.run({ Bubble: Bubble, print: print, fail: fail, ok: ok, quick: !!env.quick, wanted: wanted, manifests: manifests, report: report });
+      } catch (e) {
+        fail("suite " + suite.name + " crashed: " + e);
+      }
+    });
 
     // 6. Fingerprint: a hash over fixed runs of every manifest. Node and jsc must print the same one.
     var fp = [];

@@ -10,6 +10,7 @@ import SwiftUI
 //   debugOpen(...)   FB_OPEN=feature:<key>/<screen>[/<arg>]; return false to fall back to open
 //   install(...)     once at launch (seed chats, notifications, observers)
 //   didFinish(...)   after every recorded run in the player
+//   didPublish(...)  after Muse Studio publishes (remixes, co-made games, games about me)
 //
 // Don't edit this file in a feature branch.
 
@@ -156,6 +157,20 @@ enum BubbleFeatureRouter {
         LearnScreens.didFinish(score, in: bubble, request: request, appStore: appStore, bubbleStore: bubbleStore)
         LengthScreens.didFinish(score, in: bubble, request: request, appStore: appStore, bubbleStore: bubbleStore)
         SavesScreens.didFinish(score, in: bubble, request: request, appStore: appStore, bubbleStore: bubbleStore)
+    }
+
+    /// After Muse Studio publishes (`BubbleStore.publishFromStudio`), first level first.
+    @MainActor
+    static func didPublish(_ bubbles: [Bubble], appStore: AppStore, bubbleStore: BubbleStore) {
+        ChallengeScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
+        GroupsSearchScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
+        TogetherScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
+        RemixScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
+        StoryScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
+        NextlineScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
+        LearnScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
+        LengthScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
+        SavesScreens.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
     }
 }
 

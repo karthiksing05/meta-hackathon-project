@@ -43,6 +43,12 @@ enum RemixScreens {
     @MainActor
     static func didFinish(_ score: BubbleScore, in bubble: Bubble, request: BubblePlayRequest, appStore: AppStore, bubbleStore: BubbleStore) {
     }
+
+    /// After Muse Studio publishes new Bubbles (first level first): remixes, co-made games, games
+    /// about me, adventures from your own story.
+    @MainActor
+    static func didPublish(_ bubbles: [Bubble], appStore: AppStore, bubbleStore: BubbleStore) {
+    }
 }
 
 /// Every new user-facing string for the "remix" feature, in one place so a rename is easy.
