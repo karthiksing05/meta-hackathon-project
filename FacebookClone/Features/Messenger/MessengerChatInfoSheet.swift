@@ -108,9 +108,9 @@ struct MessengerChatInfoSheet: View {
 
     private var header: some View {
         VStack(spacing: 10) {
-            MessengerConversationAvatar(conversation: conversation, size: 88)
+            MessengerConversationAvatar(conversation: conversation, size: FBAvatarSize.request)
             Text(conversation.title)
-                .font(.system(size: 22, weight: .bold))
+                .font(.fbTitle)
                 .foregroundStyle(FBColor.primaryText)
                 .multilineTextAlignment(.center)
             Text(subtitle)
@@ -141,7 +141,7 @@ struct MessengerChatInfoSheet: View {
         } label: {
             VStack(spacing: 6) {
                 Image(systemName: symbol)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 44, height: 44)
                     .background(FBColor.buttonGray, in: Circle())
@@ -193,7 +193,7 @@ struct MessengerChatInfoSheet: View {
                 .overlay {
                     if isSelected {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: FBIconSize.medium, weight: .bold))
                             .foregroundStyle(.white)
                     }
                 }
@@ -211,7 +211,7 @@ struct MessengerChatInfoSheet: View {
     private var quickEmojiTitleRow: some View {
         HStack(spacing: 12) {
             Text(conversation.quickEmoji)
-                .font(.system(size: 20))
+                .font(.system(size: 20)) // Display text
                 .frame(width: 24)
             Text("Quick reaction")
                 .foregroundStyle(FBColor.primaryText)
@@ -234,7 +234,7 @@ struct MessengerChatInfoSheet: View {
             store.setQuickEmoji(emoji, for: conversation)
         } label: {
             Text(emoji)
-                .font(.system(size: 24))
+                .font(.system(size: 24)) // Display text
                 .frame(width: 36, height: 36)
                 .background {
                     if isSelected {
@@ -266,7 +266,7 @@ struct MessengerChatInfoSheet: View {
 
     private func memberRow(_ user: User, subtitle: String) -> some View {
         HStack(spacing: 12) {
-            AvatarView(user: user, size: 40, showsOnline: !user.isMe)
+            AvatarView(user: user, size: FBAvatarSize.post, showsOnline: !user.isMe)
             VStack(alignment: .leading, spacing: 2) {
                 Text(user.name)
                     .font(.fbName)
@@ -278,7 +278,7 @@ struct MessengerChatInfoSheet: View {
             Spacer(minLength: 8)
             if !user.isMe {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
                     .foregroundStyle(FBColor.tertiaryText)
             }
         }

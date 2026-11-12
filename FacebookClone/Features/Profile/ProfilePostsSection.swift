@@ -8,12 +8,12 @@ struct ProfileSquareAvatar: View {
         ZStack {
             Rectangle().fill(AvatarView.color(for: user.id))
             Text(user.initials)
-                .font(.system(size: 28, weight: .semibold))
+                .font(.fbLargeTitle)
                 .foregroundStyle(.white)
             RemoteImage(url: user.avatarURL, data: user.avatarData, placeholder: .clear)
         }
         .aspectRatio(1, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
     }
 }
 
@@ -45,6 +45,7 @@ struct ProfilePostsSection: View {
         .sheet(isPresented: $showFilters) {
             ProfileFiltersSheet()
                 .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
     }
 
@@ -88,7 +89,7 @@ struct ProfilePostsSection: View {
     private func detailRow(_ symbol: String, prefix: String, bold: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbol)
-                .font(.system(size: 17))
+                .font(.system(size: FBIconSize.regular))
                 .foregroundStyle(FBColor.secondaryText)
                 .frame(width: 24)
             (Text(prefix).foregroundStyle(FBColor.primaryText)
@@ -115,7 +116,7 @@ struct ProfilePostsSection: View {
                         } label: {
                             RemoteImage(url: media.url, data: media.data)
                                 .aspectRatio(0.8, contentMode: .fit)
-                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                         }
                         .buttonStyle(.pressable)
                         .accessibilityLabel("Featured photo \(index + 1)")
@@ -167,7 +168,7 @@ struct ProfilePostsSection: View {
                         VStack(alignment: .leading, spacing: 4) {
                             ProfileSquareAvatar(user: friend)
                             Text(friend.name)
-                                .font(.fbMeta.weight(.semibold))
+                                .font(.fbMetaEmphasized)
                                 .foregroundStyle(FBColor.primaryText)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)

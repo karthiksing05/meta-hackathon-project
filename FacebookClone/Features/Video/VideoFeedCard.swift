@@ -56,7 +56,7 @@ struct VideoFeedCard: View {
             Button {
                 router.push(.profile(post.author))
             } label: {
-                AvatarView(user: post.author, size: 40)
+                AvatarView(user: post.author, size: FBAvatarSize.post)
             }
             .buttonStyle(.plain)
 
@@ -117,7 +117,7 @@ struct VideoFeedCard: View {
             }
             Text("·")
             Image(systemName: post.audience.symbol)
-                .font(.system(size: 11))
+                .font(.system(size: FBIconSize.xs))
                 .accessibilityLabel(post.audience.title)
         }
         .font(.fbMeta)
@@ -152,7 +152,7 @@ struct VideoFeedCard: View {
             }
         } label: {
             Image(systemName: "ellipsis")
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: FBIconSize.regular, weight: .semibold))
                 .foregroundStyle(FBColor.secondaryText)
                 .frame(width: 40, height: 40)
                 .contentShape(Rectangle())
@@ -240,10 +240,10 @@ struct VideoFeedCard: View {
             HStack(spacing: 6) {
                 if reaction == .like {
                     Image(systemName: "hand.thumbsup.fill")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
                 } else {
                     Text(reaction.emoji)
-                        .font(.system(size: 18))
+                        .font(.system(size: FBIconSize.regular))
                 }
                 Text(reaction.title)
                     .font(.fbButton)
@@ -252,7 +252,7 @@ struct VideoFeedCard: View {
         } else {
             HStack(spacing: 6) {
                 Image(systemName: "hand.thumbsup")
-                    .font(.system(size: 18))
+                    .font(.system(size: FBIconSize.regular))
                 Text("Like")
                     .font(.fbButton)
             }
@@ -292,7 +292,7 @@ private struct VideoActionButton: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: symbol)
-                    .font(.system(size: 18))
+                    .font(.system(size: FBIconSize.regular))
                 Text(title)
                     .font(.fbButton)
             }

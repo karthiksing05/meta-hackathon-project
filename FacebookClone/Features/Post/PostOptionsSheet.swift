@@ -14,6 +14,7 @@ enum PostOption: Hashable {
     case editAudience
     case delete
     case whyAd
+    case whyPost
 }
 
 private struct PostOptionItem: Identifiable {
@@ -57,7 +58,7 @@ struct PostOptionsSheet: View {
                 row(item)
             }
         }
-        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
     }
 
     private func row(_ item: PostOptionItem) -> some View {
@@ -67,7 +68,7 @@ struct PostOptionsSheet: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: item.symbol)
-                    .font(.system(size: 19))
+                    .font(.system(size: FBIconSize.large))
                     .foregroundStyle(item.isDestructive ? FBColor.notificationRed : FBColor.primaryText)
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
@@ -109,7 +110,7 @@ struct PostOptionsSheet: View {
         return [
             [save, notifications, favorite],
             [hide(title: "Hide post", subtitle: "See fewer posts like this."), snooze, unfollow],
-            [copyLink, report(title: "Report post")],
+            [whyPost, copyLink, report(title: "Report post")],
         ]
     }
 
@@ -169,6 +170,10 @@ struct PostOptionsSheet: View {
 
     private var whyAd: PostOptionItem {
         PostOptionItem(option: .whyAd, symbol: "info.circle", title: "Why am I seeing this ad?")
+    }
+
+    private var whyPost: PostOptionItem {
+        PostOptionItem(option: .whyPost, symbol: "info.circle", title: "Why am I seeing this post?")
     }
 
     private var edit: PostOptionItem {
@@ -237,6 +242,7 @@ struct PostAudiencePicker: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
     private func row(_ audience: Audience) -> some View {
@@ -246,7 +252,7 @@ struct PostAudiencePicker: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: audience.symbol)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 40, height: 40)
                     .background(FBColor.buttonGray, in: Circle())
@@ -260,7 +266,7 @@ struct PostAudiencePicker: View {
                 }
                 Spacer(minLength: 8)
                 Image(systemName: current == audience ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 22))
+                    .font(.system(size: FBIconSize.xl))
                     .foregroundStyle(current == audience ? FBColor.accent : FBColor.tertiaryText)
             }
             .contentShape(Rectangle())

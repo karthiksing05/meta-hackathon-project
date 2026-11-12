@@ -61,7 +61,7 @@ struct ToastView: View {
         HStack(spacing: 10) {
             if let symbol = toast.symbol {
                 Image(systemName: symbol)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: FBIconSize.medium, weight: .semibold))
             }
             Text(toast.message)
                 .font(.fbBody)
@@ -71,9 +71,9 @@ struct ToastView: View {
         .foregroundStyle(.white)
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Color(hex: 0x303031), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(FBColor.toastBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .shadow(color: .black.opacity(0.18), radius: 10, y: 4)
-        .padding(.horizontal, 12)
+        .padding(.horizontal, FBMetrics.gutter)
         .accessibilityElement(children: .combine)
     }
 }
@@ -92,13 +92,13 @@ struct SplashView: View {
             VStack(spacing: 2) {
                 Spacer()
                 Text("from")
-                    .font(.footnote)
+                    .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                 HStack(spacing: 4) {
                     Image(systemName: "infinity")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.system(size: FBIconSize.regular, weight: .bold))
                     Text("Meta")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.fbHeadline)
                 }
                 .foregroundStyle(FBColor.primaryText)
                 .padding(.bottom, 24)
@@ -133,7 +133,7 @@ struct LoggedOutView: View {
                 logIn()
             } label: {
                 HStack(spacing: 12) {
-                    AvatarView(user: store.me, size: 52)
+                    AvatarView(user: store.me, size: FBAvatarSize.row)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(store.me.name)
                             .font(.fbHeadline)
@@ -151,15 +151,15 @@ struct LoggedOutView: View {
                     }
                 }
                 .padding(14)
-                .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
                         .stroke(FBColor.divider, lineWidth: 1)
                 }
             }
             .buttonStyle(.pressable)
             .disabled(isLoggingIn)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, FBMetrics.screenPadding)
 
             Spacer()
 

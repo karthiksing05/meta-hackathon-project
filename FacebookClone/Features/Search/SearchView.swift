@@ -78,7 +78,7 @@ struct SearchView: View {
                 dismiss()
             } label: {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 40, height: 40)
                     .contentShape(Rectangle())
@@ -128,6 +128,7 @@ struct SearchView: View {
                     recentRow(term)
                 }
                 Button("Clear all") {
+                    Haptics.warning()
                     confirmClear = true
                 }
                 .font(.fbBody)
@@ -152,7 +153,7 @@ struct SearchView: View {
             } label: {
                 HStack(spacing: 12) {
                     Image(systemName: "clock")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
                         .foregroundStyle(FBColor.primaryText)
                         .frame(width: 36, height: 36)
                         .background(FBColor.buttonGray, in: Circle())
@@ -169,7 +170,7 @@ struct SearchView: View {
                 withAnimation { store.removeRecentSearch(term) }
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
                     .foregroundStyle(FBColor.secondaryText)
                     .frame(width: 36, height: 36)
                     .contentShape(Rectangle())
@@ -193,7 +194,7 @@ struct SearchView: View {
                             router.push(.profile(user))
                         } label: {
                             VStack(spacing: 6) {
-                                AvatarView(user: user, size: 56)
+                                AvatarView(user: user, size: FBAvatarSize.row)
                                 Text(user.firstName)
                                     .font(.fbCaption)
                                     .foregroundStyle(FBColor.primaryText)
@@ -216,7 +217,7 @@ struct SearchView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "arrow.up.right")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: FBIconSize.medium, weight: .semibold))
                     .foregroundStyle(FBColor.accent)
                     .frame(width: 36, height: 36)
                     .background(FBColor.tintedBlueBackground, in: Circle())
@@ -252,6 +253,7 @@ struct SearchView: View {
             HStack(spacing: 8) {
                 ForEach(SearchFilter.allCases) { option in
                     ChipView(title: option.rawValue, isSelected: filter == option) {
+                        Haptics.selection()
                         withAnimation { filter = option }
                     }
                 }

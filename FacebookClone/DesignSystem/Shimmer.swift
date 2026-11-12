@@ -42,7 +42,7 @@ extension View {
 struct SkeletonBlock: View {
     var width: CGFloat? = nil
     var height: CGFloat
-    var cornerRadius: CGFloat = 6
+    var cornerRadius: CGFloat = FBMetrics.radiusSmall
 
     var body: some View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -60,7 +60,7 @@ struct PostSkeletonView: View {
             HStack(spacing: 10) {
                 Circle()
                     .fill(FBColor.skeleton)
-                    .frame(width: 40, height: 40)
+                    .frame(width: FBAvatarSize.post, height: FBAvatarSize.post)
                 VStack(alignment: .leading, spacing: 6) {
                     SkeletonBlock(width: 140, height: 12)
                     SkeletonBlock(width: 80, height: 10)

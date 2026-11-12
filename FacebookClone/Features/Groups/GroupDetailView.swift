@@ -78,22 +78,22 @@ struct GroupDetailView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 6) {
                     Text(group.name)
-                        .font(.system(size: 24, weight: .bold))
+                        .font(.fbTabTitle)
                         .foregroundStyle(FBColor.primaryText)
                         .lineLimit(2)
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: FBIconSize.medium, weight: .bold))
                         .foregroundStyle(FBColor.secondaryText)
                 }
                 HStack(spacing: 6) {
                     Image(systemName: group.privacySymbol)
-                        .font(.system(size: 12))
+                        .font(.system(size: FBIconSize.small))
                     Text("\(group.privacyText) · \(group.memberCount.fbCompact) members")
                         .font(.fbBody)
                 }
                 .foregroundStyle(FBColor.secondaryText)
                 if !group.memberSample.isEmpty {
-                    AvatarStack(users: group.memberSample, size: 28, maxCount: 6)
+                    AvatarStack(users: group.memberSample, size: FBAvatarSize.reply, maxCount: 6)
                 }
                 actionButtons
             }
@@ -126,7 +126,7 @@ struct GroupDetailView: View {
             .buttonStyle(.fbSecondary)
             ShareLink(item: "Check out \(group.name) on Facebook") {
                 Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 44, height: 36)
                     .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: FBMetrics.cornerRadius, style: .continuous))
@@ -138,18 +138,21 @@ struct GroupDetailView: View {
     private var joinedMenu: some View {
         Menu {
             Button {
+                Haptics.light()
                 isFollowing.toggle()
                 store.showToast(isFollowing ? "You're following \(group.name)" : "You unfollowed \(group.name)")
             } label: {
                 Label(isFollowing ? "Unfollow group" : "Follow group", systemImage: isFollowing ? "bell.slash" : "bell")
             }
             Button {
+                Haptics.light()
                 notificationsOn.toggle()
                 store.showToast(notificationsOn ? "Notifications turned on" : "Notifications turned off", symbol: "bell.fill")
             } label: {
                 Label(notificationsOn ? "Turn off notifications" : "Turn on notifications", systemImage: "bell.badge")
             }
             Button(role: .destructive) {
+                Haptics.warning()
                 showLeaveConfirm = true
             } label: {
                 Label("Leave group", systemImage: "rectangle.portrait.and.arrow.right")
@@ -158,7 +161,7 @@ struct GroupDetailView: View {
             HStack(spacing: 6) {
                 Text("Joined")
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: FBIconSize.small, weight: .bold))
             }
             .font(.fbButton)
             .foregroundStyle(FBColor.primaryText)
@@ -173,6 +176,7 @@ struct GroupDetailView: View {
             HStack(spacing: 8) {
                 ForEach(GroupsDetailTab.allCases) { item in
                     ChipView(title: item.rawValue, isSelected: tab == item) {
+                        Haptics.selection()
                         tab = item
                     }
                 }
@@ -237,7 +241,7 @@ struct GroupDetailView: View {
     private var lockCard: some View {
         VStack(spacing: 10) {
             Image(systemName: "lock.fill")
-                .font(.system(size: 34))
+                .font(.system(size: FBIconSize.xxl))
                 .foregroundStyle(FBColor.secondaryText)
             Text("Join this group to see the discussion")
                 .font(.fbHeadline)
@@ -250,7 +254,7 @@ struct GroupDetailView: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity)
-        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .padding(12)
     }
 
@@ -288,7 +292,7 @@ struct GroupDetailView: View {
     private func aboutRow(symbol: String, title: String, detail: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbol)
-                .font(.system(size: 18))
+                .font(.system(size: FBIconSize.regular))
                 .foregroundStyle(FBColor.secondaryText)
                 .frame(width: 26)
             VStack(alignment: .leading, spacing: 2) {
@@ -377,7 +381,7 @@ private struct GroupsMemberRow: View {
         HStack(spacing: 12) {
             NavigationLink(value: Route.profile(user)) {
                 HStack(spacing: 12) {
-                    AvatarView(user: user, size: 52)
+                    AvatarView(user: user, size: FBAvatarSize.compact)
                     VStack(alignment: .leading, spacing: 2) {
                         NameWithBadge(user: user)
                         if user.mutualFriendCount > 0 && !user.isMe {

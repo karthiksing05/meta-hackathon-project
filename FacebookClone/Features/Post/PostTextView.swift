@@ -88,7 +88,7 @@ struct PostBackgroundText: View {
             .frame(maxWidth: .infinity)
             .overlay {
                 Text(text)
-                    .font(.system(size: fontSize, weight: .bold))
+                    .font(.system(size: fontSize, weight: .bold)) // Display text
                     .multilineTextAlignment(.center)
                     .foregroundStyle(background.textColor)
                     .minimumScaleFactor(0.5)

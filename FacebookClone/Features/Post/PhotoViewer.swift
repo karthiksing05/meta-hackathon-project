@@ -201,7 +201,7 @@ struct PhotoViewer: View {
 
     private func chromeIcon(_ name: String) -> some View {
         Image(systemName: name)
-            .font(.system(size: 17, weight: .semibold))
+            .font(.system(size: FBIconSize.regular, weight: .semibold))
             .foregroundStyle(.white)
             .frame(width: 40, height: 40)
             .background(Color.white.opacity(0.14), in: Circle())
@@ -308,7 +308,7 @@ private struct PostViewerActionsBar: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: symbol)
-                    .font(.system(size: 17))
+                    .font(.system(size: FBIconSize.regular))
                 Text(title)
                     .font(.fbButton)
             }

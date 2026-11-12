@@ -215,7 +215,7 @@ struct PostReactorRow: View {
         HStack(spacing: 12) {
             NavigationLink(value: Route.profile(entry.user)) {
                 HStack(spacing: 12) {
-                    AvatarView(user: entry.user, size: 48)
+                    AvatarView(user: entry.user, size: FBAvatarSize.compact)
                         .overlay(alignment: .bottomTrailing) {
                             ReactionBadge(type: entry.type, size: 18)
                                 .offset(x: 3, y: 3)

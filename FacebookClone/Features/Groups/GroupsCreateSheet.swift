@@ -48,6 +48,8 @@ struct GroupsCreateSheet: View {
                 }
             }
         }
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 
     private var fields: some View {
@@ -56,13 +58,16 @@ struct GroupsCreateSheet: View {
                 .font(.fbBodyLarge)
                 .padding(.horizontal, 12)
                 .frame(height: 48)
-                .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             Picker("Privacy", selection: $privacy) {
                 ForEach(GroupsPrivacyChoice.allCases) { choice in
                     Text(choice.rawValue).tag(choice)
                 }
             }
             .pickerStyle(.segmented)
+            .onChange(of: privacy) {
+                Haptics.selection()
+            }
             Text(privacy == .isPrivate
                  ? "Only members can see who's in the group and what they post."
                  : "Anyone can see who's in the group and what they post.")

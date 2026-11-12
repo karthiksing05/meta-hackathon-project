@@ -75,7 +75,7 @@ struct VideoInlinePlayer: View {
         if showsPlayButton {
             Button(action: onPlay) {
                 Image(systemName: "play.fill")
-                    .font(.system(size: 26, weight: .bold))
+                    .font(.system(size: FBIconSize.xxl, weight: .bold))
                     .foregroundStyle(Color.white)
                     .frame(width: 64, height: 64)
                     .background(Color.black.opacity(0.55), in: Circle())
@@ -115,7 +115,7 @@ struct VideoInlinePlayer: View {
                 store.videosMuted.toggle()
             } label: {
                 Image(systemName: store.videosMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
                     .foregroundStyle(Color.white)
                     .frame(width: 30, height: 30)
                     .background(Color.black.opacity(0.55), in: Circle())
@@ -150,7 +150,7 @@ private struct VideoTimePill: View {
     var body: some View {
         if remaining > 0 {
             Text(remaining.clockString)
-                .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                .font(.fbCaptionEmphasized.monospacedDigit())
                 .foregroundStyle(Color.white)
                 .padding(.horizontal, 7)
                 .padding(.vertical, 3)
@@ -163,12 +163,12 @@ private struct VideoTimePill: View {
 private struct VideoLiveBadge: View {
     var body: some View {
         Text("LIVE")
-            .font(.system(size: 12, weight: .heavy))
+            .font(.fbCaptionEmphasized)
             .tracking(0.5)
             .foregroundStyle(Color.white)
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
-            .background(FBColor.liveRed, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+            .background(FBColor.liveRed, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXS, style: .continuous))
             .accessibilityLabel("Live")
     }
 }
@@ -182,15 +182,15 @@ private struct VideoWatchingPill: View {
             let watchers = VideoLiveStats.watchers(for: post, at: context.date)
             HStack(spacing: 4) {
                 Image(systemName: "eye.fill")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: FBIconSize.xs, weight: .bold))
                 Text("\(watchers.fbCompact) watching")
-                    .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                    .font(.fbCaptionEmphasized.monospacedDigit())
                     .contentTransition(.numericText())
             }
             .foregroundStyle(Color.white)
             .padding(.horizontal, 7)
             .padding(.vertical, 3)
-            .background(Color.black.opacity(0.6), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+            .background(Color.black.opacity(0.6), in: RoundedRectangle(cornerRadius: FBMetrics.radiusXS, style: .continuous))
             .animation(.easeInOut(duration: 0.3), value: watchers)
             .accessibilityElement(children: .combine)
         }

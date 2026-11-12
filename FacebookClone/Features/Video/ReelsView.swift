@@ -161,7 +161,7 @@ private struct ReelsTopBar: View {
         HStack(spacing: 4) {
             iconButton("xmark", label: "Close", action: onClose)
             Text("Reels")
-                .font(.system(size: 22, weight: .bold))
+                .font(.fbTitle)
                 .foregroundStyle(Color.white)
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 8)
@@ -179,7 +179,7 @@ private struct ReelsTopBar: View {
     private func iconButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: FBIconSize.large, weight: .semibold))
                 .foregroundStyle(Color.white)
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
@@ -200,7 +200,7 @@ private struct ReelsEndPage: View {
                 .font(.system(size: 60))
                 .foregroundStyle(Color.white)
             Text("You're all caught up")
-                .font(.system(size: 22, weight: .bold))
+                .font(.fbTitle)
                 .foregroundStyle(Color.white)
             Text("You've watched all the reels we have for you right now.")
                 .font(.fbBody)
@@ -259,7 +259,7 @@ struct ReelsOptionsSheet: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: symbol)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 38, height: 38)
                     .background(FBColor.buttonGray, in: Circle())

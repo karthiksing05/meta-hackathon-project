@@ -73,7 +73,7 @@ private struct HomeAudienceRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: option.symbol)
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: FBIconSize.regular, weight: .semibold))
                 .foregroundStyle(FBColor.primaryText)
                 .frame(width: 48, height: 48)
                 .background(FBColor.buttonGray, in: Circle())
@@ -188,7 +188,7 @@ private struct HomeFeelingCell: View {
     var body: some View {
         HStack(spacing: 10) {
             Text(feeling.emoji)
-                .font(.system(size: 26))
+                .font(.system(size: 26)) // Display text
             Text(feeling.name)
                 .font(.fbBody)
                 .foregroundStyle(FBColor.primaryText)
@@ -294,10 +294,10 @@ struct HomeTagPeopleSheet: View {
                         toggle(user)
                     } label: {
                         VStack(spacing: 4) {
-                            AvatarView(user: user, size: 48)
+                            AvatarView(user: user, size: FBAvatarSize.compact)
                                 .overlay(alignment: .topTrailing) {
                                     Image(systemName: "xmark")
-                                        .font(.system(size: 9, weight: .bold))
+                                        .font(.system(size: FBIconSize.xs, weight: .bold))
                                         .foregroundStyle(FBColor.primaryText)
                                         .frame(width: 18, height: 18)
                                         .background(FBColor.buttonGray, in: Circle())
@@ -339,14 +339,14 @@ private struct HomeTagRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            AvatarView(user: user, size: 40)
+            AvatarView(user: user, size: FBAvatarSize.post)
             Text(user.name)
                 .font(.fbName)
                 .foregroundStyle(FBColor.primaryText)
                 .lineLimit(1)
             Spacer(minLength: 8)
             Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 22))
+                .font(.system(size: FBIconSize.xl))
                 .foregroundStyle(isSelected ? FBColor.brandBlue : FBColor.tertiaryText)
         }
         .padding(.horizontal, 16)
@@ -488,7 +488,7 @@ private struct HomePlaceRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "mappin")
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: FBIconSize.regular, weight: .semibold))
                 .foregroundStyle(FBColor.checkInRed)
                 .frame(width: 44, height: 44)
                 .background(FBColor.inputBackground, in: Circle())
@@ -505,7 +505,7 @@ private struct HomePlaceRow: View {
             Spacer(minLength: 8)
             if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.system(size: FBIconSize.medium, weight: .bold))
                     .foregroundStyle(FBColor.accent)
             }
         }
@@ -525,7 +525,7 @@ private struct HomeActionRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: symbol)
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: FBIconSize.regular, weight: .bold))
                 .foregroundStyle(color)
                 .frame(width: 44, height: 44)
                 .background(FBColor.inputBackground, in: Circle())
@@ -570,7 +570,7 @@ struct HomeComposerToolsSheet: View {
                             Spacer(minLength: 8)
                             if activeTools.contains(tool) {
                                 Image(systemName: "checkmark")
-                                    .font(.system(size: 15, weight: .bold))
+                                    .font(.system(size: FBIconSize.medium, weight: .bold))
                                     .foregroundStyle(FBColor.accent)
                             }
                         }

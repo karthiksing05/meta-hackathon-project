@@ -4,8 +4,8 @@ import SwiftUI
 
 /// Sizes and choices shared by the Messenger screens.
 enum MessengerStyle {
-    static let bubbleRadius: CGFloat = 18
-    static let joinedRadius: CGFloat = 4
+    static let bubbleRadius: CGFloat = FBMetrics.radiusXL
+    static let joinedRadius: CGFloat = FBMetrics.radiusXS
     static let maxBubbleWidth: CGFloat = 264
     static let avatarSize: CGFloat = 28
     static let photoWidth: CGFloat = 220
@@ -214,7 +214,7 @@ struct MessengerBubbleShape: Shape {
 /// Two overlapping avatars for a group chat.
 struct MessengerGroupAvatar: View {
     let users: [User]
-    var size: CGFloat = 56
+    var size: CGFloat = FBAvatarSize.row
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -241,7 +241,7 @@ struct MessengerGroupAvatar: View {
 /// The avatar for a chat: one person (with the green dot) or two overlapping group members.
 struct MessengerConversationAvatar: View {
     let conversation: Conversation
-    var size: CGFloat = 56
+    var size: CGFloat = FBAvatarSize.row
     var showsOnline: Bool = true
 
     var body: some View {

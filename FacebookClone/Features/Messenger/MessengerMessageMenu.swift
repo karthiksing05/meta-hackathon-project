@@ -76,7 +76,7 @@ struct MessengerMessageMenu: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
-        .background(FBColor.elevated, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .background(FBColor.elevated, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
         .shadow(color: Color.black.opacity(0.18), radius: 12, y: 4)
     }
 
@@ -85,7 +85,7 @@ struct MessengerMessageMenu: View {
             onReact(emoji)
         } label: {
             Text(emoji)
-                .font(.system(size: 26))
+                .font(.system(size: 26)) // Display text
                 .frame(width: 36, height: 36)
                 .background {
                     if myReaction == emoji {
@@ -105,7 +105,7 @@ struct MessengerMessageMenu: View {
             }
         } label: {
             Image(systemName: showsMore ? "chevron.up" : "plus")
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: FBIconSize.medium, weight: .bold))
                 .foregroundStyle(FBColor.secondaryText)
                 .frame(width: 32, height: 32)
                 .background(FBColor.buttonGray, in: Circle())
@@ -136,8 +136,8 @@ struct MessengerMessageMenu: View {
             }
         }
         .frame(width: 230)
-        .background(FBColor.elevated, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(FBColor.elevated, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .shadow(color: Color.black.opacity(0.18), radius: 12, y: 4)
     }
 
@@ -145,10 +145,10 @@ struct MessengerMessageMenu: View {
         Button(action: action) {
             HStack {
                 Text(title)
-                    .font(.system(size: 16))
+                    .font(.fbBodyLarge)
                 Spacer(minLength: 8)
                 Image(systemName: symbol)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: FBIconSize.regular, weight: .medium))
             }
             .foregroundStyle(isDestructive ? FBColor.notificationRed : FBColor.primaryText)
             .padding(.horizontal, 16)
@@ -229,7 +229,7 @@ struct MessengerReactionsSheet: View {
         } label: {
             HStack(spacing: 12) {
                 if let user {
-                    AvatarView(user: user, size: 40)
+                    AvatarView(user: user, size: FBAvatarSize.post)
                 } else {
                     Circle()
                         .fill(FBColor.buttonGray)
@@ -247,7 +247,7 @@ struct MessengerReactionsSheet: View {
                 }
                 Spacer(minLength: 8)
                 Text(entry.emoji)
-                    .font(.system(size: 26))
+                    .font(.system(size: 26)) // Display text
             }
             .contentShape(Rectangle())
         }

@@ -47,6 +47,7 @@ struct SavedView: View {
             HStack(spacing: 8) {
                 ForEach(MoreSavedFilter.allCases) { item in
                     ChipView(title: item.rawValue, isSelected: filter == item) {
+                        Haptics.selection()
                         filter = item
                     }
                 }
@@ -104,6 +105,7 @@ struct SavedView: View {
     }
 
     private func unsave(_ entry: MoreSavedEntry) {
+        Haptics.light()
         switch entry {
         case .post(let post): store.toggleSave(post)
         case .listing(let listing): store.toggleSave(listing)
@@ -143,12 +145,12 @@ struct SavedView: View {
             ZStack {
                 FBColor.inputBackground
                 Image(systemName: icon)
-                    .font(.system(size: 28))
+                    .font(.system(size: FBIconSize.xxl))
                     .foregroundStyle(FBColor.secondaryText)
                 RemoteImage(url: thumb, placeholder: .clear)
             }
             .aspectRatio(1, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             Text(title)
                 .font(.fbName)
                 .foregroundStyle(FBColor.primaryText)
@@ -206,7 +208,7 @@ private struct MoreSavedRow: View {
             }
         }
         .frame(width: 72, height: 72)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
     }
 
     private var title: String {
@@ -238,6 +240,7 @@ private struct MoreSavedRow: View {
     private var menu: some View {
         Menu {
             Button(role: .destructive) {
+                Haptics.light()
                 switch entry {
                 case .post(let post): store.toggleSave(post)
                 case .listing(let listing): store.toggleSave(listing)
@@ -255,7 +258,7 @@ private struct MoreSavedRow: View {
             }
         } label: {
             Image(systemName: "ellipsis")
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: FBIconSize.regular, weight: .bold))
                 .foregroundStyle(FBColor.secondaryText)
                 .frame(width: 36, height: 44)
         }

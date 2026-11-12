@@ -51,6 +51,7 @@ struct FriendRequestsView: View {
         .sheet(isPresented: $showSent) {
             FriendsSentRequestsSheet()
                 .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         }
     }
 }
@@ -72,7 +73,7 @@ private struct FriendsSentRequestsSheet: View {
                     List {
                         ForEach(store.sentRequests) { user in
                             HStack(spacing: 12) {
-                                AvatarView(user: user, size: 60)
+                                AvatarView(user: user, size: FBAvatarSize.row)
                                 VStack(alignment: .leading, spacing: 4) {
                                     NameWithBadge(user: user)
                                     if let date = user.requestDate {

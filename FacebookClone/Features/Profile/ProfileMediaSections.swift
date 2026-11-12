@@ -109,7 +109,7 @@ struct ProfilePhotosSection: View {
                     VStack(alignment: .leading, spacing: 6) {
                         RemoteImage(url: album.items.first?.url, data: album.items.first?.data)
                             .aspectRatio(1, contentMode: .fit)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                         Text(album.name)
                             .font(.fbName)
                             .foregroundStyle(FBColor.primaryText)
@@ -182,9 +182,9 @@ struct ProfileReelsSection: View {
             .overlay(alignment: .bottomLeading) {
                 HStack(spacing: 3) {
                     Image(systemName: "play.fill")
-                        .font(.system(size: 11))
+                        .font(.system(size: FBIconSize.xs))
                     Text(post.viewCount.fbCompact)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.fbMetaEmphasized)
                 }
                 .foregroundStyle(.white)
                 .shadow(color: .black.opacity(0.5), radius: 2)

@@ -211,7 +211,7 @@ struct CreatePostView: View {
                 attemptDismiss()
             } label: {
                 Image(systemName: "arrow.left")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: FBIconSize.large, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 36, height: 36)
                     .contentShape(Rectangle())
@@ -220,7 +220,7 @@ struct CreatePostView: View {
             .accessibilityLabel("Back")
 
             Text(screenTitle)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.fbHeadline)
                 .foregroundStyle(FBColor.primaryText)
                 .accessibilityAddTraits(.isHeader)
 
@@ -239,7 +239,7 @@ struct CreatePostView: View {
 
     private var authorRow: some View {
         HStack(alignment: .top, spacing: 10) {
-            AvatarView(user: store.me, size: 44)
+            AvatarView(user: store.me, size: FBAvatarSize.post)
             VStack(alignment: .leading, spacing: 6) {
                 headerLine
                     .font(.fbBody)
@@ -299,7 +299,7 @@ struct CreatePostView: View {
         if let group = request.group {
             HStack(spacing: 4) {
                 Image(systemName: group.privacySymbol)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: FBIconSize.xs, weight: .semibold))
                 Text("Posting in \(group.name)")
                     .font(.fbMeta)
                     .lineLimit(1)
@@ -308,7 +308,7 @@ struct CreatePostView: View {
         } else if let owner = request.timelineOwner {
             HStack(spacing: 4) {
                 Image(systemName: "person.crop.circle")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: FBIconSize.xs, weight: .semibold))
                 Text("Writing on \(owner.firstName)'s profile")
                     .font(.fbMeta)
                     .lineLimit(1)
@@ -350,14 +350,14 @@ struct CreatePostView: View {
             palette.gradient
             if text.isEmpty {
                 Text(placeholder)
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold)) // Display text
                     .foregroundStyle(palette.textColor.opacity(0.75))
                     .multilineTextAlignment(.center)
                     .padding(24)
                     .allowsHitTesting(false)
             }
             TextField("", text: $text, axis: .vertical)
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: 28, weight: .bold)) // Display text
                 .foregroundStyle(palette.textColor)
                 .tint(palette.textColor)
                 .multilineTextAlignment(.center)

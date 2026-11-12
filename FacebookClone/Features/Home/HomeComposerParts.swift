@@ -63,7 +63,7 @@ enum HomeComposerTool: String, CaseIterable, Identifiable, Hashable {
         case .feeling: return FBColor.feelingYellow
         case .checkIn: return FBColor.checkInRed
         case .background: return FBColor.savedPurple
-        case .poll: return Color(hex: 0xF5A623)
+        case .poll: return FBColor.pollOrange
         case .live: return FBColor.liveRed
         case .camera: return FBColor.groupsBlue
         case .lifeEvent: return FBColor.memoriesBlue
@@ -84,19 +84,19 @@ struct HomeComposerChip: View {
         Button(action: action) {
             HStack(spacing: 4) {
                 Image(systemName: symbol)
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: FBIconSize.xs, weight: .bold))
                 Text(title)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.fbMetaEmphasized)
                     .lineLimit(1)
                 if showsChevron {
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.system(size: FBIconSize.xs, weight: .bold))
                 }
             }
             .foregroundStyle(FBColor.accent)
             .padding(.horizontal, 8)
             .frame(height: 26)
-            .background(FBColor.tintedBlueBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .background(FBColor.tintedBlueBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusSmall, style: .continuous))
         }
         .buttonStyle(.plain)
     }
@@ -139,7 +139,7 @@ struct HomeComposerToolsBar: View {
                 }
                 Button(action: onExpand) {
                     Image(systemName: "ellipsis.circle.fill")
-                        .font(.system(size: 22))
+                        .font(.system(size: FBIconSize.xl))
                         .foregroundStyle(FBColor.secondaryText)
                         .frame(width: 32, height: 40)
                         .contentShape(Rectangle())
@@ -192,7 +192,7 @@ struct HomeComposerToolIcon: View {
                 .font(.system(size: size * 0.55, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: size + 2, height: size + 2)
-                .background(HomeComposerToolIcon.rainbow, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .background(HomeComposerToolIcon.rainbow, in: RoundedRectangle(cornerRadius: FBMetrics.radiusSmall, style: .continuous))
         } else {
             Image(systemName: tool.symbol)
                 .font(.system(size: size, weight: .semibold))
@@ -264,25 +264,25 @@ struct HomeBackgroundSwatchRow: View {
     private var toggleLabel: some View {
         if isExpanded {
             Image(systemName: "chevron.left")
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: FBIconSize.medium, weight: .bold))
                 .foregroundStyle(FBColor.primaryText)
                 .frame(width: 34, height: 34)
-                .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
         } else {
             Text("Aa")
-                .font(.system(size: 15, weight: .bold))
+                .font(.fbButton)
                 .foregroundStyle(.white)
                 .frame(width: 34, height: 34)
-                .background(HomeComposerToolIcon.rainbow, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(HomeComposerToolIcon.rainbow, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
         }
     }
 
     private var noneSwatch: some View {
-        RoundedRectangle(cornerRadius: 8, style: .continuous)
+        RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous)
             .fill(FBColor.surface)
             .frame(width: 34, height: 34)
             .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous)
                     .stroke(FBColor.divider, lineWidth: 1)
             }
             .overlay {
@@ -293,7 +293,7 @@ struct HomeBackgroundSwatchRow: View {
     }
 
     private func swatch(_ preset: PostBackground) -> some View {
-        RoundedRectangle(cornerRadius: 8, style: .continuous)
+        RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous)
             .fill(preset.gradient)
             .frame(width: 34, height: 34)
             .overlay {
@@ -304,7 +304,7 @@ struct HomeBackgroundSwatchRow: View {
     }
 
     private var selectionRing: some View {
-        RoundedRectangle(cornerRadius: 10, style: .continuous)
+        RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
             .stroke(FBColor.accent, lineWidth: 2.5)
             .padding(-3)
     }
@@ -339,7 +339,7 @@ struct HomePollEditor: View {
                 Spacer()
                 Button(action: onRemove) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: FBIconSize.small, weight: .bold))
                         .foregroundStyle(FBColor.primaryText)
                         .frame(width: 28, height: 28)
                         .background(FBColor.buttonGray, in: Circle())
@@ -354,13 +354,13 @@ struct HomePollEditor: View {
                         .foregroundStyle(FBColor.primaryText)
                         .padding(.horizontal, 12)
                         .frame(height: 40)
-                        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                     if options.count > 2 {
                         Button {
                             remove(option.id)
                         } label: {
                             Image(systemName: "minus.circle.fill")
-                                .font(.system(size: 20))
+                                .font(.system(size: FBIconSize.large))
                                 .foregroundStyle(FBColor.secondaryText)
                         }
                         .buttonStyle(.plain)
@@ -383,7 +383,7 @@ struct HomePollEditor: View {
         }
         .padding(12)
         .overlay {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
                 .stroke(FBColor.divider, lineWidth: 1)
         }
     }
@@ -425,7 +425,7 @@ struct HomeComposerMediaGrid: View {
                 tile(item)
             }
             if isLoading {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous)
                     .fill(FBColor.skeleton)
                     .frame(height: 170)
                     .overlay {
@@ -441,7 +441,7 @@ struct HomeComposerMediaGrid: View {
         if media.count == 1 && !isLoading {
             RemoteImage(url: item.url, data: item.data)
                 .aspectRatio(CGFloat(max(item.aspectRatio, 0.6)), contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                 .overlay(alignment: .topTrailing) {
                     removeButton(for: item)
                 }
@@ -451,7 +451,7 @@ struct HomeComposerMediaGrid: View {
         } else {
             RemoteImage(url: item.url, data: item.data)
                 .frame(height: 170)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                 .overlay(alignment: .topTrailing) {
                     removeButton(for: item)
                 }
@@ -468,7 +468,7 @@ struct HomeComposerMediaGrid: View {
                 onRemove(item)
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: FBIconSize.small, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: 26, height: 26)
                     .background(Color.black.opacity(0.55), in: Circle())
@@ -483,7 +483,7 @@ struct HomeComposerMediaGrid: View {
     private func videoBadge(for item: Media) -> some View {
         if item.kind == .video {
             Image(systemName: "play.fill")
-                .font(.system(size: 18, weight: .bold))
+                .font(.system(size: FBIconSize.regular, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 44, height: 44)
                 .background(Color.black.opacity(0.45), in: Circle())
@@ -501,14 +501,14 @@ struct HomeSharedPostPreview: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
-                    AvatarView(user: post.author, size: 32)
+                    AvatarView(user: post.author, size: FBAvatarSize.comment)
                     VStack(alignment: .leading, spacing: 1) {
                         NameWithBadge(user: post.author)
                         HStack(spacing: 3) {
                             Text(post.createdAt.fbShort)
                             Text("·")
                             Image(systemName: post.audience.symbol)
-                                .font(.system(size: 10))
+                                .font(.system(size: FBIconSize.xs))
                         }
                         .font(.fbCaption)
                         .foregroundStyle(FBColor.secondaryText)
@@ -527,9 +527,9 @@ struct HomeSharedPostPreview: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(FBColor.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
                 .stroke(FBColor.divider, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
@@ -545,7 +545,7 @@ struct HomeSharedPostPreview: View {
                 .overlay {
                     if item.kind == .video {
                         Image(systemName: "play.fill")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: FBIconSize.large, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(width: 48, height: 48)
                             .background(Color.black.opacity(0.45), in: Circle())

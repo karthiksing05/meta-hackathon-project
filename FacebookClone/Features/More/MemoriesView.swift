@@ -46,10 +46,10 @@ struct MemoriesView: View {
     private var headerCard: some View {
         VStack(spacing: 8) {
             Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 34, weight: .semibold))
+                .font(.system(size: FBIconSize.xxl, weight: .semibold))
                 .foregroundStyle(FBColor.memoriesBlue)
             Text("On this day")
-                .font(.system(size: 24, weight: .bold))
+                .font(.fbTabTitle)
                 .foregroundStyle(FBColor.primaryText)
             Text(todayText)
                 .font(.fbBody)
@@ -128,5 +128,6 @@ private struct MoreMemorySettingsSheet: View {
             }
         }
         .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
     }
 }

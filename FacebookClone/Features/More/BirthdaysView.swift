@@ -57,7 +57,7 @@ struct BirthdaysView: View {
         VStack(spacing: 12) {
             NavigationLink(value: Route.profile(user)) {
                 HStack(spacing: 12) {
-                    AvatarView(user: user, size: 60)
+                    AvatarView(user: user, size: FBAvatarSize.row)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(user.name)
                             .font(.fbName)
@@ -68,7 +68,7 @@ struct BirthdaysView: View {
                     }
                     Spacer()
                     Text("🎂")
-                        .font(.system(size: 28))
+                        .font(.system(size: 28)) // Display text
                 }
             }
             .buttonStyle(.plain)
@@ -91,7 +91,7 @@ struct BirthdaysView: View {
             }
         }
         .padding(12)
-        .background(FBColor.background, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(FBColor.background, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
     }
 
     // MARK: Upcoming
@@ -139,7 +139,7 @@ struct BirthdaysView: View {
     private func upcomingRow(_ user: User) -> some View {
         NavigationLink(value: Route.profile(user)) {
             HStack(spacing: 12) {
-                AvatarView(user: user, size: 52)
+                AvatarView(user: user, size: FBAvatarSize.compact)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(user.name)
                         .font(.fbName)

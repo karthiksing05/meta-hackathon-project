@@ -67,6 +67,7 @@ struct GroupsView: View {
             HStack(spacing: 8) {
                 ForEach(GroupsFilter.allCases) { item in
                     ChipView(title: item.rawValue, isSelected: filter == item) {
+                        Haptics.selection()
                         filter = item
                     }
                 }
@@ -226,7 +227,7 @@ private struct GroupsTile: View {
         VStack(alignment: .leading, spacing: 6) {
             GroupsCoverImage(group: group)
                 .frame(width: 116, height: 116)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 .overlay(alignment: .topTrailing) {
                     if group.unreadCount > 0 {
                         Circle()
@@ -254,7 +255,7 @@ private struct GroupsRow: View {
         HStack(spacing: 12) {
             GroupsCoverImage(group: group)
                 .frame(width: 60, height: 60)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(group.name)
                     .font(.fbName)
@@ -326,8 +327,8 @@ private struct GroupsDiscoverCard: View {
             }
             .padding(12)
         }
-        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
     }
 
     private var memberLine: String {

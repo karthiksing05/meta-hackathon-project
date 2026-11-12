@@ -287,7 +287,7 @@ struct VideoReelsCarousel: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Image(systemName: "film")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.reelsPink)
                 Text("Reels")
                     .font(.fbHeadline)
@@ -342,7 +342,7 @@ private struct VideoReelCard: View {
                 )
             }
             .overlay(alignment: .topLeading) {
-                AvatarView(user: reel.author, size: 28)
+                AvatarView(user: reel.author, size: FBAvatarSize.reply)
                     .overlay {
                         Circle().stroke(FBColor.brandBlue, lineWidth: 2)
                     }
@@ -351,8 +351,8 @@ private struct VideoReelCard: View {
             .overlay(alignment: .bottomLeading) {
                 info
             }
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Reel by \(reel.author.name), \(reel.viewCount.fbCompact) plays")
     }
@@ -361,15 +361,15 @@ private struct VideoReelCard: View {
         VStack(alignment: .leading, spacing: 4) {
             if !reel.text.isEmpty {
                 Text(reel.text)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.fbCaptionEmphasized)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
             }
             HStack(spacing: 3) {
                 Image(systemName: "play.fill")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: FBIconSize.xs, weight: .bold))
                 Text(reel.viewCount.fbCompact)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.fbCaptionEmphasized)
             }
         }
         .foregroundStyle(Color.white)
@@ -385,7 +385,7 @@ private struct VideoHiddenRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "eye.slash.fill")
-                .font(.system(size: 18))
+                .font(.system(size: FBIconSize.regular))
                 .foregroundStyle(FBColor.secondaryText)
                 .frame(width: 36, height: 36)
                 .background(FBColor.buttonGray, in: Circle())

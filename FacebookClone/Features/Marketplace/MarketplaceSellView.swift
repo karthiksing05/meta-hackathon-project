@@ -110,13 +110,13 @@ struct MarketplaceSellView: View {
         ) {
             VStack(spacing: 6) {
                 Image(systemName: "camera.fill")
-                    .font(.system(size: 22))
+                    .font(.system(size: FBIconSize.xl))
                 Text("Add photos")
                     .font(.fbMeta)
             }
             .foregroundStyle(FBColor.accent)
             .frame(width: 96, height: 96)
-            .background(FBColor.tintedBlueBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(FBColor.tintedBlueBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         }
         .buttonStyle(.plain)
     }
@@ -124,13 +124,13 @@ struct MarketplaceSellView: View {
     private func thumbnail(_ photo: MarketplaceSellPhoto) -> some View {
         RemoteImage(url: nil, data: photo.data)
             .frame(width: 96, height: 96)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .overlay(alignment: .topTrailing) {
                 Button {
                     photos.removeAll { $0.id == photo.id }
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .bold))
+                        .font(.system(size: FBIconSize.xs, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 22, height: 22)
                         .background(Color.black.opacity(0.65), in: Circle())
@@ -144,7 +144,7 @@ struct MarketplaceSellView: View {
     private var priceRow: some View {
         HStack {
             Text("$")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(FBColor.secondaryText)
             TextField("Price", text: $priceText)
                 .keyboardType(.numberPad)
                 .disabled(isFree)

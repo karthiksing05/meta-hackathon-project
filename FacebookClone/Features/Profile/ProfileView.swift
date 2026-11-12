@@ -39,7 +39,7 @@ struct ProfileView: View {
     @State private var showsNavTitle = false
 
     private let coverHeight: CGFloat = 220
-    private let avatarOuter: CGFloat = 168
+    private let avatarOuter: CGFloat = FBAvatarSize.profile
 
     private var sections: [ProfileSection] {
         user.isPage
@@ -193,7 +193,7 @@ struct ProfileView: View {
         let hasStory = story != nil
         let seen = story?.isSeen ?? false
         let ring: AvatarRing = hasStory ? .story(seen: seen) : .none
-        let inner: CGFloat = hasStory ? 142 : 160
+        let inner: CGFloat = hasStory ? FBAvatarSize.profile - 26 : FBAvatarSize.profile - 8
         return AvatarView(user: user, size: inner, ring: ring)
             .padding(4)
             .background(FBColor.surface, in: Circle())
@@ -202,7 +202,7 @@ struct ProfileView: View {
     private var nameRow: some View {
         HStack(spacing: 6) {
             Text(user.name)
-                .font(.system(size: 26, weight: .bold))
+                .font(.fbTabTitle)
                 .foregroundStyle(FBColor.primaryText)
                 .fixedSize(horizontal: false, vertical: true)
             if user.isVerified {
@@ -240,7 +240,7 @@ struct ProfileView: View {
                             .foregroundStyle(FBColor.secondaryText)
                     }
                     .buttonStyle(.plain)
-                    AvatarStack(users: store.friends(of: user), size: 24, maxCount: 5)
+                    AvatarStack(users: store.friends(of: user), size: FBAvatarSize.tiny, maxCount: 5)
                 }
             }
         }

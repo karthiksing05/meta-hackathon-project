@@ -76,7 +76,7 @@ struct SettingsView: View {
                 router.push(.comingSoon(title: "Accounts Center", symbol: "person.crop.circle.badge.checkmark"))
             } label: {
                 HStack(spacing: 12) {
-                    AvatarView(user: store.me, size: 48)
+                    AvatarView(user: store.me, size: FBAvatarSize.compact)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Accounts Center")
                             .font(.fbHeadline)
@@ -88,7 +88,7 @@ struct SettingsView: View {
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: FBIconSize.small, weight: .semibold))
                         .foregroundStyle(FBColor.tertiaryText)
                 }
                 .padding(.vertical, 4)
@@ -223,6 +223,7 @@ struct SettingsView: View {
         if show("Clear search history", "Search history") {
             Section("Search history") {
                 Button {
+                    Haptics.warning()
                     confirmClearHistory = true
                 } label: {
                     SettingsLabel(title: "Clear search history", symbol: "magnifyingglass", color: FBColor.secondaryText)
@@ -259,7 +260,7 @@ struct SettingsView: View {
                                     .foregroundStyle(FBColor.primaryText)
                                 Spacer()
                                 Image(systemName: "chevron.right")
-                                    .font(.system(size: 13, weight: .semibold))
+                                    .font(.system(size: FBIconSize.small, weight: .semibold))
                                     .foregroundStyle(FBColor.tertiaryText)
                             }
                         }
@@ -285,10 +286,10 @@ struct SettingsLabel: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: symbol)
-                .font(.system(size: 14, weight: .bold))
+                .font(.system(size: FBIconSize.medium, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 30, height: 30)
-                .background(color, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(color, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
             Text(title)
                 .font(.fbBodyLarge)
                 .foregroundStyle(FBColor.primaryText)

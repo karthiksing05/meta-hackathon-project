@@ -89,7 +89,7 @@ struct MessengerComposer: View {
 
     private func toolIcon(_ symbol: String) -> some View {
         Image(systemName: symbol)
-            .font(.system(size: 21, weight: .semibold))
+            .font(.system(size: FBIconSize.xl, weight: .semibold))
             .foregroundStyle(conversation.themeColor)
             .frame(width: 26, height: 36)
             .contentShape(Rectangle())
@@ -100,7 +100,7 @@ struct MessengerComposer: View {
     private var field: some View {
         HStack(alignment: .bottom, spacing: 6) {
             TextField("Aa", text: $draft, axis: .vertical)
-                .font(.system(size: 16))
+                .font(.fbBodyLarge)
                 .lineLimit(1...5)
                 .focused(isFocused)
                 .padding(.vertical, 8)
@@ -109,7 +109,7 @@ struct MessengerComposer: View {
                 Haptics.selection()
             } label: {
                 Image(systemName: "face.smiling")
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: FBIconSize.large, weight: .medium))
                     .foregroundStyle(conversation.themeColor)
                     .frame(width: 28, height: 36)
                     .contentShape(Rectangle())
@@ -119,7 +119,7 @@ struct MessengerComposer: View {
         }
         .padding(.leading, 14)
         .padding(.trailing, 6)
-        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
     }
 
     // MARK: Send / quick emoji
@@ -131,7 +131,7 @@ struct MessengerComposer: View {
                 onSend()
             } label: {
                 Image(systemName: "paperplane.fill")
-                    .font(.system(size: 21))
+                    .font(.system(size: FBIconSize.xl))
                     .foregroundStyle(conversation.themeColor)
                     .frame(width: 36, height: 36)
                     .contentShape(Rectangle())
@@ -144,7 +144,7 @@ struct MessengerComposer: View {
                 sendQuickEmoji()
             } label: {
                 Text(conversation.quickEmoji)
-                    .font(.system(size: 26))
+                    .font(.system(size: 26)) // Display text
                     .scaleEffect(quickEmojiScale)
                     .frame(width: 36, height: 36)
                     .contentShape(Rectangle())
@@ -175,10 +175,10 @@ struct MessengerComposer: View {
         HStack(alignment: .top, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(replyTitle(for: reply))
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.fbName)
                     .foregroundStyle(FBColor.primaryText)
                 Text(replyPreview(for: reply))
-                    .font(.system(size: 13))
+                    .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                     .lineLimit(1)
             }
@@ -187,7 +187,7 @@ struct MessengerComposer: View {
                 replyingTo = nil
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 13, weight: .bold))
+                    .font(.system(size: FBIconSize.small, weight: .bold))
                     .foregroundStyle(FBColor.secondaryText)
                     .frame(width: 28, height: 28)
                     .contentShape(Rectangle())
@@ -227,7 +227,7 @@ struct MessengerComposer: View {
                         Haptics.selection()
                     } label: {
                         Text(emoji)
-                            .font(.system(size: 28))
+                            .font(.system(size: 28)) // Display text
                             .frame(width: 42, height: 42)
                     }
                     .buttonStyle(.pressable)

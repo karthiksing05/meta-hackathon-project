@@ -44,6 +44,7 @@ struct PagesView: View {
             HStack(spacing: 8) {
                 ForEach(MorePagesFilter.allCases) { item in
                     ChipView(title: item.rawValue, isSelected: filter == item) {
+                        Haptics.selection()
                         filter = item
                     }
                 }
@@ -116,7 +117,7 @@ struct PagesView: View {
 
     private func inviteRow(_ invite: MorePageInvite) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            AvatarView(user: invite.page, size: 60)
+            AvatarView(user: invite.page, size: FBAvatarSize.row)
             VStack(alignment: .leading, spacing: 4) {
                 NameWithBadge(user: invite.page)
                 Text("\(invite.inviter.name) invited you to like this Page")
@@ -124,6 +125,7 @@ struct PagesView: View {
                     .foregroundStyle(FBColor.secondaryText)
                 HStack(spacing: 8) {
                     Button {
+                        Haptics.light()
                         store.follow(invite.page)
                         dismissedInvites.insert(invite.id)
                     } label: {
@@ -152,7 +154,7 @@ private struct MorePageRow: View {
         HStack(spacing: 12) {
             NavigationLink(value: Route.profile(page)) {
                 HStack(spacing: 12) {
-                    AvatarView(user: page, size: 60)
+                    AvatarView(user: page, size: FBAvatarSize.row)
                     VStack(alignment: .leading, spacing: 2) {
                         NameWithBadge(user: page)
                         if let category = page.category {

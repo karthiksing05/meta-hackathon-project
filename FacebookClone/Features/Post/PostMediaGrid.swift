@@ -183,7 +183,7 @@ struct PostMediaTile: View {
                     ZStack {
                         Color.black.opacity(0.45)
                         Text("+\(extraCount)")
-                            .font(.system(size: 30, weight: .semibold))
+                            .font(.system(size: 30, weight: .semibold)) // Display text
                             .foregroundStyle(.white)
                     }
                 }

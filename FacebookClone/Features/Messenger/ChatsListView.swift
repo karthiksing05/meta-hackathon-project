@@ -77,7 +77,7 @@ struct ChatsListView: View {
                 dismiss()
             }
             Text("Chats")
-                .font(.system(size: 28, weight: .bold))
+                .font(.fbLargeTitle)
                 .foregroundStyle(FBColor.primaryText)
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 8)
@@ -189,7 +189,7 @@ struct ChatsListView: View {
         } label: {
             Label(conversation.isMuted ? "Unmute" : "Mute", systemImage: conversation.isMuted ? "bell.fill" : "bell.slash.fill")
         }
-        .tint(Color(hex: 0x8C4FFF))
+        .tint(FBColor.savedPurple)
 
         Button {
             withAnimation {
@@ -198,7 +198,7 @@ struct ChatsListView: View {
         } label: {
             Label(conversation.isArchived ? "Unarchive" : "Archive", systemImage: "archivebox.fill")
         }
-        .tint(Color(hex: 0x65676B))
+        .tint(FBColor.secondaryText)
     }
 
     @ViewBuilder
@@ -317,10 +317,10 @@ struct ChatsListView: View {
             openChat(store.conversation(with: person))
         } label: {
             HStack(spacing: 12) {
-                AvatarView(user: person, size: 44, showsOnline: true)
+                AvatarView(user: person, size: FBAvatarSize.post, showsOnline: true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(person.name)
-                        .font(.system(size: 16))
+                        .font(.fbBodyLarge)
                         .foregroundStyle(FBColor.primaryText)
                         .lineLimit(1)
                     if person.isOnline {
@@ -413,7 +413,7 @@ struct MessengerChatRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            MessengerConversationAvatar(conversation: conversation, size: 56)
+            MessengerConversationAvatar(conversation: conversation, size: FBAvatarSize.row)
             VStack(alignment: .leading, spacing: 3) {
                 titleLine
                 previewLine
@@ -432,12 +432,12 @@ struct MessengerChatRow: View {
     private var titleLine: some View {
         HStack(spacing: 5) {
             Text(conversation.title)
-                .font(.system(size: 16, weight: isUnread ? .bold : .regular))
+                .font(isUnread ? .fbHeadline : .fbBodyLarge)
                 .foregroundStyle(FBColor.primaryText)
                 .lineLimit(1)
             if conversation.isPinned {
                 Image(systemName: "pin.fill")
-                    .font(.system(size: 11))
+                    .font(.system(size: FBIconSize.xs))
                     .foregroundStyle(FBColor.secondaryText)
                     .rotationEffect(.degrees(45))
                     .accessibilityLabel("Pinned")
@@ -449,16 +449,16 @@ struct MessengerChatRow: View {
         HStack(spacing: 4) {
             if conversation.isTyping {
                 Text("typing...")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.fbButton)
                     .foregroundStyle(FBColor.accent)
             } else {
                 Text(store.messengerPreview(for: conversation))
-                    .font(.system(size: 14, weight: isUnread ? .semibold : .regular))
+                    .font(isUnread ? .fbName : .fbBody)
                     .foregroundStyle(previewColor)
                     .lineLimit(1)
                 if let last = conversation.lastMessage {
                     Text("· \(MessengerFormat.listTime(last.sentAt))")
-                        .font(.system(size: 14, weight: isUnread ? .semibold : .regular))
+                        .font(isUnread ? .fbName : .fbBody)
                         .foregroundStyle(previewColor)
                         .lineLimit(1)
                         .fixedSize()
@@ -466,7 +466,7 @@ struct MessengerChatRow: View {
             }
             if conversation.isMuted {
                 Image(systemName: "bell.slash.fill")
-                    .font(.system(size: 11))
+                    .font(.system(size: FBIconSize.xs))
                     .foregroundStyle(FBColor.tertiaryText)
                     .accessibilityLabel("Muted")
             }
@@ -494,22 +494,22 @@ struct MessengerChatRow: View {
         switch status {
         case .sending:
             Image(systemName: "circle")
-                .font(.system(size: 14))
+                .font(.system(size: FBIconSize.medium))
                 .foregroundStyle(FBColor.tertiaryText)
                 .accessibilityLabel("Sending")
         case .sent:
             Image(systemName: "checkmark.circle")
-                .font(.system(size: 14))
+                .font(.system(size: FBIconSize.medium))
                 .foregroundStyle(FBColor.tertiaryText)
                 .accessibilityLabel("Sent")
         case .delivered:
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 14))
+                .font(.system(size: FBIconSize.medium))
                 .foregroundStyle(FBColor.tertiaryText)
                 .accessibilityLabel("Delivered")
         case .seen:
             if let user = conversation.primaryUser {
-                AvatarView(user: user, size: 16)
+                AvatarView(user: user, size: FBAvatarSize.micro)
                     .accessibilityLabel("Seen by \(user.firstName)")
             }
         }
@@ -530,13 +530,13 @@ private struct MessengerNoteItem: View {
         Button(action: action) {
             VStack(spacing: 5) {
                 ZStack(alignment: .top) {
-                    AvatarView(user: user, size: 62, showsOnline: !isMine)
+                    AvatarView(user: user, size: FBAvatarSize.row, showsOnline: !isMine)
                         .padding(.top, 30)
                     bubble
                 }
                 .frame(width: 80, height: 94, alignment: .top)
                 Text(title)
-                    .font(.system(size: 12))
+                    .font(.fbCaption)
                     .foregroundStyle(isMine ? FBColor.secondaryText : FBColor.primaryText)
                     .lineLimit(1)
             }
@@ -578,7 +578,7 @@ struct MessengerThoughtBubble: View {
             .lineLimit(2)
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
-            .background(FBColor.elevated, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(FBColor.elevated, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .overlay(alignment: .bottomLeading) {
                 tail
             }

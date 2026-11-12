@@ -38,7 +38,7 @@ struct SearchPersonRow: View {
                 open(.profile(user))
             } label: {
                 HStack(spacing: 12) {
-                    AvatarView(user: user, size: 60)
+                    AvatarView(user: user, size: FBAvatarSize.row)
                     VStack(alignment: .leading, spacing: 2) {
                         searchHighlighted(user.name, query: query)
                             .font(.fbName)
@@ -110,7 +110,7 @@ struct SearchPageRow: View {
                 open(.profile(page))
             } label: {
                 HStack(spacing: 12) {
-                    AvatarView(user: page, size: 60)
+                    AvatarView(user: page, size: FBAvatarSize.row)
                     VStack(alignment: .leading, spacing: 2) {
                         searchHighlighted(page.name, query: query)
                             .font(.fbName)
@@ -157,7 +157,7 @@ struct SearchGroupRow: View {
                 HStack(spacing: 12) {
                     RemoteImage(url: group.coverURL)
                         .frame(width: 60, height: 60)
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
                         searchHighlighted(group.name, query: query)
                             .font(.fbName)
@@ -200,7 +200,7 @@ struct SearchPostRow: View {
             open(.post(post))
         } label: {
             HStack(alignment: .top, spacing: 12) {
-                AvatarView(user: post.author, size: 40)
+                AvatarView(user: post.author, size: FBAvatarSize.post)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("\(post.author.name) · \(post.createdAt.fbShort)")
                         .font(.fbMeta)
@@ -236,7 +236,7 @@ struct SearchListingCell: View {
                     .overlay {
                         RemoteImage(url: listing.coverURL, data: listing.imageData.first)
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                 Text(listing.priceText)
                     .font(.fbName)
                     .foregroundStyle(FBColor.primaryText)
@@ -263,10 +263,10 @@ struct SearchEventRow: View {
             HStack(spacing: 12) {
                 RemoteImage(url: event.coverURL)
                     .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(event.startDate.eventStyle)
-                        .font(.fbCaption.weight(.semibold))
+                        .font(.fbCaptionEmphasized)
                         .foregroundStyle(FBColor.eventRed)
                         .lineLimit(1)
                     searchHighlighted(event.title, query: query)

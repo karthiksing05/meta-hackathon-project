@@ -106,9 +106,9 @@ struct HomeView: View {
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.up")
-                        .font(.system(size: 13, weight: .bold))
+                        .font(.system(size: FBIconSize.small, weight: .bold))
                     Text("New posts")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.fbButton)
                 }
                 .foregroundStyle(.white)
                 .padding(.horizontal, 16)

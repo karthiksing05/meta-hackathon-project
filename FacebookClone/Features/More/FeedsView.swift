@@ -31,6 +31,7 @@ struct FeedsView: View {
             HStack(spacing: 8) {
                 ForEach(FeedFilter.allCases) { item in
                     ChipView(title: item.title, isSelected: filter == item) {
+                        Haptics.selection()
                         filter = item
                     }
                 }
@@ -107,11 +108,13 @@ private struct MoreFeedsManageSheet: View {
                 }
             }
         }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
     private func row(_ user: User) -> some View {
         HStack(spacing: 12) {
-            AvatarView(user: user, size: 44)
+            AvatarView(user: user, size: FBAvatarSize.post)
             VStack(alignment: .leading, spacing: 2) {
                 NameWithBadge(user: user)
                 Text(user.isPage ? (user.category ?? "Page") : "Friend")
@@ -124,7 +127,7 @@ private struct MoreFeedsManageSheet: View {
                 store.toggleFavorite(user)
             } label: {
                 Image(systemName: user.isFavorite ? "star.fill" : "star")
-                    .font(.system(size: 20))
+                    .font(.system(size: FBIconSize.large))
                     .foregroundStyle(user.isFavorite ? FBColor.feelingYellow : FBColor.secondaryText)
             }
             .buttonStyle(.plain)

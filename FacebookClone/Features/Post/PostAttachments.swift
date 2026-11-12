@@ -62,9 +62,9 @@ struct PostSharedPostView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(FBColor.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
                     .stroke(FBColor.divider, lineWidth: 1)
             }
             .contentShape(Rectangle())
@@ -75,7 +75,7 @@ struct PostSharedPostView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            AvatarView(user: post.author, size: 32)
+            AvatarView(user: post.author, size: FBAvatarSize.comment)
             VStack(alignment: .leading, spacing: 1) {
                 NameWithBadge(user: post.author)
                 HStack(spacing: 4) {
@@ -87,7 +87,7 @@ struct PostSharedPostView: View {
                     Text(post.createdAt.fbShort)
                     Text("·")
                     Image(systemName: post.group?.privacySymbol ?? post.audience.symbol)
-                        .font(.system(size: 10))
+                        .font(.system(size: FBIconSize.xs))
                 }
                 .font(.fbMeta)
                 .foregroundStyle(FBColor.secondaryText)
@@ -171,7 +171,7 @@ struct PostPollView: View {
             HStack(spacing: 8) {
                 if hasVoted {
                     Image(systemName: isMine ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 16))
+                        .font(.system(size: FBIconSize.regular))
                         .foregroundStyle(isMine ? FBColor.accent : FBColor.tertiaryText)
                 }
                 Text(option.title)
@@ -182,7 +182,7 @@ struct PostPollView: View {
                 Spacer(minLength: 8)
                 if hasVoted {
                     Text(percentText(fraction))
-                        .font(.fbMeta.weight(.semibold))
+                        .font(.fbMetaEmphasized)
                         .foregroundStyle(FBColor.secondaryText)
                         .contentTransition(.numericText())
                 }
@@ -196,9 +196,9 @@ struct PostPollView: View {
                         .frame(width: proxy.size.width * CGFloat(fraction))
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous)
                     .stroke(isMine ? FBColor.accent : FBColor.divider, lineWidth: 1)
             }
             .contentShape(Rectangle())
@@ -223,7 +223,7 @@ struct PostLifeEventView: View {
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: event.symbol)
-                .font(.system(size: 26, weight: .semibold))
+                .font(.system(size: FBIconSize.xxl, weight: .semibold))
                 .foregroundStyle(.white)
                 .frame(width: 60, height: 60)
                 .background(FBColor.brandBlue, in: Circle())

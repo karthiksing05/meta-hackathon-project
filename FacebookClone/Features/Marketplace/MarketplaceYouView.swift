@@ -59,7 +59,7 @@ struct MarketplaceYouView: View {
     private var ratingCard: some View {
         let me = store.me
         return HStack(spacing: 12) {
-            AvatarView(user: me, size: 56)
+            AvatarView(user: me, size: FBAvatarSize.row)
             VStack(alignment: .leading, spacing: 4) {
                 Text(me.firstName + " " + me.lastName)
                     .font(.fbHeadline)
@@ -68,11 +68,11 @@ struct MarketplaceYouView: View {
                     MarketplaceStars(rating: me.marketplaceRating)
                     Text("\(String(format: "%.1f", me.marketplaceRating)) · \(me.marketplaceRatingCount) ratings")
                         .font(.fbMeta)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(FBColor.secondaryText)
                 }
                 Text("Seller rating")
                     .font(.fbMeta)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(FBColor.secondaryText)
             }
             Spacer()
         }
@@ -87,7 +87,7 @@ struct MarketplaceYouView: View {
             if store.myListings.isEmpty {
                 Text("You haven't listed anything yet. Tap Sell on the Marketplace home to get started.")
                     .font(.fbBody)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(FBColor.secondaryText)
             } else {
                 ForEach(store.myListings) { listing in
                     myListingRow(listing)
@@ -137,7 +137,7 @@ struct MarketplaceYouView: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.system(size: FBIconSize.medium, weight: .bold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 36, height: 36)
                     .background(FBColor.buttonGray, in: Circle())
@@ -154,7 +154,7 @@ struct MarketplaceYouView: View {
             if store.savedListings.isEmpty {
                 Text("Items you save will show up here.")
                     .font(.fbBody)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(FBColor.secondaryText)
             } else {
                 horizontalStrip(store.savedListings)
             }
@@ -174,7 +174,7 @@ struct MarketplaceYouView: View {
                                 .foregroundStyle(FBColor.primaryText)
                             Text(listing.title)
                                 .font(.fbMeta)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(FBColor.secondaryText)
                                 .lineLimit(1)
                         }
                         .frame(width: 120, alignment: .leading)
@@ -193,7 +193,7 @@ struct MarketplaceYouView: View {
             if buyingSellers.isEmpty {
                 Text("Save or view items to message sellers.")
                     .font(.fbBody)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(FBColor.secondaryText)
             } else {
                 ForEach(buyingSellers) { seller in
                     Button {
@@ -210,7 +210,7 @@ struct MarketplaceYouView: View {
 
     private func sellerRow(_ seller: User) -> some View {
         HStack(spacing: 12) {
-            AvatarView(user: seller, size: 44)
+            AvatarView(user: seller, size: FBAvatarSize.post)
             Text(seller.firstName + " " + seller.lastName)
                 .font(.fbName)
                 .foregroundStyle(FBColor.primaryText)
@@ -229,7 +229,7 @@ struct MarketplaceYouView: View {
             } label: {
                 HStack(spacing: 12) {
                     Image(systemName: "tray.fill")
-                        .font(.system(size: 18))
+                        .font(.system(size: FBIconSize.regular))
                         .foregroundStyle(FBColor.accent)
                         .frame(width: 44, height: 44)
                         .background(FBColor.tintedBlueBackground, in: Circle())
@@ -238,8 +238,8 @@ struct MarketplaceYouView: View {
                         .foregroundStyle(FBColor.primaryText)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: FBIconSize.small, weight: .semibold))
+                        .foregroundStyle(FBColor.secondaryText)
                 }
                 .contentShape(Rectangle())
             }
@@ -256,7 +256,7 @@ struct MarketplaceYouView: View {
             if recents.isEmpty {
                 Text("Listings you open will show up here.")
                     .font(.fbBody)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(FBColor.secondaryText)
             } else {
                 horizontalStrip(recents)
             }

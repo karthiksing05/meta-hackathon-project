@@ -276,7 +276,7 @@ struct ChatView: View {
     private func toolbarIcon(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: FBIconSize.regular, weight: .semibold))
                 .foregroundStyle(conversation.themeColor)
         }
         .accessibilityLabel(label)
@@ -458,14 +458,14 @@ private struct MessengerChatHeader: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            MessengerConversationAvatar(conversation: conversation, size: 36)
+            MessengerConversationAvatar(conversation: conversation, size: FBAvatarSize.story)
             VStack(alignment: .leading, spacing: 0) {
                 Text(conversation.title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.fbHeadline)
                     .foregroundStyle(FBColor.primaryText)
                     .lineLimit(1)
                 Text(statusText)
-                    .font(.system(size: 12))
+                    .font(.fbCaption)
                     .foregroundStyle(FBColor.secondaryText)
                     .lineLimit(1)
             }
@@ -492,10 +492,10 @@ private struct MessengerChatIntro: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            MessengerConversationAvatar(conversation: conversation, size: 84, showsOnline: false)
+            MessengerConversationAvatar(conversation: conversation, size: FBAvatarSize.request, showsOnline: false)
                 .padding(.bottom, 4)
             Text(conversation.title)
-                .font(.system(size: 20, weight: .bold))
+                .font(.fbTitle)
                 .foregroundStyle(FBColor.primaryText)
                 .multilineTextAlignment(.center)
             if !subtitle.isEmpty {
@@ -587,7 +587,7 @@ private struct MessengerConversationSearchBar: View {
     private func arrowButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(size: FBIconSize.medium, weight: .semibold))
                 .frame(width: 28, height: 32)
                 .contentShape(Rectangle())
         }

@@ -31,7 +31,7 @@ struct PostCommentRow: View {
                 if let imageURL = comment.imageURL {
                     RemoteImage(url: imageURL)
                         .frame(width: 180, height: 140)
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 }
                 metaRow
                     .padding(.top, comment.totalReactions > 0 ? 4 : 0)
@@ -60,12 +60,12 @@ struct PostCommentRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
         .overlay(alignment: .bottomTrailing) {
             reactionPill
                 .offset(x: 10, y: 10)
         }
-        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
         .contextMenu {
             contextMenuItems
         }
@@ -74,7 +74,7 @@ struct PostCommentRow: View {
     private var nameLine: some View {
         HStack(spacing: 4) {
             Text(comment.author.name)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.fbMetaEmphasized)
                 .foregroundStyle(FBColor.primaryText)
                 .lineLimit(1)
             if comment.author.isVerified {
@@ -82,7 +82,7 @@ struct PostCommentRow: View {
             }
             if comment.author.id == post.author.id {
                 Text("Author")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.fbMicroEmphasized)
                     .foregroundStyle(FBColor.accent)
             }
         }
@@ -96,7 +96,7 @@ struct PostCommentRow: View {
                 ReactionBadgeStack(types: comment.topReactions, size: 16)
                 if total > 1 {
                     Text(total.fbCompact)
-                        .font(.system(size: 12))
+                        .font(.fbCaption)
                         .foregroundStyle(FBColor.secondaryText)
                         .padding(.trailing, 2)
                 }
@@ -131,7 +131,7 @@ struct PostCommentRow: View {
                 Text("Edited")
             }
         }
-        .font(.system(size: 12))
+        .font(.fbCaption)
         .foregroundStyle(FBColor.secondaryText)
         .padding(.leading, 12)
     }

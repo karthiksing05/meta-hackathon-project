@@ -168,7 +168,7 @@ private struct FBTabBarItem: View {
                     }
                 }
             Text(tab.title)
-                .font(.system(size: 10, weight: isSelected ? .semibold : .regular))
+                .font(.system(size: 10, weight: isSelected ? .semibold : .regular)) // Display text: fixed tab-bar label
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
                 .foregroundStyle(isSelected ? FBColor.brandBlue : FBColor.secondaryText)
@@ -190,7 +190,7 @@ private struct FBTabBarItem: View {
                 }
                 .overlay(alignment: .bottomTrailing) {
                     Image(systemName: "line.3.horizontal")
-                        .font(.system(size: 7, weight: .bold))
+                        .font(.system(size: 7, weight: .bold)) // Tiny badge glyph
                         .foregroundStyle(FBColor.primaryText)
                         .frame(width: 13, height: 13)
                         .background(FBColor.buttonGray, in: Circle())
@@ -201,7 +201,7 @@ private struct FBTabBarItem: View {
                 }
         } else {
             Image(systemName: isSelected ? tab.selectedSymbol : tab.symbol)
-                .font(.system(size: 22, weight: isSelected ? .semibold : .regular))
+                .font(.system(size: FBIconSize.xl, weight: isSelected ? .semibold : .regular))
                 .foregroundStyle(isSelected ? FBColor.brandBlue : FBColor.secondaryText)
                 .symbolEffect(.bounce, value: isSelected)
         }

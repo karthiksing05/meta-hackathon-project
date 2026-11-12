@@ -102,7 +102,7 @@ struct ProfileAboutSection: View {
                 ForEach(rows) { row in
                     HStack(alignment: .top, spacing: 12) {
                         Image(systemName: row.symbol)
-                            .font(.system(size: 18))
+                            .font(.system(size: FBIconSize.regular))
                             .foregroundStyle(FBColor.secondaryText)
                             .frame(width: 26)
                         VStack(alignment: .leading, spacing: 2) {

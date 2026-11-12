@@ -59,7 +59,7 @@ struct PostHeaderView: View {
         var text = Text(nameString)
         if post.author.isVerified {
             text = text + Text(" ") + Text(Image(systemName: "checkmark.seal.fill"))
-                .font(.system(size: 12))
+                .font(.system(size: FBIconSize.small))
                 .foregroundStyle(FBColor.brandBlue)
         }
         return text + Text(contextString)
@@ -142,7 +142,7 @@ struct PostHeaderView: View {
             }
             Text("·")
             Image(systemName: audienceSymbol)
-                .font(.system(size: 11))
+                .font(.system(size: FBIconSize.xs))
                 .accessibilityLabel(audienceLabel)
             if post.isEdited {
                 Text("·")
@@ -188,7 +188,7 @@ struct PostHeaderView: View {
 
     private func headerIcon(_ name: String) -> some View {
         Image(systemName: name)
-            .font(.system(size: 16, weight: .semibold))
+            .font(.system(size: FBIconSize.regular, weight: .semibold))
             .foregroundStyle(FBColor.secondaryText)
             .frame(width: 36, height: 36)
             .contentShape(Rectangle())

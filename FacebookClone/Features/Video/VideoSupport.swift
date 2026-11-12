@@ -69,9 +69,11 @@ struct VideoSheetContent: View {
         case .comments(let post):
             CommentsView(post: post)
                 .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         case .share(let post):
             ShareSheetView(post: post)
                 .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         case .reelOptions(let post):
             ReelsOptionsSheet(post: post)
                 .presentationDetents([.medium])

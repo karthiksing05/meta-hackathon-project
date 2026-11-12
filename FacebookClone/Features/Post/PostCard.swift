@@ -272,8 +272,29 @@ struct PostCard: View {
         case .delete:
             confirmDelete = true
         case .whyAd:
-            store.showToast("You're seeing this ad based on your activity on Facebook", symbol: "info.circle")
+            store.showToast("\(post.author.name) wants to reach people like you, based on your activity on Facebook", symbol: "info.circle")
+        case .whyPost:
+            store.showToast(post.postWhyShownReason, symbol: "info.circle")
         }
+    }
+}
+
+extension Post {
+    /// The answer to "Why am I seeing this post?", most specific reason first.
+    var postWhyShownReason: String {
+        if let group {
+            return "You're seeing this because you're a member of \(group.name)"
+        }
+        if author.isFavorite {
+            return "You're seeing this because \(author.name) is in your Favorites"
+        }
+        if author.isPage {
+            return "You're seeing this because you follow \(author.name)"
+        }
+        if author.isFriend {
+            return "You're seeing this because you're friends with \(author.name)"
+        }
+        return "You're seeing this because it's popular with people like you"
     }
 }
 

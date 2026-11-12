@@ -74,7 +74,7 @@ struct VideoFullScreenPlayer: View {
         if controller.didFail {
             VStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 28, weight: .semibold))
+                    .font(.system(size: FBIconSize.xxl, weight: .semibold))
                 Text("This video can't play right now")
                     .font(.fbName)
                 Text("Check your connection and try again.")
@@ -84,7 +84,7 @@ struct VideoFullScreenPlayer: View {
             .foregroundStyle(Color.white)
             .multilineTextAlignment(.center)
             .padding(20)
-            .background(Color.black.opacity(0.65), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Color.black.opacity(0.65), in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .padding(.horizontal, 32)
             .allowsHitTesting(false)
         } else if controller.isBuffering {
@@ -125,14 +125,14 @@ struct VideoFullScreenPlayer: View {
                 dismiss()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .frame(width: 40, height: 40)
                     .background(Color.white.opacity(0.16), in: Circle())
                     .contentShape(Circle())
             }
             .accessibilityLabel("Close")
 
-            AvatarView(user: post.author, size: 32)
+            AvatarView(user: post.author, size: FBAvatarSize.comment)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(post.author.name)
@@ -153,7 +153,7 @@ struct VideoFullScreenPlayer: View {
                 scheduleHide()
             } label: {
                 Image(systemName: controller.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .frame(width: 40, height: 40)
                     .background(Color.white.opacity(0.16), in: Circle())
                     .contentShape(Circle())
@@ -222,7 +222,7 @@ struct VideoFullScreenPlayer: View {
                 Spacer()
                 Text("-" + remainingTime.clockString)
             }
-            .font(.system(size: 13, weight: .semibold).monospacedDigit())
+            .font(.fbMetaEmphasized.monospacedDigit())
             .foregroundStyle(Color.white.opacity(0.85))
         }
         .padding(.horizontal, 20)

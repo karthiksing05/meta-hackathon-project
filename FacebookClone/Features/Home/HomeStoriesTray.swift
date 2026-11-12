@@ -70,7 +70,7 @@ private struct HomeCreateStoryCard: View {
                 ZStack(alignment: .bottom) {
                     FBColor.surface
                     Text("Create story")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.fbMetaEmphasized)
                         .foregroundStyle(FBColor.primaryText)
                         .lineLimit(1)
                         .padding(.bottom, 12)
@@ -81,9 +81,9 @@ private struct HomeCreateStoryCard: View {
                 plusBadge
                     .offset(y: photoHeight - plusSize / 2)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
                     .stroke(FBColor.divider, lineWidth: 0.5)
             }
         }
@@ -95,7 +95,7 @@ private struct HomeCreateStoryCard: View {
         ZStack {
             AvatarView.color(for: me.id)
             Text(me.initials)
-                .font(.system(size: 40, weight: .semibold))
+                .font(.system(size: 40, weight: .semibold)) // Display text
                 .foregroundStyle(.white)
             RemoteImage(url: me.avatarURL, data: me.avatarData, placeholder: .clear)
         }
@@ -103,7 +103,7 @@ private struct HomeCreateStoryCard: View {
 
     private var plusBadge: some View {
         Image(systemName: "plus")
-            .font(.system(size: 18, weight: .bold))
+            .font(.system(size: FBIconSize.regular, weight: .bold))
             .foregroundStyle(.white)
             .frame(width: plusSize, height: plusSize)
             .background(FBColor.brandBlue, in: Circle())
@@ -131,10 +131,10 @@ private struct HomeStoryCard: View {
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                AvatarView(user: story.author, size: 36, ring: .story(seen: story.isSeen))
+                AvatarView(user: story.author, size: FBAvatarSize.story, ring: .story(seen: story.isSeen))
                     .padding(8)
                 Text(title)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.fbMetaEmphasized)
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -143,7 +143,7 @@ private struct HomeStoryCard: View {
                     .frame(width: size.width, height: size.height, alignment: .bottomLeading)
             }
             .frame(width: size.width, height: size.height)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         }
         .buttonStyle(.pressable)
         .accessibilityLabel(accessibilityText)
@@ -165,7 +165,7 @@ private struct HomeStoryCard: View {
 
 private struct HomeStorySkeletonCard: View {
     var body: some View {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
             .fill(FBColor.skeleton)
             .frame(width: HomeTrayMetrics.cardSize.width, height: HomeTrayMetrics.cardSize.height)
             .overlay(alignment: .topLeading) {

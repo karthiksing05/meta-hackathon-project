@@ -32,6 +32,7 @@ struct EventsView: View {
             HStack(spacing: 8) {
                 ForEach(EventsFilter.allCases) { item in
                     ChipView(title: item.rawValue, isSelected: filter == item) {
+                        Haptics.selection()
                         filter = item
                     }
                 }
@@ -108,8 +109,8 @@ private struct EventsCard: View {
             .buttonStyle(.plain)
             actions
         }
-        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
     }
 
     private var cover: some View {
@@ -125,7 +126,7 @@ private struct EventsCard: View {
     private var info: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(event.startDate.eventStyle.uppercased())
-                .font(.system(size: 12, weight: .bold))
+                .font(.fbCaptionEmphasized)
                 .foregroundStyle(FBColor.eventRed)
             Text(event.title)
                 .font(.fbHeadline)
@@ -160,7 +161,7 @@ private struct EventsCard: View {
             .buttonStyle(.fb(event.response == nil ? .secondary : .tinted))
             ShareLink(item: "\(event.title) · \(event.startDate.eventStyle)") {
                 Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 44, height: 36)
                     .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: FBMetrics.cornerRadius, style: .continuous))

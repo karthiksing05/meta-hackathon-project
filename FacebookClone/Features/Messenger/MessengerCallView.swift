@@ -86,7 +86,7 @@ struct MessengerCallView: View {
                 endCall()
             } label: {
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 40, height: 40)
                     .background(Color.white.opacity(0.15), in: Circle())
@@ -95,7 +95,7 @@ struct MessengerCallView: View {
             .accessibilityLabel("Leave call")
             Spacer()
             Label("End-to-end encrypted", systemImage: "lock.fill")
-                .font(.system(size: 12, weight: .medium))
+                .font(.fbCaptionEmphasized)
                 .foregroundStyle(Color.white.opacity(0.75))
             Spacer()
             Color.clear
@@ -118,22 +118,22 @@ struct MessengerCallView: View {
                             .scaleEffect(pulse ? 1.3 : 0.9)
                             .opacity(pulse ? 0 : 1)
                     }
-                    MessengerConversationAvatar(conversation: conversation, size: 120, showsOnline: false)
+                    MessengerConversationAvatar(conversation: conversation, size: FBAvatarSize.hero, showsOnline: false)
                 }
                 .frame(height: 170)
                 .transition(.scale.combined(with: .opacity))
             }
             Text(conversation.title)
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: 28, weight: .bold)) // Display text
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
             Text(isConnected ? "Connected" : callingText)
-                .font(.system(size: 16, weight: .medium))
+                .font(.fbBodyLarge)
                 .foregroundStyle(Color.white.opacity(0.8))
             if isConnected {
                 Text(MessengerFormat.callDuration(elapsed))
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.fbHeadline)
                     .monospacedDigit()
                     .foregroundStyle(.white)
                     .contentTransition(.numericText())
@@ -149,29 +149,32 @@ struct MessengerCallView: View {
 
     // MARK: Self preview
 
+    // Decorative self-preview backdrop.
+    private static let selfPreviewColors: [Color] = [Color(hex: 0x4B4C4F), Color(hex: 0x1C1D1F)]
+
     private var selfPreview: some View {
         VStack {
             HStack {
                 Spacer()
                 ZStack {
                     LinearGradient(
-                        colors: [Color(hex: 0x4B4C4F), Color(hex: 0x1C1D1F)],
+                        colors: Self.selfPreviewColors,
                         startPoint: .top,
                         endPoint: .bottom
                     )
-                    AvatarView(user: store.me, size: 56)
+                    AvatarView(user: store.me, size: FBAvatarSize.row)
                     VStack {
                         Spacer()
                         Text("You")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(.fbMicroEmphasized)
                             .foregroundStyle(.white)
                             .padding(.bottom, 8)
                     }
                 }
                 .frame(width: 104, height: 150)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
                         .stroke(Color.white.opacity(0.25), lineWidth: 1)
                 }
                 .shadow(color: Color.black.opacity(0.35), radius: 8, y: 3)
@@ -213,7 +216,7 @@ struct MessengerCallView: View {
                 endCall()
             } label: {
                 Image(systemName: "phone.down.fill")
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(.system(size: FBIconSize.xl, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 58, height: 58)
                     .background(FBColor.notificationRed, in: Circle())
@@ -233,7 +236,7 @@ struct MessengerCallView: View {
             action()
         } label: {
             Image(systemName: symbol)
-                .font(.system(size: 21, weight: .semibold))
+                .font(.system(size: FBIconSize.xl, weight: .semibold))
                 .foregroundStyle(isActive ? Color.black : Color.white)
                 .frame(width: 54, height: 54)
                 .background(isActive ? Color.white : Color.white.opacity(0.18), in: Circle())

@@ -149,7 +149,7 @@ struct PostCommentsHeader: View {
                         .lineLimit(1)
                 }
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
                     .foregroundStyle(FBColor.secondaryText)
                 Spacer(minLength: 0)
             }
@@ -178,7 +178,7 @@ struct PostCommentsHeader: View {
                 Text(model.sort.title)
                     .font(.fbName)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: FBIconSize.xs, weight: .bold))
             }
             .foregroundStyle(FBColor.primaryText)
             .contentShape(Rectangle())
@@ -326,7 +326,7 @@ struct PostCommentThread: View {
             } label: {
                 HStack(spacing: 6) {
                     if let first = all.first {
-                        AvatarView(user: first.author, size: 20)
+                        AvatarView(user: first.author, size: FBAvatarSize.tiny)
                     }
                     Text("View \(all.count) replies")
                         .font(.fbName)

@@ -49,16 +49,16 @@ struct NotificationsAvatar: View {
             kindBadge
                 .offset(x: 3, y: 3)
         }
-        .frame(width: 60, height: 60)
+        .frame(width: FBAvatarSize.row, height: FBAvatarSize.row)
     }
 
     @ViewBuilder
     private var main: some View {
         if let actor = notification.actors.first {
-            AvatarView(user: actor, size: 60)
+            AvatarView(user: actor, size: FBAvatarSize.row)
         } else {
             let style = NotificationsKindStyle.style(for: notification.kind)
-            SymbolBadge(symbol: style.symbol, color: style.color, size: 60)
+            SymbolBadge(symbol: style.symbol, color: style.color, size: FBAvatarSize.row)
         }
     }
 
@@ -124,7 +124,7 @@ struct NotificationsRow: View {
         VStack(spacing: 10) {
             Button(action: onMore) {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: FBIconSize.regular, weight: .bold))
                     .foregroundStyle(FBColor.secondaryText)
                     .frame(width: 32, height: 32)
                     .contentShape(Rectangle())

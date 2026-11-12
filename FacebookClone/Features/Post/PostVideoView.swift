@@ -82,7 +82,7 @@ struct PostVideoView: View {
     private var timePill: some View {
         if let text = remainingText {
             Text(text)
-                .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                .font(.fbCaptionEmphasized.monospacedDigit())
                 .foregroundStyle(.white)
                 .padding(.horizontal, 7)
                 .padding(.vertical, 3)
@@ -100,7 +100,7 @@ struct PostVideoView: View {
                 Haptics.light()
             } label: {
                 Image(systemName: store.videosMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 30, height: 30)
                     .background(Color.black.opacity(0.55), in: Circle())

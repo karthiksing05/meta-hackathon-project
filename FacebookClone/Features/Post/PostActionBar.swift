@@ -83,13 +83,13 @@ struct PostActionBar: View {
         switch post.myReaction {
         case .none:
             Image(systemName: "hand.thumbsup")
-                .font(.system(size: 18))
+                .font(.system(size: FBIconSize.regular))
         case .some(.like):
             Image(systemName: "hand.thumbsup.fill")
-                .font(.system(size: 18))
+                .font(.system(size: FBIconSize.regular))
         case .some(let reaction):
             Text(reaction.emoji)
-                .font(.system(size: 18))
+                .font(.system(size: FBIconSize.regular))
         }
     }
 
@@ -134,7 +134,7 @@ struct PostActionBar: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: symbol)
-                    .font(.system(size: 18))
+                    .font(.system(size: FBIconSize.regular))
                 Text(title)
                     .font(.fbButton)
             }
@@ -306,7 +306,7 @@ struct PostReactionPicker: View {
         .overlay(alignment: .top) {
             if isHovered {
                 Text(reaction.title)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.fbMicroEmphasized)
                     .foregroundStyle(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)

@@ -113,7 +113,7 @@ struct MessengerMessageRow: View {
 
     private var timestamp: some View {
         Text(MessengerFormat.separator(row.message.sentAt))
-            .font(.system(size: 12, weight: .semibold))
+            .font(.fbCaptionEmphasized)
             .foregroundStyle(FBColor.secondaryText)
             .frame(maxWidth: .infinity)
             .padding(.top, 16)
@@ -122,7 +122,7 @@ struct MessengerMessageRow: View {
 
     private var tappedTime: some View {
         Text(row.message.sentAt.timeOfDay)
-            .font(.system(size: 11, weight: .medium))
+            .font(.fbMicroEmphasized)
             .foregroundStyle(FBColor.secondaryText)
             .frame(maxWidth: .infinity)
             .padding(.top, 6)
@@ -132,7 +132,7 @@ struct MessengerMessageRow: View {
 
     private var senderName: some View {
         Text(row.sender?.firstName ?? "")
-            .font(.system(size: 12))
+            .font(.fbCaption)
             .foregroundStyle(FBColor.secondaryText)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.leading, incomingInset + 12)
@@ -258,7 +258,7 @@ struct MessengerMessageRow: View {
     private var replyIcon: some View {
         if dragOffset != 0 {
             Image(systemName: "arrowshape.turn.up.left.fill")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(size: FBIconSize.small, weight: .semibold))
                 .foregroundStyle(FBColor.secondaryText)
                 .frame(width: 30, height: 30)
                 .background(FBColor.buttonGray, in: Circle())
@@ -333,7 +333,7 @@ struct MessengerBubble: View {
         content
             .overlay {
                 if isCurrentMatch {
-                    shape.stroke(Color.yellow, lineWidth: 3)
+                    shape.stroke(FBColor.feelingYellow, lineWidth: 3)
                 }
             }
     }
@@ -344,7 +344,7 @@ struct MessengerBubble: View {
             unsentBubble
         } else if let emoji = message.bigEmoji {
             Text(emoji)
-                .font(.system(size: 44))
+                .font(.system(size: 44)) // Display text
                 .padding(.vertical, 2)
                 .accessibilityLabel(emoji)
         } else if message.isImage {
@@ -368,7 +368,7 @@ struct MessengerBubble: View {
 
     private var textBubble: some View {
         MessengerTextHighlighter.text(message.text ?? "", term: searchTerm)
-            .font(.system(size: 16))
+            .font(.fbBodyLarge)
             .foregroundStyle(textColor)
             .lineLimit(maxLines)
             .padding(.horizontal, 12)
@@ -388,7 +388,7 @@ struct MessengerBubble: View {
 
     private var unsentBubble: some View {
         Text(unsentText)
-            .font(.system(size: 15).italic())
+            .font(.fbBody.italic())
             .foregroundStyle(FBColor.secondaryText)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -415,11 +415,11 @@ struct MessengerReactionCapsule: View {
         HStack(spacing: 1) {
             ForEach(topEmojis, id: \.self) { emoji in
                 Text(emoji)
-                    .font(.system(size: 13))
+                    .font(.fbMeta)
             }
             if reactions.count > 1 {
                 Text("\(reactions.count)")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.fbMicroEmphasized)
                     .foregroundStyle(FBColor.secondaryText)
                     .padding(.leading, 2)
             }
@@ -455,16 +455,16 @@ struct MessengerReplyQuote: View {
     var body: some View {
         VStack(alignment: isFromMe ? .trailing : .leading, spacing: 3) {
             Label(caption, systemImage: "arrowshape.turn.up.left.fill")
-                .font(.system(size: 11))
+                .font(.fbMicro)
                 .foregroundStyle(FBColor.secondaryText)
                 .lineLimit(1)
             Text(previewText)
-                .font(.system(size: 14))
+                .font(.fbBody)
                 .foregroundStyle(FBColor.secondaryText)
                 .lineLimit(2)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 7)
-                .background(FBColor.incomingBubble.opacity(0.65), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .background(FBColor.incomingBubble.opacity(0.65), in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
                 .frame(maxWidth: 230, alignment: isFromMe ? .trailing : .leading)
         }
         .accessibilityElement(children: .combine)
@@ -494,7 +494,7 @@ struct MessengerMessageStatusView: View {
         case .seen:
             HStack(spacing: -3) {
                 ForEach(seenBy) { user in
-                    AvatarView(user: user, size: 14)
+                    AvatarView(user: user, size: FBAvatarSize.micro)
                 }
             }
             .accessibilityElement(children: .ignore)
@@ -504,7 +504,7 @@ struct MessengerMessageStatusView: View {
 
     private func label(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 11))
+            .font(.fbMicro)
             .foregroundStyle(FBColor.secondaryText)
     }
 }

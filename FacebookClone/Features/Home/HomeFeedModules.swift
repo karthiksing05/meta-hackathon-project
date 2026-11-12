@@ -15,12 +15,12 @@ struct HomeModuleHeader: View {
         HStack(alignment: .center, spacing: 8) {
             if let symbol {
                 Image(systemName: symbol)
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(symbolColor)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 17, weight: .bold))
+                    .font(.fbHeadline)
                     .foregroundStyle(FBColor.primaryText)
                     .accessibilityAddTraits(.isHeader)
                 if let subtitle {
@@ -103,13 +103,13 @@ private struct HomeReelCard: View {
             }
             .frame(width: width, height: height)
             .overlay(alignment: .topLeading) {
-                AvatarView(user: reel.author, size: 28)
+                AvatarView(user: reel.author, size: FBAvatarSize.reply)
                     .overlay {
                         Circle().stroke(Color.white, lineWidth: 1.5)
                     }
                     .padding(8)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         }
         .buttonStyle(.pressable)
         .accessibilityLabel(accessibilityText)
@@ -119,20 +119,20 @@ private struct HomeReelCard: View {
         VStack(alignment: .leading, spacing: 4) {
             if !reel.text.isEmpty {
                 Text(reel.text)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.fbMetaEmphasized)
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
             }
             Text(reel.author.name)
-                .font(.system(size: 12))
+                .font(.fbCaption)
                 .foregroundStyle(Color.white.opacity(0.85))
                 .lineLimit(1)
             HStack(spacing: 4) {
                 Image(systemName: "play.fill")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: FBIconSize.xs, weight: .bold))
                 Text(reel.viewCount.fbCompact)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.fbCaptionEmphasized)
             }
             .foregroundStyle(.white)
         }
@@ -218,9 +218,9 @@ private struct HomeSuggestionCard: View {
         }
         .frame(width: width)
         .background(FBColor.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
                 .stroke(FBColor.divider, lineWidth: 0.5)
         }
         .animation(.easeInOut(duration: 0.2), value: person.friendship)
@@ -230,7 +230,7 @@ private struct HomeSuggestionCard: View {
         ZStack {
             AvatarView.color(for: person.id)
             Text(person.initials)
-                .font(.system(size: 44, weight: .semibold))
+                .font(.system(size: 44, weight: .semibold)) // Display text
                 .foregroundStyle(.white)
             RemoteImage(url: person.avatarURL, data: person.avatarData, placeholder: .clear)
         }
@@ -243,7 +243,7 @@ private struct HomeSuggestionCard: View {
             remove()
         } label: {
             Image(systemName: "xmark")
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(size: FBIconSize.small, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 26, height: 26)
                 .background(Color.black.opacity(0.45), in: Circle())
@@ -265,7 +265,7 @@ private struct HomeSuggestionCard: View {
             if count > 0 {
                 HStack(spacing: 4) {
                     if !mutual.isEmpty {
-                        AvatarStack(users: Array(mutual.prefix(2)), size: 16, maxCount: 2)
+                        AvatarStack(users: Array(mutual.prefix(2)), size: FBAvatarSize.micro, maxCount: 2)
                     }
                     Text(mutualText(count))
                         .font(.fbMeta)
@@ -429,9 +429,9 @@ private struct HomeGroupCard: View {
         }
         .frame(width: width)
         .background(FBColor.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
                 .stroke(FBColor.divider, lineWidth: 0.5)
         }
     }
@@ -452,7 +452,7 @@ private struct HomeGroupCard: View {
     private var hideButton: some View {
         Button(action: onHide) {
             Image(systemName: "xmark")
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(size: FBIconSize.small, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 26, height: 26)
                 .background(Color.black.opacity(0.45), in: Circle())
@@ -490,7 +490,7 @@ struct HomeBirthdayCard: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
                     .foregroundStyle(FBColor.secondaryText)
             }
             .padding(.horizontal, FBMetrics.gutter)
@@ -504,10 +504,10 @@ struct HomeBirthdayCard: View {
     @ViewBuilder
     private var avatar: some View {
         if let first = people.first {
-            AvatarView(user: first, size: 44)
+            AvatarView(user: first, size: FBAvatarSize.post)
                 .overlay(alignment: .bottomTrailing) {
                     Text("🎁")
-                        .font(.system(size: 14))
+                        .font(.fbBody)
                         .frame(width: 22, height: 22)
                         .background(FBColor.surface, in: Circle())
                         .offset(x: 4, y: 4)

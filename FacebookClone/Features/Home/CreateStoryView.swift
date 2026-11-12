@@ -13,7 +13,7 @@ struct CreateStoryView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0x18191A)
+            FBColor.darkCanvas
                 .ignoresSafeArea()
             stageView
         }
@@ -60,7 +60,7 @@ struct CreateStoryView: View {
     private var topBar: some View {
         ZStack {
             Text("Create story")
-                .font(.system(size: 17, weight: .bold))
+                .font(.fbHeadline)
                 .foregroundStyle(.white)
                 .accessibilityAddTraits(.isHeader)
             HStack {
@@ -68,7 +68,7 @@ struct CreateStoryView: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 40, height: 40)
                         .contentShape(Rectangle())
@@ -80,7 +80,7 @@ struct CreateStoryView: View {
                     store.showToast("Story settings aren't available in this demo", symbol: "gearshape.fill")
                 } label: {
                     Image(systemName: "gearshape.fill")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 40, height: 40)
                         .contentShape(Rectangle())
@@ -114,10 +114,10 @@ struct CreateStoryView: View {
     private var cameraRollHeader: some View {
         HStack(spacing: 6) {
             Text("Camera roll")
-                .font(.system(size: 17, weight: .bold))
+                .font(.fbHeadline)
                 .foregroundStyle(.white)
             Image(systemName: "chevron.down")
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(size: FBIconSize.small, weight: .bold))
                 .foregroundStyle(.white)
             Spacer()
             if isLoadingPhoto {
@@ -224,11 +224,11 @@ enum HomeStoryCreateOption: String, CaseIterable, Identifiable {
 
     var colors: [Color] {
         switch self {
-        case .text: return [Color(hex: 0x0866FF), Color(hex: 0x00C6FF)]
+        case .text: return [FBColor.brandBlue, Color(hex: 0x00C6FF)]
         case .music: return [Color(hex: 0xC600FF), Color(hex: 0xF5576C)]
         case .boomerang: return [Color(hex: 0xFF8008), Color(hex: 0xFFC837)]
         case .selfie: return [Color(hex: 0x11998E), Color(hex: 0x38EF7D)]
-        case .aiImages: return [Color(hex: 0x4E54C8), Color(hex: 0xE42D6F)]
+        case .aiImages: return [Color(hex: 0x4E54C8), FBColor.reelsPink]
         }
     }
 }
@@ -247,7 +247,7 @@ private struct HomeStoryOptionTile: View {
                 }
             Spacer(minLength: 0)
             Text(option.title)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.fbMetaEmphasized)
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .padding(.bottom, 12)
@@ -255,7 +255,7 @@ private struct HomeStoryOptionTile: View {
         .frame(width: 100, height: 150)
         .background(
             LinearGradient(colors: option.colors, startPoint: .topLeading, endPoint: .bottomTrailing),
-            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
         )
     }
 
@@ -264,11 +264,11 @@ private struct HomeStoryOptionTile: View {
         let tint = option.colors.first ?? FBColor.brandBlue
         if option == .text {
             Text("Aa")
-                .font(.system(size: 16, weight: .bold))
+                .font(.fbHeadline)
                 .foregroundStyle(tint)
         } else {
             Image(systemName: option.symbol)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: FBIconSize.regular, weight: .semibold))
                 .foregroundStyle(tint)
         }
     }

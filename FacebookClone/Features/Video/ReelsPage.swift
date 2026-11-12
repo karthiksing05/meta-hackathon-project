@@ -257,7 +257,7 @@ private struct ReelsInfoOverlay: View {
                 onOpenProfile(reel.author)
             } label: {
                 HStack(spacing: 8) {
-                    AvatarView(user: reel.author, size: 34)
+                    AvatarView(user: reel.author, size: FBAvatarSize.story)
                     Text(reel.author.name)
                         .font(.fbName)
                         .foregroundStyle(Color.white)
@@ -275,7 +275,7 @@ private struct ReelsInfoOverlay: View {
                     follow()
                 } label: {
                     Text("Follow")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.fbMetaEmphasized)
                         .foregroundStyle(Color.white)
                         .padding(.horizontal, 12)
                         .frame(height: 28)
@@ -323,7 +323,7 @@ private struct ReelsInfoOverlay: View {
     private var audioRow: some View {
         HStack(spacing: 6) {
             Image(systemName: "music.note")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: FBIconSize.small, weight: .semibold))
             ReelsMarqueeText(text: audioTitle, width: 190, isAnimating: isPlaying)
         }
         .foregroundStyle(Color.white)
@@ -385,7 +385,7 @@ private struct ReelsMarqueeText: View {
 
     private var label: some View {
         Text(text)
-            .font(.system(size: 13, weight: .medium))
+            .font(.fbMetaEmphasized)
             .lineLimit(1)
             .fixedSize()
             .background {
@@ -437,7 +437,7 @@ private struct ReelsActionColumn: View {
                 likeIcon
                     .frame(width: 44, height: 40)
                 Text(reel.totalReactions.fbCompact)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.fbMetaEmphasized)
                     .foregroundStyle(Color.white)
             }
             .shadow(color: Color.black.opacity(0.35), radius: 3, y: 1)
@@ -452,10 +452,10 @@ private struct ReelsActionColumn: View {
     private var likeIcon: some View {
         if let reaction = reel.myReaction, reaction != .like {
             Text(reaction.emoji)
-                .font(.system(size: 30))
+                .font(.system(size: FBIconSize.xxl))
         } else {
             Image(systemName: "hand.thumbsup.fill")
-                .font(.system(size: 28, weight: .semibold))
+                .font(.system(size: FBIconSize.xxl, weight: .semibold))
                 .foregroundStyle(reel.myReaction == nil ? Color.white : FBColor.brandBlue)
                 .symbolEffect(.bounce, value: likeBounce)
         }
@@ -472,12 +472,12 @@ private struct ReelsActionButton: View {
         Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: symbol)
-                    .font(.system(size: 26, weight: .semibold))
+                    .font(.system(size: FBIconSize.xxl, weight: .semibold))
                     .foregroundStyle(Color.white)
                     .frame(width: 44, height: 40)
                 if let count {
                     Text(count.fbCompact)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.fbMetaEmphasized)
                         .foregroundStyle(Color.white)
                 }
             }
@@ -505,17 +505,17 @@ private struct ReelsAudioThumbnail: View {
 
     private var thumbnail: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous)
                 .fill(AvatarView.color(for: user.id))
             Text(user.initials)
-                .font(.system(size: 12, weight: .bold))
+                .font(.fbCaptionEmphasized)
                 .foregroundStyle(Color.white)
             RemoteImage(url: user.avatarURL, data: user.avatarData, placeholder: .clear)
         }
         .frame(width: 32, height: 32)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous)
                 .stroke(Color.white, lineWidth: 2)
         }
     }

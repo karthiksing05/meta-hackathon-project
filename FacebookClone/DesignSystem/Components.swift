@@ -94,7 +94,7 @@ struct BadgeCount: View {
 
     var body: some View {
         Text(count > 99 ? "99+" : "\(count)")
-            .font(.system(size: 11, weight: .bold))
+            .font(.system(size: 11, weight: .bold)) // Fixed so badges never outgrow their icon
             .foregroundStyle(.white)
             .padding(.horizontal, 5)
             .frame(minWidth: 18, minHeight: 18)
@@ -107,7 +107,7 @@ struct BadgeCount: View {
 }
 
 struct VerifiedBadge: View {
-    var size: CGFloat = 13
+    var size: CGFloat = FBIconSize.small
 
     var body: some View {
         Image(systemName: "checkmark.seal.fill")
@@ -234,7 +234,7 @@ struct ChipView: View {
             HStack(spacing: 6) {
                 if let symbol {
                     Image(systemName: symbol)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: FBIconSize.medium, weight: .semibold))
                 }
                 Text(title)
                     .font(.fbButton)
@@ -324,7 +324,7 @@ struct TabHeader<Trailing: View>: View {
             Spacer(minLength: 8)
             trailing
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, FBMetrics.screenPadding)
         .padding(.vertical, 8)
     }
 }
@@ -349,7 +349,7 @@ struct SearchField: View {
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: FBIconSize.medium, weight: .medium))
                 .foregroundStyle(FBColor.secondaryText)
             TextField(placeholder, text: $text)
                 .font(.fbBodyLarge)
@@ -395,7 +395,7 @@ struct ComposerBar: View {
             Button {
                 router.push(.profile(store.me))
             } label: {
-                AvatarView(user: store.me, size: 40)
+                AvatarView(user: store.me, size: FBAvatarSize.post)
             }
             .buttonStyle(.plain)
 
@@ -420,7 +420,7 @@ struct ComposerBar: View {
                 router.composePost(CreatePostRequest(group: group, timelineOwner: timelineOwner, startAction: .photo))
             } label: {
                 Image(systemName: "photo.on.rectangle.angled")
-                    .font(.system(size: 22))
+                    .font(.system(size: FBIconSize.xl))
                     .foregroundStyle(FBColor.photoGreen)
                     .frame(width: 36, height: 36)
             }

@@ -58,20 +58,20 @@ struct EventDetailView: View {
         HStack(alignment: .top, spacing: 14) {
             VStack(spacing: 0) {
                 Text(DateFormatters.monthShort.string(from: event.startDate).uppercased())
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.fbCaptionEmphasized)
                     .foregroundStyle(FBColor.eventRed)
                 Text(DateFormatters.dayNumber.string(from: event.startDate))
-                    .font(.system(size: 26, weight: .bold))
+                    .font(.fbTabTitle)
                     .foregroundStyle(FBColor.primaryText)
             }
             .frame(width: 52, height: 56)
-            .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.startDate.eventStyle)
-                    .font(.fbMeta.weight(.semibold))
+                    .font(.fbMetaEmphasized)
                     .foregroundStyle(FBColor.eventRed)
                 Text(event.title)
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.fbTitle)
                     .foregroundStyle(FBColor.primaryText)
                 Text("Event by \(event.hostName)")
                     .font(.fbBody)
@@ -118,7 +118,7 @@ struct EventDetailView: View {
                 Image(systemName: option.symbol)
                 Text(option.title)
             }
-            .font(.system(size: 14, weight: .semibold))
+            .font(.fbButton)
         }
         .buttonStyle(.fb(selected ? .tinted : .secondary))
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -142,7 +142,7 @@ struct EventDetailView: View {
             }
         } label: {
             Image(systemName: "ellipsis")
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: FBIconSize.regular, weight: .bold))
                 .foregroundStyle(FBColor.primaryText)
                 .frame(width: 44, height: 36)
                 .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: FBMetrics.cornerRadius, style: .continuous))
@@ -179,7 +179,7 @@ struct EventDetailView: View {
     private func infoRow(symbol: String, text: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: symbol)
-                .font(.system(size: 18))
+                .font(.system(size: FBIconSize.regular))
                 .foregroundStyle(FBColor.secondaryText)
                 .frame(width: 26)
             Text(text)
@@ -194,7 +194,7 @@ struct EventDetailView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "mappin.and.ellipse")
-                    .font(.system(size: 18))
+                    .font(.system(size: FBIconSize.regular))
                     .foregroundStyle(FBColor.secondaryText)
                     .frame(width: 26)
                 VStack(alignment: .leading, spacing: 2) {
@@ -226,7 +226,7 @@ struct EventDetailView: View {
             Marker(event.locationName, coordinate: coordinate)
         }
         .frame(height: 160)
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .allowsHitTesting(false)
     }
 
@@ -245,7 +245,7 @@ struct EventDetailView: View {
                 Button("See more") {
                     withAnimation { showFullAbout = true }
                 }
-                .font(.fbBody.weight(.semibold))
+                .font(.fbButton)
                 .foregroundStyle(FBColor.secondaryText)
             }
         }
@@ -260,7 +260,7 @@ struct EventDetailView: View {
                 .font(.fbHeadline)
                 .foregroundStyle(FBColor.primaryText)
             HStack(spacing: 10) {
-                AvatarStack(users: event.friendsGoing, size: 32, maxCount: 5)
+                AvatarStack(users: event.friendsGoing, size: FBAvatarSize.comment, maxCount: 5)
                 Text(friendNames)
                     .font(.fbBody)
                     .foregroundStyle(FBColor.secondaryText)
@@ -293,7 +293,7 @@ struct EventDetailView: View {
                     .frame(width: 48, height: 48)
                     .overlay {
                         Image(systemName: "person.crop.circle.fill")
-                            .font(.system(size: 26))
+                            .font(.system(size: FBIconSize.xxl))
                             .foregroundStyle(FBColor.brandBlue)
                     }
                 VStack(alignment: .leading, spacing: 2) {
@@ -306,6 +306,7 @@ struct EventDetailView: View {
                 }
                 Spacer()
                 Button {
+                    Haptics.light()
                     store.showToast("Message sent to \(event.hostName)", symbol: "paperplane.fill")
                 } label: {
                     Text("Message")
@@ -332,7 +333,7 @@ struct EventDetailView: View {
     private func countCell(value: Int, title: String) -> some View {
         VStack(spacing: 2) {
             Text(value.fbCompact)
-                .font(.system(size: 20, weight: .bold))
+                .font(.fbTitle)
                 .foregroundStyle(FBColor.primaryText)
             Text(title)
                 .font(.fbMeta)

@@ -64,7 +64,7 @@ struct MenuView: View {
                 router.push(.profile(store.me))
             } label: {
                 HStack(spacing: 12) {
-                    AvatarView(user: store.me, size: 44)
+                    AvatarView(user: store.me, size: FBAvatarSize.post)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(store.me.name)
                             .font(.fbHeadline)
@@ -85,7 +85,7 @@ struct MenuView: View {
             } label: {
                 HStack(spacing: 12) {
                     Image(systemName: "plus")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: FBIconSize.regular, weight: .bold))
                         .foregroundStyle(FBColor.primaryText)
                         .frame(width: 44, height: 44)
                         .background(FBColor.buttonGray, in: Circle())
@@ -99,7 +99,7 @@ struct MenuView: View {
             }
             .buttonStyle(.plain)
         }
-        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .shadow(color: Color.black.opacity(0.08), radius: 3, x: 0, y: 1)
         .padding(.horizontal, 12)
     }
@@ -136,7 +136,7 @@ struct MenuView: View {
             VStack(spacing: 6) {
                 RemoteImage(url: group.coverURL)
                     .frame(width: 60, height: 60)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 Text(group.name)
                     .font(.fbCaption)
                     .foregroundStyle(FBColor.primaryText)
@@ -153,7 +153,7 @@ struct MenuView: View {
             router.push(.profile(page))
         } label: {
             VStack(spacing: 6) {
-                AvatarView(user: page, size: 60)
+                AvatarView(user: page, size: FBAvatarSize.row)
                 Text(page.name)
                     .font(.fbCaption)
                     .foregroundStyle(FBColor.primaryText)
@@ -268,6 +268,7 @@ struct MenuView: View {
 
     private var logOutButton: some View {
         Button {
+            Haptics.warning()
             showLogOut = true
         } label: {
             Text("Log out")

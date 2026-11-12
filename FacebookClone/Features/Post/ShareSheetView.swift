@@ -43,7 +43,7 @@ struct ShareSheetView: View {
     private var composer: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                AvatarView(user: store.me, size: 40)
+                AvatarView(user: store.me, size: FBAvatarSize.post)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(store.me.name)
                         .font(.fbName)
@@ -78,16 +78,16 @@ struct ShareSheetView: View {
                 Text("Feed")
                 Text("·")
                 Image(systemName: audience.symbol)
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.system(size: FBIconSize.xs, weight: .semibold))
                 Text(audience.title)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: FBIconSize.xs, weight: .bold))
             }
-            .font(.system(size: 12, weight: .semibold))
+            .font(.fbCaptionEmphasized)
             .foregroundStyle(FBColor.primaryText)
             .padding(.horizontal, 8)
             .frame(height: 24)
-            .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: FBMetrics.radiusSmall, style: .continuous))
         }
         .accessibilityLabel("Audience, \(audience.title)")
     }
@@ -146,13 +146,13 @@ struct ShareSheetView: View {
             }
         } label: {
             VStack(spacing: 6) {
-                AvatarView(user: friend, size: 56, showsOnline: !isSelected)
+                AvatarView(user: friend, size: FBAvatarSize.row, showsOnline: !isSelected)
                     .overlay(alignment: .bottomTrailing) {
                         if isSelected {
                             Image(systemName: "checkmark.circle.fill")
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, FBColor.brandBlue)
-                                .font(.system(size: 20))
+                                .font(.system(size: FBIconSize.large))
                                 .background(Circle().fill(FBColor.surface).padding(-2))
                                 .transition(.scale.combined(with: .opacity))
                         }
@@ -263,7 +263,7 @@ private struct PostShareRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: FBIconSize.regular, weight: .semibold))
                 .foregroundStyle(FBColor.primaryText)
                 .frame(width: 40, height: 40)
                 .background(FBColor.buttonGray, in: Circle())
@@ -273,7 +273,7 @@ private struct PostShareRow: View {
             Spacer(minLength: 8)
             if showsChevron {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
                     .foregroundStyle(FBColor.tertiaryText)
             }
         }
@@ -318,7 +318,7 @@ struct PostShareGroupPicker: View {
         HStack(spacing: 12) {
             RemoteImage(url: group.coverURL)
                 .frame(width: 48, height: 48)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(group.name)
                     .font(.fbName)

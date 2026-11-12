@@ -16,7 +16,7 @@ private struct ProfileButtonLabel: View {
         HStack(spacing: 6) {
             if let symbol {
                 Image(systemName: symbol)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: FBIconSize.medium, weight: .semibold))
             }
             Text(title)
                 .font(.fbButton)
@@ -62,6 +62,7 @@ struct ProfileActionButtons: View {
         .sheet(isPresented: $showMeSheet) {
             ProfileMeOptionsSheet(user: user, link: profileLink)
                 .presentationDetents([.height(300)])
+                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showFriendSheet) {
             ProfileFriendSheet(user: user) {
@@ -71,6 +72,7 @@ struct ProfileActionButtons: View {
                 }
             }
             .presentationDetents([.height(340)])
+            .presentationDragIndicator(.visible)
         }
         .confirmationDialog(
             "Unfriend \(user.name)?",
@@ -114,7 +116,7 @@ struct ProfileActionButtons: View {
             showMeSheet = true
         } label: {
             Image(systemName: "ellipsis")
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: FBIconSize.regular, weight: .bold))
                 .frame(width: 24)
         }
         .buttonStyle(.fb(.secondary, expand: false))
@@ -204,7 +206,7 @@ struct ProfileActionButtons: View {
             }
         } label: {
             Image(systemName: "ellipsis")
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: FBIconSize.regular, weight: .bold))
                 .foregroundStyle(FBColor.primaryText)
                 .frame(width: 44, height: 36)
                 .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: FBMetrics.cornerRadius, style: .continuous))
@@ -257,7 +259,7 @@ private struct ProfileSheetRow: View {
                 .frame(width: 40, height: 40)
                 .overlay {
                     Image(systemName: symbol)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
                         .foregroundStyle(destructive ? FBColor.notificationRed : FBColor.primaryText)
                 }
             Text(title)

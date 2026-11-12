@@ -55,7 +55,7 @@ struct FriendsPersonRow: View {
             Button {
                 router.push(.profile(user))
             } label: {
-                AvatarView(user: user, size: 80)
+                AvatarView(user: user, size: FBAvatarSize.request)
             }
             .buttonStyle(.plain)
 
@@ -76,7 +76,7 @@ struct FriendsPersonRow: View {
             Button {
                 router.push(.profile(user))
             } label: {
-                NameWithBadge(user: user, font: .system(size: 17, weight: .semibold))
+                NameWithBadge(user: user, font: .fbHeadline)
             }
             .buttonStyle(.plain)
             Spacer(minLength: 4)
@@ -92,7 +92,7 @@ struct FriendsPersonRow: View {
     private var mutualLine: some View {
         if user.mutualFriendCount > 0 {
             HStack(spacing: 6) {
-                AvatarStack(users: store.mutualFriends(with: user), size: 18)
+                AvatarStack(users: store.mutualFriends(with: user), size: FBAvatarSize.tiny)
                 Text("\(user.mutualFriendCount) mutual friends")
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)

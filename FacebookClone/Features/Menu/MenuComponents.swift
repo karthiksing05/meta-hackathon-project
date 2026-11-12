@@ -22,7 +22,7 @@ struct MenuTile: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
                     Image(systemName: item.symbol)
-                        .font(.system(size: 26, weight: .semibold))
+                        .font(.system(size: FBIconSize.xxl, weight: .semibold))
                         .foregroundStyle(item.color)
                         .frame(height: 30)
                     Spacer()
@@ -37,7 +37,7 @@ struct MenuTile: View {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .shadow(color: Color.black.opacity(0.08), radius: 3, x: 0, y: 1)
         }
         .buttonStyle(.pressable)
@@ -55,7 +55,7 @@ struct MenuLinkRow: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: symbol)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 34, height: 34)
                     .background(FBColor.buttonGray, in: Circle())
@@ -69,7 +69,7 @@ struct MenuLinkRow: View {
                         .foregroundStyle(FBColor.secondaryText)
                 }
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: FBIconSize.small, weight: .semibold))
                     .foregroundStyle(FBColor.tertiaryText)
             }
             .padding(.horizontal, 12)
@@ -100,7 +100,7 @@ struct MenuCollapsibleSection<Content: View>: View {
             } label: {
                 HStack(spacing: 12) {
                     Image(systemName: symbol)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
                         .foregroundStyle(FBColor.primaryText)
                         .frame(width: 34, height: 34)
                         .background(FBColor.buttonGray, in: Circle())
@@ -109,7 +109,7 @@ struct MenuCollapsibleSection<Content: View>: View {
                         .foregroundStyle(FBColor.primaryText)
                     Spacer()
                     Image(systemName: "chevron.down")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: FBIconSize.medium, weight: .bold))
                         .foregroundStyle(FBColor.secondaryText)
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
@@ -128,7 +128,7 @@ struct MenuCollapsibleSection<Content: View>: View {
                 .transition(.opacity)
             }
         }
-        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .shadow(color: Color.black.opacity(0.08), radius: 3, x: 0, y: 1)
         .clipped()
     }
@@ -150,7 +150,7 @@ struct MenuDarkModeSheet: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: FBIconSize.medium, weight: .bold))
                         .foregroundStyle(FBColor.primaryText)
                         .frame(width: 32, height: 32)
                         .background(FBColor.buttonGray, in: Circle())
@@ -175,7 +175,7 @@ struct MenuDarkModeSheet: View {
                             .foregroundStyle(FBColor.primaryText)
                         Spacer()
                         Image(systemName: appearance == mode ? "largecircle.fill.circle" : "circle")
-                            .font(.system(size: 22))
+                            .font(.system(size: FBIconSize.xl))
                             .foregroundStyle(appearance == mode ? FBColor.accent : FBColor.tertiaryText)
                     }
                     .padding(.horizontal, 16)

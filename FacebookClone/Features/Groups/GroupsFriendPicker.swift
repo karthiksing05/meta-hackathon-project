@@ -24,13 +24,13 @@ struct GroupsFriendSelectionList: View {
             }
         } label: {
             HStack(spacing: 12) {
-                AvatarView(user: friend, size: 44)
+                AvatarView(user: friend, size: FBAvatarSize.post)
                 Text(friend.name)
                     .font(.fbName)
                     .foregroundStyle(FBColor.primaryText)
                 Spacer()
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 22))
+                    .font(.system(size: FBIconSize.xl))
                     .foregroundStyle(isSelected ? FBColor.brandBlue : FBColor.tertiaryText)
             }
             .padding(.horizontal, 16)
@@ -76,5 +76,6 @@ struct GroupsFriendPickerSheet: View {
             }
         }
         .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }

@@ -49,15 +49,21 @@ struct MarketplaceView: View {
         .background(FBColor.surface)
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(isPresented: $showYou) { MarketplaceYouView() }
-        .sheet(isPresented: $showSell) { sellSheet }
+        .sheet(isPresented: $showSell) {
+            sellSheet
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $showCategories) { categoriesSheet }
         .sheet(isPresented: $showLocation) {
             MarketplaceLocationSheet(filters: filters)
                 .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showFilter) {
             MarketplaceFilterSheet(filters: filters, resultCount: displayed.count)
                 .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
         .task {
             guard isLoading else { return }
@@ -128,7 +134,7 @@ struct MarketplaceView: View {
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "location.fill")
-                        .font(.system(size: 12))
+                        .font(.system(size: FBIconSize.small))
                     Text("San Francisco · \(Int(filters.radius)) mi")
                         .font(.fbButton)
                 }
@@ -180,6 +186,7 @@ struct MarketplaceView: View {
             }
         }
         .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
     }
 }
 

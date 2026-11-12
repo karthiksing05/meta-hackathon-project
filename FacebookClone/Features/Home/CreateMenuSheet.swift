@@ -130,12 +130,12 @@ private struct HomeCreateMenuRow: View {
                 .frame(width: 40, height: 40)
                 .overlay {
                     Image(systemName: item.symbol)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
                         .foregroundStyle(.white)
                 }
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.fbHeadline)
                     .foregroundStyle(FBColor.primaryText)
                 Text(item.subtitle)
                     .font(.fbMeta)

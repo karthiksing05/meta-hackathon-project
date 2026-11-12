@@ -58,7 +58,7 @@ private struct SettingsPersonRow<Trailing: View>: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            AvatarView(user: user, size: 44)
+            AvatarView(user: user, size: FBAvatarSize.post)
             VStack(alignment: .leading, spacing: 2) {
                 NameWithBadge(user: user)
                 if let subtitle {
@@ -85,7 +85,7 @@ struct SettingsFavoritesView: View {
                         store.toggleFavorite(user)
                     } label: {
                         Image(systemName: user.isFavorite ? "star.fill" : "star")
-                            .font(.system(size: 20))
+                            .font(.system(size: FBIconSize.large))
                             .foregroundStyle(user.isFavorite ? FBColor.feelingYellow : FBColor.secondaryText)
                             .frame(width: 36, height: 36)
                     }
@@ -209,7 +209,7 @@ struct SettingsTimeView: View {
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                     Text(averageText)
-                        .font(.system(size: 30, weight: .bold))
+                        .font(.system(size: 30, weight: .bold)) // Display text
                         .foregroundStyle(FBColor.primaryText)
                     chart
                         .padding(.top, 8)

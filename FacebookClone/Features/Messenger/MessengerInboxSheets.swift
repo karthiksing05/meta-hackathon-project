@@ -49,6 +49,7 @@ struct MessengerNewMessageSheet: View {
                 isQueryFocused = true
             }
         }
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
 
@@ -83,9 +84,9 @@ struct MessengerNewMessageSheet: View {
         } label: {
             HStack(spacing: 4) {
                 Text(user.firstName)
-                    .font(.fbMeta.weight(.semibold))
+                    .font(.fbMetaEmphasized)
                 Image(systemName: "xmark")
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: FBIconSize.xs, weight: .bold))
             }
             .foregroundStyle(FBColor.accent)
             .padding(.horizontal, 10)
@@ -99,7 +100,7 @@ struct MessengerNewMessageSheet: View {
     private var groupNameField: some View {
         HStack(spacing: 10) {
             Image(systemName: "person.3.fill")
-                .font(.system(size: 15))
+                .font(.system(size: FBIconSize.medium))
                 .foregroundStyle(FBColor.secondaryText)
             TextField("Group name (optional)", text: $groupName)
                 .font(.fbBodyLarge)
@@ -160,10 +161,10 @@ struct MessengerNewMessageSheet: View {
     private func friendRow(_ friend: User) -> some View {
         let isSelected = selected.contains(friend)
         return HStack(spacing: 12) {
-            AvatarView(user: friend, size: 44, showsOnline: true)
+            AvatarView(user: friend, size: FBAvatarSize.post, showsOnline: true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(friend.name)
-                    .font(.system(size: 16))
+                    .font(.fbBodyLarge)
                     .foregroundStyle(FBColor.primaryText)
                     .lineLimit(1)
                 if friend.isOnline {
@@ -174,7 +175,7 @@ struct MessengerNewMessageSheet: View {
             }
             Spacer(minLength: 8)
             Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 22))
+                .font(.system(size: FBIconSize.xl))
                 .foregroundStyle(isSelected ? FBColor.messengerBlue : FBColor.divider)
         }
         .padding(.horizontal, 16)
@@ -231,7 +232,7 @@ struct MessengerNoteSheet: View {
                     .focused($isFocused)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
-                    .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 Text("\(draft.count)/\(limit)")
                     .font(.fbCaption)
                     .monospacedDigit()
@@ -282,7 +283,7 @@ struct MessengerNoteSheet: View {
 
     private var preview: some View {
         ZStack(alignment: .top) {
-            AvatarView(user: store.me, size: 88)
+            AvatarView(user: store.me, size: FBAvatarSize.request)
                 .padding(.top, 46)
             MessengerThoughtBubble(
                 text: trimmedDraft.isEmpty ? "Share a thought..." : trimmedDraft,

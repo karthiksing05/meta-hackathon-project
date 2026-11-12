@@ -151,7 +151,7 @@ struct EditProfileView: View {
                 ProfileEditActionLabel(title: "Edit")
             }
         }) {
-            AvatarView(user: store.me, size: 120)
+            AvatarView(user: store.me, size: FBAvatarSize.hero)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
         }
@@ -166,7 +166,7 @@ struct EditProfileView: View {
             RemoteImage(url: store.me.coverURL, data: store.me.coverData)
                 .frame(maxWidth: .infinity)
                 .frame(height: 160)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         }
     }
 
@@ -185,7 +185,7 @@ struct EditProfileView: View {
                     .lineLimit(2...5)
                     .focused($focus, equals: .bio)
                     .padding(12)
-                    .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 Text("\(bio.count)/\(EditProfileView.bioLimit)")
                     .font(.fbMeta)
                     .foregroundStyle(bio.count >= EditProfileView.bioLimit ? FBColor.notificationRed : FBColor.secondaryText)
@@ -232,7 +232,7 @@ struct EditProfileView: View {
         }
         .padding(.horizontal, 12)
         .frame(minHeight: 44)
-        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
     }
 
     private var nameCard: some View {
@@ -262,7 +262,7 @@ struct EditProfileView: View {
         }
         .padding(.horizontal, 12)
         .frame(minHeight: 44)
-        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
     }
 }
 

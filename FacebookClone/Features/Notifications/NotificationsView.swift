@@ -116,6 +116,7 @@ struct NotificationsView: View {
         HStack(spacing: 8) {
             ForEach(NotificationsFilter.allCases) { option in
                 ChipView(title: option.rawValue, isSelected: filter == option) {
+                    Haptics.selection()
                     filter = option
                 }
             }

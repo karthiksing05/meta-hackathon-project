@@ -135,7 +135,7 @@ struct PostCommentComposer: View {
                 bannerRow(banner)
             }
             HStack(alignment: .bottom, spacing: 8) {
-                AvatarView(user: store.me, size: 32)
+                AvatarView(user: store.me, size: FBAvatarSize.comment)
                     .padding(.bottom, 3)
                 field(text: $model.draft)
                 sendButton
@@ -168,7 +168,7 @@ struct PostCommentComposer: View {
                 model.cancelContext()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: FBIconSize.small, weight: .bold))
                     .foregroundStyle(FBColor.secondaryText)
                     .frame(width: 28, height: 28)
                     .contentShape(Rectangle())
@@ -196,28 +196,28 @@ struct PostCommentComposer: View {
         }
         .padding(.leading, 14)
         .padding(.trailing, 12)
-        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
     }
 
     private var accessoryButtons: some View {
         HStack(spacing: 14) {
             accessoryButton(label: "Add photo") {
                 Image(systemName: "camera")
-                    .font(.system(size: 17))
+                    .font(.system(size: FBIconSize.regular))
             }
             accessoryButton(label: "Add GIF") {
                 Text("GIF")
-                    .font(.system(size: 9, weight: .heavy))
+                    .font(.fbMicroEmphasized)
                     .padding(.horizontal, 3)
                     .padding(.vertical, 2)
                     .overlay {
-                        RoundedRectangle(cornerRadius: 3, style: .continuous)
+                        RoundedRectangle(cornerRadius: FBMetrics.radiusXS, style: .continuous)
                             .stroke(FBColor.secondaryText, lineWidth: 1.4)
                     }
             }
             accessoryButton(label: "Add emoji") {
                 Image(systemName: "face.smiling")
-                    .font(.system(size: 17))
+                    .font(.system(size: FBIconSize.regular))
             }
         }
         .foregroundStyle(FBColor.secondaryText)
@@ -237,7 +237,7 @@ struct PostCommentComposer: View {
     private var sendButton: some View {
         Button(action: send) {
             Image(systemName: "paperplane.fill")
-                .font(.system(size: 20))
+                .font(.system(size: FBIconSize.large))
                 .foregroundStyle(canSend ? FBColor.accent : FBColor.tertiaryText)
                 .frame(width: 36, height: 38)
                 .contentShape(Rectangle())

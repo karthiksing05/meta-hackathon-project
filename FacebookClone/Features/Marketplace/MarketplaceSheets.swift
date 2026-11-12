@@ -40,7 +40,7 @@ struct MarketplaceCategoriesSheet: View {
         } label: {
             VStack(alignment: .leading, spacing: 10) {
                 Image(systemName: category.symbol)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: FBIconSize.large, weight: .semibold))
                     .foregroundStyle(FBColor.accent)
                     .frame(width: 44, height: 44)
                     .background(FBColor.tintedBlueBackground, in: Circle())
@@ -51,7 +51,7 @@ struct MarketplaceCategoriesSheet: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
-            .background(FBColor.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         }
         .buttonStyle(.pressable)
     }
@@ -95,8 +95,8 @@ struct MarketplaceLocationSheet: View {
     private var map: some View {
         Map(position: $position) {
             MapCircle(center: MarketplaceLocationSheet.center, radius: radiusMeters)
-                .foregroundStyle(Color.blue.opacity(0.18))
-                .stroke(Color.blue, lineWidth: 2)
+                .foregroundStyle(FBColor.brandBlue.opacity(0.18))
+                .stroke(FBColor.brandBlue, lineWidth: 2)
         }
     }
 
@@ -157,7 +157,7 @@ struct MarketplaceFilterSheet: View {
                     HStack(spacing: 12) {
                         TextField("Min", text: $filters.minPrice)
                             .keyboardType(.numberPad)
-                        Text("to").foregroundStyle(.secondary)
+                        Text("to").foregroundStyle(FBColor.secondaryText)
                         TextField("Max", text: $filters.maxPrice)
                             .keyboardType(.numberPad)
                     }

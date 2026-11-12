@@ -58,7 +58,7 @@ struct HomeStoryPage: View {
         .overlay(alignment: .bottom) {
             caption
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 0)
@@ -93,7 +93,7 @@ struct HomeStoryPage: View {
                 Spacer(minLength: 8)
                 Button(action: actions.onOptions) {
                     Image(systemName: "ellipsis")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: FBIconSize.large, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 40, height: 40)
                         .contentShape(Rectangle())
@@ -102,7 +102,7 @@ struct HomeStoryPage: View {
                 .accessibilityLabel("Story options")
                 Button(action: actions.onClose) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: FBIconSize.large, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 40, height: 40)
                         .contentShape(Rectangle())
@@ -118,14 +118,14 @@ struct HomeStoryPage: View {
 
     private var authorLabel: some View {
         HStack(spacing: 8) {
-            AvatarView(user: story.author, size: 36)
+            AvatarView(user: story.author, size: FBAvatarSize.story)
             Text(story.author.isMe ? "Your story" : story.author.name)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.fbName)
                 .foregroundStyle(.white)
                 .lineLimit(1)
             if let item {
                 Text(item.createdAt.fbShort)
-                    .font(.system(size: 13))
+                    .font(.fbMeta)
                     .foregroundStyle(Color.white.opacity(0.8))
                     .lineLimit(1)
             }
@@ -136,12 +136,12 @@ struct HomeStoryPage: View {
     private var caption: some View {
         if let text = item?.caption, !text.isEmpty {
             Text(text)
-                .font(.system(size: 16, weight: .medium))
+                .font(.fbBodyLarge)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Color.black.opacity(0.45), in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 .padding(.horizontal, 20)
                 .padding(.bottom, 24)
                 .opacity(chromeHidden ? 0 : 1)
@@ -197,7 +197,7 @@ private struct HomeStoryReplyFooter: View {
         HStack(spacing: 4) {
             Button(action: onReply) {
                 Text("Send message")
-                    .font(.system(size: 15))
+                    .font(.fbBody)
                     .foregroundStyle(Color.white.opacity(0.85))
                     .lineLimit(1)
                     .padding(.horizontal, 14)
@@ -215,7 +215,7 @@ private struct HomeStoryReplyFooter: View {
                     onReact(emoji)
                 } label: {
                     Text(emoji)
-                        .font(.system(size: 26))
+                        .font(.system(size: 26)) // Display text
                         .frame(width: 34, height: 40)
                 }
                 .buttonStyle(.pressable)
@@ -238,7 +238,7 @@ private struct HomeMyStoryFooter: View {
                 Image(systemName: "eye.fill")
                 Text(viewerText)
             }
-            .font(.system(size: 15, weight: .semibold))
+            .font(.fbButton)
             .foregroundStyle(.white)
             .accessibilityElement(children: .combine)
 
@@ -249,7 +249,7 @@ private struct HomeMyStoryFooter: View {
                     Image(systemName: "plus.circle.fill")
                     Text("Add to story")
                 }
-                .font(.system(size: 15, weight: .semibold))
+                .font(.fbButton)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 14)
                 .frame(height: 38)
@@ -296,7 +296,7 @@ struct HomeStoryReplyComposer: View {
                 }
             HStack(spacing: 8) {
                 TextField("Reply to \(recipient.firstName)...", text: $text)
-                    .font(.system(size: 16))
+                    .font(.fbBodyLarge)
                     .foregroundStyle(.white)
                     .tint(.white)
                     .focused($isFocused)
@@ -314,7 +314,7 @@ struct HomeStoryReplyComposer: View {
                     onSend(text)
                 } label: {
                     Image(systemName: "paperplane.fill")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: FBIconSize.large, weight: .semibold))
                         .foregroundStyle(canSend ? FBColor.accent : Color.white.opacity(0.4))
                         .frame(width: 44, height: 44)
                 }
@@ -353,7 +353,7 @@ struct HomeFloatingEmoji: View {
 
     var body: some View {
         Text(reaction.emoji)
-            .font(.system(size: 46))
+            .font(.system(size: 46)) // Display text
             .scaleEffect(rise ? 1.35 : 0.5)
             .offset(x: rise ? reaction.drift : 0, y: rise ? -340 : 0)
             .opacity(fade ? 0 : 1)

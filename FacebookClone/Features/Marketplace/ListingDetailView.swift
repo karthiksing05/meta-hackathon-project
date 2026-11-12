@@ -98,7 +98,7 @@ struct ListingDetailView: View {
             .overlay(alignment: .bottomTrailing) {
                 if images.count > 1 {
                     Text("\(page + 1)/\(images.count)")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.fbMetaEmphasized)
                         .foregroundStyle(.white)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
@@ -131,18 +131,18 @@ struct ListingDetailView: View {
                 .foregroundStyle(FBColor.primaryText)
             HStack(spacing: 8) {
                 Text(listing.priceText)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.fbHeadline)
                     .foregroundStyle(FBColor.primaryText)
                 if let original = listing.originalPriceText {
                     Text(original)
                         .font(.fbBody)
                         .strikethrough()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(FBColor.secondaryText)
                 }
             }
             Text("Listed \(listing.createdAt.fbLong) in \(listing.city)")
                 .font(.fbMeta)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(FBColor.secondaryText)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
@@ -224,7 +224,7 @@ struct ListingDetailView: View {
             }
         }
         .padding(16)
-        .background(FBColor.background, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(FBColor.background, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .padding(.horizontal, 16)
         .padding(.bottom, 16)
     }
@@ -299,7 +299,7 @@ struct ListingDetailView: View {
             .buttonStyle(.fb(.destructive))
             Text("\(listing.viewCount) people viewed this listing")
                 .font(.fbMeta)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(FBColor.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(.horizontal, 16)
@@ -318,7 +318,7 @@ struct ListingDetailView: View {
                 HStack {
                     Text("Category")
                         .font(.fbBody)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(FBColor.secondaryText)
                     Spacer()
                     Text(listing.category.title)
                         .font(.fbBody)
@@ -337,7 +337,7 @@ struct ListingDetailView: View {
         HStack {
             Text(label)
                 .font(.fbBody)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(FBColor.secondaryText)
             Spacer()
             Text(value)
                 .font(.fbBody)
@@ -379,18 +379,18 @@ struct ListingDetailView: View {
                 interactionModes: []
             ) {
                 MapCircle(center: coordinate, radius: 900)
-                    .foregroundStyle(Color.blue.opacity(0.2))
-                    .stroke(Color.blue, lineWidth: 2)
+                    .foregroundStyle(FBColor.brandBlue.opacity(0.2))
+                    .stroke(FBColor.brandBlue, lineWidth: 2)
             }
             .frame(height: 170)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .allowsHitTesting(false)
             Text(listing.city)
                 .font(.fbBody)
                 .foregroundStyle(FBColor.primaryText)
             Text("Approximate location to protect the seller's privacy")
                 .font(.fbMeta)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(FBColor.secondaryText)
         }
         .padding(16)
     }
@@ -409,19 +409,19 @@ struct ListingDetailView: View {
                 .font(.fbHeadline)
                 .foregroundStyle(FBColor.primaryText)
             HStack(spacing: 12) {
-                AvatarView(user: seller, size: 48)
+                AvatarView(user: seller, size: FBAvatarSize.compact)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(seller.firstName + " " + seller.lastName)
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
                     Text("Joined Facebook in \(String(year))")
                         .font(.fbMeta)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(FBColor.secondaryText)
                     HStack(spacing: 6) {
                         MarketplaceStars(rating: seller.marketplaceRating)
                         Text("\(String(format: "%.1f", seller.marketplaceRating)) (\(seller.marketplaceRatingCount))")
                             .font(.fbMeta)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(FBColor.secondaryText)
                     }
                 }
                 Spacer()
@@ -456,7 +456,7 @@ struct MarketplaceRoundLabel: View {
     var body: some View {
         VStack(spacing: 6) {
             Image(systemName: symbol)
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: FBIconSize.regular, weight: .semibold))
                 .foregroundStyle(highlighted ? FBColor.accent : FBColor.primaryText)
                 .frame(width: 44, height: 44)
                 .background(highlighted ? FBColor.tintedBlueBackground : FBColor.buttonGray, in: Circle())

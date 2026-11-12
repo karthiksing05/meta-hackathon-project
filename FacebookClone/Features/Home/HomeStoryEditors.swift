@@ -91,7 +91,7 @@ struct HomeTextStoryEditor: View {
         HStack {
             Button(action: onCancel) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(palette.textColor)
                     .frame(width: 38, height: 38)
                     .background(Color.black.opacity(0.18), in: Circle())
@@ -103,7 +103,7 @@ struct HomeTextStoryEditor: View {
                 Button("Done") {
                     isFocused = false
                 }
-                .font(.system(size: 16, weight: .semibold))
+                .font(.fbHeadline)
                 .foregroundStyle(palette.textColor)
                 .padding(.horizontal, 14)
                 .frame(height: 34)
@@ -118,12 +118,12 @@ struct HomeTextStoryEditor: View {
         VStack(spacing: 14) {
             HStack(spacing: 10) {
                 Text("A")
-                    .font(.system(size: 13, weight: .bold))
+                    .font(.fbMetaEmphasized)
                 Slider(value: $fontSize, in: 20...48)
                     .tint(palette.textColor)
                     .accessibilityLabel("Text size")
                 Text("A")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.fbTitle)
             }
             .foregroundStyle(palette.textColor)
             .padding(.horizontal, 24)
@@ -154,7 +154,7 @@ struct HomeTextStoryEditor: View {
                 onShare(trimmed, backgroundIndex)
             } label: {
                 Text("Share to story")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.fbHeadline)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 46)
@@ -257,7 +257,7 @@ struct HomePhotoStoryEditor: View {
                 canvasSize = newSize
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .padding(.horizontal, 4)
     }
 
@@ -267,7 +267,7 @@ struct HomePhotoStoryEditor: View {
         HStack(alignment: .top) {
             Button(action: onCancel) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 38, height: 38)
                     .background(Color.black.opacity(0.4), in: Circle())
@@ -295,12 +295,12 @@ struct HomePhotoStoryEditor: View {
         Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: symbol)
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 38, height: 38)
                     .background(Color.black.opacity(0.4), in: Circle())
                 Text(title)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.fbMicroEmphasized)
                     .foregroundStyle(.white)
                     .shadow(color: Color.black.opacity(0.5), radius: 2)
             }
@@ -312,7 +312,7 @@ struct HomePhotoStoryEditor: View {
     private var captionBar: some View {
         HStack(spacing: 10) {
             TextField("Add a caption...", text: $caption)
-                .font(.system(size: 15))
+                .font(.fbBody)
                 .foregroundStyle(.white)
                 .tint(.white)
                 .submitLabel(.done)
@@ -326,7 +326,7 @@ struct HomePhotoStoryEditor: View {
                     Image(systemName: "plus.circle.fill")
                     Text("Share to story")
                 }
-                .font(.system(size: 15, weight: .semibold))
+                .font(.fbButton)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 14)
                 .frame(height: 42)
@@ -348,12 +348,12 @@ struct HomePhotoStoryEditor: View {
             ZStack {
                 if overlayText.isEmpty {
                     Text("Type something")
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 28, weight: .bold)) // Display text
                         .foregroundStyle(Color.white.opacity(0.55))
                         .allowsHitTesting(false)
                 }
                 TextField("", text: $overlayText, axis: .vertical)
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .bold)) // Display text
                     .foregroundStyle(.white)
                     .tint(.white)
                     .multilineTextAlignment(.center)
@@ -367,7 +367,7 @@ struct HomePhotoStoryEditor: View {
                     Button("Done") {
                         endTextEditing()
                     }
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.fbHeadline)
                     .foregroundStyle(.white)
                     .padding(16)
                 }
@@ -432,12 +432,12 @@ struct HomeStoryOverlayLabel: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 28, weight: .bold))
+            .font(.system(size: 28, weight: .bold)) // Display text
             .foregroundStyle(.white)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(Color.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(Color.black.opacity(0.55), in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             .padding(.horizontal, 24)
     }
 }
@@ -447,7 +447,7 @@ struct HomeStickerLabel: View {
 
     var body: some View {
         Text(emoji)
-            .font(.system(size: 64))
+            .font(.system(size: 64)) // Display text
             .shadow(color: Color.black.opacity(0.25), radius: 4, y: 2)
     }
 }
@@ -583,7 +583,7 @@ struct HomeStickerPicker: View {
                             dismiss()
                         } label: {
                             Text(emoji)
-                                .font(.system(size: 38))
+                                .font(.system(size: 38)) // Display text
                                 .frame(maxWidth: .infinity, minHeight: 52)
                         }
                         .buttonStyle(.pressable)

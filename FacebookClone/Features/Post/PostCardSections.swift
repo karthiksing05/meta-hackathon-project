@@ -46,7 +46,7 @@ struct PostHiddenView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 12) {
                 Image(systemName: "eye.slash")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
@@ -100,7 +100,7 @@ struct PostHiddenView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: symbol)
-                    .font(.system(size: 18))
+                    .font(.system(size: FBIconSize.regular))
                     .foregroundStyle(FBColor.primaryText)
                     .frame(width: 28)
                 VStack(alignment: .leading, spacing: 2) {
@@ -224,7 +224,7 @@ struct PostCommentPreview: View {
                             .foregroundStyle(FBColor.secondaryText)
                     }
                     HStack(alignment: .top, spacing: 8) {
-                        AvatarView(user: comment.author, size: 28)
+                        AvatarView(user: comment.author, size: FBAvatarSize.reply)
                         bubble(for: comment)
                         Spacer(minLength: 24)
                     }
@@ -243,7 +243,7 @@ struct PostCommentPreview: View {
     private func bubble(for comment: Comment) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(comment.author.name)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.fbMetaEmphasized)
                 .foregroundStyle(FBColor.primaryText)
             Text(comment.text.isEmpty ? "Sent a photo" : comment.text)
                 .font(.fbBody)
@@ -253,7 +253,7 @@ struct PostCommentPreview: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 7)
-        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
     }
 
     /// The most-reacted comment, like "Most relevant".

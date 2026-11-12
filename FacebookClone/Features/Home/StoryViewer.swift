@@ -9,6 +9,8 @@ struct StoryViewer: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
+    /// With Reduce Motion on, authors slide flat instead of turning like a cube.
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(AppStore.self) private var store
     @Environment(Router.self) private var router
 
@@ -158,7 +160,7 @@ struct StoryViewer: View {
         )
         .frame(width: size.width, height: size.height)
         .rotation3DEffect(
-            .degrees(Double(turn) * 45),
+            .degrees(reduceMotion ? 0 : Double(turn) * 45),
             axis: (x: 0, y: 1, z: 0),
             anchor: turn > 0 ? .leading : .trailing,
             perspective: 2.5

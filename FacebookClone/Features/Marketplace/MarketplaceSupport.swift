@@ -190,7 +190,7 @@ struct MarketplaceGridCell: View {
             .overlay(alignment: .topTrailing) {
                 if listing.isSaved {
                     Image(systemName: "bookmark.fill")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: FBIconSize.small, weight: .bold))
                         .foregroundStyle(.white)
                         .padding(6)
                         .background(Color.black.opacity(0.45), in: Circle())
@@ -222,7 +222,7 @@ struct MarketplaceGridCell: View {
                     Text(original)
                         .font(.fbMeta)
                         .strikethrough()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(FBColor.secondaryText)
                 }
             }
             Text(listing.title)
@@ -231,7 +231,7 @@ struct MarketplaceGridCell: View {
                 .lineLimit(1)
             Text(listing.marketplaceLocationText)
                 .font(.fbMeta)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(FBColor.secondaryText)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -247,7 +247,7 @@ struct MarketplaceBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 11, weight: .bold))
+            .font(.fbMicroEmphasized)
             .foregroundStyle(.white)
             .padding(.horizontal, 7)
             .padding(.vertical, 3)
@@ -309,7 +309,7 @@ struct MarketplaceStars: View {
         HStack(spacing: 2) {
             ForEach(0..<5, id: \.self) { index in
                 Image(systemName: Double(index) + 0.5 <= rating ? "star.fill" : "star")
-                    .font(.system(size: 12))
+                    .font(.system(size: FBIconSize.small))
                     .foregroundStyle(FBColor.feelingYellow)
             }
         }
@@ -324,6 +324,6 @@ struct MarketplaceThumb: View {
     var body: some View {
         MarketplaceListingImage(listing: listing)
             .frame(width: size, height: size)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
     }
 }

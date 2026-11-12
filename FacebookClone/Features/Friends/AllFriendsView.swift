@@ -114,7 +114,7 @@ struct AllFriendsView: View {
                         Text(sortOrder.rawValue)
                             .font(.fbBody)
                         Image(systemName: "arrow.up.arrow.down")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.system(size: FBIconSize.small, weight: .semibold))
                     }
                     .foregroundStyle(FBColor.accent)
                 }
@@ -133,10 +133,10 @@ struct AllFriendsView: View {
             HStack(spacing: 12) {
                 Circle()
                     .fill(FBColor.buttonGray)
-                    .frame(width: 60, height: 60)
+                    .frame(width: FBAvatarSize.row, height: FBAvatarSize.row)
                     .overlay {
                         Image(systemName: "gift.fill")
-                            .font(.system(size: 24))
+                            .font(.system(size: FBIconSize.xl))
                             .foregroundStyle(FBColor.eventRed)
                     }
                 Text("Birthdays")
@@ -144,7 +144,7 @@ struct AllFriendsView: View {
                     .foregroundStyle(FBColor.primaryText)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: FBIconSize.medium, weight: .semibold))
                     .foregroundStyle(FBColor.secondaryText)
             }
             .padding(.horizontal, 16)
@@ -160,9 +160,9 @@ struct AllFriendsView: View {
                 router.push(.profile(friend))
             } label: {
                 HStack(spacing: 12) {
-                    AvatarView(user: friend, size: 60)
+                    AvatarView(user: friend, size: FBAvatarSize.row)
                     VStack(alignment: .leading, spacing: 2) {
-                        NameWithBadge(user: friend, font: .system(size: 17, weight: .semibold))
+                        NameWithBadge(user: friend, font: .fbHeadline)
                         if !user.isMe && friend.mutualFriendCount > 0 {
                             Text("\(friend.mutualFriendCount) mutual friends")
                                 .font(.fbMeta)
