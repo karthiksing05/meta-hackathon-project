@@ -66,3 +66,18 @@ node authoring/tools/test-studio-bundle.mjs      # loads the bundle in a Node vm
 
 `gold/` holds 16 hand-made example games paired with requests: the quality bar for Muse. Studio picks the
 two closest to each request for Muse's prompt (`expander/gold.mjs`). See `gold/README.md`.
+
+## Muse harness
+
+See [the Emberpost sprite experiment](MUSE_HARNESS.md) for the structured prompt, the comparison
+with a plain prompt, and the checks to repeat on future sprite packs.
+
+## Muse token budgets
+
+For complex prompts that ask Muse Wonder to write a full manifest, consider a higher per-call
+output allowance if the experiment has spend headroom. In the Midnight Ward pilot, the API
+returned `finish_reason: length` with no manifest after using 9,998 of 10,000 completion tokens
+for reasoning. Log completion and reasoning tokens separately so this failure is visible. A retry
+with a higher allowance should still reserve its estimated cost against the experiment budget.
+For branching stories, a compact scene graph is another option. Muse produced the graph in a
+separate call, and local code expanded it into a manifest we could validate and replay.
