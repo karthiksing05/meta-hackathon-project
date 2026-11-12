@@ -215,6 +215,7 @@ struct GroupDetailView: View {
             VStack(spacing: 0) {
                 FeedSeparator()
                 BubbleGroupSection(group: group)
+                GroupBlendSection(group: group)
                 if group.isMember {
                     FeedSeparator()
                     ComposerBar(placeholder: "Write something...", group: group)
