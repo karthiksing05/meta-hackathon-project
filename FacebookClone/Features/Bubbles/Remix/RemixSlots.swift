@@ -78,7 +78,7 @@ struct RemixCaptionCredit: View {
     @Environment(BubbleStore.self) private var bubbleStore
 
     var body: some View {
-        if let text {
+        if let text = Self.text(for: bubble, in: bubbleStore) {
             HStack(spacing: 5) {
                 Image(systemName: "wand.and.sparkles")
                     .font(.system(size: FBIconSize.xs, weight: .bold))
@@ -95,7 +95,8 @@ struct RemixCaptionCredit: View {
         }
     }
 
-    private var text: String? {
+    /// The credit text alone, for the feed page's one-line meta row.
+    static func text(for bubble: Bubble, in bubbleStore: BubbleStore) -> String? {
         if RemixLineage.isRemix(bubble) {
             let creator = bubble.creator
             if creator.isFriend {

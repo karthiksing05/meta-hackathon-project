@@ -145,15 +145,20 @@ struct StoryEndingsPanel: View {
                         .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
                 }
                 if isLoading {
+                    // A row-shaped placeholder in the games' own skeleton color, with the dots.
                     HStack(spacing: 10) {
-                        Circle().fill(FBColor.skeleton).frame(width: FBAvatarSize.comment, height: FBAvatarSize.comment)
-                        Text(StoryCopy.friendsLoading)
-                            .font(.fbMeta)
-                            .foregroundStyle(FBColor.secondaryText)
+                        Circle().fill(GameColor.skeleton).frame(width: FBAvatarSize.comment, height: FBAvatarSize.comment)
+                        VStack(alignment: .leading, spacing: 6) {
+                            RoundedRectangle(cornerRadius: FBMetrics.radiusSmall, style: .continuous)
+                                .fill(GameColor.skeleton)
+                                .frame(width: 120, height: 10)
+                            GameLoader(style: .dots, label: StoryCopy.friendsLoading, size: 5)
+                        }
                     }
                     .shimmering()
                     .padding(.vertical, 6)
-                    .accessibilityElement(children: .combine)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(StoryCopy.friendsLoading)
                 }
             }
             .animation(reduceMotion ? nil : .easeOut(duration: 0.25), value: paths.count)

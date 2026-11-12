@@ -245,10 +245,8 @@ struct LengthCustomizePanelView: View {
                 Text(LengthCopy.idle)
                     .foregroundStyle(FBColor.secondaryText)
             case .checking:
-                ProgressView()
-                    .controlSize(.mini)
-                Text(LengthCopy.checking)
-                    .foregroundStyle(FBColor.secondaryText)
+                // The headless runtime is replaying the bots at the new length.
+                GameLoader(style: .dots, label: LengthCopy.checking, size: 5)
             case .kept(let line, let note):
                 Image(systemName: "checkmark.seal.fill")
                     .foregroundStyle(StudioGlow.fixed)

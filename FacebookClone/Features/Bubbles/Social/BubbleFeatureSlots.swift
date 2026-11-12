@@ -8,7 +8,7 @@ import SwiftUI
 // Spot                          Where it's called                         Order
 // BubbleResultInfoSlots         BubbleResultSheet, under the hero         length, challenge, story, learn, nextline
 // BubbleResultActionSlots       BubbleResultSheet, above Play again       saves, challenge, remix
-// BubbleFeedCaptionSlots        BubbleFeedPage caption, above the creator category chip, length, remix, saves
+// BubbleFeedCaptionSlots        (unused: the feed caption merges these into one meta line and one social line)
 // BubbleDetailSlots             BubbleDetailView, under the actions       length, saves, challenge, together, remix, story, learn, nextline
 // BubblePlayerTopBarSlots       BubblePlayerView top bar, before mute     saves
 // BubblePlayerBannerSlots       BubblePlayerView, under the top bar       challenge, nextline

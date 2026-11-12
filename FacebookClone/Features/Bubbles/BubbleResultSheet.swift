@@ -29,11 +29,8 @@ struct BubbleResultSheet: View {
             if let bubble = bubbleStore.bubble(id: context.bubbleID) {
                 content(bubble)
             } else {
-                ContentUnavailableView(
-                    "This \(ProductName.singular) didn't load",
-                    systemImage: "sparkles",
-                    description: Text("It isn't available anymore.")
-                )
+                EngineErrorCard(detail: EngineErrorCard.goneDetail)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .presentationDetents([.large])
