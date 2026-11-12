@@ -245,9 +245,12 @@ rule updates. The shipped `game.json` never contains it.
 
 ### 2.7 Inside Bubbles
 
-The manifest sits in beta's wrapper as `formula: "microgame"`, with the manifest under `game`. `brief`,
-`lineage`, `chain`, `style`, `seed` and `studio` don't change. The expander adds the fragment versions it
-resolved to `lineage`, so an old Bubble expands the same way after the library moves on.
+A Bubble manifest with `formula: "microgame"` carries the **expanded** `game.json` in `content.game`, so
+the player never needs the expander, and this authoring manifest in `content.authoring`, for remixing
+and lineage (docs/BUBBLES.md 7.11). `expander/bubble.mjs` (`wrapBubble`) builds it. `brief`, `lineage`,
+`chain`, `style`, `seed` and `studio` are the usual Bubble fields. The expander adds the fragment versions
+it resolved to `lineage`, so an old Bubble expands the same way after the library moves on.
+(An earlier beta draft put this manifest under a top-level `game`; the CLI still reads that.)
 
 ## 3. Expander
 
