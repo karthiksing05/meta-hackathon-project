@@ -1,34 +1,45 @@
 import SwiftUI
 
 /// Sweeps a soft highlight across the view, like Facebook's loading placeholders.
+///
+/// The sweep is driven by the clock (`TimelineView`), not by a repeating `withAnimation` in
+/// `onAppear`. A repeating animation started there joins that frame's whole transaction: on
+/// iOS 18 the Home feed's one-time top inset change at launch was captured by it and replayed
+/// every 1.3 s forever, so the feed crept downwards by itself. A clock-driven sweep can't leak.
 struct ShimmerModifier: ViewModifier {
     var isActive: Bool = true
-    @State private var phase: CGFloat = -1
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// One sweep, left to right, in seconds.
+    private static let period: TimeInterval = 1.3
 
     func body(content: Content) -> some View {
         content
             .overlay {
-                if isActive {
-                    GeometryReader { proxy in
-                        let width = proxy.size.width
-                        LinearGradient(
-                            colors: [.clear, Color.white.opacity(0.35), .clear],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                        .frame(width: width * 0.6)
-                        .offset(x: phase * width * 1.3)
+                if isActive && !reduceMotion {
+                    TimelineView(.animation) { timeline in
+                        GeometryReader { proxy in
+                            let width = proxy.size.width
+                            LinearGradient(
+                                colors: [.clear, Color.white.opacity(0.35), .clear],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .frame(width: width * 0.6)
+                            .offset(x: Self.phase(at: timeline.date) * width * 1.3)
+                        }
                     }
                     .mask(content)
                     .allowsHitTesting(false)
                 }
             }
-            .onAppear {
-                guard isActive else { return }
-                withAnimation(.linear(duration: 1.3).repeatForever(autoreverses: false)) {
-                    phase = 1.4
-                }
-            }
+    }
+
+    /// Where the highlight is at `date`: -1 (just off the leading edge) to 1.4 (past the trailing
+    /// edge), linearly, once per period.
+    private static func phase(at date: Date) -> CGFloat {
+        let progress = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: period) / period
+        return CGFloat(-1 + 2.4 * progress)
     }
 }
 
