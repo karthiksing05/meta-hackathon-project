@@ -44,6 +44,7 @@ struct SavesHintView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(SavesCopy.hintTitle)
                         .font(.fbCaptionEmphasized)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(SavesCopy.hintBody)
                         .font(.fbCaption)
                         .fixedSize(horizontal: false, vertical: true)
