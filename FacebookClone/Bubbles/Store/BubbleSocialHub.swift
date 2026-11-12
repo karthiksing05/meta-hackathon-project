@@ -133,9 +133,20 @@ enum BubbleSocialHub {
     /// head-to-head and stays verifiable.
     /// Challenge and session cards fill in their own context (opponent, score to beat) when
     /// `context` is nil.
+    ///
+    /// Cards live in Messenger and in feature sheets, which MainTabView presents like the player.
+    /// SwiftUI shows one of them at a time, so those close first and the player opens just after.
     static func play(_ card: BubbleChatCard, router: Router, context: BubblePlayContext? = nil) {
         let context = context ?? ChallengeCenter.shared.playContext(for: card)
-        router.play(BubblePlayRequest(bubbleID: card.bubbleID, seed: card.seed, length: card.length, context: context))
+        let request = BubblePlayRequest(bubbleID: card.bubbleID, seed: card.seed, length: card.length, context: context)
+        var closed = false
+        if router.isMessengerPresented { router.isMessengerPresented = false; closed = true }
+        if router.bubbleSheet != nil { router.bubbleSheet = nil; closed = true }
+        guard closed else {
+            router.play(request)
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { router.play(request) }
     }
 
     // MARK: Helpers

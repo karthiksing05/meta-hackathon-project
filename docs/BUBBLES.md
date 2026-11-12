@@ -793,7 +793,8 @@ forced to `.challenge`); a group chat or a Group gets a session (kind forced to 
 assigns `sessionID` (a UUID string), fills the extras below, delivers, then starts the bots. Cards
 sent to the feed, and every other kind, are delivered as is. `BubbleSocialHub.play` fills in the
 play context for challenge and session cards when the caller passes none (opponent name, score to
-beat). `targets` lists New in SF friends first, the demo group chats first among chats, and New in
+beat), and closes Messenger or a feature sheet before opening the player (one cover at a time),
+so Play works from a chat. `targets` lists New in SF friends first, the demo group chats first among chats, and New in
 SF first among Groups. `receive` counts a message unread unless that chat is open.
 
 **1:1 challenges.** Seed and length are the run's (`replay.seed`, `replay.length`); your score and
