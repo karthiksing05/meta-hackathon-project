@@ -1094,8 +1094,9 @@ types at 1.6 characters a tick (a tap finishes it), choices unlock after at leas
 an ending card holds 2.5 s. The bot reads for 1–3 s, then bolder (more skilled) bots take the boldest
 choice (timing, then flag-unlocked, then flag-setting, then not-an-ending; ties at random) and land
 timing taps more often, so skilled bots score more. Length: modes `rounds` and `endless`, default
-`rounds: 12` (the depth cap); each scene left is `lengthRound()`, and when it returns false the run
-jumps to the nearest ending. The kit also emits `story.reached_<n>` at ending n, so playtest event
+`rounds: 12` (the depth cap); each scene left is `lengthRound()`, except that when one round is
+left the run jumps to the nearest ending without spending it, so the engine never ends a story
+mid-scene and every run ends on an ending with its tag. The kit also emits `story.reached_<n>` at ending n, so playtest event
 counts show which endings bots found.
 
 **Content:**

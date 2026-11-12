@@ -23,7 +23,8 @@
 // "ending=<id>;first=<choice id>;found=<n>/<m>;path=<choice indexes>" for the app (7.6).
 //
 // Length (7.9): modes rounds and endless, default rounds = the depth cap. lengthRound() is called
-// when a scene is left; when it returns false the story jumps to the nearest ending.
+// when a scene is left. When only one round is left, the story jumps to the nearest ending instead
+// of spending it, so the run ends on an ending (with its tag) rather than mid-story.
 //
 // State: state.story (the walk), state.story_page (layout), state.choices / state.choices_locked
 // (for input.select), state.poster_tick.
@@ -439,7 +440,14 @@
         if (!(c.skill && !hit)) for (var i = 0; i < c.set.length; i++) st.flags[c.set[i]] = true;
         sdk.emit("story.choice", { scene: scene.id, choice: c.id, index: c.index, to: target, hit: !!hit });
         var dest = graph.byId[target] ? target : nearestEnding(graph, st.scene, st.flags);
-        if (sdk.lengthRound() === false && !(graph.byId[dest] && graph.byId[dest].ending)) dest = nearestEnding(graph, dest, st.flags);
+        // The last round of a locked length goes straight to the nearest ending without spending
+        // it: spending it would let the engine end the run before the ending card and its tag.
+        var left = sdk.lengthLeft ? sdk.lengthLeft().rounds_left : null;
+        if (left === 1) {
+          if (!(graph.byId[dest] && graph.byId[dest].ending)) dest = nearestEnding(graph, dest, st.flags);
+        } else if (sdk.lengthRound() === false && !(graph.byId[dest] && graph.byId[dest].ending)) {
+          dest = nearestEnding(graph, dest, st.flags);
+        }
         st.next = dest;
         st.phase = "move";
         st.t0 = sdk.tick;
