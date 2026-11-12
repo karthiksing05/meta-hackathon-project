@@ -37,6 +37,7 @@ struct BubbleDetailView: View {
                 popInButton(bubble)
                 stats(bubble)
                 actions(bubble)
+                ShowcaseDetailSection(bubble: bubble)
                 BubbleDetailSlots(bubble: bubble)
                 burstPreview(bubble)
                 boardPreview(bubble)
