@@ -124,7 +124,9 @@ Request ──► Muse Studio (Swift harness) ──► Manifest (JSON) ──�
 
 **Formulas** (taxonomy canvas, section 9) the runtime supports, in priority order:
 `dodge`, `guess`, `group` (sort into groups), `answer` (type or pick; consensus or correct scoring),
-`time` (tap at the right moment, e.g. stack), `merge` (drop and merge).
+`time` (tap at the right moment, e.g. stack), `merge` (drop and merge). The collaboration batch adds
+`story` (Adventure: choose your path), `nextline` (Quiz night: guess what they say next) and
+`learn` (Learn: lesson, practice, recap); see section 7.
 
 ---
 
@@ -189,6 +191,10 @@ Swift type: `BubbleManifest` in `Bubbles/Models/BubbleManifest.swift`.
   "studio": { "models": ["muse-wonder-1.0", "muse-ember-1.0"], "created_at": "2026-11-12T08:00:00Z", "duration_sec": 41.2, "offline": false }
 }
 ```
+
+Collaboration fields (all optional, section 7.1): `length` (`{mode, rounds, seconds, lives}`),
+`about` (`{subject_id, subject_name, template}`), and in `lineage`: `remix_of_title`,
+`remix_of_creator_id`, `remix_of_creator_name` and `makers` (`[{id, name, role, contribution}]`).
 
 Glue rules: each entry is the source of **one pure function** whose name is the slot
 (`feedback`, `spawn`, `score`, `transform`, `constraint`). No network, DOM, timers or globals.
@@ -259,6 +265,7 @@ each surface has its own file in `Features/Bubbles/Surfaces/`. `Post` carries `b
 JavaScriptCore: `catalog()`, `validate(_:)`, `simulate(_:seed:maxTicks:bot:replay:)`.
 
 DEBUG launch routing for screenshots: `FB_TAB`, `FB_OPEN`, `FB_SKIP_SPLASH` (see `App/DebugLaunch.swift`).
+Collaboration screens open with `FB_OPEN=feature:<key>/<screen>[/<arg>]` (section 7.1).
 
 ### 4.6 Runtime internals: kits, concepts and the SDK
 
@@ -544,7 +551,8 @@ calls the server.
 
 `Bubbles/Seeds/bubble-seed-<id>.json` is a manifest plus keys starting with `_`, which the runtime
 and validator ignore. `_seed` holds demo metadata for `BubbleStore`: `creator_id` (a demo-world
-person id or `me`), `group_id`, `event_id`, `created_hours_ago`, `play_count`, `like_count`.
+person id or `me`), `group_id`, `event_id`, `created_hours_ago`, `play_count`, `like_count`, `save_count` (saves are the
+likes, 7.10; defaults to `like_count`).
 `_placeholder: true` marks a stand-in that the runtime owners replace with a real, validated
 manifest under the same id. Seed ids are stable; screens and debug links use them.
 
@@ -638,3 +646,170 @@ Each look is a skin over the same `g` primitives. Kit code does not change per l
 3. New in SF's Daily Bubble: play, float the result to the Group, see the Bubble Board.
 4. Blow a bubble live: type a request, edit the brief, watch Muse compose, play it, make level 2.
 5. Share a Burst to your Story; the Event icebreaker; tomorrow's Daily Bubble is the reason to return.
+
+---
+
+## 7. Collaboration: closer together
+
+Every Bubble should bring specific people closer (friends, a Group, a group chat, people from an
+Event) through Facebook's own surfaces: friends, Groups, Messenger chats, Search, profiles and the
+feed. People come closer three ways: **friendly competition** (challenges, leaderboards, quiz
+nights), **shared stories** (adventures, paths you send) and **self-expression** (games about you,
+games made together, remixes). Every social screen shows who played, made or remixed it, plus a
+one-tap way to bring someone in: challenge, invite, send to the chat or add friend.
+
+The batch is nine features, each built on its own branch from `feat/base`: challenge, groups-search,
+together, remix, story, nextline, learn, length and saves. 7.1 is the shared plumbing every feature
+uses; 7.2 to 7.10 belong to the features, and each feature's implementer fills in its own section.
+
+### 7.1 Shared plumbing (feat/base)
+
+**Rule: fill in your own files only.** Shared screens call into features through pre-wired slots
+and registries. A feature edits its own files plus the small, listed shared edits in its spec.
+
+**Routes.** `Route.bubbleFeature(BubbleFeatureRoute)` pushes a feature screen;
+`router.bubbleSheet` presents one as a sheet over the tabs. `BubbleFeatureRoute(feature, screen,
+arg)`; `BubbleFeature` keys are `challenge`, `groups-search`, `together`, `remix`, `story`,
+`nextline`, `learn`, `length`, `saves`. `BubbleFeatureRouter` (Features/Bubbles/Social) dispatches
+to each feature's `<Feature>Screens` enum: `destination`, `sheet`, `open` (notification taps and
+cards), `debugOpen`, `install` (once at launch, after `BubbleSocialCast.install`) and `didFinish`
+(after the player records one of your runs). `AppNotification.bubbleAction` routes a notification
+tap to a feature. DEBUG: `FB_OPEN=feature:<key>/<screen>[/<arg>]`, for example
+`FB_OPEN=feature:challenge/picker/hill-hopper`. Stub screens show a "Coming soon" placeholder.
+
+**Slots.** `Social/BubbleFeatureSlots.swift` lists every slot and its order: result sheet info and
+actions, feed caption, Bubble page, player top bar and banner, Group Featured and Games tab,
+profile header and Bubbles tab, friend rows, Library header, Studio Ask and Try. Each slot view lives
+in `<Feature>Slots.swift` and keeps its name and stored properties. Result-sheet slots get a
+`BubbleResultSlotContext` (`result`, `bubble`, `play`, `request`, `playAgain`, `exitPlayer`; use
+`leavingPlayer { }` to open Studio or a chat from inside the player).
+
+**Playing with a fixed seed and length.** `BubblePlayRequest` has `seed`, `length` and `context`
+(`BubblePlayContext`: `kind` challenge/session/gameNight/contribution/lesson, `id`, `cardID`,
+`opponentName`, `target`). `router.play(BubblePlayRequest(...))` plays
+`manifest.withSeed(seed).withLength(length)`; the session key includes the content hash, so it never
+reuses a prepared session. The replay log records the seed and, when locked, the length
+(`BubbleInputLog.length`, also written by the runtime's `replayLog()`), and `BubbleStore.verify`
+replays with it, so every score stays verifiable.
+
+**Playable cards and Group posts** (owner: challenge). `BubbleChatCard` (`id, kind, bubble_id,
+seed, length, from_user_id, headline, session_id, score, extras`) rides on `Message.bubbleCard` and
+`Post.bubbleCard`. Kinds and owners: `challenge`, `session`, `share` (challenge); `remix` (remix);
+`contribution` (together); `gameNight` (nextline); `storyPath` (story); `lesson` (learn).
+`BubbleChatCardView` draws each kind with its owner's view (`<Feature>CardBody`), falling back to
+`BubbleChatCardFallback`. Send and update cards only through `BubbleSocialHub`:
+
+| Call | Does |
+|---|---|
+| `targets(appStore:kinds:)` | Friends, recent chats (group chats first), your Groups, feed, story, as `BubbleShareTarget` |
+| `send(_:to:note:appStore:bubbleStore:)` | Chat or friend: a message carrying the card. Group or feed: a post carrying it |
+| `receive(_:from:in:text:appStore:)` | A card from someone else lands in a chat (a friend's simulated score) |
+| `update(cardID:appStore:_:)` | Changes a card wherever it is ("3 of 5 played", the winner line) |
+| `play(_:router:context:)` | Plays the card's seed and length |
+
+**The other side.** `BubbleSocialCast` installs the synthetic group chats "New in SF crew" (Maya,
+Diego, Priya, Chloe) and "Picnic planners" (Omar, Lena, Jordan), names the default rival (Maya),
+and lists New in SF's members. `BubbleStore.simulateRun(of:on:manifest:skill:botSeed:completion:)`
+plays a person's run with the real runtime's bot on the exact seed and length, so a friend's score
+arrives with a replay. Use short delays (2–6 s) so it feels live.
+
+**Social signals.** Every collaboration moment calls `BubbleSocialSignals.post(_ kind:bubbleID:with:)`,
+which posts `Notification.Name.bubbleSocialSignal` with userInfo `["kind": String, "bubbleID":
+String, "with": [String]]` (other people's user ids). Kinds (`BubbleSocialSignalKind`):
+`challenge_sent`, `challenge_accepted`, `challenge_won`, `challenge_rematch`, `group_chat_play`,
+`group_challenge`, `game_night_play`, `remix`, `share`, `co_make_contribution`, `about_me_play`,
+`story_path_shared`, `lesson_shared`, `add_friend_from_game`. Kevin's recommender listens.
+
+**Saves contract.** Every save anywhere goes through `BubbleStore.toggleSave(_ bubble: Bubble,
+source: BubbleSaveSource = .feed)`, which updates `isSaved` and `saveCount` and posts
+`Notification.Name.bubbleSaveChanged` with userInfo `["bubbleID": String, "isSaved": Bool,
+"source": String]`. Sources: `feed game result detail library chat group search profile`. Don't save
+any other way. Kevin's recommender codes against this.
+
+**Length contract** (owner: length). Manifest `length` `{mode: endless|rounds|timed|lives, rounds?,
+seconds?, lives?}`; Swift `BubbleLength`. A formula declares `length: {modes, default, knobs}` in
+`defineFormula`; the catalog lists it and `length_modes`. In kits: `sdk.length` (resolved and
+frozen: `{mode, rounds, seconds, lives}`), `sdk.lengthRound()` when a round ends (false: the run is
+over), `sdk.lengthMiss()` on a miss (true: a life absorbed it; false: apply the kit's normal fail),
+`sdk.lengthLeft()` for HUDs. feat/base resolves `sdk.length` and validates the shape (error code
+`length`); the engine side (ending timed and rounds runs, lives, HUD, intro label) is the length
+feature's.
+
+**Studio hooks** (`Bubbles/Studio/StudioFormulaHints.swift`). `StudioFormulaHint` per new formula
+(keywords, nouns, looks, composer guide, offline content, playtest flags, relaxed flags), registered
+for story, nextline and learn. `StudioSocialHooks` runs each feature's `promptLines`, `applyDraft`
+(online draft to manifest), `applyOffline` (offline, before validation) and `finalize` (metadata at
+stamp time: lineage credits, makers, `about`). `StudioRequest` carries `length`, `tuning` and
+`social` (`StudioSocialContext`: base creator, makers, contributions, about-me template and answers,
+own story, lesson notes); `StudioLaunch` carries `social` and `length`, and `StudioModel` passes them
+on (remixes fill the base creator automatically).
+
+**Categories.** `BubbleFormula.category` (`BubbleCategory`): `story` is **Adventure**, `nextline`
+is **Quiz night**, `learn` is **Learn**, everything else is play (no chip). `BubbleCategoryChip`
+shows on feed pages, Bubble pages and Library cards; the Studio and Library formula chips list the
+new formulas.
+
+**Copy.** Each feature keeps its new user-facing strings in its `<Feature>Copy` enum, so a rename
+is one place per feature. The name stays "Bubbles" for now.
+
+### 7.2 Challenge Me and group chats (challenge)
+
+Challenge any friend, chat or Group to beat your score on the exact same seed, right from the
+result sheet, a friend row or a profile. The card lands in Messenger (or the Group), opening it plays
+the same seed, and a head-to-head result offers a rematch. A card dropped in a group chat starts a
+shared session: everyone plays the same seed, and the card tracks who played, a mini leaderboard
+and the winner. Friends' sides are bot runs that arrive a few seconds later, so every score stays
+verifiable. Owns `BubbleSocialHub`.
+
+### 7.3 Games in Groups and Search (groups-search)
+
+Search finds games by title, creator, category or Group, with a Games filter and playable results,
+and offers "Make it with Muse" when nothing matches. Groups get a Games tab: the Daily Bubble, a
+weekly leaderboard with a trophy and "Most improved", "Challenge the Group" posts, a game-night
+entry point, and Add friend from the leaderboard.
+
+### 7.4 Make it together, and games about you (together)
+
+Start a game and invite friends, a chat or a Group to add to it (a question, words, a scene or a
+level); Muse stitches the contributions into one game and credits every maker in `lineage.makers`.
+"Games about me" templates build a game from your answers (manifest `about`), shown on your profile
+with who knows you best.
+
+### 7.5 Remix and share (remix)
+
+Remix is on every surface and opens Studio with the game loaded. The manifest's lineage carries a
+"Remix of <title> by <name>" credit; the original creator is notified; the Bubble page shows a remix
+count and a small tree with friends highlighted; "Send it back" sends your remix to the creator's
+chat. Share always sends a playable card.
+
+### 7.6 Adventures: stories you play (story)
+
+The `story` formula (category Adventure): scenes with choices, flags that gate choices, several
+endings, and an optional quick skill moment. A validator proves every path ends and every scene is
+reachable. After an ending you see which endings friends found and who took the other path, and can
+send your path. Muse can turn your own story into an adventure.
+
+### 7.7 Quiz night: guess what they say next (nextline)
+
+The `nextline` formula (category Quiz night): a short, original animated scene freezes before the
+punchline and players pick the real line from four tiles against a timer. A quiz night runs in a
+Group or group chat, with a live-feeling leaderboard between rounds.
+
+### 7.8 Learn together (learn)
+
+The `learn` formula (category Learn): a short lesson card, practice questions with an explanation
+after each, a recap and a mastery streak. A Group's shared lesson has a mastery meter, and friends'
+streaks show up.
+
+### 7.9 Length and customizing (length)
+
+Length is a first-class primitive (7.1): endless, rounds, timed or lives, honored by every kit, with
+a Customize panel in Studio. Intro cards, results and boards label the mode, and shared play locks
+everyone to the same mode and numbers.
+
+### 7.10 Saves are the likes (saves)
+
+People leave a game to save it but not to like it, so saves are the appreciation signal: saves
+counts where likes would be, a one-tap Save in the player that never leaves the game, Save as the
+result sheet's primary action, "Saved by Maya and 37 others", creator notifications and stats. The
+contract is in 7.1.

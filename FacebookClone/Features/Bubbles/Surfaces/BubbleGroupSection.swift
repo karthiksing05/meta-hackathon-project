@@ -16,6 +16,7 @@ struct BubbleGroupSection: View {
                     .padding(12)
                     .background(FBColor.surface)
             }
+            BubbleGroupFeaturedSlots(group: group)
             if group.isMember {
                 BubbleGroupBlowRow(group: group)
             }

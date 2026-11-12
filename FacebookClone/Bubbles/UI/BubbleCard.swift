@@ -87,6 +87,7 @@ struct BubbleCard: View {
         var parts = [bubble.title, bubble.rule]
         if bubble.isDaily { parts.append("Daily Bubble") }
         if let level = bubble.levelIndex { parts.append("Level \(level)") }
+        if bubble.category != .play { parts.append(bubble.category.title) }
         return parts.joined(separator: ". ")
     }
 
@@ -114,6 +115,7 @@ struct BubbleCard: View {
                     .foregroundStyle(FBColor.secondaryText)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                BubbleCategoryChip(category: bubble.category)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(accessibilitySummary)

@@ -18,6 +18,7 @@ struct StudioTryStep: View {
                         StudioDetailsCard(model: model, result: result)
                             .id("details")
                     }
+                    StudioTrySlots(model: model)
                     StudioTweakCard(model: model, isFocused: $isTweakFocused)
                         .id("tweak")
                 }

@@ -9,7 +9,9 @@ import SwiftUI
 /// - `FB_OPEN`: one of
 ///   `bubble:<id>`, `board:<id>`, `library`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
 ///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
-///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`
+///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
+///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
+///   keys: challenge, groups-search, together, remix, story, nextline, learn, length, saves)
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
 ///
 /// Screens can read their own `FB_*` variables for extra DEBUG-only state (keep them documented
@@ -63,6 +65,10 @@ enum DebugLaunch {
         case "reels": router.openReels()
         case "story":
             break // Stories: the stories surface reads FB_OPEN=story:<userID> itself.
+        case "feature":
+            if let route = BubbleFeatureRoute(debugPath: arg) {
+                BubbleFeatureRouter.debugOpen(route, router: router, appStore: appStore, bubbleStore: bubbleStore)
+            }
         default:
             break
         }

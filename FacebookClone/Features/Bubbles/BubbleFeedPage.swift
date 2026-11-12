@@ -109,6 +109,7 @@ private struct BubbleFeedCaption: View {
             if !tags.isEmpty {
                 BubbleFeedTags(tags: tags)
             }
+            BubbleFeedCaptionSlots(bubble: bubble)
             creatorRow
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {

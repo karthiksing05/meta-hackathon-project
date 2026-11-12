@@ -166,6 +166,15 @@ final class StudioModel {
     /// The look the person picked; nil means Muse picks. Sent as `StudioRequest.paletteHint`.
     var lookHint: StudioLook?
 
+    // Collaboration (docs/BUBBLES.md 7)
+    /// Co-makers, contributions, about-me answers, own story, lesson notes. From the launch;
+    /// features' Studio entries may set it.
+    var social: StudioSocialContext?
+    /// The length picked in Customize; nil lets Muse pick. Owner: length.
+    var length: BubbleLength?
+    /// Tuning knobs picked in Customize, by knob id. Owner: length.
+    var tuning: [String: JSONValue]?
+
     // Brief
     var brief: BubbleBrief?
     var isDraftingBrief = false
@@ -229,6 +238,8 @@ final class StudioModel {
 
         baseBubble = launch.baseBubbleID.flatMap { bubbleStore.bubble(id: $0) }
         prompt = launch.prompt
+        social = launch.social
+        length = launch.length
         audience = initialAudience()
         destination = defaultDestination(for: audience)
         refreshSources()
@@ -536,8 +547,25 @@ final class StudioModel {
             formulaHint: formulaHint,
             paletteHint: look?.rawValue,
             date: requestMode == .daily ? BubbleStore.dayKey(Date()) : nil,
-            creatorName: me?.firstName ?? "Alex"
+            creatorName: me?.firstName ?? "Alex",
+            length: length,
+            tuning: tuning,
+            social: socialContext(for: requestMode)
         )
+    }
+
+    /// `social`, plus the base Bubble's creator for remixes (the "Remix of … by …" credit).
+    private func socialContext(for requestMode: StudioMode) -> StudioSocialContext? {
+        var context = social
+        if requestMode == .remix, let base = baseBubble {
+            var filled = context ?? StudioSocialContext()
+            if filled.baseCreatorID == nil {
+                filled.baseCreatorID = base.creator.id
+                filled.baseCreatorName = base.creator.isMe ? nil : base.creator.firstName
+            }
+            context = filled
+        }
+        return context
     }
 
     // MARK: Ask → Brief

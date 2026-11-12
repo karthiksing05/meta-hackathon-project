@@ -2,6 +2,8 @@ import SwiftUI
 
 private enum GroupsDetailTab: String, CaseIterable, Identifiable {
     case featured = "Featured"
+    /// Bubbles: the Group's games, leaderboard, game night (`BubbleGroupGamesTab`).
+    case games = "Games"
     case about = "About"
     case members = "Members"
     case media = "Media"
@@ -18,11 +20,14 @@ private struct GroupsViewerItem: Identifiable {
 
 struct GroupDetailView: View {
     let group: FBGroup
+    /// Open on the Games tab (Bubbles deep links, e.g. a game night invite).
+    var startsOnGames = false
 
     @Environment(AppStore.self) private var store
     @Environment(Router.self) private var router
 
     @State private var tab: GroupsDetailTab = .featured
+    @State private var didApplyStartTab = false
     @State private var showLeaveConfirm = false
     @State private var showInvite = false
     @State private var isFollowing = true
@@ -43,6 +48,10 @@ struct GroupDetailView: View {
         .onAppear {
             group.unreadCount = 0
             group.lastVisited = Date()
+            if startsOnGames && !didApplyStartTab {
+                didApplyStartTab = true
+                tab = .games
+            }
         }
         .sheet(isPresented: $showInvite) {
             GroupsFriendPickerSheet(title: "Invite friends", confirmTitle: "Send") { _ in
@@ -197,6 +206,12 @@ struct GroupDetailView: View {
         switch tab {
         case .featured:
             featuredContent
+        case .games:
+            if canSeeContent {
+                BubbleGroupGamesTab(group: group)
+            } else {
+                lockCard
+            }
         case .about:
             aboutContent
         case .members:

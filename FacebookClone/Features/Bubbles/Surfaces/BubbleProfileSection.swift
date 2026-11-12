@@ -14,6 +14,7 @@ struct BubbleProfileSection: View {
         let best = bubbleStore.worldBestScores(of: user)
         let chains = bubbleStore.worldChains(by: user)
         VStack(spacing: 0) {
+            BubbleProfileSectionSlots(user: user)
             if user.isMe {
                 blowRow
                 ProfileGap()

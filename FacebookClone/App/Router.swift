@@ -90,6 +90,9 @@ enum Route: Hashable {
     case bubbleChain(String)
     /// Marketplace as a pushed screen (it left the tab bar for Bubbles).
     case marketplace
+    /// A collaboration feature's screen (docs/BUBBLES.md 7.1): challenge, groups-search,
+    /// together, remix, story, nextline, learn, length, saves. `BubbleFeatureRouter` resolves it.
+    case bubbleFeature(BubbleFeatureRoute)
 }
 
 /// Opens the full-screen Bubble player.
@@ -98,6 +101,17 @@ struct BubblePlayRequest: Identifiable {
     let bubbleID: String
     /// Watch this run as a Burst first; tapping takes over.
     var replay: BubbleInputLog? = nil
+    /// Play this seed instead of the Bubble's (same-seed challenges and group-chat sessions).
+    var seed: Int? = nil
+    /// Lock the run to this length (challenges, sessions, game nights; docs/BUBBLES.md 7.9).
+    var length: BubbleLength? = nil
+    /// Why this play started (challenge, session, game night…), for the player and result sheet.
+    var context: BubblePlayContext? = nil
+
+    /// The manifest the player runs: the Bubble's, with this request's seed and length.
+    func effectiveManifest(_ manifest: BubbleManifest) -> BubbleManifest {
+        manifest.withSeed(seed).withLength(length)
+    }
 }
 
 /// Opens Muse Studio.
@@ -111,6 +125,10 @@ struct StudioLaunch: Identifiable {
     /// Make it for this Event (icebreaker).
     var eventID: String? = nil
     var prompt: String = ""
+    /// Remix credit, co-makers, about-me answers, own story, lesson notes (docs/BUBBLES.md 7).
+    var social: StudioSocialContext? = nil
+    /// Start with this length locked in Customize.
+    var length: BubbleLength? = nil
 }
 
 enum ComposerStartAction: Hashable {
@@ -159,10 +177,18 @@ final class Router {
     var reelsRequest: ReelsRequest? = nil
     var bubblePlayRequest: BubblePlayRequest? = nil
     var studioLaunch: StudioLaunch? = nil
+    /// A collaboration feature's sheet over the tabs (challenge picker, share sheet…). Inside the
+    /// player or another cover, present sheets locally instead.
+    var bubbleSheet: BubbleFeatureRoute? = nil
 
     /// Opens the Bubble player full screen, optionally starting with a Burst of `replay`.
     func play(_ bubbleID: String, replay: BubbleInputLog? = nil) {
         bubblePlayRequest = BubblePlayRequest(bubbleID: bubbleID, replay: replay)
+    }
+
+    /// Opens the player for a social play: a fixed seed and length, with its context.
+    func play(_ request: BubblePlayRequest) {
+        bubblePlayRequest = request
     }
 
     /// Opens Muse Studio full screen.
@@ -296,6 +322,8 @@ struct RouteDestination: View {
             BubbleChainView(chainID: id)
         case .marketplace:
             MarketplaceView()
+        case .bubbleFeature(let route):
+            BubbleFeatureRouter.destination(route)
         }
     }
 }

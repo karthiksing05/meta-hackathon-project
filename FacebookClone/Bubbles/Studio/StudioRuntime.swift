@@ -115,6 +115,6 @@ actor StudioRuntime {
                 events: sim.events
             ))
         }
-        return StudioPlaytest.analyze(runs)
+        return StudioFormulaHints.adjust(StudioPlaytest.analyze(runs), for: manifest)
     }
 }

@@ -213,6 +213,7 @@ struct StudioManifestBuilder {
             "created_at": .string(Self.timestamp(Date())),
             "offline": false,
         ]
+        StudioSocialHooks.applyDraft(&object, draft: draft, request: request)
         do {
             return try JSONValue.object(object).decode(BubbleManifest.self)
         } catch {
@@ -252,7 +253,7 @@ struct StudioManifestBuilder {
         )
         if let coverPrompt { out.style.coverPrompt = coverPrompt }
         if !catalog.isEmpty { out.engineVersion = catalog.engineVersion }
-        return out
+        return StudioSocialHooks.finalize(out, request: request)
     }
 
     // MARK: - Look (LOOKS.md)

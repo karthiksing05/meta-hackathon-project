@@ -23,16 +23,20 @@ struct BubbleInputLog: Codable, Hashable, Sendable {
     var tickRate: Int
     var totalTicks: Int
     var inputs: [BubbleInput]
+    /// The length the run was played with, when it was locked (challenges, sessions, game nights;
+    /// docs/BUBBLES.md 7.9). Verification replays with it, so every mode stays verifiable.
+    var length: BubbleLength?
 
-    init(seed: Int, tickRate: Int = 60, totalTicks: Int = 0, inputs: [BubbleInput] = []) {
+    init(seed: Int, tickRate: Int = 60, totalTicks: Int = 0, inputs: [BubbleInput] = [], length: BubbleLength? = nil) {
         self.seed = seed
         self.tickRate = tickRate
         self.totalTicks = totalTicks
         self.inputs = inputs
+        self.length = length
     }
 
     enum CodingKeys: String, CodingKey {
-        case seed, inputs
+        case seed, inputs, length
         case tickRate = "tick_rate"
         case totalTicks = "total_ticks"
     }

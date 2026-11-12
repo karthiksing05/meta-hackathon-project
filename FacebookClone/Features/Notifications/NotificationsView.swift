@@ -193,6 +193,10 @@ struct NotificationsView: View {
             if let actor = item.actors.first { router.push(.profile(actor)) }
             return
         }
+        if let action = item.bubbleAction {
+            BubbleFeatureRouter.open(action, router: router)
+            return
+        }
         if let id = item.bubbleID, item.kind.isBubble {
             if item.kind == .bubbleDaily || item.kind == .bubbleScore {
                 router.play(id)

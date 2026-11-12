@@ -21,6 +21,7 @@ struct StudioAskStep: View {
                             .padding(.horizontal, FBMetrics.screenPadding)
                         examples
                     }
+                    StudioAskSlots(model: model)
                     if model.showsAudiencePicker {
                         StudioAudienceSection(model: model)
                     } else if model.mode == .daily, let group = model.audienceGroup {
@@ -439,6 +440,9 @@ private struct StudioFormulaSection: View {
         case .time: return "Tap at just the right moment."
         case .merge: return "Drop bubbles and merge them into bigger ones."
         case .make: return "Make something together."
+        case .story: return "A story you play: pick a path, find every ending."
+        case .nextline: return "Guess what they say next, against the clock."
+        case .learn: return "A short lesson, then practice until it sticks."
         }
     }
 }

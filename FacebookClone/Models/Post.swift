@@ -222,6 +222,9 @@ final class Post: Identifiable, Hashable {
     var bubbleReplay: BubbleInputLog? = nil
     /// Bubbles: the author opted this post in as material for their Group's Daily Bubble.
     var allowsBubbles: Bool = false
+    /// Bubbles: a playable card posted to a Group or the feed ("Challenge the Group", a quiz
+    /// night, a shared lesson). Shown instead of the plain Bubble attachment (docs/BUBBLES.md 7.1).
+    var bubbleCard: BubbleChatCard? = nil
 
     init(
         id: String = UUID().uuidString,

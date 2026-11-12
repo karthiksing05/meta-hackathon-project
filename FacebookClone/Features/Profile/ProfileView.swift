@@ -121,6 +121,7 @@ struct ProfileView: View {
                 }
                 ProfileActionButtons(user: user)
                     .padding(.top, 4)
+                BubbleProfileHeaderSlots(user: user)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 12)

@@ -56,6 +56,10 @@
   const HAPTICS = ["light", "medium", "selection", "success", "warning"];
   const Z = { background: 0, space: 10, entities: 20, effects: 30, hud: 40 };
   const PARAM_TYPES = ["number", "integer", "boolean", "string", "enum", "string_list"];
+  // Length (docs/BUBBLES.md 7.9): how a run ends. Manifest `length` {mode, rounds, seconds, lives};
+  // a formula declares `length: {modes, default, knobs}`. Owner: the length feature, which fills in
+  // the engine side (lengthRound/lengthMiss/lengthLeft, timed endings, the HUD) and validation.
+  const LENGTH_MODES = ["endless", "rounds", "timed", "lives"];
 
   const GLUE_SLOTS = {
     feedback: "function feedback(guess, target, info) -> one mark per letter: \"hit\" (right spot), \"near\" (in the word) or \"miss\". Used by letter-feedback rules.",
@@ -622,6 +626,8 @@
       tags: isObj(def.tags) ? def.tags : {},
       tips: arr(def.tips),
       poster_ticks: typeof def.poster_ticks === "number" && isFinite(def.poster_ticks) ? clamp(Math.floor(def.poster_ticks), 0, POSTER_MAX_TICKS) : POSTER_TICKS,
+      // {modes: [...LENGTH_MODES], default: {mode, rounds, seconds, lives}, knobs: {id: {concept, param, label}}}
+      length: isObj(def.length) ? def.length : null,
     };
     formulas[f.id] = f;
     formulaOrder.push(f.id);
@@ -679,8 +685,26 @@
     return {
       id: f.id, title: f.title, describe: f.describe, core: f.core, optional: f.optional,
       content: f.content, has_bot: !!f.bot, styles: f.styles, tags: f.tags, tips: f.tips,
-      poster_ticks: f.poster_ticks, example: f.example, examples: f.examples,
+      poster_ticks: f.poster_ticks, example: f.example, examples: f.examples, length: f.length,
     };
+  }
+
+  // The run's length: the manifest's `length` over the formula's default, else endless. Numbers
+  // only for the chosen mode (null otherwise). Frozen; kits read it through `sdk.length`.
+  function resolveLength(manifest, formula) {
+    const own = isObj(manifest && manifest.length) ? manifest.length : null;
+    const base = formula && isObj(formula.length) && isObj(formula.length.default) ? formula.length.default : null;
+    const pick = own && LENGTH_MODES.indexOf(own.mode) >= 0 ? own : base && LENGTH_MODES.indexOf(base.mode) >= 0 ? base : { mode: "endless" };
+    const num = (key) => {
+      const v = pick[key] !== undefined ? pick[key] : base && base.mode === pick.mode ? base[key] : undefined;
+      return typeof v === "number" && isFinite(v) && v > 0 ? Math.floor(v) : null;
+    };
+    return Object.freeze({
+      mode: pick.mode,
+      rounds: pick.mode === "rounds" ? num("rounds") : null,
+      seconds: pick.mode === "timed" ? num("seconds") : null,
+      lives: pick.mode === "lives" ? num("lives") : null,
+    });
   }
   function conceptMeta(c) {
     return {
@@ -974,6 +998,9 @@
     }
     if (m.content !== undefined && !isObj(m.content)) errors.push(issue("schema", "content must be an object", "content"));
     if (m.glue !== undefined && m.glue !== null && !isObj(m.glue)) errors.push(issue("schema", "glue must be an object of {slot, source}", "glue"));
+    if (m.length !== undefined && m.length !== null && (!isObj(m.length) || LENGTH_MODES.indexOf(m.length.mode) < 0)) {
+      errors.push(issue("length", "length must be {mode, rounds?, seconds?, lives?} with mode one of " + LENGTH_MODES.join(", "), "length"));
+    }
     if (m.style !== undefined && !isObj(m.style)) errors.push(issue("schema", "style must be an object", "style"));
     else if (isObj(m.style)) validateStyle(m.style, errors, warnings);
     if (!Array.isArray(m.concepts) || !m.concepts.length) {
@@ -1273,6 +1300,16 @@
     share(partial) { this._run.mergeShare(partial); }
     preload(url) { if (this._run.preload) this._run.preload(url); }
     log(message) { logOnce(this._owner + ":" + message, this._owner + ": " + message); }
+    // Length contract (docs/BUBBLES.md 7.9). Every kit honors it:
+    //   sdk.length         {mode, rounds, seconds, lives}, resolved from the manifest and formula
+    //   sdk.lengthRound()  call when a round/item/scene completes; false means the run is over
+    //   sdk.lengthMiss()   call on a miss; true means a life absorbed it, false means apply the
+    //                      kit's normal fail
+    //   sdk.lengthLeft()   {rounds_left, seconds_left, lives_left} (null when not used) for HUDs
+    get length() { return this._run.length; }
+    lengthRound() { return this._run.lengthRound(); }
+    lengthMiss() { return this._run.lengthMiss(); }
+    lengthLeft() { return this._run.lengthLeft(); }
   }
 
   class BubbleRun {
@@ -1302,6 +1339,9 @@
       this.outcome = null;
       this.endInfo = null;
       this.state = {};
+      this.length = resolveLength(this.manifest, this.formula);
+      this.lengthRounds = 0;
+      this.lengthLivesLost = 0;
       this.content = Object.assign({}, this.manifest.content);
       this.hud = { score: true, label: "", retry: true, note: "" };
       this.feel = { ambient: 1, particles: 1, shake: 1, sound: "soft", tempo: 1 };
@@ -1579,7 +1619,27 @@
     }
 
     replayLog() {
-      return { seed: this.seed, tick_rate: TICK_RATE, total_ticks: this.tick, inputs: this.log.slice() };
+      const log = { seed: this.seed, tick_rate: TICK_RATE, total_ticks: this.tick, inputs: this.log.slice() };
+      // A locked length travels with the replay, so verification replays it exactly.
+      if (isObj(this.manifest.length)) log.length = deepCopy(this.manifest.length);
+      return log;
+    }
+
+    // ----- length (stubs from feat/base; the length feature implements them) -----
+
+    // A round completed. Returns false when the run should end (rounds used up).
+    lengthRound() {
+      this.lengthRounds++;
+      return true;
+    }
+
+    // A miss. Returns true when a life absorbed it (lives mode), false for the kit's normal fail.
+    lengthMiss() {
+      return false;
+    }
+
+    lengthLeft() {
+      return { rounds_left: null, seconds_left: null, lives_left: null };
     }
 
     eventCounts() {
@@ -1647,6 +1707,7 @@
       style_rules: "style: {look, palette (a preset or custom), colors {" + COLOR_ROLES.join(", ") + "} as #RRGGBB (ink needs 4.5:1 on both backgrounds), font, motif, emoji, mood_preset, cover_prompt}. Kits color through palette roles (g.palette.primary, secondary, accent, ink, bgTop, bgBottom, danger, surface, line, inkOn(fill)) and draw through g, so every look applies.",
       sounds: SOUNDS.slice(),
       haptics: HAPTICS.slice(),
+      length_modes: LENGTH_MODES.slice(),
       formulas: formulaOrder.map((id) => formulaMeta(formulas[id])),
       concepts: conceptOrder.map((id) => conceptMeta(concepts[id])),
       load_warnings: loadWarnings.slice(),
@@ -1749,6 +1810,8 @@
     simulate: (m, o) => simulate(m, o || {}),
     normalize: normalizeManifest,
     createSession,
+    resolveLength,
+    lengthModes: LENGTH_MODES,
     palette: paletteFor,
     palettes: PALETTES,
     looks: LOOKS,

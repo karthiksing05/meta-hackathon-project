@@ -18,6 +18,7 @@ struct BubbleLibraryView: View {
                     .padding(.horizontal, FBMetrics.screenPadding)
                 chips
                 if query.isEmpty && formula == nil { blowBanner }
+                BubbleLibraryHeaderSlots()
                 if sections.isEmpty {
                     emptyState
                 } else {

@@ -62,7 +62,9 @@ struct BubblePlayerView: View {
                 context: context,
                 onPlayAgain: playAgain,
                 onSeeBoard: openBoard,
-                onNextLevel: playNextLevel
+                onNextLevel: playNextLevel,
+                request: request,
+                exitPlayer: exitPlayer
             )
         }
         .onAppear(perform: appear)
@@ -88,7 +90,7 @@ struct BubblePlayerView: View {
 
     private func game(_ bubble: Bubble, safeArea: EdgeInsets) -> some View {
         BubbleWebView(
-            manifest: bubble.manifest,
+            manifest: effectiveManifest(bubble),
             mode: mode,
             playerName: appStore.me.firstName,
             bestScore: bubbleStore.bestScore(of: appStore.me, in: bubble)?.score,
@@ -105,7 +107,27 @@ struct BubblePlayerView: View {
         .accessibilityLabel("\(bubble.title). \(bubble.rule)")
     }
 
+    /// The Bubble's manifest, with the request's seed and length for the Bubble it was opened on
+    /// (challenges, sessions, game nights). Next levels play their own.
+    private func effectiveManifest(_ bubble: Bubble) -> BubbleManifest {
+        bubble.id == request.bubbleID ? request.effectiveManifest(bubble.manifest) : bubble.manifest
+    }
+
+    /// The request that applies to `bubble`: the launch request, or a plain one after a level change.
+    private func activeRequest(for bubble: Bubble) -> BubblePlayRequest {
+        bubble.id == request.bubbleID ? request : BubblePlayRequest(bubbleID: bubble.id)
+    }
+
     private func topBar(_ bubble: Bubble) -> some View {
+        VStack(spacing: 8) {
+            topBarRow(bubble)
+            if !isWatchingBurst {
+                BubblePlayerBannerSlots(bubble: bubble, request: activeRequest(for: bubble), score: score)
+            }
+        }
+    }
+
+    private func topBarRow(_ bubble: Bubble) -> some View {
         HStack(spacing: 10) {
             circleButton("xmark", label: "Close") {
                 dismiss()
@@ -130,6 +152,7 @@ struct BubblePlayerView: View {
                 BubbleScorePill(score: score)
                     .transition(.scale.combined(with: .opacity))
             }
+            BubblePlayerTopBarSlots(bubble: bubble, request: activeRequest(for: bubble))
             circleButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off") {
                 Haptics.light()
                 isMuted.toggle()
@@ -247,7 +270,14 @@ struct BubblePlayerView: View {
         lastResultAt = Date()
         score = runResult.score
         let previous = bubbleStore.bestScore(of: appStore.me, in: bubble)?.score
-        bubbleStore.record(runResult, in: bubble)
+        let played = activeRequest(for: bubble)
+        var runResult = runResult
+        if runResult.replay.length == nil, let length = played.length {
+            // The replay says which length it was played with, so verification replays it exactly.
+            runResult.replay.length = length
+        }
+        let entry = bubbleStore.record(runResult, in: bubble)
+        BubbleFeatureRouter.didFinish(entry, in: bubble, request: played, appStore: appStore, bubbleStore: bubbleStore)
         let context = BubbleResultContext(bubbleID: bubble.id, result: runResult, previousBest: previous)
         lastResult = context
         result = context
@@ -281,6 +311,15 @@ struct BubblePlayerView: View {
         dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
             router.push(.bubbleBoard(bubble.id))
+        }
+    }
+
+    /// Closes the result sheet and the player, then runs `action` (open Studio, a chat, a page).
+    private func exitPlayer(_ action: @escaping () -> Void) {
+        result = nil
+        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            action()
         }
     }
 

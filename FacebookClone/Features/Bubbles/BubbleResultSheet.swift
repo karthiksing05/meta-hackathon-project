@@ -8,6 +8,10 @@ struct BubbleResultSheet: View {
     var onPlayAgain: () -> Void
     var onSeeBoard: (Bubble) -> Void
     var onNextLevel: (Bubble) -> Void
+    /// The player's request (seed, length, challenge or session context). Nil from the feed.
+    var request: BubblePlayRequest? = nil
+    /// Closes the player, then runs the action. Nil outside the player.
+    var exitPlayer: ((@escaping () -> Void) -> Void)? = nil
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(AppStore.self) private var appStore
@@ -54,6 +58,7 @@ struct BubbleResultSheet: View {
                     isCelebrating: isCelebrating,
                     streak: bubble.isDaily ? bubbleStore.dailyStreak : 0
                 )
+                BubbleResultInfoSlots(slot: slot(for: bubble))
                 BubbleResultBoard(board: board) {
                     onSeeBoard(bubble)
                 }
@@ -107,6 +112,7 @@ struct BubbleResultSheet: View {
     private func actions(_ bubble: Bubble) -> some View {
         let group = bubble.group
         return VStack(spacing: 8) {
+            BubbleResultActionSlots(slot: slot(for: bubble))
             Button {
                 Haptics.light()
                 onPlayAgain()
@@ -144,6 +150,18 @@ struct BubbleResultSheet: View {
                 .buttonStyle(.fb(.tinted, height: 44))
             }
         }
+    }
+
+    /// What the collaboration slots get (docs/BUBBLES.md 7.1).
+    private func slot(for bubble: Bubble) -> BubbleResultSlotContext {
+        BubbleResultSlotContext(
+            result: context,
+            bubble: bubble,
+            play: request?.bubbleID == bubble.id ? request?.context : nil,
+            request: request?.bubbleID == bubble.id ? request : nil,
+            playAgain: onPlayAgain,
+            exitPlayer: exitPlayer
+        )
     }
 
     private func float(_ bubble: Bubble, to group: FBGroup?) {

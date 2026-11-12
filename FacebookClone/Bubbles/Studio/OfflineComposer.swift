@@ -189,6 +189,12 @@ final class OfflineComposer: @unchecked Sendable {
         if let line = contentNote.line {
             timeline.emit(.content, line.title, detail: line.detail, offline: true, sources: sourcesUsed.isEmpty ? nil : sourcesUsed)
         }
+        // Feature formulas write their own offline content; social and length hooks run after
+        // (docs/BUBBLES.md 7.1).
+        if let fill = StudioFormulaHints.hint(for: manifest.formula.rawValue)?.offlineContent, let line = fill(&manifest, request, brief) {
+            timeline.emit(.content, line, offline: true)
+        }
+        StudioSocialHooks.applyOffline(&manifest, request: request, brief: brief)
         if (request.mode == .daily || request.scope.hasPrefix("event:")) && !request.sources.isEmpty {
             manifest.brief.contentSources = sourcesUsed.isEmpty ? nil : sourcesUsed.map { "\($0)'s post (opted in)" }
         }
@@ -725,7 +731,10 @@ final class OfflineComposer: @unchecked Sendable {
 
     // MARK: - Picking
 
-    static let formulaKeywords: [String: [String]] = [
+    /// Built-in keywords plus each feature formula's (`StudioFormulaHints`).
+    static let formulaKeywords: [String: [String]] = baseFormulaKeywords.merging(StudioFormulaHints.keywords) { builtIn, _ in builtIn }
+
+    static let baseFormulaKeywords: [String: [String]] = [
         "dodge": ["dodge", "avoid", "fly", "float", "flap", "jump", "hop", "run", "runner", "running", "jog", "hill", "hills", "obstacle", "survive", "endless", "drift", "glide", "swim", "bike", "surf", "wave", "fog", "chill"],
         "guess": ["word", "words", "guess", "letter", "letters", "spell", "puzzle", "riddle", "daily word"],
         "group": ["sort", "group them", "category", "categories", "categorize", "match", "pairs", "which neighborhood", "bucket", "belongs"],
@@ -734,7 +743,7 @@ final class OfflineComposer: @unchecked Sendable {
         "merge": ["merge", "combine", "grow", "fuse", "bigger", "blend", "match three"],
     ]
 
-    static let formulaPriority = ["dodge", "guess", "group", "answer", "time", "merge"]
+    static let formulaPriority = ["dodge", "guess", "group", "answer", "time", "merge"] + StudioFormulaHints.formulas
 
     static func pickFormula(request: StudioRequest, brief: BubbleBrief, catalog: StudioCatalog) -> (formula: StudioCatalog.Formula?, reason: String) {
         let available = catalog.formulas.filter { $0.example != nil }
@@ -913,7 +922,7 @@ final class OfflineComposer: @unchecked Sendable {
         case "answer": options = ["Quiz", "Picks"]
         case "time": options = ["Stack", "Catch"]
         case "merge": options = ["Merge", "Fizz"]
-        default: options = ["Pop"]
+        default: options = StudioFormulaHints.hint(for: formula).map(\.nouns).flatMap { $0.isEmpty ? nil : $0 } ?? ["Pop"]
         }
         return options[stableIndex(seed, count: options.count)]
     }

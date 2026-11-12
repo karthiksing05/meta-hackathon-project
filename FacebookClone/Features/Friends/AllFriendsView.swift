@@ -175,6 +175,8 @@ struct AllFriendsView: View {
             }
             .buttonStyle(.plain)
 
+            BubbleFriendRowSlots(user: friend)
+
             CircleButton(symbol: "ellipsis", size: 34, accessibilityLabel: "More options for \(friend.name)") {
                 selected = friend
                 showOptions = true

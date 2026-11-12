@@ -36,6 +36,7 @@ struct BubbleDetailView: View {
                 popInButton(bubble)
                 stats(bubble)
                 actions(bubble)
+                BubbleDetailSlots(bubble: bubble)
                 burstPreview(bubble)
                 boardPreview(bubble)
                 chainRow(bubble)
@@ -114,6 +115,9 @@ struct BubbleDetailView: View {
     private func tags(_ bubble: Bubble) -> some View {
         FlowLayout(spacing: 8, lineSpacing: 8) {
             BubbleTagPill(symbol: bubble.formula.symbol, text: bubble.formula.title)
+            if bubble.category != .play {
+                BubbleTagPill(symbol: bubble.category.symbol, text: bubble.category.title, highlighted: true)
+            }
             if bubble.isDaily {
                 BubbleTagPill(symbol: "sun.max.fill", text: bubble.group.map { "Daily Bubble · \($0.name)" } ?? "Daily Bubble", highlighted: true)
             }
