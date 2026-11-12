@@ -243,12 +243,8 @@ struct LearnGroupMeterCard: View {
             }
             LearnMeterBar(value: value, height: 12)
             if value == 0 && !progress.learners(in: group, lessons: [lesson], bubbleStore: bubbleStore).isEmpty {
-                HStack(spacing: 8) {
-                    ProgressView()
-                    Text(LearnCopy.countingLearners)
-                        .font(.fbMeta)
-                        .foregroundStyle(FBColor.secondaryText)
-                }
+                GameLoader(style: .dots, label: LearnCopy.countingLearners, size: 6)
+                    .transition(.opacity)
             }
             if !top.isEmpty {
                 HStack(spacing: 12) {
