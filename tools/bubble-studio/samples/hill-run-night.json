@@ -1,0 +1,188 @@
+{
+  "brief" : {
+    "audience" : "everyone",
+    "competition" : "light",
+    "energy" : "medium",
+    "intent" : "make it harder and night themed",
+    "mood" : [
+      "dreamy",
+      "focused"
+    ],
+    "notes" : "I read this as dreamy and focused, for everyone."
+  },
+  "concepts" : [
+    {
+      "params" : {
+        "backdrop" : "hills",
+        "ground" : true,
+        "speed" : 2.6
+      },
+      "use" : "space.side_scroll"
+    },
+    {
+      "params" : {
+        "emoji" : "",
+        "face" : true,
+        "size" : 15,
+        "tint" : "glow",
+        "x" : 104
+      },
+      "use" : "entity.avatar"
+    },
+    {
+      "params" : {
+        "forgiveness" : 4,
+        "labels" : true,
+        "near" : 14,
+        "style" : "hill",
+        "width" : 66
+      },
+      "use" : "entity.obstacle"
+    },
+    {
+      "params" : {
+        "cooldown" : 0,
+        "zone" : "anywhere"
+      },
+      "use" : "input.tap"
+    },
+    {
+      "params" : {
+        "max_fall" : 8,
+        "strength" : 0.33
+      },
+      "use" : "behavior.gravity"
+    },
+    {
+      "params" : {
+        "strength" : 6.1
+      },
+      "use" : "behavior.impulse"
+    },
+    {
+      "params" : {
+        "first" : 330,
+        "gap" : 178,
+        "gap_shrink" : 20,
+        "spacing" : 215,
+        "variance" : 0.5
+      },
+      "use" : "behavior.spawn_stream"
+    },
+    {
+      "params" : {
+        "delay" : 4,
+        "max" : 1.8,
+        "rate" : 0.1
+      },
+      "use" : "behavior.speed_ramp"
+    },
+    {
+      "params" : {
+        "shake" : true
+      },
+      "use" : "rule.collide_fail"
+    },
+    {
+      "params" : {
+        "float" : true,
+        "label" : "hills",
+        "on" : "entity.passed",
+        "points" : 1
+      },
+      "use" : "score.count"
+    },
+    {
+      "params" : {
+        "label" : "Tap to play again"
+      },
+      "use" : "flow.run_retry"
+    },
+    {
+      "params" : {
+        "preset" : "focused"
+      },
+      "use" : "feel.mood_preset"
+    },
+    {
+      "params" : {
+        "action" : "blip",
+        "haptics" : true,
+        "near" : "chime",
+        "score" : "tick"
+      },
+      "use" : "feel.sfx_on_action"
+    },
+    {
+      "params" : {
+        "brag" : "floated with the running club",
+        "label" : "hills"
+      },
+      "use" : "share.score_card"
+    }
+  ],
+  "content" : {
+    "avatar_emoji" : "🏃",
+    "obstacle_labels" : [
+      "Twin Peaks",
+      "Bernal Hill",
+      "Nob Hill",
+      "Russian Hill",
+      "Telegraph Hill",
+      "Potrero Hill",
+      "Mount Sutro",
+      "Buena Vista"
+    ],
+    "theme" : "SF hills for a new running club"
+  },
+  "engine_version" : 1,
+  "formula" : "dodge",
+  "glue" : {
+
+  },
+  "id" : "hill-drift-ctqh",
+  "lineage" : {
+    "operators" : [
+      "re-skin",
+      "re-tune"
+    ],
+    "parent" : "hill-drift-ctqh"
+  },
+  "one_line_rule" : "Tap to float over the hills. Don't touch the fog.",
+  "seed" : 116530458,
+  "structure" : {
+    "cadence" : "endless",
+    "scope" : "everyone",
+    "setter" : "ai"
+  },
+  "studio" : {
+    "created_at" : "2026-11-12T17:23:53Z",
+    "duration_sec" : 40.6,
+    "models" : [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "offline" : false
+  },
+  "style" : {
+    "colors" : {
+      "accent" : "#FFE84A",
+      "bg_bottom" : "#1B0B38",
+      "bg_top" : "#0A0620",
+      "danger" : "#FF3D6E",
+      "ink" : "#F6F0FF",
+      "primary" : "#FF4FD8",
+      "secondary" : "#38F2FF"
+    },
+    "cover_prompt" : "Square cover art for a tiny mobile game. Scene: a tiny runner inside a glowing soap bubble drifting over dark San Francisco hills at night under bright stars, neon city lights below. Style: neon line art at night: glowing outline strokes with soft bloom on a near-black background, a perspective grid or horizon line, electric sparks and light streaks. Colors: deep midnight indigo, electric cyan and magenta glow, pale starlight. One clear centered subject with breathing room around it. No text, no letters, no numbers, no logos, no watermarks, no real people or brands.",
+    "emoji" : "🏃",
+    "font" : "condensed",
+    "look" : "neon",
+    "mood_preset" : "focused",
+    "motif" : "stars",
+    "palette" : "custom"
+  },
+  "title" : "Hill Drift",
+  "version" : 2
+}

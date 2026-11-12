@@ -1,0 +1,24 @@
+[  0.0s] understand Reading your request — “an icebreaker for the newcomers' picnic” · for Newcomers' picnic in Dolores Park
+[  2.4s] brief      Brief: social and warm, medium energy — I read this as warm and social, for the newcomers' picnic in Dolores Park.  (muse-ember-1.0)
+[  2.4s] compose    Muse is composing — Wonder is reading the library of 6 formulas and 55 concepts  (muse-wonder-1.0)
+[  7.2s] compose    Picked guess — Who-style guessing teaches names and facts  (muse-wonder-1.0)
+[  7.2s] compose    Paper cutout · warm cream paper, tomato red and deep teal — Picked a paper-cutout look in warm cream paper, tomato red, deep teal and sunny mustard  (muse-wonder-1.0)
+[ 16.5s] compose    Composed 8 concepts — guess core + select, rounds, count, mood preset and 2 more  (muse-wonder-1.0)
+[ 16.5s] content    Wonder wrote the content — Heading “Who is it?” and 7 people  (muse-wonder-1.0)
+[ 16.5s] content    Used 7 of 7 opted-in posts — Maya, Diego, Priya, Lena, Jordan and 2 more. Nothing else was read.
+[ 16.5s] validate   Wiring checks out — 8 concepts, every event wired
+[ 16.5s] playtest   Playtest: the bot cleared it in 16 s and scored 700 — 5 bots scored 400–700 over 14–16 s · 5 cleared it
+[ 33.0s] cover      Painted the cover — A paper-cutout cover, painted in 26 s while Muse composed: “a picnic blanket with baskets and lemonade on a grassy Dolores Park hill, city skyline an…”  (muse-image-1.0)
+[ 33.0s] polish     Final touches — Filled 5 defaults · pinned engine v1
+[ 33.0s] done       Ready to play — Picnic Pals · guess · made in 33 s
+
+Look: paper · palette custom {"accent":"#F2B33D","bg_bottom":"#F1D9BC","bg_top":"#F7E9D4","danger":"#C63D3D","ink":"#3B2A20","primary":"#E8664A","secondary":"#3F9C8A"} · ink contrast 10.0:1 · font rounded · motif hills · 🧺
+
+Check: valid · playtest passed: the bot cleared it in 16 s and scored 700 · 5 bots scored 400–700 over 14–16 s · 5 cleared it
+
+Muse calls
+  muse-ember-1.0   brief                      2.4 s    784 tokens out (672 reasoning)
+  muse-wonder-1.0  compose turn 1             4.7 s    514 tokens out (270 reasoning)
+  muse-wonder-1.0  compose turn 2             9.3 s    1890 tokens out (1124 reasoning)
+  muse-image-1.0   cover                      25.8 s   1547 tokens out
+Total 33.0 s · muse-wonder-1.0, muse-ember-1.0, muse-image-1.0

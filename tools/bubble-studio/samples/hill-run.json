@@ -1,0 +1,178 @@
+{
+  "brief" : {
+    "audience" : "everyone",
+    "competition" : "light",
+    "energy" : "low",
+    "intent" : "a chill game for my new running club about sf hills",
+    "mood" : [
+      "chill",
+      "social"
+    ],
+    "notes" : "I read this as chill and social, for your new running club in San Francisco.",
+    "occasion" : "club"
+  },
+  "concepts" : [
+    {
+      "params" : {
+        "backdrop" : "hills",
+        "ground" : true,
+        "speed" : 2.5
+      },
+      "use" : "space.side_scroll"
+    },
+    {
+      "params" : {
+        "emoji" : "",
+        "face" : true,
+        "size" : 15,
+        "tint" : "glow",
+        "x" : 104
+      },
+      "use" : "entity.avatar"
+    },
+    {
+      "params" : {
+        "forgiveness" : 4,
+        "labels" : true,
+        "near" : 14,
+        "style" : "hill",
+        "width" : 64
+      },
+      "use" : "entity.obstacle"
+    },
+    {
+      "params" : {
+        "cooldown" : 0,
+        "zone" : "anywhere"
+      },
+      "use" : "input.tap"
+    },
+    {
+      "params" : {
+        "max_fall" : 8,
+        "strength" : 0.32
+      },
+      "use" : "behavior.gravity"
+    },
+    {
+      "params" : {
+        "strength" : 6.1
+      },
+      "use" : "behavior.impulse"
+    },
+    {
+      "params" : {
+        "first" : 330,
+        "gap" : 185,
+        "gap_shrink" : 20,
+        "spacing" : 220,
+        "variance" : 0.5
+      },
+      "use" : "behavior.spawn_stream"
+    },
+    {
+      "params" : {
+        "delay" : 4,
+        "max" : 1.7,
+        "rate" : 0.08
+      },
+      "use" : "behavior.speed_ramp"
+    },
+    {
+      "params" : {
+        "shake" : true
+      },
+      "use" : "rule.collide_fail"
+    },
+    {
+      "params" : {
+        "float" : true,
+        "label" : "hills",
+        "on" : "entity.passed",
+        "points" : 1
+      },
+      "use" : "score.count"
+    },
+    {
+      "params" : {
+        "label" : "Tap to play again"
+      },
+      "use" : "flow.run_retry"
+    },
+    {
+      "params" : {
+        "preset" : "chill"
+      },
+      "use" : "feel.mood_preset"
+    },
+    {
+      "params" : {
+        "action" : "blip",
+        "haptics" : true,
+        "near" : "chime",
+        "score" : "tick"
+      },
+      "use" : "feel.sfx_on_action"
+    },
+    {
+      "params" : {
+        "brag" : "floated with the running club",
+        "label" : "hills"
+      },
+      "use" : "share.score_card"
+    }
+  ],
+  "content" : {
+    "avatar_emoji" : "🏃",
+    "obstacle_labels" : [
+      "Twin Peaks",
+      "Bernal Hill",
+      "Nob Hill",
+      "Russian Hill",
+      "Telegraph Hill",
+      "Potrero Hill",
+      "Mount Sutro",
+      "Buena Vista"
+    ],
+    "theme" : "SF hills for a new running club"
+  },
+  "engine_version" : 1,
+  "formula" : "dodge",
+  "glue" : {
+
+  },
+  "id" : "hill-drift-ctqh",
+  "lineage" : {
+    "operators" : [
+
+    ]
+  },
+  "one_line_rule" : "Tap to float over the hills. Don't touch the fog.",
+  "seed" : 116530458,
+  "structure" : {
+    "cadence" : "endless",
+    "scope" : "everyone",
+    "setter" : "ai"
+  },
+  "studio" : {
+    "created_at" : "2026-11-12T17:21:59Z",
+    "duration_sec" : 25,
+    "models" : [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "offline" : false
+  },
+  "style" : {
+    "cover_prompt" : "Square cover art for a tiny mobile game. Scene: a tiny runner inside a glowing soap bubble floating gently over rolling San Francisco hills at golden hour, soft fog below and pastel sky above. Style: dreamy pastel illustration: iridescent soap bubbles with rainbow rims and soft white highlights, soft glow and halos, airy depth and gentle light. Colors: soft sky blue, lilac and mint pastel gradient with warm peach glow. One clear centered subject with breathing room around it. No text, no letters, no numbers, no logos, no watermarks, no real people or brands.",
+    "emoji" : "🏃",
+    "font" : "rounded",
+    "look" : "glow",
+    "mood_preset" : "chill",
+    "motif" : "hills",
+    "palette" : "sky-glow"
+  },
+  "title" : "Hill Drift",
+  "version" : 1
+}

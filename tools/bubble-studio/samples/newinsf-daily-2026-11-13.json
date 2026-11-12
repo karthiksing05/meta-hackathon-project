@@ -1,0 +1,163 @@
+{
+  "brief" : {
+    "audience" : "group:group-newinsf",
+    "competition" : "none",
+    "content_sources" : [
+      "Maya's post (opted in)",
+      "Diego's post (opted in)",
+      "Priya's post (opted in)",
+      "Sam's post (opted in)",
+      "Lena's post (opted in)"
+    ],
+    "energy" : "medium",
+    "intent" : "today's daily bubble so new in sf gets to know each other",
+    "mood" : [
+      "warm",
+      "social",
+      "curious"
+    ],
+    "notes" : "I read this as warm and social, for New in SF getting to know each other.",
+    "occasion" : "daily"
+  },
+  "concepts" : [
+    {
+      "params" : {
+        "count" : 1,
+        "into" : "target",
+        "list" : "words",
+        "salt" : 0
+      },
+      "use" : "content.seed"
+    },
+    {
+      "params" : {
+        "mist" : true,
+        "show_last" : true,
+        "show_tries" : true
+      },
+      "use" : "space.word_bubbles"
+    },
+    {
+      "params" : {
+        "enter_label" : "Pop",
+        "layout" : "qwerty",
+        "max_length" : 12,
+        "show_value" : false,
+        "top" : 480
+      },
+      "use" : "input.type"
+    },
+    {
+      "params" : {
+        "accept" : "any",
+        "hint" : "first_letter"
+      },
+      "use" : "rule.letter_feedback"
+    },
+    {
+      "params" : {
+        "attempts" : 6,
+        "counts" : "all",
+        "show" : false
+      },
+      "use" : "rule.attempt_budget"
+    },
+    {
+      "params" : {
+        "partial" : 10,
+        "per_try" : 100
+      },
+      "use" : "score.attempts_used"
+    },
+    {
+      "params" : {
+        "day" : "",
+        "label" : "Daily Bubble",
+        "note" : "A new one tomorrow"
+      },
+      "use" : "flow.daily_gate"
+    },
+    {
+      "params" : {
+        "stagger" : 9
+      },
+      "use" : "feel.bubble_reveal"
+    },
+    {
+      "params" : {
+        "preset" : "auto"
+      },
+      "use" : "feel.mood_preset"
+    },
+    {
+      "params" : {
+        "set" : "smiles"
+      },
+      "use" : "share.emoji_grid"
+    }
+  ],
+  "content" : {
+    "clues" : {
+      "AUSTIN" : "Maya moved from this city three weeks ago for a lab job",
+      "BERLIN" : "Lena arrived from this city just last week",
+      "BERNAL" : "Sam is up on this hill most evenings for sunset",
+      "CHICAGO" : "Diego is a transplant from this city, now in the Mission",
+      "TORONTO" : "Priya, a new nurse in town, moved here from this city"
+    },
+    "words" : [
+      "AUSTIN",
+      "CHICAGO",
+      "TORONTO",
+      "BERLIN",
+      "BERNAL"
+    ]
+  },
+  "engine_version" : 1,
+  "formula" : "guess",
+  "glue" : {
+
+  },
+  "id" : "newinsf-daily-2026-11-13",
+  "lineage" : {
+    "operators" : [
+
+    ]
+  },
+  "one_line_rule" : "Guess today's word from a newcomer's post.",
+  "seed" : 20261113,
+  "structure" : {
+    "cadence" : "daily",
+    "scope" : "group:group-newinsf",
+    "setter" : "ai"
+  },
+  "studio" : {
+    "created_at" : "2026-11-12T17:23:12Z",
+    "duration_sec" : 39.4,
+    "models" : [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "offline" : false
+  },
+  "style" : {
+    "colors" : {
+      "accent" : "#D9AB41",
+      "bg_bottom" : "#FFCDB8",
+      "bg_top" : "#FFE6D6",
+      "danger" : "#E5484D",
+      "ink" : "#3D2430",
+      "primary" : "#FF8A65",
+      "secondary" : "#6CC4E0"
+    },
+    "cover_prompt" : "Square cover art for a tiny mobile game. Scene: five friendly newcomers waving hello on a San Francisco hill at golden hour, bay and colorful houses behind them, cozy toy-like shapes. Style: soft 3D claymation diorama: chunky rounded toy-like shapes with smooth clay texture, soft studio lighting, a gentle vignette, contact shadows and small specular highlights. Colors: warm peach and cream, coral red, soft teal and golden yellow accents. One clear centered subject with breathing room around it. No text, no letters, no numbers, no logos, no watermarks, no real people or brands.",
+    "emoji" : "👋",
+    "font" : "rounded",
+    "look" : "clay",
+    "mood_preset" : "warm",
+    "motif" : "hills",
+    "palette" : "custom"
+  },
+  "title" : "First Hellos",
+  "version" : 1
+}

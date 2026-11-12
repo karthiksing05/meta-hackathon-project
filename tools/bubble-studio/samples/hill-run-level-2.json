@@ -1,0 +1,196 @@
+{
+  "brief" : {
+    "audience" : "everyone",
+    "competition" : "none",
+    "energy" : "low",
+    "intent" : "level 2",
+    "mood" : [
+      "dreamy",
+      "focused"
+    ],
+    "notes" : "I read this as dreamy and focused, for everyone."
+  },
+  "chain" : {
+    "id" : "chain-hill-drift-ctqh",
+    "index" : 2,
+    "prev" : "hill-drift-ctqh",
+    "title" : "Hill Drift"
+  },
+  "concepts" : [
+    {
+      "params" : {
+        "backdrop" : "hills",
+        "ground" : true,
+        "speed" : 2.9
+      },
+      "use" : "space.side_scroll"
+    },
+    {
+      "params" : {
+        "emoji" : "",
+        "face" : true,
+        "size" : 15,
+        "tint" : "glow",
+        "x" : 104
+      },
+      "use" : "entity.avatar"
+    },
+    {
+      "params" : {
+        "forgiveness" : 3,
+        "labels" : true,
+        "near" : 14,
+        "style" : "hill",
+        "width" : 70
+      },
+      "use" : "entity.obstacle"
+    },
+    {
+      "params" : {
+        "cooldown" : 0,
+        "zone" : "anywhere"
+      },
+      "use" : "input.tap"
+    },
+    {
+      "params" : {
+        "max_fall" : 8.5,
+        "strength" : 0.36
+      },
+      "use" : "behavior.gravity"
+    },
+    {
+      "params" : {
+        "strength" : 6.3
+      },
+      "use" : "behavior.impulse"
+    },
+    {
+      "params" : {
+        "first" : 330,
+        "gap" : 165,
+        "gap_shrink" : 28,
+        "spacing" : 200,
+        "variance" : 0.58
+      },
+      "use" : "behavior.spawn_stream"
+    },
+    {
+      "params" : {
+        "delay" : 3,
+        "max" : 1.9,
+        "rate" : 0.12
+      },
+      "use" : "behavior.speed_ramp"
+    },
+    {
+      "params" : {
+        "shake" : true
+      },
+      "use" : "rule.collide_fail"
+    },
+    {
+      "params" : {
+        "float" : true,
+        "label" : "hills",
+        "on" : "entity.passed",
+        "points" : 1
+      },
+      "use" : "score.count"
+    },
+    {
+      "params" : {
+        "label" : "Tap to play again"
+      },
+      "use" : "flow.run_retry"
+    },
+    {
+      "params" : {
+        "preset" : "focused"
+      },
+      "use" : "feel.mood_preset"
+    },
+    {
+      "params" : {
+        "action" : "blip",
+        "haptics" : true,
+        "near" : "chime",
+        "score" : "tick"
+      },
+      "use" : "feel.sfx_on_action"
+    },
+    {
+      "params" : {
+        "brag" : "floated with the running club",
+        "label" : "hills"
+      },
+      "use" : "share.score_card"
+    }
+  ],
+  "content" : {
+    "avatar_emoji" : "🏃",
+    "obstacle_labels" : [
+      "Mount Davidson",
+      "Corona Heights",
+      "Tank Hill",
+      "Kite Hill",
+      "Grandview",
+      "Rocky Outcrop",
+      "Buena Vista",
+      "Mount Sutro",
+      "Billy Goat Hill",
+      "Hawk Hill"
+    ],
+    "theme" : "SF hills for a new running club"
+  },
+  "engine_version" : 1,
+  "formula" : "dodge",
+  "glue" : {
+
+  },
+  "id" : "hill-drift-2-j3hm",
+  "lineage" : {
+    "operators" : [
+      "next-level",
+      "re-tune"
+    ],
+    "parent" : "hill-drift-ctqh"
+  },
+  "one_line_rule" : "Tap to float over the hills. Don't touch the fog.",
+  "seed" : 1185694483,
+  "structure" : {
+    "cadence" : "endless",
+    "scope" : "everyone",
+    "setter" : "ai"
+  },
+  "studio" : {
+    "created_at" : "2026-11-12T17:24:18Z",
+    "duration_sec" : 25.4,
+    "models" : [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "offline" : false
+  },
+  "style" : {
+    "colors" : {
+      "accent" : "#FFE84A",
+      "bg_bottom" : "#1B0B38",
+      "bg_top" : "#0A0620",
+      "danger" : "#FF3D6E",
+      "ink" : "#F6F0FF",
+      "primary" : "#FF4FD8",
+      "secondary" : "#38F2FF"
+    },
+    "cover_prompt" : "Square cover art for a tiny mobile game. Scene: a glowing soap bubble with a tiny runner inside drifting faster over steep neon San Francisco hills at night, stars and city lights below, tighter fog gaps ahead. Style: neon line art at night: glowing outline strokes with soft bloom on a near-black background, a perspective grid or horizon line, electric sparks and light streaks. Colors: deep indigo, magenta, cyan and yellow. Background: stars. One clear centered subject with breathing room around it. No text, no letters, no numbers, no logos, no watermarks, no real people or brands.",
+    "emoji" : "🏃",
+    "font" : "condensed",
+    "look" : "neon",
+    "mood_preset" : "focused",
+    "motif" : "stars",
+    "palette" : "custom"
+  },
+  "title" : "Hill Drift 2",
+  "version" : 1
+}

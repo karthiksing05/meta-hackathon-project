@@ -1,0 +1,23 @@
+[  0.0s] understand Planning the next level — Level 2 after Hill Drift · “level 2”
+[  2.0s] brief      Brief: dreamy and focused, low energy — I read this as dreamy and focused, for everyone.  (muse-ember-1.0)
+[  2.0s] compose    Muse is composing — Wonder is reading the library of 6 formulas and 55 concepts  (muse-wonder-1.0)
+[  6.1s] compose    Picked dodge — Same dodge formula as Hill Drift, harder  (muse-wonder-1.0)
+[  6.1s] compose    Neon · deep indigo, magenta and cyan — Kept a neon look from level 1 in deep indigo, magenta, cyan and yellow, with stars behind  (muse-wonder-1.0)
+[ 14.3s] compose    Composed 14 concepts — dodge core + tap, gravity, impulse, spawn stream and 7 more  (muse-wonder-1.0)
+[ 14.3s] content    Wonder rewrote the content — 10 obstacle labels  (muse-wonder-1.0)
+[ 14.3s] validate   Wiring checks out — 14 concepts, every event wired
+[ 14.7s] playtest   Playtest: the bot survived 20 s and scored 18 — 5 bots scored 0–41 over 1–40 s · 5 popped · Harder than level 1: the bot survives 20 s vs 25 s (2 of 5 bots do worse)
+[ 25.4s] cover      Painted the cover — A neon cover, painted in 19 s while Muse composed: “a glowing soap bubble with a tiny runner inside drifting faster over steep neon San Franc…”  (muse-image-1.0)
+[ 25.4s] polish     Final touches — Every param already set · pinned engine v1
+[ 25.4s] done       Ready to play — Hill Drift 2 · dodge · made in 25 s
+
+Look: neon · palette custom {"accent":"#FFE84A","bg_bottom":"#1B0B38","bg_top":"#0A0620","danger":"#FF3D6E","ink":"#F6F0FF","primary":"#FF4FD8","secondary":"#38F2FF"} · ink contrast 16.3:1 · font condensed · motif stars · 🏃
+
+Check: valid · playtest passed: the bot survived 20 s and scored 18 · 5 bots scored 0–41 over 1–40 s · 5 popped
+
+Muse calls
+  muse-ember-1.0   brief                      2.0 s    538 tokens out (461 reasoning)
+  muse-wonder-1.0  compose turn 1             4.1 s    539 tokens out (283 reasoning)
+  muse-wonder-1.0  compose turn 2             8.2 s    1539 tokens out (774 reasoning)
+  muse-image-1.0   cover                      19.4 s   2058 tokens out
+Total 25.4 s · muse-wonder-1.0, muse-ember-1.0, muse-image-1.0
