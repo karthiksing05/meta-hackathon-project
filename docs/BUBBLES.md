@@ -873,8 +873,9 @@ locked endless run with no rule.lives, the first miss ends it; with rule.lives, 
 **Intro card, replays, validation.** The intro card shows the length next to the title:
 "Endless: beat 42" (with `player.best`, in place of "Your best"), "10 rounds", "60 seconds",
 "3 lives" (`Bubble.displayLength(manifest)`, `Bubble.lengthLabel(len, best)`). `replayLog()`
-carries a locked `length`, and `simulate` applies `replay.length` to a manifest without one, so a
-replay is self-describing; `BubbleStore.verify` replays with it. Validation errors (code `length`):
+carries a locked `length`, and `simulate` (and the host's `replay` mode, for Bursts) applies
+`replay.length` to a manifest without one, so a replay is self-describing; `BubbleStore.verify`
+replays with it. Validation errors (code `length`):
 a bad shape, a mode the formula doesn't list, a number that isn't a whole number in range; a
 warning when the formula declares no length.
 

@@ -5434,6 +5434,15 @@
           insets: normInsets(pick("insets", null)),
           botSkill: typeof pick("bot_skill", null) === "number" ? pick("bot_skill", null) : DEMO_BOT_SKILL,
         };
+        // A replay that recorded a locked length (a challenge, a group-chat session) plays on that
+        // length even when the prepared manifest has none (docs/BUBBLES.md 7.9).
+        const rl = this.opts.replay && isObj(this.opts.replay.length) ? this.opts.replay.length : null;
+        if (this.mode === "replay" && rl && !isObj(entry.session.manifest.length) && LENGTH_MODES.indexOf(rl.mode) >= 0) {
+          const lk = JSON.stringify(rl);
+          const cache = entry.lengthSessions || (entry.lengthSessions = {});
+          const locked = cache[lk] || (cache[lk] = createSession(Object.assign({}, entry.session.manifest, { length: deepCopy(rl) })));
+          this.entry = Object.assign({}, entry, { session: locked });
+        }
         this.paused = false;
         this.demoLoop = 0;
         this.hideError();
