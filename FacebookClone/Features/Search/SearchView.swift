@@ -90,7 +90,7 @@ struct SearchView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Back")
-            SearchField(placeholder: "Search Facebook", text: $query, autoFocus: true) {
+            SearchField(placeholder: "Search Facebook", text: $query, autoFocus: initialQuery.isEmpty) {
                 store.addRecentSearch(query)
             }
         }
