@@ -1,0 +1,18 @@
+{
+  "note": "Climb, fetch the red-striped cask, light the lamp, keep watch until dawn.",
+  "seed": 1,
+  "expect": "won",
+  "inputs": [
+    {"key":"Space","t":160.0},
+    {"key":"Digit1","t":320.0},
+    {"tap":[180,300],"t":480.0},
+    {"tap":[180,579],"t":640.0},
+    {"key":"Enter","t":800.0},
+    {"key":"Digit1","t":960.0},
+    {"key":"Space","t":1120.0},
+    {"tap":[180,523],"t":1280.0},
+    {"key":"Space","t":1440.0},
+    {"key":"Digit1","t":1600.0},
+    {"t":7792.0}
+  ]
+}

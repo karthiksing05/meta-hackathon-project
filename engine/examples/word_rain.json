@@ -1,0 +1,174 @@
+{
+  "format": "microgame/0.2",
+  "meta": {
+    "title": "Word Rain",
+    "instructions": "Words drip from the clouds. Type a word and press Enter to pop it before it hits the puddle. Pop 25 words to win; three misses and you're soaked.",
+    "duration_s": 75
+  },
+  "types": {
+    "Drop": { "id": "int", "text": "string", "x": "float", "y": "float", "speed": "float" }
+  },
+  "state": {
+    "drops":    { "type": "list<Drop>", "init": "[]" },
+    "typed":    { "type": "string", "init": "''" },
+    "lives":    { "type": "int", "init": "3" },
+    "score":    { "type": "int", "init": "0" },
+    "streak":   { "type": "int", "init": "0" },
+    "best":     { "type": "int", "init": "0" },
+    "spawn_ms": { "type": "int", "init": "2300" },
+    "fall":     { "type": "float", "init": "34.0" },
+    "next_id":  { "type": "int", "init": "0" },
+    "last_pop": { "type": "string", "init": "''" }
+  },
+  "functions": {
+    "pool": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "split('rain cloud storm drip mist puddle thunder breeze drizzle umbrella rainbow splash gutter window lantern pebble meadow river harbor kettle orchard willow candle velvet sparrow comet marble ribbon puzzle tunnel', ' ')"
+    },
+    "clean": {
+      "params": { "s": "string" },
+      "returns": "string",
+      "body": "lower(replace(trim(s), ' ', ''))"
+    },
+    "matches": {
+      "params": { "d": "Drop", "t": "string" },
+      "returns": "bool",
+      "body": "t != '' and starts_with(d.text, t)"
+    }
+  },
+  "events": {
+    "spawn_word": {},
+    "popped":     { "x": "float", "y": "float", "word": "string" },
+    "missed":     { "x": "float" },
+    "wrong":      {}
+  },
+  "inputs": {
+    "edit": {
+      "payload": { "value": "string" },
+      "from": [ { "text": "change", "with": { "value": "text.value" }, "placeholder": "Type a falling word", "max_len": 16 } ]
+    },
+    "submit": {
+      "payload": { "value": "string" },
+      "from": [ { "text": "submit", "with": { "value": "text.value" } } ]
+    }
+  },
+  "rules": [
+    { "id": "begin", "on": "start", "do": [ { "emit": "spawn_word" } ] },
+    { "id": "spawn", "on": "spawn_word", "do": [
+      { "let": { "free": "filter(pool(), w => not any(drops, d => d.text == w) and w != last_pop)" } },
+      { "let": { "word": "pick(free)" } },
+      { "push": "drops", "value": "{id: next_id, text: word, x: random_float(40 + len(word) * 7, 320 - len(word) * 7), y: -20.0, speed: fall + random_float(0, 14)}" },
+      { "incr": "next_id" },
+      { "set": "spawn_ms", "to": "max(700, spawn_ms * 94 / 100)" },
+      { "set": "fall", "to": "min(fall + 1.6, 80.0)" },
+      { "after": "spawn_ms", "emit": "spawn_word", "id": "spawner" }
+    ] },
+    { "id": "edit", "on": "edit", "do": [ { "set": "typed", "to": "clean(event.value)" } ] },
+    { "id": "submit", "on": "submit", "do": [
+      { "let": { "w": "clean(event.value)" } },
+      { "set": "typed", "to": "''" },
+      { "let": { "hits": "filter(drops, d => d.text == w)" } },
+      { "if": "len(hits) > 0",
+        "then": [
+          { "let": { "d": "first(hits)" } },
+          { "remove": "drops", "where": "x => x.id == d.id" },
+          { "incr": "score" },
+          { "incr": "streak" },
+          { "set": "best", "to": "max(best, streak)" },
+          { "set": "last_pop", "to": "d.text" },
+          { "emit": "popped", "with": { "x": "d.x", "y": "d.y", "word": "upper(d.text)" } }
+        ],
+        "else": [
+          { "set": "streak", "to": "0" },
+          { "emit": "wrong" }
+        ] }
+    ] },
+    { "id": "fall", "on": "tick", "do": [
+      { "set": "drops", "to": "map(drops, d => {...d, y: d.y + d.speed * event.dt / 1000})" },
+      { "let": { "late": "filter(drops, d => d.y > 548)" } },
+      { "if": "len(late) > 0", "then": [
+        { "remove": "drops", "where": "d => d.y > 548" },
+        { "decr": "lives", "by": "len(late)" },
+        { "set": "streak", "to": "0" },
+        { "for_each": "late", "as": "d", "do": [ { "emit": "missed", "with": { "x": "d.x" } } ] }
+      ] }
+    ] }
+  ],
+  "objectives": {
+    "win": "score >= 25",
+    "lose": "lives <= 0",
+    "score": "score * 10 + best * 5",
+    "time_limit": "120s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "canvas": { "w": 360, "h": 640, "background": "$night" },
+    "text_field": { "x": 30, "y": 584, "w": 300, "h": 44, "size": 20 },
+    "tokens": {
+      "night": "#141B34", "cloud": "#2C365E", "cloud_hi": "#3B4878", "city": "#0C1024", "window": "#F6C85F",
+      "drop": "#DDE7FF", "drop_hot": "#FFE08A", "ink": "#16203F", "typed": "#E4572E", "pale": "#9AA8D6",
+      "puddle": "#3E7CB1", "heart": "#FF6B6B", "heart_off": "#3A4166"
+    },
+    "root": {
+      "node": "group",
+      "children": [
+        { "node": "poly", "fill": "$city", "points": "[vec(0, 548), vec(0, 470), vec(40, 470), vec(40, 430), vec(80, 430), vec(80, 490), vec(110, 490), vec(110, 410), vec(150, 410), vec(150, 460), vec(200, 460), vec(200, 390), vec(240, 390), vec(240, 480), vec(275, 480), vec(275, 440), vec(320, 440), vec(320, 500), vec(360, 500), vec(360, 548)]" },
+        { "node": "repeat", "source": "range(9)", "as": "i", "template": {
+          "node": "rect", "x": "= 12 + i * 38 + (i % 3) * 4", "y": "= 448 + (i % 4) * 14", "w": 7, "h": 9, "radius": 1,
+          "fill": "$window", "opacity": "= 0.35 + 0.35 * abs(sin(now / 900 + i))" } },
+        { "node": "repeat", "source": "drops", "as": "d", "key": "d.id", "template": {
+          "node": "group",
+          "children": [
+            { "node": "line", "x": "= d.x", "y": "= d.y - 34", "x1": 0, "y1": 0, "x2": 0, "y2": 18, "stroke": "$pale", "stroke_width": 2, "opacity": 0.5 },
+            { "node": "rect", "anchor": "center", "x": "= d.x", "y": "= d.y", "w": "= len(d.text) * 13 + 26", "h": 34, "radius": 17,
+              "fill": "= if matches(d, typed) then $drop_hot else $drop",
+              "transition": { "fill": { "ms": 120, "ease": "out" } } },
+            { "node": "stack", "dir": "row", "gap": 0, "anchor": "center", "x": "= d.x", "y": "= d.y",
+              "children": [
+                { "node": "text", "text": "= if matches(d, typed) then typed else ''", "size": 20, "weight": 800, "color": "$typed" },
+                { "node": "text", "text": "= if matches(d, typed) then substr(d.text, len(typed), len(d.text)) else d.text", "size": 20, "weight": 700, "color": "$ink" }
+              ] }
+          ]
+        } },
+        { "node": "rect", "x": 0, "y": 548, "w": 360, "h": 92, "fill": "$puddle", "opacity": 0.55 },
+        { "node": "line", "x": 0, "y": 548, "x1": 0, "y1": 0, "x2": 360, "y2": 0, "stroke": "#8FC1E8", "stroke_width": 3 },
+        { "node": "repeat", "source": "range(4)", "as": "i", "template": {
+          "node": "circle", "x": "= 60 + i * 80", "y": 30, "r": 34, "fill": "$cloud" } },
+        { "node": "repeat", "source": "range(3)", "as": "i", "template": {
+          "node": "circle", "x": "= 100 + i * 80", "y": 20, "r": 30, "fill": "$cloud_hi" } },
+        { "node": "text", "x": 16, "y": 70, "text": "= 'Popped ' + str(score) + ' / 25'", "size": 18, "weight": 700, "color": "$drop" },
+        { "node": "text", "x": 16, "y": 94, "visible": "= streak >= 3", "text": "= 'Streak x' + str(streak)", "size": 15, "weight": 600, "color": "$drop_hot",
+          "animate_on": { "popped": { "prop": "scale", "keys": [1, 1.2, 1], "ms": 160 } } },
+        { "node": "repeat", "source": "range(3)", "as": "i", "template": {
+          "node": "circle", "x": "= 300 + i * 22", "y": 80, "r": 8,
+          "fill": "= if i < lives then $heart else $heart_off",
+          "transition": { "fill": { "ms": 200, "ease": "out" } } } }
+      ]
+    },
+    "feedback": [
+      { "on": "popped", "do": [
+        { "particles": { "x": "= event.x", "y": "= event.y", "count": 18, "color": "#FFE08A", "speed": 180, "size": 4, "ms": 550, "gravity": 300 } },
+        { "particles": { "x": "= event.x", "y": "= event.y", "count": 8, "color": "#DDE7FF", "speed": 90, "size": 6, "ms": 400 } },
+        { "sound": { "wave": "triangle", "notes": ["G5", "C6"], "step_ms": 50, "volume": 0.4 } },
+        { "haptic": "light" },
+        { "toast": { "text": "= event.word", "ms": 600 } }
+      ] },
+      { "on": "missed", "do": [
+        { "particles": { "x": "= event.x", "y": 548, "count": 14, "color": "#8FC1E8", "speed": 160, "ms": 500, "gravity": 500, "spread": 120 } },
+        { "sound": { "wave": "sine", "note": "E3", "slide": "A2", "ms": 260, "volume": 0.5 } },
+        { "haptic": "warning" },
+        { "shake": { "px": 5, "ms": 200 } }
+      ] },
+      { "on": "wrong", "do": [
+        { "sound": { "wave": "square", "note": "C3", "ms": 90, "volume": 0.25 } },
+        { "haptic": "error" }
+      ] },
+      { "on": "win", "do": [
+        { "sound": { "wave": "triangle", "notes": ["C5", "E5", "G5", "B5", "C6"], "step_ms": 80 } },
+        { "haptic": "success" }
+      ] },
+      { "on": "lose", "do": [ { "sound": { "wave": "sawtooth", "notes": ["E4", "C4", "A3"], "step_ms": 140, "volume": 0.4 } } ] }
+    ]
+  }
+}

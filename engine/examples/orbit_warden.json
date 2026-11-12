@@ -1,0 +1,162 @@
+{
+  "format": "microgame/0.2",
+  "meta": {
+    "title": "Orbit Warden",
+    "instructions": "Space mites swarm the beacon. Tap or hold anywhere to fire that way, or press any key to fire at the closest mite. Hold out for 45 seconds or zap 40 mites.",
+    "duration_s": 45
+  },
+  "types": {
+    "Shot": { "x": "float", "y": "float", "vx": "float", "vy": "float", "r": "float", "dead": "bool" },
+    "Mite": { "x": "float", "y": "float", "vx": "float", "vy": "float", "r": "float", "hp": "int", "dead": "bool", "big": "bool" },
+    "Core": { "x": "float", "y": "float", "r": "float" }
+  },
+  "state": {
+    "core":      { "type": "Core", "init": "{x: 180.0, y: 330.0, r: 28.0}" },
+    "shots":     { "type": "list<Shot>", "init": "[]" },
+    "mites":     { "type": "list<Mite>", "init": "[]" },
+    "aim":       { "type": "float", "init": "-pi / 2" },
+    "last_shot": { "type": "int", "init": "-1000" },
+    "shield":    { "type": "int", "init": "5" },
+    "kills":     { "type": "int", "init": "0" },
+    "spawn_ms":  { "type": "int", "init": "1100" }
+  },
+  "functions": {
+    "toward": { "params": { "from": "vec2", "to": "vec2" }, "returns": "float", "body": "atan2(to.y - from.y, to.x - from.x)" }
+  },
+  "events": {
+    "fire":   { "angle": "float" },
+    "hit":    { "a": "int", "b": "int" },
+    "breach": { "b": "int" },
+    "zapped": { "x": "float", "y": "float", "big": "bool" },
+    "spawn":  {},
+    "hurt":   {}
+  },
+  "inputs": {
+    "aim_at": {
+      "payload": { "x": "float", "y": "float" },
+      "from": [
+        { "pointer": "down", "with": { "x": "pointer.x", "y": "pointer.y" } },
+        { "pointer": "move", "with": { "x": "pointer.x", "y": "pointer.y" } }
+      ]
+    },
+    "auto": {
+      "payload": { "c": "string" },
+      "when": "len(mites) > 0",
+      "from": [ { "key": "any", "with": { "c": "key.char" } } ]
+    }
+  },
+  "rules": [
+    { "id": "begin", "on": "start", "do": [ { "after": "600ms", "emit": "spawn" } ] },
+    { "id": "aim", "on": "aim_at", "do": [
+      { "set": "aim", "to": "toward(vec(core.x, core.y), vec(event.x, event.y))" },
+      { "emit": "fire", "with": { "angle": "aim" } }
+    ] },
+    { "id": "auto", "on": "auto", "do": [
+      { "let": { "near": "first(sort_by(mites, m => dist(vec(m.x, m.y), vec(core.x, core.y))))" } },
+      { "set": "aim", "to": "toward(vec(core.x, core.y), vec(near.x, near.y))" },
+      { "emit": "fire", "with": { "angle": "aim" } }
+    ] },
+    { "id": "fire", "on": "fire", "when": "now - last_shot >= 160", "do": [
+      { "set": "last_shot", "to": "now" },
+      { "let": { "d": "from_angle(event.angle)" } },
+      { "push": "shots", "value": "{x: core.x + d.x * 34, y: core.y + d.y * 34, vx: d.x * 520, vy: d.y * 520, r: 4.0, dead: false}" }
+    ] },
+    { "id": "spawn", "on": "spawn", "do": [
+      { "let": { "a": "random_float(0, 2 * pi)" } },
+      { "let": { "big": "chance(0.22 + kills * 0.004)" } },
+      { "let": { "p": "vec(core.x, core.y) + from_angle(a) * 300" } },
+      { "let": { "sp": "(if big then 38 else 62) + kills * 1.1" } },
+      { "let": { "v": "rotate(from_angle(a + pi), random_float(-0.08, 0.08)) * sp" } },
+      { "push": "mites", "value": "{x: p.x, y: p.y, vx: v.x, vy: v.y, r: if big then 17.0 else 10.0, hp: if big then 3 else 1, dead: false, big: big}" },
+      { "set": "spawn_ms", "to": "max(380, spawn_ms - 22)" },
+      { "after": "spawn_ms", "emit": "spawn", "id": "spawner" }
+    ] },
+    { "id": "hit", "on": "hit", "when": "not shots[event.a].dead and not mites[event.b].dead", "do": [
+      { "set": "shots[event.a].dead", "to": "true" },
+      { "decr": "mites[event.b].hp" },
+      { "if": "mites[event.b].hp <= 0", "then": [
+        { "set": "mites[event.b].dead", "to": "true" },
+        { "incr": "kills" },
+        { "emit": "zapped", "with": { "x": "mites[event.b].x", "y": "mites[event.b].y", "big": "mites[event.b].big" } }
+      ] }
+    ] },
+    { "id": "breach", "on": "breach", "when": "not mites[event.b].dead", "do": [
+      { "set": "mites[event.b].dead", "to": "true" },
+      { "decr": "shield", "by": "if mites[event.b].big then 2 else 1" },
+      { "emit": "hurt" }
+    ] },
+    { "id": "sweep", "on": "tick", "do": [
+      { "remove": "shots", "where": "s => s.dead or s.x < -20 or s.x > 380 or s.y < -20 or s.y > 660" },
+      { "remove": "mites", "where": "m => m.dead or dist(vec(m.x, m.y), vec(core.x, core.y)) > 420" }
+    ] }
+  ],
+  "physics": {
+    "gravity": [0, 0],
+    "bodies": {
+      "shots": { "state": "shots" },
+      "mites": { "state": "mites" },
+      "core":  { "state": "core", "static": true }
+    },
+    "collisions": [
+      { "a": "shots", "b": "mites", "emit": "hit" },
+      { "a": "core",  "b": "mites", "emit": "breach" }
+    ]
+  },
+  "objectives": {
+    "win": "kills >= 40",
+    "lose": "shield <= 0",
+    "score": "kills * 10 + max(0, shield) * 25",
+    "time_limit": "45s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "canvas": { "w": 360, "h": 640, "background": "$space" },
+    "tokens": {
+      "space": "#07071A", "ring": "#2A2A5A", "core": "#5EE6FF", "core_dim": "#1E5F7A", "barrel": "#E8ECFF",
+      "shot": "#FFF27A", "mite": "#FF5DA2", "mite_big": "#B86BFF", "ink": "#E8ECFF", "warn": "#FF5D5D"
+    },
+    "root": {
+      "node": "group",
+      "children": [
+        { "node": "repeat", "source": "range(50)", "as": "i", "template": {
+          "node": "circle", "x": "= hash(i) * 360", "y": "= hash(i + 99) * 640", "r": "= 0.6 + hash(i + 3) * 1.4",
+          "fill": "#FFFFFF", "opacity": "= 0.3 + 0.5 * abs(sin(now / 800 + i * 1.7))" } },
+        { "node": "circle", "x": "= core.x", "y": "= core.y", "r": 120, "fill": "#00000000", "stroke": "$ring", "stroke_width": 1 },
+        { "node": "circle", "x": "= core.x", "y": "= core.y", "r": 220, "fill": "#00000000", "stroke": "$ring", "stroke_width": 1 },
+        { "node": "repeat", "source": "shots", "as": "s", "template": {
+          "node": "line", "x": "= s.x", "y": "= s.y", "x1": 0, "y1": 0, "x2": "= -s.vx * 0.025", "y2": "= -s.vy * 0.025",
+          "stroke": "$shot", "stroke_width": 3 } },
+        { "node": "repeat", "source": "mites", "as": "m", "template": {
+          "node": "poly", "x": "= m.x", "y": "= m.y", "fill": "= if m.big then $mite_big else $mite",
+          "opacity": "= if m.big and m.hp < 3 then 0.6 + 0.13 * m.hp else 1",
+          "points": "= map(range(8), k => from_angle(k * pi / 4 + now / 400) * (if k % 2 == 0 then m.r else m.r * 0.55))" } },
+        { "node": "circle", "x": "= core.x", "y": "= core.y", "r": "= core.r", "fill": "= if shield >= 3 then $core else $core_dim",
+          "animate_on": { "hurt": { "prop": "scale", "keys": [1, 1.25, 1], "ms": 220 } } },
+        { "node": "line", "x": "= core.x", "y": "= core.y", "x1": 0, "y1": 0,
+          "x2": "= cos(aim) * 40", "y2": "= sin(aim) * 40", "stroke": "$barrel", "stroke_width": 8 },
+        { "node": "group", "fixed": true, "children": [
+          { "node": "text", "x": 16, "y": 16, "text": "= 'Zapped ' + str(kills) + ' / 40'", "size": 18, "weight": 700, "color": "$ink" },
+          { "node": "text", "x": 16, "y": 40, "text": "= str(max(0, 45 - now / 1000)) + 's'", "size": 14, "color": "$ink", "opacity": 0.7 },
+          { "node": "repeat", "source": "range(5)", "as": "i", "template": {
+            "node": "rect", "x": "= 250 + i * 20", "y": 20, "w": 14, "h": 14, "radius": 3,
+            "fill": "= if i < shield then $core else $ring" } }
+        ] }
+      ]
+    },
+    "feedback": [
+      { "on": "fire", "do": [ { "sound": { "wave": "square", "note": "A5", "slide": "A4", "ms": 60, "volume": 0.18 } } ] },
+      { "on": "zapped", "do": [
+        { "particles": { "x": "= event.x", "y": "= event.y", "count": "= if event.big then 30 else 14", "color": "= if event.big then '#B86BFF' else '#FF5DA2'", "speed": 180, "size": 3, "ms": 450 } },
+        { "sound": { "wave": "triangle", "note": "= if event.big then 'C5' else 'G5'", "slide": "C7", "ms": 80, "volume": 0.3 } }
+      ] },
+      { "on": "hurt", "do": [
+        { "shake": { "px": 7, "ms": 250 } },
+        { "haptic": "heavy" },
+        { "sound": { "wave": "sawtooth", "note": "D3", "slide": "G2", "ms": 250, "volume": 0.4 } },
+        { "particles": { "x": 180, "y": 330, "count": 20, "color": "#FF5D5D", "speed": 240, "ms": 400 } }
+      ] },
+      { "on": "win", "do": [ { "sound": { "wave": "triangle", "notes": ["G4", "C5", "E5", "G5", "C6"], "step_ms": 90 } }, { "haptic": "success" } ] },
+      { "on": "lose", "do": [ { "sound": { "wave": "sawtooth", "notes": ["C4", "G3", "C3"], "step_ms": 160, "volume": 0.4 } } ] }
+    ]
+  }
+}

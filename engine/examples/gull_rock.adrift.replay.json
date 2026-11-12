@@ -1,0 +1,14 @@
+{
+  "note": "Signal, wave them north, row out: lost at sea.",
+  "seed": 1,
+  "expect": "lost",
+  "inputs": [
+    {"key":"Space","t":160.0},
+    {"key":"Digit2","t":320.0},
+    {"key":"Space","t":480.0},
+    {"key":"Digit1","t":640.0},
+    {"key":"Space","t":800.0},
+    {"key":"Digit2","t":960.0},
+    {"t":7584.0}
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "format": "microgame/0.1",
+  "meta": {
+    "title": "Meteor Dodge",
+    "instructions": "Drag or use the arrow keys to dodge falling meteors. Survive 30 seconds.",
+    "duration_s": 30
+  },
+  "types": {
+    "Meteor": { "x": "float", "y": "float", "r": "float", "speed": "float" }
+  },
+  "state": {
+    "player_x": { "type": "float", "init": "180" },
+    "meteors":  { "type": "list<Meteor>", "init": "[]" },
+    "bonus":    { "type": "float", "init": "0" },
+    "mode":     { "type": { "enum": ["calm", "storm"] }, "init": "'calm'" }
+  },
+  "events": {
+    "message": { "text": "string" }
+  },
+  "inputs": {
+    "move": { "payload": { "x": "float" } },
+    "nudge": {
+      "payload": { "dx": "float" },
+      "from": [
+        { "key": "ArrowLeft",  "with": { "dx": "-24" } },
+        { "key": "ArrowRight", "with": { "dx": "24" } }
+      ]
+    }
+  },
+  "rules": [
+    { "id": "storm_warning", "on": "start", "do": [
+      { "after": "10s", "emit": "message", "with": { "text": "'Storm incoming!'" }, "id": "warn" }
+    ] },
+    { "id": "storm", "on": "message", "do": [
+      { "set": "mode", "to": "'storm'" },
+      { "incr": "bonus", "by": "120" }
+    ] },
+    { "id": "drag", "on": "move", "do": [ { "set": "player_x", "to": "clamp(event.x, 20, 340)" } ] },
+    { "id": "keys", "on": "nudge", "do": [ { "set": "player_x", "to": "clamp(player_x + event.dx, 20, 340)" } ] },
+    { "id": "fall", "on": "tick", "do": [
+      { "set": "meteors", "to": "map(meteors, m => {...m, y: m.y + m.speed * event.dt / 1000})" },
+      { "remove": "meteors", "where": "m => m.y > 700" },
+      { "if": "any(meteors, m => overlaps_circle(vec(player_x, 580.0), 16, vec(m.x, m.y), m.r))",
+        "then": [ { "end": "lose" } ] }
+    ] },
+    { "id": "spawn", "on": { "every": "400ms" }, "do": [
+      { "push": "meteors", "value": "{x: random_float(20, 340), y: -20.0, r: random_float(10, 22), speed: random_float(160, 280) + bonus}" }
+    ] }
+  ],
+  "objectives": {
+    "score": "now / 100",
+    "time_limit": "30s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "canvas": { "w": 360, "h": 640, "background": "= if mode == 'storm' then $storm else $bg" },
+    "tokens": { "bg": "#0B1026", "storm": "#1E0B26", "rock": "#C9A27E", "ship": "#5EE6FF", "ink": "#E8ECFF" },
+    "root": {
+      "node": "group",
+      "children": [
+        { "node": "rect", "w": 360, "h": 640, "fill": "#00000000",
+          "on_drag": { "input": "move", "with": { "x": "pointer.x" } } },
+        { "node": "repeat", "source": "meteors", "as": "m", "key": "m.x",
+          "template": { "node": "circle", "x": "= m.x", "y": "= m.y", "r": "= m.r", "fill": "$rock" } },
+        { "node": "circle", "x": "= player_x", "y": 580, "r": 16, "fill": "$ship",
+          "transition": { "x": { "ms": 80, "ease": "out" } } },
+        { "node": "text", "x": 180, "y": 40, "anchor": "center", "size": 22, "weight": 700, "color": "$ink",
+          "text": "= str(now / 1000) + 's / 30s'" }
+      ]
+    },
+    "feedback": [
+      { "on": "message", "do": [ { "toast": { "text": "= event.text", "ms": 1500 } } ] },
+      { "on": "lose", "do": [ { "shake": { "px": 10, "ms": 300 } }, { "sound": { "wave": "sawtooth", "note": "C2", "ms": 300 } } ] },
+      { "on": "win",  "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 300 } } ] }
+    ]
+  }
+}

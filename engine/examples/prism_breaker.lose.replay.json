@@ -1,0 +1,20 @@
+{
+  "note": "Park the paddle at the left wall and let every orb through.",
+  "seed": 1,
+  "expect": "lost",
+  "inputs": [
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"key":"ArrowLeft","t":0.0},
+    {"t":20688.0}
+  ]
+}

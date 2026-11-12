@@ -1,0 +1,11 @@
+[package]
+name = "mg-lang"
+description = "Front end: JSON schema, expression parser, name resolution, type checker, static checks, lowering to IR"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+mg-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true

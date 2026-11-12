@@ -1,0 +1,172 @@
+{
+  "format": "microgame/0.1",
+  "meta": {
+    "title": "Lights Out",
+    "instructions": "Tap a tile to flip it and its neighbors. Turn every light off.",
+    "duration_s": 90
+  },
+  "state": {
+    "board": {
+      "type": "grid<bool>",
+      "init": "grid(5, 5, false)"
+    },
+    "moves": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "press": {
+      "params": {
+        "b": "grid<bool>",
+        "c": "ivec2"
+      },
+      "returns": "grid<bool>",
+      "body": "grid_map(b, (v, p) => if p == c or contains(neighbors4(p), c) then not v else v)"
+    }
+  },
+  "inputs": {
+    "tap_cell": {
+      "payload": {
+        "cell": "ivec2"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "scramble",
+      "on": "start",
+      "do": [
+        {
+          "for_each": "range(8)",
+          "as": "i",
+          "do": [
+            {
+              "set": "board",
+              "to": "press(board, pick(cells(board)))"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tap",
+      "on": "tap_cell",
+      "do": [
+        {
+          "set": "board",
+          "to": "press(board, event.cell)"
+        },
+        {
+          "incr": "moves"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "all(values(board), v => not v)",
+    "score": "max(0, 1000 - moves * 20)",
+    "time_limit": "90s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "canvas": {
+      "w": 360,
+      "h": 640,
+      "background": "$bg"
+    },
+    "tokens": {
+      "bg": "#F4F1EA",
+      "ink": "#1A1A1A",
+      "on": "#E4572E",
+      "off": "#2B2B2B"
+    },
+    "root": {
+      "node": "stack",
+      "dir": "column",
+      "gap": 32,
+      "align": "center",
+      "x": 180,
+      "y": 320,
+      "anchor": "center",
+      "children": [
+        {
+          "node": "text",
+          "text": "LIGHTS OUT",
+          "size": 40,
+          "weight": 700,
+          "color": "$ink"
+        },
+        {
+          "node": "grid",
+          "source": "board",
+          "cell_size": 56,
+          "gap": 6,
+          "cell": {
+            "node": "rect",
+            "w": 56,
+            "h": 56,
+            "radius": 6,
+            "fill": "= if value then $on else $off",
+            "transition": {
+              "fill": {
+                "ms": 120,
+                "ease": "out"
+              }
+            },
+            "on_tap": {
+              "input": "tap_cell",
+              "with": {
+                "cell": "cell"
+              }
+            },
+            "animate_on": {
+              "tap_cell": {
+                "when": "event.cell == cell",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  1.12,
+                  1
+                ],
+                "ms": 150
+              }
+            }
+          }
+        },
+        {
+          "node": "text",
+          "text": "= 'Moves: ' + str(moves)",
+          "size": 18,
+          "color": "$ink"
+        }
+      ]
+    },
+    "feedback": [
+      {
+        "on": "tap_cell",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "E5",
+              "ms": 60
+            }
+          }
+        ]
+      },
+      {
+        "on": "win",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "C6",
+              "ms": 300
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
