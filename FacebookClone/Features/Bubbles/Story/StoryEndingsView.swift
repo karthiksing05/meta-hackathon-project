@@ -22,6 +22,8 @@ struct StoryEndingsPanel: View {
     var onSendPath: (() -> Void)?
     /// Play again to find the rest (nil hides the button).
     var onPlay: (() -> Void)?
+    /// The run just played (the result sheet); nil shows your latest.
+    var run: StoryRunTag? = nil
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(AppStore.self) private var appStore
@@ -31,7 +33,7 @@ struct StoryEndingsPanel: View {
     var body: some View {
         if let story = StoryAdventure(bubble.manifest) {
             let found = progress.foundEndings(bubble.id)
-            let mine = progress.latestTag(bubble.id)
+            let mine = run ?? progress.latestTag(bubble.id)
             VStack(alignment: .leading, spacing: 12) {
                 header(story, found: found)
                 if style == .result, let mine, let ending = story.ending(id: mine.ending) {
@@ -334,15 +336,6 @@ struct StoryEndingsView: View {
                     onSendPath: { isSharing = true },
                     onPlay: { router.play(bubble.id) }
                 )
-                if StoryProgressStore.shared.latestTag(bubble.id) == nil {
-                    Button {
-                        Haptics.light()
-                        router.play(bubble.id)
-                    } label: {
-                        Label(StoryCopy.playFirst, systemImage: "play.fill")
-                    }
-                    .buttonStyle(.fb(.primary, height: 44))
-                }
             }
             .padding(FBMetrics.screenPadding)
         }

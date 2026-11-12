@@ -17,8 +17,14 @@ struct StoryResultEndings: View {
                 bubble: slot.bubble,
                 style: .result,
                 onSendPath: { isSharing = true },
-                onPlay: nil
+                onPlay: nil,
+                run: StoryRunTag(slot.result.result.share.tag)
             )
+            .onAppear {
+                // Results from the Bubbles tab don't pass through the player's didFinish.
+                guard slot.result.isRecorded else { return }
+                StoryProgressStore.shared.record(slot.result.result, in: slot.bubble, request: slot.request)
+            }
             .sheet(isPresented: $isSharing) {
                 StoryPathShareSheet(bubbleID: slot.bubble.id)
             }

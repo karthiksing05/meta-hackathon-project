@@ -240,11 +240,22 @@ final class StoryProgressStore {
 
     /// After you finish a story run (`StoryScreens.didFinish`): the ending joins your found endings.
     func record(_ score: BubbleScore, in bubble: Bubble, request: BubblePlayRequest) {
-        guard bubble.formula == .story, let raw = score.share?.tag, let tag = StoryRunTag(raw) else { return }
+        record(tag: score.share?.tag, score: score.score, in: bubble, request: request)
+    }
+
+    /// The same from a result sheet (the Bubbles tab plays without the player). Idempotent.
+    func record(_ result: BubbleRunResult, in bubble: Bubble, request: BubblePlayRequest?) {
+        record(tag: result.share.tag, score: result.score, in: bubble, request: request)
+    }
+
+    private func record(tag raw: String?, score: Int, in bubble: Bubble, request: BubblePlayRequest?) {
+        guard bubble.formula == .story, let raw, let tag = StoryRunTag(raw) else { return }
         var list = found[bubble.id] ?? []
         if !list.contains(tag.ending) { list.append(tag.ending) }
+        let run = StoryMyRun(tag: raw, score: score, seed: request?.seed, length: request?.length)
+        guard found[bubble.id] != list || latest[bubble.id] != run else { return }
         found[bubble.id] = list
-        latest[bubble.id] = StoryMyRun(tag: raw, score: score.score, seed: request.seed, length: request.length)
+        latest[bubble.id] = run
         persist()
     }
 
