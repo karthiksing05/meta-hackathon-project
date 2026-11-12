@@ -11,6 +11,7 @@ struct BubbleDetailView: View {
     @Environment(Router.self) private var router
 
     @State private var showFloat = false
+    @State private var showShare = false
 
     var body: some View {
         Group {
@@ -54,6 +55,9 @@ struct BubbleDetailView: View {
             BubbleFloatSheet(bubble: bubble) { showFloat = false }
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showShare) {
+            RemixShareSheet(bubble: bubble)
         }
     }
 
@@ -201,7 +205,7 @@ struct BubbleDetailView: View {
                     bubbleStore.toggleSave(bubble)
                     appStore.showToast(bubble.isSaved ? "Saved to your Library" : "Removed from saved", symbol: bubble.isSaved ? "bookmark.fill" : "bookmark.slash")
                 }
-                actionButton("Float", symbol: "arrowshape.turn.up.right") { showFloat = true }
+                actionButton("Share", symbol: "arrowshape.turn.up.right") { showShare = true }
             }
             if mine {
                 HStack(spacing: 8) {

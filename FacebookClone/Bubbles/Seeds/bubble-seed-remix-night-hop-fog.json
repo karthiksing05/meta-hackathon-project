@@ -1,0 +1,170 @@
+{
+  "id": "remix-night-hop-fog",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Night Hop: Into the Mist",
+  "one_line_rule": "The fog rolled in. Tap to float, and trust the hills you can't see.",
+  "formula": "dodge",
+  "brief": {
+    "intent": "Maya's Night Hop with the fog rolling in over the hills",
+    "audience": "everyone",
+    "mood": [
+      "focused"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": "remix-hill-hopper-night-hop",
+    "operators": [
+      "remix",
+      "re-skin",
+      "re-tune"
+    ],
+    "remix_of": "remix-hill-hopper-night-hop",
+    "remix_of_title": "Hill Hopper: Night Hop",
+    "remix_of_creator_id": "sf-maya-okafor",
+    "remix_of_creator_name": "Maya"
+  },
+  "chain": null,
+  "style": {
+    "look": "ink",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#DCE3F2",
+      "bg_bottom": "#B9C3DE",
+      "ink": "#1E2440",
+      "primary": "#3B5BDB",
+      "secondary": "#7048E8",
+      "accent": "#4DABF7",
+      "danger": "#5F3DC4"
+    },
+    "font": "rounded",
+    "motif": "hills",
+    "emoji": "🌫️",
+    "mood_preset": "chill",
+    "cover_prompt": "ink wash drawing of a small round hopper floating through thick fog over faint hills, blue-gray paper, soft brush strokes"
+  },
+  "concepts": [
+    {
+      "use": "space.side_scroll",
+      "params": {
+        "speed": 2.3,
+        "backdrop": "hills",
+        "ground": true
+      }
+    },
+    {
+      "use": "entity.avatar",
+      "params": {
+        "size": 15
+      }
+    },
+    {
+      "use": "entity.obstacle",
+      "params": {
+        "style": "hill",
+        "width": 62
+      }
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "behavior.gravity",
+      "params": {
+        "strength": 0.3,
+        "max_fall": 8.5
+      }
+    },
+    {
+      "use": "behavior.impulse",
+      "params": {
+        "strength": 6.1
+      }
+    },
+    {
+      "use": "behavior.spawn_stream",
+      "params": {
+        "spacing": 232,
+        "gap": 200,
+        "gap_shrink": 12,
+        "variance": 0.4
+      }
+    },
+    {
+      "use": "behavior.speed_ramp",
+      "params": {
+        "rate": 0.05,
+        "max": 1.5,
+        "delay": 4
+      }
+    },
+    {
+      "use": "rule.collide_fail"
+    },
+    {
+      "use": "score.count",
+      "params": {
+        "on": "entity.passed",
+        "points": 1,
+        "label": "hills"
+      }
+    },
+    {
+      "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "feel.sfx_on_action"
+    },
+    {
+      "use": "social.beat_marker"
+    },
+    {
+      "use": "share.score_card",
+      "params": {
+        "label": "hills"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "theme": "fog rolling over SF hills at night",
+    "obstacle_labels": [
+      "Twin Peaks?",
+      "Bernal?",
+      "Sutro",
+      "Nob Hill",
+      "Mount Davidson",
+      "Potrero",
+      "Buena Vista",
+      "Tank Hill"
+    ]
+  },
+  "seed": 3517,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-12T16:00:00Z",
+    "duration_sec": 31.2,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-diego-ramirez",
+    "created_hours_ago": 7,
+    "play_count": 210,
+    "like_count": 64,
+    "save_count": 41
+  }
+}
