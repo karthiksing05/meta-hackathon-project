@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Step 4: play what Muse made, right here. Edit the title and rule, tweak it with Muse, or make
-/// the next level.
+/// Step 4: play what Muse made, right here. Edit the title and rule, tweak it with Muse (for
+/// microgames through `MicrogameComposer.revise`), customize it, or make the next level.
 struct StudioTryStep: View {
     @Bindable var model: StudioModel
     @FocusState private var isTweakFocused: Bool
@@ -19,6 +19,9 @@ struct StudioTryStep: View {
                             .id("details")
                     }
                     StudioTrySlots(model: model)
+                    // SOUND SECTION: the lead mounts `SoundCustomizeSection` (built on another
+                    // branch) in `soundSection` below. Keep it here, between Customize and Tweak.
+                    soundSection
                     StudioTweakCard(model: model, isFocused: $isTweakFocused)
                         .id("tweak")
                 }
@@ -50,9 +53,9 @@ struct StudioTryStep: View {
                         model.go(to: .float)
                     } label: {
                         HStack(spacing: 6) {
-                            Image(systemName: model.isEditMode && model.levels.count == 1 ? "checkmark" : "sparkles")
+                            Image(systemName: model.isEditMode && model.levels.count == 1 ? "checkmark" : "paperplane.fill")
                                 .font(.system(size: FBIconSize.medium, weight: .bold))
-                            Text(model.isEditMode && model.levels.count == 1 ? "Save changes" : "Share")
+                            Text(model.isEditMode && model.levels.count == 1 ? "Save changes" : "Share with friends")
                         }
                     }
                     .buttonStyle(.studioPrimary)
@@ -77,6 +80,15 @@ struct StudioTryStep: View {
             model.focusTweak = false
             isTweakFocused = true
         }
+    }
+}
+
+extension StudioTryStep {
+    /// SOUND SECTION hook: empty for now. The lead replaces the body with
+    /// `SoundCustomizeSection(...)` once it lands; it gets `model` and `model.currentResult`.
+    @ViewBuilder
+    var soundSection: some View {
+        EmptyView()
     }
 }
 
@@ -261,7 +273,9 @@ private struct StudioDetailsCard: View {
                         .padding(.top, 2)
                 }
             }
-            lookRow
+            if result.manifest.formula != .microgame {
+                lookRow
+            }
             if !result.sourcesUsed.isEmpty {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Image(systemName: "lock.fill")
@@ -338,6 +352,11 @@ private struct StudioTweakCard: View {
     var isFocused: FocusState<Bool>.Binding
 
     private static let suggestions = ["A little slower", "Make it harder", "Calmer colors", "Use our names"]
+    private static let microgameSuggestions = ["A little slower", "Make it harder", "Softer sounds", "Brighter colors"]
+
+    private var suggestions: [String] {
+        model.currentResult?.manifest.formula == .microgame ? Self.microgameSuggestions : Self.suggestions
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.m) {
@@ -373,7 +392,7 @@ private struct StudioTweakCard: View {
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: FBSpacing.s) {
-                    ForEach(Self.suggestions, id: \.self) { suggestion in
+                    ForEach(suggestions, id: \.self) { suggestion in
                         StudioChip(title: suggestion, symbol: "sparkle") {
                             Haptics.selection()
                             model.tweakText = suggestion

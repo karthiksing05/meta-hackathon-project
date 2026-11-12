@@ -1,7 +1,9 @@
 import SwiftUI
 
-/// Step 2: Muse's brief, in Muse's voice, for the creator to edit before composing. Daily and
-/// Group Bubbles also list the opted-in posts Muse may read.
+/// Step 2: Muse's brief, in Muse's voice, for the creator to edit before Muse builds it: the vibe
+/// (mood, energy, competition), the length, the look and the sound, plus how Muse builds it (a
+/// ready formula or a microgame from scratch). Daily and Group games also list the opted-in posts
+/// Muse may read.
 struct StudioBriefStep: View {
     @Bindable var model: StudioModel
 
@@ -164,6 +166,31 @@ private struct StudioBriefCard: View {
                     model.brief?.occasion = value.isEmpty ? nil : value
                 }
             }
+            if model.canBuildMicrogame {
+                field("How Muse builds it") {
+                    StudioOptionRow(options: ["formula", "microgame"], selection: model.buildsMicrogame ? "microgame" : "formula", title: Self.buildTitle) { value in
+                        model.setBuildsMicrogame(value == "microgame")
+                    }
+                    Text(model.buildsMicrogame
+                         ? "From scratch on the game engine: Muse writes the rules, art and sound, then checks and playtests them. Takes a little longer."
+                         : "From Muse's library of tested game types. Quickest.")
+                        .font(.fbMeta)
+                        .foregroundStyle(FBColor.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            if !model.buildsMicrogame {
+                field("Length") {
+                    StudioOptionRow(options: Self.lengthOptions.map(\.id), selection: Self.lengthID(model.length), title: Self.lengthTitle) { value in
+                        model.length = Self.lengthOptions.first { $0.id == value }?.length
+                    }
+                }
+            }
+            field("Sound") {
+                StudioOptionRow(options: Self.soundOptions, selection: model.soundHint ?? "", title: Self.soundTitle) { value in
+                    model.soundHint = value.isEmpty ? nil : value
+                }
+            }
             field("Look") {
                 let line = model.briefLook
                 StudioLookRow(look: line.look, title: line.title, detail: line.detail) {
@@ -277,6 +304,32 @@ private struct StudioBriefCard: View {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
             model.addMood(mood)
         }
+    }
+
+    static func buildTitle(_ value: String) -> String {
+        value == "microgame" ? "Microgame, from scratch" : "Ready formula"
+    }
+
+    /// Length chips: Muse picks, or one of the common shapes (docs/BUBBLES.md 7.9).
+    static let lengthOptions: [(id: String, length: BubbleLength?)] = [
+        ("", nil), ("timed60", .timed(60)), ("rounds5", .rounds(5)), ("lives3", .lives(3)), ("endless", .endless),
+    ]
+
+    static func lengthID(_ length: BubbleLength?) -> String {
+        guard let length else { return "" }
+        return lengthOptions.first { $0.length == length }?.id ?? "custom"
+    }
+
+    static func lengthTitle(_ id: String) -> String {
+        guard let length = lengthOptions.first(where: { $0.id == id })?.length else { return id == "custom" ? "Custom" : "Muse picks" }
+        return length.shortLabel
+    }
+
+    /// The sound sets the runtime plays (soft, bright, dreamy); "" lets Muse pick from the mood.
+    static let soundOptions = ["", "soft", "bright", "dreamy"]
+
+    static func soundTitle(_ value: String) -> String {
+        value.isEmpty ? "Muse picks" : display(value)
     }
 
     static func display(_ mood: String) -> String {

@@ -1,18 +1,24 @@
 import SwiftUI
 
-/// Step 5: float it to your feed, a Group or an Event (or save the edit). Floating pops the bubble,
-/// publishes it and opens it on the Bubbles tab.
-struct StudioFloatStep: View {
+/// Step 5, Share: everything that brings people in, in one step. Who to challenge (friends' faces,
+/// three picked to start), a preview of the chat card they'll get, where it posts (your feed, a
+/// Group or an Event) and a caption. Sharing publishes it, sends the challenges through the
+/// existing challenge and share paths, keeps "How Muse made it", then opens the game page.
+/// Editing saves a new version instead.
+struct StudioShareStep: View {
     @Bindable var model: StudioModel
-    let onFloat: () -> Void
+    let onShare: () -> Void
 
     var body: some View {
         ScrollView {
-            VStack(spacing: FBSpacing.xl) {
-                StudioFloatPreview(model: model)
+            VStack(spacing: FBSpacing.l) {
+                StudioSharePreview(model: model)
                 if model.isEditMode && model.levels.count == 1 {
                     StudioSaveNote(model: model)
                 } else {
+                    if !model.friendChoices.isEmpty && model.mode != .daily {
+                        StudioChallengeCard(model: model)
+                    }
                     StudioDestinationCard(model: model)
                     if showsCaption {
                         StudioCaptionCard(model: model)
@@ -24,6 +30,7 @@ struct StudioFloatStep: View {
             .padding(.bottom, FBSpacing.xl)
         }
         .scrollDismissesKeyboard(.interactively)
+        .onAppear { model.pickDefaultFriendsIfNeeded() }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             StudioActionBar {
                 Button {
@@ -35,15 +42,26 @@ struct StudioFloatStep: View {
                 .buttonStyle(.studioSecondary(expand: false, height: 44))
                 .disabled(model.isPopping)
 
-                Button(action: onFloat) {
-                    HStack(spacing: 6) {
-                        Image(systemName: model.floatButtonTitle == "Save changes" ? "checkmark" : "sparkles")
-                            .font(.system(size: FBIconSize.medium, weight: .bold))
-                        Text(buttonTitle)
+                Button(action: onShare) {
+                    if model.isPopping {
+                        HStack(spacing: FBSpacing.s) {
+                            GameLoader(style: .dots)
+                                .accessibilityHidden(true)
+                            Text(model.challengeIDs.isEmpty || model.isEditMode ? "Sharing" : "Sending")
+                        }
+                        .accessibilityElement(children: .combine)
+                    } else {
+                        HStack(spacing: 6) {
+                            Image(systemName: symbol)
+                                .font(.system(size: FBIconSize.medium, weight: .bold))
+                            Text(buttonTitle)
+                                .minimumScaleFactor(0.75)
+                        }
                     }
                 }
                 .buttonStyle(.studioPrimary)
                 .disabled(model.isPopping)
+                .accessibilityHint(accessibilityHint)
             }
         }
     }
@@ -53,70 +71,159 @@ struct StudioFloatStep: View {
         return true
     }
 
+    private var isSave: Bool { model.floatButtonTitle == "Save changes" }
+
+    private var symbol: String {
+        if isSave { return "checkmark" }
+        return model.challengeIDs.isEmpty ? "sparkles" : "flag.checkered"
+    }
+
     private var buttonTitle: String {
-        if model.floatButtonTitle == "Save changes" { return "Save changes" }
+        if isSave { return "Save changes" }
         if model.mode == .daily { return "Share today's \(ProductName.singular)" }
+        let people = model.challengedPeople.map(\.firstName)
+        if !people.isEmpty {
+            let verb = model.sendsChallenge ? "Challenge" : "Send to"
+            let names = MakeRecord.names(people)
+            return names.count <= 26 ? "\(verb) \(names)" : "\(verb) \(people.count) friends"
+        }
         let name = model.destination == .feed ? "your feed" : model.destinationName
         return name.count <= 20 ? "Share to \(name)" : "Share"
+    }
+
+    private var accessibilityHint: String {
+        if isSave { return "Saves a new version" }
+        if model.challengeIDs.isEmpty { return "Shares to \(model.destinationName)" }
+        return "Shares to \(model.destinationName) and sends it to \(model.challengeIDs.count) friends in Messenger"
     }
 }
 
 // MARK: - Preview
 
-private struct StudioFloatPreview: View {
+private struct StudioSharePreview: View {
     let model: StudioModel
 
     var body: some View {
         if let result = model.levels.first {
-            ZStack {
-                VStack(spacing: FBSpacing.s) {
-                    cover(result)
-                        .modifier(StudioBob())
-                        .padding(.bottom, FBSpacing.s)
+            HStack(spacing: FBSpacing.m) {
+                BubbleCoverView(bubble: model.previewBubble(for: result))
+                    .frame(width: 84, height: 105)
+                    .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
+                            .strokeBorder(GameColor.rim, lineWidth: 1.5)
+                    }
+                    .shadow(color: GameColor.periwinkle.opacity(0.45), radius: 14, y: 6)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 4) {
                     Text(result.manifest.title)
                         .font(.fbTitle)
                         .studioRounded()
                         .foregroundStyle(FBColor.primaryText)
-                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(result.manifest.oneLineRule)
-                        .font(.fbBody)
+                        .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
-                        .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                     if model.levels.count > 1 {
                         Label("\(model.levels.count) levels · Level chain", systemImage: "link")
                             .font(.fbCaptionEmphasized)
-                            .foregroundStyle(BubbleGlow.ink)
+                            .foregroundStyle(GameColor.ink)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 5)
-                            .background(BubbleGlow.brandGradient, in: Capsule())
+                            .background(GameColor.gradient, in: Capsule())
                     }
                 }
-                .scaleEffect(model.isPopping ? 1.18 : 1)
-                .opacity(model.isPopping ? 0 : 1)
-                .blur(radius: model.isPopping ? 10 : 0)
-                if model.isPopping {
-                    StudioPopBurst()
-                        .offset(y: -50)
-                }
+                Spacer(minLength: 0)
             }
-            .frame(maxWidth: .infinity)
+            .opacity(model.isPopping ? 0.6 : 1)
+            .animation(GameMotion.reveal, value: model.isPopping)
             .accessibilityElement(children: .combine)
         }
     }
+}
 
-    private func cover(_ result: StudioResult) -> some View {
-        let shape = RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous)
-        return BubbleCoverView(bubble: model.previewBubble(for: result))
-            .frame(width: 176, height: 220)
-            .clipShape(shape)
-            .overlay(shape.strokeBorder(BubbleGlow.iridescent, lineWidth: 2))
-            .overlay(alignment: .topLeading) {
-                MuseBadge(compact: true)
-                    .padding(FBSpacing.s)
+// MARK: - Challenge friends
+
+/// "Challenge Maya, Leo and Priya": pick friends, and see the card they'll get in Messenger.
+private struct StudioChallengeCard: View {
+    let model: StudioModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: FBSpacing.m) {
+            StudioSectionTitle(
+                title: model.sendsChallenge ? "Challenge friends" : "Send to friends",
+                detail: model.challengeIDs.isEmpty ? "Optional" : "\(model.challengeIDs.count) picked",
+                symbol: model.sendsChallenge ? "flag.checkered" : "paperplane"
+            )
+            StudioFriendPicker(model: model)
+            if let result = model.levels.first, !model.challengedPeople.isEmpty {
+                StudioChatCardPreview(model: model, result: result)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            } else {
+                Text("Pick friends to send it to in Messenger. Everyone plays the same course.")
+                    .font(.fbMeta)
+                    .foregroundStyle(FBColor.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .shadow(color: BubbleGlow.pink.opacity(0.4), radius: 22, y: 10)
-            .accessibilityHidden(true)
+        }
+        .studioCard()
+        .animation(GameMotion.appear, value: model.challengeIDs)
+    }
+}
+
+/// What friends get in Messenger: a message from you carrying the playable card.
+private struct StudioChatCardPreview: View {
+    let model: StudioModel
+    let result: StudioResult
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("To \(MakeRecord.names(model.challengedPeople.map(\.firstName))) in Messenger")
+                .font(.fbMicroEmphasized)
+                .foregroundStyle(FBColor.tertiaryText)
+            HStack(alignment: .bottom, spacing: FBSpacing.s) {
+                Spacer(minLength: 40)
+                card
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Preview of the Messenger card: \(model.cardHeadline(for: result.manifest.title)). Play.")
+    }
+
+    private var card: some View {
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        return VStack(alignment: .leading, spacing: 0) {
+            BubbleCoverView(bubble: model.previewBubble(for: result), showsEmoji: false)
+                .frame(height: 96)
+                .frame(maxWidth: .infinity)
+                .clipped()
+            VStack(alignment: .leading, spacing: 4) {
+                Text(model.cardHeadline(for: result.manifest.title))
+                    .font(.fbName)
+                    .foregroundStyle(FBColor.primaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(model.sendsChallenge ? "Same course for everyone · \(ProductName.singular)" : "A \(ProductName.singular) by \(model.me?.firstName ?? "you")")
+                    .font(.fbMicro)
+                    .foregroundStyle(FBColor.secondaryText)
+                HStack(spacing: 4) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 11, weight: .bold)) // Small glyph inside a 30 pt pill
+                    Text("Play")
+                        .font(.fbCaptionEmphasized)
+                }
+                .foregroundStyle(GameColor.ink)
+                .frame(maxWidth: .infinity, minHeight: 30)
+                .background(GameColor.gradient, in: Capsule())
+                .padding(.top, 4)
+            }
+            .padding(10)
+        }
+        .frame(width: 220)
+        .background(FBColor.surface)
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(FBColor.divider, lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.06), radius: 6, y: 2)
     }
 }
 
