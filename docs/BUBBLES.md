@@ -904,9 +904,71 @@ Group or group chat, with a live-feeling leaderboard between rounds.
 
 ### 7.8 Learn together (learn)
 
-The `learn` formula (category Learn): a short lesson card, practice questions with an explanation
-after each, a recap and a mastery streak. A Group's shared lesson has a mastery meter, and friends'
-streaks show up.
+The `learn` formula (category **Learn**): a lesson card with 2–4 points, practice questions with an
+explanation after every answer (right or wrong), a recap of the points you know, your mastery
+("7/8") and a learning streak. Learning is social: a Group's lessons have a mastery meter
+everyone moves together ("New in SF knows 82% of the hills"), friends' streaks sit next to yours
+(Library, profiles, lesson pages), and lesson cards in chats and Groups invite people to learn it
+with you; friends in a chat learn it too and their results land in the chat.
+
+**Why a dedicated kit** (not a teach mode in answer, sort and guess): it demos the whole arc (lesson,
+practice, explanation, recap) in one game; it needs no edits to kits other features own; and it gets
+its own category, Studio guidance and playtest policy. Its concepts are its own (`formulas:
+["learn"]`), so it never borrows answer's quiz concepts.
+
+**Kit** (`bubble-kit-learn.js`): `space.lesson_desk` (draws everything), `rule.lesson_practice`
+(runs the lesson and ends the run; params `pass_ratio` 0.5, `shuffle_choices`, `shuffle_questions`,
+`lesson_min_seconds`, `recap_seconds`), `score.mastery` (100 a right answer + 20 per streak step,
+capped at 5; glue `score`), with the common `input.select`. Content: `{topic, subject?, lesson:
+{title, points: [2–4, ≤ 90]}, questions: [{q ≤ 90, choices: [2–4, ≤ 40, distinct], answer, explain
+≤ 120, point?}]}`; `point` links a question to the lesson point it practices (the recap ticks it off),
+`subject` is the meter's noun phrase. Length: `rounds` (default: one per question), `lives` (each
+wrong answer costs a life; 3 by default) and `endless` (fresh order each pass until the first miss);
+the kit calls `lengthRound()` after every question and `lengthMiss()` on every miss, and counts lives
+itself while `lengthLeft()` reports nulls. A run succeeds at `pass_ratio` mastery or better. Events:
+`learn.lesson_done`, `learn.question`, `learn.answer`, `learn.right`, `learn.wrong`, `learn.explain`,
+`learn.recap`, `round.start`, `round.end`. Share: `score_text` "7/8 mastered".
+
+**Tag keys:** `mastery` (`right/asked`), `topic` (a slug), `miss` (content indexes of missed
+questions, comma-separated). Example: `mastery=7/8;topic=hills-of-sf;miss=3`.
+
+**Lesson cards** (`.lesson`, sent through `BubbleSocialHub`; `LearnShare` in `LearnScreens.swift`).
+Extras: `topic`, `subject`, `mastery` (the sender's "7/8"), `group_mastery` (0–1) and `group_name`
+(the meter when the lesson has one), `learners` (`{userID: "7/8"}`, updated live as people learn it).
+`sessionID` is `lesson-<bubbleID>`; Learn it plays the card's seed with context `.lesson`. Sending
+posts `lesson_shared` with the chat's members, the friend, or the Group's members. Sent to a chat,
+two members play the same seed (real bot runs) and reply with their result a few seconds later.
+
+**State** (`LearnProgressStore.shared`): your learning days and best mastery per lesson
+(UserDefaults; each launch the demo world gives Alex the two days before today, so a lesson today makes a 3-day
+streak); members' mastery from `simulateRun` tags (until a run lands, a member's best real board
+score / the best possible score stands in); friends' streaks are deterministic and synthetic.
+`groupMastery(group:in:)` is the Group meter across its lessons (0–1); `groupMastery(of:group:)` is
+one lesson's.
+
+**Slots:** `LearnResultRecap` (ring, streak with friends', what you learned, the Group meter, "Share
+with New in SF" and "Send to New in SF crew"), `LearnDetailMastery`, `LearnGroupMastery` (Games tab),
+`LearnProfileStreak`, `LearnLibraryStreaks`, `LearnStudioEntry` ("Turn a topic or notes into a
+lesson": a sheet that sets the learn formula hint, the prompt and `social.lessonNotes`) and
+`LearnCardBody`. Copy lives in `LearnCopy`.
+
+**Studio** (`LearnStudio.swift`): keywords (learn, lesson, teach, study, quiz me, flashcards,
+practice, notes, language, phrases, history of…), nouns (101, Lesson, Basics), looks (chalk, paper,
+riso), a composer guide (accurate, widely known, checkable facts; conservative over surprising; one
+short sentence that teaches why; 6–10 questions; 2–4 points the questions cover; no medical, legal or
+financial advice; generic, non-brand content), prompt lines that pass pasted notes with "use only
+facts from these notes", and an offline builder (cloze questions from the notes' sentences, with
+the sentence as the explanation; else a built-in SF neighborhoods lesson). Playtest policy:
+`no_challenge` is relaxed (practice shouldn't feel punishing) and a non-blocking `lesson_short` flag
+notes fewer than 5 questions.
+
+**FB_OPEN:** `feature:learn/lesson/<bubbleID>` (the lesson's page with mastery and friends),
+`feature:learn/group/<groupID>` (the Group page on its Games tab with the meter),
+`feature:learn/streaks` (friends' learning streaks). Also `play:learn-hills-of-sf` and
+`bubble:learn-hola-meetup`.
+
+**Seeds:** `learn-hills-of-sf` ("Hills of SF 101", chalk, by Aiko) and `learn-hola-meetup` ("Hola!
+Meetup Basics", paper, by Lena), both for New in SF. Tests: `tools/kits-tests/suite-learn.js`.
 
 ### 7.9 Length and customizing (length)
 
