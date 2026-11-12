@@ -1,0 +1,80 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Fog Dodge",
+    "instructions": "Drag or use the arrow keys to steer your cable car through the fog. Survive 45 seconds.",
+    "duration_s": 45
+  },
+  "uses": [
+    { "fragment": "lives", "params": { "count": 5 } },
+    { "fragment": "spawn_wave", "params": { "from": "top", "every": "700ms", "speed": 140.0, "radius": 18.0, "jitter": 0.3, "max_alive": 14, "kind": "fog" } },
+    { "fragment": "speed_ramp", "params": { "every": 6000, "step": 0.1 } },
+    { "fragment": "countdown", "params": { "on_end": "none" } }
+  ],
+  "state": {
+    "player_x": { "type": "float", "init": "180.0" },
+    "inv_until": { "type": "int", "init": "0" }
+  },
+  "events": {
+    "hit": {}
+  },
+  "inputs": {
+    "move": { "payload": { "x": "float" } },
+    "nudge": {
+      "payload": { "dx": "float" },
+      "from": [
+        { "key": "ArrowLeft", "with": { "dx": "-28.0" } },
+        { "key": "ArrowRight", "with": { "dx": "28.0" } }
+      ]
+    }
+  },
+  "rules": [
+    { "id": "drag", "on": "move", "do": [ { "set": "player_x", "to": "clamp(event.x, 20.0, 340.0)" } ] },
+    { "id": "keys", "on": "nudge", "do": [ { "set": "player_x", "to": "clamp(player_x + event.dx, 20.0, 340.0)" } ] },
+    {
+      "id": "collide",
+      "on": "tick",
+      "when": "now >= inv_until and any(spawns, s => overlaps_circle(vec(player_x, 560.0), 14.0, vec(s.x, s.y), s.r))",
+      "do": [
+        { "remove": "spawns", "where": "s => overlaps_circle(vec(player_x, 560.0), 14.0, vec(s.x, s.y), s.r)" },
+        { "set": "inv_until", "to": "now + 1200" },
+        { "emit": "hit" }
+      ]
+    }
+  ],
+  "objectives": {
+    "score": "now / 100",
+    "time_limit": "45s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect", "w": 360, "h": 640, "fill": "#00000000",
+          "on_drag": { "input": "move", "with": { "x": "pointer.x" } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle", "x": "= player_x", "y": 560, "r": 14,
+          "fill": "= if now < inv_until then $car_hurt else $car",
+          "role": "avatar",
+          "transition": { "x": { "ms": 80, "ease": "out" } }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "hit", "do": [ { "sound": { "wave": "sawtooth", "note": "C2", "ms": 200 } } ] },
+      { "on": "win", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 300 } } ] }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": { "car": "#5EE6FF", "car_hurt": "#3A4A6B" }
+  },
+  "content": {},
+  "playtest": { "progress": "lives * 1000" }
+}

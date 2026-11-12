@@ -1,0 +1,111 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Lantern Letters",
+    "instructions": "Light up five hidden words, one letter at a time. Eight wrong letters and the lanterns go out.",
+    "duration_s": 180
+  },
+  "uses": [
+    { "fragment": "lives", "params": { "count": 8 } },
+    { "fragment": "score", "params": { "points": 10, "target": 0, "label": "Score" } }
+  ],
+  "state": {
+    "order": { "type": "list<string>", "init": "[]" },
+    "round": { "type": "int", "init": "0" },
+    "guessed": { "type": "set<string>", "init": "set_of([])" }
+  },
+  "events": {
+    "hit": {},
+    "word_done": {}
+  },
+  "inputs": {
+    "guess": { "payload": { "letter": "string" } }
+  },
+  "rules": [
+    {
+      "id": "pick_words",
+      "on": "start",
+      "do": [ { "set": "order", "to": "take(shuffle(content_words), 5)" } ]
+    },
+    {
+      "id": "guess",
+      "on": "guess",
+      "when": "event.letter != '' and not has(guessed, event.letter) and round < len(order)",
+      "do": [
+        { "set": "guessed", "to": "add(guessed, event.letter)" },
+        { "let": { "w": "get_or(order, round, '')" } },
+        {
+          "if": "contains(chars(w), event.letter)",
+          "then": [ { "emit": "point" } ],
+          "else": [ { "emit": "hit" } ]
+        },
+        { "if": "all(chars(w), c => has(guessed, c))", "then": [ { "emit": "word_done" } ] }
+      ]
+    },
+    {
+      "id": "next_word",
+      "on": "word_done",
+      "do": [
+        { "incr": "round" },
+        { "set": "guessed", "to": "set_of([])" }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "len(order) > 0 and round >= len(order)",
+    "time_limit": "180s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 180, "y": 130, "anchor": "center", "size": 18, "weight": 600, "color": "$ink",
+          "text": "= 'Word ' + str(min(round + 1, len(order))) + ' of ' + str(len(order))"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 180, "y": 230, "anchor": "center", "size": 40, "weight": 700, "color": "$ink",
+          "text": "= join(map(chars(get_or(order, round, '')), c => if has(guessed, c) then upper(c) else '_'), ' ')"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "grid", "cols": 7, "rows": 4, "cell_size": 44, "gap": 4, "x": 14, "y": 400,
+          "cell": {
+            "node": "group",
+            "children": [
+              {
+                "node": "rect", "w": 44, "h": 44, "radius": 8,
+                "fill": "= if get_or(chars('abcdefghijklmnopqrstuvwxyz'), cell.y * 7 + cell.x, '') == '' then $blank else if not has(guessed, get_or(chars('abcdefghijklmnopqrstuvwxyz'), cell.y * 7 + cell.x, '')) then $surface else if contains(chars(get_or(order, round, '')), get_or(chars('abcdefghijklmnopqrstuvwxyz'), cell.y * 7 + cell.x, '')) then $right else $wrong",
+                "transition": { "fill": { "ms": 120, "ease": "out" } },
+                "on_tap": { "input": "guess", "with": { "letter": "get_or(chars('abcdefghijklmnopqrstuvwxyz'), cell.y * 7 + cell.x, '')" } }
+              },
+              {
+                "node": "text", "x": 22, "y": 22, "anchor": "center", "size": 20, "weight": 600, "color": "$ink",
+                "text": "= upper(get_or(chars('abcdefghijklmnopqrstuvwxyz'), cell.y * 7 + cell.x, ''))"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "hit", "do": [ { "sound": { "wave": "square", "note": "C3", "ms": 120 } } ] },
+      { "on": "word_done", "do": [ { "sound": { "wave": "triangle", "note": "G5", "ms": 160 } } ] },
+      { "on": "win", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 300 } } ] }
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "tokens": { "right": "#8FCB9B", "wrong": "#E8A08F", "blank": "#00000000" }
+  },
+  "content": {
+    "words": ["picnic", "ferry", "mural", "hike", "tacos", "museum", "karaoke", "market", "bikes", "concert", "garden", "bakery"]
+  },
+  "playtest": { "progress": "score + round * 100" }
+}
