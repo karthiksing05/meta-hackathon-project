@@ -3,7 +3,7 @@
   "version": 1,
   "engine_version": 1,
   "title": "Moving Day",
-  "one_line_rule": "Float your boxes up the stairs. Tap to lift.",
+  "one_line_rule": "Float your box up past the clutter. Tap to lift, three bumps and you're out.",
   "formula": "dodge",
   "brief": {
     "intent": "a funny game about my move to SF",
@@ -26,40 +26,92 @@
   },
   "chain": null,
   "style": {
-    "palette": "peach-fizz",
+    "look": "clay",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#F7E9D6",
+      "bg_bottom": "#E8CDA9",
+      "ink": "#3B2A20",
+      "primary": "#C47F45",
+      "secondary": "#5E9ED6",
+      "accent": "#F2BE3A",
+      "danger": "#DD5144"
+    },
+    "font": "rounded",
+    "motif": "city",
     "emoji": "📦",
-    "mood_preset": "funny"
+    "mood_preset": "funny",
+    "cover_prompt": "claymation diorama of a cardboard box floating past stacks of moving boxes on a city street, soft studio light, chunky toy shapes"
   },
   "concepts": [
     {
-      "use": "space.side_scroll"
+      "use": "space.side_scroll",
+      "params": {
+        "speed": 2.4,
+        "backdrop": "city",
+        "ground": true
+      }
     },
     {
-      "use": "entity.avatar"
+      "use": "entity.avatar",
+      "params": {
+        "size": 16,
+        "emoji": "📦"
+      }
     },
     {
-      "use": "entity.obstacle"
+      "use": "entity.obstacle",
+      "params": {
+        "style": "stack",
+        "width": 64
+      }
     },
     {
       "use": "input.tap"
     },
     {
-      "use": "behavior.gravity"
+      "use": "behavior.gravity",
+      "params": {
+        "strength": 0.33
+      }
     },
     {
-      "use": "behavior.impulse"
+      "use": "behavior.impulse",
+      "params": {
+        "strength": 6.2
+      }
     },
     {
-      "use": "behavior.spawn_stream"
+      "use": "behavior.spawn_stream",
+      "params": {
+        "spacing": 226,
+        "gap": 192,
+        "gap_shrink": 14,
+        "variance": 0.45
+      }
     },
     {
-      "use": "behavior.speed_ramp"
+      "use": "behavior.speed_ramp",
+      "params": {
+        "rate": 0.07,
+        "max": 1.6,
+        "delay": 3
+      }
     },
     {
-      "use": "rule.collide_fail"
+      "use": "rule.lives",
+      "params": {
+        "lives": 3,
+        "grace": 55
+      }
     },
     {
-      "use": "score.count"
+      "use": "score.count",
+      "params": {
+        "on": "entity.passed",
+        "points": 1,
+        "label": "boxes"
+      }
     },
     {
       "use": "flow.run_retry"
@@ -68,17 +120,30 @@
       "use": "feel.mood_preset"
     },
     {
-      "use": "share.score_card"
+      "use": "feel.sfx_on_action"
+    },
+    {
+      "use": "share.score_card",
+      "params": {
+        "label": "boxes",
+        "brag": "my move in one game"
+      }
     }
   ],
   "glue": {},
   "content": {
-    "theme": "moving into a new apartment",
+    "theme": "moving into a new apartment in SF",
     "obstacle_labels": [
-      "stairs",
-      "couch",
-      "boxes"
-    ]
+      "Stairs",
+      "Couch",
+      "Boxes",
+      "Lamp",
+      "Plants",
+      "Bike",
+      "Mattress",
+      "4th floor"
+    ],
+    "avatar_emoji": "📦"
   },
   "seed": 777,
   "studio": {
@@ -91,7 +156,6 @@
     "duration_sec": 41.5,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "me",
     "created_hours_ago": 50,

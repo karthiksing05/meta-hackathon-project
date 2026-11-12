@@ -32,40 +32,88 @@
     "next": "hill-hopper-2"
   },
   "style": {
-    "palette": "sky-glow",
+    "look": "paper",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#CDE6F4",
+      "bg_bottom": "#F5EAD7",
+      "ink": "#25283D",
+      "primary": "#EE7F35",
+      "secondary": "#5FA370",
+      "accent": "#F2C641",
+      "danger": "#D04545"
+    },
+    "font": "rounded",
+    "motif": "hills",
     "emoji": "⛰️",
-    "mood_preset": "chill"
+    "mood_preset": "chill",
+    "cover_prompt": "paper cutout diorama of a small round hopper bouncing over layered green paper hills under a pale blue paper sky, soft offset shadows"
   },
   "concepts": [
     {
-      "use": "space.side_scroll"
+      "use": "space.side_scroll",
+      "params": {
+        "speed": 2.3,
+        "backdrop": "hills",
+        "ground": true
+      }
     },
     {
-      "use": "entity.avatar"
+      "use": "entity.avatar",
+      "params": {
+        "size": 15
+      }
     },
     {
-      "use": "entity.obstacle"
+      "use": "entity.obstacle",
+      "params": {
+        "style": "hill",
+        "width": 62
+      }
     },
     {
       "use": "input.tap"
     },
     {
-      "use": "behavior.gravity"
+      "use": "behavior.gravity",
+      "params": {
+        "strength": 0.32,
+        "max_fall": 8.5
+      }
     },
     {
-      "use": "behavior.impulse"
+      "use": "behavior.impulse",
+      "params": {
+        "strength": 6.1
+      }
     },
     {
-      "use": "behavior.spawn_stream"
+      "use": "behavior.spawn_stream",
+      "params": {
+        "spacing": 232,
+        "gap": 198,
+        "gap_shrink": 12,
+        "variance": 0.4
+      }
     },
     {
-      "use": "behavior.speed_ramp"
+      "use": "behavior.speed_ramp",
+      "params": {
+        "rate": 0.05,
+        "max": 1.5,
+        "delay": 4
+      }
     },
     {
       "use": "rule.collide_fail"
     },
     {
-      "use": "score.count"
+      "use": "score.count",
+      "params": {
+        "on": "entity.passed",
+        "points": 1,
+        "label": "hills"
+      }
     },
     {
       "use": "flow.run_retry"
@@ -74,17 +122,30 @@
       "use": "feel.mood_preset"
     },
     {
-      "use": "share.score_card"
+      "use": "feel.sfx_on_action"
+    },
+    {
+      "use": "social.beat_marker"
+    },
+    {
+      "use": "share.score_card",
+      "params": {
+        "label": "hills"
+      }
     }
   ],
   "glue": {},
   "content": {
-    "theme": "SF hills",
+    "theme": "SF hills on a run club morning",
     "obstacle_labels": [
       "Twin Peaks",
       "Bernal",
       "Nob Hill",
-      "Russian Hill"
+      "Russian Hill",
+      "Telegraph",
+      "Potrero",
+      "Buena Vista",
+      "Tank Hill"
     ]
   },
   "seed": 1907,
@@ -98,7 +159,6 @@
     "duration_sec": 33.4,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-diego-ramirez",
     "created_hours_ago": 30,

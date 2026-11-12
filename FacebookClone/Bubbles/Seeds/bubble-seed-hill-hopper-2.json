@@ -34,40 +34,97 @@
     "next": null
   },
   "style": {
-    "palette": "night-bloom",
+    "look": "neon",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#0A0620",
+      "bg_bottom": "#1C0B36",
+      "ink": "#F6F0FF",
+      "primary": "#FF52D4",
+      "secondary": "#3CF0FF",
+      "accent": "#B8FF4D",
+      "danger": "#FF3D6E"
+    },
+    "font": "condensed",
+    "motif": "city",
     "emoji": "🌄",
-    "mood_preset": "focused"
+    "mood_preset": "focused",
+    "cover_prompt": "neon line art of two hilltops at night above a glowing city skyline, magenta and cyan glow lines, near-black starry sky"
   },
   "concepts": [
     {
-      "use": "space.side_scroll"
+      "use": "space.side_scroll",
+      "params": {
+        "speed": 2.65,
+        "backdrop": "city",
+        "ground": true
+      }
     },
     {
-      "use": "entity.avatar"
+      "use": "entity.avatar",
+      "params": {
+        "size": 15
+      }
     },
     {
-      "use": "entity.obstacle"
+      "use": "entity.obstacle",
+      "params": {
+        "style": "hill",
+        "width": 60,
+        "near": 16
+      }
     },
     {
       "use": "input.tap"
     },
     {
-      "use": "behavior.gravity"
+      "use": "behavior.gravity",
+      "params": {
+        "strength": 0.36,
+        "max_fall": 9.5
+      }
     },
     {
-      "use": "behavior.impulse"
+      "use": "behavior.impulse",
+      "params": {
+        "strength": 6.5
+      }
     },
     {
-      "use": "behavior.spawn_stream"
+      "use": "behavior.spawn_stream",
+      "params": {
+        "spacing": 214,
+        "gap": 172,
+        "gap_shrink": 16,
+        "variance": 0.55
+      }
     },
     {
-      "use": "behavior.speed_ramp"
+      "use": "behavior.speed_ramp",
+      "params": {
+        "rate": 0.08,
+        "max": 1.7,
+        "delay": 3
+      }
+    },
+    {
+      "use": "behavior.wind",
+      "params": {
+        "strength": 0.1,
+        "every": 5,
+        "length": 1.4
+      }
     },
     {
       "use": "rule.collide_fail"
     },
     {
-      "use": "score.count"
+      "use": "score.count",
+      "params": {
+        "on": "entity.passed",
+        "points": 1,
+        "label": "peaks"
+      }
     },
     {
       "use": "flow.run_retry"
@@ -76,16 +133,34 @@
       "use": "feel.mood_preset"
     },
     {
-      "use": "share.score_card"
+      "use": "feel.sfx_on_action"
+    },
+    {
+      "use": "social.beat_marker"
+    },
+    {
+      "use": "share.score_card",
+      "params": {
+        "label": "peaks"
+      }
     }
   ],
-  "glue": {},
+  "glue": {
+    "glue.skim_bonus": {
+      "slot": "score",
+      "describe": "Skimming a peak (a near miss) is worth an extra point.",
+      "source": "function score(run) {\n  return run.near ? run.base + 1 : run.base;\n}"
+    }
+  },
   "content": {
-    "theme": "Twin Peaks at night",
+    "theme": "Twin Peaks at night, city lights below",
     "obstacle_labels": [
       "Twin Peaks",
       "Sutro",
-      "Corona Heights"
+      "Corona Heights",
+      "Mt Davidson",
+      "Tank Hill",
+      "Grand View"
     ]
   },
   "seed": 1908,
@@ -99,7 +174,6 @@
     "duration_sec": 36.1,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-diego-ramirez",
     "created_hours_ago": 26,

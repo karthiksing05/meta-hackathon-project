@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <title>Bubble</title>
 <link rel="stylesheet" href="bubble-glow.css">
 </head>
 <body>
-<div id="bubble-root"></div>
+<div id="bubble-root" class="palette-lilac-haze"><canvas id="bubble-canvas" aria-label="Bubble game"></canvas></div>
 <!-- Load order matters (docs/BUBBLES.md 4.6): runtime, common kit, then the other kits by name. -->
 <script src="bubble-runtime.js"></script>
 <script src="bubble-kit-common.js"></script>

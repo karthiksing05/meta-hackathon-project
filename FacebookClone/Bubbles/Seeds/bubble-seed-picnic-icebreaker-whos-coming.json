@@ -3,7 +3,7 @@
   "version": 1,
   "engine_version": 1,
   "title": "Who's coming Saturday?",
-  "one_line_rule": "Read a fact, pick the newcomer it belongs to.",
+  "one_line_rule": "Read a fact, pick the newcomer it belongs to. Quick picks score more.",
   "formula": "guess",
   "brief": {
     "intent": "learn names before the picnic",
@@ -31,167 +31,147 @@
   },
   "chain": null,
   "style": {
-    "palette": "peach-fizz",
+    "look": "paper",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#FFF3DF",
+      "bg_bottom": "#F6DDBD",
+      "ink": "#3A2A1E",
+      "primary": "#D9573B",
+      "secondary": "#4E9A5E",
+      "accent": "#EDAA2F",
+      "danger": "#B93A33"
+    },
+    "font": "serif",
+    "motif": "leaves",
     "emoji": "🧺",
-    "mood_preset": "warm"
+    "mood_preset": "warm",
+    "cover_prompt": "paper cutout diorama of a picnic blanket on the grass at Dolores Park, a woven basket and layered paper trees, warm afternoon light"
   },
   "concepts": [
     {
-      "use": "space.cards"
+      "use": "space.portrait_choices",
+      "params": {
+        "choices": 4,
+        "heading": "Who is it?"
+      }
     },
     {
       "use": "input.select"
     },
     {
-      "use": "rule.guess_feedback"
+      "use": "rule.pick_match"
     },
     {
-      "use": "rule.attempt_budget"
+      "use": "flow.rounds",
+      "params": {
+        "count": 6,
+        "pause": 72,
+        "pass_ratio": 0.5
+      }
     },
     {
-      "use": "score.count"
+      "use": "score.count",
+      "params": {
+        "on": "round.correct",
+        "points": 100,
+        "label": "points"
+      }
     },
     {
-      "use": "flow.rounds"
+      "use": "feel.mood_preset"
     },
     {
-      "use": "feel.flip_reveal"
+      "use": "feel.sfx_on_action",
+      "params": {
+        "score": "none"
+      }
     },
     {
-      "use": "share.emoji_grid"
+      "use": "share.emoji_grid",
+      "params": {
+        "set": "smiles"
+      }
     }
   ],
-  "glue": {},
+  "glue": {
+    "glue.quick_pick": {
+      "slot": "score",
+      "describe": "Up to 60 bonus points for picking within a second or two.",
+      "source": "function score(run) {\n  var quick = Math.max(0, 60 - Math.floor(run.ticks / 3));\n  return run.base + quick;\n}"
+    }
+  },
   "content": {
-    "rounds": [
+    "heading": "Who is it?",
+    "people": [
       {
-        "fact": "Runs the Lands End trail every Saturday",
-        "answer_id": "sf-maya-okafor",
-        "choices": [
-          {
-            "id": "sf-maya-okafor",
-            "name": "Maya Okafor",
-            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
-          },
-          {
-            "id": "sf-diego-ramirez",
-            "name": "Diego Ramírez",
-            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
-          },
-          {
-            "id": "sf-priya-natarajan",
-            "name": "Priya Natarajan",
-            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
-          },
-          {
-            "id": "sf-lena-fischer",
-            "name": "Lena Fischer",
-            "avatar": "https://randomuser.me/api/portraits/women/21.jpg"
-          }
+        "id": "sf-maya-okafor",
+        "name": "Maya Okafor",
+        "avatar": "https://randomuser.me/api/portraits/women/44.jpg",
+        "facts": [
+          "Runs the Lands End trail every Saturday",
+          "Moved from Austin three weeks ago",
+          "Has a cat named Biscuit"
         ]
       },
       {
-        "fact": "Bakes too much sourdough",
-        "answer_id": "sf-diego-ramirez",
-        "choices": [
-          {
-            "id": "sf-diego-ramirez",
-            "name": "Diego Ramírez",
-            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
-          },
-          {
-            "id": "sf-maya-okafor",
-            "name": "Maya Okafor",
-            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
-          },
-          {
-            "id": "sf-priya-natarajan",
-            "name": "Priya Natarajan",
-            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
-          },
-          {
-            "id": "sf-lena-fischer",
-            "name": "Lena Fischer",
-            "avatar": "https://randomuser.me/api/portraits/women/21.jpg"
-          }
+        "id": "sf-diego-ramirez",
+        "name": "Diego Ramírez",
+        "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
+        "facts": [
+          "Bakes too much sourdough",
+          "Lives in the Mission",
+          "Still owns a winter coat he will never need here"
         ]
       },
       {
-        "fact": "Works night shifts as a nurse",
-        "answer_id": "sf-priya-natarajan",
-        "choices": [
-          {
-            "id": "sf-priya-natarajan",
-            "name": "Priya Natarajan",
-            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
-          },
-          {
-            "id": "sf-maya-okafor",
-            "name": "Maya Okafor",
-            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
-          },
-          {
-            "id": "sf-diego-ramirez",
-            "name": "Diego Ramírez",
-            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
-          },
-          {
-            "id": "sf-lena-fischer",
-            "name": "Lena Fischer",
-            "avatar": "https://randomuser.me/api/portraits/women/21.jpg"
-          }
+        "id": "sf-priya-natarajan",
+        "name": "Priya Natarajan",
+        "avatar": "https://randomuser.me/api/portraits/women/65.jpg",
+        "facts": [
+          "Works night shifts as a nurse",
+          "Moved from Toronto",
+          "Wants to find the best dumplings in the Richmond"
         ]
       },
       {
-        "fact": "Swims in the cold water at Aquatic Park",
-        "answer_id": "sf-lena-fischer",
-        "choices": [
-          {
-            "id": "sf-lena-fischer",
-            "name": "Lena Fischer",
-            "avatar": "https://randomuser.me/api/portraits/women/21.jpg"
-          },
-          {
-            "id": "sf-maya-okafor",
-            "name": "Maya Okafor",
-            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
-          },
-          {
-            "id": "sf-diego-ramirez",
-            "name": "Diego Ramírez",
-            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
-          },
-          {
-            "id": "sf-priya-natarajan",
-            "name": "Priya Natarajan",
-            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
-          }
+        "id": "sf-lena-fischer",
+        "name": "Lena Fischer",
+        "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+        "facts": [
+          "Swims in the cold water at Aquatic Park",
+          "Arrived from Berlin last week",
+          "Collects vintage postcards"
         ]
       },
       {
-        "fact": "Cooks in a restaurant kitchen",
-        "answer_id": "sf-jordan-brooks",
-        "choices": [
-          {
-            "id": "sf-jordan-brooks",
-            "name": "Jordan Brooks",
-            "avatar": "https://randomuser.me/api/portraits/men/57.jpg"
-          },
-          {
-            "id": "sf-maya-okafor",
-            "name": "Maya Okafor",
-            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
-          },
-          {
-            "id": "sf-diego-ramirez",
-            "name": "Diego Ramírez",
-            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
-          },
-          {
-            "id": "sf-priya-natarajan",
-            "name": "Priya Natarajan",
-            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
-          }
+        "id": "sf-jordan-brooks",
+        "name": "Jordan Brooks",
+        "avatar": "https://randomuser.me/api/portraits/men/57.jpg",
+        "facts": [
+          "Cooks in a restaurant kitchen",
+          "Wants to learn to surf at Ocean Beach",
+          "Grew up in Atlanta"
+        ]
+      },
+      {
+        "id": "sf-omar-haddad",
+        "name": "Omar Haddad",
+        "avatar": "https://randomuser.me/api/portraits/men/71.jpg",
+        "facts": [
+          "Bikes up every hill",
+          "Plays pickup soccer on Sundays",
+          "Moved from Detroit"
+        ]
+      },
+      {
+        "id": "sf-chloe-nguyen",
+        "name": "Chloe Nguyen",
+        "avatar": "https://randomuser.me/api/portraits/women/9.jpg",
+        "facts": [
+          "Runs a Thursday trivia team",
+          "Is still getting used to the fog",
+          "Grew up in San Diego"
         ]
       }
     ]
@@ -207,7 +187,6 @@
     "duration_sec": 30.7,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-diego-ramirez",
     "event_id": "event-newcomers-picnic",

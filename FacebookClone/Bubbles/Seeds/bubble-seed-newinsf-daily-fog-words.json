@@ -31,43 +31,86 @@
   },
   "chain": null,
   "style": {
-    "palette": "lilac-haze",
+    "look": "ink",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#FBF8F1",
+      "bg_bottom": "#EFE9DC",
+      "ink": "#24212B",
+      "primary": "#4F78C9",
+      "secondary": "#E08A5C",
+      "accent": "#E2B13F",
+      "danger": "#C9473F"
+    },
+    "font": "hand",
+    "motif": "clouds",
     "emoji": "🌫️",
-    "mood_preset": "cozy"
+    "mood_preset": "cozy",
+    "cover_prompt": "hand-drawn ink and watercolor sketch of fog rolling over San Francisco rooftops, a few letters drifting in the mist, off-white paper, loose hatching"
   },
   "concepts": [
     {
-      "use": "space.grid"
+      "use": "content.seed",
+      "params": {
+        "list": "words",
+        "into": "target",
+        "salt": 1
+      }
     },
     {
-      "use": "input.type"
+      "use": "space.word_bubbles"
     },
     {
-      "use": "rule.guess_feedback"
+      "use": "input.type",
+      "params": {
+        "enter_label": "Pop"
+      }
     },
     {
-      "use": "rule.attempt_budget"
+      "use": "rule.letter_feedback",
+      "params": {
+        "hint": "first_letter"
+      }
     },
     {
-      "use": "feedback.letter_position"
+      "use": "rule.attempt_budget",
+      "params": {
+        "attempts": 6,
+        "show": false
+      }
     },
     {
-      "use": "score.attempts_used"
+      "use": "score.attempts_used",
+      "params": {
+        "per_try": 100,
+        "partial": 10
+      }
     },
     {
-      "use": "flow.daily_gate"
+      "use": "flow.daily_gate",
+      "params": {
+        "label": "Daily Bubble"
+      }
     },
     {
-      "use": "feel.flip_reveal"
+      "use": "feel.bubble_reveal",
+      "params": {
+        "stagger": 9
+      }
     },
     {
-      "use": "share.emoji_grid"
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.emoji_grid",
+      "params": {
+        "set": "weather"
+      }
     }
   ],
   "glue": {},
   "content": {
-    "target": "FOGGY",
-    "dictionary": [
+    "words": [
       "FOGGY",
       "HILLS",
       "CABLE",
@@ -83,7 +126,24 @@
       "CHINATOWN",
       "PRESIDIO",
       "MURAL"
-    ]
+    ],
+    "clues": {
+      "FOGGY": "How most summer mornings look out in the Sunset",
+      "HILLS": "The city has more than forty of them, and you will climb them all",
+      "CABLE": "The kind of car you can hang off on Powell Street",
+      "BRIDGE": "The famous one here is painted orange, not gold",
+      "MISSION": "Sunny neighborhood of murals, taquerias and Dolores Park",
+      "SOURDOUGH": "Tangy bread the city has baked since the Gold Rush",
+      "OCEAN": "The long, windy beach at the west end of the city",
+      "BAYSIDE": "Right on the water, like the Embarcadero walk",
+      "TROLLEY": "Vintage streetcars that run along the F line",
+      "DOLORES": "The park where Saturday's newcomers' picnic is",
+      "SUNSET": "Foggy neighborhood by the ocean, and the time to climb Bernal Hill",
+      "PIER": "Number 39 is the one with the sea lions",
+      "CHINATOWN": "The oldest one in North America starts at the Dragon Gate",
+      "PRESIDIO": "Old army post turned giant park near the bridge",
+      "MURAL": "Painted walls all over Balmy Alley"
+    }
   },
   "seed": 20261112,
   "studio": {
@@ -96,7 +156,6 @@
     "duration_sec": 28.0,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-chloe-nguyen",
     "group_id": "group-newinsf",

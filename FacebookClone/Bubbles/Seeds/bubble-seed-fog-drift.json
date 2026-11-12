@@ -26,40 +26,89 @@
   },
   "chain": null,
   "style": {
-    "palette": "night-bloom",
+    "look": "glow",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#262B57",
+      "bg_bottom": "#6A5890",
+      "ink": "#FFF6FB",
+      "primary": "#FFB0D8",
+      "secondary": "#9CE6F5",
+      "accent": "#FFE1A0",
+      "danger": "#FF7A9C"
+    },
+    "font": "rounded",
+    "motif": "waves",
     "emoji": "🌁",
-    "mood_preset": "dreamy"
+    "mood_preset": "dreamy",
+    "cover_prompt": "dreamy soft-focus illustration of a soap bubble drifting between fog banks above ocean waves at dusk, pastel glow"
   },
   "concepts": [
     {
-      "use": "space.side_scroll"
+      "use": "space.side_scroll",
+      "params": {
+        "speed": 2.2,
+        "backdrop": "waves",
+        "ground": true
+      }
     },
     {
-      "use": "entity.avatar"
+      "use": "entity.avatar",
+      "params": {
+        "size": 15
+      }
     },
     {
-      "use": "entity.obstacle"
+      "use": "entity.obstacle",
+      "params": {
+        "style": "fog",
+        "width": 66
+      }
     },
     {
-      "use": "input.tap"
+      "use": "input.hold"
     },
     {
-      "use": "behavior.gravity"
+      "use": "behavior.gravity",
+      "params": {
+        "strength": 0.26,
+        "max_fall": 6.5
+      }
     },
     {
-      "use": "behavior.impulse"
+      "use": "behavior.thrust",
+      "params": {
+        "strength": 0.52,
+        "max_rise": 5.2
+      }
     },
     {
-      "use": "behavior.spawn_stream"
+      "use": "behavior.spawn_stream",
+      "params": {
+        "spacing": 236,
+        "gap": 200,
+        "gap_shrink": 10,
+        "variance": 0.35
+      }
     },
     {
-      "use": "behavior.speed_ramp"
+      "use": "behavior.speed_ramp",
+      "params": {
+        "rate": 0.06,
+        "max": 1.6,
+        "delay": 4
+      }
     },
     {
       "use": "rule.collide_fail"
     },
     {
-      "use": "score.count"
+      "use": "score.count",
+      "params": {
+        "on": "entity.passed",
+        "points": 1,
+        "label": "fog banks"
+      }
     },
     {
       "use": "flow.run_retry"
@@ -68,14 +117,33 @@
       "use": "feel.mood_preset"
     },
     {
-      "use": "share.score_card"
+      "use": "feel.sfx_on_action",
+      "params": {
+        "action": "none"
+      }
+    },
+    {
+      "use": "share.score_card",
+      "params": {
+        "label": "fog banks"
+      }
     }
   ],
-  "glue": {},
+  "glue": {
+    "glue.breathing_fog": {
+      "slot": "spawn",
+      "describe": "The fog banks rise and fall in a slow wave instead of jumping around.",
+      "source": "function spawn(info) {\n  var mid = (info.min_y + info.max_y) / 2;\n  var reach = (info.max_y - info.min_y) * 0.42;\n  return { gap_y: mid + Math.sin(info.index * 0.62) * reach };\n}"
+    }
+  },
   "content": {
-    "theme": "fog over the bay",
+    "theme": "fog rolling in over the bay",
     "obstacle_labels": [
-      "fog bank"
+      "Karl",
+      "marine layer",
+      "fog bank",
+      "Sutro mist",
+      "bay fog"
     ]
   },
   "seed": 5150,
@@ -89,7 +157,6 @@
     "duration_sec": 38.8,
     "offline": false
   },
-  "_placeholder": true,
   "_seed": {
     "creator_id": "sf-lena-fischer",
     "created_hours_ago": 9,

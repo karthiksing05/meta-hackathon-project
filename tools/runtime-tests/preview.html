@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Bubble preview</title>
+<!--
+  Visual check for the Bubble runtime, outside the app. Loads the real runtime files and boots a seed:
+
+    preview.html?seed=hill-hopper&mode=demo
+    preview.html?formula=dodge&mode=play&start=1
+    preview.html?seed=newinsf-daily-fog-words&mode=demo&skill=0.6&best=3&debug=1
+
+  Params: seed (bubble-seed-<seed>.json) or formula (that formula's catalog example); mode
+  (play, demo, replay, poster); start=1 (skip the tap on the intro card); skill (demo bot);
+  best; muted=0; reduced=1; top/bottom/left/right (insets); debug=1 (message log); posters=1
+  (poster strip); poster=1 (show BubbleHost.poster() full size instead of the live page, redrawn on
+  poster_update); guides=1 (shade the insets, e.g. the feed's caption and action rail:
+  poster=1&guides=1&top=59&bottom=260&right=80); images=stand-in (pass payload.images: drawn
+  stand-in portraits as data URLs for every avatar URL, the way Swift can hand over cached photos).
+  Style overrides (LOOKS.md): look, palette, font, motif; colors=example uses the look's example
+  colors; e.g. preview.html?seed=hill-hopper&look=pixel&colors=example
+  Over file://, Chrome needs --allow-file-access-from-files to read seed JSON.
+-->
+<link rel="stylesheet" href="../../FacebookClone/Bubbles/Runtime/web/bubble-glow.css">
+<style>
+  #preview-log { position: fixed; left: 8px; right: 8px; bottom: 8px; max-height: 32%; overflow: auto; z-index: 10;
+    font: 11px/1.35 ui-monospace, Menlo, monospace; color: #fff; background: rgba(20, 10, 40, 0.72); border-radius: 10px; padding: 8px; pointer-events: none; }
+  #preview-posters { position: fixed; left: 6px; top: 6px; z-index: 10; display: flex; gap: 6px; }
+  #preview-posters img { width: 72px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  #preview-poster { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 5; }
+  .preview-guide { position: absolute; z-index: 6; background: rgba(255, 0, 90, 0.18); outline: 1px dashed rgba(255, 0, 90, 0.7); pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="bubble-root" class="palette-lilac-haze"><canvas id="bubble-canvas"></canvas></div>
+<script>
+  // Phone-sized stage: headless Chrome clamps window widths, so pin the root to ?w x ?h (390 x 844).
+  (function () {
+    const q = new URLSearchParams(location.search);
+    const w = Number(q.get("w") || 390), h = Number(q.get("h") || 844);
+    const root = document.getElementById("bubble-root");
+    root.style.cssText = "position:fixed;left:0;top:0;right:auto;bottom:auto;width:" + w + "px;height:" + h + "px";
+    // Headless Chrome barely runs requestAnimationFrame under --virtual-time-budget; drive frames
+    // with a 60 Hz timer there (or with ?timer=1) so screenshots show a live run.
+    if (q.get("timer") === "1" || (q.get("timer") !== "0" && /HeadlessChrome/.test(navigator.userAgent))) {
+      let id = 0;
+      const timers = new Map();
+      window.requestAnimationFrame = (cb) => { const k = ++id; timers.set(k, setTimeout(() => { timers.delete(k); cb(performance.now()); }, 16.67)); return k; };
+      window.cancelAnimationFrame = (k) => { clearTimeout(timers.get(k)); timers.delete(k); };
+    }
+  })();
+</script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-runtime.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-common.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-answer.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-dodge.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-group.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-guess.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-merge.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-time.js"></script>
+<script>
+(function () {
+  "use strict";
+  const q = new URLSearchParams(location.search);
+  const debug = q.get("debug") === "1";
+  let logEl = null;
+  function note(msg) {
+    if (!debug) return;
+    if (!logEl) { logEl = document.createElement("div"); logEl.id = "preview-log"; document.body.appendChild(logEl); }
+    const line = document.createElement("div");
+    line.textContent = msg;
+    logEl.appendChild(line);
+    while (logEl.childNodes.length > 40) logEl.removeChild(logEl.firstChild);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  // No webkit message handler here: the host guards for it; this hook mirrors messages for the log.
+  if (window.BubbleHost) {
+    BubbleHost.onmessage = (m) => {
+      const copy = Object.assign({}, m);
+      if (copy.replay) copy.replay = "(" + (copy.replay.inputs ? copy.replay.inputs.length : 0) + " inputs)";
+      note(JSON.stringify(copy));
+      window.__bubbleMessages = window.__bubbleMessages || [];
+      window.__bubbleMessages.push(m);
+    };
+  }
+
+  function loadJSON(url) {
+    return new Promise((resolve, reject) => {
+      const x = new XMLHttpRequest();
+      x.open("GET", url);
+      x.onload = () => {
+        if (x.status && x.status !== 200 && x.status !== 0) { reject(new Error("HTTP " + x.status)); return; }
+        try { resolve(JSON.parse(x.responseText)); } catch (e) { reject(e); }
+      };
+      x.onerror = () => reject(new Error("Couldn't read " + url + " (over file:// start Chrome with --allow-file-access-from-files)"));
+      x.send();
+    });
+  }
+
+  async function manifest() {
+    if (q.get("formula")) {
+      const f = Bubble.catalog().formulas.find((x) => x.id === q.get("formula"));
+      if (!f) throw new Error("No formula " + q.get("formula"));
+      const i = Number(q.get("example") || 0);
+      return i > 0 && f.examples && f.examples[i - 1] ? f.examples[i - 1] : f.example;
+    }
+    const seed = q.get("seed") || "hill-hopper";
+    return loadJSON("../../FacebookClone/Bubbles/Seeds/bubble-seed-" + seed + ".json");
+  }
+
+  async function main() {
+    const m = await manifest();
+    // Style overrides: preview any Bubble in any look.
+    const st = Object.assign({}, m.style || {});
+    for (const k of ["look", "palette", "font", "motif"]) if (q.get(k)) st[k] = q.get(k);
+    if (q.get("colors") === "example") { st.palette = "custom"; st.colors = Object.assign({}, Bubble.looks[st.look || "glow"].example_colors); }
+    else if (q.get("colors") === "none") { delete st.colors; if (st.palette === "custom") st.palette = "lilac-haze"; }
+    m.style = st;
+    const v = Bubble.validate(m);
+    note("validate: " + (v.ok ? "ok" : JSON.stringify(v.errors)));
+    const mode = q.get("mode") || "demo";
+    const payload = {
+      manifest: m,
+      mode,
+      player: { name: "Alex", best: q.get("best") ? Number(q.get("best")) : null },
+      muted: q.get("muted") !== "0",
+      reduced_motion: q.get("reduced") === "1",
+      insets: { top: Number(q.get("top") || 0), bottom: Number(q.get("bottom") || 0), left: Number(q.get("left") || 0), right: Number(q.get("right") || 0) },
+    };
+    if (q.get("skill")) payload.bot_skill = Number(q.get("skill"));
+    if (q.get("images") === "stand-in") {
+      // Synthetic stand-in portraits (a silhouette on a color), keyed by the manifest's avatar URLs.
+      payload.images = {};
+      const urls = new Set();
+      const c = m.content || {};
+      for (const x of c.people || []) if (x && x.avatar) urls.add(x.avatar);
+      for (const r of c.rounds || []) for (const x of (r && r.choices) || []) if (x && x.avatar) urls.add(x.avatar);
+      let i = 0;
+      for (const u of urls) {
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = 96;
+        const x = cv.getContext("2d");
+        x.fillStyle = "hsl(" + ((i * 67) % 360) + ", 55%, 72%)";
+        x.fillRect(0, 0, 96, 96);
+        x.fillStyle = "hsl(" + ((i * 67 + 180) % 360) + ", 30%, 32%)";
+        x.beginPath(); x.arc(48, 40, 18, 0, Math.PI * 2); x.fill();
+        x.beginPath(); x.ellipse(48, 96, 34, 30, 0, Math.PI, 0); x.fill();
+        payload.images[u] = cv.toDataURL("image/png");
+        i++;
+      }
+    }
+    if (mode === "replay") {
+      const sim = Bubble.simulate(m, { bot_skill: Number(q.get("skill") || 0.8), bot_seed: Number(q.get("botseed") || 3) });
+      payload.replay = sim.replay;
+      note("replay of a bot run: " + sim.outcome + " " + sim.score + " in " + sim.duration_sec + "s");
+    }
+    const prep = JSON.parse(BubbleHost.prepare(payload));
+    note("prepare: " + JSON.stringify(prep));
+    if (q.get("posters") === "1") {
+      const strip = document.createElement("div");
+      strip.id = "preview-posters";
+      document.body.appendChild(strip);
+      const img = document.createElement("img");
+      img.src = BubbleHost.poster(prep.key, JSON.stringify({ width: 180, height: 320, scale: 2 }));
+      strip.appendChild(img);
+    }
+    if (q.get("guides") === "1") {
+      const root = document.getElementById("bubble-root");
+      const ins = payload.insets;
+      const box = (css) => { const d = document.createElement("div"); d.className = "preview-guide"; d.style.cssText = css; root.appendChild(d); };
+      if (ins.top) box("left:0;right:0;top:0;height:" + ins.top + "px");
+      if (ins.bottom) box("left:0;right:0;bottom:0;height:" + ins.bottom + "px");
+      if (ins.left) box("left:0;top:0;bottom:0;width:" + ins.left + "px");
+      if (ins.right) box("right:0;top:0;bottom:0;width:" + ins.right + "px");
+    }
+    if (q.get("poster") === "1") {
+      // The poster as the feed shows it: full size, same insets, redrawn when its images arrive.
+      const root = document.getElementById("bubble-root");
+      const img = document.createElement("img");
+      img.id = "preview-poster";
+      root.appendChild(img);
+      const w = root.clientWidth, h = root.clientHeight;
+      const draw = () => {
+        const t0 = performance.now();
+        img.src = BubbleHost.poster(prep.key, JSON.stringify({ width: w, height: h, scale: 2, type: "image/png" }));
+        note("poster: " + (performance.now() - t0).toFixed(1) + " ms");
+      };
+      const prev = BubbleHost.onmessage;
+      BubbleHost.onmessage = (m) => { if (prev) prev(m); if (m.type === "poster_update" && m.key === prep.key) draw(); };
+      draw();
+      return;
+    }
+    const act = JSON.parse(BubbleHost.activate(prep.key, JSON.stringify(payload)));
+    note("activate: " + JSON.stringify(act));
+    if (q.get("start") === "1") BubbleHost.command("start");
+    if (q.get("taps")) {
+      // taps=12:180,300;40:180,300 (frame-delayed taps in logical coordinates)
+      const host = BubbleHost._host;
+      for (const part of q.get("taps").split(";")) {
+        const [t, xy] = part.split(":");
+        const [x, y] = xy.split(",").map(Number);
+        setTimeout(() => { if (host.run) host.run.queue("tap", x, y); }, Number(t) * 16.7);
+      }
+    }
+  }
+
+  main().catch((e) => {
+    note("error: " + e.message);
+    console.error(e);
+  });
+})();
+</script>
+</body>
+</html>

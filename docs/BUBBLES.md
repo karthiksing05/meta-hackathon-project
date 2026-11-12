@@ -362,6 +362,46 @@ Engine events: `clock.tick {tick}`, `pointer.down/move/up {x, y}`, `flow.phase {
 | `g.emoji(s, x, y, size)` | Emoji glyph |
 | `g.image(url, x, y, w, h, {circle, radius, alpha})` | Cached image (avatars); a placeholder orb until loaded |
 
+**Looks: the full `g`** (additions, implemented with LOOKS.md). Every primitive above draws in
+the Bubble's look (`style.look`: `glow paper pixel neon ink clay riso chalk`); kit code never
+changes per look. Rendering only: looks never touch game state or the game RNG, so a run is
+identical in every look (tested). Each look pre-renders its sprites and textures into the atlas at
+prepare time.
+
+| Member | Meaning |
+|---|---|
+| `g.palette` | Roles: `primary secondary accent ink bgTop bgBottom danger`, `accents` (4), plus helpers `surface` (panels, keys), `surfaceStrong`, `line`, `shadow`, `mist`, `good`/`near` (right/close feedback), `mid`, `soft`, `dark`, `look`, and `inkOn(fill)` (readable text color on a fill). `top`, `bottom`, `glow` stay for old code. Custom `style.colors` are used as given. |
+| `g.look`, `g.font`, `g.fontStack`, `g.motif`, `g.view` | The look id (only for small optional flourishes), font, motif and the visible area in playfield units (`{x0, y0, x1, y1, w, h}`, larger than 360 × 640 on tall screens) |
+| `g.pill(x, y, w, h, {fill, stroke, strokeWidth, dash, radius, glow, glowColor, shade, alpha})` | `fill: null` or `"none"` draws an outline-only pill; `stroke` outlines in the look's line style (wobbly ink, chalk, pixel steps, neon tube) |
+| `g.line(x1, y1, x2, y2, color, {width, alpha, cap, dash})`, `g.path([x0, y0, ...], color, {width, alpha, closed, fill, dash})` | Lines and polylines in the look's line style; `dash: [on, off]` in playfield units |
+| `g.circle`, `g.ring`, `g.halo`, `g.puff`, `g.spark`, `g.glowRect`, `g.lens(x, y, r, {tint, alpha, glow})` | Small shapes; `lens` is a see-through bubble over a portrait or letter |
+| `g.clip(x, y, w, h, r)`, `g.unclip()` | Clip to a rounded rect (unwound automatically at the end of the layer) |
+| `g.emoji(s, x, y, size, alpha)` | Emoji with optional alpha (a number or `{alpha}`) |
+| `g.particle(kind, x, y, size, k, color)`, `g.scenery(motif \| "auto", {scroll})`, `g.ground(floorY, scroll)` | Look particles; parallax motif scenery (`hills waves city stars clouds grid dots leaves`) and a ground strip |
+| `g.wrapText(s, maxWidth, size, weight)`, `g.rgba(hex, a)`, `g.mix(a, b, t)`, `g.ease`, `g.spring` | Helpers |
+
+Rules for kits: color through roles, never hex; draw through `g` (raw `g.ctx` drawing skips the
+look). Text uses the look's font; the pixel look draws a built-in 5x7 (or 3x5) bitmap face.
+
+**Style validation.** An unknown `style.look` is an error with code `style` (with a "Did you mean");
+an unknown palette, font, motif or color role is a `style` warning; a bad hex, ink below 4.5:1 on
+either background, or an accent that barely differs from the background (low contrast and a
+similar hue) is a `style_contrast` warning. The catalog adds `looks` (`{id, title, describe,
+moods, energy, fonts, motifs, default_font, default_motif, example_colors}`), `fonts`, `motifs`,
+`color_roles` and `style_rules`.
+
+**SDK additions.** Beyond the table above: `palette` (the roles), `feel`, `Z` (layer constants),
+`clamp`, `lerp`, `off(type, fn)`, `range(a, b)`, `chance(p)` (seeded), `botSkill`, `botState`
+(bot memory), `ended`, `preload(url)` (warm an image), `log(message)` (once), `fx.sparkle(x, y,
+color, n)` and `fx.ring(x, y, r, color)`.
+
+**Poster moment.** A poster is one representative still, not tick 0: the demo bot plays until
+`state.poster_tick` when a concept sets it (`rule.pick_match`: the first fact with every portrait
+in place; `input.type`: the first guess half typed, nothing revealed), else until the formula's
+`poster_ticks` (default 90 = 1.5 s). `Bubble.posterRun(session, {bot_skill})` returns that run;
+the host draws it, and `demo` starts from the same tick with the same bot seed (silently), so a
+feed page turns from its poster into the live demo without a jump.
+
 **Validation** (`Bubble.validateJSON`) checks, with these error codes: `schema` (required fields
 and types), `unknown_formula`, `unknown_concept`, `formula_mismatch` (concept not built for this
 formula), `missing_core`, `structure` (exactly one `space.*`, at least one `input.*`, at least one
@@ -392,7 +432,7 @@ the run ends; a tap **takes over** (post `takeover`, restart the same seed in `p
 and apply the tap as the first input). After a `play` run ends: a ~0.8 s fail/success moment, then
 phase `result` and the `result` message (Swift shows the result sheet). `restart` replays from the
 start in `play` without the intro. `pause` stops the clock without catch-up. `poster`: run the bot
-for ~1.5 s headless, draw one frame, stop. Uncaught errors post `error` and show "This bubble
+to the poster moment headless, draw one frame, stop. Uncaught errors post `error` and show "This bubble
 popped" instead of a blank screen.
 
 ### 4.7 Demo world
@@ -431,7 +471,7 @@ user arrives:
 |---|---|---|
 | `BubbleHost.prepare(payloadJSON)` | Parses the manifest, compiles glue, runs concept setup, warms sprites, draws the first frame offscreen. Keeps the 4 most recently used sessions (LRU). Payload as `boot`, plus optional `key` (default `"<id>#<version>"`). | `{ok, key, ms, error}` |
 | `BubbleHost.activate(key, optionsJSON)` | Shows that session and starts it from tick 0 in `options.mode` (`play/replay/demo/poster`, plus `replay`, `player`, `muted`, `reduced_motion`, `insets`). The previous session pauses. | `{ok, ms, error}` |
-| `BubbleHost.poster(key, optionsJSON)` | The session's first frame as an image (`{width, height, scale, type: "image/jpeg", quality}`). | data URL string |
+| `BubbleHost.poster(key, optionsJSON)` | The session's poster frame as an image (`{width, height, scale, type: "image/jpeg", quality, insets, bot_skill, hud}`). It honors `insets` (default: the payload's) like activate and draws the score HUD where the live page shows it (`hud: false` leaves it out, e.g. for small cards). | data URL string |
 | `BubbleHost.evict(key)` | Frees a session. | — |
 | `BubbleHost.boot(payloadJSON)` | `prepare` + `activate` (kept for simple surfaces). | — |
 
@@ -439,11 +479,25 @@ Every message the host posts carries `key`, so Swift knows which session sent it
 `perf` message: `{type: "perf", key, prepare_ms, activate_ms, first_frame_ms, fps, heap_mb}`
 (sent after activation and every few seconds while playing).
 
+**Insets and posters (additions).** `insets` are `{top, bottom, left, right}` in points (each
+optional): the playfield fits inside them, the look's background still fills the screen, and the
+HUD and cards center inside them (`command({type: "insets", top, bottom, left, right})` updates
+them live). With insets, a Bubble that shows the score HUD also gets a 72 pt row for it under the
+top inset (on a full screen the HUD floats in the space above the playfield), so the HUD never
+covers the game's top line. Posters use the same insets, so in the feed the game clears the caption, the "Pop in"
+button and the action rail. A poster drawn while its images were still loading shows
+placeholders; when they arrive the host posts `{type: "poster_update", key}` and calling `poster`
+again gives the finished frame. Remote images served without CORS headers (for example
+randomuser.me portraits) can't be drawn into an exported canvas, so posters show them as
+placeholders unless the payload maps them to same-origin data: `"images": {"<url>":
+"data:image/jpeg;base64,..."}` (Swift can pass the photos it already cached). Live play shows
+them either way.
+
 **The feed's sliding window.** While Bubble 0 plays: +1 is prepared (ready to activate), +2 is
 preparing, −1 stays prepared for scrolling back, anything further is evicted. Only Bubble 0
 simulates and renders; the others are paused. Pages that aren't live show their poster frame (an
-exact still of their first frame), so scrolling looks live and the live host takes over when the
-page settles.
+exact still of the demo's first frame, the poster moment), so scrolling looks live and the live
+host takes over when the page settles.
 
 **Inside the engine.**
 

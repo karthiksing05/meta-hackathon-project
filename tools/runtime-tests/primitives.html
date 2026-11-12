@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Look primitives</title>
+<!--
+  Every g primitive in every look, light and dark, to check the looks side by side:
+
+    primitives.html                 all looks, each with its example colors and a dark palette
+    primitives.html?looks=paper,ink one or a few looks
+
+  Rows: outline-only pills (solid, dashed, glowing), a filled pill with a stroke, dashed lines,
+  g.path (open and filled), g.clip, emoji alpha, sticker/glow text, bubbles, orbs and a portrait
+  placeholder.
+-->
+<link rel="stylesheet" href="../../FacebookClone/Bubbles/Runtime/web/bubble-glow.css">
+<style>
+  body { margin: 0; background: #E9E6EF; font: 12px/1.3 ui-monospace, Menlo, monospace; color: #222; }
+  #grid { display: grid; grid-template-columns: repeat(2, 360px); gap: 8px; padding: 8px; }
+  figure { margin: 0; }
+  figcaption { padding: 2px 4px; }
+  canvas { display: block; width: 360px; height: 250px; border-radius: 10px; }
+  #bubble-root { display: none; }
+</style>
+</head>
+<body>
+<div id="bubble-root"><canvas id="bubble-canvas"></canvas></div>
+<div id="grid"></div>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-runtime.js"></script>
+<script src="../../FacebookClone/Bubbles/Runtime/web/bubble-kit-common.js"></script>
+<script>
+(function () {
+  "use strict";
+  const q = new URLSearchParams(location.search);
+  const host = BubbleHost._host;
+  host.initDOM();
+  const g = host.g;
+  const looks = (q.get("looks") || Object.keys(Bubble.looks).join(",")).split(",");
+  const W = 360, H = 250, K = 2;
+
+  function draw(g, pal) {
+    // background
+    const ctx = g.ctx;
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, pal.bgTop);
+    grad.addColorStop(1, pal.bgBottom);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    // row 1: outline-only pills
+    g.pill(12, 12, 100, 34, { fill: null, stroke: pal.primary, strokeWidth: 2 });
+    g.pill(124, 12, 100, 34, { fill: "none", stroke: pal.ink, strokeWidth: 1.5, dash: [6, 4] });
+    g.pill(236, 12, 112, 34, { fill: null, stroke: pal.secondary, strokeWidth: 2, glow: 0.8 });
+    g.text("outline", 62, 29, { size: 13, weight: 800, color: pal.ink });
+    g.text("dashed", 174, 29, { size: 13, weight: 800, color: pal.ink });
+    g.text("glow", 292, 29, { size: 13, weight: 800, color: pal.ink });
+    // row 2: filled pill + stroke, dashed lines, path
+    g.pill(12, 58, 100, 34, { fill: pal.accent, stroke: pal.ink, strokeWidth: 1.5 });
+    g.text("fill+stroke", 62, 75, { size: 12, weight: 800, color: pal.inkOn(pal.accent) });
+    g.line(124, 64, 224, 64, pal.primary, { width: 2, dash: [5, 5] });
+    g.line(124, 78, 224, 92, pal.danger, { width: 3, dash: [10, 4], cap: "butt" });
+    g.path([236, 92, 256, 60, 276, 88, 296, 60, 316, 88, 336, 62], pal.secondary, { width: 2.5 });
+    // row 3: closed filled path, clip, emoji alpha
+    g.path([20, 160, 60, 110, 100, 160], pal.ink, { fill: pal.primary, closed: true, width: 1.5 });
+    g.clip(120, 108, 100, 56, 14);
+    g.orb(170, 150, 46, pal.secondary, { glow: 0 });
+    g.orb(130, 112, 22, pal.accent, { glow: 0 });
+    g.unclip();
+    g.pill(120, 108, 100, 56, { fill: null, stroke: pal.ink, strokeWidth: 1, radius: 14, dash: [3, 3] });
+    g.emoji("🧺", 250, 136, 34, 0.35);
+    g.emoji("🧺", 306, 136, 34);
+    // row 4: text effects, bubble, orb, portrait placeholder
+    g.text("×2 streak", 70, 196, { size: 22, weight: 900, color: pal.ink, glow: true });
+    g.text("+3", 150, 196, { size: 24, weight: 900, color: "#FFFFFF", glow: true });
+    g.bubble(205, 196, 20, { glow: 0.8 });
+    g.orb(255, 196, 18, pal.primary, { glow: 0.8 });
+    g.image("", 288, 176, 40, 40, { circle: true, placeholder: "Maya" });
+    g.text(pal.look + (pal.dark ? " · dark" : ""), W / 2, 236, { size: 13, weight: 800, color: pal.ink, alpha: 0.8 });
+  }
+
+  function cell(look, styleIn, caption) {
+    const style = Bubble.resolveStyle(Object.assign({ look }, styleIn));
+    const fig = document.createElement("figure");
+    const cv = document.createElement("canvas");
+    cv.width = W * K;
+    cv.height = H * K;
+    fig.appendChild(cv);
+    const cap = document.createElement("figcaption");
+    cap.textContent = caption;
+    fig.appendChild(cap);
+    document.getElementById("grid").appendChild(fig);
+    const view = { x0: 0, y0: 0, x1: W, y1: H, w: W, h: H };
+    if (look === "pixel") {
+      // The pixel look draws into a low-res buffer (0.5 px per unit), scaled up without smoothing.
+      const k = 0.5;
+      const buf = document.createElement("canvas");
+      buf.width = W * k;
+      buf.height = H * k;
+      const bctx = buf.getContext("2d");
+      bctx.setTransform(k, 0, 0, k, 0, 0);
+      g.begin(bctx, style, k, view, 0, { poster: true, lowRes: true });
+      g.originX = 0;
+      g.originY = 0;
+      draw(g, style.palette);
+      const ctx = cv.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(buf, 0, 0, cv.width, cv.height);
+    } else {
+      const ctx = cv.getContext("2d");
+      ctx.setTransform(K, 0, 0, K, 0, 0);
+      g.begin(ctx, style, K, view, 0, { poster: true });
+      g.originX = 0;
+      g.originY = 0;
+      draw(g, style.palette);
+    }
+  }
+
+  for (const look of looks) {
+    const L = Bubble.looks[look];
+    if (!L) continue;
+    cell(look, { palette: "custom", colors: L.example_colors }, look + " · example colors");
+    cell(look, { palette: "night-bloom" }, look + " · night-bloom (dark)");
+  }
+  window.__done = true;
+})();
+</script>
+</body>
+</html>
