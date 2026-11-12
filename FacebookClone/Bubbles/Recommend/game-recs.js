@@ -856,7 +856,7 @@
     var picks = [];
     for (var slot = 0; slot < count; slot++) {
       var blocked = {};
-      feed.slice(feed.length - window).forEach(function (id) { if (window > 0) blocked[id] = true; });
+      feed.slice(Math.max(0, feed.length - window)).forEach(function (id) { if (window > 0) blocked[id] = true; });
       var pool = order.filter(function (id) { return !blocked[id]; });
       if (!pool.length) pool = order.filter(function (id) { return id !== feed[feed.length - 1]; });
       if (!pool.length) pool = order.slice();
@@ -944,7 +944,7 @@
     var picks = [];
     for (var i = 0; i < (input.count || 0); i++) {
       var blocked = {};
-      if (window > 0) feed.slice(feed.length - window).forEach(function (id) { blocked[id] = true; });
+      if (window > 0) feed.slice(Math.max(0, feed.length - window)).forEach(function (id) { blocked[id] = true; });
       var pool = cands.filter(function (c) { return !blocked[c.gameID]; });
       if (!pool.length) pool = cands.filter(function (c) { return c.gameID !== feed[feed.length - 1]; });
       if (!pool.length) pool = cands;
