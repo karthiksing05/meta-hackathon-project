@@ -16,7 +16,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 export async function expandAndValidate(manifest, { validate = true, library = loadLibrary(root) } = {}) {
   // A Bubble wrapper (SPEC.md 2.7): the authoring manifest is content.authoring (or `game` in the
   // earlier beta draft).
-  const m = manifest.formula === 'microgame' ? manifest.content?.authoring ?? manifest.game ?? manifest : manifest;
+  const c = manifest.content || {};
+  const m = manifest.formula === 'microgame'
+    ? (typeof c.authoring_json === 'string' ? JSON.parse(c.authoring_json) : c.authoring) ?? manifest.game ?? manifest
+    : manifest;
   const result = expand(m, library);
   const authoringErrors = result.diagnostics.filter((d) => d.severity === 'error');
   let engineDiagnostics = [];

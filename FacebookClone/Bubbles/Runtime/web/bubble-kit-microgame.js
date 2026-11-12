@@ -1,8 +1,12 @@
 /*
  * bubble-kit-microgame.js: the microgame formula (docs/BUBBLES.md, "microgame").
  *
- * A microgame Bubble carries a complete `microgame/0.1` or `0.2` game in `content.game` (the
- * format of engine/SPEC-v0.2.md, usually expanded from an authoring manifest by authoring/). The
+ * A microgame Bubble carries a complete `microgame/0.1` or `0.2` game (the format of
+ * engine/SPEC-v0.2.md, usually expanded from an authoring manifest by authoring/), preferably as
+ * the JSON *text* `content.game_json`. Object key order is part of a game's meaning (function
+ * params are positional; a state init may read earlier state), and Swift's JSONValue re-encodes
+ * objects with sorted keys, so only the text form reaches the engine byte for byte as it was
+ * validated. `content.game` (an object) is accepted for hand-made games whose order is safe. The
  * Rust/WASM engine in bubble-kit-microgame-engine.js runs it; this kit only adapts it to the
  * Bubble runtime, so the shared frame (intro card, HUD, pop, result, share, replays, posters,
  * haptics, mute) works the same as for every other formula.
@@ -51,7 +55,10 @@
 
   function gameJSON(content) {
     let s = jsonCache.get(content);
-    if (!s) { s = JSON.stringify(content.game); jsonCache.set(content, s); }
+    if (!s) {
+      s = typeof content.game_json === "string" ? content.game_json : JSON.stringify(content.game);
+      jsonCache.set(content, s);
+    }
     return s;
   }
 
@@ -284,24 +291,29 @@
   function validateContent(content) {
     const out = [];
     const bad = (code, message, path, warning) => out.push({ code, message, path: "content" + (path || ""), warning: !!warning });
-    if (!content || typeof content !== "object" || !content.game || typeof content.game !== "object") {
-      bad("content", "content.game must be a microgame engine game (an object with format, state, rules, presentation)", ".game");
+    const hasText = content && typeof content.game_json === "string" && content.game_json.length > 0;
+    const hasObject = content && content.game && typeof content.game === "object";
+    if (!content || typeof content !== "object" || (!hasText && !hasObject)) {
+      bad("content", "content.game_json must be a microgame engine game as JSON text (or content.game as an object)", ".game_json");
       return out;
+    }
+    if (hasText) {
+      try { JSON.parse(content.game_json); } catch (e) { bad("content", "content.game_json is not valid JSON: " + e.message, ".game_json"); return out; }
     }
     const engine = engineOrNull();
     if (!engine) {
-      bad("microgame_unavailable", "this runtime can't run microgames (" + ((lib() && lib().engineError()) || "the engine isn't loaded") + "); validate it in a web view", ".game");
+      bad("microgame_unavailable", "this runtime can't run microgames (" + ((lib() && lib().engineError()) || "the engine isn't loaded") + "); validate it in a web view", hasText ? ".game_json" : ".game");
       return out;
     }
     let diags;
     try {
       diags = engine.validate(gameJSON(content));
     } catch (e) {
-      bad("microgame", "the engine crashed validating the game: " + (e && e.message ? e.message : e), ".game");
+      bad("microgame", "the engine crashed validating the game: " + (e && e.message ? e.message : e), hasText ? ".game_json" : ".game");
       return out;
     }
     for (const d of diags) {
-      bad(d.code, d.message + (d.hint ? " (" + d.hint + ")" : ""), ".game" + (d.at || ""), d.severity === "warning");
+      bad(d.code, d.message + (d.hint ? " (" + d.hint + ")" : ""), (hasText ? ".game_json" : ".game") + (d.at || ""), d.severity === "warning");
     }
     return out;
   }
@@ -359,15 +371,17 @@
   B.defineFormula({
     id: "microgame",
     title: "Microgame",
-    describe: "Any game the microgame engine can run: arcade, physics, puzzles, typing-free word games, stories. The whole game lives in content.game (rules, state, presentation, assets), usually expanded from an authoring manifest. Use the three microgame concepts and nothing else.",
+    describe: "Any game the microgame engine can run: arcade, physics, puzzles, typing-free word games, stories. The whole game lives in content.game_json (rules, state, presentation, assets), usually expanded from an authoring manifest. Use the three microgame concepts and nothing else.",
     core: ["space.microgame", "input.microgame", "score.microgame"],
     optional: [],
     content: {
-      describe: "game: a complete microgame/0.1 or 0.2 game (engine/SPEC-v0.2.md). authoring: the authoring manifest it was expanded from (optional, for remixing).",
+      describe: "game_json: a complete microgame/0.1 or 0.2 game (engine/SPEC-v0.2.md) as JSON text, so its key order survives (game: the same as an object, for hand-made games). authoring_json: the authoring manifest it was expanded from, as text (optional, for remixing).",
       schema: {
-        type: "object", required: ["game"],
+        type: "object",
         properties: {
+          game_json: { type: "string" },
           game: { type: "object" },
+          authoring_json: { type: "string" },
           authoring: { type: "object" },
         },
       },
@@ -377,7 +391,7 @@
     share,
     poster_ticks: 120,
     tips: [
-      "Write the game with the authoring layer (fragments + params), then expand it; don't hand-write content.game.",
+      "Write the game with the authoring layer (fragments + params), then expand it; don't hand-write content.game_json.",
       "Games should be playable by touch only: taps, drags and swipes. The runtime has no keyboard.",
     ],
     example: {
@@ -396,7 +410,7 @@
         { use: "score.microgame", params: { label: "points" } },
       ],
       glue: {},
-      content: { game: EXAMPLE_GAME },
+      content: { game_json: JSON.stringify(EXAMPLE_GAME) },
       seed: 4242,
     },
   });

@@ -1,7 +1,10 @@
 // Wraps an expanded game.json into a Bubble manifest with `formula: "microgame"` (SPEC.md 2.7):
-// the expanded game in `content.game`, the authoring manifest it came from in `content.authoring`.
-// The player runs `content.game` directly, so it never needs the expander; `content.authoring` is
-// kept for remixing and lineage.
+// the expanded game as JSON text in `content.game_json`, the authoring manifest it came from as
+// text in `content.authoring_json`. Text, not objects: key order is part of a game's meaning
+// (positional function params, state init order), and the app's Swift JSONValue re-encodes
+// objects with sorted keys. The text reaches the engine exactly as it was validated and gated.
+// The player runs `content.game_json` directly, so it never needs the expander;
+// `content.authoring_json` is kept for remixing and lineage.
 //
 // Pure: no disk or network, so the app (Studio) can bundle it with the expander.
 
@@ -73,7 +76,9 @@ export function wrapBubble(opts) {
       { use: 'score.microgame', params: { label: 'points' } },
     ],
     glue: {},
-    content: opts.authoring ? { game, authoring: opts.authoring } : { game },
+    content: opts.authoring
+      ? { game_json: JSON.stringify(game), authoring_json: JSON.stringify(opts.authoring) }
+      : { game_json: JSON.stringify(game) },
     seed: opts.seed ?? 1,
   };
 }
