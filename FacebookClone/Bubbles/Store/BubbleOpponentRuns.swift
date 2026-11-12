@@ -27,7 +27,8 @@ extension BubbleRuntimeWorker {
 extension BubbleStore {
     /// Simulates `user` playing `manifest` (pass the challenge's or session's seed and length
     /// already applied, e.g. `bubble.manifest.withSeed(seed).withLength(length)`). Calls back on the
-    /// main thread with a score that carries its replay; nothing is added to any board, the caller
+    /// main thread with a score that carries its replay and share artifact (with the kit's `tag`);
+    /// nothing is added to any board, the caller
     /// decides. Falls back to a synthetic score without a replay when the runtime can't simulate.
     ///
     /// - Parameters:
@@ -40,7 +41,9 @@ extension BubbleStore {
         runtimeWorker.simulateOnce(manifest, botSeed: resolvedBotSeed, botSkill: resolvedSkill) { simulation in
             if let simulation, var replay = simulation.replay {
                 replay.length = manifest.length
-                completion(BubbleScore(user: user, score: simulation.score, replay: replay, isVerified: true))
+                // The run's share artifact, tag included ("ending=ferry"), for friends' results.
+                let share = simulation.raw["share"].flatMap { try? $0.decode(BubbleShareArtifact.self) }
+                completion(BubbleScore(user: user, score: simulation.score, replay: replay, share: share, isVerified: true))
             } else {
                 completion(BubbleScore(user: user, score: BubbleStore.syntheticScore(for: bubble, userID: user.id)))
             }

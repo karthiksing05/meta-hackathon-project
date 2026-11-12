@@ -231,7 +231,7 @@ Swift to call `BubbleHost.boot(payloadJSON)`:
 | `ready` | `title` |
 | `phase` | `name`: `intro`, `playing`, `fail`, `success`, `result` |
 | `score` | `value` |
-| `result` | `outcome` (`fail`/`success`), `score`, `duration_sec`, `replay` (input log), `share` `{headline, score_text, emoji_grid?}` |
+| `result` | `outcome` (`fail`/`success`), `score`, `duration_sec`, `replay` (input log), `share` `{headline, score_text, emoji_grid?, tag?}` |
 | `haptic` | `style`: `light`, `medium`, `selection`, `success`, `warning` |
 | `takeover` | (none) |
 | `error` | `message` |
@@ -743,6 +743,12 @@ stamp time: lineage credits, makers, `about`). `StudioRequest` carries `length`,
 `social` (`StudioSocialContext`: base creator, makers, contributions, about-me template and answers,
 own story, lesson notes); `StudioLaunch` carries `social` and `length`, and `StudioModel` passes them
 on (remixes fill the base creator automatically).
+
+**Result tags.** A kit may set `share.tag` (via `sdk.share({tag})` or its `share` builder): a short
+machine-readable result the app reads and players never see, such as `ending=ferry;first=ferry`
+(story), `right=4/5` (nextline) or `mastery=7/8` (learn). It reaches Swift as
+`BubbleShareArtifact.tag` and comes back from `simulate` too, so a friend's bot run has one. Each
+formula's feature defines its own keys in its section.
 
 **Categories.** `BubbleFormula.category` (`BubbleCategory`): `story` is **Adventure**, `nextline`
 is **Quiz night**, `learn` is **Learn**, everything else is play (no chip). `BubbleCategoryChip`

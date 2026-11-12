@@ -51,15 +51,19 @@ struct BubbleShareArtifact: Codable, Hashable, Sendable {
     var headline: String
     var scoreText: String
     var emojiGrid: String?
+    /// A short machine-readable result a kit reports for the app, never shown ("ending=ferry",
+    /// "mastery=7/8", "right=4/5"). Keys are owned by the formula's feature (docs/BUBBLES.md 7.1).
+    var tag: String?
 
-    init(headline: String, scoreText: String, emojiGrid: String? = nil) {
+    init(headline: String, scoreText: String, emojiGrid: String? = nil, tag: String? = nil) {
         self.headline = headline
         self.scoreText = scoreText
         self.emojiGrid = emojiGrid
+        self.tag = tag
     }
 
     enum CodingKeys: String, CodingKey {
-        case headline
+        case headline, tag
         case scoreText = "score_text"
         case emojiGrid = "emoji_grid"
     }

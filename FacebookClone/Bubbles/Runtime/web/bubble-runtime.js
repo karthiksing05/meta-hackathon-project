@@ -1615,6 +1615,9 @@
       Object.assign(out, this.sharePartial);
       const share = { headline: String(out.headline || m.title), score_text: String(out.score_text === undefined ? this.score : out.score_text) };
       if (typeof out.emoji_grid === "string" && out.emoji_grid) share.emoji_grid = out.emoji_grid;
+      // A short machine-readable result for the app (docs/BUBBLES.md 7.1), e.g. "ending=ferry" or
+      // "mastery=7/8". Never shown to players.
+      if (typeof out.tag === "string" && out.tag) share.tag = out.tag.slice(0, 120);
       return share;
     }
 
