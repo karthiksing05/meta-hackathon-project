@@ -6,6 +6,7 @@ enum ProfileSection: String, CaseIterable, Identifiable {
     case about = "About"
     case photos = "Photos"
     case reels = "Reels"
+    case bubbles = "Bubbles"
     case videos = "Videos"
 
     var id: String { rawValue }
@@ -44,7 +45,7 @@ struct ProfileView: View {
     private var sections: [ProfileSection] {
         user.isPage
             ? [.posts, .about, .photos, .reels, .videos]
-            : [.posts, .about, .photos, .reels]
+            : [.posts, .about, .photos, .reels, .bubbles]
     }
 
     private var story: Story? { store.story(for: user) }
@@ -282,6 +283,8 @@ struct ProfileView: View {
             ProfilePhotosSection(user: user, onOpenPhotos: openPhotos)
         case .reels:
             ProfileReelsSection(user: user, videosOnly: false)
+        case .bubbles:
+            BubbleProfileSection(user: user)
         case .videos:
             ProfileReelsSection(user: user, videosOnly: true)
         }

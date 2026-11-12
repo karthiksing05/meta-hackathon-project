@@ -16,6 +16,7 @@ struct EventDetailView: View {
                 cover
                 titleBlock
                 responseButtons
+                BubbleEventSection(event: event)
                 FeedSeparator()
                 detailRows
                 if !event.details.isEmpty {

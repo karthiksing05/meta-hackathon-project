@@ -73,15 +73,16 @@ final class MockDataFactory {
         let buffer = (makePosts(count: 70, before: oldestInitial) + myPosts)
             .sorted { $0.createdAt > $1.createdAt }
         let memories = makeMemories()
+        let world = makeDemoWorld(feed: initialFeed, buffer: buffer)
 
         return SeedData(
             me: me,
             people: people,
             pages: pages,
             groups: groups,
-            events: events,
-            posts: initialFeed,
-            feedBuffer: buffer,
+            events: world.events + events,
+            posts: world.feed,
+            feedBuffer: world.buffer,
             reels: makeReels(count: 14),
             watchVideos: makeWatchVideos(count: 12),
             stories: makeStories(),
@@ -873,7 +874,7 @@ final class MockDataFactory {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         for (index, info) in MockContent.events.enumerated() {
-            let day = calendar.date(byAdding: .day, value: index * 2 + 1, to: today) ?? today
+            let day = calendar.date(byAdding: .day, value: index * 2 + 3, to: today) ?? today
             let start = day.addingTimeInterval(Double(randomInt(9...20)) * 3_600)
             let isOnline = index % 6 == 5
             let event = FBEvent(
@@ -1175,5 +1176,288 @@ final class MockDataFactory {
         }
         postCounter += 1
         return messages
+    }
+}
+
+
+// MARK: - Demo world (New in SF)
+
+/// `bubble-demo-world.json`: the synthetic New in SF Group, the picnic Event and ten newcomers.
+/// Mock data and the seed Bubbles both read it, so names and ids always match.
+struct DemoWorld: Decodable {
+    struct GroupInfo: Decodable {
+        var id: String
+        var name: String
+        var category: String
+        var about: String
+        var memberCount: Int
+        var isPrivate: Bool
+        var coverSeed: String
+    }
+
+    struct EventInfo: Decodable {
+        var id: String
+        var title: String
+        var locationName: String
+        var address: String
+        var latitude: Double
+        var longitude: Double
+        var startsInDays: Int
+        var startHour: Int
+        var durationHours: Int
+        var hostName: String
+        var category: String
+        var details: String
+        var goingCount: Int
+        var interestedCount: Int
+        var coverSeed: String
+    }
+
+    struct Person: Decodable {
+        var id: String
+        var firstName: String
+        var lastName: String
+        var female: Bool
+        var portrait: Int
+        var hometown: String
+        var work: String
+        var neighborhood: String
+        var movedWeeksAgo: Int
+        var intro: String
+        var facts: [String]
+        var isFriend: Bool
+        var goingToPicnic: Bool
+    }
+
+    var group: GroupInfo
+    var event: EventInfo
+    var people: [Person]
+
+    /// Decoded once from the bundle. Nil when the file is missing (for example in some previews).
+    static let shared: DemoWorld? = {
+        guard let url = Bundle.main.url(forResource: "bubble-demo-world", withExtension: "json"),
+              let data = try? Data(contentsOf: url) else { return nil }
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try? decoder.decode(DemoWorld.self, from: data)
+    }()
+
+    static let groupID = "group-newinsf"
+    static let eventID = "event-newcomers-picnic"
+
+    func person(id: String) -> Person? { people.first { $0.id == id } }
+}
+
+private struct WorldResult {
+    var events: [FBEvent]
+    var feed: [Post]
+    var buffer: [Post]
+}
+
+extension MockDataFactory {
+    private static let newcomerEmployers: [String: String] = [
+        "sf-maya-okafor": "Lab scientist at Bayfield Biosciences",
+        "sf-diego-ramirez": "Product designer at Tidepool Studio",
+        "sf-priya-natarajan": "Nurse at Lakeshore Medical Center",
+        "sf-sam-whitfield": "Teacher at Hillcrest Middle School",
+        "sf-lena-fischer": "Data analyst at Northwind Analytics",
+        "sf-jordan-brooks": "Line cook at Salt & Fennel",
+        "sf-aiko-tanaka": "Architect at Hatchwork Architects",
+        "sf-omar-haddad": "Nursing student at Bay Nursing College",
+        "sf-chloe-nguyen": "UX researcher at Lanternfish Labs",
+        "sf-theo-adeyemi": "Musician at The Foghorn Room",
+    ]
+
+    /// Adds the New in SF Group, the picnic Event, ten newcomers and their posts.
+    /// Runs last, with its own random stream, so the rest of the world is unchanged.
+    fileprivate func makeDemoWorld(feed: [Post], buffer: [Post]) -> WorldResult {
+        guard let world = DemoWorld.shared else {
+            return WorldResult(events: [], feed: feed, buffer: buffer)
+        }
+        let savedRNG = rng
+        rng = SeededGenerator(seed: 4_242_017)
+        defer { rng = savedRNG }
+
+        // Newcomers.
+        var newcomers: [User] = []
+        for (index, info) in world.people.enumerated() {
+            let user = User(
+                id: info.id,
+                firstName: info.firstName,
+                lastName: info.lastName,
+                avatarURL: MockDataFactory.portrait(female: info.female, index: info.portrait),
+                coverURL: MockDataFactory.photo("cover-\(info.id)", 1200, 450),
+                bio: info.intro,
+                city: "San Francisco, California",
+                hometown: info.hometown,
+                work: MockDataFactory.newcomerEmployers[info.id] ?? info.work,
+                school: "",
+                relationship: "",
+                joinedDate: timeAgo(days: 900 + index * 140),
+                birthdayMonth: (index * 5 + 2) % 12 + 1,
+                birthdayDay: (index * 7 + 3) % 27 + 1,
+                friendCount: 80 + (index * 53) % 340,
+                followerCount: (index * 17) % 60,
+                mutualFriendCount: info.isFriend ? 0 : 2 + index % 7,
+                friendship: info.isFriend ? .friends : .none,
+                isOnline: index % 3 == 0,
+                lastActive: timeAgo(minutes: 4 + index * 37)
+            )
+            newcomers.append(user)
+        }
+        people.append(contentsOf: newcomers)
+
+        // The Group.
+        let groupInfo = world.group
+        let group = FBGroup(
+            id: groupInfo.id,
+            name: groupInfo.name,
+            coverURL: MockDataFactory.photo(groupInfo.coverSeed, 1200, 600),
+            isPrivate: groupInfo.isPrivate,
+            memberCount: groupInfo.memberCount,
+            isMember: true,
+            isAdmin: false,
+            about: groupInfo.about,
+            category: groupInfo.category,
+            postsPerDay: 24,
+            unreadCount: 5,
+            lastVisited: timeAgo(hours: 9),
+            memberSample: newcomers
+        )
+        groups.insert(group, at: 0)
+
+        // The Event.
+        let eventInfo = world.event
+        let calendar = Calendar.current
+        let day = calendar.date(byAdding: .day, value: eventInfo.startsInDays, to: calendar.startOfDay(for: Date())) ?? Date()
+        let start = day.addingTimeInterval(Double(eventInfo.startHour) * 3_600)
+        let goingIDs = Set(world.people.filter { $0.goingToPicnic }.map { $0.id })
+        let event = FBEvent(
+            id: eventInfo.id,
+            title: eventInfo.title,
+            coverURL: MockDataFactory.photo(eventInfo.coverSeed, 1200, 630),
+            startDate: start,
+            endDate: start.addingTimeInterval(Double(eventInfo.durationHours) * 3_600),
+            locationName: eventInfo.locationName,
+            address: eventInfo.address,
+            latitude: eventInfo.latitude,
+            longitude: eventInfo.longitude,
+            hostName: eventInfo.hostName,
+            details: eventInfo.details,
+            category: eventInfo.category,
+            goingCount: eventInfo.goingCount,
+            interestedCount: eventInfo.interestedCount,
+            response: .going,
+            friendsGoing: newcomers.filter { goingIDs.contains($0.id) && $0.isFriend }
+        )
+
+        // Alex just moved here.
+        me.city = "San Francisco, California"
+        if me.hometown.isEmpty || me.hometown.contains("San Francisco") { me.hometown = "Austin, Texas" }
+
+        var worldPosts: [Post] = []
+
+        // Intros: one per newcomer, spread over the last few days, opted in as Daily Bubble material.
+        for (index, info) in world.people.enumerated() {
+            let post = Post(
+                id: "world-intro-\(info.id)",
+                author: newcomers[index],
+                group: group,
+                text: info.intro,
+                createdAt: timeAgo(minutes: 150 + index * 410 + (index % 3) * 35),
+                audience: .everyone,
+                notificationsOn: false
+            )
+            post.allowsBubbles = true
+            decorate(post)
+            worldPosts.append(post)
+        }
+
+        func person(_ id: String) -> User { newcomers.first { $0.id == id } ?? me }
+
+        let normal = Post(
+            id: "world-group-laundry",
+            author: person("sf-priya-natarajan"),
+            group: group,
+            text: "Quick question for the Noe Valley folks: where do you do laundry? Every laundromat I find either has a line out the door or eats quarters.",
+            createdAt: timeAgo(minutes: 95),
+            audience: .everyone
+        )
+        let beach = Post(
+            id: "world-group-beach",
+            author: person("sf-jordan-brooks"),
+            group: group,
+            text: "Ocean Beach at 6 a.m. is a different planet. Wetsuit rented, ego not included. Surf lesson volunteers welcome.",
+            media: [.photo(MockDataFactory.photo("world-ocean-beach", 1080, 1080))],
+            location: "Ocean Beach",
+            createdAt: timeAgo(hours: 14),
+            audience: .everyone
+        )
+        let poll = Post(
+            id: "world-group-poll",
+            author: person("sf-chloe-nguyen"),
+            group: group,
+            text: "Settling a Thursday trivia argument. Which one wins?",
+            poll: Poll(options: [
+                PollOption(title: "Fog is a weather", votes: 212),
+                PollOption(title: "Fog is a personality", votes: 187),
+                PollOption(title: "Karl needs a name change", votes: 93),
+            ]),
+            createdAt: timeAgo(hours: 31),
+            audience: .everyone
+        )
+        let sunset = Post(
+            id: "world-group-sunset",
+            author: person("sf-sam-whitfield"),
+            group: group,
+            text: "Bernal Hill sunset tonight, 6:15 sharp. Bring a layer and a friend. Board game night to follow if it gets cold.",
+            media: [.photo(MockDataFactory.photo("world-bernal-sunset", 1080, 1350), aspectRatio: 4.0 / 5.0)],
+            createdAt: timeAgo(hours: 52),
+            audience: .everyone
+        )
+        for post in [normal, beach, poll, sunset] {
+            decorate(post)
+            worldPosts.append(post)
+        }
+
+        // Alex: a post in New in SF and a life event on the timeline.
+        let myGroupPost = Post(
+            id: "world-me-newinsf",
+            author: me,
+            group: group,
+            text: "Hi New in SF! Moved from Austin two weeks ago and I already got lost twice on the Muni. Down for a Saturday hike or a coffee walk?",
+            createdAt: timeAgo(hours: 20),
+            audience: .everyone
+        )
+        myGroupPost.allowsBubbles = true
+        decorate(myGroupPost)
+        worldPosts.append(myGroupPost)
+
+        let moved = Post(
+            id: "world-me-moved",
+            author: me,
+            text: "New city, steep hills, foggy mornings. Say hi if you're around!",
+            media: [.photo(MockDataFactory.photo("world-me-moved", 1080, 720), aspectRatio: 1.5)],
+            lifeEvent: LifeEvent(
+                title: "Moved to San Francisco, California",
+                subtitle: DateFormatters.monthYear.string(from: Date()),
+                symbol: "house.fill"
+            ),
+            createdAt: timeAgo(hours: 40),
+            audience: .friends
+        )
+        decorate(moved)
+        worldPosts.append(moved)
+
+        // Recent ones go straight into the Home feed, older ones into the preload buffer.
+        let cutoff = feed.last?.createdAt ?? Date()
+        var newFeed = feed
+        var newBuffer = buffer
+        for post in worldPosts {
+            if post.createdAt > cutoff { newFeed.append(post) } else { newBuffer.append(post) }
+        }
+        newFeed.sort { $0.createdAt > $1.createdAt }
+        newBuffer.sort { $0.createdAt > $1.createdAt }
+        return WorldResult(events: [event], feed: newFeed, buffer: newBuffer)
     }
 }

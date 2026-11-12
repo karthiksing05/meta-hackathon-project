@@ -96,6 +96,7 @@ struct GroupsView: View {
         VStack(spacing: 0) {
             FeedSeparator()
             yourGroupsRow
+            BubbleGroupDailyStrip()
             FeedSeparator()
             recentActivity
             if !store.suggestedGroups.isEmpty {

@@ -213,6 +213,8 @@ struct GroupDetailView: View {
         if canSeeContent {
             let posts = store.posts(in: group)
             VStack(spacing: 0) {
+                FeedSeparator()
+                BubbleGroupSection(group: group)
                 if group.isMember {
                     FeedSeparator()
                     ComposerBar(placeholder: "Write something...", group: group)
