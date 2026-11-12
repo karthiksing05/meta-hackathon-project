@@ -1143,6 +1143,16 @@ final class StudioModel {
         levels[selectedLevel].manifest.oneLineRule = rule
     }
 
+    /// Swaps the selected level's game for an edited copy (the Sounds section's set, music and
+    /// loudness changes, or a Muse sound tweak). Keeps the level's id, so it keeps its place, cover
+    /// and make record.
+    func replaceManifest(_ manifest: BubbleManifest) {
+        guard levels.indices.contains(selectedLevel) else { return }
+        var updated = manifest
+        updated.id = levels[selectedLevel].manifest.id
+        levels[selectedLevel].manifest = updated
+    }
+
     /// A transient Bubble for cover and card views (not in the store).
     func previewBubble(for result: StudioResult) -> Bubble {
         Bubble(manifest: result.manifest, creator: me ?? User(firstName: "You", friendship: .me), coverImageData: result.cover)

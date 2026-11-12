@@ -19,8 +19,7 @@ struct StudioTryStep: View {
                             .id("details")
                     }
                     StudioTrySlots(model: model)
-                    // SOUND SECTION: the lead mounts `SoundCustomizeSection` (built on another
-                    // branch) in `soundSection` below. Keep it here, between Customize and Tweak.
+                    // SOUND SECTION: between Customize and Tweak.
                     soundSection
                     StudioTweakCard(model: model, isFocused: $isTweakFocused)
                         .id("tweak")
@@ -84,11 +83,16 @@ struct StudioTryStep: View {
 }
 
 extension StudioTryStep {
-    /// SOUND SECTION hook: empty for now. The lead replaces the body with
-    /// `SoundCustomizeSection(...)` once it lands; it gets `model` and `model.currentResult`.
+    /// SOUND SECTION: hear and change a microgame's sound set, music and loudness. Only microgames
+    /// have a sound section (`SoundManifestEditor`); other games take their sounds from their feel,
+    /// so the section stays hidden for them.
     @ViewBuilder
     var soundSection: some View {
-        EmptyView()
+        if let draft = model.currentResult?.manifest, draft.formula == .microgame {
+            SoundCustomizeSection(manifest: draft) { newManifest in
+                model.replaceManifest(newManifest)
+            }
+        }
     }
 }
 
