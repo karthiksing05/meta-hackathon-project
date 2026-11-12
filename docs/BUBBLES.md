@@ -882,8 +882,8 @@ warning when the formula declares no length.
 
 **Swift.** `BubbleLength` (`label`, `label(best:)`, `shortLabel`, `normalized`, `json`,
 `init?(json:)`), `BubbleLengthSpec` and `BubbleLengthKnob` (a formula's declaration), and
-`BubbleLengthCatalog.shared` (built in, mirroring the kits; Studio registers the runtime catalog
-over it). Helpers for other features: `BubbleLength.defaultLength(for: manifest)`,
+`BubbleLengthCatalog.shared` (built in, mirroring the kits; `LengthScreens.install` registers the
+runtime catalog over it a few seconds after launch). Helpers for other features: `BubbleLength.defaultLength(for: manifest)`,
 `BubbleLength.effective(for: manifest)` (what players see), `BubbleLength.locked(for: bubble)`
 (what a challenge, session or game night card should carry in `card.length` and pass to
 `BubblePlayRequest.length`) and `BubbleLength.of(run: replay, in: bubble)`.

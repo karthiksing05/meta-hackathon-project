@@ -58,8 +58,15 @@ enum LengthScreens {
         return open(route, router: router)
     }
 
-    /// Once at launch. Labels use the kits' built-in declarations until Studio loads the catalog.
+    /// Once at launch: a little later, on the runtime worker's queue, take every formula's length
+    /// declaration from the runtime catalog (labels use the built-in copy until then).
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
+        let worker = bubbleStore.runtimeWorker
+        worker.queue.asyncAfter(deadline: .now() + 3) {
+            if let catalog = worker.loadRuntime()?.catalog() {
+                BubbleLengthCatalog.shared.register(catalog: catalog)
+            }
+        }
     }
 
     /// After the player records one of your runs (the replay already carries the locked length).
