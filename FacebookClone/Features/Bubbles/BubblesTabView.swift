@@ -235,7 +235,6 @@ struct BubblesTabView: View {
     private func appear() {
         model.configure(store: bubbleStore)
         model.setVisible(isVisible)
-        GameSound.install(appStore: appStore)
         syncMute()
         #if DEBUG
         applyDebugLaunch()
