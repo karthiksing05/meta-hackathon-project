@@ -45,7 +45,7 @@ struct StudioBriefStep: View {
                     HStack(spacing: 6) {
                         Image(systemName: "sparkles")
                             .font(.system(size: FBIconSize.medium, weight: .bold))
-                        Text(model.mode == .nextLevel ? "Blow level \((model.baseBubble?.levelIndex ?? 1) + 1)" : "Blow it")
+                        Text(model.mode == .nextLevel ? "Make level \((model.baseBubble?.levelIndex ?? 1) + 1)" : "Make it")
                     }
                 }
                 .buttonStyle(.studioPrimary)

@@ -232,7 +232,7 @@ struct RemixRouteSheet: View {
             if let bubble = bubbleStore.bubble(id: route.arg) {
                 RemixShareSheet(bubble: bubble)
             } else {
-                ContentUnavailableView(RemixCopy.notFound, systemImage: "bubbles.and.sparkles", description: Text(RemixCopy.cardUnavailable))
+                ContentUnavailableView(RemixCopy.notFound, systemImage: "sparkles", description: Text(RemixCopy.cardUnavailable))
             }
         case RemixScreens.sendBack:
             RemixSendBackSheet(bubbleID: route.arg)

@@ -214,7 +214,7 @@ enum GroupsSearchCopy {
     // Game night
 
     // Daily
-    static let dailyTitle = "Today's Daily Bubble"
+    static let dailyTitle = "Today's Daily \(ProductName.singular)"
 
     // Search
     static let gamesFilter = "Games"

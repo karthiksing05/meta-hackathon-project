@@ -8,9 +8,6 @@ import SwiftUI
 /// The challenge feature's blue-to-purple accent.
 enum ChallengeStyle {
     static let purple = FBColor.savedPurple
-    static var gradient: LinearGradient {
-        LinearGradient(colors: [FBColor.brandBlue, FBColor.savedPurple], startPoint: .leading, endPoint: .trailing)
-    }
 }
 
 /// A small capsule label on a card cover ("Challenge", "Group challenge", "Rematch").
@@ -24,7 +21,7 @@ struct ChallengeBadge: View {
             .foregroundStyle(Color.white)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(ChallengeStyle.gradient, in: Capsule())
+            .background(GameColor.accentGradient, in: Capsule())
             .accessibilityElement(children: .combine)
     }
 }
@@ -382,7 +379,7 @@ struct ChallengeSessionCard: View {
                 ZStack(alignment: .leading) {
                     Capsule().fill(FBColor.buttonGray)
                     Capsule()
-                        .fill(ChallengeStyle.gradient)
+                        .fill(GameColor.accentGradient)
                         .frame(width: members > 0 ? proxy.size.width * CGFloat(played) / CGFloat(members) : 0)
                 }
             }

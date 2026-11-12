@@ -61,10 +61,10 @@ struct BubbleBurstInfoRow: View {
     @Environment(BubbleStore.self) private var bubbleStore
 
     var body: some View {
-        let title = bubbleStore.bubble(id: bubbleID)?.title ?? "A Bubble"
+        let title = bubbleStore.bubble(id: bubbleID)?.title ?? ProductName.withArticleCapitalized
         HStack(spacing: 6) {
-            Text(bubbleStore.bubble(id: bubbleID)?.emoji ?? "🫧")
-            Text("Burst · \(title)")
+            Text(bubbleStore.bubble(id: bubbleID)?.emoji ?? "✨")
+            Text("Replay · \(title)")
                 .font(.fbMetaEmphasized)
                 .lineLimit(1)
         }
@@ -73,7 +73,7 @@ struct BubbleBurstInfoRow: View {
         .padding(.vertical, 5)
         .background(Color.white.opacity(0.18), in: Capsule())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Burst of \(title). Tap to take over.")
+        .accessibilityLabel("Replay of \(title). Tap to take over.")
     }
 }
 
@@ -85,10 +85,10 @@ struct BubbleBurstCarousel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Image(systemName: "bubbles.and.sparkles.fill")
+                Image(systemName: "sparkles")
                     .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(BubbleGlow.lilac)
-                Text("Bursts")
+                Text("Replays")
                     .font(.fbHeadline)
                     .foregroundStyle(FBColor.primaryText)
                     .accessibilityAddTraits(.isHeader)
@@ -158,7 +158,7 @@ private struct BubbleBurstCard: View {
         }
         .overlay(alignment: .bottomLeading) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(bubble?.title ?? "A Bubble")
+                Text(bubble?.title ?? ProductName.withArticleCapitalized)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
@@ -176,7 +176,7 @@ private struct BubbleBurstCard: View {
         .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Burst of \(bubble?.title ?? "a Bubble") by \(burst.author.name)")
+        .accessibilityLabel("Replay of \(bubble?.title ?? "a Bubble") by \(burst.author.name)")
         .accessibilityHint("Opens Reels")
     }
 }

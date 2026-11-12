@@ -438,7 +438,7 @@ enum StudioScript {
         final.id = "\(base.id)-level-\(index)-\(UUID().uuidString.prefix(4).lowercased())"
         final.version = 1
         final.title = "\(base.title) \(index)"
-        final.oneLineRule = "Faster hills, tighter gaps. Tap to float."
+        final.oneLineRule = "Faster hills, tighter gaps. Tap to glide."
         final.seed = base.seed + index
         final.lineage = BubbleLineage(parent: base.id, operators: ["next-level"])
         final.chain = BubbleChainLink(id: base.chain?.id ?? "chain-\(base.id)", index: index, title: base.chain?.title ?? base.title, prev: base.id)
@@ -485,7 +485,7 @@ enum StudioScript {
     static func manifest(for request: StudioRequest, template: [BubbleFormula: BubbleManifest]) -> BubbleManifest {
         let formula = request.formulaHint ?? (request.mode == .daily ? .guess : (request.base?.formula ?? .dodge))
         let names: [(String, String, String)] = [
-            ("Hill Hop", "Tap to float over the hills. Don't touch the fog.", "⛰️"),
+            ("Hill Hop", "Tap to glide over the hills. Don't touch the fog.", "⛰️"),
             ("Fog Drift", "Glide under the fog bank. Tap to rise.", "🌫️"),
             ("Bay Breeze", "Ride the breeze across the bay. Tap to lift.", "🌊"),
         ]

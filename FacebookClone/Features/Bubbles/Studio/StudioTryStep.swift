@@ -42,7 +42,7 @@ struct StudioTryStep: View {
                             }
                         }
                         .buttonStyle(.studioSecondary(expand: false, height: 44))
-                        .accessibilityHint("Muse makes a harder next level that links to this one as a Bubble Chain")
+                        .accessibilityHint("Muse makes a harder next level that links to this one as a level chain")
                     }
                     Button {
                         isTweakFocused = false
@@ -50,9 +50,9 @@ struct StudioTryStep: View {
                         model.go(to: .float)
                     } label: {
                         HStack(spacing: 6) {
-                            Image(systemName: model.isEditMode && model.levels.count == 1 ? "checkmark" : "bubbles.and.sparkles.fill")
+                            Image(systemName: model.isEditMode && model.levels.count == 1 ? "checkmark" : "sparkles")
                                 .font(.system(size: FBIconSize.medium, weight: .bold))
-                            Text(model.isEditMode && model.levels.count == 1 ? "Save changes" : "Float it")
+                            Text(model.isEditMode && model.levels.count == 1 ? "Save changes" : "Share")
                         }
                     }
                     .buttonStyle(.studioPrimary)
@@ -183,7 +183,7 @@ private struct StudioPlayerCard: View {
             restart()
         } label: {
             HStack(spacing: FBSpacing.s) {
-                Image(systemName: run.outcome == .success ? "star.fill" : "bubbles.and.sparkles.fill")
+                Image(systemName: run.outcome == .success ? "star.fill" : "sparkles")
                     .font(.system(size: FBIconSize.medium, weight: .semibold))
                 Text(run.share.scoreText.isEmpty ? "\(run.score) points" : run.share.scoreText)
                     .font(.fbButton)
@@ -215,7 +215,7 @@ private struct StudioPlayerCard: View {
             Haptics.success()
         // The runtime pool plays the game's own haptics for the active host.
         case .error(let message):
-            runtimeError = message.isEmpty ? "This bubble popped" : "This bubble popped: \(message)"
+            runtimeError = message.isEmpty ? "This \(ProductName.singular) didn't load" : "This \(ProductName.singular) didn't load: \(message)"
         default:
             break
         }
@@ -341,7 +341,7 @@ private struct StudioTweakCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.m) {
-            StudioSectionTitle(title: "Tweak it", detail: "Muse edits this bubble", symbol: "wand.and.stars")
+            StudioSectionTitle(title: "Tweak it", detail: "Muse edits this \(ProductName.singular)", symbol: "wand.and.stars")
             HStack(alignment: .bottom, spacing: FBSpacing.s) {
                 TextField("Make it slower, add our inside jokes…", text: $model.tweakText, axis: .vertical)
                     .font(.fbBodyLarge)

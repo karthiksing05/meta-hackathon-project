@@ -4,14 +4,6 @@ import SwiftUI
 // pieces the together screens share: the blue-to-purple badge, overlapping maker avatars and
 // one contribution's content.
 
-/// The together feature's decorative palette: Facebook blue to purple.
-enum TogetherStyle {
-    static let indigo = Color(hex: 0x5B4BFF)
-    static var gradient: LinearGradient {
-        LinearGradient(colors: [FBColor.brandBlue, indigo, FBColor.savedPurple], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-}
-
 /// A round gradient badge with a symbol.
 struct TogetherBadge: View {
     var symbol = "person.3.sequence.fill"
@@ -22,7 +14,7 @@ struct TogetherBadge: View {
             .font(.system(size: size * 0.42, weight: .semibold))
             .foregroundStyle(.white)
             .frame(width: size, height: size)
-            .background(TogetherStyle.gradient, in: Circle())
+            .background(GameColor.accentGradient, in: Circle())
             .accessibilityHidden(true)
     }
 }
@@ -223,7 +215,7 @@ struct TogetherCardView: View {
                 if let bubble {
                     BubbleCoverView(bubble: bubble, showsEmoji: true)
                 } else {
-                    TogetherStyle.gradient
+                    GameColor.accentGradient
                 }
                 Label(TogetherCopy.madeTogether, systemImage: "person.3.sequence.fill")
                     .font(.fbCaptionEmphasized)
@@ -361,7 +353,7 @@ struct TogetherCardView: View {
         .foregroundStyle(.white)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(TogetherStyle.gradient)
+        .background(GameColor.accentGradient)
         .accessibilityElement(children: .combine)
     }
 

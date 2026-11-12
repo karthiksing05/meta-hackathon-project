@@ -32,7 +32,6 @@ extension BubbleLength {
 enum LengthTint {
     static let blue = FBColor.brandBlue
     static let purple = FBColor.savedPurple
-    static let gradient = LinearGradient(colors: [FBColor.brandBlue, FBColor.savedPurple], startPoint: .leading, endPoint: .trailing)
 }
 
 /// A capsule with the mode's symbol and its label ("⏱ 60 seconds").

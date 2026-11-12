@@ -19,7 +19,7 @@ struct LearnLessonCardView: View {
                     if let bubble {
                         BubbleCoverView(bubble: bubble, showsEmoji: true)
                     } else {
-                        LearnStyle.gradient
+                        GameColor.accentGradient
                     }
                 }
                 .frame(height: 112)

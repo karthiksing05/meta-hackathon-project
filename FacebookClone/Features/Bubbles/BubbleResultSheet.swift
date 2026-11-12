@@ -30,8 +30,8 @@ struct BubbleResultSheet: View {
                 content(bubble)
             } else {
                 ContentUnavailableView(
-                    "This Bubble popped",
-                    systemImage: "bubbles.and.sparkles",
+                    "This \(ProductName.singular) didn't load",
+                    systemImage: "sparkles",
                     description: Text("It isn't available anymore.")
                 )
             }
@@ -125,7 +125,7 @@ struct BubbleResultSheet: View {
                 float(bubble, to: group)
             } label: {
                 Label(
-                    didFloat ? "Floated" : "Float to \(group?.name ?? "your feed")",
+                    didFloat ? "Shared" : "Share to \(group?.name ?? "your feed")",
                     systemImage: didFloat ? "checkmark" : "arrowshape.turn.up.right.fill"
                 )
             }
@@ -165,16 +165,16 @@ struct BubbleResultSheet: View {
     }
 
     private func float(_ bubble: Bubble, to group: FBGroup?) {
-        let message = "I got \(score.withCommas) in \(bubble.title). Beat it? 🫧"
+        let message = "I got \(score.withCommas) in \(bubble.title). Beat it? ✨"
         let post = BubbleSurfaceHooks.float(bubble, result: context.result, to: group, message: message, appStore: appStore, bubbleStore: bubbleStore)
         if post != nil {
             Haptics.success()
             withAnimation(.easeInOut(duration: 0.2)) {
                 didFloat = true
             }
-            appStore.showToast(group.map { "Floated to \($0.name)" } ?? "Floated to your feed", symbol: "bubbles.and.sparkles.fill")
+            appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
         } else {
-            appStore.showToast("Couldn't float this right now", symbol: "exclamationmark.circle")
+            appStore.showToast("Couldn't share this right now", symbol: "exclamationmark.circle")
         }
     }
 
@@ -279,7 +279,7 @@ private struct BubbleResultHero: View {
     }
 
     private var bestLine: String {
-        guard let previousBest else { return "Your first run on this Bubble" }
+        guard let previousBest else { return "Your first run on this \(ProductName.singular)" }
         if isNewBest { return "Up from \(previousBest.withCommas)" }
         return "Your best: \(previousBest.withCommas)"
     }
@@ -387,7 +387,7 @@ private struct BubbleResultBoard: View {
                     Haptics.light()
                     onSeeBoard()
                 } label: {
-                    Text("See Bubble Board")
+                    Text("See board")
                         .font(.fbMetaEmphasized)
                         .foregroundStyle(FBColor.accent)
                         .padding(.vertical, 6)

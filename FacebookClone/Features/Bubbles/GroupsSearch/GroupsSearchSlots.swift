@@ -104,7 +104,7 @@ struct GroupsSearchFeaturedTeaser: View {
                         .font(.system(size: FBIconSize.small, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 28, height: 28)
-                        .background(GroupBoardStyle.trophyGradient, in: Circle())
+                        .background(GameColor.accentGradient, in: Circle())
                     AvatarView(user: leader.user, size: FBAvatarSize.tiny)
                     Text(text)
                         .font(.fbMetaEmphasized)

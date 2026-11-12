@@ -51,8 +51,8 @@ final class BubbleJSRuntime {
 
         var errorDescription: String? {
             switch self {
-            case .missingScript(let name): return "Bubble runtime script \(name) is missing."
-            case .scriptFailed(let name, let message): return "Bubble runtime script \(name) failed to load: \(message)"
+            case .missingScript(let name): return "Game runtime script \(name) is missing."
+            case .scriptFailed(let name, let message): return "Game runtime script \(name) failed to load: \(message)"
             }
         }
     }

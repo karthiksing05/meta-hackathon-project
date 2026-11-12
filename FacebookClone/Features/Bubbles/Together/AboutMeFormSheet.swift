@@ -46,7 +46,7 @@ struct AboutMeFormSheet: View {
             Text(template.emoji)
                 .font(.system(size: 30)) // Emoji glyph, sized to its tile
                 .frame(width: 56, height: 56)
-                .background(TogetherStyle.gradient.opacity(0.18), in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                .background(GameColor.accentGradient.opacity(0.18), in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text(template.gameTitle(appStore.me.firstName))
@@ -105,7 +105,7 @@ struct AboutMeFormSheet: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
-                .background(TogetherStyle.gradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
+                .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                 .opacity(answered >= 2 ? 1 : 0.45)
             }
             .buttonStyle(.plain)

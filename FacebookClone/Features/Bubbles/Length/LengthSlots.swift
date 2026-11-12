@@ -62,7 +62,7 @@ struct LengthDetailRow: View {
             let mine = bubble.creator.id == appStore.me.id
             HStack(alignment: .center, spacing: FBSpacing.m) {
                 ZStack {
-                    Circle().fill(LengthTint.gradient)
+                    Circle().fill(GameColor.accentGradient)
                     Image(systemName: length.symbol)
                         .font(.system(size: FBIconSize.small, weight: .bold))
                         .foregroundStyle(.white)

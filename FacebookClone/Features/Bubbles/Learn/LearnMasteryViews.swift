@@ -7,7 +7,6 @@ import SwiftUI
 enum LearnStyle {
     static let blue = FBColor.brandBlue
     static let purple = FBColor.savedPurple
-    static let gradient = LinearGradient(colors: [FBColor.brandBlue, FBColor.savedPurple], startPoint: .leading, endPoint: .trailing)
     static let track = FBColor.buttonGray
     static let tint = FBColor.tintedBlueBackground
 }
@@ -73,7 +72,7 @@ struct LearnMeterBar: View {
             ZStack(alignment: .leading) {
                 Capsule().fill(LearnStyle.track)
                 Capsule()
-                    .fill(LearnStyle.gradient)
+                    .fill(GameColor.accentGradient)
                     .frame(width: max(height, proxy.size.width * min(1, max(0, value))))
                     .animation(reduceMotion ? nil : .easeOut(duration: 0.6), value: value)
             }
@@ -234,7 +233,7 @@ struct LearnGroupMeterCard: View {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(LearnCopy.percent(value))
                     .font(.system(size: 34, weight: .heavy, design: .rounded))
-                    .foregroundStyle(LearnStyle.gradient)
+                    .foregroundStyle(GameColor.accentGradient)
                     .monospacedDigit()
                     .contentTransition(.numericText())
                 Text(LearnCopy.groupKnows(group.name, percent: Int((value * 100).rounded()), subject: subject))
@@ -380,7 +379,7 @@ struct LearnStreaksView: View {
     private func hero(_ progress: LearnProgressStore) -> some View {
         HStack(spacing: 16) {
             ZStack {
-                Circle().fill(LearnStyle.gradient)
+                Circle().fill(GameColor.accentGradient)
                 Image(systemName: "flame.fill")
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(.white)
@@ -391,7 +390,7 @@ struct LearnStreaksView: View {
                 Text(LearnCopy.learningStreak(progress.myStreak))
                     .font(.fbTitle)
                     .foregroundStyle(FBColor.primaryText)
-                Text(LearnCopy.studioEntrySubtitle)
+                Text(LearnCopy.streakSubtitle(progress.myStreak))
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)

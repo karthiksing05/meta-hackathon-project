@@ -294,6 +294,13 @@ enum LearnCopy {
         days == 1 ? "1-day learning streak" : "\(days)-day learning streak"
     }
 
+    /// Under the streak on the streaks screen: how to start or keep it.
+    static func streakSubtitle(_ days: Int) -> String {
+        days == 0
+            ? "Finish a lesson to start a streak. Friends see it next to yours."
+            : "Finish a lesson each day to keep it going. Friends see it next to yours."
+    }
+
     static func shareWith(_ name: String) -> String { "Share with \(name)" }
     static func sendTo(_ name: String) -> String { "Send to \(name)" }
     static func sharedTo(_ name: String) -> String { "Shared to \(name)" }

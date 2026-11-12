@@ -25,7 +25,7 @@ struct LearnNotesSheet: View {
                 VStack(alignment: .leading, spacing: 18) {
                     HStack(spacing: 12) {
                         ZStack {
-                            Circle().fill(LearnStyle.gradient)
+                            Circle().fill(GameColor.accentGradient)
                             Image(systemName: "graduationcap.fill")
                                 .font(.system(size: 20, weight: .semibold))
                                 .foregroundStyle(.white)

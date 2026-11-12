@@ -32,7 +32,7 @@ struct BubblePalette: Identifiable, Hashable {
     }
 }
 
-/// The Bubbles brand: pastel, bubbly, glowing. Bubbles content (cards, player, Studio) uses
+/// Game looks and legacy brand names. Game content (cards, player, Studio) uses
 /// these; Facebook chrome (tab bar, headers, sheets) keeps `FBColor`.
 enum BubbleGlow {
     static let lilacHaze = BubblePalette(
@@ -93,25 +93,25 @@ enum BubbleGlow {
     }
 
     // MARK: Brand
+    //
+    // The brand now lives in `GameColor` (DesignSystem/GameBrand.swift): pastel blue to violet,
+    // no pink or peach. These names stay so existing callers keep compiling; new code should use
+    // `GameColor` directly.
 
-    static let lilac = Color(hex: 0xB9A7FF)
-    static let pink = Color(hex: 0xFF9ECF)
-    static let peach = Color(hex: 0xFFC59E)
-    /// Deep plum for text on Glow surfaces.
-    static let ink = Color(hex: 0x2E1F5E)
+    /// Legacy name; now the brand's violet stop.
+    static let lilac = GameColor.violet
+    /// Legacy name; now periwinkle (the brand has no pink).
+    static let pink = GameColor.periwinkle
+    /// Legacy name; now sky blue (the brand has no peach).
+    static let peach = GameColor.sky
+    /// Text on brand surfaces.
+    static let ink = GameColor.ink
 
-    /// Lilac → pink → peach, from the Muse cover art.
-    static var brandGradient: LinearGradient {
-        LinearGradient(colors: [lilac, pink, peach], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
+    /// The brand gradient (`GameColor.gradient`): sky → periwinkle → violet.
+    static var brandGradient: LinearGradient { GameColor.gradient }
 
-    /// Soap-bubble rim.
-    static var iridescent: AngularGradient {
-        AngularGradient(
-            colors: [Color(hex: 0xFFB3E6), Color(hex: 0xB3E5FF), Color(hex: 0xC9FFE8), Color(hex: 0xFFF1B3), Color(hex: 0xD9B3FF), Color(hex: 0xFFB3E6)],
-            center: .center
-        )
-    }
+    /// A rim in the brand stops (it was a rainbow soap-bubble rim).
+    static var iridescent: AngularGradient { GameColor.rim }
 }
 
 // MARK: - Glow modifiers
@@ -126,54 +126,34 @@ extension View {
 
 // MARK: - Brand marks
 
-/// A single iridescent soap bubble, drawn (not an image) so it stays crisp at any size.
+/// The brand orb, kept under its old name for existing callers. See `GameOrb`.
 struct BubbleOrb: View {
     var size: CGFloat = 28
     var tint: Color = .white
+    var sparkle = false
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [tint.opacity(0.05), tint.opacity(0.18), Color(hex: 0xFFD6F2).opacity(0.35)],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: size / 2
-                    )
-                )
-            Circle()
-                .strokeBorder(BubbleGlow.iridescent, lineWidth: max(1.5, size * 0.07))
-                .opacity(0.9)
-            // Highlight
-            Ellipse()
-                .fill(Color.white.opacity(0.85))
-                .frame(width: size * 0.28, height: size * 0.16)
-                .rotationEffect(.degrees(-35))
-                .offset(x: -size * 0.18, y: -size * 0.2)
-                .blur(radius: size * 0.02)
-        }
-        .frame(width: size, height: size)
-        .bubbleGlow(.white, radius: size * 0.18, opacity: 0.55)
-        .accessibilityHidden(true)
+        GameOrb(size: size, tint: tint, sparkle: sparkle)
     }
 }
 
-/// The "bubbles" wordmark: rounded heavy type in the brand gradient with a soft glow.
+/// The lowercase product wordmark (`ProductName.wordmark`): rounded heavy type in the brand
+/// gradient with a soft glow, and the orb with its sparkle.
 struct BubbleWordmark: View {
     var size: CGFloat = 28
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: size * 0.08) {
-            Text("bubbles")
+            Text(ProductName.wordmark)
                 .font(.system(size: size, weight: .heavy, design: .rounded)) // Display text: brand wordmark
-                .foregroundStyle(BubbleGlow.brandGradient)
-                .bubbleGlow(BubbleGlow.pink, radius: size * 0.22, opacity: 0.35)
-            BubbleOrb(size: size * 0.5)
+                .foregroundStyle(GameColor.gradient)
+                .bubbleGlow(GameColor.periwinkle, radius: size * 0.22, opacity: 0.35)
+            GameOrb(size: size * 0.5, sparkle: true)
                 .offset(y: -size * 0.32)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Bubbles")
+        .accessibilityLabel(ProductName.display)
+        .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -188,10 +168,10 @@ struct MuseBadge: View {
             Text(compact ? "Muse" : "Made with Muse")
                 .font(.fbCaptionEmphasized)
         }
-        .foregroundStyle(BubbleGlow.ink)
+        .foregroundStyle(GameColor.ink)
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(BubbleGlow.brandGradient.opacity(0.9), in: Capsule())
+        .background(GameColor.gradient.opacity(0.95), in: Capsule())
         .overlay(Capsule().strokeBorder(Color.white.opacity(0.6), lineWidth: 0.5))
         .accessibilityLabel("Made with Muse")
     }

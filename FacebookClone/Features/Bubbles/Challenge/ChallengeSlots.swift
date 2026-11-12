@@ -194,7 +194,7 @@ struct ChallengeDetailRow: View {
                         .font(.system(size: FBIconSize.regular, weight: .semibold))
                         .foregroundStyle(Color.white)
                         .frame(width: 40, height: 40)
-                        .background(ChallengeStyle.gradient, in: Circle())
+                        .background(GameColor.accentGradient, in: Circle())
                     VStack(alignment: .leading, spacing: 2) {
                         Text(ChallengeCopy.challengeAFriend)
                             .font(.fbName)
@@ -282,7 +282,7 @@ struct ChallengePlayerBanner: View {
             .frame(minHeight: 32)
             .background {
                 if isAhead {
-                    Capsule().fill(ChallengeStyle.gradient)
+                    Capsule().fill(GameColor.accentGradient)
                 } else {
                     Capsule().fill(Color.black.opacity(0.36))
                 }

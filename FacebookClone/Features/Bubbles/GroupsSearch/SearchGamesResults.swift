@@ -205,7 +205,7 @@ struct SearchMakeWithMuseRow: View {
                     .font(.system(size: FBIconSize.regular, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)
-                    .background(GroupBoardStyle.trophyGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                    .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(GroupsSearchCopy.makeWithMuse(query))
                         .font(.fbName)

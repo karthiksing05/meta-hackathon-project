@@ -121,7 +121,7 @@ final class Bubble: Identifiable, Hashable {
     /// The colors this Bubble really uses, custom colors included (LOOKS.md). Use for anything
     /// Bubble-specific: accents, backgrounds behind posters.
     var palette: BubblePalette { BubbleGlow.palette(for: manifest.style) }
-    var emoji: String { manifest.style.emoji ?? "🫧" }
+    var emoji: String { manifest.style.emoji ?? "✨" }
     var isDaily: Bool { manifest.structure.isDaily }
     var isIcebreaker: Bool { manifest.structure.eventID != nil }
     var chainID: String? { manifest.chain?.id }

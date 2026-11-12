@@ -99,7 +99,7 @@ struct TogetherDetailCredits: View {
                         .foregroundStyle(FBColor.accent)
                 }
                 Spacer(minLength: 0)
-                Text(template?.emoji ?? "🫧")
+                Text(template?.emoji ?? "✨")
                     .font(.system(size: 26)) // Emoji glyph
                     .accessibilityHidden(true)
             }
@@ -573,7 +573,7 @@ struct TogetherStudioEntry: View {
     private func aboutBanner(_ templateID: String) -> some View {
         let template = TogetherStudio.template(templateID)
         return banner(
-            leading: AnyView(Text(template?.emoji ?? "🫧").font(.system(size: 24))), // Emoji glyph
+            leading: AnyView(Text(template?.emoji ?? "✨").font(.system(size: 24))), // Emoji glyph
             title: TogetherCopy.aboutMeBanner(template?.title ?? templateID),
             detail: TogetherCopy.aboutMeBannerDetail
         )

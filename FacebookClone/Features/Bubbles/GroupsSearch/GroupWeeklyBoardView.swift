@@ -6,11 +6,6 @@ import SwiftUI
 
 /// Facebook blue to purple, for the trophy and the Most improved chip.
 enum GroupBoardStyle {
-    static let trophyGradient = LinearGradient(
-        colors: [FBColor.brandBlue, FBColor.savedPurple],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
     static let improvedTint = FBColor.savedPurple
 }
 
@@ -104,7 +99,7 @@ struct GroupWeeklyBoardCard: View {
             Spacer(minLength: 0)
             Image(systemName: "trophy.fill")
                 .font(.system(size: FBIconSize.large, weight: .semibold))
-                .foregroundStyle(GroupBoardStyle.trophyGradient)
+                .foregroundStyle(GameColor.accentGradient)
                 .accessibilityHidden(true)
         }
         .accessibilityElement(children: .combine)
@@ -203,7 +198,7 @@ struct GroupTrophyLeaderRow: View {
             ZStack {
                 sparkles
                 Circle()
-                    .fill(GroupBoardStyle.trophyGradient)
+                    .fill(GameColor.accentGradient)
                     .frame(width: 44, height: 44)
                 Image(systemName: "trophy.fill")
                     .font(.system(size: FBIconSize.large, weight: .bold))
@@ -232,7 +227,7 @@ struct GroupTrophyLeaderRow: View {
         .background(FBColor.tintedBlueBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
-                .strokeBorder(GroupBoardStyle.trophyGradient.opacity(0.45), lineWidth: 1)
+                .strokeBorder(GameColor.accentGradient.opacity(0.45), lineWidth: 1)
         )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(GroupsSearchCopy.leaderA11y(standing.user.isMe ? GroupsSearchCopy.youLead : GroupsSearchCopy.leads(standing.user.name), standing.points))

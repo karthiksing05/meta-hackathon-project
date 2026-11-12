@@ -13,7 +13,7 @@ struct SavesStatsView: View {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
             } else {
-                ContentUnavailableView("This Bubble popped", systemImage: "bubbles.and.sparkles", description: Text("It isn't available anymore."))
+                ContentUnavailableView("This \(ProductName.singular) didn't load", systemImage: "sparkles", description: Text("It isn't available anymore."))
             }
         }
         .background(FBColor.background)

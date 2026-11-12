@@ -98,7 +98,7 @@ struct TogetherStartSheet: View {
                                 .font(.system(size: FBIconSize.medium, weight: .semibold))
                                 .foregroundStyle(kind == option ? Color.white : FBColor.accent)
                                 .frame(width: 32, height: 32)
-                                .background(kind == option ? AnyShapeStyle(TogetherStyle.gradient) : AnyShapeStyle(FBColor.tintedBlueBackground), in: Circle())
+                                .background(kind == option ? AnyShapeStyle(GameColor.accentGradient) : AnyShapeStyle(FBColor.tintedBlueBackground), in: Circle())
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(TogetherCopy.kindTitle(option))
                                     .font(.fbName)

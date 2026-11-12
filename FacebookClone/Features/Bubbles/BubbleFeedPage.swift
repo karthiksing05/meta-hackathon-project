@@ -40,7 +40,7 @@ struct BubbleFeedPage: View {
         }
         .clipped()
         .accessibilityElement(children: .contain)
-        .accessibilityAction(named: "Pop in", actions.takeOver)
+        .accessibilityAction(named: "Play", actions.takeOver)
     }
 
     // MARK: Layers
@@ -172,7 +172,7 @@ private struct BubbleFeedCaption: View {
     }
 
     private var bestText: String {
-        guard let run else { return "Be the first on the Bubble Board" }
+        guard let run else { return "Be the first on the board" }
         let name = run.user.isMe ? "Your" : "\(run.user.firstName)'s"
         let mine = bubbleStore.bestScore(of: bubbleStore.appStore.me, in: bubble)?.score
         if let mine, mine > run.score, !run.user.isMe {
@@ -186,7 +186,7 @@ private struct BubbleFeedCaption: View {
             HStack(spacing: 6) {
                 Image(systemName: "hand.tap.fill")
                     .font(.system(size: FBIconSize.medium, weight: .semibold))
-                Text("Pop in")
+                Text("Play")
                     .font(.fbButton)
             }
             .foregroundStyle(BubbleGlow.ink)
@@ -199,14 +199,14 @@ private struct BubbleFeedCaption: View {
         }
         .buttonStyle(.pressable)
         .padding(.top, 4)
-        .accessibilityLabel("Pop in to \(bubble.title)")
+        .accessibilityLabel("Play \(bubble.title)")
     }
 
     private var tags: [BubbleFeedTag] {
         var tags: [BubbleFeedTag] = []
         if bubble.isDaily {
             let group = bubble.group?.name
-            tags.append(BubbleFeedTag(symbol: "sun.max.fill", text: group.map { "Daily Bubble · \($0)" } ?? "Daily Bubble"))
+            tags.append(BubbleFeedTag(symbol: "sun.max.fill", text: group.map { "Daily \(ProductName.singular) · \($0)" } ?? "Daily \(ProductName.singular)"))
         }
         if bubble.isIcebreaker {
             let event = bubble.event.map(Self.shortEventTitle) ?? "your event"
@@ -227,7 +227,7 @@ private struct BubbleFeedCaption: View {
                 tags.append(BubbleFeedTag(symbol: "person.3.fill", text: group.name))
             }
         case .yours where tags.isEmpty:
-            tags.append(BubbleFeedTag(symbol: "person.crop.circle", text: "Your Bubble"))
+            tags.append(BubbleFeedTag(symbol: "person.crop.circle", text: "Your \(ProductName.singular)"))
         default:
             break
         }
@@ -294,13 +294,13 @@ private struct BubbleFeedRail: View {
                 saveBounce += 1
                 actions.save(bubble)
             }
-            BubbleFeedRailButton(symbol: "trophy.fill", label: "Board", accessibility: "Bubble Board") {
+            BubbleFeedRailButton(symbol: "trophy.fill", label: "Board", accessibility: "Board") {
                 actions.openBoard(bubble)
             }
             BubbleFeedRailButton(symbol: "wand.and.stars", label: "Remix", accessibility: "Remix with Muse") {
                 actions.remix(bubble)
             }
-            BubbleFeedRailButton(symbol: "arrowshape.turn.up.right.fill", label: "Float", accessibility: "Float this Bubble") {
+            BubbleFeedRailButton(symbol: "arrowshape.turn.up.right.fill", label: "Share", accessibility: "Share this \(ProductName.singular)") {
                 actions.float(bubble)
             }
         }

@@ -42,7 +42,7 @@ struct BubbleGroupDailyCard: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 6) {
                 BubbleOrb(size: 18, tint: palette.glow)
-                Text("Daily Bubble")
+                Text("Daily \(ProductName.singular)")
                     .font(.fbCaptionEmphasized)
                     .textCase(.uppercase)
                     .foregroundStyle(palette.ink.opacity(0.75))
@@ -72,7 +72,7 @@ struct BubbleGroupDailyCard: View {
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "play.fill")
-                    Text(played ? "Pop in again" : "Pop in")
+                    Text(played ? "Play again" : "Play")
                 }
                 .font(.fbButton)
                 .foregroundStyle(palette.isDark ? BubbleGlow.ink : Color.white)
@@ -81,7 +81,7 @@ struct BubbleGroupDailyCard: View {
                 .background(palette.isDark ? AnyShapeStyle(Color.white.opacity(0.92)) : AnyShapeStyle(palette.ink), in: Capsule())
             }
             .buttonStyle(.pressable)
-            .accessibilityLabel("Pop in to \(bubble.title)")
+            .accessibilityLabel("Play \(bubble.title)")
 
             leaderboard(palette)
 
@@ -90,7 +90,7 @@ struct BubbleGroupDailyCard: View {
                 router.push(.bubbleBoard(bubble.id))
             } label: {
                 HStack(spacing: 4) {
-                    Text("See Bubble Board")
+                    Text("See board")
                     Image(systemName: "chevron.right")
                         .font(.system(size: FBIconSize.xs, weight: .bold))
                 }
@@ -117,7 +117,7 @@ struct BubbleGroupDailyCard: View {
                 .font(.fbMetaEmphasized)
                 .foregroundStyle(palette.ink.opacity(0.75))
             if top.isEmpty {
-                Text("Nobody has popped in yet today. Be the first on the board.")
+                Text("Nobody has played yet today. Be the first on the board.")
                     .font(.fbBody)
                     .foregroundStyle(palette.ink.opacity(0.85))
             } else {
@@ -155,7 +155,7 @@ struct BubbleGroupDailyCard: View {
             if let standing {
                 Text("You: \(standing.score.withCommas) · #\(standing.rank) of \(standing.of)")
             } else {
-                Text("You haven't popped in today")
+                Text("You haven't played today")
             }
             if streak > 0 {
                 Text("· 🔥 \(streak)-day streak")
@@ -185,7 +185,7 @@ struct BubbleGroupBlowRow: View {
                     .padding(6)
                     .background(BubbleGlow.brandGradient.opacity(0.55), in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Blow a bubble for this group")
+                    Text("Make \(ProductName.withArticle) for this group")
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
                     Text("Describe a game and Muse builds it")
@@ -203,14 +203,14 @@ struct BubbleGroupBlowRow: View {
             .overlay(alignment: .top) { HairlineDivider() }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Blow a bubble for this group")
+        .accessibilityLabel("Make \(ProductName.withArticle) for this group")
     }
 }
 
 /// A "Bubbles" row of compact cards.
 struct BubbleGroupBubblesRow: View {
     let bubbles: [Bubble]
-    var title = "Bubbles"
+    var title = ProductName.display
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -252,7 +252,7 @@ struct BubbleGroupDailyStrip: View {
         }
         if !items.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(title: "Daily Bubbles", subtitle: "A new game in each of your groups every day")
+                SectionHeader(title: "Daily \(ProductName.plural)", subtitle: "A new game in each of your groups every day")
                     .padding(.horizontal, 16)
                     .padding(.top, 14)
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -290,7 +290,7 @@ struct BubbleGroupDailyStrip: View {
                         .font(.fbName)
                         .foregroundStyle(palette.ink)
                         .lineLimit(1)
-                    Text(played ? "Played today" : "Pop in")
+                    Text(played ? "Played today" : "Play")
                         .font(.fbCaptionEmphasized)
                         .foregroundStyle(palette.ink.opacity(0.85))
                 }
@@ -301,6 +301,6 @@ struct BubbleGroupDailyStrip: View {
             .overlay(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous).strokeBorder(Color.white.opacity(0.5), lineWidth: 1))
         }
         .buttonStyle(.pressable)
-        .accessibilityLabel("\(group.name) Daily Bubble, \(bubble.title). \(played ? "Played today" : "Pop in")")
+        .accessibilityLabel("\(group.name) Daily \(ProductName.singular), \(bubble.title). \(played ? "Played today" : "Play")")
     }
 }

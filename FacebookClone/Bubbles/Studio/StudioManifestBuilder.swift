@@ -173,7 +173,7 @@ struct StudioManifestBuilder {
         guard !concepts.isEmpty else { throw BuildError.noConcepts }
 
         let example = catalog.formula(formulaID)?.example
-        let title = Self.cleanTitle(draft["title"]?.string) ?? base?.title ?? example?["title"]?.string ?? "New bubble"
+        let title = Self.cleanTitle(draft["title"]?.string) ?? base?.title ?? example?["title"]?.string ?? "New game"
         var rule = (draft["one_line_rule"]?.string ?? draft["rule"]?.string ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if rule.isEmpty { rule = base?.oneLineRule ?? example?["one_line_rule"]?.string ?? "Tap to play." }
 

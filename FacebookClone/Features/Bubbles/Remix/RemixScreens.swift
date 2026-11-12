@@ -374,7 +374,7 @@ enum RemixCopy {
     static func sendBackBody(_ name: String, original: String) -> String {
         "\(name) made \(original). Send your remix to their chat so they can play what you made of it."
     }
-    static let sendBackNotRemix = "This Bubble isn't a remix, so there's no one to send it back to."
+    static let sendBackNotRemix = "This \(ProductName.singular) isn't a remix, so there's no one to send it back to."
     static let sendBackYourOwn = "This is a remix of your own game. Share it with friends instead."
     static let openChat = "Open chat"
     static let done = "Done"
@@ -424,15 +424,15 @@ enum RemixCopy {
     static func addFriendLabel(_ name: String) -> String { "Add \(name) as a friend" }
 
     // Accessibility
-    static let notFound = "Bubble not found"
+    static let notFound = "\(ProductName.singular) not found"
     static let seeAllLabel = "See the whole remix tree"
     static func openOriginalLabel(_ title: String) -> String { "Open original: \(title)" }
     static let a11yMadeByYou = "made by you"
     static func a11yMadeBy(_ name: String) -> String { "made by \(name)" }
     static let a11yOriginal = "original"
     static let a11yFriend = "your friend"
-    static let a11yThisOne = "this Bubble"
-    static let a11yOpens = "Opens this Bubble"
+    static let a11yThisOne = "this \(ProductName.singular)"
+    static let a11yOpens = "Opens this \(ProductName.singular)"
     static func sentTo(_ title: String) -> String { "Sent to \(title)" }
     static func sendTo(_ title: String) -> String { "Send to \(title)" }
     static func playLabel(_ title: String?) -> String { "Play \(title ?? "the remix")" }

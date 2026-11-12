@@ -93,7 +93,7 @@ struct GroupGamesHubView: View {
                     .font(.system(size: FBIconSize.regular, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: 40, height: 40)
-                    .background(GroupBoardStyle.trophyGradient, in: Circle())
+                    .background(GameColor.accentGradient, in: Circle())
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(GroupsSearchCopy.challengeTitle)

@@ -19,7 +19,7 @@ struct BubbleChainView: View {
             }
         }
         .background(FBColor.surface)
-        .navigationTitle("Bubble Chain")
+        .navigationTitle("Level chain")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -127,7 +127,7 @@ struct BubbleChainView: View {
                 Button {
                     router.play(level.id)
                 } label: {
-                    Text(best == nil ? "Pop in" : "Again")
+                    Text(best == nil ? "Play" : "Again")
                 }
                 .buttonStyle(.fb(.tinted, expand: false, height: 34))
                 .padding(.top, 19)

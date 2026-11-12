@@ -7,10 +7,6 @@ enum QuizNightStyle {
     static let blue = Color(hex: 0x3D6FE0)
     static let violet = Color(hex: 0x7B61D9)
     static let deep = Color(hex: 0x23205A)
-
-    static var gradient: LinearGradient {
-        LinearGradient(colors: [blue, violet], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
 }
 
 /// The small "QUIZ NIGHT" chip.
@@ -110,7 +106,7 @@ struct QuizNightCard: View {
                 if let bubble {
                     BubbleCoverView(bubble: bubble, showsEmoji: true)
                 } else {
-                    QuizNightStyle.gradient
+                    GameColor.accentGradient
                 }
                 LinearGradient(colors: [.clear, Color.black.opacity(0.55)], startPoint: .top, endPoint: .bottom)
                 VStack(alignment: .leading, spacing: 4) {
@@ -280,7 +276,7 @@ struct QuizNightPlacePicker: View {
                     .font(.system(size: FBIconSize.medium, weight: .semibold))
                     .foregroundStyle(Color.white)
                     .frame(width: 36, height: 36)
-                    .background(QuizNightStyle.gradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
+                    .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(.fbName)

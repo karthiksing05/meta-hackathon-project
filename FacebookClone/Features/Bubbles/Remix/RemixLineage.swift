@@ -60,7 +60,7 @@ enum RemixLineage {
     static func credit(for bubble: Bubble) -> String? {
         guard isRemix(bubble) else { return nil }
         let lineage = bubble.manifest.lineage
-        let title = lineage.remixOfTitle ?? "another Bubble"
+        let title = lineage.remixOfTitle ?? "another \(ProductName.singular)"
         if lineage.remixOfCreatorID == "me" {
             return RemixCopy.creditByYou(title)
         }
@@ -76,7 +76,7 @@ enum RemixLineage {
         guard isRemix(bubble) else { return nil }
         let lineage = bubble.manifest.lineage
         let original = original(of: bubble, in: store.bubbles)
-        let title = lineage.remixOfTitle ?? original?.title ?? "another Bubble"
+        let title = lineage.remixOfTitle ?? original?.title ?? "another \(ProductName.singular)"
         if let creator = originalCreator(of: bubble, store: store), creator.id == store.appStore.me.id {
             return RemixCopy.creditByYou(title)
         }

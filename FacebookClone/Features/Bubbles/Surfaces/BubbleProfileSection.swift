@@ -23,7 +23,7 @@ struct BubbleProfileSection: View {
                 empty
             } else {
                 if !made.isEmpty {
-                    card(title: "Bubbles") {
+                    card(title: ProductName.display) {
                         LazyVGrid(columns: columns, spacing: 8) {
                             ForEach(made) { bubble in
                                 NavigationLink(value: Route.bubble(bubble.id)) {
@@ -48,7 +48,7 @@ struct BubbleProfileSection: View {
                 }
                 if !chains.isEmpty {
                     ProfileGap()
-                    card(title: "Bubble Chains") {
+                    card(title: "Level chains") {
                         VStack(spacing: 0) {
                             ForEach(Array(chains.enumerated()), id: \.offset) { index, levels in
                                 if index > 0 { HairlineDivider() }
@@ -83,7 +83,7 @@ struct BubbleProfileSection: View {
                     .padding(6)
                     .background(BubbleGlow.brandGradient.opacity(0.55), in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Blow a bubble")
+                    Text("Make \(ProductName.withArticle)")
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
                     Text("Describe a game and Muse builds it")
@@ -99,17 +99,17 @@ struct BubbleProfileSection: View {
             .background(FBColor.surface)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Blow a bubble")
+        .accessibilityLabel("Make \(ProductName.withArticle)")
     }
 
     private var empty: some View {
         VStack(spacing: 10) {
             BubbleOrb(size: 44)
-            Text(user.isMe ? "You haven't blown a bubble yet" : "\(user.firstName) hasn't blown a bubble yet")
+            Text(user.isMe ? "You haven't made \(ProductName.withArticle) yet" : "\(user.firstName) hasn't made \(ProductName.withArticle) yet")
                 .font(.fbHeadline)
                 .foregroundStyle(FBColor.primaryText)
                 .multilineTextAlignment(.center)
-            Text(user.isMe ? "Describe a game in a sentence and Muse builds it." : "Their Bubbles and best scores will show up here.")
+            Text(user.isMe ? "Describe a game in a sentence and Muse builds it." : "Their \(ProductName.plural) and best scores will show up here.")
                 .font(.fbBody)
                 .foregroundStyle(FBColor.secondaryText)
                 .multilineTextAlignment(.center)
@@ -164,7 +164,7 @@ struct BubbleProfileSection: View {
                         .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(first?.manifest.chain?.title ?? first?.title ?? "Bubble Chain")
+                    Text(first?.manifest.chain?.title ?? first?.title ?? "Level chain")
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
                         .lineLimit(1)

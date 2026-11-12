@@ -9,7 +9,7 @@ actor StudioRuntime {
 
         var errorDescription: String? {
             switch self {
-            case .unavailable(let message): return "The Bubble runtime didn't load: \(message)"
+            case .unavailable(let message): return "The game engine didn't load: \(message)"
             }
         }
     }
@@ -73,7 +73,7 @@ actor StudioRuntime {
     func validate(json: String) -> BubbleJSRuntime.Validation {
         if let cached = cachedValidations[json] { return cached }
         guard let runtime = try? loaded() else {
-            return .failure("runtime", loadError ?? "The Bubble runtime didn't load")
+            return .failure("runtime", loadError ?? "The game engine didn't load")
         }
         let result = runtime.validate(json: json)
         if cachedValidations.count > 64 { cachedValidations.removeAll() }
@@ -85,7 +85,7 @@ actor StudioRuntime {
 
     func simulate(_ manifest: BubbleManifest, seed: Int? = nil, maxTicks: Int = 5400, botSeed: Int? = nil, botSkill: Double? = nil) -> BubbleJSRuntime.Simulation {
         guard let runtime = try? loaded() else {
-            return .failure(loadError ?? "The Bubble runtime didn't load")
+            return .failure(loadError ?? "The game engine didn't load")
         }
         return runtime.simulate(manifest, seed: seed, maxTicks: maxTicks, bot: true, botSeed: botSeed, botSkill: botSkill)
     }

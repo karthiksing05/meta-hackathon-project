@@ -51,7 +51,7 @@ struct QuizNightPodiumView: View {
                     }
                 }
                 .padding(16)
-                .background(QuizNightStyle.gradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
+                .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
                 .padding(.horizontal, FBMetrics.gutter)
 
                 actions(night)

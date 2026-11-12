@@ -79,7 +79,7 @@ struct QuizNightLobbyView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(QuizNightStyle.gradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
+        .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
         .padding(.horizontal, FBMetrics.gutter)
         .accessibilityElement(children: .combine)
     }

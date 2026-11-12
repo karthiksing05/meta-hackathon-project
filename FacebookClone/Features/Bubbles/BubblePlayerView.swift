@@ -139,7 +139,7 @@ struct BubblePlayerView: View {
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
                 if isWatchingBurst, let owner = burstOwner(in: bubble) {
-                    Text(owner.isMe ? "Your Burst" : "\(owner.firstName)'s Burst")
+                    Text(owner.isMe ? "Your replay" : "\(owner.firstName)'s replay")
                         .font(.fbMeta)
                         .foregroundStyle(Color.white.opacity(0.85))
                         .lineLimit(1)
@@ -197,8 +197,8 @@ struct BubblePlayerView: View {
     private var missing: some View {
         VStack(spacing: 16) {
             ContentUnavailableView(
-                "This Bubble popped",
-                systemImage: "bubbles.and.sparkles",
+                "This \(ProductName.singular) didn't load",
+                systemImage: "sparkles",
                 description: Text("It isn't available anymore.")
             )
             Button("Close") {
@@ -234,7 +234,7 @@ struct BubblePlayerView: View {
         if let replay = mode.replayLog, let run = bubble.scores.first(where: { $0.replay == replay }) {
             return run.user.isMe ? "Tap to beat your \(run.score.withCommas)" : "Tap to beat \(run.user.firstName)'s \(run.score.withCommas)"
         }
-        return "Tap to pop in"
+        return "Tap to play"
     }
 
     // MARK: Messages

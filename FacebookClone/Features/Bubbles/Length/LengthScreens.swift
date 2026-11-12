@@ -110,7 +110,7 @@ enum LengthCopy {
 
     static func modeExplainer(_ mode: BubbleLengthMode) -> String {
         switch mode {
-        case .endless: return "Play until you pop. Beat your best."
+        case .endless: return "Play until you miss. Beat your best."
         case .rounds: return "A set number of rounds, then the score is final."
         case .timed: return "Score as much as you can before the clock runs out."
         case .lives: return "Every miss costs a life. Out of lives, the run ends."

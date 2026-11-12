@@ -224,7 +224,7 @@ struct BubblesTabView: View {
     }
 
     private var floatTitle: String {
-        floatTarget.map { "Float \($0.title)" } ?? "Float"
+        floatTarget.map { "Share \($0.title)" } ?? "Share"
     }
 
     // MARK: Actions
@@ -301,24 +301,24 @@ struct BubblesTabView: View {
     @ViewBuilder
     private func floatButtons(for bubble: Bubble) -> some View {
         if let group = bubble.group ?? bubbleStore.boardGroups(for: bubble).first(where: { $0.isMember }) {
-            Button("Float to \(group.name)") {
+            Button("Share to \(group.name)") {
                 float(bubble, to: group)
             }
         }
-        Button("Float to your feed") {
+        Button("Share to your feed") {
             float(bubble, to: nil)
         }
         Button("Cancel", role: .cancel) {}
     }
 
     private func float(_ bubble: Bubble, to group: FBGroup?) {
-        let message = "Pop into \(bubble.title) with me 🫧"
+        let message = "Play \(bubble.title) with me ✨"
         let post = BubbleSurfaceHooks.float(bubble, result: nil, to: group, message: message, appStore: appStore, bubbleStore: bubbleStore)
         if post != nil {
             Haptics.success()
-            appStore.showToast(group.map { "Floated to \($0.name)" } ?? "Floated to your feed", symbol: "bubbles.and.sparkles.fill")
+            appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
         } else {
-            appStore.showToast("Couldn't float this Bubble right now", symbol: "exclamationmark.circle")
+            appStore.showToast("Couldn't share this \(ProductName.singular) right now", symbol: "exclamationmark.circle")
         }
     }
 
@@ -395,7 +395,8 @@ private struct BubbleFeedScrollProbe: ViewModifier {
 
 // MARK: - Header
 
-/// Over the top of the feed: the wordmark, Library, sound and "Blow a bubble".
+/// Over the top of the feed: the wordmark, sound, Library and the make button.
+/// The wordmark keeps its full width; the make button drops its title when space runs short.
 private struct BubbleFeedHeader: View {
     let isMuted: Bool
     let onToggleMute: () -> Void
@@ -408,7 +409,9 @@ private struct BubbleFeedHeader: View {
                 // Stays legible over light looks (paper, glow) as well as dark ones.
                 .shadow(color: Color.black.opacity(0.3), radius: 6, y: 1)
                 .padding(.leading, 2)
-            Spacer(minLength: 8)
+                .fixedSize()
+                .layoutPriority(1)
+            Spacer(minLength: 4)
             iconButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off", action: onToggleMute)
             iconButton("books.vertical.fill", label: "Library") {
                 router.push(.bubbleLibrary)
@@ -417,7 +420,6 @@ private struct BubbleFeedHeader: View {
                 blowButton(showsTitle: true)
                 blowButton(showsTitle: false)
             }
-            .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, FBMetrics.screenPadding)
     }
@@ -446,21 +448,21 @@ private struct BubbleFeedHeader: View {
                 Image(systemName: "plus")
                     .font(.system(size: FBIconSize.medium, weight: .bold))
                 if showsTitle {
-                    Text("Blow a bubble")
+                    Text("Make \(ProductName.withArticle)")
                         .font(.fbButton)
                         .lineLimit(1)
-                        .fixedSize()
                 }
             }
-            .foregroundStyle(BubbleGlow.ink)
-            .padding(.horizontal, showsTitle ? 14 : 0)
+            .foregroundStyle(GameColor.ink)
+            .padding(.horizontal, showsTitle ? 12 : 0)
             .frame(minWidth: 36, minHeight: 36)
-            .background(BubbleGlow.brandGradient, in: Capsule())
+            .background(GameColor.gradient, in: Capsule())
             .overlay(Capsule().strokeBorder(Color.white.opacity(0.7), lineWidth: 1))
-            .contentShape(Capsule())
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.pressable)
-        .accessibilityLabel("Blow a bubble")
+        .accessibilityLabel("Make \(ProductName.withArticle)")
     }
 }
 

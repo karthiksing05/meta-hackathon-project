@@ -171,7 +171,7 @@ struct LengthCustomizePanelView: View {
         let draft = draftLength(spec)
         HStack(spacing: FBSpacing.m) {
             ZStack {
-                Circle().fill(LengthTint.gradient)
+                Circle().fill(GameColor.accentGradient)
                 Image(systemName: draft.symbol)
                     .font(.system(size: FBIconSize.small, weight: .bold))
                     .foregroundStyle(.white)

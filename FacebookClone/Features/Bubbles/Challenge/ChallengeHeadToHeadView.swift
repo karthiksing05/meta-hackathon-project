@@ -121,7 +121,7 @@ struct ChallengeHeadToHeadPanel: View {
         .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
-                .strokeBorder(challenge.outcome == .won ? AnyShapeStyle(ChallengeStyle.gradient) : AnyShapeStyle(FBColor.divider), lineWidth: challenge.outcome == .won ? 2 : 1)
+                .strokeBorder(challenge.outcome == .won ? AnyShapeStyle(GameColor.accentGradient) : AnyShapeStyle(FBColor.divider), lineWidth: challenge.outcome == .won ? 2 : 1)
         )
         .accessibilityElement(children: .combine)
     }

@@ -62,7 +62,7 @@ struct LearnProfileStreak: View {
             VStack(spacing: 0) {
                 HStack(spacing: 12) {
                     ZStack {
-                        Circle().fill(LearnStyle.gradient)
+                        Circle().fill(GameColor.accentGradient)
                         Image(systemName: "flame.fill")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(.white)
@@ -155,7 +155,7 @@ struct LearnStudioEntry: View {
                 } label: {
                     HStack(spacing: 12) {
                         ZStack {
-                            Circle().fill(LearnStyle.gradient)
+                            Circle().fill(GameColor.accentGradient)
                             Image(systemName: "graduationcap.fill")
                                 .font(.system(size: 17, weight: .semibold))
                                 .foregroundStyle(.white)

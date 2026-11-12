@@ -37,7 +37,7 @@ struct StudioFloatStep: View {
 
                 Button(action: onFloat) {
                     HStack(spacing: 6) {
-                        Image(systemName: model.floatButtonTitle == "Save changes" ? "checkmark" : "bubbles.and.sparkles.fill")
+                        Image(systemName: model.floatButtonTitle == "Save changes" ? "checkmark" : "sparkles")
                             .font(.system(size: FBIconSize.medium, weight: .bold))
                         Text(buttonTitle)
                     }
@@ -55,9 +55,9 @@ struct StudioFloatStep: View {
 
     private var buttonTitle: String {
         if model.floatButtonTitle == "Save changes" { return "Save changes" }
-        if model.mode == .daily { return "Float today's bubble" }
+        if model.mode == .daily { return "Share today's \(ProductName.singular)" }
         let name = model.destination == .feed ? "your feed" : model.destinationName
-        return name.count <= 20 ? "Float to \(name)" : "Float it"
+        return name.count <= 20 ? "Share to \(name)" : "Share"
     }
 }
 
@@ -84,7 +84,7 @@ private struct StudioFloatPreview: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                     if model.levels.count > 1 {
-                        Label("\(model.levels.count) levels · Bubble Chain", systemImage: "link")
+                        Label("\(model.levels.count) levels · Level chain", systemImage: "link")
                             .font(.fbCaptionEmphasized)
                             .foregroundStyle(BubbleGlow.ink)
                             .padding(.horizontal, 10)
@@ -127,12 +127,12 @@ private struct StudioDestinationCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            StudioSectionTitle(title: model.mode == .daily ? "Floats to" : "Float it to")
+            StudioSectionTitle(title: model.mode == .daily ? "Goes to" : "Share to")
                 .padding(.bottom, FBSpacing.s)
             if model.mode == .daily, let group = model.audienceGroup {
                 StudioDestinationRow(
                     title: group.name,
-                    subtitle: "Today's Daily Bubble · same game for everyone",
+                    subtitle: "Today's Daily \(ProductName.singular) · same game for everyone",
                     isSelected: true,
                     action: {}
                 ) {
@@ -164,7 +164,7 @@ private struct StudioDestinationCard: View {
     private var feedRow: some View {
         StudioDestinationRow(
             title: "Your feed",
-            subtitle: "Friends and the Bubbles tab",
+            subtitle: "Friends and the \(ProductName.display) tab",
             isSelected: model.destination == .feed,
             action: { select(.feed) }
         ) {
@@ -303,7 +303,7 @@ private struct StudioCaptionCard: View {
             if let me = model.me {
                 AvatarView(user: me, size: FBAvatarSize.post)
             }
-            TextField("Say something about this bubble…", text: $model.caption, axis: .vertical)
+            TextField("Say something about this \(ProductName.singular)…", text: $model.caption, axis: .vertical)
                 .font(.fbBodyLarge)
                 .foregroundStyle(FBColor.primaryText)
                 .lineLimit(2...5)
@@ -330,7 +330,7 @@ private struct StudioSaveNote: View {
                 Text("Saves version \(nextVersion) of \(model.baseTitle)")
                     .font(.fbName)
                     .foregroundStyle(FBColor.primaryText)
-                Text("Earlier versions stay in its history. Plays and the Bubble Board carry over.")
+                Text("Earlier versions stay in its history. Plays and the board carry over.")
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)

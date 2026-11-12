@@ -69,7 +69,7 @@ struct NextlineResultSummary: View {
             }
         }
         .padding(14)
-        .background(QuizNightStyle.gradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
+        .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
         .accessibilityElement(children: .contain)
     }
 }
@@ -92,7 +92,7 @@ struct NextlineDetailRow: View {
                         .font(.system(size: FBIconSize.large, weight: .semibold))
                         .foregroundStyle(Color.white)
                         .frame(width: 44, height: 44)
-                        .background(QuizNightStyle.gradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                        .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
                         Text(NextlineCopy.startIn)
                             .font(.fbName)
@@ -359,7 +359,7 @@ struct NextlineGroupGameNight: View {
             .accessibilityLabel("\(NextlineCopy.quizNight): \(open == nil ? NextlineCopy.startOne : NextlineCopy.join)")
         }
         .padding(14)
-        .background(QuizNightStyle.gradient, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .padding(12)
         .background(FBColor.surface)
         .accessibilityElement(children: .contain)
@@ -416,7 +416,7 @@ struct NextlineFeaturedBanner: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(QuizNightStyle.gradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             }
             .buttonStyle(.pressable)
             .padding(.horizontal, 12)

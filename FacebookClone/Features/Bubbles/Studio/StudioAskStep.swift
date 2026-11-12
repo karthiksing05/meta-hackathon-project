@@ -229,7 +229,7 @@ private struct StudioDailyScopeCard: View {
                 Text("For \(group.name)")
                     .font(.fbName)
                     .foregroundStyle(FBColor.primaryText)
-                Text("Daily Bubble · the same game for everyone in the group today")
+                Text("Daily \(ProductName.singular) · the same game for everyone in the group today")
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -434,12 +434,12 @@ private struct StudioFormulaSection: View {
     static func blurb(for formula: BubbleFormula?) -> String {
         switch formula {
         case .none: return "Muse picks the kind of game that fits your idea best."
-        case .dodge: return "One-touch survival: float through the gaps."
+        case .dodge: return "One-touch survival: glide through the gaps."
         case .guess: return "Find the hidden word or answer in a few tries."
         case .group: return "Sort things into the right groups."
         case .answer: return "Pick or type answers, then see how your crowd answered."
         case .time: return "Tap at just the right moment."
-        case .merge: return "Drop bubbles and merge them into bigger ones."
+        case .merge: return "Drop pieces and merge them into bigger ones."
         case .make: return "Make something together."
         case .story: return "A story you play: pick a path, find every ending."
         case .nextline: return "Guess what they say next, against the clock."
@@ -493,7 +493,7 @@ private struct StudioLookSection: View {
 
     private var blurb: String {
         guard let look = model.lookHint else {
-            return "Muse picks a look that fits your idea, so every bubble looks like itself."
+            return "Muse picks a look that fits your idea, so every \(ProductName.singular) looks like itself."
         }
         return "\(look.title): \(look.feel.prefix(1).lowercased() + look.feel.dropFirst())."
     }

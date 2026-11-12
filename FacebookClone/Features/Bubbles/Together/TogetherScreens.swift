@@ -265,7 +265,7 @@ enum TogetherCopy {
 
     // Cards and chat lines
     static func inviteHeadline(name: String, title: String) -> String { "\(name) started \(title)" }
-    static func inviteNote(_ ask: String) -> String { "Let's make a game together! \(ask) 🫧" }
+    static func inviteNote(_ ask: String) -> String { "Let's make a game together! \(ask) ✨" }
     static func addedHeadline(name: String, kind: TogetherAskKind, title: String) -> String { "\(name) added \(kindNoun(kind)) to \(title)" }
     static func addedNotification(kind: TogetherAskKind, title: String) -> String { "added \(kindNoun(kind)) to \(title). Stitch it when everyone's in." }
     static func publishedHeadline(_ title: String) -> String { "We made \(title) together" }
@@ -401,7 +401,7 @@ enum TogetherCopy {
     }
     static let usePosts = "Use my opted-in posts"
     static func usePostsDetail(_ count: Int) -> String {
-        count == 0 ? "None of your posts are opted in to Bubbles yet." : "Muse may read \(count == 1 ? "1 post" : "\(count) posts") you opted in."
+        count == 0 ? "None of your posts are opted in to \(ProductName.display) yet." : "Muse may read \(count == 1 ? "1 post" : "\(count) posts") you opted in."
     }
     static let editAnything = "These are your answers. Edit anything; leave one blank to skip it."
     static let createWithMuse = "Make it with Muse"
@@ -449,6 +449,6 @@ enum TogetherCopy {
     static let sentToFriends = "Sent"
     static let sendToFriendsHint = "Sends it to New in SF crew so friends can play"
     static func aboutMeCardHeadline(_ title: String) -> String { title }
-    static let aboutMeSendNote = "Made a game about me. Who knows me best? 🫧"
+    static let aboutMeSendNote = "Made a game about me. Who knows me best? ✨"
     static let aboutMeCardDetail = "Play to see if you know them best"
 }

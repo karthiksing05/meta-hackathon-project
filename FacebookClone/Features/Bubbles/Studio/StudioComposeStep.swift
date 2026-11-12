@@ -36,7 +36,7 @@ struct StudioComposeStep: View {
                     Haptics.selection()
                     model.cancelCompose()
                 } label: {
-                    Text(model.composeKind == .create ? "Back to the brief" : "Back to my bubble")
+                    Text(model.composeKind == .create ? "Back to the brief" : "Back to my \(ProductName.singular)")
                 }
                 .buttonStyle(.studioSecondary(expand: true, height: 44))
             }
@@ -90,23 +90,23 @@ private struct StudioComposeHeader: View {
     }
 
     private var headline: String {
-        if model.failure != nil { return "This bubble popped" }
+        if model.failure != nil { return "This \(ProductName.singular) didn't load" }
         let title = model.draftManifest?.title
         switch model.composeKind {
         case .create:
             if model.isFinished {
                 let name = (title ?? "").trimmingCharacters(in: .whitespaces)
-                return name.isEmpty ? "Your bubble is ready" : name
+                return name.isEmpty ? "Your \(ProductName.singular) is ready" : name
             }
             if model.mode == .remix { return "Muse is remixing \(model.baseTitle)" }
-            if model.mode == .nextLevel { return "Muse is blowing level \((model.baseBubble?.levelIndex ?? 1) + 1)" }
-            return "Muse is blowing your bubble"
+            if model.mode == .nextLevel { return "Muse is making level \((model.baseBubble?.levelIndex ?? 1) + 1)" }
+            return "Muse is making your \(ProductName.singular)"
         case .tweak:
-            let name = model.currentResult?.manifest.title ?? "your bubble"
+            let name = model.currentResult?.manifest.title ?? "your \(ProductName.singular)"
             return model.isFinished ? "Tweaked and ready" : "Muse is tweaking \(name)"
         case .nextLevel:
             let number = model.levels.last.flatMap { $0.manifest.chain?.index } ?? model.levelButtonNumber
-            return model.isFinished ? "Level \(number) is ready" : "Muse is blowing level \(model.levelButtonNumber)"
+            return model.isFinished ? "Level \(number) is ready" : "Muse is making level \(model.levelButtonNumber)"
         }
     }
 
@@ -304,8 +304,8 @@ extension StudioModel {
     }
 
     nonisolated static let generalTips = [
-        "Every bubble is playtested before anyone pops in.",
-        "Good bubbles take about a minute.",
+        "Every \(ProductName.singular) is playtested before anyone plays.",
+        "Good \(ProductName.plural) take about a minute.",
         "You can tweak anything once it's ready.",
     ]
 
@@ -313,15 +313,15 @@ extension StudioModel {
         switch step {
         case .understand: return ["Muse is reading your idea and who it's for."]
         case .brief: return ["Turning your words into a game brief."]
-        case .compose: return ["Picking concepts from the Bubble library and wiring them together."]
+        case .compose: return ["Picking concepts from the library and wiring them together."]
         case .glue: return ["Writing a few lines of custom code for your twist."]
         case .content: return ["Ember is writing the words, clues and names."]
         case .validate: return ["Checking every rule connects and the game can end."]
         case .repair: return ["Fixing what the checks found, then checking again."]
-        case .playtest: return ["A bot is playing your bubble to make sure it's fair and finishable."]
+        case .playtest: return ["A bot is playing your \(ProductName.singular) to make sure it's fair and finishable."]
         case .cover: return ["Muse Image is painting your cover in the Glow style."]
         case .polish: return ["Naming it and writing the one-line rule."]
-        case .done: return ["Ready to pop in."]
+        case .done: return ["Ready to play."]
         case .failed: return ["Something went wrong."]
         }
     }

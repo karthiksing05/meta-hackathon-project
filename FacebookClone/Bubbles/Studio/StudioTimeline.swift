@@ -176,10 +176,10 @@ enum StudioCopy {
         case .create:
             return [quoted, "for \(audience(request))"].compactMap { $0 }.joined(separator: " · ")
         case .edit:
-            let base = request.base.map { "Editing \($0.title) v\($0.version)" } ?? "Editing a Bubble"
+            let base = request.base.map { "Editing \($0.title) v\($0.version)" } ?? "Editing \(ProductName.withArticle)"
             return [base, quoted].compactMap { $0 }.joined(separator: " · ")
         case .remix:
-            let base = request.base.map { "Remixing \($0.title)" } ?? "Remixing a Bubble"
+            let base = request.base.map { "Remixing \($0.title)" } ?? "Remixing \(ProductName.withArticle)"
             return [base, quoted].compactMap { $0 }.joined(separator: " · ")
         case .nextLevel:
             let level = (request.base?.chain?.index ?? 1) + 1
@@ -188,7 +188,7 @@ enum StudioCopy {
         case .daily:
             let count = request.sources.count
             let posts = count == 1 ? "1 opted-in post" : "\(count) opted-in posts"
-            return "Daily Bubble for \(audience(request)) from \(posts)"
+            return "Daily \(ProductName.singular) for \(audience(request)) from \(posts)"
         }
     }
 }

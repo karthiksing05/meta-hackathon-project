@@ -20,7 +20,7 @@ enum StudioStage: Int, CaseIterable, Identifiable, Comparable {
         case .brief: return "Brief"
         case .compose: return "Compose"
         case .tryIt: return "Try it"
-        case .float: return "Float it"
+        case .float: return "Share"
         }
     }
 
@@ -386,15 +386,15 @@ final class StudioModel {
 
     // MARK: Copy by mode
 
-    var baseTitle: String { baseBubble?.title ?? "your bubble" }
+    var baseTitle: String { baseBubble?.title ?? "your \(ProductName.singular)" }
 
     var heroTitle: String {
         switch mode {
-        case .create: return "Blow a bubble"
+        case .create: return "Make \(ProductName.withArticle)"
         case .edit: return "Edit \(baseTitle)"
         case .remix: return "Remix \(baseTitle)"
         case .nextLevel: return "Level \((baseBubble?.levelIndex ?? 1) + 1) of \(baseTitle)"
-        case .daily: return "Today's Daily Bubble"
+        case .daily: return "Today's Daily \(ProductName.singular)"
         }
     }
 
@@ -414,11 +414,11 @@ final class StudioModel {
 
     var topBarSubtitle: String {
         switch mode {
-        case .create: return levels.count > 1 ? "\(levels.count) levels" : "New bubble"
+        case .create: return levels.count > 1 ? "\(levels.count) levels" : "New \(ProductName.singular)"
         case .edit: return "Editing \(baseTitle)"
         case .remix: return "Remix of \(baseTitle)"
         case .nextLevel: return "Level \((baseBubble?.levelIndex ?? 1) + 1) of \(baseTitle)"
-        case .daily: return "Daily Bubble · \(audienceName)"
+        case .daily: return "Daily \(ProductName.singular) · \(audienceName)"
         }
     }
 
@@ -435,7 +435,7 @@ final class StudioModel {
         switch mode {
         case .remix: return "Remix \(baseTitle) with a fresh twist"
         case .nextLevel: return "Level \((baseBubble?.levelIndex ?? 1) + 1) of \(baseTitle): same feel, a little harder"
-        case .daily: return "Today's Daily Bubble for \(audienceName)"
+        case .daily: return "Today's Daily \(ProductName.singular) for \(audienceName)"
         default: return ""
         }
     }
@@ -477,9 +477,9 @@ final class StudioModel {
         "Dodge the fog rolling over Twin Peaks",
         "Sort taquerias, bakeries and coffee spots by neighborhood",
         "Stack picnic snacks without tipping the blanket",
-        "Pop the right bubble before the tide comes in at Ocean Beach",
+        "Catch the right shell before the tide comes in at Ocean Beach",
         "A cozy guessing game about my first week in SF",
-        "Merge little bubbles into one giant Dolores Park bubble",
+        "Merge little clouds into one giant Dolores Park cloud",
     ]
 
     var showsAudiencePicker: Bool { mode == .create || mode == .remix }
@@ -797,7 +797,7 @@ final class StudioModel {
                 }
                 guard let self, !Task.isCancelled else { return }
                 if self.isComposing {
-                    self.fail(StudioFailure(message: "Muse stopped before the bubble was ready.", detail: nil))
+                    self.fail(StudioFailure(message: "Muse stopped before your \(ProductName.singular) was ready.", detail: nil))
                 }
             } catch is CancellationError {
                 return
@@ -1075,7 +1075,7 @@ final class StudioModel {
         }
         let text = error.localizedDescription
         return StudioFailure(
-            message: "Something interrupted Muse while it was making your bubble. Your brief is saved.",
+            message: "Something interrupted Muse while it was making your \(ProductName.singular). Your brief is saved.",
             detail: text.count <= 140 ? text : nil
         )
     }
@@ -1183,7 +1183,7 @@ final class StudioModel {
     }
 
     var floatButtonTitle: String {
-        isEditMode && levels.count == 1 ? "Save changes" : "Float it"
+        isEditMode && levels.count == 1 ? "Save changes" : "Share"
     }
 
     func requestFloat() {
@@ -1254,11 +1254,11 @@ final class StudioModel {
         if isEditMode {
             toast = published.count == 1 ? "Changes saved with a new level" : "Changes saved with \(published.count) new levels"
         } else if isDaily, let group {
-            toast = "Today's Daily Bubble is live in \(group.name)"
+            toast = "Today's Daily \(ProductName.singular) is live in \(group.name)"
         } else if published.count > 1 {
-            toast = "Floated \(published.count) levels to \(destinationName)"
+            toast = "Shared \(published.count) levels to \(destinationName)"
         } else {
-            toast = "Floated to \(destinationName)"
+            toast = "Shared to \(destinationName)"
         }
         return openID.map { ($0, toast) }
     }
@@ -1271,10 +1271,10 @@ final class StudioModel {
     }
 
     func defaultCaption(for bubble: Bubble) -> String {
-        if mode == .daily { return "Today's Daily Bubble is here. Pop in!" }
-        if mode == .nextLevel { return "Level \(bubble.levelIndex ?? 2) of \(baseTitle) is out. Pop in!" }
-        if mode == .remix { return "I remixed \(baseTitle). Pop in!" }
-        return "I blew a new bubble with Muse. Pop in!"
+        if mode == .daily { return "Today's Daily \(ProductName.singular) is here. Play now!" }
+        if mode == .nextLevel { return "Level \(bubble.levelIndex ?? 2) of \(baseTitle) is out. Play now!" }
+        if mode == .remix { return "I remixed \(baseTitle). Play it!" }
+        return "I made a new \(ProductName.singular) with Muse. Play it!"
     }
 }
 

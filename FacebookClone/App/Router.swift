@@ -20,7 +20,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "Home"
         case .video: return "Video"
-        case .bubbles: return "Bubbles"
+        case .bubbles: return ProductName.display
         case .friends: return "Friends"
         case .marketplace: return "Marketplace"
         case .notifications: return "Notifications"
@@ -32,7 +32,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "house"
         case .video: return "play.tv"
-        case .bubbles: return "bubbles.and.sparkles"
+        case .bubbles: return "sparkles"
         case .friends: return "person.2"
         case .marketplace: return "storefront"
         case .notifications: return "bell"
@@ -44,7 +44,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "house.fill"
         case .video: return "play.tv.fill"
-        case .bubbles: return "bubbles.and.sparkles.fill"
+        case .bubbles: return "sparkles"
         case .friends: return "person.2.fill"
         case .marketplace: return "storefront.fill"
         case .notifications: return "bell.fill"

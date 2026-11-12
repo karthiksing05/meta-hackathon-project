@@ -390,7 +390,7 @@ final class BubbleLengthCatalog: @unchecked Sendable {
             infer: [.rounds: ["entity.sort_bubble.deal"]],
             knobs: [
                 BubbleLengthKnob(id: "speed", concept: "entity.sort_bubble", param: "rise_speed", label: "Rise speed", min: 20, max: 60, invert: false),
-                BubbleLengthKnob(id: "difficulty", concept: "entity.sort_bubble", param: "spawn_every", label: "Bubble pace", min: 1, max: 3, invert: true),
+                BubbleLengthKnob(id: "difficulty", concept: "entity.sort_bubble", param: "spawn_every", label: "Spawn pace", min: 1, max: 3, invert: true),
             ]),
         "answer": BubbleLengthSpec(
             modes: [.rounds, .timed, .lives, .endless], defaultLength: BubbleLength(mode: .rounds),

@@ -317,7 +317,7 @@ struct RemixTreeScreen: View {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
             } else {
-                ContentUnavailableView(RemixCopy.notFound, systemImage: "bubbles.and.sparkles", description: Text(RemixCopy.cardUnavailable))
+                ContentUnavailableView(RemixCopy.notFound, systemImage: "sparkles", description: Text(RemixCopy.cardUnavailable))
             }
         }
         .background(FBColor.surface)

@@ -182,12 +182,12 @@ struct BubbleFeaturePlaceholder: View {
     var body: some View {
         ContentUnavailableView(
             "Coming soon",
-            systemImage: "bubbles.and.sparkles",
+            systemImage: "sparkles",
             description: Text("\(route.feature.rawValue) · \(route.screen)\(route.arg.isEmpty ? "" : " · \(route.arg)")")
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(FBColor.surface)
-        .navigationTitle("Bubbles")
+        .navigationTitle(ProductName.display)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

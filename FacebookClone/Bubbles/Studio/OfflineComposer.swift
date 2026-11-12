@@ -778,9 +778,9 @@ final class OfflineComposer: @unchecked Sendable {
         let words = StudioManifestBuilder.unique(hits[pick.id] ?? []).prefix(2).map { "“\($0)”" }
         let reason: String
         if request.mode == .daily && words.isEmpty {
-            reason = "Daily Bubbles work best as a quick \(pick.title.lowercased()) game everyone shares"
+            reason = "Daily \(ProductName.plural) work best as a quick \(pick.title.lowercased()) game everyone shares"
         } else if words.isEmpty {
-            reason = "A one-touch game anyone can pop into"
+            reason = "A one-touch game anyone can jump into"
         } else {
             reason = "Your words \(words.joined(separator: " and ")) fit \(pick.title.lowercased())"
         }
@@ -935,7 +935,7 @@ final class OfflineComposer: @unchecked Sendable {
             id: identity.id,
             version: identity.version,
             title: title,
-            oneLineRule: "Tap to float through the gaps.",
+            oneLineRule: "Tap to glide through the gaps.",
             formula: .dodge,
             brief: brief,
             structure: identity.structure,

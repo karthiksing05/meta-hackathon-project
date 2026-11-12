@@ -25,7 +25,7 @@ struct ChallengePickerSheet: View {
                 if let bubble = bubbleStore.bubble(id: bubbleID) {
                     content(bubble, draft: resolvedDraft(bubble))
                 } else {
-                    ContentUnavailableView(ChallengeCopy.bubbleGone, systemImage: "bubbles.and.sparkles", description: Text(ChallengeCopy.bubbleGoneNote))
+                    ContentUnavailableView(ChallengeCopy.bubbleGone, systemImage: "sparkles", description: Text(ChallengeCopy.bubbleGoneNote))
                 }
             }
             .background(FBColor.surface)

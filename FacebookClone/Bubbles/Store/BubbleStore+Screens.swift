@@ -12,7 +12,7 @@ extension BubbleStore {
 
     func chainName(_ chainID: String) -> String {
         let levels = chain(chainID)
-        return levels.first?.manifest.chain?.title ?? levels.first?.title ?? "Bubble Chain"
+        return levels.first?.manifest.chain?.title ?? levels.first?.title ?? "Level chain"
     }
 
     func isMine(_ bubble: Bubble) -> Bool {
@@ -66,8 +66,8 @@ extension BubbleStore {
         }
 
         let sections = [
-            LibrarySection(id: "mine", title: "Your Bubbles", symbol: "person.crop.circle", bubbles: pool.filter { $0.creator.id == me.id }),
-            LibrarySection(id: "daily", title: "Daily Bubbles from your Groups", symbol: "sun.max", bubbles: pool.filter { $0.isDaily && ($0.group?.isMember ?? false) }),
+            LibrarySection(id: "mine", title: "Your \(ProductName.plural)", symbol: "person.crop.circle", bubbles: pool.filter { $0.creator.id == me.id }),
+            LibrarySection(id: "daily", title: "Daily \(ProductName.plural) from your Groups", symbol: "sun.max", bubbles: pool.filter { $0.isDaily && ($0.group?.isMember ?? false) }),
             LibrarySection(id: "friends", title: "From friends", symbol: "person.2", bubbles: pool.filter { $0.creator.isFriend }),
             LibrarySection(id: "chains", title: "Chains", symbol: "link", bubbles: chainHeads),
             LibrarySection(id: "saved", title: "Saved", symbol: "bookmark", bubbles: pool.filter { $0.isSaved }),

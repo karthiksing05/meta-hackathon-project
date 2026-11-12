@@ -93,7 +93,7 @@ struct StudioView: View {
     }
 
     private var closeTitle: String {
-        model.isEditMode ? "Discard your changes?" : "Discard this bubble?"
+        model.isEditMode ? "Discard your changes?" : "Discard this \(ProductName.singular)?"
     }
 
     private func requestClose() {
@@ -128,7 +128,7 @@ struct StudioView: View {
             // Open the new Bubble underneath first, so closing Studio reveals it.
             router.selectedTab = .bubbles
             router.push(.bubble(outcome.bubbleID))
-            appStore.showToast(outcome.toast, symbol: "bubbles.and.sparkles.fill")
+            appStore.showToast(outcome.toast, symbol: "sparkles")
             dismiss()
         }
     }

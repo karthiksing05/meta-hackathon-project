@@ -83,7 +83,7 @@ struct TogetherSessionView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(TogetherStyle.gradient, in: Capsule())
+                    .background(GameColor.accentGradient, in: Capsule())
                 Text(TogetherCopy.inTarget(session.target.title))
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
@@ -326,7 +326,7 @@ struct TogetherSessionView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
-                .background(TogetherStyle.gradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
+                .background(GameColor.accentGradient, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                 .opacity(ready ? 1 : 0.45)
             }
             .buttonStyle(.plain)

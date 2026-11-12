@@ -14,7 +14,7 @@ struct BubbleLibraryView: View {
         let sections = bubbleStore.librarySections(query: query, formula: formula)
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 20, pinnedViews: []) {
-                SearchField(placeholder: "Search Bubbles", text: $query)
+                SearchField(placeholder: "Search \(ProductName.plural)", text: $query)
                     .padding(.horizontal, FBMetrics.screenPadding)
                 chips
                 if query.isEmpty && formula == nil { blowBanner }
@@ -57,7 +57,7 @@ struct BubbleLibraryView: View {
             HStack(spacing: 12) {
                 BubbleOrb(size: 40)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Blow a bubble")
+                    Text("Make \(ProductName.withArticle)")
                         .font(.fbHeadline)
                     Text("Tell Muse your idea. It makes the game.")
                         .font(.fbMeta)
@@ -109,10 +109,10 @@ struct BubbleLibraryView: View {
         let filtering = !query.isEmpty || formula != nil
         return VStack(spacing: 12) {
             BubbleOrb(size: 72)
-            Text(filtering ? "No Bubbles match" : "Your Library is empty")
+            Text(filtering ? "No \(ProductName.plural) match" : "Your Library is empty")
                 .font(.fbTitle)
                 .foregroundStyle(FBColor.primaryText)
-            Text(filtering ? "Try another word or clear the filter." : "Bubbles you make, save or pop into show up here.")
+            Text(filtering ? "Try another word or clear the filter." : "\(ProductName.plural) you make, save or play show up here.")
                 .font(.fbBody)
                 .foregroundStyle(FBColor.secondaryText)
                 .multilineTextAlignment(.center)
@@ -120,7 +120,7 @@ struct BubbleLibraryView: View {
                 Button("Clear filters") { query = ""; formula = nil }
                     .buttonStyle(.fb(.secondary, expand: false, height: 40))
             }
-            Button("Blow a bubble") { router.openStudio() }
+            Button("Make \(ProductName.withArticle)") { router.openStudio() }
                 .buttonStyle(.fb(.primary, expand: false, height: 40))
         }
         .frame(maxWidth: .infinity)
