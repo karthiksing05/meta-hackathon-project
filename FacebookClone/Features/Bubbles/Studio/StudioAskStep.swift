@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Step 1: describe the game. A big prompt, example chips for the launch context, who it's for,
-/// an optional game type and an optional look.
+/// Step 1: describe the game. People first: who it's for (the Group, the Event or friends, with
+/// their faces) sits above the prompt. Then example chips for the launch context, the audience
+/// picker, an optional game type and an optional look.
 struct StudioAskStep: View {
     @Bindable var model: StudioModel
     @FocusState private var isPromptFocused: Bool
@@ -17,6 +18,8 @@ struct StudioAskStep: View {
                             .padding(.horizontal, FBMetrics.screenPadding)
                     }
                     VStack(alignment: .leading, spacing: FBSpacing.m) {
+                        StudioAudienceFaces(model: model)
+                            .padding(.horizontal, FBMetrics.screenPadding)
                         StudioPromptCard(model: model, isFocused: $isPromptFocused)
                             .padding(.horizontal, FBMetrics.screenPadding)
                         examples
@@ -56,10 +59,11 @@ struct StudioAskStep: View {
                 } label: {
                     if model.isDraftingBrief {
                         HStack(spacing: FBSpacing.s) {
-                            ProgressView()
-                                .tint(BubbleGlow.ink)
-                            Text("Reading your idea…")
+                            GameLoader(style: .dots)
+                                .accessibilityHidden(true)
+                            Text("Muse is reading your idea")
                         }
+                        .accessibilityElement(children: .combine)
                     } else {
                         HStack(spacing: 6) {
                             Text("Next")
@@ -399,8 +403,11 @@ struct StudioEventDateTile: View {
 private struct StudioFormulaSection: View {
     let model: StudioModel
 
-    // Microgames come from the authoring path (docs/BUBBLES.md, "microgame"), not this picker.
-    private static let formulas = BubbleFormula.allCases.filter { $0 != .make && $0 != .microgame }
+    // "Microgame" builds a game from scratch on the engine (StudioMicrogameBridge, docs/BUBBLES.md
+    // 7.12). It needs real Muse, so it only shows when Studio can build one.
+    private var formulas: [BubbleFormula] {
+        BubbleFormula.allCases.filter { $0 != .make && ($0 != .microgame || model.canBuildMicrogame) }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.m) {
@@ -412,7 +419,7 @@ private struct StudioFormulaSection: View {
                         Haptics.selection()
                         model.formulaHint = nil
                     }
-                    ForEach(Self.formulas, id: \.self) { formula in
+                    ForEach(formulas, id: \.self) { formula in
                         StudioChip(title: formula.title, symbol: formula.symbol, isSelected: model.formulaHint == formula) {
                             Haptics.selection()
                             model.formulaHint = formula
@@ -444,7 +451,7 @@ private struct StudioFormulaSection: View {
         case .story: return "A story you play: pick a path, find every ending."
         case .nextline: return "Guess what they say next, against the clock."
         case .learn: return "A short lesson, then practice until it sticks."
-        case .microgame: return "Any game Muse can build, with its own art and sound."
+        case .microgame: return "Muse builds it from scratch on the game engine, with its own rules, art and sound. Takes a little longer."
         }
     }
 }

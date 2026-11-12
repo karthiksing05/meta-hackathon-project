@@ -1,8 +1,12 @@
 import SwiftUI
 import UIKit
 
-/// Step 3: Muse composes live. A bubble being blown grows as steps complete; below it, the agent
-/// timeline streams in (model, detail, concepts, problems and fixes). Takes 20–60 s with Muse.
+/// Step 3, Build: "Muse at work". The orb grows only when a real step arrives; under it the
+/// storyboard (`ShowcaseBuildStage`) lights each beat Muse really reached (draft, check, fix N
+/// issues, bots playtesting, ready), and the timeline streams the events themselves (model,
+/// detail, concepts, problems and fixes, the bots' runs). Formula games come from the
+/// `StudioEvent` stream; microgames from `MicrogameComposer` through `StudioMicrogameBridge`.
+/// Takes 20–60 s with Muse (microgames can take longer).
 struct StudioComposeStep: View {
     let model: StudioModel
 
@@ -10,6 +14,14 @@ struct StudioComposeStep: View {
         VStack(spacing: 0) {
             StudioComposeHeader(model: model)
                 .padding(.horizontal, FBMetrics.screenPadding)
+            ShowcaseBuildStage(
+                events: model.events,
+                isMicrogame: model.runIsMicrogame,
+                kind: model.composeKind,
+                isWorking: model.isComposing,
+                failed: model.failure != nil
+            )
+            .padding(.bottom, FBSpacing.s)
             StudioComposeTimeline(model: model)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -51,7 +63,7 @@ private struct StudioComposeHeader: View {
     let model: StudioModel
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var smoother = StudioProgressSmoother()
+    @State private var smoother = GameProgressSmoother()
     @State private var coverImage: UIImage?
 
     var body: some View {
@@ -69,7 +81,7 @@ private struct StudioComposeHeader: View {
                     reduceMotion: reduceMotion
                 )
             }
-            .frame(height: 176)
+            .frame(height: 140)
             .animation(.easeInOut(duration: 0.5), value: coverImage != nil)
 
             Text(headline)
@@ -99,6 +111,7 @@ private struct StudioComposeHeader: View {
                 return name.isEmpty ? "Your \(ProductName.singular) is ready" : name
             }
             if model.mode == .remix { return "Muse is remixing \(model.baseTitle)" }
+            if model.runIsMicrogame { return "Muse is building your \(ProductName.singular) from scratch" }
             if model.mode == .nextLevel { return "Muse is making level \((model.baseBubble?.levelIndex ?? 1) + 1)" }
             return "Muse is making your \(ProductName.singular)"
         case .tweak:
@@ -166,11 +179,20 @@ private struct StudioComposeTimeline: View {
                         StudioStartingRow()
                     }
                     ForEach(Array(model.events.enumerated()), id: \.element.id) { index, event in
-                        StudioTimelineRow(
-                            event: event,
-                            state: state(at: index),
-                            showsConnector: index < model.events.count - 1
-                        )
+                        VStack(alignment: .leading, spacing: 0) {
+                            StudioTimelineRow(
+                                event: event,
+                                state: state(at: index),
+                                showsConnector: index < model.events.count - 1
+                            )
+                            if let report = model.playtestReports[event.id], !report.runs.isEmpty {
+                                // The bots' real runs, under the playtest result that carried them.
+                                ShowcaseBotLanes(lanes: MakeRecord.lanes(from: report))
+                                    .padding(.leading, FBSpacing.m + 32 + FBSpacing.m)
+                                    .padding(.trailing, FBSpacing.m)
+                                    .padding(.bottom, FBSpacing.s)
+                            }
+                        }
                         .id(event.id)
                         .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity), removal: .opacity))
                     }
@@ -261,7 +283,17 @@ private struct StudioComposeFailureCard: View {
                 Label("Try again", systemImage: "arrow.clockwise")
             }
             .buttonStyle(.studioPrimary)
-            if model.canTryOffline {
+            if model.runIsMicrogame && model.composeKind == .create {
+                // A microgame that won't come together can still be a game today.
+                Button {
+                    Haptics.light()
+                    model.useFormulaInstead()
+                } label: {
+                    Label("Make it with a ready formula", systemImage: "square.stack.3d.up")
+                }
+                .buttonStyle(.studioSecondary(expand: true, height: 44))
+            }
+            if model.canTryOffline && !model.runIsMicrogame {
                 Button {
                     Haptics.light()
                     model.retry(offline: true)
@@ -278,15 +310,12 @@ private struct StudioComposeFailureCard: View {
 // MARK: - Progress and tips
 
 extension StudioModel {
-    /// The header bubble's size target: the furthest step reached, creeping toward the next one
-    /// while Muse works so long steps (the cover takes ~11 s) still feel alive.
+    /// The header orb's size target: the furthest step really reached. It never grows on time
+    /// alone; between events the orb breathes instead (`StudioBlowingBubble`'s wobble).
     func progressTarget(at date: Date) -> Double {
         let reached = reachedProgress
         guard isComposing else { return reached }
-        let stepSize = 1.0 / Double(Self.progressSteps.count + 1)
-        let waited = max(0, date.timeIntervalSince(lastEventAt ?? date))
-        let creep = stepSize * 0.9 * (1 - exp(-waited / 7))
-        return min(0.97, max(0.04, reached + creep))
+        return min(0.97, max(0.04, reached))
     }
 
     /// "0:23".
@@ -298,16 +327,26 @@ extension StudioModel {
     /// What Muse is doing right now, rotating every few seconds during long steps.
     func tip(at date: Date) -> String {
         let step = currentEvent?.step ?? .understand
-        let tips = StudioModel.tips(for: step) + StudioModel.generalTips
+        let tips = (runIsMicrogame ? StudioModel.microgameTips(for: step) : StudioModel.tips(for: step)) + StudioModel.generalTips
         let waited = max(0, date.timeIntervalSince(lastEventAt ?? date))
         return tips[Int(waited / 6) % tips.count]
     }
 
     nonisolated static let generalTips = [
-        "Every \(ProductName.singular) is playtested before anyone plays.",
-        "Good \(ProductName.plural) take about a minute.",
-        "You can tweak anything once it's ready.",
+        "Every \(ProductName.singular) is playtested by bots before anyone plays.",
+        "You can tweak anything with Muse once it's ready.",
+        "When it's ready, challenge friends to beat your score.",
     ]
+
+    nonisolated static func microgameTips(for step: StudioStep) -> [String] {
+        switch step {
+        case .compose: return ["Muse is writing the whole game: rules, art and sound."]
+        case .validate: return ["The game engine builds Muse's draft and checks every rule."]
+        case .repair: return ["Muse gets each problem with where it is, and fixes it."]
+        case .playtest: return ["New, regular and pro bots play it on the real engine."]
+        default: return tips(for: step)
+        }
+    }
 
     nonisolated static func tips(for step: StudioStep) -> [String] {
         switch step {
@@ -319,7 +358,7 @@ extension StudioModel {
         case .validate: return ["Checking every rule connects and the game can end."]
         case .repair: return ["Fixing what the checks found, then checking again."]
         case .playtest: return ["A bot is playing your \(ProductName.singular) to make sure it's fair and finishable."]
-        case .cover: return ["Muse Image is painting your cover in the Glow style."]
+        case .cover: return ["Muse Image is painting your cover."]
         case .polish: return ["Naming it and writing the one-line rule."]
         case .done: return ["Ready to play."]
         case .failed: return ["Something went wrong."]

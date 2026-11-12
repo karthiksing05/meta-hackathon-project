@@ -108,22 +108,34 @@ struct StudioTimelineRow: View {
     }
 }
 
-/// The step's symbol in a circle. The current step glows and its rim turns.
+/// The step's symbol in a circle. The current step glows and its rim turns, driven by the clock
+/// (`TimelineView`), never by a repeating animation (the iOS 18 bug in `GameMotion`).
 struct StudioStepIcon: View {
     let step: StudioStep
     let state: StudioRowState
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var pulse = false
+
+    private static let spin = GameMotion.loop(period: 2.2)
 
     var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: state != .active || reduceMotion)) { context in
+            let wave = state == .active && !reduceMotion ? Self.spin.wave(at: context.date) : 0
+            let turn = state == .active && !reduceMotion ? Self.spin.phase(at: context.date) : 0
+            icon(wave: wave, turn: turn)
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: state)
+        .accessibilityHidden(true)
+    }
+
+    private func icon(wave: Double, turn: Double) -> some View {
         ZStack {
             switch state {
             case .active:
-                Circle().fill(BubbleGlow.brandGradient)
+                Circle().fill(GameColor.gradient)
                 Circle()
-                    .strokeBorder(BubbleGlow.iridescent, lineWidth: 2)
-                    .rotationEffect(.degrees(pulse ? 360 : 0))
+                    .strokeBorder(GameColor.rim, lineWidth: 2)
+                    .rotationEffect(.degrees(360 * turn))
             case .done:
                 Circle().fill(StudioGlow.cardFill)
                 Circle().strokeBorder(StudioGlow.cardStroke, lineWidth: 0.75)
@@ -148,30 +160,15 @@ struct StudioStepIcon: View {
                     .transition(.scale.combined(with: .opacity))
             }
         }
-        .scaleEffect(state == .active && pulse && !reduceMotion ? 1.06 : 1)
-        .shadow(color: BubbleGlow.pink.opacity(state == .active ? (pulse ? 0.7 : 0.3) : 0), radius: 10)
-        .onAppear(perform: startPulse)
-        .onChange(of: state) { startPulse() }
-        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: state)
-        .accessibilityHidden(true)
+        .scaleEffect(1 + 0.06 * wave)
+        .shadow(color: GameColor.periwinkle.opacity(state == .active ? 0.3 + 0.4 * wave : 0), radius: 10)
     }
 
     private var iconColor: Color {
         switch state {
-        case .active: return BubbleGlow.ink
+        case .active: return GameColor.ink
         case .done: return step == .done ? StudioGlow.fixed : FBColor.secondaryText
         case .failed: return StudioGlow.issue
-        }
-    }
-
-    private func startPulse() {
-        guard state == .active, !reduceMotion else {
-            pulse = false
-            return
-        }
-        pulse = false
-        withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
-            pulse = true
         }
     }
 }
