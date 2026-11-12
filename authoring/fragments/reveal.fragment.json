@@ -1,0 +1,72 @@
+{
+  "fragment": "reveal",
+  "version": 1,
+  "describe": "Hidden text that uncovers letter by letter as a progress number rises. Requires state `reveal_progress: int` (bind it to `score`, or to any int the game raises, and keep it from going down); every `per_piece` of progress uncovers one more character, left to right, and spaces are always shown. Provides `reveal_text` (string, starts as the param `text`; a game with its words in `content` sets it on `start`), `revealed` (characters uncovered so far, 0 to the text length), and emits `fully_revealed` once. With `wins` true, revealing everything wins. The text is cut into lines of `wrap` characters (up to 4 lines, so at most 4 x `wrap` characters) and drawn from (`x`, `y`) in the `layer` (playfield or overlay). Hidden letters show as a dot.",
+  "params": {
+    "text":      { "type": "string", "default": "Something good is coming", "max_len": 80 },
+    "per_piece": { "type": "int", "default": 10, "min": 1, "max": 1000 },
+    "wins":      { "type": "bool", "default": false },
+    "layer":     { "type": "enum", "values": ["playfield", "overlay"], "default": "playfield" },
+    "wrap":      { "type": "int", "default": 20, "min": 8, "max": 30 },
+    "size":      { "type": "int", "default": 24, "min": 12, "max": 40 },
+    "x":         { "type": "int", "default": 180, "min": 0, "max": 360 },
+    "y":         { "type": "int", "default": 110, "min": 0, "max": 640 }
+  },
+  "requires": {
+    "state": { "reveal_progress": "int" }
+  },
+  "state": {
+    "reveal_text": { "type": "string", "init": "@text" },
+    "revealed": { "type": "int", "init": "0" },
+    "_done": { "type": "bool", "init": "false" }
+  },
+  "events": {
+    "fully_revealed": {}
+  },
+  "rules": [
+    {
+      "id": "uncover",
+      "on": "tick",
+      "when": "not _done",
+      "do": [
+        { "set": "revealed", "to": "min(len(reveal_text), max(revealed, reveal_progress / @per_piece))" },
+        {
+          "if": "revealed >= len(reveal_text) and len(reveal_text) > 0",
+          "then": [ { "set": "_done", "to": "true" }, { "emit": "fully_revealed" } ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": { "include": "@wins", "expr": "_done" }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield", "include": "@layer == 'playfield'",
+        "node": {
+          "node": "repeat", "source": "range(4)", "as": "k", "key": "k",
+          "template": {
+            "node": "text", "x": "@x", "y": "= @y + k * (@size + 10)", "anchor": "center", "size": "@size", "weight": 700, "color": "$ink",
+            "text": "= join(map(slice(chars(reveal_text), k * @wrap, (k + 1) * @wrap), (ch, j) => if ch == ' ' or k * @wrap + j < revealed then ch else '•'), '')"
+          }
+        }
+      },
+      {
+        "slot": "overlay", "include": "@layer == 'overlay'",
+        "node": {
+          "node": "repeat", "source": "range(4)", "as": "k", "key": "k",
+          "template": {
+            "node": "text", "x": "@x", "y": "= @y + k * (@size + 10)", "anchor": "center", "size": "@size", "weight": 700, "color": "$ink",
+            "text": "= join(map(slice(chars(reveal_text), k * @wrap, (k + 1) * @wrap), (ch, j) => if ch == ' ' or k * @wrap + j < revealed then ch else '•'), '')"
+          }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "fully_revealed", "do": [ { "sound": { "wave": "triangle", "note": "C5", "ms": 140 } }, { "sound": { "wave": "triangle", "note": "G5", "ms": 240 } } ] }
+    ]
+  },
+  "tags": { "mood": ["calm", "playful"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

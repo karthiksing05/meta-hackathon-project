@@ -1,0 +1,69 @@
+{
+  "fragment": "hint",
+  "version": 1,
+  "describe": "A limited-use hint button. Each tap (while hints are left and none is active) costs one hint, sets `hint_active` for `cooldown` ms and emits `hint_used`. Games read `hint_active` to reveal something, for example all cards.",
+  "params": {
+    "uses":     { "type": "int", "default": 2, "min": 1, "max": 5 },
+    "cooldown": { "type": "duration", "default": 3000, "min": 500, "max": 10000 }
+  },
+  "requires": {},
+  "state": {
+    "hints_left":  { "type": "int", "init": "@uses" },
+    "hint_active": { "type": "bool", "init": "false" },
+    "_until":      { "type": "int", "init": "0" }
+  },
+  "events": {
+    "hint_used": {},
+    "_hint_end": {}
+  },
+  "inputs": {
+    "use_hint": {}
+  },
+  "rules": [
+    {
+      "id": "use",
+      "on": "use_hint",
+      "when": "hints_left > 0 and not hint_active",
+      "do": [
+        { "decr": "hints_left" },
+        { "set": "hint_active", "to": "true" },
+        { "set": "_until", "to": "now + @cooldown" },
+        { "after": "@cooldown", "emit": "_hint_end", "id": "_timer" },
+        { "emit": "hint_used" }
+      ]
+    },
+    {
+      "id": "end",
+      "on": "_hint_end",
+      "do": [ { "set": "hint_active", "to": "false" } ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect", "w": 120, "h": 36, "radius": 18,
+              "fill": "= if hints_left > 0 and not hint_active then $accent else $surface",
+              "transition": { "fill": { "ms": 150, "ease": "out" } },
+              "on_tap": { "input": "use_hint" }
+            },
+            {
+              "node": "text", "x": 60, "y": 18, "anchor": "center", "size": 16, "weight": 600, "color": "$ink",
+              "text": "= if hint_active then 'Look! ' + str(max(0, ceil((_until - now) / 1000.0))) + 's' else 'Hint (' + str(hints_left) + ')'"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "hint_used", "do": [ { "sound": { "wave": "sine", "note": "A5", "ms": 120 } } ] }
+    ]
+  },
+  "tags": { "mood": ["calm"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

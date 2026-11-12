@@ -1,0 +1,396 @@
+{
+  "fragment": "quiz",
+  "version": 1,
+  "describe": "Multiple-choice questions, one at a time. The game supplies three functions that read `content` lists: `quiz_questions()` (list<string>, one entry per question), `quiz_choices()` (list<string>, all the answer choices flattened: question q owns the entries from q * `choices` up to (q + 1) * `choices`, exactly `choices` per question) and `quiz_answers()` (list<string>, entry q is the exact text of the correct choice of question q, so it must also appear among that question's choices). Questions are asked in a shuffled order (reshuffled when used up) and each question's choices are shuffled on screen. Tapping a choice (input `answer {index}`) emits `answered_right` or `answered_wrong`, shows the right choice for about 700 ms, then emits `question_done` and asks the next one. Each question has `time_ms` (a bar drains); running out counts as `answered_wrong`. `question_done` is the event the `rounds` fragment counts: bind rounds' `round_done` to it. State: `right_count`, `wrong_count`, `opts` (choices on screen), `locked`. With `goal` above 0, `goal` right answers win; with 0 the quiz never wins on its own, so end it with rounds or a lose path (lives bound to `answered_wrong`). Sets no score; bind score's `point` to `answered_right`.",
+  "params": {
+    "choices": {
+      "type": "int",
+      "default": 3,
+      "min": 2,
+      "max": 4
+    },
+    "time_ms": {
+      "type": "duration",
+      "default": 8000,
+      "min": 1000,
+      "max": 30000
+    },
+    "goal": {
+      "type": "int",
+      "default": 0,
+      "min": 0,
+      "max": 200
+    }
+  },
+  "requires": {
+    "functions": {
+      "quiz_questions": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "quiz_choices": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "quiz_answers": {
+        "params": {},
+        "returns": "list<string>"
+      }
+    }
+  },
+  "state": {
+    "order": {
+      "type": "list<int>",
+      "init": "[]"
+    },
+    "qi": {
+      "type": "int",
+      "init": "0"
+    },
+    "opts": {
+      "type": "list<string>",
+      "init": "[]"
+    },
+    "picked": {
+      "type": "int",
+      "init": "-1"
+    },
+    "locked": {
+      "type": "bool",
+      "init": "true"
+    },
+    "right_count": {
+      "type": "int",
+      "init": "0"
+    },
+    "wrong_count": {
+      "type": "int",
+      "init": "0"
+    },
+    "_serial": {
+      "type": "int",
+      "init": "0"
+    },
+    "_until": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "question_text": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(quiz_questions(), get_or(order, qi, 0), '')"
+    },
+    "correct_answer": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(quiz_answers(), get_or(order, qi, 0), '')"
+    },
+    "_opt_fill": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "string",
+      "body": "if not locked then '' else if get_or(opts, k, '') == correct_answer() then 'good' else if k == picked then 'bad' else ''"
+    }
+  },
+  "events": {
+    "answered_right": {},
+    "answered_wrong": {},
+    "question_done": {},
+    "_ask": {},
+    "_reveal_end": {},
+    "_timeout": {
+      "serial": "int"
+    }
+  },
+  "inputs": {
+    "answer": {
+      "payload": {
+        "index": "int"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        {
+          "set": "order",
+          "to": "shuffle(range(len(quiz_questions())))"
+        },
+        {
+          "emit": "_ask"
+        }
+      ]
+    },
+    {
+      "id": "ask",
+      "on": "_ask",
+      "do": [
+        {
+          "if": "qi >= len(order)",
+          "then": [
+            {
+              "set": "order",
+              "to": "shuffle(order)"
+            },
+            {
+              "set": "qi",
+              "to": "0"
+            }
+          ]
+        },
+        {
+          "let": {
+            "q": "order[qi]"
+          }
+        },
+        {
+          "set": "opts",
+          "to": "shuffle(slice(quiz_choices(), q * @choices, q * @choices + @choices))"
+        },
+        {
+          "set": "picked",
+          "to": "-1"
+        },
+        {
+          "set": "locked",
+          "to": "false"
+        },
+        {
+          "incr": "_serial"
+        }
+      ]
+    },
+    {
+      "id": "arm",
+      "on": "_ask",
+      "do": [
+        {
+          "set": "_until",
+          "to": "now + @time_ms"
+        },
+        {
+          "after": "@time_ms",
+          "emit": "_timeout",
+          "with": {
+            "serial": "_serial"
+          },
+          "id": "_t_question"
+        }
+      ]
+    },
+    {
+      "id": "pick_choice",
+      "on": "answer",
+      "when": "not locked and event.index >= 0 and event.index < len(opts)",
+      "do": [
+        {
+          "set": "locked",
+          "to": "true"
+        },
+        {
+          "set": "picked",
+          "to": "event.index"
+        },
+        {
+          "if": "opts[event.index] == correct_answer()",
+          "then": [
+            {
+              "incr": "right_count"
+            },
+            {
+              "emit": "answered_right"
+            }
+          ],
+          "else": [
+            {
+              "incr": "wrong_count"
+            },
+            {
+              "emit": "answered_wrong"
+            }
+          ]
+        },
+        {
+          "after": "700ms",
+          "emit": "_reveal_end",
+          "id": "_t_reveal"
+        }
+      ]
+    },
+    {
+      "id": "run_out",
+      "on": "_timeout",
+      "when": "not locked and event.serial == _serial",
+      "do": [
+        {
+          "set": "locked",
+          "to": "true"
+        },
+        {
+          "incr": "wrong_count"
+        },
+        {
+          "emit": "answered_wrong"
+        },
+        {
+          "after": "700ms",
+          "emit": "_reveal_end",
+          "id": "_t_reveal"
+        }
+      ]
+    },
+    {
+      "id": "reveal_end",
+      "on": "_reveal_end",
+      "do": [
+        {
+          "emit": "question_done"
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "on": "question_done",
+      "do": [
+        {
+          "incr": "qi"
+        },
+        {
+          "emit": "_ask"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": {
+      "include": "@goal > 0",
+      "expr": "right_count >= @goal"
+    }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 30,
+          "y": 110,
+          "w": 300,
+          "h": 110,
+          "align": "center",
+          "valign": "middle",
+          "size": 22,
+          "weight": 700,
+          "color": "$ink",
+          "text": "= question_text()"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 30,
+          "y": 232,
+          "w": "= if locked then 0.0 else max(0.0, 300.0 * ((_until - now) * 1.0) / (@time_ms * 1.0))",
+          "h": 8,
+          "radius": 4,
+          "fill": "= if _until - now < @time_ms / 4 then $danger else $primary"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(@choices)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "group",
+            "children": [
+              {
+                "node": "rect",
+                "x": 30,
+                "y": "= 270 + k * 72",
+                "w": 300,
+                "h": 60,
+                "radius": 14,
+                "role": "tile",
+                "fill": "= if _opt_fill(k) == 'good' then $primary else if _opt_fill(k) == 'bad' then $danger else $surface",
+                "transition": {
+                  "fill": {
+                    "ms": 120,
+                    "ease": "out"
+                  }
+                },
+                "on_tap": {
+                  "input": "answer",
+                  "with": {
+                    "index": "k"
+                  }
+                }
+              },
+              {
+                "node": "text",
+                "x": 180,
+                "y": "= 300 + k * 72",
+                "anchor": "center",
+                "size": 18,
+                "weight": 600,
+                "color": "$ink",
+                "text": "= get_or(opts, k, '')"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "answered_right",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "G5",
+              "ms": 140
+            }
+          }
+        ]
+      },
+      {
+        "on": "answered_wrong",
+        "do": [
+          {
+            "shake": {
+              "px": 5,
+              "ms": 160
+            }
+          },
+          {
+            "sound": {
+              "wave": "square",
+              "note": "C3",
+              "ms": 110
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "tags": {
+    "mood": [
+      "calm",
+      "playful"
+    ],
+    "energy": [
+      "low",
+      "medium"
+    ]
+  },
+  "conflicts": []
+}

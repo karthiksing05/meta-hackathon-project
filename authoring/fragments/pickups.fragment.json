@@ -1,0 +1,95 @@
+{
+  "fragment": "pickups",
+  "version": 1,
+  "describe": "Collectibles that appear every `every` ms at random positions (inside x_min..x_max and y_min..y_max, or on one of `columns` evenly spaced x positions when columns > 0), up to `max_alive` at once. With `fall` above 0 they spawn above the canvas and drift down at that many px/s; with `scroll` above 0 they spawn past the right edge (at a random height in y_min..y_max) and drift left at that many px/s; otherwise they appear in place. They vanish after `lifetime` ms (0 means they never expire). Touching one with `player` (within `reach` plus `radius`) removes it, adds 1 to `collected` and emits `point` once per item; the `point` event must exist, from `score` or the game. Provides `items` and `collected`. Requires state `player: vec2`.",
+  "params": {
+    "every":     { "type": "duration", "default": 1500, "min": 200, "max": 10000 },
+    "max_alive": { "type": "int", "default": 3, "min": 1, "max": 20 },
+    "radius":    { "type": "float", "default": 12.0, "min": 4.0, "max": 40.0 },
+    "reach":     { "type": "float", "default": 16.0, "min": 0.0, "max": 60.0 },
+    "lifetime":  { "type": "duration", "default": 6000, "min": 0, "max": 60000 },
+    "x_min":     { "type": "float", "default": 40.0, "min": 0.0, "max": 360.0 },
+    "x_max":     { "type": "float", "default": 320.0, "min": 0.0, "max": 360.0 },
+    "y_min":     { "type": "float", "default": 160.0, "min": 0.0, "max": 640.0 },
+    "y_max":     { "type": "float", "default": 520.0, "min": 0.0, "max": 640.0 },
+    "columns":   { "type": "int", "default": 0, "min": 0, "max": 8 },
+    "fall":      { "type": "float", "default": 0.0, "min": 0.0, "max": 600.0 },
+    "scroll":    { "type": "float", "default": 0.0, "min": 0.0, "max": 600.0 }
+  },
+  "requires": {
+    "state": { "player": "vec2" },
+    "events": { "point": {} }
+  },
+  "types": {
+    "Pickup": { "id": "int", "x": "float", "y": "float", "born": "int" }
+  },
+  "state": {
+    "items":     { "type": "list<Pickup>", "init": "[]" },
+    "collected": { "type": "int", "init": "0" },
+    "_next_id":  { "type": "int", "init": "0" }
+  },
+  "events": {
+    "collected_one": {}
+  },
+  "rules": [
+    {
+      "id": "spawn",
+      "on": { "every": "@every" },
+      "when": "len(items) < @max_alive",
+      "do": [
+        { "let": { "px": "if @scroll > 0.0 then @game.canvas_w + @radius else if @columns > 1 then @x_min + random_int(0, @columns - 1) * (@x_max - @x_min) / (@columns - 1) else random_float(@x_min, @x_max)" } },
+        { "let": { "py": "if @fall > 0.0 then -@radius else random_float(@y_min, @y_max)" } },
+        { "set": "items", "to": "push(items, {id: _next_id, x: px, y: py, born: now})" },
+        { "incr": "_next_id" }
+      ]
+    },
+    {
+      "id": "drift",
+      "include": "@fall > 0.0 or @scroll > 0.0",
+      "on": "tick",
+      "do": [
+        { "set": "items", "to": "map(items, i => {...i, x: i.x - @scroll * event.dt / 1000.0, y: i.y + @fall * event.dt / 1000.0})" },
+        { "remove": "items", "where": "i => i.y > @game.canvas_h + 2.0 * @radius or i.x < -2.0 * @radius" }
+      ]
+    },
+    {
+      "id": "expire",
+      "include": "@lifetime > 0",
+      "on": "tick",
+      "do": [
+        { "remove": "items", "where": "i => now - i.born > @lifetime" }
+      ]
+    },
+    {
+      "id": "collect",
+      "on": "tick",
+      "when": "any(items, i => overlaps_circle(player, @reach, vec(i.x, i.y), @radius))",
+      "do": [
+        { "let": { "got": "filter(items, i => overlaps_circle(player, @reach, vec(i.x, i.y), @radius))" } },
+        { "remove": "items", "where": "i => overlaps_circle(player, @reach, vec(i.x, i.y), @radius)" },
+        { "for_each": "got", "as": "g", "do": [
+          { "incr": "collected" },
+          { "emit": "collected_one" },
+          { "emit": "point" }
+        ] }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat", "source": "items", "as": "i", "key": "i.id",
+          "template": { "node": "circle", "x": "= i.x", "y": "= i.y", "r": "@radius", "fill": "$accent", "role": "pickup" }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "collected_one", "do": [ { "sound": { "wave": "sine", "note": "A5", "ms": 80 } } ] }
+    ]
+  },
+  "tags": { "mood": ["cosy", "playful"], "energy": ["low", "medium", "high"] },
+  "conflicts": []
+}

@@ -1,0 +1,85 @@
+{
+  "fragment": "ghost_score",
+  "version": 1,
+  "describe": "Races a friend's recorded run of the same game. Requires `score: int`. Provides `ghost: int`, the friend's score at the current elapsed time (`now`), rising linearly from 0 to `friend_score` over `friend_time` and then holding. Shows the friend next to you in the HUD, e.g. `Maya 340`. Emits `passed_ghost` once, the first time `score` goes above `ghost`, and `ghost_passed_you` once, the first time `ghost` goes above `score` after you had passed it. Sets no objectives; pair with `beat_target` or a game rule for the win. The app passes the friend's name, final score and run duration as params.",
+  "params": {
+    "friend_name":  { "type": "string", "default": "Maya", "max_len": 12 },
+    "friend_score": { "type": "int", "default": 300, "min": 0, "max": 100000 },
+    "friend_time":  { "type": "duration", "default": 30000, "min": 1000, "max": 600000 }
+  },
+  "requires": {
+    "state": { "score": "int" }
+  },
+  "state": {
+    "ghost": { "type": "int", "init": "0" },
+    "_lead": { "type": "int", "init": "0" },
+    "_passed": { "type": "bool", "init": "false" },
+    "_repassed": { "type": "bool", "init": "false" },
+    "_banner_until": { "type": "int", "init": "0" },
+    "_banner": { "type": "string", "init": "''" }
+  },
+  "events": {
+    "passed_ghost": {},
+    "ghost_passed_you": {}
+  },
+  "rules": [
+    {
+      "id": "pace",
+      "on": "tick",
+      "do": [
+        { "set": "ghost", "to": "floor(@friend_score * 1.0 * min(now, @friend_time) / @friend_time)" },
+        {
+          "if": "score > ghost and not _passed",
+          "then": [
+            { "set": "_passed", "to": "true" },
+            { "set": "_lead", "to": "1" },
+            { "set": "_banner", "to": "'You passed ' + @friend_name + '!'" },
+            { "set": "_banner_until", "to": "now + 1500" },
+            { "emit": "passed_ghost" }
+          ]
+        },
+        {
+          "if": "ghost > score and _lead == 1 and not _repassed",
+          "then": [
+            { "set": "_repassed", "to": "true" },
+            { "set": "_banner", "to": "@friend_name + ' passed you!'" },
+            { "set": "_banner_until", "to": "now + 1500" },
+            { "emit": "ghost_passed_you" }
+          ]
+        },
+        {
+          "if": "_lead == 1 and ghost > score",
+          "then": [ { "set": "_lead", "to": "-1" } ]
+        },
+        {
+          "if": "_lead == -1 and score > ghost",
+          "then": [ { "set": "_lead", "to": "1" } ]
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": { "node": "text", "text": "= @friend_name + ' ' + str(ghost)", "size": 18, "weight": 600, "color": "= if ghost > score then $danger else $secondary", "role": "hud" }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "text", "x": 180, "y": 112, "anchor": "center", "size": 18, "weight": 700,
+          "color": "$accent",
+          "text": "= _banner",
+          "opacity": "= if now < _banner_until then 1.0 else 0.0"
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "passed_ghost", "do": [ { "sound": { "wave": "sine", "note": "G5", "ms": 120 } } ] },
+      { "on": "ghost_passed_you", "do": [ { "sound": { "wave": "triangle", "note": "D3", "ms": 160 } } ] }
+    ]
+  },
+  "tags": { "mood": ["playful", "tense"], "energy": ["medium", "high"] },
+  "conflicts": []
+}

@@ -1,0 +1,136 @@
+{
+  "fragment": "word_check",
+  "version": 1,
+  "describe": "Guess a hidden word, with per-letter feedback. Listens to the keyboard fragment's input `press {letter}`: a letter is added to the typed word (`typed`) until it has `length` letters, then it is submitted automatically; the letter '<' (add it to the keyboard's `letters`) deletes the last typed letter. The game must provide state `answer` (string, lowercase, exactly `length` letters; usually picked from a content list). A submitted guess is kept in `guesses` and drawn as a row of dots: right place ($primary), in the word elsewhere ($accent) or absent (grey); a guess equal to `answer` sets `solved` and emits `word_solved`, any other emits `guess_wrong`. Provides `key_state(letter)` for the keyboard (0 untouched, 1 used and in the word, 2 used and absent) and `letter_mark(guess, c)` (2, 1 or 0 for letter c of a guess). Running out of `max_guesses` without solving loses. With on_solved 'win' the game is won when solved; with 'none' the game decides (for example emit `word_reset` after setting a new `answer` to start another word, which clears the board). Draws a status line and the guess board; `y` is the board's top. Sets no score.",
+  "params": {
+    "length":      { "type": "int", "default": 5, "min": 3, "max": 7 },
+    "max_guesses": { "type": "int", "default": 6, "min": 3, "max": 8 },
+    "on_solved":   { "type": "enum", "values": ["win", "none"], "default": "win" },
+    "cell_size":   { "type": "int", "default": 40, "min": 24, "max": 56 },
+    "gap":         { "type": "int", "default": 4, "min": 0, "max": 12 },
+    "y":           { "type": "int", "default": 100, "min": 60, "max": 400 }
+  },
+  "requires": {
+    "state": { "answer": "string" },
+    "inputs": { "press": { "letter": "string" } }
+  },
+  "state": {
+    "guesses": { "type": "list<string>", "init": "[]" },
+    "typed":   { "type": "string", "init": "''" },
+    "solved":  { "type": "bool", "init": "false" }
+  },
+  "functions": {
+    "letter_mark": {
+      "params": { "guess": "string", "c": "int" },
+      "returns": "int",
+      "body": "let ch = get_or(chars(guess), c, '') in if ch == get_or(chars(answer), c, '') then 2 else if contains(chars(answer), ch) then 1 else 0"
+    },
+    "key_state": {
+      "params": { "letter": "string" },
+      "returns": "int",
+      "body": "if not any(guesses, g => contains(chars(g), letter)) then 0 else if contains(chars(answer), letter) then 1 else 2"
+    },
+    "_cell_letter": {
+      "params": { "r": "int", "c": "int" },
+      "returns": "string",
+      "body": "if r < len(guesses) then get_or(chars(guesses[r]), c, '') else if r == len(guesses) then get_or(chars(typed), c, '') else ''"
+    },
+    "_cell_mark": {
+      "params": { "r": "int", "c": "int" },
+      "returns": "int",
+      "body": "if r < len(guesses) then letter_mark(guesses[r], c) else -1"
+    }
+  },
+  "events": {
+    "word_solved": {},
+    "guess_wrong": {},
+    "word_reset": {}
+  },
+  "rules": [
+    {
+      "id": "back",
+      "on": "press",
+      "when": "event.letter == '<' and not solved and len(chars(typed)) > 0",
+      "do": [ { "set": "typed", "to": "join(take(chars(typed), len(chars(typed)) - 1), '')" } ]
+    },
+    {
+      "id": "type",
+      "on": "press",
+      "when": "event.letter != '' and event.letter != '<' and not solved and len(guesses) < @max_guesses and len(chars(typed)) < @length",
+      "do": [
+        { "let": { "word": "typed + event.letter" } },
+        {
+          "if": "len(chars(word)) >= @length",
+          "then": [
+            { "push": "guesses", "value": "word" },
+            { "set": "typed", "to": "''" },
+            {
+              "if": "word == answer",
+              "then": [ { "set": "solved", "to": "true" }, { "emit": "word_solved" } ],
+              "else": [ { "emit": "guess_wrong" } ]
+            }
+          ],
+          "else": [ { "set": "typed", "to": "word" } ]
+        }
+      ]
+    },
+    {
+      "id": "reset",
+      "on": "word_reset",
+      "include": "@on_solved == 'none'",
+      "do": [
+        { "set": "guesses", "to": "[]" },
+        { "set": "typed", "to": "''" },
+        { "set": "solved", "to": "false" }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": { "include": "@on_solved == 'win'", "expr": "solved" },
+    "lose": "len(guesses) >= @max_guesses and not solved"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 180, "y": "= @y - 16", "anchor": "center", "size": 18, "weight": 600, "color": "$ink",
+          "text": "= if solved then 'Got it!' else 'Guess ' + str(min(len(guesses) + 1, @max_guesses)) + ' of ' + str(@max_guesses)"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": "= (@game.canvas_w - (@length * @cell_size + (@length - 1) * @gap)) / 2",
+          "y": "@y",
+          "children": [
+            {
+              "node": "grid", "cols": "@length", "rows": "@max_guesses", "cell_size": "@cell_size", "gap": "@gap",
+              "cell": {
+                "node": "group",
+                "children": [
+                  {
+                    "node": "circle", "x": "= @cell_size / 2", "y": "= @cell_size / 2", "r": "= @cell_size / 2",
+                    "fill": "= if _cell_mark(cell.y, cell.x) == 2 then $primary else if _cell_mark(cell.y, cell.x) == 1 then $accent else if _cell_mark(cell.y, cell.x) == 0 then '#9AA0A6' else $surface",
+                    "transition": { "fill": { "ms": 150, "ease": "out" } }
+                  },
+                  {
+                    "node": "text", "x": "= @cell_size / 2", "y": "= @cell_size / 2", "anchor": "center", "size": 20, "weight": 700, "color": "$ink",
+                    "text": "= upper(_cell_letter(cell.y, cell.x))"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "guess_wrong", "do": [ { "sound": { "wave": "square", "note": "C3", "ms": 100 } } ] },
+      { "on": "word_solved", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 260 } } ] }
+    ]
+  },
+  "tags": { "mood": ["calm", "focused"], "energy": ["low", "medium"] },
+  "conflicts": []
+}
