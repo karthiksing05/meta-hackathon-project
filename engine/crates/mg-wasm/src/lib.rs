@@ -516,6 +516,28 @@ pub extern "C" fn mg_state_json(h: i32) -> i32 {
     set_result(v.to_string().as_bytes())
 }
 
+/// Current tap and drag targets as JSON `[{x, y, w, h, drag}]` (canvas
+/// units, topmost first) → result buffer. Builds a frame first if needed.
+/// For bots: tap the center of a target.
+#[no_mangle]
+pub extern "C" fn mg_hit_targets(h: i32) -> i32 {
+    let Some(g) = slot(h) else { return ERR_HANDLE };
+    let targets = g.player.hit_targets();
+    result_with(|out| {
+        out.push(b'[');
+        for (i, t) in targets.iter().enumerate() {
+            if i > 0 {
+                out.push(b',');
+            }
+            let _ = std::io::Write::write_fmt(
+                out,
+                format_args!("{{\"x\":{},\"y\":{},\"w\":{},\"h\":{},\"drag\":{}}}", t.x, t.y, t.w, t.h, t.drag),
+            );
+        }
+        out.push(b']');
+    })
+}
+
 /// State hash as 16 lowercase hex digits → result buffer.
 #[no_mangle]
 pub extern "C" fn mg_state_hash(h: i32) -> i32 {

@@ -58,6 +58,18 @@ export class Microgame {
     return engine;
   }
 
+  /**
+   * Synchronous init from raw wasm bytes (or a compiled WebAssembly.Module).
+   * For hosts whose API is synchronous (the iOS app's runtime). Large modules
+   * may be refused off the main thread in some browsers; Safari/JSC allow it.
+   */
+  static initSync(source) {
+    const module = source instanceof WebAssembly.Module ? source : new WebAssembly.Module(source);
+    const engine = new Microgame(new WebAssembly.Instance(module, {}).exports);
+    Microgame.default = engine;
+    return engine;
+  }
+
   static validate(json) { return requireDefault().validate(json); }
   static load(json, seed) { return requireDefault().load(json, seed); }
 
@@ -248,6 +260,9 @@ export class Game {
     if (h < 0) throw new MicrogameCrash(`fork failed (${h})`);
     return new Game(this.engine, h);
   }
+
+  /** Tap and drag targets [{x, y, w, h, drag}], canvas units, topmost first (for bots). */
+  hitTargets() { return this.engine._resultJSON(this._call((m, h) => m.mg_hit_targets(h))); }
 
   state() { return this.engine._resultJSON(this._call((m, h) => m.mg_state_json(h))); }
   stateHash() { return this.engine._resultString(this._call((m, h) => m.mg_state_hash(h))); }

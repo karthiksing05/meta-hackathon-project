@@ -311,3 +311,13 @@ These are decisions taken while building v0.1. They belong in the next revision 
 
 `examples/meteor_dodge.json` is a fourth test game. It covers what the three fixtures
 don't: drag, `repeat`, `tick`, circles, records, enums, `after`, `push` and `remove`.
+
+## In the iOS app
+
+The app runs microgames through its Bubble runtime (docs/BUBBLES.md 7.11). `web/render.js` is the
+frame renderer shared by the browser shell and the app. `tools/make-app-bundle.mjs` packs
+`web/microgame.js`, `web/render.js` and the WASM (base64) into one classic script,
+`FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js`, which is committed. After any engine
+change: `./build-wasm.sh && node tools/make-app-bundle.mjs` (`--check` tells you if it's stale).
+`Microgame.initSync(bytes)` compiles synchronously for hosts with synchronous APIs, and
+`game.hitTargets()` (`mg_hit_targets`) lists tap and drag targets for bots.
