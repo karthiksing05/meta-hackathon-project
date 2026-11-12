@@ -781,10 +781,103 @@ entry point, and Add friend from the leaderboard.
 
 ### 7.4 Make it together, and games about you (together)
 
-Start a game and invite friends, a chat or a Group to add to it (a question, words, a scene or a
-level); Muse stitches the contributions into one game and credits every maker in `lineage.makers`.
-"Games about me" templates build a game from your answers (manifest `about`), shown on your profile
-with who knows you best.
+Making a game becomes something friends do together, and a way to say something about yourself.
+Two flows: **Make it together** (start a game, invite a group chat, a friend or a Group to add a
+question, words, a scene or a level; Muse stitches every contribution into one game whose credits
+name every maker) and **Games about me** (a template turns your answers into a quiz; friends play it
+and your profile shows who knows you best). Code: `Features/Bubbles/Together/` (state in
+`TogetherCenter.shared`, strings in `TogetherCopy`) and `Bubbles/Studio/TogetherStudio.swift`.
+
+**Make it together.** `TogetherStartSheet` picks what friends add (`TogetherAskKind`: `question`,
+`words`, `scene`, `level`), the game's name, the ask, and one target from
+`BubbleSocialHub.targets` (group chats first, then Groups, then friends; New in SF crew is the
+default). Start creates a `TogetherSession` (`id, kind, title, ask, starterID, target, invitedIDs,
+entries, inviteCardID, bubbleID?`) and sends the invite card with `hub.send`. Two people from the
+target add over about 3–10 s (the first adds one, the second two; canned, original content in
+`TogetherCopy.cannedContributions`): each arrives through `hub.receive` in a chat, or as a live count
+on the Group's invite post through `hub.update`, with a notification (tap opens the session) and
+`co_make_contribution` with the maker's id (the session id stands in for `bubbleID` until the game
+exists). `TogetherSessionView` shows contributions arriving with avatars, who is still adding, and
+your own (question, right answer, optional wrong answers; words; or a line of text). **Stitch with
+Muse** opens Studio with `StudioLaunch(prompt: "“<title>”: …", social: StudioSocialContext(makers:
+[starter, contributors…], contributions: [...]))`, the Group as audience for Group sessions; the
+Studio entry sets `formulaHint` (questions → answer, words → guess).
+
+**Contribution card extras** (`BubbleChatCard.kind == .contribution`, `bubble_id` empty until the
+game exists):
+
+| Key | Type | Meaning |
+|---|---|---|
+| `session_id` | String | The `TogetherSession` (also in `session_id` on the card) |
+| `stage` | String | `invite`, `contribution`, `published` or `played` |
+| `kind` | String | `question`, `words`, `scene` or `level` |
+| `ask` | String? | What the starter asked for (invite) |
+| `text` | String? | The contribution as written (contribution), or the maker's result line (played) |
+| `title` | String | The game's name |
+| `added` | Number? | Live count of friends' contributions (invite) |
+| `makers` | String? | The credit line, "Made by Maya, Diego and you" (published) |
+
+A question's `text` is `"<question>\nAnswer: <answer>\nAlso: <wrong>, <wrong>"`
+(`TogetherStudio.encodeQuestion` / `parseQuestion`); words are `"BLANKET (clue), FRISBEE"`
+(`parseWords`: A–Z, 3–10 letters, clue in parentheses).
+
+**Studio** (`TogetherStudio`, runs only when `request.social` has contributions, more than one
+maker, or an about-me template, so remixes are untouched). `promptLines` adds a **Made together**
+block (each maker's exact contribution; keep their wording, fix only spelling, credit everyone, fit
+the formula schema, top up to 5 rounds with rounds noted "Added by Muse") or an **About <name>**
+block (Q/A pairs; the subject's answers are right, decoys plausible but not theirs, no brands,
+nothing private beyond what's given). `applyOffline` turns questions into answer-key rounds (the
+maker's answer plus their wrong answers and a fitting pool, at a stable position, note
+"<Maya>'s question"), tops up to 5 rounds from `TogetherStudio.toppers`, switches the answer
+manifest to `rule.answer_key` + `score.answer_points` with `flow.rounds` count = rounds, and takes
+the title from the quoted prompt; words become the guess kit's `words` and `clues` (no daily gate).
+Scenes and levels need Muse online; offline keeps the template's content and still credits every
+maker. The stitch line ("Stitched 3 questions from 3 makers; added 2 Muse questions…") goes in
+`brief.notes`. `finalize` (metadata only) sets `lineage.makers`: the starter first with role
+`starter`, then each contributor once with role `contributor` and what they added ("a question",
+"2 questions", "4 words").
+
+**Published.** `didPublish` takes the first new Bubble whose `lineage.makers` has more than one
+entry, you as starter, and no `remix_of` or `parent`: a `published` card goes to the session's chat
+("We made Picnic Trivia together · Play"), or the Group's invite post turns into it; you get a
+notification naming the makers; `co_make_contribution` posts with every maker's id; and each maker
+plays the game a few seconds later (`simulateRun`, scores added to the board, a `played` card in
+the chat). `TogetherDetailCredits` on the Bubble page shows "Made by Maya, Diego and you" with each
+maker (tap for their profile) and what they added.
+
+**Games about me.** Templates (`TogetherStudio.templates`, ids `how-well` "How well do you know
+me?", `first-month` "My first month in SF", `favorite-spot` "Guess my favorite spot") have 5–6
+questions, each with an id, a form label, a third-person round prompt (`{name}`), decoys and a demo
+answer. `AboutMeFormSheet` prefills the answers (edit any; blank skips), can add your opted-in posts
+(`allowsBubbles`) as `aboutMeAnswers["from_posts"]`, and opens Studio with `social.aboutMeTemplate`,
+`aboutMeAnswers` (by question id) and `makers: [you]`, prompt "“How Well Do You Know Alex?”: a quiz
+about me…" (from Studio's own entry it fills the open Studio instead). `applyOffline` builds one
+answer-key round per answered question in template order; `finalize` sets `about` `{subject_id,
+subject_name, template}` from the first maker. When a game about you publishes, Diego, Aiko and
+Theo play it over the next ~12 s (Diego knows you best in the demo).
+`TogetherProfileAboutMe` (profile Bubbles tab) and the `together/profile/<id>` page list Bubbles
+whose `about.subject_id` is the person (`"me"` counts as you), "Who knows <name> best" (each
+player's best score per game, summed; for you, friends only; top 3, with Add friend for people who
+aren't friends yet, posting `add_friend_from_game`), Play it on a friend's game, and for you the
+three templates. Finishing a run of someone else's about-me game posts `about_me_play` with
+`[subject_id]`. `TogetherGroupMakeRow` on a Group's Games tab starts a session with the Group as the
+target and lists its sessions in progress.
+
+**Seeds.** `bubble-seed-together-picnic-trivia.json` (answer; creator you; New in SF; makers Alex
+starter, Maya, Diego; 6 rounds, 2 "Added by Muse") and `bubble-seed-aboutme-maya-first-month.json`
+(answer; creator Maya; `about` Maya, `first-month`). Both pass the strict kit tests.
+
+**FB_OPEN** (with `FB_SKIP_SPLASH=1`):
+
+| Value | Opens |
+|---|---|
+| `feature:together/start[/group:<id>\|chat:<id>\|friend:<id>]` | `TogetherStartSheet` over the tabs |
+| `feature:together/session/demo` | Stages Picnic Trivia in New in SF crew (contributions over ~10 s) and pushes the session |
+| `feature:together/session/<id>` | A session started this launch |
+| `feature:together/aboutme[/<template>]` | The template picker, or `how-well`, `first-month`, `favorite-spot`'s form |
+| `feature:together/profile/me` | Stages your "Alex's First Month in SF" (offline rounds) and friends' plays, then pushes "Games about me" |
+| `feature:together/profile/<userID>` | Games about that person, e.g. `sf-maya-okafor` |
+| `bubble:together-picnic-trivia` | The Bubble page with "Made by Maya, Diego and you" |
 
 ### 7.5 Remix and share (remix)
 

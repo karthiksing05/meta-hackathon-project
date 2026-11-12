@@ -104,7 +104,8 @@ enum TogetherScreens {
         let me = appStore.me
         let existing = bubbleStore.bubbles.first { $0.manifest.about?.subjectID == me.id || $0.manifest.about?.subjectID == "me" }
         if let existing {
-            if existing.scores.allSatisfy({ $0.user.isMe }) {
+            // A game kept from an earlier launch: replay friends' plays if Diego's run isn't there.
+            if bubbleStore.bestScore(ofUserID: "sf-diego-ramirez", in: existing) == nil {
                 TogetherCenter.shared.scheduleAboutMePlays(existing, appStore: appStore, bubbleStore: bubbleStore)
             }
             return
