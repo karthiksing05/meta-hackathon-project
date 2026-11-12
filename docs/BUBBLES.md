@@ -898,9 +898,69 @@ reproduce ending, tag and score; rounds and endless lengths still end at an endi
 
 ### 7.7 Quiz night: guess what they say next (nextline)
 
-The `nextline` formula (category Quiz night): a short, original animated scene freezes before the
-punchline and players pick the real line from four tiles against a timer. A quiz night runs in a
-Group or group chat, with a live-feeling leaderboard between rounds.
+The `nextline` formula (category Quiz night): a short, original scene (2–3 shape characters whose
+lines type out in speech bubbles) freezes right before the punchline, and players pick the real
+next line from four tiles against a timer. A quiz night runs in a Group or group chat: a lobby
+fills with members, everyone plays the same seed and length, members light up as they answer, and
+a podium, a Rematch and the game night card close the loop. Members' sides are real bot runs
+(`simulateRun`) on the night's seed and length; the app only paces them to your clock.
+
+**Kit** (`bubble-kit-nextline.js`). Concepts: `space.nextline_stage` (stage, characters, typed
+bubbles; idle bobs on the tick clock), `entity.line_tiles` (the tiles and timer bar),
+`rule.next_line` (params `round_seconds` 4–15, default 8; `shuffle_episodes`) and
+`score.quick_answer` (`base` 500 + up to `speed_bonus` 500 by time left, times a streak
+multiplier: +`streak_step` 0.5 per right answer in a row, up to `max_multiplier` 3; glue slot
+`score`). Content:
+
+```
+{ episodes: [ { title ≤ 40, setting? ≤ 80,
+    cast: [{ name ≤ 14, shape: blob|square|tall|round|star, role: primary|secondary|accent }] (2–3),
+    lines: [{ who: <cast name>, text ≤ 70 }] (2–6),
+    next_who: <cast name>, answer ≤ 60, decoys: [3 × ≤ 60, distinct from the answer],
+    reveal_emoji? } ] (2–6) }
+```
+
+Tile style: four full-width rounded cards in one card color with a number badge and a small
+speech tail. No color or shape coding per answer, no copied sounds. A time-out is wrong and breaks
+the streak. Timing (ticks): lead-in 18, title 54, each line `ceil(chars × 1.25) + 22` (a tap on the
+stage finishes a line), the timer, then a 150-tick reveal; `QuizTimeline` mirrors it in Swift.
+Length: `rounds` (default 5, capped at the episode count), `timed` (finishes the round in
+progress) and `lives` (a miss calls `lengthMiss()`; out of lives fails the run). The bot is right
+with probability 0.35 + 0.6 × skill and answers faster with skill.
+
+**Share tag**: `right=4/5;streak=3;r=1:1.8:1:868|2:8.0:0:0|…`. `right` is right/played,
+`streak` the best streak, and each `r` entry is `round:seconds:correct(1/0):points` (a time-out
+reports the full timer). Falls back to dropping points, then `r`, to stay within 120 characters.
+
+**Card** (`.gameNight`, sent with `BubbleSocialHub.send` to the Group or chat; the seed and
+`length: rounds(n)` lock everyone to the same game). Extras: `night_id`, `bubble_id`, `rounds`,
+`members` (Int, you included), `place_name`, `standings` (`[{user_id, score}]`, people whose run
+has finished on the night's clock) and `winner_id` (once everyone is done).
+`BubbleSocialHub.update` keeps it live. Play context: `.gameNight` with `id` = the night id.
+
+**Signals**: `game_night_play` (with the members' ids) when a night starts and when you finish;
+`add_friend_from_game` from the podium's Add friend. Someone else's win adds a notification whose
+`bubbleAction` opens the podium; in a group chat a member reacts.
+
+**Screens** (`NextlineScreens`, state in `QuizNightCenter.shared`): `night/<groupID or chatID>`
+(lobby), `podium/<nightID>`, `results/<bubbleID>` (latest finished night). Slots:
+`NextlineResultSummary`, `NextlinePlayerBanner` (live strip, mini leaderboard between rounds),
+`NextlineGroupGameNight`, `NextlineFeaturedBanner`, `NextlineDetailRow` (Start a quiz night in…),
+`NextlineCardBody`. The groups-search Games tab opens `BubbleFeatureRoute(.nextline, "night",
+groupID)`.
+
+**FB_OPEN** (with `FB_SKIP_SPLASH=1`): `play:nextline-thermostat-wars`,
+`feature:nextline/night/group-newinsf`, `feature:nextline/night/bubble-chat-newinsf-crew`,
+`feature:nextline/live/nextline-thermostat-wars` (a staged night in New in SF: the card posts and
+the player opens with the live strip) and `feature:nextline/results/nextline-thermostat-wars` (a
+staged podium; your side there is a practice bot run, labeled and never recorded).
+
+**Seeds**: `nextline-thermostat-wars` (roommates and the thermostat, riso, by Chloe) and
+`nextline-hill-parking` (new neighbors on a steep street, clay, by Omar), both in New in SF, 5
+episodes each. **Studio**: `NextlineStudio.hint` (keywords such as quiz night, punchline, what
+they say next; looks riso, paper, clay; a composer guide; offline: five scenes from original
+templates with the request's subject; playtest flag `nextline_short` under 15 s). **Tests**:
+`tools/kits-tests/suite-nextline.js`.
 
 ### 7.8 Learn together (learn)
 

@@ -1,0 +1,307 @@
+{
+  "id": "nextline-thermostat-wars",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Thermostat Wars",
+  "one_line_rule": "Guess what the roommates say next.",
+  "formula": "nextline",
+  "brief": {
+    "intent": "a quiz night for New in SF: guess the punchline",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "playful",
+      "silly"
+    ],
+    "energy": "medium",
+    "competition": "friendly",
+    "occasion": "party"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "riso",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#F4F1FA",
+      "bg_bottom": "#E6E0F5",
+      "ink": "#241B4B",
+      "primary": "#5B5BD6",
+      "secondary": "#8E6CEF",
+      "accent": "#2F8FD8",
+      "danger": "#B3261E"
+    },
+    "font": "condensed",
+    "motif": "dots",
+    "emoji": "🌡️",
+    "mood_preset": "playful",
+    "cover_prompt": "riso zine print of two cartoon roommates, a round blob and a square, arguing over a wall thermostat, two spot colors, halftone, cream paper"
+  },
+  "concepts": [
+    {
+      "use": "space.nextline_stage"
+    },
+    {
+      "use": "entity.line_tiles"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.next_line",
+      "params": {
+        "round_seconds": 8
+      }
+    },
+    {
+      "use": "score.quick_answer"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "episodes": [
+      {
+        "title": "Day one",
+        "setting": "Two roommates, one thermostat.",
+        "cast": [
+          {
+            "name": "Juno",
+            "shape": "blob",
+            "role": "primary"
+          },
+          {
+            "name": "Pax",
+            "shape": "square",
+            "role": "secondary"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Juno",
+            "text": "Why is it 64 degrees in here?"
+          },
+          {
+            "who": "Pax",
+            "text": "Because 64 is a crisp, efficient number."
+          },
+          {
+            "who": "Juno",
+            "text": "I can see my breath, Pax."
+          },
+          {
+            "who": "Juno",
+            "text": "We need a compromise."
+          }
+        ],
+        "next_who": "Pax",
+        "answer": "Fine. We'll both wear sweaters.",
+        "decoys": [
+          "Fine. I'll open a window instead.",
+          "Let's paint the walls a warmer blue.",
+          "Did you finish my oat milk?"
+        ],
+        "reveal_emoji": "🧶"
+      },
+      {
+        "title": "The secret tweak",
+        "setting": "Someone touched the dial overnight.",
+        "cast": [
+          {
+            "name": "Pax",
+            "shape": "square",
+            "role": "secondary"
+          },
+          {
+            "name": "Juno",
+            "shape": "blob",
+            "role": "primary"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Pax",
+            "text": "Did someone touch the thermostat?"
+          },
+          {
+            "who": "Juno",
+            "text": "No idea what you mean."
+          },
+          {
+            "who": "Pax",
+            "text": "It says 78. It's a sauna in here."
+          },
+          {
+            "who": "Juno",
+            "text": "Okay, but hear me out..."
+          }
+        ],
+        "next_who": "Juno",
+        "answer": "My houseplants asked for a tropical vacation.",
+        "decoys": [
+          "I was trying to save money on heating.",
+          "I think the landlord changed it.",
+          "Can you pass me the remote?"
+        ],
+        "reveal_emoji": "🌴"
+      },
+      {
+        "title": "Enter Wren",
+        "setting": "A new roommate moves in.",
+        "cast": [
+          {
+            "name": "Wren",
+            "shape": "tall",
+            "role": "accent"
+          },
+          {
+            "name": "Juno",
+            "shape": "blob",
+            "role": "primary"
+          },
+          {
+            "name": "Pax",
+            "shape": "square",
+            "role": "secondary"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Wren",
+            "text": "Hi! I'm the new roommate."
+          },
+          {
+            "who": "Juno",
+            "text": "Welcome! Quick question: hot or cold?"
+          },
+          {
+            "who": "Wren",
+            "text": "I sleep with the window open in winter."
+          },
+          {
+            "who": "Pax",
+            "text": "Finally. An ally."
+          }
+        ],
+        "next_who": "Juno",
+        "answer": "This is a hostile takeover.",
+        "decoys": [
+          "Great, I'll put the kettle on.",
+          "Do you like board games?",
+          "The bathroom is down the hall."
+        ],
+        "reveal_emoji": "🥶"
+      },
+      {
+        "title": "The treaty",
+        "setting": "A house meeting at the kitchen table.",
+        "cast": [
+          {
+            "name": "Wren",
+            "shape": "tall",
+            "role": "accent"
+          },
+          {
+            "name": "Pax",
+            "shape": "square",
+            "role": "secondary"
+          },
+          {
+            "name": "Juno",
+            "shape": "blob",
+            "role": "primary"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Wren",
+            "text": "Let's settle this like adults."
+          },
+          {
+            "who": "Pax",
+            "text": "A schedule. 68 during the day."
+          },
+          {
+            "who": "Juno",
+            "text": "And 72 at night."
+          },
+          {
+            "who": "Wren",
+            "text": "And on weekends?"
+          }
+        ],
+        "next_who": "Pax",
+        "answer": "Weekends, the thermostat gets a day off too.",
+        "decoys": [
+          "Weekends we all go to the beach.",
+          "We order dumplings on Sundays.",
+          "Weekends, Wren picks the music."
+        ],
+        "reveal_emoji": "📜"
+      },
+      {
+        "title": "Lights out",
+        "setting": "The power just went out.",
+        "cast": [
+          {
+            "name": "Juno",
+            "shape": "blob",
+            "role": "primary"
+          },
+          {
+            "name": "Pax",
+            "shape": "square",
+            "role": "secondary"
+          },
+          {
+            "name": "Wren",
+            "shape": "tall",
+            "role": "accent"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Juno",
+            "text": "The power's out. The heat's off."
+          },
+          {
+            "who": "Pax",
+            "text": "It's getting colder in here."
+          },
+          {
+            "who": "Wren",
+            "text": "Everyone, blanket fort. Now."
+          },
+          {
+            "who": "Juno",
+            "text": "Pax, you've been very quiet."
+          }
+        ],
+        "next_who": "Pax",
+        "answer": "Honestly? Best night of my life.",
+        "decoys": [
+          "I'll go find the flashlight.",
+          "Should we call the landlord?",
+          "I think I left the oven on."
+        ],
+        "reveal_emoji": "🕯️"
+      }
+    ]
+  },
+  "seed": 2026111401,
+  "_seed": {
+    "creator_id": "sf-chloe-nguyen",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 5,
+    "play_count": 64,
+    "like_count": 22,
+    "save_count": 19
+  }
+}
