@@ -484,3 +484,136 @@ function runInterleaveChecks(R, ok) {
 }
 
 if (typeof module !== "undefined" && module.exports) module.exports.runInterleaveChecks = runInterleaveChecks;
+
+// The optional Muse re-rank: the prompt, the reply check, the capped term, and the guards.
+function runMuseChecks(R, ok) {
+  "use strict";
+  var F = ["dodge", "time", "merge", "guess", "group", "answer"], M = ["calm", "warm", "playful", "hype"];
+  var sums = [], cands = [];
+  for (var i = 0; i < 12; i++) {
+    sums.push({ id: "m" + i, formula: F[i % F.length], mood: [M[i % M.length]], energy: "medium", competition: "friendly", look: "glow", scope: i === 3 ? "group" : "everyone", isDaily: false, bots: [] });
+    cands.push({ gameID: "m" + i, reason: "popular", runUserID: null, weight: 1 });
+  }
+  function input(seed, count, extra) {
+    var x = { candidates: cands, summaries: sums, feed: [], count: count || 6, seed: seed, day: 1 };
+    for (var k in extra || {}) x[k] = extra[k];
+    return x;
+  }
+  function imp(id, o) {
+    var x = { id: id, dwellSec: 3, tookOver: false, runsFinished: 0, replays: 0, saved: false, liked: false, floated: false, openedBoard: false, addedFriend: false, remixed: false, quitMidRun: false, endedSession: false, day: 1 };
+    for (var k in o) x[k] = o[k];
+    return x;
+  }
+  function reply(order, why) { return JSON.stringify({ order: order, why: why || {} }); }
+
+  var Pon = R.params({ muse: { on: true } });
+  ok(R.params().muse.on === false, "the Muse layer is off by default");
+
+  // The request
+  var S = R.newState(), u = R.newUser();
+  R.describeAll(sums, Pon);
+  R.observe(S, u, imp("m1", { tookOver: true, runsFinished: 1, replays: 2, saved: true }), Pon);
+  R.observe(S, u, imp("m2", { dwellSec: 0.4 }), Pon);
+  var req = R.museRequest(S, u, input(5), Pon);
+  var known = {};
+  cands.forEach(function (c) { known[c.gameID] = true; });
+  ok(req.ids.length === 10 && req.ids.every(function (id) { return known[id]; }), "Ember sees the formula's top 10, all real games", req.ids.length);
+  ok(/finished a .*replayed it twice, saved it/.test(req.user) && /skipped a /.test(req.user), "recent plays are described in words", req.user.split("\n").slice(0, 3).join(" | "));
+  ok(!/\bme\b|@|\.com/.test(req.user) && req.ids.every(function (id) { return req.user.indexOf("- " + id + ":") >= 0; }), "the prompt lists the games and no people");
+  var formulaOrder = R.rank(S, u, input(5, 10), R.params()).picks.map(function (p) { return p.gameID; });
+  var shuffledSomewhere = false;
+  for (var s = 0; s < 5; s++) {
+    var q = R.museRequest(S, u, input(20 + s), Pon);
+    var f = R.rank(S, u, input(20 + s, 10), R.params()).picks.map(function (p) { return p.gameID; });
+    if (q.ids.join() !== f.slice(0, q.ids.length).join()) shuffledSomewhere = true;
+  }
+  ok(shuffledSomewhere, "candidates reach Ember shuffled, not in the formula's order (position bias)");
+  ok(R.museRequest(S, u, input(5), Pon).ids.join() === req.ids.join(), "the same seed gives the same prompt");
+
+  // Checking the reply
+  var want = req.ids.slice().reverse();
+  var a1 = R.museApply(S, u, "Sure! Here you go: " + reply(want.concat(["made-up-1"]).concat([want[0]]), { m1: "You loved this kind of game" }) + " Enjoy.", Pon, 1000);
+  ok(a1.ok && a1.kept === 10 && a1.dropped === 2, "made-up and repeated IDs are dropped and counted; prose around the JSON is fine", JSON.stringify(a1));
+  ok(u.museStats.dropped === 2 && Math.abs(R.museStats(u).madeUpIDShare - 2 / 12) < 1e-9, "the made-up-ID share is tracked");
+  R.museRequest(S, u, input(5), Pon);
+  ok(R.museApply(S, u, "no json here", Pon, 1000).ok === false, "a reply without an order is rejected");
+  R.museRequest(S, u, input(5), Pon);
+  ok(R.museApply(S, u, reply(["nope", "nada"]), Pon, 1000).ok === false, "a reply naming no real games is rejected");
+  ok(R.museApply(R.newState(), R.newUser(), reply(["m1"]), Pon, 1000).ok === false, "a reply with no request behind it is rejected");
+
+  // The capped term
+  var u2 = R.newUser(), S2 = R.newState();
+  R.museRequest(S2, u2, input(5), Pon);
+  var ids2 = u2.musePending.ids.slice();
+  R.museApply(S2, u2, reply(ids2), Pon, 1000);
+  var top = R.museTerm(u2, ids2[0], Pon, 2000), last = R.museTerm(u2, ids2[ids2.length - 1], Pon, 2000);
+  ok(Math.abs(top - 0.6) < 1e-9 && Math.abs(last + 0.6) < 1e-9, "Ember's first pick gets +0.6 and its last -0.6", top + ", " + last);
+  ok(R.museTerm(u2, "m-not-ranked", Pon, 2000) === 0, "a game Ember didn't rank gets nothing");
+  var big = R.params({ muse: { on: true, w: 5, cap: 0.6 } });
+  ok(Math.abs(R.museTerm(u2, ids2[0], big, 2000)) <= 0.6 + 1e-12, "the cap holds even with a big weight");
+  ok(R.museTerm(u2, ids2[0], Pon, 1000 + 31 * 60000) === 0, "an order older than 30 minutes is ignored");
+  ok(R.museTerm(u2, ids2[0], R.params(), 2000) === 0, "with the layer off, the term is 0");
+
+  // Muse breaks a tie...
+  var flat = R.params({ muse: { on: true }, stages: { bandit: false, calibration: false, coldStart: false, bait: false } });
+  var twins = [{ id: "tA", formula: "guess", mood: ["calm"], energy: "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: false, bots: [] },
+    { id: "tB", formula: "guess", mood: ["calm"], energy: "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: false, bots: [] }];
+  var tIn = { candidates: [{ gameID: "tA", reason: "popular", weight: 1 }, { gameID: "tB", reason: "popular", weight: 1 }], summaries: twins, feed: [], count: 1, seed: 3, day: 1, now: 2000 };
+  var u3 = R.newUser(), S3 = R.newState();
+  R.museRequest(S3, u3, tIn, flat);
+  R.museApply(S3, u3, reply(["tB", "tA"], { tB: "a calm one to unwind" }), flat, 1000);
+  var withMuse = R.rank(S3, u3, tIn, flat).picks[0];
+  ok(withMuse.gameID === "tB" && withMuse.museWhy === "a calm one to unwind" && withMuse.parts.muse > 0, "between equal games, Ember's pick wins and brings its why line");
+  ok(typeof withMuse.why === "string" && withMuse.why.length > 0, "the formula's own why line is kept next to Ember's");
+  // ...but can't lift slop over a good game.
+  var S4 = R.newState(), u4 = R.newUser(), crowd = R.userIn(S4, "crowd");
+  var pair = [{ id: "good", formula: "merge", mood: ["warm"], energy: "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: false, bots: [] },
+    { id: "slop", formula: "merge", mood: ["warm"], energy: "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: false, bots: [] }];
+  R.describeAll(pair, Pon);
+  for (var t = 0; t < 12; t++) {
+    R.observe(S4, crowd, imp("good", { tookOver: true, runsFinished: 1, replays: 1 }), Pon);
+    R.observe(S4, crowd, imp("slop", { tookOver: true, quitMidRun: true }), Pon);
+  }
+  var pIn = { candidates: [{ gameID: "good", reason: "popular", weight: 1 }, { gameID: "slop", reason: "popular", weight: 1 }], summaries: pair, feed: [], count: 1, seed: 9, day: 1, now: 2000 };
+  R.museRequest(S4, u4, pIn, Pon);
+  R.museApply(S4, u4, reply(["slop", "good"]), Pon, 1000);
+  var firstPicks = 0;
+  for (var z = 0; z < 20; z++) { pIn.seed = 100 + z; if (R.rank(S4, u4, pIn, Pon).picks[0].gameID === "good") firstPicks++; }
+  ok(firstPicks >= 19, "Ember can't lift a game people quit over a game they finish", firstPicks + "/20");
+
+  // Interleaving judges it against the formula alone.
+  var Pi = R.params({ muse: { on: true }, interleave: { on: true, against: "noMuse" } });
+  var S5 = R.newState(), u5 = R.newUser();
+  R.museRequest(S5, u5, input(7), Pi);
+  R.museApply(S5, u5, reply(u5.musePending.ids.slice().reverse()), Pi, 1000);
+  var mix = R.interleave(S5, u5, input(7, 6, { now: 2000 }), Pi);
+  var noMuse = R.rank(S5, u5, input(7, 6, { now: 2000 }), R.params({ muse: { on: false } })).picks.map(function (p) { return p.gameID; });
+  var bIds = mix.picks.filter(function (p) { return p.team === "B"; }).map(function (p) { return p.gameID; });
+  var j = 0;
+  noMuse.forEach(function (id) { if (id === bIds[j]) j++; });
+  ok(mix.interleave.against === "noMuse" && j === bIds.length, "interleaving against noMuse compares with the formula alone");
+
+  // App bridge
+  var A = R.app;
+  A.load(null, null);
+  ok(JSON.parse(A.museRequest(JSON.stringify(input(5)))).skip === true, "with the flag off, app.museRequest skips");
+  A.load(null, JSON.stringify({ muse: { on: true } }));
+  var bridged = JSON.parse(A.museRequest(JSON.stringify(input(5))));
+  ok(typeof bridged.system === "string" && bridged.ids.length === 10, "app.museRequest returns the prompt");
+  var applied = JSON.parse(A.museApply(reply(bridged.ids), 5000));
+  ok(applied.ok && applied.kept === 10, "app.museApply takes Ember's raw reply");
+  var dbg = JSON.parse(A.debugSummary());
+  ok(dbg.muse && dbg.muse.active && dbg.muse.applied === 1 && dbg.muse.madeUpIDShare === 0, "the debug summary shows the Muse layer");
+  A.load(A.exportState(), JSON.stringify({ muse: { on: true } }));
+  ok(JSON.parse(A.debugSummary()).muse.active, "Ember's order survives export and reload");
+  A.load(null, null);
+  ok(R._math.firstJSONObject('x {"a": "}{"} y {"b":1}').a === "}{", "the JSON finder handles braces inside strings");
+
+  // Repeat window early in a session (fixed in 0.5: a short feed used to block too little).
+  var fresh = R.rank(R.newState(), R.newUser(), input(31, 5), R.params()).picks.map(function (p) { return p.gameID; });
+  var freshBase = R.baseline(input(31, 5)).picks.map(function (p) { return p.gameID; });
+  function distinct(list) { var o = {}; list.forEach(function (x) { o[x] = true; }); return Object.keys(o).length; }
+  ok(distinct(fresh) === 5 && distinct(freshBase) === 5, "the first 5 pages of a session never repeat a game", fresh.join(",") + " / " + freshBase.join(","));
+}
+
+if (typeof module !== "undefined" && module.exports) module.exports.runMuseChecks = runMuseChecks;

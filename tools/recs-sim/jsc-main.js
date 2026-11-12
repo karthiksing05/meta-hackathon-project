@@ -9,6 +9,7 @@
   runRecsChecks(GameRecs, ok);
   runBlendChecks(GameRecs, ok);
   runInterleaveChecks(GameRecs, ok);
+  runMuseChecks(GameRecs, ok);
   print(passed + " passed, " + failed + " failed");
   if (failed) throw new Error(failed + " checks failed");
 })();

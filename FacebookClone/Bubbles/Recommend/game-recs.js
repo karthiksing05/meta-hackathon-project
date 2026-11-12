@@ -115,6 +115,17 @@
         tiers: [0.4, 0.65]
       },
       feed: { reasonPrior: 1, repeatWindow: 4, repeatFatigue: 0.9, burstRotation: 1.6 },
+      // Optional Muse re-rank, off by default. Ember reads your recent plays (as game features,
+      // no names) and the formula's top games, and suggests an order. That order enters the score
+      // as one named, capped term, so the formula still decides and every guard still holds.
+      muse: {
+        on: false,
+        w: 0.6,          // Ember's first pick gets +w, its last -w, linear in between
+        cap: 0.6,        // the term never moves a score by more than this
+        topK: 10,        // how many of the formula's games Ember sees
+        historyN: 8,     // recent plays described in the prompt
+        ttlMin: 30       // an order older than this is ignored
+      },
       // Team-draft interleaving: each feed mixes the formula's picks (team A) with a control's
       // (team B), and a session goes to whichever side's picks you enjoyed more. Off by default.
       interleave: {
@@ -688,6 +699,11 @@
       user.recent.push({ hooky: hook >= P.bait.hookyAt, bad: res.quickSkip || !!imp.quitMidRun });
       while (user.recent.length > P.bait.fatigueWindow) user.recent.shift();
     }
+    // A short log of recent plays, for the Muse prompt (game features only, never people).
+    if (!user.log) user.log = [];
+    user.log.push({ id: imp.id, took: !!imp.tookOver, fin: (imp.runsFinished || 0) > 0, rep: imp.replays || 0, saved: !!imp.saved, quit: !!imp.quitMidRun, social: (imp.social || []).length, skip: res.quickSkip });
+    var keep = (P.muse && P.muse.historyN) || 8;
+    while (user.log.length > keep) user.log.shift();
     var team = creditPage(user, imp, P);
     return { g: res.g, s: res.s, v: res.v, r: res.r, hook: hook, team: team };
   }
@@ -794,7 +810,8 @@
       var maxW = 0;
       byGame[id].forEach(function (c) { if (c.weight > maxW) maxW = c.weight; });
       parts.reason = F.reasonPrior * Math.log(Math.max(maxW, 0.05));
-      var base = parts.quality + parts.taste + parts.bait + parts.slop + parts.reason;
+      parts.muse = museTerm(user, id, P, input.now);
+      var base = parts.quality + parts.taste + parts.bait + parts.slop + parts.reason + parts.muse;
       info[id] = { view: v, parts: parts, base: base, thetaGrab: tg, thetaSat: ts };
     });
 
@@ -907,7 +924,8 @@
         pSlop: it.view.pSlop,
         unproven: it.view.unproven,
         parts: it.parts,
-        why: explain(it, bait)
+        why: explain(it, bait),
+        museWhy: it.parts.muse ? museWhyFor(user, best) : null
       });
       feed.push(best);
       uses[best] = (uses[best] || 0) + 1;
@@ -1078,6 +1096,152 @@
       T[t].engaged += ses[t].engaged;
       T[t].points += ses[t].points;
     });
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Optional Muse re-rank (off by default).
+  //
+  //   request  the formula ranks as usual with the Muse term off; its top `topK` games, in a
+  //            shuffled order (LLM rankers favor whatever comes first; Hou et al. 2023), and your
+  //            last `historyN` plays, described by game features only, become the prompt.
+  //   apply    Ember's reply is checked: only games from the request count, each once. Made-up IDs
+  //            are dropped and counted. The order is kept with a time stamp.
+  //   term     in rank(), parts.muse = w · (1 − 2ρ/(K − 1)) for Ember's rank ρ of K, capped at ±cap,
+  //            so the formula still decides and the guards still hold. Games Ember didn't rank get 0.
+  //   judge    interleaving against `noMuse` (the formula with this term off) says whether it helps.
+
+  function museTerm(user, id, P, now) {
+    var M = P.muse;
+    if (!M || !M.on || !user.muse || !user.muse.ranks) return 0;
+    var m = user.muse, rho = m.ranks[id];
+    if (rho === undefined) return 0;
+    if (M.ttlMin && now && m.at && now - m.at > M.ttlMin * 60000) return 0;
+    var span = Math.max(1, m.K - 1);
+    return clamp(M.w * (1 - 2 * rho / span), -M.cap, M.cap);
+  }
+
+  function museWhyFor(user, id) {
+    return (user.muse && user.muse.why && user.muse.why[id]) || null;
+  }
+
+  function gameWords(d, summary) {
+    var s = summary || {};
+    var bits = [];
+    var mood = (s.mood || []).map(function (m) { return String(m).toLowerCase(); }).slice(0, 2).join(" and ");
+    bits.push((mood ? mood + " " : "") + (FORMULA_WORD[s.formula] || s.formula || "mini") + " game");
+    if (s.energy) bits.push(String(s.energy).toLowerCase() + " energy");
+    if (s.competition) bits.push(String(s.competition).toLowerCase());
+    if (s.scope && s.scope !== "everyone") bits.push("made for a " + s.scope);
+    if (s.title) bits.unshift("\"" + String(s.title).slice(0, 40) + "\"");
+    return bits.join(", ");
+  }
+
+  function playLine(e, summaries) {
+    var what = gameWords(null, summaries[e.id]);
+    if (e.skip) return "skipped a " + what;
+    if (!e.took) return "looked at a " + what + " but didn't play";
+    var out = (e.fin ? "finished" : e.quit ? "quit partway through" : "played") + " a " + what;
+    if (e.rep) out += ", replayed it " + (e.rep === 1 ? "once" : e.rep === 2 ? "twice" : e.rep + " times");
+    if (e.saved) out += ", saved it";
+    if (e.social) out += ", shared or challenged someone";
+    return out;
+  }
+
+  var MUSE_SYSTEM =
+    "You re-rank a short list of tiny games for one person's feed. Use only the games listed, by their ids. " +
+    "Order them from the one this person is most likely to enjoy finishing and come back to, to the least. " +
+    "Favor games that pay off over games that only grab attention, and keep some variety. " +
+    "Reply with JSON only: {\"order\": [ids, best first], \"why\": {\"<id>\": \"one short reason for this person, under 12 words\"}}. " +
+    "Never invent ids.";
+
+  function museRequest(S, user, input, P) {
+    var M = P.muse || {};
+    var Pm = JSON.parse(JSON.stringify(P));
+    Pm.muse.on = false;
+    var K = Math.max(2, M.topK || 10);
+    var asked = {};
+    for (var k in input) asked[k] = input[k];
+    // The formula's order with no game repeated: block every earlier pick, then keep the first K.
+    Pm.feed.repeatWindow = 1e6;
+    asked.count = K;
+    var top = rank(S, user, asked, Pm).picks, ids = [], seen = {};
+    top.forEach(function (p) { if (!seen[p.gameID] && ids.length < K) { seen[p.gameID] = true; ids.push(p.gameID); } });
+    var r = rng((input.seed >>> 0) ^ hashString("muse|" + ids.join("|")));
+    for (var i = ids.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)); var t = ids[i]; ids[i] = ids[j]; ids[j] = t; }
+    var byId = {};
+    (input.summaries || []).forEach(function (s) { byId[s.id] = s; });
+    var history = (user.log || []).map(function (e) { return "- " + playLine(e, byId); });
+    var lines = ids.map(function (id) {
+      var v = CACHE.descs[id] ? itemView(S, CACHE.descs[id], P, input.day || 0, globalGrab(S, P)) : null;
+      return "- " + id + ": " + gameWords(null, byId[id]) + (v && v.unproven ? ", new" : "");
+    });
+    user.musePending = { ids: ids, day: input.day || 0 };
+    if (!user.museStats) user.museStats = { requests: 0, applied: 0, rejected: 0, returned: 0, dropped: 0 };
+    user.museStats.requests += 1;
+    var prompt = "Recent plays, oldest first:\n" + (history.length ? history.join("\n") : "- none yet") +
+      "\n\nGames to order (in no particular order):\n" + lines.join("\n");
+    return { system: MUSE_SYSTEM, user: prompt, ids: ids };
+  }
+
+  // The first {...} in a reply that parses as JSON.
+  function firstJSONObject(text) {
+    text = String(text || "");
+    for (var start = text.indexOf("{"); start >= 0; start = text.indexOf("{", start + 1)) {
+      var depth = 0, inStr = false, esc = false;
+      for (var i = start; i < text.length; i++) {
+        var ch = text.charAt(i);
+        if (inStr) {
+          if (esc) esc = false; else if (ch === "\\") esc = true; else if (ch === "\"") inStr = false;
+          continue;
+        }
+        if (ch === "\"") inStr = true;
+        else if (ch === "{") depth++;
+        else if (ch === "}" && --depth === 0) {
+          try { return JSON.parse(text.slice(start, i + 1)); } catch (e) { break; }
+        }
+      }
+    }
+    return null;
+  }
+
+  function museApply(S, user, replyText, P, now) {
+    var pending = user.musePending;
+    if (!user.museStats) user.museStats = { requests: 0, applied: 0, rejected: 0, returned: 0, dropped: 0 };
+    var stats = user.museStats;
+    if (!pending) return { ok: false, reason: "no request" };
+    var obj = firstJSONObject(replyText);
+    var order = obj && Array.isArray(obj.order) ? obj.order : null;
+    if (!order) { stats.rejected += 1; return { ok: false, reason: "no order" }; }
+    var allowed = {}, kept = [], seen = {}, dropped = 0;
+    pending.ids.forEach(function (id) { allowed[id] = true; });
+    order.forEach(function (id) {
+      id = String(id);
+      if (!allowed[id] || seen[id]) { dropped++; return; }
+      seen[id] = true;
+      kept.push(id);
+    });
+    stats.returned += order.length;
+    stats.dropped += dropped;
+    if (kept.length < 2) { stats.rejected += 1; return { ok: false, reason: "too few known games", dropped: dropped }; }
+    var ranks = {}, why = {};
+    kept.forEach(function (id, i) { ranks[id] = i; });
+    var w = (obj.why && typeof obj.why === "object") ? obj.why : {};
+    kept.forEach(function (id) {
+      if (typeof w[id] === "string" && w[id].trim()) why[id] = w[id].replace(/\s+/g, " ").trim().slice(0, 90);
+    });
+    user.muse = { ranks: ranks, why: why, K: kept.length, at: now || null, day: pending.day };
+    user.musePending = null;
+    stats.applied += 1;
+    return { ok: true, kept: kept.length, dropped: dropped, why: Object.keys(why).length };
+  }
+
+  function museStats(user) {
+    var s = user.museStats || { requests: 0, applied: 0, rejected: 0, returned: 0, dropped: 0 };
+    return {
+      requests: s.requests, applied: s.applied, rejected: s.rejected,
+      madeUpIDShare: s.returned ? s.dropped / s.returned : null,
+      active: !!(user.muse && user.muse.ranks), K: user.muse ? user.muse.K : 0, at: user.muse ? user.muse.at : null
+    };
   }
 
   // Two-sided sign test on decided sessions: exact up to 1,000, normal approximation past that.
@@ -1602,6 +1766,17 @@
       if (APP.S) endSession(userIn(APP.S, "me"), APP.S);
       return "{}";
     },
+    // Muse re-rank, step 1: the prompt for Ember, or {skip: true} when the layer is off.
+    museRequest: function (inputJSON) {
+      if (!APP.S) app.load(null, null);
+      if (!APP.P.muse || !APP.P.muse.on) return JSON.stringify({ skip: true });
+      return JSON.stringify(museRequest(APP.S, userIn(APP.S, "me"), JSON.parse(inputJSON), APP.P));
+    },
+    // Step 2: Ember's raw reply text and the time in ms. Unknown games are dropped and counted.
+    museApply: function (replyText, nowMs) {
+      if (!APP.S) app.load(null, null);
+      return JSON.stringify(museApply(APP.S, userIn(APP.S, "me"), replyText, APP.P, +nowMs || null));
+    },
     // Interleaving tally so far, per control: {baseline: {sessions, formulaWins, ...}}.
     interleaveStats: function () {
       return JSON.stringify(interleaveStats(APP.S));
@@ -1622,7 +1797,8 @@
       var me = userIn(APP.S, "me");
       return JSON.stringify({
         version: VERSION, stages: APP.P.stages, bait: baitLean(me, APP.P, APP.S), pages: me.n, items: Object.keys(APP.S.items).length,
-        interleave: APP.P.interleave && APP.P.interleave.on ? { against: APP.P.interleave.against, stats: interleaveStats(APP.S) } : null
+        interleave: APP.P.interleave && APP.P.interleave.on ? { against: APP.P.interleave.against, stats: interleaveStats(APP.S) } : null,
+        muse: APP.P.muse && APP.P.muse.on ? museStats(me) : null
       });
     }
   };
@@ -1649,6 +1825,10 @@
     baseline: baseline,
     interleave: interleave,
     interleaveStats: interleaveStats,
+    museRequest: museRequest,
+    museApply: museApply,
+    museTerm: museTerm,
+    museStats: museStats,
     baitLean: baitLean,
     botQuality: botQuality,
     profileOf: profileOf,
@@ -1662,7 +1842,7 @@
     skillPlus: skillPlus,
     groupBlend: groupBlend,
     blendSpec: blendSpec,
-    _math: { sigmoid: sigmoid, logit: logit, phi: phi, betaSample: betaSample, betaBelow: betaBelow, rng: rng, hashString: hashString, signTest: signTest, wilson: wilson },
+    _math: { sigmoid: sigmoid, logit: logit, phi: phi, betaSample: betaSample, betaBelow: betaBelow, rng: rng, hashString: hashString, signTest: signTest, wilson: wilson, firstJSONObject: firstJSONObject },
     _dims: { FORMULAS: FORMULAS, MOODS: MOODS, LOOKS: LOOKS, SCOPES: SCOPES, DIM: DIM },
     app: app
   };
