@@ -136,8 +136,17 @@ private struct StudioPlayerCard: View {
     @State private var runtimeError: String?
 
     var body: some View {
+        // The badge sits under the card, so it never covers the game's own top-left HUD.
+        VStack(alignment: .leading, spacing: FBSpacing.s) {
+            player
+            MuseBadge()
+                .padding(.leading, FBSpacing.xs)
+        }
+    }
+
+    private var player: some View {
         let shape = RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous)
-        BubbleWebView(
+        return BubbleWebView(
             manifest: result.manifest,
             mode: .play,
             playerName: model.me?.firstName ?? "",
@@ -152,12 +161,7 @@ private struct StudioPlayerCard: View {
         .background(BubbleGlow.palette(for: result.manifest.style).gradient)
         .clipShape(shape)
         .overlay(shape.strokeBorder(BubbleGlow.iridescent, lineWidth: 1.5).opacity(0.9))
-        .shadow(color: BubbleGlow.pink.opacity(0.3), radius: 18, y: 8)
-        .overlay(alignment: .topLeading) {
-            MuseBadge()
-                .padding(FBSpacing.m)
-                .allowsHitTesting(false)
-        }
+        .shadow(color: GameColor.periwinkle.opacity(0.3), radius: 18, y: 8)
         .overlay(alignment: .topTrailing) {
             HStack(spacing: 0) {
                 StudioCircleButton(symbol: GameSound.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", accessibilityLabel: GameSound.isMuted ? "Turn sound on" : "Turn sound off") {
@@ -211,7 +215,7 @@ private struct StudioPlayerCard: View {
             .frame(minHeight: 44)
             .background(BubbleGlow.brandGradient, in: Capsule())
             .overlay(Capsule().strokeBorder(Color.white.opacity(0.75), lineWidth: 1))
-            .shadow(color: BubbleGlow.pink.opacity(0.4), radius: 10, y: 4)
+            .shadow(color: GameColor.periwinkle.opacity(0.4), radius: 10, y: 4)
         }
         .buttonStyle(.pressable)
     }
