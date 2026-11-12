@@ -100,7 +100,7 @@ struct BubbleDetailView: View {
                     Text(bubble.creator.id == appStore.me.id ? "You" : bubble.creator.name)
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
-                    Text("Blown \(bubble.createdAt.formatted(.relative(presentation: .named)))")
+                    Text("Made \(bubble.createdAt.formatted(.relative(presentation: .named)))")
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                 }
@@ -119,7 +119,8 @@ struct BubbleDetailView: View {
     private func tags(_ bubble: Bubble) -> some View {
         FlowLayout(spacing: 8, lineSpacing: 8) {
             BubbleTagPill(symbol: bubble.formula.symbol, text: bubble.formula.title)
-            if bubble.category != .play {
+            // Skip the category when it repeats the formula ("Learn · Learn").
+            if bubble.category != .play, bubble.category.title != bubble.formula.title {
                 BubbleTagPill(symbol: bubble.category.symbol, text: bubble.category.title, highlighted: true)
             }
             if bubble.isDaily {
