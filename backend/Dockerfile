@@ -19,12 +19,14 @@ RUN apk add --no-cache ca-certificates tzdata \
  && addgroup -g 10001 app && adduser -D -u 10001 -G app app
 
 FROM base AS api
+LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hackathon-project"
 COPY --from=build /out/api /out/dbinit /app/
 USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["/app/api"]
 
 FROM base AS games
+LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hackathon-project"
 COPY --from=build /out/games /app/games
 USER 10001:10001
 EXPOSE 8081

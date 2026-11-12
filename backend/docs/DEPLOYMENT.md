@@ -120,9 +120,8 @@ token as a secret and do not put it in the repo, a container image, or a workflo
 On the server (Debian 12), install from Cloudflare's apt repo and register the service:
 
 ```bash
-curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg -o /usr/share/keyrings/cloudflare-main.gpg
-echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main" > /etc/apt/sources.list.d/cloudflared.list
-apt update && apt -y install cloudflared
+curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o /tmp/cloudflared.deb
+apt -y install /tmp/cloudflared.deb
 cloudflared service install <TOKEN-FROM-THE-DASHBOARD>
 systemctl enable --now cloudflared && systemctl status cloudflared
 ```

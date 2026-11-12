@@ -77,6 +77,9 @@ jobs:
   deploy:
     needs: images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read          # lets this job's token pull the images on the server
     environment: production   # holds VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_KNOWN_HOSTS (and optional API_PUBLIC_URL)
     steps:
       - uses: actions/checkout@v4
