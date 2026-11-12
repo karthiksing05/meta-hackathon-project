@@ -247,7 +247,7 @@ struct SettingsTimeView: View {
                 y: .value("Minutes", day.minutes)
             )
             .foregroundStyle(day.isToday ? FBColor.brandBlue : FBColor.brandBlue.opacity(0.35))
-            .cornerRadius(4)
+            .cornerRadius(FBMetrics.radiusXS)
         }
         .frame(height: 180)
     }

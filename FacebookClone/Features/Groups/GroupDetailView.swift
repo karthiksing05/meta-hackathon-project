@@ -108,7 +108,7 @@ struct GroupDetailView: View {
                 joinedMenu
             } else {
                 Button {
-                    Haptics.medium()
+                    Haptics.light()
                     store.toggleMembership(group)
                 } label: {
                     Text("Join group")

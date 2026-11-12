@@ -58,7 +58,7 @@ struct GroupsCreateSheet: View {
                 .font(.fbBodyLarge)
                 .padding(.horizontal, 12)
                 .frame(height: 48)
-                .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                .background(FBColor.inputBackground, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
             Picker("Privacy", selection: $privacy) {
                 ForEach(GroupsPrivacyChoice.allCases) { choice in
                     Text(choice.rawValue).tag(choice)

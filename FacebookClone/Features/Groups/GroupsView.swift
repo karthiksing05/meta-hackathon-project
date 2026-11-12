@@ -310,7 +310,7 @@ private struct GroupsDiscoverCard: View {
                     .foregroundStyle(FBColor.secondaryText)
                 if !group.memberSample.isEmpty {
                     HStack(spacing: 8) {
-                        AvatarStack(users: group.memberSample, size: 24, maxCount: 4)
+                        AvatarStack(users: group.memberSample, size: FBAvatarSize.tiny, maxCount: 4)
                         Text(memberLine)
                             .font(.fbMeta)
                             .foregroundStyle(FBColor.secondaryText)

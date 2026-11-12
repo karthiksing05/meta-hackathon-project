@@ -325,8 +325,9 @@ Reuse these. All live in `DesignSystem/` unless noted.
 
 ### Confirmations and feedback
 
-- Destructive actions (delete, unfriend, leave group, log out, discard) use `confirmationDialog` with
-  a destructive button.
+- Destructive actions that lose content or relationships (delete post, unfriend, leave group, log out,
+  discard a draft) use `confirmationDialog` with a destructive button. Low-stakes removals (a
+  notification, a saved item) happen immediately, as in Facebook.
 - Confirm completed actions with a toast when Facebook does: saved, shared, sent, copied, reported,
   snoozed, unfollowed, joined, deleted. Copy: sentence case, past tense or present state, no period,
   e.g. "Saved to your items", "Link copied".
