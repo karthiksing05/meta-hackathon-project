@@ -1495,9 +1495,13 @@ WebAssembly) instead of the JS kits, **side by side**: every other formula is un
 group-chat play, Groups leaderboards and saves stay on the JS formulas for now. Plan and history:
 `authoring/INTEGRATION.md`.
 
-**Manifest.** The whole game is in `content.game`, a `microgame/0.1` or `0.2` game
-(`engine/SPEC-v0.2.md`): rules, state, presentation, assets, audio. `content.authoring` optionally keeps
-the authoring manifest it was expanded from (`authoring/SPEC.md` 2.7), for remixing. Concepts are always
+**Manifest.** The whole game is in `content.game_json`: a `microgame/0.1` or `0.2` game
+(`engine/SPEC-v0.2.md`: rules, state, presentation, assets, audio) **as JSON text**.
+`content.authoring_json` optionally keeps the authoring manifest it was expanded from
+(`authoring/SPEC.md` 2.7), also as text, for remixing. Text, because key order is part of a game's
+meaning (function params are positional; a state init reads only earlier state) and Swift's `JSONValue`
+writes objects with sorted keys: as text, the game reaches the engine byte for byte as it was validated
+and gated. (`content.game` as an object is still accepted, for hand-made games.) Concepts are always
 exactly `space.microgame`, `input.microgame` and `score.microgame` (params: `runtime_hud`, `swipes`,
 `label`). `authoring/expander/bubble.mjs` (`wrapBubble`) writes this wrapper, and picks `style.colors`
 from the game so the frame and letterbox match it.
@@ -1533,3 +1537,82 @@ example and the `mg-*` seeds. `node tools/runtime-tests/microgame-chrome.mjs` pl
 `bubble-host.html` in headless Chrome with touch input and checks the bridge messages.
 
 **FB_OPEN.** `play:mg-gust-glider`, `bubble:mg-prism-breaker` (any `mg-*` seed id).
+
+### 7.12 Making microgames in Studio
+
+Muse writes an **authoring manifest** (`authoring/SPEC.md` 2); Studio expands it into a `game.json`,
+validates it in the engine, sends errors back to Muse, playtests it with the bots and wraps it as a
+`formula: "microgame"` Bubble (7.11). Everything runs in **one hidden `WKWebView`** (a bare `JSContext`
+on iOS has no WebAssembly), created lazily and never on screen. Headless pieces only; the Studio
+screens call them.
+
+**Interface** (`Bubbles/Studio/MicrogameStudio.swift`, `MicrogameComposer.swift`, `MicrogamePrompts.swift`):
+
+```swift
+@MainActor final class MicrogameStudio {             // the page: microgame-studio.html
+    static let shared: MicrogameStudio
+    func warmUp() async
+    func catalog() async throws -> MicrogameCatalog    // fragments, looks, engine catalog, format rules,
+                                                       // examples, ready-made prompt text
+    func expand(_ authoring: JSONValue) async throws -> MicrogameExpansion
+    func expand(text: String) async throws -> MicrogameExpansion   // model output: keeps its key order
+    func gate(_ e: MicrogameExpansion, seed: Int) async throws -> StudioPlaytest.Report
+    func wrap(_ e: MicrogameExpansion, id: String, brief: BubbleBrief?, emoji: String?) async throws -> BubbleManifest
+}
+@MainActor final class MicrogameComposer {
+    init(muse: any MicrogameMuse = MuseClient.studio, studio: MicrogameStudio = .shared, maxRepairRounds: Int = 3)
+    func compose(request: String, brief: BubbleBrief, onEvent: @MainActor (Event) -> Void) async throws -> BubbleManifest
+    func revise(_ bubble: BubbleManifest, request: String, onEvent: @MainActor (Event) -> Void) async throws -> BubbleManifest
+    // Event: drafting(attempt:), expanding, repairing(round:issues:), playtesting(bots:),
+    //        playtested(Report), done(BubbleManifest), failed(String)
+}
+protocol MicrogameMuse { func chatJSON(model:system:user:options:) async throws -> (value: JSONValue, reply: MuseClient.ChatReply) }
+```
+
+`MicrogameDiagnostic` has `severity`, `code`, `at` (a JSON Pointer into the manifest), `message`, `hint` and
+`audience`: `.model` (Muse fixes it) or `.library` (a fragment or look bug: logged in
+`MicrogameComposer.libraryIssues`, and Muse only hears that the fragment can't take those params). Errors
+are `MicrogameStudioError` (page missing, load failed, engine unavailable, JavaScript, timed out). A call
+that times out throws the page away; the next call loads a fresh one.
+
+**Flow.** `compose`: the system prompt (`MicrogamePrompts.system`) is built from `catalog()` at run time:
+every fragment's `describe`, params, requires, provides and slots, the looks, the engine catalog, the
+format rules (SPEC.md 1.1–1.4 and 2) and three complete example manifests. Muse's reply text goes to
+`expand(text:)`. Model errors go back with their pointers, for up to `maxRepairRounds`. Then the gate
+(the five `StudioPlaytest` bots, the same flags; runs capped at 180 s as in `authoring/playtest`); blocking
+flags get one more repair. If neither version passes, the one with fewer blocking flags ships, and the
+`playtested` event carries its report. `wrap` stores the game as text in `content.game_json` and the
+authoring manifest, with fragment versions pinned, as text in `content.authoring_json`, and sets `studio`
+(models, time). `revise` starts from `content.authoring_json` (the text, so Muse sees the real key order)
+and keeps the Bubble's id, brief and lineage, with `version + 1`.
+`lastStats` says whether the first draft validated and how many repair rounds it took.
+
+**Key order.** Swift's `JSONValue` writes objects with sorted keys, and the engine reads key order in
+function `params` (positional) and state `init`s (an init reads only earlier state). So games never
+cross Swift as objects: the page returns `game_json`, `playtest_game_json` and `authoring_json` text
+(`MicrogameExpansion.gameJSON` …), `gate` and `wrap` take that text back, and the Bubble stores text
+(7.11). As a second line of defense, `expand` also makes games sort-safe
+(`authoring/expander/stable.mjs`: out-of-order params are renamed `p0_…`, `p1_…`; a pure init that would
+sort later is inlined).
+
+**The page.** `Studio/web/microgame-studio.html` loads `bubble-kit-microgame-engine.js` (7.11) and
+`microgame-studio.js`. Both sit flat in the bundle root next to the page, so `loadFileURL` with read access
+to that folder finds them. `microgame-studio.js` is **generated and committed** from `authoring/`: the
+expander, `bubble.mjs`, the async gate (`playtest/gate-async.mjs`: bots one after another, yielding to the
+page, with `game.fork()` look-ahead instead of replaying the history) and the API
+(`expander/studio.mjs`, `window.MicrogameStudio`: `catalog()`, `expand(json)`, `gate(json, seed)` (a
+Promise) and `wrap(opts)`, all JSON strings), with the fragment and look library, the engine's
+`catalog --json`, the format rules and the examples as data. Rebuild after changing anything in
+`authoring/` or the engine:
+
+```sh
+node authoring/tools/make-studio-bundle.mjs          # runs the engine's catalog with cargo; --check verifies
+node authoring/tools/test-studio-bundle.mjs          # the bundle in a Node vm vs the Node gate; --all for all 20
+```
+
+**CLI.** `tools/bubble-studio/build.sh`, then
+`bubble-studio --microgame "a cozy game about lanterns" [--fake-muse] [--out FILE.json] [--revise FILE.json]`.
+It runs `MicrogameComposer` in a hidden macOS `WKWebView` (WebKit runs the WebAssembly engine) and prints
+the events, the title, the validation result and the gate report. It uses real Muse when a key is
+configured; `--fake-muse` replies with a manifest with a misspelled param, then
+`authoring/games/tide_taps.authoring.json` (or `--fake-good FILE`), which exercises the repair loop.
