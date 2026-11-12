@@ -212,9 +212,6 @@ enum GroupsSearchCopy {
     static let viewPost = "View post"
 
     // Game night
-    static let gameNightTitle = "Game night"
-    static let gameNightDetail = "Quiz night for the whole Group: guess what they say next."
-    static let gameNightButton = "Start a game night"
 
     // Daily
     static let dailyTitle = "Today's Daily Bubble"

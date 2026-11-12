@@ -71,8 +71,6 @@ struct GroupGamesHubView: View {
                 challengeCard
             }
             FeedSeparator()
-            gameNightCard
-            FeedSeparator()
         }
         .sheet(isPresented: $showsChallengePicker) {
             GroupChallengePickerSheet(group: group)
@@ -143,44 +141,6 @@ struct GroupGamesHubView: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(FBColor.surface)
-    }
-
-    // MARK: Game night
-
-    private var gameNightCard: some View {
-        Button {
-            Haptics.light()
-            BubbleFeatureRouter.open(GroupsSearchScreens.gameNightRoute(for: group.id), router: router)
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: BubbleCategory.party.symbol)
-                    .font(.system(size: FBIconSize.regular, weight: .semibold))
-                    .foregroundStyle(FBColor.savedPurple)
-                    .frame(width: 40, height: 40)
-                    .background(FBColor.savedPurple.opacity(0.14), in: Circle())
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(GroupsSearchCopy.gameNightTitle)
-                        .font(.fbName)
-                        .foregroundStyle(FBColor.primaryText)
-                    Text(GroupsSearchCopy.gameNightDetail)
-                        .font(.fbMeta)
-                        .foregroundStyle(FBColor.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 0)
-                Text(GroupsSearchCopy.gameNightButton)
-                    .font(.fbButton)
-                    .foregroundStyle(FBColor.accent)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(FBColor.surface)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(GroupsSearchCopy.gameNightButton). \(GroupsSearchCopy.gameNightDetail)")
     }
 }
 

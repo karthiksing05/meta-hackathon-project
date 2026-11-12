@@ -867,8 +867,8 @@ don't know yet, and "Challenge the Group" starts a shared game in the Group feed
 `GroupWeeklyBoardView`, `GroupGamesHubView`, `SearchGamesResults`); copy in `GroupsSearchCopy`.
 
 **Games tab** (`GroupsSearchGamesHub` on top, `GroupsSearchGamesList` at the bottom): today's Daily
-Bubble (`BubbleGroupDailyCard`), the weekly board card, "Challenge the Group", a "Game night" entry,
-and a grid of `worldBubbles(in:)` with "N members played". The Featured tab gets one line,
+Bubble (`BubbleGroupDailyCard`), the weekly board card and "Challenge the Group"; the quiz night
+card comes from nextline's `NextlineGroupGameNight` slot right below; and at the bottom a grid of `worldBubbles(in:)` with "N members played". The Featured tab gets one line,
 `GroupsSearchFeaturedTeaser` ("This week: Diego leads · you're #3"), which opens the full board.
 
 **Weekly board** (`GroupGamesStore.shared.weeklyStandings(group:)` →
@@ -891,8 +891,9 @@ Group feed and the challenge feature runs the shared session. Extras keys (group
 posted by the challenge feature when it starts the session, not again here.
 groups-search owns only the button and the post copy; challenge draws the card.
 
-**Game night**: the entry opens `GroupsSearchScreens.gameNightRoute(for: groupID)` =
-`BubbleFeatureRoute(.nextline, "night", groupID)`; nextline implements it.
+**Game night**: `GroupsSearchScreens.gameNightRoute(for: groupID)` =
+`BubbleFeatureRoute(.nextline, "night", groupID)`; nextline implements it and draws the Games tab's
+only game-night entry (the hub dropped its own card at integration so there is just one).
 
 **Search** (`SearchView`): a "Games" filter chip and a Games section in All (4 rows, all on the
 filter). `gamesMatching(query:in:)` is a pure, case- and diacritic-insensitive match on title,
