@@ -203,6 +203,10 @@ enum LearnShare {
                     reply.fromUserID = user.id
                     reply.headline = LearnCopy.friendLearned(user.firstName, mastery: mastery, title: bubble.title)
                     reply.extras[masteryKey] = .string(mastery)
+                    // The reply shows the friend's own result next to yours.
+                    var replyLearners = reply.extras[learnersKey]?.object ?? [:]
+                    replyLearners[user.id] = .string(mastery)
+                    reply.extras[learnersKey] = .object(replyLearners)
                     BubbleSocialHub.receive(reply, from: user, in: chat, text: LearnCopy.friendReply(streak: LearnProgressStore.shared.streak(of: user)), appStore: appStore)
                     BubbleSocialHub.update(cardID: card.id, appStore: appStore) { original in
                         var learners = original.extras[learnersKey]?.object ?? [:]

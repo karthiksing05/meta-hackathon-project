@@ -844,7 +844,7 @@ posts `lesson_shared` with the chat's members, the friend, or the Group's member
 two members play the same seed (real bot runs) and reply with their result a few seconds later.
 
 **State** (`LearnProgressStore.shared`): your learning days and best mastery per lesson
-(UserDefaults; the demo world gives Alex the two days before today, so a lesson today makes a 3-day
+(UserDefaults; each launch the demo world gives Alex the two days before today, so a lesson today makes a 3-day
 streak); members' mastery from `simulateRun` tags (until a run lands, a member's best real board
 score / the best possible score stands in); friends' streaks are deterministic and synthetic.
 `groupMastery(group:in:)` is the Group meter across its lessons (0–1); `groupMastery(of:group:)` is

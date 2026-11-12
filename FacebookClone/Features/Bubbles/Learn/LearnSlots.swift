@@ -304,7 +304,10 @@ private struct LearnRecapPanel: View {
         .background(LearnStyle.tint.opacity(0.55), in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .onAppear {
             // The feed's result sheet doesn't go through the player's didFinish; noting is idempotent.
-            progress.notePlay(bubble, tag: slot.result.result.share.tag)
+            // DEBUG fake results never reach the board, so they never count as your mastery either.
+            if slot.result.isRecorded {
+                progress.notePlay(bubble, tag: slot.result.result.share.tag)
+            }
             if let group {
                 progress.warmUp([bubble], people: progress.learners(in: group, lessons: [bubble], bubbleStore: bubbleStore), bubbleStore: bubbleStore)
             }

@@ -243,7 +243,7 @@ struct LearnGroupMeterCard: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             LearnMeterBar(value: value, height: 12)
-            if value == 0 {
+            if value == 0 && !progress.learners(in: group, lessons: [lesson], bubbleStore: bubbleStore).isEmpty {
                 HStack(spacing: 8) {
                     ProgressView()
                     Text(LearnCopy.countingLearners)
@@ -375,9 +375,6 @@ struct LearnStreaksView: View {
         .background(FBColor.surface)
         .navigationTitle(LearnCopy.streaksTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .overlay(alignment: .bottom) {
-            ToastHost().padding(.bottom, 16)
-        }
     }
 
     private func hero(_ progress: LearnProgressStore) -> some View {

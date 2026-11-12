@@ -102,7 +102,6 @@ final class LearnProgressStore {
         var days: [String] = []
         var best: [String: Double] = [:]
         var lastTag: [String: String] = [:]
-        var seededDemo = false
     }
 
     private static let defaultsKey = "learn.progress.v1"
@@ -125,6 +124,8 @@ final class LearnProgressStore {
     // MARK: Lifecycle
 
     /// Once at launch: the demo world's learning history for Alex (the two days before today).
+    /// Seeded relative to today on every launch (not once ever), so a demo on a later day still
+    /// opens on a 2-day streak and a lesson today makes it 3.
     func install() {
         guard !seededDemo else { return }
         seededDemo = true
@@ -297,11 +298,10 @@ final class LearnProgressStore {
         days = Set(saved.days)
         best = saved.best
         lastTag = saved.lastTag
-        seededDemo = saved.seededDemo
     }
 
     private func save() {
-        let saved = Saved(days: days.sorted().suffix(120).map { $0 }, best: best, lastTag: lastTag, seededDemo: seededDemo)
+        let saved = Saved(days: days.sorted().suffix(120).map { $0 }, best: best, lastTag: lastTag)
         if let data = try? JSONEncoder().encode(saved) {
             UserDefaults.standard.set(data, forKey: Self.defaultsKey)
         }
