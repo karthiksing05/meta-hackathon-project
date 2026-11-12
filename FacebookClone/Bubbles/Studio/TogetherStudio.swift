@@ -28,7 +28,8 @@ enum TogetherStudio {
             A question becomes one round whose right answer is the maker's answer; write 3 plausible wrong answers when they \
             gave fewer. Words become the word list, with a short clue each. Scenes become scenes in their order. A level is a \
             description: turn it into params and content for the formula. The content must fit the formula's content schema \
-            exactly. If there are fewer than 5 rounds, add your own short rounds on the same theme after theirs to reach 5.
+            exactly. If there are fewer than 5 rounds, add your own short rounds on the same theme after theirs to reach 5; \
+            give those the note "Added by Muse" and never credit a maker for them. No real brands, teams or businesses.
             """)
         }
         if let templateID = social.aboutMeTemplate {
@@ -45,7 +46,7 @@ enum TogetherStudio {
             lines.append("""
             Rules: use the answer formula with an answer key. Each answer above is the right choice of one round, asked about \
             \(subject) in the third person ("What's \(subject)'s favorite food?"). Decoys are plausible but clearly not \
-            \(subject)'s. Keep the rounds in the order given\(templateID == "first-month" ? " (they tell the month in order)" : ""). \
+            \(subject)'s, and never real brands, teams or businesses. Keep the rounds in the order given\(templateID == "first-month" ? " (they tell the month in order)" : ""). \
             Nothing private beyond what's given here. Title it like "\(template?.gameTitle(subject) ?? "About \(subject)")".
             """)
         }
@@ -92,6 +93,9 @@ enum TogetherStudio {
             if !manifest.uses("content.seed") {
                 manifest.concepts.insert(ConceptUse("content.seed", params: ["list": .string("words"), "into": .string("target")]), at: 0)
             }
+            // A game friends made is replayable, not a once-a-day word.
+            manifest.concepts.removeAll { $0.use == "flow.daily_gate" }
+            if manifest.structure.cadence == "daily" { manifest.structure.cadence = "endless" }
             if let title { manifest.title = title }
             manifest.oneLineRule = clip("Guess a word \(names(makers.map(\.name))) picked.", 70)
             note(&manifest, "Stitched \(words.count) words from \(makers.count) makers")
