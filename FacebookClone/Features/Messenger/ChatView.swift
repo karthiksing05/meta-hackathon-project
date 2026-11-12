@@ -469,7 +469,7 @@ private struct MessengerChatHeader: View {
                     .foregroundStyle(FBColor.secondaryText)
                     .lineLimit(1)
             }
-            .frame(maxWidth: 170, alignment: .leading)
+            .frame(maxWidth: 150, alignment: .leading)
         }
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
