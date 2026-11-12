@@ -1413,7 +1413,8 @@ keeps them. `LengthStudio`: `promptLines` locks Muse to `request.length`, or ask
 `length` from the brief ("a quick game for the bus" is timed 45) and to keep the creator's tuning;
 `applyDraft` copies the request's or the draft's valid `length` (else the base Bubble's) and applies
 tuning; `applyOffline` applies `request.length` and tuning, or a length the brief clearly asks for
-(the bus, a quiz night, "until you drop", kids); `finalize` does nothing.
+(the bus, a quiz night, "until you drop", kids); `finalize` does nothing. Both cap a nextline rounds
+length at its episode count, because nextline plays each episode once.
 
 **FB_OPEN screens** (with `FB_SKIP_SPLASH=1`): `feature:length/customize/<bubbleID>` (Studio
 editing it, scrolled to Customize; `FB_STUDIO_SCROLL=customize` does the same on any Studio

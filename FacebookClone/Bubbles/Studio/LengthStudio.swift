@@ -50,7 +50,8 @@ enum LengthStudio {
             length = base.normalized
         }
         if let length, spec?.supports(length.mode) ?? true {
-            object["length"] = completed(length, spec: spec).json
+            let episodes = object["content"]?.object?["episodes"]?.array?.count
+            object["length"] = capped(completed(length, spec: spec), formula: formula, episodes: episodes).json
         } else {
             object["length"] = nil
         }
@@ -71,10 +72,11 @@ enum LengthStudio {
     /// validation and playtest.
     static func applyOffline(_ manifest: inout BubbleManifest, request: StudioRequest, brief: BubbleBrief) {
         let spec = BubbleLengthCatalog.shared.spec(for: manifest.formula.rawValue)
+        let episodes = manifest.content["episodes"]?.array?.count
         if let locked = request.length?.normalized, spec?.supports(locked.mode) ?? true {
-            manifest.length = completed(locked, spec: spec)
+            manifest.length = capped(completed(locked, spec: spec), formula: manifest.formula.rawValue, episodes: episodes)
         } else if request.length == nil, manifest.length == nil, let picked = fromBrief(request: request, brief: brief, spec: spec) {
-            manifest.length = picked
+            manifest.length = capped(picked, formula: manifest.formula.rawValue, episodes: episodes)
         }
         if let tuning = request.tuning { apply(tuning: tuning, to: &manifest) }
     }
@@ -103,6 +105,15 @@ enum LengthStudio {
     static func value(of knob: BubbleLengthKnob, in manifest: BubbleManifest, fallback: Double? = nil) -> Double? {
         guard let concept = knob.concept(in: manifest) else { return nil }
         return manifest.concepts.first { $0.use == concept }?.params?[knob.param]?.double ?? fallback
+    }
+
+    /// Nextline plays each episode once (it doesn't cycle its content like answer and learn), so a
+    /// rounds length is capped at the episode count and the label never promises more rounds than
+    /// the game has.
+    static func capped(_ length: BubbleLength, formula: String, episodes: Int?) -> BubbleLength {
+        guard formula == BubbleFormula.nextline.rawValue, length.mode == .rounds,
+              let n = length.number, let episodes, episodes > 0, n > episodes else { return length }
+        return .rounds(episodes)
     }
 
     /// A length with its number filled from the formula's suggestion when it has none.
