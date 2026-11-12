@@ -13,6 +13,11 @@
  * choices, answer, picked, correct, start}, choices (portrait hit areas), keyboard (input.type).
  * Events: guess.made {correct}, guess.feedback {guess, marks, index}, guess.invalid {reason},
  * guess.solved {tries}, round.correct / round.miss {x, y, ticks, index}, round.done {correct}.
+ *
+ * Length (docs/BUBBLES.md 7.9): the word style's tries are rounds (rounds mode: length.rounds
+ * tries; lives mode: length.lives wrong tries; rule.attempt_budget or rule.letter_feedback counts
+ * them) and a timed word that isn't found when the clock runs out is a fail. The who style plays
+ * through flow.rounds: length.rounds facts (cycling), or facts until the clock or lives run out.
  */
 (function () {
   "use strict";
@@ -109,6 +114,15 @@
         }
       }
       const rank = { miss: 1, near: 2, hit: 3 };
+      // Length: a timed word not found in time is a fail; without rule.attempt_budget this rule
+      // counts tries as rounds or wrong tries as lives.
+      const L = sdk.length || {};
+      const countsTries = !sdk.has("rule.attempt_budget") && (L.rounds || L.lives);
+      sdk.on("length.end", (e) => {
+        if (e.mode !== "timed" || st.solved || sdk.ended) return;
+        sdk.emit("rule.fail", { reason: "time" });
+        sdk.end("fail", { delay: 24 });
+      });
 
       sdk.on("input.submit", (e) => {
         if (sdk.ended || st.solved) return;
@@ -156,6 +170,13 @@
           sdk.emit("guess.solved", { tries: st.guesses.length });
           sdk.emit("rule.success", { tries: st.guesses.length });
           sdk.end("success", { delay: until - sdk.tick + 36 });
+          if (countsTries && L.rounds) sdk.lengthRound();
+        } else if (countsTries && !sdk.ended) {
+          const out = L.rounds ? !sdk.lengthRound({ outcome: "fail", delay: until - sdk.tick + 24 }) : !sdk.lengthMiss();
+          if (out && !sdk.ended) {
+            sdk.emit("rule.fail", { reason: "tries" });
+            sdk.end("fail", { delay: until - sdk.tick + 24 });
+          }
         }
       });
 
@@ -858,5 +879,17 @@
     ],
     example: WORD_EXAMPLE,
     examples: [WORD_EXAMPLE, WHO_EXAMPLE],
+    // Length (docs/BUBBLES.md 7.9): word style tries or who style facts, from the manifest.
+    length: {
+      modes: ["rounds", "timed", "lives"],
+      default: { mode: "rounds" },
+      numbers: { rounds: 6, seconds: 90, lives: 5 },
+      infer: { rounds: ["rule.attempt_budget.attempts"] },
+      knobs: {
+        difficulty: { concept: "space.portrait_choices", param: "choices", label: "Faces to pick from", min: 2, max: 4, step: 1 },
+        speed: { concept: "flow.rounds", param: "pause", label: "Pace", min: 50, max: 130, invert: true },
+      },
+      describe: "Rounds: tries (word) or facts (who). Timed: find it before the clock. Lives: wrong tries you can take.",
+    },
   });
 })();

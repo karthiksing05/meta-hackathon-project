@@ -350,6 +350,7 @@ Kinds: `input`, `space`, `entity`, `behavior`, `rule`, `feedback`, `score`, `flo
 | `share(partial)` | Merge into the share artifact `{headline, score_text, emoji_grid}` |
 | `phase`, `mode`, `player` | `intro/playing/fail/success/result`; `play/replay/demo/poster/headless`; `{name, best}` |
 | `hud` | `{ score: true, label: "" }`: turn off or relabel the engine's score HUD |
+| `length`, `lengthRound(info?)`, `lengthMiss()`, `lengthLeft()` | The run's length `{mode, rounds, seconds, lives, locked}`; call `lengthRound` when a round ends (false: over) and `lengthMiss` on a miss (true: a life absorbed it); `lengthLeft()` for HUDs. `hud.length = false` hides the engine's length chip. See 7.9 |
 
 Engine events: `clock.tick {tick}`, `pointer.down/move/up {x, y}`, `flow.phase {name}`,
 `score.changed {score, delta}`. Concepts emit the rest (`input.*`, `entity.*`, `rule.*`,
@@ -814,9 +815,106 @@ streaks show up.
 
 ### 7.9 Length and customizing (length)
 
-Length is a first-class primitive (7.1): endless, rounds, timed or lives, honored by every kit, with
-a Customize panel in Studio. Intro cards, results and boards label the mode, and shared play locks
-everyone to the same mode and numbers.
+Length is a first-class primitive: every kit honors one contract, so a creator can shape how a run
+feels and shared play stays fair. A challenge, a group-chat session or a Group game night locks
+everyone to the same mode and numbers ("10 rounds for everyone"), and each friend's bot run plays
+that same length.
+
+**Manifest.** `length: {mode: endless|rounds|timed|lives, rounds?, seconds?, lives?}`, only the
+mode's own number; rounds 1–50, seconds 10–300, lives 1–9. No `length` plays exactly as before
+lengths existed (same scores, ticks and events for every seed; `tools/kits-tests` checks it).
+
+**Formula declaration** (`defineFormula`):
+`length: {modes, default, numbers?, infer?, knobs, describe?}`. `default` is the unlocked length
+(its number may be left out: "rounds from content"); `numbers` suggests a number per mode when a
+creator picks one (`{rounds, seconds, lives}`); `infer` names what an unlocked run's length comes
+from, for labels only (`{rounds: ["rule.timing_window.targets", "content:rounds"]}`); `knobs` are
+the Customize sliders, `{speed|difficulty|timer|rounds|lives: {concept ("a|b" for alternatives),
+param, label, min, max, step?, invert?}}` (`invert`: a higher param is easier). The catalog lists
+each formula's `length`, plus `length_modes`, `length_limits` and `length_knobs`.
+
+| Kit | Modes (default first) | A round is | Knobs |
+|---|---|---|---|
+| dodge | endless, timed, rounds, lives | an obstacle cleared | speed, difficulty (gap) |
+| time | rounds (targets/goal), timed, lives, endless | a hit or a stacked piece | speed, difficulty (perfect zone) |
+| merge | endless (rule.timer: timed), timed, rounds | a drop (the jar settles 1.5 s after the last) | speed (drop pace), difficulty (overflow grace) |
+| group | rounds (the deck), timed, lives, endless | a bubble sorted or lost | speed (rise), difficulty (bubble pace) |
+| answer | rounds (content), timed, lives, endless | a question (content cycles) | speed (pace), timer (seconds per question) |
+| guess | rounds (tries or facts), timed, lives | a try (word) or a fact (who) | speed, difficulty (faces) |
+
+**Runtime.** `resolveLength` gives `sdk.length = {mode, rounds, seconds, lives, locked}` (frozen).
+`locked` is true when the manifest sets `length`; a locked length always has its number (the
+manifest's, the formula's `numbers`, else 10 rounds, 60 seconds or 3 lives). The engine enforces a
+length only when it has a number:
+
+- `sdk.lengthRound(info?)` counts a round and emits `length.round {index, done, total, left}`; at
+  N it emits `length.end` and ends the run after this tick (`info.delay` ticks later, `info.outcome`
+  "fail" to end it as a fail) and returns false.
+- `sdk.lengthMiss()` in lives mode emits `length.life {left, lost, total}` and returns true while a
+  life absorbed the miss; the last one emits `length.end` and returns false (apply your normal fail).
+  Outside lives mode it returns false.
+- Timed: at seconds × 60 ticks the engine emits `length.end {mode: "timed"}`, then (if no handler
+  ended the run first) `rule.success` and ends it in success. A kit can end it first with its own
+  outcome (a word not found in time is a fail).
+- `sdk.lengthLeft()` returns `{rounds_left, seconds_left, lives_left}` (null when unused).
+- The engine draws a small HUD chip top left ("Round 3/10", a timer ring with seconds, lives as
+  bubbles) through `g` with palette roles, only for an enforced length and never on the intro. A
+  concept that shows the length itself sets `sdk.hud.length = false` (rule.timer, rule.lives and
+  flow.rounds do).
+
+**Precedence.** A manifest `length` overrides the common concepts' numbers: rule.timer runs for
+`length.seconds` (a locked length in another mode turns rule.timer off), rule.lives takes
+`length.lives` misses through `lengthMiss`, flow.rounds plays `length.rounds` rounds (content
+cycles) and has no round count in a locked timed, lives or endless run, rule.attempt_budget allows
+`length.rounds` tries or `length.lives` wrong tries. Kit goals (time's targets and goal, group's
+deck, answer's content) become the length's rounds, or unlimited in the other locked modes. In a
+locked endless run with no rule.lives, the first miss ends it; with rule.lives, its lives do.
+
+**Intro card, replays, validation.** The intro card shows the length next to the title:
+"Endless: beat 42" (with `player.best`, in place of "Your best"), "10 rounds", "60 seconds",
+"3 lives" (`Bubble.displayLength(manifest)`, `Bubble.lengthLabel(len, best)`). `replayLog()`
+carries a locked `length`, and `simulate` applies `replay.length` to a manifest without one, so a
+replay is self-describing; `BubbleStore.verify` replays with it. Validation errors (code `length`):
+a bad shape, a mode the formula doesn't list, a number that isn't a whole number in range; a
+warning when the formula declares no length.
+
+**Swift.** `BubbleLength` (`label`, `label(best:)`, `shortLabel`, `normalized`, `json`,
+`init?(json:)`), `BubbleLengthSpec` and `BubbleLengthKnob` (a formula's declaration), and
+`BubbleLengthCatalog.shared` (built in, mirroring the kits; Studio registers the runtime catalog
+over it). Helpers for other features: `BubbleLength.defaultLength(for: manifest)`,
+`BubbleLength.effective(for: manifest)` (what players see), `BubbleLength.locked(for: bubble)`
+(what a challenge, session or game night card should carry in `card.length` and pass to
+`BubblePlayRequest.length`) and `BubbleLength.of(run: replay, in: bubble)`.
+
+**Players.** Feed pages: `LengthCaptionLabel` ("Endless: beat 42" with your best). Bubble page:
+`LengthDetailRow` (mode, best to beat, the shared-play promise, Customize for the creator). Result
+sheet: `LengthResultLabel` ("60 seconds · 41", from the run's own `replay.length`), plus "You and
+Maya played the same 10 rounds" in a challenge, session or game night.
+
+**Studio.** `LengthCustomizePanel` (under the details card on Try): a mode picker with only the
+formula's modes, a stepper for the number, a slider per knob the manifest uses. Every change
+re-validates and re-playtests the level with a headless runtime after a short pause and is kept
+only if it validates and the bots can play it ("Playtest: a typical player lasts 60 s, 34 points");
+choices land in `StudioModel.length` and `.tuning` (knob id to param value), so a later "Tweak it"
+keeps them. `LengthStudio`: `promptLines` locks Muse to `request.length`, or asks it to pick
+`length` from the brief ("a quick game for the bus" is timed 45) and to keep the creator's tuning;
+`applyDraft` copies the request's or the draft's valid `length` (else the base Bubble's) and applies
+tuning; `applyOffline` applies `request.length` and tuning, or a length the brief clearly asks for
+(the bus, a quiz night, "until you drop", kids); `finalize` does nothing.
+
+**FB_OPEN screens** (with `FB_SKIP_SPLASH=1`): `feature:length/customize/<bubbleID>` (Studio
+editing it, scrolled to Customize; `FB_STUDIO_SCROLL=customize` does the same on any Studio
+launch) and `feature:length/intro/<bubbleID>/<mode>` (the player locked to timed 60, rounds 10,
+lives 3 or endless, on its intro card), for example `intro/hill-hopper/timed`,
+`intro/newinsf-fog-or-sun/rounds`, `intro/cable-car-catch/lives`. No cards, extras, tags or seeds
+of its own.
+
+**Tests.** `tools/kits-tests/suite-length.js`: every example and seed of every declared formula, in
+every mode, at three bot skills: timed runs end at seconds × 60 ticks, rounds after N
+`length.round`, lives after N `length.life`; endless matches today's run where today's is endless;
+every run replays exactly, also from a self-describing replay on the plain manifest. story,
+nextline and learn get the replay checks until their kits call the length hooks.
+`tools/runtime-tests/checks.js` has a Length section (catalog, validation, labels, replays).
 
 ### 7.10 Saves are the likes (saves)
 

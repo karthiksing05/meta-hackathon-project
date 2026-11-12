@@ -24,6 +24,15 @@
  * guess.made {correct} (any committed answer), round.start {index, total}, round.done {correct}
  * (a rule finished a round), round.end {index, correct}, rule.fail, rule.success, timer.warning,
  * lives.lost {left}, behavior.ramp {pace}, social.new_best {score, best}.
+ *
+ * Length (docs/BUBBLES.md 7.9). A manifest `length` overrides these concepts' own numbers:
+ *   timed   rule.timer runs for length.seconds (a locked length in another mode turns rule.timer off)
+ *   rounds  flow.rounds plays length.rounds rounds (content cycles) and rule.attempt_budget allows
+ *           length.rounds tries; each counts through sdk.lengthRound()
+ *   lives   rule.lives and rule.attempt_budget take length.lives misses through sdk.lengthMiss()
+ *   locked timed, lives or endless: flow.rounds keeps going (no round count); without rule.lives a
+ *           missed round costs a life (lives) or ends the run (endless)
+ * A manifest without `length` plays exactly as before.
  */
 (function () {
   "use strict";
@@ -31,6 +40,8 @@
   if (!B) return;
   const clamp = B.util.clamp;
   const SOUND_CHOICES = ["none", "pop", "blip", "tick", "chime", "whoosh", "success", "fail"];
+  // The run's length (sdk.length, docs/BUBBLES.md 7.9); endless and unlocked when the SDK is older.
+  function lengthOf(sdk) { return sdk.length || { mode: "endless", rounds: null, seconds: null, lives: null, locked: false }; }
   const ALL_ENERGY = ["low", "medium", "high"];
 
   function inZone(zone, x, y) {
@@ -363,6 +374,15 @@
     setup(sdk, p) {
       const st = (sdk.state.rounds = { index: -1, total: p.count, won: 0, results: [], active: false, next: p.lead_in, startTick: 0 });
       if (typeof sdk.state.rounds_available === "number") st.total = clamp(Math.min(p.count, sdk.state.rounds_available), 1, p.count);
+      // Length: rounds mode plays exactly length.rounds (the rule cycles its content); a locked
+      // timed, lives or endless length has no round count (st.unbounded, total Infinity).
+      const L = lengthOf(sdk);
+      const byLength = !!L.rounds;
+      st.unbounded = !byLength && L.locked && L.mode !== "rounds";
+      if (byLength) st.total = L.rounds;
+      else if (st.unbounded) st.total = Infinity;
+      const lifeRule = sdk.has("rule.lives");
+      if (byLength && p.show) sdk.hud.length = false;
       sdk.state.share_rows = [st.results];
       sdk.on("clock.tick", () => {
         if (st.active || sdk.ended || sdk.tick < st.next) return;
@@ -385,11 +405,30 @@
         st.results.push(correct ? "hit" : "miss");
         sdk.emit("round.end", { index: st.index, correct });
         st.next = sdk.tick + p.pause;
+        if (sdk.ended) return;
+        if (byLength) {
+          // The last round ends the run after its pause, with the pass_ratio outcome.
+          const last = st.results.length >= st.total;
+          const ok = st.won >= Math.ceil(st.total * p.pass_ratio - 1e-9);
+          sdk.lengthRound(last ? { outcome: ok ? "success" : "fail", delay: p.pause, won: st.won, total: st.total } : null);
+        } else if (st.unbounded && !correct && !lifeRule) {
+          sdk.lengthRound();
+          if (L.mode === "lives" && sdk.lengthMiss()) return;
+          if (L.mode === "lives" || L.mode === "endless") {
+            sdk.emit("rule.fail", { won: st.won, total: st.results.length, reason: "length" });
+            sdk.end("fail", { delay: p.pause });
+          }
+        } else if (st.unbounded) sdk.lengthRound();
       });
       if (p.show) {
         const pal = sdk.palette;
         const missDot = B.color.mix(pal.ink, pal.mid, 0.6);
         sdk.layer(sdk.Z.hud, (g) => {
+          if (st.unbounded) return;
+          if (st.total > 12) {
+            g.text("Round " + Math.min(st.index + 1, st.total) + "/" + st.total, B.W / 2, 26, { size: 13, weight: 800, color: pal.ink, alpha: 0.85 });
+            return;
+          }
           const n = st.total, gap = 22, x0 = B.W / 2 - ((n - 1) * gap) / 2, y = 26;
           for (let i = 0; i < n; i++) {
             const x = x0 + i * gap;
@@ -712,7 +751,12 @@
     state: "timer: {total, left}",
     tags: { energy: ["medium", "high"] },
     setup(sdk, p) {
-      const total = p.seconds * 60;
+      // Length: a timed length sets the clock; a locked length in another mode turns the timer off.
+      const L = lengthOf(sdk);
+      if (L.locked && L.mode !== "timed") return;
+      const seconds = L.seconds || p.seconds;
+      if (L.seconds) sdk.hud.length = false;
+      const total = seconds * 60;
       const st = (sdk.state.timer = { total, left: total });
       sdk.on("clock.tick", (e) => {
         if (sdk.ended) return;
@@ -726,7 +770,7 @@
       if (p.show) {
         const pal = sdk.palette;
         const labels = [];
-        for (let i = 0; i <= p.seconds; i++) labels.push(String(i));
+        for (let i = 0; i <= seconds; i++) labels.push(String(i));
         sdk.layer(sdk.Z.hud, (g) => {
           const x = B.W - 30, y = 30, r = 17;
           const frac = st.left / total;
@@ -765,9 +809,14 @@
     state: "lives: {left, max, grace_until}",
     tags: { energy: ["low", "medium"], mood: ["chill", "cozy", "warm"] },
     setup(sdk, p) {
-      const st = (sdk.state.lives = { left: p.lives, max: p.lives, grace_until: -1 });
+      // Length: lives mode sets how many, and each hit goes through sdk.lengthMiss().
+      const L = lengthOf(sdk);
+      const byLength = !!L.lives;
+      if (byLength) sdk.hud.length = false;
+      const st = (sdk.state.lives = { left: byLength ? L.lives : p.lives, max: byLength ? L.lives : p.lives, grace_until: -1 });
       sdk.on("entity.hit", (e) => {
         if (sdk.ended || sdk.tick < st.grace_until) return;
+        if (byLength) sdk.lengthMiss();
         st.left--;
         st.grace_until = sdk.tick + p.grace;
         sdk.emit("lives.lost", { left: st.left });
@@ -807,10 +856,22 @@
     state: "attempts: {used, budget, left}",
     tags: { energy: ["low"], competition: ["light", "friendly"] },
     setup(sdk, p) {
-      const st = (sdk.state.attempts = { used: 0, budget: p.attempts, left: p.attempts });
+      // Length: rounds mode allows length.rounds tries (each one a round), lives mode
+      // length.lives wrong tries (each one a life).
+      const L = lengthOf(sdk);
+      const n = L.rounds || L.lives;
+      if (n && p.show) sdk.hud.length = false;
+      const st = (sdk.state.attempts = { used: 0, budget: n || p.attempts, left: n || p.attempts });
       sdk.on("guess.made", (e) => {
         if (sdk.ended) return;
         const correct = !!(e && e.correct);
+        if (L.lives && !correct) sdk.lengthMiss();
+        if (L.rounds) {
+          // Every try is a round; the last one ends the run (found it: success, else a fail).
+          const settle = typeof sdk.state.reveal_until === "number" ? Math.max(0, sdk.state.reveal_until - sdk.tick) : 0;
+          const last = !sdk.lengthRound({ outcome: correct ? "success" : "fail", delay: settle + (correct ? 36 : 24) });
+          if (last) { st.used++; st.left = Math.max(0, st.budget - st.used); return; }
+        }
         if (p.counts === "misses" && correct) return;
         st.used++;
         st.left = Math.max(0, st.budget - st.used);
