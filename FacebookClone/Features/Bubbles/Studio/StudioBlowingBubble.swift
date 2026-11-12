@@ -134,18 +134,8 @@ struct StudioWand: View {
     }
 }
 
-/// Eases the header bubble toward Muse's progress so jumps between steps look like breaths.
-final class StudioProgressSmoother {
-    private var current: Double = 0.02
-    private var lastDate: Date?
-
-    func step(toward target: Double, at date: Date) -> Double {
-        let dt = lastDate.map { min(0.1, max(0, date.timeIntervalSince($0))) } ?? 0
-        lastDate = date
-        current += (target - current) * min(1, dt * 2.2)
-        return current
-    }
-}
+/// Kept for existing callers; the shared smoother lives in `DesignSystem/GameLoading.swift`.
+typealias StudioProgressSmoother = GameProgressSmoother
 
 /// A celebratory pop: a ring and a spray of little bubbles and sparkles.
 struct StudioPopBurst: View {
