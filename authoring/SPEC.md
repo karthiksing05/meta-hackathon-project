@@ -111,6 +111,13 @@ type or payload (`A_MISSING_REQUIREMENT`, `A_REQUIREMENT_TYPE`).
 
 This use listens for the game's `crashed` event and keeps its count in `hearts`.
 
+Requirement payloads are written bare: `"events": { "flip": { "index": "int" } }`, and
+`"inputs": { "tap_cell": { "cell": "ivec2" } }`, without the `payload` wrapper that declarations use.
+
+**Joining an event:** binding one of a fragment's own events onto an event that already exists, for
+example `"bind": { "point": "pair_found" }` on `score`, makes the fragment listen to that event instead
+of declaring a new one. The payloads must match (`A_REQUIREMENT_TYPE` otherwise).
+
 **Collisions:** if two uses provide the same public name, the second use's name gets a `_2` suffix (then
 `_3` and so on), and the expander reports `W_AUTO_RENAMED` with the new name. If the game declares a name
 a use provides, that's `A_DUPLICATE_NAME`. The game should drop its own copy, or `bind` the fragment's
@@ -222,6 +229,13 @@ and moderated in one place. In v0.1 a value is a string or a list of strings. Ea
 expression reads, as `content_<key>`, becomes a state entry of type `string` or `list<string>`. Writing
 to one is `A_CONTENT_WRITE`. Keys nothing reads stay in the manifest only (covers, captions).
 
+Fragments can't read `content_<key>` themselves, because a content key only becomes state when the
+game's own expressions read it. A fragment that needs content (`quiz`, `sort_bins`, `choice_story`)
+requires a function or a state entry instead, and the game supplies it from content, for example
+`"functions": { "quiz_questions": { "params": {}, "returns": "list<string>", "body": "content_questions" } }` or
+`"state": { "story_lines": { "type": "list<string>", "init": "content_story_lines" } }`. A `content`
+requirement kind is a possible later addition.
+
 ### 2.6 Playtest hint
 
 `"playtest": { "progress": "<expr>" }` is optional. It tells the playtest bots what "doing better" means
@@ -273,7 +287,11 @@ Authoring-side codes:
 
 From Artem's agent's answers on 2026-11-12, tested against the built engine:
 
-- Objectives are checked after the whole start chain and then after every event.
+- Objectives are checked after the whole start chain and then after every event, including each event
+  in an emit chain. So a win can fire before a later event in the same chain runs. Count score from
+  state the winning rule already set (for example `matches * 100`), not from an event emitted after it.
+- Taps hit-test against the layout from the last `frame()` call (v0.1; reported to Artem). The playtest
+  gate draws a frame before every bot tap.
 - `and`, `or` and `if` short-circuit. `string + string` concatenates. `fold` infers `[]` accumulators.
 - `after` takes any int-ms expression; `every` and `time_limit` are constants. So speed ramps use
   `after` timers that re-schedule themselves, or a `tick` accumulator.
