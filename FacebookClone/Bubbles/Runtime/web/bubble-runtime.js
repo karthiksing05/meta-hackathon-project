@@ -5847,6 +5847,13 @@
         flash(color) { if (self.ffwd) return; self.flashA = self.opts && self.opts.reduced ? 0.12 : 0.32; self.flashCol = color || "#FFFFFF"; },
         sound(name) { if (!self.ffwd) Sound.play(name); },
         haptic(style) { if (!self.ffwd) self.haptic(style); },
+        // Where formulas that synthesize their own audio (microgame) should play it: the shared
+        // master gain, so mute and volume apply. Null while muted, fast-forwarding or locked.
+        audio() {
+          if (self.ffwd || Sound.muted) return null;
+          const ctx = Sound.ensure();
+          return ctx && ctx.state === "running" ? { ctx, dest: Sound.master } : null;
+        },
         sparkle(x, y, color, n) { if (!self.ffwd) self.fxSparkle(x, y, color, n); },
         ring(x, y, r, color) { if (!self.ffwd) self.fxRing(x, y, r || 40, color); },
       };

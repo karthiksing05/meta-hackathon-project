@@ -151,6 +151,8 @@
       }
     }
 
+    const genericBot = (m) => m.formula === "microgame";
+
     // ------------------------------------------------------------------ bot simulations
     section("Bot runs (skills 0.2 / 0.5 / 0.9)");
     const skills = [0.2, 0.5, 0.9];
@@ -168,10 +170,17 @@
       if (errors) continue;
       const all = [].concat(rows[0.2], rows[0.5], rows[0.9]);
       ok(all.every((r) => ["success", "fail", "timeout"].indexOf(r.outcome) >= 0 && r.duration_sec <= 90.01), m.id + ": outcomes and durations are sane");
-      ok(median(rows[0.9].map((r) => r.duration_sec)) >= 6, m.id + ": a strong bot doesn't fail instantly", "median " + fmt(median(rows[0.9].map((r) => r.duration_sec))) + " s");
-      ok(rows[0.2].some((r) => r.outcome !== "timeout"), m.id + ": a weak bot's run ends (not endless)");
-      ok(mean(rows[0.9].map((r) => r.score)) >= mean(rows[0.2].map((r) => r.score)), m.id + ": skill helps (mean score 0.9 >= 0.2)",
-        fmt(mean(rows[0.9].map((r) => r.score))) + " vs " + fmt(mean(rows[0.2].map((r) => r.score))));
+      // Microgames carry a whole game, so the formula's bot is generic (it taps the game's real
+      // targets and flicks) and can't show skill. Their game quality is gated where the game is made:
+      // the authoring playtest gate (authoring/playtest, 5 bots) and the engine examples' scripted
+      // win and lose replays (engine/crates/mg-cli/tests/examples.rs). Sanity, share, determinism
+      // and replay checks below still apply.
+      if (!genericBot(m)) {
+        ok(median(rows[0.9].map((r) => r.duration_sec)) >= 6, m.id + ": a strong bot doesn't fail instantly", "median " + fmt(median(rows[0.9].map((r) => r.duration_sec))) + " s");
+        ok(rows[0.2].some((r) => r.outcome !== "timeout"), m.id + ": a weak bot's run ends (not endless)");
+        ok(mean(rows[0.9].map((r) => r.score)) >= mean(rows[0.2].map((r) => r.score)), m.id + ": skill helps (mean score 0.9 >= 0.2)",
+          fmt(mean(rows[0.9].map((r) => r.score))) + " vs " + fmt(mean(rows[0.2].map((r) => r.score))));
+      }
       ok(all.every((r) => r.share && r.share.headline && r.share.score_text), m.id + ": every run has a share headline and score text");
       if (m.concepts.some((c) => c.use === "share.emoji_grid")) ok(all.every((r) => typeof r.share.emoji_grid === "string" && r.share.emoji_grid.length > 0), m.id + ": emoji grid is filled");
       const line = skills.map((s) => s + ": " + rows[s].map((r) => r.outcome[0] + r.score + "/" + Math.round(r.duration_sec) + "s").join(" ")).join("  ");
@@ -198,7 +207,7 @@
       ok(a.replay.tick_rate === 60 && a.replay.total_ticks === a.ticks && Array.isArray(a.replay.inputs) && a.replay.seed !== undefined, m.id + ": replay log shape");
       const variety = {};
       for (const bs of [1, 2, 3, 4, 5]) { const r = sim(m, { bot_seed: bs, bot_skill: 0.6 }); variety[r.outcome + r.score + "@" + r.ticks] = 1; }
-      ok(Object.keys(variety).length >= 2, m.id + ": bot seeds vary the runs");
+      if (!genericBot(m)) ok(Object.keys(variety).length >= 2, m.id + ": bot seeds vary the runs");
     }
 
     // ------------------------------------------------------------------ negative cases

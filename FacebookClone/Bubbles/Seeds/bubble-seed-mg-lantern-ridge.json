@@ -1,0 +1,988 @@
+{
+  "id": "mg-lantern-ridge",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Lantern Ridge",
+  "one_line_rule": "Arrow keys or A/D to run, Space or Up to jump.",
+  "formula": "microgame",
+  "brief": {
+    "intent": "Arrow keys or A/D to run, Space or Up to jump.",
+    "audience": "everyone",
+    "mood": [
+      "playful"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "glow",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#241B3A",
+      "bg_bottom": "#241B3A",
+      "ink": "#FFFFFF",
+      "primary": "#7AE582",
+      "secondary": "#8E7DBE",
+      "accent": "#C3B1E1",
+      "danger": "#FF6B6B"
+    },
+    "font": "rounded",
+    "motif": "none",
+    "emoji": "🏮",
+    "mood_preset": "playful"
+  },
+  "concepts": [
+    {
+      "use": "space.microgame"
+    },
+    {
+      "use": "input.microgame"
+    },
+    {
+      "use": "score.microgame",
+      "params": {
+        "label": "points"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "game": {
+      "format": "microgame/0.2",
+      "meta": {
+        "title": "Lantern Ridge",
+        "instructions": "Arrow keys or A/D to run, Space or Up to jump. On a phone, hold the arrows and tap the jump button. Collect sparks, dodge the thorns, mind the gaps, and reach the lantern post.",
+        "duration_s": 60
+      },
+      "assets": {
+        "hero": {
+          "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 36' width='64' height='36'><g><rect x='5' y='4' width='22' height='24' rx='9' fill='#6C63FF'/><rect x='9' y='9' width='16' height='9' rx='4' fill='#F4F1EA'/><circle cx='20' cy='13.5' r='2.2' fill='#1A1A2E'/><rect x='7' y='26' width='7' height='9' rx='3' fill='#3D3A99'/><rect x='18' y='26' width='7' height='9' rx='3' fill='#3D3A99'/><path d='M5 10 L0 6 L4 14 Z' fill='#FF8C42'/></g><g transform='translate(32 0)'><rect x='5' y='3' width='22' height='24' rx='9' fill='#6C63FF'/><rect x='9' y='8' width='16' height='9' rx='4' fill='#F4F1EA'/><circle cx='20' cy='12.5' r='2.2' fill='#1A1A2E'/><rect x='4' y='25' width='7' height='9' rx='3' fill='#3D3A99' transform='rotate(-20 7 29)'/><rect x='20' y='25' width='7' height='9' rx='3' fill='#3D3A99' transform='rotate(20 23 29)'/><path d='M5 9 L0 3 L4 13 Z' fill='#FF8C42'/></g></svg>",
+          "w": 32,
+          "h": 36,
+          "frames": 2,
+          "cols": 2,
+          "fps": 8
+        },
+        "spark": {
+          "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'><path d='M12 1 L15 9 L23 12 L15 15 L12 23 L9 15 L1 12 L9 9 Z' fill='#FFD166' stroke='#F4A261' stroke-width='1.5'/><circle cx='12' cy='12' r='3' fill='#FFF8E1'/></svg>",
+          "w": 24,
+          "h": 24
+        },
+        "post": {
+          "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 130' width='40' height='130'><rect x='17' y='30' width='6' height='100' fill='#4A3B5C'/><rect x='8' y='4' width='24' height='30' rx='6' fill='#2E2440'/><rect x='12' y='9' width='16' height='20' rx='4' fill='#FFD166'/><circle cx='20' cy='19' r='12' fill='#FFD166' opacity='0.3'/></svg>",
+          "w": 40,
+          "h": 130
+        }
+      },
+      "types": {
+        "Hero": {
+          "x": "float",
+          "y": "float",
+          "vx": "float",
+          "vy": "float",
+          "w": "float",
+          "h": "float"
+        },
+        "Box": {
+          "x": "float",
+          "y": "float",
+          "w": "float",
+          "h": "float"
+        },
+        "Spark": {
+          "x": "float",
+          "y": "float",
+          "r": "float",
+          "taken": "bool"
+        }
+      },
+      "state": {
+        "hero": {
+          "type": "Hero",
+          "init": "{x: 60.0, y: 520.0, vx: 0.0, vy: 0.0, w: 22.0, h: 34.0}"
+        },
+        "ground": {
+          "type": "list<Box>",
+          "init": "[{x: 260.0, y: 600.0, w: 520.0, h: 80.0}, {x: 855.0, y: 600.0, w: 490.0, h: 80.0}, {x: 1460.0, y: 600.0, w: 480.0, h: 80.0}, {x: 2110.0, y: 600.0, w: 580.0, h: 80.0}]"
+        },
+        "ledges": {
+          "type": "list<Box>",
+          "init": "[{x: 300.0, y: 450.0, w: 120.0, h: 18.0}, {x: 470.0, y: 345.0, w: 100.0, h: 18.0}, {x: 900.0, y: 455.0, w: 110.0, h: 18.0}, {x: 1010.0, y: 360.0, w: 100.0, h: 18.0}, {x: 1160.0, y: 470.0, w: 90.0, h: 18.0}, {x: 1500.0, y: 440.0, w: 100.0, h: 18.0}, {x: 1640.0, y: 350.0, w: 110.0, h: 18.0}, {x: 1760.0, y: 445.0, w: 90.0, h: 18.0}, {x: 2230.0, y: 445.0, w: 120.0, h: 18.0}]"
+        },
+        "thorns": {
+          "type": "list<Box>",
+          "init": "[{x: 820.0, y: 552.0, w: 56.0, h: 16.0}, {x: 1420.0, y: 552.0, w: 64.0, h: 16.0}, {x: 2080.0, y: 552.0, w: 56.0, h: 16.0}]"
+        },
+        "sparks": {
+          "type": "list<Spark>",
+          "init": "map([[200, 520], [300, 410], [470, 305], [565, 460], [900, 415], [1010, 320], [1050, 520], [1160, 430], [1300, 520], [1500, 400], [1640, 310], [1760, 405], [2080, 480], [2230, 405], [2280, 520]], p => {x: p[0] * 1.0, y: p[1] * 1.0, r: 11.0, taken: false})"
+        },
+        "goal": {
+          "type": "Box",
+          "init": "{x: 2330.0, y: 495.0, w: 24.0, h: 130.0}"
+        },
+        "left_held": {
+          "type": "bool",
+          "init": "false"
+        },
+        "right_held": {
+          "type": "bool",
+          "init": "false"
+        },
+        "facing": {
+          "type": "int",
+          "init": "1"
+        },
+        "landed_at": {
+          "type": "int",
+          "init": "-1000"
+        },
+        "collected": {
+          "type": "int",
+          "init": "0"
+        },
+        "phase": {
+          "type": {
+            "enum": [
+              "running",
+              "won",
+              "fallen"
+            ]
+          },
+          "init": "'running'"
+        }
+      },
+      "functions": {
+        "grounded": {
+          "params": {
+            "t": "int",
+            "landed": "int"
+          },
+          "returns": "bool",
+          "body": "t - landed <= 60"
+        },
+        "cam_x": {
+          "params": {
+            "hx": "float"
+          },
+          "returns": "float",
+          "body": "clamp(hx - 140, 0.0, 2040.0)"
+        }
+      },
+      "events": {
+        "land": {
+          "ny": "float"
+        },
+        "grab": {
+          "b": "int"
+        },
+        "hurt": {},
+        "ouch": {},
+        "reached": {},
+        "goal": {},
+        "got": {
+          "x": "float",
+          "y": "float"
+        },
+        "jumped": {},
+        "fell": {
+          "x": "float"
+        },
+        "finish": {}
+      },
+      "inputs": {
+        "left": {
+          "payload": {
+            "on": "bool"
+          },
+          "from": [
+            {
+              "key": "ArrowLeft",
+              "with": {
+                "on": "true"
+              }
+            },
+            {
+              "key": "ArrowLeft",
+              "on": "up",
+              "with": {
+                "on": "false"
+              }
+            },
+            {
+              "key": "KeyA",
+              "with": {
+                "on": "true"
+              }
+            },
+            {
+              "key": "KeyA",
+              "on": "up",
+              "with": {
+                "on": "false"
+              }
+            }
+          ]
+        },
+        "right": {
+          "payload": {
+            "on": "bool"
+          },
+          "from": [
+            {
+              "key": "ArrowRight",
+              "with": {
+                "on": "true"
+              }
+            },
+            {
+              "key": "ArrowRight",
+              "on": "up",
+              "with": {
+                "on": "false"
+              }
+            },
+            {
+              "key": "KeyD",
+              "with": {
+                "on": "true"
+              }
+            },
+            {
+              "key": "KeyD",
+              "on": "up",
+              "with": {
+                "on": "false"
+              }
+            }
+          ]
+        },
+        "jump": {
+          "payload": {},
+          "when": "phase == 'running'",
+          "from": [
+            {
+              "key": "Space"
+            },
+            {
+              "key": "ArrowUp"
+            },
+            {
+              "key": "KeyW"
+            }
+          ]
+        }
+      },
+      "rules": [
+        {
+          "id": "left",
+          "on": "left",
+          "do": [
+            {
+              "set": "left_held",
+              "to": "event.on"
+            }
+          ]
+        },
+        {
+          "id": "right",
+          "on": "right",
+          "do": [
+            {
+              "set": "right_held",
+              "to": "event.on"
+            }
+          ]
+        },
+        {
+          "id": "jump",
+          "on": "jump",
+          "when": "grounded(now, landed_at)",
+          "do": [
+            {
+              "set": "hero.vy",
+              "to": "-760.0"
+            },
+            {
+              "set": "landed_at",
+              "to": "-1000"
+            },
+            {
+              "emit": "jumped"
+            }
+          ]
+        },
+        {
+          "id": "land",
+          "on": "land",
+          "when": "event.ny < -0.5",
+          "do": [
+            {
+              "set": "landed_at",
+              "to": "now"
+            }
+          ]
+        },
+        {
+          "id": "grab",
+          "on": "grab",
+          "when": "phase == 'running' and not sparks[event.b].taken",
+          "do": [
+            {
+              "set": "sparks[event.b].taken",
+              "to": "true"
+            },
+            {
+              "incr": "collected"
+            },
+            {
+              "emit": "got",
+              "with": {
+                "x": "sparks[event.b].x",
+                "y": "sparks[event.b].y"
+              }
+            }
+          ]
+        },
+        {
+          "id": "hurt",
+          "on": "hurt",
+          "when": "phase == 'running'",
+          "do": [
+            {
+              "set": "phase",
+              "to": "'fallen'"
+            },
+            {
+              "set": "hero",
+              "to": "{...hero, vx: 0.0, vy: -500.0}"
+            },
+            {
+              "emit": "ouch"
+            },
+            {
+              "after": "800ms",
+              "emit": "finish"
+            }
+          ]
+        },
+        {
+          "id": "goal",
+          "on": "goal",
+          "when": "phase == 'running'",
+          "do": [
+            {
+              "set": "phase",
+              "to": "'won'"
+            },
+            {
+              "set": "hero.vx",
+              "to": "0.0"
+            },
+            {
+              "emit": "reached"
+            },
+            {
+              "after": "600ms",
+              "emit": "finish"
+            }
+          ]
+        },
+        {
+          "id": "finish",
+          "on": "finish",
+          "do": [
+            {
+              "if": "phase == 'won'",
+              "then": [
+                {
+                  "end": "win"
+                }
+              ],
+              "else": [
+                {
+                  "end": "lose"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "steer",
+          "on": "tick",
+          "when": "phase == 'running'",
+          "do": [
+            {
+              "let": {
+                "dir": "(if right_held then 1 else 0) - (if left_held then 1 else 0)"
+              }
+            },
+            {
+              "set": "hero.vx",
+              "to": "dir * 230.0"
+            },
+            {
+              "if": "dir != 0",
+              "then": [
+                {
+                  "set": "facing",
+                  "to": "dir"
+                }
+              ]
+            },
+            {
+              "remove": "sparks",
+              "where": "s => s.taken"
+            },
+            {
+              "if": "hero.y > 700",
+              "then": [
+                {
+                  "emit": "fell",
+                  "with": {
+                    "x": "hero.x"
+                  }
+                },
+                {
+                  "set": "phase",
+                  "to": "'fallen'"
+                },
+                {
+                  "after": "500ms",
+                  "emit": "finish"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "physics": {
+        "gravity": [
+          0,
+          1800
+        ],
+        "bounds": [
+          0,
+          -400,
+          2400,
+          1400
+        ],
+        "bodies": {
+          "hero": {
+            "state": "hero",
+            "bounded": true,
+            "max_speed": 1100
+          },
+          "ground": {
+            "state": "ground",
+            "static": true
+          },
+          "ledges": {
+            "state": "ledges",
+            "static": true
+          },
+          "thorns": {
+            "state": "thorns",
+            "static": true
+          },
+          "sparks": {
+            "state": "sparks",
+            "static": true
+          },
+          "goal": {
+            "state": "goal",
+            "static": true
+          }
+        },
+        "collisions": [
+          {
+            "a": "hero",
+            "b": "ground",
+            "solid": true,
+            "emit": "land"
+          },
+          {
+            "a": "hero",
+            "b": "ledges",
+            "solid": true,
+            "emit": "land"
+          },
+          {
+            "a": "hero",
+            "b": "thorns",
+            "emit": "hurt"
+          },
+          {
+            "a": "hero",
+            "b": "sparks",
+            "emit": "grab"
+          },
+          {
+            "a": "hero",
+            "b": "goal",
+            "emit": "goal"
+          }
+        ]
+      },
+      "objectives": {
+        "score": "collected * 100 + (if phase == 'won' then max(0, 600 - now / 100) else 0)",
+        "time_limit": "90s",
+        "on_timeout": "lose"
+      },
+      "presentation": {
+        "canvas": {
+          "w": 360,
+          "h": 640,
+          "background": "$sky"
+        },
+        "camera": {
+          "x": "= cam_x(hero.x)",
+          "y": "0"
+        },
+        "tokens": {
+          "sky": "#241B3A",
+          "far": "#3B2F5C",
+          "mid": "#4E3F73",
+          "soil": "#2E2440",
+          "grass": "#7AE582",
+          "ledge": "#8E7DBE",
+          "ledge_top": "#C3B1E1",
+          "thorn": "#FF5D73",
+          "ink": "#F4F1EA",
+          "btn": "#FFFFFF"
+        },
+        "root": {
+          "node": "group",
+          "children": [
+            {
+              "node": "poly",
+              "fill": "$far",
+              "x": "= cam_x(hero.x) * 0.7",
+              "points": "= concat([vec(0.0, 640.0)], concat(map(range(16), i => vec(i * 80.0, if i % 2 == 0 then 400.0 else 300.0 + (i % 3) * 35)), [vec(1200.0, 640.0)]))"
+            },
+            {
+              "node": "poly",
+              "fill": "$mid",
+              "x": "= cam_x(hero.x) * 0.4",
+              "points": "= concat([vec(0.0, 640.0)], concat(map(range(31), i => vec(i * 60.0, 450 + 40 * sin(i * 1.3) + 20 * cos(i * 0.7))), [vec(1800.0, 640.0)]))"
+            },
+            {
+              "node": "repeat",
+              "source": "range(40)",
+              "as": "i",
+              "template": {
+                "node": "circle",
+                "x": "= hash(i) * 2400",
+                "y": "= hash(i + 100) * 300",
+                "r": "= 1 + hash(i + 7) * 1.5",
+                "fill": "#FFFFFF",
+                "opacity": "= 0.4 + 0.4 * abs(sin(now / 700 + i))"
+              }
+            },
+            {
+              "node": "repeat",
+              "source": "ground",
+              "as": "g",
+              "template": {
+                "node": "group",
+                "children": [
+                  {
+                    "node": "rect",
+                    "x": "= g.x - g.w / 2",
+                    "y": "= g.y - g.h / 2",
+                    "w": "= g.w",
+                    "h": 200,
+                    "fill": "$soil"
+                  },
+                  {
+                    "node": "rect",
+                    "x": "= g.x - g.w / 2",
+                    "y": "= g.y - g.h / 2",
+                    "w": "= g.w",
+                    "h": 8,
+                    "radius": 3,
+                    "fill": "$grass"
+                  }
+                ]
+              }
+            },
+            {
+              "node": "repeat",
+              "source": "ledges",
+              "as": "l",
+              "template": {
+                "node": "group",
+                "children": [
+                  {
+                    "node": "rect",
+                    "x": "= l.x - l.w / 2",
+                    "y": "= l.y - l.h / 2",
+                    "w": "= l.w",
+                    "h": "= l.h",
+                    "radius": 6,
+                    "fill": "$ledge"
+                  },
+                  {
+                    "node": "rect",
+                    "x": "= l.x - l.w / 2 + 4",
+                    "y": "= l.y - l.h / 2",
+                    "w": "= l.w - 8",
+                    "h": 5,
+                    "radius": 2,
+                    "fill": "$ledge_top"
+                  }
+                ]
+              }
+            },
+            {
+              "node": "repeat",
+              "source": "thorns",
+              "as": "t",
+              "template": {
+                "node": "poly",
+                "fill": "$thorn",
+                "x": "= t.x - t.w / 2",
+                "y": "= t.y + t.h / 2",
+                "points": "= concat([vec(0.0, 0.0)], concat(map(range(floor(t.w / 14)), k => vec(k * 14.0 + 7, -t.h - 4)), [vec(t.w, 0.0)]))"
+              }
+            },
+            {
+              "node": "image",
+              "asset": "post",
+              "anchor": "center",
+              "x": "= goal.x",
+              "y": "= goal.y",
+              "animate_on": {
+                "reached": {
+                  "prop": "scale",
+                  "keys": [
+                    1,
+                    1.3,
+                    1.1
+                  ],
+                  "ms": 400
+                }
+              }
+            },
+            {
+              "node": "repeat",
+              "source": "sparks",
+              "as": "s",
+              "key": "s.x",
+              "template": {
+                "node": "image",
+                "asset": "spark",
+                "anchor": "center",
+                "x": "= s.x",
+                "y": "= s.y + 4 * sin(now / 250 + s.x)",
+                "rotation": "= fmod(now / 8 + s.x, 360.0)"
+              }
+            },
+            {
+              "node": "image",
+              "asset": "hero",
+              "anchor": "center",
+              "x": "= hero.x",
+              "y": "= hero.y - 1",
+              "flip_x": "= facing < 0",
+              "frame": "= if not grounded(now, landed_at) then 1 else if abs(hero.vx) > 1 then floor(now / 110) % 2 else 0"
+            },
+            {
+              "node": "group",
+              "fixed": true,
+              "children": [
+                {
+                  "node": "text",
+                  "x": 16,
+                  "y": 18,
+                  "text": "= 'Sparks ' + str(collected) + ' / 15'",
+                  "size": 18,
+                  "weight": 700,
+                  "color": "$ink",
+                  "stroke": "$sky",
+                  "stroke_width": 4,
+                  "animate_on": {
+                    "got": {
+                      "prop": "scale",
+                      "keys": [
+                        1,
+                        1.2,
+                        1
+                      ],
+                      "ms": 160
+                    }
+                  }
+                },
+                {
+                  "node": "rect",
+                  "x": 250,
+                  "y": 20,
+                  "w": 94,
+                  "h": 8,
+                  "radius": 4,
+                  "fill": "#FFFFFF33"
+                },
+                {
+                  "node": "rect",
+                  "x": 250,
+                  "y": 20,
+                  "w": "= 94 * clamp(hero.x / 2330, 0, 1)",
+                  "h": 8,
+                  "radius": 4,
+                  "fill": "$grass"
+                },
+                {
+                  "node": "circle",
+                  "x": 52,
+                  "y": 584,
+                  "r": 34,
+                  "fill": "$btn",
+                  "opacity": "= if left_held then 0.32 else 0.18",
+                  "scale": "= if left_held then 0.9 else 1",
+                  "transition": {
+                    "scale": {
+                      "ms": 80
+                    }
+                  },
+                  "on_press": {
+                    "input": "left",
+                    "with": {
+                      "on": "true"
+                    }
+                  },
+                  "on_release": {
+                    "input": "left",
+                    "with": {
+                      "on": "false"
+                    }
+                  }
+                },
+                {
+                  "node": "poly",
+                  "x": 52,
+                  "y": 584,
+                  "points": "[vec(8, -12), vec(-10, 0), vec(8, 12)]",
+                  "fill": "$btn",
+                  "opacity": 0.8
+                },
+                {
+                  "node": "circle",
+                  "x": 132,
+                  "y": 584,
+                  "r": 34,
+                  "fill": "$btn",
+                  "opacity": "= if right_held then 0.32 else 0.18",
+                  "scale": "= if right_held then 0.9 else 1",
+                  "transition": {
+                    "scale": {
+                      "ms": 80
+                    }
+                  },
+                  "on_press": {
+                    "input": "right",
+                    "with": {
+                      "on": "true"
+                    }
+                  },
+                  "on_release": {
+                    "input": "right",
+                    "with": {
+                      "on": "false"
+                    }
+                  }
+                },
+                {
+                  "node": "poly",
+                  "x": 132,
+                  "y": 584,
+                  "points": "[vec(-8, -12), vec(10, 0), vec(-8, 12)]",
+                  "fill": "$btn",
+                  "opacity": 0.8
+                },
+                {
+                  "node": "circle",
+                  "x": 304,
+                  "y": 576,
+                  "r": 40,
+                  "fill": "$grass",
+                  "opacity": 0.3,
+                  "on_tap": {
+                    "input": "jump",
+                    "with": {}
+                  },
+                  "animate_on": {
+                    "jumped": {
+                      "prop": "scale",
+                      "keys": [
+                        1,
+                        0.88,
+                        1
+                      ],
+                      "ms": 140
+                    }
+                  }
+                },
+                {
+                  "node": "poly",
+                  "x": 304,
+                  "y": 576,
+                  "points": "[vec(-14, 8), vec(0, -10), vec(14, 8)]",
+                  "fill": "$btn",
+                  "opacity": 0.85
+                }
+              ]
+            }
+          ]
+        },
+        "feedback": [
+          {
+            "on": "jumped",
+            "do": [
+              {
+                "sound": {
+                  "wave": "square",
+                  "note": "C5",
+                  "slide": "G5",
+                  "ms": 110,
+                  "volume": 0.25
+                }
+              }
+            ]
+          },
+          {
+            "on": "got",
+            "do": [
+              {
+                "particles": {
+                  "x": "= event.x",
+                  "y": "= event.y",
+                  "count": 14,
+                  "color": "#FFD166",
+                  "speed": 150,
+                  "size": 3,
+                  "ms": 450
+                }
+              },
+              {
+                "sound": {
+                  "wave": "triangle",
+                  "notes": [
+                    "E6",
+                    "A6"
+                  ],
+                  "step_ms": 45,
+                  "volume": 0.35
+                }
+              },
+              {
+                "haptic": "light"
+              }
+            ]
+          },
+          {
+            "on": "ouch",
+            "do": [
+              {
+                "particles": {
+                  "x": "= hero.x",
+                  "y": "= hero.y",
+                  "count": 20,
+                  "color": "#FF5D73",
+                  "speed": 220,
+                  "ms": 600,
+                  "gravity": 600
+                }
+              },
+              {
+                "shake": {
+                  "px": 8,
+                  "ms": 260
+                }
+              },
+              {
+                "haptic": "heavy"
+              },
+              {
+                "sound": {
+                  "wave": "sawtooth",
+                  "note": "A3",
+                  "slide": "A2",
+                  "ms": 260,
+                  "volume": 0.45
+                }
+              }
+            ]
+          },
+          {
+            "on": "fell",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "G4",
+                  "slide": "C3",
+                  "ms": 500,
+                  "volume": 0.45
+                }
+              },
+              {
+                "haptic": "error"
+              }
+            ]
+          },
+          {
+            "on": "reached",
+            "do": [
+              {
+                "particles": {
+                  "x": "= goal.x",
+                  "y": "= goal.y - 50",
+                  "count": 40,
+                  "color": "#FFD166",
+                  "speed": 260,
+                  "ms": 900,
+                  "gravity": 300
+                }
+              },
+              {
+                "sound": {
+                  "wave": "triangle",
+                  "notes": [
+                    "C5",
+                    "E5",
+                    "G5",
+                    "C6",
+                    "E6"
+                  ],
+                  "step_ms": 80
+                }
+              },
+              {
+                "haptic": "success"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "seed": 1006,
+  "_seed": {
+    "creator_id": "sf-chloe-nguyen",
+    "created_hours_ago": 30,
+    "play_count": 512,
+    "like_count": 133,
+    "save_count": 160
+  }
+}

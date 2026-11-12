@@ -1,0 +1,692 @@
+{
+  "id": "mg-postcard-pairs",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Postcard Pairs",
+  "one_line_rule": "Match the postcards from around your new city.",
+  "formula": "microgame",
+  "brief": {
+    "intent": "Match the postcards from around your new city.",
+    "audience": "everyone",
+    "mood": [
+      "playful"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "glow",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#F4F1EA",
+      "bg_bottom": "#F4F1EA",
+      "ink": "#141414",
+      "primary": "#3A6EA5",
+      "secondary": "#E4572E",
+      "accent": "#1F1B16",
+      "danger": "#FF6B6B"
+    },
+    "font": "rounded",
+    "motif": "none",
+    "emoji": "💌",
+    "mood_preset": "playful"
+  },
+  "concepts": [
+    {
+      "use": "space.microgame"
+    },
+    {
+      "use": "input.microgame"
+    },
+    {
+      "use": "score.microgame",
+      "params": {
+        "label": "points"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "game": {
+      "format": "microgame/0.1",
+      "meta": {
+        "title": "Postcard Pairs",
+        "instructions": "Match the postcards from around your new city. Tap two to flip them. Nine slips and the mail is lost.",
+        "duration_s": 90
+      },
+      "types": {
+        "Card": {
+          "symbol": "int",
+          "revealed": "bool",
+          "matched": "bool"
+        }
+      },
+      "state": {
+        "cards": {
+          "type": "list<Card>",
+          "init": "[]"
+        },
+        "selected": {
+          "type": "list<int>",
+          "init": "[]"
+        },
+        "matches": {
+          "type": "int",
+          "init": "0"
+        },
+        "hints_left": {
+          "type": "int",
+          "init": "2"
+        },
+        "hint_active": {
+          "type": "bool",
+          "init": "false"
+        },
+        "hint__until": {
+          "type": "int",
+          "init": "0"
+        },
+        "score": {
+          "type": "int",
+          "init": "0"
+        },
+        "lives": {
+          "type": "int",
+          "init": "9"
+        }
+      },
+      "functions": {
+        "face_color": {
+          "params": {
+            "s": "int"
+          },
+          "returns": "string",
+          "body": "get_or(['#E4572E', '#3A6EA5', '#6BAF7B', '#E9B44C', '#8E5BA8', '#2FA5A0', '#D9638A', '#7A6A55'], s, '#7A6A55')"
+        },
+        "face_letter": {
+          "params": {
+            "s": "int"
+          },
+          "returns": "string",
+          "body": "get_or(['P', 'B', 'T', 'M', 'F', 'W', 'H', 'K'], s, '?')"
+        },
+        "shown": {
+          "params": {
+            "c": "ivec2"
+          },
+          "returns": "bool",
+          "body": "let i = c.y * 4 + c.x in i < len(cards) and (hint_active or cards[i].revealed or cards[i].matched)"
+        },
+        "cell_fill": {
+          "params": {
+            "c": "ivec2"
+          },
+          "returns": "string",
+          "body": "if shown(c) then face_color(cards[c.y * 4 + c.x].symbol) else ''"
+        },
+        "cell_label": {
+          "params": {
+            "c": "ivec2"
+          },
+          "returns": "string",
+          "body": "if shown(c) then face_letter(cards[c.y * 4 + c.x].symbol) else ''"
+        }
+      },
+      "events": {
+        "pair_found": {},
+        "pair_missed": {},
+        "match_pairs__check": {},
+        "match_pairs__resolve": {},
+        "hint_used": {},
+        "hint__hint_end": {},
+        "life_lost": {}
+      },
+      "inputs": {
+        "tap_cell": {
+          "payload": {
+            "cell": "ivec2"
+          }
+        },
+        "use_hint": {}
+      },
+      "rules": [
+        {
+          "id": "match_pairs__deal",
+          "on": "start",
+          "do": [
+            {
+              "set": "cards",
+              "to": "map(shuffle(concat(range(8), range(8))), s => {symbol: s, revealed: false, matched: false})"
+            }
+          ]
+        },
+        {
+          "id": "match_pairs__flip",
+          "on": "tap_cell",
+          "when": "len(selected) < 2 and event.cell.y * 4 + event.cell.x >= 0 and event.cell.y * 4 + event.cell.x < len(cards) and not cards[event.cell.y * 4 + event.cell.x].matched and not cards[event.cell.y * 4 + event.cell.x].revealed",
+          "do": [
+            {
+              "let": {
+                "i": "event.cell.y * 4 + event.cell.x"
+              }
+            },
+            {
+              "set": "cards",
+              "to": "set_at(cards, i, {symbol: cards[i].symbol, revealed: true, matched: false})"
+            },
+            {
+              "push": "selected",
+              "value": "i"
+            },
+            {
+              "if": "len(selected) == 2",
+              "then": [
+                {
+                  "emit": "match_pairs__check"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "match_pairs__check",
+          "on": "match_pairs__check",
+          "do": [
+            {
+              "after": "800",
+              "emit": "match_pairs__resolve",
+              "id": "match_pairs__resolve_timer"
+            }
+          ]
+        },
+        {
+          "id": "match_pairs__resolve",
+          "on": "match_pairs__resolve",
+          "do": [
+            {
+              "let": {
+                "a": "selected[0]",
+                "b": "selected[1]"
+              }
+            },
+            {
+              "if": "cards[a].symbol == cards[b].symbol",
+              "then": [
+                {
+                  "set": "cards",
+                  "to": "set_at(set_at(cards, a, {symbol: cards[a].symbol, revealed: true, matched: true}), b, {symbol: cards[b].symbol, revealed: true, matched: true})"
+                },
+                {
+                  "incr": "matches"
+                },
+                {
+                  "set": "selected",
+                  "to": "[]"
+                },
+                {
+                  "emit": "pair_found"
+                }
+              ],
+              "else": [
+                {
+                  "set": "cards",
+                  "to": "set_at(set_at(cards, a, {symbol: cards[a].symbol, revealed: false, matched: false}), b, {symbol: cards[b].symbol, revealed: false, matched: false})"
+                },
+                {
+                  "set": "selected",
+                  "to": "[]"
+                },
+                {
+                  "emit": "pair_missed"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hint__use",
+          "on": "use_hint",
+          "when": "hints_left > 0 and not hint_active",
+          "do": [
+            {
+              "decr": "hints_left"
+            },
+            {
+              "set": "hint_active",
+              "to": "true"
+            },
+            {
+              "set": "hint__until",
+              "to": "now + 2500"
+            },
+            {
+              "after": "2500",
+              "emit": "hint__hint_end",
+              "id": "hint__timer"
+            },
+            {
+              "emit": "hint_used"
+            }
+          ]
+        },
+        {
+          "id": "hint__end",
+          "on": "hint__hint_end",
+          "do": [
+            {
+              "set": "hint_active",
+              "to": "false"
+            }
+          ]
+        },
+        {
+          "id": "score__add",
+          "on": "pair_found",
+          "do": [
+            {
+              "incr": "score",
+              "by": "100"
+            }
+          ]
+        },
+        {
+          "id": "lives__lose_life",
+          "on": "pair_missed",
+          "when": "lives > 0",
+          "do": [
+            {
+              "decr": "lives"
+            },
+            {
+              "emit": "life_lost"
+            }
+          ]
+        }
+      ],
+      "objectives": {
+        "win": "matches >= 8",
+        "lose": "lives <= 0",
+        "score": "matches * 100",
+        "time_limit": "90s",
+        "on_timeout": "lose"
+      },
+      "presentation": {
+        "canvas": {
+          "w": 360,
+          "h": 640,
+          "background": "$bg"
+        },
+        "tokens": {
+          "primary": "#3A6EA5",
+          "secondary": "#8FB3D9",
+          "accent": "#E4572E",
+          "ink": "#1F1B16",
+          "bg": "#F4F1EA",
+          "surface": "#E6DFD1",
+          "danger": "#C8402A"
+        },
+        "root": {
+          "node": "group",
+          "children": [
+            {
+              "node": "group",
+              "x": 0,
+              "y": 0,
+              "children": [
+                {
+                  "node": "grid",
+                  "cols": 4,
+                  "rows": 4,
+                  "cell_size": 64,
+                  "gap": 8,
+                  "x": 36,
+                  "y": 180,
+                  "cell": {
+                    "node": "group",
+                    "children": [
+                      {
+                        "node": "rect",
+                        "w": 64,
+                        "h": 64,
+                        "radius": 10,
+                        "fill": "= if cell_fill(cell) == '' then $surface else cell_fill(cell)",
+                        "transition": {
+                          "fill": {
+                            "ms": 150,
+                            "ease": "out"
+                          }
+                        },
+                        "on_tap": {
+                          "input": "tap_cell",
+                          "with": {
+                            "cell": "cell"
+                          }
+                        }
+                      },
+                      {
+                        "node": "text",
+                        "x": 64,
+                        "y": 64,
+                        "anchor": "center",
+                        "size": 24,
+                        "weight": 700,
+                        "color": "$ink",
+                        "text": "= cell_label(cell)",
+                        "font": "Fraunces"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "node": "text",
+                  "text": "POSTCARD PAIRS",
+                  "x": 180,
+                  "y": 120,
+                  "anchor": "center",
+                  "size": 26,
+                  "weight": 700,
+                  "color": "$ink",
+                  "font": "Fraunces"
+                }
+              ]
+            },
+            {
+              "node": "stack",
+              "dir": "row",
+              "gap": 28,
+              "align": "center",
+              "x": 180,
+              "y": 52,
+              "anchor": "center",
+              "children": [
+                {
+                  "node": "text",
+                  "text": "= 'Pairs: ' + str(matches) + ' / ' + str(8)",
+                  "size": 18,
+                  "weight": 600,
+                  "color": "$ink",
+                  "font": "Fraunces"
+                },
+                {
+                  "node": "text",
+                  "text": "= 'Score' + ': ' + str(score)",
+                  "size": 18,
+                  "weight": 600,
+                  "color": "$ink",
+                  "font": "Fraunces"
+                },
+                {
+                  "node": "text",
+                  "text": "= 'Lives: ' + str(lives)",
+                  "size": 18,
+                  "weight": 600,
+                  "color": "$ink",
+                  "font": "Fraunces"
+                }
+              ]
+            },
+            {
+              "node": "stack",
+              "dir": "row",
+              "gap": 28,
+              "align": "center",
+              "x": 180,
+              "y": 604,
+              "anchor": "center",
+              "children": [
+                {
+                  "node": "group",
+                  "children": [
+                    {
+                      "node": "rect",
+                      "w": 120,
+                      "h": 36,
+                      "radius": 18,
+                      "fill": "= if hints_left > 0 and not hint_active then $accent else $surface",
+                      "transition": {
+                        "fill": {
+                          "ms": 150,
+                          "ease": "out"
+                        }
+                      },
+                      "on_tap": {
+                        "input": "use_hint"
+                      }
+                    },
+                    {
+                      "node": "text",
+                      "x": 60,
+                      "y": 18,
+                      "anchor": "center",
+                      "size": 16,
+                      "weight": 600,
+                      "color": "$ink",
+                      "text": "= if hint_active then 'Look! ' + str(max(0, ceil((hint__until - now) / 1000.0))) + 's' else 'Hint (' + str(hints_left) + ')'",
+                      "font": "Fraunces"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "node": "group",
+              "x": 0,
+              "y": 0,
+              "children": []
+            }
+          ]
+        },
+        "feedback": [
+          {
+            "on": "pair_found",
+            "do": [
+              {
+                "sound": {
+                  "wave": "triangle",
+                  "note": "G5",
+                  "ms": 140
+                }
+              }
+            ]
+          },
+          {
+            "on": "pair_missed",
+            "do": [
+              {
+                "sound": {
+                  "wave": "square",
+                  "note": "C3",
+                  "ms": 100
+                }
+              }
+            ]
+          },
+          {
+            "on": "hint_used",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "A5",
+                  "ms": 120
+                }
+              }
+            ]
+          },
+          {
+            "on": "pair_found",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "E5",
+                  "ms": 60
+                }
+              }
+            ]
+          },
+          {
+            "on": "life_lost",
+            "do": [
+              {
+                "shake": {
+                  "px": 6,
+                  "ms": 200
+                }
+              },
+              {
+                "sound": {
+                  "wave": "square",
+                  "note": "C3",
+                  "ms": 120
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "authoring": {
+      "authoring": "microgame-authoring/0.1",
+      "meta": {
+        "title": "Postcard Pairs",
+        "instructions": "Match the postcards from around your new city. Tap two to flip them. Nine slips and the mail is lost.",
+        "duration_s": 90
+      },
+      "uses": [
+        {
+          "fragment": "grid_board",
+          "params": {
+            "cols": 4,
+            "rows": 4,
+            "cell_size": 64,
+            "gap": 8,
+            "x": 36,
+            "y": 180
+          }
+        },
+        {
+          "fragment": "match_pairs",
+          "params": {
+            "pairs": 8,
+            "cols": 4,
+            "mismatch_ms": 800
+          }
+        },
+        {
+          "fragment": "hint",
+          "params": {
+            "uses": 2,
+            "cooldown": 2500
+          }
+        },
+        {
+          "fragment": "score",
+          "params": {
+            "points": 100,
+            "label": "Score"
+          },
+          "bind": {
+            "point": "pair_found"
+          }
+        },
+        {
+          "fragment": "lives",
+          "params": {
+            "count": 9
+          },
+          "bind": {
+            "hit": "pair_missed"
+          }
+        }
+      ],
+      "functions": {
+        "face_color": {
+          "params": {
+            "s": "int"
+          },
+          "returns": "string",
+          "body": "get_or(['#E4572E', '#3A6EA5', '#6BAF7B', '#E9B44C', '#8E5BA8', '#2FA5A0', '#D9638A', '#7A6A55'], s, '#7A6A55')"
+        },
+        "face_letter": {
+          "params": {
+            "s": "int"
+          },
+          "returns": "string",
+          "body": "get_or(['P', 'B', 'T', 'M', 'F', 'W', 'H', 'K'], s, '?')"
+        },
+        "shown": {
+          "params": {
+            "c": "ivec2"
+          },
+          "returns": "bool",
+          "body": "let i = c.y * 4 + c.x in i < len(cards) and (hint_active or cards[i].revealed or cards[i].matched)"
+        },
+        "cell_fill": {
+          "params": {
+            "c": "ivec2"
+          },
+          "returns": "string",
+          "body": "if shown(c) then face_color(cards[c.y * 4 + c.x].symbol) else ''"
+        },
+        "cell_label": {
+          "params": {
+            "c": "ivec2"
+          },
+          "returns": "string",
+          "body": "if shown(c) then face_letter(cards[c.y * 4 + c.x].symbol) else ''"
+        }
+      },
+      "objectives": {
+        "time_limit": "90s",
+        "on_timeout": "lose",
+        "score": "matches * 100"
+      },
+      "presentation": {
+        "slots": [
+          {
+            "slot": "playfield",
+            "node": {
+              "node": "text",
+              "text": "POSTCARD PAIRS",
+              "x": 180,
+              "y": 120,
+              "anchor": "center",
+              "size": 26,
+              "weight": 700,
+              "color": "$ink"
+            }
+          }
+        ],
+        "feedback": []
+      },
+      "look": {
+        "id": "paper",
+        "tokens": {}
+      },
+      "content": {},
+      "playtest": {
+        "progress": "matches * 100 + lives"
+      }
+    }
+  },
+  "seed": 1001,
+  "_seed": {
+    "creator_id": "sf-aiko-tanaka",
+    "created_hours_ago": 12,
+    "play_count": 410,
+    "like_count": 96,
+    "save_count": 115
+  }
+}

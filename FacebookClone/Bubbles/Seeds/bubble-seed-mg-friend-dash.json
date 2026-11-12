@@ -1,0 +1,713 @@
+{
+  "id": "mg-friend-dash",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Friend Dash",
+  "one_line_rule": "Tap each firefly before it flickers out.",
+  "formula": "microgame",
+  "brief": {
+    "intent": "Tap each firefly before it flickers out.",
+    "audience": "everyone",
+    "mood": [
+      "playful"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "glow",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#0A0F24",
+      "bg_bottom": "#0A0F24",
+      "ink": "#FFFFFF",
+      "primary": "#00E5FF",
+      "secondary": "#7C5CFF",
+      "accent": "#FF3DB4",
+      "danger": "#FF6B6B"
+    },
+    "font": "rounded",
+    "motif": "none",
+    "emoji": "🏃",
+    "mood_preset": "playful"
+  },
+  "concepts": [
+    {
+      "use": "space.microgame"
+    },
+    {
+      "use": "input.microgame"
+    },
+    {
+      "use": "score.microgame",
+      "params": {
+        "label": "points"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "game": {
+      "format": "microgame/0.1",
+      "meta": {
+        "title": "Friend Dash",
+        "instructions": "Tap each firefly before it flickers out. Maya ran this exact course: beat her score before the 30 seconds are up. Four missed fireflies and you're out.",
+        "duration_s": 30
+      },
+      "state": {
+        "score": {
+          "type": "int",
+          "init": "0"
+        },
+        "lives": {
+          "type": "int",
+          "init": "4"
+        },
+        "ghost": {
+          "type": "int",
+          "init": "0"
+        },
+        "ghost_score__lead": {
+          "type": "int",
+          "init": "0"
+        },
+        "ghost_score__passed": {
+          "type": "bool",
+          "init": "false"
+        },
+        "ghost_score__repassed": {
+          "type": "bool",
+          "init": "false"
+        },
+        "ghost_score__banner_until": {
+          "type": "int",
+          "init": "0"
+        },
+        "ghost_score__banner": {
+          "type": "string",
+          "init": "''"
+        },
+        "beat_target__done": {
+          "type": "bool",
+          "init": "false"
+        },
+        "fx": {
+          "type": "float",
+          "init": "random_float(50.0, 310.0)"
+        },
+        "fy": {
+          "type": "float",
+          "init": "random_float(160.0, 540.0)"
+        },
+        "born": {
+          "type": "int",
+          "init": "0"
+        }
+      },
+      "events": {
+        "point": {},
+        "life_lost": {},
+        "passed_ghost": {},
+        "ghost_passed_you": {},
+        "target_beaten": {},
+        "missed": {}
+      },
+      "inputs": {
+        "tap": {
+          "payload": {
+            "x": "float",
+            "y": "float"
+          }
+        }
+      },
+      "rules": [
+        {
+          "id": "score__add",
+          "on": "point",
+          "do": [
+            {
+              "incr": "score",
+              "by": "10"
+            }
+          ]
+        },
+        {
+          "id": "lives__lose_life",
+          "on": "missed",
+          "when": "lives > 0",
+          "do": [
+            {
+              "decr": "lives"
+            },
+            {
+              "emit": "life_lost"
+            }
+          ]
+        },
+        {
+          "id": "ghost_score__pace",
+          "on": "tick",
+          "do": [
+            {
+              "set": "ghost",
+              "to": "floor(220 * 1.0 * min(now, 30000) / 30000)"
+            },
+            {
+              "if": "score > ghost and not ghost_score__passed",
+              "then": [
+                {
+                  "set": "ghost_score__passed",
+                  "to": "true"
+                },
+                {
+                  "set": "ghost_score__lead",
+                  "to": "1"
+                },
+                {
+                  "set": "ghost_score__banner",
+                  "to": "'You passed ' + 'Maya' + '!'"
+                },
+                {
+                  "set": "ghost_score__banner_until",
+                  "to": "now + 1500"
+                },
+                {
+                  "emit": "passed_ghost"
+                }
+              ]
+            },
+            {
+              "if": "ghost > score and ghost_score__lead == 1 and not ghost_score__repassed",
+              "then": [
+                {
+                  "set": "ghost_score__repassed",
+                  "to": "true"
+                },
+                {
+                  "set": "ghost_score__banner",
+                  "to": "'Maya' + ' passed you!'"
+                },
+                {
+                  "set": "ghost_score__banner_until",
+                  "to": "now + 1500"
+                },
+                {
+                  "emit": "ghost_passed_you"
+                }
+              ]
+            },
+            {
+              "if": "ghost_score__lead == 1 and ghost > score",
+              "then": [
+                {
+                  "set": "ghost_score__lead",
+                  "to": "-1"
+                }
+              ]
+            },
+            {
+              "if": "ghost_score__lead == -1 and score > ghost",
+              "then": [
+                {
+                  "set": "ghost_score__lead",
+                  "to": "1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "beat_target__check",
+          "on": "tick",
+          "when": "not beat_target__done and score > 220",
+          "do": [
+            {
+              "set": "beat_target__done",
+              "to": "true"
+            },
+            {
+              "emit": "target_beaten"
+            }
+          ]
+        },
+        {
+          "id": "catch",
+          "on": "tap",
+          "do": [
+            {
+              "if": "now >= born and overlaps_circle(vec(event.x, event.y), 1.0, vec(fx, fy), 42.0)",
+              "then": [
+                {
+                  "emit": "point"
+                },
+                {
+                  "set": "fx",
+                  "to": "random_float(50.0, 310.0)"
+                },
+                {
+                  "set": "fy",
+                  "to": "random_float(160.0, 540.0)"
+                },
+                {
+                  "set": "born",
+                  "to": "now + 450"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "flicker_out",
+          "on": "tick",
+          "when": "now - born > 1100",
+          "do": [
+            {
+              "emit": "missed"
+            },
+            {
+              "set": "fx",
+              "to": "random_float(50.0, 310.0)"
+            },
+            {
+              "set": "fy",
+              "to": "random_float(160.0, 540.0)"
+            },
+            {
+              "set": "born",
+              "to": "now + 450"
+            }
+          ]
+        }
+      ],
+      "objectives": {
+        "win": "score > 220",
+        "lose": "lives <= 0",
+        "score": "score",
+        "time_limit": "30s",
+        "on_timeout": "lose"
+      },
+      "presentation": {
+        "canvas": {
+          "w": 360,
+          "h": 640,
+          "background": "$bg"
+        },
+        "tokens": {
+          "primary": "#00E5FF",
+          "secondary": "#7C5CFF",
+          "accent": "#FF3DB4",
+          "ink": "#E8ECFF",
+          "bg": "#0A0F24",
+          "surface": "#151C3A",
+          "danger": "#FF4D6D"
+        },
+        "root": {
+          "node": "group",
+          "children": [
+            {
+              "node": "group",
+              "x": 0,
+              "y": 0,
+              "children": [
+                {
+                  "node": "rect",
+                  "x": 0,
+                  "y": 0,
+                  "w": 360,
+                  "h": 640,
+                  "fill": "#00000000",
+                  "on_tap": {
+                    "input": "tap",
+                    "with": {
+                      "x": "pointer.x",
+                      "y": "pointer.y"
+                    }
+                  }
+                },
+                {
+                  "node": "circle",
+                  "x": "= fx",
+                  "y": "= fy",
+                  "r": 40,
+                  "fill": "$accent",
+                  "opacity": 0.25,
+                  "visible": "= now >= born"
+                },
+                {
+                  "node": "circle",
+                  "x": "= fx",
+                  "y": "= fy",
+                  "r": "= max(8.0, 24.0 - (now - born) / 60.0)",
+                  "fill": "$accent",
+                  "visible": "= now >= born"
+                }
+              ]
+            },
+            {
+              "node": "stack",
+              "dir": "row",
+              "gap": 28,
+              "align": "center",
+              "x": 180,
+              "y": 48,
+              "anchor": "center",
+              "children": [
+                {
+                  "node": "text",
+                  "text": "= 'Score' + ': ' + str(score)",
+                  "size": 18,
+                  "weight": 600,
+                  "color": "$ink",
+                  "font": "Inter"
+                },
+                {
+                  "node": "text",
+                  "text": "= 'Lives: ' + str(lives)",
+                  "size": 18,
+                  "weight": 600,
+                  "color": "$ink",
+                  "font": "Inter"
+                },
+                {
+                  "node": "text",
+                  "text": "= 'Maya' + ' ' + str(ghost)",
+                  "size": 18,
+                  "weight": 600,
+                  "color": "= if ghost > score then $danger else $secondary",
+                  "font": "Inter"
+                }
+              ]
+            },
+            {
+              "node": "stack",
+              "dir": "row",
+              "gap": 28,
+              "align": "center",
+              "x": 180,
+              "y": 608,
+              "anchor": "center",
+              "children": [
+                {
+                  "node": "text",
+                  "text": "= 'Beat ' + 'Maya' + ': ' + str(220)",
+                  "size": 16,
+                  "weight": 600,
+                  "color": "$ink",
+                  "font": "Inter"
+                }
+              ]
+            },
+            {
+              "node": "group",
+              "x": 0,
+              "y": 0,
+              "children": [
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 112,
+                  "anchor": "center",
+                  "size": 18,
+                  "weight": 700,
+                  "color": "$accent",
+                  "text": "= ghost_score__banner",
+                  "opacity": "= if now < ghost_score__banner_until then 1.0 else 0.0",
+                  "font": "Inter"
+                }
+              ]
+            }
+          ]
+        },
+        "feedback": [
+          {
+            "on": "point",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "E5",
+                  "ms": 60
+                }
+              }
+            ]
+          },
+          {
+            "on": "life_lost",
+            "do": [
+              {
+                "shake": {
+                  "px": 6,
+                  "ms": 200
+                }
+              },
+              {
+                "sound": {
+                  "wave": "square",
+                  "note": "C3",
+                  "ms": 120
+                }
+              }
+            ]
+          },
+          {
+            "on": "passed_ghost",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "G5",
+                  "ms": 120
+                }
+              }
+            ]
+          },
+          {
+            "on": "ghost_passed_you",
+            "do": [
+              {
+                "sound": {
+                  "wave": "triangle",
+                  "note": "D3",
+                  "ms": 160
+                }
+              }
+            ]
+          },
+          {
+            "on": "target_beaten",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "C6",
+                  "ms": 200
+                }
+              }
+            ]
+          },
+          {
+            "on": "point",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "A5",
+                  "ms": 60
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "authoring": {
+      "authoring": "microgame-authoring/0.1",
+      "meta": {
+        "title": "Friend Dash",
+        "instructions": "Tap each firefly before it flickers out. Maya ran this exact course: beat her score before the 30 seconds are up. Four missed fireflies and you're out.",
+        "duration_s": 30
+      },
+      "uses": [
+        {
+          "fragment": "score",
+          "params": {
+            "points": 10,
+            "target": 0,
+            "label": "Score"
+          }
+        },
+        {
+          "fragment": "lives",
+          "params": {
+            "count": 4
+          },
+          "bind": {
+            "hit": "missed"
+          }
+        },
+        {
+          "fragment": "ghost_score",
+          "params": {
+            "friend_name": "Maya",
+            "friend_score": 220,
+            "friend_time": "30s"
+          }
+        },
+        {
+          "fragment": "beat_target",
+          "params": {
+            "friend_name": "Maya",
+            "target": 220
+          }
+        }
+      ],
+      "state": {
+        "fx": {
+          "type": "float",
+          "init": "random_float(50.0, 310.0)"
+        },
+        "fy": {
+          "type": "float",
+          "init": "random_float(160.0, 540.0)"
+        },
+        "born": {
+          "type": "int",
+          "init": "0"
+        }
+      },
+      "events": {
+        "missed": {}
+      },
+      "inputs": {
+        "tap": {
+          "payload": {
+            "x": "float",
+            "y": "float"
+          }
+        }
+      },
+      "rules": [
+        {
+          "id": "catch",
+          "on": "tap",
+          "do": [
+            {
+              "if": "now >= born and overlaps_circle(vec(event.x, event.y), 1.0, vec(fx, fy), 42.0)",
+              "then": [
+                {
+                  "emit": "point"
+                },
+                {
+                  "set": "fx",
+                  "to": "random_float(50.0, 310.0)"
+                },
+                {
+                  "set": "fy",
+                  "to": "random_float(160.0, 540.0)"
+                },
+                {
+                  "set": "born",
+                  "to": "now + 450"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "flicker_out",
+          "on": "tick",
+          "when": "now - born > 1100",
+          "do": [
+            {
+              "emit": "missed"
+            },
+            {
+              "set": "fx",
+              "to": "random_float(50.0, 310.0)"
+            },
+            {
+              "set": "fy",
+              "to": "random_float(160.0, 540.0)"
+            },
+            {
+              "set": "born",
+              "to": "now + 450"
+            }
+          ]
+        }
+      ],
+      "objectives": {
+        "time_limit": "30s",
+        "on_timeout": "lose"
+      },
+      "presentation": {
+        "slots": [
+          {
+            "slot": "playfield",
+            "node": {
+              "node": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 360,
+              "h": 640,
+              "fill": "#00000000",
+              "on_tap": {
+                "input": "tap",
+                "with": {
+                  "x": "pointer.x",
+                  "y": "pointer.y"
+                }
+              }
+            }
+          },
+          {
+            "slot": "playfield",
+            "node": {
+              "node": "circle",
+              "x": "= fx",
+              "y": "= fy",
+              "r": 40,
+              "fill": "$accent",
+              "opacity": 0.25,
+              "visible": "= now >= born"
+            }
+          },
+          {
+            "slot": "playfield",
+            "node": {
+              "node": "circle",
+              "x": "= fx",
+              "y": "= fy",
+              "r": "= max(8.0, 24.0 - (now - born) / 60.0)",
+              "fill": "$accent",
+              "role": "pickup",
+              "visible": "= now >= born"
+            }
+          }
+        ],
+        "feedback": [
+          {
+            "on": "point",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "A5",
+                  "ms": 60
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "look": {
+        "id": "neon",
+        "tokens": {}
+      },
+      "content": {},
+      "playtest": {
+        "progress": "score + lives"
+      }
+    }
+  },
+  "seed": 1000,
+  "_seed": {
+    "creator_id": "sf-maya-okafor",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 5,
+    "play_count": 640,
+    "like_count": 150,
+    "save_count": 180
+  }
+}

@@ -399,7 +399,8 @@ struct StudioEventDateTile: View {
 private struct StudioFormulaSection: View {
     let model: StudioModel
 
-    private static let formulas = BubbleFormula.allCases.filter { $0 != .make }
+    // Microgames come from the authoring path (docs/BUBBLES.md, "microgame"), not this picker.
+    private static let formulas = BubbleFormula.allCases.filter { $0 != .make && $0 != .microgame }
 
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.m) {
@@ -443,6 +444,7 @@ private struct StudioFormulaSection: View {
         case .story: return "A story you play: pick a path, find every ending."
         case .nextline: return "Guess what they say next, against the clock."
         case .learn: return "A short lesson, then practice until it sticks."
+        case .microgame: return "Any game Muse can build, with its own art and sound."
         }
     }
 }

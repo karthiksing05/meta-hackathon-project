@@ -18,6 +18,9 @@ enum BubbleFormula: String, Codable, CaseIterable, Sendable {
     case nextline
     /// A short lesson, practice and a recap (docs/BUBBLES.md 7.8).
     case learn
+    /// Any game the Rust/WASM microgame engine runs: the whole game is in `content.game`
+    /// (engine/SPEC-v0.2.md), played by bubble-kit-microgame.js (docs/BUBBLES.md, "microgame").
+    case microgame
 
     var title: String {
         switch self {
@@ -31,6 +34,7 @@ enum BubbleFormula: String, Codable, CaseIterable, Sendable {
         case .story: return "Adventure"
         case .nextline: return "Next line"
         case .learn: return "Learn"
+        case .microgame: return "Microgame"
         }
     }
 
@@ -47,6 +51,7 @@ enum BubbleFormula: String, Codable, CaseIterable, Sendable {
         case .story: return "signpost.right.and.left"
         case .nextline: return "quote.bubble"
         case .learn: return "graduationcap"
+        case .microgame: return "gamecontroller"
         }
     }
 

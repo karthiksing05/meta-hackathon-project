@@ -486,6 +486,7 @@ extension BubbleStore {
         case .story: return 20...120
         case .nextline: return 200...1_600
         case .learn: return 3...12
+        case .microgame: return 10...400
         }
     }
 

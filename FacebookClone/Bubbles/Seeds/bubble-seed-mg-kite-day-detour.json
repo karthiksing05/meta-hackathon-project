@@ -1,0 +1,810 @@
+{
+  "id": "mg-kite-day-detour",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Kite Day Detour",
+  "one_line_rule": "Carry Nora's kite to the hilltop festival.",
+  "formula": "microgame",
+  "brief": {
+    "intent": "Carry Nora's kite to the hilltop festival.",
+    "audience": "everyone",
+    "mood": [
+      "playful"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "glow",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#F4F1EA",
+      "bg_bottom": "#F4F1EA",
+      "ink": "#141414",
+      "primary": "#3A6EA5",
+      "secondary": "#E4572E",
+      "accent": "#1F1B16",
+      "danger": "#FF6B6B"
+    },
+    "font": "rounded",
+    "motif": "none",
+    "emoji": "🪁",
+    "mood_preset": "playful"
+  },
+  "concepts": [
+    {
+      "use": "space.microgame"
+    },
+    {
+      "use": "input.microgame"
+    },
+    {
+      "use": "score.microgame",
+      "params": {
+        "label": "points"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "game": {
+      "format": "microgame/0.1",
+      "meta": {
+        "title": "Kite Day Detour",
+        "instructions": "Carry Nora's kite to the hilltop festival. Every choice leads somewhere new, and not every road ends well.",
+        "duration_s": 120
+      },
+      "state": {
+        "scene": {
+          "type": "int",
+          "init": "0"
+        },
+        "choice_story__ready_at": {
+          "type": "int",
+          "init": "2500"
+        },
+        "choice_story__ended": {
+          "type": "bool",
+          "init": "false"
+        },
+        "choice_story__good": {
+          "type": "bool",
+          "init": "false"
+        },
+        "content_choice_points": {
+          "type": "list<string>",
+          "init": "['1', '1', '0', '2', '0', '0', '2', '0', '3', '0', '2', '0', '2', '1', '0', '1', '0', '0', '3', '0', '0', '0', '2', '0', '1', '0', '0', '2', '1', '0', '3', '0', '0', '2', '0', '0', '0', '2', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '3', '2', '0', '0', '0', '0', '1', '0', '0']"
+        },
+        "content_story_ends": {
+          "type": "list<string>",
+          "init": "['', '', '', '', '', '', '', '', '', '', '', '', '', 'bad', 'good', 'bad', 'good', '', '', '']"
+        },
+        "content_story_labels": {
+          "type": "list<string>",
+          "init": "['Take the river path', 'Take the market lane', 'Cut through the hedge', 'Wait for the ducks', 'Shoo them off', '', 'Follow the puppy', 'Eat the bun, walk on', 'Share the bun with it', 'Tug it free', 'Ask the gardener to help', '', 'Let the kid hold it', 'Hurry on up the hill', '', 'Dry it in the sun', 'Run on, dripping', '', 'Hand the puppy back', 'Keep walking', '', 'Chase the crow', 'Offer it the rest', '', 'Patch it with a wrapper', 'Give up and go home', '', 'Tie it to the tail', 'Thank her and hurry', '', 'Launch it together', 'Fly it alone', '', 'Launch it for everyone', 'Wait for a better gust', '', 'Try launching anyway', 'Ask a neighbour for help', '', '', '', '', '', '', '', '', '', '', '', '', '', 'Hold on tight yourself', 'Let the kid help hold', '', 'Let go of the string', 'Dig in your heels', '', 'Let the kite climb', 'Reel it back in', '']"
+        },
+        "content_story_lines": {
+          "type": "list<string>",
+          "init": "['Kite Day! You carry Nora’s', 'new kite up to the hilltop.', 'The path splits in three.', '', 'A duck family waddles onto', 'the little bridge. Your kite', 'tail dips in the water.', '', 'A baker offers a warm bun.', 'A lost puppy tugs your', 'sleeve and whines.', '', 'You squeeze through, and', 'the kite snags on a thorn.', '', '', 'The ducks waddle off. A kid', 'with no kite smiles at', 'yours.', '', 'Splash! The ducks scatter', 'and your kite tail gets', 'soaked.', '', 'The puppy leads you to a', 'girl searching for her', 'pet.', '', 'Yum! But crumbs call the', 'crows, and one grabs your', 'kite string!', '', 'RIP. The kite tears right', 'down the middle.', '', '', 'The gardener frees the kite', 'and gives you a ribbon.', '', '', 'At the hill, a happy crowd', 'has gathered to watch.', '', '', 'You reach the hilltop. The', 'wind is just right.', '', '', 'The wind drops and the sun', 'is low. The festival is', 'nearly over.', '', 'You head home with the kite', 'still folded. Maybe next', 'year.', '', 'Up it goes! The whole hill', 'cheers as the kite soars.', '', '', 'Flop. The kite tumbles into', 'a bush and the lanterns', 'go out.', '', 'A neighbour lends a big', 'breeze-catcher. Together', 'you fly it high!', '', 'A big gust! The kite pulls', 'hard on the string, and a', 'small hand reaches over.', '', 'The string burns your palms', 'as the kite drags you down', 'the slope, faster and faster!', '', 'Two small hands, one steady', 'string. The kite wobbles,', 'then settles in the wind.', '']"
+        },
+        "content_story_next": {
+          "type": "list<string>",
+          "init": "['1', '2', '3', '4', '5', '', '6', '7', '6', '8', '9', '', '10', '11', '', '11', '15', '', '10', '12', '', '13', '11', '', '12', '13', '', '11', '11', '', '17', '15', '', '17', '12', '', '15', '16', '', '', '', '', '', '', '', '', '', '', '', '', '', '18', '19', '', '13', '15', '', '14', '15', '']"
+        },
+        "story_lines": {
+          "type": "list<string>",
+          "init": "content_story_lines"
+        },
+        "story_labels": {
+          "type": "list<string>",
+          "init": "content_story_labels"
+        },
+        "story_next": {
+          "type": "list<string>",
+          "init": "content_story_next"
+        },
+        "story_ends": {
+          "type": "list<string>",
+          "init": "content_story_ends"
+        },
+        "warmth": {
+          "type": "int",
+          "init": "0"
+        }
+      },
+      "functions": {
+        "digit": {
+          "params": {
+            "s": "string"
+          },
+          "returns": "int",
+          "body": "index_of(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], s)"
+        },
+        "points_for": {
+          "params": {
+            "s": "int",
+            "c": "int"
+          },
+          "returns": "int",
+          "body": "digit(get_or(content_choice_points, s * 3 + c, '0'))"
+        }
+      },
+      "events": {
+        "choice_made": {
+          "scene": "int",
+          "choice": "int"
+        },
+        "ending_reached": {
+          "good": "bool"
+        }
+      },
+      "inputs": {
+        "choice_story__choose": {
+          "payload": {
+            "choice": "int"
+          }
+        }
+      },
+      "rules": [
+        {
+          "id": "choice_story__choose",
+          "on": "choice_story__choose",
+          "when": "not choice_story__ended and now >= choice_story__ready_at and event.choice >= 0 and event.choice < 3 and get_or(story_labels, scene * 3 + event.choice, '') != ''",
+          "do": [
+            {
+              "let": {
+                "target": "index_of(map(range(60), n => str(n)), get_or(story_next, scene * 3 + event.choice, ''))"
+              }
+            },
+            {
+              "if": "target >= 0",
+              "then": [
+                {
+                  "let": {
+                    "pick": "event.choice"
+                  }
+                },
+                {
+                  "let": {
+                    "from_scene": "scene"
+                  }
+                },
+                {
+                  "set": "scene",
+                  "to": "target"
+                },
+                {
+                  "set": "choice_story__ready_at",
+                  "to": "now + 2500"
+                },
+                {
+                  "emit": "choice_made",
+                  "with": {
+                    "scene": "from_scene",
+                    "choice": "pick"
+                  }
+                },
+                {
+                  "if": "get_or(story_ends, scene, '') != ''",
+                  "then": [
+                    {
+                      "emit": "ending_reached",
+                      "with": {
+                        "good": "get_or(story_ends, scene, '') == 'good'"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "choice_story__finish",
+          "on": "ending_reached",
+          "do": [
+            {
+              "set": "choice_story__ended",
+              "to": "true"
+            },
+            {
+              "set": "choice_story__good",
+              "to": "event.good"
+            }
+          ]
+        },
+        {
+          "id": "kindness",
+          "on": "choice_made",
+          "do": [
+            {
+              "incr": "warmth",
+              "by": "points_for(event.scene, event.choice)"
+            }
+          ]
+        }
+      ],
+      "objectives": {
+        "win": "choice_story__ended and choice_story__good",
+        "lose": "choice_story__ended and not choice_story__good",
+        "score": "warmth * 10"
+      },
+      "presentation": {
+        "canvas": {
+          "w": 360,
+          "h": 640,
+          "background": "$bg"
+        },
+        "tokens": {
+          "primary": "#3A6EA5",
+          "secondary": "#8FB3D9",
+          "accent": "#E4572E",
+          "ink": "#1F1B16",
+          "bg": "#F4F1EA",
+          "surface": "#E6DFD1",
+          "danger": "#C8402A"
+        },
+        "root": {
+          "node": "group",
+          "children": [
+            {
+              "node": "group",
+              "x": 0,
+              "y": 0,
+              "children": [
+                {
+                  "node": "repeat",
+                  "source": "range(4)",
+                  "as": "k",
+                  "key": "k",
+                  "template": {
+                    "node": "text",
+                    "x": 180,
+                    "y": "= 150 + k * 30",
+                    "anchor": "center",
+                    "size": 20,
+                    "weight": 500,
+                    "color": "$ink",
+                    "text": "= get_or(story_lines, scene * 4 + k, '')",
+                    "font": "Fraunces"
+                  }
+                },
+                {
+                  "node": "repeat",
+                  "source": "range(3)",
+                  "as": "c",
+                  "key": "c",
+                  "template": {
+                    "node": "group",
+                    "x": 30,
+                    "y": "= 380 + c * 64",
+                    "visible": "= get_or(story_labels, scene * 3 + c, '') != '' and not choice_story__ended",
+                    "opacity": "= if now >= choice_story__ready_at then 1.0 else 0.4",
+                    "children": [
+                      {
+                        "node": "rect",
+                        "w": 300,
+                        "h": 52,
+                        "radius": 12,
+                        "fill": "$surface",
+                        "on_tap": {
+                          "input": "choice_story__choose",
+                          "with": {
+                            "choice": "c"
+                          }
+                        }
+                      },
+                      {
+                        "node": "text",
+                        "x": 150,
+                        "y": 26,
+                        "anchor": "center",
+                        "size": 17,
+                        "weight": 600,
+                        "color": "$ink",
+                        "text": "= get_or(story_labels, scene * 3 + c, '')",
+                        "font": "Fraunces"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "node": "text",
+                  "text": "KITE DAY DETOUR",
+                  "x": 180,
+                  "y": 100,
+                  "anchor": "center",
+                  "size": 26,
+                  "weight": 700,
+                  "color": "$primary",
+                  "font": "Fraunces"
+                }
+              ]
+            },
+            {
+              "node": "stack",
+              "dir": "row",
+              "gap": 28,
+              "align": "center",
+              "x": 180,
+              "y": 52,
+              "anchor": "center",
+              "children": [
+                {
+                  "node": "text",
+                  "text": "= 'Kindness: ' + str(warmth)",
+                  "size": 18,
+                  "weight": 600,
+                  "color": "$ink",
+                  "font": "Fraunces"
+                }
+              ]
+            },
+            {
+              "node": "stack",
+              "dir": "row",
+              "gap": 28,
+              "align": "center",
+              "x": 180,
+              "y": 604,
+              "anchor": "center",
+              "children": []
+            },
+            {
+              "node": "group",
+              "x": 0,
+              "y": 0,
+              "children": []
+            }
+          ]
+        },
+        "feedback": [
+          {
+            "on": "choice_made",
+            "do": [
+              {
+                "sound": {
+                  "wave": "sine",
+                  "note": "D5",
+                  "ms": 70
+                }
+              }
+            ]
+          },
+          {
+            "on": "ending_reached",
+            "do": [
+              {
+                "sound": {
+                  "wave": "triangle",
+                  "note": "G4",
+                  "ms": 220
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "authoring": {
+      "authoring": "microgame-authoring/0.1",
+      "meta": {
+        "title": "Kite Day Detour",
+        "instructions": "Carry Nora's kite to the hilltop festival. Every choice leads somewhere new, and not every road ends well.",
+        "duration_s": 120
+      },
+      "uses": [
+        {
+          "fragment": "choice_story",
+          "params": {
+            "read_ms": 2500,
+            "good_wins": true,
+            "bad_loses": true
+          }
+        }
+      ],
+      "functions": {
+        "digit": {
+          "params": {
+            "s": "string"
+          },
+          "returns": "int",
+          "body": "index_of(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], s)"
+        },
+        "points_for": {
+          "params": {
+            "s": "int",
+            "c": "int"
+          },
+          "returns": "int",
+          "body": "digit(get_or(content_choice_points, s * 3 + c, '0'))"
+        }
+      },
+      "state": {
+        "story_lines": {
+          "type": "list<string>",
+          "init": "content_story_lines"
+        },
+        "story_labels": {
+          "type": "list<string>",
+          "init": "content_story_labels"
+        },
+        "story_next": {
+          "type": "list<string>",
+          "init": "content_story_next"
+        },
+        "story_ends": {
+          "type": "list<string>",
+          "init": "content_story_ends"
+        },
+        "warmth": {
+          "type": "int",
+          "init": "0"
+        }
+      },
+      "rules": [
+        {
+          "id": "kindness",
+          "on": "choice_made",
+          "do": [
+            {
+              "incr": "warmth",
+              "by": "points_for(event.scene, event.choice)"
+            }
+          ]
+        }
+      ],
+      "objectives": {
+        "score": "warmth * 10"
+      },
+      "presentation": {
+        "slots": [
+          {
+            "slot": "hud_top",
+            "node": {
+              "node": "text",
+              "text": "= 'Kindness: ' + str(warmth)",
+              "size": 18,
+              "weight": 600,
+              "color": "$ink",
+              "role": "hud"
+            }
+          },
+          {
+            "slot": "playfield",
+            "node": {
+              "node": "text",
+              "text": "KITE DAY DETOUR",
+              "x": 180,
+              "y": 100,
+              "anchor": "center",
+              "size": 26,
+              "weight": 700,
+              "color": "$primary"
+            }
+          }
+        ],
+        "feedback": []
+      },
+      "look": {
+        "id": "paper",
+        "tokens": {}
+      },
+      "content": {
+        "story_lines": [
+          "Kite Day! You carry Nora's",
+          "new kite up to the hilltop.",
+          "The path splits in three.",
+          "",
+          "A duck family waddles onto",
+          "the little bridge. Your kite",
+          "tail dips in the water.",
+          "",
+          "A baker offers a warm bun.",
+          "A lost puppy tugs your",
+          "sleeve and whines.",
+          "",
+          "You squeeze through, and",
+          "the kite snags on a thorn.",
+          "",
+          "",
+          "The ducks waddle off. A kid",
+          "with no kite smiles at",
+          "yours.",
+          "",
+          "Splash! The ducks scatter",
+          "and your kite tail gets",
+          "soaked.",
+          "",
+          "The puppy leads you to a",
+          "girl searching for her",
+          "pet.",
+          "",
+          "Yum! But crumbs call the",
+          "crows, and one grabs your",
+          "kite string!",
+          "",
+          "RIP. The kite tears right",
+          "down the middle.",
+          "",
+          "",
+          "The gardener frees the kite",
+          "and gives you a ribbon.",
+          "",
+          "",
+          "At the hill, a happy crowd",
+          "has gathered to watch.",
+          "",
+          "",
+          "You reach the hilltop. The",
+          "wind is just right.",
+          "",
+          "",
+          "The wind drops and the sun",
+          "is low. The festival is",
+          "nearly over.",
+          "",
+          "You head home with the kite",
+          "still folded. Maybe next",
+          "year.",
+          "",
+          "Up it goes! The whole hill",
+          "cheers as the kite soars.",
+          "",
+          "",
+          "Flop. The kite tumbles into",
+          "a bush and the lanterns",
+          "go out.",
+          "",
+          "A neighbour lends a big",
+          "breeze-catcher. Together",
+          "you fly it high!",
+          "",
+          "A big gust! The kite pulls",
+          "hard on the string, and a",
+          "small hand reaches over.",
+          "",
+          "The string burns your palms",
+          "as the kite drags you down",
+          "the slope, faster and faster!",
+          "",
+          "Two small hands, one steady",
+          "string. The kite wobbles,",
+          "then settles in the wind.",
+          ""
+        ],
+        "story_labels": [
+          "Take the river path",
+          "Take the market lane",
+          "Cut through the hedge",
+          "Wait for the ducks",
+          "Shoo them off",
+          "",
+          "Follow the puppy",
+          "Eat the bun, walk on",
+          "Share the bun with it",
+          "Tug it free",
+          "Ask the gardener to help",
+          "",
+          "Let the kid hold it",
+          "Hurry on up the hill",
+          "",
+          "Dry it in the sun",
+          "Run on, dripping",
+          "",
+          "Hand the puppy back",
+          "Keep walking",
+          "",
+          "Chase the crow",
+          "Offer it the rest",
+          "",
+          "Patch it with a wrapper",
+          "Give up and go home",
+          "",
+          "Tie it to the tail",
+          "Thank her and hurry",
+          "",
+          "Launch it together",
+          "Fly it alone",
+          "",
+          "Launch it for everyone",
+          "Wait for a better gust",
+          "",
+          "Try launching anyway",
+          "Ask a neighbour for help",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "Hold on tight yourself",
+          "Let the kid help hold",
+          "",
+          "Let go of the string",
+          "Dig in your heels",
+          "",
+          "Let the kite climb",
+          "Reel it back in",
+          ""
+        ],
+        "story_next": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "",
+          "6",
+          "7",
+          "6",
+          "8",
+          "9",
+          "",
+          "10",
+          "11",
+          "",
+          "11",
+          "15",
+          "",
+          "10",
+          "12",
+          "",
+          "13",
+          "11",
+          "",
+          "12",
+          "13",
+          "",
+          "11",
+          "11",
+          "",
+          "17",
+          "15",
+          "",
+          "17",
+          "12",
+          "",
+          "15",
+          "16",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "18",
+          "19",
+          "",
+          "13",
+          "15",
+          "",
+          "14",
+          "15",
+          ""
+        ],
+        "story_ends": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "bad",
+          "good",
+          "bad",
+          "good",
+          "",
+          "",
+          ""
+        ],
+        "choice_points": [
+          "1",
+          "1",
+          "0",
+          "2",
+          "0",
+          "0",
+          "2",
+          "0",
+          "3",
+          "0",
+          "2",
+          "0",
+          "2",
+          "1",
+          "0",
+          "1",
+          "0",
+          "0",
+          "3",
+          "0",
+          "0",
+          "0",
+          "2",
+          "0",
+          "1",
+          "0",
+          "0",
+          "2",
+          "1",
+          "0",
+          "3",
+          "0",
+          "0",
+          "2",
+          "0",
+          "0",
+          "0",
+          "2",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "3",
+          "2",
+          "0",
+          "0",
+          "0",
+          "0",
+          "1",
+          "0",
+          "0"
+        ]
+      },
+      "playtest": {
+        "progress": "warmth"
+      }
+    }
+  },
+  "seed": 1003,
+  "_seed": {
+    "creator_id": "sf-lena-fischer",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 16,
+    "play_count": 233,
+    "like_count": 71,
+    "save_count": 85
+  }
+}
