@@ -4,9 +4,75 @@
 
 *Last updated 2026-11-12. "Bubbles" is a working name; a rename is under review.*
 
+## The problem and the solution
+
+**Problem.** Young adults starting over in a new city join Facebook Groups and Events full of strangers, but Facebook gives them nothing easy and low-stakes to do together, so joining a Group rarely turns into knowing anyone in it.
+
+**Solution.** Bubbles lets anyone turn one sentence into a tiny game that Meta's Muse models build from their own Group, Event or friends, which those people then play together inside Facebook on the same seed, so a score next to a stranger becomes an introduction and a rematch keeps a new friendship going.
+
+### Who has the problem
+
+Young adults, roughly 18 to 29, in the middle of a change: a move, a first job, a new campus. Three situations show it:
+
+- **A new city.** She moved to San Francisco two weeks ago. She joined New in SF and RSVP'd to a picnic, and she knows nobody in either.
+- **A quiet group chat.** Her hometown friends' chat used to be busy. Now it is a birthday message every few months.
+- **A Group that only posts announcements.** Her running club's Group posts the Saturday route and nothing else. Members show up, run and leave.
+
+The newcomer is the sharpest case, and the one our demo follows. The same gap exists for anyone whose people are on Facebook but have nothing to do together there, and Bubbles is built so anyone can make a game for any of their people.
+
+### The problem, in detail
+
+1. **Young adults are the loneliest age group, and many have just moved.** Ages 19 to 29 are the loneliest age group worldwide: 27% very or fairly lonely, against 17% of those 65 and over [60]. 26.6% of 18-to-24-year-olds changed address in the past year (2023, including local moves) [63].
+2. **Friendship takes repeated time together, and young adults have less of it.** It takes about 50 hours to become casual friends, 90 to become friends and more than 200 to become close friends [65]. In-person time with friends for ages 15 to 24 fell from about 150 to 40 minutes a day between 2003 and 2020 [59].
+3. **The first move in a Group of strangers is a high-stakes post.** The only ways to take part are to write an intro or comment, or to lurk. People underestimate how much new acquaintances like them, which "can hinder our ability to develop new relationships" [68].
+4. **Facebook has the people but not the daily reason.** 69% of US adults aged 18 to 29 use Facebook [52] and 49% of all 18-to-29-year-olds use it daily, yet Facebook's daily use peaks among people aged 30 to 64 [53]. Meta itself names the moment: young adults arrive at life moments such as "moving, going to college, getting their first job or apartment" [13].
+5. **Group chats and plans stall.** Messenger saw 2.5 million new group chats a day in 2017 (latest public figure) [19], but a chat with nothing to do goes quiet, and "we should hang out" rarely becomes a plan. A shared daily game can restart one: Wordle revived a quiet family group chat [88].
+
+### Why it isn't solved today
+
+- **Facebook has the rooms, not the activity.** Groups, Events and friends all live on Facebook, used by almost 1.8 billion people a month in Groups alone [14]. What a newcomer can do there is post, comment or scroll. Facebook's past games did not fix this: Instant Games needed studios to make each game [34], and FarmVille's growth came from notifications Facebook later limited as spam [39].
+- **Event apps cover only the meetup.** Partiful [122] and Apple Invites [121] have guest lists, but no standing community before or after the Event.
+- **Community apps lack everyday identity.** Discord has servers, events and live games, but pseudonymous accounts; it added age checks only in 2026 [99]. Meeting a stranger there starts without Facebook's everyday-name norm [30].
+- **AI game makers have no social context.** YouTube's Playables Builder [101], Roblox's 4D generation [96] and Meta's own Pocket [44] make games from prompts, but the games flow from a creator to an audience. None puts a game inside a Group, an Event or a chat, made about the people in it.
+- **Daily games are the same for everyone.** LinkedIn's games [79] and NYT Games [82] build a daily habit, but with one editorial puzzle for the whole world, not one about your Group.
+
+### Our solution
+
+What a person does, step by step:
+
+1. **Make.** Type one sentence in Muse Studio, for example "a chill game for my new running club about SF hills". Or do nothing: a Group gets a Daily Bubble and an Event gets an icebreaker.
+2. **Check the brief.** Muse reads the sentence back as a short brief ("chill and social, for your new running club in San Francisco"). Edit it if it's wrong.
+3. **Wait about half a minute.** Muse builds the game, tests it with bots and paints its cover, in a median of 28 seconds in our benchmark (D2).
+4. **Play together.** Everyone in the Group, the Event or the chat gets the same game on the same seed, so scores are fair and can be checked.
+5. **Meet.** Your score lands on the Bubble Board next to the names of people you don't know yet. Watch the replay of the person above you, then tap Add friend.
+6. **Share and come back.** Float "I got 42. Beat it?" to the Group, the feed or your Story. Tomorrow there is a new Daily.
+
+What Muse does that could not be done without it:
+
+- **It makes a game about these people, not a template.** Muse turned 7 of 7 picnic guests' opted-in intros into an icebreaker that pairs each name with facts from that person's intro, and 5 of 5 opted-in Group posts into a Daily (D8). Our keyword template, given the same 10 prompts, made only 2 on-topic games; Muse made 10 of 10 on-topic (D7).
+- **It does the whole build.** Ember writes the brief, Wonder composes the game from 55 tested building blocks with tool calls and writes its content, Wonder repairs drafts that fail bot testing, and Muse Image paints the cover (D1, D5).
+- **It makes making cheap enough for everyone.** A game a day for every Group, or one for each Event, is only possible when nobody has to write it by hand.
+
+### How the solution maps to the problem
+
+| Problem point | Feature | Facebook surface | Status |
+|---|---|---|---|
+| 3. A first move that isn't a post | Daily Bubble from members' opted-in posts (VP-02, VP-01) | Groups | Live (Daily generation: Debug/CLI only) |
+| 1, 2. Meeting strangers in person, cold | Event icebreaker made from guests' intros (VP-03) | Events | Live |
+| 2, 3. No path from stranger to friend | Bubble Board with fair, same-seed scores and Add friend (VP-04, VP-16) | Groups, Events, profiles | Live (rows are synthetic people) |
+| 4. No daily reason to open Facebook | One Daily per Group, and a playable feed of replays (VP-06, VP-39) | Groups, feed, Stories, Reels | Live |
+| All. A game about your people would otherwise need a developer | Muse Studio: one sentence to a game (VP-05, VP-34) | Bubbles tab, Groups, Events | Live |
+| 5. Group chats and old friendships go quiet | Challenge Me and one card the whole chat plays (VP-14, VP-15) | Messenger | Not built |
+| 2. Time together is scarce | Make a game together; weekly boards and game night (VP-38, VP-19) | Groups, Events | Not built |
+| 1, 2. Strangers you just met stay strangers | Blends and an Event bracket (VP-40) | Events, profiles | Not built |
+
+### Where this came from
+
+Karthik's first brainstorm was a playable layer across Facebook: tiny games anyone makes with Muse, shown in the feed, on Stories and profiles, with leaderboards, remixes and linked levels, and a look as distinct as the Muse brand. The team's problem statement asked which young-adult need it served and why someone would open Facebook again, and Bayan proposed tying it to making friends in a new city. After a judge's feedback on 2026-11-12, Karthik made "closer together" the top priority: every feature has to bring specific people closer through Facebook's own surfaces, by friendly competition, shared stories and self-expression, and Kevin and Karthik's Blends idea came from that turn. This section states that current framing.
+
 ## 1. Thesis
 
-**Facebook Groups have members but no shared moment. Bubbles gives every Group and Event a daily shared moment that Muse writes from the community itself, played on one seed, so a score next to a stranger becomes an introduction.**
+**Facebook Groups and Events give a newcomer a room full of strangers but no shared moment. Bubbles gives every Group and Event a daily shared moment that Muse writes from the community itself, played on one seed, so a score next to a stranger becomes an introduction.**
 
 Bubbles is about bringing people closer together, which is the mission Facebook has stated since 2017: to "build community and bring the world closer together" [12][50]. It does that in three ways:
 
@@ -30,6 +96,7 @@ The pitch itself, from the one-liner to the 5-minute story and the Q&A, is secti
 
 ### How to read this document
 
+- "The problem and the solution", above section 1, states the problem and our answer in plain terms; every later section builds on it.
 - Section 2 shows how Bubbles brings people closer, step by step. Section 3 is the short answer to "why Facebook". Section 4 lists every value proposition in one table. Section 5 is the pitch: the one-liner, the 5-minute story, the demo script, the Q&A and open items. Section 6 details each value proposition.
 - The appendix "Every pitch example" collects every example we gathered for the pitch, each linked to its value proposition.
 - The value propositions are in tiers. The **five core** ones are the pitch. **Supporting** ones add to it. **Value to Meta** and **Muse** explain why Meta would fund it. The **roadmap** holds what is being built and can't be shown yet.
