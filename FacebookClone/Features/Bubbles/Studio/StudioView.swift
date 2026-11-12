@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Muse Studio: blow a Bubble with Muse. Describe it, read and edit Muse's brief, watch Muse
-/// compose it live, try it, then float it to your feed, a Group or an Event. The same flow edits,
-/// remixes, adds levels and makes Daily Bubbles (`StudioLaunch.mode`).
+/// Muse Studio: make a game with Muse, from idea to friends. Describe it (for whom first), read
+/// and edit Muse's brief, watch Muse build it live ("Muse at work"), try it, then share it and
+/// challenge friends. The same flow edits, remixes, adds levels and makes Daily games
+/// (`StudioLaunch.mode`).
 ///
 /// DEBUG launch variables (with `FB_OPEN=studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`,
 /// `next:<id>` or `daily:<groupID>`; see `App/DebugLaunch.swift`):
@@ -11,7 +12,8 @@ import SwiftUI
 /// - `FB_STUDIO_SERVICE=scripted`: a realistic ~40 s Muse run with no network.
 ///   `FB_STUDIO_SPEED=4` plays it 4× faster; `FB_STUDIO_FAIL=1` makes it fail halfway.
 /// - `FB_STUDIO_AUTOPILOT=1`: drives the whole flow (describe → brief → compose → try → tweak →
-///   new look → level 2 → float) and logs each step as `[Studio autopilot] …`.
+///   new look → level 2 → share and challenge) and logs each step as `[Studio autopilot] …`.
+/// - `FB_STUDIO_MICROGAME=1`: build it as a microgame when Muse is configured.
 struct StudioView: View {
     let launch: StudioLaunch
 
@@ -78,7 +80,7 @@ struct StudioView: View {
                 StudioTryStep(model: model)
                     .transition(stageTransition)
             case .float:
-                StudioFloatStep(model: model, onFloat: float)
+                StudioShareStep(model: model, onShare: float)
                     .transition(stageTransition)
             }
         }
@@ -110,15 +112,17 @@ struct StudioView: View {
         dismiss()
     }
 
-    /// Pops the bubble, publishes it, then opens it on the Bubbles tab.
+    /// Shares it: shows the pending state, publishes, sends the challenges, then opens the game
+    /// page. The pending state lasts exactly as long as the work (no fixed wait).
     private func float() {
         guard !model.isPopping, !model.levels.isEmpty else { return }
         Haptics.medium()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.65)) {
+        withAnimation(GameMotion.tap) {
             model.isPopping = true
         }
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 700_000_000)
+            // Let the pending state draw before the main-actor work starts.
+            await Task.yield()
             guard let outcome = model.commitFloat() else {
                 model.isPopping = false
                 return
