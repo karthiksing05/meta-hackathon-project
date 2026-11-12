@@ -701,7 +701,7 @@
   function share(sdk) {
     var rule = sdk.state.sort_rule, f = sdk.state.sort_field;
     var m = sdk.manifest || {};
-    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Bubble");
+    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Game");
     if (!rule) return { headline: title, score_text: sdk.score + " points" };
     var rows = [];
     for (var i = 0; i < rule.marks.length; i += 6) rows.push(rule.marks.slice(i, i + 6).join(""));
@@ -751,7 +751,7 @@
       infer: { rounds: ["entity.sort_bubble.deal"] },
       knobs: {
         speed: { concept: "entity.sort_bubble", param: "rise_speed", label: "Rise speed", min: 20, max: 60 },
-        difficulty: { concept: "entity.sort_bubble", param: "spawn_every", label: "Bubble pace", min: 1, max: 3, invert: true },
+        difficulty: { concept: "entity.sort_bubble", param: "spawn_every", label: "Pace", min: 1, max: 3, invert: true },
       },
       describe: "Rounds: bubbles to sort. Timed: sort as many as you can. Lives: misses you can take.",
     },

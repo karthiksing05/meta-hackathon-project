@@ -6272,7 +6272,7 @@
         ["card-rule", m.one_line_rule || ""],
         lenText ? ["card-best card-length", lenText] : null,
         best !== null && !endlessBest ? ["card-best", "Your best " + best] : null,
-        ["card-cta", "Tap to pop in"],
+        ["card-cta", "Tap to play"],
       ]);
       const chip = card.querySelector ? card.querySelector(".card-length") : null;
       if (chip && best !== null && !endlessBest) chip.style.marginRight = "6px";
@@ -6285,7 +6285,7 @@
       const best = this.opts.player && typeof this.opts.player.best === "number" ? this.opts.player.best : null;
       const isBest = best !== null && run.score > best;
       const label = run.hud.label || (run.score === 1 ? "point" : "points");
-      const kicker = run.outcome === "success" ? "You did it!" : "Popped!";
+      const kicker = run.outcome === "success" ? "You did it!" : "Game over";
       const cta = run.hud.retry === false ? run.hud.note || "Nice one" : run.hud.note || "Tap to play again";
       const card = this.cardEl([
         ["card-kicker", kicker],
@@ -6314,7 +6314,7 @@
       if (this.dom) {
         const err = this.dom.error;
         while (err.firstChild) err.removeChild(err.firstChild);
-        const parts = [["error-orb", ""], ["card-title", "This bubble popped"], ["card-rule", "Something in this game broke. Try another one."]];
+        const parts = [["error-orb", ""], ["card-title", "This game hit a snag"], ["card-rule", "Something in this game broke. Try another one."]];
         for (const p of parts) {
           const el = document.createElement("div");
           el.className = p[0];

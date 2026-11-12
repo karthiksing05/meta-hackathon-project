@@ -63,7 +63,7 @@
     {
       "use": "input.type",
       "params": {
-        "enter_label": "Pop"
+        "enter_label": "Go"
       }
     },
     {

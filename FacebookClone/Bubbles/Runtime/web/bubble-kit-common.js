@@ -230,11 +230,11 @@
     id: "input.type",
     kind: "input",
     formulas: ["*"],
-    describe: "An on-screen bubble keyboard drawn in the game. Letter keys emit input.key {key}; the round Pop key emits input.submit {value} with the typed word. Rules mark letters (state.keyboard.marks) so keys glow by what you've learned.",
+    describe: "An on-screen bubble keyboard drawn in the game. Letter keys emit input.key {key}; the round Go key emits input.submit {value} with the typed word. Rules mark letters (state.keyboard.marks) so keys glow by what you've learned.",
     examples: ["type today's word", "type the neighborhood's name"],
     params: {
       layout: { type: "enum", values: ["qwerty", "abc"], default: "qwerty", describe: "Key order" },
-      enter_label: { type: "string", default: "Pop", max_length: 8, describe: "Label on the submit key" },
+      enter_label: { type: "string", default: "Go", max_length: 8, describe: "Label on the submit key" },
       max_length: { type: "integer", default: 12, min: 1, max: 12, describe: "Longest entry (rules may lower it to the word length)" },
       top: { type: "number", default: 480, min: 380, max: 520, unit: "px", describe: "Top of the keyboard in the 360x640 playfield" },
       show_value: { type: "boolean", default: false, describe: "Draw the typed text above the keyboard (off when the space shows it)" },
@@ -262,7 +262,7 @@
           keys.push({ key: "BACK", label: "⌫", x: side, y, w: special, h: kh });
           let x = side + special + gap;
           for (const ch of letters) { keys.push({ key: ch, label: ch, x, y, w: kw, h: kh }); x += kw + gap; }
-          keys.push({ key: "ENTER", label: p.enter_label || "Pop", x, y, w: special, h: kh });
+          keys.push({ key: "ENTER", label: p.enter_label || "Go", x, y, w: special, h: kh });
         }
       }
       for (const k of keys) { k.cx = k.x + k.w / 2; k.cy = k.y + k.h / 2; }
