@@ -12,13 +12,13 @@
 
 :root {
   --top: #C9B8FF;
-  --bottom: #FFC8E8;
+  --bottom: #E6EEFF;
   --ink: #2E1F5E;
   --glow: #FFFFFF;
   --a1: #9EF0DA;
   --a2: #FFE59A;
   --a3: #9AD4FF;
-  --a4: #FF9EC9;
+  --a4: #B8A6FF;
   --primary: var(--a1);
   --secondary: var(--a2);
   --accent: var(--a3);
@@ -26,8 +26,8 @@
   --surface: rgba(255, 255, 255, 0.6);
   --surface-strong: rgba(255, 255, 255, 0.82);
   --on-primary: #2E1F5E;
-  --brand: linear-gradient(135deg, #B9A7FF 0%, #FF9ECF 55%, #FFC59E 100%);
-  --iridescent: conic-gradient(from 200deg, #FFB3E6, #B3E5FF, #C9FFE8, #FFF1B3, #D9B3FF, #FFB3E6);
+  --brand: linear-gradient(135deg, #ADD8FF 0%, #B8BFFF 50%, #C9B2FF 100%);
+  --iridescent: conic-gradient(from 200deg, #ADD8FF, #B8BFFF, #C9B2FF, #E6EEFF, #ADD8FF);
   --glass: rgba(255, 255, 255, 0.6);
   --glass-edge: rgba(255, 255, 255, 0.85);
   --shadow: rgba(46, 31, 94, 0.16);
@@ -42,7 +42,7 @@
   --pop-y: 52%;
 }
 
-.palette-lilac-haze { --top: #C9B8FF; --bottom: #FFC8E8; --ink: #2E1F5E; --glow: #FFFFFF; --a1: #9EF0DA; --a2: #FFE59A; --a3: #9AD4FF; --a4: #FF9EC9; }
+.palette-lilac-haze { --top: #C9B8FF; --bottom: #E6EEFF; --ink: #2E1F5E; --glow: #FFFFFF; --a1: #9EF0DA; --a2: #FFE59A; --a3: #9AD4FF; --a4: #B8A6FF; }
 .palette-peach-fizz { --top: #FFC2B0; --bottom: #FFE7A8; --ink: #4D2238; --glow: #FFF6E8; --a1: #FF8FB8; --a2: #8FD6FF; --a3: #B8F2A6; --a4: #C9A8FF; }
 .palette-mint-pop { --top: #A6F2DC; --bottom: #B3CCFF; --ink: #123B4D; --glow: #F2FFFB; --a1: #FF9ECB; --a2: #FFE48F; --a3: #C9A8FF; --a4: #8FE3FF; }
 .palette-sky-glow { --top: #ADD8FF; --bottom: #DCC8FF; --ink: #1F2B66; --glow: #F4F8FF; --a1: #FFB0D9; --a2: #A6F2DC; --a3: #FFE59A; --a4: #9AB8FF; }
@@ -50,7 +50,7 @@
 
 .dark {
   --glass: rgba(43, 33, 80, 0.58);
-  --glass-edge: rgba(255, 217, 245, 0.35);
+  --glass-edge: rgba(214, 222, 255, 0.35);
   --shadow: rgba(10, 4, 30, 0.45);
 }
 
@@ -153,7 +153,7 @@ body {
 }
 
 .dark .hud-score {
-  text-shadow: 0 0 16px rgba(255, 157, 226, 0.65), 0 0 34px rgba(255, 217, 245, 0.45);
+  text-shadow: 0 0 16px rgba(184, 191, 255, 0.65), 0 0 34px rgba(214, 222, 255, 0.45);
 }
 
 .hud-score.bump {
@@ -209,7 +209,7 @@ body {
   border-radius: 50%;
   background:
     radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.95) 0 12%, rgba(255, 255, 255, 0) 24%),
-    radial-gradient(circle, rgba(255, 255, 255, 0.12) 55%, rgba(255, 210, 240, 0.45) 100%);
+    radial-gradient(circle, rgba(255, 255, 255, 0.12) 55%, rgba(200, 210, 255, 0.45) 100%);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
 
@@ -238,7 +238,7 @@ body {
   line-height: 1;
   background:
     radial-gradient(ellipse 30% 18% at 32% 26%, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0) 100%),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.22) 62%, rgba(255, 200, 240, 0.5) 100%);
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.22) 62%, rgba(190, 200, 255, 0.5) 100%);
   box-shadow: 0 0 26px rgba(255, 255, 255, 0.85), 0 10px 26px var(--shadow);
   animation: bubble-float 3.2s ease-in-out infinite;
 }
@@ -288,7 +288,7 @@ body {
 .card-best.new {
   background: var(--brand);
   color: #2E1F5E;
-  box-shadow: 0 0 18px rgba(255, 158, 207, 0.6);
+  box-shadow: 0 0 18px rgba(155, 160, 255, 0.6);
   animation: bubble-bump 0.6s var(--spring) 0.25s both;
 }
 
@@ -301,7 +301,7 @@ body {
   font-weight: 800;
   color: #2E1F5E;
   background: var(--brand);
-  box-shadow: 0 8px 22px rgba(255, 158, 207, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.6), inset 0 2px 8px rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 22px rgba(155, 160, 255, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.6), inset 0 2px 8px rgba(255, 255, 255, 0.55);
   animation: bubble-breathe 2.4s ease-in-out infinite;
 }
 
@@ -368,7 +368,7 @@ body {
   margin: -6px 0 0 -6px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: -30px -22px 0 -2px rgba(255, 179, 230, 0.9), 26px -26px 0 -3px rgba(179, 229, 255, 0.9), 32px 18px 0 -2px rgba(255, 241, 179, 0.95), -24px 26px 0 -3px rgba(201, 255, 232, 0.95), 0 0 16px rgba(255, 255, 255, 0.9);
+  box-shadow: -30px -22px 0 -2px rgba(201, 178, 255, 0.9), 26px -26px 0 -3px rgba(179, 229, 255, 0.9), 32px 18px 0 -2px rgba(184, 191, 255, 0.95), -24px 26px 0 -3px rgba(230, 238, 255, 0.95), 0 0 16px rgba(255, 255, 255, 0.9);
 }
 
 /* ---------- Looks: the frame borrows the game's surfaces, font and colors ---------- */

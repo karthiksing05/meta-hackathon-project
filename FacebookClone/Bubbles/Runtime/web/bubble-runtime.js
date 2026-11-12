@@ -216,14 +216,14 @@
   // Palettes: identical hex values in BubbleGlow.swift and bubble-glow.css (docs/BUBBLES.md 2).
   // good / near: the accents each palette uses for "right" and "close"; danger: hazards and alarms.
   const PALETTES = {
-    "lilac-haze": { top: "#C9B8FF", bottom: "#FFC8E8", ink: "#2E1F5E", glow: "#FFFFFF", accents: ["#9EF0DA", "#FFE59A", "#9AD4FF", "#FF9EC9"], dark: false, good: "#9EF0DA", near: "#FFE59A", danger: "#FF5C8A" },
+    "lilac-haze": { top: "#C9B8FF", bottom: "#E6EEFF", ink: "#2E1F5E", glow: "#FFFFFF", accents: ["#9EF0DA", "#FFE59A", "#9AD4FF", "#B8A6FF"], dark: false, good: "#9EF0DA", near: "#FFE59A", danger: "#FF5C8A" },
     "peach-fizz": { top: "#FFC2B0", bottom: "#FFE7A8", ink: "#4D2238", glow: "#FFF6E8", accents: ["#FF8FB8", "#8FD6FF", "#B8F2A6", "#C9A8FF"], dark: false, good: "#B8F2A6", near: "#8FD6FF", danger: "#F2526B" },
     "mint-pop": { top: "#A6F2DC", bottom: "#B3CCFF", ink: "#123B4D", glow: "#F2FFFB", accents: ["#FF9ECB", "#FFE48F", "#C9A8FF", "#8FE3FF"], dark: false, good: "#8FE3FF", near: "#FFE48F", danger: "#FF5F87" },
     "sky-glow": { top: "#ADD8FF", bottom: "#DCC8FF", ink: "#1F2B66", glow: "#F4F8FF", accents: ["#FFB0D9", "#A6F2DC", "#FFE59A", "#9AB8FF"], dark: false, good: "#A6F2DC", near: "#FFE59A", danger: "#FF5F87" },
     "night-bloom": { top: "#2B2150", bottom: "#5A3577", ink: "#FFF3FF", glow: "#FFD9F5", accents: ["#FF9DE2", "#9DF2FF", "#FFE59D", "#B9A2FF"], dark: true, good: "#9DF2FF", near: "#FFE59D", danger: "#FF6F9A" },
   };
-  const IRIDESCENT = ["#FFB3E6", "#B3E5FF", "#C9FFE8", "#FFF1B3", "#D9B3FF", "#FFB3E6"];
-  const BRAND = ["#B9A7FF", "#FF9ECF", "#FFC59E"];
+  const IRIDESCENT = ["#ADD8FF", "#B8BFFF", "#C9B2FF", "#E6EEFF", "#9AD4FF", "#ADD8FF"];
+  const BRAND = ["#ADD8FF", "#B8BFFF", "#C9B2FF"];
 
   // Looks (LOOKS.md): render families. Every Bubble gets its own look inside the same Bubble frame.
   // Rendering only: a look never changes logic, timing or game randomness.
@@ -232,7 +232,7 @@
       title: "Glow", font: "rounded", motif: "none",
       describe: "Dreamy and soft: pastel gradients, iridescent soap bubbles with halos, rounded glowing type, floating ambient bubbles.",
       moods: ["dreamy", "calm", "chill", "cozy"], energy: ["low", "medium"], fonts: ["rounded"], motifs: ["none", "clouds", "waves", "hills"],
-      example_colors: { bg_top: "#C9B8FF", bg_bottom: "#FFC8E8", ink: "#2E1F5E", primary: "#9EF0DA", secondary: "#FFE59A", accent: "#9AD4FF", danger: "#FF5C8A" },
+      example_colors: { bg_top: "#C9B8FF", bg_bottom: "#E6EEFF", ink: "#2E1F5E", primary: "#9EF0DA", secondary: "#FFE59A", accent: "#9AD4FF", danger: "#FF5C8A" },
     },
     paper: {
       title: "Paper", font: "rounded", motif: "none",
