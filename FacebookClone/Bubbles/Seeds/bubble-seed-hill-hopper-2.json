@@ -1,0 +1,109 @@
+{
+  "id": "hill-hopper-2",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Hill Hopper: Twin Peaks",
+  "one_line_rule": "Same hills, steeper. Tap to float, mind the wind.",
+  "formula": "dodge",
+  "brief": {
+    "intent": "level 2 of Hill Hopper, harder",
+    "audience": "everyone",
+    "mood": [
+      "focused"
+    ],
+    "energy": "high",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": "hill-hopper",
+    "operators": [
+      "level-up"
+    ],
+    "remix_of": null
+  },
+  "chain": {
+    "id": "chain-hill-hopper",
+    "index": 2,
+    "title": "Hill Hopper",
+    "prev": "hill-hopper",
+    "next": null
+  },
+  "style": {
+    "palette": "night-bloom",
+    "emoji": "🌄",
+    "mood_preset": "focused"
+  },
+  "concepts": [
+    {
+      "use": "space.side_scroll"
+    },
+    {
+      "use": "entity.avatar"
+    },
+    {
+      "use": "entity.obstacle"
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "behavior.gravity"
+    },
+    {
+      "use": "behavior.impulse"
+    },
+    {
+      "use": "behavior.spawn_stream"
+    },
+    {
+      "use": "behavior.speed_ramp"
+    },
+    {
+      "use": "rule.collide_fail"
+    },
+    {
+      "use": "score.count"
+    },
+    {
+      "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.score_card"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "theme": "Twin Peaks at night",
+    "obstacle_labels": [
+      "Twin Peaks",
+      "Sutro",
+      "Corona Heights"
+    ]
+  },
+  "seed": 1908,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-10T13:00:00Z",
+    "duration_sec": 36.1,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-diego-ramirez",
+    "created_hours_ago": 26,
+    "play_count": 880,
+    "like_count": 201
+  }
+}

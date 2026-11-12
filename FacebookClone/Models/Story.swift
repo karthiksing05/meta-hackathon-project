@@ -6,6 +6,8 @@ enum StoryContent: Hashable {
     case localPhoto(Data)
     /// Text on a `PostBackground` preset.
     case text(String, backgroundIndex: Int)
+    /// Bubbles: a Burst of a Bubble, played full-bleed. Nil `replay` means the demo bot plays.
+    case bubble(id: String, replay: BubbleInputLog?, score: Int?)
 }
 
 struct StoryItem: Identifiable, Hashable {

@@ -5,6 +5,7 @@ import UIKit
 /// position and navigation survive tab switches. Also hosts the app-wide covers.
 struct MainTabView: View {
     @Environment(AppStore.self) private var store
+    @Environment(BubbleStore.self) private var bubbleStore
     @Environment(Router.self) private var router
     /// The keyboard covers the tab bar in the real app, so hide it while typing.
     @State private var isKeyboardVisible = false
@@ -13,7 +14,7 @@ struct MainTabView: View {
         @Bindable var router = router
 
         ZStack {
-            ForEach(AppTab.allCases) { tab in
+            ForEach(AppTab.tabBarTabs) { tab in
                 TabRootContainer(tab: tab)
                     .opacity(router.selectedTab == tab ? 1 : 0)
                     .allowsHitTesting(router.selectedTab == tab)
@@ -26,11 +27,25 @@ struct MainTabView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            // Only a text field in the tabs themselves (search, a post's comment box) hides the
+            // tab bar. A keyboard in a sheet or cover leaves the tab bar, and so the size of every
+            // tab's scroll view underneath, alone.
+            let isCovered = MainTabView.isPresentingOverTabs
+            FBScrollLog.home.log("keyboard will show (sheet or cover up: \(isCovered))")
+            guard !isCovered else { return }
             isKeyboardVisible = true
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            if isKeyboardVisible {
+                FBScrollLog.home.log("keyboard will hide")
+            }
             isKeyboardVisible = false
         }
+        #if DEBUG
+        .onChange(of: router.selectedTab) { oldTab, newTab in
+            FBScrollLog.home.log("tab \(oldTab.rawValue) -> \(newTab.rawValue)")
+        }
+        #endif
         .fullScreenCover(isPresented: $router.isMessengerPresented) {
             MessengerContainer()
         }
@@ -43,6 +58,12 @@ struct MainTabView: View {
         .fullScreenCover(item: $router.reelsRequest) { request in
             ReelsView(startReelID: request.startReelID)
         }
+        .fullScreenCover(item: $router.bubblePlayRequest) { request in
+            BubblePlayerView(request: request)
+        }
+        .fullScreenCover(item: $router.studioLaunch) { launch in
+            StudioView(launch: launch)
+        }
         .sheet(isPresented: $router.isCreateMenuPresented) {
             CreateMenuSheet()
         }
@@ -51,6 +72,19 @@ struct MainTabView: View {
                 ImageLoader.shared.prefetch(urls)
             }
         }
+        .task {
+            // DEBUG-only: FB_TAB / FB_OPEN launch routing for screenshots.
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            DebugLaunch.apply(router: router, appStore: store, bubbleStore: bubbleStore)
+        }
+    }
+
+    /// True while a sheet or full-screen cover is presented over the tabs.
+    private static var isPresentingOverTabs: Bool {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .contains { $0.isKeyWindow && $0.rootViewController?.presentedViewController != nil }
     }
 }
 
@@ -74,6 +108,8 @@ private struct TabRootContainer: View {
             HomeView()
         case .video:
             VideoTabView()
+        case .bubbles:
+            BubblesTabView()
         case .friends:
             FriendsView()
         case .marketplace:
@@ -109,7 +145,7 @@ struct FBTabBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(AppTab.allCases) { tab in
+            ForEach(AppTab.tabBarTabs) { tab in
                 Button {
                     if router.selectedTab != tab {
                         Haptics.selection()

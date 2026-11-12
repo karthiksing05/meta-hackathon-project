@@ -12,3 +12,7 @@ xcuserdata/
 
 # macOS
 .DS_Store
+
+.env
+# Muse key for the app bundle (written by scripts/sync-muse-config.sh)
+FacebookClone/Bubbles/Studio/MuseConfig.json

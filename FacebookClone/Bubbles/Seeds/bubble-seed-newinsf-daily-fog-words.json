@@ -1,0 +1,107 @@
+{
+  "id": "newinsf-daily-fog-words",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Fog Words",
+  "one_line_rule": "Guess today's San Francisco word in six tries.",
+  "formula": "guess",
+  "brief": {
+    "intent": "learn the city with your new Group",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "cozy",
+      "playful"
+    ],
+    "energy": "low",
+    "competition": "light",
+    "occasion": "daily",
+    "content_sources": [
+      "New in SF posts (opted in)"
+    ]
+  },
+  "structure": {
+    "cadence": "daily",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "lilac-haze",
+    "emoji": "🌫️",
+    "mood_preset": "cozy"
+  },
+  "concepts": [
+    {
+      "use": "space.grid"
+    },
+    {
+      "use": "input.type"
+    },
+    {
+      "use": "rule.guess_feedback"
+    },
+    {
+      "use": "rule.attempt_budget"
+    },
+    {
+      "use": "feedback.letter_position"
+    },
+    {
+      "use": "score.attempts_used"
+    },
+    {
+      "use": "flow.daily_gate"
+    },
+    {
+      "use": "feel.flip_reveal"
+    },
+    {
+      "use": "share.emoji_grid"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "target": "FOGGY",
+    "dictionary": [
+      "FOGGY",
+      "HILLS",
+      "CABLE",
+      "BRIDGE",
+      "MISSION",
+      "SOURDOUGH",
+      "OCEAN",
+      "BAYSIDE",
+      "TROLLEY",
+      "DOLORES",
+      "SUNSET",
+      "PIER",
+      "CHINATOWN",
+      "PRESIDIO",
+      "MURAL"
+    ]
+  },
+  "seed": 20261112,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-10T10:00:00Z",
+    "duration_sec": 28.0,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-chloe-nguyen",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 3,
+    "play_count": 412,
+    "like_count": 96
+  }
+}

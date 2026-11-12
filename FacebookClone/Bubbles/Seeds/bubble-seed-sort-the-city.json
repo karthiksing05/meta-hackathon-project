@@ -1,0 +1,106 @@
+{
+  "id": "sort-the-city",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Sort the City",
+  "one_line_rule": "Sort each bubble: neighborhood, food or landmark.",
+  "formula": "group",
+  "brief": {
+    "intent": "learn the city",
+    "audience": "everyone",
+    "mood": [
+      "curious"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "lilac-haze",
+    "emoji": "🗺️",
+    "mood_preset": "curious"
+  },
+  "concepts": [
+    {
+      "use": "space.bins"
+    },
+    {
+      "use": "entity.tile"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.sort_correct"
+    },
+    {
+      "use": "rule.attempt_budget"
+    },
+    {
+      "use": "score.count"
+    },
+    {
+      "use": "flow.run_retry"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "groups": [
+      {
+        "label": "Neighborhood",
+        "items": [
+          "Mission",
+          "Sunset",
+          "Richmond",
+          "Noe Valley"
+        ]
+      },
+      {
+        "label": "Food",
+        "items": [
+          "Sourdough",
+          "Burrito",
+          "Dim sum",
+          "Cioppino"
+        ]
+      },
+      {
+        "label": "Landmark",
+        "items": [
+          "Coit Tower",
+          "Ferry Building",
+          "Painted houses",
+          "Golden Gate"
+        ]
+      }
+    ]
+  },
+  "seed": 3131,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-11T17:00:00Z",
+    "duration_sec": 46.9,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-aiko-tanaka",
+    "created_hours_ago": 40,
+    "play_count": 950,
+    "like_count": 210
+  }
+}

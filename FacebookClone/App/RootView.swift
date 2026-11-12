@@ -3,7 +3,12 @@ import SwiftUI
 /// Splash, then either the logged-out screen or the main tabs. Hosts the global toast.
 struct RootView: View {
     @Environment(AppStore.self) private var store
-    @State private var showSplash = true
+    @State private var showSplash = DebugLaunch.value("FB_SKIP_SPLASH") == nil
+
+    init() {
+        // Before the first NavigationStack exists: Facebook's white bars on iOS 17 and 18.
+        FBSystemBars.configure()
+    }
 
     var body: some View {
         ZStack {
@@ -28,6 +33,8 @@ struct RootView: View {
         }
         .task {
             try? await Task.sleep(nanoseconds: 900_000_000)
+            // With FB_HOME_AUTOSCROLL_LOG=1: Home's layout should settle before this line.
+            FBScrollLog.home.log("splash fading out")
             withAnimation(.easeOut(duration: 0.35)) {
                 showSplash = false
             }

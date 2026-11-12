@@ -1,0 +1,76 @@
+{
+  "id": "cable-car-catch",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Cable Car Catch",
+  "one_line_rule": "Tap when the cable car lines up with the stop.",
+  "formula": "time",
+  "brief": {
+    "intent": "a quick timing game",
+    "audience": "everyone",
+    "mood": [
+      "playful"
+    ],
+    "energy": "high",
+    "competition": "competitive"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "sky-glow",
+    "emoji": "🚋",
+    "mood_preset": "playful"
+  },
+  "concepts": [
+    {
+      "use": "space.stage"
+    },
+    {
+      "use": "entity.mover"
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "rule.timing_window"
+    },
+    {
+      "use": "score.precision"
+    },
+    {
+      "use": "flow.run_retry"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "mover": "🚋",
+    "target_label": "Stop"
+  },
+  "seed": 8080,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-12T18:00:00Z",
+    "duration_sec": 49.6,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-omar-haddad",
+    "created_hours_ago": 18,
+    "play_count": 1720,
+    "like_count": 402
+  }
+}

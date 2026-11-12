@@ -216,6 +216,12 @@ final class Post: Identifiable, Hashable {
     var uploadProgress: Double
     /// Memories: how many years ago this was first posted.
     var memoryYearsAgo: Int?
+    /// Bubbles: the Bubble this post carries (a floated Bubble, a shared result, or a Burst reel).
+    var bubbleID: String? = nil
+    /// Bubbles: the run to play as a Burst before the viewer takes over.
+    var bubbleReplay: BubbleInputLog? = nil
+    /// Bubbles: the author opted this post in as material for their Group's Daily Bubble.
+    var allowsBubbles: Bool = false
 
     init(
         id: String = UUID().uuidString,

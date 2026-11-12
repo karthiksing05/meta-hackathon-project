@@ -1,0 +1,110 @@
+{
+  "id": "newinsf-fog-or-sun",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Fog or Sun?",
+  "one_line_rule": "Guess what most of New in SF picked.",
+  "formula": "answer",
+  "brief": {
+    "intent": "see what the Group thinks",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "playful"
+    ],
+    "energy": "low",
+    "competition": "light"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "mint-pop",
+    "emoji": "☀️",
+    "mood_preset": "playful"
+  },
+  "concepts": [
+    {
+      "use": "space.cards"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.consensus"
+    },
+    {
+      "use": "score.closeness"
+    },
+    {
+      "use": "flow.rounds"
+    },
+    {
+      "use": "share.emoji_grid"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "rounds": [
+      {
+        "prompt": "Weekend plan?",
+        "choices": [
+          "Ocean Beach",
+          "Dolores Park"
+        ],
+        "votes": [
+          41,
+          59
+        ]
+      },
+      {
+        "prompt": "Best way up a hill?",
+        "choices": [
+          "Walk it",
+          "Cable car"
+        ],
+        "votes": [
+          66,
+          34
+        ]
+      },
+      {
+        "prompt": "Fog or sun?",
+        "choices": [
+          "Fog",
+          "Sun"
+        ],
+        "votes": [
+          38,
+          62
+        ]
+      }
+    ]
+  },
+  "seed": 2026,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-10T16:00:00Z",
+    "duration_sec": 44.2,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-sam-whitfield",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 14,
+    "play_count": 301,
+    "like_count": 77
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "id": "picnic-icebreaker-whos-coming",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Who's coming Saturday?",
+  "one_line_rule": "Read a fact, pick the newcomer it belongs to.",
+  "formula": "guess",
+  "brief": {
+    "intent": "learn names before the picnic",
+    "audience": "event:event-newcomers-picnic",
+    "mood": [
+      "warm",
+      "playful"
+    ],
+    "energy": "low",
+    "competition": "light",
+    "occasion": "icebreaker",
+    "content_sources": [
+      "Attendee intros (opted in)"
+    ]
+  },
+  "structure": {
+    "cadence": "once",
+    "scope": "event:event-newcomers-picnic",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "peach-fizz",
+    "emoji": "🧺",
+    "mood_preset": "warm"
+  },
+  "concepts": [
+    {
+      "use": "space.cards"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.guess_feedback"
+    },
+    {
+      "use": "rule.attempt_budget"
+    },
+    {
+      "use": "score.count"
+    },
+    {
+      "use": "flow.rounds"
+    },
+    {
+      "use": "feel.flip_reveal"
+    },
+    {
+      "use": "share.emoji_grid"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "rounds": [
+      {
+        "fact": "Runs the Lands End trail every Saturday",
+        "answer_id": "sf-maya-okafor",
+        "choices": [
+          {
+            "id": "sf-maya-okafor",
+            "name": "Maya Okafor",
+            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
+          },
+          {
+            "id": "sf-diego-ramirez",
+            "name": "Diego Ramírez",
+            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
+          },
+          {
+            "id": "sf-priya-natarajan",
+            "name": "Priya Natarajan",
+            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
+          },
+          {
+            "id": "sf-lena-fischer",
+            "name": "Lena Fischer",
+            "avatar": "https://randomuser.me/api/portraits/women/21.jpg"
+          }
+        ]
+      },
+      {
+        "fact": "Bakes too much sourdough",
+        "answer_id": "sf-diego-ramirez",
+        "choices": [
+          {
+            "id": "sf-diego-ramirez",
+            "name": "Diego Ramírez",
+            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
+          },
+          {
+            "id": "sf-maya-okafor",
+            "name": "Maya Okafor",
+            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
+          },
+          {
+            "id": "sf-priya-natarajan",
+            "name": "Priya Natarajan",
+            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
+          },
+          {
+            "id": "sf-lena-fischer",
+            "name": "Lena Fischer",
+            "avatar": "https://randomuser.me/api/portraits/women/21.jpg"
+          }
+        ]
+      },
+      {
+        "fact": "Works night shifts as a nurse",
+        "answer_id": "sf-priya-natarajan",
+        "choices": [
+          {
+            "id": "sf-priya-natarajan",
+            "name": "Priya Natarajan",
+            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
+          },
+          {
+            "id": "sf-maya-okafor",
+            "name": "Maya Okafor",
+            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
+          },
+          {
+            "id": "sf-diego-ramirez",
+            "name": "Diego Ramírez",
+            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
+          },
+          {
+            "id": "sf-lena-fischer",
+            "name": "Lena Fischer",
+            "avatar": "https://randomuser.me/api/portraits/women/21.jpg"
+          }
+        ]
+      },
+      {
+        "fact": "Swims in the cold water at Aquatic Park",
+        "answer_id": "sf-lena-fischer",
+        "choices": [
+          {
+            "id": "sf-lena-fischer",
+            "name": "Lena Fischer",
+            "avatar": "https://randomuser.me/api/portraits/women/21.jpg"
+          },
+          {
+            "id": "sf-maya-okafor",
+            "name": "Maya Okafor",
+            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
+          },
+          {
+            "id": "sf-diego-ramirez",
+            "name": "Diego Ramírez",
+            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
+          },
+          {
+            "id": "sf-priya-natarajan",
+            "name": "Priya Natarajan",
+            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
+          }
+        ]
+      },
+      {
+        "fact": "Cooks in a restaurant kitchen",
+        "answer_id": "sf-jordan-brooks",
+        "choices": [
+          {
+            "id": "sf-jordan-brooks",
+            "name": "Jordan Brooks",
+            "avatar": "https://randomuser.me/api/portraits/men/57.jpg"
+          },
+          {
+            "id": "sf-maya-okafor",
+            "name": "Maya Okafor",
+            "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
+          },
+          {
+            "id": "sf-diego-ramirez",
+            "name": "Diego Ramírez",
+            "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
+          },
+          {
+            "id": "sf-priya-natarajan",
+            "name": "Priya Natarajan",
+            "avatar": "https://randomuser.me/api/portraits/women/65.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  "seed": 4471,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-11T11:00:00Z",
+    "duration_sec": 30.7,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-diego-ramirez",
+    "event_id": "event-newcomers-picnic",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 20,
+    "play_count": 58,
+    "like_count": 21
+  }
+}

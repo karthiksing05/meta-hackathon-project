@@ -4,6 +4,7 @@ import SwiftUI
 enum AppTab: String, CaseIterable, Identifiable, Hashable {
     case home
     case video
+    case bubbles
     case friends
     case marketplace
     case notifications
@@ -11,10 +12,15 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
+    /// The tabs in the bottom bar. Bubbles takes Marketplace's spot; Marketplace opens from Menu
+    /// (`Route.marketplace`), the way Facebook lets people customize their tabs.
+    static let tabBarTabs: [AppTab] = [.home, .video, .bubbles, .friends, .notifications, .menu]
+
     var title: String {
         switch self {
         case .home: return "Home"
         case .video: return "Video"
+        case .bubbles: return "Bubbles"
         case .friends: return "Friends"
         case .marketplace: return "Marketplace"
         case .notifications: return "Notifications"
@@ -26,6 +32,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "house"
         case .video: return "play.tv"
+        case .bubbles: return "bubbles.and.sparkles"
         case .friends: return "person.2"
         case .marketplace: return "storefront"
         case .notifications: return "bell"
@@ -37,6 +44,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "house.fill"
         case .video: return "play.tv.fill"
+        case .bubbles: return "bubbles.and.sparkles.fill"
         case .friends: return "person.2.fill"
         case .marketplace: return "storefront.fill"
         case .notifications: return "bell.fill"
@@ -71,6 +79,38 @@ enum Route: Hashable {
     case settings
     case marketplaceCategory(ListingCategory)
     case comingSoon(title: String, symbol: String)
+    // Bubbles
+    /// A Bubble's page: cover, rule, Burst, play button, board preview, chain, actions.
+    case bubble(String)
+    /// A Bubble's leaderboard.
+    case bubbleBoard(String)
+    /// Every Bubble you can play.
+    case bubbleLibrary
+    /// The levels of a Bubble Chain.
+    case bubbleChain(String)
+    /// Marketplace as a pushed screen (it left the tab bar for Bubbles).
+    case marketplace
+}
+
+/// Opens the full-screen Bubble player.
+struct BubblePlayRequest: Identifiable {
+    let id = UUID()
+    let bubbleID: String
+    /// Watch this run as a Burst first; tapping takes over.
+    var replay: BubbleInputLog? = nil
+}
+
+/// Opens Muse Studio.
+struct StudioLaunch: Identifiable {
+    let id = UUID()
+    var mode: StudioMode = .create
+    /// The Bubble to edit, remix or continue.
+    var baseBubbleID: String? = nil
+    /// Make it for this Group (Daily Bubble or Group game).
+    var groupID: String? = nil
+    /// Make it for this Event (icebreaker).
+    var eventID: String? = nil
+    var prompt: String = ""
 }
 
 enum ComposerStartAction: Hashable {
@@ -117,6 +157,18 @@ final class Router {
     var isCreateStoryPresented = false
     var isCreateMenuPresented = false
     var reelsRequest: ReelsRequest? = nil
+    var bubblePlayRequest: BubblePlayRequest? = nil
+    var studioLaunch: StudioLaunch? = nil
+
+    /// Opens the Bubble player full screen, optionally starting with a Burst of `replay`.
+    func play(_ bubbleID: String, replay: BubbleInputLog? = nil) {
+        bubblePlayRequest = BubblePlayRequest(bubbleID: bubbleID, replay: replay)
+    }
+
+    /// Opens Muse Studio full screen.
+    func openStudio(_ launch: StudioLaunch = StudioLaunch()) {
+        studioLaunch = launch
+    }
 
     func path(for tab: AppTab) -> Binding<NavigationPath> {
         Binding(
@@ -234,6 +286,16 @@ struct RouteDestination: View {
             MarketplaceCategoryView(category: category)
         case .comingSoon(let title, let symbol):
             ComingSoonView(title: title, symbol: symbol)
+        case .bubble(let id):
+            BubbleDetailView(bubbleID: id)
+        case .bubbleBoard(let id):
+            BubbleBoardView(bubbleID: id)
+        case .bubbleLibrary:
+            BubbleLibraryView()
+        case .bubbleChain(let id):
+            BubbleChainView(chainID: id)
+        case .marketplace:
+            MarketplaceView()
         }
     }
 }

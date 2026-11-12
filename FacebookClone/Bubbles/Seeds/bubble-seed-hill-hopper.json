@@ -1,0 +1,108 @@
+{
+  "id": "hill-hopper",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Hill Hopper",
+  "one_line_rule": "Tap to float over the hills. Don't touch the fog.",
+  "formula": "dodge",
+  "brief": {
+    "intent": "a chill game for my new running club about SF hills",
+    "audience": "everyone",
+    "mood": [
+      "chill"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": {
+    "id": "chain-hill-hopper",
+    "index": 1,
+    "title": "Hill Hopper",
+    "prev": null,
+    "next": "hill-hopper-2"
+  },
+  "style": {
+    "palette": "sky-glow",
+    "emoji": "⛰️",
+    "mood_preset": "chill"
+  },
+  "concepts": [
+    {
+      "use": "space.side_scroll"
+    },
+    {
+      "use": "entity.avatar"
+    },
+    {
+      "use": "entity.obstacle"
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "behavior.gravity"
+    },
+    {
+      "use": "behavior.impulse"
+    },
+    {
+      "use": "behavior.spawn_stream"
+    },
+    {
+      "use": "behavior.speed_ramp"
+    },
+    {
+      "use": "rule.collide_fail"
+    },
+    {
+      "use": "score.count"
+    },
+    {
+      "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.score_card"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "theme": "SF hills",
+    "obstacle_labels": [
+      "Twin Peaks",
+      "Bernal",
+      "Nob Hill",
+      "Russian Hill"
+    ]
+  },
+  "seed": 1907,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-12T12:00:00Z",
+    "duration_sec": 33.4,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-diego-ramirez",
+    "created_hours_ago": 30,
+    "play_count": 2310,
+    "like_count": 540
+  }
+}

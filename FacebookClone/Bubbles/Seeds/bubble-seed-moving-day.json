@@ -1,0 +1,101 @@
+{
+  "id": "moving-day",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Moving Day",
+  "one_line_rule": "Float your boxes up the stairs. Tap to lift.",
+  "formula": "dodge",
+  "brief": {
+    "intent": "a funny game about my move to SF",
+    "audience": "friends",
+    "mood": [
+      "funny"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "peach-fizz",
+    "emoji": "📦",
+    "mood_preset": "funny"
+  },
+  "concepts": [
+    {
+      "use": "space.side_scroll"
+    },
+    {
+      "use": "entity.avatar"
+    },
+    {
+      "use": "entity.obstacle"
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "behavior.gravity"
+    },
+    {
+      "use": "behavior.impulse"
+    },
+    {
+      "use": "behavior.spawn_stream"
+    },
+    {
+      "use": "behavior.speed_ramp"
+    },
+    {
+      "use": "rule.collide_fail"
+    },
+    {
+      "use": "score.count"
+    },
+    {
+      "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.score_card"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "theme": "moving into a new apartment",
+    "obstacle_labels": [
+      "stairs",
+      "couch",
+      "boxes"
+    ]
+  },
+  "seed": 777,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-12T15:00:00Z",
+    "duration_sec": 41.5,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "me",
+    "created_hours_ago": 50,
+    "play_count": 64,
+    "like_count": 18
+  }
+}

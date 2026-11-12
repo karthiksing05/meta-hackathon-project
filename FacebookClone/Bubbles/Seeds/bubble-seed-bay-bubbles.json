@@ -1,0 +1,89 @@
+{
+  "id": "bay-bubbles",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Bay Bubbles",
+  "one_line_rule": "Drop bubbles. Two of a kind merge into something bigger.",
+  "formula": "merge",
+  "brief": {
+    "intent": "a calm merge game about the bay",
+    "audience": "everyone",
+    "mood": [
+      "calm"
+    ],
+    "energy": "low",
+    "competition": "light"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "mint-pop",
+    "emoji": "🌊",
+    "mood_preset": "calm"
+  },
+  "concepts": [
+    {
+      "use": "space.jar"
+    },
+    {
+      "use": "entity.orb"
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "behavior.drop"
+    },
+    {
+      "use": "rule.merge_on_touch"
+    },
+    {
+      "use": "rule.overflow_fail"
+    },
+    {
+      "use": "score.merge_value"
+    },
+    {
+      "use": "flow.run_retry"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "tiers": [
+      "🫧",
+      "💧",
+      "🐚",
+      "🦀",
+      "🐟",
+      "🦭",
+      "🐋"
+    ]
+  },
+  "seed": 6060,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-11T10:00:00Z",
+    "duration_sec": 55.0,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-theo-adeyemi",
+    "created_hours_ago": 60,
+    "play_count": 3100,
+    "like_count": 720
+  }
+}

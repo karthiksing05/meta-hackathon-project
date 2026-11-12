@@ -1,0 +1,75 @@
+{
+  "id": "sourdough-stack",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Sourdough Stack",
+  "one_line_rule": "Drop each loaf right on top. Overhangs get trimmed.",
+  "formula": "time",
+  "brief": {
+    "intent": "a silly stacking game about bread",
+    "audience": "friends",
+    "mood": [
+      "silly"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "peach-fizz",
+    "emoji": "🍞",
+    "mood_preset": "silly"
+  },
+  "concepts": [
+    {
+      "use": "space.stage"
+    },
+    {
+      "use": "entity.mover"
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "rule.timing_window"
+    },
+    {
+      "use": "score.precision"
+    },
+    {
+      "use": "flow.run_retry"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "mover": "🍞"
+  },
+  "seed": 4242,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-10T19:00:00Z",
+    "duration_sec": 52.3,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-diego-ramirez",
+    "created_hours_ago": 7,
+    "play_count": 640,
+    "like_count": 150
+  }
+}

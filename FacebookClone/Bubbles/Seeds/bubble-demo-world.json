@@ -1,0 +1,102 @@
+{
+  "_note": "Synthetic demo people for the New in SF story (docs/BUBBLES.md 4.7). Not real people. Mock data (Swift) and seed Bubbles both read this file so names and IDs match.",
+  "group": {
+    "id": "group-newinsf",
+    "name": "New in SF",
+    "category": "Neighborhood",
+    "about": "Just moved to San Francisco? Same. Meetups, apartment tips, hiking buddies and a Daily Bubble to learn the city together.",
+    "member_count": 2814,
+    "is_private": false,
+    "cover_seed": "newinsf-bay"
+  },
+  "event": {
+    "id": "event-newcomers-picnic",
+    "title": "Newcomers' picnic in Dolores Park",
+    "location_name": "Dolores Park",
+    "address": "Dolores St & 19th St, San Francisco, CA",
+    "latitude": 37.7596,
+    "longitude": -122.4269,
+    "starts_in_days": 2,
+    "start_hour": 13,
+    "duration_hours": 3,
+    "host_name": "New in SF",
+    "category": "Social",
+    "details": "Bring a blanket and a snack to share. Name tags provided. Play the icebreaker Bubble before you come so you already know a few faces.",
+    "going_count": 46,
+    "interested_count": 128,
+    "cover_seed": "picnic-park"
+  },
+  "people": [
+    {
+      "id": "sf-maya-okafor", "first_name": "Maya", "last_name": "Okafor", "female": true, "portrait": 44,
+      "hometown": "Austin, Texas", "work": "Lab scientist", "neighborhood": "Inner Sunset", "moved_weeks_ago": 3,
+      "intro": "Hi! Moved from Austin three weeks ago for a lab job. Looking for people to run Lands End with on Saturday mornings.",
+      "facts": ["Runs the Lands End trail every Saturday", "Moved from Austin three weeks ago", "Has a cat named Biscuit"],
+      "is_friend": false, "going_to_picnic": true
+    },
+    {
+      "id": "sf-diego-ramirez", "first_name": "Diego", "last_name": "Ramírez", "female": false, "portrait": 32,
+      "hometown": "Chicago, Illinois", "work": "Product designer", "neighborhood": "Mission", "moved_weeks_ago": 6,
+      "intro": "Chicago transplant in the Mission. I bake way too much sourdough and need people to give it to.",
+      "facts": ["Bakes too much sourdough", "Lives in the Mission", "Still owns a winter coat he will never need here"],
+      "is_friend": true, "going_to_picnic": true
+    },
+    {
+      "id": "sf-priya-natarajan", "first_name": "Priya", "last_name": "Natarajan", "female": true, "portrait": 65,
+      "hometown": "Toronto, Canada", "work": "Nurse", "neighborhood": "Noe Valley", "moved_weeks_ago": 2,
+      "intro": "New nurse in town from Toronto. Night shifts, so I'm free weekday afternoons for coffee walks.",
+      "facts": ["Works night shifts as a nurse", "Moved from Toronto", "Wants to find the best dumplings in the Richmond"],
+      "is_friend": false, "going_to_picnic": true
+    },
+    {
+      "id": "sf-sam-whitfield", "first_name": "Sam", "last_name": "Whitfield", "female": false, "portrait": 12,
+      "hometown": "Portland, Oregon", "work": "Teacher", "neighborhood": "Bernal Heights", "moved_weeks_ago": 8,
+      "intro": "Middle school science teacher, up on Bernal Hill most evenings for sunset. Board game night anyone?",
+      "facts": ["Teaches middle school science", "Watches sunset from Bernal Hill", "Hosts board game nights"],
+      "is_friend": false, "going_to_picnic": false
+    },
+    {
+      "id": "sf-lena-fischer", "first_name": "Lena", "last_name": "Fischer", "female": true, "portrait": 21,
+      "hometown": "Berlin, Germany", "work": "Data analyst", "neighborhood": "Hayes Valley", "moved_weeks_ago": 1,
+      "intro": "Arrived from Berlin last week. I swim at Aquatic Park in the cold water and I'm looking for brave company.",
+      "facts": ["Swims in the cold water at Aquatic Park", "Arrived from Berlin last week", "Collects vintage postcards"],
+      "is_friend": false, "going_to_picnic": true
+    },
+    {
+      "id": "sf-jordan-brooks", "first_name": "Jordan", "last_name": "Brooks", "female": false, "portrait": 57,
+      "hometown": "Atlanta, Georgia", "work": "Line cook", "neighborhood": "Outer Richmond", "moved_weeks_ago": 4,
+      "intro": "Cook from Atlanta, now near Ocean Beach. Will trade fried chicken tips for surf lessons.",
+      "facts": ["Cooks in a restaurant kitchen", "Wants to learn to surf at Ocean Beach", "Grew up in Atlanta"],
+      "is_friend": false, "going_to_picnic": true
+    },
+    {
+      "id": "sf-aiko-tanaka", "first_name": "Aiko", "last_name": "Tanaka", "female": true, "portrait": 88,
+      "hometown": "Osaka, Japan", "work": "Architect", "neighborhood": "North Beach", "moved_weeks_ago": 5,
+      "intro": "Architect from Osaka. I sketch the painted houses on my walks and I would love a sketching buddy.",
+      "facts": ["Sketches the painted houses on walks", "Moved from Osaka", "Plays the ukulele"],
+      "is_friend": true, "going_to_picnic": false
+    },
+    {
+      "id": "sf-omar-haddad", "first_name": "Omar", "last_name": "Haddad", "female": false, "portrait": 71,
+      "hometown": "Detroit, Michigan", "work": "Nursing student", "neighborhood": "Potrero Hill", "moved_weeks_ago": 7,
+      "intro": "Student from Detroit on Potrero Hill. I bike everywhere, even up the hills. Pickup soccer on Sundays?",
+      "facts": ["Bikes up every hill", "Plays pickup soccer on Sundays", "Moved from Detroit"],
+      "is_friend": false, "going_to_picnic": true
+    },
+    {
+      "id": "sf-chloe-nguyen", "first_name": "Chloe", "last_name": "Nguyen", "female": true, "portrait": 9,
+      "hometown": "San Diego, California", "work": "UX researcher", "neighborhood": "Lower Haight", "moved_weeks_ago": 2,
+      "intro": "San Diego girl adjusting to the fog. I organize a Thursday trivia team and we need two more people.",
+      "facts": ["Runs a Thursday trivia team", "Is still getting used to the fog", "Grew up in San Diego"],
+      "is_friend": false, "going_to_picnic": true
+    },
+    {
+      "id": "sf-theo-adeyemi", "first_name": "Theo", "last_name": "Adeyemi", "female": false, "portrait": 40,
+      "hometown": "London, England", "work": "Musician", "neighborhood": "Duboce Triangle", "moved_weeks_ago": 10,
+      "intro": "Musician from London. I play keys in a few bands and I am hunting for the best open mic in the city.",
+      "facts": ["Plays keys in a few bands", "Moved from London", "Looking for the best open mic"],
+      "is_friend": true, "going_to_picnic": false
+    }
+  ],
+  "sf_words": ["FOGGY", "HILLS", "CABLE", "BRIDGE", "MISSION", "SOURDOUGH", "OCEAN", "BAYSIDE", "TROLLEY", "DOLORES", "SUNSET", "PIER", "CHINATOWN", "PRESIDIO", "MURAL"]
+}

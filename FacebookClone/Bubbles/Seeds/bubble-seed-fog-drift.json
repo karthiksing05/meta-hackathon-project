@@ -1,0 +1,99 @@
+{
+  "id": "fog-drift",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Fog Drift",
+  "one_line_rule": "Hold your breath and drift between the fog banks.",
+  "formula": "dodge",
+  "brief": {
+    "intent": "a moody night game",
+    "audience": "everyone",
+    "mood": [
+      "dreamy"
+    ],
+    "energy": "medium",
+    "competition": "light"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "palette": "night-bloom",
+    "emoji": "🌁",
+    "mood_preset": "dreamy"
+  },
+  "concepts": [
+    {
+      "use": "space.side_scroll"
+    },
+    {
+      "use": "entity.avatar"
+    },
+    {
+      "use": "entity.obstacle"
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "behavior.gravity"
+    },
+    {
+      "use": "behavior.impulse"
+    },
+    {
+      "use": "behavior.spawn_stream"
+    },
+    {
+      "use": "behavior.speed_ramp"
+    },
+    {
+      "use": "rule.collide_fail"
+    },
+    {
+      "use": "score.count"
+    },
+    {
+      "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "share.score_card"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "theme": "fog over the bay",
+    "obstacle_labels": [
+      "fog bank"
+    ]
+  },
+  "seed": 5150,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-11T14:00:00Z",
+    "duration_sec": 38.8,
+    "offline": false
+  },
+  "_placeholder": true,
+  "_seed": {
+    "creator_id": "sf-lena-fischer",
+    "created_hours_ago": 9,
+    "play_count": 1204,
+    "like_count": 330
+  }
+}
