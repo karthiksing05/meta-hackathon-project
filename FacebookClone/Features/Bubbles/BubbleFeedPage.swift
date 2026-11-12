@@ -21,10 +21,12 @@ struct BubbleFeedPage: View {
     let actions: BubbleFeedPageActions
 
     @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var isLive: Bool { model.isLive(item) }
     private var isTakenOver: Bool { isLive && model.isTakenOver }
     private var run: BubbleScore? { model.run(for: item, in: bubble) }
+    private var failure: EngineFailure? { model.failedItemID == item.id ? model.failure : nil }
 
     var body: some View {
         ZStack {
@@ -32,12 +34,30 @@ struct BubbleFeedPage: View {
             if isLive, let host = model.host {
                 BubbleRuntimeHostView(host: host, isRevealed: model.isLiveRevealed, isInteractive: isTakenOver)
                     .accessibilityHidden(true)
+                // The poster stays over the live game until its session has drawn, then fades, so
+                // the page never pops from the poster to the game (or shows a failed runtime page).
+                PosterReveal(poster: model.poster(for: bubble), isLive: model.isLiveRevealed, showsLoader: false) {
+                    BubbleCoverView(bubble: bubble)
+                }
+                .accessibilityHidden(true)
+                EngineLoadingView(
+                    isLoading: !model.isLiveRevealed && failure == nil,
+                    label: EngineLoadingView.label(for: bubble.manifest),
+                    style: .pill
+                )
+                .frame(maxHeight: .infinity, alignment: .top)
+                .padding(.top, model.insetTop + 12)
             }
             if !isTakenOver {
                 chrome
                     .transition(.opacity)
             }
+            if let failure {
+                EngineErrorCard(failure: failure, onRetry: model.retry)
+                    .transition(.opacity)
+            }
         }
+        .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: failure)
         .clipped()
         .accessibilityElement(children: .contain)
         .accessibilityAction(named: "Play", actions.takeOver)
@@ -47,19 +67,24 @@ struct BubbleFeedPage: View {
 
     /// The game itself, in its own look: the poster frame (an exact still of its first frame)
     /// once the runtime has drawn one, otherwise the Muse cover or `BubbleCoverView`.
-    @ViewBuilder
+    /// The cover is always underneath; when the poster arrives it crossfades in over it instead of
+    /// replacing it in one frame.
     private var backdrop: some View {
-        if let poster = model.poster(for: bubble) {
-            ZStack {
-                bubble.palette.gradient
-                Image(uiImage: poster)
-                    .resizable()
-                    .scaledToFill()
-            }
-            .accessibilityHidden(true)
-        } else {
+        let poster = model.poster(for: bubble)
+        return ZStack {
             BubbleCoverView(bubble: bubble)
+            if let poster {
+                ZStack {
+                    bubble.palette.gradient
+                    Image(uiImage: poster)
+                        .resizable()
+                        .scaledToFill()
+                }
+                .transition(.opacity)
+            }
         }
+        .animation(GameMotion.resolved(GameMotion.reveal, reduceMotion: reduceMotion), value: poster != nil)
+        .accessibilityHidden(true)
     }
 
     private var chrome: some View {
@@ -197,7 +222,7 @@ private struct BubbleFeedCaption: View {
             .bubbleGlow(BubbleGlow.pink, radius: 8, opacity: 0.45)
             .contentShape(Capsule())
         }
-        .buttonStyle(.pressable)
+        .gamePress()
         .padding(.top, 4)
         .accessibilityLabel("Play \(bubble.title)")
     }
@@ -335,7 +360,7 @@ private struct BubbleFeedRailButton: View {
             .shadow(color: Color.black.opacity(0.4), radius: 3, y: 1)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .gamePress(scale: 0.9)
         .accessibilityLabel(accessibility)
         .accessibilityValue(value ?? "")
     }
