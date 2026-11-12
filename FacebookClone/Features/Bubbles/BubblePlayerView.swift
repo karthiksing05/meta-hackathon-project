@@ -1,0 +1,316 @@
+import SwiftUI
+
+/// Full-screen Bubble player (`router.play(_:replay:)`).
+///
+/// With `request.replay` it plays that run as a Burst first; tapping takes over and you play
+/// the same seed. Otherwise it starts with the Bubble's intro card. When a run ends the result
+/// sheet shows your score, best and rank, and offers play again, float, story and next level.
+///
+/// DEBUG: `FB_FAKE_RESULT=1` shows the result sheet without playing.
+struct BubblePlayerView: View {
+    let request: BubblePlayRequest
+
+    @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(AppStore.self) private var appStore
+    @Environment(Router.self) private var router
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @State private var bubbleID: String
+    @State private var mode: BubbleRunMode
+    @State private var isWatchingBurst: Bool
+    @State private var hasStarted = false
+    @State private var score = 0
+    @State private var result: BubbleResultContext?
+    @State private var lastResult: BubbleResultContext?
+    @State private var lastResultAt = Date.distantPast
+    @State private var restartToken = 0
+    @State private var isMuted = false
+
+    init(request: BubblePlayRequest) {
+        self.request = request
+        _bubbleID = State(initialValue: request.bubbleID)
+        _mode = State(initialValue: request.replay.map { .replay($0) } ?? .play)
+        _isWatchingBurst = State(initialValue: request.replay != nil)
+    }
+
+    private var bubble: Bubble? { bubbleStore.bubble(id: bubbleID) }
+
+    var body: some View {
+        ZStack {
+            backdrop
+            if let bubble {
+                GeometryReader { proxy in
+                    game(bubble, safeArea: proxy.safeAreaInsets)
+                }
+                VStack(spacing: 0) {
+                    topBar(bubble)
+                    Spacer(minLength: 0)
+                    bottomBar(bubble)
+                }
+            } else {
+                missing
+            }
+        }
+        .overlay(alignment: .bottom) {
+            ToastHost()
+                .padding(.bottom, 24)
+        }
+        .sheet(item: $result) { context in
+            BubbleResultSheet(
+                context: context,
+                onPlayAgain: playAgain,
+                onSeeBoard: openBoard,
+                onNextLevel: playNextLevel
+            )
+        }
+        .onAppear(perform: appear)
+    }
+
+    // MARK: Layers
+
+    /// The game in its own look while the runtime starts: its poster frame, else its cover.
+    @ViewBuilder
+    private var backdrop: some View {
+        if let bubble {
+            BubblePosterView(bubble: bubble, showsEmoji: false)
+                .ignoresSafeArea()
+        } else {
+            BubbleGlow.lilacHaze.gradient
+                .ignoresSafeArea()
+        }
+    }
+
+    /// Space the top bar (close, title) and bottom bar (Burst pill, Play again) take.
+    private static let topBarHeight: CGFloat = 58
+    private static let bottomBarHeight: CGFloat = 68
+
+    private func game(_ bubble: Bubble, safeArea: EdgeInsets) -> some View {
+        BubbleWebView(
+            manifest: bubble.manifest,
+            mode: mode,
+            playerName: appStore.me.firstName,
+            bestScore: bubbleStore.bestScore(of: appStore.me, in: bubble)?.score,
+            isActive: scenePhase == .active,
+            isMuted: isMuted,
+            reducedMotion: reduceMotion,
+            restartToken: restartToken,
+            insetTop: safeArea.top + Self.topBarHeight,
+            insetBottom: safeArea.bottom + Self.bottomBarHeight
+        ) { message in
+            handle(message, in: bubble)
+        }
+        .ignoresSafeArea()
+        .accessibilityLabel("\(bubble.title). \(bubble.rule)")
+    }
+
+    private func topBar(_ bubble: Bubble) -> some View {
+        HStack(spacing: 10) {
+            circleButton("xmark", label: "Close") {
+                dismiss()
+            }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(bubble.title)
+                    .font(.fbName)
+                    .foregroundStyle(Color.white)
+                    .lineLimit(1)
+                if isWatchingBurst, let owner = burstOwner(in: bubble) {
+                    Text(owner.isMe ? "Your Burst" : "\(owner.firstName)'s Burst")
+                        .font(.fbMeta)
+                        .foregroundStyle(Color.white.opacity(0.85))
+                        .lineLimit(1)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.black.opacity(0.28), in: RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
+            Spacer(minLength: 8)
+            if hasStarted && !isWatchingBurst {
+                BubbleScorePill(score: score)
+                    .transition(.scale.combined(with: .opacity))
+            }
+            circleButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off") {
+                Haptics.light()
+                isMuted.toggle()
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 4)
+        .shadow(color: Color.black.opacity(0.2), radius: 3, y: 1)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: hasStarted)
+    }
+
+    @ViewBuilder
+    private func bottomBar(_ bubble: Bubble) -> some View {
+        if isWatchingBurst {
+            HStack(spacing: 8) {
+                Image(systemName: "hand.tap.fill")
+                    .font(.system(size: FBIconSize.medium, weight: .semibold))
+                Text(burstScoreText(in: bubble))
+                    .font(.fbButton)
+                    .lineLimit(1)
+            }
+            .foregroundStyle(BubbleGlow.ink)
+            .padding(.horizontal, 16)
+            .frame(height: 40)
+            .background(BubbleGlow.brandGradient, in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.white.opacity(0.7), lineWidth: 1))
+            .bubbleGlow(BubbleGlow.pink, radius: 8, opacity: 0.4)
+            .padding(.bottom, 24)
+            .allowsHitTesting(false)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+        } else if lastResult != nil && result == nil {
+            Button(action: playAgain) {
+                Label("Play again", systemImage: "arrow.counterclockwise")
+            }
+            .buttonStyle(.fb(.primary, expand: false, height: 44))
+            .padding(.bottom, 24)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+    }
+
+    private var missing: some View {
+        VStack(spacing: 16) {
+            ContentUnavailableView(
+                "This Bubble popped",
+                systemImage: "bubbles.and.sparkles",
+                description: Text("It isn't available anymore.")
+            )
+            Button("Close") {
+                dismiss()
+            }
+            .buttonStyle(.fb(.primary, expand: false, height: 40))
+        }
+    }
+
+    private func circleButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: FBIconSize.medium, weight: .bold))
+                .foregroundStyle(Color.white)
+                .frame(width: 36, height: 36)
+                .background(Color.black.opacity(0.32), in: Circle())
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+
+    // MARK: Burst
+
+    /// Whose run the Burst is: the score that recorded this replay.
+    private func burstOwner(in bubble: Bubble) -> User? {
+        guard let replay = mode.replayLog else { return nil }
+        return bubble.scores.first { $0.replay == replay }?.user
+    }
+
+    private func burstScoreText(in bubble: Bubble) -> String {
+        if let replay = mode.replayLog, let run = bubble.scores.first(where: { $0.replay == replay }) {
+            return run.user.isMe ? "Tap to beat your \(run.score.withCommas)" : "Tap to beat \(run.user.firstName)'s \(run.score.withCommas)"
+        }
+        return "Tap to pop in"
+    }
+
+    // MARK: Messages
+
+    private func handle(_ message: BubbleBridgeMessage, in bubble: Bubble) {
+        switch message {
+        case .takeover:
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isWatchingBurst = false
+                hasStarted = true
+            }
+            score = 0
+        case .phase(let phase):
+            if phase == .playing && !isWatchingBurst {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    hasStarted = true
+                }
+            }
+        case .score(let value):
+            if !isWatchingBurst {
+                score = value
+            }
+        case .result(let runResult):
+            guard !isWatchingBurst else { return }
+            finish(runResult, in: bubble)
+        default:
+            break
+        }
+    }
+
+    private func finish(_ runResult: BubbleRunResult, in bubble: Bubble) {
+        // One result per run, even if the runtime repeats itself.
+        guard Date().timeIntervalSince(lastResultAt) > 1 else { return }
+        lastResultAt = Date()
+        score = runResult.score
+        let previous = bubbleStore.bestScore(of: appStore.me, in: bubble)?.score
+        bubbleStore.record(runResult, in: bubble)
+        let context = BubbleResultContext(bubbleID: bubble.id, result: runResult, previousBest: previous)
+        lastResult = context
+        result = context
+    }
+
+    // MARK: Actions
+
+    private func appear() {
+        #if DEBUG
+        if DebugLaunch.value("FB_FAKE_RESULT") == "1", let bubble {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                showFakeResult(for: bubble)
+            }
+        }
+        #endif
+    }
+
+    private func playAgain() {
+        result = nil
+        withAnimation(.easeInOut(duration: 0.2)) {
+            lastResult = nil
+            isWatchingBurst = false
+            hasStarted = true
+        }
+        score = 0
+        restartToken += 1
+    }
+
+    private func openBoard(_ bubble: Bubble) {
+        result = nil
+        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            router.push(.bubbleBoard(bubble.id))
+        }
+    }
+
+    private func playNextLevel(_ next: Bubble) {
+        result = nil
+        lastResult = nil
+        score = 0
+        hasStarted = false
+        isWatchingBurst = false
+        mode = .play
+        bubbleID = next.id
+    }
+
+    #if DEBUG
+    private func showFakeResult(for bubble: Bubble) {
+        let previous = bubbleStore.bestScore(of: appStore.me, in: bubble)?.score
+        let base = previous ?? bubble.featuredRun?.score ?? 20
+        let fake = BubbleRunResult(
+            outcome: .success,
+            score: base + 3,
+            durationSec: 34,
+            replay: BubbleInputLog(seed: bubble.manifest.seed, totalTicks: 34 * 60),
+            share: BubbleShareArtifact(headline: bubble.title, scoreText: "\(base + 3) points")
+        )
+        isWatchingBurst = false
+        hasStarted = true
+        score = fake.score
+        let context = BubbleResultContext(bubbleID: bubble.id, result: fake, previousBest: previous, isRecorded: false)
+        lastResult = context
+        result = context
+    }
+    #endif
+}
