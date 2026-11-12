@@ -14,6 +14,8 @@ use crate::eval::{eval, eval_pure, Cx, Locals, PureEnv};
 use crate::{Fired, Game, Phase};
 use mg_core::scene::EventRef;
 
+mod v02;
+
 // ───────────────────────────── builders ─────────────────────────────
 
 fn empty_program() -> Program {
@@ -33,8 +35,11 @@ fn empty_program() -> Program {
         stroke_width: None,
         on_tap: None,
         on_drag: None,
+        on_press: None,
+        on_release: None,
         transitions: vec![],
         animate_on: vec![],
+        fixed: false,
     };
     Program {
         meta: Meta { title: Rc::from("t"), instructions: Rc::from(""), duration_s: None, seed: None },
@@ -59,7 +64,12 @@ fn empty_program() -> Program {
             feedback: vec![],
             n_locals: 0,
             pointer_slot: 0,
+            camera: None,
+            music: None,
         },
+        assets: vec![],
+        physics: None,
+        text_input: None,
     }
 }
 
@@ -1025,11 +1035,11 @@ fn keys_and_swipes() {
     let code = p.state("code", Type::Str, s(""));
     let steer = p.input("steer", 1, None);
     p.source(steer, SourceTrigger::Swipe(None), vec![Expr::Field(Box::new(loc(0)), 0)]);
-    p.source(steer, SourceTrigger::Key(Rc::from("ArrowUp")), vec![iv(0, -1)]);
+    p.source(steer, SourceTrigger::Key { code: Some(Rc::from("ArrowUp")), up: false }, vec![iv(0, -1)]);
     let only_left = p.input("left", 1, None);
     p.source(only_left, SourceTrigger::Swipe(Some((-1, 0))), vec![iv(-9, -9)]);
     let named = p.input("named", 1, None);
-    p.source(named, SourceTrigger::Key(Rc::from("KeyA")), vec![iv(1, 1)]);
+    p.source(named, SourceTrigger::Key { code: Some(Rc::from("KeyA")), up: false }, vec![iv(1, 1)]);
     p.rule("s", Trigger::Input(steer), None, vec![set(dir, Expr::Event(0))]);
     p.rule("l", Trigger::Input(only_left), None, vec![set(dir, Expr::Event(0))]);
     p.rule("n", Trigger::Input(named), None, vec![set(code, s("A"))]);
@@ -1107,7 +1117,7 @@ fn hand_snake() -> (Program, InputId) {
     let steer = p.input("steer", 1, None);
     p.source(steer, SourceTrigger::Swipe(None), vec![Expr::Field(Box::new(loc(0)), 0)]);
     for (k, d) in [("ArrowUp", (0, -1)), ("ArrowDown", (0, 1)), ("ArrowLeft", (-1, 0)), ("ArrowRight", (1, 0))] {
-        p.source(steer, SourceTrigger::Key(Rc::from(k)), vec![iv(d.0, d.1)]);
+        p.source(steer, SourceTrigger::Key { code: Some(Rc::from(k)), up: false }, vec![iv(d.0, d.1)]);
     }
     p.rule(
         "steer",

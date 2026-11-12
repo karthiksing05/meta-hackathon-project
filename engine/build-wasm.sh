@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds the engine to WebAssembly for the browser shell.
 #   engine/web/pkg/microgame.wasm   the engine (plain C ABI, see README)
-#   engine/web/games/*.json         copies of engine/fixtures + index.json
+#   engine/web/games/*.json         copies of engine/fixtures and engine/examples + index.json
 #
 # MG_WASM_OPT=s|z trades speed for size (default: the profile's opt-level 3).
 set -euo pipefail
@@ -27,9 +27,11 @@ else
   echo "wasm-opt: not found, skipped"
 fi
 
-# Fixtures for the shell's picker.
+# Fixtures and examples for the shell's picker (not replay scripts).
+rm -f web/games/*.json
 names=()
 for f in fixtures/*.json examples/*.json; do
+  case "$f" in *.replay.json) continue ;; esac
   cp "$f" web/games/
   names+=("\"$(basename "$f")\"")
 done

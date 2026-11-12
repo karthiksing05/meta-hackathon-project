@@ -23,6 +23,7 @@ pub(crate) struct Timer {
 }
 
 /// Buffered timer operation, applied in order when the rule commits.
+#[derive(Clone)]
 pub(crate) enum TimerOp {
     After { due_us: i64, event: EventId, payload: Rc<[Value]>, name: Option<TimerId> },
     Cancel(TimerId),

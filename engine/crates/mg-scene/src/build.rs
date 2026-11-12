@@ -15,7 +15,15 @@
 //!
 //! Content bounds: rect `(0,0,w,h)`; circle `(-r,-r,r,r)` (so `x`/`y` is its
 //! center either way); text its box; group / repeat the union of their
-//! children; stack its packed size; grid `cols*cell+(cols-1)*gap` square.
+//! children; stack its packed size; grid `cols*cell+(cols-1)*gap` square;
+//! v0.2 image `(0,0,w,h)`, line and poly the bounding box of their points.
+//!
+//! v0.2: after layout, non-`fixed` ops and hit records are shifted by
+//! `-camera`, and the frame is ordered world ops, particles, fixed ops (see
+//! `Scene::layers`). Image `frame` defaults to
+//! `floor(clock * fps / 1000) % frames`; the cache rebuilds exactly when that
+//! changes. Particles are analytic in their age (`p0 + v t + g t²/2`, opacity
+//! `1 - age/ms`), seeded by `(fired-event sequence, feedback index)`.
 //!
 //! v0.1 limits: `rotation` and `scale` apply to the op that carries them
 //! (around its center) and do not propagate from a group to its children;
@@ -25,24 +33,97 @@
 use std::collections::HashSet;
 use std::rc::Rc;
 
-use mg_core::color::Rgba;
-use mg_core::frame::{note_to_hz, CircleOp, DrawOp, Frame, RectOp, Sound, TextOp, Toast, Wave};
-use mg_core::ir::{Expr, Program, Slot};
-use mg_core::limits::{MAX_COLLECTION_LEN, MAX_RENDER_OPS};
-use mg_core::scene::{Align, Anchor, Dir, FeedbackAction, InputBinding, Prop, PropName};
+use mg_core::color::{parse_color, Rgba};
+use mg_core::frame::{
+    note_to_hz, CircleOp, DrawOp, Frame, Haptic, ImageOp, LineOp, MusicState, PolyOp, RectOp, Sound, SoundKind,
+    TextOp, Toast, Wave,
+};
+use mg_core::hash::splitmix64;
+use mg_core::ir::{AssetId, AssetKind, Expr, Program, Slot};
+use mg_core::limits::{MAX_COLLECTION_LEN, MAX_PARTICLES, MAX_PARTICLES_PER_BURST, MAX_POLY_POINTS, MAX_RENDER_OPS};
+use mg_core::scene::{Align, Anchor, Dir, FeedbackAction, InputBinding, ParticlesAction, Prop, PropName, SoundAction};
 use mg_core::{Code, Diagnostic, Value};
 use mg_runtime::eval::{eval_pure, EvalError, Locals, PureEnv};
 use mg_runtime::{Fired, Phase};
 
 use crate::motion::{sample_keys, Anim, Tween, PV};
-use crate::template::{Color, FromValue, TKind, TNode, Template, Weight, BLACK, DEFAULT_FONT, P};
-use crate::text::measure_text;
+use crate::template::{
+    resolve_asset, AssetRef, Color, FromValue, Points, TKind, TNode, Template, Weight, BLACK, DEFAULT_FONT, P,
+};
+use crate::text::{measure_text, wrap_text, LINE_HEIGHT_EM};
 use crate::util::{cell_local, child_ctx, mix, prop_bit, prop_key, value_hash, Bounds, KeyMap};
 
 /// Most diagnostics kept (first error per prop).
 const MAX_DIAGS: usize = 256;
 /// Most `animate_on` events waiting for the next build.
 const MAX_PENDING_EVENTS: usize = 512;
+/// Most notes in one jingle.
+const MAX_JINGLE_NOTES: usize = 256;
+
+/// Pseudo node ids for diagnostics on presentation-level props.
+const CANVAS_ID: u32 = u32::MAX;
+const CAMERA_ID: u32 = u32::MAX - 1;
+const MUSIC_ID: u32 = u32::MAX - 2;
+
+/// One live particle. Its position is analytic in its age, so replays and
+/// frame rates never change the path.
+#[derive(Clone, Debug)]
+struct Particle {
+    x: f64,
+    y: f64,
+    vx: f64,
+    vy: f64,
+    gravity: f64,
+    r: f64,
+    color: Rgba,
+    start: f64,
+    ms: f64,
+}
+
+/// Tiny deterministic RNG for particle bursts (splitmix64 stream).
+struct BurstRng(u64);
+
+impl BurstRng {
+    fn next(&mut self) -> f64 {
+        self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
+        (splitmix64(self.0) >> 11) as f64 / (1u64 << 53) as f64
+    }
+}
+
+/// Translates one op.
+#[inline]
+fn shift_op(op: &mut DrawOp, dx: f64, dy: f64) {
+    match op {
+        DrawOp::Rect(r) => {
+            r.x += dx;
+            r.y += dy;
+        }
+        DrawOp::Circle(c) => {
+            c.x += dx;
+            c.y += dy;
+        }
+        DrawOp::Text(t) => {
+            t.x += dx;
+            t.y += dy;
+        }
+        DrawOp::Image(i) => {
+            i.x += dx;
+            i.y += dy;
+        }
+        DrawOp::Line(l) => {
+            l.x1 += dx;
+            l.y1 += dy;
+            l.x2 += dx;
+            l.y2 += dy;
+        }
+        DrawOp::Poly(p) => {
+            for pt in &mut p.points {
+                pt.0 += dx;
+                pt.1 += dy;
+            }
+        }
+    }
+}
 
 /// A tappable / draggable region recorded during layout.
 #[derive(Clone, Debug)]
@@ -54,6 +135,8 @@ pub struct HitRec {
     pub node: u32,
     /// Range into `Scene::saved`: node-local slots in scope at the node.
     pub saved: (u32, u32),
+    /// A `fixed` (HUD) node: its pointer values are canvas coordinates.
+    pub fixed: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -75,6 +158,7 @@ pub struct View<'a> {
     pub phase: Phase,
 }
 
+#[derive(Clone)]
 pub struct Diags {
     pub list: Vec<Diagnostic>,
     seen: HashSet<u64>,
@@ -129,12 +213,30 @@ fn set_local(locals: &mut Locals, slot: Slot, v: Value) {
 }
 
 /// All presentation state that survives between frames.
+#[derive(Clone)]
 pub struct Scene {
     pub tpl: Rc<Template>,
     pub program: Rc<Program>,
     pub locals: Locals,
     pub frame: Frame,
+    /// Hit records in canvas (screen) coordinates, camera applied, in paint
+    /// order (world targets first, then fixed ones).
     pub hits: Vec<HitRec>,
+    /// Camera of the last build (world = canvas + camera).
+    pub camera: (f64, f64),
+    /// Per op of `frame.ops` during layout: drawn by a fixed node.
+    op_fixed: Vec<bool>,
+    op_scratch: Vec<DrawOp>,
+    fixed_ops: Vec<DrawOp>,
+    particles: Vec<Particle>,
+    /// New particles since the last build.
+    particles_dirty: bool,
+    /// The last build drew particles.
+    built_particles: bool,
+    /// Clock time at which some auto-animated image changes frame.
+    next_image_change: f64,
+    /// Sequence number of the next fired event (seeds particle bursts).
+    fired_seq: u64,
     pub saved: Vec<(Slot, Value)>,
     scope: Vec<(Slot, Value)>,
     scratch: Vec<ChildRec>,
@@ -159,6 +261,7 @@ pub struct Scene {
     // Feedback output.
     audio: Vec<Sound>,
     toasts: Vec<Toast>,
+    haptics: Vec<Haptic>,
     shake_px: f64,
     shake_ms: f64,
     shake_start: f64,
@@ -180,6 +283,15 @@ impl Scene {
             locals,
             frame: Frame::default(),
             hits: Vec::new(),
+            camera: (0.0, 0.0),
+            op_fixed: Vec::new(),
+            op_scratch: Vec::new(),
+            fixed_ops: Vec::new(),
+            particles: Vec::new(),
+            particles_dirty: false,
+            built_particles: false,
+            next_image_change: f64::INFINITY,
+            fired_seq: 0,
             saved: Vec::new(),
             scope: Vec::new(),
             scratch: Vec::new(),
@@ -199,6 +311,7 @@ impl Scene {
             built_phase: Phase::Playing,
             audio: Vec::new(),
             toasts: Vec::new(),
+            haptics: Vec::new(),
             shake_px: 0.0,
             shake_ms: 0.0,
             shake_start: 0.0,
@@ -217,8 +330,17 @@ impl Scene {
         self.frame.ops.clear();
         self.frame.audio.clear();
         self.frame.toasts.clear();
+        self.frame.haptics.clear();
+        self.frame.music = None;
         self.audio.clear();
         self.toasts.clear();
+        self.haptics.clear();
+        self.particles.clear();
+        self.particles_dirty = false;
+        self.built_particles = false;
+        self.next_image_change = f64::INFINITY;
+        self.fired_seq = 0;
+        self.camera = (0.0, 0.0);
         self.shake_px = 0.0;
         self.clock = 0.0;
         self.anim_until = f64::NEG_INFINITY;
@@ -229,10 +351,15 @@ impl Scene {
 
     /// Whether the cached ops are stale.
     pub fn needs_build(&mut self, view: View, version: u64) -> bool {
-        if !self.built || !self.pending.is_empty() {
+        if !self.built || !self.pending.is_empty() || self.particles_dirty {
             return true;
         }
-        if self.anim_until > self.built_clock && self.clock > self.built_clock {
+        if self.clock > self.built_clock
+            && (self.anim_until > self.built_clock
+                || self.built_particles
+                || !self.particles.is_empty()
+                || self.clock >= self.next_image_change)
+        {
             return true;
         }
         if version == self.built_version {
@@ -259,6 +386,16 @@ impl Scene {
         if self.pending.first().is_some_and(|(_, t)| *t < horizon) {
             self.pending.retain(|(_, t)| *t >= horizon);
         }
+        if !self.particles.is_empty() {
+            let now = self.clock;
+            self.particles.retain(|p| now - p.start < p.ms);
+        }
+    }
+
+    /// Particles alive now (tests).
+    #[cfg(test)]
+    pub fn particle_count(&self) -> usize {
+        self.particles.len()
     }
 
     // ── Fired events: animation queue + feedback ────────────────────────────
@@ -266,6 +403,8 @@ impl Scene {
     pub fn on_fired(&mut self, fired: &[Fired], view: View) {
         let tpl = self.tpl.clone();
         for f in fired {
+            let seq = self.fired_seq;
+            self.fired_seq += 1;
             if tpl.anim_events.contains(&f.on) {
                 if self.pending.len() >= MAX_PENDING_EVENTS {
                     self.pending.remove(0);
@@ -276,9 +415,32 @@ impl Scene {
                 if fb.on != f.on {
                     continue;
                 }
-                for (ai, act) in fb.actions.iter().enumerate() {
-                    self.feedback_action(fi, ai, act, &f.payload, view);
+                if let Some(w) = &fb.when {
+                    if !self.fb_when(fi, w, &f.payload, view) {
+                        continue;
+                    }
                 }
+                for (ai, act) in fb.actions.iter().enumerate() {
+                    self.feedback_action(seq, fi, ai, act, &f.payload, view);
+                }
+            }
+        }
+    }
+
+    /// v0.2.1: a feedback entry's `when`. An error or a non-bool counts as
+    /// false (reported once).
+    fn fb_when(&mut self, fi: usize, e: &Expr, event: &[Value], view: View) -> bool {
+        let at = || format!("/presentation/feedback/{fi}/when");
+        let key = name_key(0xFEED_0000 + ((fi as u64) << 8) + 0xFF, "when");
+        match eval_expr(&self.program, view, event, &mut self.locals, e) {
+            Ok(Value::Bool(b)) => b,
+            Ok(v) => {
+                self.diags.report(key, Code::Presentation, at, || format!("`when` must be a bool, got `{v}`"));
+                false
+            }
+            Err(err) => {
+                self.diags.report(key, Code::Runtime, at, || err.message.clone());
+                false
             }
         }
     }
@@ -319,30 +481,52 @@ impl Scene {
         n
     }
 
-    fn feedback_action(&mut self, fi: usize, ai: usize, act: &FeedbackAction, event: &[Value], view: View) {
+    fn fb_str(&mut self, fi: usize, ai: usize, name: &str, p: &Prop, event: &[Value], view: View) -> Option<Rc<str>> {
+        let v = self.fb_eval(fi, ai, name, p, event, view)?;
+        match v {
+            Value::Str(s) => Some(s),
+            v => {
+                self.fb_bad(fi, ai, name, "a string", &v);
+                None
+            }
+        }
+    }
+
+    /// A note name (`C5`, `F#4`) or a number in Hz.
+    fn fb_hz(&mut self, fi: usize, ai: usize, name: &str, v: &Value) -> Option<f64> {
+        let hz = match v {
+            Value::Str(s) => note_to_hz(s),
+            v => v.as_f64(),
+        };
+        let hz = hz.filter(|h| h.is_finite() && *h > 0.0);
+        if hz.is_none() {
+            self.fb_bad(fi, ai, name, "a note name or Hz", v);
+        }
+        hz
+    }
+
+    fn fb_asset(&mut self, fi: usize, ai: usize, p: &Prop, event: &[Value], view: View) -> Option<AssetId> {
+        let name = self.fb_str(fi, ai, "asset", p, event, view)?;
+        match resolve_asset(&self.program, &self.tpl.asset_ids, &name, false) {
+            Ok(id) => Some(id),
+            Err(msg) => {
+                self.diags.report(
+                    name_key(0xFEED_0000 + ((fi as u64) << 8) + ai as u64, "asset"),
+                    Code::Asset,
+                    || format!("/presentation/feedback/{fi}/do/{ai}/asset"),
+                    || msg,
+                );
+                None
+            }
+        }
+    }
+
+    fn feedback_action(&mut self, seq: u64, fi: usize, ai: usize, act: &FeedbackAction, event: &[Value], view: View) {
         match act {
-            FeedbackAction::Sound { wave, note, ms } => {
-                let wave = match self.fb_eval(fi, ai, "wave", wave, event, view) {
-                    Some(v) => match v.as_str().and_then(Wave::from_name) {
-                        Some(w) => w,
-                        None => {
-                            self.fb_bad(fi, ai, "wave", "sine | square | triangle | sawtooth", &v);
-                            Wave::Sine
-                        }
-                    },
-                    None => Wave::Sine,
-                };
-                let Some(nv) = self.fb_eval(fi, ai, "note", note, event, view) else { return };
-                let hz = match &nv {
-                    Value::Str(s) => note_to_hz(s),
-                    v => v.as_f64(),
-                };
-                let Some(hz) = hz.filter(|h| h.is_finite() && *h > 0.0) else {
-                    self.fb_bad(fi, ai, "note", "a note name or Hz", &nv);
-                    return;
-                };
-                let ms = self.fb_num(fi, ai, "ms", ms, event, view).unwrap_or(100.0).max(0.0);
-                self.audio.push(Sound { wave, freq_hz: hz, ms });
+            FeedbackAction::Sound(snd) => {
+                if let Some(s) = self.sound(fi, ai, snd, event, view) {
+                    self.audio.push(s);
+                }
             }
             FeedbackAction::Toast { text, ms } => {
                 let Some(t) = self.fb_eval(fi, ai, "text", text, event, view) else { return };
@@ -360,7 +544,128 @@ impl Scene {
                     self.shake_start = self.clock;
                 }
             }
+            FeedbackAction::Particles(pa) => self.burst(seq, fi, ai, pa, event, view),
+            FeedbackAction::Haptic(p) => {
+                let Some(name) = self.fb_str(fi, ai, "haptic", p, event, view) else { return };
+                match Haptic::from_name(&name) {
+                    Some(h) => self.haptics.push(h),
+                    None => self.fb_bad(
+                        fi,
+                        ai,
+                        "haptic",
+                        "light | medium | heavy | success | warning | error",
+                        &Value::Str(name),
+                    ),
+                }
+            }
         }
+    }
+
+    /// Sample (`asset`), jingle (`notes`) or a single synth note (with an
+    /// optional `slide`). Volume is clamped to 0..1.
+    fn sound(&mut self, fi: usize, ai: usize, a: &SoundAction, event: &[Value], view: View) -> Option<Sound> {
+        let volume = self.fb_num(fi, ai, "volume", &a.volume, event, view).unwrap_or(0.6);
+        let volume = if volume.is_finite() { volume.clamp(0.0, 1.0) } else { 0.6 };
+        if let Some(asset) = &a.asset {
+            let asset = self.fb_asset(fi, ai, asset, event, view)?;
+            let rate = self.fb_num(fi, ai, "rate", &a.rate, event, view).unwrap_or(1.0);
+            let rate = if rate.is_finite() && rate > 0.0 { rate.clamp(0.0625, 16.0) } else { 1.0 };
+            // A sample plays to its end; its length isn't known to the engine.
+            return Some(Sound { kind: SoundKind::Sample { asset, rate }, volume, ms: 0.0 });
+        }
+        let wave = match self.fb_eval(fi, ai, "wave", &a.wave, event, view) {
+            Some(v) => match v.as_str().and_then(Wave::from_name) {
+                Some(w) => w,
+                None => {
+                    self.fb_bad(fi, ai, "wave", "sine | square | triangle | sawtooth", &v);
+                    Wave::Sine
+                }
+            },
+            None => Wave::Sine,
+        };
+        let slide_to_hz = match &a.slide {
+            None => None,
+            Some(p) => {
+                let v = self.fb_eval(fi, ai, "slide", p, event, view)?;
+                Some(self.fb_hz(fi, ai, "slide", &v)?)
+            }
+        };
+        let (freqs, step_ms) = if let Some(notes) = &a.notes {
+            let nv = self.fb_eval(fi, ai, "notes", notes, event, view)?;
+            let Value::List(items) = &nv else {
+                self.fb_bad(fi, ai, "notes", "a list of notes", &nv);
+                return None;
+            };
+            let mut freqs = Vec::with_capacity(items.len().min(MAX_JINGLE_NOTES));
+            for it in items.iter().take(MAX_JINGLE_NOTES) {
+                freqs.push(self.fb_hz(fi, ai, "notes", it)?);
+            }
+            if freqs.is_empty() {
+                return None;
+            }
+            let step = self.fb_num(fi, ai, "step_ms", &a.step_ms, event, view).unwrap_or(80.0);
+            (freqs, if step.is_finite() { step.max(0.0) } else { 80.0 })
+        } else {
+            let nv = self.fb_eval(fi, ai, "note", &a.note, event, view)?;
+            let hz = self.fb_hz(fi, ai, "note", &nv)?;
+            let ms = self.fb_num(fi, ai, "ms", &a.ms, event, view).unwrap_or(100.0);
+            (vec![hz], if ms.is_finite() { ms.max(0.0) } else { 100.0 })
+        };
+        let ms = step_ms * freqs.len() as f64;
+        Some(Sound { kind: SoundKind::Synth { wave, freqs, step_ms, slide_to_hz }, volume, ms })
+    }
+
+    /// Spawns one particle burst. The burst's shape is seeded from the
+    /// fired-event sequence number and the feedback position.
+    fn burst(&mut self, seq: u64, fi: usize, ai: usize, pa: &ParticlesAction, event: &[Value], view: View) {
+        let Some(x) = self.fb_num(fi, ai, "x", &pa.x, event, view) else { return };
+        let Some(y) = self.fb_num(fi, ai, "y", &pa.y, event, view) else { return };
+        let num = |s: &mut Scene, name: &str, p: &Prop, d: f64| {
+            let v = s.fb_num(fi, ai, name, p, event, view).unwrap_or(d);
+            if v.is_finite() { v } else { d }
+        };
+        let count = num(self, "count", &pa.count, 12.0).floor().clamp(0.0, MAX_PARTICLES_PER_BURST as f64) as usize;
+        let speed = num(self, "speed", &pa.speed, 200.0);
+        let size = num(self, "size", &pa.size, 4.0).max(0.0);
+        let ms = num(self, "ms", &pa.ms, 500.0);
+        let gravity = num(self, "gravity", &pa.gravity, 0.0);
+        let spread = num(self, "spread", &pa.spread, 360.0).clamp(0.0, 360.0);
+        if count == 0 || ms <= 0.0 || !x.is_finite() || !y.is_finite() {
+            return;
+        }
+        let color = match self.fb_eval(fi, ai, "color", &pa.color, event, view) {
+            Some(v) => match v.as_str().and_then(parse_color) {
+                Some(c) => c,
+                None => {
+                    self.fb_bad(fi, ai, "color", "a color string", &v);
+                    BLACK
+                }
+            },
+            None => BLACK,
+        };
+        let mut rng = BurstRng(mix(seq, ((fi as u64) << 16) | ai as u64));
+        let excess = (self.particles.len() + count).saturating_sub(MAX_PARTICLES);
+        if excess > 0 {
+            // Oldest first.
+            self.particles.drain(..excess.min(self.particles.len()));
+        }
+        for _ in 0..count {
+            // Angle from straight up, within ±spread/2; speed 50–100%.
+            let a = (rng.next() - 0.5) * spread.to_radians();
+            let sp = speed * (0.5 + 0.5 * rng.next());
+            self.particles.push(Particle {
+                x,
+                y,
+                vx: a.sin() * sp,
+                vy: -a.cos() * sp,
+                gravity,
+                r: size / 2.0,
+                color,
+                start: self.clock,
+                ms,
+            });
+        }
+        self.particles_dirty = true;
     }
 
     /// Shake amplitude now: linear decay from `px` to 0 over `ms`.
@@ -381,8 +686,10 @@ impl Scene {
     pub fn finish_frame(&mut self) {
         self.frame.audio.clear();
         self.frame.toasts.clear();
+        self.frame.haptics.clear();
         std::mem::swap(&mut self.frame.audio, &mut self.audio);
         std::mem::swap(&mut self.frame.toasts, &mut self.toasts);
+        std::mem::swap(&mut self.frame.haptics, &mut self.haptics);
         self.frame.shake_px = self.current_shake();
     }
 
@@ -395,6 +702,7 @@ impl Scene {
         self.gen = self.gen.wrapping_add(1);
         self.builds += 1;
         self.frame.ops.clear();
+        self.op_fixed.clear();
         self.hits.clear();
         self.saved.clear();
         self.scope.clear();
@@ -402,14 +710,35 @@ impl Scene {
         self.frame.width = tpl.canvas_w;
         self.frame.height = tpl.canvas_h;
 
-        let mut b = Builder { t: &tpl, program: &program, view, s: self, live_tweens: 0, live_anims: 0 };
+        let mut b = Builder {
+            t: &tpl,
+            program: &program,
+            view,
+            s: self,
+            live_tweens: 0,
+            live_anims: 0,
+            next_image_change: f64::INFINITY,
+        };
         let bg = match &tpl.background {
-            Some(p) => b.get(p, u32::MAX, "background").map(|c| c.0).unwrap_or(0xFFFF_FFFF),
+            Some(p) => b.get(p, CANVAS_ID, "background").map(|c| c.0).unwrap_or(0xFFFF_FFFF),
             None => 0xFFFF_FFFF,
         };
+        let camera = match &tpl.camera {
+            None => (0.0, 0.0),
+            Some((x, y)) => {
+                let cx = b.num(Some(x), CAMERA_ID, "x", 0.0);
+                let cy = b.num(Some(y), CAMERA_ID, "y", 0.0);
+                (if cx.is_finite() { cx } else { 0.0 }, if cy.is_finite() { cy } else { 0.0 })
+            }
+        };
+        let music = tpl.music.as_ref().and_then(|m| b.music(m));
         b.place_free(0, 1.0, 0, 0.0, 0.0);
         let (live_tweens, live_anims) = (b.live_tweens, b.live_anims);
+        self.next_image_change = b.next_image_change;
         self.frame.background = bg;
+        self.frame.music = music;
+        self.camera = camera;
+        self.layers(camera);
 
         // Garbage-collect motion for instances that were not laid out.
         let gen = self.gen;
@@ -429,6 +758,65 @@ impl Scene {
         self.built_phase = view.phase;
         self.built_state.clear();
         self.built_state.extend_from_slice(view.state);
+    }
+
+    /// Applies the camera to world ops and hit records, and orders the frame
+    /// as world ops, then particles, then fixed (HUD) ops.
+    fn layers(&mut self, (cx, cy): (f64, f64)) {
+        let n_fixed = if self.tpl.any_fixed { self.op_fixed.iter().filter(|f| **f).count() } else { 0 };
+        if n_fixed > 0 {
+            std::mem::swap(&mut self.frame.ops, &mut self.op_scratch);
+            self.frame.ops.clear();
+            self.fixed_ops.clear();
+            for (mut op, &f) in self.op_scratch.drain(..).zip(&self.op_fixed) {
+                if f {
+                    self.fixed_ops.push(op);
+                } else {
+                    shift_op(&mut op, -cx, -cy);
+                    self.frame.ops.push(op);
+                }
+            }
+        } else if cx != 0.0 || cy != 0.0 {
+            for op in &mut self.frame.ops {
+                shift_op(op, -cx, -cy);
+            }
+        }
+        // Particles, in world coordinates.
+        self.built_particles = !self.particles.is_empty();
+        self.particles_dirty = false;
+        let room = MAX_RENDER_OPS.saturating_sub(self.frame.ops.len() + n_fixed);
+        let now = self.clock;
+        for p in self.particles.iter().take(room) {
+            let age = (now - p.start).max(0.0);
+            let opacity = 1.0 - age / p.ms;
+            if opacity <= 0.0 {
+                continue;
+            }
+            let t = age / 1000.0;
+            self.frame.ops.push(DrawOp::Circle(CircleOp {
+                x: p.x + p.vx * t - cx,
+                y: p.y + p.vy * t + 0.5 * p.gravity * t * t - cy,
+                r: p.r,
+                fill: Some(p.color),
+                stroke: None,
+                stroke_width: 0.0,
+                scale: 1.0,
+                opacity,
+            }));
+        }
+        if n_fixed > 0 {
+            self.frame.ops.append(&mut self.fixed_ops);
+        }
+        if cx != 0.0 || cy != 0.0 {
+            for h in self.hits.iter_mut().filter(|h| !h.fixed) {
+                h.x -= cx;
+                h.y -= cy;
+            }
+        }
+        if n_fixed > 0 || self.hits.iter().any(|h| h.fixed) {
+            // Stable: fixed targets are on top, each layer keeps its order.
+            self.hits.sort_by_key(|h| h.fixed);
+        }
     }
 
     /// Topmost hit record containing the point (last in paint order wins).
@@ -477,6 +865,8 @@ struct Builder<'a> {
     s: &'a mut Scene,
     live_tweens: usize,
     live_anims: usize,
+    /// Earliest clock time an auto-animated image changes frame.
+    next_image_change: f64,
 }
 
 impl Builder<'_> {
@@ -490,8 +880,56 @@ impl Builder<'_> {
     }
 
     fn report_eval(&mut self, id: u32, name: &str, msg: String) {
-        let at = if id == u32::MAX { Rc::from("/presentation/canvas") } else { self.node(id).at.clone() };
-        self.s.diags.report(name_key(id as u64, name), Code::Runtime, || format!("{at}/{name}"), || msg);
+        self.report(id, name, Code::Runtime, msg);
+    }
+
+    fn report(&mut self, id: u32, name: &str, code: Code, msg: String) {
+        let at: Rc<str> = match id {
+            CANVAS_ID => Rc::from("/presentation/canvas"),
+            CAMERA_ID => Rc::from("/presentation/camera"),
+            MUSIC_ID => Rc::from("/presentation/music"),
+            _ => self.node(id).at.clone(),
+        };
+        self.s.diags.report(name_key(id as u64, name), code, || format!("{at}/{name}"), || msg);
+    }
+
+    /// Resolves an asset reference to an id of the wanted kind.
+    fn asset(&mut self, r: &AssetRef, id: u32, image: bool) -> Option<AssetId> {
+        match r {
+            AssetRef::Id(a) => Some(*a),
+            AssetRef::Bad => None,
+            AssetRef::Expr(e) => {
+                let v = match self.eval(e, &[]) {
+                    Ok(v) => v,
+                    Err(err) => {
+                        self.report_eval(id, "asset", err.message);
+                        return None;
+                    }
+                };
+                let r = match v.as_str() {
+                    Some(name) => resolve_asset(self.program, &self.t.asset_ids, name, image),
+                    None => Err(format!("`asset` must be an asset id string, got `{v}`")),
+                };
+                match r {
+                    Ok(a) => Some(a),
+                    Err(msg) => {
+                        self.report(id, "asset", Code::Asset, msg);
+                        None
+                    }
+                }
+            }
+        }
+    }
+
+    fn music(&mut self, m: &crate::template::TMusic) -> Option<MusicState> {
+        let asset = self.asset(&m.asset, MUSIC_ID, false)?;
+        let volume = self.num(Some(&m.volume), MUSIC_ID, "volume", 0.6);
+        let volume = if volume.is_finite() { volume.clamp(0.0, 1.0) } else { 0.6 };
+        let playing = match &m.playing {
+            None => self.view.phase == Phase::Playing,
+            Some(p) => self.get(p, MUSIC_ID, "playing").unwrap_or(false),
+        };
+        Some(MusicState { asset, volume, playing })
     }
 
     /// Evaluates a typed prop. `None` (with a diagnostic) on failure.
@@ -621,9 +1059,10 @@ impl Builder<'_> {
         }
     }
 
-    fn push_op(&mut self, op: DrawOp) {
+    fn push_op(&mut self, id: u32, op: DrawOp) {
         if !self.ops_full() {
             self.s.frame.ops.push(op);
+            self.s.op_fixed.push(self.t.nodes[id as usize].fixed);
         }
     }
 
@@ -651,20 +1090,7 @@ impl Builder<'_> {
             return;
         }
         for op in &mut self.s.frame.ops[op0..op1] {
-            match op {
-                DrawOp::Rect(r) => {
-                    r.x += dx;
-                    r.y += dy;
-                }
-                DrawOp::Circle(c) => {
-                    c.x += dx;
-                    c.y += dy;
-                }
-                DrawOp::Text(t) => {
-                    t.x += dx;
-                    t.y += dy;
-                }
-            }
+            shift_op(op, dx, dy);
         }
         for h in &mut self.s.hits[hit0..hit1] {
             h.x += dx;
@@ -733,7 +1159,7 @@ impl Builder<'_> {
                 let (fill, stroke, stroke_width) = self.paint(n, id, ctx);
                 let rotation = self.num_m(n.rotation.as_ref(), id, ctx, PropName::Rotation, "rotation", 0.0);
                 let scale = self.num_m(n.scale.as_ref(), id, ctx, PropName::Scale, "scale", 1.0);
-                self.push_op(DrawOp::Rect(RectOp {
+                self.push_op(id, DrawOp::Rect(RectOp {
                     x: 0.0,
                     y: 0.0,
                     w,
@@ -752,10 +1178,10 @@ impl Builder<'_> {
                 let r = self.num_m(Some(r), id, ctx, PropName::R, "r", 0.0).max(0.0);
                 let (fill, stroke, stroke_width) = self.paint(n, id, ctx);
                 let scale = self.num_m(n.scale.as_ref(), id, ctx, PropName::Scale, "scale", 1.0);
-                self.push_op(DrawOp::Circle(CircleOp { x: 0.0, y: 0.0, r, fill, stroke, stroke_width, scale, opacity }));
+                self.push_op(id, DrawOp::Circle(CircleOp { x: 0.0, y: 0.0, r, fill, stroke, stroke_width, scale, opacity }));
                 Bounds::new(-r, -r, r, r)
             }
-            TKind::Text { text, size, font, weight, color, w, h, align, valign } => {
+            TKind::Text { text, size, font, weight, color, w, h, align, valign, wrap } => {
                 let text = self.get(text, id, "text").unwrap_or_else(|| Rc::from(""));
                 let size = self.num_m(Some(size), id, ctx, PropName::Size, "size", 16.0).max(0.0);
                 let font = match font {
@@ -781,25 +1207,42 @@ impl Builder<'_> {
                 };
                 let bw = w.as_ref().map(|p| self.num_m(Some(p), id, ctx, PropName::W, "w", 0.0));
                 let bh = h.as_ref().map(|p| self.num_m(Some(p), id, ctx, PropName::H, "h", 0.0));
-                let (w, h) = match (bw, bh) {
-                    (Some(w), Some(h)) => (w, h),
+                let line_height = size * LINE_HEIGHT_EM;
+                let (text, w, h) = match (bw, bh) {
+                    // v0.2.1: wrap to the box width; `h` defaults to the wrapped height.
+                    (Some(w), bh) if *wrap => {
+                        let (wrapped, lines) = wrap_text(&text, w, size, weight);
+                        let text = if *wrapped == *text { text } else { Rc::from(wrapped) };
+                        (text, w, bh.unwrap_or(lines as f64 * line_height))
+                    }
+                    (Some(w), Some(h)) => (text, w, h),
                     _ => {
                         let (mw, mh) = measure_text(&text, size, weight);
-                        (bw.unwrap_or(mw), bh.unwrap_or(mh))
+                        (text, bw.unwrap_or(mw), bh.unwrap_or(mh))
                     }
                 };
+                // v0.2.1: an outline under the fill (default width 2).
+                let stroke = self.color_m(n.stroke.as_ref(), id, ctx, PropName::Stroke, "stroke");
+                let stroke_width = match stroke {
+                    Some(_) => self.num_m(n.stroke_width.as_ref(), id, ctx, PropName::StrokeWidth, "stroke_width", 2.0).max(0.0),
+                    None => 0.0,
+                };
+                let stroke = stroke.filter(|_| stroke_width > 0.0);
                 let rotation = self.num_m(n.rotation.as_ref(), id, ctx, PropName::Rotation, "rotation", 0.0);
                 let scale = self.num_m(n.scale.as_ref(), id, ctx, PropName::Scale, "scale", 1.0);
-                self.push_op(DrawOp::Text(TextOp {
+                self.push_op(id, DrawOp::Text(TextOp {
                     x: 0.0,
                     y: 0.0,
                     w,
                     h,
                     text,
+                    line_height,
                     size,
                     font,
                     weight,
                     color,
+                    stroke,
+                    stroke_width,
                     align: *align,
                     valign: *valign,
                     rotation,
@@ -808,12 +1251,97 @@ impl Builder<'_> {
                 }));
                 Bounds::new(0.0, 0.0, w.max(0.0), h.max(0.0))
             }
+            TKind::Image { asset, w, h, frame, flip_x, flip_y } => {
+                let Some(asset) = self.asset(asset, id, true) else { return Some((Bounds::EMPTY, x, y)) };
+                let AssetKind::Image { w: aw, h: ah, frames, fps, .. } = self.program.assets[asset as usize].kind else {
+                    return Some((Bounds::EMPTY, x, y));
+                };
+                let w = self.num_m(w.as_ref(), id, ctx, PropName::W, "w", aw);
+                let h = self.num_m(h.as_ref(), id, ctx, PropName::H, "h", ah);
+                let frames = frames.max(1) as i64;
+                let frame = match frame {
+                    Some(p) => {
+                        let f = self.num(Some(p), id, "frame", 0.0);
+                        if f.is_finite() { (f.floor() as i64).rem_euclid(frames) } else { 0 }
+                    }
+                    None if frames > 1 && fps > 0.0 && fps.is_finite() => {
+                        let n = (self.s.clock * fps / 1000.0).floor();
+                        self.next_image_change = self.next_image_change.min((n + 1.0) * 1000.0 / fps);
+                        (n as i64).rem_euclid(frames)
+                    }
+                    None => 0,
+                };
+                let flip_x = flip_x.as_ref().and_then(|p| self.get(p, id, "flip_x")).unwrap_or(false);
+                let flip_y = flip_y.as_ref().and_then(|p| self.get(p, id, "flip_y")).unwrap_or(false);
+                let rotation = self.num_m(n.rotation.as_ref(), id, ctx, PropName::Rotation, "rotation", 0.0);
+                let scale = self.num_m(n.scale.as_ref(), id, ctx, PropName::Scale, "scale", 1.0);
+                self.push_op(id, DrawOp::Image(ImageOp {
+                    x: 0.0,
+                    y: 0.0,
+                    w,
+                    h,
+                    asset,
+                    frame: frame as u16,
+                    flip_x,
+                    flip_y,
+                    rotation,
+                    scale,
+                    opacity,
+                }));
+                Bounds::new(0.0, 0.0, w.max(0.0), h.max(0.0))
+            }
+            TKind::Line { x1, y1, x2, y2 } => {
+                let x1 = self.num(Some(x1), id, "x1", 0.0);
+                let y1 = self.num(Some(y1), id, "y1", 0.0);
+                let x2 = self.num(Some(x2), id, "x2", 0.0);
+                let y2 = self.num(Some(y2), id, "y2", 0.0);
+                let stroke = match n.stroke {
+                    None if !n.has_motion(PropName::Stroke) => BLACK,
+                    None => self.motion(id, ctx, PropName::Stroke, PV::C(BLACK)).color(),
+                    Some(_) => self.color_m(n.stroke.as_ref(), id, ctx, PropName::Stroke, "stroke").unwrap_or(BLACK),
+                };
+                let sw = self.num_m(n.stroke_width.as_ref(), id, ctx, PropName::StrokeWidth, "stroke_width", 2.0);
+                self.push_op(id, DrawOp::Line(LineOp { x1, y1, x2, y2, stroke, stroke_width: sw.max(0.0), opacity }));
+                Bounds::new(x1.min(x2), y1.min(y2), x1.max(x2), y1.max(y2))
+            }
+            TKind::Poly { points, closed } => {
+                let pts = match points {
+                    P::C(p) => p.0.clone(),
+                    p => self.get(p, id, "points").map(|p: Points| p.0).unwrap_or_else(|| Rc::from(Vec::new())),
+                };
+                let pts = if pts.len() > MAX_POLY_POINTS {
+                    self.report(
+                        id,
+                        "points",
+                        Code::Limit,
+                        format!("{} points; only the first {MAX_POLY_POINTS} are drawn", pts.len()),
+                    );
+                    &pts[..MAX_POLY_POINTS]
+                } else {
+                    &pts[..]
+                };
+                let mut b = Bounds::EMPTY;
+                for &(px, py) in pts {
+                    b = b.union(Bounds::new(px, py, px, py));
+                }
+                let (fill, stroke, stroke_width) = self.paint(n, id, ctx);
+                self.push_op(id, DrawOp::Poly(PolyOp { points: pts.to_vec(), closed: *closed, fill, stroke, stroke_width, opacity }));
+                b
+            }
         };
 
-        if (n.on_tap.is_some() || n.on_drag.is_some()) && !b.is_empty() {
+        if n.is_target() && !b.is_empty() {
             let s0 = self.s.saved.len() as u32;
             self.s.saved.extend(self.s.scope.iter().cloned());
-            let rec = HitRec { x: b.x0, y: b.y0, w: b.w(), h: b.h(), node: id, saved: (s0, self.s.saved.len() as u32) };
+            let rec = HitRec {
+                x: b.x0,
+                y: b.y0,
+                w: b.w(),
+                h: b.h(),
+                node: id,
+                saved: (s0, self.s.saved.len() as u32),
+                fixed: n.fixed,
+            };
             // Before descendants, so a more specific child target wins.
             self.s.hits.insert(hit0, rec);
         }

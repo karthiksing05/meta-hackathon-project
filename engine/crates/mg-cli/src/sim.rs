@@ -4,7 +4,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
 use mg_core::hash::splitmix64;
-use mg_core::ir::SourceTrigger;
+use mg_core::ir::{SourceTrigger, TextPhase};
 use mg_core::rng::Rng;
 use mg_core::{Diagnostic, Program};
 use mg_runtime::Phase;
@@ -15,11 +15,67 @@ use crate::panic_message;
 /// What a random player can do in a game.
 #[derive(Clone, Debug, Default)]
 pub struct Controls {
-    /// Every `{"key": ...}` source, deduplicated, in declaration order.
+    /// Every `{"key": ...}` source code (down or up), deduplicated, in declaration order.
     pub keys: Vec<Rc<str>>,
+    /// Some input has a `{"key": "any"}` source.
+    pub any_key: bool,
     /// True if any input has a swipe source.
     pub swipe: bool,
+    /// Some input has a `{"pointer": ...}` source.
+    pub pointer: bool,
+    /// Some input has a `{"text": ...}` source.
+    pub text: bool,
     pub canvas: (f64, f64),
+}
+
+/// Words the random player types (plus random strings).
+pub const WORDS: &[&str] = &[
+    "cat", "dog", "apple", "house", "tree", "sun", "moon", "star", "game", "play", "hello", "world", "yes", "no",
+    "Paris", "ok", "42", "7", "-3", "0", "", "  spaced  ", "ÜBER", "naïve", "😀", "a b c",
+];
+
+/// Characters for random key presses on `any` sources and random strings.
+const CHARS: &[char] = &[
+    'a', 'b', 'e', 'k', 'q', 'z', 'A', 'M', 'Z', '0', '1', '9', ' ', '.', ',', '!', '?', '-', '\'', 'é', 'ß', '中',
+];
+
+/// Non-printable keys sent to `any` sources (empty char).
+const SPECIAL_KEYS: &[&str] = &["Enter", "Backspace", "ArrowLeft", "ArrowUp", "Escape", "Tab", "ShiftLeft"];
+
+/// The browser `KeyboardEvent.code` for a printable char (`'a'` → `KeyA`).
+pub fn code_for_char(c: char) -> String {
+    match c {
+        'a'..='z' => format!("Key{}", c.to_ascii_uppercase()),
+        'A'..='Z' => format!("Key{c}"),
+        '0'..='9' => format!("Digit{c}"),
+        ' ' => "Space".into(),
+        '.' => "Period".into(),
+        ',' => "Comma".into(),
+        '-' => "Minus".into(),
+        '\'' => "Quote".into(),
+        _ => String::new(),
+    }
+}
+
+/// The printable char a key code types (`KeyA` → `a`, `Space` → ` `), or `""`.
+/// A single-character code is its own char.
+pub fn char_for_code(code: &str) -> String {
+    let mut it = code.chars();
+    if let (Some(c), None) = (it.next(), it.next()) {
+        return c.to_string();
+    }
+    if let Some(rest) = code.strip_prefix("Key").or_else(|| code.strip_prefix("Digit")) {
+        if rest.len() == 1 {
+            return rest.to_ascii_lowercase();
+        }
+    }
+    match code {
+        "Space" => " ".into(),
+        "Period" => ".".into(),
+        "Comma" => ",".into(),
+        "Minus" => "-".into(),
+        _ => String::new(),
+    }
 }
 
 impl Controls {
@@ -28,12 +84,15 @@ impl Controls {
         for input in &p.inputs {
             for s in &input.sources {
                 match &s.trigger {
-                    SourceTrigger::Key(k) => {
+                    SourceTrigger::Key { code: Some(k), .. } => {
                         if !c.keys.contains(k) {
                             c.keys.push(k.clone());
                         }
                     }
+                    SourceTrigger::Key { code: None, .. } => c.any_key = true,
                     SourceTrigger::Swipe(_) => c.swipe = true,
+                    SourceTrigger::Pointer(_) => c.pointer = true,
+                    SourceTrigger::Text(_) => c.text = true,
                 }
             }
         }
@@ -44,8 +103,10 @@ impl Controls {
 pub const SWIPES: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
 
 /// Sends random valid inputs: taps at random points inside the current hit
-/// targets (and drags for draggable ones), keys from every key source,
-/// swipes in 4 directions, and the odd tap that misses everything.
+/// targets (and drags for draggable ones), key down/up pairs for every key
+/// source (random printable and special keys for `any`), swipes in 4
+/// directions, pointer down/move/up anywhere (for pointer sources), typed text
+/// (changes, then a submit) and the odd tap that misses everything.
 pub struct RandomDriver {
     pub rng: Rng,
     pub controls: Controls,
@@ -61,14 +122,54 @@ impl RandomDriver {
         self.rng.next_f64()
     }
 
-    /// Applies one random input. Drags step the game between pointer events.
+    fn point(&mut self) -> (f64, f64) {
+        (self.unit() * self.controls.canvas.0, self.unit() * self.controls.canvas.1)
+    }
+
+    /// Steps the game 0–`max` times (inputs held across steps).
+    fn pause(&mut self, player: &mut Player, max: u64) {
+        for _ in 0..self.rng.below(max + 1) {
+            player.step(self.dt);
+        }
+    }
+
+    /// A random key: a declared code, or (for `any`) a printable or special key.
+    fn random_key(&mut self) -> (String, String) {
+        let n_declared = self.controls.keys.len() as u64;
+        let pick_declared = n_declared > 0 && (!self.controls.any_key || self.rng.below(2) == 0);
+        if pick_declared {
+            let k = self.controls.keys[self.rng.below(n_declared) as usize].to_string();
+            let ch = char_for_code(&k);
+            return (k, ch);
+        }
+        if self.rng.below(4) == 0 {
+            let k = SPECIAL_KEYS[self.rng.below(SPECIAL_KEYS.len() as u64) as usize];
+            return (k.to_string(), String::new());
+        }
+        let c = CHARS[self.rng.below(CHARS.len() as u64) as usize];
+        (code_for_char(c), c.to_string())
+    }
+
+    fn random_text(&mut self) -> String {
+        if self.rng.below(3) > 0 {
+            return WORDS[self.rng.below(WORDS.len() as u64) as usize].to_string();
+        }
+        let len = self.rng.below(48);
+        (0..len).map(|_| CHARS[self.rng.below(CHARS.len() as u64) as usize]).collect()
+    }
+
+    /// Applies one random input. Drags, held keys and typing step the game
+    /// between events.
     pub fn act(&mut self, player: &mut Player) {
         let targets = player.hit_targets();
         let w_tap = if targets.is_empty() { 0 } else { 6 };
-        let w_key = if self.controls.keys.is_empty() { 0 } else { 4 };
+        let w_key = if self.controls.keys.is_empty() && !self.controls.any_key { 0 } else { 4 };
         let w_swipe = if self.controls.swipe { 4 } else { 0 };
         let w_miss = 1;
-        let roll = self.rng.below((w_tap + w_key + w_swipe + w_miss) as u64) as i32;
+        let w_pointer = if self.controls.pointer { 4 } else { 0 };
+        let w_text = if self.controls.text { 4 } else { 0 };
+        let total = w_tap + w_key + w_swipe + w_miss + w_pointer + w_text;
+        let roll = self.rng.below(total as u64) as i32;
         if roll < w_tap {
             let t = &targets[self.rng.below(targets.len() as u64) as usize];
             let x = t.x + t.w * (0.05 + 0.9 * self.unit());
@@ -78,22 +179,48 @@ impl RandomDriver {
                 let moves = 1 + self.rng.below(4);
                 for _ in 0..moves {
                     player.step(self.dt);
-                    let (mx, my) = (self.unit() * self.controls.canvas.0, self.unit() * self.controls.canvas.1);
+                    let (mx, my) = self.point();
                     player.pointer(PointerKind::Move, mx, my);
                 }
-                let (ux, uy) = (self.unit() * self.controls.canvas.0, self.unit() * self.controls.canvas.1);
+                let (ux, uy) = self.point();
                 player.pointer(PointerKind::Up, ux, uy);
             } else {
                 player.pointer(PointerKind::Up, x, y);
             }
         } else if roll < w_tap + w_key {
-            let k = self.controls.keys[self.rng.below(self.controls.keys.len() as u64) as usize].clone();
-            player.key(&k);
+            let (code, ch) = self.random_key();
+            player.key_event(&code, &ch, true);
+            self.pause(player, 3);
+            player.key_event(&code, &ch, false);
         } else if roll < w_tap + w_key + w_swipe {
             let (dx, dy) = SWIPES[self.rng.below(4) as usize];
             player.swipe(dx, dy);
+        } else if roll < w_tap + w_key + w_swipe + w_pointer {
+            let (x, y) = self.point();
+            player.pointer(PointerKind::Down, x, y);
+            for _ in 0..self.rng.below(4) {
+                player.step(self.dt);
+                let (mx, my) = self.point();
+                player.pointer(PointerKind::Move, mx, my);
+            }
+            let (ux, uy) = self.point();
+            player.pointer(PointerKind::Up, ux, uy);
+        } else if roll < w_tap + w_key + w_swipe + w_pointer + w_text {
+            let text = self.random_text();
+            // Type it: a change per prefix (at most 8), then submit; the field clears.
+            let chars: Vec<char> = text.chars().collect();
+            let stride = chars.len().div_ceil(8).max(1);
+            let mut n = 0;
+            while n < chars.len() {
+                n = (n + stride).min(chars.len());
+                let prefix: String = chars[..n].iter().collect();
+                player.text(TextPhase::Change, &prefix);
+                self.pause(player, 1);
+            }
+            player.text(TextPhase::Submit, &text);
+            player.text(TextPhase::Change, "");
         } else {
-            let (x, y) = (self.unit() * self.controls.canvas.0, self.unit() * self.controls.canvas.1);
+            let (x, y) = self.point();
             player.pointer(PointerKind::Down, x, y);
             player.pointer(PointerKind::Up, x, y);
         }

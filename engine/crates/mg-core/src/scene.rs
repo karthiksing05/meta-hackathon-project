@@ -21,6 +21,25 @@ pub struct Presentation {
     /// Slot holding `pointer` (`vec2`, canvas units) while an `on_drag` /
     /// `on_tap` `with` expression is evaluated.
     pub pointer_slot: Slot,
+    /// v0.2: top-left of the view in world units. `None` = (0, 0).
+    pub camera: Option<Camera>,
+    /// v0.2: looping background music.
+    pub music: Option<Music>,
+}
+
+#[derive(Clone, Debug)]
+pub struct Camera {
+    pub x: Prop,
+    pub y: Prop,
+}
+
+#[derive(Clone, Debug)]
+pub struct Music {
+    /// Asset name (`Value::Str`), literal or expression.
+    pub asset: Prop,
+    pub volume: Prop,
+    /// `None` = playing while `status == 'playing'`.
+    pub playing: Option<Prop>,
 }
 
 #[derive(Clone, Debug)]
@@ -163,8 +182,15 @@ pub struct Node {
     pub stroke_width: Option<Prop>,
     pub on_tap: Option<InputBinding>,
     pub on_drag: Option<InputBinding>,
+    /// v0.2.1: sent on pointer down over the node.
+    pub on_press: Option<InputBinding>,
+    /// v0.2.1: sent when the pointer that pressed the node comes up
+    /// (anywhere), or when a restart cancels the press.
+    pub on_release: Option<InputBinding>,
     pub transitions: Vec<Transition>,
     pub animate_on: Vec<AnimateOn>,
+    /// v0.2: ignores the camera (HUD). Inherited by the subtree.
+    pub fixed: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -211,10 +237,27 @@ pub enum NodeKind {
         h: Option<Prop>,
         align: TextAlign,
         valign: TextValign,
+        /// v0.2.1: break lines at spaces to fit the box width `w`.
+        wrap: bool,
     },
+    /// v0.2. `asset` is an asset name (`Value::Str`). `w`/`h` default to the
+    /// asset's frame size. `frame` defaults to animating at the asset's `fps`
+    /// on the presentation clock.
+    Image {
+        asset: Prop,
+        w: Option<Prop>,
+        h: Option<Prop>,
+        frame: Option<Prop>,
+        flip_x: Option<Prop>,
+        flip_y: Option<Prop>,
+    },
+    /// v0.2. Ends relative to the node's origin. Uses `stroke`/`stroke_width`.
+    Line { x1: Prop, y1: Prop, x2: Prop, y2: Prop },
+    /// v0.2. `points`: `list<vec2|ivec2>` relative to the node's origin.
+    Poly { points: Prop, closed: bool },
 }
 
-/// `on_tap` / `on_drag`: which input to send and how to build its payload.
+/// `on_tap` / `on_drag` / `on_press` / `on_release`: which input to send and how to build its payload.
 #[derive(Clone, Debug)]
 pub struct InputBinding {
     pub input: InputId,
@@ -254,14 +297,53 @@ pub struct AnimateOn {
 #[derive(Clone, Debug)]
 pub struct Feedback {
     pub on: EventRef,
+    /// v0.2.1: pure guard with `event` and state in scope; the actions run
+    /// only when it is true.
+    pub when: Option<Expr>,
     pub actions: Vec<FeedbackAction>,
 }
 
 #[derive(Clone, Debug)]
 pub enum FeedbackAction {
-    /// `wave`: sine | square | triangle | sawtooth. `note`: `C5`, `F#4`, `Bb3`
-    /// or a number in Hz.
-    Sound { wave: Prop, note: Prop, ms: Prop },
+    Sound(SoundAction),
     Toast { text: Prop, ms: Prop },
     Shake { px: Prop, ms: Prop },
+    /// v0.2. See SPEC-v0.2 §7.
+    Particles(ParticlesAction),
+    /// v0.2. `light | medium | heavy | success | warning | error` (`Value::Str`).
+    Haptic(Prop),
+}
+
+/// SPEC-v0.2 §6. `asset` set → sample; `notes` set → jingle; else a synth note.
+/// Defaults are filled in by mg-lang, so every non-`Option` prop is present.
+#[derive(Clone, Debug)]
+pub struct SoundAction {
+    /// Sample: a `sound` asset name.
+    pub asset: Option<Prop>,
+    /// `sine | square | triangle | sawtooth`.
+    pub wave: Prop,
+    /// `C5`, `F#4`, `Bb3` or a number in Hz.
+    pub note: Prop,
+    /// Jingle: a list of notes.
+    pub notes: Option<Prop>,
+    pub step_ms: Prop,
+    /// Glide target note.
+    pub slide: Option<Prop>,
+    pub ms: Prop,
+    pub volume: Prop,
+    pub rate: Prop,
+}
+
+#[derive(Clone, Debug)]
+pub struct ParticlesAction {
+    pub x: Prop,
+    pub y: Prop,
+    pub count: Prop,
+    pub color: Prop,
+    pub speed: Prop,
+    pub size: Prop,
+    pub ms: Prop,
+    pub gravity: Prop,
+    /// Degrees, centered on up.
+    pub spread: Prop,
 }

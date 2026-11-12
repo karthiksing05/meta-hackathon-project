@@ -1,0 +1,9 @@
+{
+  "note": "One flap, then the glider drops onto the ground.",
+  "seed": 1,
+  "expect": "lost",
+  "inputs": [
+    {"key":"Space","t":0.0},
+    {"t":1936.0}
+  ]
+}

@@ -40,5 +40,7 @@ pub use ir::Program;
 pub use types::Type;
 pub use value::Value;
 
-/// Format tag every game file must carry.
-pub const FORMAT: &str = "microgame/0.1";
+/// Latest format tag. Game files may carry any tag in `FORMATS`.
+pub const FORMAT: &str = "microgame/0.2";
+/// Every accepted format tag, oldest first. v0.2 is a superset of v0.1.
+pub const FORMATS: &[&str] = &["microgame/0.1", "microgame/0.2"];

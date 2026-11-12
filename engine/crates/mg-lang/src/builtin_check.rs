@@ -132,6 +132,15 @@ impl Checker {
         }
     }
 
+    /// One string argument (enums count as strings).
+    fn str_arg(&mut self, b: Builtin, i: usize, a: &ast::Expr) -> IR {
+        let (ir, t) = self.check(a, None);
+        if !is_str(&t) && !t.is_unknown() {
+            self.arg_err(b, i, "a string", &t, a.span);
+        }
+        ir
+    }
+
     fn mk(b: Builtin, args: Vec<IR>) -> IR {
         IR::Builtin(b, args.into_boxed_slice())
     }
@@ -168,9 +177,10 @@ impl Checker {
             B::Abs | B::Floor | B::Ceil | B::Round | B::Sqrt | B::Log2 | B::Sin | B::Cos | B::Hash | B::Len
             | B::First | B::Last | B::Reverse | B::Sum | B::SetOf | B::MapOf | B::Keys | B::Values | B::Width
             | B::Height | B::Cells | B::Neighbors4 | B::Neighbors8 | B::Length | B::Normalize | B::Chars
-            | B::Upper | B::Lower | B::Str | B::InDictionary | B::IsNone | B::Pick | B::Shuffle => (1, 1),
+            | B::Upper | B::Lower | B::Str | B::InDictionary | B::IsNone | B::Pick | B::Shuffle | B::Trim
+            | B::ParseInt | B::Sign | B::Angle | B::FromAngle | B::MinOf | B::MaxOf | B::Chance => (1, 1),
             B::Clamp | B::Lerp | B::GetOr | B::Slice | B::SetAt | B::InsertAt | B::Fold | B::Put | B::Grid
-            | B::WriteLine | B::InBounds => (3, 3),
+            | B::WriteLine | B::InBounds | B::Substr | B::Replace => (3, 3),
             B::OverlapsCircle | B::OverlapsRect => (4, 4),
             _ => (2, 2),
         };
@@ -179,6 +189,77 @@ impl Checker {
         }
         let a = args;
         match b {
+            // ── v0.2: text ──
+            B::Trim => {
+                let i0 = self.str_arg(b, 0, &a[0]);
+                (Self::mk(b, vec![i0]), Str)
+            }
+            B::ParseInt => {
+                let i0 = self.str_arg(b, 0, &a[0]);
+                (Self::mk(b, vec![i0]), Type::option(Int))
+            }
+            B::Split | B::StartsWith | B::EndsWith | B::Replace => {
+                let irs: Vec<IR> = a.iter().enumerate().map(|(k, x)| self.str_arg(b, k, x)).collect();
+                let rt = match b {
+                    B::Split => Type::list(Str),
+                    B::Replace => Str,
+                    _ => Bool,
+                };
+                (Self::mk(b, irs), rt)
+            }
+            B::Substr => {
+                let i0 = self.str_arg(b, 0, &a[0]);
+                let (i1, _) = self.check(&a[1], Some(&Int));
+                let (i2, _) = self.check(&a[2], Some(&Int));
+                (Self::mk(b, vec![i0, i1, i2]), Str)
+            }
+
+            // ── v0.2: math and space ──
+            B::Sign => {
+                let (i, t) = self.check(&a[0], exp.filter(|t| t.is_numeric()));
+                if !matches!(t, Int | Float | Unknown) {
+                    self.arg_err(b, 0, "a number", &t, a[0].span);
+                }
+                (Self::mk(b, vec![i]), t)
+            }
+            B::Atan2 | B::Pow | B::Fmod => {
+                let i0 = self.float_arg(b, 0, &a[0]);
+                let i1 = self.float_arg(b, 1, &a[1]);
+                (Self::mk(b, vec![i0, i1]), Float)
+            }
+            B::FromAngle => {
+                let i0 = self.float_arg(b, 0, &a[0]);
+                (Self::mk(b, vec![i0]), Vec2)
+            }
+            B::Chance => {
+                let i0 = self.float_arg(b, 0, &a[0]);
+                (Self::mk(b, vec![i0]), Bool)
+            }
+            B::Angle => {
+                let (i0, t0) = self.check(&a[0], None);
+                self.want_vec(b, 0, &t0, a[0].span);
+                (Self::mk(b, vec![i0]), Float)
+            }
+            B::Rotate => {
+                let (i0, t0) = self.check(&a[0], None);
+                self.want_vec(b, 0, &t0, a[0].span);
+                let i1 = self.float_arg(b, 1, &a[1]);
+                (Self::mk(b, vec![i0, i1]), Vec2)
+            }
+            B::MinOf | B::MaxOf => {
+                let le = exp_inner.filter(|t| t.is_numeric()).map(|t| Type::list(t.clone()));
+                let (i0, t0) = self.check(&a[0], le.as_ref());
+                let el = self.list_elem(b, 0, &t0, a[0].span);
+                let rt = match el {
+                    Int | Float | Unknown => el,
+                    t => {
+                        self.arg_err(b, 0, "a list of numbers", &Type::list(t), a[0].span);
+                        Unknown
+                    }
+                };
+                (Self::mk(b, vec![i0]), rt)
+            }
+
             // ── Math ──
             B::Abs => {
                 let (i, t) = self.check(&a[0], exp);
@@ -325,7 +406,18 @@ impl Checker {
             }
             B::IndexOf => {
                 let (i0, t0) = self.check(&a[0], None);
-                let el = self.list_elem(b, 0, &t0, a[0].span);
+                if is_str(&t0) {
+                    let i1 = self.str_arg(b, 1, &a[1]);
+                    return (Self::mk(b, vec![i0, i1]), Int);
+                }
+                let el = match &t0 {
+                    List(t) => (**t).clone(),
+                    Unknown => Unknown,
+                    t => {
+                        self.arg_err(b, 0, "a list or string", t, a[0].span);
+                        Unknown
+                    }
+                };
                 let (i1, _) = self.check(&a[1], Some(&el));
                 (Self::mk(b, vec![i0, i1]), Int)
             }

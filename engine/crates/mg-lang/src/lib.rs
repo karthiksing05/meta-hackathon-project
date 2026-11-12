@@ -17,19 +17,24 @@
 //! * `program`: the JSON walk over every section, rules, objectives, and
 //!   the whole-program static checks.
 //! * `effects`: rule effects (A10).
-//! * `present`: presentation (A12) → `mg_core::scene`.
+//! * `present`: presentation (A12) → `mg_core::scene`, including the v0.2
+//!   nodes, camera, music, text field and feedback actions.
+//! * `assets`: v0.2 assets and asset references.
+//! * `physics`: the v0.2 physics section.
 
 use std::borrow::Cow;
 
 use mg_core::{Diagnostic, Program};
 use serde_json::Value as J;
 
+mod assets;
 mod builtin_check;
 mod check;
 mod dupjson;
 mod effects;
 mod lexer;
 pub mod parser;
+mod physics;
 mod present;
 mod program;
 mod typarse;
@@ -105,3 +110,5 @@ pub(crate) fn is_ident(s: &str) -> bool {
 
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod tests_v02;

@@ -1,7 +1,7 @@
 // shell.js: the browser shell. It has no game logic (spec B4): it forwards raw
 // input to the engine, steps it once per animation frame, and draws whatever
 // the frame says. It also owns the default start and end screens, sound,
-// toasts and shake.
+// music, haptics, toasts, shake, asset loading and the v0.2 text field.
 
 import { Microgame, MicrogameLoadError, MicrogameCrash, rgbaToCss } from './microgame.js';
 
@@ -14,6 +14,7 @@ const startEl = $('#start');
 const endEl = $('#end');
 const panel = $('#panel');
 const badge = $('#badge');
+const textField = $('#textfield');
 
 const SWIPE_MIN_PX = 24;
 const MAX_DT_MS = 100;
@@ -58,7 +59,7 @@ async function main() {
   const wanted = `fixture:${params.get('game')}.json`;
   if (games.has(wanted)) select(wanted);
   else if (picker.options.length) select(picker.options[0].value);
-  if (cur && params.get('play') === '1') play();
+  if (cur && params.get('play') === '1') cur.assets.ready.then(() => play());
   requestAnimationFrame(loop);
 }
 
@@ -85,7 +86,10 @@ function addGame(key, text, label, selectIt = true) {
   const old = games.get(key);
   if (old) old.game.dispose();
   else picker.add(new Option(game.meta.title || label, key));
-  games.set(key, { game, text, label: game.meta.title || label });
+  if (old) old.assets.dispose();
+  const entry = { game, text, label: game.meta.title || label, assets: new AssetStore(game.assets()) };
+  games.set(key, entry);
+  entry.assets.ready.then(() => { if (cur === entry && mode === 'start') showStartReady(); });
   if (selectIt) select(key);
   return true;
 }
@@ -98,21 +102,41 @@ function select(key) {
   runtimeDiags = [];
   updateBadge();
   hideOverlays();
+  stopMusic();
   $('[data-title]', startEl).textContent = entry.game.meta.title;
   $('[data-instructions]', startEl).textContent = entry.game.meta.instructions;
   startEl.classList.add('show');
   mode = 'start';
+  showStartReady();
+  setupTextField();
   resize();
 }
 
+/** The Play button waits for the game's assets (missing ones draw a placeholder). */
+function showStartReady() {
+  const btn = $('[data-play]', startEl);
+  const a = cur && cur.assets;
+  const loading = a && !a.done;
+  btn.disabled = !!loading;
+  btn.textContent = loading ? `Loading assets… ${a.loaded}/${a.list.length}` : 'Play';
+  if (a && a.done && a.failed.length) console.warn(`${a.failed.length} asset(s) failed to load`, a.failed);
+}
+
 function play() {
+  if (cur && !cur.assets.done) return;
   ensureAudio();
   hideOverlays();
   mode = 'playing';
   lastT = performance.now();
+  if (cur?.game.meta.text_input) {
+    textField.value = '';
+    textField.disabled = false;
+    textField.focus({ preventScroll: true });
+  }
 }
 
 function restart() {
+  stopMusic();
   if (!cur || cur.game.crashed) {
     if (cur) addGame(picker.value, cur.text, cur.label);
     return;
@@ -152,7 +176,12 @@ function loop(t) {
     }
     const f = game.frame();
     draw(f);
-    for (const s of f.audio) playSound(s);
+    const live = mode === 'playing' || mode === 'ending';
+    if (live) {
+      for (const s of f.audio) playSound(s);
+      for (const h of f.haptics) haptic(h);
+    }
+    syncMusic(live ? f.music : null);
     for (const toast of f.toasts) showToast(toast.text, toast.ms);
     if (mode === 'ending' && t >= endAt) showEnd(game.status());
     if (++frameCount % 30 === 0) collectRuntimeDiagnostics(game);
@@ -167,6 +196,7 @@ function loop(t) {
 
 function showEnd(st) {
   mode = 'ended';
+  textField.disabled = true;
   $('[data-result]', endEl).textContent = st.phase === 'won' ? 'You won!' : 'Game over';
   $('[data-score]', endEl).textContent = st.score == null ? '' : formatScore(st.score);
   $('[data-detail]', endEl).textContent = `${(st.time_ms / 1000).toFixed(1)} s`;
@@ -209,6 +239,7 @@ function resize() {
   canvas.width = Math.round(w * s * dpr);
   canvas.height = Math.round(h * s * dpr);
   fit = { s, dpr };
+  placeTextField();
 }
 
 function draw(f) {
@@ -230,9 +261,14 @@ function draw(f) {
     const alpha = Math.min(1, op.opacity);
     if (!(alpha > 0) || !(op.scale !== 0)) continue;
     ctx.globalAlpha = alpha;
-    if (op.op === 'rect') drawRect(op);
-    else if (op.op === 'circle') drawCircle(op);
-    else drawText(op);
+    switch (op.op) {
+      case 'rect': drawRect(op); break;
+      case 'circle': drawCircle(op); break;
+      case 'text': drawText(op); break;
+      case 'image': drawImage(op); break;
+      case 'line': drawLine(op); break;
+      case 'poly': drawPoly(op); break;
+    }
   }
   ctx.globalAlpha = 1;
 }
@@ -286,6 +322,66 @@ function drawCircle(op) {
   paint(op);
 }
 
+function drawImage(op) {
+  const cx = op.x + op.w / 2, cy = op.y + op.h / 2;
+  const flip = op.flip_x || op.flip_y;
+  const saved = flip || op.rotation !== 0 || op.scale !== 1;
+  if (saved) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    if (op.rotation) ctx.rotate((op.rotation * Math.PI) / 180);
+    if (op.scale !== 1 || flip) ctx.scale(op.scale * (op.flip_x ? -1 : 1), op.scale * (op.flip_y ? -1 : 1));
+    ctx.translate(-cx, -cy);
+  }
+  const a = cur.assets.images[op.asset];
+  if (a && a.ok) {
+    const cols = a.cols, rows = Math.ceil(a.frames / cols);
+    const sw = a.img.naturalWidth / cols, sh = a.img.naturalHeight / rows;
+    const f = op.frame % a.frames;
+    ctx.drawImage(a.img, (f % cols) * sw, Math.floor(f / cols) * sh, sw, sh, op.x, op.y, op.w, op.h);
+  } else {
+    // Missing or still loading: a placeholder box with a cross.
+    ctx.fillStyle = 'rgba(128,128,128,0.25)';
+    ctx.fillRect(op.x, op.y, op.w, op.h);
+    ctx.strokeStyle = 'rgba(128,128,128,0.8)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.rect(op.x, op.y, op.w, op.h);
+    ctx.moveTo(op.x, op.y); ctx.lineTo(op.x + op.w, op.y + op.h);
+    ctx.moveTo(op.x + op.w, op.y); ctx.lineTo(op.x, op.y + op.h);
+    ctx.stroke();
+  }
+  if (saved) ctx.restore();
+}
+
+function drawLine(op) {
+  if (!(op.stroke & 0xff) || !(op.stroke_width > 0)) return;
+  ctx.beginPath();
+  ctx.moveTo(op.x1, op.y1);
+  ctx.lineTo(op.x2, op.y2);
+  ctx.strokeStyle = rgbaToCss(op.stroke);
+  ctx.lineWidth = op.stroke_width;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.lineCap = 'butt';
+}
+
+function drawPoly(op) {
+  const p = op.points; // flat [x0, y0, x1, y1, ...] (binary) or [[x, y], ...] (JSON)
+  const flat = typeof p[0] === 'number' || p.length === 0;
+  const n = flat ? p.length / 2 : p.length;
+  if (n < 2) return;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const x = flat ? p[2 * i] : p[i][0], y = flat ? p[2 * i + 1] : p[i][1];
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  if (op.closed) ctx.closePath();
+  ctx.lineJoin = 'round';
+  paint(op);
+  ctx.lineJoin = 'miter';
+}
+
 const fontCache = new Map();
 function fontFor(weight, size, family) {
   const key = `${weight}|${size}|${family}`;
@@ -300,22 +396,31 @@ function fontFor(weight, size, family) {
 }
 
 function drawText(op) {
-  if (!op.text || !(op.color & 0xff)) return;
+  const fill = op.color & 0xff ? op.color : 0;
+  const stroke = op.stroke & 0xff && op.stroke_width > 0 ? op.stroke : 0;
+  if (!op.text || (!fill && !stroke)) return;
   const saved = transformAround(op, op.x + op.w / 2, op.y + op.h / 2);
   ctx.font = fontFor(op.weight, op.size, op.font);
-  ctx.fillStyle = rgbaToCss(op.color);
   ctx.textAlign = op.align;
   ctx.textBaseline = 'middle';
   const x = op.align === 'left' ? op.x : op.align === 'right' ? op.x + op.w : op.x + op.w / 2;
+  // Lines are already wrapped by the engine; each sits line_height apart.
   const lines = op.text.includes('\n') ? op.text.split('\n') : null;
-  const lh = op.size * 1.2;
+  const lh = op.line_height || op.size * 1.25;
   const blockH = lines ? lh * lines.length : lh;
   let y = op.valign === 'top' ? op.y : op.valign === 'bottom' ? op.y + op.h - blockH : op.y + (op.h - blockH) / 2;
   y += lh / 2;
-  if (lines) {
-    for (const line of lines) { ctx.fillText(line, x, y); y += lh; }
-  } else {
-    ctx.fillText(op.text, x, y);
+  if (stroke) {
+    // The outline goes under the fill, so only its outer half shows.
+    ctx.strokeStyle = rgbaToCss(stroke);
+    ctx.lineWidth = op.stroke_width;
+    ctx.lineJoin = 'round';
+  }
+  if (fill) ctx.fillStyle = rgbaToCss(fill);
+  for (const line of lines || [op.text]) {
+    if (stroke) ctx.strokeText(line, x, y);
+    if (fill) ctx.fillText(line, x, y);
+    y += lh;
   }
   if (saved) ctx.restore();
 }
@@ -335,7 +440,11 @@ function send(fn) {
   try { fn(cur.game); } catch (e) { console.error(e); }
 }
 
+// Keep keyboard focus in the text field when the canvas is clicked.
+canvas.addEventListener('mousedown', (e) => { if (document.activeElement === textField) e.preventDefault(); });
+
 canvas.addEventListener('pointerdown', (e) => {
+  ensureAudio();
   if (mode !== 'playing') return;
   e.preventDefault();
   canvas.setPointerCapture(e.pointerId);
@@ -363,14 +472,69 @@ function pointerEnd(e) {
 canvas.addEventListener('pointerup', pointerEnd);
 canvas.addEventListener('pointercancel', pointerEnd);
 
-window.addEventListener('keydown', (e) => {
-  if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement || e.metaKey || e.ctrlKey) return;
-  if (mode === 'start' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); play(); return; }
-  if (mode === 'ended' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); restart(); return; }
+// Keys go to the engine as full events (code, printable char, down/up).
+// While the text field has focus, only Enter reaches the game as a key; the
+// field itself submits on Enter.
+const keysDown = new Set();
+function onKey(e, down) {
+  const t = e.target;
+  if (t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement || e.metaKey || e.ctrlKey) return;
+  const inField = t === textField;
+  if (down) ensureAudio();
+  if (down && !inField && (mode === 'start' || mode === 'ended') && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    if (mode === 'start') play(); else restart();
+    return;
+  }
   if (mode !== 'playing') return;
+  if (inField && e.key !== 'Enter') return;
+  if (!down && !keysDown.delete(e.code)) return; // an up without a down we saw (e.g. focus moved)
+  if (down) keysDown.add(e.code);
   let matched = false;
-  send((g) => { matched = g.key(e.code, e.key); });
-  if (matched || e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault();
+  send((g) => { matched = g.keyEvent(e.code, e.key, down); });
+  if (!inField && (matched || e.key.startsWith('Arrow') || e.key === ' ')) e.preventDefault();
+}
+window.addEventListener('keydown', (e) => onKey(e, true));
+window.addEventListener('keyup', (e) => onKey(e, false));
+window.addEventListener('blur', () => {
+  // Release held keys so games don't see a key stuck down.
+  for (const code of keysDown) send((g) => g.keyEvent(code, '', false));
+  keysDown.clear();
+});
+
+// ------------------------------------------------------- text field ----
+
+function setupTextField() {
+  const ti = cur?.game.meta.text_input;
+  textField.hidden = !ti;
+  textField.disabled = true;
+  textField.value = '';
+  if (!ti) return;
+  textField.placeholder = ti.placeholder || 'Type here';
+  textField.maxLength = ti.max_len || 32;
+}
+
+function placeTextField() {
+  const ti = cur?.game.meta.text_input;
+  if (!ti) return;
+  const { w: cw, h: ch } = cur.game.meta.canvas;
+  const r = ti.x == null ? { x: 12, y: ch - 60, w: cw - 24, h: 48 } : { x: ti.x, y: ti.y, w: ti.w, h: ti.h };
+  const size = ti.size ?? Math.max(12, Math.min(22, r.h * 0.45));
+  const s = fit.s;
+  Object.assign(textField.style, {
+    left: `${r.x * s}px`, top: `${r.y * s}px`, width: `${r.w * s}px`, height: `${r.h * s}px`,
+    fontSize: `${size * s}px`,
+  });
+}
+
+textField.addEventListener('input', () => send((g) => g.text('change', textField.value)));
+textField.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' || e.isComposing) return;
+  e.preventDefault();
+  const value = textField.value;
+  send((g) => g.text('submit', value));
+  textField.value = '';
+  send((g) => g.text('change', ''));
 });
 
 window.addEventListener('resize', resize);
@@ -379,22 +543,45 @@ matchMedia?.('(resolution: 1dppx)')?.addEventListener?.('change', resize);
 // ------------------------------------------------- sound, toasts, UI ----
 
 let audioCtx = null;
-function ensureAudio() {
+function getAudioCtx() {
   const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return;
-  if (!audioCtx) audioCtx = new AC();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx && AC) audioCtx = new AC();
+  return audioCtx;
+}
+/** Creates or resumes the AudioContext. Call from user gestures (it unlocks audio). */
+function ensureAudio() {
+  const ac = getAudioCtx();
+  if (ac && ac.state === 'suspended') ac.resume();
 }
 
-function playSound({ wave, freq, ms }) {
-  if (!audioCtx || audioCtx.state !== 'running' || !(freq > 0)) return;
-  const t0 = audioCtx.currentTime;
-  const dur = Math.max(0.02, Math.min(5, ms / 1000));
+const MAX_SOUND_S = 5;
+
+/** v0.2 audio entries: {kind: 'synth', wave, freqs, step_ms, slide_hz, ms, volume} or {kind: 'sample', asset, rate, volume}. */
+function playSound(s) {
+  if (!audioCtx || audioCtx.state !== 'running') return;
+  const volume = Math.max(0, Math.min(1, s.volume ?? 0.6));
+  if (!(volume > 0)) return;
+  if (s.kind === 'sample') return playSample(s, volume);
+  const freqs = s.freqs || [];
+  if (!freqs.length) return;
+  const jingle = freqs.length > 1;
+  const noteS = Math.max(0.02, Math.min(MAX_SOUND_S, (jingle ? s.step_ms : s.ms) / 1000));
+  const peak = volume * (s.wave === 'square' || s.wave === 'sawtooth' ? 0.13 : 0.3);
+  let t0 = audioCtx.currentTime;
+  for (let i = 0; i < freqs.length && i < 64; i++) {
+    const last = i === freqs.length - 1;
+    note(s.wave, freqs[i], last ? s.slide_hz : null, t0, noteS, peak);
+    t0 += noteS;
+  }
+}
+
+function note(wave, freq, slideHz, t0, dur, peak) {
+  if (!(freq > 0)) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  osc.type = wave;
-  osc.frequency.value = Math.min(20000, freq);
-  const peak = wave === 'square' || wave === 'sawtooth' ? 0.08 : 0.18;
+  osc.type = wave || 'sine';
+  osc.frequency.setValueAtTime(Math.min(20000, freq), t0);
+  if (slideHz > 0) osc.frequency.exponentialRampToValueAtTime(Math.min(20000, slideHz), t0 + dur);
   gain.gain.setValueAtTime(0.0001, t0);
   gain.gain.exponentialRampToValueAtTime(peak, t0 + 0.005);
   gain.gain.setValueAtTime(peak, t0 + Math.min(0.03, dur * 0.3));
@@ -402,6 +589,122 @@ function playSound({ wave, freq, ms }) {
   osc.connect(gain).connect(audioCtx.destination);
   osc.start(t0);
   osc.stop(t0 + dur + 0.02);
+}
+
+function playSample(s, volume) {
+  const buf = cur?.assets.buffers[s.asset];
+  if (!buf) return;
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.playbackRate.value = Math.max(0.1, Math.min(4, s.rate || 1));
+  const gain = audioCtx.createGain();
+  gain.gain.value = volume;
+  src.connect(gain).connect(audioCtx.destination);
+  src.start();
+}
+
+// Music: one looping BufferSource, started and stopped from frame.music.
+let music = null; // { asset, buffer, src, gain }
+function syncMusic(m) {
+  const buf = m && m.playing ? cur?.assets.buffers[m.asset] : null;
+  if (!buf || !audioCtx || audioCtx.state !== 'running') { stopMusic(); return; }
+  if (music && music.buffer !== buf) stopMusic();
+  if (!music) {
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const gain = audioCtx.createGain();
+    src.connect(gain).connect(audioCtx.destination);
+    src.start();
+    music = { buffer: buf, src, gain };
+  }
+  music.gain.gain.value = Math.max(0, Math.min(1, m.volume));
+}
+function stopMusic() {
+  if (!music) return;
+  try { music.src.stop(); } catch { /* already stopped */ }
+  music.src.disconnect();
+  music = null;
+}
+
+const HAPTIC_PATTERNS = {
+  light: 10, medium: 20, heavy: 35, success: [15, 60, 15], warning: [25, 50, 25], error: [40, 40, 40, 40, 40],
+};
+function haptic(name) {
+  if (typeof navigator.vibrate !== 'function') return;
+  try { navigator.vibrate(HAPTIC_PATTERNS[name] ?? 10); } catch { /* not allowed */ }
+}
+
+// ------------------------------------------------------------- assets ----
+
+/**
+ * Loads a game's assets (from `game.assets()`): inline SVG becomes a Blob
+ * URL image, URLs and data URIs load as images, and sounds are decoded into
+ * AudioBuffers. Failures are logged and draw a placeholder; they never stop
+ * the game.
+ */
+class AssetStore {
+  constructor(list) {
+    this.list = list;
+    this.images = [];
+    this.buffers = [];
+    this.urls = [];
+    this.failed = [];
+    this.loaded = 0;
+    this.done = list.length === 0;
+    const TIMEOUT_MS = 15000;
+    const jobs = list.map((a) => this.load(a)
+      .catch((e) => { this.failed.push({ name: a.name, error: String(e?.message || e) }); })
+      .finally(() => { this.loaded++; if (this === cur?.assets && mode === 'start') showStartReady(); }));
+    const all = Promise.all(jobs);
+    const timeout = new Promise((r) => setTimeout(r, TIMEOUT_MS));
+    this.ready = Promise.race([all, timeout]).then(() => { this.done = true; });
+  }
+
+  async load(a) {
+    if (a.kind === 'image') {
+      let src = a.src;
+      const frames = a.frames || 1, cols = a.cols || frames;
+      if (a.svg) {
+        let svg = a.src;
+        if (!/xmlns=/.test(svg.slice(0, 400))) svg = svg.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+        // Give the sheet an intrinsic size so every browser can rasterize it.
+        if (!/^<svg[^>]*\swidth=/.test(svg)) {
+          const rows = Math.ceil(frames / cols);
+          svg = svg.replace(/^<svg/, `<svg width="${a.w * cols}" height="${a.h * rows}"`);
+        }
+        src = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+        this.urls.push(src);
+      }
+      const img = new Image();
+      if (!src.startsWith('data:') && !src.startsWith('blob:')) img.crossOrigin = 'anonymous';
+      img.decoding = 'async';
+      const entry = { img, ok: false, frames, cols };
+      this.images[a.id] = entry;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error(`image '${a.name}' failed to load`));
+        img.src = src;
+      });
+      if (!img.naturalWidth || !img.naturalHeight) throw new Error(`image '${a.name}' has no size`);
+      entry.ok = true;
+    } else if (a.kind === 'sound') {
+      const ac = getAudioCtx();
+      if (!ac) throw new Error('no WebAudio');
+      const res = await fetch(a.src);
+      if (!res.ok) throw new Error(`sound '${a.name}': HTTP ${res.status}`);
+      const bytes = await res.arrayBuffer();
+      this.buffers[a.id] = await new Promise((resolve, reject) => {
+        const p = ac.decodeAudioData(bytes, resolve, reject);
+        if (p && p.then) p.then(resolve, reject);
+      });
+    }
+  }
+
+  dispose() {
+    for (const u of this.urls) URL.revokeObjectURL(u);
+    this.urls = [];
+  }
 }
 
 function showToast(text, ms) {
@@ -529,5 +832,8 @@ window.addEventListener('drop', async (e) => {
     if (text) loadCustom(text, 'dropped game');
   }
 });
+
+// For tests and debugging: the current game (e.g. `microgameShell.game().log()`).
+window.microgameShell = { game: () => cur?.game, mode: () => mode, assets: () => cur?.assets };
 
 main();

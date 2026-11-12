@@ -19,6 +19,9 @@ use crate::parser;
 
 pub(crate) type Payload = Rc<[(Rc<str>, Type)]>;
 
+/// `presentation.text_field`: optional rect and font size.
+pub(crate) type TextField = (Option<(f64, f64, f64, f64)>, Option<f64>);
+
 pub(crate) struct Local {
     pub name: Rc<str>,
     pub slot: Slot,
@@ -110,6 +113,18 @@ pub(crate) struct Checker {
     pub timer_names: Vec<Rc<str>>,
     pub timer_has_after: Vec<bool>,
     pub cancel_sites: Vec<(u16, String)>,
+
+    /// v0.2 assets: name and kind (`None` when the asset itself is broken,
+    /// so references to it don't cascade).
+    pub assets: Vec<(Rc<str>, Option<crate::assets::AssetUse>)>,
+    pub asset_idx: HashMap<Rc<str>, u16>,
+    /// v0.2: inside a `fixed` subtree (inherited by children).
+    pub pres_fixed: bool,
+    /// v0.2: from the first text source; `rect`/`size` are filled from
+    /// `presentation.text_field` at the end.
+    pub text_input: Option<mg_core::ir::TextInputSpec>,
+    /// v0.2: `presentation.text_field` placement and its pointer.
+    pub text_field: Option<TextField>,
 
     pub root: Option<Root>,
 }
@@ -577,6 +592,7 @@ impl Checker {
             "left" => return (IR::Const(Value::IVec2(-1, 0)), Type::IVec2),
             "right" => return (IR::Const(Value::IVec2(1, 0)), Type::IVec2),
             "now" => return (IR::Now, Type::Int),
+            "pi" => return (IR::Const(Value::Float(std::f64::consts::PI)), Type::Float),
             "status" if self.r().presentation => {
                 let members: Rc<[Rc<str>]> = Rc::from(vec![Rc::from("playing"), Rc::from("won"), Rc::from("lost")]);
                 return (IR::Status, Type::Enum(members));

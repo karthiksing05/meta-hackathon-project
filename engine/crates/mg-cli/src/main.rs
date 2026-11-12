@@ -13,24 +13,37 @@ use mg_core::{Diagnostic, Program};
 use serde_json::json;
 
 const USAGE: &str = "\
-microgame: check and run microgame/0.1 game files
+microgame: check and run microgame/0.1 and 0.2 game files
 
 usage:
   microgame validate <game.json> [--json]
   microgame simulate <game.json> [--seed N] [--random-inputs N] [--seeds K] [--dt MS] [--no-restart] [--json]
   microgame replay   <game.json> --script <inputs.json> [--seed N] [--dt MS] [--tail MS] [--state] [--json]
   microgame bench    <game.json> [--seed N] [--steps N] [--dt MS] [--json]
+  microgame verify   <game.json> --log <log.json> [--json]
+  microgame catalog  [--json]
 
 validate   Prints every diagnostic. Exit 0 if there are no errors, 1 if there are.
 simulate   Plays K seeds (default 1) starting at N (default 1) with N random inputs
-           (default 1000): taps on tappable nodes, keys, swipes. Steps 1-6 times
+           (default 1000): taps on tappable nodes, key down/up pairs (random
+           printable keys for \"any\"), swipes, pointer down/move/up anywhere,
+           and typed text (changes, then a submit). Steps 1-6 times
            (dt 16 ms) between inputs and restarts a game when it ends. Reports
            runtime errors, wins and losses, and the final state hash.
 replay     Plays a script of timed inputs and prints the final status and hash.
            Entries: {\"t\": ms, \"key\": \"ArrowUp\"}, {\"t\": ms, \"swipe\": \"left\"},
-           {\"t\": ms, \"tap\": [x, y]}, {\"t\": ms, \"input\": \"name\", \"with\": {...}},
+           {\"t\": ms, \"key\": \"Space\", \"up\": true}, {\"t\": ms, \"char\": \"a\"},
+           {\"t\": ms, \"tap\": [x, y]}, {\"t\": ms, \"pointer\": \"down\", \"at\": [x, y]},
+           {\"t\": ms, \"text\": \"submit\", \"value\": \"hello\"},
+           {\"t\": ms, \"input\": \"name\", \"with\": {...}},
            {\"t\": ms} (wait). --tail (default 16) steps on after the last entry.
 bench      Steps per second, and microseconds per step, frame build and encode.
+verify     Replays an input log recorded in the browser (mg_log, microgame-log/1)
+           and checks the game file hash and the claimed state hash, phase,
+           score and time. Exit 0 only if everything matches.
+catalog    Every builtin, constant, effect, node kind and prop, input source,
+           feedback action, physics option, limit and diagnostic code, as JSON
+           with --json (for prompt generators).
 
 Seeds default to meta.seed when the file has one.";
 
@@ -52,6 +65,8 @@ fn main() -> ExitCode {
         "simulate" | "sim" => cmd_simulate(rest),
         "replay" => cmd_replay(rest),
         "bench" => cmd_bench(rest),
+        "verify" => cmd_verify(rest),
+        "catalog" => cmd_catalog(rest),
         "help" | "--help" | "-h" => {
             println!("{USAGE}");
             Ok(0)
@@ -300,6 +315,44 @@ fn cmd_bench(rest: &[String]) -> Result<u8, Fail> {
         println!("  frame build    {:>9.2} µs   ({:.0} ops/frame)", b.frame_us, b.avg_ops);
         println!("  JSON encode    {:>9.2} µs   ({:.0} bytes/frame)", b.json_us, b.avg_json_bytes);
         println!("  binary encode  {:>9.2} µs   ({:.0} bytes/frame)", b.bin_us, b.avg_bin_bytes);
+    }
+    Ok(0)
+}
+
+fn cmd_verify(rest: &[String]) -> Result<u8, Fail> {
+    let a = parse(rest, &["log"], &["json"])?;
+    let json_out = a.has("json");
+    let log_path: String = get(&a, "log")?.ok_or_else(|| Fail::Usage("verify needs --log <log.json>".into()))?;
+    let (source, program) = load(&a.pos[0], json_out)?;
+    let log_text = read(&log_path)?;
+    let v = mg_cli::verify::verify(&source, &program, &log_text).map_err(|e| Fail::Io(format!("{log_path}: {e}")))?;
+    if json_out {
+        println!("{}", serde_json::to_string_pretty(&v.to_json()).unwrap_or_default());
+    } else {
+        let r = &v.recomputed;
+        println!("phase: {}", r["phase"].as_str().unwrap_or("?"));
+        println!("score: {}", if r["score"].is_null() { "none".to_string() } else { r["score"].to_string() });
+        println!("time_ms: {}", r["time_ms"]);
+        println!("hash: {}", r["state_hash"].as_str().unwrap_or("?"));
+        println!("steps: {}", v.steps);
+        for p in &v.problems {
+            println!("mismatch: {p}");
+        }
+        println!("{}", if v.ok { "verified: the log reproduces its result" } else { "NOT verified" });
+    }
+    Ok(if v.ok { 0 } else { 1 })
+}
+
+fn cmd_catalog(rest: &[String]) -> Result<u8, Fail> {
+    let a = args::parse(rest, &[], &["json"]).map_err(Fail::Usage)?;
+    if let Some(p) = a.pos.first() {
+        return Err(Fail::Usage(format!("unexpected argument '{p}'")));
+    }
+    let c = mg_cli::catalog::catalog();
+    if a.has("json") {
+        println!("{}", serde_json::to_string_pretty(&c).unwrap_or_default());
+    } else {
+        println!("{}", mg_cli::catalog::summary(&c));
     }
     Ok(0)
 }

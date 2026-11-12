@@ -6,18 +6,23 @@ use std::rc::Rc;
 use mg_core::diag::{Code, Diagnostic};
 use mg_core::ir::{
     self, Dispatch, EventDef, Expr as IR, Function, InputDef, InputSource, Meta, Objectives, Outcome, Rule,
-    SourceTrigger, StateVar, Trigger,
+    PointerPhase, SourceTrigger, StateVar, TextInputSpec, TextPhase, Trigger,
 };
+use mg_core::limits::MAX_TEXT_INPUT_LEN;
 use mg_core::types::Type;
 use mg_core::value::Value;
-use mg_core::FORMAT;
 use serde_json::{Map, Value as J};
 
 use crate::check::{dym, placeholder, Checker, EventCtx, FnInfo, Payload, Root, StateInfo};
 use crate::{is_ident, json_kind, ptr, src_of};
 
-const TOP_KEYS: &[&str] =
-    &["format", "meta", "types", "state", "functions", "events", "inputs", "rules", "objectives", "presentation"];
+const TOP_KEYS: &[&str] = &[
+    "format", "meta", "assets", "types", "state", "functions", "events", "inputs", "rules", "objectives", "physics",
+    "presentation",
+];
+/// Accepted `format` tags. v0.2 is additive, so both compile the same way.
+const FORMATS: &[&str] = &["microgame/0.1", "microgame/0.2"];
+const SOURCE_KINDS: &[&str] = &["key", "swipe", "pointer", "text"];
 const RESERVED: &[&str] = &["start", "tick", "win", "lose", "event"];
 
 type Obj = Map<String, J>;
@@ -493,40 +498,165 @@ impl Checker {
 
     fn input_source(&mut self, v: &J, at: &str, declared: &[(Rc<str>, Type)], input: &str) -> Option<InputSource> {
         let m = self.obj(v, at, "an input source")?;
-        self.check_keys(m, &["swipe", "key", "with"], at, "an input source");
-        let (trigger, local, lty) = if let Some(s) = m.get("swipe") {
-            let sat = ptr(at, "swipe");
-            let s = self.string(s, &sat, "swipe")?;
-            let dir = match s {
-                "any" => None,
-                "up" => Some((0, -1)),
-                "down" => Some((0, 1)),
-                "left" => Some((-1, 0)),
-                "right" => Some((1, 0)),
-                _ => {
-                    let hint = dym(s, ["any", "up", "down", "left", "right"]);
-                    self.err_at(Code::BadField, &sat, format!("swipe must be any, up, down, left or right, found '{s}'"), hint);
+        let kinds: Vec<&str> = SOURCE_KINDS.iter().copied().filter(|k| m.contains_key(*k)).collect();
+        let kind = match kinds.as_slice() {
+            [k] => *k,
+            [] => {
+                // Unknown source kind: point at the offending key.
+                let unknown = m.keys().find(|k| !k.starts_with('_') && !matches!(k.as_str(), "with" | "on" | "placeholder" | "max_len"));
+                match unknown {
+                    Some(k) => {
+                        let lower = k.to_ascii_lowercase();
+                        let hint = dym(&lower, SOURCE_KINDS.iter().copied())
+                            .or_else(|| match lower.as_str() {
+                                "keys" | "keyboard" | "keydown" | "keyup" => Some("did you mean 'key'?".into()),
+                                "tap" | "click" | "touch" | "mouse" | "drag" => Some(
+                                    "taps on objects are wired with on_tap in presentation; for a pointer anywhere use {\"pointer\": \"down\"}".into(),
+                                ),
+                                _ => None,
+                            })
+                            .or_else(|| Some("sources: key, swipe, pointer, text".into()));
+                        self.err_at(Code::BadField, &ptr(at, k), format!("unknown input source '{k}'"), hint);
+                    }
+                    None => self.err_at(
+                        Code::BadField,
+                        at,
+                        "an input source needs one of \"key\", \"swipe\", \"pointer\" or \"text\"",
+                        Some("like {\"key\": \"ArrowUp\", \"with\": {...}}".into()),
+                    ),
+                }
+                return None;
+            }
+            [first, second, ..] => {
+                self.err_at(
+                    Code::BadField,
+                    &ptr(at, second),
+                    format!("an input source has exactly one of key, swipe, pointer or text; found both '{first}' and '{second}'"),
+                    Some("put each one in its own entry of \"from\"".into()),
+                );
+                return None;
+            }
+        };
+        let allowed: &[&'static str] = match kind {
+            "key" => &["key", "on", "with"],
+            "text" => &["text", "placeholder", "max_len", "with"],
+            "swipe" => &["swipe", "with"],
+            _ => &["pointer", "with"],
+        };
+        self.check_keys(m, allowed, at, &format!("a {kind} source"));
+        let kat = ptr(at, kind);
+        let word = |ck: &mut Self, options: &[&str], what: &str| -> Option<String> {
+            let s = ck.string(&m[kind], &kat, kind)?;
+            if options.contains(&s) {
+                return Some(s.to_string());
+            }
+            let hint = dym(s, options.iter().copied());
+            ck.err_at(Code::BadField, &kat, format!("{what} must be {}, found '{s}'", options.join(", ")), hint);
+            None
+        };
+        let rec = |fields: &[(&str, Type)]| Type::record(fields.iter().map(|(n, t)| (Rc::from(*n), t.clone())).collect());
+        let (trigger, lty) = match kind {
+            "swipe" => {
+                let s = word(self, &["any", "up", "down", "left", "right"], "swipe")?;
+                let dir = match s.as_str() {
+                    "up" => Some((0, -1)),
+                    "down" => Some((0, 1)),
+                    "left" => Some((-1, 0)),
+                    "right" => Some((1, 0)),
+                    _ => None,
+                };
+                (SourceTrigger::Swipe(dir), rec(&[("dir", Type::IVec2)]))
+            }
+            "key" => {
+                let code = self.string(&m["key"], &kat, "key")?;
+                if code.is_empty() {
+                    self.err_at(Code::BadField, &kat, "key can't be empty", Some("use a key code like \"Space\" or \"ArrowUp\", or \"any\"".into()));
                     return None;
                 }
-            };
-            (SourceTrigger::Swipe(dir), "swipe", Type::record(vec![(Rc::from("dir"), Type::IVec2)]))
-        } else if let Some(kv) = m.get("key") {
-            let kat = ptr(at, "key");
-            let s = self.string(kv, &kat, "key")?;
-            (SourceTrigger::Key(Rc::from(s)), "key", Type::record(vec![(Rc::from("code"), Type::Str)]))
-        } else {
-            self.err_at(
-                Code::BadField,
-                at,
-                "an input source needs \"swipe\" or \"key\"",
-                Some("like {\"key\": \"ArrowUp\", \"with\": {...}}".into()),
-            );
-            return None;
+                let code = if code == "any" { None } else { Some(Rc::from(code)) };
+                let up = match m.get("on") {
+                    None => false,
+                    Some(J::String(s)) if s == "down" => false,
+                    Some(J::String(s)) if s == "up" => true,
+                    Some(other) => {
+                        let hint = other.as_str().and_then(|s| dym(s, ["down", "up"]));
+                        self.err_at(Code::BadField, &ptr(at, "on"), format!("'on' must be \"down\" or \"up\", found {other}"), hint);
+                        false
+                    }
+                };
+                (SourceTrigger::Key { code, up }, rec(&[("char", Type::Str), ("code", Type::Str)]))
+            }
+            "pointer" => {
+                let s = word(self, &["down", "up", "move"], "pointer")?;
+                let phase = match s.as_str() {
+                    "down" => PointerPhase::Down,
+                    "up" => PointerPhase::Up,
+                    _ => PointerPhase::Move,
+                };
+                (SourceTrigger::Pointer(phase), rec(&[("x", Type::Float), ("y", Type::Float)]))
+            }
+            _ => {
+                let s = word(self, &["submit", "change"], "text");
+                let placeholder = match m.get("placeholder") {
+                    None => None,
+                    Some(J::String(p)) => Some(Rc::from(p.as_str())),
+                    Some(other) => {
+                        self.err_at(Code::TypeMismatch, &ptr(at, "placeholder"), format!("placeholder must be a string, found {}", json_kind(other)), None);
+                        None
+                    }
+                };
+                let max_len = match m.get("max_len") {
+                    None => None,
+                    Some(J::Number(n)) if n.as_u64().is_some_and(|x| x >= 1) => {
+                        let x = n.as_u64().unwrap();
+                        if x as usize > MAX_TEXT_INPUT_LEN {
+                            self.err_at(
+                                Code::Limit,
+                                &ptr(at, "max_len"),
+                                format!("max_len is {x}; the limit is {MAX_TEXT_INPUT_LEN}"),
+                                None,
+                            );
+                        }
+                        Some(x.min(MAX_TEXT_INPUT_LEN as u64) as u32)
+                    }
+                    Some(other) => {
+                        self.err_at(Code::TypeMismatch, &ptr(at, "max_len"), format!("max_len must be a whole number >= 1, found {other}"), None);
+                        None
+                    }
+                };
+                match &self.text_input {
+                    None => {
+                        self.text_input = Some(TextInputSpec {
+                            placeholder: placeholder.unwrap_or_else(|| Rc::from("Type here")),
+                            max_len: max_len.unwrap_or(32),
+                            rect: None,
+                            size: None,
+                        });
+                    }
+                    Some(first) => {
+                        let differs = placeholder.is_some_and(|p| p != first.placeholder) || max_len.is_some_and(|n| n != first.max_len);
+                        if differs {
+                            self.err_at(
+                                Code::Lint,
+                                at,
+                                "there is one text field: only the first text source's placeholder and max_len are used",
+                                Some("set placeholder and max_len on the first text source only".into()),
+                            );
+                        }
+                    }
+                }
+                let phase = if s? == "submit" { TextPhase::Submit } else { TextPhase::Change };
+                (SourceTrigger::Text(phase), rec(&[("value", Type::Str)]))
+            }
         };
-        let mut root = Root::new(EventCtx::None("input sources build the payload; use 'swipe' or 'key'"), false, "in input sources");
+        let mut root = Root::new(
+            EventCtx::None("input sources build the payload from the source record (key, swipe, pointer or text)"),
+            false,
+            "in input sources",
+        );
         root.next_slot = 0;
         self.begin(root);
-        self.bind_slot(Rc::from(local), lty, 0);
+        self.bind_slot(Rc::from(kind), lty, 0);
         self.root().next_slot = 1;
         let with = self.payload_args(declared, m.get("with"), at, &format!("input '{input}'"), at);
         let n = self.end();
@@ -887,17 +1017,19 @@ pub fn compile_program(src: &str) -> (Option<ir::Program>, Vec<Diagnostic>) {
         return (None, ck.diags);
     };
     ck.check_keys(top, TOP_KEYS, "", "the game file");
+    let latest = FORMATS[FORMATS.len() - 1];
     match top.get("format") {
-        None => ck.err_at(Code::Format, "/format", format!("missing \"format\": \"{FORMAT}\""), None),
-        Some(J::String(s)) if s == FORMAT => {}
+        None => ck.err_at(Code::Format, "/format", format!("missing \"format\": \"{latest}\""), None),
+        Some(J::String(s)) if FORMATS.contains(&s.as_str()) => {}
         Some(other) => ck.err_at(
             Code::Format,
             "/format",
-            format!("unsupported format {other}; expected \"{FORMAT}\""),
+            format!("unsupported format {other}; expected \"{latest}\" (or \"microgame/0.1\")"),
             None,
         ),
     }
     let meta = ck.meta(top.get("meta"));
+    let assets = ck.assets(top.get("assets"));
     ck.declare_types(top.get("types"));
     ck.declare_events(top.get("events"));
     ck.declare_inputs(top.get("inputs"));
@@ -910,6 +1042,25 @@ pub fn compile_program(src: &str) -> (Option<ir::Program>, Vec<Diagnostic>) {
     let (rules, dispatch) = ck.rules(top.get("rules"));
     let objectives = ck.objectives(top.get("objectives"));
     let presentation = ck.presentation(top.get("presentation"));
+    let physics = ck.physics(top.get("physics"), (presentation.canvas.w, presentation.canvas.h));
+    let text_input = match (ck.text_input.take(), ck.text_field.take()) {
+        (Some(mut t), Some((rect, size))) => {
+            t.rect = rect;
+            t.size = size;
+            Some(t)
+        }
+        (Some(t), None) => Some(t),
+        (None, Some(_)) => {
+            ck.err_at(
+                Code::Lint,
+                "/presentation/text_field",
+                "text_field is set, but no input has a text source, so no text field is shown",
+                Some("add {\"text\": \"submit\", \"with\": {...}} to an input's \"from\"".into()),
+            );
+            None
+        }
+        (None, None) => None,
+    };
     ck.final_checks(top, &rules, &objectives);
 
     let mut diags = std::mem::take(&mut ck.diags);
@@ -931,6 +1082,9 @@ pub fn compile_program(src: &str) -> (Option<ir::Program>, Vec<Diagnostic>) {
         timer_names: std::mem::take(&mut ck.timer_names),
         objectives,
         presentation,
+        assets,
+        physics,
+        text_input,
     };
     (Some(program), diags)
 }

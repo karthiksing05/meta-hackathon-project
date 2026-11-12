@@ -28,7 +28,7 @@ pub struct PureEnv<'a> {
 }
 
 /// CONTRACT. Flat local-variable stack. Root frame slots start at 0.
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct Locals {
     pub stack: Vec<Value>,
 }

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Microgame shell</title>
+<link rel="icon" href="data:,">
 <style>
   :root { --bar: 48px; --ink: #1c1e21; --muted: #65676b; --accent: #0866ff; --err: #e41e3f; }
   * { box-sizing: border-box; }
@@ -32,6 +33,12 @@
   .card .score { font-size: 40px; font-weight: 800; color: var(--ink); margin: 4px 0 2px; }
   .card button { width: 100%; height: 44px; border: 0; border-radius: 8px; background: var(--accent);
     color: #fff; font: 600 16px system-ui, sans-serif; cursor: pointer; }
+  .card button:disabled { background: #8a8d91; cursor: progress; }
+  #textfield { position: absolute; border: 2px solid rgba(0,0,0,.25); border-radius: 10px; padding: 0 .6em;
+    background: rgba(255,255,255,.96); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    outline: none; }
+  #textfield:focus { border-color: var(--accent); }
+  #textfield:disabled { opacity: .6; }
   #toasts { position: absolute; left: 0; right: 0; top: 12%; display: flex; flex-direction: column;
     align-items: center; gap: 8px; pointer-events: none; }
   .toast { background: rgba(28, 30, 33, .9); color: #fff; padding: 8px 14px; border-radius: 18px;
@@ -73,6 +80,8 @@
   <div id="stage">
     <div id="frame">
       <canvas id="canvas"></canvas>
+      <input id="textfield" type="text" hidden autocomplete="off" autocapitalize="off" autocorrect="off"
+        spellcheck="false" enterkeyhint="done" aria-label="Type your answer">
       <div id="toasts"></div>
       <div id="start" class="overlay"><div class="card">
         <h1 data-title></h1><p data-instructions></p><button data-play>Play</button>

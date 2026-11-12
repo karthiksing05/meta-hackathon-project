@@ -9,8 +9,18 @@
 //!   {"t": 450, "tap": [120, 300]},
 //!   {"t": 500, "down": [10, 10]}, {"t": 520, "move": [40, 10]}, {"t": 540, "up": [40, 10]},
 //!   {"t": 600, "input": "tap_cell", "with": {"cell": [2, 3]}},
+//!   {"t": 700, "key": "Space", "up": true},
+//!   {"t": 710, "char": "a"},
+//!   {"t": 720, "pointer": "down", "at": [100, 200]},
+//!   {"t": 800, "text": "submit", "value": "hello"},
 //!   {"t": 3000} ]
 //! ```
+//!
+//! `key` sends a key down (`"up": true` a key up) with `KeyboardEvent.code`
+//! semantics; its char is `"char"` if given, else derived from the code
+//! (`KeyA` → `a`). `char` sends a down and an up for one typed character.
+//! `pointer` goes through the same hit-testing as a tap, then falls back to
+//! the pointer sources. `text` is `submit` or `change`.
 //!
 //! The game is stepped to each `t` in `dt` (16 ms) increments, a frame is
 //! built after every step (as the shell does), and then the entry is applied.
@@ -20,20 +30,25 @@
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
-use mg_core::ir::InputId;
+use mg_core::ir::{InputId, TextPhase};
 use mg_core::value::Value;
 use mg_core::{Diagnostic, Program};
 use mg_runtime::Status;
 use mg_scene::{Player, PointerKind};
 use serde_json::Value as J;
 
+use crate::sim::{char_for_code, code_for_char};
 use crate::value_json::json_to_value;
 
 #[derive(Clone, Debug)]
 pub enum Action {
     Wait,
-    Key(String),
+    /// `(code, char, down)`.
+    Key(String, String, bool),
+    /// One typed character: down and up.
+    Char(String, String),
     Swipe(i32, i32),
+    Text(TextPhase, String),
     Tap(f64, f64),
     Pointer(PointerKind, f64, f64),
     Input(InputId, Vec<Value>),
@@ -77,7 +92,48 @@ fn xy(j: &J) -> Result<(f64, f64), String> {
 
 fn parse_action(o: &serde_json::Map<String, J>, program: &Program) -> Result<Action, String> {
     if let Some(k) = o.get("key") {
-        return Ok(Action::Key(k.as_str().ok_or("\"key\" must be a string")?.to_string()));
+        let code = k.as_str().ok_or("\"key\" must be a string")?.to_string();
+        let ch = match o.get("char") {
+            Some(c) => c.as_str().ok_or("\"char\" must be a string")?.to_string(),
+            None => char_for_code(&code),
+        };
+        let up = match o.get("up") {
+            None => false,
+            Some(J::Bool(b)) => *b,
+            Some(_) => return Err("\"up\" must be true or false".into()),
+        };
+        return Ok(Action::Key(code, ch, !up));
+    }
+    if let Some(c) = o.get("char") {
+        let ch = c.as_str().ok_or("\"char\" must be a string")?;
+        let mut it = ch.chars();
+        let code = match (it.next(), it.next()) {
+            (Some(c), None) => code_for_char(c),
+            _ => return Err(format!("\"char\" must be one character, found {ch:?}")),
+        };
+        return Ok(Action::Char(code, ch.to_string()));
+    }
+    if let Some(p) = o.get("pointer") {
+        let kind = match p.as_str() {
+            Some("down") => PointerKind::Down,
+            Some("move") => PointerKind::Move,
+            Some("up") => PointerKind::Up,
+            _ => return Err(format!("\"pointer\" must be \"down\", \"move\" or \"up\", found {p}")),
+        };
+        let (x, y) = xy(o.get("at").ok_or("a pointer entry needs \"at\": [x, y]")?)?;
+        return Ok(Action::Pointer(kind, x, y));
+    }
+    if let Some(t) = o.get("text") {
+        let phase = match t.as_str() {
+            Some("submit") => TextPhase::Submit,
+            Some("change") => TextPhase::Change,
+            _ => return Err(format!("\"text\" must be \"submit\" or \"change\", found {t}")),
+        };
+        let value = match o.get("value") {
+            Some(v) => v.as_str().ok_or("\"value\" must be a string")?.to_string(),
+            None => String::new(),
+        };
+        return Ok(Action::Text(phase, value));
     }
     if let Some(s) = o.get("swipe") {
         let (dx, dy) = match s {
@@ -130,7 +186,7 @@ fn parse_action(o: &serde_json::Map<String, J>, program: &Program) -> Result<Act
     if o.len() == 1 {
         return Ok(Action::Wait);
     }
-    Err("unknown entry: use key, swipe, tap, down/move/up, input, or only t".into())
+    Err("unknown entry: use key, char, swipe, tap, down/move/up, pointer, text, input, or only t".into())
 }
 
 #[derive(Clone, Debug)]
@@ -138,7 +194,7 @@ pub struct ReplayResult {
     pub status: Status,
     pub hash: u64,
     pub state: J,
-    /// Indexes of `key`/`swipe` entries that matched no input source.
+    /// Indexes of key down, `char`, `swipe` and `text` entries that matched no input source.
     pub unmatched: Vec<usize>,
     pub errors: Vec<Diagnostic>,
     pub panic: Option<String>,
@@ -182,8 +238,20 @@ fn run(program: &Rc<Program>, seed: u64, script: &[Entry], dt: f64, tail_ms: f64
         advance(&mut player, e.t, res, &mut diags);
         match &e.action {
             Action::Wait => {}
-            Action::Key(k) => {
-                if !player.key(k) {
+            Action::Key(code, ch, down) => {
+                if !player.key_event(code, ch, *down) && *down {
+                    res.unmatched.push(i);
+                }
+            }
+            Action::Char(code, ch) => {
+                let hit = player.key_event(code, ch, true);
+                player.key_event(code, ch, false);
+                if !hit {
+                    res.unmatched.push(i);
+                }
+            }
+            Action::Text(phase, value) => {
+                if !player.text(*phase, value) {
                     res.unmatched.push(i);
                 }
             }

@@ -281,6 +281,127 @@ pub(crate) fn call(env: &PureEnv, cx: &mut Cx, b: Builtin, args: &[Expr]) -> R<V
         };
     }
     let out = match b {
+        // ── v0.2: text ────────────────────────────────────────────────
+        B::Split => {
+            let s = string(b, a!(0))?;
+            let sep = string(b, a!(1))?;
+            let mut buf = [0u8; 4];
+            let parts: Vec<Value> = if sep.is_empty() {
+                s.chars().map(|c| V::Str(Rc::from(&*c.encode_utf8(&mut buf)))).collect()
+            } else {
+                s.split(&*sep).map(V::str).collect()
+            };
+            check_len(parts.len(), "split result")?;
+            lin(cx, parts.len())?;
+            V::List(Rc::new(parts))
+        }
+        B::Trim => {
+            let s = string(b, a!(0))?;
+            let t = s.trim();
+            if t.len() == s.len() {
+                V::Str(s)
+            } else {
+                V::str(t)
+            }
+        }
+        B::Substr => {
+            let s = string(b, a!(0))?;
+            let st = int(b, &a!(1))?;
+            let en = int(b, &a!(2))?;
+            let n = s.chars().count();
+            let (lo, hi) = (clamp_idx(st, n), clamp_idx(en, n));
+            if hi <= lo {
+                V::str("")
+            } else if lo == 0 && hi == n {
+                V::Str(s)
+            } else {
+                V::Str(Rc::from(s.chars().skip(lo).take(hi - lo).collect::<String>()))
+            }
+        }
+        B::StartsWith | B::EndsWith => {
+            let s = string(b, a!(0))?;
+            let p = string(b, a!(1))?;
+            V::Bool(if b == B::StartsWith { s.starts_with(&*p) } else { s.ends_with(&*p) })
+        }
+        B::Replace => {
+            let s = string(b, a!(0))?;
+            let from = string(b, a!(1))?;
+            let to = string(b, a!(2))?;
+            if from.is_empty() || !s.contains(&*from) {
+                V::Str(s)
+            } else {
+                let hits = s.matches(&*from).count();
+                let len = s.len() - hits * from.len() + hits * to.len();
+                check_len(len, "replace result")?;
+                lin(cx, len)?;
+                V::Str(Rc::from(s.replace(&*from, &to)))
+            }
+        }
+        B::ParseInt => {
+            let s = string(b, a!(0))?;
+            // `i64::from_str`: optional `+`/`-`, then ASCII digits; anything else or overflow → none.
+            s.trim().parse::<i64>().map_or(V::None, V::Int)
+        }
+
+        // ── v0.2: math and space ──────────────────────────────────────
+        B::Atan2 => {
+            let y = num(b, &a!(0))?;
+            let x = num(b, &a!(1))?;
+            V::Float(mathx::atan2(y, x))
+        }
+        B::Sign => match a!(0) {
+            V::Int(i) => V::Int(i.signum()),
+            // NaN → 0.0 so the result is always -1, 0 or 1.
+            V::Float(x) => V::Float(if x > 0.0 {
+                1.0
+            } else if x < 0.0 {
+                -1.0
+            } else {
+                0.0
+            }),
+            v => return Err(type_err(b, "number", &v)),
+        },
+        B::Pow => {
+            let x = num(b, &a!(0))?;
+            let y = num(b, &a!(1))?;
+            V::Float(mathx::pow(x, y))
+        }
+        B::Fmod => {
+            let x = num(b, &a!(0))?;
+            let y = num(b, &a!(1))?;
+            if y == 0.0 {
+                bail!("fmod: division by zero");
+            }
+            // IEEE remainder-by-truncation: exact, so the same on every platform.
+            V::Float(x % y)
+        }
+        B::Angle => {
+            let (x, y) = vecf(b, &a!(0))?;
+            V::Float(mathx::atan2(y, x))
+        }
+        B::FromAngle => {
+            let t = num(b, &a!(0))?;
+            V::Vec2(mathx::cos(t), mathx::sin(t))
+        }
+        B::Rotate => {
+            let (x, y) = vecf(b, &a!(0))?;
+            let t = num(b, &a!(1))?;
+            let (c, sn) = (mathx::cos(t), mathx::sin(t));
+            V::Vec2(x * c - y * sn, x * sn + y * c)
+        }
+        B::MinOf | B::MaxOf => {
+            let l = seq(b, a!(0))?;
+            let Some(first) = l.first() else { bail!("{}() of an empty list", b.name()) };
+            lin(cx, l.len())?;
+            let want_max = b == B::MaxOf;
+            let mut acc = first.clone();
+            num(b, &acc)?;
+            for x in l[1..].iter() {
+                num(b, x)?;
+                acc = min_max(b, acc, x.clone(), want_max)?;
+            }
+            acc
+        }
         // ── Math ──────────────────────────────────────────────────────
         B::Abs => match a!(0) {
             V::Int(i) => V::Int(i.wrapping_abs()),
@@ -488,12 +609,19 @@ pub(crate) fn call(env: &PureEnv, cx: &mut Cx, b: Builtin, args: &[Expr]) -> R<V
             lin(cx, n as usize)?;
             V::List(Rc::new((lo..hi).map(V::Int).collect()))
         }
-        B::IndexOf => {
-            let l = list(b, a!(0))?;
-            let x = a!(1);
-            lin(cx, l.len())?;
-            V::Int(l.iter().position(|v| *v == x).map_or(-1, |p| p as i64))
-        }
+        B::IndexOf => match a!(0) {
+            V::Str(s) => {
+                let t = string(b, a!(1))?;
+                lin(cx, s.len())?;
+                V::Int(s.find(&*t).map_or(-1, |p| s[..p].chars().count() as i64))
+            }
+            c => {
+                let l = list(b, c)?;
+                let x = a!(1);
+                lin(cx, l.len())?;
+                V::Int(l.iter().position(|v| *v == x).map_or(-1, |p| p as i64))
+            }
+        },
         B::Contains => {
             let c = a!(0);
             let x = a!(1);
@@ -1010,6 +1138,10 @@ pub(crate) fn call(env: &PureEnv, cx: &mut Cx, b: Builtin, args: &[Expr]) -> R<V
                 rng(cx, b)?; // still reject in pure contexts
             }
             V::List(l)
+        }
+        B::Chance => {
+            let p = num(b, &a!(0))?;
+            V::Bool(rng(cx, b)?.next_f64() < p)
         }
         B::Weighted => {
             let vs = list(b, a!(0))?;

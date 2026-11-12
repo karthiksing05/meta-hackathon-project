@@ -97,7 +97,8 @@ builtins! {
     /// `range(n) -> list<int>` = `[0, 1, ..., n-1]`; `range(a, b)` = `[a, ..., b-1]`.
     /// Empty when the end is not above the start.
     Range = "range",
-    /// `index_of(list<T>, T) -> int`. First match, or `-1`.
+    /// `index_of(list<T>, T) -> int`. First match, or `-1`. Also
+    /// `index_of(string, string) -> int`: char index of the first occurrence, or `-1`.
     IndexOf = "index_of",
     /// `contains(list<T>, T) -> bool`; `contains(set<T>, T)`; `contains(string, string)` (substring).
     Contains = "contains",
@@ -212,6 +213,45 @@ builtins! {
     /// `or_else(T?, T) -> T`
     OrElse = "or_else",
 
+    // ── v0.2: text ──────────────────────────────────────────────────────
+    /// `split(string, sep: string) -> list<string>`. `sep == ''` splits into chars.
+    Split = "split",
+    /// `trim(string) -> string`. Unicode whitespace at both ends.
+    Trim = "trim",
+    /// `substr(string, start: int, end: int) -> string`. Char indices, end
+    /// exclusive, clamped like `slice`.
+    Substr = "substr",
+    /// `starts_with(string, prefix: string) -> bool`
+    StartsWith = "starts_with",
+    /// `ends_with(string, suffix: string) -> bool`
+    EndsWith = "ends_with",
+    /// `replace(string, from: string, to: string) -> string`. Replaces all
+    /// occurrences; an empty `from` returns the string unchanged.
+    Replace = "replace",
+    /// `parse_int(string) -> int?`. Trims first; optional leading `-`/`+`,
+    /// then decimal digits only; `none` otherwise or on overflow.
+    ParseInt = "parse_int",
+
+    // ── v0.2: math and space ────────────────────────────────────────────
+    /// `atan2(y: num, x: num) -> float` (radians).
+    Atan2 = "atan2",
+    /// `sign(num) -> same kind`: -1, 0 or 1 (`sign(-0.0) == 0.0`).
+    Sign = "sign",
+    /// `pow(num, num) -> float`.
+    Pow = "pow",
+    /// `fmod(num, num) -> float`. Result has the sign of the dividend; divisor 0 → error.
+    Fmod = "fmod",
+    /// `angle(ivec2|vec2) -> float` = `atan2(y, x)`.
+    Angle = "angle",
+    /// `from_angle(radians: num) -> vec2` = `vec(cos(a), sin(a))`.
+    FromAngle = "from_angle",
+    /// `rotate(ivec2|vec2, radians: num) -> vec2`.
+    Rotate = "rotate",
+    /// `min_of(list<num>) -> num`. Empty → error.
+    MinOf = "min_of",
+    /// `max_of(list<num>) -> num`. Empty → error.
+    MaxOf = "max_of",
+
     // ── Random (seeded; only in state init and effects) ─────────────────
     /// `random_int(a: int, b: int) -> int`, inclusive of both ends.
     RandomInt = "random_int",
@@ -221,6 +261,8 @@ builtins! {
     Pick = "pick",
     /// `shuffle(list<T>) -> list<T>`. Fisher-Yates from the last index down.
     Shuffle = "shuffle",
+    /// `chance(p: num) -> bool`: `next_f64() < p` (one draw).
+    Chance = "chance",
     /// `weighted(values: list<T>, weights: list<num>) -> T`. Lengths must match,
     /// weights must be >= 0 with a positive total, else error. Draws one
     /// `next_f64() * total` and walks the cumulative sum.
@@ -233,7 +275,12 @@ impl Builtin {
     pub fn is_random(self) -> bool {
         matches!(
             self,
-            Builtin::RandomInt | Builtin::RandomFloat | Builtin::Pick | Builtin::Shuffle | Builtin::Weighted
+            Builtin::RandomInt
+                | Builtin::RandomFloat
+                | Builtin::Pick
+                | Builtin::Shuffle
+                | Builtin::Weighted
+                | Builtin::Chance
         )
     }
 
@@ -256,8 +303,8 @@ impl Builtin {
 
 /// Named constants (lowest priority in name lookup).
 /// `up = vec(0,-1)`, `down = vec(0,1)`, `left = vec(-1,0)`, `right = vec(1,0)`
-/// (all `ivec2`), and `now` (game time in ms, `int`).
-pub const CONSTANTS: &[&str] = &["up", "down", "left", "right", "now"];
+/// (all `ivec2`), `now` (game time in ms, `int`) and `pi` (`float`, v0.2).
+pub const CONSTANTS: &[&str] = &["up", "down", "left", "right", "now", "pi"];
 
 #[cfg(test)]
 mod tests {

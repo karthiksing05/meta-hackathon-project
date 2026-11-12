@@ -1,0 +1,19 @@
+{
+  "note": "Waste oil, take the sea-water cask, then wait in the cellar until the night runs out.",
+  "seed": 1,
+  "expect": "lost",
+  "inputs": [
+    {"key":"Space","t":160.0},
+    {"key":"Digit2","t":320.0},
+    {"key":"Space","t":480.0},
+    {"key":"Digit2","t":640.0},
+    {"key":"Space","t":800.0},
+    {"key":"Digit1","t":960.0},
+    {"key":"Digit2","t":1120.0},
+    {"key":"Space","t":1280.0},
+    {"key":"Digit2","t":1440.0},
+    {"key":"Space","t":1600.0},
+    {"key":"Digit1","t":1760.0},
+    {"t":180064.0}
+  ]
+}

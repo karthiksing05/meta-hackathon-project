@@ -12,7 +12,10 @@
 //!   queued inputs (arrival order), then due timers (by due time, then
 //!   creation order), then one `tick`. Each of those *source* events is
 //!   followed by its cascade of emitted events (FIFO: an emit goes to the
-//!   back of the queue) before the next source event is taken. Timers are
+//!   back of the queue) before the next source event is taken.
+//! * v0.2 physics (`physics.rs`) runs between the timers and the tick when
+//!   the clock advanced: one atomic pseudo-rule, then its emitted events,
+//!   then an objectives check. Timers are
 //!   pulled one at a time, so a timer cancelled or replaced earlier in the
 //!   same step does not fire.
 //! * After every event the objectives are checked (`win` before `lose`),
@@ -26,8 +29,10 @@ use std::collections::VecDeque;
 use std::rc::Rc;
 
 use mg_core::hash::StableHasher;
-use mg_core::ir::{EventId, Expr, InputId, Outcome, Program, RuleId, SourceTrigger};
-use mg_core::limits::{MAX_EFFECTS_PER_EVENT, MAX_EVAL_STEPS_PER_EVENT, MAX_EVENTS_PER_STEP, MAX_QUEUED_INPUTS};
+use mg_core::ir::{EventId, Expr, InputId, Outcome, PointerPhase, Program, RuleId, SourceTrigger, TextPhase};
+use mg_core::limits::{
+    MAX_EFFECTS_PER_EVENT, MAX_EVAL_STEPS_PER_EVENT, MAX_EVENTS_PER_STEP, MAX_QUEUED_INPUTS, MAX_TEXT_INPUT_LEN,
+};
 use mg_core::rng::Rng;
 use mg_core::scene::EventRef;
 use mg_core::types::Type;
@@ -37,6 +42,7 @@ mod builtins;
 pub mod eval;
 mod exec;
 mod mathx;
+mod physics;
 mod words;
 
 #[cfg(test)]
@@ -108,7 +114,9 @@ enum Due {
     Every(RuleId),
 }
 
-/// CONTRACT. One running game.
+/// CONTRACT. One running game. `Clone` gives a cheap fork (state containers
+/// are `Rc`-shared copy-on-write), used for bot look-ahead.
+#[derive(Clone)]
 pub struct Game {
     program: Rc<Program>,
     seed: u64,
@@ -137,12 +145,16 @@ pub struct Game {
     fired: Vec<Fired>,
     diags: Vec<Diagnostic>,
     events_left: u32,
+    /// The event budget overflowed this step (report it once).
+    overflowed: bool,
     steps_left: u64,
     effects_left: u32,
     rule_emits: Vec<(EventId, Rc<[Value]>)>,
     rule_ops: Vec<TimerOp>,
     keybuf: Vec<Value>,
     empty: Rc<[Value]>,
+    phys: physics::Scratch,
+    phys_events: Vec<(EventId, Rc<[Value]>)>,
 }
 
 impl Game {
@@ -181,12 +193,15 @@ impl Game {
             fired: Vec::new(),
             diags: Vec::new(),
             events_left: MAX_EVENTS_PER_STEP,
+            overflowed: false,
             steps_left: MAX_EVAL_STEPS_PER_EVENT,
             effects_left: MAX_EFFECTS_PER_EVENT,
             rule_emits: Vec::new(),
             rule_ops: Vec::new(),
             keybuf: Vec::new(),
             empty: Rc::from(Vec::new()),
+            phys: physics::Scratch::default(),
+            phys_events: Vec::new(),
         };
         g.init(seed);
         g
@@ -288,10 +303,64 @@ impl Game {
 
     /// Maps a key (browser `KeyboardEvent.code` or `.key`) to inputs via
     /// `InputDef::sources` and queues them. Returns true if any matched.
+    /// Same as `key_event(code, "", true)`.
     pub fn key(&mut self, code: &str) -> bool {
-        self.source_input(|t| matches!(t, SourceTrigger::Key(k) if &**k == code), || {
-            Value::Record(Rc::new(vec![Value::str(code)]))
-        })
+        self.key_event(code, "", true)
+    }
+
+    /// v0.2 full keyboard event. `code` is `KeyboardEvent.code` (or `.key`),
+    /// `ch` the printable character (`'a'`, `'A'`, `' '`) or `""`. Matches
+    /// `{"key": K}` sources whose `on` agrees with `down` and where `K` equals
+    /// `code` or a non-empty `ch`, plus `{"key": "any"}` sources. The source
+    /// record is `{char: ch, code}`. Returns true if any input matched.
+    pub fn key_event(&mut self, code: &str, ch: &str, down: bool) -> bool {
+        let up = !down;
+        self.source_input(
+            |t| match t {
+                SourceTrigger::Key { code: Some(k), up: u } => *u == up && (&**k == code || (!ch.is_empty() && &**k == ch)),
+                SourceTrigger::Key { code: None, up: u } => *u == up,
+                _ => false,
+            },
+            || Value::Record(Rc::new(vec![Value::str(ch), Value::str(code)])),
+        )
+    }
+
+    /// v0.2 pointer anywhere (spec §4). The scene calls this only for pointer
+    /// events no `on_tap`/`on_drag`/`on_press`/`on_release` node took, and `Move` only while the
+    /// pointer is down. `x, y` are world coordinates. The source record is
+    /// `{x: float, y: float}`. Returns true if any input matched.
+    pub fn pointer_source(&mut self, phase: PointerPhase, x: f64, y: f64) -> bool {
+        self.source_input(
+            |t| matches!(t, SourceTrigger::Pointer(p) if *p == phase),
+            || Value::Record(Rc::new(vec![Value::Float(x), Value::Float(y)])),
+        )
+    }
+
+    /// v0.2 typed text (spec §4). `value` is truncated to `max_len` chars
+    /// (`program.text_input`, at most `MAX_TEXT_INPUT_LEN`). The source record
+    /// is `{value: string}`. Returns true if any input matched.
+    pub fn text(&mut self, phase: TextPhase, value: &str) -> bool {
+        let max = self
+            .program
+            .text_input
+            .as_ref()
+            .map_or(MAX_TEXT_INPUT_LEN, |t| (t.max_len as usize).min(MAX_TEXT_INPUT_LEN));
+        let v: Value = match value.char_indices().nth(max) {
+            Some((cut, _)) => Value::str(&value[..cut]),
+            None => Value::str(value),
+        };
+        self.source_input(|t| matches!(t, SourceTrigger::Text(p) if *p == phase), || Value::Record(Rc::new(vec![v.clone()])))
+    }
+
+    /// Whether any input has a source matching `pred`, e.g.
+    /// `g.has_source(|t| matches!(t, SourceTrigger::Pointer(_)))`.
+    pub fn has_source(&self, pred: impl Fn(&SourceTrigger) -> bool) -> bool {
+        self.program.inputs.iter().any(|d| d.sources.iter().any(|s| pred(&s.trigger)))
+    }
+
+    /// Whether any input has a `{"pointer": ...}` source.
+    pub fn has_pointer_sources(&self) -> bool {
+        self.has_source(|t| matches!(t, SourceTrigger::Pointer(_)))
     }
 
     /// Maps a swipe direction (one of the 4 unit ivec2s) to inputs and queues
@@ -374,6 +443,7 @@ impl Game {
             self.version += 1;
         }
         self.events_left = MAX_EVENTS_PER_STEP;
+        self.overflowed = false;
 
         // 1. Queued inputs, in arrival order.
         while self.phase == Phase::Playing && !self.inputs.is_empty() {
@@ -401,14 +471,21 @@ impl Game {
             self.drain_emitted(&prog);
         }
 
-        // 3. One tick.
-        if self.phase == Phase::Playing && self.take_event_slot() {
+        // 3. Physics (v0.2), when the clock moved.
+        if self.phase == Phase::Playing && adv > 0 && prog.physics.is_some() {
+            self.run_physics(&prog, adv);
+        }
+
+        // 4. One tick. It always runs, outside the event budget, so a burst of
+        // emitted events (e.g. hundreds of physics contacts) can't starve the
+        // game's per-frame logic. Events it emits still count.
+        if self.phase == Phase::Playing {
             let payload = [Value::Float(adv as f64 / 1000.0)];
             self.process(&prog, Ev::Tick, &payload);
             self.drain_emitted(&prog);
         }
 
-        // 4. Time limit.
+        // 5. Time limit.
         if self.phase == Phase::Playing {
             if let Some(lim) = self.time_limit_us {
                 if self.clock_us >= lim {
@@ -552,16 +629,21 @@ impl Game {
             self.events_left -= 1;
             return true;
         }
-        let dropped = self.inputs.len() + self.emitted.len();
+        // The event that asked for the slot is dropped too.
+        let dropped = self.inputs.len() + self.emitted.len() + 1;
         self.inputs.clear();
         self.emitted.clear();
-        self.diag(
-            Code::Limit,
-            "/rules".into(),
-            format!(
-                "more than {MAX_EVENTS_PER_STEP} events in one step (an emit loop?); {dropped} queued events were dropped"
-            ),
-        );
+        if !self.overflowed {
+            self.overflowed = true;
+            self.diag(
+                Code::Limit,
+                "/rules".into(),
+                format!(
+                    "more than {MAX_EVENTS_PER_STEP} events in one step; {dropped} queued events were dropped \
+                     (an emit loop, or too many physics contacts emitting events)"
+                ),
+            );
+        }
         false
     }
 
@@ -726,6 +808,28 @@ impl Game {
                 self.diag(e.code, rule.at.to_string(), msg);
             }
         }
+    }
+
+    /// The physics pseudo-rule (spec v0.2 §5): atomic, then its events (FIFO,
+    /// each counting toward the step's event cap), then the objectives.
+    fn run_physics(&mut self, prog: &Program, adv_us: i64) {
+        let Some(ph) = &prog.physics else { return };
+        let mut events = std::mem::take(&mut self.phys_events);
+        events.clear();
+        let dt_s = adv_us as f64 / 1_000_000.0;
+        match physics::step(prog, ph, &mut self.state, dt_s, &mut self.phys, &mut events) {
+            Ok(changed) => {
+                if changed {
+                    self.state_rev += 1;
+                    self.version += 1;
+                }
+                self.emitted.extend(events.drain(..));
+                self.drain_emitted(prog);
+                self.check_objectives(prog);
+            }
+            Err(e) => self.diag(e.code, "/physics".into(), format!("physics: {}", e.msg)),
+        }
+        self.phys_events = events;
     }
 
     fn apply_timer_op(&mut self, op: TimerOp) {

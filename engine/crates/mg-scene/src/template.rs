@@ -2,10 +2,12 @@
 //! constant props pre-converted (colors parsed, numbers widened), so a frame
 //! build never re-parses a literal.
 
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use mg_core::color::{parse_color, Rgba};
-use mg_core::ir::{Expr, Program, Slot};
+use mg_core::ir::{AssetId, AssetKind, Expr, Program, Slot};
+use mg_core::limits::MAX_POLY_POINTS;
 use mg_core::scene::{
     Align, Anchor, AnimateOn, Dir, Ease, EventRef, Feedback, InputBinding, Node, NodeKind, Presentation, Prop,
     PropName, TextAlign, TextValign, Transition,
@@ -86,6 +88,43 @@ impl FromValue for Weight {
     }
 }
 
+/// `poly` points (`list<vec2|ivec2>`), relative to the node origin.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Points(pub Rc<[(f64, f64)]>);
+
+impl FromValue for Points {
+    const WHAT: &'static str = "a list of vec2";
+    fn from_value(v: &Value) -> Option<Points> {
+        let Value::List(items) = v else { return None };
+        let mut out = Vec::with_capacity(items.len());
+        for it in items.iter() {
+            match it {
+                Value::Vec2(x, y) if x.is_finite() && y.is_finite() => out.push((*x, *y)),
+                Value::IVec2(x, y) => out.push((*x as f64, *y as f64)),
+                _ => return None,
+            }
+        }
+        Some(Points(out.into()))
+    }
+}
+
+/// An asset reference: resolved at load time when the name is a literal.
+#[derive(Clone, Debug)]
+pub enum AssetRef {
+    Id(AssetId),
+    /// Name expression, resolved each build.
+    Expr(Expr),
+    /// Bad literal (reported at load time); the node / music is skipped.
+    Bad,
+}
+
+#[derive(Clone, Debug)]
+pub struct TMusic {
+    pub asset: AssetRef,
+    pub volume: P<f64>,
+    pub playing: Option<P<bool>>,
+}
+
 #[derive(Clone, Debug)]
 pub struct TAnim {
     pub on: EventRef,
@@ -123,7 +162,18 @@ pub enum TKind {
         h: Option<P<f64>>,
         align: TextAlign,
         valign: TextValign,
+        wrap: bool,
     },
+    Image {
+        asset: AssetRef,
+        w: Option<P<f64>>,
+        h: Option<P<f64>>,
+        frame: Option<P<f64>>,
+        flip_x: Option<P<bool>>,
+        flip_y: Option<P<bool>>,
+    },
+    Line { x1: P<f64>, y1: P<f64>, x2: P<f64>, y2: P<f64> },
+    Poly { points: P<Points>, closed: bool },
 }
 
 #[derive(Clone, Debug)]
@@ -142,14 +192,23 @@ pub struct TNode {
     pub stroke_width: Option<P<f64>>,
     pub on_tap: Option<InputBinding>,
     pub on_drag: Option<InputBinding>,
+    pub on_press: Option<InputBinding>,
+    pub on_release: Option<InputBinding>,
     pub transitions: Vec<Transition>,
     pub animate_on: Vec<TAnim>,
     /// Bit per `PropName` with a transition / animation (fast skip).
     pub trans_mask: u16,
     pub anim_mask: u16,
+    /// Ignores the camera: the node's own `fixed` or an ancestor's.
+    pub fixed: bool,
 }
 
 impl TNode {
+    /// Takes pointer downs: has `on_tap`, `on_drag`, `on_press` or `on_release`.
+    #[inline]
+    pub fn is_target(&self) -> bool {
+        self.on_tap.is_some() || self.on_drag.is_some() || self.on_press.is_some() || self.on_release.is_some()
+    }
     #[inline]
     pub fn has_motion(&self, p: PropName) -> bool {
         (self.trans_mask | self.anim_mask) & prop_bit(p) != 0
@@ -171,17 +230,61 @@ pub struct Template {
     pub max_anim_ms: f64,
     /// Whether any presentation expression can read `now`.
     pub uses_now: bool,
+    /// Asset name → id, for names computed at run time.
+    pub asset_ids: HashMap<Rc<str>, AssetId>,
+    pub camera: Option<(P<f64>, P<f64>)>,
+    pub music: Option<TMusic>,
+    /// Some node is `fixed` (so ops need sorting into layers).
+    pub any_fixed: bool,
+}
+
+/// Resolves an asset name, checking its kind. `Err` is a message.
+pub fn resolve_asset(
+    program: &Program,
+    ids: &HashMap<Rc<str>, AssetId>,
+    name: &str,
+    want_image: bool,
+) -> Result<AssetId, String> {
+    let Some(&id) = ids.get(name) else {
+        return Err(format!("unknown asset `{name}`"));
+    };
+    match (&program.assets[id as usize].kind, want_image) {
+        (AssetKind::Image { .. }, true) | (AssetKind::Sound { .. }, false) => Ok(id),
+        (AssetKind::Sound { .. }, true) => Err(format!("asset `{name}` is a sound, not an image")),
+        (AssetKind::Image { .. }, false) => Err(format!("asset `{name}` is an image, not a sound")),
+    }
 }
 
 pub const DEFAULT_FONT: &str = "Inter, system-ui, sans-serif";
 pub const BLACK: Rgba = 0x0000_00FF;
 
 struct Compiler<'a> {
+    program: &'a Program,
+    asset_ids: &'a HashMap<Rc<str>, AssetId>,
     nodes: Vec<TNode>,
     diags: &'a mut Vec<Diagnostic>,
 }
 
 impl Compiler<'_> {
+    fn asset(&mut self, p: &Prop, at: &str, image: bool) -> AssetRef {
+        match p {
+            Prop::Expr(Expr::Const(v)) | Prop::Const(v) => {
+                let r = match v.as_str() {
+                    Some(name) => resolve_asset(self.program, self.asset_ids, name, image),
+                    None => Err(format!("`asset` must be an asset id string, got `{v}`")),
+                };
+                match r {
+                    Ok(id) => AssetRef::Id(id),
+                    Err(msg) => {
+                        self.diags.push(Diagnostic::new(Code::Asset, format!("{at}/asset"), msg));
+                        AssetRef::Bad
+                    }
+                }
+            }
+            Prop::Expr(e) => AssetRef::Expr(e.clone()),
+        }
+    }
+
     fn prop<T: FromValue>(&mut self, p: &Prop, at: &str, name: &str) -> Option<P<T>> {
         match p {
             Prop::Expr(Expr::Const(v)) | Prop::Const(v) => match T::from_value(v) {
@@ -205,9 +308,10 @@ impl Compiler<'_> {
         self.prop(p, at, name).unwrap_or(P::C(default))
     }
 
-    fn node(&mut self, n: &Node) -> u32 {
+    fn node(&mut self, n: &Node, parent_fixed: bool) -> u32 {
         let id = self.nodes.len() as u32;
         let at: &str = &n.at;
+        let fixed = parent_fixed || n.fixed;
         // Placeholder so children get later ids (pre-order).
         self.nodes.push(TNode {
             at: n.at.clone(),
@@ -224,10 +328,13 @@ impl Compiler<'_> {
             stroke_width: None,
             on_tap: n.on_tap.clone(),
             on_drag: n.on_drag.clone(),
+            on_press: n.on_press.clone(),
+            on_release: n.on_release.clone(),
             transitions: n.transitions.clone(),
             animate_on: Vec::new(),
             trans_mask: 0,
             anim_mask: 0,
+            fixed,
         });
         let x = self.opt(&n.x, at, "x");
         let y = self.opt(&n.y, at, "y");
@@ -239,12 +346,12 @@ impl Compiler<'_> {
         let stroke = self.opt(&n.stroke, at, "stroke");
         let stroke_width = self.opt(&n.stroke_width, at, "stroke_width");
         let kind = match &n.kind {
-            NodeKind::Group { children } => TKind::Group { children: children.iter().map(|c| self.node(c)).collect() },
+            NodeKind::Group { children } => TKind::Group { children: children.iter().map(|c| self.node(c, fixed)).collect() },
             NodeKind::Stack { dir, gap, align, children } => TKind::Stack {
                 dir: *dir,
                 gap: *gap,
                 align: *align,
-                children: children.iter().map(|c| self.node(c)).collect(),
+                children: children.iter().map(|c| self.node(c, fixed)).collect(),
             },
             NodeKind::Grid { source, cols, rows, cell_size, gap, cell, cell_slot, value_slot } => {
                 let cols = self.opt(cols, at, "cols");
@@ -255,7 +362,7 @@ impl Compiler<'_> {
                     rows,
                     cell_size: *cell_size,
                     gap: *gap,
-                    cell: self.node(cell),
+                    cell: self.node(cell, fixed),
                     cell_slot: *cell_slot,
                     value_slot: *value_slot,
                 }
@@ -265,7 +372,7 @@ impl Compiler<'_> {
                 item_slot: *item_slot,
                 index_slot: *index_slot,
                 key: key.clone(),
-                node: self.node(node),
+                node: self.node(node, fixed),
             },
             NodeKind::Rect { w, h, radius } => TKind::Rect {
                 w: self.req(w, at, "w", 0.0),
@@ -273,7 +380,7 @@ impl Compiler<'_> {
                 radius: self.opt(radius, at, "radius"),
             },
             NodeKind::Circle { r } => TKind::Circle { r: self.req(r, at, "r", 0.0) },
-            NodeKind::Text { text, size, font, weight, color, w, h, align, valign } => TKind::Text {
+            NodeKind::Text { text, size, font, weight, color, w, h, align, valign, wrap } => TKind::Text {
                 text: self.req(text, at, "text", Rc::from("")),
                 size: self.req(size, at, "size", 16.0),
                 font: self.opt(font, at, "font"),
@@ -283,7 +390,36 @@ impl Compiler<'_> {
                 h: self.opt(h, at, "h"),
                 align: *align,
                 valign: *valign,
+                wrap: *wrap,
             },
+            NodeKind::Image { asset, w, h, frame, flip_x, flip_y } => TKind::Image {
+                asset: self.asset(asset, at, true),
+                w: self.opt(w, at, "w"),
+                h: self.opt(h, at, "h"),
+                frame: self.opt(frame, at, "frame"),
+                flip_x: self.opt(flip_x, at, "flip_x"),
+                flip_y: self.opt(flip_y, at, "flip_y"),
+            },
+            NodeKind::Line { x1, y1, x2, y2 } => TKind::Line {
+                x1: self.req(x1, at, "x1", 0.0),
+                y1: self.req(y1, at, "y1", 0.0),
+                x2: self.req(x2, at, "x2", 0.0),
+                y2: self.req(y2, at, "y2", 0.0),
+            },
+            NodeKind::Poly { points, closed } => {
+                let mut points = self.req(points, at, "points", Points(Rc::from(Vec::new())));
+                if let P::C(Points(pts)) = &mut points {
+                    if pts.len() > MAX_POLY_POINTS {
+                        self.diags.push(Diagnostic::new(
+                            Code::Limit,
+                            format!("{at}/points"),
+                            format!("{} points; only the first {MAX_POLY_POINTS} are drawn", pts.len()),
+                        ));
+                        *pts = Rc::from(&pts[..MAX_POLY_POINTS]);
+                    }
+                }
+                TKind::Poly { points, closed: *closed }
+            }
         };
         let mut animate_on = Vec::with_capacity(n.animate_on.len());
         for (i, a) in n.animate_on.iter().enumerate() {
@@ -340,10 +476,23 @@ impl Compiler<'_> {
 impl Template {
     pub fn compile(program: &Program, diags: &mut Vec<Diagnostic>) -> Template {
         let p: &Presentation = &program.presentation;
-        let mut c = Compiler { nodes: Vec::new(), diags };
+        let mut asset_ids = HashMap::with_capacity(program.assets.len());
+        for (i, a) in program.assets.iter().enumerate() {
+            asset_ids.entry(a.name.clone()).or_insert(i as AssetId);
+        }
+        let mut c = Compiler { program, asset_ids: &asset_ids, nodes: Vec::new(), diags };
         let background = c.prop(&p.canvas.background, "/presentation/canvas", "background");
-        c.node(&p.root);
+        let camera = p.camera.as_ref().map(|cam| {
+            (c.req(&cam.x, "/presentation/camera", "x", 0.0), c.req(&cam.y, "/presentation/camera", "y", 0.0))
+        });
+        let music = p.music.as_ref().map(|m| TMusic {
+            asset: c.asset(&m.asset, "/presentation/music", false),
+            volume: c.req(&m.volume, "/presentation/music", "volume", 0.6),
+            playing: c.opt(&m.playing, "/presentation/music", "playing"),
+        });
+        c.node(&p.root, false);
         let nodes = c.nodes;
+        let any_fixed = nodes.iter().any(|n| n.fixed);
         let mut anim_events = Vec::new();
         let mut max_anim_ms: f64 = 0.0;
         for n in &nodes {
@@ -354,7 +503,7 @@ impl Template {
                 max_anim_ms = max_anim_ms.max(a.ms);
             }
         }
-        let uses_now = presentation_uses_now(program, &nodes);
+        let uses_now = presentation_uses_now(program, &nodes, camera.as_ref(), music.as_ref());
         Template {
             canvas_w: p.canvas.w,
             canvas_h: p.canvas.h,
@@ -366,6 +515,10 @@ impl Template {
             anim_events,
             max_anim_ms,
             uses_now,
+            asset_ids,
+            camera,
+            music,
+            any_fixed,
         }
     }
 }
@@ -375,7 +528,12 @@ impl Template {
 // and phase are compared directly; `now` only matters if an expression (or a
 // function it calls) reads it.
 
-fn presentation_uses_now(program: &Program, nodes: &[TNode]) -> bool {
+fn presentation_uses_now(
+    program: &Program,
+    nodes: &[TNode],
+    camera: Option<&(P<f64>, P<f64>)>,
+    music: Option<&TMusic>,
+) -> bool {
     let mut w = NowWalker { program, visited: vec![false; program.functions.len()] };
     let mut any = false;
     let mut check = |e: &Expr| any |= w.expr(e);
@@ -425,7 +583,45 @@ fn presentation_uses_now(program: &Program, nodes: &[TNode]) -> bool {
                 p(w, &mut check);
                 p(h, &mut check);
             }
+            TKind::Image { asset, w, h, frame, flip_x, flip_y } => {
+                if let AssetRef::Expr(e) = asset {
+                    check(e);
+                }
+                p(w, &mut check);
+                p(h, &mut check);
+                p(frame, &mut check);
+                p(flip_x, &mut check);
+                p(flip_y, &mut check);
+            }
+            TKind::Line { x1, y1, x2, y2 } => {
+                for q in [x1, y1, x2, y2] {
+                    if let P::E(e) = q {
+                        check(e);
+                    }
+                }
+            }
+            TKind::Poly { points, .. } => {
+                if let P::E(e) = points {
+                    check(e);
+                }
+            }
         }
+    }
+    if let Some((x, y)) = camera {
+        for q in [x, y] {
+            if let P::E(e) = q {
+                check(e);
+            }
+        }
+    }
+    if let Some(m) = music {
+        if let AssetRef::Expr(e) = &m.asset {
+            check(e);
+        }
+        if let P::E(e) = &m.volume {
+            check(e);
+        }
+        p(&m.playing, &mut check);
     }
     if let Prop::Expr(e) = &program.presentation.canvas.background {
         any |= w.expr(e);

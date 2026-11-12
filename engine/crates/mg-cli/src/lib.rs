@@ -1,12 +1,14 @@
-//! Library behind the `microgame` CLI (spec B5). The binary in `main.rs` is a
+//! Library behind the `microgame` CLI (spec B5, SPEC-v0.2). The binary in `main.rs` is a
 //! thin layer over these modules; the acceptance tests call them directly.
 
 pub mod args;
 pub mod bench;
+pub mod catalog;
 pub mod report;
 pub mod replay;
 pub mod sim;
 pub mod value_json;
+pub mod verify;
 
 use std::rc::Rc;
 

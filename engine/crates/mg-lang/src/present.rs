@@ -11,14 +11,17 @@ use mg_core::color::parse_color;
 use mg_core::diag::Code;
 use mg_core::frame::{note_to_hz, Wave};
 use mg_core::ir::Expr as IR;
+use mg_core::frame::Haptic;
+use mg_core::limits::{MAX_PARTICLES_PER_BURST, MAX_POLY_POINTS};
 use mg_core::scene::{
-    Align, Anchor, AnimateOn, Canvas, Dir, Ease, EventRef, Feedback, FeedbackAction, InputBinding, Node, NodeKind,
-    Presentation, Prop, PropName, TextAlign, TextValign, Transition,
+    Align, Anchor, AnimateOn, Camera, Canvas, Dir, Ease, EventRef, Feedback, FeedbackAction, InputBinding, Music, Node,
+    NodeKind, ParticlesAction, Presentation, Prop, PropName, SoundAction, TextAlign, TextValign, Transition,
 };
 use mg_core::types::Type;
 use mg_core::value::Value;
 use serde_json::{Map, Value as J};
 
+use crate::assets::AssetUse;
 use crate::check::{dym, placeholder, tyname, Checker, EventCtx, Payload, Root};
 use crate::{is_ident, json_kind, ptr};
 
@@ -26,9 +29,14 @@ type Obj = Map<String, J>;
 
 const COMMON: &[&str] = &[
     "node", "id", "x", "y", "anchor", "rotation", "scale", "opacity", "visible", "fill", "stroke", "stroke_width", "on_tap",
-    "on_drag", "transition", "animate_on",
+    "on_drag", "on_press", "on_release", "transition", "animate_on", "fixed",
 ];
-const KINDS: &[&str] = &["group", "stack", "grid", "repeat", "rect", "circle", "text"];
+/// Keys of one `feedback` entry.
+const FEEDBACK_KEYS: &[&str] = &["on", "when", "do"];
+const KINDS: &[&str] = &["group", "stack", "grid", "repeat", "rect", "circle", "text", "image", "line", "poly"];
+const ACTIONS: &[&str] = &["sound", "toast", "shake", "particles", "haptic"];
+const WAVES: &[&str] = &["sine", "square", "triangle", "sawtooth"];
+const HAPTICS: &[&str] = &["light", "medium", "heavy", "success", "warning", "error"];
 const PROP_NAMES: &[&str] =
     &["x", "y", "w", "h", "r", "radius", "rotation", "scale", "opacity", "fill", "stroke", "stroke_width", "color", "size"];
 const EASES: &[&str] = &["linear", "in", "out", "in_out", "spring"];
@@ -41,7 +49,10 @@ fn kind_keys(kind: &str) -> &'static [&'static str] {
         "repeat" => &["source", "as", "key", "template", "item"],
         "rect" => &["w", "h", "radius"],
         "circle" => &["r"],
-        "text" => &["text", "size", "font", "weight", "color", "w", "h", "align", "valign"],
+        "text" => &["text", "size", "font", "weight", "color", "w", "h", "align", "valign", "wrap"],
+        "image" => &["asset", "w", "h", "frame", "flip_x", "flip_y"],
+        "line" => &["x1", "y1", "x2", "y2"],
+        "poly" => &["points", "closed"],
         _ => &[],
     }
 }
@@ -316,8 +327,11 @@ impl Checker {
             stroke_width: None,
             on_tap: None,
             on_drag: None,
+            on_press: None,
+            on_release: None,
             transitions: Vec::new(),
             animate_on: Vec::new(),
+            fixed: false,
         };
         let mut p = Presentation {
             canvas: Canvas { w: 360.0, h: 640.0, background: Prop::Const(Value::str("#FFFFFF")) },
@@ -325,6 +339,8 @@ impl Checker {
             feedback: Vec::new(),
             n_locals: 0,
             pointer_slot,
+            camera: None,
+            music: None,
         };
         let m = match v {
             None => {
@@ -334,7 +350,12 @@ impl Checker {
             Some(v) => self.obj(v, "/presentation", "presentation"),
         };
         if let Some(m) = m {
-            self.check_keys(m, &["canvas", "tokens", "root", "feedback"], "/presentation", "presentation");
+            self.check_keys(
+                m,
+                &["canvas", "tokens", "root", "feedback", "camera", "music", "text_field"],
+                "/presentation",
+                "presentation",
+            );
             if let Some(t) = m.get("tokens") {
                 self.tokens(t);
             }
@@ -348,6 +369,15 @@ impl Checker {
                         p.canvas.background = self.prop(b, &ptr(at, "background"), PK::Color);
                     }
                 }
+            }
+            if let Some(c) = m.get("camera") {
+                p.camera = self.camera(c);
+            }
+            if let Some(mu) = m.get("music") {
+                p.music = self.music(mu);
+            }
+            if let Some(t) = m.get("text_field") {
+                self.text_field(t);
             }
             match m.get("root") {
                 Some(r) => p.root = self.node(r, "/presentation/root"),
@@ -391,8 +421,11 @@ impl Checker {
             stroke_width: None,
             on_tap: None,
             on_drag: None,
+            on_press: None,
+            on_release: None,
             transitions: Vec::new(),
             animate_on: Vec::new(),
+            fixed: false,
         };
         let J::Object(m) = v else {
             self.pres_err(at, format!("a node must be an object, found {}", json_kind(v)), None);
@@ -409,7 +442,7 @@ impl Checker {
                 return node;
             }
             None => {
-                self.pres_err(at, "a node needs \"node\": one of group, stack, grid, repeat, rect, circle, text", None);
+                self.pres_err(at, format!("a node needs \"node\": one of {}", KINDS.join(", ")), None);
                 return node;
             }
         };
@@ -436,6 +469,17 @@ impl Checker {
         node.fill = self.opt_prop(m, "fill", at, PK::Color);
         node.stroke = self.opt_prop(m, "stroke", at, PK::Color);
         node.stroke_width = self.opt_prop(m, "stroke_width", at, PK::Num);
+        let outer_fixed = self.pres_fixed;
+        match m.get("fixed") {
+            None => {}
+            Some(J::Bool(b)) => self.pres_fixed |= *b,
+            Some(other) => self.pres_err(
+                &ptr(at, "fixed"),
+                format!("'fixed' must be true or false, found {}", json_kind(other)),
+                Some("\"fixed\": true keeps a node (and its children) in place when the camera moves".into()),
+            ),
+        }
+        node.fixed = self.pres_fixed;
 
         // Kind-specific props. Node locals are bound before the props that
         // can see them; the grid/repeat's own props see only outer locals.
@@ -488,17 +532,86 @@ impl Checker {
                     Some("bottom") => TextValign::Bottom,
                     _ => TextValign::Middle,
                 };
-                NodeKind::Text { text, size, font, weight, color, w, h, align, valign }
+                let wrap = match m.get("wrap") {
+                    None => false,
+                    Some(J::Bool(b)) => *b,
+                    Some(other) => {
+                        self.pres_err(&ptr(at, "wrap"), format!("'wrap' must be true or false, found {}", json_kind(other)), None);
+                        false
+                    }
+                };
+                if wrap && w.is_none() {
+                    self.pres_err(
+                        &ptr(at, "wrap"),
+                        "'wrap' needs a box width 'w' to wrap to",
+                        Some("like {\"node\": \"text\", \"w\": 280, \"wrap\": true, ...}".into()),
+                    );
+                }
+                NodeKind::Text { text, size, font, weight, color, w, h, align, valign, wrap }
+            }
+            "image" => {
+                let asset = match m.get("asset") {
+                    Some(a) => self.asset_prop(a, &ptr(at, "asset"), AssetUse::Image),
+                    None => {
+                        self.pres_err(at, "an image node is missing 'asset'", Some("like {\"node\": \"image\", \"asset\": \"hero\"}".into()));
+                        Prop::Const(Value::None)
+                    }
+                };
+                NodeKind::Image {
+                    asset,
+                    w: self.opt_prop(m, "w", at, PK::Num),
+                    h: self.opt_prop(m, "h", at, PK::Num),
+                    frame: self.opt_prop(m, "frame", at, PK::Int),
+                    flip_x: self.opt_prop(m, "flip_x", at, PK::Bool),
+                    flip_y: self.opt_prop(m, "flip_y", at, PK::Bool),
+                }
+            }
+            "line" => {
+                // The start defaults to the node's origin; the end is required.
+                let zero = || Prop::Const(Value::Float(0.0));
+                let x1 = self.opt_prop(m, "x1", at, PK::Num).unwrap_or_else(zero);
+                let y1 = self.opt_prop(m, "y1", at, PK::Num).unwrap_or_else(zero);
+                let x2 = self.required_prop(m, "x2", at, PK::Num);
+                let y2 = self.required_prop(m, "y2", at, PK::Num);
+                if node.stroke_width.is_none() {
+                    node.stroke_width = Some(Prop::Const(Value::Float(2.0)));
+                }
+                NodeKind::Line { x1, y1, x2, y2 }
+            }
+            "poly" => {
+                let points = match m.get("points") {
+                    Some(pv) => self.points_prop(pv, &ptr(at, "points")),
+                    None => {
+                        self.pres_err(at, "this node is missing 'points'", Some("like \"points\": [[0, 0], [20, 0], [10, 16]]".into()));
+                        Prop::Const(Value::None)
+                    }
+                };
+                let closed = match m.get("closed") {
+                    None => true,
+                    Some(J::Bool(b)) => *b,
+                    Some(other) => {
+                        self.pres_err(&ptr(at, "closed"), format!("'closed' must be true or false, found {}", json_kind(other)), None);
+                        true
+                    }
+                };
+                NodeKind::Poly { points, closed }
             }
             _ => unreachable!(),
         };
         self.scope_reset(mark);
+        self.pres_fixed = outer_fixed;
 
         if let Some(t) = m.get("on_tap") {
             node.on_tap = self.binding(t, &ptr(at, "on_tap"));
         }
         if let Some(t) = m.get("on_drag") {
             node.on_drag = self.binding(t, &ptr(at, "on_drag"));
+        }
+        if let Some(t) = m.get("on_press") {
+            node.on_press = self.binding(t, &ptr(at, "on_press"));
+        }
+        if let Some(t) = m.get("on_release") {
+            node.on_release = self.binding(t, &ptr(at, "on_release"));
         }
         if let Some(t) = m.get("transition") {
             node.transitions = self.transitions(t, &ptr(at, "transition"));
@@ -731,7 +844,7 @@ impl Checker {
 
     fn feedback(&mut self, v: &J, at: &str) -> Option<Feedback> {
         let m = self.obj(v, at, "a feedback entry")?;
-        self.pres_keys(m, &["on", "do"], at, "a feedback entry");
+        self.pres_keys(m, FEEDBACK_KEYS, at, "a feedback entry");
         let oat = ptr(at, "on");
         let name = match m.get("on") {
             Some(J::String(s)) => s.as_str(),
@@ -742,6 +855,7 @@ impl Checker {
         };
         let (on, ectx) = self.event_ref(name, &oat)?;
         let saved = std::mem::replace(&mut self.root().event, ectx);
+        let when = m.get("when").map(|w| self.pres_expr(w, &ptr(at, "when"), Some(&Type::Bool)).0);
         let mut actions = Vec::new();
         let dat = ptr(at, "do");
         match m.get("do") {
@@ -752,63 +866,39 @@ impl Checker {
                     }
                 }
             }
-            _ => self.pres_err(at, "feedback needs \"do\": a list of sound, toast or shake actions", None),
+            _ => self.pres_err(at, "feedback needs \"do\": a list of sound, toast, shake, particles or haptic actions", None),
         }
         self.root().event = saved;
-        Some(Feedback { on, actions })
+        Some(Feedback { on, when, actions })
     }
 
     fn action(&mut self, v: &J, at: &str) -> Option<FeedbackAction> {
         let m = self.obj(v, at, "a feedback action")?;
-        let kinds = ["sound", "toast", "shake"];
-        let Some(kind) = kinds.iter().copied().find(|k| m.contains_key(*k)) else {
+        let Some(kind) = ACTIONS.iter().copied().find(|k| m.contains_key(*k)) else {
             let key = m.keys().next().cloned().unwrap_or_default();
             self.pres_err(
                 &ptr(at, &key),
                 format!("unknown feedback action '{key}'"),
-                dym(&key, kinds).or_else(|| Some("actions: sound, toast, shake".into())),
+                dym(&key, ACTIONS.iter().copied()).or_else(|| Some(format!("actions: {}", ACTIONS.join(", ")))),
             );
             return None;
         };
         self.pres_keys(m, &[kind], at, "a feedback action");
         let kat = ptr(at, kind);
-        let am = self.obj(&m[kind], &kat, kind)?;
-        let num = |s: &mut Self, key: &str, default: f64| -> mg_core::scene::Prop {
-            s.opt_prop(am, key, &kat, PK::Num).unwrap_or(Prop::Const(Value::Float(default)))
-        };
-        Some(match kind {
-            "sound" => {
-                self.pres_keys(am, &["wave", "note", "ms"], &kat, "sound");
-                let wave = self.opt_prop(am, "wave", &kat, PK::Str).unwrap_or(Prop::Const(Value::str("sine")));
-                if let Prop::Const(Value::Str(w)) = &wave {
-                    if Wave::from_name(w).is_none() {
-                        self.pres_err(
-                            &ptr(&kat, "wave"),
-                            format!("unknown wave '{w}'"),
-                            dym(w, ["sine", "square", "triangle", "sawtooth"]),
-                        );
-                    }
+        if kind == "haptic" {
+            let p = self.prop(&m[kind], &kat, PK::Str);
+            if let Prop::Const(Value::Str(s)) = &p {
+                if Haptic::from_name(s).is_none() {
+                    let hint = dym(s, HAPTICS.iter().copied()).or_else(|| Some(format!("haptics: {}", HAPTICS.join(", "))));
+                    self.pres_err(&kat, format!("unknown haptic '{s}'"), hint);
                 }
-                let note = match am.get("note") {
-                    Some(J::Number(n)) => Prop::Const(Value::Float(n.as_f64().unwrap_or(440.0))),
-                    Some(nv) => {
-                        let p = self.prop(nv, &ptr(&kat, "note"), PK::Str);
-                        if let Prop::Const(Value::Str(s)) = &p {
-                            if note_to_hz(s).is_none() {
-                                self.pres_err(
-                                    &ptr(&kat, "note"),
-                                    format!("'{s}' is not a note"),
-                                    Some("use a note name like C5, F#4 or Bb3, or a number in Hz".into()),
-                                );
-                            }
-                        }
-                        p
-                    }
-                    None => Prop::Const(Value::str("A4")),
-                };
-                let ms = num(self, "ms", 100.0);
-                FeedbackAction::Sound { wave, note, ms }
             }
+            return Some(FeedbackAction::Haptic(p));
+        }
+        let am = self.obj(&m[kind], &kat, kind)?;
+        Some(match kind {
+            "sound" => FeedbackAction::Sound(self.sound(am, &kat)),
+            "particles" => FeedbackAction::Particles(self.particles(am, &kat)),
             "toast" => {
                 self.pres_keys(am, &["text", "ms"], &kat, "toast");
                 let text = match am.get("text") {
@@ -818,15 +908,380 @@ impl Checker {
                         Prop::Const(Value::str(""))
                     }
                 };
-                let ms = num(self, "ms", 1500.0);
+                let ms = self.num_prop(am, "ms", &kat, 1500.0);
                 FeedbackAction::Toast { text, ms }
             }
             _ => {
                 self.pres_keys(am, &["px", "ms"], &kat, "shake");
-                let px = num(self, "px", 8.0);
-                let ms = num(self, "ms", 300.0);
+                let px = self.num_prop(am, "px", &kat, 8.0);
+                let ms = self.num_prop(am, "ms", &kat, 300.0);
                 FeedbackAction::Shake { px, ms }
             }
         })
+    }
+
+    /// An optional numeric prop with a default.
+    fn num_prop(&mut self, m: &Obj, key: &str, at: &str, default: f64) -> Prop {
+        self.opt_prop(m, key, at, PK::Num).unwrap_or(Prop::Const(Value::Float(default)))
+    }
+
+    /// Reports a constant numeric prop outside `[lo, hi]`.
+    fn check_range(&mut self, p: &Prop, at: &str, lo: f64, hi: f64, what: &str) {
+        if let Prop::Const(v) = p {
+            if let Some(x) = v.as_f64() {
+                if !(x >= lo && x <= hi) {
+                    self.pres_err(at, format!("expected {what}, found {}", mg_core::value::format_float(x)), None);
+                }
+            }
+        }
+    }
+
+    /// SPEC-v0.2 §6: sample (`asset`), jingle (`notes`) or synth note.
+    fn sound(&mut self, am: &Obj, at: &str) -> SoundAction {
+        const ALL: &[&str] = &["asset", "wave", "note", "notes", "step_ms", "slide", "ms", "volume", "rate"];
+        let (form, allowed): (&str, &[&str]) = if am.contains_key("asset") {
+            ("sample", &["asset", "volume", "rate"])
+        } else if am.contains_key("notes") {
+            ("jingle", &["wave", "notes", "step_ms", "slide", "volume"])
+        } else {
+            ("synth", &["wave", "note", "ms", "slide", "volume"])
+        };
+        for k in am.keys() {
+            if k.starts_with('_') || allowed.contains(&k.as_str()) {
+                continue;
+            }
+            let kat = ptr(at, k);
+            if ALL.contains(&k.as_str()) {
+                let hint = match (form, k.as_str()) {
+                    ("sample", _) => format!("a sample sound (\"asset\") only takes volume and rate; remove '{k}', or remove \"asset\" for a synth sound"),
+                    ("jingle", "note") => "use \"note\" for one note or \"notes\" for a jingle, not both".to_string(),
+                    ("jingle", "ms") => "each jingle note lasts \"step_ms\"".to_string(),
+                    ("synth", "step_ms") => "step_ms only applies to jingles (\"notes\": [...])".to_string(),
+                    (_, "rate") => "rate only applies to samples (\"asset\": ...)".to_string(),
+                    _ => format!("a {form} sound takes: {}", allowed.join(", ")),
+                };
+                self.pres_err(&kat, format!("'{k}' doesn't apply to a {form} sound"), Some(hint));
+            } else {
+                let hint = dym(k, ALL.iter().copied()).or_else(|| Some(format!("a {form} sound takes: {}", allowed.join(", "))));
+                self.pres_err(&kat, format!("unknown property '{k}' on sound"), hint);
+            }
+        }
+        let asset = am.get("asset").map(|a| self.asset_prop(a, &ptr(at, "asset"), AssetUse::Sound));
+        let wave = self.opt_prop(am, "wave", at, PK::Str).unwrap_or(Prop::Const(Value::str("sine")));
+        if let Prop::Const(Value::Str(w)) = &wave {
+            if Wave::from_name(w).is_none() {
+                let hint = dym(w, WAVES.iter().copied()).or_else(|| Some(format!("waves: {}", WAVES.join(", "))));
+                self.pres_err(&ptr(at, "wave"), format!("unknown wave '{w}'"), hint);
+            }
+        }
+        let note = match am.get("note") {
+            Some(n) => self.note_prop(n, &ptr(at, "note")),
+            None => Prop::Const(Value::str("A4")),
+        };
+        let notes = am.get("notes").map(|n| self.notes_prop(n, &ptr(at, "notes")));
+        let slide = am.get("slide").map(|n| self.note_prop(n, &ptr(at, "slide")));
+        let ms = self.num_prop(am, "ms", at, 100.0);
+        self.check_range(&ms, &ptr(at, "ms"), f64::MIN_POSITIVE, f64::MAX, "a positive number of ms");
+        let step_ms = self.num_prop(am, "step_ms", at, 80.0);
+        self.check_range(&step_ms, &ptr(at, "step_ms"), f64::MIN_POSITIVE, f64::MAX, "a positive number of ms");
+        let volume = self.num_prop(am, "volume", at, 0.6);
+        self.check_range(&volume, &ptr(at, "volume"), 0.0, 1.0, "a volume from 0 to 1");
+        let rate = self.num_prop(am, "rate", at, 1.0);
+        self.check_range(&rate, &ptr(at, "rate"), f64::MIN_POSITIVE, 16.0, "a playback rate above 0 (1 = normal speed)");
+        SoundAction { asset, wave, note, notes, step_ms, slide, ms, volume, rate }
+    }
+
+    fn check_note(&mut self, s: &str, at: &str) {
+        if note_to_hz(s).is_none_or(|hz| !(hz > 0.0 && hz.is_finite())) {
+            self.pres_err(at, format!("'{s}' is not a note"), Some("use a note name like C5, F#4 or Bb3, or a number in Hz".into()));
+        }
+    }
+
+    /// A note: a name (`C5`), a number in Hz, or an expression giving either.
+    fn note_prop(&mut self, v: &J, at: &str) -> Prop {
+        match v {
+            J::Number(n) => {
+                let hz = n.as_f64().unwrap_or(0.0);
+                if hz <= 0.0 {
+                    self.pres_err(at, format!("a frequency must be positive, found {n}"), None);
+                }
+                Prop::Const(Value::Float(hz))
+            }
+            J::String(s) if s.trim_start().starts_with('=') => {
+                let src = s.replacen('=', " ", 1);
+                let (ir, t) = self.expr_src(&src, at, None);
+                let ir = match t {
+                    Type::Int => crate::check::to_float(ir),
+                    Type::Float | Type::Str | Type::Enum(_) | Type::Unknown => ir,
+                    t => {
+                        self.err_at(
+                            Code::TypeMismatch,
+                            at,
+                            format!("a note must be a note name (string) or a number in Hz, found {}", tyname(&t)),
+                            None,
+                        );
+                        ir
+                    }
+                };
+                match ir {
+                    IR::Const(v) => {
+                        if let Value::Str(s) = &v {
+                            self.check_note(s, at);
+                        }
+                        Prop::Const(v)
+                    }
+                    e => Prop::Expr(e),
+                }
+            }
+            _ => {
+                let p = self.prop(v, at, PK::Str);
+                if let Prop::Const(Value::Str(s)) = &p {
+                    self.check_note(s, at);
+                }
+                p
+            }
+        }
+    }
+
+    /// Jingle notes: a literal list of note names / Hz numbers (lowered to a
+    /// list of strings), or an expression / token giving `list<string>`.
+    fn notes_prop(&mut self, v: &J, at: &str) -> Prop {
+        let check_list = |ck: &mut Self, items: &[Value]| {
+            if items.is_empty() {
+                ck.pres_err(at, "a jingle needs at least one note", Some("like \"notes\": [\"C5\", \"E5\", \"G5\"]".into()));
+            }
+            for (i, it) in items.iter().enumerate() {
+                if let Value::Str(s) = it {
+                    ck.check_note(s, &ptr(at, &i.to_string()));
+                }
+            }
+        };
+        match v {
+            J::Array(items) => {
+                let mut out = Vec::with_capacity(items.len());
+                for (i, it) in items.iter().enumerate() {
+                    match it {
+                        J::String(s) => out.push(Value::str(s)),
+                        J::Number(n) => out.push(Value::str(&n.to_string())),
+                        other => self.pres_err(
+                            &ptr(at, &i.to_string()),
+                            format!("a note must be a note name or a number in Hz, found {}", json_kind(other)),
+                            None,
+                        ),
+                    }
+                }
+                check_list(self, &out);
+                Prop::Const(Value::list(out))
+            }
+            // A string is always an expression here (a leading '=' is tolerated).
+            J::String(s) => {
+                let src = if s.trim_start().starts_with('=') { s.replacen('=', " ", 1) } else { s.clone() };
+                let (ir, _) = self.expr_src(&src, at, Some(&Type::list(Type::Str)));
+                match ir {
+                    IR::Const(v) => {
+                        if let Some(items) = v.as_list() {
+                            let items = items.clone();
+                            check_list(self, &items);
+                        }
+                        Prop::Const(v)
+                    }
+                    e => Prop::Expr(e),
+                }
+            }
+            other => {
+                self.pres_err(at, format!("notes must be a list of notes, found {}", json_kind(other)), Some("like \"notes\": [\"C5\", \"E5\", \"G5\"]".into()));
+                Prop::Const(Value::None)
+            }
+        }
+    }
+
+    /// SPEC-v0.2 §7.
+    fn particles(&mut self, am: &Obj, at: &str) -> ParticlesAction {
+        self.pres_keys(am, &["x", "y", "count", "color", "speed", "size", "ms", "gravity", "spread"], at, "particles");
+        let xy = |ck: &mut Self, key: &str| match ck.opt_prop(am, key, at, PK::Num) {
+            Some(p) => p,
+            None => {
+                ck.pres_err(
+                    at,
+                    format!("particles needs '{key}' (world coordinates)"),
+                    Some(format!("like \"{key}\": \"= event.{key}\" or a number")),
+                );
+                Prop::Const(Value::Float(0.0))
+            }
+        };
+        let x = xy(self, "x");
+        let y = xy(self, "y");
+        let count = self.opt_prop(am, "count", at, PK::Int).unwrap_or(Prop::Const(Value::Int(12)));
+        if let Prop::Const(Value::Int(n)) = &count {
+            let cat = ptr(at, "count");
+            if *n < 1 {
+                self.pres_err(&cat, format!("count must be at least 1, found {n}"), None);
+            } else if *n as usize > MAX_PARTICLES_PER_BURST {
+                self.err_at(Code::Limit, &cat, format!("count is {n}; the limit is {MAX_PARTICLES_PER_BURST} particles per burst"), None);
+            }
+        }
+        let color = self.opt_prop(am, "color", at, PK::Color).unwrap_or(Prop::Const(Value::str("#FFFFFF")));
+        let speed = self.num_prop(am, "speed", at, 200.0);
+        self.check_range(&speed, &ptr(at, "speed"), 0.0, f64::MAX, "a speed >= 0");
+        let size = self.num_prop(am, "size", at, 4.0);
+        self.check_range(&size, &ptr(at, "size"), f64::MIN_POSITIVE, f64::MAX, "a positive size");
+        let ms = self.num_prop(am, "ms", at, 500.0);
+        self.check_range(&ms, &ptr(at, "ms"), f64::MIN_POSITIVE, f64::MAX, "a positive number of ms");
+        let gravity = self.num_prop(am, "gravity", at, 0.0);
+        let spread = self.num_prop(am, "spread", at, 360.0);
+        self.check_range(&spread, &ptr(at, "spread"), 0.0, 360.0, "an angle from 0 to 360 degrees");
+        ParticlesAction { x, y, count, color, speed, size, ms, gravity, spread }
+    }
+
+    /// An asset name prop (literal, token or `= expression` giving a string).
+    /// Constant names are checked against the declared assets.
+    fn asset_prop(&mut self, v: &J, at: &str, want: AssetUse) -> Prop {
+        let p = self.prop(v, at, PK::Str);
+        if let Prop::Const(Value::Str(s)) = &p {
+            self.check_asset_name(s, at, want);
+        }
+        p
+    }
+
+    /// Poly `points`: a literal list of `[x, y]` pairs (lowered to `vec2`s) or
+    /// an expression giving `list<vec2>` or `list<ivec2>`.
+    fn points_prop(&mut self, v: &J, at: &str) -> Prop {
+        let count_check = |ck: &mut Self, n: usize| {
+            if n > MAX_POLY_POINTS {
+                ck.err_at(Code::Limit, at, format!("{n} points; the limit is {MAX_POLY_POINTS} per poly"), None);
+            } else if n < 2 {
+                ck.pres_err(at, format!("a poly needs at least 2 points, found {n}"), None);
+            }
+        };
+        match v {
+            J::Array(items) => {
+                count_check(self, items.len());
+                let mut out = Vec::with_capacity(items.len());
+                for (i, it) in items.iter().enumerate() {
+                    match it.as_array().map(|p| p.as_slice()) {
+                        Some([J::Number(x), J::Number(y)]) => {
+                            out.push(Value::Vec2(x.as_f64().unwrap_or(0.0), y.as_f64().unwrap_or(0.0)))
+                        }
+                        _ => self.pres_err(
+                            &ptr(at, &i.to_string()),
+                            format!("a point must be [x, y] (two numbers), found {it}"),
+                            None,
+                        ),
+                    }
+                }
+                Prop::Const(Value::list(out))
+            }
+            // A string is always an expression here (a leading '=' is tolerated).
+            J::String(s) => {
+                let src = if s.trim_start().starts_with('=') { s.replacen('=', " ", 1) } else { s.clone() };
+                let (ir, t) = self.expr_src(&src, at, None);
+                let ok = match &t {
+                    Type::List(e) => matches!(**e, Type::Vec2 | Type::IVec2 | Type::Unknown),
+                    Type::Unknown => true,
+                    _ => false,
+                };
+                if !ok {
+                    self.err_at(
+                        Code::TypeMismatch,
+                        at,
+                        format!("points must be list<vec2> or list<ivec2>, found {}", tyname(&t)),
+                        Some("like \"= [vec(0, 0), vec(20, 0), vec(10, 16)]\"".into()),
+                    );
+                }
+                match ir {
+                    IR::Const(v) => {
+                        if let Some(items) = v.as_list() {
+                            count_check(self, items.len());
+                        }
+                        Prop::Const(v)
+                    }
+                    // A list literal (`[vec(0, 0), ...]`) has a known length.
+                    e => {
+                        if let IR::List(items) = &e {
+                            count_check(self, items.len());
+                        }
+                        Prop::Expr(e)
+                    }
+                }
+            }
+            other => {
+                self.pres_err(
+                    at,
+                    format!("points must be a list of [x, y] pairs or an '=' expression, found {}", json_kind(other)),
+                    Some("like \"points\": [[0, 0], [20, 0], [10, 16]]".into()),
+                );
+                Prop::Const(Value::None)
+            }
+        }
+    }
+
+    fn camera(&mut self, v: &J) -> Option<Camera> {
+        let at = "/presentation/camera";
+        let m = self.obj(v, at, "camera")?;
+        self.pres_keys(m, &["x", "y"], at, "camera");
+        // Camera coordinates are always expressions ("0" and "= p.x" both work).
+        let coord = |ck: &mut Self, key: &str| match m.get(key) {
+            None => Prop::Const(Value::Float(0.0)),
+            Some(v) => match ck.pres_expr(v, &ptr(at, key), Some(&Type::Float)).0 {
+                IR::Const(c) => Prop::Const(c),
+                e => Prop::Expr(e),
+            },
+        };
+        let x = coord(self, "x");
+        let y = coord(self, "y");
+        Some(Camera { x, y })
+    }
+
+    fn music(&mut self, v: &J) -> Option<Music> {
+        let at = "/presentation/music";
+        let m = self.obj(v, at, "music")?;
+        self.pres_keys(m, &["asset", "volume", "playing"], at, "music");
+        let asset = match m.get("asset") {
+            Some(a) => self.asset_prop(a, &ptr(at, "asset"), AssetUse::Sound),
+            None => {
+                self.pres_err(at, "music needs 'asset': a sound asset to loop", Some("like \"music\": {\"asset\": \"theme\", \"volume\": 0.4}".into()));
+                return None;
+            }
+        };
+        let volume = self.num_prop(m, "volume", at, 0.6);
+        self.check_range(&volume, &ptr(at, "volume"), 0.0, 1.0, "a volume from 0 to 1");
+        let playing = self.opt_prop(m, "playing", at, PK::Bool);
+        Some(Music { asset, volume, playing })
+    }
+
+    fn text_field(&mut self, v: &J) {
+        let at = "/presentation/text_field";
+        let Some(m) = self.obj(v, at, "text_field") else { return };
+        self.pres_keys(m, &["x", "y", "w", "h", "size"], at, "text_field");
+        let get = |ck: &mut Self, key: &str, positive: bool| -> Option<f64> {
+            let x = ck.num_lit(m, key, at, Some(f64::NAN));
+            if x.is_nan() {
+                return None;
+            }
+            if positive && x <= 0.0 {
+                ck.pres_err(&ptr(at, key), format!("'{key}' must be positive, found {}", mg_core::value::format_float(x)), None);
+            }
+            Some(x)
+        };
+        let parts = [get(self, "x", false), get(self, "y", false), get(self, "w", true), get(self, "h", true)];
+        let size = get(self, "size", true);
+        let given = ["x", "y", "w", "h"].iter().filter(|k| m.contains_key(**k)).count();
+        let rect = match parts {
+            [Some(x), Some(y), Some(w), Some(h)] => Some((x, y, w, h)),
+            _ => {
+                if given > 0 {
+                    let missing: Vec<&str> = ["x", "y", "w", "h"].into_iter().filter(|k| !m.contains_key(*k)).collect();
+                    if !missing.is_empty() {
+                        self.pres_err(
+                            at,
+                            format!("text_field is missing {}", missing.iter().map(|k| format!("'{k}'")).collect::<Vec<_>>().join(", ")),
+                            Some("give all of x, y, w and h (canvas units), or none for the default bar at the bottom".into()),
+                        );
+                    }
+                }
+                None
+            }
+        };
+        self.text_field = Some((rect, size));
     }
 }

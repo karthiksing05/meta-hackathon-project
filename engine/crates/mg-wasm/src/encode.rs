@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use mg_core::color::{to_hex, Rgba};
-use mg_core::frame::{DrawOp, Frame, Wave};
+use mg_core::frame::{DrawOp, Frame, Haptic, SoundKind, Wave};
 use mg_core::scene::{TextAlign, TextValign};
 
 // ---------------------------------------------------------------- JSON ----
@@ -26,6 +26,52 @@ pub fn frame_json(f: &Frame, out: &mut Vec<u8>) {
             out.push(b',');
         }
         match op {
+            DrawOp::Image(m) => {
+                out.extend_from_slice(b"{\"op\":\"image\",\"x\":");
+                num(out, m.x);
+                field_num(out, "y", m.y);
+                field_num(out, "w", m.w);
+                field_num(out, "h", m.h);
+                field_num(out, "asset", m.asset as f64);
+                field_num(out, "frame", m.frame as f64);
+                field_bool(out, "flip_x", m.flip_x);
+                field_bool(out, "flip_y", m.flip_y);
+                field_num(out, "rotation", m.rotation);
+                field_num(out, "scale", m.scale);
+                field_num(out, "opacity", m.opacity);
+                out.push(b'}');
+            }
+            DrawOp::Line(l) => {
+                out.extend_from_slice(b"{\"op\":\"line\",\"x1\":");
+                num(out, l.x1);
+                field_num(out, "y1", l.y1);
+                field_num(out, "x2", l.x2);
+                field_num(out, "y2", l.y2);
+                field_color(out, "stroke", Some(l.stroke));
+                field_num(out, "stroke_width", l.stroke_width);
+                field_num(out, "opacity", l.opacity);
+                out.push(b'}');
+            }
+            DrawOp::Poly(p) => {
+                out.extend_from_slice(b"{\"op\":\"poly\",\"points\":[");
+                for (k, &(x, y)) in p.points.iter().enumerate() {
+                    if k > 0 {
+                        out.push(b',');
+                    }
+                    out.push(b'[');
+                    num(out, x);
+                    out.push(b',');
+                    num(out, y);
+                    out.push(b']');
+                }
+                out.push(b']');
+                field_bool(out, "closed", p.closed);
+                field_color(out, "fill", p.fill);
+                field_color(out, "stroke", p.stroke);
+                field_num(out, "stroke_width", p.stroke_width);
+                field_num(out, "opacity", p.opacity);
+                out.push(b'}');
+            }
             DrawOp::Rect(r) => {
                 out.extend_from_slice(b"{\"op\":\"rect\",\"x\":");
                 num(out, r.x);
@@ -74,6 +120,9 @@ pub fn frame_json(f: &Frame, out: &mut Vec<u8>) {
                 field_num(out, "rotation", t.rotation);
                 field_num(out, "scale", t.scale);
                 field_num(out, "opacity", t.opacity);
+                field_num(out, "line_height", t.line_height);
+                field_color(out, "stroke", t.stroke);
+                field_num(out, "stroke_width", t.stroke_width);
                 out.push(b'}');
             }
         }
@@ -83,11 +132,33 @@ pub fn frame_json(f: &Frame, out: &mut Vec<u8>) {
         if i > 0 {
             out.push(b',');
         }
-        out.extend_from_slice(b"{\"wave\":\"");
-        out.extend_from_slice(s.wave.name().as_bytes());
-        out.extend_from_slice(b"\",\"freq\":");
-        num(out, s.freq_hz);
+        match &s.kind {
+            SoundKind::Synth { wave, freqs, step_ms, slide_to_hz } => {
+                out.extend_from_slice(b"{\"kind\":\"synth\",\"wave\":\"");
+                out.extend_from_slice(wave.name().as_bytes());
+                out.extend_from_slice(b"\",\"freqs\":[");
+                for (k, f) in freqs.iter().enumerate() {
+                    if k > 0 {
+                        out.push(b',');
+                    }
+                    num(out, *f);
+                }
+                out.push(b']');
+                field_num(out, "step_ms", *step_ms);
+                out.extend_from_slice(b",\"slide_hz\":");
+                match slide_to_hz {
+                    Some(hz) => num(out, *hz),
+                    None => out.extend_from_slice(b"null"),
+                }
+            }
+            SoundKind::Sample { asset, rate } => {
+                out.extend_from_slice(b"{\"kind\":\"sample\",\"asset\":");
+                num(out, *asset as f64);
+                field_num(out, "rate", *rate);
+            }
+        }
         field_num(out, "ms", s.ms);
+        field_num(out, "volume", s.volume);
         out.push(b'}');
     }
     out.extend_from_slice(b"],\"toasts\":[");
@@ -100,7 +171,27 @@ pub fn frame_json(f: &Frame, out: &mut Vec<u8>) {
         field_num(out, "ms", t.ms);
         out.push(b'}');
     }
-    out.extend_from_slice(b"],\"shake\":{\"px\":");
+    out.extend_from_slice(b"],\"haptics\":[");
+    for (i, h) in f.haptics.iter().enumerate() {
+        if i > 0 {
+            out.push(b',');
+        }
+        out.push(b'"');
+        out.extend_from_slice(h.name().as_bytes());
+        out.push(b'"');
+    }
+    out.extend_from_slice(b"],\"music\":");
+    match &f.music {
+        Some(m) => {
+            out.extend_from_slice(b"{\"asset\":");
+            num(out, m.asset as f64);
+            field_num(out, "volume", m.volume);
+            field_bool(out, "playing", m.playing);
+            out.push(b'}');
+        }
+        None => out.extend_from_slice(b"null"),
+    }
+    out.extend_from_slice(b",\"shake\":{\"px\":");
     num(out, f.shake_px);
     out.extend_from_slice(b"}}");
 }
@@ -127,6 +218,13 @@ fn field_num(out: &mut Vec<u8>, name: &str, v: f64) {
     out.extend_from_slice(name.as_bytes());
     out.extend_from_slice(b"\":");
     num(out, v);
+}
+
+fn field_bool(out: &mut Vec<u8>, name: &str, v: bool) {
+    out.push(b',');
+    out.push(b'"');
+    out.extend_from_slice(name.as_bytes());
+    out.extend_from_slice(if v { b"\":true" } else { b"\":false" });
 }
 
 fn field_color(out: &mut Vec<u8>, name: &str, c: Option<Rgba>) {
@@ -206,11 +304,45 @@ fn string(out: &mut Vec<u8>, s: &str) {
 
 // -------------------------------------------------------------- binary ----
 
-pub const MAGIC: u32 = 0x3146_474D; // "MGF1" little-endian
+/// `"MGF2"` little-endian. v0.2 frames (v0.1 was `"MGF1"`, a 10-word header).
+pub const MAGIC: u32 = 0x3246_474D;
+/// Header size in 4-byte words.
+pub const HEADER_WORDS: usize = 13;
 pub const FLAG_RESET_STRINGS: u32 = 1;
 pub const OP_RECT: u32 = 1;
 pub const OP_CIRCLE: u32 = 2;
 pub const OP_TEXT: u32 = 3;
+pub const OP_IMAGE: u32 = 4;
+pub const OP_LINE: u32 = 5;
+pub const OP_POLY: u32 = 6;
+/// v0.2.1 text head flags: an outline follows (`u32 stroke, f32 stroke_width`).
+pub const TEXT_STROKE: u32 = 1 << 8;
+/// v0.2.1 text head flag: several lines; `f32 line_height` follows.
+pub const TEXT_LINES: u32 = 1 << 9;
+pub const AUDIO_SYNTH: u32 = 0;
+pub const AUDIO_SAMPLE: u32 = 1;
+/// Header word 11 when the game has no music.
+pub const NO_MUSIC: u32 = 0xFFFF_FFFF;
+
+pub fn wave_code(w: Wave) -> u32 {
+    match w {
+        Wave::Sine => 0,
+        Wave::Square => 1,
+        Wave::Triangle => 2,
+        Wave::Sawtooth => 3,
+    }
+}
+
+pub fn haptic_code(h: Haptic) -> u32 {
+    match h {
+        Haptic::Light => 0,
+        Haptic::Medium => 1,
+        Haptic::Heavy => 2,
+        Haptic::Success => 3,
+        Haptic::Warning => 4,
+        Haptic::Error => 5,
+    }
+}
 /// When the string table grows past this, it is cleared and the next frame
 /// re-sends every string it uses (flag `FLAG_RESET_STRINGS`).
 pub const MAX_STRINGS: usize = 4096;
@@ -274,6 +406,40 @@ impl BinEncoder {
         let mut body = std::mem::take(&mut self.body);
         for op in &f.ops {
             match op {
+                DrawOp::Image(m) => {
+                    let flags = m.flip_x as u32 | (m.flip_y as u32) << 1;
+                    put_u32(&mut body, OP_IMAGE | flags << 8);
+                    put_f32(&mut body, m.x);
+                    put_f32(&mut body, m.y);
+                    put_f32(&mut body, m.w);
+                    put_f32(&mut body, m.h);
+                    put_u32(&mut body, m.asset as u32 | (m.frame as u32) << 16);
+                    put_f32(&mut body, m.rotation);
+                    put_f32(&mut body, m.scale);
+                    put_f32(&mut body, m.opacity);
+                }
+                DrawOp::Line(l) => {
+                    put_u32(&mut body, OP_LINE);
+                    put_f32(&mut body, l.x1);
+                    put_f32(&mut body, l.y1);
+                    put_f32(&mut body, l.x2);
+                    put_f32(&mut body, l.y2);
+                    put_u32(&mut body, l.stroke);
+                    put_f32(&mut body, l.stroke_width);
+                    put_f32(&mut body, l.opacity);
+                }
+                DrawOp::Poly(p) => {
+                    put_u32(&mut body, OP_POLY | (p.closed as u32) << 8);
+                    put_u32(&mut body, p.points.len() as u32);
+                    put_u32(&mut body, p.fill.unwrap_or(0));
+                    put_u32(&mut body, p.stroke.unwrap_or(0));
+                    put_f32(&mut body, p.stroke_width);
+                    put_f32(&mut body, p.opacity);
+                    for &(x, y) in &p.points {
+                        put_f32(&mut body, x);
+                        put_f32(&mut body, y);
+                    }
+                }
                 DrawOp::Rect(r) => {
                     put_u32(&mut body, OP_RECT);
                     put_f32(&mut body, r.x);
@@ -302,7 +468,16 @@ impl BinEncoder {
                 DrawOp::Text(t) => {
                     let text = self.intern(&t.text);
                     let font = self.intern(&t.font);
-                    put_u32(&mut body, OP_TEXT);
+                    let stroke = t.stroke.filter(|_| t.stroke_width > 0.0);
+                    let lines = t.text.contains('\n');
+                    let mut head = OP_TEXT;
+                    if stroke.is_some() {
+                        head |= TEXT_STROKE;
+                    }
+                    if lines {
+                        head |= TEXT_LINES;
+                    }
+                    put_u32(&mut body, head);
                     put_f32(&mut body, t.x);
                     put_f32(&mut body, t.y);
                     put_f32(&mut body, t.w);
@@ -325,27 +500,47 @@ impl BinEncoder {
                     put_f32(&mut body, t.rotation);
                     put_f32(&mut body, t.scale);
                     put_f32(&mut body, t.opacity);
+                    if let Some(c) = stroke {
+                        put_u32(&mut body, c);
+                        put_f32(&mut body, t.stroke_width);
+                    }
+                    if lines {
+                        put_f32(&mut body, t.line_height);
+                    }
                 }
             }
         }
         for s in &f.audio {
-            let wave = match s.wave {
-                Wave::Sine => 0,
-                Wave::Square => 1,
-                Wave::Triangle => 2,
-                Wave::Sawtooth => 3,
-            };
-            put_u32(&mut body, wave);
-            put_f32(&mut body, s.freq_hz);
-            put_f32(&mut body, s.ms);
+            match &s.kind {
+                SoundKind::Synth { wave, freqs, step_ms, slide_to_hz } => {
+                    let n = freqs.len().min(0xFFFF);
+                    put_u32(&mut body, AUDIO_SYNTH | wave_code(*wave) << 8 | (n as u32) << 16);
+                    put_f32(&mut body, s.volume);
+                    put_f32(&mut body, s.ms);
+                    put_f32(&mut body, *step_ms);
+                    put_f32(&mut body, slide_to_hz.unwrap_or(0.0));
+                    for f in &freqs[..n] {
+                        put_f32(&mut body, *f);
+                    }
+                }
+                SoundKind::Sample { asset, rate } => {
+                    put_u32(&mut body, AUDIO_SAMPLE | (*asset as u32) << 16);
+                    put_f32(&mut body, s.volume);
+                    put_f32(&mut body, s.ms);
+                    put_f32(&mut body, *rate);
+                }
+            }
         }
         for t in &f.toasts {
             let id = self.intern(&t.text);
             put_u32(&mut body, id);
             put_f32(&mut body, t.ms);
         }
+        for h in &f.haptics {
+            put_u32(&mut body, haptic_code(*h));
+        }
 
-        out.reserve(40 + self.strs.len() + body.len());
+        out.reserve(4 * HEADER_WORDS + self.strs.len() + body.len());
         put_u32(out, MAGIC);
         put_u32(out, flags);
         put_f32(out, f.width);
@@ -356,6 +551,17 @@ impl BinEncoder {
         put_u32(out, f.ops.len() as u32);
         put_u32(out, f.audio.len() as u32);
         put_u32(out, f.toasts.len() as u32);
+        put_u32(out, f.haptics.len() as u32);
+        match &f.music {
+            Some(m) => {
+                put_u32(out, m.asset as u32 | (m.playing as u32) << 16);
+                put_f32(out, m.volume);
+            }
+            None => {
+                put_u32(out, NO_MUSIC);
+                put_f32(out, 0.0);
+            }
+        }
         out.extend_from_slice(&self.strs);
         out.extend_from_slice(&body);
         self.body = body;
@@ -375,7 +581,7 @@ fn put_f32(out: &mut Vec<u8>, v: f64) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mg_core::frame::{CircleOp, RectOp, Sound, TextOp, Toast};
+    use mg_core::frame::{CircleOp, ImageOp, LineOp, MusicState, PolyOp, RectOp, Sound, TextOp, Toast};
 
     fn sample(text: &str) -> Frame {
         Frame {
@@ -412,10 +618,13 @@ mod tests {
                     w: 100.0,
                     h: 20.0,
                     text: Rc::from(text),
+                    line_height: 22.5,
                     size: 18.0,
                     font: Rc::from("Inter"),
                     weight: 700,
                     color: 0x1A1A_1AFF,
+                    stroke: None,
+                    stroke_width: 0.0,
                     align: TextAlign::Right,
                     valign: TextValign::Bottom,
                     rotation: 0.0,
@@ -423,10 +632,318 @@ mod tests {
                     opacity: 1.0,
                 }),
             ],
-            audio: vec![Sound { wave: Wave::Triangle, freq_hz: 440.0, ms: 60.0 }],
+            audio: vec![synth(Wave::Triangle, vec![440.0], None)],
             toasts: vec![Toast { text: Rc::from("hi \"there\"\n"), ms: 1500.0 }],
             shake_px: 0.0,
+            haptics: vec![],
+            music: None,
         }
+    }
+
+    fn synth(wave: Wave, freqs: Vec<f64>, slide: Option<f64>) -> Sound {
+        Sound { kind: SoundKind::Synth { wave, freqs, step_ms: 80.0, slide_to_hz: slide }, volume: 0.6, ms: 60.0 }
+    }
+
+    /// A frame with every v0.2 addition.
+    fn sample_v2() -> Frame {
+        let mut f = sample("Score: 12");
+        f.ops.push(DrawOp::Image(ImageOp {
+            x: 10.0,
+            y: 20.25,
+            w: 34.0,
+            h: 24.0,
+            asset: 3,
+            frame: 5,
+            flip_x: true,
+            flip_y: false,
+            rotation: 15.0,
+            scale: 1.5,
+            opacity: 0.75,
+        }));
+        f.ops.push(DrawOp::Line(LineOp {
+            x1: 0.0,
+            y1: 1.0,
+            x2: 100.5,
+            y2: -20.0,
+            stroke: 0x1122_33FF,
+            stroke_width: 3.0,
+            opacity: 1.0,
+        }));
+        f.ops.push(DrawOp::Poly(PolyOp {
+            points: vec![(0.0, 0.0), (10.0, 0.0), (5.0, 8.5)],
+            closed: true,
+            fill: Some(0xFFD1_66FF),
+            stroke: None,
+            stroke_width: 2.0,
+            opacity: 0.5,
+        }));
+        f.ops.push(DrawOp::Poly(PolyOp {
+            points: vec![],
+            closed: false,
+            fill: None,
+            stroke: Some(0x0000_00FF),
+            stroke_width: 1.0,
+            opacity: 1.0,
+        }));
+        f.audio = vec![
+            synth(Wave::Square, vec![523.25, 659.25, 783.99, 1046.5], None),
+            synth(Wave::Sawtooth, vec![261.63], Some(523.25)),
+            Sound { kind: SoundKind::Sample { asset: 7, rate: 1.25 }, volume: 0.8, ms: 0.0 },
+        ];
+        f.haptics = vec![Haptic::Light, Haptic::Error];
+        f.music = Some(MusicState { asset: 2, volume: 0.4, playing: true });
+        f
+    }
+
+    // ---- a test decoder that mirrors `decodeFrame` in web/microgame.js ----
+
+    struct Rd<'a> {
+        b: &'a [u8],
+        o: usize,
+    }
+    impl Rd<'_> {
+        fn u32(&mut self) -> u32 {
+            let v = u32::from_le_bytes(self.b[self.o..self.o + 4].try_into().unwrap());
+            self.o += 4;
+            v
+        }
+        fn f32(&mut self) -> f64 {
+            let v = f32::from_le_bytes(self.b[self.o..self.o + 4].try_into().unwrap());
+            self.o += 4;
+            v as f64
+        }
+    }
+
+    fn opt(c: u32) -> Option<u32> {
+        (c != 0).then_some(c)
+    }
+    fn f32r(v: f64) -> f64 {
+        v as f32 as f64
+    }
+
+    /// Decodes a binary frame back into a `Frame` (values rounded to f32).
+    fn decode(b: &[u8], strings: &mut Vec<String>) -> Frame {
+        let mut r = Rd { b, o: 0 };
+        assert_eq!(r.u32(), MAGIC);
+        let flags = r.u32();
+        let (width, height, background, shake_px) = (r.f32(), r.f32(), r.u32(), r.f32());
+        let (n_str, n_ops, n_audio, n_toasts, n_haptics) = (r.u32(), r.u32(), r.u32(), r.u32(), r.u32());
+        let music_word = r.u32();
+        let music_vol = r.f32();
+        if flags & FLAG_RESET_STRINGS != 0 {
+            strings.clear();
+        }
+        for _ in 0..n_str {
+            let id = r.u32() as usize;
+            let len = r.u32() as usize;
+            let s = std::str::from_utf8(&b[r.o..r.o + len]).unwrap().to_string();
+            r.o += (len + 3) & !3;
+            if strings.len() <= id {
+                strings.resize(id + 1, String::new());
+            }
+            strings[id] = s;
+        }
+        let mut ops = Vec::new();
+        for _ in 0..n_ops {
+            let head = r.u32();
+            let op = match head & 0xff {
+                OP_RECT => DrawOp::Rect(RectOp {
+                    x: r.f32(),
+                    y: r.f32(),
+                    w: r.f32(),
+                    h: r.f32(),
+                    radius: r.f32(),
+                    fill: opt(r.u32()),
+                    stroke: opt(r.u32()),
+                    stroke_width: r.f32(),
+                    rotation: r.f32(),
+                    scale: r.f32(),
+                    opacity: r.f32(),
+                }),
+                OP_CIRCLE => DrawOp::Circle(CircleOp {
+                    x: r.f32(),
+                    y: r.f32(),
+                    r: r.f32(),
+                    fill: opt(r.u32()),
+                    stroke: opt(r.u32()),
+                    stroke_width: r.f32(),
+                    scale: r.f32(),
+                    opacity: r.f32(),
+                }),
+                OP_TEXT => {
+                    let (x, y, w, h) = (r.f32(), r.f32(), r.f32(), r.f32());
+                    let text = Rc::from(strings[r.u32() as usize].as_str());
+                    let size = r.f32();
+                    let font = Rc::from(strings[r.u32() as usize].as_str());
+                    let packed = r.u32();
+                    let align = [TextAlign::Left, TextAlign::Center, TextAlign::Right][((packed >> 16) & 0xff) as usize];
+                    let valign = [TextValign::Top, TextValign::Middle, TextValign::Bottom][(packed >> 24) as usize];
+                    let (color, rotation, scale, opacity) = (r.u32(), r.f32(), r.f32(), r.f32());
+                    let (stroke, stroke_width) =
+                        if head & TEXT_STROKE != 0 { (Some(r.u32()), r.f32()) } else { (None, 0.0) };
+                    // Single-line ops leave the line height to the decoder.
+                    let line_height = if head & TEXT_LINES != 0 { r.f32() } else { size * 1.25 };
+                    DrawOp::Text(TextOp {
+                        x,
+                        y,
+                        w,
+                        h,
+                        text,
+                        line_height,
+                        size,
+                        font,
+                        weight: (packed & 0xffff) as u16,
+                        align,
+                        valign,
+                        color,
+                        stroke,
+                        stroke_width,
+                        rotation,
+                        scale,
+                        opacity,
+                    })
+                }
+                OP_IMAGE => {
+                    let (x, y, w, h) = (r.f32(), r.f32(), r.f32(), r.f32());
+                    let af = r.u32();
+                    DrawOp::Image(ImageOp {
+                        x,
+                        y,
+                        w,
+                        h,
+                        asset: (af & 0xffff) as u16,
+                        frame: (af >> 16) as u16,
+                        flip_x: head & (1 << 8) != 0,
+                        flip_y: head & (2 << 8) != 0,
+                        rotation: r.f32(),
+                        scale: r.f32(),
+                        opacity: r.f32(),
+                    })
+                }
+                OP_LINE => DrawOp::Line(LineOp {
+                    x1: r.f32(),
+                    y1: r.f32(),
+                    x2: r.f32(),
+                    y2: r.f32(),
+                    stroke: r.u32(),
+                    stroke_width: r.f32(),
+                    opacity: r.f32(),
+                }),
+                OP_POLY => {
+                    let n = r.u32();
+                    let (fill, stroke, stroke_width, opacity) = (opt(r.u32()), opt(r.u32()), r.f32(), r.f32());
+                    let points = (0..n).map(|_| (r.f32(), r.f32())).collect();
+                    DrawOp::Poly(PolyOp { points, closed: head & (1 << 8) != 0, fill, stroke, stroke_width, opacity })
+                }
+                t => panic!("bad tag {t}"),
+            };
+            ops.push(op);
+        }
+        let waves = [Wave::Sine, Wave::Square, Wave::Triangle, Wave::Sawtooth];
+        let mut audio = Vec::new();
+        for _ in 0..n_audio {
+            let head = r.u32();
+            let (volume, ms) = (r.f32(), r.f32());
+            let kind = match head & 0xff {
+                AUDIO_SYNTH => {
+                    let step_ms = r.f32();
+                    let slide = r.f32();
+                    let freqs = (0..head >> 16).map(|_| r.f32()).collect();
+                    SoundKind::Synth {
+                        wave: waves[((head >> 8) & 0xff) as usize],
+                        freqs,
+                        step_ms,
+                        slide_to_hz: (slide != 0.0).then_some(slide),
+                    }
+                }
+                AUDIO_SAMPLE => SoundKind::Sample { asset: (head >> 16) as u16, rate: r.f32() },
+                k => panic!("bad audio kind {k}"),
+            };
+            audio.push(Sound { kind, volume, ms });
+        }
+        let toasts =
+            (0..n_toasts).map(|_| Toast { text: Rc::from(strings[r.u32() as usize].as_str()), ms: r.f32() }).collect();
+        let hs = [Haptic::Light, Haptic::Medium, Haptic::Heavy, Haptic::Success, Haptic::Warning, Haptic::Error];
+        let haptics = (0..n_haptics).map(|_| hs[r.u32() as usize]).collect();
+        assert_eq!(r.o, b.len(), "trailing bytes");
+        let music = (music_word != NO_MUSIC).then_some(MusicState {
+            asset: (music_word & 0xffff) as u16,
+            volume: music_vol,
+            playing: music_word & (1 << 16) != 0,
+        });
+        Frame { width, height, background, ops, audio, toasts, shake_px, haptics, music }
+    }
+
+    /// `f` with every float rounded to f32, as the binary format carries it.
+    fn rounded(f: &Frame) -> Frame {
+        let mut g = f.clone();
+        g.width = f32r(g.width);
+        g.height = f32r(g.height);
+        g.shake_px = f32r(g.shake_px);
+        for op in &mut g.ops {
+            match op {
+                DrawOp::Rect(r) => {
+                    for v in [&mut r.x, &mut r.y, &mut r.w, &mut r.h, &mut r.radius, &mut r.stroke_width] {
+                        *v = f32r(*v);
+                    }
+                    for v in [&mut r.rotation, &mut r.scale, &mut r.opacity] {
+                        *v = f32r(*v);
+                    }
+                }
+                DrawOp::Circle(c) => {
+                    for v in [&mut c.x, &mut c.y, &mut c.r, &mut c.stroke_width, &mut c.scale, &mut c.opacity] {
+                        *v = f32r(*v);
+                    }
+                }
+                DrawOp::Text(t) => {
+                    for v in [&mut t.x, &mut t.y, &mut t.w, &mut t.h, &mut t.size, &mut t.rotation, &mut t.scale] {
+                        *v = f32r(*v);
+                    }
+                    t.opacity = f32r(t.opacity);
+                    t.stroke_width = f32r(t.stroke_width);
+                    t.line_height = if t.text.contains('\n') { f32r(t.line_height) } else { t.size * 1.25 };
+                }
+                DrawOp::Image(m) => {
+                    for v in [&mut m.x, &mut m.y, &mut m.w, &mut m.h, &mut m.rotation, &mut m.scale, &mut m.opacity] {
+                        *v = f32r(*v);
+                    }
+                }
+                DrawOp::Line(l) => {
+                    for v in [&mut l.x1, &mut l.y1, &mut l.x2, &mut l.y2, &mut l.stroke_width, &mut l.opacity] {
+                        *v = f32r(*v);
+                    }
+                }
+                DrawOp::Poly(p) => {
+                    p.stroke_width = f32r(p.stroke_width);
+                    p.opacity = f32r(p.opacity);
+                    for (x, y) in &mut p.points {
+                        *x = f32r(*x);
+                        *y = f32r(*y);
+                    }
+                }
+            }
+        }
+        for s in &mut g.audio {
+            s.volume = f32r(s.volume);
+            s.ms = f32r(s.ms);
+            match &mut s.kind {
+                SoundKind::Synth { freqs, step_ms, slide_to_hz, .. } => {
+                    *step_ms = f32r(*step_ms);
+                    *slide_to_hz = slide_to_hz.map(f32r);
+                    for f in freqs {
+                        *f = f32r(*f);
+                    }
+                }
+                SoundKind::Sample { rate, .. } => *rate = f32r(*rate),
+            }
+        }
+        for t in &mut g.toasts {
+            t.ms = f32r(t.ms);
+        }
+        if let Some(m) = &mut g.music {
+            m.volume = f32r(m.volume);
+        }
+        g
     }
 
     #[test]
@@ -441,8 +958,128 @@ mod tests {
         assert_eq!(v["ops"][2]["align"], "right");
         assert_eq!(v["ops"][2]["weight"], 700);
         assert_eq!(v["toasts"][0]["text"], "hi \"there\"\n");
+        assert_eq!(v["audio"][0]["kind"], "synth");
         assert_eq!(v["audio"][0]["wave"], "triangle");
+        assert_eq!(v["audio"][0]["freqs"], serde_json::json!([440]));
+        assert_eq!(v["audio"][0]["slide_hz"], serde_json::Value::Null);
+        assert_eq!(v["haptics"], serde_json::json!([]));
+        assert_eq!(v["music"], serde_json::Value::Null);
         assert_eq!(v["shake"]["px"], 0);
+    }
+
+    #[test]
+    fn json_v2_ops_audio_haptics_music() {
+        let mut out = Vec::new();
+        frame_json(&sample_v2(), &mut out);
+        let v: serde_json::Value = serde_json::from_slice(&out).expect("valid JSON");
+        let ops = v["ops"].as_array().unwrap();
+        assert_eq!(ops.len(), 7);
+        assert_eq!(
+            ops[3],
+            serde_json::json!({"op": "image", "x": 10, "y": 20.25, "w": 34, "h": 24, "asset": 3, "frame": 5,
+                "flip_x": true, "flip_y": false, "rotation": 15, "scale": 1.5, "opacity": 0.75})
+        );
+        assert_eq!(
+            ops[4],
+            serde_json::json!({"op": "line", "x1": 0, "y1": 1, "x2": 100.5, "y2": -20, "stroke": "#112233",
+                "stroke_width": 3, "opacity": 1})
+        );
+        assert_eq!(ops[5]["points"], serde_json::json!([[0, 0], [10, 0], [5, 8.5]]));
+        assert_eq!(ops[5]["closed"], true);
+        assert_eq!(ops[5]["stroke"], serde_json::Value::Null);
+        assert_eq!(ops[6]["points"], serde_json::json!([]));
+        assert_eq!(ops[6]["fill"], serde_json::Value::Null);
+        assert_eq!(
+            v["audio"][0],
+            serde_json::json!({"kind": "synth", "wave": "square", "freqs": [523.25, 659.25, 783.99, 1046.5],
+                "step_ms": 80, "slide_hz": null, "ms": 60, "volume": 0.6})
+        );
+        assert_eq!(v["audio"][1]["slide_hz"], 523.25);
+        assert_eq!(
+            v["audio"][2],
+            serde_json::json!({"kind": "sample", "asset": 7, "rate": 1.25, "ms": 0, "volume": 0.8})
+        );
+        assert_eq!(v["haptics"], serde_json::json!(["light", "error"]));
+        assert_eq!(v["music"], serde_json::json!({"asset": 2, "volume": 0.4, "playing": true}));
+    }
+
+    #[test]
+    fn binary_round_trip_v2() {
+        let mut enc = BinEncoder::new();
+        let mut strings = Vec::new();
+        for f in [sample("a"), sample_v2(), sample_v2(), sample("b")] {
+            let mut out = Vec::new();
+            enc.encode(&f, &mut out);
+            assert_eq!(out.len() % 4, 0);
+            let back = decode(&out, &mut strings);
+            assert_eq!(back.ops, rounded(&f).ops);
+            assert_eq!(back.audio, rounded(&f).audio);
+            assert_eq!(back.toasts, f.toasts);
+            assert_eq!(back.haptics, f.haptics);
+            assert_eq!(back.music, rounded(&f).music);
+            assert_eq!(back.background, f.background);
+        }
+        // Sizes: image 9 words, line 8, poly 6 + 2n, synth 5 + n, sample 4, haptic 1.
+        let mut out = Vec::new();
+        enc.encode(&sample_v2(), &mut out);
+        let words = HEADER_WORDS + (12 + 9 + 13) + 9 + 8 + (6 + 6) + 6 + (5 + 4) + (5 + 1) + 4 + 2 + 2;
+        assert_eq!(out.len(), 4 * words);
+    }
+
+    /// v0.2.1: a wrapped, outlined text op.
+    fn outlined(text: &str, stroke: Option<u32>, stroke_width: f64) -> DrawOp {
+        DrawOp::Text(TextOp {
+            x: 4.0,
+            y: 8.0,
+            w: 120.0,
+            h: 45.0,
+            text: Rc::from(text),
+            line_height: 22.5,
+            size: 18.0,
+            font: Rc::from("Inter"),
+            weight: 400,
+            color: 0xFFFF_FFFF,
+            stroke,
+            stroke_width,
+            align: TextAlign::Left,
+            valign: TextValign::Top,
+            rotation: 0.0,
+            scale: 1.0,
+            opacity: 1.0,
+        })
+    }
+
+    #[test]
+    fn text_lines_and_stroke_round_trip() {
+        let mut f = sample("x");
+        f.ops = vec![
+            outlined("two\nlines", Some(0x0000_00FF), 3.0),
+            outlined("one line", Some(0x1122_33FF), 2.5),
+            outlined("plain\nwrapped", None, 0.0),
+            outlined("plain", None, 0.0),
+        ];
+        // JSON carries all three new fields.
+        let mut out = Vec::new();
+        frame_json(&f, &mut out);
+        let v: serde_json::Value = serde_json::from_slice(&out).unwrap();
+        assert_eq!(v["ops"][0]["text"], "two\nlines");
+        assert_eq!(v["ops"][0]["line_height"], 22.5);
+        assert_eq!(v["ops"][0]["stroke"], "#000000");
+        assert_eq!(v["ops"][0]["stroke_width"], 3);
+        assert_eq!(v["ops"][3]["stroke"], serde_json::Value::Null);
+        // Binary: head flags add 2 words for a stroke and 1 for several lines.
+        let mut enc = BinEncoder::new();
+        let mut out = Vec::new();
+        enc.encode(&f, &mut out);
+        let mut strings = Vec::new();
+        let back = decode(&out, &mut strings);
+        assert_eq!(back.ops, rounded(&f).ops);
+        let mut again = Vec::new();
+        enc.encode(&f, &mut again);
+        let words = HEADER_WORDS + (13 + 2 + 1) + (13 + 2) + (13 + 1) + 13 + 6 + 2;
+        assert_eq!(again.len(), 4 * words);
+        let word = |i: usize| u32::from_le_bytes(again[i * 4..i * 4 + 4].try_into().unwrap());
+        assert_eq!(word(HEADER_WORDS), OP_TEXT | TEXT_STROKE | TEXT_LINES);
     }
 
     #[test]
@@ -455,16 +1092,17 @@ mod tests {
         assert_eq!(word(&a, 1), FLAG_RESET_STRINGS);
         assert_eq!(word(&a, 6), 3); // "Moves: 3", "Inter", toast text
         assert_eq!(word(&a, 7), 3);
+        assert_eq!(word(&a, 11), NO_MUSIC);
         let mut b = Vec::new();
         enc.encode(&sample("Moves: 3"), &mut b);
         assert_eq!(word(&b, 1), 0);
         assert_eq!(word(&b, 6), 0);
-        // header + ops (12 + 9 + 13 words) + audio (3) + toast (2)
-        assert_eq!(b.len(), 4 * (10 + 12 + 9 + 13 + 3 + 2));
+        // header + ops (12 + 9 + 13 words) + audio (synth, 1 note: 6) + toast (2)
+        assert_eq!(b.len(), 4 * (HEADER_WORDS + 12 + 9 + 13 + 6 + 2));
         let mut c = Vec::new();
         enc.encode(&sample("Moves: 4"), &mut c);
         assert_eq!(word(&c, 6), 1);
-        assert_eq!(word(&c, 10), 3); // new id
-        assert_eq!(word(&c, 11), 8); // byte length
+        assert_eq!(word(&c, HEADER_WORDS), 3); // new id
+        assert_eq!(word(&c, HEADER_WORDS + 1), 8); // byte length
     }
 }

@@ -17,3 +17,21 @@ pub const MAX_RENDER_OPS: usize = 2_000;
 pub const MAX_EVAL_STEPS_PER_EVENT: u64 = 2_000_000;
 /// Inputs waiting in the queue; extra inputs are dropped.
 pub const MAX_QUEUED_INPUTS: usize = 64;
+
+// ── v0.2 ────────────────────────────────────────────────────────────────
+/// Assets per game.
+pub const MAX_ASSETS: usize = 256;
+/// Bytes of one inline `svg` asset.
+pub const MAX_SVG_BYTES: usize = 256 * 1024;
+/// Bytes of one `data:` URI asset.
+pub const MAX_DATA_URI_BYTES: usize = 4 * 1024 * 1024;
+/// Points in one `poly` node.
+pub const MAX_POLY_POINTS: usize = 256;
+/// Particles alive at once (presentation only).
+pub const MAX_PARTICLES: usize = 512;
+/// Particles per burst.
+pub const MAX_PARTICLES_PER_BURST: usize = 64;
+/// Physics sub-steps per step.
+pub const MAX_PHYSICS_SUBSTEPS: u32 = 8;
+/// Characters in a text input value.
+pub const MAX_TEXT_INPUT_LEN: usize = 200;

@@ -4,7 +4,8 @@
 //   const engine = await Microgame.init('pkg/microgame.wasm');
 //   const diags  = engine.validate(json);           // Diagnostic[]
 //   const game   = engine.load(json, seed);         // Game, or throws MicrogameLoadError
-//   game.pointer('down', x, y); game.key(e.code, e.key); game.swipe('left');
+//   game.pointer('down', x, y); game.keyEvent(e.code, e.key, true); game.swipe('left');
+//   game.text('submit', 'hello'); game.assets(); game.log();
 //   game.step(16); const frame = game.frame();      // binary fast path, decoded
 //   game.status(); game.restart(); game.dispose();
 //
@@ -154,6 +155,38 @@ export class Game {
     this._call((m, h) => m.mg_pointer(h, k, x, y));
   }
 
+  /**
+   * v0.2 full keyboard event. code: KeyboardEvent.code; key: KeyboardEvent.key
+   * (only single printable characters are passed on as `char`); down: true
+   * for keydown, false for keyup. Returns true if it matched an input.
+   */
+  keyEvent(code, key, down = true) {
+    const ch = typeof key === 'string' && [...key].length === 1 ? key : '';
+    const c = utf8enc.encode(code || ''), k = utf8enc.encode(ch);
+    return this._call((m, h) => this.engine._withBytes(c, (cp, cn) =>
+      this.engine._withBytes(k, (kp, kn) => m.mg_key_event(h, cp, cn, kp, kn, down ? 1 : 0)))) === 1;
+  }
+
+  /** v0.2 text field. kind: 'submit' | 'change'. Returns true if it matched an input. */
+  text(kind, value) {
+    const k = kind === 'submit' || kind === 0 ? 0 : 1;
+    const bytes = utf8enc.encode(String(value ?? ''));
+    return this._call((m, h) => this.engine._withBytes(bytes, (p, n) => m.mg_text(h, k, p, n))) === 1;
+  }
+
+  /** v0.2 assets: [{id, name, kind: 'image'|'sound', src, svg, w, h, frames, cols, fps}]. */
+  assets() { return this.engine._resultJSON(this._call((m, h) => m.mg_assets(h))); }
+
+  /**
+   * The input log since load or restart (`microgame-log/1`), with the current
+   * result as `final`. `microgame verify game.json --log log.json` checks it.
+   * Pass `raw = true` for the JSON string.
+   */
+  log(raw = false) {
+    const s = this.engine._resultString(this._call((m, h) => m.mg_log(h)));
+    return raw ? s : JSON.parse(s);
+  }
+
   /** Tries each name in order (pass KeyboardEvent.code, then .key). Returns true if one matched. */
   key(...names) {
     for (const name of names) {
@@ -206,6 +239,16 @@ export class Game {
     this._meta = null;
   }
 
+  /**
+   * An independent copy of this game (state, scene and input log), e.g. for a
+   * bot to try a move and look ahead. Cheap. Dispose of it when done.
+   */
+  fork() {
+    const h = this._call((m, h) => m.mg_fork(h));
+    if (h < 0) throw new MicrogameCrash(`fork failed (${h})`);
+    return new Game(this.engine, h);
+  }
+
   state() { return this.engine._resultJSON(this._call((m, h) => m.mg_state_json(h))); }
   stateHash() { return this.engine._resultString(this._call((m, h) => m.mg_state_hash(h))); }
   /** Runtime diagnostics since the last call. */
@@ -219,13 +262,15 @@ export class Game {
 
 // ------------------------------------------------------- binary frames ----
 
-const MAGIC = 0x3146474d;
+const MAGIC = 0x3246474d; // "MGF2"
 const ALIGN = ['left', 'center', 'right'];
 const VALIGN = ['top', 'middle', 'bottom'];
 const WAVES = ['sine', 'square', 'triangle', 'sawtooth'];
+const HAPTICS = ['light', 'medium', 'heavy', 'success', 'warning', 'error'];
 
 function newFrame() {
-  return { width: 0, height: 0, background: 0, shake: 0, ops: [], audio: [], toasts: [], _pool: [] };
+  return { width: 0, height: 0, background: 0, shake: 0, ops: [], audio: [], toasts: [], haptics: [], music: null,
+    _pool: [] };
 }
 
 /**
@@ -244,7 +289,10 @@ export function decodeFrame(view, strings, out = newFrame()) {
   out.height = f32();
   out.background = u32();
   out.shake = f32();
-  const nStrings = u32(), nOps = u32(), nAudio = u32(), nToasts = u32();
+  const nStrings = u32(), nOps = u32(), nAudio = u32(), nToasts = u32(), nHaptics = u32();
+  const musicWord = u32(), musicVolume = f32();
+  out.music = musicWord === 0xffffffff ? null
+    : { asset: musicWord & 0xffff, playing: (musicWord >>> 16 & 1) === 1, volume: musicVolume };
   if (flags & 1) strings.length = 0;
   for (let i = 0; i < nStrings; i++) {
     const id = u32(), len = u32();
@@ -255,7 +303,8 @@ export function decodeFrame(view, strings, out = newFrame()) {
   out.ops.length = nOps;
   for (let i = 0; i < nOps; i++) {
     const op = pool[i] || (pool[i] = {});
-    const tag = u32();
+    const head = u32();
+    const tag = head & 0xff;
     if (tag === 1) {
       op.op = 'rect';
       op.x = f32(); op.y = f32(); op.w = f32(); op.h = f32(); op.radius = f32();
@@ -273,15 +322,53 @@ export function decodeFrame(view, strings, out = newFrame()) {
       const packed = u32();
       op.weight = packed & 0xffff; op.align = ALIGN[(packed >>> 16) & 0xff]; op.valign = VALIGN[packed >>> 24];
       op.color = u32(); op.rotation = f32(); op.scale = f32(); op.opacity = f32();
+      // v0.2.1 head flags: bit 8 an outline, bit 9 several lines.
+      if (head & 0x100) { op.stroke = u32(); op.stroke_width = f32(); } else { op.stroke = 0; op.stroke_width = 0; }
+      op.line_height = (head & 0x200) ? f32() : op.size * 1.25;
+    } else if (tag === 4) {
+      op.op = 'image';
+      op.x = f32(); op.y = f32(); op.w = f32(); op.h = f32();
+      const af = u32();
+      op.asset = af & 0xffff; op.frame = af >>> 16;
+      op.flip_x = (head & 0x100) !== 0; op.flip_y = (head & 0x200) !== 0;
+      op.rotation = f32(); op.scale = f32(); op.opacity = f32();
+    } else if (tag === 5) {
+      op.op = 'line';
+      op.x1 = f32(); op.y1 = f32(); op.x2 = f32(); op.y2 = f32();
+      op.stroke = u32(); op.stroke_width = f32(); op.opacity = f32();
+      op.rotation = 0; op.scale = 1;
+    } else if (tag === 6) {
+      op.op = 'poly';
+      op.closed = (head & 0x100) !== 0;
+      const n = u32();
+      op.fill = u32(); op.stroke = u32(); op.stroke_width = f32(); op.opacity = f32();
+      const pts = op.points instanceof Float32Array && op.points.length === 2 * n ? op.points : new Float32Array(2 * n);
+      for (let k = 0; k < 2 * n; k++) pts[k] = f32();
+      op.points = pts; // flat [x0, y0, x1, y1, ...]
+      op.rotation = 0; op.scale = 1;
     } else {
       throw new Error(`bad op tag ${tag} at byte ${o - 4}`);
     }
     out.ops[i] = op;
   }
   out.audio.length = 0;
-  for (let i = 0; i < nAudio; i++) out.audio.push({ wave: WAVES[u32()] || 'sine', freq: f32(), ms: f32() });
+  for (let i = 0; i < nAudio; i++) {
+    const head = u32();
+    const volume = f32(), ms = f32();
+    if ((head & 0xff) === 1) {
+      out.audio.push({ kind: 'sample', asset: head >>> 16, volume, ms, rate: f32() });
+    } else {
+      const step_ms = f32(), slide = f32();
+      const freqs = [];
+      for (let k = 0, n = head >>> 16; k < n; k++) freqs.push(f32());
+      out.audio.push({ kind: 'synth', wave: WAVES[(head >>> 8) & 0xff] || 'sine', freqs, step_ms,
+        slide_hz: slide > 0 ? slide : null, ms, volume });
+    }
+  }
   out.toasts.length = 0;
   for (let i = 0; i < nToasts; i++) out.toasts.push({ text: strings[u32()], ms: f32() });
+  out.haptics.length = 0;
+  for (let i = 0; i < nHaptics; i++) out.haptics.push(HAPTICS[u32()] || 'light');
   return out;
 }
 

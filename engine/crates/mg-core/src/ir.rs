@@ -36,6 +36,8 @@ pub type TimerId = u16;
 pub type Slot = u16;
 pub type RuleId = u16;
 pub type FieldIdx = u16;
+pub type AssetId = u16;
+pub type BodyGroupId = u16;
 
 #[derive(Clone, Debug)]
 pub struct Program {
@@ -53,6 +55,146 @@ pub struct Program {
     pub timer_names: Vec<Rc<str>>,
     pub objectives: Objectives,
     pub presentation: Presentation,
+    /// v0.2: assets, in declaration order. Index = `AssetId`.
+    pub assets: Vec<Asset>,
+    /// v0.2: optional arcade physics.
+    pub physics: Option<Physics>,
+    /// v0.2: present iff some input has a `text` source. Tells the shell to
+    /// show a text field. From the first text source in file order, with
+    /// placement from `presentation.text_field`.
+    pub text_input: Option<TextInputSpec>,
+}
+
+// ── v0.2: assets ────────────────────────────────────────────────────────────
+
+#[derive(Clone, Debug)]
+pub struct Asset {
+    pub name: Rc<str>,
+    pub kind: AssetKind,
+}
+
+#[derive(Clone, Debug)]
+pub enum AssetKind {
+    Image {
+        src: AssetSrc,
+        /// Size of one frame, canvas units.
+        w: f64,
+        h: f64,
+        /// >= 1
+        frames: u16,
+        /// >= 1, frames per row in the sheet.
+        cols: u16,
+        /// Default animation speed; 0 = static frame 0.
+        fps: f64,
+    },
+    Sound { src: AssetSrc },
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum AssetSrc {
+    /// Inline SVG markup.
+    Svg(Rc<str>),
+    /// `https://` URL or `data:` URI.
+    Url(Rc<str>),
+}
+
+impl AssetSrc {
+    pub fn as_str(&self) -> &str {
+        match self {
+            AssetSrc::Svg(s) | AssetSrc::Url(s) => s,
+        }
+    }
+}
+
+// ── v0.2: text input ────────────────────────────────────────────────────────
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct TextInputSpec {
+    pub placeholder: Rc<str>,
+    pub max_len: u32,
+    /// Placement in canvas units; `None` = shell default (bar at the bottom).
+    pub rect: Option<(f64, f64, f64, f64)>,
+    /// Font size in canvas units; `None` = shell default.
+    pub size: Option<f64>,
+}
+
+// ── v0.2: physics ───────────────────────────────────────────────────────────
+
+/// See `engine/SPEC-v0.2.md` §5 for the exact step semantics.
+#[derive(Clone, Debug)]
+pub struct Physics {
+    /// px/s².
+    pub gravity: (f64, f64),
+    /// `(x, y, w, h)`.
+    pub bounds: Option<(f64, f64, f64, f64)>,
+    /// In declaration order. Index = `BodyGroupId`.
+    pub bodies: Vec<BodyGroup>,
+    /// In file order.
+    pub collisions: Vec<CollisionRule>,
+    /// In file order.
+    pub on_bounds: Vec<BoundsRule>,
+}
+
+#[derive(Clone, Debug)]
+pub struct BodyGroup {
+    pub name: Rc<str>,
+    pub state: StateId,
+    /// The state var is `list<Record>` (true) or a single `Record` (false).
+    pub is_list: bool,
+    /// Field indices into the (name-sorted) record type. All are `float`.
+    pub x: FieldIdx,
+    pub y: FieldIdx,
+    pub vx: Option<FieldIdx>,
+    pub vy: Option<FieldIdx>,
+    pub shape: BodyShape,
+    pub gravity_scale: f64,
+    pub is_static: bool,
+    pub bounded: bool,
+    pub bounce: f64,
+    pub max_speed: Option<f64>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum BodyShape {
+    /// Field holding the radius.
+    Circle { r: FieldIdx },
+    /// Fields holding the full width and height (box centered at x, y).
+    Rect { w: FieldIdx, h: FieldIdx },
+}
+
+#[derive(Clone, Debug)]
+pub struct CollisionRule {
+    pub a: BodyGroupId,
+    pub b: BodyGroupId,
+    pub solid: bool,
+    pub bounce: f64,
+    pub emit: Option<PhysicsEmit>,
+}
+
+#[derive(Clone, Debug)]
+pub struct BoundsRule {
+    pub body: BodyGroupId,
+    /// Payload fields allowed: `A` (body index), `Nx`, `Ny`.
+    pub emit: PhysicsEmit,
+}
+
+/// A custom event emitted by physics, with its payload built from contact data.
+#[derive(Clone, Debug)]
+pub struct PhysicsEmit {
+    pub event: EventId,
+    /// One entry per declared payload field of the event, in payload order.
+    pub fields: Vec<ContactField>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ContactField {
+    /// `int`: index of the body in group a (0 for a single record).
+    A,
+    /// `int`: index of the body in group b.
+    B,
+    /// `float`: contact normal, pointing from b toward a.
+    Nx,
+    Ny,
 }
 
 #[derive(Clone, Debug)]
@@ -99,7 +241,7 @@ pub struct InputDef {
     /// time. Evaluated with the payload as `event`.
     pub guard: Option<Expr>,
     pub guard_n_locals: u16,
-    /// Keyboard / swipe sources.
+    /// Keyboard / swipe / pointer / text sources.
     pub sources: Vec<InputSource>,
 }
 
@@ -107,19 +249,39 @@ pub struct InputDef {
 pub struct InputSource {
     pub trigger: SourceTrigger,
     /// One expression per **declared** payload field (excluding `t`), in
-    /// payload order. Slot 0 holds the source record:
-    /// key: `{code: string}`; swipe: `{dir: ivec2}`.
+    /// payload order. Slot 0 holds the source record (fields name-sorted):
+    /// key: `{char: string, code: string}`; swipe: `{dir: ivec2}`;
+    /// pointer: `{x: float, y: float}` (world coords); text: `{value: string}`.
     pub with: Vec<Expr>,
     pub n_locals: u16,
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum SourceTrigger {
-    /// `{"key": "ArrowUp"}`. Matched against the browser `KeyboardEvent.code`
-    /// **or** `KeyboardEvent.key` string the shell passes in.
-    Key(Rc<str>),
+    /// `{"key": "ArrowUp"}` / `{"key": "any"}` (→ `code: None`), with
+    /// `"on": "up"` → `up: true`. A specific code is matched against the
+    /// browser `KeyboardEvent.code` **or** `KeyboardEvent.key` the shell passes.
+    Key { code: Option<Rc<str>>, up: bool },
     /// `{"swipe": "any"}` → `None`; `{"swipe": "left"}` → `Some((-1, 0))`.
     Swipe(Option<(i32, i32)>),
+    /// v0.2 `{"pointer": "down" | "up" | "move"}`: pointer anywhere that no
+    /// `on_tap`/`on_drag`/`on_press`/`on_release` node took. `move` only while the pointer is down.
+    Pointer(PointerPhase),
+    /// v0.2 `{"text": "submit" | "change"}`.
+    Text(TextPhase),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum PointerPhase {
+    Down,
+    Move,
+    Up,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum TextPhase {
+    Submit,
+    Change,
 }
 
 #[derive(Clone, Debug)]

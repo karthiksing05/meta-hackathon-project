@@ -37,6 +37,10 @@ pub enum Code {
     Duplicate,
     /// Presentation-specific problems (bad node kind, bad prop, bad token, bad color).
     Presentation,
+    /// Bad asset: source, size, kind, unknown id (v0.2).
+    Asset,
+    /// Bad physics section (v0.2).
+    Physics,
     /// Error raised while running (simulation or live play).
     Runtime,
     /// An engine limit was exceeded at load time or run time.
@@ -66,6 +70,8 @@ impl Code {
             Code::BadLambda => "E_BAD_LAMBDA",
             Code::Duplicate => "E_DUPLICATE",
             Code::Presentation => "E_PRESENTATION",
+            Code::Asset => "E_ASSET",
+            Code::Physics => "E_PHYSICS",
             Code::Runtime => "E_RUNTIME",
             Code::Limit => "E_LIMIT",
             Code::UnreachableRule => "W_UNREACHABLE_RULE",
