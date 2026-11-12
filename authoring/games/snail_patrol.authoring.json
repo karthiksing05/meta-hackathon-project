@@ -1,0 +1,337 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Snail Patrol",
+    "instructions": "Tap the garden snails before they cross the fence. Each wave is bigger and quicker. Lose a life and the wave restarts from your last saved score.",
+    "duration_s": 90
+  },
+  "uses": [
+    {
+      "fragment": "waves",
+      "params": {
+        "break_ms": 1800,
+        "waves_to_win": 5,
+        "end_on": "clear"
+      }
+    },
+    {
+      "fragment": "difficulty_curve",
+      "params": {
+        "from": 0.0,
+        "to": 1.0,
+        "over": 45000,
+        "curve": "ease_in"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Score"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      }
+    },
+    {
+      "fragment": "checkpoint",
+      "params": {
+        "penalty": 0,
+        "label": "Saved"
+      },
+      "bind": {
+        "setback": "life_lost"
+      }
+    }
+  ],
+  "types": {
+    "Snail": {
+      "id": "int",
+      "x": "float",
+      "y": "float",
+      "r": "float"
+    }
+  },
+  "state": {
+    "snails": {
+      "type": "list<Snail>",
+      "init": "[]"
+    },
+    "to_spawn": {
+      "type": "int",
+      "init": "0"
+    },
+    "next_id": {
+      "type": "int",
+      "init": "0"
+    },
+    "spawn_cd": {
+      "type": "float",
+      "init": "0.0"
+    }
+  },
+  "functions": {
+    "progress_now": {
+      "params": {},
+      "returns": "int",
+      "body": "score"
+    },
+    "wave_size": {
+      "params": {
+        "w": "int"
+      },
+      "returns": "int",
+      "body": "3 + 2 * w"
+    }
+  },
+  "events": {
+    "hit": {},
+    "checkpoint_reached": {}
+  },
+  "inputs": {
+    "tap": {
+      "payload": {
+        "x": "float",
+        "y": "float"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "fill_wave",
+      "on": "wave_started",
+      "do": [
+        {
+          "set": "to_spawn",
+          "to": "wave_size(event.index)"
+        },
+        {
+          "set": "spawn_cd",
+          "to": "0.0"
+        }
+      ]
+    },
+    {
+      "id": "spawn",
+      "on": "tick",
+      "when": "not in_break and to_spawn > 0",
+      "do": [
+        {
+          "set": "spawn_cd",
+          "to": "spawn_cd - event.dt"
+        },
+        {
+          "if": "spawn_cd <= 0.0",
+          "then": [
+            {
+              "set": "snails",
+              "to": "push(snails, {id: next_id, x: random_float(40.0, 320.0), y: -20.0, r: 20.0})"
+            },
+            {
+              "incr": "next_id"
+            },
+            {
+              "decr": "to_spawn"
+            },
+            {
+              "set": "spawn_cd",
+              "to": "max(350.0, 1100.0 - 500.0 * difficulty)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crawl",
+      "on": "tick",
+      "when": "not in_break",
+      "do": [
+        {
+          "set": "snails",
+          "to": "map(snails, s => {...s, y: s.y + (60.0 + 60.0 * difficulty) * event.dt / 1000.0})"
+        },
+        {
+          "if": "any(snails, s => s.y > 520.0)",
+          "then": [
+            {
+              "remove": "snails",
+              "where": "s => s.y > 520.0"
+            },
+            {
+              "emit": "hit"
+            }
+          ]
+        },
+        {
+          "if": "to_spawn == 0 and len(snails) == 0 and not in_break",
+          "then": [
+            {
+              "emit": "enemies_gone"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "squash",
+      "on": "tap",
+      "when": "not in_break",
+      "do": [
+        {
+          "let": {
+            "near": "filter(snails, s => overlaps_circle(vec(event.x, event.y), 1.0, vec(s.x, s.y), s.r + 12.0))"
+          }
+        },
+        {
+          "if": "len(near) > 0",
+          "then": [
+            {
+              "let": {
+                "gone": "first(near).id"
+              }
+            },
+            {
+              "remove": "snails",
+              "where": "s => s.id == gone"
+            },
+            {
+              "emit": "point"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "save_after_wave",
+      "on": "wave_cleared",
+      "do": [
+        {
+          "emit": "checkpoint_reached"
+        }
+      ]
+    },
+    {
+      "id": "redo_wave",
+      "on": "restore_checkpoint",
+      "do": [
+        {
+          "set": "score",
+          "to": "event.value"
+        },
+        {
+          "set": "snails",
+          "to": "[]"
+        },
+        {
+          "set": "to_spawn",
+          "to": "wave_size(wave)"
+        },
+        {
+          "set": "spawn_cd",
+          "to": "900.0"
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 640,
+          "fill": "#00000000",
+          "on_tap": {
+            "input": "tap",
+            "with": {
+              "x": "pointer.x",
+              "y": "pointer.y"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": 528,
+          "w": 360,
+          "h": 14,
+          "radius": 4,
+          "fill": "$secondary"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "snails",
+          "as": "s",
+          "key": "s.id",
+          "template": {
+            "node": "group",
+            "children": [
+              {
+                "node": "circle",
+                "x": "= s.x",
+                "y": "= s.y",
+                "r": "= s.r",
+                "fill": "$accent",
+                "role": "hazard"
+              },
+              {
+                "node": "circle",
+                "x": "= s.x + 4.0",
+                "y": "= s.y + 2.0",
+                "r": "= s.r * 0.55",
+                "fill": "$primary"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "hit",
+        "do": [
+          {
+            "sound": {
+              "wave": "square",
+              "note": "C3",
+              "ms": 100
+            }
+          }
+        ]
+      },
+      {
+        "on": "point",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "E5",
+              "ms": 50
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "content": {},
+  "playtest": {
+    "progress": "score * 1.0 + lives * 30.0"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Hangout Words",
+    "instructions": "Guess the secret hangout word in six tries. Green dots are in the right spot, gold dots are in the word but elsewhere, grey dots are not in it. Tap < to delete a letter.",
+    "duration_s": 150
+  },
+  "uses": [
+    { "fragment": "word_check", "params": { "length": 5, "max_guesses": 6, "on_solved": "win", "y": 100 } },
+    { "fragment": "keyboard", "params": { "letters": "abcdefghijklmnopqrstuvwxyz<", "cols": 7, "rows": 4, "y": 400 } }
+  ],
+  "state": {
+    "answer": { "type": "string", "init": "pick(content_words)" }
+  },
+  "objectives": {
+    "score": "10 * count(chars('abcdefghijklmnopqrstuvwxyz'), l => key_state(l) == 1) + (if solved then 50 * (6 - len(guesses)) else 0)",
+    "time_limit": "150s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": { "node": "text", "text": "= 'Score: ' + str(10 * count(chars('abcdefghijklmnopqrstuvwxyz'), l => key_state(l) == 1) + (if solved then 50 * (6 - len(guesses)) else 0))", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      }
+    ],
+    "feedback": []
+  },
+  "look": { "id": "paper", "tokens": {} },
+  "content": {
+    "words": ["movie", "salsa", "bingo", "music", "dance", "pizza", "cards", "beach", "lunch", "cakes", "party", "games", "plans", "hikes", "paint"]
+  },
+  "playtest": { "progress": "10 * count(chars('abcdefghijklmnopqrstuvwxyz'), l => key_state(l) == 1) + count(chars(typed), l => contains(chars(answer), l))" }
+}

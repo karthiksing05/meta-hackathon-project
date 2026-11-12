@@ -1,0 +1,94 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Picnic Packers",
+    "instructions": "Pack for the group picnic. Tap the bin each item belongs in: Food, Drinks, Games or Gear. Sort 30 right before three slips.",
+    "duration_s": 90
+  },
+  "uses": [
+    {
+      "fragment": "sort_bins",
+      "params": {
+        "bins": 4,
+        "item_ms": 2500,
+        "goal": 30
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "bind": {
+        "hit": "sorted_wrong"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Packed"
+      },
+      "bind": {
+        "point": "sorted_right"
+      }
+    }
+  ],
+  "functions": {
+    "bin_items": {
+      "params": {
+        "b": "int"
+      },
+      "returns": "list<string>",
+      "body": "if b == 0 then content_food else if b == 1 then content_drinks else if b == 2 then content_games else content_gear"
+    },
+    "bin_label": {
+      "params": {
+        "b": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['Food', 'Drinks', 'Games', 'Gear'], b, '')"
+    }
+  },
+  "objectives": {
+    "time_limit": "90s",
+    "on_timeout": "lose"
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "content": {
+    "food": [
+      "Sandwich",
+      "Grapes",
+      "Cookies",
+      "Pretzels",
+      "Watermelon"
+    ],
+    "drinks": [
+      "Lemonade",
+      "Iced tea",
+      "Juice box",
+      "Cider",
+      "Water jug"
+    ],
+    "games": [
+      "Frisbee",
+      "Kite",
+      "Card deck",
+      "Bocce set",
+      "Bubble wand"
+    ],
+    "gear": [
+      "Blanket",
+      "Cooler",
+      "Umbrella",
+      "Sunscreen",
+      "Lantern"
+    ]
+  },
+  "playtest": {
+    "progress": "score"
+  }
+}
