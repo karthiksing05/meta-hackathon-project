@@ -1,7 +1,7 @@
 {
   "fragment": "match_pairs",
   "version": 1,
-  "describe": "Memory match over 2 x `pairs` face-down cards, shuffled at start. It listens to the input `tap_cell` (from grid_board) and turns the card at index cell.y * `cols` + cell.x, so `cols` must equal the board's cols. Once two cards are face up they stay visible for `mismatch_ms` (taps are ignored meanwhile); then a matching pair stays matched and emits `pair_found`, otherwise both flip back and `pair_missed` is emitted. Matching every pair wins. The game draws cards by reading `cards[i].symbol`, `.revealed` and `.matched` (symbols are ints 0 to pairs - 1); the board needs at least 2 x `pairs` cells.",
+  "describe": "Memory match over 2 x `pairs` face-down cards, shuffled at start. It listens to the input `tap_cell` (from grid_board) and turns the card at index cell.y * `cols` + cell.x, so `cols` must equal the board's cols. Once two cards are face up they stay visible for `mismatch_ms` (taps are ignored meanwhile); then a matching pair stays matched and emits `pair_found`, otherwise both flip back and `pair_missed` is emitted. Matching every pair wins. The game draws cards by reading `cards[i].symbol`, `.revealed` and `.matched` (symbols are ints 0 to pairs - 1); the board needs at least 2 x `pairs` cells. With the game's `card` sprite (one frame per symbol, frame = symbol), it draws each face-up card itself over the board at `x`, `y`, `cell_size` and `gap` (set them to grid_board's). A pair sparkles and pops; a miss plays the `hit` moment.",
   "params": {
     "pairs": {
       "type": "int",
@@ -20,6 +20,36 @@
       "default": 800,
       "min": 200,
       "max": 3000
+    },
+    "x": {
+      "type": "int",
+      "default": 36,
+      "min": 0,
+      "max": 360
+    },
+    "y": {
+      "type": "int",
+      "default": 180,
+      "min": 0,
+      "max": 640
+    },
+    "cell_size": {
+      "type": "int",
+      "default": 64,
+      "min": 24,
+      "max": 90
+    },
+    "gap": {
+      "type": "int",
+      "default": 8,
+      "min": 0,
+      "max": 16
+    }
+  },
+  "art": {
+    "card": {
+      "describe": "A card face: a sprite with one frame per symbol (give svg as a list, one SVG per symbol), drawn cell_size square on face-up cards.",
+      "color": "accent"
     }
   },
   "requires": {
@@ -48,6 +78,14 @@
     "matches": {
       "type": "int",
       "init": "0"
+    },
+    "_last_a": {
+      "type": "int",
+      "init": "-1"
+    },
+    "_last_b": {
+      "type": "int",
+      "init": "-1"
     }
   },
   "events": {
@@ -117,6 +155,14 @@
           }
         },
         {
+          "set": "_last_a",
+          "to": "a"
+        },
+        {
+          "set": "_last_b",
+          "to": "b"
+        },
+        {
           "if": "cards[a].symbol == cards[b].symbol",
           "then": [
             {
@@ -166,6 +212,48 @@
           "color": "$ink",
           "role": "hud"
         }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.card",
+        "node": {
+          "node": "repeat",
+          "source": "range(len(cards))",
+          "as": "i",
+          "key": "i",
+          "template": {
+            "node": "image",
+            "asset": "@art.card.id",
+            "frame": "= cards[i].symbol",
+            "x": "= @x + (i % @cols) * (@cell_size + @gap)",
+            "y": "= @y + (i / @cols) * (@cell_size + @gap)",
+            "w": "@cell_size",
+            "h": "@cell_size",
+            "visible": "= cards[i].revealed or cards[i].matched",
+            "animate_on": {
+              "tap_cell": {
+                "when": "event.cell.y * @cols + event.cell.x == i",
+                "prop": "scale",
+                "keys": [
+                  0.6,
+                  1.08,
+                  1
+                ],
+                "ms": 200
+              },
+              "pair_found": {
+                "when": "i == _last_a or i == _last_b",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  1.2,
+                  1
+                ],
+                "ms": 260
+              }
+            }
+          }
+        }
       }
     ],
     "feedback": [
@@ -173,11 +261,32 @@
         "on": "pair_found",
         "do": [
           {
-            "sound": {
-              "wave": "triangle",
-              "note": "G5",
-              "ms": 140
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": "= @x + (_last_a % @cols) * (@cell_size + @gap) + @cell_size / 2",
+              "y": "= @y + (_last_a / @cols) * (@cell_size + @gap) + @cell_size / 2",
+              "count": 14,
+              "color": "@art.card.color",
+              "speed": 180,
+              "size": 5,
+              "ms": 500
             }
+          },
+          {
+            "particles": {
+              "x": "= @x + (_last_b % @cols) * (@cell_size + @gap) + @cell_size / 2",
+              "y": "= @y + (_last_b / @cols) * (@cell_size + @gap) + @cell_size / 2",
+              "count": 14,
+              "color": "@art.card.color",
+              "speed": 180,
+              "size": 5,
+              "ms": 500
+            }
+          },
+          {
+            "haptic": "light"
           }
         ]
       },
@@ -185,11 +294,10 @@
         "on": "pair_missed",
         "do": [
           {
-            "sound": {
-              "wave": "square",
-              "note": "C3",
-              "ms": 100
-            }
+            "moment": "hit"
+          },
+          {
+            "haptic": "warning"
           }
         ]
       }

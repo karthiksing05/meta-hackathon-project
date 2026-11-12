@@ -48,7 +48,9 @@
         }
       }
     ],
-    "feedback": []
+    "feedback": [
+      { "on": "press", "when": "event.letter != ''", "do": [ { "moment": "tap" } ] }
+    ]
   },
   "tags": { "mood": ["any"], "energy": ["low", "medium"] },
   "conflicts": []

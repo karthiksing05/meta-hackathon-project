@@ -4,7 +4,9 @@
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { rewrite, rewriteType, namesIn, tokenize, stringLiteral, durationMs, safeText } from './expr.mjs';
+import { rewrite, rewriteType, namesIn, tokenize, stringLiteral, durationMs, safeText, PLACEHOLDER_NAME } from './expr.mjs';
+import { compileArt } from './art.mjs';
+import { compileSound, MOMENTS } from './sound.mjs';
 
 export const STANDARD_TOKENS = ['primary', 'secondary', 'accent', 'ink', 'bg', 'danger', 'surface'];
 export const SLOTS = { hud_top: 3, hud_bottom: 2, playfield: Infinity, overlay: Infinity };
@@ -13,6 +15,8 @@ const FRAGMENT_FORBIDDEN_OBJECTIVES = ['time_limit', 'on_timeout'];
 const NODE_CHILD_KEYS = ['children'];
 const NODE_TEMPLATE_KEYS = ['template', 'item', 'cell', 'node'];
 const NAME_EXPR_PROPS = ['source', 'key'];
+const LITERAL_PLACEHOLDER = new RegExp(`^@${PLACEHOLDER_NAME}$`);
+export const FEEL_KEYS = ['particles', 'shake', 'haptics'];
 
 // ---------- library ----------
 
@@ -269,6 +273,7 @@ function walkFeedback(list, fns, at) {
   return (list || []).map((f, i) => ({
     ...f,
     on: ['win', 'lose'].includes(f.on) ? f.on : fns.name(f.on, 'event_or_input'),
+    ...(f.when !== undefined ? { when: fns.expr(f.when, `${at}/${i}/when`) } : {}),
     do: (f.do || []).map((d, j) => Object.fromEntries(Object.entries(d).map(([kind, body]) => [
       kind,
       body && typeof body === 'object'
@@ -304,6 +309,20 @@ export function expand(manifest, lib, options = {}) {
   const look = lib.looks[lookId];
   if (!look) err('A_UNKNOWN_LOOK', '/look/id', `no look named '${lookId}'`, { hint: didYouMean(lookId, Object.keys(lib.looks)) });
   const canvas = { w: look?.canvas?.w ?? 360, h: look?.canvas?.h ?? 640 };
+
+  // ---- art, sound and feel (SPEC 2.8–2.10) ----
+  const art = compileArt(manifest.art, canvas, err);
+  const sound = compileSound(manifest.sound, err);
+  const feel = Object.fromEntries(FEEL_KEYS.map((k) => [k, true]));
+  if (manifest.feel !== undefined) {
+    if (!manifest.feel || typeof manifest.feel !== 'object' || Array.isArray(manifest.feel)) err('A_FEEL_FIELD', '/feel', 'feel is an object like {"shake": false}');
+    else for (const [k, v] of Object.entries(manifest.feel)) {
+      if (!FEEL_KEYS.includes(k)) err('A_FEEL_FIELD', `/feel/${esc(k)}`, `feel has no '${k}' (${FEEL_KEYS.join(', ')})`);
+      else if (typeof v !== 'boolean') err('A_FEEL_FIELD', `/feel/${esc(k)}`, `feel.${k} is true or false`);
+      else feel[k] = v;
+    }
+  }
+  const usedSprites = new Set();
 
   const gameObjectives = manifest.objectives || {};
   const durationFromLimit = gameObjectives.time_limit !== undefined ? durationMs(gameObjectives.time_limit) : NaN;
@@ -362,6 +381,27 @@ export function expand(manifest, lib, options = {}) {
       params[name] = { type: spec.type, value };
     }
     for (const [k, v] of Object.entries(gameParams)) params[k] = v;
+
+    // Sprite roles (SPEC 1.7): `use.art` maps a role the fragment draws to one of the game's
+    // sprites (default: the sprite with the role's own name), or to false for the fallback shape.
+    const roles = frag.art || {};
+    const artMap = use.art ?? {};
+    if (typeof artMap !== 'object' || Array.isArray(artMap)) err('A_ART_FIELD', `${at}/art`, 'a use\'s art maps a role to a sprite name: {"hazard": "fogbank"}');
+    else for (const [role, name] of Object.entries(artMap)) {
+      const here = `${at}/art/${esc(role)}`;
+      if (!roles[role]) err('A_UNKNOWN_ART_ROLE', here, `${use.fragment} draws no '${role}'`, { hint: Object.keys(roles).length ? `its roles are ${Object.keys(roles).join(', ')}` : `${use.fragment} draws no sprites` });
+      else if (name !== false && (typeof name !== 'string' || !art.sprites[name])) err('A_ART_MISSING', here, `there is no sprite named '${name}' in art.sprites`, { hint: didYouMean(String(name), Object.keys(art.sprites)) });
+    }
+    for (const [role, spec] of Object.entries(roles)) {
+      const name = artMap[role] === undefined ? role : artMap[role];
+      const sp = typeof name === 'string' ? art.sprites[name] : undefined;
+      if (sp) usedSprites.add(name);
+      params[`art.${role}`] = { type: 'bool', value: Boolean(sp) };
+      params[`art.${role}.id`] = { type: 'string', value: sp?.id ?? '' };
+      params[`art.${role}.frames`] = { type: 'int', value: sp?.frames ?? 1 };
+      params[`art.${role}.aspect`] = { type: 'float', value: sp?.aspect ?? 1 };
+      params[`art.${role}.color`] = { type: 'color', value: sp?.color ?? `$${spec.color ?? 'accent'}` };
+    }
     uses.push({ use, ui, at, frag, id, params, paramsOk });
   });
 
@@ -410,7 +450,7 @@ export function expand(manifest, lib, options = {}) {
     const libErr = (code, at, message) => err(code, at, message, { origin, library: true });
     const paramText = (name) => {
       const p = params[name];
-      if (!p) { libErr('A_UNKNOWN_PARAM', '', `${frag.fragment} uses @${name}, which isn't a param`); return '0'; }
+      if (!p) { libErr('A_UNKNOWN_PARAM', '', `${frag.fragment} uses @${name}, which isn't a param${name.startsWith('art.') ? ' (declare the role in the fragment\'s art header)' : ''}`); return '0'; }
       const t = exprText(p.type, p.value);
       if (t === null) { libErr('A_PARAM_PLACEMENT', '', `@${name} (${p.type}) can't go inside an expression`); return '0'; }
       return t;
@@ -420,7 +460,7 @@ export function expand(manifest, lib, options = {}) {
       type: (t) => rewriteType(t, rename),
       name: (n) => (rename.has(n) ? rename.get(n) : n),
       literal: (v) => {
-        if (typeof v === 'string' && /^@(game\.[a-z_]+|[A-Za-z_][A-Za-z0-9_]*)$/.test(v)) {
+        if (typeof v === 'string' && LITERAL_PLACEHOLDER.test(v)) {
           const p = params[v.slice(1)];
           if (!p) { libErr('A_UNKNOWN_PARAM', '', `${frag.fragment} uses ${v}, which isn't a param`); return v; }
           return literalValue(p.type, p.value);
@@ -439,6 +479,18 @@ export function expand(manifest, lib, options = {}) {
       catch (e) { libErr('A_PARAM_PLACEMENT', '', `${frag.fragment}: can't read include '${item.include}': ${e.message}`); return false; }
     };
     const strip = (item) => { const { include, ...rest } = item; return rest; };
+    // `include` also works on any child node and on single feedback actions (SPEC 1.1).
+    const pruneNode = (node) => {
+      if (!node || typeof node !== 'object') return node;
+      const n = strip(node);
+      for (const k of NODE_CHILD_KEYS) if (Array.isArray(n[k])) n[k] = n[k].filter((c) => c.slot || keep(c)).map(pruneNode);
+      for (const k of NODE_TEMPLATE_KEYS) if (n[k] && typeof n[k] === 'object' && !Array.isArray(n[k])) n[k] = pruneNode(n[k]);
+      return n;
+    };
+    for (const [role, spec] of Object.entries(frag.art || {})) {
+      if (!/^[a-z][a-z0-9_]*$/.test(role) || !spec || typeof spec !== 'object') libErr('A_FRAGMENT_FIELD', '', `${frag.fragment}: art role '${role}' needs a lowercase name and an object`);
+      else if (spec.color !== undefined && !STANDARD_TOKENS.includes(spec.color)) libErr('A_UNKNOWN_TOKEN', '', `${frag.fragment}: art.${role}.color must be a standard token role`);
+    }
     // expression tokens inside expressions too
     const checkTokens = (s) => { if (typeof s === 'string') for (const t of tokenize(s)) if (t.kind === 'token') fns.token(t.text); };
     const exprWithTokens = fns.expr;
@@ -456,11 +508,11 @@ export function expand(manifest, lib, options = {}) {
     }
     u.out.slots = [];
     (frag.presentation?.slots || []).forEach((e, i) => {
-      if (keep(e)) u.out.slots.push({ slot: e.slot, node: walkNode(e.node, fns, `/presentation/slots/${i}/node`), origin, pointer: `/presentation/slots/${i}/node` });
+      if (keep(e)) u.out.slots.push({ slot: e.slot, node: walkNode(pruneNode(e.node), fns, `/presentation/slots/${i}/node`), origin, pointer: `/presentation/slots/${i}/node` });
     });
     u.out.feedback = [];
     (frag.presentation?.feedback || []).forEach((f, i) => {
-      if (keep(f)) u.out.feedback.push({ item: walkFeedback([strip(f)], fns, '/presentation/feedback')[0], origin, pointer: `/presentation/feedback/${i}` });
+      if (keep(f)) u.out.feedback.push({ item: walkFeedback([{ ...strip(f), do: (f.do || []).filter(keep).map(strip) }], fns, '/presentation/feedback')[0], origin, pointer: `/presentation/feedback/${i}` });
     });
   }
 
@@ -496,8 +548,14 @@ export function expand(manifest, lib, options = {}) {
   }
 
   // ---- merge sections ----
-  const out = { format: 'microgame/0.1', meta: clone(manifest.meta) };
+  const out = { format: 'microgame/0.2', meta: clone(manifest.meta) };
   map('/meta', 'game', '/meta');
+  const assets = { ...art.assets, ...(sound.music ? { music: sound.music.asset } : {}) };
+  if (Object.keys(assets).length) {
+    out.assets = assets;
+    for (const id of Object.keys(art.assets)) map(ptr('assets', id), 'game', id === 'backdrop' ? '/art/backdrop' : ptr('art', 'sprites', id));
+    if (sound.music) map('/assets/music', 'game', '/sound/music');
+  }
   for (const s of SECTIONS) {
     const merged = {};
     for (const u of uses) for (const [n, v] of Object.entries(u.out[s])) { merged[n] = v; map(ptr(s, n), `use:${u.id}`, ptr(s, Object.keys(u.frag[s]).find((o) => u.rename.get(o) === n) ?? n), { fragment: u.frag.fragment, version: u.frag.version }); }
@@ -589,26 +647,39 @@ export function expand(manifest, lib, options = {}) {
     return n;
   };
   const root = look ? splice(clone(look.layout)) : { node: 'group', children: [] };
+  // The backdrop sits under everything, filling the canvas.
+  if (art.backdrop) (root.children ??= []).unshift({ node: 'image', asset: art.backdrop.id, x: 0, y: 0, w: art.backdrop.w, h: art.backdrop.h });
+  const font = art.font ?? look?.font;
   const visit = (node, at, inherited) => {
     const e = origins.get(node);
     if (e) map(at, e.origin, e.pointer);
     const from = e ? e : inherited;
-    if (node.node === 'text' && look?.font && node.font === undefined) node.font = look.font;
+    if (node.node === 'text' && font && node.font === undefined) node.font = font;
     for (const k of NODE_CHILD_KEYS) (node[k] || []).forEach((c, i) => visit(c, `${at}/${k}/${i}`, from));
     for (const k of NODE_TEMPLATE_KEYS) if (node[k] && typeof node[k] === 'object') visit(node[k], `${at}/${k}`, from);
   };
   visit(root, '/presentation/root', null);
   map('/presentation/root', `look:${lookId}`, '/layout');
-  const feedback = [...uses.flatMap((u) => u.out.feedback), ...gameFeedback];
+  if (art.backdrop) map('/presentation/root/children/0', 'game', '/art/backdrop');
+  const feedback = resolveFeedback([...uses.flatMap((u) => u.out.feedback), ...feelFeedback(canvas), ...gameFeedback], sound, feel, err);
   feedback.forEach((f, i) => map(`/presentation/feedback/${i}`, f.origin, f.pointer));
-  const tokens = { ...(look?.tokens || {}), ...(manifest.look?.tokens || {}) };
+  const tokens = { ...(look?.tokens || {}), ...art.tokens, ...(manifest.look?.tokens || {}) };
+  if (Object.keys(art.tokens).length) map('/presentation/tokens', 'game', '/art/palette');
   out.presentation = {
     canvas: { w: canvas.w, h: canvas.h, background: manifest.look?.background ?? look?.background ?? '$bg' },
     tokens,
     root,
     feedback: feedback.map((f) => f.item),
+    ...(sound.music ? { music: sound.music.presentation } : {}),
   };
-  map('/presentation/tokens', `look:${lookId}`, '/tokens');
+  if (sound.music) map('/presentation/music', 'game', '/sound/music');
+
+  // Sprites nothing draws are probably a mistake (a role name typo, or a fragment that was dropped).
+  for (const e of gameSlots) collectAssetNames(e.node, usedSprites);
+  for (const name of Object.keys(art.sprites)) {
+    if (!usedSprites.has(name)) warn('W_ART_UNUSED', `/art/sprites/${esc(name)}`, `no fragment or node draws the sprite '${name}'`, { hint: spriteHint(uses) });
+  }
+  if (!Object.keys(art.tokens).length) map('/presentation/tokens', `look:${lookId}`, '/tokens');
   map('/presentation/canvas', `look:${lookId}`, '/canvas');
 
   // ---- playtest probe (SPEC 4): a copy of the game with a hidden progress value for bots ----
@@ -620,6 +691,64 @@ export function expand(manifest, lib, options = {}) {
   }
 
   return { game: out, sourceMap, diagnostics: diags, playtestGame };
+}
+
+// ---------- feel and sound moments (SPEC 2.9, 2.10) ----------
+
+// Game-level feel every game gets: the win and lose stings, confetti and haptics.
+function feelFeedback(canvas) {
+  const burst = (color, speed) => ({ particles: { x: canvas.w / 2, y: Math.round(canvas.h * 0.42), count: 36, color, speed, size: 7, ms: 1200, gravity: 520 } });
+  return [
+    { item: { on: 'win', do: [{ moment: 'win' }, burst('$accent', 360), burst('$primary', 280), { haptic: 'success' }] }, origin: 'feel', pointer: '/win' },
+    { item: { on: 'lose', do: [{ moment: 'lose' }, { haptic: 'error' }] }, origin: 'feel', pointer: '/lose' },
+  ];
+}
+
+// Swaps `{ "moment": m }` actions for the game's sound, scales every sound by the game's volume, and
+// drops what `feel` turns off. A sound the game itself plays on an event replaces the library's
+// moments on that event, and the same moment on the same event plays once.
+function resolveFeedback(entries, sound, feel, err) {
+  const gameSoundOn = new Set(entries.filter((f) => f.origin === 'game' && f.item.do?.some((a) => a.sound !== undefined || a.moment !== undefined)).map((f) => f.item.on));
+  const seen = new Set();
+  const out = [];
+  for (const f of entries) {
+    const actions = [];
+    (f.item.do || []).forEach((a, j) => {
+      if (a.moment !== undefined) {
+        if (!MOMENTS.includes(a.moment)) {
+          const extra = f.origin === 'game' ? {} : { origin: f.origin, library: true };
+          err('A_SOUND_MOMENT', f.origin === 'game' ? `${f.pointer}/do/${j}/moment` : '', `no sound moment named '${a.moment}'`, { hint: `moments are ${MOMENTS.join(', ')}`, ...extra });
+          return;
+        }
+        if (f.origin !== 'game' && gameSoundOn.has(f.item.on)) return;
+        const key = `${f.item.on}|${f.item.when ?? ''}|${a.moment}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        actions.push(...sound.moment(a.moment));
+      } else if (a.sound !== undefined) {
+        if (sound.volume > 0) actions.push(sound.scale(a));
+      } else if ((a.shake !== undefined && !feel.shake) || (a.particles !== undefined && !feel.particles) || (a.haptic !== undefined && !feel.haptics)) {
+        // turned off by the game's feel section
+      } else actions.push(a);
+    });
+    if (actions.length) out.push({ ...f, item: { ...f.item, do: actions } });
+  }
+  return out;
+}
+
+function collectAssetNames(node, into) {
+  if (!node || typeof node !== 'object') return;
+  if (typeof node.asset === 'string') {
+    if (node.asset.startsWith('=')) for (const m of node.asset.matchAll(/'([a-z][a-z0-9_]*)'/g)) into.add(m[1]);
+    else into.add(node.asset);
+  }
+  for (const k of NODE_CHILD_KEYS) (node[k] || []).forEach((c) => collectAssetNames(c, into));
+  for (const k of NODE_TEMPLATE_KEYS) if (node[k] && typeof node[k] === 'object') collectAssetNames(node[k], into);
+}
+
+function spriteHint(uses) {
+  const roles = [...new Set(uses.flatMap((u) => Object.keys(u.frag.art || {}).map((r) => `${r} (${u.frag.fragment})`)))];
+  return roles.length ? `the fragments in this game draw: ${roles.join(', ')}; name a sprite after a role, map it with a use's "art", or draw it with your own image node` : 'none of the fragments in this game draw sprites; draw it with your own image node';
 }
 
 // ---------- source map ----------

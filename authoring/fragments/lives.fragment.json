@@ -1,9 +1,12 @@
 {
   "fragment": "lives",
   "version": 1,
-  "describe": "The player has N lives. Each `hit` event costs one; at zero lives the game is lost.",
+  "describe": "The player has N lives. Each `hit` event costs one; at zero lives the game is lost. Shows `Lives: N`, or a row of the game's `life` sprite (lost ones fade). Losing a life shakes the screen and buzzes; the sound comes from whatever caused the hit (collide, a wrong answer), so a game event bound to `hit` should play the `hit` moment itself.",
   "params": {
     "count": { "type": "int", "default": 3, "min": 1, "max": 9 }
+  },
+  "art": {
+    "life": { "describe": "One life icon for the HUD (a heart, a lantern), drawn 22 units wide; one per life in a row.", "color": "danger" }
   },
   "requires": {
     "events": { "hit": {} }
@@ -28,12 +31,32 @@
   "presentation": {
     "slots": [
       {
-        "slot": "hud_top",
-        "node": { "node": "text", "text": "= 'Lives: ' + str(lives)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+        "slot": "hud_top", "include": "not @art.life",
+        "node": {
+          "node": "text", "text": "= 'Lives: ' + str(lives)", "size": 18, "weight": 600, "color": "$ink", "role": "hud",
+          "animate_on": { "life_lost": { "prop": "scale", "keys": [1, 1.35, 1], "ms": 220 } }
+        }
+      },
+      {
+        "slot": "hud_top", "include": "@art.life",
+        "node": {
+          "node": "group", "role": "hud",
+          "children": [
+            {
+              "node": "repeat", "source": "range(@count)", "as": "k", "key": "k",
+              "template": {
+                "node": "image", "asset": "@art.life.id", "x": "= k * 24", "y": 0, "w": 22, "h": "= 22.0 * @art.life.aspect",
+                "opacity": "= if k < lives then 1.0 else 0.22",
+                "transition": { "opacity": { "ms": 250, "ease": "out" } },
+                "animate_on": { "life_lost": { "when": "k == lives", "prop": "scale", "keys": [1, 1.6, 0.7, 1], "ms": 320 } }
+              }
+            }
+          ]
+        }
       }
     ],
     "feedback": [
-      { "on": "life_lost", "do": [ { "shake": { "px": 6, "ms": 200 } }, { "sound": { "wave": "square", "note": "C3", "ms": 120 } } ] }
+      { "on": "life_lost", "do": [ { "shake": { "px": 6, "ms": 200 } }, { "haptic": "warning" } ] }
     ]
   },
   "tags": { "mood": ["tense"], "energy": ["medium", "high"] },

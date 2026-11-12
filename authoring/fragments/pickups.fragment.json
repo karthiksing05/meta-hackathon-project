@@ -1,7 +1,7 @@
 {
   "fragment": "pickups",
   "version": 1,
-  "describe": "Collectibles that appear every `every` ms at random positions (inside x_min..x_max and y_min..y_max, or on one of `columns` evenly spaced x positions when columns > 0), up to `max_alive` at once. With `fall` above 0 they spawn above the canvas and drift down at that many px/s; with `scroll` above 0 they spawn past the right edge (at a random height in y_min..y_max) and drift left at that many px/s; otherwise they appear in place. They vanish after `lifetime` ms (0 means they never expire). Touching one with `player` (within `reach` plus `radius`) removes it, adds 1 to `collected` and emits `point` once per item; the `point` event must exist, from `score` or the game. Provides `items` and `collected`. Requires state `player: vec2`.",
+  "describe": "Collectibles that appear every `every` ms at random positions (inside x_min..x_max and y_min..y_max, or on one of `columns` evenly spaced x positions when columns > 0), up to `max_alive` at once. With `fall` above 0 they spawn above the canvas and drift down at that many px/s; with `scroll` above 0 they spawn past the right edge (at a random height in y_min..y_max) and drift left at that many px/s; otherwise they appear in place. They vanish after `lifetime` ms (0 means they never expire). Touching one with `player` (within `reach` plus `radius`) removes it, adds 1 to `collected` and emits `point` once per item; the `point` event must exist, from `score` or the game. Provides `items` and `collected`. Requires state `player: vec2`. Draws the game's `pickup` sprite (else a circle), with a sparkle and a light haptic on each pickup; the `point` event's score fragment plays the sound.",
   "params": {
     "every":     { "type": "duration", "default": 1500, "min": 200, "max": 10000 },
     "max_alive": { "type": "int", "default": 3, "min": 1, "max": 20 },
@@ -16,6 +16,9 @@
     "fall":      { "type": "float", "default": 0.0, "min": 0.0, "max": 600.0 },
     "scroll":    { "type": "float", "default": 0.0, "min": 0.0, "max": 600.0 }
   },
+  "art": {
+    "pickup": { "describe": "A collectible, centred on the item and about 2.6 × radius wide. Bobs gently and pops in when it appears.", "color": "accent" }
+  },
   "requires": {
     "state": { "player": "vec2" },
     "events": { "point": {} }
@@ -26,10 +29,12 @@
   "state": {
     "items":     { "type": "list<Pickup>", "init": "[]" },
     "collected": { "type": "int", "init": "0" },
-    "_next_id":  { "type": "int", "init": "0" }
+    "_next_id":  { "type": "int", "init": "0" },
+    "_got_at":   { "type": "vec2", "init": "vec(0.0, 0.0)" }
   },
   "events": {
-    "collected_one": {}
+    "collected_one": {},
+    "_appeared": { "id": "int" }
   },
   "rules": [
     {
@@ -40,6 +45,7 @@
         { "let": { "px": "if @scroll > 0.0 then @game.canvas_w + @radius else if @columns > 1 then @x_min + random_int(0, @columns - 1) * (@x_max - @x_min) / (@columns - 1) else random_float(@x_min, @x_max)" } },
         { "let": { "py": "if @fall > 0.0 then -@radius else random_float(@y_min, @y_max)" } },
         { "set": "items", "to": "push(items, {id: _next_id, x: px, y: py, born: now})" },
+        { "emit": "_appeared", "with": { "id": "_next_id" } },
         { "incr": "_next_id" }
       ]
     },
@@ -68,6 +74,7 @@
         { "let": { "got": "filter(items, i => overlaps_circle(player, @reach, vec(i.x, i.y), @radius))" } },
         { "remove": "items", "where": "i => overlaps_circle(player, @reach, vec(i.x, i.y), @radius)" },
         { "for_each": "got", "as": "g", "do": [
+          { "set": "_got_at", "to": "vec(g.x, g.y)" },
           { "incr": "collected" },
           { "emit": "collected_one" },
           { "emit": "point" }
@@ -80,14 +87,34 @@
     "slots": [
       {
         "slot": "playfield",
+        "include": "@art.pickup",
         "node": {
           "node": "repeat", "source": "items", "as": "i", "key": "i.id",
-          "template": { "node": "circle", "x": "= i.x", "y": "= i.y", "r": "@radius", "fill": "$accent", "role": "pickup" }
+          "template": {
+            "node": "image", "asset": "@art.pickup.id", "anchor": "center",
+            "x": "= i.x", "y": "= i.y + sin((now + i.id * 211) / 260.0) * 3.0", "w": "= @radius * 2.6", "h": "= @radius * 2.6 * @art.pickup.aspect",
+            "role": "pickup",
+            "animate_on": { "_appeared": { "when": "event.id == i.id", "prop": "scale", "keys": [0.2, 1.2, 1], "ms": 240 } }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.pickup",
+        "node": {
+          "node": "repeat", "source": "items", "as": "i", "key": "i.id",
+          "template": {
+            "node": "circle", "x": "= i.x", "y": "= i.y", "r": "@radius", "fill": "$accent", "role": "pickup",
+            "animate_on": { "_appeared": { "when": "event.id == i.id", "prop": "scale", "keys": [0.2, 1.2, 1], "ms": 240 } }
+          }
         }
       }
     ],
     "feedback": [
-      { "on": "collected_one", "do": [ { "sound": { "wave": "sine", "note": "A5", "ms": 80 } } ] }
+      { "on": "collected_one", "do": [
+        { "particles": { "x": "= _got_at.x", "y": "= _got_at.y", "count": 14, "color": "@art.pickup.color", "speed": 170, "size": 5, "ms": 450 } },
+        { "haptic": "light" }
+      ] }
     ]
   },
   "tags": { "mood": ["cosy", "playful"], "energy": ["low", "medium", "high"] },

@@ -1,7 +1,7 @@
 {
   "fragment": "lanes",
   "version": 1,
-  "describe": "Discrete lane movement. Tapping the left or right half of the canvas (or the arrow keys) moves the avatar one lane that way, stopping at the edge lanes. Provides `player` (vec2, centre of the avatar at lane x and the fixed `y`), `lane` (int, 0 is leftmost) and the function `lane_x(i) -> float`. Emits `lane_changed` with the new lane. Draws faint lane strips and the avatar in `playfield` (role avatar). Conflicts with player_drag and gravity_jump, which also provide `player`.",
+  "describe": "Discrete lane movement. Tapping the left or right half of the canvas (or the arrow keys) moves the avatar one lane that way, stopping at the edge lanes. Provides `player` (vec2, centre of the avatar at lane x and the fixed `y`), `lane` (int, 0 is leftmost) and the function `lane_x(i) -> float`. Emits `lane_changed` with the new lane. Draws faint lane strips and the avatar in `playfield`: the game's `avatar` sprite if it has one, else a circle. Conflicts with player_drag and gravity_jump, which also provide `player`.",
   "params": {
     "count":  { "type": "int", "default": 3, "min": 3, "max": 5 },
     "x_min":  { "type": "float", "default": 80.0, "min": 0.0, "max": 360.0 },
@@ -9,6 +9,9 @@
     "y":      { "type": "float", "default": 540.0, "min": 0.0, "max": 640.0 },
     "size":   { "type": "float", "default": 16.0, "min": 4.0, "max": 40.0 },
     "tone":   { "type": "enum", "values": ["primary", "secondary", "accent", "ink", "danger"], "default": "primary" }
+  },
+  "art": {
+    "avatar": { "describe": "The player, centred on `player` and about 2.8 × size wide. Squashes when it changes lane.", "color": "primary" }
   },
   "requires": {},
   "functions": {
@@ -67,16 +70,29 @@
       },
       {
         "slot": "playfield",
+        "include": "@art.avatar",
+        "node": {
+          "node": "image", "asset": "@art.avatar.id", "anchor": "center",
+          "x": "= player.x", "y": "= player.y", "w": "= @size * 2.8", "h": "= @size * 2.8 * @art.avatar.aspect",
+          "role": "avatar",
+          "transition": { "x": { "ms": 90, "ease": "out" } },
+          "animate_on": { "lane_changed": { "prop": "scale", "keys": [1, 0.86, 1.08, 1], "ms": 180 } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.avatar",
         "node": {
           "node": "circle", "x": "= player.x", "y": "= player.y", "r": "@size",
           "fill": "= if @tone == 'primary' then $primary else if @tone == 'secondary' then $secondary else if @tone == 'accent' then $accent else if @tone == 'ink' then $ink else $danger",
           "role": "avatar",
-          "transition": { "x": { "ms": 90, "ease": "out" } }
+          "transition": { "x": { "ms": 90, "ease": "out" } },
+          "animate_on": { "lane_changed": { "prop": "scale", "keys": [1, 0.86, 1.08, 1], "ms": 180 } }
         }
       }
     ],
     "feedback": [
-      { "on": "lane_changed", "do": [ { "sound": { "wave": "triangle", "note": "G4", "ms": 40 } } ] }
+      { "on": "lane_changed", "do": [ { "moment": "tap" }, { "haptic": "light" } ] }
     ]
   },
   "tags": { "mood": ["any"], "energy": ["medium", "high"] },

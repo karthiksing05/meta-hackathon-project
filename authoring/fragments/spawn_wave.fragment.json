@@ -1,7 +1,7 @@
 {
   "fragment": "spawn_wave",
   "version": 1,
-  "describe": "Spawns round objects from one edge every `every` ms and moves them straight across the canvas, removing them once they leave it. Provides `spawns` for collision rules and `spawn_speed` (1.0) for speed ramps. Doesn't handle collisions.",
+  "describe": "Spawns round objects from one edge every `every` ms and moves them straight across the canvas, removing them once they leave it. Provides `spawns` for collision rules and `spawn_speed` (1.0) for speed ramps. Doesn't handle collisions. Draws the game's `hazard` sprite for each (use `\"art\": {\"hazard\": \"<sprite>\"}` to pick another sprite), else a circle.",
   "params": {
     "every":     { "type": "duration", "default": 800, "min": 150, "max": 10000 },
     "from":      { "type": "enum", "values": ["top", "bottom", "left", "right"], "default": "top" },
@@ -10,6 +10,9 @@
     "radius":    { "type": "float", "default": 14.0, "min": 4.0, "max": 60.0 },
     "max_alive": { "type": "int", "default": 12, "min": 1, "max": 60 },
     "kind":      { "type": "string", "default": "hazard", "max_len": 24 }
+  },
+  "art": {
+    "hazard": { "describe": "One spawned object, centred on it and about 2.6 × radius wide (the hit circle is the inner 2 × radius). Sways a little as it moves.", "color": "danger" }
   },
   "requires": {},
   "types": {
@@ -51,6 +54,20 @@
     "slots": [
       {
         "slot": "playfield",
+        "include": "@art.hazard",
+        "node": {
+          "node": "repeat", "source": "spawns", "as": "s", "key": "s.id",
+          "template": {
+            "node": "image", "asset": "@art.hazard.id", "anchor": "center",
+            "x": "= s.x", "y": "= s.y", "w": "= s.r * 2.6", "h": "= s.r * 2.6 * @art.hazard.aspect",
+            "rotation": "= sin((now + s.id * 137) / 420.0) * 7.0",
+            "role": "hazard"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.hazard",
         "node": {
           "node": "repeat", "source": "spawns", "as": "s", "key": "s.id",
           "template": { "node": "circle", "x": "= s.x", "y": "= s.y", "r": "= s.r", "fill": "$danger", "role": "hazard" }

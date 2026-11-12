@@ -38,7 +38,7 @@
       }
     ],
     "feedback": [
-      { "on": "level_up", "do": [ { "sound": { "wave": "triangle", "note": "A5", "ms": 160 } } ] }
+      { "on": "level_up", "do": [ { "moment": "level" }, { "haptic": "light" } ] }
     ]
   },
   "tags": { "mood": ["any"], "energy": ["medium", "high"] },

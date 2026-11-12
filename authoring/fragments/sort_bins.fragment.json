@@ -1,7 +1,7 @@
 {
   "fragment": "sort_bins",
   "version": 1,
-  "describe": "Sort items into bins, one at a time. `bins` labelled bins (2 to 4) sit along the bottom; one item name is shown at a time and the player taps the bin it belongs in (input `choose {bin}`). The right bin emits `sorted_right`, a wrong one `sorted_wrong`; either way the next item comes up. Each item has `item_ms` (a bar drains) and running out counts as `sorted_wrong`. Items come from `content`: the game must define two functions, `bin_items(b)` returning the list<string> of item names that belong in bin b (b is 0 to bins - 1; usually `if b == 0 then content_snacks else if b == 1 then content_games else content_gear`) and `bin_label(b)` returning the bin's short label (8 characters or fewer reads best). All items from all bins are shuffled into one deck that reshuffles when it runs out. State: `deck`, `item_i`, `right_count`, `wrong_count`, `verdict` (short text for the last answer), and `current_name()` for the item on screen. With `goal` above 0, `goal` right answers win; with 0 it is endless, so the game needs its own lose path (lives bound to `sorted_wrong`). Sets no score.",
+  "describe": "Sort items into bins, one at a time. `bins` labelled bins (2 to 4) sit along the bottom; one item name is shown at a time and the player taps the bin it belongs in (input `choose {bin}`). The right bin emits `sorted_right`, a wrong one `sorted_wrong`; either way the next item comes up. Each item has `item_ms` (a bar drains) and running out counts as `sorted_wrong`. Items come from `content`: the game must define two functions, `bin_items(b)` returning the list<string> of item names that belong in bin b (b is 0 to bins - 1; usually `if b == 0 then content_snacks else if b == 1 then content_games else content_gear`) and `bin_label(b)` returning the bin's short label (8 characters or fewer reads best). All items from all bins are shuffled into one deck that reshuffles when it runs out. State: `deck`, `item_i`, `right_count`, `wrong_count`, `verdict` (short text for the last answer), and `current_name()` for the item on screen. With `goal` above 0, `goal` right answers win; with 0 it is endless, so the game needs its own lose path (lives bound to `sorted_wrong`). Sets no score. With the game's `bin` sprite the bins draw it (frame = bin index); a right answer sparkles from the bin.",
   "params": {
     "bins": {
       "type": "int",
@@ -20,6 +20,12 @@
       "default": 12,
       "min": 0,
       "max": 200
+    }
+  },
+  "art": {
+    "bin": {
+      "describe": "A bin, one frame per bin (give svg as a list, in bin order), drawn about 104 × 140 (78 to 150 wide, by the number of bins). The bin's label is drawn on it near the middle.",
+      "color": "primary"
     }
   },
   "requires": {
@@ -70,6 +76,10 @@
       "init": "0"
     },
     "_until": {
+      "type": "int",
+      "init": "0"
+    },
+    "_last_bin": {
       "type": "int",
       "init": "0"
     }
@@ -149,6 +159,10 @@
       "on": "choose",
       "when": "event.bin >= 0 and event.bin < @bins and item_i < len(deck)",
       "do": [
+        {
+          "set": "_last_bin",
+          "to": "event.bin"
+        },
         {
           "if": "event.bin == deck[item_i].bin",
           "then": [
@@ -302,6 +316,34 @@
             "node": "group",
             "children": [
               {
+                "include": "@art.bin",
+                "node": "image",
+                "asset": "@art.bin.id",
+                "frame": "= k",
+                "x": "= _bin_x(k)",
+                "y": 380,
+                "w": "= _bin_w()",
+                "h": 140,
+                "role": "tile"
+              },
+              {
+                "include": "@art.bin",
+                "node": "rect",
+                "x": "= _bin_x(k)",
+                "y": 380,
+                "w": "= _bin_w()",
+                "h": 140,
+                "radius": 14,
+                "fill": "#00000000",
+                "on_tap": {
+                  "input": "choose",
+                  "with": {
+                    "bin": "k"
+                  }
+                }
+              },
+              {
+                "include": "not @art.bin",
                 "node": "rect",
                 "x": "= _bin_x(k)",
                 "y": 380,
@@ -327,7 +369,20 @@
                 "color": "$ink",
                 "text": "= bin_label(k)"
               }
-            ]
+            ],
+            "animate_on": {
+              "choose": {
+                "when": "event.bin == k",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  0.92,
+                  1.04,
+                  1
+                ],
+                "ms": 180
+              }
+            }
           }
         }
       }
@@ -337,11 +392,21 @@
         "on": "sorted_right",
         "do": [
           {
-            "sound": {
-              "wave": "sine",
-              "note": "A5",
-              "ms": 70
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": "= _bin_x(_last_bin) + _bin_w() / 2",
+              "y": 420,
+              "count": 10,
+              "color": "@art.bin.color",
+              "speed": 200,
+              "size": 5,
+              "ms": 340
             }
+          },
+          {
+            "haptic": "light"
           }
         ]
       },
@@ -349,17 +414,16 @@
         "on": "sorted_wrong",
         "do": [
           {
+            "moment": "hit"
+          },
+          {
             "shake": {
               "px": 5,
               "ms": 160
             }
           },
           {
-            "sound": {
-              "wave": "square",
-              "note": "C3",
-              "ms": 100
-            }
+            "haptic": "warning"
           }
         ]
       }

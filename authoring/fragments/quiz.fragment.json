@@ -1,7 +1,7 @@
 {
   "fragment": "quiz",
   "version": 1,
-  "describe": "Multiple-choice questions, one at a time. The game supplies three functions that read `content` lists: `quiz_questions()` (list<string>, one entry per question), `quiz_choices()` (list<string>, all the answer choices flattened: question q owns the entries from q * `choices` up to (q + 1) * `choices`, exactly `choices` per question) and `quiz_answers()` (list<string>, entry q is the exact text of the correct choice of question q, so it must also appear among that question's choices). Questions are asked in a shuffled order (reshuffled when used up) and each question's choices are shuffled on screen. Tapping a choice (input `answer {index}`) emits `answered_right` or `answered_wrong`, shows the right choice for about 700 ms, then emits `question_done` and asks the next one. Each question has `time_ms` (a bar drains); running out counts as `answered_wrong`. `question_done` is the event the `rounds` fragment counts: bind rounds' `round_done` to it. State: `right_count`, `wrong_count`, `opts` (choices on screen), `locked`. With `goal` above 0, `goal` right answers win; with 0 the quiz never wins on its own, so end it with rounds or a lose path (lives bound to `answered_wrong`). Sets no score; bind score's `point` to `answered_right`.",
+  "describe": "Multiple-choice questions, one at a time. The game supplies three functions that read `content` lists: `quiz_questions()` (list<string>, one entry per question), `quiz_choices()` (list<string>, all the answer choices flattened: question q owns the entries from q * `choices` up to (q + 1) * `choices`, exactly `choices` per question) and `quiz_answers()` (list<string>, entry q is the exact text of the correct choice of question q, so it must also appear among that question's choices). Questions are asked in a shuffled order (reshuffled when used up) and each question's choices are shuffled on screen. Tapping a choice (input `answer {index}`) emits `answered_right` or `answered_wrong`, shows the right choice for about 700 ms, then emits `question_done` and asks the next one. Each question has `time_ms` (a bar drains); running out counts as `answered_wrong`. `question_done` is the event the `rounds` fragment counts: bind rounds' `round_done` to it. State: `right_count`, `wrong_count`, `opts` (choices on screen), `locked`. With `goal` above 0, `goal` right answers win; with 0 the quiz never wins on its own, so end it with rounds or a lose path (lives bound to `answered_wrong`). Sets no score; bind score's `point` to `answered_right`. With the game's `button` sprite the answers draw it.",
   "params": {
     "choices": {
       "type": "int",
@@ -20,6 +20,12 @@
       "default": 0,
       "min": 0,
       "max": 200
+    }
+  },
+  "art": {
+    "button": {
+      "describe": "An answer button, 300 × 60, drawn under the answer text (keep its middle calm). Right and wrong answers are tinted over it.",
+      "color": "primary"
     }
   },
   "requires": {
@@ -313,6 +319,40 @@
             "node": "group",
             "children": [
               {
+                "include": "@art.button",
+                "node": "image",
+                "asset": "@art.button.id",
+                "x": 30,
+                "y": "= 270 + k * 72",
+                "w": 300,
+                "h": 60,
+                "role": "tile"
+              },
+              {
+                "include": "@art.button",
+                "node": "rect",
+                "x": 30,
+                "y": "= 270 + k * 72",
+                "w": 300,
+                "h": 60,
+                "radius": 14,
+                "fill": "= if _opt_fill(k) == 'good' then $primary else if _opt_fill(k) == 'bad' then $danger else '#00000000'",
+                "transition": {
+                  "fill": {
+                    "ms": 120,
+                    "ease": "out"
+                  }
+                },
+                "on_tap": {
+                  "input": "answer",
+                  "with": {
+                    "index": "k"
+                  }
+                },
+                "opacity": 0.8
+              },
+              {
+                "include": "not @art.button",
                 "node": "rect",
                 "x": 30,
                 "y": "= 270 + k * 72",
@@ -344,7 +384,20 @@
                 "color": "$ink",
                 "text": "= get_or(opts, k, '')"
               }
-            ]
+            ],
+            "animate_on": {
+              "answer": {
+                "when": "event.index == k",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  0.94,
+                  1.03,
+                  1
+                ],
+                "ms": 170
+              }
+            }
           }
         }
       }
@@ -354,11 +407,21 @@
         "on": "answered_right",
         "do": [
           {
-            "sound": {
-              "wave": "triangle",
-              "note": "G5",
-              "ms": 140
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": "= 300 + max(0, picked) * 72",
+              "count": 18,
+              "color": "@art.button.color",
+              "speed": 220,
+              "size": 5,
+              "ms": 500
             }
+          },
+          {
+            "haptic": "success"
           }
         ]
       },
@@ -366,17 +429,16 @@
         "on": "answered_wrong",
         "do": [
           {
+            "moment": "hit"
+          },
+          {
             "shake": {
               "px": 5,
               "ms": 160
             }
           },
           {
-            "sound": {
-              "wave": "square",
-              "note": "C3",
-              "ms": 110
-            }
+            "haptic": "warning"
           }
         ]
       }

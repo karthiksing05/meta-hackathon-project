@@ -51,6 +51,10 @@
     "born": {
       "type": "int",
       "init": "0"
+    },
+    "caught_at": {
+      "type": "vec2",
+      "init": "vec(0.0, 0.0)"
     }
   },
   "events": {
@@ -72,6 +76,10 @@
         {
           "if": "now >= born and overlaps_circle(vec(event.x, event.y), 1.0, vec(fx, fy), 42.0)",
           "then": [
+            {
+              "set": "caught_at",
+              "to": "vec(fx, fy)"
+            },
             {
               "emit": "point"
             },
@@ -144,20 +152,21 @@
           "node": "circle",
           "x": "= fx",
           "y": "= fy",
-          "r": 40.0,
-          "fill": "$accent",
-          "opacity": 0.25,
+          "r": 24.0,
+          "fill": "#00000000",
           "visible": "= now >= born"
         }
       },
       {
         "slot": "playfield",
         "node": {
-          "node": "circle",
+          "node": "image",
+          "asset": "firefly",
+          "anchor": "center",
           "x": "= fx",
           "y": "= fy",
-          "r": "= max(8.0, 24.0 - (now - born) / 60.0)",
-          "fill": "$accent",
+          "w": "= max(16.0, 48.0 - (now - born) / 30.0) * 1.7",
+          "h": "= max(16.0, 48.0 - (now - born) / 30.0) * 1.7",
           "role": "pickup",
           "visible": "= now >= born"
         }
@@ -168,11 +177,27 @@
         "on": "point",
         "do": [
           {
-            "sound": {
-              "wave": "sine",
-              "note": "A5",
-              "ms": 60
+            "particles": {
+              "x": "= caught_at.x",
+              "y": "= caught_at.y",
+              "count": 20,
+              "color": "$accent",
+              "speed": 210,
+              "size": 5,
+              "ms": 520,
+              "gravity": 120
             }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "missed",
+        "do": [
+          {
+            "moment": "hit"
           }
         ]
       }
@@ -181,6 +206,41 @@
   "look": {
     "id": "neon",
     "tokens": {}
+  },
+  "art": {
+    "style": "A summer-night meadow: violet dusk, tall teal grass, plump glowing fireflies and lantern-jar lives.",
+    "palette": {
+      "bg": "#151A44",
+      "surface": "#232B5C",
+      "primary": "#8CF5C4",
+      "secondary": "#B49BFF",
+      "accent": "#FFE066",
+      "ink": "#F2F5FF",
+      "danger": "#FF6B8B"
+    },
+    "font": "Avenir Next",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#151A44'/><stop offset='0.55' stop-color='#2A2560'/><stop offset='0.85' stop-color='#3F2E6B'/><stop offset='1' stop-color='#1B3640'/></linearGradient><filter id='glow' x='-50%' y='-50%' width='200%' height='200%'><feGaussianBlur stdDeviation='3'/></filter></defs><rect width='360' height='640' fill='url(#sky)'/><circle cx='24' cy='40' r='1' fill='#F2EEFF' opacity='0.7'/><circle cx='80' cy='96' r='1.3' fill='#F2EEFF' opacity='0.8'/><circle cx='140' cy='30' r='0.9' fill='#F2EEFF' opacity='0.6'/><circle cx='196' cy='74' r='1.2' fill='#F2EEFF' opacity='0.7'/><circle cx='256' cy='24' r='1' fill='#F2EEFF' opacity='0.6'/><circle cx='318' cy='88' r='1.4' fill='#F2EEFF' opacity='0.8'/><circle cx='52' cy='150' r='0.8' fill='#F2EEFF' opacity='0.5'/><circle cx='290' cy='150' r='0.9' fill='#F2EEFF' opacity='0.5'/><circle cx='180' cy='140' r='0.8' fill='#F2EEFF' opacity='0.4'/><path d='M0 520 Q40 470 80 500 Q120 450 170 492 Q220 446 262 488 Q306 454 360 486 L360 640 L0 640Z' fill='#182B3A'/><g filter='url(#glow)'><circle cx='40' cy='470' r='2' fill='#FFE89A' opacity='0.35'/><circle cx='300' cy='430' r='2.4' fill='#FFE89A' opacity='0.3'/><circle cx='220' cy='500' r='1.6' fill='#FFE89A' opacity='0.4'/><circle cx='90' cy='380' r='1.4' fill='#FFE89A' opacity='0.25'/><circle cx='330' cy='320' r='1.8' fill='#FFE89A' opacity='0.25'/><circle cx='150' cy='450' r='1.2' fill='#FFE89A' opacity='0.3'/></g><path d='M0 640 Q4 580 -2 560 Q8 584 10 640Z' fill='#0F2A2E'/><path d='M16 640 Q20 560 18 540 Q24 564 26 640Z' fill='#123236'/><path d='M40 640 Q44 586 39 566 Q48 590 50 640Z' fill='#0F2A2E'/><path d='M64 640 Q68 568 69 548 Q72 572 74 640Z' fill='#14383A'/><path d='M92 640 Q96 590 95 570 Q100 594 102 640Z' fill='#0F2A2E'/><path d='M118 640 Q122 564 123 544 Q126 568 128 640Z' fill='#123236'/><path d='M146 640 Q150 582 149 562 Q154 586 156 640Z' fill='#14383A'/><path d='M172 640 Q176 558 177 538 Q180 562 182 640Z' fill='#0F2A2E'/><path d='M200 640 Q204 586 203 566 Q208 590 210 640Z' fill='#123236'/><path d='M228 640 Q232 566 229 546 Q236 570 238 640Z' fill='#14383A'/><path d='M254 640 Q258 592 257 572 Q262 596 264 640Z' fill='#0F2A2E'/><path d='M280 640 Q284 562 285 542 Q288 566 290 640Z' fill='#123236'/><path d='M306 640 Q310 580 304 560 Q314 584 316 640Z' fill='#14383A'/><path d='M332 640 Q336 568 332 548 Q340 572 342 640Z' fill='#0F2A2E'/><path d='M350 640 Q354 586 350 566 Q358 590 360 640Z' fill='#123236'/></svg>"
+    },
+    "sprites": {
+      "firefly": {
+        "svg": [
+          "<svg viewBox='0 0 48 48'><defs><radialGradient id='g' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFF6B0' stop-opacity='0.95'/><stop offset='0.45' stop-color='#FFE066' stop-opacity='0.55'/><stop offset='1' stop-color='#FFE066' stop-opacity='0'/></radialGradient></defs><circle cx='24' cy='27' r='20' fill='url(#g)'/><ellipse cx='17' cy='18' rx='7' ry='4.5' fill='#D9F3FF' opacity='0.75' transform='rotate(-30 17 18)'/><ellipse cx='31' cy='18' rx='7' ry='4.5' fill='#D9F3FF' opacity='0.75' transform='rotate(30 31 18)'/><ellipse cx='24' cy='20' rx='4.5' ry='6' fill='#3A2F5C'/><circle cx='24' cy='14' r='3.6' fill='#3A2F5C'/><path d='M22 11 l-3 -4 M26 11 l3 -4' stroke='#3A2F5C' stroke-width='1.3' stroke-linecap='round'/><ellipse cx='24' cy='29' rx='5.5' ry='6.5' fill='#FFF3A0'/><ellipse cx='24' cy='28' rx='3' ry='3.5' fill='#FFFFFF'/></svg>",
+          "<svg viewBox='0 0 48 48'><defs><radialGradient id='g' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFF6B0' stop-opacity='0.95'/><stop offset='0.45' stop-color='#FFE066' stop-opacity='0.55'/><stop offset='1' stop-color='#FFE066' stop-opacity='0'/></radialGradient></defs><circle cx='24' cy='27' r='23' fill='url(#g)'/><ellipse cx='17' cy='18' rx='7' ry='3' fill='#D9F3FF' opacity='0.75' transform='rotate(-30 17 18)'/><ellipse cx='31' cy='18' rx='7' ry='3' fill='#D9F3FF' opacity='0.75' transform='rotate(30 31 18)'/><ellipse cx='24' cy='20' rx='4.5' ry='6' fill='#3A2F5C'/><circle cx='24' cy='14' r='3.6' fill='#3A2F5C'/><path d='M22 11 l-3 -4 M26 11 l3 -4' stroke='#3A2F5C' stroke-width='1.3' stroke-linecap='round'/><ellipse cx='24' cy='29' rx='5.5' ry='6.5' fill='#FFF3A0'/><ellipse cx='24' cy='28' rx='3' ry='3.5' fill='#FFFFFF'/></svg>"
+        ],
+        "fps": 6,
+        "color": "#FFE066"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 24 28'><defs><radialGradient id='l' cx='0.5' cy='0.6' r='0.5'><stop offset='0' stop-color='#FFF6B0'/><stop offset='1' stop-color='#FFD24D'/></radialGradient></defs><rect x='6' y='2' width='12' height='4' rx='1.5' fill='#8C7BD9'/><path d='M5 7 h14 q2 0 2 3 v13 q0 4 -4 4 h-10 q-4 0 -4 -4 v-13 q0 -3 2 -3z' fill='#C9E8FF' opacity='0.45' stroke='#E8F4FF' stroke-width='1.2'/><circle cx='12' cy='17' r='5' fill='url(#l)'/><path d='M7 11 v9' stroke='#FFFFFF' stroke-width='1.4' stroke-linecap='round' opacity='0.7'/></svg>",
+        "color": "#FFE066"
+      }
+    }
+  },
+  "sound": {
+    "set": "arcade",
+    "volume": 0.8,
+    "music": "bounce"
   },
   "content": {},
   "playtest": {

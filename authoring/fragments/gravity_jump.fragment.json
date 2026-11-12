@@ -1,7 +1,7 @@
 {
   "fragment": "gravity_jump",
   "version": 1,
-  "describe": "Tap anywhere (or press Space or ArrowUp) to hop. Gravity pulls the avatar down to a floor at `floor_y`. Provides `player` (vec2: fixed `x`, y moves) and `vel_y` (px/s, negative is up). With `double_jump` on, one more hop is allowed in the air. Emits `jumped` on each hop and `landed` on touching the floor. Draws a floor line and the avatar in `playfield` (role avatar). Conflicts with player_drag and lanes, which also provide `player`.",
+  "describe": "Tap anywhere (or press Space or ArrowUp) to hop. Gravity pulls the avatar down to a floor at `floor_y`. Provides `player` (vec2: fixed `x`, y moves) and `vel_y` (px/s, negative is up). With `double_jump` on, one more hop is allowed in the air. Emits `jumped` on each hop and `landed` on touching the floor. Draws the floor (with the game's `ground` sprite along its top, if any) and the avatar in `playfield` (the game's `avatar` sprite, else a circle). Kicks up dust on landing. Conflicts with player_drag and lanes, which also provide `player`.",
   "params": {
     "gravity":     { "type": "float", "default": 1800.0, "min": 200.0, "max": 5000.0 },
     "jump_vel":    { "type": "float", "default": 720.0, "min": 100.0, "max": 2000.0 },
@@ -10,6 +10,10 @@
     "double_jump": { "type": "bool", "default": false },
     "size":        { "type": "float", "default": 16.0, "min": 4.0, "max": 40.0 },
     "tone":        { "type": "enum", "values": ["primary", "secondary", "accent", "ink", "danger"], "default": "primary" }
+  },
+  "art": {
+    "avatar": { "describe": "The player, standing on the floor with its feet at the bottom of the sprite, about 2.8 × size wide. Tilts with its speed, stretches on a hop and squashes on landing.", "color": "primary" },
+    "ground": { "describe": "A strip drawn along the top of the floor, as wide as the canvas (a wide, short sprite: grass, a road, a ledge).", "color": "surface" }
   },
   "requires": {},
   "state": {
@@ -77,15 +81,40 @@
       },
       {
         "slot": "playfield",
+        "include": "@art.ground",
+        "node": { "node": "image", "asset": "@art.ground.id", "x": 0, "y": "= @floor_y + @size - 4.0", "w": "@game.canvas_w", "h": "= @game.canvas_w * @art.ground.aspect" }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.avatar",
+        "node": {
+          "node": "image", "asset": "@art.avatar.id", "anchor": "center",
+          "x": "= player.x", "y": "= player.y + @size - @size * 1.4 * @art.avatar.aspect", "w": "= @size * 2.8", "h": "= @size * 2.8 * @art.avatar.aspect",
+          "rotation": "= clamp(vel_y * 0.02, -12.0, 16.0)",
+          "role": "avatar",
+          "animate_on": {
+            "jumped": { "prop": "scale", "keys": [1, 1.16, 1], "ms": 180 },
+            "landed": { "prop": "scale", "keys": [1, 0.84, 1.06, 1], "ms": 200 }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.avatar",
         "node": {
           "node": "circle", "x": "= player.x", "y": "= player.y", "r": "@size",
           "fill": "= if @tone == 'primary' then $primary else if @tone == 'secondary' then $secondary else if @tone == 'accent' then $accent else if @tone == 'ink' then $ink else $danger",
-          "role": "avatar"
+          "role": "avatar",
+          "animate_on": {
+            "jumped": { "prop": "scale", "keys": [1, 1.16, 1], "ms": 180 },
+            "landed": { "prop": "scale", "keys": [1, 0.84, 1.06, 1], "ms": 200 }
+          }
         }
       }
     ],
     "feedback": [
-      { "on": "jumped", "do": [ { "sound": { "wave": "square", "note": "E4", "ms": 60 } } ] }
+      { "on": "jumped", "do": [ { "moment": "tap" }, { "haptic": "light" } ] },
+      { "on": "landed", "do": [ { "particles": { "x": "= player.x", "y": "= @floor_y + @size", "count": 8, "color": "@art.ground.color", "speed": 90, "size": 5, "ms": 380, "gravity": 240, "spread": 140 } } ] }
     ]
   },
   "tags": { "mood": ["playful"], "energy": ["medium", "high"] },

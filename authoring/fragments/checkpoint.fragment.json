@@ -42,7 +42,7 @@
       }
     ],
     "feedback": [
-      { "on": "checkpoint_saved", "do": [ { "sound": { "wave": "sine", "note": "A5", "ms": 90 } } ] }
+      { "on": "checkpoint_saved", "do": [ { "moment": "level" } ] }
     ]
   },
   "tags": { "mood": ["any"], "energy": ["medium", "high"] },

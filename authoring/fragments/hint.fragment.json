@@ -61,7 +61,7 @@
       }
     ],
     "feedback": [
-      { "on": "hint_used", "do": [ { "sound": { "wave": "sine", "note": "A5", "ms": 120 } } ] }
+      { "on": "hint_used", "do": [ { "moment": "tap" } ] }
     ]
   },
   "tags": { "mood": ["calm"], "energy": ["low", "medium"] },

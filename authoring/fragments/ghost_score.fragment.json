@@ -76,7 +76,7 @@
       }
     ],
     "feedback": [
-      { "on": "passed_ghost", "do": [ { "sound": { "wave": "sine", "note": "G5", "ms": 120 } } ] },
+      { "on": "passed_ghost", "do": [ { "moment": "level" }, { "haptic": "light" } ] },
       { "on": "ghost_passed_you", "do": [ { "sound": { "wave": "triangle", "note": "D3", "ms": 160 } } ] }
     ]
   },

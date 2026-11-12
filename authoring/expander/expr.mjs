@@ -4,7 +4,9 @@
 
 const IDENT = /[A-Za-z_][A-Za-z0-9_]*/y;
 const NUMBER = /[0-9]+(\.[0-9]+)?([a-z]+)?/y;
-const PLACEHOLDER = /@(@|game\.[a-z_]+|[A-Za-z_][A-Za-z0-9_]*)/y;
+// `@name`, `@game.<field>` and `@art.<role>` / `@art.<role>.<fact>` (SPEC 1.1, 1.7).
+export const PLACEHOLDER_NAME = '(?:game\\.[a-z_]+|art\\.[a-z][a-z0-9_]*(?:\\.[a-z_]+)?|[A-Za-z_][A-Za-z0-9_]*)';
+const PLACEHOLDER = new RegExp(`@(@|${PLACEHOLDER_NAME})`, 'y');
 
 // Splits an expression into tokens: {kind: 'ident'|'param'|'string'|'number'|'token'|'other', text, start}.
 export function tokenize(src) {

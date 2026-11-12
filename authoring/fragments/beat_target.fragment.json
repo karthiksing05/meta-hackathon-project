@@ -38,7 +38,11 @@
       }
     ],
     "feedback": [
-      { "on": "target_beaten", "do": [ { "sound": { "wave": "sine", "note": "C6", "ms": 200 } } ] }
+      { "on": "target_beaten", "do": [
+        { "moment": "level" },
+        { "particles": { "x": 180, "y": 120, "count": 30, "color": "$accent", "speed": 260, "size": 6, "ms": 900, "gravity": 380 } },
+        { "haptic": "success" }
+      ] }
     ]
   },
   "tags": { "mood": ["playful", "tense"], "energy": ["medium", "high"] },

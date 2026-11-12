@@ -56,7 +56,7 @@
       }
     ],
     "feedback": [
-      { "on": "goal_reached", "do": [ { "sound": { "wave": "sine", "note": "E6", "ms": 240 } } ] }
+      { "on": "goal_reached", "do": [ { "moment": "level" }, { "haptic": "success" } ] }
     ]
   },
   "tags": { "mood": ["warm", "playful"], "energy": ["low", "medium", "high"] },

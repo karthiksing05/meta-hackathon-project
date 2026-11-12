@@ -1,7 +1,7 @@
 {
   "fragment": "tile_slide",
   "version": 1,
-  "describe": "A sliding-tile board (the merge-in-one-direction genre). A `size` x `size` grid `board` (grid<int>, 0 = empty) starts with `start_tiles` tiles; each swipe or arrow key (input `slide {dir}`) slides every tile as far as it goes in that direction and merges equal neighbours into one tile of double value. After any move that changed the board, one new tile of `base` (or, `high_pct` percent of the time, 2 x `base`) appears in a random empty cell. Emits `slid` after a move that changed the board, `spawn_tile` for each new tile, and `merged {value}` once per line that merged, where `value` is the sum of the new tiles made in that line (the game decides what that is worth, for example `incr score by event.value`). Public function `best_tile()` is the largest tile and `can_move(board)` says whether any move changes the board. The game is lost when no move is left (`no_moves`). With `target` above 0, making a tile of that value wins. The fragment draws the board at (x, y); `cell_size` and `gap` size it (the board is size * cell_size + (size - 1) * gap wide), and the game can put a score or other text above it. Requires nothing and sets no score.",
+  "describe": "A sliding-tile board (the merge-in-one-direction genre). A `size` x `size` grid `board` (grid<int>, 0 = empty) starts with `start_tiles` tiles; each swipe or arrow key (input `slide {dir}`) slides every tile as far as it goes in that direction and merges equal neighbours into one tile of double value. After any move that changed the board, one new tile of `base` (or, `high_pct` percent of the time, 2 x `base`) appears in a random empty cell. Emits `slid` after a move that changed the board, `spawn_tile` for each new tile, and `merged {value}` once per line that merged, where `value` is the sum of the new tiles made in that line (the game decides what that is worth, for example `incr score by event.value`). Public function `best_tile()` is the largest tile and `can_move(board)` says whether any move changes the board. The game is lost when no move is left (`no_moves`). With `target` above 0, making a tile of that value wins. The fragment draws the board at (x, y); `cell_size` and `gap` size it (the board is size * cell_size + (size - 1) * gap wide), and the game can put a score or other text above it. With the game's `tile` sprite, each tile draws the frame for its value under the number. Requires nothing and sets no score.",
   "params": {
     "size":        { "type": "int", "default": 4, "min": 3, "max": 6 },
     "start_tiles": { "type": "int", "default": 2, "min": 1, "max": 4 },
@@ -12,6 +12,9 @@
     "gap":         { "type": "int", "default": 8, "min": 0, "max": 16 },
     "x":           { "type": "int", "default": 16, "min": 0, "max": 360 },
     "y":           { "type": "int", "default": 170, "min": 0, "max": 640 }
+  },
+  "art": {
+    "tile": { "describe": "A numbered tile: a sprite with one frame per value step (frame 0 is `base`, frame 1 is 2 × base, and so on; give svg as a list). The number is drawn on top, so leave the middle calm.", "color": "accent" }
   },
   "requires": {},
   "types": {
@@ -120,6 +123,22 @@
             "node": "group",
             "children": [
               {
+                "include": "@art.tile",
+                "node": "image", "asset": "@art.tile.id", "w": "@cell_size", "h": "@cell_size", "role": "tile",
+                "frame": "= floor(log2(max(1, value) * 1.0 / @base))",
+                "visible": "= value != 0",
+                "animate_on": {
+                  "spawn_tile": { "when": "value != 0", "prop": "scale", "keys": [0.9, 1.05, 1], "ms": 120 },
+                  "merged": { "when": "value > @base * 2", "prop": "scale", "keys": [1, 1.08, 1], "ms": 140 }
+                }
+              },
+              {
+                "include": "@art.tile",
+                "node": "rect", "w": "@cell_size", "h": "@cell_size", "radius": 8,
+                "fill": "= if value == 0 then '#00000022' else '#00000000'"
+              },
+              {
+                "include": "not @art.tile",
                 "node": "rect", "w": "@cell_size", "h": "@cell_size", "radius": 8, "role": "tile",
                 "fill": "= if value == 0 then '#00000022' else _tile_fill(value)",
                 "transition": { "fill": { "ms": 100, "ease": "out" } },
@@ -140,9 +159,8 @@
       }
     ],
     "feedback": [
-      { "on": "slid", "do": [ { "sound": { "wave": "sine", "note": "A4", "ms": 40 } } ] },
-      { "on": "merged", "do": [ { "sound": { "wave": "triangle", "note": "E5", "ms": 80 } } ] },
-      { "on": "win", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 300 } } ] }
+      { "on": "slid", "do": [ { "moment": "tap" }, { "haptic": "light" } ] },
+      { "on": "merged", "do": [ { "moment": "combo" } ] }
     ]
   },
   "tags": { "mood": ["calm", "focused"], "energy": ["low", "medium"] },

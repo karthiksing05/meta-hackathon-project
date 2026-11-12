@@ -64,7 +64,7 @@
       }
     ],
     "feedback": [
-      { "on": "fully_revealed", "do": [ { "sound": { "wave": "triangle", "note": "C5", "ms": 140 } }, { "sound": { "wave": "triangle", "note": "G5", "ms": 240 } } ] }
+      { "on": "fully_revealed", "do": [ { "moment": "level" } ] }
     ]
   },
   "tags": { "mood": ["calm", "playful"], "energy": ["low", "medium"] },

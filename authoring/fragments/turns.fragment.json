@@ -90,8 +90,8 @@
       }
     ],
     "feedback": [
-      { "on": "turn_started", "do": [ { "sound": { "wave": "sine", "note": "A4", "ms": 80 } } ] },
-      { "on": "all_turns_done", "do": [ { "sound": { "wave": "sine", "note": "C6", "ms": 240 } } ] }
+      { "on": "turn_started", "do": [ { "moment": "tap" } ] },
+      { "on": "all_turns_done", "do": [ { "moment": "level" } ] }
     ]
   },
   "tags": { "mood": ["playful", "warm"], "energy": ["low", "medium"] },

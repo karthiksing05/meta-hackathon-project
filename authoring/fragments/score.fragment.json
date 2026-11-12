@@ -25,15 +25,17 @@
     "slots": [
       {
         "slot": "hud_top", "include": "@target > 0",
-        "node": { "node": "text", "text": "= @label + ': ' + str(score) + ' / ' + str(@target)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+        "node": { "node": "text", "text": "= @label + ': ' + str(score) + ' / ' + str(@target)", "size": 18, "weight": 600, "color": "$ink", "role": "hud",
+                  "animate_on": { "point": { "prop": "scale", "keys": [1, 1.25, 1], "ms": 180 } } }
       },
       {
         "slot": "hud_top", "include": "@target == 0",
-        "node": { "node": "text", "text": "= @label + ': ' + str(score)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+        "node": { "node": "text", "text": "= @label + ': ' + str(score)", "size": 18, "weight": 600, "color": "$ink", "role": "hud",
+                  "animate_on": { "point": { "prop": "scale", "keys": [1, 1.25, 1], "ms": 180 } } }
       }
     ],
     "feedback": [
-      { "on": "point", "do": [ { "sound": { "wave": "sine", "note": "E5", "ms": 60 } } ] }
+      { "on": "point", "do": [ { "moment": "pickup" } ] }
     ]
   },
   "tags": { "mood": ["any"], "energy": ["low", "medium", "high"] },

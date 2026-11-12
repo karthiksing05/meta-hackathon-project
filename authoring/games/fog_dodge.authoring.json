@@ -2,7 +2,7 @@
   "authoring": "microgame-authoring/0.1",
   "meta": {
     "title": "Fog Dodge",
-    "instructions": "Drag or use the arrow keys to steer your cable car through the fog. Survive 45 seconds.",
+    "instructions": "Drag or use the arrow keys to steer your cable car through the fog banks. Survive 45 seconds.",
     "duration_s": 45
   },
   "uses": [
@@ -40,6 +40,9 @@
         "jitter": 0.3,
         "max_alive": 14,
         "kind": "fog"
+      },
+      "art": {
+        "hazard": "fogbank"
       }
     },
     {
@@ -75,38 +78,45 @@
   },
   "presentation": {
     "slots": [],
-    "feedback": [
-      {
-        "on": "hit",
-        "do": [
-          {
-            "sound": {
-              "wave": "sawtooth",
-              "note": "C2",
-              "ms": 200
-            }
-          }
-        ]
-      },
-      {
-        "on": "win",
-        "do": [
-          {
-            "sound": {
-              "wave": "triangle",
-              "note": "C6",
-              "ms": 300
-            }
-          }
-        ]
-      }
-    ]
+    "feedback": []
   },
   "look": {
     "id": "neon",
-    "tokens": {
-      "primary": "#5EE6FF"
+    "tokens": {}
+  },
+  "art": {
+    "style": "Moonlit mountain night: deep navy sky, soft lavender fog, a warm red cable car with glowing windows.",
+    "palette": {
+      "bg": "#0E1733",
+      "surface": "#1C2850",
+      "primary": "#7FE3FF",
+      "secondary": "#6C7BD9",
+      "accent": "#FFC86B",
+      "ink": "#EAF2FF",
+      "danger": "#FF8A7A"
+    },
+    "font": "Avenir Next",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#0A1130'/><stop offset='0.55' stop-color='#18265A'/><stop offset='1' stop-color='#2B3C77'/></linearGradient><radialGradient id='moon' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFF1CF' stop-opacity='0.55'/><stop offset='1' stop-color='#FFF1CF' stop-opacity='0'/></radialGradient><filter id='mist' x='-20%' y='-50%' width='140%' height='200%'><feGaussianBlur stdDeviation='9'/></filter></defs><rect width='360' height='640' fill='url(#sky)'/><circle cx='30' cy='60' r='1.2' fill='#DCE6FF' opacity='0.8'/><circle cx='74' cy='132' r='0.9' fill='#DCE6FF' opacity='0.6'/><circle cx='122' cy='48' r='1.4' fill='#DCE6FF' opacity='0.9'/><circle cx='168' cy='170' r='0.8' fill='#DCE6FF' opacity='0.5'/><circle cx='210' cy='84' r='1.1' fill='#DCE6FF' opacity='0.7'/><circle cx='38' cy='230' r='0.9' fill='#DCE6FF' opacity='0.5'/><circle cx='332' cy='250' r='1.2' fill='#DCE6FF' opacity='0.7'/><circle cx='250' cy='210' r='0.8' fill='#DCE6FF' opacity='0.5'/><circle cx='340' cy='40' r='1' fill='#DCE6FF' opacity='0.6'/><circle cx='150' cy='250' r='1' fill='#DCE6FF' opacity='0.4'/><circle cx='282' cy='122' r='64' fill='url(#moon)'/><circle cx='282' cy='122' r='19' fill='#FFF1CF'/><circle cx='274' cy='116' r='4' fill='#EBDDB8'/><circle cx='288' cy='129' r='3' fill='#EBDDB8'/><path d='M0 430 L48 372 L92 404 L150 318 L206 392 L262 340 L318 396 L360 362 L360 640 L0 640Z' fill='#141F47'/><path d='M150 318 L136 336 L150 330 L164 340Z' fill='#C9D4F5' opacity='0.5'/><path d='M262 340 L250 354 L262 350 L274 358Z' fill='#C9D4F5' opacity='0.5'/><g filter='url(#mist)' fill='#AAB6E6' opacity='0.22'><ellipse cx='70' cy='420' rx='90' ry='16'/><ellipse cx='270' cy='450' rx='110' ry='18'/><ellipse cx='170' cy='300' rx='80' ry='12'/></g><path d='M0 520 L70 470 L140 506 L214 458 L292 500 L360 476 L360 640 L0 640Z' fill='#1C2B5B'/><path d='M14 640 L14 528 L8 528 L22 512 L36 528 L30 528 L30 640Z' fill='#0F1838'/><path d='M330 640 L330 528 L324 528 L338 512 L352 528 L346 528 L346 640Z' fill='#0F1838'/><path d='M0 534 Q180 548 360 534' stroke='#A8B8EE' stroke-width='2' fill='none'/><path d='M0 600 Q180 612 360 600' stroke='#5D6FAE' stroke-width='1.2' fill='none' opacity='0.6'/></svg>"
+    },
+    "sprites": {
+      "avatar": {
+        "svg": "<svg viewBox='0 0 48 56'><defs><linearGradient id='body' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FFB08A'/><stop offset='1' stop-color='#E2574C'/></linearGradient><radialGradient id='lamp' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFF4C2'/><stop offset='1' stop-color='#FFC86B'/></radialGradient></defs><circle cx='24' cy='5' r='4.2' fill='#DCE4FF' stroke='#5A6BA8' stroke-width='1.2'/><rect x='22.6' y='8' width='2.8' height='11' fill='#DCE4FF'/><rect x='9' y='17' width='30' height='4' rx='2' fill='#DCE4FF'/><rect x='5' y='20' width='38' height='32' rx='8' fill='url(#body)' stroke='#7A2230' stroke-width='1.6'/><rect x='9.5' y='25' width='12.5' height='12' rx='3' fill='url(#lamp)'/><rect x='26' y='25' width='12.5' height='12' rx='3' fill='url(#lamp)'/><circle cx='15.7' cy='31' r='2.2' fill='#7A2230' opacity='0.55'/><rect x='5' y='42' width='38' height='4.5' fill='#B8433E'/><path d='M10 22 q14 -4 28 0' stroke='#FFD9C2' stroke-width='1.4' fill='none' opacity='0.8'/></svg>",
+        "color": "#FFB08A"
+      },
+      "fogbank": {
+        "svg": "<svg viewBox='0 0 64 48'><defs><radialGradient id='f' cx='0.5' cy='0.4' r='0.65'><stop offset='0' stop-color='#F4F6FF'/><stop offset='0.65' stop-color='#BCC5EC'/><stop offset='1' stop-color='#8A95CC'/></radialGradient><filter id='b' x='-20%' y='-20%' width='140%' height='140%'><feGaussianBlur stdDeviation='1.1'/></filter></defs><g filter='url(#b)' fill='url(#f)'><circle cx='19' cy='28' r='13'/><circle cx='34' cy='19' r='15'/><circle cx='48' cy='28' r='12'/><rect x='10' y='26' width='46' height='16' rx='8'/></g><path d='M15 34 q6 -3.5 12 0 t12 0 t12 0' stroke='#6E78B0' stroke-width='2.2' fill='none' stroke-linecap='round'/><path d='M21 40 q5 -2.5 10 0 t10 0' stroke='#6E78B0' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='0.7'/></svg>",
+        "color": "#C8D0F2"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 24 24'><rect x='11' y='1' width='2' height='5' fill='#DCE4FF'/><rect x='4' y='5' width='16' height='2.5' rx='1.2' fill='#DCE4FF'/><rect x='2.5' y='7' width='19' height='15' rx='4' fill='#FF8C6E' stroke='#7A2230' stroke-width='1'/><rect x='5' y='10' width='6' height='5.5' rx='1.4' fill='#FFE7A8'/><rect x='13' y='10' width='6' height='5.5' rx='1.4' fill='#FFE7A8'/></svg>",
+        "color": "#FF8C6E"
+      }
     }
+  },
+  "sound": {
+    "set": "soft",
+    "music": "drift"
   },
   "content": {},
   "playtest": {

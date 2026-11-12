@@ -1,7 +1,7 @@
 {
   "fragment": "collide",
   "version": 1,
-  "describe": "Overlap check between `player` and a list of points the game owns. Requires state `player: vec2` and a game function `colliders() -> list<vec2>` returning the centres to test (for example `map(spawns, s => vec(s.x, s.y))`). Each tick, if any centre is within `radius` of the player (the player's and the object's radii added together) and the `grace` window has passed, emits `hit` once and records `hit_at` (the player's position). A `grace` of 0 emits on every tick of contact. Objects are not removed here: the game removes them in its own rule on `hit`, near `hit_at`. `lives` listens for `hit`.",
+  "describe": "Overlap check between `player` and a list of points the game owns. Requires state `player: vec2` and a game function `colliders() -> list<vec2>` returning the centres to test (for example `map(spawns, s => vec(s.x, s.y))`). Each tick, if any centre is within `radius` of the player (the player's and the object's radii added together) and the `grace` window has passed, emits `hit` once and records `hit_at` (the player's position). A `grace` of 0 emits on every tick of contact. Objects are not removed here: the game removes them in its own rule on `hit`, near `hit_at`. `lives` listens for `hit`. Each hit plays the `hit` sound moment, a burst of particles at `hit_at`, a light shake and a haptic; with a short `grace` these repeat at most every 300 ms.",
   "params": {
     "radius": { "type": "float", "default": 28.0, "min": 2.0, "max": 200.0 },
     "grace":  { "type": "duration", "default": 1000, "min": 0, "max": 5000 }
@@ -12,7 +12,9 @@
   },
   "state": {
     "hit_at":      { "type": "vec2", "init": "vec(0.0, 0.0)" },
-    "safe_until":  { "type": "int", "init": "0" }
+    "safe_until":  { "type": "int", "init": "0" },
+    "_fx_next":    { "type": "int", "init": "0" },
+    "_fx_on":      { "type": "bool", "init": "false" }
   },
   "events": {
     "hit": {}
@@ -25,12 +27,24 @@
       "do": [
         { "set": "hit_at", "to": "player" },
         { "set": "safe_until", "to": "now + @grace" },
+        { "set": "_fx_on", "to": "now >= _fx_next" },
+        { "if": "now >= _fx_next", "then": [ { "set": "_fx_next", "to": "now + 300" } ] },
         { "emit": "hit" }
       ]
     }
   ],
   "objectives": {},
-  "presentation": { "slots": [], "feedback": [] },
+  "presentation": {
+    "slots": [],
+    "feedback": [
+      { "on": "hit", "when": "_fx_on", "do": [
+        { "moment": "hit" },
+        { "particles": { "x": "= hit_at.x", "y": "= hit_at.y", "count": 18, "color": "$danger", "speed": 240, "size": 5, "ms": 420 } },
+        { "shake": { "px": 5, "ms": 160 } },
+        { "haptic": "medium" }
+      ] }
+    ]
+  },
   "tags": { "mood": ["tense"], "energy": ["medium", "high"] },
   "conflicts": []
 }

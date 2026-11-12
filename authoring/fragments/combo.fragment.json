@@ -55,7 +55,8 @@
       }
     ],
     "feedback": [
-      { "on": "combo_broken", "do": [ { "sound": { "wave": "sawtooth", "note": "E2", "ms": 140 } } ] }
+      { "on": "hit_good", "when": "combo > 1", "do": [ { "moment": "combo" } ] },
+      { "on": "combo_broken", "do": [ { "shake": { "px": 3, "ms": 120 } }, { "haptic": "light" } ] }
     ]
   },
   "tags": { "mood": ["playful", "tense"], "energy": ["medium", "high"] },

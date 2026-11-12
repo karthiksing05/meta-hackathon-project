@@ -83,8 +83,8 @@
       }
     ],
     "feedback": [
-      { "on": "wave_started", "do": [ { "sound": { "wave": "triangle", "note": "E4", "ms": 120 } } ] },
-      { "on": "wave_cleared", "do": [ { "sound": { "wave": "sine", "note": "C5", "ms": 160 } }, { "sound": { "wave": "sine", "note": "G5", "ms": 200 } } ] }
+      { "on": "wave_started", "do": [ { "moment": "level" } ] },
+      { "on": "wave_cleared", "do": [ { "moment": "combo" }, { "haptic": "success" } ] }
     ]
   },
   "tags": { "mood": ["tense", "playful"], "energy": ["medium", "high"] },

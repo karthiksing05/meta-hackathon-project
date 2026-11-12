@@ -81,7 +81,7 @@
       }
     ],
     "feedback": [
-      { "on": "time_out", "do": [ { "shake": { "px": 6, "ms": 200 } }, { "sound": { "wave": "square", "note": "C2", "ms": 220 } } ] }
+      { "on": "time_out", "do": [ { "moment": "hit" }, { "shake": { "px": 6, "ms": 200 } }, { "haptic": "warning" } ] }
     ]
   },
   "tags": { "mood": ["tense"], "energy": ["high"] },

@@ -127,8 +127,8 @@
       }
     ],
     "feedback": [
-      { "on": "guess_wrong", "do": [ { "sound": { "wave": "square", "note": "C3", "ms": 100 } } ] },
-      { "on": "word_solved", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 260 } } ] }
+      { "on": "guess_wrong", "do": [ { "moment": "hit" }, { "shake": { "px": 4, "ms": 140 } }, { "haptic": "warning" } ] },
+      { "on": "word_solved", "do": [ { "moment": "combo" }, { "haptic": "success" } ] }
     ]
   },
   "tags": { "mood": ["calm", "focused"], "energy": ["low", "medium"] },

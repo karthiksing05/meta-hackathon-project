@@ -1,7 +1,8 @@
 # Microgame authoring format v0.1
 
-The authoring layer turns what a model writes into one flat `microgame/0.1` `game.json` that Artem's
-engine validates and runs. This page defines the two things it reads:
+The authoring layer turns what a model writes into one flat `microgame/0.2` `game.json` that Artem's
+engine validates and runs (`engine/SPEC-v0.2.md`; the 0.2 parts used are assets, `image` nodes,
+particles, haptics, feedback `when` and music). This page defines the two things it reads:
 
 - a **fragment**: one reusable game concept (lives, score, a spawn wave), written in `microgame/0.1`
   pieces plus a header that says how it plugs in;
@@ -30,6 +31,7 @@ A fragment is a JSON file, `fragments/<id>.fragment.json`:
   "rules": [],
   "objectives": { "win": "<expr>", "lose": "<expr>", "score": "<expr>" },
   "presentation": { "slots": [ { "slot": "hud_top", "node": {} } ], "feedback": [] },
+  "art": { "life": { "describe": "One life icon for the HUD", "color": "danger" } },
   "tags": { "mood": ["tense"], "energy": ["medium", "high"] },
   "conflicts": ["sudden_death"]
 }
@@ -66,8 +68,8 @@ used anywhere in the engine's grammar. `@@` is a literal `@`.
   so `{ "every": "@every" }` stays a duration literal.
 - Nowhere else. Placeholders in keys, names or partial literal text are `A_PARAM_PLACEMENT`.
 
-**Optional pieces.** A rule, a feedback entry, a slot entry or an objective can carry
-`"include": "<condition>"`. The condition reads only params, so the expander decides it once: the piece
+**Optional pieces.** A rule, a feedback entry, a single feedback action, a slot entry, any node inside
+a `children` list, or an objective can carry `"include": "<condition>"`. The condition reads only params, so the expander decides it once: the piece
 is either kept (minus the `include` key) or dropped. Objectives use the long form
 `"win": { "include": "@target > 0", "expr": "score >= @target" }`. Conditions are `@param` compared
 with a literal (`== != < <= > >=`), joined by `and`/`or`. Without this, a param that turns something off
@@ -76,6 +78,12 @@ leaves dead `10 > 0 and …` guards in the output.
 **Game params** are read-only values every fragment can use, in either kind of field and as a param's
 `default`: `@game.duration_ms` (the game's `time_limit`, or else `meta.duration_s × 1000`),
 `@game.canvas_w` and `@game.canvas_h` (from the look, 360 × 640 for every v0.1 look).
+
+**Art params** describe the game's sprite for each role the fragment declares in its `art` header
+(1.7): `@art.<role>` (bool: the game has one), `@art.<role>.id` (string: its asset id),
+`@art.<role>.frames` (int), `@art.<role>.aspect` (float, height ÷ width) and `@art.<role>.color` (a
+`#RRGGBB` the sprite names for particles, else the role's fallback token like `$accent`; literal fields
+only). Using `@art.<role>` for a role the header doesn't declare is a library error.
 
 ### 1.2 Names, `requires` and `bind`
 
@@ -174,6 +182,72 @@ The engine's string literals are single-quoted. Whenever the expander writes tex
 `string` param, a `content` value), it replaces `'` with `’` (U+2019) and rejects control characters.
 Text stays readable, and nothing can break out of a literal.
 
+### 1.7 Sprite roles
+
+A fragment that draws something game-specific (an avatar, hazards, cards, buttons) declares the
+**roles** it can draw with the game's art, in an `art` header:
+
+```json
+"art": {
+  "avatar": { "describe": "The player, centred on `player`, about 2.8 × size wide.", "color": "primary" }
+}
+```
+
+`describe` tells the model what to draw and at what size; `color` is the standard token the role's
+particles fall back to. Each role's slot entries come in two versions, picked with `include` on the
+art params (1.1): the sprite as an `image` node when the game has one, and today's shape when it
+doesn't, so games without art keep working unchanged:
+
+```json
+{ "slot": "playfield", "include": "@art.avatar",
+  "node": { "node": "image", "asset": "@art.avatar.id", "anchor": "center", "x": "= player.x", "y": "= player.y",
+            "w": "= @size * 2.8", "h": "= @size * 2.8 * @art.avatar.aspect" } },
+{ "slot": "playfield", "include": "not @art.avatar",
+  "node": { "node": "circle", "x": "= player.x", "y": "= player.y", "r": "@size", "fill": "$primary" } }
+```
+
+The fragment sizes the sprite from its own geometry (the hit circle or cell), so art never changes how
+the game plays. Variants (card faces, pads, bins, tile values, scene pictures) are frames of one
+sprite, picked with `"frame": "= symbol"`; the engine wraps frame numbers past the last frame. Where a
+tap target turns into a picture, keep a transparent `rect` with the `on_tap` on top of it.
+
+The game's sprite for a role is the one with the role's name. A use can point a role at another
+sprite, or at `false` to keep the shape, with `"art": { "hazard": "fogbank" }` (2.1).
+
+| Fragment | Roles |
+|---|---|
+| `player_drag`, `lanes` | `avatar` |
+| `gravity_jump` | `avatar`, `ground` (a strip along the top of the floor) |
+| `spawn_wave` | `hazard` |
+| `pickups` | `pickup` |
+| `lives` | `life` (one HUD icon per life) |
+| `grid_board` | `cell` (a plain cell, such as a card back) |
+| `match_pairs` | `card` (one frame per symbol) |
+| `tile_slide` | `tile` (one frame per value step: base, 2 × base, …) |
+| `sort_bins` | `bin` (one frame per bin) |
+| `sequence_memory` | `pad` (one frame per pad) |
+| `quiz` | `button` |
+| `choice_story` | `scene` (a picture; one frame per scene, or one for all), `button` |
+
+### 1.8 Sound moments and feel
+
+Fragments don't write synth notes for common moments. A feedback action `{ "moment": "<name>" }` plays
+the game's sound for that moment (2.9): `tap`, `pickup`, `hit`, `combo`, `level`, `countdown`, `win` or
+`lose`. Every fragment gives feedback by default, without the game wiring it up:
+
+- **Particles** in the art's colors where something happened: `collide` at `hit_at`, `pickups` at the
+  item, `match_pairs` on both cards, `sort_bins`, `quiz` and `sequence_memory` on the answer.
+- **Pop and squash** with `animate_on`: avatars squash on lane changes and landings, cells, cards,
+  pads, bins, answers and story buttons pop when tapped, pickups pop in, HUD counters pulse.
+- **A light shake and a haptic** on hits, misses and wrong answers; light haptics on taps and pickups.
+- **Sound moments** as above. Who plays what: the cause makes the sound (`collide` plays `hit`, a
+  wrong answer plays `hit`), so `lives` only shakes and buzzes; `score` plays `pickup` on `point`, so
+  `pickups` only sparkles.
+
+Use feedback `when` (v0.2.1) so repeated events don't spam: `collide` with a short `grace` fires its
+feedback at most every 300 ms, `combo` plays only once the streak is past 1. The `when` and `on` of a
+fragment's feedback are renamed like everything else (1.2).
+
 ## 2. Authoring manifest
 
 ```json
@@ -182,13 +256,17 @@ Text stays readable, and nothing can break out of a literal.
   "meta": { "title": "Fog Dodge", "instructions": "Drag to steer through the fog. Survive 45 seconds.", "duration_s": 45 },
   "uses": [
     { "fragment": "lives",      "params": { "count": 3 }, "bind": { "hit": "fog_hit" } },
-    { "fragment": "spawn_wave", "params": { "every": "600ms", "kind": "fogbank", "from": "top" } }
+    { "fragment": "spawn_wave", "params": { "every": "600ms", "kind": "fogbank", "from": "top" },
+      "art": { "hazard": "fogbank" } }
   ],
   "types": {}, "state": {}, "functions": {}, "events": {}, "inputs": {},
   "rules": [],
   "objectives": { "time_limit": "45s", "on_timeout": "win" },
   "presentation": { "slots": [], "feedback": [] },
   "look": { "id": "paper", "tokens": { "primary": "#3A6EA5" } },
+  "art": { "palette": { "bg": "#0E1733" }, "sprites": { "fogbank": { "svg": "<svg viewBox='0 0 64 48'>…</svg>" } } },
+  "sound": { "set": "soft", "music": false },
+  "feel": { "shake": false },
   "content": { "theme_words": ["fog", "cable car", "hill"] }
 }
 ```
@@ -196,7 +274,7 @@ Text stays readable, and nothing can break out of a literal.
 ### 2.1 `uses`
 
 Each entry has `fragment`, optional `id` (default: the fragment name, then `<name>_2` and so on),
-`params`, `bind` and `version`. Without a version, the expander uses the library's latest and records
+`params`, `bind`, `art` (2.8) and `version`. Without a version, the expander uses the library's latest and records
 which one it used (2.6). Unknown fragments are `A_UNKNOWN_FRAGMENT`, with a did-you-mean hint.
 
 ### 2.2 The game's own sections
@@ -222,6 +300,9 @@ expander splices them into the parent's `children`. Every layout puts `playfield
 (0, 0), so playfield nodes use plain canvas coordinates and the HUD paints on top. The look's `font` is
 set on every `text` node that doesn't set its own.
 
+Tokens are applied in this order, later winning: the look's preset, `art.palette` (2.8), `look.tokens`.
+`art.font` replaces the look's font.
+
 ### 2.5 Content
 
 `content` holds words and lists the model writes, kept out of expression strings so they can be read
@@ -245,12 +326,181 @@ rule updates. The shipped `game.json` never contains it.
 
 ### 2.7 Inside Bubbles
 
-A Bubble manifest with `formula: "microgame"` carries the **expanded** `game.json` in `content.game`, so
-the player never needs the expander, and this authoring manifest in `content.authoring`, for remixing
+A Bubble manifest with `formula: "microgame"` carries the **expanded** `game.json` as JSON text in
+`content.game_json`, so the player never needs the expander, and this authoring manifest as text in
+`content.authoring_json`, for remixing (text, so key order survives the app's sorted-key JSON)
 and lineage (docs/BUBBLES.md 7.11). `expander/bubble.mjs` (`wrapBubble`) builds it. `brief`, `lineage`,
 `chain`, `style`, `seed` and `studio` are the usual Bubble fields. The expander adds the fragment versions
 it resolved to `lineage`, so an old Bubble expands the same way after the library moves on.
 (An earlier beta draft put this manifest under a top-level `game`; the CLI still reads that.)
+
+### 2.8 Art
+
+`art` is the game's own look, made from the user's prompt. Every part is optional; whatever is missing
+comes from the look preset and the fragments' fallback shapes.
+
+```json
+"art": {
+  "style": "Moonlit mountain night: navy sky, lavender fog, a red cable car with glowing windows.",
+  "palette": { "bg": "#0E1733", "surface": "#1C2850", "primary": "#7FE3FF", "accent": "#FFC86B",
+               "ink": "#EAF2FF", "secondary": "#6C7BD9", "danger": "#FF8A7A" },
+  "font": "Avenir Next",
+  "backdrop": { "svg": "<svg viewBox='0 0 360 640'>…</svg>" },
+  "sprites": {
+    "avatar":  { "svg": "<svg viewBox='0 0 48 56'>…</svg>", "color": "#FFB08A" },
+    "fogbank": { "svg": "<svg viewBox='0 0 64 48'>…</svg>" },
+    "card":    { "svg": ["<svg viewBox='0 0 64 64'>…</svg>", "<svg viewBox='0 0 64 64'>…</svg>"] },
+    "firefly": { "svg": ["<svg …>glow</svg>", "<svg …>bright</svg>"], "fps": 6 },
+    "photo":   { "image": "data:image/png;base64,…", "w": 64, "h": 64 }
+  }
+}
+```
+
+- **`palette`** sets the standard token roles (`primary secondary accent ink bg danger surface`) as
+  `#RRGGBB`. It fills the look's tokens, so every fragment's text, HUD and fallback shapes follow it.
+  `bg` is also the canvas background and the Bubble frame's color. Put game-only colors in
+  `look.tokens`.
+- **`font`** is one of: `system`, `Inter`, `Fraunces`, `Space Grotesk`, `Silkscreen`, `Avenir Next`,
+  `Futura`, `Gill Sans`, `Optima`, `Georgia`, `Baskerville`, `American Typewriter`, `Chalkboard SE`,
+  `Marker Felt`, `Noteworthy`, `Menlo`, `Courier New`.
+- **`backdrop`** is one sprite drawn under everything at the canvas size (360 × 640).
+- **`sprites`** maps a name (lowercase, digits and `_`, up to 24 characters; not `backdrop` or
+  `music`) to a sprite. A sprite named after a role a fragment draws (1.7) is drawn by that fragment;
+  a use's `"art": { "<role>": "<sprite>" }` picks another one. The game's own nodes draw any sprite by
+  name: `{ "node": "image", "asset": "firefly", … }`. A sprite nothing draws is `W_ART_UNUSED`.
+- **A sprite** has exactly one source:
+  - `svg`: inline SVG (preferred), or a **list of SVGs**, one per frame; the expander lays them out as
+    a sprite sheet, so each frame keeps its own `viewBox` and ids.
+  - `image`: a `data:image/png|jpeg|webp|gif;base64,…` URI, with `w` and `h` (one frame's size).
+
+  and optionally `w`, `h` (the frame's size in canvas units; default from the `viewBox`, longest side
+  64), `frames` and `cols` (for a single SVG or image that is already a sheet), `fps` (animate on its
+  own; a fragment that picks frames, like cards, ignores it) and `color` (`#RRGGBB`, for particles).
+- The fragment decides the drawn size from its own geometry and keeps the sprite's aspect ratio, so
+  draw sprites square-ish and centred, with the subject filling the `viewBox`. For HUD icons and
+  numbered tiles, keep the middle calm: text is drawn on top.
+- The expander writes the sprites into the engine's `assets` (asset id = sprite name) and validates
+  them in the engine (`E_ASSET`).
+
+**SVG rules.** Every SVG goes through the sanitizer (`expander/svg.mjs`) before anything else. Anything
+it rejects is an `A_ART_SVG` error for the model, at the SVG's pointer, saying what to change. It
+**keeps** shapes, paths, text, groups, `defs`, `use`/`symbol`, gradients, patterns, clip paths, masks,
+markers and filters (blur, drop shadow, turbulence and the other `fe*` primitives), and `style`
+attributes and elements. It **rejects**:
+
+- `<script>`, `<foreignObject>`, links (`<a>`), SMIL animation (use frames), `<iframe>`, `<embed>`,
+  `<object>`, media elements and web fonts;
+- any `on…` event attribute, and namespaced attributes other than `xlink:href`, `xml:space` and
+  `xmlns:xlink`;
+- `href` or `xlink:href` that doesn't start with `#`, except `<image>` embedding a
+  `data:image/png|jpeg|gif|webp` URI; any `url(…)` that isn't `url(#id)`; `@import`; `javascript:` or
+  `data:text` anywhere (entity-encoded too);
+- `<!DOCTYPE>`, `<!ENTITY>`, `<?xml …?>`, anything before `<svg` or after `</svg>`, unclosed tags;
+- an SVG without a `viewBox` (or numeric `width` and `height`);
+- **size:** a sprite over 24 KB, the backdrop over 64 KB, more than 2,000 elements or 32 levels of
+  nesting, an `image` over 512 KB, more than 32 sprites, or all the art together over 192 KB.
+
+Other art errors: `A_ART_FIELD` (an unknown or malformed field), `A_ART_PALETTE`, `A_ART_FONT`,
+`A_ART_IMAGE`, `A_ART_SIZE`, `A_UNKNOWN_ART_ROLE` (a use maps a role its fragment doesn't draw) and
+`A_ART_MISSING` (a use maps a role to a sprite that doesn't exist).
+
+### 2.9 Sound
+
+Every sound is synthesized: engine synth notes, slides and jingles, and music rendered by the expander
+into a short WAV loop. `sound` picks a sound for each **moment** that fragments play (1.8):
+
+| Moment | When |
+|---|---|
+| `tap` | a small player action: a tap on a cell, a lane change, a hop, a choice |
+| `pickup` | something good: a point, a pickup, a right answer, a pair |
+| `hit` | something bad: a hit, a miss, a wrong answer |
+| `combo` | a streak grows, tiles merge, a pattern is repeated |
+| `level` | a step up: a new wave or level, a checkpoint, passing a friend |
+| `countdown` | each of the last seconds on a `countdown` clock |
+| `win`, `lose` | the stings at the end (every game gets them, with confetti and a haptic on a win) |
+
+```json
+"sound": { "set": "arcade", "volume": 0.7, "music": false,
+           "moments": { "hit": "thud", "win": { "wave": "triangle", "notes": ["C5", "E5", "G5", "C6"], "step_ms": 90 } } }
+```
+
+- **`set`** (default `classic`) is a named sound set from the library (`expander/sound.mjs`):
+
+  | Set | Feel | Music |
+  |---|---|---|
+  | `classic` | plain, clear synth beeps | none |
+  | `soft` | quiet, rounded sine tones for calm games | `drift` |
+  | `arcade` | bright square-wave bleeps for fast games | `bounce` |
+  | `chime` | bells and sparkles for puzzles and pairs | none |
+  | `retro` | chiptune blips | `chip` |
+  | `cozy` | wooden plucks for stories and slow play | `lullaby` |
+
+- **`moments`** overrides single moments: a preset name, a synth body (`wave` sine, square, triangle
+  or sawtooth; `note` like `"C5"`, `"F#4"` or Hz; optional `slide`, `ms`, `volume`), a jingle body
+  (`notes`, up to 8, with `step_ms`), or `false` for silence. Presets: `blip tick click pluck bubble
+  pip` (taps), `ding coin sparkle chirp bell woodblock` (good), `thud buzz zap bonk crunch` (bad),
+  `rise arpeggio shimmer levelup chime` (streaks and steps), `fanfare tada glow hooray` (wins),
+  `sigh fall wah powerdown` (losses).
+- **`volume`** (0 to 1, default 1) scales every sound in the game, the game's own included. `0` is
+  silent.
+- **`music`**: absent means the set's music, `false` none, `true` the set's (or `lullaby`), a name
+  (`lullaby drift bounce chip`) that loop, or your own `{ "melody": [eighth notes, null for a rest,
+  up to 32], "bass": [quarter notes, up to 16], "bpm": 50–180, "wave": …, "volume": … }`. It plays while
+  the game is playing.
+
+So "softer" is `"volume": 0.5` (or `"set": "soft"`), "more arcade" is `"set": "arcade"`, and "no
+music" is `"music": false`. The game can still play its own sounds in `presentation.feedback`, as a
+`sound` action or a `{ "moment": … }`. A game's own sound on an event replaces the library's moments on
+that event (its own `win` sound replaces the win sting), and one moment on one event plays once even
+when two fragments ask for it. Errors: `A_SOUND_SET`, `A_SOUND_MOMENT`, `A_SOUND_PRESET`,
+`A_SOUND_FIELD`.
+
+### 2.10 Feel
+
+`feel` turns the default game feel down: `{ "particles": false, "shake": false, "haptics": false }`
+(each defaults to true) removes those actions from every feedback entry, the fragments' and the
+game's. Unknown keys are `A_FEEL_FIELD`.
+
+### 2.11 For the prompt
+
+<!-- for-the-prompt: start. The Studio composer pastes this block into Muse's prompt as is. -->
+
+```text
+ART AND SOUND. Your manifest may add three sections. Leave out any of them to keep the defaults.
+
+"art": { "style": "<one line>", "palette": {...}, "font": "<font>", "backdrop": {"svg": "..."}, "sprites": {...} }
+- palette: #RRGGBB for primary secondary accent ink bg danger surface. ink must read on bg and surface.
+- font: system, Inter, Fraunces, Space Grotesk, Silkscreen, Avenir Next, Futura, Gill Sans, Optima,
+  Georgia, Baskerville, American Typewriter, Chalkboard SE, Marker Felt, Noteworthy, Menlo, Courier New.
+- backdrop: one SVG with viewBox "0 0 360 640", drawn under everything. Keep the middle quiet so
+  the game reads on top; put detail at the edges.
+- sprites: { "<name>": { "svg": "<svg viewBox='0 0 W H'>...</svg>", "color": "#RRGGBB" } }.
+  Name a sprite after a role your fragments draw (each fragment's art header lists its roles,
+  what to draw and how big), or map a role with "art": {"<role>": "<sprite>"} on the use.
+  For variants (card faces, pads, bins, tile values), or a short animation, give "svg" as a
+  list of SVGs, one per frame; add "fps" for an animation. "color" is the sprite's main color,
+  used for its particles.
+- SVG rules: start with <svg and include a viewBox; fill the viewBox with the subject, centred.
+  Use shapes, paths, gradients, patterns, clip paths and filters freely. No <script>, no on...
+  attributes, no <foreignObject>, no <a>, no <animate> (use frames), no links or url(...) outside
+  the SVG (only href="#id" and url(#id)), no <image> except data:image/png|jpeg|gif|webp. Sprites
+  up to 24 KB, the backdrop up to 64 KB. Write attributes with single quotes so the JSON stays
+  readable.
+- Make the player stand out from hazards (shape and color), and keep HUD icons and numbered
+  tiles simple in the middle: text is drawn on top. Original designs only: no characters, logos
+  or looks copied from existing games or brands.
+
+"sound": { "set": "<classic|soft|arcade|chime|retro|cozy>", "volume": 0..1, "music": true|false|"<lullaby|drift|bounce|chip>", "moments": {...} }
+- Pick the set from the mood and energy of the brief: soft or cozy for calm, arcade or retro for
+  fast, chime for puzzles. Moments: tap pickup hit combo level countdown win lose; override one
+  with a preset name, {"wave","note","slide","ms","volume"} or {"wave","notes":[...],"step_ms"},
+  or false for silence. "Softer" = lower volume or set soft; "no music" = "music": false.
+
+"feel": { "particles": true, "shake": true, "haptics": true }  (turn one off for calmer games)
+Fragments already add particles, pops, shake, haptics and the sound moments; don't re-add them.
+```
+
+<!-- for-the-prompt: end -->
 
 ## 3. Expander
 
@@ -261,8 +511,11 @@ The expander is deterministic: the same manifest and library versions give byte-
 3. Check `requires` and `conflicts` across all uses and the game.
 4. Merge, in `uses` order and then the game's: `types`, `state`, `functions`, `events`, `inputs`,
    `rules`, slots and `feedback`. Combine `objectives` (1.3).
-5. Apply the look: `presentation.canvas`, `presentation.tokens` (preset, then overrides), and `root`
-   built from the look's slot layout with the slot nodes inside.
+5. Apply the look: `presentation.canvas`, `presentation.tokens` (preset, then `art.palette`, then
+   `look.tokens`), and `root` built from the look's slot layout with the slot nodes inside (the
+   backdrop first). Art and music become `assets`; the moments in every feedback entry become the
+   game's sounds, scaled by `sound.volume`; `feel` drops what it turns off; the win and lose stings are
+   added (origin `feel`, a library origin).
 6. Write the **source map**: for every JSON Pointer in the output, its origin. The origin is
    `use:<id>` (with the fragment and version), `game`, or `look:<id>`, plus the pointer in that input.
    Expression strings whose identifiers were renamed also carry a span map, so a diagnostic's `span`
@@ -281,8 +534,10 @@ Authoring-side codes:
 
 - For the model: `A_UNKNOWN_FRAGMENT A_FRAGMENT_VERSION A_UNKNOWN_PARAM A_PARAM_TYPE A_PARAM_RANGE
   A_UNKNOWN_BIND A_DUPLICATE_NAME A_MISSING_REQUIREMENT A_REQUIREMENT_TYPE A_CONFLICT A_SLOT_FULL
-  A_UNKNOWN_SLOT A_UNKNOWN_LOOK A_UNKNOWN_CONTENT A_CONTENT_TYPE A_CONTENT_WRITE` and
-  `W_AUTO_RENAMED`.
+  A_UNKNOWN_SLOT A_UNKNOWN_LOOK A_UNKNOWN_CONTENT A_CONTENT_TYPE A_CONTENT_WRITE A_ART_SVG
+  A_ART_FIELD A_ART_PALETTE A_ART_FONT A_ART_IMAGE A_ART_SIZE A_UNKNOWN_ART_ROLE A_ART_MISSING
+  A_SOUND_SET A_SOUND_MOMENT A_SOUND_PRESET A_SOUND_FIELD A_FEEL_FIELD`, and the warnings
+  `W_AUTO_RENAMED` and `W_ART_UNUSED`.
 - For the library log: `A_PARAM_PLACEMENT A_UNKNOWN_TOKEN A_FRAGMENT_FIELD`. They use the engine's diagnostic shape (`code`, `at`, `span`, `message`, `hint`), with
 `at` pointing into the manifest.
 
@@ -301,7 +556,14 @@ From Artem's agent's answers on 2026-11-12, tested against the built engine:
 - Fixed 60 Hz stepping in the shell. `sin`, `cos` and `log2` match between native and WASM.
 - Hit-testing picks the topmost target and uses the untransformed box. `pointer` is a `vec2`. A group's
   size is its children's bounding box. Text is measured by the engine.
-- Collisions are expressions in `tick` rules. There are no images or text entry until v0.2.
+- Collisions are expressions in `tick` rules (the fragments don't use v0.2 physics yet).
+- v0.2 (tested 2026-11-12): `image` nodes take an `=` asset expression and `frame` (wrapped past the
+  last frame), `anchor`, `rotation` (degrees) and `scale`; `animate_on` keys may be inputs and their
+  `when` sees `event`, node locals and state; feedback `when` and particles see the state after the
+  step's rules; particle `color` takes `$tokens`; synth `note` takes Hz from an expression.
+- The playtest bots tap the centres of `rect` and `circle` ops, not `image` ops. A tap target the game
+  draws as a sprite needs a transparent `rect` or `circle` under it (the fragments keep one), or bots
+  can't find it.
 
 ## 5. Open
 
