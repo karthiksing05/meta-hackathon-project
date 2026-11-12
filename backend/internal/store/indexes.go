@@ -37,6 +37,11 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			{Keys: k("tags", 1, "createdAt", -1), Options: options.Index().SetName("tags_newest")},
 			{Keys: k("ownerId", 1, "createdAt", -1), Options: options.Index().SetName("owner_newest")},
 			{Keys: k("likes", -1), Options: options.Index().SetName("likes_desc")},
+			// the manifest's own id: unique when present
+			{Keys: k("slug", 1), Options: options.Index().SetUnique(true).SetName("slug_unique").
+				SetPartialFilterExpression(bson.D{{Key: "slug", Value: bson.D{{Key: "$exists", Value: true}}}})},
+			{Keys: k("groupId", 1, "createdAt", -1), Options: options.Index().SetName("group_newest").
+				SetPartialFilterExpression(bson.D{{Key: "groupId", Value: bson.D{{Key: "$exists", Value: true}}}})},
 			{Keys: k("title", "text", "tags", "text", "description", "text"),
 				Options: options.Index().SetName("games_search").
 					SetWeights(bson.D{{Key: "title", Value: 10}, {Key: "tags", Value: 5}, {Key: "description", Value: 1}})},
@@ -51,6 +56,9 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			{Keys: k("userId", 1, "createdAt", -1), Options: options.Index().SetName("events_user")},
 			{Keys: k("gameId", 1, "type", 1, "createdAt", -1), Options: options.Index().SetName("events_game_type")},
 			{Keys: k("createdAt", 1), Options: options.Index().SetExpireAfterSeconds(90 * day).SetName("events_ttl")},
+			// the interleaving summary reads only events that carry a team
+			{Keys: k("team", 1, "createdAt", 1), Options: options.Index().SetName("events_team").
+				SetPartialFilterExpression(bson.D{{Key: "team", Value: bson.D{{Key: "$exists", Value: true}}}})},
 		},
 		// leaderboards
 		cScores: {
