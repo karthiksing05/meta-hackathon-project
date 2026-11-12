@@ -1,0 +1,64 @@
+{
+  "fragment": "shared_progress",
+  "version": 1,
+  "describe": "A Group's combined total across everyone's runs. Requires `score: int` (this run's points). Provides `group_progress: int` = `group_total + score`, kept current every tick, and emits `goal_reached` once, the first tick `group_progress >= goal` (immediately if the Group had already passed the goal). The HUD (hud_bottom) shows `<Group>: total+score / goal` with a thin progress bar under it. Sets no objectives. `group_total` is what the Group had before this run; the app or backend fills it in (real totals come from the backend later) and takes `score` back out at the end of the run to add it to the Group's total.",
+  "params": {
+    "group_name":  { "type": "string", "default": "Hill Street Crew", "max_len": 20 },
+    "group_total": { "type": "int", "default": 0, "min": 0, "max": 10000000 },
+    "goal":        { "type": "int", "default": 1000, "min": 1, "max": 10000000 }
+  },
+  "requires": {
+    "state": { "score": "int" }
+  },
+  "state": {
+    "group_progress": { "type": "int", "init": "@group_total" },
+    "_reached": { "type": "bool", "init": "false" }
+  },
+  "events": {
+    "goal_reached": {}
+  },
+  "rules": [
+    {
+      "id": "sum",
+      "on": "tick",
+      "do": [
+        { "set": "group_progress", "to": "@group_total + score" },
+        {
+          "if": "group_progress >= @goal and not _reached",
+          "then": [
+            { "set": "_reached", "to": "true" },
+            { "emit": "goal_reached" }
+          ]
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "text", "x": 0, "y": 0, "size": 14, "weight": 600, "color": "$ink",
+              "text": "= @group_name + ': ' + str(group_progress) + ' / ' + str(@goal)"
+            },
+            { "node": "rect", "x": 0, "y": 20, "w": 200, "h": 6, "radius": 3, "fill": "$surface" },
+            {
+              "node": "rect", "x": 0, "y": 20, "h": 6, "radius": 3,
+              "w": "= max(0.0, 200.0 * min(1.0, group_progress * 1.0 / @goal))",
+              "fill": "= if _reached then $accent else $primary"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "goal_reached", "do": [ { "sound": { "wave": "sine", "note": "E6", "ms": 240 } } ] }
+    ]
+  },
+  "tags": { "mood": ["warm", "playful"], "energy": ["low", "medium", "high"] },
+  "conflicts": []
+}

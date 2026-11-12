@@ -1,0 +1,167 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Quiz Night",
+    "instructions": "Answer the friendly trivia questions before the clock runs out. Tap the right choice. Get through 12 questions; the second slip ends the night.",
+    "duration_s": 120
+  },
+  "uses": [
+    {
+      "fragment": "quiz",
+      "params": {
+        "choices": 4,
+        "time_ms": 3000,
+        "goal": 0
+      }
+    },
+    {
+      "fragment": "rounds",
+      "params": {
+        "count": 12,
+        "label": "Question"
+      },
+      "bind": {
+        "round_done": "question_done"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 2
+      },
+      "bind": {
+        "hit": "answered_wrong"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Score"
+      },
+      "bind": {
+        "point": "answered_right"
+      }
+    }
+  ],
+  "functions": {
+    "quiz_questions": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_questions"
+    },
+    "quiz_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_choices"
+    },
+    "quiz_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_answers"
+    }
+  },
+  "objectives": {
+    "time_limit": "120s",
+    "on_timeout": "lose"
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "content": {
+    "questions": [
+      "Which planet is known as the red planet?",
+      "How many days are in a leap year?",
+      "What do bees make?",
+      "Which ocean is the largest?",
+      "What is frozen water called?",
+      "How many sides does a hexagon have?",
+      "What gas do plants take in?",
+      "Which season comes after winter?",
+      "What is the capital of Japan?",
+      "Which instrument has black and white keys?",
+      "What is the largest mammal?",
+      "How many minutes are in an hour?",
+      "What colour do you get from mixing blue and yellow?",
+      "Which animal is known for building dams?"
+    ],
+    "choices": [
+      "Mars",
+      "Venus",
+      "Jupiter",
+      "Saturn",
+      "364",
+      "365",
+      "366",
+      "367",
+      "Honey",
+      "Silk",
+      "Maple syrup",
+      "Butter",
+      "Atlantic",
+      "Indian",
+      "Arctic",
+      "Pacific",
+      "Steam",
+      "Ice",
+      "Fog",
+      "Dew",
+      "Five",
+      "Six",
+      "Seven",
+      "Eight",
+      "Oxygen",
+      "Helium",
+      "Carbon dioxide",
+      "Neon",
+      "Autumn",
+      "Summer",
+      "Monsoon",
+      "Spring",
+      "Kyoto",
+      "Tokyo",
+      "Osaka",
+      "Nagoya",
+      "Drum",
+      "Flute",
+      "Piano",
+      "Harp",
+      "Blue whale",
+      "Elephant",
+      "Giraffe",
+      "Hippo",
+      "50",
+      "60",
+      "90",
+      "100",
+      "Orange",
+      "Purple",
+      "Green",
+      "Pink",
+      "Otter",
+      "Beaver",
+      "Heron",
+      "Fox"
+    ],
+    "answers": [
+      "Mars",
+      "366",
+      "Honey",
+      "Pacific",
+      "Ice",
+      "Six",
+      "Carbon dioxide",
+      "Spring",
+      "Tokyo",
+      "Piano",
+      "Blue whale",
+      "60",
+      "Green",
+      "Beaver"
+    ]
+  },
+  "playtest": {
+    "progress": "score"
+  }
+}

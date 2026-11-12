@@ -1,0 +1,26 @@
+{
+  "fragment": "daily_seed",
+  "version": 1,
+  "describe": "The game-side half of a daily puzzle. It does NOT choose the seed: the host must start the game with the day's seed (the engine gives the same game for the same seed), the same one for everyone in a Group, and pass the date text as `day_label` (for example 'Nov 12'). The fragment shows a tag `Daily · <day_label>` and provides `daily: bool` (true while `enabled`), which other rules can read, for example to hide a retry button. Without the host's seed the game is just a normal random game with a daily label. Requires and emits nothing.",
+  "params": {
+    "day_label": { "type": "string", "default": "Today", "max_len": 20 },
+    "enabled":   { "type": "bool", "default": true }
+  },
+  "requires": {},
+  "state": {
+    "daily": { "type": "bool", "init": "@enabled" }
+  },
+  "rules": [],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_bottom", "include": "@enabled",
+        "node": { "node": "text", "text": "= 'Daily · ' + @day_label", "size": 16, "weight": 600, "color": "$accent", "role": "hud" }
+      }
+    ],
+    "feedback": []
+  },
+  "tags": { "mood": ["any"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

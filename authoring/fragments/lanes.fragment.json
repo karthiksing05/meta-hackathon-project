@@ -1,0 +1,84 @@
+{
+  "fragment": "lanes",
+  "version": 1,
+  "describe": "Discrete lane movement. Tapping the left or right half of the canvas (or the arrow keys) moves the avatar one lane that way, stopping at the edge lanes. Provides `player` (vec2, centre of the avatar at lane x and the fixed `y`), `lane` (int, 0 is leftmost) and the function `lane_x(i) -> float`. Emits `lane_changed` with the new lane. Draws faint lane strips and the avatar in `playfield` (role avatar). Conflicts with player_drag and gravity_jump, which also provide `player`.",
+  "params": {
+    "count":  { "type": "int", "default": 3, "min": 3, "max": 5 },
+    "x_min":  { "type": "float", "default": 80.0, "min": 0.0, "max": 360.0 },
+    "x_max":  { "type": "float", "default": 280.0, "min": 0.0, "max": 360.0 },
+    "y":      { "type": "float", "default": 540.0, "min": 0.0, "max": 640.0 },
+    "size":   { "type": "float", "default": 16.0, "min": 4.0, "max": 40.0 },
+    "tone":   { "type": "enum", "values": ["primary", "secondary", "accent", "ink", "danger"], "default": "primary" }
+  },
+  "requires": {},
+  "functions": {
+    "lane_x": {
+      "params": { "i": "int" },
+      "returns": "float",
+      "body": "@x_min + i * (@x_max - @x_min) / (@count - 1)"
+    }
+  },
+  "state": {
+    "lane":   { "type": "int", "init": "@count / 2" },
+    "player": { "type": "vec2", "init": "vec(@x_min + (@count / 2) * (@x_max - @x_min) / (@count - 1), @y)" }
+  },
+  "events": {
+    "lane_changed": { "lane": "int" }
+  },
+  "inputs": {
+    "_shift": {
+      "payload": { "dir": "int" },
+      "from": [
+        { "key": "ArrowLeft",  "with": { "dir": "-1" } },
+        { "key": "ArrowRight", "with": { "dir": "1" } }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "shift",
+      "on": "_shift",
+      "do": [
+        { "let": { "next": "clamp(lane + event.dir, 0, @count - 1)" } },
+        { "if": "next != lane", "then": [
+          { "set": "lane", "to": "next" },
+          { "set": "player", "to": "vec(lane_x(next), @y)" },
+          { "emit": "lane_changed", "with": { "lane": "next" } }
+        ] }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect", "w": "@game.canvas_w", "h": "@game.canvas_h", "fill": "#00000000",
+          "on_tap": { "input": "_shift", "with": { "dir": "if pointer.x < @game.canvas_w / 2.0 then -1 else 1" } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat", "source": "range(@count)", "as": "k", "key": "k",
+          "template": { "node": "rect", "x": "= lane_x(k) - 24.0", "y": 0, "w": 48, "h": "@game.canvas_h", "fill": "$surface" }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle", "x": "= player.x", "y": "= player.y", "r": "@size",
+          "fill": "= if @tone == 'primary' then $primary else if @tone == 'secondary' then $secondary else if @tone == 'accent' then $accent else if @tone == 'ink' then $ink else $danger",
+          "role": "avatar",
+          "transition": { "x": { "ms": 90, "ease": "out" } }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "lane_changed", "do": [ { "sound": { "wave": "triangle", "note": "G4", "ms": 40 } } ] }
+    ]
+  },
+  "tags": { "mood": ["any"], "energy": ["medium", "high"] },
+  "conflicts": ["player_drag", "gravity_jump"]
+}

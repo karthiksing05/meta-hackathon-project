@@ -1,0 +1,189 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Friend Dash",
+    "instructions": "Tap each firefly before it flickers out. Maya ran this exact course: beat her score before the 30 seconds are up. Four missed fireflies and you're out.",
+    "duration_s": 30
+  },
+  "uses": [
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "target": 0,
+        "label": "Score"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 4
+      },
+      "bind": {
+        "hit": "missed"
+      }
+    },
+    {
+      "fragment": "ghost_score",
+      "params": {
+        "friend_name": "Maya",
+        "friend_score": 220,
+        "friend_time": "30s"
+      }
+    },
+    {
+      "fragment": "beat_target",
+      "params": {
+        "friend_name": "Maya",
+        "target": 220
+      }
+    }
+  ],
+  "state": {
+    "fx": {
+      "type": "float",
+      "init": "random_float(50.0, 310.0)"
+    },
+    "fy": {
+      "type": "float",
+      "init": "random_float(160.0, 540.0)"
+    },
+    "born": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "events": {
+    "missed": {}
+  },
+  "inputs": {
+    "tap": {
+      "payload": {
+        "x": "float",
+        "y": "float"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "catch",
+      "on": "tap",
+      "do": [
+        {
+          "if": "now >= born and overlaps_circle(vec(event.x, event.y), 1.0, vec(fx, fy), 42.0)",
+          "then": [
+            {
+              "emit": "point"
+            },
+            {
+              "set": "fx",
+              "to": "random_float(50.0, 310.0)"
+            },
+            {
+              "set": "fy",
+              "to": "random_float(160.0, 540.0)"
+            },
+            {
+              "set": "born",
+              "to": "now + 450"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flicker_out",
+      "on": "tick",
+      "when": "now - born > 1100",
+      "do": [
+        {
+          "emit": "missed"
+        },
+        {
+          "set": "fx",
+          "to": "random_float(50.0, 310.0)"
+        },
+        {
+          "set": "fy",
+          "to": "random_float(160.0, 540.0)"
+        },
+        {
+          "set": "born",
+          "to": "now + 450"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "30s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 640,
+          "fill": "#00000000",
+          "on_tap": {
+            "input": "tap",
+            "with": {
+              "x": "pointer.x",
+              "y": "pointer.y"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": "= fx",
+          "y": "= fy",
+          "r": 40.0,
+          "fill": "$accent",
+          "opacity": 0.25,
+          "visible": "= now >= born"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": "= fx",
+          "y": "= fy",
+          "r": "= max(8.0, 24.0 - (now - born) / 60.0)",
+          "fill": "$accent",
+          "role": "pickup",
+          "visible": "= now >= born"
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "point",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "A5",
+              "ms": 60
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {}
+  },
+  "content": {},
+  "playtest": {
+    "progress": "score + lives"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "fragment": "score",
+  "version": 1,
+  "describe": "A score that goes up by `points` on each `point` event. With a target above 0, reaching it wins. Games may also write `score` directly.",
+  "params": {
+    "points": { "type": "int", "default": 1, "min": 1, "max": 1000 },
+    "target": { "type": "int", "default": 0, "min": 0, "max": 100000 },
+    "label":  { "type": "string", "default": "Score", "max_len": 16 }
+  },
+  "requires": {},
+  "state": {
+    "score": { "type": "int", "init": "0" }
+  },
+  "events": {
+    "point": {}
+  },
+  "rules": [
+    { "id": "add", "on": "point", "do": [ { "incr": "score", "by": "@points" } ] }
+  ],
+  "objectives": {
+    "win": { "include": "@target > 0", "expr": "score >= @target" },
+    "score": "score"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top", "include": "@target > 0",
+        "node": { "node": "text", "text": "= @label + ': ' + str(score) + ' / ' + str(@target)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      },
+      {
+        "slot": "hud_top", "include": "@target == 0",
+        "node": { "node": "text", "text": "= @label + ': ' + str(score)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      }
+    ],
+    "feedback": [
+      { "on": "point", "do": [ { "sound": { "wave": "sine", "note": "E5", "ms": 60 } } ] }
+    ]
+  },
+  "tags": { "mood": ["any"], "energy": ["low", "medium", "high"] },
+  "conflicts": []
+}

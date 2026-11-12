@@ -1,0 +1,32 @@
+{
+  "look": "pixel",
+  "version": 1,
+  "describe": "Chunky pixel art: hard edges, stepped motion, a bitmap font.",
+  "font": "Silkscreen",
+  "tokens": {
+    "primary": "#7BD389",
+    "secondary": "#3E8E5A",
+    "accent": "#F2C14E",
+    "ink": "#E8F5EA",
+    "bg": "#0F1A12",
+    "surface": "#16261A",
+    "danger": "#FF5D5D"
+  },
+  "layout": {
+    "node": "group",
+    "children": [
+      { "node": "group", "x": 0, "y": 0, "children": [ { "slot": "playfield" } ] },
+      {
+        "node": "stack", "dir": "row", "gap": 24, "align": "center",
+        "x": 180, "y": 56, "anchor": "center",
+        "children": [ { "slot": "hud_top" } ]
+      },
+      {
+        "node": "stack", "dir": "row", "gap": 24, "align": "center",
+        "x": 180, "y": 600, "anchor": "center",
+        "children": [ { "slot": "hud_bottom" } ]
+      },
+      { "node": "group", "x": 0, "y": 0, "children": [ { "slot": "overlay" } ] }
+    ]
+  }
+}

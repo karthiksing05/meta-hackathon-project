@@ -1,0 +1,50 @@
+{
+  "fragment": "checkpoint",
+  "version": 1,
+  "describe": "Progress you keep after a setback. The game declares function `progress_now() -> int` (any int measure of progress: score, wave, distance) and emits `checkpoint_reached` at safe moments. The fragment saves `checkpoint = max(checkpoint, progress_now())` and emits `checkpoint_saved {value}`. When the required event `setback` happens (bind it to `life_lost` from `lives`, or to any game event) it emits `restore_checkpoint {value}` where value is `max(0, checkpoint - penalty)`. It never changes the game itself: the game listens to `restore_checkpoint` and applies the value (set score back, restart a level, reposition the player). Provides `checkpoint: int` and the events `checkpoint_saved` and `restore_checkpoint`. The optional HUD tag shows `<label> n`.",
+  "params": {
+    "penalty": { "type": "int", "default": 0, "min": 0, "max": 100000 },
+    "show":    { "type": "bool", "default": true },
+    "label":   { "type": "string", "default": "Saved", "max_len": 12 }
+  },
+  "requires": {
+    "events": { "checkpoint_reached": {}, "setback": {} },
+    "functions": { "progress_now": { "params": {}, "returns": "int" } }
+  },
+  "state": {
+    "checkpoint": { "type": "int", "init": "0" }
+  },
+  "events": {
+    "checkpoint_saved": { "value": "int" },
+    "restore_checkpoint": { "value": "int" }
+  },
+  "rules": [
+    {
+      "id": "save",
+      "on": "checkpoint_reached",
+      "do": [
+        { "set": "checkpoint", "to": "max(checkpoint, progress_now())" },
+        { "emit": "checkpoint_saved", "with": { "value": "checkpoint" } }
+      ]
+    },
+    {
+      "id": "restore",
+      "on": "setback",
+      "do": [ { "emit": "restore_checkpoint", "with": { "value": "max(0, checkpoint - @penalty)" } } ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_bottom", "include": "@show",
+        "node": { "node": "text", "text": "= @label + ' ' + str(checkpoint)", "size": 16, "weight": 500, "color": "$ink", "opacity": 0.8, "role": "hud" }
+      }
+    ],
+    "feedback": [
+      { "on": "checkpoint_saved", "do": [ { "sound": { "wave": "sine", "note": "A5", "ms": 90 } } ] }
+    ]
+  },
+  "tags": { "mood": ["any"], "energy": ["medium", "high"] },
+  "conflicts": []
+}

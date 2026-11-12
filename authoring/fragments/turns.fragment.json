@@ -1,0 +1,99 @@
+{
+  "fragment": "turns",
+  "version": 1,
+  "describe": "Pass-and-play for 2 to 4 people on one phone, `turns` turns each in rotation. The game emits `turn_done {points}` when the active player's turn ends. Provides: `turn_player: int` (0-based index of whose turn it is), `turn_active: bool` (false while the 'Pass to <name>' overlay is up; the game should only run its play and spawn rules while true), `turn_totals: list<int>` (running total per player), `turn_no: int` (finished turns), function `turn_name(i)`, and events `turn_started {player}` (after the next player taps the overlay) and `all_turns_done`. The overlay appears at the start and between turns and is dismissed by a tap. The game is won when every player has had all their turns (`turn_no >= players * turns`). The score objective is the leading total, `max(turn_totals)`. Points on `turn_done` before the overlay is dismissed are ignored.",
+  "params": {
+    "players": { "type": "int", "default": 2, "min": 2, "max": 4 },
+    "turns":   { "type": "int", "default": 3, "min": 1, "max": 10 },
+    "p1": { "type": "string", "default": "Player 1", "max_len": 10 },
+    "p2": { "type": "string", "default": "Player 2", "max_len": 10 },
+    "p3": { "type": "string", "default": "Player 3", "max_len": 10 },
+    "p4": { "type": "string", "default": "Player 4", "max_len": 10 }
+  },
+  "requires": {
+    "events": { "turn_done": { "points": "int" } }
+  },
+  "state": {
+    "turn_player": { "type": "int", "init": "0" },
+    "turn_active": { "type": "bool", "init": "false" },
+    "turn_totals": { "type": "list<int>", "init": "repeat(0, @players)" },
+    "turn_no": { "type": "int", "init": "0" }
+  },
+  "functions": {
+    "turn_name": {
+      "params": { "i": "int" },
+      "returns": "string",
+      "body": "get_or([@p1, @p2, @p3, @p4], i, 'Player')"
+    },
+    "_scoreboard": {
+      "params": {},
+      "returns": "string",
+      "body": "join(map(range(@players), i => turn_name(i) + ' ' + str(get_or(turn_totals, i, 0))), '   ')"
+    }
+  },
+  "inputs": {
+    "_ready": {}
+  },
+  "events": {
+    "turn_started": { "player": "int" },
+    "all_turns_done": {}
+  },
+  "rules": [
+    {
+      "id": "go",
+      "on": "_ready",
+      "when": "not turn_active and turn_no < @players * @turns",
+      "do": [
+        { "set": "turn_active", "to": "true" },
+        { "emit": "turn_started", "with": { "player": "turn_player" } }
+      ]
+    },
+    {
+      "id": "finish_turn",
+      "on": "turn_done",
+      "when": "turn_active",
+      "do": [
+        { "set": "turn_totals", "to": "set_at(turn_totals, turn_player, get_or(turn_totals, turn_player, 0) + event.points)" },
+        { "set": "turn_active", "to": "false" },
+        { "incr": "turn_no" },
+        { "set": "turn_player", "to": "turn_no % @players" },
+        { "if": "turn_no >= @players * @turns", "then": [ { "emit": "all_turns_done" } ] }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "turn_no >= @players * @turns",
+    "score": "max(0, fold(turn_totals, 0, (a, t) => max(a, t)))"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": { "node": "text", "text": "= turn_name(turn_player) + '’s turn'", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      },
+      {
+        "slot": "hud_bottom",
+        "node": { "node": "text", "text": "= _scoreboard()", "size": 14, "weight": 600, "color": "$ink", "role": "hud" }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "group",
+          "visible": "= not turn_active and turn_no < @players * @turns",
+          "children": [
+            { "node": "rect", "x": 0, "y": 0, "w": 360, "h": 640, "fill": "$bg", "on_tap": { "input": "_ready" } },
+            { "node": "text", "x": 180, "y": 270, "anchor": "center", "size": 30, "weight": 700, "color": "$ink", "text": "= 'Pass to ' + turn_name(turn_player)" },
+            { "node": "text", "x": 180, "y": 320, "anchor": "center", "size": 18, "weight": 500, "color": "$secondary", "text": "= 'Turn ' + str(floor(turn_no * 1.0 / @players) + 1) + ' of ' + str(@turns) + ' - tap when ready'" },
+            { "node": "text", "x": 180, "y": 380, "anchor": "center", "size": 16, "weight": 600, "color": "$accent", "text": "= _scoreboard()" }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "turn_started", "do": [ { "sound": { "wave": "sine", "note": "A4", "ms": 80 } } ] },
+      { "on": "all_turns_done", "do": [ { "sound": { "wave": "sine", "note": "C6", "ms": 240 } } ] }
+    ]
+  },
+  "tags": { "mood": ["playful", "warm"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

@@ -1,0 +1,150 @@
+{
+  "fragment": "tile_slide",
+  "version": 1,
+  "describe": "A sliding-tile board (the merge-in-one-direction genre). A `size` x `size` grid `board` (grid<int>, 0 = empty) starts with `start_tiles` tiles; each swipe or arrow key (input `slide {dir}`) slides every tile as far as it goes in that direction and merges equal neighbours into one tile of double value. After any move that changed the board, one new tile of `base` (or, `high_pct` percent of the time, 2 x `base`) appears in a random empty cell. Emits `slid` after a move that changed the board, `spawn_tile` for each new tile, and `merged {value}` once per line that merged, where `value` is the sum of the new tiles made in that line (the game decides what that is worth, for example `incr score by event.value`). Public function `best_tile()` is the largest tile and `can_move(board)` says whether any move changes the board. The game is lost when no move is left (`no_moves`). With `target` above 0, making a tile of that value wins. The fragment draws the board at (x, y); `cell_size` and `gap` size it (the board is size * cell_size + (size - 1) * gap wide), and the game can put a score or other text above it. Requires nothing and sets no score.",
+  "params": {
+    "size":        { "type": "int", "default": 4, "min": 3, "max": 6 },
+    "start_tiles": { "type": "int", "default": 2, "min": 1, "max": 4 },
+    "base":        { "type": "int", "default": 2, "min": 1, "max": 8 },
+    "high_pct":    { "type": "int", "default": 10, "min": 1, "max": 50 },
+    "target":      { "type": "int", "default": 0, "min": 0, "max": 65536 },
+    "cell_size":   { "type": "int", "default": 76, "min": 30, "max": 100 },
+    "gap":         { "type": "int", "default": 8, "min": 0, "max": 16 },
+    "x":           { "type": "int", "default": 16, "min": 0, "max": 360 },
+    "y":           { "type": "int", "default": 170, "min": 0, "max": 640 }
+  },
+  "requires": {},
+  "types": {
+    "MergeResult": { "cells": "list<int>", "gained": "int" }
+  },
+  "state": {
+    "board": { "type": "grid<int>", "init": "grid(@size, @size, 0)" }
+  },
+  "functions": {
+    "merge_line": {
+      "params": { "line": "list<int>" },
+      "returns": "MergeResult",
+      "body": "let packed = fold(filter(line, v => v != 0), {out: [], locked: true, gained: 0}, (acc, v) => if not acc.locked and last(acc.out) == v then {out: set_at(acc.out, len(acc.out) - 1, v * 2), locked: true, gained: acc.gained + v * 2} else {out: push(acc.out, v), locked: false, gained: acc.gained}) in {cells: concat(packed.out, repeat(0, len(line) - len(packed.out))), gained: packed.gained}"
+    },
+    "can_move": {
+      "params": { "b": "grid<int>" },
+      "returns": "bool",
+      "body": "any([up, down, left, right], d => any(lines(b, d), l => merge_line(map(l, c => b[c])).cells != map(l, c => b[c])))"
+    },
+    "best_tile": {
+      "params": {},
+      "returns": "int",
+      "body": "fold(values(board), 0, (a, v) => max(a, v))"
+    },
+    "_tile_fill": {
+      "params": { "v": "int" },
+      "returns": "string",
+      "body": "get_or(['#DCD7F0', '#C7D7FA', '#A9C1F7', '#8BA8F2', '#7C8CEB', '#8A72E0', '#9B5BD6', '#B347C9', '#D6479E', '#E0596B', '#E88A4B', '#EDB83C', '#6BAF7B'], round(log2(max(v, 1))), '#3C3A32')"
+    }
+  },
+  "events": {
+    "spawn_tile": {},
+    "slid": {},
+    "merged": { "value": "int" }
+  },
+  "inputs": {
+    "slide": {
+      "payload": { "dir": "ivec2" },
+      "from": [
+        { "swipe": "any", "with": { "dir": "swipe.dir" } },
+        { "key": "ArrowUp", "with": { "dir": "up" } },
+        { "key": "ArrowDown", "with": { "dir": "down" } },
+        { "key": "ArrowLeft", "with": { "dir": "left" } },
+        { "key": "ArrowRight", "with": { "dir": "right" } }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "setup",
+      "on": "start",
+      "do": [
+        { "for_each": "range(@start_tiles)", "as": "n", "do": [ { "emit": "spawn_tile" } ] }
+      ]
+    },
+    {
+      "id": "spawn",
+      "on": "spawn_tile",
+      "when": "any(values(board), v => v == 0)",
+      "do": [
+        { "let": { "spot": "pick(filter(cells(board), c => board[c] == 0))" } },
+        { "set": "board[spot]", "to": "weighted([@base, @base * 2], [100 - @high_pct, @high_pct])" }
+      ]
+    },
+    {
+      "id": "slide",
+      "on": "slide",
+      "do": [
+        { "let": { "before": "board" } },
+        {
+          "for_each": "lines(board, event.dir)",
+          "as": "line",
+          "do": [
+            { "let": { "r": "merge_line(map(line, c => board[c]))" } },
+            { "set": "board", "to": "write_line(board, line, r.cells)" },
+            { "if": "r.gained > 0", "then": [ { "emit": "merged", "with": { "value": "r.gained" } } ] }
+          ]
+        },
+        {
+          "if": "board != before",
+          "then": [ { "emit": "slid" }, { "emit": "spawn_tile" } ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": { "include": "@target > 0", "expr": "any(values(board), v => v >= @target)" },
+    "lose": "not can_move(board)"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": "= @x - 8", "y": "= @y - 8",
+          "w": "= @size * @cell_size + (@size - 1) * @gap + 16", "h": "= @size * @cell_size + (@size - 1) * @gap + 16",
+          "radius": 12, "fill": "$surface"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "grid", "source": "board", "cell_size": "@cell_size", "gap": "@gap", "x": "@x", "y": "@y",
+          "cell": {
+            "node": "group",
+            "children": [
+              {
+                "node": "rect", "w": "@cell_size", "h": "@cell_size", "radius": 8, "role": "tile",
+                "fill": "= if value == 0 then '#00000022' else _tile_fill(value)",
+                "transition": { "fill": { "ms": 100, "ease": "out" } },
+                "animate_on": {
+                  "spawn_tile": { "when": "value != 0", "prop": "scale", "keys": [0.9, 1.05, 1], "ms": 120 }
+                }
+              },
+              {
+                "node": "text", "w": "@cell_size", "h": "@cell_size", "align": "center", "valign": "middle",
+                "text": "= if value == 0 then '' else str(value)",
+                "size": "= if value >= 1000 then 22 else if value >= 100 then 28 else 34",
+                "weight": 700,
+                "color": "= if value <= 4 * @base then $ink else '#FFFFFF'"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "slid", "do": [ { "sound": { "wave": "sine", "note": "A4", "ms": 40 } } ] },
+      { "on": "merged", "do": [ { "sound": { "wave": "triangle", "note": "E5", "ms": 80 } } ] },
+      { "on": "win", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 300 } } ] }
+    ]
+  },
+  "tags": { "mood": ["calm", "focused"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

@@ -1,0 +1,50 @@
+{
+  "fragment": "grid_board",
+  "version": 1,
+  "describe": "A tappable board of `cols` x `rows` square cells at (`x`, `y`). Each tap emits the input `tap_cell` with the cell as an ivec2 (column x, row y). The game paints it through two functions it must declare: `cell_fill(c)` returns a color string such as '#AABBCC', or '' to draw the plain $surface cell (functions can't return $tokens, so use hex strings or game tokens written out as hex), and `cell_label(c)` returns the text drawn on the cell ('' for none). Cell index is c.y * cols + c.x. The board has no rules and no win or lose condition.",
+  "params": {
+    "cols":      { "type": "int", "default": 4, "min": 2, "max": 10 },
+    "rows":      { "type": "int", "default": 4, "min": 2, "max": 10 },
+    "cell_size": { "type": "int", "default": 64, "min": 24, "max": 90 },
+    "gap":       { "type": "int", "default": 8, "min": 0, "max": 16 },
+    "x":         { "type": "int", "default": 36, "min": 0, "max": 360 },
+    "y":         { "type": "int", "default": 180, "min": 0, "max": 640 }
+  },
+  "requires": {
+    "functions": {
+      "cell_fill":  { "params": { "c": "ivec2" }, "returns": "string" },
+      "cell_label": { "params": { "c": "ivec2" }, "returns": "string" }
+    }
+  },
+  "inputs": {
+    "tap_cell": { "payload": { "cell": "ivec2" } }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "grid", "cols": "@cols", "rows": "@rows", "cell_size": "@cell_size", "gap": "@gap", "x": "@x", "y": "@y",
+          "cell": {
+            "node": "group",
+            "children": [
+              {
+                "node": "rect", "w": "@cell_size", "h": "@cell_size", "radius": 10,
+                "fill": "= if cell_fill(cell) == '' then $surface else cell_fill(cell)",
+                "transition": { "fill": { "ms": 150, "ease": "out" } },
+                "on_tap": { "input": "tap_cell", "with": { "cell": "cell" } }
+              },
+              {
+                "node": "text", "x": "@cell_size", "y": "@cell_size", "anchor": "center", "size": 24, "weight": 700, "color": "$ink",
+                "text": "= cell_label(cell)"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "tags": { "mood": ["calm", "playful"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

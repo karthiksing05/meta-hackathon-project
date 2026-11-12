@@ -1,0 +1,89 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Golden Hour",
+    "instructions": "Tap when the marker is inside the glowing band. Snap 10 photos before five misses.",
+    "duration_s": 60
+  },
+  "uses": [
+    { "fragment": "lives", "params": { "count": 5 } },
+    { "fragment": "score", "params": { "points": 1, "target": 10, "label": "Snaps" } }
+  ],
+  "state": {
+    "pos": { "type": "float", "init": "0.0" },
+    "vel": { "type": "float", "init": "0.35" },
+    "zone_c": { "type": "float", "init": "random_float(0.25, 0.75)" },
+    "zone_w": { "type": "float", "init": "0.3" },
+    "cool": { "type": "int", "init": "0" }
+  },
+  "events": {
+    "hit": {}
+  },
+  "inputs": {
+    "snap": {
+      "payload": {},
+      "from": [ { "key": " " } ]
+    }
+  },
+  "rules": [
+    {
+      "id": "sweep",
+      "on": "tick",
+      "do": [
+        { "let": { "np": "pos + vel * event.dt / 1000.0" } },
+        { "if": "np >= 1.0", "then": [ { "set": "pos", "to": "1.0" }, { "set": "vel", "to": "-abs(vel)" } ],
+          "else": [
+            { "if": "np <= 0.0", "then": [ { "set": "pos", "to": "0.0" }, { "set": "vel", "to": "abs(vel)" } ],
+              "else": [ { "set": "pos", "to": "np" } ] }
+          ] }
+      ]
+    },
+    {
+      "id": "snap",
+      "on": "snap",
+      "when": "now >= cool",
+      "do": [
+        { "set": "cool", "to": "now + 250" },
+        {
+          "if": "abs(pos - zone_c) <= zone_w / 2.0",
+          "then": [
+            { "emit": "point" },
+            { "set": "zone_w", "to": "max(0.07, zone_w * 0.93)" },
+            { "set": "vel", "to": "(if vel < 0.0 then -1.0 else 1.0) * min(1.6, abs(vel) * 1.05)" },
+            { "set": "zone_c", "to": "random_float(0.15, 0.85)" }
+          ],
+          "else": [ { "emit": "hit" } ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "60s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      { "slot": "playfield", "node": { "node": "text", "x": 180, "y": 220, "anchor": "center", "size": 22, "weight": 600, "color": "$ink", "text": "Tap in the golden band" } },
+      { "slot": "playfield", "node": { "node": "rect", "x": 30, "y": 290, "w": 300, "h": 20, "radius": 10, "fill": "$surface" } },
+      { "slot": "playfield", "node": { "node": "rect", "x": "= 30.0 + (zone_c - zone_w / 2.0) * 300.0", "y": 284, "w": "= zone_w * 300.0", "h": 32, "radius": 8, "fill": "$gold" } },
+      { "slot": "playfield", "node": { "node": "rect", "x": "= 30.0 + pos * 300.0 - 4.0", "y": 276, "w": 8, "h": 48, "radius": 4, "fill": "$ink" } },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect", "x": 0, "y": 0, "w": 360, "h": 640, "fill": "#00000000",
+          "on_tap": { "input": "snap" }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "hit", "do": [ { "sound": { "wave": "square", "note": "C3", "ms": 120 } } ] },
+      { "on": "win", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 300 } } ] }
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "tokens": { "gold": "#F2B134" }
+  },
+  "content": {},
+  "playtest": { "progress": "score * 100 + lives * 10" }
+}

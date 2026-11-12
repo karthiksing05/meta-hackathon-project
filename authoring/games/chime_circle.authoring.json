@@ -1,0 +1,17 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Chime Circle",
+    "instructions": "Watch the chimes light up, then tap them back in the same order. Each round adds one more. Repeat a pattern of 7 to win; three slips and the circle goes quiet.",
+    "duration_s": 120
+  },
+  "uses": [
+    { "fragment": "sequence_memory", "params": { "pads": 4, "start_len": 2, "show_ms": 450, "target_len": 7, "y": 250 } },
+    { "fragment": "lives", "params": { "count": 3 }, "bind": { "hit": "sequence_wrong" } },
+    { "fragment": "score", "params": { "points": 10, "label": "Score" }, "bind": { "point": "pad_ok" } }
+  ],
+  "objectives": { "time_limit": "120s", "on_timeout": "lose" },
+  "look": { "id": "paper", "tokens": {} },
+  "content": {},
+  "playtest": { "progress": "score + pos" }
+}

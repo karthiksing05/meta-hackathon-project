@@ -1,0 +1,63 @@
+{
+  "fragment": "combo",
+  "version": 1,
+  "describe": "A combo multiplier. Each `hit_good` raises `combo` by `step` up to `max` and tracks `best_combo`; `hit_bad` resets it and emits `combo_broken`. `combo_mult` (1 + combo) is the number games multiply their points by.",
+  "params": {
+    "step":  { "type": "int", "default": 1, "min": 1, "max": 5 },
+    "max":   { "type": "int", "default": 8, "min": 2, "max": 20 },
+    "label": { "type": "string", "default": "Combo", "max_len": 12 }
+  },
+  "requires": {
+    "events": { "hit_good": {}, "hit_bad": {} }
+  },
+  "state": {
+    "combo": { "type": "int", "init": "0" },
+    "best_combo": { "type": "int", "init": "0" },
+    "combo_mult": { "type": "int", "init": "1" }
+  },
+  "events": {
+    "combo_broken": {}
+  },
+  "rules": [
+    {
+      "id": "grow",
+      "on": "hit_good",
+      "do": [
+        { "set": "combo", "to": "min(@max, combo + @step)" },
+        { "set": "best_combo", "to": "max(best_combo, combo)" },
+        { "set": "combo_mult", "to": "1 + combo" }
+      ]
+    },
+    {
+      "id": "reset",
+      "on": "hit_bad",
+      "do": [
+        { "if": "combo > 0", "then": [ { "emit": "combo_broken" } ] },
+        { "set": "combo", "to": "0" },
+        { "set": "combo_mult", "to": "1" }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text",
+          "text": "= @label + ' x' + str(combo_mult)",
+          "size": 18, "weight": 600,
+          "color": "$accent",
+          "opacity": "= if combo > 0 then 1.0 else 0.35",
+          "transition": { "opacity": { "ms": 150, "ease": "out" } },
+          "role": "hud"
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "combo_broken", "do": [ { "sound": { "wave": "sawtooth", "note": "E2", "ms": 140 } } ] }
+    ]
+  },
+  "tags": { "mood": ["playful", "tense"], "energy": ["medium", "high"] },
+  "conflicts": []
+}

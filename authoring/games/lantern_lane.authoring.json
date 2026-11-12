@@ -1,0 +1,80 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Lantern Lane",
+    "instructions": "Carry your lantern down the lane. Tap the left or right side to change lanes, dodge the tumbling crates and catch the fireflies. Forty seconds to the next street.",
+    "duration_s": 40
+  },
+  "uses": [
+    { "fragment": "lanes", "params": { "count": 3, "x_min": 80.0, "x_max": 280.0, "y": 540.0, "size": 16.0, "tone": "accent" } },
+    { "fragment": "score", "params": { "points": 10, "label": "Fireflies" } },
+    { "fragment": "lives", "params": { "count": 4 } },
+    { "fragment": "collide", "params": { "radius": 30.0, "grace": 900 } },
+    { "fragment": "pickups", "params": { "every": 1100, "max_alive": 3, "radius": 12.0, "reach": 18.0, "lifetime": 0, "x_min": 80.0, "x_max": 280.0, "columns": 3, "fall": 190.0 } },
+    { "fragment": "speed_ramp", "params": { "every": 8000, "step": 0.15, "max": 1.6 } },
+    { "fragment": "countdown", "params": { "on_end": "none" } }
+  ],
+  "types": {
+    "Crate": { "id": "int", "x": "float", "y": "float" }
+  },
+  "state": {
+    "crates": { "type": "list<Crate>", "init": "[]" },
+    "crate_seq": { "type": "int", "init": "0" },
+    "spawn_speed": { "type": "float", "init": "1.0" }
+  },
+  "functions": {
+    "colliders": {
+      "params": {},
+      "returns": "list<vec2>",
+      "body": "map(crates, c => vec(c.x, c.y))"
+    }
+  },
+  "rules": [
+    {
+      "id": "drop_crate",
+      "on": { "every": "800ms" },
+      "when": "len(crates) < 6",
+      "do": [
+        { "set": "crates", "to": "push(crates, {id: crate_seq, x: lane_x(random_int(0, 2)), y: -14.0})" },
+        { "incr": "crate_seq" }
+      ]
+    },
+    {
+      "id": "fall",
+      "on": "tick",
+      "do": [
+        { "set": "crates", "to": "map(crates, c => {...c, y: c.y + 230.0 * spawn_speed * event.dt / 1000.0})" },
+        { "remove": "crates", "where": "c => c.y > 680.0" }
+      ]
+    },
+    {
+      "id": "smash",
+      "on": "hit",
+      "do": [
+        { "remove": "crates", "where": "c => dist(vec(c.x, c.y), hit_at) < 60.0" }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "40s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat", "source": "crates", "as": "c", "key": "c.id",
+          "template": { "node": "rect", "x": "= c.x - 14.0", "y": "= c.y - 14.0", "w": 28, "h": 28, "fill": "$danger", "role": "hazard" }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "hit", "do": [ { "sound": { "wave": "sawtooth", "note": "C2", "ms": 180 } } ] },
+      { "on": "win", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 300 } } ] }
+    ]
+  },
+  "look": { "id": "paper", "tokens": { "accent": "#E8A33D" } },
+  "content": {},
+  "playtest": { "progress": "score + lives * 100" }
+}

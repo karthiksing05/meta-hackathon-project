@@ -1,0 +1,70 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Number Merge",
+    "instructions": "Swipe or use the arrow keys to slide tiles. Equal tiles merge. Reach 128.",
+    "duration_s": 180
+  },
+  "uses": [
+    {
+      "fragment": "tile_slide",
+      "params": {
+        "size": 4,
+        "target": 128
+      }
+    }
+  ],
+  "types": {},
+  "state": {
+    "score": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {},
+  "events": {},
+  "inputs": {},
+  "rules": [
+    {
+      "id": "cash_in",
+      "on": "merged",
+      "do": [
+        {
+          "incr": "score",
+          "by": "event.value"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "score": "score",
+    "time_limit": "180s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 110,
+          "anchor": "center",
+          "size": 28,
+          "weight": 700,
+          "color": "$ink",
+          "text": "= 'Score: ' + str(score)"
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "look": {
+    "id": "riso",
+    "tokens": {}
+  },
+  "content": {},
+  "playtest": {
+    "progress": "score + 10 * count(values(board), v => v == 0)"
+  }
+}

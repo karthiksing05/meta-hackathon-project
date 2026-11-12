@@ -1,0 +1,378 @@
+{
+  "fragment": "sort_bins",
+  "version": 1,
+  "describe": "Sort items into bins, one at a time. `bins` labelled bins (2 to 4) sit along the bottom; one item name is shown at a time and the player taps the bin it belongs in (input `choose {bin}`). The right bin emits `sorted_right`, a wrong one `sorted_wrong`; either way the next item comes up. Each item has `item_ms` (a bar drains) and running out counts as `sorted_wrong`. Items come from `content`: the game must define two functions, `bin_items(b)` returning the list<string> of item names that belong in bin b (b is 0 to bins - 1; usually `if b == 0 then content_snacks else if b == 1 then content_games else content_gear`) and `bin_label(b)` returning the bin's short label (8 characters or fewer reads best). All items from all bins are shuffled into one deck that reshuffles when it runs out. State: `deck`, `item_i`, `right_count`, `wrong_count`, `verdict` (short text for the last answer), and `current_name()` for the item on screen. With `goal` above 0, `goal` right answers win; with 0 it is endless, so the game needs its own lose path (lives bound to `sorted_wrong`). Sets no score.",
+  "params": {
+    "bins": {
+      "type": "int",
+      "default": 3,
+      "min": 2,
+      "max": 4
+    },
+    "item_ms": {
+      "type": "duration",
+      "default": 4000,
+      "min": 1000,
+      "max": 20000
+    },
+    "goal": {
+      "type": "int",
+      "default": 12,
+      "min": 0,
+      "max": 200
+    }
+  },
+  "requires": {
+    "functions": {
+      "bin_items": {
+        "params": {
+          "b": "int"
+        },
+        "returns": "list<string>"
+      },
+      "bin_label": {
+        "params": {
+          "b": "int"
+        },
+        "returns": "string"
+      }
+    }
+  },
+  "types": {
+    "SortItem": {
+      "name": "string",
+      "bin": "int"
+    }
+  },
+  "state": {
+    "deck": {
+      "type": "list<SortItem>",
+      "init": "[]"
+    },
+    "item_i": {
+      "type": "int",
+      "init": "0"
+    },
+    "right_count": {
+      "type": "int",
+      "init": "0"
+    },
+    "wrong_count": {
+      "type": "int",
+      "init": "0"
+    },
+    "verdict": {
+      "type": "string",
+      "init": "''"
+    },
+    "_serial": {
+      "type": "int",
+      "init": "0"
+    },
+    "_until": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "current_name": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(map(deck, d => d.name), item_i, '')"
+    },
+    "_bin_w": {
+      "params": {},
+      "returns": "int",
+      "body": "if @bins == 2 then 150 else if @bins == 3 then 104 else 78"
+    },
+    "_bin_x": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "int",
+      "body": "(360 - (@bins * _bin_w() + (@bins - 1) * 10)) / 2 + k * (_bin_w() + 10)"
+    },
+    "_bin_color": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['#F4B183', '#9DC3E6', '#A9D18E', '#FFD966'], k, '#CCCCCC')"
+    }
+  },
+  "events": {
+    "sorted_right": {},
+    "sorted_wrong": {},
+    "_advance": {},
+    "_timeout": {
+      "serial": "int"
+    }
+  },
+  "inputs": {
+    "choose": {
+      "payload": {
+        "bin": "int"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        {
+          "set": "deck",
+          "to": "shuffle(fold(range(@bins), [], (acc, b) => concat(acc, map(bin_items(b), s => {name: s, bin: b}))))"
+        }
+      ]
+    },
+    {
+      "id": "arm_first",
+      "on": "start",
+      "do": [
+        {
+          "set": "_until",
+          "to": "now + @item_ms"
+        },
+        {
+          "after": "@item_ms",
+          "emit": "_timeout",
+          "with": {
+            "serial": "0"
+          },
+          "id": "_t_item"
+        }
+      ]
+    },
+    {
+      "id": "pick_bin",
+      "on": "choose",
+      "when": "event.bin >= 0 and event.bin < @bins and item_i < len(deck)",
+      "do": [
+        {
+          "if": "event.bin == deck[item_i].bin",
+          "then": [
+            {
+              "incr": "right_count"
+            },
+            {
+              "set": "verdict",
+              "to": "'Nice!'"
+            },
+            {
+              "emit": "sorted_right"
+            }
+          ],
+          "else": [
+            {
+              "incr": "wrong_count"
+            },
+            {
+              "set": "verdict",
+              "to": "'Not there: ' + bin_label(deck[item_i].bin)"
+            },
+            {
+              "emit": "sorted_wrong"
+            }
+          ]
+        },
+        {
+          "emit": "_advance"
+        }
+      ]
+    },
+    {
+      "id": "run_out",
+      "on": "_timeout",
+      "when": "event.serial == _serial and item_i < len(deck)",
+      "do": [
+        {
+          "incr": "wrong_count"
+        },
+        {
+          "set": "verdict",
+          "to": "'Too slow!'"
+        },
+        {
+          "emit": "sorted_wrong"
+        },
+        {
+          "emit": "_advance"
+        }
+      ]
+    },
+    {
+      "id": "advance",
+      "on": "_advance",
+      "do": [
+        {
+          "incr": "_serial"
+        },
+        {
+          "incr": "item_i"
+        },
+        {
+          "if": "item_i >= len(deck)",
+          "then": [
+            {
+              "set": "deck",
+              "to": "shuffle(deck)"
+            },
+            {
+              "set": "item_i",
+              "to": "0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rearm",
+      "on": "_advance",
+      "do": [
+        {
+          "set": "_until",
+          "to": "now + @item_ms"
+        },
+        {
+          "after": "@item_ms",
+          "emit": "_timeout",
+          "with": {
+            "serial": "_serial"
+          },
+          "id": "_t_item"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": {
+      "include": "@goal > 0",
+      "expr": "right_count >= @goal"
+    }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 200,
+          "anchor": "center",
+          "size": 34,
+          "weight": 700,
+          "color": "$ink",
+          "text": "= current_name()"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 270,
+          "anchor": "center",
+          "size": 18,
+          "weight": 600,
+          "color": "$ink",
+          "text": "= verdict"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 30,
+          "y": 310,
+          "w": "= max(0.0, 300.0 * ((_until - now) * 1.0) / (@item_ms * 1.0))",
+          "h": 8,
+          "radius": 4,
+          "fill": "= if _until - now < @item_ms / 4 then $danger else $primary"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(@bins)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "group",
+            "children": [
+              {
+                "node": "rect",
+                "x": "= _bin_x(k)",
+                "y": 380,
+                "w": "= _bin_w()",
+                "h": 140,
+                "radius": 14,
+                "role": "tile",
+                "fill": "= _bin_color(k)",
+                "on_tap": {
+                  "input": "choose",
+                  "with": {
+                    "bin": "k"
+                  }
+                }
+              },
+              {
+                "node": "text",
+                "x": "= _bin_x(k) + _bin_w() / 2",
+                "y": 450,
+                "anchor": "center",
+                "size": 16,
+                "weight": 700,
+                "color": "$ink",
+                "text": "= bin_label(k)"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "sorted_right",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "A5",
+              "ms": 70
+            }
+          }
+        ]
+      },
+      {
+        "on": "sorted_wrong",
+        "do": [
+          {
+            "shake": {
+              "px": 5,
+              "ms": 160
+            }
+          },
+          {
+            "sound": {
+              "wave": "square",
+              "note": "C3",
+              "ms": 100
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "tags": {
+    "mood": [
+      "playful",
+      "calm"
+    ],
+    "energy": [
+      "medium"
+    ]
+  },
+  "conflicts": []
+}

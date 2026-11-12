@@ -1,0 +1,35 @@
+{
+  "fragment": "speed_ramp",
+  "version": 1,
+  "describe": "Every `every` ms, raises `spawn_speed` by `step` up to `max`. Needs a fragment that provides `spawn_speed`, such as spawn_wave.",
+  "params": {
+    "every": { "type": "duration", "default": 4000, "min": 1000, "max": 30000 },
+    "step":  { "type": "float", "default": 0.15, "min": 0.01, "max": 1.0 },
+    "max":   { "type": "float", "default": 2.5, "min": 1.0, "max": 5.0 }
+  },
+  "requires": {
+    "state": { "spawn_speed": "float" }
+  },
+  "events": {
+    "_ramp": {}
+  },
+  "rules": [
+    {
+      "id": "arm",
+      "on": "start",
+      "do": [ { "after": "@every", "emit": "_ramp", "id": "_ramp_timer" } ]
+    },
+    {
+      "id": "raise",
+      "on": "_ramp",
+      "do": [
+        { "set": "spawn_speed", "to": "min(@max, spawn_speed + @step)" },
+        { "after": "@every", "emit": "_ramp", "id": "_ramp_timer" }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": { "slots": [], "feedback": [] },
+  "tags": { "mood": ["tense"], "energy": ["medium", "high"] },
+  "conflicts": []
+}
