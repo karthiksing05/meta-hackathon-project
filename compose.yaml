@@ -1,0 +1,44 @@
+cat > /srv/game-platform/compose.yaml <<'EOF'
+name: game-platform
+
+services:
+  api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+
+    restart: unless-stopped
+
+    env_file:
+      - ./app/.env
+
+    ports:
+      - "127.0.0.1:8080:8080"
+
+    volumes:
+      - ./data/games:/data/games
+      - ./data/game-source:/data/game-source
+
+    networks:
+      - game-backend
+
+  games:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.games
+
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:8081:8081"
+
+    volumes:
+      - ./data/games:/data/games:ro
+
+    networks:
+      - game-backend
+
+networks:
+  game-backend:
+    external: true
+EOF
