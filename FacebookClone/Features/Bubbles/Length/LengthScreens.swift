@@ -10,7 +10,7 @@ import SwiftUI
 ///   intro/<bubbleID>/<mode>       the player on <bubbleID> locked to a mode, showing the intro card:
 ///                                 timed (60 seconds), rounds (10 rounds), lives (3 lives), endless
 ///   e.g. customize/hill-hopper, intro/hill-hopper/timed, intro/newinsf-fog-or-sun/rounds,
-///        intro/cable-car-catch/lives
+///        intro/cable-car-catch/lives (short ids work in FB_OPEN: intro/fog-or-sun/rounds)
 enum LengthScreens {
     /// A pushed screen (`Route.bubbleFeature`): length opens other screens instead (see `open`).
     @MainActor
@@ -51,11 +51,13 @@ enum LengthScreens {
     /// is nothing to stage.
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
-        if route.screen == "intro" {
-            let id = route.arg.split(separator: "/").first.map(String.init) ?? ""
-            guard bubbleStore.bubble(id: id) != nil else { return false }
-        }
-        return open(route, router: router)
+        guard route.screen == "intro" || route.screen == "customize" else { return open(route, router: router) }
+        var parts = route.arg.split(separator: "/", maxSplits: 1).map(String.init)
+        guard let id = parts.first, !id.isEmpty else { return false }
+        // Short ids work too ("fog-or-sun" finds "newinsf-fog-or-sun").
+        guard let bubble = bubbleStore.bubble(id: id) ?? bubbleStore.bubbles.first(where: { $0.id.hasSuffix("-" + id) }) else { return false }
+        parts[0] = bubble.id
+        return open(BubbleFeatureRoute(route.feature, route.screen, parts.joined(separator: "/")), router: router)
     }
 
     /// Once at launch: a little later, on the runtime worker's queue, take every formula's length

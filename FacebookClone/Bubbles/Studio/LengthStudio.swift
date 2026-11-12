@@ -117,7 +117,9 @@ enum LengthStudio {
         guard let spec else { return nil }
         let text = ([request.prompt, brief.intent, brief.occasion ?? "", brief.notes ?? ""] + brief.mood)
             .joined(separator: " ").lowercased()
-        func has(_ words: [String]) -> Bool { words.contains { text.contains($0) } }
+        // Whole words only, so "bus" doesn't match "busy" and "kids" doesn't match "skids".
+        let padded = " " + text.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).joined(separator: " ") + " "
+        func has(_ words: [String]) -> Bool { words.contains { padded.contains(" \($0) ") } }
         var picks: [BubbleLength] = []
         if let seconds = secondsMentioned(in: text) { picks.append(.timed(seconds)) }
         if has(["quick", "bus", "commute", "coffee break", "in line", "one minute", "a minute", "lunch break", "short break"]) {
