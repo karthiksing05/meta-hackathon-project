@@ -119,7 +119,7 @@ struct BubbleResultSheet: View {
             } label: {
                 Label("Play again", systemImage: "arrow.counterclockwise")
             }
-            .buttonStyle(.fb(.primary, height: 44))
+            .buttonStyle(.fb(.secondary, height: 44))
 
             Button {
                 float(bubble, to: group)

@@ -12,14 +12,23 @@ enum SavesScreens {
     @MainActor
     @ViewBuilder
     static func destination(_ route: BubbleFeatureRoute) -> some View {
-        BubbleFeaturePlaceholder(route: route)
+        switch route.screen {
+        case "stats":
+            SavesStatsView(bubbleID: route.arg)
+        case "library":
+            BubbleLibraryView()
+        default:
+            BubbleFeaturePlaceholder(route: route)
+        }
     }
 
     /// A sheet over the tabs (`router.bubbleSheet`).
     @MainActor
     @ViewBuilder
     static func sheet(_ route: BubbleFeatureRoute) -> some View {
-        BubbleFeaturePlaceholder(route: route)
+        NavigationStack {
+            destination(route)
+        }
     }
 
     /// Opens a route (notification taps, cards). Return false to push `destination`.
@@ -28,15 +37,55 @@ enum SavesScreens {
         false
     }
 
+    private static func pushStats(bubbleID: String, router: Router, bubbleStore: BubbleStore) {
+        let id = bubbleStore.bubble(id: bubbleID) != nil ? bubbleID : (bubbleStore.bubbles.first { $0.creator.isMe }?.id ?? bubbleID)
+        router.push(.bubbleFeature(BubbleFeatureRoute(.saves, "stats", id)))
+    }
+
     /// `FB_OPEN=feature:saves/...` (DEBUG): stage demo state, then open. Return false to fall back
     /// to `open`.
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
-        false
+        switch route.screen {
+        case "hint":
+            // The hint shows in the player (and on the feed caption); play a game so it is in view.
+            SavesHintCenter.shared.reset()
+            router.play(route.arg.isEmpty ? "hill-hopper" : route.arg)
+            return true
+        case "stats":
+            pushStats(bubbleID: route.arg, router: router, bubbleStore: bubbleStore)
+            return true
+        case "library":
+            router.push(.bubbleLibrary)
+            return true
+        default:
+            return false
+        }
     }
 
     /// Once at launch, after `BubbleSocialCast.install` (seed notifications, observers).
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
+        MainActor.assumeIsolated {
+            installNotification(appStore: appStore, bubbleStore: bubbleStore)
+            SavesMilestones.start(appStore: appStore, bubbleStore: bubbleStore)
+        }
+    }
+
+    /// '38 people saved Moving Day': Diego and 37 others, in Notifications. Tapping opens who saved it.
+    @MainActor
+    private static func installNotification(appStore: AppStore, bubbleStore: BubbleStore) {
+        let id = "bubble-note-saves-seed"
+        guard !appStore.notifications.contains(where: { $0.id == id }),
+              let bubble = bubbleStore.bubble(id: "moving-day") ?? bubbleStore.bubbles.first(where: { $0.creator.isMe }),
+              bubble.saveCount > 1 else { return }
+        let actor = bubbleStore.resolvePerson(BubbleSocialCast.friendIDs[0])
+        let note = AppNotification(
+            id: id, kind: .bubblePlayed, actors: [actor], extraActorCount: bubble.saveCount - 1,
+            message: SavesSocialProof.notificationMessage(for: bubble),
+            createdAt: Date().addingTimeInterval(-25 * 60), isRead: false, bubbleID: bubble.id
+        )
+        note.bubbleAction = BubbleFeatureRoute(.saves, "stats", bubble.id)
+        appStore.notifications.insert(note, at: 0)
     }
 
     /// After the player records one of your runs.
@@ -52,5 +101,60 @@ enum SavesScreens {
 }
 
 /// Every new user-facing string for the "saves" feature, in one place so a rename is easy.
+
+
 enum SavesCopy {
+    static let save = "Save"
+    static let saved = "Saved"
+    static let statsTitle = "Saves"
+    static let whoSaved = "Who saved it"
+    static let friendsFirst = "Friends first. Saving is how people show love for a game."
+    static let seeAll = "See everyone who saved it"
+    static let friend = "Friend"
+    static let youSaved = "You saved this"
+    static let newInSF = "New in SF"
+    static let requestSent = "Request sent"
+    static let addFriend = "Add friend"
+    static let confirm = "Confirm"
+    static let emptyTitle = "No saves yet"
+    static let emptyBody = "When someone saves this game, they show up here."
+    static let hintTitle = "Saving is how you show love for a game."
+    static let hintBody = "Tap the bookmark anytime, even mid-game."
+    static let mostSaved = "Most saved"
+    static let libraryEmptyTitle = "Saves are the likes"
+    static let libraryEmptyBody = "Make a game and your friends can save it. Their names show up here."
+
+    static func savesCount(_ n: Int) -> String { n == 1 ? "1 save" : "\(n.fbCompact) saves" }
+    static func savesThisWeek(_ n: Int) -> String { n == 1 ? "1 save this week" : "\(n.fbCompact) saves this week" }
+    static func savedBy(_ who: String) -> String { "Saved by \(who)" }
+    static func savedByCount(_ n: Int) -> String { "Saved by \(n.fbCompact) \(n == 1 ? "person" : "people")" }
+    static func andMore(_ n: Int) -> String { "and \(n.fbCompact) more" }
+    static func mutual(_ n: Int) -> String { n == 1 ? "1 mutual friend" : "\(n) mutual friends" }
+    static func libraryWeekly(_ n: Int) -> String { "Your games were saved \(n.fbCompact) \(n == 1 ? "time" : "times") this week" }
+    static func milestone(_ title: String, _ n: Int) -> String { "\(title) just passed \(n.fbCompact) saves." }
+}
+
+/// A milestone notification when a save pushes one of your Bubbles across a round number.
+@MainActor
+enum SavesMilestones {
+    private static var task: Task<Void, Never>?
+    static let steps = [10, 25, 50, 100, 250, 500, 1000]
+
+    static func start(appStore: AppStore, bubbleStore: BubbleStore) {
+        guard task == nil else { return }
+        task = Task { @MainActor in
+            for await note in NotificationCenter.default.notifications(named: .bubbleSaveChanged) {
+                guard let id = note.userInfo?[BubbleSaveSignals.bubbleIDKey] as? String,
+                      note.userInfo?[BubbleSaveSignals.isSavedKey] as? Bool == true,
+                      let bubble = bubbleStore.bubble(id: id), bubble.creator.isMe,
+                      steps.contains(bubble.saveCount) else { continue }
+                let item = AppNotification(
+                    id: "bubble-note-saves-milestone-\(id)-\(bubble.saveCount)", kind: .bubblePlayed, actors: [],
+                    message: SavesCopy.milestone(bubble.title, bubble.saveCount), isRead: false, bubbleID: id
+                )
+                item.bubbleAction = BubbleFeatureRoute(.saves, "stats", id)
+                appStore.notifications.insert(item, at: 0)
+            }
+        }
+    }
 }

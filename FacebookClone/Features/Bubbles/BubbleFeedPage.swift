@@ -274,26 +274,25 @@ private struct BubbleFeedTags: View {
 
 // MARK: - Action rail
 
-/// Right side: like, Bubble Board, Remix, float and save.
+/// Right side: save (saves are the likes), Bubble Board, Remix and float.
 private struct BubbleFeedRail: View {
     let bubble: Bubble
     let actions: BubbleFeedPageActions
 
-    @State private var likeBounce = 0
     @State private var saveBounce = 0
 
     var body: some View {
         VStack(spacing: 14) {
             BubbleFeedRailButton(
-                symbol: "hand.thumbsup.fill",
-                label: bubble.likeCount.fbCompact,
-                tint: bubble.isLiked ? FBColor.brandBlue : Color.white,
-                bounce: likeBounce,
-                accessibility: bubble.isLiked ? "Unlike" : "Like",
-                value: "\(bubble.likeCount) likes"
+                symbol: bubble.isSaved ? "bookmark.fill" : "bookmark",
+                label: bubble.saveCount.fbCompact,
+                tint: bubble.isSaved ? Color(hex: 0x6EA8FF) : Color.white,
+                bounce: saveBounce,
+                accessibility: bubble.isSaved ? "Unsave" : "Save",
+                value: "\(bubble.saveCount) saves"
             ) {
-                likeBounce += 1
-                actions.like(bubble)
+                saveBounce += 1
+                actions.save(bubble)
             }
             BubbleFeedRailButton(symbol: "trophy.fill", label: "Board", accessibility: "Bubble Board") {
                 actions.openBoard(bubble)
@@ -303,16 +302,6 @@ private struct BubbleFeedRail: View {
             }
             BubbleFeedRailButton(symbol: "arrowshape.turn.up.right.fill", label: "Float", accessibility: "Float this Bubble") {
                 actions.float(bubble)
-            }
-            BubbleFeedRailButton(
-                symbol: bubble.isSaved ? "bookmark.fill" : "bookmark",
-                label: bubble.isSaved ? "Saved" : "Save",
-                tint: bubble.isSaved ? BubbleGlow.peach : Color.white,
-                bounce: saveBounce,
-                accessibility: bubble.isSaved ? "Unsave" : "Save"
-            ) {
-                saveBounce += 1
-                actions.save(bubble)
             }
         }
         .padding(.bottom, 4)
