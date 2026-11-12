@@ -106,9 +106,8 @@ struct MenuView: View {
 
     // MARK: Shortcuts
 
-    @ViewBuilder
     private var shortcutsSection: some View {
-        if !store.myGroups.isEmpty || !store.followedPages.isEmpty {
+        Group {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Your shortcuts")
                     .font(.fbHeadline)
@@ -116,6 +115,12 @@ struct MenuView: View {
                     .padding(.horizontal, 16)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 12) {
+                        symbolShortcut(title: "Bubbles", symbol: "bubbles.and.sparkles.fill", fill: AnyShapeStyle(BubbleGlow.brandGradient), glyph: .white) {
+                            router.push(.bubbleLibrary)
+                        }
+                        symbolShortcut(title: "Marketplace", symbol: "storefront.fill", fill: AnyShapeStyle(FBColor.marketplaceTeal), glyph: .white) {
+                            router.push(.marketplace)
+                        }
                         ForEach(store.myGroups) { group in
                             groupShortcut(group)
                         }
@@ -127,6 +132,26 @@ struct MenuView: View {
                 }
             }
         }
+    }
+
+    private func symbolShortcut(title: String, symbol: String, fill: AnyShapeStyle, glyph: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: symbol)
+                    .font(.system(size: FBIconSize.xxl, weight: .semibold))
+                    .foregroundStyle(glyph)
+                    .frame(width: 60, height: 60)
+                    .background(fill, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                Text(title)
+                    .font(.fbCaption)
+                    .foregroundStyle(FBColor.primaryText)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 70)
+            }
+        }
+        .buttonStyle(.pressable)
+        .accessibilityLabel(title)
     }
 
     private func groupShortcut(_ group: FBGroup) -> some View {
@@ -173,7 +198,7 @@ struct MenuView: View {
             MenuTileItem(id: "saved", title: "Saved", symbol: "bookmark.fill", color: FBColor.savedPurple) { router.push(.saved) },
             MenuTileItem(id: "groups", title: "Groups", symbol: "person.3.fill", color: FBColor.groupsBlue) { router.push(.groups) },
             MenuTileItem(id: "video", title: "Video", symbol: "play.rectangle.fill", color: FBColor.brandBlue) { router.select(.video) },
-            MenuTileItem(id: "marketplace", title: "Marketplace", symbol: "storefront.fill", color: FBColor.marketplaceTeal) { router.select(.marketplace) },
+            MenuTileItem(id: "marketplace", title: "Marketplace", symbol: "storefront.fill", color: FBColor.marketplaceTeal) { router.push(.marketplace) },
             MenuTileItem(id: "friends", title: "Friends", symbol: "person.2.fill", color: FBColor.brandBlue) { router.select(.friends) },
             MenuTileItem(id: "feeds", title: "Feeds", symbol: "newspaper.fill", color: FBColor.brandBlue) { router.push(.feeds) },
             MenuTileItem(id: "events", title: "Events", symbol: "calendar", color: FBColor.eventRed) { router.push(.events) },

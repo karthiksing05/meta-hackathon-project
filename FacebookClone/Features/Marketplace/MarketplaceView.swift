@@ -32,7 +32,7 @@ struct MarketplaceView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    header.id("marketplaceTop")
+                    Color.clear.frame(height: 0).id("marketplaceTop")
                     if showSearch { searchBar }
                     chipsRow
                     picksHeader
@@ -47,7 +47,27 @@ struct MarketplaceView: View {
             }
         }
         .background(FBColor.surface)
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle("Marketplace")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    showYou = true
+                } label: {
+                    Image(systemName: "person.fill")
+                }
+                .accessibilityLabel("Your Marketplace")
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showSearch.toggle()
+                        if !showSearch { searchText = "" }
+                    }
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                }
+                .accessibilityLabel("Search Marketplace")
+            }
+        }
         .navigationDestination(isPresented: $showYou) { MarketplaceYouView() }
         .sheet(isPresented: $showSell) {
             sellSheet
@@ -73,20 +93,6 @@ struct MarketplaceView: View {
     }
 
     // MARK: Sections
-
-    private var header: some View {
-        TabHeader("Marketplace") {
-            CircleButton(symbol: "person.fill", accessibilityLabel: "Your Marketplace") {
-                showYou = true
-            }
-            CircleButton(symbol: "magnifyingglass", accessibilityLabel: "Search Marketplace") {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showSearch.toggle()
-                    if !showSearch { searchText = "" }
-                }
-            }
-        }
-    }
 
     private var searchBar: some View {
         SearchField(placeholder: "Search Marketplace", text: $searchText, autoFocus: true)
