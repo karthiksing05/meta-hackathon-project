@@ -102,6 +102,7 @@ enum StudioTools {
                 ],
                 "glue": ["type": "object", "description": "{\"glue.<name>\": {\"slot\", \"source\", \"describe\"}}; usually empty"],
                 "content": ["type": "object", "description": "Follows the formula's content schema"],
+                "length": ["type": "object", "description": "How a run ends (docs 7.9), one of the formula's length.modes: {\"mode\": \"endless\"}, {\"mode\": \"rounds\", \"rounds\": n}, {\"mode\": \"timed\", \"seconds\": n} or {\"mode\": \"lives\", \"lives\": n}. Optional."],
                 "operators": ["type": "array", "items": ["type": "string"]],
                 "sources_used": ["type": "array", "items": ["type": "integer"], "description": "Numbers of the opted-in posts you used (Daily Bubbles and Icebreakers)"],
             ],
