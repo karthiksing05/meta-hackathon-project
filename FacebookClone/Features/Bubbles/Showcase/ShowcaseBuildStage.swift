@@ -99,6 +99,8 @@ struct ShowcaseBuildStage: View {
 
     var body: some View {
         let items = self.items
+        let focus = items.first { $0.state == .active || $0.state == .failed }?.beat ?? items.last { $0.state == .done }?.beat
+        ScrollViewReader { proxy in
         ScrollView(.horizontal, showsIndicators: false) {
             TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reduceMotion || !isWorking)) { context in
                 let wave = reduceMotion || !isWorking ? 0.5 : Self.breath.wave(at: context.date)
@@ -108,11 +110,23 @@ struct ShowcaseBuildStage: View {
                             connector(lit: item.state != .pending)
                         }
                         beatView(item, wave: wave)
+                            .id(item.beat)
                     }
                 }
                 .padding(.horizontal, FBMetrics.screenPadding)
                 .padding(.vertical, 4)
             }
+        }
+        .onChange(of: focus) { _, beat in
+            // Keep the beat Muse is on in view when the strip is wider than the screen.
+            guard let beat else { return }
+            withAnimation(GameMotion.resolved(GameMotion.stage, reduceMotion: reduceMotion)) {
+                proxy.scrollTo(beat, anchor: .center)
+            }
+        }
+        .onAppear {
+            if let focus { proxy.scrollTo(focus, anchor: .center) }
+        }
         }
         .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: items.map(\.beat))
         .accessibilityElement(children: .ignore)

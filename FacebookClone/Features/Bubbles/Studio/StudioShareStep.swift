@@ -55,6 +55,7 @@ struct StudioShareStep: View {
                             Image(systemName: symbol)
                                 .font(.system(size: FBIconSize.medium, weight: .bold))
                             Text(buttonTitle)
+                                .minimumScaleFactor(0.75)
                         }
                     }
                 }

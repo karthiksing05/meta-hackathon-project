@@ -71,7 +71,8 @@ struct ShowcaseHowMuseMadeIt: View {
     let record: MakeRecord?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isOpen = false
+    /// DEBUG: `FB_SHOWCASE_OPEN=1` starts it open, for screenshots.
+    @State private var isOpen = DebugLaunch.value("FB_SHOWCASE_OPEN") == "1"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
