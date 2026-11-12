@@ -53,6 +53,26 @@ What Muse does that could not be done without it:
 - **It does the whole build.** Ember writes the brief, Wonder composes the game from 55 tested building blocks with tool calls and writes its content, Wonder repairs drafts that fail bot testing, and Muse Image paints the cover (D1, D5).
 - **It makes making cheap enough for everyone.** A game a day for every Group, or one for each Event, is only possible when nobody has to write it by hand.
 
+### Why friendly competition makes friends
+
+Strangers need a reason to talk, and a score gives one. Your 42 next to a stranger's 44 is low stakes: it is about the game, not about you, and the Group or Event already put you both in the room. "How did you get 44?" is easier to send than "want to be friends?", and a rivalry gives a reason to message again. The comparison only means something if both played the same game, and same-seed play gives that.
+
+What the evidence says:
+
+- **Rivals can bond, if they affect each other.** In a lab study, playing an interdependent game as rivals still raised relatedness, enjoyment and trust, though playing as partners raised trust more. In a survey of 234 players, interdependence predicted in-game ties (paths of .45 for bridging and .30 for bonding), while cooperation did not; the authors write that "players do not need to work toward the same goal to form social bonds" [72].
+- **Rivalry is a relationship.** In NCAA basketball, how similar two teams were and how often and how closely they had played before predicted how strong a rivalry they felt [126].
+- **Small leaderboards bring people back.** In the STEP UP trial (about 600 adults, 2019), groups of three ranked on a weekly leaderboard walked 920 more steps a day than controls, more than the support (689) or collaboration (637) arms. They were the only arm still significantly ahead three months after the game ended (569 steps) [127].
+- **First contact works by lowering anxiety.** Across 515 studies, more contact with another group went with less prejudice (mean r = .21), and lower anxiety about contact was a main reason [128].
+
+Competition can also divide. Competition between groups raised cooperation inside each group in a 192-student lab game [129], but at the Robbers Cave camp, after a tournament with prizes, only 6.4% and 7.5% of each group's friendship choices went to the other group; after shared goals they rose to 36.4% and 23.2% [130]. Toxicity also predicted fewer in-game ties [72]. So our guardrails are:
+
+- **Fair seeds.** Everyone in a Group's Daily plays the same seed, and runs can be re-checked (VP-16). Live.
+- **Scoped boards.** Rows appear only for people in a Group or Event you both joined, and contact goes through the normal friend flow (VP-04). Live, with synthetic rows.
+- **Plus-only fairness in Blends.** Blends favor evenly matched games with a bonus that fades to zero as skills drift apart and never goes negative, and members the Blend has served least get a boost without anyone being pushed down (VP-40). Weekly boards add Most improved, so it isn't only for the best player (VP-19). Blends: built on a teammate's branch, not yet in the app.
+- **Opt-in.** You choose to play, to float a score and to challenge someone. No mass invites, no cash rewards (VP-29).
+
+The Bubble Board with Add friend is Live, with bot runs by synthetic people. Challenge Me, group-chat play and Blends are Not built.
+
 ### How the solution maps to the problem
 
 | Problem point | Feature | Facebook surface | Status |
@@ -460,6 +480,8 @@ Lab work found "a social game can be more effective than a social task at foster
 
 **"Does this bring people closer, or keep them on their phones?"** Every feature names who it brings closer: Add friend on board rows, icebreakers before the picnic, rematches in the group chat, games made together, Blends between two people. The feed ranks Add friend highest. The goal is walking into the picnic knowing three names. The pilot's north star is new friendships and first Events, not minutes (section 9).
 
+**"Isn't competition the opposite of closer together?"** Not when it is friendly and fair. A score next to a stranger is a low-stakes reason to talk, and a rematch is a reason to message again. In a survey of 234 players, players who affected each other formed ties whether or not they shared a goal, and toxicity cut ties [72]. Competition between groups with prizes can divide them [130], so boards stay scoped to your Group, Event or friends, everyone plays the same seed, Blends add a plus-only bonus for evenly matched games (not yet in the app), and weekly boards add Most improved. See "Why friendly competition makes friends".
+
 **"Isn't an endless game feed another engagement machine?"** A fair tension our design review raised. Daily play is capped at one scored run, the result sheet ends in a person, and ranking rewards connection outcomes such as Add friend and floats to a Group, while quick skips count against (VP-10). In a teammate's simulation of synthetic users, bait-averse people saw clickbait fall from 36% to 14%, against 49% when ranking on clicks alone (D21; simulated, teammate-reported). We would measure social actions, not minutes.
 
 **"Games built from my posts? I didn't agree to be a puzzle answer."** Only posts their authors marked for Bubbles are read, the maker can drop any, and the timeline names what was used and says nothing else was read (VP-21). Muse is told never to invent facts about people, and the data stays with Meta's own models. Two gaps are real and named: there is no opt-in toggle in the post composer yet (opt-ins are set in demo data), and no separate moderation step.
@@ -633,6 +655,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Close friendships mostly start in shared, repeated settings: 54% of Americans with close friends met one at work, and only 8% made a close friend online [64]. A Group board is a shared, repeated setting.
   - For adults who had just moved, playing video games together went with closeness [66].
   - Facebook use is most strongly tied to "bridging" social capital, the weak ties that bring new information and people [71].
+  - Rivals still form ties when they affect each other, and toxicity undoes them [72]. See "Why friendly competition makes friends" for the evidence and our guardrails.
 - **Evidence.**
   - Context, not evidence for this mechanism: in ESA's 2025 survey (YouGov, n=5,000 US adults), 70% of Gen Z players and 61% of Millennial players said they have met people through games they otherwise wouldn't have [76] (industry survey; about online games generally, not leaderboards).
   - Context: 61% of US adults say close friends are extremely or very important for a fulfilling life, more than marriage (23%) or money (24%) [57].
@@ -667,7 +690,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 - **Claim.** Every run is a seed plus an input log that can be re-simulated, so scores on Group boards and in challenges are checkable, and head-to-heads are on identical games.
 - **Why Facebook.** Verification itself is not Facebook-specific. Pairing verified scores with everyday-name people, some with opt-in Facebook Verified badges [21], gives a "real person, real score" board that pseudonymous networks lack.
-- **Rationale.** Competition only brings people closer if it feels fair. Toxicity is a strong negative predictor of friendships formed in games [72], and cheating is a form of toxicity. One engineering choice powers same-seed challenges, verified badges, Bursts and bot playtests.
+- **Rationale.** Competition only brings people closer if it feels fair. Toxicity is a strong negative predictor of friendships formed in games [72], and cheating is a form of toxicity. A fair, shared game is also what makes a comparison mean anything (see "Why friendly competition makes friends"). One engineering choice powers same-seed challenges, verified badges, Bursts and bot playtests.
 - **Evidence.**
   - 390 of 390 bot runs (13 games, 3 skill levels, 10 seeds) re-simulated to the identical score (D12).
   - Verifying a run costs about 4.06 ms of CPU in Node (D14).
@@ -1102,6 +1125,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Moving puts relationships at risk. Facebook's own research found that targeted, composed contact from close friends goes with better well-being, while likes "don't move the needle" [70].
   - People underestimate how much others appreciate being reached out to [69].
   - Playing against a friend was more engaging than playing a stranger in a 2006 lab study [78] (verified from the abstract only).
+  - Rivalry grows from repeated, close contests [126], which is what Challenge back sets up (see "Why friendly competition makes friends").
 - **Evidence.** The format has worked before:
   - Facebook's Instant Games offered leaderboards and challenges in Messenger threads in 2016 [33].
   - Apple's Games app lets players invite "friends or contacts" to score challenges [110].
@@ -1126,6 +1150,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Social play lasts longer than solo play: Roblox reports co-play sessions are typically 1.9 times longer than solo sessions [93].
   - An AI party game on Discord, Death by AI, reached nearly 7 million players within weeks [98].
   - Wordle revived a quiet family group chat [88].
+  - Groups of three ranked on a weekly leaderboard walked 920 more steps a day than controls, the most of any arm (STEP UP, 2019) [127]. A chat's mini leaderboard is the same shape (see "Why friendly competition makes friends").
 - **Evidence.**
   - Facebook's own Instant Games offered leaderboards and challenges in Messenger group threads in 2016 [33].
   - Apple made challenges with friends a main social feature of its Games app [110].
@@ -1149,6 +1174,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - For adults who had just moved, playing video games and watching movies went with closeness, while time together at work or school did not [66].
   - Cooperation and interdependence each increased closeness between strangers [72].
   - "Most improved" keeps newcomers in contention against members who have played for months.
+  - Competition between groups raised cooperation inside each group in a lab game [129], but a prize tournament between groups cut friendships across them [130]. Team formats should pull a Group together without making another Group the enemy (see "Why friendly competition makes friends").
 - **Evidence.** Hall's hours-to-friendship figures [65][66] and Depping's cooperation results [72]. Our bots show a caution: the word game "Fog Words" did not rank by skill (median scores 200, 400 and 300 for low, middle and high skill), so luck-heavy games should reward improvement rather than raw rank (D16).
 - **How Bubbles delivers it.**
   - Not built: a Games section, a weekly leaderboard with trophy and Most improved, Challenge the Group, game night.
@@ -1179,6 +1205,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Interdependence increased closeness between strangers in lab studies, and it worked through more conversation [72]. A Blend is built from both people's tastes, so each round is a prompt to talk about them.
   - People underestimate how much new acquaintances like them [68] and how much others appreciate being contacted [69]. A Blend gives a concrete, low-stakes reason to reach out after meeting.
   - A bracket keeps the group together after an Event and turns "nice to meet you" into a rematch.
+  - Head-to-head play can still build trust when the two players affect each other [72]; Blends add a bonus for evenly matched games that never goes negative, so nobody is matched down (built on a teammate's branch, not yet in the app) (see "Why friendly competition makes friends").
 - **Evidence.** No prototype data; it is a design. Spotify's Blend is the analogy [125]. The pieces it builds on exist: same-seed play and replay verification (D12), the Event icebreaker that already makes a game from guests' intros (D8), and Kevin's recommender, which learns each person's taste from their plays (D21 for its simulation; local branch, not in the app).
 - **How Bubbles delivers it.**
   - Not built: taste profiles from play history, matching two profiles and blending them into a brief Muse can build from (asked of Kevin's recommender work; design and request sent on Nov 12), a "Blend with" button on a friend's profile and on board rows, and an Event bracket.
@@ -1535,6 +1562,11 @@ The loop: Daily, then board, then Add friend, then Event, then rematch, then the
 123. Discord Developer Documentation, Guild Scheduled Event (stage, voice and external entity types), accessed 2026-11-12. https://docs.discord.com/developers/resources/guild-scheduled-event
 124. Apple, App Store Review Guidelines, section 4.7 (mini apps and mini games) and 4.7.1 to 4.7.5, accessed 2026-11-12. https://developer.apple.com/app-store/review/guidelines/
 125. Spotify Newsroom, Blend, a shared playlist that merges two people's listening with a taste match score, 2021-08-31. https://newsroom.spotify.com/2021-08-31/how-spotifys-newest-personalized-experience-blend-creates-a-playlist-for-you-and-your-bestie/
+126. Kilduff, Elfenbein and Staw, "The Psychology of Rivalry: A Relationally Dependent Analysis of Competition", Academy of Management Journal 53(5), 2010 (NCAA basketball; similarity and prior contests predict rivalry). https://web-docs.stern.nyu.edu/management/Kilduff/KilduffEtAl%20AMJ%202010.pdf
+127. Penn Medicine release on Patel et al., the STEP UP randomized trial, JAMA Internal Medicine, 2019-09-09 (about 600 adults; groups of three on a weekly leaderboard; +920 steps a day during, +569 three months after; checked from the release, not the paper). https://www.eurekalert.org/news-releases/901675
+128. Pettigrew and Tropp, "How does intergroup contact reduce prejudice? Meta-analytic tests of three mediators", European Journal of Social Psychology 38, 2008 (515 studies, mean r = .21; anxiety reduction a main mediator). https://courses.washington.edu/pbafhall/563/Readings/pettigrew.pdf
+129. Puurtinen and Mappes, "Between-group competition and human cooperation", Proceedings of the Royal Society B 276, 2009 (192 students; public goods game with and without group competition). https://jyx.jyu.fi/bitstreams/0e6bae43-1edd-4985-a137-e2bf1048a1b7/download
+130. Sherif, Harvey, White, Hood and Sherif, Intergroup Conflict and Cooperation: The Robbers Cave Experiment, 1954/1961, chapter 7 (out-group friendship choices after competition and after shared goals). https://psychclassics.yorku.ca/Sherif/chap7.htm
 
 ## Appendix: what we dropped or held back, and why
 
