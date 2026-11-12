@@ -17,6 +17,8 @@ struct ReelsPage: View {
     let onOpenProfile: (User) -> Void
 
     @Environment(AppStore.self) private var store
+    @Environment(Router.self) private var router
+    @Environment(\.dismiss) private var dismiss
 
     @State private var progress = VideoProgressModel()
     @State private var isPausedByUser = false
@@ -33,8 +35,21 @@ struct ReelsPage: View {
     var body: some View {
         ZStack {
             Color.black
-            RemoteImage(url: reel.media.first?.url)
-            playerLayer
+            if let bubbleID = reel.bubbleID {
+                BubbleBurstReelLayer(
+                    bubbleID: bubbleID,
+                    replay: reel.bubbleReplay,
+                    isLive: isCurrent && !isSuspended,
+                    isPaused: isPausedByUser || isHolding
+                )
+                BubbleBurstTakeoverHint()
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .padding(.top, insets.top + 64)
+                    .opacity(isHolding ? 0 : 1)
+            } else {
+                RemoteImage(url: reel.media.first?.url)
+                playerLayer
+            }
             bottomScrim
             pauseGlyph
             heartsLayer
@@ -169,9 +184,26 @@ struct ReelsPage: View {
     private func togglePause() {
         // A tap can land right after a hold ends; that release shouldn't also pause.
         guard isCurrent, Date().timeIntervalSince(holdEndedAt) > 0.45 else { return }
+        if reel.bubbleID != nil {
+            takeOver()
+            return
+        }
         Haptics.soft()
         withAnimation(.easeOut(duration: 0.2)) {
             isPausedByUser.toggle()
+        }
+    }
+
+    /// A Burst: close Reels and open the player on the same run.
+    private func takeOver() {
+        guard let id = reel.bubbleID else { return }
+        Haptics.medium()
+        let router = router
+        let log = reel.bubbleReplay
+        dismiss()
+        Task {
+            try? await Task.sleep(nanoseconds: 450_000_000)
+            router.play(id, replay: log)
         }
     }
 
@@ -245,7 +277,11 @@ private struct ReelsInfoOverlay: View {
             if !reel.text.isEmpty {
                 caption
             }
-            audioRow
+            if let bubbleID = reel.bubbleID {
+                BubbleBurstInfoRow(bubbleID: bubbleID)
+            } else {
+                audioRow
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .shadow(color: Color.black.opacity(0.4), radius: 3, y: 1)

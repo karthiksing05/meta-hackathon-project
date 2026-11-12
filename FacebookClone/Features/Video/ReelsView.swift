@@ -46,6 +46,12 @@ struct ReelsView: View {
             if currentID == nil || !reels.contains(where: { $0.id == currentID }) {
                 currentID = reels.first?.id
             }
+            #if DEBUG
+            // FB_OPEN=reels:burst starts on the first Burst page.
+            if DebugLaunch.value("FB_OPEN") == "reels:burst", let burst = reels.first(where: { $0.bubbleID != nil }) {
+                currentID = burst.id
+            }
+            #endif
         }
     }
 

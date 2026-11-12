@@ -39,6 +39,14 @@ struct VideoTabView: View {
             .refreshable {
                 await refresh()
             }
+            .task {
+                #if DEBUG
+                // FB_OPEN=videobursts scrolls to the Bursts row.
+                guard DebugLaunch.value("FB_OPEN") == "videobursts" else { return }
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                proxy.scrollTo("video.bursts", anchor: .center)
+                #endif
+            }
             .onChange(of: router.scrollToTopSignal(for: .video)) {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     proxy.scrollTo(VideoFeedLayout.topAnchor, anchor: .top)
@@ -128,10 +136,17 @@ struct VideoTabView: View {
                     feedRow(post, isLive: liveIDs.contains(post.id))
                     FeedSeparator()
                     if index == 0 && showsReelsTray {
-                        VideoReelsCarousel(reels: store.reels) { reel in
+                        VideoReelsCarousel(reels: store.reels.filter { $0.bubbleID == nil }) { reel in
                             router.openReels(startingAt: reel)
                         }
                         FeedSeparator()
+                        if !bursts.isEmpty {
+                            BubbleBurstCarousel(bursts: bursts) { burst in
+                                router.openReels(startingAt: burst ?? bursts.first)
+                            }
+                            .id("video.bursts")
+                            FeedSeparator()
+                        }
                     }
                 }
             }
@@ -168,6 +183,11 @@ struct VideoTabView: View {
                 }
             )
         }
+    }
+
+    /// Bubble Bursts mixed into Reels.
+    private var bursts: [Post] {
+        store.reels.filter { $0.bubbleID != nil }
     }
 
     private var showsReelsTray: Bool {

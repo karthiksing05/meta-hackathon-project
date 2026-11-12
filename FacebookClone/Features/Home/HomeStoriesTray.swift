@@ -28,6 +28,27 @@ struct HomeStoriesTray: View {
         }
         .frame(height: HomeTrayMetrics.cardSize.height + 20)
         .background(FBColor.surface)
+        .task {
+            await openDebugStory()
+        }
+    }
+
+    /// DEBUG only: `FB_OPEN=story:<userID>` (or `story:me`) opens that author's story viewer.
+    @MainActor
+    private func openDebugStory() async {
+        #if DEBUG
+        guard let open = DebugLaunch.value("FB_OPEN"), open.hasPrefix("story:") else { return }
+        let userID = String(open.dropFirst("story:".count))
+        try? await Task.sleep(nanoseconds: 1_800_000_000)
+        let tray = store.storiesForTray
+        if userID == "me", let mine = store.myStory {
+            onOpenStory([mine] + tray, 0)
+        } else if let index = tray.firstIndex(where: { $0.author.id == userID }) {
+            onOpenStory(tray, index)
+        } else if let index = tray.firstIndex(where: { story in story.items.contains { if case .bubble = $0.content { return true } else { return false } } }) {
+            onOpenStory(tray, index)
+        }
+        #endif
     }
 
     @ViewBuilder
@@ -156,7 +177,7 @@ private struct HomeStoryCard: View {
     @ViewBuilder
     private var preview: some View {
         if let item = story.previewItem {
-            HomeStoryContentView(content: item.content, textSize: 15)
+            HomeStoryContentView(content: item.content, textSize: 15, isBubbleCompact: true)
         } else {
             Rectangle().fill(FBColor.skeleton)
         }
@@ -193,6 +214,12 @@ struct HomeStoryContentView: View {
     var textSize: CGFloat = 30
     /// Picked photos are shown whole over a blurred copy instead of cropped.
     var fitsLocalPhotos: Bool = false
+    /// Bubble items: true only for the item on screen in the viewer; everywhere else shows a cover.
+    var runsBubble: Bool = false
+    /// Bubble items: pauses the running Burst (a finger is down, a sheet is open).
+    var pausesBubble: Bool = false
+    /// Bubble items: the small tray card version, with no buttons.
+    var isBubbleCompact: Bool = false
 
     var body: some View {
         switch content {
@@ -213,6 +240,15 @@ struct HomeStoryContentView: View {
             }
         case .text(let text, let backgroundIndex):
             HomeTextStoryCanvas(text: text, backgroundIndex: backgroundIndex, fontSize: textSize)
+        case .bubble(let id, let replay, let score):
+            BubbleStoryContentView(
+                bubbleID: id,
+                replay: replay,
+                score: score,
+                isLive: runsBubble,
+                isPaused: pausesBubble,
+                isCompact: isBubbleCompact
+            )
         }
     }
 }

@@ -156,7 +156,9 @@ struct StoryViewer: View {
             itemIndex: isCurrent ? itemIndex : story.firstUnseenIndex,
             progress: isCurrent ? progress : 0,
             chromeHidden: isCurrent && chromeHidden,
-            actions: pageActions()
+            actions: pageActions(),
+            isCurrentAuthor: isCurrent && !isClosing && !isInBackground,
+            isHeld: isPaused
         )
         .frame(width: size.width, height: size.height)
         .rotation3DEffect(
@@ -371,6 +373,15 @@ struct StoryViewer: View {
     }
 
     private func handleTap(at location: CGPoint) {
+        // Bubble items keep the middle of the screen for the game; only the edges navigate.
+        if case .bubble = currentItem?.content {
+            if location.x < pageWidth * 0.22 {
+                goBackward()
+            } else if location.x > pageWidth * 0.78 {
+                goForward()
+            }
+            return
+        }
         if location.x < pageWidth / 3 {
             goBackward()
         } else {

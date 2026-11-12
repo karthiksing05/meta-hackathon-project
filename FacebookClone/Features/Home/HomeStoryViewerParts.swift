@@ -25,6 +25,10 @@ struct HomeStoryPage: View {
     let progress: Double
     let chromeHidden: Bool
     let actions: HomeStoryPageActions
+    /// This is the author on screen, so a Bubble item may run live.
+    var isCurrentAuthor: Bool = false
+    /// Something holds the story still: pauses a running Bubble too.
+    var isHeld: Bool = false
 
     private var item: StoryItem? {
         story.items.indices.contains(itemIndex) ? story.items[itemIndex] : nil
@@ -70,7 +74,14 @@ struct HomeStoryPage: View {
     @ViewBuilder
     private var content: some View {
         if let item {
-            HomeStoryContentView(content: item.content, textSize: 30, fitsLocalPhotos: true)
+            HomeStoryContentView(
+                content: item.content,
+                textSize: 30,
+                fitsLocalPhotos: true,
+                runsBubble: isCurrentAuthor,
+                pausesBubble: isHeld
+            )
+            .id(item.id)
         } else {
             Color(white: 0.12)
         }
