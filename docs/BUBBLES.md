@@ -765,12 +765,90 @@ is one place per feature. The name stays "Bubbles" for now.
 
 ### 7.2 Challenge Me and group chats (challenge)
 
-Challenge any friend, chat or Group to beat your score on the exact same seed, right from the
-result sheet, a friend row or a profile. The card lands in Messenger (or the Group), opening it plays
-the same seed, and a head-to-head result offers a rematch. A card dropped in a group chat starts a
-shared session: everyone plays the same seed, and the card tracks who played, a mini leaderboard
-and the winner. Friends' sides are bot runs that arrive a few seconds later, so every score stays
-verifiable. Owns `BubbleSocialHub`.
+Friendly competition, through Messenger, friends, profiles and Groups. Any run becomes a fair
+head-to-head: one tap on the result sheet sends **Challenge Me** to a friend, a chat or a Group, on
+the exact seed and length you played. Opening the card plays that same course, and a head-to-head
+result offers **Challenge back**. A card dropped in a group chat or a Group becomes a shared session
+everyone plays. With one phone at the demo, friends' sides are bot runs of the real runtime on the
+same seed (`BubbleStore.simulateRun`), so their scores carry replays and verify like yours. Files:
+`Features/Bubbles/Challenge/` (`ChallengeCenter` holds all state for the launch) and
+`Bubbles/Store/BubbleSocialHub.swift`.
+
+**Where it shows.** Result sheet: `ChallengeResultAction` ("Challenge Me", or "Challenge back" and
+"Open chat" after a challenge, "Rematch" and "Back to the chat" after a session) opens
+`ChallengePickerSheet` locally; `ChallengeResultHeadToHead` shows both players, scores and the winner
+(or your rank in a session). Player: `ChallengePlayerBanner` reads "Beat Maya's 41" and turns into
+"Ahead of Maya!" once your live score passes it (the target updates if her score lands mid-run).
+Bubble page: `ChallengeDetailRow` ("Challenge a friend", plus your latest challenge on it). Friend
+rows: `ChallengeFriendButton` opens `ChallengeGamePickerSheet` (games you've played, best first, then
+games they play first). Profiles (not yours): `ChallengeProfileRivalry`, "You vs Maya: 3-2 this
+week", the last three results and a Challenge button. The head-to-head screen adds "Watch Maya's
+run" (her replay as a Burst on the same seed; tapping takes over as a challenge play) and "Add Maya
+as a friend" (posts `add_friend_from_game`).
+
+**Hub contract.** `BubbleSocialHub.send` with a `.challenge` or `.session` card whose `sessionID` is
+nil starts one through `ChallengeCenter.open`: a friend or 1:1 chat gets a 1:1 challenge (kind
+forced to `.challenge`); a group chat or a Group gets a session (kind forced to `.session`). The hub
+assigns `sessionID` (a UUID string), fills the extras below, delivers, then starts the bots. Cards
+sent to the feed, and every other kind, are delivered as is. `BubbleSocialHub.play` fills in the
+play context for challenge and session cards when the caller passes none (opponent name, score to
+beat). `targets` lists New in SF friends first, the demo group chats first among chats, and New in
+SF first among Groups. `receive` counts a message unread unless that chat is open.
+
+**1:1 challenges.** Seed and length are the run's (`replay.seed`, `replay.length`); your score and
+replay ride along when you challenge with a run, otherwise they play first. 3–6 s later the
+opponent's bot plays: of skills 0.95, 0.85 and 0.7 the app takes the score closest above yours, or
+the lowest if none beats you (no score: 0.85). The chat shows typing, then a reply card ("41 💪 your
+move"), the invite card's score row updates, an `AppNotification` (`.bubbleScore`, "beat your 34
+with 41 in Hill Hopper. Rematch?") arrives with `bubbleAction = feature:challenge/chat/<id>`, and a
+toast shows unless the chat is open. Your plays from a card count your best attempt; the first drops
+a result card ("You 45 · Maya 41") in the chat. Challenge back makes a new challenge in the same chat
+on a new seed (`stableHash("rematch|<id>|<seed>")`), with `rematch_of`; they play first.
+
+**Sessions.** Members are a group chat's participants plus you, or for a Group target the first five
+of `BubbleSocialCast.groupMembers` plus you. Each other member's bot plays on a stable delay of
+5–25 s, and the card updates live: "N of M played", a progress bar, the top three, "Your turn, Alex"
+until you play, then who's left, then the winner line and Rematch. When everyone but you has played,
+a notification and toast nudge you. When the session ends, a member cheers the winner in the chat. A
+Group target makes a "Challenge New in SF" post that fills in the same way.
+
+**Card extras** (kinds `challenge`, `session`; `share` uses `BubbleChatCardFallback`):
+
+| Key | Type | Meaning |
+|---|---|---|
+| `scores` | `[{"user_id": String, "score": Int}]` | Everyone who has played, best first |
+| `played` | Int | How many have played |
+| `members` | Int | How many are in it (2 for a 1:1 challenge) |
+| `winner_id` | String or null | Set once everyone has played (null before, and on a 1:1 tie; a session tie goes to whoever played first) |
+| `rematch_of` | String | The challenge or session this one is a rematch of |
+| `role` | String | `invite` (starts the thread), `reply` (a friend's score), `result` (your head-to-head) |
+| `title` | String | The chat or Group name of a session |
+
+**Signals.** `challenge_sent` (1:1 or group chat; with the opponents), `group_challenge` (a Group
+target), `challenge_rematch` (any rematch), `challenge_accepted` (a friend's score lands),
+`challenge_won` (your run takes the lead in a 1:1), `group_chat_play` (your first play in a
+session), `add_friend_from_game` (head-to-head screen).
+
+**Verification.** Every play from a card runs `manifest.withSeed(card.seed).withLength(card.length)`,
+so your recorded `BubbleScore.replay.seed` equals the card's seed (DEBUG logs a mismatch), and
+`BubbleStore.verify` checks it (`BubbleRuntimePerf` "verify" lines). Friends' entries keep their bot
+replay and are marked verified; a check mark shows next to verified scores. Nothing records a score
+for you that you didn't play (the seeded past session includes you only with your real Fog Drift
+best). `tools/kits-tests/suite-challenge.js` checks, for one seeded Bubble per formula, that bot
+runs at 0.95, 0.85 and 0.7 on a challenge seed and a rematch seed record that seed, replay exactly
+and repeat exactly.
+
+**Seeds** (at launch, no seed files): a 1:1 chat with Maya (two friendly messages from New in SF); a
+finished Fog Drift session in New in SF crew with a winner line; rivalry histories with Maya (3-2)
+and Diego (2-2) from `stableHash("rivalry|<id>")`. Everyone else starts at 0-0; live results add to
+`ChallengeCenter.shared.rivalry(with:)`.
+
+**FB_OPEN** (with `FB_SKIP_SPLASH=1`): `feature:challenge/picker/hill-hopper` (the picker, with your
+best or a staged 34), `feature:challenge/chat/hill-hopper` (a challenge to Maya, her reply in about
+4 s), `feature:challenge/h2h/hill-hopper` (a finished You 45, Maya 41), `feature:challenge/groupchat/fog-drift`
+(a session in New in SF crew filling in over about 20 s), `feature:challenge/rivalry/sf-maya-okafor`
+(Maya's profile) and `feature:challenge/friend/<userID>` (pick a game for them). `FB_TAB=friends`, then
+All friends, shows the Challenge buttons.
 
 ### 7.3 Games in Groups and Search (groups-search)
 
