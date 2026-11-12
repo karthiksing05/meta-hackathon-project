@@ -1268,8 +1268,8 @@ capped at 5; glue `score`), with the common `input.select`. Content: `{topic, su
 ≤ 120, point?}]}`; `point` links a question to the lesson point it practices (the recap ticks it off),
 `subject` is the meter's noun phrase. Length: `rounds` (default: one per question), `lives` (each
 wrong answer costs a life; 3 by default) and `endless` (fresh order each pass until the first miss);
-the kit calls `lengthRound()` after every question and `lengthMiss()` on every miss, and counts lives
-itself while `lengthLeft()` reports nulls. A run succeeds at `pass_ratio` mastery or better. Events:
+the kit calls `lengthRound()` after every question except the last of a locked rounds length (so the
+engine doesn't end the run before the recap and tag), and `lengthMiss()` on every miss. A run succeeds at `pass_ratio` mastery or better. Events:
 `learn.lesson_done`, `learn.question`, `learn.answer`, `learn.right`, `learn.wrong`, `learn.explain`,
 `learn.recap`, `round.start`, `round.end`. Share: `score_text` "7/8 mastered".
 

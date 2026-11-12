@@ -14,8 +14,8 @@
 //
 // Length contract (docs/BUBBLES.md 7.9): rounds (default: one per question), lives (3 wrong answers
 // end the run) and endless (fresh order each pass, until the first miss). The kit calls
-// sdk.lengthRound() after every question and sdk.lengthMiss() on every miss, and keeps its own
-// counts when the engine side of length hasn't landed (lengthLeft() reports nulls).
+// sdk.lengthRound() after every question but the last of a locked rounds length (spending that
+// one would end the run before the recap), and sdk.lengthMiss() on every miss.
 //
 // Share: score_text "7/8 mastered", tag "mastery=7/8;topic=hills-of-sf;miss=2,5" (miss: content
 // indexes of the questions you missed). Events: learn.lesson_done, learn.question, learn.answer,
@@ -247,8 +247,11 @@
           L.endsAfter = true;
         }
       }
-      // A completed question is a round; false from the engine means the length is used up.
-      var more = sdk.lengthRound();
+      // A completed question is a round; false from the engine means the length is used up. The
+      // last round of a locked length isn't spent: the kit's own count (L.total) ends the run after
+      // the explanation and recap, so the result keeps its outcome and mastery tag.
+      var lengthLeft = sdk.lengthLeft ? sdk.lengthLeft() : null;
+      var more = lengthLeft && lengthLeft.rounds_left === 1 ? true : sdk.lengthRound();
       if (more === false) L.endsAfter = true;
       if (mode === "rounds" && L.asked >= L.total) L.endsAfter = true;
     }

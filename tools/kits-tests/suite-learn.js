@@ -93,6 +93,7 @@ var KitSuites = (typeof KitSuites !== "undefined" ? KitSuites : []).concat([{
       });
       var four = sim(withLength(m, { mode: "rounds", rounds: 4 }), { seed: m.seed, max_ticks: 60 * 150, bot: true, bot_seed: 77, bot_skill: 0.7 });
       if (!four.ok || ev(four, "learn.answer") !== 4) fail(name + ": rounds 4 asked " + ev(four, "learn.answer") + " questions");
+      else if (!(four.share && /(^|;)mastery=\d+\/4(;|$)/.test(four.share.tag || "")) || ev(four, "learn.recap") !== 1) fail(name + ": rounds 4 should end on the recap with a mastery tag (" + (four.share && four.share.tag) + ")");
       var livesRun = sim(withLength(m, { mode: "lives", lives: 3 }), { seed: m.seed, max_ticks: 60 * 300, bot: true, bot_seed: 78, bot_skill: 0 });
       if (!livesRun.ok || ev(livesRun, "learn.wrong") !== 3 || livesRun.outcome !== "fail") fail(name + ": lives 3 should end after 3 wrong answers (" + ev(livesRun, "learn.wrong") + " wrong, " + livesRun.outcome + ")");
       var lifeTwo = sim(withLength(m, { mode: "lives", lives: 2 }), { seed: m.seed, max_ticks: 60 * 300, bot: true, bot_seed: 79, bot_skill: 0 });
