@@ -1,0 +1,136 @@
+name: Backend deploy
+
+# Deploys only when commits are pushed or merged into the exact branch `Prod`.
+on:
+  push:
+    branches: [Prod]
+
+concurrency:
+  group: backend-deploy-prod
+  cancel-in-progress: false   # never interrupt a deployment that is mid-flight
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Format check
+        run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go test -race ./...
+      - name: Shell script syntax
+        run: bash -n deploy/deploy.sh && bash -n deploy/backup.sh && bash -n deploy/dbinit.sh
+      - name: Compose file is valid
+        run: |
+          sudo mkdir -p /etc/game-platform && sudo touch /etc/game-platform/api.env /etc/game-platform/mongo.env
+          API_IMAGE=x GAMES_IMAGE=y docker compose -f deploy/docker-compose.prod.yml config -q
+
+  images:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: |
+          echo "tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "prefix=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push api
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          target: api
+          push: true
+          tags: ${{ steps.meta.outputs.prefix }}/bubbles-api:${{ github.sha }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+      - name: Build and push games
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          target: games
+          push: true
+          tags: ${{ steps.meta.outputs.prefix }}/bubbles-games:${{ github.sha }}
+          cache-from: type=gha,scope=games
+          cache-to: type=gha,mode=max,scope=games
+
+  deploy:
+    needs: images
+    runs-on: ubuntu-latest
+    environment: production   # holds VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_KNOWN_HOSTS (and optional API_PUBLIC_URL)
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts   # pinned host key: no trust-on-first-use
+      - name: Copy deployment files
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_: ${{ secrets.VPS_USER }}
+        run: |
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            backend/deploy/docker-compose.prod.yml backend/deploy/mongo-init.js \
+            backend/deploy/deploy.sh backend/deploy/dbinit.sh backend/deploy/backup.sh \
+            "$USER_@$HOST:/srv/game-platform/app/"
+      - name: Deploy (rolls back automatically if /readyz fails)
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_: ${{ secrets.VPS_USER }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          TAG: ${{ needs.images.outputs.tag }}
+        run: |
+          # The registry token is short-lived (this job only) and goes over SSH stdin, so no
+          # long-lived registry credential is stored on the server.
+          printf '%s' "$GHCR_TOKEN" | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" \
+            "docker login ghcr.io -u '$GHCR_USER' --password-stdin >/dev/null && chmod +x /srv/game-platform/app/*.sh && /srv/game-platform/app/deploy.sh deploy '$TAG'; rc=\$?; docker logout ghcr.io >/dev/null 2>&1; exit \$rc"
+      - name: Verify public readiness (optional)
+        id: verify
+        if: ${{ vars.API_PUBLIC_URL != '' }}
+        env:
+          URL: ${{ vars.API_PUBLIC_URL }}
+        run: |
+          for i in $(seq 1 15); do
+            curl -fsS --max-time 5 "$URL/readyz" && exit 0
+            sleep 4
+          done
+          echo "public readiness failed" >&2
+          exit 1
+      - name: Roll back if public readiness failed
+        # deploy.sh already rolls back a local readiness failure. This covers the case where the
+        # local check passed but the public one (through Cloudflare) did not.
+        if: ${{ always() && steps.verify.outcome == 'failure' }}
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" \
+            "/srv/game-platform/app/deploy.sh rollback"
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
