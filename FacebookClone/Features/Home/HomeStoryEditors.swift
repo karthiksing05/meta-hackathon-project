@@ -41,7 +41,7 @@ struct HomeTextStoryEditor: View {
         self.onShare = onShare
     }
 
-    private var background: PostBackground { PostBackground.preset(backgroundIndex) }
+    private var palette: PostBackground { PostBackground.preset(backgroundIndex) }
 
     private var trimmed: String {
         text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -49,7 +49,7 @@ struct HomeTextStoryEditor: View {
 
     var body: some View {
         ZStack {
-            background.gradient
+            palette.gradient
                 .ignoresSafeArea()
                 .onTapGesture {
                     isFocused = true
@@ -73,13 +73,13 @@ struct HomeTextStoryEditor: View {
             if text.isEmpty {
                 Text("Start typing")
                     .font(.system(size: CGFloat(fontSize), weight: .bold))
-                    .foregroundStyle(background.textColor.opacity(0.6))
+                    .foregroundStyle(palette.textColor.opacity(0.6))
                     .allowsHitTesting(false)
             }
             TextField("", text: $text, axis: .vertical)
                 .font(.system(size: CGFloat(fontSize), weight: .bold))
-                .foregroundStyle(background.textColor)
-                .tint(background.textColor)
+                .foregroundStyle(palette.textColor)
+                .tint(palette.textColor)
                 .multilineTextAlignment(.center)
                 .lineLimit(1...10)
                 .focused($isFocused)
@@ -92,7 +92,7 @@ struct HomeTextStoryEditor: View {
             Button(action: onCancel) {
                 Image(systemName: "xmark")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(background.textColor)
+                    .foregroundStyle(palette.textColor)
                     .frame(width: 38, height: 38)
                     .background(Color.black.opacity(0.18), in: Circle())
             }
@@ -104,7 +104,7 @@ struct HomeTextStoryEditor: View {
                     isFocused = false
                 }
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(background.textColor)
+                .foregroundStyle(palette.textColor)
                 .padding(.horizontal, 14)
                 .frame(height: 34)
                 .background(Color.black.opacity(0.18), in: Capsule())
@@ -120,12 +120,12 @@ struct HomeTextStoryEditor: View {
                 Text("A")
                     .font(.system(size: 13, weight: .bold))
                 Slider(value: $fontSize, in: 20...48)
-                    .tint(background.textColor)
+                    .tint(palette.textColor)
                     .accessibilityLabel("Text size")
                 Text("A")
                     .font(.system(size: 22, weight: .bold))
             }
-            .foregroundStyle(background.textColor)
+            .foregroundStyle(palette.textColor)
             .padding(.horizontal, 24)
 
             ScrollView(.horizontal, showsIndicators: false) {
