@@ -183,6 +183,8 @@ struct ChallengeScoreRow: View {
                         Text(entry.map { $0.score.withCommas } ?? (isPending ? ChallengeCopy.waiting : "–"))
                             .font(entry == nil ? .fbMeta : .fbHeadline.monospacedDigit())
                             .foregroundStyle(FBColor.primaryText)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                             .contentTransition(.numericText())
                         if let entry, ChallengeCenter.shared.isVerified(entry, bubbleID: challenge.bubbleID) {
                             Image(systemName: "checkmark.seal.fill")
@@ -193,15 +195,19 @@ struct ChallengeScoreRow: View {
                     }
                 }
                 Spacer(minLength: 0)
-                if isWinner {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: FBIconSize.small))
-                        .foregroundStyle(ChallengeStyle.purple)
-                        .accessibilityLabel(ChallengeCopy.winner)
-                }
             }
             .padding(6)
             .frame(maxWidth: .infinity)
+            // The crown sits on the corner so it never squeezes the name or score at bubble width.
+            .overlay(alignment: .topTrailing) {
+                if isWinner {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: FBIconSize.xs))
+                        .foregroundStyle(ChallengeStyle.purple)
+                        .padding(4)
+                        .accessibilityLabel(ChallengeCopy.winner)
+                }
+            }
             .background(isWinner ? FBColor.tintedBlueBackground : FBColor.background, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
             .accessibilityElement(children: .combine)
         }
@@ -269,7 +275,19 @@ struct ChallengeReplyCard: View {
                     if isResult || challenge.isFinished {
                         ChallengeStatusLine(challenge: challenge)
                     }
-                    HStack(spacing: 8) {
+                    // Two buttons never fit side by side at chat-bubble width, so they stack there.
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: 8) { replyButtons(challenge: challenge, bubble: bubble, isResult: isResult) }
+                        VStack(spacing: 6) { replyButtons(challenge: challenge, bubble: bubble, isResult: isResult) }
+                    }
+                }
+            }
+            .padding(12)
+        }
+    }
+
+    @ViewBuilder
+    private func replyButtons(challenge: BubbleChallenge, bubble: Bubble?, isResult: Bool) -> some View {
                         if challenge.isFinished {
                             Button {
                                 Haptics.light()
@@ -289,11 +307,6 @@ struct ChallengeReplyCard: View {
                             .buttonStyle(.fb(challenge.isFinished ? .secondary : .primary, height: 34))
                             .disabled(bubble == nil)
                         }
-                    }
-                }
-            }
-            .padding(12)
-        }
     }
 
     private func playLabel(_ challenge: BubbleChallenge) -> String {
