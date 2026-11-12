@@ -127,7 +127,7 @@ struct StudioView: View {
                 model.isPopping = false
                 return
             }
-            Haptics.success()
+            GameSound.play(.publish, haptic: true)
             model.stopAll()
             // Open the new Bubble underneath first, so closing Studio reveals it.
             router.selectedTab = .bubbles

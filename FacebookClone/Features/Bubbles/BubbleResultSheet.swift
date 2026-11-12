@@ -81,7 +81,7 @@ struct BubbleResultSheet: View {
         guard shownScore == 0 else { return }
         if reduceMotion || score <= 0 {
             shownScore = score
-            if isNewBest { Haptics.success() }
+            if isNewBest { GameSound.play(.newBest, haptic: true) }
             return
         }
         Task { @MainActor in
@@ -94,7 +94,7 @@ struct BubbleResultSheet: View {
             }
             shownScore = score
             if isNewBest {
-                Haptics.success()
+                GameSound.play(.newBest, haptic: true)
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) {
                     isCelebrating = true
                 }

@@ -910,7 +910,8 @@ final class StudioModel {
         }
         isComposing = false
         composeEndedAt = Date()
-        Haptics.success()
+        // Formula and microgame runs both end here.
+        GameSound.play(.ready, haptic: true)
         advanceTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: 1_300_000_000)
             guard let self, !Task.isCancelled, self.stage == .compose, !self.isComposing, self.failure == nil else { return }
