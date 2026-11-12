@@ -774,10 +774,58 @@ verifiable. Owns `BubbleSocialHub`.
 
 ### 7.3 Games in Groups and Search (groups-search)
 
-Search finds games by title, creator, category or Group, with a Games filter and playable results,
-and offers "Make it with Muse" when nothing matches. Groups get a Games tab: the Daily Bubble, a
-weekly leaderboard with a trophy and "Most improved", "Challenge the Group" posts, a game-night
-entry point, and Add friend from the leaderboard.
+Games live where Facebook already gathers people: a Group's **Games** tab and **Search**. Closer
+together through friendly competition: a weekly Group board puts names and faces next to each other,
+"Most improved" means it isn't only for the best player, Add friend sits on every row of someone you
+don't know yet, and "Challenge the Group" starts a shared game in the Group feed. Code:
+`Features/Bubbles/GroupsSearch/` (`GroupsSearchScreens`, `GroupsSearchSlots`, `GroupGamesStore`,
+`GroupWeeklyBoardView`, `GroupGamesHubView`, `SearchGamesResults`); copy in `GroupsSearchCopy`.
+
+**Games tab** (`GroupsSearchGamesHub` on top, `GroupsSearchGamesList` at the bottom): today's Daily
+Bubble (`BubbleGroupDailyCard`), the weekly board card, "Challenge the Group", a "Game night" entry,
+and a grid of `worldBubbles(in:)` with "N members played". The Featured tab gets one line,
+`GroupsSearchFeaturedTeaser` ("This week: Diego leads · you're #3"), which opens the full board.
+
+**Weekly board** (`GroupGamesStore.shared.weeklyStandings(group:)` →
+`[Standing(user, points, lastWeekPoints, rank, rankChange, isMostImproved, gamesPlayed)]`). Each
+Group game (icebreakers excluded), each day: 1st 5 points, 2nd 3, 3rd 2, anyone else who played 1.
+This week is the last 7 days. Today counts the real Group boards (`leaderboard(for:scope: .group)`),
+so a run moves you at once. Earlier days for the cast come from a stable synthetic history (hash of
+Group, person, game and date; New in SF is tuned so Diego leads, Chloe is most improved and Maya won
+last week); your earlier days count only your real runs (1 point per game played), never invented
+scores. "Most improved" is the biggest gain on last week, leader excluded. The leader row plays a
+one-shot trophy pop and sparkles once per launch (still under Reduce Motion). Add friend calls
+`appStore.sendRequest(to:)` and posts `add_friend_from_game` (`with: [userID]`, bubbleID = the
+Group's Daily or first game).
+
+**Challenge the Group** (`GroupChallengeComposer.post`): pick the Daily or a Group game, then
+`BubbleSocialHub.send` a `BubbleChatCard(kind: .session, seed: manifest.seed, length:
+manifest.length, sessionID: nil, score: your best)` to the `.group` target, so the post lands in the
+Group feed and the challenge feature runs the shared session. Extras keys (groups-search): `origin`
+= `"groups-search"`, `group_id` = the Group id. Posts `group_challenge` with the Group's members.
+groups-search owns only the button and the post copy; challenge draws the card.
+
+**Game night**: the entry opens `GroupsSearchScreens.gameNightRoute(for: groupID)` =
+`BubbleFeatureRoute(.nextline, "night", groupID)`; nextline implements it.
+
+**Search** (`SearchView`): a "Games" filter chip and a Games section in All (4 rows, all on the
+filter). `gamesMatching(query:in:)` is a pure, case- and diacritic-insensitive match on title,
+rule, creator name, formula title, category title (Adventure, Quiz night, Learn) and Group name;
+every query word must match; title matches rank first; an empty query returns nothing ("fog" →
+Fog Words, Fog Drift and Fog or Sun? by title, then Hill Hopper by its rule). Rows show cover, title, category
+or formula, creator, Group, friends' faces with "N friends played", Save (`toggleSave(_, source:
+.search)`) and Play (`router.play`); tapping the row opens the Bubble page. People rows show
+`SearchPersonGamesStrip` (up to 3 covers, "Diego's games"). With no game matches, a "Make
+"<query>" with Muse" row opens `router.openStudio(StudioLaunch(prompt: query))`.
+`SearchView(initialQuery:startsOnGames:)` opens on the Games filter.
+
+No seeds, kits or tags. `FB_OPEN=feature:groups-search/<screen>/<arg>` (with `FB_SKIP_SPLASH=1`):
+`search/fog` (Games filter), `search/picnic%20dance-off` (URL-decoded; shows Make with Muse),
+`games/group-newinsf` (Group page on Games), `leaderboard/group-newinsf` (full board),
+`gamenight/group-newinsf` (nextline's night route), `challenge/group-newinsf` (posts a Challenge the
+Group for the Daily, then opens the Group feed) and `addfriend/group-newinsf` (sends Maya a request
+from the board, then opens it). `router.bubbleSheet = BubbleFeatureRoute(.groupsSearch,
+"challenge", groupID)` shows the game picker over the tabs.
 
 ### 7.4 Make it together, and games about you (together)
 
