@@ -793,8 +793,8 @@ every remix credits the game it came from, its creator hears about it, and the r
 to them as a playable card. Code: `Features/Bubbles/Remix/` and `Bubbles/Studio/RemixStudio.swift`.
 
 **Credit (manifest lineage).** A remix keeps `lineage.parent` and `operators` as Studio's identity
-sets them, plus `remix_of` (the base id), `remix_of_title`, `remix_of_creator_id` (a demo-world id,
-or `"me"`) and `remix_of_creator_name` (first name; omitted when the base is your own game).
+sets them, plus `remix_of` (the base id), `remix_of_title`, `remix_of_creator_id` (the base
+creator's id: a demo-world id, `"me"` in seeds, or your own user id from Studio) and `remix_of_creator_name` (first name; omitted when the base is your own game).
 `RemixStudio.finalize` fills them in remix mode from `request.base` and `request.social`
 (`StudioModel` puts the base creator in `social`), and an edit of a remix keeps them.
 `RemixStudio.promptLines` tells Muse: keep the core and feel, change what was asked, and give it a
@@ -811,6 +811,8 @@ remix mode with the game loaded. Feed captions (`RemixCaptionCredit`) say "Remix
 Maya" when a friend made the remix, "Remix of Hill Hopper by Diego" otherwise, and "2 remixes" on an
 original. The Bubble page (`RemixDetailTree`) shows the remix count, the credit with "Open original",
 a tree of up to 2 levels and 6 nodes ("+N more") with friends ringed in blue, and "See all".
+Under the tree, "Remixers you might know" lists up to 3 creators in the family who aren't your
+friends yet, each with Add friend (`appStore.sendRequest`, plus the `addFriendFromGame` signal).
 
 **Send it back.** `RemixCenter.sendBack` sends a `.remix` card to the original creator's 1:1 chat
 through `BubbleSocialHub.send(_, to: .friend(creatorID))`, posts the `remix` signal with the
@@ -821,9 +823,10 @@ creator, and the creator replies a few seconds later.
 and length and your score from a result; Story uses `BubbleSurfaceHooks.shareToStory` with a result,
 else a story item with the featured run. Every share posts the `share` signal with the people it
 reached (a friend, a chat's members, New in SF's members, nobody for feed and story).
+Signals: `remix` (with the original creator), `share` (with recipients) and `addFriendFromGame`.
 
 **After publish.** `RemixScreens.didPublish` fills a missing credit, posts `remix` with the original
-creator (never you), and schedules the creator's reply in your chat plus a "played your remix"
+creator (never you, once per creator per publish, so a remixed Chain doesn't repeat it), and schedules the creator's reply in your chat plus a "played your remix"
 notification that opens the tree.
 
 **Card extras.** `.remix`: `original_id`, `remix_id` (strings). `.share` (sent by remix):
@@ -845,7 +848,9 @@ and "Maya remixed Diego's Hill Hopper into Hill Hopper: Night Hop", both `.bubbl
 | `feature:remix/sendback/remix-night-hop-fog` | Stages it as your remix, then the Send it back sheet |
 | `feature:remix/share/hill-hopper` | `RemixShareSheet` via `router.bubbleSheet` |
 | `remix:hill-hopper` | Studio in remix mode (existing) |
-| `FB_TAB=notifications` | "Diego remixed your Moving Day…" |
+| `bubble:remix-night-hop-fog` | A remix's page: credit pill, Open original, tree |
+
+`FB_TAB=notifications` shows "Diego remixed your Moving Day…"; tapping it opens the tree.
 
 ### 7.6 Adventures: stories you play (story)
 

@@ -141,7 +141,7 @@ struct RemixShareSheet: View {
             }
             .buttonStyle(.fb(sent ? .secondary : .primary, expand: false, height: 32))
             .disabled(sent)
-            .accessibilityLabel(sent ? "\(RemixCopy.sent) to \(target.title)" : "\(RemixCopy.send) to \(target.title)")
+            .accessibilityLabel(sent ? RemixCopy.sentTo(target.title) : RemixCopy.sendTo(target.title))
         }
         .padding(.vertical, 2)
         .listRowBackground(FBColor.surface)
@@ -232,7 +232,7 @@ struct RemixRouteSheet: View {
             if let bubble = bubbleStore.bubble(id: route.arg) {
                 RemixShareSheet(bubble: bubble)
             } else {
-                ContentUnavailableView("Bubble not found", systemImage: "bubbles.and.sparkles", description: Text(RemixCopy.cardUnavailable))
+                ContentUnavailableView(RemixCopy.notFound, systemImage: "bubbles.and.sparkles", description: Text(RemixCopy.cardUnavailable))
             }
         case RemixScreens.sendBack:
             RemixSendBackSheet(bubbleID: route.arg)

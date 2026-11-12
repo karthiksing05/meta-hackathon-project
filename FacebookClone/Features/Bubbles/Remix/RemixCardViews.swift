@@ -68,7 +68,7 @@ struct RemixCardBody: View {
                         Label(RemixCopy.play, systemImage: "play.fill")
                     }
                     .buttonStyle(.fb(.primary, height: 36))
-                    .accessibilityLabel("Play \(remix?.title ?? "the remix")")
+                    .accessibilityLabel(RemixCopy.playLabel(remix?.title))
                     Button {
                         Haptics.light()
                         if let remix {
@@ -78,7 +78,7 @@ struct RemixCardBody: View {
                         Label(RemixCopy.remixBack, systemImage: "wand.and.sparkles")
                     }
                     .buttonStyle(.fb(.tinted, height: 36))
-                    .accessibilityLabel("Remix \(remix?.title ?? "it") back")
+                    .accessibilityLabel(RemixCopy.remixBackLabel(remix?.title))
                 }
                 .disabled(remix == nil)
             }
@@ -165,7 +165,7 @@ struct RemixSendBackSheet: View {
                 if let bubble = bubbleStore.bubble(id: bubbleID) {
                     content(bubble)
                 } else {
-                    ContentUnavailableView("Bubble not found", systemImage: "bubbles.and.sparkles", description: Text(RemixCopy.cardUnavailable))
+                    ContentUnavailableView(RemixCopy.notFound, systemImage: "bubbles.and.sparkles", description: Text(RemixCopy.cardUnavailable))
                 }
             }
             .background(FBColor.surface)
@@ -204,7 +204,7 @@ struct RemixSendBackSheet: View {
                     if let card = previewCard {
                         BubbleChatCardView(card: card, placement: .chat(messageID: "preview", isFromMe: true))
                             .allowsHitTesting(false)
-                            .accessibilityLabel("Preview: \(card.headline)")
+                            .accessibilityLabel(RemixCopy.previewLabel(card.headline))
                     }
                     if chat != nil {
                         Label(RemixCopy.sendBackSent(creator.firstName), systemImage: "checkmark.circle.fill")

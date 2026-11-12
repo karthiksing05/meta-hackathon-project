@@ -147,7 +147,7 @@ struct RemixDetailTree: View {
                     }
                     .font(.fbButton)
                     .foregroundStyle(FBColor.accent)
-                    .accessibilityLabel("See the whole remix tree")
+                    .accessibilityLabel(RemixCopy.seeAllLabel)
                 }
             }
             if isRemix {
@@ -157,6 +157,7 @@ struct RemixDetailTree: View {
                 RemixTreeView(bubble: bubble)
                     .padding(6)
                     .background(FBColor.background, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                RemixPeopleRow(bubble: bubble)
             } else {
                 Text(RemixCopy.treeEmpty)
                     .font(.fbMeta)
@@ -200,7 +201,7 @@ struct RemixDetailTree: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(RemixCopy.openOriginal): \(original.title)")
+                .accessibilityLabel(RemixCopy.openOriginalLabel(original.title))
             }
         }
     }

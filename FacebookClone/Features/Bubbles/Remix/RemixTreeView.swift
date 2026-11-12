@@ -121,7 +121,7 @@ private struct RemixTreeRow: View {
         .buttonStyle(.pressable)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
-        .accessibilityHint(isCurrent ? "" : "Opens this Bubble")
+        .accessibilityHint(isCurrent ? "" : RemixCopy.a11yOpens)
     }
 
     private var cover: some View {
@@ -137,10 +137,10 @@ private struct RemixTreeRow: View {
     }
 
     private var accessibilityText: String {
-        var parts = [row.bubble.title, isMe ? "made by you" : "made by \(creator.name)"]
-        if row.depth == 0 { parts.append("original") }
-        if creator.isFriend { parts.append("your friend") }
-        if isCurrent { parts.append("this Bubble") }
+        var parts = [row.bubble.title, isMe ? RemixCopy.a11yMadeByYou : RemixCopy.a11yMadeBy(creator.name)]
+        if row.depth == 0 { parts.append(RemixCopy.a11yOriginal) }
+        if creator.isFriend { parts.append(RemixCopy.a11yFriend) }
+        if isCurrent { parts.append(RemixCopy.a11yThisOne) }
         return parts.joined(separator: ", ")
     }
 }
@@ -202,6 +202,80 @@ private struct RemixTreeBadge: View {
     }
 }
 
+/// People in a remix family you aren't friends with yet ("Maya remixed this too"), each with a
+/// one-tap Add friend. Posts the `addFriendFromGame` signal.
+struct RemixPeopleRow: View {
+    let bubble: Bubble
+
+    @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(AppStore.self) private var appStore
+
+    var body: some View {
+        let people = strangers
+        if !people.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(RemixCopy.peopleTitle)
+                    .font(.fbMetaEmphasized)
+                    .foregroundStyle(FBColor.secondaryText)
+                    .accessibilityAddTraits(.isHeader)
+                ForEach(people) { person in
+                    HStack(spacing: 10) {
+                        AvatarView(user: person, size: FBAvatarSize.comment)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(person.name)
+                                .font(.fbName)
+                                .foregroundStyle(FBColor.primaryText)
+                                .lineLimit(1)
+                            Text(RemixCopy.peopleSub(person.firstName))
+                                .font(.fbMeta)
+                                .foregroundStyle(FBColor.secondaryText)
+                                .lineLimit(2)
+                        }
+                        Spacer(minLength: 8)
+                        friendButton(person)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Creators in the family who aren't you or your friends, original first.
+    private var strangers: [User] {
+        let root = RemixLineage.root(of: bubble, in: bubbleStore.bubbles)
+        let family = [root] + RemixLineage.descendants(of: root, in: bubbleStore.bubbles)
+        var seen: Set<String> = []
+        return family.map(\.creator).filter { user in
+            guard user.id != appStore.me.id, !user.isMe, !user.isFriend, user.kind == .person else { return false }
+            return seen.insert(user.id).inserted
+        }
+        .prefix(3)
+        .map { $0 }
+    }
+
+    @ViewBuilder
+    private func friendButton(_ person: User) -> some View {
+        if person.friendship == .requestSent {
+            Text(RemixCopy.requested)
+                .font(.fbCaptionEmphasized)
+                .foregroundStyle(FBColor.secondaryText)
+                .padding(.horizontal, 10)
+                .frame(minHeight: 32)
+                .background(FBColor.buttonGray, in: Capsule())
+        } else {
+            Button {
+                Haptics.light()
+                withAnimation(.easeInOut(duration: 0.2)) { appStore.sendRequest(to: person) }
+                BubbleSocialSignals.post(.addFriendFromGame, bubbleID: bubble.id, with: [person.id])
+            } label: {
+                Label(person.friendship == .requestReceived ? RemixCopy.confirm : RemixCopy.addFriend, systemImage: "person.badge.plus")
+            }
+            .buttonStyle(.fb(.tinted, expand: false, height: 32))
+            .accessibilityLabel(RemixCopy.addFriendLabel(person.name))
+        }
+    }
+}
+
 /// "Remix of Hill Hopper by Diego", as a pill on light surfaces.
 struct RemixCreditPill: View {
     let text: String
@@ -243,7 +317,7 @@ struct RemixTreeScreen: View {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
             } else {
-                ContentUnavailableView("Bubble not found", systemImage: "bubbles.and.sparkles", description: Text(RemixCopy.cardUnavailable))
+                ContentUnavailableView(RemixCopy.notFound, systemImage: "bubbles.and.sparkles", description: Text(RemixCopy.cardUnavailable))
             }
         }
         .background(FBColor.surface)
@@ -269,6 +343,7 @@ struct RemixTreeScreen: View {
                 Text(RemixCopy.treeIntro)
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
+                RemixPeopleRow(bubble: bubble)
                 actions(bubble)
             }
             .padding(.horizontal, FBMetrics.screenPadding)

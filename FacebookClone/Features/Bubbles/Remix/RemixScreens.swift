@@ -126,6 +126,9 @@ enum RemixScreens {
     /// creator, and that creator answers in your 1:1 chat a few seconds later.
     @MainActor
     static func didPublish(_ bubbles: [Bubble], appStore: AppStore, bubbleStore: BubbleStore) {
+        // A remixed Chain publishes several levels at once: credit each, but signal and reply
+        // once per original creator.
+        var greeted: Set<String> = []
         for bubble in bubbles where RemixLineage.isRemix(bubble) {
             if let original = RemixLineage.original(of: bubble, in: bubbleStore.bubbles),
                bubble.manifest.lineage.remixOfTitle == nil || bubble.manifest.lineage.remixOfCreatorID == nil {
@@ -135,7 +138,8 @@ enum RemixScreens {
                 bubbleStore.scheduleSave()
             }
             guard let creator = RemixLineage.originalCreator(of: bubble, store: bubbleStore),
-                  creator.id != appStore.me.id else { continue }
+                  creator.id != appStore.me.id,
+                  greeted.insert(creator.id).inserted else { continue }
             BubbleSocialSignals.post(.remix, bubbleID: bubble.id, with: [creator.id])
             let originalTitle = bubble.manifest.lineage.remixOfTitle ?? "my game"
             RemixCenter.shared.scheduleReply(
@@ -384,7 +388,7 @@ enum RemixCopy {
     static let yourFeed = "Your feed"
     static let yourFeedSub = "Friends can play from Home"
     static let yourStory = "Your story"
-    static let yourStorySub = "A 24-hour Burst"
+    static let yourStorySub = "Friends see it for 24 hours"
     static let groups = "Groups"
     static let groupSub = "Post a playable card in the Group"
     static let chats = "Chats"
@@ -410,6 +414,30 @@ enum RemixCopy {
     }
     static let cardTag = "Remix"
     static let cardUnavailable = "This remix isn't available anymore."
+
+    // People in the tree
+    static let peopleTitle = "Remixers you might know"
+    static func peopleSub(_ name: String) -> String { "\(name) remixed a game in this tree" }
+    static let addFriend = "Add friend"
+    static let confirm = "Confirm"
+    static let requested = "Requested"
+    static func addFriendLabel(_ name: String) -> String { "Add \(name) as a friend" }
+
+    // Accessibility
+    static let notFound = "Bubble not found"
+    static let seeAllLabel = "See the whole remix tree"
+    static func openOriginalLabel(_ title: String) -> String { "Open original: \(title)" }
+    static let a11yMadeByYou = "made by you"
+    static func a11yMadeBy(_ name: String) -> String { "made by \(name)" }
+    static let a11yOriginal = "original"
+    static let a11yFriend = "your friend"
+    static let a11yThisOne = "this Bubble"
+    static let a11yOpens = "Opens this Bubble"
+    static func sentTo(_ title: String) -> String { "Sent to \(title)" }
+    static func sendTo(_ title: String) -> String { "Send to \(title)" }
+    static func playLabel(_ title: String?) -> String { "Play \(title ?? "the remix")" }
+    static func remixBackLabel(_ title: String?) -> String { "Remix \(title ?? "it") back" }
+    static func previewLabel(_ headline: String) -> String { "Preview: \(headline)" }
 
     // Notifications and replies
     static func notificationYourGame(_ original: String, remix: String) -> String {
