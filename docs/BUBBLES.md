@@ -789,8 +789,8 @@ and a grid of `worldBubbles(in:)` with "N members played". The Featured tab gets
 **Weekly board** (`GroupGamesStore.shared.weeklyStandings(group:)` →
 `[Standing(user, points, lastWeekPoints, rank, rankChange, isMostImproved, gamesPlayed)]`). Each
 Group game (icebreakers excluded), each day: 1st 5 points, 2nd 3, 3rd 2, anyone else who played 1.
-This week is the last 7 days. Today counts the real Group boards (`leaderboard(for:scope: .group)`),
-so a run moves you at once. Earlier days for the cast come from a stable synthetic history (hash of
+This week is the last 7 days. Today counts the real Group boards (`leaderboard(for:scope: .group)`,
+with your entry being your best run from today), so a run moves you at once. Earlier days for the cast come from a stable synthetic history (hash of
 Group, person, game and date; New in SF is tuned so Diego leads, Chloe is most improved and Maya won
 last week); your earlier days count only your real runs (1 point per game played), never invented
 scores. "Most improved" is the biggest gain on last week, leader excluded. The leader row plays a

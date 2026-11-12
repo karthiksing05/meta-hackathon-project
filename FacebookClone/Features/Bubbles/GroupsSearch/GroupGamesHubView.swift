@@ -66,7 +66,7 @@ struct GroupGamesHubView: View {
                 FeedSeparator()
             }
             GroupWeeklyBoardCard(group: group)
-            if hasGames {
+            if hasGames && group.isMember {
                 FeedSeparator()
                 challengeCard
             }
@@ -126,7 +126,7 @@ struct GroupGamesHubView: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(FBColor.online)
+                            .foregroundStyle(FBColor.accent)
                         Text(GroupsSearchCopy.challengeLive)
                             .foregroundStyle(FBColor.primaryText)
                         Spacer(minLength: 0)

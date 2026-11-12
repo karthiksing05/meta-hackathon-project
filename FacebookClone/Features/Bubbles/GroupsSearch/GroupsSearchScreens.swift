@@ -233,5 +233,12 @@ enum GroupsSearchCopy {
     static let makeWithMuseDetail = "No game like that yet. Describe it and Muse builds it in about a minute."
     static func noGames(_ query: String) -> String { "No games for \u{201C}\(query)\u{201D}" }
     static func playA11y(_ title: String) -> String { "Play \(title)" }
+    static let openGameHint = "Opens the game's page"
+
+    // VoiceOver (weekly board)
+    static func leaderA11y(_ line: String, _ points: Int) -> String { "Trophy. \(line) with \(points) points" }
+    static func rowA11y(_ rank: Int, _ name: String, _ points: Int) -> String { "Number \(rank), \(name), \(points) points" }
+    static func confirmA11y(_ name: String) -> String { "Confirm \(name)" }
+    static func addFriendA11y(_ name: String) -> String { "Add \(name) as a friend" }
     static func saveA11y(_ title: String, _ saved: Bool) -> String { saved ? "Remove \(title) from saved" : "Save \(title)" }
 }

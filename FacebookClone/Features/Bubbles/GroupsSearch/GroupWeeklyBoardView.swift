@@ -235,7 +235,7 @@ struct GroupTrophyLeaderRow: View {
                 .strokeBorder(GroupBoardStyle.trophyGradient.opacity(0.45), lineWidth: 1)
         )
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Trophy. \(standing.user.isMe ? GroupsSearchCopy.youLead : GroupsSearchCopy.leads(standing.user.name)) with \(standing.points) points")
+        .accessibilityLabel(GroupsSearchCopy.leaderA11y(standing.user.isMe ? GroupsSearchCopy.youLead : GroupsSearchCopy.leads(standing.user.name), standing.points))
         .onAppear(perform: celebrate)
     }
 
@@ -361,7 +361,7 @@ struct GroupWeeklyBoardRow: View {
         .padding(.horizontal, user.isMe ? 8 : 0)
         .background(user.isMe ? FBColor.tintedBlueBackground : Color.clear, in: RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Number \(standing.rank), \(user.isMe ? "you" : user.name), \(standing.points) points")
+        .accessibilityLabel(GroupsSearchCopy.rowA11y(standing.rank, user.isMe ? GroupsSearchCopy.you : user.name, standing.points))
     }
 
     @ViewBuilder
@@ -370,7 +370,7 @@ struct GroupWeeklyBoardRow: View {
             if change > 0 {
                 Label(GroupsSearchCopy.up(change), systemImage: "arrow.up")
                     .labelStyle(.titleAndIcon)
-                    .foregroundStyle(FBColor.online)
+                    .foregroundStyle(FBColor.accent)
             } else if change < 0 {
                 Label(GroupsSearchCopy.down(-change), systemImage: "arrow.down")
                     .labelStyle(.titleAndIcon)
@@ -402,7 +402,7 @@ struct GroupWeeklyBoardRow: View {
                 BubbleSocialSignals.post(.addFriendFromGame, bubbleID: boardBubbleID, with: [user.id])
             }
             .buttonStyle(.fb(.primary, expand: false, height: 32))
-            .accessibilityLabel("Confirm \(user.name)")
+            .accessibilityLabel(GroupsSearchCopy.confirmA11y(user.name))
         case .none:
             Button {
                 Haptics.light()
@@ -412,7 +412,7 @@ struct GroupWeeklyBoardRow: View {
                     .labelStyle(.titleAndIcon)
             }
             .buttonStyle(.fb(.tinted, expand: false, height: 32))
-            .accessibilityLabel("Add \(user.name) as a friend")
+            .accessibilityLabel(GroupsSearchCopy.addFriendA11y(user.name))
         }
     }
 

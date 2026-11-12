@@ -95,9 +95,16 @@ final class GroupGamesStore {
         var lastWeek: [String: Int] = [:]
         var played: [String: Int] = [:]
 
-        // Today: the real Group boards.
+        // Today: the real Group boards. Your entry is your best run from today only, so a run from
+        // an earlier day isn't counted twice (it already scores in the earlier-days loop below).
         for game in games {
-            let board = bubbleStore.leaderboard(for: game, scope: .group).filter { memberSet.contains($0.user.id) }
+            var board = bubbleStore.leaderboard(for: game, scope: .group).filter { memberSet.contains($0.user.id) && $0.user.id != me.id }
+            if let myToday = game.scores
+                .filter({ $0.user.id == me.id && calendar.isDate($0.achievedAt, inSameDayAs: now) })
+                .max(by: { $0.score < $1.score }) {
+                board.append(myToday)
+                board.sort { lhs, rhs in lhs.score != rhs.score ? lhs.score > rhs.score : lhs.achievedAt < rhs.achievedAt }
+            }
             for (index, entry) in board.enumerated() {
                 thisWeek[entry.user.id, default: 0] += Self.points(forRankIndex: index)
                 played[entry.user.id, default: 0] += 1

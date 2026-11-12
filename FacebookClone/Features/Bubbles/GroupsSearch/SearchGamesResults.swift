@@ -117,7 +117,7 @@ struct SearchGameRow: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("\(bubble.title), \(subtitle)")
-            .accessibilityHint("Opens the game's page")
+            .accessibilityHint(GroupsSearchCopy.openGameHint)
             Button {
                 Haptics.light()
                 bubbleStore.toggleSave(bubble, source: .search)
