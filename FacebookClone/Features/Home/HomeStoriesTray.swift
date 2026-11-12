@@ -224,12 +224,12 @@ struct HomeTextStoryCanvas: View {
     var fontSize: CGFloat = 30
 
     var body: some View {
-        let background = PostBackground.preset(backgroundIndex)
+        let palette = PostBackground.preset(backgroundIndex)
         ZStack {
-            background.gradient
+            palette.gradient
             Text(text)
                 .font(.system(size: fontSize, weight: .bold))
-                .foregroundStyle(background.textColor)
+                .foregroundStyle(palette.textColor)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.4)
                 .padding(fontSize * 0.6)

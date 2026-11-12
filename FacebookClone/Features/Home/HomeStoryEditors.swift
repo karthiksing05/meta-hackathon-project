@@ -276,7 +276,7 @@ struct HomePhotoStoryEditor: View {
             .accessibilityLabel("Discard")
             Spacer()
             VStack(spacing: 14) {
-                toolButton(title: "Text", symbol: "textformat") {
+                toolButton(title: "Add text", symbol: "textformat") {
                     beginTextEditing()
                 }
                 toolButton(title: "Stickers", symbol: "face.smiling") {
