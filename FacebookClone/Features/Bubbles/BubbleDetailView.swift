@@ -175,17 +175,8 @@ struct BubbleDetailView: View {
     private func stats(_ bubble: Bubble) -> some View {
         HStack(spacing: 16) {
             Label("\(bubble.playCount.fbCompact) plays", systemImage: "play.circle")
-            Button {
-                withAnimation(.spring(duration: 0.25)) { bubbleStore.toggleLike(bubble) }
-                Haptics.light()
-            } label: {
-                Label("\(bubble.likeCount.fbCompact) likes", systemImage: bubble.isLiked ? "heart.fill" : "heart")
-                    .foregroundStyle(bubble.isLiked ? FBColor.notificationRed : FBColor.secondaryText)
-                    .frame(minHeight: 44)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(bubble.isLiked ? "Unlike" : "Like")
+            Label(SavesCopy.savesCount(bubble.saveCount), systemImage: bubble.isSaved ? "bookmark.fill" : "bookmark")
+                .foregroundStyle(bubble.isSaved ? FBColor.accent : FBColor.secondaryText)
             Spacer(minLength: 0)
         }
         .font(.fbMeta)
@@ -202,7 +193,7 @@ struct BubbleDetailView: View {
                     router.openStudio(StudioLaunch(mode: .remix, baseBubbleID: bubble.id))
                 }
                 actionButton(bubble.isSaved ? "Saved" : "Save", symbol: bubble.isSaved ? "bookmark.fill" : "bookmark") {
-                    bubbleStore.toggleSave(bubble)
+                    bubbleStore.toggleSave(bubble, source: .detail)
                     appStore.showToast(bubble.isSaved ? "Saved to your Library" : "Removed from saved", symbol: bubble.isSaved ? "bookmark.fill" : "bookmark.slash")
                 }
                 actionButton("Share", symbol: "arrowshape.turn.up.right") { showShare = true }

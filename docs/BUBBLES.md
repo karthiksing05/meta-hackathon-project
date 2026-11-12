@@ -1320,7 +1320,54 @@ everyone to the same mode and numbers.
 
 ### 7.10 Saves are the likes (saves)
 
-People leave a game to save it but not to like it, so saves are the appreciation signal: saves
-counts where likes would be, a one-tap Save in the player that never leaves the game, Save as the
-result sheet's primary action, "Saved by Maya and 37 others", creator notifications and stats. The
-contract is in 7.1.
+People leave a game to save it but not to like it, so saves are the appreciation signal on every
+Bubble surface. The contract (`BubbleStore.toggleSave(_:source:)`, `BubbleSaveSource`,
+`Notification.Name.bubbleSaveChanged`) is in 7.1; this section is what the feature adds.
+
+**Surfaces and sources.** Every save below goes through `toggleSave`; nothing sets `isSaved` or
+`saveCount` directly.
+
+| Surface | Control | `source` |
+|---|---|---|
+| Player top bar (`SavesPlayerButton`) | 36 pt bookmark before mute; haptic and symbol bounce; no sheet, toast or pause; shown while playing and while watching a Burst | `game` |
+| Result sheet (`SavesResultAction`) | primary full-width Save / Saved; Play again is secondary | `result` |
+| Feed rail (`BubbleFeedRail`) | bookmark with `saveCount.fbCompact`, in the old like slot; the separate Save button is gone | `feed` (the tab's default) |
+| Bubble page (`BubbleDetailView`) | Save action; stats read "N saves" | `detail` |
+| Library (`SavesLibraryStats`) | bookmark on your most-saved game | `library` |
+
+**Likes are folded away.** `likeCount`, `isLiked` and `toggleLike` stay (persistence and old
+archives), but no Bubble surface shows or sets them.
+
+**Copy.** All strings live in `SavesCopy`. 'Saved by Diego and 37 others' (friends named first,
+'you' first when you saved it), '1.2K saves', '38 saves this week', 'Your games were saved N times
+this week', and the first-run hint 'Saving is how you show love for a game. Tap the bookmark
+anytime, even mid-game.' (once, `bubbles.saves.hintSeen` in UserDefaults; on the feed caption and
+in the player; dismissed by tap or by saving, and in the player after 12 s on screen).
+
+**Reusable.** `SavesSocialProof.savers(for:in:limit:) -> [User]` (deterministic, friends first,
+you first when saved, never the creator, never more than `saveCount`),
+`SavesSocialProof.text(for:in:) -> String?` and `SavesSocialProof.savesThisWeek(_:)`.
+
+**Notifications.** At launch a `.bubblePlayed` row 'Diego Ramirez and 37 others saved Moving Day.'
+(`extraActorCount = saveCount - 1`; the actor is the friend the feed caption names) is added with
+`bubbleAction = route(.saves, "stats", id)`. When one of your Bubbles' `saveCount` reaches 10, 25,
+50, 100, 250, 500 or 1000 after a save, a milestone row is added (once per number).
+
+**Who saved it.** Tapping the feed caption's 'Saved by' line pushes `feature:saves/stats/<id>`.
+`SavesStatsView` lists savers friends first with Add friend for non-friends
+(`appStore.sendRequest(to:)`, then `BubbleSocialSignals.post(.addFriendFromGame, ...)`). The Bubble
+page shows the top three for your own Bubbles.
+
+**Seeds.** Every seed's `_seed` block has `save_count` (hill-hopper 1,240 down to 17).
+
+**For the recommender (Kevin).** Listen for `Notification.Name.bubbleSaveChanged`; userInfo is
+`["bubbleID": String, "isSaved": Bool, "source": String]`. Treat `game` and `result` as the
+strongest signals: the player chose to leave attention on the game to save it, or saved right
+after a run. `feed` is a browse-time save, `detail` and `library` are deliberate re-visits.
+`isSaved == false` is an unsave and should cancel the earlier boost. Read totals from
+`Bubble.saveCount` (seed counts plus yours) and `BubbleStore.savedBubbles` for the set you saved.
+Add friend from the savers list posts `.addFriendFromGame`.
+
+**FB_OPEN screens.** `feature:saves/hint` (resets the flag and plays Hill Hopper so the hint shows),
+`feature:saves/stats/<bubbleID>` (an unknown id falls back to your first Bubble),
+`feature:saves/library`. The feed, `play:hill-hopper` and `FB_TAB=notifications` show the rest.
