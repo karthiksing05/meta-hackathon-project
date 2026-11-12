@@ -1,0 +1,328 @@
+{
+  "id": "story-last-cable-home",
+  "version": 1,
+  "engine_version": 1,
+  "title": "The Last Cable Home",
+  "one_line_rule": "Get home across three hills before the city goes to sleep.",
+  "formula": "story",
+  "brief": {
+    "intent": "a late-night adventure for New in SF",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "dreamy",
+      "playful"
+    ],
+    "energy": "low",
+    "competition": "light"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "ink",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#F7F5F0",
+      "bg_bottom": "#EAE6DD",
+      "ink": "#1E1B2E",
+      "primary": "#3B4FC4",
+      "secondary": "#6A4BC9",
+      "accent": "#2F8F9D",
+      "danger": "#9E3434"
+    },
+    "font": "hand",
+    "motif": "hills",
+    "emoji": "🚋",
+    "mood_preset": "dreamy",
+    "cover_prompt": "loose ink sketch of a cable car climbing a steep night street, lit windows, light hatching, off-white paper, blue and violet ink washes"
+  },
+  "concepts": [
+    {
+      "use": "space.story_page"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.story_paths"
+    },
+    {
+      "use": "score.story_points"
+    },
+    {
+      "use": "feel.mood_preset"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "start": "dinner",
+    "scenes": [
+      {
+        "id": "dinner",
+        "emoji": "🍜",
+        "text": "Dinner with the crew ran late. It's 11:40, home is three hills away, and the last cable car leaves at midnight.",
+        "choices": [
+          {
+            "id": "run",
+            "text": "Run for the cable car",
+            "to": "run",
+            "past": "ran for the cable car"
+          },
+          {
+            "id": "walk",
+            "text": "Walk with Priya",
+            "to": "walk",
+            "past": "walked home with Priya"
+          }
+        ]
+      },
+      {
+        "id": "run",
+        "emoji": "🏃",
+        "text": "You round the corner as the bell clangs. The car is pulling away, the gripman watching you in the mirror.",
+        "choices": [
+          {
+            "id": "jump",
+            "text": "Jump on the step",
+            "to": "aboard",
+            "past": "caught the last car",
+            "skill": {
+              "kind": "timing",
+              "window": 0.28,
+              "miss": "missed"
+            }
+          },
+          {
+            "id": "let-go",
+            "text": "Let it go",
+            "to": "missed",
+            "past": "let the car go"
+          }
+        ]
+      },
+      {
+        "id": "aboard",
+        "emoji": "🚋",
+        "speaker": "The gripman",
+        "text": "\"Cutting it close!\" The gripman grins. \"Ever rung the bell? Two short, one long. Your stop's at the top.\"",
+        "choices": [
+          {
+            "id": "ring",
+            "text": "Ring the bell",
+            "to": "rang",
+            "past": "rang the bell",
+            "set": [
+              "bell"
+            ],
+            "skill": {
+              "kind": "timing",
+              "window": 0.22,
+              "miss": "ride"
+            }
+          },
+          {
+            "id": "enjoy",
+            "text": "Just enjoy the ride",
+            "to": "ride",
+            "past": "enjoyed the ride"
+          }
+        ]
+      },
+      {
+        "id": "rang",
+        "emoji": "🔔",
+        "text": "Two short, one long. The whole car cheers. \"Not bad,\" says the gripman. \"Stay on to the turnaround if you like.\"",
+        "choices": [
+          {
+            "id": "top",
+            "text": "Ride to the top",
+            "to": "top",
+            "past": "rode to the top"
+          }
+        ]
+      },
+      {
+        "id": "ride",
+        "emoji": "🌃",
+        "text": "The city slides by in lit windows. The car crests the hill and the bay opens up below, dark and sparkling.",
+        "choices": [
+          {
+            "id": "stop",
+            "text": "Hop off at your stop",
+            "to": "home",
+            "past": "hopped off at their stop"
+          }
+        ]
+      },
+      {
+        "id": "top",
+        "emoji": "⛰️",
+        "text": "At the top the gripman lets you ring it once more, for luck. Your stop is right there. So is the turnaround.",
+        "choices": [
+          {
+            "id": "hop",
+            "text": "Hop off here",
+            "to": "home",
+            "past": "hopped off at the top"
+          },
+          {
+            "id": "turn",
+            "text": "Stay for the turnaround",
+            "to": "conductor",
+            "past": "stayed for the turnaround",
+            "need": [
+              "bell"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "missed",
+        "emoji": "🚏",
+        "text": "The car is gone and the street is quiet. A night bus idles at the corner. A staircase climbs into the fog.",
+        "choices": [
+          {
+            "id": "bus",
+            "text": "Take the night bus",
+            "to": "bus",
+            "past": "took the night bus"
+          },
+          {
+            "id": "climb",
+            "text": "Climb the stairs",
+            "to": "stairs",
+            "past": "climbed the stairs"
+          }
+        ]
+      },
+      {
+        "id": "walk",
+        "emoji": "🚶",
+        "speaker": "Priya",
+        "text": "\"Shortcut,\" says Priya, pointing at a staircase into the fog. \"Or the bus. Your call. I'm here for the company.\"",
+        "choices": [
+          {
+            "id": "stairs",
+            "text": "Take the stairs",
+            "to": "stairs",
+            "past": "took the stairs"
+          },
+          {
+            "id": "night-bus",
+            "text": "Catch the night bus",
+            "to": "bus",
+            "past": "caught the night bus"
+          }
+        ]
+      },
+      {
+        "id": "stairs",
+        "emoji": "🌫️",
+        "text": "The stairs go up and up. Halfway, the fog parts and the whole city is lit below you. Your legs disagree.",
+        "choices": [
+          {
+            "id": "push",
+            "text": "Push to the top",
+            "to": "summit",
+            "past": "pushed to the top",
+            "skill": {
+              "kind": "timing",
+              "window": 0.3,
+              "miss": "bench"
+            }
+          },
+          {
+            "id": "rest",
+            "text": "Rest on a bench",
+            "to": "bench",
+            "past": "rested on a bench"
+          }
+        ]
+      },
+      {
+        "id": "bench",
+        "emoji": "🐕",
+        "text": "A neighbor walking a very small dog sits down next to you and points out your street from up here.",
+        "choices": [
+          {
+            "id": "last-block",
+            "text": "Walk the last block",
+            "to": "home",
+            "past": "walked the last block"
+          }
+        ]
+      },
+      {
+        "id": "home",
+        "emoji": "🏠",
+        "text": "You're through the door at 11:58. You text the crew a cable car emoji and get three in a row right back.",
+        "ending": {
+          "id": "home",
+          "title": "Home by Midnight",
+          "emoji": "🏠",
+          "tone": "good"
+        }
+      },
+      {
+        "id": "bus",
+        "emoji": "🚌",
+        "text": "The night bus has six people, one accordion and a shared bag of oranges. You get home at 1. Worth it.",
+        "ending": {
+          "id": "night-bus",
+          "title": "Night Bus Friends",
+          "emoji": "🚌",
+          "tone": "odd"
+        }
+      },
+      {
+        "id": "summit",
+        "emoji": "✨",
+        "text": "At the top the fog is a sea under the city lights. You sit for a while, then walk the last flat block home, grinning.",
+        "ending": {
+          "id": "above-fog",
+          "title": "Above the Fog",
+          "emoji": "✨",
+          "tone": "good"
+        }
+      },
+      {
+        "id": "conductor",
+        "emoji": "🛎️",
+        "text": "At the turnaround the crew lets you help push the car around by hand. You go home with a brass bell pin and a Friday plan.",
+        "ending": {
+          "id": "bell",
+          "title": "The Conductor's Bell",
+          "emoji": "🛎️",
+          "tone": "secret"
+        }
+      }
+    ]
+  },
+  "seed": 2026111402,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-11T19:30:00Z",
+    "duration_sec": 52.8,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-theo-adeyemi",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 20,
+    "play_count": 96,
+    "like_count": 27,
+    "save_count": 34
+  }
+}

@@ -795,10 +795,106 @@ chat. Share always sends a playable card.
 
 ### 7.6 Adventures: stories you play (story)
 
-The `story` formula (category Adventure): scenes with choices, flags that gate choices, several
-endings, and an optional quick skill moment. A validator proves every path ends and every scene is
-reachable. After an ending you see which endings friends found and who took the other path, and can
-send your path. Muse can turn your own story into an adventure.
+The `story` formula, category **Adventure** (never "Story", so it isn't confused with Facebook
+Stories). A story is a small graph: scenes type out, 1–3 choices are drawn as pills, choices can
+`set` flags and other choices `need` them, a bold choice can hide a quick timing tap, and every path
+ends at one of 2–6 endings (usually one secret). After an ending you see which endings friends found
+and who took the other path ("Maya took the ferry"), and you can send your path to a friend, a chat
+or the Group. Muse plans and writes adventures, including one built from your own story ("my first
+week in SF"). Shared stories and self-expression: friends compare paths and the card starts a
+conversation.
+
+**Kit** (`bubble-kit-story.js`): `space.story_page` (draws the page in any look), `rule.story_paths`
+(walks the graph, ends with success at an ending), `score.story_points` (scenes visited × 10, timing
+hits × 25, ending bonus good 40 / odd 30 / secret 80; all params) and `input.select`. Pacing: text
+types at 1.6 characters a tick (a tap finishes it), choices unlock after at least 1.6 s per scene,
+an ending card holds 2.5 s. The bot reads for 1–3 s, then bolder (more skilled) bots take the boldest
+choice (timing, then flag-unlocked, then flag-setting, then not-an-ending; ties at random) and land
+timing taps more often, so skilled bots score more. Length: modes `rounds` and `endless`, default
+`rounds: 12` (the depth cap); each scene left is `lengthRound()`, and when it returns false the run
+jumps to the nearest ending. The kit also emits `story.reached_<n>` at ending n, so playtest event
+counts show which endings bots found.
+
+**Content:**
+
+```json
+{ "start": "morning",
+  "scenes": [
+    { "id": "morning", "emoji": "☀️", "speaker": "Maya", "text": "≤ 160 chars, second person",
+      "choices": [
+        { "id": "ferry", "text": "Take the ferry", "past": "took the ferry", "to": "ferry", "set": ["sketch"] },
+        { "id": "race", "text": "Race to the bottom", "past": "raced down", "to": "race",
+          "skill": { "kind": "timing", "window": 0.25, "miss": "fog" } },
+        { "text": "Try the yellow roof", "to": "rooftop", "need": ["key"] } ] },
+    { "id": "golden", "emoji": "🌇", "text": "…",
+      "ending": { "id": "golden-hour", "title": "Golden Hour on the Pier", "emoji": "🌇", "tone": "good" } } ] }
+```
+
+Choice `text` ≤ 28, `past` ≤ 32 (what friends read: "Maya took the ferry"), `id` ≤ 24 (defaults to a
+slug of the text, unique in the scene). `skill.window` 0.15–0.4 is the share of the meter that
+counts; a hit takes `to` and sets the flags, a miss (or no tap) takes `miss` and sets nothing.
+Ending `tone`: `good`, `odd` or `secret`.
+
+**Validator** (`validateContent`, code `content`, path into the content): 3–40 scenes with unique ids;
+text and name limits; 1–3 choices on every scene that isn't an ending and none on an ending; every
+`to` and `skill.miss` names a real scene (not itself); every `need`ed flag is `set` somewhere; at most
+8 flags; `start` exists; 2–6 endings with unique ids; no loops; every scene reachable from `start`
+(no orphans); the longest path is at most 12 choices; walking `(scene, flags)` states, no scene is a
+dead end (all choices gated by flags you may not have) and every ending is reachable with flags set
+before they're needed.
+
+**Share and tag.** `score_text` "Ending 2 of 4 · 🌇" (the number, never the title), `emoji_grid` one
+mark per choice (▫️, ⚡ timing hit, 💨 miss) and the ending's emoji. `tag`:
+`ending=<ending id>;first=<id of the first choice taken>;found=<n>/<m>;path=<steps>`, where
+`found` is this ending's number and the story's ending count, and `path` is the choice index taken in
+each scene, dot-separated, with `x` after a missed timing tap (`1.1x.0.2`). The app rebuilds the
+path from the tag and the manifest (`StoryAdventure.choices(along:)`).
+
+**Card** `.storyPath` (owner story) extras: `ending_id` (String), `path_choices` ([String], the choice
+texts in order), `found` (Number, endings the sender has found). The headline is "Alex took the
+stairs. Which way would you go?"; Play plays the card's seed and length. Sending posts
+`.storyPathShared` with the recipients (a friend, the chat's members, or New in SF's members), and a
+friend in the chat answers a few seconds later with their own path card (a real bot run).
+
+**App.** `StoryProgressStore.shared` keeps the endings you found and your latest run per Bubble
+(UserDefaults), and friends' paths per Bubble for the session: Maya, Diego and Chloe each play a
+real bot run (`simulateRun`) of the story, chosen so one took the other path from you, one found a
+secret ending and one shows a new ending. Slots: `StoryResultEndings` (your ending N of M and path,
+endings found with the rest as "?", friends' paths with Add friend for non-friends, Send your path),
+`StoryDetailEndings` (the same on the Bubble page, plus Play to find the rest), `StoryStudioEntry`
+(Studio Ask: "Turn your story into an adventure", a sheet that sets `social.personalStory`, the
+prompt and formula hint `story`) and `StoryCardBody`. `StoryScreens.install` adds a notification
+("Priya made an adventure in New in SF") that opens the endings screen.
+
+**Studio** (`StoryStudio.swift`): keywords (adventure, choose your own, choose your path, story,
+branching, quest, what would you do, my first week, my story), nouns Path, Tale, Adventure, looks
+paper, ink, riso, a composer guide (plan the graph first: 6–12 scenes, 3–4 endings with one secret
+gated by a flag, depth ≤ 10, ≤ 3 choices, `past` on every choice, at most two timing moments), and
+prompt lines that pass `social.personalStory` with "Turn this into an adventure about the person who
+wrote it; keep real details they gave, invent nothing private." Offline: a deterministic 7-scene,
+3-ending graph from the own story's sentences (first person turned to second) or the prompt, with
+one timing moment that unlocks the secret ending ("Wrote 7 scenes and 3 endings from your story").
+Playtest: `ending_unreachable` (blocking) when bots found fewer endings than the story has and a
+static walk (`StoryGraphCheck`) can't reach them; otherwise a non-blocking `endings_rare` note.
+`no_challenge` and `flat` are relaxed (stories have no fail state).
+
+**FB_OPEN** (with `FB_SKIP_SPLASH=1`): `play:story-ferry-or-fog`;
+`feature:story/endings/<bubbleID>` pushes the endings screen with friends' paths loading;
+`feature:story/path/<bubbleID>` presents the send-path sheet (DEBUG stages a bot run as your path if
+you haven't played); `feature:story/mystory` presents the own-story sheet, which opens Studio;
+`studio:an%20adventure%20about%20my%20first%20week`.
+
+**Seeds** (New in SF, Group `group-newinsf`):
+
+| Id | Look | Notes |
+|---|---|---|
+| `story-ferry-or-fog` | paper | "Ferry or Fog?", a first Saturday. 4 endings (Island Picnic, Golden Hour on the Pier, Lost in the Fog, secret The Secret Rooftop gated by a key), two timing moments. By Priya. |
+| `story-last-cable-home` | ink | "The Last Cable Home", getting home across three hills at midnight. 4 endings (Home by Midnight, Night Bus Friends, Above the Fog, secret The Conductor's Bell gated by ringing the bell), three timing moments. By Theo. |
+
+**Tests:** `tools/kits-tests/suite-story.js` (validator rejections: a dangling choice or miss, an
+orphan, a dead end, an unreachable ending, a loop, too deep, a bad window, one ending, long text, an
+ending with choices; bots reach every ending of the example and both seeds in 40 runs; replays
+reproduce ending, tag and score; rounds and endless lengths still end at an ending).
 
 ### 7.7 Quiz night: guess what they say next (nextline)
 
