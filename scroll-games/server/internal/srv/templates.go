@@ -1,6 +1,7 @@
 package srv
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -113,7 +114,7 @@ func oneOf(v string, allowed []string, def string) string {
 
 // Normalize fills defaults and clamps values; server-known media wins over model output.
 func (b *Brief) Normalize(level string, media []Media) {
-	b.Template = "quiz"
+	b.Template = pickGenre(*b)
 	b.Level = oneOf(level, []string{"remix", "compose", "free"}, "remix")
 	b.TitleIdea = truncate(strings.TrimSpace(b.TitleIdea), 60)
 	if b.TitleIdea == "" {
@@ -249,8 +250,13 @@ func (a *App) quizManifestTemplate() []byte {
 	return a.readSpecFile("templates/quiz.manifest.json", embeddedQuizManifest)
 }
 
-// templateManifest customizes the pre-baked quiz manifest with the brief.
+// templateManifest customizes the pre-baked manifest of the brief's genre with the brief.
 func (a *App) templateManifest(b Brief) json.RawMessage {
+	if g := b.Genre(); g != "quiz" {
+		if raw, ok := a.genreManifest(b, g); ok {
+			return raw
+		}
+	}
 	var m map[string]any
 	_ = json.Unmarshal(a.quizManifestTemplate(), &m)
 	m["title"] = b.TitleIdea
@@ -285,6 +291,11 @@ func (a *App) templateManifest(b Brief) json.RawMessage {
 
 // templateContent builds deterministic photo-caption questions when media is available, else the template content.
 func (a *App) templateContent(b Brief, media []Media) json.RawMessage {
+	if g := b.Genre(); g != "quiz" {
+		if raw, ok := a.genreContent(b, g, media); ok {
+			return raw
+		}
+	}
 	if len(media) >= 3 {
 		return captionContent(media, b.Limits.Rounds)
 	}
@@ -364,41 +375,448 @@ func paramDigest(name string, p map[string]any) string {
 	return s
 }
 
-// BuildCatalogDigest returns the compact catalog the planner sees: only implemented concepts
-// (stubs are inert and would break event wiring), with params, ranges, requires and event wiring.
-func BuildCatalogDigest(specDir string) string {
+// loadConcepts reads spec/concepts.json; nil when unreadable.
+func loadConcepts(specDir string) []concept {
 	var cs []concept
 	if raw, err := os.ReadFile(filepath.Join(specDir, "concepts.json")); err == nil {
 		_ = json.Unmarshal(raw, &cs)
 	}
-	var lines []string
-	stubs := 0
-	for _, c := range cs {
-		if c.Status != "implemented" {
-			stubs++
-			continue
+	return cs
+}
+
+func conceptLine(c concept, wiring bool) string {
+	line := c.ID + ": " + c.Summary
+	if len(c.Params) > 0 {
+		names := make([]string, 0, len(c.Params))
+		for k := range c.Params {
+			names = append(names, k)
 		}
-		line := c.ID + ": " + c.Summary
-		if len(c.Params) > 0 {
-			names := make([]string, 0, len(c.Params))
-			for k := range c.Params {
-				names = append(names, k)
-			}
-			sort.Strings(names)
-			ps := make([]string, len(names))
-			for i, n := range names {
-				ps[i] = paramDigest(n, c.Params[n])
-			}
-			line += " PARAMS " + strings.Join(ps, "; ")
+		sort.Strings(names)
+		ps := make([]string, len(names))
+		for i, n := range names {
+			ps[i] = paramDigest(n, c.Params[n])
 		}
+		line += " PARAMS " + strings.Join(ps, "; ")
+	}
+	if wiring {
 		if len(c.Requires) > 0 {
 			line += " REQUIRES " + strings.Join(c.Requires, ",")
 		}
 		line += " CONSUMES " + strings.Join(c.Consumes, ",") + " EMITS " + strings.Join(c.Emits, ",")
-		lines = append(lines, line)
+	}
+	return line
+}
+
+// catalogDigest lists the implemented concepts in `only` (all implemented ones when nil) with params, ranges,
+// requires and event wiring. Stubs are left out: they are inert and would break event wiring.
+func catalogDigest(cs []concept, only map[string]bool) string {
+	var lines []string
+	omitted := 0
+	for _, c := range cs {
+		if c.Status != "implemented" || (only != nil && !only[c.ID]) {
+			omitted++
+			continue
+		}
+		lines = append(lines, conceptLine(c, true))
 	}
 	if len(lines) == 0 {
 		return ""
 	}
-	return strings.Join(lines, "\n") + fmt.Sprintf("\n(%d other catalog ids are inert stubs; never use them.)", stubs)
+	return strings.Join(lines, "\n") + fmt.Sprintf("\n(%d other catalog ids are omitted; use only the ids listed above.)", omitted)
+}
+
+// BuildCatalogDigest returns the compact catalog of every concept some template uses.
+func BuildCatalogDigest(specDir string) string {
+	used := templateConcepts(specDir)
+	if len(used) == 0 {
+		used = nil
+	}
+	return catalogDigest(loadConcepts(specDir), used)
+}
+
+// manifestConceptIDs is the set of concept ids a manifest lists.
+func manifestConceptIDs(manifest []byte) map[string]bool {
+	var m struct {
+		Concepts []struct {
+			ID string `json:"id"`
+		} `json:"concepts"`
+	}
+	ids := map[string]bool{}
+	if json.Unmarshal(manifest, &m) == nil {
+		for _, c := range m.Concepts {
+			ids[c.ID] = true
+		}
+	}
+	return ids
+}
+
+// ---- Genres ----------------------------------------------------------------
+//
+// Every genre is a pair of files in spec/templates: <genre>.manifest.json and <genre>.content.json
+// (the quiz is quiz.manifest.json + trip-trivia.content.json). The brief's `template` picks one.
+
+// Genre describes one playable template: how the planner chooses it and what content shape it needs.
+type Genre struct {
+	Name     string
+	Blurb    string   // shown to the brief writer
+	Keywords []string // lowercase substrings of the brief text that select this genre
+	Content  string   // content item kind Ember must write; "" means the template content is used as is
+	Shape    string   // what Ember writes for Content
+	Tokens   int      // max_tokens for the Ember call (reasoning included); 0 means the default
+}
+
+var genres = []Genre{
+	{Name: "quiz", Blurb: "photo or fact questions with four answers"},
+	{Name: "memory_match", Blurb: "flip cards and find the matching pairs", Keywords: []string{"memory", "match pairs", "matching", "flip card", "concentration"}, Content: "card",
+		Shape: `6 different cards: {"prompt": one emoji or one short word, "media_id": a photo id from the list or ""}.`, Tokens: 700},
+	{Name: "word_guess", Blurb: "guess the hidden five letter word in six tries", Keywords: []string{"wordle", "word guess", "guess the word", "five letter", "5 letter", "word game", "anagram", "vocabulary"}, Content: "word",
+		Shape: `8 different common words of exactly 5 letters in capitals that fit the theme, e.g. BEACH, TRAMS: {"prompt": the word, "clue": a hint of at most 6 words}.`, Tokens: 1000},
+	{Name: "daily_word", Blurb: "one shared five letter word puzzle per day", Keywords: []string{"word of the day", "daily word", "daily puzzle"}, Content: "word",
+		Shape: `8 different common words of exactly 5 letters in capitals that fit the theme, e.g. BEACH, TRAMS: {"prompt": the word, "clue": a hint of at most 6 words}.`, Tokens: 1000},
+	{Name: "timeline_sort", Blurb: "drag moments into chronological order", Keywords: []string{"timeline", "chronolog", "put in order", "sort the", "order of events", "what happened first"}, Content: "event",
+		Shape: `5 moments from the story: {"prompt": at most 5 words, "order": chronological position 1 to 5, all different}.`, Tokens: 700},
+	{Name: "map_pins", Blurb: "drag pins to where places belong on a map", Keywords: []string{"map", "pin the", "where is", "geography", "locations"}, Content: "place",
+		Shape: `4 places: {"prompt": place name of at most 4 words, "x": 5 to 95 (percent from the left of the map), "y": 5 to 95 (percent from the top)}. Spread them out.`, Tokens: 700},
+	{Name: "lane_runner", Blurb: "swipe between lanes to grab coins and dodge rocks", Keywords: []string{"runner", "run ", "dash", "dodge", "endless run", "lane", "obstacle", "subway"}},
+	{Name: "rhythm_tap", Blurb: "tap lanes in time with falling notes", Keywords: []string{"rhythm", "beat", "music", "tempo", "drum", "tap in time"}},
+	{Name: "paddle_rally", Blurb: "keep a bouncing ball alive with a paddle", Keywords: []string{"paddle", "pong", "ball", "bounce", "rally", "breakout"}},
+	{Name: "star_catcher", Blurb: "drag a basket to catch falling stars and avoid bombs", Keywords: []string{"catch", "falling", "collect", "basket", "stars"}},
+	{Name: "star_shooter", Blurb: "fly a ship and shoot waves of invaders", Keywords: []string{"shoot", "invader", "space", "shooter", "blast", "alien", "enemy", "enemies"}},
+	{Name: "match3", Blurb: "swipe tiles to match three in a row", Keywords: []string{"match 3", "match-3", "match three", "candy", "swap", "bejeweled", "puzzle tiles"}},
+	{Name: "swipe_merge", Blurb: "swipe to slide and merge equal numbers", Keywords: []string{"2048", "merge", "numbers", "sliding"}},
+	{Name: "photo_hunt", Blurb: "find hidden things in a photo", Keywords: []string{"hidden object", "photo hunt", "find the", "spot the", "seek", "i spy"}},
+	{Name: "whack_mole", Blurb: "tap critters that pop up, avoid decoys", Keywords: []string{"whack", "mole", "reaction", "reflex", "pop up", "tap the"}},
+	{Name: "simon_says", Blurb: "repeat a growing pattern of lights", Keywords: []string{"simon", "pattern", "repeat the", "sequence", "echo"}},
+	{Name: "trace_draw", Blurb: "trace a shape by drawing with a finger", Keywords: []string{"draw", "trace", "doodle", "sketch", "tracing"}},
+}
+
+func genreByName(name string) (Genre, bool) {
+	for _, g := range genres {
+		if g.Name == name {
+			return g, true
+		}
+	}
+	return Genre{}, false
+}
+
+// GenreNames lists every genre id, quiz first.
+func GenreNames() []string {
+	out := make([]string, len(genres))
+	for i, g := range genres {
+		out[i] = g.Name
+	}
+	return out
+}
+
+// inferGenre picks a genre from free text; quiz when nothing matches or the text asks for a quiz.
+func inferGenre(text string) string {
+	low := strings.ToLower(text)
+	if strings.Contains(low, "quiz") || strings.Contains(low, "trivia") || strings.Contains(low, "question") {
+		return "quiz"
+	}
+	for _, g := range genres[1:] { // a genre named outright ("rhythm tap game") beats keyword matches
+		if strings.Contains(low, strings.ReplaceAll(g.Name, "_", " ")) {
+			return g.Name
+		}
+	}
+	for _, g := range genres {
+		for _, k := range g.Keywords {
+			if strings.Contains(low, k) {
+				return g.Name
+			}
+		}
+	}
+	return "quiz"
+}
+
+// pickGenre honours a valid brief.template and otherwise infers the genre from the brief text.
+func pickGenre(b Brief) string {
+	if _, ok := genreByName(strings.ToLower(strings.TrimSpace(b.Template))); ok {
+		return strings.ToLower(strings.TrimSpace(b.Template))
+	}
+	return inferGenre(b.Intent + " " + b.TitleIdea)
+}
+
+// Genre is the normalized template of the brief ("quiz" when unset).
+func (b Brief) Genre() string {
+	if _, ok := genreByName(b.Template); ok {
+		return b.Template
+	}
+	return "quiz"
+}
+
+func genreFiles(g string) (manifest, content string) {
+	if g == "quiz" {
+		return "templates/quiz.manifest.json", "templates/trip-trivia.content.json"
+	}
+	return "templates/" + g + ".manifest.json", "templates/" + g + ".content.json"
+}
+
+// templateConcepts is the set of concept ids used by any template manifest; the planner digest lists only those.
+func templateConcepts(specDir string) map[string]bool {
+	used := map[string]bool{}
+	files, _ := filepath.Glob(filepath.Join(specDir, "templates", "*.manifest.json"))
+	for _, f := range files {
+		raw, err := os.ReadFile(f)
+		if err != nil {
+			continue
+		}
+		var m struct {
+			Concepts []struct {
+				ID string `json:"id"`
+			} `json:"concepts"`
+		}
+		if json.Unmarshal(raw, &m) == nil {
+			for _, c := range m.Concepts {
+				used[c.ID] = true
+			}
+		}
+	}
+	return used
+}
+
+// genreExample is the manifest the planner starts from for this brief.
+func (a *App) genreExample(b Brief) []byte {
+	if g := b.Genre(); g != "quiz" {
+		rel, _ := genreFiles(g)
+		if raw, err := os.ReadFile(filepath.Join(a.cfg.SpecDir, rel)); err == nil && json.Valid(raw) {
+			return raw
+		}
+	}
+	return a.quizManifestTemplate()
+}
+
+// genreManifest customizes a genre template manifest with the brief.
+func (a *App) genreManifest(b Brief, g string) (json.RawMessage, bool) {
+	rel, _ := genreFiles(g)
+	raw, err := os.ReadFile(filepath.Join(a.cfg.SpecDir, rel))
+	if err != nil {
+		return nil, false
+	}
+	var m map[string]any
+	if json.Unmarshal(raw, &m) != nil {
+		return nil, false
+	}
+	m["title"] = b.TitleIdea
+	m["description"] = truncate(b.Intent, 90)
+	m["level"] = b.Level
+	m["template"] = g
+	m["seed_scope"] = b.SeedScope()
+	theme := map[string]any{"palette": b.ThemePalette(), "mood": b.ThemeMood(), "emoji": b.Emoji}
+	m["theme"] = theme
+	concepts, _ := m["concepts"].([]any)
+	for _, c := range concepts {
+		cm, _ := c.(map[string]any)
+		params, _ := cm["params"].(map[string]any)
+		if params == nil {
+			params = map[string]any{}
+			cm["params"] = params
+		}
+		switch cm["id"] {
+		case "feel.theme":
+			params["palette"], params["mood"], params["emoji"] = theme["palette"], theme["mood"], theme["emoji"]
+		case "share.score_card":
+			params["headline"] = truncate(b.TitleIdea, 40)
+		case "rule.lives":
+			switch b.Difficulty {
+			case "easy":
+				params["lives"] = 5
+			case "hard":
+				params["lives"] = 2
+			}
+		case "entity.card":
+			params["pairs"] = clampInt(b.Limits.Rounds, 3, 8, 6)
+		}
+	}
+	out, _ := json.Marshal(m)
+	return out, true
+}
+
+// genreContent returns the genre's template content, personalized with the group's photos where the shape allows.
+func (a *App) genreContent(b Brief, g string, media []Media) (json.RawMessage, bool) {
+	_, rel := genreFiles(g)
+	raw, err := os.ReadFile(filepath.Join(a.cfg.SpecDir, rel))
+	if err != nil || !json.Valid(raw) {
+		return nil, false
+	}
+	var c map[string]any
+	if json.Unmarshal(raw, &c) != nil {
+		return nil, false
+	}
+	switch g {
+	case "memory_match":
+		if len(media) >= 4 {
+			items := []map[string]any{}
+			for i, m := range media {
+				if i >= 8 {
+					break
+				}
+				items = append(items, map[string]any{"id": fmt.Sprintf("c%d", i+1), "kind": "card", "prompt": truncate(m.Caption, 14), "media_id": m.ID, "media_url": m.URL})
+			}
+			c["items"] = items
+		}
+	case "timeline_sort":
+		if len(media) >= 3 {
+			sorted := append([]Media(nil), media...)
+			sort.SliceStable(sorted, func(i, j int) bool { return sorted[i].TakenAt.Before(sorted[j].TakenAt) })
+			if len(sorted) > 5 {
+				sorted = sorted[:5]
+			}
+			items := []map[string]any{}
+			for i, m := range sorted {
+				items = append(items, map[string]any{"id": fmt.Sprintf("e%d", i+1), "kind": "event", "prompt": truncate(m.Caption, 40), "answer": i + 1, "media_url": m.URL})
+			}
+			c["items"] = items
+		}
+	}
+	if cp, ok := c["copy"].(map[string]any); ok && b.Intent != "" {
+		cp["intro"] = truncate(b.Intent, 120)
+	}
+	out, _ := json.Marshal(c)
+	return out, true
+}
+
+// genreContentSchema is the loose structured-output schema for authored genre content.
+func genreContentSchema() map[string]any {
+	str := map[string]any{"type": "string"}
+	num := map[string]any{"type": "integer"}
+	return map[string]any{"type": "object", "properties": map[string]any{
+		"items": map[string]any{"type": "array", "items": map[string]any{"type": "object", "properties": map[string]any{
+			"prompt": str, "media_id": str, "clue": str, "order": num, "x": num, "y": num}, "required": []string{"prompt"}}},
+		"copy": map[string]any{"type": "object", "properties": map[string]any{"intro": str, "win": str, "lose": str}},
+	}, "required": []string{"items", "copy"}}
+}
+
+func genreContentSystem(g Genre) string {
+	return "Write content for a mini-game (" + g.Blurb + "). Output ONE JSON object: " +
+		`{"items":[...],"copy":{"intro","win","lose"}}. items: ` + g.Shape +
+		" copy: three short friendly lines (max 10 words each)."
+}
+
+// genreContentUser is the compact brief; photos are listed only for genres whose items point at them.
+func genreContentUser(g Genre, b Brief, media []Media) string {
+	var user strings.Builder
+	fmt.Fprintf(&user, "Theme: %s. Title: %s. Tone: %s.", b.Intent, b.TitleIdea, b.Tone)
+	if g.Content == "card" {
+		user.WriteString("\nPhotos:")
+		for _, m := range media {
+			fmt.Fprintf(&user, "\n%s: %s", m.ID, m.Caption)
+		}
+	}
+	return user.String()
+}
+
+// planGenreContent authors content for a non-quiz genre. handled=false means the quiz path applies.
+func (a *App) planGenreContent(ctx context.Context, acc *runAcc, b Brief, media []Media) (json.RawMessage, bool, error) {
+	name := b.Genre()
+	if name == "quiz" {
+		return nil, false, nil
+	}
+	g, _ := genreByName(name)
+	if g.Content == "" {
+		return a.templateContent(b, media), true, nil
+	}
+	tokens := g.Tokens
+	if tokens == 0 {
+		tokens = 800
+	}
+	res, err := a.muse.Chat(ctx, ChatReq{Model: ModelEmber, Purpose: "content", System: genreContentSystem(g), User: genreContentUser(g, b, media),
+		MaxTokens: tokens, SchemaName: "content", Schema: genreContentSchema(), Reasoning: "minimal"})
+	acc.add(res, err, "content")
+	if err != nil {
+		return nil, true, err
+	}
+	obj, err := ExtractJSONObject(res.Content)
+	if err != nil {
+		acc.add(nil, err, "content")
+		return nil, true, err
+	}
+	out, err := normalizeGenreContent(g, obj, media)
+	if err != nil {
+		acc.add(nil, err, "content")
+	}
+	return out, true, err
+}
+
+// normalizeGenreContent turns Ember output into sg.content/1 items of the genre's kind, dropping invalid ones.
+func normalizeGenreContent(g Genre, raw json.RawMessage, media []Media) (json.RawMessage, error) {
+	var in struct {
+		Items []struct {
+			Prompt  string `json:"prompt"`
+			MediaID string `json:"media_id"`
+			Clue    string `json:"clue"`
+			Order   int    `json:"order"`
+			X       int    `json:"x"`
+			Y       int    `json:"y"`
+		} `json:"items"`
+		Copy map[string]string `json:"copy"`
+	}
+	if err := json.Unmarshal(raw, &in); err != nil {
+		return nil, err
+	}
+	urls := map[string]string{}
+	for _, m := range media {
+		urls[m.ID] = m.URL
+	}
+	seen := map[string]bool{}
+	orders := map[int]bool{}
+	items := []map[string]any{}
+	for _, it := range in.Items {
+		p := strings.TrimSpace(it.Prompt)
+		if p == "" || len(items) >= 14 {
+			continue
+		}
+		id := fmt.Sprintf("%c%d", g.Content[0], len(items)+1)
+		item := map[string]any{"id": id, "kind": g.Content, "prompt": truncate(p, 60)}
+		switch g.Content {
+		case "word":
+			p = strings.ToUpper(p)
+			ok := len([]rune(p)) == 5
+			for _, r := range p {
+				if r < 'A' || r > 'Z' {
+					ok = false
+				}
+			}
+			if !ok || seen[strings.ToLower(p)] {
+				continue
+			}
+			item["prompt"] = p
+			if it.Clue != "" {
+				item["clue"] = truncate(it.Clue, 80)
+			}
+		case "card":
+			if seen[strings.ToLower(p)] || len(items) >= 8 {
+				continue
+			}
+			item["prompt"] = truncate(p, 14)
+			if u, ok := urls[it.MediaID]; ok {
+				item["media_id"], item["media_url"] = it.MediaID, u
+			}
+		case "event":
+			if it.Order < 1 || it.Order > 10 || orders[it.Order] || len(items) >= 6 {
+				continue
+			}
+			orders[it.Order] = true
+			item["answer"] = it.Order
+		case "place":
+			if len(items) >= 5 {
+				continue
+			}
+			clamp := func(v int) int { return clampInt(v, 5, 95, 50) }
+			item["choices"] = []string{fmt.Sprint(clamp(it.X)), fmt.Sprint(clamp(it.Y))}
+		}
+		seen[strings.ToLower(p)] = true
+		items = append(items, item)
+	}
+	min := map[string]int{"word": 6, "card": 4, "event": 3, "place": 3}[g.Content]
+	if len(items) < min {
+		return nil, fmt.Errorf("only %d valid %s items", len(items), g.Content)
+	}
+	cp := map[string]string{"intro": "Ready?", "win": "Nailed it!", "lose": "Good try, go again!"}
+	for k, v := range in.Copy {
+		if strings.TrimSpace(v) != "" {
+			cp[k] = v
+		}
+	}
+	return json.Marshal(map[string]any{"schema": "sg.content/1", "items": items, "copy": cp})
 }

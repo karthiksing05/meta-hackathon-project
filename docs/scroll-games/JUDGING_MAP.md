@@ -13,6 +13,6 @@ The hackathon brief's judging criteria are not in this repository. The criteria 
 
 ## Gaps to state honestly
 
-- Moderation is a stub (`moderation: "stub-pass"`).
+- Moderation is real: free pre-checks plus one Ember classifier call, verdict block / flag / pass, and user reports that hide a game at two reporters. It runs while the plan is still generating, so it adds no wait.
 - Data and identity are synthetic (`X-User` header).
 - 20 of 179 concepts are implemented; the rest are contract-only.

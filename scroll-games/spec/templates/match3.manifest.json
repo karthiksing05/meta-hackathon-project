@@ -1,0 +1,90 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Fruit Swap",
+  "description": "Swipe a fruit to line up three or more.",
+  "level": "remix",
+  "template": "match3",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.grid_board",
+      "params": {
+        "cols": 7,
+        "rows": 7
+      }
+    },
+    {
+      "id": "entity.tile",
+      "params": {
+        "kinds": 5
+      }
+    },
+    {
+      "id": "behavior.shuffle_tiles",
+      "params": {}
+    },
+    {
+      "id": "input.swipe_direction",
+      "params": {
+        "min_distance": 20,
+        "directions": "four"
+      }
+    },
+    {
+      "id": "rule.match_three",
+      "params": {
+        "min_run": 3
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 30
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 60000
+      }
+    },
+    {
+      "id": "feedback.haptic",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "candy",
+        "mood": "playful",
+        "emoji": "🍓"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "candy",
+    "mood": "playful",
+    "emoji": "🍓"
+  }
+}

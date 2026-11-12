@@ -131,6 +131,9 @@ pub struct ConceptSpec {
     pub conflicts: Vec<String>,
     #[serde(default)]
     pub content: Option<String>,
+    /// When true, only one of `consumes` has to be available (e.g. `rule.lives`).
+    #[serde(default)]
+    pub consumes_any: bool,
 }
 
 #[derive(Clone, Debug, Deserialize)]

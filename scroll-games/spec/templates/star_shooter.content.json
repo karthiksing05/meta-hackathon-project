@@ -1,0 +1,15 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "i1",
+      "kind": "sprite",
+      "prompt": "Ship"
+    }
+  ],
+  "copy": {
+    "intro": "Drag to fly, tap to fire.",
+    "win": "Sector cleared!",
+    "lose": "They landed."
+  }
+}

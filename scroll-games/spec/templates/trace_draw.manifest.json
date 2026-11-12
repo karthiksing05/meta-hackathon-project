@@ -1,0 +1,80 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Trace It",
+  "description": "Draw over the shape with your finger.",
+  "level": "remix",
+  "template": "trace_draw",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "flow.levels",
+      "params": {
+        "levels": 3
+      }
+    },
+    {
+      "id": "space.free_canvas",
+      "params": {
+        "background": "#101018",
+        "goal": "trace"
+      }
+    },
+    {
+      "id": "input.draw_stroke",
+      "params": {
+        "brush_size": 8,
+        "color": "#ffd166"
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 200
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 60000
+      }
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "forest",
+        "mood": "calm",
+        "emoji": "✏️"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "forest",
+    "mood": "calm",
+    "emoji": "✏️"
+  }
+}

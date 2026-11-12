@@ -1,0 +1,15 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "i1",
+      "kind": "note",
+      "prompt": "Song"
+    }
+  ],
+  "copy": {
+    "intro": "Tap a lane as the note crosses the glowing line.",
+    "win": "You kept the beat!",
+    "lose": "Lost the rhythm."
+  }
+}

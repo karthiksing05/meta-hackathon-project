@@ -1,0 +1,55 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "s1",
+      "kind": "shape",
+      "prompt": "Circle",
+      "choices": [
+        "80,35",
+        "76,47",
+        "65,56",
+        "50,60",
+        "35,56",
+        "24,47",
+        "20,35",
+        "24,23",
+        "35,14",
+        "50,10",
+        "65,14",
+        "76,23"
+      ]
+    },
+    {
+      "id": "s2",
+      "kind": "shape",
+      "prompt": "Zigzag",
+      "choices": [
+        "15,25",
+        "30,60",
+        "45,25",
+        "60,60",
+        "75,25",
+        "90,60"
+      ]
+    },
+    {
+      "id": "s3",
+      "kind": "shape",
+      "prompt": "Line",
+      "choices": [
+        "15,50",
+        "30,50",
+        "45,50",
+        "60,50",
+        "75,50",
+        "90,50"
+      ]
+    }
+  ],
+  "copy": {
+    "intro": "Trace the dotted shape.",
+    "win": "Steady hand!",
+    "lose": "Out of time."
+  }
+}

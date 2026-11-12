@@ -1,0 +1,82 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Photo Hunt",
+  "description": "Find the hidden things in the photo.",
+  "level": "remix",
+  "template": "photo_hunt",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.photo_stage",
+      "params": {
+        "fit": "cover"
+      }
+    },
+    {
+      "id": "input.tap_target",
+      "params": {
+        "hit_slop": 10
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 150
+      }
+    },
+    {
+      "id": "rule.wrong_penalty",
+      "params": {
+        "penalty": 25
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 60000
+      }
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feedback.haptic",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "forest",
+        "mood": "calm",
+        "emoji": "🔍"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "forest",
+    "mood": "calm",
+    "emoji": "🔍"
+  }
+}

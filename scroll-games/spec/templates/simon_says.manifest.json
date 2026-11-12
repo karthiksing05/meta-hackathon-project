@@ -1,0 +1,83 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Echo",
+  "description": "Repeat the growing pattern.",
+  "level": "remix",
+  "template": "simon_says",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.free_canvas",
+      "params": {
+        "background": "#101018",
+        "goal": "sandbox"
+      }
+    },
+    {
+      "id": "input.tap_target",
+      "params": {
+        "hit_slop": 0
+      }
+    },
+    {
+      "id": "rule.sequence_memory",
+      "params": {
+        "start_len": 2
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 100
+      }
+    },
+    {
+      "id": "rule.lives",
+      "params": {
+        "lives": 3
+      }
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feedback.haptic",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "midnight",
+        "mood": "mysterious",
+        "emoji": "🎛️"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "midnight",
+    "mood": "mysterious",
+    "emoji": "🎛️"
+  }
+}

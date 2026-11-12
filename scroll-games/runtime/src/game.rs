@@ -1,5 +1,6 @@
 //! Shared mutable game state that concept systems and glue operate on.
 
+use crate::ext_play::world::World;
 use crate::rng::Rng;
 use crate::types::{Event, Item};
 use serde_json::{json, Map, Value};
@@ -106,6 +107,16 @@ pub struct Game {
     pub flash: Option<(String, i64)>,
     pub confetti_us: i64,
     pub end_requested: bool,
+
+    // extension view data (owned by ext_meta.rs systems), surfaced as view.ext
+    pub ext_view: serde_json::Map<String, Value>,
+
+    // gameplay world (owned by ext_play.rs systems), surfaced as view.world
+    pub world: World,
+    /// Values that survive a run restart (best_of_n, retry_once).
+    pub carry: BTreeMap<String, Value>,
+    pub restart_req: bool,
+    pub won: bool,
 }
 
 impl Game {
@@ -119,6 +130,11 @@ impl Game {
             banner: String::new(),
             round_points: 0,
             custom: BTreeMap::new(),
+            ext_view: serde_json::Map::new(),
+            world: World::new(),
+            carry: BTreeMap::new(),
+            restart_req: false,
+            won: false,
             round: Round::default(),
             reveal_us: None,
             rng: Rng::new(seed),
@@ -196,6 +212,26 @@ impl Game {
         self.round_points = self.round_points.saturating_add(delta);
         let ev = json!({ "score": self.score, "delta": delta });
         self.emit("score.changed", ev);
+    }
+
+    /// Publish a HUD value (also visible to glue via get()).
+    pub fn hud_set(&mut self, key: &str, val: Value) {
+        self.world.hud.insert(key.to_string(), val.clone());
+        self.custom.insert(key.to_string(), val);
+    }
+
+    /// A goal was reached (board cleared, word solved, ...). Advances a level or ends the game.
+    pub fn finish(&mut self, won: bool) {
+        if won {
+            self.won = true;
+            if self.world.endless || (self.world.levels_on && self.world.level < self.world.levels) {
+                let level = self.world.level;
+                self.emit("level.ended", json!({ "level": level }));
+                return;
+            }
+        }
+        let score = self.score;
+        self.emit("game.over", json!({ "score": score }));
     }
 
     /// Reserved + custom variables as seen by glue.

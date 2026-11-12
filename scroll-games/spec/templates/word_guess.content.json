@@ -1,0 +1,100 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "w1",
+      "kind": "word",
+      "prompt": "BEACH",
+      "clue": "Sand and waves"
+    },
+    {
+      "id": "w2",
+      "kind": "word",
+      "prompt": "TRAIN",
+      "clue": "Runs on rails"
+    },
+    {
+      "id": "w3",
+      "kind": "word",
+      "prompt": "LEMON",
+      "clue": "Sour yellow fruit"
+    },
+    {
+      "id": "w4",
+      "kind": "word",
+      "prompt": "PIZZA",
+      "clue": "Round and cheesy"
+    },
+    {
+      "id": "w5",
+      "kind": "word",
+      "prompt": "MUSIC",
+      "clue": "Notes in the air"
+    },
+    {
+      "id": "w6",
+      "kind": "word",
+      "prompt": "RIVER",
+      "clue": "Flows to the sea"
+    },
+    {
+      "id": "w7",
+      "kind": "word",
+      "prompt": "SUNNY",
+      "clue": "Bright and warm"
+    },
+    {
+      "id": "w8",
+      "kind": "word",
+      "prompt": "TOAST",
+      "clue": "Golden slices"
+    },
+    {
+      "id": "w9",
+      "kind": "word",
+      "prompt": "PLANE",
+      "clue": "Flies high"
+    },
+    {
+      "id": "w10",
+      "kind": "word",
+      "prompt": "CRANE",
+      "clue": "Tall machine bird"
+    },
+    {
+      "id": "w11",
+      "kind": "word",
+      "prompt": "HOTEL",
+      "clue": "Place to stay"
+    },
+    {
+      "id": "w12",
+      "kind": "word",
+      "prompt": "LIGHT",
+      "clue": "Opposite of dark"
+    },
+    {
+      "id": "w13",
+      "kind": "word",
+      "prompt": "DANCE",
+      "clue": "Move to a beat"
+    },
+    {
+      "id": "w14",
+      "kind": "word",
+      "prompt": "BERRY",
+      "clue": "Small sweet fruit"
+    },
+    {
+      "id": "w15",
+      "kind": "word",
+      "prompt": "STONE",
+      "clue": "Rock"
+    }
+  ],
+  "copy": {
+    "intro": "Tap letters, press enter. Green is right, yellow is in the word.",
+    "win": "Word wizard!",
+    "lose": "Not this time."
+  }
+}

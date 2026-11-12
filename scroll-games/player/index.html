@@ -49,6 +49,22 @@
         <p class="clue" id="clue" hidden></p>
       </article>
       <div class="choices" id="choices"></div>
+      <div class="w-hud" id="w-hud" hidden></div>
+      <div class="stage" id="stage" hidden>
+        <canvas id="world-canvas" aria-label="Play field"></canvas>
+      </div>
+      <form class="w-text" id="w-text" hidden autocomplete="off">
+        <input id="w-text-input" type="text" enterkeyhint="send" autocapitalize="off" aria-label="Your answer">
+        <button type="submit" class="btn primary">Go</button>
+        <button type="button" class="btn" id="w-mic" hidden aria-label="Speak">🎤</button>
+      </form>
+      <button class="btn primary" id="w-submit" hidden>Submit</button>
+      <button class="w-hint" id="w-hint" hidden aria-label="Hint">🦉</button>
+      <div class="w-toast" id="w-toast" hidden></div>
+      <div class="w-overlay" id="w-overlay" hidden>
+        <p id="w-overlay-text"></p>
+        <button id="w-overlay-btn" class="btn primary" hidden>Got it</button>
+      </div>
       <div class="countdown" id="countdown" hidden aria-live="assertive"><span id="countdown-n">3</span></div>
       <div class="pause-veil" id="pause-veil" hidden>
         <h2>Paused</h2>

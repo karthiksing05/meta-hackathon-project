@@ -1,0 +1,50 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "h1",
+      "kind": "hotspot",
+      "prompt": "the sunset",
+      "choices": [
+        "50",
+        "22"
+      ],
+      "media_url": "https://picsum.photos/seed/sg-m7/600/400"
+    },
+    {
+      "id": "h2",
+      "kind": "hotspot",
+      "prompt": "the boat",
+      "choices": [
+        "20",
+        "60"
+      ],
+      "media_url": "https://picsum.photos/seed/sg-m7/600/400"
+    },
+    {
+      "id": "h3",
+      "kind": "hotspot",
+      "prompt": "a seagull",
+      "choices": [
+        "78",
+        "38"
+      ],
+      "media_url": "https://picsum.photos/seed/sg-m7/600/400"
+    },
+    {
+      "id": "h4",
+      "kind": "hotspot",
+      "prompt": "the lighthouse",
+      "choices": [
+        "85",
+        "70"
+      ],
+      "media_url": "https://picsum.photos/seed/sg-m7/600/400"
+    }
+  ],
+  "copy": {
+    "intro": "Tap the things on the list. Misses cost points.",
+    "win": "Eagle eyes!",
+    "lose": "Time is up."
+  }
+}

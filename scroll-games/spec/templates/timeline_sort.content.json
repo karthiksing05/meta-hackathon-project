@@ -1,0 +1,40 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "e1",
+      "kind": "event",
+      "prompt": "Packed the bags",
+      "answer": 1
+    },
+    {
+      "id": "e2",
+      "kind": "event",
+      "prompt": "Missed the train",
+      "answer": 2
+    },
+    {
+      "id": "e3",
+      "kind": "event",
+      "prompt": "Found the beach",
+      "answer": 3
+    },
+    {
+      "id": "e4",
+      "kind": "event",
+      "prompt": "Sunset dinner",
+      "answer": 4
+    },
+    {
+      "id": "e5",
+      "kind": "event",
+      "prompt": "Flight home",
+      "answer": 5
+    }
+  ],
+  "copy": {
+    "intro": "Drag each moment onto the timeline, earliest on the left.",
+    "win": "History fixed!",
+    "lose": "Out of time."
+  }
+}

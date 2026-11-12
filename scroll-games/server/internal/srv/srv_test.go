@@ -26,6 +26,12 @@ type fakeMuse struct {
 	manifest  string
 	content   string
 	rejectAll bool // 400 on reasoning_effort
+
+	modOut    string // moderation verdict JSON; empty means all categories "none"
+	modStatus int    // non-zero: moderation calls answer with this HTTP status
+	modCalls  atomic.Int32
+
+	planDelay, contentDelay, modDelay time.Duration // injected latency per call kind
 }
 
 func newFakeMuse(t *testing.T) *fakeMuse {
@@ -40,10 +46,31 @@ func newFakeMuse(t *testing.T) *fakeMuse {
 				return
 			}
 		}
+		if rf, ok := req["response_format"].(map[string]any); ok {
+			if js, _ := rf["json_schema"].(map[string]any); js["name"] == "moderation" {
+				f.modCalls.Add(1)
+				time.Sleep(f.modDelay)
+				if f.modStatus != 0 {
+					w.WriteHeader(f.modStatus)
+					fmt.Fprint(w, `{"error":"moderation down"}`)
+					return
+				}
+				out := f.modOut
+				if out == "" {
+					out = modVerdict(nil)
+				}
+				b, _ := json.Marshal(out)
+				fmt.Fprintf(w, `{"choices":[{"message":{"content":%s}}],"usage":{"prompt_tokens":500,"completion_tokens":60}}`, b)
+				return
+			}
+		}
 		f.calls.Add(1)
 		out := f.manifest
 		if req["model"] == ModelEmber {
 			out = f.content
+			time.Sleep(f.contentDelay)
+		} else {
+			time.Sleep(f.planDelay)
 		}
 		if rf, ok := req["response_format"].(map[string]any); ok {
 			if js, _ := rf["json_schema"].(map[string]any); js["name"] == "brief" {

@@ -1,5 +1,7 @@
 // Scroll Games player: renders the runtime's JSON view model and bridges to the host.
 import init, { Session } from './pkg/sg_runtime.js';
+import { renderExt } from './ext.js';
+import { initWorld, renderWorld, worldClock } from './world.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -70,9 +72,10 @@ async function loadFromQuery() {
   }
   if (seed == null) seed = randomSeed();
   if (QUERY.local) {
+    const tpl = (params.get('template') || 'quiz').replace(/[^a-z0-9_]/g, '');
     const [manifest, content] = await Promise.all([
-      fetchJSON('../spec/templates/quiz.manifest.json'),
-      fetchJSON('../spec/templates/trip-trivia.content.json'),
+      fetchJSON(`../spec/templates/${tpl}.manifest.json`),
+      fetchJSON(`../spec/templates/${tpl === 'quiz' ? 'trip-trivia' : tpl}.content.json`),
     ]);
     return { manifest, content, seed, gameId: QUERY.game || 'local' };
   }
@@ -88,6 +91,7 @@ function dailyLabel(date) {
 
 function present(payload) {
   stopLoop();
+  $('btn-again').hidden = false;
   loaded = payload;
   finished = false;
   try {
@@ -142,10 +146,10 @@ function renderChoices(view) {
       b.textContent = c.label;
       b.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        sendChoice(i);
+        pickChoice(i);
       });
       b.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') sendChoice(i);
+        if (e.key === 'Enter' || e.key === ' ') pickChoice(i);
       });
       box.appendChild(b);
     });
@@ -179,10 +183,17 @@ function renderCard(view) {
 }
 
 function render(view) {
+  renderExt(view.ext || {}, view);
+  const w = view.world;
+  const stage = !!(w && w.space);
+  multiSelect = !!(w && w.input && w.input.select);
+  if (w && (view.state === 'playing' || view.state === 'countdown' || view.state === 'paused')) renderWorld(w, view);
   if (view.state === 'playing' || view.state === 'countdown' || view.state === 'paused') {
     applyTheme(view);
-    renderCard(view);
-    renderChoices(view);
+    if (!stage) {
+      renderCard(view);
+      renderChoices(view);
+    }
     $('hud-round').textContent = view.total_rounds ? `${Math.max(view.round, 1)}/${view.total_rounds}` : '';
     $('hud-round').hidden = !view.total_rounds;
     const score = $('hud-score');
@@ -197,16 +208,19 @@ function render(view) {
     $('hud-streak-n').textContent = view.streak;
     $('hud-mult').hidden = view.multiplier <= 1;
     $('hud-mult').textContent = `×${view.multiplier}`;
-    const frac = view.round_time_ms > 0 ? Math.max(0, Math.min(1, view.time_left_ms / view.round_time_ms)) : 1;
-    $('timer').hidden = view.round_time_ms <= 0;
+    const clock = w ? worldClock(w) : null;
+    const total = clock ? clock.total : view.round_time_ms;
+    const left = clock ? clock.left : view.time_left_ms;
+    const frac = total > 0 ? Math.max(0, Math.min(1, left / total)) : 1;
+    $('timer').hidden = total <= 0;
     $('timer-fill').style.transform = `scaleX(${frac})`;
-    $('timer').classList.toggle('low', view.round_time_ms > 0 && view.time_left_ms < 3000 && view.time_left_ms > 0);
+    $('timer').classList.toggle('low', total > 0 && left < 3000 && left > 0);
     $('timer').setAttribute('aria-valuenow', String(Math.round(frac * 100)));
     const banner = $('banner');
     banner.hidden = !view.banner;
     if (banner.textContent !== view.banner) banner.textContent = view.banner;
     const clue = $('clue');
-    clue.hidden = !view.clue;
+    clue.hidden = !view.clue || stage;
     clue.textContent = view.clue || '';
     const cd = $('countdown');
     cd.hidden = view.countdown == null;
@@ -236,12 +250,32 @@ function sendChoice(index) {
   session.input(JSON.stringify({ type: 'choice', index }));
 }
 
+function sendInput(msg) {
+  if (!session || finished) return;
+  session.input(JSON.stringify(msg));
+}
+
+let multiSelect = false;
+function pickChoice(index) {
+  if (multiSelect) sendInput({ type: 'select', index });
+  else sendChoice(index);
+}
+
 function setPaused(on) {
   if (!session || finished || paused === on) return;
   paused = on;
   session.input(JSON.stringify({ type: on ? 'pause' : 'resume' }));
   if (!on) last = performance.now();
 }
+
+// ext.js (meta concepts) talks to the host through window events.
+window.addEventListener('sg:input', (e) => sendInput(e.detail));
+window.addEventListener('sg:social', (e) => {
+  const detail = e.detail || {};
+  (window.SG.social = window.SG.social || []).push(detail);
+  if (iosHandler) post({ type: 'social', game_id: loaded && loaded.gameId, challenge_id: QUERY.challenge, ...detail });
+  else if (detail.type === 'rematch') $('btn-again').click();
+});
 
 $('btn-pause').addEventListener('click', () => setPaused(true));
 $('btn-resume').addEventListener('click', () => setPaused(false));
@@ -333,6 +367,13 @@ function showResult(view, result) {
   $('beat-line').hidden = true;
   $('btn-share').hidden = true;
   $('btn-get').hidden = !!iosHandler;
+  const daily = view.world && view.world.extra && view.world.extra.daily_puzzle;
+  $('btn-again').hidden = !!daily;
+  if (daily) {
+    $('result-copy').textContent = `${$('result-copy').textContent} New puzzle at ${String(daily.reset_hour_utc).padStart(2, '0')}:00 UTC.`.trim();
+  }
+  const practice = view.world && view.world.extra && view.world.extra.practice;
+  if (practice) $('result-kicker').textContent = 'Practice run (not counted)';
   $('btn-get').href = QUERY.api ? `${QUERY.api}/` : '/';
   showScreen('result');
   if (!reducedMotion && good) confetti();
@@ -479,6 +520,7 @@ function drawFx() {
 async function boot() {
   try {
     await init();
+    initWorld(sendInput);
     if (window.__sgPending) {
       const p = window.__sgPending;
       window.__sgPending = null;

@@ -24,6 +24,8 @@ struct Entry {
     id: String,
     on: Vec<String>,
     ast: AST,
+    /// Name the script gave the event parameter of `on_event`.
+    param: String,
     disabled: bool,
 }
 
@@ -127,14 +129,12 @@ impl GlueHost {
         let mut entries = Vec::new();
         let mut errors = Vec::new();
         for (i, g) in glue.iter().enumerate() {
-            match engine.compile(&g.script) {
-                Ok(ast) => {
-                    if !ast.iter_functions().any(|f| f.name == "on_event" && f.params.len() == 1) {
-                        errors.push((i, "script must define fn on_event(ev)".to_string()));
-                        continue;
-                    }
-                    entries.push(Entry { id: g.id.clone(), on: g.on.clone(), ast, disabled: false });
-                }
+            let Some((param, source)) = split_on_event(&g.script) else {
+                errors.push((i, "script must define fn on_event(ev)".to_string()));
+                continue;
+            };
+            match engine.compile(&source) {
+                Ok(ast) => entries.push(Entry { id: g.id.clone(), on: g.on.clone(), ast, param, disabled: false }),
                 Err(e) => errors.push((i, format!("compile error: {e}"))),
             }
         }
@@ -168,14 +168,29 @@ impl GlueHost {
         let mut arg = RMap::new();
         arg.insert("name".into(), Dynamic::from(ev.name.clone()));
         arg.insert("data".into(), value_to_dyn(&ev.data));
+        let initial = g.snapshot();
         let mut scope = Scope::new();
-        let res = self.engine.call_fn::<Dynamic>(&mut scope, &self.entries[i].ast, "on_event", (arg,));
+        for (k, v) in &initial {
+            if is_ident(k) {
+                scope.push_dynamic(k.as_str(), value_to_dyn(v));
+            }
+        }
+        let base = scope.len();
+        scope.push_dynamic(self.entries[i].param.as_str(), Dynamic::from(arg));
+        let res = self.engine.run_ast_with_scope(&mut scope, &self.entries[i].ast);
         let cx = std::mem::take(&mut *self.ctx.borrow_mut());
         if let Err(e) = res {
             return Err(e.to_string());
         }
         if let Some(r) = cx.rng {
             g.rng = r;
+        }
+        // Bare-variable assignments (`score += 10`) land in the scope; shadowing `let`s sit past `base`.
+        for (name, _, val) in scope.iter().take(base) {
+            let now = dyn_to_value(&val);
+            if initial.get(name) != Some(&now) {
+                g.set_var(name, now);
+            }
         }
         for (k, v) in cx.writes {
             g.set_var(&k, v);
@@ -211,6 +226,149 @@ impl GlueHost {
         errors.dedup();
         errors
     }
+}
+
+fn is_ident(s: &str) -> bool {
+    let mut chars = s.chars();
+    matches!(chars.next(), Some(c) if c.is_ascii_alphabetic() || c == '_')
+        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
+}
+
+/// Skip a string, char literal or comment starting at `i`; returns the index after it, or `i` if none starts here.
+fn skip_literal(b: &[u8], i: usize) -> usize {
+    let n = b.len();
+    match b[i] {
+        b'"' | b'\'' => {
+            let q = b[i];
+            let mut j = i + 1;
+            while j < n && b[j] != q {
+                j += if b[j] == b'\\' { 2 } else { 1 };
+            }
+            (j + 1).min(n)
+        }
+        b'`' => {
+            let mut j = i + 1;
+            while j < n && b[j] != b'`' {
+                j += 1;
+            }
+            (j + 1).min(n)
+        }
+        b'/' if i + 1 < n && b[i + 1] == b'/' => {
+            let mut j = i;
+            while j < n && b[j] != b'\n' {
+                j += 1;
+            }
+            j
+        }
+        b'/' if i + 1 < n && b[i + 1] == b'*' => {
+            let (mut j, mut depth) = (i + 2, 1);
+            while j < n && depth > 0 {
+                if b[j] == b'/' && j + 1 < n && b[j + 1] == b'*' {
+                    depth += 1;
+                    j += 2;
+                } else if b[j] == b'*' && j + 1 < n && b[j + 1] == b'/' {
+                    depth -= 1;
+                    j += 2;
+                } else {
+                    j += 1;
+                }
+            }
+            j
+        }
+        _ => i,
+    }
+}
+
+fn skip_ws(b: &[u8], mut i: usize) -> usize {
+    while i < b.len() && b[i].is_ascii_whitespace() {
+        i += 1;
+    }
+    i
+}
+
+/// Rhai functions cannot see scope variables, so the body of `fn on_event(ev) { .. }` is lifted to
+/// top-level statements (run with a scope holding the game vars and the event). Returns the event
+/// parameter name and the rewritten script: other functions first, then the body.
+fn split_on_event(src: &str) -> Option<(String, String)> {
+    let b = src.as_bytes();
+    let n = b.len();
+    let mut depth = 0i32;
+    let mut i = 0;
+    while i < n {
+        let j = skip_literal(b, i);
+        if j != i {
+            i = j;
+            continue;
+        }
+        match b[i] {
+            b'{' => depth += 1,
+            b'}' => depth -= 1,
+            b'f' if depth == 0
+                && src[i..].starts_with("fn")
+                && (i == 0 || !(b[i - 1].is_ascii_alphanumeric() || b[i - 1] == b'_')) =>
+            {
+                if let Some(found) = parse_on_event(src, i) {
+                    return Some(found);
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    None
+}
+
+fn parse_on_event(src: &str, at: usize) -> Option<(String, String)> {
+    let b = src.as_bytes();
+    let mut i = skip_ws(b, at + 2);
+    let rest = &src[i..];
+    if !rest.starts_with("on_event") {
+        return None;
+    }
+    i = skip_ws(b, i + "on_event".len());
+    if b.get(i) != Some(&b'(') {
+        return None;
+    }
+    i = skip_ws(b, i + 1);
+    let start = i;
+    while i < b.len() && (b[i].is_ascii_alphanumeric() || b[i] == b'_') {
+        i += 1;
+    }
+    let param = &src[start..i];
+    if !is_ident(param) {
+        return None;
+    }
+    i = skip_ws(b, i);
+    if b.get(i) != Some(&b')') {
+        return None;
+    }
+    i = skip_ws(b, i + 1);
+    if b.get(i) != Some(&b'{') {
+        return None;
+    }
+    let open = i;
+    let mut depth = 0i32;
+    while i < b.len() {
+        let j = skip_literal(b, i);
+        if j != i {
+            i = j;
+            continue;
+        }
+        match b[i] {
+            b'{' => depth += 1,
+            b'}' => {
+                depth -= 1;
+                if depth == 0 {
+                    let body = &src[open + 1..i];
+                    let script = format!("{}\n{}\n{}", &src[..at], &src[i + 1..], body);
+                    return Some((param.to_string(), script));
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    None
 }
 
 fn synthetic_data(name: &str, round: i64) -> Value {

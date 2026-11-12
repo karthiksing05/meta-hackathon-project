@@ -40,6 +40,7 @@ type genOut struct {
 	Prompt, Completion int
 	Notes              []string
 	Stages             map[string]int64
+	Moderation         *Moderation
 }
 
 // genJob is one memoized generation run. It may be started speculatively when the brief is
@@ -124,8 +125,9 @@ func (a *App) prepare(req GenerateReq) (Brief, json.RawMessage, []Media, string,
 	return brief, briefJSON, media, "gen2:" + hashKey(string(briefJSON), strings.Join(mids, ",")), nil
 }
 
-// getOrStart returns the running job for key, a persisted result, or starts a new job.
-func (a *App) getOrStart(key string, brief Brief, media []Media) (*genJob, *genOut) {
+// getOrStart returns the running job for key, a persisted (or, after a speculative run, recent) result, or starts a new job.
+// A speculative run that ends in a fallback stays joinable for recentTTL so the Generate that follows reuses it.
+func (a *App) getOrStart(key string, brief Brief, media []Media, speculative bool) (*genJob, *genOut) {
 	a.jobsMu.Lock()
 	defer a.jobsMu.Unlock()
 	if j, ok := a.jobs[key]; ok {
@@ -137,6 +139,13 @@ func (a *App) getOrStart(key string, brief Brief, media []Media) (*genJob, *genO
 			return nil, &genOut{Manifest: c.Manifest, Content: c.Content, Source: "cache", Stages: map[string]int64{}}
 		}
 	}
+	if r, ok := a.recent[key]; ok {
+		if a.now().Sub(r.at) < recentTTL {
+			out := r.out
+			return nil, &out
+		}
+		delete(a.recent, key)
+	}
 	j := newGenJob()
 	a.jobs[key] = j
 	go func() {
@@ -146,6 +155,9 @@ func (a *App) getOrStart(key string, brief Brief, media []Media) (*genJob, *genO
 		}
 		a.jobsMu.Lock()
 		delete(a.jobs, key)
+		if out.Source != "muse" && speculative {
+			a.recent[key] = recentGen{out: out, at: a.now()}
+		}
 		a.jobsMu.Unlock()
 		j.finish(out)
 	}()
@@ -173,7 +185,7 @@ func (a *App) speculate(b Brief, media []Media) {
 	if running >= 4 {
 		return
 	}
-	a.getOrStart(key, brief, media2)
+	a.getOrStart(key, brief, media2, true)
 }
 
 // Generate runs (or joins) the plan/content pipeline and saves a draft game.
@@ -183,7 +195,7 @@ func (a *App) Generate(ctx context.Context, userID string, req GenerateReq, emit
 	if err != nil {
 		return nil, err
 	}
-	job, cached := a.getOrStart(key, brief, media)
+	job, cached := a.getOrStart(key, brief, media, false)
 	var out genOut
 	if cached != nil {
 		out = *cached
@@ -196,6 +208,12 @@ func (a *App) Generate(ctx context.Context, userID string, req GenerateReq, emit
 			}
 			emit(ev)
 		}
+		emit(Event{Stage: "moderate", Status: "start"})
+		ms := time.Now()
+		if out.Moderation == nil {
+			out.Moderation = a.moderate(ctx, a.genModText(out.Manifest, out.Content, media), out.Manifest, nil)
+		}
+		emit(Event{Stage: "moderate", Status: "done", MS: time.Since(ms).Milliseconds()})
 	} else if out, err = job.follow(ctx, emit); err != nil {
 		return nil, err
 	}
@@ -211,6 +229,7 @@ func (a *App) Generate(ctx context.Context, userID string, req GenerateReq, emit
 	ms := time.Since(ss).Milliseconds()
 	emit(Event{Stage: "save", Status: "done", MS: ms})
 	a.store.mu.Lock()
+	g.Moderation = out.Moderation
 	g.Gen.Stages["save"] = ms
 	a.store.mu.Unlock()
 	return g, nil
@@ -232,6 +251,9 @@ func (a *App) runGen(brief Brief, media []Media, emit Emit) genOut {
 	}
 	planCh := make(chan result, 1)
 	contentCh := make(chan result, 1)
+	var contentMod <-chan *contentVerdict
+	var contentModStart time.Time
+	var contentModContent json.RawMessage
 
 	emit(Event{Stage: "plan", Status: "start"})
 	emit(Event{Stage: "glue", Status: "start"})
@@ -260,6 +282,14 @@ func (a *App) runGen(brief Brief, media []Media, emit Emit) genOut {
 		ms := time.Since(s).Milliseconds()
 		stage("content", ms)
 		emit(Event{Stage: "content", Status: "done", MS: ms})
+		// Moderate the player-visible content now (the template content when Ember failed), overlapping the still-running plan.
+		contentModContent = raw
+		if err != nil {
+			contentModContent = a.templateContent(brief, media)
+		}
+		emit(Event{Stage: "moderate", Status: "start"})
+		contentModStart = time.Now()
+		contentMod = a.startContentModeration(a.contentModText(contentModContent, media), acc)
 		contentCh <- result{raw, err}
 	}()
 	plan, cont := <-planCh, <-contentCh
@@ -284,6 +314,11 @@ func (a *App) runGen(brief Brief, media []Media, emit Emit) genOut {
 	}
 
 	emit(Event{Stage: "validate", Status: "start"})
+	modStart := contentModStart
+	if contentMod == nil {
+		emit(Event{Stage: "moderate", Status: "start"})
+		modStart = time.Now()
+	}
 	vs := time.Now()
 	vr, verr := a.tool.Validate(manifest, content)
 	stage("validate", time.Since(vs).Milliseconds())
@@ -340,17 +375,33 @@ func (a *App) runGen(brief Brief, media []Media, emit Emit) genOut {
 		emit(Event{Stage: "repair", Status: "done", MS: ms})
 	}
 
+	var mod *Moderation
+	texts := a.genModText(manifest, content, media)
+	if contentMod != nil && string(content) == string(contentModContent) {
+		cv := <-contentMod
+		mod = a.moderateWithContent(context.Background(), cv, texts, a.planModText(manifest), manifest, acc, modStart)
+	} else {
+		mod = a.moderate(context.Background(), texts, manifest, acc)
+	}
+	modMS := time.Since(modStart).Milliseconds()
+	stage("moderate", modMS)
+	emit(Event{Stage: "moderate", Status: "done", MS: modMS})
+
 	acc.mu.Lock()
 	defer acc.mu.Unlock()
 	stMu.Lock()
 	defer stMu.Unlock()
 	return genOut{Manifest: manifest, Content: content, Source: source, Cost: acc.cost, Prompt: acc.prompt,
-		Completion: acc.completion, Notes: append([]string(nil), acc.notes...), Stages: stages}
+		Completion: acc.completion, Notes: append([]string(nil), acc.notes...), Stages: stages, Moderation: mod}
 }
 
-func (a *App) callManifest(ctx context.Context, acc *runAcc, purpose, system, user string, b Brief) (json.RawMessage, error) {
-	res, err := a.muse.Chat(ctx, ChatReq{Model: ModelWonder, Purpose: purpose, System: system, User: user, MaxTokens: a.cfg.PlanMaxTokens,
-		SchemaName: "manifest", Schema: manifestSchema(), Reasoning: a.cfg.PlanReasoning})
+// genrePlanMaxTokens caps the genre planner answer (a short tuning, not a whole manifest); reasoning tokens count against it.
+const genrePlanMaxTokens = 1200
+
+// askPlanner runs one Wonder call and returns the JSON object it answered with.
+func (a *App) askPlanner(ctx context.Context, acc *runAcc, purpose, system, user string, schema map[string]any, maxTokens int) (map[string]any, error) {
+	res, err := a.muse.Chat(ctx, ChatReq{Model: ModelWonder, Purpose: purpose, System: system, User: user, MaxTokens: maxTokens,
+		SchemaName: "manifest", Schema: schema, Reasoning: a.cfg.PlanReasoning})
 	acc.add(res, err, purpose)
 	if err != nil {
 		return nil, err
@@ -364,10 +415,12 @@ func (a *App) callManifest(ctx context.Context, acc *runAcc, purpose, system, us
 	if err := json.Unmarshal(obj, &m); err != nil {
 		return nil, err
 	}
-	if _, ok := m["concepts"].([]any); !ok {
-		return nil, errors.New("manifest has no concepts")
-	}
-	m["schema"], m["template"], m["level"] = "sg.manifest/1", "quiz", b.Level
+	return m, nil
+}
+
+// finishManifest stamps the server-owned fields on a full manifest.
+func finishManifest(m map[string]any, b Brief) json.RawMessage {
+	m["schema"], m["template"], m["level"] = "sg.manifest/1", b.Genre(), b.Level
 	if s, _ := m["title"].(string); strings.TrimSpace(s) == "" {
 		m["title"] = b.TitleIdea
 	}
@@ -375,17 +428,121 @@ func (a *App) callManifest(ctx context.Context, acc *runAcc, purpose, system, us
 		m["seed_scope"] = b.SeedScope()
 	}
 	out, _ := json.Marshal(m)
-	return out, nil
+	return out
+}
+
+func (a *App) callManifest(ctx context.Context, acc *runAcc, purpose, system, user string, b Brief) (json.RawMessage, error) {
+	m, err := a.askPlanner(ctx, acc, purpose, system, user, manifestSchema(), a.cfg.PlanMaxTokens)
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := m["concepts"].([]any); !ok {
+		return nil, errors.New("manifest has no concepts")
+	}
+	return finishManifest(m, b), nil
+}
+
+// genreBase is the brief-customized template manifest the planner of a non-quiz genre tunes.
+func (a *App) genreBase(b Brief) (map[string]any, bool) {
+	g := b.Genre()
+	if g == "quiz" {
+		return nil, false
+	}
+	raw, ok := a.genreManifest(b, g)
+	if !ok {
+		return nil, false
+	}
+	var m map[string]any
+	if json.Unmarshal(raw, &m) != nil {
+		return nil, false
+	}
+	return m, true
+}
+
+// mergeGenrePlan applies the planner's description, per-concept params and glue to a genre template.
+func mergeGenrePlan(base, plan map[string]any) map[string]any {
+	if s, _ := plan["description"].(string); strings.TrimSpace(s) != "" {
+		base["description"] = truncate(strings.TrimSpace(s), 90)
+	}
+	params, _ := plan["params"].(map[string]any)
+	concepts, _ := base["concepts"].([]any)
+	for _, c := range concepts {
+		cm, _ := c.(map[string]any)
+		id, _ := cm["id"].(string)
+		over, _ := params[id].(map[string]any)
+		if serverSetConcepts[id] || len(over) == 0 {
+			continue
+		}
+		dst, _ := cm["params"].(map[string]any)
+		if dst == nil {
+			dst = map[string]any{}
+			cm["params"] = dst
+		}
+		for k, v := range over {
+			dst[k] = v
+		}
+	}
+	if glue, _ := plan["glue"].([]any); len(glue) > 0 {
+		base["glue"] = glue
+	}
+	return base
+}
+
+// genrePlanOf is the planner-shaped view (description, params, glue) of a customized manifest, shown back on repair.
+func genrePlanOf(manifest json.RawMessage) map[string]any {
+	var m map[string]any
+	_ = json.Unmarshal(manifest, &m)
+	params := map[string]any{}
+	concepts, _ := m["concepts"].([]any)
+	for _, c := range concepts {
+		cm, _ := c.(map[string]any)
+		id, _ := cm["id"].(string)
+		if p, _ := cm["params"].(map[string]any); len(p) > 0 && !serverSetConcepts[id] {
+			params[id] = p
+		}
+	}
+	return map[string]any{"description": m["description"], "params": params, "glue": m["glue"]}
+}
+
+// planGenre asks for a tuning of the genre template and merges it in. errs, when set, is a failed attempt to correct.
+func (a *App) planGenre(ctx context.Context, acc *runAcc, purpose string, b Brief, base map[string]any, bad json.RawMessage, errs string) (json.RawMessage, error) {
+	user := genrePlanUser(b)
+	if bad != nil {
+		prev, _ := json.Marshal(genrePlanOf(bad))
+		user += "\nYour previous answer failed validation.\nANSWER:\n" + string(prev) + "\nVALIDATOR ERRORS:\n" + truncate(errs, 1200) +
+			"\nReturn the corrected full answer. If a glue script is the problem, simplify it."
+	}
+	plan, err := a.askPlanner(ctx, acc, purpose, genrePlanSystem(a.concepts, base), user, genrePlanSchema(), genrePlanMaxTokens)
+	if err != nil {
+		return nil, err
+	}
+	if _, full := plan["concepts"].([]any); full {
+		return finishManifest(plan, b), nil
+	}
+	return finishManifest(mergeGenrePlan(base, plan), b), nil
+}
+
+// quizCatalog is the catalog digest limited to the concepts of the example manifest.
+func (a *App) quizCatalog(example []byte) string {
+	return catalogDigest(a.concepts, manifestConceptIDs(example))
 }
 
 func (a *App) planManifest(ctx context.Context, acc *runAcc, b Brief) (json.RawMessage, error) {
-	return a.callManifest(ctx, acc, "plan", planSystem(a.catalog, a.quizManifestTemplate()), planUser(b), b)
+	if base, ok := a.genreBase(b); ok {
+		return a.planGenre(ctx, acc, "plan", b, base, nil, "")
+	}
+	example := a.genreExample(b)
+	return a.callManifest(ctx, acc, "plan", planSystem(a.quizCatalog(example), example), planUser(b), b)
 }
 
 func (a *App) repairManifest(ctx context.Context, acc *runAcc, b Brief, bad json.RawMessage, errs string) (json.RawMessage, error) {
+	if base, ok := a.genreBase(b); ok {
+		return a.planGenre(ctx, acc, "repair", b, base, bad, errs)
+	}
 	user := planUser(b) + "\nYour previous manifest failed validation.\nMANIFEST:\n" + string(bad) + "\nVALIDATOR ERRORS:\n" + truncate(errs, 1500) +
 		"\nReturn the corrected full manifest. If a glue script is the problem, simplify it."
-	return a.callManifest(ctx, acc, "repair", planSystem(a.catalog, a.quizManifestTemplate()), user, b)
+	example := a.genreExample(b)
+	return a.callManifest(ctx, acc, "repair", planSystem(a.quizCatalog(example), example), user, b)
 }
 
 // normalizeContent validates Ember output against sg.content/1 and fills ids and media urls; needs >=3 valid items.
@@ -446,6 +603,9 @@ func normalizeContent(raw json.RawMessage, media []Media, maxItems int) (json.Ra
 }
 
 func (a *App) planContent(ctx context.Context, acc *runAcc, b Brief, media []Media) (json.RawMessage, error) {
+	if raw, handled, err := a.planGenreContent(ctx, acc, b, media); handled {
+		return raw, err
+	}
 	var user strings.Builder
 	briefJSON, _ := json.Marshal(map[string]any{"title": b.TitleIdea, "intent": b.Intent, "tone": b.Tone, "difficulty": b.Difficulty, "mood": b.Mood})
 	fmt.Fprintf(&user, "BRIEF: %s\nQuestions: %d\nPhotos:\n", briefJSON, b.Limits.Rounds)
@@ -468,6 +628,28 @@ func (a *App) planContent(ctx context.Context, acc *runAcc, b Brief, media []Med
 		acc.add(nil, err, "content")
 	}
 	return out, err
+}
+
+// contentModText collects the moderation input that depends only on the content (and photo captions).
+func (a *App) contentModText(content json.RawMessage, media []Media) []modText {
+	return a.genModText(nil, content, media)
+}
+
+// planModText collects the moderation input that depends only on the manifest (title, description, glue strings).
+func (a *App) planModText(manifest json.RawMessage) []modText {
+	return a.genModText(manifest, nil, nil)
+}
+
+// genModText collects the moderation input for freshly generated manifest and content.
+func (a *App) genModText(manifest, content json.RawMessage, media []Media) []modText {
+	return collectModText("", "", manifest, content, func(id string) (Media, bool) {
+		for _, m := range media {
+			if m.ID == id {
+				return m, true
+			}
+		}
+		return Media{}, false
+	})
 }
 
 func glueCount(manifest json.RawMessage) int {

@@ -1,0 +1,106 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Whack-a-Memory",
+  "description": "Tap the friends that pop up, avoid the decoys.",
+  "level": "remix",
+  "template": "whack_mole",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.grid_board",
+      "params": {
+        "cols": 3,
+        "rows": 3
+      }
+    },
+    {
+      "id": "entity.collectible",
+      "params": {
+        "value": 10,
+        "emoji": "🐹",
+        "lifetime_ms": 1100
+      }
+    },
+    {
+      "id": "entity.obstacle",
+      "params": {
+        "damage": 1,
+        "emoji": "💣",
+        "lifetime_ms": 1100
+      }
+    },
+    {
+      "id": "behavior.spawn_wave",
+      "params": {
+        "every_ms": 650
+      }
+    },
+    {
+      "id": "behavior.spawn_rate_ramp",
+      "params": {
+        "ramp_per_min": 1.0
+      }
+    },
+    {
+      "id": "input.tap_target",
+      "params": {
+        "hit_slop": 6
+      }
+    },
+    {
+      "id": "rule.lives",
+      "params": {
+        "lives": 3
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 40000
+      }
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "candy",
+        "mood": "intense",
+        "emoji": "🔨"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [
+    {
+      "id": "juice",
+      "on": [
+        "entity.collected",
+        "collision.hit"
+      ],
+      "script": "fn on_event(ev) {\n    if ev.name == \"entity.collected\" {\n        emit(\"feedback.haptic\", #{ style: \"light\" });\n    } else if ev.data.harm == true {\n        emit(\"feedback.flash\", #{ color: \"red\" });\n        emit(\"feedback.haptic\", #{ style: \"error\" });\n    }\n}\n"
+    }
+  ],
+  "theme": {
+    "palette": "candy",
+    "mood": "intense",
+    "emoji": "🔨"
+  }
+}

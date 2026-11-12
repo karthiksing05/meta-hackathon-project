@@ -1,0 +1,15 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "i1",
+      "kind": "sprite",
+      "prompt": "Basket"
+    }
+  ],
+  "copy": {
+    "intro": "Drag the basket under the falling stars.",
+    "win": "Starry night!",
+    "lose": "Boom."
+  }
+}

@@ -151,6 +151,11 @@ actor ScrollGamesAPI {
         return (game, item)
     }
 
+    /// Reports a game; the server hides it from everyone but its creator once two people report it.
+    func reportGame(gameID: String, reason: String) async throws {
+        let _: JSONValue = try await send("POST", "/api/games/\(gameID)/report", body: .object(["reason": .string(reason)]))
+    }
+
     // MARK: Play
 
     func submitPlay(gameID: String, result: SGPlayResult, challengeID: String?, dailyDate: String? = nil) async throws -> SGPlayResponse {

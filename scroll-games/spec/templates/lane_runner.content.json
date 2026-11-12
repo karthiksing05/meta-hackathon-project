@@ -1,0 +1,15 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "i1",
+      "kind": "sprite",
+      "prompt": "Runner"
+    }
+  ],
+  "copy": {
+    "intro": "Swipe left and right to switch lanes. Coins score, rocks cost a life.",
+    "win": "What a run!",
+    "lose": "Tripped up. Run it again?"
+  }
+}

@@ -95,6 +95,7 @@ final class SGCreateModel {
         ("content", "Writing content with Ember"),
         ("glue", "Writing new mechanics"),
         ("validate", "Validating"),
+        ("moderate", "Checking content"),
         ("repair", "Repairing"),
         ("save", "Saving"),
     ]
@@ -250,6 +251,14 @@ final class SGCreateModel {
             Haptics.success()
             return (result.game ?? game, result.feedItem)
         } catch {
+            if case SGError.status(422, _) = error {
+                // Blocked by moderation: reload the game to get the verdict and reasons.
+                if let updated = try? await api.game(id: game.id) {
+                    self.game = updated
+                    publishError = nil
+                    return nil
+                }
+            }
             publishError = error.localizedDescription
             return nil
         }

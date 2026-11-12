@@ -1,0 +1,88 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Merge 2048",
+  "description": "Swipe to slide and merge equal tiles.",
+  "level": "remix",
+  "template": "swipe_merge",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.grid_board",
+      "params": {
+        "cols": 4,
+        "rows": 4
+      }
+    },
+    {
+      "id": "entity.tile",
+      "params": {
+        "kinds": 5
+      }
+    },
+    {
+      "id": "behavior.merge_adjacent",
+      "params": {
+        "merge_to": 2
+      }
+    },
+    {
+      "id": "input.swipe_direction",
+      "params": {
+        "min_distance": 20,
+        "directions": "four"
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 20
+      }
+    },
+    {
+      "id": "rule.win_target",
+      "params": {
+        "target": 600
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 120000
+      }
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "sunset",
+        "mood": "cozy",
+        "emoji": "🔢"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "sunset",
+    "mood": "cozy",
+    "emoji": "🔢"
+  }
+}

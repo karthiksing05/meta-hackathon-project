@@ -1,0 +1,50 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "c1",
+      "kind": "card",
+      "prompt": "🌅"
+    },
+    {
+      "id": "c2",
+      "kind": "card",
+      "prompt": "🍝"
+    },
+    {
+      "id": "c3",
+      "kind": "card",
+      "prompt": "🚋"
+    },
+    {
+      "id": "c4",
+      "kind": "card",
+      "prompt": "🏖️"
+    },
+    {
+      "id": "c5",
+      "kind": "card",
+      "prompt": "🎸"
+    },
+    {
+      "id": "c6",
+      "kind": "card",
+      "prompt": "⛰️"
+    },
+    {
+      "id": "c7",
+      "kind": "card",
+      "prompt": "🍷"
+    },
+    {
+      "id": "c8",
+      "kind": "card",
+      "prompt": "🛶"
+    }
+  ],
+  "copy": {
+    "intro": "Memorize the cards, then match every pair.",
+    "win": "Perfect memory!",
+    "lose": "Time ran out."
+  }
+}

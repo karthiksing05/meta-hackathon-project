@@ -8,8 +8,8 @@ Four steps in `SGCreateFlowView.swift`, from the Games tab "Make a game" button.
 
 1. Request: free-text prompt ("What kind of game?"), creator level (default Remix; Compose and Free are accepted by the API), optional photos (see opt-in rules). Continue is disabled while the prompt is empty. Button: "Review brief".
 2. Brief review: `POST /api/briefs` returns an editable brief (intent, audience, mood, energy, competition solo/versus/daily, rounds and duration, title idea, glue ideas), labeled "From Muse", "Fallback brief" or "Offline sample". Copy: "This is the plan Wonder will build from. Change anything before you generate." Mood is fixed at creation. Server starts generating speculatively as soon as the brief returns; editing the brief starts a new job.
-3. Generating and preview: `POST /api/games/generate` over SSE. Stage list: plan, content, glue, validate, repair (only if it runs), save, with per-stage ms and "Done in N s". The close gesture is disabled while generating. The preview plays the game with a random seed and shows "Preview score".
-4. Publish: creates a feed item and sets `moderation: "stub-pass"`. The screen says "Moderation: stub (always passes in this demo)".
+3. Generating and preview: `POST /api/games/generate` over SSE. Stage list: plan, content, glue, validate, "Checking content" (moderation), repair (only if it runs), save, with per-stage ms and "Done in N s". The close gesture is disabled while generating. The preview plays the game with a random seed and shows "Preview score".
+4. Publish: runs moderation (the verdict computed during generation is reused). Pass publishes with "Checked by Muse: passed". Flagged publishes but only the creator sees it until review. Blocked returns 422, shows the reasons with an "Edit brief" action and keeps the game a draft. If Muse is unavailable the screen says "Muse was unavailable. Passed basic checks only."
 
 ## Play flow and result screen (built)
 
@@ -57,9 +57,11 @@ Question and choice order are shuffled by `meta.seeded_random`, so the same seed
 - At most 8 photos are selected; only captions inform Ember's questions.
 - Not built: consent from other people in a photo, per-photo visibility rules.
 
-## Moderation stub (built as a stub)
+## Moderation (built)
 
-Publish always passes and records `moderation: "stub-pass"`. The UI says it is a stub. We say: "Moderation is a placeholder in this prototype. Generated games are not reviewed. A real product needs classification before publish, reporting and takedown." No reports, blocking or review queue exist.
+Before a game can go public it passes two checks. Free deterministic pre-checks run first (blocklists for slurs, sexual content, self-harm and violent threats; emails, phone numbers and street addresses; spam wording; a small real-person list; length limits). Then one Muse Ember call classifies all player-visible text and the captions of photos used into hate, harassment, sexual, violence, self-harm, personal info and spam, each none, low or high, with a reason (about 1.7 s and $0.0003 measured on the Lisbon game; it runs in parallel with validation). Any high blocks publish (422, game stays a draft). Any low flags it: published, but visible only to its creator until reviewed. If Muse fails or times out (5 s) the pre-check result stands and the verdict says `pass-precheck-only`.
+
+Any user can report a game (`POST /api/games/{id}/report`); two distinct reporters hide it from everyone but its creator pending review, and `GET /api/moderation/queue` lists flagged and reported games. Not built: human review tools, appeals, image moderation (only captions are checked, not pixels), a Report button in the app (API only), auth on the queue, and classifier accuracy measurement. The pre-checks are English-only and can be evaded.
 
 ## Synthetic demo data (built)
 

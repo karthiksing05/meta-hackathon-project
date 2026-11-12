@@ -1,0 +1,15 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "i1",
+      "kind": "note",
+      "prompt": "Fruit"
+    }
+  ],
+  "copy": {
+    "intro": "Swipe a fruit toward its neighbor to match three.",
+    "win": "Juicy!",
+    "lose": "Time is up."
+  }
+}

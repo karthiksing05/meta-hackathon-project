@@ -87,6 +87,16 @@ final class SGStore {
         }
     }
 
+    /// Sends a report for a game; returns false when the server couldn't be reached.
+    func report(game: SGGame, reason: SGReportReason) async -> Bool {
+        do {
+            try await api.reportGame(gameID: game.id, reason: reason.apiValue)
+            return true
+        } catch {
+            return false
+        }
+    }
+
     /// Puts a freshly published game at the top of the feed.
     func insertPublished(game: SGGame, feedItem: SGFeedItem?) {
         let item = feedItem ?? SGFeedItem(id: "f_\(game.id)", type: "game", actor: me, game: game)

@@ -110,7 +110,9 @@ fn check_manifest(r: &mut Report, cat: &Catalog, mv: &Value) -> Option<Manifest>
     };
 
     let mut seen: HashSet<&str> = HashSet::new();
-    let mut emitted: HashSet<String> = cat.events.iter().filter(|e| e.builtin).map(|e| e.name.clone()).collect();
+    // input.tap is built in for glue, but as a consumed event it must come from an input concept.
+    let mut emitted: HashSet<String> =
+        cat.events.iter().filter(|e| e.builtin && e.name != "input.tap").map(|e| e.name.clone()).collect();
     for (i, c) in m.concepts.iter().enumerate() {
         let path = format!("manifest.concepts[{i}]");
         if !seen.insert(c.id.as_str()) {
@@ -136,6 +138,11 @@ fn check_manifest(r: &mut Report, cat: &Catalog, mv: &Value) -> Option<Manifest>
         r.err("manifest.concepts", "must include flow.session");
     }
     let has_glue = !m.glue.is_empty();
+    let spaces: Vec<&str> = ids.iter().copied().filter(|i| i.starts_with("space.")).collect();
+    let has_canvas_space = spaces.iter().any(|i| *i != "space.choice_board");
+    if spaces.len() > 1 {
+        r.err("manifest.concepts", format!("use exactly one space.* concept, found {}", spaces.len()));
+    }
     for (i, c) in m.concepts.iter().enumerate() {
         let Some(spec) = cat.concept(&c.id) else { continue };
         let path = format!("manifest.concepts[{i}]");
@@ -149,11 +156,20 @@ fn check_manifest(r: &mut Report, cat: &Catalog, mv: &Value) -> Option<Manifest>
                 r.err(&path, format!("'{}' conflicts with '{con}'", c.id));
             }
         }
-        for ev in &spec.consumes {
-            let satisfied = emitted.contains(ev) || (ev.starts_with("glue.") && has_glue);
-            if !satisfied {
-                r.err(&path, format!("'{}' consumes '{ev}' but no concept in the manifest emits it", c.id));
+        let available = |ev: &String| emitted.contains(ev) || (ev.starts_with("glue.") && has_glue);
+        if spec.consumes_any {
+            if !spec.consumes.is_empty() && !spec.consumes.iter().any(available) {
+                r.err(&path, format!("'{}' needs at least one of {:?} to be emitted by another concept", c.id, spec.consumes));
             }
+        } else {
+            for ev in &spec.consumes {
+                if !available(ev) {
+                    r.err(&path, format!("'{}' consumes '{ev}' but no concept in the manifest emits it", c.id));
+                }
+            }
+        }
+        if (c.id.starts_with("entity.") || c.id.starts_with("behavior.")) && c.id != "entity.hint_giver" && !has_canvas_space {
+            r.err(&path, format!("'{}' needs a play space: add one of the space.* concepts (not space.choice_board)", c.id));
         }
         if spec.status != "implemented" {
             r.warn(&path, format!("'{}' is a stub; it is accepted but inert at runtime", c.id));

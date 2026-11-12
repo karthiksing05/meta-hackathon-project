@@ -2,6 +2,8 @@
 
 pub mod catalog;
 pub mod concepts;
+pub mod ext_meta;
+pub mod ext_play;
 pub mod game;
 pub mod glue;
 pub mod rng;

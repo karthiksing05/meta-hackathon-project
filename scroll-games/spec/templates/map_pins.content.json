@@ -1,0 +1,46 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "p1",
+      "kind": "place",
+      "prompt": "The lighthouse",
+      "choices": [
+        "20",
+        "15"
+      ]
+    },
+    {
+      "id": "p2",
+      "kind": "place",
+      "prompt": "The old market",
+      "choices": [
+        "70",
+        "30"
+      ]
+    },
+    {
+      "id": "p3",
+      "kind": "place",
+      "prompt": "The train station",
+      "choices": [
+        "35",
+        "60"
+      ]
+    },
+    {
+      "id": "p4",
+      "kind": "place",
+      "prompt": "The beach",
+      "choices": [
+        "80",
+        "75"
+      ]
+    }
+  ],
+  "copy": {
+    "intro": "Drag each pin to its spot on the map.",
+    "win": "Cartographer!",
+    "lose": "Lost at sea."
+  }
+}

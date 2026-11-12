@@ -21,23 +21,33 @@ type App struct {
 	budget      *Budget
 	muse        *Muse
 	tool        *Tool
-	catalog     string
+	concepts    []concept
 	briefSchema map[string]any
 
 	now func() time.Time // injectable clock for the daily game
 
 	jobsMu sync.Mutex
 	jobs   map[string]*genJob
+	recent map[string]recentGen // finished runs that were not cached (fallbacks), joinable for a short while
 }
+
+// recentGen is a finished generation kept briefly so a Generate that follows the speculative run reuses it.
+type recentGen struct {
+	out genOut
+	at  time.Time
+}
+
+// recentTTL is how long an uncached finished run stays joinable.
+const recentTTL = 2 * time.Minute
 
 func NewApp(cfg Config) *App {
 	_ = os.MkdirAll(cfg.DataDir, 0o755)
-	a := &App{cfg: cfg, jobs: map[string]*genJob{}, now: time.Now}
+	a := &App{cfg: cfg, jobs: map[string]*genJob{}, recent: map[string]recentGen{}, now: time.Now}
 	a.budget = NewBudget(cfg.DataDir+"/usage.json", cfg.CapUSD)
 	a.muse = NewMuse(cfg, a.budget)
 	a.tool = &Tool{Path: cfg.SgtoolPath}
 	a.cache = OpenCache(cfg.DataDir)
-	a.catalog = BuildCatalogDigest(cfg.SpecDir)
+	a.concepts = loadConcepts(cfg.SpecDir)
 	a.briefSchema = LoadBriefSchema(cfg.SpecDir)
 	mediaDir = cfg.MediaDir
 	st, fresh := OpenStore(cfg.DataDir)

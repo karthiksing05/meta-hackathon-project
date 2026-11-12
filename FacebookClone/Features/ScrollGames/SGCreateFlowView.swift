@@ -77,7 +77,11 @@ struct SGCreateFlowView: View {
     private func publish() {
         Task {
             guard let (game, item) = await model.publish() else { return }
-            store.showToast("Published to Scroll Games", symbol: "checkmark.circle.fill")
+            if game.moderation?.isFlagged == true {
+                store.showToast("Published. Only you can see it until it is reviewed.", symbol: "flag.fill")
+            } else {
+                store.showToast("Published to Scroll Games", symbol: "checkmark.circle.fill")
+            }
             onPublished(game, item)
             dismiss()
         }
@@ -523,10 +527,8 @@ private struct SGPreviewStep: View {
                     }
                 }
                 .buttonStyle(.fb(.primary, height: 44))
-                .disabled(model.isPublishing)
-                Text("Moderation: stub (always passes in this demo)")
-                    .font(.fbCaption)
-                    .foregroundStyle(FBColor.tertiaryText)
+                .disabled(model.isPublishing || model.game?.moderation?.isBlocked == true)
+                SGModerationNote(moderation: model.game?.moderation) { model.step = .brief }
             }
             .padding(FBMetrics.screenPadding)
             .background(FBColor.surface)

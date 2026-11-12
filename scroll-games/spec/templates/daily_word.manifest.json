@@ -1,0 +1,95 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Daily Word",
+  "description": "One shared puzzle a day. One attempt.",
+  "level": "remix",
+  "template": "daily_word",
+  "seed_scope": "daily",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "flow.daily_puzzle",
+      "params": {
+        "reset_hour_utc": 0
+      }
+    },
+    {
+      "id": "space.word_grid",
+      "params": {
+        "word_length": 5
+      }
+    },
+    {
+      "id": "input.text_entry",
+      "params": {
+        "max_chars": 5,
+        "case_sensitive": false
+      }
+    },
+    {
+      "id": "entity.word_tile",
+      "params": {
+        "alphabet": "latin"
+      }
+    },
+    {
+      "id": "input.tap_target",
+      "params": {
+        "hit_slop": 2
+      }
+    },
+    {
+      "id": "rule.word_valid",
+      "params": {
+        "min_len": 5
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 500
+      }
+    },
+    {
+      "id": "rule.no_repeat",
+      "params": {}
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "ocean",
+        "mood": "calm",
+        "emoji": "📅"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "ocean",
+    "mood": "calm",
+    "emoji": "📅"
+  }
+}

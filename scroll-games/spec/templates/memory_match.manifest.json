@@ -1,0 +1,105 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Memory Match",
+  "description": "Flip cards and find every pair before time runs out.",
+  "level": "remix",
+  "template": "memory_match",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.card_table",
+      "params": {
+        "cols": 4
+      }
+    },
+    {
+      "id": "entity.card",
+      "params": {
+        "pairs": 6,
+        "face_down": false
+      }
+    },
+    {
+      "id": "input.tap_target",
+      "params": {
+        "hit_slop": 4
+      }
+    },
+    {
+      "id": "rule.match_pair",
+      "params": {}
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 100
+      }
+    },
+    {
+      "id": "rule.wrong_penalty",
+      "params": {
+        "penalty": 15
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 75000
+      }
+    },
+    {
+      "id": "entity.hint_giver",
+      "params": {
+        "emoji": "🦉"
+      }
+    },
+    {
+      "id": "rule.hint_budget",
+      "params": {
+        "hints": 2
+      }
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feedback.haptic",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "candy",
+        "mood": "playful",
+        "emoji": "🧠"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "candy",
+    "mood": "playful",
+    "emoji": "🧠"
+  }
+}

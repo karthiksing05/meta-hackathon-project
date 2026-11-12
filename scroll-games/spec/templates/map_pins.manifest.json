@@ -1,0 +1,82 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Pin the Place",
+  "description": "Drag each pin to where it belongs.",
+  "level": "remix",
+  "template": "map_pins",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.map_view",
+      "params": {
+        "zoom": 3
+      }
+    },
+    {
+      "id": "input.drag_drop",
+      "params": {
+        "snap_radius": 20
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 150
+      }
+    },
+    {
+      "id": "rule.wrong_penalty",
+      "params": {
+        "penalty": 20
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 75000
+      }
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feedback.haptic",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "ocean",
+        "mood": "playful",
+        "emoji": "🗺️"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "ocean",
+    "mood": "playful",
+    "emoji": "🗺️"
+  }
+}

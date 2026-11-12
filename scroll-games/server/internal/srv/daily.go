@@ -43,7 +43,7 @@ func (a *App) dailyGameIDLocked(date string) string {
 	}
 	var daily, all []string
 	for id, g := range a.store.d.Games {
-		if g.Status != "published" {
+		if g.Status != "published" || a.hiddenFromOthersLocked(g) {
 			continue
 		}
 		all = append(all, id)

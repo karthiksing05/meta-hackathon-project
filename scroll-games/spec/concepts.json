@@ -19,7 +19,7 @@
   "id": "input.swipe_direction",
   "kind": "input",
   "summary": "Swipe up/down/left/right to answer or steer.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "min_distance": {
     "type": "int",
@@ -53,7 +53,7 @@
   "id": "input.tap_target",
   "kind": "input",
   "summary": "Tap anywhere on the play field; reports the tap position.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "hit_slop": {
     "type": "int",
@@ -70,14 +70,16 @@
    "input.tap"
   ],
   "requires": [],
-  "conflicts": [],
+  "conflicts": [
+   "input.double_tap"
+  ],
   "content": null
  },
  {
   "id": "input.drag_drop",
   "kind": "input",
-  "summary": "Drag an entity and drop it on a target zone.",
-  "status": "stub",
+  "summary": "Drag an entity and drop it on a target zone; also reports plain finger drags (phase start|move|end).",
+  "status": "implemented",
   "params": {
    "snap_radius": {
     "type": "int",
@@ -101,7 +103,7 @@
   "id": "input.hold_release",
   "kind": "input",
   "summary": "Press and hold, then release; reports the hold duration.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "max_hold_ms": {
     "type": "duration_ms",
@@ -125,7 +127,7 @@
   "id": "input.text_entry",
   "kind": "input",
   "summary": "Type a short answer with the system keyboard.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "max_chars": {
     "type": "int",
@@ -154,7 +156,7 @@
   "id": "input.draw_stroke",
   "kind": "input",
   "summary": "Freehand drawing with a finger.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "brush_size": {
     "type": "int",
@@ -183,7 +185,7 @@
   "id": "input.tilt_steer",
   "kind": "input",
   "summary": "Steer using device tilt.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "sensitivity": {
     "type": "float",
@@ -194,6 +196,7 @@
    }
   },
   "consumes": [
+   "input.raw",
    "tick"
   ],
   "emits": [
@@ -207,7 +210,7 @@
   "id": "input.double_tap",
   "kind": "input",
   "summary": "Double tap to confirm or boost.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "window_ms": {
     "type": "duration_ms",
@@ -224,14 +227,16 @@
    "input.tap"
   ],
   "requires": [],
-  "conflicts": [],
+  "conflicts": [
+   "input.tap_target"
+  ],
   "content": null
  },
  {
   "id": "input.multi_select",
   "kind": "input",
   "summary": "Select several choices before submitting.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "max_selected": {
     "type": "int",
@@ -255,7 +260,7 @@
   "id": "input.voice_answer",
   "kind": "input",
   "summary": "Speak the answer (speech recognition, opt-in).",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "language": {
     "type": "string",
@@ -277,7 +282,7 @@
   "id": "input.rotary_dial",
   "kind": "input",
   "summary": "Spin a dial to pick a value.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "steps": {
     "type": "int",
@@ -325,7 +330,7 @@
   "id": "space.grid_board",
   "kind": "space",
   "summary": "Square grid of cells for tiles, matching and puzzles.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "cols": {
     "type": "int",
@@ -352,7 +357,7 @@
   "id": "space.lanes",
   "kind": "space",
   "summary": "Vertical lanes (runner style) the player moves between.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "lane_count": {
     "type": "int",
@@ -372,7 +377,7 @@
   "id": "space.scrolling_world",
   "kind": "space",
   "summary": "Auto-scrolling side or top-down world.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "speed": {
     "type": "float",
@@ -402,16 +407,29 @@
   "id": "space.free_canvas",
   "kind": "space",
   "summary": "Blank canvas for drawing and sandbox play.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "background": {
     "type": "color",
     "default": "#101018",
     "doc": "Canvas background color."
+   },
+   "goal": {
+    "type": "enum",
+    "default": "sandbox",
+    "doc": "sandbox = free drawing, trace = cover the target shape.",
+    "values": [
+     "sandbox",
+     "trace"
+    ]
    }
   },
   "consumes": [],
-  "emits": [],
+  "emits": [
+   "answer.correct",
+   "answer.wrong",
+   "game.over"
+  ],
   "requires": [],
   "conflicts": [],
   "content": null
@@ -420,7 +438,7 @@
   "id": "space.card_table",
   "kind": "space",
   "summary": "Table of face-down cards.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "cols": {
     "type": "int",
@@ -434,13 +452,13 @@
   "emits": [],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": "card"
  },
  {
   "id": "space.word_grid",
   "kind": "space",
   "summary": "Letter grid for word search or Wordle style guesses.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "word_length": {
     "type": "int",
@@ -454,13 +472,13 @@
   "emits": [],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": "word"
  },
  {
   "id": "space.timeline_strip",
   "kind": "space",
   "summary": "Horizontal strip for ordering events or photos.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "slots": {
     "type": "int",
@@ -474,13 +492,13 @@
   "emits": [],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": "event"
  },
  {
   "id": "space.physics_world",
   "kind": "space",
   "summary": "2D physics sandbox with gravity and collisions.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "gravity": {
     "type": "float",
@@ -499,8 +517,8 @@
  {
   "id": "space.photo_stage",
   "kind": "space",
-  "summary": "Full-bleed photo with overlay hotspots.",
-  "status": "stub",
+  "summary": "Full-bleed photo with hidden hotspots to find by tapping (hidden-object play).",
+  "status": "implemented",
   "params": {
    "fit": {
     "type": "enum",
@@ -512,17 +530,24 @@
     "doc": "Photo scaling."
    }
   },
-  "consumes": [],
-  "emits": [],
+  "consumes": [
+   "input.tap"
+  ],
+  "emits": [
+   "entity.collected",
+   "answer.correct",
+   "answer.wrong",
+   "game.over"
+  ],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": "hotspot"
  },
  {
   "id": "space.rhythm_track",
   "kind": "space",
   "summary": "Scrolling note highway for rhythm games.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "bpm": {
     "type": "int",
@@ -530,10 +555,24 @@
     "min": 60,
     "max": 200,
     "doc": "Beats per minute."
+   },
+   "beats": {
+    "type": "int",
+    "default": 32,
+    "doc": "Number of notes in the song.",
+    "min": 4,
+    "max": 200
    }
   },
-  "consumes": [],
-  "emits": [],
+  "consumes": [
+   "input.tap"
+  ],
+  "emits": [
+   "beat.hit",
+   "answer.correct",
+   "answer.wrong",
+   "game.over"
+  ],
   "requires": [],
   "conflicts": [],
   "content": null
@@ -542,7 +581,7 @@
   "id": "space.map_view",
   "kind": "space",
   "summary": "Simple map with draggable pins.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "zoom": {
     "type": "int",
@@ -552,17 +591,23 @@
     "doc": "Initial zoom level."
    }
   },
-  "consumes": [],
-  "emits": [],
+  "consumes": [
+   "input.drag"
+  ],
+  "emits": [
+   "answer.correct",
+   "answer.wrong",
+   "game.over"
+  ],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": "place"
  },
  {
   "id": "entity.player_avatar",
   "kind": "entity",
   "summary": "The player's character or cursor.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "emoji": {
     "type": "string",
@@ -587,7 +632,7 @@
   "id": "entity.falling_object",
   "kind": "entity",
   "summary": "Objects that fall from the top.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "fall_speed": {
     "type": "float",
@@ -600,13 +645,20 @@
     "type": "string",
     "default": "star",
     "doc": "Sprite kind."
+   },
+   "emoji": {
+    "type": "string",
+    "default": "⭐",
+    "doc": "Glyph drawn for the object."
    }
   },
   "consumes": [
    "tick"
   ],
   "emits": [
-   "entity.spawned"
+   "entity.spawned",
+   "entity.destroyed",
+   "collision.hit"
   ],
   "requires": [],
   "conflicts": [],
@@ -616,7 +668,7 @@
   "id": "entity.obstacle",
   "kind": "entity",
   "summary": "Hazard that hurts on contact.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "damage": {
     "type": "int",
@@ -624,6 +676,18 @@
     "min": 1,
     "max": 5,
     "doc": "Lives lost on contact."
+   },
+   "emoji": {
+    "type": "string",
+    "default": "🪨",
+    "doc": "Glyph drawn for the hazard."
+   },
+   "lifetime_ms": {
+    "type": "duration_ms",
+    "default": 0,
+    "doc": "On grid spaces how long it stays; 0 = default.",
+    "min": 0,
+    "max": 10000
    }
   },
   "consumes": [
@@ -631,6 +695,7 @@
   ],
   "emits": [
    "entity.spawned",
+   "entity.destroyed",
    "collision.hit"
   ],
   "requires": [],
@@ -641,7 +706,7 @@
   "id": "entity.collectible",
   "kind": "entity",
   "summary": "Pickup that gives points or progress.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "value": {
     "type": "int",
@@ -649,6 +714,18 @@
     "min": 1,
     "max": 1000,
     "doc": "Value when collected."
+   },
+   "emoji": {
+    "type": "string",
+    "default": "🪙",
+    "doc": "Glyph drawn for the pickup."
+   },
+   "lifetime_ms": {
+    "type": "duration_ms",
+    "default": 0,
+    "doc": "On grid spaces how long it stays; 0 = default.",
+    "min": 0,
+    "max": 10000
    }
   },
   "consumes": [
@@ -656,7 +733,9 @@
   ],
   "emits": [
    "entity.spawned",
-   "entity.collected"
+   "entity.collected",
+   "entity.destroyed",
+   "score.changed"
   ],
   "requires": [],
   "conflicts": [],
@@ -666,7 +745,7 @@
   "id": "entity.enemy_wave",
   "kind": "entity",
   "summary": "Group of enemies that arrive in waves.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "wave_size": {
     "type": "int",
@@ -674,14 +753,42 @@
     "min": 1,
     "max": 30,
     "doc": "Enemies per wave."
+   },
+   "emoji": {
+    "type": "string",
+    "default": "👾",
+    "doc": "Glyph drawn for an enemy."
+   },
+   "value": {
+    "type": "int",
+    "default": 25,
+    "doc": "Points for destroying one enemy.",
+    "min": 0,
+    "max": 1000
+   },
+   "speed": {
+    "type": "float",
+    "default": 30.0,
+    "doc": "Descent speed.",
+    "min": 5.0,
+    "max": 300.0
+   },
+   "gap_ms": {
+    "type": "duration_ms",
+    "default": 2500,
+    "doc": "Pause between waves.",
+    "min": 200,
+    "max": 20000
    }
   },
   "consumes": [
-   "round.started"
+   "tick"
   ],
   "emits": [
    "entity.spawned",
-   "entity.destroyed"
+   "entity.destroyed",
+   "collision.hit",
+   "score.changed"
   ],
   "requires": [],
   "conflicts": [],
@@ -691,12 +798,19 @@
   "id": "entity.card",
   "kind": "entity",
   "summary": "Flippable card with a face and a back.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "face_down": {
     "type": "bool",
     "default": true,
     "doc": "Start face down."
+   },
+   "pairs": {
+    "type": "int",
+    "default": 6,
+    "doc": "Number of pairs on the table.",
+    "min": 2,
+    "max": 10
    }
   },
   "consumes": [
@@ -705,7 +819,9 @@
   "emits": [
    "entity.spawned"
   ],
-  "requires": [],
+  "requires": [
+   "space.card_table"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -713,7 +829,7 @@
   "id": "entity.tile",
   "kind": "entity",
   "summary": "Colored match-3 tile.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "kinds": {
     "type": "int",
@@ -729,7 +845,9 @@
   "emits": [
    "entity.spawned"
   ],
-  "requires": [],
+  "requires": [
+   "space.grid_board"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -737,7 +855,7 @@
   "id": "entity.word_tile",
   "kind": "entity",
   "summary": "Single letter tile.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "alphabet": {
     "type": "enum",
@@ -750,12 +868,15 @@
    }
   },
   "consumes": [
-   "session.started"
+   "input.tap"
   ],
   "emits": [
-   "entity.spawned"
+   "entity.spawned",
+   "input.text"
   ],
-  "requires": [],
+  "requires": [
+   "space.word_grid"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -763,7 +884,7 @@
   "id": "entity.bouncing_ball",
   "kind": "entity",
   "summary": "Ball that bounces off walls.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "radius": {
     "type": "int",
@@ -784,6 +905,7 @@
    "tick"
   ],
   "emits": [
+   "entity.spawned",
    "collision.hit"
   ],
   "requires": [],
@@ -794,7 +916,7 @@
   "id": "entity.particle_emitter",
   "kind": "entity",
   "summary": "Cosmetic particle source.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "rate": {
     "type": "int",
@@ -816,7 +938,7 @@
   "id": "entity.hint_giver",
   "kind": "entity",
   "summary": "Friendly character that offers hints.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "emoji": {
     "type": "string",
@@ -836,7 +958,7 @@
   "id": "entity.projectile",
   "kind": "entity",
   "summary": "Shot fired by the player or an enemy.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "speed": {
     "type": "float",
@@ -844,6 +966,11 @@
     "min": 50.0,
     "max": 1500.0,
     "doc": "Points per second."
+   },
+   "emoji": {
+    "type": "string",
+    "default": "🔸",
+    "doc": "Glyph drawn for the shot."
    }
   },
   "consumes": [
@@ -853,7 +980,9 @@
    "entity.spawned",
    "collision.hit"
   ],
-  "requires": [],
+  "requires": [
+   "entity.player_avatar"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -861,7 +990,7 @@
   "id": "entity.paddle",
   "kind": "entity",
   "summary": "Horizontal paddle for bounce games.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "width": {
     "type": "int",
@@ -883,7 +1012,7 @@
   "id": "behavior.gravity",
   "kind": "behavior",
   "summary": "Applies constant downward acceleration.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "strength": {
     "type": "float",
@@ -905,7 +1034,7 @@
   "id": "behavior.patrol",
   "kind": "behavior",
   "summary": "Moves back and forth along a path.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "range": {
     "type": "int",
@@ -927,7 +1056,7 @@
   "id": "behavior.homing",
   "kind": "behavior",
   "summary": "Steers toward the player.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "turn_rate": {
     "type": "float",
@@ -941,7 +1070,9 @@
    "tick"
   ],
   "emits": [],
-  "requires": [],
+  "requires": [
+   "entity.player_avatar"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -949,7 +1080,7 @@
   "id": "behavior.spawn_wave",
   "kind": "behavior",
   "summary": "Spawns entities at a regular interval.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "every_ms": {
     "type": "duration_ms",
@@ -973,7 +1104,7 @@
   "id": "behavior.spawn_rate_ramp",
   "kind": "behavior",
   "summary": "Speeds up spawning as time passes.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "ramp_per_min": {
     "type": "float",
@@ -989,7 +1120,9 @@
   "emits": [
    "difficulty.changed"
   ],
-  "requires": [],
+  "requires": [
+   "behavior.spawn_wave"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -997,7 +1130,7 @@
   "id": "behavior.bounce",
   "kind": "behavior",
   "summary": "Reflects entities off walls.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "damping": {
     "type": "float",
@@ -1019,7 +1152,7 @@
   "id": "behavior.magnet",
   "kind": "behavior",
   "summary": "Pulls nearby collectibles toward the player.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "radius": {
     "type": "int",
@@ -1033,7 +1166,10 @@
    "tick"
   ],
   "emits": [],
-  "requires": [],
+  "requires": [
+   "entity.player_avatar",
+   "entity.collectible"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1041,7 +1177,7 @@
   "id": "behavior.wrap_edges",
   "kind": "behavior",
   "summary": "Entities leaving one edge appear on the opposite edge.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -1053,7 +1189,7 @@
   "id": "behavior.follow_finger",
   "kind": "behavior",
   "summary": "Entity tracks the finger position.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "smoothing": {
     "type": "float",
@@ -1075,13 +1211,15 @@
   "id": "behavior.shuffle_tiles",
   "kind": "behavior",
   "summary": "Shuffles tiles into a random solvable layout.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "session.started"
   ],
   "emits": [],
-  "requires": [],
+  "requires": [
+   "entity.tile"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1089,7 +1227,7 @@
   "id": "behavior.merge_adjacent",
   "kind": "behavior",
   "summary": "Merges equal neighbors (2048 style).",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "merge_to": {
     "type": "int",
@@ -1103,9 +1241,13 @@
    "input.swipe"
   ],
   "emits": [
-   "match.made"
+   "match.made",
+   "answer.correct",
+   "game.over"
   ],
-  "requires": [],
+  "requires": [
+   "entity.tile"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1113,7 +1255,7 @@
   "id": "behavior.slide_to_wall",
   "kind": "behavior",
   "summary": "Entity slides until it hits a wall.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "input.swipe"
@@ -1121,7 +1263,10 @@
   "emits": [
    "collision.hit"
   ],
-  "requires": [],
+  "requires": [
+   "entity.player_avatar",
+   "space.grid_board"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1129,7 +1274,7 @@
   "id": "behavior.drift",
   "kind": "behavior",
   "summary": "Slow idle drift for ambient motion.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "amount": {
     "type": "float",
@@ -1201,7 +1346,7 @@
   "id": "rule.lives",
   "kind": "rule",
   "summary": "Player has a number of lives; zero lives ends the game.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "lives": {
     "type": "int",
@@ -1222,13 +1367,14 @@
   ],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": null,
+  "consumes_any": true
  },
  {
   "id": "rule.hint_budget",
   "kind": "rule",
   "summary": "Limited number of hints per game.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "hints": {
     "type": "int",
@@ -1244,7 +1390,9 @@
   "emits": [
    "hint.used"
   ],
-  "requires": [],
+  "requires": [
+   "entity.hint_giver"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1252,7 +1400,7 @@
   "id": "rule.no_repeat",
   "kind": "rule",
   "summary": "Never repeats a content item in a session.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -1264,7 +1412,7 @@
   "id": "rule.collision",
   "kind": "rule",
   "summary": "Detects overlaps between entities.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "precision": {
     "type": "enum",
@@ -1290,16 +1438,21 @@
   "id": "rule.match_pair",
   "kind": "rule",
   "summary": "Two flipped cards that match are cleared.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "input.tap"
   ],
   "emits": [
    "pair.matched",
-   "pair.missed"
+   "pair.missed",
+   "answer.correct",
+   "answer.wrong",
+   "game.over"
   ],
-  "requires": [],
+  "requires": [
+   "entity.card"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1307,7 +1460,7 @@
   "id": "rule.match_three",
   "kind": "rule",
   "summary": "Three or more same tiles in a line clear.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "min_run": {
     "type": "int",
@@ -1322,9 +1475,13 @@
   ],
   "emits": [
    "match.made",
-   "match.failed"
+   "match.failed",
+   "answer.correct",
+   "game.over"
   ],
-  "requires": [],
+  "requires": [
+   "entity.tile"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1332,7 +1489,7 @@
   "id": "rule.word_valid",
   "kind": "rule",
   "summary": "Submitted words must be in the word list.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "min_len": {
     "type": "int",
@@ -1346,9 +1503,14 @@
    "input.text"
   ],
   "emits": [
-   "word.submitted"
+   "word.submitted",
+   "answer.correct",
+   "answer.wrong",
+   "game.over"
   ],
-  "requires": [],
+  "requires": [
+   "space.word_grid"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1356,15 +1518,20 @@
   "id": "rule.order_sequence",
   "kind": "rule",
   "summary": "Items must be put in the correct order.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "input.drag"
   ],
   "emits": [
-   "sequence.step"
+   "sequence.step",
+   "answer.correct",
+   "answer.wrong",
+   "game.over"
   ],
-  "requires": [],
+  "requires": [
+   "space.timeline_strip"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1372,7 +1539,7 @@
   "id": "rule.elimination",
   "kind": "rule",
   "summary": "Lowest scorer is removed each round (versus).",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "cut_per_round": {
     "type": "int",
@@ -1380,6 +1547,13 @@
     "min": 1,
     "max": 5,
     "doc": "Players removed per round."
+   },
+   "rivals": {
+    "type": "int",
+    "default": 5,
+    "doc": "Simulated rivals in the field.",
+    "min": 1,
+    "max": 12
    }
   },
   "consumes": [
@@ -1388,7 +1562,9 @@
   "emits": [
    "game.over"
   ],
-  "requires": [],
+  "requires": [
+   "flow.rounds"
+  ],
   "conflicts": [],
   "content": null
  },
@@ -1396,7 +1572,7 @@
   "id": "rule.difficulty_ramp",
   "kind": "rule",
   "summary": "Raises difficulty each round.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "step": {
     "type": "float",
@@ -1420,7 +1596,7 @@
   "id": "rule.streak_shield",
   "kind": "rule",
   "summary": "A full streak absorbs the next mistake.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "streak_needed": {
     "type": "int",
@@ -1443,7 +1619,7 @@
   "id": "rule.total_time_limit",
   "kind": "rule",
   "summary": "Whole game ends after a fixed time.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "limit_ms": {
     "type": "duration_ms",
@@ -1467,7 +1643,7 @@
   "id": "rule.wrong_penalty",
   "kind": "rule",
   "summary": "Wrong answers subtract points.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "penalty": {
     "type": "int",
@@ -1491,7 +1667,7 @@
   "id": "rule.sequence_memory",
   "kind": "rule",
   "summary": "Player repeats a growing sequence.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "start_len": {
     "type": "int",
@@ -1505,7 +1681,9 @@
    "input.tap"
   ],
   "emits": [
-   "sequence.step"
+   "sequence.step",
+   "answer.correct",
+   "answer.wrong"
   ],
   "requires": [],
   "conflicts": [],
@@ -1515,7 +1693,7 @@
   "id": "rule.win_target",
   "kind": "rule",
   "summary": "Game ends in a win at a target score.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "target": {
     "type": "int",
@@ -1562,7 +1740,8 @@
   ],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": null,
+  "consumes_any": true
  },
  {
   "id": "feedback.haptic",
@@ -1607,7 +1786,8 @@
   ],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": null,
+  "consumes_any": true
  },
  {
   "id": "feedback.confetti",
@@ -1638,7 +1818,7 @@
   "id": "feedback.sound_cue",
   "kind": "feedback",
   "summary": "Short sound for correct and wrong answers.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "volume": {
     "type": "float",
@@ -1661,7 +1841,7 @@
   "id": "feedback.screen_shake",
   "kind": "feedback",
   "summary": "Shakes the screen on mistakes.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "intensity": {
     "type": "float",
@@ -1672,8 +1852,7 @@
    }
   },
   "consumes": [
-   "answer.wrong",
-   "collision.hit"
+   "answer.wrong"
   ],
   "emits": [],
   "requires": [],
@@ -1684,7 +1863,7 @@
   "id": "feedback.floating_score",
   "kind": "feedback",
   "summary": "Points float up from where they were earned.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "duration_ms": {
     "type": "duration_ms",
@@ -1706,7 +1885,7 @@
   "id": "feedback.pulse_timer",
   "kind": "feedback",
   "summary": "Timer bar pulses when time is low.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "threshold_ms": {
     "type": "duration_ms",
@@ -1728,7 +1907,7 @@
   "id": "feedback.color_wash",
   "kind": "feedback",
   "summary": "Slow background color shift with the streak.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "max_hue_shift": {
     "type": "int",
@@ -1750,7 +1929,7 @@
   "id": "feedback.emoji_burst",
   "kind": "feedback",
   "summary": "Emoji rain on a correct answer.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "emoji": {
     "type": "string",
@@ -1770,7 +1949,7 @@
   "id": "feedback.voice_cheer",
   "kind": "feedback",
   "summary": "Spoken encouragement via text-to-speech.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "voice": {
     "type": "string",
@@ -1791,7 +1970,7 @@
   "id": "feedback.slowmo",
   "kind": "feedback",
   "summary": "Brief slow motion on a close call.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "factor": {
     "type": "float",
@@ -1813,7 +1992,7 @@
   "id": "feedback.vignette_low_time",
   "kind": "feedback",
   "summary": "Red vignette creeps in as time runs out.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "threshold_ms": {
     "type": "duration_ms",
@@ -1835,7 +2014,7 @@
   "id": "feedback.toast",
   "kind": "feedback",
   "summary": "Small toast message for events.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "duration_ms": {
     "type": "duration_ms",
@@ -1846,8 +2025,7 @@
    }
   },
   "consumes": [
-   "streak.changed",
-   "level.started"
+   "streak.changed"
   ],
   "emits": [],
   "requires": [],
@@ -1874,9 +2052,7 @@
   "emits": [
    "score.changed"
   ],
-  "requires": [
-   "flow.rounds"
-  ],
+  "requires": [],
   "conflicts": [
    "score.time_attack"
   ],
@@ -1953,7 +2129,7 @@
   "id": "score.time_attack",
   "kind": "score",
   "summary": "Score is the time taken; lower is better.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "unit": {
     "type": "enum",
@@ -1981,7 +2157,7 @@
   "id": "score.distance",
   "kind": "score",
   "summary": "Score grows with distance travelled.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "per_meter": {
     "type": "float",
@@ -2005,7 +2181,7 @@
   "id": "score.combo_chain",
   "kind": "score",
   "summary": "Quick successive hits build a combo.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "window_ms": {
     "type": "duration_ms",
@@ -2016,9 +2192,7 @@
    }
   },
   "consumes": [
-   "match.made",
-   "pair.matched",
-   "entity.collected"
+   "answer.correct"
   ],
   "emits": [
    "combo.changed",
@@ -2032,7 +2206,7 @@
   "id": "score.accuracy_percent",
   "kind": "score",
   "summary": "Score is the percent of correct answers.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "answer.correct",
@@ -2049,7 +2223,7 @@
   "id": "score.lives_bonus",
   "kind": "score",
   "summary": "Bonus for each remaining life at the end.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "per_life": {
     "type": "int",
@@ -2075,7 +2249,7 @@
   "id": "score.par_target",
   "kind": "score",
   "summary": "Beat a par score for a bonus.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "par": {
     "type": "int",
@@ -2106,7 +2280,7 @@
   "id": "score.perfect_bonus",
   "kind": "score",
   "summary": "Bonus for a flawless game.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "bonus": {
     "type": "int",
@@ -2130,7 +2304,7 @@
   "id": "score.collect_count",
   "kind": "score",
   "summary": "Score is how many items were collected.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "per_item": {
     "type": "int",
@@ -2154,7 +2328,7 @@
   "id": "score.word_length",
   "kind": "score",
   "summary": "Longer valid words are worth more.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "per_letter": {
     "type": "int",
@@ -2178,7 +2352,7 @@
   "id": "score.rhythm_accuracy",
   "kind": "score",
   "summary": "Points by timing grade (perfect, good, miss).",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "perfect": {
     "type": "int",
@@ -2209,7 +2383,7 @@
   "id": "score.drawing_similarity",
   "kind": "score",
   "summary": "Scores how close a drawing is to a reference.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "threshold": {
     "type": "float",
@@ -2317,7 +2491,7 @@
   "id": "flow.levels",
   "kind": "flow",
   "summary": "Sequence of levels with rising difficulty.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "levels": {
     "type": "int",
@@ -2325,6 +2499,13 @@
     "min": 1,
     "max": 30,
     "doc": "Number of levels."
+   },
+   "level_ms": {
+    "type": "duration_ms",
+    "default": 0,
+    "doc": "Advance a level every N ms (0 = goal driven).",
+    "min": 0,
+    "max": 600000
    }
   },
   "consumes": [
@@ -2343,7 +2524,7 @@
   "id": "flow.endless",
   "kind": "flow",
   "summary": "Play until the player fails.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -2352,14 +2533,17 @@
    "session.ended"
   ],
   "requires": [],
-  "conflicts": [],
+  "conflicts": [
+   "flow.levels",
+   "flow.rounds"
+  ],
   "content": null
  },
  {
   "id": "flow.sudden_death",
   "kind": "flow",
   "summary": "One mistake ends the game.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "answer.wrong",
@@ -2370,13 +2554,14 @@
   ],
   "requires": [],
   "conflicts": [],
-  "content": null
+  "content": null,
+  "consumes_any": true
  },
  {
   "id": "flow.daily_puzzle",
   "kind": "flow",
   "summary": "One attempt per day on a shared daily seed.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "reset_hour_utc": {
     "type": "int",
@@ -2398,7 +2583,7 @@
   "id": "flow.best_of_n",
   "kind": "flow",
   "summary": "Series of games, best total wins.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "n": {
     "type": "int",
@@ -2422,7 +2607,7 @@
   "id": "flow.practice_mode",
   "kind": "flow",
   "summary": "Unscored practice run.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "session.started"
@@ -2436,7 +2621,7 @@
   "id": "flow.intermission",
   "kind": "flow",
   "summary": "Short break screen between rounds.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "duration_ms": {
     "type": "duration_ms",
@@ -2461,7 +2646,7 @@
   "id": "flow.retry_once",
   "kind": "flow",
   "summary": "One free retry after a loss.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -2477,7 +2662,7 @@
   "id": "flow.lobby_wait",
   "kind": "flow",
   "summary": "Wait for friends to join a versus game.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "timeout_ms": {
     "type": "duration_ms",
@@ -2501,7 +2686,7 @@
   "id": "flow.tutorial",
   "kind": "flow",
   "summary": "Optional one-round tutorial.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "skippable": {
     "type": "bool",
@@ -2570,7 +2755,7 @@
   "id": "content.word_list",
   "kind": "content",
   "summary": "Words for guessing and word-search games.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "min_len": {
     "type": "int",
@@ -2597,7 +2782,7 @@
   "id": "content.emoji_set",
   "kind": "content",
   "summary": "Emoji sets for emoji puzzles.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "count": {
     "type": "int",
@@ -2617,7 +2802,7 @@
   "id": "content.caption_guess",
   "kind": "content",
   "summary": "Guess which caption belongs to a photo.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "round.started"
@@ -2631,7 +2816,7 @@
   "id": "content.audio_clip",
   "kind": "content",
   "summary": "Short audio clips for name-that-tune.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "clip_ms": {
     "type": "duration_ms",
@@ -2653,7 +2838,7 @@
   "id": "content.pair_deck",
   "kind": "content",
   "summary": "Pairs of matching items for memory games.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "pairs": {
     "type": "int",
@@ -2673,7 +2858,7 @@
   "id": "content.image_sequence",
   "kind": "content",
   "summary": "Photos to put in chronological order.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "length": {
     "type": "int",
@@ -2695,7 +2880,7 @@
   "id": "content.fill_blank",
   "kind": "content",
   "summary": "Sentences with a missing word.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "round.started"
@@ -2709,7 +2894,7 @@
   "id": "content.riddle_set",
   "kind": "content",
   "summary": "Short riddles with free-text answers.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "round.started"
@@ -2723,7 +2908,7 @@
   "id": "content.trivia_category",
   "kind": "content",
   "summary": "Trivia grouped by category.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "category": {
     "type": "string",
@@ -2741,7 +2926,7 @@
   "id": "content.user_media_pool",
   "kind": "content",
   "summary": "Draws on the creator's selected photos.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "max_media": {
     "type": "int",
@@ -2761,7 +2946,7 @@
   "id": "content.map_pins",
   "kind": "content",
   "summary": "Locations to place on a map.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "round.started"
@@ -2775,7 +2960,7 @@
   "id": "content.reference_drawing",
   "kind": "content",
   "summary": "Reference shapes to draw.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "round.started"
@@ -2789,7 +2974,7 @@
   "id": "content.beatmap",
   "kind": "content",
   "summary": "Note timings for a rhythm track.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "session.started"
@@ -2825,7 +3010,7 @@
   "id": "social.challenge_friend",
   "kind": "social",
   "summary": "Send the score as a challenge to friends.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "max_recipients": {
     "type": "int",
@@ -2849,7 +3034,7 @@
   "id": "social.friends_leaderboard",
   "kind": "social",
   "summary": "Leaderboard limited to friends.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "top": {
     "type": "int",
@@ -2871,7 +3056,7 @@
   "id": "social.ghost_replay",
   "kind": "social",
   "summary": "Race the ghost of a friend's best run.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "opacity": {
     "type": "float",
@@ -2895,7 +3080,7 @@
   "id": "social.async_versus",
   "kind": "social",
   "summary": "Both players play the same seed asynchronously.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -2911,7 +3096,7 @@
   "id": "social.coop_score",
   "kind": "social",
   "summary": "Group members pool one shared score.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "score.changed"
@@ -2925,7 +3110,7 @@
   "id": "social.reaction_stickers",
   "kind": "social",
   "summary": "Friends react to results with stickers.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -2939,7 +3124,7 @@
   "id": "social.comment_on_result",
   "kind": "social",
   "summary": "Comment thread under a result.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -2953,7 +3138,7 @@
   "id": "social.tag_friend_in_photo",
   "kind": "social",
   "summary": "Questions about who is in a photo.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "round.started"
@@ -2967,7 +3152,7 @@
   "id": "social.group_scoreboard",
   "kind": "social",
   "summary": "Scoreboard across a group.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "group_scope": {
     "type": "enum",
@@ -2991,7 +3176,7 @@
   "id": "social.rematch",
   "kind": "social",
   "summary": "One tap rematch on the same seed.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -3007,7 +3192,7 @@
   "id": "social.spectate",
   "kind": "social",
   "summary": "Watch a friend play live.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "tick"
@@ -3021,7 +3206,7 @@
   "id": "social.follow_creator",
   "kind": "social",
   "summary": "Follow the game's creator after playing.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -3057,7 +3242,7 @@
   "id": "share.replay_clip",
   "kind": "share",
   "summary": "Auto-recorded short clip of the run.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "max_seconds": {
     "type": "int",
@@ -3081,7 +3266,7 @@
   "id": "share.daily_streak",
   "kind": "share",
   "summary": "Share your daily play streak.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -3097,7 +3282,7 @@
   "id": "share.result_emoji_grid",
   "kind": "share",
   "summary": "Spoiler-free emoji grid of right and wrong answers.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "correct": {
     "type": "string",
@@ -3125,7 +3310,7 @@
   "id": "share.invite_link",
   "kind": "share",
   "summary": "Link that opens the game in a browser.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -3141,7 +3326,7 @@
   "id": "share.story_export",
   "kind": "share",
   "summary": "Export the result as a story image.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "aspect": {
     "type": "enum",
@@ -3167,7 +3352,7 @@
   "id": "share.copy_result_text",
   "kind": "share",
   "summary": "Copy a text summary to the clipboard.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -3183,7 +3368,7 @@
   "id": "share.qr_challenge",
   "kind": "share",
   "summary": "QR code for in-person challenges.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -3242,7 +3427,7 @@
   "id": "feel.sound_pack",
   "kind": "feel",
   "summary": "Choose a sound effect pack.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "pack": {
     "type": "enum",
@@ -3266,7 +3451,7 @@
   "id": "feel.music_loop",
   "kind": "feel",
   "summary": "Background music loop.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "track": {
     "type": "enum",
@@ -3296,7 +3481,7 @@
   "id": "feel.palette_cycle",
   "kind": "feel",
   "summary": "Palette shifts slowly during play.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "period_s": {
     "type": "int",
@@ -3318,7 +3503,7 @@
   "id": "feel.retro_pixel",
   "kind": "feel",
   "summary": "Pixelated retro rendering.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "pixel_size": {
     "type": "int",
@@ -3338,7 +3523,7 @@
   "id": "feel.paper_texture",
   "kind": "feel",
   "summary": "Paper grain overlay.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "grain": {
     "type": "float",
@@ -3358,7 +3543,7 @@
   "id": "feel.neon_glow",
   "kind": "feel",
   "summary": "Neon outlines and glow.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "glow": {
     "type": "float",
@@ -3378,7 +3563,7 @@
   "id": "feel.juice_level",
   "kind": "feel",
   "summary": "Global amount of animation and effects.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "level": {
     "type": "enum",
@@ -3401,7 +3586,7 @@
   "id": "feel.camera_zoom",
   "kind": "feel",
   "summary": "Subtle zoom pulses on correct answers.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "amount": {
     "type": "float",
@@ -3423,7 +3608,7 @@
   "id": "feel.font_pack",
   "kind": "feel",
   "summary": "Typeface for headings.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "font": {
     "type": "enum",
@@ -3447,7 +3632,7 @@
   "id": "feel.cozy_mode",
   "kind": "feel",
   "summary": "Warm, slow-paced presentation.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -3459,7 +3644,7 @@
   "id": "feel.dark_light",
   "kind": "feel",
   "summary": "Force light or dark appearance.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "appearance": {
     "type": "enum",
@@ -3505,7 +3690,7 @@
   "id": "meta.daily_seed",
   "kind": "meta",
   "summary": "Seed derived from the UTC date so everyone plays the same game.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -3517,7 +3702,7 @@
   "id": "meta.adaptive_difficulty",
   "kind": "meta",
   "summary": "Adjusts difficulty to the player's skill.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "aggressiveness": {
     "type": "float",
@@ -3541,7 +3726,7 @@
   "id": "meta.analytics_events",
   "kind": "meta",
   "summary": "Report anonymous gameplay analytics.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "game.over"
@@ -3555,7 +3740,7 @@
   "id": "meta.ab_variant",
   "kind": "meta",
   "summary": "Assign an A/B variant to the player.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "variants": {
     "type": "int",
@@ -3577,7 +3762,7 @@
   "id": "meta.debug_overlay",
   "kind": "meta",
   "summary": "Developer overlay with ticks and events.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "tick"
@@ -3591,7 +3776,7 @@
   "id": "meta.content_moderation_hint",
   "kind": "meta",
   "summary": "Flags content the moderator should review.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "session.loaded"
@@ -3605,7 +3790,7 @@
   "id": "meta.input_recorder",
   "kind": "meta",
   "summary": "Records inputs for server-side replay verification.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
    "input.raw"
@@ -3619,7 +3804,7 @@
   "id": "meta.cheat_guard",
   "kind": "meta",
   "summary": "Rejects implausible timings.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "min_answer_ms": {
     "type": "duration_ms",
@@ -3641,7 +3826,7 @@
   "id": "meta.locale",
   "kind": "meta",
   "summary": "Localised strings.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "locale": {
     "type": "string",
@@ -3659,7 +3844,7 @@
   "id": "meta.schema_version",
   "kind": "meta",
   "summary": "Pins the manifest schema version.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "version": {
     "type": "int",
@@ -3679,7 +3864,7 @@
   "id": "meta.hot_seat",
   "kind": "meta",
   "summary": "Pass-and-play turn handling.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "players": {
     "type": "int",
@@ -3713,7 +3898,7 @@
   "id": "accessibility.reduced_motion",
   "kind": "accessibility",
   "summary": "Disables non-essential animation.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -3725,7 +3910,7 @@
   "id": "accessibility.high_contrast",
   "kind": "accessibility",
   "summary": "High contrast colors.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -3737,7 +3922,7 @@
   "id": "accessibility.colorblind_palette",
   "kind": "accessibility",
   "summary": "Colorblind-safe feedback colors.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "mode": {
     "type": "enum",
@@ -3760,7 +3945,7 @@
   "id": "accessibility.screen_reader_labels",
   "kind": "accessibility",
   "summary": "Descriptive labels for VoiceOver.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -3772,7 +3957,7 @@
   "id": "accessibility.extended_time",
   "kind": "accessibility",
   "summary": "Extra time on timers.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "multiplier": {
     "type": "float",
@@ -3794,7 +3979,7 @@
   "id": "accessibility.one_handed",
   "kind": "accessibility",
   "summary": "Controls reachable with one thumb.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "side": {
     "type": "enum",
@@ -3816,7 +4001,7 @@
   "id": "accessibility.haptics_off",
   "kind": "accessibility",
   "summary": "Disables haptic feedback.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -3828,10 +4013,11 @@
   "id": "accessibility.captions",
   "kind": "accessibility",
   "summary": "Captions for audio cues.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [
-   "feedback.haptic"
+   "answer.correct",
+   "answer.wrong"
   ],
   "emits": [],
   "requires": [],
@@ -3842,7 +4028,7 @@
   "id": "accessibility.dyslexia_font",
   "kind": "accessibility",
   "summary": "Dyslexia-friendly typeface.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],
@@ -3854,7 +4040,7 @@
   "id": "accessibility.big_targets",
   "kind": "accessibility",
   "summary": "Enlarged touch targets.",
-  "status": "stub",
+  "status": "implemented",
   "params": {
    "min_size": {
     "type": "int",
@@ -3874,7 +4060,7 @@
   "id": "accessibility.pause_anytime",
   "kind": "accessibility",
   "summary": "Always-visible pause control.",
-  "status": "stub",
+  "status": "implemented",
   "params": {},
   "consumes": [],
   "emits": [],

@@ -1,0 +1,106 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Word Guess",
+  "description": "Guess the five letter word in six tries.",
+  "level": "remix",
+  "template": "word_guess",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "flow.levels",
+      "params": {
+        "levels": 3
+      }
+    },
+    {
+      "id": "space.word_grid",
+      "params": {
+        "word_length": 5
+      }
+    },
+    {
+      "id": "entity.word_tile",
+      "params": {
+        "alphabet": "latin"
+      }
+    },
+    {
+      "id": "input.tap_target",
+      "params": {
+        "hit_slop": 2
+      }
+    },
+    {
+      "id": "rule.word_valid",
+      "params": {
+        "min_len": 3
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 200
+      }
+    },
+    {
+      "id": "rule.wrong_penalty",
+      "params": {
+        "penalty": 10
+      }
+    },
+    {
+      "id": "entity.hint_giver",
+      "params": {
+        "emoji": "🦉"
+      }
+    },
+    {
+      "id": "rule.hint_budget",
+      "params": {
+        "hints": 3
+      }
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feedback.haptic",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "ocean",
+        "mood": "calm",
+        "emoji": "🔤"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "ocean",
+    "mood": "calm",
+    "emoji": "🔤"
+  }
+}

@@ -254,9 +254,10 @@ struct SGGame: Decodable, Identifiable, Hashable {
     var createdAt: String?
     var gen: SGGenInfo?
     var stats: SGGameStats
+    var moderation: SGModeration?
 
     enum CodingKeys: String, CodingKey {
-        case id, title, description, status, manifest, content, brief, gen, stats
+        case id, title, description, status, manifest, content, brief, gen, stats, moderation
         case creatorID = "creator_id"
         case createdAt = "created_at"
     }
@@ -289,6 +290,7 @@ struct SGGame: Decodable, Identifiable, Hashable {
         createdAt = c.flex(String.self, .createdAt)
         gen = c.flex(SGGenInfo.self, .gen)
         stats = c.flex(SGGameStats.self, .stats) ?? SGGameStats()
+        moderation = c.flex(SGModeration.self, .moderation)
     }
 
     var emoji: String {

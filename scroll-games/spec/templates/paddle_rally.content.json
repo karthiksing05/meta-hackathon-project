@@ -1,0 +1,15 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "i1",
+      "kind": "note",
+      "prompt": "Ball"
+    }
+  ],
+  "copy": {
+    "intro": "Drag to move the paddle. Every bounce scores.",
+    "win": "Great rally!",
+    "lose": "The ball got away."
+  }
+}

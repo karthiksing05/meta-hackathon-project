@@ -167,7 +167,7 @@ func (a *App) seedStore() {
 		briefRaw, _ := json.Marshal(bb)
 		man := a.templateManifest(bb)
 		s.d.Games[g.id] = &Game{ID: g.id, Title: g.title, Description: g.desc, CreatorID: g.creator, Status: "published",
-			Moderation: "stub-pass", Manifest: man, Content: g.content, Brief: briefRaw, CreatedAt: now.Add(-g.age),
+			Moderation: &Moderation{Decision: DecisionPass, Reasons: []ModReason{}, Checker: "seed", CheckedAt: now}, Manifest: man, Content: g.content, Brief: briefRaw, CreatedAt: now.Add(-g.age),
 			Gen: GenInfo{Stages: map[string]int64{}, Source: "seed"}}
 		s.d.Feed = append(s.d.Feed, FeedItem{ID: "f_" + g.id, Type: "game", ActorID: g.creator, GameID: g.id,
 			Text: fmt.Sprintf("%s published %s", s.userName(g.creator), g.title), CreatedAt: now.Add(-g.age)})

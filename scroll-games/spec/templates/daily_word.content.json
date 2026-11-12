@@ -1,0 +1,85 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "w1",
+      "kind": "word",
+      "prompt": "BEACH"
+    },
+    {
+      "id": "w2",
+      "kind": "word",
+      "prompt": "TRAIN"
+    },
+    {
+      "id": "w3",
+      "kind": "word",
+      "prompt": "LEMON"
+    },
+    {
+      "id": "w4",
+      "kind": "word",
+      "prompt": "PIZZA"
+    },
+    {
+      "id": "w5",
+      "kind": "word",
+      "prompt": "MUSIC"
+    },
+    {
+      "id": "w6",
+      "kind": "word",
+      "prompt": "RIVER"
+    },
+    {
+      "id": "w7",
+      "kind": "word",
+      "prompt": "SUNNY"
+    },
+    {
+      "id": "w8",
+      "kind": "word",
+      "prompt": "TOAST"
+    },
+    {
+      "id": "w9",
+      "kind": "word",
+      "prompt": "PLANE"
+    },
+    {
+      "id": "w10",
+      "kind": "word",
+      "prompt": "CRANE"
+    },
+    {
+      "id": "w11",
+      "kind": "word",
+      "prompt": "HOTEL"
+    },
+    {
+      "id": "w12",
+      "kind": "word",
+      "prompt": "LIGHT"
+    },
+    {
+      "id": "w13",
+      "kind": "word",
+      "prompt": "DANCE"
+    },
+    {
+      "id": "w14",
+      "kind": "word",
+      "prompt": "BERRY"
+    },
+    {
+      "id": "w15",
+      "kind": "word",
+      "prompt": "STONE"
+    }
+  ],
+  "copy": {
+    "intro": "Everyone gets the same word today.",
+    "win": "Solved!",
+    "lose": "Better luck tomorrow."
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Photo Invaders",
+  "description": "Shoot the wave before it lands.",
+  "level": "remix",
+  "template": "star_shooter",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.physics_world",
+      "params": {
+        "gravity": 0.0
+      }
+    },
+    {
+      "id": "entity.player_avatar",
+      "params": {
+        "emoji": "🚀",
+        "size": 48
+      }
+    },
+    {
+      "id": "entity.projectile",
+      "params": {
+        "speed": 520.0,
+        "emoji": "🔸"
+      }
+    },
+    {
+      "id": "entity.enemy_wave",
+      "params": {
+        "wave_size": 8,
+        "emoji": "👾",
+        "value": 25,
+        "speed": 28.0,
+        "gap_ms": 1800
+      }
+    },
+    {
+      "id": "behavior.patrol",
+      "params": {
+        "range": 40
+      }
+    },
+    {
+      "id": "input.drag_drop",
+      "params": {
+        "snap_radius": 24
+      }
+    },
+    {
+      "id": "input.tap_target",
+      "params": {
+        "hit_slop": 8
+      }
+    },
+    {
+      "id": "behavior.follow_finger",
+      "params": {
+        "smoothing": 0.1
+      }
+    },
+    {
+      "id": "rule.collision",
+      "params": {
+        "precision": "circle"
+      }
+    },
+    {
+      "id": "rule.lives",
+      "params": {
+        "lives": 3
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 60000
+      }
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "forest",
+        "mood": "intense",
+        "emoji": "👾"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [
+    {
+      "id": "juice",
+      "on": [
+        "entity.collected",
+        "collision.hit"
+      ],
+      "script": "fn on_event(ev) {\n    if ev.name == \"entity.collected\" {\n        emit(\"feedback.haptic\", #{ style: \"light\" });\n    } else if ev.data.harm == true {\n        emit(\"feedback.flash\", #{ color: \"red\" });\n        emit(\"feedback.haptic\", #{ style: \"error\" });\n    }\n}\n"
+    }
+  ],
+  "theme": {
+    "palette": "forest",
+    "mood": "intense",
+    "emoji": "👾"
+  }
+}

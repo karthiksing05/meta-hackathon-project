@@ -1,0 +1,92 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Time Machine",
+  "description": "Drag the moments into the right order.",
+  "level": "remix",
+  "template": "timeline_sort",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "flow.levels",
+      "params": {
+        "levels": 2
+      }
+    },
+    {
+      "id": "space.timeline_strip",
+      "params": {
+        "slots": 5
+      }
+    },
+    {
+      "id": "input.drag_drop",
+      "params": {
+        "snap_radius": 30
+      }
+    },
+    {
+      "id": "rule.order_sequence",
+      "params": {}
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 100
+      }
+    },
+    {
+      "id": "rule.wrong_penalty",
+      "params": {
+        "penalty": 20
+      }
+    },
+    {
+      "id": "rule.total_time_limit",
+      "params": {
+        "limit_ms": 90000
+      }
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feedback.haptic",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "sunset",
+        "mood": "cozy",
+        "emoji": "⏳"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "sunset",
+    "mood": "cozy",
+    "emoji": "⏳"
+  }
+}

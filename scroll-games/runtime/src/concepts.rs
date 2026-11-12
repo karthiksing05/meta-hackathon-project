@@ -22,15 +22,23 @@ impl Params {
         Params(m)
     }
 
-    fn int(&self, k: &str) -> i64 {
+    pub(crate) fn int(&self, k: &str) -> i64 {
         self.0.get(k).and_then(|v| v.as_i64().or_else(|| v.as_f64().map(|f| f as i64))).unwrap_or(0)
     }
 
-    fn bool(&self, k: &str) -> bool {
+    pub(crate) fn has(&self, k: &str) -> bool {
+        self.0.get(k).map_or(false, |v| v.is_number())
+    }
+
+    pub(crate) fn float(&self, k: &str) -> f64 {
+        self.0.get(k).and_then(Value::as_f64).unwrap_or(0.0)
+    }
+
+    pub(crate) fn bool(&self, k: &str) -> bool {
         self.0.get(k).and_then(Value::as_bool).unwrap_or(false)
     }
 
-    fn string(&self, k: &str) -> String {
+    pub(crate) fn string(&self, k: &str) -> String {
         self.0.get(k).and_then(Value::as_str).unwrap_or("").to_string()
     }
 }
@@ -82,7 +90,7 @@ pub fn build(cat: &Catalog, refs: &[ConceptRef], g: &mut Game) -> Vec<Box<dyn Sy
                 items: p.bool("shuffle_items"),
                 choices: p.bool("shuffle_choices"),
             })),
-            _ => None,
+            other => crate::ext_play::build(other, &p).or_else(|| crate::ext_meta::build(other, &p)),
         };
         match sys {
             Some(mut s) => {

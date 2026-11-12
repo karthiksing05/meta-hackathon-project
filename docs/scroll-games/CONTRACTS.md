@@ -17,7 +17,7 @@ Decisions taken for the open questions (orchestrator calls):
 
 ```
 scroll-games/
-  spec/            concepts.json (catalog, 179 concepts, 20 implemented), events.json, schemas (*.schema.json)
+  spec/            concepts.json (catalog, 179 concepts, all implemented), events.json, schemas (*.schema.json)
   runtime/         Rust crate sg_runtime (rlib + cdylib) + wasm-bindgen API
   player/          index.html, player.js, player.css (static, served by server at /player/)
   server/          Go module (module name `scrollgames/server`), main in cmd/server
@@ -77,7 +77,7 @@ Session state machine: `Loading → Ready → Countdown → Playing ⇄ Paused �
 
 ## Glue API (Rhai)
 Each glue entry's script defines `fn on_event(ev)`; `ev` is a map `{name, data}`. Scripts may call:
-`emit(name, data_map)`, `get(key)`, `set(key, value)` (game vars; reserved keys: `score`, `round`, `total_rounds`, `streak`, `multiplier`, `time_left_ms`), `rand_int(lo, hi)` (seeded), `log(msg)`.
+`emit(name, data_map)`, `get(key)`, `set(key, value)` (game vars; reserved keys: `score`, `round`, `total_rounds`, `streak`, `multiplier`, `time_left_ms`), `rand_int(lo, hi)` (seeded), `log(msg)`. The reserved vars and any custom vars already set are also plain scope variables inside `on_event`: `score += 10; banner = "Nice"; multiplier = 2;` work without `get`/`set`. Changed values are written back after the script succeeds (same rules as `set`: read-only vars warn, `score`/`streak` announce changes); a `let` that shadows a game var is local and never written back. Custom vars that were never set are not defined (use `get`, or `is_def_var("n")`). The validator dry-run uses the same scope.
 Limits: max 50_000 operations per event dispatch, max expression depth 32, string max 1KB, array max 256, no `eval`, no module import. A script error disables that glue entry for the session and records a warning; the game keeps running.
 
 ## Native CLI `sgtool` (used by the Go server)
@@ -126,9 +126,12 @@ Identity: header `X-User: u_me` (default `u_me`). Synthetic users/groups/media s
 | GET | /api/media?group= | `[{id,url,caption,group_id,owner_id,taken_at}]` (synthetic, picsum seeded URLs) |
 | GET | /api/groups | `[{id,name,member_ids,media_ids}]` |
 | POST | /api/briefs | `{prompt, media_ids[], level, opt_in_personal_media:bool}` → `{brief, ms, cached, source:"muse"\|"fallback"}` |
-| POST | /api/games/generate | `{prompt, brief, media_ids[]}` → **SSE** (`text/event-stream`): `event: stage` `{stage, status:"start"\|"done", ms}` for stages `plan, content, glue, validate, repair, save`; final `event: done` `{game}` or `event: error` `{message}`. `?stream=0` returns final JSON instead. |
+| POST | /api/games/generate | `{prompt, brief, media_ids[]}` → **SSE** (`text/event-stream`): `event: stage` `{stage, status:"start"\|"done", ms}` for stages `plan, content, glue, validate, moderate, repair, save`; final `event: done` `{game}` or `event: error` `{message}`. `?stream=0` returns final JSON instead. |
 | GET | /api/games/:id | `{game}` where game = `{id, title, description, creator_id, status:"draft"\|"published", manifest, content, brief, created_at, gen:{ms, stages, source, cost_usd}, stats:{plays, best}}` |
-| POST | /api/games/:id/publish | → `{game, feed_item}` (moderation stub runs here: always passes, sets `moderation:"stub-pass"`) |
+| POST | /api/games/:id/publish | → 200 `{game, feed_item, moderation}` (pass or flagged) or **422** `{error, moderation:{decision:"blocked", reasons[]}}` with the game left `draft` (see Moderation) |
+| POST | /api/games/:id/moderate | creator only; re-checks the game and returns `{moderation}` |
+| POST | /api/games/:id/report | `{reason}` from any user → `{ok, reports, hidden}` |
+| GET | /api/moderation/queue | `[{game (trimmed), reports[], hidden}]` for flagged or reported games |
 | GET | /api/daily | `{date, game, seed, resets_at, my_play?, my_streak, leaderboard_top:[{rank,user,user_id,score}], friends_played, my_rank_among_friends?}` (see Daily game) |
 | GET | /api/feed | `[{id, type:"game"\|"score"\|"challenge"\|"daily", actor, game, play?, challenge?, text, created_at, band}]` |
 | POST | /api/games/:id/plays | `{seed, inputs, score, ticks, challenge_id?, daily?, date?}` → `{play, verified, rank, beat:{user,score,won}?, daily?:{date,counted,practice,streak,rank_among_friends}}` (server re-runs `replay`; verified = scores match) |
@@ -186,3 +189,165 @@ Target: generate end-to-end p50 under ~10 s with live Muse, under 100 ms on cach
 
 - `POST /api/users/{id}/follow` and `DELETE /api/users/{id}/follow` (caller from `X-User`) add or remove `{id}` in the caller's `follows` and return the updated user. Idempotent; 404 for an unknown user, 400 for following yourself. `GET /api/me` reflects it and the feed "creators" band reads it.
 - Demo photos live in `server/static/media/<media_id>.jpg` (generated once with `go run ./cmd/genphotos`, Muse Image, ~$0.01 each) and are served at `GET /media/<file>` with `Cache-Control: public, max-age=86400`. Stored media URLs are relative (`/media/m1.jpg`); every `/api/*` response (JSON and SSE) rewrites them to absolute `scheme://host/media/...`, so `media_url` in game content and `GET /api/media` are directly loadable. Media without a generated file keep their picsum URL.
+
+## Moderation
+
+- **Stored on the game** as `moderation:{decision, reasons[{category,severity:"low"|"high",reason,where?,source:"precheck"|"muse"}], checker, input_hash, ms, cost_usd, notes[], checked_at}`. `decision` is `pass`, `pass-precheck-only` (Muse failed or timed out; only the free checks ran), `flagged` (any low) or `blocked` (any high). Older stores with `moderation:"stub-pass"` load as `pass` with `checker:"legacy-stub"`; seeded games have `checker:"seed"`.
+- **Pre-checks** (`moderation.go`, no network): regex blocklists for slurs, sexual content, self-harm, violent threats, emails, phone numbers, street addresses, spam wording and links; a small real-person list flagged only next to an insult cue; length limits (title 80, description 400, any text 400, total 20000); glue scripts that try to emit core events are recorded in `notes` (the runtime already ignores them).
+- **Model check**: one `muse-ember-1.0` call (`reasoning_effort:"minimal"`, `response_format` json_schema `moderation`, 5 s timeout, budget-guarded) over title, description, all content strings, glue string literals and the captions of photos the content uses. It returns severity `none|low|high` plus a reason for each of `hate, harassment, sexual, violence, self_harm, personal_info, spam`. A missing category is treated as a failed call. The verdict is cached by the hash of the checked text.
+- **Pipeline**: stage `moderate` starts the moment `content` finishes and runs while the Wonder plan is still in flight (content text only). When the plan arrives only the free pre-checks run over its strings (title, description, glue literals) and merge with the content verdict; a second Muse call happens only for a long plan text (over 300 characters) that the pre-checks did not settle. Repaired or fallback content is re-moderated. The merged verdict is cached under the hash of the full text and saved on the draft, so publish reuses it. A cached generation also emits `moderate`.
+- **Publish**: blocked gives 422 and the game stays `draft`; flagged publishes but the game is visible only to its creator (feed, daily) with a banner; pass publishes normally.
+- **Reports**: `POST /api/games/:id/report` stores one report per user per game (a repeat updates it). At 2 distinct reporters the game is hidden from everyone but its creator pending review. `GET /api/moderation/queue` has no auth in this prototype.
+- **iOS**: the generating checklist shows "Checking content"; the publish step shows the verdict ("Checked by Muse: passed" / flagged / blocked with reasons and "Edit brief"). A Report action in the game card menu is not built (needs `ScrollGamesHomeView`).
+
+
+## Meta concepts
+
+Non-spatial concepts (`runtime/src/ext_meta.rs`, rendered by `player/ext.js`). All write into `view.ext.<group>.<key>`; they are deterministic (tick counters and `g.rng` only). Server- or host-supplied runtime data (leaderboards, ghost series, invite links) comes in as content `copy`: `copy.social`, `copy.share`, `copy.meta`, `copy.locales`. List order matters in two places: content concepts that claim rounds (`caption`, `blank`, `audio`, `riddle`, `pin`, `shape` items) append their items to the round order at `session.loaded`, so list them after `content.question_bank` (or omit it). `result()` has no extension data; final values (`share.*`, `social.*`, `meta.analytics`) are read from `view().ext` after `session.ended`.
+
+Float params: `Params` has only integer accessors, so a float override is honoured when its integer part differs from the catalog default (catalog defaults otherwise). Adding `Params::float` to `concepts.rs` makes these exact.
+
+Host hooks (CustomEvents on `window`, not yet wired by `player.js`): `sg:social` `{type: reaction|comment|follow|rematch|qr|story|replay_clip, ...}` and `sg:input` `{type:"text", text}` (riddle answers; the session would forward them as `input.text`).
+
+| Concept | Behavior | `view.ext` keys |
+|---|---|---|
+| feedback.sound_cue | cue + counter on correct/wrong/timeout | `sound.{cue,n,volume}` |
+| feedback.screen_shake | 400 ms shake on wrong (skipped under reduced motion) | `fx.shake.{intensity,n,active}` |
+| feedback.floating_score | last 6 score deltas with a fade `life` 0..1 | `fx.floaters[{id,delta,life}]` |
+| feedback.pulse_timer | pulse rate rises once time left is under the threshold | `fx.timer_pulse.{active,hz}` |
+| feedback.color_wash | hue shift grows with streak (full at streak 5) | `fx.color_wash.{hue,streak}` |
+| feedback.emoji_burst | emoji rain on correct | `fx.emoji_burst.{emoji,n,count}` |
+| feedback.voice_cheer | TTS phrase on correct and at game over | `voice.{text,voice,n}` |
+| feedback.slowmo | slow-motion when answered with 25% or less time left | `fx.slowmo.{active,factor}` |
+| feedback.vignette_low_time | red vignette strength 0..1 under the threshold | `fx.vignette` |
+| feedback.toast | toasts for streak >= 2 and `level.started` | `fx.toasts[{id,text}]` |
+| score.time_attack | at `session.ended` score becomes elapsed play time (lower is better) | `score.{mode,lower_is_better,unit}` |
+| score.distance | `per_meter` x `custom.distance` (or `custom.speed` x seconds, default 1 m/s) | `score.distance_m` |
+| score.combo_chain | hits inside `window_ms` chain; bonus 10 x (combo-1); wrong or timeout breaks it; emits `combo.changed` | `score.combo` |
+| score.accuracy_percent | score tracks round(100 x correct / answered) | `score.accuracy` |
+| score.lives_bonus | at `game.over` `per_life` x lives (from `lives.changed` or `custom.lives`) | `score.lives_bonus` |
+| score.par_target | `bonus` at `game.over` if score >= par; live par gap | `score.par.{par,bonus,hit,gap}` |
+| score.perfect_bonus | `bonus` at `game.over` when no wrong answers and at least one correct | `score.perfect` |
+| score.collect_count | `per_item` per `entity.collected` | `score.collected` |
+| score.word_length | `per_letter` x letters of each valid `word.submitted` | `score.words` |
+| score.rhythm_accuracy | `perfect`/`good` points per `beat.hit` grade, miss = 0 | `score.rhythm.{perfect,good,miss}` |
+| score.drawing_similarity | on `input.draw` compares to `custom.reference_shape`; >= threshold scores round(sim x 100); resolves the round (`answer.correct`/`answer.wrong`) | `score.drawing_similarity` |
+| content.word_list | `word` items filtered by length, deduped, optional seeded shuffle; also `custom.words` | `content.{words,word_hints}` |
+| content.emoji_set | `emoji` items (prompt tokens or choices) flattened, first `count` | `content.emoji` |
+| content.caption_guess | `caption` items become choice rounds (photo + captions as choices) | none |
+| content.fill_blank | `blank` items become choice rounds (prompt holds the `___`) | none |
+| content.audio_clip | `audio` items become choice rounds; `media_url` is the clip | `content.audio.{url,clip_ms,round}` |
+| content.pair_deck | `pair` items (prompt = face A, `choices[0]` or clue = face B), seeded-shuffled deck of 2 x `pairs` cards | `content.deck.{pairs,cards[{pair,face,media_url}]}` |
+| content.image_sequence | first `length` `sequence` items are the chronological answer; shown order is seeded-shuffled and never equal | `content.sequence.{shown,answer}` |
+| content.riddle_set | `riddle` items: `choices` are accepted answers, `clue` the hint; `input.text` (normalised) resolves the round, 3 attempts | `content.riddle.{active,hint,letters,attempts_left,answer}` |
+| content.trivia_category | keeps question items whose id starts `<category>:` or `<category>/` (`general` keeps all) | `content.category` |
+| content.user_media_pool | `media` items (max `max_media`); rounds without a photo get one from the pool | `content.media[{id,url,caption}]` |
+| content.map_pins | `pin` items: `choices` = `[x, y, radius?]` in 0..1 map coords; `input.tap` within radius is correct, one try | `content.pin.{name,radius,target}` (target only after the round) |
+| content.reference_drawing | `shape` items: `choices` = `"x,y"` points; sets `custom.reference_shape` and the prompt | `content.shape.{name,points}` |
+| content.beatmap | `beat` items: `choices` = note times in ms; `input.tap` is graded perfect (80 ms) / good (160 ms), passed notes are misses; emits `beat.hit` | `content.beats.{t_ms,total,upcoming,perfect,good,miss}` |
+| social.challenge_friend | at `game.over` emits `challenge.sent` | `social.challenge.{ready,max_recipients,score}` |
+| social.friends_leaderboard | `copy.social.friends` + the player (`copy.social.me.name`), top N plus the player's own row | `social.friends_leaderboard.{rows,you_rank,total,final}` |
+| social.ghost_replay | `copy.social.ghost` = `{name, series:[[t_ms,score]]}` (or `score`); emits `ghost.updated` on change | `social.ghost.{name,opacity,score,delta,ahead}` |
+| social.async_versus | `copy.social.opponent`; status pending, win, lose, tie, waiting; emits `challenge.sent` | `social.versus.{opponent,you,status,same_seed}` |
+| social.coop_score | `copy.social.coop` members pooled with the player | `social.coop.{mine,others,pool,members}` |
+| social.reaction_stickers | stickers unlock at `game.over`; counts from `copy.social.reactions` | `social.reactions.{available,enabled,counts}` |
+| social.comment_on_result | thread unlocks at `game.over`; items from `copy.social.comments` | `social.comments.{enabled,max_len,items}` |
+| social.tag_friend_in_photo | `copy.social.tags[media_id]` people, revealed at `round.ended` | `social.tags.{media_id,count,people}` |
+| social.group_scoreboard | like the leaderboard over `copy.social.group` (or `friends`) | `social.group_scoreboard.{rows,you_rank,total,final,scope}` |
+| social.rematch | same-seed rematch offer at game over; emits `challenge.sent` | `social.rematch.{available,same_seed,score}` |
+| social.spectate | state frame every 6 ticks for the host to stream | `social.spectate.{seq,t_ms,score,round,total_rounds,streak,time_left_ms}` |
+| social.follow_creator | follow prompt at game over; `copy.social.creator` | `social.follow.{show,creator}` |
+| share.replay_clip | window of the last `max_seconds` of ticks (re-play inputs from `start_tick`); emits `share.requested` | `share.replay_clip.{max_seconds,start_tick,end_tick,total_ticks}` |
+| share.daily_streak | `copy.share.daily_streak = {days, played_today}`; +1 at game over | `share.daily_streak.{days,text}` |
+| share.result_emoji_grid | one cell per round, rows of 5 | `share.emoji_grid.{grid,rows}` |
+| share.invite_link | `copy.share.invite_url` + challenge line | `share.invite.{url,text}` |
+| share.story_export | 1080x1920 or 1080x1080 card fields | `share.story.{aspect,width,height,title,score,headline,emoji,palette}` |
+| share.copy_result_text | text summary (+ emoji grid when present) | `share.text` |
+| share.qr_challenge | `copy.share.challenge_url` + `beat=<score>` (or `sg://challenge?beat=`) | `share.qr.payload` |
+| feel.sound_pack | pack for cues (`arcade` `soft` `retro` `none`) | `sound.pack` |
+| feel.music_loop | plays while the session is running | `sound.music.{track,volume,playing}` |
+| feel.palette_cycle | hue 0..360 over `period_s` | `style.palette_cycle.{hue,period_s}` |
+| feel.retro_pixel / paper_texture / neon_glow | style intensity | `style.pixel_size` / `style.paper_grain` / `style.neon_glow` |
+| feel.juice_level | global effects amount | `style.juice` |
+| feel.camera_zoom | zoom pulse on correct | `fx.zoom.{amount,n}` |
+| feel.font_pack / dark_light | typeface; light or dark | `style.font` / `style.appearance` |
+| feel.cozy_mode | warm filter; sets `theme.mood = "cozy"` | `style.cozy` |
+| meta.daily_seed | flag; the host derives the seed (`seed_scope: daily`); date from `copy.meta.date` | `meta.daily_seed.{enabled,date}` |
+| meta.adaptive_difficulty | level 0..1 moves by 0.1 x aggressiveness per round; next round timer x (1.25 - 0.5 x level); emits `difficulty.changed` | `meta.difficulty` |
+| meta.analytics_events | event counts and result summary at game over (no ids) | `meta.analytics` |
+| meta.ab_variant | `g.rng` draw at load; also `custom.ab_variant` for glue | `meta.ab_variant` |
+| meta.debug_overlay | last 8 events and counters | `meta.debug.{tick,recent,score,round,warnings}` |
+| meta.content_moderation_hint | flags contact info, links and abusive words in items; adds a warning | `meta.moderation.{count,flags[{item,reason}]}` |
+| meta.input_recorder | counts `input.raw` (the session records inputs regardless) | `meta.input_recorder.{recording,count}` |
+| meta.cheat_guard | answers faster than `min_answer_ms` lose that round's points and add a warning | `meta.cheat_guard.{rejected,min_answer_ms}` |
+| meta.locale | built-in en/es/fr/de/pt strings, overridable by `copy.locales[locale]` | `meta.locale.{locale,dir,strings}` |
+| meta.schema_version | pins the version, warns when not 1 | `meta.schema_version` |
+| meta.hot_seat | player = (round-1) mod players; banner "Player N's turn"; per-player score deltas | `meta.hot_seat.{players,current,scores,winner}` |
+| accessibility.reduced_motion | flag; suppresses confetti, shake, zoom, burst, slowmo | `a11y.reduced_motion` |
+| accessibility.high_contrast | black/white/yellow palette applied as CSS vars | `a11y.{high_contrast,palette}` |
+| accessibility.colorblind_palette | Okabe-Ito good/bad colors; the flash color is replaced in the runtime; checkmark/cross glyphs | `a11y.colorblind.{mode,good,bad,symbols}` |
+| accessibility.screen_reader_labels | status line, prompt, per-choice labels, live announcements | `a11y.labels.{status,prompt,choices,announce,announce_n}` |
+| accessibility.extended_time | round timer x multiplier on the first tick of each round | `a11y.time_multiplier` |
+| accessibility.one_handed | layout shifted to one side | `a11y.one_handed` (`left` or `right`) |
+| accessibility.haptics_off | player stops `navigator.vibrate`; hosts must ignore `feedback.haptic` | `a11y.haptics_off` |
+| accessibility.captions | text captions for audio cues for 2.5 s | `a11y.captions[{id,text}]` |
+| accessibility.dyslexia_font / big_targets / pause_anytime | font; min touch target px (>= 44); pinned pause button | `a11y.dyslexia_font` / `a11y.min_target_px` / `a11y.pause_anytime` |
+
+## Gameplay concepts
+
+The 73 input / space / entity / behavior / rule / flow concepts beyond the quiz set live in `runtime/src/ext_play/` (`input.rs`, `space.rs`, `entity.rs`, `behavior.rs`, `rule.rs`, `flow.rs`, `board.rs`, shared `world.rs`). All state is in `Game::world` (a 360 x 600 logical field); the player only draws `view.world` and sends inputs. Determinism: fixed 60 Hz ticks, the one seeded `g.rng` (cosmetic particles use their own fixed-seed RNG), only `+ - * /` and `sqrt` in the simulation (no sin/cos/pow, so native `sgtool` and wasm agree bit for bit; verified by `scripts/play-templates.mjs`).
+
+**Runtime behavior shared by all genres**
+- Tick order: `world.integrate()` (move, cull, expire) -> default circle collision (unless `rule.collision` takes over) -> `tick` event (spawners, behaviors, rules). Entities live in `world.ents`; geometry helpers: grid cell, lane x, timeline zones.
+- Generic outcome events: board and goal concepts also emit `answer.correct` / `answer.wrong`, so `score.points`, `rule.wrong_penalty`, `rule.lives`, `flow.sudden_death`, `feedback.*` and the meta concepts work in every genre. `Game::finish(won)` ends a stage: it emits `level.ended` when `flow.levels` / `flow.endless` is present, else `game.over`.
+- Dispatch order: `rule.streak_shield` first; `flow.session` then the interceptors (`flow.levels`, `flow.endless`, `flow.retry_once`, `flow.best_of_n`, `flow.practice_mode`, `flow.intermission`, `rule.difficulty_ramp`, `rule.no_repeat`, `rule.elimination`, `rule.win_target`) last. `retry_once` and `best_of_n` rebuild the systems and continue the RNG stream (`Session::restart_run`).
+- Freeze: `flow.lobby_wait` and `flow.tutorial` freeze the sim (`view.world.overlay`); only `ack`, `pause`, `resume` are accepted. During a freeze the runtime dispatches `freeze.tick` instead of `tick`.
+- New host input messages (all recorded and replayed): `{type:"tap",x,y}` (now delivered as `input.raw`; `input.tap` comes from `input.tap_target` / `input.double_tap`), `swipe {dx,dy,x,y}`, `drag {phase:start|move|end,x,y}`, `press`, `release`, `text {text}`, `voice {text}`, `draw {points:[[x,y]..]}`, `tilt {x:-1..1}`, `select {index}`, `submit`, `dial {step}`, `ack`. Coordinates are logical field units.
+- Validator additions: `input.tap` is no longer "built in" for wiring (an input concept must emit it); `entity.*` / `behavior.*` need exactly one non-quiz `space.*`; at most one space; `consumes_any` catalog flag (rule.lives, flow.sudden_death, feedback.flash/haptic) means one of the consumed events is enough; space concepts declare the content kind they need (`card`, `word`, `event`, `place`, `hotspot`).
+- Catalog edits made for coherent wiring: extra params (`emoji`, `lifetime_ms`, `rivals`, `level_ms`, `beats`, `pairs`, `goal`, ...), `requires`, the added `emits` (`answer.*`, `game.over`, `level.ended`, `score.changed`, ...), `score.points` no longer requires `flow.rounds`.
+
+| Concept | System |
+|---|---|
+| input.swipe_direction | `raw swipe` -> `input.swipe{dir,dx,dy,x,y}`; `min_distance`, `directions` filter |
+| input.tap_target | `raw tap` -> `input.tap{x,y}`; `hit_slop` widens hit tests |
+| input.drag_drop | pick up draggable events/pins, snap to zones within `snap_radius`, emit `input.drag{x,y,phase,id,slot}` for every phase |
+| input.hold_release | counts ticks between `press`/`release`, auto-release at `max_hold_ms`, emits `input.hold{ms}` |
+| input.text_entry / voice_answer | `raw text` / `voice` -> `input.text{text}` (max chars, case); player shows a text box / mic |
+| input.draw_stroke | `raw draw` -> stored strokes (`view.world.strokes`) + `input.draw{points}` |
+| input.tilt_steer | `raw tilt` -> integrates a steering x, emits `input.drag` while tilted |
+| input.double_tap | two taps within `window_ms` -> `input.tap{double:true}` |
+| input.multi_select | `select` toggles up to `max_selected` (state `selected`), `submit` emits one `input.choice{index,indices}` |
+| input.rotary_dial | `dial` -> value mod `steps`, `view.world.extra.dial`, `input.drag{phase:"dial"}` |
+| space.grid_board / card_table | grid geometry (`world.grid`), cols x rows; card table sizes rows from the card count |
+| space.lanes / scrolling_world | lane count and lane x; scrolling background, entity flow direction (left/up/down) and base speed |
+| space.free_canvas | blank canvas; `goal: trace` scores stroke coverage of a `shape` item (>= 75% solves) |
+| space.word_grid | 6-row guess grid, hidden target and dictionary from `word` items, per-level reset (`extra.word`) |
+| space.timeline_strip | zones for `slots` and the shuffled `event` pool, ranks from `answer` |
+| space.physics_world | gravity (px/s^2 = gravity x 30) and free two-axis motion |
+| space.photo_stage | full-bleed photo plus hidden `hotspot` items found by tapping (`extra.find`) |
+| space.rhythm_track | 4 lanes, a note every beat at `bpm`, tap judging (perfect/good/miss) -> `beat.hit`, `answer.*`; `beats` notes then `finish(true)` |
+| space.map_view | draggable `place` pins, tolerance shrinks with `zoom`; lock on target |
+| entity.player_avatar | the player glyph: lane steering by swipe/tap, grid walking, follows drags |
+| entity.falling_object / obstacle / collectible | spawn templates (own timers, or driven by `behavior.spawn_wave`); catch = points, obstacle = `collision.hit{harm}`, `lifetime_ms` for grid whack play |
+| entity.enemy_wave | waves of `wave_size` enemies after `gap_ms`; shot -> `value` points, landing -> harm hit |
+| entity.card / tile / word_tile | memory cards from `card` items; match tiles / 2048 tiles; on-screen keyboard emitting `input.text` |
+| entity.bouncing_ball / paddle / projectile | ball with wall and paddle bounces (`collision.hit`); paddle follows drags; shots fired on tap |
+| entity.particle_emitter / hint_giver | cosmetic trail (own RNG); hint button that dims a wrong choice / peeks a pair / reveals a letter |
+| behavior.gravity / patrol / homing / bounce / magnet / wrap_edges / drift | world gravity; sideways sway; steering toward the avatar; wall and brick bounces; pull of collectibles; wrap instead of cull; render-only ambient wobble |
+| behavior.spawn_wave / spawn_rate_ramp | seeded weighted spawning every `every_ms`; rate grows `ramp_per_min`, announces `difficulty.changed` |
+| behavior.follow_finger | eases avatar/paddle to the last drag position (`smoothing`) |
+| behavior.shuffle_tiles / merge_adjacent / slide_to_wall | solvable shuffle; 2048 merge (`merge_to`) with `match.made`; avatar slides to the wall (`collision.hit`) |
+| rule.lives / hint_budget / wrong_penalty / win_target / total_time_limit | lives (`lives.changed`, `game.over`); tap the hint entity (`hint.used`); score penalty; end at target; whole-game clock (`hud.clock_ms`) |
+| rule.collision / no_repeat / difficulty_ramp / streak_shield / elimination | box or circle overlap events; dedupes items; difficulty per round (shorter timers); a full streak absorbs a mistake; simulated rivals, lowest cut per round |
+| rule.match_pair / match_three / word_valid / order_sequence / sequence_memory | memory pairs; swap + cascade + refill; Wordle grading against the dictionary; drag-order check (`sequence.step`); Simon pad sequence |
+| flow.levels / endless | level counter, `level_ms` or goal driven, difficulty +0.25; stage after stage until failure |
+| flow.sudden_death / retry_once / best_of_n / practice_mode | first mistake ends; one free restart after a loss; best run of n; result score 0 |
+| flow.intermission / lobby_wait / tutorial / daily_puzzle | extra delay after a round; simulated friends joining; overlay with "Got it"; `extra.daily_puzzle` hides Play again |
+
+**View model additions** (`view.world`, always present): `space` (`""` = quiz), `w`, `h`, `bg`, `scroll`, `flow`, `cols`, `rows`, `lanes`, `slots`, `grid {ox,oy,s}`, `photo`, `fit`, `zoom`, `ents[{id,role,label,img,x,y,r,hw,hh,state,tag}]` (`tag` only for tiles and pads; face-down card labels are blank), `zones`, `hud {lives,hints,level,found,pairs,combo,clock_ms,clock_total_ms,...}` (the same keys are readable by glue via `get`), `toast`, `overlay {kind,text,button}`, `input {swipe,tap,drag,hold,text,voice,draw,tilt,select,dial}` (which inputs the player must wire), `strokes`, `extra {word, find, trace, dial, hold, hit_y, daily_puzzle, practice}`, `level`. `result()` now also carries `ext` (the meta view data).
+
+**Genre templates** (`spec/templates/<genre>.manifest.json` + `<genre>.content.json`, `?local=1&template=<genre>` in the player): lane_runner, memory_match, word_guess, daily_word, rhythm_tap, paddle_rally, star_catcher, star_shooter, match3, swipe_merge, timeline_sort, photo_hunt, whack_mole, simon_says, map_pins, trace_draw (plus the quiz). Content kinds: `card` (prompt, media_url), `word` (prompt, clue), `event` (prompt, answer = order), `place` / `hotspot` (prompt, choices = [x%, y%]), `shape` (choices = "x,y" points); see `spec/content.schema.json`.
+
+**Server**: the brief's `template` (or genre keywords in intent/title) selects the genre; `templateManifest` / `templateContent` serve the genre fallback (personalized with photos for memory_match and timeline_sort); the planner gets the genre manifest as its EXAMPLE and a GENRE note; Ember writes the genre's content kind (`planGenreContent`) with the template as fallback. The plan catalog digest lists only concepts used by a template.
+
+**Checks**: `cargo test` (`tests/gameplay.rs`: every template validates, a scripted bot wins each genre and the run replays exactly; per-concept tests), `node scripts/play-templates.mjs` (wasm play + wasm and native replay agree), `node scripts/browser-templates-check.mjs [--shots dir]` (headless Chrome, no page errors, canvas painted).

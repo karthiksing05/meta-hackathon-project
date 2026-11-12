@@ -1,0 +1,118 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Photo Dash",
+  "description": "Swipe between lanes, grab coins, dodge the rocks.",
+  "level": "remix",
+  "template": "lane_runner",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "flow.levels",
+      "params": {
+        "levels": 3,
+        "level_ms": 12000
+      }
+    },
+    {
+      "id": "space.lanes",
+      "params": {
+        "lane_count": 3
+      }
+    },
+    {
+      "id": "entity.player_avatar",
+      "params": {
+        "emoji": "🏃",
+        "size": 48
+      }
+    },
+    {
+      "id": "entity.collectible",
+      "params": {
+        "value": 10,
+        "emoji": "🪙"
+      }
+    },
+    {
+      "id": "entity.obstacle",
+      "params": {
+        "damage": 1,
+        "emoji": "🪨"
+      }
+    },
+    {
+      "id": "behavior.spawn_wave",
+      "params": {
+        "every_ms": 850
+      }
+    },
+    {
+      "id": "behavior.spawn_rate_ramp",
+      "params": {
+        "ramp_per_min": 0.6
+      }
+    },
+    {
+      "id": "entity.particle_emitter",
+      "params": {
+        "rate": 14
+      }
+    },
+    {
+      "id": "input.swipe_direction",
+      "params": {
+        "min_distance": 30,
+        "directions": "two_horizontal"
+      }
+    },
+    {
+      "id": "rule.lives",
+      "params": {
+        "lives": 3
+      }
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "sunset",
+        "mood": "intense",
+        "emoji": "🏃"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [
+    {
+      "id": "juice",
+      "on": [
+        "entity.collected",
+        "collision.hit"
+      ],
+      "script": "fn on_event(ev) {\n    if ev.name == \"entity.collected\" {\n        emit(\"feedback.haptic\", #{ style: \"light\" });\n    } else if ev.data.harm == true {\n        emit(\"feedback.flash\", #{ color: \"red\" });\n        emit(\"feedback.haptic\", #{ style: \"error\" });\n    }\n}\n"
+    }
+  ],
+  "theme": {
+    "palette": "sunset",
+    "mood": "intense",
+    "emoji": "🏃"
+  }
+}

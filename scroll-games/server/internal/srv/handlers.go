@@ -52,6 +52,9 @@ func (a *App) Handler() http.Handler {
 	mux.HandleFunc("POST /api/games/generate", a.generate)
 	mux.HandleFunc("GET /api/games/{id}", a.getGame)
 	mux.HandleFunc("POST /api/games/{id}/publish", a.publish)
+	mux.HandleFunc("POST /api/games/{id}/moderate", a.moderateEndpoint)
+	mux.HandleFunc("POST /api/games/{id}/report", a.reportGame)
+	mux.HandleFunc("GET /api/moderation/queue", a.moderationQueue)
 	mux.HandleFunc("POST /api/games/{id}/plays", a.postPlay)
 	mux.HandleFunc("GET /api/games/{id}/leaderboard", a.leaderboard)
 	mux.HandleFunc("GET /api/daily", a.daily)
@@ -291,24 +294,44 @@ func (a *App) getGame(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) publish(w http.ResponseWriter, r *http.Request) {
-	a.store.mu.Lock()
-	defer a.store.mu.Unlock()
+	a.store.mu.RLock()
 	g, ok := a.store.d.Games[r.PathValue("id")]
+	var gm Game
+	if ok {
+		gm = *g
+	}
+	a.store.mu.RUnlock()
 	if !ok {
 		writeErr(w, 404, "game not found")
 		return
 	}
-	if g.CreatorID != userID(r) {
+	if gm.CreatorID != userID(r) {
 		writeErr(w, 403, "only the creator can publish")
 		return
 	}
-	g.Moderation = "stub-pass" // moderation stub: always passes
+	// Moderation runs outside the store lock; a verdict cached during generation makes this instant.
+	mod := a.moderateGame(r.Context(), gm)
+
+	a.store.mu.Lock()
+	defer a.store.mu.Unlock()
+	g, ok = a.store.d.Games[gm.ID]
+	if !ok {
+		writeErr(w, 404, "game not found")
+		return
+	}
+	g.Moderation = mod
+	if mod.Decision == DecisionBlocked {
+		g.Status = "draft"
+		a.store.saveLocked()
+		writeJSON(w, 422, map[string]any{"error": "blocked by moderation", "moderation": mod})
+		return
+	}
 	g.Status = "published"
 	item := FeedItem{ID: newID("f_"), Type: "game", ActorID: g.CreatorID, GameID: g.ID,
 		Text: a.store.userName(g.CreatorID) + " published " + g.Title, CreatedAt: time.Now().UTC()}
 	a.store.d.Feed = append(a.store.d.Feed, item)
 	a.store.saveLocked()
-	writeJSON(w, 200, map[string]any{"game": a.withStats(g), "feed_item": a.expandFeed(item, "")})
+	writeJSON(w, 200, map[string]any{"game": a.withStats(g), "feed_item": a.expandFeed(item, ""), "moderation": mod})
 }
 
 // replayScore re-runs the game through sgtool; ok is false if it could not be replayed.
@@ -570,7 +593,7 @@ func (a *App) feed(w http.ResponseWriter, r *http.Request) {
 	}
 	items := []FeedItem{}
 	for _, it := range a.store.d.Feed {
-		if g, ok := a.store.d.Games[it.GameID]; ok && g.Status == "published" {
+		if g, ok := a.store.d.Games[it.GameID]; ok && g.Status == "published" && (g.CreatorID == uid || !a.hiddenFromOthersLocked(g)) {
 			items = append(items, it)
 		}
 	}

@@ -1,0 +1,77 @@
+{
+  "schema": "sg.manifest/1",
+  "title": "Beat Tap",
+  "description": "Tap the lane when the note hits the line.",
+  "level": "remix",
+  "template": "rhythm_tap",
+  "seed_scope": "per_challenge",
+  "concepts": [
+    {
+      "id": "flow.session",
+      "params": {}
+    },
+    {
+      "id": "flow.countdown_start",
+      "params": {
+        "seconds": 3
+      }
+    },
+    {
+      "id": "space.rhythm_track",
+      "params": {
+        "bpm": 110,
+        "beats": 28
+      }
+    },
+    {
+      "id": "input.tap_target",
+      "params": {
+        "hit_slop": 4
+      }
+    },
+    {
+      "id": "score.points",
+      "params": {
+        "per_correct": 50
+      }
+    },
+    {
+      "id": "rule.lives",
+      "params": {
+        "lives": 8
+      }
+    },
+    {
+      "id": "feedback.flash",
+      "params": {}
+    },
+    {
+      "id": "feedback.haptic",
+      "params": {}
+    },
+    {
+      "id": "feel.theme",
+      "params": {
+        "palette": "midnight",
+        "mood": "intense",
+        "emoji": "🥁"
+      }
+    },
+    {
+      "id": "share.score_card",
+      "params": {
+        "headline": "Final score"
+      }
+    },
+    {
+      "id": "social.beat_them",
+      "params": {}
+    }
+  ],
+  "glue": [],
+  "theme": {
+    "palette": "midnight",
+    "mood": "intense",
+    "emoji": "🥁"
+  }
+}

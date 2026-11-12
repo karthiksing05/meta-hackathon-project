@@ -8,6 +8,8 @@ struct ScrollGamesHomeView: View {
     @State private var isShowingServer = false
     @State private var playRequest: SGPlayRequest?
     @State private var profileUser: SGUser?
+    @State private var reportTarget: SGGame?
+    @State private var toast: String?
 
     private let topAnchor = "sg.top"
 
@@ -79,7 +81,41 @@ struct ScrollGamesHomeView: View {
                 Task { await sg.refresh() }
             }
         }
+        .confirmationDialog(
+            "Why are you reporting this game?",
+            isPresented: Binding(get: { reportTarget != nil }, set: { if !$0 { reportTarget = nil } }),
+            titleVisibility: .visible,
+            presenting: reportTarget
+        ) { game in
+            ForEach(SGReportReason.allCases) { reason in
+                Button(reason.title) { report(game, reason: reason) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .overlay(alignment: .bottom) {
+            if let toast {
+                Text(toast)
+                    .font(.fbCaptionEmphasized)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, FBSpacing.l)
+                    .padding(.vertical, FBSpacing.m)
+                    .background(.black.opacity(0.8), in: Capsule())
+                    .padding(.bottom, FBSpacing.xxl)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .accessibilityAddTraits(.isStaticText)
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: toast)
         .environment(sg)
+    }
+
+    private func report(_ game: SGGame, reason: SGReportReason) {
+        Task {
+            let sent = await sg.report(game: game, reason: reason)
+            toast = sent ? "Thanks, we'll review this game." : "Couldn't send your report. Try again."
+            try? await Task.sleep(for: .seconds(2.5))
+            toast = nil
+        }
     }
 
     private func warmUpIfSelected() {
@@ -198,7 +234,8 @@ struct ScrollGamesHomeView: View {
                     SGFeedCard(
                         item: item,
                         onPlay: { play(item) },
-                        onProfile: { profileUser = $0 }
+                        onProfile: { profileUser = $0 },
+                        onReport: { reportTarget = $0 }
                     )
                     FeedSeparator()
                 }
@@ -349,12 +386,16 @@ private struct SGFeedCard: View {
     let item: SGFeedItem
     let onPlay: () -> Void
     let onProfile: (SGUser) -> Void
+    let onReport: (SGGame) -> Void
 
     var body: some View {
         if let game = item.game {
             let creator = sg.creator(of: game, fallback: item.actor)
             VStack(alignment: .leading, spacing: 0) {
-                header(creator: creator)
+                header(creator: creator, game: game)
+                if game.creatorID == SGConfig.userID, game.moderation?.isFlagged == true {
+                    flaggedBanner
+                }
                 banner(game: game)
                 footer(game: game)
             }
@@ -364,7 +405,17 @@ private struct SGFeedCard: View {
 
     private var actor: SGUser? { item.actor }
 
-    private func header(creator: SGUser) -> some View {
+    private var flaggedBanner: some View {
+        Label("Flagged \u{2014} only you can see this", systemImage: "flag.fill")
+            .font(.fbCaptionEmphasized)
+            .foregroundStyle(FBColor.primaryText)
+            .padding(.horizontal, FBMetrics.gutter)
+            .padding(.vertical, FBSpacing.s)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(FBColor.feelingYellow.opacity(0.3))
+    }
+
+    private func header(creator: SGUser, game: SGGame) -> some View {
         let shown = actor ?? creator
         return HStack(spacing: 10) {
             Button { onProfile(shown) } label: {
@@ -382,6 +433,18 @@ private struct SGFeedCard: View {
             }
             .buttonStyle(.plain)
             Spacer(minLength: 0)
+            if game.creatorID != SGConfig.userID {
+                Menu {
+                    Button("Report game", systemImage: "flag") { onReport(game) }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
+                        .foregroundStyle(FBColor.secondaryText)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("More options")
+            }
         }
         .padding(.horizontal, FBMetrics.gutter)
         .padding(.top, FBMetrics.gutter)

@@ -185,14 +185,13 @@ fn validator_checks_content_shape() {
 }
 
 #[test]
-fn stub_concepts_are_accepted_but_warn() {
+fn unknown_concepts_are_rejected() {
     let mut m = manifest();
-    m["concepts"].as_array_mut().unwrap().push(json!({ "id": "feedback.sound_cue" }));
+    m["concepts"].as_array_mut().unwrap().push(json!({ "id": "feedback.not_a_concept" }));
     let r = report(&m);
-    assert_eq!(r["ok"], true, "{}", errors_text(&r));
-    assert!(r["warnings"].to_string().contains("stub"));
-    let s = Session::new(&m.to_string(), CONTENT, 1).unwrap();
-    assert!(s.warnings().iter().any(|w| w.contains("feedback.sound_cue")));
+    assert_eq!(r["ok"], false);
+    assert!(errors_text(&r).contains("unknown concept"));
+    assert!(Session::new(&m.to_string(), CONTENT, 1).is_err());
 }
 
 /// Plays all rounds correctly on a fixed tick cadence. Returns (final score, points earned in the last round, saw banner).
@@ -284,7 +283,7 @@ fn catalog_is_consistent() {
     let cat: Vec<Value> = serde_json::from_str(&sg_runtime::catalog()).unwrap();
     assert!(cat.len() >= 150, "catalog has {} concepts", cat.len());
     let implemented = cat.iter().filter(|c| c["status"] == "implemented").count();
-    assert_eq!(implemented, 20);
+    assert_eq!(implemented, cat.len(), "every catalog concept has a runtime system");
     let kinds: std::collections::BTreeSet<&str> = cat.iter().map(|c| c["kind"].as_str().unwrap()).collect();
     assert_eq!(kinds.len(), 14);
     for c in &cat {
@@ -299,4 +298,74 @@ fn bad_input_json_is_an_error_not_a_panic() {
     assert!(s.input("not json").is_err());
     let r: Value = serde_json::from_str(&sg_runtime::replay(MANIFEST, CONTENT, 1, "oops")).unwrap();
     assert_eq!(r["ok"], false);
+}
+
+fn bare_glue(script: &str, on: &[&str]) -> Value {
+    let mut m = manifest();
+    m["glue"] = json!([{ "id": "bare", "on": on, "script": script }]);
+    m
+}
+
+#[test]
+fn glue_bare_variables_read_and_write() {
+    let mut without = manifest();
+    without["glue"] = json!([]);
+    let plain = play(&without, 5, true, 700.0).score();
+
+    let script = "fn bonus(n) { n * 2 }\nfn on_event(ev) {\n  // bare vars\n  let streak = 0;\n  score += 10;\n  banner = \"nice \\\"one\\\" {\";\n  multiplier = multiplier + 1;\n  let combo = get(\"combo\"); if combo == () { combo = 0; }\n  set(\"combo\", combo + bonus(1));\n}";
+    let m = bare_glue(script, &["answer.correct"]);
+    let r = report(&m);
+    assert_eq!(r["ok"], true, "{}", errors_text(&r));
+
+    let a = play(&m, 5, true, 700.0);
+    let b = play(&m, 5, true, 700.0);
+    assert_eq!(a.score(), b.score(), "deterministic");
+    assert!(a.score() >= plain + 80, "score += 10 per correct answer: {} vs {} {:?}", a.score(), plain, a.warnings());
+    assert_eq!(a.result()["stats"]["best_streak"], 8, "shadowing `let streak` must not write back");
+    assert!(a.warnings().is_empty(), "{:?}", a.warnings());
+}
+
+#[test]
+fn glue_bare_custom_variable_persists_between_events() {
+    let mut m = manifest();
+    m["glue"] = json!([{
+        "id": "setter",
+        "on": ["round.started"],
+        "script": "fn on_event(ev) { set(\"n\", 5); }"
+    }, {
+        "id": "reader",
+        "on": ["answer.correct"],
+        "script": "fn on_event(ev) { if is_def_var(\"n\") { n += 1; set(\"m\", n); score += n; } }"
+    }]);
+    let r = report(&m);
+    assert_eq!(r["ok"], true, "{}", errors_text(&r));
+    let mut without = manifest();
+    without["glue"] = json!([]);
+    let plain = play(&without, 5, true, 700.0).score();
+    let s = play(&m, 5, true, 700.0);
+    assert!(s.warnings().is_empty(), "{:?}", s.warnings());
+    assert!(s.score() >= plain + 8 * 6, "n is 6 on every answer: {} vs {}", s.score(), plain);
+}
+
+#[test]
+fn glue_bare_write_to_read_only_var_warns() {
+    let m = bare_glue("fn on_event(ev) { round = 99; }", &["round.started"]);
+    let s = play(&m, 3, true, 700.0);
+    assert_eq!(s.result()["stats"]["correct"], 8);
+    assert!(s.warnings().iter().any(|w| w.contains("read-only var 'round'")), "{:?}", s.warnings());
+}
+
+#[test]
+fn glue_bare_failure_is_caught_by_dry_run() {
+    let m = bare_glue("fn on_event(ev) { banner = nope + 1; }", &["round.started"]);
+    let r = report(&m);
+    assert_eq!(r["ok"], false);
+    assert!(errors_text(&r).contains("nope"), "{}", errors_text(&r));
+}
+
+#[test]
+fn glue_infinite_loop_with_bare_vars_is_stopped() {
+    let m = bare_glue("fn on_event(ev) { while score >= 0 { score += 1; } }", &["round.started"]);
+    let r = report(&m);
+    assert_eq!(r["ok"], false, "dry-run catches the runaway loop");
 }

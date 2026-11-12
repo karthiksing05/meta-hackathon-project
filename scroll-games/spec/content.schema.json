@@ -3,39 +3,265 @@
   "$id": "https://scrollgames.dev/schema/sg.content/1",
   "title": "Scroll Games content",
   "type": "object",
-  "required": ["schema", "items"],
+  "required": [
+    "schema",
+    "items"
+  ],
   "properties": {
-    "schema": { "const": "sg.content/1" },
+    "schema": {
+      "const": "sg.content/1"
+    },
     "items": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "kind"],
+        "required": [
+          "id",
+          "kind"
+        ],
         "properties": {
-          "id": { "type": "string", "minLength": 1 },
-          "kind": { "type": "string" }
-        },
-        "if": { "properties": { "kind": { "const": "question" } } },
-        "then": {
-          "required": ["prompt", "choices", "answer"],
-          "properties": {
-            "prompt": { "type": "string", "minLength": 1 },
-            "media_id": { "type": "string" },
-            "media_url": { "type": "string" },
-            "choices": { "type": "array", "minItems": 2, "maxItems": 6, "items": { "type": "string", "minLength": 1 } },
-            "answer": { "type": "integer", "minimum": 0, "description": "Index into choices." },
-            "clue": { "type": "string" }
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string"
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "question"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "prompt",
+                "choices",
+                "answer"
+              ],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "media_id": {
+                  "type": "string"
+                },
+                "media_url": {
+                  "type": "string"
+                },
+                "choices": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 6,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "answer": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Index into choices."
+                },
+                "clue": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "card"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "prompt"
+              ],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 24,
+                  "description": "Card face: an emoji or short word. Each card item becomes a pair."
+                },
+                "media_url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "word"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "prompt"
+              ],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "pattern": "^\\S+$",
+                  "description": "The word (letters). Items of one game should share a length (space.word_grid word_length)."
+                },
+                "clue": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "event"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "prompt",
+                "answer"
+              ],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "answer": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Chronological position; all distinct."
+                },
+                "media_url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "place"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "prompt",
+                "choices"
+              ],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "choices": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "[x, y] as percentages 0-100 of the map."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "hotspot"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "prompt",
+                "choices"
+              ],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "What to find."
+                },
+                "choices": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "[x, y] percent position on the photo."
+                },
+                "media_url": {
+                  "type": "string",
+                  "description": "The photo (the first hotspot item's media_url is used)."
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "shape"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "prompt",
+                "choices"
+              ],
+              "properties": {
+                "prompt": {
+                  "type": "string"
+                },
+                "choices": {
+                  "type": "array",
+                  "minItems": 3,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^\\d+,\\d+$"
+                  },
+                  "description": "Points \"x,y\" in percent along the shape to trace."
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "copy": {
       "type": "object",
       "properties": {
-        "intro": { "type": "string" },
-        "win": { "type": "string" },
-        "lose": { "type": "string" }
+        "intro": {
+          "type": "string"
+        },
+        "win": {
+          "type": "string"
+        },
+        "lose": {
+          "type": "string"
+        }
       }
     }
   }

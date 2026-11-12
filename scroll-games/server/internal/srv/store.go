@@ -58,7 +58,7 @@ type Game struct {
 	Description string          `json:"description"`
 	CreatorID   string          `json:"creator_id"`
 	Status      string          `json:"status"`
-	Moderation  string          `json:"moderation,omitempty"`
+	Moderation  *Moderation     `json:"moderation,omitempty"`
 	Manifest    json.RawMessage `json:"manifest,omitempty"`
 	Content     json.RawMessage `json:"content,omitempty"`
 	Brief       json.RawMessage `json:"brief,omitempty"`
@@ -116,6 +116,7 @@ type data struct {
 	Challenges map[string]*Challenge `json:"challenges"`
 	Feed       []FeedItem            `json:"feed"`
 	Daily      map[string]string     `json:"daily,omitempty"` // UTC date -> pinned daily game id
+	Reports    []Report              `json:"reports,omitempty"`
 }
 
 // Store is the in-memory database with atomic JSON persistence.

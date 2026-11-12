@@ -1,0 +1,15 @@
+{
+  "schema": "sg.content/1",
+  "items": [
+    {
+      "id": "i1",
+      "kind": "note",
+      "prompt": "Pads"
+    }
+  ],
+  "copy": {
+    "intro": "Watch the pads light up, then tap them in the same order.",
+    "win": "Great memory!",
+    "lose": "Pattern lost."
+  }
+}

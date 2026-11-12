@@ -11,23 +11,24 @@ import (
 
 // Config holds all runtime settings; tests override timeouts and URLs.
 type Config struct {
-	Addr           string
-	DataDir        string
-	PlayerDir      string
-	MediaDir       string // generated demo photos served at /media/
-	SpecDir        string
-	SgtoolPath     string
-	MuseBaseURL    string
-	MuseKey        string
-	CapUSD         float64
-	BriefTimeout   time.Duration
-	PlanTimeout    time.Duration
-	ContentTimeout time.Duration
-	RepairTimeout  time.Duration
-	BriefModel     string // model for POST /api/briefs
-	PlanReasoning  string // reasoning_effort for the Wonder plan call
-	PlanMaxTokens  int
-	Speculate      bool // start generation as soon as a brief is returned
+	Addr              string
+	DataDir           string
+	PlayerDir         string
+	MediaDir          string // generated demo photos served at /media/
+	SpecDir           string
+	SgtoolPath        string
+	MuseBaseURL       string
+	MuseKey           string
+	CapUSD            float64
+	BriefTimeout      time.Duration
+	PlanTimeout       time.Duration
+	ContentTimeout    time.Duration
+	RepairTimeout     time.Duration
+	ModerationTimeout time.Duration
+	BriefModel        string // model for POST /api/briefs
+	PlanReasoning     string // reasoning_effort for the Wonder plan call
+	PlanMaxTokens     int
+	Speculate         bool // start generation as soon as a brief is returned
 }
 
 // DefaultConfig returns the contract defaults (paths relative to scroll-games/server).
@@ -37,22 +38,23 @@ func DefaultConfig() Config {
 		capUSD = v
 	}
 	return Config{
-		Addr:           ":8787",
-		DataDir:        "data",
-		PlayerDir:      "../player",
-		MediaDir:       "static/media",
-		SpecDir:        "../spec",
-		SgtoolPath:     "../runtime/target/release/sgtool",
-		MuseBaseURL:    "https://api.meta.ai/v1",
-		CapUSD:         capUSD,
-		BriefTimeout:   12 * time.Second,
-		PlanTimeout:    25 * time.Second,
-		ContentTimeout: 25 * time.Second,
-		RepairTimeout:  20 * time.Second,
-		BriefModel:     briefModelFromEnv(),
-		PlanReasoning:  envOr("SG_PLAN_REASONING", "minimal"),
-		PlanMaxTokens:  2000,
-		Speculate:      os.Getenv("SG_SPECULATE") != "0",
+		Addr:              ":8787",
+		DataDir:           "data",
+		PlayerDir:         "../player",
+		MediaDir:          "static/media",
+		SpecDir:           "../spec",
+		SgtoolPath:        "../runtime/target/release/sgtool",
+		MuseBaseURL:       "https://api.meta.ai/v1",
+		CapUSD:            capUSD,
+		BriefTimeout:      12 * time.Second,
+		PlanTimeout:       60 * time.Second,
+		ContentTimeout:    60 * time.Second,
+		RepairTimeout:     60 * time.Second,
+		ModerationTimeout: 20 * time.Second,
+		BriefModel:        briefModelFromEnv(),
+		PlanReasoning:     envOr("SG_PLAN_REASONING", "minimal"),
+		PlanMaxTokens:     2000,
+		Speculate:         os.Getenv("SG_SPECULATE") != "0",
 	}
 }
 

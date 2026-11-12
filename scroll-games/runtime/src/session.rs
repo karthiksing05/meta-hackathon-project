@@ -11,6 +11,20 @@ use std::collections::VecDeque;
 
 const MAX_EVENTS_PER_DISPATCH: usize = 2000;
 const MAX_STEP_MS: f64 = 250.0;
+/// Dispatch order: rules that veto (shield) first, game-flow interceptors after `flow.session`.
+fn order_systems(systems: &mut [Box<dyn System>]) {
+    fn priority(id: &str) -> i32 {
+        match id {
+            "rule.streak_shield" => -1,
+            "flow.session" => 1,
+            "flow.levels" | "flow.endless" | "flow.retry_once" | "flow.best_of_n" | "flow.practice_mode" | "flow.intermission"
+            | "rule.difficulty_ramp" | "rule.no_repeat" | "rule.elimination" | "rule.win_target" => 2,
+            _ => 0,
+        }
+    }
+    systems.sort_by_key(|s| priority(s.id()));
+}
+
 const REPLAY_TICK_CAP: u64 = 60 * 600;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -41,6 +55,8 @@ impl State {
 }
 
 pub struct Session {
+    manifest: Manifest,
+    content: Content,
     g: Game,
     systems: Vec<Box<dyn System>>,
     glue: GlueHost,
@@ -66,11 +82,14 @@ impl Session {
         let content: Content = serde_json::from_str(content_json).map_err(|e| e.to_string())?;
         let cat = Catalog::load();
 
-        let mut g = Game::new(&manifest.title, content.items, content.copy, manifest.theme.clone(), seed);
-        let systems = concepts::build(&cat, &manifest.concepts, &mut g);
+        let mut g = Game::new(&manifest.title, content.items.clone(), content.copy.clone(), manifest.theme.clone(), seed);
+        let mut systems = concepts::build(&cat, &manifest.concepts, &mut g);
+        order_systems(&mut systems);
         let glue = GlueHost::new(&manifest.glue).map_err(|e| format!("glue: {e:?}"))?;
 
         let mut s = Session {
+            manifest,
+            content,
             g,
             systems,
             glue,
@@ -152,7 +171,17 @@ impl Session {
                 if self.g.round.active && !self.g.round.locked {
                     self.g.round.elapsed_us += TICK_US;
                 }
-                self.dispatch(Event::new("tick", json!({ "tick": self.tick })));
+                if self.g.world.freeze.is_some() {
+                    self.dispatch(Event::new("freeze.tick", json!({})));
+                } else {
+                    let evs = self.g.world.integrate();
+                    self.g.pending.extend(evs);
+                    if !self.g.world.shared_collision {
+                        let evs = self.g.world.detect(true);
+                        self.g.pending.extend(evs);
+                    }
+                    self.dispatch(Event::new("tick", json!({ "tick": self.tick })));
+                }
                 if self.state == State::Playing && self.g.max_duration_us > 0 && self.playing_us >= self.g.max_duration_us {
                     let score = self.g.score;
                     self.g.warn("session hit its maximum duration");
@@ -183,13 +212,15 @@ impl Session {
 
     fn apply_input(&mut self, v: &Value) {
         match v["type"].as_str().unwrap_or("") {
-            "choice" if self.state == State::Playing => {
+            "choice" if self.state == State::Playing && self.g.world.freeze.is_none() => {
                 let data = json!({ "type": "choice", "index": v["index"] });
                 self.dispatch(Event::new("input.raw", data));
             }
-            "tap" if self.state == State::Playing => {
-                let data = json!({ "x": v["x"], "y": v["y"] });
-                self.dispatch(Event::new("input.tap", data));
+            "ack" if self.state == State::Playing => self.dispatch(Event::new("input.raw", v.clone())),
+            "tap" | "swipe" | "drag" | "press" | "release" | "text" | "draw" | "tilt" | "select" | "submit" | "voice" | "dial"
+                if self.state == State::Playing && self.g.world.freeze.is_none() =>
+            {
+                self.dispatch(Event::new("input.raw", v.clone()));
             }
             "pause" if self.state.is_active() => {
                 self.paused_from = self.state;
@@ -206,11 +237,38 @@ impl Session {
 
     fn dispatch(&mut self, first: Event) {
         self.run_queue(first);
+        if self.g.restart_req {
+            self.g.restart_req = false;
+            self.restart_run();
+        }
         if self.g.end_requested {
             self.g.end_requested = false;
             self.state = State::Ended;
             let score = self.g.score;
             self.run_queue(Event::new("session.ended", json!({ "score": score })));
+        }
+    }
+
+    /// Start a fresh run (retry_once, best_of_n): systems and state are rebuilt, the RNG stream and carry values continue.
+    fn restart_run(&mut self) {
+        let cat = Catalog::load();
+        let mut g = Game::new(&self.manifest.title, self.content.items.clone(), self.content.copy.clone(), self.manifest.theme.clone(), 0);
+        g.rng = self.g.rng;
+        g.stats = self.g.stats.clone();
+        g.carry = self.g.carry.clone();
+        g.warnings = self.g.warnings.clone();
+        g.logs = self.g.logs.clone();
+        let mut systems = concepts::build(&cat, &self.manifest.concepts, &mut g);
+        order_systems(&mut systems);
+        let post = g.carry.remove("post_restart");
+        self.g = g;
+        self.systems = systems;
+        self.paused_from = State::Playing;
+        self.run_queue(Event::new("session.loaded", json!({})));
+        self.run_queue(Event::new("session.started", json!({})));
+        if let Some(p) = post {
+            let name = p["name"].as_str().unwrap_or("level.started").to_string();
+            self.run_queue(Event::new(&name, p["data"].clone()));
         }
     }
 
@@ -229,6 +287,7 @@ impl Session {
             for s in self.systems.iter_mut() {
                 s.on_event(&ev, &mut self.g);
             }
+            self.g.world.absorb = false;
             self.glue.dispatch(&mut self.g, &ev);
             queue.extend(self.g.pending.drain(..));
         }
@@ -249,7 +308,7 @@ impl Session {
             "feedback.confetti" => self.g.confetti_us = CONFETTI_US,
             _ => {}
         }
-        if ev.name != "tick" && ev.name != "input.raw" {
+        if ev.name != "tick" && ev.name != "input.raw" && ev.name != "freeze.tick" {
             self.log.push(ev.clone());
         }
     }
@@ -286,6 +345,8 @@ impl Session {
             "ui": { "share_card": g.ui_share_card, "beat_them": g.ui_beat_them,
                     "share_headline": g.share_headline, "beat_label": g.beat_label },
             "copy": g.copy,
+            "ext": g.ext_view,
+            "world": g.world.view(),
         })
     }
 
@@ -304,6 +365,7 @@ impl Session {
                        "best_streak": self.g.stats.best_streak },
             "warnings": self.g.warnings_json(),
             "logs": self.g.logs,
+            "ext": self.g.ext_view,
         })
     }
 }
