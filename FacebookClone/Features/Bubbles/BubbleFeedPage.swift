@@ -289,7 +289,7 @@ private struct BubbleFeedRail: View {
                 tint: bubble.isSaved ? Color(hex: 0x6EA8FF) : Color.white,
                 bounce: saveBounce,
                 accessibility: bubble.isSaved ? "Unsave" : "Save",
-                value: "\(bubble.saveCount) saves"
+                value: SavesCopy.savesCount(bubble.saveCount)
             ) {
                 saveBounce += 1
                 actions.save(bubble)

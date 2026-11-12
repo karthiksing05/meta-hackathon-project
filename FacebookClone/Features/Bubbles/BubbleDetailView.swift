@@ -171,7 +171,7 @@ struct BubbleDetailView: View {
     private func stats(_ bubble: Bubble) -> some View {
         HStack(spacing: 16) {
             Label("\(bubble.playCount.fbCompact) plays", systemImage: "play.circle")
-            Label("\(bubble.saveCount.fbCompact) saves", systemImage: bubble.isSaved ? "bookmark.fill" : "bookmark")
+            Label(SavesCopy.savesCount(bubble.saveCount), systemImage: bubble.isSaved ? "bookmark.fill" : "bookmark")
                 .foregroundStyle(bubble.isSaved ? FBColor.accent : FBColor.secondaryText)
             Spacer(minLength: 0)
         }

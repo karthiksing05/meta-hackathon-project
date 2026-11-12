@@ -842,18 +842,19 @@ archives), but no Bubble surface shows or sets them.
 'you' first when you saved it), '1.2K saves', '38 saves this week', 'Your games were saved N times
 this week', and the first-run hint 'Saving is how you show love for a game. Tap the bookmark
 anytime, even mid-game.' (once, `bubbles.saves.hintSeen` in UserDefaults; on the feed caption and
-in the player; dismissed by tap, by saving, or after 12 s).
+in the player; dismissed by tap or by saving, and in the player after 12 s on screen).
 
 **Reusable.** `SavesSocialProof.savers(for:in:limit:) -> [User]` (deterministic, friends first,
 you first when saved, never the creator, never more than `saveCount`),
 `SavesSocialProof.text(for:in:) -> String?` and `SavesSocialProof.savesThisWeek(_:)`.
 
 **Notifications.** At launch a `.bubblePlayed` row 'Diego Ramirez and 37 others saved Moving Day.'
-(`extraActorCount = saveCount - 1`) is added with `bubbleAction = route(.saves, "stats", id)`. When
-one of your Bubbles' `saveCount` reaches 10, 25, 50, 100, 250, 500 or 1000 after a save, a
-milestone row is added.
+(`extraActorCount = saveCount - 1`; the actor is the friend the feed caption names) is added with
+`bubbleAction = route(.saves, "stats", id)`. When one of your Bubbles' `saveCount` reaches 10, 25,
+50, 100, 250, 500 or 1000 after a save, a milestone row is added (once per number).
 
-**Who saved it.** `SavesStatsView` lists savers friends first with Add friend for non-friends
+**Who saved it.** Tapping the feed caption's 'Saved by' line pushes `feature:saves/stats/<id>`.
+`SavesStatsView` lists savers friends first with Add friend for non-friends
 (`appStore.sendRequest(to:)`, then `BubbleSocialSignals.post(.addFriendFromGame, ...)`). The Bubble
 page shows the top three for your own Bubbles.
 

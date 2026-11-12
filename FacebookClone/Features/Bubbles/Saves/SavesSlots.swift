@@ -40,6 +40,7 @@ struct SavesCaptionProof: View {
     let bubble: Bubble
 
     @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(Router.self) private var router
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -49,16 +50,25 @@ struct SavesCaptionProof: View {
             }
             if let text = SavesSocialProof.text(for: bubble, in: bubbleStore) {
                 let savers = Array(SavesSocialProof.savers(for: bubble, in: bubbleStore, limit: 3))
-                HStack(spacing: 6) {
-                    if !savers.isEmpty {
-                        AvatarStack(users: savers, size: 18, maxCount: 3)
+                // Tap to see who saved it, friends first, with Add friend for the rest.
+                Button {
+                    router.push(.bubbleFeature(BubbleFeatureRoute(.saves, "stats", bubble.id)))
+                } label: {
+                    HStack(spacing: 6) {
+                        if !savers.isEmpty {
+                            AvatarStack(users: savers, size: 18, maxCount: 3)
+                        }
+                        Text(text)
+                            .font(.fbMetaEmphasized)
+                            .foregroundStyle(Color.white)
+                            .lineLimit(1)
                     }
-                    Text(text)
-                        .font(.fbMetaEmphasized)
-                        .foregroundStyle(Color.white)
-                        .lineLimit(1)
+                    .frame(minHeight: 28)
+                    .contentShape(Rectangle())
                 }
-                .accessibilityElement(children: .combine)
+                .buttonStyle(.plain)
+                .accessibilityLabel(text)
+                .accessibilityHint(SavesCopy.seeAll)
             }
         }
     }
@@ -166,7 +176,8 @@ struct SavesPlayerButton: View {
         .zIndex(1)
         .task {
             guard SavesHintCenter.shared.isVisible else { return }
-            try? await Task.sleep(nanoseconds: 12_000_000_000)
+            // Closing the player cancels this; only a full 12 s on screen counts as seen.
+            guard (try? await Task.sleep(nanoseconds: 12_000_000_000)) != nil else { return }
             withAnimation(.easeOut(duration: 0.2)) { SavesHintCenter.shared.dismiss() }
         }
     }

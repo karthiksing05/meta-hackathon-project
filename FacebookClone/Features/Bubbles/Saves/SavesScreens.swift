@@ -78,7 +78,9 @@ enum SavesScreens {
         guard !appStore.notifications.contains(where: { $0.id == id }),
               let bubble = bubbleStore.bubble(id: "moving-day") ?? bubbleStore.bubbles.first(where: { $0.creator.isMe }),
               bubble.saveCount > 1 else { return }
-        let actor = bubbleStore.resolvePerson(BubbleSocialCast.friendIDs[0])
+        // The same friend the feed caption names ('Saved by Diego and 37 others').
+        let actor = SavesSocialProof.savers(for: bubble, in: bubbleStore, limit: 3).first { !$0.isMe && $0.isFriend }
+            ?? bubbleStore.resolvePerson(BubbleSocialCast.friendIDs[0])
         let note = AppNotification(
             id: id, kind: .bubblePlayed, actors: [actor], extraActorCount: bubble.saveCount - 1,
             message: SavesSocialProof.notificationMessage(for: bubble),
@@ -148,8 +150,11 @@ enum SavesMilestones {
                       note.userInfo?[BubbleSaveSignals.isSavedKey] as? Bool == true,
                       let bubble = bubbleStore.bubble(id: id), bubble.creator.isMe,
                       steps.contains(bubble.saveCount) else { continue }
+                let noteID = "bubble-note-saves-milestone-\(id)-\(bubble.saveCount)"
+                // Unsave then save again lands on the same number; say it once.
+                guard !appStore.notifications.contains(where: { $0.id == noteID }) else { continue }
                 let item = AppNotification(
-                    id: "bubble-note-saves-milestone-\(id)-\(bubble.saveCount)", kind: .bubblePlayed, actors: [],
+                    id: noteID, kind: .bubblePlayed, actors: [],
                     message: SavesCopy.milestone(bubble.title, bubble.saveCount), isRead: false, bubbleID: id
                 )
                 item.bubbleAction = BubbleFeatureRoute(.saves, "stats", id)

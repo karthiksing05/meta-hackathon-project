@@ -166,7 +166,7 @@ struct SavesSaverRow: View {
                 BubbleSocialSignals.post(.addFriendFromGame, bubbleID: bubble.id, with: [user.id])
             }
             .buttonStyle(.fb(.tinted, expand: false, height: 34))
-            .accessibilityLabel("Add \(user.firstName) as a friend")
+            .accessibilityLabel(user.friendship == .requestReceived ? "Confirm \(user.firstName)'s friend request" : "Add \(user.firstName) as a friend")
         }
     }
 }
