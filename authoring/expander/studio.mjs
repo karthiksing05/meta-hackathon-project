@@ -11,6 +11,7 @@ import { expand as expandManifest, translate } from './expand.mjs';
 import { wrapGame } from './wrap.mjs';
 import { playtestAsync, DEFAULT_BOTS } from '../playtest/gate-async.mjs';
 import { checkScore } from '../playtest/score-check.mjs';
+import { chooseLook, lookChoice } from '../kit/look.mjs';
 import { storyGate as playStoryGate, asScoreRuns } from '../playtest/story-bots.mjs';
 import { validateStoryGraph } from './story-graph.mjs';
 import { applyGeo } from './geo.mjs';
@@ -301,7 +302,9 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
    * (stable.mjs), because the app re-encodes JSON with sorted keys.
    */
   function expand(manifestJSON, optionsJSON = null) {
-    // options (optional): {canvas: "tall" | "classic"}; the manifest's own look.canvas still wins.
+    // options (optional): {canvas: "tall" | "classic"} (the manifest's own look.canvas still wins), and
+    // {look: words, look_id, keep_look} to set art.type from the look kit (kit/look.mjs chooseLook with the
+    // manifest's title; look_id, else the title, picks the pairing). keep_look keeps an art.type already there.
     const o = (typeof optionsJSON === 'string' ? JSON.parse(optionsJSON || '{}') : optionsJSON) || {};
     const expandOptions = o.canvas === 'tall' ? { canvas: 'tall' } : {};
     const t0 = now();
@@ -314,6 +317,11 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     let manifest = unwrap(input);
     if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) return fail('A_MALFORMED', 'the authoring manifest must be a JSON object');
     manifest = safe(manifest).doc;
+    if (o.look && typeof o.look === 'object' && !(o.keep_look && manifest.art?.type)) {
+      const title = String(manifest.meta?.title ?? '');
+      const choice = lookChoice(chooseLook({ ...o.look, title }, String(o.look_id || title)));
+      manifest = { ...manifest, art: { ...(manifest.art && typeof manifest.art === 'object' ? manifest.art : {}), type: choice } };
+    }
     // Build-time content steps, before the expander: maps (a `geo` section becomes the map sprite,
     // place functions and fragment params, docs/harness-gaps/maps.md) and spot-the-difference pairs
     // (`content.scene` with diff_spots, docs/harness-gaps/images.md). The stored authoring keeps them.

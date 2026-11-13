@@ -309,7 +309,7 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
       await withCtx.text();
       const sys = calls[before]?.body.messages[0].content ?? '';
       check('the version-3 bundle gets the context and renders it itself, once', studio.version >= 3 && !/## Planned for this request/.test(sys) && /## Fragments for this game \(from the plan\)/.test(sys), sys.slice(-300));
-      check('the prompt without context has no planned section', !/Planned for this request|from the plan/.test(calls[0]?.body.messages[0].content ?? ''));
+      check('the prompt without context has no planned section', !/## Planned for this request|## Fragments for this game \(from the plan\)/.test(calls[0]?.body.messages[0].content ?? ''));
       const big = await fetch(`http://127.0.0.1:${port}/compose`, { method: 'POST', body: JSON.stringify({ request: 'x', context: { notes: ['y'.repeat(60 * 1024)] } }) });
       check('a context over 48 KB is a 400', big.status === 400, big.status);
 

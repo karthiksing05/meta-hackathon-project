@@ -160,13 +160,25 @@ export async function composeGame({ request, brief, base = null, context = null 
   // anything else the classic 360 × 640. Every expand in this compose (stories too) gets it; a manifest's own
   // look.canvas still wins.
   const canvas = context?.canvas === 'tall' ? 'tall' : 'classic';
-  if (canvas === 'tall') {
-    const inner = studio;
-    studio = { ...inner, expand: (text, options) => inner.expand(text, { canvas: 'tall', ...(options ?? {}) }) };
-  }
   stats.canvas = canvas;
-  // Fonts and vibe (the UI kit, pending its hook requests): the plan's context.plan.spec.theme.type and the vibe's
-  // font pairing get read here and passed to expand next to the canvas, the same way.
+  // The game's look (kit/look.mjs): its vibe, font pairing and scale from the plan's words (spec.theme.type,
+  // the understanding) and the request, set as art.type before every expand; the expander applies it. The
+  // game id picks the pairing: a revision's id, else the title. A revision keeps the look it has.
+  // context.look false leaves art.type to the manifest.
+  const lookWordsFor = () => {
+    const t = context?.plan?.spec?.theme?.type ?? {};
+    const u = context?.understanding ?? context?.plan?.understanding ?? {};
+    return { theme: [t.theme ?? [], u.theme ?? []], era: t.era ?? '', genre: [t.genre ?? [], u.families ?? []], style: t.style ?? [], keywords: u.keywords ?? [], refs: u.named_refs ?? [], request: brief?.intent || request };
+  };
+  const lookOn = context?.look !== false;
+  {
+    const inner = studio;
+    studio = { ...inner, expand: (text, options) => inner.expand(text, {
+      ...(canvas === 'tall' ? { canvas: 'tall' } : {}),
+      ...(lookOn ? { look: lookWordsFor(), ...(base?.id ? { look_id: base.id } : {}), keep_look: !!base } : {}),
+      ...(options ?? {}),
+    }) };
+  }
   const engineOf = () => { try { return typeof studio.engine === 'function' ? studio.engine() : null; } catch { return null; } };
   // Layout fixes in code (layout-fix.mjs), after expand and before the gate: presentation only, so rules
   // and replays don't change. On unless context.layout_fix is false; without Chrome only the structural
@@ -204,7 +216,7 @@ export async function composeGame({ request, brief, base = null, context = null 
     const t0 = Date.now();
     let v;
     try {
-      v = await studio.verifyLayout(expansion.game_json, { engine: engineOf() });
+      v = await studio.verifyLayout(expansion.game_json, { engine: engineOf(), authoring: expansion.authoring_json ?? null });
     } catch (e) {
       if (e?.name === 'GenerationError') throw e;
       stats.layoutVerifyError = String(e?.message ?? e).slice(0, 200);
