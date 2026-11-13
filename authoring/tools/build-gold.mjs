@@ -1,18 +1,21 @@
 #!/usr/bin/env node
-// Builds the gold set's derived files from authoring/gold/{story,party,arcade,social}.json and the
+// Builds the gold set's derived files from authoring/gold/{story,party,arcade,social,puzzle}.json and the
 // games they point at:
 //   authoring/gold/index.json  every entry, with its group and title, in one list
 //   authoring/gold/pairs.jsonl one chat-format training pair per game: the user turn is the request
-//                              (as the composer phrases it), the assistant turn is the manifest
+//                              as prompts.mjs phrases it, the assistant turn is the design (when the
+//                              entry has one) followed by the manifest
 // Each game must expand with no errors first. --check exits 1 if the files are stale.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expand, loadLibrary } from '../expander/expand.mjs';
+import * as Prompts from '../expander/prompts.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const GROUPS = ['story', 'party', 'arcade', 'social'];
+// puzzle.json is optional (the puzzle set may not be there yet).
+const GROUPS = ['story', 'party', 'arcade', 'social', 'puzzle'].filter((g) => existsSync(join(root, 'gold', `${g}.json`)));
 const check = process.argv.includes('--check');
 const lib = loadLibrary(root);
 
@@ -27,14 +30,11 @@ for (const group of GROUPS) {
     if (errors.length) throw new Error(`${e.id}: ${errors[0].code} ${errors[0].message}`);
     const entry = { ...e, group, title: manifest.meta?.title ?? e.id };
     index.push(entry);
-    const b = e.brief || {};
-    const user = [
-      'Make a microgame for this request:', e.request, '',
-      `Brief: ${b.intent ?? ''}. Audience: ${b.audience ?? 'everyone'}. Mood: ${(b.mood || []).join(', ')}. ` +
-      `Energy: ${b.energy ?? 'medium'}. Competition: ${b.competition ?? 'friendly'}.`,
-      '', 'Reply with the complete authoring manifest.',
-    ].join('\n');
-    pairs.push(JSON.stringify({ id: e.id, messages: [{ role: 'user', content: user }, { role: 'assistant', content: JSON.stringify(manifest) }] }));
+    // The same user turn Muse gets at run time (prompts.mjs), and the reply it should give: the
+    // design first, then the manifest.
+    const user = Prompts.compose(e.request, e.brief || {});
+    const reply = e.design ? { design: e.design, ...manifest } : manifest;
+    pairs.push(JSON.stringify({ id: e.id, messages: [{ role: 'user', content: user }, { role: 'assistant', content: JSON.stringify(reply) }] }));
   }
 }
 const outputs = {

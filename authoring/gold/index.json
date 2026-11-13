@@ -3,6 +3,37 @@
     "id": "gold_stormglass_affair",
     "file": "authoring/games/gold_stormglass_affair.authoring.json",
     "request": "a spooky wizard school mystery where my roommate gets framed for stealing something and I have to find the real thief before dawn",
+    "design": {
+      "pitch": "A snowy wizard-school whodunit: your bunkmate Wren is framed for stealing the Stormglass, and you have two bells before dawn to find the real thief.",
+      "theme": [
+        "Fernhallow",
+        "the Stormglass",
+        "Prefect Finch",
+        "Wren",
+        "Professor Thistlewood",
+        "Headmistress Ravel",
+        "the Weather Tower",
+        "Gloam’s boot room",
+        "a silver-stitched glove",
+        "lantern-fish"
+      ],
+      "verb": "Read each scene’s four short lines, then tap one of up to three choices; a choice can add a clue to your notebook, raise or lower Trust, or unlock a later option.",
+      "twist": "Midnight only lets you visit two of three places (the Weather Tower, Wren in the Infirmary, the Prefects’ Study), your house (Cinder, Quill or Moss) unlocks its own moves, and the ‘theft’ turns out to be a cracked glass leaking winter.",
+      "arc": [
+        "Scenes 1–2: in the Great Hall you pick a house, then CRACK, the Stormglass is gone and Prefect Finch blames Wren; stand up for her, study the frost, or nod along.",
+        "Scenes 3–7: from the Midnight Corridor you visit two of three places, collecting clues (glove, crack, ledger, lantern, alibi, flinch, match); Quill can read the ward-runes and follow the meltwater to the Stormglass in the Gloam Boot Room.",
+        "Final scenes: at the Dawn Tribunal, Headmistress Ravel says ‘Name the thief’ (Prefect Finch, Wren or Professor Thistlewood), or, in the boot room, you take the glass to the tribunal, mend it yourself, or fetch Wren to mend it."
+      ],
+      "lose": "Five of the 7 endings are bad and end the run 5 seconds after they appear: accuse Finch with fewer than 3 clues (All Hunch, No Proof), accuse Wren (The Wrong Friend) or Thistlewood (Slander in the Staffroom), mend the glass yourself (The Snowman), or keep a pocket summer (Pocket Summer).",
+      "win": "Accuse Finch with 3 or more clues for Case Closed (+500), or reach the secret Weather Menders ending (+900): Quill reads the runes, Trust is 2 or more so Wren can mend the glass, and you return it before dawn. Score = Clues × 100 + Trust × 50 + Ending, shown on the end card.",
+      "juice": [
+        "A clue: the sparkle sound, 18 frost-blue particles burst from the toast line, the Clues pill pops and a gold toast names it: ‘Clue: a silver-stitched glove’.",
+        "Trust gained: a chime, 10 gold particles and the Trust pill pops with ‘Wren will remember that’ (losing Trust bonks, shakes 4 px and buzzes a warning haptic).",
+        "A good ending: 40 frost-blue particles drift up from the vignette as ‘THE END’ fades in over the score line and ‘One of 7 endings. Try another path.’"
+      ],
+      "look": "A candlelit gothic academy at midnight: a gold-traced pointed arch over deep indigo stone with drifting frost-blue snow; indigo, candle gold and frost blue feel mysterious but cozy. Each scene shows one of eight gold-framed storybook vignettes, choices sit on gold-edged indigo plaques with diamond studs, gains toast in gold and losses shake the screen. Font: Baskerville.",
+      "voice": "Wry, cozy-gothic boarding-school mystery with dry jokes at the first-year’s expense: “Her notes: ‘Storm loose! Data!’”, “Wren sniffs: ‘Apology noted.’”, “Clue: Finch flinched. Gotcha.”"
+    },
     "brief": {
       "intent": "Investigate a theft in your first term at a magic academy, gather clues and name the thief at a dawn tribunal",
       "audience": "teens and adults who like cozy fantasy and whodunits",
@@ -28,6 +59,7 @@
       "Content keys are only ones the game's own functions read (`content_effects`, `content_needs`, `content_routes`, `content_callbacks`, `content_scene_info`), each story line fits about 28 characters and each label about 24, so no text overflows the 360-wide canvas.",
       "The ending holds for five seconds before the win or lose screen (the fragment's `good_wins`/`bad_loses` are off and a `curtain` timer sets `verdict`), so players can read how the story ends."
     ],
+    "themes": "harry potter hogwarts wizard magic school mystery detective whodunit clue sherlock",
     "group": "story",
     "title": "The Stormglass Affair"
   },
@@ -35,6 +67,37 @@
     "id": "gold_last_run_of_the_magpie",
     "file": "authoring/games/gold_last_run_of_the_magpie.authoring.json",
     "request": "a space opera adventure where I'm a smuggler pulled into a rebellion against an evil empire, with a big escape at the end and maybe a traitor",
+    "design": {
+      "pitch": "You fly the Magpie, a smuggler ship 9,000 crowns in debt, carrying a hooded kid to the rebels, and your old wingmate is selling you out.",
+      "theme": [
+        "the Magpie",
+        "LEDGER",
+        "Nim",
+        "Dace",
+        "Admiral Okoro",
+        "the Concordance",
+        "the Verdict",
+        "the Needle",
+        "the Ember Choir Fleet",
+        "Brightwater Docks"
+      ],
+      "verb": "Read each scene, then tap one of two or three choices, trading Loyalty (to Nim and the rebels) against Heat (how wanted the Magpie is).",
+      "twist": "Heat decides the escape: at the Needle the right fork is the way out unless Heat is 2 or more, and Dace always radios ‘Go left!’, a trap into the Verdict’s hangar; Nim is secretly the Concordance’s heir.",
+      "arc": [
+        "Scenes 1–2: at Brightwater Docks you take the kid aboard, scan them first, or ask for quadruple pay; then three Warden cutters block the lane: punch through, hide in a comet’s tail, or bluff ‘Medical cargo!’",
+        "Scenes 3–6: a dogfight, the comet (where LEDGER finds a tracker) or the Warden’s scan (which salutes Nim), then the Ember Choir Fleet, where Dace waves you in and his wrist-comm blinks Concordance gold.",
+        "Final scenes: Admiral Okoro asks you to fly Nim (yes, for 20,000 crowns, or sell Nim to the empire), then the Needle Gate: the left fork, the right fork, or, if you know Nim is the heir and Loyalty is 2 or more, let Nim take the comm."
+      ],
+      "lose": "Three of the 5 endings are bad and end the run 5 seconds after they appear: take Dace’s left fork (The Left Fork), take the right fork with Heat 2 or more (Too Hot to Hide), or deliver Nim or ransom the heir (Rich and Alone).",
+      "win": "Take the right fork with Heat under 2 for Through the Needle (+500), or let Nim abdicate on air for the secret The Last Toll (+900). Score = Loyalty × 100 + Cool × 50 + Ending, where Cool is 3 minus Heat (never below 0); ending points land only when the curtain falls.",
+      "juice": [
+        "Loyalty up: a combo sound, 14 ember-orange particles and the Loyalty pill pops with ‘Nim never misses. Who IS this?’",
+        "A discovery (the tracker or the heir): a chirp, 16 cyan sparks and ‘The Warden SALUTES Nim. What?’ (Heat rising zaps, shakes 6 px and buzzes a warning haptic).",
+        "A good ending: 48 ember particles burst from the vignette as ‘THE END’ fades in; a bad one shakes 8 px with an error haptic instead."
+      ],
+      "look": "Space opera at night: a deep navy starfield with pink and blue nebulae and cyan cockpit brackets; ember-orange rebels against an empire of gold, with cyan HUD text, feels epic and tense. Each scene shows one of twelve vignettes, choices are chamfered navy cockpit panels with a cyan outline, ember corner bars and a chevron, and Heat rises shake the screen. Font: Futura.",
+      "voice": "Breezy space-opera banter with a sarcastic ship AI: “LEDGER: ‘Debt down. Morals?’”, “Dace hugs back. A bit too long”, “Fake handoff. Bold. Heat up”."
+    },
     "brief": {
       "intent": "Fly a debt-ridden smuggler ship through a blockade, choose loyalty or money, spot the traitor and survive the final escape",
       "audience": "sci-fi fans, teens and adults",
@@ -60,6 +123,7 @@
       "Conditional choices never leave gaps or dead ends: `needs` hides a choice, the glue packs the visible ones to the top, and a path simulation confirms that every scene has 2 or more choices and that every path has 6 to 8 decisions.",
       "Feedback stays in proportion for a story: shake and a warning haptic only when heat rises, sparkles for loyalty and discoveries, and no custom `{\"action\": ...}` or unknown node kinds."
     ],
+    "themes": "star wars han solo smuggler rebellion empire jedi space opera galaxy escape",
     "group": "story",
     "title": "Last Run of the Magpie"
   },
@@ -67,6 +131,37 @@
     "id": "gold_the_hostess_knows",
     "file": "authoring/games/gold_the_hostess_knows.authoring.json",
     "request": "a messy rich-kid prep school drama where an anonymous gossip account is leaking everyone's secrets and I have to figure out who runs it",
+    "design": {
+      "pitch": "New kid at Ashcombe Prep, and an anonymous account called The Hostess is posting everyone’s secrets, so feed her a fake one and see who leaks it.",
+      "theme": [
+        "Ashcombe Prep",
+        "The Hostess",
+        "Margo Bell",
+        "Dev Kapoor",
+        "Celeste Varga-Whitlock",
+        "the Winter Gala",
+        "the Courtyard Café",
+        "the Roof Garden",
+        "pearls",
+        "the Alps"
+      ],
+      "verb": "Read each scene, then tap one of up to three choices to protect your Rep, bank Secrets and collect receipts (clues).",
+      "twist": "Secrets are bait: tell Margo a fake secret (a pearl allergy), and when The Hostess posts it you get the clue that only Margo heard it; a trap (you’ll wear green) can prove it, but texting her ‘Gotcha’ tips her off.",
+      "arc": [
+        "Scenes 1–3: on day one The Hostess posts your bowl cut; at lunch Margo Bell asks for a secret (fake, real, or none), and that night The Hostess posts Dev Kapoor’s ballet, or the secret you told Margo.",
+        "Scenes 4–7: check on Dev on the Roof Garden, make a truce with Celeste Varga-Whitlock, or confront Margo (her phone shows DRAFTS (3)); then Gala Week: set a trap for Margo, skip the gala, or go and face it.",
+        "Final scene: midnight at the Winter Gala, where you unmask Margo, unmask Celeste, or, with Dev and Celeste as allies and Secrets at 2 or more, have everyone confess at once."
+      ],
+      "lose": "Five of the 7 endings are bad and end the run 5 seconds after they appear: skip the gala (The Empty Chair), unmask Margo with fewer than 3 clues (All Gossip, No Proof) or with 3 clues but Rep below 1 (Right, but Unpopular), warn her first (Logged Off Early), or accuse Celeste (Off to the Alps).",
+      "win": "Unmask Margo with 3 or more clues and Rep 1 or more for Unmasked (+500), or confess together for the secret The Truce (+900). Score = Clues × 100 + Rep × 50 + Ending; Rep starts at 1.",
+      "juice": [
+        "A clue: a ding, 18 champagne particles burst from the toast line, the Clues pill pops and ‘Clue: the trap snapped shut’ appears.",
+        "Rep up: a combo sound, 12 blush-pink particles and ‘Dev’s in your corner now’ (Rep down buzzes, shakes 4 px and fires a warning haptic).",
+        "A good ending: 50 blush-pink particles shower down over the vignette as ‘THE END’ fades in over the score line."
+      ],
+      "look": "The Upper East Side after dark: plum-black lacquer under a blush-and-black striped café awning, with lit townhouse windows; blush pink, champagne gold and pearl white feel glamorous and scheming. Each scene shows one of nine vignettes, choices are plum pill buttons with a champagne outline and a pearl at each end, and Rep losses shake the screen. Font: Optima.",
+      "voice": "Arch, gossipy teen drama with deadpan punchlines: “Rep down: nobody likes a narc”, “Celeste: ‘Cute. No.’ Rep down”, “Her secret: she’s scared of horses”."
+    },
     "brief": {
       "intent": "Survive your first week at an elite prep school, protect your reputation, collect receipts and unmask the anonymous gossip account",
       "audience": "teens and young adults who love teen drama",
@@ -92,6 +187,7 @@
       "No real people: the account, the school, its sign-off and every character are original, because the request names a genre (prep-school gossip), not a show. When a request does name one, keep its names and world.",
       "List lengths stay in step: 4 lines, 3 labels and 3 targets per scene, written one scene per row, with a `scene_names` key that maps each number to its scene id."
     ],
+    "themes": "gossip girl xoxo upper east side rich kids prep school drama scandal secrets mean girls",
     "group": "story",
     "title": "The Hostess Knows"
   },
@@ -99,6 +195,37 @@
     "id": "gold_saffron_egg_job",
     "file": "authoring/games/gold_saffron_egg_job.authoring.json",
     "request": "a heist story game where I pick my crew and plan how to steal back a priceless egg from a crooked collector's masked party, and someone might double-cross me",
+    "design": {
+      "pitch": "Pick two of three crooks, plan one night, and steal the Saffron Egg back from Augustin Vole’s masquerade, knowing one of your crew has sold out before.",
+      "theme": [
+        "Augustin Vole",
+        "the Saffron Egg",
+        "Nell",
+        "Osric",
+        "Bea",
+        "the masquerade",
+        "a peacock mask",
+        "soufflés",
+        "red lasers",
+        "the village bakery window"
+      ],
+      "verb": "Read each scene, then tap one of up to three choices to hire crew, gather kit and slip past guards while keeping the Alarm meter low.",
+      "twist": "Your crew is both your toolkit and your risk: Bea opens the ivy route to the roof, Nell rehearses the getaway, Osric forges a fake egg for a quiet swap, but if you hire Osric he is waiting at the getaway to take the egg.",
+      "arc": [
+        "Scenes 1–3: at Monday’s briefing you hire two of Nell, Osric and Bea, then on Thursday night you case the museum, visit Osric’s workshop, or rehearse the getaway.",
+        "Scenes 4–6: Friday’s masquerade, through the front door past Vole in a peacock mask, the kitchen as waiters, or up the ivy to the roof; then the top floor: smash the glass, swap in the fake egg, or work the lock.",
+        "Final scenes: the getaway, where you sprint for the van or stroll out the front, or, if Osric is on the crew, he steps out of a doorway: hand him the egg, shove past, or give him the second fake."
+      ],
+      "lose": "Three of the 5 endings are bad and end the run 5 seconds after they appear: rope down past the lasers without casing the place (The Laser Harp), reach the getaway with Alarm 3 or more and no rehearsal, or stroll out without ever getting inside (Caught Red-Gloved), or hand Osric the egg (Double-Crossed).",
+      "win": "Get the egg home for Clean Getaway (+500), or give Osric the second fake for the secret The Long Con (+900). Score = Stealth × 100 + Ending, where Stealth is 4 minus Alarm (never below 0); Alarm starts at 1 and stays between 0 and 5.",
+      "juice": [
+        "New kit or a plan: a coin sound, 16 mustard particles and a toast like ‘Mid-twirl, you lift his keycard’, while the bottom line lists your kit.",
+        "Alarm down: a chirp, 10 mint particles and the ●○○○○ meter pops with ‘The dog adores you. Alarm down’ (Alarm up buzzes, shakes 5 px and fires a warning haptic).",
+        "A good ending: 50 mustard particles shower down over the vignette as ‘THE END’ fades in over the Stealth score."
+      ],
+      "look": "A 1960s caper: deep teal night over a faint blueprint grid with a coral, mustard and mint stripe across the top; mustard and coral on teal feel playful and stylish. Each scene shows one of twelve vignettes, choices are teal index cards with a mustard outline, coral corner brackets and a paperclip, and Alarm rises shake the screen. Font: American Typewriter.",
+      "voice": "Breezy caper narration with slapstick payoffs: “Nell: never been caught. Yet.”, “Bea: climbs anything. Twice.”, “It falls. The chef SCREAMS.”"
+    },
     "brief": {
       "intent": "Assemble a two-person crew, prep the night before, then pull off a masquerade heist and the getaway",
       "audience": "adults and teens who like caper movies",
@@ -124,6 +251,7 @@
       "Stats are clamped where they change (`clamp(alarm + delta(...), 0, 5)`), so the meter and the score (Stealth x 100 + Ending) can't run out of range.",
       "Text is written for a wide typewriter font: lines of about 26 characters and labels of 24 or fewer, checked in screenshots, so nothing clips at the canvas edge."
     ],
+    "themes": "oceans eleven heist money heist crew robbery caper steal vault",
     "group": "story",
     "title": "The Saffron Egg Job"
   },
@@ -131,6 +259,37 @@
     "id": "gold_aura_farm",
     "file": "authoring/games/gold_aura_farm.authoring.json",
     "request": "a stupid brainrot game where you farm aura by tapping on beat",
+    "design": {
+      "pitch": "Tap when a golden spark hits the glowing zone to farm aura for a smug lime bean in shades, and climb from Certified NPC to Aura Deity in 45 seconds.",
+      "theme": [
+        "aura",
+        "Certified NPC",
+        "Main Character",
+        "Aura Deity",
+        "shades",
+        "gold chain",
+        "golden spark",
+        "glow ring",
+        "magenta grid floor",
+        "SIGMA?"
+      ],
+      "verb": "Tap anywhere as the golden spark orbiting the glow ring passes through the lime zone; the gold slice in its middle is a PERFECT.",
+      "twist": "Every tap is multiplied by your combo (PERFECT pays 300 x the multiplier, CLEAN 100 x, up to x9), and after each zone the target jumps to a new random spot ahead of the spark, so one early tap (-500 aura and a 350 ms stun) wipes out a big streak.",
+      "arc": [
+        "0–10 s: the spark circles at 0.36 laps a second, the hint reads TAP WHEN THE SPARK HITS THE GLOW for the first 6 s, and the first CLEAN and PERFECT taps push past 1000 aura to Background Extra.",
+        "10–40 s: each zone you hit or let slip makes the spark faster (up to 0.62 laps a second) and the zone thinner (down to 0.085 of the ring), the gold glow behind the bean swells with the combo, and the bar under the rank counts to the next rank at 3000, 6000, 10000 and up.",
+        "40 s+: the clock turns red and ticks through the last 5 s; reach 45 s for AURA ASCENDED, with the final aura, rank title, end line and best combo on the card."
+      ],
+      "lose": "Let the spark slip past the zone 3 times: each slip costs 1000 aura and one of 3 pairs of shades, and with none left the card reads SHADES SHATTERED. Early taps cost 500 aura and break the combo but not a life.",
+      "win": "Survive the full 45 seconds to win. The score is your aura, and it sets one of 8 ranks: Certified NPC, Background Extra (1000), Side Quest Enjoyer (3000), Lowkey Legendary (6000), Aura Merchant (10000), Main Character (16000), Final Boss Energy (24000) and Aura Deity (35000).",
+      "juice": [
+        "PERFECT: a square-wave zip that climbs a semitone with every combo step, 26 gold particles bursting from the spark and 14 lime ones from the bean, PERFECT +N popping in gold, and the bean throwing its arms up.",
+        "Rank up: the levelup sting, 40 gold and 24 lime particles raining from the rank title as it scales up to 1.7x, and a success haptic.",
+        "Flop: the wah sound, 20 pink particles falling from the spark, a 9 px shake, an error haptic, the bean wobbling with its shades slipped down, and a pink line like CRINGE -500 or GHOSTED IT -1000."
+      ],
+      "look": "A synthwave aura shrine: a purple sunburst over a magenta grid floor with faint +1000 AURA and SIGMA? scrawls, in a night-purple palette (#1A0838) lit by lime #B6FF3B and gold #FFD23F. The bean in shades and a gold chain sits in the middle of a dark ring; the target is a pulsing lime arc with a gold centre, the spark trails four fading dots, and hot pink #FF3D7F is kept for losses. Heavy Futura with dark outlines.",
+      "voice": "A brainrot hype-man: all caps, internet slang and grand titles. \"GHOSTED IT -1000\", \"Your aura is on airplane mode.\", \"Scientists cannot measure you.\""
+    },
     "brief": {
       "intent": "Tap when an orbiting spark crosses a glowing zone to stack aura and climb absurd rank titles",
       "audience": "group chat, teens and twenty-somethings",
@@ -159,6 +318,7 @@
       "Early taps only cost aura and stun for 350 ms; only letting the spark slip costs a life, so spam taps are punished but one fat-finger never ends the run.",
       "Every content key (ranks, miss_lines, ghost_lines, end_lines) is read by an expression; nothing is dead."
     ],
+    "themes": "brainrot aura sigma skibidi rizz gyatt rhythm beat music tiktok meme",
     "group": "party",
     "title": "Aura Farm"
   },
@@ -166,6 +326,37 @@
     "id": "gold_npc_or_main",
     "file": "authoring/games/gold_npc_or_main.authoring.json",
     "request": "npc or main character game where weird situations pop up and you have to sort them super fast",
+    "design": {
+      "pitch": "Rapid-fire cards of everyday behavior: call each one NPC or main character energy before your plot armor runs out.",
+      "theme": [
+        "NPC",
+        "MAIN CHARACTER",
+        "PLOT ARMOR",
+        "Clout",
+        "season finale",
+        "scenario card",
+        "sleepy robot NPC button",
+        "spotlit main-character button",
+        "CINEMA",
+        "DEFAULT SKIN"
+      ],
+      "verb": "Read the scenario card and tap the NPC or MAIN CHARACTER button, or swipe left for NPC and right for main character.",
+      "twist": "One draining plot armor bar is the whole clock: it holds 8 s, each right call puts 0.7 s back, each wrong call rips 1.5 s off, and it drains up to 2.3x faster over the first 50 s, so you have to be quick and right at once.",
+      "arc": [
+        "0–10 s: the bar drains at normal speed, the footer says tap a side, or swipe left or right, and easy cards like Pushes the door that clearly says pull. Twice. teach the two piles.",
+        "10–40 s: the drain picks up on an ease-in curve, right calls refill it and build the streak multiplier, and every 5 in a row fires a sting and a teal burst.",
+        "40 s+: the bar drains at up to 2.3x by 50 s, the label flashes PLOT ARMOR: CRITICAL under 2 s, and the footer counts down the seconds until the season finale at 60 s."
+      ],
+      "lose": "The plot armor bar empties: it drains all the time, wrong calls take 1.5 s off it, and at zero the card reads PLOT ARMOR: GONE.",
+      "win": "Survive 60 seconds to win MAIN CHARACTER. Clout is 100 per right call plus a speed bonus of up to 50 for answering within 2 s, multiplied by the streak multiplier (up to x10).",
+      "juice": [
+        "Right call: the card flies off toward the side you chose, a stamp like MAIN CHARACTER ENERGY or NPC BEHAVIOR slams in, a +N floats up over that button with 20 particles in its color, and a square-wave chirp rises a semitone per streak step.",
+        "Every 5 in a row: the arpeggio sting, 48 teal particles raining from the card and a success haptic.",
+        "Wrong call: the buzz sound, a red stamp like WRONG. PLOT HOLE. or THE AUDIENCE GASPED, 22 red particles, a 10 px shake and the PLOT ARMOR label jolting."
+      ],
+      "look": "Tabloid sticker pop: sunny halftone yellow (#FFD84A) with pink candy stripes and comic bursts. A white scenario card fills the middle, a periwinkle sleepy robot NPC button sits on the left (its stamps in blue #3D5AFE) and a pink spotlit main-character button on the right (#FF3D8B); red #E8282B is only for wrong calls. Dark ink #1B1036 in heavy Avenir Next.",
+      "voice": "A deadpan reality-show narrator roasting tiny everyday habits: \"Replies “lol” to a nine-paragraph text\", \"Rides a bike with no hands and a baguette\", \"You are the plot. Everyone else is a cameo.\""
+    },
     "brief": {
       "intent": "Rapid two-way sorting of absurd everyday scenarios, against a draining plot-armor meter",
       "audience": "friends sending it to the group chat",
@@ -194,6 +385,7 @@
       "Two inputs (`tap_call` with no source, `swipe_call` with swipe sources) feed one `called` event, so buttons and swipes share one judging rule and the bots test both.",
       "Content stays content: two lists of scenarios become a typed deck with `map(content_npc, s => {text: s, main: false})`, not hard-coded strings in rules."
     ],
+    "themes": "npc main character brainrot tiktok meme sort swipe vibes",
     "group": "party",
     "title": "NPC or Main Character?"
   },
@@ -201,6 +393,37 @@
     "id": "gold_goblin_snack_run",
     "file": "authoring/games/gold_goblin_snack_run.authoring.json",
     "request": "goblin mode game where you grab snacks at 2am and dodge responsibilities",
+    "design": {
+      "pitch": "Drag a goblin in a hoodie around a 2 AM kitchen grabbing pizza and dodging alarm clocks and angry emails, then chain five snacks to go GOBLIN MODE and eat your responsibilities.",
+      "theme": [
+        "Grub",
+        "2 AM kitchen",
+        "open fridge",
+        "pizza",
+        "alarm clocks",
+        "angry emails",
+        "brain cells",
+        "GOBLIN MODE",
+        "LAUNDRY AVALANCHE",
+        "INBOX TSUNAMI"
+      ],
+      "verb": "Drag Grub around the kitchen (he follows your finger) to grab pizza slices while slipping between alarm clocks falling from the top and emails flying in from the right.",
+      "twist": "Five snacks without getting hit turns on GOBLIN MODE for 5 s: hazards can't hurt you, each snack is worth double, and every alarm clock or email Grub touches gets eaten for +25.",
+      "arc": [
+        "0–10 s: GET READY, GOBLIN during a 1.8 s breather, then WAVE 1: KITCHEN RAID: an alarm clock every 0.65 s, an email every 1.4 s, a pizza slice every 0.8 s, and the five streak pips filling up.",
+        "10–40 s: each wave lasts 10 s, is followed by a 1.8 s hazard-free breather, and comes back 0.3x faster: WAVE 2: LAUNDRY AVALANCHE, WAVE 3: INBOX TSUNAMI, then WAVE 4: MONDAY IS COMING.",
+        "40 s+: WAVE 5: THE ALARM BOSS throws hazards at 2.2x speed; survive it, about 59 s in, to win."
+      ],
+      "lose": "Each touch from an alarm clock or email costs one of 3 brain cells (then 1.1 s of grace), clears the hazards near you and resets the snack streak; with none left it's bedtime and the card reads BRAIN CELLS: 0.",
+      "win": "Clear all 5 waves to win SNACK LEGEND. Yum counts 10 per snack (20 in GOBLIN MODE) plus 25 for each responsibility eaten.",
+      "juice": [
+        "Each pizza grabbed plays a square-wave blip that climbs with the streak, and the next of the 5 streak pips pops.",
+        "GOBLIN MODE ACTIVATED: a hooray, 48 green particles bursting from Grub, a green glow pulsing around him, a small shake, a success haptic and EAT YOUR RESPONSIBILITIES with a 5 s countdown.",
+        "Chomp: a sawtooth slide from C4 to C5, 24 amber crumbs falling where he ate and a medium haptic."
+      ],
+      "look": "A 2 AM kitchen raid: violet wallpaper and a glowing open fridge in a midnight-purple palette (#1A0B33) with goblin green #7CFF4F, amber and pink. Grub is a green goblin in a purple hoodie; the hazards are red alarm clocks and white angry emails, the pickups are golden pizza slices, and the lives are pink brain cells. Marker Felt with dark purple outlines.",
+      "voice": "Chaotic, self-roasting jokes about adulting: \"OOF. ADULTING.\", \"THE INBOX GOT YOU\", \"ZERO EMAILS ANSWERED\""
+    },
     "brief": {
       "intent": "Drag a goblin around a 2 AM kitchen, grabbing pizza and dodging alarm clocks and emails across 5 named waves",
       "audience": "anyone who has ever raided the fridge at 2 AM",
@@ -232,6 +455,7 @@
       "Keeps the HUD within the 3-node `hud_top` limit (lives, score, waves) and puts the custom snack-streak pips in `hud_bottom` rather than overflowing a slot.",
       "Adds transparent circles under the pickup sprites so the bots, which only see rect and circle ops, can find the snacks."
     ],
+    "themes": "goblin mode 2am snacks junk food chaos lazy procrastinate",
     "group": "party",
     "title": "Goblin Mode: Snack Run"
   },
@@ -239,6 +463,37 @@
     "id": "gold_rizz_or_flop",
     "file": "authoring/games/gold_rizz_or_flop.authoring.json",
     "request": "rizz or flop quiz where you pick the least cringe thing to say and judges react",
+    "design": {
+      "pitch": "A dating game show where your crush says something, you pick the least cringe of four replies in 5 seconds, and a frog, a DJ cat and a robot nana hold up score cards.",
+      "theme": [
+        "The Rizz Tribunal",
+        "DJ Whiskers",
+        "monocled frog",
+        "robot nana",
+        "crush",
+        "judges' desk",
+        "chat-bubble prompt",
+        "marquee of bulbs",
+        "magenta curtains",
+        "Unspoken Rizz Deity"
+      ],
+      "verb": "Read your crush's line and tap one of four shuffled replies before the 5 s bar runs out.",
+      "twist": "The judges are the scoreboard: after every answer the frog, DJ Whiskers and Nana switch to hype or cringe faces and hold up cards (Nana gives an 11 for a smooth answer inside 1.5 s, and a negative card for a flop) with a reaction line, while the heat doubles, then triples the points every 4 rounds.",
+      "arc": [
+        "Rounds 1–4: LOW STAKES ROUND at x1, openers like They text: “wyd”, and the RIZZ STREAK tag appears after 2 smooth answers in a row.",
+        "Rounds 5–8: the banner pops to HEAT x2: THEY ARE INTERESTED with a levelup sting, and every answer pays double.",
+        "Rounds 9–12: HEAT x3: FINAL BOSS DATE in gold, triple points, and with 2 hearts one more flop can end the date."
+      ],
+      "lose": "A wrong pick, or letting the 5 s bar run out, costs one of 2 hearts; losing both (or running out the 75 s clock) ends it with THE DATE IS OVER.",
+      "win": "Survive all 12 rounds to win IT IS GIVING RIZZ. Rizz is 100 per smooth answer plus, times the heat, a speed bonus (up to 350, gone after 3.5 s) and 50 for each answer already in your streak; the total earns a title from Certified Flop to Unspoken Rizz Deity.",
+      "juice": [
+        "Smooth answer: a triangle-wave whoop that climbs a semitone per streak step, 30 gold particles spraying from the judges' desk, all three judges hopping with hype faces as their cards pop up, and a gold +N floating up.",
+        "Every 3 in a row: a hooray and 40 pink particles raining from the top of the stage.",
+        "Flop: a 10 px shake, an error haptic, the judges wobbling with cringe faces and low or negative cards, and a line like Nana unplugged herself."
+      ],
+      "look": "A late-night dating game show: a hot-pink stage (#E255B0) with magenta curtains and a marquee of bulbs, gold #FFC233 for points and heat and violet for the final score. Your crush's line sits in a chat bubble, the four replies are pink bubble buttons, the judges' desk runs along the bottom, and red is only for flops. Chalkboard SE with deep plum outlines.",
+      "voice": "Game-show host meets group chat, flirty and self-owning: \"I know. I'm him.\", \"Nana is kicking her feet.\", \"Buffering... still buffering...\""
+    },
     "brief": {
       "intent": "A speed quiz where you pick the least cringe of four replies and a panel of absurd judges scores every line",
       "audience": "group chat, dating-show fans",
@@ -267,6 +522,7 @@
       "Static framing (the chat bubble behind the question, the judges' desk) goes in the backdrop, because the game's playfield nodes draw on top of the fragment's.",
       "Hooks the heat-change sting to the public `round_started {index}` event instead of reaching for the quiz's private `_ask`."
     ],
+    "themes": "rizz dating flirt pickup lines cringe love island bachelor dialogue",
     "group": "party",
     "title": "Rizz or Flop"
   },
@@ -274,6 +530,37 @@
     "id": "gold_moonbroom_derby",
     "file": "authoring/games/gold_moonbroom_derby.authoring.json",
     "request": "a broom racing game at a magic school where I dodge storm clouds and grab sparks",
+    "design": {
+      "pitch": "Race a broom through a wizard-school night sky for 50 seconds, dodging storm clouds and flapping spellbooks and skimming past them for Whoosh points.",
+      "theme": [
+        "Moonbroom Derby",
+        "crescent moon",
+        "castle spires",
+        "storm clouds",
+        "runaway spellbooks",
+        "sparks",
+        "finish lanterns",
+        "plum-cloaked rider",
+        "orange scarf",
+        "pink lightning"
+      ],
+      "verb": "Tap the left or right side to swerve one lane at a time across five lanes, slipping between falling hazards and under falling sparks.",
+      "twist": "Nerve pays: a hazard that passes in the next lane over (within 80 px) is a near miss worth 'Whoosh +5', so the best line runs right beside danger while sparks build a Streak.",
+      "arc": [
+        "0–10 s: the first storm cloud drops at 0.7 s, then one cloud about every second at 230 px/s, with mint sparks falling in the five lanes every 900 ms.",
+        "10–40 s: the ease_in_out curve kicks in: from about 16 s runaway spellbooks sway across their lane, from about 20 s a second cloud often fills another lane in the same row, and speed and spawn rate climb.",
+        "40 s+: difficulty peaks at 45 s (420 px/s, a row every 540 ms); the finish lanterns appear at 47 s and sweep down to the line at 50 s."
+      ],
+      "lose": "Three hits from storm clouds or spellbooks; each hit costs one of 3 lives, resets the Streak, clears hazards within 56 px and gives 1 s of grace.",
+      "win": "Survive until the 50-second finish. Score counts sparks (10 + 5 x Streak, Streak up to 8) plus 5 for every Whoosh near miss.",
+      "juice": [
+        "Grabbing a spark: a triangle-wave chime that climbs a whole step with each Streak, and a '+N' pop above the rider.",
+        "A near miss: a sine swish sliding from E6 to A5, 10 lavender particles between broom and hazard, a light haptic and 'Whoosh +5'.",
+        "The finish: the progress rail fills, the lantern arch sweeps down over the last 3 seconds, then the 'tada' win sting."
+      ],
+      "look": "A wizard-academy night race over an indigo sky with a crescent moon and castle spires with warm windows; drifting wisps and speed streaks that stretch as it speeds up. Deep night palette with amber and mint glows: the plum-cloaked rider with an orange scarf reads warm amber, the slate storm clouds with pink lightning and crimson flapping spellbooks read as danger, sparks are mint. Font: Optima.",
+      "voice": "Whimsical and breathless, short race calls: 'Whoosh +5', 'Dodge storm clouds and runaway spellbooks, grab sparks to build a streak, and skim past hazards for Whoosh points.', 'Cross the finish lanterns in 50 seconds.'"
+    },
     "brief": {
       "intent": "Swerve a broom between five lanes through a speeding night race, dodging storm clouds and runaway spellbooks while chaining sparks",
       "audience": "friends, all ages",
@@ -306,6 +593,7 @@
       "The rising-pitch sound is the game's own feedback on `point`, which replaces score's library pickup moment instead of playing both.",
       "Stays within 3 hud_top nodes (lives, score, combo); course progress is a playfield rail, not a fourth HUD node (`A_SLOT_FULL`)."
     ],
+    "themes": "harry potter quidditch wizard witch broom magic school hogwarts flying race sky storm",
     "group": "arcade",
     "title": "Moonbroom Derby"
   },
@@ -313,6 +601,37 @@
     "id": "gold_rift_run",
     "file": "authoring/games/gold_rift_run.authoring.json",
     "request": "a space fighter flying down a narrow canyon shooting drones, with a big boss target at the end",
+    "design": {
+      "pitch": "Fly a starfighter down a canyon that keeps narrowing, shred three waves of drones and then blow up the Rift Core, all with one finger.",
+      "theme": [
+        "Rift Run",
+        "Rift Core",
+        "starfighter",
+        "canyon",
+        "drones",
+        "scouts",
+        "divers",
+        "gunners",
+        "ember river",
+        "plum rock walls"
+      ],
+      "verb": "Drag left and right to glide the auto-firing starfighter under drones, dodging their orbs and keeping off the canyon walls.",
+      "twist": "The canyon walls are hazards that close in each wave (the same `wall_l`/`wall_r` draw them and test hits), and wave 4 is a boss: the Rift Core with 24 HP and 3-orb volleys.",
+      "arc": [
+        "0–10 s: 'Drones inbound' for 1.8 s, then wave 1: 9 weaving scouts launched every 420 ms down a wide canyon while the ship fires twin bolts every 200 ms.",
+        "10–40 s: 'Wave 2 incoming' adds homing divers (12 drones), 'Wave 3 incoming' adds gunners that fire aimed orbs (15 drones); the scroll speeds from 200 to 260 px/s and the canyon narrows each wave.",
+        "40 s+: 'Rift Core ahead!': the core drifts down, sways across the narrowest canyon yet and fires 3-orb volleys every 1.3 s while 6 more drones come in, until its HP bar is empty."
+      ],
+      "lose": "Three hits from drones, orbs or scraping the canyon wall; each costs one of 3 lives, clears drones and orbs within 48 px, resets the chain and gives 1.2 s of grace.",
+      "win": "Clear all 4 waves by breaking the Rift Core. Score: 10 + 5 x chain per drone (chain up to x10, reset by a hit or an escaped drone), 5 per bolt on the core and 300 + 100 x lives left when it breaks.",
+      "juice": [
+        "Each drone down: a square-wave blip that rises with the chain, 16 pink and 6 yellow particles, a '+N' pop, a light haptic and 'Chain xN' bouncing in the bottom HUD.",
+        "Hitting the core: yellow sparks and a short tick that drops in pitch as its 24 HP drain, with the RIFT CORE bar shrinking.",
+        "Core down: 88 particles, a 12 px shake, a heavy haptic, a sawtooth slide from C4 to C2 and 'CORE DOWN +N' in big text."
+      ],
+      "look": "A sunset canyon run: plum rock walls with glowing orange rims and an inner shade layer over a deep rift with an ember river. Dusky plum palette with hot ember and yellow accents: the white-and-cyan starfighter is the only cool color, against magenta drones with amber eyes, orange orbs and a hexagonal yellow Rift Core. Font: Futura.",
+      "voice": "Terse, heroic flight-briefing calls: 'Drones inbound', 'Wave 3 incoming', 'Rift Core ahead!'"
+    },
     "brief": {
       "intent": "Fly a starfighter down a narrowing canyon, shoot four waves of drones and break the Rift Core",
       "audience": "friends who like arcade shooters",
@@ -342,6 +661,7 @@
       "Score is the game's own `score` state plus `objectives.score`, shown as one number in hud_top, because lives + 'Score: N' + 'Wave n of 4' would be wider than the canvas.",
       "Random rolls (`chance`, `random_float`) live only in rule effects; `canyon_cx`, `colliders` and every presentation expression stay pure."
     ],
+    "themes": "star wars starfighter x-wing space galaxy laser blaster deflect shoot pew sci-fi trench run boss ship alien",
     "group": "arcade",
     "title": "Rift Run"
   },
@@ -349,6 +669,37 @@
     "id": "gold_rooftop_courier",
     "file": "authoring/games/gold_rooftop_courier.authoring.json",
     "request": "an endless runner where I jump across city rooftops at night collecting letters",
+    "design": {
+      "pitch": "Sprint across night rooftops as a courier, hopping vents and leaping alleys to grab glowing letters, and see how far you get before three stumbles.",
+      "theme": [
+        "Rooftop Courier",
+        "night rooftops",
+        "glowing letters",
+        "roof vents",
+        "stacks",
+        "alleys",
+        "far skyline",
+        "yellow jacket",
+        "teal cap",
+        "brick facades"
+      ],
+      "verb": "Tap to jump and tap again in the air to double-jump, timing hops over vents and stacks and leaps across alleys.",
+      "twist": "Letters float in arcs that trace the ideal jump over each alley, so collecting them teaches the line, and a double jump rescues a late tap.",
+      "arc": [
+        "0–10 s: three letters wait on the first roof; low vents and alleys 58–86 px wide come at 250 px/s, and a single hop clears either.",
+        "10–40 s: the city speeds up on an ease_in curve; the first 100 m milestone pays +50 about 16 s in, and from about 29 s tall stacks need a higher jump or a double-jump.",
+        "40 s+: alleys widen by up to 54 px and the run climbs toward 490 px/s at 75 s, a +50 every 100 m, until three stumbles end it."
+      ],
+      "lose": "Three stumbles: running into a vent or stack, or landing in an alley (which bounces you back up with 'Whoa!'), each costs one of 3 lives and resets the combo.",
+      "win": "Endless: the score counts letters (10 + 5 x combo, combo up to 6) plus 50 for every 100 m run.",
+      "juice": [
+        "A letter grab: a square-wave note that climbs a whole step per combo, 12 cyan particles and a '+N' pop by the courier.",
+        "Every 100 m: the level sting, 24 gold particles, '100 m  +50' in big text and the meter counter bouncing.",
+        "Falling into an alley: a red 'Whoa!', a triangle slide from G4 up to C6 and the courier flung back up onto the roof."
+      ],
+      "look": "Night rooftops under a violet-to-magenta dusk: a far skyline with warm windows, haze bands drifting at 0.12x, purple brick facades and alleys scrolling at full speed. Moody neon-noir palette: the courier in a yellow jacket and teal cap is warm gold, the steel roof vents with red warning lights and hazard stripes read red, and the letters glow cyan. Font: Avenir Next.",
+      "voice": "Upbeat and street-quick, a few words at a time: 'Whoa!', '100 m  +50', 'The city speeds up the farther you go. Three stumbles ends the run.'"
+    },
     "brief": {
       "intent": "Time jumps across night rooftops, hopping vents and leaping alleys, while collecting glowing letters in arcs",
       "audience": "anyone, quick one-more-run sessions",
@@ -380,6 +731,7 @@
       "No `time_limit` on an endless game; `lives` is the lose path, and `playtest.progress` (score + lives + meters) tells the bots what doing better means.",
       "Labels kept short ('Combo', max 6) so lives + score + combo fit the hud_top row at 4-digit scores."
     ],
+    "themes": "spider-man city night rooftops parkour jump runner mario platform delivery",
     "group": "arcade",
     "title": "Rooftop Courier"
   },
@@ -387,6 +739,37 @@
     "id": "gold_cake_tower",
     "file": "authoring/games/gold_cake_tower.authoring.json",
     "request": "a cozy one-more-try game where you stack cake layers as high as you can",
+    "design": {
+      "pitch": "Tap to drop each sliding cake layer, line it up or lose the overhang, and build 24 layers high to put the cherry on top.",
+      "theme": [
+        "Cake Tower",
+        "cherry",
+        "lilac cake stand",
+        "Cherry line",
+        "strawberry",
+        "matcha",
+        "lemon",
+        "cocoa",
+        "blueberry",
+        "bunting"
+      ],
+      "verb": "Tap to drop the layer sliding back and forth above the cake, timing it to line up with the layer below.",
+      "twist": "Whatever hangs over the edge is sliced off and tumbles away, so every sloppy drop makes the cake narrower, but a perfect drop (within 7 px) grows it back by 8 px.",
+      "arc": [
+        "0–10 s: the first layers on the lilac cake stand; the slider moves at 110 px/s plus 6 per layer, and its outline turns white when it lines up, so early perfects are easy.",
+        "10–40 s: past layer 10 the camera glides up, the slider passes 170 px/s, sloppy drops trim the cake thinner and perfect drops grow it back and build the Combo.",
+        "40 s+: the climb to the Cherry line at 24 layers on a narrow cake, with the slider at up to 254 px/s; a full miss is a 'Splat!'."
+      ],
+      "lose": "Three layers that miss the cake entirely ('Splat!') use up the 3 lives and the bakery closes.",
+      "win": "Stack 24 layers and the cherry pops on top, adding 100 x lives left. Score: 10 per layer that lands, plus 10 x Combo for perfect drops (Combo up to 8).",
+      "juice": [
+        "Every landing: a triangle note that rises with the cake's height, a puff of 10 crumbs and a light haptic.",
+        "A perfect drop: a sine chime that climbs with the combo, white and gold particles from both edges, the layer bouncing to 1.08x, a 'Perfect! +N' pop and a sparkle that keeps spinning on that layer.",
+        "The cherry: the level sting, the cherry scaling in from 0.2 to 1.3 to 1, and 30 pink particles."
+      ],
+      "look": "A cozy morning bakery: peach wallpaper with little diamonds, bunting, jars on shelves and a wooden counter. Warm pastel palette: sponge layers in strawberry, matcha, lemon, cocoa and blueberry with cream frosting drips and a jam line; the sliding layer gets a white outline when aligned, guide lines mark the top layer's edges, and sliced pieces tumble away spinning. Font: Chalkboard SE.",
+      "voice": "Sweet and gently teasing, like a bakery chalkboard: 'Splat!', 'Cherry line', 'Stack 24 layers to add the cherry; three layers on the floor and the bakery closes.'"
+    },
     "brief": {
       "intent": "Drop sliding cake layers onto a growing cake; overhang gets sliced off, perfect drops grow it back, reach 24 layers for the cherry",
       "audience": "everyone, relaxed solo play",
@@ -415,6 +798,7 @@
       "The perfect chime is one `note` with a Hz expression; jingle `notes` must be literal note names, or validation fails with E_PRESENTATION.",
       "The drop input has a guard (`when: not built`) and a Space key source; the tap target is a transparent full-canvas `rect`, so bots and people can always hit it."
     ],
+    "themes": "baking bake off cake dessert food cooking stack tower tetris cozy",
     "group": "arcade",
     "title": "Cake Tower"
   },
@@ -422,6 +806,37 @@
     "id": "gold_which_house",
     "file": "authoring/games/gold_which_house.authoring.json",
     "request": "a which-house-are-you quiz for my friends with a magic school vibe, so we can all post our results in the chat",
+    "design": {
+      "pitch": "Eight snap questions against a burning candle, and Brambleford Academy's Lantern tells you if you're a Moonwarden, Emberjack, Thornquill or Hearthmoss, with a crest to post in the group chat.",
+      "theme": [
+        "Brambleford Academy",
+        "the Lantern",
+        "Moonwarden",
+        "Emberjack",
+        "Thornquill",
+        "Hearthmoss",
+        "the Midnight Exam",
+        "the Lantern Cup",
+        "the bell tower",
+        "the hallway ghost"
+      ],
+      "verb": "Read a question, then tap one of four shuffled answers on instinct before the candle burns down; each answer adds 2 to one house and 1 to another.",
+      "twist": "There are no right answers but you can still lose: answering fast scores Conviction, letting the candle burn out twice puts the Lantern out, and a split heart (top two houses less than 2 points apart) can't be sorted. The reveal quotes your own deciding answer back as 'Your tell'.",
+      "arc": [
+        "Questions 1–2: a 1.5 s read lock dims the answers, then the candle bar drains over 9 s; a pick bursts particles in its house's colour and that house's crest along the bottom pops.",
+        "Questions 3–8: the four crests glow brighter as you lean toward them; let a candle burn out and 'Your candle gutters…' costs one of your 2 lives.",
+        "Reveal: the brass lantern swings over cycling crests ('The Lantern is deciding…') for 1.8 s, then 'THE LANTERN HAS CHOSEN': your crest under rays, 'You are a', the house name, motto, blurb, 'Your tell: “…”' and the share line ('I’m a Moonwarden 🌙')."
+      ],
+      "lose": "Let the candle run out on two questions and the Lantern goes dark; or finish all 8 with your top two houses less than 2 points apart and 'THE LANTERN FLICKERS': 'Torn between' both house names, with both crests tilted side by side.",
+      "win": "Finish with one house at least 2 points ahead and the Lantern sorts you into it. Conviction counts 10 per answer plus up to 9 more for answering before the candle drains, and 5 points for every point your house leads the runner-up.",
+      "juice": [
+        "Picking an answer: the card bounces, 16 particles in the house's colour burst from it, a light haptic, and that house's crest pops to 1.35x.",
+        "The Lantern chooses: a 'shimmer', 48 house-coloured particles plus 24 pale gold sparks, a success haptic, and the crest scales up from 0.2 under slowly turning rays.",
+        "A split heart: a 'fall' sound, a 6 px shake and a warning haptic under 'THE LANTERN FLICKERS', then 'Tap to try again'."
+      ],
+      "look": "Midnight at a wizard academy: an indigo starry sky with a crescent moon, glowing lanterns at the edges and a castle skyline at the bottom; hushed and candlelit, gold (#F5C66B) on indigo (#150F35). There's no player sprite: you face the candle bar (it turns red below 30%), the answers are cards, and each house has a crest colour (Moonwarden blue, Emberjack orange, Thornquill green, Hearthmoss gold). Baskerville.",
+      "voice": "Whimsical and warm, a cozy boarding-school narrator with dry jokes: 'A toad with strong opinions about your essays', 'Saying yes to every plan, then inventing three more', and the Hearthmoss motto '“Nobody eats alone.”'."
+    },
     "brief": {
       "intent": "An eight-question personality quiz that sorts you into one of four invented houses of a wizard academy and ends with a shareable crest",
       "audience": "friends in a group chat comparing results",
@@ -449,6 +864,7 @@
       "Parameters inside their ranges (`lives.count` 2 of 1..9) and `score`'s `point` really emitted (base 10 per answer, the time bonus added on top), so there's no unreachable fragment rule.",
       "Every tap target is a transparent `rect` over its sprite, so both the hit-test and the playtest bots find the answers."
     ],
+    "themes": "harry potter sorting hat hogwarts house personality buzzfeed quiz which are you",
     "group": "social",
     "title": "Which House Claims You?"
   },
@@ -456,6 +872,37 @@
     "id": "gold_who_posted",
     "file": "authoring/games/gold_who_posted.authoring.json",
     "request": "a gossip trivia game at a fancy prep school where you guess who wrote each anonymous post, so I can challenge my roommate to beat my score",
+    "design": {
+      "pitch": "Someone keeps posting on Kestrel Hall's anonymous Whisper Wall: guess which of five students (or the dean's corgi) wrote each post, and beat Jules's 1600.",
+      "theme": [
+        "Kestrel Hall",
+        "the Whisper Wall",
+        "Sloane, queen bee",
+        "Jasper, lacrosse captain",
+        "Wren, overachiever",
+        "Rafi, class clown",
+        "Duchess, dean's corgi",
+        "Jules",
+        "Pancake",
+        "the east stairwell"
+      ],
+      "verb": "Read each anonymous post as it types in, then tap which of the four suspects shown wrote it, within 10 seconds.",
+      "twist": "Every suspect writes in an unmistakable voice (Sloane's 'Per my last', Jasper's secret haikus, Wren's 6:00 sharp, Rafi's stairwell gum, Duchess in ALL CAPS), so each post is a fair deduction, and you're racing a named friend's score, not just running up a total.",
+      "arc": [
+        "0–10 s: post 1 types onto the glossy card ('anon  ·  the Whisper Wall', 'POST 1 / 12') behind a ▍ cursor for 1.2 s while a blocker covers the answers, then you pick from four suspects.",
+        "10–40 s: each new post arrives with a two-note ping; right calls build the Streak (max 3), so a post is worth 100, then 150, then 200, and 'Three in a row! 200 a post now' pops up.",
+        "40 s+: the race to pass 'Beat Jules: 1600' before 'POST 12 / 12', which takes at least 9 right calls; a wrong call resets the streak and costs a crown, and six in a row brings 'Six straight. Jules is sweating.'"
+      ],
+      "lose": "Three wrong calls (running out the 10 s counts as wrong) cost all three crowns; 12 posts without passing 1600 loses; and so does the 180 s time limit.",
+      "win": "You win the moment your score passes Jules's 1600. A right call scores 50 plus 50 × the Streak (max 3): 100, 150, then 200 a post.",
+      "juice": [
+        "A new post: a two-note triangle ping (E6, B6) and the text typing in behind a ▍ cursor.",
+        "A right call: a 'sparkle' (plus a 'rise' once the streak is going), and the tilted 'CALLED IT' stamp slams onto the card in mint at 1.7x and settles.",
+        "A wrong call: 'IT WAS RAFI' (or whoever it was) stamps on in red, the screen shakes 6 px with a warning haptic, and a gold crown goes."
+      ],
+      "look": "Prep-school drama after dark: a plum-velvet backdrop with a faint gold lattice, a pink spotlight, dark arches with ivy and a faint crest; glamorous and sly, mint (#4FE0B0) for right calls and hot pink (#FF5FA2) for gossip. There's no player sprite: the post sits on a glossy card with a pink-to-lilac top bar and a masked avatar, the suspects are pill buttons, and lives are gold crowns. Futura.",
+      "voice": "Sassy, petty and funny, a different voice per suspect: 'Reminder: the library opens at 6:00, not 6:05. Some of us fit three study blocks in before breakfast.', 'Wrote a haiku for my dog, Pancake. He ate it. Honestly? Fair review.', 'THE MAIL CARRIER HAS RETURNED. HE IS A TRAITOR. I HAVE WARNED THIS SCHOOL BEFORE.'"
+    },
     "brief": {
       "intent": "Read anonymous posts from a school confession wall and pick which of five original students (or the dean's corgi) wrote each, racing a friend's score",
       "audience": "two friends, one challenging the other",
@@ -485,6 +932,7 @@
       "A transparent blocker over the answers while a post types in gives people time to read and stops instant taps: bot runs take 18–28 s, not 5.",
       "One score system: `score`'s `point` bound to `answered_right` plus one bonus rule (`50 * combo`), with `lives` bound to `answered_wrong` so wrong answers can lose; choices are written exactly as the answers, 4 per question, as `quiz` requires."
     ],
+    "themes": "gossip girl prep school rich kids drama anonymous who said it trivia",
     "group": "social",
     "title": "Who Posted It?"
   },
@@ -492,6 +940,37 @@
     "id": "gold_driftwood_cipher",
     "file": "authoring/games/gold_driftwood_cipher.authoring.json",
     "request": "a daily space puzzle for our group chat, like decoding a secret message from a rebel ship",
+    "design": {
+      "pitch": "Crack three scrambled transmissions from the Driftwood Fleet one letter at a time before the Regency's jammer cuts the line, and the whole group chat gets the same three today.",
+      "theme": [
+        "the Driftwood Fleet",
+        "the Regency",
+        "the jammer",
+        "the navigator",
+        "the toaster",
+        "the senate",
+        "sea shanties",
+        "the admiral",
+        "the space goat",
+        "the east hatch"
+      ],
+      "verb": "Tap a letter on the keyboard that you think is in the message; a right guess unscrambles every copy of it in the coded grid.",
+      "twist": "It's a real substitution cipher, not hangman: every letter is shown as its neighbour in a shuffled key (none stands for itself), so repeated code letters and word shapes are clues, and each copy a guess reveals scores 10, so common letters pay more.",
+      "arc": [
+        "0–10 s (Message 1 of 3): 'Tap a letter you think is in the message.' Up to four lines of amber code letters sit under blank cells, and a first guess like E or T lights up copies across the grid.",
+        "10–40 s: each guess takes a 450 ms decrypt beat while unknown cells flicker with static; a miss ('No Q. Static on the line.') drops a signal bar, and the navigator's 'Hint (2)' reveals a letter for no points.",
+        "40 s+ (Messages 2–3): 'New key. Same crew. Go.' Each message brings a fresh key and three fresh signal bars, while the JAMMER countdown turns red under 15 s."
+      ],
+      "lose": "Three wrong letters in one message kill the signal (you get 3 again for each message), or the 120 s jammer arrives before all three are cracked.",
+      "win": "Crack all three messages before the jammer. A right letter scores 10 for each copy in the message, cracking one adds 30 for each signal bar left ('Cracked! +90 for signal left'), and the navigator's tips score nothing.",
+      "juice": [
+        "A right guess: every copy of the letter pops in mint at 1.8x and settles, with a 'chirp', up to 40 mint particles (8 per copy) and a light haptic; three or more copies add an 'arpeggio'.",
+        "A miss: a 'zap', a 6 px shake and the status line 'No Q. Static on the line.' as a signal bar goes dark.",
+        "Cracking a message: 'Cracked! +90 for signal left' in mint, 60 amber particles burst and fall, and a success haptic, then the next transmission comes in."
+      ],
+      "look": "A rebel freighter's comms console in deep space: a navy void with pink and teal nebulae and scattered stars, behind a console with amber brackets; clever and calm. There's no player sprite: decoded letters glow mint (#5CF2C2) above amber (#FFB347) code letters, unknown cells flicker with static, lives are mint signal bars, and the JAMMER timer turns red (#FF5C7A). Avenir Next, with Menlo for the code and the timer.",
+      "voice": "Deadpan spy-radio comedy, each message written with | line breaks: 'the toaster|is a traitor', 'the admiral|is a hologram|act normal', 'hide the map|inside the|space goat'."
+    },
     "brief": {
       "intent": "A daily cryptogram: three short scrambled transmissions from an original rebel crew, decoded one letter at a time before the jammer arrives",
       "audience": "a group chat that plays the same puzzle every day",
@@ -522,6 +1001,7 @@
       "A 450 ms decrypt beat between guesses keeps bot runs at 5–23 s, so they aren't over in a few taps, and `keyboard`'s required `key_state(letter)` returns exactly 0, 1 or 2.",
       "Content stays parseable: every message is lowercase letters and spaces with `|` line breaks, at most 4 lines of 13 characters, so the letter grid always fits the console."
     ],
+    "themes": "star wars rebel spy code cipher decode secret message wordle word puzzle daily space",
     "group": "social",
     "title": "Static from the Driftwood Fleet"
   },
@@ -529,6 +1009,37 @@
     "id": "gold_pillow_fort",
     "file": "authoring/games/gold_pillow_fort.authoring.json",
     "request": "a pass-the-phone party game for a sleepover where we all build something together",
+    "design": {
+      "pitch": "Pass the phone and build one pillow fort together: Ana, Kofi and Mei take turns dropping a swinging pillow on top, and every pillow stays in its builder's colour.",
+      "theme": [
+        "Pillow Fort Night",
+        "Ana",
+        "Kofi",
+        "Mei",
+        "the couch",
+        "the ceiling",
+        "Sky Fort",
+        "string lights",
+        "the blanket canopy",
+        "pillows"
+      ],
+      "verb": "Watch your pillow swing side to side above the fort, tap to drop it on top, then pass the phone.",
+      "twist": "One shared fort, three builders: each pillow keeps its builder's colour and initial where it landed, every wobbly drop squishes the fort narrower for the next friend, and a perfect drop fluffs it back out.",
+      "arc": [
+        "Turns 1–3: Ana, Kofi and Mei each drop a first pillow onto the teal couch ('The fort starts with you.'), with a 'Pass to …' screen between turns.",
+        "Turns 4–9: the swing gets faster every turn, off-centre drops narrow the top (never below 44), and the pass screen shows a mini fort and the last drop ('Ana: Comfy! +9').",
+        "Turns 10–12: the fort climbs toward 'CEILING · SKY FORT +30'; land all 12 for 'SKY FORT!'. Wait 5 s and 'Arms got tired!' drops the pillow for you."
+      ],
+      "lose": "A pillow whose middle misses the pillow below tumbles off ('Tumble!', no points); three tumbles and the fort caves in.",
+      "win": "Get through all 12 turns (4 each) without three tumbles. A drop scores up to 10 by how centred it is, a drop within 6 px is 'Perfect! +15', and landing all 12 adds +30 for the Sky Fort; the top shows the team's 'Fort' total and the turns scoreboard keeps each friend's own.",
+      "juice": [
+        "A perfect drop: 'Perfect! +15' in the builder's colour, a 'sparkle', 30 cream particles off the top and a success haptic, and the pillow lands 12 wider (up to 190).",
+        "Every landing: the pillow squashes from 1.12x to 0.94x, 14 particles in the builder's colour puff out and the 'Fort' total bumps.",
+        "Sky Fort: the twelfth pillow reaches the ceiling, the label turns to 'SKY FORT!' and 60 gold particles rain down with a 'levelup'."
+      ],
+      "look": "A cozy living room at night: striped wallpaper, a moonlit window, a floor lamp, a purple blanket canopy strung with glowing bulbs and a teal couch at the bottom; warm and sleepy, indigo with gold light. Pillows are rounded cushions in each friend's colour (coral for Ana, teal for Kofi, yellow for Mei) with an inner seam and their initial; a pillow that misses tips up to 70° and falls off the screen, and lives are little heart pillows. Avenir Next.",
+      "voice": "Warm, encouraging sleepover banter: 'The fort starts with you.', 'Tap to drop, Ana!', 'Arms got tired!'."
+    },
     "brief": {
       "intent": "Three friends take turns dropping swinging pillows onto one shared fort; every pillow stays in its builder's colour",
       "audience": "3 friends passing one phone",
@@ -555,6 +1066,7 @@
       "An 'arms got tired' auto-drop after 5 s keeps every turn moving, points land at release so lookahead sees them, and the fall takes only 600 ms, so bot runs end in 4–17 s (13–17 s for a full fort) and about a minute for people.",
       "Respects HUD capacity: `turns` already fills `hud_bottom`, so the team total is one extra `hud_top` text (3 of 3), not a fourth node or a `shared_progress` bar that wouldn't fit."
     ],
+    "themes": "sleepover jenga stacking pass and play hot seat party build together",
     "group": "social",
     "title": "Pillow Fort Night"
   }

@@ -3,6 +3,37 @@
     "id": "gold_moonbroom_derby",
     "file": "authoring/games/gold_moonbroom_derby.authoring.json",
     "request": "a broom racing game at a magic school where I dodge storm clouds and grab sparks",
+    "design": {
+      "pitch": "Race a broom through a wizard-school night sky for 50 seconds, dodging storm clouds and flapping spellbooks and skimming past them for Whoosh points.",
+      "theme": [
+        "Moonbroom Derby",
+        "crescent moon",
+        "castle spires",
+        "storm clouds",
+        "runaway spellbooks",
+        "sparks",
+        "finish lanterns",
+        "plum-cloaked rider",
+        "orange scarf",
+        "pink lightning"
+      ],
+      "verb": "Tap the left or right side to swerve one lane at a time across five lanes, slipping between falling hazards and under falling sparks.",
+      "twist": "Nerve pays: a hazard that passes in the next lane over (within 80 px) is a near miss worth 'Whoosh +5', so the best line runs right beside danger while sparks build a Streak.",
+      "arc": [
+        "0–10 s: the first storm cloud drops at 0.7 s, then one cloud about every second at 230 px/s, with mint sparks falling in the five lanes every 900 ms.",
+        "10–40 s: the ease_in_out curve kicks in: from about 16 s runaway spellbooks sway across their lane, from about 20 s a second cloud often fills another lane in the same row, and speed and spawn rate climb.",
+        "40 s+: difficulty peaks at 45 s (420 px/s, a row every 540 ms); the finish lanterns appear at 47 s and sweep down to the line at 50 s."
+      ],
+      "lose": "Three hits from storm clouds or spellbooks; each hit costs one of 3 lives, resets the Streak, clears hazards within 56 px and gives 1 s of grace.",
+      "win": "Survive until the 50-second finish. Score counts sparks (10 + 5 x Streak, Streak up to 8) plus 5 for every Whoosh near miss.",
+      "juice": [
+        "Grabbing a spark: a triangle-wave chime that climbs a whole step with each Streak, and a '+N' pop above the rider.",
+        "A near miss: a sine swish sliding from E6 to A5, 10 lavender particles between broom and hazard, a light haptic and 'Whoosh +5'.",
+        "The finish: the progress rail fills, the lantern arch sweeps down over the last 3 seconds, then the 'tada' win sting."
+      ],
+      "look": "A wizard-academy night race over an indigo sky with a crescent moon and castle spires with warm windows; drifting wisps and speed streaks that stretch as it speeds up. Deep night palette with amber and mint glows: the plum-cloaked rider with an orange scarf reads warm amber, the slate storm clouds with pink lightning and crimson flapping spellbooks read as danger, sparks are mint. Font: Optima.",
+      "voice": "Whimsical and breathless, short race calls: 'Whoosh +5', 'Dodge storm clouds and runaway spellbooks, grab sparks to build a streak, and skim past hazards for Whoosh points.', 'Cross the finish lanterns in 50 seconds.'"
+    },
     "brief": {
       "intent": "Swerve a broom between five lanes through a speeding night race, dodging storm clouds and runaway spellbooks while chaining sparks",
       "audience": "friends, all ages",
@@ -34,12 +65,44 @@
       "Keeps hazards in the game's own list and hands them to `collide` through `colliders()`; the game's `hit` rule removes the hazard near `hit_at`, so one cloud costs one life.",
       "The rising-pitch sound is the game's own feedback on `point`, which replaces score's library pickup moment instead of playing both.",
       "Stays within 3 hud_top nodes (lives, score, combo); course progress is a playfield rail, not a fourth HUD node (`A_SLOT_FULL`)."
-    ]
+    ],
+    "themes": "harry potter quidditch wizard witch broom magic school hogwarts flying race sky storm"
   },
   {
     "id": "gold_rift_run",
     "file": "authoring/games/gold_rift_run.authoring.json",
     "request": "a space fighter flying down a narrow canyon shooting drones, with a big boss target at the end",
+    "design": {
+      "pitch": "Fly a starfighter down a canyon that keeps narrowing, shred three waves of drones and then blow up the Rift Core, all with one finger.",
+      "theme": [
+        "Rift Run",
+        "Rift Core",
+        "starfighter",
+        "canyon",
+        "drones",
+        "scouts",
+        "divers",
+        "gunners",
+        "ember river",
+        "plum rock walls"
+      ],
+      "verb": "Drag left and right to glide the auto-firing starfighter under drones, dodging their orbs and keeping off the canyon walls.",
+      "twist": "The canyon walls are hazards that close in each wave (the same `wall_l`/`wall_r` draw them and test hits), and wave 4 is a boss: the Rift Core with 24 HP and 3-orb volleys.",
+      "arc": [
+        "0–10 s: 'Drones inbound' for 1.8 s, then wave 1: 9 weaving scouts launched every 420 ms down a wide canyon while the ship fires twin bolts every 200 ms.",
+        "10–40 s: 'Wave 2 incoming' adds homing divers (12 drones), 'Wave 3 incoming' adds gunners that fire aimed orbs (15 drones); the scroll speeds from 200 to 260 px/s and the canyon narrows each wave.",
+        "40 s+: 'Rift Core ahead!': the core drifts down, sways across the narrowest canyon yet and fires 3-orb volleys every 1.3 s while 6 more drones come in, until its HP bar is empty."
+      ],
+      "lose": "Three hits from drones, orbs or scraping the canyon wall; each costs one of 3 lives, clears drones and orbs within 48 px, resets the chain and gives 1.2 s of grace.",
+      "win": "Clear all 4 waves by breaking the Rift Core. Score: 10 + 5 x chain per drone (chain up to x10, reset by a hit or an escaped drone), 5 per bolt on the core and 300 + 100 x lives left when it breaks.",
+      "juice": [
+        "Each drone down: a square-wave blip that rises with the chain, 16 pink and 6 yellow particles, a '+N' pop, a light haptic and 'Chain xN' bouncing in the bottom HUD.",
+        "Hitting the core: yellow sparks and a short tick that drops in pitch as its 24 HP drain, with the RIFT CORE bar shrinking.",
+        "Core down: 88 particles, a 12 px shake, a heavy haptic, a sawtooth slide from C4 to C2 and 'CORE DOWN +N' in big text."
+      ],
+      "look": "A sunset canyon run: plum rock walls with glowing orange rims and an inner shade layer over a deep rift with an ember river. Dusky plum palette with hot ember and yellow accents: the white-and-cyan starfighter is the only cool color, against magenta drones with amber eyes, orange orbs and a hexagonal yellow Rift Core. Font: Futura.",
+      "voice": "Terse, heroic flight-briefing calls: 'Drones inbound', 'Wave 3 incoming', 'Rift Core ahead!'"
+    },
     "brief": {
       "intent": "Fly a starfighter down a narrowing canyon, shoot four waves of drones and break the Rift Core",
       "audience": "friends who like arcade shooters",
@@ -68,12 +131,44 @@
       "Bolt hits are computed with `let` before any `remove`, so the bolts and drones removed come from the same snapshot; each kill emits `drone_down {x, y}` and particles read `event.x`.",
       "Score is the game's own `score` state plus `objectives.score`, shown as one number in hud_top, because lives + 'Score: N' + 'Wave n of 4' would be wider than the canvas.",
       "Random rolls (`chance`, `random_float`) live only in rule effects; `canyon_cx`, `colliders` and every presentation expression stay pure."
-    ]
+    ],
+    "themes": "star wars starfighter x-wing space galaxy laser blaster deflect shoot pew sci-fi trench run boss ship alien"
   },
   {
     "id": "gold_rooftop_courier",
     "file": "authoring/games/gold_rooftop_courier.authoring.json",
     "request": "an endless runner where I jump across city rooftops at night collecting letters",
+    "design": {
+      "pitch": "Sprint across night rooftops as a courier, hopping vents and leaping alleys to grab glowing letters, and see how far you get before three stumbles.",
+      "theme": [
+        "Rooftop Courier",
+        "night rooftops",
+        "glowing letters",
+        "roof vents",
+        "stacks",
+        "alleys",
+        "far skyline",
+        "yellow jacket",
+        "teal cap",
+        "brick facades"
+      ],
+      "verb": "Tap to jump and tap again in the air to double-jump, timing hops over vents and stacks and leaps across alleys.",
+      "twist": "Letters float in arcs that trace the ideal jump over each alley, so collecting them teaches the line, and a double jump rescues a late tap.",
+      "arc": [
+        "0–10 s: three letters wait on the first roof; low vents and alleys 58–86 px wide come at 250 px/s, and a single hop clears either.",
+        "10–40 s: the city speeds up on an ease_in curve; the first 100 m milestone pays +50 about 16 s in, and from about 29 s tall stacks need a higher jump or a double-jump.",
+        "40 s+: alleys widen by up to 54 px and the run climbs toward 490 px/s at 75 s, a +50 every 100 m, until three stumbles end it."
+      ],
+      "lose": "Three stumbles: running into a vent or stack, or landing in an alley (which bounces you back up with 'Whoa!'), each costs one of 3 lives and resets the combo.",
+      "win": "Endless: the score counts letters (10 + 5 x combo, combo up to 6) plus 50 for every 100 m run.",
+      "juice": [
+        "A letter grab: a square-wave note that climbs a whole step per combo, 12 cyan particles and a '+N' pop by the courier.",
+        "Every 100 m: the level sting, 24 gold particles, '100 m  +50' in big text and the meter counter bouncing.",
+        "Falling into an alley: a red 'Whoa!', a triangle slide from G4 up to C6 and the courier flung back up onto the roof."
+      ],
+      "look": "Night rooftops under a violet-to-magenta dusk: a far skyline with warm windows, haze bands drifting at 0.12x, purple brick facades and alleys scrolling at full speed. Moody neon-noir palette: the courier in a yellow jacket and teal cap is warm gold, the steel roof vents with red warning lights and hazard stripes read red, and the letters glow cyan. Font: Avenir Next.",
+      "voice": "Upbeat and street-quick, a few words at a time: 'Whoa!', '100 m  +50', 'The city speeds up the farther you go. Three stumbles ends the run.'"
+    },
     "brief": {
       "intent": "Time jumps across night rooftops, hopping vents and leaping alleys, while collecting glowing letters in arcs",
       "audience": "anyone, quick one-more-run sessions",
@@ -104,12 +199,44 @@
       "Two obstacle heights become one or two collider points with `fold(blocks, [], (acc, b) => concat(acc, ...))`, instead of a second collide fragment.",
       "No `time_limit` on an endless game; `lives` is the lose path, and `playtest.progress` (score + lives + meters) tells the bots what doing better means.",
       "Labels kept short ('Combo', max 6) so lives + score + combo fit the hud_top row at 4-digit scores."
-    ]
+    ],
+    "themes": "spider-man city night rooftops parkour jump runner mario platform delivery"
   },
   {
     "id": "gold_cake_tower",
     "file": "authoring/games/gold_cake_tower.authoring.json",
     "request": "a cozy one-more-try game where you stack cake layers as high as you can",
+    "design": {
+      "pitch": "Tap to drop each sliding cake layer, line it up or lose the overhang, and build 24 layers high to put the cherry on top.",
+      "theme": [
+        "Cake Tower",
+        "cherry",
+        "lilac cake stand",
+        "Cherry line",
+        "strawberry",
+        "matcha",
+        "lemon",
+        "cocoa",
+        "blueberry",
+        "bunting"
+      ],
+      "verb": "Tap to drop the layer sliding back and forth above the cake, timing it to line up with the layer below.",
+      "twist": "Whatever hangs over the edge is sliced off and tumbles away, so every sloppy drop makes the cake narrower, but a perfect drop (within 7 px) grows it back by 8 px.",
+      "arc": [
+        "0–10 s: the first layers on the lilac cake stand; the slider moves at 110 px/s plus 6 per layer, and its outline turns white when it lines up, so early perfects are easy.",
+        "10–40 s: past layer 10 the camera glides up, the slider passes 170 px/s, sloppy drops trim the cake thinner and perfect drops grow it back and build the Combo.",
+        "40 s+: the climb to the Cherry line at 24 layers on a narrow cake, with the slider at up to 254 px/s; a full miss is a 'Splat!'."
+      ],
+      "lose": "Three layers that miss the cake entirely ('Splat!') use up the 3 lives and the bakery closes.",
+      "win": "Stack 24 layers and the cherry pops on top, adding 100 x lives left. Score: 10 per layer that lands, plus 10 x Combo for perfect drops (Combo up to 8).",
+      "juice": [
+        "Every landing: a triangle note that rises with the cake's height, a puff of 10 crumbs and a light haptic.",
+        "A perfect drop: a sine chime that climbs with the combo, white and gold particles from both edges, the layer bouncing to 1.08x, a 'Perfect! +N' pop and a sparkle that keeps spinning on that layer.",
+        "The cherry: the level sting, the cherry scaling in from 0.2 to 1.3 to 1, and 30 pink particles."
+      ],
+      "look": "A cozy morning bakery: peach wallpaper with little diamonds, bunting, jars on shelves and a wooden counter. Warm pastel palette: sponge layers in strawberry, matcha, lemon, cocoa and blueberry with cream frosting drips and a jam line; the sliding layer gets a white outline when aligned, guide lines mark the top layer's edges, and sliced pieces tumble away spinning. Font: Chalkboard SE.",
+      "voice": "Sweet and gently teasing, like a bakery chalkboard: 'Splat!', 'Cherry line', 'Stack 24 layers to add the cherry; three layers on the floor and the bakery closes.'"
+    },
     "brief": {
       "intent": "Drop sliding cake layers onto a growing cake; overhang gets sliced off, perfect drops grow it back, reach 24 layers for the cherry",
       "audience": "everyone, relaxed solo play",
@@ -137,6 +264,7 @@
       "The win waits for a `topper` event 900 ms after the 24th layer, so the last point and combo bonus land before the objective is checked.",
       "The perfect chime is one `note` with a Hz expression; jingle `notes` must be literal note names, or validation fails with E_PRESENTATION.",
       "The drop input has a guard (`when: not built`) and a Space key source; the tap target is a transparent full-canvas `rect`, so bots and people can always hit it."
-    ]
+    ],
+    "themes": "baking bake off cake dessert food cooking stack tower tetris cozy"
   }
 ]

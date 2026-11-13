@@ -15,6 +15,8 @@ const GROUP_HINTS = {
     'chaos cringe vibe vibes skit party unhinged',
   arcade: 'dodge run runner race racing jump jumping shoot shooter fly flying avoid catch stack stacking ' +
     'endless arcade speed reflex action platformer collect dash swerve',
+  puzzle: 'puzzle puzzles wordle word words letter letters guess connections group groups grouping categories ' +
+    'category crossword logic grid daily brain teaser riddle ladder sudoku solve clue clues deduce nyt linkedin',
   social: 'quiz trivia which personality sort sorting house puzzle riddle cipher word guess daily friends ' +
     'group chat pass phone turns together challenge sleepover party team',
 };
@@ -27,7 +29,9 @@ function words(text) {
 
 function entryText(e) {
   const b = e.brief || {};
-  return [e.request, e.genre, b.intent, (b.mood || []).join(' '), b.energy, b.competition, e.title].join(' ');
+  // themes: words people type for this kind of game, franchises included ("star wars", "gossip girl"),
+  // so a themed request finds the gold game with the same feel. Retrieval only; never shown to Muse.
+  return [e.request, e.genre, b.intent, (b.mood || []).join(' '), b.energy, b.competition, e.title, e.themes].join(' ');
 }
 
 /**
@@ -90,15 +94,17 @@ export function compactArt(manifest, max = 400) {
 export function goldPromptText(entries, budget = 90000) {
   let used = 0;
   return entries.map((e, i) => {
-    let manifest = JSON.stringify(e.manifest);
-    if (i > 0 && used + manifest.length > budget) manifest = JSON.stringify(compactArt(e.manifest));
+    // The reply Muse should give: the design first (when the entry has one), then the manifest.
+    const reply = e.design ? { design: e.design, ...e.manifest } : e.manifest;
+    let manifest = JSON.stringify(reply);
+    if (i > 0 && used + manifest.length > budget) manifest = JSON.stringify(compactArt(reply));
     used += manifest.length;
     return [
       `### Example ${i + 1}: ${e.title || e.id} (${e.genre})`,
       `Request: "${e.request}"`,
       `Why it works: ${(e.why_its_good || []).join(' ')}`,
       `Mistakes it avoids: ${(e.pitfalls_avoided || []).join(' ')}`,
-      'Manifest:',
+      'Reply (design, then the manifest):',
       manifest,
     ].join('\n');
   }).join('\n\n');
