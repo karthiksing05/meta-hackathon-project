@@ -35,7 +35,7 @@ struct BubbleLookSpec: Sendable, Hashable {
         let all = [
             BubbleLookSpec(id: "glow", title: "Glow", describe: "Dreamy, soft, pastel: gradient sky, iridescent soap bubbles with halos, rounded glowing text",
                        moods: ["dreamy", "calm"], energy: ["low"], fonts: ["rounded"], motifs: ["clouds", "stars", "waves", "dots"],
-                       exampleColors: [BubbleColors(bgTop: "#C9B8FF", bgBottom: "#FFC8E8", ink: "#2E1F5E", primary: "#9EF0DA", secondary: "#FFE59A", accent: "#9AD4FF", danger: "#FF6B8B")]),
+                       exampleColors: [BubbleColors(bgTop: "#C9B8FF", bgBottom: "#E6EEFF", ink: "#2E1F5E", primary: "#9EF0DA", secondary: "#FFE59A", accent: "#9AD4FF", danger: "#FF6B8B")]),
             BubbleLookSpec(id: "paper", title: "Paper", describe: "Crafty, warm, tactile: paper grain, layered cutouts, flat fills with offset shadows, confetti scraps",
                        moods: ["crafty", "cozy"], energy: ["low", "medium"], fonts: ["rounded", "serif"], motifs: ["hills", "leaves", "clouds", "city", "waves"],
                        exampleColors: [

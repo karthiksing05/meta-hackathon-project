@@ -19,7 +19,7 @@ struct BubbleCoverView: View {
     var body: some View {
         let palette = BubbleGlow.palette(bubble.paletteID)
         ZStack {
-            palette.gradient
+            background(palette)
             if let data = bubble.coverImageData {
                 RemoteImage(url: nil, data: data, placeholder: .clear)
             } else {
@@ -41,6 +41,17 @@ struct BubbleCoverView: View {
         }
         .clipped()
         .accessibilityHidden(true)
+    }
+
+    /// A game that picked a non-default preset keeps its colors; the default and custom palettes
+    /// get the brand gradient, so covers stay blue to violet.
+    @ViewBuilder
+    private func background(_ palette: BubblePalette) -> some View {
+        if palette.id == BubbleGlow.lilacHaze.id || palette.id != bubble.paletteID {
+            GameColor.gradient
+        } else {
+            palette.gradient
+        }
     }
 }
 

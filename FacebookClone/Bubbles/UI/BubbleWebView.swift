@@ -121,7 +121,7 @@ struct BubbleWebView: UIViewRepresentable {
                 let outcome = await host.start(key: key, manifest: manifest, options: options)
                 guard let self, self.startCount == count, self.host === host, !outcome.superseded else { return }
                 if !outcome.ok {
-                    self.onMessage(.error(outcome.error ?? "This bubble popped"))
+                    self.onMessage(.error(outcome.error ?? "This game hit a snag"))
                 }
                 if !self.isActive {
                     host.command("pause")

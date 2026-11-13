@@ -3,8 +3,8 @@ import UIKit
 
 /// The Bubbles tab: a full-screen, infinite vertical feed of Bubbles, paged like Reels.
 ///
-/// Only the settled page runs the live runtime (a friend's Burst, or a bot demo), muted until you
-/// unmute. Its neighbors show poster frames. Tap a page to take over and play it right there;
+/// Only the settled page runs the live runtime (a friend's Burst, or a bot demo), with sound unless
+/// the app-wide game mute (`GameSound.isMuted`, the header's speaker) is on. Its neighbors show poster frames. Tap a page to take over and play it right there;
 /// the result sheet follows. See `BubbleFeedModel` for the runtime side.
 ///
 /// DEBUG launch variables (see `DebugLaunch`):
@@ -60,7 +60,7 @@ struct BubblesTabView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
                 } else {
                     topScrim(height: topInset + Self.headerHeight + 40)
-                    BubbleFeedHeader(isMuted: model.isMuted, onToggleMute: toggleMute)
+                    BubbleFeedHeader(isMuted: GameSound.isMuted, onToggleMute: toggleMute)
                         .frame(height: Self.headerHeight)
                         .padding(.top, topInset)
                         .transition(.opacity)
@@ -99,6 +99,9 @@ struct BubblesTabView: View {
         .onAppear(perform: appear)
         .onChange(of: isVisible) { _, visible in
             model.setVisible(visible)
+        }
+        .onChange(of: GameSound.isMuted) { _, _ in
+            model.applyMute()
         }
         .onChange(of: model.currentID) { _, id in
             model.pageDidChange(to: id)
@@ -248,9 +251,10 @@ struct BubblesTabView: View {
         model.insetTop = insets.top + Self.headerHeight
     }
 
+    /// The header button flips the app-wide game mute (`GameSound`); the feed follows it.
     private func toggleMute() {
         Haptics.light()
-        model.toggleMute()
+        GameSound.toggleMute()
     }
 
     /// Jumps to the first page and fades it in. An animated programmatic scroll doesn't draw the

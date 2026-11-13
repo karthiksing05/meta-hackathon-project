@@ -220,15 +220,18 @@ struct PosterReveal<Fallback: View>: View {
     var isLive: Bool
     /// Read by VoiceOver while loading.
     var label: String
+    /// False leaves loading to the caller (for example `EngineLoadingView` on top).
+    var showsLoader: Bool
     private let fallback: Fallback
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showsLoader = false
+    @State private var isLoaderVisible = false
 
-    init(poster: UIImage?, isLive: Bool, label: String = "Loading", @ViewBuilder fallback: () -> Fallback) {
+    init(poster: UIImage?, isLive: Bool, label: String = "Loading", showsLoader: Bool = true, @ViewBuilder fallback: () -> Fallback) {
         self.poster = poster
         self.isLive = isLive
         self.label = label
+        self.showsLoader = showsLoader
         self.fallback = fallback()
     }
 
@@ -240,7 +243,7 @@ struct PosterReveal<Fallback: View>: View {
             if !isLive {
                 ZStack(alignment: .bottom) {
                     backdrop
-                    if showsLoader {
+                    if isLoaderVisible {
                         GameLoader(style: .dots, label: nil)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -255,13 +258,13 @@ struct PosterReveal<Fallback: View>: View {
             }
         }
         .animation(GameMotion.resolved(GameMotion.reveal, reduceMotion: reduceMotion), value: isLive)
-        .animation(GameMotion.reveal, value: showsLoader)
+        .animation(GameMotion.reveal, value: isLoaderVisible)
         .allowsHitTesting(!isLive)
         .task(id: isLive) {
-            showsLoader = false
-            guard !isLive else { return }
+            isLoaderVisible = false
+            guard !isLive, showsLoader else { return }
             try? await Task.sleep(for: Self.loaderDelay)
-            if !Task.isCancelled { showsLoader = true }
+            if !Task.isCancelled { isLoaderVisible = true }
         }
     }
 
@@ -283,8 +286,8 @@ struct PosterReveal<Fallback: View>: View {
 
 extension PosterReveal where Fallback == LinearGradient {
     /// Falls back to the brand gradient when there is no poster yet.
-    init(poster: UIImage?, isLive: Bool, label: String = "Loading") {
-        self.init(poster: poster, isLive: isLive, label: label) { GameColor.gradient }
+    init(poster: UIImage?, isLive: Bool, label: String = "Loading", showsLoader: Bool = true) {
+        self.init(poster: poster, isLive: isLive, label: label, showsLoader: showsLoader) { GameColor.gradient }
     }
 }
 

@@ -757,7 +757,7 @@
   function share(sdk) {
     var st = sdk.state.timing;
     var mf = sdk.manifest || {};
-    var title = (mf.style && mf.style.emoji ? mf.style.emoji + " " : "") + (mf.title || "Bubble");
+    var title = (mf.style && mf.style.emoji ? mf.style.emoji + " " : "") + (mf.title || "Game");
     if (!st) return { headline: title, score_text: sdk.score + " points" };
     var rows = [];
     for (var i = 0; i < st.marks.length; i += 8) rows.push(st.marks.slice(i, i + 8).join(""));

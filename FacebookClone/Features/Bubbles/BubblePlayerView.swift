@@ -6,7 +6,8 @@ import SwiftUI
 /// the same seed. Otherwise it starts with the Bubble's intro card. When a run ends the result
 /// sheet shows your score, best and rank, and offers play again, float, story and next level.
 ///
-/// DEBUG: `FB_FAKE_RESULT=1` shows the result sheet without playing.
+/// DEBUG: `FB_FAKE_RESULT=1` shows the result sheet without playing; `FB_ENGINE_FAIL=1` shows the
+/// engine error card.
 struct BubblePlayerView: View {
     let request: BubblePlayRequest
 
@@ -26,7 +27,12 @@ struct BubblePlayerView: View {
     @State private var lastResult: BubbleResultContext?
     @State private var lastResultAt = Date.distantPast
     @State private var restartToken = 0
-    @State private var isMuted = false
+    /// The game's session has drawn (`ready` or later from the runtime).
+    @State private var isLive = false
+    /// Set when the game didn't start; shows `EngineErrorCard`.
+    @State private var failure: EngineFailure?
+    /// Bumped by "Try again": a new web view, so a fresh host lease and a fresh start.
+    @State private var attempt = 0
 
     init(request: BubblePlayRequest) {
         self.request = request
@@ -43,6 +49,22 @@ struct BubblePlayerView: View {
             if let bubble {
                 GeometryReader { proxy in
                     game(bubble, safeArea: proxy.safeAreaInsets)
+                        .id(attempt)
+                }
+                // The poster (an exact still of the first frame) stays over the game until it has
+                // drawn, then fades: no pop from blank. It comes back over a failed runtime page.
+                PosterReveal(poster: nil, isLive: isLive && failure == nil, showsLoader: false) {
+                    BubblePosterView(bubble: bubble, showsEmoji: false)
+                }
+                .ignoresSafeArea()
+                .accessibilityHidden(true)
+                EngineLoadingView(
+                    isLoading: !isLive && failure == nil,
+                    label: EngineLoadingView.label(for: bubble.manifest)
+                )
+                if let failure {
+                    EngineErrorCard(failure: failure, onRetry: retry, secondaryTitle: "Close", onSecondary: { dismiss() })
+                    .transition(.opacity)
                 }
                 VStack(spacing: 0) {
                     topBar(bubble)
@@ -67,7 +89,14 @@ struct BubblePlayerView: View {
                 exitPlayer: exitPlayer
             )
         }
+        .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: failure)
         .onAppear(perform: appear)
+        .task(id: "\(bubbleID)#\(attempt)") {
+            // A start that never reports `ready` gets the error card and a retry, not an endless loader.
+            try? await Task.sleep(for: EngineFailure.startTimeout)
+            guard !Task.isCancelled, !isLive, failure == nil, bubble != nil else { return }
+            failure = EngineFailure(kind: .timedOut)
+        }
     }
 
     // MARK: Layers
@@ -79,7 +108,7 @@ struct BubblePlayerView: View {
             BubblePosterView(bubble: bubble, showsEmoji: false)
                 .ignoresSafeArea()
         } else {
-            BubbleGlow.lilacHaze.gradient
+            GameColor.gradient
                 .ignoresSafeArea()
         }
     }
@@ -95,7 +124,7 @@ struct BubblePlayerView: View {
             playerName: appStore.me.firstName,
             bestScore: bubbleStore.bestScore(of: appStore.me, in: bubble)?.score,
             isActive: scenePhase == .active,
-            isMuted: isMuted,
+            isMuted: GameSound.isMuted,
             reducedMotion: reduceMotion,
             restartToken: restartToken,
             insetTop: safeArea.top + Self.topBarHeight,
@@ -154,15 +183,15 @@ struct BubblePlayerView: View {
                     .transition(.scale.combined(with: .opacity))
             }
             BubblePlayerTopBarSlots(bubble: bubble, request: activeRequest(for: bubble))
-            circleButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off") {
+            circleButton(GameSound.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: GameSound.isMuted ? "Turn sound on" : "Turn sound off") {
                 Haptics.light()
-                isMuted.toggle()
+                GameSound.toggleMute()
             }
         }
         .padding(.horizontal, 12)
         .padding(.top, 4)
         .shadow(color: Color.black.opacity(0.2), radius: 3, y: 1)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: hasStarted)
+        .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: hasStarted)
     }
 
     @ViewBuilder
@@ -190,22 +219,12 @@ struct BubblePlayerView: View {
             }
             .buttonStyle(.fb(.primary, expand: false, height: 44))
             .padding(.bottom, 24)
-            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
         }
     }
 
     private var missing: some View {
-        VStack(spacing: 16) {
-            ContentUnavailableView(
-                "This \(ProductName.singular) didn't load",
-                systemImage: "sparkles",
-                description: Text("It isn't available anymore.")
-            )
-            Button("Close") {
-                dismiss()
-            }
-            .buttonStyle(.fb(.primary, expand: false, height: 40))
-        }
+        EngineErrorCard(detail: EngineErrorCard.goneDetail, secondaryTitle: "Close", onSecondary: { dismiss() })
     }
 
     private func circleButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
@@ -218,7 +237,7 @@ struct BubblePlayerView: View {
                 .frame(width: 44, height: 44)
                 .contentShape(Circle())
         }
-        .buttonStyle(.plain)
+        .gamePress(scale: 0.9)
         .accessibilityLabel(label)
     }
 
@@ -240,6 +259,19 @@ struct BubblePlayerView: View {
     // MARK: Messages
 
     private func handle(_ message: BubbleBridgeMessage, in bubble: Bubble) {
+        switch message {
+        case .ready, .phase, .score, .takeover:
+            if !isLive && failure == nil {
+                isLive = true
+            }
+        case .error(let message) where EngineFailure.stopsGame(message):
+            // The runtime stopped the game and drew its own error page; cover it and offer a retry.
+            failure = EngineFailure(kind: .failed, message: message)
+            isLive = false
+            return
+        default:
+            break
+        }
         switch message {
         case .takeover:
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -288,12 +320,25 @@ struct BubblePlayerView: View {
 
     private func appear() {
         #if DEBUG
+        // FB_ENGINE_FAIL=1 shows the engine error card; "Try again" then starts the game for real.
+        if DebugLaunch.value("FB_ENGINE_FAIL") == "1", attempt == 0 {
+            failure = EngineFailure(kind: .failed, message: "Simulated by FB_ENGINE_FAIL")
+        }
         if DebugLaunch.value("FB_FAKE_RESULT") == "1", let bubble {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 showFakeResult(for: bubble)
             }
         }
         #endif
+    }
+
+    /// "Try again" on the error card: a new web view leases a host and starts the game afresh.
+    private func retry() {
+        failure = nil
+        isLive = false
+        hasStarted = false
+        score = 0
+        attempt += 1
     }
 
     private func playAgain() {
@@ -330,6 +375,8 @@ struct BubblePlayerView: View {
         score = 0
         hasStarted = false
         isWatchingBurst = false
+        isLive = false
+        failure = nil
         mode = .play
         bubbleID = next.id
     }

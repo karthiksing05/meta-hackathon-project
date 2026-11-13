@@ -234,7 +234,7 @@ final class MuseStudioService: BubbleStudioService {
             if error is CancellationError || Task.isCancelled {
                 timeline.finish(throwing: CancellationError())
             } else {
-                timeline.emit(.failed, "This bubble popped", detail: error.localizedDescription)
+                timeline.emit(.failed, "This game hit a snag", detail: error.localizedDescription)
                 timeline.finish(throwing: error)
             }
         }

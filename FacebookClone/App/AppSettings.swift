@@ -6,6 +6,8 @@ enum SettingsKey {
     static let autoplayVideos = "settings.autoplayVideos"
     static let haptics = "settings.haptics"
     static let soundEffects = "settings.soundEffects"
+    /// The one mute for game sound: the games tab, the player, Studio and app cues (`GameSound`).
+    static let gameSoundMuted = "settings.gameSoundMuted"
     static let dataSaver = "settings.dataSaver"
     static let activeStatus = "settings.activeStatus"
     static let pushNotifications = "settings.pushNotifications"

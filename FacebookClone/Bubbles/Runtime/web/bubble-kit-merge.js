@@ -799,7 +799,7 @@
   function share(sdk) {
     var st = sdk.state.merge, sc = sdk.state.merge_score;
     var m = sdk.manifest || {};
-    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Bubble");
+    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Game");
     if (!st) return { headline: title, score_text: sdk.score + " points" };
     var ladder = st.tiers.map(function (t, i) { return i <= st.maxTier ? (isEmojiish(t) ? t : "🫧") : "⚪"; }).join("");
     var names = sdk.content && Array.isArray(sdk.content.tier_names) ? sdk.content.tier_names : null;
