@@ -205,7 +205,8 @@ export function controlsOf(A, G) {
     tap: nodes.tap > 0,
     drag: nodes.drag > 0 || frags.has('player_drag'),
     type: from.some((f) => f.text) || ['keyboard', 'typed_answer', 'word_check'].some((f) => frags.has(f)),
-    choice: ['quiz', 'picture_quiz'].some((f) => frags.has(f)),
+    // Multiple choice: the quiz fragments, a story's choices, or tap buttons that send an answer index.
+    choice: ['quiz', 'picture_quiz', 'choice_story'].some((f) => frags.has(f)) || (nodes.tap > 1 && Object.entries(G.inputs ?? {}).some(([k, i]) => /answer|choice|option|pick/i.test(k) && Object.keys(i.payload ?? {}).some((p) => /index|choice|option|i$/i.test(p)))),
     taps: nodes.tap,
   };
 }
@@ -225,7 +226,7 @@ const LIST_NAMES = {
 };
 const STATE_NAMES = {
   lives: /^(?:lives?|hearts?|hp|health|chances|stars?|strikes_left|lives_left|tries|tries_left|guesses_left|misses_left)$|lives|hearts|chances_left|tries_left/i,
-  lanes: /lanes?$|lane_count|num_lanes/i,
+  lanes: /^(?:lanes|lane_count|num_lanes|n_lanes|lanes_total)$/i,
   columns: /^(?:cols?|columns?|board_w|grid_w|width_cells)$/i,
   rows: /^(?:rows?|brick_rows|board_h|grid_h)$/i,
   budget: /budget|money|cash|wallet|dollars|funds|cents|spend/i,
@@ -323,6 +324,8 @@ export function measureCandidates(measure, A, G) {
     case 'budget':
       for (const v of vars) if (STATE_NAMES.budget.test(v.name)) { push(v.value, `state.${v.name}`); if (v.value % 100 === 0) push(v.value / 100, `state.${v.name} (cents)`); }
       for (const [k, v] of Object.entries(content)) if (/budget|money|cash|wallet/i.test(k) && typeof v === 'number') push(v, `content.${k}`);
+      // A cap written into a rule or function: "spent_dollars + price > 100".
+      for (const m of JSON.stringify([G.rules ?? [], G.functions ?? {}]).matchAll(/(?:budget|spent|money|cash|wallet|total|cost)[\w.]*(?:\s*[+-]\s*[\w.()]+)?\s*(?:>|>=|<|<=)\s*(\d+(?:\.\d+)?)/gi)) push(m[1], 'a budget cap in the rules');
       break;
     case 'pairs':
       for (const v of param(A, 'match_pairs', 'pairs')) push(v, 'match_pairs.pairs');
@@ -548,8 +551,12 @@ export function playtestCheck(r, trace, built) {
     return null;
   }
   if (t.measure === 'choices_made') {
-    const most = Math.max(...runs.map((x) => x.inputs));
-    return result(r, compare(most, t.op, t.value) ? 'pass' : 'fail', 'playtest', 'R_COUNT_MISMATCH', `the longest bot run made ${most} inputs`);
+    // A story counts its own choices (choices_used, sg_used); taps on the page are not choices.
+    const re = /^(?:choices?_used|choices?_made|sg_used|decisions|turns?_used|steps?_taken|moves?_made)$/i;
+    const name = Object.keys(runs[0].max ?? {}).find((k) => re.test(k));
+    if (!name) return null;
+    const most = Math.max(...runs.map((x) => x.max?.[name] ?? 0));
+    return result(r, compare(most, t.op, t.value) ? 'pass' : 'fail', 'playtest', 'R_COUNT_MISMATCH', `the longest bot run made ${most} choices (${name})`);
   }
   if (t.no === 'lose') {
     const lost = runs.filter((x) => x.outcome === 'fail');

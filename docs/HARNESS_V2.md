@@ -259,6 +259,41 @@ for games with no right answer, how closely people agree (`opinion_compare`).
   goal ("in 10 choices or less") scored per use, and an opinion request scored like a quiz are problems for the
   repair round. Request words that name an unbuilt tool's alias get a gap entry, never dropped silently.
 
+### Requirements: what the person said, quoted and checked (`spec.requirements`, 2026-11-13)
+
+Every explicit number, name and rule in a request becomes a requirement, and the plan may not contradict one.
+`game-spec/1` gains `requirements[]`:
+
+```json
+{"id": "r1", "quote": "12 questions", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 12},
+ "must": true, "verify": "code"}
+```
+
+- `quote` is the person's exact words. `kind` is one of count, timer, content, rule, win, lose, control, style, tone,
+  structure, social. `verify` is `code`, `playtest` or `judge`.
+- `target` is machine-checkable or `null` (a judge reads it): `{measure, op, value}` (questions, rounds, choices,
+  choices_made, run_seconds, per_question_seconds, lives, lanes, waves, pairs, holes, columns, rows, pads, budget, bpm,
+  win_at), `{text, match}`, `{palette: {only | include}}`, `{input | input_not}`, `{no: timer | lose}`,
+  `{timeout_is}`, `{numbers}`, `{state_reaches}` or `{path, op, value}`.
+- **Extraction** (`authoring/expander/requirements.mjs`): a code pass that never misses a number, quoted word, color,
+  control or "no X", then one Muse call (`REQUIREMENTS_SYSTEM`) that adds the rest; the merge keeps every seed Muse's
+  quotes don't cover, and `coverageIssues` lists any number, name or quoted word left without a requirement.
+  `planContradictions(requirements, spec)` flags a spec that says a different number (`R_PLAN_CONTRADICTS`).
+- **Compose** gets `requirementsSection()`: "Requirements you must meet, quoted"; the quote wins over the spec.
+- **Check** (`authoring/playtest/requirements-check.mjs`): code checks on the manifest and expanded game, playtest
+  checks on bot runs replayed with a state trace (lives, run length, a multiplier firing, story choices), and a judge
+  for the rest. Codes: `R_COUNT_MISMATCH`, `R_TIMER_MISMATCH`, `R_LIVES_MISMATCH`, `R_TEXT_MISSING`,
+  `R_PALETTE_OFF`, `R_CONTROL_MISSING`, `R_CONTROL_FORBIDDEN`, `R_NOT_RULED_OUT`, `R_TIMEOUT_OUTCOME`,
+  `R_NUMBERS_MISSING`, `R_STATE_NOT_REACHED`, `R_PATH_MISMATCH`, `R_JUDGE_UNMET`, `R_UNVERIFIED`.
+- **Repair:** a failed `must` gets one targeted revision naming the requirement and its quote (`repairRequest`). If it
+  still fails, the game ships with `honestNote()` and a `gapEntries()` entry.
+- **Test set:** `authoring/catalog/eval/specified/requests.json`, 30 specified requests with hand-written requirements
+  plus 10 general twins. Tests: `node authoring/playtest/test-requirements.mjs`.
+- **Measured** (real Muse, 2026-11-13; Muse's billing failed partway, so 13 specified requests built both ways and
+  the repair step did not run): extraction recall against the hand-written lists 95% (111/117; code pass alone 84%).
+  Must-haves met: before 94% (46/49), with requirements in the plan and compose 98% (48/49). The 10 general twins
+  meet only 38% of their specified twin's requirements, so the detail in a request is what gets built.
+
 ### 5–6. Compose and check (today's pipeline, with a smaller prompt)
 
 - `prompts.system` takes the plan's types and tools in place of the full fragment catalog. Gold examples are still
