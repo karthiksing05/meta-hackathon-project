@@ -121,6 +121,7 @@ func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessag
 	applySocialDefault(spec, sdef, plan)
 	problems, fixed := spec.Validate()
 	problems = append(append(decodeProblems, problems...), requestChecks(spec, in)...)
+	problems = append(problems, requirementChecks(spec, in)...)
 	plan.Notes = append(plan.Notes, fixed...)
 	if len(problems) > 0 {
 		failing := failingParts(problems)
@@ -134,6 +135,7 @@ func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessag
 			applySocialDefault(s2, sdef, plan)
 			problems, fixed = s2.Validate()
 			problems = append(append(dp, problems...), requestChecks(s2, in)...)
+			problems = append(problems, requirementChecks(s2, in)...)
 			plan.Notes = append(plan.Notes, fixed...)
 			spec = s2
 		} else {
@@ -301,4 +303,25 @@ func applyLookPreference(spec *Spec, plan *Plan, in PlanInput) {
 			plan.Clarify[i].Choices = nil
 		}
 	}
+}
+
+var reContradictPath = regexp.MustCompile(`\(/([a-z_]+)/`)
+
+// requirementChecks sets spec.requirements and returns each plan contradiction as a problem on the part
+// that says the wrong number ("pieces: requirements r2: the plan says ..."), so the repair round fixes it
+// and what's left goes to spec_issues.
+func requirementChecks(spec *Spec, in PlanInput) []string {
+	if spec == nil || len(in.Requirements) == 0 {
+		return nil
+	}
+	spec.Requirements = in.Requirements
+	var out []string
+	for _, c := range planContradictions(in.Requirements, spec) {
+		part := "constraints"
+		if m := reContradictPath.FindStringSubmatch(c.Message); m != nil && oneOf(m[1], SpecParts) {
+			part = m[1]
+		}
+		out = append(out, fmt.Sprintf("%s: requirements %s: %s", part, c.Requirement, c.Message))
+	}
+	return out
 }

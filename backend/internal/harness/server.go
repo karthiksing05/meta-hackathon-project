@@ -31,7 +31,8 @@ func NewForServer(ctx context.Context, db *mongo.Database, generatorURL string) 
 	if err != nil {
 		return nil, nil, err
 	}
-	planner := &Planner{Muse: PlanMuse(generatorURL), Visual: VisualOn(os.Getenv("HARNESS_VISUAL"))}
+	planner := &Planner{Muse: PlanMuse(generatorURL), Visual: VisualOn(os.Getenv("HARNESS_VISUAL")),
+		Requirements: RequirementsOn(os.Getenv("HARNESS_REQUIREMENTS")), ReqMuse: RequirementsMuse(generatorURL)}
 	if dir, ok := FindCatalogDir(); ok {
 		lists, _, err := LoadChecklists(dir)
 		if err != nil {

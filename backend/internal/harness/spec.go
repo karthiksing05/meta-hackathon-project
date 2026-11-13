@@ -32,6 +32,8 @@ type Spec struct {
 	Social      Social      `json:"social"`
 	Feel        Feel        `json:"feel"`
 	Visual      *Visual     `json:"visual,omitempty"` // the art direction (visual.go); nil when the stage is off or failed
+	// Requirements are the person's own words, quoted (requirements.go); Go fills them, every part must agree.
+	Requirements []Requirement `json:"requirements,omitempty"`
 }
 
 // Theme is the world, its named things (real franchise names when asked), the tone and the look family.

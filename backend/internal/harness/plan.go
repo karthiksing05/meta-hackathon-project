@@ -102,6 +102,11 @@ type Planner struct {
 	Chain bool
 	// Visual runs the art-direction stage after the spec (visual.go). A failure there only adds a note.
 	Visual bool
+	// Requirements turns on the Muse requirements extraction (requirements.go; HARNESS_REQUIREMENTS, on by
+	// default in the server and harness-query). Off, the code pass alone runs, with no Muse call.
+	Requirements bool
+	// ReqMuse is the extraction's transport (muse-spark-1.3); nil uses Muse.
+	ReqMuse MuseJSON
 }
 
 // PlanInput is everything the planner reads.
@@ -113,6 +118,8 @@ type PlanInput struct {
 	// Unbuilt are the catalog's planned and gap tools. A request whose words hit one's name or aliases gets a
 	// gap entry even when retrieval didn't send that tool, so a need is never dropped silently.
 	Unbuilt []GameTool
+	// Requirements are the person's stated requirements (the planner's first stage fills them).
+	Requirements []Requirement
 }
 
 const planSystem = `You are Muse Studio's game planner. A person asked for a tiny phone game. A search of our game catalog found
@@ -163,6 +170,8 @@ Rules
   look): guessed=false. A slot nothing speaks to takes its default (or a better guess): guessed=true. Ask only when a
   "required" slot's ask_when holds, using the slot's ask and choices, and AT MOST 2 questions in total; when you ask,
   still give your best guess as value. Put the same questions on the matching anatomy parts.
+- spec.requirements lists the person's own words. Every part you write must agree with each quote: the exact counts,
+  seconds, lives, names and controls. Never write a different number. (Go fills spec.requirements; don't write it.)
 - art_style (when listed): the request's own style words win (guessed false). When the game is art-heavy (a story
   with characters, or 3 or more drawn things) and nothing names a style, you may ask it (it counts toward the 2) with
   3-4 styles that fit this theme as choices; the app adds Other. Otherwise guess one that fits and say it in the
@@ -195,17 +204,27 @@ func (p *Planner) Plan(ctx context.Context, in PlanInput) (*Plan, error) {
 	def := defaultScoreFor(in.Context.Types[0])
 	sdef := DefaultSocial(in.Context.Types[0], in.Request)
 	system := strings.Replace(planSystem, "SPECSCHEMA", specSchema(parts, def, sdef), 1)
+	// First stage: the person's requirements (code pass, plus one Muse call when on).
+	pre := &Plan{}
+	if ex := p.extractRequirements(ctx, in.Request, pre); ex != nil {
+		in.Requirements = ex.Requirements
+		for _, is := range ex.Issues {
+			pre.Notes = append(pre.Notes, "requirements: "+is.Code+" "+is.Message)
+		}
+		pre.Notes = append(pre.Notes, fmt.Sprintf("requirements: %d by %s", len(ex.Requirements), ex.By))
+	}
 	t := time.Now()
 	raw, err := p.Muse.JSON(ctx, system, planUser(in, lists))
 	if err != nil {
 		return nil, err
 	}
-	calls := []CallTiming{{Step: "plan", Ms: ms(time.Since(t))}}
+	calls := append(pre.Calls, CallTiming{Step: "plan", Ms: ms(time.Since(t))})
 	plan, err := ValidatePlan(raw, in, lists)
 	if err != nil {
 		return nil, err
 	}
 	plan.Calls = calls
+	plan.Notes = append(pre.Notes, plan.Notes...)
 	if err := p.finishSpec(ctx, plan, raw, in, def, sdef); err != nil {
 		return nil, err
 	}
@@ -267,6 +286,9 @@ func planUser(in PlanInput, lists []checklistFor) string {
 		if lookPreference(in.Context.Preferences) != nil && !namesStyle(in.Request) {
 			sb.WriteString("The request names no art style, so the look pick fills spec.theme.look and settles any art style slot (guessed false).\n")
 		}
+	}
+	if rl := requirementsLines(in.Requirements); rl != "" {
+		sb.WriteString(rl)
 	}
 	sb.WriteString("\n")
 	types, _ := json.Marshal(in.Context.Types)

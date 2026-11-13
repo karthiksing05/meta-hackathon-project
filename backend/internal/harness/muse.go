@@ -30,6 +30,11 @@ func LookupMuse(generatorURL string) *GeneratorMuse {
 	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 25 * time.Second}
 }
 
+// RequirementsMuse is the requirements extraction's transport (muse-spark-1.3, low, 6000 tokens, 40 s).
+func RequirementsMuse(generatorURL string) *GeneratorMuse {
+	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 6000, Effort: "low", Timeout: 40 * time.Second}
+}
+
 // PlanEffort is the planner's reasoning effort.
 var PlanEffort = "low"
 

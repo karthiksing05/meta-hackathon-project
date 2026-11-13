@@ -111,7 +111,10 @@ func main() {
 				effort = harness.PlanEffort
 			}
 			planner = &harness.Planner{Checklists: lists, Chain: *chain, Visual: harness.VisualOn(os.Getenv("HARNESS_VISUAL")), Muse: &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"),
-				Model: harness.ModelWonder, MaxTokens: 12000, ReasoningEffort: effort, Timeout: 90 * time.Second, OnUsage: record("plan")}}
+				Model: harness.ModelWonder, MaxTokens: 12000, ReasoningEffort: effort, Timeout: 90 * time.Second, OnUsage: record("plan")},
+				Requirements: harness.RequirementsOn(os.Getenv("HARNESS_REQUIREMENTS")),
+				ReqMuse: &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"), Model: harness.ModelSpark, MaxTokens: 6000,
+					ReasoningEffort: "low", Timeout: 40 * time.Second, OnUsage: record("requirements")}}
 		}
 	}
 	h, err := harness.New(ctx, cfg)
