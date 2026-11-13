@@ -120,6 +120,14 @@ ok(!spec.numerals || tn[2].font === spec.numerals.family, 'score in the numerals
 ok(tn.every((n) => !/'#/.test(String(n.color)) && !/^#/.test(String(n.color))), 'text colours are tokens', tn.map((n) => n.color));
 ok(Object.keys(LOOK_CODES).length === 8, 'eight look codes');
 
+// ---------- every pairing (incl. one family for text and display) gives numeric sizes ----------
+for (const v of VIBES) for (const p of v.pairings) for (const seed of [0, 1, 2, 7]) {
+  const sp = lookFromChoice({ vibe: v.id, pairing: p.id, seed });
+  const out = applyLook(game, sp).game;
+  const bad = textNodes(out).map((t) => t.n).filter((n) => !(typeof n.size === 'number' && n.size > 0) && !(typeof n.size === 'string' && !/undefined|NaN/.test(n.size)));
+  ok(!bad.length, `${v.id}/${p.id} seed ${seed}: every size defined${p.display === p.text ? ' (one family)' : ''}`, bad.map((n) => n.size));
+}
+
 // ---------- the expander applies art.type ----------
 const { expand, loadLibrary } = await import('../expander/expand.mjs');
 const lib = loadLibrary(join(root, 'authoring'));
