@@ -154,7 +154,11 @@ if (!existsSync(authoringPath('games/gold_kit_trivia_night_market.authoring.json
 }
 
 // ---- the art step: the plan's visual stage marks assets "image", and Muse Image paints them after the gate ----
-{
+// SELFTEST_FAST=1 (the deploy gate) skips this block: it composes with the layout hooks and the painting stage over and
+// over and is about 3/4 of the run time. The "Backend tests" workflow and the image run still run it.
+if (process.env.SELFTEST_FAST === '1') {
+  console.log('SKIP the art step checks (SELFTEST_FAST=1)');
+} else {
   const { encodePNG, decodePNG } = await import('./src/pixels.mjs');
   const painting = (w, h, sprite) => {
     const data = new Uint8ClampedArray(w * h * 4);

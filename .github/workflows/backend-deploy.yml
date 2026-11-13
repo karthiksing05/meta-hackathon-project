@@ -32,13 +32,22 @@ jobs:
           cache-dependency-path: backend/go.sum
       - name: Format check
         run: test -z "$(gofmt -l .)"
-      - run: go vet ./...
-      - run: go test -race ./...
+      - run: go vet ./...   # also compiles every test, so a broken test file fails here
+      # A targeted gate, not the whole suite (the "Backend tests" workflow runs everything, with -race, on every push to
+      # backend-api). These are the paths whose failure would take production down or leak data: sign-in and uploads,
+      # making a game, scores and boards, the feed and recommender wiring, notifications, replacing a build, who may see
+      # what, plus the small packages whole. Left out on purpose: the recommender simulation, the retrieval eval, the web
+      # lookup's network-guard sweep and other slow quality or eval tests.
+      - name: Go tests (targeted)
+        run: |
+          go test ./internal/pkgstore ./internal/staticsrv ./internal/store ./internal/config ./internal/apns ./internal/mediastore ./internal/recs
+          go test ./internal/api -run '^(TestAuthFlow|TestReady|TestUploadRejections|TestCreationFeedSearchLikesEvents|TestManifestIsStoredByteForByte|TestGenerateStoresTheGame|TestGenerateFailureIsReported|TestGenerateGuards|TestChangeAGame|TestDraftsAnatomyAndBaseManifest|TestTimeTrialBoard|TestSeries|TestRounds|TestScopedBoardsAndLikes|TestRankedFeed|TestLearningFromEvents|TestALikeCountsAsOneSave|TestChallengesTeachTheRecommender|TestNotificationTriggersAndInbox|TestPushDevicesAndDelivery|TestLightManifestForEveryoneButTheOwner|TestReplaceCreation|TestMediaUploadPhotoScopedToOwner|TestDebugDelete|TestGroups|TestFriends)$'
+          go test ./internal/harness -run '^(TestCatalogLoads|TestTestCatalogValidates|TestMongoCatalog|TestBuildAttachesPlan|TestPlanValidation|TestSafeClientRefusesPrivateAndRedirects|TestLookupRefusesOtherSchemes)$'
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Generator self-test (a scripted Muse, no key)
-        run: node generator/selftest.mjs
+      - name: Generator self-test, fast (a scripted Muse, no key; skips the slow art-painting checks)
+        run: SELFTEST_FAST=1 node generator/selftest.mjs
       - name: Shell script syntax
         run: bash -n deploy/deploy.sh && bash -n deploy/backup.sh && bash -n deploy/dbinit.sh && bash -n deploy/apply-env.sh
       - name: Compose file is valid
@@ -46,8 +55,7 @@ jobs:
           sudo mkdir -p /etc/game-platform && sudo touch /etc/game-platform/api.env /etc/game-platform/mongo.env
           API_IMAGE=x GAMES_IMAGE=y GENERATOR_IMAGE=z docker compose -f deploy/docker-compose.prod.yml config -q
 
-  images:
-    needs: test
+  images:   # builds alongside the tests, not after them; nothing is deployed unless both pass (see `deploy`)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -98,7 +106,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=generator
 
   deploy:
-    needs: images
+    needs: [test, images]   # both must pass: tests gate the deploy, and the images it runs must exist
     runs-on: ubuntu-latest
     permissions:
       contents: read
