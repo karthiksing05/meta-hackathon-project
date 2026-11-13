@@ -2,7 +2,7 @@
 // the "New in SF" Group and the newcomers' picnic Event (with the same ids the app's demo world and the /v1/fb seed
 // use: group-newinsf, event-newcomers-picnic), copies of real Muse-made games scoped to them, verified scores from
 // the cast (bot runs replayed by the server from their real input logs), and today's Daily, which notifies the
-// Group's members ("Today's Daily in New in SF is ready").
+// Group's members ("Today's Curio in New in SF is ready").
 //
 //   node tools/demo-seed/seed.mjs                      # local API (http://127.0.0.1:8080)
 //   node tools/demo-seed/seed.mjs --api https://api.ol4ol.com
@@ -293,7 +293,7 @@ for (const spec of games) {
   }
 }
 
-// today's Daily: set by the host, so everyone else (Alex included) gets "Today's Daily in New in SF is ready"
+// today's Daily: set by the host, so everyone else (Alex included) gets "Today's Curio in New in SF is ready"
 if (!DRY && !serverHasDaily) console.log(`state: ${stateFile}`);
 if (!DRY && serverHasDaily) {
   const daily = state.games[DAILY_KEY];

@@ -190,7 +190,7 @@ func (s *Server) createSession(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		n := model.Notification{UserID: id, Kind: model.NotifSessionInvite, SessionID: se.ID, Source: "session:" + se.ID,
-			Title: name + " wants to make a game with you", Body: body}
+			Title: name + " wants to make a Curio with you", Body: body}
 		if tkind == "group" {
 			n.GroupID = tid
 		}

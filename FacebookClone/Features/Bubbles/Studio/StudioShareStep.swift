@@ -271,7 +271,7 @@ private struct StudioDestinationCard: View {
     private var feedRow: some View {
         StudioDestinationRow(
             title: "Your feed",
-            subtitle: "Friends and the \(ProductName.display) tab",
+            subtitle: "Friends and the \(ProductName.short) tab",
             isSelected: model.destination == .feed,
             action: { select(.feed) }
         ) {

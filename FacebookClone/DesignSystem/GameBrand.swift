@@ -36,6 +36,15 @@ enum GameColor {
         LinearGradient(colors: [FBColor.brandBlue, FBColor.savedPurple], startPoint: .leading, endPoint: .trailing)
     }
 
+    /// The product name's gradient, Facebook blue #0866FF to violet #8A3FFC: "Curios" in the
+    /// wordmark. No pink.
+    static var nameGradient: LinearGradient {
+        LinearGradient(colors: [Color(hex: 0x0866FF), Color(hex: 0x8A3FFC)], startPoint: .leading, endPoint: .trailing)
+    }
+
+    /// "Muse" in the wordmark on light surfaces (#1C1E21, Facebook's primary text).
+    static let wordmarkInk = Color(hex: 0x1C1E21)
+
     /// A ring of the brand stops, for rims and spinners.
     static var rim: AngularGradient {
         AngularGradient(colors: [sky, periwinkle, violet, Color(hex: 0xE6EEFF), sky], center: .center)

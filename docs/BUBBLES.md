@@ -1,6 +1,12 @@
 # Bubbles
 
-**Tiny games your people make with Muse.** Bubbles is a Facebook feature where anyone can describe a
+> **Name:** people see this feature as **Muse Curios**, and one game as **a Curio** (Karthik,
+> 2026-11-13). The app reads the name from `ProductName`. This doc, the code and the file names still
+> say "Bubble"; read it as "Curio".
+>
+> *When the world is your muse, how will you create the content of tomorrow?*
+
+**Tiny games your people make with Muse.** Muse Curios (Bubbles in this doc) is a Facebook feature where anyone can describe a
 game in a sentence and Muse builds it, for a Group, an Event, or everyone. Bubbles play inline in a
 vertical feed, live in the Groups they were made for, show up on Stories and profiles, and turn into
 short clips ("Bursts") for Reels.

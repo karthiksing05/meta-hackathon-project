@@ -20,7 +20,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .home: return "Home"
         case .video: return "Video"
-        case .bubbles: return ProductName.display
+        case .bubbles: return ProductName.short
         case .friends: return "Friends"
         case .marketplace: return "Marketplace"
         case .notifications: return "Notifications"

@@ -170,7 +170,7 @@ export function system(catalog, { examples = null, context = null } = {}) {
   const format = catalog.game_format ?? 'microgame/0.1';
   const p = catalog.prompt ?? {};
   const plan = hasPlan(context) ? planMenu(catalog, context) : null;
-  return `You design microgames: tiny games people make and play inside Facebook on a phone, and share with their friends.
+  return `You design microgames for Muse Curios: tiny games, each called a Curio, that people make and play inside Facebook on a phone, and share with their friends.
 A microgame is written as an authoring manifest (JSON). An expander combines it with a library of tested fragments into a ${format} game for a deterministic engine, the engine validates it, and five bots playtest it before it ships.
 
 Reply with exactly one JSON object: the complete authoring manifest, with "authoring": "microgame-authoring/0.1". No markdown, no comments, no text around it.

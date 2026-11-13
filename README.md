@@ -7,6 +7,15 @@ app feels alive.
 
 This is a hackathon project. It is not affiliated with or endorsed by Meta.
 
+## Muse Curios
+
+> When the world is your muse, how will you create the content of tomorrow?
+
+Muse Curios is the feature we built on top: anyone can describe a tiny game in a sentence, Meta's Muse
+models make it, and the Curio plays inside Facebook, in the Curios tab, in Groups, Events, Stories and
+Reels. The design and contracts are in [docs/BUBBLES.md](docs/BUBBLES.md) (the code still says
+"Bubble"), and the backend in [backend/README.md](backend/README.md).
+
 ## Run it
 
 1. Install **Xcode 16 or later**. The project uses Xcode 16's folder-synced project format, so every

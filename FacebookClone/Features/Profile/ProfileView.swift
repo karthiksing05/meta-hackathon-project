@@ -11,7 +11,7 @@ enum ProfileSection: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
     /// The chip label. The games section reads the product name, which may change.
-    var title: String { self == .bubbles ? ProductName.display : rawValue }
+    var title: String { self == .bubbles ? ProductName.short : rawValue }
 }
 
 struct ProfilePhotoRequest: Identifiable {

@@ -137,17 +137,23 @@ struct BubbleOrb: View {
     }
 }
 
-/// The lowercase product wordmark (`ProductName.wordmark`): rounded heavy type in the brand
-/// gradient with a soft glow, and the orb with its sparkle.
+/// The product wordmark: "Muse" in ink and "Curios" in the blue-to-violet name gradient
+/// (`ProductName.wordmarkLead`, `ProductName.wordmarkTail`), then the orb with its sparkle.
+/// `lead` is the ink for "Muse": `GameColor.wordmarkInk` on light surfaces; the feed header, which
+/// sits over dark game covers, passes white so the word stays readable.
 struct BubbleWordmark: View {
     var size: CGFloat = 28
+    var lead: Color = GameColor.wordmarkInk
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: size * 0.08) {
-            Text(ProductName.wordmark)
-                .font(.system(size: size, weight: .heavy, design: .rounded)) // Display text: brand wordmark
-                .foregroundStyle(GameColor.gradient)
-                .bubbleGlow(GameColor.periwinkle, radius: size * 0.22, opacity: 0.35)
+            HStack(alignment: .firstTextBaseline, spacing: size * 0.22) {
+                Text(ProductName.wordmarkLead)
+                    .foregroundStyle(lead)
+                Text(ProductName.wordmarkTail)
+                    .foregroundStyle(GameColor.nameGradient)
+            }
+            .font(.system(size: size, weight: .heavy, design: .rounded)) // Display text: brand wordmark
             GameOrb(size: size * 0.5, sparkle: true)
                 .offset(y: -size * 0.32)
         }

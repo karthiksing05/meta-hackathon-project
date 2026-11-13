@@ -376,7 +376,7 @@ enum MicrogameStudioError: Error, LocalizedError {
         if let emoji, !emoji.isEmpty { options["emoji"] = .string(emoji) }
         if let seed { options["seed"] = .number(Double(seed)) }
         let text = try await call("return MicrogameStudio.wrap(json)", arguments: ["json": JSONValue.object(options).jsonString()],
-                                  operation: "wrap the Bubble", timeout: timeouts.wrap)
+                                  operation: "wrap the game", timeout: timeouts.wrap)
         do {
             return try BubbleManifest.decode(text)
         } catch {
