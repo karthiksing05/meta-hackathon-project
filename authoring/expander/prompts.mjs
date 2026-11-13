@@ -136,6 +136,11 @@ export function planMenu(catalog, context) {
   // A twist version (variants.mjs) carries its rule on spec.loop.twist: a rule to build, not a note.
   const twist = plan.spec?.loop?.twist;
   if (typeof twist === 'string' && twist.trim()) spec.push('', `This version's twist (a rule the game must have, shown on screen): ${clip(twist.trim(), 300)}`);
+  // The twist step (Go twist.go): the planner's picked difficulty twist, a rule to build, not a note.
+  const dTwist = plan.spec?.progression?.twist;
+  if (dTwist && typeof dTwist === 'object' && typeof dTwist.picked === 'string' && dTwist.picked.trim()) {
+    spec.push('', `Difficulty twist (build it as a real rule, shown on screen, so an expert clearly beats a newcomer and a perfect run takes skill${dTwist.kind ? `; kind ${clip(String(dTwist.kind), 30)}` : ''}): ${clip(dTwist.picked.trim(), 300)}`);
+  }
   // The person's earlier picks between versions (variants.mjs applyPick). context.notes stays out of the
   // prompt: those are the harness's notes for people (who understood the request, what the planner fixed).
   const prefs = preferencesOf(context).flatMap((p) => { try { return [preferenceNote(p)]; } catch { return []; } });

@@ -23,7 +23,7 @@ import { qualityReport, qualityLines } from './quality.mjs';
 import * as Prompts from './prompts.mjs';
 import { composeGame } from './pipeline.mjs';
 import { makeVariants } from './variants.mjs';
-import { apply as applyAction } from '../playtest/bots.mjs';
+import { apply as applyAction, skillSpread } from '../playtest/bots.mjs';
 import { traceRuns, checkRequirements, readBuilt } from '../playtest/requirements-check.mjs';
 
 // 3: compose takes a harness `context` (trimmed menu, gold_ids, spec, gate_profile) and checks scores.
@@ -410,6 +410,8 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       ...(options.gate_profile ? { gate_profile: options.gate_profile } : {}),
       ms: res.ms,
       flags: res.flags,
+      // The twist step's check (bots.mjs skillSpread): expert vs novice, and not trivially maxed.
+      spread: (() => { try { return skillSpread(res.runs, { direction: options.direction ?? JSON.parse(json)?.score?.direction }); } catch { return null; } })(),
       runs: res.runs.map((r) => ({
         bot: { label: r.bot.label, skill: r.bot.skill, bot_seed: r.bot.botSeed, seed_offset: r.bot.seedOffset },
         ok: r.ok,

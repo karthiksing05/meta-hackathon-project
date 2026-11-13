@@ -109,6 +109,8 @@ var ConstraintKinds = []string{"time", "lives", "moves", "accuracy", "rate", "sp
 type Progression struct {
 	Steps  []Step   `json:"steps"`
 	Levers []string `json:"levers"`
+	// Twist is the difficulty twist the planner picked (twist.go): built by compose, checked by the gate's skill spread.
+	Twist *Twist `json:"twist,omitempty"`
 }
 
 // Step is one stage of the ramp.
@@ -340,6 +342,9 @@ func (s *Spec) Validate() (problems, fixed []string) {
 	// progression: three steps
 	if len(s.Progression.Steps) != 3 {
 		bad("progression", "needs 3 steps, has %d", len(s.Progression.Steps))
+	}
+	if t := s.Progression.Twist; t != nil && t.Picked != "" && t.Kind != "" && !oneOf(t.Kind, TwistKinds) {
+		bad("progression", "twist kind %q is not one of %v", t.Kind, TwistKinds)
 	}
 	// end
 	if empty(s.End.Win) {

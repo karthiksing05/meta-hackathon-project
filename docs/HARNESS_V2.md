@@ -100,6 +100,29 @@ whole manifests. It writes the existing `game-anatomy/0.1` and the design block,
 - `gaps`: tools with status `planned` or `gap` that the idea needs. Each gap gets the approximation it will use
   instead (the existing familiarity field: `known`, `approximate` or `new to Muse`).
 
+### 4b. The twist step: difficulty on purpose (Karthik, 2026-11-13)
+
+"We don't introduce a ton of difficulty into the games": the planner now thinks of a twist actively. It rides on the
+plan call, so it costs no extra Muse round trip.
+
+- **Plan** (`internal/harness/twist.go`, the `progression` part in `specplan.go`): the planner lists 2-3 candidate
+  twists in `spec.progression.twist.candidates` (`{kind, rule}`; kinds `ramp`, `constraint`, `limited_resource`,
+  `decoy`, `speed_up`, `late_rule_change`, `combo`, `penalty`), picks the one that best fits the theme
+  (`picked`, `kind`, `why`), and enforces it with a constraint or a progression step. A bad kind is a `progression`
+  problem for the repair round; a missing twist is only a note (`twist: ...` in `plan.Notes`), never a repair.
+- **The creator decides**: a request that asks for easy, chill, relaxing, gentle or for kids (`GentleRequest`) keeps a
+  soft ramp, and the note says so.
+- **Compose** (`expander/prompts.mjs`) quotes the picked twist as a rule to build and show on screen, next to the spec.
+- **Gate** (`playtest/bots.mjs skillSpread`): the expert bot (`pro`) must beat the novice (`new player`) by at least
+  20% of the expert's score (`SPREAD_MARGIN`), or win where the novice lost, and the bots must not all reach the same
+  score without losing ("trivially maxed"). A miss is the `narrow_spread` warning; `studio.gate` returns `spread`.
+- **Offline** (`authoring/tools/twist.mjs`): applies an agent-written twist (patch ops on `content.game_json`) to a
+  published manifest, re-runs the engine check, the gate and the verifier, and writes the manifest only when the gate
+  passes, the spread improved, the verifier has no new blocking finding and the score stays inside `score.bounds`.
+  Seeded games (ids found under `--seeded` folders) are refused. Measured 2026-11-13 on Prod games: Zeus Is Not Amused
+  0.09 to 0.22, Capital Clues 0.17 to 0.22, Atlas Night 0.23 to 0.37, Stanley Tumbler Dash 0.45 to 0.65. Speed-only
+  twists rarely move the bots (they all answer within 2 s); penalties and late-game density changes do.
+
 ### Clarification checklists
 
 Each family has a checklist of what must be settled before a game of that kind can be made

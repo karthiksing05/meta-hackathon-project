@@ -2,7 +2,7 @@
 // Unit tests for gate profiles in bots.mjs (`gateProfile`, `analyze` with `profile`, `pickState`).
 // Plain Node, no packages, no engine: node authoring/playtest/test-profiles.mjs (exit 1 on any failure).
 
-import { analyze, gateProfile, decisionBase, pickState, GATE_PROFILES, FAST_WIN_SECONDS } from './bots.mjs';
+import { analyze, skillSpread, gateProfile, decisionBase, pickState, GATE_PROFILES, FAST_WIN_SECONDS } from './bots.mjs';
 
 let passed = 0, failed = 0;
 function ok(cond, name, detail) {
@@ -87,6 +87,15 @@ const st = { tier_picks: ['a'], my_rating: 3, score_total: 9, __progress: 1, end
 ok(JSON.stringify(Object.keys(pickState(fake(st)))) === JSON.stringify(['tier_picks', 'my_rating', 'ending']), 'pick keys found by name', pickState(fake(st)));
 ok(JSON.stringify(pickState(fake(st), ['score_total'])) === '{"score_total":9}', 'named keys win');
 ok(JSON.stringify(pickState({ state: () => { throw new Error('x'); } })) === '{}', 'no state, no picks');
+
+// --- skill spread (the twist step's check) ---
+const sp = (scores, outcomes = () => 'fail') => LABELS.map((label, i) => ({ bot: { label }, ok: true, outcome: outcomes(i), score: scores[i], seconds: 30 }));
+ok(skillSpread(sp([10, 30, 60, 30, 30])).ok, 'pro 60 vs new player 10 is a clear spread');
+ok(!skillSpread(sp([55, 58, 60, 57, 58])).clear, 'pro 60 vs 55 is narrow');
+ok(skillSpread(sp([50, 50, 50, 50, 50], () => 'success')).maxed, 'all bots maxed without losing');
+ok(skillSpread(sp([50, 50, 50, 50, 50], (i) => (i === 2 ? 'success' : 'fail'))).clear, 'expert wins where the novice loses');
+ok(skillSpread(sp([9000, 6000, 3000, 6000, 6000]), { direction: 'lower' }).ok, 'lower is better: a faster pro is a spread');
+ok(find(analyze(sp([55, 58, 60, 57, 58]).map((r) => ({ ...r, seconds: 30 }))), 'narrow_spread')?.blocking === false, 'narrow spread is a warning');
 
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

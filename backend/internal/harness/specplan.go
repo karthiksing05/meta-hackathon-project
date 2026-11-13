@@ -33,7 +33,15 @@ var partSchemas = map[string]string{
 	"constraints": `"constraints": {"items": [{"kind": "time"|"lives"|"moves"|"accuracy"|"rate"|"space"|"other", "value": string, "enforced_by": string, "hud": string}]}
    the pressure: each one is enforced by a rule (enforced_by) and shown in the HUD (hud). A calm game may have none.`,
 	"progression": `"progression": {"steps": [{"at": string, "change": string}], "levers": [string]}
-   EXACTLY 3 steps of the difficulty arc (what ramps and when); levers are the knobs (speed, timer, prompt breadth).`,
+   EXACTLY 3 steps of the difficulty arc (what ramps and when); levers are the knobs (speed, timer, prompt breadth).
+   twist: {"candidates": [{"kind": TWISTKIND, "rule": string}], "picked": string, "kind": TWISTKIND, "why": string}
+   THE TWIST STEP: before settling the arc, think actively of 2-3 candidate twists that make the game HARDER in a way that
+   rewards skill (an expert must clearly beat a newcomer, and a perfect run must not be trivial). TWISTKIND is one of
+   "ramp"|"constraint"|"limited_resource"|"decoy"|"speed_up"|"late_rule_change"|"combo"|"penalty". Each rule is one
+   concrete, measurable sentence in this game's own words ("after 30 s, a decoy <thing> that costs a life appears").
+   picked is the rule that best fits the theme, copied; it is a rule the game must have, enforced by a constraint or a
+   progression step and shown on screen. If the request asks for easy, chill, relaxing, gentle or for kids, keep it gentle:
+   pick a soft ramp (or kind "ramp" with a small change) and say so in why.`,
 	"end": `"end": {"win": string, "lose": string, "ends_when": ["time_out"|"lives_gone"|"target_reached"|"all_prompts_done"|"board_full"|"story_end"|"player_stops"], "session_seconds": [min, max]}
    every run ends within session_seconds (5-600). lose is "" when there is no losing.`,
 	"score": `"score": {"kind": KIND, "measures": string, "unit": string, "direction": "higher"|"lower", "counts_when": "finished"|"any", "aggregate": "best"|"latest"|"sum_week", "tie_break": "less time"|"earlier", "format": string, "events": [string], "reason": string}
@@ -148,6 +156,7 @@ func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessag
 		plan.Notes = append(plan.Notes, "theme: sponsor "+sp.Name+" copied from the understanding")
 	}
 	applyLookPreference(spec, plan, in)
+	plan.Notes = append(plan.Notes, twistNotes(spec, in.Request)...)
 	plan.Spec = spec
 	finishArt(plan, in)
 	plan.Issues = uniq(problems)

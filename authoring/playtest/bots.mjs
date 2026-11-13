@@ -415,6 +415,10 @@ export function analyze(runs, { maxSeconds = 180, inputProbe = null, game = null
     flag('flat', `Skill doesn't change the score (every bot scored ${maxScore}). Consider a twist that rewards good play.`, false);
   }
 
+  // The twist step's check: the expert must clearly beat the novice, and a run must not be trivially maxed.
+  const spread = skillSpread(done, { direction: game?.score?.direction });
+  if (spread && !spread.ok) flag('narrow_spread', `Skill spread is narrow: ${spread.reason}. Add a difficulty twist (a ramp, a decoy, a limited resource, a late rule change) so practice pays off.`, false);
+
   const typicalTimedOut = regular?.outcome === 'timeout' && regulars.filter((r) => r.outcome === 'timeout').length * 2 > regulars.length;
   const slowestWin = wins.length ? Math.max(...wins.map((r) => r.seconds)) : Infinity;
   const tooShort = flags.some((f) => f.code === 'too_short');
@@ -502,6 +506,37 @@ function deadInputFlag(probe, game, flag) {
   const cause = guards.length ? `${guards.join('; ')}, so a ${one} is ignored whenever that is false` : `no rule reacts to them at that moment`;
   flag('dead_inputs', `Most ${many} (${worst.dead} of ${worst.sent}) did nothing when a player mashed them: ${cause}. `
     + `Make the ${one} work whenever the player presses it (for a jump: let it work in the air too), or give it another effect.`, worst.share >= DEAD_BLOCK);
+}
+
+/** How far the expert ("pro") ends ahead of the novice ("new player"), in the score's direction. */
+export const SPREAD_MARGIN = 0.2;
+const OUTCOME_RANK = { fail: 0, timeout: 1, success: 2 };
+
+/**
+ * The skill spread of a gate's runs: {novice, expert, margin, clear, maxed, ok, reason}. margin is the expert's lead
+ * over the novice as a share of the expert's score (or of the score range); clear when it is at least SPREAD_MARGIN, or
+ * the expert won where the novice lost. maxed when every bot reached the same top score without losing. Null when
+ * either bot is missing.
+ */
+export function skillSpread(runs, { direction = 'higher' } = {}) {
+  const done = runs.filter((r) => r.ok !== false);
+  const novice = done.find((r) => r.bot?.label === 'new player');
+  const expert = done.find((r) => r.bot?.label === 'pro');
+  if (!novice || !expert) return null;
+  const sign = direction === 'lower' ? -1 : 1;
+  const scores = done.map((r) => r.score ?? 0);
+  const range = Math.max(...scores) - Math.min(...scores);
+  const lead = sign * ((expert.score ?? 0) - (novice.score ?? 0));
+  const scale = Math.max(1, Math.abs(expert.score ?? 0), range);
+  const margin = Math.round((lead / scale) * 1000) / 1000;
+  const outcomeLead = (OUTCOME_RANK[expert.outcome] ?? 1) > (OUTCOME_RANK[novice.outcome] ?? 1);
+  const clear = margin >= SPREAD_MARGIN || (outcomeLead && margin >= 0);
+  const maxed = done.length > 2 && range === 0 && !done.some((r) => r.outcome === 'fail');
+  const ok = clear && !maxed;
+  const reason = ok ? 'the expert clearly beats the novice'
+    : maxed ? `every bot reached the same score (${scores[0]}) without losing`
+      : `the expert scored ${expert.score} (${expert.outcome}) against the novice's ${novice.score} (${novice.outcome}), a ${Math.round(margin * 100)}% lead`;
+  return { novice: { score: novice.score, outcome: novice.outcome, seconds: Math.round(novice.seconds ?? 0) }, expert: { score: expert.score, outcome: expert.outcome, seconds: Math.round(expert.seconds ?? 0) }, margin, clear, maxed, ok, reason };
 }
 
 export function summarize(runs, maxSeconds = 180) {
