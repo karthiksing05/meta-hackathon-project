@@ -348,6 +348,9 @@ func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMe
 		return
 	}
 
+	if c := s.harnessContext(ctx, job); c != nil { // HARNESS_CONTEXT=1 only; nil leaves the job as it was
+		job.Context = c
+	}
 	request := job.Request
 	if job.Anatomy != "" {
 		request += "\n\n" + job.Anatomy

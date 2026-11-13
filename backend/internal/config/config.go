@@ -29,6 +29,9 @@ type Config struct {
 	GeneratorURL       string // empty turns generation off
 	GenerateConcurrent int    // jobs running at once, across everyone
 	GeneratePerHour    int    // jobs one person may start per hour
+	// HarnessContext (HARNESS_CONTEXT=1) runs the game-making harness before each new game and turns on
+	// POST /v1/harness/plan. Off by default.
+	HarnessContext bool
 
 	// Ranking (game-recs.js). RecsRuntimes is how many recommender runtimes run at once (0 turns ranking off).
 	// RecsInterleave is "" (off), "baseline", or a variant name such as "noBait": mixes each feed with a control.
@@ -53,6 +56,7 @@ func Load() (*Config, error) {
 		GeneratorURL:       strings.TrimRight(os.Getenv("GENERATOR_URL"), "/"),
 		GenerateConcurrent: int(envInt("GENERATE_CONCURRENT", 2)),
 		GeneratePerHour:    int(envInt("GENERATE_PER_HOUR", 6)),
+		HarnessContext:     os.Getenv("HARNESS_CONTEXT") == "1",
 
 		RecsRuntimes:   int(envInt("RECS_RUNTIMES", 2)),
 		RecsInterleave: os.Getenv("RECS_INTERLEAVE"),

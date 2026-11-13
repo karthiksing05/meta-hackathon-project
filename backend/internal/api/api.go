@@ -17,6 +17,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/model"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/pkgstore"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/recs"
@@ -40,6 +41,12 @@ type Options struct {
 	GeneratorURL       string
 	GenerateConcurrent int
 	GeneratePerHour    int
+
+	// The game-making harness (internal/harness). HarnessContext (HARNESS_CONTEXT=1) turns on the job context
+	// and POST /v1/harness/plan; off by default.
+	HarnessContext bool
+	Harness        *harness.Harness
+	Planner        *harness.Planner
 }
 
 type Server struct {
@@ -137,6 +144,7 @@ func (s *Server) Handler() http.Handler {
 		// Making a game: the app sends a request, the backend runs Muse, checks, playtests and stores it.
 		r.With(s.requireAuth).Post("/anatomy", s.anatomy("/anatomy"))
 		r.With(s.requireAuth).Post("/anatomy/revise", s.anatomy("/anatomy/revise"))
+		r.With(s.requireAuth).Post("/harness/plan", s.harnessPlan)
 		r.Route("/generate", func(r chi.Router) {
 			r.Use(s.requireAuth)
 			r.Get("/", s.listJobs)

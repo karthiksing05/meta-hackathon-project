@@ -14,9 +14,11 @@ import (
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/api"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/config"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/pkgstore"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/recs"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/store"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func main() {
@@ -65,11 +67,27 @@ func run(log *slog.Logger) error {
 		}
 		log.Info("recommender loaded", "version", engine.Version(), "runtimes", cfg.RecsRuntimes, "interleave", cfg.RecsInterleave)
 	}
+	var hs0 *harness.Harness
+	var planner *harness.Planner
+	if cfg.HarnessContext && cfg.GeneratorURL != "" {
+		var db *mongo.Database
+		if m, ok := st.(*store.Mongo); ok {
+			db = m.Database()
+		}
+		if h, p, err := harness.NewForServer(ctx, db, cfg.GeneratorURL); err != nil {
+			log.Warn("harness not loaded; games are made without it", "err", err) // best-effort, never blocks the API
+		} else {
+			hs0, planner = h, p
+			nt, nl := h.Index().Len()
+			log.Info("harness loaded", "types", nt, "tools", nl)
+		}
+	}
 	srv := api.New(api.Options{
 		Store: st, Packages: pk, Signer: auth.NewSigner(cfg.JWTSecret, cfg.AccessTTL),
 		RefreshTTL: cfg.RefreshTTL, GamesBaseURL: cfg.GamesBaseURL, CORSOrigins: cfg.CORSOrigins,
 		MaxUploadMB: cfg.MaxUploadMB, Log: log,
 		Recs: engine, GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
+		HarnessContext: cfg.HarnessContext, Harness: hs0, Planner: planner,
 	})
 	if n, err := st.FailStaleJobs(ctx, "The server restarted while this game was being made. Please try again."); err != nil {
 		log.Warn("could not clear stale generation jobs", "err", err)
