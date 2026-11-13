@@ -6,8 +6,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEngine } from '../expander/engine.mjs';
 import { expand, loadLibrary } from '../expander/expand.mjs';
-import { layoutCheck, lintSample, sampleFrames, instrument, textInk, contrast, parseColor } from './layout-check.mjs';
-import { fixLayout, fitText, spaceTargets } from '../expander/layout-fix.mjs';
+import { layoutCheck, lintSample, sampleFrames, instrument, textInk, contrast, parseColor, moved, inHudBand } from './layout-check.mjs';
+import { fixLayout, fitText, spaceTargets, plateLabels, rowsToColumns, hudToTop, nudgeIntoSafe } from '../expander/layout-fix.mjs';
 import { applyLayoutOps, parseJudge, critiqueLoop, CHECKLIST } from './visual-critique.mjs';
 import { chromeAvailable } from './frame-render.mjs';
 
@@ -163,6 +163,61 @@ const pixels = chromeAvailable();
     ok(out.rounds.length === 1 && out.rounds[0].kept && out.game.presentation.root.children[6].size === 13, 'one repair round, kept when the judge and the lint improve', out.rounds.map((r) => ({ kept: r.kept, applied: r.applied, refused: r.refused })));
     ok(out.pngs.length === 3, 'three frames rendered for the judge');
   }
+}
+
+// Structural fixes from node geometry (synthetic geometry: no engine needed).
+{
+  ok(!moved({ x0: 100, y0: 10, x1: 200, y1: 30 }, { x0: 80, y0: 10, x1: 220, y1: 30 }), 'a centered label that grows is not motion');
+  ok(moved({ x0: 100, y0: 10, x1: 200, y1: 30 }, { x0: 100, y0: 40, x1: 200, y1: 60 }), 'a box that goes down is motion');
+  ok(inHudBand(150, 360, 780) && !inHudBand(400, 360, 780) && inHudBand(100, 360, 640), 'HUD bands: two rows under the bar on a tall canvas');
+  const geo = (list) => new Map(list.map(([p, g]) => [p, { frames: 10, of: 10, hud: false, inBand: false, interactive: false, moving: false, ...g }]));
+  const tokens = { bg: '#0A0F24', ink: '#FFFFFF', accent: '#FFD23F', surface: '#151C3A', primary: '#00E5FF' };
+  // A popup in a repeat and a still label that a falling sprite crosses get plates and draw last.
+  const g1 = { presentation: { canvas: { w: 360, h: 640 }, tokens, root: { node: 'group', children: [
+    { node: 'repeat', source: 'pops', as: 'p', template: { node: 'text', text: '= p.text', x: '= p.x', y: '= p.y', anchor: 'center', size: 14, color: '$accent', opacity: '= 1.0 - (now - p.born) / 700.0' } },
+    { node: 'text', text: 'LANDING LINE', x: 180, y: 590, anchor: 'center', size: 12, color: '$ink' },
+    { node: 'repeat', source: 'drops', as: 'd', template: { node: 'image', asset: 'drop', x: '= d.x', y: '= d.y', w: 18, h: 22 } },
+  ] } } };
+  const fx1 = plateLabels(g1, geo([
+    ['/presentation/root/children/0/template', { kind: 'text', moving: true, box: { x0: 40, y0: 100, x1: 300, y1: 400 } }],
+    ['/presentation/root/children/1', { kind: 'text', box: { x0: 140, y0: 584, x1: 220, y1: 596 } }],
+    ['/presentation/root/children/2/template', { kind: 'image', moving: true, box: { x0: 20, y0: 0, x1: 340, y1: 640 } }],
+  ]));
+  const kids = g1.presentation.root.children;
+  ok(fx1.length === 2 && kids[0].node === 'repeat' && kids[0].source === 'drops', 'plated nodes draw after the sprites', fx1);
+  const popup = kids.find((k) => k.source === 'pops')?.template;
+  ok(popup?.node === 'group' && popup.children[0].node === 'rect' && popup.children[0].fill === '$bg' && /then 1.0 else 0.0/.test(popup.children[1].opacity), 'a popup becomes a badge that snaps out instead of fading over sprites', popup);
+  const still = kids.find((k) => k.node === 'group');
+  ok(still && still.children[0].opacity === 0.92 && still.children[1].text === 'LANDING LINE', 'a crossed still label sits on a plate', still);
+  // A text written on its own tile is left alone.
+  const g2 = { presentation: { canvas: { w: 360, h: 640 }, tokens, root: { node: 'group', children: [{ node: 'repeat', source: 'cards', as: 'c', template: { node: 'group', children: [{ node: 'rect', x: '= c.x', y: 0, w: 60, h: 40 }, { node: 'text', text: '= c.name', x: '= c.x + 30', y: 20, anchor: 'center' }] } }] } } };
+  const fx2 = plateLabels(g2, geo([
+    ['/presentation/root/children/0/template/children/0', { kind: 'rect', moving: true, box: { x0: 0, y0: 0, x1: 70, y1: 40 } }],
+    ['/presentation/root/children/0/template/children/1', { kind: 'text', moving: true, box: { x0: 10, y0: 14, x1: 50, y1: 26 } }],
+  ]));
+  ok(fx2.length === 0, 'a label on its own piece stays', fx2);
+  // A row of texts past the edges stacks as a column; a bottom HUD row the player crosses moves up.
+  const g3 = { presentation: { canvas: { w: 360, h: 640 }, tokens, root: { node: 'group', children: [
+    { node: 'stack', dir: 'row', gap: 28, x: 180, y: 48, anchor: 'center', children: [{ node: 'text', text: 'Score: 0' }] },
+    { node: 'stack', dir: 'row', gap: 28, x: 180, y: 608, anchor: 'center', children: [{ node: 'text', text: 'Bombs: 2 and a long hint' }, { node: 'text', text: 'Another long line here' }] },
+    { node: 'image', asset: 'ship', x: '= px', y: 600, w: 40, h: 30 },
+  ] } } };
+  const rows = rowsToColumns(g3, geo([
+    ['/presentation/root/children/1/children/0', { kind: 'text', box: { x0: -20, y0: 600, x1: 170, y1: 616 } }],
+    ['/presentation/root/children/1/children/1', { kind: 'text', box: { x0: 198, y0: 600, x1: 380, y1: 616 } }],
+  ]));
+  ok(rows.length === 1 && g3.presentation.root.children[1].dir === 'column', 'an overflowing row becomes a column', rows);
+  const top = hudToTop(g3, geo([
+    ['/presentation/root/children/0/children/0', { kind: 'text', hud: true, inBand: true, box: { x0: 140, y0: 40, x1: 220, y1: 56 } }],
+    ['/presentation/root/children/1/children/0', { kind: 'text', hud: true, inBand: true, box: { x0: 100, y0: 590, x1: 260, y1: 606 } }],
+    ['/presentation/root/children/1/children/1', { kind: 'text', hud: true, inBand: true, box: { x0: 100, y0: 610, x1: 260, y1: 626 } }],
+    ['/presentation/root/children/2', { kind: 'image', moving: true, box: { x0: 0, y0: 585, x1: 360, y1: 615 } }],
+  ]));
+  ok(top.length === 1 && g3.presentation.root.children[1].y === 608 - (590 - 64), 'the crossed bottom HUD row moves under the top HUD', { top, y: g3.presentation.root.children[1].y });
+  // On a tall canvas, a still title under the phone's bar moves into the safe area.
+  const g4 = { presentation: { canvas: { w: 360, h: 780 }, tokens, root: { node: 'group', children: [{ node: 'group', x: 0, y: 70, children: [{ node: 'text', text: 'Title', x: 180, y: 34, anchor: 'center', size: 20 }] }] } } };
+  const safe = nudgeIntoSafe(g4, geo([['/presentation/root/children/0/children/0', { kind: 'text', box: { x0: 150, y0: 92, x1: 210, y1: 116 } }]]));
+  ok(safe.length === 1 && g4.presentation.root.children[0].children[0].y === 34 + 12, 'bleed text nudged into the safe area', { safe, y: g4.presentation.root.children[0].children[0].y });
 }
 
 console.log(`layout tests: ${passed} passed, ${failed} failed${pixels ? '' : ' (no Chrome: pixel checks skipped)'}`);
