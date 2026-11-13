@@ -219,3 +219,15 @@ its own `<key>/` folder, so copy that folder aside first. A game whose owner has
 | Pop Mart Labubu Blind Box Set | s3 | glossy pastel vinyl-toy shop, Baloo 2 / M PLUS Rounded | 4 | backdrop, 12 sprites (9 Labubus, box, slot, token), candy frames; box then figure on the counter, collection book of figure silhouettes, one HUD plaque |
 | Fog Over the Bay | (unpublished key) | moonlit gouache bay, DM Serif / Work Sans | 5 | backdrop (redrawn once with a high horizon), fog, glint, puff, lamp, sea-glass frames; HUD in the bottom band, calm lines dropped |
 | Guess the Decade | k20 | synthwave sunset, Righteous / Josefin / Teko | 1 | presentation only (seeded): sky, striped sun, mountains and grid as shapes, neon answer pills, one shake on a miss |
+
+## Gold v2 (art direction v2, 2026-11-13)
+
+Every v2 game carries a lettered wordmark (intro handoff via `presentation.app`, and the end card), the
+look kit's characterful display face, and sprites for every figure. Builders in `artdir/gold/`.
+
+| Game | Key | Builder | New calls | Loop | Proof |
+|---|---|---|---|---|---|
+| Guess the Decade | k20 (seeded) | `k20v2.mjs` | 4 (wordmark, backdrop edit, 8 sprites, UI kit) | unchanged (seeded) | logic hash same, 6/6 seeded run logs replay, replays equal |
+| Duolingo: Unhinged Owl Streak Sprint | s5 | `s5.mjs` | 5 (frame, wordmark, backdrop, Duo in 4 moods + flame + heart, UI kit) | typed answers on a 31-point keyboard → tap-the-translation cards, 5 hearts, shrinking clock, easy→hard tiers | `--new-rules`: own gate runs replay on the verified build |
+| Pop Mart Labubu Blind Box Set | s3 | `s3v2.mjs` | 1 (wordmark) | one box tapped 14 times (luck) → shelf hunt: peek tags, golden secret only in mystery boxes, 4-token trades | `--new-rules`; skill spread in the gate (86 vs 97) |
+| Fog Over the Bay | fog (unpublished key) | `fogv2.mjs` | 1 (wordmark) | unchanged | logic hash same, replays equal |
