@@ -1623,19 +1623,26 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   keyboard from a user gesture, so nothing focuses it by script. Every edit sends `change`; Enter or
   Done sends `submit`, then clears the field and sends an empty `change`, like the shell. Taps on the
   game keep the keyboard up. In demos and replays the field is read-only and shows the run's last
-  typed value; a tap goes through it to take over. Letter-grid games (the `keyboard` fragment) are
-  unchanged: they're taps.
+  typed value; a tap goes through it to take over. The field is opaque, with autocorrect,
+  autocapitalize and spellcheck off and a Done key (`enterkeyhint`). **Keyboard lift:** iOS scrolls the
+  page to reveal a focused field by more than it needs, pushing the game's top under the status bar;
+  the host undoes that scroll and instead lifts `#bubble-root` (a CSS transform, so pointer mapping is
+  unchanged) just far enough that the field clears the keyboard (`visualViewport`), never past the
+  field's own top, and drops it on blur or when the run ends (`liftForKeyboard`). The field's place
+  still comes from canvas units through the kit's mapping and the host's fit, so it follows 360 x 640
+  and tall 360 x 780 canvases alike. Letter-grid games (the `keyboard` fragment) are unchanged:
+  they're taps.
 - **Typed text in replays.** Text reaches the engine through the runtime's input queue as
   `text.input`, so it's applied at the start of a tick and logged in the run's replay log as
   `{t, a: "text", v: ["submit" | "change", value]}`. A replay, a resumed run or `BubbleJSRuntime.verify`
   re-sends the same text at the same tick. Several edits in one tick keep only the last. `v` is an
   array, so `BubbleInput` (Swift) keeps it unchanged, and an older runtime ignores the entry.
-- **Typed answers** (`typed_answer` + `keyboard`, `fuzzy_match`; `authoring/SPEC.md` 2.12) are
+- **Typed answers** (`typed_answer` v2, `qa_bank` v2, `fuzzy_match`; `authoring/SPEC.md` 2.12) are
   matched by engine functions the fragments carry, generated from `authoring/expander/fuzzy.mjs`:
   case, accents, punctuation, articles, word order, plurals and length-aware typos are forgiven,
   aliases come from the answer bank (`answer=alias`). Nothing runs outside the engine, so live play,
-  bots and replays score the same answer the same way. Typing works through the on-screen keyboard fragment
-  (letters and space) or the native text field below.
+  bots and replays score the same answer the same way. Typing goes through the native text field
+  (the iPhone keyboard); the drawn `keyboard` fragment is only for games where the keys are the game.
 - The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. In games with a text
   field it also types: it reads candidate strings from the game's live state (a target word, the words
   on screen) and types one a letter at a time, then presses Done. With probability = skill it picks

@@ -1521,7 +1521,7 @@
       "pace"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "timer_bar",
       "speed_ramp",
       "score"
@@ -2210,7 +2210,7 @@
       "time"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "score",
       "rounds"
     ],
@@ -2264,7 +2264,7 @@
     ],
     "tools": [
       "quiz",
-      "keyboard",
+      "text_input",
       "rounds"
     ],
     "engine_gaps": [],

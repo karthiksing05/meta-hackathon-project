@@ -26,27 +26,7 @@
   },
   "presentation": {
     "slots": [
-      {
-        "slot": "playfield",
-        "node": {
-          "node": "grid", "cols": "@cols", "rows": "@rows", "cell_size": "@key_size", "gap": "@gap", "x": "@x", "y": "@y",
-          "cell": {
-            "node": "group",
-            "children": [
-              {
-                "node": "rect", "w": "@key_size", "h": "@key_size", "radius": 8, "role": "tile",
-                "fill": "= if _letter_at(cell.y * @cols + cell.x) == '' then '#00000000' else if key_state(_letter_at(cell.y * @cols + cell.x)) == 1 then $primary else if key_state(_letter_at(cell.y * @cols + cell.x)) == 2 then $danger else $surface",
-                "transition": { "fill": { "ms": 120, "ease": "out" } },
-                "on_tap": { "input": "press", "with": { "letter": "_letter_at(cell.y * @cols + cell.x)" } }
-              },
-              {
-                "node": "text", "x": "= @key_size / 2", "y": "= @key_size / 2", "anchor": "center", "size": 20, "weight": 600, "color": "$ink",
-                "text": "= if _letter_at(cell.y * @cols + cell.x) == ' ' then '␣' else upper(_letter_at(cell.y * @cols + cell.x))"
-              }
-            ]
-          }
-        }
-      }
+      {"slot":"playfield","node":{"ui":"keyboard","letters":"@letters","cols":"@cols","key_state":"= key_state(letter)","on_tap":{"input":"press","with":{"letter":"letter"}}}}
     ],
     "feedback": [
       { "on": "press", "when": "event.letter != ''", "do": [ { "moment": "tap" } ] }

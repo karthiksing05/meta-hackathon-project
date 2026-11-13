@@ -226,6 +226,15 @@ actor GamesAPILive: GamesAPI, GamesAuth {
                        auth: .required, timeout: HarnessPlanClient.timeout)
     }
 
+    // MARK: Facebook surfaces (backend/README.md, "Facebook surfaces")
+
+    /// A raw `/v1/fb/...` call for `FacebookAPILive`, with this client's tokens. `signIn` needs an account
+    /// (a device account is made if allowed); otherwise the token is sent when there is one.
+    func facebookRaw(_ method: String, _ path: String, query: [URLQueryItem] = [], body: Data? = nil, signIn: Bool) async throws -> Data {
+        try await send(method, path, query: query, body: body, contentType: body == nil ? nil : "application/json",
+                       auth: signIn ? .required : .optional)
+    }
+
     // MARK: Sounds (backend/README.md, "Sounds")
 
     /// The library: `GET /v1/sounds?tab=trending|for_you|saved|recent&q=&limit=`. `saved` needs sign-in.

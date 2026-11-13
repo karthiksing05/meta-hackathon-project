@@ -133,17 +133,12 @@ if (engine) {
   if (json) {
     const vd = engine.validate(json).filter((d) => d.severity === 'error');
     ok(!vd.length, `qa example validates: ${vd.map((d) => d.code + ' ' + d.message).join('; ')}`);
-    const LETTERS = 'qwertyuiopasdfghjklzxcvbnm <>';
+    // Typed into the native text field (each edit, then Return), as the app and the bots do.
     const tap = (g, x, y) => { g.frame(); g.pointer('down', x, y); g.pointer('up', x, y); g.step(16); };
-    const type = (g, text) => {
-      for (const ch of text) {
-        const i = LETTERS.indexOf(ch);
-        if (i < 0) continue;
-        tap(g, 9 + (i % 10) * 34 + 15.5, 420 + Math.floor(i / 10) * 34 + 15.5);
-      }
-    };
-    const ask = (g, q) => { type(g, q.toLowerCase()); type(g, '>'); g.step(16); return g.state(); };
-    const solve = (g, q) => { type(g, q.toLowerCase()); tap(g, 265, 382); g.step(16); return g.state(); };
+    const type = (g, text) => { for (let i = 1; i <= text.length; i++) g.text('change', text.slice(0, i)); g.step(16); g.text('submit', text); g.text('change', ''); g.step(16); };
+    const ask = (g, q) => { type(g, q.toLowerCase()); g.step(16); return g.state(); };
+    // Solve switches Return to checking a theory.
+    const solve = (g, q) => { tap(g, 265, 328); type(g, q.toLowerCase()); g.step(16); return g.state(); };
 
     const facts = fixture.puzzles[0].bank.cases[0].facts;
     const intents = facts.map(Q.factIntent);

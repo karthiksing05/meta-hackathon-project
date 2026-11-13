@@ -938,7 +938,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "growth_timer",
       "gallery"
     ],
@@ -1264,7 +1263,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "shared_progress",
       "gallery"
     ],
@@ -1910,7 +1908,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "sticker_library",
       "gallery"
     ],
@@ -2037,7 +2034,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "turns",
       "group_roster"
     ],

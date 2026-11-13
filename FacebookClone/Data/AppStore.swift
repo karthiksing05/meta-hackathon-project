@@ -110,12 +110,15 @@ final class AppStore {
     var videosMuted = true
     /// The chat on screen right now. Replies there are not counted as unread.
     var openConversationID: String? = nil
+    /// Where the feed, Reels, Stories and Messenger come from (`AppStore+Live.swift`).
+    var facebookSource: FacebookSource = .mock
+    @ObservationIgnored let live = FacebookLiveState()
 
     /// Set by the UI layer to warm the image cache for upcoming content.
     @ObservationIgnored var imagePrefetcher: ([URL]) -> Void = { _ in }
 
     @ObservationIgnored private var factory: MockDataFactory
-    @ObservationIgnored private var feedBuffer: [Post]
+    @ObservationIgnored var feedBuffer: [Post]
     @ObservationIgnored private var pendingReplies: Set<String> = []
     @ObservationIgnored private var ambientTimer: Timer?
 
@@ -144,6 +147,7 @@ final class AppStore {
             self?.isFeedLoading = false
         }
         startAmbientActivity()
+        startLiveFacebook()
     }
 
     // MARK: - Derived collections
@@ -335,6 +339,7 @@ final class AppStore {
     /// Pull to refresh: waits like a network call, then adds a few fresh posts on top.
     @MainActor
     func refreshFeed() async {
+        if await refreshLiveFeed() { return }
         isRefreshingFeed = true
         try? await Task.sleep(nanoseconds: 1_200_000_000)
         let fresh = factory.makeFreshPosts(count: Int.random(in: 2...4))
@@ -346,6 +351,7 @@ final class AppStore {
     /// Call from each post's `onAppear`. Near the end of the feed it appends the next page
     /// from the preload buffer and prefetches the images of the page after that.
     func loadMoreFeedIfNeeded(currentPost post: Post) {
+        if loadMoreLiveIfNeeded(currentPost: post) { return }
         let feed = feedPosts
         guard !isLoadingMoreFeed,
               let index = feed.firstIndex(where: { $0.id == post.id }),
@@ -371,11 +377,13 @@ final class AppStore {
 
     func setReaction(_ reaction: ReactionType?, on post: Post) {
         post.myReaction = reaction
+        liveReact(post)
     }
 
     /// Tap on "Like": likes, or removes whatever reaction is set.
     func toggleLike(_ post: Post) {
         post.myReaction = post.myReaction == nil ? .like : nil
+        liveReact(post)
     }
 
     func setReaction(_ reaction: ReactionType?, on comment: Comment) {
@@ -396,6 +404,8 @@ final class AppStore {
         } else {
             post.comments.append(comment)
         }
+        liveComment(comment, on: post, isReply: parent != nil)
+        guard !live.feedIsLive else { return comment }
         simulateCommentEngagement(comment, on: post, parent: parent)
         return comment
     }
@@ -505,6 +515,7 @@ final class AppStore {
         post.isUploading = true
         posts.insert(post, at: 0)
         simulateUpload(post)
+        livePublish(post)
         if let group {
             groupPostReveal = GroupPostReveal(postID: post.id, groupID: group.id)
         }
@@ -580,6 +591,7 @@ final class AppStore {
             myStory = story
         }
         showToast("Your story was shared", symbol: "checkmark.circle.fill")
+        liveStory(item)
         simulateStoryViews(item.id)
         return story
     }
@@ -753,6 +765,7 @@ final class AppStore {
 
     func markRead(_ conversation: Conversation) {
         conversation.unreadCount = 0
+        liveMarkRead(conversation)
     }
 
     func toggleMute(_ conversation: Conversation) {
@@ -983,6 +996,7 @@ final class AppStore {
         }
         after(1.35) { [weak self] in
             post.isUploading = false
+            guard self?.live.feedIsLive == false else { return }
             self?.simulateEngagement(for: post)
         }
     }
@@ -1064,6 +1078,7 @@ final class AppStore {
         after(0.35) { [weak self] in
             self?.setStatus(.sent, for: messageID, in: conversation)
         }
+        if sendLive(message, in: conversation) { return }
         after(0.9) { [weak self] in
             self?.setStatus(.delivered, for: messageID, in: conversation)
         }
@@ -1132,7 +1147,7 @@ final class AppStore {
                 pushNotification(notification)
             }
         case 2:
-            if let story = stories.filter({ $0.isSeen }).randomElement() {
+            if !live.feedIsLive, let story = stories.filter({ $0.isSeen }).randomElement() {
                 story.items.append(factory.makeStoryItem())
             }
         default:

@@ -74,6 +74,7 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/me/notifications`, `PUT /v1/me/notifications/{id}/read`, `PUT /v1/me/notifications/read`, `PUT`/`DELETE /v1/me/push-devices/{installationId}`, `POST /v1/groups/{id}/game-shares` | bearer | the notification inbox, push devices and Group game shares (see [Notifications](#notifications)) |
 | `POST /v1/rounds`, `GET /v1/rounds`, `GET /v1/rounds/{id}`, `POST /v1/rounds/{id}/plays`, `GET /v1/games/{id}/agreement` | bearer | same-seed rounds in a chat or a Group, and how opinion games compare (see [Rounds](#rounds-same-seed-play-in-a-chat-or-a-group)) |
 | `POST /v1/series`, `GET /v1/series`, `GET /v1/series/{id}`, `POST /v1/series/{id}/rounds/{n}` | bearer | best-of-N with a friend on the same games and seeds; scores come from replaying the run's input log in the engine (see [Series](#series)) |
+| `GET /v1/fb/posts`, `/v1/fb/reels`, `/v1/fb/stories`, `/v1/fb/people`; `POST /v1/fb/posts`, `PUT\|DELETE /v1/fb/posts/{id}/reaction`, `POST /v1/fb/posts/{id}/comments`, `POST /v1/fb/stories`; `GET\|POST /v1/fb/threads`, `GET\|POST /v1/fb/threads/{id}/messages`, `PUT /v1/fb/threads/{id}/read` | optional / bearer | the wider Facebook surfaces: feed posts, reels, stories and Messenger (see [Facebook surfaces](#facebook-surfaces-posts-reels-stories-messenger)) |
 
 Scores are whole numbers (a fractional score is rejected). A manifest `id` that is a lowercase slug
 (`hill-hopper`) is kept as the game's unique `slug`; publishing a second game with the same slug is refused (422).
@@ -129,8 +130,15 @@ Compose's server-side hooks (`backend/generator/src/hooks.mjs`, docs/HARNESS_V2.
 fixes run before each gate and the layout lint after (`authoring/expander/layout-fix.mjs`, `authoring/playtest/layout-check.mjs`,
 copied into the image; no Chrome, so structural fixes only; `GENERATOR_LAYOUT=0` turns them off). With `GENERATOR_IMAGE_ART=1`,
 muse-image-1.0 draws the pictures of an art-heavy plan (`plan.art: "image"`) in place of the older art step; `GENERATOR_IMAGE_ART=0`
-turns both off. A finished job's `stats` carries `requirements` (`{must_passed, must_total, note, gaps}`), `layout`
-(`{counts, pixels, warnings}`), `layoutFixes` and, when pictures were drawn, `image_art`.
+turns both off. The blocking layout verifier (`authoring/verify/`, through `authoring/expander/verify-layout.mjs`) replaces the
+fixes when it loads: verify, code fixes, solver, a proof that rules and replays are unchanged, then a layout repair round
+for what still blocks. No Chrome in the image, so it runs without pixels (estimated text widths, shapes-only contrast);
+`GENERATOR_LAYOUT_VERIFY=0` falls back to the fixes alone. It refuses to publish a game that still blocks only with
+`context.layout_block: true` or `GENERATOR_LAYOUT_BLOCK=1` (off by default). `GENERATOR_CANVAS=tall` builds 360 × 780 games
+(`classic`, 360 × 640, by default; `context.canvas` wins). A finished job's `stats` carries `requirements`
+(`{must_passed, must_total, note, gaps}`), `layout` (the verifier's `{verifier, pass, blocking, warnings, byCode, reverted,
+findings}`, or the lint's `{counts, pixels, warnings}` without it), `layoutBlocking`, `layoutVerifyMs`, `layoutRepairs`,
+`layoutFixes`, `canvas` and, when pictures were drawn, `image_art`.
 
 ## Sponsored games
 
@@ -267,6 +275,36 @@ Mongo (`recs_state`); the pages shown this session are kept with it.
   The golden test replays a fixed call sequence made by Node and fails if the Go engine's answers differ.
 - Games carry what the recommender describes them by (`mood`, `energy`, `competition`, `look`, `scope`, `isDaily`, and the
   playtest bots' runs for generated games), read from the manifest when a game is published.
+
+## Facebook surfaces: posts, reels, stories, Messenger
+
+The Home feed, Group posts, Reels, Stories and Messenger read from `/v1/fb/*` (`internal/api/fbsocial.go`). The content starts as
+a **synthetic demo world** (`internal/fbseed/world.json`, built by `make_world.py` from the app's New in SF world): 18 invented
+people and 4 Pages ("Personas", ids like `sf-maya-okafor`, the same ids the app uses), cartoon avatars (DiceBear), scenery
+photos (picsum) and CC0 sample videos. The first `/v1/fb` call after a start writes it: Personas are upserted every time,
+posts, reels and stories only into an empty database (times are relative to that moment). Each person gets their own copy of
+the demo chats the first time they open Messenger. People's own posts, reactions, comments, stories and messages go on top.
+Authors and chat members are Personas or server accounts; the reply's `author` / `members` objects are
+`{id, firstName, lastName, kind, category, avatarUrl, coverUrl, bio, city, work, verified, isMe, isAccount}`.
+
+| Endpoint | Auth | Reply |
+|---|---|---|
+| `GET /v1/fb/posts?groupId=&authorId=&cursor=&limit=` (max 50), `GET /v1/fb/reels` (same) | optional | `{items: [post], cursor}` newest first; `post` = `{id, kind, author, groupId?, text, background?, media: [{kind, url, videoUrl?, aspect, duration?}], poll?: [{id, title, votes}], feeling?, location?, lifeEvent?, audio?, sponsored?, allowsGames?, reactions: {type: n}, myReaction?, comments: [{id, author, text, createdAt}], shares, views, createdAt}`. `reactions` counts everyone but me. |
+| `GET /v1/fb/posts/{id}` | optional | one `post` |
+| `POST /v1/fb/posts` `{text, groupId?, background?, feeling?, location?, photoUrls?}` | bearer | 201 `post` |
+| `PUT /v1/fb/posts/{id}/reaction` `{type}` (like, love, care, haha, wow, sad, angry); `DELETE` | bearer | the `post` |
+| `POST /v1/fb/posts/{id}/comments` `{text}` | bearer | 201 comment |
+| `GET /v1/fb/stories` | optional | `{items: [{author, items: [{id, media?, text?, background?, caption?, createdAt}]}]}`; one entry per author, most recent first, mine first; items oldest first |
+| `POST /v1/fb/stories` `{text, background?, caption?}` or `{photoUrl, caption?}` | bearer | 201 item; it expires after 24 hours (the demo world's never do) |
+| `GET /v1/fb/people?ids=a,b` | optional | `{items: [person]}`; no `ids`: every Persona |
+| `GET /v1/fb/threads?messages=20` | bearer | my chats, most recent first: `{items: [{id, members (not me), name?, theme?, emoji?, lastAt, lastText, unread, messages (latest, oldest first)}]}` |
+| `POST /v1/fb/threads` `{memberIds, name?}` | bearer | 201 thread; a one-to-one chat that exists comes back with 200 |
+| `GET /v1/fb/threads/{id}/messages?before=&limit=` | bearer (member) | `{items: [{id, threadId, senderId, text?, imageUrl?, emoji?, sentAt}]}` oldest first |
+| `POST /v1/fb/threads/{id}/messages` `{text?, emoji?, imageUrl?}` | bearer (member) | 201 `{message, reply}`: in a chat with Personas one of them answers 2.5 s later (stored with that time) |
+| `PUT /v1/fb/threads/{id}/read` | bearer (member) | 204 |
+
+Collections: `fb_personas`, `fb_posts`, `fb_stories`, `fb_threads`, `fb_messages`; run `deploy/dbinit.sh` after deploying for their
+indexes (the routes work without them). To reseed, drop `fb_personas`, `fb_posts` and `fb_stories` and restart the API. The demo world stays recent on its own: every 10 minutes the API checks it, and when it has drifted more than an hour from "N minutes ago" it moves all its posts, comments and stories forward together (reactions, comments and people's own posts are kept). Each person's copied demo chats keep the times they were copied with.
 
 ## People, friends and Groups
 

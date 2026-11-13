@@ -8,10 +8,10 @@
       "type freely",
       "system keyboard"
     ],
-    "summary": "A native text field for typing (system keyboard: spaces, numbers, punctuation, autocorrect, dictation), with the submitted text recorded in the replay log. The engine has it (input sources {\"text\": \"submit\"} and {\"text\": \"change\"}, presentation.text_field, replay and verify record the text); the app runtime (bubble-kit-microgame.js) and the JS playtest bots don't drive it yet, so games type on the keyboard fragment grid.",
-    "when_to_use": "Plan for it in typed games (typed_answer, qa_bank, fill-in, name-the-thing), but compose with the keyboard fragment until it ships: the phone shows no field for a text source today, and the bots never type, so a game that only takes text fails the gate.",
+    "summary": "A native text field: the player types on the iPhone keyboard (spaces, numbers, punctuation; autocorrect and autocapitalize off) and Return submits. The text is recorded in the replay log, so runs verify like taps. Engine input sources {\"text\": \"submit\"} and {\"text\": \"change\"}, placed by presentation.text_field in canvas units; the app raises the keyboard when the field is tapped and lifts the game so the field stays in view; the playtest bots type playtest.text_candidates.",
+    "when_to_use": "Every typed answer, name, number or question: typed_answer and qa_bank bring one; custom typed rules add their own text input (fuzzy_match to check). Put the field in the top half and keep the bottom 45% calm (the keyboard covers it). Not for games where the keys are the game (keyboard fragment).",
     "api": "inputs.<name>.from: [{\"text\": \"submit\" | \"change\", \"placeholder\"?: string, \"max_len\"?: int <= 200}] with record text {value: string}; presentation.text_field {x, y, w, h, size}; the field clears after submit; engine JS: game.text(\"submit\" | \"change\", value); replay log line {\"t\": ms, \"text\": \"submit\", \"value\": \"...\"}",
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "typing only through the keyboard fragment grid",
       "no spaces, digits, punctuation or autocorrect in typed answers"
@@ -22,7 +22,7 @@
       "twenty_questions"
     ],
     "path": "engine/SPEC-v0.2.md",
-    "notes": "engine side done (SPEC-v0.2 section 4, mg-cli sim types random text). Needed: Artem, the field in bubble-kit-microgame.js; Bayan, bots that type (a playtest.texts list). Request text in docs/harness-gaps/open-text.md"
+    "notes": "engine SPEC-v0.2 section 4; app: bubble-kit-microgame.js (sdk.textField) and bubble-runtime.js (the field and the keyboard lift); bots: authoring/playtest/bots.mjs textCandidates (typing takes about 4 characters a second in the gate)"
   },
   {
     "id": "answer_bank",

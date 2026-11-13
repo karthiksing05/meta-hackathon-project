@@ -134,7 +134,7 @@ struct PostHeaderView: View {
     private var subtitle: some View {
         HStack(spacing: 4) {
             if post.isSponsored {
-                Text("Sponsored")
+                AdBadge()
             } else {
                 TimelineView(.everyMinute) { _ in
                     Text(post.createdAt.fbShort)

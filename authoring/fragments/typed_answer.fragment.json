@@ -1,7 +1,7 @@
 {
   "fragment": "typed_answer",
-  "version": 1,
-  "describe": "Open-answer prompts the player answers by TYPING (Krillion-style trivia, \"name a…\", fill-in, guess the word): not multiple choice. Pair it with the keyboard fragment: its `letters` must include ' ' (space), '<' (delete) and '>' (submit), e.g. \"qwertyuiopasdfghjklzxcvbnm <>\" with cols 10, rows 3, key_size 31, gap 3, x 9, y 420. This fragment provides the keyboard's `key_state` (so the game must not define it). The game supplies two functions that read `content` lists: `ta_prompts()` (list<string>, one prompt per entry, e.g. \"Name a red fruit\") and `ta_answers()` (list<string>, entry q holds prompt q's accepted answers in rarity tiers: tiers separated by '|', answers inside a tier by ',', most common tier first; an answer's other accepted names (aliases, nicknames, short forms) follow it joined by '=', e.g. \"apple,strawberry,cherry|raspberry,tomato|pomegranate,lingonberry\" or \"harry potter=harry,hermione granger=hermione|neville longbottom=neville\"). Matching is forgiving and fair (the fuzzy_match rules): it ignores case, accents, punctuation, a leading 'the'/'a'/'an', word order, plurals and number words, and forgives typos by length (4 letters or fewer must be exact, 5-7 letters allow one typo, longer answers pass at `threshold`), so list each real answer once with its true aliases, not misspellings. One answer per prompt: a match scores its tier's points (`common`, `uncommon`, `rare`, `legendary` params), shows the answer as listed, and emits `answered_right {points, tier}`; anything else, or running out of `time_ms`, emits `answered_wrong`. After about 900 ms it emits `prompt_done` (bind rounds' `round_done` to it) and asks the next prompt (shuffled order). It sets the score (`ta_points`), so don't also use the score fragment. End it with rounds (bound to `prompt_done`) and/or lives (bound to `answered_wrong`). For the playtest bots set the game's \"playtest\": {\"progress\": \"ta_progress()\"} so they can spell real answers. State: `typed`, `ta_points`, `right_count`, `wrong_count`, `last_result` ('common' | 'uncommon' | 'rare' | 'legendary' | 'miss' | 'time' | ''), `last_points`, `last_answer` (the matched answer as listed, '' otherwise), `locked`. Draws the prompt, a time bar, the answer box and the result line above y 330; with the game's `answer_box` sprite the box draws it.",
+  "version": 2,
+  "describe": "Open-answer prompts the player answers by TYPING on the iPhone keyboard (Krillion-style trivia, \"name a…\", fill-in, guess the word): not multiple choice. It brings its own native text field over the answer box (the app raises the system keyboard when the player taps it; Return submits), so do NOT add the keyboard fragment. The game supplies two functions that read `content` lists: `ta_prompts()` (list<string>, one prompt per entry, e.g. \"Name a red fruit\") and `ta_answers()` (list<string>, entry q holds prompt q's accepted answers in rarity tiers: tiers separated by '|', answers inside a tier by ',', most common tier first; an answer's other accepted names (aliases, nicknames, short forms) follow it joined by '=', e.g. \"apple,strawberry,cherry|raspberry,tomato|pomegranate,lingonberry\" or \"harry potter=harry,hermione granger=hermione|neville longbottom=neville\"). Matching is forgiving and fair (the fuzzy_match rules): it ignores case, accents, punctuation, a leading 'the'/'a'/'an', word order, plurals and number words, and forgives typos by length (4 letters or fewer must be exact, 5-7 letters allow one typo, longer answers pass at `threshold`), so list each real answer once with its true aliases, not misspellings. One answer per prompt: a match scores its tier's points (`common`, `uncommon`, `rare`, `legendary` params), shows the answer as listed, and emits `answered_right {points, tier}`; anything else, or running out of `time_ms`, emits `answered_wrong`. After about 900 ms it emits `prompt_done` (bind rounds' `round_done` to it) and asks the next prompt (shuffled order). It sets the score (`ta_points`), so don't also use the score fragment. End it with rounds (bound to `prompt_done`) and/or lives (bound to `answered_wrong`). The playtest bots get the answers to try from the fragment itself (`ta_candidates()`); \"playtest\": {\"progress\": \"ta_progress()\"} still helps. State: `typed`, `ta_points`, `right_count`, `wrong_count`, `last_result` ('common' | 'uncommon' | 'rare' | 'legendary' | 'miss' | 'time' | ''), `last_points`, `last_answer` (the matched answer as listed, '' otherwise), `locked`. Draws the prompt, a time bar, the answer box (the text field sits on it, at 30,224 300 x 54) and the result line above y 330; keep the rest of the top half clear, and keep the bottom 45% calm: the iPhone keyboard covers it while the player types. With the game's `answer_box` sprite the box draws it.",
   "params": {
     "time_ms": {
       "type": "duration",
@@ -70,11 +70,6 @@
       "ta_answers": {
         "params": {},
         "returns": "list<string>"
-      }
-    },
-    "inputs": {
-      "press": {
-        "letter": "string"
       }
     }
   },
@@ -193,12 +188,10 @@
       "returns": "int",
       "body": "ta_points * 100 + (if locked then 0 else if _on_track() then len(typed) else -5)"
     },
-    "key_state": {
-      "params": {
-        "letter": "string"
-      },
-      "returns": "int",
-      "body": "if letter == '>' then 1 else if letter == '<' then 2 else 0"
+    "ta_candidates": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "if locked then [] else let q = get_or(order, qi, 0) in let mine = map(split(join(_tiers(), ','), ','), e => _canon(e)) in concat([first(mine), last(mine)], concat(take(map(filter(range(len(ta_answers())), i => i != q), i => _canon(get_or(split(get_or(split(get_or(ta_answers(), i, ''), '|'), 0, ''), ','), 0, ''))), 7), ['not sure']))"
     },
     "_fm_apos": {
       "params": {},
@@ -361,7 +354,6 @@
     "answered_wrong": {},
     "prompt_done": {},
     "_ask": {},
-    "_submit": {},
     "_reveal_end": {},
     "_timeout": {
       "serial": "int"
@@ -432,54 +424,32 @@
       ]
     },
     {
-      "id": "type_key",
-      "on": "press",
-      "when": "not locked and event.letter != ''",
+      "id": "type_edit",
+      "on": "ta_edit",
+      "when": "not locked",
       "do": [
         {
-          "if": "event.letter == '<'",
-          "then": [
-            {
-              "set": "typed",
-              "to": "substr(typed, 0, len(typed) - 1)"
-            }
-          ],
-          "else": [
-            {
-              "if": "event.letter == '>'",
-              "then": [
-                {
-                  "emit": "_submit"
-                }
-              ],
-              "else": [
-                {
-                  "if": "len(typed) < @max_len and not (event.letter == ' ' and (typed == '' or ends_with(typed, ' ')))",
-                  "then": [
-                    {
-                      "set": "typed",
-                      "to": "concat(typed, event.letter)"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+          "set": "typed",
+          "to": "substr(event.value, 0, @max_len)"
         }
       ]
     },
     {
       "id": "submit",
-      "on": "_submit",
-      "when": "not locked and trim(typed) != ''",
+      "on": "ta_enter",
+      "when": "not locked and trim(event.value) != ''",
       "do": [
+        {
+          "set": "typed",
+          "to": "substr(event.value, 0, @max_len)"
+        },
         {
           "set": "locked",
           "to": "true"
         },
         {
           "let": {
-            "pk": "_pick(typed)"
+            "pk": "_pick(substr(event.value, 0, @max_len))"
           }
         },
         {
@@ -597,6 +567,13 @@
     "score": "ta_points"
   },
   "presentation": {
+    "text_field": {
+      "x": 30,
+      "y": 224,
+      "w": 300,
+      "h": 54,
+      "size": 22
+    },
     "slots": [
       {
         "slot": "playfield",
@@ -610,8 +587,8 @@
           "valign": "middle",
           "size": 22,
           "weight": 700,
-          "color": "$ink",
-          "text": "= prompt_text()"
+          "color": "= if last_answer != '' then $primary else $ink",
+          "text": "= if last_answer != '' then upper(last_answer) else prompt_text()"
         }
       },
       {
@@ -727,5 +704,39 @@
   "conflicts": [
     "quiz",
     "score"
-  ]
+  ],
+  "inputs": {
+    "ta_enter": {
+      "payload": {
+        "value": "string"
+      },
+      "from": [
+        {
+          "text": "submit",
+          "placeholder": "@placeholder",
+          "max_len": "@max_len",
+          "with": {
+            "value": "text.value"
+          }
+        }
+      ]
+    },
+    "ta_edit": {
+      "payload": {
+        "value": "string"
+      },
+      "from": [
+        {
+          "text": "change",
+          "with": {
+            "value": "text.value"
+          }
+        }
+      ]
+    }
+  },
+  "playtest": {
+    "text_candidates": "ta_candidates()",
+    "progress": "ta_progress()"
+  }
 }

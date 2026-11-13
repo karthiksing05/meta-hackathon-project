@@ -174,6 +174,13 @@ export function textCandidates(g, rng) {
   return picked;
 }
 
+// Typing takes time on a phone keyboard: about 4 characters a second, plus a moment to press
+// Return. The gate waits this long after a bot submits text, so typed games aren't over in seconds.
+export function typingSteps(action) {
+  if (action?.kind !== 'text') return 0;
+  return Math.round((String(action.value ?? '').length * 250 + 300) / DT);
+}
+
 function tapAt(x, y) {
   return { kind: 'tap', x, y };
 }

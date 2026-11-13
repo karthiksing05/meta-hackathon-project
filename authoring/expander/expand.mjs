@@ -7,8 +7,10 @@ import { join } from 'node:path';
 import { rewrite, rewriteType, namesIn, tokenize, stringLiteral, durationMs, safeText, PLACEHOLDER_NAME } from './expr.mjs';
 import { compileArt } from './art.mjs';
 import { compileSound, MOMENTS } from './sound.mjs';
+import { applyUiKit, kitTokens } from './ui-kit.mjs';
 import { normalizeScore, unknownScoreEvents } from './score.mjs';
 import { pickCanvas, fitLayout, safeArea } from './canvas.mjs';
+import { applyLook, lookFromChoice } from '../kit/look.mjs';
 
 export const STANDARD_TOKENS = ['primary', 'secondary', 'accent', 'ink', 'bg', 'danger', 'surface'];
 export const SLOTS = { hud_top: 3, hud_bottom: 2, playfield: Infinity, overlay: Infinity };
@@ -517,6 +519,10 @@ export function expand(manifest, lib, options = {}) {
     (frag.presentation?.slots || []).forEach((e, i) => {
       if (keep(e)) u.out.slots.push({ slot: e.slot, node: walkNode(pruneNode(e.node), fns, `/presentation/slots/${i}/node`), origin, pointer: `/presentation/slots/${i}/node` });
     });
+    // A fragment with a text input may say where the app's text field goes (canvas units, params
+    // allowed) and what the playtest bots should type; the game's own settings win (SPEC 2.2, 2.6).
+    if (frag.presentation?.text_field) u.out.textField = Object.fromEntries(Object.entries(frag.presentation.text_field).map(([k, v]) => [k, fns.literal(v, `/presentation/text_field/${k}`)]));
+    if (frag.playtest) u.out.playtest = Object.fromEntries(Object.entries(frag.playtest).map(([k, v]) => [k, fns.expr(v, `/playtest/${k}`)]));
     u.out.feedback = [];
     (frag.presentation?.feedback || []).forEach((f, i) => {
       if (keep(f)) u.out.feedback.push({ item: walkFeedback([{ ...strip(f), do: (f.do || []).filter(keep).map(strip) }], fns, '/presentation/feedback')[0], origin, pointer: `/presentation/feedback/${i}` });
@@ -655,10 +661,13 @@ export function expand(manifest, lib, options = {}) {
     }
     return n;
   };
-  const root = look ? splice(fitLayout(clone(look.layout), canvas)) : { node: 'group', children: [] };
+  // The game UI kit (ui-kit.mjs, authoring/UI_KIT.md): components, regions and the HUD bar, in the
+  // canvas's safe area (canvas.mjs).
+  const kit = applyUiKit(slotNodes, { manifest, canvas, lookLayout: look ? fitLayout(clone(look.layout), canvas) : null, palette: { ...(look?.tokens || {}), ...art.tokens, ...(manifest.look?.tokens || {}) }, warn });
+  const root = look ? splice(clone(kit.layout)) : { node: 'group', children: [] };
   // The backdrop sits under everything, filling the canvas.
   if (art.backdrop) (root.children ??= []).unshift({ node: 'image', asset: art.backdrop.id, x: 0, y: 0, w: art.backdrop.w, h: art.backdrop.h });
-  const font = art.font ?? look?.font;
+  const font = art.font ?? (manifest.ui ? kit.style.font : null) ?? look?.font;
   const visit = (node, at, inherited) => {
     const e = origins.get(node);
     if (e) map(at, e.origin, e.pointer);
@@ -672,7 +681,7 @@ export function expand(manifest, lib, options = {}) {
   if (art.backdrop) map('/presentation/root/children/0', 'game', '/art/backdrop');
   const feedback = resolveFeedback([...uses.flatMap((u) => u.out.feedback), ...feelFeedback(canvas), ...gameFeedback], sound, feel, err);
   feedback.forEach((f, i) => map(`/presentation/feedback/${i}`, f.origin, f.pointer));
-  const tokens = { ...(look?.tokens || {}), ...art.tokens, ...(manifest.look?.tokens || {}) };
+  const tokens = kitTokens(manifest, { ...(look?.tokens || {}), ...art.tokens, ...(manifest.look?.tokens || {}) }, kit.style);
   if (Object.keys(art.tokens).length) map('/presentation/tokens', 'game', '/art/palette');
   out.presentation = {
     canvas: { w: canvas.w, h: canvas.h, background: manifest.look?.background ?? look?.background ?? '$bg' },
@@ -680,10 +689,15 @@ export function expand(manifest, lib, options = {}) {
     root,
     feedback: feedback.map((f) => f.item),
     ...(sound.music ? { music: sound.music.presentation } : {}),
-    // Where the app's text field goes for games with a text input (SPEC 2.2), as written.
-    ...(manifest.presentation?.text_field ? { text_field: clone(manifest.presentation.text_field) } : {}),
+    // Where the app's text field goes for games with a text input (SPEC 2.2): as the game wrote it,
+    // else where the first fragment that places one says.
+    ...(manifest.presentation?.text_field ? { text_field: clone(manifest.presentation.text_field) }
+      : uses.find((u) => u.out.textField) ? { text_field: clone(uses.find((u) => u.out.textField).out.textField) } : {}),
   };
   if (sound.music) map('/presentation/music', 'game', '/sound/music');
+  // The game's own look (art.type, authoring/kit): every text node on its pairing's fonts, its scale
+  // and its palette. Presentation only.
+  if (art.type) applyLook(out, lookFromChoice(art.type), { inPlace: true });
 
   // Sprites nothing draws are probably a mistake (a role name typo, or a fragment that was dropped).
   for (const e of gameSlots) collectAssetNames(e.node, usedSprites);
@@ -696,9 +710,11 @@ export function expand(manifest, lib, options = {}) {
   // ---- playtest probe (SPEC 2.6): a copy of the game with hidden values for bots: a progress
   // number, and the strings worth submitting to a text input ----
   let playtestGame;
-  const pt = manifest.playtest;
-  const textCandidates = pt?.text_candidates ?? pt?.texts; // `texts` is accepted as another name
-  if (pt?.progress || textCandidates) {
+  // Fragment hints (the first use that has one) fill what the game's own playtest hint leaves out.
+  const fragHint = (k) => uses.find((u) => u.out.playtest?.[k])?.out.playtest[k];
+  const pt = { ...(fragHint('progress') ? { progress: fragHint('progress') } : {}), ...(fragHint('text_candidates') ? { text_candidates: fragHint('text_candidates') } : {}), ...(manifest.playtest || {}) };
+  const textCandidates = pt.text_candidates ?? pt.texts; // `texts` is accepted as another name
+  if (pt.progress || textCandidates) {
     playtestGame = clone(out);
     if (textCandidates) {
       playtestGame.state = { ...(playtestGame.state || {}), __text_candidates: { type: 'list<string>', init: '[]' } };

@@ -82,3 +82,27 @@ func TestSharedArtStyleSlot(t *testing.T) {
 		t.Errorf("withArtStyle: %+v", lists)
 	}
 }
+
+func TestFillThemeType(t *testing.T) {
+	s := baseSpec()
+	s.Theme.ArtStyle = "pixel art"
+	fillThemeType(&s, ContextUnder{Theme: []string{"space"}, Families: []string{"arcade_action"}})
+	if s.Theme.Type == nil || s.Theme.Type.Theme[0] != "space" || s.Theme.Type.Genre[0] != "arcade_action" || s.Theme.Type.Style[0] != "pixel art" {
+		t.Fatalf("theme.type not filled: %+v", s.Theme.Type)
+	}
+	// The spec's own words win; only the empty parts are filled.
+	s2 := baseSpec()
+	s2.Theme.Type = &ThemeType{Era: "1985", Theme: []string{"game show"}}
+	fillThemeType(&s2, ContextUnder{Theme: []string{"tv"}, Families: []string{"trivia"}})
+	if s2.Theme.Type.Era != "1985" || s2.Theme.Type.Theme[0] != "game show" || s2.Theme.Type.Genre[0] != "trivia" {
+		t.Fatalf("spec words not kept: %+v", s2.Theme.Type)
+	}
+	// Nothing to say: no type.
+	s3 := baseSpec()
+	s3.Theme.ArtStyle = ""
+	fillThemeType(&s3, ContextUnder{})
+	if s3.Theme.Type != nil {
+		t.Fatalf("empty type set: %+v", s3.Theme.Type)
+	}
+	fillThemeType(nil, ContextUnder{Theme: []string{"x"}})
+}

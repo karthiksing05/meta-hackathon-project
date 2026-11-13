@@ -130,7 +130,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "quiz",
       "reveal",
       "rounds",
@@ -835,7 +834,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "quiz",
       "rounds",
       "score",
@@ -906,7 +904,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "rounds",
       "score",
@@ -1715,7 +1712,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "quiz",
       "rounds",
@@ -1916,7 +1912,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "rounds",
       "score",
       "reveal",
@@ -2052,7 +2047,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "rounds",
       "score",
       "reveal",

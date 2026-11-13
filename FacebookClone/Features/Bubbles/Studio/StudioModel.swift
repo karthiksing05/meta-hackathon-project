@@ -928,7 +928,8 @@ final class StudioModel {
         case .failed:
             fail(StudioFailure(message: event.detail ?? "Muse couldn't finish this one.", detail: nil))
         default:
-            Haptics.soft()
+            // No tap per step while minimized (the person is elsewhere in the app).
+            if !GameBuildTracker.shared.isMinimized(self) { Haptics.soft() }
         }
     }
 
@@ -986,7 +987,8 @@ final class StudioModel {
         if composeKind == .tweak, pendingChangeRun { anatomyThread.acceptAsBuilt() }
         pendingChangeRun = false
         // Formula and microgame runs both end here.
-        GameSound.play(.ready, haptic: true)
+        // Minimized: the dock gives its own gentle haptic instead of the ready sound.
+        if !GameBuildTracker.shared.isMinimized(self) { GameSound.play(.ready, haptic: true) }
         advanceTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: 1_300_000_000)
             // Mid-answer on the Build step: the Play button waits for them instead.
@@ -1514,7 +1516,7 @@ extension StudioModel {
         let onWait: @MainActor (StudioGenerateBridge.Wait?) -> Void = { [weak self] wait in self?.generationWait = wait }
         if let revision = runRevision {
             runIsServer = true
-            return StudioGenerateBridge.revise(with: GameGeneratorFactory.current, revision: revision, onReport: onReport, onWait: onWait)
+            return StudioGenerateBridge.revise(with: GameBuildTracker.shared.generator(for: self), revision: revision, onReport: onReport, onWait: onWait)
         }
         guard kind == .create, canBuildMicrogame else { return nil }
         let brief = request.brief ?? briefForRun ?? BubbleBrief(intent: request.prompt, audience: request.scope)
@@ -1524,7 +1526,7 @@ extension StudioModel {
         let text = String(String.UnicodeScalarView(words.unicodeScalars.prefix(Self.maxRequestCharacters)))
         runIsServer = true
         // A draft until the person shares it, so builds they drop never reach the feed.
-        return StudioGenerateBridge.compose(with: GameGeneratorFactory.current, request: text, brief: brief,
+        return StudioGenerateBridge.compose(with: GameBuildTracker.shared.generator(for: self), request: text, brief: brief,
                                             anatomy: agreedAnatomyText, draft: true, sound: sound,
                                             onReport: onReport, onWait: onWait)
     }

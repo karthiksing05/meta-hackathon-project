@@ -10,10 +10,14 @@ import SwiftUI
 /// - `FB_AUTH=screen|guest`: force the sign-in screen, or continue as a guest
 /// - `FB_OPEN`: one of
 ///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `find-friends`, `sound:<id>`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
+///   `play-file:<path>` (a game manifest JSON file on the Mac running the simulator: added for this session and played),
 ///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
 ///   keys: challenge, groups-search, together, remix, story, nextline, learn, length, saves)
+///   `messenger`, `chat:<id prefix>` (or `chat:` for the latest chat)
+/// - `FB_API=mock|live`: the feed, Reels, Stories and Messenger from the built-in mock world or the
+///   server (`/v1/fb`, the default). See `FacebookAPI.swift`.
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
 /// - `FB_LOGIN_EMAIL` + `FB_LOGIN_PASSWORD`: sign in as that (test) account at launch (`GamesAccount`).
 /// - `FB_AUTOPLAY=1`: the player starts the run without the intro tap.
@@ -68,6 +72,10 @@ enum DebugLaunch {
                 let bubble = await bubbleStore.loadGame(id: arg)
                 router.play(bubble?.id ?? arg)
             }
+        case "play-file":
+            if let data = FileManager.default.contents(atPath: arg), let manifest = try? BubbleManifest.decode(data) {
+                router.play(bubbleStore.publish(manifest).id)
+            }
         case "burst":
             let replay = bubbleStore.bubble(id: arg)?.featuredRun?.replay
             router.play(arg, replay: replay)
@@ -83,6 +91,13 @@ enum DebugLaunch {
         case "profile":
             if let user = arg == "me" ? appStore.me : appStore.user(id: arg) { router.push(.profile(user)) }
         case "reels": router.openReels()
+        case "messenger": router.openMessenger()
+        case "chat":
+            // A chat by id, or the most recent one ("chat:" alone). Waits for the live chats to load.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                let chat = arg.isEmpty ? appStore.inboxConversations.first : appStore.conversations.first { $0.id.hasPrefix(arg) }
+                if let chat { router.openChat(chat) }
+            }
         case "story":
             break // Stories: the stories surface reads FB_OPEN=story:<userID> itself.
         case "feature":

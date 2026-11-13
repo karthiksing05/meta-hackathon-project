@@ -24,8 +24,8 @@
     "social_hooks": ["the Group gets the same daily story and compares how few questions each needed", "share your best question without spoiling the answer"],
     "content_needs": ["cases: setup, hidden solution, 30-60 facts with replies and the words players use, solutions (qa-bank/1, refined once)"],
     "difficulty_levers": ["question budget", "how far the story is from the obvious reading", "number of key facts", "wrong-solve cost"],
-    "tools": ["qa_bank", "keyboard", "qa_bank_content", "daily_seed"],
-    "engine_gaps": ["text_input"],
+    "tools": ["qa_bank", "qa_bank_content", "daily_seed"],
+    "engine_gaps": [],
     "gate_profile": "puzzle",
     "example_prompts": [
       "lateral thinking puzzles where I ask yes/no questions to solve them",
@@ -35,7 +35,7 @@
     ],
     "status": "seed",
     "source": "gap_open_text",
-    "notes": "Kevin32 #26. The keyboard grid until text_input ships; the matcher answers about 90% of held-out player questions right after one refine round (docs/harness-gaps/open-text.md)."
+    "notes": "Kevin32 #26. Typed on the iPhone keyboard (qa_bank v2 brings a native text field); the matcher answers about 90% of held-out player questions right after one refine round (docs/harness-gaps/open-text.md)."
   },
   {
     "id": "interrogate_typed_questions",
@@ -61,8 +61,8 @@
     "social_hooks": ["friends race the same case and compare question counts"],
     "content_needs": ["one case per run: setup, hidden truth, facts in the character's knowledge, solutions (qa-bank/1)"],
     "difficulty_levers": ["question budget", "how many facts are evasive", "red herrings"],
-    "tools": ["qa_bank", "keyboard", "qa_bank_content"],
-    "engine_gaps": ["text_input"],
+    "tools": ["qa_bank", "qa_bank_content"],
+    "engine_gaps": [],
     "gate_profile": "puzzle",
     "example_prompts": [
       "interrogate a suspect by typing my own questions",

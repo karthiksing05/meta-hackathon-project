@@ -477,7 +477,7 @@
       "hidden cubes"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "reveal"
     ],
     "engine_gaps": [],

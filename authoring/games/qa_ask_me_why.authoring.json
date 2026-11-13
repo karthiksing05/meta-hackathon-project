@@ -7,18 +7,6 @@
  },
  "uses": [
   {
-   "fragment": "keyboard",
-   "params": {
-    "letters": "qwertyuiopasdfghjklzxcvbnm <>",
-    "cols": 10,
-    "rows": 3,
-    "key_size": 31,
-    "gap": 3,
-    "x": 9,
-    "y": 420
-   }
-  },
-  {
    "fragment": "qa_bank",
    "params": {
     "questions": 20

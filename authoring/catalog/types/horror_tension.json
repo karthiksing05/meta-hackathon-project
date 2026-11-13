@@ -2523,7 +2523,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "vote_tally",
       "anonymous_submit",
       "group_roster",

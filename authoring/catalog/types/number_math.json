@@ -151,7 +151,7 @@
       "time limit"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "timer_bar",
       "score"
     ],
@@ -204,7 +204,7 @@
       "hints"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "lives",
       "hint"
     ],
@@ -479,7 +479,7 @@
     ],
     "tools": [
       "reveal",
-      "keyboard",
+      "text_input",
       "score",
       "rounds"
     ],
@@ -1008,7 +1008,7 @@
       "time"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "lives",
       "rounds"
     ],
@@ -1220,7 +1220,7 @@
       "speed"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "timer_bar",
       "sequence_memory"
     ],
@@ -1324,7 +1324,7 @@
       "uneven orders"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "reveal"
     ],
     "engine_gaps": [],
@@ -1532,7 +1532,7 @@
       "time"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "hint",
       "reveal"
     ],
@@ -1638,7 +1638,7 @@
       "time"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "timer_bar"
     ],
     "engine_gaps": [],
@@ -1796,7 +1796,7 @@
     ],
     "tools": [
       "sequence_memory",
-      "keyboard",
+      "text_input",
       "speed_ramp"
     ],
     "engine_gaps": [],
@@ -1901,7 +1901,7 @@
       "streak target"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "timer_bar"
     ],
     "engine_gaps": [],
