@@ -50,6 +50,15 @@ protocol GamesAPI: Sendable {
     func blend(groupID: String, count: Int) async throws -> RemoteBlend
     /// My own games (`GET /v1/creations`).
     func creations() async throws -> [RemoteGame]
+
+    // Game anatomy (docs/BUBBLES.md 7.13): the server asks Muse; one short call each (about 5 to
+    // 10 s), answered in the reply as a `game-anatomy/0.1` object. Decode it with
+    // `GameAnatomy.decode`. 503: Muse isn't set up; 502: Muse's reply wasn't an anatomy.
+    /// `POST /v1/anatomy {request, audience?}`: Muse takes an idea apart into its working parts.
+    func anatomy(request: String, audience: String?) async throws -> JSONValue
+    /// `POST /v1/anatomy/revise {anatomy, change, request?, afterPlaying?}`: the anatomy with the
+    /// change (and any answers in it) folded in, plus `changed` and `reply`.
+    func reviseAnatomy(_ anatomy: JSONValue, change: String, request: String?, afterPlaying: Bool) async throws -> JSONValue
 }
 
 /// Accounts.

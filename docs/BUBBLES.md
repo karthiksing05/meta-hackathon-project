@@ -1727,10 +1727,13 @@ original.
 ### 7.13 Game anatomy: agreeing how the game works
 
 > **Live data (Stage 4).** The app's Muse call (`GameAnatomyMuse.swift`, `MuseAnatomyPrompts.swift`)
-> and the fixtures are deleted. Until the server has an anatomy endpoint, the Brief step's "How the
-> game works" card and Try's "Change the game" card say "Not available yet"
-> (`StudioAnatomyThread.isAvailable`). The format, the model (`GameAnatomy.swift`) and the views
-> stay, and a game's saved anatomy still loads.
+> and the fixtures are deleted. The server asks Muse instead (`POST /v1/anatomy {request, audience?}`
+> and `POST /v1/anatomy/revise {anatomy, change, request?, afterPlaying?}`, both answered in the reply
+> with the `game-anatomy/0.1` object, about 5 to 10 s; the prompts moved to
+> `backend/generator/src/anatomy.mjs`). The app decodes it (`GameAnatomy.decode`) and calibrates it
+> with the engine's fragment ids from `MicrogameStudio.catalog()`. Errors show the server's words: 503
+> "Muse is not set up on this server yet", 502 "Muse couldn't take this game apart", with Try again
+> (or "Make it as written" on Try).
 
 Studio used to take a person's *style* (mood, look, theme) but not their *function*. The game anatomy is
 Muse's read of how the game works, part by part, agreed with the person before the build and changed
@@ -1762,12 +1765,11 @@ get defaults, unknown familiarity reads as approximate, a `{"anatomy": {...}}` w
 Revisions add top-level `changed` (`"end"`, `"rules.2"`, ...) and `reply` ("This changes rule 2 and how it
 ends."); Studio also diffs the two versions itself when `changed` is missing.
 
-**Muse.** `GameAnatomyMuse` (`draft`, `revise`), one JSON turn on the fast model (about 5 s; the planner
-took 30–55 s for the same reads). Prompts: `MuseAnatomyPrompts.swift` (`MusePrompts.anatomySystem`,
-`anatomyUser`, `anatomyReviseUser`); the system prompt lists the microgame fragments (live catalog,
-or a built-in list) so Muse can judge what it knows. Without a Muse key, or with `FB_STUDIO_ANATOMY`,
-Studio uses `GameAnatomyFixtures` (a word guess, a grid logic puzzle with parts new to Muse, and a dodge
-game in the request's theme).
+**Muse.** On the server (`GamesAPI.anatomy(request:audience:)` and
+`reviseAnatomy(_:change:request:afterPlaying:)`), one JSON turn on the fast model. The server's system
+prompt lists the microgame fragments so Muse can judge what it knows; the answers the person gave
+travel inside the anatomy (`answer` on each part). There are no fixtures: when the server can't answer,
+the card says why.
 
 **In Studio** (`StudioAnatomyThread`, `StudioAnatomyCard`, `StudioAnatomyChat`):
 - *Brief step*: "How the game works" drafts alongside the brief. Summary ("Muse understood 13 parts; 2 are
@@ -1780,8 +1782,9 @@ game in the request's theme).
   formula games, to the brief's `notes`. `MicrogamePrompts` is unchanged.
 - *Try step*: "Change the game" replaces "Tweak it" when there is an anatomy. Each message is first mapped
   onto the anatomy (Muse's reply, the updated parts, anything new to Muse); "Make the change" makes the
-  updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`) with the person's
-  words, what changes and the updated anatomy. The last 6 turns stay visible.
+  updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`, a change on the
+  server, 4.4) with the person's words, what changes and the changed parts' new wording (the game
+  already follows the rest). The last 6 turns stay visible.
 - *Saved with the game*: on share or save, the agreed anatomy goes into the game's make record on this
   device (`MakeRecord.anatomyJSON` and `anatomyRequest`; the manifest is unchanged). Edit, Remix and the
   next level load it (`StudioModel.loadSavedAnatomy`), so they keep "Change the game", and a remix shows
