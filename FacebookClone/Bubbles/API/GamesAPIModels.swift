@@ -218,11 +218,15 @@ struct RemoteFeedItem: Decodable, Identifiable, Hashable, Sendable {
     var team: String?
     /// Set when this page is a sponsored post. Only the server decides that.
     var sponsor: RemoteSponsor?
+    /// The game's family (`baseId`): a base game, its Group copies, remixes and variants share it.
+    /// The server shows one per family per session; the app dedupes on it too.
+    var baseID: String?
 
     var id: String { feedItemID }
 
     enum CodingKeys: String, CodingKey {
         case feedItemID, reason, why, unproven, team, sponsor
+        case baseID = "baseId"
     }
 
     init(from decoder: Decoder) throws {
@@ -234,6 +238,7 @@ struct RemoteFeedItem: Decodable, Identifiable, Hashable, Sendable {
         unproven = try c.decodeIfPresent(Bool.self, forKey: .unproven) ?? false
         team = try c.decodeIfPresent(String.self, forKey: .team).flatMap { $0.isEmpty ? nil : $0 }
         sponsor = (try? c.decodeIfPresent(RemoteSponsor.self, forKey: .sponsor)).flatMap { $0?.name.isEmpty == false ? $0 : nil } ?? game.sponsor
+        baseID = try c.decodeIfPresent(String.self, forKey: .baseID).flatMap { $0.isEmpty ? nil : $0 }
     }
 }
 

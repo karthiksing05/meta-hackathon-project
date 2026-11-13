@@ -52,6 +52,8 @@ final class BubbleStore {
     @ObservationIgnored var feedTask: Task<Void, Never>?
     /// Bumped for each feed request, so a superseded one can tell it no longer owns the feed.
     @ObservationIgnored var feedGeneration = 0
+    /// Feed pages in a row that brought nothing new (see `loadMoreFeed`).
+    @ObservationIgnored var feedStaleStreak = 0
     @ObservationIgnored var gameRequests: [String: Task<Bubble?, Never>] = [:]
     @ObservationIgnored private var dayObservers: [NSObjectProtocol] = []
     @ObservationIgnored let isPreview: Bool
@@ -339,9 +341,7 @@ final class BubbleStore {
         }
         // A different account (signed in, signed up, guest) means a different personalized feed.
         dayObservers.append(center.addObserver(forName: .gamesAccountChanged, object: nil, queue: .main) { [weak self] _ in
-            guard let self else { return }
-            self.feedItems.removeAll()
-            self.reloadFeed()
+            self?.restartFeedForNewAccount()
         })
     }
 

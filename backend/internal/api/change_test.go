@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -94,8 +95,12 @@ func TestDraftsAnatomyAndBaseManifest(t *testing.T) {
 	if baseGame["unlisted"] != nil {
 		t.Fatalf("a new game is public: %v", baseGame)
 	}
+	// The feed shows one game per family (a change is in its base game's family) and picks the one that suits the
+	// viewer, so ask as the person who made the changes: their own version wins. Each look is a new session.
+	looks := 0
 	feedIDs := func() map[string]bool {
-		_, f := do(t, "GET", ts.URL+"/v1/feed", "", nil, "")
+		looks++
+		_, f := do(t, "GET", ts.URL+"/v1/feed?sessionID=look"+strconv.Itoa(looks), other, nil, "")
 		ids := map[string]bool{}
 		for _, it := range f["items"].([]any) {
 			ids[it.(map[string]any)["id"].(string)] = true
