@@ -1,0 +1,101 @@
+{
+  "family": "mystery_narrative",
+  "checklists": [
+    {
+      "applies_to": [
+        "*"
+      ],
+      "slots": [
+        {
+          "id": "hero_and_world",
+          "ask": "Who are you in the story, and where does it happen?",
+          "why": "The hero and the world set every scene, the choices that make sense, and the art.",
+          "need": "required",
+          "extrapolate_from": "a named character, franchise, place or role in the request (\"Princess Leia\", \"a stray cat\", \"a medieval peasant\")",
+          "default": "an original fantasy hero",
+          "ask_when": "the request names no hero, role or world at all",
+          "choices": [
+            "a named character",
+            "an everyday version of me",
+            "an animal",
+            "an original fantasy hero"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        },
+        {
+          "id": "case",
+          "ask": "What is the mystery: who did it, what is missing, or what really happened?",
+          "why": "The case decides the clues (items and flags), the suspects and which ending counts as solving it.",
+          "need": "required",
+          "extrapolate_from": "the crime, the missing thing or the question in the request",
+          "default": "what went missing",
+          "choices": [
+            "who did it",
+            "what went missing",
+            "what really happened"
+          ],
+          "affects": [
+            "content",
+            "rules"
+          ]
+        },
+        {
+          "id": "clue_count",
+          "ask": "How many clues do you need before you can accuse someone?",
+          "why": "Sets the clue threshold that gates the right accusation, and so how hard the case is.",
+          "need": "nice",
+          "extrapolate_from": "easy, hard, quick, daily in the request",
+          "default": "3 clues",
+          "choices": [
+            "2 clues",
+            "3 clues",
+            "4 clues"
+          ],
+          "affects": [
+            "difficulty",
+            "rules"
+          ]
+        },
+        {
+          "id": "cast",
+          "ask": "Should people from your Group be in the story?",
+          "why": "A Group cast makes the story about specific friends; only names and details given in the request are used.",
+          "need": "nice",
+          "extrapolate_from": "\"starring our group\", \"my friends\", names in the request, or a Group target in Studio",
+          "default": "no, an original cast",
+          "choices": [
+            "no, an original cast",
+            "yes, the Group as side characters",
+            "yes, the Group as rivals"
+          ],
+          "affects": [
+            "content",
+            "social"
+          ]
+        },
+        {
+          "id": "tone",
+          "ask": "Should it feel funny, epic or tense?",
+          "why": "Tone sets the voice of every scene, how harsh bad endings are, and the look and sound.",
+          "need": "nice",
+          "extrapolate_from": "words like brainrot, silly, epic, spooky, cozy, or the franchise's usual tone",
+          "default": "light and funny",
+          "choices": [
+            "light and funny",
+            "epic",
+            "tense",
+            "cozy"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": "Choice-driven mysteries use branching_story: clues are items or a clue stat, the accusation routes on them."
+}

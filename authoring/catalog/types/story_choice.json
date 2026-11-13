@@ -59,6 +59,7 @@
       "card variety"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "swipe_cards",
       "meters",
@@ -134,6 +135,7 @@
       "number of hidden endings"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "score"
@@ -207,6 +209,7 @@
       "how hidden the last ones are"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "shared_progress",
       "checkpoint",
@@ -360,6 +363,7 @@
       "visibility of mood"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "rounds",
@@ -437,6 +441,7 @@
       "number of beats"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "score"
@@ -512,6 +517,7 @@
       "loop limit"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "checkpoint",
       "hint",
@@ -585,6 +591,7 @@
       "check thresholds"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "score"
@@ -659,6 +666,7 @@
       "event harshness"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "lives",
@@ -733,6 +741,7 @@
       "outcome length"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal"
     ],
@@ -802,6 +811,7 @@
       "extremity"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "shared_progress"
@@ -875,6 +885,7 @@
       "number of branches"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "timer_bar"
@@ -947,6 +958,7 @@
       "number of gates"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "pickups",
       "inventory",
@@ -1020,6 +1032,7 @@
       "interviewer strictness"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "rounds",
@@ -1092,6 +1105,7 @@
       "fear weight"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "reveal"
@@ -1162,6 +1176,7 @@
       "number of scenes"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal"
     ],
@@ -1310,6 +1325,7 @@
       "number of resources"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "score",
@@ -1381,6 +1397,7 @@
       "tag count"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "reveal"
@@ -1453,6 +1470,7 @@
       "number of steps"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "score"
@@ -1597,6 +1615,7 @@
       "story length"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "quiz",
       "score"
@@ -1666,6 +1685,7 @@
       "number of branches"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "checkpoint",
       "hint",
@@ -1741,6 +1761,7 @@
       "number of sectors"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "lives",
@@ -1818,6 +1839,7 @@
       "hint quality"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "score"
@@ -1891,6 +1913,7 @@
       "audience volatility"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "rounds",
@@ -1963,6 +1986,7 @@
       "cross-effects"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "turns",
       "checkpoint"
@@ -2034,6 +2058,7 @@
       "distance between flag and callback"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "checkpoint",
       "reveal",
@@ -2105,6 +2130,7 @@
       "stakes"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "timer_bar",
       "countdown",
@@ -2176,6 +2202,7 @@
       "ties"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "shared_progress",
       "daily_seed"
@@ -2248,6 +2275,7 @@
       "typed vs picked"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "turns",
       "keyboard",
@@ -2319,6 +2347,7 @@
       "line variety"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "rounds",
@@ -2392,6 +2421,7 @@
       "dead ends"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "pickups",
       "checkpoint",
@@ -2463,6 +2493,7 @@
       "contradiction difficulty"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "hint"
@@ -2532,6 +2563,7 @@
       "deck size"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "daily_seed"
@@ -2602,6 +2634,7 @@
       "conflicts"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "score"
     ],
@@ -2615,5 +2648,234 @@
     "status": "seed",
     "source": "seed-karthik",
     "refs": []
+  },
+  {
+    "status": "seed",
+    "source": "gap-story",
+    "id": "choice_limit_quest",
+    "name": "Goal in N choices",
+    "family": "story_choice",
+    "subfamily": "choice limit",
+    "aliases": [
+      "in 10 choices or less",
+      "rags to riches in N moves",
+      "become king in 10 choices",
+      "speedrun story"
+    ],
+    "summary": "A branching quest with a hard choice budget: reach the top ending (become king, get the job, win the heart) before your choices run out. Friends compare who got there in the fewest choices.",
+    "core_loop": "read scene → pick a choice that builds stats or items → watch the choices-left counter → reach an ending or run out → share \"king in 6 choices\"",
+    "verbs": [
+      "choose",
+      "plan",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene text",
+      "choice buttons",
+      "choices-left counter",
+      "stats line",
+      "ending card"
+    ],
+    "rules": [
+      "every path ends within the choice limit",
+      "the last choice falls to an out-of-choices ending unless it reaches one",
+      "stats and items gate the shortcut routes",
+      "fewer choices to a good ending scores more"
+    ],
+    "win": "reach the best ending within the limit",
+    "lose": "a bad ending or running out of choices",
+    "scoring": "ending rank first, then unused choices",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "\"I became king in 6 choices\": compare choice counts in the Group",
+      "see which endings friends found"
+    ],
+    "content_needs": [
+      "story graph of 14-30 scenes",
+      "choice limit and out-of-choices ending",
+      "1-3 stats, 1-2 items",
+      "ranked endings with share lines"
+    ],
+    "difficulty_levers": [
+      "choice limit",
+      "how many stats the top route needs",
+      "decoy routes"
+    ],
+    "tools": [
+      "branching_story",
+      "choice_story",
+      "story_vars",
+      "score",
+      "stat_block",
+      "inventory"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "choose your own adventure where I'm a medieval peasant trying to become king in 10 choices or less",
+      "go from intern to CEO in 8 choices",
+      "win the heart of the prom king in five choices",
+      "escape the island in 7 moves or less"
+    ]
+  },
+  {
+    "status": "seed",
+    "source": "gap-story",
+    "id": "survive_the_day_story",
+    "name": "Survive the day",
+    "family": "story_choice",
+    "subfamily": "survival story",
+    "aliases": [
+      "survive the week",
+      "office survival",
+      "dodge the manager",
+      "last day before vacation",
+      "Friday 4:59pm"
+    ],
+    "summary": "A short day told in scenes: each choice spends energy or raises suspicion while trouble closes in (the manager, the landlord, the in-laws). Make it to the end of the day with your stats intact.",
+    "core_loop": "read the moment → pick how to dodge or deal → energy and suspicion shift → the clock moves on → escape, get caught or collapse",
+    "verbs": [
+      "dodge",
+      "choose",
+      "hide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "clock or day label",
+      "scene text",
+      "choice buttons",
+      "energy and suspicion stats",
+      "endings"
+    ],
+    "rules": [
+      "risky dodges raise suspicion; safe ones cost energy",
+      "suspicion over a threshold routes to getting caught",
+      "an item (badge, excuse, coffee) unlocks a shortcut"
+    ],
+    "win": "get out on time",
+    "lose": "caught, exhausted or stuck late",
+    "scoring": "ending rank, then stats left",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare escape endings with coworkers",
+      "a Group's Friday challenge"
+    ],
+    "content_needs": [
+      "story graph of 12-25 scenes",
+      "two opposing stats",
+      "catch thresholds",
+      "ranked endings"
+    ],
+    "difficulty_levers": [
+      "catch threshold",
+      "energy cost of safe moves",
+      "number of traps"
+    ],
+    "tools": [
+      "branching_story",
+      "choice_story",
+      "story_vars",
+      "score",
+      "stat_block"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "survival game where I'm the last person in the office at 4:59pm dodging my manager",
+      "survive the week at summer camp",
+      "get through thanksgiving dinner without a fight",
+      "make it out of the mall before close"
+    ]
+  },
+  {
+    "status": "seed",
+    "source": "gap-story",
+    "id": "group_cast_story",
+    "name": "Our Group's adventure",
+    "family": "story_choice",
+    "subfamily": "social story",
+    "aliases": [
+      "choose your path starring our group",
+      "adventure with my friends in it",
+      "our group chat as a story"
+    ],
+    "summary": "A branching story whose cast is the Group: members (only the names and details given) are allies, rivals and side characters. Everyone plays the same story, then compares endings and who they trusted.",
+    "core_loop": "read a scene with a friend in it → pick who to trust or what to do → stats and flags remember it → reach an ending → compare paths in the Group",
+    "verbs": [
+      "choose",
+      "trust",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene text naming members",
+      "choice buttons",
+      "trust stat",
+      "ending card"
+    ],
+    "rules": [
+      "cast only names and details the request gives; nothing private",
+      "each member appears in at least one choice",
+      "endings reflect who you trusted"
+    ],
+    "win": "the best ending",
+    "lose": "a bad ending",
+    "scoring": "ending rank, then trust",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "the Group sees who trusted whom",
+      "tag the friend who betrayed you in the story"
+    ],
+    "content_needs": [
+      "member names and safe details",
+      "story graph of 12-25 scenes",
+      "ranked endings"
+    ],
+    "difficulty_levers": [
+      "how many members gate routes",
+      "decoy allies"
+    ],
+    "tools": [
+      "branching_story",
+      "choice_story",
+      "story_vars",
+      "score",
+      "stat_block",
+      "shared_progress"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a choose your path story starring our group",
+      "make an adventure where my friends and I rob a bakery",
+      "a mystery where someone in our group chat ate the last slice"
+    ]
   }
 ]

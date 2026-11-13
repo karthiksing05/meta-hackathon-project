@@ -28,5 +28,11 @@
     "expect": [
       "cooperative_raid_boss"
     ]
+  },
+  {
+    "request": "retro rpg as a stray cat recruiting a gang to take over the alley",
+    "expect": [
+      "gang_recruit_story_rpg"
+    ]
   }
 ]

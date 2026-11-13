@@ -440,10 +440,15 @@
       "key items"
     ],
     "summary": "A list of items the player holds; picking up adds one, using or combining removes them, and choices or doors check for them.",
-    "when_to_use": "Escape rooms, adventure and story games with key items, crafting.",
+    "when_to_use": "Escape rooms, adventure and story games with key items, crafting. In a branching story, items are story-graph vars of kind \"item\" (branching_story).",
     "api": "list<string> or set state; push / add on pickup, remove on use, has / contains in guards; a row of item icons in the HUD",
     "status": "shipped",
-    "notes": "custom rules from list and set builtins; choice_story labels can be hidden (empty) by rules when an item is missing"
+    "notes": "custom rules from list and set builtins; in a branching_story an item is a 0/1 var shown in the bag line and checked by a choice's \"if\" (story_vars hides the choice when it fails)",
+    "example_types": [
+      "inventory_gated_story",
+      "gang_recruit_story_rpg",
+      "text_parser_adventure"
+    ]
   },
   {
     "id": "swipe_zones",
