@@ -11,6 +11,8 @@ import { expand as expandManifest, translate } from './expand.mjs';
 import { wrapGame } from './wrap.mjs';
 import { playtestAsync, DEFAULT_BOTS } from '../playtest/gate-async.mjs';
 import { checkScore } from '../playtest/score-check.mjs';
+import { storyGate as playStoryGate, asScoreRuns } from '../playtest/story-bots.mjs';
+import { validateStoryGraph } from './story-graph.mjs';
 import { normalizeScore } from './score.mjs';
 import { sortSafe } from './stable.mjs';
 import { pickGold, goldPromptText } from './gold.mjs';
@@ -19,7 +21,9 @@ import * as Prompts from './prompts.mjs';
 import { composeGame } from './pipeline.mjs';
 
 // 3: compose takes a harness `context` (trimmed menu, gold_ids, spec, gate_profile) and checks scores.
-export const STUDIO_API_VERSION = 3;
+export const STUDIO_API_VERSION = 4; // 4: storyGate, and compose builds stories from a story graph
+/** Random readers the story gate plays; the spam check compares with their median, so more is steadier. */
+export const STORY_RANDOM_READERS = 7;
 
 const now = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
 const round1 = (x) => Math.round(x * 10) / 10;
@@ -392,6 +396,29 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
   }
 
   /**
+   * The story gate (playtest/story-bots.mjs) on a compiled story: plays a route to every ending plus
+   * random readers, checks the engine against the graph on every move, and keeps the runs (as score
+   * runs: shortest = pro, random = regular, worst = new player) for scoreCheck. graph: the story-graph/1;
+   * manifest: the compiled authoring manifest. Resolves to JSON {passed, summary, flags, endings, runs}.
+   */
+  async function storyGate(gameJSON, graphJSON, manifestJSON) {
+    const json = typeof gameJSON === 'string' ? gameJSON : JSON.stringify(gameJSON);
+    const graph = typeof graphJSON === 'string' ? JSON.parse(graphJSON) : graphJSON;
+    const manifest = typeof manifestJSON === 'string' ? JSON.parse(manifestJSON) : manifestJSON;
+    const report = validateStoryGraph(graph);
+    const res = playStoryGate(engine(), json, report, manifest, { randomBots: STORY_RANDOM_READERS });
+    // The extra random readers keep their 'random N' label: the spam check's median reads them, the
+    // skill order doesn't.
+    const extra = res.runs.filter((r) => r.ok && /^random (\d+)$/.test(r.bot.label) && Number(r.bot.label.slice(7)) > 3);
+    gated.set(json, { runs: [...asScoreRuns(res.runs), ...extra], seed: 1, maxSeconds: 600 });
+    while (gated.size > 4) gated.delete(gated.keys().next().value);
+    return JSON.stringify({
+      passed: res.passed, summary: res.summary, flags: res.flags, endings: res.endings,
+      runs: res.runs.map((r) => ({ bot: { label: r.bot.label, skill: r.bot.skill }, ok: r.ok, error: r.error, outcome: r.outcome, score: r.score, seconds: round1(r.seconds), ending: r.ending, choices: r.choices, mismatch: r.mismatch ?? null })),
+    });
+  }
+
+  /**
    * The score check (playtest/score-check.mjs) on a game the gate played: the runs come from that gate
    * call (it gates the game again when they're gone). scoreJSON: the model (expand's `score`, or a raw
    * score block). Resolves to JSON {ok, ambiguous, checks, bounds, lines, runs}.
@@ -506,6 +533,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       expand: (text) => JSON.parse(expand(text)),
       gate: async (json, seed, opts) => JSON.parse(await gate(json, seed, opts)),
       scoreCheck: async (json, model) => JSON.parse(await scoreCheck(json, model)),
+      storyGate: async (json, graph, manifest) => JSON.parse(await storyGate(json, graph, manifest)),
       quality: (text, request) => JSON.parse(quality(text, request)),
       wrap: (opts) => JSON.parse(wrap(opts)),
     };
@@ -518,5 +546,5 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     return JSON.stringify(out);
   }
 
-  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, scoreCheck, wrap, examples: examplesFor, quality, prompt, compose });
+  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, storyGate, scoreCheck, wrap, examples: examplesFor, quality, prompt, compose });
 }
