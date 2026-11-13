@@ -332,6 +332,13 @@ emits `input.launch {dx, dy}`. Everything is drawn in the canvas (keyboards and 
 too), so replays and posters show it. Bots return the same pointer input (`[{a: "tap", v: [x, y]}]`),
 using layout helpers their kit exposes in `sdk.state`.
 
+The one exception is **typed text**, for kits that ask for a native text field with
+`sdk.textField({x, y, w, h, size, placeholder, max_len})` (playfield units; `null` for none; only
+microgames do, 7.11). Typed text goes through the same queue and is logged as
+`{t, a: "text", v: [kind, value]}`, with `kind` = `submit` or `change`. Concepts get it as
+`text.input {kind, value}`. A run logs text only when a concept listens for `text.input`, so Bubbles
+without a text field log exactly what they always did.
+
 **Defining a formula** (one per kit):
 
 ```js
@@ -1579,18 +1586,38 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   engine is seeded from the run's RNG.
 - Its frames draw in one `space` layer, scaled to fit the 360×640 playfield. Audio goes through the
   runtime's master gain (`fx.audio()`, new), so mute applies. Haptics and toasts go through `fx`.
-- Taps, drags and holds are forwarded; a quick flick is also sent as a swipe. The runtime has no
-  keyboard, so microgames must be playable by touch.
+- Taps, drags and holds are forwarded; a quick flick is also sent as a swipe. The runtime has no key
+  events, so microgames must be playable by touch, apart from typed text (next item).
+- **Text field.** A game with a text input (`{"text": "submit"}` or `{"text": "change"}` sources, so
+  `game.meta.text_input` is set; `engine/SPEC-v0.2.md` 4) gets a native `<input>` over the game at
+  `presentation.text_field` (canvas units; without it, a bar at the bottom like the engine's shell),
+  scaled with the playfield. The kit asks for it with `sdk.textField`, and the host
+  (`BubbleHost.syncTextField`, class `.bubble-text`) shows it only while the run plays. It hides as
+  soon as the run ends, and the keyboard goes with it. Its font is at least 16 px, so iOS doesn't zoom.
+  The field handles its own touches, so a tap on it opens the keyboard. WKWebView only opens the
+  keyboard from a user gesture, so nothing focuses it by script. Every edit sends `change`; Enter or
+  Done sends `submit`, then clears the field and sends an empty `change`, like the shell. Taps on the
+  game keep the keyboard up. In demos and replays the field is read-only and shows the run's last
+  typed value; a tap goes through it to take over. Letter-grid games (the `keyboard` fragment) are
+  unchanged: they're taps.
+- **Typed text in replays.** Text reaches the engine through the runtime's input queue as
+  `text.input`, so it's applied at the start of a tick and logged in the run's replay log as
+  `{t, a: "text", v: ["submit" | "change", value]}`. A replay, a resumed run or `BubbleJSRuntime.verify`
+  re-sends the same text at the same tick. Several edits in one tick keep only the last. `v` is an
+  array, so `BubbleInput` (Swift) keeps it unchanged, and an older runtime ignores the entry.
 - **Typed answers** (`typed_answer` + `keyboard`, `fuzzy_match`; `authoring/SPEC.md` 2.12) are
   matched by engine functions the fragments carry, generated from `authoring/expander/fuzzy.mjs`:
   case, accents, punctuation, articles, word order, plurals and length-aware typos are forgiven,
   aliases come from the answer bank (`answer=alias`). Nothing runs outside the engine, so live play,
-  bots and replays score the same answer the same way. Typing is through the on-screen keyboard
-  fragment for now (letters and space); the engine's native text field (`{"text": "submit"}`) isn't
-  wired into this kit yet.
-- The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. It drives posters,
-  demos and smoke runs. It's generic, so the runtime tests skip the skill checks for microgame seeds;
-  game quality is gated by `authoring/playtest` and the engine's replay tests.
+  bots and replays score the same answer the same way. Typing works through the on-screen keyboard fragment
+  (letters and space) or the native text field below.
+- The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. In games with a text
+  field it also types: it reads candidate strings from the game's live state (a target word, the words
+  on screen) and types one a letter at a time, then presses Done. With probability = skill it picks
+  the candidate that scores on a fork of the game (`mg_fork`). Weaker bots slip a letter more often.
+  It drives posters, demos and smoke runs. It's generic, so the runtime tests skip the skill checks
+  for microgame seeds; game quality is gated by `authoring/playtest` and the engine's replay tests.
+  The gate's bots submit `playtest.text_candidates` (`authoring/SPEC.md` 2.6).
 - **Verifiable scores** (for challenges and leaderboards). When a run is won or lost, the kit puts the
   engine's input log in `state.microgame.log`: `microgame-log/1` JSON text with the seed, the game's
   hash, every input and the final `{state_hash, phase, score, time_ms}`. Submit it with the score.
@@ -1598,7 +1625,9 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   recomputed, claimed, problems}`. It runs anywhere the engine bundle loads: the app, a friend's
   phone, or the server's Node generator. An edited score, a removed input or another game file fails.
   `tools/runtime-tests/microgame-verify.js` plays every microgame seed through the real runtime
-  and checks that honest logs verify and raised scores don't.
+  and checks that honest logs verify and raised scores don't. The engine logs text calls itself, so
+  typed answers verify like taps. The runtime's `result` message carries the log to Swift as
+  `engine_log` (`BubbleRunResult.engineLog`), which series rounds submit (7.14).
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
@@ -1614,8 +1643,13 @@ A bare `JSContext` on iOS has no WebAssembly, so headless validation there repor
 `microgame_unavailable`; microgame validation and playtests run in a web view (Studio, 7.12).
 
 **Tests.** `tools/runtime-tests/run-node.js` and `run-jsc.sh` validate, play and replay the formula's
-example and the `mg-*` seeds. `node tools/runtime-tests/microgame-chrome.mjs` plays seeds in the real
-`bubble-host.html` in headless Chrome with touch input and checks the bridge messages.
+example and the `mg-*` seeds. `node tools/runtime-tests/microgame-text.js` types into
+`mg-ferry-call` (the text-input fixture) through the real runtime. It checks the score, the
+`text` log entries, replays (also after a sorted-key round trip), `MicrogameEngine.verify` and bot
+runs, and that games without a text input never log text. `node tools/runtime-tests/microgame-chrome.mjs`
+plays seeds in the real `bubble-host.html` in headless Chrome with touch input and checks the bridge
+messages. For `mg-ferry-call` it taps the text field, types and presses Enter. It checks the field's
+place, focus and font size, that it hides at the end, and that the result's replay scores the same.
 
 **FB_OPEN.** `play:mg-gust-glider`, `bubble:mg-prism-breaker` (any `mg-*` seed id).
 
@@ -1850,54 +1884,29 @@ the content prompt; covers still carry no text or logos).
 DEBUG: the anatomy fixtures and `FB_STUDIO_ANATOMY`/`FB_STUDIO_STEP` were removed in Stage 4;
 `FB_STUDIO_SCROLL=anatomy|anatomy-rules|anatomy-<part>` (Brief) or `chat` (Try).
 
-### 7.14 Get-to-know brackets (bracket)
+### 7.14 Matches with a friend: best of 5 on the server (bracket)
 
-Meeting someone new should come with something to do together. When you become friends (you
-confirm, or they accept: `AppStore` posts `Notification.Name.friendshipStarted`), or you tap Add
-friend next to a stranger on a Group's weekly board or a game's board, the app proposes a **best of
-three** with that person: round 1 **Quick hands** (dodge, timing, microgame, merge), round 2 **Words
-and trivia** (guess, quiz night, answer, learn), round 3 **Get to know you** (answer, adventure,
-sort). Each round is a different game on a seed shared by the two of you (and the game's length), so
-it's the same course. The card (`BracketCardView`) shows both faces, the standing ("You 1 – 0
-Maya"), each round's game and both scores, and the winner; each round's Play opens the player on the
-round's seed. It sits at the top of their profile (`BubbleProfileHeaderSlots`), which also offers
-"Get to know Maya: 3 quick games" when there is none. Each round you finish posts a line to your 1:1
-chat ("Our bracket, round 1 (Hill Hopper): me 42 · you 39"); the final result goes to the chat and,
-for a bracket that started on a Group board, to the Group as a playable share card.
+Meeting someone new should come with something to do together. Adding a friend on the server (Find
+friends, the Group Blend's Add friend) posts `gamesFriendAdded`, and the app offers **a best of 5**
+(`BestOfFiveOfferSheet`): five quick microgames from the server's feed, the same games and the same
+seeds for both of you, first to 3 wins. "Play Maya: best of 5" starts it and drops you straight into
+round 1. A friend's profile has the same card (`BracketProfileCard`), or one tap to start a match.
 
-**Files** (`Features/Bubbles/Bracket/`): `FriendBracket.swift` (model, `BracketService` protocol,
-`BracketPlanner`), `LocalBracketService.swift` (today's implementation, in memory for the launch),
-`BracketLocalOpponent.swift` (**local stand-in**: the other person's rounds are bot runs of the real
-runtime on the same seed, through `BubbleStore.runtimeWorker`, marked `theirsIsLocalStandIn`),
-`BracketCardView.swift`, `BracketHooks.swift` (install, `didFinish`, `met`). Shared edits: one line
-each in `BubbleFeatureRouter` (install, didFinish), `BubbleFeatureSlots` (profile header),
-`AppStore` (the friendship notification), `GroupWeeklyBoardActions.addFriend` and `BubbleBoardView`.
-DEBUG: `FB_BRACKET=<userID>[:played]`.
+**Server-backed and checked** (`ServerBracketService`, Max's `/v1/series`, `backend/README.md` "Series"):
+- `POST /v1/series {opponentId, games}` creates the match; the server picks each round's seed.
+- Each round's Play opens the player on the round's seed (`BubblePlayRequest(seed:)`). When the run
+  ends, the runtime's result carries the engine's input log (`engine_log`, `microgame-log/1`, see
+  7.11), `BubbleStore.record` keeps it (`lastEngineLogs`), and `BracketHooks.didFinish` submits it:
+  `POST /v1/series/{id}/rounds/{n} {log}`. The server replays the log with `MicrogameEngine.verify`
+  against the game's stored `game_json` and keeps the **replayed** score and time; both players'
+  engine seeds must match. The other side's score stays hidden until you've played the round.
+- A round goes to the higher score, then the lower time; the match ends when someone has won more
+  than half the rounds or every round is decided (`winsNeeded`, `winner`).
+- Matches in play sit at the top of **Challenges** ("Your matches", `BracketCardView`), and rounds
+  waiting on you add to the trophy's badge. Nothing is simulated: the other side's rounds come from
+  the other person.
 
-**One offer per Add friend.** A server friendship (Find friends, the Group Blend's Add friend) posts
-`gamesFriendAdded`, and that tap gets the Challenges best-of-5 offer (`BestOfFiveOfferSheet`) and
-nothing from brackets. Brackets never pop up there: they live as the "Getting to know" card on the
-person's profile, start from its button, start quietly from Add friend on a game or Group weekly
-board (which use the local friend request and get no best-of-5 offer), and announce themselves with a
-toast only for friendships made through the local friend requests (`friendshipStarted`). When the
-server serves same-seed series, the bracket's rounds can become that series and the two merge.
-
-**Server endpoints the backend would need** (so `LocalBracketService` and `BracketLocalOpponent`
-can be swapped for a `GamesAPI`-backed service with no screen changes). Picking games, seeds and
-winners moves to the server; runs are verified like any score (seed plus replay).
-
-| Call | Body | Returns |
-|---|---|---|
-| `POST /v1/brackets` | `{opponent_id, origin: {kind: "new_friend" \| "group" \| "event", id?}}` | the bracket (an open one with that person if it exists) |
-| `GET /v1/brackets?with=<user_id>` | — | `{brackets: [bracket]}`, newest first |
-| `GET /v1/brackets/<id>` | — | the bracket |
-| `POST /v1/brackets/<id>/rounds/<index>/runs` | `{score, replay}` (the `BubbleInputLog`; its seed must be the round's) | the bracket, with your best score on that round |
-
-A bracket: `{id, created_at, origin, players: [user_id, user_id], rounds: [{index, theme: "reflex" |
-"words" | "about_you", game_id, seed, length, scores: {<user_id>: {score, replay_id, verified}}}],
-standing: {<user_id>: wins}, winner_id: string | null, finished: bool}`. Best of three: finished at
-two wins or when all three rounds have both scores. Events the app should hear (push or the
-notifications feed): `bracket.proposed` (a new friend; the app shows the card), `bracket.round_played`
-(the other person's score landed), `bracket.finished`. Posting the round lines to the chat and the
-final card to the Group can stay in the app (it already sends messages and Group posts) or move to the
-server with these events.
+**Files** (`Features/Bubbles/Bracket/`): `FriendBracket.swift` (model, `BracketService`, planner),
+`ServerBracketService.swift` (the server series, the round submission and copy), `BracketCardView.swift`,
+`BracketHooks.swift` (install, `didFinish`, `met`). `met` (Add friend on a board) starts nothing
+unless the person is already a server friend. Debug: `FB_BEST_OF_5=<userID>` shows the offer.

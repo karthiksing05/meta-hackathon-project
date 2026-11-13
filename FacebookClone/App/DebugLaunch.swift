@@ -17,8 +17,6 @@ import SwiftUI
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
 /// - `FB_API_URL`: overrides the games API base URL (default `https://api.ol4ol.com`). Point it at an
 ///   unreachable host to see the loading and error states.
-/// - `FB_BRACKET=<userID>[:played]`: starts a get-to-know bracket with that person at launch
-///   (`played` also records your round 1); see it on their profile (`FB_OPEN=profile:<userID>`).
 /// - `FB_RESUME_DEMO=<seconds>` / `FB_RESUME_AUTO=1`: the Resume prompt in the player (see
 ///   `BubblePlayerView`). `FB_FAKE_RESULT=player`: the result card in the player only.
 ///

@@ -10,7 +10,17 @@ struct ChallengesInboxView: View {
 
     var body: some View {
         List {
-            if inbox.items.isEmpty {
+            let matches = ServerBracketService.shared.active
+            if !matches.isEmpty {
+                Section("Your matches") {
+                    ForEach(matches) { match in
+                        BracketCardView(bracket: match, opponent: matchOpponent(match))
+                            .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                            .listRowBackground(Color.clear)
+                    }
+                }
+            }
+            if inbox.items.isEmpty && matches.isEmpty {
                 Section { emptyState }
             } else {
                 if !inbox.received.isEmpty {
@@ -38,8 +48,8 @@ struct ChallengesInboxView: View {
                 .accessibilityLabel("Find friends")
             }
         }
-        .refreshable { inbox.reload() }
-        .onAppear { inbox.reload() }
+        .refreshable { inbox.reload(); ServerBracketService.shared.reload() }
+        .onAppear { inbox.reload(); ServerBracketService.shared.reload() }
     }
 
     @ViewBuilder
@@ -67,6 +77,12 @@ struct ChallengesInboxView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
         }
+    }
+
+    private func matchOpponent(_ match: FriendBracket) -> User {
+        let p = ServerBracketService.shared.opponent(of: match)
+        return bubbleStore.person(id: match.opponentID, name: p.map { $0.displayName.isEmpty ? $0.username : $0.displayName } ?? "Friend",
+                                  isFriend: true)
     }
 
     private func receivedRow(_ c: RemoteChallenge) -> some View {

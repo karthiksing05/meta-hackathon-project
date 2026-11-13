@@ -5,9 +5,11 @@ struct BubbleInput: Codable, Hashable, Sendable {
     /// Tick number (60 per second).
     var t: Int
     /// Pointer action: "tap" (finger down), "move" or "up". Everything else (keys, choices, launches)
-    /// is derived from these by concepts, so a replay is just the pointer log.
+    /// is derived from these by concepts, so a replay is just the pointer log. The one exception is
+    /// "text": typed text from a microgame's native text field (docs/BUBBLES.md 7.11).
     var a: String
-    /// Position in the 360x640 logical playfield as `[x, y]`, rounded to 0.1.
+    /// Position in the 360x640 logical playfield as `[x, y]`, rounded to 0.1. For "text",
+    /// `[kind, value]` with kind "submit" or "change".
     var v: JSONValue?
 
     init(t: Int, a: String, v: JSONValue? = nil) {
@@ -82,6 +84,9 @@ struct BubbleRunResult: Codable, Hashable, Sendable {
     var durationSec: Double
     var replay: BubbleInputLog
     var share: BubbleShareArtifact
+    /// Microgames only: the engine's input log (`microgame-log/1` JSON text) for server checks
+    /// (`MicrogameEngine.verify`). Nil for other formulas.
+    var engineLog: String?
 
     init(outcome: BubbleOutcome, score: Int, durationSec: Double, replay: BubbleInputLog, share: BubbleShareArtifact) {
         self.outcome = outcome
@@ -94,6 +99,7 @@ struct BubbleRunResult: Codable, Hashable, Sendable {
     enum CodingKeys: String, CodingKey {
         case outcome, score, replay, share
         case durationSec = "duration_sec"
+        case engineLog = "engine_log"
     }
 
     init(from decoder: Decoder) throws {
@@ -108,6 +114,7 @@ struct BubbleRunResult: Codable, Hashable, Sendable {
         replay = (try? c.decode(BubbleInputLog.self, forKey: .replay)) ?? BubbleInputLog(seed: 1)
         share = (try? c.decode(BubbleShareArtifact.self, forKey: .share))
             ?? BubbleShareArtifact(headline: "", scoreText: "\(score)")
+        engineLog = try? c.decodeIfPresent(String.self, forKey: .engineLog)
     }
 }
 

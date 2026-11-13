@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The bracket with someone: both faces, the standing, and three rounds (theme, game, both scores,
-/// who took it). Each round's Play opens the game on the round's seed and length.
+/// A match with someone (a server series): both faces, the standing, and its rounds (game, both
+/// scores, who took it). Each round's Play opens the game on the round's seed.
 struct BracketCardView: View {
     let bracket: FriendBracket
     let opponent: User
@@ -118,20 +118,20 @@ struct BracketCardView: View {
     }
 }
 
-/// On someone's profile (not yours): your bracket with them, or one tap to start one.
+/// On a friend's profile: your match with them, or one tap to start a best of 5.
 struct BracketProfileCard: View {
     let user: User
 
     @Environment(AppStore.self) private var appStore
     @Environment(BubbleStore.self) private var bubbleStore
-    @State private var service = LocalBracketService.shared
+    private var service: ServerBracketService { ServerBracketService.shared }
 
     var body: some View {
         if !user.isMe && !user.isPage {
             Group {
                 if let bracket = service.bracket(with: user.id) {
                     BracketCardView(bracket: bracket, opponent: user)
-                } else {
+                } else if user.friendship == .friends {
                     Button {
                         Haptics.light()
                         service.install(appStore: appStore, bubbleStore: bubbleStore)
