@@ -22,6 +22,8 @@ struct StudioAskStep: View {
                             .padding(.horizontal, FBMetrics.screenPadding)
                         StudioPromptCard(model: model, isFocused: $isPromptFocused)
                             .padding(.horizontal, FBMetrics.screenPadding)
+                        StudioSoundRow(model: model)
+                            .padding(.horizontal, FBMetrics.screenPadding)
                         examples
                     }
                     StudioAskSlots(model: model)

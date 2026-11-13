@@ -153,6 +153,9 @@ final class StudioModel {
 
     /// The Bubble being edited, remixed or continued.
     var baseBubble: Bubble?
+    /// The library sound the new game plays behind it ("Use this sound"); a remix keeps the
+    /// original's sound unless this names another (the server's rule).
+    var sound: RemoteGameSound?
 
     // Ask
     var prompt = ""
@@ -251,6 +254,7 @@ final class StudioModel {
 
         baseBubble = launch.baseBubbleID.flatMap { bubbleStore.bubble(id: $0) }
         prompt = launch.prompt
+        sound = launch.sound
         social = launch.social
         length = launch.length
         audience = initialAudience()
@@ -722,7 +726,7 @@ final class StudioModel {
         switch kind {
         case .create:
             request = makeRequest(mode: mode == .edit ? .create : mode, prompt: effectivePrompt, base: baseBubble?.manifest, brief: briefForRun, look: lookHint)
-            revision = launchRevision(for: request)
+            revision = launchRevision(for: request).map { var r = $0; r.sound = sound; return r }
         case .tweak:
             guard let current = currentResult else { return }
             let text = (tweak ?? tweakText).trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1419,7 +1423,7 @@ extension StudioModel {
             brief.notes = [brief.notes, anatomy].compactMap { $0 }.joined(separator: "\n\n")
         }
         runIsServer = true
-        return StudioGenerateBridge.compose(with: GameGeneratorFactory.current, request: text, brief: brief, onReport: onReport, onWait: onWait)
+        return StudioGenerateBridge.compose(with: GameGeneratorFactory.current, request: text, brief: brief, sound: sound, onReport: onReport, onWait: onWait)
     }
 
     /// `POST /v1/generate` takes a request of 1 to 2,000 characters.

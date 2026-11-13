@@ -62,6 +62,7 @@ final class GameSound {
         muted = value
         GameSound.debugLog("mute -> \(value ? "muted" : "sound on")")
         if value { stopMusic() }
+        NotificationCenter.default.post(name: .gameSoundMuteChanged, object: nil)
     }
 
     // MARK: Music preview state

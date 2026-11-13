@@ -10,8 +10,14 @@ struct GameGeneratorLive: GameGenerator {
     var pollInterval: TimeInterval { 1.5 }
 
     func start(request: String, brief: BubbleBrief) async throws -> String {
+        try await start(request: request, brief: brief, sound: nil)
+    }
+
+    func start(request: String, brief: BubbleBrief, sound: RemoteGameSound?) async throws -> String {
         if await !api.isSignedIn { _ = try await api.signInAsDevice() }
-        let body = try JSONSerialization.data(withJSONObject: ["request": request, "brief": Self.json(brief)])
+        var payload: [String: Any] = ["request": request, "brief": Self.json(brief)]
+        Self.add(sound, to: &payload)
+        let body = try JSONSerialization.data(withJSONObject: payload)
         let data = try await api.generationStart(body: body)
         return try decode(GenerationStarted.self, data).jobID
     }
@@ -31,8 +37,17 @@ struct GameGeneratorLive: GameGenerator {
         }
         if revision.nextLevel { payload["nextLevel"] = true }
         if let brief = revision.brief { payload["brief"] = Self.json(brief) }
+        Self.add(revision.sound, to: &payload)
         let data = try await api.generationStart(body: try JSONSerialization.data(withJSONObject: payload))
         return try decode(GenerationStarted.self, data).jobID
+    }
+
+    /// A library sound for the game: `soundId`, `offsetMs`, `mix` (backend/README.md, "Sounds").
+    static func add(_ sound: RemoteGameSound?, to payload: inout [String: Any]) {
+        guard let sound else { return }
+        payload["soundId"] = sound.id
+        payload["offsetMs"] = sound.offsetMs
+        payload["mix"] = sound.mix
     }
 
     /// `BubbleBrief` as the server reads it (snake_case keys, like the app's manifest).

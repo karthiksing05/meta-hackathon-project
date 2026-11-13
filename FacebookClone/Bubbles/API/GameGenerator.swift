@@ -29,6 +29,8 @@ import Foundation
 protocol GameGenerator: Sendable {
     /// `POST /v1/generate`; returns the job id.
     func start(request: String, brief: BubbleBrief) async throws -> String
+    /// The same, with a library sound to play behind the game (`soundId`, `offsetMs`, `mix`).
+    func start(request: String, brief: BubbleBrief, sound: RemoteGameSound?) async throws -> String
     /// `POST /v1/generate` with `baseGameId`: a change to a game the server has. Returns the job id.
     func start(revision: GameRevision) async throws -> String
     /// `GET /v1/generate/{id}`, with `after` = the last `seq` seen (nil on the first poll).
@@ -56,6 +58,8 @@ struct GameRevision: Sendable {
     var nextLevel = false
     /// The reviewed brief, for remixes; nil keeps the base game's own brief.
     var brief: BubbleBrief?
+    /// A sound to swap in; nil keeps the base game's sound (the server's rule).
+    var sound: RemoteGameSound? = nil
 
     /// The server's limit on the request text it builds from these fields.
     static let maxChangeCharacters = 1_800
@@ -214,8 +218,13 @@ enum GameGenerationError: LocalizedError, Equatable {
 
 extension GameGenerator {
     /// Starts a job and streams it to the end. Cancelling the consumer cancels the job.
-    func generate(request: String, brief: BubbleBrief) -> AsyncThrowingStream<GenerationUpdate, Error> {
-        stream { try await start(request: request, brief: brief) }
+    func generate(request: String, brief: BubbleBrief, sound: RemoteGameSound? = nil) -> AsyncThrowingStream<GenerationUpdate, Error> {
+        stream { try await start(request: request, brief: brief, sound: sound) }
+    }
+
+    /// Generators that don't know sounds ignore one.
+    func start(request: String, brief: BubbleBrief, sound: RemoteGameSound?) async throws -> String {
+        try await start(request: request, brief: brief)
     }
 
     /// Starts a change to an existing game and streams it to the end, exactly like a new game. A

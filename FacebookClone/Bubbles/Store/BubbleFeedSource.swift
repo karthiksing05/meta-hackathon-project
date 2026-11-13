@@ -34,6 +34,8 @@ struct BubbleFeedItem: Identifiable, Hashable {
     let why: String?
     /// `A` or `B` when the server interleaves.
     let team: String?
+    /// Set when the server marks this page as a sponsored post.
+    var sponsor: RemoteSponsor? = nil
     /// Whose run plays as the Burst. The server doesn't send runs yet, so pages play the bot's
     /// demo.
     var runUserID: String? { nil }
@@ -62,7 +64,7 @@ extension BubbleStore {
                     guard let bubble = await adopt(item.game) else { continue }
                     added.append(BubbleFeedItem(
                         id: item.feedItemID, bubbleID: bubble.id, reason: BubbleFeedReason(server: item.reason),
-                        serverReason: item.reason, why: item.why, team: item.team
+                        serverReason: item.reason, why: item.why, team: item.team, sponsor: item.sponsor
                     ))
                 }
                 feedItems.append(contentsOf: added)

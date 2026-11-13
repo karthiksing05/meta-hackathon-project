@@ -5121,7 +5121,7 @@
       }
       const ctx = this.ctx;
       this.master = ctx.createGain();
-      this.master.gain.value = this.muted ? 0 : 0.32;
+      this.master.gain.value = this.level();
       const lp = ctx.createBiquadFilter();
       lp.type = "lowpass";
       lp.frequency.value = 6000;
@@ -5140,7 +5140,17 @@
     setMuted(m) {
       this.muted = !!m;
       if (!this.muted) this.unlock();
-      if (this.master) this.master.gain.value = this.muted ? 0 : 0.32;
+      if (this.master) this.master.gain.value = this.level();
+    },
+    // A sound from the app's library plays behind the game (docs/BUBBLES.md 4.3, `backing`): the
+    // game's own music stays off and its effects play a little quieter. Presentation only.
+    backing: false,
+    level() {
+      return this.muted ? 0 : this.backing ? 0.24 : 0.32;
+    },
+    setBacking(on) {
+      this.backing = !!on;
+      if (this.master) this.master.gain.value = this.level();
     },
     unlock() {
       if (this.muted) return;
@@ -5596,6 +5606,7 @@
           replay: isObj(replay) ? replay : null,
           player: isObj(pick("player", null)) ? pick("player", null) : { name: "", best: null },
           muted: pick("muted", true) !== false,
+          backing: pick("backing", false) === true,
           reduced: !!pick("reduced_motion", false),
           insets: normInsets(pick("insets", null)),
           botSkill: typeof pick("bot_skill", null) === "number" ? pick("bot_skill", null) : DEMO_BOT_SKILL,
@@ -5616,6 +5627,7 @@
         this.demoLoop = 0;
         this.hideError();
         this.applyStyle(entry.session.style);
+        Sound.setBacking(this.opts.backing);
         Sound.setMuted(this.opts.muted);
         this.resize();
         this.resetFx(entry.session);
@@ -5753,6 +5765,10 @@
             break;
           case "unmute":
             Sound.setMuted(false);
+            break;
+          case "backing":
+            if (this.opts) this.opts.backing = cmd.on !== false;
+            Sound.setBacking(cmd.on !== false);
             break;
           case "insets":
             if (this.opts) this.opts.insets = normInsets(cmd);
@@ -6068,7 +6084,7 @@
         audio() {
           if (self.ffwd || Sound.muted) return null;
           const ctx = Sound.ensure();
-          return ctx && ctx.state === "running" ? { ctx, dest: Sound.master } : null;
+          return ctx && ctx.state === "running" ? { ctx, dest: Sound.master, backing: Sound.backing } : null;
         },
         sparkle(x, y, color, n) { if (!self.ffwd) self.fxSparkle(x, y, color, n); },
         ring(x, y, r, color) { if (!self.ffwd) self.fxRing(x, y, r || 40, color); },
