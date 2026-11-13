@@ -111,7 +111,7 @@ struct AnatomyMeta: Hashable, Sendable {
             let what = rest.range(of: " - ").map { String(rest[$0.upperBound...]) } ?? rest
             return what.isEmpty ? "Muse writes custom rules for this" : "Muse writes custom rules: \(what)"
         case "gate": return rest.isEmpty ? "Muse checks this in playtests" : "Muse checks this in playtests: \(rest)"
-        case "engine-gap", "engine_gap", "gap": return "The game engine can't do this yet\(rest.isEmpty ? "" : " (\(rest))"), so Muse will get as close as it can"
+        case "engine-gap", "engine_gap", "gap": return "The game engine can't do this yet\(rest.isEmpty ? "" : " (\(rest.replacingOccurrences(of: "_", with: " ")))"), so Muse will get as close as it can"
         default: return plan
         }
     }
@@ -569,9 +569,13 @@ struct GameAnatomy: Hashable, Sendable {
             let lower = plan.lowercased()
             let fragmentID = lower.hasPrefix("fragment:")
                 ? String(lower.dropFirst("fragment:".count)).trimmingCharacters(in: .whitespaces) : nil
+            // An engine gap is always new, whatever Muse called it.
+            if lower.hasPrefix("engine-gap") || lower.hasPrefix("engine_gap") {
+                meta.familiarity = .unfamiliar
+                return meta
+            }
             switch meta.familiarity {
             case .unfamiliar:
-                if lower.hasPrefix("engine-gap") { break }
                 if let fragmentID, knownFragments.contains(fragmentID) || knownFragments.isEmpty {
                     meta.familiarity = .approximate
                 } else if Self.planUsesOnlyBuiltins(plan) {

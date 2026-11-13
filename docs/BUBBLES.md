@@ -1657,7 +1657,10 @@ Every part and rule also carries `source` (`you` | `guess`), `familiarity` (`kno
 `unfamiliar`, shown as Known / Approximate / New to Muse), `plan` (`fragment:<id>` | `custom:<what>` |
 `gate:<check>` | `engine-gap:<name>`), `question` and `options`. Familiarity is mechanical: **known** maps to a
 listed fragment; **approximate** is custom rules from named engine builtins (`custom:grid, neighbors8, count - …`;
-the list is `GameAnatomy.promptBuiltins`); **unfamiliar** needs an engine gap or has no builtin plan.
+the list is `GameAnatomy.promptBuiltins`); **unfamiliar** needs an engine gap or has no builtin plan. The
+prompt names the known gaps (`MusePrompts.anatomyEngineGaps`: `share_grid` (microgames share score text only),
+`segment_collision`, `joints`, `rotated_shapes`, `device_sensors`, `live_multiplayer`, `3d`), and an
+`engine-gap:` plan always reads as unfamiliar.
 `GameAnatomy.calibrated(knownFragments:)` enforces it on Muse's reply: an unfamiliar part with a listed
 fragment or a builtins-only `custom:` plan becomes approximate, and a "known" part without a fragment becomes
 approximate. Muse asks questions only on guessed parts

@@ -25,6 +25,22 @@ extension MusePrompts {
         ("word_check", "guess a hidden word with per-letter feedback"),
     ]
 
+    /// What the microgame engine can't do yet (engine/SPEC-v0.2.md, bubble-kit-microgame.js), so Muse
+    /// flags it instead of quietly faking it. Names are the `engine-gap:<name>` plan values.
+    static let anatomyEngineGaps: [(String, String)] = [
+        ("share_grid", "a custom shared result such as a colored-square grid of your guesses (a microgame shares its score text only)"),
+        ("segment_collision", "lines, ropes or beams hitting things (physics and overlaps cover circles and axis-aligned boxes only)"),
+        ("joints", "ropes, chains, hinges or springs linking bodies (no joints; a swing can only be drawn with angle math)"),
+        ("rotated_shapes", "rotated boxes or polygons that collide"),
+        ("device_sensors", "camera, microphone, voice, location or tilt"),
+        ("live_multiplayer", "real-time play between phones (turns on one phone are fine)"),
+        ("3d", "3D scenes or perspective"),
+    ]
+
+    static var anatomyEngineGapLines: String {
+        anatomyEngineGaps.map { "  - \($0.0): \($0.1)" }.joined(separator: "\n")
+    }
+
     static var anatomyFallbackFragmentLines: String {
         anatomyFallbackFragments.map { "- \($0.0): \($0.1)" }.joined(separator: "\n")
     }
@@ -65,9 +81,12 @@ extension MusePrompts {
           "known": it maps to a fragment listed below (plan "fragment:<id>", tuned by params is fine).
           "approximate": no fragment, but custom rules built from the engine builtins below do it (plan \
         "custom:<builtin>, <builtin> - <what they do>", e.g. "custom:grid, neighbors8, count - two crowns may not touch").
-          "unfamiliar": it needs something the engine doesn't have (plan "engine-gap:<name>": camera, voice, live online \
-        multiplayer, 3D), or you have no clear plan from the builtins. Most parts are known or approximate; a part is \
-        new to you only when you can't name the builtins that build it.
+          "unfamiliar": it needs something the engine doesn't have (plan "engine-gap:<name>", see the list below), or \
+        you have no clear plan from the builtins. Most parts are known or approximate; a part is new to you when it \
+        touches a known gap or you can't name the builtins that build it.
+        - Known engine gaps. Whenever a part needs one of these, mark it "unfamiliar" with plan "engine-gap:<name>", \
+        even if you could fake it, and say in the text what you'd do instead:
+        \(anatomyEngineGapLines)
         - Use "gate:<check>" for a rule that a playtest must confirm (e.g. every daily puzzle is solvable).
         - question: only on parts that are a guess AND not known. When there are such parts, ask 1 to 3 questions in \
         total, on the guesses that most change how the game plays (a board size, a number of tries, what happens on a \
