@@ -870,5 +870,96 @@
     },
     "status": "shipped",
     "path": "authoring/fragments/word_check.fragment.json"
+  },
+  {
+    "id": "qa_bank",
+    "kind": "fragment",
+    "name": "Ask yes/no questions",
+    "aliases": [
+      "yes no questions",
+      "ask questions to solve",
+      "lateral thinking",
+      "situation puzzle",
+      "twenty questions",
+      "interrogate",
+      "ask the suspect"
+    ],
+    "summary": "The player types free yes/no questions about a mystery and taps Ask; a deterministic matcher maps each question to one of the case's pre-written facts (written by Muse at build time) and answers Yes, No, Doesn't matter or Partly, showing which question it answered. Key facts are clues; typing a theory and tapping Solve checks it against the solutions. Unmatched questions get \"Ask another way\" and cost nothing.",
+    "when_to_use": "Lateral-thinking and situation puzzles, twenty questions about a hidden thing, interrogating a suspect or witness, \"ask the oracle\" games: anywhere the player asks in their own words and a fixed answer is enough. Not for free conversation or judging creative text (use npc_judge with written replies).",
+    "api": "pair with keyboard (letters include space, < and >); game provides qa_setups(), qa_reveals(), qa_facts(), qa_solves(), all list<string> one entry per case, from the qa_bank_content step (qa-bank/1, authoring/expander/qa-bank.mjs toContent): fact strings \"<y|n|i|p>[*]|<question shown>|<group>|<group>\", words in a group joined by =, facts by ;; provides key_state, case_text(), questions_left(), reply_label(r), qa_progress(), state typed, asked, clues, solved_count, qa_points, last_reply, last_ask, history, locked, revealing, ran_out; inputs qa_ask, qa_solve (its Ask and Solve buttons); set playtest.progress to qa_progress(); not with typed_answer, quiz or score",
+    "events": [
+      "question_answered",
+      "question_unclear",
+      "clue_found",
+      "case_solved",
+      "solve_wrong",
+      "out_of_questions",
+      "case_done"
+    ],
+    "params": {
+      "questions": "int, default 20, 3..60",
+      "clue_points": "int, default 50, 0..1000",
+      "solve_points": "int, default 500, 0..5000",
+      "question_points": "int, default 25, 0..1000 (per question left on a solve)",
+      "wrong_solve_cost": "int, default 2, 0..10 (questions)",
+      "unclear_costs": "bool, default false",
+      "goal": "int, default 1, 0..20 (cases solved to win; 0 never wins on its own)",
+      "out_loses": "bool, default true",
+      "max_len": "int, default 40, 10..60",
+      "placeholder": "string, default \"Ask a yes or no question\", max 30 chars"
+    },
+    "status": "shipped",
+    "gaps_it_closes": [
+      "free-typed questions answered without an LLM at play time"
+    ],
+    "example_types": [
+      "lateral_thinking_yes_no",
+      "twenty_questions",
+      "interrogate_typed_questions",
+      "ask_the_oracle_yes_no"
+    ],
+    "path": "authoring/fragments/qa_bank.fragment.json",
+    "notes": "matching is authoring/expander/intent.mjs (generated into the fragment by authoring/tools/make-qa-fragment.mjs); measured 90-93% right on held-out player questions after one refine round (docs/harness-gaps/open-text.md); typing is the keyboard grid until text_input ships"
+  },
+  {
+    "id": "npc_judge",
+    "kind": "fragment",
+    "name": "Character judges your reply",
+    "aliases": [
+      "rizz simulator",
+      "rate my pickup line",
+      "convince the bouncer",
+      "roast judge",
+      "debate judge",
+      "npc rates"
+    ],
+    "summary": "Each round a character says a line and the player picks one of 2-4 replies; the character rates it 0-100 into named bands (\"cringe\" to \"W rizz\") with a reaction line. Ratings and reactions are written by Muse at build time, so play is deterministic and replays.",
+    "when_to_use": "Rizz and pickup-line simulators, convince-the-bouncer or the boss, a debate or roast judge, caption contests judged by a character, interview and negotiation games where a character scores what you say. The honest stand-in for \"type anything and an AI judges it\".",
+    "api": "game provides nj_lines() (line per round), nj_options(), nj_ratings() (whole numbers 0-100 as strings), nj_reactions(), the last three flattened with `choices` entries per round; provides judge_line(), option_text(k), option_rating(k), band_label(r), state nj_points, last_rating, last_label, last_reaction, high_count, low_count, picked, locked; input nj_pick {index}; bind rounds round_done to line_done and lives hit to judged_low; art roles judge (a generic or caricature character) and button; not with quiz, score or choice_story",
+    "events": [
+      "judged",
+      "judged_high",
+      "judged_low",
+      "line_done"
+    ],
+    "params": {
+      "choices": "int, default 3, 2..4",
+      "time_ms": "duration, default 12000, 0..60000 (0 = no timer)",
+      "reveal_ms": "duration, default 1800, 600..5000",
+      "labels": "string, default \"Cringe|Meh|Smooth|Legendary\", the bands low to high split by |",
+      "high_at": "int, default 75, 1..100",
+      "low_at": "int, default 25, 0..99"
+    },
+    "status": "shipped",
+    "gaps_it_closes": [
+      "a character that judges what the player says, without an LLM at play time"
+    ],
+    "example_types": [
+      "npc_rates_your_line",
+      "convince_the_gatekeeper",
+      "judged_reply_quiz"
+    ],
+    "path": "authoring/fragments/npc_judge.fragment.json",
+    "notes": "content comes from the npc_lines content step; a typed version (player writes the line) needs live_judge, which is a gap"
   }
 ]

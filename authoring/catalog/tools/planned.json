@@ -8,18 +8,21 @@
       "type freely",
       "system keyboard"
     ],
-    "summary": "A native text field in the game runtime kit, so typing has spaces, numbers and autocorrect, and replays record the text. The engine already has text submit/change input sources; the phone and bot runtime do not show the field yet.",
-    "when_to_use": "Typed answers longer than one word, numbers, names, free-text prompts; replaces the on-screen keyboard fragment for typing.",
-    "api": "inputs.<name>.from: {\"text\": \"submit\" | \"change\", placeholder?, max_len?} with text {value}; presentation.text_field {x, y, w, h, size}",
+    "summary": "A native text field for typing (system keyboard: spaces, numbers, punctuation, autocorrect, dictation), with the submitted text recorded in the replay log. The engine has it (input sources {\"text\": \"submit\"} and {\"text\": \"change\"}, presentation.text_field, replay and verify record the text); the app runtime (bubble-kit-microgame.js) and the JS playtest bots don't drive it yet, so games type on the keyboard fragment grid.",
+    "when_to_use": "Plan for it in typed games (typed_answer, qa_bank, fill-in, name-the-thing), but compose with the keyboard fragment until it ships: the phone shows no field for a text source today, and the bots never type, so a game that only takes text fails the gate.",
+    "api": "inputs.<name>.from: [{\"text\": \"submit\" | \"change\", \"placeholder\"?: string, \"max_len\"?: int <= 200}] with record text {value: string}; presentation.text_field {x, y, w, h, size}; the field clears after submit; engine JS: game.text(\"submit\" | \"change\", value); replay log line {\"t\": ms, \"text\": \"submit\", \"value\": \"...\"}",
     "status": "building",
     "gaps_it_closes": [
-      "typing only through the keyboard fragment grid"
+      "typing only through the keyboard fragment grid",
+      "no spaces, digits, punctuation or autocorrect in typed answers"
     ],
     "example_types": [
-      "rare_answer_trivia"
+      "rare_answer_trivia",
+      "lateral_thinking_yes_no",
+      "twenty_questions"
     ],
     "path": "engine/SPEC-v0.2.md",
-    "notes": "runtime side lives in FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame.js"
+    "notes": "engine side done (SPEC-v0.2 section 4, mg-cli sim types random text). Needed: Artem, the field in bubble-kit-microgame.js; Bayan, bots that type (a playtest.texts list). Request text in docs/harness-gaps/open-text.md"
   },
   {
     "id": "answer_bank",
@@ -857,5 +860,72 @@
       "no paired picture variants"
     ],
     "notes": "works today if the scene is drawn from object lists in state (the changes are rule edits); changes inside one generated picture are not possible"
+  },
+  {
+    "id": "qa_bank_content",
+    "kind": "content_tool",
+    "name": "Yes/no fact bank",
+    "aliases": [
+      "answer bank for questions",
+      "fact table",
+      "intent bank",
+      "qa bank"
+    ],
+    "summary": "Build-time content step for qa_bank games: Muse writes each case (setup, hidden solution), 30-60 facts with a yes/no/irrelevant/partly reply and the concept words players use, and the solutions; then plays it (40 probe questions with true replies), and repairs the facts the matcher gets wrong, once. Checked by checkBank (shape, every fact's own question lands on it, no stop-word groups).",
+    "when_to_use": "Every qa_bank game: lateral puzzles, twenty questions, interrogations. One bank per case; a daily puzzle is one case per day.",
+    "api": "bankPrompt({request, count, puzzle?}) -> qa-bank/1 {cases: [{title, setup, solution, facts: [{ask, reply, key, match: [[words]], also_ask}], solve: [[[words]]], hints}]}; probePrompt(case) -> {questions: [{q, reply}]}; probeFailures(case, questions); repairPrompt(bank, failures); toContent(bank) -> {qa_setups, qa_reveals, qa_facts, qa_solves} (authoring/expander/qa-bank.mjs); CLI authoring/tools/qa-bank-muse.mjs --refine",
+    "status": "building",
+    "gaps_it_closes": [
+      "no LLM at play time for free questions"
+    ],
+    "example_types": [
+      "lateral_thinking_yes_no",
+      "twenty_questions",
+      "interrogate_typed_questions"
+    ],
+    "path": "authoring/expander/qa-bank.mjs",
+    "notes": "module and CLI built and measured (3 Muse calls, about 2 min, per case); not yet called by the generator's compose step, which would need a content-step hook in pipeline.mjs"
+  },
+  {
+    "id": "npc_lines",
+    "kind": "content_tool",
+    "name": "Judged replies",
+    "aliases": [
+      "rated replies",
+      "pickup lines with ratings",
+      "reply options with scores"
+    ],
+    "summary": "Build-time content step for npc_judge: per round, the character's line, 3-4 replies in the person's theme, a 0-100 rating of each in the character's voice (one clearly best, one flop) and the character's reaction to each.",
+    "when_to_use": "Rizz, convince-the-bouncer, roast or debate judges, caption contests with a judge: any npc_judge game.",
+    "api": "planned: npc_lines({theme, character, rounds, choices}) -> {lines[], options[], ratings[], reactions[]} flattened per round for nj_lines/nj_options/nj_ratings/nj_reactions; today compose writes these straight into content",
+    "status": "planned",
+    "example_types": [
+      "npc_rates_your_line",
+      "convince_the_gatekeeper"
+    ]
+  },
+  {
+    "id": "live_judge",
+    "kind": "server_tool",
+    "name": "Live AI answer while playing",
+    "aliases": [
+      "ask muse while playing",
+      "ai judge",
+      "llm npc",
+      "free chat npc",
+      "rate anything i type"
+    ],
+    "summary": "A server endpoint the game calls during play to have Muse answer a question or judge free text the bank doesn't cover; the answer is stored with the run and written into the replay log, so verification replays the recorded answer instead of calling Muse again.",
+    "when_to_use": "Not available. Plan typed-judging ideas (rate my own pickup line, free chat with a character, judge my caption) as npc_judge with written replies, or qa_bank with an \"Ask another way\" miss, and say in the plan that live judging is a gap.",
+    "api": "proposed: POST /v1/games/{id}/ask {run_id, seq, text} -> {reply, label?, rating?} (Muse Spark at minimal effort, 5-12 s); the engine receives it as an input event {\"ask_reply\": {seq, reply}} logged like any input; verify replays the log; per-user rate limits and a moderation pass",
+    "status": "gap",
+    "gaps_it_closes": [
+      "questions or text outside the build-time bank"
+    ],
+    "example_types": [
+      "lateral_thinking_yes_no",
+      "npc_rates_your_line"
+    ],
+    "notes": "needs Max (endpoint, cost, abuse limits) and Artem (an async host input that the runtime injects and the replay log records); 5-20 s per Muse call is too slow per turn for most games. See docs/harness-gaps/open-text.md"
   }
 ]

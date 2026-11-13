@@ -1,0 +1,51 @@
+{
+  "family": "party_social",
+  "notes": "Type-specific checklists for the character-judge games (docs/harness-gaps/open-text.md). The family default is left to the party_social family's writer.",
+  "checklists": [
+    {
+      "applies_to": ["npc_rates_your_line", "convince_the_gatekeeper"],
+      "slots": [
+        {
+          "id": "judge_character",
+          "ask": "Who is doing the judging?",
+          "why": "The character's voice writes every rating and reaction. Real people become a generic or caricature stand-in, never their likeness.",
+          "need": "required",
+          "extrapolate_from": "named character, job or archetype in the request (barista, bouncer, crush, boss)",
+          "default": "a stylish stranger",
+          "choices": ["a stylish stranger", "a bouncer", "a strict boss", "someone I name"],
+          "affects": ["content", "art"]
+        },
+        {
+          "id": "rating_scale",
+          "ask": "What should the rating scale say, low to high?",
+          "why": "The band labels are the joke and the share line ('cringe' to 'W rizz').",
+          "need": "nice",
+          "extrapolate_from": "quoted labels or slang in the request",
+          "default": "Cringe, Meh, Smooth, Legendary",
+          "choices": ["Cringe, Meh, Smooth, Legendary", "cringe, mid, smooth, W rizz", "Denied, Maybe, In, VIP"],
+          "affects": ["content", "social"]
+        },
+        {
+          "id": "tone",
+          "ask": "Wholesome or savage?",
+          "why": "Sets how harsh the reactions are; replies stay friendly either way.",
+          "need": "nice",
+          "extrapolate_from": "'roast', 'savage', 'cute', 'wholesome' in the request",
+          "default": "playful",
+          "choices": ["wholesome", "playful", "savage"],
+          "affects": ["content"]
+        },
+        {
+          "id": "rounds",
+          "ask": "How many rounds?",
+          "why": "Rounds set the session length and the top score.",
+          "need": "nice",
+          "extrapolate_from": "'quick', a number of rounds in the request",
+          "default": "8",
+          "choices": ["5", "8", "12"],
+          "affects": ["rules", "difficulty"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+[
+  { "request": "Lateral thinking puzzles (\"a man walks into a bar and asks for water...\") where I ask yes/no questions to solve them", "expect": ["lateral_thinking_yes_no"], "notes": "Kevin32 #26" },
+  { "request": "black stories for the group chat", "expect": ["lateral_thinking_yes_no"] },
+  { "request": "a daily situation puzzle where we ask yes or no questions", "expect": ["lateral_thinking_yes_no"] },
+  { "request": "interrogate the suspect by typing my own questions", "expect": ["interrogate_typed_questions"] },
+  { "request": "Rizz simulator where I pick pickup lines and an NPC rates them from \"cringe\" to \"W rizz\"", "expect": ["npc_rates_your_line"], "notes": "Kevin32 #23" },
+  { "request": "rate my pickup lines", "expect": ["npc_rates_your_line"] },
+  { "request": "convince the bouncer to let me in", "expect": ["convince_the_gatekeeper"] }
+]
