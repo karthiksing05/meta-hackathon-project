@@ -200,6 +200,14 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return series
     }
 
+    // MARK: Game plan (harness v2)
+
+    /// `POST /v1/harness/plan {request}`: the raw reply, for `HarnessPlanClient`.
+    func gamePlanRaw(body: Data) async throws -> Data {
+        try await send("POST", "v1/harness/plan", body: body, contentType: "application/json",
+                       auth: .required, timeout: HarnessPlanClient.timeout)
+    }
+
     // MARK: Sounds (backend/README.md, "Sounds")
 
     /// The library: `GET /v1/sounds?tab=trending|for_you|saved|recent&q=&limit=`. `saved` needs sign-in.
@@ -605,3 +613,5 @@ struct GamesKeychain: Sendable {
         SecItemDelete(query(account) as CFDictionary)
     }
 }
+
+extension GamesAPILive: GamePlanTransport {}

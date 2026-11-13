@@ -592,7 +592,9 @@ final class StudioModel {
         briefTask?.cancel()
         isDraftingBrief = false
         briefNote = nil
-        draftAnatomyIfNeeded()
+        // New games show the server's plan first (StudioPlanGate), which drafts it with Muse; the
+        // anatomy is drafted only if the Brief step shows instead, so Muse isn't asked twice.
+        if mode != .create { draftAnatomyIfNeeded() }
         brief = normalized(localBrief())
         buildsMicrogame = suggestsMicrogame
         go(to: .brief)

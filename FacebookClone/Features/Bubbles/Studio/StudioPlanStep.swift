@@ -257,6 +257,8 @@ struct StudioPlanGate<Brief: View>: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: showsPlan)
+        // The Brief step (planning off, or the person chose it) shows the anatomy: draft it then.
+        .onChange(of: showsPlan) { if !showsPlan { model.draftAnatomyIfNeeded() } }
         .onAppear {
             guard usesPlan else { return }
             plan.showsBrief = false
