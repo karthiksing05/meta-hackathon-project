@@ -48,7 +48,7 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/events/export?since=&limit=` | bearer | the event log as JSON Lines, for offline benchmarking |
 | `GET /v1/games/{id}` | optional | one game; `{id}` may also be the slug from its manifest |
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
-| `GET /v1/games/{id}/leaderboard?scope=everyone\|friends\|group&groupId=`, `POST /v1/games/{id}/scores` | none (friends and group need a bearer; group needs membership) / bearer | best score per user, optionally only among my friends (and me) or a Group's members |
+| `GET /v1/games/{id}/leaderboard?scope=everyone\|friends\|group&groupId=`, `POST /v1/games/{id}/scores` (`{score}`, or `{log}` for a game with a score model) | none (friends and group need a bearer; group needs membership) / bearer | best score per user, optionally only among my friends (and me) or a Group's members |
 | `GET /v1/me/likes`, `GET /v1/games/{id}/likes` | bearer / optional | the games I saved; how many saved a game and which of my friends did |
 | `POST /v1/challenges`, `GET /v1/challenges` | bearer | "beat my score": `{gameId, toUserIds[]}` (friends only, up to 20); the ones I sent and received, with `beaten`/`myScore` or each recipient's `responses` |
 | `GET /v1/me/moments` | bearer | what happened with me on other phones: challenges received plus off-feed moment events that name me in `with`; `{moments: [{momentID, kind, gameID, from, at}], cursor}` |
@@ -68,6 +68,8 @@ treat the exact shapes as the first version and change them together with the cl
 | `POST /v1/creations` | bearer | upload a package zip (`Content-Type: application/zip`) |
 | `GET /v1/creations`, `GET /v1/creations/{id}`, `GET /v1/creations/{id}/source` | bearer | the caller's games (drafts included, with `unlisted: true`); private editable source as a zip |
 | `POST /v1/creations/{id}/publish`, `DELETE /v1/creations/{id}` | bearer (owner) | list a draft in the feed, search and its Group; delete a game with its saves and scores (the files stay on the games host under their unguessable id) |
+| `GET /v1/sounds?tab=trending\|for_you\|saved\|recent&q=`, `GET /v1/sounds/{id}`, `GET /v1/sounds/{id}/games?sort=top\|recent`, `PUT\|DELETE /v1/sounds/{id}/save`, `POST /v1/sounds` | optional / bearer | the sound library: loops that play behind games (see [Sounds](#sounds)) |
+| `PUT\|DELETE /v1/games/{id}/sound` | bearer (owner) | put a sound behind a game `{soundId, offsetMs?, mix?}`, or take it off |
 | `POST /v1/series`, `GET /v1/series`, `GET /v1/series/{id}`, `POST /v1/series/{id}/rounds/{n}` | bearer | best-of-N with a friend on the same games and seeds; scores come from replaying the run's input log in the engine (see [Series](#series)) |
 
 Scores are whole numbers (a fractional score is rejected). A manifest `id` that is a lowercase slug
@@ -120,6 +122,32 @@ loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, s
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
 
+## Sounds
+
+Loops that play behind games in the feed, like TikTok sounds. A sound is a published package, stored and served like a game (`https://games.<domain>/<soundId>/<file>`): a zip with a `manifest.json`
+`{"title": "...", "audio": "loop.m4a", "cover": "cover.png"?, "duration_ms"?, "bpm"?, "kind": "library" | "original"?}`, the audio file (m4a, mp3, ogg or wav) and an optional cover (png, jpg, webp). `POST /v1/sounds` (application/zip, signed in) publishes it.
+
+- **Find them:** `GET /v1/sounds?tab=trending|for_you|saved|recent&q=&limit=` returns `{items: [{id, title, creator, creatorId, kind, durationMs, bpm, audioUrl, coverUrl, useCount, saves, savedByMe, createdAt}]}`.
+  `trending` is the most used, then newest. `for_you` ranks like trending until the recommender learns sound affinity. `saved` needs sign-in. `q` matches the start of a word in the title or the creator's name.
+- **A sound's page:** `GET /v1/sounds/{id}` and `GET /v1/sounds/{id}/games?sort=top|recent` (`{items: [games], total}`; drafts are left out). `PUT|DELETE /v1/sounds/{id}/save` is idempotent and returns `{saves, savedByMe}`.
+- **On a game:** every game and feed item gains `sound: {id, title, creator, audioUrl, coverUrl, offsetMs, mix}` when it has one. `offsetMs` is where in the loop to start; `mix` is 0 (only the game's own sound) to 1 (only the sound), 0.7 by default.
+  `POST /v1/generate` takes `soundId`, `offsetMs` and `mix`; a change to a game (`baseGameId`) keeps the original's sound unless it names another. `PUT /v1/games/{id}/sound {soundId, offsetMs?, mix?}` (its owner) sets or changes it; `DELETE` takes it off. Each sound counts the games that use it (`useCount`).
+- A sound is presentation only: it never changes a replay or a score check. Not built yet: original sounds made automatically from a game's own music (the server can't render audio), sound events on the feed, and a personal "for you" ranking.
+
+## Score-aware boards
+
+A game's `manifest.json` may carry a top-level `score` (authoring/SPEC.md 2.13): `kind`, `direction`, `counts_when`, `aggregate`, `tie_break`, `format`, `bounds`, `ranked`. The server keeps it on the game record and shows it on every
+game as `score {kind, direction, countsWhen, aggregate, tieBreak, format, bounds, ranked}`. A game without one ranks points, higher first, best run, as before.
+
+- **Scores are whole numbers**: time kinds are whole milliseconds, accuracy a whole percent. `format` (`"{n} orders"`, `"{n}%"`, `m:ss.t`, `m:ss`, `s.t`) turns one into text; every board row carries that as `display`, so the app never formats a score.
+- **`direction: lower`** ranks the smallest first (a time trial). `tie_break: "less time"` puts the shorter run first on equal scores, `"earlier"` the one set first. This holds for the game board, its friends and Group scopes, the Group weekly board, challenges (`beaten`) and series.
+- **Only replayed runs**: `POST /v1/games/{id}/scores {log}`. The server replays the run's input log in the engine and reads the phase, score and time from that, never from the phone. The run must be finished (won or lost). The value is the run time for `time_to_complete` and
+  `survival_time` (unless `source: "score"`), otherwise the engine's score. A plain `{score}` is refused (400) for a game with a score model. Reply: the board (`items` with `display`, `ranked`, `direction`, `format`) plus `counted`, `score`, `display`, `finished` and, when not counted, `reason`.
+- **`counts_when: finished`**: a lost run isn't counted (`counted: false`). In a series it is a DNF and loses to a finished run.
+- **`aggregate`**: `best` keeps a person's best by the direction and tie-break; `latest` their newest run. `sum_week` ranks as `best` for now.
+- **`bounds`**: a score below `min` or above `max`, or earned faster than `max_rate_per_s`, is refused (422).
+- **`ranked: false`**: the board is a plain list, newest first, and it awards no points on the Group weekly board.
+
 ## The generator's internal routes (private network only)
 
 The Node generator has no published port; only the API calls it. Besides `/compose`, `/anatomy` and `/verify` it offers `POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?}` -> `{content, model}`: one JSON turn on a Muse
@@ -127,8 +155,10 @@ model (`muse-*` only), for the Go harness steps. The key stays in the generator 
 The API fills it with the harness (`internal/harness`, docs/HARNESS_V2.md): understand, retrieve, look up and plan, about 30–60 s
 before compose, on by default and best-effort (any failure sends no context). `HARNESS_CONTEXT=0` (or `off`) turns it off, and with it
 `POST /v1/harness/plan {request}` -> `{plan, clarify, spec, types, timings}`, which lets the app ask its 0–2 questions first.
-`/compose` also takes an optional `context` object (up to 48 KB): what the harness worked out before the call (`types`, `tools`, `plan`, `notes`). It goes into the system prompt as a "Planned for this request" section, as data;
-entries marked `learned` came from the web and are never treated as instructions. Only the server sets it (`Job.Context`); no client route does.
+`/compose` also takes an optional `context` object (up to 48 KB): what the harness worked out before the call (`types`, `tools`, `plan`, `notes`). With Studio bundle version 3 and up, the bundle itself puts it in the prompt (only the planned tools in the menu, the spec, the matched gold
+examples); an older bundle gets a "Planned for this request" section, as data. Entries marked `learned` came from the web and are never treated as instructions. Only the server sets it (`Job.Context`); no client route does.
+`/internal/muse/json` and every Muse call return the tokens used as `usage {prompt_tokens, completion_tokens, reasoning_tokens, total_tokens, calls}`, and each call logs it (`muse call`, with its purpose, model and time). The pipeline can name its own
+model, effort and token budget for a call (the score review asks for `muse-wonder-1.0`, high effort, 12,000 tokens); the generator honours it.
 
 ## Series
 
@@ -187,7 +217,7 @@ back to its own neutral defaults. The server holds no cast, seed games or invent
 The games host serves a small player at **`https://games.<domain>/play/`** (`/play/?game=<24-character id or slug>`). It runs the
 app's own game runtime in the browser (read from `FacebookClone/Bubbles/Runtime/web`; the games image copies that folder to `/app/player/runtime`), loads the game's `manifest.json` from the games host, and boots it, so a game looks and plays as it does in the
 app. A microgame runs on Artem's Rust engine (WebAssembly) with its game script from `content.game_json`. The page lists the games
-from `GET /v1/feed`, can watch a bot play, and logs the runtime's messages. The API allows the games host's origin for CORS.
+from `GET /v1/feed`, can watch a bot play, and logs the runtime's messages. A red **Delete this game** button removes the open game (and its saves and scores) after a confirmation: it asks the owner to sign in (the page keeps the token for the tab only) and calls `DELETE /v1/creations/{id}`; anyone else gets "only the game's owner can delete it". The API allows the games host's origin for CORS.
 Refresh the runtime copy from `main` when the app's runtime changes.
 
 ## Event log and recommender support

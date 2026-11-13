@@ -9,7 +9,7 @@
 //
 // No Node APIs and no imports outside this folder.
 
-import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, apply, analyze, summarize } from './bots.mjs';
+import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize } from './bots.mjs';
 
 export { DEFAULT_BOTS };
 
@@ -56,7 +56,7 @@ async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceM
     let sliceStart = now();
     while (steps < maxSteps && g.phase() === 'playing') {
       if (steps >= nextDecision) {
-        const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null);
+        const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null, sources.text ? textCandidates(g, rng) : null);
         let choice;
         if (rng() < bot.skill) {
           let best = -Infinity;
@@ -104,7 +104,7 @@ async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceM
 /**
  * Plays the game with every bot, one at a time, and analyzes the runs like gate.mjs `playtest`.
  * options: {seed = 1, bots = DEFAULT_BOTS, maxSeconds = 180, sliceMs = 12, onRun(run, index)}.
- * Returns {runs, flags, passed, summary, ms}.
+ * Returns {runs, flags, inputProbe, passed, summary, ms}.
  */
 export async function playtestAsync(engine, gameJson, { seed = 1, bots = DEFAULT_BOTS, maxSeconds = 180, sliceMs = 12, onRun } = {}) {
   const started = now();
@@ -119,6 +119,10 @@ export async function playtestAsync(engine, gameJson, { seed = 1, bots = DEFAULT
     if (onRun) onRun(run, runs.length - 1);
     await yieldToHost();
   }
-  const flags = analyze(runs, { maxSeconds });
-  return { runs, flags, passed: !flags.some((f) => f.blocking), summary: summarize(runs, maxSeconds), ms: Math.round(now() - started) };
+  let inputProbe = null;
+  try {
+    inputProbe = probeDeadInputs(engine, json, sources, { seed });
+  } catch { /* the mash probe is advisory: a failure here never fails the gate */ }
+  const flags = analyze(runs, { maxSeconds, inputProbe, game: gameObject(json) });
+  return { runs, flags, inputProbe, passed: !flags.some((f) => f.blocking), summary: summarize(runs, maxSeconds), ms: Math.round(now() - started) };
 }

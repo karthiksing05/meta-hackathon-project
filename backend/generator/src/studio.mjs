@@ -64,6 +64,8 @@ export function loadStudio(files = findBundles()) {
      * Replays a run's input log (microgame-log/1) against the exact game text and checks what it claims:
      * {ok, game_hash_ok, steps, recomputed: {state_hash, phase, score, time_ms}, claimed, problems}.
      */
+    /** The Studio bundle's API version (3 and up take the harness context and Muse call options themselves). */
+    version: Number(S.version) || 0,
     /** The engine bundle's global, for tests that play a game to make a log. */
     engine: () => context.MicrogameEngine,
     verify(gameText, log) {

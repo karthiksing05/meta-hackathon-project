@@ -57,6 +57,7 @@ type Server struct {
 	recsLocks   userLocks
 	jobRuns     sync.Map  // job id -> *jobRun, for the jobs running now
 	seriesLocks userLocks // one series at a time, so two runs can't overwrite each other
+	scoreLocks  userLocks // one person's score on one game: read the old, write the new
 }
 
 // recsSession is one person's loaded recommender state (see internal/recs).
@@ -102,6 +103,8 @@ func (s *Server) Handler() http.Handler {
 
 		r.Route("/games/{id}", func(r chi.Router) {
 			r.With(s.optionalAuth).Get("/", s.getGame)
+			r.With(s.requireAuth).Put("/sound", s.setGameSound)
+			r.With(s.requireAuth).Delete("/sound", s.clearGameSound)
 			r.With(s.requireAuth).Put("/like", s.like(true))
 			r.With(s.requireAuth).Delete("/like", s.like(false))
 			r.With(s.optionalAuth).Get("/leaderboard", s.leaderboard)
@@ -114,6 +117,14 @@ func (s *Server) Handler() http.Handler {
 		r.With(s.optionalAuth).Get("/users/{id}", s.getUser)
 		r.With(s.requireAuth).Get("/me/likes", s.myLikes)
 		r.With(s.requireAuth).Get("/me/moments", s.myMoments)
+		r.With(s.optionalAuth).Get("/sounds", s.listSounds)
+		r.With(s.requireAuth).Post("/sounds", s.createSound)
+		r.Route("/sounds/{id}", func(r chi.Router) {
+			r.With(s.optionalAuth).Get("/", s.getSound)
+			r.With(s.optionalAuth).Get("/games", s.soundGames)
+			r.With(s.requireAuth).Put("/save", s.saveSound(true))
+			r.With(s.requireAuth).Delete("/save", s.saveSound(false))
+		})
 		r.With(s.requireAuth).Post("/series", s.createSeries)
 		r.With(s.requireAuth).Get("/series", s.listSeries)
 		r.With(s.requireAuth).Get("/series/{id}", s.getSeries)

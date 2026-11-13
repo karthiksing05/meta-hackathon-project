@@ -57,6 +57,11 @@ type generateIn struct {
 	// Draft makes the finished game unlisted: reachable by id and in the owner's creations, but not in the feed or
 	// search until it is published. A change is a draft unless this is false; a new game is public unless this is true.
 	Draft *bool `json:"draft"`
+	// A sound to put behind the finished game (a sound id from /v1/sounds), where in the loop to start, and how loud it
+	// is against the game's own sound effects (0 to 1). A change to a game keeps the original's sound unless this names another.
+	SoundID  string   `json:"soundId"`
+	OffsetMs *int64   `json:"offsetMs"`
+	Mix      *float64 `json:"mix"`
 }
 
 // genHealthCache remembers the generator's last health answer for a few seconds.
@@ -129,6 +134,28 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		in.Brief["intent"] = in.Request // the brief's intent defaults to the request
 	}
 
+	var sound *model.GameSound
+	switch {
+	case strings.TrimSpace(in.SoundID) != "":
+		if _, err := s.Store.SoundByID(r.Context(), strings.TrimSpace(in.SoundID)); err != nil {
+			if errors.Is(err, store.ErrNotFound) {
+				writeErr(w, 404, "sound not found")
+			} else {
+				s.serverErr(w, r, err)
+			}
+			return
+		}
+		sound = &model.GameSound{ID: strings.TrimSpace(in.SoundID), Mix: defaultSoundMix}
+		if in.OffsetMs != nil {
+			sound.OffsetMs = *in.OffsetMs
+		}
+		if in.Mix != nil {
+			sound.Mix = *in.Mix
+		}
+	case base != nil && base.Sound != nil:
+		c := *base.Sound
+		sound = &c
+	}
 	if len(in.BaseManifest) > 0 && string(in.BaseManifest) != "null" {
 		var bm struct {
 			Content struct {
@@ -179,6 +206,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		}
 		job.Anatomy = a
 	}
+	job.Sound = sound
 	job.Draft = base != nil // a change stays a draft until it is published
 	if in.Draft != nil {
 		job.Draft = *in.Draft
@@ -470,6 +498,11 @@ func (s *Server) finishJob(ctx context.Context, job model.Job, owner model.User,
 		}
 		s.failJob(ctx, job.ID, "Couldn't save the game: "+perr.Msg)
 		return
+	}
+	if job.Sound != nil {
+		if err := s.attachSound(context.WithoutCancel(ctx), g, job.Sound.ID, job.Sound.OffsetMs, job.Sound.Mix); err != nil {
+			log.Warn("generate: could not put the sound behind the game", "err", err)
+		}
 	}
 	if job.Draft {
 		if err := s.Store.SetGameUnlisted(context.WithoutCancel(ctx), g.ID, true); err != nil {

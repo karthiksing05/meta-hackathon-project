@@ -94,6 +94,17 @@ type Store interface {
 	SetGameUnlisted(ctx context.Context, gameID string, unlisted bool) error
 	DeleteGame(ctx context.Context, gameID string) error
 
+	// Sounds: loops that play behind games. Files are a published package; these keep the records, saves and use counts.
+	InsertSound(ctx context.Context, s *model.Sound) error
+	SoundByID(ctx context.Context, id string) (*model.Sound, error)
+	SoundsByIDs(ctx context.Context, ids []string) ([]model.Sound, error)
+	FindSounds(ctx context.Context, q SoundQuery) ([]model.Sound, error)
+	SetSoundSaved(ctx context.Context, soundID, userID string, saved bool) (int64, error)
+	SoundsSavedSet(ctx context.Context, userID string, ids []string) (map[string]bool, error)
+	AddSoundUse(ctx context.Context, soundID string, delta int64) error
+	SetGameSound(ctx context.Context, gameID string, gs *model.GameSound) error // nil takes the sound off
+	GamesBySound(ctx context.Context, soundID, order string, limit int) ([]model.Game, error)
+
 	// Series: best-of-N between two friends with server-checked scores.
 	InsertSeries(ctx context.Context, s *model.Series) error
 	SeriesByID(ctx context.Context, id string) (*model.Series, error)
@@ -104,7 +115,12 @@ type Store interface {
 	Interleave(ctx context.Context, since time.Time) (model.Interleave, error)
 	ExportEvents(ctx context.Context, since time.Time, limit int) ([]model.Event, error) // oldest first
 
-	SubmitScore(ctx context.Context, s model.Score) error // keeps the user's best
+	SubmitScore(ctx context.Context, s model.Score) error // keeps the user's best (a plain game: points, higher first)
+	// Board, ScoreOf and PutScore are for games with a score model: sorted by its direction and tie-break, one person's
+	// score, and writing it as the API decided (best, latest, lower is better).
+	Board(ctx context.Context, gameID string, limit int, order model.BoardOrder) ([]model.Score, error)
+	ScoreOf(ctx context.Context, gameID, userID string) (*model.Score, error)
+	PutScore(ctx context.Context, s model.Score) error
 	Leaderboard(ctx context.Context, gameID string, limit int) ([]model.Score, error)
 }
 

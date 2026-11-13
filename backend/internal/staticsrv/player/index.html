@@ -27,6 +27,14 @@
   #log { font: 11px/1.4 ui-monospace, Menlo, monospace; max-height: 220px; overflow: auto; background: rgba(120,120,160,.12); padding: 8px; border-radius: 10px; white-space: pre-wrap; }
   #meta { margin: 6px 0 12px; }
   .err { color: #c0392b; }
+  #actions { margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
+  #actions[hidden], #signin[hidden] { display: none; }
+  #del { background: #c0392b; align-self: flex-start; }
+  #del:disabled { opacity: .45; cursor: default; }
+  #signin { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(120,120,160,.14); }
+  #signin input { width: auto; max-width: 100%; }
+  #who { font-size: 12px; opacity: .75; }
+  #who a { color: inherit; }
 </style>
 </head>
 <body>
@@ -44,6 +52,16 @@
   <div id="stage-wrap"><div id="bubble-root" class="palette-lilac-haze"><canvas id="bubble-canvas"></canvas></div></div>
   <div id="side">
     <div id="meta"></div>
+    <div id="actions" hidden>
+      <button id="del" type="button" disabled title="Delete the game that is open, with its saves and scores (its owner only)">Delete this game</button>
+      <form id="signin" hidden onsubmit="return false">
+        <div>Sign in as the game's owner to delete it.</div>
+        <input id="email" type="email" placeholder="email" autocomplete="username" spellcheck="false">
+        <input id="password" type="password" placeholder="password" autocomplete="current-password">
+        <div><button id="signin-go" type="submit">Sign in and delete</button> <button id="signin-cancel" type="button" style="background:transparent;color:inherit;border-color:rgba(120,120,160,.45)">Cancel</button></div>
+      </form>
+      <div id="who"></div>
+    </div>
     <strong>Games on the server</strong>
     <div id="games">Loading…</div>
     <strong>Messages</strong>
@@ -112,6 +130,77 @@
     return r.json();
   }
 
+  // ---- deleting the open game (its owner only; the API checks) ----
+  let current = null; // the game that is open: {id, title}
+  let token = null;
+  let me = null;
+  try { token = sessionStorage.getItem("playerToken"); me = sessionStorage.getItem("playerUser"); } catch (e) {}
+  function remember() {
+    try {
+      if (token) { sessionStorage.setItem("playerToken", token); sessionStorage.setItem("playerUser", me || ""); }
+      else { sessionStorage.removeItem("playerToken"); sessionStorage.removeItem("playerUser"); }
+    } catch (e) {}
+  }
+  function showWho() {
+    const w = $("who");
+    w.textContent = "";
+    if (!token) return;
+    w.append("Signed in as " + (me || "you") + " · ");
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = "sign out";
+    a.addEventListener("click", (ev) => { ev.preventDefault(); token = null; me = null; remember(); showWho(); note("signed out"); });
+    w.appendChild(a);
+  }
+  function setCurrent(game) {
+    current = game;
+    $("actions").hidden = !game;
+    $("del").disabled = !game || !apiBase;
+    $("del").title = apiBase ? $("del").title : "Needs the API address (?api=https://api...)";
+    $("signin").hidden = true;
+    showWho();
+  }
+  async function signIn() {
+    const r = await fetch(apiBase + "/v1/auth/login", {
+      method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ email: $("email").value.trim(), password: $("password").value }),
+    });
+    const out = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(out.error || "sign-in failed (" + r.status + ")");
+    token = out.accessToken;
+    me = out.user && out.user.username;
+    $("password").value = "";
+    remember();
+    showWho();
+  }
+  async function removeCurrent() {
+    const g = current;
+    const r = await fetch(apiBase + "/v1/creations/" + encodeURIComponent(g.id), { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+    if (r.status === 401) { token = null; remember(); showWho(); $("signin").hidden = false; throw new Error("your sign-in expired: sign in again"); }
+    if (r.status === 404) throw new Error("only the game's owner can delete it" + (me ? " (you're signed in as " + me + ")" : ""));
+    if (r.status !== 204) throw new Error("the server answered " + r.status);
+    note("deleted " + g.id + " (" + g.title + ")");
+    $("meta").textContent = "Deleted " + g.title + ".";
+    $("status").textContent = "Deleted";
+    setCurrent(null);
+    history.replaceState(null, "", location.pathname + (q.get("api") ? "?api=" + encodeURIComponent(q.get("api")) : ""));
+    listGames();
+  }
+  $("del").addEventListener("click", async () => {
+    if (!current || !apiBase) return;
+    if (!confirm('Delete "' + current.title + '"?\n\nThis removes the game, its saves and its scores for everyone. It can\'t be undone.')) return;
+    if (!token) { $("signin").hidden = false; $("email").focus(); return; }
+    try { await removeCurrent(); } catch (e) { fail(e.message); }
+  });
+  $("signin-cancel").addEventListener("click", () => { $("signin").hidden = true; });
+  $("signin").addEventListener("submit", async () => {
+    try {
+      await signIn();
+      $("signin").hidden = true;
+      await removeCurrent();
+    } catch (e) { fail(e.message); }
+  });
+
   async function manifestUrlFor(ref) {
     if (/^[a-f0-9]{24}$/.test(ref)) return { url: location.origin + "/" + ref + "/manifest.json", game: null };
     if (!apiBase) throw new Error("give a 24-character game id, or ?api=https://api... so a slug can be looked up");
@@ -143,6 +232,7 @@
     const act = JSON.parse(BubbleHost.activate(prep.key, JSON.stringify(payload)));
     note("activate: " + JSON.stringify(act));
     $("status").textContent = "Tap the game to start";
+    setCurrent({ id: found.game ? found.game.id : ref, title: m.title || ref });
     history.replaceState(null, "", "?game=" + encodeURIComponent(ref) + (q.get("api") ? "&api=" + encodeURIComponent(q.get("api")) : ""));
     document.querySelectorAll("#games a").forEach((a) => a.classList.toggle("current", a.dataset.ref === ref || a.dataset.id === ref));
   }

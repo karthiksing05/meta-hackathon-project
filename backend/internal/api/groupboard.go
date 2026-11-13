@@ -60,16 +60,22 @@ type boardRow struct {
 }
 
 // rankWeek turns each game's scores into rank points for the given members and week, and orders the members.
-func rankWeek(boards map[string][]model.Score, members map[string]bool, start, end time.Time) []boardRow {
+// models are the games' score models (a game without one ranks points, higher first). A game whose board is unranked
+// awards no points.
+func rankWeek(boards map[string][]model.Score, members map[string]bool, start, end time.Time, models map[string]*model.ScoreModel) []boardRow {
 	byUser := map[string]*boardRow{}
-	for _, scores := range boards {
+	for gid, scores := range boards {
+		sm := models[gid]
+		if !sm.Ranked() {
+			continue
+		}
 		var in []model.Score
 		for _, s := range scores {
 			if members[s.UserID] && !s.UpdatedAt.Before(start) && s.UpdatedAt.Before(end) {
 				in = append(in, s)
 			}
 		}
-		sort.SliceStable(in, func(i, j int) bool { return in[i].Score > in[j].Score })
+		sort.SliceStable(in, func(i, j int) bool { return beats(sm, in[i].Score, in[j].Score) })
 		place := 0
 		for i, s := range in {
 			if i == 0 || s.Score != in[i-1].Score { // equal scores share a place
@@ -160,16 +166,18 @@ func (s *Server) groupLeaderboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	boards := make(map[string][]model.Score, len(games))
+	models := make(map[string]*model.ScoreModel, len(games))
 	for _, game := range games {
-		rows, err := s.Store.Leaderboard(ctx, game.ID, boardScan)
+		rows, err := s.Store.Board(ctx, game.ID, boardScan, model.OrderOf(game.Score))
 		if err != nil {
 			s.serverErr(w, r, err)
 			return
 		}
 		boards[game.ID] = rows
+		models[game.ID] = game.Score
 	}
-	this := rankWeek(boards, members, start, end)
-	before := placeOf(rankWeek(boards, members, prevStart, start))
+	this := rankWeek(boards, members, start, end, models)
+	before := placeOf(rankWeek(boards, members, prevStart, start, models))
 	now := placeOf(this)
 
 	users, err := s.Store.UsersByIDs(ctx, ids)

@@ -220,6 +220,7 @@ sprite, or at `false` to keep the shape, with `"art": { "hazard": "fogbank" }` (
 | `gravity_jump` | `avatar`, `ground` (a strip along the top of the floor) |
 | `spawn_wave` | `hazard` |
 | `pickups` | `pickup` |
+| `gap_walls` | `wall` (stretched to each wall part), `wall_cap` (at the gap edge, as wide as the wall) |
 | `lives` | `life` (one HUD icon per life) |
 | `grid_board` | `cell` (a plain cell, such as a card back) |
 | `match_pairs` | `card` (one frame per symbol) |
@@ -283,6 +284,13 @@ which one it used (2.6). Unknown fragments are `A_UNKNOWN_FRAGMENT`, with a did-
 use provides, under its bound name. The game's rules run after every fragment's rules for the same
 event, because the expander writes fragment rules first (A10: rules run in file order).
 
+**Typed answers.** An input with a `{"text": "submit"}` or `{"text": "change"}` source
+(`engine/SPEC-v0.2.md` 4) gets the app's native text field and keyboard (docs/BUBBLES.md 7.11).
+`presentation.text_field` (`{x, y, w, h, size}` in canvas units) places it. The expander copies it to
+the game as written; without it the field is a bar at the bottom. Keep the bottom of the playfield
+clear for it, and give gate bots the strings to try with `playtest.text_candidates` (2.6). Games that
+spell with on-screen letters (the `keyboard` fragment) are taps and need none of this.
+
 ### 2.3 Objectives
 
 These are the game's own `win`, `lose` and `score`, plus `time_limit` and `on_timeout`. See 1.3 for how
@@ -319,10 +327,19 @@ requirement kind is a possible later addition.
 
 ### 2.6 Playtest hint
 
-`"playtest": { "progress": "<expr>" }` is optional. It tells the playtest bots what "doing better" means
-(lights switched off, distance to the food, lives kept) when the score alone doesn't show it. The
-expander writes a second copy of the game for the gate, with a hidden `__progress` state that a `tick`
-rule updates. The shipped `game.json` never contains it.
+`"playtest": { "progress": "<expr>", "text_candidates": "<expr>" }`. Both are optional.
+
+- `progress` tells the playtest bots what "doing better" means (lights switched off, distance to the
+  food, lives kept) when the score alone doesn't show it.
+- `text_candidates` is for games with a text input (2.2). It's a `list<string>` expression for the
+  strings worth submitting right now, for example `content_words` or `[answer, upper(answer)]`. It
+  can read whatever the game's own expressions read. Each bot decision submits one of them (at most
+  12, picked at random when there are more), then clears the field. Stronger bots pick the one that
+  does best in look-ahead. Without a hint, the bots submit strings found in the game's state.
+
+The expander writes a second copy of the game for the gate. It has a hidden `__progress` (float) and
+`__text_candidates` (`list<string>`) state, which `tick` rules update. The shipped `game.json` never
+contains them. Errors in either expression point at `/playtest/progress` or `/playtest/text_candidates`.
 
 ### 2.7 Inside Bubbles
 

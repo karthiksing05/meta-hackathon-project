@@ -40,7 +40,7 @@ func (s *Server) views(r *http.Request, games []model.Game) ([]model.GameView, e
 			ID: g.ID, Title: g.Title, Description: g.Description, Tags: nonNil(g.Tags), Formula: g.Formula,
 			OwnerID: g.OwnerID, OwnerUsername: g.OwnerUsername, Likes: g.Likes, Plays: g.Plays,
 			Finishes: g.Finishes, LikedByMe: liked[g.ID], RemixOf: g.RemixOf,
-			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID, Unlisted: g.Unlisted,
+			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID, Unlisted: g.Unlisted, Score: g.Score.View(),
 			PackageURL: base, ManifestURL: base + g.ManifestPath, CreatedAt: g.CreatedAt,
 		}
 		if g.CoverPath != "" {
@@ -48,6 +48,7 @@ func (s *Server) views(r *http.Request, games []model.Game) ([]model.GameView, e
 		}
 		out[i] = v
 	}
+	s.attachSoundViews(r.Context(), games, out)
 	return out, nil
 }
 
@@ -203,19 +204,16 @@ func (s *Server) leaderboard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	rows, ok := s.scopedBoard(w, r, g.ID, limitParam(r, 20, 100))
-	if !ok {
-		return
-	}
-	if rows == nil {
-		rows = []model.Score{}
-	}
-	writeJSON(w, 200, map[string]any{"items": rows})
+	s.writeBoard(w, r, g, nil)
 }
 
 func (s *Server) submitScore(w http.ResponseWriter, r *http.Request) {
 	g, ok := s.gameOr404(w, r)
 	if !ok {
+		return
+	}
+	if g.Score != nil { // a game with a score model only takes replayed runs
+		s.submitScored(w, r, g)
 		return
 	}
 	var in struct{ Score float64 }
@@ -277,6 +275,7 @@ type manifestMeta struct {
 	Lineage struct {
 		RemixOf string `json:"remix_of"`
 	} `json:"lineage"`
+	Score *manifestScore `json:"score"` // what the board ranks and how (scoring.go)
 }
 
 // publishError is a failed publish: Status and Msg are safe to show; Err (when set) is an internal failure.
@@ -334,6 +333,7 @@ func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Read
 	if m.Chain.Index > 1 && m.Chain.Index < 1000 {
 		g.Level = m.Chain.Index
 	}
+	g.Score = scoreModelFrom(m.Score)
 	g.Mood, g.Energy, g.Competition = normTags(m.Brief.Mood), strings.ToLower(strings.TrimSpace(m.Brief.Energy)), strings.ToLower(strings.TrimSpace(m.Brief.Competition))
 	g.Look, g.IsDaily, g.Bots = strings.ToLower(strings.TrimSpace(m.Style.Look)), strings.EqualFold(m.Structure.Cadence, "daily"), bots
 	switch {

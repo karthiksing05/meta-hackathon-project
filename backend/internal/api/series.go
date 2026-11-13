@@ -78,10 +78,18 @@ type seriesView struct {
 }
 
 // roundOutcome says who won a decided round: "a", "b" or "draw".
-func roundOutcome(a, b model.RoundPlay) string {
+func roundOutcome(a, b model.RoundPlay, lower bool) string {
 	switch {
+	case a.DNF || b.DNF: // a run that didn't finish loses to one that did; two of them are a draw
+		switch {
+		case a.DNF && b.DNF:
+			return "draw"
+		case a.DNF:
+			return "b"
+		}
+		return "a"
 	case a.Score != b.Score:
-		if a.Score > b.Score {
+		if (a.Score > b.Score) != lower {
 			return "a"
 		}
 		return "b"
@@ -104,7 +112,7 @@ func settle(se *model.Series, now time.Time) {
 			continue
 		}
 		decided++
-		switch roundOutcome(pa, pb) {
+		switch roundOutcome(pa, pb, r.Lower) {
 		case "a":
 			wa++
 		case "b":
@@ -178,7 +186,7 @@ func (s *Server) seriesFor(r *http.Request, se *model.Series) (seriesView, error
 			}
 		}
 		if iPlayed && theyPlayed {
-			switch roundOutcome(mine, theirs) {
+			switch roundOutcome(mine, theirs, rd.Lower) {
 			case "a":
 				rv.Winner = "me"
 				v.Tally.Me++
@@ -247,7 +255,7 @@ func (s *Server) createSeries(w http.ResponseWriter, r *http.Request) {
 			writeErr(w, 422, "only microgames can be played in a series (their scores can be checked)")
 			return
 		}
-		rounds = append(rounds, model.SeriesRound{N: i + 1, GameID: g.ID, Seed: randomSeed(), Plays: map[string]model.RoundPlay{}})
+		rounds = append(rounds, model.SeriesRound{N: i + 1, GameID: g.ID, Seed: randomSeed(), Lower: g.Score.Lower(), Plays: map[string]model.RoundPlay{}})
 	}
 	se := &model.Series{
 		ID: auth.NewID(12), PlayerA: me.ID, PlayerB: in.OpponentID, Rounds: rounds,
@@ -468,10 +476,16 @@ func (s *Server) submitRound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rd.LogSeed = head.Seed.String()
-	rd.Plays[me.ID] = model.RoundPlay{
+	play := model.RoundPlay{
 		Score: int64(math.Round(res.Recomputed.Score)), TimeMs: int64(math.Round(res.Recomputed.TimeMs)),
 		At: time.Now().UTC().Truncate(time.Millisecond),
 	}
+	if g.Score != nil { // a game with a score model: its value, and a run that didn't finish when only finished runs count
+		var finished bool
+		play.Score, play.TimeMs, finished = runValue(g.Score, res)
+		play.DNF = g.Score.FinishedOnly() && !finished
+	}
+	rd.Plays[me.ID] = play
 	settle(se, time.Now().UTC().Truncate(time.Millisecond))
 	if err := s.Store.ReplaceSeries(ctx, se); err != nil {
 		s.serverErr(w, r, err)

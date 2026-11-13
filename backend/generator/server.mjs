@@ -14,7 +14,7 @@
 //   POST /anatomy         {request, audience?}                      -> 200 {anatomy: game-anatomy/0.1 ...}
 //   POST /anatomy/revise  {anatomy, change, request?, afterPlaying?} -> 200 {anatomy: ...}  (the same shape)
 //        one JSON turn on the fast model; 503 muse_not_configured, 429 busy, 502 when Muse's reply isn't an anatomy
-//   POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?} -> {content, model}
+//   POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?} -> {content, model, usage}
 //        one JSON turn on a Muse model, for the Go API's harness steps; the key never leaves this container
 //   POST /verify          {game, log} (both as text)               -> the engine's replay result {ok, game_hash_ok, recomputed, claimed, problems}
 //   GET /healthz -> {"status":"ok","museConfigured":bool,"fragments":n}
@@ -89,8 +89,8 @@ async function museJSON(req, res) {
   const started = Date.now();
   try {
     const r = await muse.chatJSON({ model, system, user, maxTokens, reasoningEffort: effort, timeout, maxAttempts: 1 });
-    log('muse json ok', { model: r.model, seconds: (Date.now() - started) / 1000 });
-    return json(res, 200, { content: r.content, model: r.model });
+    log('muse json ok', { model: r.model, seconds: (Date.now() - started) / 1000, usage: r.usage });
+    return json(res, 200, { content: r.content, model: r.model, usage: r.usage });
   } catch (e) {
     log('muse json failed', { model, seconds: (Date.now() - started) / 1000, error: String(e?.message ?? e).slice(0, 200) });
     return json(res, 502, { error: 'muse_failed', message: String(e?.message ?? e).slice(0, 300) });

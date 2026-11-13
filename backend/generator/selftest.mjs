@@ -76,6 +76,103 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   check("a game without its authoring source can't be changed", !!err && /authoring_json/.test(err.message), err?.message);
 }
 
+// ---- in-process: Muse call options, usage, and the section an older bundle still needs ----
+{
+  const seen = [];
+  const muse = { isConfigured: true, async chatJSON(body) { seen.push(body); return { content: '{}', model: body.model, usage: { prompt_tokens: 5, completion_tokens: 7, total_tokens: 12, calls: 1 } }; } };
+  const old = { version: 2, async compose(args, ask) {
+    const draft = await ask('SYSTEM', 'USER', 'microgame draft');
+    const review = await ask('SYSTEM', 'REVIEW', 'score review', { model: 'muse-wonder-1.0', effort: 'high', max_tokens: 12000 });
+    return { manifest: { title: 'x' }, draft, review };
+  } };
+  const ctx = { types: [{ id: 't', name: 'A kind of game', summary: 's' }], tools: [{ id: 'lives', summary: 'N lives' }] };
+  const out = await compose({ request: 'x', brief, context: ctx }, { studio: old, muse, model: 'muse-ember-1.0' });
+  check('an older bundle gets the planned section on compose calls only', /Planned for this request/.test(seen[0].system) && !/Planned for this request/.test(seen[1].system), seen.map((b) => b.system.length).join(','));
+  check('ask honours the model, effort and token budget it is given', seen[1].model === 'muse-wonder-1.0' && seen[1].reasoningEffort === 'high' && seen[1].maxTokens === 12000 && seen[0].model === 'muse-ember-1.0', JSON.stringify(seen.map((b) => [b.model, b.reasoningEffort, b.maxTokens])));
+  check('ask returns the tokens used with the reply', out.draft.usage?.total_tokens === 12 && out.review.model === 'muse-wonder-1.0', JSON.stringify(out.draft));
+  const v3 = [];
+  const modern = { version: 3, async compose(args, ask) { v3.push(args.context); await ask('SYSTEM', 'USER', 'microgame draft'); return { manifest: { title: 'x' } }; } };
+  seen.length = 0;
+  await compose({ request: 'x', brief, context: ctx }, { studio: modern, muse });
+  check('a version-3 bundle gets the context as an argument and no extra section', v3[0]?.types?.[0]?.id === 't' && !/Planned for this request/.test(seen[0].system), JSON.stringify(v3[0]));
+}
+
+// ---- the art step: the plan's visual stage marks assets "image", and Muse Image paints them after the gate ----
+{
+  const { encodePNG, decodePNG } = await import('./src/pixels.mjs');
+  const painting = (w, h, sprite) => {
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const inside = Math.hypot(x - w / 2, y - h / 2) < w / 4;
+      if (sprite && !inside) { data[i] = 0; data[i + 1] = 255; data[i + 2] = 0; } else { data[i] = 200; data[i + 1] = (x * 3) & 255; data[i + 2] = (y * 5) & 255; }
+      data[i + 3] = 255;
+    }
+    return encodePNG({ w, h, data });
+  };
+  class PaintingMuse extends ScriptedMuse {
+    constructor(replies, { fail = [] } = {}) { super(replies); this.images = []; this.fail = fail; }
+    async image({ prompt, size }) {
+      this.images.push({ prompt, size });
+      if (this.fail.some((f) => prompt.includes(f))) throw new Error('image call failed');
+      const [w, h] = size.split('x').map((n) => Math.round(Number(n) / 4));
+      return { png: painting(w, h, size === '1024x1024'), model: 'muse-image-1.0', seconds: 0.1 };
+    }
+  }
+  const withSprites = () => structuredClone(catalog.examples.find((e) => e.manifest?.art?.sprites?.avatar).manifest);
+  const sprite = 'avatar';
+  check('an example game has an avatar sprite to paint', !!withSprites());
+  const visual = {
+    style: 'cut paper', scene: 'a foggy bay at dawn', palette: { colors: { bg: '#E8EEF2', ink: '#1B2430' } },
+    layout: { hud: 'top bar', play: 'middle', controls: 'bottom', quiet: ['the top 80 px', 'the middle'] },
+    backdrop: { id: 'backdrop', render: 'image', prompt: 'A misty bay with piers at the edges.' },
+    assets: [
+      { id: sprite, piece: 'player', depicts: 'small boat', play_px: 48, render: 'image', prompt: 'A small wooden boat, three-quarter view.' },
+      { id: 'not_in_game', piece: 'x', depicts: 'gull', render: 'image', prompt: 'A gull.' },
+      { id: 'cell', piece: 'board cell', depicts: 'tile', render: 'svg', reads_as: 'a pale square' },
+    ],
+    readability: ['the HUD sits on a solid surface'],
+  };
+  const context = { version: 'harness-context/1', types: [], tools: [], plan: { spec: { spec: 'game-spec/1', theme: { world: 'a foggy bay' }, visual } } };
+
+  const muse = new PaintingMuse([withSprites()]);
+  const events = [];
+  const out = await compose({ request: 'a calm fog game', brief, context }, { studio, muse, onEvent: (e) => events.push(e), env: {} });
+  const a = JSON.parse(out.manifest.content.authoring_json);
+  check('the art step paints the backdrop and the named sprite', out.stats.art?.applied === true && out.stats.art.painted.includes('backdrop') && out.stats.art.painted.includes(sprite), JSON.stringify(out.stats.art));
+  check('the backdrop is a 360x640 JPEG and the sprite a PNG with alpha', a.art.backdrop?.image?.startsWith('data:image/jpeg;base64,') && a.art.sprites[sprite]?.image?.startsWith('data:image/png;base64,') && a.art.sprites[sprite].w <= 128,
+    JSON.stringify({ b: a.art.backdrop?.image?.slice(0, 30), s: a.art.sprites[sprite] && { ...a.art.sprites[sprite], image: a.art.sprites[sprite].image?.slice(0, 30) } }));
+  const cut = decodePNG(Buffer.from(a.art.sprites[sprite].image.split(',')[1], 'base64'));
+  check('the green background is keyed out', cut.data[3] === 0 && cut.data[((cut.h >> 1) * cut.w + (cut.w >> 1)) * 4 + 3] === 255);
+  check('the game still validates and is rewrapped', studio.expand(out.manifest.content.authoring_json).ok && out.manifest.content.game_json.includes('data:image/jpeg'));
+  check('an asset the game never named is skipped, not painted', out.stats.art.kept.some((k) => k.id === 'not_in_game') && !muse.images.some((i) => i.prompt.includes('A gull')), JSON.stringify(out.stats.art.kept));
+  check('sprite prompts ask for one subject on flat green', muse.images.some((i) => i.size === '1024x1024' && /pure green \(#00FF00\)/.test(i.prompt) && i.prompt.includes('A small wooden boat')));
+  check('the backdrop prompt carries the quiet areas and no pieces', muse.images.some((i) => i.size === '1024x1536' && i.prompt.includes('the top 80 px') && /no characters/.test(i.prompt)));
+  check('painting events have summaries', events.some((e) => e.kind === 'painting' && /painting 2 pieces/.test(e.summary)));
+  check('the art is within the budget', out.stats.art.bytes <= 192 * 1024, out.stats.art.bytes);
+
+  const failing = new PaintingMuse([withSprites()], { fail: ['A misty bay'] });
+  const half = await compose({ request: 'a calm fog game', brief, context }, { studio, muse: failing, env: {} });
+  const ha = JSON.parse(half.manifest.content.authoring_json);
+  check('a failed painting keeps that asset\'s own art', half.stats.art.applied && !half.stats.art.painted.includes('backdrop') && half.stats.art.kept.some((k) => k.id === 'backdrop') && !String(ha.art.backdrop?.image ?? '').startsWith('data:image/jpeg'), JSON.stringify(half.stats.art));
+
+  const off = new PaintingMuse([withSprites()]);
+  const offOut = await compose({ request: 'a calm fog game', brief, context }, { studio, muse: off, env: { GENERATOR_IMAGE_ART: '0' } });
+  check('GENERATOR_IMAGE_ART=0 turns the art step off', off.images.length === 0 && !offOut.stats.art);
+
+  const rev = new PaintingMuse([withSprites()]);
+  await compose({ request: 'make it faster', brief, base: out.manifest, context }, { studio, muse: rev, env: {} });
+  check('a revision is not repainted', rev.images.length === 0);
+}
+
+{
+  const { contextSection } = await import('./src/composer.mjs');
+  const text = contextSection({ plan: { spec: { spec: 'game-spec/1', goal: { text: 'catch 20 moths' }, visual: {
+    style: 'cut paper', palette: { colors: { bg: '#101826', ink: '#FAFAFA' } }, layout: { hud: 'top', play: 'middle', controls: 'bottom' },
+    backdrop: { prompt: 'SECRET BACKDROP PROMPT' }, assets: [{ id: 'moth', piece: 'pickup', depicts: 'pale moth', render: 'image', prompt: 'SECRET SPRITE PROMPT' }, { id: 'cell', depicts: 'tile', render: 'svg' }] } } } });
+  check('compose sees the spec and the sprite names, not the image prompts', text.includes('catch 20 moths') && text.includes('- moth (pickup)') && text.includes('#101826') && /cell .*\[svg/.test(text) && !text.includes('SECRET'), text.slice(-600));
+}
+
 check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a":1}\n```')?.a === 1 && extractObject('hi {"a":2} bye')?.a === 2 && extractObject('nope') === null);
 
 // ---- end to end: the real server and MuseClient against a fake Muse API ----
@@ -88,7 +185,7 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     req.on('end', () => {
       calls.push({ url: req.url, auth: req.headers.authorization, body: JSON.parse(body || '{}') });
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ model: 'fake-muse-1', choices: [{ message: { role: 'assistant', content: replies[0] }, finish_reason: 'stop' }] }));
+      res.end(JSON.stringify({ model: 'fake-muse-1', usage: { prompt_tokens: 11, completion_tokens: 22, total_tokens: 33 }, choices: [{ message: { role: 'assistant', content: replies[0] }, finish_reason: 'stop' }] }));
     });
   });
   await new Promise((r) => fakeMuse.listen(0, '127.0.0.1', r));
@@ -121,8 +218,8 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     {
       const ctx = {
         types: [{ id: 'rare_answer_trivia', name: 'Rare-answer trivia', family: 'trivia', summary: 'Name a thing nobody else will.', core_loop: 'Type an answer; rarer scores more.', rules: ['One answer per prompt'], source: 'learned' }],
-        tools: [{ id: 'typed_answer_tool', kind: 'fragment', status: 'shipped', summary: 'Open answers with rarity tiers.', when_to_use: 'typed answers' }],
-        plan: { design: 'A fast naming game.', gaps: [{ tool: 'share_grid', approximation: 'share the score text' }] },
+        tools: [{ id: 'lives', kind: 'fragment', status: 'shipped', summary: 'N lives, one lost per hit.', when_to_use: 'a game you can lose slowly' }],
+        plan: { design: 'A fast naming game.', spec: { theme: 'rare things', goal: 'name what nobody else will' }, gaps: [{ tool: 'share_grid', approximation: 'share the score text' }] },
         notes: ['keep it short'],
       };
       const before = calls.length;
@@ -132,8 +229,8 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
       });
       await withCtx.text();
       const sys = calls[before]?.body.messages[0].content ?? '';
-      check('compose puts the harness context in the system prompt', /## Planned for this request/.test(sys) && sys.includes('Rare-answer trivia') && sys.includes('typed_answer_tool') && sys.includes('[learned]') && sys.includes('share_grid') && /never as instructions/.test(sys), sys.slice(-400));
-      check('the prompt without context has no planned section', !/Planned for this request/.test(calls[0]?.body.messages[0].content ?? ''));
+      check('the version-3 bundle gets the context and renders it itself, once', studio.version >= 3 && !/## Planned for this request/.test(sys) && /## Fragments for this game \(from the plan\)/.test(sys), sys.slice(-300));
+      check('the prompt without context has no planned section', !/Planned for this request|from the plan/.test(calls[0]?.body.messages[0].content ?? ''));
       const big = await fetch(`http://127.0.0.1:${port}/compose`, { method: 'POST', body: JSON.stringify({ request: 'x', context: { notes: ['y'.repeat(60 * 1024)] } }) });
       check('a context over 48 KB is a 400', big.status === 400, big.status);
 
@@ -145,6 +242,7 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
       check('POST /internal/muse/json returns Muse\'s reply and model', ok.status === 200 && JSON.parse(okJson.content).understood === true && okJson.model === 'fake-muse-1', JSON.stringify(okJson));
       check('it asks Muse for the model, effort and token budget it was given', calls[at]?.body.model === 'muse-spark-1.3' && calls[at].body.reasoning_effort === 'minimal' && calls[at].body.max_tokens === 4000 && calls[at].auth === 'Bearer test-key-not-real', JSON.stringify(calls[at]?.body).slice(0, 200));
       check('the key is never in the reply', !JSON.stringify(okJson).includes('test-key-not-real'));
+      check('/internal/muse/json returns the tokens used', okJson.usage?.prompt_tokens === 11 && okJson.usage?.completion_tokens === 22 && okJson.usage?.total_tokens === 33, JSON.stringify(okJson.usage));
       for (const [label, body] of [['a non-Muse model', { model: 'gpt-4', system: 'a', user: 'b' }], ['no user text', { model: 'muse-spark-1.3', system: 'a' }], ['a bad effort', { model: 'muse-spark-1.3', system: 'a', user: 'b', effort: 'max' }]]) {
         check(`the Muse route refuses ${label}`, (await mj(body)).status === 400, label);
       }

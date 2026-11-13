@@ -110,7 +110,7 @@ func main() {
 			if effort == "" {
 				effort = harness.PlanEffort
 			}
-			planner = &harness.Planner{Checklists: lists, Chain: *chain, Muse: &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"),
+			planner = &harness.Planner{Checklists: lists, Chain: *chain, Visual: harness.VisualOn(os.Getenv("HARNESS_VISUAL")), Muse: &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"),
 				Model: harness.ModelWonder, MaxTokens: 12000, ReasoningEffort: effort, Timeout: 90 * time.Second, OnUsage: record("plan")}}
 		}
 	}
