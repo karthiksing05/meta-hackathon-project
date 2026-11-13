@@ -95,6 +95,8 @@ func main() {
 		cfg.Understander = harness.MuseUnderstander{Muse: client("understand")}
 		lk := harness.NewLookup(client("lookup"))
 		lk.FetchBudget = *budget
+		lk.BankMuse = &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"), Model: harness.ModelSpark, MaxTokens: 8000,
+			ReasoningEffort: "minimal", Timeout: 18 * time.Second, OnUsage: record("bank")}
 		cfg.Lookup = lk
 		if *withPlan {
 			dir := *catalog

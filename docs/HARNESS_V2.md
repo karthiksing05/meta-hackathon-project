@@ -89,6 +89,42 @@ Triggers: an `unknown_refs` name with no alias hit, or a top fused score below t
 - **On failure:** if the lookup fails or runs out of time, the job continues with step 2's results. The Studio step
   text says so honestly.
 
+### 3b. The answer bank for themed rarity games (Go, `bank.go`, budget 20 s; 2026-11-13)
+
+A rarity or naming game ("name a Hogwarts student", "name a Greek god") needs every accepted answer, with aliases and
+a tier. Muse alone writes a thin list with wrong entries (one build put "Open Sesame" among Harry Potter spells), so:
+
+- **When:** the plan uses `tiered_points`, a `rare_answer*` type, or `typed_answer` / `fuzzy_match` / `rarity_tiers` /
+  `qa_bank` / `answer_bank`, and the request names a topic or a category. A catalog hit does not skip it.
+- **Starts with the job:** when the raw request reads like a rarity game (rare, rarest, krillion, "name a …"), the lane
+  starts at once with the topic and category read from the text (`RawBankKey`), so it runs alongside understand,
+  retrieve and plan. Otherwise it starts after the plan when the plan needs it. The plan decides whether it is used.
+- **Sources:** Wikipedia search for "List of <topic> <category>s" and "List of <topic> characters"; up to three pages
+  read as Parsoid HTML through the same safe fetcher (public addresses only, no cookies), with a longer cap for list
+  pages (12 s and 6 MB each). Names come from list items' leading link or bold text, table rows' first cells and
+  section headings, and are counted by mentions over every page read.
+- **Tiers:** one Muse Spark call keeps the candidates that fit the category and tiers them by familiarity (it may only
+  pick names from the quoted list; Go drops anything else). If it fails, mention rank sets the tiers. Each multi-word
+  name gets its first and last word as aliases, and an alias two answers share is dropped.
+- **Into the job:** `context.content.answer_bank` (tiers, sources, a note that it is quoted data) and
+  `context.content.ta_answers` (typed_answer's `ta_answers()` line). The prompt shows Muse a sample and asks it to write
+  `"@answer_bank"` where the bank goes; the generator puts the whole bank there in code (`src/lanes.mjs bankMerge`), so
+  Muse never copies it. `stats.lookup` = `{fired, reason, topic, category, pages, candidates, answers, tiers, tier_by,
+  ms, fetch_ms, merged}`.
+- **On failure** (no page, no names, out of time): a note in the context, and Muse writes the answers as before.
+
+### Parallel lanes and `stats.timeline` (2026-11-13)
+
+- **Harness:** the answer-bank lane runs beside understand → retrieve → plan; several game lookups run at once.
+- **Generator** (`src/lanes.mjs`): every Muse call (text and image) goes through one limiter, 4 at once. The plan's
+  backdrop picture starts as the job starts, alongside compose, and the art step picks it up when the game is
+  built (sprites still wait for the game, since only the names it has are painted). The bundle's compose (draft,
+  verify, gate, repair, score) is still one lane: Muse writes rules and presentation in one manifest, so splitting
+  them, and per-part repair, needs the bundle to compose in parts first.
+- **`stats.timeline`:** every stage as `{lane, stage, start_ms, end_ms, note?}`, the harness's from
+  `context.timeline` and the generator's shifted to start where the harness ended. `stats.parallel` =
+  `{wall_ms, sequential_ms, saved_ms, lanes}` compares the wall time with the same stages run one after another.
+
 ### 4. Plan (Muse Wonder)
 
 The planner gets the request and compact cards for the retrieved types and tools, about 300–600 characters each, not

@@ -7,6 +7,7 @@
 import { paintArt, imageArtOn } from './art.mjs';
 import { composeHooks, pictureArtOn } from './hooks.mjs';
 import { applyMedia, mediaBrief } from './media.mjs';
+import { Timeline, bankMerge, laneMuse, limiter, startArt } from './lanes.mjs';
 
 export { summarize } from './events.mjs';
 
@@ -168,6 +169,25 @@ export async function verifyAfterPictures(out, { hooks, studio }) {
 }
 
 /**
+ * stats.timeline: the harness's stages (context.timeline, ms from the harness's start), then this job's lanes
+ * shifted to start where the harness ended; stats.parallel compares the wall time with the stages run one after
+ * another; stats.lookup is the answer-bank lookup (context.lookup) and how many times the bank was merged in.
+ */
+export function laneStats(context, timeline, bank) {
+  const harness = Array.isArray(context?.timeline) ? context.timeline.filter((l) => l && typeof l === 'object') : [];
+  const offset = harness.reduce((m, l) => Math.max(m, Number(l.end_ms) || 0), 0);
+  const job = timeline.lanes.map((l) => ({ ...l, start_ms: l.start_ms + offset, end_ms: l.end_ms + offset }));
+  const all = [...harness, ...job].sort((a, b) => a.start_ms - b.start_ms);
+  const wall = all.reduce((m, l) => Math.max(m, l.end_ms), 0);
+  // one after another: every stage that isn't inside a longer stage on its own lane (a Muse call inside compose)
+  const top = all.filter((l) => !all.some((o) => o !== l && o.lane === l.lane && o.start_ms <= l.start_ms && o.end_ms >= l.end_ms && (o.end_ms - o.start_ms) > (l.end_ms - l.start_ms)));
+  const sequential = top.reduce((t, l) => t + (l.end_ms - l.start_ms), 0);
+  const out = { timeline: all, parallel: { wall_ms: wall, sequential_ms: sequential, saved_ms: Math.max(0, sequential - wall), lanes: [...new Set(all.map((l) => l.lane))] } };
+  if (context?.lookup && typeof context.lookup === 'object') out.lookup = { ...context.lookup, merged: bank ? bank.merged : 0 };
+  return out;
+}
+
+/**
  * compose({request, brief, base?, remixOf?, level?, context?}, {muse, studio, model, onEvent, signal})
  *   -> {manifest, stats, bots, gate, quality}
  * base: the stored manifest of the game being changed (it must carry content.authoring_json). The result is
@@ -180,17 +200,26 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   // compose calls, not on the score review or repair that name their own model.
   const bundled = (studio.version ?? 0) >= 3;
   const planned = bundled ? '' : contextSection(context);
+  // Parallel lanes (src/lanes.mjs): every Muse call goes through one limiter (about 4 at once) and onto the job's
+  // timeline; the plan's pictures start now, alongside compose (new games only); the answer bank is merged in code.
+  const timeline = new Timeline();
+  const limit = limiter();
+  const visualEarly = context?.plan?.spec?.visual;
+  const early = !base && imageArtOn(env) && !pictureArtOn(env) ? startArt(visualEarly, muse, timeline, { limit }) : new Map();
+  muse = laneMuse(muse, timeline, { limit, prestarted: early });
+  const bank = bankMerge(context);
   const ask = async (system, user, purpose = '', options = null) => {
     if (signal?.aborted) throw new GenerationError('The job was cancelled or ran out of time.');
+    if (bank) user = bank.toMuse(user);
     const body = { model: options?.model || model, system: planned && !options?.model ? system + '\n' + planned : system, user };
     if (options?.max_tokens) body.maxTokens = Number(options.max_tokens);
     if (options?.effort !== undefined) body.reasoningEffort = options.effort;
     // A capped call (the score review's timeout_s): one attempt within the cap, so a retry never runs past it.
     if (Number(options?.timeout_s) > 0) { body.timeout = Number(options.timeout_s); body.maxAttempts = 1; }
     const started = Date.now();
-    const r = await muse.chatJSON(body);
+    const r = await muse.chatJSON(body, purpose);
     console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'muse call', purpose, model: r.model, ms: Date.now() - started, usage: r.usage }));
-    return { content: r.content, model: r.model, usage: r.usage };
+    return { content: bank ? bank.fromMuse(r.content) : r.content, model: r.model, usage: r.usage };
   };
   // Server-side hooks (src/hooks.mjs): picture art (GENERATOR_IMAGE_ART=1) and the layout fixes and lint. A caller
   // may pass its own (tests) or null for none.
@@ -209,14 +238,14 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   // picture sprites it draws; the real pictures go in after the gate. New games only.
   const media = !base && Array.isArray(context.media) && context.media.length ? context.media : null;
   if (media) request = request + '\n' + mediaBrief(media);
-  const out = await studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))), hooks);
+  const out = await timeline.run('compose', 'rules + presentation: draft, verify, gate, score', () => studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))), hooks));
   // The art step paints what the plan's visual stage marked "image". New games only for now: a revision sends the
   // whole authoring manifest back through Muse, and painted images would ride along as base64. With
   // GENERATOR_IMAGE_ART=1 the bundle's picture art (the hooks above) draws instead, so this step stays out.
   const visual = context?.plan?.spec?.visual;
   if (visual && !base && imageArtOn(env) && !pictureArtOn(env) && typeof muse.image === 'function') {
     try {
-      const art = await paintArt({ manifest: out.manifest, visual, muse, studio, renderFrame, signal, onEvent: (e) => onEvent(e) });
+      const art = await timeline.run('art', 'apply pictures', () => paintArt({ manifest: out.manifest, visual, muse, studio, renderFrame, signal, onEvent: (e) => onEvent(e) }));
       out.manifest = art.manifest;
       out.stats = { ...(out.stats ?? {}), art: art.report };
     } catch (e) {
@@ -235,8 +264,9 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   // New pictures change the pixels behind the words, so the layout verifier runs once more on the game that ships
   // (readability on): a label that read on the stand-in backdrop may not on the painted one.
   if ((out.stats?.art?.applied || out.stats?.media?.applied) && typeof hooks?.verifyLayout === 'function' && context?.layout_fix !== false) {
-    await verifyAfterPictures(out, { hooks, studio });
+    await timeline.run('art', 'verify after pictures', () => verifyAfterPictures(out, { hooks, studio }));
   }
+  out.stats = { ...(out.stats ?? {}), ...laneStats(context, timeline, bank) };
   const m = out.manifest;
   if (base) {
     // A change keeps how the game is played together and where it lives: the base's group_play when the new

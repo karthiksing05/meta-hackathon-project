@@ -34,8 +34,11 @@ const DefaultUserAgent = "game-catalog-lookup/0.1 (+https://en.wikipedia.org/api
 type Lookup struct {
 	// HTTP fetches pages. nil = NewSafeHTTPClient (public addresses only, http(s) only, no cookies).
 	// Tests that serve pages from 127.0.0.1 set their own client.
-	HTTP        *http.Client
-	Muse        MuseJSON      // writes the learned entry (muse-spark-1.3, 4000 tokens, 15 s in production)
+	HTTP *http.Client
+	Muse MuseJSON // writes the learned entry (muse-spark-1.3, 4000 tokens, 15 s in production)
+	// BankMuse picks and tiers the answer bank from the list pages (bank.go); nil uses Muse.
+	BankMuse    MuseJSON
+	bankHTTP    *http.Client  // the answer-bank pages: NewSafeHTTPClient(bankPageTimeout), or HTTP when the caller set its own
 	WikiBase    string        // default https://en.wikipedia.org
 	FetchBudget time.Duration // all fetching for one name, in parallel; default 4 s
 	PageTimeout time.Duration // one request; default 4 s
@@ -79,6 +82,12 @@ func (l *Lookup) defaults() {
 	}
 	if l.HTTP == nil {
 		l.HTTP = NewSafeHTTPClient(l.PageTimeout)
+		if l.bankHTTP == nil {
+			l.bankHTTP = NewSafeHTTPClient(bankPageTimeout) // list pages are long: a longer cap than a summary
+		}
+	}
+	if l.bankHTTP == nil {
+		l.bankHTTP = l.HTTP
 	}
 	if l.WikiBase == "" {
 		l.WikiBase = "https://en.wikipedia.org"
@@ -162,6 +171,11 @@ func (l *Lookup) gather(ctx context.Context, ref string) []Evidence {
 }
 
 func (l *Lookup) get(ctx context.Context, u string) ([]byte, string, string, error) {
+	return l.getLimit(ctx, l.HTTP, u, l.MaxBytes, l.PageTimeout)
+}
+
+// getLimit is get with its own size cap and timeout (the answer-bank lookup reads long list pages).
+func (l *Lookup) getLimit(ctx context.Context, hc *http.Client, u string, maxBytes int64, timeout time.Duration) ([]byte, string, string, error) {
 	pu, err := url.Parse(u)
 	if err != nil {
 		return nil, "", "", err
@@ -169,7 +183,7 @@ func (l *Lookup) get(ctx context.Context, u string) ([]byte, string, string, err
 	if pu.Scheme != "http" && pu.Scheme != "https" {
 		return nil, "", "", fmt.Errorf("harness: refusing to fetch %q (http and https only)", pu.Scheme)
 	}
-	ctx, cancel := context.WithTimeout(ctx, l.PageTimeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
@@ -178,7 +192,7 @@ func (l *Lookup) get(ctx context.Context, u string) ([]byte, string, string, err
 	// no cookies, no credentials: the request carries only these headers
 	req.Header.Set("User-Agent", l.UserAgent)
 	req.Header.Set("Accept", "text/html,application/json;q=0.9,text/plain;q=0.8")
-	res, err := l.HTTP.Do(req)
+	res, err := hc.Do(req)
 	if err != nil {
 		return nil, "", "", err
 	}
@@ -186,7 +200,7 @@ func (l *Lookup) get(ctx context.Context, u string) ([]byte, string, string, err
 	if res.StatusCode != http.StatusOK {
 		return nil, "", "", fmt.Errorf("%s: HTTP %d", u, res.StatusCode)
 	}
-	b, err := io.ReadAll(io.LimitReader(res.Body, l.MaxBytes))
+	b, err := io.ReadAll(io.LimitReader(res.Body, maxBytes))
 	return b, res.Header.Get("Content-Type"), res.Request.URL.String(), err
 }
 
