@@ -1,0 +1,44 @@
+{
+  "title": "Pop Mart Labubu Blind Box Set",
+  "gameId": "ab3696f4592af6b849ddc97b",
+  "words": "Pop Mart Labubu blind box collectible vinyl toy shop cute pastel",
+  "vibe": "cute_collectible",
+  "pairing": "soft_box",
+  "style": "glossy soft 3D vinyl designer-toy render like a Pop Mart shop display, rounded chunky shapes, pastel candy colors, soft studio light from the top left, gentle rim light, clean and premium",
+  "palette": ["#FFE9EF", "#FFD6E2", "#BFE9D9", "#C9B8F2", "#FFC88A", "#5A3446"],
+  "frame": {
+    "scene": "the inside of a cozy pastel Pop Mart toy shop seen straight on: a soft pink back wall with rounded arched shelves of small toy boxes softly out of focus at the far left and right edges, a warm cream counter at the bottom",
+    "focal": "one sealed pastel blind box with a satin ribbon on top, glowing softly, standing on a round cream display pedestal, with a small Labubu figure (a cute furry elf-monster with tall bunny ears and a toothy grin) peeking out",
+    "hud": "one wide blank pink rounded score plaque at the very top",
+    "controls": "a 3 by 3 grid of empty rounded collection-book slots on a cream card panel"
+  },
+  "backdrop": {
+    "scene": "a cozy pastel toy-shop wall with arched shelves of small toy boxes kept at the far left and right edges, a soft pink middle wall with gentle light, a cream counter at the bottom",
+    "calm": "the middle third of the width from top to bottom is a soft, plain pink wall with gentle gradient light"
+  },
+  "sprites": {
+    "key": "green",
+    "px": 192,
+    "set": "Subjects 1 to 9 are nine different Labubu figures of one collectible blind-box series: the same character (a cute furry elf-monster with tall pointed bunny ears, big round eyes and a wide toothy grin, standing upright), each with its own fur color and outfit exactly as described, all in the same pose and size, no two alike.",
+    "items": [
+      { "id": "f0", "text": "Coco Labubu: cocoa brown fur, cream overalls" },
+      { "id": "f1", "text": "Berry Labubu: raspberry red fur, a strawberry hat" },
+      { "id": "f2", "text": "Mint Labubu: pale mint fur, a little white apron" },
+      { "id": "f3", "text": "Lilac Labubu: lavender fur, a starry wizard cape" },
+      { "id": "f4", "text": "Peach Labubu: peach orange fur, a peach-slice pouch" },
+      { "id": "f5", "text": "Sky Labubu: sky blue fur, a cloud scarf" },
+      { "id": "f6", "text": "Rose Labubu: rose pink fur, a ballet tutu" },
+      { "id": "f7", "text": "Coral Labubu: coral fur, a striped sailor shirt" },
+      { "id": "f8", "text": "Gold Labubu, the secret figure: shiny metallic gold fur, a tiny crown, sparkles" },
+      { "id": "box", "text": "a sealed pastel blind box: a cube box in pink and cream halves with a satin mint ribbon bow on top and an embossed bunny-ear silhouette on the front" },
+      { "id": "slot", "text": "an empty rounded-square collection-book slot: a soft cream recessed pocket with a stitched pink edge, seen straight on" },
+      { "id": "token", "text": "a shiny round pastel gold trade token coin with a raised star in the middle" }
+    ]
+  },
+  "ui": {
+    "key": "green",
+    "material": "glossy pastel candy plastic: a cream-white face with a thick rounded raspberry-pink rim and a soft inner highlight",
+    "button": "a thicker darker pink lower lip so it looks pressable",
+    "corner": 56
+  }
+}

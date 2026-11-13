@@ -1,0 +1,16 @@
+{
+  "title": "Guess the Decade",
+  "gameId": "dca2283a1b53cd83a57173d0",
+  "presentationOnly": true,
+  "words": "guess the decade synth melody retro 80s synthwave cassette radio music",
+  "vibe": "retro_80s",
+  "pairing": "chrome",
+  "style": "clean flat vector synthwave poster art, crisp geometric shapes, a big striped sunset sun, layered mountain silhouettes, a glowing perspective grid floor, smooth gradients, subtle glow, no texture",
+  "palette": ["#140A2E", "#2A1356", "#FF4FA3", "#FFB547", "#3DE7FF", "#F3EEFF"],
+  "frame": {
+    "scene": "a retro 1980s synthwave night: deep indigo sky with a few stars, a huge striped orange-to-pink sunset sun sitting on a horizon of violet mountain silhouettes, a glowing magenta perspective grid floor below",
+    "focal": "a round glowing cyan play button in front of the sun, ringed with a soft sound-wave halo",
+    "hud": "two small blank dark rounded plaques side by side at the top",
+    "controls": "four wide stacked dark translucent rounded answer bars with thin cyan outlines over the grid floor"
+  }
+}
