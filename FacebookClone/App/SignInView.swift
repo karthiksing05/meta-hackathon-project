@@ -33,7 +33,11 @@ struct SignInView: View {
                     field("Full name", text: $name, field: .name, content: .name)
                     field("Username", text: $username, field: .username, content: .username)
                 }
-                field("Email", text: $email, field: .email, content: .emailAddress, keyboard: .emailAddress)
+                if mode == .logIn {
+                    field("Email or username", text: $email, field: .email, content: .username, keyboard: .emailAddress)
+                } else {
+                    field("Email", text: $email, field: .email, content: .emailAddress, keyboard: .emailAddress)
+                }
                 secureField
 
                 if let error {
@@ -126,7 +130,8 @@ struct SignInView: View {
     // MARK: Actions
 
     private var canSubmit: Bool {
-        let base = email.contains("@") && password.count >= (mode == .signUp ? 8 : 1)
+        let id = email.trimmingCharacters(in: .whitespaces)
+        let base = (mode == .logIn ? id.count >= 3 : id.contains("@")) && password.count >= (mode == .signUp ? 8 : 1)
         guard mode == .signUp else { return base }
         return base && !name.trimmingCharacters(in: .whitespaces).isEmpty && username.trimmingCharacters(in: .whitespaces).count >= 3
     }
