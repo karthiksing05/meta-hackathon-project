@@ -94,7 +94,15 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
-	u, err := s.Store.UserByEmail(r.Context(), strings.ToLower(strings.TrimSpace(in.Email)))
+	// The "email" field also takes a username (with or without a leading @).
+	id := strings.ToLower(strings.TrimSpace(in.Email))
+	var u *model.User
+	var err error
+	if strings.Contains(id, "@") && !strings.HasPrefix(id, "@") {
+		u, err = s.Store.UserByEmail(r.Context(), id)
+	} else {
+		u, err = s.Store.UserByUsername(r.Context(), strings.TrimPrefix(id, "@"))
+	}
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			writeErr(w, 401, "wrong email or password")

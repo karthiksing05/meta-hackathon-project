@@ -40,6 +40,7 @@ treat the exact shapes as the first version and change them together with the cl
 |---|---|---|
 | `GET /healthz`, `GET /readyz` | none | liveness; readiness (database + storage) |
 | `POST /v1/auth/register`, `login`, `refresh`, `logout`; `GET /v1/auth/me` | none / bearer | accounts and tokens |
+| `POST /v1/auth/login` `{email, password}`: `email` may also be a username | none | log in with email or username |
 | `POST /v1/auth/password` `{currentPassword, newPassword}` (8-72 characters) | bearer | change your password; 204 |
 | `GET /v1/feed?limit=&sessionID=&exclude=` | optional | **the one feed**: the next pages, ranked by the recommender (see [Ranking](#ranking-the-recommender-runs-here)) |
 | `GET /v1/search?q=&tag=&cursor=&limit=` | optional | full-text and tag search |
