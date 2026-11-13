@@ -244,8 +244,13 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 	}
 	var shown []model.Game
 	var picks []rankPick
+	onPage := map[string]bool{}
 	for _, p := range reply.Picks {
+		if onPage[p.GameID] {
+			continue // a page never shows the same game twice
+		}
 		if g, ok := byID[p.GameID]; ok {
+			onPage[p.GameID] = true
 			shown = append(shown, g)
 			picks = append(picks, p)
 		}

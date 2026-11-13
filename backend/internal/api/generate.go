@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -34,6 +35,7 @@ const (
 	jobTimeout       = 10 * time.Minute
 	maxRequestChars  = 2000
 	maxBriefBytes    = 8 << 10
+	maxAnatomyBytes  = 16 << 10
 	generatorTimeout = 3 * time.Second
 )
 
@@ -46,6 +48,15 @@ type generateIn struct {
 	Change     string `json:"change"`
 	Look       string `json:"look"`
 	NextLevel  bool   `json:"nextLevel"`
+	// BaseManifest is the game as the phone has it, with the person's own edits (title, rule, sound). When it is sent,
+	// the change starts from it and not from the stored copy. It must carry content.authoring_json.
+	BaseManifest json.RawMessage `json:"baseManifest"`
+	// Anatomy is the agreed game anatomy text. It is kept apart from the request so it doesn't count against the
+	// 2,000 character limit (it can be up to 16 KB).
+	Anatomy string `json:"anatomy"`
+	// Draft makes the finished game unlisted: reachable by id and in the owner's creations, but not in the feed or
+	// search until it is published. A change is a draft unless this is false; a new game is public unless this is true.
+	Draft *bool `json:"draft"`
 }
 
 // genHealthCache remembers the generator's last health answer for a few seconds.
@@ -91,6 +102,10 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
+	if len(in.Anatomy) > maxAnatomyBytes {
+		writeErr(w, 400, "anatomy is too large")
+		return
+	}
 	var base *model.Game
 	if id := strings.TrimSpace(in.BaseGameID); id != "" {
 		var ok bool
@@ -112,6 +127,20 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	}
 	if v, _ := in.Brief["intent"].(string); strings.TrimSpace(v) == "" && base == nil {
 		in.Brief["intent"] = in.Request // the brief's intent defaults to the request
+	}
+
+	if len(in.BaseManifest) > 0 && string(in.BaseManifest) != "null" {
+		var bm struct {
+			Content struct {
+				Authoring string `json:"authoring_json"`
+			} `json:"content"`
+		}
+		if base == nil || json.Unmarshal(in.BaseManifest, &bm) != nil || bm.Content.Authoring == "" {
+			writeErr(w, 400, "baseManifest needs baseGameId and content.authoring_json")
+			return
+		}
+	} else {
+		in.BaseManifest = nil
 	}
 
 	reachable, configured := s.generatorStatus(r.Context())
@@ -144,6 +173,16 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	now := time.Now().UTC().Truncate(time.Millisecond)
 	job := &model.Job{ID: auth.NewID(12), OwnerID: u.ID, Request: in.Request, Brief: in.Brief,
 		Status: model.JobQueued, Events: []model.JobEvent{}, CreatedAt: now, UpdatedAt: now}
+	if a := strings.TrimSpace(in.Anatomy); a != "" {
+		if !strings.Contains(a, "Agreed game anatomy") {
+			a = "Agreed game anatomy:\n" + a
+		}
+		job.Anatomy = a
+	}
+	job.Draft = base != nil // a change stays a draft until it is published
+	if in.Draft != nil {
+		job.Draft = *in.Draft
+	}
 	if base != nil {
 		job.BaseGameID, job.NextLevel = base.ID, in.NextLevel
 		job.Level = max(base.Level, 1)
@@ -155,7 +194,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
-	go s.runJob(*job, *u)
+	go s.runJob(*job, *u, in.BaseManifest)
 	w.Header().Set("Location", "/v1/generate/"+job.ID)
 	writeJSON(w, 202, map[string]string{"jobId": job.ID, "status": job.Status})
 }
@@ -257,16 +296,45 @@ type genLine struct {
 	Message  string          `json:"message"`
 }
 
+// jobRun is a running job, so it can be cancelled.
+type jobRun struct {
+	cancel    context.CancelFunc
+	cancelled atomic.Bool
+}
+
+// DELETE /v1/generate/{id}: stop a job that is queued or running. Finished jobs are left as they are.
+func (s *Server) cancelJob(w http.ResponseWriter, r *http.Request) {
+	j, ok := s.jobOr404(w, r)
+	if !ok {
+		return
+	}
+	if j.Status == model.JobQueued || j.Status == model.JobRunning {
+		if v, running := s.jobRuns.Load(j.ID); running {
+			run := v.(*jobRun)
+			run.cancelled.Store(true)
+			run.cancel() // the generator hears the connection close and stops spending Muse calls
+		} else { // left over from a restart
+			s.failJob(r.Context(), j.ID, "Cancelled.")
+		}
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (s *Server) failJob(ctx context.Context, id, msg string) {
+	if v, ok := s.jobRuns.Load(id); ok && v.(*jobRun).cancelled.Load() {
+		msg = "Cancelled."
+	}
 	if err := s.Store.SetJobStatus(context.WithoutCancel(ctx), id, model.JobFailed, model.JobUpdate{Error: msg}); err != nil {
 		s.Log.Error("generate: could not record failure", "job", id, "err", err)
 	}
 }
 
-func (s *Server) runJob(job model.Job, owner model.User) {
+func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMessage) {
 	ctx, cancel := context.WithTimeout(context.Background(), jobTimeout)
 	defer cancel()
 	log := s.Log.With("job", job.ID)
+	s.jobRuns.Store(job.ID, &jobRun{cancel: cancel})
+	defer s.jobRuns.Delete(job.ID)
 
 	select { // wait for a free slot; the job stays queued meanwhile
 	case s.genSem <- struct{}{}:
@@ -280,15 +348,22 @@ func (s *Server) runJob(job model.Job, owner model.User) {
 		return
 	}
 
-	payload := map[string]any{"request": job.Request, "brief": job.Brief}
+	request := job.Request
+	if job.Anatomy != "" {
+		request += "\n\n" + job.Anatomy
+	}
+	payload := map[string]any{"request": request, "brief": job.Brief}
 	if job.BaseGameID != "" {
 		if len(job.Brief) == 0 {
 			payload["brief"] = nil // a change keeps the game's own brief
 		}
-		manifest, err := s.Packages.ReadManifest(ctx, s.baseKey(ctx, job.BaseGameID))
-		if err != nil {
-			s.failJob(ctx, job.ID, "The game to change is no longer available.")
-			return
+		manifest := baseManifest // the phone's own copy, when it sent one
+		if len(manifest) == 0 {
+			var err error
+			if manifest, err = s.Packages.ReadManifest(ctx, s.baseKey(ctx, job.BaseGameID)); err != nil {
+				s.failJob(ctx, job.ID, "The game to change is no longer available.")
+				return
+			}
 		}
 		payload["base"] = json.RawMessage(manifest)
 		payload["remixOf"] = job.BaseGameID
@@ -389,6 +464,12 @@ func (s *Server) finishJob(ctx context.Context, job model.Job, owner model.User,
 		}
 		s.failJob(ctx, job.ID, "Couldn't save the game: "+perr.Msg)
 		return
+	}
+	if job.Draft {
+		if err := s.Store.SetGameUnlisted(context.WithoutCancel(ctx), g.ID, true); err != nil {
+			log.Error("generate: could not make the game a draft", "err", err)
+		}
+		g.Unlisted = true
 	}
 	stats := l.Stats
 	if stats == nil {

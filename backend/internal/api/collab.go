@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
@@ -320,6 +321,22 @@ func (s *Server) myMoments(w http.ResponseWriter, r *http.Request) {
 	for _, c := range cs {
 		if c.FromID != me.ID {
 			out = append(out, moment{"challenge:" + c.ID, "challenge_received", c.GameID, who(c.FromID, c.FromName), c.CreatedAt})
+		}
+	}
+	// a friend started a series with you, or played a round of one
+	if list, err := s.Store.SeriesForUser(ctx, me.ID, limit); err == nil {
+		for _, se := range list {
+			other := se.PlayerA
+			if se.PlayerA == me.ID {
+				other = se.PlayerB
+			} else {
+				out = append(out, moment{"series:" + se.ID, "series_invited", se.Rounds[0].GameID, who(other, ""), se.CreatedAt})
+			}
+			for _, rd := range se.Rounds {
+				if p, ok := rd.Plays[other]; ok {
+					out = append(out, moment{"series:" + se.ID + ":" + strconv.Itoa(rd.N), "series_round", rd.GameID, who(other, ""), p.At})
+				}
+			}
 		}
 	}
 	evs, err := s.Store.MomentsWith(ctx, me.ID, limit)

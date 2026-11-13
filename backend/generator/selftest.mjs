@@ -70,7 +70,7 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   const out = await compose({ request: 'make it faster', brief, base: first.manifest, remixOf: 'aaaaaaaaaaaaaaaaaaaaaaaa', level: 2 }, { studio, muse });
   const m = out.manifest;
   check('the prompt for a change carries the game being changed', /make it faster/.test(muse.prompts[0]) && muse.prompts[0].includes('Change it as asked'), muse.prompts[0]?.slice(0, 200));
-  check('a change is a new game with a new id, lineage and level', m.id !== first.manifest.id && /^mg-[a-z0-9-]+-[a-z0-9]{4}$/.test(m.id) && m.lineage?.remix_of === 'aaaaaaaaaaaaaaaaaaaaaaaa' && m.chain?.index === 2, JSON.stringify({ id: m.id, lineage: m.lineage, chain: m.chain }));
+  check('a change is a new game with a new id, lineage and level', m.id !== first.manifest.id && /^mg-[a-z0-9-]+-[a-z0-9]{4}$/.test(m.id) && m.lineage?.remix_of === 'aaaaaaaaaaaaaaaaaaaaaaaa' && m.chain?.index === 2 && m.chain.prev === first.manifest.id && m.chain.next === null && /^chain-/.test(m.chain.id) && m.chain.title, JSON.stringify({ id: m.id, lineage: m.lineage, chain: m.chain }));
   let err;
   try { await compose({ request: 'x', brief, base: { title: 'x', content: {} } }, { studio, muse: new ScriptedMuse([example()]) }); } catch (e) { err = e; }
   check("a game without its authoring source can't be changed", !!err && /authoring_json/.test(err.message), err?.message);
@@ -117,6 +117,25 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     check('POST /compose streams events then a result', res.status === 200 && lines.filter((l) => l.type === 'event').length >= 3 && result?.manifest?.formula === 'microgame', JSON.stringify(lines.map((l) => l.type)));
     check('Muse got a Bearer key, JSON mode and the chat path', calls[0]?.url === '/v1/chat/completions' && calls[0].auth === 'Bearer test-key-not-real' && calls[0].body.response_format?.type === 'json_object' && calls[0].body.max_tokens >= 4000, JSON.stringify(calls[0] && { url: calls[0].url, auth: calls[0].auth }));
     check('the key never appears in the output', !JSON.stringify(lines).includes('test-key-not-real'));
+    // replaying a run's log: the server checks a score instead of trusting the phone
+    {
+      const gameText = studio.expand(JSON.stringify(example())).game_json;
+      const game = studio.engine().getEngine().load(gameText, 777);
+      for (let i = 0; i < 120; i++) game.step(16.666666666666668);
+      game.pointer('down', 100, 200); game.step(16.67); game.pointer('up', 100, 200);
+      const log = JSON.stringify(game.log());
+      const post = (body) => fetch(`http://127.0.0.1:${port}/verify`, { method: 'POST', body: JSON.stringify(body) });
+      const good = await (await post({ game: gameText, log })).json();
+      check('POST /verify replays an honest run', good.ok === true && good.game_hash_ok === true && good.recomputed?.score === good.claimed?.score, JSON.stringify(good).slice(0, 200));
+      const forged = JSON.parse(log);
+      forged.final.score = 99999;
+      const bad = await (await post({ game: gameText, log: JSON.stringify(forged) })).json();
+      check('POST /verify rejects a forged score', bad.ok === false && bad.problems.length > 0 && bad.recomputed.score !== 99999, JSON.stringify(bad).slice(0, 200));
+      const other = await (await post({ game: gameText.replace('"title"', '"title" ').replace(/\s+$/, '') + ' ', log })).json();
+      check('POST /verify rejects a different game file', other.ok === false && other.game_hash_ok === false, JSON.stringify(other).slice(0, 200));
+      check('POST /verify needs both texts', (await post({ game: gameText })).status === 400);
+    }
+
     // a change sends the stored manifest, which is far bigger than a small request body
     const fat = { ...result.manifest, content: { ...result.manifest.content, padding: 'x'.repeat(400 * 1024) } };
     const rv = await fetch(`http://127.0.0.1:${port}/compose`, {

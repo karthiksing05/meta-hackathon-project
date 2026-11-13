@@ -49,6 +49,7 @@ type Game struct {
 	Plays         int64     `bson:"plays"`
 	Finishes      int64     `bson:"finishes"`
 	CreatedAt     time.Time `bson:"createdAt"`
+	Unlisted      bool      `bson:"unlisted,omitempty"` // a draft: reachable by id and in its owner's creations, but not in the feed, search or Group lists
 }
 
 type GameView struct {
@@ -70,6 +71,7 @@ type GameView struct {
 	PackageURL    string    `json:"packageUrl"`
 	ManifestURL   string    `json:"manifestUrl"`
 	CoverURL      string    `json:"coverUrl,omitempty"`
+	Unlisted      bool      `json:"unlisted,omitempty"`
 	CreatedAt     time.Time `json:"createdAt"`
 }
 
@@ -182,6 +184,8 @@ type Job struct {
 	OwnerID    string         `bson:"ownerId"`
 	Request    string         `bson:"request"`
 	Brief      map[string]any `bson:"brief,omitempty"`
+	Anatomy    string         `bson:"anatomy,omitempty"`    // the agreed game anatomy, kept apart from the 2,000 character request
+	Draft      bool           `bson:"draft,omitempty"`      // the finished game starts unlisted
 	BaseGameID string         `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)
 	NextLevel  bool           `bson:"nextLevel,omitempty"`
 	Level      int            `bson:"level,omitempty"`

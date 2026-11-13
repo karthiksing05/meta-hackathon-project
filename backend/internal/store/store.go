@@ -90,6 +90,16 @@ type Store interface {
 	// MomentsWith returns off-feed moment events (events with a kind) that name userID in `with`, newest first.
 	MomentsWith(ctx context.Context, userID string, limit int) ([]model.Event, error)
 
+	// SetGameUnlisted lists a game (false) or makes it a draft (true); DeleteGame removes a game, its saves and its scores.
+	SetGameUnlisted(ctx context.Context, gameID string, unlisted bool) error
+	DeleteGame(ctx context.Context, gameID string) error
+
+	// Series: best-of-N between two friends with server-checked scores.
+	InsertSeries(ctx context.Context, s *model.Series) error
+	SeriesByID(ctx context.Context, id string) (*model.Series, error)
+	ReplaceSeries(ctx context.Context, s *model.Series) error
+	SeriesForUser(ctx context.Context, userID string, limit int) ([]model.Series, error) // newest first
+
 	GameStats(ctx context.Context, since time.Time) ([]model.GameStats, error)
 	Interleave(ctx context.Context, since time.Time) (model.Interleave, error)
 	ExportEvents(ctx context.Context, since time.Time, limit int) ([]model.Event, error) // oldest first

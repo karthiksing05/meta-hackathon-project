@@ -309,3 +309,26 @@ func TestSearchUsesTheRecommender(t *testing.T) {
 		t.Fatalf("with ranking off the order is plain: %v", res)
 	}
 }
+
+// A page never shows one game twice, even when the catalog has only one game.
+func TestFeedNeverRepeatsAGameOnAPage(t *testing.T) {
+	ts := serverWithRecs(t, true)
+	maker := register(t, ts, "maker")
+	if code, out := publish(t, ts.URL, maker, `{"id":"only-game","title":"Only","one_line_rule":"x","formula":"guess","brief":{"mood":["cozy"]}}`); code != 201 {
+		t.Fatalf("publish: %d %v", code, out)
+	}
+	viewer := register(t, ts, "viewer")
+	for _, tok := range []string{"", viewer} {
+		_, items := feedPage(t, ts, tok, map[string]any{"count": 10, "sessionID": "s1"})
+		seen := map[any]bool{}
+		for _, it := range items {
+			if seen[it["id"]] {
+				t.Fatalf("a game came twice on one page (%d items): %v", len(items), items)
+			}
+			seen[it["id"]] = true
+		}
+		if len(items) != 1 {
+			t.Fatalf("one game, one item: %d", len(items))
+		}
+	}
+}
