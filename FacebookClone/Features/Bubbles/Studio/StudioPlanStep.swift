@@ -262,7 +262,7 @@ struct StudioPlanGate<Brief: View>: View {
         .onAppear {
             guard usesPlan else { return }
             plan.showsBrief = false
-            plan.start(model.effectivePrompt)
+            plan.start(model.effectivePrompt, media: model.media.input)
         }
     }
 

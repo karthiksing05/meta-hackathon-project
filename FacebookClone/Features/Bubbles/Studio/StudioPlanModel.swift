@@ -31,6 +31,8 @@ final class StudioPlanModel {
     var answers: [String: String] = [:]
     /// The person chose the full Brief ("More options").
     var showsBrief = false
+    /// The photos and video sent with every plan request.
+    private(set) var media: GameMediaInput = .none
 
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private let client: HarnessPlanClient
@@ -40,11 +42,12 @@ final class StudioPlanModel {
     }
 
     /// Plans `text` unless this model already has (or is making) a plan for it.
-    func start(_ text: String) {
+    func start(_ text: String, media: GameMediaInput = .none) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        if trimmed == original, phase != .idle, !isFailed { return }
+        if trimmed == original, media == self.media, phase != .idle, !isFailed { return }
         original = trimmed
+        self.media = media
         changes = []
         answers = [:]
         run(trimmed)
@@ -89,9 +92,9 @@ final class StudioPlanModel {
         withAnimation(.easeInOut(duration: 0.25)) {
             phase = .planning(started: Date())
         }
-        task = Task { [weak self, client] in
+        task = Task { [weak self, client, media] in
             do {
-                let outcome = try await client.plan(request: text)
+                let outcome = try await client.plan(request: text, media: media)
                 guard let self, !Task.isCancelled else { return }
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.9)) {
                     switch outcome {

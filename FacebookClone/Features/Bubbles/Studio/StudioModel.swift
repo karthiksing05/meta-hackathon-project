@@ -163,6 +163,9 @@ final class StudioModel {
     var formulaHint: BubbleFormula?
     /// The look the person picked; nil means Muse picks. Sent as `StudioRequest.paletteHint`.
     var lookHint: StudioLook?
+    /// Photos and video the person added, uploaded as they're picked (`media`, `mediaNote`,
+    /// `mediaRestyle` on the plan and the build).
+    let media = StudioMediaModel()
 
     // Collaboration (docs/BUBBLES.md 7)
     /// Co-makers, contributions, about-me answers, own story, lesson notes. From the launch;
@@ -288,6 +291,9 @@ final class StudioModel {
             focusTweak = true
         }
         loadSavedAnatomy()
+        #if DEBUG
+        if let demo = DebugLaunch.value("FB_STUDIO_MEDIA_DEMO") { media.debugFill(demo) }
+        #endif
         isReady = true
         Task { @MainActor in _ = await bubbleStore.loadMyGroups() }
     }
@@ -1304,6 +1310,7 @@ final class StudioModel {
         if isPopping { return false }
         if isComposing || brief != nil { return true }
         if !trimmedPrompt.isEmpty && trimmedPrompt != launch.prompt { return true }
+        if !media.items.isEmpty { return true }
         if levels.contains(where: { !$0.isExisting }) { return true }
         let base = baseBubble?.manifest
         return levels.contains { $0.isExisting && $0.manifest != base }
@@ -1446,6 +1453,8 @@ final class StudioModel {
     func discardDrafts() {
         let ids = Array(drafts.values)
         drafts = [:]
+        // Nothing was built from the media: drop it on the server too. (A game deletes its own.)
+        if ids.isEmpty { media.discardAll() }
         guard !ids.isEmpty else { return }
         let generator = GameGeneratorFactory.current
         Task.detached {
@@ -1528,7 +1537,7 @@ extension StudioModel {
         // A draft until the person shares it, so builds they drop never reach the feed.
         return StudioGenerateBridge.compose(with: GameBuildTracker.shared.generator(for: self), request: text, brief: brief,
                                             anatomy: agreedAnatomyText, draft: true, sound: sound,
-                                            onReport: onReport, onWait: onWait)
+                                            media: media.input, onReport: onReport, onWait: onWait)
     }
 
     /// `POST /v1/generate` takes a request of 1 to 2,000 characters.

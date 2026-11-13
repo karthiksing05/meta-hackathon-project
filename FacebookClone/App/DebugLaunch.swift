@@ -21,6 +21,9 @@ import SwiftUI
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
 /// - `FB_STUDIO_PLAN=normal|questions|gap|opinion|story|loading|failed|off`: Studio's Plan step answers
 ///   with a preview plan (`GamePlanFixtures`) instead of the server, for screenshots.
+/// - `FB_STUDIO_MEDIA_DEMO=1|error`: Studio's Describe step starts with mock photos and a video
+///   (`StudioMediaModel.debugFill`; `error` adds a failed upload). Uploads use the mock. Pair with
+///   `FB_STUDIO_SCROLL=media`.
 /// - `FB_API_URL`: overrides the games API base URL (default `https://api.ol4ol.com`). Point it at an
 ///   unreachable host to see the loading and error states.
 /// - `FB_RESUME_DEMO=<seconds>` / `FB_RESUME_AUTO=1`: the Resume prompt in the player (see

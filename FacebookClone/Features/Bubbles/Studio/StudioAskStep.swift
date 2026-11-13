@@ -22,8 +22,28 @@ struct StudioAskStep: View {
                             .padding(.horizontal, FBMetrics.screenPadding)
                         StudioPromptCard(model: model, isFocused: $isPromptFocused)
                             .padding(.horizontal, FBMetrics.screenPadding)
-                        StudioSoundRow(model: model)
+                        // "Add sound" and "Add photos or video" share a row until either is used.
+                        HStack(spacing: FBSpacing.s) {
+                            StudioSoundRow(model: model)
+                            if showsInlineMediaButton {
+                                StudioMediaAddButton(media: model.media)
+                                    .transition(.opacity)
+                                Spacer(minLength: 0)
+                            }
+                        }
+                        .padding(.horizontal, FBMetrics.screenPadding)
+                        if !showsInlineMediaButton {
+                            Group {
+                                if model.media.items.isEmpty {
+                                    StudioMediaAddButton(media: model.media)
+                                } else {
+                                    StudioMediaSection(media: model.media)
+                                }
+                            }
                             .padding(.horizontal, FBMetrics.screenPadding)
+                            .transition(.opacity)
+                            .id("media")
+                        }
                         examples
                     }
                     StudioAskSlots(model: model)
@@ -46,10 +66,11 @@ struct StudioAskStep: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .task {
-                // DEBUG screenshots: FB_STUDIO_SCROLL=look shows the look picker.
-                guard DebugLaunch.value("FB_STUDIO_SCROLL") == "look" else { return }
+                // DEBUG screenshots: FB_STUDIO_SCROLL=look shows the look picker, `media` the
+                // photos and video (with FB_STUDIO_MEDIA_DEMO).
+                guard let target = DebugLaunch.value("FB_STUDIO_SCROLL"), target == "look" || target == "media" else { return }
                 try? await Task.sleep(nanoseconds: 400_000_000)
-                proxy.scrollTo("look", anchor: .bottom)
+                proxy.scrollTo(target, anchor: target == "look" ? .bottom : .center)
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -75,7 +96,7 @@ struct StudioAskStep: View {
                     }
                 }
                 .buttonStyle(.studioPrimary)
-                .disabled(model.effectivePrompt.isEmpty)
+                .disabled(model.effectivePrompt.isEmpty || model.media.isBusy)
                 .allowsHitTesting(!model.isDraftingBrief)
             }
         }
@@ -85,6 +106,11 @@ struct StudioAskStep: View {
                 isPromptFocused = true
             }
         }
+    }
+
+    /// The media button sits next to "Add sound" until a sound or media is added.
+    private var showsInlineMediaButton: Bool {
+        model.sound == nil && model.media.items.isEmpty
     }
 
     private var hero: some View {
