@@ -70,7 +70,7 @@ struct RemixResultAction: View {
     }
 }
 
-/// 'Remixed by Diego · from Maya' / 'Remix of Hill Hopper by Diego' on feed pages, or '3 remixes'
+/// 'Remixed by Diego · from Maya' / 'Remix of <original> by Diego' on feed pages, or '3 remixes'
 /// on an original that friends have riffed on. White on the page's dark scrim.
 struct RemixCaptionCredit: View {
     let bubble: Bubble

@@ -7,16 +7,13 @@ import SwiftUI
 ///   path/<bubbleID>                    send your path to a friend, a chat or the Group
 ///   mystory                            turn your own story ('my first week in SF') into an adventure
 enum StoryScreens {
-    /// The adventure the demo opens by default.
-    static let demoBubbleID = "story-ferry-or-fog"
-
     /// A pushed screen (`Route.bubbleFeature`).
     @MainActor
     @ViewBuilder
     static func destination(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "endings":
-            StoryEndingsView(bubbleID: route.arg.isEmpty ? demoBubbleID : route.arg)
+            StoryEndingsView(bubbleID: route.arg)
         default:
             BubbleFeaturePlaceholder(route: route)
         }
@@ -28,7 +25,7 @@ enum StoryScreens {
     static func sheet(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "path":
-            StoryPathShareSheet(bubbleID: route.arg.isEmpty ? demoBubbleID : route.arg)
+            StoryPathShareSheet(bubbleID: route.arg)
         case "mystory":
             StoryMyStorySheet(model: nil)
         default:
@@ -51,8 +48,10 @@ enum StoryScreens {
     /// `FB_OPEN=feature:story/...` (DEBUG): stage demo state, then open.
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
-        let bubbleID = route.arg.isEmpty ? demoBubbleID : route.arg
-        guard let bubble = bubbleStore.bubble(id: bubbleID) else { return false }
+        // With no id, the first story game the server sent this session.
+        let found = route.arg.isEmpty ? bubbleStore.bubbles.first(where: { $0.formula == .story }) : bubbleStore.bubble(id: route.arg)
+        guard let bubble = found else { return false }
+        let bubbleID = bubble.id
         switch route.screen {
         case "endings":
             StoryProgressStore.shared.loadFriends(for: bubble, bubbleStore: bubbleStore)

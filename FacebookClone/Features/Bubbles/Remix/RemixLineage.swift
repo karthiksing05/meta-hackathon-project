@@ -56,7 +56,7 @@ enum RemixLineage {
 
     // MARK: Credit
 
-    /// "Remix of Hill Hopper by Diego". Nil for an original. Reads only the manifest's lineage.
+    /// "Remix of <original> by Diego". Nil for an original. Reads only the manifest's lineage.
     static func credit(for bubble: Bubble) -> String? {
         guard isRemix(bubble) else { return nil }
         let lineage = bubble.manifest.lineage

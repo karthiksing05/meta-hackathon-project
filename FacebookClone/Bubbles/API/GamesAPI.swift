@@ -6,7 +6,7 @@ import Foundation
 //
 //     let api = GamesAPIFactory.current                              // always the live client
 //     let page = try await api.feed(limit: 10, sessionID: id, exclude: [])   // ranked by the server
-//     let game = try await api.game(id: "hill-hopper")                 // a slug or a 24-hex server id
+//     let game = try await api.game(id: slugOrServerID)                // a slug or a 24-hex server id
 //     let board = try await api.scores(gameID: game.id)                // one global board per game
 //     _ = try await api.setSaved(true, gameID: game.id)                // PUT /like; needs an account
 //     try await api.sendFeedEvents([...])                              // what happened on each page

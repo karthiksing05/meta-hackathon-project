@@ -9,7 +9,7 @@ import Foundation
 /// One game as the server describes it (`GameView`).
 struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     var id: String
-    /// The manifest's lowercase slug (`hill-hopper`), when it had one.
+    /// The manifest's lowercase slug (`my-game`), when it had one.
     var slug: String?
     /// The Group or Event the game was made for (manifest `structure.group_id` / `event_id`).
     var groupID: String?
