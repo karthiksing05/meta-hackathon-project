@@ -265,6 +265,7 @@ final class BubbleStore {
         if let remote {
             bubble.serverID = remote.id
             remoteGames[bubble.id] = remote
+            loadCover(for: bubble, from: remote.coverURL)
         }
         bubbles.removeAll { $0.id == bubble.id }
         bubbles.insert(bubble, at: 0)

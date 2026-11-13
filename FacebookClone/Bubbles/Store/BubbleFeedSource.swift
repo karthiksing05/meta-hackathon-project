@@ -220,6 +220,7 @@ extension BubbleStore {
         if let existing = bubbles.first(where: { $0.id == manifest.id }) {
             existing.serverID = game.id
             refreshCounters(existing, from: game)
+            loadCover(for: existing, from: game.coverURL)
             return existing
         }
         let bubble = Bubble(
@@ -257,7 +258,9 @@ extension BubbleStore {
         }
     }
 
-    private func loadCover(for bubble: Bubble, from url: URL?) {
+    /// Fetches the game's `coverUrl` into `coverImageData`, which every cover (Library, profile,
+    /// Saves, feed placeholder, Studio card) draws. Without one the Glow placeholder stays.
+    func loadCover(for bubble: Bubble, from url: URL?) {
         guard let url, bubble.coverImageData == nil else { return }
         Task { @MainActor [weak self] in
             guard let self, let data = try? await api.fetch(url) else { return }
