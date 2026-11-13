@@ -28,6 +28,8 @@ load(path.join(web, "bubble-kit-common.js"));
 const kits = fs.readdirSync(web).filter((n) => /^bubble-kit-.*\.js$/.test(n) && n !== "bubble-kit-common.js").sort();
 for (const k of kits) load(path.join(web, k));
 
+// Extra suites (suite-*.js) register themselves on globalThis.KitSuites.
+for (const s of fs.readdirSync(__dirname).filter((n) => /^suite-.*\.js$/.test(n)).sort()) load(path.join(__dirname, s));
 const KitTests = require("./kits-tests-core.js");
 const seeds = fs.readdirSync(seedsDir).filter((n) => /^bubble-seed-.*\.json$/.test(n)).sort().map((n) => path.join(seedsDir, n));
 const formulas = opt("--formula") ? opt("--formula").split(",") : undefined;

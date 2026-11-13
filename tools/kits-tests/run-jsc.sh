@@ -15,7 +15,9 @@ FILES=("$WEB/bubble-runtime.js" "$WEB/bubble-kit-common.js")
 while IFS= read -r f; do
   [ "$(basename "$f")" = "bubble-kit-common.js" ] || FILES+=("$f")
 done < <(ls "$WEB"/bubble-kit-*.js | LC_ALL=C sort)
+SUITES=()
+while IFS= read -r f; do SUITES+=("$f"); done < <(ls "$HERE"/suite-*.js 2>/dev/null | LC_ALL=C sort)
 SEED_FILES=()
 while IFS= read -r f; do SEED_FILES+=("$f"); done < <(ls "$SEEDS"/bubble-seed-*.json | LC_ALL=C sort)
 
-exec "$JSC" "${FILES[@]}" "$HERE/kits-tests-core.js" "$HERE/jsc-main.js" -- "$@" --seeds "${SEED_FILES[@]}"
+exec "$JSC" "${FILES[@]}" ${SUITES[@]+"${SUITES[@]}"} "$HERE/kits-tests-core.js" "$HERE/jsc-main.js" -- "$@" --seeds "${SEED_FILES[@]}"

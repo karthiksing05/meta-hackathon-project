@@ -19,7 +19,7 @@ struct BubbleCoverView: View {
     var body: some View {
         let palette = BubbleGlow.palette(bubble.paletteID)
         ZStack {
-            palette.gradient
+            background(palette)
             if let data = bubble.coverImageData {
                 RemoteImage(url: nil, data: data, placeholder: .clear)
             } else {
@@ -41,6 +41,17 @@ struct BubbleCoverView: View {
         }
         .clipped()
         .accessibilityHidden(true)
+    }
+
+    /// A game that picked a non-default preset keeps its colors; the default and custom palettes
+    /// get the brand gradient, so covers stay blue to violet.
+    @ViewBuilder
+    private func background(_ palette: BubblePalette) -> some View {
+        if palette.id == BubbleGlow.lilacHaze.id || palette.id != bubble.paletteID {
+            GameColor.gradient
+        } else {
+            palette.gradient
+        }
     }
 }
 
@@ -85,8 +96,9 @@ struct BubbleCard: View {
 
     private var accessibilitySummary: String {
         var parts = [bubble.title, bubble.rule]
-        if bubble.isDaily { parts.append("Daily Bubble") }
+        if bubble.isDaily { parts.append("Daily \(ProductName.singular)") }
         if let level = bubble.levelIndex { parts.append("Level \(level)") }
+        if bubble.category != .play { parts.append(bubble.category.title) }
         return parts.joined(separator: ". ")
     }
 
@@ -114,6 +126,7 @@ struct BubbleCard: View {
                     .foregroundStyle(FBColor.secondaryText)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                BubbleCategoryChip(category: bubble.category)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(accessibilitySummary)

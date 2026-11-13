@@ -36,7 +36,7 @@ struct NotificationsKindStyle {
         case .suggestion:
             return NotificationsKindStyle(symbol: "person.badge.plus", color: FBColor.brandBlue)
         case .bubbleScore, .bubbleDaily, .bubbleRemix, .bubblePlayed:
-            return NotificationsKindStyle(symbol: "bubbles.and.sparkles.fill", color: BubbleGlow.pink)
+            return NotificationsKindStyle(symbol: "sparkles", color: GameColor.deepFill)
         }
     }
 }
@@ -123,15 +123,24 @@ struct NotificationsRow: View {
         return combined
             .font(.fbBody)
             .foregroundStyle(FBColor.primaryText)
-            .lineLimit(4)
+            // Game rows carry a cover thumbnail, so they keep to three lines to stay compact.
+            .lineLimit(notification.kind.isBubble ? 3 : 4)
             .multilineTextAlignment(.leading)
     }
 
+    /// The cover thumbnail (game rows) sits beside the menu button, not above it, so a short
+    /// message doesn't make a tall row.
     private var trailing: some View {
-        VStack(spacing: 10) {
+        HStack(alignment: .top, spacing: 2) {
             if notification.kind.isBubble, let id = notification.bubbleID {
                 BubbleNotificationThumb(bubbleID: id)
             }
+            menuColumn
+        }
+    }
+
+    private var menuColumn: some View {
+        VStack(spacing: 10) {
             Button(action: onMore) {
                 Image(systemName: "ellipsis")
                     .font(.system(size: FBIconSize.regular, weight: .bold))

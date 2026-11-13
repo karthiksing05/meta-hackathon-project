@@ -1,0 +1,92 @@
+{
+  "fragment": "waves",
+  "version": 1,
+  "describe": "Escalating waves with a breather between them. The game spawns a wave's enemies when it sees `wave_started {index}` (index is 1-based and equals `wave`). `in_break` is true before wave 1 and between waves; games should not spawn or count enemies then. A wave ends in one of two ways, chosen by `end_on`: 'clear' (the game emits `enemies_gone` once every enemy of the wave has been spawned and removed; ignored during a break) or 'timer' (the wave ends by itself after `wave_ms`). Ending a wave emits `wave_cleared`, starts a break of `break_ms`, then the next wave. With `waves_to_win` above 0, clearing that many waves emits `all_waves_cleared` and wins; 0 is endless. HUD shows `Wave n` (or `Wave n of N`). Provides `wave`, `in_break` and the events `enemies_gone`, `wave_started`, `wave_cleared`, `all_waves_cleared`.",
+  "params": {
+    "break_ms":     { "type": "duration", "default": 2500, "min": 500, "max": 15000 },
+    "waves_to_win": { "type": "int", "default": 5, "min": 0, "max": 30 },
+    "end_on":       { "type": "enum", "values": ["clear", "timer"], "default": "clear" },
+    "wave_ms":      { "type": "duration", "default": 12000, "min": 2000, "max": 60000 },
+    "label":        { "type": "string", "default": "Wave", "max_len": 12 }
+  },
+  "requires": {},
+  "state": {
+    "wave": { "type": "int", "init": "0" },
+    "in_break": { "type": "bool", "init": "true" },
+    "_finished": { "type": "bool", "init": "false" }
+  },
+  "events": {
+    "enemies_gone": {},
+    "wave_started": { "index": "int" },
+    "wave_cleared": {},
+    "all_waves_cleared": {},
+    "_begin": {},
+    "_wave_over": {}
+  },
+  "rules": [
+    {
+      "id": "first_break",
+      "on": "start",
+      "do": [ { "after": "@break_ms", "emit": "_begin", "id": "_break_timer" } ]
+    },
+    {
+      "id": "begin",
+      "on": "_begin",
+      "when": "not _finished",
+      "do": [
+        { "set": "in_break", "to": "false" },
+        { "incr": "wave" },
+        { "emit": "wave_started", "with": { "index": "wave" } }
+      ]
+    },
+    {
+      "id": "arm_timer",
+      "on": "_begin",
+      "include": "@end_on == 'timer'",
+      "when": "not _finished",
+      "do": [ { "after": "@wave_ms", "emit": "_wave_over", "id": "_wave_timer" } ]
+    },
+    {
+      "id": "cleared",
+      "on": "enemies_gone",
+      "include": "@end_on == 'clear'",
+      "when": "not in_break and not _finished",
+      "do": [ { "emit": "_wave_over" } ]
+    },
+    {
+      "id": "wave_over",
+      "on": "_wave_over",
+      "when": "not in_break and not _finished",
+      "do": [
+        { "set": "in_break", "to": "true" },
+        { "emit": "wave_cleared" },
+        {
+          "if": "@waves_to_win > 0 and wave >= @waves_to_win",
+          "then": [ { "set": "_finished", "to": "true" }, { "emit": "all_waves_cleared" } ],
+          "else": [ { "after": "@break_ms", "emit": "_begin", "id": "_break_timer" } ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": { "include": "@waves_to_win > 0", "expr": "_finished" }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top", "include": "@waves_to_win > 0",
+        "node": { "node": "text", "text": "= @label + ' ' + str(max(1, wave)) + ' of ' + str(@waves_to_win)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      },
+      {
+        "slot": "hud_top", "include": "@waves_to_win == 0",
+        "node": { "node": "text", "text": "= @label + ' ' + str(max(1, wave))", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      }
+    ],
+    "feedback": [
+      { "on": "wave_started", "do": [ { "moment": "level" } ] },
+      { "on": "wave_cleared", "do": [ { "moment": "combo" }, { "haptic": "success" } ] }
+    ]
+  },
+  "tags": { "mood": ["tense", "playful"], "energy": ["medium", "high"] },
+  "conflicts": []
+}

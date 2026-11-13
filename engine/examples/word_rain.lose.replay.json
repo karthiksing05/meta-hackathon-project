@@ -1,0 +1,8 @@
+{
+  "note": "Nobody types: three words reach the puddle.",
+  "seed": 1,
+  "expect": "lost",
+  "inputs": [
+    {"t":18752.0}
+  ]
+}

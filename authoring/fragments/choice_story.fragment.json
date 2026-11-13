@@ -1,0 +1,137 @@
+{
+  "fragment": "choice_story",
+  "version": 1,
+  "describe": "A branching story: scenes with 2 or 3 choices each. The scene is `scene` (starts at 0); the fragment draws its text and one button per choice and reads the story from four string lists the game declares as state (usually `\"init\": \"content_<key>\"`, so all words live in `content`). Encoding: `story_lines` has 4 entries per scene (lines of the scene text, at most about 30 characters each; '' for unused lines), so scene s uses indices s*4 to s*4+3. `story_labels` has 3 entries per scene (button labels, '' for no choice), index s*3+c. `story_next` has 3 entries per scene, index s*3+c, each the number of the scene that choice leads to, written as a string of digits ('7'; scenes 0 to 59). `story_ends` has 1 entry per scene: '' for a normal scene, 'good' or 'bad' for an ending (an ending scene's choices are ignored). Choosing emits `choice_made {scene, choice}` (scene is the scene the choice was made in, choice is 0 to 2; `scene` already holds the new scene when it fires), then, if that scene is an ending, `ending_reached {good}`. With `good_wins` a good ending wins; with `bad_loses` a bad ending loses. Choices are ignored for `read_ms` after each scene appears, so people can read it. Wrong lengths in the lists make choices silently do nothing, so keep them in step. Provides `scene`, `choose` (input) and the events above. With the game's `scene` sprite it draws a picture between the text and the buttons (frame = scene), and with a `button` sprite the buttons draw it.",
+  "params": {
+    "read_ms":   { "type": "duration", "default": 1200, "min": 0, "max": 10000 },
+    "good_wins": { "type": "bool", "default": true },
+    "bad_loses": { "type": "bool", "default": true },
+    "text_y":    { "type": "int", "default": 150, "min": 40, "max": 400 },
+    "button_y":  { "type": "int", "default": 380, "min": 200, "max": 560 },
+    "picture_y": { "type": "int", "default": 310, "min": 60, "max": 560 },
+    "picture_h": { "type": "int", "default": 110, "min": 40, "max": 300 },
+    "picture_sway": { "type": "float", "default": 0.0, "min": 0.0, "max": 20.0 }
+  },
+  "art": {
+    "scene": { "describe": "A picture for the scene, centred at (180, picture_y) and picture_h tall (at most 300 wide). Give svg as a list for one picture per scene (frame = scene number, wrapping around), or one picture for the whole story; `picture_sway` rocks it gently by that many degrees.", "color": "accent" },
+    "button": { "describe": "A choice button, 300 × 52, drawn under the choice text (keep its middle calm).", "color": "primary" }
+  },
+  "requires": {
+    "state": {
+      "story_lines": "list<string>",
+      "story_labels": "list<string>",
+      "story_next": "list<string>",
+      "story_ends": "list<string>"
+    }
+  },
+  "state": {
+    "scene": { "type": "int", "init": "0" },
+    "_ready_at": { "type": "int", "init": "@read_ms" },
+    "_ended": { "type": "bool", "init": "false" },
+    "_good": { "type": "bool", "init": "false" }
+  },
+  "inputs": {
+    "choose": { "payload": { "choice": "int" } }
+  },
+  "events": {
+    "choice_made": { "scene": "int", "choice": "int" },
+    "ending_reached": { "good": "bool" }
+  },
+  "rules": [
+    {
+      "id": "choose",
+      "on": "choose",
+      "when": "not _ended and now >= _ready_at and event.choice >= 0 and event.choice < 3 and get_or(story_labels, scene * 3 + event.choice, '') != ''",
+      "do": [
+        { "let": { "target": "index_of(map(range(60), n => str(n)), get_or(story_next, scene * 3 + event.choice, ''))" } },
+        {
+          "if": "target >= 0",
+          "then": [
+            { "let": { "pick": "event.choice" } },
+            { "let": { "from_scene": "scene" } },
+            { "set": "scene", "to": "target" },
+            { "set": "_ready_at", "to": "now + @read_ms" },
+            { "emit": "choice_made", "with": { "scene": "from_scene", "choice": "pick" } },
+            {
+              "if": "get_or(story_ends, scene, '') != ''",
+              "then": [ { "emit": "ending_reached", "with": { "good": "get_or(story_ends, scene, '') == 'good'" } } ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finish",
+      "on": "ending_reached",
+      "do": [ { "set": "_ended", "to": "true" }, { "set": "_good", "to": "event.good" } ]
+    }
+  ],
+  "objectives": {
+    "win": { "include": "@good_wins", "expr": "_ended and _good" },
+    "lose": { "include": "@bad_loses", "expr": "_ended and not _good" }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat", "source": "range(4)", "as": "k", "key": "k",
+          "template": {
+            "node": "text", "x": 180, "y": "= @text_y + k * 30", "anchor": "center", "size": 20, "weight": 500, "color": "$ink",
+            "text": "= get_or(story_lines, scene * 4 + k, '')",
+            "animate_on": { "choice_made": { "prop": "opacity", "keys": [0, 1], "ms": 350 } }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.scene",
+        "node": {
+          "node": "image", "asset": "@art.scene.id", "frame": "= scene", "anchor": "center",
+          "x": 180, "y": "@picture_y", "rotation": "= sin(now / 650.0) * @picture_sway",
+          "w": "= min(300.0, @picture_h / @art.scene.aspect)", "h": "= min(300.0, @picture_h / @art.scene.aspect) * @art.scene.aspect",
+          "animate_on": { "choice_made": { "prop": "opacity", "keys": [0, 1], "ms": 450 } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat", "source": "range(3)", "as": "c", "key": "c",
+          "template": {
+            "node": "group", "x": 30, "y": "= @button_y + c * 64",
+            "visible": "= get_or(story_labels, scene * 3 + c, '') != '' and not _ended",
+            "opacity": "= if now >= _ready_at then 1.0 else 0.4",
+            "transition": { "opacity": { "ms": 250, "ease": "out" } },
+            "animate_on": { "choose": { "when": "event.choice == c", "prop": "scale", "keys": [1, 0.94, 1.03, 1], "ms": 170 } },
+            "children": [
+              {
+                "include": "@art.button",
+                "node": "image", "asset": "@art.button.id", "w": 300, "h": 52, "role": "tile"
+              },
+              {
+                "include": "@art.button",
+                "node": "rect", "w": 300, "h": 52, "radius": 12, "fill": "#00000000",
+                "on_tap": { "input": "choose", "with": { "choice": "c" } }
+              },
+              {
+                "include": "not @art.button",
+                "node": "rect", "w": 300, "h": 52, "radius": 12, "fill": "$surface", "role": "tile",
+                "on_tap": { "input": "choose", "with": { "choice": "c" } }
+              },
+              {
+                "node": "text", "x": 150, "y": 26, "anchor": "center", "size": 17, "weight": 600, "color": "$ink",
+                "text": "= get_or(story_labels, scene * 3 + c, '')"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "choice_made", "do": [ { "moment": "tap" }, { "haptic": "light" } ] },
+      { "on": "ending_reached", "when": "(event.good and not @good_wins) or (not event.good and not @bad_loses)", "do": [ { "moment": "level" } ] }
+    ]
+  },
+  "tags": { "mood": ["playful", "calm"], "energy": ["low"] },
+  "conflicts": []
+}

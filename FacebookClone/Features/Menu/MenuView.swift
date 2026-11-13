@@ -115,7 +115,7 @@ struct MenuView: View {
                     .padding(.horizontal, 16)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 12) {
-                        symbolShortcut(title: "Bubbles", symbol: "bubbles.and.sparkles.fill", fill: AnyShapeStyle(BubbleGlow.brandGradient), glyph: .white) {
+                        symbolShortcut(title: ProductName.display, symbol: "sparkles", fill: AnyShapeStyle(GameColor.accentGradient), glyph: .white) {
                             router.push(.bubbleLibrary)
                         }
                         symbolShortcut(title: "Marketplace", symbol: "storefront.fill", fill: AnyShapeStyle(FBColor.marketplaceTeal), glyph: .white) {

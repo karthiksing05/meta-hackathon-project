@@ -1,0 +1,23 @@
+[package]
+name = "mg-cli"
+description = "microgame CLI: validate, simulate, replay, bench"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "microgame"
+path = "src/main.rs"
+
+[dependencies]
+mg-core.workspace = true
+mg-lang.workspace = true
+mg-runtime.workspace = true
+mg-scene.workspace = true
+serde_json.workspace = true
+# Frame encoders (JSON and binary), for `bench`.
+mg-wasm = { path = "../mg-wasm" }
+
+[lib]
+name = "mg_cli"
+path = "src/lib.rs"

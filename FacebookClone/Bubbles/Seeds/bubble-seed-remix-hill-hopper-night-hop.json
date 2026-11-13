@@ -1,0 +1,170 @@
+{
+  "id": "remix-hill-hopper-night-hop",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Hill Hopper: Night Hop",
+  "one_line_rule": "Tap to float over the hills after dark. Follow the streetlights.",
+  "formula": "dodge",
+  "brief": {
+    "intent": "Hill Hopper but at night, for the after-work run crew",
+    "audience": "everyone",
+    "mood": [
+      "chill"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": "hill-hopper",
+    "operators": [
+      "remix",
+      "re-skin",
+      "re-tune"
+    ],
+    "remix_of": "hill-hopper",
+    "remix_of_title": "Hill Hopper",
+    "remix_of_creator_id": "sf-diego-ramirez",
+    "remix_of_creator_name": "Diego"
+  },
+  "chain": null,
+  "style": {
+    "look": "glow",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#0E1440",
+      "bg_bottom": "#2A1A5E",
+      "ink": "#EEF0FF",
+      "primary": "#7FA8FF",
+      "secondary": "#9B7BFF",
+      "accent": "#FFE38A",
+      "danger": "#C46BFF"
+    },
+    "font": "rounded",
+    "motif": "hills",
+    "emoji": "🌙",
+    "mood_preset": "chill",
+    "cover_prompt": "soft glowing night scene of a small round hopper bouncing over dark blue hills lit by warm streetlights, violet sky, gentle glow"
+  },
+  "concepts": [
+    {
+      "use": "space.side_scroll",
+      "params": {
+        "speed": 2.1,
+        "backdrop": "hills",
+        "ground": true
+      }
+    },
+    {
+      "use": "entity.avatar",
+      "params": {
+        "size": 15
+      }
+    },
+    {
+      "use": "entity.obstacle",
+      "params": {
+        "style": "hill",
+        "width": 62
+      }
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "behavior.gravity",
+      "params": {
+        "strength": 0.32,
+        "max_fall": 8.5
+      }
+    },
+    {
+      "use": "behavior.impulse",
+      "params": {
+        "strength": 6.1
+      }
+    },
+    {
+      "use": "behavior.spawn_stream",
+      "params": {
+        "spacing": 232,
+        "gap": 206,
+        "gap_shrink": 12,
+        "variance": 0.4
+      }
+    },
+    {
+      "use": "behavior.speed_ramp",
+      "params": {
+        "rate": 0.05,
+        "max": 1.5,
+        "delay": 4
+      }
+    },
+    {
+      "use": "rule.collide_fail"
+    },
+    {
+      "use": "score.count",
+      "params": {
+        "on": "entity.passed",
+        "points": 1,
+        "label": "hills"
+      }
+    },
+    {
+      "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "feel.sfx_on_action"
+    },
+    {
+      "use": "social.beat_marker"
+    },
+    {
+      "use": "share.score_card",
+      "params": {
+        "label": "hills"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "theme": "SF hills on a night run",
+    "obstacle_labels": [
+      "Night Twin Peaks",
+      "Bernal",
+      "Nob Hill",
+      "Corona Heights",
+      "Telegraph",
+      "Potrero",
+      "Buena Vista",
+      "Tank Hill"
+    ]
+  },
+  "seed": 2411,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-12T08:00:00Z",
+    "duration_sec": 28.7,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-maya-okafor",
+    "created_hours_ago": 20,
+    "play_count": 640,
+    "like_count": 152,
+    "save_count": 97
+  }
+}

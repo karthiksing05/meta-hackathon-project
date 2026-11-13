@@ -1,0 +1,8 @@
+{
+  "note": "Never fire: the mites wear the shield down.",
+  "seed": 1,
+  "expect": "lost",
+  "inputs": [
+    {"t":9584.0}
+  ]
+}

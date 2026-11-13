@@ -67,6 +67,9 @@ struct MainTabView: View {
         .sheet(isPresented: $router.isCreateMenuPresented) {
             CreateMenuSheet()
         }
+        .sheet(item: $router.bubbleSheet) { route in
+            BubbleFeatureRouter.sheet(route)
+        }
         .onAppear {
             store.imagePrefetcher = { urls in
                 ImageLoader.shared.prefetch(urls)

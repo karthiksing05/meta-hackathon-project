@@ -21,6 +21,8 @@ struct FacebookCloneApp: App {
         let bubbleStore = BubbleStore(appStore: store)
         bubbleStore.studio = BubbleStudioFactory.make()
         BubbleSurfaceHooks.install(appStore: store, bubbleStore: bubbleStore)
+        // Audio session, the persisted game mute and social cues from notifications.
+        GameSound.install(appStore: store)
         // BubbleStore warms the runtime pool itself, right after the first frame.
         _store = State(initialValue: store)
         _bubbleStore = State(initialValue: bubbleStore)

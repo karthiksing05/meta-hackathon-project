@@ -1,0 +1,209 @@
+// The playtest bots' shared, host-agnostic parts: the bot roster, the action space, how an action
+// is applied, and the analysis that turns runs into flags (a port of the beta app's
+// StudioPlaytest). No Node APIs, so both gate.mjs (Node worker threads) and gate-async.mjs (the
+// Studio web view, bundled by authoring/tools/make-studio-bundle.mjs) use it.
+
+export const DT = 1000 / 60;
+export const LOOKAHEAD_STEPS = 45;
+const MAX_TAP_TARGETS = 40;
+
+export const DEFAULT_BOTS = [
+  { label: 'new player', skill: 0.35, botSeed: 11, seedOffset: 0 },
+  { label: 'regular', skill: 0.7, botSeed: 23, seedOffset: 0 },
+  { label: 'pro', skill: 0.95, botSeed: 37, seedOffset: 0 },
+  { label: 'regular, seed 2', skill: 0.7, botSeed: 41, seedOffset: 7 },
+  { label: 'regular, seed 3', skill: 0.7, botSeed: 53, seedOffset: 13 },
+];
+
+const isTypical = (bot) => bot.label.startsWith('regular');
+
+export function mulberry32(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export const asObject = (v) => (typeof v === 'string' ? JSON.parse(v) : v);
+
+export function gameObject(json) {
+  return typeof json === 'string' ? JSON.parse(json) : json;
+}
+
+// ---------- action space ----------
+
+export function inputSources(game) {
+  const keys = new Set();
+  let swipes = false;
+  let pointer = false;
+  for (const input of Object.values(game.inputs ?? {})) {
+    // An input with no key or swipe source is driven by the pointer (taps and drags).
+    if (!(input.from ?? []).some((f) => f.key || f.swipe)) pointer = true;
+    for (const from of input.from ?? []) {
+      if (from.key) keys.add(from.key);
+      if (from.swipe) swipes = true;
+      if (!from.key && !from.swipe) pointer = true;
+    }
+  }
+  // Arrow keys duplicate swipes in the usual four-way games; evaluating both only doubles the cost.
+  const allArrows = [...keys].every((k) => k.startsWith('Arrow'));
+  return { keys: swipes && allArrows ? [] : [...keys], swipes, pointer };
+}
+
+function tapAt(x, y) {
+  return { kind: 'tap', x, y };
+}
+
+/**
+ * Tap candidates: the engine's own hit targets (`targets`, from game.hitTargets()) when the engine
+ * provides them, so the bots never tap decoration such as particles or sprites; otherwise the
+ * centers of drawn rects and circles (engine v0.1). Plus a row of open-screen taps for games that
+ * take a pointer anywhere, and the game's keys and swipes.
+ */
+export function candidatesFor(frame, sources, rng, targets = null) {
+  const out = [{ kind: 'noop' }];
+  if (!sources.pointer) {
+    for (const key of sources.keys) out.push({ kind: 'key', key });
+    if (sources.swipes) for (const dir of ['left', 'right', 'up', 'down']) out.push({ kind: 'swipe', dir });
+    return out;
+  }
+  const seen = [];
+  let taps = [];
+  const shapes = (frame.ops ?? []).filter((op) => op.op === 'rect' || op.op === 'circle')
+    .map((op) => (op.op === 'rect' ? [op.x + op.w / 2, op.y + op.h / 2] : [op.x, op.y]));
+  let points = shapes;
+  if (Array.isArray(targets) && targets.length) {
+    // Small targets (buttons, tiles, cards): their centers. Big ones (a full-screen tap layer that
+    // reads the pointer position): the drawn shapes inside them, which is where the play is.
+    const big = (t) => t.w * t.h > 0.2 * frame.width * frame.height;
+    const inside = (t, [x, y]) => x >= t.x && x <= t.x + t.w && y >= t.y && y <= t.y + t.h;
+    points = targets.filter((t) => !big(t)).map((t) => [t.x + t.w / 2, t.y + t.h / 2]);
+    const bigs = targets.filter(big);
+    if (bigs.length) points.push(...shapes.filter((p) => bigs.some((t) => inside(t, p))));
+  }
+  for (const [x, y] of points) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    if (seen.some(([sx, sy]) => Math.abs(sx - x) < 4 && Math.abs(sy - y) < 4)) continue;
+    seen.push([x, y]);
+    taps.push(tapAt(x, y));
+  }
+  if (taps.length > MAX_TAP_TARGETS) {
+    const pool = taps.slice();
+    taps = [];
+    for (let i = 0; i < MAX_TAP_TARGETS; i++) taps.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+  }
+  out.push(...taps);
+  for (let i = 0; i < 7; i++) out.push(tapAt(((i + 0.5) / 7) * frame.width, 0.875 * frame.height));
+  for (const key of sources.keys) out.push({ kind: 'key', key });
+  if (sources.swipes) for (const dir of ['left', 'right', 'up', 'down']) out.push({ kind: 'swipe', dir });
+  return out;
+}
+
+export function apply(g, action) {
+  switch (action.kind) {
+    case 'tap':
+      // Engine v0.1 hit-tests against the layout from the last frame() call, not the current
+      // state. A real screen draws every frame, so refresh it before tapping (main game and probe
+      // alike), or lookahead taps hit stale positions.
+      g.frame();
+      g.pointer('down', action.x, action.y);
+      g.pointer('up', action.x, action.y);
+      break;
+    case 'key': g.key(action.key); break;
+    case 'swipe': g.swipe(action.dir); break;
+    default: break;
+  }
+}
+
+// ---------- analysis ----------
+
+export function median(values) {
+  if (!values.length) return 0;
+  const s = values.slice().sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+export function analyze(runs, { maxSeconds = 180 } = {}) {
+  const flags = [];
+  const flag = (code, message, blocking) => flags.push({ code, message, blocking });
+  const done = runs.filter((r) => r.ok);
+
+  const broken = runs.find((r) => !r.ok);
+  if (broken) flag('runtime_error', `The game crashed in a bot run: ${broken.error ?? 'unknown error'}. Check glue functions and params.`, true);
+  if (!done.length) return flags;
+
+  const med = median(done.map((r) => r.seconds));
+  const scores = done.map((r) => r.score);
+  const maxScore = Math.max(...scores);
+  const minScore = Math.min(...scores);
+  const timeouts = done.filter((r) => r.outcome === 'timeout');
+  const fails = done.filter((r) => r.outcome === 'fail');
+  const wins = done.filter((r) => r.outcome === 'success');
+  const weak = done.find((r) => r.bot.label === 'new player');
+  const regulars = done.filter((r) => isTypical(r.bot)).sort((a, b) => a.seconds - b.seconds);
+  const regular = regulars.length ? regulars[regulars.length >> 1] : null;
+  const pro = done.find((r) => r.bot.label === 'pro');
+  const secs = (s) => Math.round(s);
+
+  if (timeouts.length === done.length) {
+    flag('never_ends', `Never ends: no bot run ended within ${maxSeconds} s. Make the challenge ramp up (or add a clear finish) so a run can be failed.`, true);
+  } else if (med < 10 && med >= 6 && !fails.length && !timeouts.length) {
+    flag('short', `Short: bots clear it in about ${secs(med)} s; people take longer.`, false);
+  } else if (med < 10) {
+    const isFail = fails.length * 2 >= done.length;
+    flag('too_short', isFail
+      ? `Too short and too hard: runs end after about ${secs(med)} s. A good game lasts 10–120 s; ease the start (slower speed, wider gaps, gentler gravity, more tries).`
+      : `Too short: runs are over in about ${secs(med)} s. A good game lasts 10–120 s; add rounds, items or tries.`, true);
+  }
+
+  if (maxScore <= 0) flag('no_score', 'Nobody scored: every bot finished with 0 points. Check the score concept and that the content gives points.', true);
+
+  if (pro && pro.outcome === 'fail' && pro.seconds < 8 && med >= 10) {
+    flag('too_hard', `Too hard: even the strongest bot lost after ${secs(pro.seconds)} s.`, true);
+  } else if (regular && regular.outcome === 'fail' && regular.seconds < 10 && med >= 10) {
+    flag('too_hard', `Too hard: a typical player loses after ${secs(regular.seconds)} s. Ease the first seconds.`, true);
+  }
+
+  if (weak && weak.outcome !== 'fail' && timeouts.length !== done.length && !fails.length && done.length > 2 && minScore === maxScore) {
+    flag('no_challenge', "Even the weakest bot got the top score without failing; skill doesn't show yet.", false);
+  } else if (done.length > 2 && minScore === maxScore && maxScore > 0) {
+    flag('flat', `Skill doesn't change the score (every bot scored ${maxScore}). Consider a twist that rewards good play.`, false);
+  }
+
+  const typicalTimedOut = regular?.outcome === 'timeout' && regulars.filter((r) => r.outcome === 'timeout').length * 2 > regulars.length;
+  if (timeouts.length !== done.length && (typicalTimedOut || timeouts.length * 2 >= done.length)) {
+    flag('too_easy', `Too easy: a typical player is still going after ${maxSeconds} s (${timeouts.length} of ${done.length} bots never failed). Make it ramp up (faster pace, tighter gaps, a timer) so runs end in 10–120 s.`, true);
+  } else if (timeouts.length && timeouts.length !== done.length) {
+    flag('long', `Long for strong players: the ${timeouts.map((r) => r.bot.label).join(', ')} bot was still going after ${maxSeconds} s.`, false);
+  } else if (med > 120) {
+    flag('long', `Long: runs take about ${secs(med)} s.`, false);
+  }
+
+  // Handoff rules: ends, can be lost, can be won or scored, lasts 10–120 s.
+  if (!fails.length) flag('cant_lose', 'Can\'t be lost: no bot run ended in a loss.', true);
+  if (!wins.length && maxScore <= 0) flag('no_win_or_score', 'No bot won or scored: it can\'t be won or scored.', true);
+  if (med > 120) flag('too_long', `Too long: the median run is ${secs(med)} s; a good game lasts 10–120 s.`, true);
+
+  return flags;
+}
+
+export function summarize(runs, maxSeconds = 180) {
+  const done = runs.filter((r) => r.ok);
+  if (!done.length) return 'No bot run finished';
+  const scores = done.map((r) => r.score);
+  const secs = done.map((r) => Math.round(r.seconds));
+  const range = (a) => (Math.min(...a) === Math.max(...a) ? `${a[0]}` : `${Math.min(...a)}–${Math.max(...a)}`);
+  const parts = [`${done.length} bots scored ${range(scores)} over ${range(secs)} s`];
+  const count = (o) => done.filter((r) => r.outcome === o).length;
+  const out = [];
+  if (count('fail')) out.push(`${count('fail')} lost`);
+  if (count('success')) out.push(`${count('success')} won`);
+  if (count('timeout')) out.push(`${count('timeout')} still going at ${maxSeconds} s`);
+  if (out.length) parts.push(out.join(', '));
+  return parts.join(' · ');
+}

@@ -32,7 +32,7 @@ struct BubblePostAttachment: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(post.bubbleReplay == nil ? "Pop in to \(bubble.title)" : "Watch the Burst, then pop in to \(bubble.title)")
+            .accessibilityLabel(post.bubbleReplay == nil ? "Play \(bubble.title)" : "Watch the replay, then play \(bubble.title)")
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(bubble.title)
@@ -55,7 +55,7 @@ struct BubblePostAttachment: View {
                         Haptics.light()
                         router.play(bubble.id, replay: post.bubbleReplay)
                     } label: {
-                        Label("Pop in", systemImage: "bubbles.and.sparkles.fill")
+                        Label("Play", systemImage: "sparkles")
                             .font(.fbName)
                             .foregroundStyle(BubbleGlow.ink)
                             .frame(maxWidth: .infinity, minHeight: 36)
@@ -65,7 +65,7 @@ struct BubblePostAttachment: View {
                     Button {
                         router.push(.bubbleBoard(bubble.id))
                     } label: {
-                        Label("Bubble Board", systemImage: "list.number")
+                        Label("Board", systemImage: "list.number")
                             .font(.fbName)
                             .foregroundStyle(FBColor.primaryText)
                             .padding(.horizontal, 12)
@@ -73,7 +73,7 @@ struct BubblePostAttachment: View {
                             .background(FBColor.divider.opacity(0.6), in: Capsule())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Open the Bubble Board for \(bubble.title)")
+                    .accessibilityLabel("Open the board for \(bubble.title)")
                 }
                 .padding(.top, 4)
             }
@@ -87,8 +87,8 @@ struct BubblePostAttachment: View {
 
     private func badge(_ bubble: Bubble) -> some View {
         HStack(spacing: 4) {
-            Image(systemName: "bubbles.and.sparkles.fill")
-            Text(bubble.isDaily ? "Daily Bubble" : "Bubble")
+            Image(systemName: "sparkles")
+            Text(bubble.isDaily ? "Daily \(ProductName.singular)" : ProductName.singular)
         }
         .font(.fbCaptionEmphasized)
         .foregroundStyle(BubbleGlow.ink)
@@ -103,7 +103,7 @@ struct BubblePostAttachment: View {
         if post.bubbleReplay != nil {
             HStack(spacing: 4) {
                 Image(systemName: "play.fill")
-                Text("Burst")
+                Text("Replay")
             }
             .font(.fbCaptionEmphasized)
             .foregroundStyle(.white)

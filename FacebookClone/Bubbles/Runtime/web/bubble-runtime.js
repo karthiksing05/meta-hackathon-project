@@ -56,6 +56,16 @@
   const HAPTICS = ["light", "medium", "selection", "success", "warning"];
   const Z = { background: 0, space: 10, entities: 20, effects: 30, hud: 40 };
   const PARAM_TYPES = ["number", "integer", "boolean", "string", "enum", "string_list"];
+  // Length (docs/BUBBLES.md 7.9): how a run ends. Manifest `length` {mode, rounds, seconds, lives};
+  // a formula declares `length: {modes, default, knobs}`. Owner: the length feature, which fills in
+  // the engine side (lengthRound/lengthMiss/lengthLeft, timed endings, the HUD) and validation.
+  const LENGTH_MODES = ["endless", "rounds", "timed", "lives"];
+  // The number each mode reads, its allowed range, and the number a locked length uses when it
+  // names a mode but no number (and the formula's default is another mode).
+  const LENGTH_KEYS = { rounds: "rounds", timed: "seconds", lives: "lives" };
+  const LENGTH_LIMITS = { rounds: [1, 50], seconds: [10, 300], lives: [1, 9] };
+  const LENGTH_FALLBACK = { rounds: 10, seconds: 60, lives: 3 };
+  const LENGTH_KNOBS = ["speed", "difficulty", "lives", "rounds", "timer"];
 
   const GLUE_SLOTS = {
     feedback: "function feedback(guess, target, info) -> one mark per letter: \"hit\" (right spot), \"near\" (in the word) or \"miss\". Used by letter-feedback rules.",
@@ -206,14 +216,14 @@
   // Palettes: identical hex values in BubbleGlow.swift and bubble-glow.css (docs/BUBBLES.md 2).
   // good / near: the accents each palette uses for "right" and "close"; danger: hazards and alarms.
   const PALETTES = {
-    "lilac-haze": { top: "#C9B8FF", bottom: "#FFC8E8", ink: "#2E1F5E", glow: "#FFFFFF", accents: ["#9EF0DA", "#FFE59A", "#9AD4FF", "#FF9EC9"], dark: false, good: "#9EF0DA", near: "#FFE59A", danger: "#FF5C8A" },
+    "lilac-haze": { top: "#C9B8FF", bottom: "#E6EEFF", ink: "#2E1F5E", glow: "#FFFFFF", accents: ["#9EF0DA", "#FFE59A", "#9AD4FF", "#B8A6FF"], dark: false, good: "#9EF0DA", near: "#FFE59A", danger: "#FF5C8A" },
     "peach-fizz": { top: "#FFC2B0", bottom: "#FFE7A8", ink: "#4D2238", glow: "#FFF6E8", accents: ["#FF8FB8", "#8FD6FF", "#B8F2A6", "#C9A8FF"], dark: false, good: "#B8F2A6", near: "#8FD6FF", danger: "#F2526B" },
     "mint-pop": { top: "#A6F2DC", bottom: "#B3CCFF", ink: "#123B4D", glow: "#F2FFFB", accents: ["#FF9ECB", "#FFE48F", "#C9A8FF", "#8FE3FF"], dark: false, good: "#8FE3FF", near: "#FFE48F", danger: "#FF5F87" },
     "sky-glow": { top: "#ADD8FF", bottom: "#DCC8FF", ink: "#1F2B66", glow: "#F4F8FF", accents: ["#FFB0D9", "#A6F2DC", "#FFE59A", "#9AB8FF"], dark: false, good: "#A6F2DC", near: "#FFE59A", danger: "#FF5F87" },
     "night-bloom": { top: "#2B2150", bottom: "#5A3577", ink: "#FFF3FF", glow: "#FFD9F5", accents: ["#FF9DE2", "#9DF2FF", "#FFE59D", "#B9A2FF"], dark: true, good: "#9DF2FF", near: "#FFE59D", danger: "#FF6F9A" },
   };
-  const IRIDESCENT = ["#FFB3E6", "#B3E5FF", "#C9FFE8", "#FFF1B3", "#D9B3FF", "#FFB3E6"];
-  const BRAND = ["#B9A7FF", "#FF9ECF", "#FFC59E"];
+  const IRIDESCENT = ["#ADD8FF", "#B8BFFF", "#C9B2FF", "#E6EEFF", "#9AD4FF", "#ADD8FF"];
+  const BRAND = ["#ADD8FF", "#B8BFFF", "#C9B2FF"];
 
   // Looks (LOOKS.md): render families. Every Bubble gets its own look inside the same Bubble frame.
   // Rendering only: a look never changes logic, timing or game randomness.
@@ -222,7 +232,7 @@
       title: "Glow", font: "rounded", motif: "none",
       describe: "Dreamy and soft: pastel gradients, iridescent soap bubbles with halos, rounded glowing type, floating ambient bubbles.",
       moods: ["dreamy", "calm", "chill", "cozy"], energy: ["low", "medium"], fonts: ["rounded"], motifs: ["none", "clouds", "waves", "hills"],
-      example_colors: { bg_top: "#C9B8FF", bg_bottom: "#FFC8E8", ink: "#2E1F5E", primary: "#9EF0DA", secondary: "#FFE59A", accent: "#9AD4FF", danger: "#FF5C8A" },
+      example_colors: { bg_top: "#C9B8FF", bg_bottom: "#E6EEFF", ink: "#2E1F5E", primary: "#9EF0DA", secondary: "#FFE59A", accent: "#9AD4FF", danger: "#FF5C8A" },
     },
     paper: {
       title: "Paper", font: "rounded", motif: "none",
@@ -622,6 +632,8 @@
       tags: isObj(def.tags) ? def.tags : {},
       tips: arr(def.tips),
       poster_ticks: typeof def.poster_ticks === "number" && isFinite(def.poster_ticks) ? clamp(Math.floor(def.poster_ticks), 0, POSTER_MAX_TICKS) : POSTER_TICKS,
+      // {modes: [...LENGTH_MODES], default: {mode, rounds, seconds, lives}, knobs: {id: {concept, param, label}}}
+      length: isObj(def.length) ? def.length : null,
     };
     formulas[f.id] = f;
     formulaOrder.push(f.id);
@@ -679,9 +691,97 @@
     return {
       id: f.id, title: f.title, describe: f.describe, core: f.core, optional: f.optional,
       content: f.content, has_bot: !!f.bot, styles: f.styles, tags: f.tags, tips: f.tips,
-      poster_ticks: f.poster_ticks, example: f.example, examples: f.examples,
+      poster_ticks: f.poster_ticks, example: f.example, examples: f.examples, length: f.length,
     };
   }
+
+  // The run's length: the manifest's `length` over the formula's default, else endless. Numbers
+  // only for the chosen mode (null otherwise). Frozen; kits read it through `sdk.length`.
+  //
+  // A formula's declaration: {modes, default, knobs, numbers?: {rounds, seconds, lives} (what a
+  // mode suggests when picked without a number), infer?: {rounds|seconds|lives: [refs]} (labels).
+  //
+  // `locked` is true when the manifest sets `length` itself (a creator's Customize choice, or a
+  // challenge, group-chat session or game night that locks everyone to the same length). A locked
+  // length always has its number (the manifest's, else the formula default's for the same mode,
+  // else LENGTH_FALLBACK), clamped to LENGTH_LIMITS. An unlocked length is the formula's default:
+  // a kit may leave its number null ("from content", "from rule.timer"), and then the engine
+  // enforces nothing, so a manifest without `length` plays exactly as it did before lengths.
+  function resolveLength(manifest, formula) {
+    const own = isObj(manifest && manifest.length) && LENGTH_MODES.indexOf(manifest.length.mode) >= 0 ? manifest.length : null;
+    const base = formula && isObj(formula.length) && isObj(formula.length.default) && LENGTH_MODES.indexOf(formula.length.default.mode) >= 0 ? formula.length.default : null;
+    const pick = own || base || { mode: "endless" };
+    const key = LENGTH_KEYS[pick.mode];
+    const valid = (v) => typeof v === "number" && isFinite(v) && v > 0;
+    let n = null;
+    if (key) {
+      const mine = pick[key];
+      const fromBase = base && base.mode === pick.mode ? base[key] : undefined;
+      if (valid(mine)) n = Math.floor(mine);
+      else if (valid(fromBase)) n = Math.floor(fromBase);
+      else if (own) {
+        // The formula's suggested number for the mode (`length.numbers`), else the engine's.
+        const sug = formula && isObj(formula.length) && isObj(formula.length.numbers) ? formula.length.numbers[key] : undefined;
+        n = valid(sug) ? Math.floor(sug) : LENGTH_FALLBACK[key];
+      }
+      if (n !== null && own) n = clamp(n, LENGTH_LIMITS[key][0], LENGTH_LIMITS[key][1]);
+    }
+    return Object.freeze({
+      mode: pick.mode,
+      rounds: pick.mode === "rounds" ? n : null,
+      seconds: pick.mode === "timed" ? n : null,
+      lives: pick.mode === "lives" ? n : null,
+      locked: !!own,
+    });
+  }
+
+  // Concept param a formula's `length.infer` names ("rule.timer.seconds"), or content array
+  // length ("content:rounds"). Used only for labels, never for enforcement.
+  function inferNumber(manifest, ref) {
+    if (typeof ref !== "string") return null;
+    if (ref.indexOf("content:") === 0) {
+      const v = isObj(manifest.content) ? manifest.content[ref.slice(8)] : undefined;
+      return Array.isArray(v) && v.length ? v.length : null;
+    }
+    const dot = ref.lastIndexOf(".");
+    const cid = ref.slice(0, dot), param = ref.slice(dot + 1);
+    const use = (Array.isArray(manifest.concepts) ? manifest.concepts : []).filter((c) => isObj(c) && c.use === cid)[0];
+    if (!use) return null;
+    const v = isObj(use.params) ? use.params[param] : undefined;
+    if (typeof v === "number" && isFinite(v) && v > 0) return Math.floor(v);
+    const def = concepts[cid] && concepts[cid].params[param];
+    return def && typeof def.default === "number" && def.default > 0 ? Math.floor(def.default) : null;
+  }
+
+  // The length a player sees for a manifest: the locked length, else what the concepts say
+  // (rule.timer, flow.rounds, the formula's `length.infer`, rule.lives), else the formula's
+  // default mode. Labels only (intro card, Studio, feed); runs use resolveLength.
+  const LENGTH_INFER = { timed: ["rule.timer.seconds"], rounds: ["flow.rounds.count"], lives: ["rule.lives.lives"] };
+  function displayLength(manifest, formula) {
+    const L = resolveLength(manifest, formula);
+    if (L.locked || !isObj(manifest)) return L;
+    const infer = formula && isObj(formula.length) && isObj(formula.length.infer) ? formula.length.infer : {};
+    for (const mode of ["timed", "rounds", "lives"]) {
+      const refs = LENGTH_INFER[mode].concat(arr(infer[mode]));
+      for (const ref of refs) {
+        const n = inferNumber(manifest, ref);
+        if (n) return Object.freeze({ mode, rounds: mode === "rounds" ? n : null, seconds: mode === "timed" ? n : null, lives: mode === "lives" ? n : null, locked: false });
+      }
+    }
+    if (L.rounds || L.seconds || L.lives || L.mode === "endless") return L;
+    return null;
+  }
+
+  // "Endless: beat 42", "10 rounds", "60 seconds", "3 lives" (docs/BUBBLES.md 7.9).
+  function lengthLabel(L, best) {
+    if (!L) return "";
+    if (L.mode === "endless") return typeof best === "number" && best > 0 ? "Endless: beat " + best : "Endless";
+    if (L.mode === "rounds") return L.rounds ? L.rounds + (L.rounds === 1 ? " round" : " rounds") : "";
+    if (L.mode === "timed") return L.seconds ? L.seconds + " seconds" : "";
+    if (L.mode === "lives") return L.lives ? L.lives + (L.lives === 1 ? " life" : " lives") : "";
+    return "";
+  }
+
   function conceptMeta(c) {
     return {
       id: c.id, kind: c.kind, version: c.version, formulas: c.formulas, describe: c.describe, examples: c.examples,
@@ -950,6 +1050,28 @@
     }
   }
 
+  // Length (docs/BUBBLES.md 7.9): the mode must be one the formula supports, and its number must
+  // be a whole number in LENGTH_LIMITS. A formula with no length declaration gets a warning.
+  function validateLength(len, formula, errors, warnings) {
+    const decl = isObj(formula.length) ? formula.length : null;
+    if (!decl) {
+      warnings.push(issue("length", "Formula \"" + formula.id + "\" doesn't declare length modes, so its kit may not honor length " + len.mode, "length.mode"));
+    } else {
+      const modes = arr(decl.modes).filter((x) => LENGTH_MODES.indexOf(x) >= 0);
+      if (modes.length && modes.indexOf(len.mode) < 0) {
+        errors.push(issue("length", "Formula \"" + formula.id + "\" can't run length mode \"" + len.mode + "\". Modes: " + modes.join(", "), "length.mode"));
+      }
+    }
+    for (const mode of Object.keys(LENGTH_KEYS)) {
+      const key = LENGTH_KEYS[mode];
+      const v = len[key];
+      if (v === undefined || v === null) continue;
+      const lim = LENGTH_LIMITS[key];
+      if (typeof v !== "number" || !isFinite(v) || Math.floor(v) !== v) errors.push(issue("length", "length." + key + " must be a whole number", "length." + key));
+      else if (v < lim[0] || v > lim[1]) errors.push(issue("length", "length." + key + " must be " + lim[0] + "–" + lim[1] + " (got " + v + ")", "length." + key));
+    }
+  }
+
   function validateManifest(input) {
     const errors = [];
     const warnings = [];
@@ -974,6 +1096,9 @@
     }
     if (m.content !== undefined && !isObj(m.content)) errors.push(issue("schema", "content must be an object", "content"));
     if (m.glue !== undefined && m.glue !== null && !isObj(m.glue)) errors.push(issue("schema", "glue must be an object of {slot, source}", "glue"));
+    if (m.length !== undefined && m.length !== null && (!isObj(m.length) || LENGTH_MODES.indexOf(m.length.mode) < 0)) {
+      errors.push(issue("length", "length must be {mode, rounds?, seconds?, lives?} with mode one of " + LENGTH_MODES.join(", "), "length"));
+    }
     if (m.style !== undefined && !isObj(m.style)) errors.push(issue("schema", "style must be an object", "style"));
     else if (isObj(m.style)) validateStyle(m.style, errors, warnings);
     if (!Array.isArray(m.concepts) || !m.concepts.length) {
@@ -986,6 +1111,7 @@
       const hint = closest(m.formula, formulaOrder);
       errors.push(issue("unknown_formula", "Unknown formula \"" + m.formula + "\"" + (hint ? ". Did you mean \"" + hint + "\"?" : "") + " Formulas: " + formulaOrder.join(", "), "formula"));
     }
+    if (formula && isObj(m.length) && LENGTH_MODES.indexOf(m.length.mode) >= 0) validateLength(m.length, formula, errors, warnings);
 
     // Concepts
     const used = [];
@@ -1189,6 +1315,51 @@
   const DEFAULT_V = Object.freeze([W / 2, H / 2]);
   const GLUE_SDK_STUB = Object.freeze({ rng: () => 0.5, int: (a) => a, pick: (l) => (l ? l[0] : undefined), clamp, lerp });
 
+  // The engine's length chip (docs/BUBBLES.md 7.9), top left in the HUD layer: "Round 3/10", a
+  // timer ring with seconds, or lives as small bubbles. Drawn through g with palette roles, so it
+  // reads in every look; hidden on the intro (the card shows the label) and when a concept shows
+  // the length itself (hud.length false). Render only: it never touches game state.
+  function drawLengthChip(g, run) {
+    if (run.hud.length === false || run.phase === "intro") return;
+    const L = run.length, pal = g.palette, left = run.lengthLeft();
+    const h = 26, x = 12;
+    const y = run.session.conceptIDs.indexOf("rule.lives") >= 0 ? 48 : 12;
+    const cy = y + h / 2;
+    const chip = (w) => g.pill(x, y, w, h, { fill: pal.surface, stroke: pal.line, strokeWidth: 1, radius: h / 2, alpha: 0.94 });
+    if (L.mode === "rounds") {
+      const text = "Round " + Math.min(run.lengthRounds + 1, L.rounds) + "/" + L.rounds;
+      const w = 22 + text.length * 6.6;
+      chip(w);
+      g.text(text, x + w / 2, cy + 0.5, { size: 12, weight: 800, color: pal.ink });
+    } else if (L.mode === "timed") {
+      const secs = left.seconds_left;
+      const text = secs >= 60 ? Math.floor(secs / 60) + ":" + (secs % 60 < 10 ? "0" : "") + (secs % 60) : secs + "s";
+      const w = 40 + text.length * 7;
+      chip(w);
+      const rx = x + 15, r = 7.5;
+      const frac = clamp((run.lengthTicks - run.tick) / run.lengthTicks, 0, 1);
+      const warn = secs <= 5;
+      g.ring(rx, cy, r, pal.ink, { width: 2.5, alpha: 0.16 });
+      if (frac > 0.01) {
+        const pts = [], steps = Math.max(2, Math.ceil(frac * 24));
+        for (let i = 0; i <= steps; i++) {
+          const a = -Math.PI / 2 + (Math.PI * 2 * frac * i) / steps;
+          pts.push(rx + Math.cos(a) * r, cy + Math.sin(a) * r);
+        }
+        g.path(pts, warn ? pal.danger : pal.primary, { width: 2.5 });
+      }
+      g.text(text, x + 28 + (w - 28) / 2 - 2, cy + 0.5, { size: 12, weight: 800, color: warn ? pal.danger : pal.ink });
+    } else if (L.mode === "lives") {
+      const n = L.lives, gap = 15, w = 16 + n * gap;
+      chip(w);
+      for (let i = 0; i < n; i++) {
+        const bx = x + 15 + i * gap;
+        if (i < left.lives_left) g.bubble(bx, cy, 5.5, { tint: pal.danger, glow: 0.6 });
+        else g.ring(bx, cy, 4, pal.ink, { width: 1.5, alpha: 0.25 });
+      }
+    }
+  }
+
   class BubbleSession {
     constructor(input) {
       const m = normalizeManifest(input);
@@ -1273,6 +1444,17 @@
     share(partial) { this._run.mergeShare(partial); }
     preload(url) { if (this._run.preload) this._run.preload(url); }
     log(message) { logOnce(this._owner + ":" + message, this._owner + ": " + message); }
+    // Length contract (docs/BUBBLES.md 7.9). Every kit honors it:
+    //   sdk.length         {mode, rounds, seconds, lives}, resolved from the manifest and formula
+    //   sdk.lengthRound(info?)  call when a round/item/scene completes; false means the run is
+    //                      over (info {delay, outcome} shapes how the last round ends it)
+    //   sdk.lengthMiss()   call on a miss; true means a life absorbed it, false means apply the
+    //                      kit's normal fail
+    //   sdk.lengthLeft()   {rounds_left, seconds_left, lives_left} (null when not used) for HUDs
+    get length() { return this._run.length; }
+    lengthRound(info) { return this._run.lengthRound(isObj(info) ? info : null); }
+    lengthMiss() { return this._run.lengthMiss(); }
+    lengthLeft() { return this._run.lengthLeft(); }
   }
 
   class BubbleRun {
@@ -1302,8 +1484,15 @@
       this.outcome = null;
       this.endInfo = null;
       this.state = {};
+      this.length = resolveLength(this.manifest, this.formula);
+      this.lengthRounds = 0;
+      this.lengthLivesLost = 0;
+      // Timed runs end at seconds x 60 ticks (an unlocked default without a number never does).
+      this.lengthTicks = this.length.seconds ? this.length.seconds * TICK_RATE : 0;
       this.content = Object.assign({}, this.manifest.content);
-      this.hud = { score: true, label: "", retry: true, note: "" };
+      // hud.length: the engine's length chip (rounds 3/10, a timer, lives). A concept that shows the
+      // length itself (rule.timer, rule.lives, flow.rounds) sets it to false.
+      this.hud = { score: true, label: "", retry: true, note: "", length: true };
       this.feel = { ambient: 1, particles: 1, shake: 1, sound: "soft", tempo: 1 };
       this.handlers = Object.create(null);
       this.counts = Object.create(null);
@@ -1380,6 +1569,7 @@
       }
       this.owner = "engine";
       this.botSdk = new BubbleSDK(this, EMPTY, "bot");
+      if (this.lengthActive()) this.addLayer(Z.hud + 2, (g) => drawLengthChip(g, this), "engine");
     }
 
     // Starts the run: phase "playing". Called right away headless, on the first tap in play mode.
@@ -1540,6 +1730,7 @@
       }
       this.tickPayload.tick = t;
       this.emit("clock.tick", this.tickPayload);
+      if (this.lengthTicks && !this.ending && !this.ended && t + 1 >= this.lengthTicks) this.lengthEnd("timed", null);
       this.tick = t + 1;
       if (this.ending && this.tick >= this.endAt) this.finish();
       return !this.ended;
@@ -1575,11 +1766,72 @@
       Object.assign(out, this.sharePartial);
       const share = { headline: String(out.headline || m.title), score_text: String(out.score_text === undefined ? this.score : out.score_text) };
       if (typeof out.emoji_grid === "string" && out.emoji_grid) share.emoji_grid = out.emoji_grid;
+      // A short machine-readable result for the app (docs/BUBBLES.md 7.1), e.g. "ending=ferry" or
+      // "mastery=7/8". Never shown to players.
+      if (typeof out.tag === "string" && out.tag) share.tag = out.tag.slice(0, 120);
       return share;
     }
 
     replayLog() {
-      return { seed: this.seed, tick_rate: TICK_RATE, total_ticks: this.tick, inputs: this.log.slice() };
+      const log = { seed: this.seed, tick_rate: TICK_RATE, total_ticks: this.tick, inputs: this.log.slice() };
+      // A locked length travels with the replay, so verification replays it exactly.
+      if (isObj(this.manifest.length)) log.length = deepCopy(this.manifest.length);
+      return log;
+    }
+
+    // ----- length (docs/BUBBLES.md 7.9) -----
+
+    // True when the engine enforces the length: a mode with its number. An unlocked default
+    // without a number ("rounds from content") and endless enforce nothing.
+    lengthActive() {
+      const L = this.length;
+      return !!(L.rounds || L.seconds || L.lives);
+    }
+
+    // The engine ends the run for its length: emits length.end first, so a kit can end it with its
+    // own outcome (a word not found when time runs out is a fail); otherwise success.
+    lengthEnd(mode, info) {
+      this.emit("length.end", { mode, rounds: this.lengthRounds, lives_lost: this.lengthLivesLost, tick: this.tick });
+      if (this.ending || this.ended) return;
+      const outcome = info && info.outcome === "fail" ? "fail" : "success";
+      this.emit(outcome === "success" ? "rule.success" : "rule.fail", { reason: "length", mode });
+      if (this.ending || this.ended) return;
+      this.end(outcome, Object.assign({ reason: "length", mode }, isObj(info) ? info : null));
+    }
+
+    // A round completed. Returns false when the run is over (rounds used up), and then ends it
+    // after this tick (info.delay ticks later; info.outcome "fail" to end it as a fail).
+    lengthRound(info) {
+      this.lengthRounds++;
+      const n = this.length.rounds;
+      if (!n) return true;
+      this.emit("length.round", { index: this.lengthRounds - 1, done: this.lengthRounds, total: n, left: Math.max(0, n - this.lengthRounds) });
+      if (this.lengthRounds < n) return true;
+      if (this.lengthRounds === n) this.lengthEnd("rounds", info);
+      return false;
+    }
+
+    // A miss. In lives mode it costs a life: true while one absorbed it, false when the last one is
+    // gone (the kit then applies its normal fail). Otherwise false.
+    lengthMiss() {
+      const n = this.length.lives;
+      if (!n || this.ending || this.ended) return false;
+      this.lengthLivesLost = Math.min(n, this.lengthLivesLost + 1);
+      const left = n - this.lengthLivesLost;
+      this.emit("length.life", { left, lost: this.lengthLivesLost, total: n });
+      if (left > 0) return true;
+      this.emit("length.end", { mode: "lives", rounds: this.lengthRounds, lives_lost: this.lengthLivesLost, tick: this.tick });
+      return false;
+    }
+
+    // For HUDs: what's left of the length (null for numbers the mode doesn't use).
+    lengthLeft() {
+      const L = this.length;
+      return {
+        rounds_left: L.rounds ? Math.max(0, L.rounds - this.lengthRounds) : null,
+        seconds_left: L.seconds ? Math.max(0, Math.ceil((this.lengthTicks - this.tick) / TICK_RATE)) : null,
+        lives_left: L.lives ? Math.max(0, L.lives - this.lengthLivesLost) : null,
+      };
     }
 
     eventCounts() {
@@ -1647,6 +1899,9 @@
       style_rules: "style: {look, palette (a preset or custom), colors {" + COLOR_ROLES.join(", ") + "} as #RRGGBB (ink needs 4.5:1 on both backgrounds), font, motif, emoji, mood_preset, cover_prompt}. Kits color through palette roles (g.palette.primary, secondary, accent, ink, bgTop, bgBottom, danger, surface, line, inkOn(fill)) and draw through g, so every look applies.",
       sounds: SOUNDS.slice(),
       haptics: HAPTICS.slice(),
+      length_modes: LENGTH_MODES.slice(),
+      length_limits: deepCopy(LENGTH_LIMITS),
+      length_knobs: LENGTH_KNOBS.slice(),
       formulas: formulaOrder.map((id) => formulaMeta(formulas[id])),
       concepts: conceptOrder.map((id) => conceptMeta(concepts[id])),
       load_warnings: loadWarnings.slice(),
@@ -1659,10 +1914,12 @@
     const base = { ok: false, error: null, outcome: null, score: 0, ticks: 0, duration_sec: 0, events: {}, replay: null };
     let run = null;
     try {
-      const m = parseMaybe(manifestInput);
+      let m = parseMaybe(manifestInput);
       if (!isObj(m)) throw new Error("The manifest must be a JSON object");
-      const session = createSession(m);
       const replay = isObj(o.replay) ? o.replay : null;
+      // A replay is self-describing: a locked length it recorded applies to a manifest without one.
+      if (replay && isObj(replay.length) && !isObj(m.length)) m = Object.assign({}, m, { length: deepCopy(replay.length) });
+      const session = createSession(m);
       const seed = o.seed !== undefined && o.seed !== null ? o.seed : replay && replay.seed !== undefined ? replay.seed : session.manifest.seed;
       run = session.newRun({
         mode: "headless",
@@ -1749,6 +2006,14 @@
     simulate: (m, o) => simulate(m, o || {}),
     normalize: normalizeManifest,
     createSession,
+    resolveLength,
+    lengthModes: LENGTH_MODES,
+    // Labels only: the length a player sees for a manifest, and its text ("Endless: beat 42").
+    displayLength(manifest) {
+      const m = parseMaybe(manifest);
+      return isObj(m) ? displayLength(m, formulas[m.formula] || null) : null;
+    },
+    lengthLabel,
     palette: paletteFor,
     palettes: PALETTES,
     looks: LOOKS,
@@ -5170,6 +5435,15 @@
           insets: normInsets(pick("insets", null)),
           botSkill: typeof pick("bot_skill", null) === "number" ? pick("bot_skill", null) : DEMO_BOT_SKILL,
         };
+        // A replay that recorded a locked length (a challenge, a group-chat session) plays on that
+        // length even when the prepared manifest has none (docs/BUBBLES.md 7.9).
+        const rl = this.opts.replay && isObj(this.opts.replay.length) ? this.opts.replay.length : null;
+        if (this.mode === "replay" && rl && !isObj(entry.session.manifest.length) && LENGTH_MODES.indexOf(rl.mode) >= 0) {
+          const lk = JSON.stringify(rl);
+          const cache = entry.lengthSessions || (entry.lengthSessions = {});
+          const locked = cache[lk] || (cache[lk] = createSession(Object.assign({}, entry.session.manifest, { length: deepCopy(rl) })));
+          this.entry = Object.assign({}, entry, { session: locked });
+        }
         this.paused = false;
         this.demoLoop = 0;
         this.hideError();
@@ -5573,6 +5847,13 @@
         flash(color) { if (self.ffwd) return; self.flashA = self.opts && self.opts.reduced ? 0.12 : 0.32; self.flashCol = color || "#FFFFFF"; },
         sound(name) { if (!self.ffwd) Sound.play(name); },
         haptic(style) { if (!self.ffwd) self.haptic(style); },
+        // Where formulas that synthesize their own audio (microgame) should play it: the shared
+        // master gain, so mute and volume apply. Null while muted, fast-forwarding or locked.
+        audio() {
+          if (self.ffwd || Sound.muted) return null;
+          const ctx = Sound.ensure();
+          return ctx && ctx.state === "running" ? { ctx, dest: Sound.master } : null;
+        },
         sparkle(x, y, color, n) { if (!self.ffwd) self.fxSparkle(x, y, color, n); },
         ring(x, y, r, color) { if (!self.ffwd) self.fxRing(x, y, r || 40, color); },
       };
@@ -5979,14 +6260,22 @@
     showIntro() {
       const m = this.entry.session.manifest;
       const best = this.opts.player && typeof this.opts.player.best === "number" && this.opts.player.best > 0 ? this.opts.player.best : null;
+      // The length (docs/BUBBLES.md 7.9): "Endless: beat 42" takes the place of "Your best 42";
+      // "10 rounds", "60 seconds" and "3 lives" sit next to it.
+      const len = displayLength(m, this.entry.session.formula);
+      const lenText = lengthLabel(len, best);
+      const endlessBest = len && len.mode === "endless" && best !== null;
       const card = this.cardEl([
         ["card-mark", ""],
         ["card-orb", m.style && m.style.emoji ? m.style.emoji : "🫧"],
         ["card-title", m.title],
         ["card-rule", m.one_line_rule || ""],
-        best !== null ? ["card-best", "Your best " + best] : null,
-        ["card-cta", "Tap to pop in"],
+        lenText ? ["card-best card-length", lenText] : null,
+        best !== null && !endlessBest ? ["card-best", "Your best " + best] : null,
+        ["card-cta", "Tap to play"],
       ]);
+      const chip = card.querySelector ? card.querySelector(".card-length") : null;
+      if (chip && best !== null && !endlessBest) chip.style.marginRight = "6px";
       card.className = "bubble-card intro enter";
       this.dom.hud.classList.add("hidden");
     },
@@ -5996,7 +6285,7 @@
       const best = this.opts.player && typeof this.opts.player.best === "number" ? this.opts.player.best : null;
       const isBest = best !== null && run.score > best;
       const label = run.hud.label || (run.score === 1 ? "point" : "points");
-      const kicker = run.outcome === "success" ? "You did it!" : "Popped!";
+      const kicker = run.outcome === "success" ? "You did it!" : "Game over";
       const cta = run.hud.retry === false ? run.hud.note || "Nice one" : run.hud.note || "Tap to play again";
       const card = this.cardEl([
         ["card-kicker", kicker],
@@ -6025,7 +6314,7 @@
       if (this.dom) {
         const err = this.dom.error;
         while (err.firstChild) err.removeChild(err.firstChild);
-        const parts = [["error-orb", ""], ["card-title", "This bubble popped"], ["card-rule", "Something in this game broke. Try another one."]];
+        const parts = [["error-orb", ""], ["card-title", "This game hit a snag"], ["card-rule", "Something in this game broke. Try another one."]];
         for (const p of parts) {
           const el = document.createElement("div");
           el.className = p[0];

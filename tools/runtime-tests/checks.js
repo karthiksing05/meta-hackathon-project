@@ -151,6 +151,8 @@
       }
     }
 
+    const genericBot = (m) => m.formula === "microgame";
+
     // ------------------------------------------------------------------ bot simulations
     section("Bot runs (skills 0.2 / 0.5 / 0.9)");
     const skills = [0.2, 0.5, 0.9];
@@ -168,10 +170,17 @@
       if (errors) continue;
       const all = [].concat(rows[0.2], rows[0.5], rows[0.9]);
       ok(all.every((r) => ["success", "fail", "timeout"].indexOf(r.outcome) >= 0 && r.duration_sec <= 90.01), m.id + ": outcomes and durations are sane");
-      ok(median(rows[0.9].map((r) => r.duration_sec)) >= 6, m.id + ": a strong bot doesn't fail instantly", "median " + fmt(median(rows[0.9].map((r) => r.duration_sec))) + " s");
-      ok(rows[0.2].some((r) => r.outcome !== "timeout"), m.id + ": a weak bot's run ends (not endless)");
-      ok(mean(rows[0.9].map((r) => r.score)) >= mean(rows[0.2].map((r) => r.score)), m.id + ": skill helps (mean score 0.9 >= 0.2)",
-        fmt(mean(rows[0.9].map((r) => r.score))) + " vs " + fmt(mean(rows[0.2].map((r) => r.score))));
+      // Microgames carry a whole game, so the formula's bot is generic (it taps the game's real
+      // targets and flicks) and can't show skill. Their game quality is gated where the game is made:
+      // the authoring playtest gate (authoring/playtest, 5 bots) and the engine examples' scripted
+      // win and lose replays (engine/crates/mg-cli/tests/examples.rs). Sanity, share, determinism
+      // and replay checks below still apply.
+      if (!genericBot(m)) {
+        ok(median(rows[0.9].map((r) => r.duration_sec)) >= 6, m.id + ": a strong bot doesn't fail instantly", "median " + fmt(median(rows[0.9].map((r) => r.duration_sec))) + " s");
+        ok(rows[0.2].some((r) => r.outcome !== "timeout"), m.id + ": a weak bot's run ends (not endless)");
+        ok(mean(rows[0.9].map((r) => r.score)) >= mean(rows[0.2].map((r) => r.score)), m.id + ": skill helps (mean score 0.9 >= 0.2)",
+          fmt(mean(rows[0.9].map((r) => r.score))) + " vs " + fmt(mean(rows[0.2].map((r) => r.score))));
+      }
       ok(all.every((r) => r.share && r.share.headline && r.share.score_text), m.id + ": every run has a share headline and score text");
       if (m.concepts.some((c) => c.use === "share.emoji_grid")) ok(all.every((r) => typeof r.share.emoji_grid === "string" && r.share.emoji_grid.length > 0), m.id + ": emoji grid is filled");
       const line = skills.map((s) => s + ": " + rows[s].map((r) => r.outcome[0] + r.score + "/" + Math.round(r.duration_sec) + "s").join(" ")).join("  ");
@@ -198,7 +207,7 @@
       ok(a.replay.tick_rate === 60 && a.replay.total_ticks === a.ticks && Array.isArray(a.replay.inputs) && a.replay.seed !== undefined, m.id + ": replay log shape");
       const variety = {};
       for (const bs of [1, 2, 3, 4, 5]) { const r = sim(m, { bot_seed: bs, bot_skill: 0.6 }); variety[r.outcome + r.score + "@" + r.ticks] = 1; }
-      ok(Object.keys(variety).length >= 2, m.id + ": bot seeds vary the runs");
+      if (!genericBot(m)) ok(Object.keys(variety).length >= 2, m.id + ": bot seeds vary the runs");
     }
 
     // ------------------------------------------------------------------ negative cases
@@ -356,6 +365,59 @@
       const noBot = copy(base);
       const r = B.posterRun(B.createSession(noBot), { bot_skill: 0.2 });
       ok(r.tick <= 90, "posterRun takes a bot skill and stops by poster_ticks", "tick " + r.tick);
+    }
+
+    // ------------------------------------------------------------------ length (docs/BUBBLES.md 7.9)
+    section("Length");
+    {
+      const lcat = cat;
+      ok(Array.isArray(lcat.length_modes) && ["endless", "rounds", "timed", "lives"].every((m) => lcat.length_modes.indexOf(m) >= 0), "catalog lists the four length modes");
+      ok(lcat.length_limits && lcat.length_limits.rounds[1] === 50 && lcat.length_limits.seconds[0] === 10 && lcat.length_limits.lives[1] === 9, "catalog lists length limits");
+      const declared = lcat.formulas.filter((f) => f.length && Array.isArray(f.length.modes));
+      ok(["dodge", "time", "merge", "guess", "group", "answer"].every((id) => declared.some((f) => f.id === id)), "every original kit declares length");
+      for (const f of declared) {
+        ok(f.length.modes.every((m) => lcat.length_modes.indexOf(m) >= 0), f.id + ": length modes are known");
+        ok(f.length.default && f.length.modes.indexOf(f.length.default.mode) >= 0, f.id + ": default length is one of its modes");
+        for (const id of Object.keys(f.length.knobs || {})) {
+          const k = f.length.knobs[id];
+          ok(lcat.length_knobs.indexOf(id) >= 0, f.id + ": knob " + id + " is a known knob id");
+          const alts = String(k.concept || "").split("|");
+          ok(alts.every((cid) => { const c = lcat.concepts.find((x) => x.id === cid); return c && c.params[k.param]; }), f.id + ": knob " + id + " names a real concept param", k.concept + "." + k.param);
+        }
+      }
+      const dodge = byId["hill-hopper"] || (lcat.formulas.find((f) => f.id === "dodge") || {}).example;
+      if (dodge) {
+        const withLen = (len) => Object.assign(copy(dodge), { length: len });
+        const lcodes = (v) => v.errors.filter((e) => e.code === "length").length;
+        ok(B.validate(withLen({ mode: "timed", seconds: 60 })).ok, "a timed length validates");
+        ok(lcodes(B.validate(withLen({ mode: "forever" }))) === 1, "an unknown mode is a length error");
+        ok(lcodes(B.validate(withLen("10 rounds"))) === 1, "a length that isn't an object is a length error");
+        ok(lcodes(B.validate(withLen({ mode: "rounds", rounds: 0 }))) === 1, "rounds 0 is a length error");
+        ok(lcodes(B.validate(withLen({ mode: "rounds", rounds: 51 }))) === 1, "rounds 51 is a length error");
+        ok(lcodes(B.validate(withLen({ mode: "timed", seconds: 5 }))) === 1, "seconds 5 is a length error");
+        ok(lcodes(B.validate(withLen({ mode: "timed", seconds: 301 }))) === 1, "seconds 301 is a length error");
+        ok(lcodes(B.validate(withLen({ mode: "lives", lives: 10 }))) === 1, "lives 10 is a length error");
+        ok(lcodes(B.validate(withLen({ mode: "lives", lives: 2.5 }))) === 1, "lives 2.5 is a length error");
+        const merge = (lcat.formulas.find((f) => f.id === "merge") || {}).example;
+        if (merge) ok(lcodes(B.validate(Object.assign(copy(merge), { length: { mode: "lives", lives: 3 } }))) === 1, "a mode the formula doesn't support is a length error");
+        const L0 = B.resolveLength(dodge, null);
+        ok(L0.mode === "endless" && !L0.locked, "no length resolves to endless, unlocked");
+        const L1 = B.resolveLength(withLen({ mode: "timed" }), { length: { default: { mode: "endless" }, numbers: { seconds: 45 } } });
+        ok(L1.mode === "timed" && L1.seconds === 45 && L1.locked, "a locked mode without a number takes the formula's suggestion", JSON.stringify(L1));
+        const L2 = B.resolveLength(withLen({ mode: "lives" }), null);
+        ok(L2.lives === 3, "a locked mode without any suggestion takes the engine's", JSON.stringify(L2));
+        ok(B.lengthLabel(B.displayLength(dodge), 42) === "Endless: beat 42", "endless label shows the best", B.lengthLabel(B.displayLength(dodge), 42));
+        ok(B.lengthLabel(B.displayLength(withLen({ mode: "rounds", rounds: 10 }))) === "10 rounds", "rounds label");
+        ok(B.lengthLabel(B.displayLength(withLen({ mode: "timed", seconds: 60 }))) === "60 seconds", "timed label");
+        ok(B.lengthLabel(B.displayLength(withLen({ mode: "lives", lives: 1 }))) === "1 life", "one life label");
+        const timedRun = B.simulate(withLen({ mode: "timed", seconds: 10 }), { bot_seed: 3, bot_skill: 1, max_ticks: 3000 });
+        ok(timedRun.ok && timedRun.ticks <= 600, "a timed run ends by its seconds", timedRun.outcome + " " + timedRun.ticks);
+        ok(timedRun.replay && timedRun.replay.length && timedRun.replay.length.seconds === 10, "the replay records the locked length");
+        const again = B.simulate(dodge, { replay: timedRun.replay, max_ticks: 3000 });
+        ok(again.ticks === timedRun.ticks && again.score === timedRun.score && again.outcome === timedRun.outcome, "a replay with a length replays on a manifest without one");
+        const plain = B.simulate(dodge, { bot_seed: 3, bot_skill: 0.6, max_ticks: 3000 });
+        ok(!plain.replay.length && !plain.events["length.round"] && !plain.events["length.end"], "a manifest without length records no length and emits no length events");
+      }
     }
 
     // ------------------------------------------------------------------ normalize

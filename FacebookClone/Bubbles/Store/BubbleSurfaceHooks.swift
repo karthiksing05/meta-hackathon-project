@@ -19,5 +19,8 @@ enum BubbleSurfaceHooks {
         installNotifications(appStore: appStore, bubbleStore: bubbleStore)
         installStories(appStore: appStore, bubbleStore: bubbleStore)
         installReels(appStore: appStore, bubbleStore: bubbleStore)
+        // Collaboration (docs/BUBBLES.md 7): the shared synthetic chats first, then each feature.
+        BubbleSocialCast.install(appStore: appStore, bubbleStore: bubbleStore)
+        BubbleFeatureRouter.installAll(appStore: appStore, bubbleStore: bubbleStore)
     }
 }

@@ -130,6 +130,7 @@ extension StudioModel {
             log("tweaked: version=\(model.currentResult?.manifest.version ?? 0)")
             await pause(3)
 
+            if model.currentResultTakesLooks {
             let lookBefore = StudioLook(id: model.currentResult?.manifest.style.look) ?? .glow
             let newLook: StudioLook = lookBefore == .pixel ? .clay : .pixel
             log("new look: \(lookBefore.rawValue) -> \(newLook.rawValue)")
@@ -139,6 +140,7 @@ extension StudioModel {
             let style = model.currentResult?.manifest.style
             log("look now: \(style?.look ?? "?") palette=\(style?.palette ?? "?") font=\(style?.font ?? "-") version=\(model.currentResult?.manifest.version ?? 0) words=\(style.map(StudioLookWords.detail(for:)) ?? "?")")
             await pause(3)
+            }
 
             if model.canMakeNextLevel {
                 log("next level: \(model.levelButtonNumber)")
@@ -150,7 +152,8 @@ extension StudioModel {
             }
 
             model.go(to: .float)
-            log("float to \(model.destinationName)")
+            model.pickDefaultFriendsIfNeeded()
+            log("share to \(model.destinationName), challenge \(model.challengedPeople.map(\.firstName))")
             await pause(3)
             let made = model.levels
             let countBefore = model.bubbleStore?.bubbles.count ?? 0
@@ -166,7 +169,10 @@ extension StudioModel {
                 let chain = bubble.manifest.chain.map { "\($0.id)#\($0.index) prev=\($0.prev ?? "-") next=\($0.next ?? "-")" } ?? "none"
                 log("published \(bubble.id) v\(bubble.manifest.version) \"\(bubble.title)\" scope=\(bubble.manifest.structure.scope) group=\(bubble.group?.name ?? "-") event=\(bubble.event?.title ?? "-") chain=\(chain) cover=\(bubble.coverImageData != nil) look=\(bubble.manifest.style.look)/\(bubble.manifest.style.palette)")
             }
-            if !store.dailyBubbleIDs.isEmpty {
+            if let first = made.first, let record = MakeRecordStore.shared.record(for: first.id) {
+                log("make record: microgame=\(record.isMicrogame) blocks=\(record.concepts.count) repairs=\(record.repairs.count) playtest=\(record.playtest?.title ?? "-") lanes=\(record.playtest?.lanes.count ?? 0) sentTo=\(record.sentTo.map(\.name))")
+            }
+                        if !store.dailyBubbleIDs.isEmpty {
                 log("daily bubbles: \(store.dailyBubbleIDs)")
             }
             log("done")
@@ -438,7 +444,7 @@ enum StudioScript {
         final.id = "\(base.id)-level-\(index)-\(UUID().uuidString.prefix(4).lowercased())"
         final.version = 1
         final.title = "\(base.title) \(index)"
-        final.oneLineRule = "Faster hills, tighter gaps. Tap to float."
+        final.oneLineRule = "Faster hills, tighter gaps. Tap to glide."
         final.seed = base.seed + index
         final.lineage = BubbleLineage(parent: base.id, operators: ["next-level"])
         final.chain = BubbleChainLink(id: base.chain?.id ?? "chain-\(base.id)", index: index, title: base.chain?.title ?? base.title, prev: base.id)
@@ -485,7 +491,7 @@ enum StudioScript {
     static func manifest(for request: StudioRequest, template: [BubbleFormula: BubbleManifest]) -> BubbleManifest {
         let formula = request.formulaHint ?? (request.mode == .daily ? .guess : (request.base?.formula ?? .dodge))
         let names: [(String, String, String)] = [
-            ("Hill Hop", "Tap to float over the hills. Don't touch the fog.", "⛰️"),
+            ("Hill Hop", "Tap to glide over the hills. Don't touch the fog.", "⛰️"),
             ("Fog Drift", "Glide under the fog bank. Tap to rise.", "🌫️"),
             ("Bay Breeze", "Ride the breeze across the bay. Tap to lift.", "🌊"),
         ]

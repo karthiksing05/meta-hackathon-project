@@ -1,0 +1,46 @@
+{
+  "fragment": "endless",
+  "version": 1,
+  "describe": "The endless half of endless/finite: no win condition and a `level` that climbs forever, +1 every `level_every` ms, emitting `level_up`. Sets no objectives, so the game needs its own lose path (lives, timer_bar) and should leave time_limit unset. Games raise difficulty in a rule on `level_up`.",
+  "params": {
+    "level_every": { "type": "duration", "default": 8000, "min": 2000, "max": 60000 }
+  },
+  "requires": {},
+  "state": {
+    "level": { "type": "int", "init": "1" }
+  },
+  "events": {
+    "level_up": { "level": "int" },
+    "_climb": {}
+  },
+  "rules": [
+    {
+      "id": "arm",
+      "on": "start",
+      "do": [ { "after": "@level_every", "emit": "_climb", "id": "_level_timer" } ]
+    },
+    {
+      "id": "climb",
+      "on": "_climb",
+      "do": [
+        { "incr": "level" },
+        { "emit": "level_up", "with": { "level": "level" } },
+        { "after": "@level_every", "emit": "_climb", "id": "_level_timer" }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": { "node": "text", "text": "= 'Level ' + str(level)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      }
+    ],
+    "feedback": [
+      { "on": "level_up", "do": [ { "moment": "level" }, { "haptic": "light" } ] }
+    ]
+  },
+  "tags": { "mood": ["any"], "energy": ["medium", "high"] },
+  "conflicts": []
+}

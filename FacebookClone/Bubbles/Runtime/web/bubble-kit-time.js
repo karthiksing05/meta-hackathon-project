@@ -12,6 +12,11 @@
 // behavior.speed_ramp (state.pace speeds the mover up), share.emoji_grid (state.share_rows).
 //
 // State: state.timing_stage (camera), state.timing_mover, state.timing (rule), state.timing_score.
+//
+// Length (docs/BUBBLES.md 7.9): by default a run is `targets` (catch) or `goal` (stack) hits.
+// Rounds: length.rounds hits, each one a round (sdk.lengthRound). Timed, lives and endless have
+// no goal: the clock ends a timed run; misses spend lives (rule.lives, else sdk.lengthMiss); in
+// endless a miss ends the run unless rule.lives is there.
 (function () {
   "use strict";
   var root = typeof globalThis !== "undefined" ? globalThis : this;
@@ -211,6 +216,21 @@
   function drawProgress(g, text) {
     g.text(text, W - 22, 30, { size: 14, weight: 800, color: g.palette.ink, alpha: 0.8, align: "right" });
   }
+  // The hits a run needs: the length's rounds, none (Infinity) for a locked timed, lives or
+  // endless length, else the rule's own number.
+  function goalFor(sdk, own) {
+    var L = sdk.length || {};
+    if (L.rounds) return L.rounds;
+    if (L.locked && L.mode !== "rounds") return Infinity;
+    return own;
+  }
+  // A miss with a locked length and no rule.lives: true when it ends the run.
+  function lengthMissEnds(sdk) {
+    var L = sdk.length || {};
+    if (!L.locked || sdk.has("rule.lives")) return false;
+    if (L.mode === "lives") return !sdk.lengthMiss();
+    return L.mode === "endless";
+  }
   function judgeLabel(precision, perfect) {
     return perfect ? "Perfect!" : precision >= 0.8 ? "Great" : precision >= 0.5 ? "Nice" : "Close";
   }
@@ -237,10 +257,11 @@
       var stops = Array.isArray(c.stops) ? c.stops.filter(isStr).map(String) : [];
       var fallback = isStr(c.target_label) ? String(c.target_label) : "";
       var st = sdk.state.timing = {
-        mode: "catch", hits: 0, goal: params.targets, target: 0, label: "", passes: 0, state: "run", until: 0, cooldown: 0,
+        mode: "catch", hits: 0, goal: goalFor(sdk, params.targets), target: 0, label: "", passes: 0, state: "run", until: 0, cooldown: 0,
         marks: [], rows: [], perfects: 0, streak: 0, last: null, over: false, stopIndex: 0, flashAt: -100, window: params.window
       };
-      function windowNow() { return params.window * (1 - params.narrow * clamp(st.hits / Math.max(1, st.goal - 1), 0, 1)); }
+      var narrowOver = isFinite(st.goal) ? st.goal : params.targets;
+      function windowNow() { return params.window * (1 - params.narrow * clamp(st.hits / Math.max(1, narrowOver - 1), 0, 1)); }
       var spawnGlue = sdk.glue && sdk.glue("spawn");
       function mv() { return moverOf(sdk); }
       function pos() { var m = mv(); return m.motion === "pulse" ? m.r : m.x; }
@@ -283,6 +304,12 @@
         sdk.fx.sound(reason === "passed" ? "whoosh" : "fail");
         sdk.fx.haptic("warning");
         sdk.fx.shake(3);
+        if (!sdk.ended && lengthMissEnds(sdk)) {
+          st.over = true;
+          sdk.emit("rule.fail", { reason: reason, hits: st.hits });
+          sdk.end("fail", { hits: st.hits, delay: 30 });
+          return;
+        }
         if (reason === "passed" && !sdk.ended) newTarget(false);
       }
 
@@ -313,8 +340,10 @@
             sdk.emit("rule.success", { hits: st.hits, perfects: st.perfects });
             sdk.fx.sound("success");
             sdk.end("success", { hits: st.hits, delay: 24 });
+            sdk.lengthRound();
             return;
           }
+          sdk.lengthRound();
           st.state = "caught";
           st.until = sdk.tick + 40;
           m.active = false;
@@ -406,7 +435,7 @@
       });
       sdk.layer(40, function (g) {
         var ro = roles(g.palette);
-        drawProgress(g, Math.min(st.hits + (st.over ? 0 : 1), st.goal) + " / " + st.goal);
+        drawProgress(g, isFinite(st.goal) ? Math.min(st.hits + (st.over ? 0 : 1), st.goal) + " / " + st.goal : st.hits + " caught");
         if (st.last && sdk.tick - st.last.at < 40) {
           var t = (sdk.tick - st.last.at) / 40;
           g.text(st.last.label, CX, 182 - t * 18, { size: st.last.perfect ? 30 : 24, weight: 900, color: ro.ink, alpha: 1 - t * t, glow: st.last.perfect ? ro.accent : true });
@@ -441,7 +470,7 @@
       if (!pieces.length) pieces = [contentMover(sdk)];
       var H = params.piece_height;
       var st = sdk.state.timing = {
-        mode: "stack", hits: 0, goal: params.goal, stack: [], falling: null, debris: [], state: "swing", until: 0,
+        mode: "stack", hits: 0, goal: goalFor(sdk, params.goal), stack: [], falling: null, debris: [], state: "swing", until: 0,
         marks: [], rows: [], perfects: 0, streak: 0, last: null, over: false, pieceH: H, pieces: pieces, next: 0, flashAt: -100
       };
       var withLives = sdk.has("rule.lives");
@@ -508,7 +537,9 @@
           st.last = { label: "Whoops", at: sdk.tick, good: false };
           sdk.emit("rule.miss", { reason: "off" });
           sdk.fx.sound("fail"); sdk.fx.haptic("warning"); sdk.fx.shake(5);
+          var L = sdk.length || {};
           if (withLives) sdk.emit("entity.hit", { x: f.x, y: f.y, reason: "off", delay: 30 });
+          else if (L.lives && sdk.lengthMiss()) { /* a life absorbed it */ }
           else {
             st.over = true;
             sdk.emit("rule.fail", { reason: "off", height: st.hits });
@@ -554,8 +585,10 @@
           sdk.emit("rule.success", { height: st.hits, perfects: st.perfects });
           sdk.fx.sound("success");
           sdk.end("success", { height: st.hits, delay: 24 });
+          sdk.lengthRound();
           return;
         }
+        sdk.lengthRound();
         st.state = "settle"; st.until = sdk.tick + 14;
       }
 
@@ -620,7 +653,7 @@
       });
       sdk.layer(40, function (g) {
         var ro = roles(g.palette);
-        drawProgress(g, st.hits + " / " + st.goal);
+        drawProgress(g, isFinite(st.goal) ? st.hits + " / " + st.goal : String(st.hits));
         if (st.last && sdk.tick - st.last.at < 40) {
           var t = (sdk.tick - st.last.at) / 40;
           g.text(st.last.label, CX, 300 - t * 18, { size: st.last.perfect ? 30 : 24, weight: 900, color: ro.ink, alpha: 1 - t * t, glow: st.last.perfect ? ro.accent : true });
@@ -724,12 +757,12 @@
   function share(sdk) {
     var st = sdk.state.timing;
     var mf = sdk.manifest || {};
-    var title = (mf.style && mf.style.emoji ? mf.style.emoji + " " : "") + (mf.title || "Bubble");
+    var title = (mf.style && mf.style.emoji ? mf.style.emoji + " " : "") + (mf.title || "Game");
     if (!st) return { headline: title, score_text: sdk.score + " points" };
     var rows = [];
     for (var i = 0; i < st.marks.length; i += 8) rows.push(st.marks.slice(i, i + 8).join(""));
     var unit = st.mode === "stack" ? (sdk.content && isStr(sdk.content.goal_label) ? sdk.content.goal_label : "high") : "caught";
-    var text = sdk.score + " points · " + st.hits + (st.mode === "stack" ? " " + unit : "/" + st.goal + " " + unit) + (st.perfects ? " · " + st.perfects + " perfect" : "");
+    var text = sdk.score + " points · " + st.hits + (st.mode === "stack" || !isFinite(st.goal) ? " " + unit : "/" + st.goal + " " + unit) + (st.perfects ? " · " + st.perfects + " perfect" : "");
     return { headline: title, score_text: text, emoji_grid: rows.join("\n") };
   }
 
@@ -760,6 +793,18 @@
     validateContent: validateContent,
     bot: { describe: "Looks ahead along the mover's path and taps when it will line up; timing noise shrinks from about ±7 ticks at skill 0 to under ±1 at skill 1, with rare fumbles for weak bots.", decide: decide },
     share: share,
+    // Length (docs/BUBBLES.md 7.9): a run is its targets or goal by default.
+    length: {
+      modes: ["rounds", "timed", "lives", "endless"],
+      default: { mode: "rounds" },
+      numbers: { rounds: 12, seconds: 45, lives: 3 },
+      infer: { rounds: ["rule.timing_window.targets", "rule.timing_stack.goal"] },
+      knobs: {
+        speed: { concept: "entity.timing_mover", param: "speed", label: "Speed", min: 0.28, max: 0.8 },
+        difficulty: { concept: "rule.timing_window|rule.timing_stack", param: "perfect", label: "Perfect zone", min: 2, max: 10, invert: true },
+      },
+      describe: "Rounds: hits to finish. Timed: as many as you can before the clock. Lives: misses you can take.",
+    },
     example: {
       id: "example-time-catch", version: 1, engine_version: 1,
       title: "Ferry Hop",

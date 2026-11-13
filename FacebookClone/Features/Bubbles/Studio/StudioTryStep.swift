@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Step 4: play what Muse made, right here. Edit the title and rule, tweak it with Muse, or make
-/// the next level.
+/// Step 4: play what Muse made, right here. Edit the title and rule, tweak it with Muse (for
+/// microgames through `MicrogameComposer.revise`), customize it, or make the next level.
 struct StudioTryStep: View {
     @Bindable var model: StudioModel
     @FocusState private var isTweakFocused: Bool
@@ -18,6 +18,9 @@ struct StudioTryStep: View {
                         StudioDetailsCard(model: model, result: result)
                             .id("details")
                     }
+                    StudioTrySlots(model: model)
+                    // SOUND SECTION: between Customize and Tweak.
+                    soundSection
                     StudioTweakCard(model: model, isFocused: $isTweakFocused)
                         .id("tweak")
                 }
@@ -41,7 +44,7 @@ struct StudioTryStep: View {
                             }
                         }
                         .buttonStyle(.studioSecondary(expand: false, height: 44))
-                        .accessibilityHint("Muse makes a harder next level that links to this one as a Bubble Chain")
+                        .accessibilityHint("Muse makes a harder next level that links to this one as a level chain")
                     }
                     Button {
                         isTweakFocused = false
@@ -49,9 +52,9 @@ struct StudioTryStep: View {
                         model.go(to: .float)
                     } label: {
                         HStack(spacing: 6) {
-                            Image(systemName: model.isEditMode && model.levels.count == 1 ? "checkmark" : "bubbles.and.sparkles.fill")
+                            Image(systemName: model.isEditMode && model.levels.count == 1 ? "checkmark" : "paperplane.fill")
                                 .font(.system(size: FBIconSize.medium, weight: .bold))
-                            Text(model.isEditMode && model.levels.count == 1 ? "Save changes" : "Float it")
+                            Text(model.isEditMode && model.levels.count == 1 ? "Save changes" : "Share with friends")
                         }
                     }
                     .buttonStyle(.studioPrimary)
@@ -66,9 +69,29 @@ struct StudioTryStep: View {
         }
         .task {
             guard model.focusTweak else { return }
-            model.focusTweak = false
             try? await Task.sleep(nanoseconds: 500_000_000)
+            // Opened to Customize: its panel clears focusTweak, and the keyboard would cover it.
+            guard model.focusTweak, !LengthCustomizer.shared.scrollPending,
+                  DebugLaunch.value("FB_STUDIO_SCROLL") != "customize" else {
+                model.focusTweak = false
+                return
+            }
+            model.focusTweak = false
             isTweakFocused = true
+        }
+    }
+}
+
+extension StudioTryStep {
+    /// SOUND SECTION: hear and change a microgame's sound set, music and loudness. Only microgames
+    /// have a sound section (`SoundManifestEditor`); other games take their sounds from their feel,
+    /// so the section stays hidden for them.
+    @ViewBuilder
+    var soundSection: some View {
+        if let draft = model.currentResult?.manifest, draft.formula == .microgame {
+            SoundCustomizeSection(manifest: draft) { newManifest in
+                model.replaceManifest(newManifest)
+            }
         }
     }
 }
@@ -110,18 +133,26 @@ private struct StudioPlayerCard: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var revision = 0
     @State private var lastRun: BubbleRunResult?
-    @State private var isMuted = true
     @State private var runtimeError: String?
 
     var body: some View {
+        // The badge sits under the card, so it never covers the game's own top-left HUD.
+        VStack(alignment: .leading, spacing: FBSpacing.s) {
+            player
+            MuseBadge()
+                .padding(.leading, FBSpacing.xs)
+        }
+    }
+
+    private var player: some View {
         let shape = RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous)
-        BubbleWebView(
+        return BubbleWebView(
             manifest: result.manifest,
             mode: .play,
             playerName: model.me?.firstName ?? "",
             bestScore: nil,
             isActive: scenePhase == .active && !model.isPopping,
-            isMuted: isMuted,
+            isMuted: GameSound.isMuted,
             reducedMotion: reduceMotion,
             onMessage: handle
         )
@@ -130,17 +161,12 @@ private struct StudioPlayerCard: View {
         .background(BubbleGlow.palette(for: result.manifest.style).gradient)
         .clipShape(shape)
         .overlay(shape.strokeBorder(BubbleGlow.iridescent, lineWidth: 1.5).opacity(0.9))
-        .shadow(color: BubbleGlow.pink.opacity(0.3), radius: 18, y: 8)
-        .overlay(alignment: .topLeading) {
-            MuseBadge()
-                .padding(FBSpacing.m)
-                .allowsHitTesting(false)
-        }
+        .shadow(color: GameColor.periwinkle.opacity(0.3), radius: 18, y: 8)
         .overlay(alignment: .topTrailing) {
             HStack(spacing: 0) {
-                StudioCircleButton(symbol: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", accessibilityLabel: isMuted ? "Turn sound on" : "Turn sound off") {
+                StudioCircleButton(symbol: GameSound.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", accessibilityLabel: GameSound.isMuted ? "Turn sound on" : "Turn sound off") {
                     Haptics.light()
-                    isMuted.toggle()
+                    GameSound.toggleMute()
                 }
                 StudioCircleButton(symbol: "arrow.counterclockwise", accessibilityLabel: "Restart") {
                     restart()
@@ -176,7 +202,7 @@ private struct StudioPlayerCard: View {
             restart()
         } label: {
             HStack(spacing: FBSpacing.s) {
-                Image(systemName: run.outcome == .success ? "star.fill" : "bubbles.and.sparkles.fill")
+                Image(systemName: run.outcome == .success ? "star.fill" : "sparkles")
                     .font(.system(size: FBIconSize.medium, weight: .semibold))
                 Text(run.share.scoreText.isEmpty ? "\(run.score) points" : run.share.scoreText)
                     .font(.fbButton)
@@ -189,7 +215,7 @@ private struct StudioPlayerCard: View {
             .frame(minHeight: 44)
             .background(BubbleGlow.brandGradient, in: Capsule())
             .overlay(Capsule().strokeBorder(Color.white.opacity(0.75), lineWidth: 1))
-            .shadow(color: BubbleGlow.pink.opacity(0.4), radius: 10, y: 4)
+            .shadow(color: GameColor.periwinkle.opacity(0.4), radius: 10, y: 4)
         }
         .buttonStyle(.pressable)
     }
@@ -208,7 +234,7 @@ private struct StudioPlayerCard: View {
             Haptics.success()
         // The runtime pool plays the game's own haptics for the active host.
         case .error(let message):
-            runtimeError = message.isEmpty ? "This bubble popped" : "This bubble popped: \(message)"
+            runtimeError = message.isEmpty ? "This \(ProductName.singular) didn't load" : "This \(ProductName.singular) didn't load: \(message)"
         default:
             break
         }
@@ -254,7 +280,9 @@ private struct StudioDetailsCard: View {
                         .padding(.top, 2)
                 }
             }
-            lookRow
+            if result.manifest.formula != .microgame {
+                lookRow
+            }
             if !result.sourcesUsed.isEmpty {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Image(systemName: "lock.fill")
@@ -331,10 +359,15 @@ private struct StudioTweakCard: View {
     var isFocused: FocusState<Bool>.Binding
 
     private static let suggestions = ["A little slower", "Make it harder", "Calmer colors", "Use our names"]
+    private static let microgameSuggestions = ["A little slower", "Make it harder", "Softer sounds", "Brighter colors"]
+
+    private var suggestions: [String] {
+        model.currentResult?.manifest.formula == .microgame ? Self.microgameSuggestions : Self.suggestions
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.m) {
-            StudioSectionTitle(title: "Tweak it", detail: "Muse edits this bubble", symbol: "wand.and.stars")
+            StudioSectionTitle(title: "Tweak it", detail: "Muse edits this \(ProductName.singular)", symbol: "wand.and.stars")
             HStack(alignment: .bottom, spacing: FBSpacing.s) {
                 TextField("Make it slower, add our inside jokes…", text: $model.tweakText, axis: .vertical)
                     .font(.fbBodyLarge)
@@ -366,7 +399,7 @@ private struct StudioTweakCard: View {
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: FBSpacing.s) {
-                    ForEach(Self.suggestions, id: \.self) { suggestion in
+                    ForEach(suggestions, id: \.self) { suggestion in
                         StudioChip(title: suggestion, symbol: "sparkle") {
                             Haptics.selection()
                             model.tweakText = suggestion

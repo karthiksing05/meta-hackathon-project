@@ -16,11 +16,11 @@ struct BubbleBoardView: View {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
             } else {
-                ContentUnavailableView("Bubble not found", systemImage: "list.number")
+                ContentUnavailableView("\(ProductName.singular) not found", systemImage: "list.number")
             }
         }
         .background(FBColor.surface)
-        .navigationTitle("Bubble Board")
+        .navigationTitle("Board")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -103,7 +103,7 @@ struct BubbleBoardView: View {
                 }
             }
             Spacer(minLength: 0)
-            Button("Pop in") { router.play(bubble.id) }
+            Button("Play") { router.play(bubble.id) }
                 .buttonStyle(.fb(.tinted, expand: false, height: 34))
         }
         .padding(.horizontal, FBMetrics.screenPadding)
@@ -117,10 +117,10 @@ struct BubbleBoardView: View {
                 .font(.fbHeadline)
                 .foregroundStyle(FBColor.primaryText)
                 .multilineTextAlignment(.center)
-            Text(bubble.isDaily ? "Pop in now and set today's score." : "Pop in and set the first score.")
+            Text(bubble.isDaily ? "Play now and set today's score." : "Play and set the first score.")
                 .font(.fbBody)
                 .foregroundStyle(FBColor.secondaryText)
-            Button("Pop in") { router.play(bubble.id) }
+            Button("Play") { router.play(bubble.id) }
                 .buttonStyle(.fb(.primary, expand: false, height: 40))
         }
         .frame(maxWidth: .infinity)
@@ -246,7 +246,7 @@ struct BubbleBoardRow: View {
                         Button {
                             router.play(bubble.id, replay: replay)
                         } label: {
-                            Label("Watch Burst", systemImage: "play.circle.fill")
+                            Label("Watch replay", systemImage: "play.circle.fill")
                                 .font(.fbMetaEmphasized)
                                 .foregroundStyle(FBColor.accent)
                                 .labelStyle(.titleAndIcon)
@@ -254,7 +254,7 @@ struct BubbleBoardRow: View {
                                 .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Watch Burst, \(entry.user.name)")
+                        .accessibilityLabel("Watch replay, \(entry.user.name)")
                     }
                 }
             }

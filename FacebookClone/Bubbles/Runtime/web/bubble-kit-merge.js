@@ -15,6 +15,10 @@
 //
 // State: state.jar (space), state.merge (bodies, drop queue; the entity), state.merge_rule,
 // state.overflow, state.merge_score.
+//
+// Length (docs/BUBBLES.md 7.9): endless by default (until the jar overflows; rule.timer makes it
+// timed). Timed: length.seconds on the clock. Rounds: each drop is a round (sdk.lengthRound);
+// after the last one the jar settles for 1.5 s, then the run ends in success.
 (function () {
   "use strict";
   var root = typeof globalThis !== "undefined" ? globalThis : this;
@@ -546,13 +550,17 @@
       combo_seconds: { type: "number", default: 0.5, min: 0, max: 2, describe: "Merges within this many seconds of each other count as a combo (a cascade from one drop usually is one); score.merge_value multiplies them." },
       win_tier: { type: "integer", default: 0, min: 0, max: 10, describe: "Make this tier (1 = the smallest) to win right away. 0 = no goal tier." }
     },
-    consumes: ["entity.merged", "entity.maxed?"], emits: ["rule.success"], requires: ["entity.merge_orb"], conflicts: [], ends: true,
+    consumes: ["entity.merged", "entity.maxed?", "entity.dropped?"], emits: ["rule.success"], requires: ["entity.merge_orb"], conflicts: [], ends: true,
     state: "merge_rule: {keepTop, comboTicks}",
     tags: { mood: ["calm", "cozy", "satisfying"], energy: ["low", "medium"] },
     glue: [],
     setup: function (sdk, params) {
       sdk.state.merge_rule = { keepTop: params.top_tier === "keep", comboTicks: Math.round(params.combo_seconds * 60) };
       var done = false;
+      // Length: every drop is a round; the last one lets the jar settle before the run ends.
+      sdk.on("entity.dropped", function () {
+        if (!sdk.ended) sdk.lengthRound({ delay: 90 });
+      });
       sdk.on("entity.merged", function (e) {
         var jar = sdk.state.jar;
         var y = jar && jar.rise ? JAR_TOP + JAR_FLOOR - e.y : e.y;
@@ -791,7 +799,7 @@
   function share(sdk) {
     var st = sdk.state.merge, sc = sdk.state.merge_score;
     var m = sdk.manifest || {};
-    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Bubble");
+    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Game");
     if (!st) return { headline: title, score_text: sdk.score + " points" };
     var ladder = st.tiers.map(function (t, i) { return i <= st.maxTier ? (isEmojiish(t) ? t : "🫧") : "⚪"; }).join("");
     var names = sdk.content && Array.isArray(sdk.content.tier_names) ? sdk.content.tier_names : null;
@@ -823,6 +831,17 @@
     validateContent: validateContent,
     bot: { describe: "Scores 23 drop columns (land on a same-tier twin, keep the pile low, big bubbles to the walls) with noise that shrinks with skill; weak bots aim loosely and sometimes drop anywhere.", decide: decide },
     share: share,
+    // Length (docs/BUBBLES.md 7.9): endless (until it overflows) unless rule.timer runs the clock.
+    length: {
+      modes: ["endless", "timed", "rounds"],
+      default: { mode: "endless" },
+      numbers: { rounds: 40, seconds: 75 },
+      knobs: {
+        speed: { concept: "entity.merge_orb", param: "cooldown", label: "Drop pace", min: 0.3, max: 1, invert: true },
+        difficulty: { concept: "rule.overflow_fail", param: "grace", label: "Overflow grace", min: 0.6, max: 2.6, invert: true },
+      },
+      describe: "Rounds: drops. Timed: merge as much as you can before the clock. Endless: until the jar overflows.",
+    },
     example: {
       id: "example-merge", version: 1, engine_version: 1,
       title: "Snack Stack",

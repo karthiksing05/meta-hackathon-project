@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Microgame shell</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --bar: 48px; --ink: #1c1e21; --muted: #65676b; --accent: #0866ff; --err: #e41e3f; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #18191a; color: #e4e6eb;
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+  #bar { height: var(--bar); display: flex; gap: 8px; align-items: center; padding: 0 10px;
+    background: #242526; border-bottom: 1px solid #3a3b3c; overflow-x: auto; overflow-y: hidden; }
+  #bar .title { font-weight: 700; margin-right: 6px; white-space: nowrap; }
+  #bar select, #bar button { height: 32px; border-radius: 6px; border: 1px solid #3e4042;
+    background: #3a3b3c; color: inherit; font: inherit; padding: 0 10px; cursor: pointer; white-space: nowrap; flex: none; }
+  #bar select { flex: 0 1 auto; min-width: 90px; }
+  @media (max-width: 560px) { #bar .title { display: none; } #bar { gap: 6px; padding: 0 6px; } }
+  #bar .spacer { flex: 1; }
+  #badge { display: none; background: var(--err); color: #fff; border: 0; }
+  #stage { position: absolute; top: var(--bar); left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: center; }
+  #frame { position: relative; }
+  canvas { display: block; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 4px; }
+  .overlay { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, .55); border-radius: 4px; padding: 24px; }
+  .overlay.show { display: flex; }
+  .card { background: #fff; color: var(--ink); border-radius: 12px; padding: 24px 22px; width: min(320px, 90%);
+    text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,.35); }
+  .card h1 { margin: 0 0 8px; font-size: 24px; }
+  .card p { margin: 0 0 16px; color: var(--muted); }
+  .card .score { font-size: 40px; font-weight: 800; color: var(--ink); margin: 4px 0 2px; }
+  .card button { width: 100%; height: 44px; border: 0; border-radius: 8px; background: var(--accent);
+    color: #fff; font: 600 16px system-ui, sans-serif; cursor: pointer; }
+  .card button:disabled { background: #8a8d91; cursor: progress; }
+  #textfield { position: absolute; border: 2px solid rgba(0,0,0,.25); border-radius: 10px; padding: 0 .6em;
+    background: rgba(255,255,255,.96); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    outline: none; }
+  #textfield:focus { border-color: var(--accent); }
+  #textfield:disabled { opacity: .6; }
+  #toasts { position: absolute; left: 0; right: 0; top: 12%; display: flex; flex-direction: column;
+    align-items: center; gap: 8px; pointer-events: none; }
+  .toast { background: rgba(28, 30, 33, .9); color: #fff; padding: 8px 14px; border-radius: 18px;
+    max-width: 85%; text-align: center; transition: opacity .25s, transform .25s; }
+  .toast.out { opacity: 0; transform: translateY(-6px); }
+  #panel { position: absolute; top: calc(var(--bar) + 8px); right: 8px; bottom: 8px; width: min(560px, calc(100% - 16px));
+    background: #242526; border: 1px solid #3e4042; border-radius: 10px; display: none; flex-direction: column; z-index: 5; }
+  #panel.show { display: flex; }
+  #panel header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #3e4042; }
+  #panel header b { flex: 1; }
+  #panel header button { background: #3a3b3c; color: inherit; border: 1px solid #4e4f50; border-radius: 6px; height: 30px; padding: 0 10px; cursor: pointer; }
+  #panel .body { overflow: auto; padding: 10px 12px; flex: 1; }
+  #panel textarea { width: 100%; height: 100%; min-height: 240px; resize: none; background: #18191a; color: #e4e6eb;
+    border: 1px solid #3e4042; border-radius: 6px; font: 12px/1.4 ui-monospace, Menlo, monospace; padding: 8px; }
+  .diag { border-left: 3px solid var(--err); padding: 4px 8px; margin: 0 0 10px; }
+  .diag.warning { border-color: #f7b928; }
+  .diag code { font: 12px ui-monospace, Menlo, monospace; }
+  .diag .msg { margin: 2px 0; }
+  .diag .hint { color: #8ab4f8; }
+  .diag pre { margin: 4px 0 0; white-space: pre-wrap; word-break: break-all; font: 12px/1.35 ui-monospace, Menlo, monospace; color: #b0b3b8; }
+  .diag pre mark { background: rgba(228, 30, 63, .35); color: #fff; border-radius: 2px; }
+  #drop { position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(8, 102, 255, .25); border: 3px dashed var(--accent); font-size: 20px; z-index: 10; pointer-events: none; }
+  #drop.show { display: flex; }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <span class="title">Microgame</span>
+    <select id="picker" aria-label="Game"></select>
+    <button id="paste">Paste JSON</button>
+    <button id="open">Open file</button>
+    <input id="file" type="file" accept=".json,application/json" hidden>
+    <span class="spacer"></span>
+    <button id="badge" title="Runtime diagnostics"></button>
+    <button id="restart">Restart</button>
+  </div>
+
+  <div id="stage">
+    <div id="frame">
+      <canvas id="canvas"></canvas>
+      <input id="textfield" type="text" hidden autocomplete="off" autocapitalize="off" autocorrect="off"
+        spellcheck="false" enterkeyhint="done" aria-label="Type your answer">
+      <div id="toasts"></div>
+      <div id="start" class="overlay"><div class="card">
+        <h1 data-title></h1><p data-instructions></p><button data-play>Play</button>
+      </div></div>
+      <div id="end" class="overlay"><div class="card">
+        <h1 data-result></h1><div class="score" data-score></div><p data-detail></p><button data-again>Play again</button>
+      </div></div>
+    </div>
+  </div>
+
+  <div id="panel">
+    <header><b data-heading></b><button data-load hidden>Load</button><button data-close>Close</button></header>
+    <div class="body" data-body></div>
+  </div>
+  <div id="drop">Drop a game.json to play it</div>
+
+  <script type="module" src="./shell.js"></script>
+</body>
+</html>

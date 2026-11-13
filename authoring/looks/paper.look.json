@@ -1,0 +1,24 @@
+{
+  "look": "paper",
+  "version": 1,
+  "describe": "Warm paper and ink: off-white ground, soft shadows, a calm serif.",
+  "font": "Fraunces",
+  "tokens": {
+    "primary": "#3A6EA5",
+    "secondary": "#8FB3D9",
+    "accent": "#E4572E",
+    "ink": "#1F1B16",
+    "bg": "#F4F1EA",
+    "surface": "#E6DFD1",
+    "danger": "#C8402A"
+  },
+  "layout": {
+    "node": "group",
+    "children": [
+      { "node": "group", "x": 0, "y": 0, "children": [ { "slot": "playfield" } ] },
+      { "node": "stack", "dir": "row", "gap": 28, "align": "center", "x": 180, "y": 52, "anchor": "center", "children": [ { "slot": "hud_top" } ] },
+      { "node": "stack", "dir": "row", "gap": 28, "align": "center", "x": 180, "y": 604, "anchor": "center", "children": [ { "slot": "hud_bottom" } ] },
+      { "node": "group", "x": 0, "y": 0, "children": [ { "slot": "overlay" } ] }
+    ]
+  }
+}

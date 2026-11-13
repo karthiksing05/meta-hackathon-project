@@ -29,7 +29,7 @@ extension BubbleSurfaceHooks {
         }
         let seeds: [Seed] = [
             Seed(id: "diego-hill-hopper", author: "sf-diego-ramirez", fallback: 0, bubble: "hill-hopper",
-                 text: "Floated Hill Hopper to \(group?.name ?? "my feed") 🫧 Nobody has cleared Lombard yet.", score: 31,
+                 text: "Shared Hill Hopper to \(group?.name ?? "my feed") ✨ Nobody has cleared Lombard yet.", score: 31,
                  minutesAgo: 22, inGroup: true, likes: 18),
             Seed(id: "chloe-fog-words", author: "sf-chloe-nguyen", fallback: 1, bubble: "newinsf-daily-fog-words",
                  text: "Got today's Fog Words in four. The fog was not helping.", score: 44,
@@ -78,16 +78,16 @@ extension BubbleSurfaceHooks {
         } else if let result {
             text = "Scored \(result.score) in \(bubble.title). Beat it?"
         } else if let group {
-            text = "Floated \(bubble.title) to \(group.name) 🫧"
+            text = "Shared \(bubble.title) to \(group.name) ✨"
         } else {
-            text = "Floated \(bubble.title) 🫧"
+            text = "Shared \(bubble.title) ✨"
         }
         let post = appStore.createPost(text: text, audience: group == nil ? .friends : .everyone, group: group)
         post.bubbleID = bubble.id
         post.bubbleReplay = result?.replay ?? bubble.featuredRun?.replay
         post.isUploading = false
         GameRecommender.shared.note(.floated, gameID: bubble.id)
-        appStore.showToast(group.map { "Floated to \($0.name)" } ?? "Floated to your feed", symbol: "bubbles.and.sparkles.fill")
+        appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
         return post
     }
 }

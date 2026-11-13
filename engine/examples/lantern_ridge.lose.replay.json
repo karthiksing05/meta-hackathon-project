@@ -1,0 +1,9 @@
+{
+  "note": "Hold D and never jump: fall into the first gap.",
+  "seed": 1,
+  "expect": "lost",
+  "inputs": [
+    {"key":"KeyD","t":0.0},
+    {"t":3040.0}
+  ]
+}

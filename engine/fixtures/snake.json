@@ -1,0 +1,214 @@
+{
+  "format": "microgame/0.1",
+  "meta": {
+    "title": "Snake",
+    "instructions": "Swipe or use the arrow keys to steer. Eat 10 apples. Don't hit the walls or yourself.",
+    "duration_s": 120
+  },
+  "state": {
+    "snake": {
+      "type": "list<ivec2>",
+      "init": "[vec(4, 7), vec(3, 7), vec(2, 7)]"
+    },
+    "dir": {
+      "type": "ivec2",
+      "init": "right"
+    },
+    "next_dir": {
+      "type": "ivec2",
+      "init": "right"
+    },
+    "food": {
+      "type": "ivec2",
+      "init": "vec(10, 7)"
+    },
+    "score": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "inputs": {
+    "steer": {
+      "payload": {
+        "dir": "ivec2"
+      },
+      "from": [
+        {
+          "swipe": "any",
+          "with": {
+            "dir": "swipe.dir"
+          }
+        },
+        {
+          "key": "ArrowUp",
+          "with": {
+            "dir": "up"
+          }
+        },
+        {
+          "key": "ArrowDown",
+          "with": {
+            "dir": "down"
+          }
+        },
+        {
+          "key": "ArrowLeft",
+          "with": {
+            "dir": "left"
+          }
+        },
+        {
+          "key": "ArrowRight",
+          "with": {
+            "dir": "right"
+          }
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "steer",
+      "on": "steer",
+      "when": "event.dir + dir != vec(0, 0)",
+      "do": [
+        {
+          "set": "next_dir",
+          "to": "event.dir"
+        }
+      ]
+    },
+    {
+      "id": "move",
+      "on": {
+        "every": "150ms"
+      },
+      "do": [
+        {
+          "set": "dir",
+          "to": "next_dir"
+        },
+        {
+          "let": {
+            "head": "snake[0] + dir"
+          }
+        },
+        {
+          "if": "not in_bounds(head, 15, 15) or contains(take(snake, len(snake) - 1), head)",
+          "then": [
+            {
+              "end": "lose"
+            }
+          ]
+        },
+        {
+          "if": "head == food",
+          "then": [
+            {
+              "set": "snake",
+              "to": "concat([head], snake)"
+            },
+            {
+              "incr": "score"
+            },
+            {
+              "set": "food",
+              "to": "pick(filter(coords(15, 15), c => not contains(snake, c)))"
+            }
+          ],
+          "else": [
+            {
+              "set": "snake",
+              "to": "concat([head], take(snake, len(snake) - 1))"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "score >= 10",
+    "score": "score",
+    "time_limit": "120s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "canvas": {
+      "w": 360,
+      "h": 640,
+      "background": "$bg"
+    },
+    "tokens": {
+      "bg": "#0F1A12",
+      "empty": "#16261A",
+      "body": "#7BD389",
+      "head": "#C6F6CF",
+      "food": "#FF5D5D",
+      "ink": "#E8F5EA"
+    },
+    "root": {
+      "node": "stack",
+      "dir": "column",
+      "gap": 20,
+      "align": "center",
+      "x": 180,
+      "y": 320,
+      "anchor": "center",
+      "children": [
+        {
+          "node": "text",
+          "text": "= 'Apples: ' + str(score) + ' / 10'",
+          "size": 22,
+          "weight": 600,
+          "color": "$ink"
+        },
+        {
+          "node": "grid",
+          "cols": 15,
+          "rows": 15,
+          "cell_size": 22,
+          "gap": 1,
+          "cell": {
+            "node": "rect",
+            "w": 22,
+            "h": 22,
+            "radius": 4,
+            "fill": "= if cell == food then $food else if cell == snake[0] then $head else if contains(snake, cell) then $body else $empty"
+          }
+        }
+      ]
+    },
+    "feedback": [
+      {
+        "on": "lose",
+        "do": [
+          {
+            "shake": {
+              "px": 8,
+              "ms": 300
+            }
+          },
+          {
+            "sound": {
+              "wave": "square",
+              "note": "C3",
+              "ms": 250
+            }
+          }
+        ]
+      },
+      {
+        "on": "win",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "C6",
+              "ms": 300
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

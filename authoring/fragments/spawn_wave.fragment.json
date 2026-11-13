@@ -1,0 +1,81 @@
+{
+  "fragment": "spawn_wave",
+  "version": 1,
+  "describe": "Spawns round objects from one edge every `every` ms and moves them straight across the canvas, removing them once they leave it. Provides `spawns` for collision rules and `spawn_speed` (1.0) for speed ramps. Doesn't handle collisions. Draws the game's `hazard` sprite for each (use `\"art\": {\"hazard\": \"<sprite>\"}` to pick another sprite), else a circle.",
+  "params": {
+    "every":     { "type": "duration", "default": 800, "min": 150, "max": 10000 },
+    "from":      { "type": "enum", "values": ["top", "bottom", "left", "right"], "default": "top" },
+    "speed":     { "type": "float", "default": 140.0, "min": 20.0, "max": 800.0 },
+    "jitter":    { "type": "float", "default": 0.25, "min": 0.0, "max": 0.9 },
+    "radius":    { "type": "float", "default": 14.0, "min": 4.0, "max": 60.0 },
+    "max_alive": { "type": "int", "default": 12, "min": 1, "max": 60 },
+    "kind":      { "type": "string", "default": "hazard", "max_len": 24 }
+  },
+  "art": {
+    "hazard": { "describe": "One spawned object, centred on it and about 2.6 × radius wide (the hit circle is the inner 2 × radius). Sways a little as it moves.", "color": "danger" }
+  },
+  "requires": {},
+  "types": {
+    "Spawn": { "id": "int", "x": "float", "y": "float", "vx": "float", "vy": "float", "r": "float", "kind": "string" }
+  },
+  "state": {
+    "spawns":      { "type": "list<Spawn>", "init": "[]" },
+    "spawn_speed": { "type": "float", "init": "1.0" },
+    "_next_id":    { "type": "int", "init": "0" }
+  },
+  "events": {
+    "spawned": { "id": "int" }
+  },
+  "rules": [
+    {
+      "id": "spawn",
+      "on": { "every": "@every" },
+      "when": "len(spawns) < @max_alive",
+      "do": [
+        { "let": { "sp": "@speed * spawn_speed * (1.0 + random_float(-@jitter, @jitter))" } },
+        { "let": { "p": "if @from == 'top' then vec(random_float(@radius, @game.canvas_w - @radius), -@radius) else if @from == 'bottom' then vec(random_float(@radius, @game.canvas_w - @radius), @game.canvas_h + @radius) else if @from == 'left' then vec(-@radius, random_float(@radius, @game.canvas_h - @radius)) else vec(@game.canvas_w + @radius, random_float(@radius, @game.canvas_h - @radius))" } },
+        { "let": { "v": "if @from == 'top' then vec(0.0, sp) else if @from == 'bottom' then vec(0.0, -sp) else if @from == 'left' then vec(sp, 0.0) else vec(-sp, 0.0)" } },
+        { "set": "spawns", "to": "push(spawns, {id: _next_id, x: p.x, y: p.y, vx: v.x, vy: v.y, r: @radius, kind: @kind})" },
+        { "emit": "spawned", "with": { "id": "_next_id" } },
+        { "incr": "_next_id" }
+      ]
+    },
+    {
+      "id": "move",
+      "on": "tick",
+      "do": [
+        { "set": "spawns", "to": "map(spawns, s => {...s, x: s.x + s.vx * event.dt / 1000.0, y: s.y + s.vy * event.dt / 1000.0})" },
+        { "remove": "spawns", "where": "s => s.x < -2.0 * s.r or s.x > @game.canvas_w + 2.0 * s.r or s.y < -2.0 * s.r or s.y > @game.canvas_h + 2.0 * s.r" }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "include": "@art.hazard",
+        "node": {
+          "node": "repeat", "source": "spawns", "as": "s", "key": "s.id",
+          "template": {
+            "node": "image", "asset": "@art.hazard.id", "anchor": "center",
+            "x": "= s.x", "y": "= s.y", "w": "= s.r * 2.6", "h": "= s.r * 2.6 * @art.hazard.aspect",
+            "rotation": "= sin((now + s.id * 137) / 420.0) * 7.0",
+            "role": "hazard"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.hazard",
+        "node": {
+          "node": "repeat", "source": "spawns", "as": "s", "key": "s.id",
+          "template": { "node": "circle", "x": "= s.x", "y": "= s.y", "r": "= s.r", "fill": "$danger", "role": "hazard" }
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "tags": { "mood": ["tense"], "energy": ["medium", "high"] },
+  "conflicts": []
+}

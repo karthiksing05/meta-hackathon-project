@@ -22,6 +22,9 @@ struct Message: Identifiable, Hashable {
     var replyToID: String?
     var status: MessageStatus
     var isUnsent: Bool
+    /// Bubbles: a playable card (challenge, group-chat session, share…). Rendered by
+    /// `BubbleChatCardView`; sent through `BubbleSocialHub` (docs/BUBBLES.md 7.1).
+    var bubbleCard: BubbleChatCard? = nil
 
     init(
         id: String = UUID().uuidString,
@@ -54,6 +57,7 @@ struct Message: Identifiable, Hashable {
     /// One-line preview for the chat list.
     var previewText: String {
         if isUnsent { return "Unsent a message" }
+        if let card = bubbleCard { return text ?? card.headline }
         if let text { return text }
         if isImage { return "Sent a photo" }
         if let bigEmoji { return bigEmoji }

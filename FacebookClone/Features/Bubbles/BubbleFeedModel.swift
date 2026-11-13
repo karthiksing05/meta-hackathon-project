@@ -36,9 +36,14 @@ final class BubbleFeedModel {
     private(set) var liveScore = 0
     /// Shows the result sheet.
     var result: BubbleResultContext?
-    var isMuted = true
+    /// The app-wide game mute (`GameSound`). Sound is on by default.
+    var isMuted: Bool { GameSound.isMuted }
     /// Poster frames by session key.
     private(set) var posters: [String: UIImage] = [:]
+    /// The live page whose game didn't start (an error, a timeout or no engine), and why. The
+    /// page shows `EngineErrorCard`; `retry()` starts it again.
+    private(set) var failedItemID: String?
+    private(set) var failure: EngineFailure?
 
     /// Size of one page. Posters (for every surface) are drawn at this size.
     @ObservationIgnored var pageSize: CGSize = .zero {
@@ -57,6 +62,7 @@ final class BubbleFeedModel {
     @ObservationIgnored private var releaseTask: Task<Void, Never>?
     @ObservationIgnored private var lastResultAt = Date.distantPast
     @ObservationIgnored private var didPrewarm = false
+    @ObservationIgnored private var stallTask: Task<Void, Never>?
 
     func configure(store: BubbleStore) {
         guard self.store == nil else { return }
@@ -136,8 +142,8 @@ final class BubbleFeedModel {
         }
     }
 
-    func toggleMute() {
-        isMuted.toggle()
+    /// Tells the live game about the app-wide mute after it changes.
+    func applyMute() {
         host?.command(isMuted ? "mute" : "unmute")
     }
 
@@ -174,6 +180,31 @@ final class BubbleFeedModel {
         if let item = item(id: liveItemID) {
             activate(item)
         }
+    }
+
+    /// Starts the failed page's game again. A host whose runtime page never loaded goes back to
+    /// the pool and a different one is leased.
+    func retry() {
+        guard let item = item(id: failedItemID) ?? currentItem else { return }
+        failedItemID = nil
+        failure = nil
+        pendingTakeover = false
+        if isTakenOver {
+            isTakenOver = false
+        }
+        if let host, host.capability != .sessions && host.capability != .bootOnly {
+            releaseHost()
+        }
+        activate(item)
+    }
+
+    private func fail(_ itemID: String, _ failure: EngineFailure) {
+        guard itemID == liveItemID else { return }
+        stallTask?.cancel()
+        isLiveRevealed = false
+        pendingTakeover = false
+        failedItemID = itemID
+        self.failure = failure
     }
 
     func playAgain() {
@@ -230,6 +261,14 @@ final class BubbleFeedModel {
         liveKey = key
         liveItemID = itemID
         isLiveRevealed = false
+        failedItemID = nil
+        failure = nil
+        stallTask?.cancel()
+        stallTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: EngineFailure.startTimeout)
+            guard let self, !Task.isCancelled, token == self.activationToken, !self.isLiveRevealed else { return }
+            self.fail(itemID, EngineFailure(kind: .timedOut))
+        }
         let options = sessionOptions(for: bubble, mode: burstMode(for: item, in: bubble))
         let manifest = bubble.manifest
         let title = bubble.title
@@ -237,6 +276,12 @@ final class BubbleFeedModel {
             let outcome = await host.start(key: key, manifest: manifest, options: options)
             guard let self, token == self.activationToken, self.host === host, !outcome.superseded else { return }
             BubbleRuntimePerf.shared.recordSwitch(title: title, outcome: outcome, runtime: host.runtimeVersion)
+            self.stallTask?.cancel()
+            guard outcome.ok else {
+                let kind: EngineFailure.Kind = host.capability == .sessions || host.capability == .bootOnly ? .failed : .unavailable
+                self.fail(itemID, EngineFailure(kind: kind, message: outcome.error))
+                return
+            }
             if !self.isVisible {
                 host.command("pause")
             }
@@ -328,6 +373,26 @@ final class BubbleFeedModel {
         liveKey = nil
         liveItemID = nil
         isLiveRevealed = false
+        stallTask?.cancel()
+        failedItemID = nil
+        failure = nil
+    }
+
+    // MARK: Recommender
+
+    /// Tells the recommender (GameRecommender) about the live page.
+    private func noteRecs(_ signal: GameRecommender.Signal) {
+        guard let bubbleID = item(id: liveItemID)?.bubbleID else { return }
+        GameRecommender.shared.note(signal, gameID: bubbleID)
+    }
+
+    /// Leaving the tab pauses the page; coming back resumes it (or starts a new session).
+    private func noteVisibility(_ visible: Bool) {
+        if visible {
+            GameRecommender.shared.feedVisible(feedItemID: currentItem?.id, gameID: currentItem?.bubbleID)
+        } else {
+            GameRecommender.shared.feedHidden()
+        }
     }
 
     // MARK: Recommender
@@ -367,6 +432,9 @@ final class BubbleFeedModel {
         case .result(let runResult):
             guard isTakenOver else { return }
             finish(runResult, itemID: itemID)
+        case .error(let message) where EngineFailure.stopsGame(message):
+            // The runtime stopped the game (its own error page is up); cover it and offer a retry.
+            fail(itemID, EngineFailure(kind: .failed, message: message))
         default:
             break
         }

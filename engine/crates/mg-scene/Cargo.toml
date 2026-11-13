@@ -1,0 +1,13 @@
+[package]
+name = "mg-scene"
+description = "Presentation runtime: layout, bindings, tweens, animations, hit-testing, feedback, frames; plus the Player facade"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+mg-core.workspace = true
+mg-runtime.workspace = true
+
+[dev-dependencies]
+mg-lang.workspace = true

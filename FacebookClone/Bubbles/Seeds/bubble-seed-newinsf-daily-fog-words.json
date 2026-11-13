@@ -63,7 +63,7 @@
     {
       "use": "input.type",
       "params": {
-        "enter_label": "Pop"
+        "enter_label": "Go"
       }
     },
     {
@@ -161,6 +161,7 @@
     "group_id": "group-newinsf",
     "created_hours_ago": 3,
     "play_count": 412,
-    "like_count": 96
+    "like_count": 96,
+    "save_count": 118
   }
 }

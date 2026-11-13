@@ -1,0 +1,16 @@
+[package]
+name = "mg-wasm"
+description = "WebAssembly bindings (plain C ABI, no wasm-bindgen) for the browser shell"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+mg-core.workspace = true
+mg-lang.workspace = true
+mg-runtime.workspace = true
+mg-scene.workspace = true
+serde_json.workspace = true

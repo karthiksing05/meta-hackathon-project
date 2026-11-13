@@ -1,0 +1,182 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Bullseye Relay",
+    "instructions": "Pass the phone around. On your turn, tap to stop the swinging marker as close to the middle as you can. Every point counts toward your Group's goal, but three wild throws (under 3 points) and the relay is over.",
+    "duration_s": 120
+  },
+  "uses": [
+    {
+      "fragment": "turns",
+      "params": {
+        "players": 3,
+        "turns": 3,
+        "p1": "Maya",
+        "p2": "Theo",
+        "p3": "Priya"
+      }
+    },
+    {
+      "fragment": "shared_progress",
+      "params": {
+        "group_name": "Hill Street Crew",
+        "group_total": 310,
+        "goal": 360
+      }
+    }
+  ],
+  "state": {
+    "score": {
+      "type": "int",
+      "init": "0"
+    },
+    "swing": {
+      "type": "float",
+      "init": "0.0"
+    },
+    "slips": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "marker_x": {
+      "params": {},
+      "returns": "float",
+      "body": "180.0 + 140.0 * sin(now / 380.0)"
+    }
+  },
+  "events": {
+    "turn_done": {
+      "points": "int"
+    }
+  },
+  "inputs": {
+    "stop": {}
+  },
+  "rules": [
+    {
+      "id": "throw",
+      "on": "stop",
+      "when": "turn_active",
+      "do": [
+        {
+          "set": "swing",
+          "to": "max(0.0, 10.0 - floor(abs(marker_x() - 180.0) / 14.0))"
+        },
+        {
+          "incr": "score",
+          "by": "floor(swing)"
+        },
+        {
+          "if": "swing < 3.0",
+          "then": [
+            {
+              "incr": "slips"
+            }
+          ]
+        },
+        {
+          "emit": "turn_done",
+          "with": {
+            "points": "floor(swing)"
+          }
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "120s",
+    "on_timeout": "lose",
+    "lose": "slips >= 3"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 640,
+          "fill": "#00000000",
+          "on_tap": {
+            "input": "stop"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 40,
+          "y": 300,
+          "w": 280,
+          "h": 16,
+          "radius": 8,
+          "fill": "$surface"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 166,
+          "y": 290,
+          "w": 28,
+          "h": 36,
+          "radius": 8,
+          "fill": "$secondary",
+          "opacity": 0.5
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": "= marker_x()",
+          "y": 308.0,
+          "r": 16.0,
+          "fill": "$accent",
+          "role": "pickup"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 400,
+          "anchor": "center",
+          "size": 22,
+          "weight": 700,
+          "color": "$primary",
+          "text": "= 'Last throw: ' + str(floor(swing)) + '   Wild: ' + str(slips) + ' / 3'"
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "turn_done",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "E5",
+              "ms": 90
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "content": {},
+  "playtest": {
+    "progress": "score"
+  }
+}

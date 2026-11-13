@@ -1,0 +1,192 @@
+{
+  "id": "learn-hills-of-sf",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Hills of SF 101",
+  "one_line_rule": "Learn four facts about the city's hills, then practice them.",
+  "formula": "learn",
+  "brief": {
+    "intent": "learn the city's hills together",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "cozy",
+      "curious"
+    ],
+    "energy": "low",
+    "competition": "light"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "chalk",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#2B3446",
+      "bg_bottom": "#222A3A",
+      "ink": "#F3F0E6",
+      "primary": "#A9C8FF",
+      "secondary": "#C9B6FF",
+      "accent": "#9BE3DE",
+      "danger": "#FFB86B"
+    },
+    "font": "hand",
+    "motif": "none",
+    "emoji": "⛰️",
+    "mood_preset": "cozy",
+    "cover_prompt": "chalk drawing of San Francisco's hills on a dark blue chalkboard, two rounded peaks and a winding street, soft chalk dust"
+  },
+  "concepts": [
+    {
+      "use": "space.lesson_desk"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.lesson_practice",
+      "params": {
+        "pass_ratio": 0.5
+      }
+    },
+    {
+      "use": "score.mastery"
+    },
+    {
+      "use": "feel.mood_preset",
+      "params": {
+        "preset": "cozy"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "topic": "Hills of SF",
+    "subject": "the hills",
+    "lesson": {
+      "title": "Hills of SF 101",
+      "points": [
+        "Twin Peaks is two summits side by side, near the middle of the city.",
+        "Lombard Street's famously crooked block winds down Russian Hill.",
+        "Coit Tower stands on top of Telegraph Hill, above North Beach.",
+        "Cable car lines climb up and over Nob Hill."
+      ]
+    },
+    "questions": [
+      {
+        "q": "Why is it called Twin Peaks?",
+        "choices": [
+          "It has two summits",
+          "Two cities share it",
+          "It was named for twins"
+        ],
+        "answer": 0,
+        "explain": "Twin Peaks is two summits side by side, hence the name.",
+        "point": 0
+      },
+      {
+        "q": "Where in the city is Twin Peaks?",
+        "choices": [
+          "Out on the bay shore",
+          "Near the middle of the city",
+          "At the Golden Gate"
+        ],
+        "answer": 1,
+        "explain": "Twin Peaks rises near the center of San Francisco, so you can see most of the city from it.",
+        "point": 0
+      },
+      {
+        "q": "Lombard Street's crooked block is on which hill?",
+        "choices": [
+          "Nob Hill",
+          "Bernal Heights",
+          "Russian Hill"
+        ],
+        "answer": 2,
+        "explain": "The famously crooked block of Lombard Street winds down Russian Hill.",
+        "point": 1
+      },
+      {
+        "q": "What makes that block of Lombard Street famous?",
+        "choices": [
+          "Its tight hairpin turns",
+          "Its glass sidewalk",
+          "It's the flattest street"
+        ],
+        "answer": 0,
+        "explain": "The street zigzags through tight switchbacks because the hill is too steep to drive straight down.",
+        "point": 1
+      },
+      {
+        "q": "Which tower stands on top of Telegraph Hill?",
+        "choices": [
+          "Sutro Tower",
+          "Coit Tower"
+        ],
+        "answer": 1,
+        "explain": "Coit Tower crowns Telegraph Hill; Sutro Tower is the tall antenna near Twin Peaks.",
+        "point": 2
+      },
+      {
+        "q": "Which neighborhood sits just below Telegraph Hill?",
+        "choices": [
+          "North Beach",
+          "The Outer Sunset",
+          "Bernal Heights"
+        ],
+        "answer": 0,
+        "explain": "Telegraph Hill rises right above North Beach, near the waterfront.",
+        "point": 2
+      },
+      {
+        "q": "Which hill do cable car lines climb up and over?",
+        "choices": [
+          "Twin Peaks",
+          "Telegraph Hill",
+          "Nob Hill"
+        ],
+        "answer": 2,
+        "explain": "Cable car lines run up and over Nob Hill on their way across downtown.",
+        "point": 3
+      },
+      {
+        "q": "How does a cable car get up a steep hill?",
+        "choices": [
+          "It grips a moving cable",
+          "It has a big engine",
+          "Overhead electric wires"
+        ],
+        "answer": 0,
+        "explain": "The car grips a cable that moves in a slot under the street, and lets go to stop.",
+        "point": 3
+      }
+    ]
+  },
+  "seed": 2026111401,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-11T18:00:00Z",
+    "duration_sec": 38.6,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-aiko-tanaka",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 20,
+    "play_count": 214,
+    "like_count": 58,
+    "save_count": 63
+  }
+}

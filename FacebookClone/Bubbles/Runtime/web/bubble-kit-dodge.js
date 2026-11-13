@@ -9,6 +9,11 @@
  * wind {active, dir, strength}. The bot reads these; it never writes them.
  * Events: entity.spawn {gap_y, gap_h, label, index}, entity.passed {x, y, near, index},
  * entity.near_miss {x, y}, entity.hit {kind, x, y}, entity.puff, behavior.gust {dir}.
+ *
+ * Length (docs/BUBBLES.md 7.9): endless by default (play until you pop). Timed: the engine ends
+ * the run. Rounds: each obstacle cleared is a round (sdk.lengthRound). Lives: rule.collide_fail
+ * spends a life (sdk.lengthMiss) instead of popping, bounces off the ground and blinks for a
+ * moment; rule.lives takes its count from the length.
  */
 (function () {
   "use strict";
@@ -246,6 +251,8 @@
             o.passed = true;
             const near = o.minClear < p.near;
             sdk.emit("entity.passed", { x: av.x + 6, y: av.y - av.r - 14, near, index: o.index });
+            // Length: every obstacle cleared is a round (a no-op unless the length counts rounds).
+            if (!sdk.lengthRound({ delay: 24 })) sdk.fx.sound("success");
             if (near) {
               sdk.emit("entity.near_miss", { x: av.x, y: av.y });
               sdk.fx.sparkle(av.x + 4, av.y, sdk.palette.accents[1], 10);
@@ -576,8 +583,26 @@
     ends: true,
     tags: { competition: ["friendly", "competitive"] },
     setup(sdk, p) {
+      // Length, lives mode: a hit spends a life instead of popping the bubble.
+      const L = sdk.length || {};
+      const lives = L.lives ? (sdk.state.lives = { left: L.lives, max: L.lives, grace_until: -1 }) : null;
       sdk.on("entity.hit", (e) => {
         if (sdk.ended) return;
+        if (lives) {
+          if (sdk.tick < lives.grace_until) return;
+          if (sdk.lengthMiss()) {
+            lives.left = sdk.lengthLeft().lives_left;
+            lives.grace_until = sdk.tick + 72;
+            const av = sdk.state.avatar, phys = sdk.state.physics;
+            if (av && e.kind === "floor") av.vy = -Math.max(5, (phys && phys.impulse) || 6);
+            sdk.emit("lives.lost", { left: lives.left });
+            if (p.shake) sdk.fx.shake(4);
+            sdk.fx.sound("pop");
+            sdk.fx.haptic("medium");
+            return;
+          }
+          lives.left = 0;
+        }
         sdk.emit("rule.fail", { reason: e.kind, x: e.x, y: e.y });
         if (p.shake) sdk.fx.shake(7);
         sdk.fx.flash(sdk.palette.glow);
@@ -813,5 +838,16 @@
       "The spawn glue gets {index, gap_y, gap_h, pace, min_y, max_y, label} and may return {gap_y, gap_h, label}.",
     ],
     example: EXAMPLE,
+    // Length (docs/BUBBLES.md 7.9): endless by default; knobs are what Customize shows.
+    length: {
+      modes: ["endless", "timed", "rounds", "lives"],
+      default: { mode: "endless" },
+      numbers: { rounds: 20, seconds: 60, lives: 3 },
+      knobs: {
+        speed: { concept: "space.side_scroll", param: "speed", label: "Speed", min: 1.6, max: 3.6 },
+        difficulty: { concept: "behavior.spawn_stream", param: "gap", label: "Gap size", min: 140, max: 240, invert: true },
+      },
+      describe: "Rounds: obstacles to clear. Timed: survive the clock. Lives: hits you can take.",
+    },
   });
 })();

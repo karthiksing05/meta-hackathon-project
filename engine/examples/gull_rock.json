@@ -1,0 +1,559 @@
+{
+ "format": "microgame/0.2",
+ "meta": {
+  "title": "The Keeper of Gull Rock",
+  "instructions": "A storm, a dark lighthouse and a lost boat. Read each page, then tap a choice (or press 1 and 2). Tap the page to show it all at once. Watch your lamp oil.",
+  "duration_s": 120
+ },
+ "assets": {
+  "theme": {
+   "sound": "data:audio/wav;base64,UklGRiRLAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQBLAACAgYKEhomLjY6PkJCPjo2Mi4qJiIaEgX15dXBrZ2RhYWNmbHN8ho+YoKWoqaekn5mTjYeCfnt4dXJva2diXVhTUE5NT1NZYmx3g46ZoqmusbGwramkn5qVkY6LiYaDf3p1cGpkX1tZWFpeZGx1f4iSmaCkpqakoJuWkIqFgX16d3RxbmtnYl1YVFFPUFJWXWZweoaQmqKpra+vraqmoZyYlJCNi4iFgn56dXBqZWBdW1tdYWhveIGKk5qfoqSjoZ2Yko2Ig397eXZzcW5qZmJdWVVTUlJVWmFpc36IkpujqKytraqno5+alpKPjIqIhYJ+enVwamVhXl1eYGVrcnuDjJOanqGhoJ6ZlY+KhYF9enh1c3BtamZiXVlWVFRVWF1kbXaAipSco6eqq6qopaGcmJSRjoyJh4SBfnl1cGtmYmBfYGNobnV9hY2UmZ2fn56blpKNiIN/fHl3dHJwbWlmYl5aV1ZWV1thaHB5g4yVnaKmqamopaKempaTkI2LiYeEgX15dXBrZ2RiYWNma3F4gIeOlJmcnZ2bmJSPioaBfnt4dnRyb2xpZWJeW1hXWFpeZGtzfIWOlp2ipaenpqOgnJiVko+Ni4mGhIF9eXRwa2hlY2NlaG1zeoGJj5SYm5ubmJWRjIiDgHx6d3VzcW9saWViXlxaWVpdYWdudn+HkJedoqSmpaShnpqXlJGOjIqIhoOAfXl0cGxpZmVmaGtwdnyDipCUmJmZmJaSjoqGgn57eXZ1c3Fua2hlYl9cW1tcX2RqcXmBiZGYnaGjpKOhn5yZlZKQjoyKiIaDgH15dHBtamhnaGptcnh+hYuQlJeYmJaTkIyIhIB9enh2dHJwbmtoZWJfXVxdXmJmbHN7g4uSmJ2goqKhoJ2al5SRj42LiYiFg4B8eHRxbWtpaWpscHV6gIaLkJOWlpaUkY2JhYJ+e3l3dXNycG1raGViYF5eXmBkaW92fYWMk5idn6GhoJ6bmJaTkI6Ni4mHhYOAfHh1cW5sampsbnJ3fIKHjJCTlJWUko+Lh4SAfXp4dnVzcW9ta2hlY2FfX2BjZmtxeICHjpSZnJ+gn56cmpeUkpCOjIuJh4WCf3x4dXFvbWxsbXB0eH6DiIyQkpOTko+MiYWCf3x5d3Z0cnFvbWpoZWNhYWFiZWludHqBiI+UmZyenp6dm5iWk5GPjYyKiYeFgn98eHVyb25tbW9ydnp/hIiMj5GSkZCNioeDgH17eHZ1c3Jwb2xqaGVkYmJiZGdrcHZ8g4qPlJibnZ2cm5mXlJKQjo2LioiHhYJ/fHh1cnBvbm9xdHd8gIWJjI+QkJCOi4iFgn98eXd2dHNycG5samhmZGNjZGZpbXJ4foWLkJWYm5ycm5qYlpORj46Mi4qIhoSCf3x5dnNxcHBxc3V5fYGGiYyOj4+OjImGg4B9e3l3dXRzcXBubGpoZmVkZGVna290eoCGjJGVmJqbm5qYlpSSkY+NjIuKiIaEgn98eXZzcnFxcnR3e36ChomMjY6OjIqIhYJ/fHp4dnVzcnFvbmxqaGdlZWVnaW1xdnyCh42RlZiZmpqZl5WTkpCOjYyLiYiGhIF/fHl2dHNycnN2eHx/g4eJi42NjIuJhoOAfXt5d3V0c3Jxb25samhnZmZnaGtuc3h9g4iNkpWXmZmZmJaUk5GPjo2Mi4mIhoSBf3x5d3Vzc3N1d3p9gISHiYuMjIuJh4SBf3x6eHZ1dHNycG9tbGppZ2dnaGptcHV6f4SJjpKVl5iYmJaVk5KQj46Ni4qJiIaEgX98eXd1dHR1dnh7foGEh4mKi4qJiIWDgH17eXd2dHNycXBvbWxqaWhoaGlrbnJ2e4CFio6SlZaXl5eVlJORkI6NjIuKiYeGg4F+fHp3dnV1dnd5fH+ChYeJioqJiIaEgX98enh2dXRzcnFwb21samlpaGlqbXB0eH2Ch4uPkpSWlpaWlZOSkI+OjYyLiomHhYOBfnx6eHd2dnd4e32AgoWHiImJiIeFgoB9e3l3dnV0c3JxcG5tbGtqaWlqbG5xdXp+g4eMj5KUlZaVlZSSkZCPjo2Mi4qJh4WDgX98enh3d3d4eXt+gIOFh4iIiIeFg4F/fHp4d3V0c3JxcW9ubWxrampqa21wc3d7gISIjI+SlJWVlZSTkpGPjo6NjIuKiYeFg4F/fHp5eHh4eXp8f4GDhYaHh4eGhIKAfXt5d3Z1dHNycXBvbm1sa2tra2xucXR4fIGFiY2QkpOUlJSTkpGQj46NjYyLiomHhYOBf317eXl4eXp7fX+Bg4WGh4aGhIOBfnx6eHd1dHNzcnFwb25tbGtra2xtcHJ2eX6ChoqNkJKTlJSTk5KRkI+OjYyMi4qIh4WDgX99e3p5eXp7fH6AgoOFhoaGhYOBf317eXd2dXRzcnJxcG9ubWxsbGxtb3F0d3t/g4eKjZCRk5OTk5KRkI+Ojo2MjIuKiIeFg4F/fXt6enp6e31/gIKDhYWFhYSCgH58enh3dXRzc3JxcXBvbm1tbGxtbnBydXh8gISHi42QkZKTk5KRkZCPjo6NjIyLioiHhYOBf318e3p6e3x9f4GCg4SFhISCgX99e3l4dnV0c3JycXBwb25tbW1tbm9xc3Z5fYGFiIuOkJGSkpKSkZCPj46NjYyLi4mIhoWDgX99fHt7e3x9foCBgoOEhISDgYB+fHp4d3V0c3NycnFwcG9ubm1tbm5wcnR3e36ChYmLjpCRkZKSkZCQj46OjY2Mi4qJiIaFg4F/fn18fHx8fX+AgYKDg4ODgoB/fXt5eHZ1dHNycnFxcHBvbm5ubm5vcXN1eHx/g4aJjI6PkZGRkZGQj4+Ojo2NjIuKiYiGhYOBf359fHx8fX5/gIGCg4ODgoF/fnx6eHd2dHRzcnJxcXBwb25ubm5vcHJ0dnl9gIOHiYyOj5CRkZGQkI+Pjo6NjYyLiomIhoSDgX9+fX19fX1+f4CBgoKCgoGAfn17eXh2dXRzcnJxcXFwcG9vbm5vcHFzdXh7foGEh4qMjo+QkJGQkI+Pjo6OjY2Mi4qJiIaEg4GAfn59fX1+f4CAgYKCgoGAf358enl3dnR0c3JycXFwcHBvb29vb3BydHZ5fH+ChYiKjI6PkJCQkJCPj46Ojo2NjIuKiYiGhIOBgH9+fX1+fn+AgYGCgoGBf359e3l4dnV0c3NycnFxcHBwb29vb3Bxc3R3enx/gYKCgoKCgYB/fn5/gYWJj5Wan6OlpqSinpmVkY2JhYF9eHFqYlpTTkxOVFxnc3+LlZyfoJ6ZlI2HgXx5dnNwbWlkXllUUVBTWGFseYeVoauytra0sKqknpmUkY2KhoF7dW5nYV1bXWFpcn2JlJ2jpqekn5mSioR+eXVybmplX1lTTkpISU1VX2t4hZGbo6eop6SfmpWRjYuIhoSAfHdxbGdkY2VqcXuGkp2mrbGysKylnpeQioWBfHhzbmhhWlROS0tNU1tlcXyHkJebnJqXko2IhIB+fHp4dXJuaWRhXl5gZW13g4+bpa2ztbWyraehm5aRjYmGgXx3cGljXVlYWV1kbXaBipKYm5uZlY+Jg356dnNxbmtoY15aVlNSVFlganWCjpihqKusq6ijnpqWkpCNi4iEf3p0b2pnZWdqcXmCjJWdoqWlo56ZkoyGgHx4dHFtaGNdWFNPTU5RV19pdH+JkpicnZyalpKOioiGhIOBfnt3c29raWhqb3V+iJKcpKqur66qpZ+Zk46JhYJ+eXVvaWNdWFVUVVlgaHJ7hIuRlJSTkIuHgn97eXd2dHJvbGhkYV9fYWZtdoCLlZ+mq66urKikn5qWk4+NioaCfXhybGdkY2NnbHN7hIuSlpmYlpKNiIJ9eXZzcG5rZ2RfW1dVVFVZX2hxfIaQmJ2hoqGfnJiUkY+Ni4qIhYF9eXVxbm1ucnd+h4+XnaKkpaKfmpSOiYR/fHh1cW1oY15ZVVNTVVpgaHF7g4qQk5STkY6Kh4SCgH9+fXt5dnNvbWtrbXF3f4iRmaGnqqyrqKSfmpaRjYqGg397dnFrZmJeXV5hZm10fIOJjY+PjouHg357eHZ0cnFvbGpmY2FfX2Fla3N8ho+XnqOmpqWjn5yYlZKQjoyJhoJ+eXRwbWxtb3R6gIeOk5eYmJaSjoiDf3t3dHJvbGllYV1aV1ZXWl9mbneAiI+Ul5iYlpSRjoyKiYiHhYSBfnt4dXNzdHd8gomRmJ6ipKSjn5uWkYyIhIF9endzbmlkYFxaWVteY2lxeH+FiYyMi4mHhIF+fHt6eXh3dXNxbmxra21xd36Gjpadoqanp6Win5uXk5CNi4iFgX14dG9raGdnaW1yeH6EiYyNjYuIhYF9eXZ0cnBvbWtoZWJgX19gZGlweICIkJabnZ6enJqXlJKQj42MioiFgn56d3V0dHd6f4WLkZWYmZmXlI+LhoJ+end1cm9saGRhXVtZWlxgZWxzeoGHi46Pj46MiYeGhISDg4KBf317eHZ1dXd6foSLkZedoaOkoqCcmJSQjImGg4B9eXVwbGhkYmFhY2dscnh9goWHh4aEgn98enh3dnV0c3JwbmxrampscHV7goqRl5ygoqKhn5yZlpSRj42LiYaDf3t3c3FwcHF0eH2Ch4qNjo2LiIWBfXp3dHJwb21qaGViYF9eYGJnbXN6goiOkpSWlpWTkY+OjYyLiomIhoOBfnt6eXp8gISJjpOXmpubmZaSjoqGgn98eXd0cG1pZWJfXl1fYmZrcXd8gYWHiIeGhYOBgH9+fn59fXx6eXd2dXV3en6EipCWm5+hoqGfnZmWk4+NioiFgn98eHNwbGppaWptcXV6foGEhYWEgX98eXd1dHNycXBvbWtqaGhoam1yd36Ei5GWmZucnJqYlpSSkZCOjYuJh4SAfXp4d3d5e3+Dh4qNj5CPjYqHg398eXZ0cnBubGlmZGFgX2BiZWpwdnyBhoqMjY2NjIqJiIiHh4eGhoSDgX99fXx9gIOHjJCVmJucnJqYlZGOioeEgX58eXZzb2toZWNjY2VobHF1en2AgoKCgX99fHp5eXl5eHh3dnV0c3N0dnl9goeNkpebnZ+fnZyZl5SSkI6MioeFgn57d3RycXBxc3Z6fYCDhYWFg4F+e3h2dHJxcG9ubWtpaGdmZmhqbnN5f4SKjpKUlZWUk5KRj4+OjY2MiomGhIKAfn1+f4GEh4uOkJKSkpCNioaDgH16eHVzcW9saWZkYmFhY2VpbXJ3fICDhYaGhoWEg4KCgoKCgoKBgH9+fX19f4GEiIyRlZibnJybmZeUkY6LiYaEgn98eXZyb2xqaWlqbG9zdnl8fn9/fn17eXh2dXV0dHR0c3JycXBwcXN2eX6DiI2SlpiampqZl5aUkpGPjo2LiYeEgX58enh4eXp8f4KEhoeHhoWCgH16d3VzcnBvbmxqaWdmZWVmaGtvdHl+g4eKjI2Ojo2Mi4uLioqKiomIh4WEgoGBgoOFiIuOkZOVlZSTkI6Kh4SBf3x6eHZzcG5raGZlZWVnaW1xdHh7fX+AgH9/fn18fHx9fX19fX18e3t7fH2Ag4eLj5OWmZubm5qYlpORj42LiYeFgn98eXZ0cnBwcHJ0dnl7fX5/fn17enh2dHNycnFxcHBvbm5tbW5wcnV6foOIjI+SlJWVlZSTkpGQj4+OjYuKiIWDgYB/f3+AgoSHiIqLiomIhYOAfXp4dnRycW9tbGpoZmVlZmdpbXB1eX2Ag4WGhoaGhoaFhYaGhoeGhoWFhIODg4SFh4qNkJOVlpeXlZORjoyJhoSCgH17eXZzcG5samlpamxucXR2eXp7fHt7enl4eHd3eHh4eHh4eHh4eHl7fYCEiIyQk5aYmZmYl5aUkpGPjoyLiYeFgoB9e3l4d3d4eXt9foCAgH9+fHp4dnRzcnFwb29ubWxra2trbG5xdXl9gYWJi42Oj4+Pjo6NjY2NjYyMi4mIhoWEg4OEhYeJi42Ojo6Ni4mHhIF/fHp4dnRzcW9samlnZ2dnaWtucnV4e31/f4CAgIB/gICAgYGCgoKCgoKBgYKDhYeKjZCTlZeYmJeVlJKPjYuJh4WDgX98end0cnBvb29wcXN1d3l6enp5eHd2dXR0c3N0dHR0dHR0dHR1d3l8f4OHi46Rk5SVlZWUk5KRkI+OjYyLiYeFg4F/fn5+fn+BgoOEhIOCgX99enh2dHNycXBvbWxramlpaWpsbnF0eHx/goSGh4iJiYmJiYmJioqKioqJiIeHhoaGh4mKjI6QkZKRkY+Ni4mGhIF/fXt5d3VzcW9ta2ppampsbnBzdXd5ent7e3p6enp6e3t8fX1+fn5+fn+AgYOFiIuOkZOVlpeXlpWTkpCOjYuKiIaEgoB9e3l3dnV1dXZ3eXp6e3t6eXh2dXRzcnFxcXFxcHBwcHBwcXN1d3t/gICBgoWJjZGUl5iYl5WTkZCOi4iEfnhzb25xd4GMl6Goqqijm5OLg313cmtjWlFJRURJU2FxgpCZnp6ak4yFf3t3dHBrZV5YVFRZZHKDlKSvtri1r6igmpSQjIeBenFpY2BhaHOBkJ2ora6qo5qRiIF8dnFqY1pRSkdHTVdldIOQmJybl5CJg356d3Rwa2VeWVZXXWh2hpelr7W1sqylnpiTj4uHgXlxaWRiZGt2hJKep6yrp6CXjoaAenVwamJaUktJSlBbaHeFkJeamZSNh4F8eXd0cGtlX1pYWmFseoqZpq+zs6+popyWko+LhoB5cWplZGdveoaTn6aqqaSclIyEfnl1b2lhWVJNS01TXmt5hpCWmJaRi4WAfHl2c3BrZWBcW11lcH2Mm6ausbCspqCalZGOioV/eHFrZ2ZqcnyJlZ+lqKagmZGJg314dG5oYVlTTk1QV2Fue4eQlZaTjomDfnt4dnNwa2ZhXV1haHOBj5ymra+uqqSemZSRjYqFf3hxbGhpbXV/i5afpKWjnZaOh4F8d3NuaGFZU09PUlpkcX2IkJOUkYyGgX16eHZzcGtmYl9fY2t2hJGdpqytrKeinJeTkI2JhH94cmxqa293go2Xn6OjoJqTjIWAe3dybWdgWVRRUVVdZ3N/iI+Sko+KhYB8enh2c3BrZ2NhYmZveoaTnqarrKmloJqWko+MiYR+eHJtbG1yeoSOl56hoZ2YkYqDfnp2cWxmYFpVUlNYX2p1gIiOkZCMiIN/e3l3dnNwa2dkY2Rpcn2JlZ+mqqqno56ZlZGPjIiDfnhybm1vdHyGj5idoJ+blY6Ign15dXFsZmBaVlRVWmJsd4GJjY+OioaBfnt5d3VzcGxoZWRnbHV/i5afpaiopaGcl5SRjouIg314c29vcXd+iJCYnZ6dmJOMhoB8eHRwa2ZgWldVV11lbniCiIyNjIiEgH16eXd1c3BsaWZmaW93go2Xn6WnpqOfmpaTkI6Lh4N9eHNxcHN5gImRmJycmpaQioR/e3d0cGtlYFtYV1lfZ3B6goiMjIqHg398enh3dXNwbGloaGtxeoSPmKCkpqShnZmVkpCNioeCfXh0cnJ1e4KKkpebm5iUjoiDfnp3c29qZWBbWVlbYWlye4OIioqIhYF+e3p4d3VzcG1qaWpudH2GkJmgo6Sjn5yYlJGPjYqGgn14dHNzd32Ei5KXmZmWkYyGgX15dnNuamVgXFpaXWNrdHyDh4mJh4OAfXt5eHd1c3Bta2pscHZ/iJKan6KjoZ6alpORj4yJhoF9eHV0dXl+hYySl5iXlI+KhYB8eXVybmlkYFxbXF9lbXV9g4eIiIWCf3x6eXh3dnNxbmxsbnJ5gYqTmp+hoZ+cmZWSkI6MiYWBfXl2dXZ6gIeNkpaXlZKNiIN/e3h1cW1pZGBdXF1hZ292foOGh4aEgX58enl4d3ZzcW9tbW90e4OMlJqfoKCem5eUkpCOi4mFgX15d3Z4fIGIjpKVlpSQi4aCfnp3dHFtaWRgXl1fY2lweH6DhoaFg4B9e3p5eHd2dHFvbm9xdn2FjZWanp+fnZqWk5GPjYuIhYF9eXd3eX2DiY6SlJSSjoqFgX15d3RwbWhkYV9fYWVrcnl+g4WFhIF/fHt6eXh3dnRycG9wc3h/h46Vmp6enpuYlZORj42LiISAfXp4eHt/hImOkpOTkI2IhH98eXZzcGxoZGFgYGJmbHN5f4KEhIOAfnx6eXl4d3Z0cnFwcnV6gYiPlpqdnZyal5SSkI6MioeEgH16eXl8gIWKjpGSkY+Lh4J+e3h2c3BsaGRiYGFkaG50en+Cg4OCf317enl5eHh2dHNxcXN3fIKJkJaanJybmZaTkZCOjIqHhIB9enp6fYGGio6RkZCNiYWBfXp4dXJvbGhlYmFiZWpvdXt/goOCgX99e3p5eXl4dnVzcnN1eH6Ei5GWmpybmpiVk5GPjoyKh4OAfXt6e36ChouOkJCPjIiEgHx6d3Vyb2toZWNiY2ZrcHZ7f4GCgYB+fHt6eXl5eHd1dHN0dnp/hYySlpqbmpmXlJKQj42LiYaDgH17e3x/g4eLjo+PjYqGgn98eXd0cm9raGVjY2VobHJ3fH+BgYB/fXx6enp5eXh3dXR0dXd7gYeNkpeZmpmYlpORkI6Ni4mGg4B9fHx9gISIi46PjoyJhYF+e3h2dHFua2hlZGRmaW5zeHx/gIGAfn17enp6eXl4d3Z1dXZ5fYKIjpOXmZmZl5WTkY+OjYuIhoOAfnx8foGEiIuNjo2Lh4SAfXp4dnNxbmtoZmVlZ2pvdHh8f4CAf318e3p6enp5eHd2dnZ3en6DiY6TlpiYmJaUkpCPjoyKiIWDgH59fX+ChYiLjY2MiYaDf3x6d3VzcW5raGZlZmhscHR5fH5/f359fHt6enp6eXl4d3Z3eHuAhYqPk5aYmJeVk5GQjo2MioiFgoB+fX6AgoWIi4yMi4iFgn58eXd1c3Bua2hnZmdpbXF1eXx+f39+fHt6enp6enp5eHd3eHp9gYaLkJOWl5eWlJKRj46NjIqHhYKAfn5+gIOGiYuLi4mHhIF+e3l3dXJwbWtpZ2doam5ydnp8fn5+fXx7enp6enp6eXh4eHl7foKHjJCUlpeWlZOSkI+OjYuJh4WCgH9+f4GDhomKi4qIhoOAfXp4dnRycG1raWhoaWtvc3Z6fH5+fn18e3p6enp6enl5eHh6fH+DiIyQlJWWlpSTkZCPjYyLiYeEgoB/f4CBhIaJioqJh4WCf3x6eHZ0cnBta2loaGpscHN3enx9fn18e3t6enp7e3p6eXl5e32AhImNkZOVlZWUkpGPjo2Mi4mHhIKAf3+AgoSHiImJiIaEgX57eXd2dHJvbWtpaWlrbXF0d3p8fX19fHt6enp7e3t7enp5ent+gYWKjpGTlZWUk5GQj46NjIqIhoSCgH+AgYKFh4iJiYeFg4B9e3l3dXNxb21ramlqa25xdXh6fH19fHt7enp7e3t7e3p6ent8f4KGio6Rk5SUk5KRkI+OjYuKiIaEgoCAgIGDhYeIiIiGhIJ/fXp4d3VzcW9ta2pqa2xvcnV4e3x9fHx7e3p6e3t7e3t7ent8fYCDh4uOkZOUlJOSkI+OjYyLioiGhIKBgICCg4WHiIiHhoOBfnx6eHZ1c3FvbWtqamttcHN2eXt8fHx8e3t6e3t7e3uAgYSGiYqKiomJiIeEgH17fIKLlp+kpaKclY+KhX92bGNdX2h5jJ2nqaKXi4F5cmthVUtFSFNmfJCcoJyTiH95dG9nXVRPUVxvhpuqsK6mnJONiIN7cmhhYWl6j6OyuLauopiPiYJ6b2NaV11rfpGgp6adkod+d3FpX1RLR0xZbYGSnJ6YjoV9eHNuZlxUUVVidoueqq6qopiRi4eBenBnYmRvgJSmsrayqZ6VjYeBeG1iW1picIOVoaWimY6EfHZvZ11TTEpRX3KFlJualIqCe3dybGRcVVNaaHyQoaqrpp6Vj4qGgHhvZ2RodIaZqbKzrqSakouGf3ZrYlxdZnaIl6GjnpSKgXp0bmZcU01NVmV4iZWal5CHf3p2cWtjW1ZXX26BlKKpqKKako2JhX93bmhmbHmLnaqxsKqgl4+KhH10amJeYWt7jJmgoJqQhn54c21kW1JOUVtrfIyVmJSMhH14dXBqYltXWmR0hpejp6Wfl5CLiIN9dm5paXF/kKCrr62mnZSNiIN7cmliYGVwgI+an52WjIN8d3JrY1pTUFVgcICOlZWQiYF7d3RvaWJbWV5peYuao6Wim5SOioeCfHRtamx1g5Siq62qopmSjIeBenFoYmJpdYSRm52akomBe3ZwamJZU1NZZXSDj5STjYZ/endzbmhhXFxibn6Om6Ojn5iSjYmGgXt0bmxveoiXpKurpp6Wj4qFgHhwaGRlbXmHk5qblo6Gf3l0b2hgWVRVXWl4ho+TkIqDfXl2cm1nYV1eZnOCkZyioZyVj4uIhYB6c25uc36MmqWqqKObk42JhH53bmhlaHF9ipWamZOLg314c25nX1lWWGFufIiPkY2HgXx4dXJtZmFfYWp3hpSdoJ6Zk46Kh4R/eXNvcHaCkJylqKafmJGMh4N9dW5oZ2t0gY2VmJaQiIF7d3JtZl9ZWFxlcn+Kj4+LhX96d3VxbGZhYGVufIqWnZ+clpGMiYaDfnhycHJ6hpOepaajnJWPioaCe3RtaWlueISPlZeTjYV/enZxbGVeWlpfaXaCio6NiIJ9eXd0cGtmYmJocoCNl5ydmZSPi4iGgn13c3F1fomWn6SkoJmTjYmFgHpzbWlrcXuHkJWVkYqDfXl1cGtkXltcYm15hIuNi4aAfHh2c29qZmNla3aDj5icm5eSjYqIhYF8d3NzeIGNmKCjop2XkYyIhH95cm1rbXR/iZGUk46HgXx4dG9qY15cX2ZwfIWLjImEfnt4dnNvamZlZ296hpGYmpmUkIyJh4SAe3Z0dXuEj5mgoqCalI+Lh4N+eHFtbHB4gYuRk5GLhX96d3NvaWNfXmFpdH6GioqGgn16d3VybmpmZmpyfYmSmJmXko6LiIaDf3t2dXd+h5KboKCdmJKNiYaCfXdxbW5yeoSMkZKOiYN9eXZybmhjX2BkbHeAh4qIhIB8eXd1cm5qZ2htdoGLk5eXlZCNioiGg396d3Z5gYqUm5+fm5WQjIiFgXx2cW5wdX2GjZCQjIeBfHh1cm1nY2BiZ3B5goeJh4J+e3h3dHFtamhqcHmDjZSXlpOPi4mHhYJ+end4fIONlpyenZiTjouHhIB7dXFvcneAiI2QjoqEf3t4dXFsZ2NhZGpye4OHh4WBfXp4dnRxbWppbHN8ho6UlpSRjYqIh4WBfXp4eX6Gj5ecnZuWkY2JhoN/enRxcHR6gomOj4yIgn56d3Rwa2djY2ZsdX2Eh4aDf3x5eHZ0cG1ra251f4iQlJWSj4yJiIaEgX16eXuAiJGYm5uZlJCMiIaCfnl0cXJ2fISKjY2KhoF8eXZzb2tmZGRob3d/hIaFgn57eXd2c3Bta2xxeIGKkJOTkY6LiYeGg4B8enp9g4uSmJual5KOioiFgX14dHJzeH6Fio2MiYR/e3h2c29qZmVma3J5gISFg4B9enh3dXNwbWxuc3uDi5GTko+MioiHhYN/fHp7f4WNlJiamJWQjYmHhIB8d3RzdXqAhouMioeCfnp4dXJuamdmaG10e4GEhIJ/fHl4d3VzcG5tcHZ9hYyRkpGOi4mIhoWCf3x7fIGHjpSYmZeTj4uJhoN/e3d0dHd8goeLi4mFgX16d3VxbWpnZ2pvdn2ChIOBfnt5eHd1cnBub3J4gIeNkJGPjYqIh4aEgn98fH6CiZCVmJeVkY2KiIWCf3p3dXV4fYOIioqHg398eXd0cW1qaGhscXh+goOCf316eXh2dXJwb3B0eoKJjpCQjouJiIeGhIF+fH1/hIuRlZeWk5CMiYeFgn56d3V2en+EiIqJhoJ+e3h2dHBtamhqbnN6f4KCgX58enh3dnRycHBxdnyDio6Pj42KiYeGhYOBfn1+gYaMkpWWlZKOi4iGhIF9eXd2d3uAhYiJiISBfXp4dnNwbGppa291e3+CgoB9e3l4d3Z0cnBxc3h+hYqOj46MioiHhoWDgH59f4KIjZKVlZOQjYqIhoOAfHl3d3l9goaIiIaDf3x6eHVzb2xqam1xd3yAgYF/fHp5eHd2dHJxcnV6gIaLjo6Ni4mIh4aEgoB+foCEiY6TlJSSj4yJh4WCf3x5d3h6foOGiIeFgn57eXd1cm9sa2tuc3h9gIGAfnx6eXh3dnRycnN2fIKHi42NjIqIh4aFhIKAfn+BhYqPk5STkI2LiIaEgn97eXh4e4CEhoeGhIB9e3l3dHJvbGttcHV6foCAf317enl4d3Z0cnJ0eH2DiIyNjIuJiIeGhYSBgH+AgoeMkJKTko+MioiGhIF+e3l4en2BhIaHhYJ/fHp4dnRxb21sbnJ2e36AgH58e3l5eHd1dHNzdXp/hImMjIuKiIeGhoWDgYB/gISIjZCSkpGOi4mHhYOAfXt5eXt+goWGhoSBfnx6eHZ0cW5tbW9zeHx/gH99fHp5eXh3dXRzdHd7gIWJi4yLiYiHhoaEg4GAgIGFiY2QkpGPjYqIhoWCgH16eXl8f4KFhoWDgH17eXh2c3FvbW5xdHl8f39+fXt6eXl4d3V0dHV4fYKGiouLioiHhoaFhIKBgICChoqOkJGQjoyJh4aEgn98enl6fYCDhYaEgn99e3l3dXNxb25vcnZ6fX9/fnx7enl5eHd1dHV2en6Dh4qLiomIh4aGhYSCgYCBg4eLjpCQj42LiYeFhIF/fHp6e36Bg4WFg4F+fHp5d3VzcG9vcHN3e31/fn18enl5eXh3dXV1d3t/gIGBgYF/fnx7fYCGjZOZm5uZlZCNiYaCfXVuZ2NlbHiIl6OpqaOakIeAenRsY1hPSktTYnWJmKKkoJiOhn96dnBpYFdRUFdkd4udqrCuqJ+Xj4qFgHpxZ2BcX2h4ip2rsrOtpJqRiYR+d25kWlRTWWV2iJiipaKakId/eXRvZ19VTkxQW2t+kJ2kpaCYj4iDf3p1bWVdWVtkcoSXpq+yrqeelY+KhX93bmVeXGFse42cp6upopiPh4B7dW5lXFRQUVpoeYqXnp+bk4qDfXh0b2hgWFNUWmd4ipqlqaiimpKMh4N/eXFpYmBjbXyNnamvrqmhmJCKhH95cWdfWlpgbHuLmKCinpeOhX95dW9oYFhSUFVfbn+Pmp+fmpKLhIB8eHNsZV9cXmd0hZajq6ypopqTjYmEf3hwaGNiZ3GAj52mqaaflo6HgXx3cGhfWFVXYG18i5abm5ePh4F7d3NuaGBaVldeanmJl6CjoZyUjomFgX14cWpkY2dxf46cp6uqpZ2Wj4mFgHpza2NfYGZxf46Zn6CclIyFf3p2cGpiW1ZVWWNxgI6Xm5qUjoeBfnp3cmxlYF5haXaFlJ+mp6OdlpCLh4R/eXFrZmZsdoORnaSmo52VjYeCfnlza2NdW11lcX+MlZmYk4yFf3p3c25oYVtYWmFseomUnJ6blpCKhoJ/fHdwamZmanSBj5ukqKahmpOOiYWBfHVtZ2RlbHaDkJmenpmSi4R/e3dya2ReWVleZ3SBjZSXlZCKhH98eXVxa2VhX2Nrd4WSnKGhnpiSjYmGg355cm1panB6hpKdo6Shm5ONh4N/e3VuZ2FgY2p1go2Ul5aRioR+endzbmliXVtdY257iJKYmZaRi4eDgH56dXBrZ2htdoKPmqGkop2XkY2JhYJ9dnBraGpxe4aRmZ2cmJGKhIB8eHNtZ2FdXmJrd4KMkpSRjIeBfXp3dHBrZWJhZW14hZCZnZyZlI+Kh4SCfnlzbmxtc3yIk5yhoZ6YkoyIhIB8d3BqZmVob3mEjpSWlI+Jg356d3NvaWRfXmBmcHyHj5SVko2IhIB+fHl0b2toaW53go6YnqCempSPi4iFgn14cm5sb3V+iZKZnJqWkIqFgX16dW9pZGFiZ295g4yQkY6KhH98eXdzb2pmY2Nnb3mEjpWYmJSQi4iFg4B9eHNvbnB2f4mTm5+fm5aRjIiFgX14c21qaW10fYaOk5SSjYiCfnt4dHBrZmJgY2lyfYaNkZGOiYWBfnx6d3Nva2lrcHiDjZWbnJqWkY2Kh4WCfXh0cG9yeIGLk5iamZWPioWCfnt3cmxnZWZrcnyEi4+PjIiDfnt5dnNva2ZkZGlweYSMkpSTkIyIhYOBf3x3c3BvcniAipOZnJyZlI+LiIWCf3p1cG1tcXeAiI+TlJGMh4J+e3l1cWxoZGNmbHR9houOjYuGgn99e3l2cm5ramxxeYKMk5eYlpOPi4iGhIF9eXVycnV7g4yTmJmXk46KhoOAfXh0b2tpam92foaLjo2KhoJ+e3h2c29rZ2VmanF6g4qPkZCMiYWDgX99endzcXBzeYGKkpeamZaSjoqIhYN/e3dzcHF1e4KKkJOTkIyHg398endzbmpnZmlvdn6FioyLiISAfXt6eHVybmtrbXJ5goqRlJWTj4yJhoWDgH15dnR0d32FjZOXmJaSjoqGg4F+enZxbm1ucnmAh4uNjImFgX17eXZzcGxpZ2hsc3qCiYyOjImGg4F/fnx5dnNxcXR6gYmQlZeWlJCMiYeFg4B8eHVzdHh+hYuQkpKPi4eDgH17eHRwbGpqbHF4f4WJiomGgn98enl3dHFubGtuc3qBiY6RkY+MiYeFg4KAfXl2dXZ5f4aNkpaWlJGNiYaEgn98eHRxcHJ2fIKIjI2LiIWBfnt5d3RxbWppam50e4KHiouJhoOBf358e3h1c3FydXqBiY+TlJSRjouIhoWDgH15d3V3eoCGjJCSkY+Lh4SBf3x5dnJvbW1vdHqAhYiJh4SBfnx6eHZ0cW5sbG9zeoGHjI6OjImHhYOCgX98eXd2d3uAho2SlJSTj4yJh4WCgH15dnNzdXl+hImMjIuIhIF+fHp4dXJubGtscHV8gYaIiIeEgX99fHt5d3VycXJ1e4GIjZCSkY6MiYeGhIKAfXp4d3l9goiNkJGRjouHhIKAfnt3dHFvcHJ3fIGGiIiGg4B9e3p4dnRxb21tcHR6gIaKi4uJh4SDgYB/fXt5d3Z4e4GHjJCTk5GOi4mGhYOBfnt4dnZ4e4CFioyMi4iEgX99e3l2c3BubW5yd3yBhYeGhYKAfnx7enh2dHJxc3Z7gYaLjo+OjIqHhoWDgoB9e3l5e36DiI2QkZCNioeFg4F/fHl2c3JydXl+g4aIh4WDgH17enh2dHJvbm5xdXqAhIiJiIeEgoGAf358enh3d3h8gYaLj5GRj42KiIaFg4F/fHl4eHp+goeKjIyKiIWCf358end0cnBvcXR4fYGEhoWDgX99e3p5eHZ0cnJzdnuAhYmMjIuKh4aEg4KBf317enp8f4SJjY+Qj42Kh4WDgoB9e3h1dHV4e4CEhoiHhYKAfXx6eXd1cnBvcHJ2e3+DhoeGhIKBf39+fXt5eHd3eXyBhoqNj4+Ni4mHhoWDgX99e3l6fICEiIuMjIqIhYKAf317eXZzcnFzdnp+goSFhIKAfnx7enl3dXNycnN2e4CEiIqKiYeFhIOCgYB/fXt6e32AhYmMjo+OjImHhYSCgX58eXd3eHp9gYWHiIeFgoB+fHt5eHVzcXBxc3d7f4OFhYSCgX9+fX18enl3dnd5fICFiYyNjYuJiIaFhIOBf318e3x+gYWIi4yMioiFg4GAfnx6d3V0dHV4e3+ChISDgX99fHt6eXd1dHJydHd7f4OGiIiHhYSCgoGAf358e3p7fYGFiYyNjo2LiYeFhIOBf317eXl6fH+DhoeIh4WCgH59fHp4dnRycnJ0eHt/goOEg4F/fn18fHt6eHd2d3l8gISIiouLiYiGhYSDgoF/fnx8fX+ChomLjIuKiIWDgoF/fXt5d3Z2d3p9gIOEhIOBf318e3p5d3V0c3N0d3t/goSGhoWDgoGAgH9+fXx7ent9gYSIi4yMi4qIhoWEg4KAfnx7e3x+gYSGiIiHhYOBf358e3l3dXRzdHZ5fH+Bg4KBgH59fHx7enl4dnZ3eXyAgICAgH99e3p4eHl8gYeNk5eZmZeUkIyIhYJ/enRtZl9bWl5ndIOSoKirqqSck4uEf3t2cWpiWVJOTlNda3yMmqSqqqafl5CJhYF9eHJrY1xXVlpjcH+Qnqmvsa2nn5ePioWBfHZuZl5YVVZdaHaGlKCnqaagmZCJg356dXBpYlpTUFFXYW9/jpukqKejnJWOiISAfHhya2RdWVldZnOCkp+prq6qo5yUjoiEgHt1bmZeWVdZYWx6iJagpaajnZaOh4J9eXVwaWJaVVJUWmVzgpCbo6akoJmSjIeDf3x3cmtkXltbYWp3hZOfqKyrp6CZkoyHg396dG1mX1pZXGRvfYqWn6SkoJqTjIWAfHl0b2liW1ZUV15odoSRm6Kkop2XkIqGgn97d3FrZF9dXmRteoiVoKeqqKSdlpCKhoJ+enRtZmBcXF9ncn+Ml5+iop6XkIqEgHx4dG9pYlxYV1phbHmGkpuhop+alI6JhYF+e3Zxa2VgX2FncX2KlqCmqKahm5SOiYWCfnlzbWZhXV5ianWCjZeeoJ+blY6Ig397eHRuaGJdWVldZG97iJObn6CdmJKMh4SBfnp2cWtlYmFjanR/jJegpKajnpiSjIiEgX15c21mYV9gZW14hI+XnZ+dmJKMhoJ+e3dzbmhiXltbYGdyfoqUm56empWQi4aDgH16dnFrZmNjZm12go2Yn6OjoZyWkIuHhIB9eHNsZ2JhYmhweoWQl5ydmpaQioWBfXp3c25oY19dXmJqdYCLlJqcnJiTjomFgoB9enVwa2dkZWhveYSPmJ+ioZ6ZlI6KhoOAfHhybGdjYmVqcn2HkJebm5iUjoiEgH16d3NuaGNgXmBlbXeCjJSZm5qWkYyIhIJ/fXl1cGtoZmdrcnuGkJieoJ+cl5KNiIWCf3x3cmxoZWRnbXV/iJGXmZmWkYyHgn98eXZybmlkYWBiaHB6hI2UmJmYlI+Lh4SBf3x5dXBsaGdobXR+iJGYnZ+dmpWQi4eEgn97d3JsaGZmaW93gImRlpiXlI+KhoJ+fHl2cm5pZWJiZGpyfIWOlJeYlpKOiYaDgX98eXVwbGloam93gImSmJydm5iTjoqHhIF+e3ZxbWlnZ2txeYKKkZWXlZKOiYSBfnt5dnJtaWVjY2ZsdH6HjpSWlpSQjIiFgoB+fHl1cG1qamxxeYGKkpibm5mWkY2JhoOBfnp2cW1qaGltc3uDi5GVlZSQjIeDgH17eXVybWlmZGVpb3Z/iI+TlZWSj4uHhIKAfnx4dXFta2tuc3uDi5OYmpqYlJCLiIWDgH16dnFtamlrb3V9hYyRlJSSjoqGgn99e3h1cm5qZ2Zna3F4gYmPk5STkY2JhoOBgH57eHVxbmxtcHV9hYyTl5mYlpKOioeEgoB9enZxbmtrbHF3foaMkZOTkI2JhYF/fHp4dXFuamhnaW1zeoKJj5KTko+MiIWDgX9+e3h1cW5tbnJ3foaNk5eYl5SRjYmGhIJ/fXl1cW5sbG5yeYCGjJCSkY+Lh4SBfnx6eHVxbmtoaGpudXyDio+RkpGOioeEgoF/fXt4dXFvb3B0eYCHjpOWl5WTj4uIhYOBf3x5dXFubW1wdHqBh4yQkZCNioaDgH58enh1cW5raWpscHZ9hIqPkZGPjImGhIKAf317eHVycHBxdXuBiI6TlZWUkY6Kh4WDgX98eXVyb25ucXZ8goiMj5COjIiFgn99fHp3dXFubGprbXJ4f4WLjpCQjouIhYOCgH99e3h1cnFxc3d8g4mOkpSUk5CMiYaEgoB+fHh1cm9vcHN3fYOIjI6PjYuHhIF/fXt5d3RxbmxrbG90eYCGi46Pj42Kh4WDgYB/fXp4dXNxcnR4foSKj5KTk5GOi4iGhIKAfnt4dXJwb3F0eX6EiYyOjoyJhoOAfn17eXd0cW9tbG1wdXuBhouNjo2MiYaEgoGAfn16eHVzcnN2en+Fio+Sk5KQjYqHhYOCgH57eHVycXBydXp/hImMjY2LiIWCgH58e3l3dHJvbW1vcnd8goeLjY2MioiGhIKBgH58enh1dHN0d3uAhouPkZKRj4yJh4SDgX99e3h1c3Fxc3Z7gIWJi4yMioeEgX9+fHt5d3Ryb25ucHN4fYOHi4yNi4mHhYOCgX9+fHp4dnR0dXh8gYaLj5CRkI6LiIaEgoF/fXt4dXNycnR4fIGFiYuLioiGg4F/fXx7eXd0cnBvb3F1eX6Dh4qMjIqJhoSDgYB/fnx6eHZ1dXZ5fYKHi46QkI+MioeFhIKBf316eHVzc3N1eX2ChomKi4mHhYKAfn18enl3dHJwcHBydnp/hIiKi4uKiIaEgoGAf358enh2dXZ3en+DiIuOj4+Oi4mHhYOCgH99enh1dHN0dnp+goaJioqJhoSCgH59fHp5d3RycXBxc3d7gISIiouKiYeFg4KBgH9+fHp4d3Z3eHuAhIiMjo+OjYuIhoSDgYB+fHp4dnR0dXd7f4OGiImJiIaDgX9+fXt6eHZ0cnFxcnV4fIGFiImKiYiGhIOCgYB/fnx6eHd3d3l9gIWJjI2OjYyKh4WEgoGAfnx6eHZ1dXZ4fH+DhoiJiIeFg4B/fXx7enh2dHNycnN2eX2BhYiJiYmHhYSCgYGAf358enl3d3h6fYGFiYuNjYyLiYeFg4KBgH58enh2dXV3eXyAg4aIiIeGhIKAfn18e3p4dnVzcnN0d3p+goWIiYmIhoWDgoGAgH9+fHp5eHh5e36ChomLjY2MioiGhIOCgX9+fHp4dnZ2eHp9gYSGh4eHhYOBf359fHt6eHZ1c3NzdXh7f4KFh4iIh4aEg4KBgIB/fXx6eXh5enx/g4aJi4yMi4mHhoSDgoB/fnx6eHd2d3h7foGEhoeHhoSCgX9+fXx7enh2dXRzdHZ4fH+DhYeIiIeFhIOCgYCAf318e3l5eXt9gIOHiYuMi4qJh4WEgoGAf318enh3d3d5fH6BhIaGhoWEgoB/fn18e3p4dnV0dHV3eX2Ag4WHh4eGhYOCgYGAgH99fHt6eXp7foGEh4mLi4uJiIaFg4KBgH99fHp4d3d4enx/goSFhoaEg4GAfn18fHt5eHd1dHV1d3p9gIOFh4eGhYSDgoGBgH9/fXx7enp7fH+BhIeJiouKiYeGhIOCgYB/fXt6eHh4eXp9f4KEhYaFhIKBf359fHx7eXh3dXV1dnh7foGDhYaGhoV/f4CBg4WHiYuMjIuKiYeGhIOBgH16dnJtaGRiYmRpcXqFkJqiqKurqKOclY+JhIB9eXVwamRdV1JPT1JZYm57iJSfpqusqqagmpSOiYaCf3x4c25nYVxYVldcY215hpKdpquuraqln5iSjIeDgHx4dG5oYVtWUlJUWWJseIWRm6KmqKajnZeRjIeDgH16dnJtZ2FcWFZXW2Jrd4OPmqOprKyqpaCalI6KhoN/fHhzbWZgW1hWWF1kbnmFkJmhpaelop2XkYuGgn98eXVxbGZhW1dVVVlfaHJ+ipWepKipp6OemJOOioaDgH16dXBqZF9cW1xgZ3B6hZCaoaaop6OfmZONiISBfXp3c25oYl1ZVlZYXmVveoWQmZ+jpKOfm5WQi4eEgX98eXVwa2VhXVxdYWdweoWPmaCmqKiloZuWkIuHhIF+enZybGdhXVpZW19mb3mEjZacoKGgnZiTjomFgn98endzb2plYF1bXF9lbXeBjJWdo6WmpKCclpGNiYaDgH56dnFrZmJfXl9jaXF6hI6WnKChoJ2ZlI6JhYJ/fHl2c25pZGBcWltdYmpzfYeQmJ6hoqCdmZSQi4iFg4B+e3dzbmllYmFiZWtzfIWPl52ho6Kfm5aRjIiEgX98eXVxbGdiXlxcXmJocXqDjJSZnZ6cmpaRjYmFgoB+fHl2cm1pZWJhYmVqcnqEjZWcoKKioJ2YlI+Lh4SCf3x5dXFsZ2NgYGFkanJ6g4uSmJucm5iUkIuHg4F+fHp3dHBsaGRhX2BjaG93gImRmJ2foJ6bl5OPi4iFg4F/fHh0cGtnZWRlaG10fISMk5mcnZyalpGNiYWCf316eHRxbGhkYV9fYWVsc3yEjJOYm5uamJSQjImGhIKAfnt4dXFtaWdmZ2pudX2FjZSZnZ+enJiUkIyIhYKAfXt4dHBrZ2RiYWNma3J6goqQlZeYl5WRjoqGg4F/fXt5dnNva2hmZWZobXN7g4uSmJyenpyZlZKOioeFg4F+e3h0cGxpZmVmaW50e4OKkJSXmJeVkY2JhoOAfnx6d3VxbmpnZGNjZmpwd36GjZOXmpqZl5SQjYmHhYOBf316d3NvbGppamxxd32Fi5GWmZqZl5SQjIiFgoB+e3l2c29raGVjY2VobXR7gomPk5WWlZOQjYqHhIKAf317eXZzb2xqamptcXd9hIuRlpmbm5mWk4+LiIWDgX99endzb2xpZ2Znam50e4GIjZGTlJORjouHhIKAfnx7eXZ0cW1raWhoa290eoGIjpSXmZmYlpOPjImHhYOBf316d3RwbWtqa25yd32DiY6SlJWUko+MiIWCgH58enh2c3BtamdmZmhscXZ9hIqPk5WVlJOQjYqIhYSCgX99e3h1cnBubW5wdHl/hYuQlJaXl5WSj4uIhYOBf317eHVyb2xpZ2doa291e4GGi4+RkpGPjYqHhIKBf359e3l2dHFvbWxtb3N4fYSKj5OWmJeWlJGOi4iGhIKAfnx5dnNwbWxrbG5xdnyBhouOkJGQjoyJhoOBf318enl3dHJvbGtqamxwdHqAhouQk5WVlJKQjYuIhoWDgoB+fHl3dHFwb29xdXl+hImNkJKTkpCOi4iFgoB+fXt5d3Ryb2xqaWlrbXF2fIKHi46QkZCPjIqIhYSCgYB/fXx5d3RycXBxc3Z6f4WKjpKUlZWTkY6LiIaEgoB+fHp4dXJvbWtrbG5xdnuAhYmMjo6NjIqHhYKBf359fHp5d3RycG9ub3F0eH2DiIyQk5SUk5KPjYqIhoSDgoB+fHl2dHFwb3BydHh9goaKjY6PjoyKh4WCgH59fHp5d3VzcG5tbGxucXR5foOIjI+RkZCPjYuJh4WEg4KBf317eXZ0c3JzdXd7gISIjI+RkZGPjYqHhYOBf358enh2dHFvbWxsbW9ydnuAhIiLjI2Mi4mHhYOCgYB/fn17enh2dHNyc3V4e4CEiY2QkpOTkZCNi4iGhIOBgH58enh1c3Fvb29xdHd7gISHiYuLi4mHhYOBf359fHt6eHd1c3FwcHBydXh9gYaKjZCRkZGPjYuJh4aFhIKBgH58eXd1dHNzdXd7foKGiYyNjYyLiYaEgoB+fXx7eXh2dHJwbm1ub3F1eH2BhYmLjY2NjIqIh4WEg4KBgH9+fHp4d3Z1dnd6fYGFiIyOkJCQjoyKiIWDgoB/fXx6eHZ0cnBvbm9xdHd7f4KFiImKiYiGhYOBgH9+fn18e3l4dnV0dHR2eHyAhIiLjpCRkZCOjIqIh4WEg4GAfn16eHZ0c3JzdHZ5fICDhoiJiYmHhoSCgH59fHt6eXh3dXNycXBxcnV4fICEh4qMjo6OjYuKiIeFhISDgoF/fXt6eHd2d3h6fYCDhomLjIyMioiGhIKAf358e3p4d3VzcXBvb3BydXh8f4OGiImKiYiHhoSDgoGBgIB/fnx7eXh3d3h5e36BhYiLjY+Pj46MioiGhIOCgH9+fHp4dnRzcnFyc3V4e36BhIaHh4eGhIOBgH9+fXx8e3p5eHZ1dXR1dnl8f4KGiYyOjo+OjYuKiIeGhYSDgYB/fXt5d3Z2dnd5e36Bg4aHiIiIhoWDgYB+fXx7enl4d3V0cnJxcnN1d3p+gYWHiYqLi4qJh4aFhISDgoKBgH59e3p5eXl6fH+BhIeJi4yMi4qJh4WDgYB/fnx7enh3dXNycXFyc3V4e36Bg4WGh4aGhIOCgYCAf39+fn18e3p5eHh5enx/gYWHioyNjo6NjIqIh4WEg4KBgH59e3l3dnV0dXV3eXx+gYOEhYWFhIOBgH59fXx7e3p5eHd2dXV1dXZ4e36BhIeJi4yMjIuKiYiGhoWEg4OCgH99fHp5eXl6e32AgoSGh4iIh4aFg4GAfn18e3p5eHd2dHNycnJzdXd5fH+ChIaHiIiHhoWEg4OCgoKBgYB/fn18e3t7fH6AgoWHiYuMjIuKiYeGhIOBgH9+fXx6eHd1dHNzc3R2eHt9f4GDhISEg4KBgH9+fn59fX18e3p6eXh4eXp8foGEhomLjI2NjIuKiYeGhYSDgoGAf318enl4d3d4eXt9f4GDhISEhIOCgH9+fXx7e3p5eXh3dnV0dHV2eHp8f4KFh4iJiomJiIeGhoWEhISDgoGAf359fHx8fH5/gYOFh4iIiIiHhYSCgX9+fXx7enl4d3V0c3Nzc3V2eXt9gIKDhIWFhISDgoGAf359fHx9foGEiY2Qk5SUk5GOjImHhIJ/e3dxa2VgXl5ja3aCkJylq6ypo5yUjIaBfXl0b2liWlRPTU9VX217ipeiqKuqpZ+YkYyHg4B9eHNsZV9aV1hdZnKAj5ymrbCvq6Welo+KhYF9eHNsZF1XU1NWXWh1g5Cboqamo52Wj4iDf3t4dG9pY1xWU1JWXWd0g5CcpausqqWfmJKNiYWCfnp0bmdhXFpcYmp2g5CcpaqrqaSel5CKhIB8eHRuZ2BaVVJTV19qd4SQmqGjo5+ak42Ig4B9enZybGZgW1lZXWVwfIqWoaisrKmknpeRjIiFgX14c2xlX1xbXWNsd4OPmaCkpaKdlpCJhIB8eXVwa2VfWVVUVltkb3yIlJyipKOfmpSOioaDgH16dW9qZGBeX2RsdoKOmaKoqqmloJmTjomFgX56dG5oYlxZWVxjbHeCjZacn5+cl5GLhoF+e3h0cGtmYFxZWVxia3eDjpmgpKWkoJuVkIyIhYJ/e3dxa2ZiYWNnb3mEj5mgpKWjn5mTjYiDgHx5dXBqZF5aWFldZG14g42Vm52cmZWPioWCf316d3NuaWRhX19janN+iZSdo6ampJ+alI+LiIWCf3p1b2plYmFjaHB5g42WnJ+fnJiSjIeCf3t5dXFtZ2JdWllbYGhxfIeQmJyenZqVkIyIhYKAfnt3cm1pZWRlaXB5g46XnqOlpKCclpGMiIWCfnt2cWtmYV9fYWdveIKLkpeamZaSjYiDgH16eHVxbWhkYF5eYWZueIONlZyfoJ+bl5KOioiFg4B9eXRva2hnaG1zfIWOlpyfoJ6alZCLhoN/fHl2cWxnYl9dXmFnb3iCipGWl5eUkIyHg4F+fHp4dHFsaGVkZWhudoCJkpqfoaGfm5eSjouIhYOAfHdzbmlnZmhsc3uEjJOXmpqXk46JhYF+e3h2cm5qZWFeXmBka3N8hY2Tl5mYlZGNioaEgoB+fHh1cW1qaWpudHyFjZWbn6CfnJiUj4uHhIJ/fHhzbmpmZGNmanF5gYmPk5WUko6JhYF+fHp4dXJva2dkYmJlanF6g4uSmJubmpeUkIyJh4WDgX57d3NvbGxtcXd+ho2UmZucmpaSjYmFgn98enZzbmpmYmFiZWpxeYGIjpGTkpCMiIWCf358enh1cm9saWhpbHJ5gYmRl5udnZuYlJCNioiFg4F9enVxbWtrbHB2fISKkJSWlZOPi4eDgH16eHZzb2toZGJiY2dtdHyEi5CTlJORjouIhYOCgH99endzcG5ub3J3foaNlJmcnZyZlZGNioeEgn99eXVxbWloaGptc3qBh4yPkJCOioaDgH17eXd1c3BtaWdmZmltc3uCipCUl5iWlJGOi4mHhYSCgH15dnNxcHF1eYCGjZKWmJiWk4+Lh4SBf3x6d3RwbGhmZWVobHJ5gIaKjY6OjImGg4B+fXx6eXZ0cW5sbG1wdHuCiY+VmJqamJWSj4yKiIaEgn97eHRxb29wc3h+hImOkZKSj4yJhYF+fHp4dnNwbWpnZWVmam91fIOIjY+QkI6LiYaEg4GAf317eXZzcnFzdnqAho2SlpmamZaTkIyJh4SCgH16d3NvbWtrbXB1eoCFiYyNjIqHhIF+fHp5d3VzcW5samlpbHB1e4KIjpGUlJORj4yKiIeFhIOBfnt4dnR0dXh8gYeMkZSVlZORjYqGg4F/fXp4dXFua2loaGpuc3l/hIiKi4qIhoOBf318e3p5d3VzcW9vcHN3fIKJjpOWl5eWk5GOi4mIhoSCgH16d3RycnN2en+EiIyOj46MioaDgH57enh2dHFua2loaGlscHZ8gYaKjI2Mi4mHhYOCgYB/fnx6eHZ1dXZ5fYKHjJGVl5eWlJGOi4mGhIOBfnt4dXJvbm5vcnZ7f4SHiYqJh4SCf317eXh3dXRyb21sa2xucXZ8goeMj5GRkY+Ni4mIh4aFg4KAfXt5d3d4e36Dh4yPkpOTkY+LiIWDgH99e3h1c29ta2prbHB0eX6ChYeIh4aEgX9+fXx7enl4dnRzcnFzdXl+g4iNkZSVlZOSj42LiYiGhYOBf3x5d3V1dnh7f4SHioyNjIqHhIJ/fXt5eHZ0cm9ta2pqa25xdnuAhIeJioqIh4WEgoKBgYB/fXx6eHd3eXt/g4iMkJOVlZSSkI2LiIaFg4F/fHp3dHJwcHF0d3t/goWHh4aEgoB9e3p5eHd1dHJwb21tbnBzd3yBhoqNjo+OjYyKiYeHhoWEg4F/fXt6ent9gISIi46QkZGPjYqHhYKAfn17eXZ0cW9tbG1ucXV5fYCDhIWEg4GAfn18e3t6eXh3dnR0dHV3e3+DiIyQkpOTkpCOjIuJiIeGhIKAfnt5eHh4en2AhIeJioqKiIaDgH58enl3dnRycG5sa2ttb3J2e3+DhYeIh4aFhIOCgYGBgH9+fXx6enp7fYCEiIyPkpOTkpGPjIqIhoWDgoB9e3h2dHNyc3V4e36Bg4SEhIKAfnx6eXh3dnV0c3Fwb29wcXR4fIGFiIuMjY2MiomIh4eGhYWEgoB/fXx8fX+ChYiLjY+Pj42LiYaEgoB+fXt5d3RycG5ubnBydXh8f4GCgoKBgH59fHt7enp6eXh3dnV2d3l8gISIjI6QkZGQj42Mi4mIh4aFg4F/fXt6enp8foGEhoiJiYiGhIJ/fXt6eXd2dHNxb25tbW5wc3Z6foGDhYWFhYSDgoGBgYGAgH9+fXx8fH1/goWJjI+RkpKRkI6MioiGhYSCgH58end2dXR1dnl7foCCgoKCgH59e3l4d3d2dXRzcnFwcHFzdXl9gISHiYuLi4qJiIiHh4aGhYSDgoB/f35/gYOGiIuNjo6OjIqIhoSCgH59e3l3dXNxcG9vcXN1eHt9f4CAgH9+fXx7e3p6enp5eHd3d3d4en2AhIiLjY+QkI+OjYyKiYmIh4aEgoF/fXx8fH1/gYOFh4eHhoWDgH58e3l4d3Z0c3Fwbm5ub3Fzdnp9gIKDg4ODgoKBgYGBgYGAgH9+fn1+f4GDhomMjpCRkZCPjYuKiIeFhIOBf317eXd2dnZ3eXt9f4CBgYB/fXt6eXh3dnZ1dHNycnFxcnR2eX2Ag4aIiYqKiYmIh4eHh4aGhYSDgoGAgIGChIaJi4yNjYyLiYeFg4GAfn17enh2dHJxcHFyc3V4enx9fn5+fXx8e3p6enp6enl5eHg="
+  },
+  "tower": {
+   "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 220' width='120' height='220'><path d='M42 60 L78 60 L92 210 L28 210 Z' fill='#E9E4D8'/><path d='M38 100 L82 100 L84 120 L36 120 Z M33 150 L87 150 L89 170 L31 170 Z' fill='#C0392B'/><rect x='38' y='40' width='44' height='22' rx='3' fill='#2C3E50'/><rect x='44' y='44' width='32' height='14' rx='2' fill='#FFE29A'/><path d='M34 40 L60 18 L86 40 Z' fill='#C0392B'/><rect x='52' y='186' width='16' height='24' rx='3' fill='#5D4037'/></svg>",
+   "w": 120,
+   "h": 220
+  },
+  "boat": {
+   "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40' width='60' height='40'><path d='M4 26 L56 26 L48 38 L12 38 Z' fill='#8D6E63'/><rect x='28' y='4' width='3' height='22' fill='#5D4037'/><path d='M31 6 L50 22 L31 22 Z' fill='#ECEFF1'/><circle cx='29' cy='4' r='3' fill='#7CFC8A'/></svg>",
+   "w": 60,
+   "h": 40
+  }
+ },
+ "types": {
+  "Choice": {
+   "label": "string",
+   "to": "int",
+   "oil": "int"
+  },
+  "Page": {
+   "text": "string",
+   "mood": "string",
+   "ending": "string",
+   "choices": "list<Choice>"
+  }
+ },
+ "state": {
+  "book": {
+   "type": "list<Page>",
+   "init": "[{text: 'The storm reached Gull Rock at dusk. Far out on the black water, a small boat blinks a weak green light. The great lamp above you is dark.', mood: 'storm', ending: 'none', choices: [{label: 'Climb to the lamp room', to: 1, oil: 0}, {label: 'Signal with your hand lantern (1 oil)', to: 2, oil: -1}]}, {text: 'Ninety-nine steps. Wind howls through a cracked pane. The wick of the great lamp is dry, and the oil can beside it is nearly empty.', mood: 'storm', ending: 'none', choices: [{label: 'Pour in the last oil (2 oil)', to: 3, oil: -2}, {label: 'Go down to the cellar for more', to: 4, oil: 0}]}, {text: 'Your little lantern swings in wide arcs. The green light turns toward you, and toward the rocks below the cliff.', mood: 'storm', ending: 'none', choices: [{label: 'Wave them north, away from the rocks', to: 5, oil: 0}, {label: 'Run up to the lamp room', to: 1, oil: 0}]}, {text: 'The great lamp roars to life and its beam sweeps the bay. But the flame already sputters. It won’t last the night.', mood: 'storm', ending: 'none', choices: [{label: 'Turn the lens slowly to save fuel', to: 6, oil: 0}, {label: 'Keep it blazing at full', to: 7, oil: 0}]}, {text: 'The cellar is flooding. Two casks bob in the dark water: one painted with a red stripe, one with no mark at all.', mood: 'storm', ending: 'none', choices: [{label: 'Take the red-striped cask (+3 oil)', to: 8, oil: 3}, {label: 'Take the unmarked cask', to: 9, oil: 0}]}, {text: 'The boat swings north, clear of the rocks, but now it drifts toward open sea. Without the great lamp they will never find the harbor.', mood: 'storm', ending: 'none', choices: [{label: 'Climb to the lamp room', to: 1, oil: 0}, {label: 'Row out to guide them yourself', to: 10, oil: 0}]}, {text: 'The slow beam pulses like a heartbeat. Through the rain you see oars rise and fall, steady now, pulling toward your dock.', mood: 'calm', ending: 'none', choices: [{label: 'Keep watch until morning', to: 11, oil: 0}]}, {text: 'For one glorious minute the whole bay is bright as noon. Then the flame gutters and dies, and the dark rushes back.', mood: 'storm', ending: 'none', choices: [{label: 'Hurry down to the cellar', to: 4, oil: 0}, {label: 'Light your hand lantern (1 oil)', to: 2, oil: -1}]}, {text: 'You haul the cask up ninety-nine steps, soaked and shaking. It sloshes, heavy and full. Enough oil for the whole night.', mood: 'storm', ending: 'none', choices: [{label: 'Light the great lamp (2 oil)', to: 6, oil: -2}]}, {text: 'It’s sea water, not oil. The wick hisses and drowns. Somewhere below, the cellar door slams in the wind.', mood: 'storm', ending: 'none', choices: [{label: 'Back down to the cellar', to: 4, oil: 0}]}, {text: 'Your rowboat climbs a wave taller than the lighthouse door. For a moment the green light is close enough to touch. Then the sea takes your oars.', mood: 'storm', ending: 'adrift', choices: []}, {text: 'Dawn breaks pink over Gull Rock. The little boat is tied to your dock, and a family in borrowed blankets waves up at your window.', mood: 'dawn', ending: 'dawn', choices: []}]"
+  },
+  "page": {
+   "type": "int",
+   "init": "0"
+  },
+  "oil": {
+   "type": "int",
+   "init": "2"
+  },
+  "shown_at": {
+   "type": "int",
+   "init": "0"
+  },
+  "steps_taken": {
+   "type": "int",
+   "init": "0"
+  },
+  "mood": {
+   "type": {
+    "enum": [
+     "calm",
+     "storm",
+     "dawn"
+    ]
+   },
+   "init": "'storm'"
+  },
+  "ending": {
+   "type": {
+    "enum": [
+     "none",
+     "dawn",
+     "adrift"
+    ]
+   },
+   "init": "'none'"
+  }
+ },
+ "functions": {
+  "wrap": {
+   "params": {
+    "text": "string",
+    "n": "int"
+   },
+   "returns": "list<string>",
+   "body": "fold(split(text, ' '), [], (lines, w) => if len(lines) > 0 and len(last(lines)) + 1 + len(w) <= n then set_at(lines, len(lines) - 1, last(lines) + ' ' + w) else push(lines, w))"
+  },
+  "reveal_ms": {
+   "params": {
+    "text": "string"
+   },
+   "returns": "int",
+   "body": "len(text) * 28"
+  },
+  "affordable": {
+   "params": {
+    "c": "Choice",
+    "fuel": "int"
+   },
+   "returns": "bool",
+   "body": "fuel + c.oil >= 0"
+  }
+ },
+ "events": {
+  "turned": {
+   "to": "int"
+  },
+  "finish": {},
+  "broke": {}
+ },
+ "inputs": {
+  "choose": {
+   "payload": {
+    "i": "int"
+   },
+   "when": "ending == 'none'",
+   "from": [
+    {
+     "key": "Digit1",
+     "with": {
+      "i": "0"
+     }
+    },
+    {
+     "key": "Digit2",
+     "with": {
+      "i": "1"
+     }
+    },
+    {
+     "key": "Numpad1",
+     "with": {
+      "i": "0"
+     }
+    },
+    {
+     "key": "Numpad2",
+     "with": {
+      "i": "1"
+     }
+    }
+   ]
+  },
+  "skip": {
+   "payload": {},
+   "from": [
+    {
+     "key": "Space"
+    },
+    {
+     "key": "Enter"
+    }
+   ]
+  }
+ },
+ "rules": [
+  {
+   "id": "skip",
+   "on": "skip",
+   "do": [
+    {
+     "set": "shown_at",
+     "to": "min(shown_at, now - reveal_ms(book[page].text))"
+    }
+   ]
+  },
+  {
+   "id": "choose",
+   "on": "choose",
+   "when": "now - shown_at >= reveal_ms(book[page].text) and event.i < len(book[page].choices) and affordable(book[page].choices[event.i], oil)",
+   "do": [
+    {
+     "let": {
+      "c": "book[page].choices[event.i]"
+     }
+    },
+    {
+     "incr": "oil",
+     "by": "c.oil"
+    },
+    {
+     "set": "page",
+     "to": "c.to"
+    },
+    {
+     "set": "shown_at",
+     "to": "now"
+    },
+    {
+     "incr": "steps_taken"
+    },
+    {
+     "let": {
+      "p": "book[c.to]"
+     }
+    },
+    {
+     "set": "mood",
+     "to": "if p.mood == 'dawn' then 'dawn' else if p.mood == 'calm' then 'calm' else 'storm'"
+    },
+    {
+     "emit": "turned",
+     "with": {
+      "to": "c.to"
+     }
+    },
+    {
+     "if": "p.ending != 'none'",
+     "then": [
+      {
+       "set": "ending",
+       "to": "if p.ending == 'dawn' then 'dawn' else 'adrift'"
+      },
+      {
+       "after": "reveal_ms(p.text) + 2500",
+       "emit": "finish"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cant_afford",
+   "on": "choose",
+   "when": "now - shown_at >= reveal_ms(book[page].text) and event.i < len(book[page].choices) and not affordable(book[page].choices[event.i], oil)",
+   "do": [
+    {
+     "emit": "broke"
+    }
+   ]
+  },
+  {
+   "id": "finish",
+   "on": "finish",
+   "do": [
+    {
+     "if": "ending == 'dawn'",
+     "then": [
+      {
+       "end": "win"
+      }
+     ],
+     "else": [
+      {
+       "end": "lose"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "objectives": {
+  "score": "if ending == 'dawn' then max(100, 1000 - steps_taken * 60 + oil * 50) else steps_taken * 10",
+  "time_limit": "180s",
+  "on_timeout": "lose"
+ },
+ "presentation": {
+  "canvas": {
+   "w": 360,
+   "h": 640,
+   "background": "= if mood == 'dawn' then $dawn_bg else if mood == 'calm' then $calm_bg else $storm_bg"
+  },
+  "music": {
+   "asset": "theme",
+   "volume": 0.35,
+   "playing": "= status == 'playing' and mood != 'dawn'"
+  },
+  "tokens": {
+   "storm_bg": "#101828",
+   "calm_bg": "#1B2B44",
+   "dawn_bg": "#F7C59F",
+   "sea": "#0B3954",
+   "sea_dawn": "#3E7CB1",
+   "paper": "#FBF7EE",
+   "ink": "#2B2118",
+   "faded": "#9C8F80",
+   "card": "#FFFFFF",
+   "card_off": "#E3DED4",
+   "accent": "#C0392B",
+   "oil": "#F4A259",
+   "rain": "#9FB4D9"
+  },
+  "root": {
+   "node": "group",
+   "children": [
+    {
+     "node": "repeat",
+     "source": "range(24)",
+     "as": "i",
+     "template": {
+      "node": "line",
+      "visible": "= mood == 'storm'",
+      "x": "= fmod(hash(i) * 400 + now * 0.05, 400.0) - 20",
+      "y": "= fmod(hash(i + 50) * 260 + now * 0.6, 260.0) - 20",
+      "x1": 0,
+      "y1": 0,
+      "x2": -6,
+      "y2": 18,
+      "stroke": "$rain",
+      "stroke_width": 1.5,
+      "opacity": 0.5
+     }
+    },
+    {
+     "node": "image",
+     "asset": "tower",
+     "x": 222,
+     "y": 20,
+     "w": 96,
+     "h": 176
+    },
+    {
+     "node": "poly",
+     "visible": "= mood != 'dawn' and page != 0 and page != 2 and page != 4 and page != 9",
+     "x": 270,
+     "y": 56,
+     "fill": "#FFE29A",
+     "opacity": "= 0.18 + 0.1 * sin(now / 300)",
+     "points": "= let a = sin(now / 900) * 0.6 in [vec(0.0, 0.0), vec(-260 * cos(a), -40 + 260 * sin(a)), vec(-260 * cos(a), 40 + 260 * sin(a))]"
+    },
+    {
+     "node": "poly",
+     "fill": "= if mood == 'dawn' then $sea_dawn else $sea",
+     "points": "= concat(map(range(13), i => vec(i * 30.0, 196 + 6 * sin(now / 400 + i * 0.9))), [vec(360.0, 260.0), vec(0.0, 260.0)])"
+    },
+    {
+     "node": "image",
+     "asset": "boat",
+     "x": "= if ending == 'dawn' then 180 else 40 + 20 * sin(now / 1300)",
+     "y": "= 172 + 4 * sin(now / 350)",
+     "rotation": "= 6 * sin(now / 500)",
+     "transition": {
+      "x": {
+       "ms": 1500,
+       "ease": "out"
+      }
+     }
+    },
+    {
+     "node": "rect",
+     "x": 16,
+     "y": 248,
+     "w": 328,
+     "h": 376,
+     "radius": 16,
+     "fill": "$paper",
+     "on_tap": {
+      "input": "skip",
+      "with": {}
+     }
+    },
+    {
+     "node": "text",
+     "x": 32,
+     "y": 262,
+     "text": "= 'Page ' + str(steps_taken + 1)",
+     "size": 13,
+     "weight": 600,
+     "color": "$faded"
+    },
+    {
+     "node": "text",
+     "x": 228,
+     "y": 262,
+     "align": "right",
+     "w": 100,
+     "text": "= 'Oil ' + str(oil)",
+     "size": 13,
+     "weight": 700,
+     "color": "$oil",
+     "animate_on": {
+      "broke": {
+       "prop": "scale",
+       "keys": [
+        1,
+        1.4,
+        1
+       ],
+       "ms": 300
+      }
+     }
+    },
+    {
+     "node": "repeat",
+     "source": "wrap(book[page].text, 28)",
+     "as": "line",
+     "template": {
+      "node": "text",
+      "x": 32,
+      "y": "= 288 + index * 24",
+      "size": 17,
+      "color": "$ink",
+      "text": "= let before = sum(map(take(wrap(book[page].text, 28), index), l => len(l) + 1)) in let shown = floor((now - shown_at) / 28) - before in if shown <= 0 then '' else substr(line, 0, shown)"
+     }
+    },
+    {
+     "node": "repeat",
+     "source": "book[page].choices",
+     "as": "c",
+     "template": {
+      "node": "group",
+      "visible": "= now - shown_at >= reveal_ms(book[page].text)",
+      "children": [
+       {
+        "node": "rect",
+        "x": 28,
+        "y": "= 500 + index * 56",
+        "w": 304,
+        "h": 46,
+        "radius": 12,
+        "fill": "= if affordable(c, oil) then $card else $card_off",
+        "stroke": "$accent",
+        "stroke_width": "= if affordable(c, oil) then 2 else 0",
+        "on_tap": {
+         "input": "choose",
+         "with": {
+          "i": "index"
+         }
+        },
+        "animate_on": {
+         "choose": {
+          "when": "event.i == index",
+          "prop": "scale",
+          "keys": [
+           1,
+           0.95,
+           1
+          ],
+          "ms": 140
+         }
+        }
+       },
+       {
+        "node": "text",
+        "x": 44,
+        "y": "= 500 + index * 56",
+        "w": 280,
+        "h": 46,
+        "valign": "middle",
+        "align": "left",
+        "wrap": true,
+        "text": "= str(index + 1) + '.  ' + c.label",
+        "size": 15,
+        "weight": 600,
+        "color": "= if affordable(c, oil) then $ink else $faded"
+       }
+      ]
+     }
+    },
+    {
+     "node": "text",
+     "x": 180,
+     "y": 580,
+     "anchor": "center",
+     "visible": "= ending != 'none' and now - shown_at >= reveal_ms(book[page].text)",
+     "text": "= if ending == 'dawn' then 'THE END' else 'LOST AT SEA'",
+     "size": 22,
+     "weight": 800,
+     "color": "$accent"
+    }
+   ]
+  },
+  "feedback": [
+   {
+    "on": "turned",
+    "do": [
+     {
+      "sound": {
+       "wave": "sine",
+       "notes": [
+        "A4",
+        "E5"
+       ],
+       "step_ms": 70,
+       "volume": 0.3
+      }
+     },
+     {
+      "haptic": "light"
+     }
+    ]
+   },
+   {
+    "on": "broke",
+    "do": [
+     {
+      "toast": {
+       "text": "Not enough oil",
+       "ms": 1200
+      }
+     },
+     {
+      "haptic": "warning"
+     },
+     {
+      "sound": {
+       "wave": "square",
+       "note": "C3",
+       "ms": 120,
+       "volume": 0.25
+      }
+     }
+    ]
+   },
+   {
+    "on": "win",
+    "do": [
+     {
+      "sound": {
+       "wave": "triangle",
+       "notes": [
+        "C5",
+        "E5",
+        "G5",
+        "C6"
+       ],
+       "step_ms": 160,
+       "volume": 0.5
+      }
+     },
+     {
+      "haptic": "success"
+     },
+     {
+      "particles": {
+       "x": 270,
+       "y": 60,
+       "count": 40,
+       "color": "#FFE29A",
+       "speed": 160,
+       "ms": 1400,
+       "spread": 180
+      }
+     }
+    ]
+   },
+   {
+    "on": "lose",
+    "do": [
+     {
+      "sound": {
+       "wave": "sine",
+       "notes": [
+        "E4",
+        "D4",
+        "B3",
+        "A3"
+       ],
+       "step_ms": 220,
+       "volume": 0.4
+      }
+     },
+     {
+      "haptic": "heavy"
+     }
+    ]
+   }
+  ]
+ }
+}

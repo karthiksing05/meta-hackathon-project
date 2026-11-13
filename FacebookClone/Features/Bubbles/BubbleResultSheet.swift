@@ -8,6 +8,10 @@ struct BubbleResultSheet: View {
     var onPlayAgain: () -> Void
     var onSeeBoard: (Bubble) -> Void
     var onNextLevel: (Bubble) -> Void
+    /// The player's request (seed, length, challenge or session context). Nil from the feed.
+    var request: BubblePlayRequest? = nil
+    /// Closes the player, then runs the action. Nil outside the player.
+    var exitPlayer: ((@escaping () -> Void) -> Void)? = nil
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(AppStore.self) private var appStore
@@ -25,11 +29,8 @@ struct BubbleResultSheet: View {
             if let bubble = bubbleStore.bubble(id: context.bubbleID) {
                 content(bubble)
             } else {
-                ContentUnavailableView(
-                    "This Bubble popped",
-                    systemImage: "bubbles.and.sparkles",
-                    description: Text("It isn't available anymore.")
-                )
+                EngineErrorCard(detail: EngineErrorCard.goneDetail)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .presentationDetents([.large])
@@ -54,6 +55,7 @@ struct BubbleResultSheet: View {
                     isCelebrating: isCelebrating,
                     streak: bubble.isDaily ? bubbleStore.dailyStreak : 0
                 )
+                BubbleResultInfoSlots(slot: slot(for: bubble))
                 BubbleResultBoard(board: board) {
                     onSeeBoard(bubble)
                 }
@@ -79,7 +81,7 @@ struct BubbleResultSheet: View {
         guard shownScore == 0 else { return }
         if reduceMotion || score <= 0 {
             shownScore = score
-            if isNewBest { Haptics.success() }
+            if isNewBest { GameSound.play(.newBest, haptic: true) }
             return
         }
         Task { @MainActor in
@@ -92,7 +94,7 @@ struct BubbleResultSheet: View {
             }
             shownScore = score
             if isNewBest {
-                Haptics.success()
+                GameSound.play(.newBest, haptic: true)
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) {
                     isCelebrating = true
                 }
@@ -107,19 +109,20 @@ struct BubbleResultSheet: View {
     private func actions(_ bubble: Bubble) -> some View {
         let group = bubble.group
         return VStack(spacing: 8) {
+            BubbleResultActionSlots(slot: slot(for: bubble))
             Button {
                 Haptics.light()
                 onPlayAgain()
             } label: {
                 Label("Play again", systemImage: "arrow.counterclockwise")
             }
-            .buttonStyle(.fb(.primary, height: 44))
+            .buttonStyle(.fb(.secondary, height: 44))
 
             Button {
                 float(bubble, to: group)
             } label: {
                 Label(
-                    didFloat ? "Floated" : "Float to \(group?.name ?? "your feed")",
+                    didFloat ? "Shared" : "Share to \(group?.name ?? "your feed")",
                     systemImage: didFloat ? "checkmark" : "arrowshape.turn.up.right.fill"
                 )
             }
@@ -146,17 +149,29 @@ struct BubbleResultSheet: View {
         }
     }
 
+    /// What the collaboration slots get (docs/BUBBLES.md 7.1).
+    private func slot(for bubble: Bubble) -> BubbleResultSlotContext {
+        BubbleResultSlotContext(
+            result: context,
+            bubble: bubble,
+            play: request?.bubbleID == bubble.id ? request?.context : nil,
+            request: request?.bubbleID == bubble.id ? request : nil,
+            playAgain: onPlayAgain,
+            exitPlayer: exitPlayer
+        )
+    }
+
     private func float(_ bubble: Bubble, to group: FBGroup?) {
-        let message = "I got \(score.withCommas) in \(bubble.title). Beat it? 🫧"
+        let message = "I got \(score.withCommas) in \(bubble.title). Beat it? ✨"
         let post = BubbleSurfaceHooks.float(bubble, result: context.result, to: group, message: message, appStore: appStore, bubbleStore: bubbleStore)
         if post != nil {
             Haptics.success()
             withAnimation(.easeInOut(duration: 0.2)) {
                 didFloat = true
             }
-            appStore.showToast(group.map { "Floated to \($0.name)" } ?? "Floated to your feed", symbol: "bubbles.and.sparkles.fill")
+            appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
         } else {
-            appStore.showToast("Couldn't float this right now", symbol: "exclamationmark.circle")
+            appStore.showToast("Couldn't share this right now", symbol: "exclamationmark.circle")
         }
     }
 
@@ -261,7 +276,7 @@ private struct BubbleResultHero: View {
     }
 
     private var bestLine: String {
-        guard let previousBest else { return "Your first run on this Bubble" }
+        guard let previousBest else { return "Your first run on this \(ProductName.singular)" }
         if isNewBest { return "Up from \(previousBest.withCommas)" }
         return "Your best: \(previousBest.withCommas)"
     }
@@ -369,7 +384,7 @@ private struct BubbleResultBoard: View {
                     Haptics.light()
                     onSeeBoard()
                 } label: {
-                    Text("See Bubble Board")
+                    Text("See board")
                         .font(.fbMetaEmphasized)
                         .foregroundStyle(FBColor.accent)
                         .padding(.vertical, 6)

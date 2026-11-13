@@ -23,16 +23,20 @@ struct BubbleInputLog: Codable, Hashable, Sendable {
     var tickRate: Int
     var totalTicks: Int
     var inputs: [BubbleInput]
+    /// The length the run was played with, when it was locked (challenges, sessions, game nights;
+    /// docs/BUBBLES.md 7.9). Verification replays with it, so every mode stays verifiable.
+    var length: BubbleLength?
 
-    init(seed: Int, tickRate: Int = 60, totalTicks: Int = 0, inputs: [BubbleInput] = []) {
+    init(seed: Int, tickRate: Int = 60, totalTicks: Int = 0, inputs: [BubbleInput] = [], length: BubbleLength? = nil) {
         self.seed = seed
         self.tickRate = tickRate
         self.totalTicks = totalTicks
         self.inputs = inputs
+        self.length = length
     }
 
     enum CodingKeys: String, CodingKey {
-        case seed, inputs
+        case seed, inputs, length
         case tickRate = "tick_rate"
         case totalTicks = "total_ticks"
     }
@@ -47,15 +51,19 @@ struct BubbleShareArtifact: Codable, Hashable, Sendable {
     var headline: String
     var scoreText: String
     var emojiGrid: String?
+    /// A short machine-readable result a kit reports for the app, never shown ("ending=ferry",
+    /// "mastery=7/8", "right=4/5"). Keys are owned by the formula's feature (docs/BUBBLES.md 7.1).
+    var tag: String?
 
-    init(headline: String, scoreText: String, emojiGrid: String? = nil) {
+    init(headline: String, scoreText: String, emojiGrid: String? = nil, tag: String? = nil) {
         self.headline = headline
         self.scoreText = scoreText
         self.emojiGrid = emojiGrid
+        self.tag = tag
     }
 
     enum CodingKeys: String, CodingKey {
-        case headline
+        case headline, tag
         case scoreText = "score_text"
         case emojiGrid = "emoji_grid"
     }

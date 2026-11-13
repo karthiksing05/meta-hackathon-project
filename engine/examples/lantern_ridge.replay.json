@@ -1,0 +1,26 @@
+{
+  "note": "Bot: holds the HUD arrows (left, then right) and jumps at gaps and thorns.",
+  "seed": 1,
+  "expect": "won",
+  "inputs": [
+    {"down":[52,584],"t":0.0},
+    {"up":[52,584],"t":192.0},
+    {"down":[132,584],"t":208.0},
+    {"key":"Space","t":2160.0},
+    {"key":"Space","up":true,"t":2176.0},
+    {"key":"Space","t":3296.0},
+    {"key":"Space","up":true,"t":3312.0},
+    {"key":"Space","t":4704.0},
+    {"key":"Space","up":true,"t":4720.0},
+    {"key":"Space","t":5888.0},
+    {"key":"Space","up":true,"t":5904.0},
+    {"key":"Space","t":7312.0},
+    {"key":"Space","up":true,"t":7328.0},
+    {"key":"Space","t":7920.0},
+    {"key":"Space","up":true,"t":7936.0},
+    {"key":"Space","t":8896.0},
+    {"key":"Space","up":true,"t":8912.0},
+    {"up":[200,400],"t":10864.0},
+    {"t":10928.0}
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "fragment": "beat_target",
+  "version": 1,
+  "describe": "Win by beating a friend's score. Requires `score: int`. With `target` above 0, the game is won as soon as `score > target` (strictly more than the friend), and `target_beaten` is emitted once. HUD (hud_bottom) shows `Beat Maya: 420`. The game should leave `score`'s own target at 0 (score param `target: 0`) so the two win conditions do not fight, and needs its own lose path (lives, timer_bar or time_limit with on_timeout lose). With `target` 0 the fragment is inert and shows nothing. The app passes the friend's name and score as params.",
+  "params": {
+    "friend_name": { "type": "string", "default": "Maya", "max_len": 12 },
+    "target":      { "type": "int", "default": 100, "min": 0, "max": 100000 }
+  },
+  "requires": {
+    "state": { "score": "int" }
+  },
+  "state": {
+    "_done": { "type": "bool", "init": "false" }
+  },
+  "events": {
+    "target_beaten": {}
+  },
+  "rules": [
+    {
+      "id": "check",
+      "on": "tick",
+      "include": "@target > 0",
+      "when": "not _done and score > @target",
+      "do": [
+        { "set": "_done", "to": "true" },
+        { "emit": "target_beaten" }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": { "include": "@target > 0", "expr": "score > @target" }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_bottom", "include": "@target > 0",
+        "node": { "node": "text", "text": "= 'Beat ' + @friend_name + ': ' + str(@target)", "size": 16, "weight": 600, "color": "$ink", "role": "hud" }
+      }
+    ],
+    "feedback": [
+      { "on": "target_beaten", "do": [
+        { "moment": "level" },
+        { "particles": { "x": 180, "y": 120, "count": 30, "color": "$accent", "speed": 260, "size": 6, "ms": 900, "gravity": 380 } },
+        { "haptic": "success" }
+      ] }
+    ]
+  },
+  "tags": { "mood": ["playful", "tense"], "energy": ["medium", "high"] },
+  "conflicts": []
+}

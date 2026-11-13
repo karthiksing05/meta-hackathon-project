@@ -120,7 +120,7 @@ extension BubbleStore {
             items = feedGenerator.head(from: openingCandidates(from: candidates))
         }
         let wanted = max(count - (items.count - feedItems.count), 4)
-        // The recommender orders everything after the curated opening (BubbleStore+Recs.swift).
+        // The recommender orders everything after the curated opening (StoreRecommendations.swift).
         // The generator is the fallback: FB_RECS=off, or the recommender failed.
         let more = recommendedItems(count: wanted, after: items, candidates: candidates)
             ?? feedGenerator.makeItems(count: wanted, after: items, candidates: candidates)

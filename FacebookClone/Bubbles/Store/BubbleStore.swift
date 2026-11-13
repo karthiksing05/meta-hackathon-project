@@ -320,9 +320,14 @@ final class BubbleStore {
         scheduleSave()
     }
 
-    func toggleSave(_ bubble: Bubble) {
+    /// Saves or unsaves a Bubble. Saves are the likes (docs/BUBBLES.md 7.10): every save in the app,
+    /// in-game saves included, goes through here, and it posts `Notification.Name.bubbleSaveChanged`
+    /// with `["bubbleID": String, "isSaved": Bool, "source": String]` for the recommender.
+    func toggleSave(_ bubble: Bubble, source: BubbleSaveSource = .feed) {
         bubble.isSaved.toggle()
+        bubble.saveCount = max(0, bubble.saveCount + (bubble.isSaved ? 1 : -1))
         scheduleSave()
+        BubbleSaveSignals.post(bubbleID: bubble.id, isSaved: bubble.isSaved, source: source)
     }
 
     // MARK: - Featured runs
@@ -362,7 +367,8 @@ final class BubbleStore {
                 createdAt: now.addingTimeInterval(-hoursAgo * 3600),
                 coverImageData: Self.bundledCover(for: manifest.id),
                 playCount: meta["play_count"]?.int ?? 0,
-                likeCount: meta["like_count"]?.int ?? 0
+                likeCount: meta["like_count"]?.int ?? 0,
+                saveCount: meta["save_count"]?.int ?? meta["like_count"]?.int ?? 0
             ))
         }
         bubbles = loaded.sorted { $0.createdAt > $1.createdAt }
@@ -392,7 +398,8 @@ final class BubbleStore {
 
     private func verify(_ entry: BubbleScore, in bubble: Bubble) {
         guard let replay = entry.replay else { return }
-        let manifest = bubble.manifest
+        // A locked length (challenge, session, game night) replays with that length.
+        let manifest = bubble.manifest.withLength(replay.length)
         let bubbleID = bubble.id
         runtimeWorker.verify(manifest, replay: replay, claimedScore: entry.score) { [weak self] ok in
             guard ok, let self, let bubble = self.bubble(id: bubbleID),
@@ -580,7 +587,12 @@ final class BubbleStore {
             }
         }
         for id in archive.saved {
-            bubble(id: id)?.isSaved = true
+            guard let bubble = bubble(id: id), !bubble.isSaved else { continue }
+            bubble.isSaved = true
+            // Seed save counts don't include yours.
+            if seedIDs.contains(id) {
+                bubble.saveCount += 1
+            }
         }
     }
 

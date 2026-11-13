@@ -1,0 +1,99 @@
+{
+  "fragment": "player_drag",
+  "version": 1,
+  "describe": "Drag to steer an avatar. Provides `player` (vec2, the avatar's centre), kept inside the canvas by `margin`. `axis` picks x only, y only or both; the other axis stays at the start position. `mode` 'follow' snaps to the finger, 'glide' moves toward it at `speed` px/s. Arrow keys nudge by `key_step`. Draws the avatar in `playfield`: the game's `avatar` sprite if it has one, else a circle in the `tone` token color. Emits and requires nothing.",
+  "params": {
+    "axis":     { "type": "enum", "values": ["x", "y", "xy"], "default": "x" },
+    "mode":     { "type": "enum", "values": ["follow", "glide"], "default": "follow" },
+    "start_x":  { "type": "float", "default": 180.0, "min": 0.0, "max": 360.0 },
+    "start_y":  { "type": "float", "default": 560.0, "min": 0.0, "max": 640.0 },
+    "speed":    { "type": "float", "default": 420.0, "min": 50.0, "max": 2000.0 },
+    "margin":   { "type": "float", "default": 20.0, "min": 0.0, "max": 120.0 },
+    "key_step": { "type": "float", "default": 28.0, "min": 4.0, "max": 120.0 },
+    "size":     { "type": "float", "default": 14.0, "min": 4.0, "max": 60.0 },
+    "tone":     { "type": "enum", "values": ["primary", "secondary", "accent", "ink", "danger"], "default": "primary" }
+  },
+  "art": {
+    "avatar": { "describe": "The player, centred on `player` and about 2.8 × size wide. It tilts toward where it is gliding.", "color": "primary" }
+  },
+  "requires": {},
+  "state": {
+    "player":  { "type": "vec2", "init": "vec(@start_x, @start_y)" },
+    "_target": { "type": "vec2", "init": "vec(@start_x, @start_y)" }
+  },
+  "inputs": {
+    "_steer": { "payload": { "x": "float", "y": "float" } },
+    "_nudge": {
+      "payload": { "dx": "float", "dy": "float" },
+      "from": [
+        { "key": "ArrowLeft",  "with": { "dx": "-@key_step", "dy": "0.0" } },
+        { "key": "ArrowRight", "with": { "dx": "@key_step",  "dy": "0.0" } },
+        { "key": "ArrowUp",    "with": { "dx": "0.0", "dy": "-@key_step" } },
+        { "key": "ArrowDown",  "with": { "dx": "0.0", "dy": "@key_step" } }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "steer",
+      "on": "_steer",
+      "do": [
+        { "set": "_target", "to": "vec(if @axis == 'y' then @start_x else clamp(event.x, @margin, @game.canvas_w - @margin), if @axis == 'x' then @start_y else clamp(event.y, @margin, @game.canvas_h - @margin))" },
+        { "if": "@mode == 'follow'", "then": [ { "set": "player", "to": "_target" } ] }
+      ]
+    },
+    {
+      "id": "nudge",
+      "on": "_nudge",
+      "do": [
+        { "set": "_target", "to": "vec(if @axis == 'y' then @start_x else clamp(_target.x + event.dx, @margin, @game.canvas_w - @margin), if @axis == 'x' then @start_y else clamp(_target.y + event.dy, @margin, @game.canvas_h - @margin))" },
+        { "if": "@mode == 'follow'", "then": [ { "set": "player", "to": "_target" } ] }
+      ]
+    },
+    {
+      "id": "glide",
+      "include": "@mode == 'glide'",
+      "on": "tick",
+      "do": [
+        { "let": { "m": "@speed * event.dt / 1000.0" } },
+        { "set": "player", "to": "vec(player.x + clamp(_target.x - player.x, -m, m), player.y + clamp(_target.y - player.y, -m, m))" }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect", "w": "@game.canvas_w", "h": "@game.canvas_h", "fill": "#00000000",
+          "on_drag": { "input": "_steer", "with": { "x": "pointer.x", "y": "pointer.y" } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.avatar",
+        "node": {
+          "node": "image", "asset": "@art.avatar.id", "anchor": "center",
+          "x": "= player.x", "y": "= player.y", "w": "= @size * 2.8", "h": "= @size * 2.8 * @art.avatar.aspect",
+          "rotation": "= clamp((_target.x - player.x) * 0.4, -14.0, 14.0)",
+          "role": "avatar",
+          "transition": { "x": { "ms": 80, "ease": "out" }, "y": { "ms": 80, "ease": "out" }, "rotation": { "ms": 120, "ease": "out" } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.avatar",
+        "node": {
+          "node": "circle", "x": "= player.x", "y": "= player.y", "r": "@size",
+          "fill": "= if @tone == 'primary' then $primary else if @tone == 'secondary' then $secondary else if @tone == 'accent' then $accent else if @tone == 'ink' then $ink else $danger",
+          "role": "avatar",
+          "transition": { "x": { "ms": 80, "ease": "out" }, "y": { "ms": 80, "ease": "out" } }
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "tags": { "mood": ["any"], "energy": ["medium", "high"] },
+  "conflicts": ["gravity_jump", "lanes"]
+}

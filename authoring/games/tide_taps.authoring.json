@@ -1,0 +1,210 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Tide Taps",
+    "instructions": "Tap each glowing jellyfish before the tide bar runs dry. Chain taps for a bigger combo, and don't tap empty water.",
+    "duration_s": 60
+  },
+  "uses": [
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Score"
+      }
+    },
+    {
+      "fragment": "combo",
+      "params": {
+        "step": 1,
+        "max": 8
+      }
+    },
+    {
+      "fragment": "endless",
+      "params": {
+        "level_every": 8000
+      }
+    },
+    {
+      "fragment": "timer_bar",
+      "params": {
+        "full_ms": 6000,
+        "refill_ms": 1500,
+        "drain_rate": 1.0,
+        "on_empty": "lose"
+      }
+    }
+  ],
+  "state": {
+    "tx": {
+      "type": "float",
+      "init": "random_float(60.0, 300.0)"
+    },
+    "ty": {
+      "type": "float",
+      "init": "random_float(150.0, 520.0)"
+    },
+    "tr": {
+      "type": "float",
+      "init": "34.0"
+    }
+  },
+  "events": {
+    "hit_good": {},
+    "hit_bad": {},
+    "refill": {}
+  },
+  "inputs": {
+    "tap": {
+      "payload": {
+        "x": "float",
+        "y": "float"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "tap",
+      "on": "tap",
+      "do": [
+        {
+          "if": "overlaps_circle(vec(event.x, event.y), 1.0, vec(tx, ty), tr + 8.0)",
+          "then": [
+            {
+              "emit": "point"
+            },
+            {
+              "incr": "score",
+              "by": "10 * combo"
+            },
+            {
+              "emit": "hit_good"
+            },
+            {
+              "emit": "refill"
+            },
+            {
+              "set": "tx",
+              "to": "random_float(tr + 10.0, 350.0 - tr)"
+            },
+            {
+              "set": "ty",
+              "to": "random_float(130.0 + tr, 540.0 - tr)"
+            }
+          ],
+          "else": [
+            {
+              "emit": "hit_bad"
+            },
+            {
+              "decr": "time_left",
+              "by": "400.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tide_rises",
+      "on": "level_up",
+      "do": [
+        {
+          "set": "drain_mult",
+          "to": "drain_mult + 0.3"
+        },
+        {
+          "set": "tr",
+          "to": "max(18.0, tr - 2.0)"
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 640,
+          "fill": "#00000000",
+          "on_tap": {
+            "input": "tap",
+            "with": {
+              "x": "pointer.x",
+              "y": "pointer.y"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": "= tx",
+          "y": "= ty",
+          "r": "= tr + 14.0",
+          "fill": "$glow",
+          "opacity": 0.25
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": "= tx",
+          "y": "= ty",
+          "r": "= tr",
+          "fill": "$accent",
+          "role": "pickup",
+          "transition": {
+            "r": {
+              "ms": 120,
+              "ease": "out"
+            }
+          }
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "hit_good",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "A5",
+              "ms": 70
+            }
+          }
+        ]
+      },
+      {
+        "on": "hit_bad",
+        "do": [
+          {
+            "sound": {
+              "wave": "square",
+              "note": "C3",
+              "ms": 90
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {
+      "glow": "#7C5CFF"
+    }
+  },
+  "content": {},
+  "playtest": {
+    "progress": "score + time_left / 100.0"
+  }
+}

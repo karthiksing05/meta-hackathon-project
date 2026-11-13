@@ -1,0 +1,68 @@
+{
+  "fragment": "grid_board",
+  "version": 1,
+  "describe": "A tappable board of `cols` x `rows` square cells at (`x`, `y`). Each tap emits the input `tap_cell` with the cell as an ivec2 (column x, row y). The game paints it through two functions it must declare: `cell_fill(c)` returns a color string such as '#AABBCC', or '' to draw the plain $surface cell (functions can't return $tokens, so use hex strings or game tokens written out as hex), and `cell_label(c)` returns the text drawn on the cell ('' for none). Cell index is c.y * cols + c.x. With a `cell` sprite, plain cells draw it instead of the $surface square. Tapped cells pop and play the `tap` moment. The board has no rules and no win or lose condition.",
+  "params": {
+    "cols":      { "type": "int", "default": 4, "min": 2, "max": 10 },
+    "rows":      { "type": "int", "default": 4, "min": 2, "max": 10 },
+    "cell_size": { "type": "int", "default": 64, "min": 24, "max": 90 },
+    "gap":       { "type": "int", "default": 8, "min": 0, "max": 16 },
+    "x":         { "type": "int", "default": 36, "min": 0, "max": 360 },
+    "y":         { "type": "int", "default": 180, "min": 0, "max": 640 }
+  },
+  "art": {
+    "cell": { "describe": "A plain board cell (a card back, a tile, a stone), drawn cell_size square wherever cell_fill(c) is ''.", "color": "surface" }
+  },
+  "requires": {
+    "functions": {
+      "cell_fill":  { "params": { "c": "ivec2" }, "returns": "string" },
+      "cell_label": { "params": { "c": "ivec2" }, "returns": "string" }
+    }
+  },
+  "inputs": {
+    "tap_cell": { "payload": { "cell": "ivec2" } }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "grid", "cols": "@cols", "rows": "@rows", "cell_size": "@cell_size", "gap": "@gap", "x": "@x", "y": "@y",
+          "cell": {
+            "node": "group",
+            "animate_on": { "tap_cell": { "when": "event.cell == cell", "prop": "scale", "keys": [1, 0.9, 1.05, 1], "ms": 170 } },
+            "children": [
+              {
+                "include": "@art.cell",
+                "node": "image", "asset": "@art.cell.id", "w": "@cell_size", "h": "@cell_size",
+                "visible": "= cell_fill(cell) == ''"
+              },
+              {
+                "include": "@art.cell",
+                "node": "rect", "w": "@cell_size", "h": "@cell_size", "radius": 10,
+                "fill": "= if cell_fill(cell) == '' then '#00000000' else cell_fill(cell)",
+                "on_tap": { "input": "tap_cell", "with": { "cell": "cell" } }
+              },
+              {
+                "include": "not @art.cell",
+                "node": "rect", "w": "@cell_size", "h": "@cell_size", "radius": 10,
+                "fill": "= if cell_fill(cell) == '' then $surface else cell_fill(cell)",
+                "transition": { "fill": { "ms": 150, "ease": "out" } },
+                "on_tap": { "input": "tap_cell", "with": { "cell": "cell" } }
+              },
+              {
+                "node": "text", "x": "@cell_size", "y": "@cell_size", "anchor": "center", "size": 24, "weight": 700, "color": "$ink",
+                "text": "= cell_label(cell)"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "tap_cell", "do": [ { "moment": "tap" } ] }
+    ]
+  },
+  "tags": { "mood": ["calm", "playful"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

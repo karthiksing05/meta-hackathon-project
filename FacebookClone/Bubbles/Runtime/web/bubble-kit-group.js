@@ -9,6 +9,11 @@
 //
 // State: state.sort_bins (space), state.sort_field (bubbles), state.sort_rule (judging, marks),
 // state.sort_score (multiplier).
+//
+// Length (docs/BUBBLES.md 7.9): by default a run deals the deck once (rule.timer: endlessly
+// against the clock). Rounds: length.rounds bubbles (the deck reshuffles if it runs short), each
+// one a round. Timed, lives and endless deal endlessly: the clock ends a timed run; misses spend
+// lives (rule.lives, else sdk.lengthMiss); in endless a miss ends the run unless rule.lives is there.
 (function () {
   "use strict";
   var root = typeof globalThis !== "undefined" ? globalThis : this;
@@ -254,11 +259,21 @@
       var groups = groupsOf(sdk.content);
       var items = [];
       groups.forEach(function (g, gi) { g.items.forEach(function (label) { items.push({ label: label, group: gi }); }); });
-      var endless = sdk.has("rule.timer");
+      var L = sdk.length || {};
+      var endless = L.rounds ? false : L.locked ? true : sdk.has("rule.timer");
       function freshDeck() {
         var idx = [];
         for (var i = 0; i < items.length; i++) idx.push(i);
         idx = sdk.shuffle(idx);
+        if (L.rounds) {
+          // Exactly length.rounds bubbles: reshuffle the deck as often as it takes.
+          while (idx.length < L.rounds && items.length) {
+            var more = [];
+            for (var j = 0; j < items.length; j++) more.push(j);
+            idx = idx.concat(sdk.shuffle(more));
+          }
+          return idx.slice(0, L.rounds);
+        }
         var n = Math.floor(num(params.deal, 0));
         if (n > 0 && !endless) idx = idx.slice(0, Math.min(n, idx.length));
         return idx;
@@ -480,6 +495,15 @@
     glue: [],
     setup: function (sdk, params) {
       var st = sdk.state.sort_rule = { hits: 0, wrong: 0, escaped: 0, streak: 0, bestStreak: 0, marks: [], rows: [], binCounts: [0, 0, 0, 0], over: false };
+      // Length: every resolved bubble is a round; with a locked length and no rule.lives, a miss
+      // spends a life (lives) or ends the run (endless). Rounds show here, top right.
+      var L = sdk.length || {};
+      if (L.rounds) sdk.hud.length = false;
+      function lengthMissEnds() {
+        if (!L.locked || sdk.has("rule.lives")) return false;
+        if (L.mode === "lives") return !sdk.lengthMiss();
+        return L.mode === "endless";
+      }
       function mark(m) {
         st.marks.push(m === "hit" ? MARK.hit : m === "miss" ? MARK.wrong : MARK.escaped);
         st.rows.push(m);
@@ -492,6 +516,14 @@
         if (reason === "escaped") { sdk.fx.pop(e.x, ESCAPE_Y, null, 10); sdk.fx.sound("whoosh"); }
         else { sdk.fx.pop(e.x, e.y, null, 8); sdk.fx.sound("fail"); sdk.fx.shake(4); }
         sdk.fx.haptic("warning");
+        if (sdk.ended) return;
+        if ((reason !== "escaped" || params.escape_costs_life) && lengthMissEnds()) {
+          st.over = true;
+          sdk.emit("rule.fail", { reason: reason, sorted: st.hits });
+          sdk.end("fail", { sorted: st.hits, delay: 20 });
+          return;
+        }
+        sdk.lengthRound({ delay: 12 });
       }
       sdk.on("entity.sorted", function (e) {
         if (st.over || sdk.ended) return;
@@ -505,6 +537,7 @@
           if (big && sdk.fx.sparkle) sdk.fx.sparkle(e.x, e.y - 20, null, 12);
           sdk.fx.sound(big ? "chime" : "pop");
           sdk.fx.haptic(big ? "success" : "light");
+          sdk.lengthRound({ delay: 12 });
         } else lose("wrong_bin", e);
       });
       sdk.on("entity.escaped", function (e) { if (!st.over && !sdk.ended) lose("escaped", e); });
@@ -668,7 +701,7 @@
   function share(sdk) {
     var rule = sdk.state.sort_rule, f = sdk.state.sort_field;
     var m = sdk.manifest || {};
-    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Bubble");
+    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Game");
     if (!rule) return { headline: title, score_text: sdk.score + " points" };
     var rows = [];
     for (var i = 0; i < rule.marks.length; i += 6) rows.push(rule.marks.slice(i, i + 6).join(""));
@@ -710,6 +743,18 @@
     validateContent: validateContent,
     bot: { describe: "Takes the highest (most urgent) bubble after a 0.2–1.1 s reaction (faster with skill), taps it, then taps the right bin with probability 0.55–0.98 by skill.", decide: decide },
     share: share,
+    // Length (docs/BUBBLES.md 7.9): a run deals the deck once by default (rule.timer: timed).
+    length: {
+      modes: ["rounds", "timed", "lives", "endless"],
+      default: { mode: "rounds" },
+      numbers: { rounds: 15, seconds: 45, lives: 3 },
+      infer: { rounds: ["entity.sort_bubble.deal"] },
+      knobs: {
+        speed: { concept: "entity.sort_bubble", param: "rise_speed", label: "Rise speed", min: 20, max: 60 },
+        difficulty: { concept: "entity.sort_bubble", param: "spawn_every", label: "Pace", min: 1, max: 3, invert: true },
+      },
+      describe: "Rounds: bubbles to sort. Timed: sort as many as you can. Lives: misses you can take.",
+    },
     example: {
       id: "example-group", version: 1, engine_version: 1,
       title: "Hill or Flat?",

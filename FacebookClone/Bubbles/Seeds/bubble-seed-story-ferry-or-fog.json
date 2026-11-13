@@ -1,0 +1,360 @@
+{
+  "id": "story-ferry-or-fog",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Ferry or Fog?",
+  "one_line_rule": "Pick your path through your first Saturday in the city.",
+  "formula": "story",
+  "brief": {
+    "intent": "a first-Saturday adventure for New in SF",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "cozy",
+      "curious"
+    ],
+    "energy": "low",
+    "competition": "light"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "paper",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#FBF6EC",
+      "bg_bottom": "#F0E7D6",
+      "ink": "#2A2440",
+      "primary": "#4F6BED",
+      "secondary": "#7B5CD6",
+      "accent": "#2E86B0",
+      "danger": "#A83A3A"
+    },
+    "font": "serif",
+    "motif": "city",
+    "emoji": "⛴️",
+    "mood_preset": "cozy",
+    "cover_prompt": "paper-cut illustration of a small ferry crossing a foggy bay toward a city pier at golden hour, layered cream paper, soft blue and violet"
+  },
+  "concepts": [
+    {
+      "use": "space.story_page"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.story_paths"
+    },
+    {
+      "use": "score.story_points"
+    },
+    {
+      "use": "feel.mood_preset"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "start": "morning",
+    "scenes": [
+      {
+        "id": "morning",
+        "emoji": "☀️",
+        "text": "Your first Saturday in the city. The fog is lifting off the bay, and the New in SF crew says: meet at the pier at sunset.",
+        "choices": [
+          {
+            "id": "ferry",
+            "text": "Take the ferry",
+            "to": "ferry",
+            "past": "took the ferry"
+          },
+          {
+            "id": "stairs",
+            "text": "Take the stairs",
+            "to": "stairs",
+            "past": "took the stairs"
+          }
+        ]
+      },
+      {
+        "id": "ferry",
+        "emoji": "⛴️",
+        "text": "The ferry rocks gently. A woman with a sketchbook smiles at you. Gulls trail the boat like kites.",
+        "choices": [
+          {
+            "id": "sketch",
+            "text": "Sit with the sketcher",
+            "to": "sketch",
+            "past": "sat with a sketcher",
+            "set": [
+              "sketch"
+            ]
+          },
+          {
+            "id": "bow",
+            "text": "Dash to the bow",
+            "to": "bow",
+            "past": "dashed to the bow",
+            "skill": {
+              "kind": "timing",
+              "window": 0.3,
+              "miss": "splash"
+            }
+          }
+        ]
+      },
+      {
+        "id": "sketch",
+        "emoji": "✏️",
+        "speaker": "Ines",
+        "text": "\"I draw one stranger every weekend,\" she says, turning the page to you. \"Hold still. Island, or back to the pier?\"",
+        "choices": [
+          {
+            "id": "island",
+            "text": "Hop off at the island",
+            "to": "isle",
+            "past": "hopped off at the island"
+          },
+          {
+            "id": "back",
+            "text": "Ride back to the pier",
+            "to": "pier",
+            "past": "rode back to the pier"
+          }
+        ]
+      },
+      {
+        "id": "bow",
+        "emoji": "📸",
+        "text": "You reach the bow just as the boat crests a wave. Your photo of the bridge rising out of the fog is unreal.",
+        "choices": [
+          {
+            "id": "post",
+            "text": "Post it to the Group",
+            "to": "pier",
+            "past": "posted the bridge photo"
+          },
+          {
+            "id": "island-2",
+            "text": "Hop off at the island",
+            "to": "isle",
+            "past": "hopped off at the island"
+          }
+        ]
+      },
+      {
+        "id": "splash",
+        "emoji": "💦",
+        "text": "A wave smacks the bow and soaks your jacket. A deckhand tosses you a towel and a grin. Welcome to the bay.",
+        "choices": [
+          {
+            "id": "dry",
+            "text": "Dry off and ride back",
+            "to": "pier",
+            "past": "dried off on the ferry"
+          }
+        ]
+      },
+      {
+        "id": "isle",
+        "emoji": "🌼",
+        "text": "The island is all wind and wildflowers. Ines unpacks bread and a thermos and hands you a cup. Nobody here is in a hurry.",
+        "choices": [
+          {
+            "id": "picnic",
+            "text": "Stay for the picnic",
+            "to": "island",
+            "past": "stayed on the island"
+          }
+        ]
+      },
+      {
+        "id": "stairs",
+        "emoji": "🪜",
+        "text": "Three hundred steps down the hill, past gardens and a cat on every landing. Halfway down, a garden gate stands open.",
+        "choices": [
+          {
+            "id": "gate",
+            "text": "Peek through the gate",
+            "to": "gate",
+            "past": "peeked through the gate"
+          },
+          {
+            "id": "race",
+            "text": "Race to the bottom",
+            "to": "race",
+            "past": "raced down the stairs",
+            "skill": {
+              "kind": "timing",
+              "window": 0.25,
+              "miss": "fog"
+            }
+          }
+        ]
+      },
+      {
+        "id": "gate",
+        "emoji": "🗝️",
+        "speaker": "Mr. Okoro",
+        "text": "An old man is watering tomatoes. \"New here? Take this key. Yellow building on the pier, the roof, at sunset. Trust me.\"",
+        "choices": [
+          {
+            "id": "key",
+            "text": "Pocket the key",
+            "to": "pier",
+            "past": "took the key",
+            "set": [
+              "key"
+            ]
+          },
+          {
+            "id": "thanks",
+            "text": "Smile and head on",
+            "to": "fog",
+            "past": "waved and wandered on"
+          }
+        ]
+      },
+      {
+        "id": "race",
+        "emoji": "🏃",
+        "text": "You fly down the last flight, early. A busker drops a key tagged YELLOW ROOF. \"Keep it,\" she laughs. \"Sunset up there is free.\"",
+        "choices": [
+          {
+            "id": "pocket",
+            "text": "Pocket the key",
+            "to": "pier",
+            "past": "pocketed a rooftop key",
+            "set": [
+              "key"
+            ]
+          },
+          {
+            "id": "crew",
+            "text": "Find the crew",
+            "to": "pier",
+            "past": "found the crew early"
+          }
+        ]
+      },
+      {
+        "id": "fog",
+        "emoji": "🌫️",
+        "text": "You take a wrong turn and the fog rolls back in. Every street looks like the last one. Somewhere, a foghorn.",
+        "choices": [
+          {
+            "id": "ask",
+            "text": "Ask for directions",
+            "to": "pier",
+            "past": "asked for directions"
+          },
+          {
+            "id": "foghorn",
+            "text": "Follow the foghorn",
+            "to": "lost",
+            "past": "followed the foghorn"
+          }
+        ]
+      },
+      {
+        "id": "pier",
+        "emoji": "🌉",
+        "text": "The crew is on the pier: Maya waving, Diego with snacks. The light is going gold over the water.",
+        "choices": [
+          {
+            "id": "stay",
+            "text": "Stay for golden hour",
+            "to": "golden",
+            "past": "stayed for golden hour"
+          },
+          {
+            "id": "roof",
+            "text": "Try the yellow roof",
+            "to": "rooftop",
+            "past": "opened the rooftop",
+            "need": [
+              "key"
+            ]
+          },
+          {
+            "id": "wander",
+            "text": "Wander off alone",
+            "to": "lost",
+            "past": "wandered off"
+          }
+        ]
+      },
+      {
+        "id": "island",
+        "emoji": "🏝️",
+        "text": "You stay till sunset with your new friend and her sketchbook, then text the crew her drawing of you. They want to meet her.",
+        "ending": {
+          "id": "island",
+          "title": "Island Picnic",
+          "emoji": "🏝️",
+          "tone": "good"
+        }
+      },
+      {
+        "id": "golden",
+        "emoji": "🌇",
+        "text": "The bridge glows orange, the band plays, and Maya says, \"Same time next Saturday?\" You say yes before she finishes.",
+        "ending": {
+          "id": "golden-hour",
+          "title": "Golden Hour on the Pier",
+          "emoji": "🌇",
+          "tone": "good"
+        }
+      },
+      {
+        "id": "lost",
+        "emoji": "🍜",
+        "text": "You end up at a tiny noodle shop that isn't on any map. Best soup of your life. You'll never find it again.",
+        "ending": {
+          "id": "noodle",
+          "title": "Lost in the Fog",
+          "emoji": "🍜",
+          "tone": "odd"
+        }
+      },
+      {
+        "id": "rooftop",
+        "emoji": "🏙️",
+        "text": "The key fits. The crew climbs up as the sun drops behind the hills. Mr. Okoro was right: trust the neighbors.",
+        "ending": {
+          "id": "rooftop",
+          "title": "The Secret Rooftop",
+          "emoji": "🏙️",
+          "tone": "secret"
+        }
+      }
+    ]
+  },
+  "seed": 2026111401,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-12T10:00:00Z",
+    "duration_sec": 47.3,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-priya-natarajan",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 5,
+    "play_count": 142,
+    "like_count": 38,
+    "save_count": 51
+  }
+}
