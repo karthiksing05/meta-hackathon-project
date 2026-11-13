@@ -61,8 +61,9 @@ func (s *Server) soundViews(r *http.Request, list []model.Sound) ([]model.SoundV
 	for i, x := range list {
 		base := s.GamesBaseURL + "/" + x.StorageKey + "/"
 		v := model.SoundView{
-			ID: x.ID, Title: x.Title, Creator: x.OwnerUsername, CreatorID: x.OwnerID, Kind: x.Kind, DurationMs: x.DurationMs, BPM: x.BPM,
+			ID: x.ID, Title: x.Title, Creator: x.Credit(), CreatorID: x.OwnerID, Kind: x.Kind, DurationMs: x.DurationMs, BPM: x.BPM,
 			AudioURL: base + x.AudioPath, UseCount: x.UseCount, Saves: x.Saves, SavedByMe: saved[x.ID], CreatedAt: x.CreatedAt,
+			License: x.License, Attribution: x.Attribution, SourceURL: x.SourceURL, Tags: x.Tags,
 		}
 		if x.CoverPath != "" {
 			v.CoverURL = base + x.CoverPath
@@ -191,6 +192,12 @@ func (s *Server) createSound(w http.ResponseWriter, r *http.Request) {
 		DurationMs int64  `json:"duration_ms"`
 		BPM        int    `json:"bpm"`
 		Kind       string `json:"kind"`
+		// Credit for a track by another artist (optional): see model.Sound.
+		Artist      string   `json:"artist"`
+		License     string   `json:"license"`
+		Attribution string   `json:"attribution"`
+		SourceURL   string   `json:"source_url"`
+		Tags        []string `json:"tags"`
 	}
 	_, err := s.Packages.Publish(r.Context(), id, r.Body, func(p *pkgstore.Package) error {
 		if json.Unmarshal(p.Manifest, &m) != nil {
@@ -208,6 +215,18 @@ func (s *Server) createSound(w http.ResponseWriter, r *http.Request) {
 			return errors.New("duration_ms must be between 0 and 10 minutes")
 		case m.BPM < 0 || m.BPM > 400:
 			return errors.New("bpm must be between 0 and 400")
+		case len([]rune(m.Artist)) > 80 || len([]rune(m.License)) > 60 || len([]rune(m.Attribution)) > 400:
+			return errors.New("artist (80), license (60) and attribution (400 characters) are too long")
+		case m.SourceURL != "" && !strings.HasPrefix(m.SourceURL, "https://") && !strings.HasPrefix(m.SourceURL, "http://"):
+			return errors.New("source_url must be an http(s) address")
+		case len(m.Tags) > 8:
+			return errors.New("at most 8 tags")
+		}
+		for i, t := range m.Tags {
+			m.Tags[i] = strings.ToLower(strings.TrimSpace(t))
+			if m.Tags[i] == "" || len(m.Tags[i]) > 24 {
+				return errors.New("each tag is 1 to 24 characters")
+			}
 		}
 		return nil
 	})
@@ -231,6 +250,8 @@ func (s *Server) createSound(w http.ResponseWriter, r *http.Request) {
 	sd := &model.Sound{
 		ID: id, Title: m.Title, OwnerID: u.ID, OwnerUsername: u.Username, Kind: kind, DurationMs: m.DurationMs, BPM: m.BPM,
 		StorageKey: id, AudioPath: m.Audio, CoverPath: m.Cover, CreatedAt: time.Now().UTC().Truncate(time.Millisecond),
+		Artist: strings.TrimSpace(m.Artist), License: strings.TrimSpace(m.License), Attribution: strings.TrimSpace(m.Attribution),
+		SourceURL: strings.TrimSpace(m.SourceURL), Tags: m.Tags,
 	}
 	if err := s.Store.InsertSound(r.Context(), sd); err != nil {
 		s.serverErr(w, r, err)
@@ -353,7 +374,7 @@ func (s *Server) attachSoundViews(ctx context.Context, games []model.Game, out [
 			continue
 		}
 		base := s.GamesBaseURL + "/" + sd.StorageKey + "/"
-		v := &model.GameSoundView{ID: sd.ID, Title: sd.Title, Creator: sd.OwnerUsername, AudioURL: base + sd.AudioPath, OffsetMs: g.Sound.OffsetMs, Mix: g.Sound.Mix}
+		v := &model.GameSoundView{ID: sd.ID, Title: sd.Title, Creator: sd.Credit(), Attribution: sd.Attribution, AudioURL: base + sd.AudioPath, OffsetMs: g.Sound.OffsetMs, Mix: g.Sound.Mix}
 		if sd.CoverPath != "" {
 			v.CoverURL = base + sd.CoverPath
 		}
