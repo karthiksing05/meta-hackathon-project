@@ -106,7 +106,7 @@
     "music": false
   },
   "feel": {
-    "particles": true,
+    "particles": false,
     "shake": true,
     "haptics": true
   },
