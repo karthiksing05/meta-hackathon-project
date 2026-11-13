@@ -46,8 +46,11 @@ function textOnSprite(scenes, add) {
       if (ta < 4) continue;
       // A label that rides on its own sprite (a badge on a moving piece) is part of that sprite.
       if (t.moving && t.n && items.some((x) => x !== t && x.n && x.n.parentPtr === t.n.parentPtr && x.op.op === 'image')) continue;
+      const plate = items.find((it) => it.i === t.i - 1 && it.op.op === 'rect' && it.n && t.n && it.n.parentPtr === t.n.parentPtr);
       for (const sp of sprites) {
         if (sp.handler && sp.handler === t.handler) continue; // the label of a button drawn as a sprite
+        // Another instance of the same badge (two popups stacked): opaque plates over plates, read as a pile.
+        if (plate && sp !== plate && sp.n?.ptr === plate.n.ptr && opacityOf(sp.op) > 0.85) continue;
         if (sp.n && t.n && (sp.n.parentPtr === t.n.parentPtr || t.n.ancestors.includes(sp.n.parentPtr))) {
           // A sprite beside the text in its own group is its card/tile art: only a partial cross counts.
           if (iarea(t.box, sp.box) >= 0.85 * ta) continue;

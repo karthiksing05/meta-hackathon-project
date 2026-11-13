@@ -25,7 +25,8 @@ export const MIN_GAP = 4;     // between tap targets
 const TAG_EPS = 1e-5;
 const TAGGED = new Set(['rect', 'circle', 'text', 'image']);
 const TEMPLATE_KEYS = ['template', 'item', 'cell', 'node'];
-const HUD_RE = /\b(score|time|timer|clock|lives|life|level|round|best|streak|moves|distance|metres|meters|coins?|strikes?|mistakes?|wave|lap|question|prompt|hp|health|combo|points?|pts|rows)\b|\d+\s*(\/|of)\s*\d+|\bscore\b/i;
+// A counter readout: a known HUD word, "3 of 5", or any "Label: <number>" (literal or `'Label: ' + str(n)`).
+const HUD_RE = /\b(score|time|timer|clock|lives|life|level|round|best|streak|moves|distance|metres|meters|coins?|strikes?|mistakes?|wave|lap|question|prompt|hp|health|combo|points?|pts|rows)\b|\d+\s*(\/|of)\s*\d+|\bscore\b|^[A-Za-z][A-Za-z ]{1,15}:\s*\d|'[A-Za-z][A-Za-z ]{0,15}:\s*'\s*\+\s*str\(/i;
 
 export const HINTS = {
   L_TEXT_OVERFLOW: 'shrink the label to fit its box (size down to 11), then wrap it (text w + wrap: true), or give the tile more room',
@@ -183,6 +184,26 @@ const contains = (b, x, y, tol = 0) => x >= b.x0 - tol && x <= b.x1 + tol && y >
 const round = (b) => b && ({ x: +b.x0.toFixed(1), y: +b.y0.toFixed(1), w: +(b.x1 - b.x0).toFixed(1), h: +(b.y1 - b.y0).toFixed(1) });
 const scaled = (b, s, cx, cy) => (s === 1 || s == null ? b : { x0: cx + (b.x0 - cx) * s, y0: cy + (b.y0 - cy) * s, x1: cx + (b.x1 - cx) * s, y1: cy + (b.y1 - cy) * s });
 
+/**
+ * Whether a node moved between two captures: its box went up or down, or sideways at both edges and
+ * its center. A box that only grows or shrinks around its anchor (a centered label whose text changes
+ * length, a bar filling from its left edge) isn't motion.
+ */
+export function moved(p, b) {
+  if (Math.abs(p.y0 - b.y0) > 2 && Math.abs(p.y1 - b.y1) > 2) return true;
+  return Math.abs(p.x0 - b.x0) > 2 && Math.abs(p.x1 - b.x1) > 2 && Math.abs(p.x0 + p.x1 - b.x0 - b.x1) > 4;
+}
+
+/**
+ * Whether a y (a box's center) is in a HUD band: the top 20 % or bottom 12 % of a 360 × 640 canvas;
+ * on a tall canvas, the safe area's top 100 units (two HUD rows under the phone's bar) or its bottom
+ * 72, and the bleed bands beyond them.
+ */
+export function inHudBand(cy, W, H) {
+  if (H * 360 > W * 640 * 1.02) return cy < H * 110 / 780 + 100 || cy > H * (1 - 96 / 780) - 72;
+  return cy < 0.2 * H || cy > 0.88 * H;
+}
+
 export function approxWidth(line, size, weight) { return [...line].length * size * 0.6 * (weight >= 600 ? 1.05 : 1); }
 
 /** The box a text op's glyphs cover (widths: measured line widths, or the engine's approximation). */
@@ -301,7 +322,7 @@ export function lintSample(sample, { measures = null } = {}) {
       if (!b) return;
       const sk = `${f.idle}:${f.seed}:${n.id}:${k}`;
       const p = lastPos.get(sk);
-      if (p && (Math.abs(p.x0 - b.x0) > 2 || Math.abs(p.y0 - b.y0) > 2)) moving.add(n.id);
+      if (p && moved(p, b)) moving.add(n.id);
       lastPos.set(sk, b);
     });
   }
@@ -318,7 +339,7 @@ export function lintSample(sample, { measures = null } = {}) {
       if (op.op === 'text') box = textInk(op, measByIdx.get(i)?.widths ?? null);
       const isBackdrop = op.op !== 'text' && box && area(box) >= 0.7 * canvasArea;
       const cy = box ? (box.y0 + box.y1) / 2 : 0;
-      const inBand = cy < 0.2 * H || cy > 0.88 * H;
+      const inBand = inHudBand(cy, W, H);
       let role = 'shape';
       if (isBackdrop) role = 'backdrop';
       else if (n?.hud && inBand) role = 'hud';
@@ -344,7 +365,10 @@ export function lintSample(sample, { measures = null } = {}) {
       // and (when tagged) that sits beside the text in the tree.
       const ax = op.x + op.w / 2, ay = op.y + op.h / 2;
       const related = (s) => !t.n || !s.n || s.n.parentPtr === t.n.parentPtr || (t.n.ancestors.includes(s.n.parentPtr) && s.n.parentPtr !== t.n.ancestors[0]);
-      const cont = shapes.filter((s) => s.i < t.i && contains(s.box, ax, ay, 1) && related(s) && area(s.box) < 0.6 * canvasArea && area(s.box) > 100 && (s.op.op !== 'image' || s.role === 'target' || s.n?.interactive || t.n?.inTemplate))
+      // A badge's own plate is the rect drawn just before it in its group; the same plate node's
+      // other instances (another popup's badge) are never this text's container.
+      const plate = items.find((it) => it.i === t.i - 1 && it.op.op === 'rect' && it.n && t.n && it.n.parentPtr === t.n.parentPtr);
+      const cont = shapes.filter((s) => s.i < t.i && contains(s.box, ax, ay, 1) && related(s) && !(plate && s !== plate && s.n?.ptr === plate.n.ptr) && area(s.box) < 0.6 * canvasArea && area(s.box) > 100 && (s.op.op !== 'image' || s.role === 'target' || s.n?.interactive || t.n?.inTemplate))
         .sort((a, b) => area(a.box) - area(b.box))[0];
       if (cont) {
         const c = cont.box;
@@ -380,6 +404,9 @@ export function lintSample(sample, { measures = null } = {}) {
     // --- text over text
     for (let a = 0; a < texts.length; a++) for (let b = a + 1; b < texts.length; b++) {
       const A = texts[a], B = texts[b];
+      // A crossfade (one label fading out as another fades in, 250 ms): a text under half opacity is
+      // in transition, not a second label on top.
+      if (Math.min(A.op.opacity ?? 1, B.op.opacity ?? 1) < 0.5) continue;
       const ia = iarea(A.box, B.box);
       if (ia <= 0 || ia < 0.2 * Math.min(area(A.box), area(B.box))) continue;
       if (A.op.text === B.op.text && Math.abs(A.op.x - B.op.x) <= 4 && Math.abs(A.op.y - B.op.y) <= 4) continue; // a drop shadow
@@ -484,6 +511,43 @@ export function lintSample(sample, { measures = null } = {}) {
 
 const clip = (s) => { s = String(s).replace(/\n/g, ' '); return s.length > 28 ? s.slice(0, 27) + '…' : s; };
 
+/**
+ * Where each tagged node was drawn over the sampled frames: {ptr → {kind, box (union of every op's
+ * box), moving, frames (captures it was visible in), of (captures in all), hud, inTemplate,
+ * interactive, text}}. Text boxes use measured widths when `measures` has them. The structural
+ * layout fixes (layout-fix.mjs) read this to tell popups and labels riding sprites from fixed text,
+ * and to find what sits in a tall canvas's bleed bands.
+ */
+export function nodeGeometry(sample, { measures = null } = {}) {
+  const { frames, nodes } = sample;
+  const out = new Map();
+  const lastPos = new Map();
+  for (const f of frames) {
+    const ord = new Map();
+    const meas = new Map((measures?.[f.key] ?? []).map((m) => [m.i, m]));
+    const seenHere = new Set();
+    f.frame.ops.forEach((op, i) => {
+      const n = decodeTag(op, nodes);
+      if (!n) return;
+      if (!((op.opacity ?? 1) > 0.05) || (op.scale ?? 1) === 0) return;
+      const k = ord.get(n.id) ?? 0; ord.set(n.id, k + 1);
+      const b = op.op === 'text' ? textInk(op, meas.get(i)?.widths ?? null) : opBox(op);
+      if (!b) return;
+      let g = out.get(n.ptr);
+      if (!g) out.set(n.ptr, (g = { kind: n.kind, box: { ...b }, moving: false, frames: 0, of: frames.length, hud: !!n.hud, inTemplate: n.inTemplate, interactive: n.interactive, text: n.text }));
+      g.box = { x0: Math.min(g.box.x0, b.x0), y0: Math.min(g.box.y0, b.y0), x1: Math.max(g.box.x1, b.x1), y1: Math.max(g.box.y1, b.y1) };
+      if (!seenHere.has(n.ptr)) { g.frames++; seenHere.add(n.ptr); }
+      const sk = `${f.idle}:${f.seed}:${f.run ?? ''}:${n.id}:${k}`;
+      const p = lastPos.get(sk);
+      if (p && moved(p, b)) g.moving = true;
+      lastPos.set(sk, b);
+    });
+  }
+  const H = frames[0]?.frame?.height ?? 640, W = frames[0]?.frame?.width ?? 360;
+  for (const g of out.values()) g.inBand = inHudBand((g.box.y0 + g.box.y1) / 2, W, H);
+  return out;
+}
+
 /** Counts by code and severity, plus a 0–100 layout score (100 = no findings). */
 export function countFindings(findings) {
   const byCode = {};
@@ -497,8 +561,8 @@ export function countFindings(findings) {
  * opts: {seeds, maxSeconds, pixels (default true when Chrome is installed), pngs: write PNGs of intro/mid/end}.
  * Returns {findings, counts, tagged, frames: [{key, label, png?}]}.
  */
-export async function layoutCheck(gameJson, { seeds = [1, 2], maxSeconds = 40, pixels = null, pngs = false, engine = null } = {}) {
-  const sample = await sampleFrames(gameJson, { seeds, maxSeconds, engine });
+export async function layoutCheck(gameJson, { seeds = [1, 2], maxSeconds = 40, everyMs = 1500, pixels = null, pngs = false, engine = null } = {}) {
+  const sample = await sampleFrames(gameJson, { seeds, maxSeconds, everyMs, engine });
   let measures = null;
   const shots = [];
   const { chromeAvailable, renderFrames } = await import('./frame-render.mjs');
@@ -517,7 +581,8 @@ export async function layoutCheck(gameJson, { seeds = [1, 2], maxSeconds = 40, p
   }
   // Frames without Chrome measures fall back to the approximation inside lintSample.
   const findings = lintSample(sample, { measures });
-  return { findings, counts: countFindings(findings), tagged: sample.tagged, pixels: !!measures, frames: shots };
+  const geometry = nodeGeometry(sample, { measures });
+  return { findings, counts: countFindings(findings), tagged: sample.tagged, pixels: !!measures, frames: shots, geometry };
 }
 
 /** A manifest, a {content: {game_json}} wrapper or a bare game, as the game object. */

@@ -2,7 +2,7 @@
 // (layout-check.mjs's rotation tags), gives it a role (backdrop, hud, target, actor, label, shape),
 // and maps the engine's hit targets to the nodes that own them (the nearest node with a handler).
 
-import { walkNodes, opBox, textInk, parseColor } from '../playtest/layout-check.mjs';
+import { walkNodes, opBox, textInk, parseColor, moved, inHudBand } from '../playtest/layout-check.mjs';
 
 const TAG_EPS = 1e-5;
 export const area = (b) => (b ? Math.max(0, b.x1 - b.x0) * Math.max(0, b.y1 - b.y0) : 0);
@@ -53,7 +53,7 @@ export function analyze(sample, game, measures = null) {
       if (!b) continue;
       const sk = `${f.seed}:${n.id}:${k}`;
       const p = lastPos.get(sk);
-      if (p && (Math.abs(p.x0 - b.x0) > 2 || Math.abs(p.y0 - b.y0) > 2)) moving.add(n.id);
+      if (p && moved(p, b)) moving.add(n.id);
       lastPos.set(sk, b);
     }
   }
@@ -70,7 +70,7 @@ export function analyze(sample, game, measures = null) {
       const cy = (box.y0 + box.y1) / 2;
       let role = 'shape';
       if (op.op !== 'text' && area(box) >= 0.7 * W * H) role = 'backdrop';
-      else if (n?.hud && (cy < 0.2 * H || cy > 0.88 * H)) role = 'hud';
+      else if (n?.hud && inHudBand(cy, W, H)) role = 'hud';
       else if (n?.interactive) role = 'target';
       else if (n && moving.has(n.id) && op.op !== 'text') role = 'actor';
       else if (op.op === 'text') role = 'label';
