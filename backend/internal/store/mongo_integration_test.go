@@ -288,7 +288,7 @@ func TestMongoSocial(t *testing.T) {
 	}
 	now := time.Now().UTC().Truncate(time.Millisecond)
 	for _, u := range []model.User{
-		{ID: "sf-maya", Email: "maya@cast.invalid", Username: "sf_maya", DisplayName: "Maya", Synthetic: true, Skill: 0.9, CreatedAt: now},
+		{ID: "sf-maya", Email: "maya@cast.invalid", Username: "sf_maya", DisplayName: "Maya", CreatedAt: now},
 		{ID: "u2", Email: "b@example.com", Username: "bee", DisplayName: "Bee", CreatedAt: now},
 	} {
 		u := u
@@ -296,7 +296,7 @@ func TestMongoSocial(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if u, err := m.UserByUsername(ctx, "sf_maya"); err != nil || !u.Synthetic || u.Skill != 0.9 {
+	if u, err := m.UserByUsername(ctx, "sf_maya"); err != nil || u.ID != "sf-maya" {
 		t.Fatalf("by username: %+v %v", u, err)
 	}
 	if us, _ := m.UsersByIDs(ctx, []string{"sf-maya", "u2", "nobody"}); len(us) != 2 {
