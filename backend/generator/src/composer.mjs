@@ -145,9 +145,10 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
     hooks = made.hooks;
     if (made.notes.length) console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'compose hooks', notes: made.notes }));
   }
-  // The canvas: context.canvas ("tall" | "classic") wins, else GENERATOR_CANVAS (classic by default for now).
+  // The canvas: context.canvas ("tall" | "classic") wins, else GENERATOR_CANVAS (tall, 360 × 780, by default: it fills a
+  // 19.5:9 phone edge to edge; GENERATOR_CANVAS=classic builds 360 × 640).
   // GENERATOR_LAYOUT_BLOCK=1 refuses to publish a game the layout verifier still blocks on (context.layout_block).
-  const canvas = ['tall', 'classic'].includes(context?.canvas) ? context.canvas : (String(env.GENERATOR_CANVAS ?? '').trim().toLowerCase() === 'tall' ? 'tall' : 'classic');
+  const canvas = ['tall', 'classic'].includes(context?.canvas) ? context.canvas : (String(env.GENERATOR_CANVAS ?? '').trim().toLowerCase() === 'classic' ? 'classic' : 'tall');
   const layoutBlock = context?.layout_block === true || (context?.layout_block === undefined && ['1', 'on', 'true', 'yes'].includes(String(env.GENERATOR_LAYOUT_BLOCK ?? '').trim().toLowerCase()));
   context = { ...(context ?? {}), canvas, ...(layoutBlock ? { layout_block: true } : {}) };
   // The person's own photos and video (context.media, src/media.mjs): Muse composes from their description and names the
