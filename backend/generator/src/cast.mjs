@@ -470,7 +470,12 @@ export async function finishCastArt({ manifest, state, studio, muse, basePool = 
     if (!r.missing.length) break;
     const canPaint = state.imageCalls < MAX_IMAGE_CALLS && Date.now() + IMAGE_TIMEOUT_S * 1000 < deadline && !signal?.aborted && typeof muse?.image === 'function';
     if (!canPaint || n === 2) break;
-    const extra = r.missing.slice(0, MAX_CELLS).map((m) => ({ id: m.id ?? idOf(m.name), name: m.name, text: m.name, kind: CHARACTER.test(m.name) ? 'character' : 'object', pose: CHARACTER.test(m.name) ? 'neutral' : null }));
+    // A missing id the cast already describes (a remix's repaint whose sheet failed) is painted as that, not as its id.
+    const extra = r.missing.slice(0, MAX_CELLS).map((m) => {
+      const known = m.id ? cast.find((c) => c.id === m.id) : null;
+      if (known) return { id: m.id, name: known.name, text: known.text ?? known.name, kind: known.kind, pose: known.kind === 'character' ? 'neutral' : null };
+      return { id: m.id ?? idOf(m.name), name: m.name, text: m.name, kind: CHARACTER.test(m.name) ? 'character' : 'object', pose: CHARACTER.test(m.name) ? 'neutral' : null };
+    });
     state.imageCalls++;
     report.imageCalls = state.imageCalls;
     try {
