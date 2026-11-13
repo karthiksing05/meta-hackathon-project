@@ -255,7 +255,7 @@
   //     bands and the backdrop stay still; only art moves. With nothing to move, the shake becomes
   //     a short edge tint.
   //   Pulses: text is drawn at no more than TEXT_SCALE_MAX (or less than 1 / TEXT_SCALE_MAX) scale.
-  const TOAST_MAX_CHARS = 22, TOAST_MAX_MS = 900, TOAST_FADE_IN = 120, TOAST_FADE_OUT = 180, TOAST_CLEAR_MS = 90, TOAST_SIZE = 15;
+  const TOAST_MAX_CHARS = 22, TOAST_MAX_MS = 900, TOAST_FADE_IN = 120, TOAST_FADE_OUT = 180, TOAST_CLEAR_MS = 90, TOAST_GRACE_MS = 200, TOAST_SIZE = 15;
   const SHAKE_MAX_PX = 3, SHAKE_MS = 150, SHAKE_INPUT_MS = 800;
   const TEXT_SCALE_MAX = 1.08;
 
@@ -304,7 +304,8 @@
   /** A text signature with numbers masked: changes when the screen's words change (a new round), not when a counter ticks. */
   function wordsSig(ops) {
     let s = "";
-    for (const op of ops) if (op.op === "text" && op.text && op.opacity > 0.05) s += String(op.text).replace(/\b\d+\b/g, "#") + "|";
+    // Every drawn text, faint or not: words fading in with the toast's own moment are part of it.
+    for (const op of ops) if (op.op === "text" && op.text) s += String(op.text).replace(/\b\d+\b/g, "#") + "|";
     return s;
   }
 
@@ -499,7 +500,8 @@
         if (nt) sess.toast = nt;
         const t = sess.toast;
         if (t) {
-          if (t.cleared == null && wordsSig(raw.ops) !== t.sig) t.cleared = now;
+          if (t.cleared == null && now - t.born > TOAST_GRACE_MS && wordsSig(raw.ops) !== t.sig) t.cleared = now;
+          else if (now - t.born <= TOAST_GRACE_MS) t.sig = wordsSig(raw.ops);
           const a = toastAlpha(t, now);
           if (a > 0) { if (ready) drawToast(gfx.ctx, sess, t, a); } else if (now > t.born) sess.toast = null;
         }

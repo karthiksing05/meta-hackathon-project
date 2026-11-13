@@ -192,13 +192,35 @@ export async function verifyAndFix(input, opts = {}) {
   const fixes = [];
   // The look stage (kit/look.mjs lookFix): every text node on the game's own fonts, scale and palette,
   // before anything is measured. Presentation only, so the proof covers it like the other fixes.
+  // The motion stage (motion-fix.mjs): one subtle shake, capped pulses, fixed HUD slots, fades
+  // instead of pops, the reveal cleared before the next labels. First, so the look stage dresses
+  // anything it adds. Presentation only; the proof covers it.
+  if (opts.motion !== false) {
+    try {
+      const { sampleMotion } = await import('./motion-track.mjs');
+      const { motionFindings } = await import('./motion.mjs');
+      const { motionFix } = await import('./motion-fix.mjs');
+      for (let round = 0; round < 2 && !over(); round++) {
+        const ms = await sampleMotion(game, { runs: opts.runs ?? null, engine, maxSeconds: 60 });
+        const f = motionFindings(game, ms).filter((x) => x.severity === 'block');
+        if (!f.length) break;
+        const r = motionFix(game, f, { msample: ms, lookId: built0?.authoring?.look?.id ?? null });
+        if (!r.fixes.length) break;
+        try { engine.load(JSON.stringify(r.game), 1).dispose(); } catch (e) { stages.push({ stage: 'motion', error: `fix rejected by the engine: ${String(e?.message ?? e).slice(0, 160)}` }); break; }
+        game = r.game;
+        fixes.push(...r.fixes.map((x) => ({ stage: 'motion', ...x })));
+      }
+    } catch (e) {
+      stages.push({ stage: 'motion', error: String(e?.message ?? e).slice(0, 200) });
+    }
+  }
   let lookSpec = null;
   if (opts.look !== false) {
     try {
       const { lookForBuilt, lookFix } = await import('../kit/look.mjs');
       const { spec } = lookForBuilt({ ...built0, game: original });
       lookSpec = spec;
-      const r = lookFix(original, spec);
+      const r = lookFix(game, spec);
       if (r.changed || r.tokens?.length) { game = r.game; fixes.push({ stage: 'look', changed: r.changed, tokens: r.tokens ?? [] }); }
     } catch (e) {
       stages.push({ stage: 'look', error: String(e?.message ?? e).slice(0, 200) });

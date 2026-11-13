@@ -21,6 +21,13 @@ function handlers(game) {
   return out.sort();
 }
 
+const MOTION_ACTIONS = ['shake', 'toast', 'particles'];
+function feedbackSansMotion(game) {
+  return (game?.presentation?.feedback ?? [])
+    .map((fb) => ({ ...fb, do: (fb.do ?? []).filter((x) => !(x && typeof x === 'object' && MOTION_ACTIONS.some((k) => k in x))) }))
+    .filter((fb) => fb.do.length);
+}
+
 /** {rules: bool, diff: [what differs]} */
 export function sameRules(a, b) {
   const diff = [];
@@ -28,7 +35,9 @@ export function sameRules(a, b) {
     if (k === 'presentation') continue;
     if (stable(a[k]) !== stable(b[k])) diff.push(k);
   }
-  if (stable(a.presentation?.feedback) !== stable(b.presentation?.feedback)) diff.push('presentation.feedback');
+  // Feedback can't change state; only its sounds and haptics are compared (the motion fixes trim
+  // shakes, toasts and particles).
+  if (stable(feedbackSansMotion(a)) !== stable(feedbackSansMotion(b))) diff.push('presentation.feedback');
   if (handlers(a).join('\n') !== handlers(b).join('\n')) diff.push('presentation handlers');
   return { rules: diff.length === 0, diff };
 }

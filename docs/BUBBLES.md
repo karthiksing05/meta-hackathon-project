@@ -1622,7 +1622,7 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
     tap target crosses, just under the HUD first, then the first free band down (then up) the safe
     area. With no free band there is no toast. It fades in (120 ms) and out in place, with no rise and
     no scale pop. It lasts at most 900 ms (or the toast's own `ms` if shorter), and fades out within
-    90 ms as soon as the screen's words change, so it never crosses into the next round. A counter
+    90 ms as soon as the screen's words change (after a 200 ms grace for words arriving with it), so it never crosses into the next round. A counter
     ticking up doesn't count as a change. A toast fired in the same frame as a `success` haptic (a right
     answer, which the game shows with its own colours) isn't drawn.
   - *Shake:* the engine's shakes in one moment fold into one episode of at most 3 units for 150 ms,
