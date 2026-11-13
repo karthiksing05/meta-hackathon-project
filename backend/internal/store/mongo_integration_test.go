@@ -44,6 +44,19 @@ func TestMongoStore(t *testing.T) {
 	if err := m.CreateUser(ctx, &model.User{ID: "u2", Email: "a@example.com", Username: "b"}); err != store.ErrConflict {
 		t.Fatalf("duplicate email: %v", err)
 	}
+	// searching people: username prefix, or the start of a word in the display name; regex characters are text
+	for _, p := range []model.User{{ID: "u7", Email: "e7@example.com", Username: "annabel", DisplayName: "Annabel Cho"}, {ID: "u8", Email: "e8@example.com", Username: "bob", DisplayName: "Robert Ann Lee"}, {ID: "u9", Email: "e9@example.com", Username: "cat", DisplayName: "Cat"}} {
+		p := p
+		if err := m.CreateUser(ctx, &p); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got, err := m.SearchUsers(ctx, "ann", 10); err != nil || len(got) != 2 || got[0].Username != "annabel" || got[1].Username != "bob" || got[0].PasswordHash != "" {
+		t.Fatalf("search by prefix and display-name word: %v %v", got, err)
+	}
+	if got, err := m.SearchUsers(ctx, "a.*", 10); err != nil || len(got) != 0 {
+		t.Fatalf("a pattern is text, not a regex: %v %v", got, err)
+	}
 	for i, title := range []string{"Fog Words", "Hill Drift", "Fog Runner"} {
 		id := string(rune('a'+i)) + "0123456789abcdef0123456" // 24 hex characters
 		g := &model.Game{ID: id, OwnerID: "u1", Title: title, Description: "a game", Tags: []string{"cozy"},
