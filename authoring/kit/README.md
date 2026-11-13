@@ -34,7 +34,7 @@ ratio range and a body-size range.
 The game id also varies the pairing's details (`varyPairing` in `look.mjs`), so two games of one
 vibe look related but not identical: title case (upper or as written, never for script or
 blackletter faces), label weight, tracking (hair spaces, U+200A, between the letters of short
-display lines and capital labels: the engine draws no letter spacing), the display treatment (one
+display lines and capital labels, only on text that keeps to one line in its box: the engine draws no letter spacing and would cut a tracked word), the display treatment (one
 step to a neighbour: none ↔ outline ↔ heavy), the numerals face (from the vibe's own numerals), and
 for sporty vibes (`racing_sport`, `cartoon_action`, `meme_brainrot`, `game_show`) a 2–7° tilt on
 short display lines in about half the games.

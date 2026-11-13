@@ -7,7 +7,9 @@
 //                tile's width (text w + wrap: true);
 //   - center:    a label that a cell template anchors on its tile's corner moves to the tile's center
 //                (the grid_board "x = cell_size" slip);
-//   - gap:       stacks and grids of tap targets get at least a 6-unit gap.
+//   - gap:       stacks and grids of tap targets get at least a 6-unit gap;
+//   - words:     wrapped text never breaks inside a word: letter spacing comes off, then the text
+//                shrinks to its role minimum, then HUD words shorten (SCORE → PTS), then the box widens.
 // Fixes driven by the layout lint's findings (layout-check.mjs), run here when not given:
 //   - contrast:  low-contrast text is recolored to the palette color that reads best on the measured
 //                backdrop when that backdrop is even; otherwise it gets a solid plate (or an outline
@@ -18,7 +20,7 @@
 // Each fix is validated with the engine and dropped if the game stops loading.
 
 import { loadEngine } from './engine.mjs';
-import { layoutCheck, instrument, walkNodes, parseColor, contrast, MIN_TEXT } from '../playtest/layout-check.mjs';
+import { layoutCheck, instrument, walkNodes, parseColor, contrast, MIN_TEXT, engineLineChars, longestWord } from '../playtest/layout-check.mjs';
 
 const CHAR_EM = 0.63; // the engine's bold width per character (0.6 × 1.05)
 const MIN_GAP_FIX = 6;
@@ -57,6 +59,76 @@ function containerOf(siblings, idx) {
     return { x: s.x ?? 0, y: s.y ?? 0, w: s.w, h: s.h };
   }
   return null;
+}
+
+// HUD words with a short form, longest first (whole words, case kept).
+export const HUD_ABBREV = [['QUESTIONS', 'QS'], ['QUESTION', 'Q'], ['MISTAKES', 'MISSES'], ['POINTS', 'PTS'], ['SCORE', 'PTS'], ['LEVEL', 'LVL'], ['ROUND', 'RD'], ['STREAK', 'STRK'], ['SECONDS', 'SEC'], ['REMAINING', 'LEFT']];
+function abbreviate(text) {
+  let out = text;
+  for (const [long, short] of HUD_ABBREV) {
+    out = out.replace(new RegExp(`\\b${long}\\b`, 'gi'), (m) => (m === m.toUpperCase() ? short : m[0] === m[0].toUpperCase() ? short[0] + short.slice(1).toLowerCase() : short.toLowerCase()));
+  }
+  return out;
+}
+// The words a text can show: a literal's, or the string literals inside an expression.
+function wordsOf(text) {
+  if (typeof text !== 'string') return '';
+  if (!isExpr(text)) return text;
+  return [...text.matchAll(/'([^']*)'/g)].map((m) => m[1]).join(' ');
+}
+
+/**
+ * Wrapped text never breaks inside a word (the engine cuts a word longer than the line at the line
+ * width). In order: letter spacing (hair spaces) comes off; the size steps down to the role minimum
+ * (MIN_TEXT); HUD words shorten (SCORE → PTS); the box widens, centred, inside the canvas. Mutates.
+ */
+export function keepWords(game) {
+  const fixes = [];
+  const W = game.canvas?.width ?? 360;
+  walkNodes(game.presentation?.root, (t, ptr) => {
+    if (t.node !== 'text' || t.wrap !== true || !isNum(t.w)) return;
+    const weight = isNum(t.weight) ? t.weight : 400;
+    const fits = (txt, size) => longestWord(wordsOf(txt)) <= engineLineChars(t.w, size, weight);
+    const sizeNow = isNum(t.size) ? t.size : t.size === undefined ? 16 : null;
+    // A bound size (an expression): its smallest step is what a long word meets.
+    const boundMin = isExpr(t.size) ? Math.min(...[...t.size.matchAll(/\b(\d+(?:\.\d+)?)\b/g)].map((m) => +m[1]).filter((v) => v >= MIN_TEXT && v <= 120), 120) : null;
+    const size = sizeNow ?? boundMin;
+    if (size == null || fits(t.text, size)) return;
+    const before = typeof t.text === 'string' ? t.text : '';
+    if (typeof t.text === 'string' && t.text.includes('\u200A')) {
+      t.text = t.text.replace(/\u200A/g, '');
+      fixes.push({ kind: 'words', node: ptr, detail: 'letter spacing off: tracked text must not wrap' });
+      if (fits(t.text, size)) return;
+    }
+    if (sizeNow != null) {
+      let s2 = sizeNow;
+      while (s2 > MIN_TEXT && !fits(t.text, s2)) s2 -= 1;
+      if (s2 !== sizeNow) { t.size = s2; fixes.push({ kind: 'words', node: ptr, detail: `size ${sizeNow} → ${s2} so no word breaks` }); }
+      if (fits(t.text, s2)) return;
+    } else {
+      // Cap a bound size at what keeps the longest literal word on a line (never under the minimum).
+      const L = longestWord(wordsOf(t.text));
+      const cap = Math.max(MIN_TEXT, Math.floor(t.w / (L * 0.6 * (weight >= 600 ? 1.05 : 1))));
+      if (cap < size) { t.size = `= min(${cap}, ${t.size.slice(1).trim()})`; fixes.push({ kind: 'words', node: ptr, detail: `bound size capped at ${cap} so no word breaks` }); }
+      if (fits(t.text, Math.min(cap, size))) return;
+    }
+    const cur = isNum(t.size) ? t.size : MIN_TEXT;
+    const short = typeof t.text === 'string' ? (isExpr(t.text) ? t.text.replace(/'([^']*)'/g, (m, inner) => `'${abbreviate(inner)}'`) : abbreviate(t.text)) : t.text;
+    if (short !== t.text) {
+      t.text = short;
+      fixes.push({ kind: 'words', node: ptr, detail: `HUD words shortened: "${String(before).replace(/\u200A/g, '').slice(0, 30)}" → "${String(short).slice(0, 30)}"` });
+      if (fits(t.text, cur)) return;
+    }
+    // Last: widen the box to the longest word, keeping its centre, inside the canvas.
+    const need = Math.ceil(longestWord(wordsOf(t.text)) * cur * 0.6 * (weight >= 600 ? 1.05 : 1)) + 2;
+    if (need > t.w && need <= W - 8) {
+      const grow = need - t.w;
+      if (t.anchor !== 'center' && isNum(t.x)) t.x = Math.max(4 - 0, Math.round(t.x - grow / 2));
+      fixes.push({ kind: 'words', node: ptr, detail: `box ${t.w} → ${need} wide so no word breaks` });
+      t.w = need;
+    }
+  });
+  return fixes;
 }
 
 /** Fits tile and button labels; centers labels anchored on their tile's corner. Mutates `game`. */
@@ -683,6 +755,7 @@ export async function fixLayout(game, { findings = null, pixels = null, engine =
     cur = next; fixes.push(...got);
   };
   step('fit', fitText);
+  step('words', keepWords);
   step('gap', spaceTargets);
   step('inset', insetCells);
   step('lanes', softenLanes);

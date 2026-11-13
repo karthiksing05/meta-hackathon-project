@@ -66,6 +66,7 @@ engine's topmost-first list, at the same relative spot), so the bots play the sa
 | `L_OVERLAP_HUD` | block | a moving sprite and the HUD overlap (either drawn on top) | code: HUD panel; solver slot for the HUD |
 | `L_TEXT_OVERFLOW` | block | text sticks out of its tile or button (measured width) | code: fit, shrink; solver: shrink to the measured room, wrap |
 | `L_TEXT_CLIPPED` | block | text runs off the canvas | code: shrink; solver: shrink, wrap, then slot |
+| `L_WORD_BREAK` | block | a word split across lines (the engine cuts a word longer than the line), or letter-spaced text that wraps | code: drop tracking, shrink to the role minimum, abbreviate HUD words, widen the box |
 | `L_TEXT_OFFCENTER` | block | a cell label anchored on its tile's edge | code: center |
 | `L_LOW_CONTRAST` | block under 3:1, warn under 4.5:1 for small text | text against the pixels behind it | code: recolor, plate, outline; solver: outline far from the text's color |
 | `L_EMPTY_LABEL` | block | a key or tile with no visible label while its siblings have one | none (content) |

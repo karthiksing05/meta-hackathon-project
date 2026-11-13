@@ -44,12 +44,13 @@ export const HINTS = {
   L_OFFSCREEN: 'move the target inside the canvas',
   L_EMPTY_LABEL: 'this tap target has no visible label while its siblings do: give it text or an icon',
   L_INCONSISTENT: 'draw every instance of a repeated button or tile with one size, radius, font and text size',
+  L_WORD_BREAK: 'a word is split across lines: shrink the text (down to its role minimum), wrap only at spaces, abbreviate HUD words (SCORE → PTS), or widen the box; letter-spaced text must not wrap',
 };
 const SEVERITY = {
   L_TEXT_OVERFLOW: 'error', L_TEXT_OFFCENTER: 'error', L_TEXT_SMALL: 'warn', L_TEXT_CLIPPED: 'error',
   L_OVERLAP_TEXT: 'error', L_OVERLAP_HUD: 'error', L_OVERLAP_CONTROL: 'warn', L_OVERLAP_SPRITES: 'warn',
   L_OVERLAP_TARGETS: 'error', L_TARGET_GAP: 'warn', L_TARGET_SMALL: 'warn', L_LOW_CONTRAST: 'error',
-  L_OFFSCREEN: 'warn', L_EMPTY_LABEL: 'error', L_INCONSISTENT: 'warn',
+  L_OFFSCREEN: 'warn', L_EMPTY_LABEL: 'error', L_INCONSISTENT: 'warn', L_WORD_BREAK: 'error',
 };
 
 // ---------------------------------------------------------------- instrumenting ----
@@ -88,6 +89,7 @@ export function instrument(game) {
       fixed: chain.some((n) => n.fixed === true),
       inTemplate: parents.some((p) => ['grid', 'repeat'].includes(p.node.node)),
       text: node.node === 'text' ? String(node.text ?? '') : null,
+      wrap: node.node === 'text' && node.wrap === true,
       parents,
     });
   });
@@ -189,6 +191,37 @@ const scaled = (b, s, cx, cy) => (s === 1 || s == null ? b : { x0: cx + (b.x0 - 
  * its center. A box that only grows or shrinks around its anchor (a centered label whose text changes
  * length, a bar filling from its left edge) isn't motion.
  */
+// The engine's own wrap (mg-scene text.rs wrap_text): characters are size × 0.6 wide (× 1.05 at
+// weight 600+), lines break at spaces, and a word longer than a line is cut at the line width.
+export const ENGINE_CHAR_EM = 0.6;
+export function engineLineChars(w, size, weight) {
+  const cw = size * ENGINE_CHAR_EM * ((weight ?? 400) >= 600 ? 1.05 : 1);
+  return cw > 0 && Number.isFinite(w) ? Math.max(1, Math.floor(w / cw + 1e-9)) : Infinity;
+}
+/** The longest word (split at spaces and newlines, hair spaces counted, as the engine counts them). */
+export function longestWord(text) {
+  return Math.max(0, ...String(text).split(/[ \n]/).map((x) => [...x].length));
+}
+
+/**
+ * L_WORD_BREAK on a drawn text op: the engine cut a word (a line of exactly the line width with no
+ * space in it, followed by more), or letter-spaced text (hair spaces) wrapped at all.
+ */
+export function wordBreak(op, wrapped) {
+  const text = String(op.text ?? '');
+  if (!wrapped || !text.includes('\n')) return null;
+  if (text.includes('\u200A')) return `letter-spaced "${text.replace(/\u200A/g, '').replace(/\n/g, ' / ')}" wraps; letter-spaced text must stay on one line`;
+  const max = engineLineChars(op.w, op.size, op.weight);
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length - 1; i++) {
+    const a = lines[i], b = lines[i + 1];
+    if ([...a].length === max && !a.includes(' ') && b && !b.startsWith(' ') && /\S$/.test(a) && /^\S/.test(b)) {
+      return `"${a}" / "${b.split(' ')[0]}" breaks inside a word (${max} characters fit a line at size ${op.size})`;
+    }
+  }
+  return null;
+}
+
 export function moved(p, b) {
   if (Math.abs(p.y0 - b.y0) > 2 && Math.abs(p.y1 - b.y1) > 2) return true;
   return Math.abs(p.x0 - b.x0) > 2 && Math.abs(p.x1 - b.x1) > 2 && Math.abs(p.x0 + p.x1 - b.x0 - b.x1) > 4;
@@ -358,6 +391,8 @@ export function lintSample(sample, { measures = null } = {}) {
       const nodeKey = t.node ?? `text:${op.text}`;
       const size = op.size * (op.scale ?? 1);
       if (size < MIN_TEXT && (op.scale ?? 1) >= 0.95) add('L_TEXT_SMALL', f, { node: t.node, role: t.role, box: round(ink), detail: `size ${+size.toFixed(1)} < ${MIN_TEXT}: "${clip(op.text)}"`, dedupe: nodeKey });
+      const broken = wordBreak(op, t.n?.wrap === true);
+      if (broken) add('L_WORD_BREAK', f, { node: t.node, role: t.role, box: round(ink), detail: broken, dedupe: nodeKey });
       if (ink.x0 < -2 || ink.x1 > W + 2 || ink.y0 < -2 || ink.y1 > H + 2) {
         if ((op.scale ?? 1) >= 0.95) add('L_TEXT_CLIPPED', f, { node: t.node, role: t.role, box: round(ink), detail: `"${clip(op.text)}" runs off the canvas`, dedupe: nodeKey });
       }

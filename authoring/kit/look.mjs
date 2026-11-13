@@ -424,7 +424,13 @@ function styleText(n, spec, tokens, addToken) {
     const isDisplay = st.id === spec.ids.display && (step === 'display' || step === 'hero' || step === 'title') && lit2.length <= 18 && n.wrap !== true;
     const isLabel = upper && (step === 'label' || step === 'caption') && lit2.length <= 16;
     const em = isDisplay ? spec.tracking.display : isLabel ? spec.tracking.label : 0;
-    if (em >= 0.05) n.text = [...lit2].join(em >= 0.1 ? '\u200A\u200A' : '\u200A');
+    const tracked = [...lit2].join(em >= 0.1 ? '\u200A\u200A' : '\u200A');
+    // Letter-spaced text never wraps: the engine counts each hair space as a character (0.6 em,
+    // × 1.05 at 600+) and cuts a word longer than the line, so tracking goes only on text that keeps
+    // to one line in its box.
+    const sz = typeof n.size === 'number' ? n.size : 16;
+    const lineChars = typeof n.w === 'number' ? Math.floor(n.w / (sz * 0.6 * ((n.weight ?? 400) >= 600 ? 1.05 : 1)) + 1e-9) : Infinity;
+    if (em >= 0.05 && n.wrap !== true && [...tracked].length <= lineChars) n.text = tracked;
   }
   // Tilt: sporty vibes may set short display lines at a slight angle.
   if (spec.tilt && !numeral && lit2 !== null && st.id === spec.ids.display && (step === 'display' || step === 'hero') && n.wrap !== true && n.rotation === undefined) n.rotation = spec.tilt;

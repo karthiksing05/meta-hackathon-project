@@ -6,8 +6,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEngine } from '../expander/engine.mjs';
 import { expand, loadLibrary } from '../expander/expand.mjs';
-import { layoutCheck, lintSample, sampleFrames, instrument, textInk, contrast, parseColor, moved, inHudBand } from './layout-check.mjs';
-import { fixLayout, fitText, spaceTargets, plateLabels, rowsToColumns, hudToTop, nudgeIntoSafe } from '../expander/layout-fix.mjs';
+import { layoutCheck, lintSample, sampleFrames, instrument, textInk, contrast, parseColor, moved, inHudBand, wordBreak, engineLineChars, longestWord } from './layout-check.mjs';
+import { fixLayout, fitText, spaceTargets, plateLabels, rowsToColumns, hudToTop, nudgeIntoSafe, keepWords } from '../expander/layout-fix.mjs';
 import { applyLayoutOps, parseJudge, critiqueLoop, CHECKLIST } from './visual-critique.mjs';
 import { chromeAvailable } from './frame-render.mjs';
 
@@ -218,6 +218,29 @@ const pixels = chromeAvailable();
   const g4 = { presentation: { canvas: { w: 360, h: 780 }, tokens, root: { node: 'group', children: [{ node: 'group', x: 0, y: 70, children: [{ node: 'text', text: 'Title', x: 180, y: 34, anchor: 'center', size: 20 }] }] } } };
   const safe = nudgeIntoSafe(g4, geo([['/presentation/root/children/0/children/0', { kind: 'text', box: { x0: 150, y0: 92, x1: 210, y1: 116 } }]]));
   ok(safe.length === 1 && g4.presentation.root.children[0].children[0].y === 34 + 12, 'bleed text nudged into the safe area', { safe, y: g4.presentation.root.children[0].children[0].y });
+}
+
+// ---- L_WORD_BREAK: a word cut across lines, letter-spaced text that wraps, and the fix.
+{
+  ok(engineLineChars(60, 15, 700) === 6 && engineLineChars(60, 15, 400) === 6 && engineLineChars(90, 15, 400) === 10, 'the engine line width in characters', [engineLineChars(60, 15, 700), engineLineChars(90, 15, 400)]);
+  ok(longestWord('S\u200AC\u200AO\u200AR\u200AE 0') === 9, 'hair spaces count toward a word, as the engine counts them');
+  ok(/breaks inside a word/.test(wordBreak({ text: 'QUESTI\nON 3', w: 60, size: 15, weight: 400 }, true) ?? ''), 'a word cut at the line width is L_WORD_BREAK');
+  ok(wordBreak({ text: 'Lower\nrent', w: 60, size: 15, weight: 400 }, true) === null, 'a break at a space is fine');
+  ok(/letter-spaced/.test(wordBreak({ text: 'S\u200AC\u200AO\u200AR\nE', w: 60, size: 15, weight: 400 }, true) ?? ''), 'letter-spaced text that wraps is L_WORD_BREAK');
+  ok(wordBreak({ text: 'QUESTI\nON', w: 60, size: 15, weight: 400 }, false) === null, 'text that does not wrap is not checked');
+  const g = { canvas: { width: 360 }, presentation: { root: { node: 'group', children: [
+    { node: 'text', x: 10, y: 10, w: 60, h: 40, wrap: true, size: 15, weight: 700, text: 'S\u200AC\u200AO\u200AR\u200AE' },
+    { node: 'text', x: 10, y: 10, w: 50, h: 40, wrap: true, size: 15, text: 'QUESTION 3' },
+    { node: 'text', x: 100, y: 10, w: 40, h: 40, wrap: true, size: 15, text: 'Supercalifragilistic' },
+    { node: 'text', x: 10, y: 10, w: 60, h: 40, wrap: true, size: '= if len(x) < 5 then 22 else 15', text: "= 'Answering ' + x" },
+  ] } } };
+  const fx = keepWords(g);
+  const [a, b, c, d] = g.presentation.root.children;
+  ok(a.text === 'SCORE' && a.size === 15, 'tracking comes off before the size changes', a);
+  ok(b.text === 'Q 3' || (b.size >= 11 && longestWord(b.text) <= engineLineChars(b.w, b.size, 400)), 'a HUD word shortens once the size is at its minimum', b);
+  ok(c.size === 11 && c.w > 40 && longestWord(c.text) <= engineLineChars(c.w, c.size, 400), 'a long word widens its box at the minimum size', c);
+  ok(/^= min\(\d+, /.test(d.size), 'a bound size is capped so its longest literal word fits', d);
+  ok(fx.every((x) => x.kind === 'words'), 'fixes are reported as words', fx);
 }
 
 console.log(`layout tests: ${passed} passed, ${failed} failed${pixels ? '' : ' (no Chrome: pixel checks skipped)'}`);

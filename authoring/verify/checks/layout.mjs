@@ -13,6 +13,7 @@ const LINT_CODES = {
   L_TEXT_OVERFLOW: { severity: 'block', title: 'text sticks out of its tile or button' },
   L_TEXT_OFFCENTER: { severity: 'block', title: "a cell label anchored on its tile's edge" },
   L_TEXT_CLIPPED: { severity: 'block', title: 'text runs off the canvas' },
+  L_WORD_BREAK: { severity: 'block', title: 'a word split across lines, or letter-spaced text that wraps' },
   L_OVERLAP_TEXT: { severity: 'block', title: 'text over text' },
   L_OVERLAP_HUD: { severity: 'block', title: 'a moving sprite and the HUD overlap' },
   L_LOW_CONTRAST: { severity: 'block', title: `text under ${MIN_CONTRAST}:1 against what is behind it (block); under 4.5:1 for small text (warn)` },
