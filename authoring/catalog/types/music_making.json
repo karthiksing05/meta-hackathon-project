@@ -1198,16 +1198,18 @@
       "streak compare"
     ],
     "content_needs": [
-      "samples"
+      "one short original phrase per instrument (melody clips with lead_sound set)"
     ],
     "difficulty_levers": [
       "choices"
     ],
     "tools": [
-      "audio_clip_player",
+      "melody_clip",
+      "play_clip",
       "quiz",
       "lives",
-      "score"
+      "score",
+      "rounds"
     ],
     "engine_gaps": [],
     "gate_profile": "calm",
@@ -1269,7 +1271,8 @@
       "clip length"
     ],
     "tools": [
-      "audio_clip_player",
+      "melody_clip",
+      "play_clip",
       "typed_answer",
       "keyboard",
       "fuzzy_match"
@@ -1283,7 +1286,8 @@
     ],
     "status": "seed",
     "source": "seed-karthik",
-    "refs": []
+    "refs": [],
+    "notes": "Clips are drums-and-rhythm only (melody_clip with drums and no lead). Rhythms of well-known songs are recalled by the model, which is unreliable; prefer tune_recall_snippet with original jingles."
   },
   {
     "id": "sound_pad_soundboard",
@@ -2494,5 +2498,152 @@
     "status": "seed",
     "source": "seed-karthik",
     "refs": []
+  },
+  {
+    "id": "era_by_ear_quiz",
+    "name": "Guess the decade by ear",
+    "aliases": [
+      "Guess the decade",
+      "Guess the era",
+      "Which decade is this",
+      "Music era quiz",
+      "Decade quiz"
+    ],
+    "family": "music_making",
+    "subfamily": "ear training",
+    "summary": "A short original tune plays in the style of one decade (instruments, groove, recording colour) and the player taps the decade it sounds like.",
+    "core_loop": "tune plays → listen (replay up to twice) → tap the decade → reveal → next tune",
+    "verbs": [
+      "listen",
+      "guess",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "play-again button",
+      "decade choices",
+      "round counter"
+    ],
+    "rules": [
+      "each tune is original and styled after one decade",
+      "choices are neighbouring decades, so close calls are hard",
+      "two wrong guesses end the show"
+    ],
+    "win": "name every tune",
+    "lose": "run out of lives",
+    "scoring": "points per right decade",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "challenge a parent or older friend to beat your ear for eras",
+      "a Group daily of six tunes with a shared score"
+    ],
+    "content_needs": [
+      "one original clip per round in the right era style"
+    ],
+    "difficulty_levers": [
+      "neighbouring decades as choices",
+      "clip length",
+      "replays"
+    ],
+    "tools": [
+      "melody_clip",
+      "play_clip",
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "Guess the decade game where I hear a short synth melody and pick the era it sounds like",
+      "which decade does this song sound like quiz",
+      "music through the decades guessing game for my family group"
+    ],
+    "status": "seed",
+    "source": "gap_audio",
+    "notes": "Kevin #20. Gold-style example: authoring/games/guess_the_decade.authoring.json (clips written by muse-wonder-1.0)."
+  },
+  {
+    "id": "tune_recall_snippet",
+    "name": "Name the jingle",
+    "aliases": [
+      "Name that tune",
+      "Theme tune quiz",
+      "Jingle quiz"
+    ],
+    "family": "music_making",
+    "subfamily": "listening memory",
+    "summary": "Learn four original named jingles at the start, then hear a short opening snippet of one and tap its name before the bar runs out.",
+    "core_loop": "hear each jingle with its name → hear an opening snippet → tap the matching name → shorter snippets each round",
+    "verbs": [
+      "listen",
+      "remember",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "jingle names",
+      "snippet player",
+      "answer buttons"
+    ],
+    "rules": [
+      "every jingle is original and named in the game",
+      "snippets get shorter as rounds go on",
+      "a wrong name costs a life"
+    ],
+    "win": "name every snippet",
+    "lose": "run out of lives",
+    "scoring": "points per right name, more for shorter snippets",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "friends compose the jingles in Studio and dare each other to name them"
+    ],
+    "content_needs": [
+      "four to six original jingles with names",
+      "a shortened snippet of each"
+    ],
+    "difficulty_levers": [
+      "snippet length",
+      "similar jingles",
+      "number of names"
+    ],
+    "tools": [
+      "melody_clip",
+      "play_clip",
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "name that tune but with made up songs",
+      "learn the jingles then guess them from two notes",
+      "theme song quiz for our band group"
+    ],
+    "status": "seed",
+    "source": "gap_audio",
+    "notes": "Real songs can't be used, so the game teaches its own tunes first. Clips 0..n-1 are the full jingles (played on a teach screen), the rest the snippets."
   }
 ]

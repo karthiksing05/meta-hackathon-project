@@ -167,6 +167,97 @@
           "affects": ["difficulty"]
         }
       ]
+    },
+    {
+      "applies_to": [
+        "zoomed_image_guess"
+      ],
+      "slots": [
+        {
+          "id": "subject",
+          "ask": "What should the pictures show?",
+          "why": "Picks every picture and its answer choices, so it is the content brief.",
+          "need": "required",
+          "extrapolate_from": "the topic in the request (wildlife, food, a franchise, a Group in-joke)",
+          "default": "animals",
+          "ask_when": "the request names no subject",
+          "choices": [
+            "animals",
+            "food",
+            "places",
+            "a show or franchise"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        },
+        {
+          "id": "picture_style",
+          "ask": "Drawn pictures, or photo-style ones?",
+          "why": "Drawn SVG pictures work today; photo-style ones need pictures made at build time (generated_image) or CC0 photos (picture_pack). Until those land, a photo request gets detailed drawn pictures and the plan says so.",
+          "need": "nice",
+          "extrapolate_from": "'photo', 'photography', 'real', 'drawn', 'cartoon' in the request",
+          "default": "drawn",
+          "choices": [
+            "drawn",
+            "photo-style",
+            "real CC0 photos"
+          ],
+          "affects": [
+            "art",
+            "content"
+          ]
+        },
+        {
+          "id": "people",
+          "ask": "Real people show up as made-up cartoon characters. OK?",
+          "why": "Games never show photos or likenesses of real people; a request that names people gets generic caricatures, and the plan says so.",
+          "need": "nice",
+          "extrapolate_from": "a named or famous person in the request",
+          "default": "made-up cartoon characters",
+          "choices": [
+            "made-up cartoon characters",
+            "no people at all"
+          ],
+          "affects": [
+            "art",
+            "content"
+          ]
+        },
+        {
+          "id": "start_zoom",
+          "ask": "How tight should the first close-up be?",
+          "why": "Sets zoom_reveal zoom_from: the tighter the crop, the harder the early guess.",
+          "need": "nice",
+          "extrapolate_from": "'tiny crop', 'extreme close-up', 'easy', 'for kids'",
+          "default": "6x",
+          "choices": [
+            "3x (easy)",
+            "6x",
+            "10x (brutal)"
+          ],
+          "affects": [
+            "difficulty"
+          ]
+        },
+        {
+          "id": "answer_mode",
+          "ask": "Pick from choices or type the answer?",
+          "why": "Choices use picture_quiz; typing uses typed_answer and fuzzy_match and is harder.",
+          "need": "nice",
+          "extrapolate_from": "'type', 'multiple choice', 'options' in the request",
+          "default": "choices",
+          "choices": [
+            "choices",
+            "type it"
+          ],
+          "affects": [
+            "rules",
+            "difficulty"
+          ]
+        }
+      ]
     }
   ]
 }

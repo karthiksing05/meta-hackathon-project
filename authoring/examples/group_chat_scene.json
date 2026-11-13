@@ -1,0 +1,44 @@
+{
+  "notes": "A spot-the-difference scene for authoring/expander/spot-diff.mjs: a busy, made-up group chat (Kevin's prompt #28). Synthetic names and messages only. authoring/tools/make-diff-game.mjs turns it into authoring/examples/group_chat_diff.authoring.json.",
+  "w": 320,
+  "h": 240,
+  "bg": "#FFFFFF",
+  "objects": [
+    { "id": "header", "shape": "rect", "x": 0, "y": 0, "w": 320, "h": 28, "fill": "#F0F2F5", "fixed": true },
+    { "id": "title", "shape": "text", "x": 160, "y": 19, "anchor": "middle", "text": "pizza fund 🍕 (7)", "size": 12, "weight": 700, "fill": "#1C1E21", "alt": ["pizza fund 🍕 (8)", "pizza fund 🍔 (7)"] },
+    { "id": "back", "shape": "poly", "points": [[14, 14], [22, 7], [22, 21]], "fill": "#0866FF" },
+    { "id": "call", "shape": "circle", "x": 300, "y": 14, "r": 7, "fill": "#0866FF" },
+
+    { "id": "av1", "shape": "circle", "x": 16, "y": 48, "r": 9, "fill": "#F2B705" },
+    { "id": "b1", "shape": "rect", "x": 30, "y": 36, "w": 150, "h": 24, "radius": 12, "fill": "#E4E6EB" },
+    { "id": "t1", "shape": "text", "x": 40, "y": 52, "text": "who ate the last slice", "size": 11, "fill": "#1C1E21", "alt": ["who ate the last slice?!", "who took the last slice"] },
+
+    { "id": "av2", "shape": "circle", "x": 16, "y": 80, "r": 9, "fill": "#2EAD5B" },
+    { "id": "b2", "shape": "rect", "x": 30, "y": 68, "w": 96, "h": 24, "radius": 12, "fill": "#E4E6EB" },
+    { "id": "t2", "shape": "text", "x": 40, "y": 84, "text": "not me lol", "size": 11, "fill": "#1C1E21", "alt": ["not me lmao", "wasn't me lol"] },
+    { "id": "r2", "shape": "text", "x": 118, "y": 98, "text": "😂", "size": 11, "alt": ["💀", "😭"] },
+
+    { "id": "b3", "shape": "rect", "x": 150, "y": 104, "w": 156, "h": 24, "radius": 12, "fill": "#0866FF" },
+    { "id": "t3", "shape": "text", "x": 160, "y": 120, "text": "there were 9 slices", "size": 11, "fill": "#FFFFFF", "alt": ["there were 8 slices", "there were 10 slices"] },
+
+    { "id": "av4", "shape": "circle", "x": 16, "y": 148, "r": 9, "fill": "#E4572E" },
+    { "id": "b4", "shape": "rect", "x": 30, "y": 136, "w": 120, "h": 24, "radius": 12, "fill": "#E4E6EB" },
+    { "id": "t4", "shape": "text", "x": 40, "y": 152, "text": "the dog did it", "size": 11, "fill": "#1C1E21", "alt": ["the cat did it", "the dog ate it"] },
+    { "id": "dog", "shape": "text", "x": 158, "y": 154, "text": "🐶", "size": 16, "alt": ["🐱", "🐕"] },
+
+    { "id": "av5", "shape": "circle", "x": 16, "y": 182, "r": 9, "fill": "#7B4FD6" },
+    { "id": "b5", "shape": "rect", "x": 30, "y": 170, "w": 70, "h": 24, "radius": 12, "fill": "#E4E6EB" },
+    { "id": "t5", "shape": "text", "x": 40, "y": 186, "text": "sure jan", "size": 11, "fill": "#1C1E21", "alt": ["sure dan", "ok jan"] },
+    { "id": "heart", "shape": "text", "x": 96, "y": 200, "text": "❤️", "size": 10, "alt": ["👍", "😮"] },
+
+    { "id": "b6", "shape": "rect", "x": 214, "y": 172, "w": 92, "h": 24, "radius": 12, "fill": "#0866FF" },
+    { "id": "t6", "shape": "text", "x": 224, "y": 188, "text": "receipts ⬇️", "size": 11, "fill": "#FFFFFF", "alt": ["receipts ⬆️", "proof ⬇️"] },
+
+    { "id": "seen", "shape": "text", "x": 304, "y": 210, "anchor": "end", "text": "Seen by 6", "size": 9, "fill": "#65676B", "alt": ["Seen by 5", "Seen by 7"] },
+    { "id": "inputbar", "shape": "rect", "x": 40, "y": 216, "w": 236, "h": 18, "radius": 9, "fill": "#F0F2F5", "fixed": true },
+    { "id": "plus", "shape": "circle", "x": 18, "y": 225, "r": 7, "fill": "#0866FF" },
+    { "id": "like", "shape": "poly", "points": [[292, 232], [292, 220], [298, 214], [302, 216], [300, 222], [308, 222], [306, 232]], "fill": "#0866FF" },
+    { "id": "sticker", "shape": "poly", "points": [[262, 44], [267, 56], [280, 56], [270, 64], [274, 77], [262, 69], [250, 77], [254, 64], [244, 56], [257, 56]], "fill": "#F2B705" },
+    { "id": "time", "shape": "text", "x": 160, "y": 140, "anchor": "middle", "text": "11:42 PM", "size": 8, "fill": "#8A8D91", "alt": ["11:47 PM", "1:42 AM"] }
+  ]
+}

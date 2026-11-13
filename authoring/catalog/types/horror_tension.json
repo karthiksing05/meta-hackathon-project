@@ -1267,6 +1267,8 @@
       "time"
     ],
     "tools": [
+      "diff_spots",
+      "anomaly_generator",
       "image_gallery",
       "collide",
       "timer_bar",

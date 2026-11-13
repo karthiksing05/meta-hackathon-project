@@ -464,6 +464,29 @@ into a short WAV loop. `sound` picks a sound for each **moment** that fragments 
   (`lullaby drift bounce chip`) that loop, or your own `{ "melody": [eighth notes, null for a rest,
   up to 32], "bass": [quarter notes, up to 16], "bpm": 50–180, "wave": …, "volume": … }`. It plays while
   the game is playing.
+- **`clips`**: a list of short **original** tunes for listen-and-answer games (guess the decade, which
+  instrument, name the jingle). Clip `i` becomes the sound asset `clip_<i>`. The `play_clip` fragment
+  plays clip `i` for quiz question `i`; a game can also play one itself with
+  `{ "sound": { "asset": "clip_2" } }` or `"asset": "= 'clip_' + str(n)"`. Never a real song's melody.
+
+  ```json
+  { "style": "80s", "bpm": 112, "bars": 2, "lead": "A4/8 A4 C5 A4 E5/4 D5/8 C5 D5 D5 F5 D5 E5/2", "chords": "Am F" }
+  ```
+
+  `style` (`50s 60s 70s 80s 90s 00s 10s chip baroque plain`) picks the instruments, drums and recording
+  colour; you write the notes. `lead` (and `bass`) are notes with an octave (`C5`, `F#4`, `Bb3`) or `r`
+  for a rest, with `/1 /2 /4 /8 /16` or dotted `/4.` durations that carry to the next notes (the first
+  defaults to `/4`); fill exactly `bars` bars (16 sixteenths a bar). `chords` is one chord a bar
+  (`Am F C G`) or with durations (`Am/2 G/2`); qualities `m 7 maj7 m7 m7b5 dim dim7 aug sus2 sus4 add9 6
+  m6 9 5`. Optional: `bpm` (50–200), `bars` (1–8, default 4), `meter` (4 or 3), `swing` (0–1), `bass`
+  (`auto`, `none`, a pattern `root root8 octave walk root_fifth offbeat sub`, or notes), `drums` (`auto`,
+  `none`, a groove `shuffle backbeat disco gated house breakbeat rnb trap chip waltz`, or
+  `{"kick": "x...x...", "snare": "....x...", "hat", "open", "clap", "tamb", "rim"}`), `lead_sound`,
+  `chord_sound`, `bass_sound` (`sine triangle square pulse chip saw supersaw brass strings pad organ piano
+  epiano bell pluck harpsichord flute bass synth_bass fm_bass sub chip_bass`), `comp` (`pad stabs offbeat
+  strum arp boogie block`). Use the era's rhythm, not only straight eighths. Up to 12 clips, each under
+  10 s and all under 80 s; 2-bar clips keep a game small (about 30 KB a second of clip, half that past
+  30 s). The expander renders them into WAVs, the same bytes every time. Errors: `A_SOUND_CLIP`.
 
 So "softer" is `"volume": 0.5` (or `"set": "soft"`), "more arcade" is `"set": "arcade"`, and "no
 music" is `"music": false`. The game can still play its own sounds in `presentation.feedback`, as a
@@ -628,8 +651,8 @@ Authoring-side codes:
   A_UNKNOWN_BIND A_DUPLICATE_NAME A_MISSING_REQUIREMENT A_REQUIREMENT_TYPE A_CONFLICT A_SLOT_FULL
   A_UNKNOWN_SLOT A_UNKNOWN_LOOK A_UNKNOWN_CONTENT A_CONTENT_TYPE A_CONTENT_WRITE A_ART_SVG
   A_ART_FIELD A_ART_PALETTE A_ART_FONT A_ART_IMAGE A_ART_SIZE A_UNKNOWN_ART_ROLE A_ART_MISSING
-  A_SOUND_SET A_SOUND_MOMENT A_SOUND_PRESET A_SOUND_FIELD A_FEEL_FIELD`, and the warnings
-  `W_AUTO_RENAMED` and `W_ART_UNUSED`.
+  A_SOUND_SET A_SOUND_MOMENT A_SOUND_PRESET A_SOUND_FIELD A_SOUND_CLIP A_FEEL_FIELD`, and the warnings
+  `W_AUTO_RENAMED`, `W_ART_UNUSED` and `W_CLIP_TRIMMED`.
 - For the library log: `A_PARAM_PLACEMENT A_UNKNOWN_TOKEN A_FRAGMENT_FIELD`. They use the engine's diagnostic shape (`code`, `at`, `span`, `message`, `hint`), with
 `at` pointing into the manifest.
 

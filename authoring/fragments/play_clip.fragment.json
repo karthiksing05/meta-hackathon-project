@@ -1,0 +1,107 @@
+{
+  "fragment": "play_clip",
+  "version": 1,
+  "describe": "Hear a clip, then pick an answer: plays the game's melody clip for each `quiz` question and draws a Play again button above the question. Use it with `quiz`. The game writes its clips in `sound.clips` (authoring/SPEC.md 2.9); clip i is the sound asset `clip_<i>` and belongs to quiz question i (the question's content index, so content order and clip order must match; with fewer clips than questions it wraps). The clip plays `delay_ms` after each question appears (and after the first at the start); tapping the button (input `replay_clip`) plays it again, up to `replays` times per question and not while it is still playing. `clip_ms` is how long the longest clip lasts (the expander reports it): give quiz a `time_ms` of at least (`replays` + 1) × `clip_ms` + `delay_ms` + 3000, so people can hear every replay and still answer before the bar runs out. Emits `clip_play {clip}` each time a clip starts. State: `clip_now` (the clip playing or last played, -1 before any), `replays_left`. Sound is presentation only, so replays and scores don't depend on it.",
+  "params": {
+    "clips": { "type": "int", "default": 4, "min": 1, "max": 12 },
+    "replays": { "type": "int", "default": 2, "min": 0, "max": 5 },
+    "delay_ms": { "type": "duration", "default": 600, "min": 100, "max": 3000 },
+    "clip_ms": { "type": "duration", "default": 6000, "min": 500, "max": 10000 },
+    "label": { "type": "string", "default": "Play again", "max_len": 14 }
+  },
+  "requires": {
+    "state": { "order": "list<int>", "qi": "int", "locked": "bool" },
+    "events": { "question_done": {} }
+  },
+  "state": {
+    "clip_now": { "type": "int", "init": "-1" },
+    "replays_left": { "type": "int", "init": "@replays" },
+    "_playing_until": { "type": "int", "init": "0" },
+    "_serial": { "type": "int", "init": "0" }
+  },
+  "functions": {
+    "current_clip": { "params": {}, "returns": "int", "body": "get_or(order, qi, 0) % @clips" },
+    "_can_replay": { "params": {}, "returns": "bool", "body": "not locked and replays_left > 0 and now >= _playing_until and clip_now >= 0" }
+  },
+  "events": {
+    "clip_play": { "clip": "int" },
+    "_cue": { "serial": "int" }
+  },
+  "inputs": {
+    "replay_clip": { "payload": {} }
+  },
+  "rules": [
+    {
+      "id": "first_cue",
+      "on": "start",
+      "do": [ { "after": "@delay_ms", "emit": "_cue", "with": { "serial": "_serial" }, "id": "_t_cue" } ]
+    },
+    {
+      "id": "next_cue",
+      "on": "question_done",
+      "do": [
+        { "incr": "_serial" },
+        { "set": "replays_left", "to": "@replays" },
+        { "set": "_playing_until", "to": "0" },
+        { "after": "@delay_ms", "emit": "_cue", "with": { "serial": "_serial" }, "id": "_t_cue" }
+      ]
+    },
+    {
+      "id": "cue",
+      "on": "_cue",
+      "when": "event.serial == _serial and not locked",
+      "do": [ { "emit": "clip_play", "with": { "clip": "current_clip()" } } ]
+    },
+    {
+      "id": "replay",
+      "on": "replay_clip",
+      "when": "_can_replay()",
+      "do": [
+        { "set": "replays_left", "to": "replays_left - 1" },
+        { "emit": "clip_play", "with": { "clip": "current_clip()" } }
+      ]
+    },
+    {
+      "id": "playing",
+      "on": "clip_play",
+      "do": [
+        { "set": "clip_now", "to": "event.clip" },
+        { "set": "_playing_until", "to": "now + @clip_ms" }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect", "x": 105, "y": 68, "w": 150, "h": 36, "radius": 18,
+              "fill": "= if _can_replay() then $primary else $surface",
+              "transition": { "fill": { "ms": 150, "ease": "out" } },
+              "on_tap": { "input": "replay_clip" }
+            },
+            {
+              "node": "rect", "x": 105, "y": 68, "h": 36, "radius": 18, "fill": "$accent", "opacity": 0.45,
+              "w": "= if now < _playing_until then 150.0 * max(0.0, min(1.0, ((now - (_playing_until - @clip_ms)) * 1.0) / (@clip_ms * 1.0))) else 0.0"
+            },
+            {
+              "node": "text", "x": 180, "y": 86, "anchor": "center", "size": 15, "weight": 700,
+              "color": "= if _can_replay() then $bg else $ink",
+              "text": "= if now < _playing_until then 'Listening...' else if clip_now < 0 then 'Get ready' else if replays_left > 0 and not locked then @label + ' (' + str(replays_left) + ')' else if locked then '' else 'No replays left'"
+            }
+          ],
+          "animate_on": { "clip_play": { "prop": "scale", "keys": [1, 1.06, 1], "ms": 220 } }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "clip_play", "do": [ { "sound": { "asset": "= 'clip_' + str(event.clip)", "volume": 0.9 } } ] }
+    ]
+  },
+  "tags": { "mood": ["playful", "calm"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

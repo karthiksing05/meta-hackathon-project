@@ -345,13 +345,17 @@
       "bird call",
       "spoken word"
     ],
-    "summary": "Recorded or sampled sound clips as content (animal calls, instruments, spoken words, music snippets) for listen-and-answer games.",
-    "when_to_use": "Name-that-sound, listening quizzes, instrument-by-ear.",
+    "summary": "Recorded or sampled sound clips as content (animal calls, real instruments, spoken words, everyday sound effects) from a licensed or CC0 sound library, for listen-and-answer games.",
+    "when_to_use": "Name-that-sound and guess-the-sound-effect games that need real recordings. For music, use melody_clip (original tunes, shipped).",
     "status": "planned",
     "gaps_it_closes": [
-      "all sound is synthesized; no recorded clips"
+      "no recorded sounds (animals, objects, voices)"
     ],
-    "notes": "original synth melodies work today (audio_clip_player). Real songs and recordings can't be copied into games"
+    "notes": "Original synth melodies ship as melody_clip. Real songs and recordings can't be copied into games; a library must be CC0 or licensed with the source recorded. Kevin's sound-library idea (Slack, 22:29) belongs to Artem and Max; see docs/harness-gaps/audio.md, Requests.",
+    "api": "planned, compatible with melody_clip: sound.clips entries may be {library: \"<sound id>\"} next to note clips; the server resolves the id to a URL or data URI and the asset is still clip_<i>, so play_clip and feedback {sound: {asset}} work unchanged",
+    "example_types": [
+      "sound_effect_guess"
+    ]
   },
   {
     "id": "growth_timer",
@@ -570,17 +574,18 @@
     "kind": "content_tool",
     "name": "Picture set",
     "aliases": [
-      "pictures",
-      "image set",
+      "set of pictures per round",
+      "one picture per round",
       "photos to guess"
     ],
-    "summary": "A set of themed pictures as game content (scenes, objects, places), one per round.",
-    "when_to_use": "Picture puzzles, spot-the-shape, jigsaws, frame-reveal guessing.",
-    "status": "planned",
+    "summary": "A set of themed pictures as game content (scenes, objects, animals, places), one per round, as the frames of one picture sprite.",
+    "when_to_use": "Picture puzzles, close-up guessing, picture trivia, jigsaws, frame-reveal guessing.",
+    "status": "building",
     "gaps_it_closes": [
       "art roles are sprites for pieces, not a list of full pictures per round"
     ],
-    "notes": "the art pipeline makes sprites with frames (image_assets); a sheet of full-screen pictures per round is untested"
+    "notes": "SVG frames work today (zoom_reveal, picture_quiz). A raster sheet needs a build-time step that tiles generated or CC0 pictures into one JPEG under the 192 KB art budget (about 6 pictures at 384 px); requested from Max",
+    "api": "art.sprites.picture = {svg: [one SVG per round], w: 512, h: 512} (works today); raster rounds = one image sheet {image: data URI, frames, cols} made at build time"
   },
   {
     "id": "image_generator",
@@ -596,7 +601,7 @@
     "gaps_it_closes": [
       "art is made once at build time, not during play"
     ],
-    "notes": "muse-image-1.0 exists on the server, but games run offline and deterministically; a live call breaks replays and needs a server round trip"
+    "notes": "muse-image-1.0 exists (about 13-18 s, 1600-1920 px WebP, ~0.5 MB), but games run offline and deterministically; a live call breaks replays and needs a server round trip. Build-time pictures are generated_image"
   },
   {
     "id": "image_similarity",
@@ -862,16 +867,25 @@
     "name": "Anomaly variants",
     "aliases": [
       "spot the difference",
-      "what changed"
+      "what changed",
+      "spot the difference generator",
+      "make differences"
     ],
-    "summary": "Builds versions of one scene where some have a small change (an object moved, recoloured or missing), with the answer recorded.",
-    "when_to_use": "Spot-the-anomaly, what-changed and spot-the-difference rounds.",
-    "api": "planned: a base scene as a list of placed objects plus per-round edits {object, change}",
-    "status": "planned",
+    "summary": "Builds two versions of one scene: the scene as written, and a copy where N objects are recolored, removed, moved, resized or say something else, with each change's hitbox recorded. Deterministic from a seed.",
+    "when_to_use": "Spot-the-difference, what-changed and find-the-anomaly rounds. Muse writes the scene (simple placed shapes, text and emoji); code makes the changes, so the answer key always matches the pictures.",
+    "api": "authoring/expander/spot-diff.mjs: makeSpotDifference(scene {w, h, bg, objects: [{id, shape rect|circle|ellipse|text|poly|line, geometry, fill, fixed?, alt?}]}, {count 3..9, seed, kinds}) -> {a, b, diffs [{id, kind, x, y, r, box}], decoys, problems}; toAuthoring(result) -> {art.sprites picture_a/picture_b, functions diff_points/diff_radii/diff_decoys} for diff_spots. CLI: authoring/tools/make-diff-game.mjs",
+    "status": "shipped",
     "gaps_it_closes": [
       "no paired picture variants"
     ],
-    "notes": "works today if the scene is drawn from object lists in state (the changes are rule edits); changes inside one generated picture are not possible"
+    "notes": "SVG only: changes inside one generated raster picture are not possible (no inpainting); a raster pair would need Muse Image editing. The compose step does not call it yet: the planner needs a \"scene\" content slot and a call to toAuthoring (see docs/harness-gaps/images.md)",
+    "path": "authoring/expander/spot-diff.mjs",
+    "example_types": [
+      "spot_difference",
+      "what_changed_scene",
+      "what_changed_room",
+      "mirror_double_difference"
+    ]
   },
   {
     "id": "qa_bank_content",
@@ -939,5 +953,78 @@
       "npc_rates_your_line"
     ],
     "notes": "needs Max (endpoint, cost, abuse limits) and Artem (an async host input that the runtime injects and the replay log records); 5-20 s per Muse call is too slow per turn for most games. See docs/harness-gaps/open-text.md"
+  },
+  {
+    "id": "generated_image",
+    "kind": "server_tool",
+    "name": "Pictures made at build time",
+    "aliases": [
+      "muse image",
+      "generate pictures for the game",
+      "ai pictures for the game",
+      "generated illustrations"
+    ],
+    "summary": "While a game is being made, the server asks muse-image-1.0 for each picture the plan needs (an animal, a scene, a cartoon character), shrinks it, and stores it with the game, so every player sees the same pictures and replays verify.",
+    "when_to_use": "Picture rounds that need more than flat SVG can draw: wildlife or nature close-ups, painterly scenes, cartoon caricatures of generic characters. Never photos or likenesses of real people: a real person in the request becomes a generic cartoon character, and the plan says so.",
+    "api": "planned: plan.content.pictures = [{id, prompt, style}] -> server returns {id, src (data URI or games-host URL), w, h, license: \"generated\"}; the expander puts them in one sprite sheet (image_gallery)",
+    "status": "planned",
+    "gaps_it_closes": [
+      "games can only show pictures Muse can draw as SVG"
+    ],
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "zoomed_image_guess",
+      "cartoon_quote_guess",
+      "picture_reveal"
+    ],
+    "notes": "tested 2026-11-12 from the Mac: 2 calls, 13.3 s and 17.7 s, 1920x1280 and 1600x1600 WebP (538 KB and 620 KB; the size parameter was ignored), photo-real quality; a 384 px JPEG is 32-43 KB. Needs Max (generation in the job, storage) and Bayan (style consistency); see docs/harness-gaps/images.md"
+  },
+  {
+    "id": "picture_pack",
+    "kind": "content_tool",
+    "name": "Public-domain picture packs",
+    "aliases": [
+      "real photos",
+      "wildlife photos",
+      "cc0 pictures",
+      "stock photos"
+    ],
+    "summary": "Curated packs of real photos under CC0 or public-domain terms (for example Wikimedia Commons or iNaturalist CC0 observations), each with its source URL, author and license recorded, pre-shrunk for games.",
+    "when_to_use": "When the request wants real photos rather than generated ones: wildlife photo trivia, landmarks, food close-ups. Never photos of people.",
+    "api": "planned: packs/<topic>.json [{answer, aliases, src, w, h, source_url, author, license}] on the games host; the plan picks a pack and N entries by seed",
+    "status": "planned",
+    "gaps_it_closes": [
+      "no real photos with a known license"
+    ],
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "zoomed_image_guess",
+      "where_was_this_taken"
+    ],
+    "notes": "needs a one-time curation pass and storage on Max's games host; generated_image is the faster path for the demo"
+  },
+  {
+    "id": "image_clip",
+    "kind": "runtime_tool",
+    "name": "Clipped image window",
+    "aliases": [
+      "crop an image",
+      "clip to a rect",
+      "image source rect",
+      "mask an image"
+    ],
+    "summary": "Draw part of an image: a group that clips its children to its box, or an image node with a source rectangle, so a picture can zoom or pan inside a window without covering the screen around it.",
+    "when_to_use": "Zoom-out reveals over a backdrop, magnifier and spotlight effects, sliding-window pictures, jigsaw pieces cut from one picture.",
+    "api": "requested from Artem: group prop clip: true (clip children to the group box), or image props src_x, src_y, src_w, src_h (fractions of the frame)",
+    "status": "gap",
+    "gaps_it_closes": [
+      "zoom_reveal masks with $bg rects, hiding the backdrop around its window"
+    ],
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "zoomed_image_guess",
+      "hidden_object"
+    ],
+    "notes": "the renderer already clips the whole frame (render.js drawFrame); a per-group clip is a save/clip/restore around the subtree"
   }
 ]

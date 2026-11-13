@@ -28,5 +28,11 @@
     "expect": [
       "shopping_list_recall"
     ]
+  },
+  {
+    "request": "memory game where the cards make sounds instead of pictures",
+    "expect": [
+      "sound_pairs_memory"
+    ]
   }
 ]

@@ -1,0 +1,108 @@
+{
+  "family": "music_making",
+  "notes": "Every tune in a game is original: melody_clip renders notes Muse writes, so the planner never asks for a real song. When a request names a song or artist, keep it as a style hint (era, genre, instruments) and say so in the plan.",
+  "checklists": [
+    {
+      "applies_to": ["*"],
+      "slots": [
+        {
+          "id": "sound_style",
+          "ask": "What should it sound like?",
+          "why": "Picks the clip style (instruments, groove, recording colour) for every tune the game plays.",
+          "need": "required",
+          "extrapolate_from": "a genre, decade, artist or instrument named in the request, or the game's theme",
+          "default": "bright synth pop",
+          "ask_when": "the request names no genre, era, instrument or theme",
+          "choices": ["bright synth pop", "8-bit game music", "calm piano", "a decade's sound"],
+          "affects": ["content"]
+        },
+        {
+          "id": "play_or_listen",
+          "ask": "Do people make music, or listen and answer?",
+          "why": "Making uses pads, grids and loops; listening uses melody clips and a quiz. They are different games.",
+          "need": "required",
+          "extrapolate_from": "verbs in the request: make, compose, jam, beat (make); guess, hear, which, name (listen)",
+          "default": "listen and answer",
+          "ask_when": "the request is only a topic, like 'a music game'",
+          "choices": ["listen and answer", "make a beat or tune", "copy what I hear"],
+          "affects": ["rules"]
+        },
+        {
+          "id": "audience",
+          "ask": "Who plays: just you, a friend you challenge, or a Group?",
+          "why": "Challenges need a score to beat; a Group daily needs the same tunes for everyone.",
+          "need": "required",
+          "extrapolate_from": "'my friends', 'our band', 'group', 'challenge' in the request, or the Studio target",
+          "default": "a friend you challenge",
+          "choices": ["just me", "a friend you challenge", "a Group daily"],
+          "affects": ["social", "rules"]
+        },
+        {
+          "id": "ear_level",
+          "ask": "Casual ears or trained musicians?",
+          "why": "Sets how alike the choices are (neighbouring decades, similar instruments, close intervals) and the replays.",
+          "need": "nice",
+          "extrapolate_from": "'for my mom', 'for kids', 'musicians', 'hard', 'easy' in the request",
+          "default": "casual ears",
+          "choices": ["casual ears", "music fans", "trained musicians"],
+          "affects": ["difficulty", "content"]
+        },
+        {
+          "id": "length",
+          "ask": "How many tunes in a round?",
+          "why": "Each clip adds a few seconds and about 30 to 60 KB to the game; 6 to 10 is the sweet spot.",
+          "need": "nice",
+          "extrapolate_from": "'quick', 'ten rounds', 'long' in the request",
+          "default": "8 tunes",
+          "choices": ["5 tunes", "8 tunes", "10 tunes"],
+          "affects": ["rules", "content"]
+        }
+      ]
+    },
+    {
+      "applies_to": ["era_by_ear_quiz"],
+      "notes": "Kevin #20. One clip per round, choices are neighbouring decades.",
+      "slots": [
+        {
+          "id": "decades",
+          "ask": "Which decades should be in the mix?",
+          "why": "Picks the clip styles and the answer choices; a wider span is easier.",
+          "need": "required",
+          "extrapolate_from": "decades or years named in the request ('80s', 'my parents' music', 'oldies')",
+          "default": "1950s to 2010s",
+          "choices": ["1950s to 2010s", "1970s to 2000s", "just the 80s and 90s"],
+          "affects": ["content", "difficulty"]
+        },
+        {
+          "id": "audience",
+          "ask": "Who are you playing against?",
+          "why": "A family spanning generations is the best version of this: parents vs kids.",
+          "need": "required",
+          "extrapolate_from": "'family', 'my dad', 'group', 'friends' in the request",
+          "default": "a friend you challenge",
+          "choices": ["a friend you challenge", "my family Group", "just me"],
+          "affects": ["social"]
+        },
+        {
+          "id": "ear_level",
+          "ask": "Easy (far-apart decades) or hard (neighbours)?",
+          "why": "Neighbouring-decade choices are the hard mode; far-apart ones are friendly.",
+          "need": "nice",
+          "extrapolate_from": "'hard', 'easy', 'for my mom' in the request",
+          "default": "neighbouring decades",
+          "choices": ["far-apart decades", "neighbouring decades"],
+          "affects": ["difficulty"]
+        },
+        {
+          "id": "length",
+          "ask": "How many tunes?",
+          "why": "Each tune is a round of about 10 to 20 seconds.",
+          "need": "nice",
+          "default": "10 tunes",
+          "choices": ["6 tunes", "10 tunes"],
+          "affects": ["rules", "content"]
+        }
+      ]
+    }
+  ]
+}

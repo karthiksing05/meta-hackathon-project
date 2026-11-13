@@ -456,6 +456,32 @@
     "path": "authoring/fragments/pickups.fragment.json"
   },
   {
+    "id": "play_clip",
+    "kind": "fragment",
+    "name": "Play the clip",
+    "aliases": [
+      "hear a clip",
+      "listen and answer",
+      "play again button",
+      "replay the tune"
+    ],
+    "summary": "Hear a clip, then pick an answer: plays the game's melody clip for each quiz question shortly after it appears and draws a Play again button (limited replays, not while playing) above the question.",
+    "when_to_use": "Any listen-then-answer quiz with melody_clip content: guess the decade, which instrument, name the jingle. Pair with quiz (clip i = question i, in content order), rounds, score and lives. Give quiz a time_ms of at least (replays + 1) x clip_ms + delay_ms + 3000.",
+    "api": "requires quiz (state order, qi, locked; event question_done); game writes sound.clips; sends input replay_clip; provides clip_now, replays_left, current_clip(); emits clip_play {clip}",
+    "events": [
+      "clip_play"
+    ],
+    "params": {
+      "clips": "int, default 4, 1..12 (the number of clips; question indexes wrap)",
+      "replays": "int, default 2, 0..5",
+      "delay_ms": "duration, default 600, 100..3000",
+      "clip_ms": "duration, default 6000, 500..10000 (the longest clip)",
+      "label": "string, default \"Play again\", max 14 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/play_clip.fragment.json"
+  },
+  {
     "id": "player_drag",
     "kind": "fragment",
     "name": "Drag to steer",
@@ -1088,5 +1114,107 @@
     ],
     "path": "authoring/fragments/country_outline.fragment.json",
     "notes": "Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md)."
+  },
+  {
+    "id": "zoom_reveal",
+    "kind": "fragment",
+    "name": "Zoom-out picture",
+    "aliases": [
+      "zoom out reveal",
+      "close-up guess",
+      "tiny crop",
+      "what is this close-up",
+      "zoomed in picture"
+    ],
+    "summary": "A picture in a square window that starts zoomed in on a small crop and zooms out to the whole picture over a set time, driven by the game clock so replays match. The pictures are frames of the game's picture sprite, one per round.",
+    "when_to_use": "Guess-the-picture games where seeing less is harder: wildlife close-ups, what is this object, zoomed-in characters or places. Pair with picture_quiz (choices) or typed_answer (type it). Pay more for early answers with zoom_left().",
+    "api": "requires functions zoom_index(): int (which frame) and zoom_hold(): bool (show it whole, e.g. locked), event zoom_restart (bind to question_done); provides zoom_left(): int 100..0 by the clock, zoom_scale(): float; art role picture (frames, w and h 512 so it stays sharp). List it FIRST in uses: there is no clipping, so it masks around the window with $bg and later fragments draw on top",
+    "params": {
+      "x": "int, default 40, 0..340",
+      "y": "int, default 76, 0..620",
+      "size": "int, default 280, 80..360",
+      "zoom_from": "float, default 6.0, 1..16",
+      "zoom_ms": "duration, default 8000, 500..60000",
+      "focus_x": "float, default 0.5, 0..1",
+      "focus_y": "float, default 0.5, 0..1",
+      "jitter": "bool, default true (the crop point shifts per picture)",
+      "frame": "bool, default true (a border)"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/zoom_reveal.fragment.json",
+    "example_types": [
+      "zoomed_image_guess",
+      "zoom_out_picture_trivia",
+      "picture_reveal"
+    ],
+    "notes": "masks with four $bg rects, so the backdrop is hidden around the window; an engine clip (image_clip) would remove that. Reaches the server with the next Studio bundle rebuild"
+  },
+  {
+    "id": "picture_quiz",
+    "kind": "fragment",
+    "name": "Picture quiz",
+    "aliases": [
+      "picture multiple choice",
+      "what is in the picture",
+      "name the picture"
+    ],
+    "summary": "The quiz fragment's rules (shuffled questions, shuffled choices, a timer per question, right and wrong events) with a layout that leaves the top of the screen for a picture: a short question line under it and the answers in a 2 x 2 grid.",
+    "when_to_use": "Any multiple-choice round about a picture: zoom-out guessing, which animal, whose cartoon, what is this close-up, emoji or picture rebus with choices. Use quiz instead when there is no picture.",
+    "api": "requires quiz_questions(), quiz_choices(), quiz_answers() like quiz; provides order, qi, opts, picked, locked, right_count, wrong_count, question_text(), correct_answer(); emits answered_right, answered_wrong, question_done. The picture goes in y 70..350 (zoom_reveal, or the game's own image node with frame get_or(order, qi, 0)). Conflicts with quiz",
+    "events": [
+      "answered_right",
+      "answered_wrong",
+      "question_done"
+    ],
+    "params": {
+      "choices": "int, default 3, 2..4",
+      "time_ms": "duration, default 8000, 1000..30000",
+      "goal": "int, default 0, 0..200"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/picture_quiz.fragment.json",
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "cartoon_quote_guess",
+      "picture_reveal"
+    ],
+    "notes": "derived from quiz.fragment.json; keep the rules in step if quiz changes"
+  },
+  {
+    "id": "diff_spots",
+    "kind": "fragment",
+    "name": "Spot the difference board",
+    "aliases": [
+      "spot the difference",
+      "find the differences",
+      "two pictures"
+    ],
+    "summary": "Two pictures one above the other; tapping where they differ (in either picture) finds that difference and rings it in both, tapping anywhere else is a miss. The answer key is data written by the spot-difference generator, never guessed from pixels.",
+    "when_to_use": "Spot-the-difference and find-what-changed games: chaotic group-chat screenshots, rooms, scenes, outfits. Build the pictures and the key with anomaly_generator (authoring/expander/spot-diff.mjs) from one scene.",
+    "api": "requires functions diff_points(): list<ivec2>, diff_radii(): list<int>, diff_decoys(): list<ivec2> (written by spot-diff.mjs toAuthoring); art roles picture_a, picture_b; provides found, found_count, last_spot, spot_total(); emits spot_found, spot_missed, all_spots_found; wins when all are found (wins param). Bind score point to spot_found and lives hit to spot_missed",
+    "events": [
+      "spot_found",
+      "spot_missed",
+      "all_spots_found"
+    ],
+    "params": {
+      "x": "int, default 20",
+      "y_a": "int, default 84",
+      "y_b": "int, default 340",
+      "w": "int, default 320, 120..360",
+      "h": "int, default 240, 80..320",
+      "scene_w": "int, default 320 (the scene's own width)",
+      "pad": "int, default 6 (extra tap radius)",
+      "wins": "bool, default true",
+      "label": "string, default \"Found\""
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/diff_spots.fragment.json",
+    "example_types": [
+      "spot_difference",
+      "what_changed_scene",
+      "mirror_double_difference"
+    ],
+    "notes": "the bot gate finds differences in about 3 s (it taps every object), so it flags too_short for one pair; people take 20-60 s. A gate profile for search games is requested from Bayan"
   }
 ]
