@@ -134,5 +134,31 @@ const opts = { engine, maxSeconds: 8, pixels: false };
   ok(s.frames.some((f) => f.label === 'intro') && s.frames.some((f) => f.label.startsWith('end-')), 'intro and end frames', [...new Set(s.frames.map((f) => f.label))]);
 }
 
+// --- FC-02 and FC-10 on Fog Over the Bay (Prod, 2026-11-13): a cream timer over the moon, and a cream
+// end card in a dark teal game whose words were drawn in its own colour.
+{
+  const { readFileSync } = await import('node:fs');
+  const fog = JSON.parse(readFileSync(new URL('./fixtures/fog-over-the-bay.game.json', import.meta.url), 'utf8'));
+  const r = await verify(fog, { engine, maxSeconds: 62, pixels: false });
+  const timer = r.findings.find((f) => f.code === 'S_HUD_READABILITY' && /s"/.test(f.message));
+  ok(timer && timer.severity === 'block' && timer.node === '/presentation/root/children/2/children/1', 'the timer over the moon is S_HUD_READABILITY', r.findings.filter((f) => f.code === 'S_HUD_READABILITY').map((f) => f.message));
+  ok(!r.findings.some((f) => f.code === 'S_HUD_READABILITY' && f.node?.startsWith('/presentation/root/children/4/')), 'end-card text is not a HUD readout');
+  const card = r.findings.find((f) => f.code === 'S_STRAY_SHAPE');
+  ok(card && card.node === '/presentation/root/children/4/children/0/children/0' && /off the look/.test(card.message), 'the cream end card is S_STRAY_SHAPE (off the look)', card);
+  const { fixShapes } = await import('../expander/layout-fix.mjs');
+  const fx = fixShapes(fog, [{ node: '/presentation/root/children/4/children/0/children/0', off: true }]);
+  ok(fx.game.presentation.root.children[4].children[0].children[0].fill === '$surface' && fx.fixes.length === 1, 'an off-look panel takes $surface', fx.fixes);
+  ok(sameRules(fog, fx.game).rules, 'repainting a panel keeps the rules');
+  const fixed = await verifyAndFix(fog, { engine, maxSeconds: 62, pixels: false });
+  ok(!fixed.report.findings.some((f) => ['S_HUD_READABILITY', 'S_STRAY_SHAPE'].includes(f.code) && f.severity === 'block') && fixed.proof.rules && fixed.proof.replays, 'verifyAndFix clears both, rules and replays unchanged', fixed.report.findings.filter((f) => f.severity === 'block').map((f) => f.code));
+}
+{
+  // An empty outlined box is hidden; a box that holds something stays.
+  const { fixShapes } = await import('../expander/layout-fix.mjs');
+  const g = { presentation: { root: { node: 'group', children: [{ node: 'rect', x: 40, y: 300, w: 120, h: 60, fill: '#00000000', stroke: '$line', stroke_width: 3 }] } } };
+  const fx = fixShapes(g, [{ node: '/presentation/root/children/0', empty: true }]);
+  ok(fx.game.presentation.root.children[0].visible === false, 'an empty box is hidden', fx.fixes);
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

@@ -212,8 +212,14 @@ export async function verifyAndFix(input, opts = {}) {
       const { readabilityFindings, readabilityFix } = await import('../kit/readability.mjs');
       const { inflateSync } = await import('node:zlib');
       const inflate = (b) => new Uint8Array(inflateSync(b));
+      // Stray and off-look panels first (FC-10), so the words on a repainted card are re-inked against it.
+      const { strayShapes } = await import('./checks/shapes.mjs');
+      const { hudReadabilityFindings } = await import('./checks/hud.mjs');
+      const shaped = (await import('../expander/layout-fix.mjs')).fixShapes(game, strayShapes(game, await sampleDense(game, { engine, maxSeconds: opts.maxSeconds ?? 120, ref: original })));
+      if (shaped.fixes.length) { game = shaped.game; fixes.push(...shaped.fixes.map((x) => ({ stage: 'readability', ...x }))); }
       for (let round = 0; round < 2 && !over(); round++) {
-        const f = readabilityFindings(game, await sampleDense(game, { engine, maxSeconds: opts.maxSeconds ?? 120, ref: original }), { inflate });
+        const sample = await sampleDense(game, { engine, maxSeconds: opts.maxSeconds ?? 120, ref: original });
+        const f = [...readabilityFindings(game, sample, { inflate }), ...hudReadabilityFindings(game, sample, { inflate })];
         if (!f.length) break;
         const r = readabilityFix(game, f, { spec: lookSpec });
         if (!r.fixes?.length) break;
