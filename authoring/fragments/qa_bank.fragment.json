@@ -1,0 +1,1023 @@
+{
+  "fragment": "qa_bank",
+  "version": 1,
+  "describe": "Ask free yes/no questions to crack a mystery (lateral-thinking puzzles, twenty questions, interrogate a suspect): the player TYPES a question on the keyboard fragment and taps Ask; a deterministic matcher (no AI while playing) maps it to one of the case's pre-written facts and answers Yes, No, Doesn't matter or Partly, showing the fact it answered ('Did he drink the water? No'). A question that matches no fact gets 'Ask another way' and costs nothing. Typing a theory and tapping Solve checks it against the case's solutions. Pair it with keyboard: `letters` must include ' ' (space), '<' (delete) and '>' (Ask), e.g. \"qwertyuiopasdfghjklzxcvbnm <>\" with cols 10, rows 3, key_size 31, gap 3, x 9, y 420. This fragment provides keyboard's `key_state`. The game supplies four functions that read `content` lists made by the qa_bank content step (one entry per case): `qa_setups()` (the mystery the player reads, <= 240 chars), `qa_reveals()` (the full story, shown at the end), `qa_facts()` (entry c: case c's facts joined by ';', each \"<y|n|i|p>[*]|<question shown>|<concept groups>\", groups split by '|' and the words for one concept by '=', '*' marking a key fact, e.g. \"y*|Did he have hiccups?|hiccup=hiccough;n|Did he drink the water?|water=glass|drink=sip=swallow\") and `qa_solves()` (entry c: the solutions joined by ';', each in the same group format, e.g. \"hiccup=hiccough|scare=fright=shock=startle\"). A question fits a fact when every group has one of its words in the question (inflections, plurals and small typos are forgiven); the fact with the most groups wins, then the one covering more of the question's words. Each answered question costs 1 of `questions`; a new key fact is a clue (+`clue_points`); a wrong Solve costs `wrong_solve_cost` questions; solving scores `solve_points` + `question_points` per question left. Cases come in a shuffled order; after a solve (or running out) the solution shows for 3 s and `case_done` fires before the next case. With `goal` above 0, solving that many cases wins; with `out_loses`, running out of questions loses. It sets the score (`qa_points`), so don't also use score. For the bots set \"playtest\": {\"progress\": \"qa_progress()\"}. State: `typed`, `asked`, `clues`, `solved_count`, `qa_points`, `last_reply` ('' | 'yes' | 'no' | 'irrelevant' | 'partly' | 'unclear' | 'solved' | 'wrong' | 'out'), `last_ask`, `locked`, `revealing`. Draws the case, the last answers, the question box and Ask and Solve buttons above y 410.",
+  "params": {
+    "questions": {
+      "type": "int",
+      "default": 20,
+      "min": 3,
+      "max": 60
+    },
+    "clue_points": {
+      "type": "int",
+      "default": 50,
+      "min": 0,
+      "max": 1000
+    },
+    "solve_points": {
+      "type": "int",
+      "default": 500,
+      "min": 0,
+      "max": 5000
+    },
+    "question_points": {
+      "type": "int",
+      "default": 25,
+      "min": 0,
+      "max": 1000
+    },
+    "wrong_solve_cost": {
+      "type": "int",
+      "default": 2,
+      "min": 0,
+      "max": 10
+    },
+    "unclear_costs": {
+      "type": "bool",
+      "default": false
+    },
+    "goal": {
+      "type": "int",
+      "default": 1,
+      "min": 0,
+      "max": 20
+    },
+    "out_loses": {
+      "type": "bool",
+      "default": true
+    },
+    "max_len": {
+      "type": "int",
+      "default": 40,
+      "min": 10,
+      "max": 60
+    },
+    "placeholder": {
+      "type": "string",
+      "default": "Ask a yes or no question",
+      "max_len": 30
+    }
+  },
+  "art": {
+    "answer_box": {
+      "describe": "The box the typed question sits in, 320 × 44 (keep its middle calm: the text is drawn on top).",
+      "color": "surface"
+    },
+    "button": {
+      "describe": "The Ask and Solve buttons, 150 × 40 each (keep the middle calm: the label is drawn on top).",
+      "color": "primary"
+    }
+  },
+  "requires": {
+    "functions": {
+      "qa_setups": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "qa_reveals": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "qa_facts": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "qa_solves": {
+        "params": {},
+        "returns": "list<string>"
+      }
+    },
+    "inputs": {
+      "press": {
+        "letter": "string"
+      }
+    }
+  },
+  "inputs": {
+    "qa_ask": {
+      "payload": {}
+    },
+    "qa_solve": {
+      "payload": {}
+    }
+  },
+  "state": {
+    "order": {
+      "type": "list<int>",
+      "init": "[]"
+    },
+    "ci": {
+      "type": "int",
+      "init": "0"
+    },
+    "typed": {
+      "type": "string",
+      "init": "''"
+    },
+    "asked": {
+      "type": "int",
+      "init": "0"
+    },
+    "found": {
+      "type": "list<int>",
+      "init": "[]"
+    },
+    "clues": {
+      "type": "int",
+      "init": "0"
+    },
+    "solved_count": {
+      "type": "int",
+      "init": "0"
+    },
+    "qa_points": {
+      "type": "int",
+      "init": "0"
+    },
+    "last_reply": {
+      "type": "string",
+      "init": "''"
+    },
+    "last_ask": {
+      "type": "string",
+      "init": "''"
+    },
+    "history": {
+      "type": "list<string>",
+      "init": "[]"
+    },
+    "locked": {
+      "type": "bool",
+      "init": "true"
+    },
+    "revealing": {
+      "type": "bool",
+      "init": "false"
+    },
+    "ran_out": {
+      "type": "bool",
+      "init": "false"
+    }
+  },
+  "functions": {
+    "case_id": {
+      "params": {},
+      "returns": "int",
+      "body": "get_or(order, ci, 0)"
+    },
+    "case_text": {
+      "params": {},
+      "returns": "string",
+      "body": "if revealing then get_or(qa_reveals(), case_id(), '') else get_or(qa_setups(), case_id(), '')"
+    },
+    "questions_left": {
+      "params": {},
+      "returns": "int",
+      "body": "max(0, @questions - asked)"
+    },
+    "_facts": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "filter(split(get_or(qa_facts(), case_id(), ''), ';'), f => trim(f) != '')"
+    },
+    "_intents": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(_facts(), f => join(drop(split(f, '|'), 2), '|'))"
+    },
+    "_solves": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "filter(split(get_or(qa_solves(), case_id(), ''), ';'), f => trim(f) != '')"
+    },
+    "_reply_word": {
+      "params": {
+        "code": "string"
+      },
+      "returns": "string",
+      "body": "let c = replace(code, '*', '') in if c == 'y' then 'yes' else if c == 'n' then 'no' else if c == 'p' then 'partly' else 'irrelevant'"
+    },
+    "reply_label": {
+      "params": {
+        "r": "string"
+      },
+      "returns": "string",
+      "body": "if r == 'yes' then 'Yes' else if r == 'no' then 'No' else if r == 'partly' then 'Partly' else if r == 'irrelevant' then 'Doesn’t matter' else if r == 'unclear' then 'Ask another way' else if r == 'solved' then 'Solved!' else if r == 'wrong' then 'Not quite' else if r == 'out' then 'Out of questions' else ''"
+    },
+    "_phrase": {
+      "params": {
+        "it": "string"
+      },
+      "returns": "string",
+      "body": "join(map(filter(split(it, '|'), g => trim(g) != ''), g => trim(get_or(split(g, '='), 0, ''))), ' ')"
+    },
+    "_on_track": {
+      "params": {
+        "its": "list<string>"
+      },
+      "returns": "bool",
+      "body": "any(its, it => starts_with(_phrase(it), lower(typed)))"
+    },
+    "qa_progress": {
+      "params": {},
+      "returns": "int",
+      "body": "qa_points * 100 + (if locked then 0 else if _on_track(_solves()) then len(typed) * 3 else if _on_track(_intents()) then len(typed) else -5)"
+    },
+    "key_state": {
+      "params": {
+        "letter": "string"
+      },
+      "returns": "int",
+      "body": "if letter == '>' then 1 else if letter == '<' then 2 else 0"
+    },
+    "_qz_apos": {
+      "params": {},
+      "returns": "string",
+      "body": "\"'\""
+    },
+    "_qz_clean": {
+      "params": {
+        "fz_s": "string"
+      },
+      "returns": "string",
+      "body": "join(map(chars(lower(fz_s)), fz_c => if fz_c == _qz_apos() then '' else _qz_fold(fz_c)), '')"
+    },
+    "_qz_fold": {
+      "params": {
+        "fz_c": "string"
+      },
+      "returns": "string",
+      "body": "let fz_i = index_of('àáâãäåāăąçćĉċčďđðèéêëēĕėęěĝğġģĥħìíîïĩīĭįıĵķĺļľŀłñńņňŉòóôõöøōŏőŕŗřśŝşšșţťŧțùúûüũūŭůűųŵýÿŷźżžæœßþ&.’‘ʼ´`!\"#$%()*+,-/:;<=>?@[\\\\]^_{|}~\t\n\r –—‐‑…·•«»“”„¿¡̴̵̶̷̸̡̢̧̨̛̖̗̘̙̜̝̞̟̠̣̤̥̦̩̪̫̬̭̮̯̰̱̲̳̹̺̻̼͇͈͉͍͎̀́̂̃̄̅̆̇̈̉̊̋̌̍̎̏̐̑̒̓̔̽̾̿̀́͂̓̈́͆͊͋͌̕̚ͅ͏͓͔͕͖͙͚͐͑͒͗͛ͣͤͥͦͧͨͩͪͫͬͭͮͯ͘͜͟͢͝͞͠͡', fz_c) in if fz_i < 0 then fz_c else let fz_t = substr('aaaaaaaaacccccdddeeeeeeeeegggghhiiiiiiiiijklllllnnnnnooooooooorrrsssssttttuuuuuuuuuuwyyyzzz*****!!!!!!                                              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', fz_i, fz_i + 1) in if fz_t == '!' then '' else if fz_t == '*' then get_or(map_of([['æ', 'ae'], ['œ', 'oe'], ['ß', 'ss'], ['þ', 'th'], ['&', ' and ']]), fz_c, fz_c) else fz_t"
+    },
+    "_qz_stem": {
+      "params": {
+        "fz_w": "string"
+      },
+      "returns": "string",
+      "body": "let fz_a = if len(fz_w) > 3 and ends_with(fz_w, 's') and not (ends_with(fz_w, 'ss') or ends_with(fz_w, 'is') or (ends_with(fz_w, 'us') and len(fz_w) > 4)) then substr(fz_w, 0, len(fz_w) - 1) else fz_w in let fz_n = len(fz_a) in if fz_n > 3 and (ends_with(fz_a, 'xe') or ends_with(fz_a, 'she') or ends_with(fz_a, 'che') or ends_with(fz_a, 'sse')) then substr(fz_a, 0, fz_n - 1) else if fz_n > 3 and ends_with(fz_a, 'ie') then concat(substr(fz_a, 0, fz_n - 2), 'y') else if fz_n > 4 and (ends_with(fz_a, 've') or ends_with(fz_a, 'fe')) then concat(substr(fz_a, 0, fz_n - 2), 'f') else if fz_n > 5 and ends_with(fz_a, 'oe') then substr(fz_a, 0, fz_n - 1) else fz_a"
+    },
+    "_qz_words": {
+      "params": {
+        "fz_s": "string"
+      },
+      "returns": "list<string>",
+      "body": "let fz_t = map(filter(split(_qz_clean(fz_s), ' '), fz_x => fz_x != ''), fz_x => _qz_num(fz_x)) in map(if len(fz_t) > 1 and contains(['the', 'a', 'an'], first(fz_t)) then drop(fz_t, 1) else fz_t, fz_x => _qz_stem(fz_x))"
+    },
+    "_qz_num": {
+      "params": {
+        "fz_x": "string"
+      },
+      "returns": "string",
+      "body": "let fz_i = index_of(['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'], fz_x) in if fz_i < 0 then fz_x else str(fz_i)"
+    },
+    "_qz_row": {
+      "params": {
+        "fz_pp": "list<int>",
+        "fz_p": "list<int>",
+        "fz_b": "list<string>",
+        "fz_c": "string",
+        "fz_cp": "string",
+        "fz_i": "int"
+      },
+      "returns": "list<int>",
+      "body": "fold(range(1, len(fz_b) + 1), [fz_i], (fz_r, fz_j) => push(fz_r, let fz_bj = get_or(fz_b, fz_j - 1, '') in let fz_v = min(get_or(fz_p, fz_j, 0) + 1, last(fz_r) + 1, get_or(fz_p, fz_j - 1, 0) + (if fz_c == fz_bj then 0 else 1)) in if fz_i > 1 and fz_j > 1 and fz_c == get_or(fz_b, fz_j - 2, '') and fz_cp == fz_bj then min(fz_v, get_or(fz_pp, fz_j - 2, 0) + 1) else fz_v))"
+    },
+    "_qz_dist": {
+      "params": {
+        "fz_a": "string",
+        "fz_b": "string"
+      },
+      "returns": "int",
+      "body": "let fz_x = chars(fz_a) in let fz_y = chars(fz_b) in if len(fz_x) == 0 then len(fz_y) else if len(fz_y) == 0 then len(fz_x) else last(fold(range(len(fz_x)), {pp: range(len(fz_y) + 1), p: range(len(fz_y) + 1)}, (fz_st, fz_k) => {pp: fz_st.p, p: _qz_row(fz_st.pp, fz_st.p, fz_y, get_or(fz_x, fz_k, ''), get_or(fz_x, fz_k - 1, ''), fz_k + 1)}).p)"
+    },
+    "_qz_root": {
+      "params": {
+        "qz_w": "string"
+      },
+      "returns": "string",
+      "body": "let qz_a = if len(qz_w) > 5 and ends_with(qz_w, 'ing') then substr(qz_w, 0, len(qz_w) - 3) else if len(qz_w) > 4 and ends_with(qz_w, 'ed') then substr(qz_w, 0, len(qz_w) - 2) else if len(qz_w) > 5 and ends_with(qz_w, 'ly') then substr(qz_w, 0, len(qz_w) - 2) else qz_w in let qz_b = if len(qz_a) > 4 and ends_with(qz_a, 'e') then substr(qz_a, 0, len(qz_a) - 1) else qz_a in let qz_n = len(qz_b) in if qz_n > 3 and substr(qz_b, qz_n - 1, qz_n) == substr(qz_b, qz_n - 2, qz_n - 1) and not contains('aeiou', substr(qz_b, qz_n - 1, qz_n)) then substr(qz_b, 0, qz_n - 1) else qz_b"
+    },
+    "_qz_roots": {
+      "params": {
+        "qz_s": "string"
+      },
+      "returns": "list<string>",
+      "body": "map(_qz_words(qz_s), qz_x => _qz_root(qz_x))"
+    },
+    "_qz_whit": {
+      "params": {
+        "qz_q": "string",
+        "qz_b": "string"
+      },
+      "returns": "bool",
+      "body": "if qz_q == qz_b then true else let qz_n = len(qz_b) in if qz_n < 5 or len(qz_q) < 5 or abs(len(qz_q) - qz_n) > 2 then false else _qz_dist(qz_q, qz_b) <= (if qz_n >= 9 then 2 else 1)"
+    },
+    "_qz_phit": {
+      "params": {
+        "qz_qr": "list<string>",
+        "qz_p": "string"
+      },
+      "returns": "bool",
+      "body": "let qz_pr = _qz_roots(qz_p) in len(qz_pr) > 0 and all(qz_pr, qz_x => any(qz_qr, qz_y => _qz_whit(qz_y, qz_x)))"
+    },
+    "_qz_cover": {
+      "params": {
+        "qz_qr": "list<string>",
+        "qz_it": "string"
+      },
+      "returns": "int",
+      "body": "let qz_br = fold(split(replace(qz_it, '|', '='), '='), [], (qz_acc, qz_p) => concat(qz_acc, _qz_roots(qz_p))) in count(qz_qr, qz_y => any(qz_br, qz_x => _qz_whit(qz_y, qz_x)))"
+    },
+    "_qz_fits": {
+      "params": {
+        "qz_qr": "list<string>",
+        "qz_it": "string"
+      },
+      "returns": "int",
+      "body": "let qz_gs = filter(split(qz_it, '|'), qz_g => trim(qz_g) != '') in if len(qz_gs) == 0 then 0 else if all(qz_gs, qz_g => any(split(qz_g, '='), qz_p => trim(qz_p) != '' and _qz_phit(qz_qr, qz_p))) then len(qz_gs) * 100 + _qz_cover(qz_qr, qz_it) else 0"
+    },
+    "_qz_match": {
+      "params": {
+        "qz_q": "string",
+        "qz_its": "list<string>"
+      },
+      "returns": "int",
+      "body": "let qz_qr = _qz_roots(qz_q) in fold(range(len(qz_its)), {i: -1, g: 0}, (qz_st, qz_k) => let qz_v = _qz_fits(qz_qr, get_or(qz_its, qz_k, '')) in if qz_v > qz_st.g then {i: qz_k, g: qz_v} else qz_st).i"
+    }
+  },
+  "events": {
+    "question_answered": {
+      "reply": "string",
+      "fact": "int"
+    },
+    "question_unclear": {},
+    "clue_found": {
+      "fact": "int"
+    },
+    "case_solved": {
+      "left": "int"
+    },
+    "solve_wrong": {},
+    "out_of_questions": {},
+    "case_done": {},
+    "_open": {},
+    "_ask_q": {},
+    "_out": {},
+    "_next": {}
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        {
+          "set": "order",
+          "to": "shuffle(range(len(qa_setups())))"
+        },
+        {
+          "emit": "_open"
+        }
+      ]
+    },
+    {
+      "id": "open",
+      "on": "_open",
+      "do": [
+        {
+          "set": "asked",
+          "to": "0"
+        },
+        {
+          "set": "found",
+          "to": "[]"
+        },
+        {
+          "set": "history",
+          "to": "[]"
+        },
+        {
+          "set": "typed",
+          "to": "''"
+        },
+        {
+          "set": "last_reply",
+          "to": "''"
+        },
+        {
+          "set": "last_ask",
+          "to": "''"
+        },
+        {
+          "set": "revealing",
+          "to": "false"
+        },
+        {
+          "set": "ran_out",
+          "to": "false"
+        },
+        {
+          "set": "locked",
+          "to": "false"
+        }
+      ]
+    },
+    {
+      "id": "type_key",
+      "on": "press",
+      "when": "not locked and event.letter != ''",
+      "do": [
+        {
+          "if": "event.letter == '<'",
+          "then": [
+            {
+              "set": "typed",
+              "to": "substr(typed, 0, len(typed) - 1)"
+            }
+          ],
+          "else": [
+            {
+              "if": "event.letter == '>'",
+              "then": [
+                {
+                  "emit": "_ask_q"
+                }
+              ],
+              "else": [
+                {
+                  "if": "len(typed) < @max_len and not (event.letter == ' ' and (typed == '' or ends_with(typed, ' ')))",
+                  "then": [
+                    {
+                      "set": "typed",
+                      "to": "concat(typed, event.letter)"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ask_button",
+      "on": "qa_ask",
+      "do": [
+        {
+          "emit": "_ask_q"
+        }
+      ]
+    },
+    {
+      "id": "ask",
+      "on": "_ask_q",
+      "when": "not locked and trim(typed) != ''",
+      "do": [
+        {
+          "let": {
+            "k": "_qz_match(typed, _intents())"
+          }
+        },
+        {
+          "if": "k < 0",
+          "then": [
+            {
+              "set": "last_reply",
+              "to": "'unclear'"
+            },
+            {
+              "set": "last_ask",
+              "to": "trim(typed)"
+            },
+            {
+              "if": "@unclear_costs",
+              "then": [
+                {
+                  "incr": "asked"
+                }
+              ]
+            },
+            {
+              "emit": "question_unclear"
+            }
+          ],
+          "else": [
+            {
+              "let": {
+                "f": "split(get_or(_facts(), k, ''), '|')"
+              }
+            },
+            {
+              "let": {
+                "code": "get_or(f, 0, '')"
+              }
+            },
+            {
+              "set": "last_reply",
+              "to": "_reply_word(code)"
+            },
+            {
+              "set": "last_ask",
+              "to": "get_or(f, 1, '')"
+            },
+            {
+              "incr": "asked"
+            },
+            {
+              "let": {
+                "h": "push(history, concat(get_or(f, 1, ''), '  ', reply_label(_reply_word(code))))"
+              }
+            },
+            {
+              "set": "history",
+              "to": "drop(h, max(0, len(h) - 4))"
+            },
+            {
+              "if": "contains(code, '*') and not contains(found, k)",
+              "then": [
+                {
+                  "set": "found",
+                  "to": "push(found, k)"
+                },
+                {
+                  "incr": "clues"
+                },
+                {
+                  "set": "qa_points",
+                  "to": "qa_points + @clue_points"
+                },
+                {
+                  "emit": "clue_found",
+                  "with": {
+                    "fact": "k"
+                  }
+                }
+              ]
+            },
+            {
+              "emit": "question_answered",
+              "with": {
+                "reply": "_reply_word(code)",
+                "fact": "k"
+              }
+            }
+          ]
+        },
+        {
+          "set": "typed",
+          "to": "''"
+        },
+        {
+          "if": "questions_left() <= 0",
+          "then": [
+            {
+              "emit": "_out"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "solve",
+      "on": "qa_solve",
+      "when": "not locked and trim(typed) != ''",
+      "do": [
+        {
+          "if": "_qz_match(typed, _solves()) >= 0",
+          "then": [
+            {
+              "set": "locked",
+              "to": "true"
+            },
+            {
+              "set": "revealing",
+              "to": "true"
+            },
+            {
+              "set": "last_reply",
+              "to": "'solved'"
+            },
+            {
+              "set": "last_ask",
+              "to": "trim(typed)"
+            },
+            {
+              "incr": "solved_count"
+            },
+            {
+              "set": "qa_points",
+              "to": "qa_points + @solve_points + questions_left() * @question_points"
+            },
+            {
+              "emit": "case_solved",
+              "with": {
+                "left": "questions_left()"
+              }
+            },
+            {
+              "after": "3s",
+              "emit": "_next",
+              "id": "_t_next"
+            }
+          ],
+          "else": [
+            {
+              "set": "last_reply",
+              "to": "'wrong'"
+            },
+            {
+              "set": "last_ask",
+              "to": "trim(typed)"
+            },
+            {
+              "set": "asked",
+              "to": "asked + @wrong_solve_cost"
+            },
+            {
+              "emit": "solve_wrong"
+            },
+            {
+              "if": "questions_left() <= 0",
+              "then": [
+                {
+                  "emit": "_out"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "set": "typed",
+          "to": "''"
+        }
+      ]
+    },
+    {
+      "id": "out",
+      "on": "_out",
+      "when": "not locked",
+      "do": [
+        {
+          "set": "locked",
+          "to": "true"
+        },
+        {
+          "set": "revealing",
+          "to": "true"
+        },
+        {
+          "set": "ran_out",
+          "to": "true"
+        },
+        {
+          "set": "last_reply",
+          "to": "'out'"
+        },
+        {
+          "emit": "out_of_questions"
+        },
+        {
+          "after": "3s",
+          "emit": "_next",
+          "id": "_t_next"
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "on": "_next",
+      "do": [
+        {
+          "emit": "case_done"
+        },
+        {
+          "incr": "ci"
+        },
+        {
+          "if": "ci >= len(order)",
+          "then": [
+            {
+              "set": "order",
+              "to": "shuffle(order)"
+            },
+            {
+              "set": "ci",
+              "to": "0"
+            }
+          ]
+        },
+        {
+          "emit": "_open"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": {
+      "include": "@goal > 0",
+      "expr": "solved_count >= @goal"
+    },
+    "lose": {
+      "include": "@out_loses",
+      "expr": "ran_out"
+    },
+    "score": "qa_points"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 20,
+          "y": 40,
+          "w": 320,
+          "h": 20,
+          "align": "center",
+          "valign": "middle",
+          "size": 14,
+          "weight": 800,
+          "color": "$secondary",
+          "text": "= concat(str(questions_left()), ' questions left  ·  ', str(clues), if clues == 1 then ' clue' else ' clues')"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 20,
+          "y": 64,
+          "w": 320,
+          "h": 104,
+          "wrap": true,
+          "align": "left",
+          "valign": "top",
+          "size": 15,
+          "weight": 600,
+          "color": "= if revealing then $primary else $ink",
+          "text": "= case_text()"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(min(3, max(0, len(history) - 1)))",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "text",
+            "x": 20,
+            "y": "= 174 + k * 18",
+            "w": 320,
+            "h": 18,
+            "align": "left",
+            "valign": "middle",
+            "size": 12,
+            "weight": 500,
+            "color": "$ink",
+            "opacity": "= 0.75 - k * 0.2",
+            "text": "= get_or(history, len(history) - 2 - k, '')"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 20,
+          "y": 230,
+          "w": 320,
+          "h": 34,
+          "wrap": true,
+          "align": "center",
+          "valign": "middle",
+          "size": 13,
+          "weight": 600,
+          "color": "$ink",
+          "opacity": 0.8,
+          "text": "= last_ask"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 20,
+          "y": 266,
+          "w": 320,
+          "h": 34,
+          "align": "center",
+          "valign": "middle",
+          "size": 26,
+          "weight": 800,
+          "color": "= if last_reply == 'yes' or last_reply == 'solved' then $primary else if last_reply == 'no' or last_reply == 'wrong' or last_reply == 'out' then $danger else if last_reply == 'partly' then $accent else $secondary",
+          "text": "= reply_label(last_reply)"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "include": "@art.answer_box",
+              "node": "image",
+              "asset": "@art.answer_box.id",
+              "x": 20,
+              "y": 308,
+              "w": 320,
+              "h": 44
+            },
+            {
+              "include": "not @art.answer_box",
+              "node": "rect",
+              "x": 20,
+              "y": 308,
+              "w": 320,
+              "h": 44,
+              "radius": 12,
+              "fill": "$surface",
+              "stroke": "$secondary",
+              "stroke_width": 2
+            },
+            {
+              "node": "text",
+              "x": 30,
+              "y": 308,
+              "w": 300,
+              "h": 44,
+              "align": "center",
+              "valign": "middle",
+              "size": 16,
+              "weight": 700,
+              "color": "$ink",
+              "opacity": "= if typed == '' then 0.45 else 1.0",
+              "text": "= if typed == '' then @placeholder else typed"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "include": "@art.button",
+              "node": "image",
+              "asset": "@art.button.id",
+              "x": 20,
+              "y": 362,
+              "w": 150,
+              "h": 40,
+              "role": "tile"
+            },
+            {
+              "node": "rect",
+              "x": 20,
+              "y": 362,
+              "w": 150,
+              "h": 40,
+              "radius": 12,
+              "role": "tile",
+              "fill": "= if @art.button then '#00000000' else $primary",
+              "opacity": "= if locked or typed == '' then 0.5 else 1.0",
+              "on_tap": {
+                "input": "qa_ask",
+                "with": {}
+              }
+            },
+            {
+              "node": "text",
+              "x": 95,
+              "y": 382,
+              "anchor": "center",
+              "size": 17,
+              "weight": 800,
+              "color": "$bg",
+              "text": "Ask"
+            },
+            {
+              "include": "@art.button",
+              "node": "image",
+              "asset": "@art.button.id",
+              "x": 190,
+              "y": 362,
+              "w": 150,
+              "h": 40,
+              "role": "tile"
+            },
+            {
+              "node": "rect",
+              "x": 190,
+              "y": 362,
+              "w": 150,
+              "h": 40,
+              "radius": 12,
+              "role": "tile",
+              "fill": "= if @art.button then '#00000000' else $accent",
+              "opacity": "= if locked or typed == '' then 0.5 else 1.0",
+              "on_tap": {
+                "input": "qa_solve",
+                "with": {}
+              }
+            },
+            {
+              "node": "text",
+              "x": 265,
+              "y": 382,
+              "anchor": "center",
+              "size": 17,
+              "weight": 800,
+              "color": "$bg",
+              "text": "Solve"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "question_answered",
+        "do": [
+          {
+            "moment": "tap"
+          }
+        ]
+      },
+      {
+        "on": "clue_found",
+        "do": [
+          {
+            "moment": "pickup"
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      },
+      {
+        "on": "case_solved",
+        "do": [
+          {
+            "moment": "combo"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 280,
+              "count": 24,
+              "color": "@art.button.color",
+              "speed": 240,
+              "size": 5,
+              "ms": 600
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      },
+      {
+        "on": "solve_wrong",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "shake": {
+              "px": 5,
+              "ms": 160
+            }
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      },
+      {
+        "on": "question_unclear",
+        "do": [
+          {
+            "haptic": "warning"
+          }
+        ]
+      }
+    ]
+  },
+  "tags": {
+    "mood": [
+      "any"
+    ],
+    "energy": [
+      "low"
+    ]
+  },
+  "conflicts": [
+    "typed_answer",
+    "quiz",
+    "score",
+    "word_check"
+  ]
+}
