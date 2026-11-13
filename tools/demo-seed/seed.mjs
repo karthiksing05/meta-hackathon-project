@@ -6,11 +6,13 @@
 //
 //   node tools/demo-seed/seed.mjs                      # local API (http://127.0.0.1:8080)
 //   node tools/demo-seed/seed.mjs --api https://api.ol4ol.com
-//   options: --date YYYY-MM-DD (the Daily's day; default today in San Francisco), --daily <game key>,
-//            --no-scores, --dry (plan and play the bots, send nothing)
+//   options: --date YYYY-MM-DD (the Daily's day; default today in San Francisco), --daily-source <Prod game id>
+//            (the game the Daily copies; default Spinning Cat Crossing), --no-scores, --dry (plan and play the
+//            bots, send nothing)
 //
 // Re-runnable: accounts, friendships, memberships, uploads and scores that already exist are kept (a score that
-// isn't better is not counted). A later --date sets that day's Daily and notifies again.
+// isn't better is not counted). Run it again on a later day (or with --date) for that day's Daily: a fresh copy with
+// that day's scores, and a new "Today's Daily" notification.
 //
 // People are synthetic (FacebookClone/Bubbles/Seeds/bubble-demo-world.json); emails are @example.com. Passwords are
 // stored only in game-backups/demo-world/accounts.private.json (chmod 600) and never printed. Ids that aren't
@@ -62,8 +64,9 @@ const extraFriends = [
 
 // ---- the games: copies of real Muse-made games (Kevin's harness-v2 set on Prod), scoped to the Group or the Event ----
 // order: who has played, best first. Maya sits just above Alex on the Daily ("Maya's just above you").
+// Each date gets its own copy of the Daily, played that day, so the Group card's "Today's top 3" is today's.
 const games = [
-  { key: 'daily-cat-crossing', source: '2e4c4961391461a869d3b210', scope: 'group', daily: true, by: HOST,
+  { key: `daily-${DATE}`, source: opt('--daily-source', '2e4c4961391461a869d3b210'), scope: 'group', daily: true, by: HOST,
     order: ['sf-lena-fischer', 'sf-diego-ramirez', 'sf-priya-natarajan', 'sf-maya-okafor', 'me-alex', 'sf-omar-haddad', 'sf-chloe-nguyen', 'sf-jordan-brooks'] },
   { key: 'group-brainrot-trivia', source: 'aab77e45a0122c0326134be9', scope: 'group', by: 'sf-theo-adeyemi',
     order: ['sf-theo-adeyemi', 'sf-maya-okafor', 'sf-sam-whitfield', 'sf-chloe-nguyen', 'sf-diego-ramirez', 'sf-aiko-tanaka'] },
@@ -72,7 +75,7 @@ const games = [
   { key: 'event-guess-the-decade', source: 'dca2283a1b53cd83a57173d0', scope: 'event', by: HOST,
     order: ['sf-priya-natarajan', 'sf-maya-okafor', 'sf-lena-fischer', 'sf-omar-haddad', 'sf-jordan-brooks', 'sf-chloe-nguyen'] },
 ];
-const DAILY_KEY = opt('--daily', games.find((g) => g.daily).key);
+const DAILY_KEY = games.find((g) => g.daily).key;
 
 // ---- files ----
 mkdirSync(OUT, { recursive: true });
@@ -200,6 +203,7 @@ function assign(pool, order) {
 const people = Object.fromEntries(cast.map((p) => [p.key, p]));
 const tokens = {};
 const tok = async (key) => (tokens[key] ??= await signIn(people[key]));
+let serverHasDaily = false;
 
 console.log(`demo-seed → ${API}${DRY ? ' (dry run)' : ''}, Daily date ${DATE}`);
 
@@ -213,10 +217,18 @@ if (!DRY) {
   for (const [a, b] of pairs) must(await call('PUT', `/v1/me/friends/${state.accounts[b].id}`, { token: await tok(a) }), `friend ${a} ${b}`);
   console.log(`friendships: ${pairs.length}`);
 
+  // An API without the Daily routes also ignores a Group's stable id: then make no Group (it would get a random
+  // id), and seed only what it supports (accounts, friendships, games, scores). Run again after the deploy.
+  const probe = await call('GET', `/v1/groups/${GROUP_ID}/daily`);
+  serverHasDaily = probe.status === 200 || (probe.status === 404 && typeof probe.data?.error === 'string');
+  if (!serverHasDaily) console.log('this API has no Group Daily routes yet: skipping the Group, the Event and the Daily');
+}
+if (!DRY && serverHasDaily) {
   // the Group and the Event, with the demo world's ids
   const g = world.group, e = world.event;
   const ensureGroup = async (body) => {
     const r = await call('POST', '/v1/groups', { token: await tok(HOST), json: body });
+    if (r.status === 201 && r.data.id !== body.id) throw new Error(`the API gave ${body.id} the id ${r.data.id}`);
     if (r.status !== 201 && r.status !== 409) must(r, `create ${body.id}`);
   };
   await ensureGroup({ id: GROUP_ID, kind: 'group', name: g.name, category: g.category, about: g.about, coverSeed: g.cover_seed });
@@ -236,7 +248,7 @@ if (!DRY) {
 for (const spec of games) {
   const src = await (await fetch(`${SOURCE_GAMES}/${spec.source}/manifest.json`)).json();
   const m = structuredClone(src);
-  m.id = `${src.id}-newinsf`;
+  m.id = spec.daily ? `${src.id}-newinsf-${DATE}` : `${src.id}-newinsf`;
   const scopeId = spec.scope === 'group' ? GROUP_ID : EVENT_ID;
   m.structure = { ...(src.structure ?? {}), scope: `${spec.scope}:${scopeId}`, ...(spec.scope === 'group' ? { group_id: scopeId } : { event_id: scopeId }) };
   if (spec.daily) m.structure.cadence = 'daily';
@@ -282,7 +294,8 @@ for (const spec of games) {
 }
 
 // today's Daily: set by the host, so everyone else (Alex included) gets "Today's Daily in New in SF is ready"
-if (!DRY) {
+if (!DRY && !serverHasDaily) console.log(`state: ${stateFile}`);
+if (!DRY && serverHasDaily) {
   const daily = state.games[DAILY_KEY];
   if (!daily) throw new Error(`no game ${DAILY_KEY} to make the Daily`);
   const r = must(await call('POST', `/v1/groups/${GROUP_ID}/daily`, { token: await tok(HOST), json: { gameId: daily.id, date: DATE } }), 'set the Daily');
