@@ -80,6 +80,8 @@ final class RoundsCenter {
     /// Fetches one round again. Throws the server's message.
     @discardableResult
     func refresh(id: String) async throws -> RemoteRound {
+        // Rounds are members-only: ask as the signed-in person, never before sign-in ends.
+        guard await GamesAccount.shared.waitForUser() != nil else { throw GamesAPIError.signInRequired }
         let round = try await GamesAPIFactory.current.round(id: id)
         store(round)
         return round

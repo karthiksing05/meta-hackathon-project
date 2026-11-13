@@ -85,6 +85,18 @@ enum ChallengeScreens {
         case "picker", "friend":
             router.bubbleSheet = route
             return true
+        case "play-round":
+            // `feature:challenge/play-round/<roundID>`: open the player on a server round, as its Play button does.
+            Task { @MainActor in
+                guard await GamesAccount.shared.waitForUser() != nil else { return }
+                do {
+                    let round = try await RoundsCenter.shared.refresh(id: route.arg)
+                    await RoundsCenter.shared.play(round, placeName: nil, router: router)
+                } catch {
+                    appStore.showToast("Round: \(error.localizedDescription)", symbol: "exclamationmark.circle")
+                }
+            }
+            return true
         default:
             return false
         }
