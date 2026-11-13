@@ -49,8 +49,10 @@ enum SavesScreens {
         switch route.screen {
         case "hint":
             // The hint shows in the player (and on the feed caption); play a game so it is in view.
+            // With no id, the first game the server sent; with none, nothing opens.
+            guard let id = route.arg.isEmpty ? bubbleStore.feedBubbles.first?.id : route.arg else { return true }
             SavesHintCenter.shared.reset()
-            router.play(route.arg.isEmpty ? "hill-hopper" : route.arg)
+            router.play(id)
             return true
         case "stats":
             pushStats(bubbleID: route.arg, router: router, bubbleStore: bubbleStore)
