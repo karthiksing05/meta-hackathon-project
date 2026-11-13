@@ -62,14 +62,7 @@ enum RemixScreens {
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
         switch route.screen {
         case sendBack:
-            // Make the Bubble yours, keeping its credit, so 'Send it back' has someone to send to.
-            if let bubble = bubbleStore.bubble(id: route.arg), !bubble.creator.isMe, RemixLineage.isRemix(bubble) {
-                var manifest = bubble.manifest
-                if let original = RemixLineage.original(of: bubble, in: bubbleStore.bubbles) {
-                    RemixLineage.fillCredit(&manifest, base: original, me: appStore.me)
-                }
-                bubbleStore.publish(manifest, cover: bubble.coverImageData, group: bubble.group, event: bubble.event)
-            }
+            // Opens on the game as the server sent it; no local copy is made to stage it.
             router.bubbleSheet = route
             return true
         case tree:
