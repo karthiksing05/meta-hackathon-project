@@ -313,7 +313,7 @@ export function expand(manifest, lib, options = {}) {
 
   // ---- art, sound and feel (SPEC 2.8–2.10) ----
   const art = compileArt(manifest.art, canvas, err);
-  const sound = compileSound(manifest.sound, err);
+  const sound = compileSound(manifest.sound, err, warn);
   const feel = Object.fromEntries(FEEL_KEYS.map((k) => [k, true]));
   if (manifest.feel !== undefined) {
     if (!manifest.feel || typeof manifest.feel !== 'object' || Array.isArray(manifest.feel)) err('A_FEEL_FIELD', '/feel', 'feel is an object like {"shake": false}');
@@ -551,11 +551,13 @@ export function expand(manifest, lib, options = {}) {
   // ---- merge sections ----
   const out = { format: 'microgame/0.2', meta: clone(manifest.meta) };
   map('/meta', 'game', '/meta');
-  const assets = { ...art.assets, ...(sound.music ? { music: sound.music.asset } : {}) };
+  for (const id of Object.keys(sound.clips.assets)) if (art.assets[id]) err('A_ART_FIELD', ptr('art', 'sprites', id), `'${id}' is the name of a sound clip; rename the sprite`);
+  const assets = { ...art.assets, ...sound.clips.assets, ...(sound.music ? { music: sound.music.asset } : {}) };
   if (Object.keys(assets).length) {
     out.assets = assets;
     for (const id of Object.keys(art.assets)) map(ptr('assets', id), 'game', id === 'backdrop' ? '/art/backdrop' : ptr('art', 'sprites', id));
     if (sound.music) map('/assets/music', 'game', '/sound/music');
+    for (const id of Object.keys(sound.clips.assets)) map(ptr('assets', id), 'game', ptr('sound', 'clips', id.slice(5)));
   }
   for (const s of SECTIONS) {
     const merged = {};
