@@ -1,0 +1,388 @@
+{
+  "fragment": "chess_board",
+  "version": 1,
+  "describe": "A playable chess board: 8 x 8 squares of `square` units at (`x`, `y`) with file and rank coordinates. The player moves a piece by tapping it (its legal squares get dots, captures get rings) and then tapping a square, or by dragging it there; tapping another of their own pieces switches, an empty square deselects, and a drop on an illegal square slides the piece back (`chess_snap`). Legal moves are generated in the rules (deterministic, so runs replay): every piece, captures, auto-queen promotion, and no move may leave your own king in check. Castling and en passant are not supported. Load a position by emitting `chess_load {fen}` (FEN; the side to move comes from it, the board turns so it plays up the screen when `orient` is 'auto'), or set `fen` to load one at the start. Every move, the player's or one the game emits as `chess_move {from, to}` (squares 0..63, a8 = 0, h1 = 63; `chess_sq('e4')` converts), is applied only if legal and then emitted as `chess_moved {from, to, piece, captured, check, mate, name}` (name is short algebraic like 'Qxf7#'). `chess_undo` takes the last move back (the piece slides back). State: `chess_board` (64 strings, 'K' white king .. 'p' black pawn, '' empty), `chess_turn` ('w' or 'b'), `chess_moves` (legal moves as from * 64 + to), `chess_check` (the checked king's square or -1), `chess_mate`, `chess_stalemate`, `chess_last_from`/`chess_last_to`, and `chess_locked` (set it true to ignore the player, for example while the game shows feedback). Functions for the game's rules: chess_legal_from(board, sq), chess_all_moves(board, color), chess_apply(board, from, to), chess_in_check(board, color), chess_is_mate(board, color), chess_move_name(board, from, to), chess_sq(name), chess_sq_name(sq), chess_cx(sq)/chess_cy(sq) (a square's centre on the canvas). With a `piece` sprite (12 frames: K Q R B N P white, then k q r b n p black) the pieces are drawn with it, else with chess glyphs. The board has no win or lose condition: the game decides what a move means.",
+  "params": {
+    "x":       { "type": "int", "default": 4, "min": 0, "max": 360 },
+    "y":       { "type": "int", "default": 260, "min": 0, "max": 780 },
+    "square":  { "type": "int", "default": 44, "min": 40, "max": 45 },
+    "fen":     { "type": "string", "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1", "max_len": 100 },
+    "side":    { "type": "enum", "values": ["both", "white", "black"], "default": "both" },
+    "orient":  { "type": "enum", "values": ["auto", "white", "black"], "default": "auto" },
+    "coords":  { "type": "bool", "default": true },
+    "light":   { "type": "string", "default": "#EBD9B4", "max_len": 9 },
+    "dark":    { "type": "string", "default": "#9C6D47", "max_len": 9 },
+    "light_ink": { "type": "string", "default": "#6B4A2E", "max_len": 9 },
+    "dark_ink":  { "type": "string", "default": "#FFF6E6", "max_len": 9 },
+    "select":  { "type": "string", "default": "#E3C766", "max_len": 9 },
+    "last":    { "type": "string", "default": "#D9C27A", "max_len": 9 },
+    "check":   { "type": "string", "default": "#E07A63", "max_len": 9 },
+    "marker":  { "type": "string", "default": "#2A1D1466", "max_len": 9 }
+  },
+  "art": {
+    "piece": { "describe": "The chess pieces: 12 square frames, white K Q R B N P then black k q r b n p, each piece centred with about 8% padding, drawn `square` units wide on its square. Give white pieces a dark outline so they read on light squares.", "color": "ink" }
+  },
+  "requires": {},
+  "state": {
+    "chess_board":     { "type": "list<string>", "init": "repeat('', 64)" },
+    "chess_ids":       { "type": "list<int>", "init": "repeat(-1, 64)" },
+    "chess_turn":      { "type": "string", "init": "'w'" },
+    "chess_flip":      { "type": "bool", "init": "@orient == 'black'" },
+    "chess_sel":       { "type": "int", "init": "-1" },
+    "chess_targets":   { "type": "list<int>", "init": "[]" },
+    "chess_moves":     { "type": "list<int>", "init": "[]" },
+    "chess_last_from": { "type": "int", "init": "-1" },
+    "chess_last_to":   { "type": "int", "init": "-1" },
+    "chess_check":     { "type": "int", "init": "-1" },
+    "chess_mate":      { "type": "bool", "init": "false" },
+    "chess_stalemate": { "type": "bool", "init": "false" },
+    "chess_locked":    { "type": "bool", "init": "false" },
+    "chess_dragging":  { "type": "bool", "init": "false" },
+    "chess_drag":      { "type": "vec2", "init": "vec(0.0, 0.0)" },
+    "_gen":            { "type": "int", "init": "0" },
+    "_press":          { "type": "vec2", "init": "vec(0.0, 0.0)" },
+    "_press_sq":       { "type": "int", "init": "-1" },
+    "_was_sel":        { "type": "bool", "init": "false" },
+    "_can_undo":       { "type": "bool", "init": "false" },
+    "_undo_board":     { "type": "list<string>", "init": "repeat('', 64)" },
+    "_undo_ids":       { "type": "list<int>", "init": "repeat(-1, 64)" },
+    "_undo_turn":      { "type": "string", "init": "'w'" },
+    "_undo_from":      { "type": "int", "init": "-1" },
+    "_undo_to":        { "type": "int", "init": "-1" }
+  },
+  "functions": {
+    "chess_color":   { "params": { "p": "string" }, "returns": "string", "body": "if p == '' then '' else if upper(p) == p then 'w' else 'b'" },
+    "chess_other":   { "params": { "c": "string" }, "returns": "string", "body": "if c == 'w' then 'b' else 'w'" },
+    "chess_step":    { "params": { "i": "int", "o": "ivec2" }, "returns": "int", "body": "let cc = i % 8 + o.x in let cr = i / 8 + o.y in if cc < 0 or cc > 7 or cr < 0 or cr > 7 then -1 else cr * 8 + cc" },
+    "chess_knight_dirs": { "params": {}, "returns": "list<ivec2>", "body": "[vec(1, -2), vec(2, -1), vec(2, 1), vec(1, 2), vec(-1, 2), vec(-2, 1), vec(-2, -1), vec(-1, -2)]" },
+    "chess_king_dirs":   { "params": {}, "returns": "list<ivec2>", "body": "[vec(0, -1), vec(1, -1), vec(1, 0), vec(1, 1), vec(0, 1), vec(-1, 1), vec(-1, 0), vec(-1, -1)]" },
+    "chess_slide_dirs":  { "params": { "t": "string" }, "returns": "list<ivec2>", "body": "if t == 'R' then [vec(0, -1), vec(1, 0), vec(0, 1), vec(-1, 0)] else if t == 'B' then [vec(1, -1), vec(1, 1), vec(-1, 1), vec(-1, -1)] else chess_king_dirs()" },
+    "chess_ray": {
+      "params": { "b": "list<string>", "i": "int", "d": "ivec2" }, "returns": "list<int>",
+      "body": "let cs = filter(map(range(1, 8), ck => chess_step(i, vec(d.x * ck, d.y * ck))), ct => ct >= 0) in let cj = index_of(map(cs, ct => b[ct] != ''), true) in if cj < 0 then cs else take(cs, cj + 1)"
+    },
+    "chess_pawn_moves": {
+      "params": { "b": "list<string>", "i": "int" }, "returns": "list<int>",
+      "body": "let cc = chess_color(b[i]) in let dy = if cc == 'w' then -1 else 1 in let one = chess_step(i, vec(0, dy)) in let two = chess_step(i, vec(0, 2 * dy)) in let home = if cc == 'w' then 6 else 1 in concat(filter([one, two], ct => ct >= 0 and b[ct] == '' and (ct == one or (i / 8 == home and b[one] == ''))), filter(map([vec(-1, dy), vec(1, dy)], co => chess_step(i, co)), ct => ct >= 0 and chess_color(b[ct]) == chess_other(cc)))"
+    },
+    "chess_pseudo": {
+      "params": { "b": "list<string>", "i": "int" }, "returns": "list<int>",
+      "body": "let cc = chess_color(b[i]) in let ct = upper(b[i]) in if ct == '' then [] else if ct == 'P' then chess_pawn_moves(b, i) else if ct == 'N' or ct == 'K' then filter(map(if ct == 'N' then chess_knight_dirs() else chess_king_dirs(), co => chess_step(i, co)), cs => cs >= 0 and chess_color(b[cs]) != cc) else filter(fold(chess_slide_dirs(ct), [], (acc, cd) => concat(acc, chess_ray(b, i, cd))), cs => chess_color(b[cs]) != cc)"
+    },
+    "chess_attacked": {
+      "params": { "b": "list<string>", "i": "int", "by": "string" }, "returns": "bool",
+      "body": "let up = by == 'w' in let pdy = if up then 1 else -1 in any(chess_knight_dirs(), co => let cs = chess_step(i, co) in cs >= 0 and b[cs] == (if up then 'N' else 'n')) or any(chess_king_dirs(), co => let cs = chess_step(i, co) in cs >= 0 and b[cs] == (if up then 'K' else 'k')) or any([vec(-1, pdy), vec(1, pdy)], co => let cs = chess_step(i, co) in cs >= 0 and b[cs] == (if up then 'P' else 'p')) or any(chess_king_dirs(), cd => let cr = chess_ray(b, i, cd) in len(cr) > 0 and chess_color(b[last(cr)]) == by and contains(if cd.x == 0 or cd.y == 0 then ['R', 'Q'] else ['B', 'Q'], upper(b[last(cr)])))"
+    },
+    "chess_king_sq":   { "params": { "b": "list<string>", "c": "string" }, "returns": "int", "body": "index_of(b, if c == 'w' then 'K' else 'k')" },
+    "chess_in_check":  { "params": { "b": "list<string>", "c": "string" }, "returns": "bool", "body": "let ck = chess_king_sq(b, c) in ck >= 0 and chess_attacked(b, ck, chess_other(c))" },
+    "chess_promote":   { "params": { "p": "string", "to": "int" }, "returns": "string", "body": "if upper(p) == 'P' and (to / 8 == 0 or to / 8 == 7) then (if p == 'P' then 'Q' else 'q') else p" },
+    "chess_apply":     { "params": { "b": "list<string>", "from": "int", "to": "int" }, "returns": "list<string>", "body": "set_at(set_at(b, to, chess_promote(b[from], to)), from, '')" },
+    "chess_legal_from": {
+      "params": { "b": "list<string>", "i": "int" }, "returns": "list<int>",
+      "body": "let cc = chess_color(b[i]) in filter(chess_pseudo(b, i), ct => not chess_in_check(chess_apply(b, i, ct), cc))"
+    },
+    "chess_all_moves": {
+      "params": { "b": "list<string>", "c": "string" }, "returns": "list<int>",
+      "body": "fold(range(64), [], (acc, cs) => if chess_color(b[cs]) == c then concat(acc, map(chess_legal_from(b, cs), ct => cs * 64 + ct)) else acc)"
+    },
+    "chess_has_move": { "params": { "b": "list<string>", "c": "string" }, "returns": "bool", "body": "any(range(64), cs => chess_color(b[cs]) == c and len(chess_legal_from(b, cs)) > 0)" },
+    "chess_is_mate":  { "params": { "b": "list<string>", "c": "string" }, "returns": "bool", "body": "chess_in_check(b, c) and not chess_has_move(b, c)" },
+    "chess_sq_name":  { "params": { "i": "int" }, "returns": "string", "body": "substr('abcdefgh', i % 8, i % 8 + 1) + str(8 - i / 8)" },
+    "chess_sq": {
+      "params": { "name": "string" }, "returns": "int",
+      "body": "let cc = index_of('abcdefgh', lower(substr(trim(name), 0, 1))) in let cr = or_else(parse_int(substr(trim(name), 1, 2)), 0) in if cc < 0 or cr < 1 or cr > 8 then -1 else (8 - cr) * 8 + cc"
+    },
+    "chess_parse_fen": {
+      "params": { "fen": "string" }, "returns": "list<string>",
+      "body": "let cb = fold(split(get_or(split(trim(fen), ' '), 0, ''), '/'), [], (acc, row) => concat(acc, fold(chars(row), [], (a2, ch) => concat(a2, if contains('KQRBNPkqrbnp', ch) then [ch] else repeat('', or_else(parse_int(ch), 0)))))) in if len(cb) == 64 then cb else repeat('', 64)"
+    },
+    "chess_fen_turn": { "params": { "fen": "string" }, "returns": "string", "body": "if get_or(split(trim(fen), ' '), 1, 'w') == 'b' then 'b' else 'w'" },
+    "chess_move_base": {
+      "params": { "b": "list<string>", "from": "int", "to": "int" }, "returns": "string",
+      "body": "let cp = b[from] in let ct = upper(cp) in let cap = b[to] != '' in let file = substr('abcdefgh', from % 8, from % 8 + 1) in (if ct == 'P' then (if cap then file + 'x' else '') else ct + (if ct != 'K' and any(range(64), cs => cs != from and b[cs] == cp and contains(chess_legal_from(b, cs), to)) then file else '') + (if cap then 'x' else '')) + chess_sq_name(to) + (if ct == 'P' and (to / 8 == 0 or to / 8 == 7) then '=Q' else '')"
+    },
+    "chess_move_name": {
+      "params": { "b": "list<string>", "from": "int", "to": "int" }, "returns": "string",
+      "body": "let nb = chess_apply(b, from, to) in let opp = chess_other(chess_color(b[from])) in chess_move_base(b, from, to) + (if chess_is_mate(nb, opp) then '#' else if chess_in_check(nb, opp) then '+' else '')"
+    },
+    "chess_can_play": { "params": {}, "returns": "bool", "body": "not chess_locked and (@side == 'both' or (@side == 'white') == (chess_turn == 'w'))" },
+    "chess_dcol":  { "params": { "i": "int" }, "returns": "int", "body": "if chess_flip then 7 - i % 8 else i % 8" },
+    "chess_drow":  { "params": { "i": "int" }, "returns": "int", "body": "if chess_flip then 7 - i / 8 else i / 8" },
+    "chess_at_disp": { "params": { "dc": "int", "dr": "int" }, "returns": "int", "body": "if chess_flip then (7 - dr) * 8 + (7 - dc) else dr * 8 + dc" },
+    "chess_cx":    { "params": { "i": "int" }, "returns": "float", "body": "@x + chess_dcol(i) * @square + @square / 2.0" },
+    "chess_cy":    { "params": { "i": "int" }, "returns": "float", "body": "@y + chess_drow(i) * @square + @square / 2.0" },
+    "chess_sq_at": {
+      "params": { "px": "float", "py": "float" }, "returns": "int",
+      "body": "let dc = floor((px - @x) / @square) in let dr = floor((py - @y) / @square) in if dc < 0 or dc > 7 or dr < 0 or dr > 7 then -1 else chess_at_disp(dc, dr)"
+    },
+    "chess_is_light": { "params": { "i": "int" }, "returns": "bool", "body": "(i % 8 + i / 8) % 2 == 0" },
+    "chess_fill": {
+      "params": { "i": "int" }, "returns": "string",
+      "body": "if i == chess_check then @check else if i == chess_sel then @select else if i == chess_last_from or i == chess_last_to then @last else if chess_is_light(i) then @light else @dark"
+    },
+    "chess_coord_ink": {
+      "params": { "i": "int" }, "returns": "string",
+      "body": "if i == chess_check or i == chess_sel or i == chess_last_from or i == chess_last_to or chess_is_light(i) then @light_ink else @dark_ink"
+    },
+    "chess_piece_x": {
+      "params": { "i": "int" }, "returns": "float",
+      "body": "if chess_dragging and i == chess_sel then clamp(chess_drag.x - @x - @square / 2.0, -@square / 2.0, @square * 7.5) else chess_dcol(i) * @square * 1.0"
+    },
+    "chess_piece_y": {
+      "params": { "i": "int" }, "returns": "float",
+      "body": "if chess_dragging and i == chess_sel then clamp(chess_drag.y - @y - @square / 2.0, -@square / 2.0, @square * 7.5) else chess_drow(i) * @square * 1.0"
+    },
+    "chess_draw_order": {
+      "params": {}, "returns": "list<int>",
+      "body": "concat(filter(range(64), cs => chess_board[cs] != '' and cs != chess_sel), filter([chess_sel], cs => cs >= 0 and get_or(chess_board, cs, '') != ''))"
+    }
+  },
+  "events": {
+    "chess_load":     { "fen": "string" },
+    "chess_move":     { "from": "int", "to": "int" },
+    "chess_undo":     {},
+    "chess_moved":    { "from": "int", "to": "int", "piece": "string", "captured": "string", "check": "bool", "mate": "bool", "name": "string" },
+    "chess_selected": { "sq": "int" },
+    "chess_snap":     {}
+  },
+  "inputs": {
+    "_press":   { "payload": { "x": "float", "y": "float" } },
+    "_drag":    { "payload": { "x": "float", "y": "float" } },
+    "_release": { "payload": { "x": "float", "y": "float" } }
+  },
+  "rules": [
+    {
+      "id": "load_start", "include": "@fen != ''", "on": "start",
+      "do": [ { "emit": "chess_load", "with": { "fen": "@fen" } } ]
+    },
+    {
+      "id": "load", "on": "chess_load",
+      "do": [
+        { "let": { "nb": "chess_parse_fen(event.fen)", "nt": "chess_fen_turn(event.fen)" } },
+        { "incr": "_gen" },
+        { "set": "chess_board", "to": "nb" },
+        { "set": "chess_ids", "to": "map(range(64), cs => if nb[cs] == '' then -1 else _gen * 64 + cs)" },
+        { "set": "chess_turn", "to": "nt" },
+        { "set": "chess_flip", "to": "if @orient == 'auto' then nt == 'b' else @orient == 'black'" },
+        { "set": "chess_sel", "to": "-1" },
+        { "set": "chess_targets", "to": "[]" },
+        { "set": "chess_last_from", "to": "-1" },
+        { "set": "chess_last_to", "to": "-1" },
+        { "set": "chess_dragging", "to": "false" },
+        { "set": "_press_sq", "to": "-1" },
+        { "set": "_can_undo", "to": "false" },
+        { "set": "chess_moves", "to": "chess_all_moves(nb, nt)" },
+        { "set": "chess_check", "to": "if chess_in_check(nb, nt) then chess_king_sq(nb, nt) else -1" },
+        { "set": "chess_mate", "to": "chess_check >= 0 and len(chess_moves) == 0" },
+        { "set": "chess_stalemate", "to": "chess_check < 0 and len(chess_moves) == 0" }
+      ]
+    },
+    {
+      "id": "move", "on": "chess_move", "when": "contains(chess_moves, event.from * 64 + event.to)",
+      "do": [
+        { "let": { "b0": "chess_board" } },
+        { "let": { "nb": "chess_apply(b0, event.from, event.to)", "nt": "chess_other(chess_turn)", "base": "chess_move_base(b0, event.from, event.to)" } },
+        { "set": "_undo_board", "to": "b0" },
+        { "set": "_undo_ids", "to": "chess_ids" },
+        { "set": "_undo_turn", "to": "chess_turn" },
+        { "set": "_undo_from", "to": "chess_last_from" },
+        { "set": "_undo_to", "to": "chess_last_to" },
+        { "set": "_can_undo", "to": "true" },
+        { "set": "chess_board", "to": "nb" },
+        { "set": "chess_ids", "to": "set_at(set_at(chess_ids, event.to, chess_ids[event.from]), event.from, -1)" },
+        { "set": "chess_turn", "to": "nt" },
+        { "set": "chess_last_from", "to": "event.from" },
+        { "set": "chess_last_to", "to": "event.to" },
+        { "set": "chess_sel", "to": "-1" },
+        { "set": "chess_targets", "to": "[]" },
+        { "set": "chess_dragging", "to": "false" },
+        { "set": "_press_sq", "to": "-1" },
+        { "set": "chess_moves", "to": "chess_all_moves(nb, nt)" },
+        { "set": "chess_check", "to": "if chess_in_check(nb, nt) then chess_king_sq(nb, nt) else -1" },
+        { "set": "chess_mate", "to": "chess_check >= 0 and len(chess_moves) == 0" },
+        { "set": "chess_stalemate", "to": "chess_check < 0 and len(chess_moves) == 0" },
+        { "emit": "chess_moved", "with": {
+          "from": "event.from", "to": "event.to", "piece": "b0[event.from]", "captured": "b0[event.to]",
+          "check": "chess_check >= 0", "mate": "chess_mate",
+          "name": "base + (if chess_mate then '#' else if chess_check >= 0 then '+' else '')"
+        } }
+      ]
+    },
+    {
+      "id": "undo", "on": "chess_undo", "when": "_can_undo",
+      "do": [
+        { "set": "chess_board", "to": "_undo_board" },
+        { "set": "chess_ids", "to": "_undo_ids" },
+        { "set": "chess_turn", "to": "_undo_turn" },
+        { "set": "chess_last_from", "to": "_undo_from" },
+        { "set": "chess_last_to", "to": "_undo_to" },
+        { "set": "chess_sel", "to": "-1" },
+        { "set": "chess_targets", "to": "[]" },
+        { "set": "chess_dragging", "to": "false" },
+        { "set": "_press_sq", "to": "-1" },
+        { "set": "_can_undo", "to": "false" },
+        { "set": "chess_moves", "to": "chess_all_moves(chess_board, chess_turn)" },
+        { "set": "chess_check", "to": "if chess_in_check(chess_board, chess_turn) then chess_king_sq(chess_board, chess_turn) else -1" },
+        { "set": "chess_mate", "to": "chess_check >= 0 and len(chess_moves) == 0" },
+        { "set": "chess_stalemate", "to": "chess_check < 0 and len(chess_moves) == 0" }
+      ]
+    },
+    {
+      "id": "press", "on": "_press", "when": "chess_can_play()",
+      "do": [
+        { "let": { "cq": "chess_sq_at(event.x, event.y)" } },
+        { "set": "_press", "to": "vec(event.x, event.y)" },
+        { "set": "_was_sel", "to": "false" },
+        { "if": "chess_sel >= 0 and contains(chess_targets, cq)",
+          "then": [
+            { "set": "_press_sq", "to": "-1" },
+            { "emit": "chess_move", "with": { "from": "chess_sel", "to": "cq" } }
+          ],
+          "else": [
+            { "if": "cq >= 0 and chess_color(chess_board[cq]) == chess_turn",
+              "then": [
+                { "set": "_was_sel", "to": "cq == chess_sel" },
+                { "set": "chess_sel", "to": "cq" },
+                { "set": "chess_targets", "to": "map(filter(chess_moves, cm => cm / 64 == cq), cm => cm % 64)" },
+                { "set": "chess_drag", "to": "vec(event.x, event.y)" },
+                { "set": "_press_sq", "to": "cq" },
+                { "emit": "chess_selected", "with": { "sq": "cq" } }
+              ],
+              "else": [
+                { "set": "chess_sel", "to": "-1" },
+                { "set": "chess_targets", "to": "[]" },
+                { "set": "_press_sq", "to": "-1" }
+              ] }
+          ] }
+      ]
+    },
+    {
+      "id": "drag", "on": "_drag", "when": "_press_sq >= 0 and chess_sel == _press_sq and not chess_locked",
+      "do": [
+        { "set": "chess_drag", "to": "vec(event.x, event.y)" },
+        { "if": "dist(_press, vec(event.x, event.y)) > 8.0", "then": [ { "set": "chess_dragging", "to": "true" } ] }
+      ]
+    },
+    {
+      "id": "release", "on": "_release",
+      "do": [
+        { "let": { "cq": "chess_sq_at(event.x, event.y)" } },
+        { "if": "chess_dragging",
+          "then": [
+            { "if": "not chess_locked and chess_sel >= 0 and cq != chess_sel and contains(chess_targets, cq)",
+              "then": [ { "emit": "chess_move", "with": { "from": "chess_sel", "to": "cq" } } ],
+              "else": [ { "if": "cq != chess_sel", "then": [ { "emit": "chess_snap" } ] } ] }
+          ],
+          "else": [
+            { "if": "_was_sel and cq == _press_sq", "then": [
+              { "set": "chess_sel", "to": "-1" },
+              { "set": "chess_targets", "to": "[]" }
+            ] }
+          ] },
+        { "set": "chess_dragging", "to": "false" },
+        { "set": "_press_sq", "to": "-1" },
+        { "set": "_was_sel", "to": "false" }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group", "x": "@x", "y": "@y",
+          "children": [
+            {
+              "node": "rect", "x": 0, "y": 0, "w": "= @square * 8", "h": "= @square * 8", "fill": "#00000000",
+              "on_press":   { "input": "_press",   "with": { "x": "pointer.x", "y": "pointer.y" } },
+              "on_drag":    { "input": "_drag",    "with": { "x": "pointer.x", "y": "pointer.y" } },
+              "on_release": { "input": "_release", "with": { "x": "pointer.x", "y": "pointer.y" } }
+            },
+            {
+              "node": "repeat", "source": "range(64)", "as": "cq", "key": "cq",
+              "template": {
+                "node": "rect", "x": "= chess_dcol(cq) * @square", "y": "= chess_drow(cq) * @square", "w": "@square", "h": "@square",
+                "fill": "= chess_fill(cq)", "transition": { "fill": { "ms": 120, "ease": "out" } }
+              }
+            },
+            {
+              "node": "repeat", "source": "chess_targets", "as": "ct", "key": "ct",
+              "template": {
+                "node": "group", "x": "= chess_dcol(ct) * @square", "y": "= chess_drow(ct) * @square",
+                "children": [
+                  { "node": "circle", "x": "= @square / 2", "y": "= @square / 2", "r": "= @square * 0.15", "fill": "@marker",
+                    "visible": "= get_or(chess_board, ct, '') == ''" },
+                  { "node": "circle", "x": "= @square / 2", "y": "= @square / 2", "r": "= @square * 0.5 - 3", "fill": "#00000000", "stroke": "@marker", "stroke_width": 4,
+                    "visible": "= get_or(chess_board, ct, '') != ''" }
+                ]
+              }
+            },
+            {
+              "node": "repeat", "source": "chess_draw_order()", "as": "cp", "key": "get_or(chess_ids, cp, -1)",
+              "template": {
+                "node": "group",
+                "children": [
+                  {
+                    "include": "@art.piece",
+                    "node": "image", "asset": "@art.piece.id", "frame": "= index_of('KQRBNPkqrbnp', get_or(chess_board, cp, 'K'))",
+                    "x": "= chess_piece_x(cp)", "y": "= chess_piece_y(cp)", "w": "@square", "h": "@square",
+                    "scale": "= if chess_dragging and cp == chess_sel then 1.18 else 1.0",
+                    "transition": { "x": { "ms": 160, "ease": "out" }, "y": { "ms": 160, "ease": "out" } },
+                    "animate_on": {
+                      "chess_selected": { "when": "event.sq == cp", "prop": "scale", "keys": [1, 1.12, 1.0], "ms": 160 },
+                      "chess_moved": { "when": "event.mate and cp == chess_check", "prop": "scale", "keys": [1, 1.22, 0.92, 1.1, 1.0], "ms": 700 }
+                    }
+                  },
+                  {
+                    "include": "not @art.piece",
+                    "node": "text", "anchor": "center",
+                    "x": "= chess_piece_x(cp) + @square / 2.0", "y": "= chess_piece_y(cp) + @square / 2.0",
+                    "text": "= substr('♚︎♛︎♜︎♝︎♞︎♟︎', index_of('KQRBNP', upper(get_or(chess_board, cp, 'K'))) * 2, index_of('KQRBNP', upper(get_or(chess_board, cp, 'K'))) * 2 + 2)",
+                    "size": "= @square * 0.78", "font": "system",
+                    "color": "= if chess_color(get_or(chess_board, cp, '')) == 'w' then '#FFFDF8' else '#1B1410'",
+                    "stroke": "= if chess_color(get_or(chess_board, cp, '')) == 'w' then '#1B1410' else '#FFFDF8'", "stroke_width": 2,
+                    "scale": "= if chess_dragging and cp == chess_sel then 1.18 else 1.0",
+                    "transition": { "x": { "ms": 160, "ease": "out" }, "y": { "ms": 160, "ease": "out" } }
+                  }
+                ]
+              }
+            },
+            {
+              "include": "@coords",
+              "node": "repeat", "source": "range(8)", "as": "cr", "key": "cr",
+              "template": {
+                "node": "group", "x": 0, "y": "= cr * @square",
+                "children": [
+                  { "node": "rect", "x": 0, "y": 0, "w": 14, "h": 16, "fill": "= chess_fill(chess_at_disp(0, cr))", "transition": { "fill": { "ms": 120, "ease": "out" } } },
+                  { "node": "text", "x": 1, "y": 0, "w": 13, "h": 16, "align": "center", "valign": "middle", "size": 11, "weight": 700,
+                    "text": "= str(if chess_flip then cr + 1 else 8 - cr)", "color": "= chess_coord_ink(chess_at_disp(0, cr))" }
+                ]
+              }
+            },
+            {
+              "include": "@coords",
+              "node": "repeat", "source": "range(8)", "as": "cf", "key": "cf",
+              "template": {
+                "node": "group", "x": "= cf * @square + @square - 14", "y": "= @square * 8 - 16",
+                "children": [
+                  { "node": "rect", "x": 0, "y": 0, "w": 14, "h": 16, "fill": "= chess_fill(chess_at_disp(cf, 7))", "transition": { "fill": { "ms": 120, "ease": "out" } } },
+                  { "node": "text", "x": 0, "y": 0, "w": 13, "h": 16, "align": "center", "valign": "middle", "size": 11, "weight": 700,
+                    "text": "= substr('abcdefgh', if chess_flip then 7 - cf else cf, (if chess_flip then 7 - cf else cf) + 1)", "color": "= chess_coord_ink(chess_at_disp(cf, 7))" }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "chess_moved", "do": [ { "moment": "tap" }, { "haptic": "light" } ] }
+    ]
+  },
+  "playtest": {
+    "tap_pairs": "map(if chess_can_play() then chess_moves else [], cm => [chess_cx(cm / 64), chess_cy(cm / 64), chess_cx(cm % 64), chess_cy(cm % 64)])"
+  },
+  "tags": { "mood": ["calm", "playful"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

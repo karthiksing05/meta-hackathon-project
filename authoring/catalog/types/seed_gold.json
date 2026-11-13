@@ -1272,7 +1272,8 @@
     "pieces": [
       "quote card",
       "speaker name",
-      "four coloured guess tiles", "countdown",
+      "four coloured guess tiles",
+      "countdown",
       "reveal panel",
       "cartoon panel per beat"
     ],
@@ -1341,7 +1342,8 @@
     ],
     "pieces": [
       "quote card",
-      "four coloured guess tiles", "countdown",
+      "four coloured guess tiles",
+      "countdown",
       "reveal panel",
       "cartoon panels on some scenes"
     ],
@@ -1456,10 +1458,11 @@
       "async_friends"
     ],
     "inputs": [
-      "tap"
+      "tap",
+      "drag"
     ],
     "id": "mate_in_one_choice",
-    "name": "Mate in one (pick the move)",
+    "name": "Mate in one (move the piece)",
     "aliases": [
       "mate in one",
       "chess puzzle",
@@ -1469,25 +1472,25 @@
     "family": "board",
     "subfamily": "chess tactics",
     "variant_of": "chess_puzzle_mate",
-    "summary": "A chess position drawn as a picture and four candidate moves in notation; exactly one is checkmate. Every wrong move is a plausible check that fails for a concrete reason, so you must calculate escape squares.",
-    "core_loop": "study the board → pick one of four moves → reveal why it mates or fails → next position",
+    "summary": "A chess position on a playable board; move the piece that checkmates, by tapping it and its square or dragging it. Any mate counts; a wrong move slides back and costs points, and two misses show the answer.",
+    "core_loop": "study the board → tap or drag a piece → mate: the reveal says why; not mate: it slides back → next position",
     "verbs": [
       "calculate",
-      "choose"
+      "move"
     ],
     "pieces": [
-      "board picture per puzzle",
-      "four move tiles",
-      "explanation"
+      "8 x 8 chess board",
+      "chess pieces",
+      "puzzle card with the explanation"
     ],
     "rules": [
-      "one candidate mates; the others check or threaten but fail",
-      "positions are verified with a chess engine before shipping",
-      "a wrong move costs a life"
+      "any legal mate in one counts",
+      "positions are verified with a move generator before shipping",
+      "a wrong move costs 20 points; two misses show the mate"
     ],
     "win": "solve the set",
-    "lose": "lose all lives",
-    "scoring": "100 per mate",
+    "lose": "none; score attack",
+    "scoring": "100 per mate plus a speed bonus, minus 20 per wrong move",
     "session_seconds": [
       40,
       180
@@ -1504,12 +1507,11 @@
       "time per puzzle"
     ],
     "tools": [
-      "quiz",
+      "chess_board",
       "rounds",
-      "lives",
       "score"
     ],
-    "gate_profile": "trivia",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "mate in one chess puzzles",
       "a chess tactics quiz for my chess club",
@@ -1518,6 +1520,6 @@
     "refs": [
       "authoring/games/gold_one_move.authoring.json"
     ],
-    "notes": "mechanic of gold game gold_one_move. The board is a sprite with one frame per puzzle (picture, frame = get_or(order, qi, 0)); never invent a position without checking it."
+    "notes": "mechanic of gold game gold_one_move. Puzzles are content: names, FENs, solutions (UCI like e1e8) and one-sentence whys; load each with chess_load and judge chess_moved (event.mate). Never invent a position without checking it."
   }
 ]

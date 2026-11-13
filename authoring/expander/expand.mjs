@@ -252,7 +252,7 @@ function walkNode(node, fns, at) {
     else if (NODE_TEMPLATE_KEYS.includes(k) && v && typeof v === 'object') out[k] = walkNode(v, fns, here);
     else if (k === 'node' || k === 'as' || k === 'anchor' || k === 'dir' || k === 'align' || k === 'valign') out[k] = v;
     else if (NAME_EXPR_PROPS.includes(k)) out[k] = fns.expr(v, here);
-    else if (k === 'on_tap' || k === 'on_drag') {
+    else if (k === 'on_tap' || k === 'on_drag' || k === 'on_press' || k === 'on_release') {
       out[k] = { ...v, input: fns.name(v.input, 'input') };
       if (v.with) out[k].with = Object.fromEntries(Object.entries(v.with).map(([p, x]) => [p, fns.expr(x, `${here}/with/${esc(p)}`)]));
     } else if (k === 'animate_on') {
@@ -708,14 +708,19 @@ export function expand(manifest, lib, options = {}) {
   map('/presentation/canvas', `look:${lookId}`, '/canvas');
 
   // ---- playtest probe (SPEC 2.6): a copy of the game with hidden values for bots: a progress
-  // number, and the strings worth submitting to a text input ----
+  // number, the strings worth submitting to a text input, and two-tap moves ----
   let playtestGame;
   // Fragment hints (the first use that has one) fill what the game's own playtest hint leaves out.
   const fragHint = (k) => uses.find((u) => u.out.playtest?.[k])?.out.playtest[k];
-  const pt = { ...(fragHint('progress') ? { progress: fragHint('progress') } : {}), ...(fragHint('text_candidates') ? { text_candidates: fragHint('text_candidates') } : {}), ...(manifest.playtest || {}) };
+  const pt = { ...Object.fromEntries(['progress', 'text_candidates', 'tap_pairs'].filter(fragHint).map((k) => [k, fragHint(k)])), ...(manifest.playtest || {}) };
   const textCandidates = pt.text_candidates ?? pt.texts; // `texts` is accepted as another name
-  if (pt.progress || textCandidates) {
+  if (pt.progress || textCandidates || pt.tap_pairs) {
     playtestGame = clone(out);
+    // Two taps a bot can make in a row ([x1, y1, x2, y2]: pick a piece, then where it goes).
+    if (pt.tap_pairs) {
+      playtestGame.state = { ...(playtestGame.state || {}), __tap_pairs: { type: 'list<list<float>>', init: '[]' } };
+      playtestGame.rules = [...playtestGame.rules, { id: '__tap_pairs', on: 'tick', do: [{ set: '__tap_pairs', to: pt.tap_pairs }] }];
+    }
     if (textCandidates) {
       playtestGame.state = { ...(playtestGame.state || {}), __text_candidates: { type: 'list<string>', init: '[]' } };
       playtestGame.rules = [...playtestGame.rules, { id: '__text_candidates', on: 'tick', do: [{ set: '__text_candidates', to: textCandidates }] }];

@@ -2,38 +2,36 @@
   "authoring": "microgame-authoring/0.1",
   "meta": {
     "title": "One Move",
-    "instructions": "White to move. Only one of the four moves is checkmate: find it. Every wrong move is a check or a threat that fails, and costs a life.",
+    "instructions": "White to move: find the checkmate. Tap a piece, then its square, or drag it there. Two misses and the answer is shown.",
     "duration_s": 180
   },
   "uses": [
     {
-      "fragment": "quiz",
+      "fragment": "chess_board",
       "params": {
-        "choices": 4,
-        "time_ms": "25s",
-        "goal": 0,
-        "reveal_ms": "3200ms",
-        "cols": 2,
-        "lines": 2
+        "x": 4,
+        "y": 268,
+        "fen": "",
+        "side": "white",
+        "orient": "white",
+        "light": "#EAD7B7",
+        "dark": "#A9764E",
+        "light_ink": "#6B4A2E",
+        "dark_ink": "#FFF6E6",
+        "select": "#E3C766",
+        "last": "#D9C27A",
+        "check": "#E07A63",
+        "marker": "#24170F66"
       }
     },
     {
       "fragment": "rounds",
       "params": {
-        "count": 6,
+        "count": 9,
         "label": "Puzzle"
       },
       "bind": {
-        "round_done": "question_done"
-      }
-    },
-    {
-      "fragment": "lives",
-      "params": {
-        "count": 3
-      },
-      "bind": {
-        "hit": "answered_wrong"
+        "round_done": "puzzle_done"
       }
     },
     {
@@ -43,27 +41,232 @@
         "label": "Score"
       },
       "bind": {
-        "point": "answered_right"
+        "point": "mate_found"
       }
     }
   ],
-  "functions": {
-    "quiz_questions": {
-      "params": {},
-      "returns": "list<string>",
-      "body": "if locked and len(opts) > 0 then content_whys else map(content_names, n => n + ': White mates in one')"
+  "state": {
+    "order": {
+      "type": "list<int>",
+      "init": "[]"
     },
-    "quiz_choices": {
-      "params": {},
-      "returns": "list<string>",
-      "body": "content_choices"
+    "pz": {
+      "type": "int",
+      "init": "0"
     },
-    "quiz_answers": {
-      "params": {},
-      "returns": "list<string>",
-      "body": "content_answers"
+    "phase": {
+      "type": "string",
+      "init": "'solve'"
+    },
+    "tries": {
+      "type": "int",
+      "init": "0"
+    },
+    "started": {
+      "type": "int",
+      "init": "0"
+    },
+    "solved": {
+      "type": "int",
+      "init": "0"
+    },
+    "status": {
+      "type": "string",
+      "init": "'White to move. Mate in one.'"
     }
   },
+  "functions": {
+    "sol_from": {
+      "params": {},
+      "returns": "int",
+      "body": "chess_sq(substr(get_or(content_solutions, pz, ''), 0, 2))"
+    },
+    "sol_to": {
+      "params": {},
+      "returns": "int",
+      "body": "chess_sq(substr(get_or(content_solutions, pz, ''), 2, 4))"
+    }
+  },
+  "events": {
+    "puzzle_done": {},
+    "wrong_move": {},
+    "retry": {}
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        {
+          "set": "order",
+          "to": "shuffle(range(len(content_fens)))"
+        }
+      ]
+    },
+    {
+      "id": "begin",
+      "on": "round_started",
+      "do": [
+        {
+          "set": "pz",
+          "to": "get_or(order, event.index, 0)"
+        },
+        {
+          "set": "phase",
+          "to": "'solve'"
+        },
+        {
+          "set": "tries",
+          "to": "0"
+        },
+        {
+          "set": "started",
+          "to": "now"
+        },
+        {
+          "set": "status",
+          "to": "'White to move. Mate in one.'"
+        },
+        {
+          "set": "chess_locked",
+          "to": "false"
+        },
+        {
+          "emit": "chess_load",
+          "with": {
+            "fen": "get_or(content_fens, pz, '')"
+          }
+        }
+      ]
+    },
+    {
+      "id": "judge",
+      "on": "chess_moved",
+      "when": "phase == 'solve'",
+      "do": [
+        {
+          "set": "chess_locked",
+          "to": "true"
+        },
+        {
+          "if": "event.mate or (event.from == sol_from() and event.to == sol_to())",
+          "then": [
+            {
+              "set": "phase",
+              "to": "'right'"
+            },
+            {
+              "incr": "solved"
+            },
+            {
+              "set": "status",
+              "to": "get_or(content_whys, pz, '')"
+            },
+            {
+              "incr": "score",
+              "by": "max(0, 50 - (now - started) / 300)"
+            },
+            {
+              "emit": "mate_found"
+            },
+            {
+              "after": "2400ms",
+              "emit": "puzzle_done",
+              "id": "next"
+            }
+          ],
+          "else": [
+            {
+              "set": "phase",
+              "to": "'wrong'"
+            },
+            {
+              "incr": "tries"
+            },
+            {
+              "set": "score",
+              "to": "max(0, score - 20)"
+            },
+            {
+              "set": "status",
+              "to": "if event.check then event.name + ': check, but the king escapes.' else event.name + ' isn’t check.'"
+            },
+            {
+              "emit": "wrong_move"
+            },
+            {
+              "after": "900ms",
+              "emit": "chess_undo",
+              "id": "undo"
+            },
+            {
+              "after": "1000ms",
+              "emit": "retry",
+              "id": "retry"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "retry",
+      "on": "retry",
+      "do": [
+        {
+          "if": "tries >= 2",
+          "then": [
+            {
+              "set": "phase",
+              "to": "'reveal'"
+            },
+            {
+              "set": "status",
+              "to": "'Here’s the mate.'"
+            },
+            {
+              "after": "350ms",
+              "emit": "chess_move",
+              "with": {
+                "from": "sol_from()",
+                "to": "sol_to()"
+              },
+              "id": "show"
+            },
+            {
+              "after": "3000ms",
+              "emit": "puzzle_done",
+              "id": "next"
+            }
+          ],
+          "else": [
+            {
+              "set": "phase",
+              "to": "'solve'"
+            },
+            {
+              "set": "status",
+              "to": "status + ' One more try.'"
+            },
+            {
+              "set": "chess_locked",
+              "to": "false"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shown",
+      "on": "chess_moved",
+      "when": "phase == 'reveal'",
+      "do": [
+        {
+          "set": "status",
+          "to": "get_or(content_whys, pz, '')"
+        }
+      ]
+    }
+  ],
   "objectives": {
     "time_limit": "180s",
     "on_timeout": "win"
@@ -73,12 +276,152 @@
       {
         "slot": "playfield",
         "node": {
-          "ui": "picture",
-          "sprite": "board",
-          "frame": "= get_or(order, qi, 0)",
-          "aspect": 1,
-          "max_h": 300
+          "node": "group",
+          "x": 16,
+          "y": 176,
+          "children": [
+            {
+              "node": "rect",
+              "x": 0,
+              "y": 2,
+              "w": 328,
+              "h": 84,
+              "radius": 18,
+              "fill": "$shadow"
+            },
+            {
+              "node": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 328,
+              "h": 84,
+              "radius": 18,
+              "fill": "$surface",
+              "stroke": "$line",
+              "stroke_width": 1
+            },
+            {
+              "node": "text",
+              "x": 18,
+              "y": 8,
+              "w": 292,
+              "h": 30,
+              "align": "center",
+              "valign": "middle",
+              "size": 22,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= get_or(content_names, pz, '')"
+            },
+            {
+              "node": "text",
+              "x": 18,
+              "y": 38,
+              "w": 292,
+              "h": 40,
+              "align": "center",
+              "valign": "middle",
+              "size": 15,
+              "wrap": true,
+              "color": "= if phase == 'right' then $accent else if phase == 'wrong' then $danger_ink else $ink",
+              "text": "= status",
+              "animate_on": {
+                "wrong_move": {
+                  "prop": "opacity",
+                  "keys": [
+                    0.4,
+                    1
+                  ],
+                  "ms": 300
+                },
+                "mate_found": {
+                  "prop": "scale",
+                  "keys": [
+                    1,
+                    1.06,
+                    1
+                  ],
+                  "ms": 300
+                }
+              }
+            }
+          ]
         }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "wrong_move",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "E4",
+              "slide": "C4",
+              "ms": 220,
+              "volume": 0.35
+            }
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      },
+      {
+        "on": "chess_undo",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "G3",
+              "ms": 70,
+              "volume": 0.25
+            }
+          }
+        ]
+      },
+      {
+        "on": "chess_snap",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "G3",
+              "ms": 60,
+              "volume": 0.2
+            }
+          }
+        ]
+      },
+      {
+        "on": "mate_found",
+        "do": [
+          {
+            "particles": {
+              "x": "= chess_cx(chess_check)",
+              "y": "= chess_cy(chess_check)",
+              "count": 28,
+              "color": "$accent",
+              "speed": 200,
+              "size": 6,
+              "ms": 900
+            }
+          },
+          {
+            "particles": {
+              "x": "= chess_cx(chess_check)",
+              "y": "= chess_cy(chess_check)",
+              "count": 16,
+              "color": "$primary",
+              "speed": 140,
+              "size": 5,
+              "ms": 800
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
       }
     ]
   },
@@ -89,9 +432,10 @@
     "direction": "higher",
     "counts_when": "any",
     "aggregate": "best",
+    "tie_break": "earlier",
     "format": "{n}",
     "events": [
-      "answer"
+      "chess_moved"
     ]
   },
   "look": {
@@ -100,7 +444,7 @@
     "tokens": {}
   },
   "art": {
-    "style": "A walnut club board under a lamp: warm wood squares, brass coordinates, plain carved pieces.",
+    "style": "A walnut club board under a lamp: warm wood squares, cream and ebony carved pieces, brass coordinates.",
     "palette": {
       "bg": "#22170F",
       "surface": "#33241A",
@@ -120,16 +464,20 @@
       "svg": "<svg viewBox='0 0 360 780'><rect width='360' height='780' fill='#22170F'/><g opacity='0.08' fill='#C9A66B'><rect x='64' y='-16' width='64' height='64'/><rect x='192' y='-16' width='64' height='64'/><rect x='320' y='-16' width='64' height='64'/><rect x='0' y='48' width='64' height='64'/><rect x='128' y='48' width='64' height='64'/><rect x='256' y='48' width='64' height='64'/><rect x='64' y='112' width='64' height='64'/><rect x='192' y='112' width='64' height='64'/><rect x='320' y='112' width='64' height='64'/><rect x='0' y='176' width='64' height='64'/><rect x='128' y='176' width='64' height='64'/><rect x='256' y='176' width='64' height='64'/><rect x='64' y='240' width='64' height='64'/><rect x='192' y='240' width='64' height='64'/><rect x='320' y='240' width='64' height='64'/><rect x='0' y='304' width='64' height='64'/><rect x='128' y='304' width='64' height='64'/><rect x='256' y='304' width='64' height='64'/><rect x='64' y='368' width='64' height='64'/><rect x='192' y='368' width='64' height='64'/><rect x='320' y='368' width='64' height='64'/><rect x='0' y='432' width='64' height='64'/><rect x='128' y='432' width='64' height='64'/><rect x='256' y='432' width='64' height='64'/><rect x='64' y='496' width='64' height='64'/><rect x='192' y='496' width='64' height='64'/><rect x='320' y='496' width='64' height='64'/><rect x='0' y='560' width='64' height='64'/><rect x='128' y='560' width='64' height='64'/><rect x='256' y='560' width='64' height='64'/><rect x='64' y='624' width='64' height='64'/><rect x='192' y='624' width='64' height='64'/><rect x='320' y='624' width='64' height='64'/><rect x='0' y='688' width='64' height='64'/><rect x='128' y='688' width='64' height='64'/><rect x='256' y='688' width='64' height='64'/><rect x='64' y='752' width='64' height='64'/><rect x='192' y='752' width='64' height='64'/><rect x='320' y='752' width='64' height='64'/></g></svg>"
     },
     "sprites": {
-      "board": {
+      "piece": {
         "svg": [
-          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='192' y='234'>♟︎</text><text x='224' y='234'>♟︎</text><text x='256' y='234'>♟︎</text><text x='160' y='266'>♜︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='224' y='42'>♚︎</text><text x='192' y='74'>♟︎</text><text x='224' y='74'>♟︎</text><text x='256' y='74'>♟︎</text></g></svg>",
-          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='256' y='138'>♛︎</text><text x='96' y='170'>♝︎</text><text x='160' y='170'>♟︎</text><text x='32' y='234'>♟︎</text><text x='64' y='234'>♟︎</text><text x='96' y='234'>♟︎</text><text x='128' y='234'>♟︎</text><text x='192' y='234'>♟︎</text><text x='224' y='234'>♟︎</text><text x='256' y='234'>♟︎</text><text x='32' y='266'>♜︎</text><text x='64' y='266'>♞︎</text><text x='96' y='266'>♝︎</text><text x='160' y='266'>♚︎</text><text x='224' y='266'>♞︎</text><text x='256' y='266'>♜︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='32' y='42'>♜︎</text><text x='96' y='42'>♝︎</text><text x='128' y='42'>♛︎</text><text x='160' y='42'>♚︎</text><text x='192' y='42'>♝︎</text><text x='256' y='42'>♜︎</text><text x='32' y='74'>♟︎</text><text x='64' y='74'>♟︎</text><text x='96' y='74'>♟︎</text><text x='128' y='74'>♟︎</text><text x='192' y='74'>♟︎</text><text x='224' y='74'>♟︎</text><text x='256' y='74'>♟︎</text><text x='96' y='106'>♞︎</text><text x='192' y='106'>♞︎</text><text x='160' y='138'>♟︎</text></g></svg>",
-          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='224' y='138'>♞︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='224' y='42'>♜︎</text><text x='256' y='42'>♚︎</text><text x='224' y='74'>♟︎</text><text x='256' y='74'>♟︎</text></g></svg>",
-          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='64' y='74'>♜︎</text><text x='192' y='106'>♞︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='256' y='42'>♚︎</text></g></svg>",
-          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='192' y='106'>♝︎</text><text x='256' y='106'>♛︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='224' y='42'>♚︎</text><text x='192' y='74'>♟︎</text><text x='256' y='74'>♟︎</text><text x='224' y='106'>♟︎</text></g></svg>",
-          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='224' y='74'>♜︎</text><text x='224' y='266'>♚︎</text><text x='256' y='266'>♜︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='32' y='42'>♚︎</text></g></svg>",
-          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='224' y='138'>♞︎</text><text x='256' y='138'>♛︎</text><text x='128' y='202'>♝︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='192' y='42'>♜︎</text><text x='224' y='42'>♚︎</text><text x='192' y='74'>♟︎</text><text x='224' y='74'>♟︎</text><text x='256' y='74'>♟︎</text></g></svg>",
-          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='192' y='234'>♟︎</text><text x='224' y='234'>♟︎</text><text x='256' y='234'>♟︎</text><text x='128' y='266'>♜︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='64' y='42'>♚︎</text><text x='32' y='74'>♟︎</text><text x='64' y='74'>♟︎</text><text x='96' y='74'>♟︎</text></g></svg>"
+          "<svg viewBox='0 0 100 100'><g fill='#FBF5EA' stroke='#24170F' stroke-width='3.5' stroke-linejoin='round'><path d='M46 6h8v8h8v8h-8v8h-8v-8h-8v-8h8z'/><path d='M50 31c-17 0-27 12-23 26 2 8 7 12 7 16h32c0-4 5-8 7-16 4-14-6-26-23-26z'/><rect x='31' y='72' width='38' height='10' rx='2'/><rect x='24' y='84' width='52' height='9' rx='3'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#FBF5EA' stroke='#24170F' stroke-width='3.5' stroke-linejoin='round'><path d='M24 32L31 52L37 24L44 47L50 19L56 47L63 24L69 52L76 32L67 72H33Z'/><circle cx='24' cy='29' r='5'/><circle cx='37' cy='21' r='5'/><circle cx='50' cy='16' r='5'/><circle cx='63' cy='21' r='5'/><circle cx='76' cy='29' r='5'/><rect x='31' y='72' width='38' height='10' rx='2'/><rect x='24' y='84' width='52' height='9' rx='3'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#FBF5EA' stroke='#24170F' stroke-width='3.5' stroke-linejoin='round'><path d='M29 16h10v8h6v-8h10v8h6v-8h10v20l-7 6v28l6 6v8H30v-8l6-6V42l-7-6z'/><rect x='24' y='84' width='52' height='9' rx='3'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#FBF5EA' stroke='#24170F' stroke-width='3.5' stroke-linejoin='round'><circle cx='50' cy='12' r='6'/><path d='M50 19c-13 8-19 20-16 32 2 7 6 11 8 13h16c2-2 6-6 8-13 3-12-3-24-16-32z'/><rect x='37' y='64' width='26' height='8' rx='2'/><path d='M33 84c2-6 6-10 10-12h14c4 2 8 6 10 12z'/><rect x='24' y='84' width='52' height='9' rx='3'/></g><g fill='#24170F' stroke='#24170F'><path d='M55 31L45 45' fill='none' stroke-width='4' stroke-linecap='round'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#FBF5EA' stroke='#24170F' stroke-width='3.5' stroke-linejoin='round'><path d='M33 84c0-15 5-23 15-31-8 3-15 6-20 3-5-3-4-9 0-13 7-7 10-15 17-21l2-10 7 8c15 5 23 19 23 35 0 11-3 20-5 29z'/><rect x='24' y='84' width='52' height='9' rx='3'/></g><g fill='#24170F' stroke='#24170F'><circle cx='47' cy='31' r='3.5'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#FBF5EA' stroke='#24170F' stroke-width='3.5' stroke-linejoin='round'><circle cx='50' cy='29' r='13'/><path d='M40 44h20l-3 7c7 8 10 18 11 33H32c1-15 4-25 11-33z'/><rect x='24' y='84' width='52' height='9' rx='3'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#2B1C12' stroke='#0E0804' stroke-width='3.5' stroke-linejoin='round'><path d='M46 6h8v8h8v8h-8v8h-8v-8h-8v-8h8z'/><path d='M50 31c-17 0-27 12-23 26 2 8 7 12 7 16h32c0-4 5-8 7-16 4-14-6-26-23-26z'/><rect x='31' y='72' width='38' height='10' rx='2'/><rect x='24' y='84' width='52' height='9' rx='3'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#2B1C12' stroke='#0E0804' stroke-width='3.5' stroke-linejoin='round'><path d='M24 32L31 52L37 24L44 47L50 19L56 47L63 24L69 52L76 32L67 72H33Z'/><circle cx='24' cy='29' r='5'/><circle cx='37' cy='21' r='5'/><circle cx='50' cy='16' r='5'/><circle cx='63' cy='21' r='5'/><circle cx='76' cy='29' r='5'/><rect x='31' y='72' width='38' height='10' rx='2'/><rect x='24' y='84' width='52' height='9' rx='3'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#2B1C12' stroke='#0E0804' stroke-width='3.5' stroke-linejoin='round'><path d='M29 16h10v8h6v-8h10v8h6v-8h10v20l-7 6v28l6 6v8H30v-8l6-6V42l-7-6z'/><rect x='24' y='84' width='52' height='9' rx='3'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#2B1C12' stroke='#0E0804' stroke-width='3.5' stroke-linejoin='round'><circle cx='50' cy='12' r='6'/><path d='M50 19c-13 8-19 20-16 32 2 7 6 11 8 13h16c2-2 6-6 8-13 3-12-3-24-16-32z'/><rect x='37' y='64' width='26' height='8' rx='2'/><path d='M33 84c2-6 6-10 10-12h14c4 2 8 6 10 12z'/><rect x='24' y='84' width='52' height='9' rx='3'/></g><g fill='#E2CDA6' stroke='#E2CDA6'><path d='M55 31L45 45' fill='none' stroke-width='4' stroke-linecap='round'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#2B1C12' stroke='#0E0804' stroke-width='3.5' stroke-linejoin='round'><path d='M33 84c0-15 5-23 15-31-8 3-15 6-20 3-5-3-4-9 0-13 7-7 10-15 17-21l2-10 7 8c15 5 23 19 23 35 0 11-3 20-5 29z'/><rect x='24' y='84' width='52' height='9' rx='3'/></g><g fill='#E2CDA6' stroke='#E2CDA6'><circle cx='47' cy='31' r='3.5'/></g></svg>",
+          "<svg viewBox='0 0 100 100'><g fill='#2B1C12' stroke='#0E0804' stroke-width='3.5' stroke-linejoin='round'><circle cx='50' cy='29' r='13'/><path d='M40 44h20l-3 7c7 8 10 18 11 33H32c1-15 4-25 11-33z'/><rect x='24' y='84' width='52' height='9' rx='3'/></g></svg>"
         ],
         "color": "#C9A66B"
       }
@@ -142,7 +490,7 @@
   },
   "feel": {
     "particles": true,
-    "shake": true,
+    "shake": false,
     "haptics": true
   },
   "content": {
@@ -154,67 +502,41 @@
       "Bishop’s guard",
       "The ladder",
       "Greek gift",
-      "Corridor"
+      "Corridor",
+      "Crowning"
+    ],
+    "fens": [
+      "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
+      "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w - - 0 1",
+      "6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",
+      "7k/1R6/5N2/8/8/8/8/6K1 w - - 0 1",
+      "6k1/5p1p/5BpQ/8/8/8/8/6K1 w - - 0 1",
+      "k7/6R1/8/8/8/8/8/6KR w - - 0 1",
+      "5rk1/5ppp/8/6NQ/8/3B4/8/6K1 w - - 0 1",
+      "1k6/ppp5/8/8/8/8/5PPP/3R2K1 w - - 0 1",
+      "6k1/4Pppp/8/8/8/8/8/6K1 w - - 0 1"
+    ],
+    "solutions": [
+      "e1e8",
+      "h5f7",
+      "g5f7",
+      "b7h7",
+      "h6g7",
+      "h1h8",
+      "h5h7",
+      "d1d8",
+      "e7e8"
     ],
     "whys": [
       "Re8: the king’s own pawns block every escape square.",
-      "Qxf7: the bishop guards f7. Bxf7+ lets the king run to e7.",
+      "Qxf7: the bishop guards the queen, so the king can’t take her.",
       "Nf7: walled in by its own rook and pawns, the king can’t move.",
-      "Rh7: the knight guards the rook. Rb8+ lets the king out to g7.",
-      "Qg7: the bishop on f6 guards the queen. Qf8+ just loses her.",
-      "Rh8: the other rook holds the 7th rank. Rg8+ lets the king out.",
-      "Qxh7: bishop and knight both guard h7. Bxh7+ lets the king hide.",
-      "Rd8: the king’s own pawns wall off its escape squares."
-    ],
-    "choices": [
-      "Re8",
-      "Re7",
-      "Rb1",
-      "h4",
-      "Bxf7",
-      "Qxe5",
-      "Qxh7",
-      "Qxf7",
-      "Nxh7",
-      "Kf2",
-      "Nf7",
-      "Ne6",
-      "Nd7",
-      "Rh7",
-      "Rb8",
-      "Rg7",
-      "Qg7",
-      "Qxh7",
-      "Qf8",
-      "Bg5",
-      "Rg8",
-      "Ra7",
-      "Rb7",
-      "Rh8",
-      "Qxf7",
-      "Nxh7",
-      "Qxh7",
-      "Bxh7",
-      "Rd6",
-      "Rd8",
-      "Rd7",
-      "Rb1"
-    ],
-    "answers": [
-      "Re8",
-      "Qxf7",
-      "Nf7",
-      "Rh7",
-      "Qg7",
-      "Rh8",
-      "Qxh7",
-      "Rd8"
-    ],
-    "theme_words": [
-      "chess",
-      "checkmate",
-      "mate in one",
-      "puzzle"
+      "Rh7: the knight guards the rook and covers g8.",
+      "Qg7: the bishop on f6 guards the queen.",
+      "Rh8: the other rook holds the 7th rank.",
+      "Qxh7: the knight guards the queen and the king is boxed in.",
+      "Rd8: the king’s own pawns wall off its escape squares.",
+      "e8=Q: the new queen mates along the back rank."
     ]
   },
   "playtest": {

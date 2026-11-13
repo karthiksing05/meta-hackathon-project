@@ -197,6 +197,7 @@ When a request names a game, build its mechanic, not the sound of its name ("kri
 - Spelling Bee-style: make words from 7 letters that must use the center letter; longer words score more. → keyboard + in_dictionary.
 - Pinpoint-style: guess the category from clues revealed one at a time; fewer clues = more points. → reveal + typed_answer.
 - Queens-style: place one crown per row, column and colored region, and no two crowns touch. → grid_board + your own rule checks.
+- Chess puzzles and chess games (mate in one, find the best move, pass-and-play chess): the player moves the real pieces by tapping or dragging them. → chess_board (legal moves, check and mate are built in; load each position with chess_load {fen} and judge chess_moved, e.g. event.mate), never multiple choice and never a picture of a board. Check every position you write with a move generator in mind: the side to move, and exactly the mate you claim.
 - Mini crossword / word ladder: typed letters into a small grid / change one letter per step. → keyboard + your own rules.
 If a named game isn't here and the request doesn't say how it plays, pick the closest mechanic and say what you assumed in design.pitch.
 

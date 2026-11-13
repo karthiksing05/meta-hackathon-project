@@ -137,7 +137,7 @@ un-renamed requirements. Two uses of a fragment that lists the other in `conflic
 **What gets renamed:** an identifier token inside an expression string, unless it comes after `.`, is a
 record field key (`{x: …}`), or is inside a string literal. Also renamed: effect targets (`set`, `incr`,
 `push`, `remove`), `on`, `emit`, `after.emit`, `after.id`, `cancel`, rule `id`, `inputs[*].when`,
-`on_tap.input`, `on_drag.input`, `animate_on` keys and `feedback[*].on`. Payload field names are never
+`on_tap.input`, `on_drag.input`, `on_press.input`, `on_release.input`, `animate_on` keys and `feedback[*].on`. Payload field names are never
 renamed. Library rule: a fragment's lambda params and `let` names must not equal any name it provides or
 requires (checked in CI), so token renaming is always safe.
 
@@ -230,6 +230,7 @@ sprite, or at `false` to keep the shape, with `"art": { "hazard": "fogbank" }` (
 | `sequence_memory` | `pad` (one frame per pad) |
 | `quiz` | `button` |
 | `choice_story` | `scene` (a picture; one frame per scene, or one for all), `button` |
+| `chess_board` | `piece` (12 frames: K Q R B N P white, then k q r b n p black) |
 
 ### 1.8 Sound moments and feel
 
@@ -342,7 +343,7 @@ requirement kind is a possible later addition.
 
 ### 2.6 Playtest hint
 
-`"playtest": { "progress": "<expr>", "text_candidates": "<expr>" }`. Both are optional.
+`"playtest": { "progress": "<expr>", "text_candidates": "<expr>", "tap_pairs": "<expr>" }`. All are optional.
 
 - `progress` tells the playtest bots what "doing better" means (lights switched off, distance to the
   food, lives kept) when the score alone doesn't show it.
@@ -352,8 +353,14 @@ requirement kind is a possible later addition.
   12, picked at random when there are more), then clears the field. Stronger bots pick the one that
   does best in look-ahead. Without a hint, the bots submit strings found in the game's state.
 
-The expander writes a second copy of the game for the gate. It has a hidden `__progress` (float) and
-`__text_candidates` (`list<string>`) state, which `tick` rules update. The shipped `game.json` never
+- `tap_pairs` is for board games where a move is two taps (pick a piece, then its square). It's a
+  `list<list<float>>` expression: each item is `[x1, y1, x2, y2]` in canvas units. Each bot decision may
+  make one pair (at most 40, picked at random when there are more) as two taps in a row; stronger bots
+  pick the pair that does best in look-ahead. The input log records the two taps. `chess_board` gives
+  every legal move this way.
+
+The expander writes a second copy of the game for the gate. It has a hidden `__progress` (float),
+`__text_candidates` (`list<string>`) and `__tap_pairs` (`list<list<float>>`) state, which `tick` rules update. The shipped `game.json` never
 contains them. Errors in either expression point at `/playtest/progress` or `/playtest/text_candidates`.
 `playtest.texts` is accepted as another name for `text_candidates` (errors still point at
 `/playtest/text_candidates`).

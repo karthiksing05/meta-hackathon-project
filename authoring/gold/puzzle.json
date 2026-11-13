@@ -36,7 +36,7 @@
   {
     "id": "gold_one_move",
     "file": "authoring/games/gold_one_move.authoring.json",
-    "request": "a mate in one chess puzzle game where you pick the move that checkmates",
+    "request": "a mate in one chess puzzle game where you move the piece that checkmates",
     "brief": {
       "intent": "chess tactics: find the mating move",
       "mood": [
@@ -49,21 +49,20 @@
     "genre": "brainy puzzle",
     "themes": "chess checkmate mate in one tactics puzzle board game strategy",
     "fragments_used": [
-      "quiz",
+      "chess_board",
       "rounds",
-      "lives",
       "score"
     ],
     "why_its_good": [
-      "Each position was checked with a move generator: exactly one candidate mates, and each wrong one is a check or threat that fails for a concrete reason the reveal names.",
-      "The board is one sprite with a frame per puzzle, drawn by the kit picture component (frame = get_or(order, qi, 0)), so it is never covered by text.",
-      "Two columns of short move tiles (quiz cols 2) leave the middle of the screen to the board.",
-      "Notation is shown without + or #, so the answer isn’t given away by a symbol."
+      "The player moves the real piece: tap it (legal squares get dots, captures rings) then its square, or drag it; chess_board generates the legal moves in the rules, so every run replays.",
+      "Every position was checked with a move generator; any mate counts, not just the listed one.",
+      "A wrong move plays out, the card says why it fails (check but the king escapes, or no check), and the piece slides back: no shake, a soft cue and a 20-point penalty. Two misses show the mate.",
+      "The 8 x 44 board fills the tall canvas width under a short card, so text never sits on the board."
     ],
     "pitfalls_avoided": [
       "Unchecked positions with two mates or none",
-      "A board made of 64 tap targets under the 44 pt minimum",
-      "Check symbols that give the answer away"
+      "Turning the board into multiple choice",
+      "Coordinate labels crossed by sliding pieces (they sit on plates in the square colour)"
     ]
   }
 ]
