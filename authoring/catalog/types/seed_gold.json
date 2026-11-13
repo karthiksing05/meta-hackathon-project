@@ -1262,7 +1262,7 @@
     ],
     "family": "story_choice",
     "subfamily": "scripted clip",
-    "summary": "A short scripted scene (a press conference, an interview, a cooking show) cut into beats. At each beat you guess the next line from three; the reveal shows the real line, which is always the funniest, and what happened next.",
+    "summary": "A short scripted scene (a press conference, an interview, a cooking show) cut into beats. At each beat you guess the next line from four coloured tiles before a countdown runs out; the reveal shows the real line, which is always the funniest, and what happened next.",
     "core_loop": "read the quote card → guess the next line → reveal the real line and the punchline → next beat → end card: how many you called",
     "verbs": [
       "read",
@@ -1272,14 +1272,14 @@
     "pieces": [
       "quote card",
       "speaker name",
-      "three guesses",
+      "four coloured guess tiles", "countdown",
       "reveal panel",
       "cartoon panel per beat"
     ],
     "rules": [
       "beats play in order, never shuffled",
       "the real line is the joke, the twist or the disaster, and the other guesses are plausible but tame",
-      "no lives and no timer: nothing is lost",
+      "four Kahoot-coloured tiles and a countdown per beat (time_ms about 15 s; running out just reveals the real line), but no lives: nothing is lost",
       "each beat escalates the scene"
     ],
     "win": "reach the end of the clip",
@@ -1341,7 +1341,7 @@
     ],
     "pieces": [
       "quote card",
-      "three guesses",
+      "four coloured guess tiles", "countdown",
       "reveal panel",
       "cartoon panels on some scenes"
     ],
