@@ -1,10 +1,12 @@
 package staticsrv
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -102,5 +104,48 @@ func TestSymlinkEscape(t *testing.T) {
 	t.Cleanup(func() { h.(*handler).Close() })
 	if w := get(h, "GET", "/"+gid+"/link.txt", nil); w.Code != 404 {
 		t.Fatalf("symlink escape: %d", w.Code)
+	}
+}
+
+func TestWebPlayer(t *testing.T) {
+	dir := t.TempDir()
+	h, err := New(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { h.(*handler).Close() })
+	ts := httptest.NewServer(h)
+	t.Cleanup(ts.Close)
+	get := func(p string) (int, string, string) {
+		res, err := http.Get(ts.URL + p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer res.Body.Close()
+		b, _ := io.ReadAll(res.Body)
+		return res.StatusCode, res.Header.Get("Content-Type"), string(b)
+	}
+	code, ct, body := get("/play/")
+	if code != 200 || !strings.HasPrefix(ct, "text/html") || !strings.Contains(body, "Game player") {
+		t.Fatalf("player page: %d %s", code, ct)
+	}
+	if code, ct, body := get("/play/runtime/bubble-runtime.js"); code != 200 || !strings.Contains(ct, "javascript") || len(body) < 100000 {
+		t.Fatalf("runtime: %d %s %d bytes", code, ct, len(body))
+	}
+	if code, _, _ := get("/play/runtime/bubble-kit-microgame-engine.js"); code != 200 {
+		t.Fatalf("engine bundle: %d", code)
+	}
+	if code, ct, _ := get("/play/runtime/bubble-glow.css"); code != 200 || !strings.HasPrefix(ct, "text/css") {
+		t.Fatalf("css: %d %s", code, ct)
+	}
+	for _, p := range []string{"/play/runtime/", "/play/runtime", "/play/../server.go", "/play/runtime/../../server.go", "/play/nope.js", "/play/%2e%2e/server.go"} {
+		if code, _, _ := get(p); code == 200 {
+			t.Errorf("%s must not be served", p)
+		}
+	}
+	res, _ := http.Get(ts.URL + "/play")
+	res.Body.Close()
+	if res.Request.URL.Path != "/play/" {
+		t.Errorf("/play should redirect to /play/, ended at %s", res.Request.URL.Path)
 	}
 }

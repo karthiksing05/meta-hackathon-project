@@ -21,7 +21,7 @@ import (
 // (internal/recs). The phone sends what happened (events) and asks what to show next; the server
 // keeps each person's model, so nothing about ranking lives in the app.
 //
-//	POST /v1/me/feed   {count, sessionID?}    -> the next pages for me, ranked
+//	GET  /v1/feed?limit=&sessionID=            -> the next pages, ranked (the one feed endpoint)
 //	POST /v1/feed/events                       -> also teaches my model (signed in)
 //	POST /v1/blend     {group, members, count} -> games and a game spec for a set of people
 //	GET  /v1/me/recs                           -> my model's summary and taste profile
@@ -121,62 +121,110 @@ type rankPick struct {
 	Raw       json.RawMessage `json:"-"`
 }
 
-type feedIn struct {
-	Count     int    `json:"count"`
-	SessionID string `json:"sessionID"`
+// feedItem is a game as the feed shows it: the game's own fields plus why it was picked.
+type feedItem struct {
+	model.GameView
+	FeedItemID string  `json:"feedItemID"`
+	Reason     string  `json:"reason"`
+	Why        string  `json:"why,omitempty"`
+	Score      float64 `json:"score"`
+	Hook       float64 `json:"hook"`
+	Unproven   bool    `json:"unproven"`
+	Team       string  `json:"team,omitempty"`
 }
 
-func (s *Server) myFeed(w http.ResponseWriter, r *http.Request) {
-	if !s.recsEnabled() {
-		writeErr(w, 503, "ranking is not set up on this server")
-		return
+// feed is the one feed endpoint: GET /v1/feed?limit=10&sessionID=...
+//
+// Every page it returns is chosen by Kevin's recommender. A signed-in person gets pages from their own
+// model, and the server remembers what it showed them this session (so the next call continues, with no
+// repeats nearby). A signed-out caller gets the recommender's cold-start ranking, nothing is remembered,
+// and they can pass exclude=<id,id,...> to skip games they already have. Only if ranking is switched off
+// on the server (RECS_RUNTIMES=0) does it fall back to newest first, with reason "newest".
+func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	count := limitParam(r, 10, 30)
+	if c, err := strconv.Atoi(q.Get("count")); err == nil && c > 0 {
+		count = min(c, 30)
 	}
-	var in feedIn
-	if r.ContentLength != 0 && !decode(w, r, &in) {
-		return
-	}
-	if in.Count < 1 {
-		in.Count = 10
-	}
-	in.Count = min(in.Count, 30)
-	if len(in.SessionID) > 64 {
+	sessionID := q.Get("sessionID")
+	if len(sessionID) > 64 {
 		writeErr(w, 400, "sessionID is too long")
 		return
 	}
-	u := userFrom(r)
 	games, err := s.Store.AllGames(r.Context(), maxCandidates)
 	if err != nil {
 		s.serverErr(w, r, err)
 		return
 	}
+	u := userFrom(r)
+	var exclude []string
+	if u == nil {
+		for _, id := range strings.Split(q.Get("exclude"), ",") {
+			if id = strings.TrimSpace(id); id != "" && len(exclude) < 200 {
+				exclude = append(exclude, id)
+			}
+		}
+	}
+	if len(exclude) > 0 {
+		skip := map[string]bool{}
+		for _, id := range exclude {
+			skip[id] = true
+		}
+		kept := games[:0:0]
+		for _, g := range games {
+			if !skip[g.ID] {
+				kept = append(kept, g)
+			}
+		}
+		games = kept
+	}
 	if len(games) == 0 {
 		writeJSON(w, 200, map[string]any{"items": []any{}})
 		return
 	}
-	unlock := s.recsLocks.lock(u.ID)
-	defer unlock()
-
-	rec, err := s.loadRecs(r.Context(), u.ID)
-	if err != nil {
-		s.serverErr(w, r, err)
+	if !s.recsEnabled() {
+		page := games[:min(count, len(games))]
+		views, err := s.views(r, page)
+		if err != nil {
+			s.serverErr(w, r, err)
+			return
+		}
+		items := make([]feedItem, len(views))
+		for i, v := range views {
+			items[i] = feedItem{GameView: v, FeedItemID: "fi_" + auth.NewID(6), Reason: "newest"}
+		}
+		writeJSON(w, 200, map[string]any{"items": items})
 		return
 	}
+
 	now := time.Now().UTC()
-	if (in.SessionID != "" && in.SessionID != rec.FeedSession) || (!rec.FeedAt.IsZero() && now.Sub(rec.FeedAt) > sessionGap) {
-		rec.Feed, rec.FeedKeys = nil, nil // a new session starts a new page list
+	rec := &model.RecsRecord{}
+	if u != nil {
+		unlock := s.recsLocks.lock(u.ID)
+		defer unlock()
+		if rec, err = s.loadRecs(r.Context(), u.ID); err != nil {
+			s.serverErr(w, r, err)
+			return
+		}
+		if (sessionID != "" && sessionID != rec.FeedSession) || (!rec.FeedAt.IsZero() && now.Sub(rec.FeedAt) > sessionGap) {
+			rec.Feed, rec.FeedKeys = nil, nil // a new session starts a new page list
+		}
+		if sessionID != "" {
+			rec.FeedSession = sessionID
+		}
 	}
-	if in.SessionID != "" {
-		rec.FeedSession = in.SessionID
+	who := "anon|" + sessionID
+	if u != nil {
+		who = u.ID
 	}
 	h := fnv.New32a()
-	h.Write([]byte(u.ID + "|" + strconv.Itoa(len(rec.Feed)) + "|" + strconv.Itoa(today())))
+	h.Write([]byte(who + "|" + strconv.Itoa(len(rec.Feed)+len(exclude)) + "|" + strconv.Itoa(today())))
 	input, _ := json.Marshal(map[string]any{
 		"candidates": candidatesOf(games), "summaries": summariesOf(games), "feed": nonNil(rec.Feed), "feedKeys": nonNil(rec.FeedKeys),
-		"count": in.Count, "seed": h.Sum32(), "day": today(), "now": now.UnixMilli(),
+		"count": count, "seed": h.Sum32(), "day": today(), "now": now.UnixMilli(),
 	})
 	var reply struct {
 		Picks []rankPick `json:"picks"`
-		Bait  any        `json:"bait"`
 	}
 	state, err := s.Recs.Run(r.Context(), rec.State, func(sess recsSession) error {
 		out, err := sess.Rank(input)
@@ -186,7 +234,7 @@ func (s *Server) myFeed(w http.ResponseWriter, r *http.Request) {
 		return json.Unmarshal(out, &reply)
 	})
 	if err != nil {
-		s.Log.Error("recs: rank failed", "user", u.ID, "err", err)
+		s.Log.Error("recs: rank failed", "err", err)
 		writeErr(w, 503, "ranking is unavailable right now")
 		return
 	}
@@ -195,9 +243,11 @@ func (s *Server) myFeed(w http.ResponseWriter, r *http.Request) {
 		byID[g.ID] = g
 	}
 	var shown []model.Game
+	var picks []rankPick
 	for _, p := range reply.Picks {
 		if g, ok := byID[p.GameID]; ok {
 			shown = append(shown, g)
+			picks = append(picks, p)
 		}
 	}
 	views, err := s.views(r, shown)
@@ -205,33 +255,24 @@ func (s *Server) myFeed(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
-	items := make([]map[string]any, 0, len(shown))
-	vi := 0
-	for _, p := range reply.Picks {
-		if _, ok := byID[p.GameID]; !ok {
-			continue
-		}
-		item := map[string]any{
-			"feedItemID": "fi_" + auth.NewID(6), "game": views[vi], "reason": p.Reason, "why": p.Why,
-			"score": p.Score, "hook": p.Hook, "unproven": p.Unproven,
-		}
-		if p.Team != "" {
-			item["team"] = p.Team
-		}
-		items = append(items, item)
-		vi++
+	items := make([]feedItem, len(picks))
+	for i, p := range picks {
+		items[i] = feedItem{GameView: views[i], FeedItemID: "fi_" + auth.NewID(6), Reason: p.Reason, Why: p.Why,
+			Score: p.Score, Hook: p.Hook, Unproven: p.Unproven, Team: p.Team}
 		rec.Feed = append(rec.Feed, p.GameID)
 		rec.FeedKeys = append(rec.FeedKeys, p.GameID+"|"+p.Reason+"|"+orDash(p.RunUserID))
 	}
-	if n := len(rec.Feed) - maxFeedHistory; n > 0 {
-		rec.Feed, rec.FeedKeys = rec.Feed[n:], rec.FeedKeys[n:]
+	if u != nil { // only a signed-in person's session and model are kept
+		if n := len(rec.Feed) - maxFeedHistory; n > 0 {
+			rec.Feed, rec.FeedKeys = rec.Feed[n:], rec.FeedKeys[n:]
+		}
+		rec.State, rec.FeedAt, rec.UpdatedAt = state, now, now
+		if err := s.Store.PutRecs(r.Context(), rec); err != nil {
+			s.serverErr(w, r, err)
+			return
+		}
 	}
-	rec.State, rec.FeedAt, rec.UpdatedAt = state, now, now
-	if err := s.Store.PutRecs(r.Context(), rec); err != nil {
-		s.serverErr(w, r, err)
-		return
-	}
-	writeJSON(w, 200, map[string]any{"items": items, "bait": reply.Bait})
+	writeJSON(w, 200, map[string]any{"items": items})
 }
 
 func orDash(s *string) string {

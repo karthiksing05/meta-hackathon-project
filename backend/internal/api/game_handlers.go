@@ -93,12 +93,6 @@ func (s *Server) listPage(w http.ResponseWriter, r *http.Request, fetch func(lim
 	writeJSON(w, 200, map[string]any{"items": items, "nextCursor": next})
 }
 
-func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
-	s.listPage(w, r, func(limit int, c store.Cursor) ([]model.Game, error) {
-		return s.Store.Feed(r.Context(), limit, c)
-	})
-}
-
 func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	tag := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("tag")))

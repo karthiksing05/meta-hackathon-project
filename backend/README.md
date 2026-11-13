@@ -40,7 +40,7 @@ treat the exact shapes as the first version and change them together with the cl
 |---|---|---|
 | `GET /healthz`, `GET /readyz` | none | liveness; readiness (database + storage) |
 | `POST /v1/auth/register`, `login`, `refresh`, `logout`; `GET /v1/auth/me` | none / bearer | accounts and tokens |
-| `GET /v1/feed?cursor=&limit=` | optional | newest-first games, keyset pagination |
+| `GET /v1/feed?limit=&sessionID=&exclude=` | optional | **the one feed**: the next pages, ranked by the recommender (see [Ranking](#ranking-the-recommender-runs-here)) |
 | `GET /v1/search?q=&tag=&cursor=&limit=` | optional | full-text and tag search |
 | `POST /v1/feed/events` | optional | batch of up to 100 events: feed pages, off-feed moments, or the older `view/play/finish/...` types (anonymous needs `deviceId`); see [Event log](#event-log-and-recommender-support) |
 | `GET /v1/games/stats?since=` | none | per-game roll-up of the event log, plus creator, Group and creation day |
@@ -49,7 +49,6 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/games/{id}` | optional | one game; `{id}` may also be the slug from its manifest |
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
 | `GET /v1/games/{id}/leaderboard`, `POST /v1/games/{id}/scores` | none / bearer | best score per user |
-| `POST /v1/me/feed` | bearer | the next pages ranked for me: `{count, sessionID?}`; see [Ranking](#ranking-the-recommender-runs-here) |
 | `GET /v1/me/recs` | bearer | my model's summary and taste profile |
 | `POST /v1/blend` | bearer | games and a game spec for a set of people: `{group, members, count}` |
 | `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; see [Making games](#making-games-muse-lives-here) |
@@ -114,10 +113,14 @@ inside the API, on a pure-Go JavaScript engine (goja). The app does no ranking: 
 reports what happened. Each signed-in person's model (posteriors, taste, bait lean, calibration history) is kept in
 Mongo (`recs_state`); the pages shown this session are kept with it.
 
-- `POST /v1/me/feed` `{count (1-30, default 10), sessionID?}` -> `{items: [{feedItemID, game, reason, why, score, hook, unproven, team?}], bait}`.
-  Candidates are the newest 300 games: "new" ones get a small push, "popular" ones a push that grows with plays and saves.
-  A new `sessionID`, or 30 minutes idle, starts a new page list (so the repeat window and calibration restart).
-  The app should send `feedItemID` and the game's `id` back in its page events.
+- **The one feed:** `GET /v1/feed?limit=10&sessionID=...` (limit 1-30) -> `{items: [...]}`. Every item is the game's own
+  object plus `feedItemID`, `reason`, `why`, `score`, `hook`, `unproven` (and `team` when interleaving is on). Every page is
+  chosen by the recommender. Signed in: it uses that person's model, remembers what it showed them this session (so the next
+  call continues, with no repeats nearby), and a new `sessionID`, or 30 minutes idle, starts a new page list. Signed out: the
+  recommender's cold-start ranking, nothing remembered, and `exclude=<id,id,...>` skips games the caller already has. When few
+  games exist the same game can come back once the repeat window has passed. Only if ranking is switched off on the server
+  does it fall back to newest first (`reason: "newest"`). Candidates are the newest 300 games, all offered on equal terms: the
+  server has no ranking logic of its own. The app should send `feedItemID` and the game's `id` back in its page events.
 - **Learning:** `POST /v1/feed/events` from a signed-in person also teaches their model. A feed page event
   (`gameID`, `feedItemID` or `position`, `dwellSec`, `tookOver`, `runsFinished`, `replays`, `saved`, `liked`, `floated`,
   `openedBoard`, `addedFriend`, `remixed`, `social`, `with`, `quitMidRun`, `endedSession`) becomes `observe`; an off-feed
@@ -135,6 +138,15 @@ Mongo (`recs_state`); the pages shown this session are kept with it.
   The golden test replays a fixed call sequence made by Node and fails if the Go engine's answers differ.
 - Games carry what the recommender describes them by (`mood`, `energy`, `competition`, `look`, `scope`, `isDaily`, and the
   playtest bots' runs for generated games), read from the manifest when a game is published.
+
+## Web player (for testing)
+
+The games host serves a small player at **`https://games.<domain>/play/`** (`/play/?game=<24-character id or slug>`). It runs the
+app's own game runtime in the browser (the files in `internal/staticsrv/player/runtime`, copied from the app; `player/SOURCE_COMMIT`
+says which commit), loads the game's `manifest.json` from the games host, and boots it, so a game looks and plays as it does in the
+app. A microgame runs on Artem's Rust engine (WebAssembly) with its game script from `content.game_json`. The page lists the games
+from `GET /v1/feed`, can watch a bot play, and logs the runtime's messages. The API allows the games host's origin for CORS.
+Refresh the runtime copy from `main` when the app's runtime changes.
 
 ## Event log and recommender support
 

@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -81,7 +82,7 @@ func (s *Server) Handler() http.Handler {
 			r.Post("/logout", s.logout)
 			r.With(s.requireAuth).Get("/me", s.me)
 		})
-		r.With(s.optionalAuth).Get("/feed", s.feed)
+		r.With(s.optionalAuth).Get("/feed", s.feed) // the one feed: ranked by the recommender
 		r.With(s.optionalAuth).Post("/feed/events", s.feedEvents)
 		r.With(s.optionalAuth).Get("/search", s.search)
 
@@ -99,7 +100,6 @@ func (s *Server) Handler() http.Handler {
 		})
 
 		// Ranking: the recommender runs on the server, so the app asks what to show and reports what happened.
-		r.With(s.requireAuth).Post("/me/feed", s.myFeed)
 		r.With(s.requireAuth).Get("/me/recs", s.myRecs)
 		r.With(s.requireAuth).Post("/blend", s.blend)
 
@@ -186,6 +186,9 @@ func (s *Server) cors(next http.Handler) http.Handler {
 	allowed := map[string]bool{}
 	for _, o := range s.CORSOrigins {
 		allowed[o] = true
+	}
+	if u, err := url.Parse(s.GamesBaseURL); err == nil && u.Scheme != "" && u.Host != "" {
+		allowed[u.Scheme+"://"+u.Host] = true // the games site's web player reads the API
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if o := r.Header.Get("Origin"); o != "" && allowed[o] {

@@ -61,7 +61,14 @@ func publishGames(t *testing.T, ts *httptest.Server, tok string) []string {
 
 func feedPage(t *testing.T, ts *httptest.Server, tok string, body map[string]any) (int, []map[string]any) {
 	t.Helper()
-	code, out := do(t, "POST", ts.URL+"/v1/me/feed", tok, js(body), "application/json")
+	q := fmt.Sprintf("count=%v", body["count"])
+	if sid, ok := body["sessionID"].(string); ok {
+		q += "&sessionID=" + sid
+	}
+	if ex, ok := body["exclude"].(string); ok {
+		q += "&exclude=" + ex
+	}
+	code, out := do(t, "GET", ts.URL+"/v1/feed?"+q, tok, nil, "")
 	var items []map[string]any
 	for _, it := range out["items"].([]any) {
 		items = append(items, it.(map[string]any))
@@ -82,8 +89,16 @@ func TestRankedFeed(t *testing.T) {
 	}
 
 	tok := register(t, ts, "viewer")
-	if code, _ := do(t, "POST", ts.URL+"/v1/me/feed", "", js(map[string]any{"count": 3}), "application/json"); code != 401 {
-		t.Fatalf("signed out: %d", code)
+	// signed out works too: the recommender's cold-start ranking, nothing remembered, exclude skips games already held
+	_, anon := feedPage(t, ts, "", map[string]any{"count": 3})
+	if len(anon) != 3 || anon[0]["feedItemID"] == "" {
+		t.Fatalf("signed-out feed: %v", anon)
+	}
+	_, rest := feedPage(t, ts, "", map[string]any{"count": 6, "exclude": fmt.Sprintf("%v,%v", anon[0]["id"], anon[1]["id"])})
+	for _, it := range rest {
+		if it["id"] == anon[0]["id"] || it["id"] == anon[1]["id"] {
+			t.Fatalf("excluded game came back: %v", it)
+		}
 	}
 	code, first := feedPage(t, ts, tok, map[string]any{"count": 4, "sessionID": "s1"})
 	if code != 200 || len(first) != 4 {
@@ -91,7 +106,7 @@ func TestRankedFeed(t *testing.T) {
 	}
 	seen := map[string]bool{}
 	for _, it := range first {
-		g := it["game"].(map[string]any)
+		g := it
 		if !valid[g["id"].(string)] || seen[g["id"].(string)] || it["feedItemID"] == "" || it["reason"] == "" || g["manifestUrl"] == nil {
 			t.Fatalf("bad item: %v", it)
 		}
@@ -103,7 +118,7 @@ func TestRankedFeed(t *testing.T) {
 		t.Fatalf("second page: %v", second)
 	}
 	for _, it := range second {
-		if seen[it["game"].(map[string]any)["id"].(string)] {
+		if seen[it["id"].(string)] {
 			t.Fatalf("a game came back within the repeat window: %v", it)
 		}
 	}
@@ -116,8 +131,11 @@ func TestRankedFeed(t *testing.T) {
 func TestRankingIsOffWithoutTheEngine(t *testing.T) {
 	ts := serverWithRecs(t, false)
 	tok := register(t, ts, "someone")
-	if code, _ := do(t, "POST", ts.URL+"/v1/me/feed", tok, js(map[string]any{"count": 3}), "application/json"); code != 503 {
-		t.Fatalf("ranking off: %d", code)
+	// with ranking off the one feed endpoint still answers, newest first
+	maker := register(t, ts, "maker3")
+	publishGames(t, ts, maker)
+	if code, items := feedPage(t, ts, tok, map[string]any{"count": 3}); code != 200 || len(items) != 3 || items[0]["reason"] != "newest" {
+		t.Fatalf("ranking off: %d %v", code, items)
 	}
 	// events are still stored when ranking is off
 	if code, _ := post(t, ts.URL, tok, map[string]any{"events": []any{map[string]any{"gameID": "x", "kind": "share"}}}); code != 202 {
@@ -164,7 +182,7 @@ func TestLearningFromEvents(t *testing.T) {
 		// the first time each game appears (a game can come back once the repeat window has passed)
 		seenLoved, seenSkipped := false, false
 		for i, it := range items {
-			switch it["game"].(map[string]any)["id"] {
+			switch it["id"] {
 			case loved:
 				if !seenLoved {
 					lovedPos, seenLoved = lovedPos+i, true

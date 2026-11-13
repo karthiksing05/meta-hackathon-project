@@ -203,7 +203,7 @@ func TestFeedPagination(t *testing.T) {
 	seen := map[string]bool{}
 	cursor := ""
 	for pages := 0; pages < 10; pages++ {
-		_, out := do(t, "GET", ts.URL+"/v1/feed?limit=2&cursor="+cursor, "", nil, "")
+		_, out := do(t, "GET", ts.URL+"/v1/creations?limit=2&cursor="+cursor, tok, nil, "")
 		for _, it := range out["items"].([]any) {
 			id := it.(map[string]any)["id"].(string)
 			if seen[id] {

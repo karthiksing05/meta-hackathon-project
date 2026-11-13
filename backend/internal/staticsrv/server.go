@@ -1,5 +1,6 @@
 // Package staticsrv serves published game packages: read-only, GET/HEAD only, range requests,
-// no directory listings, traversal-safe, with long-lived immutable cache headers.
+// no directory listings, traversal-safe, with long-lived immutable cache headers. It also serves a
+// small web player for testing at /play/ (player.go).
 package staticsrv
 
 import (
@@ -53,6 +54,9 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		w.Header().Set("Allow", "GET, HEAD")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if servePlayer(w, r) {
 		return
 	}
 	name, ok := cleanPath(r.URL.Path)
