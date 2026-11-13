@@ -319,6 +319,12 @@ final class BubbleStore {
                 self?.refreshDayIfNeeded()
             })
         }
+        // A different account (signed in, signed up, guest) means a different personalized feed.
+        dayObservers.append(center.addObserver(forName: .gamesAccountChanged, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            self.feedItems.removeAll()
+            self.reloadFeed()
+        })
     }
 
     // MARK: - Helpers

@@ -12,11 +12,11 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            if store.isLoggedIn {
+            if store.isLoggedIn && GamesAccount.shared.state != .signedOut {
                 MainTabView()
                     .transition(.opacity)
             } else {
-                LoggedOutView()
+                SignInView()
                     .transition(.opacity)
             }
 
@@ -27,6 +27,7 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: store.isLoggedIn)
+        .animation(.easeInOut(duration: 0.3), value: GamesAccount.shared.state)
         .overlay(alignment: .bottom) {
             ToastHost()
                 .padding(.bottom, 72)
@@ -119,75 +120,3 @@ struct SplashView: View {
     }
 }
 
-/// Shown after "Log out". Tapping the saved profile signs back in. There are no password fields.
-struct LoggedOutView: View {
-    @Environment(AppStore.self) private var store
-    @State private var isLoggingIn = false
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Text("English (US)")
-                .font(.fbMeta)
-                .foregroundStyle(FBColor.secondaryText)
-                .padding(.top, 12)
-
-            Spacer()
-
-            FacebookLogo(size: 64)
-                .padding(.bottom, 48)
-
-            Button {
-                logIn()
-            } label: {
-                HStack(spacing: 12) {
-                    AvatarView(user: store.me, size: FBAvatarSize.row)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(store.me.name)
-                            .font(.fbHeadline)
-                            .foregroundStyle(FBColor.primaryText)
-                        Text("Tap to continue")
-                            .font(.fbMeta)
-                            .foregroundStyle(FBColor.secondaryText)
-                    }
-                    Spacer()
-                    if isLoggingIn {
-                        ProgressView()
-                    } else {
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(FBColor.secondaryText)
-                    }
-                }
-                .padding(14)
-                .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
-                        .stroke(FBColor.divider, lineWidth: 1)
-                }
-            }
-            .buttonStyle(.pressable)
-            .disabled(isLoggingIn)
-            .padding(.horizontal, FBMetrics.screenPadding)
-
-            Spacer()
-
-            Text("This is a demo build. Accounts and data are stored on this device only.")
-                .font(.fbCaption)
-                .foregroundStyle(FBColor.tertiaryText)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-                .padding(.bottom, 16)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(FBColor.background.ignoresSafeArea())
-    }
-
-    private func logIn() {
-        isLoggingIn = true
-        Haptics.light()
-        Task {
-            try? await Task.sleep(nanoseconds: 700_000_000)
-            isLoggingIn = false
-            store.logIn()
-        }
-    }
-}

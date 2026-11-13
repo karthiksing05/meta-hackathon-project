@@ -171,6 +171,13 @@ actor GamesAPILive: GamesAPI, GamesAuth {
 
     var isSignedIn: Bool { tokens != nil }
 
+    /// This phone already made its own (guest) account on an earlier launch.
+    var hasDeviceAccount: Bool { keychain.read("device") != nil }
+
+    /// Off while signed out, so a call that needs an account fails instead of quietly creating a
+    /// guest account behind the sign-in screen.
+    func setAutoSignIn(_ on: Bool) { autoSignIn = on }
+
     func register(email: String, username: String, displayName: String, password: String) async throws -> RemoteUser {
         let body = try JSONSerialization.data(withJSONObject: [
             "email": email, "username": username, "displayName": displayName, "password": password,
