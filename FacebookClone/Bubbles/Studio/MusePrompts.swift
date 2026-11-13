@@ -20,6 +20,11 @@ enum MusePrompts {
     products or logos. Public places (Dolores Park, Ocean Beach, Twin Peaks, the Mission) are fine.
     - Original games: genre mechanics are fine, but never reuse another game's name, characters, art, levels or look. \
     Nothing that resembles Wordle, Flappy Bird, 2048, Suika or Connections, in name or presentation.
+    - Requested themes: when the creator asks for a theme or franchise (for example "Star Wars"), honor it in names, \
+    art and words so the game keeps that feel. The mechanics stay original to the creator's idea, and never copy a \
+    specific existing game's levels or art.
+    - Agreed anatomy: when the request or brief carries an "Agreed game anatomy", follow its rules and mechanics \
+    exactly, not just its look.
     - Honest content: never invent vote counts, statistics, quotes or facts about the audience or any real group. A mode \
     that scores against the crowd's votes needs votes the request gives you; without them, use an answer key or a mode \
     with no crowd.

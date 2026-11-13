@@ -1636,3 +1636,55 @@ events by `seq`, and fetches the finished game's manifest from `manifestUrl` wit
 (`data` on events, `position`, `code`) are used when present. It's chosen by `FB_API=live` or
 `FB_GENERATE=mock` (`App/DebugLaunch.swift`); otherwise Studio uses the on-device composer. Tweaks and
 next levels stay on-device (`revise` reads the server game's `content.authoring_json`).
+
+### 7.13 Game anatomy: agreeing how the game works
+
+Studio used to take a person's *style* (mood, look, theme) but not their *function*. The game anatomy is
+Muse's read of how the game works, part by part, agreed with the person before the build and changed
+with them after it. New games only (`StudioModel.usesAnatomy`: create mode).
+
+**Format `game-anatomy/0.1`** (all in `Bubbles/Studio/GameAnatomy.swift`, so it can be swapped for another
+plan format):
+
+```
+{"anatomy": "game-anatomy/0.1", "title", "genre": "word|puzzle|action|story|party",
+ "parts": {"core_loop": {"text"}, "verbs": {"items": [..]}, "pieces": {"items": [{"name","has"}]},
+   "state": {"items": [{"name","type"}]}, "rules": [{"n","text","check"}], "end": {"win","lose","score"},
+   "structure": {"turns","timing","length_s": [a,b]}, "randomness": {"seed"}, "share": {"grid"}, "theme": {"text"}}}
+```
+
+Every part and rule also carries `source` (`you` | `guess`), `familiarity` (`known` | `approximate` |
+`unfamiliar`, shown as Known / Approximate / New to Muse), `plan` (`fragment:<id>` | `custom:<what>` |
+`gate:<check>` | `engine-gap:<name>`), `question` and `options`. Muse asks questions only on guessed parts
+it doesn't know; vague requests get concrete picks marked as guesses. Decoding is lenient (missing fields
+get defaults, unknown familiarity reads as approximate, a `{"anatomy": {...}}` wrapper is accepted).
+Revisions add top-level `changed` (`"end"`, `"rules.2"`, ...) and `reply` ("This changes rule 2 and how it
+ends."); Studio also diffs the two versions itself when `changed` is missing.
+
+**Muse.** `GameAnatomyMuse` (`draft`, `revise`), one JSON turn on the fast model (about 5 s; the planner
+took 30–55 s for the same reads). Prompts: `MuseAnatomyPrompts.swift` (`MusePrompts.anatomySystem`,
+`anatomyUser`, `anatomyReviseUser`); the system prompt lists the microgame fragments (live catalog,
+or a built-in list) so Muse can judge what it knows. Without a Muse key, or with `FB_STUDIO_ANATOMY`,
+Studio uses `GameAnatomyFixtures` (a word guess, a grid logic puzzle with parts new to Muse, and a dodge
+game in the request's theme).
+
+**In Studio** (`StudioAnatomyThread`, `StudioAnatomyCard`, `StudioAnatomyChat`):
+- *Brief step*: "How the game works" drafts alongside the brief. Summary ("Muse understood 13 parts; 2 are
+  new to it"), then a card per part and rule with the tags, the plan for anything not known, and Muse's
+  questions with quick answers. Tap a part to rewrite it; "Something off? Tell Muse" reruns the anatomy with
+  the change; after local edits or answers, "Have Muse check my changes" folds them in.
+- *The build*: `GameAnatomy.agreedText(request:)` ("Agreed game anatomy (follow the rules and mechanics
+  exactly, not just the look)", with the person's request verbatim and a requested theme kept as said) is
+  appended to the microgame request text (`microgameRequestText`, so repair rounds see it too) or, for
+  formula games, to the brief's `notes`. `MicrogamePrompts` is unchanged.
+- *Try step*: "Change the game" replaces "Tweak it" when there is an anatomy. Each message is first mapped
+  onto the anatomy (Muse's reply, the updated parts, anything new to Muse); "Make the change" makes the
+  updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`) with the person's
+  words, what changes and the updated anatomy. The last 6 turns stay visible.
+
+**Themes.** A theme or franchise the person asks for ("Star Wars") is honored in names, art and words;
+mechanics stay original to their idea, and no specific existing game's levels or art are copied
+(`MusePrompts.safety`).
+
+DEBUG: `FB_STUDIO_ANATOMY=fixture|answered|chat` with `FB_STUDIO_STEP=brief|try`;
+`FB_STUDIO_SCROLL=anatomy|anatomy-rules|anatomy-<part>` (Brief) or `chat` (Try).
