@@ -25,6 +25,8 @@
 5. Phone awake, Do Not Disturb on, brightness up, cabled to the presenting Mac. Live Video goes on slide 1 (Demo 1 starts), after slide 7 (Demo 1 payoff), on slide 8 (Demo 3, phone frame) and slide 9 (Demo 2).
 
 **Demo 1 fallback:** before the talk, make the same game once ("dodge the fog over Twin Peaks") and post it to the demo Group. If the live build isn't done at 1:50, say "it's still being playtested by the bots, so here's one I made this morning", and open that one. Go back to the live one at the end if there's time.## 1
+
+## 1
 People have always gathered around small, strange, delightful things: curios. Muse Curios is a new feature in Facebook: tiny games anyone makes with Muse, and plays with their people. *(Say "dodge the fog over Twin Peaks", tap Make, agree the plan.)*
 
 ## 2
