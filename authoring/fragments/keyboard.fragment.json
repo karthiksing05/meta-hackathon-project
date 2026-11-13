@@ -41,7 +41,7 @@
               },
               {
                 "node": "text", "x": "= @key_size / 2", "y": "= @key_size / 2", "anchor": "center", "size": 20, "weight": 600, "color": "$ink",
-                "text": "= upper(_letter_at(cell.y * @cols + cell.x))"
+                "text": "= if _letter_at(cell.y * @cols + cell.x) == ' ' then '␣' else upper(_letter_at(cell.y * @cols + cell.x))"
               }
             ]
           }

@@ -1,0 +1,219 @@
+{
+  "fragment": "typed_answer",
+  "version": 1,
+  "describe": "Open-answer prompts the player answers by TYPING (Krillion-style trivia, \"name a…\", fill-in, guess the word): not multiple choice. Pair it with the keyboard fragment: its `letters` must include ' ' (space), '<' (delete) and '>' (submit), e.g. \"qwertyuiopasdfghjklzxcvbnm <>\" with cols 10, rows 3, key_size 31, gap 3, x 9, y 420. This fragment provides the keyboard's `key_state` (so the game must not define it). The game supplies two functions that read `content` lists: `ta_prompts()` (list<string>, one prompt per entry, e.g. \"Name a red fruit\") and `ta_answers()` (list<string>, entry q holds prompt q's accepted answers in rarity tiers: tiers separated by '|', answers inside a tier by ',', most common tier first, e.g. \"apple,strawberry,cherry|raspberry,tomato|pomegranate,lingonberry\"). Matching ignores case and surrounding spaces and accepts a trailing 's' either way. One answer per prompt: submitting a listed answer scores the tier's points (`common`, `uncommon`, `rare`, `legendary` params) and emits `answered_right {points, tier}`; anything else, or running out of `time_ms`, emits `answered_wrong`. After about 900 ms it emits `prompt_done` (bind rounds' `round_done` to it) and asks the next prompt (shuffled order). It sets the score (`ta_points`), so don't also use the score fragment. End it with rounds (bound to `prompt_done`) and/or lives (bound to `answered_wrong`). For the playtest bots set the game's \"playtest\": {\"progress\": \"ta_progress()\"} so they can spell real answers. State: `typed`, `ta_points`, `right_count`, `wrong_count`, `last_result` ('common' | 'uncommon' | 'rare' | 'legendary' | 'miss' | 'time' | ''), `last_points`, `locked`. Draws the prompt, a time bar, the answer box and the result line above y 330; with the game's `answer_box` sprite the box draws it.",
+  "params": {
+    "time_ms": { "type": "duration", "default": 20000, "min": 5000, "max": 60000 },
+    "max_len": { "type": "int", "default": 18, "min": 3, "max": 30 },
+    "common": { "type": "int", "default": 10, "min": 0, "max": 1000 },
+    "uncommon": { "type": "int", "default": 25, "min": 0, "max": 1000 },
+    "rare": { "type": "int", "default": 50, "min": 0, "max": 1000 },
+    "legendary": { "type": "int", "default": 100, "min": 0, "max": 1000 },
+    "placeholder": { "type": "string", "default": "Type your answer", "max_len": 30 }
+  },
+  "art": {
+    "answer_box": {
+      "describe": "The box the typed answer sits in, 300 × 54 (keep its middle calm: the text is drawn on top).",
+      "color": "surface"
+    }
+  },
+  "requires": {
+    "functions": {
+      "ta_prompts": { "params": {}, "returns": "list<string>" },
+      "ta_answers": { "params": {}, "returns": "list<string>" }
+    },
+    "inputs": {
+      "press": { "letter": "string" }
+    }
+  },
+  "state": {
+    "order": { "type": "list<int>", "init": "[]" },
+    "qi": { "type": "int", "init": "0" },
+    "typed": { "type": "string", "init": "''" },
+    "locked": { "type": "bool", "init": "true" },
+    "ta_points": { "type": "int", "init": "0" },
+    "right_count": { "type": "int", "init": "0" },
+    "wrong_count": { "type": "int", "init": "0" },
+    "last_result": { "type": "string", "init": "''" },
+    "last_points": { "type": "int", "init": "0" },
+    "_serial": { "type": "int", "init": "0" },
+    "_until": { "type": "int", "init": "0" }
+  },
+  "functions": {
+    "prompt_text": { "params": {}, "returns": "string", "body": "get_or(ta_prompts(), get_or(order, qi, 0), '')" },
+    "_tiers": { "params": {}, "returns": "list<string>", "body": "split(get_or(ta_answers(), get_or(order, qi, 0), ''), '|')" },
+    "_norm": { "params": { "s": "string" }, "returns": "string", "body": "trim(lower(s))" },
+    "_tier_of": {
+      "params": { "w": "string" },
+      "returns": "int",
+      "body": "fold(range(len(_tiers())), -1, (acc, t) => if acc >= 0 then acc else if any(split(get_or(_tiers(), t, ''), ','), a => _norm(a) == w) then t else -1)"
+    },
+    "_alt": { "params": { "w": "string" }, "returns": "string", "body": "if ends_with(w, 's') then substr(w, 0, len(w) - 1) else concat(w, 's')" },
+    "_match": { "params": { "w": "string" }, "returns": "int", "body": "if w == '' then -1 else if _tier_of(w) >= 0 then _tier_of(w) else _tier_of(_alt(w))" },
+    "_tier_points": { "params": { "t": "int" }, "returns": "int", "body": "if t <= 0 then @common else if t == 1 then @uncommon else if t == 2 then @rare else @legendary" },
+    "_tier_name": { "params": { "t": "int" }, "returns": "string", "body": "if t <= 0 then 'common' else if t == 1 then 'uncommon' else if t == 2 then 'rare' else 'legendary'" },
+    "_on_track": {
+      "params": {},
+      "returns": "bool",
+      "body": "any(split(join(_tiers(), ','), ','), a => starts_with(_norm(a), lower(typed)))"
+    },
+    "ta_progress": {
+      "params": {},
+      "returns": "int",
+      "body": "ta_points * 100 + (if locked then 0 else if _on_track() then len(typed) else -5)"
+    },
+    "key_state": {
+      "params": { "letter": "string" },
+      "returns": "int",
+      "body": "if letter == '>' then 1 else if letter == '<' then 2 else 0"
+    }
+  },
+  "events": {
+    "answered_right": { "points": "int", "tier": "int" },
+    "answered_wrong": {},
+    "prompt_done": {},
+    "_ask": {},
+    "_submit": {},
+    "_reveal_end": {},
+    "_timeout": { "serial": "int" }
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        { "set": "order", "to": "shuffle(range(len(ta_prompts())))" },
+        { "emit": "_ask" }
+      ]
+    },
+    {
+      "id": "ask",
+      "on": "_ask",
+      "do": [
+        { "if": "qi >= len(order)", "then": [ { "set": "order", "to": "shuffle(order)" }, { "set": "qi", "to": "0" } ] },
+        { "set": "typed", "to": "''" },
+        { "set": "last_result", "to": "''" },
+        { "set": "locked", "to": "false" },
+        { "incr": "_serial" },
+        { "set": "_until", "to": "now + @time_ms" },
+        { "after": "@time_ms", "emit": "_timeout", "with": { "serial": "_serial" }, "id": "_t_prompt" }
+      ]
+    },
+    {
+      "id": "type_key",
+      "on": "press",
+      "when": "not locked and event.letter != ''",
+      "do": [
+        {
+          "if": "event.letter == '<'",
+          "then": [ { "set": "typed", "to": "substr(typed, 0, len(typed) - 1)" } ],
+          "else": [
+            {
+              "if": "event.letter == '>'",
+              "then": [ { "emit": "_submit" } ],
+              "else": [
+                { "if": "len(typed) < @max_len and not (event.letter == ' ' and (typed == '' or ends_with(typed, ' ')))", "then": [ { "set": "typed", "to": "concat(typed, event.letter)" } ] }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "submit",
+      "on": "_submit",
+      "when": "not locked and trim(typed) != ''",
+      "do": [
+        { "set": "locked", "to": "true" },
+        { "let": { "t": "_match(_norm(typed))" } },
+        {
+          "if": "t >= 0",
+          "then": [
+            { "set": "last_points", "to": "_tier_points(t)" },
+            { "set": "last_result", "to": "_tier_name(t)" },
+            { "set": "ta_points", "to": "ta_points + _tier_points(t)" },
+            { "incr": "right_count" },
+            { "emit": "answered_right", "with": { "points": "_tier_points(t)", "tier": "t" } }
+          ],
+          "else": [
+            { "set": "last_points", "to": "0" },
+            { "set": "last_result", "to": "'miss'" },
+            { "incr": "wrong_count" },
+            { "emit": "answered_wrong" }
+          ]
+        },
+        { "after": "900ms", "emit": "_reveal_end", "id": "_t_reveal" }
+      ]
+    },
+    {
+      "id": "run_out",
+      "on": "_timeout",
+      "when": "not locked and event.serial == _serial",
+      "do": [
+        { "set": "locked", "to": "true" },
+        { "set": "last_points", "to": "0" },
+        { "set": "last_result", "to": "'time'" },
+        { "incr": "wrong_count" },
+        { "emit": "answered_wrong" },
+        { "after": "900ms", "emit": "_reveal_end", "id": "_t_reveal" }
+      ]
+    },
+    { "id": "reveal_end", "on": "_reveal_end", "do": [ { "emit": "prompt_done" } ] },
+    { "id": "next", "on": "prompt_done", "do": [ { "incr": "qi" }, { "emit": "_ask" } ] }
+  ],
+  "objectives": {
+    "score": "ta_points"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 30, "y": 96, "w": 300, "h": 104, "align": "center", "valign": "middle",
+          "size": 22, "weight": 700, "color": "$ink", "text": "= prompt_text()"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect", "x": 30, "y": 206, "h": 8, "radius": 4,
+          "w": "= if locked then 0.0 else max(0.0, 300.0 * ((_until - now) * 1.0) / (@time_ms * 1.0))",
+          "fill": "= if _until - now < @time_ms / 4 then $danger else $primary"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            { "include": "@art.answer_box", "node": "image", "asset": "@art.answer_box.id", "x": 30, "y": 224, "w": 300, "h": 54 },
+            {
+              "include": "not @art.answer_box", "node": "rect", "x": 30, "y": 224, "w": 300, "h": 54, "radius": 14,
+              "fill": "$surface", "stroke": "= if last_result == 'miss' or last_result == 'time' then $danger else if last_result != '' then $primary else $secondary", "stroke_width": 2
+            },
+            {
+              "node": "text", "x": 44, "y": 224, "w": 272, "h": 54, "align": "center", "valign": "middle", "size": 24, "weight": 700,
+              "color": "$ink", "opacity": "= if typed == '' then 0.45 else 1.0",
+              "text": "= if typed == '' then @placeholder else upper(typed)"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 30, "y": 288, "w": 300, "h": 34, "align": "center", "valign": "middle", "size": 20, "weight": 800,
+          "color": "= if last_result == 'miss' or last_result == 'time' then $danger else if last_result == 'rare' or last_result == 'legendary' then $accent else $primary",
+          "text": "= if last_result == '' then '' else if last_result == 'miss' then 'Not on the list' else if last_result == 'time' then 'Out of time' else concat('+', str(last_points), ' · ', upper(last_result))"
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "answered_right", "when": "event.tier >= 2", "do": [ { "moment": "combo" } ] },
+      { "on": "answered_right", "when": "event.tier < 2", "do": [ { "moment": "pickup" } ] },
+      { "on": "answered_wrong", "do": [ { "moment": "hit" } ] }
+    ]
+  },
+  "tags": { "mood": ["any"], "energy": ["low", "medium"] },
+  "conflicts": ["quiz", "score"]
+}

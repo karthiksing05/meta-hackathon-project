@@ -1,0 +1,28 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": { "title": "Rare Finds", "instructions": "Type an answer to each prompt. Rarer right answers score more. Three misses and you're out.", "duration_s": 90 },
+  "uses": [
+    { "fragment": "keyboard", "params": { "letters": "qwertyuiopasdfghjklzxcvbnm <>", "cols": 10, "rows": 3, "key_size": 31, "gap": 3, "x": 9, "y": 420 } },
+    { "fragment": "typed_answer", "params": { "time_ms": "20s" } },
+    { "fragment": "rounds", "params": { "count": 7 }, "bind": { "round_done": "prompt_done" } },
+    { "fragment": "lives", "params": { "count": 3 }, "bind": { "hit": "answered_wrong" } }
+  ],
+  "functions": {
+    "ta_prompts": { "params": {}, "returns": "list<string>", "body": "content_prompts" },
+    "ta_answers": { "params": {}, "returns": "list<string>", "body": "content_answers" }
+  },
+  "playtest": { "progress": "ta_progress()" },
+  "content": {
+    "prompts": ["Name a red fruit", "Name a planet", "Name an animal with stripes", "Name a breakfast food", "Name a color of the rainbow", "Name something with wheels", "Name a sea creature", "Name a kind of tree"],
+    "answers": [
+      "apple,strawberry,cherry|raspberry,tomato,watermelon|pomegranate,cranberry|lingonberry,lychee",
+      "mars,earth,jupiter|saturn,venus|mercury,neptune|uranus,pluto",
+      "zebra,tiger|bee,skunk|raccoon,lemur|okapi,numbat",
+      "eggs,pancakes,cereal|bacon,toast,waffles|oatmeal,yogurt|shakshuka,congee",
+      "red,blue,green|yellow,orange|purple|indigo,violet",
+      "car,bike,bus|truck,skateboard|wheelchair,train|wheelbarrow,rollerblades",
+      "fish,shark,whale|dolphin,octopus|jellyfish,crab|narwhal,nudibranch",
+      "oak,pine,palm|maple,birch|willow,cedar|baobab,sequoia"
+    ]
+  }
+}
