@@ -253,6 +253,9 @@ func failingParts(problems []string) []string {
 func stageUser(in PlanInput, parts map[string]json.RawMessage, stage []string) string {
 	var sb strings.Builder
 	sb.WriteString(requestLine(in))
+	if gl := groupLines(in.Group); gl != "" {
+		sb.WriteString(gl + "\n")
+	}
 	if len(in.Context.Types) > 0 {
 		t := in.Context.Types[0]
 		fmt.Fprintf(&sb, "Main game type: %s (%s): %s Loop: %s Win: %s Scoring: %s\n\n", t.ID, t.Family, t.Summary, t.CoreLoop, t.Win, t.Scoring)

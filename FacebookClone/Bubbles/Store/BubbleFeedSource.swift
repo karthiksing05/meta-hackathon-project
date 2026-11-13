@@ -241,8 +241,10 @@ extension BubbleStore {
     func scoreRow(_ row: RemoteScore) -> BubbleScore {
         let myID = GamesAccount.shared.userID
         let user = row.userID == myID ? appStore.me : person(id: row.userID, name: row.username)
-        return BubbleScore(id: "\(row.userID)-\(Int(row.updatedAt.timeIntervalSince1970))", user: user, score: row.points,
-                           achievedAt: row.updatedAt, day: Self.dayKey(row.updatedAt), replay: nil, share: nil)
+        var score = BubbleScore(id: "\(row.userID)-\(Int(row.updatedAt.timeIntervalSince1970))", user: user, score: row.points,
+                                achievedAt: row.updatedAt, day: Self.dayKey(row.updatedAt), replay: nil, share: nil)
+        score.hasServerReplay = row.replayAvailable == true
+        return score
     }
 
     /// Replaces the board with the server's rows. Your own row keeps the replay of the run you
@@ -252,7 +254,7 @@ extension BubbleStore {
         bubble.scores = rows.map { row in
             let user = row.userID == myID ? appStore.me : person(id: row.userID, name: row.username)
             let isMyRun = user.isMe && mine?.score == row.points
-            return BubbleScore(
+            var score = BubbleScore(
                 id: "\(row.userID)-\(Int(row.updatedAt.timeIntervalSince1970))",
                 user: user,
                 score: row.points,
@@ -261,8 +263,27 @@ extension BubbleStore {
                 replay: isMyRun ? mine?.replay : nil,
                 share: isMyRun ? mine?.share : nil
             )
+            score.hasServerReplay = row.replayAvailable == true
+            return score
         }
         boardStates[bubble.id] = .idle
+    }
+
+    /// The run behind a board row, to watch as a Burst: the one already on the row, or the server's
+    /// (`GET /v1/games/{id}/runs/{userId}/log`, friends and Group-mates only). The fetched run is put
+    /// on the game's board row too, so the player shows whose replay it is.
+    func watchableReplay(for entry: BubbleScore, in bubble: Bubble) async throws -> BubbleInputLog? {
+        if let replay = entry.replay { return replay }
+        guard entry.hasServerReplay else { return nil }
+        let run = try await api.runReplay(gameID: bubble.serverID, userID: entry.user.id)
+        if let index = bubble.scores.firstIndex(where: { $0.user.id == entry.user.id }) {
+            bubble.scores[index].replay = run.replay
+        } else {
+            var row = entry
+            row.replay = run.replay
+            bubble.scores.append(row)
+        }
+        return run.replay
     }
 
     // MARK: People and Groups

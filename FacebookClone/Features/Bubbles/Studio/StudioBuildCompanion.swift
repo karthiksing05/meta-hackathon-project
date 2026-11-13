@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// What a new game's Build step shows under its header while Muse works (about a minute): the
+/// What a new game's Build step shows under its header while Muse works (a few minutes): the
 /// steps so far, the brief, and "How the game works" with Muse's questions to answer. Calm on
 /// purpose: one card per thing, the latest step only (every step on request), no auto-scrolling.
 struct StudioBuildCompanion: View {
@@ -159,7 +159,7 @@ private struct StudioBriefSummaryCard: View {
 // MARK: - Changes made while it built (Try)
 
 /// On Try, under the player: the edits and answers made on the Build step aren't in this version
-/// yet. One tap adds them as a quick change (a change on the server, about a minute); "Keep it
+/// yet. One tap adds them as a quick change (a change on the server); "Keep it
 /// as is" stops offering it.
 struct StudioBuildChangesCard: View {
     let model: StudioModel
@@ -174,7 +174,7 @@ struct StudioBuildChangesCard: View {
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Play this one first if you like. Adding \(changes.count == 1 ? "it" : "them") is a quick change, about a minute.")
+                    Text("Play this one first if you like. Adding \(changes.count == 1 ? "it" : "them") is a quick change.")
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)

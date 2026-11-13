@@ -23,16 +23,8 @@
   },
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top", "include": "@target > 0",
-        "node": { "node": "text", "text": "= @label + ': ' + str(score) + ' / ' + str(@target)", "size": 18, "weight": 600, "color": "$ink", "role": "hud",
-                  "animate_on": { "point": { "prop": "scale", "keys": [1, 1.25, 1], "ms": 180 } } }
-      },
-      {
-        "slot": "hud_top", "include": "@target == 0",
-        "node": { "node": "text", "text": "= @label + ': ' + str(score)", "size": 18, "weight": 600, "color": "$ink", "role": "hud",
-                  "animate_on": { "point": { "prop": "scale", "keys": [1, 1.25, 1], "ms": 180 } } }
-      }
+      {"slot":"hud_top","include":"@target > 0","node":{"ui":"stat","label":"@label","value":"= str(score) + ' / ' + str(@target)","color":"$ink","animate_on":{"point":{"prop":"scale","keys":[1,1.25,1],"ms":180}}}},
+      {"slot":"hud_top","include":"@target == 0","node":{"ui":"stat","label":"@label","value":"= str(score)","color":"$ink","animate_on":{"point":{"prop":"scale","keys":[1,1.25,1],"ms":180}}}}
     ],
     "feedback": [
       { "on": "point", "do": [ { "moment": "pickup" } ] }

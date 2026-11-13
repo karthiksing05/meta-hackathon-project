@@ -232,10 +232,12 @@ func (s *Server) createChallenge(w http.ResponseWriter, r *http.Request) {
 }
 
 type challengeResponse struct {
-	UserID   string `json:"userId"`
-	Username string `json:"username"`
-	Score    int64  `json:"score"`
-	Beat     bool   `json:"beat"`
+	UserID      string `json:"userId"`
+	Username    string `json:"username"`
+	DisplayName string `json:"displayName"`
+	Score       int64  `json:"score"`
+	Display     string `json:"display"` // the score as the game shows it ("1:02.4", "12 moves")
+	Beat        bool   `json:"beat"`
 }
 
 type challengeView struct {
@@ -274,6 +276,7 @@ func (s *Server) listChallenges(w http.ResponseWriter, r *http.Request) {
 			v.From = profile{ID: c.FromID, DisplayName: c.FromName}
 		}
 		board, _ := s.Store.Board(ctx, c.GameID, boardScan, model.OrderOf(g.Score))
+		names := map[string]profile{}
 		if c.FromID == me.ID {
 			v.Direction = "sent"
 			to := map[string]bool{}
@@ -282,7 +285,10 @@ func (s *Server) listChallenges(w http.ResponseWriter, r *http.Request) {
 			}
 			for _, row := range board {
 				if to[row.UserID] {
-					v.Responses = append(v.Responses, challengeResponse{row.UserID, row.Username, row.Score, beats(g.Score, row.Score, c.Score)})
+					p := s.displayName(ctx, row.UserID, names)
+					v.Responses = append(v.Responses, challengeResponse{UserID: row.UserID, Username: firstNonEmpty(p.Username, row.Username),
+						DisplayName: firstNonEmpty(p.DisplayName, firstNonEmpty(p.Username, row.Username)), Score: row.Score, Display: displayScore(g, row.Score),
+						Beat: beats(g.Score, row.Score, c.Score)})
 				}
 			}
 		} else {

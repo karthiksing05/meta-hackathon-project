@@ -120,6 +120,8 @@ type PlanInput struct {
 	Unbuilt []GameTool
 	// Requirements are the person's stated requirements (the planner's first stage fills them).
 	Requirements []Requirement
+	// Group is the Group or Event the game is made for, if any (group.go).
+	Group *Group
 	// Media is the person's photos and video, described (Request.Media).
 	Media string
 }
@@ -285,6 +287,7 @@ func planUser(in PlanInput, lists []checklistFor) string {
 		sp, _ := json.Marshal(u.Sponsor)
 		fmt.Fprintf(&sb, "Sponsor: %s (put it in spec.theme.sponsor)\n", sp)
 	}
+	sb.WriteString(groupLines(in.Group))
 	if len(in.Context.Preferences) > 0 {
 		sb.WriteString("The person's earlier picks between versions (lean that way):\n")
 		for _, p := range in.Context.Preferences {

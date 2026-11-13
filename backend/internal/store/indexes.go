@@ -57,6 +57,9 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 		cPushDevices: {
 			{Keys: k("userId", 1), Options: options.Index().SetName("push_devices_user")},
 		},
+		cDailies: {
+			{Keys: k("groupId", 1, "date", -1), Options: options.Index().SetName("daily_group_date")},
+		},
 		cSounds: {
 			{Keys: k("useCount", -1, "createdAt", -1), Options: options.Index().SetName("sounds_trending")},
 			{Keys: k("createdAt", -1), Options: options.Index().SetName("sounds_recent")},
@@ -68,6 +71,9 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 		cSeries: {
 			{Keys: k("playerA", 1, "createdAt", -1), Options: options.Index().SetName("series_a")},
 			{Keys: k("playerB", 1, "createdAt", -1), Options: options.Index().SetName("series_b")},
+		},
+		cSessions: {
+			{Keys: k("targetKind", 1, "targetId", 1, "createdAt", -1), Options: options.Index().SetName("sessions_target")},
 		},
 		cChallenges: {
 			{Keys: k("fromId", 1, "createdAt", -1), Options: options.Index().SetName("challenges_from")},
@@ -111,6 +117,10 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			{Keys: k("gameId", 1, "score", -1, "updatedAt", 1), Options: options.Index().SetName("leaderboard")},
 			{Keys: k("userId", 1), Options: options.Index().SetName("scores_user")},
 			{Keys: k("userId", 1, "updatedAt", -1), Options: options.Index().SetName("scores_user_recent")},
+		},
+		// run logs behind counted scores (_id is gameId:userId); deleting a game removes its logs
+		cRunLogs: {
+			{Keys: k("gameId", 1), Options: options.Index().SetName("runlogs_game")},
 		},
 		// the game-making catalog (internal/harness; _id is the entry id). Seeded by cmd/dbinit.
 		"game_types": {

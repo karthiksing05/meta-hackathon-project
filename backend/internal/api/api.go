@@ -128,6 +128,7 @@ func (s *Server) Handler() http.Handler {
 			r.With(s.optionalAuth).Get("/leaderboard", s.leaderboard)
 			r.With(s.optionalAuth).Get("/likes", s.gameLikes)
 			r.With(s.requireAuth).Post("/scores", s.submitScore)
+			r.With(s.requireAuth).Get("/runs/{userId}/log", s.runLog)
 		})
 
 		// People, friends and Groups
@@ -153,6 +154,11 @@ func (s *Server) Handler() http.Handler {
 		r.With(s.requireAuth).Get("/rounds", s.listRounds)
 		r.With(s.requireAuth).Get("/rounds/{id}", s.getRound)
 		r.With(s.requireAuth).Post("/rounds/{id}/plays", s.playRound)
+		r.With(s.requireAuth).Post("/sessions", s.createSession)
+		r.With(s.requireAuth).Get("/sessions", s.listSessions)
+		r.With(s.requireAuth).Get("/sessions/{id}", s.getSession)
+		r.With(s.requireAuth).Post("/sessions/{id}/entries", s.addSessionEntry)
+		r.With(s.requireAuth).Post("/sessions/{id}/make", s.makeSession)
 		r.With(s.requireAuth).Post("/series", s.createSeries)
 		r.With(s.requireAuth).Get("/series", s.listSeries)
 		r.With(s.requireAuth).Get("/series/{id}", s.getSeries)
@@ -168,6 +174,8 @@ func (s *Server) Handler() http.Handler {
 			r.Route("/{id}", func(r chi.Router) {
 				r.With(s.optionalAuth).Get("/", s.getGroup)
 				r.With(s.optionalAuth).Get("/games", s.groupGames)
+				r.With(s.optionalAuth).Get("/daily", s.getGroupDaily)
+				r.With(s.requireAuth).Post("/daily", s.setGroupDaily)
 				r.With(s.requireAuth).Get("/leaderboard", s.groupLeaderboard)
 				r.With(s.requireAuth).Post("/game-shares", s.shareGameToGroup)
 				r.With(s.requireAuth).Put("/members/me", s.setMembership(true))

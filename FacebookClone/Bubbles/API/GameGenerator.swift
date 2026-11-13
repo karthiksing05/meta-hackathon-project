@@ -3,6 +3,7 @@ import Foundation
 // Server-side game generation (Max's `POST /v1/generate`, posted 2026-11-12 16:01 PST).
 //
 //     POST /v1/generate               {"request", "brief": BubbleBrief, "anatomy"?, "draft"?,
+//                                      "groupId"?, "spec"?, "answers"?,
 //                                      "media"?, "mediaNote"?, "mediaRestyle"?}  -> 202 {"jobId"}
 //     POST /v1/generate               {"baseGameId", "change"?, "look"?, "nextLevel"?, "brief"?, "anatomy"?}
 //                                     -> 202 {"jobId"}: change a game (a tweak, a new look, the next
@@ -38,9 +39,11 @@ import Foundation
 protocol GameGenerator: Sendable {
     /// `POST /v1/generate`; returns the job id. `anatomy` is the agreed anatomy text; `draft` keeps
     /// the finished game out of the feed until `publish`; `sound` is a library sound to play behind
-    /// it (`soundId`, `offsetMs`, `mix`); `media` is the person's uploaded photos and video
-    /// (`media`, `mediaNote`, `mediaRestyle`, sent only when there are ids).
-    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?, media: GameMediaInput) async throws -> String
+    /// it (`soundId`, `offsetMs`, `mix`).
+    /// `extras` are who the game is for and what the Plan step agreed (`groupId`, `spec`, `answers`),
+    /// and the person's uploaded photos and video (`media`, `mediaNote`, `mediaRestyle`).
+    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?,
+               extras: NewGameExtras) async throws -> String
     /// `POST /v1/generate` with `baseGameId`: a change to a game the server has. Returns the job id.
     func start(revision: GameRevision) async throws -> String
     /// `GET /v1/generate/{id}`, with `after` = the last `seq` seen (nil on the first poll).
@@ -58,6 +61,32 @@ protocol GameGenerator: Sendable {
 }
 
 // MARK: - Wire models
+
+/// A new game's `POST /v1/generate` fields beyond the request: the Group or Event it's made for
+/// (`groupId`, a server Group I'm in; the server sends the generator its name and members) and the
+/// plan the person agreed on the Plan step (`spec`: the server builds it and doesn't plan again;
+/// `answers`: `{slot: answer}`).
+struct NewGameExtras: Sendable, Equatable {
+    var groupID: String?
+    var spec: JSONValue?
+    var answers: [String: String] = [:]
+    /// The person's uploaded photos and video (sent only when there are ids).
+    var media: GameMediaInput = .none
+
+    /// The fields as `JSONSerialization` takes them; empty ones are left out.
+    var fields: [String: Any] {
+        var out: [String: Any] = [:]
+        if let groupID = groupID?.trimmingCharacters(in: .whitespacesAndNewlines), !groupID.isEmpty { out["groupId"] = groupID }
+        if let spec, case .object = spec { out["spec"] = spec.foundationObject }
+        let answers = self.answers.filter {
+            !$0.key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && !$0.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        if !answers.isEmpty { out["answers"] = answers }
+        media.add(to: &out)
+        return out
+    }
+}
 
 /// A change to a game the server already has. At least one of `change`, `look` and `nextLevel`
 /// must be set (the server says 400 otherwise). Only microgames can be changed (422 otherwise).
@@ -243,15 +272,10 @@ enum GameGenerationError: LocalizedError, Equatable {
 // MARK: - Polling
 
 extension GameGenerator {
-    /// `start` without media.
-    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?) async throws -> String {
-        try await start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound, media: .none)
-    }
-
     /// Starts a job and streams it to the end. Cancelling the consumer cancels the job.
     func generate(request: String, brief: BubbleBrief, anatomy: String? = nil, draft: Bool = true,
-                  sound: RemoteGameSound? = nil, media: GameMediaInput = .none) -> AsyncThrowingStream<GenerationUpdate, Error> {
-        stream { try await start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound, media: media) }
+                  sound: RemoteGameSound? = nil, extras: NewGameExtras = NewGameExtras()) -> AsyncThrowingStream<GenerationUpdate, Error> {
+        stream { try await start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound, extras: extras) }
     }
 
     /// Starts a change to an existing game and streams it to the end, exactly like a new game. A

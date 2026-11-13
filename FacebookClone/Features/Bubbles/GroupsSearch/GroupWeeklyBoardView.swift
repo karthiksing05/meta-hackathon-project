@@ -31,10 +31,12 @@ struct GroupWeeklyBoardView: View {
 
     @Environment(AppStore.self) private var appStore
     @Environment(BubbleStore.self) private var bubbleStore
+    /// A server Group fetched here: `serverGroups` isn't observed, so this screen asks itself.
+    @State private var fetched: FBGroup?
 
     var body: some View {
         Group {
-            if let group = appStore.group(id: groupID) ?? bubbleStore.resolveGroup(groupID) {
+            if let group = fetched ?? appStore.group(id: groupID) ?? bubbleStore.serverGroups[groupID] {
                 ScrollView {
                     VStack(spacing: 0) {
                         GroupWeeklyBoardCard(group: group, limit: nil, showsSeeAll: false)
@@ -50,6 +52,12 @@ struct GroupWeeklyBoardView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .task(id: groupID) {
+            guard appStore.group(id: groupID) == nil, bubbleStore.serverGroups[groupID] == nil,
+                  await GamesAccount.shared.waitForUser() != nil,
+                  let detail = try? await GamesAPIFactory.current.group(id: groupID) else { return }
+            fetched = bubbleStore.adopt(detail)
+        }
     }
 }
 

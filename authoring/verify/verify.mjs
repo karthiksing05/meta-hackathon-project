@@ -165,23 +165,68 @@ export async function verify(input, opts = {}) {
 }
 
 /**
- * The flow before the gate: verify → code fixes → verify → layout solver → verify → proof.
+ * The flow before the gate: look → verify → code fixes → verify → layout solver → verify → proof.
  * Returns {game, report (final), stages: [{stage, blocking, warnings, byCode}], fixes, proof}.
+ * Pass a manifest or {game, authoring} (not a bare game) so the look checks hold the game to its art.type.
+ * opts.budgetMs (default 75000; 0 for none): past it, no new stage or solver move starts; the game so far is
+ * re-verified, proved and returned with report.truncated = true. opts.readability false skips that stage.
  */
 export async function verifyAndFix(input, opts = {}) {
-  const { game: original } = readInput(input);
+  const started = Date.now();
+  const budgetMs = opts.budgetMs ?? 75000;
+  let truncated = false;
+  // Checked only at safe points: between stages, between solver moves.
+  const over = () => { if (!truncated && budgetMs > 0 && Date.now() - started > budgetMs) truncated = true; return truncated; };
+  const { game: original, built: built0 } = readInput(input);
+  // Every verify sees the game with its manifest and authoring (the look checks read art.type from them).
+  const hasBuilt = !!built0?.manifest || Object.keys(built0?.authoring ?? {}).length > 0;
+  const withBuilt = (g) => (hasBuilt ? { manifest: built0.manifest, authoring: built0.authoring, game: g } : g);
   const engine = opts.engine ?? (await loadEngine()).engine;
   const { fixLayout } = await import('../expander/layout-fix.mjs');
   const { solveLayout } = await import('./solve.mjs');
   const { proveUnchanged } = await import('./prove.mjs');
   const stages = [];
   const note = (stage, r) => stages.push({ stage, blocking: r.blocking, warnings: r.warnings, byCode: r.byCode });
-  const v = (g) => verify(g, { ...opts, engine, ref: g === original ? null : original });
-  let report = await v(original);
-  note('built', report);
+  const v = (g) => verify(withBuilt(g), { ...opts, engine, ref: g === original ? null : original });
   let game = original;
   const fixes = [];
-  if (!report.pass || opts.always) {
+  // The look stage (kit/look.mjs lookFix): every text node on the game's own fonts, scale and palette,
+  // before anything is measured. Presentation only, so the proof covers it like the other fixes.
+  let lookSpec = null;
+  if (opts.look !== false) {
+    try {
+      const { lookForBuilt, lookFix } = await import('../kit/look.mjs');
+      const { spec } = lookForBuilt({ ...built0, game: original });
+      lookSpec = spec;
+      const r = lookFix(original, spec);
+      if (r.changed || r.tokens?.length) { game = r.game; fixes.push({ stage: 'look', changed: r.changed, tokens: r.tokens ?? [] }); }
+    } catch (e) {
+      stages.push({ stage: 'look', error: String(e?.message ?? e).slice(0, 200) });
+    }
+  }
+  // The readability stage (kit/readability.mjs): text over busy or low-contrast pixels gets a plate, an
+  // outline or a recolour from the look, judged on frames rasterised in code (no Chrome). Up to 2 rounds;
+  // presentation only, so the proof covers it.
+  if (opts.readability !== false) {
+    try {
+      const { readabilityFindings, readabilityFix } = await import('../kit/readability.mjs');
+      const { inflateSync } = await import('node:zlib');
+      const inflate = (b) => new Uint8Array(inflateSync(b));
+      for (let round = 0; round < 2 && !over(); round++) {
+        const f = readabilityFindings(game, await sampleDense(game, { engine, maxSeconds: 60, ref: original }), { inflate });
+        if (!f.length) break;
+        const r = readabilityFix(game, f, { spec: lookSpec });
+        if (!r.fixes?.length) break;
+        game = r.game;
+        fixes.push(...r.fixes.map((x) => ({ stage: 'readability', ...x })));
+      }
+    } catch (e) {
+      stages.push({ stage: 'readability', error: String(e?.message ?? e).slice(0, 200) });
+    }
+  }
+  let report = await v(game);
+  note('built', report);
+  if ((!report.pass || opts.always) && !over()) {
     const fixed = await fixLayout(game, { engine, pixels: opts.pixels ?? null });
     if (fixed.fixes.length) {
       const r2 = await v(fixed.game);
@@ -195,7 +240,7 @@ export async function verifyAndFix(input, opts = {}) {
   // kept if a follow-up move from the solver then brings the count down.
   const { setAt } = await import('./solve.mjs');
   const inner = { ...opts, pixels: false, widthCache: opts.widthCache ?? new Map() };
-  const vi = (g) => verify(g, { ...inner, engine, ref: original });
+  const vi = (g) => verify(withBuilt(g), { ...inner, engine, ref: original });
   const withMove = (g, m) => { const c = JSON.parse(JSON.stringify(g)); setAt(c, m.node, JSON.parse(JSON.stringify(m.patch))); return c; };
   const related = (a, b) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
   const keep = (list) => fixes.push(...list.map(({ patch: _p, ...x }) => ({ stage: 'solver', ...x })));
@@ -207,20 +252,22 @@ export async function verifyAndFix(input, opts = {}) {
     keep(list);
     return list.length;
   };
-  if (report.blocking) await outlines(report);
-  let cur = report.blocking ? await vi(game) : report;
-  for (let round = 0; round < (opts.solverRounds ?? 3) && cur.blocking; round++) {
+  if (report.blocking && !over()) await outlines(report);
+  let cur = report.blocking && !over() ? await vi(game) : report;
+  for (let round = 0; round < (opts.solverRounds ?? 3) && cur.blocking && !over(); round++) {
     // Round one also sees the pixel-measured findings of the full report.
     const { moves } = await solveLayout(game, round === 0 && report.blocking >= cur.blocking ? report : cur, { engine });
     const touched = [];
     let kept = 0;
     for (const m of moves.filter((x) => x.kind !== 'outline').slice(0, opts.maxMoves ?? 16)) {
+      if (over()) break;
       if (touched.some((t) => related(t, m.node))) continue;
       const g2 = withMove(game, m);
       const r2 = await vi(g2);
       let accept = r2.blocking < cur.blocking ? { g: g2, r: r2, list: [m] } : null;
       if (!accept && r2.blocking === cur.blocking) {
         for (const m2 of (await solveLayout(g2, r2, { engine })).moves.slice(0, 4)) {
+          if (over()) break;
           const g3 = withMove(g2, m2);
           const r3 = await vi(g3);
           if (r3.blocking < cur.blocking) { accept = { g: g3, r: r3, list: [m, m2] }; break; }
@@ -237,7 +284,7 @@ export async function verifyAndFix(input, opts = {}) {
   if (fixes.some((f) => f.stage === 'solver')) { report = await v(game); note('final', report); }
   // The pixel-measured report can still show what the inner loop couldn't see (contrast on art,
   // widths in frames it measured itself): one more pass judged by the full verifier.
-  if (report.blocking && (opts.finalPass ?? true)) {
+  if (report.blocking && (opts.finalPass ?? true) && !over()) {
     let changed = (await outlines(report)) > 0;
     if (changed) report = await v(game);
     for (const m of (await solveLayout(game, report, { engine })).moves.filter((x) => x.kind !== 'outline').slice(0, 4)) {
@@ -250,8 +297,11 @@ export async function verifyAndFix(input, opts = {}) {
   const proof = game === original ? { rules: true, replays: true, note: 'unchanged' } : await proveUnchanged(original, game, { engine, runs: opts.runs ?? null });
   if (!proof.rules || !proof.replays) {
     // A fix that changes play is not a layout fix: ship the original, with its findings.
-    return { game: original, report: await v(original), stages, fixes: [], proof, reverted: true };
+    const back = await v(original);
+    if (truncated) back.truncated = true;
+    return { game: original, report: back, stages, fixes: [], proof, reverted: true };
   }
+  if (truncated) { report.truncated = true; stages.push({ stage: 'truncated', budgetMs, ms: Date.now() - started }); }
   return { game, report, stages, fixes, proof };
 }
 

@@ -68,15 +68,17 @@ struct GroupGamesHubView: View {
             GroupWeeklyBoardCard(group: group)
             FeedSeparator()
             GroupGameBoardsSection(group: group)
-            if hasGames && group.isMember {
+            if group.isMember {
+                // "Challenge the Group" is a server round now: same seed for everyone, replayed runs.
                 FeedSeparator()
-                challengeCard
+                GroupRoundsCard(group: group)
             }
             FeedSeparator()
         }
         .sheet(isPresented: $showsChallengePicker) {
             GroupChallengePickerSheet(group: group)
         }
+        .task(id: group.id) { await bubbleStore.loadDaily(for: group) }
     }
 
     private var hasGames: Bool {

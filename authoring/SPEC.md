@@ -396,7 +396,13 @@ comes from the look preset and the fragments' fallback shapes.
   `look.tokens`.
 - **`font`** is one of: `system`, `Inter`, `Fraunces`, `Space Grotesk`, `Silkscreen`, `Avenir Next`,
   `Futura`, `Gill Sans`, `Optima`, `Georgia`, `Baskerville`, `American Typewriter`, `Chalkboard SE`,
-  `Marker Felt`, `Noteworthy`, `Menlo`, `Courier New`.
+  `Marker Felt`, `Noteworthy`, `Menlo`, `Courier New`. Any family the app bundles (`authoring/fonts/fonts.json`, e.g. `Bowlby One`,
+  `Cinzel`, `Press Start 2P`) is allowed too.
+- **`type`** is the game's look (`authoring/kit/README.md`): `{ "kit": "look/1", "vibe": "game_show",
+  "pairing": "marquee", "seed": 123 }`, normally written by the pipeline from the plan's words and the
+  game id. The expander sets every text node on the pairing's fonts, weights, case and modular scale,
+  text colours on the palette, and the pairing's outline under display text. An unknown vibe or
+  pairing is `A_ART_FIELD` at `/art/type`.
 - **`backdrop`** is one sprite drawn under everything at the canvas size (360 × 640).
 - **`sprites`** maps a name (lowercase, digits and `_`, up to 24 characters; not `backdrop` or
   `music`) to a sprite. A sprite named after a role a fragment draws (1.7) is drawn by that fragment;
@@ -633,6 +639,17 @@ After the bot gate, `playtest/score-check.mjs` checks the board is fair: skill o
 direction, an idle bot and a one-input spam bot ranking no better than real play, the finish rule,
 `max_rate_per_s`, every bot run replaying to the same phase, time and score (`verify` where the engine
 has it), and the score changing only on `events`.
+
+### 2.14 UI kit (`ui`)
+
+A manifest may carry a `ui` block, `{"kit": "game-style/1", "theme", "base", "accent", "family",
+"density"}`, and write UI as kit components: nodes with a `ui` key instead of `node`
+(`{"ui": "question_card", "text": "= question_text()"}`). The expander derives every token from the
+block (the palette roles and their on-colours, type scale, spacing, radii), lays the components out
+in fixed regions (HUD band, top, playfield, controls, overlay) and fits their text. Without a `ui`
+block the game's palette stays as written. `quiz`, `picture_quiz`, `choice_story`, `keyboard`,
+`story_vars`, `play_clip` and the HUD counters are drawn with the kit. The full contract, the
+component list and the style check (`S_*` codes) are in `UI_KIT.md`.
 
 ## 3. Expander
 

@@ -28,6 +28,17 @@
 !authoring/verify/*.mjs
 !authoring/verify/checks/*.mjs
 authoring/verify/test-*.mjs
+# the look kit and its font metrics (backend/generator/src/hooks.mjs AUTHORING_FILES)
+!authoring/expander/ui-style.mjs
+!authoring/kit/look.mjs
+!authoring/kit/font-data.mjs
+!authoring/kit/vibes.mjs
+!authoring/kit/readability.mjs
+!authoring/kit/raster.mjs
+!authoring/kit/jpeg.mjs
+!authoring/kit/README.md
+!authoring/fonts/fonts.json
+!authoring/fonts/metrics.json
 **/*_test.go
 **/node_modules
 **/*.env

@@ -83,7 +83,8 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     }
 
     func scores(gameID: String) async throws -> [RemoteScore] {
-        let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", auth: .none)
+        // Signed in, the server marks the rows whose runs I may watch (`replayAvailable`).
+        let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", auth: .optional)
         return board.items
     }
 
@@ -91,7 +92,7 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         var query = [URLQueryItem(name: "scope", value: scope)]
         if let groupID { query.append(URLQueryItem(name: "groupId", value: groupID)) }
         let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", query: query,
-                                                    auth: scope == "everyone" ? .none : .required)
+                                                    auth: scope == "everyone" ? .optional : .required)
         return board.items
     }
 
@@ -103,12 +104,27 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     /// replayed run: the server replays `log` (the engine's `microgame-log/1`) and ignores `score`; a
     /// plain `{score}` is refused (400). Older games keep using `score` and ignore `log`.
     func submitScore(_ score: Int, log: String?, gameID: String) async throws -> [RemoteScore] {
+        try await submitScore(score, log: log, replay: nil, gameID: gameID)
+    }
+
+    /// The same, with the runtime's replay of the run: the server keeps it with the score so friends
+    /// and Group-mates can watch it from the board (`replayAvailable`).
+    func submitScore(_ score: Int, log: String?, replay: BubbleInputLog?, gameID: String) async throws -> [RemoteScore] {
         var payload: [String: Any] = ["score": score]
         if let log, !log.isEmpty { payload["log"] = log }
+        if let replay, let data = try? JSONEncoder().encode(replay),
+           let object = try? JSONSerialization.jsonObject(with: data) {
+            payload["replay"] = object
+        }
         let body = try JSONSerialization.data(withJSONObject: payload)
         let data = try await send("POST", "v1/games/\(try serverID(gameID))/scores", body: body,
                                   contentType: "application/json", auth: .required)
         return (try decode(data) as RemoteScoreboard).items
+    }
+
+    /// `GET /v1/games/{id}/runs/{userId}/log`: a friend's or Group-mate's run to watch (403 otherwise).
+    func runReplay(gameID: String, userID: String) async throws -> RemoteRunReplay {
+        try await get("v1/games/\(try serverID(gameID))/runs/\(userID)/log", auth: .required)
     }
 
     func setSaved(_ saved: Bool, gameID: String) async throws -> SaveState {
@@ -199,6 +215,24 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         series.rounds.compactMap(\.game).forEach(link)
         return series
     }
+
+    // MARK: Calls for extensions in other files (rounds; GamesAPILive+Rounds.swift)
+
+    /// A signed-in JSON call; returns the reply body. Errors are `GamesAPIError`.
+    func authedJSON(_ method: String, _ path: String, query: [URLQueryItem] = [], body: Data? = nil,
+                    timeout: TimeInterval = 8) async throws -> Data {
+        try await send(method, path, query: query, body: body, contentType: body == nil ? nil : "application/json",
+                       auth: .required, timeout: timeout)
+    }
+
+    /// Decodes a reply with the API's date format.
+    func decodeReply<T: Decodable>(_ data: Data) throws -> T { try decode(data) }
+
+    /// A game's server id from an app id or slug (throws `unknownGame`).
+    func serverGameID(_ id: String) throws -> String { try serverID(id) }
+
+    /// Remembers the slug of a game that came inside another reply.
+    func remember(_ game: RemoteGame) { link(game) }
 
     // MARK: Game plan (harness v2)
 
@@ -330,6 +364,24 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     func blend(groupID: String, count: Int) async throws -> RemoteBlend {
         let body = try JSONSerialization.data(withJSONObject: ["count": count])
         let data = try await send("POST", "v1/groups/\(groupID)/blend", body: body, contentType: "application/json", auth: .required)
+        let blend: RemoteBlend = try decode(data)
+        blend.picks.compactMap(\.game).forEach(link)
+        return blend
+    }
+
+    /// A Blend for me and one friend (`POST /v1/blend` with the two of us): games for both, and a
+    /// spec Studio makes "a game for the two of us" from.
+    func pairBlend(myID me: String, myName: String, friendID: String, friendName: String, count: Int) async throws -> RemoteBlend {
+        let pairID = "pair-" + [me, friendID].sorted().joined(separator: "-")
+        let body = try JSONSerialization.data(withJSONObject: [
+            "group": ["id": pairID, "name": "\(myName) & \(friendName)"],
+            "members": [
+                ["userID": me, "name": myName, "isFriend": true],
+                ["userID": friendID, "name": friendName, "isFriend": true],
+            ],
+            "count": count,
+        ] as [String: Any])
+        let data = try await send("POST", "v1/blend", body: body, contentType: "application/json", auth: .required)
         let blend: RemoteBlend = try decode(data)
         blend.picks.compactMap(\.game).forEach(link)
         return blend
@@ -729,5 +781,26 @@ extension GamesAPILive: GameNotificationsAPI {
             throw GamesAPIError.decoding("Invalid notification identifier.")
         }
         return value
+    }
+}
+
+// MARK: - A Group's Daily (`GET`/`POST /v1/groups/{id}/daily`)
+
+extension GamesAPILive {
+    /// The Group's Daily for `date` (the phone's own day, `yyyy-MM-dd`), or the latest before it.
+    /// Throws `.notFound` when the Group has none yet.
+    func groupDaily(groupID: String, date: String) async throws -> RemoteGroupDaily {
+        let daily: RemoteGroupDaily = try await get("v1/groups/\(groupID)/daily", query: [URLQueryItem(name: "date", value: date)], auth: .optional)
+        link(daily.game)
+        return daily
+    }
+
+    /// Makes a game the Group's Daily for `date` (the Group's owner only); the server tells every other member.
+    func setGroupDaily(groupID: String, gameID: String, date: String) async throws -> RemoteGroupDaily {
+        let body = try JSONSerialization.data(withJSONObject: ["gameId": try serverID(gameID), "date": date])
+        let daily: RemoteGroupDaily = try decode(try await send("POST", "v1/groups/\(groupID)/daily", body: body,
+                                                                 contentType: "application/json", auth: .required))
+        link(daily.game)
+        return daily
     }
 }

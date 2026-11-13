@@ -43,6 +43,9 @@ type Store interface {
 	GroupMembers(ctx context.Context, groupID string) ([]model.GroupMember, error)
 	GroupsOfUser(ctx context.Context, userID string) ([]model.Group, error)
 	GamesByGroup(ctx context.Context, groupID string, limit int) ([]model.Game, error)
+	// PutGroupDaily sets (or replaces) a Group's Daily for one date; LatestGroupDaily is the newest on or before a date.
+	PutGroupDaily(ctx context.Context, d model.GroupDaily) error
+	LatestGroupDaily(ctx context.Context, groupID, onOrBefore string) (*model.GroupDaily, error)
 
 	// RecentScores returns the latest best scores set by the given people, newest first.
 	RecentScores(ctx context.Context, userIDs []string, limit int) ([]model.Score, error)
@@ -134,6 +137,12 @@ type Store interface {
 	RoundsForTarget(ctx context.Context, kind, id string, limit int) ([]model.Round, error)
 	RoundsForGame(ctx context.Context, gameID string, limit int) ([]model.Round, error)
 
+	// Sessions: making a game together in a chat or a Group (questions, words, scenes or levels people add).
+	InsertSession(ctx context.Context, s *model.Session) error
+	SessionByID(ctx context.Context, id string) (*model.Session, error)
+	ReplaceSession(ctx context.Context, s *model.Session) error
+	SessionsForTarget(ctx context.Context, kind, id string, limit int) ([]model.Session, error) // newest first
+
 	// Series: best-of-N between two friends with server-checked scores.
 	InsertSeries(ctx context.Context, s *model.Series) error
 	SeriesByID(ctx context.Context, id string) (*model.Series, error)
@@ -151,6 +160,12 @@ type Store interface {
 	ScoreOf(ctx context.Context, gameID, userID string) (*model.Score, error)
 	PutScore(ctx context.Context, s model.Score) error
 	Leaderboard(ctx context.Context, gameID string, limit int) ([]model.Score, error)
+
+	// Run logs: the replay behind a person's counted score (one per person and game, replaced with the score).
+	// RunLogScores says which of the given people have one on a game, with the score it set, without loading the logs.
+	PutRunLog(ctx context.Context, l model.RunLog) error
+	RunLogOf(ctx context.Context, gameID, userID string) (*model.RunLog, error)
+	RunLogScores(ctx context.Context, gameID string, userIDs []string) (map[string]int64, error)
 }
 
 // LooksLikeID reports whether a game key has the shape of a server-generated id (24 lowercase hex).

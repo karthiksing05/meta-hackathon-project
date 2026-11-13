@@ -28,10 +28,13 @@ type Memory struct {
 	challenges []model.Challenge
 	series     map[string]*model.Series
 	rounds     map[string]*model.Round
+	sessions   map[string]*model.Session // made on first use (session_stores.go)
 	notifs     map[string]*model.Notification
 	devices    map[string]model.PushDevice
 	sounds     map[string]*model.Sound
-	soundSaves map[string]bool // soundID|userID
+	soundSaves map[string]bool         // soundID|userID
+	runLogs    map[string]model.RunLog // gameID:userID (runlog_stores.go)
+	dailies    map[string]model.GroupDaily
 }
 
 func NewMemory() *Memory {

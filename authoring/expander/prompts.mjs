@@ -75,6 +75,18 @@ export function toolRules(context) {
 }
 
 /**
+ * The Group a game is made for (context.group {id, kind, name, members: [{name}]}, from the API): one
+ * paragraph naming it and its people, or '' when there is no name. Only the names the API sends.
+ */
+export function groupNote(context) {
+  const g = context?.group;
+  if (!g || typeof g !== 'object' || typeof g.name !== 'string' || !g.name.trim()) return '';
+  const what = g.kind === 'event' ? 'Event' : 'Group';
+  const names = listOf(g.members, 20).map((m) => (typeof m === 'string' ? m : m?.name)).filter((n) => typeof n === 'string' && n.trim()).map((n) => clip(n.trim(), 40));
+  return `Made for the ${what} "${clip(g.name.trim(), 80)}"${names.length ? `, whose members are ${names.join(', ')}` : ''}. When the request or the spec is about this ${what} or its people ("our group", "us", a quiz about each other, icebreakers, a cast starring us), use the ${what}'s name and these names in the title, the cast, the questions and the content. Use only these names, never invent facts about them, and never add anyone else.`;
+}
+
+/**
  * The menu for one game, from the harness context: the planned tools (fragments expanded to their full
  * specs from the catalog), what the game is (the matched types), and the spec to follow. Everything in it
  * is data; entries learned from the web are marked.
@@ -132,6 +144,8 @@ export function planMenu(catalog, context) {
   if (sponsor && typeof sponsor === 'object' && sponsor.name) {
     spec.push('', `Sponsored by ${clip(sponsor.name, 60)}: put "${clip(sponsor.name, 60)}" in the title or the intro card (meta.instructions), use its products${Array.isArray(sponsor.products) && sponsor.products.length ? ` (${sponsor.products.slice(0, 5).map((p) => clip(p, 40)).join(', ')})` : ''} as the game's pieces and content, and match its tone${sponsor.tone ? ` (${clip(sponsor.tone, 60)})` : ''}. Its real name, colors and logo are fine; keep it fun, not an ad.`);
   }
+  const forGroup = groupNote(context);
+  if (forGroup) spec.push('', forGroup);
   const tooling = toolRules(context);
   if (tooling.length) spec.push('', 'How to use the planned content tools:', ...tooling);
   const together = groupPlayRules(plan.spec?.social);
@@ -198,7 +212,7 @@ If a named game isn't here and the request doesn't say how it plays, pick the cl
 - Genre conventions: keep the core rules of the genre the person named or clearly implied, even when the brief asks for a relaxed mood. Make it gentler with speed, gap size or time, never by breaking the genre. Tap-to-flap or flappy-style: one hit ends the run (1 life), score is obstacles passed, endless or a target, difficulty from speed and gap size; use gravity_jump with flap: true plus gap_walls. Endless runner: one hit or a few lives, score is distance. Match-pairs: no lives, count moves or time. Quiz: no lives unless asked. Snake-like: a growing tail, one hit ends it. 2048 or merge: a full board ends it. Where the person's own words (the quoted requirements) say otherwise, their words win over these defaults.
 - Prefer a library fragment that does the mechanic over hand-written rules and drawing. When you must hand-write obstacles, draw and collide with the same numbers, so the hit area matches what's drawn.
 - ${context?.canvas === 'tall' ? 'The canvas is 360 × 780 (portrait, tall). Its top 110 and bottom 96 units run under the phone\'s bars: fill them with background only, and keep the HUD, text and everything tapped between y 110 and 684; the HUD sits at the top of that area (hud_top holds 3 nodes, hud_bottom 2).' : 'The canvas is 360 × 640 (portrait); the HUD sits at the top (hud_top holds 3 nodes, hud_bottom 2).'}
-- meta.title is at most 40 characters; meta.duration_s is the expected run length.
+${context?.look === false ? '' : '- Text fonts and sizes are set by the game\'s look: write sizes as caption 13 / label 15 / body 17 / title 22 / display 32 / hero 44 and colours as palette tokens; don\'t set font.\n'}- meta.title is at most 40 characters; meta.duration_s is the expected run length.
 - Put the game's words and lists in content (read them as content_<key>), not inside expressions.
 - Use the standard color tokens ($primary $secondary $accent $ink $bg $danger $surface); define extra tokens in look.tokens if you need them. Pick a look.id from the list below.
 - For maps, write a "geo" section (see geo_map) and use geo_map / map_pin / country_outline / geo_distance; never draw maps or write coordinates yourself.
@@ -224,7 +238,11 @@ ${plan.spec}
 ` : ''}` : `## Fragments (the library)
 
 ${p.fragments ?? ''}
-`}
+${groupNote(context) ? `
+## Who it's for
+
+${groupNote(context)}
+` : ''}`}
 ## Looks
 
 ${p.looks ?? ''}

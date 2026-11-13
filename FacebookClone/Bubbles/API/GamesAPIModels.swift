@@ -115,6 +115,9 @@ struct RemoteScore: Codable, Identifiable, Hashable, Sendable {
     var username: String
     var score: Double
     var updatedAt: Date
+    /// The caller may watch this run (a friend's, a Group-mate's or their own) and the server kept it:
+    /// `GamesAPILive.runReplay(gameID:userID:)` fetches it.
+    var replayAvailable: Bool?
 
     var id: String { userID }
     /// The app shows whole-number scores.
@@ -122,7 +125,21 @@ struct RemoteScore: Codable, Identifiable, Hashable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case userID = "userId"
-        case username, score, updatedAt
+        case username, score, updatedAt, replayAvailable
+    }
+}
+
+/// `GET /v1/games/{id}/runs/{userId}/log`: the run behind someone's board score, for a friend or a
+/// Group-mate to watch as a Burst.
+struct RemoteRunReplay: Decodable, Sendable {
+    var userID: String
+    var username: String
+    var score: Double
+    var replay: BubbleInputLog
+
+    enum CodingKeys: String, CodingKey {
+        case userID = "userId"
+        case username, score, replay
     }
 }
 
@@ -633,12 +650,18 @@ enum GamesAPICoding {
 struct RemoteChallengeResponse: Decodable, Hashable, Sendable {
     var userID: String
     var username: String
+    /// The name to show (the server falls back to the username).
+    var displayName: String?
     var score: Double
+    /// The score as the game shows it ("1:02.4", "12 moves"). The app never formats it itself.
+    var display: String?
     var beat: Bool
 
     enum CodingKeys: String, CodingKey {
-        case userID = "userId", username, score, beat
+        case userID = "userId", username, displayName, score, display, beat
     }
+
+    var shownName: String { (displayName?.isEmpty == false ? displayName : nil) ?? username }
 }
 
 /// "Beat my score": one game, the sender's best when sent, and how each side is doing.

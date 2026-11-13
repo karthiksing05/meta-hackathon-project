@@ -236,6 +236,10 @@ final class StudioModel {
     /// Set when the run changes a game the server has (a tweak, a new look, the next level, a
     /// remix): `POST /v1/generate {baseGameId, ...}`. Nil for a new game.
     @ObservationIgnored private var runRevision: GameRevision?
+    /// What the Plan step agreed (`spec`, `answers`), for the next new game; the build takes it.
+    @ObservationIgnored var pendingPlan: StudioPlanHandoff?
+    /// The agreed plan this run sends to `/v1/generate` (kept for Try again).
+    @ObservationIgnored private var runPlan: StudioPlanHandoff?
     /// Games the server made in this session, still drafts: the level's app id to the id the
     /// server knows it by (the manifest id it sent, linked to its server id). Shared ones are
     /// published (`publishDrafts`); the rest are deleted when Studio is discarded.
@@ -436,7 +440,7 @@ final class StudioModel {
     var heroSubtitle: String {
         switch mode {
         case .create, .edit:
-            return "Describe a game and Muse makes it in about a minute."
+            return "Describe a game and Muse makes it in a few minutes."
         case .remix:
             let owner = baseBubble.map { $0.creator.isMe ? "your" : "\($0.creator.firstName)'s" } ?? "the"
             return "Tell Muse what to change. Your remix links back to \(owner) original."
@@ -769,6 +773,12 @@ final class StudioModel {
         }
         runLookChange = kind == .tweak ? newLook : nil
         runRevision = revision
+        if kind == .create {
+            runPlan = revision == nil ? pendingPlan : nil
+            pendingPlan = nil
+        } else {
+            runPlan = nil
+        }
         run(request, kind: kind)
     }
 
@@ -1537,7 +1547,29 @@ extension StudioModel {
         // A draft until the person shares it, so builds they drop never reach the feed.
         return StudioGenerateBridge.compose(with: GameBuildTracker.shared.generator(for: self), request: text, brief: brief,
                                             anatomy: agreedAnatomyText, draft: true, sound: sound,
-                                            media: media.input, onReport: onReport, onWait: onWait)
+                                            extras: newGameExtras, onReport: onReport, onWait: onWait)
+    }
+
+    /// A new game's `groupId`, `spec` and `answers` (`NewGameExtras`): the Group or Event it's for,
+    /// and what the Plan step agreed.
+    var newGameExtras: NewGameExtras {
+        NewGameExtras(groupID: serverAudienceGroupID, spec: runPlan?.spec,
+                      answers: Dictionary((runPlan?.answers ?? []).map { ($0.slot, $0.value) }) { _, last in last },
+                      media: media.input)
+    }
+
+    /// The server Group (or Event) the game is for, when I'm a member of it there: the server makes
+    /// the game for it (its Games tab and board) and gives Muse its name and people. Groups only
+    /// the app knows are left out, so a build never fails on a Group the server doesn't have.
+    var serverAudienceGroupID: String? {
+        let id: String
+        switch audience {
+        case .group(let group): id = group
+        case .event(let event): id = event
+        case .everyone, .friends: return nil
+        }
+        guard let group = bubbleStore?.serverGroups[id], group.isMember else { return nil }
+        return group.id
     }
 
     /// `POST /v1/generate` takes a request of 1 to 2,000 characters.

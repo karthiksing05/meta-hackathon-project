@@ -91,6 +91,17 @@ export function summarize(e) {
   }
 }
 
+// The layout verifier's time (see verifyPass in composeGame).
+export const VERIFY_FIRST_MS = 75000;
+export const VERIFY_RERUN_MS = 30000;
+export const VERIFY_JOB_MS = 240000;
+/** Room kept under VERIFY_JOB_MS for a run's last stage, final check and proof past its budget. */
+export const VERIFY_OVERRUN_MS = 45000;
+/** A run that would get less than this is skipped (the code fixes run instead). */
+export const VERIFY_MIN_MS = 8000;
+/** Layout repair rounds stop once the job has run this long. */
+export const VERIFY_REPAIR_STOP_MS = 540000;
+
 export class GenerationError extends Error {
   constructor(message, issues = []) {
     super(message);
@@ -160,13 +171,25 @@ export async function composeGame({ request, brief, base = null, context = null 
   // anything else the classic 360 × 640. Every expand in this compose (stories too) gets it; a manifest's own
   // look.canvas still wins.
   const canvas = context?.canvas === 'tall' ? 'tall' : 'classic';
-  if (canvas === 'tall') {
-    const inner = studio;
-    studio = { ...inner, expand: (text, options) => inner.expand(text, { canvas: 'tall', ...(options ?? {}) }) };
-  }
   stats.canvas = canvas;
-  // Fonts and vibe (the UI kit, pending its hook requests): the plan's context.plan.spec.theme.type and the vibe's
-  // font pairing get read here and passed to expand next to the canvas, the same way.
+  // The game's look (kit/look.mjs): its vibe, font pairing and scale from the plan's words (spec.theme.type,
+  // the understanding) and the request, set as art.type before every expand; the expander applies it. The
+  // game id picks the pairing: a revision's id, else the title. A revision keeps the look it has.
+  // context.look false leaves art.type to the manifest.
+  const lookWordsFor = () => {
+    const t = context?.plan?.spec?.theme?.type ?? {};
+    const u = context?.understanding ?? context?.plan?.understanding ?? {};
+    return { theme: [t.theme ?? [], u.theme ?? []], era: t.era ?? '', genre: [t.genre ?? [], u.families ?? []], style: t.style ?? [], keywords: u.keywords ?? [], refs: u.named_refs ?? [], request: brief?.intent || request };
+  };
+  const lookOn = context?.look !== false;
+  {
+    const inner = studio;
+    studio = { ...inner, expand: (text, options) => inner.expand(text, {
+      ...(canvas === 'tall' ? { canvas: 'tall' } : {}),
+      ...(lookOn ? { look: lookWordsFor(), ...(base?.id ? { look_id: base.id } : {}), keep_look: !!base } : {}),
+      ...(options ?? {}),
+    }) };
+  }
   const engineOf = () => { try { return typeof studio.engine === 'function' ? studio.engine() : null; } catch { return null; } };
   // Layout fixes in code (layout-fix.mjs), after expand and before the gate: presentation only, so rules
   // and replays don't change. On unless context.layout_fix is false; without Chrome only the structural
@@ -196,15 +219,31 @@ export async function composeGame({ request, brief, base = null, context = null 
   // fixLayout pass above when it's there: verify, code fixes, solver, re-verify, and a proof that rules and
   // replays are unchanged. Its fixed presentation goes into both game_json and playtest_game_json (the playtest
   // copy adds only hidden state and rules), and only when it fixed something and reverted nothing.
-  // Returns {expansion, report, reverted}, or null without the hook or when it fails.
+  // Returns {expansion, report, reverted}, or null without the hook, when it fails or when the job's verifier
+  // time is spent.
+  // Time: the first run gets VERIFY_FIRST_MS with every stage; reruns (repair rounds, polish) get VERIFY_RERUN_MS
+  // and skip the readability stage; all runs in a job stay under VERIFY_JOB_MS (stats.layoutVerifyMs is the total).
+  // A budget is checked between stages and solver moves, so a run can pass it by one stage plus its final check.
   const verifying = () => typeof studio.verifyLayout === 'function' && context?.layout_fix !== false;
+  let verifyRuns = 0;
   const verifyPass = async (expansion) => {
     if (!verifying() || !expansion?.game_json) return null;
+    const spent = stats.layoutVerifyMs ?? 0;
+    const first = verifyRuns === 0;
+    const budgetMs = Math.min(first ? VERIFY_FIRST_MS : VERIFY_RERUN_MS, VERIFY_JOB_MS - VERIFY_OVERRUN_MS - spent);
+    if (budgetMs < VERIFY_MIN_MS) {
+      // Out of verifier time: this build gets the code fixes and the lint instead.
+      stats.layoutVerifySkipped = (stats.layoutVerifySkipped ?? 0) + 1;
+      delete stats.layout;
+      delete stats.layoutBlocking;
+      return null;
+    }
+    verifyRuns++;
     emit({ kind: 'verifying' });
     const t0 = Date.now();
     let v;
     try {
-      v = await studio.verifyLayout(expansion.game_json, { engine: engineOf() });
+      v = await studio.verifyLayout(expansion.game_json, { engine: engineOf(), authoring: expansion.authoring_json ?? null, budgetMs, ...(first ? {} : { readability: false }) });
     } catch (e) {
       if (e?.name === 'GenerationError') throw e;
       stats.layoutVerifyError = String(e?.message ?? e).slice(0, 200);
@@ -233,7 +272,7 @@ export async function composeGame({ request, brief, base = null, context = null 
   const layoutStats = (verified) => {
     const r = verified.report;
     stats.layoutBlocking = r.blocking ?? 0;
-    stats.layout = { verifier: true, pass: !!r.pass, blocking: r.blocking ?? 0, warnings: r.warnings ?? 0, byCode: r.byCode ?? null, reverted: verified.reverted, ms: r.ms ?? null, findings: (r.findings ?? []).slice(0, 30) };
+    stats.layout = { verifier: true, pass: !!r.pass, blocking: r.blocking ?? 0, warnings: r.warnings ?? 0, byCode: r.byCode ?? null, reverted: verified.reverted, truncated: !!r.truncated, ms: r.ms ?? null, findings: (r.findings ?? []).slice(0, 30) };
   };
 
   try {
@@ -314,7 +353,8 @@ export async function composeGame({ request, brief, base = null, context = null 
         if (verified) {
           if (!verified.report.pass) {
             if (!layoutBest || (verified.report.blocking ?? 0) < (layoutBest.report.blocking ?? 0)) layoutBest = verified;
-            if (repairs < maxRepairRounds) {
+            // No layout repair rounds once the job has run VERIFY_REPAIR_STOP_MS: the build ships with its findings.
+            if (repairs < maxRepairRounds && Date.now() - started < VERIFY_REPAIR_STOP_MS) {
               // A layout repair round: Muse fixes what the verifier still blocks on, with each finding's hint.
               const issues = blockingIssues(verified.report);
               repairs++;

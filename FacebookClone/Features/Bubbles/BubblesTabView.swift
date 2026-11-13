@@ -218,7 +218,7 @@ struct BubblesTabView: View {
             LiveDataStateView(kind: .failed(message), title: "Couldn't load \(ProductName.plural)", retry: bubbleStore.reloadFeed, onDark: true,
                               action: LiveDataStateView.Action(title: "Make one instead") { router.openStudio() })
         case .end:
-            LiveDataStateView(kind: .empty("Be the first. Describe a game and Muse makes it in about a minute."), title: "No \(ProductName.plural) yet",
+            LiveDataStateView(kind: .empty("Be the first. Describe a game and Muse makes it in a few minutes."), title: "No \(ProductName.plural) yet",
                               retry: bubbleStore.reloadFeed, onDark: true,
                               action: LiveDataStateView.Action(title: "Make \(ProductName.withArticle)", symbol: "sparkles") { router.openStudio() })
         case .idle, .loading:

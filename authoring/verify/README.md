@@ -11,7 +11,9 @@ impossible to ship. No Muse calls: everything here is code.
 | `scene.mjs` | Maps drawn ops to nodes and roles, and hit targets to the nodes that own them. |
 | `checks/layout.mjs` | Text and overlap codes on every frame (the `L_*` lint at the blocking policy, plus `L_TEXT_ON_SPRITE`). |
 | `checks/targets.mjs` | Tap targets: size, spacing, overlap, off-screen, tap-through. |
-| `checks/style.mjs` | Adapter for the UI kit's `style-check.mjs` (`S_*`), once it exists. |
+| `checks/style.mjs` | Adapter for the UI kit's `style-check.mjs` (`S_*`). |
+| `checks/readability.mjs` | `S_READABILITY`: each word against the pixels behind it (10th-percentile contrast), composited in JS so it needs no Chrome (`authoring/kit/readability.mjs`). |
+| `checks/look.mjs` | The look checks (`S_FONT_FAMILIES`, `S_TYPE_SCALE`, …): the game against its own fonts, scale and palette (`authoring/kit/README.md`). |
 | `checks/requirements.mjs` | Adapter for `requirements-check.mjs` (`R_*`), when requirements are passed. |
 | `checks/fill.mjs` | Adapter for `playtest/fill-check.mjs` (`F_*`): aspect, background coverage, HUD band, bleed bands, score owner. |
 | `solve.mjs` | The layout solver, the last resort. |
@@ -77,6 +79,9 @@ engine's topmost-first list, at the same relative spot), so the bots play the sa
 | `L_OVERLAP_SPRITES` | warn | sprites overlap at the start | – |
 | `L_INCONSISTENT` | warn | one repeated component drawn differently | – |
 | `S_*` | as the style check says (`error` → block) | tokens and tree, before play | the UI kit |
+| `S_FONT_FAMILIES`, `S_TYPE_SCALE`, `S_TEXT_COLORS`, `S_NEON_TEXT` | block | the game off its own look: families outside its pairing, sizes off its scale, literal or glowing text colours | `kit/look.mjs` `lookFix` |
+| `S_READABILITY` | block | text under 4.5:1 (small) or 3:1 (large) in the worst 10 % of the pixels behind it, or small text on a busy background, on any sampled frame | `kit/readability.mjs` `readabilityFix`: palette colour, outline or soft plate, solid plate |
+| `S_WEIGHT_MIX`, `S_ALIGNMENT`, `S_PALETTE_CLASH`, `S_THEME_MISMATCH` | warn | weights, ragged edges, palette vs backdrop, fonts vs the vibe | `lookFix` (fonts and weights) |
 | `R_*` | a failed must blocks; others warn | the person's requirements | `requirements.mjs` repair |
 | `F_BG_GAP`, `F_BACKDROP_SHORT`, `F_KEY_IN_BLEED`, `F_DOUBLE_HUD` | block | fill (`fill-check.mjs`): background gaps, key content under the phone's bars, two score HUDs | the fill fix |
 | `F_ASPECT`, `F_HUD_OUT_OF_BAND`, `F_SCORE_HIDDEN` | warn | fill: canvas aspect, HUD outside its band, no score shown | the fill fix |

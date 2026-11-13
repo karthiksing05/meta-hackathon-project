@@ -182,7 +182,5 @@ struct LiveDataUnavailableSheet: View {
 /// Why a feature is off until the server serves it (docs/APP_LIVE_DATA_PLAN.md, Stage 4). Each
 /// says what you can do instead; the screen offers that as its button.
 enum LiveDataCopy {
-    static let sessions = "Making a game together isn't on the server yet. You can make one for the Group now, and everyone can play it."
-    static let quizNight = "Quiz nights aren't on the server yet. The Group's games are, so you can play those together today."
     static let revise = "Muse can't change this kind of game yet. Make a new one from your idea instead."
 }

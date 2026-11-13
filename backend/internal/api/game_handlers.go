@@ -216,8 +216,16 @@ func (s *Server) submitScore(w http.ResponseWriter, r *http.Request) {
 		s.submitScored(w, r, g)
 		return
 	}
-	var in struct{ Score float64 }
+	var in struct {
+		Score  float64
+		Replay json.RawMessage `json:"replay"` // the runtime's replay of the run, for friends to watch (runlogs.go)
+	}
 	if !decode(w, r, &in) {
+		return
+	}
+	replay, err := parseReplay(in.Replay)
+	if err != nil {
+		writeErr(w, 400, err.Error())
 		return
 	}
 	if in.Score != in.Score || in.Score > 1e12 || in.Score < -1e12 { // NaN and absurd values
@@ -229,15 +237,20 @@ func (s *Server) submitScore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u := userFrom(r)
-	err := s.watchLeader(r.Context(), g, func() error {
-		return s.Store.SubmitScore(r.Context(), model.Score{
-			GameID: g.ID, UserID: u.ID, Username: u.Username, Score: int64(in.Score),
-			UpdatedAt: time.Now().UTC().Truncate(time.Millisecond),
-		})
-	})
+	unlock := s.scoreLocks.lock(g.ID + ":" + u.ID) // whether this run set the best decides whose replay is kept
+	defer unlock()
+	neu := model.Score{
+		GameID: g.ID, UserID: u.ID, Username: u.Username, Score: int64(in.Score),
+		UpdatedAt: time.Now().UTC().Truncate(time.Millisecond),
+	}
+	old, oldErr := s.Store.ScoreOf(r.Context(), g.ID, u.ID)
+	err = s.watchLeader(r.Context(), g, func() error { return s.Store.SubmitScore(r.Context(), neu) })
 	if err != nil {
 		s.serverErr(w, r, err)
 		return
+	}
+	if errors.Is(oldErr, store.ErrNotFound) || (oldErr == nil && neu.Score > old.Score) {
+		s.keepRunLog(r.Context(), neu, replay, "")
 	}
 	s.leaderboard(w, r)
 }

@@ -70,6 +70,12 @@ struct NotificationTests {
         let groupJSON = Data(#"{"id":"group","kind":"group_game","title":"Shared game","body":"Try it","gameId":"g4","groupId":"club","createdAt":"2026-11-13T08:00:00Z"}"#.utf8)
         let groupItem = try decoder.decode(RemoteGameNotification.self, from: groupJSON)
         precondition(groupItem.destination == .game("g4"), "a shared game need not have been made for the Group")
+        let roundJSON = Data(#"{"id":"r","kind":"round_played","title":"Ana played","body":"Ana: 7 right","gameId":"g5","roundId":"rd1","createdAt":"2026-11-13T08:00:00Z"}"#.utf8)
+        let roundItem = try decoder.decode(RemoteGameNotification.self, from: roundJSON)
+        precondition(roundItem.destination == .round("rd1"), "a round notification opens the round")
+        let sessionJSON = Data(#"{"id":"s","kind":"session_invite","title":"Ana wants to make a game","body":"","groupId":"club","sessionId":"se1","createdAt":"2026-11-13T08:00:00Z"}"#.utf8)
+        let sessionItem = try decoder.decode(RemoteGameNotification.self, from: sessionJSON)
+        precondition(sessionItem.destination == .session("se1"), "an invite opens the session")
 
         inbox.useAccount("alice")
         await api.configure([firstPage, lastPage])

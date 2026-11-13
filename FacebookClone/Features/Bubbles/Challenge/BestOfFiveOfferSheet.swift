@@ -101,6 +101,15 @@ struct BestOfFiveOfferSheet: View {
                 .disabled(sending || picks.isEmpty)
                 .padding(.horizontal, FBMetrics.screenPadding)
 
+                // Or a new game made for the two of you (PairBlendSheet.swift).
+                NavigationLink {
+                    PairBlendView(friend: friend, close: { dismiss() })
+                } label: {
+                    Label("Make a game for the two of us", systemImage: "sparkles")
+                }
+                .buttonStyle(.fb(.tinted, height: 44))
+                .padding(.horizontal, FBMetrics.screenPadding)
+
                 Button("Not now") { dismiss() }
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)

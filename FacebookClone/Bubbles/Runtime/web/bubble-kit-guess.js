@@ -774,11 +774,11 @@
     content: {
       heading: "Who is it?",
       people: [
-        { id: "a", name: "Maya Okafor", avatar: "https://randomuser.me/api/portraits/women/44.jpg", facts: ["Runs the Lands End trail every Saturday"] },
-        { id: "b", name: "Diego Ramírez", avatar: "https://randomuser.me/api/portraits/men/32.jpg", facts: ["Bakes too much sourdough"] },
-        { id: "c", name: "Priya Natarajan", avatar: "https://randomuser.me/api/portraits/women/65.jpg", facts: ["Works night shifts as a nurse"] },
-        { id: "d", name: "Lena Fischer", avatar: "https://randomuser.me/api/portraits/women/21.jpg", facts: ["Swims in the cold water at Aquatic Park"] },
-        { id: "e", name: "Jordan Brooks", avatar: "https://randomuser.me/api/portraits/men/57.jpg", facts: ["Wants to learn to surf at Ocean Beach"] },
+        { id: "a", name: "Maya Okafor", avatar: "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Maya%20Okafor", facts: ["Runs the Lands End trail every Saturday"] },
+        { id: "b", name: "Diego Ramírez", avatar: "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Diego%20Ram%C3%ADrez", facts: ["Bakes too much sourdough"] },
+        { id: "c", name: "Priya Natarajan", avatar: "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Priya%20Natarajan", facts: ["Works night shifts as a nurse"] },
+        { id: "d", name: "Lena Fischer", avatar: "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Lena%20Fischer", facts: ["Swims in the cold water at Aquatic Park"] },
+        { id: "e", name: "Jordan Brooks", avatar: "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Jordan%20Brooks", facts: ["Wants to learn to surf at Ocean Beach"] },
       ],
     },
     seed: 4471,

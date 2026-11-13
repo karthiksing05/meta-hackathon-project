@@ -116,9 +116,10 @@ struct TogetherGroupMakeRow: View {
     let group: FBGroup
 
     @Environment(Router.self) private var router
+    @Environment(BubbleStore.self) private var bubbleStore
 
     var body: some View {
-        let sessions = TogetherCenter.shared.sessions.filter { $0.target.kind == .group && $0.target.targetID == group.id }
+        let sessions = TogetherCenter.shared.sessions(at: RoundTarget(kind: .group, id: group.id))
         VStack(alignment: .leading, spacing: 0) {
             Button {
                 Haptics.light()
@@ -167,6 +168,7 @@ struct TogetherGroupMakeRow: View {
         .background(FBColor.surface)
         .padding(.bottom, FBMetrics.feedSeparatorHeight)
         .background(FBColor.feedSeparator)
+        .task(id: group.id) { TogetherCenter.shared.load(RoundTarget(kind: .group, id: group.id), bubbleStore: bubbleStore) }
     }
 }
 

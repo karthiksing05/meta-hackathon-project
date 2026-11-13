@@ -26,10 +26,11 @@ const MODULES = { codec: 'expander/image-codec.mjs', fix: 'expander/layout-fix.m
 // verifier loads every module in verify/checks/). The Dockerfile copies this list; the self-test checks both that
 // the list is closed under imports and that the Dockerfile has every file.
 export const AUTHORING_FILES = [
-  'expander/image-codec.mjs', 'expander/layout-fix.mjs', 'expander/engine.mjs', 'expander/canvas.mjs', 'expander/requirements.mjs', 'expander/verify-layout.mjs',
+  'expander/image-codec.mjs', 'expander/layout-fix.mjs', 'expander/engine.mjs', 'expander/canvas.mjs', 'expander/requirements.mjs', 'expander/verify-layout.mjs', 'expander/ui-style.mjs',
+  'kit/look.mjs', 'kit/font-data.mjs', 'kit/vibes.mjs', 'kit/readability.mjs', 'kit/raster.mjs', 'kit/jpeg.mjs',
   'playtest/layout-check.mjs', 'playtest/bots.mjs', 'playtest/frame-render.mjs', 'playtest/fill-check.mjs', 'playtest/requirements-check.mjs',
   'verify/verify.mjs', 'verify/registry.mjs', 'verify/frames.mjs', 'verify/scene.mjs', 'verify/solve.mjs', 'verify/prove.mjs',
-  'verify/checks/fill.mjs', 'verify/checks/layout.mjs', 'verify/checks/requirements.mjs', 'verify/checks/style.mjs', 'verify/checks/targets.mjs',
+  'verify/checks/fill.mjs', 'verify/checks/layout.mjs', 'verify/checks/look.mjs', 'verify/checks/readability.mjs', 'verify/checks/requirements.mjs', 'verify/checks/style.mjs', 'verify/checks/targets.mjs',
 ];
 
 const off = (v) => ['0', 'off', 'false', 'no'].includes(String(v ?? '').trim().toLowerCase());

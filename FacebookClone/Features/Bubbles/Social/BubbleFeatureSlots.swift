@@ -164,6 +164,7 @@ struct BubbleProfileHeaderSlots: View {
     var body: some View {
         // Someone you just met: the get-to-know bracket comes first.
         BracketProfileCard(user: user)
+        PairBlendProfileButton(user: user)
         ChallengeProfileRivalry(user: user)
     }
 }

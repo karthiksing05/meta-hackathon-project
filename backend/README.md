@@ -49,15 +49,17 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/games/{id}` | optional | one game; `{id}` may also be the slug from its manifest |
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
 | `GET /v1/games/{id}/leaderboard?scope=everyone\|friends\|group&groupId=`, `POST /v1/games/{id}/scores` (`{score}`, or `{log}` for a game with a score model) | none (friends and group need a bearer; group needs membership) / bearer | best score per user, optionally only among my friends (and me) or a Group's members |
+| `GET /v1/games/{id}/runs/{userId}/log` | bearer (that person, their friends or a Group-mate) | the run behind their board score, to watch as a Burst: `{gameId, userId, username, score, display, updatedAt, replay}` (see [Watching a friend's run](#watching-a-friends-run)) |
 | `GET /v1/me/likes`, `GET /v1/games/{id}/likes` | bearer / optional | the games I saved; how many saved a game and which of my friends did |
-| `POST /v1/challenges`, `GET /v1/challenges` | bearer | "beat my score": `{gameId, toUserIds[]}` (friends only, up to 20); the ones I sent and received, with `beaten`/`myScore` or each recipient's `responses` |
+| `POST /v1/challenges`, `GET /v1/challenges` | bearer | "beat my score": `{gameId, toUserIds[]}` (friends only, up to 20); the ones I sent and received, with `beaten`/`myScore` or each recipient's `responses` (`[{userId, username, displayName, score, display, beat}]`; `display` is the score as the game shows it) |
 | `GET /v1/me/moments` | bearer | what happened with me on other phones: challenges received plus off-feed moment events that name me in `with`; `{moments: [{momentID, kind, gameID, from, at}], cursor}` |
 | `GET /v1/me/recs` | bearer | my model's summary and taste profile |
 | `GET /v1/users/{id}` | optional | a person's public profile (`isFriend` when signed in) |
 | `GET /v1/me/friends`, `PUT`/`DELETE /v1/me/friends/{id}` | bearer | my friends; add or remove one (mutual, immediate) |
-| `GET /v1/groups?kind=&mine=1`, `POST /v1/groups` | optional / bearer | Groups and Events; create one |
+| `GET /v1/groups?kind=&mine=1`, `POST /v1/groups` | optional / bearer | Groups and Events; create one: `{kind, name, category?, about?, coverSeed?, private?, id?}`. `id` (optional) is a stable id the app's other surfaces already use, such as the demo world's `group-newinsf` (3 to 48 lowercase letters, digits or dashes, starting with a letter; 409 if taken); without it the server makes one |
 | `GET /v1/groups/{id}`, `PUT`/`DELETE /v1/groups/{id}/members/me` | optional / bearer | one with its members; join or leave |
 | `GET /v1/groups/{id}/games` | optional | games made for it |
+| `GET /v1/groups/{id}/daily?date=YYYY-MM-DD`, `POST /v1/groups/{id}/daily` `{gameId, date?}` | optional / bearer (the Group's owner) | the Group's Daily: one game everyone plays that day. GET returns the Daily for `date` or the latest before it, `{groupId, date, gameId, setBy, createdAt, isToday, game}` (404: none yet); the app sends its own calendar day (default: today in UTC). POST sets or replaces the day's game (a listed game, or your own draft) and sends every other member a `daily_ready` notification; Groups only (422 for an Event) |
 | `GET /v1/groups/{id}/leaderboard?week=2026-W46` | bearer (members) | the Group's weekly board: members ranked by rank points across the Group's games (10, 7, 5, 3, 2, then 1 for each game; ties share a place); `{week, items: [{user, points, gamesPlayed, rank, rankChange}]}`; ISO weeks in UTC, default this week |
 | `GET /v1/users?q=` | bearer | find people: username prefix or the start of a display-name word, 2 to 40 characters |
 | `POST /v1/groups/{id}/blend`, `GET /v1/groups/{id}/blend-inputs` | bearer (members) | Blend for the group's members, taken from the server's data; each member's skill, taste and recent games |
@@ -182,6 +184,18 @@ game as `score {kind, direction, countsWhen, aggregate, tieBreak, format, bounds
 - **`bounds`**: a score below `min` or above `max`, or earned faster than `max_rate_per_s`, is refused (422).
 - **`ranked: false`**: the board is a plain list, newest first, and it awards no points on the Group weekly board.
 
+## Watching a friend's run
+
+- A score may carry `replay`, the runtime's replay log of the same run (`{seed, tick_rate, total_ticks, inputs, length?}`, what the
+  player plays as a Burst): `POST /v1/games/{id}/scores {log, replay}` (or `{score, replay}` for a game without a score model). Up to
+  256 KB and 40,000 inputs; a malformed one is refused (400) before anything is counted.
+- The server keeps one run per person and game (`run_logs`, with the verified `log` beside it), replaced only when that run sets the
+  person's board score. A run that isn't counted keeps the old one; a counted run without a replay leaves the row with none.
+- Board rows (every scope, and the reply to a score) carry `replayAvailable: true` and `replayUrl` when the caller may watch that run:
+  it is their own, a friend's, or a Group-mate's, and the kept run still matches the score on the board. Signed out, no row has one.
+- `GET /v1/games/{id}/runs/{userId}/log` returns it (403 for anyone else, 404 when none is kept). The engine log stays on the server.
+- Deleting a game deletes its runs. The `run_logs` index comes from `cmd/dbinit`.
+
 ## The generator's internal routes (private network only)
 
 The Node generator has no published port; only the API calls it. Besides `/compose`, `/anatomy` and `/verify` it offers `POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?}` -> `{content, model}`: one JSON turn on a Muse
@@ -211,17 +225,21 @@ The generator service also has `POST /internal/muse/image {prompt, size?, guide?
 
 ## Notifications
 
-A per-person inbox that doubles as the push outbox. `GET /v1/me/notifications?limit=&cursor=` returns `{items: [{id, kind, title, body, gameId?, groupId?, challengeId?, seriesId?, createdAt, readAt?}], nextCursor?, unreadCount}` (newest first; `nextCursor` is opaque). `PUT /v1/me/notifications/{id}/read {read}` (`read` defaults to true) and `PUT /v1/me/notifications/read` (all) return `{unreadCount}`.
+A per-person inbox that doubles as the push outbox. `GET /v1/me/notifications?limit=&cursor=` returns `{items: [{id, kind, title, body, gameId?, groupId?, challengeId?, seriesId?, roundId?, sessionId?, createdAt, readAt?}], nextCursor?, unreadCount}` (newest first; `nextCursor` is opaque). `PUT /v1/me/notifications/{id}/read {read}` (`read` defaults to true) and `PUT /v1/me/notifications/read` (all) return `{unreadCount}`.
 
 Kinds, and what makes them:
 - `group_game`: `POST /v1/groups/{id}/game-shares {gameId, eventId}`. A member shares a game into a Group; every other member is notified. `eventId` is the post's stable id (4 to 100 characters), so a retry makes no second notification. The Group must be a Group (not an Event) and the sender in it.
 - `friend_challenge`: a friend sent you `POST /v1/challenges` (`challengeId`) or started `POST /v1/series` with you (`seriesId`).
+- `session_invite`: someone started `POST /v1/sessions` with you in it (`sessionId`; `groupId` for a Group session).
+- `round_started`: someone started `POST /v1/rounds` with you in it (`roundId`, `gameId`; `groupId` for a Group round).
+- `round_played`: a member of a round you are in played their run; the body is their result line (`roundId`, `gameId`).
 - `leaderboard_lost`: someone took first place from you on a ranked game. Only the former first place hears it, only when a counted score changes the leader, by the game's direction and tie-break. Own improvements, scores below first, empty boards and unranked games make nothing. Score writes on one game are serialized.
+- `daily_ready`: `POST /v1/groups/{id}/daily` by the Group's owner. Every other member hears "Today's Daily in <Group> is ready" (`gameId`, `groupId`). Once per member, date and game, so setting the same Daily again notifies nobody twice.
 - `viral_match`: a public game with many distinct players in a window whose description is close to your learned taste (the cosine of `game-recs.js`'s `describe(...).x` and your taste vector). Defaults: 100 players in 24 h, cosine 0.85, at least 5 learned pages, one a day, never your own game or one you played, each game once. Tune with `VIRAL_MIN_PLAYERS`, `VIRAL_WINDOW`, `VIRAL_COSINE`, `VIRAL_MIN_PAGES`, `VIRAL_PER_DAY`, `VIRAL_INTERVAL`; `VIRAL_MATCH=0` turns it off. A person whose taste has dislikes pulls away from a game's vector, so the cosine of 0.85 is a strict bar; expect to calibrate it on real data.
 
 One row per (person, source) at most, so a retried trigger never notifies twice. The inbox works with no push configured.
 
-Push: `PUT /v1/me/push-devices/{installationId} {token, environment: "sandbox"|"production"}` registers a device (the token is the hex APNs token; an installation moves to the account that registered it last); `DELETE` on the same route removes it, and `POST /v1/auth/logout` also takes an optional `installationId` and revokes that installation for the account whose refresh token it is. With APNs configured (`APNS_KEY_P8_B64` or `APNS_KEY_P8`, `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_TOPIC` = the app's bundle id; from GitHub: secret `APNS_KEY_P8` and the ids as variables or secrets) each new row with a registered device is pushed as `{aps: {alert: {title, body}, sound: "default", "thread-id": kind}, notificationId, kind, gameId?, groupId?, challengeId?, seriesId?}`. Pushes are leased before sending, retried with a growing delay (up to 6 tries) when Apple or the network fails, and a refused token drops the device. Nothing logs a token or the key. Without APNs the server stores the inbox and sends nothing.
+Push: `PUT /v1/me/push-devices/{installationId} {token, environment: "sandbox"|"production"}` registers a device (the token is the hex APNs token; an installation moves to the account that registered it last); `DELETE` on the same route removes it, and `POST /v1/auth/logout` also takes an optional `installationId` and revokes that installation for the account whose refresh token it is. With APNs configured (`APNS_KEY_P8_B64` or `APNS_KEY_P8`, `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_TOPIC` = the app's bundle id; from GitHub: secret `APNS_KEY_P8` and the ids as variables or secrets) each new row with a registered device is pushed as `{aps: {alert: {title, body}, sound: "default", "thread-id": kind}, notificationId, kind, gameId?, groupId?, challengeId?, seriesId?, roundId?, sessionId?}`. Pushes are leased before sending, retried with a growing delay (up to 6 tries) when Apple or the network fails, and a refused token drops the device. Nothing logs a token or the key. Without APNs the server stores the inbox and sends nothing.
 
 ## Rounds: same-seed play in a chat or a Group
 
@@ -238,9 +256,21 @@ Group play has no live multiplayer and no server chats. Someone sends a game int
 `POST /v1/generate` also takes `spec` (a game-spec/1 from `POST /v1/harness/plan`: the server uses it as the plan and does not plan again) and `answers` (`{slot: answer}` for the plan's clarifying questions; they replace the planner's guesses). Both are for new games only.
 It also takes `preferences` (up to 20 earlier picks between versions, `[{axis, chosen: {label, value?}, rejected?, at?}]`,
 docs/harness-gaps/variants.md; `POST /v1/harness/plan` takes them too) and `groupId` (a Group or Event the caller belongs to:
-the generator gets `context.group {id, kind}` and scopes the game there, `structure.scope` `group:<id>` or `event:<id>`;
-403 for a non-member, 404 for an unknown id). A brand's `sponsor` also goes into the plan's understanding when the request
+the generator gets `context.group {id, kind, name, members: [{name}]}` and scopes the game there, `structure.scope` `group:<id>` or `event:<id>`;
+403 for a non-member, 404 for an unknown id). `members` are up to 20 display names, the maker first, and nothing else
+about anyone (no emails, usernames or bios). The planner and the compose use the Group's name and people when the
+request is about them (a cast, questions about each other, icebreakers). `POST /v1/harness/plan` takes `groupId` too, so
+the plan the person agrees (and sends back as `spec`) already has the Group in it. A brand's `sponsor` also goes into the plan's understanding when the request
 doesn't name one, so `spec.theme.sponsor` carries the brand's name.
+
+## Making a game together (sessions)
+
+Someone asks a chat or a Group for questions, words, scenes or levels; the people there add entries; the person who started it has Muse make one game from all of them.
+
+- `POST /v1/sessions {kind: "question"|"words"|"scene"|"level", title, ask, target: {kind: "chat"|"group", id}, members?: [userId]}` -> 201 the session: `{id, kind, title, ask, starter: profile, target, members: [profile], entries: [], status: "open", createdAt, updatedAt}`. A chat session needs `members` (friends of yours). A Group session needs you in the Group; with no `members` it invites the whole Group (the first 50). Every invited person gets a `session_invite` notification. `title` is 1 to 80 characters, `ask` up to 200.
+- `GET /v1/sessions?target=chat:<id>|group:<id>` -> `{items}`, newest first; `GET /v1/sessions/{id}`. Only the people in it see a session: a chat session's members, or anyone in the session's Group (404 for everyone else).
+- `POST /v1/sessions/{id}/entries {text}` (1 to 280 characters, up to 40 entries) -> the session. Entries are `{id, maker: profile, text, at}`. A Group member who wasn't in the first invite joins `members` by adding. 409 once the game is being made or made.
+- `POST /v1/sessions/{id}/make` (the starter only, 403 for anyone else; 409 with no entries) -> 202 `{jobId, sessionId}`. It goes through the same path as `POST /v1/generate` (its checks, its hourly limit, its job): the request names the title, the ask and every entry with who wrote it, the brief carries `together: {kind, title, ask, makers, contributions}`, and a Group session sends `groupId`. Follow the job with `GET /v1/generate/{jobId}`. The session's `status` goes `open` -> `making` -> `made` (with `gameId` and `game`) or `failed` (with `error`; the starter can make it again).
 
 ## Ranking (the recommender runs here)
 
@@ -303,7 +333,7 @@ Authors and chat members are Personas or server accounts; the reply's `author` /
 | `PUT /v1/fb/threads/{id}/read` | bearer (member) | 204 |
 
 Collections: `fb_personas`, `fb_posts`, `fb_stories`, `fb_threads`, `fb_messages`; run `deploy/dbinit.sh` after deploying for their
-indexes (the routes work without them). To reseed, drop `fb_personas`, `fb_posts` and `fb_stories` and restart the API.
+indexes (the routes work without them). To reseed, drop `fb_personas`, `fb_posts` and `fb_stories` and restart the API. The demo world stays recent on its own: every 10 minutes the API checks it, and when it has drifted more than an hour from "N minutes ago" it moves all its posts, comments and stories forward together (reactions, comments and people's own posts are kept). Each person's copied demo chats keep the times they were copied with.
 
 ## People, friends and Groups
 
@@ -313,6 +343,8 @@ own feed generator used: a friend's best run `friendBurst` 2.2, a Group member's
 `nearby` 1.8, `nextLevel` 1.2, `yours` 0.6, `popular` 0.8); the order is decided only by the recommender. Group Blend takes its members
 and friend flags from the server, and a member's taste from what they have actually played. With no history yet, the recommender falls
 back to its own neutral defaults. The server holds no cast, seed games or invented scores.
+The demo's New in SF world is made through the public API by `tools/demo-seed/seed.mjs` (synthetic accounts, the Group and
+the picnic Event with the app's ids, scoped copies of real Muse games, scores from replayed bot runs and today's Daily).
 
 ## Web player (for testing)
 

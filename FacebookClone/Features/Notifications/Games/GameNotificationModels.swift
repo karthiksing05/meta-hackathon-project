@@ -11,12 +11,15 @@ struct RemoteGameNotification: Decodable, Identifiable, Hashable, Sendable {
     let groupID: String?
     let challengeID: String?
     let seriesID: String?
+    var roundID: String? = nil
+    var sessionID: String? = nil
     let createdAt: Date
     var readAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case id, kind, title, body, createdAt, readAt
         case gameID = "gameId", groupID = "groupId", challengeID = "challengeId", seriesID = "seriesId"
+        case roundID = "roundId", sessionID = "sessionId"
     }
 
     var isRead: Bool { readAt != nil }
@@ -27,6 +30,9 @@ struct RemoteGameNotification: Decodable, Identifiable, Hashable, Sendable {
         case "friend_challenge": return "flag.checkered"
         case "leaderboard_lost": return "trophy.fill"
         case "viral_match": return "sparkles"
+        case "session_invite": return "person.3.sequence.fill"
+        case "round_started", "round_played": return "flag.2.crossed.fill"
+        case "daily_ready": return "sun.max.fill"
         default: return "gamecontroller.fill"
         }
     }
@@ -49,15 +55,22 @@ protocol GameNotificationsAPI: Sendable {
 
 /// Value-only routing keeps all four kinds testable without UI or a notification payload.
 enum GameNotificationDestination: Equatable, Sendable {
-    case challenges, leaderboard(String), game(String), group(String), inbox
+    case challenges, leaderboard(String), game(String), group(String), round(String), session(String), inbox
 }
 
 extension RemoteGameNotification {
     var destination: GameNotificationDestination {
         switch kind {
         case "friend_challenge": return .challenges
+        case "round_started", "round_played":
+            if let id = roundID { return .round(id) }
+            return gameID.map(GameNotificationDestination.game) ?? .inbox
+        case "session_invite":
+            if let id = sessionID { return .session(id) }
+            return groupID.map(GameNotificationDestination.group) ?? .inbox
         case "leaderboard_lost": return gameID.map(GameNotificationDestination.leaderboard) ?? .inbox
-        case "group_game":
+        case "group_game", "daily_ready":
+            // today's Daily opens the game, ready to play; without one, the Group's games
             if let id = gameID { return .game(id) }
             return groupID.map(GameNotificationDestination.group) ?? .inbox
         default: return gameID.map(GameNotificationDestination.game) ?? .inbox

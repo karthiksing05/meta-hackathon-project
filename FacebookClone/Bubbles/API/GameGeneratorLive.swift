@@ -9,12 +9,13 @@ struct GameGeneratorLive: GameGenerator {
     let api: GamesAPILive
     var pollInterval: TimeInterval { 1.5 }
 
-    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?, media: GameMediaInput) async throws -> String {
+    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?,
+               extras: NewGameExtras) async throws -> String {
         if await !api.isSignedIn { _ = try await api.signInAsDevice() }
         var payload: [String: Any] = ["request": request, "brief": Self.json(brief), "draft": draft]
+        payload.merge(extras.fields) { current, _ in current }
         if let anatomy = Self.anatomyField(anatomy) { payload["anatomy"] = anatomy }
         Self.add(sound, to: &payload)
-        media.add(to: &payload)
         let body = try JSONSerialization.data(withJSONObject: payload)
         let data = try await api.generationStart(body: body)
         return try decode(GenerationStarted.self, data).jobID

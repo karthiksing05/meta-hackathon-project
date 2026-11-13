@@ -12,6 +12,7 @@ import (
 
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/model"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/store"
 )
 
 // The game-making harness (docs/HARNESS_V2.md, steps 1–4): before a new game is composed, the API
@@ -33,12 +34,12 @@ const planEndpointBudget = 115 * time.Second
 
 // harnessContext returns the generator context for a new game, or nil when the harness is off, the job
 // changes an existing game, or anything fails.
-func (s *Server) harnessContext(ctx context.Context, job model.Job, media []map[string]any) map[string]any {
+func (s *Server) harnessContext(ctx context.Context, job model.Job, group *harness.Group, media []map[string]any) map[string]any {
 	if !s.HarnessContext || s.Harness == nil || s.Planner == nil || job.BaseGameID != "" || len(job.Context) > 0 {
 		return nil
 	}
 	var given *harness.Spec
-	req := harness.Request{Text: job.Request, Media: mediaRequestText(media)}
+	req := harness.Request{Text: job.Request, Group: group, Media: mediaRequestText(media)}
 	if job.Preferences != "" {
 		_ = json.Unmarshal([]byte(job.Preferences), &req.Preferences)
 	}
@@ -88,6 +89,8 @@ type harnessPlanIn struct {
 	Request     string               `json:"request"`
 	Preferences []harness.Preference `json:"preferences"` // the person's earlier picks between versions
 	mediaIn                          // the person's own photos and video (media.go)
+	// GroupID plans the game for a Group or Event the caller belongs to: the plan sees its name and members.
+	GroupID string `json:"groupId"`
 }
 
 // maxPreferences caps the picks a request may carry (one per axis is the usual; variants.md keeps the latest per axis).
@@ -113,6 +116,24 @@ func (s *Server) harnessPlan(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 400, fmt.Sprintf("preferences can hold up to %d picks", maxPreferences))
 		return
 	}
+	var group *harness.Group
+	if id := strings.TrimSpace(in.GroupID); id != "" {
+		g, err := s.Store.GroupByID(ctx, id)
+		if err != nil {
+			if errors.Is(err, store.ErrNotFound) {
+				writeErr(w, 404, "group not found")
+			} else {
+				s.serverErr(w, r, err)
+			}
+			return
+		}
+		u := userFrom(r)
+		if u == nil || !s.isMember(ctx, g.ID, u.ID) {
+			writeErr(w, 403, "only members can plan a game for this group")
+			return
+		}
+		group = s.groupForGame(ctx, g, u.ID)
+	}
 	items, msg := s.checkMedia(userFrom(r).ID, &in.mediaIn)
 	if msg != "" {
 		writeErr(w, 400, msg)
@@ -123,7 +144,7 @@ func (s *Server) harnessPlan(w http.ResponseWriter, r *http.Request) {
 		s.describeMedia(ctx, items, in.MediaNote)
 		media = mediaContext(items, in.MediaNote, in.MediaRestyle)
 	}
-	b, err := s.Harness.Build(ctx, harness.Request{Text: in.Request, Media: mediaRequestText(media), Preferences: in.Preferences}, s.Planner)
+	b, err := s.Harness.Build(ctx, harness.Request{Text: in.Request, Media: mediaRequestText(media), Preferences: in.Preferences, Group: group}, s.Planner)
 	switch {
 	case errors.Is(err, harness.ErrMuseNotConfigured):
 		writeErr(w, 503, "Muse is not set up on this server yet")

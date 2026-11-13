@@ -133,6 +133,8 @@ type Request struct {
 	// it after the request; understanding and the stated requirements read only Text, so the media's words never
 	// become requirements.
 	Media string `json:"media,omitempty"`
+	// Group is the Group or Event the game is made for (its name and members' display names), for the plan.
+	Group *Group `json:"group,omitempty"`
 }
 
 // Timings are in milliseconds.

@@ -623,9 +623,10 @@ struct TrackedGameGenerator: GameGenerator {
 
     var pollInterval: TimeInterval { inner.pollInterval }
 
-    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?, media: GameMediaInput) async throws -> String {
+    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?,
+               extras: NewGameExtras) async throws -> String {
         if let jobID = await tracker.takeResumeJob(for: key) { return jobID }
-        let jobID = try await inner.start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound, media: media)
+        let jobID = try await inner.start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound, extras: extras)
         await tracker.jobStarted(jobID, key: key)
         return jobID
     }
