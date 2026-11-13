@@ -33,6 +33,9 @@ authoring/verify/test-*.mjs
 !authoring/kit/look.mjs
 !authoring/kit/font-data.mjs
 !authoring/kit/vibes.mjs
+!authoring/kit/readability.mjs
+!authoring/kit/raster.mjs
+!authoring/kit/jpeg.mjs
 !authoring/kit/README.md
 !authoring/fonts/fonts.json
 !authoring/fonts/metrics.json
