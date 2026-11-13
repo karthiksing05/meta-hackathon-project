@@ -10,7 +10,7 @@
 | … | Intro slides | Demo 1 builds in the background. Don't touch the phone. | — |
 | after the stack slide | Empty Live Video slide | **Demo 1 payoff:** the finished Curio. Play it for about 10 s, then post it to Harry Potter fans. | 40 |
 | on the ranking / stack slide | — | **Demo 2:** scroll the Curios feed. A Curio plays inline with its sound. Search for something that doesn't exist, and "Make it with Muse" appears. | 25 |
-| on the collaboration slide | — | **Demo 3:** Harry Potter fans' weekly board (Max, Bayan, Artem, Kevin) → tap Add friend on someone you don't know → best of 5 with Bayan, from his profile (see PHONES.md). | 30 |
+| on the collaboration slide | — | **Demo 3:** Harry Potter fans' weekly board (Max, Bayan, Artem, Kevin) → tap Add friend on someone you don't know → best of 5 with Bayan, from Bayan's profile (see PHONES.md). | 30 |
 | end | Tagline | Phone down. Pause on the tagline. | — |
 
 Total demo time is 95 s. The talk has to fit in the rest, so stay at or under 4:45 to leave slack.
