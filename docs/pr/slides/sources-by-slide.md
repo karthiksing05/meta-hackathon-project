@@ -57,3 +57,9 @@ Karthik's ask (2026-11-13): section 3 covers the whole AI stack and how it plugs
 - "Between people": the app posts `remix`, `share`, `co_make_contribution`, `group_chat_play`, `game_night_play`, `challenge_won` and `add_friend_from_game` (`BubbleSocialSignals.post` calls on `main`); the server records `challenge_sent` and `challenge_accepted` itself (`backend/README.md`, Max's 09:04 audit). Add friend from a game is the strongest single signal (+4, RANKING 1.1). `challenge_rematch` is weighted but never sent, so it's not on the slide.
 - "In the Curio itself": 24 manifest features; bot playtest results; same-seed replayed scores, with skill spread used by Group Blend (RANKING 1.5).
 - (The "What's next" column was removed at Karthik's ask, 2026-11-13.)
+
+## Draft 14 (28 slides; Karthik's asks, 2026-11-13)
+
+- **Slide 12:** the phone now shows HeyTea: What's Your Cup? (`34a556879056d2b0e451b525`), a sponsored Curio on Prod (sponsor HeyTea, "Play now"), rendered from its Prod `manifest.json` with the runtime host. Like the other Prod brand Curios it was built by the harness plus Opus with Muse Image art, so it is not labelled "made by Muse".
+- **Old slide 26** ("Where AI helped most, where it fell short, and how we adapted") is removed; its sources above no longer map to a slide. Old 27–29 are now 26–28.
+- **Slide 27, Why it matters:** "A new form of short-form content", plus connect, learn and create. No new numbers; 3 billion is Facebook's monthly users, as before.

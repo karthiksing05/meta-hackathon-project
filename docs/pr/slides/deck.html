@@ -753,6 +753,10 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .def .dfan img { position: absolute; left: var(--x); top: var(--y); width: 230px; height: 414px; object-fit: cover; border-radius: 26px; transform: rotate(var(--r)); box-shadow: 0 0 0 6px #fff, 0 24px 50px rgba(16,24,64,.22); }
 .def .dfan p { position: absolute; bottom: 0; right: 10px; font-size: 22px; font-weight: 700; color: var(--muted); }
 .slide.aid .aidg { grid-template-columns: repeat(3, 1fr); gap: 28px; } .slide.aid .aidc em { font-size: 36px; } .slide.aid .aidc small { font-size: 19px; } .slide.aid .aidc p { font-size: 27px; padding: 13px 0; }
+.spon .sph { width: 320px; } .spon .sph img { width: 320px; height: 702px; object-fit: cover; object-position: top; border-radius: 30px; } .spon .sph figcaption small { display: block; font-size: 19px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+.spon .srow { align-items: stretch; } .spon .sgrid { align-items: stretch; } .spon .sc { display: flex; flex-direction: column; justify-content: space-between; padding: 36px 40px; } .spon .sc p { font-size: 29px; margin-top: 22px; } .spon .sc em { font-size: 28px; } .spon .sc p.sev { font-size: 23px; } .spon .sc .chip { align-self: flex-start; margin-top: 18px; }
+.cta .ctag b { font-size: 52px; letter-spacing: -.01em; }
+.cta .ctasub { font-size: 38px; font-weight: 600; color: var(--sub); margin-top: 18px; line-height: 1.3; }
 </style>
 </head>
 <body>
@@ -942,9 +946,9 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
       <p><b>A brand challenge a whole Group plays together.</b> <span class="chip srv">proposal</span></p>
       <span class="chip srv">ad targeting and payouts: proposal</span></div>
   </div>
-    <figure class="sph"><img src="img/app-sponsored.png" alt="A sponsored Curio card in the app"><figcaption>A sponsored Curio, in the app</figcaption></figure>
+    <figure class="sph"><img src="img/brand-heytea-whats-your-cup.png" alt="HeyTea: What's Your Cup?, a sponsored Curio"><figcaption>HeyTea: What's Your Cup?<small>A sponsored Curio, live on our server</small></figcaption></figure>
   </div>
-  <div class="foot"><span>Real screen from the app (main, 03303ee). Creator payouts [27].</span><span class="pg"></span></div>
+  <div class="foot"><span>HeyTea's sponsored Curio, rendered from its Prod manifest. Creator payouts [27].</span><span class="pg"></span></div>
 </section>
 
 <section class="slide sech">
@@ -1182,28 +1186,6 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
   </div>
 </section>
 
-<section class="slide wfb">
-  <div class="label">04 · How we built it · what we learned</div>
-  <h2>Where AI helped most, where it fell short, and how we adapted.</h2>
-  <div class="hfa">
-    <div class="hc h"><em>Helped most</em>
-      <p><b>Doing many things at once.</b> Five people's agents worked in parallel from one shared context. A review of every merged screen took 3 hours, not 28.</p>
-      <p><b>Checking each other.</b> Every slide draft was fact-checked by another agent against the code before anyone saw it.</p>
-      <p><b>Inside the product.</b> One sentence becomes a planned, tested Curio, with no developer in the loop.</p></div>
-    <div class="hc f"><em>Fell short</em>
-      <p><b>Muse alone guessed.</b> One giant prompt (137,000 characters) gave games that missed what people asked for, and a speed-reading game a bot could win instantly.</p>
-      <p><b>Muse Image said no.</b> Asked for a Dumbledore sprite sheet, it refused on content policy, 2 runs out of 2. And Muse's own art step undid the verifier's layout fixes.</p>
-      <p><b>Limits ran out.</b> The Muse key hit its spending limit mid-test, and billing failed partway through our requirements test.</p>
-      <p><b>Agents drifted.</b> Confident wrong facts ("~1.5 MB", "live" quiz nights), overlapping branches, and an hour without Slack.</p>
-      <p><b>People missed things.</b> An older Curio shipped with "Wave 1 of 5" at 1.48:1 contrast; 4.5:1 is the floor.</p></div>
-    <div class="hc a"><em>How we adapted</em>
-      <p><b>A harness, not a prompt.</b> Search, a plan, five bots and checkers. Must-haves met rose from 94% to 98%; the gate rejected the speed-reader three times out of three.</p>
-      <p><b>Retry, then fall back.</b> One retry with plain descriptions instead of names; if it still refuses, drawn art. Pictures are added before the final check, so fixes stick.</p>
-      <p><b>Budgets.</b> A cap on Muse calls per agent, and a human OK before any big batch.</p>
-      <p><b>Shared rules.</b> CLAUDE.md, a canvas where agents claim work, one Slack thread per handoff, and a review on every draft.</p>
-      <p><b>Code checks people.</b> The contrast check now blocks that game: 33 issues. Old Curios are re-run through it.</p></div>
-  </div>
-</section>
 
 <section class="slide strug">
   <div class="label">04 · Our process · what the harness taught us</div>
@@ -1214,13 +1196,14 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 
 <section class="slide cta">
   <div class="label">Why it matters</div>
-  <h2>Through Curios, we will:</h2>
+  <h2>A new form of <span class="grad">short-form content</span>.</h2>
+  <p class="ctasub">One you play, not just watch. A Curio can be anything. What will yours be?</p>
   <div class="ctag">
-    <div><b>1</b><p><strong>End the awkward first conversation,</strong> with someone new or an old friend: "beat my score?" beats "so, what do you do?"</p></div>
-    <div><b>2</b><p><strong>Create a new kind of short-form media:</strong> the kind you play, not just watch.</p></div>
-    <div><b>3</b><p><strong>Make everyone a creator,</strong> free to imagine their own ways to have fun, with AI that makes every game personal.</p></div>
+    <div><b>Connect</b><p><strong>Break the ice with someone new,</strong> catch up with an old friend, or give a quiet Group something to share.</p></div>
+    <div><b>Learn</b><p><strong>Anything you can explain, someone can play:</strong> a lesson, a language, a quiz on what you learned today.</p></div>
+    <div><b>Create</b><p><strong>A story, an inside joke, a brand, a world of your own.</strong> No code, no template, no limit but your imagination.</p></div>
   </div>
-  <div class="ctab"><span>Tonight, make a Curio and send it to someone you want to know better.</span><em>Let's give 3 billion people a reason to play together.</em></div>
+  <div class="ctab"><span>Make one for a friend, for your Group, or for everyone.</span><em>Let's give 3 billion people a reason to play together.</em></div>
 </section>
 
 <section class="slide close">

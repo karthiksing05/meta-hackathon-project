@@ -1,14 +1,14 @@
-# Speaker notes and timing (draft 13)
+# Speaker notes and timing (draft 14)
 
-*Shape follows the organizers' guidance (2026-11-13): the problem (30–45 s), the demo as one complete journey (about 2.5 min), how Muse powers it (about 45 s), how we built it with AI (about 60 s). Thesis (Karthik): there's no better way to connect than playing a game. Slide numbers match the Keynote deck (29 slides; the live phones are on slides 10 and 11).*
+*Shape follows the organizers' guidance (2026-11-13): the problem (30–45 s), the demo as one complete journey (about 2.5 min), how Muse powers it (about 45 s), how we built it with AI (about 60 s). Thesis (Karthik): there's no better way to connect than playing a game. Slide numbers match the Keynote deck (28 slides; the live phones are on slides 10 and 11).*
 
 | Slides | Section | Talk | Running total |
 |---|---|---|---|
 | 1–7 | 01 The problem, ending on the thesis | 55 s | 0:55 |
 | 8–12 | 02 The demo, live on Karthik's iPhone (Bayan's phone joins on 11) | 2:30 | 3:25 |
 | 13–21 | 03 The AI stack: make, check, rank, learn, and where it lives in Facebook | 2:20 | 5:45 |
-| 22–27 | 04 Our process, ending on what the harness taught us | 1:30 | 7:15 |
-| 28–29 | Call to action and tagline | 10 s | 7:25 |
+| 22–26 | 04 Our process, ending on what the harness taught us | 1:15 | 7:00 |
+| 27–28 | Why it matters (call to action) and tagline | 20 s | 7:20 |
 
 **Pre-show checklist (the morning of the demo, on the presenting phone):**
 1. Signed in as the presenter's own account, member of the demo Group.
@@ -100,13 +100,10 @@ Here's what that looks like. Kevin asked for a sound library at 1:26 in the morn
 The real trick wasn't any one agent. It was keeping five people's agents in sync. Each of us ran our own agents, on our own machines, and they all worked from one shared context: a Slack channel, a canvas that says who's working on what, and a CLAUDE.md file every agent reads first. Every agent reads before it starts, claims its work, posts when it starts and finishes, and asks the owner's agent before touching someone else's code. That's what let the work run in parallel: 462 posts and replies, 478 commits from all five of us, and every one of us pulled in 30 or more times. Nobody, human or agent, lost the thread.
 
 ## 26
-AI fell short when Muse guessed from one giant prompt, when Muse Image refused franchise names, and when agents stated wrong facts confidently. So we built the harness, retries and budgets, and let code check our work.
-
-## 27
 And the harness itself taught us the most. One giant prompt of 137,000 characters missed what people asked for, so now we search the catalog first and send Muse only what the plan picked: must-haves met went from 94 to 98 percent. Muse Image refused franchise names, so we retry once with a plain description, then fall back to drawn art. Muse's own art step undid the verifier's layout fixes, so we keep the verified layout and check again. Wikipedia timed out, so we waited longer and built without it if needed. Parallel steps took a build from 197 to 161 seconds. And people missed unreadable text, so code checks every frame.
 
-## 28
-Through Curios, we'll end the awkward first conversation, with someone new or an old friend, create a new kind of short-form media you play, and make everyone a creator. Sending one is its own love language: "I played this and thought of you." So tonight: make a Curio, and send it to someone you want to know better.
+## 27
+So here's the takeaway: Curios are a new form of short-form content, one you play, not just watch. And a Curio isn't one thing. It can connect you: break the ice with someone new, catch up with an old friend, or give a quiet Group something to share. It can teach: anything you can explain, someone can play. And it can be pure creation: a story, an inside joke, a brand, a world of your own, with no code and no limit but your imagination. So make one: for a friend, for your Group, or for everyone. Let's give 3 billion people a reason to play together.
 
-## 29
+## 28
 *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.

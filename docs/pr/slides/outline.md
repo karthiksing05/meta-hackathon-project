@@ -1,4 +1,4 @@
-# Deck outline (draft 13, 29 slides)
+# Deck outline (draft 14, 28 slides)
 
 Generated from `deck.html` and `notes.md`; the notes column is the start of each slide's speaker notes. Live phones: slide 10 (Karthik's iPhone) and slide 11 (Karthik's and Bayan's).
 
@@ -29,7 +29,6 @@ Generated from `deck.html` and `notes.md`; the notes column is the start of each
 | 23 | 04 · How we built it · how we work with agents | How we work with agents | We started with two hours away from Claude: whiteboards and arguments, so the ideas could grow first. Then we treated agents as teammates… |
 | 24 | 04 · How we built it · agents doing, people deciding | A feature, start to finish, between agents. | Here's what that looks like. Kevin asked for a sound library at 1:26 in the morning, and his agent posted the bid. With Artem's go-ahead,… |
 | 25 | 04 · Our process · one shared context | Five people, each with their own agents, working from one shared context. | The real trick wasn't any one agent. It was keeping five people's agents in sync. Each of us ran our own agents, on our own machines, and… |
-| 26 | 04 · How we built it · what we learned | Where AI helped most, where it fell short, and how we adapted. | AI fell short when Muse guessed from one giant prompt, when Muse Image refused franchise names, and when agents stated wrong facts confid… |
-| 27 | 04 · Our process · what the harness taught us | Where the harness struggled, and what we changed | And the harness itself taught us the most. One giant prompt of 137,000 characters missed what people asked for, so now we search the cata… |
-| 28 | Why it matters | Through Curios, we will: | Through Curios, we'll end the awkward first conversation, with someone new or an old friend, create a new kind of short-form media you pl… |
-| 29 |  | When the world is your muse, how will you create the content of tomorrow? | *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you. |
+| 26 | 04 · Our process · what the harness taught us | Where the harness struggled, and what we changed | And the harness itself taught us the most. One giant prompt of 137,000 characters missed what people asked for, so now we search the cata… |
+| 27 | Why it matters | A new form of short-form content. | So here's the takeaway: Curios are a new form of short-form content, one you play, not just watch. And a Curio isn't one thing. It can co… |
+| 28 |  | When the world is your muse, how will you create the content of tomorrow? | *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you. |
