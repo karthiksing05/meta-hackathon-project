@@ -8,6 +8,11 @@ import SwiftUI
 /// DEBUG launch variables (with `FB_OPEN=studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`,
 /// `next:<id>` or `daily:<groupID>`; see `App/DebugLaunch.swift`):
 /// - `FB_STUDIO_SCROLL=look|sources|anatomy|customize`: scroll a step to that section.
+/// - `FB_STUDIO_BUILD=1`: goes through Describe and Brief and starts the build (with
+///   `studio:<prompt>`); `FB_STUDIO_BUILD=answer` also answers Muse's first open question once
+///   the build runs, so Try offers it as a quick change; `apply` then makes that change on Try;
+///   `cancel` stops the build after 8 s. Point `FB_API_URL` at a local stand-in server for
+///   these: a real build makes a game on the live server.
 ///
 /// Every game is made on the server (`/v1/generate`); there is no scripted or offline run.
 ///
@@ -54,6 +59,9 @@ struct StudioView: View {
         .onDisappear {
             model.stopAll()
         }
+        #if DEBUG
+        .task { await debugAutoBuild() }
+        #endif
         .studioNarration(model)
         .confirmationDialog(closeTitle, isPresented: $isConfirmingClose, titleVisibility: .visible) {
             Button(model.isEditMode ? "Discard changes" : "Discard", role: .destructive) {
@@ -88,6 +96,39 @@ struct StudioView: View {
             }
         }
     }
+
+    #if DEBUG
+    /// `FB_STUDIO_BUILD` (see the top of this file).
+    private func debugAutoBuild() async {
+        guard let how = DebugLaunch.value("FB_STUDIO_BUILD"), model.mode == .create else { return }
+        try? await Task.sleep(nanoseconds: 600_000_000)
+        model.draftBrief()
+        try? await Task.sleep(nanoseconds: 1_200_000_000)
+        model.startCompose(.create)
+        if how == "cancel" {
+            try? await Task.sleep(nanoseconds: 8_000_000_000)
+            model.cancelCompose()
+            return
+        }
+        guard how == "answer" || how == "apply" else { return }
+        for _ in 0..<120 {
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            let thread = model.anatomyThread
+            if !model.isWaitingForAnatomy, model.isComposing, let anatomy = thread.anatomy,
+               let slot = anatomy.openQuestions.first, let option = anatomy.meta(slot: slot)?.options.last {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                thread.answer(option, slot: slot)
+                break
+            }
+        }
+        guard how == "apply" else { return }
+        while !Task.isCancelled, model.stage != .tryIt || model.isComposing {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+        }
+        try? await Task.sleep(nanoseconds: 3_000_000_000)
+        model.applyBuildChanges()
+    }
+    #endif
 
     private var stageTransition: AnyTransition {
         let offset = CGFloat(40 * model.direction)

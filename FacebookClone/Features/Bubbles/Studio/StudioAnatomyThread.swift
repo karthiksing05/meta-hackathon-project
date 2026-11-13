@@ -54,6 +54,12 @@ final class StudioAnatomyThread {
     private(set) var hasLocalChanges = false
     /// "Change the game" turns, oldest first.
     private(set) var turns: [Turn] = []
+    /// The anatomy the current game was built from (Studio's first build, or its last quick
+    /// change). Edits and answers made after it differ from it, and become a quick change.
+    private(set) var builtFrom: GameAnatomy?
+    /// The build started before Muse's first read arrived: that read becomes `builtFrom` (it's
+    /// Muse's own read, not a change the person made).
+    @ObservationIgnored private var takesNextDraftAsBuilt = false
 
     @ObservationIgnored private var task: Task<Void, Never>?
     /// The engine's fragment ids, for calibrating Muse's familiarity (empty if the catalog didn't load).
@@ -142,6 +148,10 @@ final class StudioAnatomyThread {
         } else {
             lastReply = nil
             highlighted = []
+            if takesNextDraftAsBuilt {
+                takesNextDraftAsBuilt = false
+                builtFrom = new
+            }
         }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
             anatomy = new
@@ -265,6 +275,34 @@ final class StudioAnatomyThread {
         anatomy.map { $0.agreedText(request: request) }
     }
 
+    /// A new game's build just sent the anatomy as it is now (or none yet: Muse's first read,
+    /// when it lands, counts as what was built).
+    func markBuildStarted() {
+        builtFrom = anatomy
+        takesNextDraftAsBuilt = anatomy == nil
+    }
+
+    /// The game now follows the anatomy as it is (a quick change was made, or the person chose to
+    /// keep the game as it is).
+    func acceptAsBuilt() {
+        builtFrom = anatomy
+        takesNextDraftAsBuilt = false
+    }
+
+    /// What the person changed since the game's build started: rewritten parts and rules, and
+    /// answers to Muse's questions. Nil when nothing changed.
+    var changesSinceBuild: AnatomyBuildChanges? {
+        guard let base = builtFrom, let now = anatomy else { return nil }
+        let slots = now.changedSlots(from: base)
+        let answers: [AnatomyBuildChanges.Answer] = now.allMetas.compactMap { item in
+            guard let question = item.meta.question, let answer = item.meta.answer,
+                  base.meta(slot: item.slot)?.answer != answer else { return nil }
+            return AnatomyBuildChanges.Answer(slot: item.slot, question: question, answer: answer)
+        }
+        guard !slots.isEmpty || !answers.isEmpty else { return nil }
+        return AnatomyBuildChanges(slots: slots, answers: answers)
+    }
+
     func cancel() {
         task?.cancel()
         task = nil
@@ -308,6 +346,52 @@ final class StudioAnatomyThread {
         default:
             return "Muse couldn't \(what) just now. Try again."
         }
+    }
+}
+
+/// Edits and answers made to "How the game works" after the game's build started (Studio shows
+/// the anatomy while Muse builds). They go in as one quick change once the game exists.
+struct AnatomyBuildChanges: Equatable {
+    struct Answer: Equatable {
+        var slot: String
+        var question: String
+        var answer: String
+    }
+
+    /// Parts and rules whose wording changed.
+    var slots: [String]
+    var answers: [Answer]
+
+    var count: Int { Set(slots + answers.map(\.slot)).count }
+
+    /// What the person did, in Muse's voice: "changed rule 2 and answered my question about the
+    /// pieces".
+    func whatYouDid(in anatomy: GameAnatomy) -> String {
+        var bits: [String] = []
+        let edited = GameAnatomy.unique(slots.map { anatomy.label(slot: $0) })
+        if !edited.isEmpty { bits.append("changed \(GameAnatomy.list(edited))") }
+        let answered = answers.filter { !slots.contains($0.slot) }
+        if answered.count == 1 {
+            bits.append("answered my question about \(anatomy.label(slot: answered[0].slot))")
+        } else if answered.count > 1 {
+            bits.append("answered \(answered.count) of my questions")
+        }
+        return bits.joined(separator: " and ")
+    }
+
+    /// The change the server makes (`GameRevision.change`, at most 1,800 characters): what
+    /// changed and its new wording. The whole updated anatomy goes along as `anatomy`.
+    func changeText(in anatomy: GameAnatomy) -> String {
+        var lines = ["While the game was being made, the person changed how it works. Make these changes and keep every other part as it is."]
+        for slot in slots {
+            let label = GameAnatomy.sentence(anatomy.label(slot: slot))
+            lines.append("- \(label): \(anatomy.text(slot: slot) ?? "removed")")
+        }
+        if !answers.isEmpty {
+            lines.append("Their answers:")
+            lines += answers.map { "- \($0.question) \($0.answer)" }
+        }
+        return lines.joined(separator: "\n")
     }
 }
 
@@ -365,11 +449,30 @@ extension StudioModel {
         }
     }
 
+    /// Edits and answers made on the Build step while the first version was being made.
+    var buildChanges: AnatomyBuildChanges? {
+        showsAnatomyCard ? anatomyThread.changesSinceBuild : nil
+    }
+
+    /// Makes the Build step's edits and answers as one quick change to the game that was just
+    /// made (a change on the server, with the updated anatomy).
+    func applyBuildChanges() {
+        guard !isComposing, let changes = anatomyThread.changesSinceBuild, let anatomy = anatomyThread.anatomy else { return }
+        pendingChangeRun = true
+        startCompose(.tweak, text: changes.changeText(in: anatomy), anatomy: agreedAnatomyText)
+    }
+
+    /// Keeps the game as it is: the edits stay in "How the game works" but aren't offered again.
+    func keepBuildAsIs() {
+        anatomyThread.acceptAsBuilt()
+    }
+
     /// Makes a mapped change: the updated anatomy becomes the agreed one and the tweak path
     /// rebuilds the game with its changed parts (a change on the server).
     func makeAnatomyChange(_ id: UUID) {
         guard !isComposing, let text = anatomyThread.confirm(id) else { return }
         startCompose(.tweak, text: text, anatomy: agreedAnatomyText)
+        anatomyThread.acceptAsBuilt()
     }
 
     /// Muse couldn't map it: make the change from the person's words alone.

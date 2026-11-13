@@ -1,14 +1,19 @@
 import SwiftUI
 
-/// Turns Studio's progress into `MuseNarrator` lines: drafting the brief, each step of the Build
-/// timeline, the playtest verdict and Try. Lines are written here from the events Studio already
-/// has (step and title); nothing asks Muse for them. Attach once, on `StudioView`.
+/// Turns Studio's progress into `MuseNarrator` lines: the brief, each step of the Build timeline,
+/// the playtest verdict and Try. Lines are written here from the events Studio already has (step
+/// and title); nothing asks Muse for them. Attach once, on `StudioView`.
+///
+/// One line per moment: a build that just finished already said it's ready, so arriving on Try
+/// right after it says nothing more (the done line tells them to play).
 struct StudioNarration: ViewModifier {
     let model: StudioModel
 
     @State private var narrator = MuseNarrator.shared
     /// Steps already said in this build, so repeated events (two fix rounds) say it once.
     @State private var saidSteps: Set<StudioStep> = []
+    /// When the last build said its done line.
+    @State private var saidReadyAt: Date?
 
     func body(content: Content) -> some View {
         content
@@ -24,6 +29,9 @@ struct StudioNarration: ViewModifier {
                     narrator.say(StudioNarrationCopy.briefReady)
                 }
             }
+            .onChange(of: model.isWaitingForAnatomy) { _, waiting in
+                if waiting { narrator.say(StudioNarrationCopy.readingAnatomy) }
+            }
             .onChange(of: model.events.count) { old, new in
                 if new < old || new == 0 { saidSteps = [] }
                 guard new > old, let event = model.events.last else { return }
@@ -32,12 +40,17 @@ struct StudioNarration: ViewModifier {
             .onChange(of: model.failure?.message) { _, message in
                 if message != nil { narrator.say(StudioNarrationCopy.failed, urgent: true) }
             }
-            .onChange(of: model.stage) { _, stage in
+            .onChange(of: model.stage) { old, stage in
                 narrator.holdForGame = false
                 switch stage {
+                case .brief where old == .ask:
+                    narrator.say(StudioNarrationCopy.briefReady)
                 case .tryIt:
-                    narrator.say(StudioNarrationCopy.tryIt)
-                    // After this line, stay quiet while they play.
+                    // Straight from a build: its done line already said to play.
+                    if saidReadyAt.map({ Date().timeIntervalSince($0) > 8 }) ?? true {
+                        narrator.say(StudioNarrationCopy.tryIt)
+                    }
+                    // After this, stay quiet while they play.
                     narrator.holdForGame = true
                 case .float:
                     narrator.say(StudioNarrationCopy.share)
@@ -51,7 +64,12 @@ struct StudioNarration: ViewModifier {
     }
 
     private func narrate(_ event: StudioEvent) {
-        if event.step == .done || event.step == .failed {
+        if event.step == .done {
+            saidReadyAt = Date()
+            narrator.say(model.buildChanges == nil ? StudioNarrationCopy.ready : StudioNarrationCopy.readyWithChanges, urgent: true)
+            return
+        }
+        if event.step == .failed {
             narrator.say(StudioNarrationCopy.line(for: event), urgent: true)
             return
         }
@@ -72,6 +90,9 @@ extension View {
 enum StudioNarrationCopy {
     static let draftingBrief = "Muse is reading your idea and writing a brief."
     static let briefReady = "Here's the brief. Change anything you like, then build it."
+    static let readingAnatomy = "Muse is finishing how the game works, then it starts building."
+    static let ready = "It passed the playtest. Give it a try."
+    static let readyWithChanges = "It's ready. Play it, then add your changes if you like."
     static let tryIt = "It's ready. Give it a try."
     static let share = "Pick who to share it with."
     static let failed = "Muse hit a snag. You can try again."
@@ -88,7 +109,7 @@ enum StudioNarrationCopy {
         case .playtest: return "Now playtesting with bots."
         case .cover: return "Painting the cover."
         case .polish: return "Final touches."
-        case .done: return "It passed. Your \(ProductName.singular) is ready."
+        case .done: return ready
         case .failed: return failed
         }
     }
