@@ -25,7 +25,9 @@ const NOT_THEME = new Set((
   'should would could maybe also each every other another them him her his hers using use set made gets get got ' +
   'find found real before after over under out off down back first last next big small good bad best worst ' +
   'quiz trivia post posts result results build building pass phone sleepover daily puzzle story stories ' +
-  'beat high highest low lowest keep keeps start end ending endings hit hits miss misses go goes going'
+  'beat high highest low lowest keep keeps start end ending endings hit hits miss misses go goes going ' +
+  'different than figure same similar instead rather else whatever anything sort kinda pls please feature ' +
+  'featuring featured centered based around version'
 ).split(/\s+/));
 
 // Fragments that make a run harder over time.

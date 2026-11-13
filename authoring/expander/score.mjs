@@ -90,7 +90,11 @@ export function normalizeScore(raw) {
   if (raw.format === undefined || raw.format === null) out.format = out.unit && !isTimeFormat(base.format) && base.format === '{n}' ? `{n} ${out.unit}` : base.format;
   else if (!validFormat(raw.format)) { err('A_SCORE_FORMAT', '/format', `score.format "${raw.format}" isn't a format`, 'use text with one {n} ("{n} orders", "{n}%") or a time: m:ss.t, m:ss, s.t'); out.format = base.format; }
   else out.format = raw.format;
-  if (out.source === 'time' && !isTimeFormat(out.format)) warn('W_SCORE_FORMAT', '/format', `a time score reads best as m:ss.t, not "${out.format}"`);
+  // A time score is whole milliseconds; "{n} ms" would show 83400 ms (Kevin32 #24). It always reads as a time.
+  if (out.source === 'time' && !isTimeFormat(out.format)) {
+    warn('W_SCORE_FORMAT', '/format', `a time score reads as m:ss.t, not "${out.format}"; set to m:ss.t`);
+    out.format = 'm:ss.t';
+  }
 
   // The kind fixes the direction and the finish rule where the other choice can't be ranked fairly.
   if (known && kind === 'time_to_complete' && out.direction !== 'lower') err('A_SCORE_DIRECTION', '/direction', 'a time to complete ranks the fastest first: direction must be "lower"');

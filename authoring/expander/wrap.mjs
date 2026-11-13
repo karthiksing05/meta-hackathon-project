@@ -86,8 +86,18 @@ export function wrapGame(opts) {
   };
 }
 
-function firstSentence(s) {
+// Words whose period doesn't end a sentence ("Mr. Beast hosts…", Kevin32 #2).
+const ABBREVIATIONS = new Set(['mr', 'mrs', 'ms', 'dr', 'st', 'jr', 'sr', 'vs', 'prof', 'mt', 'no', 'etc', 'e.g', 'i.e', 'approx', 'inc', 'ltd', 'co']);
+
+export function firstSentence(s) {
   if (typeof s !== 'string') return '';
-  const m = /^(.+?[.!?])(\s|$)/.exec(s.trim());
-  return (m ? m[1] : s.trim());
+  const text = s.trim();
+  const re = /[.!?](?=\s|$)/g;
+  for (let m = re.exec(text); m; m = re.exec(text)) {
+    const before = /([A-Za-z.]+)$/.exec(text.slice(0, m.index))?.[1] ?? '';
+    const word = before.toLowerCase();
+    if (text[m.index] === '.' && (ABBREVIATIONS.has(word) || /^[a-z]$/i.test(before))) continue; // Mr. / J. R. R.
+    return text.slice(0, m.index + 1);
+  }
+  return text;
 }

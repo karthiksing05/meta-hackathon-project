@@ -32,6 +32,17 @@ const sys = P.system({ prompt: {}, game_format: 'microgame/0.1' });
 ok(/never draw maps or write coordinates yourself/.test(sys), 'the system prompt has the maps line');
 ok(/keep their real names/.test(sys) && /never photorealistic/.test(sys) && /recorded songs/.test(sys) && !/and no real people\./.test(sys), 'names: real names allowed; no photoreal people; no copied recordings');
 
+// ---- Kevin32 small bugs ----
+{
+  const { firstSentence } = await import('../expander/wrap.mjs');
+  const { themeWords } = await import('../expander/quality.mjs');
+  const { normalizeScore } = await import('../expander/score.mjs');
+  ok(firstSentence('Mr. Beast asks the questions. Answer fast.') === 'Mr. Beast asks the questions.', 'one_line_rule isn\'t cut at "Mr." (#2)');
+  ok(firstSentence('Tap the cats! Then win.') === 'Tap the cats!' && firstSentence('No end') === 'No end', 'ordinary sentences');
+  ok(themeWords('Wordle but with a different thing than a word. You figure out what').join() === 'wordle,word', 'filler request words aren\'t theme words (#12)');
+  ok(normalizeScore({ kind: 'time_to_complete', format: '{n} ms' }).score.format === 'm:ss.t', 'a time score never ships as {n} ms (#24)');
+}
+
 // ---- the scene step, pure ----
 const scene = read('examples/group_chat_scene.json');
 const diffGame = read('examples/group_chat_diff.authoring.json');
