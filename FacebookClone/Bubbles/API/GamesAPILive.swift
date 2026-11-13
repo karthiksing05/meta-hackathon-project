@@ -363,7 +363,17 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     }
 
     func signOut() async {
-        if let refresh = tokens?.refreshToken, let body = try? JSONSerialization.data(withJSONObject: ["refreshToken": refresh]) {
+        await signOut(installationID: nil)
+    }
+
+    /// `POST /v1/auth/logout {refreshToken, installationId?}`: with the installation, the server also
+    /// revokes this phone's push device for the account (backend/README.md, Notifications), backing
+    /// up the app's own `DELETE /v1/me/push-devices/{id}`.
+    func signOut(installationID: String?) async {
+        var payload: [String: Any] = [:]
+        if let refresh = tokens?.refreshToken { payload["refreshToken"] = refresh }
+        if let installationID, !installationID.isEmpty { payload["installationId"] = installationID }
+        if payload["refreshToken"] != nil, let body = try? JSONSerialization.data(withJSONObject: payload) {
             _ = try? await send("POST", "v1/auth/logout", body: body, contentType: "application/json", auth: .none)
         }
         clearTokens()

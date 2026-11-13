@@ -95,7 +95,7 @@ final class GamesAccount {
         GamePushNotifications.shared.clearForSignOut()
         GameNotificationInbox.shared.useAccount(nil)
         let api = GamesAPILive.shared
-        await api.signOut()
+        await api.signOut(installationID: GamePushNotifications.installationID)
         await api.setAutoSignIn(false)
         user = nil
         state = .signedOut
