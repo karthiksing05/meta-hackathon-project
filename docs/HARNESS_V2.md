@@ -477,7 +477,7 @@ sending.
   a `reason`; otherwise Go puts the default back.
 - **Repair:** parts that still fail get one repair round. Anything left goes in `spec_issues`.
 
-**Behind `HARNESS_CONTEXT=1`, off by default:**
+**On by default since 2026-11-12 (Karthik). `HARNESS_CONTEXT=0` or `off` is the kill switch:**
 - the API runs steps 1–4 for each new game (100 s budget) and sets `Job.Context`; any failure sends no context;
 - `POST /v1/harness/plan {request}` returns `{plan, clarify, spec, types, timings}`, so the app can ask the 0–2
   questions before the build.

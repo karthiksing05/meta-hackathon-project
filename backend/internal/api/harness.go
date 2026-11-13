@@ -15,8 +15,8 @@ import (
 
 // The game-making harness (docs/HARNESS_V2.md, steps 1–4): before a new game is composed, the API
 // understands the request, retrieves game types and tools from the catalog, looks up unknown games and
-// plans the game, then hands the generator that `context`. It is off unless HARNESS_CONTEXT=1, and
-// best-effort: on any failure the job runs exactly as before, with no context.
+// plans the game, then hands the generator that `context`. It is on by default (HARNESS_CONTEXT=0 or off
+// turns it off) and best-effort: on any failure the job runs exactly as before, with no context.
 //
 //	POST /v1/harness/plan {request} -> {plan, clarify, spec, types, timings}
 //

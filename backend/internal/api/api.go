@@ -42,8 +42,8 @@ type Options struct {
 	GenerateConcurrent int
 	GeneratePerHour    int
 
-	// The game-making harness (internal/harness). HarnessContext (HARNESS_CONTEXT=1) turns on the job context
-	// and POST /v1/harness/plan; off by default.
+	// The game-making harness (internal/harness). HarnessContext turns on the job context and
+	// POST /v1/harness/plan; on by default, HARNESS_CONTEXT=0 turns it off.
 	HarnessContext bool
 	Harness        *harness.Harness
 	Planner        *harness.Planner

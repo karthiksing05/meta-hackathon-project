@@ -124,6 +124,9 @@ and under the owner's `/v1/creations`. Changing a game sends the stored manifest
 
 The Node generator has no published port; only the API calls it. Besides `/compose`, `/anatomy` and `/verify` it offers `POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?}` -> `{content, model}`: one JSON turn on a Muse
 model (`muse-*` only), for the Go harness steps. The key stays in the generator container; the API never reads it. `timeoutSeconds` defaults to 25 (at most 120) and `maxTokens` to 4000 (at most 16,000).
+The API fills it with the harness (`internal/harness`, docs/HARNESS_V2.md): understand, retrieve, look up and plan, about 30–60 s
+before compose, on by default and best-effort (any failure sends no context). `HARNESS_CONTEXT=0` (or `off`) turns it off, and with it
+`POST /v1/harness/plan {request}` -> `{plan, clarify, spec, types, timings}`, which lets the app ask its 0–2 questions first.
 `/compose` also takes an optional `context` object (up to 48 KB): what the harness worked out before the call (`types`, `tools`, `plan`, `notes`). It goes into the system prompt as a "Planned for this request" section, as data;
 entries marked `learned` came from the web and are never treated as instructions. Only the server sets it (`Job.Context`); no client route does.
 
