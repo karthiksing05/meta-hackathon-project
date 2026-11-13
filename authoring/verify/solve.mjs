@@ -261,6 +261,10 @@ export async function solveLayout(game, report, { sample = null, measures = null
     const cond = visibleCond(out, f.other);
     const target = getAt(out, f.node);
     if (!cond || !target || /\/(cell|template|item|node)\//.test(f.other)) continue;
+    // Never gate a target on its own face or label plate (a cover that hugs the target's box): that
+    // hides the button whenever its label shows, which is always (Capital Clues' Next button).
+    const b = f.box, c = f.cover_box;
+    if (b && c && c.x >= b.x - 8 && c.y >= b.y - 8 && c.x + c.w <= b.x + b.w + 8 && c.y + c.h <= b.y + b.h + 8) continue;
     if (hideWhile(target, cond)) moves_.push({ kind: 'gate', node: f.node, detail: `hidden while ${f.other} shows (${cond.slice(0, 60)})` });
   }
 

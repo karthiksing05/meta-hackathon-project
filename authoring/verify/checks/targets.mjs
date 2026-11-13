@@ -75,7 +75,10 @@ export const check = {
       for (const t of s.targets) {
         if (t.last < 0) continue;
         const ta = area(t.box);
-        const covers = items.filter((it) => it.i > t.last && !it.handler && ['rect', 'image', 'poly'].includes(it.op.op) && opacityOf(it.op) >= 0.85 && it.role !== 'actor');
+        // A shape that hugs the target (inside its box grown by 8 units) is the button's own face or
+        // the plate behind its label, not an overlay: a tap on it is meant to reach the button.
+        const hugs = (c) => c.box.x0 >= t.box.x0 - 8 && c.box.y0 >= t.box.y0 - 8 && c.box.x1 <= t.box.x1 + 8 && c.box.y1 <= t.box.y1 + 8;
+        const covers = items.filter((it) => it.i > t.last && !it.handler && ['rect', 'image', 'poly'].includes(it.op.op) && opacityOf(it.op) >= 0.85 && it.role !== 'actor' && !hugs(it));
         // The covered part: the largest single cover, or the union area of covers (bounded).
         let covered = 0;
         let cover = null;
