@@ -1,5 +1,7 @@
-// Command dbinit creates the MongoDB indexes. It is run by hand (or by deploy/dbinit.sh) when the
-// schema changes, never as part of a routine API restart. It is idempotent.
+// Command dbinit creates the MongoDB indexes and seeds the game catalog (game_types, game_tools) from
+// authoring/catalog/ (or $HARNESS_CATALOG). It is run by hand (or by deploy/dbinit.sh), never as part of a
+// routine API restart. It is idempotent: seeding upserts seed and reviewed entries and never overwrites
+// learned ones.
 package main
 
 import (
@@ -8,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/store"
 )
 
@@ -33,4 +36,22 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("indexes ok")
+
+	if _, ok := harness.FindCatalogDir(); !ok {
+		fmt.Println("catalog: not found, skipped (set HARNESS_CATALOG)")
+		return
+	}
+	src := &harness.DirSource{}
+	cat, err := src.Load(ctx)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "catalog:", err)
+		os.Exit(1)
+	}
+	rep, err := harness.SeedMongo(ctx, m.Database(), cat)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "catalog:", err)
+		os.Exit(1)
+	}
+	fmt.Printf("catalog ok: %d types, %d tools seeded; %d learned kept, %d learned added; %d invalid skipped\n",
+		rep.Types, rep.Tools, rep.KeptLearned, rep.LearnedAdded, len(src.Skipped))
 }
