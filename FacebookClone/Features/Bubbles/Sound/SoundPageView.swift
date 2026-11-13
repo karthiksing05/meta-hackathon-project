@@ -59,6 +59,7 @@ struct SoundPageView: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal, FBMetrics.screenPadding)
                 grid
+                credit(sound)
             }
             .padding(.top, FBSpacing.m)
             .padding(.bottom, FBSpacing.xl)
@@ -104,6 +105,11 @@ struct SoundPageView: View {
                     Text("Original sound")
                         .font(.fbMicroEmphasized)
                         .foregroundStyle(FBColor.accent)
+                }
+                if !sound.tags.isEmpty {
+                    Text(sound.tags.filter { !$0.hasSuffix("energy") }.prefix(3).map { $0.capitalized }.joined(separator: " · "))
+                        .font(.fbMicroEmphasized)
+                        .foregroundStyle(FBColor.secondaryText)
                 }
             }
             Spacer(minLength: 0)
@@ -156,6 +162,25 @@ struct SoundPageView: View {
                         .buttonStyle(.plain)
                 }
             }
+        }
+    }
+
+    /// The track's licence credit (CC BY needs it wherever the track is used), with its source page.
+    @ViewBuilder
+    private func credit(_ sound: RemoteSound) -> some View {
+        if let attribution = sound.attribution {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(attribution)
+                    .font(.fbMicro)
+                    .foregroundStyle(FBColor.tertiaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let url = sound.sourceURL {
+                    Link("Source", destination: url)
+                        .font(.fbMicroEmphasized)
+                }
+            }
+            .padding(.horizontal, FBMetrics.screenPadding)
+            .accessibilityElement(children: .combine)
         }
     }
 
