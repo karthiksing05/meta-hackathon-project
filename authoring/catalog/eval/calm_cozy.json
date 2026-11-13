@@ -1,0 +1,32 @@
+[
+  {
+    "request": "a zen garden I can rake with my friends",
+    "expect": [
+      "zen_sand_garden_rake"
+    ]
+  },
+  {
+    "request": "shared garden for our friend group",
+    "expect": [
+      "shared_group_garden"
+    ]
+  },
+  {
+    "request": "pop it fidget game",
+    "expect": [
+      "pop_it_fidget_board"
+    ]
+  },
+  {
+    "request": "unpacking style tidy game",
+    "expect": [
+      "tidy_up_object_sorting"
+    ]
+  },
+  {
+    "request": "a breathing exercise game",
+    "expect": [
+      "guided_breathing_pacer"
+    ]
+  }
+]
