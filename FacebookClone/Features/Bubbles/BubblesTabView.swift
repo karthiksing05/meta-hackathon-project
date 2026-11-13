@@ -163,12 +163,17 @@ struct BubblesTabView: View {
             like: { bubble in
                 Haptics.light()
                 bubbleStore.toggleLike(bubble)
+                if bubble.isLiked {
+                    GameRecommender.shared.note(.liked, gameID: bubble.id)
+                }
             },
             openBoard: { bubble in
+                GameRecommender.shared.note(.openedBoard, gameID: bubble.id)
                 router.push(.bubbleBoard(bubble.id))
             },
             remix: { bubble in
                 Haptics.light()
+                GameRecommender.shared.note(.remixed, gameID: bubble.id)
                 router.openStudio(StudioLaunch(mode: .remix, baseBubbleID: bubble.id))
             },
             float: { bubble in
@@ -178,6 +183,9 @@ struct BubblesTabView: View {
             save: { bubble in
                 Haptics.light()
                 bubbleStore.toggleSave(bubble)
+                if bubble.isSaved {
+                    GameRecommender.shared.note(.saved, gameID: bubble.id)
+                }
                 appStore.showToast(
                     bubble.isSaved ? "Saved to your Library" : "Removed from your Library",
                     symbol: bubble.isSaved ? "bookmark.fill" : "bookmark.slash"
@@ -287,6 +295,7 @@ struct BubblesTabView: View {
     }
 
     private func openBoardFromResult(_ bubble: Bubble) {
+        GameRecommender.shared.note(.openedBoard, gameID: bubble.id)
         model.result = nil
         model.endTakeover()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
