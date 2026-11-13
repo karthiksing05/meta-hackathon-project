@@ -15,6 +15,13 @@
 | 8 | 20 s | **Demo 3, 30 s:** a Group's weekly board → Add friend → start a best of 5 | 4:25 |
 | 9 | 20 s | | 4:45 |
 
+**Pre-show checklist (the morning of the demo, on the presenting phone):**
+1. Signed in as the presenter's own account, member of the demo Group.
+2. Make "dodge the fog over Twin Peaks" once and post it to the demo Group. It's the Demo 1 fallback, so "one I made this morning" is true.
+3. The demo Group has a weekly board with at least one person you aren't friends with yet (Demo 3).
+4. The feed has a game with a sound behind it (Demo 2).
+5. Phone awake, Do Not Disturb on, brightness up, cabled to the presenting Mac.
+
 **Demo 1 fallback:** before the talk, make the same game once ("dodge the fog over Twin Peaks") and post it to the demo Group. If the live build isn't done at 1:50, say "it's still being playtested by the bots, so here's one I made this morning", and open that one. Go back to the live one at the end if there's time.
 
 ## 1
