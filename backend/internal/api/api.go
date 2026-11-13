@@ -107,6 +107,7 @@ func (s *Server) Handler() http.Handler {
 
 		r.Route("/games/{id}", func(r chi.Router) {
 			r.With(s.optionalAuth).Get("/", s.getGame)
+			r.With(s.requireAuth).Get("/agreement", s.gameAgreement)
 			r.With(s.requireAuth).Put("/sponsor", s.setGameSponsor)
 			r.With(s.requireAuth).Delete("/sponsor", s.clearGameSponsor)
 			r.With(s.requireAuth).Put("/sound", s.setGameSound)
@@ -132,6 +133,10 @@ func (s *Server) Handler() http.Handler {
 			r.With(s.requireAuth).Put("/save", s.saveSound(true))
 			r.With(s.requireAuth).Delete("/save", s.saveSound(false))
 		})
+		r.With(s.requireAuth).Post("/rounds", s.createRound)
+		r.With(s.requireAuth).Get("/rounds", s.listRounds)
+		r.With(s.requireAuth).Get("/rounds/{id}", s.getRound)
+		r.With(s.requireAuth).Post("/rounds/{id}/plays", s.playRound)
 		r.With(s.requireAuth).Post("/series", s.createSeries)
 		r.With(s.requireAuth).Get("/series", s.listSeries)
 		r.With(s.requireAuth).Get("/series/{id}", s.getSeries)

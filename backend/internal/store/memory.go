@@ -27,6 +27,7 @@ type Memory struct {
 	members    map[string]map[string]model.GroupMember // group -> user -> member
 	challenges []model.Challenge
 	series     map[string]*model.Series
+	rounds     map[string]*model.Round
 	sounds     map[string]*model.Sound
 	soundSaves map[string]bool // soundID|userID
 }
@@ -38,6 +39,7 @@ func NewMemory() *Memory {
 		eventID: map[string]bool{}, jobs: map[string]*model.Job{}, recs: map[string]model.RecsRecord{},
 		friends: map[string]map[string]bool{}, groups: map[string]*model.Group{}, members: map[string]map[string]model.GroupMember{},
 		series: map[string]*model.Series{},
+		rounds: map[string]*model.Round{},
 		sounds: map[string]*model.Sound{}, soundSaves: map[string]bool{},
 	}
 }

@@ -31,7 +31,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const env = process.env;
 const PORT = Number(env.PORT ?? 8090);
 const MAX_CONCURRENT = Number(env.GENERATOR_MAX_CONCURRENT ?? 2);
-const JOB_TIMEOUT_MS = Number(env.GENERATOR_JOB_TIMEOUT_SECONDS ?? 540) * 1000;
+const JOB_TIMEOUT_MS = Number(env.GENERATOR_JOB_TIMEOUT_SECONDS ?? 780) * 1000;
 const MODEL = env.MUSE_MODEL || 'muse-wonder-1.0';
 // A change to a game sends the whole stored manifest (the game script alone can be 150 KB or more).
 const COMPOSE_BODY_LIMIT = 8 * 1024 * 1024;

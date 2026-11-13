@@ -40,7 +40,7 @@ func (s *Server) views(r *http.Request, games []model.Game) ([]model.GameView, e
 			ID: g.ID, Title: g.Title, Description: g.Description, Tags: nonNil(g.Tags), Formula: g.Formula,
 			OwnerID: g.OwnerID, OwnerUsername: g.OwnerUsername, Likes: g.Likes, Plays: g.Plays,
 			Finishes: g.Finishes, LikedByMe: liked[g.ID], RemixOf: g.RemixOf,
-			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID, Unlisted: g.Unlisted, Score: g.Score.View(), Sponsor: g.Sponsor,
+			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID, Unlisted: g.Unlisted, Score: g.Score.View(), Sponsor: g.Sponsor, GroupPlay: g.GroupPlay,
 			PackageURL: base, ManifestURL: base + g.ManifestPath, CreatedAt: g.CreatedAt,
 		}
 		if g.CoverPath != "" {
@@ -275,7 +275,8 @@ type manifestMeta struct {
 	Lineage struct {
 		RemixOf string `json:"remix_of"`
 	} `json:"lineage"`
-	Score *manifestScore `json:"score"` // what the board ranks and how (scoring.go)
+	Score     *manifestScore     `json:"score"` // what the board ranks and how (scoring.go)
+	GroupPlay *manifestGroupPlay `json:"group_play"`
 }
 
 // publishError is a failed publish: Status and Msg are safe to show; Err (when set) is an internal failure.
@@ -334,6 +335,7 @@ func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Read
 		g.Level = m.Chain.Index
 	}
 	g.Score = scoreModelFrom(m.Score)
+	g.GroupPlay = groupPlayFrom(m.GroupPlay)
 	g.Mood, g.Energy, g.Competition = normTags(m.Brief.Mood), strings.ToLower(strings.TrimSpace(m.Brief.Energy)), strings.ToLower(strings.TrimSpace(m.Brief.Competition))
 	g.Look, g.IsDaily, g.Bots = strings.ToLower(strings.TrimSpace(m.Style.Look)), strings.EqualFold(m.Structure.Cadence, "daily"), bots
 	switch {

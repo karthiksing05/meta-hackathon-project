@@ -320,9 +320,10 @@ func (s *Server) listSeries(w http.ResponseWriter, r *http.Request) {
 
 // verifyResult is what the generator's engine says about a replayed run.
 type verifyResult struct {
-	OK         bool     `json:"ok"`
-	GameHashOK bool     `json:"game_hash_ok"`
-	Problems   []string `json:"problems"`
+	OK         bool           `json:"ok"`
+	GameHashOK bool           `json:"game_hash_ok"`
+	Problems   []string       `json:"problems"`
+	Result     map[string]any `json:"result"` // the end state of the replayed run, by variable name
 	Recomputed *struct {
 		Phase  string  `json:"phase"`
 		Score  float64 `json:"score"`

@@ -108,6 +108,14 @@ type Store interface {
 	SetGameSound(ctx context.Context, gameID string, gs *model.GameSound) error // nil takes the sound off
 	GamesBySound(ctx context.Context, soundID, order string, limit int) ([]model.Game, error)
 
+	// Rounds: a game, a seed and a set of people who each play it on their own time (chat or Group).
+	InsertRound(ctx context.Context, r *model.Round) error
+	RoundByID(ctx context.Context, id string) (*model.Round, error)
+	ReplaceRound(ctx context.Context, r *model.Round) error
+	RoundsForUser(ctx context.Context, userID string, limit int) ([]model.Round, error) // newest first
+	RoundsForTarget(ctx context.Context, kind, id string, limit int) ([]model.Round, error)
+	RoundsForGame(ctx context.Context, gameID string, limit int) ([]model.Round, error)
+
 	// Series: best-of-N between two friends with server-checked scores.
 	InsertSeries(ctx context.Context, s *model.Series) error
 	SeriesByID(ctx context.Context, id string) (*model.Series, error)
