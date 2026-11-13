@@ -143,7 +143,7 @@ final class RemixCenter {
         shared.contains("\(bubble.id)|\(target.id)")
     }
 
-    /// The card 'Send it back' sends: "I remixed your Hill Hopper → Fog Hopper".
+    /// The card 'Send it back' sends: "I remixed your <original> → <remix>".
     func sendBackCard(for bubble: Bubble, appStore: AppStore, bubbleStore: BubbleStore) -> BubbleChatCard? {
         guard let originalID = bubble.manifest.lineage.remixOf, RemixLineage.isRemix(bubble) else { return nil }
         let originalTitle = bubble.manifest.lineage.remixOfTitle

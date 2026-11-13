@@ -15,7 +15,7 @@ enum RemixSendBack {
 
 // MARK: - Card body
 
-/// A `.remix` card: "Diego remixed your Hill Hopper → Fog Hopper", the two covers, Play and
+/// A `.remix` card: "Diego remixed your <original> → <remix>", the two covers, Play and
 /// Remix back.
 struct RemixCardBody: View {
     let card: BubbleChatCard

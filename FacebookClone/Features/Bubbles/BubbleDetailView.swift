@@ -460,5 +460,5 @@ struct BubbleFloatSheet: View {
 }
 
 #Preview {
-    NavigationStack { BubbleDetailView(bubbleID: "hill-hopper") }.previewEnvironment()
+    NavigationStack { BubbleDetailView(bubbleID: "preview-game") }.previewEnvironment()
 }
