@@ -31,6 +31,12 @@ const PLANS = {
   'mg-kite-day-detour': [{ tap: [0.5, 0.75] }, { tap: [0.5, 0.85] }],
 };
 const targets = ids.length ? ids : Object.keys(PLANS);
+// Any other game: taps spread over the playfield, a drag and two flicks, about 6 s of play.
+const GENERIC_PLAN = [
+  { tap: [0.5, 0.62] }, { tap: [0.5, 0.72] }, { tap: [0.3, 0.55] }, { tap: [0.7, 0.55] },
+  { drag: [[0.5, 0.8], [0.25, 0.8], [0.75, 0.8]] }, { tap: [0.5, 0.5] }, { flick: 'left' },
+  { tap: [0.4, 0.66] }, { tap: [0.6, 0.78] }, { flick: 'up' }, { tap: [0.5, 0.6] }, { tap: [0.5, 0.85] },
+];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 mkdirSync(out, { recursive: true });
@@ -85,7 +91,8 @@ try {
   const pt = async (fx, fy) => evaluate(`(() => { const r = document.getElementById('bubble-canvas').getBoundingClientRect(); return [r.left + ${fx} * r.width, r.top + ${fy} * r.height]; })()`);
 
   for (const id of targets) {
-    const manifest = JSON.parse(readFileSync(join(SEEDS, `bubble-seed-${id}.json`), 'utf8'));
+    // A seed id, or a path to a manifest file (e.g. a wrapped gold game).
+    const manifest = JSON.parse(readFileSync(id.endsWith('.json') ? id : join(SEEDS, `bubble-seed-${id}.json`), 'utf8'));
     await send('Page.navigate', { url: pathToFileURL(HOST).href });
     await sleep(1200);
     const prep = JSON.parse(await evaluate(`BubbleHost.prepare(${JSON.stringify(JSON.stringify({ key: id, manifest, mode: 'play' }))})`));
@@ -94,7 +101,7 @@ try {
     const [cx, cy] = await pt(0.5, 0.5);
     await touch('touchStart', cx, cy); await touch('touchEnd', cx, cy); // the intro card's "Tap to play"
     await sleep(900);
-    for (const step of PLANS[id] || [{ tap: [0.5, 0.5] }]) {
+    for (const step of PLANS[id] || GENERIC_PLAN) {
       if (step.tap) {
         const [x, y] = await pt(...step.tap);
         await touch('touchStart', x, y); await sleep(40); await touch('touchEnd', x, y);
@@ -118,7 +125,8 @@ try {
     }
     await sleep(800);
     const shot = await send('Page.captureScreenshot', { format: 'png' });
-    writeFileSync(join(out, `${id}.png`), Buffer.from(shot.data, 'base64'));
+    const name = id.endsWith('.json') ? id.split('/').pop().replace(/\.json$/, '') : id;
+    writeFileSync(join(out, `${name}.png`), Buffer.from(shot.data, 'base64'));
     const msgs = ((await evaluate('window.__msgs')) || []).map((m) => (typeof m === 'string' ? JSON.parse(m) : m));
     const types = msgs.map((m) => m.type + (m.type === 'phase' ? ':' + m.name : ''));
     const errors = msgs.filter((m) => m.type === 'error');

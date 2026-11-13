@@ -22,6 +22,7 @@ xcrun --sdk macosx swiftc \
   -framework WebKit \
   FacebookClone/Bubbles/Models/*.swift \
   FacebookClone/Bubbles/Studio/*.swift \
+  FacebookClone/DesignSystem/ProductName.swift \
   tools/bubble-studio/main.swift \
   tools/bubble-studio/microgame.swift \
   -o "$OUT/bubble-studio"

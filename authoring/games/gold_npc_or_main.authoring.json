@@ -1,0 +1,910 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "NPC or Main Character?",
+    "instructions": "A scenario pops up: is that NPC behavior or main character energy? Tap a side or swipe left or right. Right calls refill your plot armor, wrong calls rip a chunk off, and it drains faster every second. Fast calls and streaks multiply your clout. Survive 60 seconds.",
+    "duration_s": 60
+  },
+  "uses": [
+    {
+      "fragment": "score",
+      "params": {
+        "points": 100,
+        "label": "Clout"
+      },
+      "bind": {
+        "point": "sorted_right"
+      }
+    },
+    {
+      "fragment": "combo",
+      "params": {
+        "step": 1,
+        "max": 9,
+        "label": "Streak"
+      },
+      "bind": {
+        "hit_good": "sorted_right",
+        "hit_bad": "sorted_wrong"
+      }
+    },
+    {
+      "fragment": "timer_bar",
+      "params": {
+        "full_ms": "8s",
+        "refill_ms": "700ms",
+        "drain_rate": 1.0,
+        "on_empty": "lose",
+        "x": 30,
+        "y": 384,
+        "w": 300,
+        "h": 14
+      },
+      "bind": {
+        "refill": "sorted_right"
+      }
+    },
+    {
+      "fragment": "difficulty_curve",
+      "params": {
+        "from": 0.0,
+        "to": 1.0,
+        "over": "50s",
+        "curve": "ease_in"
+      }
+    }
+  ],
+  "types": {
+    "Card": {
+      "text": "string",
+      "main": "bool"
+    }
+  },
+  "state": {
+    "deck": {
+      "type": "list<Card>",
+      "init": "[]"
+    },
+    "ci": {
+      "type": "int",
+      "init": "0"
+    },
+    "card_at": {
+      "type": "int",
+      "init": "0"
+    },
+    "last_text": {
+      "type": "string",
+      "init": "''"
+    },
+    "last_dir": {
+      "type": "int",
+      "init": "0"
+    },
+    "last_at": {
+      "type": "int",
+      "init": "-9999"
+    },
+    "stamp": {
+      "type": "string",
+      "init": "''"
+    },
+    "stamp_ok": {
+      "type": "bool",
+      "init": "true"
+    },
+    "bonus": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "card_text": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(map(deck, c => c.text), ci, '')"
+    },
+    "speed_bonus": {
+      "params": {},
+      "returns": "int",
+      "body": "max(0, 2000 - (now - card_at)) / 40"
+    }
+  },
+  "events": {
+    "sorted_right": {},
+    "sorted_wrong": {},
+    "called": {
+      "main": "bool"
+    },
+    "dealt": {}
+  },
+  "inputs": {
+    "tap_call": {
+      "payload": {
+        "main": "bool"
+      }
+    },
+    "swipe_call": {
+      "payload": {
+        "main": "bool"
+      },
+      "from": [
+        {
+          "swipe": "left",
+          "with": {
+            "main": "false"
+          }
+        },
+        {
+          "swipe": "right",
+          "with": {
+            "main": "true"
+          }
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        {
+          "set": "deck",
+          "to": "shuffle(concat(map(content_npc, s => {text: s, main: false}), map(content_main, s => {text: s, main: true})))"
+        },
+        {
+          "set": "card_at",
+          "to": "now"
+        }
+      ]
+    },
+    {
+      "id": "by_tap",
+      "on": "tap_call",
+      "do": [
+        {
+          "emit": "called",
+          "with": {
+            "main": "event.main"
+          }
+        }
+      ]
+    },
+    {
+      "id": "by_swipe",
+      "on": "swipe_call",
+      "do": [
+        {
+          "emit": "called",
+          "with": {
+            "main": "event.main"
+          }
+        }
+      ]
+    },
+    {
+      "id": "judge",
+      "on": "called",
+      "when": "ci < len(deck)",
+      "do": [
+        {
+          "let": {
+            "c": "deck[ci]"
+          }
+        },
+        {
+          "set": "last_text",
+          "to": "c.text"
+        },
+        {
+          "set": "last_dir",
+          "to": "if event.main then 1 else -1"
+        },
+        {
+          "set": "last_at",
+          "to": "now"
+        },
+        {
+          "if": "event.main == c.main",
+          "then": [
+            {
+              "set": "bonus",
+              "to": "speed_bonus() * combo_mult"
+            },
+            {
+              "incr": "score",
+              "by": "bonus"
+            },
+            {
+              "set": "stamp_ok",
+              "to": "true"
+            },
+            {
+              "set": "stamp",
+              "to": "if c.main then pick(content_main_stamps) else pick(content_npc_stamps)"
+            },
+            {
+              "emit": "sorted_right"
+            }
+          ],
+          "else": [
+            {
+              "set": "bonus",
+              "to": "0"
+            },
+            {
+              "set": "stamp_ok",
+              "to": "false"
+            },
+            {
+              "set": "stamp",
+              "to": "pick(content_wrong_stamps)"
+            },
+            {
+              "emit": "sorted_wrong"
+            }
+          ]
+        },
+        {
+          "emit": "dealt"
+        }
+      ]
+    },
+    {
+      "id": "penalty",
+      "on": "sorted_wrong",
+      "do": [
+        {
+          "set": "time_left",
+          "to": "max(0.0, time_left - 1500.0)"
+        }
+      ]
+    },
+    {
+      "id": "pressure",
+      "on": "tick",
+      "do": [
+        {
+          "set": "drain_mult",
+          "to": "1.0 + 1.3 * difficulty"
+        }
+      ]
+    },
+    {
+      "id": "next_card",
+      "on": "dealt",
+      "do": [
+        {
+          "incr": "ci"
+        },
+        {
+          "if": "ci >= len(deck)",
+          "then": [
+            {
+              "set": "deck",
+              "to": "shuffle(deck)"
+            },
+            {
+              "set": "ci",
+              "to": "0"
+            }
+          ]
+        },
+        {
+          "set": "card_at",
+          "to": "now"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "60s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 104,
+          "anchor": "center",
+          "size": 22,
+          "weight": 900,
+          "color": "$ink",
+          "stroke": "#FFFFFF",
+          "stroke_width": 5,
+          "text": "NPC or MAIN CHARACTER?"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": 30,
+          "y": 134,
+          "rotation": "= sin(now / 500.0) * 1.2",
+          "animate_on": {
+            "dealt": {
+              "prop": "x",
+              "keys": [
+                400,
+                18,
+                30
+              ],
+              "ms": 260,
+              "ease": "out"
+            }
+          },
+          "children": [
+            {
+              "node": "image",
+              "asset": "card",
+              "x": 0,
+              "y": 0,
+              "w": 300,
+              "h": 230
+            },
+            {
+              "node": "text",
+              "x": 22,
+              "y": 56,
+              "w": 256,
+              "h": 150,
+              "wrap": true,
+              "align": "center",
+              "valign": "middle",
+              "size": 22,
+              "weight": 800,
+              "color": "$ink",
+              "text": "= card_text()"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": "= 30.0 + last_dir * (now - last_at) * 1.3",
+          "y": "= 134.0 + (if last_dir == 0 then (now - last_at) * 0.9 else (now - last_at) * 0.25)",
+          "rotation": "= (if last_dir == 0 then 6.0 else last_dir * 1.0) * (now - last_at) * 0.04",
+          "opacity": "= clamp(1.0 - (now - last_at) / 380.0, 0.0, 1.0)",
+          "visible": "= now - last_at < 380",
+          "children": [
+            {
+              "node": "image",
+              "asset": "card",
+              "x": 0,
+              "y": 0,
+              "w": 300,
+              "h": 230
+            },
+            {
+              "node": "text",
+              "x": 22,
+              "y": 56,
+              "w": 256,
+              "h": 150,
+              "wrap": true,
+              "align": "center",
+              "valign": "middle",
+              "size": 22,
+              "weight": 800,
+              "color": "$ink",
+              "text": "= last_text"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 30,
+          "y": 372,
+          "size": 12,
+          "weight": 900,
+          "color": "$ink",
+          "align": "left",
+          "valign": "middle",
+          "text": "= if time_left < 2000.0 then 'PLOT ARMOR: CRITICAL' else 'PLOT ARMOR'",
+          "animate_on": {
+            "sorted_wrong": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.3,
+                1
+              ],
+              "ms": 220
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 424,
+          "anchor": "center",
+          "size": 19,
+          "weight": 900,
+          "color": "= if stamp_ok then (if last_dir > 0 then $secondary else $primary) else $danger",
+          "stroke": "#FFFFFF",
+          "stroke_width": 6,
+          "rotation": -5,
+          "text": "= stamp",
+          "opacity": "= clamp(1.0 - (now - last_at - 700) / 300.0, 0.0, 1.0)",
+          "animate_on": {
+            "dealt": {
+              "prop": "scale",
+              "keys": [
+                2.0,
+                0.9,
+                1.05,
+                1
+              ],
+              "ms": 260,
+              "ease": "out"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": 20,
+          "y": 448,
+          "animate_on": {
+            "called": {
+              "when": "not event.main",
+              "prop": "scale",
+              "keys": [
+                1,
+                0.9,
+                1.06,
+                1
+              ],
+              "ms": 200
+            }
+          },
+          "children": [
+            {
+              "node": "image",
+              "asset": "npc",
+              "x": 0,
+              "y": 0,
+              "w": 155,
+              "h": 112
+            },
+            {
+              "node": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 155,
+              "h": 112,
+              "radius": 22,
+              "fill": "#00000000",
+              "on_tap": {
+                "input": "tap_call",
+                "with": {
+                  "main": "false"
+                }
+              }
+            },
+            {
+              "node": "text",
+              "x": 77,
+              "y": 84,
+              "anchor": "center",
+              "size": 24,
+              "weight": 900,
+              "color": "$ink",
+              "text": "NPC"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": 185,
+          "y": 448,
+          "animate_on": {
+            "called": {
+              "when": "event.main",
+              "prop": "scale",
+              "keys": [
+                1,
+                0.9,
+                1.06,
+                1
+              ],
+              "ms": 200
+            }
+          },
+          "children": [
+            {
+              "node": "image",
+              "asset": "main",
+              "x": 0,
+              "y": 0,
+              "w": 155,
+              "h": 112
+            },
+            {
+              "node": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 155,
+              "h": 112,
+              "radius": 22,
+              "fill": "#00000000",
+              "on_tap": {
+                "input": "tap_call",
+                "with": {
+                  "main": "true"
+                }
+              }
+            },
+            {
+              "node": "text",
+              "x": 77,
+              "y": 84,
+              "anchor": "center",
+              "size": 17,
+              "weight": 900,
+              "color": "#FFFFFF",
+              "stroke": "$ink",
+              "stroke_width": 4,
+              "text": "MAIN CHARACTER"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": "= if last_dir > 0 then 262 else 98",
+          "y": "= 476.0 - min(600, now - last_at) / 20.0",
+          "anchor": "center",
+          "size": 22,
+          "weight": 900,
+          "color": "$ink",
+          "stroke": "#FFFFFF",
+          "stroke_width": 5,
+          "rotation": 6,
+          "visible": "= stamp_ok and now - last_at < 700",
+          "text": "= '+' + str(100 + bonus)"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 584,
+          "anchor": "center",
+          "size": 14,
+          "weight": 700,
+          "color": "$ink",
+          "text": "= if now < 5000 then 'tap a side, or swipe left or right' else str(max(0, ceil((60000 - now) / 1000.0))) + 's until the season finale'"
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "group",
+          "visible": "= status != 'playing'",
+          "animate_on": {
+            "win": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.08,
+                1
+              ],
+              "ms": 420,
+              "ease": "out"
+            },
+            "lose": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.08,
+                1
+              ],
+              "ms": 420,
+              "ease": "out"
+            }
+          },
+          "children": [
+            {
+              "node": "rect",
+              "x": 30,
+              "y": 160,
+              "w": 306,
+              "h": 300,
+              "radius": 24,
+              "fill": "$ink"
+            },
+            {
+              "node": "rect",
+              "x": 24,
+              "y": 154,
+              "w": 306,
+              "h": 300,
+              "radius": 24,
+              "fill": "#FFFFFF",
+              "stroke": "$ink",
+              "stroke_width": 4
+            },
+            {
+              "node": "text",
+              "x": 177,
+              "y": 196,
+              "anchor": "center",
+              "size": 24,
+              "weight": 900,
+              "color": "$secondary",
+              "text": "= if status == 'won' then 'MAIN CHARACTER' else 'PLOT ARMOR: GONE'"
+            },
+            {
+              "node": "text",
+              "x": 177,
+              "y": 228,
+              "anchor": "center",
+              "size": 14,
+              "weight": 700,
+              "color": "$ink",
+              "opacity": 0.7,
+              "text": "FINAL CLOUT"
+            },
+            {
+              "node": "text",
+              "x": 177,
+              "y": 272,
+              "anchor": "center",
+              "size": 50,
+              "weight": 900,
+              "color": "$primary",
+              "text": "= str(score)"
+            },
+            {
+              "node": "text",
+              "x": 177,
+              "y": 322,
+              "anchor": "center",
+              "size": 18,
+              "weight": 800,
+              "color": "$ink",
+              "text": "= 'Best streak: ' + str(best_combo) + '  |  Calls: ' + str(ci)"
+            },
+            {
+              "node": "text",
+              "x": 44,
+              "y": 346,
+              "w": 266,
+              "wrap": true,
+              "align": "center",
+              "size": 16,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= get_or(content_end_lines, min(4, score / 12000), 'You ARE the plot.')"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "sorted_right",
+        "do": [
+          {
+            "sound": {
+              "wave": "square",
+              "note": "= 587.0 * pow(1.0595, min(combo, 12) * 1.0)",
+              "slide": "= 880.0 * pow(1.0595, min(combo, 12) * 1.0)",
+              "ms": 80,
+              "volume": 0.3
+            }
+          },
+          {
+            "particles": {
+              "x": "= if last_dir > 0 then 262 else 98",
+              "y": 500,
+              "count": 20,
+              "color": "= if last_dir > 0 then $secondary else $primary",
+              "speed": 260,
+              "size": 6,
+              "ms": 480
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "sorted_right",
+        "when": "combo > 0 and combo % 5 == 0",
+        "do": [
+          {
+            "moment": "level"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 250,
+              "count": 48,
+              "color": "$accent",
+              "speed": 340,
+              "size": 7,
+              "ms": 800,
+              "gravity": 400
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      },
+      {
+        "on": "sorted_wrong",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 250,
+              "count": 22,
+              "color": "$danger",
+              "speed": 260,
+              "size": 6,
+              "ms": 500,
+              "gravity": 500
+            }
+          },
+          {
+            "shake": {
+              "px": 10,
+              "ms": 280
+            }
+          },
+          {
+            "haptic": "error"
+          }
+        ]
+      },
+      {
+        "on": "dealt",
+        "do": [
+          {
+            "moment": "tap"
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "riso",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Tabloid sticker pop: sunny halftone yellow, pink candy stripes, comic bursts, a white scenario card, a sleepy robot NPC button and a spotlit main-character button.",
+    "palette": {
+      "bg": "#FFD84A",
+      "surface": "#FFFFFF",
+      "primary": "#3D5AFE",
+      "secondary": "#FF3D8B",
+      "accent": "#00C2A8",
+      "ink": "#1B1036",
+      "danger": "#E8282B"
+    },
+    "font": "Avenir Next",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><pattern id='dots' width='12' height='12' patternUnits='userSpaceOnUse'><circle cx='3' cy='3' r='2.2' fill='#FFB800' opacity='0.55'/><circle cx='9' cy='9' r='2.2' fill='#FFB800' opacity='0.55'/></pattern><linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FFE94D'/><stop offset='1' stop-color='#FFC93C'/></linearGradient><pattern id='stripe' width='18' height='18' patternUnits='userSpaceOnUse' patternTransform='rotate(35)'><rect width='9' height='18' fill='#FF4FA3'/></pattern></defs><rect width='360' height='640' fill='url(#bg)'/><rect width='360' height='640' fill='url(#dots)'/><rect x='0' y='0' width='360' height='78' fill='url(#stripe)' opacity='0.9'/><rect x='14' y='30' width='332' height='42' rx='21' fill='#FFFFFF' stroke='#1B1036' stroke-width='3'/><rect x='0' y='74' width='360' height='4' fill='#1B1036'/><rect x='0' y='540' width='360' height='100' fill='#3D5AFE' opacity='0.12'/><polygon points='41.4,211.6 28.5,214.9 31.4,227.9 19.4,222.1 13.3,234.0 7.8,221.8 -4.5,227.0 -0.9,214.1 -13.7,210.2 -2.7,202.6 -9.9,191.4 3.4,192.7 5.1,179.5 14.4,189.0 24.2,179.9 25.3,193.3 38.6,192.6 30.8,203.5' fill='#FF4FA3' stroke='#1B1036' stroke-width='3' stroke-linejoin='round'/><polygon points='371.9,198.4 360.3,202.6 363.2,214.6 352.0,209.4 345.6,219.9 341.4,208.3 329.4,211.2 334.6,200.0 324.1,193.6 335.7,189.4 332.8,177.4 344.0,182.6 350.4,172.1 354.6,183.7 366.6,180.8 361.4,192.0' fill='#00C2A8' stroke='#1B1036' stroke-width='3' stroke-linejoin='round'/><polygon points='366.7,598.9 352.3,600.9 354.3,615.2 342.0,607.6 334.2,619.8 329.8,606.0 316.0,610.4 321.4,597.0 308.0,591.5 320.8,584.7 314.1,571.9 328.2,574.9 331.3,560.7 340.3,572.1 351.7,563.3 351.2,577.8 365.7,578.4 356.0,589.1' fill='#3D5AFE' stroke='#1B1036' stroke-width='3' stroke-linejoin='round'/><polygon points='44.0,600.0 32.9,605.4 37.0,617.0 25.4,612.9 20.0,624.0 14.6,612.9 3.0,617.0 7.1,605.4 -4.0,600.0 7.1,594.6 3.0,583.0 14.6,587.1 20.0,576.0 25.4,587.1 37.0,583.0 32.9,594.6' fill='#FF4FA3' stroke='#1B1036' stroke-width='3' stroke-linejoin='round'/><text x='16' y='213' font-family='Avenir Next' font-weight='900' font-size='19' fill='#FFFFFF' text-anchor='middle' stroke='#1B1036' stroke-width='1'>?!</text><text x='338' y='598' font-family='Avenir Next' font-weight='900' font-size='19' fill='#FFFFFF' text-anchor='middle' stroke='#1B1036' stroke-width='1'>!!</text><path transform='translate(8 380) scale(1.1)' d='M8 0 L0 14 L6 14 L2 26 L14 9 L8 9 L12 0Z' fill='#FFFFFF' stroke='#1B1036' stroke-width='1.6' stroke-linejoin='round'/><path transform='translate(334 300) scale(1.0)' d='M8 0 L0 14 L6 14 L2 26 L14 9 L8 9 L12 0Z' fill='#FF4FA3' stroke='#1B1036' stroke-width='1.6' stroke-linejoin='round'/><path transform='translate(330 420) scale(0.8)' d='M8 0 L0 14 L6 14 L2 26 L14 9 L8 9 L12 0Z' fill='#00C2A8' stroke='#1B1036' stroke-width='1.6' stroke-linejoin='round'/><g fill='#FFFFFF' stroke='#1B1036' stroke-width='1.5'><path d='M14 250 l4 9 l9 1 l-7 6 l2 9 l-8 -5 l-8 5 l2 -9 l-7 -6 l9 -1Z'/><path d='M336 220 l3 7 l7 1 l-5 4 l2 7 l-7 -4 l-6 4 l2 -7 l-5 -4 l7 -1Z'/></g></svg>"
+    },
+    "sprites": {
+      "card": {
+        "svg": "<svg viewBox='0 0 300 230'><rect x='9' y='10' width='288' height='216' rx='22' fill='#1B1036'/><rect x='3' y='3' width='288' height='216' rx='22' fill='#FFFFFF' stroke='#1B1036' stroke-width='4'/><rect x='18' y='18' width='258' height='26' rx='13' fill='#FFF3B0'/><circle cx='34' cy='31' r='5' fill='#FF4FA3'/><circle cx='50' cy='31' r='5' fill='#00C2A8'/><circle cx='66' cy='31' r='5' fill='#3D5AFE'/><text x='262' y='36' font-family='Avenir Next' font-weight='800' font-size='12' fill='#1B1036' text-anchor='end' opacity='0.6'>SPOTTED IN THE WILD</text><rect x='110' y='-6' width='80' height='20' rx='3' fill='#FF4FA3' opacity='0.75' transform='rotate(-4 150 4)'/></svg>",
+        "color": "#FFFFFF"
+      },
+      "npc": {
+        "svg": "<svg viewBox='0 0 160 116'><defs><linearGradient id='n' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#B9C6FF'/><stop offset='1' stop-color='#6F86FF'/></linearGradient></defs><rect x='8' y='9' width='150' height='105' rx='22' fill='#1B1036'/><rect x='2' y='3' width='150' height='105' rx='22' fill='url(#n)' stroke='#1B1036' stroke-width='4'/><rect x='56' y='14' width='42' height='34' rx='8' fill='#D9DEEA' stroke='#1B1036' stroke-width='3'/><line x1='77' y1='14' x2='77' y2='6' stroke='#1B1036' stroke-width='3'/><circle cx='77' cy='5' r='3.5' fill='#FF4FA3' stroke='#1B1036' stroke-width='2'/><circle cx='68' cy='29' r='3.5' fill='#1B1036'/><circle cx='86' cy='29' r='3.5' fill='#1B1036'/><rect x='67' y='38' width='20' height='3' rx='1.5' fill='#1B1036'/><rect x='104' y='14' width='30' height='18' rx='9' fill='#FFFFFF' stroke='#1B1036' stroke-width='2.5'/><circle cx='113' cy='23' r='2' fill='#1B1036'/><circle cx='119' cy='23' r='2' fill='#1B1036'/><circle cx='125' cy='23' r='2' fill='#1B1036'/></svg>",
+        "color": "#6F86FF"
+      },
+      "main": {
+        "svg": "<svg viewBox='0 0 160 116'><defs><linearGradient id='m' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FF8CC6'/><stop offset='1' stop-color='#FF3D8B'/></linearGradient><radialGradient id='spot' cx='0.5' cy='0.2' r='0.6'><stop offset='0' stop-color='#FFF6B0' stop-opacity='0.95'/><stop offset='1' stop-color='#FFF6B0' stop-opacity='0'/></radialGradient></defs><rect x='8' y='9' width='150' height='105' rx='22' fill='#1B1036'/><rect x='2' y='3' width='150' height='105' rx='22' fill='url(#m)' stroke='#1B1036' stroke-width='4'/><path d='M58 5 L96 5 L120 60 L34 60Z' fill='url(#spot)'/><path d='M62 22 Q66 8 84 10 Q98 12 100 22 Q90 16 80 18 Q70 16 62 22Z' fill='#FFD23F' stroke='#1B1036' stroke-width='2.5'/><circle cx='78' cy='30' r='13' fill='#FFE0C2' stroke='#1B1036' stroke-width='3'/><rect x='67' y='25' width='10' height='7' rx='3' fill='#1B1036'/><rect x='80' y='25' width='10' height='7' rx='3' fill='#1B1036'/><rect x='76' y='27' width='5' height='2' fill='#1B1036'/><path d='M73 37 Q79 41 85 36' stroke='#1B1036' stroke-width='2.4' fill='none' stroke-linecap='round'/><path d='M104 14 Q116 14 126 10 M104 22 Q118 22 132 20' stroke='#FFFFFF' stroke-width='3' stroke-linecap='round' fill='none'/><path d='M30 18 l3 7 l7 1 l-5 4 l2 7 l-7 -4 l-6 4 l2 -7 l-5 -4 l7 -1Z' fill='#FFFFFF'/><path d='M130 38 l2 5 l5 1 l-4 3 l1 5 l-4 -3 l-4 3 l1 -5 l-4 -3 l5 -1Z' fill='#FFF6B0'/></svg>",
+        "color": "#FF3D8B"
+      }
+    }
+  },
+  "sound": {
+    "set": "arcade",
+    "volume": 0.8,
+    "music": "bounce",
+    "moments": {
+      "tap": "pip",
+      "hit": "buzz",
+      "level": "arpeggio",
+      "win": "hooray",
+      "lose": "wah"
+    }
+  },
+  "content": {
+    "npc": [
+      "Says “you too” when the waiter says enjoy your meal",
+      "Stands up when the bus is still four stops away",
+      "Replies “lol” to a nine-paragraph text",
+      "Waves back at someone waving at the person behind them",
+      "Has 47 tabs open and is using one of them",
+      "Says “busy day, huh?” to everyone in the elevator",
+      "Pushes the door that clearly says pull. Twice.",
+      "Laughs at the joke a full minute after everyone else",
+      "Walks laps around the kitchen while on the phone",
+      "Comments 'first' on a video from six years ago",
+      "Starts every voice note with “so basically”",
+      "Stops dead in the doorway to decide where to go",
+      "Holds the door from so far away you have to jog",
+      "Answers “how are you” with “you too”",
+      "Says “it is what it is” three times in one chat",
+      "Keeps the default ringtone at max volume"
+    ],
+    "main": [
+      "Stares out a rainy bus window like it is a music video",
+      "Walks in slow motion after a fresh haircut",
+      "Narrates their own grocery run in their head",
+      "Drinks iced coffee in the middle of a snowstorm",
+      "Gets a dramatic gust of wind at exactly the right time",
+      "Changes the playlist so it matches the sunset",
+      "Turns a walk to the mailbox into a full montage",
+      "Writes in a journal at the cafe window, on purpose",
+      "Has a theme song for folding laundry",
+      "Rides a bike with no hands and a baguette",
+      "Turns around slowly when someone says their name",
+      "Gives a toast at a casual Tuesday pizza night",
+      "Sips tea calmly while the group chat argues",
+      "Befriends a random dog and leaves with a best friend",
+      "Wears sunglasses indoors for the plot",
+      "Looks back over their shoulder before leaving the party"
+    ],
+    "npc_stamps": [
+      "NPC BEHAVIOR",
+      "DEFAULT SKIN",
+      "LOADING DIALOGUE...",
+      "SIDE QUEST GIVER"
+    ],
+    "main_stamps": [
+      "MAIN CHARACTER ENERGY",
+      "THE CAMERA LOVES THEM",
+      "PLOT ARMOR",
+      "CINEMA"
+    ],
+    "wrong_stamps": [
+      "WRONG. PLOT HOLE.",
+      "THE AUDIENCE GASPED",
+      "CANON EVENT FAILED",
+      "WRITERS ARE CONFUSED"
+    ],
+    "end_lines": [
+      "You are an extra in your own episode. Rewrite the script.",
+      "Side character with a lot of potential. Get a haircut, walk slowly.",
+      "Fan favorite. People are making edits of you.",
+      "Season finale energy. The camera follows you now.",
+      "You are the plot. Everyone else is a cameo."
+    ]
+  },
+  "playtest": {
+    "progress": "score + floor(time_left / 10.0)"
+  }
+}

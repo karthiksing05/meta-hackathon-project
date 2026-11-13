@@ -1,0 +1,561 @@
+[
+  {
+    "id": "gold_stormglass_affair",
+    "file": "authoring/games/gold_stormglass_affair.authoring.json",
+    "request": "a spooky wizard school mystery where my roommate gets framed for stealing something and I have to find the real thief before dawn",
+    "brief": {
+      "intent": "Investigate a theft in your first term at a magic academy, gather clues and name the thief at a dawn tribunal",
+      "audience": "teens and adults who like cozy fantasy and whodunits",
+      "mood": [
+        "mysterious",
+        "cozy",
+        "witty"
+      ],
+      "energy": "low",
+      "competition": "light"
+    },
+    "genre": "branching mystery / choose your own adventure",
+    "fragments_used": [
+      "choice_story"
+    ],
+    "why_its_good": [
+      "State drives the plot: your house unlocks its own options (Quill reads the runes, Cinder asks the hard question, Moss starts with trust), clues are `clue_*` flags counted for the accusation, and a midnight hub lets you visit only two of three places (`visits>=2` routes every exit to dawn), so each run is a real trade-off.",
+      "Seven endings, each earned: accusing Finch routes to Case Closed only with `clues>=3` (else All Hunch, No Proof), the wrong suspect or a red herring loses, and the secret Weather Menders ending needs Quill's runes plus `trust>=2` with the friend you defended. Callbacks pay off earlier choices (nod along with Finch and Wren turns to the wall; bluff with her testimony and Finch flinches).",
+      "A complete storybook look: a gold-traced gothic arch backdrop, eight framed vignettes picked per scene through `scene_info`, a velvet button plaque, Baskerville, a minor-key triangle waltz, toasts that name each clue, and an end card that explains the score (Clues x 100 + Trust x 50 + Ending)."
+    ],
+    "pitfalls_avoided": [
+      "No made-up syntax: every reaction is a real feedback entry with `when` (clue gained, trust lost), using `moment`, `particles`, `shake` and `haptic`, and every builtin is called with its real arity (`get_or(list, i, default)`, `or_else(parse_int(s), 0)`, `fold(list, init, (acc, x) => ...)`).",
+      "Content keys are only ones the game's own functions read (`content_effects`, `content_needs`, `content_routes`, `content_callbacks`, `content_scene_info`), each story line fits about 28 characters and each label about 24, so no text overflows the 360-wide canvas.",
+      "The ending holds for five seconds before the win or lose screen (the fragment's `good_wins`/`bad_loses` are off and a `curtain` timer sets `verdict`), so players can read how the story ends."
+    ],
+    "group": "story",
+    "title": "The Stormglass Affair"
+  },
+  {
+    "id": "gold_last_run_of_the_magpie",
+    "file": "authoring/games/gold_last_run_of_the_magpie.authoring.json",
+    "request": "a space opera adventure where I'm a smuggler pulled into a rebellion against an evil empire, with a big escape at the end and maybe a traitor",
+    "brief": {
+      "intent": "Fly a debt-ridden smuggler ship through a blockade, choose loyalty or money, spot the traitor and survive the final escape",
+      "audience": "sci-fi fans, teens and adults",
+      "mood": [
+        "epic",
+        "tense",
+        "funny"
+      ],
+      "energy": "medium",
+      "competition": "light"
+    },
+    "genre": "branching space opera / choose your own adventure",
+    "fragments_used": [
+      "choice_story"
+    ],
+    "why_its_good": [
+      "Two stats that pull against each other: loyalty (to the kid and the rebels) and heat (how wanted you are). Heat decides the final escape (`heat>=2` routes the right fork to Too Hot to Hide), a decoy you plant earlier lowers it, and the HUD and the ship AI's status line (`ledger_says()`) react as they change.",
+      "Betrayal both ways: you can sell the kid to the empire or fake the handoff, and your old wingmate is the traitor. Finding the tracker unlocks a confrontation, and at the Needle he always says 'go left', a trap you can only read right if you were paying attention. The secret Last Toll ending needs the heir reveal (scan the kid, or let the Warden scan) plus `loyalty>=2`.",
+      "A full cockpit look: chamfered cyan frames with ember corners, a starfield backdrop with nebulae and HUD brackets, twelve vignettes (hangar, blockade, comet tail, golden flagship eye, toll-gate star map, the Needle canyon), Futura, a heroic D-minor theme and zap, levelup, fanfare and powerdown moments."
+    ],
+    "pitfalls_avoided": [
+      "Score means something and isn't leaked early: Loyalty x 100 + Cool x 50, plus ending points that land only when the curtain falls (`ending_points()` is 0 until `verdict` is set), so bots and players can't read the ending's worth before it plays.",
+      "Conditional choices never leave gaps or dead ends: `needs` hides a choice, the glue packs the visible ones to the top, and a path simulation confirms that every scene has 2 or more choices and that every path has 6 to 8 decisions.",
+      "Feedback stays in proportion for a story: shake and a warning haptic only when heat rises, sparkles for loyalty and discoveries, and no custom `{\"action\": ...}` or unknown node kinds."
+    ],
+    "group": "story",
+    "title": "Last Run of the Magpie"
+  },
+  {
+    "id": "gold_the_hostess_knows",
+    "file": "authoring/games/gold_the_hostess_knows.authoring.json",
+    "request": "a messy rich-kid prep school drama where an anonymous gossip account is leaking everyone's secrets and I have to figure out who runs it",
+    "brief": {
+      "intent": "Survive your first week at an elite prep school, protect your reputation, collect receipts and unmask the anonymous gossip account",
+      "audience": "teens and young adults who love teen drama",
+      "mood": [
+        "glamorous",
+        "scheming",
+        "witty"
+      ],
+      "energy": "medium",
+      "competition": "light"
+    },
+    "genre": "branching social drama / choose your own adventure",
+    "fragments_used": [
+      "choice_story"
+    ],
+    "why_its_good": [
+      "Secrets are the mechanic: tell your new best friend a fake secret, and when The Hostess posts it, an entry effect (`@2`, gated on `bait`) hands you the clue that only she could have leaked it. Rep and Secrets are stats, allies are flags, and a trap scene lets you prove it, or tip her off.",
+      "A real twist with consequences: unmasking Margo needs `clues>=3`, and also `rep>=1` or nobody cares (Right, but Unpopular). Warning her lets her vanish to Geneva first. The secret Truce ending needs both allies plus `secrets>=2`, so the patient path, not the loud one, wins big. Seven endings in all, from Unmasked to Off to the Alps (with goats).",
+      "A lacquer-and-pearls look: a striped café awning and lit townhouses in the backdrop, a pearl-string divider, pill buttons with pearls, nine vignettes (limestone steps, macarons, the post on a phone, the roof at dusk, the gala), Optima, a phone-ping tap sound, buzz for rep hits and a sly pizzicato-style loop."
+    ],
+    "pitfalls_avoided": [
+      "Callbacks use data, not duplicated scenes: `callbacks` swap single lines by flag (the post shows your own fake secret, and Celeste softens if Dev vouched for you), so one scene shows three versions without copying it.",
+      "No real people: the account, the school, its sign-off and every character are original, because the request names a genre (prep-school gossip), not a show. When a request does name one, keep its names and world.",
+      "List lengths stay in step: 4 lines, 3 labels and 3 targets per scene, written one scene per row, with a `scene_names` key that maps each number to its scene id."
+    ],
+    "group": "story",
+    "title": "The Hostess Knows"
+  },
+  {
+    "id": "gold_saffron_egg_job",
+    "file": "authoring/games/gold_saffron_egg_job.authoring.json",
+    "request": "a heist story game where I pick my crew and plan how to steal back a priceless egg from a crooked collector's masked party, and someone might double-cross me",
+    "brief": {
+      "intent": "Assemble a two-person crew, prep the night before, then pull off a masquerade heist and the getaway",
+      "audience": "adults and teens who like caper movies",
+      "mood": [
+        "playful",
+        "suspenseful",
+        "stylish"
+      ],
+      "energy": "medium",
+      "competition": "light"
+    },
+    "genre": "branching heist caper / choose your own adventure",
+    "fragments_used": [
+      "choice_story"
+    ],
+    "why_its_good": [
+      "Planning pays off later: the two crew you hire decide what opens up (Bea unlocks the roof, Nell a rehearsed getaway, Osric a fake egg and a workshop visit), prep choices set `cased` and `two_fakes`, and the vault and getaway read them. Rope past the lasers without casing the place and you play The Laser Harp.",
+      "The double-cross is foreshadowed and beatable: the briefing warns that one of the three has sold out before, Osric appears at the getaway only if you hired him (a route to a separate scene), and the secret Long Con ending needs you to have seen his second fake. The alarm meter (`Alarm ●○○○○`) and the getaway routes (`alarm>=3&!rehearsed`) make stealth matter.",
+      "A 1960s caper look: a teal blueprint-grid backdrop with a mustard-coral-mint stripe, paperclipped index-card buttons, twelve vignettes (the dossier, the blueprint, a peacock mask, soufflés, a laser skylight, a mint van, the bakery window), American Typewriter, a walking-bass loop and click, coin and buzz moments."
+    ],
+    "pitfalls_avoided": [
+      "Conditional effects instead of copied scenes: 'Work the lock' is always shown, and `effects` entries with a condition make it quiet if you got inside (`inside`) and noisy if not, so no scene is left with a single button.",
+      "Stats are clamped where they change (`clamp(alarm + delta(...), 0, 5)`), so the meter and the score (Stealth x 100 + Ending) can't run out of range.",
+      "Text is written for a wide typewriter font: lines of about 26 characters and labels of 24 or fewer, checked in screenshots, so nothing clips at the canvas edge."
+    ],
+    "group": "story",
+    "title": "The Saffron Egg Job"
+  },
+  {
+    "id": "gold_aura_farm",
+    "file": "authoring/games/gold_aura_farm.authoring.json",
+    "request": "a stupid brainrot game where you farm aura by tapping on beat",
+    "brief": {
+      "intent": "Tap when an orbiting spark crosses a glowing zone to stack aura and climb absurd rank titles",
+      "audience": "group chat, teens and twenty-somethings",
+      "mood": [
+        "absurd",
+        "smug",
+        "hype"
+      ],
+      "energy": "high",
+      "competition": "high score"
+    },
+    "genre": "timing / rhythm tap",
+    "fragments_used": [
+      "lives",
+      "combo",
+      "countdown"
+    ],
+    "why_its_good": [
+      "One verb (tap) with three readable outcomes: PERFECT, CLEAN or -500/-1000 aura, each with its own pop text, particles, mascot frame and a combo sound that climbs a semitone per streak (`note: \"= 659.0 * pow(1.0595, combo)\"`).",
+      "Skill curve built from the game's own state: each rep speeds the spark and narrows the zone toward a floor, while 8 rank titles from Certified NPC to Aura Deity give a reason to keep going and a ranked_up burst on every step.",
+      "The novelty lives in the game's own sections: a poly arc built by a function (`arc(c, w, r0, r1)`), a 3-frame mascot picked with `frame`, a fading spark trail with `repeat`, and an end card shown with `visible: status != 'playing'`."
+    ],
+    "pitfalls_avoided": [
+      "Draws the zone with a `poly` node from computed points instead of inventing an `arc` or `ellipse` node kind.",
+      "Binds fragment events to game events (`lives.hit -> ghosted`, `combo.hit_good -> nailed`) instead of re-declaring `lives` or `combo` state.",
+      "Early taps only cost aura and stun for 350 ms; only letting the spark slip costs a life, so spam taps are punished but one fat-finger never ends the run.",
+      "Every content key (ranks, miss_lines, ghost_lines, end_lines) is read by an expression; nothing is dead."
+    ],
+    "group": "party",
+    "title": "Aura Farm"
+  },
+  {
+    "id": "gold_npc_or_main",
+    "file": "authoring/games/gold_npc_or_main.authoring.json",
+    "request": "npc or main character game where weird situations pop up and you have to sort them super fast",
+    "brief": {
+      "intent": "Rapid two-way sorting of absurd everyday scenarios, against a draining plot-armor meter",
+      "audience": "friends sending it to the group chat",
+      "mood": [
+        "chaotic",
+        "funny",
+        "relatable"
+      ],
+      "energy": "high",
+      "competition": "high score"
+    },
+    "genre": "swipe / tap sorting",
+    "fragments_used": [
+      "score",
+      "combo",
+      "timer_bar",
+      "difficulty_curve"
+    ],
+    "why_its_good": [
+      "Fun in the first second: a big readable card, two huge buttons and swipe left or right as an alternative; the old card flies off in the direction you chose and a stamp slams in (MAIN CHARACTER ENERGY, WRONG. PLOT HOLE.).",
+      "One shared timer_bar is the whole tension: right calls refill it, wrong calls rip 1.5 s off, and `difficulty_curve` raises `drain_mult` over 50 s, so the run escalates without any new rules for the player to learn.",
+      "Scoring rewards both speed and streaks: 100 from `score` plus a speed bonus times `combo_mult`, with pitch-rising sounds and a level sting every 5 in a row."
+    ],
+    "pitfalls_avoided": [
+      "Uses its own wrapped card text (`w` + `wrap: true`) instead of sort_bins, whose single 34 px line can't hold a joke-length scenario.",
+      "Two inputs (`tap_call` with no source, `swipe_call` with swipe sources) feed one `called` event, so buttons and swipes share one judging rule and the bots test both.",
+      "Content stays content: two lists of scenarios become a typed deck with `map(content_npc, s => {text: s, main: false})`, not hard-coded strings in rules."
+    ],
+    "group": "party",
+    "title": "NPC or Main Character?"
+  },
+  {
+    "id": "gold_goblin_snack_run",
+    "file": "authoring/games/gold_goblin_snack_run.authoring.json",
+    "request": "goblin mode game where you grab snacks at 2am and dodge responsibilities",
+    "brief": {
+      "intent": "Drag a goblin around a 2 AM kitchen, grabbing pizza and dodging alarm clocks and emails across 5 named waves",
+      "audience": "anyone who has ever raided the fridge at 2 AM",
+      "mood": [
+        "chaotic",
+        "cozy-gremlin",
+        "silly"
+      ],
+      "energy": "high",
+      "competition": "survive and score"
+    },
+    "genre": "arcade dodge and collect",
+    "fragments_used": [
+      "player_drag",
+      "spawn_wave (x2)",
+      "pickups",
+      "collide",
+      "lives",
+      "score",
+      "waves"
+    ],
+    "why_its_good": [
+      "A twist that flips the rules: 5 snacks in a row triggers GOBLIN MODE, and for 5 s `colliders()` returns [] while a game rule lets you eat the hazards for +25 each.",
+      "Clear structure and escalation: waves with joke names (LAUNDRY AVALANCHE, INBOX TSUNAMI), hazards that speed up each wave, a hazard-free breather between waves, and a win at wave 5.",
+      "Two hazard streams from different edges come from one fragment used twice, with a full original cast (goblin, angry alarm clock, angry email, pizza, brain-cell lives) and a 2 AM kitchen backdrop."
+    ],
+    "pitfalls_avoided": [
+      "The second spawn_wave use binds every public name (`spawns -> emails`, `spawn_speed -> email_speed`, `spawned -> email_sent`, `Spawn -> Email`) instead of relying on auto-renames.",
+      "Keeps the HUD within the 3-node `hud_top` limit (lives, score, waves) and puts the custom snack-streak pips in `hud_bottom` rather than overflowing a slot.",
+      "Adds transparent circles under the pickup sprites so the bots, which only see rect and circle ops, can find the snacks."
+    ],
+    "group": "party",
+    "title": "Goblin Mode: Snack Run"
+  },
+  {
+    "id": "gold_rizz_or_flop",
+    "file": "authoring/games/gold_rizz_or_flop.authoring.json",
+    "request": "rizz or flop quiz where you pick the least cringe thing to say and judges react",
+    "brief": {
+      "intent": "A speed quiz where you pick the least cringe of four replies and a panel of absurd judges scores every line",
+      "audience": "group chat, dating-show fans",
+      "mood": [
+        "cringe-comedy",
+        "flirty",
+        "silly"
+      ],
+      "energy": "medium",
+      "competition": "high score over 12 rounds"
+    },
+    "genre": "speed quiz / dialogue choice",
+    "fragments_used": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "why_its_good": [
+      "The scoreboard is the joke: three original judges (a monocled frog, a DJ cat, a robot nana) switch between neutral, hype and cringe frames and hold up score cards, with a pick from lists of reaction lines (a separate set for timeouts, using the quiz's `picked == -1`).",
+      "Escalating stakes in the game's own rules: a speed bonus from `asked_at` plus a streak bonus, multiplied by heat (x1, x2, x3 every 4 rounds), with a banner that pops on each heat change.",
+      "Correct quiz wiring: `quiz_questions`, `quiz_choices` and `quiz_answers` read content, `rounds` counts `question_done`, `lives` listens to `answered_wrong` and `score` to `answered_right`."
+    ],
+    "pitfalls_avoided": [
+      "Every answer appears exactly once among its question's 4 choices, in content order; prompts are 23 characters or fewer because the quiz's question text doesn't wrap.",
+      "Static framing (the chat bubble behind the question, the judges' desk) goes in the backdrop, because the game's playfield nodes draw on top of the fragment's.",
+      "Hooks the heat-change sting to the public `round_started {index}` event instead of reaching for the quiz's private `_ask`."
+    ],
+    "group": "party",
+    "title": "Rizz or Flop"
+  },
+  {
+    "id": "gold_moonbroom_derby",
+    "file": "authoring/games/gold_moonbroom_derby.authoring.json",
+    "request": "a broom racing game at a magic school where I dodge storm clouds and grab sparks",
+    "brief": {
+      "intent": "Swerve a broom between five lanes through a speeding night race, dodging storm clouds and runaway spellbooks while chaining sparks",
+      "audience": "friends, all ages",
+      "mood": [
+        "whimsical",
+        "magical",
+        "tense"
+      ],
+      "energy": "high",
+      "competition": "high score"
+    },
+    "genre": "lane racer / dodge and collect",
+    "fragments_used": [
+      "lanes",
+      "score",
+      "lives",
+      "combo",
+      "collide",
+      "pickups",
+      "difficulty_curve"
+    ],
+    "why_its_good": [
+      "Fun at once and harder each second: the first hazard falls at 0.7 s, and `difficulty_curve` (ease_in_out over 45 s) drives fall speed from 230 to 420 px/s, halves the spawn gap, brings in spellbooks that sway toward the next lane at 25% and double rows at 40%, before the finish lanterns at 50 s.",
+      "The score rewards nerve: sparks pay 10 + 5 x Streak with a pitch that climbs a whole step per streak (`note: \"= 587.0 * pow(1.0595, min(combo, 12) * 2.0)\"`), and skimming a hazard in the next lane pays a 'Whoosh +5' near-miss bonus with its own swish, particles and haptic.",
+      "A full original art set with depth: a layered night backdrop (crescent moon, aurora haze, castle spires with lit windows), drifting wisps and speed streaks that scroll with `travel`, 2-frame spellbook and spark sprites, a course-progress rail, a finish arch that sweeps down in the last 3 s, floating score pops and its own minor-key music loop."
+    ],
+    "pitfalls_avoided": [
+      "Wires `combo` with `bind` (`hit_good -> point`, `hit_bad -> hit`) instead of new events; the streak bonus rule reads `combo` after the fragment's own rule has already raised it.",
+      "Keeps hazards in the game's own list and hands them to `collide` through `colliders()`; the game's `hit` rule removes the hazard near `hit_at`, so one cloud costs one life.",
+      "The rising-pitch sound is the game's own feedback on `point`, which replaces score's library pickup moment instead of playing both.",
+      "Stays within 3 hud_top nodes (lives, score, combo); course progress is a playfield rail, not a fourth HUD node (`A_SLOT_FULL`)."
+    ],
+    "group": "arcade",
+    "title": "Moonbroom Derby"
+  },
+  {
+    "id": "gold_rift_run",
+    "file": "authoring/games/gold_rift_run.authoring.json",
+    "request": "a space fighter flying down a narrow canyon shooting drones, with a big boss target at the end",
+    "brief": {
+      "intent": "Fly a starfighter down a narrowing canyon, shoot four waves of drones and break the Rift Core",
+      "audience": "friends who like arcade shooters",
+      "mood": [
+        "epic",
+        "tense",
+        "heroic"
+      ],
+      "energy": "high",
+      "competition": "high score"
+    },
+    "genre": "vertical shooter / canyon run",
+    "fragments_used": [
+      "player_drag",
+      "lives",
+      "waves",
+      "collide"
+    ],
+    "why_its_good": [
+      "A real campaign in about 30 s: `waves` (end_on 'clear', 4 waves) adds a drone type per wave (weaving scouts, homing divers, gunners firing aimed orbs), speeds the scroll and narrows the canyon. Wave 4 is the Rift Core with an HP bar and 3-orb volleys, and breaking it emits `enemies_gone` to win. Break banners ('Wave 3 incoming', 'Rift Core ahead!') pace the run.",
+      "One finger, plenty of skill: the ship auto-fires and you drag it sideways (glide mode, so it banks). A chain multiplier (+5 per kill up to x10, reset by a hit or an escaped drone) and a lives bonus on the core reward clean, aggressive play; bots scored from 225 to 2,920.",
+      "The canyon is drawn and checked by the same pure functions (`wall_l(y)`, `wall_r(y)`): scrolling `poly` walls with a lit rim and inner shade layer, so what you see is what hits you. Drone variants are frames of one sprite picked with `frame`, and the core is a 2-frame pulsing sprite with a scale pop on each hit."
+    ],
+    "pitfalls_avoided": [
+      "Wall contact reuses `collide`: `colliders()` returns `[player]` while the ship is inside a wall, so walls get the same grace, particles, shake and life loss as drones, with no hand-rolled `hit`.",
+      "Bolt hits are computed with `let` before any `remove`, so the bolts and drones removed come from the same snapshot; each kill emits `drone_down {x, y}` and particles read `event.x`.",
+      "Score is the game's own `score` state plus `objectives.score`, shown as one number in hud_top, because lives + 'Score: N' + 'Wave n of 4' would be wider than the canvas.",
+      "Random rolls (`chance`, `random_float`) live only in rule effects; `canyon_cx`, `colliders` and every presentation expression stay pure."
+    ],
+    "group": "arcade",
+    "title": "Rift Run"
+  },
+  {
+    "id": "gold_rooftop_courier",
+    "file": "authoring/games/gold_rooftop_courier.authoring.json",
+    "request": "an endless runner where I jump across city rooftops at night collecting letters",
+    "brief": {
+      "intent": "Time jumps across night rooftops, hopping vents and leaping alleys, while collecting glowing letters in arcs",
+      "audience": "anyone, quick one-more-run sessions",
+      "mood": [
+        "urban",
+        "dreamy",
+        "energetic"
+      ],
+      "energy": "high",
+      "competition": "high score"
+    },
+    "genre": "endless runner / platformer",
+    "fragments_used": [
+      "gravity_jump",
+      "score",
+      "lives",
+      "combo",
+      "collide",
+      "difficulty_curve"
+    ],
+    "why_its_good": [
+      "Jump timing with depth: vents need a hop, AC stacks a higher one, alleys need you to land past the far edge, and the double jump rescues a late tap. Letters float in arcs that trace the ideal jump over each alley, which teaches the line by rewarding it.",
+      "Endless with a real fail and a real curve: `difficulty_curve` (ease_in over 75 s) takes the run from 250 to 490 px/s and widens the alleys, and three stumbles end it. In the bot gate, runs lasted 7 to 124 s and the best score was 30 times the worst.",
+      "Layered city with motion: a static far skyline in the backdrop, haze bands that drift at 0.12x, brick facades and alleys that scroll at full speed, a 2-frame running courier, `ground` role ledge, a +50 milestone every 100 m with a level sting, and a meter counter in hud_bottom."
+    ],
+    "pitfalls_avoided": [
+      "Alleys go through `collide` too: `colliders()` adds the player's point while it stands over a gap, and the game's `hit` rule (`when: over_gap()`) bounces the runner out through the public `vel_y` and `player`, so a fall costs a life but never strands the run.",
+      "Two obstacle heights become one or two collider points with `fold(blocks, [], (acc, b) => concat(acc, ...))`, instead of a second collide fragment.",
+      "No `time_limit` on an endless game; `lives` is the lose path, and `playtest.progress` (score + lives + meters) tells the bots what doing better means.",
+      "Labels kept short ('Combo', max 6) so lives + score + combo fit the hud_top row at 4-digit scores."
+    ],
+    "group": "arcade",
+    "title": "Rooftop Courier"
+  },
+  {
+    "id": "gold_cake_tower",
+    "file": "authoring/games/gold_cake_tower.authoring.json",
+    "request": "a cozy one-more-try game where you stack cake layers as high as you can",
+    "brief": {
+      "intent": "Drop sliding cake layers onto a growing cake; overhang gets sliced off, perfect drops grow it back, reach 24 layers for the cherry",
+      "audience": "everyone, relaxed solo play",
+      "mood": [
+        "cozy",
+        "sweet",
+        "satisfying"
+      ],
+      "energy": "low",
+      "competition": "light"
+    },
+    "genre": "timing stacker",
+    "fragments_used": [
+      "lives",
+      "score",
+      "combo"
+    ],
+    "why_its_good": [
+      "One tap, understood at a glance: the overhang slices off and tumbles away, so every sloppy drop makes the next one harder. Perfect drops (within 7 px) grow the layer back by 8 px, chain a combo worth 10 more per step and ring a chime that climbs with the combo.",
+      "A gentle curve for a calm game: the slider speeds up 6 px/s per layer (110 to 260), the camera glides up as the cake grows, and a ruler with a 'Cherry line' shows the goal. Three dropped layers end it; at 24 layers a cherry pops on top and lives left pay a bonus.",
+      "Feedback a player can read: the sliding layer's outline turns white when it lines up, guide lines mark the top layer's edges, perfect layers keep a spinning sparkle, crumbs burst on every landing, and five pastel flavors cycle through list tokens (`$sponge[l.flavor]`)."
+    ],
+    "pitfalls_avoided": [
+      "Layers are drawn from engine shapes (`rect`, `circle`) so they can be any width; a stretched sprite would squash the frosting drips.",
+      "The win waits for a `topper` event 900 ms after the 24th layer, so the last point and combo bonus land before the objective is checked.",
+      "The perfect chime is one `note` with a Hz expression; jingle `notes` must be literal note names, or validation fails with E_PRESENTATION.",
+      "The drop input has a guard (`when: not built`) and a Space key source; the tap target is a transparent full-canvas `rect`, so bots and people can always hit it."
+    ],
+    "group": "arcade",
+    "title": "Cake Tower"
+  },
+  {
+    "id": "gold_which_house",
+    "file": "authoring/games/gold_which_house.authoring.json",
+    "request": "a which-house-are-you quiz for my friends with a magic school vibe, so we can all post our results in the chat",
+    "brief": {
+      "intent": "An eight-question personality quiz that sorts you into one of four invented houses of a wizard academy and ends with a shareable crest",
+      "audience": "friends in a group chat comparing results",
+      "mood": [
+        "whimsical",
+        "mysterious",
+        "cozy"
+      ],
+      "energy": "low",
+      "competition": "none: compare results (with a conviction score on the side)"
+    },
+    "genre": "personality quiz",
+    "fragments_used": [
+      "score",
+      "lives"
+    ],
+    "why_its_good": [
+      "Weighted answers (+2 to one house, +1 to a second) across four invented houses that are friend-group roles (the 2 a.m. listener, the chaos starter, the loophole finder, the snack bringer), and the reveal quotes your own deciding answer back (`Your tell: “…”`), so the result feels personal and is worth a screenshot.",
+      "Stakes without right answers: a candle drains on every question and scores conviction (answer on instinct for more points), hesitating twice puts the Lantern out (`lives` bound to `hesitated`), and a split heart (top two houses within 1 point) ends in a 'Torn between Moonwarden and Emberjack' loss that still names both houses.",
+      "Paced for people: a 1.5 s read lock per question, answers that pop and dim, crests along the bottom that glow as you lean toward them, a swinging-lantern drumroll, then a crest reveal with rays, house-coloured particles and a one-line share card ('I’m a Moonwarden 🌙')."
+    ],
+    "pitfalls_avoided": [
+      "Not `too_short`: the read lock, a 650 ms beat after each answer and the 1.8 s drumroll keep bot runs at 22–28 s (Muse's own quiz ended in 5 s).",
+      "Not `cant_lose`: two real lose paths (hesitation, and the Torn ending through an `{\"end\": \"lose\"}` effect), so 3 of 5 bots lose; the win is an `{\"end\": \"win\"}` effect too, never invented feedback syntax like `{\"action\": ...}`.",
+      "Parameters inside their ranges (`lives.count` 2 of 1..9) and `score`'s `point` really emitted (base 10 per answer, the time bonus added on top), so there's no unreachable fragment rule.",
+      "Every tap target is a transparent `rect` over its sprite, so both the hit-test and the playtest bots find the answers."
+    ],
+    "group": "social",
+    "title": "Which House Claims You?"
+  },
+  {
+    "id": "gold_who_posted",
+    "file": "authoring/games/gold_who_posted.authoring.json",
+    "request": "a gossip trivia game at a fancy prep school where you guess who wrote each anonymous post, so I can challenge my roommate to beat my score",
+    "brief": {
+      "intent": "Read anonymous posts from a school confession wall and pick which of five original students (or the dean's corgi) wrote each, racing a friend's score",
+      "audience": "two friends, one challenging the other",
+      "mood": [
+        "dramatic",
+        "funny",
+        "sassy"
+      ],
+      "energy": "medium",
+      "competition": "beat a friend's score"
+    },
+    "genre": "trivia / who-said-it deduction",
+    "fragments_used": [
+      "quiz",
+      "score",
+      "combo",
+      "lives",
+      "beat_target"
+    ],
+    "why_its_good": [
+      "Five original suspects with unmistakable voices (the queen bee's 'per my last', the lacrosse captain's secret haiku, the overachiever's 6:00 sharp, the clown's stairwell gum racket, the corgi's ALL CAPS) make every post a fair deduction, and each question keeps a confuser in the choices (a sailing brag: Sloane or Jasper? a dog haiku: Jasper or the corgi?).",
+      "Built for a challenge: `beat_target` shows 'Beat Jules: 1600' and wins the moment you pass it; `combo` streaks make a right answer worth 100 to 200, so one slip can cost the crown; three wrong calls, or 12 posts without passing Jules, lose.",
+      "Feels like a feed: each post types in with a cursor and a notification ping, then a stamped verdict ('CALLED IT' or 'IT WAS RAFI') pops on the card while the quiz tints the right and wrong answers."
+    ],
+    "pitfalls_avoided": [
+      "The `quiz` fragment's question line doesn't wrap, so the game hands it blank questions (the same number as the posts) and draws its own wrapped post card, instead of overflowing long text.",
+      "A transparent blocker over the answers while a post types in gives people time to read and stops instant taps: bot runs take 18–28 s, not 5.",
+      "One score system: `score`'s `point` bound to `answered_right` plus one bonus rule (`50 * combo`), with `lives` bound to `answered_wrong` so wrong answers can lose; choices are written exactly as the answers, 4 per question, as `quiz` requires."
+    ],
+    "group": "social",
+    "title": "Who Posted It?"
+  },
+  {
+    "id": "gold_driftwood_cipher",
+    "file": "authoring/games/gold_driftwood_cipher.authoring.json",
+    "request": "a daily space puzzle for our group chat, like decoding a secret message from a rebel ship",
+    "brief": {
+      "intent": "A daily cryptogram: three short scrambled transmissions from an original rebel crew, decoded one letter at a time before the jammer arrives",
+      "audience": "a group chat that plays the same puzzle every day",
+      "mood": [
+        "clever",
+        "adventurous",
+        "playful"
+      ],
+      "energy": "low",
+      "competition": "compare daily scores"
+    },
+    "genre": "cryptogram / word puzzle",
+    "fragments_used": [
+      "score",
+      "rounds",
+      "lives",
+      "keyboard",
+      "hint",
+      "daily_seed"
+    ],
+    "why_its_good": [
+      "A real cryptogram, not plain hangman: each message is shown in a substitution cipher (a shuffled key where each letter becomes the next one in that order, so none stands for itself), so word shapes and repeated letters are clues; a right letter unscrambles every copy and scores per copy, so E is worth more than Q.",
+      "Three short transmissions per run, each with a new key and fresh signal bars, with deadpan payoffs ('the toaster is a traitor', 'the senate hates our sea shanties'); unknown letters flicker during a short decrypt beat, and a navigator tip (`hint`, twice per run) rescues a stuck player.",
+      "Daily and social: `daily_seed` labels it and the host's seed gives the whole Group the same three messages and keys, so scores compare fairly."
+    ],
+    "pitfalls_avoided": [
+      "Losable for real: three wrong letters in one message lose (the game resets `lives`, the lives fragment's public state, on each `round_started`), and a 120 s jammer (`time_limit`, `on_timeout: lose`). Every gate seed set we tried had a losing bot, and the pro still wins.",
+      "A 450 ms decrypt beat between guesses keeps bot runs at 5–23 s, so they aren't over in a few taps, and `keyboard`'s required `key_state(letter)` returns exactly 0, 1 or 2.",
+      "Content stays parseable: every message is lowercase letters and spaces with `|` line breaks, at most 4 lines of 13 characters, so the letter grid always fits the console."
+    ],
+    "group": "social",
+    "title": "Static from the Driftwood Fleet"
+  },
+  {
+    "id": "gold_pillow_fort",
+    "file": "authoring/games/gold_pillow_fort.authoring.json",
+    "request": "a pass-the-phone party game for a sleepover where we all build something together",
+    "brief": {
+      "intent": "Three friends take turns dropping swinging pillows onto one shared fort; every pillow stays in its builder's colour",
+      "audience": "3 friends passing one phone",
+      "mood": [
+        "cozy",
+        "silly",
+        "warm"
+      ],
+      "energy": "medium",
+      "competition": "co-op build with friendly per-player totals"
+    },
+    "genre": "stacking / timing, pass-and-play",
+    "fragments_used": [
+      "turns",
+      "lives"
+    ],
+    "why_its_good": [
+      "One shared fort and everyone's pillows: each pillow keeps its builder's colour and initial exactly where they dropped it, so the fort is a picture of who did what, and the pass screen shows a mini fort and the last drop ('Ana: Comfy! +9') before handing over.",
+      "Easy to learn, with tension in the room: a pillow stays up while its middle is over the one below, every wobble squishes the fort narrower for the next friend, and a perfect drop fluffs it back out, so the room cheers or groans on every drop.",
+      "A co-op goal on top of `turns`' per-player totals: land all 12 and the fort reaches the ceiling for a Sky Fort bonus; three tumbles and it caves in."
+    ],
+    "pitfalls_avoided": [
+      "`playtest.progress` counts score, lives and turn progress, so bots tap through the 'Pass to …' screen instead of idling on it (with plain score, Bullseye Relay's pro bot took 61 s).",
+      "An 'arms got tired' auto-drop after 5 s keeps every turn moving, points land at release so lookahead sees them, and the fall takes only 600 ms, so bot runs end in 4–17 s (13–17 s for a full fort) and about a minute for people.",
+      "Respects HUD capacity: `turns` already fills `hud_bottom`, so the team total is one extra `hud_top` text (3 of 3), not a fourth node or a `shared_progress` bar that wouldn't fit."
+    ],
+    "group": "social",
+    "title": "Pillow Fort Night"
+  }
+]

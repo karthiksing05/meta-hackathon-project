@@ -62,3 +62,7 @@ node authoring/tools/test-studio-bundle.mjs      # loads the bundle in a Node vm
                                                  # 3 games and compares with the Node gate; --all for all 20
 ```
 
+## Gold set
+
+`gold/` holds 16 hand-made example games paired with requests: the quality bar for Muse. Studio picks the
+two closest to each request for Muse's prompt (`expander/gold.mjs`). See `gold/README.md`.

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "gold_stormglass_affair",
+    "file": "authoring/games/gold_stormglass_affair.authoring.json",
+    "request": "a spooky wizard school mystery where my roommate gets framed for stealing something and I have to find the real thief before dawn",
+    "brief": {
+      "intent": "Investigate a theft in your first term at a magic academy, gather clues and name the thief at a dawn tribunal",
+      "audience": "teens and adults who like cozy fantasy and whodunits",
+      "mood": ["mysterious", "cozy", "witty"],
+      "energy": "low",
+      "competition": "light"
+    },
+    "genre": "branching mystery / choose your own adventure",
+    "fragments_used": ["choice_story"],
+    "why_its_good": [
+      "State drives the plot: your house unlocks its own options (Quill reads the runes, Cinder asks the hard question, Moss starts with trust), clues are `clue_*` flags counted for the accusation, and a midnight hub lets you visit only two of three places (`visits>=2` routes every exit to dawn), so each run is a real trade-off.",
+      "Seven endings, each earned: accusing Finch routes to Case Closed only with `clues>=3` (else All Hunch, No Proof), the wrong suspect or a red herring loses, and the secret Weather Menders ending needs Quill's runes plus `trust>=2` with the friend you defended. Callbacks pay off earlier choices (nod along with Finch and Wren turns to the wall; bluff with her testimony and Finch flinches).",
+      "A complete storybook look: a gold-traced gothic arch backdrop, eight framed vignettes picked per scene through `scene_info`, a velvet button plaque, Baskerville, a minor-key triangle waltz, toasts that name each clue, and an end card that explains the score (Clues x 100 + Trust x 50 + Ending)."
+    ],
+    "pitfalls_avoided": [
+      "No made-up syntax: every reaction is a real feedback entry with `when` (clue gained, trust lost), using `moment`, `particles`, `shake` and `haptic`, and every builtin is called with its real arity (`get_or(list, i, default)`, `or_else(parse_int(s), 0)`, `fold(list, init, (acc, x) => ...)`).",
+      "Content keys are only ones the game's own functions read (`content_effects`, `content_needs`, `content_routes`, `content_callbacks`, `content_scene_info`), each story line fits about 28 characters and each label about 24, so no text overflows the 360-wide canvas.",
+      "The ending holds for five seconds before the win or lose screen (the fragment's `good_wins`/`bad_loses` are off and a `curtain` timer sets `verdict`), so players can read how the story ends."
+    ]
+  },
+  {
+    "id": "gold_last_run_of_the_magpie",
+    "file": "authoring/games/gold_last_run_of_the_magpie.authoring.json",
+    "request": "a space opera adventure where I'm a smuggler pulled into a rebellion against an evil empire, with a big escape at the end and maybe a traitor",
+    "brief": {
+      "intent": "Fly a debt-ridden smuggler ship through a blockade, choose loyalty or money, spot the traitor and survive the final escape",
+      "audience": "sci-fi fans, teens and adults",
+      "mood": ["epic", "tense", "funny"],
+      "energy": "medium",
+      "competition": "light"
+    },
+    "genre": "branching space opera / choose your own adventure",
+    "fragments_used": ["choice_story"],
+    "why_its_good": [
+      "Two stats that pull against each other: loyalty (to the kid and the rebels) and heat (how wanted you are). Heat decides the final escape (`heat>=2` routes the right fork to Too Hot to Hide), a decoy you plant earlier lowers it, and the HUD and the ship AI's status line (`ledger_says()`) react as they change.",
+      "Betrayal both ways: you can sell the kid to the empire or fake the handoff, and your old wingmate is the traitor. Finding the tracker unlocks a confrontation, and at the Needle he always says 'go left', a trap you can only read right if you were paying attention. The secret Last Toll ending needs the heir reveal (scan the kid, or let the Warden scan) plus `loyalty>=2`.",
+      "A full cockpit look: chamfered cyan frames with ember corners, a starfield backdrop with nebulae and HUD brackets, twelve vignettes (hangar, blockade, comet tail, golden flagship eye, toll-gate star map, the Needle canyon), Futura, a heroic D-minor theme and zap, levelup, fanfare and powerdown moments."
+    ],
+    "pitfalls_avoided": [
+      "Score means something and isn't leaked early: Loyalty x 100 + Cool x 50, plus ending points that land only when the curtain falls (`ending_points()` is 0 until `verdict` is set), so bots and players can't read the ending's worth before it plays.",
+      "Conditional choices never leave gaps or dead ends: `needs` hides a choice, the glue packs the visible ones to the top, and a path simulation confirms that every scene has 2 or more choices and that every path has 6 to 8 decisions.",
+      "Feedback stays in proportion for a story: shake and a warning haptic only when heat rises, sparkles for loyalty and discoveries, and no custom `{\"action\": ...}` or unknown node kinds."
+    ]
+  },
+  {
+    "id": "gold_the_hostess_knows",
+    "file": "authoring/games/gold_the_hostess_knows.authoring.json",
+    "request": "a messy rich-kid prep school drama where an anonymous gossip account is leaking everyone's secrets and I have to figure out who runs it",
+    "brief": {
+      "intent": "Survive your first week at an elite prep school, protect your reputation, collect receipts and unmask the anonymous gossip account",
+      "audience": "teens and young adults who love teen drama",
+      "mood": ["glamorous", "scheming", "witty"],
+      "energy": "medium",
+      "competition": "light"
+    },
+    "genre": "branching social drama / choose your own adventure",
+    "fragments_used": ["choice_story"],
+    "why_its_good": [
+      "Secrets are the mechanic: tell your new best friend a fake secret, and when The Hostess posts it, an entry effect (`@2`, gated on `bait`) hands you the clue that only she could have leaked it. Rep and Secrets are stats, allies are flags, and a trap scene lets you prove it, or tip her off.",
+      "A real twist with consequences: unmasking Margo needs `clues>=3`, and also `rep>=1` or nobody cares (Right, but Unpopular). Warning her lets her vanish to Geneva first. The secret Truce ending needs both allies plus `secrets>=2`, so the patient path, not the loud one, wins big. Seven endings in all, from Unmasked to Off to the Alps (with goats).",
+      "A lacquer-and-pearls look: a striped café awning and lit townhouses in the backdrop, a pearl-string divider, pill buttons with pearls, nine vignettes (limestone steps, macarons, the post on a phone, the roof at dusk, the gala), Optima, a phone-ping tap sound, buzz for rep hits and a sly pizzicato-style loop."
+    ],
+    "pitfalls_avoided": [
+      "Callbacks use data, not duplicated scenes: `callbacks` swap single lines by flag (the post shows your own fake secret, and Celeste softens if Dev vouched for you), so one scene shows three versions without copying it.",
+      "No real people: the account, the school, its sign-off and every character are original, because the request names a genre (prep-school gossip), not a show. When a request does name one, keep its names and world.",
+      "List lengths stay in step: 4 lines, 3 labels and 3 targets per scene, written one scene per row, with a `scene_names` key that maps each number to its scene id."
+    ]
+  },
+  {
+    "id": "gold_saffron_egg_job",
+    "file": "authoring/games/gold_saffron_egg_job.authoring.json",
+    "request": "a heist story game where I pick my crew and plan how to steal back a priceless egg from a crooked collector's masked party, and someone might double-cross me",
+    "brief": {
+      "intent": "Assemble a two-person crew, prep the night before, then pull off a masquerade heist and the getaway",
+      "audience": "adults and teens who like caper movies",
+      "mood": ["playful", "suspenseful", "stylish"],
+      "energy": "medium",
+      "competition": "light"
+    },
+    "genre": "branching heist caper / choose your own adventure",
+    "fragments_used": ["choice_story"],
+    "why_its_good": [
+      "Planning pays off later: the two crew you hire decide what opens up (Bea unlocks the roof, Nell a rehearsed getaway, Osric a fake egg and a workshop visit), prep choices set `cased` and `two_fakes`, and the vault and getaway read them. Rope past the lasers without casing the place and you play The Laser Harp.",
+      "The double-cross is foreshadowed and beatable: the briefing warns that one of the three has sold out before, Osric appears at the getaway only if you hired him (a route to a separate scene), and the secret Long Con ending needs you to have seen his second fake. The alarm meter (`Alarm ●○○○○`) and the getaway routes (`alarm>=3&!rehearsed`) make stealth matter.",
+      "A 1960s caper look: a teal blueprint-grid backdrop with a mustard-coral-mint stripe, paperclipped index-card buttons, twelve vignettes (the dossier, the blueprint, a peacock mask, soufflés, a laser skylight, a mint van, the bakery window), American Typewriter, a walking-bass loop and click, coin and buzz moments."
+    ],
+    "pitfalls_avoided": [
+      "Conditional effects instead of copied scenes: 'Work the lock' is always shown, and `effects` entries with a condition make it quiet if you got inside (`inside`) and noisy if not, so no scene is left with a single button.",
+      "Stats are clamped where they change (`clamp(alarm + delta(...), 0, 5)`), so the meter and the score (Stealth x 100 + Ending) can't run out of range.",
+      "Text is written for a wide typewriter font: lines of about 26 characters and labels of 24 or fewer, checked in screenshots, so nothing clips at the canvas edge."
+    ]
+  }
+]

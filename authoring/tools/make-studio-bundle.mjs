@@ -143,11 +143,25 @@ const lib = loadLibrary(authoringDir);
 const cat = engineCatalog();
 let commit = 'unknown';
 try { commit = execSync('git rev-parse --short HEAD', { cwd: root }).toString().trim(); } catch { /* not a checkout */ }
+// The gold set (authoring/gold/): example games paired with requests; Studio picks the closest
+// ones per request (expander/gold.mjs). Each must expand with no errors.
+function gold(lib) {
+  const index = JSON.parse(readFileSync(join(authoringDir, 'gold', 'index.json'), 'utf8'));
+  return index.map((e) => {
+    const manifest = JSON.parse(readFileSync(join(authoringDir, e.file.replace(/^authoring\//, '')), 'utf8'));
+    const errors = expand(manifest, lib).diagnostics.filter((d) => d.severity === 'error');
+    if (errors.length) throw new Error(`gold ${e.id} doesn't expand: ${errors[0].code} ${errors[0].message}`);
+    const { file, fragments_used, ...rest } = e;
+    return { ...rest, manifest };
+  });
+}
+
 const data = {
   library: lib,
   engineCatalog: cat,
   formatRules: formatRules(),
   examples: examples(lib),
+  gold: gold(lib),
   build: { commit, fragments: Object.keys(lib.fragments).length, looks: Object.keys(lib.looks).length, engine_version: cat.engine_version ?? null },
 };
 const { entryKey, code } = bundle(entry);
@@ -192,5 +206,5 @@ if (check) {
 } else {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, text);
-  console.log(`wrote ${relative(root, out)}: ${(text.length / 1024).toFixed(0)} KiB (${data.build.fragments} fragments, ${data.build.looks} looks, ${data.examples.length} examples, engine catalog ${data.build.engine_version})`);
+  console.log(`wrote ${relative(root, out)}: ${(text.length / 1024).toFixed(0)} KiB (${data.build.fragments} fragments, ${data.build.looks} looks, ${data.examples.length} examples, ${data.gold.length} gold, engine catalog ${data.build.engine_version})`);
 }

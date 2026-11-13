@@ -1,0 +1,1193 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Which House Claims You?",
+    "instructions": "Brambleford Academy's Lantern sorts every new student into one of four houses. Eight questions: answer on instinct before your candle burns down. Hesitate twice and it goes dark, and a split heart can't be sorted. Then send your crest to the group chat.",
+    "duration_s": 90
+  },
+  "uses": [
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Conviction"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 2
+      },
+      "bind": {
+        "hit": "hesitated"
+      }
+    }
+  ],
+  "state": {
+    "qi": {
+      "type": "int",
+      "init": "0"
+    },
+    "opts": {
+      "type": "list<int>",
+      "init": "[0, 1, 2, 3]"
+    },
+    "tally": {
+      "type": "list<int>",
+      "init": "[0, 0, 0, 0]"
+    },
+    "tells": {
+      "type": "list<string>",
+      "init": "['', '', '', '']"
+    },
+    "picked": {
+      "type": "int",
+      "init": "-1"
+    },
+    "phase": {
+      "type": {
+        "enum": [
+          "ask",
+          "chosen",
+          "deciding",
+          "result"
+        ]
+      },
+      "init": "'ask'"
+    },
+    "asked_at": {
+      "type": "int",
+      "init": "0"
+    },
+    "revealed_at": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "house_main": {
+      "params": {
+        "i": "int"
+      },
+      "returns": "int",
+      "body": "get_or([1, 0, 2, 3, 1, 2, 0, 3, 1, 2, 0, 3, 0, 2, 3, 1, 0, 2, 1, 3, 1, 2, 0, 3, 0, 2, 1, 3, 0, 1, 2, 3], i, 0)"
+    },
+    "house_lean": {
+      "params": {
+        "i": "int"
+      },
+      "returns": "int",
+      "body": "get_or([2, 3, 1, 0, 2, 3, 2, 1, 3, 0, 3, 1, 2, 1, 2, 0, 2, 1, 3, 0, 2, 0, 3, 1, 3, 1, 3, 0, 1, 0, 0, 2], i, 0)"
+    },
+    "choice_index": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "int",
+      "body": "qi * 4 + get_or(opts, k, 0)"
+    },
+    "choice_text": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "string",
+      "body": "get_or(content_choices, choice_index(k), '')"
+    },
+    "house_color": {
+      "params": {
+        "h": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['#A9C1FF', '#FF9A5C', '#5FE0B4', '#FFD36B'], h, '#FFFFFF')"
+    },
+    "top_house": {
+      "params": {},
+      "returns": "int",
+      "body": "fold(range(4), 0, (b, h) => if get_or(tally, h, 0) > get_or(tally, b, 0) then h else b)"
+    },
+    "runner_up": {
+      "params": {},
+      "returns": "int",
+      "body": "let t = top_house() in fold(range(4), if t == 0 then 1 else 0, (b, h) => if h != t and get_or(tally, h, 0) > get_or(tally, b, 0) then h else b)"
+    },
+    "lead": {
+      "params": {},
+      "returns": "int",
+      "body": "get_or(tally, top_house(), 0) - get_or(tally, runner_up(), 0)"
+    },
+    "decisive": {
+      "params": {},
+      "returns": "bool",
+      "body": "lead() >= 2"
+    },
+    "open_for_answers": {
+      "params": {},
+      "returns": "bool",
+      "body": "phase == 'ask' and now >= asked_at + 1500"
+    },
+    "candle_frac": {
+      "params": {},
+      "returns": "float",
+      "body": "if phase != 'ask' then 0.0 else if now < asked_at + 1500 then 1.0 else max(0.0, 1.0 - (now - asked_at - 1500) * 1.0 / 9000.0)"
+    },
+    "glow": {
+      "params": {
+        "h": "int"
+      },
+      "returns": "float",
+      "body": "let top = max(1, max_of(tally)) in 0.28 + 0.72 * min(1.0, get_or(tally, h, 0) * 1.0 / top)"
+    },
+    "house_name": {
+      "params": {
+        "h": "int"
+      },
+      "returns": "string",
+      "body": "get_or(content_houses, h, '')"
+    },
+    "share_line": {
+      "params": {},
+      "returns": "string",
+      "body": "'I’m a ' + house_name(top_house()) + ' ' + get_or(content_emoji, top_house(), '')"
+    },
+    "breakdown": {
+      "params": {},
+      "returns": "string",
+      "body": "join(map(sort_by(range(4), h => 0 - get_or(tally, h, 0)), h => get_or(content_emoji, h, '') + ' ' + str(get_or(tally, h, 0))), '   ')"
+    }
+  },
+  "events": {
+    "chosen": {
+      "house": "int",
+      "slot": "int"
+    },
+    "hesitated": {},
+    "candle_out": {
+      "q": "int"
+    },
+    "advance": {},
+    "reveal": {},
+    "finish": {}
+  },
+  "inputs": {
+    "pick": {
+      "payload": {
+        "slot": "int"
+      }
+    },
+    "accept": {}
+  },
+  "rules": [
+    {
+      "id": "first_question",
+      "on": "start",
+      "do": [
+        {
+          "set": "opts",
+          "to": "shuffle(range(4))"
+        },
+        {
+          "set": "picked",
+          "to": "-1"
+        },
+        {
+          "set": "asked_at",
+          "to": "now"
+        },
+        {
+          "set": "phase",
+          "to": "'ask'"
+        },
+        {
+          "after": "10500",
+          "emit": "candle_out",
+          "with": {
+            "q": "qi"
+          },
+          "id": "candle"
+        }
+      ]
+    },
+    {
+      "id": "answer",
+      "on": "pick",
+      "when": "open_for_answers() and event.slot >= 0 and event.slot < 4",
+      "do": [
+        {
+          "let": {
+            "i": "choice_index(event.slot)"
+          }
+        },
+        {
+          "let": {
+            "m": "house_main(i)",
+            "l": "house_lean(i)"
+          }
+        },
+        {
+          "set": "tally",
+          "to": "set_at(tally, m, get_or(tally, m, 0) + 2)"
+        },
+        {
+          "set": "tally",
+          "to": "set_at(tally, l, get_or(tally, l, 0) + 1)"
+        },
+        {
+          "set": "tells",
+          "to": "set_at(tells, m, get_or(content_choices, i, ''))"
+        },
+        {
+          "emit": "point"
+        },
+        {
+          "incr": "score",
+          "by": "floor(candle_frac() * 9.0)"
+        },
+        {
+          "set": "picked",
+          "to": "event.slot"
+        },
+        {
+          "set": "phase",
+          "to": "'chosen'"
+        },
+        {
+          "cancel": "candle"
+        },
+        {
+          "emit": "chosen",
+          "with": {
+            "house": "m",
+            "slot": "event.slot"
+          }
+        },
+        {
+          "after": "650ms",
+          "emit": "advance",
+          "id": "next"
+        }
+      ]
+    },
+    {
+      "id": "burn_out",
+      "on": "candle_out",
+      "when": "phase == 'ask' and event.q == qi",
+      "do": [
+        {
+          "set": "phase",
+          "to": "'chosen'"
+        },
+        {
+          "emit": "hesitated"
+        },
+        {
+          "after": "650ms",
+          "emit": "advance",
+          "id": "next"
+        }
+      ]
+    },
+    {
+      "id": "next_question",
+      "on": "advance",
+      "do": [
+        {
+          "if": "qi + 1 >= 8",
+          "then": [
+            {
+              "set": "phase",
+              "to": "'deciding'"
+            },
+            {
+              "after": "1800ms",
+              "emit": "reveal",
+              "id": "drumroll"
+            }
+          ],
+          "else": [
+            {
+              "incr": "qi"
+            },
+            {
+              "set": "opts",
+              "to": "shuffle(range(4))"
+            },
+            {
+              "set": "picked",
+              "to": "-1"
+            },
+            {
+              "set": "asked_at",
+              "to": "now"
+            },
+            {
+              "set": "phase",
+              "to": "'ask'"
+            },
+            {
+              "after": "10500",
+              "emit": "candle_out",
+              "with": {
+                "q": "qi"
+              },
+              "id": "candle"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "the_lantern_chooses",
+      "on": "reveal",
+      "do": [
+        {
+          "set": "phase",
+          "to": "'result'"
+        },
+        {
+          "set": "revealed_at",
+          "to": "now"
+        },
+        {
+          "if": "decisive()",
+          "then": [
+            {
+              "incr": "score",
+              "by": "lead() * 5"
+            }
+          ]
+        },
+        {
+          "after": "9s",
+          "emit": "finish",
+          "id": "auto_finish"
+        }
+      ]
+    },
+    {
+      "id": "wear_crest",
+      "on": "accept",
+      "when": "phase == 'result' and now >= revealed_at + 1500",
+      "do": [
+        {
+          "emit": "finish"
+        }
+      ]
+    },
+    {
+      "id": "end_run",
+      "on": "finish",
+      "when": "phase == 'result'",
+      "do": [
+        {
+          "if": "decisive()",
+          "then": [
+            {
+              "end": "win"
+            }
+          ],
+          "else": [
+            {
+              "end": "lose"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= phase == 'ask' or phase == 'chosen'",
+          "children": [
+            {
+              "node": "text",
+              "x": 180,
+              "y": 92,
+              "anchor": "center",
+              "size": 12,
+              "weight": 700,
+              "color": "$primary",
+              "text": "= 'BRAMBLEFORD ACADEMY  ·  ' + str(qi + 1) + ' OF 8'"
+            },
+            {
+              "node": "text",
+              "x": 26,
+              "y": 104,
+              "w": 308,
+              "h": 104,
+              "wrap": true,
+              "align": "center",
+              "valign": "middle",
+              "size": 21,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= get_or(content_questions, qi, '')"
+            },
+            {
+              "node": "rect",
+              "x": 40,
+              "y": 220,
+              "w": 280,
+              "h": 6,
+              "radius": 3,
+              "fill": "$surface"
+            },
+            {
+              "node": "rect",
+              "x": 40,
+              "y": 220,
+              "h": 6,
+              "radius": 3,
+              "w": "= 280.0 * candle_frac()",
+              "fill": "= if candle_frac() < 0.3 then $danger else $primary"
+            },
+            {
+              "node": "image",
+              "asset": "life",
+              "anchor": "center",
+              "x": "= 40.0 + 280.0 * candle_frac()",
+              "y": 212,
+              "w": 14,
+              "h": 20.4,
+              "visible": "= phase == 'ask'"
+            },
+            {
+              "node": "repeat",
+              "source": "range(4)",
+              "as": "k",
+              "key": "k",
+              "template": {
+                "node": "group",
+                "opacity": "= if phase == 'ask' and now < asked_at + 1500 then 0.45 else if phase == 'chosen' and picked != k then 0.35 else 1.0",
+                "transition": {
+                  "opacity": {
+                    "ms": 220,
+                    "ease": "out"
+                  }
+                },
+                "children": [
+                  {
+                    "node": "image",
+                    "asset": "answer",
+                    "x": 24,
+                    "y": "= 246 + k * 76",
+                    "w": 312,
+                    "h": 66
+                  },
+                  {
+                    "node": "rect",
+                    "x": 24,
+                    "y": "= 246 + k * 76",
+                    "w": 312,
+                    "h": 66,
+                    "radius": 14,
+                    "fill": "= if phase == 'chosen' and picked == k then '#F5C66B40' else '#00000000'",
+                    "stroke": "= if phase == 'chosen' and picked == k then '#F5C66B' else '#00000000'",
+                    "stroke_width": 2,
+                    "transition": {
+                      "fill": {
+                        "ms": 150,
+                        "ease": "out"
+                      }
+                    },
+                    "on_tap": {
+                      "input": "pick",
+                      "with": {
+                        "slot": "k"
+                      }
+                    }
+                  },
+                  {
+                    "node": "text",
+                    "x": 38,
+                    "y": "= 246 + k * 76",
+                    "w": 284,
+                    "h": 66,
+                    "wrap": true,
+                    "align": "center",
+                    "valign": "middle",
+                    "size": 15,
+                    "weight": 600,
+                    "color": "$ink",
+                    "text": "= choice_text(k)"
+                  }
+                ],
+                "animate_on": {
+                  "pick": {
+                    "when": "event.slot == k and phase == 'chosen'",
+                    "prop": "scale",
+                    "keys": [
+                      1,
+                      0.95,
+                      1.04,
+                      1
+                    ],
+                    "ms": 220,
+                    "ease": "out"
+                  }
+                }
+              }
+            },
+            {
+              "node": "repeat",
+              "source": "range(4)",
+              "as": "h",
+              "key": "h",
+              "template": {
+                "node": "group",
+                "children": [
+                  {
+                    "node": "image",
+                    "asset": "crest",
+                    "frame": "= h",
+                    "anchor": "center",
+                    "x": "= 72 + h * 72",
+                    "y": 584,
+                    "w": 40,
+                    "h": 46.4,
+                    "opacity": "= glow(h)",
+                    "transition": {
+                      "opacity": {
+                        "ms": 300,
+                        "ease": "out"
+                      }
+                    }
+                  }
+                ],
+                "animate_on": {
+                  "chosen": {
+                    "when": "event.house == h",
+                    "prop": "scale",
+                    "keys": [
+                      1,
+                      1.35,
+                      1
+                    ],
+                    "ms": 320,
+                    "ease": "out"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "group",
+          "visible": "= phase == 'deciding' or phase == 'result'",
+          "children": [
+            {
+              "node": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 360,
+              "h": 640,
+              "fill": "#120D33",
+              "on_tap": {
+                "input": "accept"
+              }
+            },
+            {
+              "node": "image",
+              "asset": "rays",
+              "anchor": "center",
+              "x": 180,
+              "y": 172,
+              "w": 250,
+              "h": 250,
+              "visible": "= phase == 'result' and decisive()",
+              "rotation": "= now / 60.0",
+              "opacity": 0.5
+            },
+            {
+              "node": "group",
+              "visible": "= phase == 'deciding'",
+              "children": [
+                {
+                  "node": "image",
+                  "asset": "lantern",
+                  "anchor": "center",
+                  "x": 180,
+                  "y": 250,
+                  "w": 120,
+                  "h": 180,
+                  "rotation": "= 9.0 * sin(now / 170.0)"
+                },
+                {
+                  "node": "image",
+                  "asset": "crest",
+                  "frame": "= floor(now / 140.0) % 4",
+                  "anchor": "center",
+                  "x": 180,
+                  "y": 420,
+                  "w": 70,
+                  "h": 81.2
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 500,
+                  "anchor": "center",
+                  "size": 22,
+                  "weight": 700,
+                  "color": "$ink",
+                  "text": "The Lantern is deciding…"
+                }
+              ]
+            },
+            {
+              "node": "group",
+              "visible": "= phase == 'result' and decisive()",
+              "children": [
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 40,
+                  "anchor": "center",
+                  "size": 13,
+                  "weight": 700,
+                  "color": "$primary",
+                  "text": "THE LANTERN HAS CHOSEN"
+                },
+                {
+                  "node": "image",
+                  "asset": "crest",
+                  "frame": "= top_house()",
+                  "anchor": "center",
+                  "x": 180,
+                  "y": 172,
+                  "w": 130,
+                  "h": 150.8,
+                  "animate_on": {
+                    "reveal": {
+                      "prop": "scale",
+                      "keys": [
+                        0.2,
+                        1.18,
+                        0.96,
+                        1
+                      ],
+                      "ms": 650,
+                      "ease": "out"
+                    }
+                  }
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 268,
+                  "anchor": "center",
+                  "size": 17,
+                  "weight": 600,
+                  "color": "$secondary",
+                  "text": "You are a"
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 304,
+                  "anchor": "center",
+                  "size": 38,
+                  "weight": 700,
+                  "color": "= house_color(top_house())",
+                  "stroke": "#0B0822",
+                  "stroke_width": 4,
+                  "text": "= house_name(top_house())"
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 340,
+                  "anchor": "center",
+                  "size": 16,
+                  "weight": 600,
+                  "color": "$primary",
+                  "text": "= get_or(content_mottos, top_house(), '')"
+                },
+                {
+                  "node": "text",
+                  "x": 30,
+                  "y": 358,
+                  "w": 300,
+                  "wrap": true,
+                  "align": "center",
+                  "valign": "top",
+                  "size": 15,
+                  "weight": 500,
+                  "color": "$ink",
+                  "text": "= get_or(content_blurbs, top_house(), '')"
+                },
+                {
+                  "node": "text",
+                  "x": 30,
+                  "y": 444,
+                  "w": 300,
+                  "wrap": true,
+                  "align": "center",
+                  "valign": "top",
+                  "size": 14,
+                  "weight": 600,
+                  "color": "$secondary",
+                  "text": "= 'Your tell: “' + get_or(tells, top_house(), '') + '”'"
+                },
+                {
+                  "node": "rect",
+                  "x": 40,
+                  "y": 496,
+                  "w": 280,
+                  "h": 50,
+                  "radius": 25,
+                  "fill": "$surface",
+                  "stroke": "= house_color(top_house())",
+                  "stroke_width": 2
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 521,
+                  "anchor": "center",
+                  "size": 20,
+                  "weight": 700,
+                  "color": "$ink",
+                  "text": "= share_line()"
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 566,
+                  "anchor": "center",
+                  "size": 14,
+                  "weight": 600,
+                  "color": "$secondary",
+                  "text": "= breakdown()"
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 604,
+                  "anchor": "center",
+                  "size": 15,
+                  "weight": 700,
+                  "color": "$primary",
+                  "opacity": "= if now >= revealed_at + 1500 then 1.0 else 0.0",
+                  "transition": {
+                    "opacity": {
+                      "ms": 300,
+                      "ease": "out"
+                    }
+                  },
+                  "text": "Tap to wear your crest"
+                }
+              ]
+            },
+            {
+              "node": "group",
+              "visible": "= phase == 'result' and not decisive()",
+              "children": [
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 60,
+                  "anchor": "center",
+                  "size": 13,
+                  "weight": 700,
+                  "color": "$danger",
+                  "text": "THE LANTERN FLICKERS"
+                },
+                {
+                  "node": "image",
+                  "asset": "crest",
+                  "frame": "= top_house()",
+                  "anchor": "center",
+                  "x": 116,
+                  "y": 210,
+                  "w": 100,
+                  "h": 116,
+                  "rotation": -8,
+                  "animate_on": {
+                    "reveal": {
+                      "prop": "scale",
+                      "keys": [
+                        0.3,
+                        1.1,
+                        1
+                      ],
+                      "ms": 500,
+                      "ease": "out"
+                    }
+                  }
+                },
+                {
+                  "node": "image",
+                  "asset": "crest",
+                  "frame": "= runner_up()",
+                  "anchor": "center",
+                  "x": 244,
+                  "y": 210,
+                  "w": 100,
+                  "h": 116,
+                  "rotation": 8,
+                  "animate_on": {
+                    "reveal": {
+                      "prop": "scale",
+                      "keys": [
+                        0.3,
+                        1.1,
+                        1
+                      ],
+                      "ms": 500,
+                      "ease": "out"
+                    }
+                  }
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 312,
+                  "anchor": "center",
+                  "size": 18,
+                  "weight": 600,
+                  "color": "$secondary",
+                  "text": "Torn between"
+                },
+                {
+                  "node": "text",
+                  "x": 30,
+                  "y": 330,
+                  "w": 300,
+                  "wrap": true,
+                  "align": "center",
+                  "valign": "top",
+                  "size": 26,
+                  "weight": 700,
+                  "color": "$ink",
+                  "text": "= house_name(top_house()) + ' and ' + house_name(runner_up())"
+                },
+                {
+                  "node": "text",
+                  "x": 30,
+                  "y": 420,
+                  "w": 300,
+                  "wrap": true,
+                  "align": "center",
+                  "valign": "top",
+                  "size": 16,
+                  "weight": 500,
+                  "color": "$ink",
+                  "text": "The Lantern can’t read a split heart. Brambleford only sorts the decisive. Answer again, with conviction."
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 540,
+                  "anchor": "center",
+                  "size": 14,
+                  "weight": 600,
+                  "color": "$secondary",
+                  "text": "= breakdown()"
+                },
+                {
+                  "node": "text",
+                  "x": 180,
+                  "y": 596,
+                  "anchor": "center",
+                  "size": 15,
+                  "weight": 700,
+                  "color": "$primary",
+                  "opacity": "= if now >= revealed_at + 1500 then 1.0 else 0.0",
+                  "text": "Tap to try again"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "chosen",
+        "do": [
+          {
+            "particles": {
+              "x": 180,
+              "y": "= 279 + event.slot * 76",
+              "count": 16,
+              "color": "= house_color(event.house)",
+              "speed": 200,
+              "size": 5,
+              "ms": 520
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "hesitated",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "toast": {
+              "text": "Your candle gutters…",
+              "ms": 1100
+            }
+          }
+        ]
+      },
+      {
+        "on": "reveal",
+        "when": "decisive()",
+        "do": [
+          {
+            "moment": "level"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 172,
+              "count": 48,
+              "color": "= house_color(top_house())",
+              "speed": 300,
+              "size": 6,
+              "ms": 1100,
+              "gravity": 260
+            }
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 172,
+              "count": 24,
+              "color": "#FFE9A8",
+              "speed": 180,
+              "size": 4,
+              "ms": 900
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      },
+      {
+        "on": "reveal",
+        "when": "not decisive()",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "shake": {
+              "px": 6,
+              "ms": 260
+            }
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Midnight at a wizard academy: indigo sky, a gold-rimmed crest for each house, candle timers and a swinging brass lantern.",
+    "palette": {
+      "bg": "#150F35",
+      "surface": "#2A2166",
+      "primary": "#F5C66B",
+      "secondary": "#B4A8FF",
+      "accent": "#FF9A5C",
+      "ink": "#FFF6E5",
+      "danger": "#FF6B7A"
+    },
+    "font": "Baskerville",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#0E0A2B'/><stop offset='0.55' stop-color='#1B1449'/><stop offset='1' stop-color='#2A1B58'/></linearGradient><radialGradient id='moon' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFF6D8'/><stop offset='0.7' stop-color='#F5E3A8'/><stop offset='1' stop-color='#F5E3A8' stop-opacity='0'/></radialGradient><radialGradient id='lg' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD98A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFB347' stop-opacity='0'/></radialGradient><radialGradient id='vig' cx='0.5' cy='0.45' r='0.7'><stop offset='0.6' stop-color='#000' stop-opacity='0'/><stop offset='1' stop-color='#05031A' stop-opacity='0.55'/></radialGradient></defs><rect width='360' height='640' fill='url(#sky)'/><g fill='#FFF6E5'><circle cx='18' cy='96' r='1.2' opacity='0.8'/><circle cx='44' cy='140' r='0.8' opacity='0.6'/><circle cx='12' cy='210' r='1' opacity='0.7'/><circle cx='30' cy='300' r='0.7' opacity='0.5'/><circle cx='14' cy='380' r='1.1' opacity='0.6'/><circle cx='340' cy='170' r='1' opacity='0.7'/><circle cx='322' cy='240' r='0.8' opacity='0.5'/><circle cx='346' cy='330' r='1.2' opacity='0.6'/><circle cx='330' cy='420' r='0.7' opacity='0.5'/><circle cx='96' cy='22' r='1' opacity='0.7'/><circle cx='150' cy='14' r='0.8' opacity='0.6'/><circle cx='230' cy='24' r='1.1' opacity='0.7'/><path d='M60 70 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z' opacity='0.85'/><path d='M300 470 l1.6 4 l4 1.6 l-4 1.6 l-1.6 4 l-1.6 -4 l-4 -1.6 l4 -1.6z' opacity='0.7'/></g><circle cx='318' cy='92' r='26' fill='url(#moon)'/><circle cx='330' cy='84' r='20' fill='#1A1347'/><g><circle cx='22' cy='250' r='16' fill='url(#lg)'/><rect x='17' y='243' width='10' height='14' rx='3' fill='#FFC46B'/><rect x='18' y='240' width='8' height='3' fill='#6B4A2B'/></g><g><circle cx='340' cy='370' r='14' fill='url(#lg)'/><rect x='336' y='364' width='8' height='12' rx='3' fill='#FFC46B'/><rect x='337' y='361' width='6' height='3' fill='#6B4A2B'/></g><g><circle cx='26' cy='470' r='11' fill='url(#lg)' opacity='0.8'/><rect x='23' y='466' width='6' height='9' rx='2' fill='#FFC46B'/></g><path d='M0 640 L0 600 L22 600 L22 560 L16 560 L30 520 L44 560 L38 560 L38 600 L70 600 L70 585 L92 585 L92 548 L84 548 L104 496 L124 548 L116 548 L116 585 L150 585 L150 570 L170 570 L180 540 L190 570 L210 570 L210 585 L244 585 L244 548 L236 548 L256 500 L276 548 L268 548 L268 585 L300 585 L300 600 L322 600 L322 556 L316 556 L330 516 L344 556 L338 556 L338 600 L360 600 L360 640Z' fill='#0B0822'/><g fill='#FFC46B'><rect x='101' y='556' width='6' height='9' rx='3'/><rect x='253' y='556' width='6' height='9' rx='3'/><rect x='27' y='572' width='5' height='8' rx='2.5'/><rect x='327' y='568' width='5' height='8' rx='2.5'/><rect x='177' y='576' width='6' height='8' rx='3'/></g><rect width='360' height='640' fill='url(#vig)'/></svg>"
+    },
+    "sprites": {
+      "crest": {
+        "svg": [
+          "<svg viewBox='0 0 100 116'><defs><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A55B8'/><stop offset='1' stop-color='#16205A'/></linearGradient><linearGradient id='rim' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFE9A8'/><stop offset='0.5' stop-color='#D9A441'/><stop offset='1' stop-color='#FFE3A0'/></linearGradient></defs><path d='M50 4 L94 16 L94 56 C94 86 74 104 50 113 C26 104 6 86 6 56 L6 16 Z' fill='url(#f)' stroke='url(#rim)' stroke-width='5' stroke-linejoin='round'/><path d='M50 12 L86 22 L86 56 C86 80 70 95 50 103' fill='none' stroke='#FFFFFF' stroke-opacity='0.16' stroke-width='3'/><path d='M58 30 A26 26 0 1 0 64 80 A20 20 0 1 1 58 30Z' fill='#E8EEFF'/><path d='M68 38 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z' fill='#FFE9A8'/><path d='M74 60 l1.5 3.5 l3.5 1.5 l-3.5 1.5 l-1.5 3.5 l-1.5 -3.5 l-3.5 -1.5 l3.5 -1.5z' fill='#FFE9A8'/></svg>",
+          "<svg viewBox='0 0 100 116'><defs><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#E0531F'/><stop offset='1' stop-color='#6E1608'/></linearGradient><linearGradient id='rim' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFE9A8'/><stop offset='0.5' stop-color='#D9A441'/><stop offset='1' stop-color='#FFE3A0'/></linearGradient></defs><path d='M50 4 L94 16 L94 56 C94 86 74 104 50 113 C26 104 6 86 6 56 L6 16 Z' fill='url(#f)' stroke='url(#rim)' stroke-width='5' stroke-linejoin='round'/><path d='M50 12 L86 22 L86 56 C86 80 70 95 50 103' fill='none' stroke='#FFFFFF' stroke-opacity='0.16' stroke-width='3'/><path d='M50 22 C58 38 72 44 70 66 C69 82 60 92 50 92 C38 92 29 82 30 68 C31 56 38 50 40 40 C44 48 46 52 50 54 C52 44 50 32 50 22Z' fill='#FFC14D'/><path d='M50 50 C55 60 62 64 61 74 C60 82 56 86 50 86 C44 86 39 81 40 74 C41 68 45 64 46 58 C48 62 49 63 50 64Z' fill='#FFF0B8'/></svg>",
+          "<svg viewBox='0 0 100 116'><defs><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#17906F'/><stop offset='1' stop-color='#06392E'/></linearGradient><linearGradient id='rim' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFE9A8'/><stop offset='0.5' stop-color='#D9A441'/><stop offset='1' stop-color='#FFE3A0'/></linearGradient></defs><path d='M50 4 L94 16 L94 56 C94 86 74 104 50 113 C26 104 6 86 6 56 L6 16 Z' fill='url(#f)' stroke='url(#rim)' stroke-width='5' stroke-linejoin='round'/><path d='M50 12 L86 22 L86 56 C86 80 70 95 50 103' fill='none' stroke='#FFFFFF' stroke-opacity='0.16' stroke-width='3'/><path d='M30 92 C42 70 56 46 74 24 C76 30 74 40 68 48 C62 58 52 70 34 92Z' fill='#F4FFF9'/><path d='M74 24 L52 66' stroke='#0B5745' stroke-width='1.6'/><path d='M24 54 C34 60 46 58 56 66 C64 72 70 80 76 84' fill='none' stroke='#FFE9A8' stroke-width='3' stroke-linecap='round'/><path d='M36 58 l-3 -6 M48 60 l2 -7 M60 70 l-5 -4 M68 78 l4 -6' stroke='#FFE9A8' stroke-width='2.4' stroke-linecap='round'/></svg>",
+          "<svg viewBox='0 0 100 116'><defs><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#C9892A'/><stop offset='1' stop-color='#5A3510'/></linearGradient><linearGradient id='rim' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFE9A8'/><stop offset='0.5' stop-color='#D9A441'/><stop offset='1' stop-color='#FFE3A0'/></linearGradient></defs><path d='M50 4 L94 16 L94 56 C94 86 74 104 50 113 C26 104 6 86 6 56 L6 16 Z' fill='url(#f)' stroke='url(#rim)' stroke-width='5' stroke-linejoin='round'/><path d='M50 12 L86 22 L86 56 C86 80 70 95 50 103' fill='none' stroke='#FFFFFF' stroke-opacity='0.16' stroke-width='3'/><path d='M26 58 C26 38 74 38 74 58 C74 62 70 64 64 64 L36 64 C30 64 26 62 26 58Z' fill='#E5483B'/><circle cx='40' cy='52' r='4' fill='#FFF3E0'/><circle cx='56' cy='48' r='5' fill='#FFF3E0'/><circle cx='64' cy='57' r='3' fill='#FFF3E0'/><circle cx='48' cy='60' r='2.5' fill='#FFF3E0'/><path d='M42 64 L58 64 L60 88 C56 92 44 92 40 88Z' fill='#FFF3E0'/><path d='M28 92 C34 84 42 88 50 90 C58 88 66 84 72 92Z' fill='#8BCF6A'/></svg>"
+        ],
+        "color": "#F5C66B"
+      },
+      "answer": {
+        "svg": "<svg viewBox='0 0 312 66'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#2E2470'/><stop offset='1' stop-color='#1E1752'/></linearGradient></defs><rect x='1.5' y='1.5' width='309' height='63' rx='14' fill='url(#g)' stroke='#D9A441' stroke-opacity='0.75' stroke-width='1.5'/><rect x='6' y='6' width='300' height='54' rx='10' fill='none' stroke='#FFE9A8' stroke-opacity='0.14'/><path d='M14 33 l4 -4 l4 4 l-4 4z' fill='#D9A441'/><path d='M290 33 l4 -4 l4 4 l-4 4z' fill='#D9A441'/></svg>",
+        "color": "#D9A441"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 22 32'><defs><radialGradient id='h' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE9A8' stop-opacity='0.9'/><stop offset='1' stop-color='#FFB347' stop-opacity='0'/></radialGradient></defs><circle cx='11' cy='8' r='8' fill='url(#h)'/><path d='M11 2 C14 6 14 9 11 12 C8 9 8 6 11 2Z' fill='#FFD36B'/><path d='M11 6 C12.4 8 12.4 9.5 11 11 C9.6 9.5 9.6 8 11 6Z' fill='#FFF6D8'/><rect x='6' y='13' width='10' height='17' rx='2' fill='#FFF3DC'/><path d='M6 15 q3 3 5 0 q2 -2 5 0' fill='#F2DDB4'/><rect x='4' y='29' width='14' height='3' rx='1.5' fill='#D9A441'/></svg>",
+        "color": "#FFD36B"
+      },
+      "lantern": {
+        "svg": "<svg viewBox='0 0 80 120'><defs><radialGradient id='glow' cx='0.5' cy='0.55' r='0.5'><stop offset='0' stop-color='#FFF1C2'/><stop offset='0.5' stop-color='#FFC46B'/><stop offset='1' stop-color='#FF8A3D' stop-opacity='0'/></radialGradient></defs><path d='M40 0 v14' stroke='#D9A441' stroke-width='2'/><circle cx='40' cy='16' r='5' fill='none' stroke='#D9A441' stroke-width='2.5'/><path d='M22 26 L58 26 L52 20 L28 20Z' fill='#B8862E'/><circle cx='40' cy='64' r='38' fill='url(#glow)' opacity='0.75'/><path d='M20 28 L60 28 L64 96 L16 96Z' fill='#FFD98A' opacity='0.35' stroke='#D9A441' stroke-width='3' stroke-linejoin='round'/><path d='M40 28 V96 M28 28 L24 96 M52 28 L56 96' stroke='#B8862E' stroke-width='1.6'/><path d='M40 46 C48 56 50 64 40 76 C30 64 32 56 40 46Z' fill='#FFF6D8'/><path d='M14 96 L66 96 L60 106 L20 106Z' fill='#B8862E'/><rect x='34' y='106' width='12' height='6' rx='2' fill='#8A6220'/></svg>",
+        "color": "#FFC46B"
+      },
+      "rays": {
+        "svg": "<svg viewBox='0 0 200 200'><defs><radialGradient id='r' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE9A8' stop-opacity='0.55'/><stop offset='0.6' stop-color='#F5C66B' stop-opacity='0.18'/><stop offset='1' stop-color='#F5C66B' stop-opacity='0'/></radialGradient></defs><circle cx='100' cy='100' r='100' fill='url(#r)'/><g fill='#FFE9A8' opacity='0.22'><path d='M100 100 L199.6 91.0 L199.6 109.0Z'/><path d='M100 100 L190.7 142.0 L181.8 157.6Z'/><path d='M100 100 L157.6 181.8 L142.0 190.7Z'/><path d='M100 100 L109.0 199.6 L91.0 199.6Z'/><path d='M100 100 L58.0 190.7 L42.4 181.8Z'/><path d='M100 100 L18.2 157.6 L9.3 142.0Z'/><path d='M100 100 L0.4 109.0 L0.4 91.0Z'/><path d='M100 100 L9.3 58.0 L18.2 42.4Z'/><path d='M100 100 L42.4 18.2 L58.0 9.3Z'/><path d='M100 100 L91.0 0.4 L109.0 0.4Z'/><path d='M100 100 L142.0 9.3 L157.6 18.2Z'/><path d='M100 100 L181.8 42.4 L190.7 58.0Z'/></g></svg>",
+        "color": "#FFE9A8"
+      }
+    }
+  },
+  "sound": {
+    "set": "chime",
+    "moments": {
+      "tap": "pluck",
+      "level": "shimmer",
+      "hit": "fall",
+      "win": "fanfare",
+      "lose": "sigh"
+    },
+    "music": {
+      "melody": [
+        "A4",
+        null,
+        "C5",
+        "E5",
+        "D5",
+        null,
+        "C5",
+        null,
+        "B4",
+        null,
+        "G4",
+        "B4",
+        "A4",
+        null,
+        null,
+        null,
+        "A4",
+        null,
+        "C5",
+        "E5",
+        "F5",
+        null,
+        "E5",
+        null,
+        "D5",
+        null,
+        "B4",
+        "G#4",
+        "A4",
+        null,
+        null,
+        null
+      ],
+      "bass": [
+        "A2",
+        "A2",
+        "F2",
+        "F2",
+        "G2",
+        "G2",
+        "A2",
+        "A2",
+        "A2",
+        "A2",
+        "D2",
+        "D2",
+        "E2",
+        "E2",
+        "A2",
+        "A2"
+      ],
+      "bpm": 96,
+      "wave": "triangle",
+      "volume": 0.22
+    }
+  },
+  "feel": {
+    "particles": true,
+    "shake": true,
+    "haptics": true
+  },
+  "content": {
+    "questions": [
+      "First night at Brambleford, your dorm door locks itself from the outside. You…",
+      "Pick a familiar.",
+      "You post in the group chat. Nobody replies for an hour. You…",
+      "The Midnight Exam is tomorrow. Tonight you…",
+      "A cursed mirror shows your worst habit. It's…",
+      "Your spellbook is bound in…",
+      "A friend is crying in the library. You…",
+      "Your house wins the Lantern Cup. You celebrate by…"
+    ],
+    "choices": [
+      "Pick the lock with a hairpin and a half-remembered spell",
+      "Slide a note under the door. Someone always answers notes.",
+      "Recite Rule 41 (no door may lock a student in) until it opens",
+      "Knock and offer the hallway ghost half your biscuit",
+      "A moth who only flies toward bad ideas",
+      "A toad with strong opinions about your essays",
+      "An owl who keeps your secrets, and a few of her own",
+      "A round hedgehog who naps in your teacup",
+      "Post again. Louder. With a gif.",
+      "Screenshot it. For the records.",
+      "Quietly check on the friend who's been off lately",
+      "Send a photo of the soup you just made for everyone",
+      "Study by candlelight in the bell tower, alone",
+      "Find out who wrote the exam. Find their notes.",
+      "Make flashcards for your whole corridor",
+      "Sleep. You'll improvise. You always do.",
+      "Saying 'one more chapter' at 3 a.m.",
+      "Correcting a rival's spell pronunciation mid-duel",
+      "Saying yes to every plan, then inventing three more",
+      "Adopting every stray. Every. Single. One.",
+      "A thundercloud, barely contained",
+      "A rival's annotated notes, 'borrowed' indefinitely",
+      "Midnight-blue velvet that smells like rain",
+      "A patchwork quilt your gran stitched for luck",
+      "Sit beside them without a word. Pass tissues.",
+      "Ask who did it. Open a file. Start a plan.",
+      "Announce a midnight kitchen raid. Right now.",
+      "Wrap them in your coat. Tea is already brewing.",
+      "Watching the fireworks from the roof, grinning",
+      "Climbing the clock tower to ring the bell yourself",
+      "Writing a twelve-page account of exactly why you won",
+      "Baking a cake shaped like the cup, for everyone"
+    ],
+    "houses": [
+      "Moonwarden",
+      "Emberjack",
+      "Thornquill",
+      "Hearthmoss"
+    ],
+    "emoji": [
+      "🌙",
+      "🔥",
+      "🪶",
+      "🍄"
+    ],
+    "mottos": [
+      "“We keep the light on.”",
+      "“Jump first. Plan on the way down.”",
+      "“Read the fine print. Then rewrite it.”",
+      "“Nobody eats alone.”"
+    ],
+    "blurbs": [
+      "You notice everything and say half of it. You're the friend people text at 2 a.m., and you always answer.",
+      "You start the fun and finish the stories. Curfew is a dare, and somehow everyone gets home safe because you were there.",
+      "You read the rules to find the loopholes. You win arguments three days later, and your notes beat the teacher's.",
+      "You remember birthdays, allergies and everyone's tea order. Your room is where the group ends up. Soft heart, iron spine."
+    ]
+  },
+  "playtest": {
+    "progress": "score"
+  }
+}

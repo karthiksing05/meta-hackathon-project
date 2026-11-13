@@ -7,7 +7,9 @@ import Foundation
 enum MicrogamePrompts {
     // MARK: System
 
-    static func system(_ catalog: MicrogameCatalog) -> String {
+    /// `examples`: prompt text for the gold examples closest to the request
+    /// (`MicrogameStudio.examples(for:)`); nil uses the catalog's fixed examples.
+    static func system(_ catalog: MicrogameCatalog, examples: String? = nil) -> String {
         """
         You design microgames for Bubbles: tiny, original games people make and play inside Facebook on a phone.
         A microgame is written as an authoring manifest (JSON). An expander combines it with a library of tested \
@@ -33,7 +35,13 @@ enum MicrogamePrompts {
         "playtest": {"progress": "<expr>"} so the bots know what doing better means.
         - Expressions use single-quoted strings, and floats are written with a decimal point (1.0, not 1) where \
         a float is expected.
-        - Everything is synthetic and original: no real people, brands, businesses or copies of existing games.
+        - No real people. A theme, franchise, show or brand the person asks for ("a Star Wars game", "like \
+        Harry Potter") is welcome: keep it in the title, names, characters, places, art and words, so the game \
+        is clearly what they asked for. Never add one nobody asked for, and never copy another game's levels, \
+        art or exact text. The examples below use invented names only because nobody asked for a franchise; \
+        follow their structure, not their names.
+        - Aim for the quality of the examples below: specific, funny or vivid writing; a difficulty curve; \
+        art for every role; a sound set that fits; real ways to win and to lose.
 
         ## The authoring format
 
@@ -51,9 +59,9 @@ enum MicrogamePrompts {
 
         \(catalog.prompt.engine)
 
-        ## Complete examples that validate and pass the bots
+        ## Complete examples that validate and pass the bots (the closest to this request)
 
-        \(catalog.prompt.examples)
+        \(examples ?? catalog.prompt.examples)
         """
     }
 

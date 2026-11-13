@@ -1,0 +1,1142 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Rift Run",
+    "instructions": "Drag left and right to fly your starfighter down the canyon. It fires on its own. Shoot the drone waves, keep off the canyon walls, then break the Rift Core in wave 4.",
+    "duration_s": 75
+  },
+  "uses": [
+    {
+      "fragment": "player_drag",
+      "params": {
+        "axis": "x",
+        "mode": "glide",
+        "speed": 1100.0,
+        "start_x": 180.0,
+        "start_y": 548.0,
+        "margin": 24.0,
+        "size": 15.0,
+        "tone": "primary"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      }
+    },
+    {
+      "fragment": "waves",
+      "params": {
+        "waves_to_win": 4,
+        "end_on": "clear",
+        "break_ms": "1800ms",
+        "label": "Wave"
+      }
+    },
+    {
+      "fragment": "collide",
+      "params": {
+        "radius": 24.0,
+        "grace": "1200ms"
+      }
+    }
+  ],
+  "types": {
+    "Bolt": {
+      "id": "int",
+      "x": "float",
+      "y": "float"
+    },
+    "Drone": {
+      "id": "int",
+      "x": "float",
+      "y": "float",
+      "x0": "float",
+      "kind": "string",
+      "born": "int",
+      "fired": "bool"
+    },
+    "Orb": {
+      "id": "int",
+      "x": "float",
+      "y": "float",
+      "vx": "float",
+      "vy": "float"
+    },
+    "Pop": {
+      "id": "int",
+      "x": "float",
+      "y": "float",
+      "born": "int",
+      "text": "string"
+    }
+  },
+  "state": {
+    "bolts": {
+      "type": "list<Bolt>",
+      "init": "[]"
+    },
+    "drones": {
+      "type": "list<Drone>",
+      "init": "[]"
+    },
+    "orbs": {
+      "type": "list<Orb>",
+      "init": "[]"
+    },
+    "pops": {
+      "type": "list<Pop>",
+      "init": "[]"
+    },
+    "seq": {
+      "type": "int",
+      "init": "0"
+    },
+    "to_spawn": {
+      "type": "int",
+      "init": "0"
+    },
+    "travel": {
+      "type": "float",
+      "init": "0.0"
+    },
+    "scroll": {
+      "type": "float",
+      "init": "170.0"
+    },
+    "half_w": {
+      "type": "float",
+      "init": "160.0"
+    },
+    "half_target": {
+      "type": "float",
+      "init": "160.0"
+    },
+    "chain": {
+      "type": "int",
+      "init": "0"
+    },
+    "core_on": {
+      "type": "bool",
+      "init": "false"
+    },
+    "core_x": {
+      "type": "float",
+      "init": "180.0"
+    },
+    "core_y": {
+      "type": "float",
+      "init": "-80.0"
+    },
+    "core_hp": {
+      "type": "int",
+      "init": "24"
+    },
+    "score": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "canyon_cx": {
+      "params": {
+        "y": "float"
+      },
+      "returns": "float",
+      "body": "180.0 + 24.0 * sin((travel - y) / 170.0) + 10.0 * sin((travel - y) / 63.0)"
+    },
+    "wall_l": {
+      "params": {
+        "y": "float"
+      },
+      "returns": "float",
+      "body": "canyon_cx(y) - half_w - 7.0 * sin((travel - y) / 23.0)"
+    },
+    "wall_r": {
+      "params": {
+        "y": "float"
+      },
+      "returns": "float",
+      "body": "canyon_cx(y) + half_w + 7.0 * cos((travel - y) / 29.0)"
+    },
+    "in_wall": {
+      "params": {},
+      "returns": "bool",
+      "body": "player.x - 9.0 < wall_l(player.y) or player.x + 9.0 > wall_r(player.y)"
+    },
+    "colliders": {
+      "params": {},
+      "returns": "list<vec2>",
+      "body": "concat(concat(map(drones, d => vec(d.x, d.y)), map(orbs, o => vec(o.x, o.y))), if in_wall() then [player] else [])"
+    }
+  },
+  "events": {
+    "drone_down": {
+      "x": "float",
+      "y": "float"
+    },
+    "core_hit": {
+      "x": "float",
+      "y": "float"
+    },
+    "core_down": {
+      "x": "float",
+      "y": "float"
+    },
+    "core_fire": {}
+  },
+  "rules": [
+    {
+      "id": "wave_setup",
+      "on": "wave_started",
+      "when": "event.index < 4",
+      "do": [
+        {
+          "set": "to_spawn",
+          "to": "6 + 3 * event.index"
+        },
+        {
+          "set": "half_target",
+          "to": "172.0 - 14.0 * event.index"
+        },
+        {
+          "set": "scroll",
+          "to": "170.0 + 30.0 * event.index"
+        }
+      ]
+    },
+    {
+      "id": "core_arrives",
+      "on": "wave_started",
+      "when": "event.index == 4",
+      "do": [
+        {
+          "set": "core_on",
+          "to": "true"
+        },
+        {
+          "set": "core_hp",
+          "to": "24"
+        },
+        {
+          "set": "core_y",
+          "to": "-80.0"
+        },
+        {
+          "set": "to_spawn",
+          "to": "6"
+        },
+        {
+          "set": "half_target",
+          "to": "118.0"
+        },
+        {
+          "after": "2600ms",
+          "emit": "core_fire",
+          "id": "core_gun"
+        }
+      ]
+    },
+    {
+      "id": "launch_drone",
+      "on": {
+        "every": "420ms"
+      },
+      "when": "not in_break and to_spawn > 0",
+      "do": [
+        {
+          "let": {
+            "kind": "if wave >= 3 and chance(0.3) then 'gunner' else if wave >= 2 and chance(0.4) then 'diver' else 'scout'"
+          }
+        },
+        {
+          "let": {
+            "sx": "random_float(wall_l(-20.0) + 34.0, wall_r(-20.0) - 34.0)"
+          }
+        },
+        {
+          "push": "drones",
+          "value": "{id: seq, x: sx, y: -24.0, x0: sx, kind: kind, born: now, fired: false}"
+        },
+        {
+          "incr": "seq"
+        },
+        {
+          "decr": "to_spawn"
+        }
+      ]
+    },
+    {
+      "id": "autofire",
+      "on": {
+        "every": "200ms"
+      },
+      "do": [
+        {
+          "push": "bolts",
+          "value": "{id: seq, x: player.x - 8.0, y: player.y - 20.0}"
+        },
+        {
+          "push": "bolts",
+          "value": "{id: seq + 1, x: player.x + 8.0, y: player.y - 20.0}"
+        },
+        {
+          "incr": "seq",
+          "by": "2"
+        }
+      ]
+    },
+    {
+      "id": "fly",
+      "on": "tick",
+      "do": [
+        {
+          "let": {
+            "s": "event.dt / 1000.0"
+          }
+        },
+        {
+          "set": "travel",
+          "to": "travel + scroll * s"
+        },
+        {
+          "set": "half_w",
+          "to": "half_w + (half_target - half_w) * min(1.0, event.dt / 700.0)"
+        },
+        {
+          "set": "bolts",
+          "to": "map(bolts, b => {...b, y: b.y - 660.0 * s})"
+        },
+        {
+          "remove": "bolts",
+          "where": "b => b.y < -30.0"
+        },
+        {
+          "set": "orbs",
+          "to": "map(orbs, o => {...o, x: o.x + o.vx * s, y: o.y + o.vy * s})"
+        },
+        {
+          "remove": "orbs",
+          "where": "o => o.y > 670.0 or o.x < -20.0 or o.x > 380.0"
+        },
+        {
+          "set": "drones",
+          "to": "map(drones, d => let ny = d.y + (if d.kind == 'diver' then 165.0 else if d.kind == 'gunner' then 95.0 else 120.0 + 10.0 * wave) * s in {...d, y: ny, x: clamp(if d.kind == 'diver' then d.x0 + clamp(player.x - d.x0, -90.0, 90.0) * clamp((ny - 100.0) / 260.0, 0.0, 1.0) else d.x0 + 34.0 * sin((now - d.born) / 430.0), wall_l(ny) + 18.0, wall_r(ny) - 18.0)})"
+        },
+        {
+          "if": "any(drones, d => d.y > 670.0)",
+          "then": [
+            {
+              "set": "chain",
+              "to": "0"
+            }
+          ]
+        },
+        {
+          "remove": "drones",
+          "where": "d => d.y > 670.0"
+        },
+        {
+          "remove": "pops",
+          "where": "p => now - p.born > 700"
+        }
+      ]
+    },
+    {
+      "id": "gunners_fire",
+      "on": "tick",
+      "when": "any(drones, d => d.kind == 'gunner' and not d.fired and d.y > 150.0)",
+      "do": [
+        {
+          "for_each": "filter(drones, d => d.kind == 'gunner' and not d.fired and d.y > 150.0)",
+          "as": "g",
+          "do": [
+            {
+              "let": {
+                "aim": "normalize(vec(player.x - g.x, player.y - g.y))"
+              }
+            },
+            {
+              "push": "orbs",
+              "value": "{id: seq, x: g.x, y: g.y + 14.0, vx: aim.x * 200.0, vy: aim.y * 200.0}"
+            },
+            {
+              "incr": "seq"
+            }
+          ]
+        },
+        {
+          "set": "drones",
+          "to": "map(drones, d => if d.kind == 'gunner' and d.y > 150.0 then {...d, fired: true} else d)"
+        }
+      ]
+    },
+    {
+      "id": "bolts_hit",
+      "on": "tick",
+      "when": "any(drones, d => any(bolts, b => abs(b.x - d.x) < 18.0 and abs(b.y - d.y) < 20.0))",
+      "do": [
+        {
+          "let": {
+            "dead": "filter(drones, d => any(bolts, b => abs(b.x - d.x) < 18.0 and abs(b.y - d.y) < 20.0))"
+          }
+        },
+        {
+          "remove": "bolts",
+          "where": "b => any(dead, d => abs(b.x - d.x) < 18.0 and abs(b.y - d.y) < 20.0)"
+        },
+        {
+          "remove": "drones",
+          "where": "d => any(dead, k => k.id == d.id)"
+        },
+        {
+          "for_each": "dead",
+          "as": "k",
+          "do": [
+            {
+              "incr": "chain"
+            },
+            {
+              "incr": "score",
+              "by": "5 * min(chain, 10)"
+            },
+            {
+              "push": "pops",
+              "value": "{id: seq, x: k.x, y: k.y - 10.0, born: now, text: '+' + str(10 + 5 * min(chain, 10))}"
+            },
+            {
+              "incr": "seq"
+            },
+            {
+              "incr": "score",
+              "by": "10"
+            },
+            {
+              "emit": "drone_down",
+              "with": {
+                "x": "k.x",
+                "y": "k.y"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wave_clear",
+      "on": "tick",
+      "when": "not in_break and wave < 4 and to_spawn == 0 and len(drones) == 0",
+      "do": [
+        {
+          "emit": "enemies_gone"
+        }
+      ]
+    },
+    {
+      "id": "core_move",
+      "on": "tick",
+      "when": "core_on",
+      "do": [
+        {
+          "set": "core_y",
+          "to": "min(140.0, core_y + 70.0 * event.dt / 1000.0)"
+        },
+        {
+          "set": "core_x",
+          "to": "canyon_cx(core_y) + 64.0 * sin(now / 900.0)"
+        }
+      ]
+    },
+    {
+      "id": "core_struck",
+      "on": "tick",
+      "when": "core_on and core_y > 60.0 and any(bolts, b => abs(b.x - core_x) < 40.0 and abs(b.y - core_y) < 34.0)",
+      "do": [
+        {
+          "let": {
+            "n": "count(bolts, b => abs(b.x - core_x) < 40.0 and abs(b.y - core_y) < 34.0)"
+          }
+        },
+        {
+          "remove": "bolts",
+          "where": "b => abs(b.x - core_x) < 40.0 and abs(b.y - core_y) < 34.0"
+        },
+        {
+          "set": "core_hp",
+          "to": "max(0, core_hp - n)"
+        },
+        {
+          "incr": "score",
+          "by": "5 * n"
+        },
+        {
+          "emit": "core_hit",
+          "with": {
+            "x": "core_x",
+            "y": "core_y + 30.0"
+          }
+        },
+        {
+          "if": "core_hp <= 0",
+          "then": [
+            {
+              "set": "core_on",
+              "to": "false"
+            },
+            {
+              "incr": "score",
+              "by": "300 + 100 * lives"
+            },
+            {
+              "set": "orbs",
+              "to": "[]"
+            },
+            {
+              "set": "drones",
+              "to": "[]"
+            },
+            {
+              "set": "to_spawn",
+              "to": "0"
+            },
+            {
+              "push": "pops",
+              "value": "{id: seq, x: core_x, y: core_y, born: now, text: 'CORE DOWN +' + str(300 + 100 * lives)}"
+            },
+            {
+              "incr": "seq"
+            },
+            {
+              "emit": "core_down",
+              "with": {
+                "x": "core_x",
+                "y": "core_y"
+              }
+            },
+            {
+              "emit": "enemies_gone"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "core_volley",
+      "on": "core_fire",
+      "when": "core_on",
+      "do": [
+        {
+          "let": {
+            "a": "angle(vec(player.x - core_x, player.y - core_y))"
+          }
+        },
+        {
+          "for_each": "[-0.32, 0.0, 0.32]",
+          "as": "da",
+          "do": [
+            {
+              "push": "orbs",
+              "value": "{id: seq, x: core_x, y: core_y + 30.0, vx: cos(a + da) * 190.0, vy: sin(a + da) * 190.0}"
+            },
+            {
+              "incr": "seq"
+            }
+          ]
+        },
+        {
+          "after": "1300ms",
+          "emit": "core_fire",
+          "id": "core_gun"
+        }
+      ]
+    },
+    {
+      "id": "shield_burst",
+      "on": "hit",
+      "do": [
+        {
+          "remove": "drones",
+          "where": "d => dist(vec(d.x, d.y), hit_at) < 48.0"
+        },
+        {
+          "remove": "orbs",
+          "where": "o => dist(vec(o.x, o.y), hit_at) < 48.0"
+        },
+        {
+          "set": "chain",
+          "to": "0"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "score": "score"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text",
+          "text": "= str(score)",
+          "size": 22,
+          "weight": 700,
+          "color": "$accent",
+          "role": "hud",
+          "animate_on": {
+            "drone_down": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.2,
+                1
+              ],
+              "ms": 160
+            },
+            "core_down": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.6,
+                1
+              ],
+              "ms": 400
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(10)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "rect",
+            "x": "= 70.0 + hash(k) * 220.0",
+            "y": "= fmod(travel * 0.55 + k * 71.0, 720.0) - 40.0",
+            "w": 2,
+            "h": 16,
+            "radius": 1,
+            "fill": "#FFC9A0",
+            "opacity": 0.18
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "poly",
+          "fill": "$rock",
+          "points": "= concat([vec(-30.0, -40.0)], concat(map(range(19), i => vec(wall_l(i * 40.0 - 40.0), i * 40.0 - 40.0)), [vec(-30.0, 700.0)]))"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "poly",
+          "fill": "$rock_dark",
+          "points": "= concat([vec(-30.0, -40.0)], concat(map(range(19), i => vec(wall_l(i * 40.0 - 40.0) - 18.0 + 6.0 * sin((travel - i * 40.0) / 37.0), i * 40.0 - 40.0)), [vec(-30.0, 700.0)]))"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "poly",
+          "closed": false,
+          "stroke": "$rim",
+          "stroke_width": 3,
+          "points": "= map(range(19), i => vec(wall_l(i * 40.0 - 40.0), i * 40.0 - 40.0))"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "poly",
+          "fill": "$rock",
+          "points": "= concat([vec(390.0, -40.0)], concat(map(range(19), i => vec(wall_r(i * 40.0 - 40.0), i * 40.0 - 40.0)), [vec(390.0, 700.0)]))"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "poly",
+          "fill": "$rock_dark",
+          "points": "= concat([vec(390.0, -40.0)], concat(map(range(19), i => vec(wall_r(i * 40.0 - 40.0) + 18.0 + 6.0 * cos((travel - i * 40.0) / 41.0), i * 40.0 - 40.0)), [vec(390.0, 700.0)]))"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "poly",
+          "closed": false,
+          "stroke": "$rim",
+          "stroke_width": 3,
+          "points": "= map(range(19), i => vec(wall_r(i * 40.0 - 40.0), i * 40.0 - 40.0))"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "image",
+          "asset": "core",
+          "anchor": "center",
+          "x": "= core_x",
+          "y": "= core_y",
+          "w": 100,
+          "h": 84,
+          "visible": "= core_on",
+          "role": "hazard",
+          "animate_on": {
+            "core_hit": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.06,
+                1
+              ],
+              "ms": 120
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "bolts",
+          "as": "b",
+          "key": "b.id",
+          "template": {
+            "node": "image",
+            "asset": "bolt",
+            "anchor": "center",
+            "x": "= b.x",
+            "y": "= b.y",
+            "w": 7,
+            "h": 20
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "drones",
+          "as": "d",
+          "key": "d.id",
+          "template": {
+            "node": "image",
+            "asset": "drone",
+            "anchor": "center",
+            "x": "= d.x",
+            "y": "= d.y",
+            "w": 38,
+            "h": 38,
+            "role": "hazard",
+            "frame": "= if d.kind == 'scout' then 0 else if d.kind == 'diver' then 1 else 2",
+            "rotation": "= if d.kind == 'scout' then 8.0 * cos((now - d.born) / 430.0) else 0.0"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "orbs",
+          "as": "o",
+          "key": "o.id",
+          "template": {
+            "node": "image",
+            "asset": "orb",
+            "anchor": "center",
+            "x": "= o.x",
+            "y": "= o.y",
+            "w": 18,
+            "h": 18,
+            "role": "hazard",
+            "scale": "= 1.0 + 0.15 * sin((now + o.id * 90) / 80.0)"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "pops",
+          "as": "p",
+          "key": "p.id",
+          "template": {
+            "node": "text",
+            "text": "= p.text",
+            "anchor": "center",
+            "x": "= p.x",
+            "y": "= p.y - (now - p.born) * 0.05",
+            "size": "= if starts_with(p.text, 'C') then 22 else 15",
+            "weight": 700,
+            "color": "$accent",
+            "stroke": "#1B0F24",
+            "stroke_width": 3,
+            "opacity": "= 1.0 - (now - p.born) / 700.0"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 14,
+          "y": 28,
+          "w": 332,
+          "h": 40,
+          "radius": 20,
+          "fill": "#140A1C",
+          "opacity": 0.72
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= core_on and core_y > 0.0",
+          "children": [
+            {
+              "node": "text",
+              "text": "RIFT CORE",
+              "x": 60,
+              "y": 78,
+              "size": 12,
+              "weight": 700,
+              "color": "$danger"
+            },
+            {
+              "node": "rect",
+              "x": 136,
+              "y": 80,
+              "w": 164,
+              "h": 8,
+              "radius": 4,
+              "fill": "#FFFFFF",
+              "opacity": 0.15
+            },
+            {
+              "node": "rect",
+              "x": 136,
+              "y": 80,
+              "w": "= 164.0 * core_hp / 24.0",
+              "h": 8,
+              "radius": 4,
+              "fill": "$danger",
+              "transition": {
+                "w": {
+                  "ms": 120,
+                  "ease": "out"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "text",
+          "text": "= 'Chain x' + str(min(chain, 10))",
+          "size": 16,
+          "weight": 700,
+          "color": "$accent",
+          "opacity": "= if chain > 1 then 1.0 else 0.0",
+          "stroke": "#1B0F24",
+          "stroke_width": 3,
+          "animate_on": {
+            "drone_down": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.25,
+                1
+              ],
+              "ms": 160
+            }
+          }
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "text",
+          "anchor": "center",
+          "x": 180,
+          "y": 300,
+          "size": 24,
+          "weight": 700,
+          "color": "$ink",
+          "stroke": "#1B0F24",
+          "stroke_width": 4,
+          "text": "= if wave == 0 then 'Drones inbound' else if wave == 3 then 'Rift Core ahead!' else 'Wave ' + str(wave + 1) + ' incoming'",
+          "visible": "= in_break and status == 'playing' and not (wave >= 4)"
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "drone_down",
+        "do": [
+          {
+            "sound": {
+              "wave": "square",
+              "note": "= 392.0 * pow(1.0595, min(chain, 12) * 1.0)",
+              "ms": 70,
+              "volume": 0.22
+            }
+          },
+          {
+            "particles": {
+              "x": "= event.x",
+              "y": "= event.y",
+              "count": 16,
+              "color": "#FF8FA8",
+              "speed": 230,
+              "size": 4,
+              "ms": 420
+            }
+          },
+          {
+            "particles": {
+              "x": "= event.x",
+              "y": "= event.y",
+              "count": 6,
+              "color": "#FFE066",
+              "speed": 120,
+              "size": 6,
+              "ms": 300
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "core_hit",
+        "do": [
+          {
+            "particles": {
+              "x": "= event.x",
+              "y": "= event.y",
+              "count": 6,
+              "color": "#FFE066",
+              "speed": 160,
+              "size": 3,
+              "ms": 260,
+              "spread": 160
+            }
+          },
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "= 180.0 + core_hp * 12.0",
+              "ms": 45,
+              "volume": 0.3
+            }
+          }
+        ]
+      },
+      {
+        "on": "core_down",
+        "do": [
+          {
+            "particles": {
+              "x": "= event.x",
+              "y": "= event.y",
+              "count": 48,
+              "color": "#FFE066",
+              "speed": 380,
+              "size": 6,
+              "ms": 900
+            }
+          },
+          {
+            "particles": {
+              "x": "= event.x",
+              "y": "= event.y",
+              "count": 40,
+              "color": "#FF4F7B",
+              "speed": 260,
+              "size": 8,
+              "ms": 1100,
+              "gravity": 200
+            }
+          },
+          {
+            "shake": {
+              "px": 12,
+              "ms": 450
+            }
+          },
+          {
+            "haptic": "heavy"
+          },
+          {
+            "sound": {
+              "wave": "sawtooth",
+              "note": "C4",
+              "slide": "C2",
+              "ms": 600,
+              "volume": 0.35
+            }
+          }
+        ]
+      },
+      {
+        "on": "core_fire",
+        "when": "core_on",
+        "do": [
+          {
+            "sound": {
+              "wave": "sawtooth",
+              "note": "A3",
+              "slide": "E3",
+              "ms": 120,
+              "volume": 0.18
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {
+      "rock": "#4A2C48",
+      "rock_dark": "#2C1A2E",
+      "rim": "#FF9E5E"
+    }
+  },
+  "art": {
+    "style": "Sunset canyon run: plum rock walls with glowing orange rims over a deep rift with an ember river, a white-and-cyan starfighter, magenta drones with amber eyes, a hexagonal Rift Core.",
+    "palette": {
+      "bg": "#1B0F24",
+      "surface": "#2C1A2E",
+      "primary": "#6FF3FF",
+      "secondary": "#FF9E5E",
+      "accent": "#FFE066",
+      "ink": "#FFF4EC",
+      "danger": "#FF4F7B"
+    },
+    "font": "Futura",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='deep' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#1B0F24'/><stop offset='0.5' stop-color='#26132C'/><stop offset='1' stop-color='#3A1830'/></linearGradient><linearGradient id='river' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FF7A3D' stop-opacity='0.05'/><stop offset='0.6' stop-color='#FF7A3D' stop-opacity='0.22'/><stop offset='1' stop-color='#FFB13D' stop-opacity='0.35'/></linearGradient><filter id='blur' x='-50%' y='-10%' width='200%' height='120%'><feGaussianBlur stdDeviation='10'/></filter><radialGradient id='haze' cx='0.5' cy='0' r='0.8'><stop offset='0' stop-color='#FF9E5E' stop-opacity='0.35'/><stop offset='1' stop-color='#FF9E5E' stop-opacity='0'/></radialGradient></defs><rect width='360' height='640' fill='url(#deep)'/><rect width='360' height='260' fill='url(#haze)'/><path d='M170 0 Q140 120 190 240 Q230 340 170 460 Q140 540 185 640 L215 640 Q170 540 200 460 Q260 340 220 240 Q170 120 200 0 Z' fill='url(#river)' filter='url(#blur)'/><g fill='#FFC9A0'><circle cx='175' cy='556' r='1.2' opacity='0.6'/><circle cx='278' cy='274' r='0.8' opacity='0.6'/><circle cx='181' cy='270' r='0.8' opacity='0.4'/><circle cx='137' cy='225' r='0.8' opacity='0.6'/><circle cx='267' cy='122' r='1.6' opacity='0.4'/><circle cx='175' cy='241' r='1.6' opacity='0.25'/><circle cx='272' cy='144' r='0.8' opacity='0.25'/><circle cx='108' cy='327' r='1.6' opacity='0.25'/><circle cx='259' cy='555' r='1.2' opacity='0.4'/><circle cx='211' cy='280' r='1.6' opacity='0.25'/><circle cx='223' cy='381' r='1.2' opacity='0.25'/><circle cx='229' cy='167' r='1.2' opacity='0.6'/><circle cx='131' cy='496' r='1.6' opacity='0.25'/><circle cx='241' cy='340' r='1.2' opacity='0.25'/><circle cx='191' cy='375' r='0.8' opacity='0.25'/><circle cx='204' cy='190' r='1.2' opacity='0.25'/><circle cx='276' cy='377' r='1.2' opacity='0.25'/><circle cx='64' cy='80' r='0.8' opacity='0.25'/><circle cx='297' cy='133' r='1.2' opacity='0.4'/><circle cx='241' cy='486' r='1.2' opacity='0.25'/><circle cx='204' cy='283' r='1.6' opacity='0.4'/><circle cx='146' cy='169' r='1.2' opacity='0.4'/><circle cx='63' cy='499' r='0.8' opacity='0.25'/><circle cx='123' cy='183' r='0.8' opacity='0.25'/><circle cx='179' cy='578' r='0.8' opacity='0.6'/><circle cx='203' cy='272' r='1.2' opacity='0.6'/><circle cx='108' cy='214' r='1.2' opacity='0.6'/><circle cx='158' cy='199' r='1.2' opacity='0.4'/><circle cx='114' cy='80' r='1.2' opacity='0.6'/><circle cx='137' cy='100' r='0.8' opacity='0.25'/><circle cx='160' cy='182' r='0.8' opacity='0.25'/><circle cx='114' cy='532' r='1.2' opacity='0.25'/><circle cx='257' cy='416' r='1.2' opacity='0.4'/><circle cx='78' cy='156' r='0.8' opacity='0.25'/><circle cx='209' cy='328' r='0.8' opacity='0.6'/><circle cx='154' cy='460' r='1.6' opacity='0.4'/><circle cx='92' cy='575' r='1.6' opacity='0.25'/><circle cx='281' cy='475' r='0.8' opacity='0.6'/><circle cx='99' cy='398' r='0.8' opacity='0.6'/><circle cx='123' cy='274' r='0.8' opacity='0.6'/></g><g fill='#140A1C' opacity='0.85'><path d='M0 0 L70 0 Q50 160 80 300 Q100 420 60 640 L0 640 Z'/><path d='M360 0 L290 0 Q312 150 282 310 Q262 430 300 640 L360 640 Z'/></g></svg>"
+    },
+    "sprites": {
+      "avatar": {
+        "svg": "<svg viewBox='0 0 48 52'><defs><linearGradient id='hull' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#F2FBFF'/><stop offset='1' stop-color='#8FB8D8'/></linearGradient><linearGradient id='glass' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#B9FBFF'/><stop offset='1' stop-color='#1FA5C9'/></linearGradient><radialGradient id='burn' cx='0.5' cy='0.3' r='0.7'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.35' stop-color='#FFE066'/><stop offset='1' stop-color='#FF7A3D' stop-opacity='0'/></radialGradient></defs><ellipse cx='17' cy='46' rx='4.5' ry='6' fill='url(#burn)'/><ellipse cx='31' cy='46' rx='4.5' ry='6' fill='url(#burn)'/><path d='M24 3 L29 18 L44 32 L45 39 L31 36 L29 42 L19 42 L17 36 L3 39 L4 32 L19 18 Z' fill='url(#hull)' stroke='#21405E' stroke-width='1.4' stroke-linejoin='round'/><path d='M4 32 L13 27 L14 34 L3 39 Z M44 32 L35 27 L34 34 L45 39 Z' fill='#6FF3FF' stroke='#21405E' stroke-width='1' stroke-linejoin='round'/><rect x='14' y='34' width='6' height='9' rx='2' fill='#3B5878'/><rect x='28' y='34' width='6' height='9' rx='2' fill='#3B5878'/><path d='M24 9 L27.5 20 L24 27 L20.5 20 Z' fill='url(#glass)' stroke='#21405E' stroke-width='1'/><path d='M23 12 L24.5 12 L23.6 18 Z' fill='#FFFFFF' opacity='0.85'/><path d='M24 28 L24 40' stroke='#21405E' stroke-width='1' opacity='0.5'/></svg>",
+        "w": 96,
+        "color": "#6FF3FF"
+      },
+      "drone": {
+        "svg": [
+          "<svg viewBox='0 0 40 40'><defs><linearGradient id='shell' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FF8FA8'/><stop offset='1' stop-color='#D12A57'/></linearGradient><radialGradient id='eye' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.45' stop-color='#FFE066'/><stop offset='1' stop-color='#FF7A3D'/></radialGradient></defs><path d='M20 4 L34 18 L20 34 L6 18 Z' fill='url(#shell)' stroke='#4A0820' stroke-width='1.5' stroke-linejoin='round'/><path d='M6 18 L1 12 L3 22 Z M34 18 L39 12 L37 22 Z' fill='#C2264E' stroke='#4A0820' stroke-width='1'/><circle cx='20' cy='19' r='5.2' fill='#2A0614'/><circle cx='20' cy='19' r='3.4' fill='url(#eye)'/></svg>",
+          "<svg viewBox='0 0 40 40'><defs><linearGradient id='shell' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FF8FA8'/><stop offset='1' stop-color='#D12A57'/></linearGradient><radialGradient id='eye' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.45' stop-color='#FFE066'/><stop offset='1' stop-color='#FF7A3D'/></radialGradient></defs><path d='M20 38 L33 10 L26 14 L20 3 L14 14 L7 10 Z' fill='url(#shell)' stroke='#4A0820' stroke-width='1.5' stroke-linejoin='round'/><path d='M7 10 L1 4 L10 8 Z M33 10 L39 4 L30 8 Z' fill='#C2264E' stroke='#4A0820' stroke-width='1'/><circle cx='20' cy='19' r='5.2' fill='#2A0614'/><circle cx='20' cy='19' r='3.4' fill='url(#eye)'/></svg>",
+          "<svg viewBox='0 0 40 40'><defs><linearGradient id='shell' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FF8FA8'/><stop offset='1' stop-color='#D12A57'/></linearGradient><radialGradient id='eye' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.45' stop-color='#FFE066'/><stop offset='1' stop-color='#FF7A3D'/></radialGradient></defs><circle cx='20' cy='19' r='14' fill='url(#shell)' stroke='#4A0820' stroke-width='1.5'/><rect x='17' y='28' width='6' height='10' rx='2' fill='#4A0820'/><path d='M6 19 L1 15 L1 23 Z M34 19 L39 15 L39 23 Z' fill='#C2264E' stroke='#4A0820' stroke-width='1'/><circle cx='20' cy='19' r='5.2' fill='#2A0614'/><circle cx='20' cy='19' r='3.4' fill='url(#eye)'/></svg>"
+        ],
+        "w": 76,
+        "color": "#FF4F7B"
+      },
+      "core": {
+        "svg": [
+          "<svg viewBox='0 0 100 84'><defs><radialGradient id='heart' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.35' stop-color='#FFE066'/><stop offset='1' stop-color='#FF4F7B' stop-opacity='0'/></radialGradient><linearGradient id='armor' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#7A5470'/><stop offset='1' stop-color='#3A2238'/></linearGradient></defs><path d='M2 30 L16 22 L16 58 L2 50 Z M98 30 L84 22 L84 58 L98 50 Z' fill='#C2264E' stroke='#2A0614' stroke-width='1.5' stroke-linejoin='round'/><path d='M30 4 L70 4 L88 42 L70 80 L30 80 L12 42 Z' fill='url(#armor)' stroke='#2A0614' stroke-width='2' stroke-linejoin='round'/><path d='M34 12 L66 12 L80 42 L66 72 L34 72 L20 42 Z' fill='none' stroke='#FF8FA8' stroke-width='1.5' opacity='0.6'/><circle cx='50' cy='42' r='24' fill='url(#heart)'/><circle cx='50' cy='42' r='9' fill='#FFFFFF' opacity='0.95'/><path d='M50 22 L50 30 M50 54 L50 62 M30 42 L38 42 M62 42 L70 42' stroke='#2A0614' stroke-width='3' stroke-linecap='round'/></svg>",
+          "<svg viewBox='0 0 100 84'><defs><radialGradient id='heart' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.35' stop-color='#FF9A3D'/><stop offset='1' stop-color='#FF4F7B' stop-opacity='0'/></radialGradient><linearGradient id='armor' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#7A5470'/><stop offset='1' stop-color='#3A2238'/></linearGradient></defs><path d='M2 30 L16 22 L16 58 L2 50 Z M98 30 L84 22 L84 58 L98 50 Z' fill='#C2264E' stroke='#2A0614' stroke-width='1.5' stroke-linejoin='round'/><path d='M30 4 L70 4 L88 42 L70 80 L30 80 L12 42 Z' fill='url(#armor)' stroke='#2A0614' stroke-width='2' stroke-linejoin='round'/><path d='M34 12 L66 12 L80 42 L66 72 L34 72 L20 42 Z' fill='none' stroke='#FF8FA8' stroke-width='1.5' opacity='0.6'/><circle cx='50' cy='42' r='21' fill='url(#heart)'/><circle cx='50' cy='42' r='9' fill='#FFFFFF' opacity='0.95'/><path d='M50 22 L50 30 M50 54 L50 62 M30 42 L38 42 M62 42 L70 42' stroke='#2A0614' stroke-width='3' stroke-linecap='round'/></svg>"
+        ],
+        "w": 200,
+        "fps": 4,
+        "color": "#FFE066"
+      },
+      "bolt": {
+        "svg": "<svg viewBox='0 0 10 26'><defs><linearGradient id='b' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.4' stop-color='#FFE066'/><stop offset='1' stop-color='#FFB13D' stop-opacity='0'/></linearGradient></defs><rect x='1' y='0' width='8' height='26' rx='4' fill='url(#b)'/><rect x='3.5' y='1' width='3' height='12' rx='1.5' fill='#FFFFFF'/></svg>",
+        "w": 16,
+        "color": "#FFE066"
+      },
+      "orb": {
+        "svg": "<svg viewBox='0 0 24 24'><defs><radialGradient id='o' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.35' stop-color='#FFB13D'/><stop offset='0.7' stop-color='#FF4F7B' stop-opacity='0.8'/><stop offset='1' stop-color='#FF4F7B' stop-opacity='0'/></radialGradient></defs><circle cx='12' cy='12' r='12' fill='url(#o)'/></svg>",
+        "w": 36,
+        "color": "#FFB13D"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 24 24'><path d='M12 1.5 L14.5 9 L22 16 L22 20 L14.5 18.5 L13.5 22 L10.5 22 L9.5 18.5 L2 20 L2 16 L9.5 9 Z' fill='#6FF3FF' stroke='#123049' stroke-width='1.2' stroke-linejoin='round'/><path d='M12 5 L13.6 10.5 L12 14 L10.4 10.5 Z' fill='#123049'/></svg>",
+        "w": 44,
+        "color": "#6FF3FF"
+      }
+    }
+  },
+  "sound": {
+    "set": "arcade",
+    "volume": 0.8,
+    "moments": {
+      "hit": "crunch",
+      "win": "hooray"
+    },
+    "music": {
+      "melody": [
+        "E5",
+        null,
+        "G5",
+        "E5",
+        "B5",
+        null,
+        "A5",
+        "G5",
+        "F#5",
+        null,
+        "A5",
+        "F#5",
+        "D6",
+        null,
+        "B5",
+        "A5",
+        "E5",
+        null,
+        "G5",
+        "E5",
+        "B5",
+        null,
+        "D6",
+        "E6",
+        "D6",
+        "B5",
+        "A5",
+        "F#5",
+        "G5",
+        null,
+        "E5",
+        null
+      ],
+      "bass": [
+        "E2",
+        "E2",
+        "E2",
+        "E2",
+        "D2",
+        "D2",
+        "D2",
+        "D2",
+        "C2",
+        "C2",
+        "C2",
+        "C2",
+        "B1",
+        "B1",
+        "D2",
+        "D2"
+      ],
+      "bpm": 160,
+      "wave": "square",
+      "volume": 0.16
+    }
+  },
+  "playtest": {
+    "progress": "score + lives * 150 + wave * 100"
+  }
+}

@@ -1,0 +1,99 @@
+[
+  {
+    "id": "gold_which_house",
+    "file": "authoring/games/gold_which_house.authoring.json",
+    "request": "a which-house-are-you quiz for my friends with a magic school vibe, so we can all post our results in the chat",
+    "brief": {
+      "intent": "An eight-question personality quiz that sorts you into one of four invented houses of a wizard academy and ends with a shareable crest",
+      "audience": "friends in a group chat comparing results",
+      "mood": ["whimsical", "mysterious", "cozy"],
+      "energy": "low",
+      "competition": "none: compare results (with a conviction score on the side)"
+    },
+    "genre": "personality quiz",
+    "fragments_used": ["score", "lives"],
+    "why_its_good": [
+      "Weighted answers (+2 to one house, +1 to a second) across four invented houses that are friend-group roles (the 2 a.m. listener, the chaos starter, the loophole finder, the snack bringer), and the reveal quotes your own deciding answer back (`Your tell: “…”`), so the result feels personal and is worth a screenshot.",
+      "Stakes without right answers: a candle drains on every question and scores conviction (answer on instinct for more points), hesitating twice puts the Lantern out (`lives` bound to `hesitated`), and a split heart (top two houses within 1 point) ends in a 'Torn between Moonwarden and Emberjack' loss that still names both houses.",
+      "Paced for people: a 1.5 s read lock per question, answers that pop and dim, crests along the bottom that glow as you lean toward them, a swinging-lantern drumroll, then a crest reveal with rays, house-coloured particles and a one-line share card ('I’m a Moonwarden 🌙')."
+    ],
+    "pitfalls_avoided": [
+      "Not `too_short`: the read lock, a 650 ms beat after each answer and the 1.8 s drumroll keep bot runs at 22–28 s (Muse's own quiz ended in 5 s).",
+      "Not `cant_lose`: two real lose paths (hesitation, and the Torn ending through an `{\"end\": \"lose\"}` effect), so 3 of 5 bots lose; the win is an `{\"end\": \"win\"}` effect too, never invented feedback syntax like `{\"action\": ...}`.",
+      "Parameters inside their ranges (`lives.count` 2 of 1..9) and `score`'s `point` really emitted (base 10 per answer, the time bonus added on top), so there's no unreachable fragment rule.",
+      "Every tap target is a transparent `rect` over its sprite, so both the hit-test and the playtest bots find the answers."
+    ]
+  },
+  {
+    "id": "gold_who_posted",
+    "file": "authoring/games/gold_who_posted.authoring.json",
+    "request": "a gossip trivia game at a fancy prep school where you guess who wrote each anonymous post, so I can challenge my roommate to beat my score",
+    "brief": {
+      "intent": "Read anonymous posts from a school confession wall and pick which of five original students (or the dean's corgi) wrote each, racing a friend's score",
+      "audience": "two friends, one challenging the other",
+      "mood": ["dramatic", "funny", "sassy"],
+      "energy": "medium",
+      "competition": "beat a friend's score"
+    },
+    "genre": "trivia / who-said-it deduction",
+    "fragments_used": ["quiz", "score", "combo", "lives", "beat_target"],
+    "why_its_good": [
+      "Five original suspects with unmistakable voices (the queen bee's 'per my last', the lacrosse captain's secret haiku, the overachiever's 6:00 sharp, the clown's stairwell gum racket, the corgi's ALL CAPS) make every post a fair deduction, and each question keeps a confuser in the choices (a sailing brag: Sloane or Jasper? a dog haiku: Jasper or the corgi?).",
+      "Built for a challenge: `beat_target` shows 'Beat Jules: 1600' and wins the moment you pass it; `combo` streaks make a right answer worth 100 to 200, so one slip can cost the crown; three wrong calls, or 12 posts without passing Jules, lose.",
+      "Feels like a feed: each post types in with a cursor and a notification ping, then a stamped verdict ('CALLED IT' or 'IT WAS RAFI') pops on the card while the quiz tints the right and wrong answers."
+    ],
+    "pitfalls_avoided": [
+      "The `quiz` fragment's question line doesn't wrap, so the game hands it blank questions (the same number as the posts) and draws its own wrapped post card, instead of overflowing long text.",
+      "A transparent blocker over the answers while a post types in gives people time to read and stops instant taps: bot runs take 18–28 s, not 5.",
+      "One score system: `score`'s `point` bound to `answered_right` plus one bonus rule (`50 * combo`), with `lives` bound to `answered_wrong` so wrong answers can lose; choices are written exactly as the answers, 4 per question, as `quiz` requires."
+    ]
+  },
+  {
+    "id": "gold_driftwood_cipher",
+    "file": "authoring/games/gold_driftwood_cipher.authoring.json",
+    "request": "a daily space puzzle for our group chat, like decoding a secret message from a rebel ship",
+    "brief": {
+      "intent": "A daily cryptogram: three short scrambled transmissions from an original rebel crew, decoded one letter at a time before the jammer arrives",
+      "audience": "a group chat that plays the same puzzle every day",
+      "mood": ["clever", "adventurous", "playful"],
+      "energy": "low",
+      "competition": "compare daily scores"
+    },
+    "genre": "cryptogram / word puzzle",
+    "fragments_used": ["score", "rounds", "lives", "keyboard", "hint", "daily_seed"],
+    "why_its_good": [
+      "A real cryptogram, not plain hangman: each message is shown in a substitution cipher (a shuffled key where each letter becomes the next one in that order, so none stands for itself), so word shapes and repeated letters are clues; a right letter unscrambles every copy and scores per copy, so E is worth more than Q.",
+      "Three short transmissions per run, each with a new key and fresh signal bars, with deadpan payoffs ('the toaster is a traitor', 'the senate hates our sea shanties'); unknown letters flicker during a short decrypt beat, and a navigator tip (`hint`, twice per run) rescues a stuck player.",
+      "Daily and social: `daily_seed` labels it and the host's seed gives the whole Group the same three messages and keys, so scores compare fairly."
+    ],
+    "pitfalls_avoided": [
+      "Losable for real: three wrong letters in one message lose (the game resets `lives`, the lives fragment's public state, on each `round_started`), and a 120 s jammer (`time_limit`, `on_timeout: lose`). Every gate seed set we tried had a losing bot, and the pro still wins.",
+      "A 450 ms decrypt beat between guesses keeps bot runs at 5–23 s, so they aren't over in a few taps, and `keyboard`'s required `key_state(letter)` returns exactly 0, 1 or 2.",
+      "Content stays parseable: every message is lowercase letters and spaces with `|` line breaks, at most 4 lines of 13 characters, so the letter grid always fits the console."
+    ]
+  },
+  {
+    "id": "gold_pillow_fort",
+    "file": "authoring/games/gold_pillow_fort.authoring.json",
+    "request": "a pass-the-phone party game for a sleepover where we all build something together",
+    "brief": {
+      "intent": "Three friends take turns dropping swinging pillows onto one shared fort; every pillow stays in its builder's colour",
+      "audience": "3 friends passing one phone",
+      "mood": ["cozy", "silly", "warm"],
+      "energy": "medium",
+      "competition": "co-op build with friendly per-player totals"
+    },
+    "genre": "stacking / timing, pass-and-play",
+    "fragments_used": ["turns", "lives"],
+    "why_its_good": [
+      "One shared fort and everyone's pillows: each pillow keeps its builder's colour and initial exactly where they dropped it, so the fort is a picture of who did what, and the pass screen shows a mini fort and the last drop ('Ana: Comfy! +9') before handing over.",
+      "Easy to learn, with tension in the room: a pillow stays up while its middle is over the one below, every wobble squishes the fort narrower for the next friend, and a perfect drop fluffs it back out, so the room cheers or groans on every drop.",
+      "A co-op goal on top of `turns`' per-player totals: land all 12 and the fort reaches the ceiling for a Sky Fort bonus; three tumbles and it caves in."
+    ],
+    "pitfalls_avoided": [
+      "`playtest.progress` counts score, lives and turn progress, so bots tap through the 'Pass to …' screen instead of idling on it (with plain score, Bullseye Relay's pro bot took 61 s).",
+      "An 'arms got tired' auto-drop after 5 s keeps every turn moving, points land at release so lookahead sees them, and the fall takes only 600 ms, so bot runs end in 4–17 s (13–17 s for a full fort) and about a minute for people.",
+      "Respects HUD capacity: `turns` already fills `hud_bottom`, so the team total is one extra `hud_top` text (3 of 3), not a fourth node or a `shared_progress` bar that wouldn't fit."
+    ]
+  }
+]

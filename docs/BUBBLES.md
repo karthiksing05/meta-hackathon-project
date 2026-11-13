@@ -1637,6 +1637,11 @@ events by `seq`, and fetches the finished game's manifest from `manifestUrl` wit
 `FB_GENERATE=mock` (`App/DebugLaunch.swift`); otherwise Studio uses the on-device composer. Tweaks and
 next levels stay on-device (`revise` reads the server game's `content.authoring_json`).
 
+**Gold examples.** Muse's prompt shows the two gold games closest to the request (`authoring/gold/`, 16
+hand-made games paired with requests; `expander/gold.mjs` picks them and `MicrogameStudio.examples(for:)`
+returns them). A theme or franchise the person asks for is kept; the gold games themselves are original.
+`MicrogameComposer.lastStats.examples` records which were used.
+
 ### 7.13 Game anatomy: agreeing how the game works
 
 Studio used to take a person's *style* (mood, look, theme) but not their *function*. The game anatomy is

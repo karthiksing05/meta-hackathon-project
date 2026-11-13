@@ -1,0 +1,915 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "The Hostess Knows",
+    "instructions": "New kid at Ashcombe Prep, and an anonymous account is posting everyone's secrets. Tap a choice, protect your rep, collect receipts, and unmask The Hostess.",
+    "duration_s": 150
+  },
+  "uses": [
+    {
+      "fragment": "choice_story",
+      "params": {
+        "read_ms": 2200,
+        "good_wins": false,
+        "bad_loses": false,
+        "text_y": 136,
+        "button_y": 392
+      }
+    }
+  ],
+  "state": {
+    "story_lines": {
+      "type": "list<string>",
+      "init": "content_story_lines"
+    },
+    "story_labels": {
+      "type": "list<string>",
+      "init": "content_story_labels"
+    },
+    "story_next": {
+      "type": "list<string>",
+      "init": "content_story_next"
+    },
+    "story_ends": {
+      "type": "list<string>",
+      "init": "content_story_ends"
+    },
+    "flags": {
+      "type": "list<string>",
+      "init": "[]"
+    },
+    "rep": {
+      "type": "int",
+      "init": "1"
+    },
+    "secrets": {
+      "type": "int",
+      "init": "0"
+    },
+    "last_toks": {
+      "type": "list<string>",
+      "init": "[]"
+    },
+    "toast": {
+      "type": "string",
+      "init": "''"
+    },
+    "toast_at": {
+      "type": "int",
+      "init": "-10000"
+    },
+    "verdict": {
+      "type": "string",
+      "init": "''"
+    }
+  },
+  "functions": {
+    "part": {
+      "params": {
+        "e": "string",
+        "i": "int"
+      },
+      "returns": "string",
+      "body": "trim(get_or(split(e, '|'), i, ''))"
+    },
+    "ckey": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "string",
+      "body": "str(s) + '.' + str(c)"
+    },
+    "clues": {
+      "params": {},
+      "returns": "int",
+      "body": "count(flags, f => starts_with(f, 'clue_'))"
+    },
+    "stat": {
+      "params": {
+        "name": "string"
+      },
+      "returns": "int",
+      "body": "if name == 'rep' then rep else if name == 'secrets' then secrets else if name == 'clues' then clues() else 0"
+    },
+    "atom_holds": {
+      "params": {
+        "t": "string"
+      },
+      "returns": "bool",
+      "body": "let p = split(t, '>=') in if len(p) == 2 then stat(trim(get_or(p, 0, ''))) >= or_else(parse_int(get_or(p, 1, '')), 0) else contains(flags, t)"
+    },
+    "holds": {
+      "params": {
+        "cond": "string"
+      },
+      "returns": "bool",
+      "body": "all(split(cond, '&'), a => let t = trim(a) in t == '' or (if starts_with(t, '!') then not atom_holds(substr(t, 1, 64)) else atom_holds(t)))"
+    },
+    "is_open": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "bool",
+      "body": "get_or(content_story_labels, s * 3 + c, '') != '' and all(filter(content_needs, n => part(n, 0) == ckey(s, c)), n => holds(part(n, 1)))"
+    },
+    "shown": {
+      "params": {
+        "s": "int"
+      },
+      "returns": "list<int>",
+      "body": "filter(range(3), c => is_open(s, c))"
+    },
+    "route_of": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "string",
+      "body": "fold(filter(content_routes, r => part(r, 0) == ckey(s, c)), get_or(content_story_next, s * 3 + c, ''), (acc, r) => if holds(part(r, 1)) then part(r, 2) else acc)"
+    },
+    "built_labels": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(range(len(content_story_labels)), i => let o = get_or(shown(i / 3), i % 3, -1) in if o < 0 then '' else get_or(content_story_labels, (i / 3) * 3 + o, ''))"
+    },
+    "built_next": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(range(len(content_story_next)), i => let o = get_or(shown(i / 3), i % 3, -1) in if o < 0 then '' else route_of(i / 3, o))"
+    },
+    "built_lines": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(range(len(content_story_lines)), i => fold(filter(content_callbacks, b => part(b, 0) == ckey(i / 4, i % 4)), get_or(content_story_lines, i, ''), (acc, b) => if holds(part(b, 1)) then part(b, 2) else acc))"
+    },
+    "fx_for": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "list<string>",
+      "body": "filter(content_effects, e => (part(e, 0) == ckey(s, c) or (c < 0 and part(e, 0) == '@' + str(s))) and holds(part(e, 3)))"
+    },
+    "toks_for": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "list<string>",
+      "body": "fold(fx_for(s, c), [], (acc, e) => concat(acc, filter(split(part(e, 1), ' '), t => t != '')))"
+    },
+    "toast_for": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "string",
+      "body": "fold(fx_for(s, c), '', (acc, e) => if part(e, 2) != '' then part(e, 2) else acc)"
+    },
+    "delta": {
+      "params": {
+        "toks": "list<string>",
+        "name": "string"
+      },
+      "returns": "int",
+      "body": "count(toks, t => t == '+' + name) - count(toks, t => t == '-' + name)"
+    },
+    "merged_flags": {
+      "params": {
+        "toks": "list<string>"
+      },
+      "returns": "list<string>",
+      "body": "concat(flags, filter(toks, t => not starts_with(t, '+') and not starts_with(t, '-') and not contains(flags, t)))"
+    },
+    "info": {
+      "params": {
+        "s": "int",
+        "i": "int"
+      },
+      "returns": "string",
+      "body": "part(get_or(content_scene_info, s, ''), i)"
+    },
+    "place": {
+      "params": {},
+      "returns": "int",
+      "body": "or_else(parse_int(info(scene, 0)), 0)"
+    },
+    "ending_value": {
+      "params": {},
+      "returns": "int",
+      "body": "or_else(parse_int(info(scene, 2)), 0)"
+    },
+    "ending_points": {
+      "params": {},
+      "returns": "int",
+      "body": "if verdict == '' then 0 else ending_value()"
+    },
+    "receipts": {
+      "params": {},
+      "returns": "string",
+      "body": "if clues() == 0 then 'Receipts: none yet' else 'Receipts: ' + join(map(filter(flags, f => starts_with(f, 'clue_')), f => substr(f, 5, 24)), ', ')"
+    }
+  },
+  "events": {
+    "curtain": {
+      "good": "bool"
+    }
+  },
+  "rules": [
+    {
+      "id": "first_build",
+      "on": "start",
+      "do": [
+        {
+          "set": "story_lines",
+          "to": "built_lines()"
+        },
+        {
+          "set": "story_labels",
+          "to": "built_labels()"
+        },
+        {
+          "set": "story_next",
+          "to": "built_next()"
+        }
+      ]
+    },
+    {
+      "id": "apply_choice",
+      "on": "choice_made",
+      "do": [
+        {
+          "let": {
+            "picked": "get_or(shown(event.scene), event.choice, event.choice)"
+          }
+        },
+        {
+          "let": {
+            "toks": "toks_for(event.scene, picked)"
+          }
+        },
+        {
+          "let": {
+            "msg": "toast_for(event.scene, picked)"
+          }
+        },
+        {
+          "set": "rep",
+          "to": "clamp(rep + delta(toks, 'rep'), 0, 5)"
+        },
+        {
+          "set": "secrets",
+          "to": "clamp(secrets + delta(toks, 'secrets'), 0, 5)"
+        },
+        {
+          "set": "flags",
+          "to": "merged_flags(toks)"
+        },
+        {
+          "if": "msg != ''",
+          "then": [
+            {
+              "set": "toast",
+              "to": "msg"
+            },
+            {
+              "set": "toast_at",
+              "to": "now"
+            }
+          ]
+        },
+        {
+          "let": {
+            "arrive": "toks_for(scene, -1)"
+          }
+        },
+        {
+          "let": {
+            "arrive_msg": "toast_for(scene, -1)"
+          }
+        },
+        {
+          "set": "rep",
+          "to": "clamp(rep + delta(arrive, 'rep'), 0, 5)"
+        },
+        {
+          "set": "secrets",
+          "to": "clamp(secrets + delta(arrive, 'secrets'), 0, 5)"
+        },
+        {
+          "set": "flags",
+          "to": "merged_flags(arrive)"
+        },
+        {
+          "if": "arrive_msg != ''",
+          "then": [
+            {
+              "set": "toast",
+              "to": "arrive_msg"
+            },
+            {
+              "set": "toast_at",
+              "to": "now"
+            }
+          ]
+        },
+        {
+          "set": "last_toks",
+          "to": "concat(toks, arrive)"
+        }
+      ]
+    },
+    {
+      "id": "rebuild",
+      "on": "choice_made",
+      "do": [
+        {
+          "set": "story_lines",
+          "to": "built_lines()"
+        },
+        {
+          "set": "story_labels",
+          "to": "built_labels()"
+        },
+        {
+          "set": "story_next",
+          "to": "built_next()"
+        }
+      ]
+    },
+    {
+      "id": "hold_the_ending",
+      "on": "ending_reached",
+      "do": [
+        {
+          "after": "5000ms",
+          "emit": "curtain",
+          "with": {
+            "good": "event.good"
+          }
+        }
+      ]
+    },
+    {
+      "id": "curtain_falls",
+      "on": "curtain",
+      "do": [
+        {
+          "set": "verdict",
+          "to": "if event.good then 'good' else 'bad'"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "verdict == 'good'",
+    "lose": "verdict == 'bad'",
+    "score": "clues() * 100 + rep * 50 + ending_points()"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "w": 84,
+              "h": 28,
+              "radius": 14,
+              "fill": "$surface",
+              "stroke": "$accent",
+              "stroke_width": 1
+            },
+            {
+              "node": "text",
+              "x": 42,
+              "y": 14,
+              "anchor": "center",
+              "size": 14,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= 'Rep ' + str(rep)",
+              "animate_on": {
+                "choice_made": {
+                  "when": "contains(last_toks, '+rep') or contains(last_toks, '-rep')",
+                  "prop": "scale",
+                  "keys": [1, 1.25, 1],
+                  "ms": 320
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "w": 104,
+              "h": 28,
+              "radius": 14,
+              "fill": "$surface",
+              "stroke": "$accent",
+              "stroke_width": 1
+            },
+            {
+              "node": "text",
+              "x": 52,
+              "y": 14,
+              "anchor": "center",
+              "size": 14,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= 'Secrets ' + str(secrets)",
+              "animate_on": {
+                "choice_made": {
+                  "when": "contains(last_toks, '+secrets')",
+                  "prop": "scale",
+                  "keys": [1, 1.25, 1],
+                  "ms": 320
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "w": 90,
+              "h": 28,
+              "radius": 14,
+              "fill": "$surface",
+              "stroke": "$accent",
+              "stroke_width": 1
+            },
+            {
+              "node": "text",
+              "x": 45,
+              "y": 14,
+              "anchor": "center",
+              "size": 14,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= 'Clues ' + str(clues())",
+              "animate_on": {
+                "choice_made": {
+                  "when": "any(last_toks, t => starts_with(t, 'clue_'))",
+                  "prop": "scale",
+                  "keys": [1, 1.25, 1],
+                  "ms": 320
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 88,
+          "anchor": "center",
+          "size": 13,
+          "weight": 700,
+          "color": "$accent",
+          "text": "= upper(info(scene, 1))",
+          "opacity": "= if now - toast_at < 2600 then 0.0 else 1.0",
+          "transition": {
+            "opacity": {
+              "ms": 250,
+              "ease": "out"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 88,
+          "anchor": "center",
+          "size": 15,
+          "weight": 700,
+          "color": "$primary",
+          "text": "= toast",
+          "opacity": "= if now - toast_at < 2600 then 1.0 else 0.0",
+          "transition": {
+            "opacity": {
+              "ms": 250,
+              "ease": "out"
+            }
+          },
+          "animate_on": {
+            "choice_made": {
+              "when": "toast_at == now",
+              "prop": "scale",
+              "keys": [0.8, 1.08, 1],
+              "ms": 300
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "image",
+          "asset": "place",
+          "frame": "= place()",
+          "anchor": "center",
+          "x": 180,
+          "y": 308,
+          "w": 300,
+          "h": 120,
+          "animate_on": {
+            "choice_made": {
+              "prop": "opacity",
+              "keys": [0, 1],
+              "ms": 500
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= get_or(story_ends, scene, '') != ''",
+          "animate_on": {
+            "ending_reached": {
+              "prop": "opacity",
+              "keys": [0, 0, 1],
+              "ms": 1200
+            }
+          },
+          "children": [
+            {
+              "node": "text",
+              "x": 180,
+              "y": 422,
+              "anchor": "center",
+              "size": 26,
+              "weight": 700,
+              "color": "$primary",
+              "text": "= if get_or(story_ends, scene, '') == 'good' then 'THE END' else 'THE END?'"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 460,
+              "anchor": "center",
+              "size": 14,
+              "weight": 600,
+              "color": "$ink",
+              "text": "= 'Clues ' + str(clues()) + '×100 + Rep ' + str(rep) + '×50 + Ending ' + str(ending_value())"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 488,
+              "anchor": "center",
+              "size": 13,
+              "weight": 500,
+              "color": "$accent",
+              "text": "One of 7 endings. Try another path."
+            }
+          ]
+        }
+      },
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "text",
+          "text": "= receipts()",
+          "size": 13,
+          "weight": 500,
+          "color": "$ink",
+          "opacity": 0.85
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "choice_made",
+        "when": "any(last_toks, t => starts_with(t, 'clue_'))",
+        "do": [
+          {
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 88,
+              "count": 18,
+              "color": "$accent",
+              "speed": 150,
+              "size": 4,
+              "ms": 700
+            }
+          }
+        ]
+      },
+      {
+        "on": "choice_made",
+        "when": "contains(last_toks, '+rep')",
+        "do": [
+          {
+            "moment": "combo"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 88,
+              "count": 12,
+              "color": "$primary",
+              "speed": 120,
+              "size": 5,
+              "ms": 600
+            }
+          }
+        ]
+      },
+      {
+        "on": "choice_made",
+        "when": "contains(last_toks, '-rep')",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "shake": {
+              "px": 4,
+              "ms": 180
+            }
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      },
+      {
+        "on": "ending_reached",
+        "when": "event.good",
+        "do": [
+          {
+            "particles": {
+              "x": 180,
+              "y": 308,
+              "count": 50,
+              "color": "$primary",
+              "speed": 240,
+              "size": 5,
+              "ms": 1200,
+              "gravity": 200
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Upper East Side after dark: plum-black lacquer, blush pink and champagne gold, a striped café awning, pearls, limestone and lit townhouse windows.",
+    "palette": {
+      "bg": "#1A0F17",
+      "surface": "#2E1A28",
+      "primary": "#F4B6C8",
+      "secondary": "#C9A96E",
+      "accent": "#E9CF96",
+      "ink": "#FFF3EE",
+      "danger": "#E5536B"
+    },
+    "font": "Optima",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='s' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#231320'/><stop offset='0.55' stop-color='#1A0F17'/><stop offset='1' stop-color='#120A10'/></linearGradient><radialGradient id='h' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#F4B6C8' stop-opacity='0.14'/><stop offset='1' stop-color='#F4B6C8' stop-opacity='0'/></radialGradient></defs><rect width='360' height='640' fill='url(#s)'/><ellipse cx='180' cy='200' rx='200' ry='150' fill='url(#h)'/><g><rect x='0' y='0' width='20' height='20' fill='#0E070C'/><rect x='20' y='0' width='20' height='20' fill='#F4B6C8'/><rect x='40' y='0' width='20' height='20' fill='#0E070C'/><rect x='60' y='0' width='20' height='20' fill='#F4B6C8'/><rect x='80' y='0' width='20' height='20' fill='#0E070C'/><rect x='100' y='0' width='20' height='20' fill='#F4B6C8'/><rect x='120' y='0' width='20' height='20' fill='#0E070C'/><rect x='140' y='0' width='20' height='20' fill='#F4B6C8'/><rect x='160' y='0' width='20' height='20' fill='#0E070C'/><rect x='180' y='0' width='20' height='20' fill='#F4B6C8'/><rect x='200' y='0' width='20' height='20' fill='#0E070C'/><rect x='220' y='0' width='20' height='20' fill='#F4B6C8'/><rect x='240' y='0' width='20' height='20' fill='#0E070C'/><rect x='260' y='0' width='20' height='20' fill='#F4B6C8'/><rect x='280' y='0' width='20' height='20' fill='#0E070C'/><rect x='300' y='0' width='20' height='20' fill='#F4B6C8'/><rect x='320' y='0' width='20' height='20' fill='#0E070C'/><rect x='340' y='0' width='20' height='20' fill='#F4B6C8'/><path d='M0 20a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0a10 9 0 0 0 20 0V20Z' fill='#0E070C'/><path d='M20 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/><path d='M60 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/><path d='M100 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/><path d='M140 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/><path d='M180 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/><path d='M220 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/><path d='M260 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/><path d='M300 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/><path d='M340 20a10 9 0 0 0 20 0z' fill='#F4B6C8'/></g><g fill='#FFF3EE' stroke='#D7C7C0' stroke-width='0.5'><circle cx='128' cy='106' r='2.6'/><circle cx='137' cy='106' r='2.6'/><circle cx='146' cy='106' r='2.6'/><circle cx='155' cy='106' r='2.6'/><circle cx='164' cy='106' r='2.6'/><circle cx='173' cy='106' r='2.6'/><circle cx='191' cy='106' r='2.6'/><circle cx='200' cy='106' r='2.6'/><circle cx='209' cy='106' r='2.6'/><circle cx='218' cy='106' r='2.6'/><circle cx='227' cy='106' r='2.6'/></g><circle cx='182' cy='106' r='4' fill='#E9CF96'/><g fill='#2B1825'><path d='M0 640V560h40v-14h30v94z'/><path d='M70 640V574h46v66z'/><path d='M244 640V566h40v74z'/><path d='M284 640V548h30v-12h46v104z'/></g><g fill='#FFD9A0' opacity='0.75'><rect x='10' y='572' width='8' height='10'/><rect x='26' y='596' width='8' height='10'/><rect x='84' y='590' width='8' height='10'/><rect x='254' y='584' width='8' height='10'/><rect x='298' y='560' width='8' height='10'/><rect x='330' y='592' width='8' height='10'/></g><rect x='0' y='604' width='360' height='36' fill='#0E070C' opacity='0.75'/><path d='M0 604H360' stroke='#E9CF96' stroke-opacity='0.4'/><g fill='#E9CF96' opacity='0.6'><path d='M30 160l2 5l5 2l-5 2l-2 5l-2-5l-5-2l5-2z'/><path d='M330 300l2 5l5 2l-5 2l-2 5l-2-5l-5-2l5-2z'/><path d='M24 470l2 4l4 2l-4 2l-2 4l-2-4l-4-2l4-2z'/></g></svg>"
+    },
+    "sprites": {
+      "place": {
+        "svg": [
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><rect x='40' y='20' width='220' height='80' fill='#E8DCCB'/><path d='M30 22L150 0L270 22Z' fill='#D9CBB6'/><g fill='#CDBFA8'><rect x='58' y='30' width='12' height='64'/><rect x='98' y='30' width='12' height='64'/><rect x='190' y='30' width='12' height='64'/><rect x='230' y='30' width='12' height='64'/></g><rect x='130' y='46' width='40' height='48' rx='20' fill='#3A2133'/><g fill='#BFAF96'><rect x='20' y='100' width='260' height='6'/><rect x='10' y='106' width='280' height='6'/><rect x='0' y='112' width='300' height='8'/></g><g transform='translate(204 40) rotate(12)'><rect width='40' height='62' rx='7' fill='#1A0F17' stroke='#F4B6C8' stroke-width='2'/><rect x='5' y='8' width='30' height='44' rx='2' fill='#F4B6C8'/><circle cx='20' cy='26' r='8' fill='#FFF3EE'/><path d='M14 26h12' stroke='#1A0F17' stroke-width='2'/></g><g stroke='#F4B6C8' stroke-width='2' stroke-linecap='round'><path d='M254 46l8-4M256 56h9M254 66l8 4'/></g></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><g><path d='M0 0H300V22H0Z' fill='#F4B6C8'/><path d='M0 0h20v22h-20z' fill='#1A0F17'/><path d='M40 0h20v22h-20z' fill='#1A0F17'/><path d='M80 0h20v22h-20z' fill='#1A0F17'/><path d='M120 0h20v22h-20z' fill='#1A0F17'/><path d='M160 0h20v22h-20z' fill='#1A0F17'/><path d='M200 0h20v22h-20z' fill='#1A0F17'/><path d='M240 0h20v22h-20z' fill='#1A0F17'/><path d='M280 0h20v22h-20z' fill='#1A0F17'/><path d='M0 22q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0q10 10 20 0V22Z' fill='#F4B6C8'/></g><ellipse cx='150' cy='84' rx='92' ry='14' fill='#E9CF96'/><rect x='146' y='88' width='8' height='32' fill='#C9A96E'/><g><path d='M98 80h22v-14h-22z' fill='#7FD1C6'/><path d='M120 70q8 0 6 6q-2 4-6 4' stroke='#7FD1C6' stroke-width='3' fill='none'/><path d='M174 80h22v-14h-22z' fill='#F4B6C8'/><path d='M196 70q8 0 6 6q-2 4-6 4' stroke='#F4B6C8' stroke-width='3' fill='none'/></g><g><ellipse cx='146' cy='76' rx='9' ry='4' fill='#C98FB0'/><rect x='137' y='70' width='18' height='4' rx='2' fill='#FFF3EE'/><ellipse cx='146' cy='69' rx='9' ry='4' fill='#C98FB0'/><ellipse cx='158' cy='78' rx='8' ry='3.5' fill='#9ED9A0'/><rect x='150' y='73' width='16' height='4' rx='2' fill='#FFF3EE'/><ellipse cx='158' cy='72' rx='8' ry='3.5' fill='#9ED9A0'/></g><g fill='#E9CF96' opacity='0.7'><circle cx='36' cy='60' r='2'/><circle cx='264' cy='52' r='2'/><circle cx='250' cy='96' r='1.5'/></g></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><circle cx='150' cy='60' r='70' fill='url(#w)' opacity='0.35'/><rect x='96' y='6' width='108' height='130' rx='16' fill='#0E070C' stroke='#E9CF96' stroke-width='2'/><rect x='104' y='16' width='92' height='120' rx='6' fill='#FFF3EE'/><g transform='translate(112 24)'><rect width='18' height='22' rx='2' fill='#F4B6C8'/><circle cx='9' cy='6' r='2.5' fill='#1A0F17'/><path d='M4 13h10M4 17h7' stroke='#1A0F17' stroke-width='1.5'/></g><path d='M136 30h40M136 38h26' stroke='#1A0F17' stroke-width='3' stroke-linecap='round'/><rect x='112' y='52' width='76' height='40' rx='4' fill='#F4B6C8' opacity='0.6'/><path d='M120 62h56M120 70h44M120 78h50' stroke='#1A0F17' stroke-width='2.5' stroke-linecap='round' opacity='0.7'/><path d='M118 104q-4-6 0-8q3-1 4 2q1-3 4-2q4 2 0 8l-4 4z' fill='#E5536B'/><text x='132' y='108' font-size='9' font-weight='700' fill='#1A0F17'>9,214</text><g fill='#E9CF96'><path d='M50 30l3 7l7 3l-7 3l-3 7l-3-7l-7-3l7-3z'/><path d='M244 70l2 5l5 2l-5 2l-2 5l-2-5l-5-2l5-2z'/></g><g fill='#F4B6C8'><path d='M224 26q-4-6 0-8q3-1 4 2q1-3 4-2q4 2 0 8l-4 4z'/><path d='M66 82q-4-6 0-8q3-1 4 2q1-3 4-2q4 2 0 8l-4 4z'/></g></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><defs><linearGradient id='d' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#E98AA5'/><stop offset='1' stop-color='#F6C99A'/></linearGradient></defs><rect width='300' height='120' fill='url(#d)'/><circle cx='230' cy='86' r='22' fill='#FFE3B3'/><g fill='#3A2133'><rect x='0' y='70' width='60' height='50'/><rect x='60' y='54' width='44' height='66'/><rect x='104' y='78' width='70' height='42'/><rect x='174' y='62' width='40' height='58'/><rect x='214' y='84' width='86' height='36'/><path d='M70 54v-14h20v14zM68 40l12-10l12 10z'/><path d='M186 62v-12h16v12zM184 50l10-8l10 8z'/></g><g fill='#FFE3B3'><rect x='12' y='80' width='6' height='8'/><rect x='30' y='92' width='6' height='8'/><rect x='72' y='66' width='6' height='8'/><rect x='120' y='90' width='6' height='8'/><rect x='182' y='74' width='6' height='8'/><rect x='240' y='100' width='6' height='8'/></g><g transform='translate(118 30) rotate(-12)'><path d='M0 10L52 0L20 14Z' fill='#FFF3EE'/><path d='M20 14L52 0L26 22Z' fill='#E7D9D2'/><path d='M10 12q6 8 14 2q6 8 14 0' fill='none' stroke='#F4B6C8' stroke-width='3'/></g><path d='M100 46q-12 4-24 0' stroke='#FFF3EE' stroke-dasharray='3 4' fill='none' stroke-width='1.5'/></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><rect x='0' y='76' width='300' height='44' fill='#2A1824'/><path d='M0 76H300' stroke='#E9CF96' stroke-opacity='0.5'/><g><path d='M120 50h56l-6 38h-44z' fill='#FFF3EE'/><ellipse cx='148' cy='50' rx='28' ry='7' fill='#C99B72'/><path d='M142 48q-4-4 0-6q3-1 6 2q3-3 6-2q4 2 0 6l-6 4z' fill='#FFF3EE'/><path d='M176 58q14 0 10 12q-3 8-12 8' stroke='#FFF3EE' stroke-width='4' fill='none'/><ellipse cx='148' cy='90' rx='40' ry='5' fill='#E9CF96' opacity='0.6'/></g><g transform='translate(40 70)'><path d='M0 6q0-10 16-10t16 10q-2 10-16 10t-16-10zM40 6q0-10 16-10t16 10q-2 10-16 10t-16-10z' fill='#1A0F17' stroke='#E9CF96'/><path d='M32 4q4-4 8 0' stroke='#E9CF96' stroke-width='2' fill='none'/></g><g fill='#FFF3EE' stroke='#D7C7C0' stroke-width='0.6'><circle cx='216' cy='81.6' r='4.2'/><circle cx='225' cy='87.9' r='4.2'/><circle cx='234' cy='92.4' r='4.2'/><circle cx='243' cy='95.1' r='4.2'/><circle cx='252' cy='96.0' r='4.2'/><circle cx='261' cy='95.1' r='4.2'/><circle cx='270' cy='92.4' r='4.2'/><circle cx='279' cy='87.9' r='4.2'/><circle cx='288' cy='81.6' r='4.2'/></g></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><g transform='rotate(-5 150 60)'><rect x='70' y='26' width='160' height='84' rx='4' fill='#E8DCCB'/><path d='M70 26L150 76L230 26' fill='#D9CBB6' stroke='#C9B79C'/></g><g transform='rotate(4 150 50)'><rect x='92' y='8' width='116' height='70' rx='3' fill='#FFF3EE' stroke='#E9CF96' stroke-width='2'/><rect x='98' y='14' width='104' height='58' fill='none' stroke='#E9CF96' stroke-opacity='0.6'/><text x='150' y='36' text-anchor='middle' font-size='10' font-style='italic' fill='#3A2133'>The Winter</text><text x='150' y='54' text-anchor='middle' font-size='16' font-weight='700' fill='#3A2133'>GALA</text></g><circle cx='150' cy='88' r='13' fill='#B0304A'/><circle cx='150' cy='88' r='9' fill='none' stroke='#E5536B' stroke-width='2'/><path d='M146 88h8M150 84v8' stroke='#E5536B' stroke-width='2'/><g fill='#E9CF96'><path d='M40 40l3 7l7 3l-7 3l-3 7l-3-7l-7-3l7-3z'/><path d='M260 80l2 5l5 2l-5 2l-2 5l-2-5l-5-2l5-2z'/></g></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><circle cx='150' cy='22' r='40' fill='url(#w)'/><path d='M150 0v12' stroke='#E9CF96' stroke-width='2'/><path d='M118 18q32 22 64 0' fill='none' stroke='#E9CF96' stroke-width='3'/><path d='M126 24q24 14 48 0' fill='none' stroke='#E9CF96' stroke-width='2'/><g fill='#FFF3EE'><path d='M122 28l3 8l-3 4l-3-4z'/><path d='M136 28l3 8l-3 4l-3-4z'/><path d='M150 28l3 8l-3 4l-3-4z'/><path d='M164 28l3 8l-3 4l-3-4z'/><path d='M178 28l3 8l-3 4l-3-4z'/></g><g fill='#2A1824'><path d='M40 120h220l-30-12h-160z'/><path d='M70 108h160l-24-10h-112z'/><path d='M94 98h112l-18-8h-76z'/></g><path d='M40 120L112 90M260 120L188 90' stroke='#E9CF96' stroke-width='2'/><g fill='#1A0F17'><circle cx='60' cy='76' r='7'/><path d='M50 104q2-22 10-22t10 22z'/><circle cx='240' cy='76' r='7'/><path d='M230 104q2-22 10-22t10 22z'/></g><g><rect x='30' y='30' width='4' height='7' rx='1' fill='#F4B6C8' transform='rotate(20 30 30)'/><rect x='80' y='50' width='4' height='7' rx='1' fill='#E9CF96' transform='rotate(-30 80 50)'/><rect x='210' y='40' width='4' height='7' rx='1' fill='#F4B6C8' transform='rotate(40 210 40)'/><rect x='262' y='24' width='4' height='7' rx='1' fill='#E9CF96' transform='rotate(10 262 24)'/><rect x='100' y='14' width='4' height='7' rx='1' fill='#7FD1C6' transform='rotate(-15 100 14)'/><rect x='196' y='70' width='4' height='7' rx='1' fill='#7FD1C6' transform='rotate(25 196 70)'/><rect x='276' y='60' width='4' height='7' rx='1' fill='#F4B6C8' transform='rotate(-20 276 60)'/></g></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><rect width='300' height='120' fill='#BFD9EA'/><path d='M0 100L60 30L110 80L160 20L230 90L270 50L300 76V120H0Z' fill='#8FA7C0'/><path d='M60 30L74 46L64 44L54 50ZM160 20L176 38L164 36L150 44Z' fill='#FFFFFF'/><path d='M0 104Q150 84 300 104V120H0Z' fill='#9ED9A0'/><g transform='translate(186 74)'><ellipse cx='20' cy='20' rx='22' ry='12' fill='#FFF3EE'/><path d='M4 28v14M12 30v12M28 30v12M36 28v14' stroke='#3A2133' stroke-width='3'/><path d='M38 14q8-14 18-8q6 6-2 14q-8 4-16 0z' fill='#FFF3EE'/><path d='M46 6l-4-8M52 6l2-8' stroke='#3A2133' stroke-width='2.5'/><circle cx='50' cy='12' r='1.8' fill='#3A2133'/><path d='M54 22v6' stroke='#FFF3EE' stroke-width='3'/></g><g transform='translate(88 78)'><rect width='40' height='30' fill='#C98F6B'/><path d='M-4 2L20-14L44 2Z' fill='#B0304A'/><rect x='15' y='14' width='10' height='16' fill='#3A2133'/></g></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2133'/><stop offset='1' stop-color='#1C0F19'/></linearGradient><clipPath id='k'><rect x='3' y='3' width='294' height='114' rx='10'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE3B3' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE3B3' stop-opacity='0'/></radialGradient></defs><rect x='1' y='1' width='298' height='118' rx='12' fill='url(#g)'/><g clip-path='url(#k)'><path d='M150-10L90 120H210Z' fill='#FFE3B3' opacity='0.18'/><ellipse cx='150' cy='108' rx='52' ry='8' fill='#FFE3B3' opacity='0.25'/><path d='M128 104V40q0-16 22-16t22 16v64' fill='none' stroke='#E9CF96' stroke-width='5'/><path d='M132 44q0-12 18-12t18 12v26h-36z' fill='#B0304A'/><rect x='120' y='70' width='60' height='10' rx='3' fill='#B0304A'/><path d='M124 80v28M176 80v28' stroke='#E9CF96' stroke-width='4'/><rect x='138' y='58' width='24' height='12' rx='1' fill='#FFF3EE'/><path d='M142 64h16' stroke='#1A0F17' stroke-width='1.5'/></g><rect x='1' y='1' width='298' height='118' rx='12' fill='none' stroke='#E9CF96' stroke-width='1.5'/><rect x='5' y='5' width='290' height='110' rx='9' fill='none' stroke='#E9CF96' stroke-opacity='0.35'/></svg>"
+        ],
+        "color": "#F4B6C8"
+      },
+      "button": {
+        "svg": "<svg viewBox='0 0 300 52'><defs><linearGradient id='b' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#2E1A28'/><stop offset='1' stop-color='#150B12'/></linearGradient></defs><rect x='1' y='4' width='298' height='47' rx='23' fill='#000000' opacity='0.5'/><rect x='1' y='1' width='298' height='47' rx='23' fill='url(#b)' stroke='#E9CF96' stroke-width='1.5'/><path d='M30 8H270' stroke='#FFF3EE' stroke-opacity='0.12' stroke-width='2' stroke-linecap='round'/><circle cx='22' cy='24.5' r='5' fill='#FFF3EE'/><circle cx='20.5' cy='23' r='1.6' fill='#FFFFFF'/><circle cx='278' cy='24.5' r='5' fill='#FFF3EE'/><circle cx='276.5' cy='23' r='1.6' fill='#FFFFFF'/></svg>",
+        "color": "#E9CF96"
+      }
+    }
+  },
+  "sound": {
+    "set": "chime",
+    "volume": 0.75,
+    "music": {
+      "melody": [
+        "E5",
+        null,
+        "G5",
+        "E5",
+        "C5",
+        null,
+        "D5",
+        null,
+        "E5",
+        "F5",
+        "E5",
+        "D5",
+        "C5",
+        null,
+        null,
+        null,
+        "A4",
+        null,
+        "C5",
+        "A4",
+        "B4",
+        null,
+        "G4",
+        null,
+        "C5",
+        "D5",
+        "E5",
+        "G5",
+        "E5",
+        null,
+        null,
+        null
+      ],
+      "bass": ["C3", "G2", "A2", "E2", "F2", "C3", "G2", "G2"],
+      "bpm": 116,
+      "wave": "triangle",
+      "volume": 0.3
+    },
+    "moments": {
+      "tap": {
+        "wave": "sine",
+        "note": "E6",
+        "ms": 60,
+        "volume": 0.5
+      },
+      "pickup": "ding",
+      "hit": "buzz",
+      "level": "shimmer",
+      "win": "tada",
+      "lose": "wah"
+    }
+  },
+  "content": {
+    "scene_names": [
+      "0 steps",
+      "1 lunch",
+      "2 post",
+      "3 dev",
+      "4 celeste",
+      "5 margo",
+      "6 week",
+      "7 trap",
+      "8 gala",
+      "9 ghost",
+      "10 unmask",
+      "11 truce",
+      "12 noproof",
+      "13 unloved",
+      "14 alps",
+      "15 vanish"
+    ],
+    "story_lines": [
+      "Day one at Ashcombe Prep.", "By lunch, an anonymous", "account called The Hostess", "has posted your bowl cut.",
+      "At lunch, Margo Bell slides", "in. ‘I know EVERYONE,’ she", "says. ‘Tell me a secret.", "I’m a vault.’",
+      "Later, The Hostess posts:", "‘Student council king Dev", "Kapoor takes BALLET.’ By", "dawn: tutus in his locker.",
+      "Dev is on the roof, folding", "a tutu into a paper plane.", "‘Ballet’s not a crime,’ he", "says. ‘Being boring is.’",
+      "Celeste Varga-Whitlock does", "not look up from her latte.", "‘The Hostess posted MY", "secret too. Truce, new kid?’",
+      "‘Me? The Hostess?’ Margo", "laughs. Her phone buzzes:", "DRAFTS (3). She flips it", "face down. Fast.",
+      "Friday is the Winter Gala.", "The Hostess promises a", "‘grand finale.’ Everyone", "says it’s about you.",
+      "You tell Margo, and only", "Margo, you’ll wear green.", "4th period, The Hostess", "posts: ‘Wearing GREEN?’",
+      "Midnight at the Winter Gala.", "Every phone buzzes: The", "Hostess unmasks herself in", "five minutes. Unless you do.",
+      "You skip it. At midnight,", "The Hostess posts a photo", "of your empty chair:", "‘Scared, sweetie?’ Ouch.",
+      "Screenshots on the big", "screen. Margo goes pale,", "then whispers: ‘I was new", "once too. Nobody saw me.’",
+      "You, Celeste and Dev read", "your own secrets into the", "mic. Nothing left to leak.", "The Hostess logs off.",
+      "You point at Margo. She", "cries on cue. By morning", "you’re the villain, and The", "Hostess is trending.",
+      "You’re right, and you have", "proof. But nobody likes you", "enough to care. The Hostess", "posts again by Monday.",
+      "Celeste’s lawyers have", "lawyers. You finish the year", "at a boarding school in the", "Alps. With goats.",
+      "The account deletes itself", "an hour early. Margo has", "already left for Geneva.", "You’ll never prove a thing."
+    ],
+    "story_labels": [
+      "Laugh it off, loudly", "Start a suspect list", "Report it to the Dean",
+      "Tell her a fake secret", "Tell her a real secret", "Smile like a locked door",
+      "Check on Dev", "Ask Celeste, carefully", "Confront Margo",
+      "Come to his recital", "Trade secrets with him", "Film him, for leverage",
+      "Truce. Let’s hunt her", "Only if I get a secret", "YOU are The Hostess",
+      "Laugh along with her", "Grab the phone", "",
+      "Set a trap for Margo", "Skip the gala", "Go, and face it",
+      "Screenshot everything", "Text Margo: ‘Gotcha’", "",
+      "Unmask Margo", "Unmask Celeste", "Everyone confess at once",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", ""
+    ],
+    "story_next": [
+      "1", "1", "1",
+      "2", "2", "2",
+      "3", "4", "5",
+      "4", "4", "4",
+      "6", "6", "6",
+      "6", "6", "",
+      "7", "9", "8",
+      "8", "8", "",
+      "12", "14", "11",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", ""
+    ],
+    "story_ends": ["", "", "", "", "", "", "", "", "", "bad", "good", "good", "bad", "bad", "bad", "bad"],
+    "scene_info": [
+      "0|Ashcombe Prep, Day One",
+      "1|The Courtyard Café",
+      "2|Night One, 9:14 p.m.",
+      "3|The Roof Garden",
+      "4|Celeste’s Table",
+      "1|The Courtyard Café",
+      "5|Gala Week",
+      "2|Thursday, 4th Period",
+      "6|The Winter Gala",
+      "8|Ending: The Empty Chair",
+      "6|Ending: Unmasked|500",
+      "6|Secret ending: The Truce|900",
+      "2|Ending: All Gossip, No Proof",
+      "2|Ending: Right, but Unpopular",
+      "7|Ending: Off to the Alps",
+      "2|Ending: Logged Off Early"
+    ],
+    "effects": [
+      "0.0|+rep|Rep up: you can take a joke",
+      "0.1|sleuth|New note: SUSPECTS. Game on.",
+      "0.2|-rep|Rep down: nobody likes a narc",
+      "1.0|bait told_margo|You ‘admit’ a pearl allergy",
+      "1.1|told_real told_margo +rep|Margo gasps: ‘A HOUSEBOAT?’",
+      "1.2|+secrets|You keep your cards. Secrets +1",
+      "@2|clue_bait|Clue: only Margo heard that|bait",
+      "@2|clue_houseboat -rep|Clue: Margo is the only leak|told_real",
+      "3.0|+rep ally_dev|Dev’s in your corner now",
+      "3.1|+secrets ally_dev clue_timing|Clue: posts drop in 4th period",
+      "3.2|+secrets +secrets -rep|You got the clip. You feel gross.",
+      "4.0|ally_celeste +rep|Celeste’s circle opens. Rep up",
+      "4.1|+secrets|Her secret: she’s scared of horses",
+      "4.2|-rep|Celeste: ‘Cute. No.’ Rep down",
+      "5.0|clue_drafts|Clue: Margo has 3 secret drafts",
+      "5.1|clue_login -rep -rep|Clue: logged in as The Hostess!",
+      "7.0|clue_trap|Clue: the trap snapped shut",
+      "7.1|clue_trap warned|Margo leaves you on read"
+    ],
+    "needs": [
+      "2.2|told_margo",
+      "6.0|told_margo",
+      "8.2|ally_celeste&ally_dev&secrets>=2"
+    ],
+    "routes": [
+      "8.0|clues>=3&rep>=1|10",
+      "8.0|clues>=3&!rep>=1|13",
+      "8.0|warned|15"
+    ],
+    "callbacks": [
+      "1.3|sleuth|I’m a vault.’ Suspect #1?",
+      "2.1|bait|‘New kid is ALLERGIC TO",
+      "2.2|bait|PEARLS.’ You made that up.",
+      "2.3|bait|Only Margo heard it.",
+      "2.1|told_real|‘New kid grew up on a",
+      "2.2|told_real|HOUSEBOAT.’ True. And only",
+      "2.3|told_real|Margo knew.",
+      "4.0|ally_dev|Dev told Celeste you’re OK.",
+      "4.1|ally_dev|She almost looks up.",
+      "8.3|warned|five minutes. Margo’s gone."
+    ]
+  }
+}

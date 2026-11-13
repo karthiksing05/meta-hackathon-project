@@ -1,0 +1,1031 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Aura Farm",
+    "instructions": "Tap anywhere when the spark hits the glowing zone. Perfect taps stack your combo and aura. Tap early: -500 aura. Let the spark slip past the zone: -1000 aura and a pair of shades cracks. Survive 45 seconds and rank up.",
+    "duration_s": 45
+  },
+  "uses": [
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "bind": {
+        "hit": "ghosted"
+      }
+    },
+    {
+      "fragment": "combo",
+      "params": {
+        "step": 1,
+        "max": 8,
+        "label": "Combo"
+      },
+      "bind": {
+        "hit_good": "nailed",
+        "hit_bad": "flopped"
+      }
+    },
+    {
+      "fragment": "countdown",
+      "params": {
+        "on_end": "none",
+        "warn_at": "5s"
+      }
+    }
+  ],
+  "state": {
+    "aura": {
+      "type": "int",
+      "init": "0"
+    },
+    "phase": {
+      "type": "float",
+      "init": "0.0"
+    },
+    "zc": {
+      "type": "float",
+      "init": "0.55"
+    },
+    "zw": {
+      "type": "float",
+      "init": "0.10"
+    },
+    "spd": {
+      "type": "float",
+      "init": "0.36"
+    },
+    "rank": {
+      "type": "int",
+      "init": "0"
+    },
+    "pop_text": {
+      "type": "string",
+      "init": "''"
+    },
+    "pop_kind": {
+      "type": "int",
+      "init": "0"
+    },
+    "pop_at": {
+      "type": "int",
+      "init": "-5000"
+    },
+    "gain": {
+      "type": "int",
+      "init": "0"
+    },
+    "stun_until": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "ang": {
+      "params": {
+        "p": "float"
+      },
+      "returns": "float",
+      "body": "p * 2.0 * pi - pi / 2.0"
+    },
+    "ring_pt": {
+      "params": {
+        "p": "float",
+        "r": "float"
+      },
+      "returns": "vec2",
+      "body": "vec(180.0 + cos(ang(p)) * r, 360.0 + sin(ang(p)) * r)"
+    },
+    "arc": {
+      "params": {
+        "c": "float",
+        "w": "float",
+        "r0": "float",
+        "r1": "float"
+      },
+      "returns": "list<vec2>",
+      "body": "concat(map(range(9), i => let a = ang(c - w + w * i / 4.0) in vec(cos(a) * r1, sin(a) * r1)), map(range(9), i => let a = ang(c + w - w * i / 4.0) in vec(cos(a) * r0, sin(a) * r0)))"
+    },
+    "rank_of": {
+      "params": {
+        "a": "int"
+      },
+      "returns": "int",
+      "body": "count([1000, 3000, 6000, 10000, 16000, 24000, 35000], t => a >= t)"
+    },
+    "rank_name": {
+      "params": {
+        "r": "int"
+      },
+      "returns": "string",
+      "body": "get_or(content_ranks, r, 'Aura Deity')"
+    },
+    "next_at": {
+      "params": {
+        "r": "int"
+      },
+      "returns": "int",
+      "body": "get_or([1000, 3000, 6000, 10000, 16000, 24000, 35000], r, 0)"
+    },
+    "pop_color": {
+      "params": {},
+      "returns": "string",
+      "body": "if pop_kind == 0 then '#FFD23F' else if pop_kind == 1 then '#B6FF3B' else '#FF3D7F'"
+    }
+  },
+  "events": {
+    "nailed": {},
+    "flopped": {},
+    "perfect": {},
+    "good": {},
+    "ghosted": {},
+    "next_zone": {},
+    "ranked_up": {}
+  },
+  "inputs": {
+    "farm": {
+      "payload": {}
+    }
+  },
+  "rules": [
+    {
+      "id": "spin",
+      "on": "tick",
+      "do": [
+        {
+          "set": "phase",
+          "to": "phase + spd * event.dt / 1000.0"
+        },
+        {
+          "if": "phase > zc + zw",
+          "then": [
+            {
+              "emit": "ghosted"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ghost",
+      "on": "ghosted",
+      "do": [
+        {
+          "set": "aura",
+          "to": "max(0, aura - 1000)"
+        },
+        {
+          "set": "pop_text",
+          "to": "pick(content_ghost_lines)"
+        },
+        {
+          "set": "pop_kind",
+          "to": "2"
+        },
+        {
+          "set": "pop_at",
+          "to": "now"
+        },
+        {
+          "emit": "flopped"
+        },
+        {
+          "emit": "next_zone"
+        }
+      ]
+    },
+    {
+      "id": "judge",
+      "on": "farm",
+      "when": "now >= stun_until",
+      "do": [
+        {
+          "let": {
+            "d": "abs(phase - zc)"
+          }
+        },
+        {
+          "if": "d <= zw * 0.4",
+          "then": [
+            {
+              "set": "gain",
+              "to": "300 * combo_mult"
+            },
+            {
+              "incr": "aura",
+              "by": "gain"
+            },
+            {
+              "set": "pop_text",
+              "to": "'PERFECT +' + str(gain)"
+            },
+            {
+              "set": "pop_kind",
+              "to": "0"
+            },
+            {
+              "emit": "perfect"
+            },
+            {
+              "emit": "nailed"
+            }
+          ],
+          "else": [
+            {
+              "if": "d <= zw",
+              "then": [
+                {
+                  "set": "gain",
+                  "to": "100 * combo_mult"
+                },
+                {
+                  "incr": "aura",
+                  "by": "gain"
+                },
+                {
+                  "set": "pop_text",
+                  "to": "'CLEAN +' + str(gain)"
+                },
+                {
+                  "set": "pop_kind",
+                  "to": "1"
+                },
+                {
+                  "emit": "good"
+                },
+                {
+                  "emit": "nailed"
+                }
+              ],
+              "else": [
+                {
+                  "set": "aura",
+                  "to": "max(0, aura - 500)"
+                },
+                {
+                  "set": "pop_text",
+                  "to": "pick(content_miss_lines)"
+                },
+                {
+                  "set": "pop_kind",
+                  "to": "2"
+                },
+                {
+                  "set": "stun_until",
+                  "to": "now + 350"
+                },
+                {
+                  "emit": "flopped"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "set": "pop_at",
+          "to": "now"
+        },
+        {
+          "if": "d <= zw",
+          "then": [
+            {
+              "emit": "next_zone"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "relocate",
+      "on": "next_zone",
+      "do": [
+        {
+          "set": "spd",
+          "to": "min(0.62, spd + 0.01)"
+        },
+        {
+          "set": "zw",
+          "to": "max(0.085, zw - 0.0008)"
+        },
+        {
+          "set": "zc",
+          "to": "phase + random_float(0.42, 0.85)"
+        }
+      ]
+    },
+    {
+      "id": "rank_check",
+      "on": "tick",
+      "when": "rank_of(aura) > rank",
+      "do": [
+        {
+          "set": "rank",
+          "to": "rank_of(aura)"
+        },
+        {
+          "emit": "ranked_up"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "score": "aura",
+    "time_limit": "45s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 640,
+          "fill": "#00000000",
+          "on_tap": {
+            "input": "farm",
+            "with": {}
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 92,
+          "anchor": "center",
+          "size": 13,
+          "weight": 700,
+          "color": "$ink",
+          "opacity": 0.75,
+          "text": "AURA"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 122,
+          "anchor": "center",
+          "size": 40,
+          "weight": 800,
+          "color": "$accent",
+          "stroke": "#14052E",
+          "stroke_width": 5,
+          "text": "= str(aura)",
+          "animate_on": {
+            "nailed": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.25,
+                1
+              ],
+              "ms": 200
+            },
+            "flopped": {
+              "prop": "scale",
+              "keys": [
+                1,
+                0.8,
+                1.05,
+                1
+              ],
+              "ms": 260
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 160,
+          "anchor": "center",
+          "size": 19,
+          "weight": 800,
+          "color": "$primary",
+          "stroke": "#14052E",
+          "stroke_width": 4,
+          "text": "= rank_name(rank)",
+          "animate_on": {
+            "ranked_up": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.7,
+                0.9,
+                1
+              ],
+              "ms": 420
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 110,
+          "y": 176,
+          "w": 140,
+          "h": 6,
+          "radius": 3,
+          "fill": "#FFFFFF33"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 110,
+          "y": 176,
+          "h": 6,
+          "radius": 3,
+          "fill": "$primary",
+          "w": "= if rank >= 7 then 140.0 else 140.0 * clamp((aura - (if rank == 0 then 0 else next_at(rank - 1))) * 1.0 / ((next_at(rank) - (if rank == 0 then 0 else next_at(rank - 1))) * 1.0), 0.0, 1.0)",
+          "transition": {
+            "w": {
+              "ms": 200,
+              "ease": "out"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": 180,
+          "y": 360,
+          "fill": "$accent",
+          "r": "= 78.0 + combo * 7.0 + sin(now / 160.0) * 4.0",
+          "opacity": "= 0.10 + combo * 0.035",
+          "transition": {
+            "r": {
+              "ms": 200,
+              "ease": "out"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": 180,
+          "y": 360,
+          "r": 118,
+          "fill": "#00000000",
+          "stroke": "#14052EAA",
+          "stroke_width": 26
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": 180,
+          "y": 360,
+          "r": 118,
+          "fill": "#00000000",
+          "stroke": "$secondary",
+          "stroke_width": 2,
+          "opacity": 0.8
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "poly",
+          "x": 180,
+          "y": 360,
+          "points": "= arc(zc, zw, 104.0, 132.0)",
+          "fill": "$primary",
+          "opacity": "= 0.7 + sin(now / 90.0) * 0.2"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "poly",
+          "x": 180,
+          "y": 360,
+          "points": "= arc(zc, zw * 0.4, 104.0, 132.0)",
+          "fill": "$accent"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "image",
+          "asset": "duke",
+          "anchor": "center",
+          "x": 180,
+          "y": 358,
+          "w": 150,
+          "h": 150,
+          "frame": "= if now - pop_at < 550 then (if pop_kind == 2 then 2 else 1) else 0",
+          "rotation": "= sin(now / 300.0) * 3.0",
+          "animate_on": {
+            "nailed": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.18,
+                0.94,
+                1
+              ],
+              "ms": 260,
+              "ease": "out"
+            },
+            "flopped": {
+              "prop": "rotation",
+              "keys": [
+                0,
+                -14,
+                12,
+                -6,
+                0
+              ],
+              "ms": 360
+            },
+            "ranked_up": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.35,
+                0.9,
+                1.05,
+                1
+              ],
+              "ms": 500
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(4)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "circle",
+            "x": "= ring_pt(phase - k * 0.018 - 0.018, 118.0).x",
+            "y": "= ring_pt(phase - k * 0.018 - 0.018, 118.0).y",
+            "r": "= 7.0 - k * 1.4",
+            "fill": "$accent",
+            "opacity": "= 0.55 - k * 0.12"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "image",
+          "asset": "spark",
+          "anchor": "center",
+          "x": "= ring_pt(phase, 118.0).x",
+          "y": "= ring_pt(phase, 118.0).y",
+          "w": 40,
+          "h": 40,
+          "rotation": "= now / 4.0",
+          "animate_on": {
+            "nailed": {
+              "prop": "scale",
+              "keys": [
+                1,
+                2.0,
+                1
+              ],
+              "ms": 220
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": "= 222.0 - min(700, now - pop_at) / 30.0",
+          "anchor": "center",
+          "size": 26,
+          "weight": 800,
+          "color": "= pop_color()",
+          "stroke": "#14052E",
+          "stroke_width": 5,
+          "opacity": "= clamp(1.0 - (now - pop_at - 450) / 400.0, 0.0, 1.0)",
+          "text": "= pop_text",
+          "animate_on": {
+            "perfect": {
+              "prop": "scale",
+              "keys": [
+                0.4,
+                1.4,
+                1
+              ],
+              "ms": 220,
+              "ease": "out"
+            },
+            "good": {
+              "prop": "scale",
+              "keys": [
+                0.5,
+                1.15,
+                1
+              ],
+              "ms": 200,
+              "ease": "out"
+            },
+            "flopped": {
+              "prop": "scale",
+              "keys": [
+                1.6,
+                0.9,
+                1
+              ],
+              "ms": 240,
+              "ease": "out"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 535,
+          "anchor": "center",
+          "size": 15,
+          "weight": 700,
+          "color": "$ink",
+          "stroke": "#14052E",
+          "stroke_width": 4,
+          "text": "= if now < 6000 then 'TAP WHEN THE SPARK HITS THE GLOW' else if rank >= 7 then 'MAXIMUM AURA. TOUCH GRASS?' else 'next rank at ' + str(next_at(rank)) + ' aura'"
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "group",
+          "visible": "= status != 'playing'",
+          "animate_on": {
+            "win": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.08,
+                1
+              ],
+              "ms": 420,
+              "ease": "out"
+            },
+            "lose": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.08,
+                1
+              ],
+              "ms": 420,
+              "ease": "out"
+            }
+          },
+          "children": [
+            {
+              "node": "rect",
+              "x": 24,
+              "y": 170,
+              "w": 312,
+              "h": 300,
+              "radius": 26,
+              "fill": "#14052EEE",
+              "stroke": "$accent",
+              "stroke_width": 3
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 214,
+              "anchor": "center",
+              "size": 26,
+              "weight": 800,
+              "color": "$primary",
+              "text": "= if status == 'won' then 'AURA ASCENDED' else 'SHADES SHATTERED'"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 250,
+              "anchor": "center",
+              "size": 14,
+              "weight": 700,
+              "color": "$ink",
+              "opacity": 0.8,
+              "text": "FINAL AURA"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 296,
+              "anchor": "center",
+              "size": 52,
+              "weight": 800,
+              "color": "$accent",
+              "stroke": "#000000",
+              "stroke_width": 4,
+              "text": "= str(aura)"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 350,
+              "anchor": "center",
+              "size": 22,
+              "weight": 800,
+              "color": "$ink",
+              "text": "= rank_name(rank)"
+            },
+            {
+              "node": "text",
+              "x": 44,
+              "y": 378,
+              "w": 272,
+              "wrap": true,
+              "size": 15,
+              "weight": 600,
+              "color": "$ink",
+              "opacity": 0.85,
+              "align": "center",
+              "text": "= get_or(content_end_lines, rank, 'You are the aura now.') + ' Best combo x' + str(best_combo + 1) + '.'"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "perfect",
+        "do": [
+          {
+            "sound": {
+              "wave": "square",
+              "note": "= 659.0 * pow(1.0595, min(combo, 12) * 1.0)",
+              "slide": "= 1318.0 * pow(1.0595, min(combo, 12) * 1.0)",
+              "ms": 90,
+              "volume": 0.32
+            }
+          },
+          {
+            "particles": {
+              "x": "= ring_pt(phase, 118.0).x",
+              "y": "= ring_pt(phase, 118.0).y",
+              "count": 26,
+              "color": "$accent",
+              "speed": 280,
+              "size": 6,
+              "ms": 520
+            }
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 360,
+              "count": 14,
+              "color": "$primary",
+              "speed": 200,
+              "size": 4,
+              "ms": 420
+            }
+          },
+          {
+            "haptic": "medium"
+          }
+        ]
+      },
+      {
+        "on": "good",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "= 523.0 * pow(1.0595, min(combo, 12) * 1.0)",
+              "ms": 80,
+              "volume": 0.45
+            }
+          },
+          {
+            "particles": {
+              "x": "= ring_pt(phase, 118.0).x",
+              "y": "= ring_pt(phase, 118.0).y",
+              "count": 14,
+              "color": "$primary",
+              "speed": 200,
+              "size": 5,
+              "ms": 420
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "flopped",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "particles": {
+              "x": "= ring_pt(phase, 118.0).x",
+              "y": "= ring_pt(phase, 118.0).y",
+              "count": 20,
+              "color": "$danger",
+              "speed": 240,
+              "size": 5,
+              "ms": 450,
+              "gravity": 400
+            }
+          },
+          {
+            "shake": {
+              "px": 9,
+              "ms": 260
+            }
+          },
+          {
+            "haptic": "error"
+          }
+        ]
+      },
+      {
+        "on": "ranked_up",
+        "do": [
+          {
+            "moment": "level"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 160,
+              "count": 40,
+              "color": "$accent",
+              "speed": 320,
+              "size": 6,
+              "ms": 800,
+              "gravity": 300
+            }
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 160,
+              "count": 24,
+              "color": "$primary",
+              "speed": 240,
+              "size": 5,
+              "ms": 700,
+              "gravity": 300
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Synthwave aura shrine: purple sunburst, magenta grid floor, a smug lime bean in shades and a gold chain, a golden spark orbiting a glow ring.",
+    "palette": {
+      "bg": "#1A0838",
+      "surface": "#2C1660",
+      "primary": "#B6FF3B",
+      "secondary": "#8E6BFF",
+      "accent": "#FFD23F",
+      "ink": "#FFF6FF",
+      "danger": "#FF3D7F"
+    },
+    "font": "Futura",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><radialGradient id='bg' cx='0.5' cy='0.56' r='0.75'><stop offset='0' stop-color='#6A22C9'/><stop offset='0.55' stop-color='#3A0F7A'/><stop offset='1' stop-color='#14052E'/></radialGradient><linearGradient id='floor' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3B0B5E'/><stop offset='1' stop-color='#12031F'/></linearGradient><radialGradient id='halo' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD23F' stop-opacity='0.35'/><stop offset='1' stop-color='#FFD23F' stop-opacity='0'/></radialGradient><linearGradient id='top' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#0C0220' stop-opacity='0.9'/><stop offset='1' stop-color='#0C0220' stop-opacity='0'/></linearGradient></defs><rect width='360' height='640' fill='url(#bg)'/><path d='M180 360 L700 360 L687 476Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L649 586 L587 684Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L504 767 L406 829Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L296 867 L180 880Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L64 867 L-46 829Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L-144 767 L-227 684Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L-289 586 L-327 476Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L-340 360 L-327 244Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L-289 134 L-227 36Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L-144 -47 L-46 -109Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L64 -147 L180 -160Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L296 -147 L406 -109Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L504 -47 L587 36Z' fill='#FFFFFF' opacity='0.05'/><path d='M180 360 L649 134 L687 244Z' fill='#FFFFFF' opacity='0.05'/><circle cx='180' cy='360' r='175' fill='url(#halo)'/><path d='M0 540 L360 540 L360 640 L0 640Z' fill='url(#floor)'/><line x1='0' y1='546' x2='360' y2='546' stroke='#FF3DD1' stroke-width='1.0' opacity='0.55'/><line x1='0' y1='556' x2='360' y2='556' stroke='#FF3DD1' stroke-width='1.4' opacity='0.55'/><line x1='0' y1='570' x2='360' y2='570' stroke='#FF3DD1' stroke-width='1.8' opacity='0.55'/><line x1='0' y1='590' x2='360' y2='590' stroke='#FF3DD1' stroke-width='2.2' opacity='0.55'/><line x1='0' y1='616' x2='360' y2='616' stroke='#FF3DD1' stroke-width='2.6' opacity='0.55'/><line x1='54' y1='540' x2='-450' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='68' y1='540' x2='-380' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='82' y1='540' x2='-310' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='96' y1='540' x2='-240' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='110' y1='540' x2='-170' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='124' y1='540' x2='-100' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='138' y1='540' x2='-30' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='152' y1='540' x2='40' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='166' y1='540' x2='110' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='180' y1='540' x2='180' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='194' y1='540' x2='250' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='208' y1='540' x2='320' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='222' y1='540' x2='390' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='236' y1='540' x2='460' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='250' y1='540' x2='530' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='264' y1='540' x2='600' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='278' y1='540' x2='670' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='292' y1='540' x2='740' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><line x1='306' y1='540' x2='810' y2='640' stroke='#FF3DD1' stroke-width='1.2' opacity='0.45'/><path d='M0 540 L360 540' stroke='#FFD23F' stroke-width='2.5' opacity='0.9'/><rect width='360' height='150' fill='url(#top)'/><path d='M34 187 Q35.6 194.4 43 196 Q35.6 197.6 34 205 Q32.4 197.6 25 196 Q32.4 194.4 34 187Z' fill='#FFD23F' opacity='1'/><path d='M322 202 Q324.2 211.8 334 214 Q324.2 216.2 322 226 Q319.8 216.2 310 214 Q319.8 211.8 322 202Z' fill='#B6FF3B' opacity='1'/><path d='M52 471 Q53.3 476.7 59 478 Q53.3 479.3 52 485 Q50.7 479.3 45 478 Q50.7 476.7 52 471Z' fill='#FF3DD1' opacity='1'/><path d='M310 462 Q311.4 468.6 318 470 Q311.4 471.4 310 478 Q308.6 471.4 302 470 Q308.6 468.6 310 462Z' fill='#FFD23F' opacity='1'/><path d='M300 115 Q300.9 119.1 305 120 Q300.9 120.9 300 125 Q299.1 120.9 295 120 Q299.1 119.1 300 115Z' fill='#FFFFFF' opacity='0.8'/><path d='M64 115 Q64.9 119.1 69 120 Q64.9 120.9 64 125 Q63.1 120.9 59 120 Q63.1 119.1 64 115Z' fill='#FFFFFF' opacity='0.7'/><path d='M20 295 Q20.9 299.1 25 300 Q20.9 300.9 20 305 Q19.1 300.9 15 300 Q19.1 299.1 20 295Z' fill='#B6FF3B' opacity='0.8'/><path d='M342 325 Q342.9 329.1 347 330 Q342.9 330.9 342 335 Q341.1 330.9 337 330 Q341.1 329.1 342 325Z' fill='#FFFFFF' opacity='0.7'/><g font-family='Futura' font-weight='bold' font-size='13' fill='#B6FF3B' opacity='0.55'><text x='14' y='240' transform='rotate(-14 14 240)'>+1000 AURA</text><text x='262' y='262' transform='rotate(12 262 262)'>+500</text><text x='250' y='510' transform='rotate(-8 250 510)' fill='#FF3DD1'>-1000</text><text x='16' y='470' transform='rotate(9 16 470)' fill='#FFD23F'>SIGMA?</text></g></svg>"
+    },
+    "sprites": {
+      "duke": {
+        "svg": [
+          "<svg viewBox='0 0 120 120'><defs><linearGradient id='b0' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#D8FF5E'/><stop offset='1' stop-color='#4FC226'/></linearGradient><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFF2A8'/><stop offset='1' stop-color='#E0A10E'/></linearGradient></defs><ellipse cx='44' cy='112' rx='12' ry='6' fill='#1B0B33'/><ellipse cx='76' cy='112' rx='12' ry='6' fill='#1B0B33'/><path d='M60 8 C88 8 100 30 100 58 C100 90 86 110 60 110 C34 110 20 90 20 58 C20 30 32 8 60 8Z' fill='url(#b0)' stroke='#1B0B33' stroke-width='3.5'/><path d='M38 22 Q48 14 60 14' stroke='#FFFFFF' stroke-width='4' stroke-linecap='round' fill='none' opacity='0.6'/><rect x='28' y='34' width='28' height='16' rx='6' fill='#14052E'/><rect x='64' y='34' width='28' height='16' rx='6' fill='#14052E'/><rect x='54' y='37' width='12' height='4' fill='#14052E'/><rect x='18' y='36' width='12' height='3.5' fill='#14052E'/><rect x='90' y='36' width='12' height='3.5' fill='#14052E'/><path d='M33 38 L40 38 M68 38 L75 38' stroke='#B6FF3B' stroke-width='2.5' stroke-linecap='round'/><path d='M48 66 Q62 74 74 62' stroke='#1B0B33' stroke-width='3.5' fill='none' stroke-linecap='round'/><path d='M34 78 Q60 100 86 78' stroke='url(#g)' stroke-width='5' fill='none' stroke-linecap='round' stroke-dasharray='5 2.5'/><path d='M60 86 L63 93 L70 93 L64.5 97.5 L66.5 104.5 L60 100.5 L53.5 104.5 L55.5 97.5 L50 93 L57 93Z' fill='url(#g)' stroke='#7A4B00' stroke-width='1.2'/></svg>",
+          "<svg viewBox='0 0 120 120'><defs><linearGradient id='b1' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#D8FF5E'/><stop offset='1' stop-color='#4FC226'/></linearGradient><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFF2A8'/><stop offset='1' stop-color='#E0A10E'/></linearGradient></defs><path d='M22 70 Q6 62 8 44 Q10 34 18 36 Q20 46 28 52' fill='url(#b1)' stroke='#1B0B33' stroke-width='3' stroke-linejoin='round'/><circle cx='13' cy='40' r='7' fill='url(#b1)' stroke='#1B0B33' stroke-width='3'/><path d='M98 70 Q114 62 112 44 Q110 34 102 36 Q100 46 92 52' fill='url(#b1)' stroke='#1B0B33' stroke-width='3' stroke-linejoin='round'/><circle cx='107' cy='40' r='7' fill='url(#b1)' stroke='#1B0B33' stroke-width='3'/><ellipse cx='44' cy='112' rx='12' ry='6' fill='#1B0B33'/><ellipse cx='76' cy='112' rx='12' ry='6' fill='#1B0B33'/><path d='M60 8 C88 8 100 30 100 58 C100 90 86 110 60 110 C34 110 20 90 20 58 C20 30 32 8 60 8Z' fill='url(#b1)' stroke='#1B0B33' stroke-width='3.5'/><path d='M38 22 Q48 14 60 14' stroke='#FFFFFF' stroke-width='4' stroke-linecap='round' fill='none' opacity='0.6'/><rect x='28' y='34' width='28' height='16' rx='6' fill='#14052E'/><rect x='64' y='34' width='28' height='16' rx='6' fill='#14052E'/><rect x='54' y='37' width='12' height='4' fill='#14052E'/><rect x='18' y='36' width='12' height='3.5' fill='#14052E'/><rect x='90' y='36' width='12' height='3.5' fill='#14052E'/><path d='M33 38 L40 38 M68 38 L75 38' stroke='#B6FF3B' stroke-width='2.5' stroke-linecap='round'/><path d='M44 62 Q60 82 78 62 Z' fill='#1B0B33'/><path d='M50 64 L72 64 L70 68 L52 68Z' fill='#FFFFFF'/><path d='M34 78 Q60 100 86 78' stroke='url(#g)' stroke-width='5' fill='none' stroke-linecap='round' stroke-dasharray='5 2.5'/><path d='M60 86 L63 93 L70 93 L64.5 97.5 L66.5 104.5 L60 100.5 L53.5 104.5 L55.5 97.5 L50 93 L57 93Z' fill='url(#g)' stroke='#7A4B00' stroke-width='1.2'/><path d='M14 6 Q15.4 12.6 22 14 Q15.4 15.4 14 22 Q12.6 15.4 6 14 Q12.6 12.6 14 6Z' fill='#FFD23F' opacity='1'/><path d='M106 10 Q107.1 14.9 112 16 Q107.1 17.1 106 22 Q104.9 17.1 100 16 Q104.9 14.9 106 10Z' fill='#FFFFFF' opacity='1'/><path d='M108 87 Q108.9 91.1 113 92 Q108.9 92.9 108 97 Q107.1 92.9 103 92 Q107.1 91.1 108 87Z' fill='#FFD23F' opacity='1'/></svg>",
+          "<svg viewBox='0 0 120 120'><defs><linearGradient id='b2' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#C9E88A'/><stop offset='1' stop-color='#6FA84F'/></linearGradient><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFF2A8'/><stop offset='1' stop-color='#E0A10E'/></linearGradient></defs><ellipse cx='44' cy='112' rx='12' ry='6' fill='#1B0B33'/><ellipse cx='76' cy='112' rx='12' ry='6' fill='#1B0B33'/><path d='M60 8 C88 8 100 30 100 58 C100 90 86 110 60 110 C34 110 20 90 20 58 C20 30 32 8 60 8Z' fill='url(#b2)' stroke='#1B0B33' stroke-width='3.5'/><path d='M38 22 Q48 14 60 14' stroke='#FFFFFF' stroke-width='4' stroke-linecap='round' fill='none' opacity='0.6'/><circle cx='46' cy='40' r='8' fill='#FFFFFF' stroke='#1B0B33' stroke-width='2.5'/><circle cx='74' cy='40' r='8' fill='#FFFFFF' stroke='#1B0B33' stroke-width='2.5'/><circle cx='47' cy='41' r='3' fill='#1B0B33'/><circle cx='73' cy='41' r='3' fill='#1B0B33'/><g transform='translate(0 12) rotate(-8 60 50)'><rect x='30' y='42' width='26' height='13' rx='5' fill='#14052E'/><rect x='64' y='42' width='26' height='13' rx='5' fill='#14052E'/><rect x='54' y='45' width='12' height='3.5' fill='#14052E'/></g><path d='M46 72 Q51 66 56 72 T66 72 T76 72' stroke='#1B0B33' stroke-width='3' fill='none' stroke-linecap='round'/><path d='M96 24 Q102 34 96 38 Q90 34 96 24Z' fill='#7FD8FF' stroke='#1B0B33' stroke-width='1.5'/><path d='M34 78 Q60 100 86 78' stroke='url(#g)' stroke-width='5' fill='none' stroke-linecap='round' stroke-dasharray='5 2.5'/><path d='M60 86 L63 93 L70 93 L64.5 97.5 L66.5 104.5 L60 100.5 L53.5 104.5 L55.5 97.5 L50 93 L57 93Z' fill='url(#g)' stroke='#7A4B00' stroke-width='1.2'/></svg>"
+        ],
+        "color": "#B6FF3B"
+      },
+      "spark": {
+        "svg": "<svg viewBox='0 0 40 40'><defs><radialGradient id='s' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.35' stop-color='#FFF3A0'/><stop offset='1' stop-color='#FFD23F' stop-opacity='0'/></radialGradient></defs><circle cx='20' cy='20' r='20' fill='url(#s)'/><path d='M20 3 Q23.1 16.9 37 20 Q23.1 23.1 20 37 Q16.9 23.1 3 20 Q16.9 16.9 20 3Z' fill='#FFFFFF' opacity='1'/><path d='M20 11 Q21.6 18.4 29 20 Q21.6 21.6 20 29 Q18.4 21.6 11 20 Q18.4 18.4 20 11Z' fill='#FFD23F' opacity='1'/></svg>",
+        "color": "#FFD23F"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 28 16'><rect x='1' y='3' width='11' height='9' rx='3.5' fill='#14052E' stroke='#B6FF3B' stroke-width='1.6'/><rect x='16' y='3' width='11' height='9' rx='3.5' fill='#14052E' stroke='#B6FF3B' stroke-width='1.6'/><rect x='11' y='5' width='6' height='2' fill='#B6FF3B'/><path d='M3.5 6 L7 6 M18.5 6 L22 6' stroke='#FFFFFF' stroke-width='1.6' stroke-linecap='round'/></svg>",
+        "color": "#B6FF3B"
+      }
+    }
+  },
+  "sound": {
+    "set": "arcade",
+    "volume": 0.8,
+    "music": {
+      "bpm": 150,
+      "wave": "square",
+      "volume": 0.18,
+      "melody": [
+        "A4",
+        null,
+        "C5",
+        "A4",
+        "E5",
+        null,
+        "D5",
+        "C5",
+        "A4",
+        null,
+        "C5",
+        "E5",
+        "G5",
+        "E5",
+        "D5",
+        null
+      ],
+      "bass": [
+        "A2",
+        "A2",
+        "F2",
+        "F2",
+        "C3",
+        "C3",
+        "G2",
+        "E2"
+      ]
+    },
+    "moments": {
+      "hit": "wah",
+      "level": "levelup",
+      "win": "hooray",
+      "lose": "powerdown"
+    }
+  },
+  "feel": {
+    "particles": true,
+    "shake": true,
+    "haptics": true
+  },
+  "content": {
+    "ranks": [
+      "Certified NPC",
+      "Background Extra",
+      "Side Quest Enjoyer",
+      "Lowkey Legendary",
+      "Aura Merchant",
+      "Main Character",
+      "Final Boss Energy",
+      "Aura Deity"
+    ],
+    "miss_lines": [
+      "TOO EARLY -500",
+      "FUMBLED -500",
+      "CRINGE -500",
+      "AURA DEBT -500"
+    ],
+    "ghost_lines": [
+      "GHOSTED IT -1000",
+      "ASLEEP? -1000",
+      "NPC MOMENT -1000"
+    ],
+    "end_lines": [
+      "Your aura is on airplane mode.",
+      "The background extras salute you.",
+      "Side quests completed: some.",
+      "People are starting to whisper.",
+      "You now sell aura wholesale.",
+      "The camera follows you now.",
+      "Bosses fear your health bar.",
+      "Scientists cannot measure you."
+    ]
+  },
+  "playtest": {
+    "progress": "aura + lives * 2500"
+  }
+}

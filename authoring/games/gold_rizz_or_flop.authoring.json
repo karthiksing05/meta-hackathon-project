@@ -1,0 +1,995 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Rizz or Flop",
+    "instructions": "Your crush says something. Tap the least cringe of four replies before the bar runs out. Fast answers and streaks score more, and later rounds pay double and triple. The Rizz Tribunal judges every line. Two flops and the date is over; survive 12 rounds to win.",
+    "duration_s": 75
+  },
+  "uses": [
+    {
+      "fragment": "quiz",
+      "params": {
+        "choices": 4,
+        "time_ms": "5s",
+        "goal": 0
+      },
+      "art": {
+        "button": "bubble"
+      }
+    },
+    {
+      "fragment": "rounds",
+      "params": {
+        "count": 12,
+        "label": "Round"
+      },
+      "bind": {
+        "round_done": "question_done"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 2
+      },
+      "bind": {
+        "hit": "answered_wrong"
+      },
+      "art": {
+        "life": "heart"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 100,
+        "label": "Rizz"
+      },
+      "bind": {
+        "point": "answered_right"
+      }
+    }
+  ],
+  "state": {
+    "asked_at": {
+      "type": "int",
+      "init": "0"
+    },
+    "streak": {
+      "type": "int",
+      "init": "0"
+    },
+    "react": {
+      "type": "int",
+      "init": "0"
+    },
+    "cards": {
+      "type": "list<int>",
+      "init": "[0, 0, 0]"
+    },
+    "line": {
+      "type": "string",
+      "init": "'The Rizz Tribunal is watching.'"
+    },
+    "gain": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "quiz_questions": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_questions"
+    },
+    "quiz_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_choices"
+    },
+    "quiz_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_answers"
+    },
+    "heat": {
+      "params": {},
+      "returns": "int",
+      "body": "1 + round / 4"
+    },
+    "title_for": {
+      "params": {
+        "s": "int"
+      },
+      "returns": "string",
+      "body": "get_or(content_titles, min(4, s / 3500), 'Unspoken Rizz Deity')"
+    }
+  },
+  "rules": [
+    {
+      "id": "clock",
+      "on": "question_done",
+      "do": [
+        {
+          "set": "asked_at",
+          "to": "now"
+        },
+        {
+          "set": "react",
+          "to": "0"
+        }
+      ]
+    },
+    {
+      "id": "smooth",
+      "on": "answered_right",
+      "do": [
+        {
+          "let": {
+            "fast": "max(0, 3500 - (now - asked_at)) / 10"
+          }
+        },
+        {
+          "set": "gain",
+          "to": "(fast + 50 * streak) * heat()"
+        },
+        {
+          "incr": "score",
+          "by": "gain"
+        },
+        {
+          "incr": "streak"
+        },
+        {
+          "set": "react",
+          "to": "1"
+        },
+        {
+          "set": "cards",
+          "to": "[min(10, 7 + fast / 100), min(10, 6 + streak), if fast > 200 then 11 else 9]"
+        },
+        {
+          "set": "line",
+          "to": "pick(content_hype)"
+        }
+      ]
+    },
+    {
+      "id": "flop",
+      "on": "answered_wrong",
+      "do": [
+        {
+          "set": "gain",
+          "to": "0"
+        },
+        {
+          "set": "streak",
+          "to": "0"
+        },
+        {
+          "set": "react",
+          "to": "2"
+        },
+        {
+          "set": "cards",
+          "to": "[random_int(0, 3), random_int(1, 4), random_int(-3, -1)]"
+        },
+        {
+          "set": "line",
+          "to": "if picked < 0 then pick(content_ghosted) else pick(content_cringe)"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "75s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 92,
+          "anchor": "center",
+          "size": 13,
+          "weight": 800,
+          "color": "= if heat() >= 3 then $accent else '#FFFFFF'",
+          "stroke": "$ink",
+          "stroke_width": 4,
+          "text": "= if heat() == 1 then 'LOW STAKES ROUND' else if heat() == 2 then 'HEAT x2: THEY ARE INTERESTED' else 'HEAT x3: FINAL BOSS DATE'",
+          "animate_on": {
+            "question_done": {
+              "when": "round % 4 == 0",
+              "prop": "scale",
+              "keys": [
+                1,
+                1.6,
+                1
+              ],
+              "ms": 360
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 290,
+          "y": "= 256.0 - min(600, now - asked_at + 700) / 40.0",
+          "anchor": "center",
+          "size": 20,
+          "weight": 800,
+          "color": "$accent",
+          "stroke": "$ink",
+          "stroke_width": 5,
+          "rotation": 8,
+          "visible": "= react == 1",
+          "text": "= '+' + str(100 + gain)",
+          "animate_on": {
+            "answered_right": {
+              "prop": "scale",
+              "keys": [
+                0.3,
+                1.4,
+                1
+              ],
+              "ms": 240
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": 22,
+          "y": 566,
+          "animate_on": {
+            "answered_right": {
+              "prop": "y",
+              "keys": [
+                566,
+                550,
+                566,
+                558,
+                566
+              ],
+              "ms": 420,
+              "ease": "out"
+            },
+            "answered_wrong": {
+              "prop": "rotation",
+              "keys": [
+                0,
+                -10,
+                8,
+                -5,
+                0
+              ],
+              "ms": 380
+            }
+          },
+          "children": [
+            {
+              "node": "image",
+              "asset": "frog",
+              "x": 0,
+              "y": 0,
+              "w": 66,
+              "h": 66,
+              "frame": "= react"
+            },
+            {
+              "node": "group",
+              "x": 58,
+              "y": 30,
+              "visible": "= react != 0",
+              "animate_on": {
+                "answered_right": {
+                  "prop": "scale",
+                  "keys": [
+                    0.2,
+                    1.3,
+                    1
+                  ],
+                  "ms": 260
+                },
+                "answered_wrong": {
+                  "prop": "scale",
+                  "keys": [
+                    0.2,
+                    1.3,
+                    1
+                  ],
+                  "ms": 260
+                }
+              },
+              "children": [
+                {
+                  "node": "rect",
+                  "x": 0,
+                  "y": 0,
+                  "w": 34,
+                  "h": 28,
+                  "radius": 5,
+                  "fill": "#FFFFFF",
+                  "stroke": "#2B0A3D",
+                  "stroke_width": 2.5
+                },
+                {
+                  "node": "text",
+                  "x": 17,
+                  "y": 14,
+                  "anchor": "center",
+                  "size": 16,
+                  "weight": 800,
+                  "color": "= if react == 1 then $primary else $danger",
+                  "text": "= str(get_or(cards, 0, 0))"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": 140,
+          "y": 566,
+          "animate_on": {
+            "answered_right": {
+              "prop": "y",
+              "keys": [
+                566,
+                550,
+                566,
+                558,
+                566
+              ],
+              "ms": 420,
+              "ease": "out"
+            },
+            "answered_wrong": {
+              "prop": "rotation",
+              "keys": [
+                0,
+                -10,
+                8,
+                -5,
+                0
+              ],
+              "ms": 380
+            }
+          },
+          "children": [
+            {
+              "node": "image",
+              "asset": "cat",
+              "x": 0,
+              "y": 0,
+              "w": 66,
+              "h": 66,
+              "frame": "= react"
+            },
+            {
+              "node": "group",
+              "x": 58,
+              "y": 30,
+              "visible": "= react != 0",
+              "animate_on": {
+                "answered_right": {
+                  "prop": "scale",
+                  "keys": [
+                    0.2,
+                    1.3,
+                    1
+                  ],
+                  "ms": 260
+                },
+                "answered_wrong": {
+                  "prop": "scale",
+                  "keys": [
+                    0.2,
+                    1.3,
+                    1
+                  ],
+                  "ms": 260
+                }
+              },
+              "children": [
+                {
+                  "node": "rect",
+                  "x": 0,
+                  "y": 0,
+                  "w": 34,
+                  "h": 28,
+                  "radius": 5,
+                  "fill": "#FFFFFF",
+                  "stroke": "#2B0A3D",
+                  "stroke_width": 2.5
+                },
+                {
+                  "node": "text",
+                  "x": 17,
+                  "y": 14,
+                  "anchor": "center",
+                  "size": 16,
+                  "weight": 800,
+                  "color": "= if react == 1 then $primary else $danger",
+                  "text": "= str(get_or(cards, 1, 0))"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": 258,
+          "y": 566,
+          "animate_on": {
+            "answered_right": {
+              "prop": "y",
+              "keys": [
+                566,
+                550,
+                566,
+                558,
+                566
+              ],
+              "ms": 420,
+              "ease": "out"
+            },
+            "answered_wrong": {
+              "prop": "rotation",
+              "keys": [
+                0,
+                -10,
+                8,
+                -5,
+                0
+              ],
+              "ms": 380
+            }
+          },
+          "children": [
+            {
+              "node": "image",
+              "asset": "nana",
+              "x": 0,
+              "y": 0,
+              "w": 66,
+              "h": 66,
+              "frame": "= react"
+            },
+            {
+              "node": "group",
+              "x": 58,
+              "y": 30,
+              "visible": "= react != 0",
+              "animate_on": {
+                "answered_right": {
+                  "prop": "scale",
+                  "keys": [
+                    0.2,
+                    1.3,
+                    1
+                  ],
+                  "ms": 260
+                },
+                "answered_wrong": {
+                  "prop": "scale",
+                  "keys": [
+                    0.2,
+                    1.3,
+                    1
+                  ],
+                  "ms": 260
+                }
+              },
+              "children": [
+                {
+                  "node": "rect",
+                  "x": 0,
+                  "y": 0,
+                  "w": 34,
+                  "h": 28,
+                  "radius": 5,
+                  "fill": "#FFFFFF",
+                  "stroke": "#2B0A3D",
+                  "stroke_width": 2.5
+                },
+                {
+                  "node": "text",
+                  "x": 17,
+                  "y": 14,
+                  "anchor": "center",
+                  "size": 16,
+                  "weight": 800,
+                  "color": "= if react == 1 then $primary else $danger",
+                  "text": "= str(get_or(cards, 2, 0))"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 558,
+          "w": 340,
+          "align": "center",
+          "anchor": "center",
+          "size": 14,
+          "weight": 800,
+          "color": "#FFFFFF",
+          "stroke": "$ink",
+          "stroke_width": 4,
+          "text": "= line",
+          "animate_on": {
+            "answered_right": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.15,
+                1
+              ],
+              "ms": 240
+            },
+            "answered_wrong": {
+              "prop": "scale",
+              "keys": [
+                1.4,
+                0.95,
+                1
+              ],
+              "ms": 240
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 90,
+          "y": 252,
+          "anchor": "center",
+          "size": 14,
+          "weight": 800,
+          "color": "$accent",
+          "stroke": "$ink",
+          "stroke_width": 4,
+          "rotation": -4,
+          "visible": "= streak >= 2",
+          "text": "= 'RIZZ STREAK x' + str(streak)"
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "group",
+          "visible": "= status != 'playing'",
+          "animate_on": {
+            "win": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.08,
+                1
+              ],
+              "ms": 420,
+              "ease": "out"
+            },
+            "lose": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.08,
+                1
+              ],
+              "ms": 420,
+              "ease": "out"
+            }
+          },
+          "children": [
+            {
+              "node": "rect",
+              "x": 28,
+              "y": 120,
+              "w": 304,
+              "h": 330,
+              "radius": 26,
+              "fill": "#FFF4E0",
+              "stroke": "$primary",
+              "stroke_width": 5
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 162,
+              "anchor": "center",
+              "size": 25,
+              "weight": 800,
+              "color": "$primary",
+              "text": "= if status == 'won' then 'IT IS GIVING RIZZ' else 'THE DATE IS OVER'"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 194,
+              "anchor": "center",
+              "size": 14,
+              "weight": 700,
+              "color": "$ink",
+              "opacity": 0.75,
+              "text": "THE TRIBUNAL'S FINAL SCORE"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 240,
+              "anchor": "center",
+              "size": 50,
+              "weight": 800,
+              "color": "$secondary",
+              "text": "= str(score)"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 288,
+              "anchor": "center",
+              "size": 20,
+              "weight": 800,
+              "color": "$ink",
+              "text": "= title_for(score)"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 318,
+              "anchor": "center",
+              "size": 15,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= str(right_count) + ' smooth  |  ' + str(wrong_count) + ' cringe  |  round ' + str(min(round + 1, 12))"
+            },
+            {
+              "node": "image",
+              "asset": "frog",
+              "x": 62,
+              "y": 340,
+              "w": 70,
+              "h": 70,
+              "frame": "= if status == 'won' then 1 else 2"
+            },
+            {
+              "node": "image",
+              "asset": "cat",
+              "x": 145,
+              "y": 340,
+              "w": 70,
+              "h": 70,
+              "frame": "= if status == 'won' then 1 else 2"
+            },
+            {
+              "node": "image",
+              "asset": "nana",
+              "x": 228,
+              "y": 340,
+              "w": 70,
+              "h": 70,
+              "frame": "= if status == 'won' then 1 else 2"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "answered_right",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "= 523.0 * pow(1.0595, min(streak, 10) * 1.0)",
+              "slide": "= 1046.0 * pow(1.0595, min(streak, 10) * 1.0)",
+              "ms": 120,
+              "volume": 0.5
+            }
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 560,
+              "count": 30,
+              "color": "$accent",
+              "speed": 300,
+              "size": 6,
+              "ms": 600,
+              "gravity": 300,
+              "spread": 120
+            }
+          }
+        ]
+      },
+      {
+        "on": "answered_right",
+        "when": "streak > 0 and streak % 3 == 0",
+        "do": [
+          {
+            "moment": "combo"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 160,
+              "count": 40,
+              "color": "$primary",
+              "speed": 320,
+              "size": 7,
+              "ms": 800,
+              "gravity": 400
+            }
+          }
+        ]
+      },
+      {
+        "on": "answered_wrong",
+        "do": [
+          {
+            "shake": {
+              "px": 10,
+              "ms": 300
+            }
+          },
+          {
+            "haptic": "error"
+          }
+        ]
+      },
+      {
+        "on": "round_started",
+        "when": "event.index > 0 and event.index % 4 == 0",
+        "do": [
+          {
+            "moment": "level"
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Late-night dating game show: hot pink stage, magenta curtains, a marquee of bulbs, a chat-bubble prompt and a judges' desk with a monocled frog, a DJ cat and a robot nana.",
+    "palette": {
+      "bg": "#E255B0",
+      "surface": "#FFFFFF",
+      "primary": "#FF2E7E",
+      "secondary": "#7B2FF7",
+      "accent": "#FFC233",
+      "ink": "#2B0A3D",
+      "danger": "#E0303A"
+    },
+    "font": "Chalkboard SE",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='stage' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FF7EB6'/><stop offset='0.6' stop-color='#C64BDB'/><stop offset='1' stop-color='#6B2FB8'/></linearGradient><linearGradient id='curt' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#A3125A'/><stop offset='1' stop-color='#E0307E'/></linearGradient><linearGradient id='beam' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FFF6C9' stop-opacity='0.5'/><stop offset='1' stop-color='#FFF6C9' stop-opacity='0'/></linearGradient><linearGradient id='desk' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3B1060'/><stop offset='1' stop-color='#1E0638'/></linearGradient></defs><rect width='360' height='640' fill='url(#stage)'/><path d='M60 76 L20 640 L150 640Z' fill='url(#beam)' opacity='0.5'/><path d='M300 76 L210 640 L340 640Z' fill='url(#beam)' opacity='0.5'/><g transform='translate(0 0) scale(1 1)'><path d='M0 0 L44 0 Q30 200 40 330 Q20 340 26 640 L0 640Z' fill='url(#curt)'/><path d='M9 0 Q13 320 7 640' stroke='#7A1046' stroke-width='2' fill='none' opacity='0.5'/><path d='M18 0 Q22 320 16 640' stroke='#7A1046' stroke-width='2' fill='none' opacity='0.5'/><path d='M27 0 Q31 320 25 640' stroke='#7A1046' stroke-width='2' fill='none' opacity='0.5'/><path d='M36 0 Q40 320 34 640' stroke='#7A1046' stroke-width='2' fill='none' opacity='0.5'/><path d='M40 330 Q22 336 10 326' stroke='#FFC233' stroke-width='4' fill='none' stroke-linecap='round'/></g><g transform='translate(360 0) scale(-1 1)'><path d='M0 0 L44 0 Q30 200 40 330 Q20 340 26 640 L0 640Z' fill='url(#curt)'/><path d='M9 0 Q13 320 7 640' stroke='#7A1046' stroke-width='2' fill='none' opacity='0.5'/><path d='M18 0 Q22 320 16 640' stroke='#7A1046' stroke-width='2' fill='none' opacity='0.5'/><path d='M27 0 Q31 320 25 640' stroke='#7A1046' stroke-width='2' fill='none' opacity='0.5'/><path d='M36 0 Q40 320 34 640' stroke='#7A1046' stroke-width='2' fill='none' opacity='0.5'/><path d='M40 330 Q22 336 10 326' stroke='#FFC233' stroke-width='4' fill='none' stroke-linecap='round'/></g><rect x='10' y='22' width='340' height='54' rx='14' fill='#FFF4E0' stroke='#B8336A' stroke-width='4'/><circle cx='22.0' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='37.0' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='52.1' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='67.1' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='82.2' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='97.2' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='112.3' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='127.3' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='142.4' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='157.4' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='172.5' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='187.5' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='202.6' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='217.6' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='232.7' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='247.7' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='262.8' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='277.8' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='292.9' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='307.9' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='323.0' cy='28' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='338.0' cy='28' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='22.0' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='37.0' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='52.1' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='67.1' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='82.2' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='97.2' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='112.3' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='127.3' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='142.4' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='157.4' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='172.5' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='187.5' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='202.6' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='217.6' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='232.7' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='247.7' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='262.8' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='277.8' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='292.9' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='307.9' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><circle cx='323.0' cy='70' r='3.2' fill='#FFE38A' stroke='#B8336A' stroke-width='1'/><circle cx='338.0' cy='70' r='3.2' fill='#FFFFFF' stroke='#B8336A' stroke-width='1'/><rect x='26' y='100' width='308' height='124' rx='26' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='4'/><path d='M58 222 L46 246 L84 222Z' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='4' stroke-linejoin='round'/><rect x='56' y='214' width='34' height='8' fill='#FFFFFF'/><circle cx='300' cy='118' r='5' fill='#FF2E7E'/><circle cx='314' cy='118' r='5' fill='#FFC233'/><rect x='0' y='550' width='360' height='90' fill='url(#desk)'/><rect x='0' y='547' width='360' height='5' fill='#FFC233'/><path d='M30 600 l3 7 l7 1 l-5 4 l2 7 l-7 -4 l-6 4 l2 -7 l-5 -4 l7 -1Z' fill='#FFC233' opacity='0.8'/><path d='M330 600 l3 7 l7 1 l-5 4 l2 7 l-7 -4 l-6 4 l2 -7 l-5 -4 l7 -1Z' fill='#FFC233' opacity='0.8'/></svg>"
+    },
+    "sprites": {
+      "bubble": {
+        "svg": "<svg viewBox='0 0 300 60'><rect x='5' y='5' width='292' height='53' rx='20' fill='#2B0A3D'/><rect x='2' y='2' width='292' height='52' rx='20' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='3.5'/><rect x='12' y='8' width='120' height='6' rx='3' fill='#FFE1EE'/><circle cx='278' cy='28' r='4' fill='#FFC233'/></svg>",
+        "color": "#FF2E7E"
+      },
+      "heart": {
+        "svg": "<svg viewBox='0 0 24 22'><path d='M12 21 Q2 14 2 7.5 Q2 2 7 2 Q10.5 2 12 5.5 Q13.5 2 17 2 Q22 2 22 7.5 Q22 14 12 21Z' fill='#FF2E7E' stroke='#2B0A3D' stroke-width='2' stroke-linejoin='round'/><path d='M6 7 Q6 4.5 8.5 4.5' stroke='#FFFFFF' stroke-width='1.8' fill='none' stroke-linecap='round'/></svg>",
+        "color": "#FF2E7E"
+      },
+      "frog": {
+        "svg": [
+          "<svg viewBox='0 0 90 90'><circle cx='26' cy='24' r='14' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><circle cx='64' cy='24' r='14' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><ellipse cx='45' cy='54' rx='38' ry='30' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><ellipse cx='45' cy='66' rx='24' ry='12' fill='#C8F5A8'/><circle cx='26' cy='24' r='7' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='2'/><circle cx='64' cy='24' r='7' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='2'/><circle cx='26' cy='25' r='3.5' fill='#2B0A3D'/><circle cx='64' cy='25' r='3.5' fill='#2B0A3D'/><path d='M32 52 Q45 56 58 52' stroke='#2B0A3D' stroke-width='3' fill='none' stroke-linecap='round'/><circle cx='64' cy='24' r='9' fill='none' stroke='#FFC233' stroke-width='2.5'/><path d='M72 28 Q78 40 74 52' stroke='#FFC233' stroke-width='1.5' fill='none'/></svg>",
+          "<svg viewBox='0 0 90 90'><circle cx='26' cy='24' r='14' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><circle cx='64' cy='24' r='14' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><ellipse cx='45' cy='54' rx='38' ry='30' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><ellipse cx='45' cy='66' rx='24' ry='12' fill='#C8F5A8'/><circle cx='26' cy='24' r='7' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='2'/><circle cx='64' cy='24' r='7' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='2'/><path d='M21 26 Q26 19 31 26 M59 26 Q64 19 69 26' stroke='#2B0A3D' stroke-width='3' fill='none' stroke-linecap='round'/><path d='M26 48 Q45 72 64 48Z' fill='#2B0A3D'/><path d='M36 58 Q45 66 54 58' fill='#FF5C8A'/><circle cx='20' cy='50' r='5' fill='#FF8FB8' opacity='0.7'/><circle cx='70' cy='50' r='5' fill='#FF8FB8' opacity='0.7'/><circle cx='64' cy='24' r='9' fill='none' stroke='#FFC233' stroke-width='2.5'/><path d='M72 28 Q78 40 74 52' stroke='#FFC233' stroke-width='1.5' fill='none'/></svg>",
+          "<svg viewBox='0 0 90 90'><circle cx='26' cy='24' r='14' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><circle cx='64' cy='24' r='14' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><ellipse cx='45' cy='54' rx='38' ry='30' fill='#7FD957' stroke='#2B0A3D' stroke-width='3'/><ellipse cx='45' cy='66' rx='24' ry='12' fill='#C8F5A8'/><circle cx='26' cy='24' r='7' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='2'/><circle cx='64' cy='24' r='7' fill='#FFFFFF' stroke='#2B0A3D' stroke-width='2'/><path d='M20 22 L32 28 M58 28 L70 22' stroke='#2B0A3D' stroke-width='3' stroke-linecap='round'/><circle cx='26' cy='27' r='2.5' fill='#2B0A3D'/><circle cx='64' cy='27' r='2.5' fill='#2B0A3D'/><path d='M30 56 Q37 50 45 56 T60 56' stroke='#2B0A3D' stroke-width='3' fill='none' stroke-linecap='round'/><path d='M76 34 Q81 42 76 46 Q71 42 76 34Z' fill='#7FD8FF' stroke='#2B0A3D' stroke-width='1.2'/><circle cx='64' cy='24' r='9' fill='none' stroke='#FFC233' stroke-width='2.5'/><path d='M72 28 Q78 40 74 52' stroke='#FFC233' stroke-width='1.5' fill='none'/></svg>"
+        ],
+        "color": "#7FD957"
+      },
+      "cat": {
+        "svg": [
+          "<svg viewBox='0 0 90 90'><path d='M14 34 L16 6 L36 22Z' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3' stroke-linejoin='round'/><path d='M76 34 L74 6 L54 22Z' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3' stroke-linejoin='round'/><path d='M19 26 L20 14 L29 21Z' fill='#FFC9A8'/><path d='M71 26 L70 14 L61 21Z' fill='#FFC9A8'/><ellipse cx='45' cy='50' rx='34' ry='30' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3'/><path d='M30 26 L33 34 M45 22 L45 31 M60 26 L57 34' stroke='#E07B1F' stroke-width='3' stroke-linecap='round'/><path d='M10 50 Q10 8 45 8 Q80 8 80 50' stroke='#2B0A3D' stroke-width='5' fill='none'/><rect x='4' y='42' width='12' height='22' rx='5' fill='#7B2FF7' stroke='#2B0A3D' stroke-width='2.5'/><rect x='74' y='42' width='12' height='22' rx='5' fill='#7B2FF7' stroke='#2B0A3D' stroke-width='2.5'/><circle cx='36' cy='46' r='3.2' fill='#2B0A3D'/><circle cx='54' cy='46' r='3.2' fill='#2B0A3D'/><path d='M39 58 L51 58' stroke='#2B0A3D' stroke-width='3' stroke-linecap='round'/><path d='M42 53 L48 53 L45 56Z' fill='#FF5C8A'/><path d='M20 58 L32 57 M20 63 L32 61 M70 58 L58 57 M70 63 L58 61' stroke='#2B0A3D' stroke-width='1.5' stroke-linecap='round'/></svg>",
+          "<svg viewBox='0 0 90 90'><path d='M14 34 L16 6 L36 22Z' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3' stroke-linejoin='round'/><path d='M76 34 L74 6 L54 22Z' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3' stroke-linejoin='round'/><path d='M19 26 L20 14 L29 21Z' fill='#FFC9A8'/><path d='M71 26 L70 14 L61 21Z' fill='#FFC9A8'/><ellipse cx='45' cy='50' rx='34' ry='30' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3'/><path d='M30 26 L33 34 M45 22 L45 31 M60 26 L57 34' stroke='#E07B1F' stroke-width='3' stroke-linecap='round'/><path d='M10 50 Q10 8 45 8 Q80 8 80 50' stroke='#2B0A3D' stroke-width='5' fill='none'/><rect x='4' y='42' width='12' height='22' rx='5' fill='#7B2FF7' stroke='#2B0A3D' stroke-width='2.5'/><rect x='74' y='42' width='12' height='22' rx='5' fill='#7B2FF7' stroke='#2B0A3D' stroke-width='2.5'/><path d='M31 47 l2.5 -6 l2.5 6 l-2.5 -1.5Z M49 47 l2.5 -6 l2.5 6 l-2.5 -1.5Z' fill='#2B0A3D' stroke='#2B0A3D' stroke-width='2' stroke-linejoin='round'/><path d='M31 44 l5 0 M49 44 l5 0' stroke='#FFC233' stroke-width='0'/><path d='M35 55 Q45 68 55 55Z' fill='#2B0A3D'/><path d='M39 61 Q45 65 51 61' fill='#FF5C8A'/><path d='M42 53 L48 53 L45 56Z' fill='#FF5C8A'/><path d='M20 58 L32 57 M20 63 L32 61 M70 58 L58 57 M70 63 L58 61' stroke='#2B0A3D' stroke-width='1.5' stroke-linecap='round'/></svg>",
+          "<svg viewBox='0 0 90 90'><path d='M14 34 L16 6 L36 22Z' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3' stroke-linejoin='round'/><path d='M76 34 L74 6 L54 22Z' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3' stroke-linejoin='round'/><path d='M19 26 L20 14 L29 21Z' fill='#FFC9A8'/><path d='M71 26 L70 14 L61 21Z' fill='#FFC9A8'/><ellipse cx='45' cy='50' rx='34' ry='30' fill='#FF9F43' stroke='#2B0A3D' stroke-width='3'/><path d='M30 26 L33 34 M45 22 L45 31 M60 26 L57 34' stroke='#E07B1F' stroke-width='3' stroke-linecap='round'/><path d='M10 50 Q10 8 45 8 Q80 8 80 50' stroke='#2B0A3D' stroke-width='5' fill='none'/><rect x='4' y='42' width='12' height='22' rx='5' fill='#7B2FF7' stroke='#2B0A3D' stroke-width='2.5'/><rect x='74' y='42' width='12' height='22' rx='5' fill='#7B2FF7' stroke='#2B0A3D' stroke-width='2.5'/><path d='M32 43 L39 47 L32 51' stroke='#2B0A3D' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M58 43 L51 47 L58 51' stroke='#2B0A3D' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M36 61 Q40.5 56 45 61 T54 61' stroke='#2B0A3D' stroke-width='3' fill='none' stroke-linecap='round'/><path d='M42 53 L48 53 L45 56Z' fill='#FF5C8A'/><path d='M20 58 L32 57 M20 63 L32 61 M70 58 L58 57 M70 63 L58 61' stroke='#2B0A3D' stroke-width='1.5' stroke-linecap='round'/></svg>"
+        ],
+        "color": "#FF9F43"
+      },
+      "nana": {
+        "svg": [
+          "<svg viewBox='0 0 90 90'><circle cx='45' cy='12' r='10' fill='#D9D9E8' stroke='#2B0A3D' stroke-width='3'/><path d='M38 8 L52 16' stroke='#FF2E7E' stroke-width='2.5' stroke-linecap='round'/><rect x='12' y='20' width='66' height='58' rx='16' fill='#B9C2D9' stroke='#2B0A3D' stroke-width='3'/><rect x='20' y='30' width='50' height='38' rx='10' fill='#E8F4FF' stroke='#2B0A3D' stroke-width='2.5'/><path d='M22 38 Q30 32 40 38 L38 46 Q30 48 24 45Z M68 38 Q60 32 50 38 L52 46 Q60 48 66 45Z' fill='none' stroke='#FF2E7E' stroke-width='2.2'/><circle cx='36' cy='43' r='3.2' fill='#2B0A3D'/><circle cx='54' cy='43' r='3.2' fill='#2B0A3D'/><path d='M39 55 L51 55' stroke='#2B0A3D' stroke-width='3' stroke-linecap='round'/><circle cx='24' cy='76.4' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='31' cy='77.6' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='38' cy='78.8' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='45' cy='80.0' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='52' cy='78.8' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='59' cy='77.6' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='66' cy='76.4' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><rect x='5' y='42' width='8' height='16' rx='3' fill='#FFC233' stroke='#2B0A3D' stroke-width='2'/><rect x='77' y='42' width='8' height='16' rx='3' fill='#FFC233' stroke='#2B0A3D' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 90 90'><circle cx='45' cy='12' r='10' fill='#D9D9E8' stroke='#2B0A3D' stroke-width='3'/><path d='M38 8 L52 16' stroke='#FF2E7E' stroke-width='2.5' stroke-linecap='round'/><rect x='12' y='20' width='66' height='58' rx='16' fill='#B9C2D9' stroke='#2B0A3D' stroke-width='3'/><rect x='20' y='30' width='50' height='38' rx='10' fill='#E8F4FF' stroke='#2B0A3D' stroke-width='2.5'/><path d='M22 38 Q30 32 40 38 L38 46 Q30 48 24 45Z M68 38 Q60 32 50 38 L52 46 Q60 48 66 45Z' fill='none' stroke='#FF2E7E' stroke-width='2.2'/><path d='M31 44 l2.5 -6 l2.5 6 l-2.5 -1.5Z M49 44 l2.5 -6 l2.5 6 l-2.5 -1.5Z' fill='#2B0A3D' stroke='#2B0A3D' stroke-width='2' stroke-linejoin='round'/><path d='M31 41 l5 0 M49 41 l5 0' stroke='#FFC233' stroke-width='0'/><path d='M35 52 Q45 65 55 52Z' fill='#2B0A3D'/><path d='M39 58 Q45 62 51 58' fill='#FF5C8A'/><circle cx='24' cy='76.4' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='31' cy='77.6' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='38' cy='78.8' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='45' cy='80.0' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='52' cy='78.8' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='59' cy='77.6' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='66' cy='76.4' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><rect x='5' y='42' width='8' height='16' rx='3' fill='#FFC233' stroke='#2B0A3D' stroke-width='2'/><rect x='77' y='42' width='8' height='16' rx='3' fill='#FFC233' stroke='#2B0A3D' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 90 90'><circle cx='45' cy='12' r='10' fill='#D9D9E8' stroke='#2B0A3D' stroke-width='3'/><path d='M38 8 L52 16' stroke='#FF2E7E' stroke-width='2.5' stroke-linecap='round'/><rect x='12' y='20' width='66' height='58' rx='16' fill='#B9C2D9' stroke='#2B0A3D' stroke-width='3'/><rect x='20' y='30' width='50' height='38' rx='10' fill='#E8F4FF' stroke='#2B0A3D' stroke-width='2.5'/><path d='M22 38 Q30 32 40 38 L38 46 Q30 48 24 45Z M68 38 Q60 32 50 38 L52 46 Q60 48 66 45Z' fill='none' stroke='#FF2E7E' stroke-width='2.2'/><path d='M32 40 L39 44 L32 48' stroke='#2B0A3D' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M58 40 L51 44 L58 48' stroke='#2B0A3D' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M36 58 Q40.5 53 45 58 T54 58' stroke='#2B0A3D' stroke-width='3' fill='none' stroke-linecap='round'/><circle cx='24' cy='76.4' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='31' cy='77.6' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='38' cy='78.8' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='45' cy='80.0' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='52' cy='78.8' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='59' cy='77.6' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><circle cx='66' cy='76.4' r='3.2' fill='#FFFFFF' stroke='#B8B8C8' stroke-width='1'/><rect x='5' y='42' width='8' height='16' rx='3' fill='#FFC233' stroke='#2B0A3D' stroke-width='2'/><rect x='77' y='42' width='8' height='16' rx='3' fill='#FFC233' stroke='#2B0A3D' stroke-width='2'/></svg>"
+        ],
+        "color": "#B9C2D9"
+      }
+    }
+  },
+  "sound": {
+    "set": "arcade",
+    "volume": 0.8,
+    "music": {
+      "bpm": 112,
+      "wave": "triangle",
+      "volume": 0.24,
+      "melody": [
+        "E5",
+        null,
+        "G5",
+        "B5",
+        "A5",
+        null,
+        "G5",
+        "E5",
+        "D5",
+        null,
+        "E5",
+        "G5",
+        "E5",
+        null,
+        null,
+        null
+      ],
+      "bass": [
+        "C3",
+        "C3",
+        "A2",
+        "A2",
+        "F2",
+        "F2",
+        "G2",
+        "G2"
+      ]
+    },
+    "moments": {
+      "tap": "bubble",
+      "hit": "wah",
+      "combo": "hooray",
+      "level": "levelup",
+      "win": "tada",
+      "lose": "sigh"
+    }
+  },
+  "content": {
+    "questions": [
+      "They text: “wyd”",
+      "Crush: “nice jacket”",
+      "Last fry. Both reach.",
+      "Your joke lands.",
+      "You blinked in the pic",
+      "They: “fave song?”",
+      "First date: you're late",
+      "They have a cute dog",
+      "They ask your sign",
+      "You trip. They saw.",
+      "They: “you're funny”",
+      "They text first!!!",
+      "Slow song comes on",
+      "They like your laugh"
+    ],
+    "choices": [
+      "eating cereal at 2pm. u?",
+      "staring at ur profile pic",
+      "writing our wedding vows",
+      "*sends 40 selfies*",
+      "thanks! it has pockets",
+      "I know. I'm him.",
+      "it's my dad's. he's cold",
+      "wanna wear it? forever?",
+      "you take it. I insist.",
+      "*eats it. eye contact.*",
+      "I'll fight you for it",
+      "*cries a little*",
+      "see? I'm funny sometimes",
+      "that's my whole set",
+      "laugh again. louder.",
+      "thank you, I'm a genius",
+      "retake? I blinked lol",
+      "I meant to. it's art.",
+      "delete it. delete me.",
+      "my eyes were saving energy",
+      "the one you sent me",
+      "my own voice note",
+      "I only listen to rain",
+      "*hums for four minutes*",
+      "sorry! I got you a cookie",
+      "I was building suspense",
+      "time is a construct",
+      "I run on main character time",
+      "can I say hi to them?",
+      "I'm cuter. ask anyone.",
+      "is he single?",
+      "*barks back*",
+      "Leo, sadly. you?",
+      "the one that says DANGER",
+      "I'm every sign at once",
+      "*shows an actual stop sign*",
+      "10/10 landing, right?",
+      "*stays on floor forever*",
+      "the floor was flirting",
+      "gravity is jealous of us",
+      "you're funnier tbh",
+      "I've been told. by me.",
+      "I have a podcast",
+      "I know. I'm a whole bit.",
+      "hiii! perfect timing",
+      "*waits 3 days to reply*",
+      "finally. ur late.",
+      "who is this? jk... unless",
+      "wanna dance? I'm bad at it",
+      "*does the worm instead*",
+      "I only dance in the rain",
+      "*moonwalks out the door*",
+      "yours is better, honestly",
+      "I practice it daily",
+      "HAHAHA thank you HAHA",
+      "I have six more laughs"
+    ],
+    "answers": [
+      "eating cereal at 2pm. u?",
+      "thanks! it has pockets",
+      "you take it. I insist.",
+      "see? I'm funny sometimes",
+      "retake? I blinked lol",
+      "the one you sent me",
+      "sorry! I got you a cookie",
+      "can I say hi to them?",
+      "Leo, sadly. you?",
+      "10/10 landing, right?",
+      "you're funnier tbh",
+      "hiii! perfect timing",
+      "wanna dance? I'm bad at it",
+      "yours is better, honestly"
+    ],
+    "hype": [
+      "The frog dropped his monocle.",
+      "Nana is kicking her feet.",
+      "DJ Whiskers just stopped the music. Respect.",
+      "Smooth. Like, butter smooth.",
+      "The tribunal is blushing.",
+      "Unspoken rizz detected."
+    ],
+    "cringe": [
+      "Secondhand embarrassment levels: critical.",
+      "Nana unplugged herself.",
+      "The frog is croaking in pain.",
+      "DJ Whiskers scratched the record.",
+      "Chat, is this real?",
+      "The tribunal needs a minute."
+    ],
+    "ghosted": [
+      "You left them on read. Bold.",
+      "Silence... the tribunal is concerned.",
+      "Buffering... still buffering..."
+    ],
+    "titles": [
+      "Certified Flop",
+      "Rizz Apprentice",
+      "Smooth-ish Operator",
+      "Rizz Royalty",
+      "Unspoken Rizz Deity"
+    ]
+  },
+  "playtest": {
+    "progress": "score + lives * 300 + round * 50"
+  }
+}

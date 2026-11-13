@@ -1,0 +1,632 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Static from the Driftwood Fleet",
+    "instructions": "Three scrambled messages from the rebel freighter, each in a new code where every letter stands for another. Tap a letter you think is in the message: right guesses unscramble everywhere (more copies, more points). Three wrong letters in one message and the signal dies. The navigator can tip you off twice. Crack all three before the Regency's jammer arrives.",
+    "duration_s": 120
+  },
+  "uses": [
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Score"
+      }
+    },
+    {
+      "fragment": "rounds",
+      "params": {
+        "count": 3,
+        "label": "Message"
+      },
+      "bind": {
+        "round_done": "transmission_done"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "bind": {
+        "hit": "static_burst"
+      }
+    },
+    {
+      "fragment": "keyboard",
+      "params": {
+        "letters": "abcdefghijklmnopqrstuvwxyz",
+        "cols": 7,
+        "rows": 4,
+        "key_size": 42,
+        "gap": 4,
+        "x": 21,
+        "y": 368
+      }
+    },
+    {
+      "fragment": "hint",
+      "params": {
+        "uses": 2,
+        "cooldown": "1500ms"
+      }
+    },
+    {
+      "fragment": "daily_seed",
+      "params": {
+        "day_label": "Nov 12"
+      }
+    }
+  ],
+  "state": {
+    "todays": {
+      "type": "list<string>",
+      "init": "take(shuffle(content_transmissions), 3)"
+    },
+    "msg": {
+      "type": "string",
+      "init": "''"
+    },
+    "cipher_key": {
+      "type": "list<string>",
+      "init": "shuffle(chars('abcdefghijklmnopqrstuvwxyz'))"
+    },
+    "guessed": {
+      "type": "set<string>",
+      "init": "set_of([])"
+    },
+    "busy_until": {
+      "type": "int",
+      "init": "0"
+    },
+    "status_line": {
+      "type": "string",
+      "init": "''"
+    },
+    "cracked": {
+      "type": "bool",
+      "init": "false"
+    }
+  },
+  "functions": {
+    "msg_lines": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "split(msg, '|')"
+    },
+    "line_at": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "string",
+      "body": "get_or(msg_lines(), k, '')"
+    },
+    "char_at": {
+      "params": {
+        "k": "int",
+        "j": "int"
+      },
+      "returns": "string",
+      "body": "substr(line_at(k), j, j + 1)"
+    },
+    "plain_letters": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "filter(chars(replace(msg, '|', '')), c => c != ' ')"
+    },
+    "hits": {
+      "params": {
+        "letter": "string"
+      },
+      "returns": "int",
+      "body": "count(plain_letters(), c => c == letter)"
+    },
+    "enc": {
+      "params": {
+        "c": "string"
+      },
+      "returns": "string",
+      "body": "if c == ' ' or c == '' then '' else upper(get_or(cipher_key, (index_of(cipher_key, c) + 1) % 26, '?'))"
+    },
+    "all_found": {
+      "params": {},
+      "returns": "bool",
+      "body": "all(plain_letters(), c => has(guessed, c))"
+    },
+    "key_state": {
+      "params": {
+        "letter": "string"
+      },
+      "returns": "int",
+      "body": "if not has(guessed, letter) then 0 else if hits(letter) > 0 then 1 else 2"
+    },
+    "found_count": {
+      "params": {},
+      "returns": "int",
+      "body": "count(plain_letters(), c => has(guessed, c))"
+    },
+    "cell_x": {
+      "params": {
+        "k": "int",
+        "j": "int"
+      },
+      "returns": "int",
+      "body": "180 - len(line_at(k)) * 12 + j * 24"
+    },
+    "busy": {
+      "params": {},
+      "returns": "bool",
+      "body": "now < busy_until"
+    },
+    "noise": {
+      "params": {
+        "k": "int",
+        "j": "int"
+      },
+      "returns": "string",
+      "body": "upper(substr('qxzjvkwfyb', floor(hash(j * 7 + k * 13 + floor(now / 70.0)) * 10.0), floor(hash(j * 7 + k * 13 + floor(now / 70.0)) * 10.0) + 1))"
+    }
+  },
+  "events": {
+    "decoded": {
+      "letter": "string",
+      "n": "int"
+    },
+    "static_burst": {},
+    "transmission_cracked": {},
+    "transmission_done": {}
+  },
+  "rules": [
+    {
+      "id": "next_transmission",
+      "on": "round_started",
+      "do": [
+        {
+          "set": "msg",
+          "to": "get_or(todays, event.index, '')"
+        },
+        {
+          "set": "cipher_key",
+          "to": "shuffle(chars('abcdefghijklmnopqrstuvwxyz'))"
+        },
+        {
+          "set": "guessed",
+          "to": "set_of([])"
+        },
+        {
+          "set": "cracked",
+          "to": "false"
+        },
+        {
+          "set": "lives",
+          "to": "3"
+        },
+        {
+          "set": "status_line",
+          "to": "if event.index == 0 then 'Tap a letter you think is in the message.' else 'New key. Same crew. Go.'"
+        }
+      ]
+    },
+    {
+      "id": "guess",
+      "on": "press",
+      "when": "event.letter != '' and not cracked and not busy() and not has(guessed, event.letter)",
+      "do": [
+        {
+          "set": "guessed",
+          "to": "add(guessed, event.letter)"
+        },
+        {
+          "set": "busy_until",
+          "to": "now + 450"
+        },
+        {
+          "let": {
+            "n": "hits(event.letter)"
+          }
+        },
+        {
+          "if": "n > 0",
+          "then": [
+            {
+              "emit": "point"
+            },
+            {
+              "incr": "score",
+              "by": "10 * (n - 1)"
+            },
+            {
+              "set": "status_line",
+              "to": "upper(event.letter) + ' appears ' + str(n) + (if n == 1 then ' time' else ' times') + '  +' + str(10 * n)"
+            },
+            {
+              "emit": "decoded",
+              "with": {
+                "letter": "event.letter",
+                "n": "n"
+              }
+            }
+          ],
+          "else": [
+            {
+              "set": "status_line",
+              "to": "'No ' + upper(event.letter) + '. Static on the line.'"
+            },
+            {
+              "emit": "static_burst"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "navigator_tip",
+      "on": "hint_used",
+      "when": "not cracked",
+      "do": [
+        {
+          "let": {
+            "pool": "filter(plain_letters(), c => not has(guessed, c))"
+          }
+        },
+        {
+          "if": "len(pool) > 0",
+          "then": [
+            {
+              "let": {
+                "tip": "pick(pool)"
+              }
+            },
+            {
+              "set": "guessed",
+              "to": "add(guessed, tip)"
+            },
+            {
+              "set": "status_line",
+              "to": "'Navigator: try ' + upper(tip) + '. (No points for tips.)'"
+            },
+            {
+              "emit": "decoded",
+              "with": {
+                "letter": "tip",
+                "n": "0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crack",
+      "on": "decoded",
+      "when": "not cracked and all_found()",
+      "do": [
+        {
+          "incr": "score",
+          "by": "lives * 30"
+        },
+        {
+          "set": "cracked",
+          "to": "true"
+        },
+        {
+          "set": "status_line",
+          "to": "'Cracked! +' + str(lives * 30) + ' for signal left'"
+        },
+        {
+          "emit": "transmission_cracked"
+        },
+        {
+          "after": "1400ms",
+          "emit": "transmission_done",
+          "id": "read_it"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "120s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "image",
+              "asset": "console",
+              "x": 14,
+              "y": 86,
+              "w": 332,
+              "h": 262
+            },
+            {
+              "node": "text",
+              "x": 34,
+              "y": 98,
+              "w": 200,
+              "h": 14,
+              "align": "left",
+              "valign": "middle",
+              "size": 11,
+              "weight": 700,
+              "color": "$accent",
+              "text": "= (if daily then 'TODAY’S' else 'INCOMING') + ' · DRIFTWOOD FLEET'"
+            },
+            {
+              "node": "text",
+              "x": 196,
+              "y": 98,
+              "w": 130,
+              "h": 14,
+              "align": "right",
+              "valign": "middle",
+              "size": 11,
+              "weight": 700,
+              "font": "Menlo",
+              "color": "= if 120000 - now < 15000 then $danger else $secondary",
+              "text": "= 'JAMMER ' + str(max(0, (120000 - now) / 1000)) + 's'"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 330,
+              "anchor": "center",
+              "size": 14,
+              "weight": 600,
+              "color": "= if cracked then $primary else $ink",
+              "text": "= status_line"
+            },
+            {
+              "node": "repeat",
+              "source": "range(len(msg_lines()))",
+              "as": "k",
+              "key": "k",
+              "template": {
+                "node": "repeat",
+                "source": "range(len(line_at(k)))",
+                "as": "j",
+                "key": "j",
+                "template": {
+                  "node": "group",
+                  "visible": "= char_at(k, j) != ' '",
+                  "children": [
+                    {
+                      "node": "rect",
+                      "x": "= cell_x(k, j) + 2",
+                      "y": "= 128 + k * 60",
+                      "w": 20,
+                      "h": 30,
+                      "radius": 5,
+                      "fill": "= if has(guessed, char_at(k, j)) then '#5CF2C21F' else '#FFFFFF0D'"
+                    },
+                    {
+                      "node": "rect",
+                      "x": "= cell_x(k, j) + 4",
+                      "y": "= 158 + k * 60",
+                      "w": 16,
+                      "h": 2,
+                      "radius": 1,
+                      "fill": "= if has(guessed, char_at(k, j)) then $primary else $secondary"
+                    },
+                    {
+                      "node": "group",
+                      "children": [
+                        {
+                          "node": "text",
+                          "x": "= cell_x(k, j) + 12",
+                          "y": "= 143 + k * 60",
+                          "anchor": "center",
+                          "size": 22,
+                          "weight": 700,
+                          "color": "$primary",
+                          "text": "= if has(guessed, char_at(k, j)) then upper(char_at(k, j)) else ''"
+                        }
+                      ],
+                      "animate_on": {
+                        "decoded": {
+                          "when": "event.letter == char_at(k, j)",
+                          "prop": "scale",
+                          "keys": [
+                            1.8,
+                            0.9,
+                            1
+                          ],
+                          "ms": 300,
+                          "ease": "out"
+                        }
+                      }
+                    },
+                    {
+                      "node": "text",
+                      "x": "= cell_x(k, j) + 12",
+                      "y": "= 143 + k * 60",
+                      "anchor": "center",
+                      "size": 20,
+                      "weight": 700,
+                      "color": "$secondary",
+                      "opacity": 0.35,
+                      "font": "Menlo",
+                      "text": "= if busy() and not has(guessed, char_at(k, j)) then noise(k, j) else ''"
+                    },
+                    {
+                      "node": "text",
+                      "x": "= cell_x(k, j) + 12",
+                      "y": "= 172 + k * 60",
+                      "anchor": "center",
+                      "size": 13,
+                      "weight": 700,
+                      "font": "Menlo",
+                      "color": "= if has(guessed, char_at(k, j)) then '#8D9BE866' else $accent",
+                      "text": "= enc(char_at(k, j))"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "decoded",
+        "when": "event.n > 0",
+        "do": [
+          {
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 200,
+              "count": "= min(40, 8 * event.n)",
+              "color": "$primary",
+              "speed": 240,
+              "size": 4,
+              "ms": 520
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "decoded",
+        "when": "event.n >= 3",
+        "do": [
+          {
+            "moment": "combo"
+          }
+        ]
+      },
+      {
+        "on": "static_burst",
+        "do": [
+          {
+            "moment": "hit"
+          }
+        ]
+      },
+      {
+        "on": "transmission_cracked",
+        "do": [
+          {
+            "moment": "level"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 200,
+              "count": 60,
+              "color": "$accent",
+              "speed": 320,
+              "size": 5,
+              "ms": 1000,
+              "gravity": 300
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {}
+  },
+  "art": {
+    "style": "A rebel freighter's comms console in deep space: navy void, pink and teal nebulae, amber console brackets, mint decoded letters.",
+    "palette": {
+      "bg": "#0B1026",
+      "surface": "#1D2656",
+      "primary": "#5CF2C2",
+      "secondary": "#8D9BE8",
+      "accent": "#FFB347",
+      "ink": "#E9F0FF",
+      "danger": "#FF5C7A"
+    },
+    "font": "Avenir Next",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='sp' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#070A1C'/><stop offset='0.5' stop-color='#0B1026'/><stop offset='1' stop-color='#141238'/></linearGradient><radialGradient id='neb' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#E05AA8' stop-opacity='0.35'/><stop offset='1' stop-color='#E05AA8' stop-opacity='0'/></radialGradient><radialGradient id='neb2' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#3FC7D9' stop-opacity='0.28'/><stop offset='1' stop-color='#3FC7D9' stop-opacity='0'/></radialGradient><linearGradient id='pl' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FFB347'/><stop offset='1' stop-color='#9C3D2E'/></linearGradient></defs><rect width='360' height='640' fill='url(#sp)'/><ellipse cx='40' cy='140' rx='120' ry='80' fill='url(#neb)'/><ellipse cx='330' cy='560' rx='130' ry='90' fill='url(#neb2)'/><g fill='#E9F0FF'><circle cx='117' cy='97' r='1.1' opacity='0.34'/><circle cx='183' cy='24' r='0.9' opacity='0.34'/><circle cx='33' cy='272' r='1.2' opacity='0.37'/><circle cx='80' cy='402' r='1.0' opacity='0.54'/><circle cx='351' cy='30' r='1.3' opacity='0.47'/><circle cx='52' cy='75' r='0.8' opacity='0.79'/><circle cx='21' cy='132' r='1.1' opacity='0.56'/><circle cx='353' cy='76' r='0.9' opacity='0.75'/><circle cx='302' cy='605' r='0.9' opacity='0.70'/><circle cx='22' cy='449' r='1.1' opacity='0.90'/><circle cx='241' cy='14' r='0.9' opacity='0.40'/><circle cx='42' cy='38' r='1.2' opacity='0.38'/><circle cx='89' cy='250' r='0.6' opacity='0.57'/><circle cx='198' cy='565' r='1.2' opacity='0.82'/><circle cx='318' cy='613' r='0.6' opacity='0.41'/><circle cx='343' cy='442' r='1.0' opacity='0.67'/><circle cx='243' cy='35' r='1.3' opacity='0.77'/><circle cx='144' cy='66' r='1.1' opacity='0.34'/><circle cx='24' cy='134' r='0.6' opacity='0.50'/><circle cx='19' cy='0' r='0.6' opacity='0.36'/><circle cx='131' cy='16' r='1.3' opacity='0.67'/><circle cx='131' cy='79' r='1.3' opacity='0.90'/><circle cx='37' cy='219' r='0.7' opacity='0.80'/><circle cx='58' cy='15' r='1.4' opacity='0.62'/><circle cx='190' cy='626' r='1.3' opacity='0.72'/><circle cx='119' cy='143' r='1.4' opacity='0.81'/><circle cx='10' cy='18' r='0.8' opacity='0.46'/><circle cx='249' cy='612' r='0.9' opacity='0.86'/><circle cx='356' cy='611' r='0.8' opacity='0.43'/><circle cx='225' cy='576' r='1.3' opacity='0.59'/><circle cx='238' cy='582' r='1.2' opacity='0.75'/><circle cx='120' cy='513' r='0.9' opacity='0.54'/><circle cx='341' cy='464' r='0.7' opacity='0.38'/><circle cx='54' cy='579' r='1.2' opacity='0.39'/><circle cx='298' cy='627' r='1.1' opacity='0.51'/><circle cx='198' cy='84' r='0.5' opacity='0.88'/><circle cx='234' cy='337' r='0.9' opacity='0.82'/><circle cx='328' cy='226' r='0.9' opacity='0.65'/><circle cx='326' cy='269' r='1.3' opacity='0.60'/></g><circle cx='352' cy='640' r='70' fill='url(#pl)' opacity='0.9'/><ellipse cx='352' cy='640' rx='110' ry='18' fill='none' stroke='#FFD9A0' stroke-opacity='0.6' stroke-width='3' transform='rotate(-18 352 640)'/><g transform='translate(26 566) rotate(-8)'><path d='M0 10 L8 4 L34 4 L44 10 L34 16 L8 16Z' fill='#5B6795'/><rect x='12' y='6' width='14' height='8' rx='2' fill='#8D9BE8'/><rect x='15' y='8' width='3' height='3' fill='#FFB347'/><rect x='20' y='8' width='3' height='3' fill='#FFB347'/><path d='M0 8 L-10 6 L-12 10 L-10 14 L0 12Z' fill='#5CF2C2' opacity='0.8'/><path d='M30 4 L36 -2 L40 4Z' fill='#7280B8'/></g></svg>"
+    },
+    "sprites": {
+      "console": {
+        "svg": "<svg viewBox='0 0 332 262'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141B44'/><stop offset='1' stop-color='#0E1435'/></linearGradient><pattern id='scan' width='4' height='4' patternUnits='userSpaceOnUse'><rect width='4' height='1' fill='#5CF2C2' opacity='0.05'/></pattern></defs><rect x='1' y='1' width='330' height='260' rx='14' fill='url(#g)' stroke='#5CF2C2' stroke-opacity='0.35' stroke-width='1.5'/><rect x='1' y='1' width='330' height='260' rx='14' fill='url(#scan)'/><g stroke='#FFB347' stroke-width='3' fill='none' stroke-linecap='round'><path d='M10 26 V10 H26'/><path d='M306 10 H322 V26'/><path d='M10 236 V252 H26'/><path d='M306 252 H322 V236'/></g></svg>",
+        "color": "#5CF2C2"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 24 24'><rect x='2' y='15' width='4' height='7' rx='1' fill='#5CF2C2'/><rect x='8' y='11' width='4' height='11' rx='1' fill='#5CF2C2'/><rect x='14' y='7' width='4' height='15' rx='1' fill='#5CF2C2'/><rect x='20' y='3' width='3' height='19' rx='1' fill='#5CF2C2'/></svg>",
+        "color": "#5CF2C2"
+      }
+    }
+  },
+  "sound": {
+    "set": "chime",
+    "moments": {
+      "tap": "tick",
+      "pickup": "chirp",
+      "hit": "zap",
+      "combo": "arpeggio",
+      "countdown": "click",
+      "win": "glow",
+      "lose": "powerdown"
+    },
+    "music": {
+      "melody": [
+        "A4",
+        null,
+        null,
+        "E5",
+        null,
+        null,
+        "D5",
+        null,
+        "C5",
+        null,
+        null,
+        "G4",
+        null,
+        null,
+        "A4",
+        null
+      ],
+      "bass": [
+        "A2",
+        null,
+        "A2",
+        null,
+        "F2",
+        null,
+        "G2",
+        null
+      ],
+      "bpm": 80,
+      "wave": "sine",
+      "volume": 0.2
+    }
+  },
+  "content": {
+    "transmissions": [
+      "the toaster|is a traitor",
+      "the cat is|at the hatch|again",
+      "the senate|hates our|sea shanties",
+      "nine tins of|tea in the|east hatch",
+      "a heron sat|on the mast|at noon",
+      "the station|is not on|the map",
+      "the cheese|is in the|east hatch",
+      "send tea|the stars|are cold",
+      "the admiral|is a hologram|act normal",
+      "hide the map|inside the|space goat"
+    ]
+  },
+  "playtest": {
+    "progress": "score"
+  }
+}

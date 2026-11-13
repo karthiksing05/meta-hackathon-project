@@ -123,6 +123,7 @@ func fakeMicrogameMuse() -> ScriptedMicrogameMuse {
         for flag in report.flags { say("  \(flag.blocking ? "BLOCKING" : "note") \(flag.code): \(flag.message)") }
     }
     let stats = composer.lastStats
+    say("Examples in the prompt: \(stats.examples.isEmpty ? "the fixed set" : stats.examples.joined(separator: ", "))")
     say("Muse: \(stats.museCalls) calls (\(stats.models.joined(separator: ", "))) · first draft \(stats.firstDraftValid == true ? "valid" : "invalid") · " +
         "\(stats.repairRounds) repair rounds\(stats.playtestRepair ? " + 1 playtest repair" : "") · \(secondsText(stats.seconds))")
     if !composer.libraryIssues.isEmpty {
