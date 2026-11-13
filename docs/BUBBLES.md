@@ -332,6 +332,13 @@ emits `input.launch {dx, dy}`. Everything is drawn in the canvas (keyboards and 
 too), so replays and posters show it. Bots return the same pointer input (`[{a: "tap", v: [x, y]}]`),
 using layout helpers their kit exposes in `sdk.state`.
 
+The one exception is **typed text**, for kits that ask for a native text field with
+`sdk.textField({x, y, w, h, size, placeholder, max_len})` (playfield units; `null` for none; only
+microgames do, 7.11). Typed text goes through the same queue and is logged as
+`{t, a: "text", v: [kind, value]}`, with `kind` = `submit` or `change`. Concepts get it as
+`text.input {kind, value}`. A run logs text only when a concept listens for `text.input`, so Bubbles
+without a text field log exactly what they always did.
+
 **Defining a formula** (one per kit):
 
 ```js

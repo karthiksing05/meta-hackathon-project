@@ -10,14 +10,16 @@
  *   4. Engine (session, run, SDK)      8. Host (BubbleHost: prepare, activate, poster, evict, command)
  *
  * Loads without a DOM (JavaScriptCore, Node): only sections 6 to 8 touch document/window, and only
- * when BubbleHost is used. Game logic is deterministic: fixed 60 Hz ticks, seeded RNG, pointer-only
- * input log, so a seed plus the log reproduces a run exactly.
+ * when BubbleHost is used. Game logic is deterministic: fixed 60 Hz ticks, seeded RNG, and an input
+ * log of pointer actions (plus typed text for kits that ask for a text field), so a seed plus the
+ * log reproduces a run exactly.
  *
  * SDK additions beyond the doc table (all optional to use):
  *   sdk.palette, sdk.Z, sdk.range(a, b), sdk.chance(p), sdk.clamp, sdk.lerp, sdk.botSkill,
  *   sdk.botState, sdk.feel {ambient, particles, shake, sound, tempo}, sdk.hud.retry, sdk.hud.note,
  *   sdk.preload(url), sdk.log(msg), sdk.ended, sdk.off(type, fn), fx.sparkle(x, y, color, n),
- *   fx.ring(x, y, r, color).
+ *   fx.ring(x, y, r, color), sdk.textField(spec) (a native text field; typed text arrives as
+ *   "text.input" events, docs/BUBBLES.md 7.11).
  * Graphics additions: g.view, g.px, g.reduced, g.poster, g.halo, g.puff, g.spark, g.ring, g.circle,
  *   g.line, g.glowRect, g.rgba, g.mix, g.ease, g.spring, g.wrapText; g.bubble also takes sx, sy, emoji;
  *   g.pill also takes shade, glowColor, strokeWidth; g.palette also has good, near, mid, soft.
@@ -50,7 +52,9 @@
 
   const KINDS = ["input", "space", "entity", "behavior", "rule", "feedback", "score", "flow", "content", "share", "social", "feel"];
   const KIND_ORDER = { content: 0, input: 10, space: 20, behavior: 30, entity: 40, rule: 50, feedback: 55, score: 60, flow: 70, social: 75, share: 80, feel: 90 };
-  const ENGINE_EVENTS = ["clock.tick", "pointer.down", "pointer.move", "pointer.up", "flow.phase", "score.changed"];
+  const ENGINE_EVENTS = ["clock.tick", "pointer.down", "pointer.move", "pointer.up", "text.input", "flow.phase", "score.changed"];
+  // Typed text (sdk.textField): the longest value one input carries (the microgame engine's cap).
+  const MAX_TEXT_LEN = 200;
   const PHASES = ["intro", "playing", "fail", "success", "result"];
   const SOUNDS = ["pop", "blip", "tick", "chime", "whoosh", "success", "fail"];
   const HAPTICS = ["light", "medium", "selection", "success", "warning"];
@@ -1442,6 +1446,11 @@
     has(conceptID) { return this._run.session.conceptIDs.indexOf(conceptID) >= 0; }
     layer(z, draw) { this._run.addLayer(z, draw, this._owner); }
     share(partial) { this._run.mergeShare(partial); }
+    // A native text field over the playfield (docs/BUBBLES.md 7.11): spec {x, y, w, h, size,
+    // placeholder, max_len} in playfield units, or null for none. The host shows it while the run
+    // plays; what the person types arrives as "text.input" {kind: "submit" | "change", value} at the
+    // start of a tick, recorded in the replay log like a pointer action. Headless it does nothing.
+    textField(spec) { this._run.setTextField(spec); }
     preload(url) { if (this._run.preload) this._run.preload(url); }
     log(message) { logOnce(this._owner + ":" + message, this._owner + ": " + message); }
     // Length contract (docs/BUBBLES.md 7.9). Every kit honors it:
@@ -1514,6 +1523,9 @@
       this.share = null;
       this.tickPayload = { tick: 0 };
       this.ptr = { x: 0, y: 0 };
+      this.textField = null;
+      this.textValue = "";
+      this.textEvent = { kind: "change", value: "" };
       this.glueFns = Object.create(null);
       this.setupGlue();
       this.botSdk = null;
@@ -1670,13 +1682,25 @@
     }
 
     // Queue live input (play mode); applied at the start of the next tick and recorded with it.
+    // Typed text queues as ("text", kind, value). Moves within a tick keep only the last position,
+    // and edits within a tick only the last value.
     queue(a, x, y) {
-      if (a === "move" && this.pending.length && this.pending[this.pending.length - 1].a === "move") {
-        const last = this.pending[this.pending.length - 1];
+      const last = this.pending.length ? this.pending[this.pending.length - 1] : null;
+      if (last && a === "move" && last.a === "move") {
         last.x = x; last.y = y;
         return;
       }
+      if (last && a === "text" && x === "change" && last.a === "text" && last.x === "change") {
+        last.y = y;
+        return;
+      }
       this.pending.push({ a, x, y });
+    }
+
+    // One recorded or bot input: a pointer action, or typed text (a: "text", v: [kind, value]).
+    input(a, x, y) {
+      if (a === "text") this.text(x, y);
+      else this.pointer(a, x, y);
     }
 
     wants(a) {
@@ -1697,6 +1721,33 @@
       this.emit(a === "tap" ? "pointer.down" : a === "move" ? "pointer.move" : "pointer.up", p);
     }
 
+    // Typed text from the host's text field (or a bot, or a replay): logged as
+    // {t, a: "text", v: [kind, value]} and sent as "text.input". Ignored when nothing listens, so
+    // Bubbles without a text field log exactly what they always did.
+    text(kind, value) {
+      if (kind !== "submit" && kind !== "change") return;
+      const list = this.handlers["text.input"];
+      if (!list || !list.length) return;
+      value = String(value === undefined || value === null ? "" : value).slice(0, MAX_TEXT_LEN);
+      this.log.push({ t: this.tick, a: "text", v: [kind, value] });
+      if (kind === "change") this.textValue = value;
+      const e = this.textEvent;
+      e.kind = kind;
+      e.value = value;
+      this.emit("text.input", e);
+    }
+
+    setTextField(spec) {
+      if (!isObj(spec)) { this.textField = null; return; }
+      const num = (v, d) => (typeof v === "number" && isFinite(v) ? v : d);
+      this.textField = Object.freeze({
+        x: num(spec.x, 12), y: num(spec.y, H - 60), w: Math.max(40, num(spec.w, W - 24)), h: Math.max(24, num(spec.h, 48)),
+        size: clamp(num(spec.size, 18), 8, 64),
+        placeholder: typeof spec.placeholder === "string" ? spec.placeholder.slice(0, 60) : "",
+        max_len: clamp(Math.floor(num(spec.max_len, 32)), 1, MAX_TEXT_LEN),
+      });
+    }
+
     step() {
       if (this.ended) return false;
       if (!this.begun) this.begin();
@@ -1706,7 +1757,7 @@
         while (this.replayIndex < inputs.length && (inputs[this.replayIndex].t | 0) <= t) {
           const inp = inputs[this.replayIndex++];
           const v = Array.isArray(inp.v) && inp.v.length >= 2 ? inp.v : DEFAULT_V;
-          this.pointer(inp.a, v[0], v[1]);
+          this.input(inp.a, v[0], v[1]);
         }
       } else if (this.botOn && !this.ending) {
         this.owner = "bot";
@@ -1717,14 +1768,14 @@
             const inp = out[i];
             if (!inp) continue;
             const v = Array.isArray(inp.v) && inp.v.length >= 2 ? inp.v : DEFAULT_V;
-            this.pointer(inp.a || "tap", v[0], v[1]);
+            this.input(inp.a || "tap", v[0], v[1]);
           }
         }
       }
       if (this.pending.length) {
         for (let i = 0; i < this.pending.length; i++) {
           const p = this.pending[i];
-          this.pointer(p.a, p.x, p.y);
+          this.input(p.a, p.x, p.y);
         }
         this.pending.length = 0;
       }
@@ -5241,6 +5292,10 @@
     cssW: 0,
     cssH: 0,
     dpr: 1,
+    // the text field (sdk.textField): shown, for which run, and its last layout key
+    textShown: false,
+    textRun: null,
+    textLayout: "",
     // fx pools
     pX: null, pY: null, pVX: null, pVY: null, pLife: null, pMax: null, pSize: null, pKind: null, pCol: null, pNext: 0,
     rX: null, rY: null, rR: null, rMax: null, rLife: null, rCol: null, rNext: 0,
@@ -5278,7 +5333,8 @@
       const card = el("div", "bubble-card hidden");
       const error = el("div", "bubble-card bubble-error hidden");
       const pop = el("div", "bubble-pop");
-      this.dom = { root, canvas, ctx: canvas.getContext("2d", { alpha: true }), hud, hudScore, hudLabel, card, error, pop };
+      const text = this.makeTextField(el);
+      this.dom = { root, canvas, ctx: canvas.getContext("2d", { alpha: true }), hud, hudScore, hudLabel, card, error, pop, text };
       this.g = new Graphics();
       this.backdrops = new Map();
       // Pools: allocated once, reused for every run.
@@ -5313,6 +5369,87 @@
         }
       });
       this.resize();
+    },
+
+    // The native text field kits ask for with sdk.textField (docs/BUBBLES.md 7.11). A real <input>,
+    // so iOS shows its keyboard on a tap (WKWebView only opens it from a user gesture). Its touches
+    // stay its own: the root's handlers prevent default on every touch, which would block focus.
+    makeTextField(el) {
+      const t = el("input", "bubble-text hidden");
+      t.type = "text";
+      const attrs = { autocomplete: "off", autocorrect: "off", autocapitalize: "none", spellcheck: "false", enterkeyhint: "done", inputmode: "text", "aria-label": "Type your answer" };
+      for (const k of Object.keys(attrs)) t.setAttribute(k, attrs[k]);
+      const own = (e) => {
+        e.stopPropagation();
+        if (e.type === "pointerdown") Sound.unlock();
+      };
+      for (const type of ["pointerdown", "pointermove", "pointerup", "pointercancel", "touchstart", "touchmove", "touchend"]) t.addEventListener(type, own, { passive: true });
+      t.addEventListener("input", () => this.onText("change"));
+      t.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" || e.isComposing) return;
+        e.preventDefault();
+        this.onText("submit");
+      });
+      return t;
+    },
+
+    // Typed text goes through the run's input queue, like pointer actions: applied at the start of
+    // the next tick and recorded in the replay log. Enter or Done submits, then clears the field
+    // (and says so with an empty edit), like the engine's own shell.
+    onText(kind) {
+      const run = this.run, t = this.dom && this.dom.text;
+      if (!t || !run || this.mode !== "play" || this.stage !== "playing" || this.paused || run.ending || run.ended) return;
+      if (kind === "submit") {
+        run.queue("text", "submit", t.value);
+        t.value = "";
+        run.queue("text", "change", "");
+      } else {
+        run.queue("text", "change", t.value);
+      }
+    },
+
+    // Shows the field over the playfield while a run that asked for one plays; hides it (and drops
+    // the keyboard) once the run ends. Demos and replays show what was typed, read-only.
+    syncTextField() {
+      const d = this.dom, t = d && d.text;
+      if (!t) return;
+      const run = this.run, spec = run ? run.textField : null, f = this.fit;
+      const show = !!spec && !!f && this.stage === "playing" && !run.ending && !run.ended && this.mode !== "poster";
+      if (!show) {
+        if (!this.textShown) return;
+        this.textShown = false;
+        this.textLayout = "";
+        if (document.activeElement === t) t.blur();
+        t.classList.add("hidden");
+        return;
+      }
+      const live = this.mode === "play";
+      if (this.textRun !== run) {
+        this.textRun = run;
+        t.value = "";
+      }
+      if (!live && t.value !== run.textValue) t.value = run.textValue;
+      const k = f.scale;
+      // At least 16 px, or iOS zooms the page when the field takes focus.
+      const layout = [f.ox + spec.x * k, f.oy + spec.y * k, spec.w * k, spec.h * k, Math.max(16, spec.size * k), live, spec.placeholder, spec.max_len].join("|");
+      if (layout !== this.textLayout) {
+        this.textLayout = layout;
+        const st = t.style;
+        st.left = Math.round(f.ox + spec.x * k) + "px";
+        st.top = Math.round(f.oy + spec.y * k) + "px";
+        st.width = Math.round(spec.w * k) + "px";
+        st.height = Math.round(spec.h * k) + "px";
+        st.fontSize = Math.max(16, Math.round(spec.size * k)) + "px";
+        t.placeholder = spec.placeholder || "Type here";
+        t.maxLength = spec.max_len;
+        t.readOnly = !live;
+        t.tabIndex = live ? 0 : -1;
+        t.classList.toggle("watch", !live);
+      }
+      if (!this.textShown) {
+        this.textShown = true;
+        t.classList.remove("hidden");
+      }
     },
 
     // ----- messages -----
@@ -5530,6 +5667,7 @@
           this.dom.ctx.clearRect(0, 0, this.dom.canvas.width, this.dom.canvas.height);
           this.hideCard();
           this.dom.hud.classList.add("hidden");
+          this.syncTextField();
         }
       }
     },
@@ -5589,6 +5727,7 @@
           case "pause":
             this.paused = true;
             this.stopLoop();
+            if (this.dom && this.dom.text && document.activeElement === this.dom.text) this.dom.text.blur();
             this.checkpoint(true);
             break;
           case "resume":
@@ -6051,6 +6190,7 @@
       if (!d || !this.run || !this.entry) return;
       this.updateFx(dt);
       this.drawFrame(d.ctx, this.run, this.entry.session.style, this.cssW, this.cssH, this.dpr, this.fit, { poster: false, t: this.renderT, fx: true, dt, entry: this.entry });
+      this.syncTextField();
     },
 
     // The look's background at this size, cached per Bubble (two at a time). Includes the motif
@@ -6412,6 +6552,7 @@
         err.classList.remove("hidden");
         this.hideCard();
         this.dom.hud.classList.add("hidden");
+        this.syncTextField();
       }
       this.post({ type: "error", message });
     },
