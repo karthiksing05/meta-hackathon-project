@@ -74,7 +74,7 @@ xcrun devicectl device install app --device <phone-udid> \
 1. Before opening Keynote: unlock both phones, plug both in, and tap **Trust** on each if asked (only the first time on a given Mac).
 2. Give Keynote camera access if macOS asks (System Settings → Privacy & Security → Camera → Keynote). An iPhone screen counts as a camera.
 3. Slide 10 has one Live Video box (Karthik's phone); slide 11 has two (Karthik's, then Bayan's). For each box: Format sidebar → Live Video → Source → pick the phone **by its name** ("Karthik-iPhone", Bayan's shows up as "iPhone"). Renaming Bayan's phone (Settings → General → About → Name) makes this harder to mix up.
-4. A full Keynote rebuild (`../slides/keynote/build.sh`) drops the Live Video boxes. Insert them again, then run `osascript ../slides/keynote/snap-phones.applescript` to snap them into the phone frames.
+4. A full Keynote rebuild (`../slides/keynote/build.sh`) drops the Live Video boxes. Insert them again, then run `osascript ../slides/keynote/snap-phones.applescript` to snap them into the phone frames. Every phone screen is 462×1000 at y 40, nearly the full slide height so the audience can read it: slide 10 at x 1334; slide 11 at x 810 (Karthik) and x 1404 (Bayan).
 5. Play the slideshow once with both phones on, and check that both boxes move live on slide 11.
 
 ### QuickTime (the fallback, tested)

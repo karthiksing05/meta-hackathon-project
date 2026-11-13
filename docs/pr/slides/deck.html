@@ -667,6 +667,23 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .collab .bo5 { width: 96px; padding-top: 220px; } .collab .crow { gap: 34px; } .collab .cgrid { column-gap: 20px; }
 .collab .cf { padding: 12px 16px; } .collab .cf b { font-size: 24px; } .collab .cf p { font-size: 19px; } .collab .cf .chip { font-size: 13px; }
 .collab .bo5 { width: 104px; } .collab .bo5 em { font-size: 16px; white-space: nowrap; } .collab .bo5 i { font-size: 13px; }
+
+/* phones as big as the slide allows (screen 462x1000, aspect 0.462 like the iPhone feed) */
+.demo .dph { position: absolute; right: 110px; top: 26px; }
+.dph .iph.big { width: 490px !important; height: 1028px !important; padding: 14px !important; border-radius: 74px !important; position: relative; }
+.dph .iph.big .scr { border-radius: 60px !important; }
+.demo .dsteps { flex: none; width: 1040px; }
+.collab .duo { position: absolute; right: 40px; top: 26px; }
+.collab .duo .phn { width: 490px; } .collab .duo .lp.iph { width: 490px !important; height: 1028px !important; padding: 14px !important; border-radius: 74px !important; }
+.collab .duo .iph .scr { border-radius: 60px !important; } .collab .duo .iph .di { width: 120px; height: 34px; top: 18px; }
+.collab .duo figcaption { display: none; }
+.collab .bo5 { width: 104px; padding-top: 300px; } .collab .bo5 em { white-space: normal; font-size: 16px; } .collab .bo5 i { font-size: 13px; }
+.collab .bo5 .who { font-style: normal; font-size: 15px; font-weight: 800; color: var(--ink); text-align: center; line-height: 1.15; }
+.collab .bo5 .who.a { color: var(--blue); margin-bottom: 18px; } .collab .bo5 .who.b { color: var(--violet); margin-top: 18px; }
+.collab h2 { font-size: 58px; width: 620px; line-height: 1.08; }
+.collab .crow { margin-top: 30px; } .collab .cgrid { flex: none; width: 620px; column-gap: 16px; row-gap: 10px; }
+.collab .ccol { gap: 10px; } .collab .ch { font-size: 22px; }
+.collab .cf { padding: 10px 12px; border-left-width: 6px; } .collab .cf b { font-size: 21px; } .collab .cf p { font-size: 16px; margin-top: 4px; } .collab .cf .chip { font-size: 12px; padding: 2px 7px; margin-left: 0; display: inline-block; vertical-align: 2px; }
 </style>
 </head>
 <body>
@@ -832,7 +849,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
     </div>
     <div class="ccr duo">
       <figure class="phn a"><div class="lp iph"><div class="scr" id="lpscr"><i class="di"></i>Karthik<br><small>live</small></div></div><figcaption><b>Karthik</b>Karthik's phone</figcaption></figure>
-      <div class="bo5"><em>Best of 5</em><span class="r"></span><span class="r"></span><span class="r"></span><span class="r"></span><span class="r"></span><i>same Curios, same seeds</i></div>
+      <div class="bo5"><b class="who a">&larr; Karthik</b><em>Best of 5</em><span class="r"></span><span class="r"></span><span class="r"></span><span class="r"></span><span class="r"></span><i>same Curios, same seeds</i><b class="who b">Bayan &rarr;</b></div>
       <figure class="phn b"><div class="lp iph"><div class="scr" id="lpscr2"><i class="di"></i>Bayan<br><small>live</small></div></div><figcaption><b>Bayan</b>Bayan's phone</figcaption></figure>
     </div>
   </div>
