@@ -37,6 +37,9 @@ type Options struct {
 
 	// Recs runs the recommender (nil turns ranking off).
 	Recs *recs.Engine
+	// FeedExplore is the share of regular feed slots given to a random eligible game (explore.go): 0 means the
+	// default 0.15, a negative value turns exploration off.
+	FeedExplore float64
 
 	// Game generation: GeneratorURL is the internal generator service (empty turns it off).
 	GeneratorURL       string

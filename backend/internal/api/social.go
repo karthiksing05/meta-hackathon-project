@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"sort"
 	"strings"
@@ -596,7 +597,15 @@ func candidatesFor(games []model.Game, sc *socialContext, now time.Time) []map[s
 		if g.Level > 1 {
 			add(g, "nextLevel", first(friendRuns, board), 1.2)
 		}
-		add(g, "popular", first(board), 0.8)
+		add(g, "popular", first(board), 0.8*popularity(g))
 	}
 	return out
+}
+
+// popularity scales the "popular" reason by how much everyone has engaged with a game: 0.6 for a game nobody has
+// touched up to 1.8 (a fresh game's weight) for one with thousands of plays, finishes and likes, on a log scale. It
+// is a fact the recommender weighs like the other reasons; its own model only sees one person's history.
+func popularity(g model.Game) float64 {
+	eng := float64(g.Plays) + 2*float64(g.Finishes) + 3*float64(g.Likes)
+	return 0.6 + 1.2*math.Min(1, math.Log1p(eng)/math.Log1p(3000))
 }

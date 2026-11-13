@@ -132,6 +132,7 @@ type feedItem struct {
 	Hook       float64 `json:"hook"`
 	Unproven   bool    `json:"unproven"`
 	Team       string  `json:"team,omitempty"`
+	Explore    bool    `json:"explore,omitempty"` // a random pick from the exploration share (FEED_EXPLORE)
 }
 
 // feed is the one feed endpoint: GET /v1/feed?limit=10&sessionID=...&exclude=...
@@ -202,10 +203,10 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 	if !s.recsEnabled() {
 		org, spon := make([]rankedGame, len(pool.organic)), make([]rankedGame, len(pool.sponsored))
 		for i, g := range pool.organic {
-			org[i] = rankedGame{g, rankPick{GameID: g.ID, Reason: "newest"}}
+			org[i] = rankedGame{g: g, p: rankPick{GameID: g.ID, Reason: "newest"}}
 		}
 		for i, g := range pool.sponsored {
-			spon[i] = rankedGame{g, rankPick{GameID: g.ID, Reason: "newest"}}
+			spon[i] = rankedGame{g: g, p: rankPick{GameID: g.ID, Reason: "newest"}}
 		}
 		page = layoutPage(org, spon, start, count)
 	} else {
@@ -213,25 +214,12 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 		if u != nil {
 			who = u.ID
 		}
-		h := fnv.New32a()
-		h.Write([]byte(who + "|" + strconv.Itoa(start+len(exclude)) + "|" + strconv.Itoa(today())))
-		seed := h.Sum32()
-		summaries := summariesOf(games)
-		var org, spon []rankedGame
-		state, err = s.Recs.Run(r.Context(), rec.State, func(sess recsSession) error {
-			var err error
-			if org, err = rankPool(sess, pool.organic, count, sc, now, summaries, rec, seed); err != nil {
-				return err
-			}
-			spon, err = rankPool(sess, pool.sponsored, count, sc, now, summaries, rec, seed^0x5f3759df)
-			return err
-		})
+		page, state, err = s.rankFeedPage(r.Context(), who, sessionID, rec, games, pool, sc, start, count, len(exclude), now)
 		if err != nil {
 			s.Log.Error("recs: rank failed", "err", err)
 			writeErr(w, 503, "ranking is unavailable right now")
 			return
 		}
-		page = layoutPage(org, spon, start, count)
 	}
 
 	shown := make([]model.Game, len(page))
@@ -247,7 +235,7 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 	for i, p := range page {
 		base := pool.bases[p.g.ID]
 		items[i] = feedItem{GameView: views[i], FeedItemID: "fi_" + auth.NewID(6), BaseID: base, Reason: p.p.Reason, Why: p.p.Why,
-			Score: p.p.Score, Hook: p.p.Hook, Unproven: p.p.Unproven, Team: p.p.Team}
+			Score: p.p.Score, Hook: p.p.Hook, Unproven: p.p.Unproven, Team: p.p.Team, Explore: p.explore}
 		rec.Feed = append(rec.Feed, p.g.ID)
 		rec.FeedKeys = append(rec.FeedKeys, p.g.ID+"|"+p.p.Reason+"|"+orDash(p.p.RunUserID))
 		rec.FeedSeen = appendSeen(rec.FeedSeen, p.g.ID, base)
@@ -273,8 +261,33 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 
 // rankedGame is a game the recommender placed, with why.
 type rankedGame struct {
-	g model.Game
-	p rankPick
+	g       model.Game
+	p       rankPick
+	explore bool
+}
+
+// rankFeedPage orders one page with the recommender, mixes in a little exploration (explore.go) and lays it out
+// under the page rules. who is the person (or "anon|<session>"), rec their model and session so far.
+func (s *Server) rankFeedPage(ctx context.Context, who, sessionID string, rec *model.RecsRecord, games []model.Game, pool feedPool,
+	sc *socialContext, start, count, nExclude int, now time.Time) ([]rankedGame, string, error) {
+	h := fnv.New32a()
+	h.Write([]byte(who + "|" + strconv.Itoa(start+nExclude) + "|" + strconv.Itoa(today())))
+	seed := h.Sum32()
+	summaries := summariesOf(games)
+	var org, spon []rankedGame
+	state, err := s.Recs.Run(ctx, rec.State, func(sess recsSession) error {
+		var err error
+		if org, err = rankPool(sess, pool.organic, count, sc, now, summaries, rec, seed); err != nil {
+			return err
+		}
+		spon, err = rankPool(sess, pool.sponsored, count, sc, now, summaries, rec, seed^0x5f3759df)
+		return err
+	})
+	if err != nil {
+		return nil, "", err
+	}
+	org = explore(org, pool.organic, s.exploreRate(), who+"|"+sessionID, start, sc, now)
+	return layoutPage(org, spon, start, count), state, nil
 }
 
 // rankPool asks the recommender to order a page's worth of games from pool, a list with one game per unseen
@@ -317,7 +330,7 @@ func rankPool(sess recsSession, pool []model.Game, want int, sc *socialContext, 
 				continue
 			}
 			taken[p.GameID] = true
-			out = append(out, rankedGame{left[i], p})
+			out = append(out, rankedGame{g: left[i], p: p})
 			feed = append(feed, p.GameID)
 			keys = append(keys, p.GameID+"|"+p.Reason+"|"+orDash(p.RunUserID))
 		}

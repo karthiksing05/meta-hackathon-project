@@ -104,7 +104,7 @@ func run(log *slog.Logger) error {
 		Store: st, Packages: pk, Signer: auth.NewSigner(cfg.JWTSecret, cfg.AccessTTL),
 		RefreshTTL: cfg.RefreshTTL, GamesBaseURL: cfg.GamesBaseURL, CORSOrigins: cfg.CORSOrigins,
 		MaxUploadMB: cfg.MaxUploadMB, Log: log,
-		Recs: engine, GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
+		Recs: engine, FeedExplore: cfg.FeedExplore, GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
 		HarnessContext: cfg.HarnessContext, Harness: hs0, Planner: planner, SponsorUsers: cfg.SponsorUsers, DebugDelete: cfg.DebugDelete,
 		Push: push, Media: media,
 		Viral: api.ViralOptions{Off: cfg.ViralOff, MinPlayers: cfg.ViralMinPlayers, Window: cfg.ViralWindow, Cosine: cfg.ViralCosine,

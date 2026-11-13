@@ -9,3 +9,11 @@ func TestHarnessOnByDefault(t *testing.T) {
 		}
 	}
 }
+
+func TestFeedExplore(t *testing.T) {
+	for v, want := range map[string]float64{"": 0.15, "0.3": 0.3, "0": -1, "abc": 0.15, "2": 0.15, "-1": 0.15} {
+		if got := feedExplore(v); got != want {
+			t.Errorf("FEED_EXPLORE=%q → %v, want %v", v, got, want)
+		}
+	}
+}
