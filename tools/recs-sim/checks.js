@@ -359,3 +359,261 @@ function runBlendChecks(R, ok) {
 }
 
 if (typeof module !== "undefined" && module.exports) module.exports.runBlendChecks = runBlendChecks;
+
+// Team-draft interleaving: the merge, the credit, the tally and the app bridge.
+function runInterleaveChecks(R, ok) {
+  "use strict";
+  var F = ["dodge", "time", "merge", "guess", "group", "answer"], M = ["calm", "warm", "playful", "hype"];
+  var sums = [], cands = [];
+  for (var i = 0; i < 10; i++) {
+    sums.push({ id: "g" + i, formula: F[i % F.length], mood: [M[i % M.length]], energy: i % 3 === 0 ? "high" : "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: i === 0, bots: [] });
+    cands.push({ gameID: "g" + i, reason: i % 2 ? "popular" : "friendBurst", runUserID: null, weight: 1 + (i % 4) });
+  }
+  function input(seed, count, feed) { return { candidates: cands, summaries: sums, feed: feed || [], count: count || 6, seed: seed, day: 2 }; }
+  function imp(id, o) {
+    var x = { id: id, dwellSec: 3, tookOver: false, runsFinished: 0, replays: 0, saved: false, liked: false, floated: false, openedBoard: false, addedFriend: false, remixed: false, quitMidRun: false, endedSession: false, day: 2 };
+    for (var k in o) x[k] = o[k];
+    return x;
+  }
+  function ids(list) { return list.map(function (p) { return p.gameID; }); }
+  function isSubsequence(sub, full) {
+    var j = 0;
+    for (var k = 0; k < full.length && j < sub.length; k++) if (full[k] === sub[j]) j++;
+    return j === sub.length;
+  }
+  var good = { tookOver: true, runsFinished: 1, replays: 2 };
+
+  ok(R.params().interleave.on === false && R.params().interleave.against === "baseline", "interleaving is off by default, against today's feed");
+
+  // The merge
+  var Pi = R.params({ interleave: { on: true } });
+  var S = R.newState(), u = R.newUser();
+  var out = R.interleave(S, u, input(5), Pi);
+  var got = ids(out.picks), seen = {};
+  ok(out.picks.length === 6 && got.every(function (g) { var dup = seen[g]; seen[g] = true; return !dup; }), "a merged page has the asked count and no repeats", got.join(","));
+  ok(Math.abs(out.interleave.A - out.interleave.B) <= 1 && out.interleave.A + out.interleave.B === 6, "each side gets half the slots", out.interleave.A + " vs " + out.interleave.B);
+  var a = R.rank(S, R.newUser(), input(5), Pi), b = R.baseline(input(5));
+  var aTeam = out.picks.filter(function (p) { return p.team === "A"; }), bTeam = out.picks.filter(function (p) { return p.team === "B"; });
+  ok(isSubsequence(ids(aTeam), ids(a.picks)), "the formula's picks keep the formula's order");
+  ok(isSubsequence(ids(bTeam), ids(b.picks)), "the control's picks keep the control's order");
+  ok(got[0] === a.picks[0].gameID || got[0] === b.picks[0].gameID, "the first slot goes to one side's top pick");
+  var again = R.interleave(R.newState(), R.newUser(), input(5), Pi);
+  ok(ids(again.picks).join() === got.join() && again.picks.map(function (p) { return p.team; }).join() === out.picks.map(function (p) { return p.team; }).join(), "the same seed gives the same merge");
+  var firstA = 0;
+  for (var s = 0; s < 400; s++) {
+    var o = R.interleave(R.newState(), R.newUser(), input(1000 + s, 2), Pi);
+    var top = R.rank(R.newState(), R.newUser(), input(1000 + s, 2), Pi).picks[0].gameID, base = R.baseline(input(1000 + s, 2)).picks[0].gameID;
+    if (top !== base && o.picks[0].team === "A") firstA++;
+    else if (top === base) firstA += 0.5;
+  }
+  ok(firstA / 400 > 0.4 && firstA / 400 < 0.6, "a fair coin decides who picks first", (firstA / 400).toFixed(2));
+
+  // Credit and the session tally
+  var S2 = R.newState(), u2 = R.newUser();
+  var m = R.interleave(S2, u2, input(7), Pi);
+  var pa = m.picks.filter(function (p) { return p.team === "A"; })[0], pb = m.picks.filter(function (p) { return p.team === "B"; })[0];
+  var ra = R.observe(S2, u2, imp(pa.gameID, good), Pi);
+  var rb = R.observe(S2, u2, imp(pb.gameID, { dwellSec: 0.4 }), Pi);
+  ok(ra.team === "A" && rb.team === "B", "each page is traced to the side that picked it");
+  ok(u2.inter.session.A.points === 1 && u2.inter.session.B.points === 0, "an enjoyed page earns its side a point; a skip earns nothing");
+  ok(R.observe(S2, u2, imp("not-shown", good), Pi).team === null, "a page the merge didn't pick counts for nobody");
+  R.endSession(u2, S2);
+  var st = R.interleaveStats(S2).baseline;
+  ok(st && st.sessions === 1 && st.formulaWins === 1 && st.controlWins === 0 && st.ties === 0, "the session goes to the side with more points");
+  ok(u2.inter.session === null && Object.keys(u2.inter.pending).length === 0, "ending a session clears what's pending");
+
+  m = R.interleave(S2, u2, input(8), Pi);
+  pa = m.picks.filter(function (p) { return p.team === "A"; })[0];
+  R.observe(S2, u2, imp(pa.gameID, { tookOver: true, quitMidRun: true }), Pi);
+  ok(u2.inter.session.A.engaged === 1 && u2.inter.session.A.points === 0, "a grab without enjoyment isn't a point");
+  R.endSession(u2, S2);
+  ok(R.interleaveStats(S2).baseline.ties === 1, "no points on either side is a tie");
+
+  m = R.interleave(S2, u2, input(9), Pi);
+  pb = m.picks.filter(function (p) { return p.team === "B"; })[0];
+  R.observe(S2, u2, imp(pb.gameID, { saved: true, dwellSec: 2 }), Pi);
+  R.endSession(u2, S2);
+  st = R.interleaveStats(S2).baseline;
+  ok(st.controlWins === 1 && st.sessions === 3 && Math.abs(st.preference - 0.5) < 1e-9, "the control can win too; preference counts ties as half", JSON.stringify(st));
+  R.endSession(u2, S2);
+  ok(R.interleaveStats(S2).baseline.sessions === 3, "a session with no interleaved pages isn't counted");
+
+  // The judge doesn't move when the formula is tuned.
+  var Pt = R.params({ interleave: { on: true }, reward: { w: { finished: -5 }, r0: 3 } });
+  var S3 = R.newState(), u3 = R.newUser();
+  var m3 = R.interleave(S3, u3, input(10), Pt);
+  R.observe(S3, u3, imp(m3.picks[0].gameID, { tookOver: true, runsFinished: 1 }), Pt);
+  ok(u3.inter.session[m3.picks[0].team].points === 1, "credit uses the default reward weights, not the tuned ones");
+
+  // Controls: the formula with a part switched off
+  var Pv = R.params({ interleave: { on: true, against: "noCalibration" } });
+  var S4 = R.newState(), u4 = R.newUser();
+  var mv = R.interleave(S4, u4, input(11, 8), Pv);
+  var noCal = R.rank(S4, R.newUser(), input(11, 8), R.params({ stages: { calibration: false } }));
+  ok(mv.interleave.against === "noCalibration" && isSubsequence(ids(mv.picks.filter(function (p) { return p.team === "B"; })), ids(noCal.picks)), "a variant control is the formula with that part off");
+  var mu = R.interleave(R.newState(), R.newUser(), input(11), R.params({ interleave: { on: true, against: "noSuchThing" } }));
+  ok(mu.interleave.against === "baseline", "an unknown control falls back to today's feed");
+
+  // A tiny catalog runs out of distinct games: repeats fill the page and count for nobody.
+  var tiny = { candidates: cands.slice(0, 2), summaries: sums.slice(0, 2), feed: [], count: 5, seed: 3, day: 2 };
+  var mt = R.interleave(R.newState(), R.newUser(), tiny, Pi);
+  ok(mt.picks.length === 5 && mt.picks.filter(function (p) { return p.team === null; }).length === 3, "repeats fill a small catalog without a team", mt.picks.map(function (p) { return p.team; }).join(","));
+
+  // Statistics
+  ok(Math.abs(R._math.signTest(8, 10) - 0.109375) < 1e-9, "sign test: 8 of 10 is p = 0.109");
+  ok(R._math.signTest(5, 10) === 1 && R._math.signTest(0, 0) === 1, "sign test: an even split is p = 1");
+  ok(R._math.signTest(1100, 2000) < 0.001, "sign test: the large-sample branch");
+  var w = R._math.wilson(8, 10);
+  ok(Math.abs(w[0] - 0.490) < 0.001 && Math.abs(w[1] - 0.943) < 0.001, "Wilson 95% interval for 8 of 10", w.join(","));
+
+  // App bridge
+  var A = R.app;
+  A.load(null, JSON.stringify({ interleave: { on: true } }));
+  var ranked = JSON.parse(A.rank(JSON.stringify(input(12))));
+  ok(ranked.interleave && ranked.picks.every(function (p) { return p.team === "A" || p.team === "B"; }), "app.rank interleaves when the flag is on");
+  var firstA2 = ranked.picks.filter(function (p) { return p.team === "A"; })[0];
+  A.observe(JSON.stringify(imp(firstA2.gameID, good)));
+  A.endSession();
+  var bridged = JSON.parse(A.interleaveStats());
+  ok(bridged.baseline && bridged.baseline.formulaWins === 1, "app.interleaveStats has the tally");
+  ok(JSON.parse(A.debugSummary()).interleave.against === "baseline", "the debug summary shows the control");
+  A.load(A.exportState(), JSON.stringify({ interleave: { on: true } }));
+  ok(JSON.parse(A.interleaveStats()).baseline.sessions === 1, "the tally survives export and reload");
+  A.load(null, null);
+  ok(JSON.parse(A.rank(JSON.stringify(input(12)))).picks.every(function (p) { return p.team === undefined; }), "with the flag off, app.rank is the plain formula");
+}
+
+if (typeof module !== "undefined" && module.exports) module.exports.runInterleaveChecks = runInterleaveChecks;
+
+// The optional Muse re-rank: the prompt, the reply check, the capped term, and the guards.
+function runMuseChecks(R, ok) {
+  "use strict";
+  var F = ["dodge", "time", "merge", "guess", "group", "answer"], M = ["calm", "warm", "playful", "hype"];
+  var sums = [], cands = [];
+  for (var i = 0; i < 12; i++) {
+    sums.push({ id: "m" + i, formula: F[i % F.length], mood: [M[i % M.length]], energy: "medium", competition: "friendly", look: "glow", scope: i === 3 ? "group" : "everyone", isDaily: false, bots: [] });
+    cands.push({ gameID: "m" + i, reason: "popular", runUserID: null, weight: 1 });
+  }
+  function input(seed, count, extra) {
+    var x = { candidates: cands, summaries: sums, feed: [], count: count || 6, seed: seed, day: 1 };
+    for (var k in extra || {}) x[k] = extra[k];
+    return x;
+  }
+  function imp(id, o) {
+    var x = { id: id, dwellSec: 3, tookOver: false, runsFinished: 0, replays: 0, saved: false, liked: false, floated: false, openedBoard: false, addedFriend: false, remixed: false, quitMidRun: false, endedSession: false, day: 1 };
+    for (var k in o) x[k] = o[k];
+    return x;
+  }
+  function reply(order, why) { return JSON.stringify({ order: order, why: why || {} }); }
+
+  var Pon = R.params({ muse: { on: true } });
+  ok(R.params().muse.on === false, "the Muse layer is off by default");
+
+  // The request
+  var S = R.newState(), u = R.newUser();
+  R.describeAll(sums, Pon);
+  R.observe(S, u, imp("m1", { tookOver: true, runsFinished: 1, replays: 2, saved: true }), Pon);
+  R.observe(S, u, imp("m2", { dwellSec: 0.4 }), Pon);
+  var req = R.museRequest(S, u, input(5), Pon);
+  var known = {};
+  cands.forEach(function (c) { known[c.gameID] = true; });
+  ok(req.ids.length === 10 && req.ids.every(function (id) { return known[id]; }), "Ember sees the formula's top 10, all real games", req.ids.length);
+  ok(/finished a .*replayed it twice, saved it/.test(req.user) && /skipped a /.test(req.user), "recent plays are described in words", req.user.split("\n").slice(0, 3).join(" | "));
+  ok(!/\bme\b|@|\.com/.test(req.user) && req.ids.every(function (id) { return req.user.indexOf("- " + id + ":") >= 0; }), "the prompt lists the games and no people");
+  var formulaOrder = R.rank(S, u, input(5, 10), R.params()).picks.map(function (p) { return p.gameID; });
+  var shuffledSomewhere = false;
+  for (var s = 0; s < 5; s++) {
+    var q = R.museRequest(S, u, input(20 + s), Pon);
+    var f = R.rank(S, u, input(20 + s, 10), R.params()).picks.map(function (p) { return p.gameID; });
+    if (q.ids.join() !== f.slice(0, q.ids.length).join()) shuffledSomewhere = true;
+  }
+  ok(shuffledSomewhere, "candidates reach Ember shuffled, not in the formula's order (position bias)");
+  ok(R.museRequest(S, u, input(5), Pon).ids.join() === req.ids.join(), "the same seed gives the same prompt");
+
+  // Checking the reply
+  var want = req.ids.slice().reverse();
+  var a1 = R.museApply(S, u, "Sure! Here you go: " + reply(want.concat(["made-up-1"]).concat([want[0]]), { m1: "You loved this kind of game" }) + " Enjoy.", Pon, 1000);
+  ok(a1.ok && a1.kept === 10 && a1.dropped === 2, "made-up and repeated IDs are dropped and counted; prose around the JSON is fine", JSON.stringify(a1));
+  ok(u.museStats.dropped === 2 && Math.abs(R.museStats(u).madeUpIDShare - 2 / 12) < 1e-9, "the made-up-ID share is tracked");
+  R.museRequest(S, u, input(5), Pon);
+  ok(R.museApply(S, u, "no json here", Pon, 1000).ok === false, "a reply without an order is rejected");
+  R.museRequest(S, u, input(5), Pon);
+  ok(R.museApply(S, u, reply(["nope", "nada"]), Pon, 1000).ok === false, "a reply naming no real games is rejected");
+  ok(R.museApply(R.newState(), R.newUser(), reply(["m1"]), Pon, 1000).ok === false, "a reply with no request behind it is rejected");
+
+  // The capped term
+  var u2 = R.newUser(), S2 = R.newState();
+  R.museRequest(S2, u2, input(5), Pon);
+  var ids2 = u2.musePending.ids.slice();
+  R.museApply(S2, u2, reply(ids2), Pon, 1000);
+  var top = R.museTerm(u2, ids2[0], Pon, 2000), last = R.museTerm(u2, ids2[ids2.length - 1], Pon, 2000);
+  ok(Math.abs(top - 0.6) < 1e-9 && Math.abs(last + 0.6) < 1e-9, "Ember's first pick gets +0.6 and its last -0.6", top + ", " + last);
+  ok(R.museTerm(u2, "m-not-ranked", Pon, 2000) === 0, "a game Ember didn't rank gets nothing");
+  var big = R.params({ muse: { on: true, w: 5, cap: 0.6 } });
+  ok(Math.abs(R.museTerm(u2, ids2[0], big, 2000)) <= 0.6 + 1e-12, "the cap holds even with a big weight");
+  ok(R.museTerm(u2, ids2[0], Pon, 1000 + 31 * 60000) === 0, "an order older than 30 minutes is ignored");
+  ok(R.museTerm(u2, ids2[0], R.params(), 2000) === 0, "with the layer off, the term is 0");
+
+  // Muse breaks a tie...
+  var flat = R.params({ muse: { on: true }, stages: { bandit: false, calibration: false, coldStart: false, bait: false } });
+  var twins = [{ id: "tA", formula: "guess", mood: ["calm"], energy: "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: false, bots: [] },
+    { id: "tB", formula: "guess", mood: ["calm"], energy: "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: false, bots: [] }];
+  var tIn = { candidates: [{ gameID: "tA", reason: "popular", weight: 1 }, { gameID: "tB", reason: "popular", weight: 1 }], summaries: twins, feed: [], count: 1, seed: 3, day: 1, now: 2000 };
+  var u3 = R.newUser(), S3 = R.newState();
+  R.museRequest(S3, u3, tIn, flat);
+  R.museApply(S3, u3, reply(["tB", "tA"], { tB: "a calm one to unwind" }), flat, 1000);
+  var withMuse = R.rank(S3, u3, tIn, flat).picks[0];
+  ok(withMuse.gameID === "tB" && withMuse.museWhy === "a calm one to unwind" && withMuse.parts.muse > 0, "between equal games, Ember's pick wins and brings its why line");
+  ok(typeof withMuse.why === "string" && withMuse.why.length > 0, "the formula's own why line is kept next to Ember's");
+  // ...but can't lift slop over a good game.
+  var S4 = R.newState(), u4 = R.newUser(), crowd = R.userIn(S4, "crowd");
+  var pair = [{ id: "good", formula: "merge", mood: ["warm"], energy: "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: false, bots: [] },
+    { id: "slop", formula: "merge", mood: ["warm"], energy: "medium", competition: "friendly", look: "glow", scope: "everyone", isDaily: false, bots: [] }];
+  R.describeAll(pair, Pon);
+  for (var t = 0; t < 12; t++) {
+    R.observe(S4, crowd, imp("good", { tookOver: true, runsFinished: 1, replays: 1 }), Pon);
+    R.observe(S4, crowd, imp("slop", { tookOver: true, quitMidRun: true }), Pon);
+  }
+  var pIn = { candidates: [{ gameID: "good", reason: "popular", weight: 1 }, { gameID: "slop", reason: "popular", weight: 1 }], summaries: pair, feed: [], count: 1, seed: 9, day: 1, now: 2000 };
+  R.museRequest(S4, u4, pIn, Pon);
+  R.museApply(S4, u4, reply(["slop", "good"]), Pon, 1000);
+  var firstPicks = 0;
+  for (var z = 0; z < 20; z++) { pIn.seed = 100 + z; if (R.rank(S4, u4, pIn, Pon).picks[0].gameID === "good") firstPicks++; }
+  ok(firstPicks >= 19, "Ember can't lift a game people quit over a game they finish", firstPicks + "/20");
+
+  // Interleaving judges it against the formula alone.
+  var Pi = R.params({ muse: { on: true }, interleave: { on: true, against: "noMuse" } });
+  var S5 = R.newState(), u5 = R.newUser();
+  R.museRequest(S5, u5, input(7), Pi);
+  R.museApply(S5, u5, reply(u5.musePending.ids.slice().reverse()), Pi, 1000);
+  var mix = R.interleave(S5, u5, input(7, 6, { now: 2000 }), Pi);
+  var noMuse = R.rank(S5, u5, input(7, 6, { now: 2000 }), R.params({ muse: { on: false } })).picks.map(function (p) { return p.gameID; });
+  var bIds = mix.picks.filter(function (p) { return p.team === "B"; }).map(function (p) { return p.gameID; });
+  var j = 0;
+  noMuse.forEach(function (id) { if (id === bIds[j]) j++; });
+  ok(mix.interleave.against === "noMuse" && j === bIds.length, "interleaving against noMuse compares with the formula alone");
+
+  // App bridge
+  var A = R.app;
+  A.load(null, null);
+  ok(JSON.parse(A.museRequest(JSON.stringify(input(5)))).skip === true, "with the flag off, app.museRequest skips");
+  A.load(null, JSON.stringify({ muse: { on: true } }));
+  var bridged = JSON.parse(A.museRequest(JSON.stringify(input(5))));
+  ok(typeof bridged.system === "string" && bridged.ids.length === 10, "app.museRequest returns the prompt");
+  var applied = JSON.parse(A.museApply(reply(bridged.ids), 5000));
+  ok(applied.ok && applied.kept === 10, "app.museApply takes Ember's raw reply");
+  var dbg = JSON.parse(A.debugSummary());
+  ok(dbg.muse && dbg.muse.active && dbg.muse.applied === 1 && dbg.muse.madeUpIDShare === 0, "the debug summary shows the Muse layer");
+  A.load(A.exportState(), JSON.stringify({ muse: { on: true } }));
+  ok(JSON.parse(A.debugSummary()).muse.active, "Ember's order survives export and reload");
+  A.load(null, null);
+  ok(R._math.firstJSONObject('x {"a": "}{"} y {"b":1}').a === "}{", "the JSON finder handles braces inside strings");
+
+  // Repeat window early in a session (fixed in 0.5: a short feed used to block too little).
+  var fresh = R.rank(R.newState(), R.newUser(), input(31, 5), R.params()).picks.map(function (p) { return p.gameID; });
+  var freshBase = R.baseline(input(31, 5)).picks.map(function (p) { return p.gameID; });
+  function distinct(list) { var o = {}; list.forEach(function (x) { o[x] = true; }); return Object.keys(o).length; }
+  ok(distinct(fresh) === 5 && distinct(freshBase) === 5, "the first 5 pages of a session never repeat a game", fresh.join(",") + " / " + freshBase.join(","));
+}
+
+if (typeof module !== "undefined" && module.exports) module.exports.runMuseChecks = runMuseChecks;

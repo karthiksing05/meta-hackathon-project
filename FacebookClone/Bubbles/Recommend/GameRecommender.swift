@@ -25,6 +25,13 @@ import UIKit
 ///   (`reward`, `bandit`, `calibration`, `coldStart`, `bait`).
 /// - `FB_RECS_RESET=1` starts from scratch.
 /// - `FB_RECS_LOG=1` prints every ranking and page to the console.
+/// - `FB_RECS_INTERLEAVE=1` mixes each feed from the formula and today's feed (team-draft
+///   interleaving) and keeps score of which side's pages you enjoyed. `FB_RECS_INTERLEAVE=noMuse`
+///   (or `noCalibration`, `noBait`, `noColdStart`, `noBandit`) compares the formula with that part
+///   switched off instead. The tally is in `interleaveStats()` and the debug summary.
+/// - `FB_RECS_MUSE=1` turns on the Muse re-rank: Ember reorders the formula's top 10 at most every
+///   10 minutes, off the main thread, and its order enters the score as one capped term on the next
+///   ranking. No key, a slow answer or a bad reply just leaves the formula as it is.
 ///
 /// Main thread only, like `BubbleStore`: JavaScriptCore contexts aren't thread-safe.
 final class GameRecommender {
@@ -48,6 +55,10 @@ final class GameRecommender {
         let pSlop: Double?
         let unproven: Bool?
         let why: String?
+        /// Ember's one-line reason, when the Muse re-rank placed this game.
+        let museWhy: String?
+        /// "A" (the formula) or "B" (the control) when interleaving is on.
+        let team: String?
     }
 
     /// False when `FB_RECS=off`, in previews, or if the script didn't load.
@@ -56,6 +67,12 @@ final class GameRecommender {
     private(set) var lastBaitLean: Double?
 
     private let logs: Bool
+    private let museEnabled: Bool
+    private var museInFlight = false
+    private var museAskedAt: Date?
+    /// At most one Ember call this often.
+    private let museEvery: TimeInterval = 600
+    private lazy var museClient: MuseClient? = MuseConfig.load().map { MuseClient(config: $0) }
     private var bridge: JSValue?
     private var context: JSContext?
     private var exception: String?
@@ -70,6 +87,7 @@ final class GameRecommender {
         let env = ProcessInfo.processInfo.environment
         let setting = (env["FB_RECS"] ?? "on").trimmingCharacters(in: .whitespaces)
         logs = env["FB_RECS_LOG"] == "1"
+        museEnabled = env["FB_RECS_MUSE"] == "1"
         isEnabled = false
         guard setting.lowercased() != "off", setting != "0", env["XCODE_RUNNING_FOR_PREVIEWS"] != "1" else { return }
 
@@ -93,7 +111,7 @@ final class GameRecommender {
         self.bridge = bridge
 
         let saved = env["FB_RECS_RESET"] == "1" ? nil : Self.stateURL.flatMap { try? String(contentsOf: $0, encoding: .utf8) }
-        guard let reply = call("load", [saved ?? "", Self.overrides(for: setting) ?? ""]) else {
+        guard let reply = call("load", [saved ?? "", Self.overrides(for: setting, env: env) ?? ""]) else {
             print("[recs] load failed; using the old feed")
             self.bridge = nil
             return
@@ -122,7 +140,8 @@ final class GameRecommender {
             feedKeys: feed.map { "\($0.bubbleID)|\($0.reason.rawValue)|\($0.runUserID ?? "-")" },
             count: count,
             seed: UInt32(truncatingIfNeeded: seed),
-            day: Self.today()
+            day: Self.today(),
+            now: Date().timeIntervalSince1970 * 1000
         )
         guard let json = Self.encode(input),
               let reply = call("rank", [json]),
@@ -140,7 +159,57 @@ final class GameRecommender {
                              pick.unproven == true ? " new" : "", pick.why ?? ""))
             }
         }
+        refreshMuseOrder(json)
         return decoded.picks
+    }
+
+    /// Interleaving tally so far (`app.interleaveStats`), for debug views. Nil when off.
+    func interleaveStats() -> String? {
+        isEnabled ? call("interleaveStats", []) : nil
+    }
+
+    // MARK: - Muse re-rank
+
+    /// Asks Ember to reorder the formula's top games (`FB_RECS_MUSE=1`). One call in flight at a
+    /// time, at most every `museEvery`. The prompt holds game features only, never people; the
+    /// reply is checked in game-recs.js (unknown games are dropped) and lands on the next ranking.
+    private func refreshMuseOrder(_ rankInputJSON: String) {
+        guard museEnabled, !museInFlight else { return }
+        if let at = museAskedAt, Date().timeIntervalSince(at) < museEvery { return }
+        guard let client = museClient,
+              let requestJSON = call("museRequest", [rankInputJSON]),
+              let request = try? JSONDecoder().decode(MuseRequest.self, from: Data(requestJSON.utf8)),
+              request.skip != true, let system = request.system, let user = request.user else { return }
+        museInFlight = true
+        museAskedAt = Date()
+        let model = client.config.fastModel
+        let messages: [JSONValue] = [
+            ["role": "system", "content": .string(system)],
+            ["role": "user", "content": .string(user)],
+        ]
+        let options = MuseClient.ChatOptions(json: true, timeout: 8, maxAttempts: 1, purpose: "feed re-rank")
+        Task { @MainActor [weak self] in
+            let content: String?
+            do {
+                content = try await client.chat(model: model, messages: messages, options: options).content
+            } catch {
+                content = nil
+                self?.log("muse re-rank skipped: \((error as? MuseError)?.shortReason ?? "error")")
+            }
+            guard let self else { return }
+            self.museInFlight = false
+            guard let content else { return }
+            let now = String(Int(Date().timeIntervalSince1970 * 1000))
+            if let result = self.call("museApply", [content, now]) {
+                self.log("muse re-rank \(result)")
+            }
+        }
+    }
+
+    private struct MuseRequest: Decodable {
+        let skip: Bool?
+        let system: String?
+        let user: String?
     }
 
     // MARK: - Group Blend
@@ -358,16 +427,29 @@ final class GameRecommender {
         }
     }
 
-    /// `FB_RECS=reward,bandit` → only those stages on.
-    private static func overrides(for setting: String) -> String? {
+    /// `FB_RECS=reward,bandit` → only those stages on; `FB_RECS_INTERLEAVE` and `FB_RECS_MUSE` as in
+    /// the header. Nil when everything is at its default.
+    private static func overrides(for setting: String, env: [String: String]) -> String? {
+        var over: [String: Any] = [:]
         let lowered = setting.lowercased()
-        guard !lowered.isEmpty, lowered != "on", lowered != "1", lowered != "all" else { return nil }
-        let wanted = Set(lowered.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })
-        var stages: [String: Bool] = [:]
-        for stage in ["reward", "bandit", "calibration", "coldStart", "bait"] {
-            stages[stage] = wanted.contains(stage.lowercased())
+        if !lowered.isEmpty, lowered != "on", lowered != "1", lowered != "all" {
+            let wanted = Set(lowered.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })
+            var stages: [String: Bool] = [:]
+            for stage in ["reward", "bandit", "calibration", "coldStart", "bait"] {
+                stages[stage] = wanted.contains(stage.lowercased())
+            }
+            over["stages"] = stages
         }
-        return encode(["stages": stages])
+        if let raw = env["FB_RECS_INTERLEAVE"]?.trimmingCharacters(in: .whitespaces),
+           !raw.isEmpty, raw != "0", raw.lowercased() != "off" {
+            let against = raw == "1" || raw.lowercased() == "on" ? "baseline" : raw
+            over["interleave"] = ["on": true, "against": against] as [String: Any]
+        }
+        if env["FB_RECS_MUSE"] == "1" {
+            over["muse"] = ["on": true]
+        }
+        guard !over.isEmpty, let data = try? JSONSerialization.data(withJSONObject: over) else { return nil }
+        return String(data: data, encoding: .utf8)
     }
 
     static func today() -> Int {
@@ -420,6 +502,8 @@ final class GameRecommender {
         let count: Int
         let seed: UInt32
         let day: Int
+        /// Milliseconds since 1970, so a stale Ember order can expire.
+        let now: Double
     }
 
     private struct ImpressionInput: Encodable {

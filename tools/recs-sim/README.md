@@ -1,17 +1,23 @@
 # Game feed recommender
 
+**Start with `docs/RANKING.md`**: the formula, how we check it, and how it compares to published
+work. This file is the longer write-up and the simulator notes.
+
 Orders the games feed (the app's games tab) after its curated opening pages. The core is
 `FacebookClone/Bubbles/Recommend/game-recs.js`: plain JS, no dependencies, the same pattern as the
 game runtime. The app runs it in JavaScriptCore through `GameRecommender.swift`. Node runs it here
 for checks and the simulator.
 
 ```sh
-node tools/recs-sim/run-node.js        # 70 checks
+node tools/recs-sim/run-node.js        # 127 checks
 tools/recs-sim/run-jsc.sh              # the same checks in JavaScriptCore (macOS)
 node tools/recs-sim/seeds-demo.js      # the real seed games through the app bridge
 node tools/recs-sim/sim.js --seeds 5   # every stage vs today's feed, synthetic people
 node tools/recs-sim/sim.js --seeds 3 --sweep calibration.lambda=0.3,0.5,0.7
 node tools/recs-sim/fb-sim.js --seeds 6  # Facebook-style ranker: IDs vs the game language (below)
+node tools/recs-sim/props.js --break   # property tests, and the same with a guard off
+node tools/recs-sim/eval-bench.js --ablate   # vs MostPop and ε-greedy: regret, learning curves, ablations
+node tools/recs-sim/interleave-sim.js  # team-draft interleaving vs today's feed and each part; --muse for Ember
 ```
 
 ## The model
@@ -92,6 +98,34 @@ v0.1 vs v0.2, everything on (1–4 + bait):
 | bait-averse hooky / slop / pages | 45% / 14% / 7.2 | 23% / 9% / 7.5 |
 | balanced hooky / slop / pages | 69% / 21% / 7.6 | 44% / 11% / 7.9 |
 | bait-lover hooky / slop / pages | 80% / 30% / 10.2 | 62% / 14% / 9.3 |
+
+App wiring status: `game-recs.js` and these tools are on the `recommendation` branch. The Swift side
+(`GameRecommender.swift`, `StoreRecommendations.swift`, `GroupBlend.swift`, `GroupBlendSection.swift`
+and the small hooks in the games tab) follows once it builds in Xcode. Until then the bundled script
+is unused, and the feed is unchanged.
+
+## Interleaving (v0.5): does the formula beat today's feed on real use?
+
+Team-draft interleaving, the cheap online test Netflix, Airbnb and Spotify use instead of a first
+A/B test (Netflix: over 100x fewer users than its most sensitive A/B metric; Airbnb: a 50x speedup
+and 82% agreement with A/B results). See `BENCHMARKING.md`.
+
+- **Draft.** The formula (team A) and a control (team B) rank the same candidates. Each round a
+  coin flip says who picks first, and each side adds its best game that isn't on the page yet.
+- **Credit.** A page earns its side a point when the judge's satisfaction is at least 0.5:
+  finishes, replays, saves and social moments. A grab alone isn't a point (Airbnb credits
+  bookings, not clicks). The judge is always the default reward weights, so tuning the formula
+  can't move the yardstick.
+- **Session.** More points wins; equal points (including none) is a tie. The tally keeps wins,
+  losses, ties, the formula's share of decided sessions with a Wilson 95% interval, a sign-test
+  p-value, and points per page for each side.
+- **Controls.** `against: "baseline"` (today's weighted-random feed) or the formula with one part
+  off: `noCalibration`, `noBait`, `noColdStart`, `noBandit`, `noMuse`. The same tally then shows
+  each part earns its place.
+- **API.** Off by default. `app.load(state, '{"interleave":{"on":true,"against":"baseline"}}')`;
+  `app.rank` then returns merged picks with `team: "A" | "B" | null`; `app.observe` credits the
+  page; `app.endSession` scores the session; `app.interleaveStats()` returns the tally. The tally
+  is saved with the rest of the state.
 
 ## Next (single-person feed)
 
