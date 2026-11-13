@@ -231,3 +231,62 @@ func TestContextSaysWhoUnderstood(t *testing.T) {
 		t.Errorf("context: %+v %v", gc.Understanding, gc.Notes)
 	}
 }
+
+func TestGenericGoalMeasure(t *testing.T) {
+	// Kevin32 #8: a goal measured in plain points can't fail "measures doesn't measure the goal"
+	s := baseSpec()
+	s.Goal = Goal{Text: "Score points.", Target: "score 500 points", Measure: "points"}
+	s.Score = Score{Kind: "points", Measures: "points", Events: []string{"answer"}}
+	s.End.EndsWhen = []string{"time_out"}
+	p, _ := s.Validate()
+	for _, x := range p {
+		if strings.HasPrefix(x, "score:") {
+			t.Errorf("false positive: %s", x)
+		}
+	}
+	s.Goal.Measure, s.Goal.Target = "orders served", "serve 20 orders"
+	s.Score.Measures = "taps"
+	if p, _ := s.Validate(); len(p) == 0 {
+		t.Error("a real mismatch is still flagged")
+	}
+}
+
+func TestSponsor(t *testing.T) {
+	cases := map[string]string{
+		"A Nike sponsored runner through Tokyo":           "Nike",
+		"Red Bull sponsored cliff diving game":            "Red Bull",
+		"a trivia game sponsored by Oreo":                 "Oreo",
+		"Doritos-sponsored snack catcher":                 "Doritos",
+		"Retro RPG where I'm a stray cat building a gang": "",
+		"a game presented by Taco Bell for our Group":     "Taco Bell",
+	}
+	for req, want := range cases {
+		if got := sponsorName(req); got != want {
+			t.Errorf("%q: sponsor %q, want %q", req, got, want)
+		}
+	}
+	u, _ := KeywordUnderstander{}.Understand(context.Background(), "Red Bull sponsored cliff diving game", Vocab{})
+	if u.Sponsor == nil || u.Sponsor.Name != "Red Bull" {
+		t.Errorf("keyword understanding: %+v", u.Sponsor)
+	}
+	for _, r := range u.NamedRefs {
+		if r == "Red Bull" {
+			t.Error("a sponsor is not a named game")
+		}
+	}
+}
+
+func TestStackHeightTopOut(t *testing.T) {
+	s4 := Score{Measures: "highest stack height in tiles", Unit: "whole tiles"}
+	g := Goal{Text: "Stack falling pieces as high as you can before the stack tops out.", Target: "reach the highest stack you can before topping out", Measure: "highest stack height in tiles"}
+	if !rewardsToppingOut(s4, g, End{Lose: "The stack reaches the top", EndsWhen: []string{"board_full"}}) {
+		t.Error("S4: a height score in a top-out game should be flagged")
+	}
+	tower := Goal{Text: "Drop cake layers to build the tallest tower without it toppling.", Target: "build the tallest tower", Measure: "tower height in layers"}
+	if rewardsToppingOut(Score{Measures: "tower height in layers", Unit: "layers"}, tower, End{Lose: "a layer misses and the tower falls", EndsWhen: []string{"lives_gone"}}) {
+		t.Error("a cake tower lost by toppling is not topping out")
+	}
+	if rewardsToppingOut(Score{Measures: "rows cleared", Unit: "rows"}, g, End{EndsWhen: []string{"board_full"}}) {
+		t.Error("rows cleared is fine")
+	}
+}

@@ -40,6 +40,7 @@ type ContextUnder struct {
 	Keywords  []string `json:"keywords"`
 	Players   string   `json:"players"`
 	By        string   `json:"by,omitempty"` // which understander ran: muse, keywords (and why), given
+	Sponsor   *Sponsor `json:"sponsor,omitempty"`
 }
 
 // ContextType is a type card: the fields the composer needs, plus why it matched.
@@ -103,7 +104,7 @@ func BuildContext(p ContextPack) (GenContext, error) {
 	c := GenContext{
 		Version: ContextVersion,
 		Understanding: ContextUnder{NamedRefs: u.NamedRefs, Verbs: u.Verbs, Inputs: u.Inputs, Families: u.Families,
-			Theme: u.Theme, Keywords: u.Keywords, Players: u.Players},
+			Theme: u.Theme, Keywords: u.Keywords, Players: u.Players, Sponsor: u.Sponsor},
 		GoldIDs: []string{},
 		Learned: []ContextType{},
 		Notes:   append([]string{}, p.Notes...),

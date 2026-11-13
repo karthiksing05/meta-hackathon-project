@@ -20,8 +20,9 @@ var specStages = [][]string{
 
 // partSchemas are each part's JSON shape and guidance, as the prompt states them.
 var partSchemas = map[string]string{
-	"theme": `"theme": {"world": string, "named": [string], "tone": string, "look": string, "terms": [string]}
-   named: the franchise, characters and places the person named, verbatim (real names are fine when asked). terms: 3-8 words players must see.`,
+	"theme": `"theme": {"world": string, "named": [string], "tone": string, "look": string, "terms": [string], "sponsor": {"name": string, "products": [string], "tone": string} | null}
+   named: the franchise, characters and places the person named, verbatim (real names are fine when asked). terms: 3-8 words players must see.
+   sponsor: only when a brand sponsors or presents the game (see Understood); its real name, 2-5 real products the game uses as pieces, and the tone. Real names, colors and logos are fine.`,
 	"goal": `"goal": {"text": string, "target": string, "measure": string}
    target is MEASURABLE, in THIS game's own words: a number ("<verb> <N> <things>") or a clear end ("survive to <end>", "<verb> every <thing>", "reach <ending>"). measure names the quantity that tracks it ("<things> <verbed>", "seconds alive"). The <...> patterns are placeholders, not content: never copy them or any example from another game.`,
 	"loop": `"loop": {"verb": string, "sees": string, "input": "tap"|"drag"|"swipe"|"hold"|"type"|"tilt"|"draw"|"voice"|"multi_touch", "feedback": string, "cycle_seconds": number}
@@ -41,7 +42,8 @@ var partSchemas = map[string]string{
    distance (higher, any, whole metres or tiles); tiered_points (higher, any: rarity-tier points); streak (higher, any, a count).
    events: the game events that change the score. format: how it is shown: "m:ss.t" for the ms kinds, "{n}%" for accuracy,
    otherwise "{n} <unit>". Leave out bounds. A goal that caps something ("in N <things> or less") never scores each <thing> used:
-   score what is left under the cap, or the ending reached. A game with no right answer (ratings, tier lists, taste) sets
+   score what is left under the cap, or the ending reached. A stacking game lost when the stack tops out never scores the
+   stack's height (it is highest when the player loses): score rows cleared, pieces placed or time alive. A game with no right answer (ratings, tier lists, taste) sets
    "ranked": false and compares agreement in social.`,
 	"social": `"social": {"mode": "same_seed_async"|"series"|"group_round"|"weekly_board"|"opinion_compare", "round_seconds": number,
    "result": {"kind": "score"|"ending"|"picks"|"creation", "compare": "score"|"ending"|"agreement"|"none", "display": string, "endings": [string], "state": [string]},
@@ -136,6 +138,11 @@ func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessag
 		} else {
 			plan.Notes = append(plan.Notes, "spec repair failed: "+err.Error())
 		}
+	}
+	if spec.Theme.Sponsor == nil && in.Context.Understanding.Sponsor != nil {
+		sp := *in.Context.Understanding.Sponsor
+		spec.Theme.Sponsor = &sp
+		plan.Notes = append(plan.Notes, "theme: sponsor "+sp.Name+" copied from the understanding")
 	}
 	plan.Spec = spec
 	plan.Issues = uniq(problems)

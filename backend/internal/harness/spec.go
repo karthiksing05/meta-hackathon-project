@@ -41,6 +41,8 @@ type Theme struct {
 	Tone  string   `json:"tone"`
 	Look  string   `json:"look"`
 	Terms []string `json:"terms,omitempty"` // words the players must see (checked by quality.mjs)
+	// Sponsor presents the game: its name goes in the title or intro card, its products become pieces.
+	Sponsor *Sponsor `json:"sponsor,omitempty"`
 }
 
 // Goal is what the player tries to do and the measurable target.
@@ -386,8 +388,11 @@ func (s *Spec) Validate() (problems, fixed []string) {
 	}
 	if empty(sc.Measures) {
 		bad("score", "measures is empty")
-	} else if !shareWord(sc.Measures+" "+sc.Unit, s.Goal.Measure+" "+s.Goal.Target+" "+s.Goal.Text) {
+	} else if hasContentWord(s.Goal.Measure+" "+s.Goal.Target+" "+s.Goal.Text) && !shareWord(sc.Measures+" "+sc.Unit, s.Goal.Measure+" "+s.Goal.Target+" "+s.Goal.Text) {
 		bad("score", "measures %q doesn't measure the goal (%q)", sc.Measures, s.Goal.Measure)
+	}
+	if rewardsToppingOut(*sc, s.Goal, s.End) {
+		bad("score", "measures %q is highest when the stack tops out, so losing scores best: score rows or lines cleared, pieces placed, or time alive", sc.Measures)
 	}
 	if sc.Kind == "time_to_complete" && !oneOf("target_reached", s.End.EndsWhen) && !oneOf("all_prompts_done", s.End.EndsWhen) && !oneOf("board_full", s.End.EndsWhen) {
 		bad("score", "a time to complete needs a run that can finish (end.ends_when target_reached or all_prompts_done)")
@@ -398,6 +403,23 @@ func (s *Spec) Validate() (problems, fixed []string) {
 		bad("feel", "no juice moments")
 	}
 	return problems, fixed
+}
+
+var (
+	reStackHeight = regexp.MustCompile(`(?i)\b(height|tall|tallest|high|highest)\b`)
+	reStack       = regexp.MustCompile(`(?i)\b(stack|stacks|stacked|stacking|tower|column|columns|pile|well)\b`)
+	reTopOut      = regexp.MustCompile(`(?i)\b(tops? out|topping out|topped out|reach(es)? the top|overflows?|board_full|fills? (up )?(the|to the) top)\b`)
+)
+
+// rewardsToppingOut reports a score that measures a stack's height in a game lost by the stack reaching
+// the top: the height is greatest at the moment the player loses, so doing nothing scores best (Kevin 47,
+// S4 "highest stack height in tiles": the idle bot tied the regular player at 10 tiles).
+func rewardsToppingOut(sc Score, g Goal, e End) bool {
+	m := sc.Measures + " " + sc.Unit
+	if !reStackHeight.MatchString(m) || !reStack.MatchString(m+" "+g.Measure+" "+g.Target) {
+		return false
+	}
+	return reTopOut.MatchString(g.Text + " " + g.Target + " " + g.Measure + " " + e.Lose + " " + strings.Join(e.EndsWhen, " "))
 }
 
 // shareWord reports whether two texts share a content word (stemmed), so "orders completed" measures
@@ -416,6 +438,29 @@ func shareWord(a, b string) bool {
 }
 
 var genericScoreWord = map[string]bool{"point": true, "score": true, "total": true, "number": true}
+
+// genericScoreStem holds the generic score words as Tokens stems them ("score" → its stem).
+var genericScoreStem = func() map[string]bool {
+	m := map[string]bool{}
+	for w := range genericScoreWord {
+		m[Stem(w)] = true
+	}
+	for _, w := range []string{"scores", "points", "totals"} {
+		m[Stem(w)] = true
+	}
+	return m
+}()
+
+// hasContentWord reports whether a goal names anything but generic score words: a goal measured in plain
+// "points" can't be matched word for word, so the check passes it (Kevin32 #8).
+func hasContentWord(s string) bool {
+	for _, t := range Tokens(s) {
+		if !genericScoreWord[t] && !genericScoreStem[t] && !reNumber.MatchString(t) {
+			return true
+		}
+	}
+	return false
+}
 
 // ErrSpecInvalid wraps the problems of a spec that can't be used.
 var ErrSpecInvalid = errors.New("harness: the game spec has problems")

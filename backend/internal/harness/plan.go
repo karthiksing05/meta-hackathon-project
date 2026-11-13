@@ -242,8 +242,13 @@ func planUser(in PlanInput, lists []checklistFor) string {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "Request: %q\n\n", in.Request)
 	u := in.Context.Understanding
-	fmt.Fprintf(&sb, "Understood: named %v, theme %v, verbs %v, inputs %v, families %v, players %s\n\n",
+	fmt.Fprintf(&sb, "Understood: named %v, theme %v, verbs %v, inputs %v, families %v, players %s\n",
 		u.NamedRefs, u.Theme, u.Verbs, u.Inputs, u.Families, u.Players)
+	if u.Sponsor != nil {
+		sp, _ := json.Marshal(u.Sponsor)
+		fmt.Fprintf(&sb, "Sponsor: %s (put it in spec.theme.sponsor)\n", sp)
+	}
+	sb.WriteString("\n")
 	types, _ := json.Marshal(in.Context.Types)
 	fmt.Fprintf(&sb, "Game types found (best first):\n%s\n\n", types)
 	type toolLine struct {
