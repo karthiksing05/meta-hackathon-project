@@ -6,7 +6,7 @@
     "axis":     { "type": "enum", "values": ["x", "y", "xy"], "default": "x" },
     "mode":     { "type": "enum", "values": ["follow", "glide"], "default": "follow" },
     "start_x":  { "type": "float", "default": 180.0, "min": 0.0, "max": 360.0 },
-    "start_y":  { "type": "float", "default": 560.0, "min": 0.0, "max": 640.0 },
+    "start_y":  { "type": "float", "default": 560.0, "min": 0.0, "max": 780.0 },
     "speed":    { "type": "float", "default": 420.0, "min": 50.0, "max": 2000.0 },
     "margin":   { "type": "float", "default": 20.0, "min": 0.0, "max": 120.0 },
     "key_step": { "type": "float", "default": 28.0, "min": 4.0, "max": 120.0 },

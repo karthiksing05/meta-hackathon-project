@@ -8,7 +8,7 @@
     "drain_rate": { "type": "float", "default": 1.0, "min": 0.5, "max": 4.0 },
     "on_empty":   { "type": "enum", "values": ["lose", "emit_only"], "default": "lose" },
     "x": { "type": "int", "default": 30, "min": 0, "max": 360 },
-    "y": { "type": "int", "default": 76, "min": 0, "max": 640 },
+    "y": { "type": "int", "default": 76, "min": 0, "max": 780 },
     "w": { "type": "int", "default": 300, "min": 20, "max": 360 },
     "h": { "type": "int", "default": 10, "min": 4, "max": 40 }
   },

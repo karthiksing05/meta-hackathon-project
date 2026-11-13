@@ -1,7 +1,7 @@
 {
   "fragment": "keyboard",
   "version": 1,
-  "describe": "An on-screen letter keyboard: a grid of keys, one per character of `letters`, row by row. Tapping a key sends input `press {letter}` (extra cells past the last letter are blank and send an empty letter, which the game should ignore). The game must define function `key_state(letter)` returning 0 = untouched ($surface), 1 = good ($primary) or 2 = bad ($danger). The grid is `cols` x `rows` keys of `key_size` px with `gap` px between, top-left at (x, y); `cols * rows` must be at least the number of letters. Defaults fit 26 letters in the lower part of the 360 x 640 canvas.",
+  "describe": "An on-screen letter keyboard: a grid of keys, one per character of `letters`, row by row. Tapping a key sends input `press {letter}` (extra cells past the last letter are blank and send an empty letter, which the game should ignore). The game must define function `key_state(letter)` returning 0 = untouched ($surface), 1 = good ($primary) or 2 = bad ($danger). The grid is `cols` x `rows` keys of `key_size` px with `gap` px between, top-left at (x, y); `cols * rows` must be at least the number of letters. Defaults fit 26 letters in the lower part of a 360 x 640 canvas.",
   "params": {
     "letters":  { "type": "string", "default": "abcdefghijklmnopqrstuvwxyz", "max_len": 40 },
     "cols":     { "type": "int", "default": 7, "min": 4, "max": 10 },
@@ -9,7 +9,7 @@
     "key_size": { "type": "int", "default": 44, "min": 28, "max": 60 },
     "gap":      { "type": "int", "default": 4, "min": 0, "max": 12 },
     "x":        { "type": "int", "default": 14, "min": 0, "max": 360 },
-    "y":        { "type": "int", "default": 400, "min": 0, "max": 640 }
+    "y":        { "type": "int", "default": 400, "min": 0, "max": 780 }
   },
   "requires": {
     "functions": { "key_state": { "params": { "letter": "string" }, "returns": "int" } }

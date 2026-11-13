@@ -4,9 +4,9 @@
   "describe": "A real map in a rect (`x`, `y`, `w`, `h`) with one place lit up. The map picture and the place outlines come from the manifest's `geo` section (authoring/expander/geo.mjs, built from Natural Earth), never from the model: write `geo` and leave the art role `map` and the geo_* functions to it. The game supplies `map_focus()` (int): the index into the `geo` places to light up, or -1 for none. For example `get_or(order, qi, -1)` to show the asked country, or `if locked then get_or(order, qi, -1) else -1` to show it only after the answer. The lit place is filled with $accent and gets a pulsing ring at its label point, so small countries still show. `geo_place_at(p)` (p: a canvas vec2, such as a tap's pointer) gives the index of the game's place whose outline contains p, or -1: use it for tap-the-country games. Draws nothing interactive; add map_pin (or your own transparent rect with on_tap) for taps.",
   "params": {
     "x": { "type": "float", "default": 5.0, "min": 0.0, "max": 360.0 },
-    "y": { "type": "float", "default": 92.0, "min": 0.0, "max": 640.0 },
+    "y": { "type": "float", "default": 92.0, "min": 0.0, "max": 780.0 },
     "w": { "type": "float", "default": 350.0, "min": 40.0, "max": 360.0 },
-    "h": { "type": "float", "default": 136.0, "min": 40.0, "max": 640.0 },
+    "h": { "type": "float", "default": 136.0, "min": 40.0, "max": 780.0 },
     "ring": { "type": "bool", "default": true }
   },
   "art": {

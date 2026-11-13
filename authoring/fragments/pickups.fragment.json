@@ -10,8 +10,8 @@
     "lifetime":  { "type": "duration", "default": 6000, "min": 0, "max": 60000 },
     "x_min":     { "type": "float", "default": 40.0, "min": 0.0, "max": 360.0 },
     "x_max":     { "type": "float", "default": 320.0, "min": 0.0, "max": 360.0 },
-    "y_min":     { "type": "float", "default": 160.0, "min": 0.0, "max": 640.0 },
-    "y_max":     { "type": "float", "default": 520.0, "min": 0.0, "max": 640.0 },
+    "y_min":     { "type": "float", "default": 160.0, "min": 0.0, "max": 780.0 },
+    "y_max":     { "type": "float", "default": 520.0, "min": 0.0, "max": 780.0 },
     "columns":   { "type": "int", "default": 0, "min": 0, "max": 8 },
     "fall":      { "type": "float", "default": 0.0, "min": 0.0, "max": 600.0 },
     "scroll":    { "type": "float", "default": 0.0, "min": 0.0, "max": 600.0 }

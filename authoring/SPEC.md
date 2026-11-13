@@ -77,7 +77,8 @@ leaves dead `10 > 0 and …` guards in the output.
 
 **Game params** are read-only values every fragment can use, in either kind of field and as a param's
 `default`: `@game.duration_ms` (the game's `time_limit`, or else `meta.duration_s × 1000`),
-`@game.canvas_w` and `@game.canvas_h` (from the look, 360 × 640 for every v0.1 look).
+`@game.canvas_w` and `@game.canvas_h` (360 × 640, or 360 × 780 with `look.canvas: "tall"`, 2.4), and
+`@game.safe_top` and `@game.safe_bottom` (the safe area's top and bottom, 2.4).
 
 **Art params** describe the game's sprite for each role the fragment declares in its `art` header
 (1.7): `@art.<role>` (bool: the game has one), `@art.<role>.id` (string: its asset id),
@@ -310,6 +311,14 @@ set on every `text` node that doesn't set its own.
 
 Tokens are applied in this order, later winning: the look's preset, `art.palette` (2.8), `look.tokens`.
 `art.font` replaces the look's font.
+
+**Canvas.** Games are 360 × 640 unless `look.canvas` is `"tall"` (360 × 780, 19.5:9, the shape of a
+phone; also `{w: 360, h}` or `"legacy"`; the expander's `options.canvas` sets a default). A tall canvas
+fills a phone screen: its top 110 and bottom 96 units run under the player's bars and hold background
+only (the backdrop is drawn at the full canvas size), and key content (taps, text, the HUD) stays in the
+safe area between them, y 110 to 684. The look's `hud_top` and `hud_bottom` stacks move to the top and
+bottom of the safe area. Game params `@game.safe_top` and `@game.safe_bottom` give the safe area (0 and
+`canvas_h` on a 360 × 640 canvas). `playtest/fill-check.mjs` checks all of this (`F_*` codes).
 
 ### 2.5 Content
 

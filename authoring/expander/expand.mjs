@@ -8,6 +8,7 @@ import { rewrite, rewriteType, namesIn, tokenize, stringLiteral, durationMs, saf
 import { compileArt } from './art.mjs';
 import { compileSound, MOMENTS } from './sound.mjs';
 import { normalizeScore, unknownScoreEvents } from './score.mjs';
+import { pickCanvas, fitLayout, safeArea } from './canvas.mjs';
 
 export const STANDARD_TOKENS = ['primary', 'secondary', 'accent', 'ink', 'bg', 'danger', 'surface'];
 export const SLOTS = { hud_top: 3, hud_bottom: 2, playfield: Infinity, overlay: Infinity };
@@ -309,7 +310,10 @@ export function expand(manifest, lib, options = {}) {
   const lookId = manifest.look?.id ?? 'paper';
   const look = lib.looks[lookId];
   if (!look) err('A_UNKNOWN_LOOK', '/look/id', `no look named '${lookId}'`, { hint: didYouMean(lookId, Object.keys(lib.looks)) });
-  const canvas = { w: look?.canvas?.w ?? 360, h: look?.canvas?.h ?? 640 };
+  // 360 × 640 unless the manifest (look.canvas) or the caller (options.canvas) asks for "tall" (360 × 780,
+  // canvas.mjs): then the look's HUD moves into the tall canvas's HUD bands.
+  const canvas = pickCanvas(manifest.look?.canvas ?? options.canvas, look);
+  const safe = safeArea(canvas);
 
   // ---- art, sound and feel (SPEC 2.8–2.10) ----
   const art = compileArt(manifest.art, canvas, err);
@@ -331,6 +335,8 @@ export function expand(manifest, lib, options = {}) {
     'game.duration_ms': { type: 'int', value: Number.isNaN(durationFromLimit) ? Math.round((manifest.meta?.duration_s ?? 60) * 1000) : durationFromLimit },
     'game.canvas_w': { type: 'int', value: canvas.w },
     'game.canvas_h': { type: 'int', value: canvas.h },
+    'game.safe_top': { type: 'int', value: safe.y0 },
+    'game.safe_bottom': { type: 'int', value: safe.y1 },
   };
 
   // Names the game declares itself, plus content state.
@@ -649,7 +655,7 @@ export function expand(manifest, lib, options = {}) {
     }
     return n;
   };
-  const root = look ? splice(clone(look.layout)) : { node: 'group', children: [] };
+  const root = look ? splice(fitLayout(clone(look.layout), canvas)) : { node: 'group', children: [] };
   // The backdrop sits under everything, filling the canvas.
   if (art.backdrop) (root.children ??= []).unshift({ node: 'image', asset: art.backdrop.id, x: 0, y: 0, w: art.backdrop.w, h: art.backdrop.h });
   const font = art.font ?? look?.font;

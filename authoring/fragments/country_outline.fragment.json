@@ -4,9 +4,9 @@
   "describe": "One place's outline drawn big, alone, filling the rect (`x`, `y`, `w`, `h`): guess the country (or US state) from its shape. The outlines come from the manifest's `geo` section with an `outline` rect (authoring/expander/geo.mjs, built from Natural Earth), never from the model: write `geo` and leave the geo_outline functions to it; the geo step also sets this use's rect. The game supplies `outline_focus()` (int): the index into the `geo` places to draw, or -1 for none. The main land mass fills the rect; far-off parts (overseas islands) are cut at the rect's edge. Filled with $primary and outlined in $ink. Draws nothing interactive.",
   "params": {
     "x": { "type": "float", "default": 40.0, "min": 0.0, "max": 360.0 },
-    "y": { "type": "float", "default": 100.0, "min": 0.0, "max": 640.0 },
+    "y": { "type": "float", "default": 100.0, "min": 0.0, "max": 780.0 },
     "w": { "type": "float", "default": 280.0, "min": 40.0, "max": 360.0 },
-    "h": { "type": "float", "default": 150.0, "min": 40.0, "max": 640.0 }
+    "h": { "type": "float", "default": 150.0, "min": 40.0, "max": 780.0 }
   },
   "requires": {
     "functions": {

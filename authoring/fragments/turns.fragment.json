@@ -81,7 +81,7 @@
           "node": "group",
           "visible": "= not turn_active and turn_no < @players * @turns",
           "children": [
-            { "node": "rect", "x": 0, "y": 0, "w": 360, "h": 640, "fill": "$bg", "on_tap": { "input": "_ready" } },
+            { "node": "rect", "x": 0, "y": 0, "w": "@game.canvas_w", "h": "@game.canvas_h", "fill": "$bg", "on_tap": { "input": "_ready" } },
             { "node": "text", "x": 180, "y": 270, "anchor": "center", "size": 30, "weight": 700, "color": "$ink", "text": "= 'Pass to ' + turn_name(turn_player)" },
             { "node": "text", "x": 180, "y": 320, "anchor": "center", "size": 18, "weight": 500, "color": "$secondary", "text": "= 'Turn ' + str(floor(turn_no * 1.0 / @players) + 1) + ' of ' + str(@turns) + ' - tap when ready'" },
             { "node": "text", "x": 180, "y": 380, "anchor": "center", "size": 16, "weight": 600, "color": "$accent", "text": "= _scoreboard()" }

@@ -5,7 +5,7 @@
   "params": {
     "gravity":     { "type": "float", "default": 1800.0, "min": 200.0, "max": 5000.0 },
     "jump_vel":    { "type": "float", "default": 720.0, "min": 100.0, "max": 2000.0 },
-    "floor_y":     { "type": "float", "default": 540.0, "min": 100.0, "max": 640.0 },
+    "floor_y":     { "type": "float", "default": 540.0, "min": 100.0, "max": 780.0 },
     "x":           { "type": "float", "default": 90.0, "min": 0.0, "max": 360.0 },
     "double_jump": { "type": "bool", "default": false },
     "flap":        { "type": "bool", "default": false },

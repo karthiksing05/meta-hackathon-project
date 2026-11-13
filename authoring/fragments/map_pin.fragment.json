@@ -4,9 +4,9 @@
   "describe": "Tap the map to drop a pin; the distance to the answer is measured on the globe (great circle) in whole km, with plain arithmetic plus sin, cos and sqrt, so replays match. Use with geo_map and a `geo` section: the geo step fills this use's rect (`x`, `y`, `w`, `h`) and projection (`ax`, `ay`, `kx`, `ky`: canvas = (ax + lon * kx, ay - lat * ky)), so don't set those yourself. The game supplies `map_target()` (vec2: the answer as vec(lon, lat), usually `get_or(geo_target(), index, vec(0.0, 0.0))`) and `map_can_pin()` (bool: pins are taken only while it is true). A tap (input `map_tap {at}`) sets `pin_at`, `pin_km` and `pin_shown`, emits `pinned {km}`, and `pin_far` when km > `far_km`; after `reveal_ms` it emits `pin_done`, the end of the round (bind rounds' `round_done` to it). While the pin shows it draws the pin, a line to the answer and the distance. `pin_points(km)` gives 0 to 1000 points, falling linearly to 0 at `zero_km`; add them to `score` yourself. Faint dots on the 30-degree grid help players aim.",
   "params": {
     "x": { "type": "float", "default": 5.0, "min": 0.0, "max": 360.0 },
-    "y": { "type": "float", "default": 92.0, "min": 0.0, "max": 640.0 },
+    "y": { "type": "float", "default": 92.0, "min": 0.0, "max": 780.0 },
     "w": { "type": "float", "default": 350.0, "min": 40.0, "max": 360.0 },
-    "h": { "type": "float", "default": 136.0, "min": 40.0, "max": 640.0 },
+    "h": { "type": "float", "default": 136.0, "min": 40.0, "max": 780.0 },
     "ax": { "type": "float", "default": 180.0, "min": -100000.0, "max": 100000.0 },
     "ay": { "type": "float", "default": 160.0, "min": -100000.0, "max": 100000.0 },
     "kx": { "type": "float", "default": 0.97, "min": 0.01, "max": 10000.0 },

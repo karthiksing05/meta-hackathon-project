@@ -10,7 +10,7 @@
     "wrap":      { "type": "int", "default": 20, "min": 8, "max": 30 },
     "size":      { "type": "int", "default": 24, "min": 12, "max": 40 },
     "x":         { "type": "int", "default": 180, "min": 0, "max": 360 },
-    "y":         { "type": "int", "default": 110, "min": 0, "max": 640 }
+    "y":         { "type": "int", "default": 110, "min": 0, "max": 780 }
   },
   "requires": {
     "state": { "reveal_progress": "int" }

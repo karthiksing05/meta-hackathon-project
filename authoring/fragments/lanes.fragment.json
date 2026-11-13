@@ -6,7 +6,7 @@
     "count":  { "type": "int", "default": 3, "min": 3, "max": 5 },
     "x_min":  { "type": "float", "default": 80.0, "min": 0.0, "max": 360.0 },
     "x_max":  { "type": "float", "default": 280.0, "min": 0.0, "max": 360.0 },
-    "y":      { "type": "float", "default": 540.0, "min": 0.0, "max": 640.0 },
+    "y":      { "type": "float", "default": 540.0, "min": 0.0, "max": 780.0 },
     "size":   { "type": "float", "default": 16.0, "min": 4.0, "max": 40.0 },
     "tone":   { "type": "enum", "values": ["primary", "secondary", "accent", "ink", "danger"], "default": "primary" }
   },

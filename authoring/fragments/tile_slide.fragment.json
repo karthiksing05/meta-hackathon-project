@@ -11,7 +11,7 @@
     "cell_size":   { "type": "int", "default": 76, "min": 30, "max": 100 },
     "gap":         { "type": "int", "default": 8, "min": 0, "max": 16 },
     "x":           { "type": "int", "default": 16, "min": 0, "max": 360 },
-    "y":           { "type": "int", "default": 170, "min": 0, "max": 640 }
+    "y":           { "type": "int", "default": 170, "min": 0, "max": 780 }
   },
   "art": {
     "tile": { "describe": "A numbered tile: a sprite with one frame per value step (frame 0 is `base`, frame 1 is 2 × base, and so on; give svg as a list). The number is drawn on top, so leave the middle calm.", "color": "accent" }
