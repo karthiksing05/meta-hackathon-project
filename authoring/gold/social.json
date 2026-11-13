@@ -258,5 +258,67 @@
       "Respects HUD capacity: `turns` already fills `hud_bottom`, so the team total is one extra `hud_top` text (3 of 3), not a fourth node or a `shared_progress` bar that wouldn't fit."
     ],
     "themes": "sleepover jenga stacking pass and play hot seat party build together"
+  },
+  {
+    "id": "gold_kit_trivia_night_market",
+    "file": "authoring/games/gold_kit_trivia_night_market.authoring.json",
+    "request": "a food trivia game set at a night market, multiple choice, fast answers should be worth more",
+    "design": {
+      "pitch": "Fifteen stalls at a lantern-lit night market, one food question each: 100 for every right answer plus a tip for answering fast, and you need 2,700 in takings before the last stall closes.",
+      "theme": [
+        "night market",
+        "stalls",
+        "takings",
+        "tips",
+        "paper lanterns",
+        "noodle stall",
+        "steamed buns",
+        "closing time"
+      ],
+      "verb": "Read the question and tap one of four shuffled answers before the lantern bar drains.",
+      "twist": "Speed is money: a right answer within 4 seconds earns a full 100 tip, falling to nothing at 10 seconds, so the target is only reachable by answering fast and missing at most one.",
+      "arc": [
+        "Stalls 1-5: a question card with a 12 s timer bar, four answer tiles and the noodle stall picture; a green banner shows the tip you earned.",
+        "Stalls 6-10: the takings stat creeps toward 2,700 and a red banner names the right answer whenever you miss or run out of time.",
+        "Stalls 11-15: every slow answer now matters; at 2,700 the market celebrates and the result card shows your takings and best tip."
+      ],
+      "lose": "Three wrong answers put out the three lantern lives, or all 15 stalls pass without reaching 2,700.",
+      "win": "Reach 2,700 takings: 100 per right answer plus a tip of up to 100 for answering fast.",
+      "juice": [
+        "Right answer: the tile turns green, particles, a coin sound, a success haptic and a green \"Fresh! +100, tip +N\" banner.",
+        "Wrong or too slow: the right tile lights green, yours red, a shake, a buzz and a red \"It was …\" banner.",
+        "A tip of 70 or more plays an extra chirp; each new stall plays a two-note chime."
+      ],
+      "look": "A warm night market: indigo sky, strings of paper lanterns and a noodle stall with a striped awning. Kit tokens: night theme, violet base, amber accent, rounded family. Font: Avenir Next.",
+      "voice": "Friendly stall-holder patter: \"Fresh! +100\", \"Too slow: Rice\", \"Best night at the market\"."
+    },
+    "brief": {
+      "intent": "Answer food trivia fast enough to hit a takings target",
+      "audience": "friends who like quizzes and food",
+      "mood": [
+        "cozy",
+        "playful"
+      ],
+      "energy": "medium",
+      "competition": "high score"
+    },
+    "genre": "multiple-choice trivia with a speed bonus",
+    "fragments_used": [
+      "quiz",
+      "score",
+      "lives"
+    ],
+    "why_its_good": [
+      "Built on the UI kit (`ui: game-style/1`): the `quiz` fragment draws the question card, timer and answer grid; the HUD is three kit chips (takings from `score`, lantern lives from `lives`, and the game's own `{\"ui\": \"stat\"}` for the stall count); the playfield is a `{\"ui\": \"picture\"}` and the overlay is two `banner`s and a `result_card`. There is not a single x or y in the presentation, and the style check finds nothing.",
+      "A real challenge for a trivia game: a score target (`score.target` 2,700) that is only reachable with speed tips, a 15-stall limit enforced by one rule on `question_done`, and three lives. Bots scored 2,400 to 2,800 and two of five lost.",
+      "Feedback says what happened: a green banner with the exact tip earned, or a red one naming the right answer, both driven by the quiz's own `locked`, `picked` and `opts` state."
+    ],
+    "pitfalls_avoided": [
+      "No hand-placed text or rects: Muse games that place their own cards overlap the timer and answers. The kit lays out the top, playfield, controls and overlay regions.",
+      "The tip uses the game's own `asked_at` clock (set on `start` and `question_done`), not the fragment's private `_until`, which a game can't read.",
+      "The quiz can be lost: with only `rounds` it would always be won, so the target plus a stall limit gives it a real lose path.",
+      "Every answer is checked: each question's four choices contain the exact answer text."
+    ],
+    "themes": "food trivia quiz night market street food cooking cuisine general knowledge multiple choice pub quiz"
   }
 ]

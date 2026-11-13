@@ -202,59 +202,8 @@
   },
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top",
-        "node": {
-          "node": "text",
-          "text": "= 'Pairs: ' + str(matches) + ' / ' + str(@pairs)",
-          "size": 18,
-          "weight": 600,
-          "color": "$ink",
-          "role": "hud"
-        }
-      },
-      {
-        "slot": "playfield",
-        "include": "@art.card",
-        "node": {
-          "node": "repeat",
-          "source": "range(len(cards))",
-          "as": "i",
-          "key": "i",
-          "template": {
-            "node": "image",
-            "asset": "@art.card.id",
-            "frame": "= cards[i].symbol",
-            "x": "= @x + (i % @cols) * (@cell_size + @gap)",
-            "y": "= @y + (i / @cols) * (@cell_size + @gap)",
-            "w": "@cell_size",
-            "h": "@cell_size",
-            "visible": "= cards[i].revealed or cards[i].matched",
-            "animate_on": {
-              "tap_cell": {
-                "when": "event.cell.y * @cols + event.cell.x == i",
-                "prop": "scale",
-                "keys": [
-                  0.6,
-                  1.08,
-                  1
-                ],
-                "ms": 200
-              },
-              "pair_found": {
-                "when": "i == _last_a or i == _last_b",
-                "prop": "scale",
-                "keys": [
-                  1,
-                  1.2,
-                  1
-                ],
-                "ms": 260
-              }
-            }
-          }
-        }
-      }
+      {"slot":"hud_top","node":{"ui":"stat","label":"Pairs","value":"= str(matches) + ' / ' + str(@pairs)","color":"$ink"}},
+      {"slot":"playfield","include":"@art.card","node":{"node":"repeat","source":"range(len(cards))","as":"i","key":"i","template":{"node":"image","asset":"@art.card.id","frame":"= cards[i].symbol","x":"= @x + (i % @cols) * (@cell_size + @gap)","y":"= @y + (i / @cols) * (@cell_size + @gap)","w":"@cell_size","h":"@cell_size","visible":"= cards[i].revealed or cards[i].matched","animate_on":{"tap_cell":{"when":"event.cell.y * @cols + event.cell.x == i","prop":"scale","keys":[0.6,1.08,1],"ms":200},"pair_found":{"when":"i == _last_a or i == _last_b","prop":"scale","keys":[1,1.2,1],"ms":260}}}}}
     ],
     "feedback": [
       {

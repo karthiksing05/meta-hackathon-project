@@ -7,6 +7,11 @@
 //                            (authoring/expander/layout-fix.mjs, authoring/playtest/layout-check.mjs). Without
 //                            Chrome (the image has none; GENERATOR_LAYOUT_PIXELS=1 asks for it) only the structural
 //                            fixes run. GENERATOR_LAYOUT=0 turns both off.
+//   verifyLayout             the blocking verifier (authoring/expander/verify-layout.mjs → authoring/verify/): verify,
+//                            fix, solve, prove, before the gate; the pipeline uses it instead of fixLayout and runs a
+//                            layout repair round on what still blocks. Without Chrome it measures nothing (estimated
+//                            text widths, shapes-only contrast). On with the layout hooks; GENERATOR_LAYOUT_VERIFY=0
+//                            falls back to fixLayout alone.
 //
 // The authoring modules are not copied twice: the image copies them into /app/authoring (GENERATOR_AUTHORING_DIR),
 // and in development they are read from the repository.
@@ -16,9 +21,16 @@ import { dirname, join, parse } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import zlib from 'node:zlib';
 
-const MODULES = { codec: 'expander/image-codec.mjs', fix: 'expander/layout-fix.mjs', check: 'playtest/layout-check.mjs' };
-// Everything those import (layout-check loads frame-render.mjs even when Chrome is off). The Dockerfile copies this list.
-export const AUTHORING_FILES = ['expander/image-codec.mjs', 'expander/layout-fix.mjs', 'expander/engine.mjs', 'playtest/layout-check.mjs', 'playtest/bots.mjs', 'playtest/frame-render.mjs'];
+const MODULES = { codec: 'expander/image-codec.mjs', fix: 'expander/layout-fix.mjs', check: 'playtest/layout-check.mjs', verify: 'expander/verify-layout.mjs' };
+// Everything those import, static and dynamic (layout-check loads frame-render.mjs even when Chrome is off; the
+// verifier loads every module in verify/checks/). The Dockerfile copies this list; the self-test checks both that
+// the list is closed under imports and that the Dockerfile has every file.
+export const AUTHORING_FILES = [
+  'expander/image-codec.mjs', 'expander/layout-fix.mjs', 'expander/engine.mjs', 'expander/canvas.mjs', 'expander/requirements.mjs', 'expander/verify-layout.mjs',
+  'playtest/layout-check.mjs', 'playtest/bots.mjs', 'playtest/frame-render.mjs', 'playtest/fill-check.mjs', 'playtest/requirements-check.mjs',
+  'verify/verify.mjs', 'verify/registry.mjs', 'verify/frames.mjs', 'verify/scene.mjs', 'verify/solve.mjs', 'verify/prove.mjs',
+  'verify/checks/fill.mjs', 'verify/checks/layout.mjs', 'verify/checks/requirements.mjs', 'verify/checks/style.mjs', 'verify/checks/targets.mjs',
+];
 
 const off = (v) => ['0', 'off', 'false', 'no'].includes(String(v ?? '').trim().toLowerCase());
 const on = (v) => ['1', 'on', 'true', 'yes'].includes(String(v ?? '').trim().toLowerCase());
@@ -27,6 +39,8 @@ const on = (v) => ['1', 'on', 'true', 'yes'].includes(String(v ?? '').trim().toL
 export const pictureArtOn = (env = process.env) => on(env.GENERATOR_IMAGE_ART);
 /** Layout fixes and lint: on unless GENERATOR_LAYOUT is 0. */
 export const layoutOn = (env = process.env) => !off(env.GENERATOR_LAYOUT);
+/** The blocking verifier: on with the layout hooks unless GENERATOR_LAYOUT_VERIFY is 0. */
+export const layoutVerifyOn = (env = process.env) => layoutOn(env) && !off(env.GENERATOR_LAYOUT_VERIFY);
 
 /** The authoring folder: GENERATOR_AUTHORING_DIR, ./authoring next to the server (the image), else the repository's. */
 export function findAuthoring(env = process.env) {
@@ -78,6 +92,19 @@ export async function composeHooks({ muse, env = process.env, signal } = {}) {
         hooks.layoutCheck = (gameJson, opts = {}) => layoutCheck(gameJson, { ...opts, pixels });
       } catch (e) {
         notes.push('layout off: ' + String(e?.message ?? e).slice(0, 200));
+      }
+      if (hooks.fixLayout && layoutVerifyOn(env)) {
+        try {
+          const { verifyLayout } = await load('verify');
+          // verify-layout.mjs imports the verifier lazily; load it and its checks now so a missing file shows here.
+          await import(pathToFileURL(join(dir, 'verify/verify.mjs')).href);
+          await (await import(pathToFileURL(join(dir, 'verify/registry.mjs')).href)).loadChecks();
+          // Without pixels nothing launches Chrome: measures null skips the width pass too (estimated widths).
+          const noPixels = on(env.GENERATOR_LAYOUT_PIXELS) ? {} : { pixels: false, measures: null };
+          hooks.verifyLayout = (gameJson, opts = {}) => verifyLayout(gameJson, { ...opts, ...noPixels });
+        } catch (e) {
+          notes.push('layout verifier off: ' + String(e?.message ?? e).slice(0, 200));
+        }
       }
     }
   }

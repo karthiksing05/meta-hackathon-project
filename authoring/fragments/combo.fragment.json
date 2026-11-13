@@ -41,18 +41,7 @@
   "objectives": {},
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top",
-        "node": {
-          "node": "text",
-          "text": "= @label + ' x' + str(combo_mult)",
-          "size": 18, "weight": 600,
-          "color": "$accent",
-          "opacity": "= if combo > 0 then 1.0 else 0.35",
-          "transition": { "opacity": { "ms": 150, "ease": "out" } },
-          "role": "hud"
-        }
-      }
+      {"slot":"hud_top","node":{"ui":"stat","label":"@label","value":"= 'x' + str(combo_mult)","color":"$accent","opacity":"= if combo > 0 then 1.0 else 0.35","transition":{"opacity":{"ms":150,"ease":"out"}}}}
     ],
     "feedback": [
       { "on": "hit_good", "when": "combo > 1", "do": [ { "moment": "combo" } ] },

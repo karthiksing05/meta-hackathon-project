@@ -1,0 +1,229 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "The Keeper of Gull Rock",
+    "instructions": "Your first night keeping the Gull Rock light, and a small boat is drifting toward the reef in a storm. Tap a choice to decide what you do. Spare the lamp oil if you can: four endings, two of them happy.",
+    "duration_s": 120
+  },
+  "ui": {
+    "kit": "game-style/1",
+    "theme": "dusk",
+    "base": "#5B86D6",
+    "accent": "#F2B544",
+    "family": "storybook",
+    "density": "regular"
+  },
+  "uses": [
+    {
+      "fragment": "choice_story",
+      "params": { "read_ms": 1500, "good_wins": false, "bad_loses": false }
+    }
+  ],
+  "state": {
+    "story_lines": { "type": "list<string>", "init": "content_story_lines" },
+    "story_labels": { "type": "list<string>", "init": "content_story_labels" },
+    "story_next": { "type": "list<string>", "init": "content_story_next" },
+    "story_ends": { "type": "list<string>", "init": "content_story_ends" },
+    "oil": { "type": "int", "init": "2" },
+    "steps": { "type": "int", "init": "0" },
+    "verdict": { "type": "string", "init": "''" }
+  },
+  "functions": {
+    "part": { "params": { "e": "string", "i": "int" }, "returns": "string", "body": "trim(get_or(split(e, '|'), i, ''))" },
+    "info": { "params": { "s": "int", "i": "int" }, "returns": "string", "body": "part(get_or(content_scene_info, s, ''), i)" },
+    "place": { "params": {}, "returns": "int", "body": "or_else(parse_int(info(scene, 0)), 0)" },
+    "place_name": { "params": {}, "returns": "string", "body": "get_or(content_places, place(), '')" },
+    "oil_cost": { "params": { "s": "int", "c": "int" }, "returns": "int", "body": "count(content_oil_costs, e => e == str(s) + '.' + str(c))" },
+    "hour": { "params": {}, "returns": "string", "body": "if steps < 3 then str(9 + steps) + ' pm' else if steps == 3 then 'Midnight' else str(steps - 3) + ' am'" },
+    "ending_points": { "params": {}, "returns": "int", "body": "or_else(parse_int(info(scene, 1)), 0)" },
+    "final_score": { "params": {}, "returns": "int", "body": "if verdict == '' then 0 else ending_points() + oil * 50" }
+  },
+  "events": {
+    "curtain": { "good": "bool" }
+  },
+  "rules": [
+    {
+      "id": "spend",
+      "on": "choice_made",
+      "do": [
+        { "incr": "steps" },
+        { "set": "oil", "to": "max(0, oil - oil_cost(event.scene, event.choice))" }
+      ]
+    },
+    {
+      "id": "hold_the_ending",
+      "on": "ending_reached",
+      "do": [ { "after": "4500ms", "emit": "curtain", "with": { "good": "event.good" } } ]
+    },
+    {
+      "id": "curtain_falls",
+      "on": "curtain",
+      "do": [ { "set": "verdict", "to": "if event.good then 'good' else 'bad'" } ]
+    }
+  ],
+  "objectives": {
+    "win": "verdict == 'good'",
+    "lose": "verdict == 'bad'",
+    "score": "final_score()"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": { "ui": "stat", "label": "Night", "value": "= hour()", "color": "$ink" }
+      },
+      {
+        "slot": "hud_top",
+        "node": {
+          "ui": "stat",
+          "label": "Lamp oil",
+          "value": "= if oil == 0 then 'Empty' else str(oil) + (if oil == 1 then ' can' else ' cans')",
+          "color": "= if oil == 0 then $danger else $ink",
+          "animate_on": { "choice_made": { "when": "oil_cost(event.scene, event.choice) > 0", "prop": "scale", "keys": [1, 1.12, 1], "ms": 220 } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": { "ui": "text", "text": "= upper(place_name())", "step": "caption", "lines": 1, "tone": "accent", "order": -1 }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "ui": "picture",
+          "sprite": "place",
+          "frame": "= place()",
+          "aspect": 0.46875,
+          "animate_on": { "choice_made": { "prop": "scale", "keys": [0.97, 1], "ms": 280 } }
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "ui": "result_card",
+          "eyebrow": "= if verdict == 'good' then 'THE LIGHT HELD' else 'THE LIGHT FAILED'",
+          "title": "= get_or(content_ending_titles, scene, 'Dawn at Gull Rock')",
+          "score": "= str(final_score())",
+          "line": "= 'Ending ' + str(ending_points()) + ' + oil ' + str(oil * 50) + '. One of four endings.'"
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "choice_made",
+        "when": "oil_cost(event.scene, event.choice) > 0",
+        "do": [ { "moment": "pickup" }, { "particles": { "x": 180, "y": 360, "count": 16, "color": "#F2B544", "speed": 160, "size": 4, "ms": 600 } } ]
+      },
+      {
+        "on": "ending_reached",
+        "when": "event.good",
+        "do": [ { "moment": "level" }, { "particles": { "x": 180, "y": 360, "count": 40, "color": "#F2B544", "speed": 220, "size": 5, "ms": 1100, "gravity": 160 } }, { "haptic": "success" } ]
+      },
+      {
+        "on": "ending_reached",
+        "when": "not event.good",
+        "do": [ { "moment": "hit" }, { "shake": { "px": 6, "ms": 260 } }, { "haptic": "warning" } ]
+      }
+    ]
+  },
+  "score": {
+    "kind": "points",
+    "measures": "the ending you reached plus 50 for each can of lamp oil left",
+    "unit": "points",
+    "direction": "higher",
+    "counts_when": "any",
+    "aggregate": "best",
+    "tie_break": "earlier",
+    "format": "{n}",
+    "events": ["curtain"]
+  },
+  "look": { "id": "paper", "tokens": {} },
+  "art": {
+    "style": "A storybook storm at sea: deep slate-blue night, rain streaks, a white-and-red lighthouse with a honey-gold beam, sea-glass cyan highlights.",
+    "font": "Georgia",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='n' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141B2E'/><stop offset='0.65' stop-color='#1B2540'/><stop offset='1' stop-color='#202C4A'/></linearGradient><linearGradient id='beam' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#F2B544' stop-opacity='0.08'/><stop offset='1' stop-color='#F2B544' stop-opacity='0'/></linearGradient></defs><rect width='360' height='640' fill='url(#n)'/><path d='M300 300 L-40 200 L-40 380Z' fill='url(#beam)'/><g stroke='#7FD1E8' stroke-opacity='0.12' stroke-width='1.5' stroke-linecap='round'><path d='M30 90 l-8 24 M90 140 l-8 24 M160 100 l-8 24 M230 160 l-8 24 M300 110 l-8 24 M60 260 l-8 24 M200 240 l-8 24 M330 280 l-8 24 M120 380 l-8 24 M260 420 l-8 24 M40 500 l-8 24 M310 520 l-8 24'/></g><path d='M-10 600 q30 -12 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 V640 H-10Z' fill='#18213A'/><path d='M-10 616 q30 -10 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 V640 H-10Z' fill='#131A2E'/></svg>"
+    },
+    "sprites": {
+      "place": {
+        "svg": [
+          "<svg viewBox='0 0 320 150'><rect width='320' height='150' rx='12' fill='#1E2A48'/><path d='M0 120 q40 -14 80 0 t80 0 t80 0 t80 0 V150 H0Z' fill='#2A3A60'/><path d='M150 30 L-20 0 V80Z' fill='#F2B544' opacity='0.22'/><path d='M170 30 L340 0 V80Z' fill='#F2B544' opacity='0.22'/><rect x='136' y='16' width='48' height='34' rx='6' fill='#F2B544'/><circle cx='160' cy='33' r='12' fill='#FFF3D1'/><rect x='128' y='50' width='64' height='8' rx='3' fill='#C9433B'/><path d='M140 58 h40 l6 70 h-52z' fill='#F4F1EA'/><path d='M138 82 h44 v12 h-44z M136 108 h48 v12 h-48z' fill='#C9433B'/><path d='M150 8 h20 l-10 -6z' fill='#C9433B'/><g stroke='#7FD1E8' stroke-opacity='0.35' stroke-width='1.5'><path d='M30 20 l-6 18 M70 60 l-6 18 M250 40 l-6 18 M290 70 l-6 18'/></g></svg>",
+          "<svg viewBox='0 0 320 150'><rect width='320' height='150' rx='12' fill='#1A2440'/><path d='M0 150 V96 q30 -10 60 -4 l40 -30 l40 20 l30 -8 V150Z' fill='#2C3550'/><path d='M140 82 q60 -16 180 8 V150 H140Z' fill='#24406A'/><path d='M150 100 q40 -12 80 0 t90 -4' stroke='#7FD1E8' stroke-width='2' fill='none' opacity='0.6'/><g><path d='M236 92 h34 l-6 10 h-22z' fill='#8A5A3C'/><path d='M252 92 v-18' stroke='#E8E4DA' stroke-width='2'/><path d='M252 76 l12 12 h-12z' fill='#E8E4DA'/><circle cx='246' cy='88' r='3' fill='#F2B544'/></g><g fill='#C9433B'><path d='M286 108 l10 -14 l10 14z'/><path d='M200 118 l8 -12 l8 12z'/></g><path d='M40 64 L320 30 V80Z' fill='#F2B544' opacity='0.12'/><g stroke='#7FD1E8' stroke-opacity='0.35' stroke-width='1.5'><path d='M40 20 l-6 18 M120 30 l-6 18 M200 14 l-6 18 M280 20 l-6 18'/></g></svg>",
+          "<svg viewBox='0 0 320 150'><rect width='320' height='150' rx='12' fill='#1A2440'/><path d='M0 150 V112 h120 l20 -10 h40 V150Z' fill='#3A3F55'/><g stroke='#5A607A' stroke-width='3'><path d='M10 112 v38 M40 112 v38 M70 112 v38 M100 112 v38'/></g><path d='M120 120 q50 -20 200 -6 V150 H120Z' fill='#24406A'/><path d='M130 128 q40 -10 80 0 t100 -4' stroke='#7FD1E8' stroke-width='2' fill='none' opacity='0.5'/><g><path d='M150 116 h44 l-8 12 h-28z' fill='#8A5A3C'/><path d='M158 116 l6 -16 M186 116 l-6 -16' stroke='#C9A27A' stroke-width='2.5' stroke-linecap='round'/></g><g><circle cx='40' cy='60' r='9' fill='#C9433B'/><circle cx='40' cy='60' r='16' fill='#C9433B' opacity='0.25'/><circle cx='90' cy='70' r='7' fill='#C9433B'/><circle cx='90' cy='70' r='13' fill='#C9433B' opacity='0.25'/></g><g stroke='#7FD1E8' stroke-opacity='0.35' stroke-width='1.5'><path d='M220 30 l-6 18 M270 60 l-6 18 M150 20 l-6 18'/></g></svg>",
+          "<svg viewBox='0 0 320 150'><rect width='320' height='150' rx='12' fill='#22304F'/><rect x='24' y='24' width='120' height='90' rx='8' fill='#141B2E' stroke='#7FD1E8' stroke-opacity='0.5' stroke-width='2'/><path d='M34 70 q20 -26 40 0 t40 0 t20 -10' stroke='#7FD1E8' stroke-width='2.5' fill='none'/><rect x='170' y='40' width='120' height='70' rx='10' fill='#3A3F55'/><circle cx='200' cy='74' r='14' fill='#141B2E' stroke='#F2B544' stroke-width='3'/><circle cx='246' cy='64' r='6' fill='#F2B544'/><circle cx='270' cy='64' r='6' fill='#7FD1E8'/><rect x='230' y='82' width='48' height='10' rx='5' fill='#141B2E'/><path d='M230 40 v-24 h6 v24' fill='#5A607A'/><path d='M0 130 h320 v20 h-320z' fill='#2A2420'/></svg>",
+          "<svg viewBox='0 0 320 150'><defs><linearGradient id='d' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#F7C98B'/><stop offset='1' stop-color='#F2B544'/></linearGradient></defs><rect width='320' height='150' rx='12' fill='url(#d)'/><circle cx='240' cy='108' r='26' fill='#FFF3D1'/><path d='M0 110 q40 -8 80 0 t80 0 t80 0 t80 0 V150 H0Z' fill='#4E7DA6'/><path d='M0 124 q40 -8 80 0 t80 0 t80 0 t80 0 V150 H0Z' fill='#3A6690'/><path d='M40 110 V40 l10 -12 l10 12 V110Z' fill='#F4F1EA'/><path d='M40 60 h20 v10 h-20z M40 86 h20 v10 h-20z' fill='#C9433B'/><g><path d='M150 108 h40 l-6 10 h-28z' fill='#8A5A3C'/><path d='M168 108 v-20' stroke='#E8E4DA' stroke-width='2'/><path d='M168 90 l12 14 h-12z' fill='#E8E4DA'/></g><g fill='#3A3F55'><path d='M110 30 q6 -6 12 0 q6 -6 12 0' stroke='#3A3F55' stroke-width='2' fill='none'/></g></svg>"
+        ],
+        "color": "#F2B544"
+      }
+    }
+  },
+  "sound": {
+    "set": "cozy",
+    "volume": 0.8,
+    "moments": { "tap": "click", "pickup": "chime", "hit": "fall", "level": "shimmer", "win": "tada", "lose": "sigh" },
+    "music": {
+      "melody": ["D5", null, "F5", null, "A5", "G5", "F5", null, "E5", null, "C5", "D5", null, null, null, null],
+      "bass": ["D3", "D3", "A2", "A2", "A#2", "A#2", "C3", "A2"],
+      "bpm": 84,
+      "wave": "triangle",
+      "volume": 0.2
+    }
+  },
+  "content": {
+    "places": ["The lamp room", "The cliff path", "The jetty", "The radio room", "Dawn"],
+    "scene_info": [
+      "1|0", "0|0", "2|0", "3|0", "0|0", "0|0", "2|0", "2|0", "3|0",
+      "4|500", "1|100", "4|400", "2|50"
+    ],
+    "oil_costs": ["1.0", "2.1", "4.0"],
+    "story_lines": [
+      "Your first night keeping Gull Rock.", "The storm hits at dusk. Then, through", "the rain, a small boat's light drifts", "toward the reef below the tower.",
+      "The great lamp gutters. The oil is", "low, and the wind finds every crack.", "The boat needs a steady beam to", "steer clear of the rocks.",
+      "Spray bursts over the jetty steps.", "The boat is close now: two people", "bailing water. Your rowboat knocks", "against its rope below.",
+      "The radio crackles. The harbour", "answers: 'The lifeboat is out at", "the north bank. Forty minutes,", "keeper. Hold on.'",
+      "The flame leaps high and the beam", "sweeps the reef white. Far below,", "the little boat turns, slowly, away", "from the rocks.",
+      "You haul the lens round by hand.", "Your arms burn. The beam stutters,", "but the boat sees it and tacks", "hard to port.",
+      "The rowboat bucks like a horse.", "You reach them: a fisher and her", "nephew, soaked and shaking.", "'The reef! We can't see the reef!'",
+      "Red flares hiss along the jetty.", "The boat swings toward the glow", "and scrapes onto the shingle.", "Two shapes wave from the deck.",
+      "'We're coming,' the harbour says.", "You wait by the set. Through the", "window, the boat's light slides", "closer to the reef each minute.",
+      "By dawn the storm has blown out.", "The boat rides safe in the cove,", "and two tired sailors are drinking", "your tea. The light held.",
+      "You sit for one breath. When you", "look up, the boat's light is gone.", "The lifeboat finds them on the", "reef at dawn: cold, alive, furious.",
+      "You pull them up the steps as the", "sea roars behind you. Wrapped in", "blankets by the stove, the nephew", "asks if he can be a keeper too.",
+      "Your rowboat is too small for three.", "A wave rolls you all into the surf.", "The lifeboat fishes you out at dawn.", "Nobody calls you keeper again."
+    ],
+    "story_labels": [
+      "Radio the harbour", "Climb up and trim the lamp", "Run down to the jetty",
+      "Pour in the spare oil", "Swing the lens by hand", "",
+      "Row out to them", "Light flares on the jetty", "Go back up to the lamp",
+      "Tell them to hurry", "Climb up to the lamp", "Run down to the jetty",
+      "Keep the beam on them", "Go down to meet them", "",
+      "Rest your arms a moment", "Hold on until they pass", "",
+      "Take them into your boat", "Tow them along the beam", "",
+      "Help them ashore", "", "",
+      "Keep waiting by the radio", "Go and light the lamp", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", ""
+    ],
+    "story_next": [
+      "3", "1", "2",
+      "4", "5", "",
+      "6", "7", "1",
+      "8", "1", "2",
+      "9", "6", "",
+      "10", "9", "",
+      "12", "11", "",
+      "11", "", "",
+      "10", "1", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", ""
+    ],
+    "story_ends": ["", "", "", "", "", "", "", "", "", "good", "bad", "good", "bad"],
+    "ending_titles": ["", "", "", "", "", "", "", "", "", "The light held", "One breath too long", "A new keeper", "Too small a boat"]
+  },
+  "playtest": {
+    "progress": "final_score()"
+  }
+}

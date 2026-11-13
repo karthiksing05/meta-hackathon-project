@@ -246,5 +246,64 @@
       "Text is written for a wide typewriter font: lines of about 26 characters and labels of 24 or fewer, checked in screenshots, so nothing clips at the canvas edge."
     ],
     "themes": "oceans eleven heist money heist crew robbery caper steal vault"
+  },
+  {
+    "id": "gold_kit_story_gull_rock",
+    "file": "authoring/games/gold_kit_story_gull_rock.authoring.json",
+    "request": "a short choose your own adventure about a lighthouse keeper in a storm trying to save a boat",
+    "design": {
+      "pitch": "Your first night keeping the Gull Rock light, a small boat is drifting toward the reef in a storm: choose between the lamp, the jetty and the radio, and spare the lamp oil if you can.",
+      "theme": [
+        "Gull Rock",
+        "the keeper",
+        "the lamp room",
+        "the jetty",
+        "the radio room",
+        "the harbour lifeboat",
+        "lamp oil",
+        "the reef"
+      ],
+      "verb": "Read each scene and tap one of two or three choices.",
+      "twist": "The cautious-sounding choices (radio for help, wait, rest, take them aboard) lead to the bad endings, and lamp oil is a resource: each can left is worth 50 at the end.",
+      "arc": [
+        "Scene 1: the storm and the boat; three places to go.",
+        "Middle: the lamp room, the jetty or the radio room, each with its own picture; pouring oil or lighting flares costs a can.",
+        "Endings: two good (the light held, a new keeper) and two bad (one breath too long, too small a boat), shown for 4.5 s before the result card."
+      ],
+      "lose": "Reach one of the two bad endings.",
+      "win": "Reach one of the two good endings. Score: ending points (500, 400, 100 or 50) plus 50 for each can of oil left.",
+      "juice": [
+        "Each choice: a click, a light haptic and the scene picture scaling in.",
+        "Spending oil: a chime, gold sparks and the Lamp oil stat pulsing.",
+        "A good ending: a shimmer and a gold particle shower; a bad one: a falling sound, a shake and a warning haptic."
+      ],
+      "look": "A storybook storm at sea: slate-blue night, rain streaks, a red-and-white lighthouse and a honey-gold beam. Kit tokens: dusk theme, sea-blue base, gold accent, storybook family. Font: Georgia.",
+      "voice": "Quiet, concrete storybook prose in short lines: \"The rowboat bucks like a horse.\""
+    },
+    "brief": {
+      "intent": "Make choices as a lighthouse keeper saving a boat in a storm",
+      "audience": "people who like short stories",
+      "mood": [
+        "cozy",
+        "tense"
+      ],
+      "energy": "low",
+      "competition": "friendly"
+    },
+    "genre": "branching story",
+    "fragments_used": [
+      "choice_story"
+    ],
+    "why_its_good": [
+      "Built on the UI kit (`ui: game-style/1`): `choice_story` draws the story in a kit `dialog` and the choices as a kit `choice_list`; the game adds a kit `text` caption for the place name (`order: -1` puts it above the dialog), a `{\"ui\": \"picture\"}` whose `frame` follows the scene, two HUD `stat`s (the hour and the lamp oil) and a `result_card`. No coordinates anywhere.",
+      "A story you can lose and replay: four endings, two of them bad, a resource (oil) that changes the score, and a 4.5 s hold on the ending scene before the result card so the last lines can be read.",
+      "All words live in `content` (scene lines, labels, routes, places, ending titles, oil costs), and small pure functions (`info`, `place`, `oil_cost`) read them."
+    ],
+    "pitfalls_avoided": [
+      "The story lists are kept in step: 4 lines, 3 labels and 3 routes per scene and one ending tag per scene, for all 13 scenes.",
+      "Endings don't end the game instantly (`good_wins`/`bad_loses` off): a curtain event sets the verdict after 4.5 s, so the ending text isn't hidden under the result card.",
+      "No hand-placed text: the place name and the HUD are kit components, so long names fit instead of running off the screen."
+    ],
+    "themes": "lighthouse keeper storm sea boat rescue choose your own adventure interactive fiction story branching"
   }
 ]

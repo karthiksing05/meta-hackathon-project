@@ -125,6 +125,22 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 		"game_tools": {
 			{Keys: k("kind", 1, "status", 1), Options: options.Index().SetName("tools_kind_status")},
 		},
+		// the wider Facebook surfaces (fbsocial_stores.go)
+		cFBPosts: {
+			{Keys: k("kind", 1, "createdAt", -1, "_id", -1), Options: options.Index().SetName("fb_posts_kind_newest")},
+			{Keys: k("groupId", 1, "createdAt", -1), Options: options.Index().SetName("fb_posts_group").
+				SetPartialFilterExpression(bson.D{{Key: "groupId", Value: bson.D{{Key: "$exists", Value: true}}}})},
+			{Keys: k("authorId", 1, "createdAt", -1), Options: options.Index().SetName("fb_posts_author")},
+		},
+		cFBStories: {
+			{Keys: k("createdAt", -1), Options: options.Index().SetName("fb_stories_newest")},
+		},
+		cFBThreads: {
+			{Keys: k("members", 1, "lastAt", -1), Options: options.Index().SetName("fb_threads_member")},
+		},
+		cFBMessages: {
+			{Keys: k("threadId", 1, "sentAt", -1), Options: options.Index().SetName("fb_messages_thread")},
+		},
 	}
 	for coll, models := range plan {
 		if _, err := m.coll(coll).Indexes().CreateMany(ctx, models); err != nil {

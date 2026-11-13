@@ -174,6 +174,9 @@ func (s *Server) Handler() http.Handler {
 			})
 		})
 
+		// The wider Facebook surfaces: feed posts, reels, stories and Messenger (fbsocial.go).
+		r.Route("/fb", s.fbRoutes)
+
 		// Ranking: the recommender runs on the server, so the app asks what to show and reports what happened.
 		r.With(s.requireAuth).Get("/me/recs", s.myRecs)
 		r.With(s.requireAuth).Post("/blend", s.blend)

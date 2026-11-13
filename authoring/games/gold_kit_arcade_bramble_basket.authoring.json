@@ -1,0 +1,293 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Bramble Basket",
+    "instructions": "Drag the basket left and right to catch falling berries. Gold berries are worth five. Dodge the spiky burrs: three pricks and the picnic is over. Last 45 seconds and keep a streak going for bonus points.",
+    "duration_s": 45
+  },
+  "ui": {
+    "kit": "game-style/1",
+    "theme": "soft",
+    "base": "#3E8E5A",
+    "accent": "#E8A33D",
+    "family": "rounded",
+    "density": "regular"
+  },
+  "uses": [
+    {
+      "fragment": "player_drag",
+      "params": {
+        "axis": "x",
+        "mode": "glide",
+        "speed": 900.0,
+        "start_x": 180.0,
+        "start_y": 556.0,
+        "margin": 36.0,
+        "size": 24.0,
+        "tone": "primary"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": { "points": 10, "target": 0, "label": "Berries" }
+    },
+    {
+      "fragment": "lives",
+      "params": { "count": 3 }
+    },
+    {
+      "fragment": "countdown",
+      "params": { "ms": "45s", "on_end": "win", "warn_at": "5s" }
+    },
+    {
+      "fragment": "collide",
+      "params": { "radius": 30.0, "grace": "900ms" }
+    },
+    {
+      "fragment": "difficulty_curve",
+      "params": { "from": 0.0, "to": 1.0, "over": "40s", "curve": "ease_in" }
+    }
+  ],
+  "types": {
+    "Drop": { "id": "int", "x": "float", "y": "float", "vy": "float", "kind": "string", "spin": "float" }
+  },
+  "state": {
+    "drops": { "type": "list<Drop>", "init": "[]" },
+    "seq": { "type": "int", "init": "0" },
+    "streak": { "type": "int", "init": "0" },
+    "best_streak": { "type": "int", "init": "0" },
+    "golds": { "type": "int", "init": "0" },
+    "cheer": { "type": "string", "init": "''" },
+    "cheer_at": { "type": "int", "init": "-10000" }
+  },
+  "functions": {
+    "burrs": { "params": {}, "returns": "list<Drop>", "body": "filter(drops, d => d.kind == 'burr')" },
+    "colliders": { "params": {}, "returns": "list<vec2>", "body": "map(burrs(), d => vec(d.x, d.y))" },
+    "in_basket": { "params": { "d": "Drop" }, "returns": "bool", "body": "d.kind != 'burr' and abs(d.x - player.x) < 36.0 and abs(d.y - (player.y - 8.0)) < 22.0" },
+    "mult": { "params": {}, "returns": "int", "body": "if streak >= 15 then 3 else if streak >= 6 then 2 else 1" }
+  },
+  "events": {
+    "caught": { "x": "float", "y": "float", "gold": "bool" },
+    "dropped": {},
+    "streak_up": { "mult": "int" }
+  },
+  "rules": [
+    {
+      "id": "spawn",
+      "on": { "every": "480ms" },
+      "do": [
+        { "let": { "roll": "random_float(0.0, 1.0)" } },
+        { "let": { "kind": "if roll < 0.22 + 0.2 * difficulty then 'burr' else if roll > 0.93 then 'gold' else 'berry'" } },
+        { "push": "drops", "value": "{id: seq, x: random_float(40.0, 320.0), y: 96.0, vy: 150.0 + 150.0 * difficulty + random_float(0.0, 50.0), kind: kind, spin: random_float(-120.0, 120.0)}" },
+        { "incr": "seq" }
+      ]
+    },
+    {
+      "id": "fall",
+      "on": "tick",
+      "do": [
+        { "set": "drops", "to": "map(drops, d => {...d, y: d.y + d.vy * event.dt / 1000.0})" }
+      ]
+    },
+    {
+      "id": "catch",
+      "on": "tick",
+      "when": "any(drops, d => in_basket(d))",
+      "do": [
+        { "for_each": "filter(drops, d => in_basket(d))", "as": "d", "do": [
+          { "incr": "streak" },
+          { "set": "best_streak", "to": "max(best_streak, streak)" },
+          { "if": "d.kind == 'gold'", "then": [ { "incr": "golds" }, { "incr": "score", "by": "40 * mult()" } ] },
+          { "incr": "score", "by": "10 * (mult() - 1)" },
+          { "emit": "point" },
+          { "emit": "caught", "with": { "x": "d.x", "y": "d.y", "gold": "d.kind == 'gold'" } },
+          { "if": "streak == 6 or streak == 15", "then": [ { "emit": "streak_up", "with": { "mult": "mult()" } } ] }
+        ] },
+        { "remove": "drops", "where": "d => in_basket(d)" }
+      ]
+    },
+    {
+      "id": "miss",
+      "on": "tick",
+      "when": "any(drops, d => d.y > 604.0)",
+      "do": [
+        { "if": "any(drops, d => d.y > 604.0 and d.kind != 'burr')", "then": [ { "set": "streak", "to": "0" }, { "emit": "dropped" } ] },
+        { "remove": "drops", "where": "d => d.y > 604.0" }
+      ]
+    },
+    {
+      "id": "prick",
+      "on": "hit",
+      "do": [
+        { "remove": "drops", "where": "d => d.kind == 'burr' and dist(vec(d.x, d.y), hit_at) < 60.0" },
+        { "set": "streak", "to": "0" },
+        { "set": "cheer", "to": "'Ouch! Streak lost'" },
+        { "set": "cheer_at", "to": "now" }
+      ]
+    },
+    {
+      "id": "cheer_streak",
+      "on": "streak_up",
+      "do": [
+        { "set": "cheer", "to": "'Streak! Berries now x' + str(event.mult)" },
+        { "set": "cheer_at", "to": "now" }
+      ]
+    }
+  ],
+  "objectives": {
+    "score": "score"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "filter(drops, d => d.kind != 'burr')",
+          "as": "d",
+          "key": "d.id",
+          "template": {
+            "node": "image",
+            "asset": "berry",
+            "anchor": "center",
+            "x": "= d.x",
+            "y": "= d.y",
+            "w": 32,
+            "h": 32,
+            "frame": "= if d.kind == 'gold' then 1 else 0",
+            "role": "pickup"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "burrs()",
+          "as": "d",
+          "key": "d.id",
+          "template": {
+            "node": "image",
+            "asset": "burr",
+            "anchor": "center",
+            "x": "= d.x",
+            "y": "= d.y",
+            "w": 40,
+            "h": 40,
+            "rotation": "= d.spin * (d.y - 96.0) / 200.0",
+            "role": "hazard"
+          }
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "ui": "banner",
+          "text": "= cheer",
+          "tone": "accent",
+          "visible": "= now - cheer_at < 1200 and not starts_with(cheer, 'Ouch') and status == 'playing'",
+          "animate_on": { "streak_up": { "prop": "scale", "keys": [0.9, 1.04, 1], "ms": 170 } }
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "ui": "banner",
+          "text": "= cheer",
+          "tone": "danger",
+          "visible": "= now - cheer_at < 1200 and starts_with(cheer, 'Ouch') and status == 'playing'"
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "ui": "result_card",
+          "eyebrow": "= if status == 'won' then 'PICNIC SAVED' else 'PRICKED THREE TIMES'",
+          "title": "= if status == 'won' then 'A basket full of berries' else 'The burrs got you'",
+          "score": "= str(score)",
+          "line": "= 'Best streak ' + str(best_streak) + ' · gold berries ' + str(golds)"
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "caught",
+        "do": [
+          { "particles": { "x": "= event.x", "y": "= event.y", "count": 10, "color": "#6C5BD4", "speed": 150, "size": 4, "ms": 380 } },
+          { "haptic": "light" }
+        ]
+      },
+      {
+        "on": "caught",
+        "when": "event.gold",
+        "do": [
+          { "particles": { "x": "= event.x", "y": "= event.y", "count": 24, "color": "#F2B84B", "speed": 240, "size": 5, "ms": 520 } },
+          { "moment": "combo" }
+        ]
+      },
+      {
+        "on": "streak_up",
+        "do": [ { "moment": "level" }, { "haptic": "success" } ]
+      },
+      {
+        "on": "dropped",
+        "do": [ { "sound": { "wave": "sine", "note": "C4", "slide": "G3", "ms": 120, "volume": 0.18 } } ]
+      }
+    ]
+  },
+  "score": {
+    "kind": "points",
+    "measures": "berry points caught before the 45 seconds run out",
+    "unit": "points",
+    "direction": "higher",
+    "counts_when": "any",
+    "aggregate": "best",
+    "tie_break": "earlier",
+    "format": "{n}",
+    "events": ["tick"]
+  },
+  "look": { "id": "paper", "tokens": {} },
+  "art": {
+    "style": "A picnic meadow at golden hour: pale mint sky, rolling green hills, a woven willow basket, plump violet berries, rare gold berries and spiky brown burrs.",
+    "font": "Avenir Next",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#EAF6EE'/><stop offset='0.6' stop-color='#F6F1E2'/><stop offset='1' stop-color='#F2E7CF'/></linearGradient><radialGradient id='sun' cx='0.78' cy='0.24' r='0.3'><stop offset='0' stop-color='#FFE2A6' stop-opacity='0.9'/><stop offset='1' stop-color='#FFE2A6' stop-opacity='0'/></radialGradient></defs><rect width='360' height='640' fill='url(#sky)'/><rect width='360' height='640' fill='url(#sun)'/><g fill='#FFFFFF' opacity='0.8'><ellipse cx='70' cy='150' rx='34' ry='10'/><ellipse cx='92' cy='142' rx='20' ry='10'/><ellipse cx='260' cy='250' rx='30' ry='8'/><ellipse cx='278' cy='244' rx='16' ry='8'/></g><path d='M-20 520 Q80 470 180 500 T380 480 V640 H-20Z' fill='#BFE0C4'/><path d='M-20 560 Q100 520 220 552 T380 540 V640 H-20Z' fill='#9ACFA6'/><path d='M-20 600 Q120 580 240 598 T380 592 V640 H-20Z' fill='#7FBF8E'/><g fill='#6C5BD4' opacity='0.35'><circle cx='40' cy='590' r='3'/><circle cx='48' cy='594' r='3'/><circle cx='318' cy='572' r='3'/><circle cx='326' cy='576' r='3'/></g><g stroke='#5E9E6E' stroke-width='2' stroke-linecap='round' opacity='0.6'><path d='M20 640 v-18 M26 640 v-24 M32 640 v-14 M330 640 v-20 M336 640 v-26 M342 640 v-16'/></g></svg>"
+    },
+    "sprites": {
+      "avatar": {
+        "svg": "<svg viewBox='0 0 80 56'><defs><linearGradient id='w' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#E2B27A'/><stop offset='1' stop-color='#B9844C'/></linearGradient></defs><path d='M18 20 Q40 -6 62 20' stroke='#9C6B3A' stroke-width='5' fill='none' stroke-linecap='round'/><path d='M4 20 h72 l-8 32 q-1 4 -5 4 h-46 q-4 0 -5 -4z' fill='url(#w)'/><g stroke='#9C6B3A' stroke-width='2' opacity='0.7'><path d='M8 30 h64 M10 40 h60 M13 49 h54'/><path d='M20 20 l2 34 M32 20 l1 36 M48 20 l-1 36 M60 20 l-2 34'/></g><rect x='2' y='16' width='76' height='8' rx='4' fill='#C99257' stroke='#9C6B3A' stroke-width='2'/><g fill='#6C5BD4'><circle cx='30' cy='15' r='6'/><circle cx='42' cy='13' r='6'/><circle cx='52' cy='16' r='5'/></g><g fill='#FFFFFF' opacity='0.6'><circle cx='28' cy='13' r='1.6'/><circle cx='40' cy='11' r='1.6'/></g></svg>",
+        "color": "#C99257"
+      },
+      "berry": {
+        "svg": [
+          "<svg viewBox='0 0 32 32'><defs><radialGradient id='b' cx='0.35' cy='0.35' r='0.7'><stop offset='0' stop-color='#9D8CFF'/><stop offset='1' stop-color='#4B3BB0'/></radialGradient></defs><path d='M16 6 q2 -5 7 -4 q-2 4 -7 4z' fill='#4E9A5E'/><circle cx='16' cy='18' r='12' fill='url(#b)'/><path d='M12 9 l4 3 l4 -3 l-1 4 h-6z' fill='#2F2580'/><circle cx='11' cy='14' r='3' fill='#FFFFFF' opacity='0.55'/></svg>",
+          "<svg viewBox='0 0 32 32'><defs><radialGradient id='g' cx='0.35' cy='0.35' r='0.7'><stop offset='0' stop-color='#FFE9A8'/><stop offset='1' stop-color='#D9902A'/></radialGradient></defs><path d='M16 6 q2 -5 7 -4 q-2 4 -7 4z' fill='#4E9A5E'/><circle cx='16' cy='18' r='12' fill='url(#g)' stroke='#FFF4D6' stroke-width='1.5'/><path d='M12 9 l4 3 l4 -3 l-1 4 h-6z' fill='#A8661C'/><circle cx='11' cy='14' r='3' fill='#FFFFFF' opacity='0.8'/><path d='M26 6 l1 3 l3 1 l-3 1 l-1 3 l-1 -3 l-3 -1 l3 -1z' fill='#FFFFFF'/></svg>"
+        ],
+        "color": "#6C5BD4"
+      },
+      "burr": {
+        "svg": "<svg viewBox='0 0 40 40'><g fill='#7A4A24'><path d='M20 0 l3 10 h-6z'/><path d='M20 40 l-3 -10 h6z'/><path d='M0 20 l10 -3 v6z'/><path d='M40 20 l-10 3 v-6z'/><path d='M6 6 l9 5 l-4 4z'/><path d='M34 34 l-9 -5 l4 -4z'/><path d='M34 6 l-5 9 l-4 -4z'/><path d='M6 34 l5 -9 l4 4z'/></g><circle cx='20' cy='20' r='11' fill='#9A6232' stroke='#5C3418' stroke-width='2'/><g stroke='#5C3418' stroke-width='1.5' stroke-linecap='round'><path d='M15 16 l3 2 M24 15 l-2 3 M16 25 l3 -2 M25 24 l-3 -1'/></g></svg>",
+        "color": "#9A6232"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 24 24'><path d='M12 21 C4 15 2 11 2 8 a5 5 0 0 1 10 -1 a5 5 0 0 1 10 1 c0 3 -2 7 -10 13z' fill='#E8A33D' stroke='#B77514' stroke-width='1.2'/><circle cx='8' cy='8' r='2' fill='#FFFFFF' opacity='0.6'/></svg>",
+        "color": "#E8A33D"
+      }
+    }
+  },
+  "sound": {
+    "set": "cozy",
+    "volume": 0.85,
+    "moments": { "pickup": "pluck", "hit": "crunch", "combo": "sparkle", "level": "rise", "win": "tada", "lose": "wah" },
+    "music": {
+      "melody": ["C5", "E5", "G5", null, "A5", "G5", "E5", null, "F5", "A5", "C6", null, "B5", "G5", null, null],
+      "bass": ["C3", "C3", "A2", "A2", "F2", "F2", "G2", "G2"],
+      "bpm": 128,
+      "wave": "triangle",
+      "volume": 0.16
+    }
+  },
+  "playtest": {
+    "progress": "score + lives * 60"
+  }
+}

@@ -174,7 +174,10 @@ if (!engine) {
     const st = g2.state();
     const q = st.order[st.qi];
     const k = st.opts.indexOf(right[q]);
-    tap(g2, 20 + (k % 2) * 164 + 78, 420 + Math.floor(k / 2) * 74 + 32);
+    // The UI kit lays the answer tiles out (two columns): tile k in reading order.
+    g2.frame();
+    const tiles = g2.hitTargets().filter((t) => t.w >= 120 && t.h >= 52).sort((a, b) => a.y - b.y || a.x - b.x);
+    tap(g2, tiles[k].x + tiles[k].w / 2, tiles[k].y + tiles[k].h / 2);
     ok(g2.state().score >= 28 && g2.state().score <= 30, `an instant right answer pays about 30 (${g2.state().score})`);
     const held = imageOp(g2);
     ok(Math.abs(held.w - 280) < 1, 'after answering, the whole picture shows');

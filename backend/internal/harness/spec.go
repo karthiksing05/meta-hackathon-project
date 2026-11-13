@@ -47,6 +47,17 @@ type Theme struct {
 	Sponsor *Sponsor `json:"sponsor,omitempty"`
 	// ArtStyle is the style muse-image draws every picture in (the art_style slot): "80s anime", "pixel art".
 	ArtStyle string `json:"art_style,omitempty"`
+	// Type is what the game's look is chosen from (authoring/kit/look.mjs chooseLook): plain words for its
+	// theme, era, genre and style. The spec may write it; the planner fills the empty parts from the understanding.
+	Type *ThemeType `json:"type,omitempty"`
+}
+
+// ThemeType is spec.theme.type: the words the look kit picks fonts and a palette from.
+type ThemeType struct {
+	Theme []string `json:"theme,omitempty"`
+	Era   string   `json:"era,omitempty"`
+	Genre []string `json:"genre,omitempty"`
+	Style []string `json:"style,omitempty"`
 }
 
 // Goal is what the player tries to do and the measurable target.

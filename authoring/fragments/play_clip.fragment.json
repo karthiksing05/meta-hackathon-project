@@ -73,30 +73,7 @@
   "objectives": {},
   "presentation": {
     "slots": [
-      {
-        "slot": "playfield",
-        "node": {
-          "node": "group",
-          "children": [
-            {
-              "node": "rect", "x": 105, "y": 68, "w": 150, "h": 36, "radius": 18,
-              "fill": "= if _can_replay() then $primary else $surface",
-              "transition": { "fill": { "ms": 150, "ease": "out" } },
-              "on_tap": { "input": "replay_clip" }
-            },
-            {
-              "node": "rect", "x": 105, "y": 68, "h": 36, "radius": 18, "fill": "$accent", "opacity": 0.45,
-              "w": "= if now < _playing_until then 150.0 * max(0.0, min(1.0, ((now - (_playing_until - @clip_ms)) * 1.0) / (@clip_ms * 1.0))) else 0.0"
-            },
-            {
-              "node": "text", "x": 180, "y": 86, "anchor": "center", "size": 15, "weight": 700,
-              "color": "= if _can_replay() then $bg else $ink",
-              "text": "= if now < _playing_until then 'Listening...' else if clip_now < 0 then 'Get ready' else if replays_left > 0 and not locked then @label + ' (' + str(replays_left) + ')' else if locked then '' else 'No replays left'"
-            }
-          ],
-          "animate_on": { "clip_play": { "prop": "scale", "keys": [1, 1.06, 1], "ms": 220 } }
-        }
-      }
+      {"slot":"playfield","node":{"ui":"button","region":"top","order":-1,"text":"= if now < _playing_until then 'Listening...' else if clip_now < 0 then 'Get ready' else if replays_left > 0 and not locked then @label + ' (' + str(replays_left) + ')' else if locked then '' else 'No replays left'","enabled":"= _can_replay()","progress":"= if now < _playing_until then max(0.0, min(1.0, ((now - (_playing_until - @clip_ms)) * 1.0) / (@clip_ms * 1.0))) else 0.0","on_tap":{"input":"replay_clip"},"animate_on":{"clip_play":{"prop":"scale","keys":[1,1.06,1],"ms":220}}}}
     ],
     "feedback": [
       { "on": "clip_play", "do": [ { "sound": { "asset": "= 'clip_' + str(event.clip)", "volume": 0.9 } } ] }

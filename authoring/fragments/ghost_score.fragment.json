@@ -61,19 +61,8 @@
   "objectives": {},
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top",
-        "node": { "node": "text", "text": "= @friend_name + ' ' + str(ghost)", "size": 18, "weight": 600, "color": "= if ghost > score then $danger else $secondary", "role": "hud" }
-      },
-      {
-        "slot": "overlay",
-        "node": {
-          "node": "text", "x": 180, "y": 112, "anchor": "center", "size": 18, "weight": 700,
-          "color": "$accent",
-          "text": "= _banner",
-          "opacity": "= if now < _banner_until then 1.0 else 0.0"
-        }
-      }
+      {"slot":"hud_top","node":{"ui":"stat","label":"@friend_name","value":"= str(ghost)","color":"= if ghost > score then $danger else $secondary"}},
+      {"slot":"overlay","node":{"node":"text","x":180,"y":112,"anchor":"center","size":18,"weight":700,"color":"$accent","text":"= _banner","opacity":"= if now < _banner_until then 1.0 else 0.0"}}
     ],
     "feedback": [
       { "on": "passed_ghost", "do": [ { "moment": "level" }, { "haptic": "light" } ] },

@@ -1,17 +1,20 @@
 // The manifest's `art` section (authoring/SPEC.md 2.8): palette, font, backdrop and sprites, turned
 // into engine assets, token overrides and the facts fragments read through `@art.<role>`.
-// Pure JS (its only import is svg.mjs), so the app can bundle it with the expander.
+// Pure JS (svg.mjs and the look kit's data), so the app can bundle it with the expander.
 
 import { sanitizeSvg, composeSheet, utf8Length, SVG_LIMITS } from './svg.mjs';
+import { FONT_DATA } from '../kit/font-data.mjs';
+import { lookChoiceErrors } from '../kit/look.mjs';
 
 export const PALETTE_ROLES = ['primary', 'secondary', 'accent', 'ink', 'bg', 'danger', 'surface'];
-// Families the app can draw offline: the look fonts plus fonts every iPhone has. `system` is the
-// platform UI font.
-export const FONTS = [
+// Families the app can draw offline: the look fonts, fonts every iPhone has, and the game fonts the
+// app bundles (authoring/fonts, kit/font-data.mjs). `system` is the platform UI font.
+export const FONTS = [...new Set([
   'system', 'Inter', 'Fraunces', 'Space Grotesk', 'Silkscreen',
   'Avenir Next', 'Futura', 'Gill Sans', 'Optima', 'Georgia', 'Baskerville', 'American Typewriter',
   'Chalkboard SE', 'Marker Felt', 'Noteworthy', 'Menlo', 'Courier New',
-];
+  ...Object.values(FONT_DATA).map((f) => f.family),
+])];
 const SPRITE_KEYS = ['svg', 'image', 'w', 'h', 'frames', 'cols', 'fps', 'color'];
 const NAME = /^[a-z][a-z0-9_]{0,23}$/;
 const RESERVED = ['backdrop', 'music'];
@@ -28,14 +31,20 @@ function sizeFrom(vb) {
 
 /**
  * Reads `art`. err(code, at, message, extra) reports model diagnostics.
- * Returns {assets, sprites: {name: {id, frames, aspect, color}}, tokens, font, backdrop}.
+ * Returns {assets, sprites: {name: {id, frames, aspect, color}}, tokens, font, backdrop, type}.
  */
 export function compileArt(art, canvas, err) {
-  const out = { assets: {}, sprites: {}, tokens: {}, font: undefined, backdrop: null };
+  const out = { assets: {}, sprites: {}, tokens: {}, font: undefined, backdrop: null, type: null };
   if (art === undefined) return out;
   if (!art || typeof art !== 'object' || Array.isArray(art)) { err('A_ART_FIELD', '/art', 'art must be an object'); return out; }
   for (const k of Object.keys(art)) {
-    if (!['palette', 'font', 'backdrop', 'sprites', 'style'].includes(k)) err('A_ART_FIELD', `/art/${esc(k)}`, `art has no field '${k}' (palette, font, backdrop, sprites, style)`);
+    if (!['palette', 'font', 'backdrop', 'sprites', 'style', 'type'].includes(k)) err('A_ART_FIELD', `/art/${esc(k)}`, `art has no field '${k}' (palette, font, backdrop, sprites, style, type)`);
+  }
+  // The game's look (authoring/kit/README.md): its vibe, pairing and seed.
+  if (art.type !== undefined) {
+    const problems = lookChoiceErrors(art.type);
+    for (const m of problems) err('A_ART_FIELD', '/art/type', m);
+    if (!problems.length) out.type = art.type;
   }
 
   for (const [role, v] of Object.entries(art.palette ?? {})) {
