@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game player</title>
+<link rel="stylesheet" href="runtime/bubble-glow.css">
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: #eef0fb; color: #1b1b2f; }
+  @media (prefers-color-scheme: dark) { body { background: #12121f; color: #e8e8f6; } }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; position: sticky; top: 0; z-index: 20;
+           background: inherit; border-bottom: 1px solid rgba(120,120,160,.25); }
+  header h1 { font-size: 15px; margin: 0 8px 0 0; }
+  input, select, button { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(120,120,160,.45); background: transparent; color: inherit; }
+  input { width: 250px; max-width: 60vw; }
+  button { cursor: pointer; background: #5b5bd6; color: #fff; border-color: transparent; }
+  main { display: flex; flex-wrap: wrap; gap: 16px; padding: 14px; align-items: flex-start; justify-content: center; }
+  #stage-wrap { width: calc(390px * var(--scale, 1)); height: calc(844px * var(--scale, 1)); }
+  #bubble-root { position: relative; width: 390px; height: 844px; transform: scale(var(--scale, 1)); transform-origin: 0 0; border-radius: 28px; overflow: hidden;
+                 box-shadow: 0 6px 30px rgba(40,40,90,.3); }
+  #side { width: 300px; max-width: 100%; }
+  #games { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 14px; }
+  #games a { display: block; padding: 8px 10px; border-radius: 10px; text-decoration: none; color: inherit; background: rgba(120,120,160,.14); }
+  #games a.current { outline: 2px solid #5b5bd6; }
+  #games small { opacity: .7; display: block; }
+  #log { font: 11px/1.4 ui-monospace, Menlo, monospace; max-height: 220px; overflow: auto; background: rgba(120,120,160,.12); padding: 8px; border-radius: 10px; white-space: pre-wrap; }
+  #meta { margin: 6px 0 12px; }
+  .err { color: #c0392b; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Game player</h1>
+  <form id="load" onsubmit="return false">
+    <input id="ref" placeholder="game id or slug" autocomplete="off" spellcheck="false">
+    <button id="go" type="submit">Play</button>
+  </form>
+  <select id="mode" title="play yourself, or watch a bot"><option value="play">Play</option><option value="demo">Watch a bot</option></select>
+  <label><input id="sound" type="checkbox" style="width:auto"> sound</label>
+  <span id="status"></span>
+</header>
+<main>
+  <div id="stage-wrap"><div id="bubble-root" class="palette-lilac-haze"><canvas id="bubble-canvas"></canvas></div></div>
+  <div id="side">
+    <div id="meta"></div>
+    <strong>Games on the server</strong>
+    <div id="games">Loading…</div>
+    <strong>Messages</strong>
+    <div id="log"></div>
+  </div>
+</main>
+
+<!-- The app's own runtime, so a game looks and plays here as it does in the app. Load order matters. -->
+<script src="runtime/bubble-runtime.js"></script>
+<script src="runtime/bubble-kit-common.js"></script>
+<script src="runtime/bubble-kit-answer.js"></script>
+<script src="runtime/bubble-kit-dodge.js"></script>
+<script src="runtime/bubble-kit-group.js"></script>
+<script src="runtime/bubble-kit-guess.js"></script>
+<script src="runtime/bubble-kit-learn.js"></script>
+<script src="runtime/bubble-kit-merge.js"></script>
+<script src="runtime/bubble-kit-microgame-engine.js"></script>
+<script src="runtime/bubble-kit-microgame.js"></script>
+<script src="runtime/bubble-kit-nextline.js"></script>
+<script src="runtime/bubble-kit-story.js"></script>
+<script src="runtime/bubble-kit-time.js"></script>
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const q = new URLSearchParams(location.search);
+
+  // Where the API is: ?api=..., or api.<domain> when this page is on games.<domain>.
+  const apiBase = (q.get("api") || (/^games\./.test(location.hostname)
+    ? location.protocol + "//api." + location.hostname.slice(6)
+    : location.hostname === "localhost" || location.hostname === "127.0.0.1" ? location.protocol + "//" + location.hostname + ":8080" : "")).replace(/\/$/, "");
+
+  function fit() {
+    const s = Math.min(1, (window.innerHeight - 70) / 844, (window.innerWidth - 20) / 390);
+    document.documentElement.style.setProperty("--scale", String(Math.max(0.3, s)));
+  }
+  window.addEventListener("resize", fit);
+  fit();
+
+  const logEl = $("log");
+  function note(msg) {
+    const d = new Date().toLocaleTimeString();
+    logEl.textContent += d + "  " + msg + "\n";
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function fail(msg) {
+    $("status").innerHTML = "";
+    const s = document.createElement("span");
+    s.className = "err";
+    s.textContent = msg;
+    $("status").appendChild(s);
+    note("error: " + msg);
+  }
+
+  if (window.BubbleHost) {
+    BubbleHost.onmessage = (m) => {
+      const c = Object.assign({}, m);
+      if (c.replay) c.replay = "(" + (c.replay.inputs ? c.replay.inputs.length : 0) + " inputs)";
+      note(JSON.stringify(c));
+    };
+  }
+
+  async function getJSON(url) {
+    const r = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!r.ok) throw new Error(url + " answered " + r.status);
+    return r.json();
+  }
+
+  async function manifestUrlFor(ref) {
+    if (/^[a-f0-9]{24}$/.test(ref)) return { url: location.origin + "/" + ref + "/manifest.json", game: null };
+    if (!apiBase) throw new Error("give a 24-character game id, or ?api=https://api... so a slug can be looked up");
+    const g = await getJSON(apiBase + "/v1/games/" + encodeURIComponent(ref));
+    return { url: g.manifestUrl, game: g };
+  }
+
+  async function play(ref) {
+    $("status").textContent = "Loading…";
+    const found = await manifestUrlFor(ref);
+    const m = await getJSON(found.url);
+    const v = Bubble.validate(m);
+    note("validate: " + (v.ok ? "ok" : JSON.stringify(v.errors)));
+    $("meta").innerHTML = "";
+    const h = document.createElement("div");
+    h.innerHTML = "<strong></strong> <small></small><br><a target=_blank rel=noopener>manifest.json</a>";
+    h.querySelector("strong").textContent = m.title || ref;
+    h.querySelector("small").textContent = [m.formula, (m.brief && m.brief.mood || []).join(", ")].filter(Boolean).join(" · ");
+    h.querySelector("a").href = found.url;
+    $("meta").appendChild(h);
+    if (m.one_line_rule) { const p = document.createElement("div"); p.textContent = m.one_line_rule; $("meta").appendChild(p); }
+
+    const payload = {
+      manifest: m, mode: $("mode").value, player: { name: "Tester", best: null },
+      muted: !$("sound").checked, reduced_motion: false, insets: { top: 0, bottom: 0, left: 0, right: 0 },
+    };
+    const prep = JSON.parse(BubbleHost.prepare(payload));
+    note("prepare: " + JSON.stringify(prep));
+    const act = JSON.parse(BubbleHost.activate(prep.key, JSON.stringify(payload)));
+    note("activate: " + JSON.stringify(act));
+    $("status").textContent = "Tap the game to start";
+    history.replaceState(null, "", "?game=" + encodeURIComponent(ref) + (q.get("api") ? "&api=" + encodeURIComponent(q.get("api")) : ""));
+    document.querySelectorAll("#games a").forEach((a) => a.classList.toggle("current", a.dataset.ref === ref || a.dataset.id === ref));
+  }
+
+  async function listGames() {
+    const box = $("games");
+    if (!apiBase) { box.textContent = "Type a game id above."; return; }
+    try {
+      const out = await getJSON(apiBase + "/v1/feed?limit=30");
+      box.textContent = "";
+      if (!out.items.length) { box.textContent = "No games on the server yet."; return; }
+      const seen = new Set(); // the ranked feed can repeat a game once few are left: list each once
+      for (const g of out.items) {
+        if (seen.has(g.id)) continue;
+        seen.add(g.id);
+        const a = document.createElement("a");
+        a.href = "?game=" + encodeURIComponent(g.slug || g.id) + (q.get("api") ? "&api=" + encodeURIComponent(q.get("api")) : "");
+        a.dataset.ref = g.slug || g.id;
+        a.dataset.id = g.id;
+        a.textContent = g.title;
+        const s = document.createElement("small");
+        s.textContent = [g.formula, g.ownerUsername && "by " + g.ownerUsername, g.why].filter(Boolean).join(" · ");
+        a.appendChild(s);
+        box.appendChild(a);
+      }
+    } catch (e) {
+      box.textContent = "Couldn't load the list: " + e.message;
+    }
+  }
+
+  $("load").addEventListener("submit", () => {
+    const ref = $("ref").value.trim();
+    if (ref) location.search = "?game=" + encodeURIComponent(ref) + (q.get("api") ? "&api=" + encodeURIComponent(q.get("api")) : "");
+  });
+  for (const id of ["mode", "sound"]) $(id).addEventListener("change", () => { const r = q.get("game"); if (r) location.reload(); });
+
+  listGames();
+  const initial = q.get("game");
+  if (initial) { $("ref").value = initial; play(initial).catch((e) => fail(e.message)); }
+  else $("status").textContent = "Pick a game";
+})();
+</script>
+</body>
+</html>

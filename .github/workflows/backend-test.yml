@@ -1,0 +1,61 @@
+name: Backend tests
+
+# Tests only: this never builds images or deploys. Deploys happen from the `Prod` branch
+# (backend-deploy.yml), which runs the same checks first.
+on:
+  push:
+    branches: [backend-api]
+    paths: ["backend/**", ".github/workflows/backend-test.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend-test.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mongo:   # a real MongoDB, so the store's queries and aggregations are tested
+        image: mongo:8.0
+        ports: ["27017:27017"]
+    env:
+      MONGO_TEST_URI: mongodb://127.0.0.1:27017
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Format check
+        run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go test -race ./...
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generator self-test (a scripted Muse, no key)
+        run: node generator/selftest.mjs
+
+  images:   # the three images must build (nothing is pushed); the deploy workflow builds and pushes them
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [api, games, generator]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          target: ${{ matrix.target }}
+          push: false
+          load: true
+          tags: check-${{ matrix.target }}
+      - name: Generator image runs its self-test
+        if: matrix.target == 'generator'
+        run: docker run --rm check-generator node selftest.mjs

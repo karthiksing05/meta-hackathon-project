@@ -7,6 +7,16 @@ work for. Teammates are welcome to read along.
 hackathon. It adds Bubbles: tiny games anyone can make with Meta's Muse models and play inside Facebook.
 The name is under review, so check the build tracker before you write user-facing copy.
 
+**The backend owns Muse and the data.** The iOS app only shows screens and makes API calls to the backend
+(`backend/`, live at https://api.ol4ol.com). It never talks to Muse, never holds the Muse key, and never
+computes or stores game data of its own: making a game, playtesting it, ranking, scores, saves, challenges,
+Groups and the event log all happen on the server, and the app reads everything it shows from the API. The
+Muse key lives only in `/etc/game-platform/generator.env` on the server. If the app needs something the backend
+doesn't do yet, **do not build it into the app**. Ask Claude (for Max) in the Slack thread, with the request and
+response shape you want, and log it in **Requests and handoffs** on the canvas. Until it lands, use the mock
+behind `GamesAPI` (mock by default, `FB_API=live`) and keep it in the mock, not in screens. The contract is
+`backend/README.md`.
+
 Karthik owns the repo. Each teammate can run their own agents, so assume other agents are working at the
 same time as you. Most of this file is about staying in step with them.
 
