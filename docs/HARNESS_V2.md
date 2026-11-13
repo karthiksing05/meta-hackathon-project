@@ -74,8 +74,13 @@ Triggers: an `unknown_refs` name with no alias hit, or a top fused score below t
 
 - **Sources** (no new keys): the Wikipedia search and summary REST APIs, plus a direct fetch of a named site's home
   page when the name looks like a domain or a product, with the text extracted.
-- **Optional:** a search API (Brave or similar) behind `HARNESS_SEARCH_KEY` in `generator.env`, only if Max agrees.
-  Off by default.
+- **No search API and no new key** (Max, 20:55).
+- **Fetcher rules** (Max):
+  - http(s) only;
+  - refuse private, loopback and link-local addresses, checked after DNS resolution and on every redirect;
+  - a few seconds and about 1 MB per page;
+  - no cookies, and never the Muse key;
+  - page text is data, never instructions.
 - Muse Spark turns what came back into a **candidate `game_types` entry**. It records the mechanic only, never copied
   prompts, art or levels, and cites its source URLs.
   - The entry is used for this job right away.
@@ -241,13 +246,79 @@ Use existing fragment ids where they fit (`ls authoring/fragments`).
 |---|---|
 | Plan, catalog schema and checks, seed entries from fragments and gold, retrieval in Go, web lookup in Go, planner wiring, fuzzy match | Claude for Karthik (subagents) |
 | Bulk catalog entries by family | Claude for Kevin (with our subagents) |
-| Where the Go harness sits and how it calls the generator; `generator.env` keys; Mongo collections | Claude for Max (to confirm) |
+| The generator's `POST /internal/muse/json` route and the `context` input to `compose` | Claude for Max |
 | Genre gate profiles; visuals (style kit, art direction) | Codex for Bayan: we agree the profile names and leave visuals to him |
 | Engine gaps the catalog surfaces (tilt, share grid) | Artem, once he's back on engine work |
 
+## Decided with Max (2026-11-12, 20:55)
+
+1. **Steps 1–4 run in Go.** Go owns understand, retrieve, lookup and plan, in `backend/internal/harness/`: new files
+   plus one route hook. The generator keeps Muse's compose loop and the engine, and takes `context` in place of the
+   full menu. The engine stays separate from the Muse side.
+2. **Catalog collections.** `game_types` and `game_tools` live in Mongo:
+   - indexes go in `internal/store/indexes.go`;
+   - `cmd/dbinit` seeds them from `authoring/catalog/`;
+   - seeding is idempotent, because `dbinit` runs on every deploy;
+   - learned entries are never overwritten by the seed.
+3. **Go calls Muse through the generator.** The route is
+   `POST /internal/muse/json {model, system, user, maxTokens?, effort?} -> {content, model}`, on the private network.
+   The API never reads the key. The two steps call it with:
+
+   | Step | Model | `maxTokens` | Timeout |
+   |---|---|---|---|
+   | understand | `muse-spark-1.3` | 4000 | 15 s |
+   | plan | `muse-wonder-1.0` | 12000 | 90 s |
+   | lookup summary | `muse-spark-1.3` | 4000 | 15 s |
+
+   All three ask for one JSON object.
+4. **Web lookup.** Wikipedia plus a page the person named, with the fetcher rules in step 3 above. There is no search
+   key.
+5. **Merging.** `harness-v2` stays ours. Max merges nothing from it into `backend-api` until we say it's ready and the
+   tests pass. Branch base: `Prod` `47c2867`, merged into `harness-v2`.
+
+## The `context` the generator receives
+
+The job gains an optional `context`. With it, `compose` builds the menu section of the system prompt from:
+- `context.tools`: the generator expands fragment ids to their full fragment specs from `authoring/fragments/`;
+- `context.types`, as "what this game is".
+
+It does this instead of pasting the whole catalog. Gold examples are picked by `gold_ids` first. Without `context`,
+nothing changes.
+
+```json
+{
+  "context": {
+    "version": "harness-context/1",
+    "understanding": {"named_refs": ["Krillion"], "verbs": ["type", "recall"], "inputs": ["type"],
+                      "families": ["trivia"], "theme": ["Harry Potter"], "keywords": ["rare answer"], "players": "solo"},
+    "types": [
+      {"id": "rare_answer_trivia", "name": "Rare-answer trivia", "family": "trivia", "summary": "…", "core_loop": "…",
+       "rules": ["…"], "win": "…", "lose": "…", "scoring": "…", "pieces": ["…"], "content_needs": ["…"],
+       "difficulty_levers": ["…"], "tools": ["typed_answer", "fuzzy_match"], "gate_profile": "trivia",
+       "status": "reviewed", "source": "seed", "refs": [], "match": {"score": 0.91, "reasons": ["alias: Krillion"]}}
+    ],
+    "tools": [
+      {"id": "typed_answer", "kind": "fragment", "status": "shipped", "summary": "…", "when_to_use": "…",
+       "api": "…", "params": {}, "events": []}
+    ],
+    "plan": {
+      "anatomy": {"format": "game-anatomy/0.1", "…": "…"},
+      "design": {"pitch": "…", "theme": ["…"], "verb": "…", "twist": "…", "arc": ["…"]},
+      "type_ids": ["rare_answer_trivia"],
+      "tool_ids": ["typed_answer", "keyboard", "fuzzy_match", "rarity_tiers", "timer_bar"],
+      "gaps": [{"tool": "rarity_tiers", "status": "planned", "approximation": "tiers written into content as answer lists"}]
+    },
+    "gold_ids": ["gold_who_posted"],
+    "gate_profile": "trivia",
+    "learned": [],
+    "notes": ["lookup skipped: catalog alias hit"]
+  }
+}
+```
+
+Limits: at most 6 types and 24 tools. The `context` is at most 48 KB of JSON, and Go trims long fields before
+sending.
+
 ## Open questions
 
-- **Max:** can the Go API own steps 1–4 and send the generator a `context` pack (types, tools, plan) on the job? Or
-  would you rather move the whole Muse loop into Go, with the shared JS run in goja as recs does?
-- **Max:** may we add `HARNESS_SEARCH_KEY` (optional) and two collections, `game_types` and `game_tools`?
 - **Bayan:** which gate profile names do you already have?
