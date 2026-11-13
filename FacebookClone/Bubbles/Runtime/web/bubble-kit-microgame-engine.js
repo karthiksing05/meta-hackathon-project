@@ -3,7 +3,7 @@
  * The microgame engine (Rust compiled to WebAssembly) for the Bubble runtime, plus its frame
  * renderer. Defines `MicrogameEngine`; bubble-kit-microgame.js turns it into the "microgame"
  * formula (docs/BUBBLES.md, "microgame").
- * Built from engine/ at 584ea69; microgame.wasm 1172646 bytes, sha256 08adc453e2dd0dfe927a5e8b1feaaa842e8965b3a70fefad8a48a271858db5d4.
+ * Built from engine/ at 965acea; microgame.wasm 1172646 bytes, sha256 08adc453e2dd0dfe927a5e8b1feaaa842e8965b3a70fefad8a48a271858db5d4.
  */
 (function (root) {
   "use strict";
@@ -717,6 +717,7 @@ function note(out, wave, freq, slideHz, t0, dur, peak) {
 }
 
 function playSample(out, s, volume, assets) {
+  if (assets && assets.decodePending) assets.decodePending();
   const buf = assets && assets.buffers[s.asset];
   if (!buf) return;
   const src = out.ctx.createBufferSource();
@@ -732,6 +733,7 @@ function playSample(out, s, volume, assets) {
 class MusicPlayer {
   constructor() { this.cur = null; } // { buffer, src, gain }
   sync(out, m, assets) {
+    if (assets && assets.decodePending && m && m.playing) assets.decodePending();
     const buf = m && m.playing && assets ? assets.buffers[m.asset] : null;
     if (!buf || !out || !out.ctx || out.ctx.state !== 'running') { this.stop(); return; }
     if (this.cur && this.cur.buffer !== buf) this.stop();
@@ -762,6 +764,11 @@ class MusicPlayer {
  * AudioBuffers with `audioCtx()` (a function, so audio can start late).
  * Failures are recorded and draw a placeholder; they never stop the game.
  * `onProgress(store)` runs after each asset settles.
+ *
+ * A sound that loads before there's an audio context (muted, or before the
+ * first tap unlocks audio) keeps its bytes and is decoded by `decodePending()`
+ * as soon as `audioCtx()` returns one; playSample and MusicPlayer call it, so a
+ * run that opened silent still gets its sounds and music once audio starts.
  */
 class AssetStore {
   constructor(list, { audioCtx = () => null, onProgress = null, timeoutMs = 15000 } = {}) {
@@ -773,6 +780,8 @@ class AssetStore {
     this.loaded = 0;
     this.done = list.length === 0;
     this.audioCtx = audioCtx;
+    this.pending = []; // [{a, bytes}]: sounds waiting for an audio context
+    this.decoding = false;
     const jobs = list.map((a) => this.load(a)
       .catch((e) => { this.failed.push({ name: a.name, error: String(e?.message || e) }); })
       .finally(() => { this.loaded++; if (onProgress) onProgress(this); }));
@@ -809,20 +818,39 @@ class AssetStore {
       if (!img.naturalWidth || !img.naturalHeight) throw new Error(`image '${a.name}' has no size`);
       entry.ok = true;
     } else if (a.kind === 'sound') {
-      const ac = this.audioCtx();
-      if (!ac) throw new Error('no WebAudio');
       const bytes = await fetchBytes(a.src);
-      this.buffers[a.id] = await new Promise((resolve, reject) => {
-        const p = ac.decodeAudioData(bytes, resolve, reject);
-        if (p && p.then) p.then(resolve, reject);
-      });
+      const ac = this.audioCtx();
+      if (!ac) { this.pending.push({ a, bytes }); return; }
+      this.buffers[a.id] = await decodeSound(ac, bytes);
     }
+  }
+
+  /** Decodes sounds that loaded before there was an audio context, once there is one. */
+  decodePending() {
+    if (!this.pending.length || this.decoding) return;
+    const ac = this.audioCtx();
+    if (!ac) return;
+    const jobs = this.pending.splice(0);
+    this.decoding = true;
+    Promise.all(jobs.map(({ a, bytes }) => decodeSound(ac, bytes)
+      .then((buf) => { this.buffers[a.id] = buf; })
+      .catch((e) => { this.failed.push({ name: a.name, error: String(e?.message || e) }); })))
+      .finally(() => { this.decoding = false; });
   }
 
   dispose() {
     for (const u of this.urls) URL.revokeObjectURL(u);
     this.urls = [];
   }
+}
+
+/** decodeAudioData, callback or promise style (older WebKit has only callbacks). Works on a suspended context. */
+function decodeSound(ac, bytes) {
+  return new Promise((resolve, reject) => {
+    // decodeAudioData detaches the buffer, so decode a copy (a retry may need the bytes again).
+    const p = ac.decodeAudioData(bytes.slice(0), resolve, reject);
+    if (p && p.then) p.then(resolve, reject);
+  });
 }
 
 /** data: URIs are decoded locally (fetch of data: URIs is blocked in some web views). */
@@ -899,6 +927,6 @@ const HAPTIC_PATTERNS = {
     Microgame, Game, MicrogameLoadError, MicrogameCrash,
     decodeFrame, rgbaToCss, rgbaToHex,
     drawFrame, playSound, MusicPlayer, AssetStore, HAPTIC_PATTERNS,
-    build: Object.freeze({ commit: "584ea69", wasm_bytes: 1172646, wasm_sha256: "08adc453e2dd0dfe927a5e8b1feaaa842e8965b3a70fefad8a48a271858db5d4" }),
+    build: Object.freeze({ commit: "965acea", wasm_bytes: 1172646, wasm_sha256: "08adc453e2dd0dfe927a5e8b1feaaa842e8965b3a70fefad8a48a271858db5d4" }),
   });
 })(typeof globalThis !== "undefined" ? globalThis : this);

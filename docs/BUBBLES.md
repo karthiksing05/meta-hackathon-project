@@ -1592,6 +1592,9 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   engine is seeded from the run's RNG.
 - Its frames draw in one `space` layer, scaled to fit the 360×640 playfield. Audio goes through the
   runtime's master gain (`fx.audio()`, new), so mute applies. Haptics and toasts go through `fx`.
+  Sound assets decode with `fx.audioContext()` (the shared context, created even while muted or
+  suspended), and a sound that loads before any context exists decodes as soon as one does, so a run
+  that opened muted or before the first tap still has its sounds and music once audio starts.
 - Taps, drags and holds are forwarded; a quick flick is also sent as a swipe. The runtime has no key
   events, so microgames must be playable by touch, apart from typed text (next item).
 - **Text field.** A game with a text input (`{"text": "submit"}` or `{"text": "change"}` sources, so

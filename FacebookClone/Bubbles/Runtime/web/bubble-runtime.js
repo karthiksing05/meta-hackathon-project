@@ -6081,6 +6081,11 @@
         haptic(style) { if (!self.ffwd) self.haptic(style); },
         // Where formulas that synthesize their own audio (microgame) should play it: the shared
         // master gain, so mute and volume apply. Null while muted, fast-forwarding or locked.
+        // The shared AudioContext, created if needed, even while muted or suspended: for decoding
+        // a game's sound assets up front (decoding works on a suspended context). Never plays.
+        audioContext() {
+          return Sound.ensure();
+        },
         audio() {
           if (self.ffwd || Sound.muted) return null;
           const ctx = Sound.ensure();

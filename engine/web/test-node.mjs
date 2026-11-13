@@ -317,6 +317,29 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
   }
 }
 
+// Sounds that load before there's an audio context (muted, or before the first tap) are decoded
+// once one exists, instead of failing for the whole run (Karthik's harness-gap request).
+{
+  const { AssetStore, MusicPlayer } = await import('./render.js');
+  let ctx = null;
+  const decoded = [];
+  const fakeCtx = {
+    state: 'suspended',
+    decodeAudioData(bytes, ok) { decoded.push(bytes.byteLength); const buf = { length: bytes.byteLength }; ok(buf); return Promise.resolve(buf); },
+  };
+  const wav = 'data:audio/wav;base64,' + Buffer.from('RIFF0000WAVEfmt ').toString('base64');
+  const store = new AssetStore([{ id: 0, name: 'beep', kind: 'sound', src: wav }], { audioCtx: () => ctx });
+  await store.ready;
+  check(store.failed.length === 0 && !store.buffers[0] && store.pending.length === 1, 'a sound with no audio context waits instead of failing');
+  store.decodePending();
+  check(store.pending.length === 1, 'still waiting while there is no context');
+  ctx = fakeCtx;
+  new MusicPlayer().sync(null, { playing: true, asset: 0, volume: 1 }, store);
+  await new Promise((r) => setTimeout(r, 0));
+  check(store.buffers[0] && store.pending.length === 0 && decoded.length === 1, 'the waiting sound decodes once a context exists (even suspended)');
+  console.log('assets: sounds that load before audio starts decode later');
+}
+
 if (failures) {
   console.error(`${failures} check(s) failed`);
   process.exit(1);

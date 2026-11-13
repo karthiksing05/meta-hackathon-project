@@ -88,7 +88,7 @@
       game,
       cw, ch,
       s, ox: (W - cw * s) / 2, oy: (H - ch * s) / 2,
-      assets: hasDOM && meta.assets > 0 ? new L.AssetStore(game.assets(), { audioCtx: () => audioOut(sdk)?.ctx || null }) : null,
+      assets: hasDOM && meta.assets > 0 ? new L.AssetStore(game.assets(), { audioCtx: () => audioContext(sdk) }) : null,
       music: hasDOM ? new L.MusicPlayer() : null,
       musicTimer: null,
       down: null,
@@ -111,6 +111,17 @@
 
   function audioOut(sdk) {
     return sdk.fx && typeof sdk.fx.audio === "function" ? sdk.fx.audio() : null;
+  }
+
+  // An AudioContext for decoding the game's sounds, even while muted or before audio is unlocked
+  // (decoding works on a suspended context), so a run that opens silent still has its sounds and
+  // music once audio starts. Older runtimes without fx.audioContext fall back to the playing one.
+  function audioContext(sdk) {
+    if (sdk.fx && typeof sdk.fx.audioContext === "function") {
+      try { return sdk.fx.audioContext() || null; } catch (e) { return null; }
+    }
+    const out = audioOut(sdk);
+    return out ? out.ctx : null;
   }
 
   // Playfield (360x640) <-> engine canvas coordinates.
