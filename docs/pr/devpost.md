@@ -79,6 +79,7 @@ The five of us built Muse Curios around a single API, with each of us working al
 - **Fair play:** the engine runs every game exactly the same way from the same seed, so the server replays every score's input log and only the replayed score counts.
 - **Sounds:** like Reels audio, you can put a song behind your game from a library of credited, licensed tracks.
 - **The feed:** a ranking model, running on our server, that learns from the moments that happen between people, like finishes, rematches, challenges and new friends, rather than from taps alone. Its sibling, Group Blend, uses the same signals to pick games for an entire Group.
+- **An infinite scroll that never makes you wait:** the phone keeps a small pool of game players warmed up from the moment the app opens, and each one loads the game engine once and is never reloaded, so a new Curio is just new data handed to a player that's already running. While you play one game, the next one, the one before it and the one after that are already being set up in the background, and every game you haven't reached yet shows a poster drawn in its own look, so swiping feels like flicking through Reels instead of opening a new app each time. Pages snap into place the way Reels do, and the game is ready to play the moment it lands.
 
 ## Challenges we ran into
 
