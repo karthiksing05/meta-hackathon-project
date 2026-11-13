@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/repo"
 )
 
 const gid = "0123456789abcdef01234567"
@@ -109,7 +111,11 @@ func TestSymlinkEscape(t *testing.T) {
 
 func TestWebPlayer(t *testing.T) {
 	dir := t.TempDir()
-	h, err := New(dir)
+	runtimeDir, ok := repo.Find("FacebookClone/Bubbles/Runtime/web")
+	if !ok {
+		t.Skip("the app's runtime folder isn't here (the player reads it from FacebookClone/Bubbles/Runtime/web)")
+	}
+	h, err := New(dir, WithPlayerRuntime(runtimeDir))
 	if err != nil {
 		t.Fatal(err)
 	}

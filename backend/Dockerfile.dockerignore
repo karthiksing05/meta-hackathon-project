@@ -5,6 +5,10 @@
 !backend/cmd
 !backend/internal
 !backend/generator
+# the one copy of what the images take from the app: the recommender, the game runtime and the engine/Studio bundles
+!FacebookClone/Bubbles/Recommend/game-recs.js
+!FacebookClone/Bubbles/Runtime/web
+!FacebookClone/Bubbles/Studio/web/microgame-studio.js
 **/*_test.go
 **/node_modules
 **/*.env

@@ -1,10 +1,11 @@
 // Package recs runs Kevin's games recommender (game-recs.js) inside the backend.
 //
-// The recommender is one dependency-free JavaScript file (internal/recs/game-recs.js, vendored from
-// the `recommendation` branch; SOURCE_COMMIT says which commit). Instead of rewriting its ~1,900
-// lines, the backend runs that exact file in goja, a pure-Go JavaScript engine, so the server ranks
-// with the same code that Kevin's 127 checks, simulators and golden test cover. When the file
-// changes, copy the new one in and run `go test ./internal/recs`.
+// The recommender is one dependency-free JavaScript file, FacebookClone/Bubbles/Recommend/game-recs.js.
+// There is only that one copy: the backend reads it from there in development and tests, and the API's
+// Docker image copies it to /app/game-recs.js (override with RECS_SCRIPT). Instead of rewriting its ~1,900
+// lines, the backend runs that exact file in goja, a pure-Go JavaScript engine, so the server ranks with the
+// same code that Kevin's checks, simulators and the golden test cover. When the file changes, run
+// `go test ./internal/recs` (the golden file is regenerated with testdata/gen_golden.mjs).
 //
 // The file's "app bridge" works on one person ("me") at a time: load that person's state, call
 // rank / observe / signal / groupBlend, read the state back. The server keeps each person's state
@@ -14,26 +15,35 @@ package recs
 
 import (
 	"context"
-	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/dop251/goja"
+
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/repo"
 )
 
-//go:embed game-recs.js
-var script string
+// scriptRel is where the one copy of the recommender lives in the repository.
+const scriptRel = "FacebookClone/Bubbles/Recommend/game-recs.js"
 
-// Version reads the embedded file's version (for logs and the debug endpoint).
-func Version() (string, error) {
-	vm, err := newVM("")
-	if err != nil {
-		return "", err
+// findScript locates game-recs.js: an explicit path, $RECS_SCRIPT, the image's /app/game-recs.js, then the
+// repository copy.
+func findScript(explicit string) (string, error) {
+	for _, p := range []string{explicit, os.Getenv("RECS_SCRIPT"), "/app/game-recs.js"} {
+		if p == "" {
+			continue
+		}
+		if _, err := os.Stat(p); err == nil {
+			return p, nil
+		}
 	}
-	v := vm.rt.Get("GameRecs").ToObject(vm.rt).Get("version")
-	return v.String(), nil
+	if p, ok := repo.Find(scriptRel); ok {
+		return p, nil
+	}
+	return "", fmt.Errorf("recs: game-recs.js not found (set RECS_SCRIPT, or run inside the repository: %s)", scriptRel)
 }
 
 type vm struct {
@@ -41,7 +51,7 @@ type vm struct {
 	app *goja.Object
 }
 
-func newVM(overrides string) (*vm, error) {
+func newVM(script string) (*vm, error) {
 	rt := goja.New()
 	if _, err := rt.RunString(script); err != nil {
 		return nil, fmt.Errorf("loading game-recs.js: %w", err)
@@ -59,6 +69,7 @@ func newVM(overrides string) (*vm, error) {
 
 // Engine is a pool of recommender runtimes.
 type Engine struct {
+	script    string
 	version   string
 	pool      chan *vm
 	overrides string // JSON parameter overrides passed to every load, "" for the defaults
@@ -68,8 +79,9 @@ type Engine struct {
 // Options tune the engine. Overrides is the JSON the file's `load` takes (e.g. {"interleave":{"on":true,"against":"baseline"}});
 // the Muse re-rank term is never turned on here: the backend leaves it off.
 type Options struct {
-	Runtimes  int
-	Overrides map[string]any
+	ScriptPath string // game-recs.js; empty finds it (see findScript)
+	Runtimes   int
+	Overrides  map[string]any
 	Timeout   time.Duration // per call; a runaway script is interrupted
 }
 
@@ -88,14 +100,22 @@ func New(o Options) (*Engine, error) {
 		}
 		over = string(b)
 	}
-	e := &Engine{pool: make(chan *vm, o.Runtimes), overrides: over, timeout: o.Timeout}
-	if v, err := Version(); err == nil {
-		e.version = v
+	path, err := findScript(o.ScriptPath)
+	if err != nil {
+		return nil, err
 	}
+	src, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	e := &Engine{script: string(src), pool: make(chan *vm, o.Runtimes), overrides: over, timeout: o.Timeout}
 	for i := 0; i < o.Runtimes; i++ {
-		v, err := newVM(over)
+		v, err := newVM(e.script)
 		if err != nil {
 			return nil, err
+		}
+		if i == 0 {
+			e.version = v.rt.Get("GameRecs").ToObject(v.rt).Get("version").String()
 		}
 		e.pool <- v
 	}

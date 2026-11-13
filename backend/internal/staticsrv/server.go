@@ -32,18 +32,30 @@ func init() {
 
 // New serves files under root (the published/ directory). os.Root confines every open to that
 // tree, even through symlinks, so path traversal cannot escape it.
-func New(rootDir string) (http.Handler, error) {
+func New(rootDir string, opts ...Option) (http.Handler, error) {
 	root, err := os.OpenRoot(rootDir)
 	if err != nil {
 		return nil, err
 	}
-	return &handler{root: root}, nil
+	h := &handler{root: root}
+	for _, o := range opts {
+		o(h)
+	}
+	return h, nil
 }
 
-type handler struct{ root *os.Root }
+type handler struct {
+	root   *os.Root
+	player *os.Root // the web player's runtime files, if configured
+}
 
 // Close releases the directory handle.
-func (h *handler) Close() error { return h.root.Close() }
+func (h *handler) Close() error {
+	if h.player != nil {
+		h.player.Close()
+	}
+	return h.root.Close()
+}
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/healthz" {
@@ -56,7 +68,7 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	if servePlayer(w, r) {
+	if h.servePlayer(w, r) {
 		return
 	}
 	name, ok := cleanPath(r.URL.Path)

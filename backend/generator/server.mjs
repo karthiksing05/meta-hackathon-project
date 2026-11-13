@@ -25,7 +25,7 @@ const MAX_CONCURRENT = Number(env.GENERATOR_MAX_CONCURRENT ?? 2);
 const JOB_TIMEOUT_MS = Number(env.GENERATOR_JOB_TIMEOUT_SECONDS ?? 540) * 1000;
 const MODEL = env.MUSE_MODEL || 'muse-wonder-1.0';
 
-const studio = loadStudio(env.GENERATOR_VENDOR_DIR || join(here, 'vendor'));
+const studio = loadStudio();
 const fragments = studio.catalog().fragments.length;
 const muse = new MuseClient({ apiKey: env.MUSE_API_KEY ?? '', baseURL: env.MUSE_BASE_URL || 'https://api.meta.ai/v1' });
 let running = 0;

@@ -108,13 +108,13 @@ app -> GET  /v1/generate/{jobId}  (poll every 1-2 s)
 How it runs: the Go API stores the job and streams it through the internal `generator` service (Node, no published port beyond
 loopback), which does what the app's `MicrogameComposer` used to: Muse writes an authoring manifest (`api.meta.ai/v1`, model
 `muse-wonder-1.0`), the expander and engine check it, up to 3 repair rounds, five bots playtest it, then `wrap`. It runs the committed
-`microgame-studio.js` and `bubble-kit-microgame-engine.js` bundles from `backend/generator/vendor` (copied from `main`; refresh them
-when the engine or authoring layer changes). The API then publishes the result like any upload, so it appears in `/v1/feed`
+`microgame-studio.js` and `bubble-kit-microgame-engine.js` bundles from the app's folders (`FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js`,
+`FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Not built yet: revising a game, Muse-made covers, and the classic (non-microgame) formulas.
 
 ## Ranking (the recommender runs here)
 
-Kevin's recommender (`game-recs.js`, vendored in `internal/recs`; `SOURCE_COMMIT` says which commit) runs **unchanged**
+Kevin's recommender (`FacebookClone/Bubbles/Recommend/game-recs.js`, the one copy, which the API image copies to `/app/game-recs.js`) runs **unchanged**
 inside the API, on a pure-Go JavaScript engine (goja). The app does no ranking: it asks the server what to show and
 reports what happened. Each signed-in person's model (posteriors, taste, bait lean, calibration history) is kept in
 Mongo (`recs_state`); the pages shown this session are kept with it.
@@ -139,7 +139,7 @@ Mongo (`recs_state`); the pages shown this session are kept with it.
 - Settings: `RECS_RUNTIMES` (default 2, `0` turns ranking off), `RECS_INTERLEAVE` (`baseline` or a variant name mixes each feed
   with a control; page events then carry `team`, and `/v1/experiments/interleave` tallies it). The optional Muse re-rank term
   stays off: the backend never turns it on.
-- To update the recommender, copy the new `game-recs.js` over `internal/recs/game-recs.js`, set `SOURCE_COMMIT`, regenerate
+- To update the recommender, change `game-recs.js` in the app's folder (nothing to copy), regenerate
   `internal/recs/testdata/golden.json` with `node internal/recs/testdata/gen_golden.mjs`, and run `go test ./internal/recs`.
   The golden test replays a fixed call sequence made by Node and fails if the Go engine's answers differ.
 - Games carry what the recommender describes them by (`mood`, `energy`, `competition`, `look`, `scope`, `isDaily`, and the
@@ -157,8 +157,7 @@ back to its own neutral defaults. The server holds no cast, seed games or invent
 ## Web player (for testing)
 
 The games host serves a small player at **`https://games.<domain>/play/`** (`/play/?game=<24-character id or slug>`). It runs the
-app's own game runtime in the browser (the files in `internal/staticsrv/player/runtime`, copied from the app; `player/SOURCE_COMMIT`
-says which commit), loads the game's `manifest.json` from the games host, and boots it, so a game looks and plays as it does in the
+app's own game runtime in the browser (read from `FacebookClone/Bubbles/Runtime/web`; the games image copies that folder to `/app/player/runtime`), loads the game's `manifest.json` from the games host, and boots it, so a game looks and plays as it does in the
 app. A microgame runs on Artem's Rust engine (WebAssembly) with its game script from `content.game_json`. The page lists the games
 from `GET /v1/feed`, can watch a bot play, and logs the runtime's messages. The API allows the games host's origin for CORS.
 Refresh the runtime copy from `main` when the app's runtime changes.

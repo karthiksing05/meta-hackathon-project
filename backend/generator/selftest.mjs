@@ -18,7 +18,7 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? 'PASS' : 'FAIL'} ${name}${ok ? '' : '   -> ' + String(detail).slice(0, 300)}`);
 };
 
-const studio = loadStudio(join(here, 'vendor'));
+const studio = loadStudio();
 const catalog = studio.catalog();
 check('catalog has the fragment library', catalog.fragments.length >= 30 && catalog.looks.length >= 4, `${catalog.fragments.length} fragments`);
 const example = () => structuredClone(catalog.examples[0].manifest);

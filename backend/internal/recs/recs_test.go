@@ -30,12 +30,12 @@ func TestGoldenAgainstNode(t *testing.T) {
 	if err := json.Unmarshal(raw, &g); err != nil {
 		t.Fatal(err)
 	}
-	if v, err := Version(); err != nil || v != g.Version {
-		t.Fatalf("embedded version %q (err %v), golden %q: regenerate golden.json", v, err, g.Version)
-	}
 	e, err := New(Options{Runtimes: 1})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if e.Version() != g.Version {
+		t.Fatalf("game-recs.js is version %q, the golden file is %q: regenerate it with testdata/gen_golden.mjs", e.Version(), g.Version)
 	}
 	_, err = e.Run(context.Background(), "", func(s *Session) error {
 		for i, st := range g.Steps {
