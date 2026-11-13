@@ -38,6 +38,15 @@ extension Color {
         )
     }
 
+    /// A `"#RRGGBB"` color from the server (a Group's or a profile's `coverColor`); nil when it
+    /// isn't one.
+    init?(serverHex: String?) {
+        guard var text = serverHex?.trimmingCharacters(in: .whitespaces), !text.isEmpty else { return nil }
+        if text.hasPrefix("#") { text.removeFirst() }
+        guard text.count == 6, let value = UInt32(text, radix: 16) else { return nil }
+        self.init(hex: value)
+    }
+
     /// A color that follows light and dark mode.
     static func dynamic(light: UInt32, dark: UInt32) -> Color {
         Color(uiColor: .dynamic(light: light, dark: dark))

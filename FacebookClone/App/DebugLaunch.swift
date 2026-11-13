@@ -88,11 +88,24 @@ enum DebugLaunch {
         case "next": router.openStudio(StudioLaunch(mode: .nextLevel, baseBubbleID: arg))
         case "daily": router.openStudio(StudioLaunch(mode: .daily, groupID: arg))
         case "group":
-            if let group = appStore.group(id: arg) { router.push(.group(group)) }
+            if let group = appStore.group(id: arg) ?? bubbleStore.serverGroups[arg] {
+                router.push(.group(group))
+            } else {
+                // A server Group the app hasn't fetched yet.
+                Task { @MainActor in
+                    if let detail = try? await bubbleStore.api.group(id: arg) {
+                        router.push(.group(bubbleStore.adopt(detail)))
+                    }
+                }
+            }
         case "event":
             if let event = appStore.event(id: arg) { router.push(.event(event)) }
         case "profile":
-            if let user = arg == "me" ? appStore.me : appStore.user(id: arg) { router.push(.profile(user)) }
+            if let user = arg == "me" ? appStore.me : appStore.user(id: arg) {
+                router.push(.profile(user))
+            } else if GameIDMap.isServerID(arg) {
+                router.push(.profile(bubbleStore.resolvePerson(arg)))
+            }
         case "reels": router.openReels()
         case "messenger": router.openMessenger()
         case "chat":

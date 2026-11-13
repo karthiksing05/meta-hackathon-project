@@ -297,16 +297,28 @@ extension BubbleStore {
         }
         let user = User(id: id, firstName: name.isEmpty ? "Player" : name, friendship: isFriend == true ? .friends : .none, isFollowing: isFriend == true)
         serverPeople[id] = user
+        // Only an id and a name here: the picture comes from the server in a moment.
+        if !isPreview { ServerAvatarLookup.shared.fill(user) }
         return user
     }
 
-    /// A server profile as an app user.
+    /// A server profile as an app user, with their picture (or cartoon), bio and cover color.
     func person(_ profile: RemoteProfile) -> User {
         let user = person(id: profile.id, name: profile.displayName.isEmpty ? profile.username : profile.displayName, isFriend: profile.isFriend)
-        if !user.isMe {
-            user.firstName = profile.displayName.isEmpty ? profile.username : profile.displayName
-            user.bio = profile.bio ?? ""
-        }
+        if !user.isMe { apply(profile, to: user) }
         return user
+    }
+
+    /// Copies a server profile onto an app user (someone in a list, or the person whose profile is
+    /// open). A picked photo (`avatarData`) still wins over the URL.
+    func apply(_ profile: RemoteProfile, to user: User) {
+        let name = profile.displayName.isEmpty ? profile.username : profile.displayName
+        if !name.isEmpty, serverPeople[user.id] === user {
+            user.firstName = name
+            user.lastName = ""
+        }
+        user.bio = profile.bio ?? ""
+        user.coverColor = profile.coverColor
+        if let picture = PersonAvatarURL.forProfile(profile) { user.avatarURL = picture }
     }
 }

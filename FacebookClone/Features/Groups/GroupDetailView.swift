@@ -25,11 +25,14 @@ struct GroupDetailView: View {
 
     @Environment(AppStore.self) private var store
     @Environment(Router.self) private var router
+    @Environment(BubbleStore.self) private var bubbleStore
 
     @State private var tab: GroupsDetailTab = .featured
     @State private var didApplyStartTab = false
     @State private var showLeaveConfirm = false
     @State private var showInvite = false
+    @State private var showAddPeople = false
+    @State private var showSettings = false
     @State private var isFollowing = true
     @State private var notificationsOn = true
     @State private var viewer: GroupsViewerItem?
@@ -61,17 +64,27 @@ struct GroupDetailView: View {
                 tab = .games
             }
         }
+        .task(id: group.id) {
+            // The server's join policy, settings and members, when it has this Group.
+            await bubbleStore.refreshGroup(group)
+        }
         .sheet(isPresented: $showInvite) {
             GroupsFriendPickerSheet(title: "Invite friends", confirmTitle: "Send") { _ in
                 store.showToast("Invites sent", symbol: "paperplane.fill")
             }
+        }
+        .sheet(isPresented: $showAddPeople) {
+            GroupsAddPeopleSheet(group: group)
+        }
+        .sheet(isPresented: $showSettings) {
+            GroupsJoinSettingsSheet(group: group)
         }
         .fullScreenCover(item: $viewer) { item in
             PhotoViewer(media: item.media, startIndex: item.index)
         }
         .confirmationDialog("Leave \(group.name)?", isPresented: $showLeaveConfirm, titleVisibility: .visible) {
             Button("Leave group", role: .destructive) {
-                store.toggleMembership(group)
+                bubbleStore.leave(group)
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -140,10 +153,16 @@ struct GroupDetailView: View {
                         .font(.fbBody)
                 }
                 .foregroundStyle(FBColor.secondaryText)
+                if group.isRecruiting {
+                    GroupsRecruitingPill()
+                }
                 if !group.memberSample.isEmpty {
                     AvatarStack(users: group.memberSample, size: FBAvatarSize.reply, maxCount: 6)
                 }
                 actionButtons
+                if group.isAdmin && group.isOnServer {
+                    GroupsRequestsSection(group: group)
+                }
             }
             .padding(16)
         }
@@ -155,23 +174,46 @@ struct GroupDetailView: View {
             if group.isMember {
                 joinedMenu
             } else {
+                GroupsJoinButton(group: group)
+            }
+            if group.isOnServer {
+                if bubbleStore.canAddPeople(to: group) {
+                    Button {
+                        Haptics.light()
+                        showAddPeople = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "person.badge.plus")
+                            Text(GroupJoinCopy.addPeople)
+                        }
+                    }
+                    .buttonStyle(.fbSecondary)
+                }
+            } else {
+                Button {
+                    showInvite = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus")
+                        Text("Invite")
+                    }
+                }
+                .buttonStyle(.fbSecondary)
+            }
+            if group.isAdmin && group.isOnServer {
                 Button {
                     Haptics.light()
-                    store.toggleMembership(group)
+                    showSettings = true
                 } label: {
-                    Text("Join group")
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: FBIconSize.regular, weight: .semibold))
+                        .foregroundStyle(FBColor.primaryText)
+                        .frame(width: 44, height: 36)
+                        .background(FBColor.buttonGray, in: RoundedRectangle(cornerRadius: FBMetrics.cornerRadius, style: .continuous))
                 }
-                .buttonStyle(.fbPrimary)
+                .buttonStyle(.plain)
+                .accessibilityLabel(GroupJoinCopy.settings)
             }
-            Button {
-                showInvite = true
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "plus")
-                    Text("Invite")
-                }
-            }
-            .buttonStyle(.fbSecondary)
             ShareLink(item: "Check out \(group.name) on Facebook") {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: FBIconSize.regular, weight: .semibold))
@@ -337,6 +379,9 @@ struct GroupDetailView: View {
                     ? "Only members can see who's in the group and what they post."
                     : "Anyone can see who's in the group and what they post."
             )
+            if group.isOnServer {
+                aboutRow(symbol: group.joinPolicy.symbol, title: group.joinPolicy.title, detail: group.joinPolicy.detail)
+            }
             aboutRow(symbol: "eye.fill", title: "Visible", detail: "Anyone can find this group.")
             aboutRow(symbol: "clock.fill", title: "History", detail: "Group created on \(creationText)")
             if !group.category.isEmpty {

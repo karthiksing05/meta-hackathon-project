@@ -78,14 +78,28 @@ extension BubbleStore {
     @discardableResult
     func adopt(_ remote: RemoteGroup) -> FBGroup {
         let group = serverGroups[remote.id] ?? FBGroup(id: remote.id, name: remote.name)
+        apply(remote, to: group)
+        serverGroups[remote.id] = group
+        return group
+    }
+
+    /// Copies the server's Group onto an app Group (also the demo world's own Group object, which
+    /// shares its id with the server's).
+    func apply(_ remote: RemoteGroup, to group: FBGroup) {
         group.name = remote.name
         group.isPrivate = remote.isPrivate
         group.memberCount = remote.memberCount
         group.isMember = remote.isMember
         group.about = remote.about ?? ""
         group.category = remote.category ?? ""
-        serverGroups[remote.id] = group
-        return group
+        group.isOnServer = true
+        group.ownerID = remote.ownerID
+        group.isAdmin = remote.ownerID != nil && remote.ownerID == GamesAccount.shared.userID
+        group.joinPolicy = GroupJoinPolicy(server: remote.joinPolicy)
+        group.isRecruiting = remote.recruiting
+        group.coverColor = remote.coverColor
+        group.hasRequested = !remote.isMember && remote.requested
+        group.requestCount = remote.requestCount
     }
 
     /// A Group with its members.
@@ -97,22 +111,16 @@ extension BubbleStore {
     }
 
     /// Joins a Group (the "Join the Group" next step on its empty game states). A Group on the
-    /// games server is joined there too (`PUT /v1/groups/{id}/members/me`), so its games, boards
-    /// and weekly board open up; if the server says no, the join is undone with a toast.
+    /// games server goes through its join policy there (`requestToJoin`): an open Group joins, a
+    /// request Group sends the owner an ask, an invite Group says a member has to add you.
     @MainActor
     func join(_ group: FBGroup, then done: (() -> Void)? = nil) {
         guard !group.isMember else { done?(); return }
-        appStore.toggleMembership(group)
-        guard !isPreview, GameIDMap.isServerID(group.id) else { done?(); return }
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            do {
-                try await api.setMember(true, groupID: group.id)
-            } catch {
-                if group.isMember { group.isMember = false; group.memberCount -= 1 }
-                appStore.showToast("Couldn't join \(group.name). Try again.", symbol: "exclamationmark.circle")
-            }
+        guard !isPreview, group.isOnServer || GameIDMap.isServerID(group.id) else {
+            appStore.toggleMembership(group)
             done?()
+            return
         }
+        requestToJoin(group, then: done)
     }
 }

@@ -92,7 +92,7 @@ extension AppStore {
         if let mine = found.first(where: { $0.id == accountID }), !GamesAccount.shared.isGuest {
             me.firstName = mine.firstName
             me.lastName = mine.lastName ?? ""
-            if let avatar = mine.avatarUrl.flatMap(URL.init(string:)) { me.avatarURL = avatar }
+            if let avatar = PersonAvatarURL.displayable(mine.avatarUrl) { me.avatarURL = avatar }
             if let bio = mine.bio, !bio.isEmpty { me.bio = bio }
         }
         for person in found where person.id != accountID {
@@ -117,7 +117,7 @@ extension AppStore {
     func liveUser(_ remote: RemoteFBPerson) -> User {
         if remote.isMe == true || remote.id == live.accountID { return me }
         live.serverPeople.insert(remote.id)
-        let avatar = remote.avatarUrl.flatMap(URL.init(string:))
+        let avatar = PersonAvatarURL.displayable(remote.avatarUrl)
         if let existing = user(id: remote.id) {
             if let avatar { existing.avatarURL = avatar }
             if let cover = remote.coverUrl.flatMap(URL.init(string:)) { existing.coverURL = cover }

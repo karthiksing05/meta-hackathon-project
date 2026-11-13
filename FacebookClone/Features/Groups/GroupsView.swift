@@ -8,17 +8,26 @@ private enum GroupsFilter: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-/// A group's cover photo with a gradient behind it while loading.
+/// A group's cover photo with a gradient behind it while loading. A Group with no photo shows its
+/// `coverColor` from the server, when it has one.
 struct GroupsCoverImage: View {
     let group: FBGroup
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [FBColor.groupsBlue, FBColor.savedPurple],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            if group.coverURL == nil, let color = Color(serverHex: group.coverColor) {
+                LinearGradient(
+                    colors: [color, color.opacity(0.75)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            } else {
+                LinearGradient(
+                    colors: [FBColor.groupsBlue, FBColor.savedPurple],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
             RemoteImage(url: group.coverURL, placeholder: .clear)
         }
     }

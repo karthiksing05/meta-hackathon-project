@@ -19,6 +19,21 @@ final class FBGroup: Identifiable, Hashable {
     var lastVisited: Date?
     var memberSample: [User]
 
+    // From the games server (`GET /v1/groups/{id}`); a Group the server doesn't know keeps the
+    // defaults and joins on the phone only.
+    /// The server sent this Group, so joining, adding people and settings go through the API.
+    var isOnServer = false
+    var ownerID: String?
+    var joinPolicy: GroupJoinPolicy = .open
+    /// The Group says it wants new members.
+    var isRecruiting = false
+    /// `"#RRGGBB"`, the cover when the Group has no picture.
+    var coverColor: String?
+    /// I asked to join and the owner hasn't answered yet.
+    var hasRequested = false
+    /// The owner only: people waiting to join.
+    var requestCount = 0
+
     init(
         id: String = UUID().uuidString,
         name: String,
@@ -54,6 +69,47 @@ final class FBGroup: Identifiable, Hashable {
 
     static func == (lhs: FBGroup, rhs: FBGroup) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
+}
+
+/// How people get into a Group (the server's `joinPolicy`).
+enum GroupJoinPolicy: String, CaseIterable, Identifiable, Hashable {
+    /// Anyone joins.
+    case open
+    /// People ask; the owner approves.
+    case request
+    /// A member adds people.
+    case invite
+
+    var id: String { rawValue }
+
+    init(server: String) {
+        self = GroupJoinPolicy(rawValue: server) ?? .open
+    }
+
+    var title: String {
+        switch self {
+        case .open: return "Anyone can join"
+        case .request: return "Ask to join"
+        case .invite: return "Invite only"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .open: return "Anyone can join right away."
+        case .request: return "People ask to join and you approve them."
+        case .invite: return "Only members can add people."
+        }
+    }
+
+    /// SF Symbol name.
+    var symbol: String {
+        switch self {
+        case .open: return "person.3.fill"
+        case .request: return "person.badge.clock.fill"
+        case .invite: return "lock.fill"
+        }
+    }
 }
 
 enum EventResponse: String, CaseIterable, Identifiable, Hashable {

@@ -396,7 +396,7 @@ struct StudioGroupThumbnail: View {
     var size: CGFloat = FBAvatarSize.post
 
     var body: some View {
-        RemoteImage(url: group.coverURL)
+        GroupsCoverImage(group: group)
             .frame(width: size, height: size)
             .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
             .accessibilityHidden(true)
