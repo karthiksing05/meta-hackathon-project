@@ -1,0 +1,1885 @@
+[
+  {
+    "id": "line_clear_falling_blocks",
+    "name": "Falling blocks line clear",
+    "aliases": [
+      "Tetris",
+      "Tetris 99"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Rotate and drop falling shapes to complete horizontal lines, which clear.",
+    "core_loop": "a piece falls → rotate and move it → lock it → full lines clear → speed rises",
+    "verbs": [
+      "rotate",
+      "drop",
+      "plan"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "full rows clear",
+      "blocks reaching the top end the game"
+    ],
+    "win": "none; score attack",
+    "lose": "the stack reaches the top",
+    "scoring": "lines cleared, multi-line bonus",
+    "session_seconds": [
+      60,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "weekly high score in a Group",
+      "battle mode sends garbage to friends"
+    ],
+    "difficulty_levers": [
+      "fall speed",
+      "preview count"
+    ],
+    "tools": [
+      "grid_board",
+      "gravity_jump",
+      "speed_ramp",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tetris but the blocks are pizza",
+      "falling blocks game",
+      "tetris battle with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "block_fit_no_gravity",
+    "name": "Place blocks to clear rows and columns",
+    "aliases": [
+      "Block Blast",
+      "1010!",
+      "Woodoku"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Place given block shapes anywhere on a grid to fill full rows or columns, which clear.",
+    "core_loop": "pick a shape → place it → full rows or columns clear → get three new shapes",
+    "verbs": [
+      "place",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "no rotation",
+      "game ends when no shape fits"
+    ],
+    "win": "none; score attack",
+    "lose": "no space for any given shape",
+    "scoring": "cells cleared, combo bonus",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's best"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "shape mix"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "block blast game",
+      "woodoku with my photos",
+      "1010 block puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "jigsaw_assemble",
+    "name": "Jigsaw",
+    "aliases": [
+      "Jigsaw puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Drag pieces of a picture into place to rebuild it.",
+    "core_loop": "pick a piece → drag it → it snaps when right → finish the picture",
+    "verbs": [
+      "arrange",
+      "match"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "pieces only snap to their correct place"
+    ],
+    "win": "complete the picture",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      120,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "make a jigsaw of a group photo and send it"
+    ],
+    "difficulty_levers": [
+      "piece count",
+      "rotation on"
+    ],
+    "tools": [
+      "player_drag",
+      "image_assets",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "jigsaw of our trip photo",
+      "jigsaw puzzle of my dog",
+      "relaxing jigsaw"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rotate_tiles_picture",
+    "name": "Rotate the tiles",
+    "aliases": [
+      "Rotate puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Each tile of a picture is turned; tap tiles to rotate until the picture is right.",
+    "core_loop": "tap a tile → it rotates 90° → fix every tile",
+    "verbs": [
+      "rotate",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "tiles rotate in place"
+    ],
+    "win": "every tile upright",
+    "lose": "none",
+    "scoring": "taps",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "send a scrambled photo"
+    ],
+    "difficulty_levers": [
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "image_assets",
+      "rotate"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "rotate tiles to fix the picture",
+      "spin the pieces puzzle",
+      "photo rotation puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "swap_tiles_picture",
+    "name": "Swap the tiles",
+    "aliases": [
+      "Swap puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Tiles of a picture are shuffled; swap two at a time to restore it.",
+    "core_loop": "tap two tiles → they swap → restore the image",
+    "verbs": [
+      "swap",
+      "match"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "any two tiles can swap"
+    ],
+    "win": "restore the picture",
+    "lose": "none",
+    "scoring": "swaps used",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "photo puzzle for a friend"
+    ],
+    "difficulty_levers": [
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "image_assets",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "swap tiles photo puzzle",
+      "unscramble my picture",
+      "tile swap game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fold_paper_predict",
+    "name": "Fold the paper",
+    "aliases": [
+      "Paper folding",
+      "Fold puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Fold paper along lines to match a target shape or pattern.",
+    "core_loop": "pick a fold line → fold → layers stack → match the target",
+    "verbs": [
+      "fold",
+      "visualize"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "folds are along given lines",
+      "order matters"
+    ],
+    "win": "match the target",
+    "lose": "none",
+    "scoring": "folds used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily fold"
+    ],
+    "difficulty_levers": [
+      "fold count"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "paper folding puzzle",
+      "fold the paper to match",
+      "origami logic game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cube_net_fold",
+    "name": "Which cube",
+    "aliases": [
+      "Cube net",
+      "Spatial test"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "See a flat net and pick which cube it folds into.",
+    "core_loop": "study the net → pick the folded cube → next",
+    "verbs": [
+      "visualize",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one correct cube per net"
+    ],
+    "win": "most right",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "IQ challenge with friends"
+    ],
+    "difficulty_levers": [
+      "net complexity"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "which cube does this net make",
+      "spatial reasoning test",
+      "cube folding quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mental_rotation",
+    "name": "Same or mirrored",
+    "aliases": [
+      "Mental rotation test"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Decide whether two rotated shapes are the same or mirror images.",
+    "core_loop": "compare shapes → tap same or mirror → next faster",
+    "verbs": [
+      "rotate",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "rotations count as same, mirrors don't"
+    ],
+    "win": "most right",
+    "lose": "none",
+    "scoring": "right answers and speed",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "brain-training duel"
+    ],
+    "difficulty_levers": [
+      "rotation angle",
+      "speed"
+    ],
+    "tools": [
+      "quiz",
+      "speed_ramp",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "mental rotation test",
+      "same or mirrored shapes",
+      "spatial iq game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "isometric_block_count",
+    "name": "Count the blocks",
+    "aliases": [
+      "Block counting"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Count the cubes in a 3D stack, including hidden ones.",
+    "core_loop": "look at the stack → count → type → reveal",
+    "verbs": [
+      "count",
+      "visualize"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "hidden support cubes count"
+    ],
+    "win": "right count",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "brain teaser for friends"
+    ],
+    "difficulty_levers": [
+      "stack size"
+    ],
+    "tools": [
+      "keyboard",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "count the cubes puzzle",
+      "how many blocks are there",
+      "3d block counting"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shadow_shape_match",
+    "name": "Match the shadow",
+    "aliases": [
+      "Shadow puzzle",
+      "Shadowmatic"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Rotate an object until its shadow matches the target silhouette.",
+    "core_loop": "rotate the object → watch the shadow → match the outline",
+    "verbs": [
+      "rotate",
+      "match"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the shadow must match within tolerance"
+    ],
+    "win": "match the shadow",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "calm puzzle to share"
+    ],
+    "difficulty_levers": [
+      "rotation axes"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "shadowmatic puzzle",
+      "rotate to match the shadow",
+      "silhouette shadow game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mirror_reflect_draw",
+    "name": "Draw the reflection",
+    "aliases": [
+      "Mirror drawing"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Draw the mirrored half of a picture across an axis.",
+    "core_loop": "see half → draw the mirror half → accuracy scores",
+    "verbs": [
+      "mirror",
+      "draw"
+    ],
+    "inputs": [
+      "draw",
+      "drag"
+    ],
+    "rules": [
+      "accuracy within tolerance"
+    ],
+    "win": "most accurate",
+    "lose": "none",
+    "scoring": "percent match",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "kids art challenge"
+    ],
+    "difficulty_levers": [
+      "axis",
+      "detail"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "finish the mirror drawing",
+      "symmetry drawing game",
+      "draw the reflection"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "maze_2d_solve",
+    "name": "Maze",
+    "aliases": [
+      "Maze"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Find the way from start to exit through a maze.",
+    "core_loop": "trace a path → avoid dead ends → reach the exit",
+    "verbs": [
+      "navigate",
+      "trace"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "walls can't be crossed"
+    ],
+    "win": "reach the exit",
+    "lose": "timer runs out",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily maze race"
+    ],
+    "difficulty_levers": [
+      "maze size",
+      "time"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "maze game with my name",
+      "daily maze race",
+      "escape the labyrinth"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rotating_maze",
+    "name": "Tilt the maze",
+    "aliases": [
+      "Rotating maze",
+      "Labyrinth"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Rotate the whole maze so a ball rolls toward the goal under gravity.",
+    "core_loop": "rotate the board → the ball rolls → steer it to the hole",
+    "verbs": [
+      "rotate",
+      "steer"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "gravity always pulls down"
+    ],
+    "win": "the ball reaches the goal",
+    "lose": "the ball falls in a trap",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "maze size",
+      "traps"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "checkpoint"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rotate the maze to roll the ball",
+      "labyrinth tilt game",
+      "marble maze"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pack_the_trunk",
+    "name": "Pack it all in",
+    "aliases": [
+      "Packing puzzle",
+      "Tetris trunk"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Fit odd-shaped items into a container with no overflow.",
+    "core_loop": "pick an item → rotate → place → fit everything",
+    "verbs": [
+      "fit",
+      "rotate",
+      "plan"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "items can't overlap",
+      "everything must fit"
+    ],
+    "win": "pack everything",
+    "lose": "none",
+    "scoring": "time and moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "road-trip themed for friends"
+    ],
+    "difficulty_levers": [
+      "item count"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "rotate"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "pack the suitcase puzzle",
+      "fit everything in the car trunk",
+      "packing tetris"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cut_to_fit",
+    "name": "Cut the shape",
+    "aliases": [
+      "Slice puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Draw straight cuts to split a shape into pieces that meet a rule (equal areas, one star each).",
+    "core_loop": "draw a cut → pieces form → satisfy the rule",
+    "verbs": [
+      "cut",
+      "plan"
+    ],
+    "inputs": [
+      "swipe",
+      "draw"
+    ],
+    "rules": [
+      "only N cuts"
+    ],
+    "win": "meet the rule",
+    "lose": "out of cuts",
+    "scoring": "cuts used",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share solutions"
+    ],
+    "difficulty_levers": [
+      "cuts",
+      "rule"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cut the cake into equal pieces",
+      "slice the shape so each part has a star",
+      "cutting puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "connect_shapes_pipes_3d",
+    "name": "Isometric path",
+    "aliases": [
+      "Monument Valley",
+      "Isometric illusion"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Rotate and shift an isometric world so paths connect through optical illusions.",
+    "core_loop": "rotate a piece → paths line up → walk across",
+    "verbs": [
+      "rotate",
+      "visualize"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "paths connect if they look connected"
+    ],
+    "win": "reach the goal",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "calm puzzle to share"
+    ],
+    "difficulty_levers": [
+      "illusion count"
+    ],
+    "tools": [
+      "rotate",
+      "player_drag",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "monument valley style puzzle",
+      "optical illusion path game",
+      "impossible architecture puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spot_difference",
+    "name": "Spot the difference",
+    "aliases": [
+      "Spot the Difference",
+      "Find the Differences"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Find all the differences between two near-identical pictures.",
+    "core_loop": "compare both pictures → tap a difference → find them all",
+    "verbs": [
+      "compare",
+      "find"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong taps cost time"
+    ],
+    "win": "find every difference",
+    "lose": "timer runs out",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "make one from a group photo"
+    ],
+    "difficulty_levers": [
+      "difference count",
+      "subtlety"
+    ],
+    "tools": [
+      "image_assets",
+      "reveal",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "spot the difference with our photos",
+      "find 5 differences",
+      "hard spot the difference"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hidden_object",
+    "name": "Hidden objects",
+    "aliases": [
+      "Hidden object",
+      "I Spy",
+      "Where's Waldo"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Find a list of objects hidden in a busy scene.",
+    "core_loop": "read the list → search the scene → tap each object",
+    "verbs": [
+      "search",
+      "find"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong taps cost time"
+    ],
+    "win": "find every object",
+    "lose": "timer runs out",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "hide your friend in a scene"
+    ],
+    "difficulty_levers": [
+      "object count",
+      "clutter"
+    ],
+    "tools": [
+      "image_assets",
+      "reveal",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "where's waldo with my friend",
+      "i spy game",
+      "hidden objects in a messy room"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "silhouette_identify",
+    "name": "Name the silhouette",
+    "aliases": [
+      "Silhouette quiz"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Identify an object or animal from its silhouette.",
+    "core_loop": "see the silhouette → pick or type the name → next",
+    "verbs": [
+      "recognize"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "one answer per silhouette"
+    ],
+    "win": "name them all",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "kids challenge"
+    ],
+    "difficulty_levers": [
+      "detail"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the animal silhouette",
+      "shadow quiz",
+      "name the object from its outline"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tile_painting_cover",
+    "name": "Cover the grid with one stroke",
+    "aliases": [
+      "Paint the grid"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Roll a ball that paints every cell it passes; cover the whole grid.",
+    "core_loop": "swipe a direction → the ball rolls to a wall, painting → cover everything",
+    "verbs": [
+      "paint",
+      "plan"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "the ball rolls until it hits a wall"
+    ],
+    "win": "paint every cell",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid shape"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "roll the ball to paint the maze",
+      "amaze puzzle",
+      "paint every tile"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "domino_fit_board",
+    "name": "Domino tiling",
+    "aliases": [
+      "Domino puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Cover a board with dominoes; some squares are blocked.",
+    "core_loop": "place a domino → cover two cells → cover everything",
+    "verbs": [
+      "place",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "each domino covers two adjacent cells"
+    ],
+    "win": "cover every open cell",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "board shape"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cover the board with dominoes",
+      "domino tiling puzzle",
+      "fit dominoes on a chessboard"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "area_fill_shikaku",
+    "name": "Divide into rectangles",
+    "aliases": [
+      "Shikaku"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Split the grid into rectangles, each containing one number equal to its area.",
+    "core_loop": "draw a rectangle around a number → match its area → cover the grid",
+    "verbs": [
+      "divide",
+      "calculate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each rectangle has exactly one number"
+    ],
+    "win": "cover the grid",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "shikaku puzzle",
+      "divide the grid into rectangles",
+      "area puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "view_from_angle",
+    "name": "Which view is it",
+    "aliases": [
+      "Orthographic views"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Pick which top, front or side view matches a 3D object.",
+    "core_loop": "study the object → pick the view → next",
+    "verbs": [
+      "visualize",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one correct view"
+    ],
+    "win": "most right",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "engineering class challenge"
+    ],
+    "difficulty_levers": [
+      "object complexity"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "which is the top view",
+      "engineering drawing quiz",
+      "3d views test"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stack_to_height",
+    "name": "Build to the outline",
+    "aliases": [
+      "Block builder"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Stack blocks to exactly fill a target outline.",
+    "core_loop": "pick a block → stack it → match the outline",
+    "verbs": [
+      "build",
+      "fit"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "blocks fall under gravity"
+    ],
+    "win": "match the outline",
+    "lose": "blocks topple",
+    "scoring": "blocks used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "build challenges for friends"
+    ],
+    "difficulty_levers": [
+      "outline complexity"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "stack blocks to match the shape",
+      "build the outline puzzle",
+      "block silhouette builder"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "light_beam_route",
+    "name": "Route the light",
+    "aliases": [
+      "Light puzzle",
+      "Lightbot"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Move and turn prisms to route colored light into matching receivers.",
+    "core_loop": "place prisms → split and bend light → match colors to receivers",
+    "verbs": [
+      "route",
+      "plan"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "prisms split white into colors"
+    ],
+    "win": "every receiver lit in its color",
+    "lose": "none",
+    "scoring": "pieces used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "receivers"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "light prism puzzle",
+      "route the colored beams",
+      "refract light game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rope_untangle",
+    "name": "Untangle",
+    "aliases": [
+      "Untangle",
+      "Planarity"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Move nodes so no lines cross.",
+    "core_loop": "drag a node → lines move with it → no crossings",
+    "verbs": [
+      "drag",
+      "visualize"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "lines stay attached to their nodes"
+    ],
+    "win": "no crossing lines",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "node count"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "untangle the lines puzzle",
+      "planarity game",
+      "no crossing lines"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rubik_cube_solve",
+    "name": "Twisty cube",
+    "aliases": [
+      "Rubik's Cube"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Turn faces of a scrambled cube until each face is one color.",
+    "core_loop": "turn a face → plan sequences → solve every face",
+    "verbs": [
+      "rotate",
+      "plan"
+    ],
+    "inputs": [
+      "swipe",
+      "drag"
+    ],
+    "rules": [
+      "only whole faces turn"
+    ],
+    "win": "solve the cube",
+    "lose": "none",
+    "scoring": "moves and time",
+    "session_seconds": [
+      120,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "speedcubing with friends"
+    ],
+    "difficulty_levers": [
+      "cube size"
+    ],
+    "tools": [
+      "three_d",
+      "rotate",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rubiks cube game",
+      "solve a 2x2 cube",
+      "speedcube timer with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "peg_solitaire",
+    "name": "Peg jump",
+    "aliases": [
+      "Peg solitaire",
+      "Cracker Barrel triangle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Jump pegs over each other into holes, removing the jumped peg, to leave one.",
+    "core_loop": "jump a peg → remove the jumped peg → plan ahead → leave one",
+    "verbs": [
+      "jump",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "jumps are in a line over one peg into an empty hole"
+    ],
+    "win": "leave one peg",
+    "lose": "no jumps left with more pegs",
+    "scoring": "pegs left",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare pegs left"
+    ],
+    "difficulty_levers": [
+      "board shape"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "peg jump triangle game",
+      "cracker barrel peg game",
+      "peg solitaire"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pipe_slide_connect",
+    "name": "Slide the pipes",
+    "aliases": [
+      "Slide pipes"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Slide pipe tiles in a sliding puzzle so water flows from start to end.",
+    "core_loop": "slide tiles → connect the path → water flows",
+    "verbs": [
+      "slide",
+      "connect"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "only tiles beside the gap move"
+    ],
+    "win": "water reaches the end",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size"
+    ],
+    "tools": [
+      "tile_slide",
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "sliding pipe puzzle",
+      "slide tiles to connect the water",
+      "unblock the pipe"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "perspective_align",
+    "name": "Line up the picture",
+    "aliases": [
+      "Perspective puzzle",
+      "Superliminal"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Move the camera until scattered fragments line up into one picture.",
+    "core_loop": "drag to move the view → fragments align → the image completes",
+    "verbs": [
+      "align",
+      "visualize"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the picture only forms from one viewpoint"
+    ],
+    "win": "complete the picture",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "calm share"
+    ],
+    "difficulty_levers": [
+      "fragment count"
+    ],
+    "tools": [
+      "three_d",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "line up the fragments puzzle",
+      "perspective illusion game",
+      "align the picture"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_match_fill",
+    "name": "Match the colors",
+    "aliases": [
+      "Color mix"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Mix primary paints to match a target color.",
+    "core_loop": "add paint → the mix updates → match the target",
+    "verbs": [
+      "mix",
+      "compare"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "accuracy within tolerance"
+    ],
+    "win": "match the color",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily color with friends"
+    ],
+    "difficulty_levers": [
+      "tolerance"
+    ],
+    "tools": [
+      "reveal",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mix paint to match the color",
+      "color matching game",
+      "daily color mixing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shape_sort_slots",
+    "name": "Fit shapes in slots",
+    "aliases": [
+      "Shape sorter"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Drop shapes into matching holes before time runs out.",
+    "core_loop": "pick a shape → find its hole → drop it",
+    "verbs": [
+      "match",
+      "react"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "only the matching hole accepts"
+    ],
+    "win": "fit every shape",
+    "lose": "timer runs out",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "toddler and parent game"
+    ],
+    "difficulty_levers": [
+      "shape count"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "shape sorter for toddlers",
+      "fit the shapes in the holes",
+      "shape matching game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gravity_flip_board",
+    "name": "Gravity flip",
+    "aliases": [
+      "Gravity puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Flip gravity to move all loose pieces at once to their targets.",
+    "core_loop": "pick a direction → everything slides → reach targets",
+    "verbs": [
+      "flip",
+      "plan"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "all loose pieces move together"
+    ],
+    "win": "every piece on a target",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "pieces",
+      "walls"
+    ],
+    "tools": [
+      "grid_board",
+      "tile_slide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "gravity flip puzzle",
+      "tilt the board to move everything",
+      "sliding pieces gravity"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bridge_draw_physics",
+    "name": "Draw the bridge",
+    "aliases": [
+      "Draw bridge",
+      "Draw Climber"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Draw a line that becomes a solid bridge for a vehicle to cross.",
+    "core_loop": "draw a line → it becomes solid → the car drives → reach the goal",
+    "verbs": [
+      "draw",
+      "plan"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "rules": [
+      "ink is limited"
+    ],
+    "win": "the car reaches the goal",
+    "lose": "the car falls",
+    "scoring": "ink used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share clever solutions"
+    ],
+    "difficulty_levers": [
+      "ink limit"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "physics_world"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "draw a bridge for the car",
+      "draw lines to save the ball",
+      "physics drawing puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mosaic_place",
+    "name": "Mosaic",
+    "aliases": [
+      "Mosaic puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Place colored tiles to recreate a target image with limited tiles.",
+    "core_loop": "pick a color → place tiles → match the image",
+    "verbs": [
+      "place",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each color has a limited count"
+    ],
+    "win": "match the image",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "make a mosaic of a group pic"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "palette"
+    ],
+    "tools": [
+      "grid_board",
+      "image_assets"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mosaic puzzle of my photo",
+      "pixel art from tiles",
+      "tile mosaic game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fence_enclose",
+    "name": "Fence the animals",
+    "aliases": [
+      "Fence puzzle"
+    ],
+    "family": "spatial_puzzle",
+    "summary": "Draw fences so each pen holds the right animals.",
+    "core_loop": "draw fence lines → enclose pens → satisfy every rule",
+    "verbs": [
+      "divide",
+      "plan"
+    ],
+    "inputs": [
+      "drag",
+      "draw"
+    ],
+    "rules": [
+      "fences follow grid lines"
+    ],
+    "win": "every pen valid",
+    "lose": "none",
+    "scoring": "fence used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "farm-themed daily"
+    ],
+    "difficulty_levers": [
+      "rules"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "fence the sheep puzzle",
+      "divide the farm",
+      "pen the animals logic"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

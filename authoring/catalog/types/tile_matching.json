@@ -1,0 +1,1599 @@
+[
+  {
+    "id": "swap_match_three",
+    "name": "Swap to match three",
+    "aliases": [
+      "Candy Crush",
+      "Bejeweled",
+      "Homescapes"
+    ],
+    "family": "tile_matching",
+    "summary": "Swap two neighboring tiles to line up three or more of the same; they clear and new tiles fall.",
+    "core_loop": "swap two tiles → a line of 3+ clears → tiles fall → cascades score more",
+    "verbs": [
+      "swap",
+      "match"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "only swaps that make a match are allowed",
+      "matches of 4 and 5 make special tiles"
+    ],
+    "win": "reach the level goal within moves",
+    "lose": "out of moves",
+    "scoring": "points per match, cascade bonus",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends' scores on the same level",
+      "send extra moves to a friend"
+    ],
+    "difficulty_levers": [
+      "moves",
+      "colors",
+      "blockers"
+    ],
+    "tools": [
+      "grid_board",
+      "combo",
+      "score",
+      "gravity_jump"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "candy crush with my friends faces",
+      "match 3 with sushi",
+      "bejeweled but space themed"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tap_group_collapse",
+    "name": "Tap groups to pop",
+    "aliases": [
+      "SameGame",
+      "Toy Blast",
+      "Collapse"
+    ],
+    "family": "tile_matching",
+    "summary": "Tap a group of two or more touching same-colored tiles to pop them; bigger groups score more.",
+    "core_loop": "tap a group → it pops → tiles fall and shift → plan big groups",
+    "verbs": [
+      "tap",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "single tiles can't pop",
+      "bigger groups score far more"
+    ],
+    "win": "clear the board",
+    "lose": "no groups left",
+    "scoring": "points squared by group size",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat friends' clears"
+    ],
+    "difficulty_levers": [
+      "colors",
+      "board size"
+    ],
+    "tools": [
+      "grid_board",
+      "gravity_jump",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "toy blast game",
+      "tap matching colors to pop",
+      "samegame"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pair_tile_solitaire",
+    "name": "Match open pairs",
+    "aliases": [
+      "Mahjong Solitaire",
+      "Shanghai"
+    ],
+    "family": "tile_matching",
+    "summary": "Remove matching pairs of tiles that are free on at least one side until the stack is gone.",
+    "core_loop": "find a free pair → tap both → they clear → uncover more",
+    "verbs": [
+      "match",
+      "find"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a tile is free if nothing covers it and one side is open"
+    ],
+    "win": "clear every tile",
+    "lose": "no free pairs left",
+    "scoring": "time",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily layout with friends' times"
+    ],
+    "difficulty_levers": [
+      "layout",
+      "tile set"
+    ],
+    "tools": [
+      "grid_board",
+      "match_pairs",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "mahjong solitaire with cats",
+      "tile matching for my mom",
+      "shanghai solitaire"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "triple_tile_tray",
+    "name": "Triple tile tray",
+    "aliases": [
+      "Tile Triple",
+      "Triple Match 3D",
+      "Zen Match"
+    ],
+    "family": "tile_matching",
+    "summary": "Tap tiles from a pile into a 7-slot tray; three of a kind clear. Fill the tray and you lose.",
+    "core_loop": "tap a free tile → it goes to the tray → three alike clear → keep the tray from filling",
+    "verbs": [
+      "pick",
+      "match",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "three identical tiles in the tray clear",
+      "a full tray ends the level"
+    ],
+    "win": "clear the pile",
+    "lose": "the tray fills",
+    "scoring": "tiles cleared",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends on the same level"
+    ],
+    "difficulty_levers": [
+      "tray size",
+      "tile types"
+    ],
+    "tools": [
+      "match_pairs",
+      "grid_board",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "triple match 3d with fruit",
+      "tile tray matching game",
+      "zen match"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "memory_flip_pairs",
+    "name": "Flip and match pairs",
+    "aliases": [
+      "Concentration",
+      "Memory"
+    ],
+    "family": "tile_matching",
+    "summary": "Flip two face-down cards per turn; matching pairs stay up.",
+    "core_loop": "flip two → remember them → match pairs → clear the board",
+    "verbs": [
+      "flip",
+      "remember",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "non-matching cards flip back"
+    ],
+    "win": "match every pair",
+    "lose": "none",
+    "scoring": "flips used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "pass-and-play with family"
+    ],
+    "difficulty_levers": [
+      "pairs",
+      "time"
+    ],
+    "tools": [
+      "match_pairs",
+      "sequence_memory",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "memory card game with our photos",
+      "concentration pairs",
+      "flip cards to match"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "connect_pairs_path",
+    "name": "Connect matching pairs",
+    "aliases": [
+      "Onet",
+      "Shisen-Sho"
+    ],
+    "family": "tile_matching",
+    "summary": "Connect two matching tiles with a path of at most two turns through empty space to remove them.",
+    "core_loop": "find a pair → check the path → remove → clear the board",
+    "verbs": [
+      "match",
+      "connect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the path can bend at most twice"
+    ],
+    "win": "clear the board",
+    "lose": "no moves left",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "tile types",
+      "time"
+    ],
+    "tools": [
+      "grid_board",
+      "match_pairs",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "onet connect game",
+      "pikachu connect tiles",
+      "shisen sho"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bubble_shooter_match",
+    "name": "Bubble shooter",
+    "aliases": [
+      "Bubble Shooter",
+      "Puzzle Bobble",
+      "Bubble Witch"
+    ],
+    "family": "tile_matching",
+    "summary": "Aim and shoot colored bubbles; three or more connected of a color pop and drop what hangs below.",
+    "core_loop": "aim → shoot → three of a color pop → orphaned bubbles drop → clear the ceiling",
+    "verbs": [
+      "aim",
+      "shoot",
+      "match"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "bubbles bounce off side walls",
+      "the ceiling lowers over time"
+    ],
+    "win": "clear the board",
+    "lose": "bubbles reach the bottom",
+    "scoring": "popped and dropped bubbles",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "weekly board"
+    ],
+    "difficulty_levers": [
+      "colors",
+      "ceiling speed"
+    ],
+    "tools": [
+      "grid_board",
+      "collide",
+      "combo",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "bubble shooter with my friends",
+      "puzzle bobble",
+      "pop bubbles game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "chain_matcher_rolling",
+    "name": "Rolling marble chain",
+    "aliases": [
+      "Zuma",
+      "Luxor"
+    ],
+    "family": "tile_matching",
+    "summary": "A chain of marbles rolls toward a hole; shoot marbles into it to make three of a color.",
+    "core_loop": "aim → shoot into the chain → three pop → stop the chain reaching the hole",
+    "verbs": [
+      "aim",
+      "shoot",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the chain keeps advancing",
+      "gaps pull back together"
+    ],
+    "win": "clear the chain",
+    "lose": "the chain reaches the hole",
+    "scoring": "marbles popped, combo bonus",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "combo bragging"
+    ],
+    "difficulty_levers": [
+      "chain speed",
+      "colors"
+    ],
+    "tools": [
+      "collide",
+      "combo",
+      "speed_ramp",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "zuma frog game",
+      "marble chain shooter",
+      "luxor style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "merge_items_board",
+    "name": "Merge items on a board",
+    "aliases": [
+      "Merge Mansion",
+      "Travel Town",
+      "Merge Dragons"
+    ],
+    "family": "tile_matching",
+    "summary": "Drag two identical items together to merge them into the next item in a chain.",
+    "core_loop": "drag an item onto its twin → it upgrades → fill orders",
+    "verbs": [
+      "merge",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "only identical items merge",
+      "board space is limited"
+    ],
+    "win": "complete the orders",
+    "lose": "the board fills",
+    "scoring": "order rewards",
+    "session_seconds": [
+      120,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trade items with friends"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "chain length"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "merge game with flowers",
+      "merge dragons style",
+      "combine items to upgrade"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "merge_drop_physics",
+    "name": "Drop and merge fruit",
+    "aliases": [
+      "Suika Game",
+      "Watermelon Game"
+    ],
+    "family": "tile_matching",
+    "summary": "Drop fruits into a box; two of the same touch and merge into a bigger fruit.",
+    "core_loop": "drop a fruit → same fruits touch → merge bigger → don't overflow",
+    "verbs": [
+      "drop",
+      "merge"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "fruits obey physics",
+      "overflowing the line ends the game"
+    ],
+    "win": "make the biggest fruit",
+    "lose": "overflow",
+    "scoring": "merge points",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat friends' scores"
+    ],
+    "difficulty_levers": [
+      "box size",
+      "drop variety"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "suika watermelon game with planets",
+      "drop and merge fruits",
+      "merge cats"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_sort_tubes",
+    "name": "Sort the colors",
+    "aliases": [
+      "Ball Sort",
+      "Water Sort"
+    ],
+    "family": "tile_matching",
+    "summary": "Pour or move colored balls between tubes until each tube holds one color.",
+    "core_loop": "pick a tube → move its top → stack colors → sort every tube",
+    "verbs": [
+      "sort",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only onto the same color or an empty tube",
+      "tubes have limited height"
+    ],
+    "win": "every tube one color",
+    "lose": "no legal moves",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily level"
+    ],
+    "difficulty_levers": [
+      "tubes",
+      "colors"
+    ],
+    "tools": [
+      "sort_bins",
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "ball sort puzzle",
+      "water sort game",
+      "sort the colors into tubes"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "screw_pin_unscrew",
+    "name": "Unscrew the pins",
+    "aliases": [
+      "Screw puzzle",
+      "Nuts & Bolts"
+    ],
+    "family": "tile_matching",
+    "summary": "Unscrew pins in the right order to release plates into matching color boxes.",
+    "core_loop": "tap a pin → it goes to a box of its color → plates fall → clear",
+    "verbs": [
+      "plan",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a pin can't come out if a plate covers it",
+      "boxes need three of a color"
+    ],
+    "win": "clear every plate",
+    "lose": "boxes full",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "plates",
+      "colors"
+    ],
+    "tools": [
+      "sort_bins",
+      "physics_world"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "screw puzzle game",
+      "unscrew the bolts",
+      "nuts and bolts sort"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "car_jam_sort",
+    "name": "Sort the cars",
+    "aliases": [
+      "Parking jam",
+      "Bus Jam"
+    ],
+    "family": "tile_matching",
+    "summary": "Tap people or cars to send them to the vehicle or spot of their color, in an order that doesn't block.",
+    "core_loop": "tap a piece → it moves if the path is clear → fill vehicles by color",
+    "verbs": [
+      "plan",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "pieces only move if their path is clear"
+    ],
+    "win": "clear the lot",
+    "lose": "gridlock",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "pieces",
+      "colors"
+    ],
+    "tools": [
+      "grid_board",
+      "sort_bins"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "bus jam game",
+      "parking jam puzzle",
+      "color people onto the bus"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_link_line",
+    "name": "Link the colors",
+    "aliases": [
+      "Two Dots",
+      "Dots"
+    ],
+    "family": "tile_matching",
+    "summary": "Draw lines through same-colored dots; closing a square clears every dot of that color.",
+    "core_loop": "drag through same colors → release → they clear → squares clear all",
+    "verbs": [
+      "link",
+      "match"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "lines go up, down, left or right",
+      "a square clears all of that color"
+    ],
+    "win": "meet the level goal",
+    "lose": "out of moves",
+    "scoring": "dots cleared",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily goals"
+    ],
+    "difficulty_levers": [
+      "colors",
+      "moves"
+    ],
+    "tools": [
+      "grid_board",
+      "combo",
+      "gravity_jump"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "two dots game",
+      "connect same color dots",
+      "dots with squares"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hexa_stack_sort",
+    "name": "Hex stack sort",
+    "aliases": [
+      "Hexa Sort"
+    ],
+    "family": "tile_matching",
+    "summary": "Place stacks of colored hexagons; touching same tops merge, and 10 of a color clear.",
+    "core_loop": "place a stack → same colors slide together → 10 clear → keep space",
+    "verbs": [
+      "place",
+      "merge"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "colors slide to neighbors with the same top"
+    ],
+    "win": "reach the level target",
+    "lose": "no room for a stack",
+    "scoring": "cleared hexes",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "colors",
+      "board"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hexa sort game",
+      "stack hexagons by color",
+      "hex merge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tile_flip_match",
+    "name": "Flip to match the pattern",
+    "aliases": [
+      "Flip match"
+    ],
+    "family": "tile_matching",
+    "summary": "Flip tiles so the board matches a target pattern.",
+    "core_loop": "flip a tile → neighbors change → match the target",
+    "verbs": [
+      "flip",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "flips affect a fixed neighborhood"
+    ],
+    "win": "match the target",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "rules"
+    ],
+    "tools": [
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "flip tiles to match the pattern",
+      "flip puzzle",
+      "reversi style flip pattern"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gem_rotate_match",
+    "name": "Rotate to match",
+    "aliases": [
+      "Hexic"
+    ],
+    "family": "tile_matching",
+    "summary": "Rotate clusters of three tiles to make lines of the same color.",
+    "core_loop": "pick a cluster → rotate it → matches clear",
+    "verbs": [
+      "rotate",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only triangle clusters rotate"
+    ],
+    "win": "score attack",
+    "lose": "no moves",
+    "scoring": "matches cleared",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "weekly board"
+    ],
+    "difficulty_levers": [
+      "colors"
+    ],
+    "tools": [
+      "grid_board",
+      "rotate",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hexic rotation puzzle",
+      "rotate three to match",
+      "spinning gem game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shooter_match_line",
+    "name": "Shoot to match a column",
+    "aliases": [
+      "Match shooter"
+    ],
+    "family": "tile_matching",
+    "summary": "Shoot a tile up a column; three of a kind vertically clear.",
+    "core_loop": "pick a column → shoot → three in a column clear → stop the stack falling",
+    "verbs": [
+      "aim",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the stack lowers over time"
+    ],
+    "win": "survive",
+    "lose": "the stack hits the bottom",
+    "scoring": "tiles cleared",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "weekly"
+    ],
+    "difficulty_levers": [
+      "speed"
+    ],
+    "tools": [
+      "grid_board",
+      "speed_ramp",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "shoot tiles up to match",
+      "column match shooter",
+      "panel shooter"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "falling_pairs_match",
+    "name": "Falling pairs",
+    "aliases": [
+      "Puyo Puyo",
+      "Dr. Mario",
+      "Columns"
+    ],
+    "family": "tile_matching",
+    "summary": "Pairs of colored blobs fall; four or more touching clear, and chains score big.",
+    "core_loop": "rotate the falling pair → drop → four connect and pop → set up chains",
+    "verbs": [
+      "rotate",
+      "drop",
+      "match"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "four connected of a color clear",
+      "chains multiply"
+    ],
+    "win": "survive or beat the opponent",
+    "lose": "the stack reaches the top",
+    "scoring": "chain-multiplied points",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "versus mode sends blockers to a friend"
+    ],
+    "difficulty_levers": [
+      "fall speed",
+      "colors"
+    ],
+    "tools": [
+      "grid_board",
+      "gravity_jump",
+      "combo",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "puyo puyo versus",
+      "dr mario pills",
+      "columns jewels"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mahjong_connect_link",
+    "name": "Link the same tiles",
+    "aliases": [
+      "Tile link"
+    ],
+    "family": "tile_matching",
+    "summary": "Drag a line through identical adjacent tiles to clear a chain of them.",
+    "core_loop": "drag through matches → release → the chain clears → refill",
+    "verbs": [
+      "link",
+      "match"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "chains of 3+ clear"
+    ],
+    "win": "meet the target",
+    "lose": "timer runs out",
+    "scoring": "chain length",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "tile types"
+    ],
+    "tools": [
+      "grid_board",
+      "combo",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "link the same tiles",
+      "drag to connect matches",
+      "chain tile link"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "clear_the_line_sliding",
+    "name": "Slide rows to match",
+    "aliases": [
+      "Slide match"
+    ],
+    "family": "tile_matching",
+    "summary": "Slide whole rows or columns to line up three of a kind.",
+    "core_loop": "slide a row → matches line up → they clear",
+    "verbs": [
+      "slide",
+      "match"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "rows wrap around"
+    ],
+    "win": "meet the target",
+    "lose": "out of moves",
+    "scoring": "matches",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid",
+      "moves"
+    ],
+    "tools": [
+      "tile_slide",
+      "grid_board",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "slide rows to match colors",
+      "row sliding match three",
+      "wrap-around match"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_fill_sort_crowd",
+    "name": "Sort the crowd by color",
+    "aliases": [
+      "Crowd sort"
+    ],
+    "family": "tile_matching",
+    "summary": "Tap groups of colored people to send them into matching areas.",
+    "core_loop": "tap a group → it walks to its area → fill every area",
+    "verbs": [
+      "sort",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "groups move only if their path is clear"
+    ],
+    "win": "sort everyone",
+    "lose": "blocked",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "colors"
+    ],
+    "tools": [
+      "sort_bins",
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "sort people by color",
+      "crowd color sort",
+      "send everyone home"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_tile_match",
+    "name": "Match word pairs",
+    "aliases": [
+      "Word pairs"
+    ],
+    "family": "tile_matching",
+    "summary": "Match tiles that form a pair (words and pictures, opposites).",
+    "core_loop": "pick two tiles → if they pair, they clear → clear all",
+    "verbs": [
+      "match",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tile has one partner"
+    ],
+    "win": "clear every pair",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "language practice with friends"
+    ],
+    "difficulty_levers": [
+      "pairs"
+    ],
+    "tools": [
+      "match_pairs",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "match opposites",
+      "pair the word to the picture",
+      "matching pairs game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "double_tap_pop_same",
+    "name": "Pop all of one kind",
+    "aliases": [
+      "Pop all"
+    ],
+    "family": "tile_matching",
+    "summary": "Tap the target kind as fast as possible among many mixed tiles.",
+    "core_loop": "see the target → tap all of that kind → next target",
+    "verbs": [
+      "find",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong taps cost time"
+    ],
+    "win": "clear every target",
+    "lose": "timer runs out",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "race"
+    ],
+    "difficulty_levers": [
+      "density"
+    ],
+    "tools": [
+      "grid_board",
+      "timer_bar",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pop all the red ones",
+      "tap every cat fast",
+      "find and pop"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "match_stack_tower",
+    "name": "Stack and match",
+    "aliases": [
+      "Stack match"
+    ],
+    "family": "tile_matching",
+    "summary": "Drop items onto stacks; three of the same on top clear.",
+    "core_loop": "pick a stack → drop → three on top clear → keep stacks low",
+    "verbs": [
+      "drop",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only the top of each stack counts"
+    ],
+    "win": "clear all",
+    "lose": "a stack overflows",
+    "scoring": "items cleared",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "stacks",
+      "items"
+    ],
+    "tools": [
+      "sort_bins",
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "stack three to clear",
+      "match on top of stacks",
+      "tower match"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "merge_number_grid",
+    "name": "Merge numbers by adjacency",
+    "aliases": [
+      "Merge grid",
+      "Just Get 10"
+    ],
+    "family": "tile_matching",
+    "summary": "Tap a group of the same numbers to merge them into one higher number.",
+    "core_loop": "tap a group → it merges up by one → reach the target",
+    "verbs": [
+      "merge",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "groups must be 2+ touching"
+    ],
+    "win": "reach the target number",
+    "lose": "no moves",
+    "scoring": "highest number",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "gravity_jump"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "just get 10",
+      "merge same numbers grid",
+      "tap groups to add up"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "emoji_match_speed",
+    "name": "Find the match",
+    "aliases": [
+      "Dobble",
+      "Spot It"
+    ],
+    "family": "tile_matching",
+    "summary": "Two cards share exactly one symbol; spot it first.",
+    "core_loop": "look at two cards → find the shared symbol → tap it first",
+    "verbs": [
+      "spot",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "exactly one symbol matches"
+    ],
+    "win": "most matches",
+    "lose": "none",
+    "scoring": "matches",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "head-to-head with a friend"
+    ],
+    "difficulty_levers": [
+      "symbols per card"
+    ],
+    "tools": [
+      "reveal",
+      "turns",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "spot it game with friends",
+      "dobble online",
+      "find the matching emoji"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tile_cascade_drop",
+    "name": "Cascade",
+    "aliases": [
+      "Cascade puzzle"
+    ],
+    "family": "tile_matching",
+    "summary": "Tap a tile; tiles above fall and may create matches; plan cascades.",
+    "core_loop": "tap to remove → tiles fall → matches cascade",
+    "verbs": [
+      "plan",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only cascades clear tiles"
+    ],
+    "win": "clear the target",
+    "lose": "out of taps",
+    "scoring": "cascade chains",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "colors"
+    ],
+    "tools": [
+      "grid_board",
+      "gravity_jump",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cascade tile game",
+      "set up chain reactions",
+      "falling tile cascade"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ring_color_match",
+    "name": "Match the rings",
+    "aliases": [
+      "Color rings"
+    ],
+    "family": "tile_matching",
+    "summary": "Place colored ring pieces so full circles of one color clear.",
+    "core_loop": "place a ring piece → full circles clear → keep space",
+    "verbs": [
+      "place",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a spot holds up to 3 sizes"
+    ],
+    "win": "survive",
+    "lose": "no spots left",
+    "scoring": "rings cleared",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "colors"
+    ],
+    "tools": [
+      "grid_board",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "color rings puzzle",
+      "match rings by color",
+      "ring stack game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "link_merge_numbers",
+    "name": "Link to merge",
+    "aliases": [
+      "Number link merge",
+      "2248"
+    ],
+    "family": "tile_matching",
+    "summary": "Drag through equal or doubling numbers to merge them into a larger number.",
+    "core_loop": "drag a chain → numbers sum → merge",
+    "verbs": [
+      "link",
+      "merge"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each next number equals or doubles"
+    ],
+    "win": "reach the target",
+    "lose": "no chains",
+    "scoring": "top number",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "2248 game",
+      "link numbers to merge",
+      "doubling chain merge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

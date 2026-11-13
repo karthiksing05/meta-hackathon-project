@@ -454,7 +454,9 @@
       "speed_ramp",
       "checkpoint"
     ],
-    "engine_gaps": [],
+    "engine_gaps": [
+      "device_sensors"
+    ],
     "gate_profile": "runner",
     "example_prompts": [
       "ski down a mountain dodging trees",
@@ -567,7 +569,9 @@
       "pickups",
       "collide"
     ],
-    "engine_gaps": [],
+    "engine_gaps": [
+      "device_sensors"
+    ],
     "gate_profile": "runner",
     "example_prompts": [
       "doodle jump but my cat",
@@ -682,7 +686,9 @@
       "speed_ramp",
       "collide"
     ],
-    "engine_gaps": [],
+    "engine_gaps": [
+      "device_sensors"
+    ],
     "gate_profile": "runner",
     "example_prompts": [
       "tunnel rush game",
@@ -1457,7 +1463,9 @@
       "collide",
       "combo"
     ],
-    "engine_gaps": [],
+    "engine_gaps": [
+      "device_sensors"
+    ],
     "gate_profile": "runner",
     "example_prompts": [
       "traffic racer game",
@@ -1512,7 +1520,9 @@
       "checkpoint",
       "pickups"
     ],
-    "engine_gaps": [],
+    "engine_gaps": [
+      "device_sensors"
+    ],
     "gate_profile": "runner",
     "example_prompts": [
       "rolling sky game",
@@ -1727,7 +1737,9 @@
       "collide",
       "speed_ramp"
     ],
-    "engine_gaps": [],
+    "engine_gaps": [
+      "multi_touch"
+    ],
     "gate_profile": "runner",
     "example_prompts": [
       "2 cars game",

@@ -1,0 +1,32 @@
+[
+  {
+    "request": "candy crush with sushi",
+    "expect": [
+      "swap_match_three"
+    ]
+  },
+  {
+    "request": "suika watermelon merge game with planets",
+    "expect": [
+      "merge_drop_physics"
+    ]
+  },
+  {
+    "request": "water sort puzzle",
+    "expect": [
+      "color_sort_tubes"
+    ]
+  },
+  {
+    "request": "triple tile match game",
+    "expect": [
+      "triple_tile_tray"
+    ]
+  },
+  {
+    "request": "mahjong solitaire for my grandma",
+    "expect": [
+      "pair_tile_solitaire"
+    ]
+  }
+]
