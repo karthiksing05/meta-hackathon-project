@@ -41,6 +41,8 @@ Interactive mini-experiences keep people in their apps, and the industry is movi
 - Three Reels [138]: A "Pause it perfectly" (@veefriends, 7.5 s, 4.2M views, one timed tap); B a "play along" quiz (@thefictionexpert, ~640K likes; don't describe its mechanics); C "At what speed will you break?" (@neravik.games, 137 s, 2.29M views, a speed-reading ramp). All three end with "tell me your score" in the comments. **Line:** "A Curio turns 'tell me your score' in the comments into a real, comparable Group score."
 - Story quiz: The Podium and Purr Earth are hand-made with the story-quiz fragment; never "made by Muse". Root Words is made by Muse.
 
+**The same formats, made by Muse** (slide 5; on Prod, owned by `brainy_studio`, made through the real `POST /v1/generate` pipeline with no hand edits): Golden S'more (`aceba181c0fd7fa0b19e60c1`, Reel A's timed tap) and Biscuit's First Day as a Waiter (`ed793361a7b4f6fce5a0c5b7`, Reel B's play-along quiz). Reel C (a "report your breaking point" ramp) could not be built: all 3 Muse runs failed because our bot gate can't test a self-reported score. Never claim a Muse Curio for C. The Podium, Purr Earth, First Things First and One Move are hand-made, and other new Prod games were built by Opus in our harness with Muse Image art; none of those are "made by Muse". Root Words is Muse-made.
+
 ## 2. Anyone can make one
 
 The friction is gone: everyone can make and share a game, not just developers.
