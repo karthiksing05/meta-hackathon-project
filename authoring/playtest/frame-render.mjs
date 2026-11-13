@@ -80,7 +80,13 @@ export function renderFrames(frames, assets, { scale = 2, budgetMs = 15000 } = {
       '--allow-file-access-from-files', `--user-data-dir=${join(dir, 'profile')}`, `--virtual-time-budget=${budgetMs}`, '--dump-dom', 'file://' + html];
     let dom;
     try { dom = execFileSync(CHROME, args, { encoding: 'utf8', maxBuffer: 512 << 20, stdio: ['ignore', 'pipe', 'pipe'], timeout: 120000 }); }
-    catch (e) { throw new Error(`chrome exited (${e.code ?? e.signal ?? e.status}): ${String(e.stderr ?? '').trim().split('\n').slice(-2).join(' | ').slice(0, 300)}`); }
+    catch (e) {
+      // Chrome sometimes crashes in teardown ("allocator loaded twice", watchdog) after it has
+      // printed the page: keep the output when it's complete.
+      const got = String(e.stdout ?? '');
+      if (/<pre id="out">\[[\s\S]*<\/pre>/.test(got)) dom = got;
+      else throw new Error(`chrome exited (${e.code ?? e.signal ?? e.status}): ${String(e.stderr ?? '').trim().split('\n').slice(-2).join(' | ').slice(0, 300)}`);
+    }
     const raw = /<pre id="out">([\s\S]*?)<\/pre>/.exec(dom)?.[1] ?? 'missing';
     const text = raw.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
     if (!text.startsWith('[')) throw new Error('frame render failed: ' + text.slice(0, 200));
