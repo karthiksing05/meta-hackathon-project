@@ -468,6 +468,7 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
     /// The system ended the page's process (memory pressure). Reload it; the active session
     /// restarts when the page is back.
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        FeedScrollLog.log("host \(serial) WEB CONTENT PROCESS TERMINATED, reloading")
         isLoaded = false
         capability = .unknown
         preparedKeys.removeAll()
@@ -711,6 +712,20 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
         return image
     }
 
+    /// Waits until the page has painted twice (two animation frames), or 250 ms at most, so a
+    /// just-activated session is on screen before its web view is shown. Without it the web view
+    /// could fade in still showing the last game's frame (a stale snapshot) for a frame or two.
+    func waitForPaint() async {
+        guard isLoaded else { return }
+        _ = await call("""
+        await Promise.race([
+          new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))),
+          new Promise(r => setTimeout(r, 250))
+        ]);
+        return "";
+        """)
+    }
+
     /// `BubbleHost.evict`: frees a prepared session.
     func evict(_ key: String) {
         guard capability == .sessions, isPrepared(key), key != activeKey else { return }
@@ -813,6 +828,7 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
     /// Moves the web view into `container`. Only one container shows a host at a time.
     func attach(to container: UIView) {
         guard webView.superview !== container else { return }
+        FeedScrollLog.log("host \(serial) attach (from \(webView.superview == nil ? "none" : "another view"))")
         webView.removeFromSuperview()
         webView.frame = container.bounds
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -896,11 +912,45 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
 
 /// Holds a host's web view in SwiftUI. Several containers may name the same host over time;
 /// the web view lives in whichever attached it last.
-final class BubbleHostContainerView: UIView {
+final class BubbleHostContainerView: UIView, UIGestureRecognizerDelegate {
+    /// Called with +1 (swiped up: next) or -1 (swiped down: previous) for a clearly vertical swipe
+    /// over the game. The game still gets every touch (the recognizer never cancels them).
+    var onVerticalSwipe: ((Int) -> Void)? {
+        didSet { swipeRecognizer.isEnabled = onVerticalSwipe != nil }
+    }
+
+    private lazy var swipeRecognizer: UIPanGestureRecognizer = {
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
+        pan.cancelsTouchesInView = false
+        pan.delaysTouchesBegan = false
+        pan.delaysTouchesEnded = false
+        pan.delegate = self
+        pan.isEnabled = false
+        return pan
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .clear
         clipsToBounds = true
+        addGestureRecognizer(swipeRecognizer)
+    }
+
+    @objc private func handleSwipe(_ pan: UIPanGestureRecognizer) {
+        guard pan.state == .ended, let onVerticalSwipe else { return }
+        let move = pan.translation(in: self)
+        let speed = pan.velocity(in: self)
+        // Clearly vertical: mostly up or down, and either far (a quarter of the page) or a quick
+        // flick that still travelled a little.
+        let isVertical = abs(move.y) > 2 * abs(move.x)
+        let isFar = abs(move.y) > max(120, bounds.height * 0.25)
+        let isFlick = abs(speed.y) > 900 && abs(move.y) > 50 && (speed.y < 0) == (move.y < 0)
+        guard isVertical, isFar || isFlick else { return }
+        onVerticalSwipe(move.y < 0 ? 1 : -1)
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
+        true
     }
 
     required init?(coder: NSCoder) {
@@ -935,12 +985,15 @@ struct BubbleRuntimeHostView: UIViewRepresentable {
     var isRevealed = true
     /// False lets touches fall through to SwiftUI (the feed's tap to take over).
     var isInteractive = true
+    /// While interactive: a clearly vertical swipe over the game (see `BubbleHostContainerView`).
+    var onVerticalSwipe: ((Int) -> Void)? = nil
 
     func makeUIView(context: Context) -> BubbleHostContainerView {
         let container = BubbleHostContainerView()
         host.attach(to: container)
         container.setRevealed(isRevealed, animated: false)
         container.isUserInteractionEnabled = isInteractive
+        container.onVerticalSwipe = isInteractive ? onVerticalSwipe : nil
         return container
     }
 
@@ -948,6 +1001,7 @@ struct BubbleRuntimeHostView: UIViewRepresentable {
         host.attach(to: container)
         container.setRevealed(isRevealed, animated: true)
         container.isUserInteractionEnabled = isInteractive
+        container.onVerticalSwipe = isInteractive ? onVerticalSwipe : nil
     }
 
     static func dismantleUIView(_ container: BubbleHostContainerView, coordinator: ()) {
