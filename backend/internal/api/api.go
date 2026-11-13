@@ -45,6 +45,8 @@ type Options struct {
 	// The game-making harness (internal/harness). HarnessContext turns on the job context and
 	// POST /v1/harness/plan; on by default, HARNESS_CONTEXT=0 turns it off.
 	HarnessContext bool
+	// DebugDelete turns on DELETE /v1/debug/games/{id}: deleting a game with no sign-in, for the debug viewer. Off by default.
+	DebugDelete bool
 	// SponsorUsers are the usernames (lowercase) of brand accounts: only they can mark a game as sponsored.
 	SponsorUsers map[string]bool
 	Harness      *harness.Harness
@@ -121,6 +123,7 @@ func (s *Server) Handler() http.Handler {
 		r.With(s.optionalAuth).Get("/users/{id}", s.getUser)
 		r.With(s.requireAuth).Get("/me/likes", s.myLikes)
 		r.With(s.requireAuth).Get("/me/moments", s.myMoments)
+		r.Delete("/debug/games/{id}", s.debugDeleteGame) // off unless DEBUG_DELETE=1
 		r.With(s.optionalAuth).Get("/sounds", s.listSounds)
 		r.With(s.requireAuth).Post("/sounds", s.createSound)
 		r.Route("/sounds/{id}", func(r chi.Router) {

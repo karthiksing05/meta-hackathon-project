@@ -32,6 +32,8 @@ type Config struct {
 	// HarnessContext runs the game-making harness (internal/harness) before each new game and turns on
 	// POST /v1/harness/plan. On by default; HARNESS_CONTEXT=0 (or off) is the kill switch.
 	HarnessContext bool
+	// DebugDelete (DEBUG_DELETE=1) allows deleting a game with no sign-in through the debug viewer. Off by default.
+	DebugDelete bool
 	// SponsorUsers are the brand accounts (SPONSOR_USERS, comma separated, lowercase) that may mark a game sponsored.
 	SponsorUsers map[string]bool
 
@@ -59,6 +61,7 @@ func Load() (*Config, error) {
 		GenerateConcurrent: int(envInt("GENERATE_CONCURRENT", 2)),
 		GeneratePerHour:    int(envInt("GENERATE_PER_HOUR", 6)),
 		HarnessContext:     harnessOn(os.Getenv("HARNESS_CONTEXT")),
+		DebugDelete:        flagOn(os.Getenv("DEBUG_DELETE")),
 		SponsorUsers:       usernameSet(os.Getenv("SPONSOR_USERS")),
 
 		RecsRuntimes:   int(envInt("RECS_RUNTIMES", 2)),
@@ -104,6 +107,15 @@ func envDur(k string, d time.Duration) time.Duration {
 		return v
 	}
 	return d
+}
+
+// flagOn reads a switch that is off unless it is "1", "true", "on" or "yes".
+func flagOn(v string) bool {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "1", "true", "on", "yes":
+		return true
+	}
+	return false
 }
 
 // usernameSet reads a comma-separated list of usernames into a lowercase set.

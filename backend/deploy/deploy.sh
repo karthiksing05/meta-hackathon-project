@@ -3,6 +3,7 @@
 #
 #   deploy.sh deploy <image-tag>    deploy a commit SHA; roll back automatically if /readyz fails
 #   deploy.sh rollback              redeploy the previously deployed tag
+#   deploy.sh restart-api           recreate the api (after changing api.env, e.g. DEBUG_DELETE or SPONSOR_USERS)
 #   deploy.sh restart-generator     recreate the generator (after changing generator.env)
 #   deploy.sh status                show the running tags
 #
@@ -102,6 +103,15 @@ case "$cmd" in
     done
     echo "generator did not become healthy" >&2
     exit 1
+    ;;
+  restart-api)
+    # Recreate the api so it re-reads /etc/game-platform/api.env (e.g. after setting DEBUG_DELETE or SPONSOR_USERS).
+    tag=$(cat "$STATE/current_tag" 2>/dev/null || true)
+    [ -n "$tag" ] || { echo "no deployed tag recorded" >&2; exit 1; }
+    export API_IMAGE="$PREFIX/bubbles-api:$tag" GAMES_IMAGE="$PREFIX/bubbles-games:$tag" GENERATOR_IMAGE="$PREFIX/bubbles-generator:$tag"
+    "${COMPOSE[@]}" up -d --no-deps --force-recreate api
+    wait_ready || { echo "the api did not become ready" >&2; exit 1; }
+    echo "api restarted: ready"
     ;;
   status)
     echo "current:  $(cat "$STATE/current_tag" 2>/dev/null || echo none)"
