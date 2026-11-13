@@ -34,7 +34,7 @@ protocol GamesAPI: Sendable {
     /// Mock only. Live throws `GamesAPIError.notSupported`.
     func challenges() async throws -> [Challenge]
     /// Mock only. Live throws `GamesAPIError.notSupported`.
-    func blend(groupID: String) async throws -> GroupBlend
+    func blend(groupID: String) async throws -> GroupBlendSummary
 }
 
 /// Accounts. The live client implements it; the mock has no accounts.

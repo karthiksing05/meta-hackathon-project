@@ -252,7 +252,7 @@ struct Challenge: Codable, Identifiable, Hashable, Sendable {
 }
 
 /// What a Group has in common and a few games for it (Kevin's Group Blend). Mock only for now.
-struct GroupBlend: Codable, Hashable, Sendable {
+struct GroupBlendSummary: Codable, Hashable, Sendable {
     var groupID: String
     var headline: String
     var sharedTraits: [String]

@@ -92,9 +92,9 @@ final class GamesAPIMock: GamesAPI, @unchecked Sendable {
         lock.withLock { sent }
     }
 
-    func blend(groupID: String) async throws -> GroupBlend {
+    func blend(groupID: String) async throws -> GroupBlendSummary {
         let ids = await MainActor.run { Array(store.feedBubbles.prefix(3).map(\.id)) }
-        return GroupBlend(
+        return GroupBlendSummary(
             groupID: groupID, headline: "A game for everyone in this Group",
             sharedTraits: ["weekend plans", "quick rounds", "friendly competition"], suggestedGameIDs: ids
         )

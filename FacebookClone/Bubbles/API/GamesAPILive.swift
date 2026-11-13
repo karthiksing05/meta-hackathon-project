@@ -101,7 +101,7 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         throw GamesAPIError.notSupported("Challenges")
     }
 
-    func blend(groupID: String) async throws -> GroupBlend {
+    func blend(groupID: String) async throws -> GroupBlendSummary {
         throw GamesAPIError.notSupported("Group Blend")
     }
 
