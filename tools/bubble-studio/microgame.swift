@@ -56,6 +56,7 @@ func fakeMicrogameMuse() -> ScriptedMicrogameMuse {
     case .playtesting(let bots): return "\(time) playtesting \(bots) bots"
     case .playtested(let report):
         return "\(time) playtested  \(report.passed ? "passed" : "FLAGGED"): \(report.headline) · \(report.spread)"
+    case .drawingArt: return "\(time) drawing art"
     case .done(let manifest): return "\(time) done        \(manifest.title) (\(manifest.id))"
     case .failed(let message): return "\(time) failed      \(message)"
     }

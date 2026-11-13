@@ -152,8 +152,11 @@ enum StudioMicrogameBridge {
                 elapsed: elapsed,
                 issues: report.passed || notes.isEmpty ? nil : Array(notes.prefix(3))
             )
+        case .drawingArt:
+            return StudioEvent(step: .polish, title: event.summary, detail: "Muse redraws the backdrop and sprites over the game's real layout", model: model, elapsed: elapsed)
         case .done(let game):
             var parts = ["\(game.title) · made in \(Int(elapsed.rounded())) s"]
+            if stats.artPassUsed { parts.append("art redrawn") }
             if stats.repairRounds > 0 {
                 parts.append("\(stats.repairRounds) \(stats.repairRounds == 1 ? "fix round" : "fix rounds")")
             }

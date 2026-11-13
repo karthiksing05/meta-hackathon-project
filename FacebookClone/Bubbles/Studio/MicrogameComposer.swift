@@ -52,6 +52,8 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
         case repairing(round: Int, issues: [String])
         case playtesting(bots: Int)
         case playtested(StudioPlaytest.Report)
+        /// The art pass (`MicrogameArtPass`): Muse redraws the art over the game's real layout.
+        case drawingArt
         case done(BubbleManifest)
         case failed(String)
 
@@ -70,6 +72,8 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
                 return "\(bots) test players are trying it"
             case .playtested(let report):
                 return report.passed ? "Playtested: \(report.headline)" : "Playtest flagged: \(report.headline)"
+            case .drawingArt:
+                return "Muse is drawing the art"
             case .done(let game):
                 return "\(game.title) is ready"
             case .failed(let reason):
@@ -106,6 +110,9 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
         var models: [String] = []
         /// The gold examples put in Muse's prompt (authoring/gold/).
         var examples: [String] = []
+        /// The art pass: whether its art was used, and why not when it wasn't.
+        var artPassUsed = false
+        var artPassNote: String?
     }
 
     let muse: any MicrogameMuse
@@ -136,7 +143,8 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
             lastStats.examples = examples?.ids ?? []
             let system = MicrogamePrompts.system(catalog, examples: examples?.text)
             let draft = try await draft(system: system, user: MicrogamePrompts.compose(request: request, brief: brief), onEvent: onEvent)
-            let (expansion, _) = try await check(draft, system: system, request: request, onEvent: onEvent)
+            var (expansion, _) = try await check(draft, system: system, request: request, onEvent: onEvent)
+            expansion = await drawArt(expansion, request: request, brief: brief, onEvent: onEvent)
             let title = expansion.game["meta"]?["title"]?.string ?? "microgame"
             let id = "mg-\(StudioManifestBuilder.slug(title).isEmpty ? "game" : StudioManifestBuilder.slug(title))-\(StudioManifestBuilder.randomSuffix())"
             var manifest = try await studio.wrap(expansion, id: id, brief: brief, emoji: nil, seed: Int.random(in: 1...999_999))
@@ -256,6 +264,25 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
             onEvent(.repairing(round: repairs + 1, issues: report.blocking.map { "\($0.code): \($0.message)" }))
             reply = try await ask(system: system, user: MicrogamePrompts.playtestRepair(request: request, manifest: shown, report: report),
                                      purpose: "microgame playtest repair")
+        }
+    }
+
+    /// The art pass, when it's on and Muse is the real client. Keeps the game's own art on any failure.
+    private func drawArt(_ expansion: MicrogameExpansion, request: String, brief: BubbleBrief, onEvent: @MainActor (Event) -> Void) async -> MicrogameExpansion {
+        guard MicrogameArtPass.isEnabled, let client = muse as? MuseClient else { return expansion }
+        onEvent(.drawingArt)
+        do {
+            let result = try await MicrogameArtPass(muse: client, studio: studio, model: model).run(expansion, request: request, brief: brief)
+            lastStats.museCalls += 1
+            lastStats.artPassUsed = true
+            lastStats.artPassNote = "\(result.roles.count) roles in \(Int(result.seconds)) s" + (result.sawLayout ? "" : ", no layout image")
+            if !lastStats.models.contains(result.model) { lastStats.models.append(result.model) }
+            Self.log("art pass: \(lastStats.artPassNote ?? "")")
+            return result.expansion
+        } catch {
+            lastStats.artPassNote = error.localizedDescription
+            Self.log("art pass skipped: \(error.localizedDescription)")
+            return expansion
         }
     }
 

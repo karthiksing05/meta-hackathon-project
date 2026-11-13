@@ -353,6 +353,12 @@ enum MicrogameStudioError: Error, LocalizedError {
         }
     }
 
+    /// Runs a script on the Studio page: a `callAsyncJavaScript` body that returns a string. Used by
+    /// `MicrogameArtPass`.
+    func run(_ script: String, arguments: [String: Any] = [:], operation: String, timeout: TimeInterval = 20) async throws -> String {
+        try await call(script, arguments: arguments, operation: operation, timeout: timeout)
+    }
+
     /// Throws the page away; the next call loads a fresh one.
     func reset() {
         loading?.cancel()
