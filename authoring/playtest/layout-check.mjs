@@ -511,6 +511,7 @@ export async function layoutCheck(gameJson, { seeds = [1, 2], maxSeconds = 40, p
     } catch (e) {
       measures = null;
       shots.length = 0;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1500 * (attempt + 1)); // Chrome sometimes crashes on start; back off
       if (attempt === 2) { shots.push({ error: String(e.message ?? e) }); if (process.env.LAYOUT_DEBUG) console.error('frame render failed:', e.message); }
     }
   }
