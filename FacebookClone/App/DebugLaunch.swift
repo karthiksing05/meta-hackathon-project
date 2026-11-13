@@ -22,6 +22,10 @@ import SwiftUI
 ///   picks the code), `device` forces the on-device composer. Unset: the server with `FB_API=live`,
 ///   otherwise on-device (the default until the server's `/v1/generate` is live).
 /// - `FB_GENERATE_SPEED=4`: replays the mock 4× faster (for screenshots).
+/// - `FB_BRACKET=<userID>[:played]`: starts a get-to-know bracket with that person at launch
+///   (`played` also records your round 1); see it on their profile (`FB_OPEN=profile:<userID>`).
+/// - `FB_RESUME_DEMO=<seconds>` / `FB_RESUME_AUTO=1`: the Resume prompt in the player (see
+///   `BubblePlayerView`). `FB_FAKE_RESULT=player`: the result card in the player only.
 ///
 /// Screens can read their own `FB_*` variables for extra DEBUG-only state (keep them documented
 /// at the top of that screen's file).

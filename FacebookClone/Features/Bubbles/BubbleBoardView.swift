@@ -286,6 +286,7 @@ struct BubbleBoardRow: View {
             Button("Add friend") {
                 Haptics.light()
                 withAnimation { appStore.sendRequest(to: entry.user) }
+                BracketHooks.met(entry.user, on: bubble.group.map { .group($0.id) } ?? .newFriend)
                 GameRecommender.shared.note(.addedFriend, gameID: bubble.id)
             }
             .buttonStyle(.fb(.tinted, expand: false, height: 32))

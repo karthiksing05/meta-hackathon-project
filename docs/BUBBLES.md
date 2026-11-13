@@ -1751,3 +1751,47 @@ the content prompt; covers still carry no text or logos).
 
 DEBUG: `FB_STUDIO_ANATOMY=fixture|answered|chat` with `FB_STUDIO_STEP=brief|try`;
 `FB_STUDIO_SCROLL=anatomy|anatomy-rules|anatomy-<part>` (Brief) or `chat` (Try).
+
+### 7.14 Get-to-know brackets (bracket)
+
+Meeting someone new should come with something to do together. When you become friends (you
+confirm, or they accept: `AppStore` posts `Notification.Name.friendshipStarted`), or you tap Add
+friend next to a stranger on a Group's weekly board or a game's board, the app proposes a **best of
+three** with that person: round 1 **Quick hands** (dodge, timing, microgame, merge), round 2 **Words
+and trivia** (guess, quiz night, answer, learn), round 3 **Get to know you** (answer, adventure,
+sort). Each round is a different game on a seed shared by the two of you (and the game's length), so
+it's the same course. The card (`BracketCardView`) shows both faces, the standing ("You 1 – 0
+Maya"), each round's game and both scores, and the winner; each round's Play opens the player on the
+round's seed. It sits at the top of their profile (`BubbleProfileHeaderSlots`), which also offers
+"Get to know Maya: 3 quick games" when there is none. Each round you finish posts a line to your 1:1
+chat ("Our bracket, round 1 (Hill Hopper): me 42 · you 39"); the final result goes to the chat and,
+for a bracket that started on a Group board, to the Group as a playable share card.
+
+**Files** (`Features/Bubbles/Bracket/`): `FriendBracket.swift` (model, `BracketService` protocol,
+`BracketPlanner`), `LocalBracketService.swift` (today's implementation, in memory for the launch),
+`BracketLocalOpponent.swift` (**local stand-in**: the other person's rounds are bot runs of the real
+runtime on the same seed via `BubbleStore.simulateRun`, marked `theirsIsLocalStandIn`),
+`BracketCardView.swift`, `BracketHooks.swift` (install, `didFinish`, `met`). Shared edits: one line
+each in `BubbleFeatureRouter` (install, didFinish), `BubbleFeatureSlots` (profile header),
+`AppStore` (the friendship notification), `GroupWeeklyBoardActions.addFriend` and `BubbleBoardView`.
+DEBUG: `FB_BRACKET=<userID>[:played]`.
+
+**Server endpoints the backend would need** (so `LocalBracketService` and `BracketLocalOpponent`
+can be swapped for a `GamesAPI`-backed service with no screen changes). Picking games, seeds and
+winners moves to the server; runs are verified like any score (seed plus replay).
+
+| Call | Body | Returns |
+|---|---|---|
+| `POST /v1/brackets` | `{opponent_id, origin: {kind: "new_friend" \| "group" \| "event", id?}}` | the bracket (an open one with that person if it exists) |
+| `GET /v1/brackets?with=<user_id>` | — | `{brackets: [bracket]}`, newest first |
+| `GET /v1/brackets/<id>` | — | the bracket |
+| `POST /v1/brackets/<id>/rounds/<index>/runs` | `{score, replay}` (the `BubbleInputLog`; its seed must be the round's) | the bracket, with your best score on that round |
+
+A bracket: `{id, created_at, origin, players: [user_id, user_id], rounds: [{index, theme: "reflex" |
+"words" | "about_you", game_id, seed, length, scores: {<user_id>: {score, replay_id, verified}}}],
+standing: {<user_id>: wins}, winner_id: string | null, finished: bool}`. Best of three: finished at
+two wins or when all three rounds have both scores. Events the app should hear (push or the
+notifications feed): `bracket.proposed` (a new friend; the app shows the card), `bracket.round_played`
+(the other person's score landed), `bracket.finished`. Posting the round lines to the chat and the
+final card to the Group can stay in the app (it already sends messages and Group posts) or move to the
+server with these events.

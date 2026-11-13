@@ -142,6 +142,9 @@ enum BubbleFeatureRouter {
         LearnScreens.install(appStore: appStore, bubbleStore: bubbleStore)
         LengthScreens.install(appStore: appStore, bubbleStore: bubbleStore)
         SavesScreens.install(appStore: appStore, bubbleStore: bubbleStore)
+        MainActor.assumeIsolated {
+            BracketHooks.install(appStore: appStore, bubbleStore: bubbleStore)
+        }
     }
 
     /// After the player records a run (yours, not a Burst). `request` says how the play started
@@ -149,6 +152,7 @@ enum BubbleFeatureRouter {
     @MainActor
     static func didFinish(_ score: BubbleScore, in bubble: Bubble, request: BubblePlayRequest, appStore: AppStore, bubbleStore: BubbleStore) {
         ChallengeScreens.didFinish(score, in: bubble, request: request, appStore: appStore, bubbleStore: bubbleStore)
+        BracketHooks.didFinish(score, in: bubble, request: request)
         GroupsSearchScreens.didFinish(score, in: bubble, request: request, appStore: appStore, bubbleStore: bubbleStore)
         TogetherScreens.didFinish(score, in: bubble, request: request, appStore: appStore, bubbleStore: bubbleStore)
         RemixScreens.didFinish(score, in: bubble, request: request, appStore: appStore, bubbleStore: bubbleStore)
