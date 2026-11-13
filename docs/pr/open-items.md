@@ -21,16 +21,18 @@ Things that are built but say something untrue, or that the pitch leans on. Each
 
 ## Asks from Karthik's bus notes
 
+**Ownership change.** Karthik now owns the agentic harness work (Studio's Muse pipeline, the game anatomy and the eval suite), picking up from Artem's handoff at 17:19. Artem gets the front-end handoff next. Engine-gap asks below still go to Artem as the engine's author until the handoff says otherwise.
+
 Karthik's notes from the evening of Nov 12, recorded here so they aren't lost. None of these has been asked in Slack by this branch.
 
 | Note (verbatim where quoted) | What it needs | Owner to ask | State |
 |---|---|---|---|
 | "Explain that bounds are truly limitless with the games that are possible." | Done in the docs: [01-story.md](01-story.md) step 6, [04-why-ai.md](04-why-ai.md), the demo script and the line bank. The claim is framed as "if you can describe a 2D game, Muse can write it", with the seven engine gaps as the roadmap | (docs) | Written |
 | "Have a game that can be gyro controlled?" | Device sensors are a named engine gap (`device_sensors`). Needs a device-motion input source in the engine, the runtime bridge passing CoreMotion readings into the WebView, and replay logs that record them | **Artem** (engine) | Ask, not started |
-| "Definitely need to prepare an intellectual game (Krillion for Harry Potter?)" | **Clarify "Krillion" with Karthik.** Our notes describe Krillion as a 2026 daily trivia game where rare answers score more. Three candidates the harness can build today are in [07-demo-script.md](07-demo-script.md#prepare-two-more-games-karthiks-bus-notes): "Rarest Spell", "Sort the Sorting" and "Who Cast It?" | Karthik (clarify); whoever runs Studio before the demo | Proposed |
+| "Definitely need to prepare an intellectual game (Krillion for Harry Potter?)" | Clarified by Karthik: Krillion's rare-answer mechanic. Krillion ([krillion.io](https://krillion.io), July 2026 [134]) is a daily trivia game with seven open prompts: you type one answer in 25 s, and rarer accepted answers score more, in tiers from 10 to 100 points. We copy the mechanic only (open answers, rarer scores more), not Krillion's name, art or tier names. Main candidate: **"Rarest Spell"**, planned as part of Karthik's harness restructure, with fuzzy, near-semantic matching (Muse writes aliases at build time; deterministic matching at play time keeps replays verifiable). Backups in [07-demo-script.md](07-demo-script.md#prepare-two-more-games-karthiks-bus-notes) | Karthik | Planned |
 | "Need to market the collaborative aspect of the app!" | Done in the docs: [01-story.md](01-story.md) step 4, [06](06-closer-together-and-engagement.md#marketing-the-collaboration), [hook.md](hook.md) option 12 and the demo script beats 4 to 6 | (docs) | Written |
 | Meet someone new, then a 3-game get-to-know-you bracket | Being built on branch `fe-qol`, not merged. The docs call it "in progress" | The `fe-qol` owner | In progress |
-| Muse harness ideas: A/B options, back-and-forth, tap-to-edit, thumbnail vs preview, endless-runner and trivia support | Roadmap items in [11-roadmap.md](11-roadmap.md#muse-harness-ideas-karthiks-bus-notes) | Artem (harness) | Roadmap |
+| Muse harness ideas: A/B options, back-and-forth, tap-to-edit, thumbnail vs preview, endless-runner and trivia support | Roadmap items in [11-roadmap.md](11-roadmap.md#muse-harness-ideas-karthiks-bus-notes) | Karthik (harness) | Roadmap |
 
 **Numbers we reconciled.** Each of these numbers is used the same way, with its label, everywhere in docs/pr.
 

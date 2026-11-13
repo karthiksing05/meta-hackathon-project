@@ -76,12 +76,13 @@ Notes on the list: Ms Rachel's audience is small children, which conflicts with 
 | Score the anatomy mode; re-score franchise requests after the theme fix | Today's numbers are one baseline; anatomy mode is unscored | Runner exists (`run.mjs --anatomy`) |
 | Human judges on the eval | Muse judges its own games today | Not started |
 | Fix gold retrieval | "star wars deflect" retrieves Aura Farm and Cake Tower, not Rift Run | Known bug |
-| Design block, no-LLM quality check and one polish round | Artem's next step for the harness | Just started at 17:19 |
+| Design block, no-LLM quality check and one polish round | Artem's planned next step at 17:19, now with the harness handed to Karthik | Just started at 17:19 |
+| Rare-answer trivia ("Rarest Spell", the Krillion mechanic in a Harry Potter theme), with fuzzy, near-semantic answer matching | The "intellectual game" for the demo | Planned, part of Karthik's harness restructure |
 | Style kit (Muse as style director and illustrator) | Muse's own art is weak: characters and palettes (D31) | Uncommitted prototype on Bayan's machine; not run on iOS (D37) |
 
 ## Muse harness ideas (Karthik's bus notes)
 
-Roadmap items for the Studio harness; none is built. Owner to ask: Artem (harness and anatomy).
+Roadmap items for the Studio harness; none is built. Owner: **Karthik**, who now owns the agentic harness work, picking up from Artem's handoff (Artem gets the front-end handoff next).
 
 | Idea | What it would do | Why |
 |---|---|---|
@@ -90,7 +91,7 @@ Roadmap items for the Studio harness; none is built. Owner to ask: Artem (harnes
 | Tap-to-edit | Tap a thing in the playing game (a piece, a score, a rule's effect) to change it | Edits where you see the problem, not in text |
 | Thumbnail vs preview | Decide whether the feed shows a still thumbnail or a short live preview of each game | Speed and data cost against how inviting the feed feels |
 | Endless-runner support | Fragments and gate settings for endless runners (a run that only ends when you lose) | A top genre for short play |
-| Trivia support | Fragments for question banks, timers and rare-answer scoring | Supports the "intellectual game" ask ([07](07-demo-script.md#prepare-two-more-games-karthiks-bus-notes)) |
+| Trivia support | Fragments for question banks, timers and rare-answer scoring | Supports the "intellectual game" ask; rare-answer scoring is planned in Karthik's harness restructure ([07](07-demo-script.md#prepare-two-more-games-karthiks-bus-notes)) |
 
 ## Engine gaps, as the roadmap
 
@@ -98,7 +99,7 @@ The engine can express almost any 2D game idea today (9 of 10 hard ideas in the 
 
 | Gap | Unlocks | Ask |
 |---|---|---|
-| `share_grid` | Wordle-style spoiler-free result grids | Artem |
+| `share_grid` | Wordle-style spoiler-free result grids | Artem (engine author; confirm the owner after the front-end handoff) |
 | `segment_collision` | Thin walls, lasers, line-drawing games | Artem |
 | `joints` | Ragdolls, chains, bridges | Artem |
 | `rotated_shapes` | Spinning platforms, tilted obstacles | Artem |

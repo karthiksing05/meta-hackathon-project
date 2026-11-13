@@ -26,7 +26,7 @@ Read [01-story.md](01-story.md) first; it is the pitch in seven steps, and each 
 | [11-roadmap.md](11-roadmap.md) | What is planned or not built: studio accounts, creator games and the rest |
 | [12-rubric-and-brief.md](12-rubric-and-brief.md) | How it maps to the judging criteria and the brief |
 | [open-items.md](open-items.md) | Internal: proposed app fixes, pending decisions, what must land, what we still need to prove |
-| [sources.md](sources.md) | Every public source, numbered [1] to [133] |
+| [sources.md](sources.md) | Every public source, numbered [1] to [134] |
 | [appendix-pitch-examples.md](appendix-pitch-examples.md) | Every example gathered for the pitch |
 | [appendix-dropped.md](appendix-dropped.md) | What we dropped or held back, and why |
 
@@ -80,4 +80,4 @@ The short version:
 
 ## Where this came from
 
-These files were one document, `docs/VALUE_PROPOSITION.md` (about 1,930 lines, last updated at 13:52 on Nov 12). Karthik asked to keep all of the writing, split it by topic, rename it to Whims and correct it. Nothing substantive was deleted: superseded material is kept and marked (for example the earlier 9-beat demo in [07](07-demo-script.md), and retired claims in [appendix-dropped.md](appendix-dropped.md)). Work credited to teammates: the engine and harness (Artem), the recommender and Group Blend (Kevin), the backend (Max), the style kit and authoring layer (Bayan), and the front end and story (Karthik).
+These files were one document, `docs/VALUE_PROPOSITION.md` (about 1,930 lines, last updated at 13:52 on Nov 12). Karthik asked to keep all of the writing, split it by topic, rename it to Whims and correct it. Nothing substantive was deleted: superseded material is kept and marked (for example the earlier 9-beat demo in [07](07-demo-script.md), and retired claims in [appendix-dropped.md](appendix-dropped.md)). Work credited to teammates: the engine and the harness up to the 17:19 handoff (Artem; Karthik owns the agentic harness since then, and Artem takes the front-end handoff next), the recommender and Group Blend (Kevin), the backend (Max), the style kit and authoring layer (Bayan), and the front end and story (Karthik).
