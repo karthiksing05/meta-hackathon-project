@@ -58,6 +58,8 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/groups?kind=&mine=1`, `POST /v1/groups` | optional / bearer | Groups and Events; create one |
 | `GET /v1/groups/{id}`, `PUT`/`DELETE /v1/groups/{id}/members/me` | optional / bearer | one with its members; join or leave |
 | `GET /v1/groups/{id}/games` | optional | games made for it |
+| `GET /v1/groups/{id}/leaderboard?week=2026-W46` | bearer (members) | the Group's weekly board: members ranked by rank points across the Group's games (10, 7, 5, 3, 2, then 1 for each game; ties share a place); `{week, items: [{user, points, gamesPlayed, rank, rankChange}]}`; ISO weeks in UTC, default this week |
+| `GET /v1/users?q=` | bearer | find people: username prefix or the start of a display-name word, 2 to 40 characters |
 | `POST /v1/groups/{id}/blend`, `GET /v1/groups/{id}/blend-inputs` | bearer (members) | Blend for the group's members, taken from the server's data; each member's skill, taste and recent games |
 | `POST /v1/blend` | bearer | games and a game spec for a set of people: `{group, members, count}` |
 | `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; or change one: `{baseGameId, change?, look?, nextLevel?}` (a tweak, a new look, a next level or a remix; always a new game with `remixOf` set); see [Making games](#making-games-muse-lives-here) |

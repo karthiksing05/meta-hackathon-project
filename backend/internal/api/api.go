@@ -116,6 +116,7 @@ func (s *Server) Handler() http.Handler {
 			r.Route("/{id}", func(r chi.Router) {
 				r.With(s.optionalAuth).Get("/", s.getGroup)
 				r.With(s.optionalAuth).Get("/games", s.groupGames)
+				r.With(s.requireAuth).Get("/leaderboard", s.groupLeaderboard)
 				r.With(s.requireAuth).Put("/members/me", s.setMembership(true))
 				r.With(s.requireAuth).Delete("/members/me", s.setMembership(false))
 				r.With(s.requireAuth).Post("/blend", s.groupBlend)
