@@ -266,10 +266,18 @@ export function startCastArt({ cast, visual = null, spec = null, title = '', mus
   }
   if (cast.length) {
     state.imageCalls++;
+    // Two cells make a 2 × 1 grid of tall cells, and Muse fills each with two figures (seen on a remix's repaint):
+    // a third cell (the first subject's happy pose or a second view) makes it a 2 × 2 grid of square cells.
+    const first = cast[0];
+    const sheetCast = cast.length === 2
+      ? [...cast, first.kind === 'character'
+        ? { ...first, id: `${first.of ?? first.id}`.slice(0, 18) + '_happy', pose: 'happy', of: first.of ?? first.id }
+        : { ...first, id: `${first.id}`.slice(0, 20) + '_alt', text: `${first.text ?? first.name}, a second view`, pose: null }]
+      : cast;
     jobs.push((async () => {
       try {
         const { sheets, prompts } = await loadArtModules(dir);
-        const r = await paintSheet({ muse, sheets, prompts, d: state.d, cast, signal, purpose: 'sheet', state });
+        const r = await paintSheet({ muse, sheets, prompts, d: state.d, cast: sheetCast, signal, purpose: 'sheet', state });
         Object.assign(state.sprites, r.sprites);
         for (const id of Object.keys(r.sprites)) state.own.add(id);
         state.calls.push({ ...r.call, method: r.method, sliced: Object.keys(r.sprites).length });
@@ -470,7 +478,12 @@ export async function finishCastArt({ manifest, state, studio, muse, basePool = 
     if (!r.missing.length) break;
     const canPaint = state.imageCalls < MAX_IMAGE_CALLS && Date.now() + IMAGE_TIMEOUT_S * 1000 < deadline && !signal?.aborted && typeof muse?.image === 'function';
     if (!canPaint || n === 2) break;
-    const extra = r.missing.slice(0, MAX_CELLS).map((m) => ({ id: m.id ?? idOf(m.name), name: m.name, text: m.name, kind: CHARACTER.test(m.name) ? 'character' : 'object', pose: CHARACTER.test(m.name) ? 'neutral' : null }));
+    // A missing id the cast already describes (a remix's repaint whose sheet failed) is painted as that, not as its id.
+    const extra = r.missing.slice(0, MAX_CELLS).map((m) => {
+      const known = m.id ? cast.find((c) => c.id === m.id) : null;
+      if (known) return { id: m.id, name: known.name, text: known.text ?? known.name, kind: known.kind, pose: known.kind === 'character' ? 'neutral' : null };
+      return { id: m.id ?? idOf(m.name), name: m.name, text: m.name, kind: CHARACTER.test(m.name) ? 'character' : 'object', pose: CHARACTER.test(m.name) ? 'neutral' : null };
+    });
     state.imageCalls++;
     report.imageCalls = state.imageCalls;
     try {
