@@ -14,7 +14,7 @@
 // expand.mjs calls `applyUiKit` once, on the slot entries, before they are spliced into the look's
 // layout, and `kitTokens` when it builds the tokens. Pure JS, deterministic.
 
-import { deriveStyle, styleTokens, STANDARD, INK_ROLES, GRID, SPACE, TYPE, MIN_TOUCH, MOTION, normHex, contrast } from './ui-style.mjs';
+import { CANVAS, bands, deriveStyle, styleTokens, STANDARD, INK_ROLES, GRID, SPACE, TYPE, MIN_TOUCH, MOTION, normHex, contrast } from './ui-style.mjs';
 import { fitTextNode, lineBox, lineHeight } from './ui-text.mjs';
 
 export const COMPONENTS = {
@@ -38,12 +38,20 @@ export const COMPONENTS = {
   spacer: { region: 'top', describe: 'Empty space. Props: h (grid units of 4).' },
 };
 
-const CANVAS_W = 360;
-const GUTTER = 12;
-const HUD = { y: 24, h: 48 };
-const BOTTOM = 616;
-const HUD_BOTTOM_H = 36;
-const HUD_BOTTOM_Y = 600;
+// Geometry comes from ui-style.mjs's CANVAS and bands(); these are set per expansion.
+let CANVAS_W = CANVAS.w;
+let CANVAS_H = CANVAS.h;
+let GUTTER = 12;
+let HUD = { y: 24, h: 48 };
+let BOTTOM = CANVAS.h - 24;
+let HUD_BOTTOM_H = 36;
+let HUD_BOTTOM_Y = CANVAS.h - 40;
+function useCanvas(canvas) {
+  const b = bands(canvas);
+  CANVAS_W = b.canvas.w; CANVAS_H = b.canvas.h; GUTTER = b.gutter;
+  HUD = { y: b.hud.y, h: b.hud.h }; BOTTOM = b.controlsBottom;
+  HUD_BOTTOM_H = b.hudBottom.h; HUD_BOTTOM_Y = b.hudBottom.y;
+}
 const isExpr = (v) => typeof v === 'string' && v.startsWith('=');
 const g4 = (v) => Math.round(v / GRID) * GRID;
 const g4down = (v) => Math.floor(v / GRID) * GRID;
@@ -353,11 +361,11 @@ function card(n, box, ctx) {
   }
   const h = g4(y + pad);
   kids.push(...panel(w, h, ctx, { elevation: 2 }), ...body);
-  const top = g4((640 - h) / 2) - 24;
+  const top = g4((CANVAS_H - h) / 2) - 24;
   const vis = n.visible ?? (n.ui === 'result_card' ? "= status != 'playing'" : undefined);
   return {
     node: 'group', x: 0, y: 0, ...passThrough(n), ...(vis !== undefined ? { visible: vis } : {}),
-    children: [{ node: 'rect', x: 0, y: 0, w: CANVAS_W, h: 640, fill: '$scrim' }, { node: 'group', x: box.x, y: top, children: kids }],
+    children: [{ node: 'rect', x: 0, y: 0, w: CANVAS_W, h: CANVAS_H, fill: '$scrim' }, { node: 'group', x: box.x, y: top, children: kids }],
   };
 }
 
@@ -459,7 +467,8 @@ function hudBar(entries, band, ctx) {
  *               entry { node, origin, pointer }
  *   ctx         { manifest, lookLayout, palette (the look's tokens after art and look.tokens), warn }
  */
-export function applyUiKit(slotNodes, { manifest = {}, lookLayout = null, palette = {}, font = null, warn = () => {} } = {}) {
+export function applyUiKit(slotNodes, { manifest = {}, lookLayout = null, palette = {}, font = null, warn = () => {}, canvas = CANVAS } = {}) {
+  useCanvas(canvas);
   const style = kitStyle(manifest, palette);
   const ctx = { style, font, warn, at: (n) => n.__at ?? '' };
   const regions = {};
@@ -540,7 +549,7 @@ export function applyUiKit(slotNodes, { manifest = {}, lookLayout = null, palett
     slotNodes.hud_bottom.forEach((e, i) => { e.node = hudChip(e.node, bar.cols[i], band, ctx); });
   }
   const layout = kitLayout(lookLayout, layoutKids);
-  return { style, regions, layout };
+  return { style, regions, layout, bands: bands(canvas) };
 }
 
 /** The look's layout with the HUD stacks replaced by plain groups (the chips place themselves). */

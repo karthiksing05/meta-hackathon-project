@@ -11,6 +11,36 @@
 
 export const STYLE_KIT = 'game-style/1';
 
+// ---------- the canvas and its fixed bands ----------
+
+/**
+ * The game canvas. THE one place to change its size: the kit's regions, the HUD bar, the cards and
+ * the style check all derive from it (a look or game.json can still pass its own canvas). Taller
+ * canvases (e.g. 360 × 780 for 19.5:9 phones) give the playfield the extra height.
+ */
+export const CANVAS = { w: 360, h: 640 };
+
+/**
+ * The fixed rectangles every game is laid out in, for a canvas. Nothing the kit places can cross a
+ * band edge: the HUD band holds only the HUD bar, the controls stack up from `controlsBottom`
+ * (above the bottom strip when there is one), and the playfield is what's left between them.
+ *   hud         the top HUD bar                     y 24 – 72 on any canvas
+ *   top         where top components start          y 84
+ *   hudBottom   the bottom strip (daily, hints)     36 tall, 4 above the bottom safe margin
+ *   controlsBottom  where controls end with no strip   h − 24
+ */
+export function bands(canvas = CANVAS) {
+  const w = canvas.w, h = canvas.h, gutter = 12;
+  return {
+    canvas: { w, h },
+    gutter,
+    hud: { x: gutter, y: 24, w: w - gutter * 2, h: 48 },
+    top: 84,
+    hudBottom: { x: gutter, y: h - 40, w: w - gutter * 2, h: 36 },
+    controlsBottom: h - 24,
+  };
+}
+
 // ---------- the scales (fixed: Muse never picks a size) ----------
 
 /** The 4 pt grid. Every static position and size the kit writes is a multiple of GRID. */

@@ -10,7 +10,9 @@ import { fileURLToPath } from 'node:url';
 import { deriveStyle, styleTokens, THEME_NAMES, FAMILIES, DENSITIES, contrast, TYPE_SIZES, MIN_TEXT, INK_ROLES, ON_ROLES } from '../expander/ui-style.mjs';
 import { wrapLines, fitStatic, fitDynamic, fitTextNode, lineHeight, WIDTH_SAFETY } from '../expander/ui-text.mjs';
 import { COMPONENTS } from '../expander/ui-kit.mjs';
-import { styleCheck, styleFix } from '../expander/style-check.mjs';
+import { styleCheck, styleFix, styleVerifier } from '../expander/style-check.mjs';
+import { applyUiKit } from '../expander/ui-kit.mjs';
+import { bands, CANVAS } from '../expander/ui-style.mjs';
 import { expand, loadLibrary } from '../expander/expand.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -145,6 +147,29 @@ if (engine && !raErr.length) {
   }
 }
 ok(Object.keys(COMPONENTS).length >= 18, 'component catalog');
+
+// ---- one canvas constant; a tall canvas moves the bottom bands and never lets regions overlap ----
+for (const canvas of [CANVAS, { w: 360, h: 780 }]) {
+  const b = bands(canvas);
+  ok(b.controlsBottom === canvas.h - 24 && b.hudBottom.y + b.hudBottom.h <= canvas.h && b.hud.y + b.hud.h < b.top, `bands for ${canvas.w}x${canvas.h}`);
+  const tall = { ...lib, looks: Object.fromEntries(Object.entries(lib.looks).map(([k, v]) => [k, { ...v, canvas }])) };
+  const r = expand(all, tall);
+  ok(!r.diagnostics.some((d) => d.severity === 'error') && r.game.presentation.canvas.h === canvas.h, `all-components game on ${canvas.w}x${canvas.h}`);
+  const slots = { hud_top: [{ node: { ui: 'stat', label: 'A', value: '= 1' } }], hud_bottom: [{ node: { node: 'text', text: 'Daily' } }], playfield: [
+    { node: { ui: 'question_card', text: 'Q' } }, { node: { ui: 'frame' } }, { node: { ui: 'answer_grid', count: 4 } }, { node: { ui: 'button', text: 'Go' } }], overlay: [] };
+  const k = applyUiKit(slots, { canvas });
+  const R = k.regions;
+  const below = (a, b) => a.y + a.h <= b.y;
+  ok(below(R.hud, R.top) && below(R.top, R.playfield) && below(R.playfield, R.controls) && below(R.controls, R.hud_bottom), `regions stack without overlap on ${canvas.h} (${JSON.stringify(R)})`);
+  ok(R.hud_bottom.y + R.hud_bottom.h <= canvas.h, 'the bottom strip is on the canvas');
+}
+
+// ---- the verifier module ----
+const vr = styleVerifier.run(messy, { library: lib });
+ok(styleVerifier.id === 'style' && vr.blocking.length > 0 && vr.findings.length >= vr.blocking.length, 'verifier: run reports blocking findings');
+const vf = styleVerifier.fix(messy, { library: lib });
+ok(vf.manifest && vf.blocking.length < vr.blocking.length, 'verifier: fix removes blocking findings');
+
 
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

@@ -87,21 +87,26 @@ diff_spots`. Layout params that the kit now decides (`keyboard.x/y/key_size/gap`
 
 ## 3. Layout regions
 
-The layout pass (in `applyUiKit`, called by `expand.mjs` before the slots are spliced into the
-look) gives every game the same regions on the 360 × 640 canvas:
+The canvas size is one constant, `CANVAS` in `expander/ui-style.mjs` (360 × 640 today; a look or the
+game can pass its own, e.g. 360 × 780 for 19.5:9 phones). `bands(canvas)` turns it into fixed
+rectangles, and the layout pass (`applyUiKit`, called by `expand.mjs` with the look's canvas) stacks
+components into them:
 
-| Region | Where |
+| Region | Where (any canvas height `h`) |
 |---|---|
 | HUD band | y 24–72: a solid `surface` bar 12 from the edges; chips in equal columns, text fitted to one line |
 | top | from y 84, components stacked with 12 between |
-| controls | stacked upward from y 616 (or from the bottom HUD strip, y 572–616) |
+| controls | stacked upward from `h − 24`, or from 12 above the bottom strip |
+| bottom strip | `h − 40` to `h − 4`, only when something is in `hud_bottom` |
 | playfield | what's left between top and controls; `frame`, `board`, `picture`, `lanes` fill it |
 | overlay | toasts at the top of the playfield, cards centred over a `scrim` |
 
-The HUD bar is opaque and drawn over the playfield, so actors pass under it rather than through
-the numbers. Controls are laid out below the playfield, so they never overlap its hit areas.
-Game nodes with their own x/y still work; the style check reports static ones that enter the HUD
-band (`S_HUD_BAND`), and the rendered-frame lint catches moving ones.
+The bands never overlap, by construction: every component's box is cut from one band, and a taller
+canvas only makes the playfield taller (`applyUiKit(...).regions` and `.bands` return the rectangles).
+The HUD bar is opaque and drawn over the playfield, so moving actors pass under it rather than
+through the numbers. Game nodes with their own x/y are the one way to break this; the style check
+blocks static ones that enter a HUD band (`S_HUD_BAND`, an error), and the rendered-frame lint
+catches moving ones.
 
 ## 4. The style check (hardware check)
 
@@ -118,11 +123,11 @@ const { manifest: fixed, after } = styleFix(manifest, { library });      // auto
 | `S_COLOR_ROLE` | warning | a literal colour (also inside expressions) that isn't a role | nearest role token; translucent darks → `$scrim`/`$shadow` |
 | `S_TEXT_UNBOXED` | warning | text with no box, outside a kit component | a box from its anchor and the screen edges, fitted |
 | `S_TEXT_OVERFLOW` | error | text that doesn't fit its box | static: shrink, wrap, ellipsize; run-time: a size that steps down with length and a "…" cut |
-| `S_TEXT_OVERLAP` | warning | two static text boxes overlap | same line: split the line |
+| `S_TEXT_OVERLAP` | error | two static text boxes overlap | same line: split the line |
 | `S_CONTRAST` | error | text under 4.5:1 on what it sits on; a palette whose ink fails | `<role>_ink` variant, else the best of ink/on-colours; adopt the palette into `ui` |
 | `S_TOUCH_TARGET` | error | a tap target under 44 × 44 | grow it around its centre (not inside repeats) |
 | `S_RADIUS`, `S_STROKE` | warning | not the family's values | snap |
-| `S_HUD_BAND` | warning | a static playfield node in the HUD band | report |
+| `S_HUD_BAND` | error | a static playfield node in the top HUD band or the bottom strip | report (Muse repairs) |
 | `S_TOO_MANY_SIZES`, `S_TOO_MANY_COLORS` | warning | over 5 sizes / 12 colours | report |
 | `S_UI_KNOB` | warning | an unknown `ui` value | the default |
 
@@ -131,6 +136,20 @@ contract). It is deterministic: the same manifest gives the same findings in the
 fix gives byte-identical output on every run, and a second fix pass changes nothing. The fixes only
 touch presentation and the `ui` block, so rules, state and objectives are unchanged and replays
 still verify.
+
+### As a verifier module
+
+`style-check.mjs` exports `styleVerifier` for the unified verifier (`authoring/verify/`):
+
+```js
+import { styleVerifier } from '../expander/style-check.mjs';
+styleVerifier.id      // 'style'; stage 'manifest'; codes: { S_*: 'error' | 'warning' }
+styleVerifier.run(manifest, { library, canvas })  // → { findings, blocking, counts }
+styleVerifier.fix(manifest, { library, canvas })  // → { manifest, findings, blocking } after the auto-fix
+```
+
+`blocking` is the error-severity findings: anything that intersects (`S_HUD_BAND`, `S_TEXT_OVERLAP`,
+`S_TEXT_OVERFLOW`), fails AA (`S_CONTRAST`) or can't be tapped (`S_TOUCH_TARGET`).
 
 ### Note for the layout-lint agent (`playtest/layout-check.mjs`)
 
@@ -151,9 +170,9 @@ to check frames against the same bands.
 Across the 45 Muse games built last night (kevin32 #1–31 and s15 S1–S15 except S7; #32 and S7 have no build; the style check run on each game's own
 manifest):
 
-- 1,599 findings before, 156 of them errors. The most common: `S_OFF_GRID` 500, `S_TEXT_UNBOXED` 374,
+- 1,599 findings before, 173 of them blocking errors. The most common: `S_OFF_GRID` 500, `S_TEXT_UNBOXED` 374,
   `S_FONT_SCALE` 262, `S_COLOR_ROLE` 199, `S_CONTRAST` 112, `S_RADIUS` 62, `S_TEXT_OVERFLOW` 30.
-- 39 left after the auto-fix (20 errors): `S_HUD_BAND` 13, `S_CONTRAST` 10 (colours chosen by
+- 39 left after the auto-fix, all blocking, for Muse to repair: `S_HUD_BAND` 13, `S_CONTRAST` 10 (colours chosen by
   expressions), `S_TOUCH_TARGET` 10 (inside repeats), `S_TEXT_OVERLAP` 6.
 - Every fix is deterministic and idempotent, and every fixed game still expands and validates.
 - Logic unchanged: for 17 games, every bot run of the old build replays on the kit build with the

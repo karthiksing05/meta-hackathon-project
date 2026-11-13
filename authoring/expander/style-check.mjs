@@ -26,22 +26,27 @@
 // manifest is byte-identical across runs (and a second fix pass finds nothing left to fix).
 // Pure JS, no Node imports.
 
-import { deriveStyle, TYPE_SIZES, MIN_TEXT, MIN_TOUCH, GRID, normHex, alphaOf, contrast, colorDistance, snapType, STANDARD, readKnobs, FAMILIES, themeFor } from './ui-style.mjs';
+import { CANVAS as CANVAS0, bands, deriveStyle, TYPE_SIZES, MIN_TEXT, MIN_TOUCH, GRID, normHex, alphaOf, contrast, colorDistance, snapType, STANDARD, readKnobs, FAMILIES, themeFor } from './ui-style.mjs';
 import { kitTokens, kitStyle, textTone } from './ui-kit.mjs';
 import { fitStatic, fitDynamic, lineBox, lineHeight, WIDTH_SAFETY } from './ui-text.mjs';
 
 export const STYLE_CHECK_VERSION = 1;
-export const CANVAS = { w: 360, h: 640 };
-export const HUD_BAND = { y: 24, h: 48 };
-export const HUD_BOTTOM_BAND = { y: 600, h: 36 };
+// The canvas and its bands come from ui-style.mjs (one constant); set per check from the look.
+let CANVAS = { ...CANVAS0 };
+let HUD_BAND = { y: 24, h: 48 };
+let HUD_BOTTOM_BAND = { y: CANVAS0.h - 40, h: 36 };
+function useCanvas(canvas) {
+  const b = bands(canvas);
+  CANVAS = b.canvas; HUD_BAND = { y: b.hud.y, h: b.hud.h }; HUD_BOTTOM_BAND = { y: b.hudBottom.y, h: b.hudBottom.h };
+}
 export const MAX_SIZES = 5;
 export const MAX_COLORS = 12;
 const GUTTER = 12;
 
 export const CODES = {
   S_OFF_GRID: 'warning', S_FONT_SCALE: 'warning', S_COLOR_ROLE: 'warning', S_TEXT_UNBOXED: 'warning',
-  S_TEXT_OVERFLOW: 'error', S_TEXT_OVERLAP: 'warning', S_CONTRAST: 'error', S_TOUCH_TARGET: 'error',
-  S_RADIUS: 'warning', S_STROKE: 'warning', S_HUD_BAND: 'warning', S_TOO_MANY_SIZES: 'warning',
+  S_TEXT_OVERFLOW: 'error', S_TEXT_OVERLAP: 'error', S_CONTRAST: 'error', S_TOUCH_TARGET: 'error',
+  S_RADIUS: 'warning', S_STROKE: 'warning', S_HUD_BAND: 'error', S_TOO_MANY_SIZES: 'warning',
   S_TOO_MANY_COLORS: 'warning', S_UI_KNOB: 'warning',
 };
 
@@ -99,7 +104,8 @@ function nearestToken(hex, alpha, tokens) {
  * Runs the check. `library` is loadLibrary()'s result (for the look's tokens). With `fix`, returns
  * a corrected copy of the manifest; the input is never changed.
  */
-export function styleCheck(input, { library = null, fix = false } = {}) {
+export function styleCheck(input, { library = null, fix = false, canvas = null } = {}) {
+  useCanvas(canvas ?? library?.looks?.[input.look?.id ?? 'paper']?.canvas ?? CANVAS0);
   const manifest = fix ? clone(input) : input;
   const findings = [];
   const add = (code, at, message, fixed = false, extra = {}) => findings.push({ code, severity: CODES[code] ?? 'warning', at, message, fixed: !!(fix && fixed), ...extra });
@@ -437,10 +443,29 @@ export function styleLines(result, max = 12) {
 }
 
 /** Check, fix, and check again: the fixed manifest plus what's left. Deterministic. */
-export function styleFix(manifest, { library = null } = {}) {
-  const first = styleCheck(manifest, { library, fix: true });
-  const after = styleCheck(first.manifest, { library, fix: false });
+export function styleFix(manifest, { library = null, canvas = null } = {}) {
+  const first = styleCheck(manifest, { library, fix: true, canvas });
+  const after = styleCheck(first.manifest, { library, fix: false, canvas });
   return { manifest: first.manifest, before: first, after };
 }
 
 export { FAMILIES };
+
+/**
+ * The style check as a verifier module (for authoring/verify/): static, on the manifest, blocking on
+ * errors. `run` reports; `fix` returns the corrected manifest and what's left.
+ */
+export const styleVerifier = {
+  id: 'style',
+  stage: 'manifest',
+  version: STYLE_CHECK_VERSION,
+  codes: CODES,
+  run: (manifest, { library = null, canvas = null } = {}) => {
+    const r = styleCheck(manifest, { library, canvas });
+    return { findings: r.findings, blocking: r.findings.filter((f) => f.severity === 'error'), counts: r.counts };
+  },
+  fix: (manifest, { library = null, canvas = null } = {}) => {
+    const r = styleFix(manifest, { library, canvas });
+    return { manifest: r.manifest, findings: r.after.findings, blocking: r.after.findings.filter((f) => f.severity === 'error') };
+  },
+};
