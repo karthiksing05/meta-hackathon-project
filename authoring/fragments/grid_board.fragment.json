@@ -1,7 +1,7 @@
 {
   "fragment": "grid_board",
   "version": 1,
-  "describe": "A tappable board of `cols` x `rows` square cells at (`x`, `y`). Each tap emits the input `tap_cell` with the cell as an ivec2 (column x, row y). The game paints it through two functions it must declare: `cell_fill(c)` returns a color string such as '#AABBCC', or '' to draw the plain $surface cell (functions can't return $tokens, so use hex strings or game tokens written out as hex), and `cell_label(c)` returns the text drawn on the cell ('' for none). Cell index is c.y * cols + c.x. With a `cell` sprite, plain cells draw it instead of the $surface square. Tapped cells pop and play the `tap` moment. The board has no rules and no win or lose condition.",
+  "describe": "A tappable board of `cols` x `rows` square cells at (`x`, `y`). Each tap emits the input `tap_cell` with the cell as an ivec2 (column x, row y). The game paints it through two functions it must declare: `cell_fill(c)` returns a color string such as '#AABBCC', or '' to draw the plain $surface cell (functions can't return $tokens, so use hex strings or game tokens written out as hex), and `cell_label(c)` returns the text drawn on the cell ('' for none); long labels shrink to fit the cell (down to 11) and then wrap. Cell index is c.y * cols + c.x. With a `cell` sprite, plain cells draw it instead of the $surface square. Tapped cells pop and play the `tap` moment. The board has no rules and no win or lose condition.",
   "params": {
     "cols":      { "type": "int", "default": 4, "min": 2, "max": 10 },
     "rows":      { "type": "int", "default": 4, "min": 2, "max": 10 },
@@ -51,7 +51,8 @@
                 "on_tap": { "input": "tap_cell", "with": { "cell": "cell" } }
               },
               {
-                "node": "text", "x": "= @cell_size / 2", "y": "= @cell_size / 2", "anchor": "center", "size": 24, "weight": 700, "color": "$ink", "stroke": "$bg", "stroke_width": 5,
+                "node": "text", "x": "= @cell_size / 2", "y": "= @cell_size / 2", "anchor": "center", "w": "= @cell_size - 8", "wrap": true,
+                "size": "= max(11.0, min(24.0, @cell_size * 0.45, (@cell_size - 8) / (max(1, len(cell_label(cell))) * 0.63)))", "weight": 700, "color": "$ink", "stroke": "$bg", "stroke_width": 5,
                 "text": "= cell_label(cell)"
               }
             ]
