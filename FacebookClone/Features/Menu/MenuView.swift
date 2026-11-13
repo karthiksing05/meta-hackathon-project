@@ -26,6 +26,8 @@ struct MenuView: View {
                 }
                 .padding(.bottom, 24)
             }
+            // Room under Log out so it scrolls clear of the tab bar and a minimized build dock on every phone.
+            .contentMargins(.bottom, 120, for: .scrollContent)
             .onChange(of: router.scrollToTopSignal(for: .menu)) {
                 withAnimation { proxy.scrollTo(topID, anchor: .top) }
             }
