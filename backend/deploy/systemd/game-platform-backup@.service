@@ -1,0 +1,6 @@
+[Unit]
+Description=Game platform backup (%i)
+
+[Service]
+Type=oneshot
+ExecStart=/srv/game-platform/app/backup.sh %i
