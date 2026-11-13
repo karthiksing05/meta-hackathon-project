@@ -191,6 +191,46 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return series
     }
 
+    // MARK: Sounds (backend/README.md, "Sounds")
+
+    /// The library: `GET /v1/sounds?tab=trending|for_you|saved|recent&q=&limit=`. `saved` needs sign-in.
+    func sounds(tab: String, query: String? = nil, limit: Int = 30) async throws -> [RemoteSound] {
+        var q = [URLQueryItem(name: "tab", value: tab), URLQueryItem(name: "limit", value: String(limit))]
+        if let query = query?.trimmingCharacters(in: .whitespacesAndNewlines), !query.isEmpty {
+            q.append(URLQueryItem(name: "q", value: query))
+        }
+        return (try await get("v1/sounds", query: q, auth: tab == "saved" ? .required : .optional) as RemoteList<RemoteSound>).items
+    }
+
+    func sound(id: String) async throws -> RemoteSound {
+        try await get("v1/sounds/\(id)", auth: .optional)
+    }
+
+    /// The games using a sound, `top` or `recent` (drafts left out).
+    func soundGames(id: String, sort: String) async throws -> RemoteSoundGames {
+        let page: RemoteSoundGames = try await get("v1/sounds/\(id)/games", query: [URLQueryItem(name: "sort", value: sort)], auth: .optional)
+        page.items.forEach(link)
+        return page
+    }
+
+    /// `PUT|DELETE /v1/sounds/{id}/save`.
+    func setSoundSaved(_ saved: Bool, soundID: String) async throws -> RemoteSoundSaveState {
+        try decode(try await send(saved ? "PUT" : "DELETE", "v1/sounds/\(soundID)/save", auth: .required))
+    }
+
+    /// Sets or swaps the sound on my game (`PUT /v1/games/{id}/sound`), or takes it off (`nil`).
+    func setGameSound(gameID: String, soundID: String?, offsetMs: Int = 0, mix: Double? = nil) async throws {
+        let id = try serverID(gameID)
+        guard let soundID else {
+            _ = try await send("DELETE", "v1/games/\(id)/sound", auth: .required)
+            return
+        }
+        var body: [String: Any] = ["soundId": soundID, "offsetMs": offsetMs]
+        if let mix { body["mix"] = mix }
+        _ = try await send("PUT", "v1/games/\(id)/sound", body: try JSONSerialization.data(withJSONObject: body),
+                           contentType: "application/json", auth: .required)
+    }
+
     func friends() async throws -> [RemoteProfile] {
         (try await get("v1/me/friends", auth: .required) as RemoteList<RemoteProfile>).items
     }

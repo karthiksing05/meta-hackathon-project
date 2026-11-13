@@ -90,6 +90,8 @@ enum Route: Hashable {
     case challengesInbox
     /// Search people on the games server and add them (`FindFriendsView`).
     case findFriends
+    /// A library sound's page: the games using it and "Use this sound" (`SoundPageView`).
+    case sound(String)
     /// The levels of a Bubble Chain.
     case bubbleChain(String)
     /// Marketplace as a pushed screen (it left the tab bar for Bubbles).
@@ -133,6 +135,8 @@ struct StudioLaunch: Identifiable {
     var social: StudioSocialContext? = nil
     /// Start with this length locked in Customize.
     var length: BubbleLength? = nil
+    /// "Use this sound": the game is made with this library sound behind it.
+    var sound: RemoteGameSound? = nil
 }
 
 enum ComposerStartAction: Hashable {
@@ -335,6 +339,8 @@ struct RouteDestination: View {
             ChallengesInboxView()
         case .findFriends:
             FindFriendsView()
+        case .sound(let id):
+            SoundPageView(soundID: id)
         case .bubbleChain(let id):
             BubbleChainView(chainID: id)
         case .marketplace:

@@ -16,6 +16,8 @@ struct BubbleWebView: UIViewRepresentable {
     var bestScore: Int? = nil
     var isActive: Bool = true
     var isMuted: Bool = true
+    /// A library sound plays behind the game (`LibrarySoundPlayer`), so its own music stays off.
+    var hasBacking: Bool = false
     var reducedMotion: Bool = false
     var restartToken: Int = 0
     var insetTop: CGFloat = 0
@@ -79,6 +81,7 @@ struct BubbleWebView: UIViewRepresentable {
             playerName: playerName,
             bestScore: bestScore,
             isMuted: isMuted,
+            hasBacking: hasBacking,
             reducedMotion: reducedMotion,
             insetTop: insetTop,
             insetBottom: insetBottom,

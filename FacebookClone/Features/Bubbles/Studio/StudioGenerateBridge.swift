@@ -24,10 +24,11 @@ enum StudioGenerateBridge {
         with generator: any GameGenerator,
         request: String,
         brief: BubbleBrief,
+        sound: RemoteGameSound? = nil,
         onReport: @escaping @MainActor (UUID, StudioPlaytest.Report) -> Void,
         onWait: @escaping @MainActor (Wait?) -> Void
     ) -> AsyncThrowingStream<StudioEvent, Error> {
-        events(from: generator.generate(request: request, brief: brief), onReport: onReport, onWait: onWait)
+        events(from: generator.generate(request: request, brief: brief, sound: sound), onReport: onReport, onWait: onWait)
     }
 
     /// A change to a game the server has; the result is a new game (`remixOf` is the base).
