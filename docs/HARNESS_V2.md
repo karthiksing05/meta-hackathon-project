@@ -122,6 +122,104 @@ The results go into the anatomy (`game-anatomy/0.1`, docs/BUBBLES.md 7.13):
 
 The values then steer content, rules, art, difficulty and social settings, as each slot's `affects` lists.
 
+### The game spec: every part named, decided and checked (Karthik, 21:45)
+
+Muse does best when it never has to invent the structure of a game, only fill it in. So the planner's output is a
+**`game-spec/1`**: a fixed set of parts, each with its own small schema, its own guidance, and its own check.
+Compose builds from the spec, not from the request. The anatomy (7.13) stays the person-facing view of the same
+parts.
+
+| Part | What it pins down | Checked by |
+|---|---|---|
+| `theme` | the world, named things (real franchise names when asked), tone, the look family | the words players see contain the theme terms (quality.mjs) |
+| `goal` | one sentence on what the player is trying to do, and the *measurable* target ("clear 20 orders", "survive", "find the rarest answer") | it is measurable, and `score` measures it |
+| `loop` | the core action loop: the verb, what the player sees, the input, the feedback, and how long one cycle takes | a bot can complete one cycle; the input is in the tool list |
+| `pieces` | the entities and content: roles, how many, where content comes from (answer bank, word list, levels) | every piece a rule names exists; content is big enough for the length |
+| `constraints` | limits and pressure: time, lives, moves, accuracy, rate | each one is enforced by a rule and can be seen in the HUD |
+| `progression` | the difficulty arc: what ramps and when (3 steps), plus `difficulty_levers` | bot scores rise with skill; the ramp is visible |
+| `end` | win, lose, and how a run ends (time out, lives gone, target reached, all prompts done) | every run ends within `session_seconds` |
+| `score` | the score model below | the score check below |
+| `social` | what is shared, the challenge shape (same seed), and how the Group board reads | the share text has no spoilers; the challenge reuses the seed |
+| `feel` | the juice moments, sound set and the look (Bayan's style kit takes over from here) | Bayan's art checks |
+
+- **The planner fills the parts in order.** Theme, goal, loop and pieces come first; then constraints, progression
+  and end; score last, because the score has to measure the goal under the constraints. Each part sees the earlier
+  ones.
+- **Per-part guidance:** the catalog types carry part-level hints. Kevin's game survey (`docs/research/`) becomes
+  per-family guidance on each part ("what goes wrong when it's made badly").
+- **Repairs are per part.** A failed check names its part, and the repair prompt sends Muse only that part plus the
+  parts it depends on, not the whole game. Faster and less drift.
+
+### Scores you can rank
+
+Today every leaderboard keeps the highest score and sorts highest first (`$max`, descending, in
+`internal/store`). Max's work splits boards by *scope* (everyone, friends, Group, Event, weekly). But a time trial
+("make 20 sandwiches as fast as you can") ranks the slowest player first. So `score` is a model, not one number:
+
+```json
+"score": {
+  "kind": "points | time_to_complete | count_in_time | survival_time | accuracy | distance | tiered_points | streak",
+  "measures": "orders completed before the timer ends",
+  "unit": "orders",
+  "direction": "higher | lower",
+  "counts_when": "finished | any",
+  "aggregate": "best | latest | sum_week",
+  "tie_break": "less time | fewer mistakes | earlier",
+  "format": "{n} orders | m:ss.t | {n}%",
+  "bounds": { "min": 0, "max": 60, "max_rate_per_s": 2 },
+  "events": ["order_done"]
+}
+```
+
+| Kind | What ranks | Direction | Counts when |
+|---|---|---|---|
+| `points` | points | higher | any |
+| `time_to_complete` | seconds to finish | lower | finished only |
+| `count_in_time` | how many in N s | higher | any |
+| `survival_time` | seconds alive | higher | any |
+| `accuracy` | percent correct | higher | finished only |
+| `tiered_points` | rarity-tier points (Krillion) | higher | any |
+| `streak` | best run of correct | higher | any |
+
+Notes on the fields:
+- `counts_when: finished` means a run that times out doesn't go on the board. Without it, a time trial would reward
+  quitting early.
+- `bounds` come from the bots, not from Muse. The gate records the range the bots actually reached, plus headroom.
+  The server then rejects impossible scores even before replay verification.
+- `format` is how the app and share text show the score, so "1:23.4" is never shown as "83400".
+
+### Score verification (a step of its own, after the gate)
+
+Muse states its score reasoning. A separate check, half code and half Muse, makes sure the score is fair, rankable
+and measures the goal.
+
+**1. Muse review** (muse-wonder-1.0, high effort; the one place we spend thinking). It receives the goal,
+constraints, end and score parts plus the bot runs, and answers:
+- does the score measure the goal, or something easier to farm?
+- is the direction right?
+- can a player raise it without playing well (idling, spamming one input, quitting early)?
+- are ties likely, and does the tie-break resolve them?
+- does the `format` read naturally?
+
+It returns `{ok, issues: [{part, problem, fix}]}`.
+
+**2. Code checks from the bots**, deterministic and run in the gate:
+- **Skill order:** pro beats regular beats new player, in the score's direction.
+- **The idle bot scores worst.**
+- **No farming:** a spam bot that repeats one input doesn't beat the regular bot, and no bot exceeds
+  `max_rate_per_s`.
+- **Finish rule:** `finished`-only kinds have at least one finished bot run, and unfinished runs are excluded.
+- **Score is replay-verifiable:** the score re-derived from the replay log equals the reported score
+  (`MicrogameEngine.verify`).
+- **Score events:** the score changes only on the `events` listed.
+
+**3. A failed check repairs only the `score` part**, plus `goal` if the review says the goal itself isn't
+measurable. At most one round. If it still fails, the game ships with an honest "unranked" board.
+
+**Server side (Max):** the game record stores `score` (direction, aggregate, counts_when, format, bounds). Boards
+sort and aggregate by it (`$min` for `lower`), reject out-of-bounds or unfinished runs as the model says, and send
+`format` to the app.
+
 ### 5–6. Compose and check (today's pipeline, with a smaller prompt)
 
 - `prompts.system` takes the plan's types and tools in place of the full fragment catalog. Gold examples are still
