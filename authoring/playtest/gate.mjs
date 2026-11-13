@@ -4,7 +4,7 @@
 
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { loadEngine } from '../expander/engine.mjs';
-import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize, GATE_PROFILES, gateProfile, decisionBase, randomLiveChoice, pickState, typingSteps } from './bots.mjs';
+import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize, GATE_PROFILES, gateProfile, decisionBase, randomLiveChoice, pickState, typingSteps, tapPairs, expandAction } from './bots.mjs';
 
 export { DEFAULT_BOTS, GATE_PROFILES, analyze, summarize, gameObject };
 
@@ -40,7 +40,7 @@ function playOne(engine, json, game, sources, bot, seed, maxSeconds, profile = g
     let nextDecision = 0;
     while (steps < maxSteps && g.phase() === 'playing') {
       if (steps >= nextDecision) {
-        const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null, sources.text ? textCandidates(g, rng) : null);
+        const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null, sources.text ? textCandidates(g, rng) : null, sources.pointer ? tapPairs(g, rng) : null);
         let choice;
         if (profile.randomPlay) {
           choice = randomLiveChoice(g, candidates, rng);
@@ -62,7 +62,7 @@ function playOne(engine, json, game, sources, bot, seed, maxSeconds, profile = g
         } else {
           choice = candidates[Math.floor(rng() * candidates.length)];
         }
-        if (choice.kind !== 'noop') { apply(g, choice); history.push({ step: steps, action: choice }); }
+        if (choice.kind !== 'noop') { apply(g, choice); for (const a of expandAction(choice)) history.push({ step: steps, action: a }); }
         nextDecision = steps + Math.max(1, base + Math.round((rng() * 2 - 1) * base * 0.15)) + typingSteps(choice);
       }
       g.step(DT);

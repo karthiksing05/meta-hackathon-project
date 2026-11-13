@@ -1264,5 +1264,42 @@
       "proof_step_order"
     ],
     "path": "authoring/fragments/story_quiz.fragment.json"
+  },
+  {
+    "id": "chess_board",
+    "kind": "fragment",
+    "name": "Playable chess board",
+    "aliases": [
+      "chess",
+      "chess board",
+      "mate in one",
+      "chess puzzle",
+      "move the piece"
+    ],
+    "summary": "An 8x8 chess board the player moves pieces on: tap a piece (legal squares get dots, captures rings) then a square, or drag it; illegal drops slide back. Legal moves are generated in the rules (all pieces, captures, auto-queen promotion, no move into check; no castling or en passant), so runs replay.",
+    "when_to_use": "Chess puzzles (mate in one, find the best move), chess variants and pass-and-play chess; any game where the player moves real chess pieces.",
+    "api": "emit chess_load {fen} to set a position (or param fen); emits chess_moved {from, to, piece, captured, check, mate, name} after every legal move; emit chess_move {from, to} to play a move and chess_undo to take one back; state chess_board, chess_turn, chess_moves (from*64+to), chess_check, chess_mate, chess_stalemate, chess_locked (game-writable); functions chess_sq(name), chess_sq_name, chess_legal_from, chess_all_moves, chess_apply, chess_in_check, chess_is_mate, chess_move_name, chess_cx/chess_cy; optional piece sprite (12 frames KQRBNP kqrbnp)",
+    "events": [
+      "chess_moved",
+      "chess_selected",
+      "chess_snap"
+    ],
+    "params": {
+      "x": "int, default 4, 0..360",
+      "y": "int, default 260, 0..780",
+      "square": "int, default 44, 40..45",
+      "fen": "string, default the start position (\"\" to load from the game)",
+      "side": "enum both|white|black, default both",
+      "orient": "enum auto|white|black, default auto",
+      "coords": "bool, default true",
+      "light, dark, light_ink, dark_ink, select, last, check, marker": "string hex colours"
+    },
+    "status": "shipped",
+    "example_types": [
+      "mate_in_one_choice",
+      "chess_puzzle_mate",
+      "chess_classic"
+    ],
+    "path": "authoring/fragments/chess_board.fragment.json"
   }
 ]

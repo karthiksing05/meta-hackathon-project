@@ -185,16 +185,43 @@ function tapAt(x, y) {
   return { kind: 'tap', x, y };
 }
 
+const MAX_TAP_PAIRS = 40;
+
+/**
+ * Two-tap moves a bot may make (SPEC 2.6 `tap_pairs`): the playtest copy's `__tap_pairs`, each
+ * [x1, y1, x2, y2] (pick a piece, then the square it goes to). At most 40, picked with the bot's rng
+ * when there are more. [] for a game without the hint.
+ */
+export function tapPairs(g, rng) {
+  let state;
+  try { state = asObject(g.state()); } catch { return []; }
+  const raw = Array.isArray(state?.__tap_pairs) ? state.__tap_pairs : [];
+  let out = raw.filter((p) => Array.isArray(p) && p.length >= 4 && p.slice(0, 4).every(Number.isFinite))
+    .map(([x1, y1, x2, y2]) => ({ kind: 'pair', taps: [tapAt(x1, y1), tapAt(x2, y2)] }));
+  if (out.length > MAX_TAP_PAIRS) {
+    const pool = out.slice();
+    out = [];
+    for (let i = 0; i < MAX_TAP_PAIRS; i++) out.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+  }
+  return out;
+}
+
+/** The actions an input log records for a choice: a two-tap move is its two taps. */
+export function expandAction(action) {
+  return action?.kind === 'pair' ? action.taps : [action];
+}
+
 /**
  * Tap candidates: the engine's own hit targets (`targets`, from game.hitTargets()) when the engine
  * provides them, so the bots never tap decoration such as particles or sprites; otherwise the
  * centers of drawn rects and circles (engine v0.1). Plus a row of open-screen taps for games that
- * take a pointer anywhere, the game's keys and swipes, and `texts` to submit (textCandidates) for
- * games with a text input.
+ * take a pointer anywhere, the game's keys and swipes, `texts` to submit (textCandidates) for
+ * games with a text input, and `pairs`, two-tap moves (tapPairs) for board games.
  */
-export function candidatesFor(frame, sources, rng, targets = null, texts = null) {
+export function candidatesFor(frame, sources, rng, targets = null, texts = null, pairs = null) {
   const out = [{ kind: 'noop' }];
   for (const value of texts ?? []) out.push({ kind: 'text', value });
+  out.push(...(pairs ?? []));
   if (!sources.pointer) {
     for (const key of sources.keys) out.push({ kind: 'key', key });
     if (sources.swipes) for (const dir of ['left', 'right', 'up', 'down']) out.push({ kind: 'swipe', dir });
@@ -242,6 +269,8 @@ export function apply(g, action) {
       g.pointer('down', action.x, action.y);
       g.pointer('up', action.x, action.y);
       break;
+    // A two-tap move (tapPairs): pick, then place. Both taps reach the engine before the next step.
+    case 'pair': for (const t of action.taps) apply(g, t); break;
     case 'key': g.key(action.key); break;
     case 'swipe': g.swipe(action.dir); break;
     // Typed and submitted at once (Enter), then the field clears, like the app's text field.

@@ -40,7 +40,7 @@
       "move hints"
     ],
     "tools": [
-      "grid_board",
+      "chess_board",
       "turns",
       "async_turns"
     ],
@@ -94,8 +94,9 @@
       "difficulty"
     ],
     "tools": [
-      "grid_board",
-      "hint",
+      "chess_board",
+      "rounds",
+      "score",
       "daily_seed"
     ],
     "engine_gaps": [],

@@ -349,15 +349,15 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     if (!diagnostics.some((d) => d.severity === 'error')) {
       const e = engine();
       diagnostics.push(...e.validate(JSON.stringify(game)).map((d) => finish(translate(d, result.sourceMap), manifest)));
-      // The playtest copy adds the model's own `playtest.progress` and `playtest.text_candidates`
+      // The playtest copy adds the model's own `playtest.progress`, `playtest.text_candidates` and `playtest.tap_pairs`
       // expressions (hidden rules and state named after them): check them too.
       if (playtestGame && !diagnostics.some((d) => d.severity === 'error')) {
         const added = {};
-        (playtestGame.rules ?? []).forEach((r, i) => { if (r.id === '__progress' || r.id === '__text_candidates') added[`/rules/${i}`] = r.id; });
+        (playtestGame.rules ?? []).forEach((r, i) => { if (r.id === '__progress' || r.id === '__text_candidates' || r.id === '__tap_pairs') added[`/rules/${i}`] = r.id; });
         const hintAt = (at) => {
           if (!at) return null;
           for (const [prefix, id] of Object.entries(added)) if (at === prefix || at.startsWith(`${prefix}/`)) return id;
-          const m = /^\/state\/(__progress|__text_candidates)(\/|$)/.exec(at);
+          const m = /^\/state\/(__progress|__text_candidates|__tap_pairs)(\/|$)/.exec(at);
           return m ? m[1] : null;
         };
         for (const d of e.validate(JSON.stringify(playtestGame))) {
