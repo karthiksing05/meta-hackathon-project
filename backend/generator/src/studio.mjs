@@ -79,11 +79,12 @@ export function loadStudio(files = findBundles()) {
     /**
      * The whole pipeline (draft, repair, gate, quality check, polish, wrap), from the bundle.
      * args: {request, brief, base?}; ask(system, user, purpose) -> {content, model}; onEvent gets progress events.
+     * hooks (optional, src/hooks.mjs): {image, decode, deflate, fixLayout, layoutCheck}, server-side functions.
      * Resolves to {manifest, stats, bots, gate, quality}.
      */
-    async compose(args, ask, onEvent) {
+    async compose(args, ask, onEvent, hooks = null) {
       if (typeof S.compose !== 'function') throw new Error('microgame-studio.js has no compose(); update the Studio bundle');
-      return JSON.parse(await S.compose(JSON.stringify(args), ask, onEvent));
+      return JSON.parse(await (hooks ? S.compose(JSON.stringify(args), ask, onEvent, hooks) : S.compose(JSON.stringify(args), ask, onEvent)));
     },
   };
 }

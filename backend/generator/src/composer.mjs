@@ -5,6 +5,7 @@
 // and stamps a revision's lineage.
 
 import { paintArt, imageArtOn } from './art.mjs';
+import { composeHooks, pictureArtOn } from './hooks.mjs';
 
 export { summarize } from './events.mjs';
 
@@ -118,7 +119,7 @@ export function visualSection(visual) {
  * always a new game: a fresh id, `lineage.remix_of` set to remixOf, and `chain.index` set to level.
  * Throws GenerationError when the game never validates, or whatever Muse or the page threw.
  */
-export async function compose({ request, brief, base = null, remixOf = null, level = null, context = null }, { muse, studio, model = 'muse-wonder-1.0', onEvent = () => {}, signal, renderFrame = null, env = process.env }) {
+export async function compose({ request, brief, base = null, remixOf = null, level = null, context = null }, { muse, studio, model = 'muse-wonder-1.0', onEvent = () => {}, signal, renderFrame = null, env = process.env, hooks = undefined }) {
   // Studio bundle version 3 and up put the harness context into the prompt themselves (only the planned tools in the
   // menu, plus the spec and the matched gold examples). An older bundle only gets the additive section, and only on
   // compose calls, not on the score review or repair that name their own model.
@@ -134,11 +135,19 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
     console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'muse call', purpose, model: r.model, ms: Date.now() - started, usage: r.usage }));
     return { content: r.content, model: r.model, usage: r.usage };
   };
-  const out = await studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))));
+  // Server-side hooks (src/hooks.mjs): picture art (GENERATOR_IMAGE_ART=1) and the layout fixes and lint. A caller
+  // may pass its own (tests) or null for none.
+  if (hooks === undefined) {
+    const made = await composeHooks({ muse, env, signal });
+    hooks = made.hooks;
+    if (made.notes.length) console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'compose hooks', notes: made.notes }));
+  }
+  const out = await studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))), hooks);
   // The art step paints what the plan's visual stage marked "image". New games only for now: a revision sends the
-  // whole authoring manifest back through Muse, and painted images would ride along as base64.
+  // whole authoring manifest back through Muse, and painted images would ride along as base64. With
+  // GENERATOR_IMAGE_ART=1 the bundle's picture art (the hooks above) draws instead, so this step stays out.
   const visual = context?.plan?.spec?.visual;
-  if (visual && !base && imageArtOn(env) && typeof muse.image === 'function') {
+  if (visual && !base && imageArtOn(env) && !pictureArtOn(env) && typeof muse.image === 'function') {
     try {
       const art = await paintArt({ manifest: out.manifest, visual, muse, studio, renderFrame, signal, onEvent: (e) => onEvent(e) });
       out.manifest = art.manifest;

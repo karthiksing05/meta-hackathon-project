@@ -5,9 +5,9 @@ name: Backend tests
 on:
   push:
     branches: [backend-api]
-    paths: ["backend/**", "FacebookClone/Bubbles/Recommend/game-recs.js", "FacebookClone/Bubbles/Runtime/web/**", "FacebookClone/Bubbles/Studio/web/microgame-studio.js", "authoring/catalog/**", ".github/workflows/backend-test.yml"]
+    paths: ["backend/**", "FacebookClone/Bubbles/Recommend/game-recs.js", "FacebookClone/Bubbles/Runtime/web/**", "FacebookClone/Bubbles/Studio/web/microgame-studio.js", "authoring/catalog/**", "authoring/expander/**", "authoring/playtest/**", ".github/workflows/backend-test.yml"]
   pull_request:
-    paths: ["backend/**", "FacebookClone/Bubbles/Recommend/game-recs.js", "FacebookClone/Bubbles/Runtime/web/**", "FacebookClone/Bubbles/Studio/web/microgame-studio.js", "authoring/catalog/**", ".github/workflows/backend-test.yml"]
+    paths: ["backend/**", "FacebookClone/Bubbles/Recommend/game-recs.js", "FacebookClone/Bubbles/Runtime/web/**", "FacebookClone/Bubbles/Studio/web/microgame-studio.js", "authoring/catalog/**", "authoring/expander/**", "authoring/playtest/**", ".github/workflows/backend-test.yml"]
 
 permissions:
   contents: read

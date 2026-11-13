@@ -13,6 +13,13 @@
 !authoring/catalog
 # the requirements code the planner runs in goja
 !authoring/expander/requirements.mjs
+# the modules behind the generator's compose hooks (backend/generator/src/hooks.mjs)
+!authoring/expander/image-codec.mjs
+!authoring/expander/layout-fix.mjs
+!authoring/expander/engine.mjs
+!authoring/playtest/layout-check.mjs
+!authoring/playtest/bots.mjs
+!authoring/playtest/frame-render.mjs
 **/*_test.go
 **/node_modules
 **/*.env

@@ -163,6 +163,30 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   const rev = new PaintingMuse([withSprites()]);
   await compose({ request: 'make it faster', brief, base: out.manifest, context }, { studio, muse: rev, env: {} });
   check('a revision is not repainted', rev.images.length === 0);
+
+  // GENERATOR_IMAGE_ART=1: the bundle's picture art draws through compose's hooks (image, decode, deflate) instead
+  const pictures = new PaintingMuse([withSprites()]);
+  const picEvents = [];
+  const picCtx = { ...context, plan: { ...context.plan, art: 'image' } };
+  const pic = await compose({ request: 'a calm fog game', brief, context: picCtx }, { studio, muse: pictures, onEvent: (e) => picEvents.push(e), env: { GENERATOR_IMAGE_ART: '1' } });
+  check('GENERATOR_IMAGE_ART=1 draws pictures through the hooks', pic.stats.image_art?.image_calls > 0 && pictures.images.length > 0 && !pic.stats.art && /data:image\/png;base64,/.test(pic.manifest.content.game_json), JSON.stringify({ image_art: pic.stats.image_art, art: pic.stats.art, calls: pictures.images.length }));
+  check('picture art emits drawing and drawn events', picEvents.some((e) => e.kind === 'drawing') && picEvents.some((e) => e.kind === 'drawn' && e.ok === true), JSON.stringify(picEvents.filter((e) => /draw/.test(e.kind))));
+  check('the game with pictures still validates', studio.expand(pic.manifest.content.authoring_json).ok);
+  const unset = new PaintingMuse([withSprites()]);
+  const unsetOut = await compose({ request: 'a calm fog game', brief, context: picCtx }, { studio, muse: unset, env: {} });
+  check('without GENERATOR_IMAGE_ART=1 the hooks draw nothing', !unsetOut.stats.image_art, JSON.stringify(unsetOut.stats.image_art));
+}
+
+// ---- the layout hooks: fixes before the gate and the lint after, no Chrome ----
+{
+  const { composeHooks, AUTHORING_FILES } = await import('./src/hooks.mjs');
+  const made = await composeHooks({ muse: new ScriptedMuse([]), env: {} });
+  check('layout hooks load from the authoring modules, picture art stays off by default', typeof made.hooks?.fixLayout === 'function' && typeof made.hooks?.layoutCheck === 'function' && !made.hooks.image, JSON.stringify(made));
+  check('GENERATOR_LAYOUT=0 turns the layout hooks off', (await composeHooks({ muse: new ScriptedMuse([]), env: { GENERATOR_LAYOUT: '0' } })).hooks === null);
+  const out = await compose({ request: 'a calm fog game', brief }, { studio, muse: new ScriptedMuse([example()]), env: {} });
+  check('stats.layout and stats.requirements come back on the result', out.stats.layout && typeof out.stats.layout.counts?.score === 'number' && out.stats.layout.pixels === false && Array.isArray(out.stats.layout.warnings) && typeof out.stats.layoutFixes === 'number' && out.stats.requirements && 'must_passed' in out.stats.requirements, JSON.stringify({ layout: out.stats.layout, fixes: out.stats.layoutFixes, req: out.stats.requirements }));
+  const docker = (await import('node:fs')).readFileSync(join(here, '..', 'Dockerfile'), 'utf8');
+  check('the generator image copies every authoring module the hooks import', AUTHORING_FILES.every((f) => docker.includes('authoring/' + f)), AUTHORING_FILES.filter((f) => !docker.includes('authoring/' + f)).join(', '));
 }
 
 {

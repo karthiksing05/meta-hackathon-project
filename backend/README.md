@@ -125,6 +125,13 @@ loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, s
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
 
+Compose's server-side hooks (`backend/generator/src/hooks.mjs`, docs/HARNESS_V2.md "Picture art" and "Layout"): the layout
+fixes run before each gate and the layout lint after (`authoring/expander/layout-fix.mjs`, `authoring/playtest/layout-check.mjs`,
+copied into the image; no Chrome, so structural fixes only; `GENERATOR_LAYOUT=0` turns them off). With `GENERATOR_IMAGE_ART=1`,
+muse-image-1.0 draws the pictures of an art-heavy plan (`plan.art: "image"`) in place of the older art step; `GENERATOR_IMAGE_ART=0`
+turns both off. A finished job's `stats` carries `requirements` (`{must_passed, must_total, note, gaps}`), `layout`
+(`{counts, pixels, warnings}`), `layoutFixes` and, when pictures were drawn, `image_art`.
+
 ## Sponsored games
 
 A brand's playable game shown in the feed like an ad. The server decides what is sponsored; the app draws a card for any game or feed item that carries `sponsor: {name, avatarUrl?, cta, url?}` (`cta` defaults to "Play now"; no `sponsor` means not sponsored).

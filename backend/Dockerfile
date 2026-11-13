@@ -53,8 +53,12 @@ LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hac
 WORKDIR /app
 COPY backend/generator/ ./
 COPY FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js FacebookClone/Bubbles/Studio/web/microgame-studio.js /app/vendor/
+# Compose's server-side hooks (src/hooks.mjs): the picture codec and the layout fixes and lint, with what they import.
+# No Chrome in the image, so only the structural layout fixes run.
+COPY authoring/expander/image-codec.mjs authoring/expander/layout-fix.mjs authoring/expander/engine.mjs /app/authoring/expander/
+COPY authoring/playtest/layout-check.mjs authoring/playtest/bots.mjs authoring/playtest/frame-render.mjs /app/authoring/playtest/
 RUN addgroup -g 10001 app && adduser -D -u 10001 -G app app
 USER 10001:10001
-ENV NODE_ENV=production PORT=8090 GENERATOR_VENDOR_DIR=/app/vendor
+ENV NODE_ENV=production PORT=8090 GENERATOR_VENDOR_DIR=/app/vendor GENERATOR_AUTHORING_DIR=/app/authoring
 EXPOSE 8090
 CMD ["node", "server.mjs"]
