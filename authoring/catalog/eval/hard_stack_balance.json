@@ -1,0 +1,64 @@
+[
+  {
+    "request": "jenga",
+    "expect": [
+      "pull_block_tower"
+    ]
+  },
+  {
+    "request": "jenga online with friends",
+    "expect": [
+      "pull_block_tower"
+    ]
+  },
+  {
+    "request": "stack the blocks as high as u can tower bloxx",
+    "expect": [
+      "tower_block_stack"
+    ]
+  },
+  {
+    "request": "tricky towers",
+    "expect": [
+      "animal_stack_balance"
+    ]
+  },
+  {
+    "request": "house of cards",
+    "expect": [
+      "stack_drop_cards"
+    ]
+  },
+  {
+    "request": "labyrinth tilt the ball past holes",
+    "expect": [
+      "balance_ball_maze",
+      "rotating_maze"
+    ]
+  },
+  {
+    "request": "balance a stick on ur finger",
+    "expect": [
+      "stick_balance_finger"
+    ]
+  },
+  {
+    "request": "burger stack catch the ingredients in order",
+    "expect": [
+      "burger_stack_order"
+    ]
+  },
+  {
+    "request": "cup stacking speed",
+    "expect": [
+      "stacking_cups_speed"
+    ]
+  },
+  {
+    "request": "rock balancing cairn chill",
+    "expect": [
+      "balance_boulder_cairn",
+      "pebble_cairn_stacking"
+    ]
+  }
+]

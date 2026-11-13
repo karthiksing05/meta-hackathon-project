@@ -1,0 +1,66 @@
+[
+  {
+    "request": "tetris",
+    "expect": [
+      "line_clear_falling_blocks"
+    ]
+  },
+  {
+    "request": "block blast",
+    "expect": [
+      "block_fit_no_gravity"
+    ]
+  },
+  {
+    "request": "jigsaw of my dog pic",
+    "expect": [
+      "jigsaw_assemble",
+      "cozy_photo_jigsaw"
+    ]
+  },
+  {
+    "request": "spot the diffrence between 2 pics",
+    "expect": [
+      "spot_difference",
+      "spot_the_difference_pair"
+    ]
+  },
+  {
+    "request": "wheres waldo but in a harry potter great hall",
+    "expect": [
+      "hidden_object"
+    ]
+  },
+  {
+    "request": "monument valley impossible paths",
+    "expect": [
+      "connect_shapes_pipes_3d"
+    ]
+  },
+  {
+    "request": "rubiks cube",
+    "expect": [
+      "rubik_cube_solve"
+    ]
+  },
+  {
+    "request": "untangle the lines so none cross",
+    "expect": [
+      "rope_untangle",
+      "yarn_untangle_knots"
+    ]
+  },
+  {
+    "request": "cracker barrel peg game",
+    "expect": [
+      "peg_solitaire"
+    ]
+  },
+  {
+    "request": "maze for kids w a mouse finding cheese",
+    "expect": [
+      "maze_2d_solve",
+      "daily_maze_fewest_moves"
+    ]
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "request": "guess who but its our friend group",
+    "expect": [
+      "guess_the_character_yes_no",
+      "picture_question_narrow",
+      "who_am_i_friend_clues"
+    ]
+  },
+  {
+    "request": "clue board game, who did it with what in which room",
+    "expect": [
+      "mystery_suspect_room_weapon",
+      "whodunit_interrogation"
+    ]
+  },
+  {
+    "request": "mafia / werewolf for the group chat, someone narrates",
+    "expect": [
+      "hidden_role_werewolf",
+      "social_deduction_traitor",
+      "mole_hunt_behavior"
+    ]
+  },
+  {
+    "request": "among us but its a pirate ship",
+    "expect": [
+      "impostor_among_us",
+      "social_deduction_traitor"
+    ]
+  },
+  {
+    "request": "battleship vs my brother",
+    "expect": [
+      "battleship_versus"
+    ]
+  },
+  {
+    "request": "akinator",
+    "expect": [
+      "twenty_questions",
+      "guess_the_person"
+    ]
+  },
+  {
+    "request": "spyfall",
+    "expect": [
+      "location_spy",
+      "spyfall_odd_one_out"
+    ]
+  },
+  {
+    "request": "bs card game where u lie about ur cards",
+    "expect": [
+      "cheat_card_bluff"
+    ]
+  },
+  {
+    "request": "avalon / resistance type thing, find the traitors on the missions",
+    "expect": [
+      "hidden_traitor_mission"
+    ]
+  },
+  {
+    "request": "monty hall 3 doors stay or switch",
+    "expect": [
+      "door_choice_logic"
+    ]
+  }
+]

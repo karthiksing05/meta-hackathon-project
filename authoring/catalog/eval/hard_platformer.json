@@ -1,0 +1,64 @@
+[
+  {
+    "request": "mario",
+    "expect": [
+      "classic_side_platformer"
+    ]
+  },
+  {
+    "request": "celeste hard platformer",
+    "expect": [
+      "precision_platformer",
+      "dash_platformer"
+    ]
+  },
+  {
+    "request": "fireboy and watergirl w my gf",
+    "expect": [
+      "coop_two_player_platform",
+      "puzzle_platformer_switches"
+    ]
+  },
+  {
+    "request": "jump king / only up rage climb",
+    "expect": [
+      "jump_king_fall"
+    ]
+  },
+  {
+    "request": "hollow knight metroidvania",
+    "expect": [
+      "metroidvania_explore"
+    ]
+  },
+  {
+    "request": "cuphead boss fight",
+    "expect": [
+      "boss_platformer"
+    ]
+  },
+  {
+    "request": "mario maker make levels for friends",
+    "expect": [
+      "level_maker_platform"
+    ]
+  },
+  {
+    "request": "donkey kong barrels",
+    "expect": [
+      "single_screen_platform"
+    ]
+  },
+  {
+    "request": "braid rewind time",
+    "expect": [
+      "time_rewind_platform"
+    ]
+  },
+  {
+    "request": "floor is lava climb up",
+    "expect": [
+      "rising_lava_climb"
+    ]
+  }
+]

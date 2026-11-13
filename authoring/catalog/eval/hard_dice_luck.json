@@ -1,0 +1,62 @@
+[
+  {
+    "request": "yahtzee",
+    "expect": [
+      "yahtzee_combos"
+    ]
+  },
+  {
+    "request": "farkle",
+    "expect": [
+      "push_luck_dice"
+    ]
+  },
+  {
+    "request": "plinko",
+    "expect": [
+      "plinko_drop"
+    ]
+  },
+  {
+    "request": "deal or no deal",
+    "expect": [
+      "deal_or_no_deal"
+    ]
+  },
+  {
+    "request": "press your luck no whammies",
+    "expect": [
+      "press_your_luck_board"
+    ]
+  },
+  {
+    "request": "spin the wheel for prizes",
+    "expect": [
+      "wheel_spin_prize"
+    ]
+  },
+  {
+    "request": "ship captain crew dice",
+    "expect": [
+      "ship_captain_crew"
+    ]
+  },
+  {
+    "request": "raffle for our group, pick a random winner",
+    "expect": [
+      "lucky_draw_raffle"
+    ]
+  },
+  {
+    "request": "scratch off tickets but fake money",
+    "expect": [
+      "scratch_card_reveal"
+    ]
+  },
+  {
+    "request": "poker dice",
+    "expect": [
+      "dice_poker"
+    ]
+  }
+]

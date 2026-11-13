@@ -1,0 +1,67 @@
+[
+  {
+    "request": "mario kart w items",
+    "expect": [
+      "kart_racing_items"
+    ]
+  },
+  {
+    "request": "mario kart but its our dogs",
+    "expect": [
+      "kart_racing_items"
+    ]
+  },
+  {
+    "request": "hill climb racing",
+    "expect": [
+      "hill_climb_physics"
+    ]
+  },
+  {
+    "request": "trackmania time trial beat my ghost",
+    "expect": [
+      "time_trial_ghost",
+      "ghost_race_runner",
+      "ghost_replay_duel"
+    ]
+  },
+  {
+    "request": "marble race and we bet on whose marble wins",
+    "expect": [
+      "marble_race_bet",
+      "bet_on_racers"
+    ]
+  },
+  {
+    "request": "drag race shift at the right time",
+    "expect": [
+      "drag_race_shift"
+    ]
+  },
+  {
+    "request": "micro machines tiny cars top down",
+    "expect": [
+      "top_down_racer"
+    ]
+  },
+  {
+    "request": "horse derby race tap tap tap",
+    "expect": [
+      "horse_race_tap",
+      "bet_on_racers"
+    ]
+  },
+  {
+    "request": "weave thru highway traffic fast",
+    "expect": [
+      "endless_traffic_highway",
+      "car_lane_dodger"
+    ]
+  },
+  {
+    "request": "rally racing w a codriver reading notes",
+    "expect": [
+      "rally_codriver"
+    ]
+  }
+]

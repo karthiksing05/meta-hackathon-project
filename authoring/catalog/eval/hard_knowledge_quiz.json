@@ -1,0 +1,65 @@
+[
+  {
+    "request": "seterra but for africa",
+    "expect": [
+      "map_click_quiz",
+      "map_place_pin_quiz"
+    ]
+  },
+  {
+    "request": "quiz me on capitals, type the answer",
+    "expect": [
+      "capital_match"
+    ]
+  },
+  {
+    "request": "dmv permit test practice",
+    "expect": [
+      "road_sign_quiz"
+    ]
+  },
+  {
+    "request": "label the parts of a cell drag n drop",
+    "expect": [
+      "label_the_diagram",
+      "label_diagram_drag_labels"
+    ]
+  },
+  {
+    "request": "periodic table fill in game for chem class",
+    "expect": [
+      "periodic_table_fill",
+      "periodic_element_match"
+    ]
+  },
+  {
+    "request": "guess what this python code prints",
+    "expect": [
+      "code_output_quiz"
+    ]
+  },
+  {
+    "request": "asl alphabet quiz",
+    "expect": [
+      "sign_language_match"
+    ]
+  },
+  {
+    "request": "decode morse code beeps",
+    "expect": [
+      "morse_decode"
+    ]
+  },
+  {
+    "request": "put the stages of mitosis in order",
+    "expect": [
+      "diagram_order_process"
+    ]
+  },
+  {
+    "request": "bird song quiz, play the call and pick the bird",
+    "expect": [
+      "listen_and_pick"
+    ]
+  }
+]

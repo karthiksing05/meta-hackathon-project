@@ -1,0 +1,66 @@
+[
+  {
+    "request": "candy crush but its sushi",
+    "expect": [
+      "swap_match_three"
+    ]
+  },
+  {
+    "request": "suika watermelon game",
+    "expect": [
+      "merge_drop_physics"
+    ]
+  },
+  {
+    "request": "mahjong solitaire",
+    "expect": [
+      "pair_tile_solitaire",
+      "tile_pair_clear"
+    ]
+  },
+  {
+    "request": "bubble shooter",
+    "expect": [
+      "bubble_shooter_match"
+    ]
+  },
+  {
+    "request": "water sort puzzle tubes",
+    "expect": [
+      "color_sort_tubes"
+    ]
+  },
+  {
+    "request": "zuma frog shooting balls",
+    "expect": [
+      "chain_matcher_rolling"
+    ]
+  },
+  {
+    "request": "merge mansion type game where u merge items to finish orders",
+    "expect": [
+      "merge_items_board"
+    ]
+  },
+  {
+    "request": "triple match 3d tray game",
+    "expect": [
+      "triple_tile_tray"
+    ]
+  },
+  {
+    "request": "dobble / spot it 2 cards one same symbol",
+    "expect": [
+      "emoji_match_speed",
+      "odd_one_out_vote"
+    ]
+  },
+  {
+    "request": "memory match with our trip pics",
+    "expect": [
+      "memory_flip_pairs",
+      "concentration_photos",
+      "friend_fact_memory_match"
+    ]
+  }
+]

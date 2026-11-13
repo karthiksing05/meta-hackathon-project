@@ -1,0 +1,68 @@
+[
+  {
+    "request": "simon says lights n sounds",
+    "expect": [
+      "simon_sequence_repeat",
+      "tap_the_melody_echo",
+      "music_memory_simon"
+    ]
+  },
+  {
+    "request": "chimp test",
+    "expect": [
+      "number_order_chimp",
+      "grid_flash_recall"
+    ]
+  },
+  {
+    "request": "human benchmark number memory",
+    "expect": [
+      "digit_span"
+    ]
+  },
+  {
+    "request": "dual n back brain training",
+    "expect": [
+      "n_back"
+    ]
+  },
+  {
+    "request": "shell game ball under cup",
+    "expect": [
+      "cup_shuffle_track"
+    ]
+  },
+  {
+    "request": "kims game remember whats on the tray",
+    "expect": [
+      "tray_items_recall",
+      "what_changed_scene"
+    ]
+  },
+  {
+    "request": "whats different in the room after it flashes",
+    "expect": [
+      "what_changed_scene",
+      "what_changed_room"
+    ]
+  },
+  {
+    "request": "memory palace to remember a list",
+    "expect": [
+      "memory_palace",
+      "memory_palace_association"
+    ]
+  },
+  {
+    "request": "remember the dance moves then copy them",
+    "expect": [
+      "sequence_dance_moves"
+    ]
+  },
+  {
+    "request": "memorize faces and names like a networking event",
+    "expect": [
+      "face_name_match"
+    ]
+  }
+]

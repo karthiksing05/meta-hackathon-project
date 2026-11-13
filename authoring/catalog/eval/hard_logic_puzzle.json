@@ -1,0 +1,69 @@
+[
+  {
+    "request": "sudoku",
+    "expect": [
+      "number_place_grid",
+      "mini_sudoku"
+    ]
+  },
+  {
+    "request": "linkedin queens",
+    "expect": [
+      "queens_placement",
+      "queens_region_placement",
+      "star_battle_regions"
+    ]
+  },
+  {
+    "request": "picross but the picture is a minecraft creeper",
+    "expect": [
+      "nonogram_picture",
+      "nonogram_daily"
+    ]
+  },
+  {
+    "request": "rush hour car puzzle, get the red car out",
+    "expect": [
+      "parking_unblock"
+    ]
+  },
+  {
+    "request": "einstein riddle with the houses and the zebra",
+    "expect": [
+      "logic_grid_zebra"
+    ]
+  },
+  {
+    "request": "minesweeper",
+    "expect": [
+      "minesweeper_logic",
+      "minesweeper_daily"
+    ]
+  },
+  {
+    "request": "flow free connect the colored dots",
+    "expect": [
+      "flow_connect",
+      "flow_pair_paths"
+    ]
+  },
+  {
+    "request": "push the boxes onto the X's warehouse game",
+    "expect": [
+      "sokoban_push"
+    ]
+  },
+  {
+    "request": "kenken",
+    "expect": [
+      "killer_cage",
+      "cage_arithmetic_grid"
+    ]
+  },
+  {
+    "request": "wolf goat and cabbage boat puzzle",
+    "expect": [
+      "river_crossing"
+    ]
+  }
+]

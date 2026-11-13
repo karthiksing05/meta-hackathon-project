@@ -1,0 +1,65 @@
+[
+  {
+    "request": "fruit ninja",
+    "expect": [
+      "slice_swipe"
+    ]
+  },
+  {
+    "request": "whack a mole but its my boss lol",
+    "expect": [
+      "whack_a_mole"
+    ]
+  },
+  {
+    "request": "reaction time test like human benchmark",
+    "expect": [
+      "reaction_light_test"
+    ]
+  },
+  {
+    "request": "aim lab trainer",
+    "expect": [
+      "aim_trainer_targets"
+    ]
+  },
+  {
+    "request": "stroop test colors",
+    "expect": [
+      "color_word_stroop"
+    ]
+  },
+  {
+    "request": "cowboy quick draw w friend first to tap",
+    "expect": [
+      "quick_draw_duel",
+      "quick_draw_reaction_duel",
+      "samurai_standoff_wait"
+    ]
+  },
+  {
+    "request": "kuku kube find the different color square",
+    "expect": [
+      "odd_color_tile",
+      "odd_color_tile_pick"
+    ]
+  },
+  {
+    "request": "stop the moving bar in the green zone",
+    "expect": [
+      "stop_the_bar"
+    ]
+  },
+  {
+    "request": "skeet shooting clays",
+    "expect": [
+      "shoot_the_clay"
+    ]
+  },
+  {
+    "request": "snap card game slap when they match",
+    "expect": [
+      "pattern_snap"
+    ]
+  }
+]

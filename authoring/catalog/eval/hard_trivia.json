@@ -1,0 +1,71 @@
+[
+  {
+    "request": "that game where u name the rarest thing",
+    "expect": [
+      "rare_answer_trivia",
+      "rare_answer_daily"
+    ]
+  },
+  {
+    "request": "krillion",
+    "expect": [
+      "rare_answer_trivia",
+      "rare_answer_daily"
+    ]
+  },
+  {
+    "request": "family feud but the survey is from our group",
+    "expect": [
+      "survey_says",
+      "survey_top_answer",
+      "family_survey_feud"
+    ]
+  },
+  {
+    "request": "kahoot style office quiz, multiple choice, fastest wins",
+    "expect": [
+      "multiple_choice_trivia",
+      "quiz_live_class_buzzer",
+      "buzzer_race"
+    ]
+  },
+  {
+    "request": "jeopardy board w/ star wars categories",
+    "expect": [
+      "category_board"
+    ]
+  },
+  {
+    "request": "geoguesser but only in japan",
+    "expect": [
+      "geo_guess"
+    ]
+  },
+  {
+    "request": "who wants to be a millionare but taylor swift questions",
+    "expect": [
+      "ladder_millionaire"
+    ]
+  },
+  {
+    "request": "higher or lower w/ youtube subscriber counts",
+    "expect": [
+      "higher_lower",
+      "higher_lower_stat_chain"
+    ]
+  },
+  {
+    "request": "sporcle name all 50 states",
+    "expect": [
+      "fill_the_list",
+      "map_click_quiz"
+    ]
+  },
+  {
+    "request": "guess the movie from one frame, daily",
+    "expect": [
+      "movie_frame_guess",
+      "frame_reveal_guess"
+    ]
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "request": "penalty kicks vs friend",
+    "expect": [
+      "penalty_kick_shootout"
+    ]
+  },
+  {
+    "request": "mini golf w the group, fewest strokes",
+    "expect": [
+      "golf_putt_minigolf"
+    ]
+  },
+  {
+    "request": "wii bowling",
+    "expect": [
+      "bowling_roll"
+    ]
+  },
+  {
+    "request": "home run derby",
+    "expect": [
+      "baseball_bat_timing"
+    ]
+  },
+  {
+    "request": "8 ball pool",
+    "expect": [
+      "pool_billiards"
+    ]
+  },
+  {
+    "request": "tony hawk skate tricks",
+    "expect": [
+      "skateboard_tricks"
+    ]
+  },
+  {
+    "request": "march madness bracket picks w the office",
+    "expect": [
+      "fantasy_pick_em",
+      "tournament_bracket_ladder"
+    ]
+  },
+  {
+    "request": "darts 501",
+    "expect": [
+      "darts_throw"
+    ]
+  },
+  {
+    "request": "pop a shot basketball arcade",
+    "expect": [
+      "basketball_flick_shot"
+    ]
+  },
+  {
+    "request": "air hockey vs my cousin on one phone",
+    "expect": [
+      "air_hockey",
+      "air_hockey_pong_duel"
+    ]
+  }
+]

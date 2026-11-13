@@ -1,0 +1,63 @@
+[
+  {
+    "request": "tamagotchi",
+    "expect": [
+      "virtual_pet_needs"
+    ]
+  },
+  {
+    "request": "neopets",
+    "expect": [
+      "virtual_pet_needs"
+    ]
+  },
+  {
+    "request": "nintendogs teach tricks",
+    "expect": [
+      "pet_training_tricks"
+    ]
+  },
+  {
+    "request": "digimon evolve based on how u raise it",
+    "expect": [
+      "creature_evolve_care"
+    ]
+  },
+  {
+    "request": "a pet the whole group chat takes care of",
+    "expect": [
+      "co_parent_pet_group"
+    ]
+  },
+  {
+    "request": "dress up my dog",
+    "expect": [
+      "pet_dress_up"
+    ]
+  },
+  {
+    "request": "hatch an egg keep it warm",
+    "expect": [
+      "egg_hatch_warmth"
+    ]
+  },
+  {
+    "request": "fish tank aquarium",
+    "expect": [
+      "aquarium_keep",
+      "tiny_aquarium_decorate"
+    ]
+  },
+  {
+    "request": "breed dragons for rare colors",
+    "expect": [
+      "pet_breeding_traits"
+    ]
+  },
+  {
+    "request": "pet shelter match dogs w adopters",
+    "expect": [
+      "pet_rescue_shelter"
+    ]
+  }
+]

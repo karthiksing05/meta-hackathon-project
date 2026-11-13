@@ -1,0 +1,63 @@
+[
+  {
+    "request": "cookie clicker",
+    "expect": [
+      "tap_clicker_cookie"
+    ]
+  },
+  {
+    "request": "adventure capitalist",
+    "expect": [
+      "idle_tycoon_business"
+    ]
+  },
+  {
+    "request": "universal paperclips",
+    "expect": [
+      "upgrade_tree_numbers"
+    ]
+  },
+  {
+    "request": "tap titans",
+    "expect": [
+      "idle_click_battle_boss"
+    ]
+  },
+  {
+    "request": "afk arena idle heroes",
+    "expect": [
+      "idle_rpg_auto_battle"
+    ]
+  },
+  {
+    "request": "number go up game",
+    "expect": [
+      "number_up_satisfy"
+    ]
+  },
+  {
+    "request": "idle miner tycoon",
+    "expect": [
+      "idle_tycoon_business"
+    ]
+  },
+  {
+    "request": "prestige rebirth for multiplier",
+    "expect": [
+      "prestige_reset_loop"
+    ]
+  },
+  {
+    "request": "whole group clicks toward one goal together",
+    "expect": [
+      "cookie_group_goal"
+    ]
+  },
+  {
+    "request": "merge creatures to evolve them idle",
+    "expect": [
+      "evolution_idle",
+      "merge_idle_generators"
+    ]
+  }
+]

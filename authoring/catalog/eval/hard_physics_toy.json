@@ -1,0 +1,63 @@
+[
+  {
+    "request": "cut the rope",
+    "expect": [
+      "cut_the_rope_feed"
+    ]
+  },
+  {
+    "request": "powder game / falling sand",
+    "expect": [
+      "sand_falling_toy"
+    ]
+  },
+  {
+    "request": "rube goldberg machine dominoes",
+    "expect": [
+      "chain_reaction_domino"
+    ]
+  },
+  {
+    "request": "poly bridge",
+    "expect": [
+      "bridge_builder_load",
+      "contraption_builder"
+    ]
+  },
+  {
+    "request": "stair dismount ragdoll",
+    "expect": [
+      "ragdoll_launch"
+    ]
+  },
+  {
+    "request": "wheres my water dig for the duck",
+    "expect": [
+      "water_pour_cups"
+    ]
+  },
+  {
+    "request": "build a contraption to carry the ball besiege style",
+    "expect": [
+      "contraption_builder"
+    ]
+  },
+  {
+    "request": "slime simulator squish",
+    "expect": [
+      "jelly_squish"
+    ]
+  },
+  {
+    "request": "teardown destroy the building",
+    "expect": [
+      "destruction_sandbox"
+    ]
+  },
+  {
+    "request": "solar system sandbox w gravity",
+    "expect": [
+      "gravity_well_orbits"
+    ]
+  }
+]
