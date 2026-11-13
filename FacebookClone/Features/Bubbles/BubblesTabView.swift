@@ -186,7 +186,12 @@ struct BubblesTabView: View {
             },
             float: { bubble in
                 Haptics.light()
-                floatTarget = bubble
+                // Only ask where when there's a choice; with no Group to offer, share to the feed.
+                if shareGroup(for: bubble) == nil {
+                    float(bubble, to: nil)
+                } else {
+                    floatTarget = bubble
+                }
             },
             save: { bubble in
                 Haptics.light()
@@ -339,9 +344,14 @@ struct BubblesTabView: View {
         }
     }
 
+    /// The Group a game can be shared to from the feed: its own, or one of yours it's played in.
+    private func shareGroup(for bubble: Bubble) -> FBGroup? {
+        bubble.group ?? bubbleStore.boardGroups(for: bubble).first(where: { $0.isMember })
+    }
+
     @ViewBuilder
     private func floatButtons(for bubble: Bubble) -> some View {
-        if let group = bubble.group ?? bubbleStore.boardGroups(for: bubble).first(where: { $0.isMember }) {
+        if let group = shareGroup(for: bubble) {
             Button("Share to \(group.name)") {
                 float(bubble, to: group)
             }
