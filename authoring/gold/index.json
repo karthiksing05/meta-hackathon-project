@@ -89,7 +89,7 @@
     ],
     "pitfalls_avoided": [
       "Callbacks use data, not duplicated scenes: `callbacks` swap single lines by flag (the post shows your own fake secret, and Celeste softens if Dev vouched for you), so one scene shows three versions without copying it.",
-      "No real people, brands or franchise lines: the account, the school, its sign-off and every character are original, and the setting is the genre (prep-school gossip), not any show.",
+      "No real people: the account, the school, its sign-off and every character are original, because the request names a genre (prep-school gossip), not a show. When a request does name one, keep its names and world.",
       "List lengths stay in step: 4 lines, 3 labels and 3 targets per scene, written one scene per row, with a `scene_names` key that maps each number to its scene id."
     ],
     "group": "story",

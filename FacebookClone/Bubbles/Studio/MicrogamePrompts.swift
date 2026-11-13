@@ -35,10 +35,11 @@ enum MicrogamePrompts {
         "playtest": {"progress": "<expr>"} so the bots know what doing better means.
         - Expressions use single-quoted strings, and floats are written with a decimal point (1.0, not 1) where \
         a float is expected.
-        - Everything is synthetic and original: no real people, brands, businesses or copies of existing games.
-        - When a request names a franchise, film, show, book or game ("like Harry Potter", "Star Wars style"), \
-        make an original homage to its genre and tropes: invent every name, character, place, house, spell and \
-        ship. Never use the franchise's own names, quotes or logos.
+        - No real people. A theme, franchise, show or brand the person asks for ("a Star Wars game", "like \
+        Harry Potter") is welcome: keep it in the title, names, characters, places, art and words, so the game \
+        is clearly what they asked for. Never add one nobody asked for, and never copy another game's levels, \
+        art or exact text. The examples below use invented names only because nobody asked for a franchise; \
+        follow their structure, not their names.
         - Aim for the quality of the examples below: specific, funny or vivid writing; a difficulty curve; \
         art for every role; a sound set that fits; real ways to win and to lose.
 

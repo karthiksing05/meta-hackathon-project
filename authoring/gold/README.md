@@ -12,9 +12,11 @@ training pairs for few-shot use on a server, or for fine-tuning if that becomes 
 | Arcade (`arcade.json`) | Moonbroom Derby, Rift Run, Rooftop Courier, Cake Tower |
 | Quizzes and social (`social.json`) | Which House Claims You?, Who Posted It?, Static from the Driftwood Fleet, Pillow Fort Night |
 
-Every game is original. Several are homages to well-known genres (a magic school, a space
-rebellion, a gossip-driven prep school), but none uses a franchise's names, characters, places,
-spells, ships or quotes. Muse's prompt asks for the same when a request names a franchise.
+Every game is original, because these are seeded examples. Several are homages to well-known genres
+(a magic school, a space rebellion, a gossip-driven prep school), but none uses a franchise's names,
+characters, places, spells, ships or quotes. That's for the gold set only: when a person's request
+names a franchise, Muse's prompt keeps it (Karthik's call, 2026-11-12), using the examples for
+structure and not for names.
 
 ## What makes them gold
 

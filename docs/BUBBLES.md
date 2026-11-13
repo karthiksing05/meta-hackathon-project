@@ -1639,5 +1639,5 @@ next levels stay on-device (`revise` reads the server game's `content.authoring_
 
 **Gold examples.** Muse's prompt shows the two gold games closest to the request (`authoring/gold/`, 16
 hand-made games paired with requests; `expander/gold.mjs` picks them and `MicrogameStudio.examples(for:)`
-returns them). When a request names a franchise, the prompt asks for an original homage.
+returns them). A theme or franchise the person asks for is kept; the gold games themselves are original.
 `MicrogameComposer.lastStats.examples` records which were used.
