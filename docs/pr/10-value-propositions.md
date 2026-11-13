@@ -108,7 +108,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Live: a Daily card pinned on the Group page, with today's top 3, your rank, a Group streak and copy inviting you to be first on the board; a Daily Whims strip on the Groups tab; a Daily-ready notification; float your result to the Group.
   - The Daily shown in the app today is a hand-made seed game. Generating it from members' posts is Debug/CLI only (VP-18).
   - Not built: the "Most improved" award (VP-19).
-- **Demo.** Narrate the persona: she joined New in SF two weeks ago and hasn't posted. She plays the Daily, sees three members' names around hers, and floats "I got 42. Beat it?" to the Group with one tap.
+- **Demo.** Narrate the persona: Alex joined New in SF two weeks ago and hasn't posted. They play the Daily, see three members' names around theirs, and share "I got 42. Beat it?" to the Group with one tap.
 - **Metric.** Share of new members whose first action in the Group is a Daily play; share of those who comment or post within 7 days, against members who didn't play; share of Daily players who had never posted before.
 - **Risk and answer.** "Lurkers stay lurkers, and shy people may not want to be ranked." The goal is a first step, not the whole path; Add friend and the profile are one tap away. Boards have a Friends scope, and finite, private-by-default options are being built. This is a hypothesis with a test, not a finding.
 
@@ -464,7 +464,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **How Whims delivers it.**
   - Live: the New in SF Group and picnic Event demo world; the Daily and boards.
   - Not built: Challenge Me.
-- **Demo.** Frame the 5 minutes as one newcomer's week: on Monday she joins the Group and plays the Daily, on Thursday she plays the icebreaker, on Saturday she goes to the picnic, and on Sunday she has a rematch with a new friend.
+- **Demo.** Frame the 5 minutes as one newcomer's week: on Monday they join the Group and play the Daily, on Thursday they play the icebreaker, on Saturday they go to the picnic, and on Sunday they have a rematch with a new friend.
 - **Metric.** Daily return of 18-to-29-year-old Whims users against matched non-users; share of 18-to-29 Group joins followed by a Whim play.
 - **Risk and answer.** "Teen use of Facebook has collapsed (32% in 2024, down from 71% in 2014-15 [54])." Whims is designed for adults (Meta limits Muse to 18 and over [6]), and young adults are the stated target.
 

@@ -51,7 +51,7 @@ This comes first because a judge asked us to focus on closer together and the so
 | Shared sessions: several people play the same seed at different times. Live multiplayer was cut. | Async play suits group chats | VP-15, VP-16 | Slack, Nov 11 20:13 (Bayan); Agent Logistics |
 | **Stories (K):** tell stories with games, and lean into it directly. | One of the three pillars | VP-09 | Slack, Nov 12 11:35 |
 | **Stories (K):** interactivity gives people a new lens to tell their stories. | Games as storytelling | VP-09 | Slack, Nov 12 11:36 |
-| **Stories:** Moving Day, Alex's funny game about his move to SF: float your box past Stairs, Couch, Mattress and the 4th floor. A hand-made seed. | Your own story as a game | VP-09 | bubble-seed-moving-day.json |
+| **Stories:** Moving Day, Alex's funny game about their move to SF: float your box past Stairs, Couch, Mattress and the 4th floor. A hand-made seed. | Your own story as a game | VP-09 | bubble-seed-moving-day.json |
 | **Stories (K):** choose-your-own-adventure games; after an ending, see which endings friends found ("Maya took the ferry"). Not built. | Shared stories | VP-09, VP-37 | Slack, Nov 12 10:36; session notes |
 | **Stories:** Wordle's grid tells the story of your attempt without the answer. Our share cards do the same. | Shares as small stories | VP-13 | Taxonomy canvas §2, §7 |
 | **Self-expression (K):** a space where people express themselves and share that expression with others through Facebook. | The creative side of closer | VP-09, VP-23 | Slack, Nov 12 11:35 |

@@ -2,9 +2,11 @@
 
 *The problem, who has it and why it is not solved today. Part of the pitch docs; start at [README.md](README.md).*
 
-## The problem and the solution
+## The problem and the solution, in short
 
-**Problem.** Facebook still has everyone's people, but it has stopped giving young adults a reason to open it, or a reason to keep opening it. Teen use fell from 71% in 2014-15 to 32% in 2024 [54], and daily use now peaks among people aged 30 to 64 [53]. Their friends, Groups and Events are all there, but there is little to *do* with them, so a visit rarely becomes a habit.
+*How this fits the story.* The lead problem, in [01-story.md](01-story.md), is that Facebook doesn't appeal to young adults: their friends spend their time on Instagram, so nothing pulls them back. Everything below is the detail. The newcomer in a new city is the sharpest case, and the one the demo follows, because a person who just moved needs people *and* has accounts on Facebook already.
+
+**Problem.** Young adults still have Facebook accounts, and many of their Groups and Events live there, but Facebook has stopped giving them a reason to open it, or a reason to keep opening it. Their friends' attention has moved elsewhere: 44% of 18-to-29-year-old users deleted the app from their phone in a single year (2018) [132], and the number of peers on a network is one of the strongest drivers of staying on it [131]. Teen use fell from 71% in 2014-15 to 32% in 2024 [54], and daily use now peaks among people aged 30 to 64 [53]. Their friends, Groups and Events are all there, but there is little to *do* with them, so a visit rarely becomes a habit.
 
 **Solution.** Other apps and news sites keep people coming back with small daily rituals: a streak, a daily puzzle, one game everyone in the chat talks about. We took that idea and made it collaborative. Whims is a space inside Facebook where anyone turns one sentence into a tiny game with Meta's Muse models, made from and for their own Group, Event or friends, and played together on the same seed. Making one is a reason to open Facebook. A new Daily, a friend's challenge and a rematch are reasons to come back. And because the game is about your people, a score next to a stranger becomes an introduction.
 
@@ -12,9 +14,9 @@
 
 Young adults, roughly 18 to 29, whose people are on Facebook but who have no reason to open it. The need is sharpest in the middle of a change (a move, a first job, a new campus), when a reason to show up matters most. Three situations show it:
 
-- **A new city.** She moved to San Francisco two weeks ago. She joined New in SF and RSVP'd to a picnic, and she knows nobody in either.
-- **A quiet group chat.** Her hometown friends' chat used to be busy. Now it is a birthday message every few months.
-- **A Group that only posts announcements.** Her running club's Group posts the Saturday route and nothing else. Members show up, run and leave.
+- **A new city.** Alex moved to San Francisco two weeks ago. They joined New in SF and RSVP'd to a picnic, and they know nobody in either.
+- **A quiet group chat.** Their hometown friends' chat used to be busy. Now it is a birthday message every few months.
+- **A Group that only posts announcements.** Their running club's Group posts the Saturday route and nothing else. Members show up, run and leave.
 
 The newcomer is the sharpest case, and the one our demo follows. The same gap exists for anyone whose people are on Facebook but have nothing to do together there, and Whims is built so anyone can make a game for any of their people.
 
