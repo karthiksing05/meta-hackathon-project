@@ -436,7 +436,8 @@ func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMe
 		return
 	}
 
-	if c := s.harnessContext(ctx, job); c != nil { // nil (harness off or failed) leaves the job as it was
+	group := s.jobGroup(ctx, job)                         // the Group's name and people, for the plan and the compose
+	if c := s.harnessContext(ctx, job, group); c != nil { // nil (harness off or failed) leaves the job as it was
 		job.Context = c
 	}
 	request := job.Request
@@ -444,15 +445,11 @@ func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMe
 		request += "\n\n" + job.Anatomy
 	}
 	payload := map[string]any{"request": request, "brief": job.Brief}
-	if job.GroupID != "" { // the generator scopes the game to it (group-play.mjs structureFor), with or without a plan
+	if group != nil { // the generator scopes the game to it (group-play.mjs structureFor), with or without a plan
 		if job.Context == nil {
 			job.Context = map[string]any{}
 		}
-		kind := "group"
-		if job.GroupKind == "event" {
-			kind = "event"
-		}
-		job.Context["group"] = map[string]any{"id": job.GroupID, "kind": kind}
+		job.Context["group"] = groupContext(group)
 	}
 	if len(job.Context) > 0 {
 		payload["context"] = job.Context

@@ -245,8 +245,11 @@ Group play has no live multiplayer and no server chats. Someone sends a game int
 `POST /v1/generate` also takes `spec` (a game-spec/1 from `POST /v1/harness/plan`: the server uses it as the plan and does not plan again) and `answers` (`{slot: answer}` for the plan's clarifying questions; they replace the planner's guesses). Both are for new games only.
 It also takes `preferences` (up to 20 earlier picks between versions, `[{axis, chosen: {label, value?}, rejected?, at?}]`,
 docs/harness-gaps/variants.md; `POST /v1/harness/plan` takes them too) and `groupId` (a Group or Event the caller belongs to:
-the generator gets `context.group {id, kind}` and scopes the game there, `structure.scope` `group:<id>` or `event:<id>`;
-403 for a non-member, 404 for an unknown id). A brand's `sponsor` also goes into the plan's understanding when the request
+the generator gets `context.group {id, kind, name, members: [{name}]}` and scopes the game there, `structure.scope` `group:<id>` or `event:<id>`;
+403 for a non-member, 404 for an unknown id). `members` are up to 20 display names, the maker first, and nothing else
+about anyone (no emails, usernames or bios). The planner and the compose use the Group's name and people when the
+request is about them (a cast, questions about each other, icebreakers). `POST /v1/harness/plan` takes `groupId` too, so
+the plan the person agrees (and sends back as `spec`) already has the Group in it. A brand's `sponsor` also goes into the plan's understanding when the request
 doesn't name one, so `spec.theme.sponsor` carries the brand's name.
 
 ## Making a game together (sessions)

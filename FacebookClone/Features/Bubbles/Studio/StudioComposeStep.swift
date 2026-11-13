@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Step 3, Build: "Muse at work". A new game takes about a minute on the server, so the step
+/// Step 3, Build: "Muse at work". A new game takes a few minutes (3 to 4) on the server, so the step
 /// gives the person something to read and answer while it runs:
 /// - a compact header: the orb, what Muse is doing now, the clock and a progress bar that moves
 ///   with the real steps (`StudioBuildPhase`);
@@ -238,7 +238,7 @@ private struct StudioComposeHeader: View {
         return "\(clock) · \(step)"
     }
 
-    /// "Usually about a minute": the honest expectation, then what to do meanwhile.
+    /// "Usually a few minutes": the honest expectation, then what to do meanwhile.
     private var estimateLine: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             Text(model.estimateText(at: context.date))
@@ -466,9 +466,9 @@ extension StudioModel {
         if failure != nil { return "Nothing was kept from this try." }
         let elapsed = composeStartedAt.map { date.timeIntervalSince($0) } ?? 0
         let readOn = showsAnatomyCard ? " Read or answer below while you wait." : ""
-        if elapsed > 80 { return "Taking a little longer than usual." + readOn }
+        if elapsed > 300 { return "Taking a little longer than usual." + readOn }
         if events.last?.step == .playtest { return "Almost there." + readOn }
-        return "Usually about a minute." + readOn
+        return "Usually a few minutes." + readOn
     }
 
     /// What Muse is doing right now, rotating every few seconds during long steps.

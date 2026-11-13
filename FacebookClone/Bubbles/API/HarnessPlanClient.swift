@@ -39,7 +39,9 @@ struct HarnessPlanClient: Sendable {
     /// The server takes 1 to 2,000 characters of request.
     static let maxRequestCharacters = 2_000
 
-    func plan(request: String) async throws -> Outcome {
+    /// `groupID`: a server Group (or Event) I'm in that the game is for; the server plans with its
+    /// name and members (`groupId`).
+    func plan(request: String, groupID: String? = nil) async throws -> Outcome {
         #if DEBUG
         if let fixture = DebugLaunch.value("FB_STUDIO_PLAN") {
             return try await GamePlanFixtures.answer(fixture, request: request)
@@ -47,7 +49,9 @@ struct HarnessPlanClient: Sendable {
         #endif
         let text = String(request.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.maxRequestCharacters))
         guard !text.isEmpty, let transport else { return .unavailable }
-        let body = try JSONSerialization.data(withJSONObject: ["request": text])
+        var fields: [String: Any] = ["request": text]
+        if let groupID, !groupID.isEmpty { fields["groupId"] = groupID }
+        let body = try JSONSerialization.data(withJSONObject: fields)
         do {
             return .plan(try GamePlan.decode(try await transport.gamePlanRaw(body: body)))
         } catch GamesAPIError.notFound {

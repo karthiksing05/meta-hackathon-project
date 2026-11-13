@@ -260,5 +260,16 @@ async function compose(args, reply) {
   ok(JSON.parse(out.manifest.content.game_json).presentation.canvas.h === 640 && P.system(catalog, {}).includes('The canvas is 360 × 640'), 'canvas classic by default');
 }
 
+{ // a game made for a Group: context.group's name and members reach the compose prompt, with or without a plan
+  const group = { id: 'grp_1', kind: 'group', name: 'Pickle Crew', members: [{ name: 'Ana' }, { name: 'Ben' }] };
+  const note = P.groupNote({ group });
+  ok(/Group "Pickle Crew", whose members are Ana, Ben/.test(note) && !/grp_1/.test(note), `groupNote: ${note}`);
+  ok(P.groupNote({ group: { id: 'grp_1', kind: 'group' } }) === '' && P.groupNote(null) === '', 'no name, no note (an id alone is only scope)');
+  ok(/Event "Fog Run"/.test(P.groupNote({ group: { kind: 'event', name: 'Fog Run' } })), 'an Event is called an Event');
+  ok(P.planMenu(catalog, { ...SAMPLES.dodge, group }).spec.includes('Pickle Crew'), 'planMenu names the Group');
+  ok(P.system(catalog, { context: { group } }).includes('whose members are Ana, Ben'), 'no plan: the system prompt still names the Group');
+  ok(P.system(catalog, { context: { group: { id: 'grp_1', kind: 'group' } } }) === P.system(catalog), 'an id-only group leaves the prompt as before');
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
