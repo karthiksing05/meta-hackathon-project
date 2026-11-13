@@ -203,3 +203,46 @@ func TestSounds(t *testing.T) {
 		t.Fatalf("saving an unknown sound: %d", code)
 	}
 }
+
+// A library track by another artist carries its credit: shown as the creator, with the licence, attribution line,
+// source page and tags, and searchable by artist and tag.
+func TestSoundCredit(t *testing.T) {
+	gen := newFakeGenerator(t)
+	ts, _ := serverWithGenerator(t, gen.URL, 30)
+	studio := register(t, ts, "studio")
+	loop := map[string]string{"loop.m4a": "AUDIO-BYTES"}
+	attribution := `"Sneaky Snitch" Kevin MacLeod (incompetech.com) Licensed under Creative Commons: By Attribution 4.0 License http://creativecommons.org/licenses/by/4.0/`
+	code, s := uploadSound(t, ts.URL, studio, map[string]any{"title": "Sneaky Snitch", "audio": "loop.m4a", "kind": "library",
+		"artist": "Kevin MacLeod", "license": "CC BY 4.0", "attribution": attribution,
+		"source_url": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100191", "tags": []string{"Funny", "suspense"}}, loop)
+	if code != 201 || s["creator"] != "Kevin MacLeod" || s["license"] != "CC BY 4.0" || s["attribution"] != attribution ||
+		!strings.HasPrefix(s["sourceUrl"].(string), "https://incompetech.com/") || len(s["tags"].([]any)) != 2 || s["tags"].([]any)[0] != "funny" {
+		t.Fatalf("credited upload: %d %v", code, s)
+	}
+	// Without credit, the uploader is the creator, as before.
+	code, own := uploadSound(t, ts.URL, studio, map[string]any{"title": "My Loop", "audio": "loop.m4a"}, loop)
+	if code != 201 || own["creator"] != "studio" || own["attribution"] != nil {
+		t.Fatalf("own upload: %d %v", code, own)
+	}
+	for _, q := range []string{"macleod", "funny"} {
+		res, err := http.Get(ts.URL + "/v1/sounds?tab=recent&q=" + q)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var list struct{ Items []map[string]any }
+		json.NewDecoder(res.Body).Decode(&list)
+		res.Body.Close()
+		if len(list.Items) != 1 || list.Items[0]["title"] != "Sneaky Snitch" {
+			t.Fatalf("search %q: %v", q, list.Items)
+		}
+	}
+	for _, bad := range []map[string]any{
+		{"title": "x", "audio": "loop.m4a", "source_url": "javascript:alert(1)"},
+		{"title": "x", "audio": "loop.m4a", "tags": []string{"a", "b", "c", "d", "e", "f", "g", "h", "i"}},
+		{"title": "x", "audio": "loop.m4a", "tags": []string{""}},
+	} {
+		if code, out := uploadSound(t, ts.URL, studio, bad, loop); code != 422 {
+			t.Fatalf("bad credit %v: %d %v", bad, code, out)
+		}
+	}
+}

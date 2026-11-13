@@ -31,7 +31,7 @@ func soundMatches(s model.Sound, q string) bool {
 	if q == "" {
 		return true
 	}
-	for _, text := range []string{s.Title, s.OwnerUsername} {
+	for _, text := range append([]string{s.Title, s.OwnerUsername, s.Artist}, s.Tags...) {
 		for _, w := range strings.Fields(strings.ToLower(text)) {
 			if strings.HasPrefix(w, q) {
 				return true
@@ -215,6 +215,7 @@ func (m *Mongo) FindSounds(ctx context.Context, q SoundQuery) ([]model.Sound, er
 		re := bson.Regex{Pattern: `(^|\s)` + regexp.QuoteMeta(needle), Options: "i"}
 		filter = append(filter, bson.E{Key: "$or", Value: bson.A{
 			bson.D{{Key: "title", Value: re}}, bson.D{{Key: "ownerUsername", Value: re}},
+			bson.D{{Key: "artist", Value: re}}, bson.D{{Key: "tags", Value: re}},
 		}})
 	}
 	if q.SavedBy != "" {

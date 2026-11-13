@@ -1,0 +1,7 @@
+// Opt-in only. Use a team/provisioning profile with Push Notifications enabled.
+// Development defaults; override BOTH for TestFlight or ad hoc production signing:
+// APS_ENVIRONMENT=production APNS_ENVIRONMENT=production
+APS_ENVIRONMENT = development
+APNS_ENVIRONMENT = sandbox
+CODE_SIGN_ENTITLEMENTS = $(SRCROOT)/docs/notifications/PushNotifications.entitlements
+INFOPLIST_KEY_APNSEnvironment = $(APNS_ENVIRONMENT)

@@ -18,12 +18,12 @@ struct NotificationsView: View {
     private let topID = "notifications.top"
 
     private var newItems: [AppNotification] {
-        let items = store.newNotifications
+        let items = store.newNotifications.filter { !$0.kind.isBubble }
         return filter == .unread ? items.filter { !$0.isRead } : items
     }
 
     private var earlierItems: [AppNotification] {
-        let items = store.earlierNotifications
+        let items = store.earlierNotifications.filter { !$0.kind.isBubble }
         return filter == .unread ? items.filter { !$0.isRead } : items
     }
 
@@ -38,8 +38,16 @@ struct NotificationsView: View {
         .toolbar(.hidden, for: .navigationBar)
         .confirmationDialog("Notifications", isPresented: $showHeaderMenu, titleVisibility: .hidden) {
             Button("Mark all as read") {
-                store.markAllNotificationsRead()
-                store.showToast("All notifications marked as read", symbol: "checkmark.circle.fill")
+                Task {
+                    let inbox = GameNotificationInbox.shared
+                    await inbox.markAllRead()
+                    if let error = inbox.errorMessage {
+                        store.showToast(error, symbol: "exclamationmark.circle")
+                    } else {
+                        store.markAllNotificationsRead()
+                        store.showToast("All notifications marked as read", symbol: "checkmark.circle.fill")
+                    }
+                }
             }
             Button("Notification settings") { router.push(.settings) }
             Button("Cancel", role: .cancel) {}
@@ -73,7 +81,8 @@ struct NotificationsView: View {
                 .plainRow()
             chips
                 .plainRow()
-            if newItems.isEmpty && earlierItems.isEmpty {
+            GameNotificationsSection(unreadOnly: filter == .unread)
+            if newItems.isEmpty && earlierItems.isEmpty && GamesAccount.shared.userID == nil {
                 emptyState
                     .plainRow()
             }
@@ -97,7 +106,7 @@ struct NotificationsView: View {
         .animation(.default, value: store.notifications.map { $0.id })
         .animation(.default, value: filter)
         .refreshable {
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            await GameNotificationInbox.shared.reload()
         }
     }
 

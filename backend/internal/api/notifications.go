@@ -311,7 +311,7 @@ func (s *Server) notifySeries(ctx context.Context, se *model.Series, first *mode
 	name := shownName(from)
 	s.notify(ctx, model.Notification{
 		UserID: se.PlayerB, Kind: model.NotifFriendChallenge, GameID: first.ID, SeriesID: se.ID, Source: "series:" + se.ID,
-		Title: name + " wants a best-of with you", Body: fmt.Sprintf("%d games, starting with %s", len(se.Rounds), first.Title),
+		Title: name + " wants a best-of with you", Body: seriesBody(len(se.Rounds), first.Title),
 	})
 }
 
@@ -451,4 +451,12 @@ func (s *Server) pushOne(ctx context.Context, n model.Notification, attempts int
 	default:
 		return model.PushFailed, time.Time{}, lastErr
 	}
+}
+
+// seriesBody: "1 game: Ferry Words" or "5 games, starting with Ferry Words".
+func seriesBody(n int, first string) string {
+	if n == 1 {
+		return "1 game: " + first
+	}
+	return fmt.Sprintf("%d games, starting with %s", n, first)
 }

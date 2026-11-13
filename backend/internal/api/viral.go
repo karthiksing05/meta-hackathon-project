@@ -166,6 +166,11 @@ func (s *Server) ScanViral(ctx context.Context, now time.Time) (int, error) {
 			if cosine(taste, vecs[i]) < v.Cosine {
 				continue
 			}
+			// A score counts as having played it too (a run from a challenge, a Group or the game's
+			// page may send no feed event).
+			if sc, err := s.Store.ScoreOf(ctx, h.game.ID, uid); err == nil && sc != nil {
+				continue
+			}
 			s.notify(ctx, model.Notification{
 				UserID: uid, Kind: model.NotifViralMatch, GameID: h.game.ID, Source: "viral:" + h.game.ID,
 				Title: "Everyone's playing " + h.game.Title, Body: "A lot of people are playing it today, and it looks like your kind of game.",

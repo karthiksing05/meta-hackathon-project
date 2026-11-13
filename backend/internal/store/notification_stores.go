@@ -177,15 +177,21 @@ func (m *Memory) UpdatePush(ctx context.Context, id, state string, attempts int,
 
 // ---- mongo ----
 
+// InsertNotification stores n unless the same (user, source) is already stored (a retried trigger).
+// It's an upsert on (userId, source), so it stays idempotent even where the notif_user_source unique
+// index hasn't been created yet (dbinit is a separate deploy step); the index still guards races.
 func (m *Mongo) InsertNotification(ctx context.Context, n *model.Notification) (bool, error) {
-	_, err := m.coll(cNotifications).InsertOne(ctx, n)
+	res, err := m.coll(cNotifications).UpdateOne(ctx,
+		bson.M{"userId": n.UserID, "source": n.Source},
+		bson.M{"$setOnInsert": n},
+		options.UpdateOne().SetUpsert(true))
 	if err != nil {
-		if mapErr(err) == ErrConflict { // the same (user, source) was already stored: a retried trigger
+		if mapErr(err) == ErrConflict { // two inserts raced; the index kept one
 			return false, nil
 		}
 		return false, err
 	}
-	return true, nil
+	return res.UpsertedCount == 1, nil
 }
 
 func (m *Mongo) NotificationsFor(ctx context.Context, userID string, limit int, cur *NotifCursor) ([]model.Notification, error) {

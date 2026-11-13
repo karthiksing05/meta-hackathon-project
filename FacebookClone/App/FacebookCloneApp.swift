@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct FacebookCloneApp: App {
+    @UIApplicationDelegateAdaptor(GameNotificationsAppDelegate.self) private var notificationDelegate
     @State private var store: AppStore
     @State private var bubbleStore: BubbleStore
     @State private var router = Router()
@@ -36,6 +37,7 @@ struct FacebookCloneApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .modifier(GameNotificationsLifecycle())
                 .environment(store)
                 .environment(bubbleStore)
                 .environment(router)

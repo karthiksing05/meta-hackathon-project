@@ -277,9 +277,15 @@ struct RemoteSound: Decodable, Identifiable, Hashable, Sendable {
     var saves: Int
     var savedByMe: Bool
     var createdAt: Date?
+    /// Credit for a library track by another artist (CC BY): shown on the sound's page.
+    var license: String?
+    var attribution: String?
+    var sourceURL: URL?
+    var tags: [String]
 
     enum CodingKeys: String, CodingKey {
-        case id, title, creator, kind, durationMs, bpm, useCount, saves, savedByMe, createdAt
+        case id, title, creator, kind, durationMs, bpm, useCount, saves, savedByMe, createdAt, license, attribution, tags
+        case sourceURL = "sourceUrl"
         case creatorID = "creatorId"
         case audioURL = "audioUrl"
         case coverURL = "coverUrl"
@@ -300,6 +306,10 @@ struct RemoteSound: Decodable, Identifiable, Hashable, Sendable {
         saves = try c.decodeIfPresent(Int.self, forKey: .saves) ?? 0
         savedByMe = try c.decodeIfPresent(Bool.self, forKey: .savedByMe) ?? false
         createdAt = try? c.decodeIfPresent(Date.self, forKey: .createdAt)
+        license = (try? c.decodeIfPresent(String.self, forKey: .license)).flatMap { $0?.isEmpty == false ? $0 : nil }
+        attribution = (try? c.decodeIfPresent(String.self, forKey: .attribution)).flatMap { $0?.isEmpty == false ? $0 : nil }
+        sourceURL = try? c.decodeIfPresent(URL.self, forKey: .sourceURL)
+        tags = (try? c.decodeIfPresent([String].self, forKey: .tags)) ?? []
     }
 
     /// As it plays behind a game, from the start.

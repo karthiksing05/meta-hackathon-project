@@ -181,7 +181,7 @@ struct FBTabBar: View {
     private func badge(for tab: AppTab) -> Int {
         switch tab {
         case .notifications:
-            return store.unreadNotificationCount
+            return store.notifications.filter { !$0.kind.isBubble && !$0.isRead }.count + GameNotificationInbox.shared.unreadCount
         case .friends:
             return store.friendRequests.count
         default:
