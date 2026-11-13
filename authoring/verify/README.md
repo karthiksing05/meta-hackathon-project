@@ -12,6 +12,7 @@ impossible to ship. No Muse calls: everything here is code.
 | `checks/layout.mjs` | Text and overlap codes on every frame (the `L_*` lint at the blocking policy, plus `L_TEXT_ON_SPRITE`). |
 | `checks/targets.mjs` | Tap targets: size, spacing, overlap, off-screen, tap-through. |
 | `checks/style.mjs` | Adapter for the UI kit's `style-check.mjs` (`S_*`). |
+| `checks/textfit.mjs` | `L_TEXT_FIT`: text fit with the longest content (every pool filled with its widest entry), the 12-unit canvas margin, panels and other text; `textFitFix`. The runtime draws through the same rule (`engine/web/render.js` `fitText`). |
 | `checks/readability.mjs` | `S_READABILITY`: each word against the pixels behind it (10th-percentile contrast), composited in JS so it needs no Chrome (`authoring/kit/readability.mjs`). |
 | `checks/look.mjs` | The look checks (`S_FONT_FAMILIES`, `S_TYPE_SCALE`, …): the game against its own fonts, scale and palette (`authoring/kit/README.md`). |
 | `checks/requirements.mjs` | Adapter for `requirements-check.mjs` (`R_*`), when requirements are passed. |
@@ -70,6 +71,7 @@ Every code belongs to a failure class in `docs/games/FAILURE_CLASSES.md`, the on
 | `L_OVERLAP_TEXT` | block | text over text | solver slot |
 | `L_TEXT_ON_SPRITE` | block | a text box crosses a sprite it isn't written on (a moving sprite crossing a label, a label half on a picture) | solver slot |
 | `L_OVERLAP_HUD` | block | a moving sprite and the HUD overlap (either drawn on top) | code: HUD panel; solver slot for the HUD |
+| `L_TEXT_FIT` | block | with the **longest** string of every content pool (a worst-case copy of the game) and as played: text past the canvas less 12 units, past its panel or button, or over other text (`checks/textfit.mjs`, Chrome-free font-average widths) | `textFitFix`, the text-fit stage of `verifyAndFix`: shrink on the game's scale (to 70 %, 11 min), then a `w` and `wrap` in the room |
 | `L_TEXT_OVERFLOW` | block | text sticks out of its tile or button (measured width) | code: fit, shrink; solver: shrink to the measured room, wrap |
 | `L_TEXT_CLIPPED` | block | text runs off the canvas | code: shrink; solver: shrink, wrap, then slot |
 | `L_WORD_BREAK` | block | a word split across lines (the engine cuts a word longer than the line), or letter-spaced text that wraps | code: drop tracking, shrink to the role minimum, abbreviate HUD words, widen the box |
@@ -105,6 +107,7 @@ Units: the canvas is 360 units wide and drawn about 390 pt wide, so 1 unit ≈ 1
 `verifyAndFix(game, opts)`:
 
 0. **Motion** (`motion-fix.mjs`, up to 2 rounds, before the look and readability stages): the `M_*` fixes.
+0b. **Text fit** (`checks/textfit.mjs` `textFitFix`, after the look and readability stages, up to 2 rounds, each kept only if `L_TEXT_FIT` findings fall): shrink on the scale, then wrap, for the longest content.
 1. **Verify** the built game.
 2. **Code fixes** (`expander/layout-fix.mjs`): fit and center labels, target gaps, shrink, HUD panel,
    contrast. Kept only if blocking findings don't rise.

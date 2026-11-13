@@ -1701,6 +1701,17 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   instead of points, and a non-empty `ending` sets the result tag
   `ending=<id>;choices=<choices_used>;path=<sg_path>`. Other microgames keep "N points" and no tag.
 
+- **Text fit (the renderer's safety net).** `drawFrame` draws every text op through
+  `fitText(op, measure, W, H)` (`engine/web/render.js`, also on `MicrogameEngine`): text that would
+  cross its box (`w`) or the canvas less `TEXT_MARGIN` (12 units) on any side is re-wrapped at spaces
+  within the box's lines (`h ÷ line_height`), then shrunk in 5 % steps to 70 % of its size, then
+  ellipsized (`…`) as the last resort; the block is then shifted inside the margin. Text that fits is
+  drawn exactly as before, and text whose box center is off the canvas (sliding in or out) keeps its
+  place. So old games never draw outside the canvas. New games must not lean on it: the verifier's
+  blocking `L_TEXT_FIT` (`authoring/verify/checks/textfit.mjs`) checks the longest string of every
+  content pool, and `verifyAndFix` fixes it before publish. `tools/runtime-tests/microgame-text-fit.js`
+  tests it.
+
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
 compiled synchronously on first use (`fetch` of `file://` WASM isn't reliable under `loadFileURL`). It

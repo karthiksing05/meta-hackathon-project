@@ -72,6 +72,7 @@ ${ENGINE_GAPS.map(([n, d]) => `  - ${n}: ${d}`).join('\n')}
 - theme: a short phrase (at most 6 words) for the setting and feel, never the whole request. When the person names a theme, franchise or brand (for example "Star Wars"), copy just those words verbatim into theme.text with source "you"; otherwise pick one that fits and mark it "guess". Requested themes are honored in names, art and words so the game keeps their feel; the mechanics stay original to the person's idea, and you never copy a specific existing game's levels, layouts or art.
 - Played by touch on a phone: taps, drags and swipes, never a physical keyboard.
 - Plain words a player understands, sentence case, at most about 20 words per text. No engine jargon.
+- Words the player sees on screen must fit a phone: names, answers and labels at most about 24 characters, questions and quotes at most about 90 (they wrap in a panel, about 32 characters a line). Keep every entry of a list near the length of the others, since the longest one sets the layout.
 - People: real brands, creators, franchises, characters and real people the person names keep their real names, as written (draw real people only as cartoons or caricatures). Never add a real name nobody asked for; anyone else is invented, with first names only when the request gives them.
 
 Fragment library (what the engine already knows):

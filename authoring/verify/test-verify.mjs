@@ -160,5 +160,34 @@ const opts = { engine, maxSeconds: 8, pixels: false };
   ok(fx.game.presentation.root.children[0].visible === false, 'an empty box is hidden', fx.fixes);
 }
 
+// --- L_TEXT_FIT: the longest string in a content pool, the canvas margin, and the fix
+{
+  const tf = await import('./checks/textfit.mjs');
+  ok(JSON.stringify(tf.stringList("['a', 'b\\'s', \"c\"]")) === JSON.stringify(["'a'", "'b\\'s'", '"c"']) && tf.stringList("['a', x]") === null && tf.stringList('= [ ]') === null, 'stringList reads string list literals only');
+  const pool = (extra = {}) => base([
+    { node: 'rect', x: 120, y: 500, w: 120, h: 56, radius: 12, fill: '$accent', on_tap: { input: 'tap' } },
+    { node: 'text', x: 180, y: 528, anchor: 'center', size: 18, weight: 700, color: '#FFFFFF', text: "= get_or(words, 0, '')", ...extra },
+  ], { state: { ...base([]).state, words: { type: 'list<string>', init: "['Tap', 'Grab the golden croissant now']" } } });
+  const g = pool();
+  const wc = tf.worstCaseGame(g);
+  ok(wc.pools === 1 && /croissant now', 'Grab/.test(wc.game.state.words.init), 'worstCaseGame fills each pool with its widest entry', wc.game.state.words.init);
+  const r = await verify(g, { ...opts, only: ['textfit'] });
+  const f = r.findings.find((x) => x.code === 'L_TEXT_FIT');
+  ok(f && f.severity === 'block' && f.kind === 'box' && f.node === '/presentation/root/children/1', 'the longest pool entry sticks out of its button: L_TEXT_FIT (block)', r.findings);
+  const fx = tf.textFitFix(g, [f]);
+  const t = fx.game.presentation.root.children[1];
+  ok(fx.fixes.length === 1 && t.size < 18 && t.size >= 11, 'textFitFix shrinks the label', fx.fixes);
+  const r2 = await verify(fx.game, { ...opts, only: ['textfit'] });
+  ok(!r2.findings.some((x) => x.code === 'L_TEXT_FIT'), 'the fixed label fits with the longest entry', r2.findings);
+  ok(sameRules(g, fx.game).rules, 'the text fit keeps the rules');
+  // Text past the canvas margin, with the real content.
+  const wide = base([{ node: 'text', x: 4, y: 300, size: 22, weight: 700, color: '$ink', text: 'A headline far too long to fit on one phone line' }]);
+  const r3 = await verify(wide, { ...opts, only: ['textfit'] });
+  ok(r3.findings.some((x) => x.code === 'L_TEXT_FIT' && x.kind === 'canvas'), 'a headline past the canvas margin is L_TEXT_FIT (canvas)', r3.findings);
+  ok((await verify(clean(), { ...opts, only: ['textfit'] })).pass, 'the clean game has no L_TEXT_FIT');
+  const vf = await verifyAndFix(g, { ...opts, motion: false, look: false, readability: false });
+  ok(vf.fixes.some((x) => x.stage === 'text-fit') && !vf.report.findings.some((x) => x.code === 'L_TEXT_FIT'), 'verifyAndFix runs the text-fit stage and clears it', { fixes: vf.fixes, f: vf.report.findings });
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
