@@ -16,6 +16,41 @@ import { decodePNG, cover, cutOut, fit, encodeJPEG, encodePNG, dataURI } from '.
 export const SPRITE_MAX_PX = 128;
 export const ART_BUDGET = 192 * 1024 * 0.95; // authoring/expander/svg.mjs SVG_LIMITS.art_bytes, with headroom
 
+/**
+ * The expand options that rebuild a composed game the way compose built it: compose expands with the job's canvas
+ * (a tall game is 360 x 780), which the stored authoring manifest doesn't record, so a re-expand without it turned a
+ * tall game back into a 360 x 640 one.
+ */
+export function expandOptionsFor(manifest) {
+  try {
+    const h = Number(JSON.parse(manifest.content.game_json)?.presentation?.canvas?.h);
+    return h >= 700 ? { canvas: 'tall' } : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The game text after new pictures, with the presentation the layout verifier fixed. Re-expanding the authoring
+ * manifest with new art rebuilds the presentation from scratch, which dropped every verifier fix (a recoloured
+ * label, a plate, the motion fades) from games that got painted art. The verified presentation goes back on when
+ * the new art changed nothing but the assets: the old authoring, expanded again, has the same rules and the same
+ * presentation as the new one. Otherwise the new expansion stands as it is. Returns {game_json, kept}.
+ */
+export function keepVerifiedPresentation(studio, manifest, expansion) {
+  try {
+    const verified = JSON.parse(manifest.content.game_json);
+    const next = JSON.parse(expansion.game_json);
+    const plain = JSON.parse(studio.expand(manifest.content.authoring_json, expandOptionsFor(manifest)).game_json);
+    const noAssets = ({ assets: _a, ...r }) => JSON.stringify(r);
+    const noLayout = ({ presentation: _p, assets: _a, ...r }) => JSON.stringify(r);
+    if (!verified?.presentation || noAssets(plain) !== noAssets(next) || noLayout(verified) !== noLayout(next)) return { game_json: expansion.game_json, kept: false };
+    return { game_json: JSON.stringify({ ...next, presentation: verified.presentation }), kept: true };
+  } catch {
+    return { game_json: expansion.game_json, kept: false };
+  }
+}
+
 export const imageArtOn = (env = process.env) => !['0', 'off', 'false'].includes(String(env.GENERATOR_IMAGE_ART ?? '').trim().toLowerCase());
 
 /** The image-model prompt for one sprite: the visual stage's description plus what the cut-out needs. */
@@ -138,12 +173,14 @@ export async function paintArt({ manifest, visual, muse, studio, renderFrame = n
     }
   }
   const nextAuthoring = { ...authoring, art: nextArt };
-  const expansion = studio.expand(JSON.stringify(nextAuthoring));
+  const expansion = studio.expand(JSON.stringify(nextAuthoring), expandOptionsFor(manifest));
   if (!expansion.ok) {
     report.error = 'the painted art did not validate: ' + JSON.stringify((expansion.diagnostics ?? []).filter((d) => d.severity === 'error').slice(0, 2));
     return done(manifest);
   }
-  const rewrapped = studio.wrap({ id: manifest.id, game_json: expansion.game_json, authoring_json: expansion.authoring_json, brief: manifest.brief, seed: manifest.seed, ...(manifest.style?.emoji ? { emoji: manifest.style.emoji } : {}) });
+  const kept = keepVerifiedPresentation(studio, manifest, expansion);
+  report.keptLayout = kept.kept;
+  const rewrapped = studio.wrap({ id: manifest.id, game_json: kept.game_json, authoring_json: expansion.authoring_json, brief: manifest.brief, seed: manifest.seed, ...(manifest.style?.emoji ? { emoji: manifest.style.emoji } : {}) });
   const next = {
     ...manifest,
     content: rewrapped.content,

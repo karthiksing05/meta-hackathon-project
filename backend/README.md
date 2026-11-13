@@ -121,7 +121,9 @@ app -> GET  /v1/generate/{jobId}  (poll every 1-2 s)
 - When `status` is `done`, `game` is the normal game object (`id`, `slug`, `title`, `formula: "microgame"`, `manifestUrl`, ...).
   The manifest at `manifestUrl` is stored exactly as generated: `content.game_json` is byte for byte what passed the playtest.
 - `failed` carries a plain-language `error`. Errors on `POST`: 400 bad request, 401 signed out, 429 (one running job per person,
-  6 an hour; see `Retry-After`), 503 (generator down, or Muse not set up yet).
+  6 an hour; see `Retry-After`), 503 (generator down, or Muse not set up yet). A job that failed while building keeps
+  its last authoring manifest in `stats.lastManifest` (JSON text, pictures cut to a stub; over 256 KB only
+  `stats.lastManifestBytes`), for debugging.
 - A job survives the app closing: poll it again later. After a server restart, unfinished jobs are marked failed.
 
 How it runs: the Go API stores the job and streams it through the internal `generator` service (Node, no published port beyond
@@ -138,7 +140,10 @@ muse-image-1.0 draws the pictures of an art-heavy plan (`plan.art: "image"`) in 
 turns both off. The blocking layout verifier (`authoring/verify/`, through `authoring/expander/verify-layout.mjs`) replaces the
 fixes when it loads: verify, code fixes, solver, a proof that rules and replays are unchanged, then a layout repair round
 for what still blocks. No Chrome in the image, so it runs without pixels (estimated text widths, shapes-only contrast);
-`GENERATOR_LAYOUT_VERIFY=0` falls back to the fixes alone. It refuses to publish a game that still blocks only with
+`GENERATOR_LAYOUT_VERIFY=0` falls back to the fixes alone. Its contrast checks need no Chrome: the readability stage
+composites the frames in code (`authoring/kit/raster.mjs`), and every text node is judged on at least one frame. The art
+step and the person's photos re-expand the game, so they keep the verified presentation when only the pictures changed,
+and the verifier then runs once more on the painted game (`stats.layoutAfterArt`). The generator refuses to publish a game that still blocks only with
 `context.layout_block: true` or `GENERATOR_LAYOUT_BLOCK=1` (off by default). New games are tall, 360 × 780, by default (they fill a
 19.5:9 phone edge to edge); `GENERATOR_CANVAS=classic` builds 360 × 640 ones, and `context.canvas` wins. A finished job's `stats` carries `requirements`
 (`{must_passed, must_total, note, gaps}`), `layout` (the verifier's `{verifier, pass, blocking, warnings, byCode, reverted,

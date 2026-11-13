@@ -26,7 +26,7 @@
 import { createServer } from 'node:http';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { compose } from './src/composer.mjs';
+import { compose, failureStats } from './src/composer.mjs';
 import { MuseClient, extractObject } from './src/muse.mjs';
 import * as Anatomy from './src/anatomy.mjs';
 import { loadStudio } from './src/studio.mjs';
@@ -298,7 +298,8 @@ const server = createServer(async (req, res) => {
       send({ type: 'result', manifest: out.manifest, stats: out.stats, gate: out.gate, bots: out.bots });
       log('compose ok', { seconds: (Date.now() - started) / 1000, museCalls: out.stats.museCalls, gate: out.gate.passed });
     } catch (e) {
-      send({ type: 'error', message: e?.message ?? String(e), issues: e?.issues ?? [], stats: e?.stats });
+      // stats.lastManifest: the last manifest the pipeline built, so a failed job can be debugged (composer.mjs failureStats).
+      send({ type: 'error', message: e?.message ?? String(e), issues: e?.issues ?? [], stats: failureStats(e) });
       log('compose failed', { seconds: (Date.now() - started) / 1000, error: String(e?.message ?? e).slice(0, 200) });
     } finally {
       clearTimeout(timer);

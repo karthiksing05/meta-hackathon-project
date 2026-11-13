@@ -72,6 +72,29 @@ export function pickFrames(frames, max = MAX_FRAMES) {
 }
 
 /**
+ * Adds frames to `picked` (up to `extra` more) so every text node is judged at least once at full
+ * opacity. The even spread misses words that show briefly (a "Next" button up for 350 ms of a
+ * 30 s run), and those went unchecked on the server, where nothing else sees pixels.
+ */
+function coverEveryText(scene, picked, extra, only = null) {
+  const keyOf = (it) => it.node ?? `text:${it.op.text}`;
+  const shown = (it) => it.op.op === 'text' && it.op.text && String(it.op.text).trim() && (it.op.opacity ?? 1) >= 0.98 && (!only || only(it));
+  const covered = new Set();
+  for (const s of scene) if (picked.has(s.f.key)) for (const it of s.items) if (shown(it)) covered.add(keyOf(it));
+  let added = 0;
+  for (const s of scene) {
+    if (added >= extra) break;
+    if (picked.has(s.f.key)) continue;
+    const fresh = s.items.filter((it) => shown(it) && !covered.has(keyOf(it)));
+    if (!fresh.length) continue;
+    picked.add(s.f.key);
+    added++;
+    for (const it of s.items) if (shown(it)) covered.add(keyOf(it));
+  }
+  return added;
+}
+
+/**
  * S_READABILITY findings for a game. sample: verify/frames.mjs sampleDense output; measures:
  * optional Chrome widths (verify's measureFrames). inflate: zlib inflate for PNG pictures.
  * Returns [{code, severity, node, frame, frames, message, p10, need, size, busy, pixels (a sample
@@ -80,6 +103,7 @@ export function pickFrames(frames, max = MAX_FRAMES) {
 export function readabilityFindings(game, sample, { measures = null, inflate = null, maxFrames = MAX_FRAMES, only = null, minNeed = 0, code = READABILITY_CODE } = {}) {
   const scene = analyze(sample, game, measures);
   const picked = new Set(pickFrames(sample.frames, maxFrames).map((f) => f.key));
+  coverEveryText(scene, picked, maxFrames, only);
   const ids = (sample.assets ?? []).map((a) => a.name ?? a.id);
   const bitmaps = assetBitmaps(game, { inflate });
   const byNode = new Map();

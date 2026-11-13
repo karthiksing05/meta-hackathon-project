@@ -44,9 +44,12 @@ export function loadStudio(files = findBundles()) {
       catalog ??= JSON.parse(S.catalog());
       return catalog;
     },
-    /** Muse's reply text (fences and prose around the object are fine) -> the expansion. */
-    expand(text) {
-      const r = JSON.parse(S.expand(text));
+    /**
+     * Muse's reply text (fences and prose around the object are fine) -> the expansion. options (optional):
+     * {canvas: "tall"} builds a 360 x 780 game, as compose did (the stored manifest's own look.canvas still wins).
+     */
+    expand(text, options = null) {
+      const r = JSON.parse(options ? S.expand(text, JSON.stringify(options)) : S.expand(text));
       if (typeof r.ok !== 'boolean') throw new Error("expand didn't return a result");
       return r;
     },
