@@ -216,10 +216,20 @@ final class StudioModel {
     var runIsServer = false
     /// Set while a server job waits for a free slot; nil once it runs (or on the device).
     var generationWait: StudioGenerateBridge.Wait?
+    /// True while a new game's build holds its request for the anatomy Muse is still drafting
+    /// (at most `anatomyGrace`), so the build follows it.
+    var isWaitingForAnatomy = false
+    /// Where the Build step's progress bar is: the phase the latest step started, and when.
+    @ObservationIgnored var buildPhase = StudioBuildPhase.idle
+    /// True while the keyboard is up on the Build step: a finished build waits on its Play button
+    /// instead of jumping to Try mid-answer.
+    var holdsAutoAdvance = false
     /// What each finished run did, by game id, for "How Muse made it" (saved on share).
     @ObservationIgnored var makeRecords: [String: MakeRecord] = [:]
     /// The new look a "Tweak it" run asked for (Try it's look menu).
     @ObservationIgnored private var runLookChange: StudioLook?
+    /// True while the run is the quick change made from anatomy edits during the first build.
+    @ObservationIgnored var pendingChangeRun = false
     /// Set when the run changes a game the server has (a tweak, a new look, the next level, a
     /// remix): `POST /v1/generate {baseGameId, ...}`. Nil for a new game.
     @ObservationIgnored private var runRevision: GameRevision?
@@ -837,16 +847,19 @@ final class StudioModel {
         composeStartedAt = Date()
         lastEventAt = composeStartedAt
         composeEndedAt = nil
+        buildPhase = .start(at: composeStartedAt ?? Date())
+        // A new game waits a moment for the anatomy Muse is still drafting (or rereading), so the
+        // build follows it; everything else starts right away.
+        let waitsForAnatomy = kind == .create && runRevision == nil && usesAnatomy && anatomyThread.isWorking
+        isWaitingForAnatomy = waitsForAnatomy
+        runIsMicrogame = true
         go(to: .compose)
 
-        guard let stream = serverStream(for: request, kind: kind) else {
-            // Every run is a new game or a change to one on the server; nothing else can build.
-            runIsMicrogame = false
-            fail(StudioFailure(message: LiveDataCopy.revise, detail: nil))
-            return
-        }
-        runIsMicrogame = true
         composeTask = Task { [weak self] in
+            if waitsForAnatomy {
+                await self?.waitForAnatomy()
+            }
+            guard let stream = self?.startStream(for: request, kind: kind), !Task.isCancelled else { return }
             do {
                 for try await event in stream {
                     guard let self, !Task.isCancelled else { return }
@@ -866,7 +879,33 @@ final class StudioModel {
         }
     }
 
+    /// The run's server stream, once any anatomy wait is over. Nil (after failing the run) when
+    /// there is nothing to build, or when the run was stopped while it waited.
+    private func startStream(for request: StudioRequest, kind: StudioComposeKind) -> AsyncThrowingStream<StudioEvent, Error>? {
+        guard !Task.isCancelled, isComposing else { return nil }
+        isWaitingForAnatomy = false
+        if kind == .create { anatomyThread.markBuildStarted() }
+        guard let stream = serverStream(for: request, kind: kind) else {
+            // Every run is a new game or a change to one on the server; nothing else can build.
+            runIsMicrogame = false
+            fail(StudioFailure(message: LiveDataCopy.revise, detail: nil))
+            return nil
+        }
+        return stream
+    }
+
+    /// How long a new game's build waits for the anatomy draft before it goes without it.
+    nonisolated static let anatomyGrace: TimeInterval = 12
+
+    private func waitForAnatomy() async {
+        let deadline = Date().addingTimeInterval(Self.anatomyGrace)
+        while anatomyThread.isWorking, Date() < deadline, !Task.isCancelled {
+            try? await Task.sleep(nanoseconds: 250_000_000)
+        }
+    }
+
     private func receive(_ event: StudioEvent) {
+        buildPhase = buildPhase.next(for: event, progress: buildProgress(at: Date()), at: Date())
         withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
             events.append(event)
             lastEventAt = Date()
@@ -943,11 +982,16 @@ final class StudioModel {
         }
         isComposing = false
         composeEndedAt = Date()
+        // A quick change from the Build step's anatomy edits is now in the game.
+        if composeKind == .tweak, pendingChangeRun { anatomyThread.acceptAsBuilt() }
+        pendingChangeRun = false
         // Formula and microgame runs both end here.
         GameSound.play(.ready, haptic: true)
         advanceTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: 1_300_000_000)
-            guard let self, !Task.isCancelled, self.stage == .compose, !self.isComposing, self.failure == nil else { return }
+            // Mid-answer on the Build step: the Play button waits for them instead.
+            guard let self, !Task.isCancelled, self.stage == .compose, !self.isComposing, self.failure == nil,
+                  !self.holdsAutoAdvance else { return }
             self.go(to: .tryIt)
         }
     }
@@ -972,12 +1016,15 @@ final class StudioModel {
         Haptics.warning()
     }
 
-    /// Stops Muse and goes back to where the run started.
+    /// Stops Muse and goes back to where the run started. A job already on the server is cancelled
+    /// (`DELETE /v1/generate/{id}`, when the stream ends).
     func cancelCompose() {
         composeTask?.cancel()
         composeTask = nil
         advanceTask?.cancel()
         isComposing = false
+        isWaitingForAnatomy = false
+        pendingChangeRun = false
         generationWait = nil
         failure = nil
         if composeKind == .create {
@@ -985,6 +1032,18 @@ final class StudioModel {
         } else {
             go(to: .tryIt, direction: -1)
         }
+    }
+
+    /// A new game's build failed: back to Describe with the idea as typed, to reword it.
+    func editIdea() {
+        composeTask?.cancel()
+        composeTask = nil
+        advanceTask?.cancel()
+        isComposing = false
+        isWaitingForAnatomy = false
+        generationWait = nil
+        failure = nil
+        go(to: .ask, direction: -1)
     }
 
     /// Stops any work (closing Studio).
