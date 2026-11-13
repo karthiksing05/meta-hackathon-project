@@ -1,64 +1,65 @@
 # Speaker notes and timing (draft 10)
 
-*Three acts: why, how, what it does for people. Thesis: people don't grow close by watching the same thing; they grow close by doing something together, or against each other. Blue = competing, violet = collaborating. The budget is 280 s (185 s of talk and 95 s of demo), leaving 20 s of slack. Demo 1 starts on slide 1 and pays off after slide 7, at about 2:10. The video voice-over reads these and ends on the tagline. Claims follow [../narrative.md](../narrative.md); words follow [../STYLE.md](../STYLE.md).*
+*Story (Karthik, 04:55): people open an app for a reason, a need or a ritual; Facebook has the people but has lost the reason; play is already the icebreaker (LinkedIn, NYT, Reels); a Curio turns "tell me your score" into a real Group score; then how we built it, what it does together, who else it's for, and how we worked. Blue = competing, violet = collaborating. The budget is 275 s (180 s of talk and 95 s of demo), leaving 25 s of slack. Demo 1 starts on slide 1 and pays off after slide 7, at about 2:00. The video voice-over reads these notes.*
 
 | Slide | Act | Talk | Demo | Running total |
 |---|---|---|---|---|
 | 1 Curio | Why | 15 s | Demo 1 starts | 0:15 |
-| 2 Together / against → closer | Why | 20 s | | 0:35 |
-| 3 The tension | Why | 10 s | | 0:45 |
-| 4 Three Reels | Why | 15 s | | 1:00 |
-| 5 NYT Games: shared games last | Why | 15 s | | 1:15 |
-| 6 Anyone can make one | How | 10 s | (Demo 1 still building) | 1:25 |
-| 7 The whole stack | How | 35 s | | 2:00 |
-| — | How | | **Demo 1, 40 s:** the finished Curio, play it, post it to a Group | 2:40 |
-| 8 Compete → collaborate | What it does | 15 s | **Demo 3, 30 s:** a Group's weekly board → Add friend → best of 5 | 3:25 |
-| 9 Play becomes a signal | What it does | 15 s | **Demo 2, 25 s:** scroll the feed, a Curio plays inline with a sound | 4:05 |
-| 10 Our AI workflow | Execution | 20 s | | 4:25 |
-| 11 The tagline | Close | 15 s | | 4:40 |
+| 2 A need or a ritual | Why | 15 s | | 0:30 |
+| 3 Facebook lost the reason | Why | 15 s | | 0:45 |
+| 4 Play became the icebreaker (LinkedIn, NYT) | Why | 15 s | | 1:00 |
+| 5 Reels you play | Why | 15 s | | 1:15 |
+| 6 Our answer: a real Group score | Our answer | 15 s | (Demo 1 still building) | 1:30 |
+| 7 The whole stack | How | 30 s | | 2:00 |
+| — | How | | **Demo 1, 40 s:** the finished Curio, play it, post it to a Group. **Demo 2, 25 s:** scroll the feed, a Curio plays inline with a sound | 3:05 |
+| 8 Collaboration | What it does | 15 s | **Demo 3, 30 s:** a Group's weekly board → Add friend → best of 5 | 3:50 |
+| 9 Creators and brands | Who it's for | 20 s | | 4:10 |
+| 10 Our AI workflow | Execution | 15 s | | 4:25 |
+| 11 The tagline | Close | 10 s | | 4:35 |
 
 **Pre-show checklist (the morning of the demo, on the presenting phone):**
 1. Signed in as the presenter's own account, member of the demo Group.
 2. Make "dodge the fog over Twin Peaks" once and post it to the demo Group. It's the Demo 1 fallback (after slide 7), so "one I made this morning" is true.
 3. The demo Group has a weekly board with at least one person you aren't friends with yet (Demo 3, slide 8).
-4. The feed has a Curio with a sound behind it (Demo 2, slide 9).
+4. The feed has a Curio with a sound behind it (Demo 2, right after Demo 1, after slide 7).
 5. Demo 1 option B (photo → story quiz): one timed dry run on the phone, signed in as `karthik_s` (not a guest). Only use B if it finishes inside 1:50; otherwise use A.
-6. Phone awake, Do Not Disturb on, brightness up, cabled to the presenting Mac. Live Video goes on slide 1 (Demo 1 starts), after slide 7 (Demo 1 payoff), on slide 8 (Demo 3, phone frame) and slide 9 (Demo 2).
+6. Phone awake, Do Not Disturb on, brightness up, cabled to the presenting Mac. Live Video goes on slide 1 (Demo 1 starts), on a phone-only slide after slide 7 (Demo 1 payoff, then Demo 2), and in the phone frame on slide 8 (Demo 3).
 
 **Demo 1, option A (default):** say "dodge the fog over Twin Peaks", tap Make, agree the plan.
-**Demo 1, option B (only after a timed dry run):** Curios tab → Make → "Add photos or video" (next to "Add sound"; up to 8 photos, 1 video) → optionally "Restyle my photos into the game's look" → type "a Kahoot-style story quiz about this photo" → Make. Uses a photo of the team or the venue; that's slide 4's Reel format, made live. Risks: needs a signed-in account, media builds take noticeably longer, not yet rehearsed.
+**Demo 1, option B (only after a timed dry run):** Curios tab → Make → "Add photos or video" (next to "Add sound"; up to 8 photos, 1 video) → optionally "Restyle my photos into the game's look" → type "a Kahoot-style story quiz about this photo" → Make. Uses a photo of the team or the venue; that's slide 5's Reel format, made live. Risks: needs a signed-in account, media builds take noticeably longer, not yet rehearsed.
 **Naming:** The Podium and Purr Earth are hand-made story quizzes; call them "the story-quiz format", never "made by Muse".
 
-**Demo 1 fallback:** before the talk, make the same game once ("dodge the fog over Twin Peaks") and post it to the demo Group. If the live build isn't done at 1:50, say "it's still being playtested by the bots, so here's one I made this morning", and open that one. Go back to the live one at the end if there's time.## 1
+**Demo 1 fallback:** before the talk, make the same game once ("dodge the fog over Twin Peaks") and post it to the demo Group. If the live build isn't done at 1:50, say "it's still being playtested by the bots, so here's one I made this morning", and open that one. Go back to the live one at the end if there's time.
+
 ## 1
-People have always gathered around small, strange, delightful things: curios. Muse Curios is a new feature in Facebook that turns a piece of the world into something you can play and share. *(Start Demo 1.)*
+People have always gathered around small, strange, delightful things: curios. Muse Curios is a new feature in Facebook: an interactive short-form experience with infinite possibility, meant to breed collaboration through friendly competitiveness. *(Start Demo 1: say the sentence, tap Make, agree the plan.)*
 
 ## 2
-Here's what we believe. People don't grow close by watching the same thing. They grow close by doing something together, or against each other. In one trial, groups of three on a weekly leaderboard walked more than people given support or teamwork: 920 extra steps a day.
+Why do people open an app? For a reason: a need, something you have to do, or a ritual, something you do every day with others watching. Apps spread when they give you one of these again and again. The ones that last give you both, with friends.
 
 ## 3
-Facebook has the people, but it's lost the reason: teen use fell from 71% to 32%. Meanwhile almost everyone plays games, and few call themselves gamers.
+Facebook has the people, but it's lost that reason for people our age: teen use fell from 71% to 32%. And the need is still there: 19-to-29-year-olds are the loneliest age group, and a quarter of 18-to-24s moved last year.
 
 ## 4
-Short-form is already becoming something you play: a Reel you pause perfectly, a quiz you play along with, a speed test. All three end with "tell me your score" in the comments. A Curio turns that into a real, comparable Group score.
+Play is already filling that gap. At work, LinkedIn's daily puzzles rank you against your colleagues, and they became a conversation starter; 86% come back the next day. NYT Games went from about 4 billion puzzles a year to over 11 billion, and added a friends-only leaderboard.
 
 ## 5
-And the games that last are shared. NYT puzzles went from about 4 billion solves to over 11 billion in three years, and 46 Wordle scores are shared every second. The Times answered with friends leaderboards and a two-player game.
+And on Reels, short-form is becoming something you play: pause it perfectly, play along, find where you break. Millions of views each, and every one ends the same way: "tell me your score" in the comments.
 
 ## 6
-Here's the new part: anyone can make one. One sentence, and about a minute after you agree the plan, your friends can play it. Mine is building now.
+So here's our answer. A Curio turns "tell me your score" into a real Group score. It's a ritual you share: same Curio, same seed, one board. It meets a need: a stranger's score next to yours is an introduction. And anyone can make one from a sentence. Mine is building now.
 
 ## 7
-Here's the whole stack. On the phone: the Make screen and our Rust engine. Everything else is on our server, including the Muse key. Spark reads the idea, we ground it in 1,280 game types, Ember writes the brief, Wonder writes the game, up to three repairs, and five bots play it before anyone else. When you play, the server replays your inputs and keeps only verified scores, because competition only brings people together if it's fair. And what you play teaches the ranker what to show next. Here's mine. *(Demo 1, 40 s.)*
+Under the hood: on the phone, you type an idea, maybe add photos. On our server, which holds the Muse key and all the data, Muse Spark reads it, we ground it in 1,280 game types, Ember writes the brief, Wonder writes the game, up to three repair rounds, and five bots play it before anyone else does. The Rust engine plays the same JSON the same way for everyone, so the server replays every score: competition only brings people together if it's fair. And what you play, finish and rematch joins Facebook's own signals in ranking what you see next. *(Demo 1, 40 s, then Demo 2, 25 s.)*
 
 ## 8
-This is where it brings people closer. A Group's weekly board. "How did you get 44?" Add friend. Settle it in a best of 5. Then make one together. Boards only show Groups you share, seeds are fair, and everything is opt-in. *(Demo 3, 30 s.)*
+This is where it brings people closer. Against: best of 5 when you meet someone, a weekly Group board with Add friend, challenges, quiz nights. Together: Group Blend, sounds, making one together, remixing with credit. Boards only show Groups you share, seeds are fair, everything is opt-in. *(Demo 3, 30 s.)*
 
 ## 9
-And play becomes a signal for the feed: finished runs, rematches, friends added. In simulation, our ranker beat today's feed in 70% of sessions, and Group Blend found games a whole Group enjoys four times as often. *(Demo 2, 25 s.)*
+It works for creators and brands too. A creator turns their persona into a Curio their audience plays and ranks on, and "tell me your score" becomes a real board. A brand gets a sponsored Curio in the feed, which is in the app today; a brand challenge a Group plays together is next.
 
 ## 10
-We built this the way it works: five people, each with our own AI agents, in one channel. The agents fact-checked each other, kept each other in sync, and handed work off when someone was overloaded. 624 commits in 35 hours; the decisions stayed ours.
+And we built a collaborative product collaboratively: five people, each with our own AI agents, synced through one Slack channel. Agents fact-checked each other, sessions answered each other in minutes, and work moved through handoff threads. 624 commits in 35 hours; the decisions stayed ours.
 
 ## 11
-Endless loops lose people. A ritual you share brings them back. *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.
+*(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.

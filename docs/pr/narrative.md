@@ -4,15 +4,20 @@
 
 **Name:** "Muse Curios"; one game is "a Curio" (Karthik's decision, 2026-11-13). **Tagline:** "When the world is your muse, how will you create the content of tomorrow?" Rules in [STYLE.md](STYLE.md).
 
-## Story arc (Karthik, 2026-11-13, ~04:15 PST)
+## Story arc (Karthik, 2026-11-13, ~04:55 PST; replaces the 04:15 arc)
 
-**Thesis:** people don't grow close by watching the same thing. They grow close by doing something together, or against each other. Short-form taught a generation to watch alone; Muse Curios, a new feature in Facebook, turns short-form into something you play *with* your friends, and Facebook is where your friends are.
+**Definition (sense 2, Karthik's words):** "an interactive short-form experience with infinite possibility, meant to breed collaboration through friendly competitiveness".
 
-**Visual motif:** blue = competing (boards, best of 5, challenges); violet = collaborating (making together, remixes, Group play). The brand gradient runs from competition into collaboration.
+**The logic:** people open an app for a reason, a need or a ritual; virality comes from doing something ritualistically and consistently, or from a real need. Facebook has the people but has lost that reason for young adults. Play is already answering it: LinkedIn's games became a conversation starter at work, NYT Games grew by sharing, and Reels end with "tell me your score". A Curio turns that comment into a real, comparable Group score: a ritual you share and a need it meets (meeting people). The intro paints that picture; the rest shows how we built it.
 
-- **Act I · Why.** 1 Curio (the definition). 2 The philosophy: together and against both lead to closer (interdependence predicts ties, .45 bridging / .30 bonding [72]; STEP UP, +920 steps a day for groups of three on a weekly leaderboard [127]; play went with closeness after a move [66]). 3 The tension: teens on Facebook 71% → 32% [54], 19–29 the loneliest at 27% [60], while 98% play games. 4 The shift: short-form you play (the mock clip, LinkedIn 86% [79], the NYT friends tab [84]); the ones that last are shared (Wordle 5.3B → 4.2B [83]).
-- **Act II · How** (AI gets the most room). 5 Anyone can make one (every Instant Game was made by a developer [34][35]). 6 The harness as one pipeline. 7 The engine and fair play: competition only brings people together if it's fair.
-- **Act III · What it does for people.** 8 Compete → collaborate (board → "How did you get 44?" → Add friend → best of 5 → make together / remix). Guardrail line: boards are scoped to Groups you share, seeds are fair, everything's opt-in (competition can divide: Robbers Cave [130]). 9 Play becomes a signal (simulated). 10 Built the way it works: a collaborative product, built collaboratively (commits per hour, real). 11 The tagline, its only appearance, on its own; the ritual point (3% vs 8–11% day-30, Appodeal 2025) is spoken over it and kept for Q&A.
+**Visual motif:** blue = competing (boards, best of 5, challenges, quiz nights); violet = collaborating (Group Blend, sounds, making together, remix).
+
+- **Why.** 1 Curio (definition + wordmark). 2 A need or a ritual (Duolingo 7-day streak 3.6× [114]; Wordle revived a family chat [88]). 3 Facebook has the people, but has lost the reason: teens 71% → 32% [54]; the need: 19–29 the loneliest at 27% [60], 26.6% of 18–24s moved [63]. 4 At work, play became the icebreaker: LinkedIn ranks you against connections, colleagues and alumni [81] (Fortune 2024), 86% next day [79]; NYT ~4B → 8B+ → 11.2B+ puzzles, 46 Wordle scores shared a second, a friends-only leaderboard. 5 Reels A/B/C all end with "tell me your score".
+- **Our answer.** 6 A Curio turns "tell me your score" into a real Group score; anyone can make one (every Instant Game was made by a developer [34][35]).
+- **How.** 7 The whole stack, phone vs server (Make / Play / Learn); same seed + server replay = fair competition; Curio signals plus Facebook signals feed the ranker (70.3%, simulated). Demo 1, then Demo 2.
+- **What it does.** 8 Collaboration: against (best of 5, weekly board + Add friend, challenges, quiz nights) and together (Group Blend, sounds, make together, remix), each with its status. Demo 3. 9 Creators and brands: a sponsored Curio card is in the app (`main` 584ea69); brand challenges in Groups, creator payouts and ad targeting are proposals.
+- **How we worked.** 10 Five people, their AI agents, one channel: three agent-to-agent case studies; 624 commits in 35 hours, 87% co-written.
+- **Close.** 11 The tagline, alone.
 
 ## 1. The next form of short-form content
 

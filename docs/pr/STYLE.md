@@ -9,8 +9,8 @@
 | The feature | **Muse Curios**, a new feature in Facebook | "Muse Curios, a new feature in Facebook, brings people closer through tiny games." Never imply a separate app: the app is Facebook. |
 | One game we make | **a Curio** (capital C) | "Make a Curio", "Fog Chase, a Curio by Dev", "Today's Curio in your Group" |
 | Where only one word fits (a tab, a button, a chip) | **Curios** | the Curios tab |
-| The dictionary word (slide 2 only) | curio (lower case) | "cu·rio, noun" |
-| The definition slide's sense 2 | **Curio** *(Muse Curios)* | "Curio (Muse Curios) : a tiny game anyone makes…" |
+| The dictionary word (slide 1 only) | curio (lower case) | "cu·rio, noun" |
+| The definition slide's sense 2 (Karthik's words, verbatim) | sense 2, credited *(Muse Curios)* | "an interactive short-form experience with infinite possibility, meant to breed collaboration through friendly competitiveness" |
 
 - Capitalize **Curio** whenever it means our game. "game" stays fine as the ordinary word for the category: "a Curio is a tiny game".
 - **Don't write** "Whims", "Whim", "Bubbles", "Bubble", "Muse Games" or a singular "Muse Curio" as the product. They survive only in code names (`Bubble*`, `docs/BUBBLES.md`, `FB_TAB=bubbles`) and in quotes about the naming history. Never "pop in", "blow a bubble" or "on a whim" puns.
@@ -50,7 +50,7 @@ It goes on the last slide only (never slide 1), in the Devpost tagline field and
 
 ## Numbers and labels
 
-- Numbers as digits with units: "40 s", "~1 MB", "86%", "11.2B", "489 commits". Use "about" or "~" when it's an estimate.
+- Numbers as digits with units: "40 s", "~1 MB", "86%", "11.2B", "624 commits". Use "about" or "~" when it's an estimate.
 - Anything from a simulation says **"simulated"** on the same slide or line (the ranker's 70.3%, Group Blend's 8.7% → 32%).
 - Company-reported figures say so: "(company-reported)".
 - Don't round a cited number differently in different places. Change it in [narrative.md](narrative.md) first, then everywhere else.
