@@ -30,6 +30,7 @@ The web player is the only browser viewer the backend serves.
 
 | Stage | What changed |
 |---|---|
+| 1 Games and feed | `BubbleStore` holds fetched games only: the feed is `GET /v1/feed` pages, a game is its server object plus its manifest and cover, boards are `/leaderboard`, runs go to `POST /scores`, saves to `/like`, Search's games to `/v1/search`, the Library loads `/v1/creations`. Deleted: the seed games (moved to `tools/game-fixtures/` for tests), bot-run scores, synthetic scores, the feed generator, the local archive and streak, `GameRecommender.swift`, `StoreRecommendations.swift`, `GroupBlend.swift` (Blend is `POST /v1/groups/{id}/blend`), and the launch-time game posts, stories, reels and notifications. `FeedEventReporter` sends page events and moments to `POST /v1/feed/events`. |
 | 0 Client | `GamesAPIFactory.current` is always `GamesAPILive.shared` (no `FB_API`, no mock). `GamesAccount` signs in once at launch with the device account. The client covers feed, search, game, leaderboard, scores, saves, feed events, users, friends, Groups, Group games, Blend and creations. `GamesAPIMock.swift`, `GameGeneratorMock.swift` and `API/Fixtures/` are deleted; `GameGeneratorFactory.current` is always the server. |
 
 ## App side: still mock or local
@@ -39,10 +40,9 @@ These are in the app and must go; where the server cannot yet serve the data, th
 | App code | Problem | Server replacement |
 |---|---|---|
 | `Data/MockData.swift`, `Data/MockContent.swift` (2,600 lines) | Hardcoded people, posts, Groups | `/v1/users`, `/v1/groups`, `/v1/me/friends` (posts/Events: request to backend) |
-| `Bubbles/Store/BubbleSocialCast.swift`, `BubbleFeedRoster.swift`, `BubbleOpponentRuns.swift` | Hardcoded friends, rival "Maya", chats, opponent runs | Friends/Groups/scores endpoints; challenges and moments inbox are requests to backend |
+| `Bubbles/Store/BubbleSocialCast.swift`, `BubbleFeedRoster.swift` (now only the cast), `BubbleOpponentRuns.swift`, `Seeds/bubble-demo-world.json` | Hardcoded friends, rival "Maya", chats, opponent runs | Friends/Groups endpoints (Stage 2); challenges and moments inbox are requests to backend |
 | `Studio/StudioDemoWorld.swift`, `OfflineComposer.swift` | Fake world and offline game composer | `/v1/generate`; delete |
 | `Studio/MuseStudioService.swift`, `MuseComposeSession.swift`, `GameAnatomyMuse.swift` etc. (~13 files) | App calls Muse directly | Server only; anatomy endpoint is a request to backend |
-| `Bubbles/Recommend/*` ranking in Swift | App-side ranking | `/v1/feed` |
 
 ## Not verified
 

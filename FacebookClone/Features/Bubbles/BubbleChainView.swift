@@ -63,9 +63,7 @@ struct BubbleChainView: View {
             .padding(.bottom, 32)
         }
         .onAppear {
-            #if DEBUG
-            levels.forEach { bubbleStore.seedSampleScoresIfNeeded($0) }
-            #endif
+            levels.forEach { bubbleStore.loadScores(for: $0) }
         }
     }
 

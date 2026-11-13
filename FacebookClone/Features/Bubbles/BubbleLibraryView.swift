@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Every Bubble you can play: yours, your Groups', friends', chains, saved and popular.
+/// Games you can play: yours (from the server), your Groups', friends', chains, saved and the ones
+/// your feed brought this session.
 struct BubbleLibraryView: View {
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(Router.self) private var router
@@ -31,6 +32,7 @@ struct BubbleLibraryView: View {
             .padding(.bottom, 32)
         }
         .scrollDismissesKeyboard(.interactively)
+        .task { await bubbleStore.loadMyGames() }
         .background(FBColor.surface)
         .navigationTitle("Library")
         .navigationBarTitleDisplayMode(.inline)

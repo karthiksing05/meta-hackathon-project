@@ -111,7 +111,7 @@
       return i > 0 && f.examples && f.examples[i - 1] ? f.examples[i - 1] : f.example;
     }
     const seed = q.get("seed") || "hill-hopper";
-    return loadJSON("../../FacebookClone/Bubbles/Seeds/bubble-seed-" + seed + ".json");
+    return loadJSON("../game-fixtures/bubble-seed-" + seed + ".json");
   }
 
   async function main() {

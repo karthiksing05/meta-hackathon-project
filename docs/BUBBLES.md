@@ -116,7 +116,8 @@ Request ──► Muse Studio (Swift harness) ──► Manifest (JSON) ──�
    Ember for content and Image for covers. Validates and playtests every manifest in JavaScriptCore
    before it ships, and repairs failures (max 2 rounds). Has an offline composer so the demo never
    breaks.
-4. **App (SwiftUI).** `BubbleStore` holds Bubbles, scores and boards. Surfaces: Bubbles tab
+4. **App (SwiftUI).** `BubbleStore` holds the games, scores and boards fetched from the games API
+   (4.5). Surfaces: Bubbles tab
    (infinite feed), player, result sheet, Bubble Board, Library, chains, Studio, Group Daily Bubble,
    Event icebreaker, profile, Stories, feed posts, Reels Bursts, notifications.
 5. **CLI.** `tools/bubble-studio` runs the same harness on macOS to pre-generate the seed library
@@ -140,7 +141,8 @@ must be unique across the app.
 ```
 FacebookClone/Bubbles/Models/        Shared Swift types (Foundation only, also compiled by the CLI)
 FacebookClone/Bubbles/Runtime/web/   bubble-runtime.js, bubble-glow.css, bubble-host.html
-FacebookClone/Bubbles/Seeds/         bubble-seed-<slug>.json (one manifest each)
+FacebookClone/Bubbles/API/           Games API client (the only source of games, people, scores, Groups)
+tools/game-fixtures/                 bubble-seed-<slug>.json test manifests (not in the app; see 4.9)
 FacebookClone/Bubbles/Studio/        Muse client + harness + validator (Foundation + JavaScriptCore only)
 FacebookClone/Bubbles/Store/         BubbleStore (SwiftUI app state)
 FacebookClone/Bubbles/UI/            Shared Bubbles UI: Glow tokens, web view, cards
@@ -258,12 +260,31 @@ Swift types: `BubbleBridgeMessage`, `BubbleRunResult`, `BubbleInputLog` in
 
 ### 4.5 App state
 
-`BubbleStore` (environment object) owns Bubbles, scores, boards and the Studio service.
+`BubbleStore` (environment object) holds the games fetched from the games API this session, their
+boards and the Studio service. It keeps nothing of its own and invents nothing (docs/APP_LIVE_DATA_PLAN.md):
+
+| Data | From |
+|---|---|
+| Games tab feed | `GET /v1/feed?limit=10&sessionID=<per launch>&exclude=` (the server's recommender picks and orders every page; `BubbleFeedItem` keeps `feedItemID`, `reason`, `why`, `team`) |
+| A game | its server object plus the manifest at `manifestUrl` and the cover at `coverUrl`; `GET /v1/games/{id}` when a screen opens one that isn't loaded (`loadGame`) |
+| Boards | `GET /v1/games/{id}/leaderboard` (one global board; Friends and Group tabs say "Not available yet") |
+| Your run | `POST /v1/games/{id}/scores`, then the returned board |
+| Saves (= likes) | `PUT`/`DELETE /v1/games/{id}/like` |
+| Search | `GET /v1/search?q=` (Facebook Search's Games results) |
+| Your games | `GET /v1/creations` (Library) |
+| Group Blend | `POST /v1/groups/{id}/blend` (Group page, members only) |
+| What happened on each page | `POST /v1/feed/events` (`FeedEventReporter`: page events and off-feed moments) |
+
+The app ranks nothing: `game-recs.js` stays in `Bubbles/Recommend/` only because the API image
+reads it from there. No Bursts play friends' runs yet (the server keeps scores, not replays), so feed
+pages play the bot's demo. Screens show loading, error ("Try again") and empty states from
+`LiveDataStateView`, never stand-in content.
 Routes and covers: `Route.bubble(id)`, `.bubbleBoard(id)`, `.bubbleLibrary`, `.bubbleChain(id)`,
 `.marketplace`; `router.play(...)` opens the player, `router.openStudio(...)` opens Muse Studio.
 
 Surfaces outside the Bubbles screens hook in through `BubbleSurfaceHooks` (called once at launch);
-each surface has its own file in `Features/Bubbles/Surfaces/`. `Post` carries `bubbleID`,
+each surface has its own file in `Features/Bubbles/Surfaces/`. Nothing is added to the home feed,
+Stories, Reels or notifications at launch; games reach them when you share one. `Post` carries `bubbleID`,
 `bubbleReplay` (a Burst) and `allowsBubbles` (opted in as Daily Bubble material).
 
 `BubbleJSRuntime` (`Bubbles/Studio/BubbleJSRuntime.swift`) runs the runtime headless in
@@ -553,27 +574,13 @@ content-hashed manifests to object storage behind a CDN. Clients cache them, and
 are served almost entirely from the CDN. Leaderboards verify replays server-side. Gameplay never
 calls the server.
 
-### 4.9 Seed files
+### 4.9 Test fixtures (formerly seed files)
 
-`Bubbles/Seeds/bubble-seed-<id>.json` is a manifest plus keys starting with `_`, which the runtime
-and validator ignore. `_seed` holds demo metadata for `BubbleStore`: `creator_id` (a demo-world
-person id or `me`), `group_id`, `event_id`, `created_hours_ago`, `play_count`, `like_count`, `save_count` (saves are the
-likes, 7.10; defaults to `like_count`).
-`_placeholder: true` marks a stand-in that the runtime owners replace with a real, validated
-manifest under the same id. Seed ids are stable; screens and debug links use them.
-
-| Id | Formula | Notes |
-|---|---|---|
-| `newinsf-daily-fog-words` | guess | New in SF's Daily Bubble (word) |
-| `picnic-icebreaker-whos-coming` | guess | Picnic icebreaker (match facts to newcomers) |
-| `hill-hopper`, `hill-hopper-2` | dodge | A two-level Bubble Chain (`chain-hill-hopper`) |
-| `fog-drift` | dodge | |
-| `moving-day` | dodge | Alex's own Bubble (profile, edit demo) |
-| `newinsf-fog-or-sun` | answer | Consensus: guess what the Group picked |
-| `sort-the-city` | group | |
-| `cable-car-catch`, `sourdough-stack` | time | |
-| `bay-bubbles` | merge | |
-| `mg-*` (8) | microgame | Generated by `authoring/tools/make-seeds.mjs` (see 7.11); don't edit by hand |
+The app bundles no games. The old seed manifests live in `tools/game-fixtures/bubble-seed-<id>.json`
+for the runtime and kit tests (`tools/runtime-tests`, `tools/kits-tests`, `tools/recs-sim`) and the
+preview pages. They are a manifest plus keys starting with `_`, which the runtime and validator
+ignore (`_seed` held the old demo metadata). `mg-*` are written by `authoring/tools/make-seeds.mjs`
+(see 7.11); don't edit them by hand. Demo games belong in the server's database, not the app.
 
 ### 4.10 Looks
 

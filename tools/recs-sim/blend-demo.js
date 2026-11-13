@@ -8,7 +8,7 @@
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.join(__dirname, "../..");
-const SEEDS = path.join(ROOT, "FacebookClone/Bubbles/Seeds");
+const SEEDS = path.join(ROOT, "tools/game-fixtures");
 const R = require(path.join(ROOT, "FacebookClone/Bubbles/Recommend/game-recs.js"));
 
 const world = JSON.parse(fs.readFileSync(path.join(SEEDS, "bubble-demo-world.json"), "utf8"));

@@ -10,14 +10,23 @@ struct BubbleBoardView: View {
 
     @State private var scope: BubbleBoardScope?
     @State private var myRowVisible = false
+    @State private var isLoadingGame = false
 
     var body: some View {
         Group {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
+            } else if isLoadingGame {
+                LiveDataStateView(kind: .loading)
             } else {
                 ContentUnavailableView("\(ProductName.singular) not found", systemImage: "list.number")
             }
+        }
+        .task(id: bubbleID) {
+            guard bubbleStore.bubble(id: bubbleID) == nil else { return }
+            isLoadingGame = true
+            _ = await bubbleStore.loadGame(id: bubbleID)
+            isLoadingGame = false
         }
         .background(FBColor.surface)
         .navigationTitle("Board")
@@ -27,7 +36,7 @@ struct BubbleBoardView: View {
     private func activeScope(_ bubble: Bubble) -> BubbleBoardScope {
         let scopes = bubbleStore.boardScopes(for: bubble)
         if let scope, scopes.contains(scope) { return scope }
-        return bubble.group != nil ? .group : .everyone
+        return .everyone
     }
 
     private func content(_ bubble: Bubble) -> some View {
@@ -76,9 +85,7 @@ struct BubbleBoardView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: myRowVisible)
         .onAppear {
-            #if DEBUG
-            bubbleStore.seedSampleScoresIfNeeded(bubble)
-            #endif
+            bubbleStore.loadScores(for: bubble)
         }
     }
 
@@ -110,7 +117,23 @@ struct BubbleBoardView: View {
         .padding(.top, 8)
     }
 
+    @ViewBuilder
     private func empty(_ bubble: Bubble, scope: BubbleBoardScope) -> some View {
+        let state = bubbleStore.boardStates[bubble.id] ?? .idle
+        if !BubbleStore.serves(scope) {
+            LiveDataStateView(kind: .notAvailable("The server keeps one board for everyone. \(scope.title) boards come when it serves them."))
+        } else if state.isLoading {
+            LiveDataStateView(kind: .loading, title: "Loading the board…")
+        } else if let failure = state.failure {
+            LiveDataStateView(kind: .failed(failure), title: "Couldn't load the board") {
+                bubbleStore.loadScores(for: bubble)
+            }
+        } else {
+            emptyBoard(bubble, scope: scope)
+        }
+    }
+
+    private func emptyBoard(_ bubble: Bubble, scope: BubbleBoardScope) -> some View {
         VStack(spacing: 12) {
             BubbleOrb(size: 64)
             Text(scope == .friends ? "None of your friends have played yet" : "Nobody's on the board yet")
@@ -279,14 +302,14 @@ struct BubbleBoardRow: View {
         case .requestReceived:
             Button("Confirm") {
                 appStore.sendRequest(to: entry.user)
-                GameRecommender.shared.note(.addedFriend, gameID: bubble.id)
+                FeedEventReporter.shared.note(.addedFriend, gameID: bubble.id)
             }
                 .buttonStyle(.fb(.primary, expand: false, height: 32))
         default:
             Button("Add friend") {
                 Haptics.light()
                 withAnimation { appStore.sendRequest(to: entry.user) }
-                GameRecommender.shared.note(.addedFriend, gameID: bubble.id)
+                FeedEventReporter.shared.note(.addedFriend, gameID: bubble.id)
             }
             .buttonStyle(.fb(.tinted, expand: false, height: 32))
             .accessibilityLabel("Add \(entry.user.name) as a friend")

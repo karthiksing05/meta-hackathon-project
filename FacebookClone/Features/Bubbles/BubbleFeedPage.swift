@@ -379,19 +379,19 @@ private struct BubbleFeedCaption: View {
         }
         switch item.reason {
         case .nearby:
-            if let place = bubbleStore.neighborhood(of: bubble.creator) {
-                parts.append("New near you · \(place)")
-            } else {
-                parts.append("New near you")
-            }
+            parts.append("New near you")
         case .groupBurst:
-            if !bubble.isDaily, let group = bubble.group ?? bubbleStore.boardGroups(for: bubble).first {
+            if !bubble.isDaily, let group = bubble.group {
                 parts.append(group.name)
             }
         case .yours where parts.isEmpty:
             parts.append("Your \(ProductName.singular)")
         default:
             break
+        }
+        // The server's own line about why this page, shown as is.
+        if let why = item.why, parts.count < 3 {
+            parts.append(why)
         }
         return parts
     }

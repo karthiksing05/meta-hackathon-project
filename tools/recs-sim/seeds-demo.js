@@ -9,7 +9,7 @@
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.join(__dirname, "../..");
-const SEEDS = path.join(ROOT, "FacebookClone/Bubbles/Seeds");
+const SEEDS = path.join(ROOT, "tools/game-fixtures");
 const recsPath = path.join(ROOT, "FacebookClone/Bubbles/Recommend/game-recs.js");
 
 function freshRecs() {

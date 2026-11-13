@@ -1,33 +1,51 @@
 import SwiftUI
 
 /// "<Group> Blend" on a Group page: games picked for everyone here, a Blend game Muse makes for
-/// all of you, and people with a taste like yours to add as friends (`BubbleStore.groupBlend`).
-/// Shows nothing when the recommender is off or the Group is too small.
+/// all of you, and people with a taste like yours to add as friends. The server makes it from what
+/// the members actually play (`POST /v1/groups/{id}/blend`); only members can ask. Shows nothing
+/// for Groups the server doesn't know, and a short line when the Blend can't be made.
 struct GroupBlendSection: View {
     let group: FBGroup
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(AppStore.self) private var appStore
     @Environment(Router.self) private var router
-    @State private var blend: GroupBlend?
-    @State private var loadedGroupID: String?
+    @State private var blend: RemoteBlend?
+    @State private var failure: String?
 
     var body: some View {
         VStack(spacing: 0) {
             if let blend, !blend.picks.isEmpty {
                 content(blend)
+            } else if let failure {
+                Text("\(group.name) Blend isn't available: \(failure)")
+                    .font(.fbMeta)
+                    .foregroundStyle(FBColor.secondaryText)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .onAppear(perform: load)
+        .task(id: group.id) { await load() }
     }
 
-    private func load() {
-        guard loadedGroupID != group.id else { return }
-        loadedGroupID = group.id
-        blend = bubbleStore.groupBlend(for: group)
+    /// Only Groups on the games server have a Blend, and only their members can ask for it.
+    private func load() async {
+        blend = nil
+        failure = nil
+        guard bubbleStore.serverGroups[group.id] != nil, group.isMember else { return }
+        do {
+            let made = try await GamesAPIFactory.current.blend(groupID: group.id, count: 8)
+            for game in made.picks.compactMap(\.game) {
+                await bubbleStore.adopt(game)
+            }
+            blend = made
+        } catch {
+            failure = error.localizedDescription
+        }
     }
 
-    private func content(_ blend: GroupBlend) -> some View {
+    private func content(_ blend: RemoteBlend) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: "\(group.name) Blend", subtitle: "Games picked for everyone here")
                 .padding(.horizontal, 16)
@@ -54,8 +72,8 @@ struct GroupBlendSection: View {
     }
 
     @ViewBuilder
-    private func pickCard(_ pick: GroupBlend.Pick) -> some View {
-        if let bubble = bubbleStore.bubble(id: pick.gameID) {
+    private func pickCard(_ pick: RemoteBlend.Pick) -> some View {
+        if let bubble = bubbleStore.bubble(id: pick.gameID) ?? pick.game.flatMap({ bubbleStore.bubble(id: $0.slug ?? $0.id) }) {
             NavigationLink(value: Route.bubble(bubble.id)) {
                 VStack(alignment: .leading, spacing: 4) {
                     BubbleCard(bubble: bubble, style: .compact)
@@ -79,7 +97,7 @@ struct GroupBlendSection: View {
     }
 
     /// "Make our Blend game": Muse Studio with the Blend's prompt, made for this Group.
-    private func blendGameRow(_ spec: GroupBlend.Spec) -> some View {
+    private func blendGameRow(_ spec: RemoteBlend.Spec) -> some View {
         Button {
             Haptics.light()
             router.openStudio(StudioLaunch(mode: .create, groupID: group.id, prompt: spec.prompt))
@@ -92,7 +110,7 @@ struct GroupBlendSection: View {
                     Text("Make our Blend game")
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
-                    Text(spec.why)
+                    Text(spec.why ?? "A game for everyone here")
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                         .lineLimit(2)
@@ -107,19 +125,19 @@ struct GroupBlendSection: View {
             .padding(.vertical, 10)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Make our Blend game. \(spec.why)")
+        .accessibilityLabel("Make our Blend game. \(spec.why ?? "")")
     }
 
     /// Someone here with a taste like yours, with Add friend.
-    private func twinRow(_ twin: GroupBlend.Twin) -> some View {
-        let user = bubbleStore.resolvePerson(twin.userID)
+    private func twinRow(_ twin: RemoteBlend.Twin) -> some View {
+        let user = bubbleStore.person(id: twin.userID, name: twin.name)
         return HStack(spacing: 10) {
             AvatarView(user: user, size: FBAvatarSize.reply)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Taste twin: \(twin.name)")
                     .font(.fbName)
                     .foregroundStyle(FBColor.primaryText)
-                Text(twin.why + (twin.evenlyMatched == true ? ", and you're evenly matched" : ""))
+                Text(twin.why)
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                     .lineLimit(2)
@@ -146,7 +164,14 @@ struct GroupBlendSection: View {
         default:
             Button("Add friend") {
                 Haptics.light()
-                withAnimation { appStore.sendRequest(to: user) }
+                Task { @MainActor in
+                    do {
+                        try await GamesAPIFactory.current.setFriend(true, userID: user.id)
+                        withAnimation { user.friendship = .friends }
+                    } catch {
+                        appStore.showToast("Couldn't add \(user.firstName): \(error.localizedDescription)", symbol: "exclamationmark.circle")
+                    }
+                }
             }
             .buttonStyle(.fb(.tinted, expand: false, height: 32))
             .accessibilityLabel("Add \(user.name) as a friend")

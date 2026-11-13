@@ -16,7 +16,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const HOST = join(ROOT, 'FacebookClone', 'Bubbles', 'Runtime', 'web', 'bubble-host.html');
-const SEEDS = join(ROOT, 'FacebookClone', 'Bubbles', 'Seeds');
+const SEEDS = join(ROOT, 'tools', 'game-fixtures');
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const args = process.argv.slice(2);
 const out = args.includes('--out') ? args[args.indexOf('--out') + 1] : '/tmp/mg-chrome';

@@ -1,8 +1,7 @@
 import SwiftUI
 
-/// A Bubble's page: cover, rule, creator, Burst, Bubble Board preview, chain, actions.
-///
-/// DEBUG launch: `FB_SAMPLE_SCORES=0` turns off the sample scores added when a board is empty.
+/// A game's page: cover, rule, creator, board preview (from the server), chain, actions. Opening a
+/// game the app hasn't fetched yet loads it by id (`GET /v1/games/{id}`).
 struct BubbleDetailView: View {
     let bubbleID: String
 
@@ -12,14 +11,23 @@ struct BubbleDetailView: View {
 
     @State private var showFloat = false
     @State private var showShare = false
+    @State private var isLoadingGame = false
 
     var body: some View {
         Group {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
+            } else if isLoadingGame {
+                LiveDataStateView(kind: .loading)
             } else {
-                ContentUnavailableView("\(ProductName.singular) not found", systemImage: "sparkles", description: Text("It may have been removed."))
+                ContentUnavailableView("\(ProductName.singular) not found", systemImage: "sparkles", description: Text("The server doesn't have it."))
             }
+        }
+        .task(id: bubbleID) {
+            guard bubbleStore.bubble(id: bubbleID) == nil else { return }
+            isLoadingGame = true
+            _ = await bubbleStore.loadGame(id: bubbleID)
+            isLoadingGame = false
         }
         .background(FBColor.surface)
         .navigationTitle(ProductName.singular)
@@ -49,9 +57,7 @@ struct BubbleDetailView: View {
             .padding(.bottom, 32)
         }
         .onAppear {
-            #if DEBUG
-            bubbleStore.seedSampleScoresIfNeeded(bubble)
-            #endif
+            bubbleStore.loadScores(for: bubble)
         }
         .sheet(isPresented: $showFloat) {
             BubbleFloatSheet(bubble: bubble) { showFloat = false }

@@ -6,8 +6,7 @@ import Observation
 /// keeps the server's user. Every call that needs a token goes through `GamesAPILive.shared`,
 /// which uses the same tokens.
 ///
-/// Read with `GamesAccount.shared` (main actor).
-@MainActor
+/// Read with `GamesAccount.shared` on the main thread.
 @Observable
 final class GamesAccount {
     static let shared = GamesAccount()
@@ -33,7 +32,7 @@ final class GamesAccount {
     func signIn() {
         guard task == nil, user == nil else { return }
         state = .signingIn
-        task = Task { [weak self] in
+        task = Task { @MainActor [weak self] in
             let api = GamesAPILive.shared
             do {
                 let user: RemoteUser
@@ -59,6 +58,7 @@ final class GamesAccount {
     }
 
     /// Waits for the current sign-in to end. Returns the user, or nil if it failed.
+    @MainActor
     func waitForUser() async -> RemoteUser? {
         if user == nil, task == nil { signIn() }
         await task?.value
