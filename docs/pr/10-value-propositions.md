@@ -35,12 +35,12 @@ No value proposition has real-user evidence, because we have no real users.
 
 | ID | Value proposition | Relationship | Why only Facebook | Mechanism | Helps people | Status |
 |---|---|---|---|---|---|---|
-| VP-05 | Make a game for your people in about 30 seconds (ready formula) or a minute or two (from scratch) | You and your people | The game is made for a named Group, Event or friends, and lands in front of them | Measured | Literature | Live |
-| VP-06 | A daily reason to clock in that is about your people | You and your Groups | One game per Group, and only Facebook has the Groups | Built | Public data | Live |
+| VP-05 | Make a game for your friends in about 30 seconds (ready formula) or a minute or two (from scratch) | You and your friends | The game is made for a named Group, Event or friends, and lands in front of them | Measured | Literature | Live |
+| VP-06 | A daily reason to clock in that is about the people you know | You and your Groups | One game per Group, and only Facebook has the Groups | Built | Public data | Live |
 | VP-07 | Meet strangers on an everyday-name network | You and a stranger | Everyday-name norm, opt-in Verified, shared Groups | Built (rows); None (badges) | Hypothesis | Live (rows); Not built (badges) |
 | VP-08 | Everything a newcomer needs, in one app | You and your city | Groups, Events, Marketplace and Dating already live here | Built | Hypothesis | Live |
 | VP-09 | A new way to tell your own story | You and your friends | "Who knows you best" needs real friends | Built (profile tab) | Literature | Live (profile, Games about me on one device) |
-| VP-10 | Play that ends, ranked for connection | You and your people | Facebook can rank on connection outcomes it can observe | Built; simulated (D27 to D29) | Hypothesis | Live (recommender in the app on `main`) |
+| VP-10 | Play that ends, ranked for connection | You and your friends | Facebook can rank on connection outcomes it can observe | Built; simulated (D27 to D29) | Hypothesis | Live (recommender in the app on `main`) |
 | VP-13 | A friend's replay is an invitation | You and a friend | Bursts land in the feed, Stories and Reels where friends look | Bot-run | Public data | Live |
 | VP-17 | Remix as a reply to a person | You and a friend | Remixes travel between people who know each other | Built | Hypothesis | Live (lineage and send it back, one device) |
 | VP-39 | A playable feed as varied as Reels | You and your feed | Facebook's feed and Reels habit, filled by members | Measured (variety); teammate-reported (speed) | Hypothesis | Live |
@@ -51,7 +51,7 @@ No value proposition has real-user evidence, because we have no real users.
 |---|---|---|---|---|---|---|
 | VP-18 | A fresh daily ritual admins don't have to write | Your Group | Tens of millions of Groups, each with its own members and posts | Measured (real Muse) | Hypothesis | Debug/CLI only |
 | VP-21 | You decide which of your posts can become a game | You and your Group | Facebook's per-post audience controls | Built | Hypothesis | Live, with named gaps |
-| VP-23 | Credit and an audience you already know | You and your people | Profiles, notifications and a creator program that rewards originals | Built | Hypothesis | Live (profile, lineage, remix credits) |
+| VP-23 | Credit and an audience you already know | You and your friends | Profiles, notifications and a creator program that rewards originals | Built | Hypothesis | Live (profile, lineage, remix credits) |
 
 ### Value to Meta
 
@@ -81,7 +81,7 @@ No value proposition has real-user evidence, because we have no real users.
 | VP-14 | Stay close to hometown friends after you move | You and a friend | Facebook holds both the old friends and the new Groups | Public data (format); same-seed primitive bot-run | Literature | Live on one device (friends are synthetic) |
 | VP-15 | One card the whole group chat plays | You and your friends | Messenger chats next to Groups and Events | Public data (format) | Public data | Live on one device |
 | VP-19 | Weekly boards and game night that reward newcomers | You and your Group | Needs Groups and Events together | Built | Literature | Live (synthetic members) |
-| VP-38 | Make a game together, for and with your people | You, your friends and your Group | The friend graph and Group membership decide who co-makes; credits go to real profiles | Built | Literature | Live on one device |
+| VP-38 | Make a game together, for and with your friends | You, your friends and your Group | The friend graph and Group membership decide who co-makes; credits go to real profiles | Built | Literature | Live on one device |
 | VP-40 | Blends: a game made from two people, and a bracket for everyone you just met | You and someone you just met; everyone at an Event | Friendships and Event guest lists scope who you blend with | Built (Group Blend); simulated (D29) | Literature | Partly Live: the Group Blend is in the app; two-person Blends and brackets Not built |
 | VP-11 | Find your scene through what you want to play | You and a new Group | A game in Search links to the Group that plays it | Built | Hypothesis | Live |
 | VP-12 | Learn together, with friends' streaks | You and your friends | Group mastery needs a Group; friends' streaks need friends | Built (learn formula) | Public data | Live (synthetic friends' streaks) |
@@ -164,7 +164,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 - **Claim.** Muse turns a Group's opted-in posts and an Event's guest list into games, so the content of the game is the community itself.
 - **Why Facebook.** The inputs are Facebook objects: Group membership and posts, Event RSVPs, and everyday-name profiles [30]. TikTok and YouTube have interest graphs built on handles, Reddit and Discord are pseudonymous, and LinkedIn's graph is professional. No other network holds all of these together under everyday names.
-- **Rationale.** Our team's review of 8 well-known short games (Wordle, 2048, Flappy Bird and others) found that all of them use generic content: word lists, procedural courses, trivia (internal synthesis, 2026-11-11). The open slot is content about who your people are. Game mechanics can be copied; a quiz about who is coming to Saturday's picnic cannot, because only the host platform knows who is coming.
+- **Rationale.** Our team's review of 8 well-known short games (Wordle, 2048, Flappy Bird and others) found that all of them use generic content: word lists, procedural courses, trivia (internal synthesis, 2026-11-11). The open slot is content about who your friends are. Game mechanics can be copied; a quiz about who is coming to Saturday's picnic cannot, because only the host platform knows who is coming.
 - **Evidence.**
   - Real Muse runs used 7 of 7 attendees' opted-in posts for the picnic icebreaker and 5 of 5 opted-in Group posts for the Daily, and the Studio timeline says "Nothing else was read" (D8).
   - Every answer in the New in SF Daily was tied to a named member's intro, such as "TORONTO: Priya, a new nurse in town, arrived from here" (D8).
@@ -199,7 +199,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 ### 6.2 Supporting: for people and friends
 
-#### VP-05. Make a game for your people in about 30 seconds
+#### VP-05. Make a game for your friends in about 30 seconds
 
 *At `6b1cc85`: "about 30 seconds" holds for a ready-formula game (median 28.0 s, D2). A game made from scratch on the microgame engine takes a median 99 s (D30). The in-app copy "about a minute" matches neither (see [open-items.md](open-items.md#proposed-app-fixes)).*
 
@@ -225,7 +225,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - "28 seconds is a long wait in a live demo." It is under half a minute, and the game is ready at 21 s. Showing it at that point is a planned change, not yet shipped.
   - "Just because a chatbot can make a game doesn't mean anyone will enjoy playing it" (Engadget on YouTube's builder [101]). Our games are composed from tested formulas and must pass validation and a bot playtest. Fun for people is unmeasured.
 
-#### VP-06. A daily reason to clock in that is about your people
+#### VP-06. A daily reason to clock in that is about the people you know
 
 - **Claim.** One short, same-for-everyone game per Group per day gives young adults a reason to open Facebook daily, rooted in their communities rather than in endless content. Every Group you join adds another small reason.
 - **Why Facebook.** LinkedIn and the NYT each run a handful of global puzzles. Facebook can run a daily game per community because it has the communities (25 million monthly active public groups [14]), and Muse makes a per-Group daily affordable.
@@ -536,7 +536,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 ### 6.5 Muse and the AI ecosystem
 
-#### VP-34. The AI does the core work: without Muse there is no game about your people
+#### VP-34. The AI does the core work: without Muse there is no game about the people you know
 
 *At `6b1cc85` the strongest evidence for this VP is the microgame harness and the game anatomy, written up in [04-why-ai.md](04-why-ai.md) and VP-42 below: on 12 eval requests, 12 games passed the gate with 88% of must-haves present (D30, Muse-judged). The entry below covers the formula path, measured at `0a3e8f7`. Its line "Muse's added value is content, context and look" is true for formula games only; on the microgame path Muse writes the mechanics too (D31).*
 
@@ -700,7 +700,7 @@ These were the team's build priority after the judge's note. Since the collabora
 - **Metric.** Share of weekly winners or Most improved who joined in the last 30 days; game-night RSVP rate among weekly players.
 - **Risk and answer.** "Leaderboards favor the already good." That is why Most improved, cooperative formats (a Group total, team against team) and a Friends scope are in the design.
 
-#### VP-38. Make a game together, for and with your people
+#### VP-38. Make a game together, for and with your friends
 
 - **Claim.** Friends, or members of a Group, co-make a game in Studio, with credit for every maker. Making becomes a shared project, not a solo act.
 - **Why Facebook.** The friend graph and Group membership decide who can co-make, and credits go to real profiles that the Group can see. A pseudonymous network can credit handles; Facebook credits the people you'll meet at the picnic.

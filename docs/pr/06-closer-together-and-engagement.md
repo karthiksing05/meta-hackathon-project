@@ -80,7 +80,7 @@ The board with Add friend is Live, with bot runs by synthetic people. Challenge 
 | 3, 4. Meeting strangers in person, cold | Event icebreaker made from guests' intros (VP-03) | Events | Live |
 | 3, 4. No path from stranger to friend | board with fair, same-seed scores and Add friend (VP-04, VP-16) | Groups, Events, profiles | Live (rows are synthetic people) |
 | 1, 2. No daily ritual that brings people back | One Daily per Group, and a playable feed of replays (VP-06, VP-39) | Groups, feed, Stories, Reels | Live |
-| All. A game about your people would otherwise need a developer | Muse Studio: one sentence to a game (VP-05, VP-34) | Curios tab, Groups, Events | Live |
+| All. A game about the people you know would otherwise need a developer | Muse Studio: one sentence to a game (VP-05, VP-34) | Curios tab, Groups, Events | Live |
 | 2, 5. Group chats and old friendships go quiet | Challenge Me and one card the whole chat plays (VP-14, VP-15) | Messenger | Live on one device |
 | 4. Time together is scarce | Make a game together; weekly boards and game night (VP-38, VP-19) | Groups, Events | Live on one device (synthetic members) |
 | 4. Strangers you just met stay strangers | Group Blend (Live); two-person Blends and an Event bracket (VP-40) | Groups, Events, profiles | Partly Live |

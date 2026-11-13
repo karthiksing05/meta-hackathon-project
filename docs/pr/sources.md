@@ -147,3 +147,11 @@
 132. Pew Research Center, "Americans are changing their relationship with Facebook", 2018-09-05 (survey May 29 to June 11, 2018; sample size in Pew's methodology note, not checked; 44% of users aged 18 to 29 deleted the Facebook app from their phone in the past year, against 12% of users 65 and older; reputable survey, not peer-reviewed). https://www.pewresearch.org/short-reads/2018/09/05/americans-are-changing-their-relationship-with-facebook/
 133. Baumer, E. P. S. et al., "Limiting, Leaving, and (Re)lapsing: An Exploration of Facebook Non-Use Practices and Experiences", Proceedings of CHI 2013, 3257 to 3266 (peer-reviewed; finds no clear binary between use and non-use, and mixed motivations both for leaving and for keeping some connection; checked from the abstract and the authors' summary). https://doi.org/10.1145/2470654.2466446
 134. Krillion, daily trivia game, July 2026 (seven open prompts a day; one typed answer per prompt in 25 s; rarer accepted answers score more, in tiers from 10 to 100 points; description from Karthik, not checked against the site for this revision). https://krillion.io
+
+### Added for the deck (2026-11-13, from Karthik's reference pack; URLs in the pack, to add)
+
+135. NBC New York / TODAY, NYT Games' 2025 year in review, 2025-12-29 (11.2B+ puzzles solved in 2025, ~4B in 2022, 8B+ in 2023; 46 Wordle scores shared per second; top Connections puzzle shared 3M times).
+136. Adweek, NYT Games daily players (10M+), 2024.
+137. NYT Help Center, friends leaderboard (up to 100 friends, no global leaderboard), 2025.
+138. Instagram Reels: @veefriends "Pause it perfectly" (7.5 s, 4.2M views); @thefictionexpert "play along" quiz (~640K likes); @neravik.games "At what speed will you break?" (137 s, 2.29M views). Counts as shown on the Reels when captured, 2026-11-13. Screenshots are on Karthik's Mac only (copyrighted).
+
