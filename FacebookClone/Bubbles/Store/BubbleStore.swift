@@ -228,10 +228,12 @@ final class BubbleStore {
         }
         bubble.playCount += 1
         let gameID = bubble.serverID
+        let log = result.engineLog
         Task { @MainActor [weak self] in
             guard let self else { return }
             do {
-                let rows = try await api.submitScore(entry.score, gameID: gameID)
+                // The engine log lets the server replay the run (required for games with a score model).
+                let rows = try await api.submitScore(entry.score, log: log, gameID: gameID)
                 apply(rows, to: bubble, keepingReplay: entry)
             } catch {
                 boardStates[bubble.id] = .failed(error.localizedDescription)

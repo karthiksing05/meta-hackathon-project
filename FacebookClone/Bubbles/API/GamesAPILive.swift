@@ -96,7 +96,16 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     }
 
     func submitScore(_ score: Int, gameID: String) async throws -> [RemoteScore] {
-        let body = try JSONSerialization.data(withJSONObject: ["score": score])
+        try await submitScore(score, log: nil, gameID: gameID)
+    }
+
+    /// `POST /v1/games/{id}/scores {score, log?}`. A game with a score model (harness v2) only takes a
+    /// replayed run: the server replays `log` (the engine's `microgame-log/1`) and ignores `score`; a
+    /// plain `{score}` is refused (400). Older games keep using `score` and ignore `log`.
+    func submitScore(_ score: Int, log: String?, gameID: String) async throws -> [RemoteScore] {
+        var payload: [String: Any] = ["score": score]
+        if let log, !log.isEmpty { payload["log"] = log }
+        let body = try JSONSerialization.data(withJSONObject: payload)
         let data = try await send("POST", "v1/games/\(try serverID(gameID))/scores", body: body,
                                   contentType: "application/json", auth: .required)
         return (try decode(data) as RemoteScoreboard).items
