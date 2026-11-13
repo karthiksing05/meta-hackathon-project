@@ -634,6 +634,17 @@ direction, an idle bot and a one-input spam bot ranking no better than real play
 `max_rate_per_s`, every bot run replaying to the same phase, time and score (`verify` where the engine
 has it), and the score changing only on `events`.
 
+### 2.14 UI kit (`ui`)
+
+A manifest may carry a `ui` block, `{"kit": "game-style/1", "theme", "base", "accent", "family",
+"density"}`, and write UI as kit components: nodes with a `ui` key instead of `node`
+(`{"ui": "question_card", "text": "= question_text()"}`). The expander derives every token from the
+block (the palette roles and their on-colours, type scale, spacing, radii), lays the components out
+in fixed regions (HUD band, top, playfield, controls, overlay) and fits their text. Without a `ui`
+block the game's palette stays as written. `quiz`, `picture_quiz`, `choice_story`, `keyboard`,
+`story_vars`, `play_clip` and the HUD counters are drawn with the kit. The full contract, the
+component list and the style check (`S_*` codes) are in `UI_KIT.md`.
+
 ## 3. Expander
 
 The expander is deterministic: the same manifest and library versions give byte-identical output.
