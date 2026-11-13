@@ -331,9 +331,9 @@ Authors and chat members are Personas or server accounts; the reply's `author` /
 
 | Endpoint | Auth | Reply |
 |---|---|---|
-| `GET /v1/fb/posts?groupId=&authorId=&cursor=&limit=` (max 50), `GET /v1/fb/reels` (same) | optional | `{items: [post], cursor}` newest first; `post` = `{id, kind, author, groupId?, text, background?, media: [{kind, url, videoUrl?, aspect, duration?}], poll?: [{id, title, votes}], feeling?, location?, lifeEvent?, audio?, sponsored?, allowsGames?, reactions: {type: n}, myReaction?, comments: [{id, author, text, createdAt}], shares, views, createdAt}`. `reactions` counts everyone but me. |
+| `GET /v1/fb/posts?groupId=&authorId=&cursor=&limit=` (max 50), `GET /v1/fb/reels` (same) | optional | `{items: [post], cursor}` newest first; `post` = `{id, kind, author, groupId?, text, background?, media: [{kind, url, videoUrl?, aspect, duration?}], poll?: [{id, title, votes}], feeling?, location?, lifeEvent?, audio?, sponsored?, allowsGames?, gameId?, reactions: {type: n}, myReaction?, comments: [{id, author, text, createdAt}], shares, views, createdAt}`. `reactions` counts everyone but me. |
 | `GET /v1/fb/posts/{id}` | optional | one `post` |
-| `POST /v1/fb/posts` `{text, groupId?, background?, feeling?, location?, photoUrls?}` | bearer | 201 `post` |
+| `POST /v1/fb/posts` `{text, groupId?, background?, feeling?, location?, photoUrls?, gameId?}` | bearer | 201 `post`; `gameId` attaches a game as a playable card and comes back on the `post` |
 | `PUT /v1/fb/posts/{id}/reaction` `{type}` (like, love, care, haha, wow, sad, angry); `DELETE` | bearer | the `post` |
 | `POST /v1/fb/posts/{id}/comments` `{text}` | bearer | 201 comment |
 | `GET /v1/fb/stories` | optional | `{items: [{author, items: [{id, media?, text?, background?, caption?, createdAt}]}]}`; one entry per author, most recent first, mine first; items oldest first |
