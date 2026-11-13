@@ -14,7 +14,7 @@ Interactive mini-experiences keep people in their apps, and the industry is movi
 | NYT Games is a habit at scale | Puzzles played over 11.2 billion times in 2025 | [82] |
 | The NYT is moving to play *together* | A friends tab "to encourage communal play"; its first 2-player game (Jan 2026) | [84], [82] |
 | One puzzle for the whole world fades | Wordle: 5.3B plays in 2024 → 4.2B in 2025 | [83] |
-| Meta is already moving to interactive formats | Instagram has 3B monthly users; Meta is building games into Threads chats | [115], [116]. Shown on slide 2 next to an illustration of an Instagram poll (drawn by us, not a screenshot) |
+| Meta is already moving to interactive formats | Instagram has 3B monthly users | [115]. Slide 2 shows our drawings (not screenshots) of the two Reel formats Karthik named: "guess what they say" (the video pauses, four answers, then the reveal) and "place your finger here". No stat on those formats themselves yet; cite one only if a solid source turns up. Threads games [116] is backup for Q&A |
 | Social mini-games work at huge scale | WeChat Mini Games passed 500M monthly users | [91] |
 
 *Open:* a cited stat for Instagram's interactive formats (polls, quizzes, stickers). Bayan's review doesn't have one.
