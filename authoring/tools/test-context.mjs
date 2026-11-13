@@ -60,6 +60,7 @@ const ex = JSON.parse(B.examples('a game', 2));
 const before = P.system(catalog, { examples: ex.text });
 ok(before === B.prompt('system', JSON.stringify({ examples: ex.text })), 'no context: the bundle\'s system prompt is unchanged');
 ok(P.system(catalog, { examples: ex.text, context: { version: 'harness-context/1', notes: ['x'] } }) === before, 'a context without tools or types changes nothing');
+ok(/Genre conventions: keep the core rules/.test(before) && /gravity_jump with flap: true plus gap_walls/.test(before) && /their words win over these defaults/.test(before), 'the genre-convention rules (Bayan) are in the system prompt');
 console.log('system prompt, characters (same gold examples in both, so the difference is the menu):');
 for (const [name, ctx] of Object.entries(SAMPLES)) {
   const after = P.system(catalog, { examples: ex.text, context: ctx });
@@ -204,6 +205,22 @@ async function compose(args, reply) {
   ok(opted.purposes.includes('requirements judge') && opted.purposes.filter((p) => /microgame (draft|revision)/.test(p)).length >= 2 && opted.out.stats.requirements?.judged === true, `requirements_repair: judge and one revise (${opted.purposes.join(', ')})`);
   const none = await run(SAMPLES.dodge);
   ok(none.out.stats.requirements?.must_total === 0, 'no requirements: zeros');
+}
+
+{ // layout: code fixes before the gate and a lint after, from server-side hooks (no Chrome here: pixels off)
+  const { fixLayout } = await import('../expander/layout-fix.mjs');
+  const { layoutCheck } = await import('../playtest/layout-check.mjs');
+  let fixCalls = 0;
+  const hooks = { fixLayout: (g, o) => { fixCalls++; return fixLayout(g, { ...o, pixels: false }); }, layoutCheck: (g, o) => layoutCheck(g, { ...o, pixels: false }) };
+  const events = [];
+  const ask = async (s, u, purpose) => ({ content: JSON.stringify(/score review/.test(purpose) ? { ok: true, issues: [] } : tide), model: 'fake' });
+  const out = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), ask, (e) => events.push(e), hooks));
+  ok(fixCalls >= 1 && typeof out.stats.layoutFixes === 'number' && !out.stats.layoutFixError, `layout fixes ran before the gate (${out.stats.layoutFixes} fixes${out.stats.layoutFixError ? `, ${out.stats.layoutFixError}` : ''})`);
+  ok(out.stats.layout && Array.isArray(out.stats.layout.warnings) && out.gate.passed, `layout lint is a warning list (${out.stats.layout?.warnings?.length} warnings${out.stats.layout?.error ? `, ${out.stats.layout.error}` : ''})`);
+  ok(out.stats.layoutFixes === 0 || events.some((e) => e.kind === 'layout_fixed' && /Tidied the layout/.test(e.summary)), 'layout_fixed event when something changed');
+  fixCalls = 0;
+  const off = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: { ...SAMPLES.dodge, layout_fix: false } }), ask, () => {}, hooks));
+  ok(fixCalls === 0 && off.stats.layoutFixes === undefined, 'layout_fix false: no fixes');
 }
 
 console.log(`${passed} passed, ${failed} failed`);

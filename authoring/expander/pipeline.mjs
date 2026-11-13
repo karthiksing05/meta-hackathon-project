@@ -82,6 +82,7 @@ export function summarize(e) {
     case 'done': return `${e.title} is ready`;
     case 'failed': return `Couldn't finish: ${e.reason}`;
     case 'drawing': return 'Muse is drawing the pictures';
+    case 'layout_fixed': return `Tidied the layout (${e.count} ${e.count === 1 ? 'fix' : 'fixes'})`;
     case 'requirements_checked': return e.must_total ? `Checked what you asked for: ${e.must_passed} of ${e.must_total} must-haves` : 'Checked what you asked for';
     case 'drawn': return e.ok ? `Drew ${e.pictures} pictures` : `Kept the drawn-in art: ${e.reason}`;
     default: return '';
@@ -132,7 +133,10 @@ const blockingOf = (report) => (report.flags ?? []).filter((f) => f.blocking);
  * each returning a parsed object (gate a Promise). opts: { ask, onEvent, signal, maxRepairRounds, polish }.
  * Returns { manifest, stats, bots, gate, quality }. Throws GenerationError when the game never validates.
  */
-export async function composeGame({ request, brief, base = null, context = null }, studio, { ask, onEvent = () => {}, signal, maxRepairRounds = MAX_REPAIR_ROUNDS, polish = true, scoreCheck = true, scoreReview = true, media = null } = {}) {
+export async function composeGame({ request, brief, base = null, context = null }, studio, { ask, onEvent = () => {}, signal, maxRepairRounds = MAX_REPAIR_ROUNDS, polish = true, scoreCheck = true, scoreReview = true, media = null, hooks = null } = {}) {
+  // Server-side hooks the caller passes in (functions, so not bundled or sent as JSON): image/decode/deflate
+  // for picture art, fixLayout/layoutCheck (expander/layout-fix.mjs, playtest/layout-check.mjs) for layout.
+  const H = hooks ?? media ?? {};
   const started = Date.now();
   const stats = { firstDraftValid: null, repairRounds: 0, playtestRepair: false, passedGate: false, polished: false, museCalls: 0, models: [], examples: [], seconds: 0, calls: [] };
   const emit = (e) => onEvent({ ...e, summary: summarize(e) });
@@ -150,6 +154,30 @@ export async function composeGame({ request, brief, base = null, context = null 
     return text;
   };
   request = String(request ?? '').trim();
+  const engineOf = () => { try { return typeof studio.engine === 'function' ? studio.engine() : null; } catch { return null; } };
+  // Layout fixes in code (layout-fix.mjs), after expand and before the gate: presentation only, so rules
+  // and replays don't change. On unless context.layout_fix is false; without Chrome only the structural
+  // fixes run. Any failure keeps the game as it was.
+  const layoutPass = async (expansion) => {
+    if (context?.layout_fix === false || typeof H.fixLayout !== 'function' || !expansion?.game_json) return expansion;
+    try {
+      const engine = engineOf();
+      const r = await H.fixLayout(JSON.parse(expansion.game_json), { engine });
+      const count = r?.fixes?.length ?? 0;
+      stats.layoutFixes = (stats.layoutFixes ?? 0) + count;
+      if (!count || !r.game) return expansion;
+      let playtest = expansion.playtest_game_json;
+      if (playtest) {
+        const r2 = await H.fixLayout(JSON.parse(playtest), { engine });
+        playtest = JSON.stringify(r2?.game ?? JSON.parse(playtest));
+      }
+      emit({ kind: 'layout_fixed', count });
+      return { ...expansion, game: r.game, game_json: JSON.stringify(r.game), ...(playtest ? { playtest_game_json: playtest } : {}) };
+    } catch (e) {
+      stats.layoutFixError = String(e?.message ?? e).slice(0, 200);
+      return expansion;
+    }
+  };
 
   try {
     brief = normalizeBrief(brief ?? base?.brief ?? {});
@@ -205,7 +233,7 @@ export async function composeGame({ request, brief, base = null, context = null 
       while (!chosen) {
         live();
         emit({ kind: 'expanding' });
-        const expansion = studio.expand(reply);
+        let expansion = studio.expand(reply);
         const shown = expansion.authoring_json ?? reply;
         if (stats.firstDraftValid === null) stats.firstDraftValid = !!expansion.ok;
         if (!expansion.ok) {
@@ -220,6 +248,7 @@ export async function composeGame({ request, brief, base = null, context = null 
           reply = await call(system, P.repair(request, shown, issues, repairs), `microgame repair ${repairs}`);
           continue;
         }
+        expansion = await layoutPass(expansion);
         emit({ kind: 'playtesting', bots: BOT_COUNT });
         const report = await studio.gate(expansion.playtest_game_json || expansion.game_json, 1, gateOptions);
         const blocking = blockingOf(report);
@@ -247,8 +276,9 @@ export async function composeGame({ request, brief, base = null, context = null 
         emit({ kind: 'polishing', issues: quality.lines });
         const text = await call(system, P.polish(request, chosen.expansion.authoring_json, quality.lines), 'microgame polish');
         emit({ kind: 'expanding' });
-        const expansion = studio.expand(text);
+        let expansion = studio.expand(text);
         if (expansion.ok) {
+          expansion = await layoutPass(expansion);
           const q2 = studio.quality(expansion.authoring_json, request);
           if (q2.score > quality.score) {
             emit({ kind: 'playtesting', bots: BOT_COUNT });
@@ -291,11 +321,11 @@ export async function composeGame({ request, brief, base = null, context = null 
     // images, muse-image redraws the pictures behind the same asset ids, so rules and replays don't change
     // and no re-gate is needed. Any failure keeps the SVG art.
     let imageArt = null;
-    if (wantsImageArt(context, media)) {
+    if (wantsImageArt(context, H)) {
       emit({ kind: 'drawing' });
       const spec = context.plan.spec ?? null;
       const style = spec?.theme?.art_style ?? null;
-      const deps = { image: media.image, decode: media.decode, deflate: media.deflate, ask: call };
+      const deps = { image: H.image, decode: H.decode, deflate: H.deflate, ask: call };
       const t0 = Date.now();
       try {
         let authoring = expansion.authoring;
@@ -355,7 +385,7 @@ export async function composeGame({ request, brief, base = null, context = null 
           const failures = repairTargets(report);
           if (failures.length && !base) {
             try {
-              const revised = await composeGame({ request: repairRequest(failures), brief, base: { id: manifest.id, title: manifest.title, one_line_rule: manifest.one_line_rule, brief, seed: manifest.seed, authoring_json: manifest.content.authoring_json }, context: { ...context, requirements_repair: false } }, studio, { ask, onEvent, signal, maxRepairRounds, polish: false, scoreCheck, scoreReview, media: null });
+              const revised = await composeGame({ request: repairRequest(failures), brief, base: { id: manifest.id, title: manifest.title, one_line_rule: manifest.one_line_rule, brief, seed: manifest.seed, authoring_json: manifest.content.authoring_json }, context: { ...context, requirements_repair: false } }, studio, { ask, onEvent, signal, maxRepairRounds, polish: false, scoreCheck, scoreReview, hooks: { fixLayout: H.fixLayout, layoutCheck: H.layoutCheck } });
               const after = revised.stats?.requirements;
               if (revised.gate?.passed && after && after.must_passed > report.summary.must_passed) reqRepaired = revised;
             } catch (e) { if (e?.name === 'GenerationError') throw e; }
@@ -368,6 +398,16 @@ export async function composeGame({ request, brief, base = null, context = null 
       }
     } else {
       stats.requirements = { must_passed: 0, must_total: 0, note: '', gaps: [] };
+    }
+    // Layout lint (layout-check.mjs): findings are warnings in stats.layout and never block.
+    if (typeof H.layoutCheck === 'function') {
+      try {
+        const lint = await H.layoutCheck(expansion.playtest_game_json || expansion.game_json, { engine: engineOf() });
+        const findings = Array.isArray(lint?.findings) ? lint.findings : [];
+        stats.layout = { counts: lint?.counts ?? null, pixels: !!lint?.pixels, warnings: findings.slice(0, 20).map((f) => ({ code: f.code, node: f.node, message: f.message })) };
+      } catch (e) {
+        stats.layout = { error: String(e?.message ?? e).slice(0, 200) };
+      }
     }
     emit({ kind: 'requirements_checked', must_passed: stats.requirements.must_passed, must_total: stats.requirements.must_total });
     if (reqRepaired) {

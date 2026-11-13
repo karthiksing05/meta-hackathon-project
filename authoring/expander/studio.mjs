@@ -558,7 +558,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
    * (or {content, model}); onEvent gets {kind, summary, …}. base (a microgame manifest with
    * content.authoring_json) makes it a revision.
    */
-  async function compose(argsJSON, ask, onEvent, media = null) {
+  async function compose(argsJSON, ask, onEvent, hooks = null) {
     const a = typeof argsJSON === 'string' ? JSON.parse(argsJSON) : argsJSON;
     let base = null;
     if (a.base) {
@@ -572,9 +572,10 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       maxRepairRounds: a.max_repair_rounds, polish: a.polish !== false,
       // On by default; score_check: false or score_review: false opt out.
       scoreCheck: a.score_check !== false, scoreReview: a.score_review !== false,
-      // Picture art: {image, decode, deflate} from the caller (functions, so not in argsJSON); used when the
-      // plan says art "image" (docs/harness-gaps/images.md).
-      media: media && typeof media === 'object' ? media : null,
+      // Server-side hooks from the caller (functions, so not in argsJSON): {image, decode, deflate} for
+      // picture art when the plan says art "image" (docs/harness-gaps/images.md), and {fixLayout,
+      // layoutCheck} for the layout pass and lint (expander/layout-fix.mjs, playtest/layout-check.mjs).
+      hooks: hooks && typeof hooks === 'object' ? hooks : null,
     });
     return JSON.stringify(out);
   }
@@ -590,6 +591,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       storyGate: async (json, graph, manifest) => JSON.parse(await storyGate(json, graph, manifest)),
       quality: (text, request) => JSON.parse(quality(text, request)),
       wrap: (opts) => JSON.parse(wrap(opts)),
+      engine: () => engine(),
       requirementsCheck: async (json, manifest, reqs, judge) => JSON.parse(await requirementsCheck(json, JSON.stringify(manifest), JSON.stringify(reqs), judge ? JSON.stringify(judge) : null)),
     };
   }
