@@ -2,8 +2,8 @@
 
 Every Curio should look like one illustrator made it for a phone: full-bleed art to every edge, one
 style for the background, the pieces, the panels and the type, nothing overlapping, every word readable
-at a glance, calm motion, and a clear focal point. This pipeline gets a game there in at most **4 image
-calls** and leaves the rest to the agent's eye. Three gold games were rebuilt with it and are the
+at a glance, calm motion, and a clear focal point. This pipeline gets a game there in at most **5 image
+calls** (frame, wordmark, backdrop, sprites, UI kit) and leaves the rest to the agent's eye. Three gold games were rebuilt with it and are the
 references: Pop Mart Labubu Blind Box (`s3`), Fog Over the Bay and Guess the Decade (`k20`, seeded).
 
 Code: `authoring/artdir/` and `authoring/tools/art-direct.mjs`. Tests: `node authoring/artdir/test-artdir.mjs`.
@@ -47,10 +47,18 @@ Download the Prod manifest (`GET /v1/games/{id}` gives `manifestUrl`). Dump its 
 rules. Decide:
 
 - **Seeded** (it has Daily, Group or board runs on Prod: grep its id in `game-backups/demo-world` and
-  `team-world` state files)? Then **presentation only**: the rules hash
-  (`testbed/rebuild.mjs rulesHash`, everything except `presentation`) must not move, and it **covers
-  `assets`**, so no new pictures. Draw the direction with engine shapes (rect, circle, poly, line) and
-  the game's existing assets. Set `"presentationOnly": true` in the direction.
+  `team-world` state files)? **New pictures are allowed** (policy since 2026-11-13: images don't change
+  the simulation). Give it a backdrop, sprites, a UI kit and a wordmark like any game, but keep every
+  rule, input, handler and the tap targets' order **and their boxes** (the server replays raw input
+  logs, so a tap must land on the same target at the same spot). Set `"seeded": true` in the direction
+  (or pass `--seeded`). The proof, run by `finish.mjs`:
+  - the **logic hash** (`finish.logicHash`: everything except `presentation` and `assets`) must not move;
+  - the **seeded run logs still replay**: the demo-seed bots (`tools/demo-seed/bots.mjs`, the same runs
+    the seed tools posted) play the Prod game, and each raw log is verified on the new game text
+    (`MicrogameEngine.verify`, what the server does) to the same phase and score
+    (`record.seededLogs`, `--seed-runs n`, default 6).
+  The rules hash (with assets) is still recorded but no longer gates. `presentationOnly: true` (shapes
+  only, no new pictures) is still accepted for a game you want to leave byte-identical in assets.
 - **Unseeded**: new assets and a new presentation; rules only if they are broken, and the replay proof
   below must still hold.
 
@@ -76,6 +84,21 @@ node authoring/tools/art-direct.mjs frame --direction d.json --out run/<key> $C
 One picture of the playing screen as it should look, tall like a phone, with calm zones behind the HUD
 and the play area (`prompts.framePrompt`). Look at `run/<key>/frame.png`. If it isn't the game you
 want, fix the direction and spend one more call; everything downstream follows this picture.
+
+### 2b. Wordmark (1 call)
+
+```sh
+node authoring/tools/art-direct.mjs wordmark --direction d.json --out run/<key> $C
+```
+
+The title lettered in the game's own style (`prompts.wordmarkPrompt`, the one prompt that asks for
+letters: exactly the title, nothing else) on a flat chroma key (`wordmark.key`, default green; pick
+magenta for green lettering), keyed, despilled, trimmed, specks far from the letters dropped
+(`sheets.finishWordmark`), fitted to 720 px: `wordmark.png` + `wordmark.json`. Optional direction fields:
+`wordmark.text` (lettering, defaults to the title), `wordmark.lettering` (a sentence on the letterforms),
+`wordmark.layout`, `wordmark.px`. Check the spelling in the picture; a misspelt wordmark is redrawn
+(one more call) or dropped for the kit's display face. Use it on the intro and the end card with
+`build.wordmark(art, cx, cy, maxW, maxH)`; `artAssets` adds it as the `wordmark` asset.
 
 ### 3. Kit from the frame (0 calls)
 
@@ -122,6 +145,11 @@ Write `authoring/artdir/gold/<key>.mjs` exporting `build(prodGame, art)` that re
   `title`, `display`, `hero`; `numerals: true` for scores).
 - `artAssets(art)`: backdrop, sprites and the baked frames as `game.assets`. Call it last.
 - Draw several sprites from one node with an asset expression: `"asset": "= 'f' + str(idx)"`.
+- `wordmark(art, cx, cy, maxW, maxH)`: the title wordmark fitted into a box (intro, end card).
+- `appHooks(art)`: the manifest's `presentation.app` for the app (docs/BUBBLES.md 7.11, "App hooks":
+  `cover`, `wordmark`, `palette`, `fonts`). The build step writes it on the manifest (never inside
+  game_json: the engine refuses unknown presentation keys); a builder may export `app(art, game)` to
+  override it.
 - `nine.skinRects(game, kit)` swaps plain panel and button rects for frames in a game you don't
   rewrite by hand.
 

@@ -19,9 +19,14 @@ export function directionErrors(d) {
   need('style', d?.style);
   need('frame.scene', d?.frame?.scene);
   need('frame.focal', d?.frame?.focal);
-  // A seeded game (presentation only: no new assets) needs no backdrop: its art is drawn as shapes.
-  if (!d?.presentationOnly) need('backdrop.scene', d?.backdrop?.scene);
-  else if (d.sprites || d.ui) errs.push('presentationOnly games get no sprites or ui sheets (new assets change the rules hash)');
+  // A seeded game may take new pictures too (images don't change the simulation; the proof is that its
+  // seeded run logs still replay to the same score, finish.mjs). Only a presentation-only direction
+  // that draws everything as shapes may leave the backdrop out.
+  if (!d?.presentationOnly || d?.backdrop) need('backdrop.scene', d?.backdrop?.scene);
+  if (d?.wordmark !== undefined) {
+    if (d.wordmark.key && !KEY_TEXT[d.wordmark.key]) errs.push(`wordmark.key is one of ${Object.keys(KEY_TEXT).join(', ')}`);
+    if (d.wordmark.text !== undefined && (typeof d.wordmark.text !== 'string' || !d.wordmark.text.trim() || d.wordmark.text.length > 40)) errs.push('wordmark.text is the title as lettered (1 to 40 characters)');
+  }
   if (d?.sprites !== undefined) {
     if (!Array.isArray(d.sprites?.items) || !d.sprites.items.length) errs.push('sprites.items must list the items to draw');
     else d.sprites.items.forEach((it, i) => { if (!/^[a-z][a-z0-9_]{0,23}$/.test(it?.id ?? '')) errs.push(`sprites.items[${i}].id must be a lowercase asset id`); need(`sprites.items[${i}].text`, it?.text); });
@@ -82,4 +87,19 @@ export function uiSheetPrompt(d) {
   const key = d.ui.key ?? 'magenta';
   const m = d.ui.material;
   return `Game UI kit sheet for "${d.title}": exactly 4 separate empty interface frames in a grid of 2 columns and 2 rows, each centered in its own cell with wide empty margins, nothing touching: (1) top left, a large empty portrait card panel, ${m}, rounded corners, a clear even border all round and a plain flat empty middle; (2) top right, a wide empty pill-shaped button, ${m}, ${d.ui.button ?? 'a slightly raised edge'}, flat empty middle; (3) bottom left, a small empty rounded-square badge plaque, ${m}; (4) bottom right, a wide empty horizontal banner plaque with a flat middle, ${m}. Every frame is seen straight on, flat lit, perfectly symmetrical, with straight even sides and the same border thickness all round, no perspective, no tilt, no icons, no ornaments in the middle. Art style: ${d.style}.${palText(d)} Background: one flat solid ${KEY_TEXT[key]} everywhere, no gradient, no shadows on the background. ${NO_TEXT}`;
+}
+
+/** The words a wordmark spells: the direction's `wordmark.text`, else the title. */
+export const wordmarkText = (d) => (d.wordmark?.text ?? d.title).trim();
+
+/**
+ * The title wordmark: one image call, the game's title lettered in the game's own style on a flat
+ * chroma key (keyed and trimmed by sheets.finishWordmark). The only prompt that asks for letters: exactly
+ * the title, spelled as written, and nothing else.
+ */
+export function wordmarkPrompt(d) {
+  const w = d.wordmark ?? {};
+  const key = w.key ?? 'green';
+  const words = (w.text ?? d.title).trim();
+  return `Game title logo lettering, the wordmark for a mobile game: the exact words "${words}" and nothing else, spelled exactly like that, every letter clearly readable. ${w.lettering ?? 'Chunky, characterful display lettering with a bold outline and a little depth, like a toy-box or arcade title'}, in the same art style as the game: ${d.style}.${palText(d)} ${w.layout ?? 'Set on one or two lines, centered, as wide as it is readable'}, filling most of the picture with wide empty margins all round, nothing cropped. No characters, no mascot, no icons, no scenery, no frame, no badge behind it, no tagline, no other words. Background: one flat solid ${KEY_TEXT[key]} everywhere, no gradient, no glow onto the background, no shadow on the background, and no ${key} anywhere in the lettering.`;
 }

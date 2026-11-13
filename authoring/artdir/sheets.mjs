@@ -234,3 +234,23 @@ function stretch(img, W, H) {
   }
   return out;
 }
+
+/**
+ * A wordmark reply keyed out of its chroma colour, cast removed and trimmed, then fitted to `px` on
+ * its longest side. Specks far from the letters (a stray sparkle) are dropped by keeping the bounding
+ * box of the connected regions that hold most of the ink.
+ */
+export function finishWordmark(img, key = 'green', px = 720, { hard = false } = {}) {
+  const keyed = despill(X.erodeAlpha(X.chromaKey(img, X.detectKey(img, KEY_RGB[key] ?? KEY_RGB.green)), 1), key, { hard });
+  let t = X.trim(keyed, { min: 40, pad: 4 });
+  const regions = X.components(t, { join: 0.04 });
+  if (regions.length) {
+    const total = regions.reduce((s, r) => s + r.n, 0);
+    const keep = regions.filter((r) => r.n >= total * 0.01);
+    const x0 = Math.min(...keep.map((r) => r.x)), y0 = Math.min(...keep.map((r) => r.y));
+    const x1 = Math.max(...keep.map((r) => r.x + r.w)), y1 = Math.max(...keep.map((r) => r.y + r.h));
+    t = X.trim(X.crop(t, x0, y0, x1 - x0, y1 - y0), { min: 40, pad: 4 });
+  }
+  const k = Math.min(1, px / Math.max(t.w, t.h));
+  return k < 1 ? X.sharpen(X.resize(t, Math.max(1, Math.round(t.w * k)), Math.max(1, Math.round(t.h * k))), 0.2) : t;
+}

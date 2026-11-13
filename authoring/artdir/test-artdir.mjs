@@ -9,8 +9,9 @@ import * as X from '../expander/image-pixels.mjs';
 import { paletteFromFrame, extractSwatches, contrast, rgbOf } from './palette.mjs';
 import { kitFromFrame } from './kit.mjs';
 import { nineSlice, skinRects } from './nine.mjs';
-import { nineInsets, sliceCells, cutNine, bakeNine, despill, toTall } from './sheets.mjs';
-import { directionErrors, framePrompt, spriteSheetPrompt, uiSheetPrompt, backdropPrompt, gridFor } from './prompts.mjs';
+import { nineInsets, sliceCells, cutNine, bakeNine, despill, toTall, finishWordmark } from './sheets.mjs';
+import { logicHash } from './finish.mjs';
+import { directionErrors, framePrompt, spriteSheetPrompt, uiSheetPrompt, backdropPrompt, gridFor, wordmarkPrompt, wordmarkText } from './prompts.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 let n = 0;
@@ -116,7 +117,34 @@ test('prompts: the gold directions are valid and every prompt says no text', () 
   assert.deepEqual(gridFor(12), { cols: 4, rows: 3 });
   assert.deepEqual(gridFor(4), { cols: 2, rows: 2 });
   assert.ok(directionErrors({ title: 'x' }).length > 0);
-  assert.ok(directionErrors({ title: 'x', style: 's', frame: { scene: 'a', focal: 'b' }, presentationOnly: true, ui: { material: 'm' } }).some((e) => /presentationOnly/.test(e)));
+  // Seeded games may take new pictures now (2026-11-13): sprites and a UI kit are allowed.
+  assert.deepEqual(directionErrors({ title: 'x', style: 's', frame: { scene: 'a', focal: 'b' }, presentationOnly: true, ui: { material: 'm' } }), []);
+  assert.ok(directionErrors({ title: 'x', style: 's', frame: { scene: 'a', focal: 'b' }, presentationOnly: true, backdrop: {} }).some((e) => /backdrop.scene/.test(e)));
+});
+
+test('wordmark: the one prompt that letters, keyed and trimmed, specks dropped', () => {
+  const d = { title: 'Guess the Decade', style: 'synthwave neon', frame: { scene: 'a', focal: 'b' }, backdrop: { scene: 'c' }, wordmark: { key: 'magenta' } };
+  assert.deepEqual(directionErrors(d), []);
+  const p = wordmarkPrompt(d);
+  assert.match(p, /"Guess the Decade"/);
+  assert.match(p, /pure magenta/);
+  assert.doesNotMatch(p, /No letters/);
+  assert.equal(wordmarkText({ title: ' A ', wordmark: { text: 'B' } }), 'B');
+  assert.ok(directionErrors({ ...d, wordmark: { key: 'red' } }).some((e) => /wordmark.key/.test(e)));
+  assert.ok(directionErrors({ ...d, wordmark: { text: '' } }).some((e) => /wordmark.text/.test(e)));
+  // Letters: a dark bar on magenta, plus a far speck in the corner.
+  const img = fill(200, 100, (x, y) => ((x >= 40 && x < 160 && y >= 35 && y < 65) || (x >= 2 && x < 4 && y >= 2 && y < 4) ? [30, 20, 60] : [255, 0, 255]));
+  const w = finishWordmark(img, 'magenta', 720);
+  assert.ok(w.w >= 118 && w.w <= 132, `trimmed width ${w.w}`);
+  assert.ok(w.h >= 28 && w.h <= 42, `trimmed height ${w.h}`);
+  assert.equal(finishWordmark(img, 'magenta', 60).w, 60, 'fitted to px');
+});
+
+test('seeded policy: logic hash ignores presentation and pictures, not rules', () => {
+  const g = { state: { s: 0 }, inputs: { tap: {} }, assets: { a: { image: 'data:x' } }, presentation: { root: {} } };
+  const h = logicHash(g);
+  assert.equal(logicHash({ ...g, assets: { a: { image: 'data:y' }, b: { image: 'data:z' } }, presentation: { root: { node: 'group' } } }), h);
+  assert.notEqual(logicHash({ ...g, state: { s: 1 } }), h);
 });
 
 console.log(`${n} tests passed`);

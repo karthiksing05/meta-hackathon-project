@@ -3,8 +3,11 @@
 //
 //   const {manifest, record} = await finish(prodManifest, newGame, {kit, seeded, profile, notes})
 //
-// - rules hash (testbed/rebuild.mjs rulesHash: everything but `presentation`): a seeded game (Daily,
-//   Group or board runs on Prod) must keep it exactly; finish refuses otherwise (record.ok false).
+// - logic hash (`logicHash`: everything but `presentation` and `assets`): a seeded game (Daily, Group
+//   or board runs on Prod) must keep it exactly, and its seeded run logs must still replay: bot runs
+//   recorded on the Prod game (tools/demo-seed/bots.mjs, the logs the seed tools post) are verified raw
+//   on the new game and must give the same phase and score (`record.seededLogs`). New pictures are
+//   allowed: images don't change the simulation. The rules hash (with assets) is still recorded.
 // - replays: every gate run, recorded on the Prod game, replayed on the new one with each tap moved to
 //   the same hit target (and a tap on nothing to a spot with nothing, unless an input reads raw pointer
 //   positions), gives the same state hash at every input and at the end. This holds for unseeded games too, so new art never changes how a run plays.
@@ -18,6 +21,35 @@ import { apply } from '../playtest/bots.mjs';
 import { styleColors } from '../expander/wrap.mjs';
 import { rulesHash } from '../testbed/rebuild.mjs';
 import { DT } from '../playtest/bots.mjs';
+import { createHash } from 'node:crypto';
+
+/** Hash of the simulation: the game without `presentation` and `assets` (pictures don't change a run). */
+export function logicHash(game) {
+  const g = typeof game === 'string' ? JSON.parse(game) : game;
+  const { presentation: _p, assets: _a, ...logic } = g ?? {};
+  return createHash('sha256').update(JSON.stringify(logic)).digest('hex').slice(0, 16);
+}
+
+/**
+ * The seeded-run proof: `n` bot runs (skills 0.25 to 0.95, fixed bot seeds) recorded on the old game's
+ * exact text with the demo-seed bots, each log verified raw (the server's replay) on the new text.
+ * {same, runs: [{skill, score, replayed, equal}]}.
+ */
+export async function seededLogProof(oldText, newText, { n = 6, seed = 1 } = {}) {
+  const { playRun, loadBots } = await import('../../tools/demo-seed/bots.mjs');
+  const { verify } = loadBots();
+  const runs = [];
+  for (let i = 0; i < n; i++) {
+    const skill = Math.round((0.25 + (0.7 * i) / Math.max(1, n - 1)) * 100) / 100;
+    const r = playRun(oldText, { seed: seed + (i % 3), skill, botSeed: 1000 + i });
+    if (!r) { runs.push({ skill, error: true, equal: false }); continue; }
+    const a = verify(oldText, r.log), b = verify(newText, r.log);
+    const sc = (v) => Math.round(v?.score ?? v?.status?.score ?? NaN);
+    const ph = (v) => v?.phase ?? v?.status?.phase ?? null;
+    runs.push({ skill, phase: r.phase, score: r.score, replayed: sc(b), equal: sc(a) === sc(b) && ph(a) === ph(b) && sc(a) === r.score });
+  }
+  return { same: runs.filter((r) => r.equal).length, runs };
+}
 
 const STD_ROLES = ['bg', 'surface', 'primary', 'secondary', 'accent', 'ink', 'danger'];
 
@@ -62,7 +94,7 @@ export function replayEqual(eng, jsonA, jsonB, { seed, actions = [], maxSteps })
   } finally { a.dispose(); b.dispose(); }
 }
 
-export async function finish(prod, game, { kit = null, seeded = false, profile = null, notes = {}, engine = null, budgetMs = 240000 } = {}) {
+export async function finish(prod, game, { kit = null, seeded = false, seedRuns = 6, profile = null, notes = {}, engine = null, budgetMs = 240000 } = {}) {
   const eng = engine ?? (await loadEngine()).engine;
   const old = JSON.parse(prod.content.game_json);
   const record = { ok: true, seeded, rulesHash: { prod: rulesHash(old), built: null, same: null } };
@@ -85,7 +117,13 @@ export async function finish(prod, game, { kit = null, seeded = false, profile =
   // Rules hash and replays against Prod.
   record.rulesHash.built = rulesHash(built);
   record.rulesHash.same = record.rulesHash.built === record.rulesHash.prod;
-  if (seeded && !record.rulesHash.same) { record.ok = false; record.why = 'seeded game: rules hash changed'; }
+  record.logicHash = { prod: logicHash(old), built: logicHash(built) };
+  record.logicHash.same = record.logicHash.prod === record.logicHash.built;
+  if (seeded && !record.logicHash.same) { record.ok = false; record.why = 'seeded game: logic hash changed'; }
+  if (seeded && seedRuns > 0) {
+    record.seededLogs = await seededLogProof(prod.content.game_json, JSON.stringify(built), { n: seedRuns });
+    if (record.seededLogs.same !== record.seededLogs.runs.length) { record.ok = false; record.why = (record.why ? record.why + '; ' : '') + 'a seeded run log replays differently'; }
+  }
   const prodGate = await playtest(JSON.stringify(old), { seed: 1, maxSeconds: 120, profile });
   const maxSteps = Math.round((120 * 1000) / DT);
   const runs = [...prodGate.runs.map((r) => ({ from: 'prod', ...r })), { from: 'idle', replay: { seed: 1, actions: [] }, bot: { label: 'idle' } }];
@@ -100,6 +138,7 @@ export async function finish(prod, game, { kit = null, seeded = false, profile =
     style: { ...(prod.style ?? {}), colors: styleColors(built) },
     content: { ...base.content, game_json: JSON.stringify(built) },
     ...(notes.artRecord ? { art_record: notes.artRecord } : {}),
+    ...(notes.app ? { presentation: { ...(prod.presentation ?? {}), app: notes.app } } : {}),
   };
   return { manifest, record };
 }

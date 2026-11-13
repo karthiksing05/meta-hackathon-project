@@ -1644,6 +1644,15 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   that opened muted or before the first tap still has its sounds and music once audio starts.
 - Taps, drags and holds are forwarded; a quick flick is also sent as a swipe. The runtime has no key
   events, so microgames must be playable by touch, apart from typed text (next item).
+- **App hooks.** A microgame manifest may carry `presentation.app` **on the manifest** (next to
+  `content`, never inside `game_json`, whose `presentation` the engine checks key by key), so the feed
+  card, the game's intro handoff and the result sheet can wear the game's look:
+  `{"cover": "<asset id>", "wordmark": "<asset id>", "palette": {"bg", "surface", "primary",
+  "on_primary", "accent", "ink"}, "fonts": {"display", "text", "numerals"}}`. `cover` and `wordmark`
+  name entries of `game_json`'s `assets` (data URIs: the cover is the 360 × 780 backdrop, the wordmark
+  the title lettered in the game's style on transparency); colours are `#RRGGBB`; fonts are family
+  names of bundled faces (`gamefont-*`). Every field is optional and the app falls back to its own
+  chrome. Written by the art-direction pipeline (`authoring/ARTDIR.md`); the engine never reads it.
 - **Text field.** A game with a text input (`{"text": "submit"}` or `{"text": "change"}` sources, so
   `game.meta.text_input` is set; `engine/SPEC-v0.2.md` 4) gets a native `<input>` over the game at
   `presentation.text_field` (canvas units; without it, a bar at the bottom like the engine's shell),

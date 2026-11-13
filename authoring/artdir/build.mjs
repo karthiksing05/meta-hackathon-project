@@ -41,6 +41,8 @@ export function loadArt(dir) {
     // The nine pieces, for live (expression-sized) frames on engines without crops (nine.mjs mode 'pieces').
     art.ui[id].pieces = cutNine(img, p.insets).map((pc) => ({ uri: uri('image/png', encodePNG(pc, deflate)), w: Math.round((pc.w / 2) * 100) / 100, h: Math.round((pc.h / 2) * 100) / 100 }));
   }
+  const wm = read('wordmark.png');
+  if (wm) art.wordmark = { uri: uri('image/png', wm), ...pngSize(wm) };
   art.deflate = deflate;
   return art;
 }
@@ -61,6 +63,7 @@ export function artAssets(art, { prefix = '', skip = [], ui: used = null } = {})
   for (const [id, u] of Object.entries(art.ui)) {
     if (used && used.includes(id)) u.pieces.forEach((p, k) => { assets[`ui_${id}_${k}`] = { image: p.uri, w: p.w, h: p.h }; });
   }
+  if (art.wordmark && !skip.includes('wordmark')) assets.wordmark = { image: art.wordmark.uri, w: Math.round(art.wordmark.w / 2), h: Math.round(art.wordmark.h / 2) };
   // Frames baked at their box by frame() (call artAssets after building the presentation).
   Object.assign(assets, art.baked);
   return assets;
@@ -102,4 +105,31 @@ export function text(art, step, value, props = {}) {
     color: '$ink',
     ...rest,
   };
+}
+
+/**
+ * The title wordmark as one image node, fitted into a box `maxW` × `maxH` centred on (cx, cy) keeping
+ * its aspect. For the intro and the end card. null when the run folder has no wordmark.png.
+ */
+export function wordmark(art, cx, cy, maxW = 300, maxH = 130, props = {}) {
+  if (!art.wordmark) return null;
+  const aw = art.wordmark.w / 2, ah = art.wordmark.h / 2;
+  const k = Math.min(maxW / aw, maxH / ah);
+  const w = Math.round(aw * k), h = Math.round(ah * k);
+  return { node: 'image', asset: 'wordmark', x: Math.round(cx - w / 2), y: Math.round(cy - h / 2), w, h, ...props };
+}
+
+/**
+ * The manifest's `presentation.app` (docs/BUBBLES.md 7.11, "App hooks"): what the app shows around the
+ * game: the feed card's cover picture and wordmark (asset ids in game_json's `assets`), the palette the
+ * result sheet uses, and the game's fonts. It sits on the manifest, next to `content`, never inside
+ * game_json (the engine refuses unknown presentation keys). finish.mjs writes it from `notes.app`.
+ */
+export function appHooks(art, { cover = 'backdrop', wordmark: wm = art.wordmark ? 'wordmark' : null } = {}) {
+  const p = art.kit.palette ?? {};
+  const pick = (k) => p[k] ?? p.roles?.[k];
+  const palette = Object.fromEntries(['bg', 'surface', 'primary', 'on_primary', 'accent', 'ink'].map((k) => [k, pick(k)]).filter(([, v]) => v));
+  const steps = art.spec?.steps ?? {};
+  const fonts = { display: steps.display?.family ?? steps.title?.family ?? null, text: steps.body?.family ?? null, numerals: art.spec?.numerals?.family ?? null };
+  return { ...(cover ? { cover } : {}), ...(wm ? { wordmark: wm } : {}), palette, fonts: Object.fromEntries(Object.entries(fonts).filter(([, v]) => v)) };
 }

@@ -5,6 +5,7 @@
 //   node authoring/tools/art-direct.mjs kit   --direction d.json --out dir   # 0 calls: palette, fonts, shape
 //   node authoring/tools/art-direct.mjs art   --direction d.json --out dir [--only backdrop,sprites,ui]
 //                                                                           # ≤ 3 calls: backdrop, sprite sheet, UI kit sheet
+//   node authoring/tools/art-direct.mjs wordmark --direction d.json --out dir   # 1 image call: the title lettered in the style, keyed, trimmed
 //   node authoring/tools/art-direct.mjs build --prod prod.json --builder authoring/artdir/gold/s3.mjs --direction d.json --out dir [--seeded] [--profile p]
 //                                                                           # 0 calls: the game's build script, then finish.mjs
 //   node authoring/tools/art-direct.mjs see   --manifest built.json --out dir [--frame dir/frame.png] [--name s3]
@@ -14,15 +15,15 @@
 // that would go over; --env <.env> reads MUSE_API_KEY from that file (into memory only, never printed).
 //
 // Writes into --out: frame.png (720 × 1560, the frame on the tall canvas at 2×), frame.json, kit.json,
-// backdrop.jpg, sprites/<id>.png + sprites.json, ui/<piece>.png + ui.json (9-slice insets), art.json
+// backdrop.jpg, sprites/<id>.png + sprites.json, ui/<piece>.png + ui.json (9-slice insets), wordmark.png + wordmark.json, art.json
 // (prompts, calls, slicing). The game itself is changed by the game's own build script (ARTDIR.md
 // step 5), which reads these files.
 
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import zlib from 'node:zlib';
-import { directionErrors, framePrompt, backdropPrompt, spriteSheetPrompt, uiSheetPrompt } from '../artdir/prompts.mjs';
-import { toTall, sliceSprites, finishSprite, sliceUi, finishUi, calmZones, contactSheet } from '../artdir/sheets.mjs';
+import { directionErrors, framePrompt, backdropPrompt, spriteSheetPrompt, uiSheetPrompt, wordmarkPrompt, wordmarkText } from '../artdir/prompts.mjs';
+import { toTall, sliceSprites, finishSprite, sliceUi, finishUi, calmZones, contactSheet, finishWordmark } from '../artdir/sheets.mjs';
 import { kitFromFrame } from '../artdir/kit.mjs';
 import { encodePNG, encodeJPEG, quantize, decodePNG } from '../expander/image-codec.mjs';
 import * as X from '../expander/image-pixels.mjs';
@@ -100,11 +101,27 @@ async function stepFrame() {
   console.log(JSON.stringify({ step: 'frame', out: join(out, 'frame.png'), calm: zones, cached: r.cached }));
 }
 
+/** The title wordmark: one call, keyed out of its chroma colour and trimmed to wordmark.png (≤ 720 px). */
+async function stepWordmark() {
+  const d = direction();
+  mkdirSync(out, { recursive: true });
+  const prompt = wordmarkPrompt(d);
+  checkBudget(1);
+  const r = await call('wordmark', prompt);
+  writeFileSync(join(out, 'wordmark-source.bin'), r.bytes);
+  const key = d.wordmark?.key ?? 'green';
+  const img = finishWordmark(r.img, key, Number(d.wordmark?.px ?? 720), { hard: d.wordmark?.despill === 'hard' });
+  writeFileSync(join(out, 'wordmark.png'), png(img));
+  writeFileSync(join(out, 'wordmark.json'), JSON.stringify({ text: wordmarkText(d), key, w: img.w, h: img.h, cached: r.cached }, null, 1));
+  record({ wordmark: { prompt, cached: r.cached, source: [r.img.w, r.img.h], size: [img.w, img.h] } });
+  console.log(JSON.stringify({ step: 'wordmark', out: join(out, 'wordmark.png'), size: [img.w, img.h], cached: r.cached }));
+}
+
 function stepKit() {
   const d = direction();
   const frame = decodePNG(new Uint8Array(readFileSync(join(out, 'frame.png'))), inflate);
   const small = X.resize(frame, 360, 780);
-  const kit = kitFromFrame({ frame: small, words: [d.title, d.style, d.words ?? ''].join(' '), gameId: d.gameId ?? d.title, vibe: d.vibe ?? null, pairing: d.pairing ?? null, mode: d.mode ?? null, shape: d.shape ?? null });
+  const kit = kitFromFrame({ frame: small, words: [d.title, d.style, d.words ?? ''].join(' '), gameId: d.gameId ?? d.title, vibe: d.vibe ?? null, pairing: d.pairing ?? null, hero: d.hero ?? true, mode: d.mode ?? null, shape: d.shape ?? null });
   writeFileSync(join(out, 'kit.json'), JSON.stringify(kit, null, 1));
   console.log(JSON.stringify({ step: 'kit', mode: kit.mode, palette: kit.palette, type: kit.type, fonts: kit.fonts, shape: kit.shape, calm: kit.calm }));
 }
@@ -174,25 +191,28 @@ async function stepSee() {
 }
 
 async function stepBuild() {
-  const { loadArt } = await import('../artdir/build.mjs');
+  const { loadArt, appHooks } = await import('../artdir/build.mjs');
   const { finish } = await import('../artdir/finish.mjs');
   const d = direction();
   const prod = readJSON(opt('--prod'));
   const builder = await import(resolve(opt('--builder')));
   const art = loadArt(out);
   const game = builder.build(JSON.parse(prod.content.game_json), art, { direction: d });
-  const seeded = argv.includes('--seeded') || !!d.presentationOnly;
-  const artRecord = d.presentationOnly ? undefined : { format: 'artdir/1', builtBy: 'harness+opus', imageArt: 'muse-image-1.0', license: 'generated', pictures: Object.keys(game.assets ?? {}).filter((k) => game.assets[k].image) };
-  const { manifest, record } = await finish(prod, game, { kit: art.kit, seeded, profile: opt('--profile'), notes: { artRecord } });
+  const seeded = argv.includes('--seeded') || !!d.seeded || !!d.presentationOnly;
+  const hasImages = Object.values(game.assets ?? {}).some((a) => a.image);
+  const artRecord = !hasImages ? undefined : { format: 'artdir/1', builtBy: 'harness+opus', imageArt: 'muse-image-1.0', license: 'generated', pictures: Object.keys(game.assets ?? {}).filter((k) => game.assets[k].image) };
+  // The app hooks live on the manifest (the engine refuses unknown keys inside game_json's presentation).
+  const app = builder.app ? builder.app(art, game) : appHooks(art, { cover: game.assets?.backdrop ? 'backdrop' : null });
+  const { manifest, record } = await finish(prod, game, { kit: art.kit, seeded, seedRuns: Number(opt('--seed-runs', '6')), profile: opt('--profile'), notes: { artRecord, app } });
   writeFileSync(join(out, 'manifest.json'), JSON.stringify(manifest));
   writeFileSync(join(out, 'finish.json'), JSON.stringify(record, null, 1));
   const bytes = JSON.stringify(manifest).length;
-  console.log(JSON.stringify({ step: 'build', ok: record.ok, why: record.why, gate: record.gate.passed, blocking: record.verifier.blocking, byCode: record.verifier.byCode, rulesHash: record.rulesHash, replays: record.replays.equal, manifestBytes: bytes }));
+  console.log(JSON.stringify({ step: 'build', ok: record.ok, why: record.why, gate: record.gate.passed, blocking: record.verifier.blocking, byCode: record.verifier.byCode, rulesHash: record.rulesHash, logicHash: record.logicHash, seededLogs: record.seededLogs ? `${record.seededLogs.same}/${record.seededLogs.runs.length}` : null, replays: record.replays.equal, manifestBytes: bytes }));
 }
 
-const steps = { frame: stepFrame, kit: stepKit, art: stepArt, build: stepBuild, see: stepSee };
+const steps = { frame: stepFrame, wordmark: stepWordmark, kit: stepKit, art: stepArt, build: stepBuild, see: stepSee };
 if (import.meta.url === `file://${process.argv[1]}`) {
-  if (!steps[cmd]) { console.error('usage: art-direct.mjs frame|kit|art|see --out <dir> ...'); process.exit(2); }
+  if (!steps[cmd]) { console.error('usage: art-direct.mjs frame|wordmark|kit|art|build|see --out <dir> ...'); process.exit(2); }
   try { loadEnvKey(); } catch (e) { console.error(String(e.message)); process.exit(1); }
   Promise.resolve(steps[cmd]()).catch((e) => {
     const key = process.env.MUSE_API_KEY;
