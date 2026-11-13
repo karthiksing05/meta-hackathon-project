@@ -1,0 +1,32 @@
+[
+  {
+    "request": "quiz me on the countries of south america on a map",
+    "expect": [
+      "map_click_quiz"
+    ]
+  },
+  {
+    "request": "turn my biology notes into a fill in the blank quiz",
+    "expect": [
+      "fill_blank_textbook"
+    ]
+  },
+  {
+    "request": "duolingo style practice for italian",
+    "expect": [
+      "translate_phrase"
+    ]
+  },
+  {
+    "request": "label the parts of the heart",
+    "expect": [
+      "label_the_diagram"
+    ]
+  },
+  {
+    "request": "name every element on the periodic table",
+    "expect": [
+      "periodic_table_fill"
+    ]
+  }
+]

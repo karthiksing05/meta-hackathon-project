@@ -28,6 +28,8 @@ COPY --from=build /out/api /out/dbinit /app/
 # The one copy of Kevin's recommender, from the app's folder.
 COPY FacebookClone/Bubbles/Recommend/game-recs.js /app/game-recs.js
 ENV RECS_SCRIPT=/app/game-recs.js
+# The game catalog (types, tools, checklists) for the harness and for dbinit's seeding.
+COPY authoring/catalog/ /app/catalog/
 USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["/app/api"]

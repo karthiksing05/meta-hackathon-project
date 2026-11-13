@@ -521,6 +521,78 @@ Fragments already add particles, pops, shake, haptics and the sound moments; don
 
 <!-- for-the-prompt: end -->
 
+### 2.12 Typed answers and fuzzy matching
+
+Games where the player types their own answer use `typed_answer` + `keyboard`; games that check typed
+text with their own rules use `fuzzy_match`. Both match with the same deterministic rules
+(`expander/fuzzy.mjs`), run inside the engine, so the phone, the bots and replay checks agree.
+
+- **Answer bank** (`ta_answers()`, one string per prompt): tiers split by `|` (most common first),
+  answers in a tier by `,`, and an answer's other accepted names after it, joined by `=`:
+  `"harry potter=harry,hermione granger=hermione|neville longbottom=neville"`. The first name is the one
+  shown after a match (state `last_answer`). Aliases are true other names (nicknames, short forms,
+  translations), never misspellings: typos are handled for you. Strings without `=` are the original
+  format and still work.
+- **Matching:** case, accents, punctuation, a leading `the`/`a`/`an`, word order, plurals and number
+  words (`three` = `3`) are ignored. Typos are forgiven by length: names of 4 letters or fewer must be
+  exact, 5–7 letters allow one typo, longer names pass at `threshold` (0.82 by default; Damerau-
+  Levenshtein and token-set ratios). So `cat` never matches `car`, `zebar` matches `zebra`, and
+  `wingardium leviosaa` matches `Wingardium Leviosa`. `phonetic: true` also accepts names of 5+ letters
+  that sound alike. The best-scoring name wins; ties go to the more common tier.
+- **Params** (both fragments): `threshold` (float 0.5–1.0, 1.0 = exact after normalizing) and
+  `phonetic` (bool).
+- **fuzzy_match functions:** `fuzzy_ok(input, entry)`, `fuzzy_best(input, entries)` (index or -1),
+  `fuzzy_score(input, name)` (0..1), `fuzzy_key(s)` (normalized text), `fuzzy_passes(input, name, score)`,
+  `fuzzy_entry(input, entry)` (best passing score or -1.0). An entry is `"answer=alias=…"`.
+- **Generated code:** the matching functions in both fragment files are written by
+  `tools/make-fuzzy-fragments.mjs` from `expander/fuzzy.mjs`; edit the JS and rerun it.
+  `tools/test-fuzzy.mjs` checks the JS rules, that the fragments are current, and (with an engine)
+  that the engine agrees with the JS on every case.
+
+### 2.13 Score model
+
+`"score"` is optional. It says what the game's board ranks and how, so a time trial ranks the fastest
+first and a run that quits early can't win. Without it, the board ranks points, higher first, best run,
+every run counts.
+
+```json
+"score": { "kind": "count_in_time", "measures": "orders served before the timer ends", "unit": "orders",
+           "direction": "higher", "counts_when": "any", "aggregate": "best", "tie_break": "earlier",
+           "format": "{n} orders", "events": ["order_done"] }
+```
+
+| `kind` | Ranks | `direction` | `counts_when` | Default `format` |
+|---|---|---|---|---|
+| `points` | points | higher | any | `{n}` |
+| `time_to_complete` | ms to finish (the run time) | lower (required) | finished (required) | `m:ss.t` |
+| `count_in_time` | how many in the time | higher | any | `{n}` |
+| `survival_time` | ms alive (the run time) | higher | any | `m:ss.t` |
+| `accuracy` | whole percent, 0–100 | higher | finished (required) | `{n}%` |
+| `distance` | distance | higher | any | `{n} m` |
+| `tiered_points` | rarity-tier points (Krillion-style) | higher | any | `{n}` |
+| `streak` | best run of correct | higher | any | `{n}` |
+
+- **Every score is a whole number.** Time kinds rank the engine's run time in whole milliseconds
+  (`source: "time"`, the default for them); the others rank `objectives.score`, rounded. `source:
+  "score"` makes a time kind rank `objectives.score` instead.
+- `counts_when: "finished"`: only won runs go on the board. A lower-is-better score must use it.
+- `aggregate`: `best`, `latest` or `sum_week`. `tie_break`: `less time` or `earlier`.
+- `format`: text with one `{n}` (`"{n} orders"`, `"{n}%"`) or a time: `m:ss.t`, `m:ss`, `s.t` (the value
+  is milliseconds). It's how the app and share text show the score.
+- `events`: the events or inputs that change the score (`tick` if it grows with time). The score
+  check fails a game whose score changes on anything else.
+- `bounds` (`min`, `max`, `max_rate_per_s`) are recorded by the score check from the bot runs; a
+  `max_rate_per_s` you give is checked against them. `ranked: false` says the board is just a list
+  (calm and no-fail games).
+
+The model never goes into `game.json` (the engine's file is strict). The expander returns it beside the
+game and `wrap.mjs` puts it at the top of the wrapped manifest as `score`, with the recorded `bounds`
+and `ranked`. `expander/score.mjs` has the defaults and checks (`A_SCORE_*` errors).
+After the bot gate, `playtest/score-check.mjs` checks the board is fair: skill order in the score's
+direction, an idle bot and a one-input spam bot ranking no better than real play, the finish rule,
+`max_rate_per_s`, every bot run replaying to the same phase, time and score (`verify` where the engine
+has it), and the score changing only on `events`.
+
 ## 3. Expander
 
 The expander is deterministic: the same manifest and library versions give byte-identical output.

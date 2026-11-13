@@ -1,0 +1,32 @@
+[
+  {
+    "request": "a beat maker I can share with my friends",
+    "expect": [
+      "step_sequencer_beat_maker"
+    ]
+  },
+  {
+    "request": "simon but with piano keys",
+    "expect": [
+      "tap_the_melody_echo"
+    ]
+  },
+  {
+    "request": "incredibox style band",
+    "expect": [
+      "character_layer_band"
+    ]
+  },
+  {
+    "request": "make a song about my friend's birthday",
+    "expect": [
+      "text_to_song_generate"
+    ]
+  },
+  {
+    "request": "a game where I sing the note shown",
+    "expect": [
+      "sing_pitch_match"
+    ]
+  }
+]

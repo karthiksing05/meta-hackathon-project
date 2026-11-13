@@ -1,0 +1,65 @@
+[
+  {
+    "request": "space invaders",
+    "expect": [
+      "fixed_shooter_invaders"
+    ]
+  },
+  {
+    "request": "galaga but its pigeons",
+    "expect": [
+      "fixed_shooter_invaders"
+    ]
+  },
+  {
+    "request": "vampire survivors",
+    "expect": [
+      "auto_shooter_survivors"
+    ]
+  },
+  {
+    "request": "touhou bullet hell",
+    "expect": [
+      "bullet_hell"
+    ]
+  },
+  {
+    "request": "asteroids",
+    "expect": [
+      "asteroids_drift"
+    ]
+  },
+  {
+    "request": "breakout",
+    "expect": [
+      "paddle_brick_breaker"
+    ]
+  },
+  {
+    "request": "worms tanks shooting each other",
+    "expect": [
+      "tank_artillery",
+      "artillery_duel_turns"
+    ]
+  },
+  {
+    "request": "missile command",
+    "expect": [
+      "missile_defense"
+    ]
+  },
+  {
+    "request": "duck hunt",
+    "expect": [
+      "gallery_shooting",
+      "shooting_gallery_race"
+    ]
+  },
+  {
+    "request": "typing of the dead shoot zombies by typing",
+    "expect": [
+      "shooter_typing_waves",
+      "falling_words"
+    ]
+  }
+]

@@ -1,0 +1,957 @@
+[
+  {
+    "id": "restaurant_rush_serve",
+    "name": "Restaurant rush",
+    "aliases": [
+      "Diner Dash",
+      "Cooking Fever"
+    ],
+    "family": "management_sim",
+    "summary": "Seat customers, take orders, serve food and clear tables before patience runs out.",
+    "core_loop": "Seat customers, take their orders, serve the food, collect payment and clear tables before anyone's patience runs out",
+    "verbs": [
+      "serve",
+      "prioritize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "patience meters drain",
+      "chaining same tasks gives a bonus"
+    ],
+    "win": "hit the day's goal",
+    "lose": "too many customers leave",
+    "scoring": "tips and goal",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "run a diner with your friends as staff"
+    ],
+    "difficulty_levers": [
+      "customer rate",
+      "patience",
+      "menu size"
+    ],
+    "tools": [
+      "timers",
+      "score",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "diner dash style restaurant",
+      "run a busy cafe",
+      "serve customers fast"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "theme_park_build",
+    "name": "Theme park builder",
+    "aliases": [
+      "RollerCoaster Tycoon",
+      "Theme Park"
+    ],
+    "family": "management_sim",
+    "summary": "Place rides and stalls, set prices and keep guests happy.",
+    "core_loop": "Place rides and food stalls, set prices, watch guests' moods and fix complaints to grow the park",
+    "verbs": [
+      "build",
+      "price",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "guests leave if unhappy"
+    ],
+    "win": "hit the park rating",
+    "lose": "bankrupt",
+    "scoring": "park value",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "visit friends' parks"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "guest count",
+      "ride costs"
+    ],
+    "tools": [
+      "grid_board",
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "rollercoaster tycoon style",
+      "build a theme park",
+      "amusement park manager"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "city_builder_zone",
+    "name": "City builder",
+    "aliases": [
+      "SimCity",
+      "Pocket City"
+    ],
+    "family": "management_sim",
+    "summary": "Zone homes, shops and industry; add roads and services; grow the population.",
+    "core_loop": "Zone homes, shops and industry, connect them with roads, add services, and grow the population without running out of money",
+    "verbs": [
+      "build",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "services need coverage"
+    ],
+    "win": "reach a population goal",
+    "lose": "bankrupt",
+    "scoring": "population",
+    "session_seconds": [
+      600,
+      3600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "visit friends' cities"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "service costs",
+      "disaster events"
+    ],
+    "tools": [
+      "grid_board",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "simcity style city builder",
+      "build my hometown",
+      "zone and grow a city"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "farm_sim_seasons",
+    "name": "Farm sim",
+    "aliases": [
+      "Stardew Valley",
+      "Hay Day"
+    ],
+    "family": "management_sim",
+    "summary": "Plant, water and harvest crops by season; sell produce and expand the farm.",
+    "core_loop": "Plant, water and harvest crops by season, sell the produce, and spend profits to expand the farm",
+    "verbs": [
+      "plant",
+      "harvest",
+      "sell"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "crops need water and the right season"
+    ],
+    "win": "reach the season goal",
+    "lose": "none",
+    "scoring": "profit",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trade crops with friends"
+    ],
+    "difficulty_levers": [
+      "season length",
+      "crop types",
+      "weather"
+    ],
+    "tools": [
+      "grid_board",
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "stardew style farm",
+      "hay day with friends",
+      "farming sim seasons"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shop_keeper_haggle",
+    "name": "Shopkeeper",
+    "aliases": [
+      "Moonlighter",
+      "Recettear"
+    ],
+    "family": "management_sim",
+    "summary": "Stock shelves, set prices and haggle with customers to maximize profit.",
+    "core_loop": "Stock shelves, set prices, haggle with customers who have different budgets, and adjust to make the most profit",
+    "verbs": [
+      "price",
+      "haggle"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "customers react to price"
+    ],
+    "win": "hit the profit goal",
+    "lose": "none",
+    "scoring": "profit",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare shops"
+    ],
+    "difficulty_levers": [
+      "customer budgets",
+      "stock costs",
+      "haggle rounds"
+    ],
+    "tools": [
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "run a shop and set prices",
+      "haggle with customers",
+      "item shop sim"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hotel_manage_rooms",
+    "name": "Hotel manager",
+    "aliases": [
+      "Hotel Dash"
+    ],
+    "family": "management_sim",
+    "summary": "Check guests in, clean rooms and handle requests before they get angry.",
+    "core_loop": "Check guests in, send staff to clean rooms, handle requests, and check guests out before anyone gets angry",
+    "verbs": [
+      "prioritize",
+      "serve"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "angry guests leave bad reviews"
+    ],
+    "win": "hit the rating",
+    "lose": "too many bad reviews",
+    "scoring": "rating and money",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "hotel run by your friend group"
+    ],
+    "difficulty_levers": [
+      "guest rate",
+      "staff count",
+      "request types"
+    ],
+    "tools": [
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hotel manager game",
+      "check in guests fast",
+      "run a hotel"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "airport_traffic_control",
+    "name": "Air traffic control",
+    "aliases": [
+      "Flight Control"
+    ],
+    "family": "management_sim",
+    "summary": "Draw landing paths for incoming planes so none collide.",
+    "core_loop": "Planes arrive from the edges; draw a landing path for each so they reach a runway without colliding",
+    "verbs": [
+      "draw",
+      "route"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "rules": [
+      "planes follow your line"
+    ],
+    "win": "land as many as possible",
+    "lose": "a collision",
+    "scoring": "planes landed",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "control tower duel"
+    ],
+    "difficulty_levers": [
+      "plane rate",
+      "runways",
+      "plane speeds"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "flight control drawing game",
+      "land the planes without crashing",
+      "air traffic control"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "train_route_switch",
+    "name": "Route the trains",
+    "aliases": [
+      "Rail routing"
+    ],
+    "family": "management_sim",
+    "summary": "Flip track switches so colored trains reach matching stations.",
+    "core_loop": "Colored trains enter the track; flip switches so each one reaches the station of its color",
+    "verbs": [
+      "switch",
+      "route"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong station costs points"
+    ],
+    "win": "route them all",
+    "lose": "crashes",
+    "scoring": "trains routed",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "train rate",
+      "switch count",
+      "train speed"
+    ],
+    "tools": [
+      "grid_board",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "switch the train tracks game",
+      "route trains by color",
+      "rail yard puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hospital_triage",
+    "name": "Hospital triage",
+    "aliases": [
+      "Two Point Hospital-lite"
+    ],
+    "family": "management_sim",
+    "summary": "Send patients to the right rooms by symptoms; build rooms as needed.",
+    "core_loop": "Read each patient's symptoms, send them to the right room, and build new rooms as demand grows",
+    "verbs": [
+      "diagnose",
+      "assign"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "wrong rooms waste time"
+    ],
+    "win": "treat the quota",
+    "lose": "too many leave",
+    "scoring": "patients treated",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "run a hospital with friends"
+    ],
+    "difficulty_levers": [
+      "patient rate",
+      "room types",
+      "budget"
+    ],
+    "tools": [
+      "sort_bins",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hospital management game",
+      "triage patients",
+      "run a clinic sim"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "zoo_keeper_habitats",
+    "name": "Zoo keeper",
+    "aliases": [
+      "Zoo Tycoon"
+    ],
+    "family": "management_sim",
+    "summary": "Build habitats, keep animals happy and attract visitors.",
+    "core_loop": "Build habitats, keep each animal fed and happy, and attract visitors whose tickets fund new animals",
+    "verbs": [
+      "build",
+      "care"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "animals need the right habitat"
+    ],
+    "win": "hit the zoo rating",
+    "lose": "none",
+    "scoring": "rating",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "visit friends' zoos"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "animal needs",
+      "visitor rate"
+    ],
+    "tools": [
+      "grid_board",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "build a zoo game",
+      "zoo tycoon style",
+      "animal park manager"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "delivery_route_plan",
+    "name": "Delivery route",
+    "aliases": [
+      "Delivery planner"
+    ],
+    "family": "management_sim",
+    "summary": "Plan a route to make every delivery within time windows.",
+    "core_loop": "See today's orders and their time windows, draw a route, then drive it and make every delivery on time",
+    "verbs": [
+      "route",
+      "plan"
+    ],
+    "inputs": [
+      "draw",
+      "tap"
+    ],
+    "rules": [
+      "late deliveries cost money"
+    ],
+    "win": "deliver everything",
+    "lose": "none",
+    "scoring": "on-time deliveries",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "windows",
+      "stops",
+      "traffic"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "plan the delivery route",
+      "package delivery planner",
+      "courier route game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coffee_shop_orders",
+    "name": "Coffee shop barista",
+    "aliases": [
+      "Barista"
+    ],
+    "family": "management_sim",
+    "summary": "Make drinks to exact orders: shots, milk, syrup, size.",
+    "core_loop": "Read each order, assemble the drink with the right shots, milk, syrup and size, and serve it before the next customer leaves",
+    "verbs": [
+      "assemble",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong drinks are returned"
+    ],
+    "win": "hit the rush goal",
+    "lose": "too many angry customers",
+    "scoring": "tips",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "cafe with friends' orders"
+    ],
+    "difficulty_levers": [
+      "order complexity",
+      "customer rate",
+      "patience"
+    ],
+    "tools": [
+      "timers",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "barista coffee orders game",
+      "make the latte right",
+      "coffee shop rush"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "lemonade_stand_weather",
+    "name": "Lemonade stand",
+    "aliases": [
+      "Lemonade Stand"
+    ],
+    "family": "management_sim",
+    "summary": "Decide price and recipe based on the weather forecast; sell for profit over days.",
+    "core_loop": "Read the forecast, set your price and recipe for the day, sell to passersby, and adjust over a run of days to make the most",
+    "verbs": [
+      "price",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "weather drives demand"
+    ],
+    "win": "profit by the end",
+    "lose": "bankrupt",
+    "scoring": "profit",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare profits"
+    ],
+    "difficulty_levers": [
+      "days",
+      "weather swings",
+      "ingredient costs"
+    ],
+    "tools": [
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "lemonade stand game",
+      "set prices by weather",
+      "classic lemonade business"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pizza_delivery_rush",
+    "name": "Pizza place rush",
+    "aliases": [
+      "Papa's Pizzeria"
+    ],
+    "family": "management_sim",
+    "summary": "Take orders, make pizzas to spec, bake and slice, then serve.",
+    "core_loop": "Take an order, add toppings to spec, bake and slice the pizza, then serve it before the customer gives up",
+    "verbs": [
+      "make",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "each step is scored"
+    ],
+    "win": "serve the day",
+    "lose": "none",
+    "scoring": "score per order",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare scores"
+    ],
+    "difficulty_levers": [
+      "toppings",
+      "orders at once",
+      "bake time"
+    ],
+    "tools": [
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "papa's pizzeria style",
+      "make pizzas to order",
+      "pizza shop"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "school_schedule_manage",
+    "name": "School day planner",
+    "aliases": [
+      "Schedule sim"
+    ],
+    "family": "management_sim",
+    "summary": "Assign classes, rooms and teachers so no conflicts happen.",
+    "core_loop": "Assign classes to rooms, teachers and time slots, check for conflicts, and fix them until the timetable works",
+    "verbs": [
+      "schedule",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "no double-booking"
+    ],
+    "win": "finish the schedule",
+    "lose": "none",
+    "scoring": "conflicts",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "constraints",
+      "classes",
+      "rooms"
+    ],
+    "tools": [
+      "grid_board",
+      "sort_bins"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "make the school schedule puzzle",
+      "scheduling game",
+      "timetable sim"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "festival_crowd_manage",
+    "name": "Run the festival",
+    "aliases": [
+      "Festival manager"
+    ],
+    "family": "management_sim",
+    "summary": "Place stages, food and toilets; keep crowds flowing and happy.",
+    "core_loop": "Place stages, food stands and toilets, watch crowds move, and fix jams to keep festival-goers happy",
+    "verbs": [
+      "build",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "crowds jam at bottlenecks"
+    ],
+    "win": "keep happiness high",
+    "lose": "none",
+    "scoring": "happiness",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "plan a group event"
+    ],
+    "difficulty_levers": [
+      "crowd size",
+      "budget",
+      "event schedule"
+    ],
+    "tools": [
+      "grid_board",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "music festival manager",
+      "plan the event layout",
+      "crowd flow sim"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "space_colony_manage",
+    "name": "Colony sim",
+    "aliases": [
+      "Colony"
+    ],
+    "family": "management_sim",
+    "summary": "Assign colonists to food, power and air; survive and grow.",
+    "core_loop": "Assign colonists to food, power and air, balance the resources, and handle random events as the colony grows",
+    "verbs": [
+      "assign",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "any resource at zero is dangerous"
+    ],
+    "win": "reach the population goal",
+    "lose": "the colony fails",
+    "scoring": "population",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare colonies"
+    ],
+    "difficulty_levers": [
+      "event rate",
+      "colonist count",
+      "resource drain"
+    ],
+    "tools": [
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "space colony sim",
+      "mars base manager",
+      "keep the colony alive"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "office_team_tasks",
+    "name": "Run the team",
+    "aliases": [
+      "Office manager"
+    ],
+    "family": "management_sim",
+    "summary": "Assign tasks to coworkers by skill; hit deadlines.",
+    "core_loop": "Read incoming tasks, assign each to the coworker with the right skill, watch progress and ship before deadlines",
+    "verbs": [
+      "assign",
+      "prioritize"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "mismatched skills slow tasks"
+    ],
+    "win": "ship on time",
+    "lose": "missed deadline",
+    "scoring": "tasks shipped",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "your actual team as characters"
+    ],
+    "difficulty_levers": [
+      "task rate",
+      "team size",
+      "deadline length"
+    ],
+    "tools": [
+      "sort_bins",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "manage my team game",
+      "office task manager",
+      "assign work to coworkers"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

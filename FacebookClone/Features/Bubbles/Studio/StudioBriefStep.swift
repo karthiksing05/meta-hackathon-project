@@ -137,19 +137,24 @@ private struct StudioBriefCard: View {
     @Bindable var model: StudioModel
     @State private var isAddingMood = false
     @State private var newMood = ""
+    @State private var intentVoice = VoiceInput()
     @FocusState private var isMoodFieldFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.l) {
             StudioSectionTitle(title: "The brief", symbol: "doc.text")
             field("What it's about") {
-                TextField("What the game is about", text: intent, axis: .vertical)
-                    .font(.fbBodyLarge)
-                    .foregroundStyle(FBColor.primaryText)
-                    .lineLimit(1...4)
-                    .padding(.horizontal, FBSpacing.m)
-                    .padding(.vertical, 10)
-                    .background(StudioGlow.fieldFill, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                HStack(alignment: .bottom, spacing: FBSpacing.xs) {
+                    TextField("What the game is about", text: intent, axis: .vertical)
+                        .font(.fbBodyLarge)
+                        .foregroundStyle(FBColor.primaryText)
+                        .lineLimit(1...4)
+                        .padding(.horizontal, FBSpacing.m)
+                        .padding(.vertical, 10)
+                        .background(StudioGlow.fieldFill, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                    VoiceInputButton(voice: intentVoice, text: intent)
+                }
+                VoiceInputNote(voice: intentVoice)
             }
             field("Who it's for") {
                 StudioBriefAudienceMenu(model: model)

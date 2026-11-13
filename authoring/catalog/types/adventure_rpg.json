@@ -1,0 +1,2750 @@
+[
+  {
+    "id": "tile_dungeon_crawl",
+    "name": "Tile dungeon crawl",
+    "aliases": [
+      "Pixel Dungeon",
+      "Rogue",
+      "Shattered Pixel Dungeon",
+      "Dungeon Crawl",
+      "Into the Dungeon"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "turn-based roguelike",
+    "summary": "Tap to move through a small grid dungeon one step at a time; enemies act after you, and you grab loot on the way to the stairs.",
+    "core_loop": "tap a tile → hero moves one step → enemies move → fight or pick up loot → reach stairs",
+    "verbs": [
+      "move",
+      "fight",
+      "loot"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid map",
+      "hero",
+      "enemies",
+      "items",
+      "stairs"
+    ],
+    "rules": [
+      "enemies move only when you do",
+      "bumping into an enemy attacks it",
+      "stairs lead to the next floor"
+    ],
+    "win": "descend as far as possible",
+    "lose": "hero HP hits zero",
+    "scoring": "floors cleared and loot",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare depth reached",
+      "same seed for a Group"
+    ],
+    "content_needs": [
+      "floor layouts",
+      "enemy types",
+      "loot tables"
+    ],
+    "difficulty_levers": [
+      "floor size",
+      "enemy count",
+      "HP"
+    ],
+    "tools": [
+      "grid_board",
+      "lives",
+      "pickups",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a pixel dungeon where the monsters are my teachers",
+      "roguelike dungeon crawl set in a haunted mall",
+      "turn based dungeon with cats",
+      "dungeon crawl where i'm a baker"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "roguelike_event_map",
+    "name": "Branching route map",
+    "aliases": [
+      "Slay the Spire map",
+      "FTL route",
+      "Hades room choices",
+      "Dicey Dungeons",
+      "Monster Train"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "node map",
+    "summary": "Choose a path across a map of nodes (fight, shop, rest, event) toward a boss, balancing HP and gold.",
+    "core_loop": "view map → pick next node → resolve node → heal or gain → repeat → boss",
+    "verbs": [
+      "route",
+      "choose",
+      "fight"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "node map",
+      "HP and gold bars",
+      "node screens",
+      "boss"
+    ],
+    "rules": [
+      "paths branch and cannot be undone",
+      "rest nodes heal",
+      "shops sell upgrades"
+    ],
+    "win": "beat the boss",
+    "lose": "HP hits zero",
+    "scoring": "nodes cleared and gold",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare route choices on same seed",
+      "daily climb"
+    ],
+    "content_needs": [
+      "node map generator",
+      "node events",
+      "boss"
+    ],
+    "difficulty_levers": [
+      "map length",
+      "elite density",
+      "healing"
+    ],
+    "tools": [
+      "choice_story",
+      "lives",
+      "meters",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "slay the spire map but i'm a toaster",
+      "roguelike route through a haunted school",
+      "choose-your-path adventure to a dragon boss"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "jrpg_menu_battle",
+    "name": "Menu battle",
+    "aliases": [
+      "Final Fantasy",
+      "Dragon Quest",
+      "Chrono Trigger",
+      "Pokémon battle",
+      "Paper Mario"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "turn menu combat",
+    "summary": "Pick attack, skill, guard or item each turn in a classic menu fight against a monster with a few exploitable weaknesses.",
+    "core_loop": "enemy telegraphs → choose action → damage resolves → enemy acts → repeat until one side is down",
+    "verbs": [
+      "choose",
+      "target"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "party panel",
+      "enemy",
+      "action menu",
+      "HP/MP bars",
+      "battle log"
+    ],
+    "rules": [
+      "speed decides turn order",
+      "elements have weaknesses",
+      "skills cost MP"
+    ],
+    "win": "defeat the enemy",
+    "lose": "party HP hits zero",
+    "scoring": "turns used and HP left",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your clever finishing move",
+      "same boss for a Group daily"
+    ],
+    "content_needs": [
+      "enemies with weaknesses",
+      "skill list",
+      "battle log lines"
+    ],
+    "difficulty_levers": [
+      "enemy HP",
+      "skill costs",
+      "party size"
+    ],
+    "tools": [
+      "turns",
+      "meters",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "final fantasy but the boss is my exam",
+      "jrpg battle menu with a cat wizard",
+      "dragon quest style fight against a giant pizza",
+      "pokemon style battle at the school"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dice_dungeon_assign",
+    "name": "Dice-assign dungeon",
+    "aliases": [
+      "Dicey Dungeons",
+      "Slice & Dice",
+      "Roll Player",
+      "Dice Throne",
+      "Backpack Hero dice"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "dice allocation",
+    "summary": "Roll dice each turn and slot them into equipment that attacks, defends or heals according to the slot's rule.",
+    "core_loop": "roll dice → assign each to a slot → slot effects fire → enemy turn → repeat",
+    "verbs": [
+      "roll",
+      "assign"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "dice tray",
+      "equipment slots with rules",
+      "enemy",
+      "HP"
+    ],
+    "rules": [
+      "each slot has a condition (even only, 5 or higher)",
+      "unused dice are wasted",
+      "gear can be upgraded between fights"
+    ],
+    "win": "clear all fights",
+    "lose": "HP zero",
+    "scoring": "floors cleared",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a build that crushed a boss",
+      "same dice seed"
+    ],
+    "content_needs": [
+      "equipment with slot rules",
+      "enemy list",
+      "dice seeds"
+    ],
+    "difficulty_levers": [
+      "dice count",
+      "slot rules",
+      "enemy HP"
+    ],
+    "tools": [
+      "random_int",
+      "player_drag",
+      "lives",
+      "turns",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dicey dungeons but all my gear is kitchen tools",
+      "dice dungeon with wizards",
+      "roll dice to attack a dragon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "loot_pick_gear",
+    "name": "Loot pick and equip",
+    "aliases": [
+      "Diablo",
+      "Hades boons",
+      "Slay the Spire relics",
+      "Borderlands loot"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "gear choice",
+    "summary": "After each fight pick one of three gear pieces with stat trade-offs; the build you assemble faces a final boss.",
+    "core_loop": "win fight → see 3 loot options → pick one → stats update → next fight",
+    "verbs": [
+      "choose",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "loot cards",
+      "stat sheet",
+      "fight resolver",
+      "boss"
+    ],
+    "rules": [
+      "loot has rarity and stat trade-offs",
+      "equipping one swaps another",
+      "final boss tests the build"
+    ],
+    "win": "beat the boss",
+    "lose": "HP zero",
+    "scoring": "build strength and clears",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the loot you took",
+      "compare builds"
+    ],
+    "content_needs": [
+      "gear tables with stats",
+      "boss requirements"
+    ],
+    "difficulty_levers": [
+      "pick count",
+      "stat variance"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "loot dungeon but all the loot is socks",
+      "pick gear to fight a dragon boss",
+      "hades style boons in a space station"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "quest_board_dispatch",
+    "name": "Quest dispatch",
+    "aliases": [
+      "Majesty",
+      "Kingdom Two Crowns",
+      "Heroes of Might",
+      "Guild Master",
+      "Quest board idle"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "dispatch heroes",
+    "summary": "Post quests on a board and send heroes whose skills fit; matching skill to quest decides success and loot.",
+    "core_loop": "read quest → pick heroes → dispatch → quest resolves with odds → collect reward",
+    "verbs": [
+      "match",
+      "dispatch"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "quest board",
+      "hero roster",
+      "success odds",
+      "rewards"
+    ],
+    "rules": [
+      "each hero has skill tags",
+      "quests need tags",
+      "heroes are busy while away"
+    ],
+    "win": "clear all quests",
+    "lose": "none; or guild bankrupt",
+    "scoring": "gold and reputation",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare guild ranks",
+      "Group guild with shared reputation"
+    ],
+    "content_needs": [
+      "quest list with tags",
+      "hero roster",
+      "reward table"
+    ],
+    "difficulty_levers": [
+      "hero count",
+      "quest harshness",
+      "timers"
+    ],
+    "tools": [
+      "turns",
+      "meters",
+      "score",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "run a guild of wizard cats sending them on quests",
+      "quest board dispatch game for a school club",
+      "send heroes on missions like majesty"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "boss_telegraph_dodge",
+    "name": "Telegraphed boss fight",
+    "aliases": [
+      "Dark Souls",
+      "Shadow of the Colossus",
+      "Cuphead",
+      "Hades boss",
+      "Zelda boss"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "dodge and strike",
+    "summary": "A big boss telegraphs attacks; you dodge, then strike during the opening before the next move.",
+    "core_loop": "boss winds up → dodge a lane or tap → boss recovers → tap to strike → repeat phases",
+    "verbs": [
+      "dodge",
+      "strike"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "boss",
+      "telegraph marks",
+      "player",
+      "HP bars"
+    ],
+    "rules": [
+      "each attack has a visible wind-up",
+      "after a dodge the boss is open for 1-2 s",
+      "phases add moves"
+    ],
+    "win": "beat the boss",
+    "lose": "HP zero",
+    "scoring": "time and damage taken",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your clear time",
+      "ghost of the best run"
+    ],
+    "content_needs": [
+      "boss move set",
+      "phases",
+      "telegraphs"
+    ],
+    "difficulty_levers": [
+      "boss speed",
+      "phases",
+      "openings"
+    ],
+    "tools": [
+      "lanes",
+      "spawn_wave",
+      "lives",
+      "ghost_score",
+      "speed_ramp",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a boss fight where the boss is a giant pigeon",
+      "dark souls telegraph dodge but cute",
+      "shadow of the colossus on my phone",
+      "dodge and strike a dragon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "overworld_fog_explore",
+    "name": "Fog-of-war explore",
+    "aliases": [
+      "Zelda overworld",
+      "Fire Emblem world map",
+      "Civilization map",
+      "Pokémon route",
+      "Pikmin"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "reveal map",
+    "summary": "Tap to explore a hidden map, revealing tiles that contain towns, monsters and treasure while a step budget drains.",
+    "core_loop": "tap adjacent tile → reveal → resolve tile → move on → reach the goal",
+    "verbs": [
+      "explore",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "fogged map",
+      "explorer",
+      "tile contents",
+      "step budget"
+    ],
+    "rules": [
+      "only adjacent tiles reveal",
+      "monsters on tiles must be beaten or avoided",
+      "steps are limited"
+    ],
+    "win": "reach the goal tile",
+    "lose": "steps run out",
+    "scoring": "treasure and steps left",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare maps via a seed",
+      "share a discovered secret"
+    ],
+    "content_needs": [
+      "map generator",
+      "tile contents",
+      "goal"
+    ],
+    "difficulty_levers": [
+      "map size",
+      "step budget",
+      "monsters"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "pickups",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "explore an overworld to find the lost cat king",
+      "fog of war adventure in an enchanted forest",
+      "zelda style world with a pizza dragon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "monster_catch_party",
+    "name": "Monster catching",
+    "aliases": [
+      "Pokémon",
+      "Temtem",
+      "Coromon",
+      "Digimon",
+      "Palworld"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "catch and team",
+    "summary": "Meet wild monsters on a route and try to catch them; the team you gather faces a trainer at the end.",
+    "core_loop": "wander → wild monster appears → weaken or choose a catch tool → try to catch → build team → trainer battle",
+    "verbs": [
+      "catch",
+      "team build"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "route screens",
+      "wild monsters",
+      "catch tools",
+      "team slots"
+    ],
+    "rules": [
+      "catch chance depends on HP and tool",
+      "team holds 3",
+      "type matchups matter in the final"
+    ],
+    "win": "win the trainer battle",
+    "lose": "team faints",
+    "scoring": "monsters caught and win",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "trade monsters with a friend",
+      "share your best catch"
+    ],
+    "content_needs": [
+      "monster designs with types",
+      "route encounters"
+    ],
+    "difficulty_levers": [
+      "catch odds",
+      "team size"
+    ],
+    "tools": [
+      "choice_story",
+      "pickups",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pokemon but the monsters are vegetables",
+      "catch monsters in a school",
+      "palworld style creature catching on my phone"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "type_matchup_battles",
+    "name": "Type-chart battles",
+    "aliases": [
+      "Pokémon type chart",
+      "Fire Emblem triangle",
+      "Rock paper scissors RPG",
+      "Temtem"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "counter picking",
+    "summary": "Fight a lineup of enemies where each type is strong against one and weak to another; swap your fighter to counter.",
+    "core_loop": "see enemy type → pick your fighter → matchup resolves → win streak → next enemy",
+    "verbs": [
+      "counter",
+      "pick"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "fighter roster",
+      "enemy sequence",
+      "type wheel"
+    ],
+    "rules": [
+      "3-4 types in a cycle",
+      "counter deals double, weak takes double",
+      "fighters have limited HP across fights"
+    ],
+    "win": "win the whole lineup",
+    "lose": "all fighters faint",
+    "scoring": "enemies beaten",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare streaks",
+      "challenge a friend's lineup"
+    ],
+    "content_needs": [
+      "type wheel",
+      "fighters",
+      "enemy lineups"
+    ],
+    "difficulty_levers": [
+      "number of types",
+      "enemy order known or hidden"
+    ],
+    "tools": [
+      "quiz",
+      "sort_bins",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pokemon type chart but with school clubs",
+      "rock paper scissors rpg with food elements",
+      "type counters game with cat wizards"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "shop_and_upgrade_loop",
+    "name": "Fight, earn, upgrade",
+    "aliases": [
+      "Hero Wars",
+      "Soul Knight",
+      "Vampire Survivors upgrade",
+      "Rogue Legacy",
+      "Adventure Capitalist"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "meta loop",
+    "summary": "Short fights earn gold; spend it between runs on permanent upgrades so each run goes further.",
+    "core_loop": "fight run → die or win → spend gold on upgrades → next run farther",
+    "verbs": [
+      "fight",
+      "upgrade"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "fight arena",
+      "gold",
+      "upgrade shop",
+      "run counter"
+    ],
+    "rules": [
+      "upgrades are permanent",
+      "each run is under 60 s",
+      "costs rise gradually"
+    ],
+    "win": "reach a depth goal",
+    "lose": "none; endless",
+    "scoring": "best depth",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare progress",
+      "a Group's shared gold pool"
+    ],
+    "content_needs": [
+      "upgrade catalog",
+      "fight scenario"
+    ],
+    "difficulty_levers": [
+      "cost curve",
+      "upgrade strength"
+    ],
+    "tools": [
+      "shared_progress",
+      "difficulty_curve",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "rogue legacy but all my ancestors are sandwiches",
+      "short runs and permanent upgrades in a pirate cave",
+      "hero upgrade grind with cat knights"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "deck_dungeon_cards",
+    "name": "Deck-building dungeon",
+    "aliases": [
+      "Slay the Spire",
+      "Monster Train",
+      "Dicey Dungeons",
+      "Hearthstone adventure",
+      "Inscryption"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "card combat",
+    "summary": "Each fight deals a hand from your deck; play cards with energy to attack and defend, then add a new card after winning.",
+    "core_loop": "draw hand → spend energy on cards → enemy intent resolves → win → pick a new card",
+    "verbs": [
+      "play cards",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "hand of cards",
+      "energy",
+      "enemy intent",
+      "deck"
+    ],
+    "rules": [
+      "3 energy per turn",
+      "enemy shows next action",
+      "new card picks shape the deck"
+    ],
+    "win": "beat the boss",
+    "lose": "HP zero",
+    "scoring": "fights won and HP",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare decks",
+      "daily seeded deck"
+    ],
+    "content_needs": [
+      "card list",
+      "enemy list",
+      "intents"
+    ],
+    "difficulty_levers": [
+      "deck size",
+      "energy",
+      "enemy HP"
+    ],
+    "tools": [
+      "turns",
+      "lives",
+      "meters",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "slay the spire but i'm a baker",
+      "card dungeon with my cat as the hero",
+      "deck builder where the cards are memes"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "stealth_guard_dungeon",
+    "name": "Stealth dungeon",
+    "aliases": [
+      "Metal Gear",
+      "Hitman Go",
+      "Monaco",
+      "Mark of the Ninja",
+      "Invisible Inc"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "vision cones",
+    "summary": "Slip past guards whose vision cones sweep rooms; time your moves and reach the loot and exit.",
+    "core_loop": "watch guard pattern → tap to move → stay out of cones → grab loot → exit",
+    "verbs": [
+      "sneak",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "rooms",
+      "guards with cones",
+      "hero",
+      "loot",
+      "exit"
+    ],
+    "rules": [
+      "guards patrol fixed paths",
+      "getting seen loses a life",
+      "hiding spots pause the cone"
+    ],
+    "win": "exit with the loot",
+    "lose": "caught three times",
+    "scoring": "loot and time",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share a stealth route",
+      "ghost run replay"
+    ],
+    "content_needs": [
+      "room layouts",
+      "guard paths"
+    ],
+    "difficulty_levers": [
+      "guard count",
+      "cone size",
+      "speed"
+    ],
+    "tools": [
+      "grid_board",
+      "lives",
+      "pickups",
+      "ghost_score",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "stealth heist in my school with teachers as guards",
+      "hitman go style puzzle where i steal cookies",
+      "ninja sneaking past sleeping cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "block_push_puzzle_dungeon",
+    "name": "Block-push dungeon",
+    "aliases": [
+      "Zelda dungeons",
+      "Baba Is You",
+      "Sokoban",
+      "Hitman Go",
+      "Chip's Challenge"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "key puzzle rooms",
+    "summary": "Explore rooms where pushing blocks, finding keys and flipping switches opens the next door.",
+    "core_loop": "enter room → push blocks → press switch → collect key → unlock door",
+    "verbs": [
+      "push",
+      "unlock"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "grid rooms",
+      "blocks",
+      "switches",
+      "locked doors",
+      "keys"
+    ],
+    "rules": [
+      "blocks push one tile",
+      "stuck blocks can be reset",
+      "rooms chain to a final room"
+    ],
+    "win": "open the final door",
+    "lose": "none; step cap",
+    "scoring": "steps used",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race fewest steps",
+      "share a solution"
+    ],
+    "content_needs": [
+      "room layouts with unique solutions"
+    ],
+    "difficulty_levers": [
+      "room size",
+      "number of blocks"
+    ],
+    "tools": [
+      "grid_board",
+      "pickups",
+      "checkpoint",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "zelda dungeon puzzles in a haunted library",
+      "push blocks to open the dragon door",
+      "sokoban dungeon with cat keys"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "treasure_map_dig",
+    "name": "Treasure dig",
+    "aliases": [
+      "Treasure Island",
+      "Dig Dug",
+      "Minecraft treasure",
+      "Metal Detecting",
+      "Terraria dig"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "clue dig",
+    "summary": "Read clues on a map, pick dig spots, and hot/cold feedback guides you toward buried treasure with a limited number of digs.",
+    "core_loop": "read map clue → choose a dig tile → hot/cold feedback → refine → dig the right tile",
+    "verbs": [
+      "dig",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "map",
+      "dig count",
+      "hot/cold indicator",
+      "treasure"
+    ],
+    "rules": [
+      "feedback shows distance bands",
+      "digs are limited",
+      "clues narrow the search"
+    ],
+    "win": "find the treasure",
+    "lose": "digs run out",
+    "scoring": "digs left",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare dig counts",
+      "hide a treasure for a friend"
+    ],
+    "content_needs": [
+      "maps with clues",
+      "treasure position"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "digs",
+      "feedback accuracy"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "treasure map with hot and cold clues",
+      "find the pirate gold in my backyard",
+      "dig for dinosaur bones"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "crafting_gather_quest",
+    "name": "Gather-and-craft quest",
+    "aliases": [
+      "Minecraft survival",
+      "Stardew",
+      "Don't Starve",
+      "Terraria",
+      "Dragon Quest Builders"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "resource loop",
+    "summary": "Gather materials in a short field trip, craft a tool at a bench, and use it to unlock the objective.",
+    "core_loop": "gather materials → return → craft → use tool at barrier → progress",
+    "verbs": [
+      "gather",
+      "craft"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "field map",
+      "bag",
+      "crafting recipe",
+      "barrier"
+    ],
+    "rules": [
+      "recipes require specific amounts",
+      "the bag is small",
+      "a barrier needs the crafted tool"
+    ],
+    "win": "cross the barrier",
+    "lose": "time runs out",
+    "scoring": "speed and bag use",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share recipes",
+      "Group gathers together"
+    ],
+    "content_needs": [
+      "recipe list",
+      "resource nodes"
+    ],
+    "difficulty_levers": [
+      "recipe depth",
+      "bag size",
+      "time"
+    ],
+    "tools": [
+      "pickups",
+      "countdown",
+      "player_drag",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "craft a sword from sticks and a pizza box",
+      "minecraft style gather and craft in a haunted forest",
+      "crafting quest to build a boat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pirate_voyage_sail",
+    "name": "Sailing voyage",
+    "aliases": [
+      "Sid Meier's Pirates",
+      "Sea of Thieves",
+      "Assassin's Creed Black Flag",
+      "Sunless Sea"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "steer and visit",
+    "summary": "Steer a ship between islands, trade and fight with limited food and crew, and find the legendary treasure.",
+    "core_loop": "pick next island → sail (food drops) → resolve island → trade or fight → reach treasure",
+    "verbs": [
+      "sail",
+      "trade",
+      "fight"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "sea map",
+      "ship stats",
+      "island events",
+      "treasure"
+    ],
+    "rules": [
+      "each leg costs food",
+      "islands have events",
+      "crew morale affects fights"
+    ],
+    "win": "find the treasure",
+    "lose": "food or crew gone",
+    "scoring": "gold at the end",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race the same map",
+      "crew of friends (shared ship)"
+    ],
+    "content_needs": [
+      "island events",
+      "sea map"
+    ],
+    "difficulty_levers": [
+      "map size",
+      "food costs"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "lives",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pirate voyage with a cat crew",
+      "sunless sea but friendly",
+      "sail between islands and find the lost treasure of the principal"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spell_draw_runes",
+    "name": "Rune-drawing combat",
+    "aliases": [
+      "Magic Touch",
+      "Okami brush",
+      "Runes",
+      "Draw spells",
+      "Spellbreak"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "gesture casting",
+    "summary": "Enemies carry a rune above them; draw the matching rune quickly to cast it and defeat them.",
+    "core_loop": "enemy appears with rune → draw rune → recognition → hit or miss → next enemy",
+    "verbs": [
+      "draw",
+      "cast"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "enemies",
+      "rune shown",
+      "drawing pad",
+      "HP"
+    ],
+    "rules": [
+      "each rune is 2-4 strokes",
+      "speed multiplies damage",
+      "misdraws let the enemy hit"
+    ],
+    "win": "defeat all waves",
+    "lose": "HP zero",
+    "scoring": "enemies defeated and speed",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare speed",
+      "challenge a friend"
+    ],
+    "content_needs": [
+      "rune set",
+      "enemy waves"
+    ],
+    "difficulty_levers": [
+      "rune complexity",
+      "time per enemy"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "waves",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "draw runes to cast spells against skeletons",
+      "magic touch style spell drawing",
+      "draw shapes to beat a dragon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cooperative_raid_boss",
+    "name": "Group raid boss",
+    "aliases": [
+      "World boss",
+      "Pokémon Go raids",
+      "Destiny strikes",
+      "Genshin world bosses"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "shared HP",
+    "summary": "A Group shares one giant boss; every member's attacks chip the HP pool until it falls within the week.",
+    "core_loop": "take daily attack turns → damage added to shared HP bar → boss phases change → defeat it together",
+    "verbs": [
+      "attack",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "boss",
+      "shared HP bar",
+      "member contributions",
+      "attack minigame"
+    ],
+    "rules": [
+      "each member has a few attacks per day",
+      "damage depends on minigame skill",
+      "boss recovers slightly overnight"
+    ],
+    "win": "boss HP reaches zero",
+    "lose": "boss heals to full by week end",
+    "scoring": "total damage",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "group_daily"
+    ],
+    "social_hooks": [
+      "whole Group defeats a boss together",
+      "leaderboard of damage",
+      "coordinated boss weakness"
+    ],
+    "content_needs": [
+      "boss designs",
+      "attack minigames",
+      "weakness schedule"
+    ],
+    "difficulty_levers": [
+      "boss HP",
+      "recovery",
+      "attacks per day"
+    ],
+    "tools": [
+      "shared_progress",
+      "daily_seed",
+      "score",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "our group chat vs a giant dragon every day",
+      "raid boss for my club",
+      "world boss we all hit together"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "endless_descent_floors",
+    "name": "Endless descent",
+    "aliases": [
+      "Downwell",
+      "Spelunky",
+      "Rogue Descent",
+      "Tower of Hero",
+      "Crossy Road dungeon"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "depth runner",
+    "summary": "Move through endless floors one choice at a time; each floor offers a door to a risk or a reward.",
+    "core_loop": "enter floor → pick a door (safe, risky, shop) → resolve → next floor deeper",
+    "verbs": [
+      "choose",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "floor display",
+      "three doors",
+      "HP",
+      "depth counter"
+    ],
+    "rules": [
+      "doors hide outcomes with risk icons",
+      "depth raises damage",
+      "treasure carries over"
+    ],
+    "win": "reach deepest floor",
+    "lose": "HP zero",
+    "scoring": "deepest floor",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare depths",
+      "daily descent"
+    ],
+    "content_needs": [
+      "door outcome table",
+      "floor scaling"
+    ],
+    "difficulty_levers": [
+      "risk curve",
+      "healing frequency"
+    ],
+    "tools": [
+      "endless",
+      "lives",
+      "difficulty_curve",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "endless dungeon descent where every door is a gamble",
+      "downwell but with decisions",
+      "how deep can my cat knight go"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sparring_skill_check_dice",
+    "name": "Skill-check adventure",
+    "aliases": [
+      "Dungeons & Dragons",
+      "Baldur's Gate",
+      "Disco Elysium checks",
+      "Pathfinder",
+      "Dicey Heroes"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "d20 narrative",
+    "summary": "Face story obstacles with a d20 roll plus a stat, with choices on when to push your luck for a reroll.",
+    "core_loop": "read obstacle → choose approach → roll d20 + stat → compare to target → consequence",
+    "verbs": [
+      "decide",
+      "roll"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "stat card",
+      "d20 dice",
+      "obstacle",
+      "DC target"
+    ],
+    "rules": [
+      "each approach uses a stat",
+      "rerolls cost a resource",
+      "critical hits and fails are special"
+    ],
+    "win": "survive the quest",
+    "lose": "HP or luck points run out",
+    "scoring": "quest progress",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "tell the funniest critical fail",
+      "run the same dungeon"
+    ],
+    "content_needs": [
+      "obstacles with DCs",
+      "stats",
+      "crit lines"
+    ],
+    "difficulty_levers": [
+      "DC range",
+      "rerolls"
+    ],
+    "tools": [
+      "random_int",
+      "choice_story",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "d&d one shot where i'm a halfling baker",
+      "roll a d20 to talk to the dragon",
+      "baldur's gate style skill checks in a school"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "partner_companion_quest",
+    "name": "Companion quest",
+    "aliases": [
+      "Zelda companion",
+      "Ni No Kuni",
+      "Ico",
+      "Journey",
+      "Stray"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "two-character control",
+    "summary": "Guide a hero and a helper companion together; each can cross obstacles the other cannot.",
+    "core_loop": "pick who acts → solve obstacle with right companion → combine abilities → reach exit",
+    "verbs": [
+      "switch",
+      "cooperate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "hero and helper",
+      "obstacles",
+      "ability icons"
+    ],
+    "rules": [
+      "helper can fly/squeeze but cannot fight",
+      "hero can fight but cannot fly",
+      "both must reach the exit"
+    ],
+    "win": "both reach the exit",
+    "lose": "either is lost",
+    "scoring": "steps and companion health",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share an elegant solution",
+      "pass the helper to a friend"
+    ],
+    "content_needs": [
+      "obstacle sets",
+      "companion abilities"
+    ],
+    "difficulty_levers": [
+      "number of obstacles",
+      "companion hp"
+    ],
+    "tools": [
+      "grid_board",
+      "checkpoint",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "quest with a baby dragon who can fly while i fight",
+      "ico style hold hands adventure",
+      "cat and knight pair escape a castle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "metroidvania_mini_map",
+    "name": "Mini metroidvania",
+    "aliases": [
+      "Metroid",
+      "Hollow Knight",
+      "Castlevania",
+      "Ori",
+      "Guacamelee"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "ability gates",
+    "summary": "A tiny interconnected map where new abilities open previously blocked routes, so backtracking is the game.",
+    "core_loop": "explore → find blocked path → find ability elsewhere → return and unlock",
+    "verbs": [
+      "explore",
+      "backtrack"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "connected map",
+      "ability icons",
+      "blocked paths",
+      "player"
+    ],
+    "rules": [
+      "6-8 rooms",
+      "3 abilities",
+      "each ability opens one block"
+    ],
+    "win": "reach the final room",
+    "lose": "none; step cap",
+    "scoring": "rooms visited and time",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare routes",
+      "ghost route replay"
+    ],
+    "content_needs": [
+      "room graph",
+      "ability gates"
+    ],
+    "difficulty_levers": [
+      "rooms",
+      "gates"
+    ],
+    "tools": [
+      "grid_board",
+      "pickups",
+      "checkpoint",
+      "ghost_score",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "metroidvania inside my school",
+      "hollow knight but in a cozy bakery",
+      "explore a tiny castle with double jump gates"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mining_dig_down",
+    "name": "Dig down and sell",
+    "aliases": [
+      "Motherload",
+      "Minecraft mining",
+      "Dig Dug",
+      "Terraria",
+      "Mr. Driller"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "vertical dig",
+    "summary": "Dig downward with a tool, collect ore until the bag fills, ride up to sell and upgrade, then go deeper.",
+    "core_loop": "tap tiles to dig → collect ore → bag fills or fuel low → return → sell → upgrade",
+    "verbs": [
+      "dig",
+      "manage"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "underground grid",
+      "drill",
+      "bag",
+      "fuel",
+      "shop"
+    ],
+    "rules": [
+      "each tile takes time to dig",
+      "deeper ore is worth more",
+      "fuel limits depth"
+    ],
+    "win": "reach the deepest stratum",
+    "lose": "fuel out underground",
+    "scoring": "depth and gold",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare depth",
+      "Group digs a shared shaft"
+    ],
+    "content_needs": [
+      "strata ore tables",
+      "upgrade list"
+    ],
+    "difficulty_levers": [
+      "fuel",
+      "ore density"
+    ],
+    "tools": [
+      "grid_board",
+      "pickups",
+      "countdown",
+      "score",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "motherload but i'm digging for pizza",
+      "dig down in my backyard to find fossils",
+      "mr driller style depth game with upgrades"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "escort_protect_npc",
+    "name": "Escort mission",
+    "aliases": [
+      "Resident Evil 4 Ashley",
+      "Escort quest",
+      "Ico",
+      "Oregon Trail guard",
+      "Last of Us Ellie"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "protect a walker",
+    "summary": "An NPC walks a path on its own; you clear threats and open ways before they arrive.",
+    "core_loop": "NPC walks → threats appear ahead → tap to remove or block → NPC passes → reach goal",
+    "verbs": [
+      "protect",
+      "clear"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "path",
+      "NPC",
+      "threats",
+      "shields"
+    ],
+    "rules": [
+      "NPC never stops unless blocked",
+      "threats must be cleared before contact",
+      "limited tools"
+    ],
+    "win": "NPC reaches the goal",
+    "lose": "NPC HP hits zero",
+    "scoring": "NPC HP at end",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare NPC HP",
+      "challenge on same path"
+    ],
+    "content_needs": [
+      "path with threats",
+      "NPC speed"
+    ],
+    "difficulty_levers": [
+      "NPC speed",
+      "threats per step"
+    ],
+    "tools": [
+      "spawn_wave",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "escort a baby dragon to its mother",
+      "protect grandma crossing a monster forest",
+      "resident evil escort but with a duck"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "trade_caravan_road",
+    "name": "Trade caravan",
+    "aliases": [
+      "Oregon Trail merchant",
+      "Taipan!",
+      "Caravan",
+      "Merchants of the Silk Road",
+      "Port Royale"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "buy low sell high",
+    "summary": "Travel between towns whose prices differ; buy goods low, sell high, and avoid bandit events, to hit a wealth goal.",
+    "core_loop": "check prices → buy → travel (event may hit) → sell → repeat",
+    "verbs": [
+      "trade",
+      "travel"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "town list",
+      "price tables",
+      "cargo",
+      "gold",
+      "events"
+    ],
+    "rules": [
+      "prices vary by town and day",
+      "cargo space is limited",
+      "bandits steal a share"
+    ],
+    "win": "reach a gold target",
+    "lose": "bankrupt or bandits take all",
+    "scoring": "final gold",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare profits",
+      "same prices for a Group daily"
+    ],
+    "content_needs": [
+      "price tables",
+      "event deck"
+    ],
+    "difficulty_levers": [
+      "cargo space",
+      "price swing"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "taipan but selling cursed sandwiches",
+      "caravan trade game across the desert",
+      "trade between towns in a fantasy kingdom"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "incantation_typed_spells",
+    "name": "Typed spellcasting",
+    "aliases": [
+      "Typing of the Dead",
+      "ZType",
+      "Nanoleaf spells",
+      "Wizard101 spells",
+      "Typing Quest"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "type to cast",
+    "summary": "Enemies approach carrying incantations; type the spell words before they arrive to blast them.",
+    "core_loop": "enemy walks in with a spell word → type it → blast → next enemy",
+    "verbs": [
+      "type",
+      "cast"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "enemies",
+      "target words",
+      "keyboard",
+      "HP"
+    ],
+    "rules": [
+      "typos fizzle",
+      "longer words deal more damage",
+      "enemies speed up"
+    ],
+    "win": "survive all waves",
+    "lose": "HP zero",
+    "scoring": "words cast and accuracy",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare words per minute",
+      "type a friend's name spells"
+    ],
+    "content_needs": [
+      "spell word lists by theme"
+    ],
+    "difficulty_levers": [
+      "word length",
+      "speed"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "waves",
+      "lives",
+      "word_check",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "typing of the dead but with harry potter spells",
+      "type spells to fight goblins",
+      "typing game where words are fireballs"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "puzzle_rpg_match_attack",
+    "name": "Match-3 battle",
+    "aliases": [
+      "Puzzle & Dragons",
+      "Empires & Puzzles",
+      "Bejeweled Battle",
+      "Candy Crush RPG",
+      "Gems of War"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "match to attack",
+    "summary": "Match colored gems to power hero attacks on enemies; bigger matches fire bigger skills.",
+    "core_loop": "swap gems → matches charge colored heroes → heroes attack → enemy attacks → repeat",
+    "verbs": [
+      "match",
+      "aim"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "pieces": [
+      "gem board",
+      "hero row",
+      "enemy",
+      "HP"
+    ],
+    "rules": [
+      "each color charges one hero",
+      "matches of 4+ create special gems",
+      "enemy attacks on a counter"
+    ],
+    "win": "defeat the enemy",
+    "lose": "party HP zero",
+    "scoring": "enemies beaten",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare score",
+      "team-up on bosses"
+    ],
+    "content_needs": [
+      "hero stats",
+      "enemy waves"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "enemy damage"
+    ],
+    "tools": [
+      "match_pairs",
+      "grid_board",
+      "waves",
+      "combo",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "puzzle and dragons but with pizzas",
+      "match 3 rpg where i'm a cat wizard",
+      "bejeweled with a dragon boss"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "survive_the_night_camp",
+    "name": "Survive the night",
+    "aliases": [
+      "Don't Starve",
+      "Darkwood",
+      "The Long Dark",
+      "Lone Survivor",
+      "Dead by Daylight"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "night timer",
+    "summary": "Prepare by day, then hold out through a night of threats with the supplies you gathered.",
+    "core_loop": "day: gather wood, food, light → night: threats approach → spend supplies to hold → dawn",
+    "verbs": [
+      "gather",
+      "defend"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "day map",
+      "supplies",
+      "night screen",
+      "threats"
+    ],
+    "rules": [
+      "night lasts 5 waves",
+      "fire needs wood",
+      "threats avoid light"
+    ],
+    "win": "survive to dawn",
+    "lose": "fire dies and threats reach you",
+    "scoring": "supplies left at dawn",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare survival",
+      "Group survives the same night"
+    ],
+    "content_needs": [
+      "threat list",
+      "supply list"
+    ],
+    "difficulty_levers": [
+      "night length",
+      "threat strength"
+    ],
+    "tools": [
+      "pickups",
+      "waves",
+      "lives",
+      "meters",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "don't starve but i'm a hamster",
+      "survive the night at the haunted campsite",
+      "gather wood by day and defend a fire at night"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dungeon_shopkeeper_haggle_hero",
+    "name": "Shop for heroes",
+    "aliases": [
+      "Moonlighter",
+      "Recettear",
+      "Shopkeeper's Dungeon",
+      "Potion Craft",
+      "Merchant RPG"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "sell to adventurers",
+    "summary": "Gather loot in a short dungeon trip, then price items in your shop for hero customers whose moods change what sells.",
+    "core_loop": "dungeon trip → bring loot → price items → customers react → profit",
+    "verbs": [
+      "price",
+      "gather"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "dungeon run",
+      "shelf with prices",
+      "customers",
+      "gold"
+    ],
+    "rules": [
+      "too high or too low a price loses profit",
+      "customers have budgets",
+      "trending items change"
+    ],
+    "win": "hit a profit goal",
+    "lose": "shop closes in the red",
+    "scoring": "profit",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare profits",
+      "stock a friend's shop"
+    ],
+    "content_needs": [
+      "loot table",
+      "customers",
+      "price curves"
+    ],
+    "difficulty_levers": [
+      "customer count",
+      "price sensitivity"
+    ],
+    "tools": [
+      "slider_input",
+      "pickups",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "moonlighter but selling to wizard cats",
+      "shopkeeper rpg for my school store",
+      "recettear style daily shop"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pet_hero_autochase",
+    "name": "Pet hero auto-fight",
+    "aliases": [
+      "Pocket Dungeon",
+      "Idle Heroes",
+      "Auto Chess lite",
+      "AFK Arena",
+      "Pixel Heroes"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "auto combat",
+    "summary": "Your hero fights automatically while you tap to trigger special abilities on cooldown at the right moments.",
+    "core_loop": "auto fight runs → ability icon glows → tap at the right time → hero strikes → wave ends",
+    "verbs": [
+      "time",
+      "trigger"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "auto-battle arena",
+      "ability buttons",
+      "cooldown rings",
+      "wave counter"
+    ],
+    "rules": [
+      "abilities have cooldowns",
+      "tapping early wastes effects",
+      "bosses have interrupt moments"
+    ],
+    "win": "clear waves",
+    "lose": "hero HP zero",
+    "scoring": "waves cleared",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare wave counts",
+      "boss ghost"
+    ],
+    "content_needs": [
+      "ability list",
+      "wave data"
+    ],
+    "difficulty_levers": [
+      "cooldowns",
+      "enemy damage"
+    ],
+    "tools": [
+      "waves",
+      "lives",
+      "combo",
+      "score",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tap abilities at the right time in a cat dragon fight",
+      "afk arena style auto fight with manual specials",
+      "auto battler where i time my ult"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "haunted_mansion_clear",
+    "name": "Haunted-room clearing",
+    "aliases": [
+      "Luigi's Mansion",
+      "Ghostbusters",
+      "Resident Evil",
+      "Phasmophobia rooms",
+      "Scooby-Doo"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "room clear",
+    "summary": "Enter room after room, find the right tool for each ghost type, and clear them all before the mansion floods with fear.",
+    "core_loop": "enter room → ghost type appears → pick tool → clear or lose HP → next room",
+    "verbs": [
+      "scan",
+      "choose tool"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "rooms",
+      "ghosts",
+      "tool belt",
+      "fear meter"
+    ],
+    "rules": [
+      "each ghost has a weakness tool",
+      "wrong tool raises fear",
+      "rooms are cleared in a chosen order"
+    ],
+    "win": "clear all rooms",
+    "lose": "fear meter full",
+    "scoring": "rooms cleared",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare clear order",
+      "ghost-hunting duo"
+    ],
+    "content_needs": [
+      "ghost types with weaknesses",
+      "room list"
+    ],
+    "difficulty_levers": [
+      "rooms",
+      "ghost speeds"
+    ],
+    "tools": [
+      "choice_story",
+      "lives",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "luigi's mansion with a vacuum for my school",
+      "clear ghosts from my grandma's house",
+      "ghostbusters game with the right tool for each ghost"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hub_town_quests_cycle",
+    "name": "Hub-town quest cycle",
+    "aliases": [
+      "Stardew quests",
+      "Animal Crossing errands",
+      "Dragon Quest villages",
+      "Legend of Zelda side quests"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "errand chain",
+    "summary": "A village has requests; do quick errands across a few spots, each unlocking the next request and building a friendship ladder.",
+    "core_loop": "talk to villager → get errand → visit spots → deliver → friendship up",
+    "verbs": [
+      "talk",
+      "fetch"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "village map",
+      "villagers",
+      "errand list",
+      "friendship hearts"
+    ],
+    "rules": [
+      "requests chain between villagers",
+      "each errand is a 10 second task",
+      "friendship unlocks a reward"
+    ],
+    "win": "finish the village chain",
+    "lose": "none",
+    "scoring": "hearts earned",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "gift villagers together",
+      "Group village"
+    ],
+    "content_needs": [
+      "errand chains",
+      "villager traits"
+    ],
+    "difficulty_levers": [
+      "villagers",
+      "chain length"
+    ],
+    "tools": [
+      "choice_story",
+      "pickups",
+      "shared_progress",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "village errands in my school",
+      "cozy rpg village with hamster neighbors",
+      "quest chain around a haunted town"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "boardgame_dungeon_dice_race",
+    "name": "Dungeon board race",
+    "aliases": [
+      "Munchkin",
+      "HeroQuest",
+      "Talisman",
+      "Betrayal at House on the Hill",
+      "Zombicide"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "board and event deck",
+    "summary": "Roll to move across a board of rooms, drawing event cards and fighting to be first to the treasure.",
+    "core_loop": "roll → move → draw event → fight or collect → race to treasure",
+    "verbs": [
+      "roll",
+      "move",
+      "draw"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "board path",
+      "dice",
+      "event deck",
+      "stats"
+    ],
+    "rules": [
+      "each space draws an event",
+      "fights compare stats plus a roll",
+      "first to the treasure wins"
+    ],
+    "win": "reach treasure first",
+    "lose": "HP zero",
+    "scoring": "score by treasure",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "pass-and-play with friends",
+      "race on the same board"
+    ],
+    "content_needs": [
+      "event deck",
+      "board"
+    ],
+    "difficulty_levers": [
+      "board length",
+      "event harshness"
+    ],
+    "tools": [
+      "random_int",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "munchkin on my phone with a wizard theme",
+      "talisman style dungeon race with friends",
+      "board game dungeon where the rooms are my teachers"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "trap_room_disarm",
+    "name": "Trap-room gauntlet",
+    "aliases": [
+      "Indiana Jones",
+      "Temple Run traps",
+      "Tomb Raider",
+      "Spelunky traps",
+      "Crypt of the NecroDancer"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "timing room",
+    "summary": "Cross a trapped corridor by timing taps to each trap's rhythm and picking the safe tile at each junction.",
+    "core_loop": "watch trap rhythm → tap to step on a safe beat → survive the room → next room",
+    "verbs": [
+      "time",
+      "step"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "corridor",
+      "traps with rhythms",
+      "explorer"
+    ],
+    "rules": [
+      "each trap has a repeating pattern",
+      "stepping on a beat is safe",
+      "later rooms combine patterns"
+    ],
+    "win": "cross all rooms",
+    "lose": "lives gone",
+    "scoring": "rooms crossed",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare rooms crossed",
+      "ghost run"
+    ],
+    "content_needs": [
+      "trap patterns",
+      "room layouts"
+    ],
+    "difficulty_levers": [
+      "pattern speed",
+      "combined traps"
+    ],
+    "tools": [
+      "beat_target",
+      "lives",
+      "checkpoint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "indiana jones temple of traps with a dog",
+      "cross a trap corridor to steal the golden cookie",
+      "timing gauntlet in a haunted castle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tavern_party_balance",
+    "name": "Tavern party builder",
+    "aliases": [
+      "Darkest Dungeon",
+      "Heroes of Might and Magic",
+      "Slay the Spire party",
+      "Hades companions"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "party composition",
+    "summary": "Recruit party members from a tavern with limited gold, then see which combo handles the dungeon's next three rooms.",
+    "core_loop": "see dungeon preview → recruit within gold → party resolves rooms → results",
+    "verbs": [
+      "recruit",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tavern roster",
+      "gold",
+      "room preview",
+      "results"
+    ],
+    "rules": [
+      "each hero covers tanking, healing, damage or utility",
+      "rooms require specific roles",
+      "gold caps the party"
+    ],
+    "win": "clear the dungeon",
+    "lose": "party wipe",
+    "scoring": "rooms cleared",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share party comps",
+      "compare versus the same dungeon"
+    ],
+    "content_needs": [
+      "hero roster with roles",
+      "dungeon previews"
+    ],
+    "difficulty_levers": [
+      "gold",
+      "roles needed"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "recruit a party of snack wizards for a dungeon",
+      "tavern party builder like darkest dungeon",
+      "pick a team of cats to beat a dragon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pet_hatch_adventure",
+    "name": "Hatch and venture",
+    "aliases": [
+      "Tamagotchi",
+      "Neopets",
+      "Monster Rancher",
+      "Adventure Pets",
+      "Pokémon Eggs"
+    ],
+    "family": "adventure_rpg",
+    "subfamily": "growth then quest",
+    "summary": "Hatch and raise a creature with small care actions, then send it on an adventure whose outcome depends on how you raised it.",
+    "core_loop": "care actions → creature grows traits → choose quest → traits decide outcomes",
+    "verbs": [
+      "nurture",
+      "choose quest"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "creature",
+      "care menu",
+      "trait bars",
+      "quest list"
+    ],
+    "rules": [
+      "care shifts traits (brave, clever, kind)",
+      "quests require traits",
+      "outcome shown as a short story"
+    ],
+    "win": "complete a quest",
+    "lose": "creature gets scared away if neglected",
+    "scoring": "quests completed",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share your creature",
+      "raise creatures together in a Group"
+    ],
+    "content_needs": [
+      "traits",
+      "quests",
+      "creature forms"
+    ],
+    "difficulty_levers": [
+      "trait weight",
+      "care decay"
+    ],
+    "tools": [
+      "meters",
+      "choice_story",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tamagotchi but it goes on dungeon quests",
+      "raise a dragon egg then send it to fight",
+      "monster rancher in my group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

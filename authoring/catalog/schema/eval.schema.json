@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "eval.schema.json",
+  "title": "retrieval_eval_case",
+  "description": "One retrieval eval case: a natural request and the game_type ids a good retrieval returns in its top 5.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request", "expect"],
+  "properties": {
+    "request": { "type": "string", "minLength": 3, "maxLength": 300 },
+    "expect": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$" } },
+    "notes": { "type": "string" }
+  }
+}

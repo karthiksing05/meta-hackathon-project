@@ -1,0 +1,2619 @@
+[
+  {
+    "id": "swipe_ruler_balance",
+    "name": "Swipe-ruler balance",
+    "aliases": [
+      "Reigns",
+      "swipe left or right",
+      "Tinder for kings",
+      "meter balancing card game"
+    ],
+    "family": "story_choice",
+    "subfamily": "card swipe",
+    "summary": "Swipe event cards left or right to decide; four meters must all stay out of the red and out of overflow.",
+    "core_loop": "read card → swipe a side → meters shift → next card → any meter at 0 or max ends the run",
+    "verbs": [
+      "swipe",
+      "decide",
+      "balance"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "pieces": [
+      "card stack",
+      "4 meters",
+      "character portrait",
+      "year counter"
+    ],
+    "rules": [
+      "each card has a left and a right effect on 1-3 meters",
+      "a meter at 0 or at max ends the run",
+      "some cards unlock only after earlier choices"
+    ],
+    "win": "survive as many years as possible",
+    "lose": "any meter hits 0 or max",
+    "scoring": "years survived",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare how many years you ruled",
+      "a Group's daily ruler seed"
+    ],
+    "content_needs": [
+      "card deck with meter effects",
+      "ruler persona and setting",
+      "ending lines per meter"
+    ],
+    "difficulty_levers": [
+      "meter start values",
+      "effect size",
+      "number of meters",
+      "card variety"
+    ],
+    "tools": [
+      "choice_story",
+      "swipe_cards",
+      "meters",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a reigns game but i'm a startup ceo",
+      "swipe to rule a pirate ship and keep the crew happy",
+      "reigns but i'm the head of a high school student council",
+      "tinder for kings"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "branching_story_endings",
+    "name": "Branching story with endings",
+    "aliases": [
+      "Choose Your Own Adventure",
+      "gamebook",
+      "interactive fiction",
+      "pick a path story"
+    ],
+    "family": "story_choice",
+    "subfamily": "scene tree",
+    "summary": "A short branching story where each scene offers two or three choices leading to distinct endings.",
+    "core_loop": "read scene → pick a choice → next scene → reach an ending → see which ending you got",
+    "verbs": [
+      "read",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene text",
+      "choice buttons",
+      "ending card"
+    ],
+    "rules": [
+      "every scene has 2-3 choices",
+      "paths can merge",
+      "endings are labeled good, bad or secret"
+    ],
+    "win": "reach an ending, ideally the best one",
+    "lose": "reach a bad ending",
+    "scoring": "ending rank (good, bad, secret)",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send a friend the ending you got",
+      "dare friends to find the secret ending"
+    ],
+    "content_needs": [
+      "scene tree of 12-30 scenes",
+      "ending set",
+      "tone and setting"
+    ],
+    "difficulty_levers": [
+      "number of scenes",
+      "how misleading choices look",
+      "number of hidden endings"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "choose your own adventure about getting lost in a haunted mall",
+      "a branching story where i'm a dragon's accountant",
+      "interactive story about the last day of summer",
+      "gamebook with 5 endings"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "endings_collector",
+    "name": "Endings collector",
+    "aliases": [
+      "Stanley Parable",
+      "find all the endings",
+      "multiple endings game",
+      "Doki Doki endings"
+    ],
+    "family": "story_choice",
+    "subfamily": "replay hunt",
+    "summary": "The same short story replays with a progress book that tracks which of N endings you have found.",
+    "core_loop": "play a run → hit an ending → ending ticks off the book → restart → try a different choice",
+    "verbs": [
+      "choose",
+      "replay",
+      "explore"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "short story",
+      "ending checklist",
+      "restart button"
+    ],
+    "rules": [
+      "story is under 8 scenes",
+      "each run is 20-40 seconds",
+      "endings are named and count toward a total"
+    ],
+    "win": "find every ending",
+    "lose": "none; completion hunt",
+    "scoring": "endings found out of N",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends to 100 percent",
+      "share a Group's combined endings found"
+    ],
+    "content_needs": [
+      "short story with many endings",
+      "ending titles",
+      "hint lines"
+    ],
+    "difficulty_levers": [
+      "number of endings",
+      "how hidden the last ones are"
+    ],
+    "tools": [
+      "choice_story",
+      "shared_progress",
+      "checkpoint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "find all 7 ways the dinner party goes wrong",
+      "endings collector but it's a haunted elevator",
+      "stanley parable but in a grocery store"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "text_parser_adventure",
+    "name": "Typed text adventure",
+    "aliases": [
+      "Zork",
+      "text adventure",
+      "parser game",
+      "MUD",
+      "AI Dungeon",
+      "interactive fiction parser"
+    ],
+    "family": "story_choice",
+    "subfamily": "typed commands",
+    "summary": "Type short commands like 'open door' to explore rooms and solve one escape goal.",
+    "core_loop": "read room → type a command → world responds → find items → reach the exit",
+    "verbs": [
+      "type",
+      "explore",
+      "combine"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "room descriptions",
+      "command box",
+      "inventory",
+      "goal line"
+    ],
+    "rules": [
+      "a small verb list (look, take, use, go)",
+      "synonyms are accepted",
+      "unknown commands get a funny reply"
+    ],
+    "win": "escape or finish the goal",
+    "lose": "run out of moves",
+    "scoring": "moves taken (fewer is better)",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare move counts",
+      "share a fun failed command"
+    ],
+    "content_needs": [
+      "room graph",
+      "objects and verbs",
+      "synonym lists",
+      "funny refusals"
+    ],
+    "difficulty_levers": [
+      "number of rooms",
+      "move cap",
+      "verb strictness"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "inventory",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a zork style adventure inside a wizard's fridge",
+      "text adventure where i have to escape my own birthday party",
+      "type commands to escape a spaceship",
+      "ai dungeon but short"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dialogue_persuasion",
+    "name": "Dialogue persuasion",
+    "aliases": [
+      "Mass Effect dialogue",
+      "talk them into it",
+      "Persona negotiation",
+      "convince the guard"
+    ],
+    "family": "story_choice",
+    "subfamily": "dialogue wheel",
+    "summary": "Pick lines in a conversation to move a target's mood meter from hostile to convinced before you run out of turns.",
+    "core_loop": "hear their line → pick a reply (kind, logical, bold) → mood shifts → repeat → reach goal mood",
+    "verbs": [
+      "talk",
+      "read the room",
+      "choose tone"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "NPC portrait",
+      "mood meter",
+      "reply options",
+      "turn counter"
+    ],
+    "rules": [
+      "each reply has a tone and the NPC likes certain tones",
+      "the NPC's preference changes with topic",
+      "limited turns"
+    ],
+    "win": "convince the NPC",
+    "lose": "mood falls to the floor or turns run out",
+    "scoring": "turns left plus final mood",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "challenge a friend to talk a bouncer in",
+      "same NPC for a Group each day"
+    ],
+    "content_needs": [
+      "NPC with likes and dislikes",
+      "reply sets in several tones",
+      "goal scenario"
+    ],
+    "difficulty_levers": [
+      "turn limit",
+      "NPC stubbornness",
+      "visibility of mood"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "convince a dragon to give back my wifi router",
+      "talk your way past the bouncer at the club",
+      "negotiate with my mom for a later curfew"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dating_sim_affection",
+    "name": "Dating sim affection",
+    "aliases": [
+      "Doki Doki Literature Club",
+      "visual novel",
+      "otome",
+      "dating sim",
+      "Hatoful Boyfriend",
+      "Love and Deepspace"
+    ],
+    "family": "story_choice",
+    "subfamily": "affection tracking",
+    "summary": "Spend a few story beats choosing how to talk to several characters; affection scores decide whose ending you get.",
+    "core_loop": "meet characters → pick actions per beat → affection rises or falls → reach final scene → ending depends on top affection",
+    "verbs": [
+      "chat",
+      "choose",
+      "flatter"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "2-4 character portraits",
+      "affection hearts",
+      "scene backgrounds",
+      "choice buttons"
+    ],
+    "rules": [
+      "each character likes different choices",
+      "affection is hidden or shown per setting",
+      "final ending goes to the highest"
+    ],
+    "win": "pick the ending you want",
+    "lose": "end up with no one",
+    "scoring": "final affection and ending reached",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send your match result to friends",
+      "compare who each friend ended up with"
+    ],
+    "content_needs": [
+      "characters with likes",
+      "scenes with 3 choices",
+      "ending per character"
+    ],
+    "difficulty_levers": [
+      "number of characters",
+      "hidden vs shown scores",
+      "number of beats"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a dating sim where all the love interests are cats",
+      "visual novel set at a wizard cafeteria",
+      "otome game but i'm trying to get into a band",
+      "date the dinosaurs"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "time_loop_knowledge",
+    "name": "Time-loop knowledge",
+    "aliases": [
+      "Outer Wilds",
+      "Groundhog Day",
+      "Majora's Mask",
+      "Deathloop",
+      "12 Minutes"
+    ],
+    "family": "story_choice",
+    "subfamily": "knowledge gating",
+    "summary": "The same short day repeats; what you learned (not items) unlocks new choices until you break the loop.",
+    "core_loop": "live the day → die or reset → keep clues → new choices appear → break the loop",
+    "verbs": [
+      "observe",
+      "remember",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "short timeline of events",
+      "clue notebook",
+      "loop counter",
+      "clock"
+    ],
+    "rules": [
+      "the day resets at a fixed time",
+      "clues carry over, items don't",
+      "a choice appears only if you hold the clue"
+    ],
+    "win": "break the loop",
+    "lose": "none; fewer loops is better",
+    "scoring": "loops used",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "fewest loops among friends",
+      "share a clue that cracked it"
+    ],
+    "content_needs": [
+      "event timeline",
+      "clues that unlock choices",
+      "ending"
+    ],
+    "difficulty_levers": [
+      "length of day",
+      "number of clues",
+      "loop limit"
+    ],
+    "tools": [
+      "choice_story",
+      "checkpoint",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "time loop where my cat dies at noon every day",
+      "groundhog day on a cruise ship",
+      "time loop at my school dance"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "stat_gated_choices",
+    "name": "Stat-gated story",
+    "aliases": [
+      "Fallen London",
+      "Choice of Games",
+      "Fighting Fantasy",
+      "RPG stats in story"
+    ],
+    "family": "story_choice",
+    "subfamily": "stat checks",
+    "summary": "Build a character from a few points, then choices unlock or fail based on those stats during a short tale.",
+    "core_loop": "spend starting points → read scene → see which choices your stats allow → pick → stats change → ending",
+    "verbs": [
+      "allocate",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "stat sheet (3-4 stats)",
+      "scenes",
+      "locked/unlocked choices",
+      "ending card"
+    ],
+    "rules": [
+      "each choice shows a stat requirement",
+      "you cannot afford everything",
+      "failing a check has a story consequence, not a game over"
+    ],
+    "win": "reach an ending that matches your goal",
+    "lose": "bad ending",
+    "scoring": "ending quality",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your build and the ending it got",
+      "compare builds on the same story"
+    ],
+    "content_needs": [
+      "scenes with stat requirements",
+      "stat names tied to theme",
+      "ending set"
+    ],
+    "difficulty_levers": [
+      "number of stats",
+      "points to spend",
+      "check thresholds"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a text rpg where my stats are charisma, snacks and luck",
+      "choice of games style story about running for mayor",
+      "stat checks story set in a haunted school"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "survival_supply_trail",
+    "name": "Supply trail",
+    "aliases": [
+      "Oregon Trail",
+      "Banner Saga caravan",
+      "Organ Trail",
+      "FTL events"
+    ],
+    "family": "story_choice",
+    "subfamily": "resource events",
+    "summary": "Travel a route of events, spend food, fuel and morale on choices, and arrive before supplies run out.",
+    "core_loop": "face event → choose how to spend supplies → resources change → advance a stop → repeat to destination",
+    "verbs": [
+      "decide",
+      "ration",
+      "trade"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "route map",
+      "supply meters",
+      "event cards",
+      "party members"
+    ],
+    "rules": [
+      "each stop is an event with 2-3 options",
+      "moving costs supplies",
+      "some choices risk a roll"
+    ],
+    "win": "reach the destination alive",
+    "lose": "supplies or party run out",
+    "scoring": "survivors and supplies left",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "same route for a Group each day",
+      "compare survivors"
+    ],
+    "content_needs": [
+      "event deck",
+      "supply types",
+      "route and destination"
+    ],
+    "difficulty_levers": [
+      "route length",
+      "starting supplies",
+      "event harshness"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "lives",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "oregon trail but we're driving to a music festival",
+      "road trip across the moon with 3 friends",
+      "oregon trail with my group chat",
+      "survival trail through a zombie mall"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "single_dilemma_regret",
+    "name": "One-decision regret",
+    "aliases": [
+      "The Last Question",
+      "Papers Please choices",
+      "Black Mirror",
+      "what would you do"
+    ],
+    "family": "story_choice",
+    "subfamily": "single choice",
+    "summary": "One big dilemma is presented; after you choose you see how the world looks under each option.",
+    "core_loop": "read the setup → make one decision → timeline plays out → see the other timeline → reflect",
+    "verbs": [
+      "decide",
+      "reflect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "setup scene",
+      "two choice buttons",
+      "outcome reveal",
+      "other path reveal"
+    ],
+    "rules": [
+      "only one decision",
+      "outcomes show both paths",
+      "no right answer"
+    ],
+    "win": "none",
+    "lose": "none",
+    "scoring": "no score; a verdict card",
+    "session_seconds": [
+      30,
+      60
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "see what friends chose",
+      "discuss in comments"
+    ],
+    "content_needs": [
+      "dilemma setup",
+      "two outcome stories",
+      "one-line verdict"
+    ],
+    "difficulty_levers": [
+      "dilemma weight",
+      "outcome length"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a dilemma game where you find a wallet with 500 dollars",
+      "one choice story about whether to read your friend's diary",
+      "black mirror one decision game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "moral_dilemma_poll",
+    "name": "Moral dilemma poll",
+    "aliases": [
+      "Trolley problem",
+      "Moral Machine",
+      "would you rather",
+      "Reigns of morals"
+    ],
+    "family": "story_choice",
+    "subfamily": "poll comparison",
+    "summary": "A sequence of quick ethical dilemmas, each followed by how everyone else chose.",
+    "core_loop": "read dilemma → choose → see percent who chose same → next → final profile of your values",
+    "verbs": [
+      "decide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "dilemma card",
+      "two buttons",
+      "percent bar",
+      "values profile"
+    ],
+    "rules": [
+      "5-8 dilemmas per run",
+      "results are aggregated across players",
+      "a final profile names your leaning"
+    ],
+    "win": "complete all dilemmas",
+    "lose": "none",
+    "scoring": "no score; a values profile",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare profiles with friends",
+      "see how your Group votes"
+    ],
+    "content_needs": [
+      "dilemma set",
+      "value tags",
+      "profile descriptions"
+    ],
+    "difficulty_levers": [
+      "number of dilemmas",
+      "extremity"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "trolley problem but every option is a pizza topping",
+      "moral machine for school lunch",
+      "dilemmas where the lifeboat is a group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "chat_message_story",
+    "name": "Chat-message story",
+    "aliases": [
+      "Hooked",
+      "Yarn",
+      "Lifeline",
+      "texting story",
+      "Chat Mystery"
+    ],
+    "family": "story_choice",
+    "subfamily": "message thread",
+    "summary": "The story arrives as text messages and you choose your replies, which steer where the thread goes.",
+    "core_loop": "message arrives → pick a reply → typing bubbles → thread branches → final message lands",
+    "verbs": [
+      "read",
+      "reply"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "chat thread UI",
+      "typing indicator",
+      "reply chips",
+      "contact avatar"
+    ],
+    "rules": [
+      "messages appear on a timer",
+      "replies shape the other character's mood",
+      "branches end in different last messages"
+    ],
+    "win": "reach the best final message",
+    "lose": "the other person stops replying",
+    "scoring": "ending quality",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send the final screenshot to a friend",
+      "pick your replies in the Group chat"
+    ],
+    "content_needs": [
+      "scripted thread with branches",
+      "character voice",
+      "endings"
+    ],
+    "difficulty_levers": [
+      "pace of messages",
+      "number of branches"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "text story where my crush replies one word at a time",
+      "lifeline style game where an astronaut texts me for help",
+      "a chat story about a missing roommate"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "inventory_gated_story",
+    "name": "Inventory-gated story",
+    "aliases": [
+      "Monkey Island",
+      "King's Quest",
+      "Zelda items",
+      "point and click inventory"
+    ],
+    "family": "story_choice",
+    "subfamily": "key items",
+    "summary": "Pick up items across scenes; some choices only appear if you hold the right object.",
+    "core_loop": "explore scene → take items → reach blocked choice → use the right item → progress",
+    "verbs": [
+      "collect",
+      "use",
+      "explore"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene screens",
+      "inventory bar",
+      "item-gated choices"
+    ],
+    "rules": [
+      "max 4 items held",
+      "items have one intended use plus a joke use",
+      "some items lost on bad choices"
+    ],
+    "win": "reach the goal scene",
+    "lose": "wrong item gets you caught",
+    "scoring": "items used wisely, scene count",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "solve it together by sharing which items you chose",
+      "fastest clear"
+    ],
+    "content_needs": [
+      "scenes with item gates",
+      "item list with uses",
+      "funny wrong-use lines"
+    ],
+    "difficulty_levers": [
+      "item cap",
+      "number of gates"
+    ],
+    "tools": [
+      "choice_story",
+      "pickups",
+      "inventory",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a point and click about stealing the last slice",
+      "item puzzle story inside a wizard's backpack",
+      "escape the dorm with only what's in my room"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "interview_simulator",
+    "name": "Interview or exam simulator",
+    "aliases": [
+      "Papers Please",
+      "job interview sim",
+      "Hades dialogue",
+      "Jackbox rapport"
+    ],
+    "family": "story_choice",
+    "subfamily": "answer sets",
+    "summary": "You answer a series of tough questions by picking from three tones; the interviewer's patience and impression change.",
+    "core_loop": "question arrives → pick an answer → patience and impression move → next question → verdict",
+    "verbs": [
+      "answer",
+      "adapt"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "interviewer portrait",
+      "patience meter",
+      "impression meter",
+      "answer chips"
+    ],
+    "rules": [
+      "answers have hidden fit scores",
+      "patience drops on rambling picks",
+      "verdict by thresholds"
+    ],
+    "win": "get hired or approved",
+    "lose": "patience hits zero",
+    "scoring": "impression plus remaining patience",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the funniest job you got",
+      "same interview for a Group each day"
+    ],
+    "content_needs": [
+      "question sets",
+      "answer fit scores",
+      "verdict lines"
+    ],
+    "difficulty_levers": [
+      "number of questions",
+      "interviewer strictness"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "job interview with a dragon hr",
+      "interview to join hogwarts as a teacher",
+      "an interview for the pizza cult"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ghost_campfire_fear",
+    "name": "Campfire fear meter",
+    "aliases": [
+      "Until Dawn",
+      "Telltale horror",
+      "Alan Wake choice",
+      "scary story round the campfire"
+    ],
+    "family": "story_choice",
+    "subfamily": "hidden stat",
+    "summary": "A spooky tale where each choice quietly raises or lowers a fear meter that decides what you see.",
+    "core_loop": "read spooky scene → choose → fear changes silently → scenes change look at high fear → survive the night",
+    "verbs": [
+      "choose",
+      "endure"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene text",
+      "hidden fear meter",
+      "look change",
+      "ending card"
+    ],
+    "rules": [
+      "fear is not shown until the end",
+      "high fear changes narration and hides options",
+      "a calm ending needs low fear"
+    ],
+    "win": "survive until dawn",
+    "lose": "fear overflows",
+    "scoring": "ending tier from final fear",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "tell a friend what you saw",
+      "compare nerves"
+    ],
+    "content_needs": [
+      "scenes with fear deltas",
+      "altered narration for high fear"
+    ],
+    "difficulty_levers": [
+      "scene count",
+      "fear weight"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "campfire horror where i'm the only one who hears the whisper",
+      "until dawn style story at a sleepover",
+      "spooky camp story with my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "personality_story_quiz",
+    "name": "Story that sorts you",
+    "aliases": [
+      "Sorting Hat",
+      "Buzzfeed quiz",
+      "Which character are you",
+      "Pottermore sorting"
+    ],
+    "family": "story_choice",
+    "subfamily": "hidden tally",
+    "summary": "Make a few story choices without knowing they tally up traits, then the game reveals which type you are.",
+    "core_loop": "choose in mini-scenes → hidden trait scores update → final reveal names your result → share card",
+    "verbs": [
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "5-7 mini-scenes",
+      "hidden trait tally",
+      "result card",
+      "share image"
+    ],
+    "rules": [
+      "each choice adds to 1-2 traits",
+      "the result is the top trait",
+      "the result has a flattering description"
+    ],
+    "win": "see your result",
+    "lose": "none",
+    "scoring": "no score; a result type",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare results with friends",
+      "a Group's mix of types"
+    ],
+    "content_needs": [
+      "trait list",
+      "choice-to-trait map",
+      "result descriptions"
+    ],
+    "difficulty_levers": [
+      "number of results",
+      "number of scenes"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "which hogwarts house am i, as a story",
+      "a story that reveals which avenger i am",
+      "sorting quiz about what kind of pasta i am"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "negotiation_haggle",
+    "name": "Haggle negotiation",
+    "aliases": [
+      "Papers Please",
+      "Merchant haggle",
+      "Shark Tank pitch",
+      "Overcooked deals"
+    ],
+    "family": "story_choice",
+    "subfamily": "offer counter",
+    "summary": "Make and counter offers with a shopkeeper whose patience falls; close the deal at the best price you can.",
+    "core_loop": "see item → make an offer → they counter or refuse → patience drops → accept or walk",
+    "verbs": [
+      "offer",
+      "bluff",
+      "accept"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "merchant portrait",
+      "price slider",
+      "patience meter",
+      "item card"
+    ],
+    "rules": [
+      "the merchant has a hidden minimum",
+      "lowball offers cost patience",
+      "you can pay in items instead"
+    ],
+    "win": "close at lowest price",
+    "lose": "merchant walks away",
+    "scoring": "savings vs fair price",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "best haggle of the day",
+      "pass a friend the same merchant"
+    ],
+    "content_needs": [
+      "items with fair price",
+      "merchant temperaments",
+      "banter"
+    ],
+    "difficulty_levers": [
+      "patience",
+      "merchant stubbornness"
+    ],
+    "tools": [
+      "slider_input",
+      "meters",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "haggle with a wizard for a flying carpet",
+      "negotiate the price of a used car from a shark",
+      "bargain at a market with my mom"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "kingdom_decrees_day",
+    "name": "Daily decrees",
+    "aliases": [
+      "Reigns",
+      "Suzerain",
+      "This is the Police",
+      "Democracy 3",
+      "King of Dragon Pass"
+    ],
+    "family": "story_choice",
+    "subfamily": "policy cards",
+    "summary": "Each day a petition arrives; your approve or deny shapes budget, loyalty and a few long-term flags.",
+    "core_loop": "read petition → approve or deny → budget and loyalty move → next day → end-of-term report",
+    "verbs": [
+      "judge",
+      "budget"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "petition card",
+      "treasury",
+      "loyalty bars",
+      "day counter",
+      "report"
+    ],
+    "rules": [
+      "petitions carry hidden consequences days later",
+      "treasury cannot go below zero",
+      "final report ranks your rule"
+    ],
+    "win": "finish the term in good standing",
+    "lose": "treasury empties or loyalty hits zero",
+    "scoring": "final score by treasury, loyalty and legacy",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare terms in a Group",
+      "share your worst decree"
+    ],
+    "content_needs": [
+      "petition deck",
+      "delayed consequences",
+      "report text"
+    ],
+    "difficulty_levers": [
+      "term length",
+      "consequence delay",
+      "number of resources"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mayor of my school for a week",
+      "run a pizza kingdom and keep the people from revolting",
+      "decrees game where i rule the group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "life_path_years",
+    "name": "Life-path years",
+    "aliases": [
+      "Life Is Strange",
+      "BitLife",
+      "Life Choices",
+      "Choice of Life"
+    ],
+    "family": "story_choice",
+    "subfamily": "time skips",
+    "summary": "Live a life in big jumps; at each age you make one defining choice that changes the next stage.",
+    "core_loop": "pick a choice at age → time skips → life stage updates → repeat → final obituary summary",
+    "verbs": [
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "age timeline",
+      "life stage cards",
+      "choice buttons",
+      "summary"
+    ],
+    "rules": [
+      "about 8 stages",
+      "choices set tags that affect later options",
+      "the ending is a summary of tags"
+    ],
+    "win": "reach a life summary you like",
+    "lose": "none",
+    "scoring": "a life score by happiness, wealth and relationships",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare lives with friends",
+      "send your obituary"
+    ],
+    "content_needs": [
+      "stage templates",
+      "tag effects",
+      "summary lines"
+    ],
+    "difficulty_levers": [
+      "number of stages",
+      "tag count"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "bitlife but i'm a cat",
+      "live a whole life as a wizard in 2 minutes",
+      "choose every year of my 20s",
+      "a life story about a band that never made it"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "villain_origin_story",
+    "name": "Villain route",
+    "aliases": [
+      "Overlord",
+      "Dungeon Keeper",
+      "Evil Genius",
+      "Tyranny"
+    ],
+    "family": "story_choice",
+    "subfamily": "flipped morality",
+    "summary": "The same story but you play the antagonist, and bold, selfish choices score while kind ones lose points.",
+    "core_loop": "plan the scheme → pick sinister options → hero reacts → scheme score climbs → final reveal",
+    "verbs": [
+      "scheme",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "villain scenes",
+      "evil meter",
+      "hero reactions",
+      "ending"
+    ],
+    "rules": [
+      "cruel choices add menace",
+      "too obvious choices alert the hero",
+      "best ending is a clever one"
+    ],
+    "win": "complete the master plan",
+    "lose": "hero stops you",
+    "scoring": "menace score",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send your villain name card",
+      "compare plans"
+    ],
+    "content_needs": [
+      "scheme steps with menace and risk",
+      "hero reactions"
+    ],
+    "difficulty_levers": [
+      "risk of detection",
+      "number of steps"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "be the villain in a cozy bake off",
+      "evil plan to steal the school mascot",
+      "villain origin where the hero is my roommate"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mad_libs_story",
+    "name": "Fill-in-the-blank story",
+    "aliases": [
+      "Mad Libs",
+      "Wordplay",
+      "Apples to Apples story",
+      "Silly story generator"
+    ],
+    "family": "story_choice",
+    "subfamily": "word fill",
+    "summary": "Provide words for blanks without seeing the story, then the finished story is read back and rated for laughs.",
+    "core_loop": "prompt for a word type → enter or pick words → story revealed with your words → rate laughs",
+    "verbs": [
+      "fill",
+      "laugh"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "story template",
+      "blanks with word types",
+      "reveal screen",
+      "laugh meter"
+    ],
+    "rules": [
+      "blanks have types (noun, verb, name)",
+      "words fill in a template",
+      "players can pick from word chips instead of typing"
+    ],
+    "win": "read the finished story",
+    "lose": "none; fun result",
+    "scoring": "friends' laugh votes",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends fill blanks for each other",
+      "vote funniest story in the Group"
+    ],
+    "content_needs": [
+      "story templates with blanks",
+      "word chip pools",
+      "names from the Group"
+    ],
+    "difficulty_levers": [
+      "number of blanks",
+      "typed vs chips"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "reveal",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mad libs about a cursed birthday party",
+      "fill in the blank story starring my best friend",
+      "mad libs but it's a harry potter fanfic"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "who_wrote_the_next_line",
+    "name": "Pick the next line",
+    "aliases": [
+      "Exquisite corpse",
+      "Once Upon a Time card game",
+      "Story Cubes",
+      "Telephone story"
+    ],
+    "family": "story_choice",
+    "subfamily": "continuation pick",
+    "summary": "A story starts and you choose which of three lines best continues it; matching the 'storyteller's' real next line scores.",
+    "core_loop": "read story so far → pick next line → real next line revealed → score → continue",
+    "verbs": [
+      "read",
+      "predict"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "story strip",
+      "three candidate lines",
+      "reveal",
+      "score"
+    ],
+    "rules": [
+      "one of the three is the original",
+      "story builds on the real line regardless",
+      "ending after 6 beats"
+    ],
+    "win": "guess the most real lines",
+    "lose": "none",
+    "scoring": "correct picks",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare guesses",
+      "friends write fake candidates"
+    ],
+    "content_needs": [
+      "stories with original and fake continuations"
+    ],
+    "difficulty_levers": [
+      "candidate plausibility",
+      "story length"
+    ],
+    "tools": [
+      "choice_story",
+      "quiz",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "guess the real line from a famous fairy tale",
+      "which continuation did the author write",
+      "story roulette with fake lines from my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "butterfly_effect_replay",
+    "name": "Butterfly-effect replay",
+    "aliases": [
+      "Life is Strange rewind",
+      "Butterfly Effect",
+      "Quantum Break choices",
+      "Her Story"
+    ],
+    "family": "story_choice",
+    "subfamily": "single change",
+    "summary": "Play a short story, then rewind and change one early choice to see how everything downstream shifts.",
+    "core_loop": "play story → reach ending → pick one earlier choice to change → replay changes → compare endings",
+    "verbs": [
+      "choose",
+      "rewind"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "story timeline",
+      "rewind control",
+      "side-by-side endings"
+    ],
+    "rules": [
+      "only one rewind per run",
+      "downstream scenes visibly change",
+      "goal is a target ending"
+    ],
+    "win": "reach the target ending by changing one choice",
+    "lose": "wrong ending after the rewind",
+    "scoring": "rewinds needed (one is par)",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "race to find the right rewind",
+      "share your fix"
+    ],
+    "content_needs": [
+      "timeline with ripple effects",
+      "target ending"
+    ],
+    "difficulty_levers": [
+      "story length",
+      "number of branches"
+    ],
+    "tools": [
+      "choice_story",
+      "checkpoint",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "rewind a bad first date to fix it",
+      "butterfly effect story at a wedding",
+      "change one choice to stop the zombie outbreak"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "space_captain_log",
+    "name": "Captain's log decisions",
+    "aliases": [
+      "FTL",
+      "Star Trek bridge",
+      "Space Station 13 events",
+      "Out There"
+    ],
+    "family": "story_choice",
+    "subfamily": "ship events",
+    "summary": "Command a ship through random events, balancing crew, hull and fuel with each decision.",
+    "core_loop": "event arrives → choose response → hull, crew, fuel shift → jump to next sector → reach destination",
+    "verbs": [
+      "command",
+      "allocate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "ship status bars",
+      "event card",
+      "star map",
+      "crew",
+      "log text"
+    ],
+    "rules": [
+      "each sector has one event",
+      "some events need crew or fuel to resolve",
+      "hull zero ends the run"
+    ],
+    "win": "reach the final sector",
+    "lose": "hull, crew or fuel hit zero",
+    "scoring": "sectors cleared and crew saved",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare how far you got",
+      "the Group names the next ship"
+    ],
+    "content_needs": [
+      "event deck",
+      "crew roster",
+      "sector map"
+    ],
+    "difficulty_levers": [
+      "event harshness",
+      "resources",
+      "number of sectors"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "lives",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "ftl but my crew is my cousins",
+      "captain of a space bakery",
+      "star trek style captain log decisions",
+      "lost in space with five hamsters"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "heist_crew_planner",
+    "name": "Heist planner",
+    "aliases": [
+      "Ocean's Eleven",
+      "Inside Job",
+      "Payday",
+      "Rainbow Six planning phase",
+      "Monaco"
+    ],
+    "family": "story_choice",
+    "subfamily": "plan then reveal",
+    "summary": "Pick a crew and a method for each stage of a heist, then watch the plan play out against hidden security.",
+    "core_loop": "pick crew → pick approach per stage → reveal security → see outcomes per stage → payout",
+    "verbs": [
+      "plan",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "crew cards",
+      "stage approach options",
+      "security hints",
+      "outcome reel"
+    ],
+    "rules": [
+      "each crew member excels at certain approaches",
+      "security counters some approaches",
+      "budget limits crew size"
+    ],
+    "win": "pull off the heist",
+    "lose": "caught before the vault",
+    "scoring": "payout minus costs",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "plan the same heist as friends and compare",
+      "the Group picks the crew together"
+    ],
+    "content_needs": [
+      "crew with skills",
+      "stages with security",
+      "outcome lines"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "number of stages",
+      "hint quality"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "plan a heist at my school cafeteria",
+      "ocean's eleven but the vault is a cake",
+      "steal the mascot in 3 stages"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "crisis_pr_response",
+    "name": "Crisis response",
+    "aliases": [
+      "Reigns",
+      "Twitter simulator",
+      "Papers Please",
+      "Overcooked PR",
+      "Mayor sim"
+    ],
+    "family": "story_choice",
+    "subfamily": "reaction posts",
+    "summary": "A scandal breaks; choose how to respond at each stage while reputation and followers swing.",
+    "core_loop": "scandal appears → choose a statement → public reacts → new twist arrives → final reputation",
+    "verbs": [
+      "respond",
+      "spin"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "feed mock-up",
+      "reputation meter",
+      "response options",
+      "twist cards"
+    ],
+    "rules": [
+      "every response has audience effects",
+      "tone mismatch worsens things",
+      "twists appear mid-run"
+    ],
+    "win": "end with reputation intact",
+    "lose": "reputation hits zero",
+    "scoring": "final reputation plus followers",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare how you handled the same scandal",
+      "share the worst response"
+    ],
+    "content_needs": [
+      "scandals with twists",
+      "audience reactions",
+      "response tones"
+    ],
+    "difficulty_levers": [
+      "number of twists",
+      "audience volatility"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "manage my school's lunch scandal like a pr agent",
+      "crisis response game where my pet dragon broke the website",
+      "twitter crisis sim"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "parallel_lives_dual",
+    "name": "Dual-character story",
+    "aliases": [
+      "Life Is Strange",
+      "Florence",
+      "Two Souls",
+      "Sunless Sea cross"
+    ],
+    "family": "story_choice",
+    "subfamily": "alternate viewpoints",
+    "summary": "Alternate between two characters in the same event; your choices for one change what the other can do.",
+    "core_loop": "play character A beat → switch to character B → their options depend on A → converge",
+    "verbs": [
+      "choose",
+      "switch"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "two character cards",
+      "shared scene",
+      "cross-effects display"
+    ],
+    "rules": [
+      "beats alternate A/B",
+      "some choices lock the other character's options",
+      "two linked endings"
+    ],
+    "win": "reach the joined best ending",
+    "lose": "split ending",
+    "scoring": "ending pairing",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "each friend plays one character and pass the story",
+      "compare pairings"
+    ],
+    "content_needs": [
+      "scene beats for two viewpoints",
+      "cross-effects",
+      "endings"
+    ],
+    "difficulty_levers": [
+      "number of beats",
+      "cross-effects"
+    ],
+    "tools": [
+      "choice_story",
+      "turns",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "story from two sides of a breakup text",
+      "both sides of a wizard duel",
+      "twins in a haunted house"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "branching_memory_callbacks",
+    "name": "Callback story",
+    "aliases": [
+      "Telltale",
+      "Mass Effect saves",
+      "The Walking Dead",
+      "remembers what you did"
+    ],
+    "family": "story_choice",
+    "subfamily": "flag callbacks",
+    "summary": "Early small choices set flags that quietly change lines and outcomes much later.",
+    "core_loop": "early choice sets a flag → mid scenes unrelated → later scene references it → final scene reflects flags",
+    "verbs": [
+      "choose",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene graph",
+      "hidden flags",
+      "callback lines"
+    ],
+    "rules": [
+      "flags are never announced when set",
+      "at least three callbacks fire",
+      "final scene lists what 'they remembered'"
+    ],
+    "win": "reach the ending you earned",
+    "lose": "none; consequence",
+    "scoring": "callbacks triggered",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare which callbacks fired",
+      "share the one that hit hardest"
+    ],
+    "content_needs": [
+      "story with flags",
+      "callback lines",
+      "finale"
+    ],
+    "difficulty_levers": [
+      "number of flags",
+      "distance between flag and callback"
+    ],
+    "tools": [
+      "choice_story",
+      "checkpoint",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "story where the way i treat the barista matters at the end",
+      "telltale style game about a road trip with friends",
+      "it remembers everything i said to the dragon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "quick_time_story",
+    "name": "Quick-time story",
+    "aliases": [
+      "Detroit Become Human",
+      "Heavy Rain",
+      "Until Dawn timer",
+      "Telltale timed choices"
+    ],
+    "family": "story_choice",
+    "subfamily": "timed picks",
+    "summary": "Story choices are on a short countdown; no answer is itself a choice with a consequence.",
+    "core_loop": "scene plays → options appear with a timer → pick or let it lapse → consequence → next",
+    "verbs": [
+      "decide fast",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "timed choice buttons",
+      "countdown ring",
+      "silence outcome"
+    ],
+    "rules": [
+      "each timed choice has 2 options plus silence",
+      "silence always has a distinct outcome",
+      "timer shrinks as stakes rise"
+    ],
+    "win": "survive the scene",
+    "lose": "bad ending",
+    "scoring": "ending quality",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share an ending where you froze",
+      "compare reaction"
+    ],
+    "content_needs": [
+      "scenes with 3-way timed choices",
+      "silence outcomes"
+    ],
+    "difficulty_levers": [
+      "timer length",
+      "stakes"
+    ],
+    "tools": [
+      "choice_story",
+      "timer_bar",
+      "countdown",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "carry out the heist with a countdown on every choice",
+      "quick time story where a bear walks into my camp",
+      "detroit style choices about an escaping robot"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "group_vote_story",
+    "name": "Group-vote story",
+    "aliases": [
+      "Twitch Plays",
+      "Crowd-choice story",
+      "Kahoot vote",
+      "Choose the next scene"
+    ],
+    "family": "story_choice",
+    "subfamily": "crowd vote",
+    "summary": "Everyone in a Group votes on the next choice each day, and the story advances by majority.",
+    "core_loop": "scene posts → members vote → majority picks branch → next scene tomorrow",
+    "verbs": [
+      "vote",
+      "wait"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene card",
+      "vote bars",
+      "story chronicle"
+    ],
+    "rules": [
+      "one vote per member per scene",
+      "ties broken by earliest vote",
+      "story continues daily"
+    ],
+    "win": "finish the story together",
+    "lose": "none",
+    "scoring": "participation",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "group_daily"
+    ],
+    "social_hooks": [
+      "the whole Group steers one tale",
+      "argue before voting",
+      "end-of-week ending party"
+    ],
+    "content_needs": [
+      "scene tree",
+      "vote tally",
+      "chapter recap"
+    ],
+    "difficulty_levers": [
+      "scenes per week",
+      "ties"
+    ],
+    "tools": [
+      "choice_story",
+      "shared_progress",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "our group chat votes on a pirate story every day",
+      "a co-written horror story the class decides",
+      "vote for what the knight does next"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "relay_story_friends",
+    "name": "Relay co-written story",
+    "aliases": [
+      "Telephone",
+      "Exquisite corpse",
+      "Storium",
+      "Story chain"
+    ],
+    "family": "story_choice",
+    "subfamily": "alternating authors",
+    "summary": "Friends alternate choosing story branches or adding a line, each seeing only the last beat.",
+    "core_loop": "receive the last beat → add a choice or line → pass to next friend → story grows → final reading",
+    "verbs": [
+      "continue",
+      "add",
+      "pass"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "story chain",
+      "next-friend picker",
+      "final reading"
+    ],
+    "rules": [
+      "each turn sees only the previous beat",
+      "a turn is a pick or one line",
+      "the final story is read aloud in order"
+    ],
+    "win": "finish the chain",
+    "lose": "none",
+    "scoring": "laugh votes at the end",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "async_friends",
+      "pass_and_play"
+    ],
+    "social_hooks": [
+      "read the final story in the Group",
+      "pass chains between friends"
+    ],
+    "content_needs": [
+      "seed prompt",
+      "prompt chips",
+      "ordering of players"
+    ],
+    "difficulty_levers": [
+      "chain length",
+      "typed vs picked"
+    ],
+    "tools": [
+      "choice_story",
+      "turns",
+      "keyboard",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "co-write a story about a cursed sandwich with my friends",
+      "story chain where we alternate sentences",
+      "each friend adds one line to a space opera"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "persuade_the_crowd_speech",
+    "name": "Speech with audience",
+    "aliases": [
+      "Debate sim",
+      "Reigns speeches",
+      "Democracy 3",
+      "Mayor of Rust"
+    ],
+    "family": "story_choice",
+    "subfamily": "audience meter",
+    "summary": "Pick lines for a speech; each line pleases different parts of an audience and a crowd meter rises or falls live.",
+    "core_loop": "choose a speech line → crowd sections react → meter moves → next line → final vote",
+    "verbs": [
+      "speak",
+      "read the crowd"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "speech lines",
+      "crowd sections with moods",
+      "approval meter"
+    ],
+    "rules": [
+      "audience sections prefer different themes",
+      "repeating a theme bores them",
+      "final vote needs majority"
+    ],
+    "win": "win the vote",
+    "lose": "approval under 50 percent",
+    "scoring": "approval percent",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "give the same speech and compare vote counts",
+      "Group rally"
+    ],
+    "content_needs": [
+      "audience sections and likes",
+      "line banks per theme"
+    ],
+    "difficulty_levers": [
+      "number of sections",
+      "line variety"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "student council speech to convince the school to get pizza",
+      "campaign speech for dragon mayor",
+      "wedding toast choose your lines"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "maze_of_rooms_story",
+    "name": "Room-by-room dungeon story",
+    "aliases": [
+      "Zork",
+      "Choose your path labyrinth",
+      "Fighting Fantasy",
+      "Where's my Water maze"
+    ],
+    "family": "story_choice",
+    "subfamily": "map branching",
+    "summary": "A story told as a small map of rooms; the order you visit decides what you find and which ending opens.",
+    "core_loop": "enter a room → choose a door → find a clue or foe → map fills in → reach the exit",
+    "verbs": [
+      "explore",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "room map",
+      "doors",
+      "room events",
+      "exit"
+    ],
+    "rules": [
+      "6-9 rooms",
+      "each room can be visited once",
+      "clues add up to unlock the final door"
+    ],
+    "win": "find the exit with the key",
+    "lose": "trapped by a dead end",
+    "scoring": "rooms explored and loot",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race for the best route",
+      "same map across a Group"
+    ],
+    "content_needs": [
+      "room graph",
+      "room events",
+      "keys"
+    ],
+    "difficulty_levers": [
+      "number of rooms",
+      "dead ends"
+    ],
+    "tools": [
+      "choice_story",
+      "pickups",
+      "checkpoint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "haunted house of 8 rooms where i pick the doors",
+      "labyrinth story in a school",
+      "text dungeon with a talking cat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "epistolary_letters_story",
+    "name": "Letters and documents story",
+    "aliases": [
+      "Her Story",
+      "Return of the Obra Dinn",
+      "Papers Please documents",
+      "Gone Home notes"
+    ],
+    "family": "story_choice",
+    "subfamily": "document reading",
+    "summary": "Read short documents in an order you choose; which ones you open decides the version of the story you understand.",
+    "core_loop": "pick a document → read → new documents unlock → choose a conclusion → reveal the truth",
+    "verbs": [
+      "read",
+      "infer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "document stack",
+      "unlock links",
+      "conclusion picker"
+    ],
+    "rules": [
+      "not all documents can be read",
+      "later documents contradict earlier ones",
+      "you choose a final conclusion"
+    ],
+    "win": "pick the right conclusion",
+    "lose": "wrong conclusion",
+    "scoring": "conclusion correctness",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare your conclusion",
+      "debate what happened"
+    ],
+    "content_needs": [
+      "documents with contradictions",
+      "conclusion options"
+    ],
+    "difficulty_levers": [
+      "document count",
+      "contradiction difficulty"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "read letters from a lighthouse keeper and decide what happened",
+      "found notes in a school locker story",
+      "diary entries from a time traveler"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tarot_fate_reading",
+    "name": "Fate-card reading",
+    "aliases": [
+      "Tarot",
+      "Where Winds Meet fortune",
+      "Fortune cookie",
+      "Cult of the Lamb tarot"
+    ],
+    "family": "story_choice",
+    "subfamily": "draw cards",
+    "summary": "Draw a few face-down cards, each of which becomes a story beat that frames the rest of your short tale.",
+    "core_loop": "draw card → card names the next beat → choose how to respond → draw again → final reading",
+    "verbs": [
+      "draw",
+      "interpret"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "card spread",
+      "card back/front",
+      "beat text"
+    ],
+    "rules": [
+      "cards are drawn without replacement",
+      "each card has a good and a bad reading",
+      "you choose which reading to lean into"
+    ],
+    "win": "complete the reading",
+    "lose": "none",
+    "scoring": "no score; a reading",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "read each other's fortune",
+      "daily card for the Group"
+    ],
+    "content_needs": [
+      "card deck with two readings",
+      "closing line"
+    ],
+    "difficulty_levers": [
+      "spread size",
+      "deck size"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "tarot story about my finals week",
+      "fortune cards that become a fantasy tale",
+      "draw three cards and tell my future as a knight"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "skill_tree_story",
+    "name": "Story with upgrade picks",
+    "aliases": [
+      "Slay the Spire events",
+      "roguelike narrative",
+      "Hades boons",
+      "Disco Elysium"
+    ],
+    "family": "story_choice",
+    "subfamily": "perk picks",
+    "summary": "After each scene pick one of three traits or perks that colors every later choice and line.",
+    "core_loop": "scene resolves → choose perk → later options reflect perks → finale uses combined perks",
+    "verbs": [
+      "choose",
+      "build"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene cards",
+      "perk offers",
+      "perk list"
+    ],
+    "rules": [
+      "perks permanently add options or lines",
+      "some perks conflict",
+      "the finale depends on the combination"
+    ],
+    "win": "reach the perk-specific finale",
+    "lose": "none",
+    "scoring": "finale tier",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare builds",
+      "share a weird perk"
+    ],
+    "content_needs": [
+      "perks with narrative effects",
+      "finale variants"
+    ],
+    "difficulty_levers": [
+      "number of perks",
+      "conflicts"
+    ],
+    "tools": [
+      "choice_story",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "disco elysium style thoughts but my brain is a bag of cats",
+      "story roguelike about delivering a pizza to a wizard",
+      "pick perks as a nervous knight"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

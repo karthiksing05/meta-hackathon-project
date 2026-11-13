@@ -1,0 +1,65 @@
+[
+  {
+    "request": "chess",
+    "expect": [
+      "chess_classic"
+    ]
+  },
+  {
+    "request": "connect 4",
+    "expect": [
+      "connect_four_drop"
+    ]
+  },
+  {
+    "request": "othello",
+    "expect": [
+      "reversi_flip"
+    ]
+  },
+  {
+    "request": "catan",
+    "expect": [
+      "settle_trade_build",
+      "resource_engine_expand"
+    ]
+  },
+  {
+    "request": "monopoly w friends",
+    "expect": [
+      "monopoly_property"
+    ]
+  },
+  {
+    "request": "sorry! / ludo",
+    "expect": [
+      "ludo_race_home"
+    ]
+  },
+  {
+    "request": "chutes and ladders",
+    "expect": [
+      "snakes_ladders"
+    ]
+  },
+  {
+    "request": "ultimate tic tac toe",
+    "expect": [
+      "tic_tac_toe_variants"
+    ]
+  },
+  {
+    "request": "mate in 2 chess puzzles",
+    "expect": [
+      "chess_puzzle_mate",
+      "piece_move_capture_puzzle"
+    ]
+  },
+  {
+    "request": "stratego",
+    "expect": [
+      "stratego_hidden_ranks",
+      "hidden_rank_capture"
+    ]
+  }
+]

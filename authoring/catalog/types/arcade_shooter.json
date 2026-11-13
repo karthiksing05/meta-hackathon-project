@@ -1,0 +1,1227 @@
+[
+  {
+    "id": "fixed_shooter_invaders",
+    "name": "Fixed shooter vs descending rows",
+    "aliases": [
+      "Space Invaders",
+      "Galaga"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Slide along the bottom and fire upward at rows of aliens that march down and shoot back.",
+    "core_loop": "move left and right → fire → clear the rows → next wave faster",
+    "verbs": [
+      "move",
+      "shoot",
+      "dodge"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "aliens speed up as their numbers drop",
+      "aliens reaching the bottom ends the game"
+    ],
+    "win": "clear every wave",
+    "lose": "out of lives or invaders land",
+    "scoring": "points per alien, bonus ships",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends' faces as the invaders",
+      "weekly board"
+    ],
+    "difficulty_levers": [
+      "wave speed",
+      "enemy fire"
+    ],
+    "tools": [
+      "waves",
+      "spawn_wave",
+      "collide",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "space invaders with my coworkers faces",
+      "galaga style shooter",
+      "shoot the descending aliens"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "vertical_scroll_shmup",
+    "name": "Vertical scrolling shooter",
+    "aliases": [
+      "1942",
+      "Raiden",
+      "Sky Force"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Fly up a scrolling level, auto-firing, dodging bullets and grabbing power-ups to beat a boss.",
+    "core_loop": "Fly up a scrolling stage while auto-firing, dodge enemy bullets, collect power-ups and beat the boss at the end",
+    "verbs": [
+      "fly",
+      "dodge",
+      "shoot"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "your ship auto-fires",
+      "one hit costs a life"
+    ],
+    "win": "beat the boss",
+    "lose": "out of lives",
+    "scoring": "points and no-hit bonus",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share scores"
+    ],
+    "difficulty_levers": [
+      "bullet density",
+      "enemy waves",
+      "power-up rate"
+    ],
+    "tools": [
+      "waves",
+      "spawn_wave",
+      "collide",
+      "pickups",
+      "camera_scroll"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "1942 plane shooter",
+      "vertical shmup with power ups",
+      "dodge bullets and shoot"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bullet_hell",
+    "name": "Bullet hell",
+    "aliases": [
+      "Touhou",
+      "Ikaruga"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Thread a tiny hitbox through dense bullet patterns while shooting a boss.",
+    "core_loop": "Thread a tiny hitbox through dense bullet patterns while keeping your fire on the boss through each of its phases",
+    "verbs": [
+      "dodge",
+      "focus",
+      "shoot"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "only a tiny core of the ship can be hit"
+    ],
+    "win": "survive every phase",
+    "lose": "out of lives",
+    "scoring": "points and grazes",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share no-hit clears"
+    ],
+    "difficulty_levers": [
+      "pattern density",
+      "bullet speed",
+      "phases"
+    ],
+    "tools": [
+      "waves",
+      "collide",
+      "lives",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "bullet hell boss fight",
+      "touhou style shooter",
+      "dodge dense bullet patterns"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "twin_stick_arena",
+    "name": "Twin-stick arena",
+    "aliases": [
+      "Geometry Wars",
+      "Brotato"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Move with one thumb and aim with the other in an arena while waves swarm in.",
+    "core_loop": "Move with one thumb and aim with the other in an arena as waves of enemies swarm in, grabbing upgrades between waves",
+    "verbs": [
+      "move",
+      "aim",
+      "shoot"
+    ],
+    "inputs": [
+      "drag",
+      "multi_touch"
+    ],
+    "rules": [
+      "enemies swarm from all sides"
+    ],
+    "win": "survive the time",
+    "lose": "out of health",
+    "scoring": "kills and survival time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "wave board"
+    ],
+    "difficulty_levers": [
+      "wave size",
+      "enemy speed",
+      "arena size"
+    ],
+    "tools": [
+      "waves",
+      "spawn_wave",
+      "collide",
+      "player_drag"
+    ],
+    "engine_gaps": [
+      "multi_touch"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "geometry wars arena shooter",
+      "twin stick survival",
+      "brotato style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "auto_shooter_survivors",
+    "name": "Auto-attack survivor",
+    "aliases": [
+      "Vampire Survivors",
+      "Brotato"
+    ],
+    "family": "arcade_shooter",
+    "summary": "You only move; weapons fire automatically. Level up and pick upgrades as hordes grow.",
+    "core_loop": "You only move; weapons fire on their own, and you collect experience to pick an upgrade each level as the horde grows",
+    "verbs": [
+      "move",
+      "choose"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "attacks are automatic",
+      "level-ups offer three upgrades"
+    ],
+    "win": "survive the timer",
+    "lose": "out of health",
+    "scoring": "time survived",
+    "session_seconds": [
+      300,
+      1200
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare builds with friends"
+    ],
+    "difficulty_levers": [
+      "horde growth",
+      "upgrade pool",
+      "run length"
+    ],
+    "tools": [
+      "waves",
+      "spawn_wave",
+      "pickups",
+      "collide",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "vampire survivors with my cat",
+      "auto shooter roguelike",
+      "survive the horde"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "asteroids_drift",
+    "name": "Drift and shoot rocks",
+    "aliases": [
+      "Asteroids"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Rotate and thrust a ship that drifts; shoot rocks that split into smaller rocks.",
+    "core_loop": "Rotate and thrust a ship that keeps drifting, shoot rocks that split into smaller rocks, and clear the field",
+    "verbs": [
+      "rotate",
+      "thrust",
+      "shoot"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "the screen wraps around",
+      "momentum carries you"
+    ],
+    "win": "clear the field",
+    "lose": "out of lives",
+    "scoring": "points per rock",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "arcade board"
+    ],
+    "difficulty_levers": [
+      "rock count",
+      "drift friction",
+      "enemy ships"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "spawn_wave",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "asteroids game",
+      "shoot space rocks",
+      "drifting ship shooter"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "missile_defense",
+    "name": "Defend the cities",
+    "aliases": [
+      "Missile Command"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Tap the sky to detonate interceptors that stop missiles falling on your cities.",
+    "core_loop": "missiles fall → tap ahead of them → blasts destroy them → protect cities",
+    "verbs": [
+      "aim",
+      "lead",
+      "defend"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "blasts last a moment",
+      "ammo is limited per wave"
+    ],
+    "win": "survive waves",
+    "lose": "all cities destroyed",
+    "scoring": "cities saved and missiles stopped",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "defend your friends' hometowns"
+    ],
+    "difficulty_levers": [
+      "missile speed",
+      "ammo"
+    ],
+    "tools": [
+      "spawn_wave",
+      "waves",
+      "collide",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "missile command defend my town",
+      "stop the falling missiles",
+      "protect the cities"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gallery_shooting",
+    "name": "Shooting gallery",
+    "aliases": [
+      "Duck Hunt",
+      "carnival gallery"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Targets cross the screen; tap to shoot them; some are worth more, some cost points.",
+    "core_loop": "targets pass → tap to shoot → avoid bad targets → time runs out",
+    "verbs": [
+      "aim",
+      "shoot"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "penalty targets subtract"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points per target",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "carnival night challenge"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "penalties"
+    ],
+    "tools": [
+      "spawn_wave",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "duck hunt game",
+      "carnival shooting gallery",
+      "shoot the targets for points"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "side_scroll_shmup",
+    "name": "Side-scrolling shooter",
+    "aliases": [
+      "Gradius",
+      "R-Type"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Fly right through a scrolling level shooting enemies and gathering weapon upgrades.",
+    "core_loop": "Fly right through a scrolling stage, shoot enemies, collect weapon upgrades and beat the stage boss",
+    "verbs": [
+      "fly",
+      "shoot",
+      "dodge"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "terrain also kills"
+    ],
+    "win": "beat the boss",
+    "lose": "out of lives",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share scores"
+    ],
+    "difficulty_levers": [
+      "enemy density",
+      "bullet speed",
+      "upgrade rate"
+    ],
+    "tools": [
+      "waves",
+      "camera_scroll",
+      "collide",
+      "pickups"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "gradius side shooter",
+      "horizontal space shooter",
+      "r-type style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "turret_rotate_defense",
+    "name": "Rotating turret",
+    "aliases": [
+      "Turret defense"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Your turret sits in the middle; rotate and fire as enemies close in from every side.",
+    "core_loop": "Your turret sits in the center; rotate and fire as enemies close in from every side, and survive as long as you can",
+    "verbs": [
+      "rotate",
+      "shoot"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "enemies reaching the center cost health"
+    ],
+    "win": "survive waves",
+    "lose": "out of health",
+    "scoring": "kills",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "wave board"
+    ],
+    "difficulty_levers": [
+      "enemy speed",
+      "spawn rate",
+      "turn speed"
+    ],
+    "tools": [
+      "waves",
+      "spawn_wave",
+      "collide",
+      "rotate"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "rotating turret defense",
+      "shoot enemies from all sides",
+      "center turret game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sniper_zoom",
+    "name": "Sniper",
+    "aliases": [
+      "Sniper game"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Scope in, account for wind and distance, and take one perfect shot.",
+    "core_loop": "Scope in on a target, adjust for wind and distance, hold steady through the sway, and take one clean shot",
+    "verbs": [
+      "aim",
+      "steady"
+    ],
+    "inputs": [
+      "drag",
+      "hold"
+    ],
+    "rules": [
+      "the scope sways",
+      "bullets drop with distance"
+    ],
+    "win": "hit the target",
+    "lose": "miss the shot",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trick-shot sharing"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "distance",
+      "scope sway"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "sniper game with wind",
+      "long range shooting",
+      "one shot sniper"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "light_gun_on_rails",
+    "name": "On-rails shooter",
+    "aliases": [
+      "House of the Dead",
+      "Time Crisis"
+    ],
+    "family": "arcade_shooter",
+    "summary": "The camera moves for you; tap enemies as they appear and reload by tapping off-screen.",
+    "core_loop": "The camera moves along a set path; tap enemies as they appear and tap off-screen to reload before they hit you",
+    "verbs": [
+      "aim",
+      "shoot",
+      "reload"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "reloading takes time"
+    ],
+    "win": "finish the route",
+    "lose": "out of health",
+    "scoring": "points and accuracy",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "arcade co-op score"
+    ],
+    "difficulty_levers": [
+      "enemy speed",
+      "ammo",
+      "civilians"
+    ],
+    "tools": [
+      "spawn_wave",
+      "collide",
+      "lives",
+      "camera_scroll"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "house of the dead zombie shooter",
+      "on rails shooting game",
+      "arcade gun game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "water_gun_fair",
+    "name": "Fill the balloon race",
+    "aliases": [
+      "Water gun race"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Keep a stream on a target to fill a balloon faster than others.",
+    "core_loop": "Aim a water stream at a moving target and hold it steady to fill your balloon before the other players",
+    "verbs": [
+      "aim",
+      "hold"
+    ],
+    "inputs": [
+      "hold",
+      "drag"
+    ],
+    "rules": [
+      "staying on target fills; off target doesn't"
+    ],
+    "win": "fill first",
+    "lose": "none",
+    "scoring": "time to fill",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "fair race with friends"
+    ],
+    "difficulty_levers": [
+      "target movement",
+      "players",
+      "stream width"
+    ],
+    "tools": [
+      "player_drag",
+      "timers",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "carnival water gun race",
+      "fill the balloon first",
+      "boardwalk race game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bomb_drop_bomber",
+    "name": "Bomb drop",
+    "aliases": [
+      "Bomber"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Fly over targets and drop bombs, leading for speed and wind.",
+    "core_loop": "Fly over targets and time each bomb drop, leading for your speed and the wind, while dodging fire from the ground",
+    "verbs": [
+      "aim",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "bombs keep your speed"
+    ],
+    "win": "destroy the targets",
+    "lose": "shot down",
+    "scoring": "targets hit",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share runs"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "speed",
+      "anti-air"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "drop bombs on targets",
+      "bomber plane game",
+      "timing bomb drop"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "space_dogfight",
+    "name": "Dogfight",
+    "aliases": [
+      "Dogfight"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Turn and fire to shoot down enemy fighters circling around you.",
+    "core_loop": "Turn and fire to shoot down enemy fighters circling around you, evading their shots between passes",
+    "verbs": [
+      "turn",
+      "aim",
+      "shoot"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "enemies flee and circle"
+    ],
+    "win": "win the dogfight",
+    "lose": "shot down",
+    "scoring": "kills",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "dogfight with a friend"
+    ],
+    "difficulty_levers": [
+      "enemy skill",
+      "enemy count",
+      "ammo"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "spawn_wave"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "space dogfight game",
+      "jet fighter duel",
+      "plane dogfight"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "paddle_brick_breaker",
+    "name": "Brick breaker",
+    "aliases": [
+      "Breakout",
+      "Arkanoid"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Bounce a ball off your paddle to break all the bricks; power-ups drop from some bricks.",
+    "core_loop": "move the paddle → bounce the ball → break bricks → catch power-ups",
+    "verbs": [
+      "move",
+      "bounce",
+      "aim"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "missing the ball costs a life"
+    ],
+    "win": "clear every brick",
+    "lose": "out of lives",
+    "scoring": "points per brick",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "build a level from a friend's photo"
+    ],
+    "difficulty_levers": [
+      "ball speed",
+      "brick layout"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "pickups",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "breakout with my photo",
+      "arkanoid style",
+      "brick breaker"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ball_launcher_bricks",
+    "name": "Launch balls at numbered bricks",
+    "aliases": [
+      "Ballz",
+      "Brick n Balls"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Aim and launch a volley of balls; bricks take hits equal to their number and move down each turn.",
+    "core_loop": "Aim and launch a volley of balls; each brick takes hits equal to its number, and the rows move down every turn",
+    "verbs": [
+      "aim",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "bricks reaching the bottom end the game"
+    ],
+    "win": "none; endless",
+    "lose": "bricks reach the bottom",
+    "scoring": "rows survived",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "weekly score"
+    ],
+    "difficulty_levers": [
+      "brick numbers",
+      "ball pickups",
+      "row speed"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ballz game",
+      "launch balls to break numbered bricks",
+      "brick n balls"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tank_artillery",
+    "name": "Artillery duel",
+    "aliases": [
+      "Worms",
+      "Pocket Tanks",
+      "Scorched Earth"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Take turns setting angle and power to lob shells at the other tank across terrain and wind.",
+    "core_loop": "set angle and power → fire → shell arcs → hit or miss → their turn",
+    "verbs": [
+      "aim",
+      "calculate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "wind changes each turn",
+      "terrain is destroyed by blasts"
+    ],
+    "win": "destroy the other tank",
+    "lose": "your tank is destroyed",
+    "scoring": "hits",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "turn-based duel with a friend"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "terrain"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "collide",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pocket tanks with my friend",
+      "worms artillery",
+      "angle and power duel"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shooter_typing_waves",
+    "name": "Type to shoot",
+    "aliases": [
+      "Typing shooter"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Enemies carry words; type the word to shoot that enemy.",
+    "core_loop": "Enemies approach carrying words; type an enemy's word to shoot it before it reaches you",
+    "verbs": [
+      "type",
+      "react"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "half-typed words lock onto that enemy"
+    ],
+    "win": "survive waves",
+    "lose": "an enemy reaches you",
+    "scoring": "kills",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "typing duels"
+    ],
+    "difficulty_levers": [
+      "word length",
+      "speed",
+      "enemy count"
+    ],
+    "tools": [
+      "keyboard",
+      "spawn_wave",
+      "waves",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "type to shoot zombies",
+      "ztype space typing",
+      "typing defense"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "reflex_target_range",
+    "name": "Quick-draw targets",
+    "aliases": [
+      "Target range"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Pop-up targets appear and hide quickly; shoot hostiles, spare civilians.",
+    "core_loop": "Targets pop up and hide quickly; shoot the hostiles and spare the civilians before each one drops",
+    "verbs": [
+      "judge",
+      "aim"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "shooting civilians costs points"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "range challenge"
+    ],
+    "difficulty_levers": [
+      "pop speed",
+      "civilian ratio",
+      "targets"
+    ],
+    "tools": [
+      "spawn_wave",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "police target range game",
+      "shoot or don't shoot",
+      "reflex shooting range"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "laser_reflect_shooter",
+    "name": "Ricochet shots",
+    "aliases": [
+      "Ricochet shooter"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Bank shots off walls and mirrors to hit enemies behind cover.",
+    "core_loop": "Aim a shot, preview how it bounces off walls and mirrors, and fire to hit enemies hiding behind cover",
+    "verbs": [
+      "aim",
+      "bounce"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "limited shots per level"
+    ],
+    "win": "hit every enemy",
+    "lose": "out of shots",
+    "scoring": "shots used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share trick shots"
+    ],
+    "difficulty_levers": [
+      "bounces allowed",
+      "enemy count",
+      "mirrors"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "ricochet shot puzzle",
+      "bounce bullets off walls",
+      "mr bullet style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cannon_aim_puzzle",
+    "name": "Cannon physics puzzle",
+    "aliases": [
+      "Angry Birds-lite cannon"
+    ],
+    "family": "arcade_shooter",
+    "summary": "Fire a cannon at structures to knock targets off, choosing angle and power.",
+    "core_loop": "Pick the cannon's angle and power, fire at a structure, and knock every target off in as few shots as possible",
+    "verbs": [
+      "aim",
+      "launch"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "limited shots"
+    ],
+    "win": "knock off every target",
+    "lose": "out of shots",
+    "scoring": "shots used, stars",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share star scores"
+    ],
+    "difficulty_levers": [
+      "structures",
+      "shots allowed",
+      "wind"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cannon knock down tower",
+      "physics cannon game",
+      "shoot the castle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

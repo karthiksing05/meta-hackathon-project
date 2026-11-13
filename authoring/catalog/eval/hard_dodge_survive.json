@@ -1,0 +1,65 @@
+[
+  {
+    "request": "pacman",
+    "expect": [
+      "dot_maze_eat"
+    ]
+  },
+  {
+    "request": "pac man but the ghosts are my coworkers",
+    "expect": [
+      "dot_maze_eat",
+      "avoid_the_chaser"
+    ]
+  },
+  {
+    "request": "fall guys hex a gone floor falls away",
+    "expect": [
+      "hex_floor_fall"
+    ]
+  },
+  {
+    "request": "frogger",
+    "expect": [
+      "traffic_crossing_frog",
+      "road_crossing_hopper"
+    ]
+  },
+  {
+    "request": "tron light cycles box ppl in",
+    "expect": [
+      "snake_avoid_tail"
+    ]
+  },
+  {
+    "request": "just shapes and beats dodge everything",
+    "expect": [
+      "bullet_dodge_arena"
+    ]
+  },
+  {
+    "request": "undertale heart dodge box",
+    "expect": [
+      "bullet_dodge_arena"
+    ]
+  },
+  {
+    "request": "battle royale zone closing in, just survive",
+    "expect": [
+      "circle_arena_survive"
+    ]
+  },
+  {
+    "request": "sumo push ppl off the platform party game",
+    "expect": [
+      "sumo_push_out",
+      "push_off_arena"
+    ]
+  },
+  {
+    "request": "dodge the stuff falling from the sky, it gets faster",
+    "expect": [
+      "dodge_falling_objects"
+    ]
+  }
+]

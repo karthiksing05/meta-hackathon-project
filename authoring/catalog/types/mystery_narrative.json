@@ -1,0 +1,2584 @@
+[
+  {
+    "id": "whodunit_interrogation",
+    "name": "Whodunit interrogation",
+    "aliases": [
+      "Clue",
+      "Cluedo",
+      "Murder mystery",
+      "Her Story",
+      "Obra Dinn",
+      "Sherlock"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "question suspects",
+    "summary": "Question a handful of suspects with a limited number of questions, then accuse the culprit.",
+    "core_loop": "read the crime → pick a suspect and a question → read answer → note contradictions → accuse",
+    "verbs": [
+      "question",
+      "notice",
+      "accuse"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "crime summary",
+      "4-6 suspects",
+      "question menu",
+      "notebook"
+    ],
+    "rules": [
+      "question budget is limited",
+      "each suspect has one lie",
+      "accusing wrong ends the case"
+    ],
+    "win": "name the culprit",
+    "lose": "wrong accusation or questions run out",
+    "scoring": "fewer questions used earns more",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare who you accused",
+      "same case for a Group each day"
+    ],
+    "content_needs": [
+      "cast of suspects",
+      "statements with one lie",
+      "culprit and motive"
+    ],
+    "difficulty_levers": [
+      "question budget",
+      "number of suspects",
+      "subtlety of lie"
+    ],
+    "tools": [
+      "choice_story",
+      "hint",
+      "reveal",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "harry potter murder mystery",
+      "whodunit at a school dance",
+      "cluedo but the suspects are my teachers",
+      "murder at the pizza shop"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hidden_clue_scene",
+    "name": "Hidden-clue scene",
+    "aliases": [
+      "Hidden Objects",
+      "June's Journey",
+      "Escape Room hidden clues",
+      "Where's Waldo detective"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "scene search",
+    "summary": "Tap suspicious items in a cluttered scene to collect clues, then deduce what happened.",
+    "core_loop": "scan the scene → tap clues → clue list fills → deduce → pick the answer",
+    "verbs": [
+      "search",
+      "tap",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene art with hotspots",
+      "clue list",
+      "deduction question"
+    ],
+    "rules": [
+      "5-8 hotspots in the scene",
+      "some items are decoys",
+      "the deduction question needs 3 of the clues"
+    ],
+    "win": "answer the deduction right",
+    "lose": "wrong deduction",
+    "scoring": "clues found plus correctness",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race to find all clues",
+      "compare deductions"
+    ],
+    "content_needs": [
+      "scene description with hotspots",
+      "clue-to-answer map"
+    ],
+    "difficulty_levers": [
+      "number of hotspots",
+      "decoys",
+      "time limit"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "hint",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "find who stole the cake in a messy kitchen",
+      "hidden object detective at a museum",
+      "search my dorm room to find where the cat went"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "contradiction_objection",
+    "name": "Objection! contradictions",
+    "aliases": [
+      "Ace Attorney",
+      "Phoenix Wright",
+      "Danganronpa truth bullets",
+      "Contradiction (Her Story)"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "testimony vs evidence",
+    "summary": "Read a witness's testimony line by line and press the line that contradicts a piece of evidence.",
+    "core_loop": "read testimony line → press a line or present evidence → witness reacts → catch the contradiction",
+    "verbs": [
+      "read",
+      "present",
+      "press"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "testimony lines",
+      "evidence list",
+      "health or patience bar"
+    ],
+    "rules": [
+      "exactly one contradiction per testimony",
+      "wrong evidence costs patience",
+      "chain several testimonies"
+    ],
+    "win": "win the case",
+    "lose": "patience runs out",
+    "scoring": "patience left and cases cleared",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the contradiction you caught",
+      "compare patience left"
+    ],
+    "content_needs": [
+      "testimonies with a built-in lie",
+      "evidence list"
+    ],
+    "difficulty_levers": [
+      "number of lines",
+      "lie subtlety",
+      "patience"
+    ],
+    "tools": [
+      "choice_story",
+      "lives",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "phoenix wright but the witness is my little brother",
+      "objection game where a parrot lies",
+      "catch the lie in a hogwarts trial"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "elimination_grid_case",
+    "name": "Elimination grid case",
+    "aliases": [
+      "Clue notebook",
+      "Cluedo grid",
+      "Logic grid puzzle",
+      "Sherlock Holmes Chapter",
+      "Return of the Obra Dinn"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "grid deduction",
+    "summary": "Use statements to cross out suspects, weapons and rooms in a grid until one combination remains.",
+    "core_loop": "read clues → mark grid cells → read next clue → combine → accuse",
+    "verbs": [
+      "deduce",
+      "mark"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "clue cards",
+      "grid of who/what/where",
+      "accuse button"
+    ],
+    "rules": [
+      "each clue rules out or confirms something",
+      "the grid always has a unique solution",
+      "marking is free"
+    ],
+    "win": "accuse the unique answer",
+    "lose": "wrong accusation",
+    "scoring": "clues unused (fewer is better)",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race a friend through the same grid",
+      "daily case"
+    ],
+    "content_needs": [
+      "clue sets that yield a unique solution",
+      "entities per axis"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "clue indirectness"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cluedo logic grid in a hogwarts castle",
+      "who ate the last cookie grid puzzle",
+      "crime solving grid for my squad"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "crime_scene_timeline",
+    "name": "Crime-scene timeline",
+    "aliases": [
+      "Return of the Obra Dinn",
+      "Telltale Sherlock",
+      "Rewind",
+      "CSI timeline"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "reorder events",
+    "summary": "Drag evidence into the order it must have happened, using timestamps and cause-and-effect hints.",
+    "core_loop": "inspect evidence → drag cards into order → submit → reveal true order",
+    "verbs": [
+      "order",
+      "reason"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "evidence cards",
+      "timeline slots",
+      "submit"
+    ],
+    "rules": [
+      "each card has a cause or time hint",
+      "the order is unique",
+      "some cards are red herrings"
+    ],
+    "win": "the order is correct",
+    "lose": "wrong order after 3 tries",
+    "scoring": "tries used",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race for fewest tries",
+      "share the red herring that tricked you"
+    ],
+    "content_needs": [
+      "evidence cards with causal hints",
+      "unique ordering"
+    ],
+    "difficulty_levers": [
+      "cards",
+      "number of herrings"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "order the events before the cake disappeared",
+      "timeline of the school break-in",
+      "reconstruct what happened at the party"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "obra_dinn_fate_log",
+    "name": "Fate logbook",
+    "aliases": [
+      "Return of the Obra Dinn",
+      "Her Story",
+      "Papers Please",
+      "Hotel Dusk"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "identify from scenes",
+    "summary": "Study frozen death scenes and fill a logbook identifying each person and how they met their end.",
+    "core_loop": "view a scene → inspect details → fill in identity and fate → three correct fills confirm → continue",
+    "verbs": [
+      "observe",
+      "infer",
+      "record"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene vignette",
+      "logbook page",
+      "name/fate pickers"
+    ],
+    "rules": [
+      "answers are confirmed in batches of three",
+      "details across scenes identify people",
+      "no random guessing"
+    ],
+    "win": "fill the logbook",
+    "lose": "none; completion",
+    "scoring": "pages confirmed",
+    "session_seconds": [
+      120,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare completion order",
+      "share a scene that fooled you"
+    ],
+    "content_needs": [
+      "scenes with clue-rich details",
+      "cast list",
+      "fate options"
+    ],
+    "difficulty_levers": [
+      "cast size",
+      "scene detail"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "obra dinn but on a school bus",
+      "identify who each passenger was",
+      "logbook mystery on a haunted train"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cold_case_files_reopen",
+    "name": "Cold-case reopen",
+    "aliases": [
+      "Cold Case Files",
+      "Detective Grimoire",
+      "Unsolved Case",
+      "Murdle"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "document triage",
+    "summary": "A cold case has a dozen old files; pick which to reread, spot what changed, and name what the original police missed.",
+    "core_loop": "open file → read → flag oversights → combine two files → new lead → name the missed fact",
+    "verbs": [
+      "read",
+      "connect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "case files",
+      "highlighter",
+      "connect-two-files action"
+    ],
+    "rules": [
+      "only 6 files can be opened per run",
+      "combining two files can reveal a lead",
+      "final answer is one missed fact"
+    ],
+    "win": "state the missed fact",
+    "lose": "wrong fact",
+    "scoring": "files opened (fewer is better)",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a theory",
+      "Group tackles a case weekly"
+    ],
+    "content_needs": [
+      "files with planted gaps",
+      "combination leads"
+    ],
+    "difficulty_levers": [
+      "number of files",
+      "openings allowed"
+    ],
+    "tools": [
+      "choice_story",
+      "hint",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cold case at a summer camp",
+      "reopen the haunted school mystery",
+      "cold case about a missing garden gnome"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spot_the_liar_statements",
+    "name": "Spot the liar",
+    "aliases": [
+      "Murdle",
+      "Knights and Knaves",
+      "Mafia logic",
+      "Among Us logic",
+      "Liar's Dice truth"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "statements logic",
+    "summary": "Several suspects each make a statement; exactly one lies, and working out which statements conflict reveals the culprit.",
+    "core_loop": "read statements → mark who must be lying → find culprit consistent with the truths → accuse",
+    "verbs": [
+      "compare",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "suspect cards with statements",
+      "liar marker",
+      "accuse"
+    ],
+    "rules": [
+      "exactly one suspect lies",
+      "the culprit is the only consistent answer",
+      "statements reference each other"
+    ],
+    "win": "accuse the culprit",
+    "lose": "wrong accusation",
+    "scoring": "correct on first try, time",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race on the same case",
+      "post a case for your Group"
+    ],
+    "content_needs": [
+      "statement sets with unique consistent solutions"
+    ],
+    "difficulty_levers": [
+      "number of suspects",
+      "statement entanglement"
+    ],
+    "tools": [
+      "choice_story",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "one of my friends is lying about who ate the donut",
+      "liar puzzle with five dragons",
+      "who is lying in the group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cipher_clue_decode",
+    "name": "Cipher clue decode",
+    "aliases": [
+      "National Treasure",
+      "Da Vinci Code",
+      "Escape The Room ciphers",
+      "Cryptex"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "decode message",
+    "summary": "Decode a ciphered clue found in the story to unlock the next location.",
+    "core_loop": "find cipher → apply key from other clue → read plaintext → move on → final reveal",
+    "verbs": [
+      "decode",
+      "match"
+    ],
+    "inputs": [
+      "drag",
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "cipher wheel or key",
+      "ciphered text",
+      "plaintext slots"
+    ],
+    "rules": [
+      "the key comes from earlier clues",
+      "the cipher is simple (shift, symbol swap)",
+      "wrong decodes show garbled text"
+    ],
+    "win": "decode all ciphers",
+    "lose": "time out",
+    "scoring": "time and hints used",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send a coded message to a friend",
+      "puzzle race"
+    ],
+    "content_needs": [
+      "ciphered messages with keys",
+      "story wrapper"
+    ],
+    "difficulty_levers": [
+      "cipher type",
+      "message length",
+      "hints"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "hint",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "national treasure but the treasure is in my school",
+      "decode the pirate map clue",
+      "spy cipher to find the hidden cookie jar"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "suspect_string_board",
+    "name": "Suspect string board",
+    "aliases": [
+      "Detective pinboard",
+      "Her Story",
+      "The Case of the Golden Idol",
+      "Contradiction"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "connect evidence",
+    "summary": "Connect photos and notes on a pinboard with strings to show how people, places and objects link.",
+    "core_loop": "study cards → draw strings between related cards → game checks links → complete the web → name the culprit",
+    "verbs": [
+      "connect",
+      "deduce"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "pinboard",
+      "evidence cards",
+      "strings",
+      "culprit slot"
+    ],
+    "rules": [
+      "links must be justified by shared facts",
+      "wrong links cost a penalty",
+      "the web reveals the culprit"
+    ],
+    "win": "name the culprit from the web",
+    "lose": "too many wrong links",
+    "scoring": "correct links minus wrong",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare boards",
+      "share a screenshot of your web"
+    ],
+    "content_needs": [
+      "card sets with true links",
+      "culprit"
+    ],
+    "difficulty_levers": [
+      "number of cards",
+      "decoy cards"
+    ],
+    "tools": [
+      "player_drag",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "pinboard case of the missing school mascot",
+      "conspiracy board for my roommates",
+      "connect the strings in a vampire murder"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "red_herring_leads",
+    "name": "Leads with a clock",
+    "aliases": [
+      "Hitman",
+      "Lucifer cases",
+      "Sherlock Holmes Crimes",
+      "24"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "limited actions",
+    "summary": "Each lead costs a unit of time; chase the right ones before the clock runs out and the culprit slips away.",
+    "core_loop": "read case → choose lead → pay time → learn clue → decide to chase or accuse",
+    "verbs": [
+      "prioritize",
+      "chase"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "lead list",
+      "clock",
+      "clue board"
+    ],
+    "rules": [
+      "each lead costs 1-3 time",
+      "some leads are herrings",
+      "accusing early is risky"
+    ],
+    "win": "accuse correctly before time ends",
+    "lose": "clock runs out",
+    "scoring": "time left",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare fastest solutions",
+      "daily case"
+    ],
+    "content_needs": [
+      "leads with time costs",
+      "herrings",
+      "culprit"
+    ],
+    "difficulty_levers": [
+      "clock length",
+      "herring count"
+    ],
+    "tools": [
+      "choice_story",
+      "countdown",
+      "timer_bar",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "catch a thief before the 6 o'clock bell",
+      "sherlock holmes style mystery with 10 turns",
+      "crime solver against the clock in a candy factory"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "who_am_i_clue_ladder",
+    "name": "Clue ladder guess",
+    "aliases": [
+      "Who Am I?",
+      "Guess Who",
+      "20 questions",
+      "Heads Up",
+      "Clue Hunter"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "progressive hints",
+    "summary": "A secret identity reveals clues from vague to specific; guessing earlier scores more.",
+    "core_loop": "see clue 1 → optionally guess → see next clue → guess → reveal",
+    "verbs": [
+      "guess",
+      "wait"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "clue ladder",
+      "guess box",
+      "points drop meter"
+    ],
+    "rules": [
+      "up to 6 clues",
+      "points fall each clue",
+      "wrong guess locks one answer"
+    ],
+    "win": "guess the identity",
+    "lose": "all clues shown with no guess",
+    "scoring": "points per clue left",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare clue number solved",
+      "daily mystery"
+    ],
+    "content_needs": [
+      "identities with ordered clues",
+      "aliases"
+    ],
+    "difficulty_levers": [
+      "clue count",
+      "vagueness"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "guess the mystery wizard from clues",
+      "who am i but all the answers are my teachers",
+      "mystery guest game with clues"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "witness_memory_testimony",
+    "name": "Eyewitness memory",
+    "aliases": [
+      "Eyewitness test",
+      "Memory Palace",
+      "Spot the difference witness",
+      "Brain age"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "view then answer",
+    "summary": "See a crime scene for a few seconds, then answer questions about details as a witness; correct details identify the culprit.",
+    "core_loop": "glimpse scene → scene hidden → answer questions → correct answers narrow the culprit → pick",
+    "verbs": [
+      "observe",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene flash",
+      "question list",
+      "lineup"
+    ],
+    "rules": [
+      "scene shows for 5 seconds",
+      "each question has 3 answers",
+      "the lineup depends on answered correctly"
+    ],
+    "win": "pick the right person in the lineup",
+    "lose": "pick wrong or too many errors",
+    "scoring": "correct details",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare memory scores",
+      "Group daily scene"
+    ],
+    "content_needs": [
+      "scenes with details",
+      "questions per scene",
+      "lineup"
+    ],
+    "difficulty_levers": [
+      "view time",
+      "detail count"
+    ],
+    "tools": [
+      "reveal",
+      "countdown",
+      "sequence_memory",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "be an eyewitness to a cafeteria theft",
+      "observe a scene for 5 seconds then pick who did it",
+      "memory crime scene game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "what_changed_room",
+    "name": "What changed?",
+    "aliases": [
+      "Spot the difference",
+      "Find the Differences",
+      "Room Escape detail",
+      "Memory room"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "change detection",
+    "summary": "Study a room, then it changes slightly; find what moved or vanished, since that is the clue to the case.",
+    "core_loop": "study room → room blinks → find what changed → each change is a clue → combine",
+    "verbs": [
+      "observe",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "before/after room",
+      "tap targets",
+      "clue tray"
+    ],
+    "rules": [
+      "3-5 changes per room",
+      "each found change adds a clue",
+      "a limited number of wrong taps"
+    ],
+    "win": "identify the culprit from clues",
+    "lose": "out of wrong taps",
+    "scoring": "changes found",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare how quickly friends spot changes",
+      "post a room for friends"
+    ],
+    "content_needs": [
+      "rooms with change lists",
+      "clue per change"
+    ],
+    "difficulty_levers": [
+      "change subtlety",
+      "time",
+      "wrong-tap cap"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "reveal",
+      "timer_bar",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "spot what changed in the haunted bedroom",
+      "find who moved the cookie jar",
+      "what changed in the principal's office"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "poison_dinner_party",
+    "name": "Dinner party poisoning",
+    "aliases": [
+      "Murder on the Orient Express",
+      "Knives Out",
+      "Clue dinner",
+      "Agatha Christie"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "opportunity matrix",
+    "summary": "A dinner is poisoned; track who sat where, who served what, and who could reach the glass to narrow down the poisoner.",
+    "core_loop": "read seating → read serving order → mark who had access → eliminate → accuse",
+    "verbs": [
+      "track",
+      "eliminate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "table diagram",
+      "course list",
+      "access rules",
+      "accuse"
+    ],
+    "rules": [
+      "access depends on seat and timing",
+      "exactly one person fits all rules",
+      "rules are shown"
+    ],
+    "win": "accuse correctly",
+    "lose": "wrong accusation",
+    "scoring": "correct; fewer hints for bonus",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race on the same table",
+      "create a dinner for a friend"
+    ],
+    "content_needs": [
+      "seating plans",
+      "access rules",
+      "culprit"
+    ],
+    "difficulty_levers": [
+      "table size",
+      "number of courses"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "knives out but at my family thanksgiving",
+      "who poisoned the tea at hogwarts feast",
+      "orient express dinner puzzle with six passengers"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "forensic_match_evidence",
+    "name": "Forensic matching",
+    "aliases": [
+      "CSI",
+      "Law and Order",
+      "L.A. Noire evidence",
+      "Forensic Files"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "match samples",
+    "summary": "Match a trace (fingerprint, footprint, fabric) from the scene to a suspect from a lineup of near-identical options.",
+    "core_loop": "inspect trace → compare to suspects → rotate or zoom → pick best match → case advances",
+    "verbs": [
+      "compare",
+      "rotate"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "trace sample",
+      "suspect panels",
+      "overlay tool"
+    ],
+    "rules": [
+      "matches use distinguishing features",
+      "several look similar",
+      "time per sample"
+    ],
+    "win": "match all traces",
+    "lose": "wrong matches reach limit",
+    "scoring": "accuracy and speed",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compete on matching speed",
+      "leaderboard among friends"
+    ],
+    "content_needs": [
+      "trace shapes with distinguishing marks",
+      "lookalike samples"
+    ],
+    "difficulty_levers": [
+      "similarity",
+      "sample count",
+      "timer"
+    ],
+    "tools": [
+      "player_drag",
+      "match_pairs",
+      "timer_bar",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "fingerprint match to find who touched the cookie jar",
+      "footprint matching to catch the garden thief",
+      "csi lab speed round"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "noir_narrator_choices",
+    "name": "Noir narration choices",
+    "aliases": [
+      "Disco Elysium",
+      "Blacksad",
+      "L.A. Noire",
+      "Raymond Chandler game"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "tone choices",
+    "summary": "A hardboiled detective monologue; you pick the tone of each line and which lead to follow, and tone changes how informants talk.",
+    "core_loop": "hear narration → pick lead or tone → informant reacts → clue → solve",
+    "verbs": [
+      "choose",
+      "talk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "monologue text",
+      "choice buttons",
+      "informant reactions",
+      "case board"
+    ],
+    "rules": [
+      "informants respond to tone (tough, charming, honest)",
+      "leads lock when you burn bridges",
+      "solving uses the clues gathered"
+    ],
+    "win": "solve the case",
+    "lose": "lose the trail",
+    "scoring": "clues found",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share your best noir line",
+      "compare cases solved"
+    ],
+    "content_needs": [
+      "narration templates",
+      "informant tone map",
+      "case"
+    ],
+    "difficulty_levers": [
+      "number of informants",
+      "tone strictness"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "noir detective about a stolen ice cream truck",
+      "hardboiled narration for finding my lost sock",
+      "disco elysium style detective but i'm a pigeon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "interrogation_pressure_bluff",
+    "name": "Interrogation pressure",
+    "aliases": [
+      "L.A. Noire",
+      "Phoenix Wright press",
+      "Good cop bad cop",
+      "Interrogation game"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "truth lie doubt",
+    "summary": "For each statement choose to believe, doubt or accuse; the right call advances the case while the wrong call spooks the suspect.",
+    "core_loop": "statement → choose believe, doubt, accuse → suspect reacts → pressure meter → confession or walkout",
+    "verbs": [
+      "read",
+      "judge"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "suspect statements",
+      "three action buttons",
+      "pressure meter",
+      "evidence"
+    ],
+    "rules": [
+      "the right call per statement is determined by evidence",
+      "doubting a truth costs trust",
+      "a confession needs the right 3 calls"
+    ],
+    "win": "get a confession",
+    "lose": "suspect walks out",
+    "scoring": "calls correct",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare accuracy",
+      "same suspect for a Group"
+    ],
+    "content_needs": [
+      "statement lists with truth values",
+      "evidence hints"
+    ],
+    "difficulty_levers": [
+      "statement count",
+      "trust sensitivity"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "interrogate my little brother about the missing cookies",
+      "good cop bad cop game",
+      "question the dragon about the missing gold"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "missing_pet_trail",
+    "name": "Missing-pet trail",
+    "aliases": [
+      "Stray",
+      "Cozy mystery",
+      "Where's my cat",
+      "Detective Pikachu"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "cozy trail",
+    "summary": "A cozy case: follow footprints and neighbors' hints through a small map to find a missing pet.",
+    "core_loop": "visit location → talk to neighbor → get hint → update map → find the pet",
+    "verbs": [
+      "explore",
+      "talk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "neighborhood map",
+      "neighbor hints",
+      "hint log"
+    ],
+    "rules": [
+      "hints narrow the pet's hiding place",
+      "no failure state, just clue counting",
+      "the pet is found at the last logical spot"
+    ],
+    "win": "find the pet",
+    "lose": "none; cozy",
+    "scoring": "fewer locations visited is nicer",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share where your pet was found",
+      "make a case for a friend's pet"
+    ],
+    "content_needs": [
+      "neighbor hints",
+      "map locations",
+      "pet hiding place"
+    ],
+    "difficulty_levers": [
+      "number of locations",
+      "hint obliqueness"
+    ],
+    "tools": [
+      "choice_story",
+      "hint",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "find my missing hamster in the neighborhood",
+      "cozy mystery of the lost cat",
+      "where is my dragon, a cozy detective game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "museum_theft_who_had_access",
+    "name": "Museum theft access log",
+    "aliases": [
+      "Thief",
+      "The Pink Panther",
+      "Monaco",
+      "Night at the Museum"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "schedule logic",
+    "summary": "A museum item vanishes; read guard schedules, badge logs and camera gaps to find the one person who could have taken it.",
+    "core_loop": "read schedules → check badge logs → find gaps → eliminate → accuse",
+    "verbs": [
+      "cross reference",
+      "eliminate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "schedule table",
+      "badge log",
+      "camera gaps",
+      "staff roster"
+    ],
+    "rules": [
+      "exactly one person fits the timing",
+      "a log can be faked",
+      "one log is unreliable"
+    ],
+    "win": "name the thief",
+    "lose": "wrong accusation",
+    "scoring": "correct with few hints",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race on the same theft",
+      "share your reasoning"
+    ],
+    "content_needs": [
+      "staff schedules",
+      "badge logs",
+      "unreliable log flag"
+    ],
+    "difficulty_levers": [
+      "roster size",
+      "log noise"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "who stole the dinosaur skull from the museum",
+      "museum thief logic puzzle",
+      "badge log mystery at a candy factory"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "daily_case_group",
+    "name": "Group daily case",
+    "aliases": [
+      "Murdle daily",
+      "Wordle but mystery",
+      "Daily Detective",
+      "Clue of the Day"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "shared daily",
+    "summary": "A new short case drops each day for the whole Group; everyone solves independently and compares.",
+    "core_loop": "open daily case → gather clues → accuse → reveal the answer → compare ranks",
+    "verbs": [
+      "deduce",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "case card",
+      "clue list",
+      "accuse picker",
+      "group board"
+    ],
+    "rules": [
+      "same case for everyone",
+      "one attempt per day",
+      "rank by clues used"
+    ],
+    "win": "solve the daily",
+    "lose": "wrong accusation",
+    "scoring": "clues used (lower is better)",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily bragging in the Group",
+      "spoiler-free share grid"
+    ],
+    "content_needs": [
+      "cases with a unique answer",
+      "clue ordering"
+    ],
+    "difficulty_levers": [
+      "case difficulty"
+    ],
+    "tools": [
+      "choice_story",
+      "hint",
+      "score",
+      "daily_seed",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "a daily murder mystery for our group chat",
+      "daily detective puzzle like wordle",
+      "everyone solves the same case every morning"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mole_hunt_behavior",
+    "name": "Mole hunt",
+    "aliases": [
+      "Mafia",
+      "Werewolf",
+      "Spyfall",
+      "Among Us tasks",
+      "Secret Hitler"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "behavior tells",
+    "summary": "Watch a short log of coworkers' behavior and guess the one who is secretly the mole from patterns.",
+    "core_loop": "read log of day → note odd behaviors → compare days → pick the mole → reveal",
+    "verbs": [
+      "observe",
+      "infer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "daily logs",
+      "behavior tags",
+      "suspect list"
+    ],
+    "rules": [
+      "the mole breaks one pattern each day",
+      "three days of logs",
+      "other people have normal quirks"
+    ],
+    "win": "pick the mole",
+    "lose": "wrong pick",
+    "scoring": "day you solved on",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race to spot the mole earliest",
+      "friends design a mole case"
+    ],
+    "content_needs": [
+      "behavior logs with a mole pattern"
+    ],
+    "difficulty_levers": [
+      "number of days",
+      "distractions"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "find the mole in my office by watching their lunch habits",
+      "spy game: who is the double agent",
+      "which teacher is secretly a vampire"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "lie_detector_tells",
+    "name": "Tells and bluffs",
+    "aliases": [
+      "Poker tells",
+      "Papers Please",
+      "Lie to Me",
+      "Truth or Dare"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "tell reading",
+    "summary": "Watch a short animated suspect statement; judge truth or lie from tells like eye shifts, pauses and wording.",
+    "core_loop": "watch statement → note tells → mark truth or lie → score → streak",
+    "verbs": [
+      "watch",
+      "judge"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "animated suspect",
+      "tell icons",
+      "truth/lie buttons",
+      "streak"
+    ],
+    "rules": [
+      "each suspect has one tell pattern",
+      "tells vary per suspect",
+      "streak multiplies points"
+    ],
+    "win": "max score over 10 suspects",
+    "lose": "none; score attack",
+    "scoring": "correct streak",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare reads",
+      "challenge a friend's tells"
+    ],
+    "content_needs": [
+      "suspects with tell patterns"
+    ],
+    "difficulty_levers": [
+      "number of tells",
+      "speed"
+    ],
+    "tools": [
+      "combo",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "lie to me style game for my group chat",
+      "read the liar at a school trial",
+      "truth or lie detective"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sherlock_observation",
+    "name": "Observe and infer",
+    "aliases": [
+      "Sherlock Holmes deductions",
+      "Mind Palace",
+      "Brain Training",
+      "Murdle"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "infer from details",
+    "summary": "Look at a stranger's belongings and details and pick the true conclusions about their day.",
+    "core_loop": "study a picture → pick the inference options → feedback shows right/wrong → next stranger",
+    "verbs": [
+      "observe",
+      "infer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "stranger portrait with details",
+      "inference options",
+      "feedback"
+    ],
+    "rules": [
+      "each detail supports exactly one inference",
+      "false inferences are plausible",
+      "lose a life for each wrong pick"
+    ],
+    "win": "all inferences right",
+    "lose": "out of lives",
+    "scoring": "correct inferences",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare deductions",
+      "send a stranger to a friend"
+    ],
+    "content_needs": [
+      "strangers with details",
+      "true and false inferences"
+    ],
+    "difficulty_levers": [
+      "detail density",
+      "plausibility of false options"
+    ],
+    "tools": [
+      "choice_story",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "sherlock holmes deduce my day from my backpack",
+      "what did this stranger do this morning",
+      "observation game: infer a wizard's day"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mystery_map_trail",
+    "name": "Map clue trail",
+    "aliases": [
+      "Carmen Sandiego",
+      "Where in the World",
+      "The Room",
+      "Geocaching"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "location chain",
+    "summary": "Clues each point to a place; follow the trail across a map and catch the thief at the last stop.",
+    "core_loop": "read clue → pick the location on a map → arrive → get next clue → arrest at final stop",
+    "verbs": [
+      "deduce",
+      "travel"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "map",
+      "clue text",
+      "trail history",
+      "arrest button"
+    ],
+    "rules": [
+      "each clue names a landmark indirectly",
+      "wrong stops waste time",
+      "final stop needs an arrest"
+    ],
+    "win": "catch the thief",
+    "lose": "time out",
+    "scoring": "stops left",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race the same trail",
+      "share a clue that stumped you"
+    ],
+    "content_needs": [
+      "trail clues",
+      "map locations",
+      "thief"
+    ],
+    "difficulty_levers": [
+      "trail length",
+      "clue obliqueness",
+      "time"
+    ],
+    "tools": [
+      "choice_story",
+      "countdown",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "carmen sandiego but through my school",
+      "follow clues across a fantasy map",
+      "chase a thief through a mall"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ghost_hunt_investigation",
+    "name": "Ghost investigation",
+    "aliases": [
+      "Phasmophobia",
+      "Ghostbusters",
+      "Luigi's Mansion",
+      "Ghost hunters"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "evidence of type",
+    "summary": "Search rooms for evidence types and use them to identify which ghost type haunts the house.",
+    "core_loop": "search room → find evidence → mark types → rule out ghosts → name the ghost",
+    "verbs": [
+      "investigate",
+      "rule out"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "room list",
+      "evidence types",
+      "ghost type table"
+    ],
+    "rules": [
+      "each ghost has 3 evidence types",
+      "rooms reveal evidence with uncertainty",
+      "time dwindles"
+    ],
+    "win": "name the correct ghost type",
+    "lose": "time up",
+    "scoring": "evidence found and correct id",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "investigate together then compare",
+      "share a scare-free report"
+    ],
+    "content_needs": [
+      "ghost table",
+      "evidence per room"
+    ],
+    "difficulty_levers": [
+      "room count",
+      "misleading evidence"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "countdown",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "ghost hunting in my grandma's attic",
+      "phasmophobia but cozy",
+      "identify the haunted house ghost from evidence"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "torn_note_reconstruct",
+    "name": "Torn-note reconstruction",
+    "aliases": [
+      "Jigsaw",
+      "Her Story",
+      "Tetris tiles",
+      "Treasure Hunter"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "piece reading",
+    "summary": "Reassemble a torn note or map by placing fragments; the restored text names the answer.",
+    "core_loop": "drag fragment → snap to match → text forms → read message → accuse",
+    "verbs": [
+      "assemble",
+      "read"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "fragments",
+      "outline",
+      "message"
+    ],
+    "rules": [
+      "fragments snap by matching edges or text flow",
+      "message reveals a name or place",
+      "decoy fragments exist"
+    ],
+    "win": "read the message and act on it",
+    "lose": "time out",
+    "scoring": "speed and pieces used",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race on the same note",
+      "send a torn note to a friend"
+    ],
+    "content_needs": [
+      "message split into fragments",
+      "decoys"
+    ],
+    "difficulty_levers": [
+      "pieces",
+      "decoys",
+      "timer"
+    ],
+    "tools": [
+      "player_drag",
+      "timer_bar",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "reassemble the torn ransom note",
+      "piece together the pirate map",
+      "fix the shredded love letter to find the culprit"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "alibi_timeline_grid",
+    "name": "Alibi timeline grid",
+    "aliases": [
+      "Murdle",
+      "Clue time of death",
+      "Alibi logic",
+      "Agatha Christie timetable"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "time slots",
+    "summary": "Each suspect claims where they were at each hour; overlapping alibis and locations expose who couldn't have been where they claim.",
+    "core_loop": "read alibi table → mark conflicts → eliminate → accuse",
+    "verbs": [
+      "cross check"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "alibi table by hour",
+      "location map",
+      "conflict marks"
+    ],
+    "rules": [
+      "travel takes time between rooms",
+      "one suspect has an impossible alibi",
+      "others have partial overlap"
+    ],
+    "win": "accuse the one with the impossible alibi",
+    "lose": "wrong accusation",
+    "scoring": "correct, with fewer hints",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare reasoning",
+      "share a table"
+    ],
+    "content_needs": [
+      "alibi table with a travel-time impossibility"
+    ],
+    "difficulty_levers": [
+      "number of suspects",
+      "time slots"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "whose alibi is impossible at the school dance",
+      "time table mystery with six wizards",
+      "alibi logic for who stole the wallet"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "disguise_unmask",
+    "name": "Unmask the disguise",
+    "aliases": [
+      "Scooby-Doo",
+      "Hitman disguises",
+      "Mission Impossible",
+      "Murder Mystery 2"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "final reveal",
+    "summary": "A masked culprit has left behavioral traces across scenes; match the traces to the cast and unmask them.",
+    "core_loop": "collect traces across scenes → compare to cast profile → unmask → reveal",
+    "verbs": [
+      "collect",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene traces",
+      "cast profile cards",
+      "unmask button"
+    ],
+    "rules": [
+      "traces include handedness, shoe size, speech habit",
+      "cast profiles list the same traits",
+      "exactly one matches all traces"
+    ],
+    "win": "unmask correctly",
+    "lose": "wrong unmask",
+    "scoring": "traces needed",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race to unmask",
+      "share the trace that gave it away"
+    ],
+    "content_needs": [
+      "traces and profiles with one match"
+    ],
+    "difficulty_levers": [
+      "trace count",
+      "lookalike profiles"
+    ],
+    "tools": [
+      "match_pairs",
+      "hint",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "scooby doo style unmask game",
+      "find the masked guy at the school gala",
+      "unmask the ghost in the amusement park"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hotel_floor_investigation",
+    "name": "Hotel floor case",
+    "aliases": [
+      "Hotel Dusk",
+      "Agatha Christie hotel",
+      "The Shining",
+      "Grand Budapest"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "room visits",
+    "summary": "Visit rooms along a hallway, each yielding one clue about a guest; assemble a profile of who is hiding what.",
+    "core_loop": "open door → meet guest → learn secret → assemble relationships → decide who did it",
+    "verbs": [
+      "visit",
+      "connect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "hallway of doors",
+      "guest cards",
+      "secret tags"
+    ],
+    "rules": [
+      "each door once",
+      "guests reference each other",
+      "the answer is the guest named by three others"
+    ],
+    "win": "name the culprit",
+    "lose": "wrong answer",
+    "scoring": "visits needed",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare which doors you opened first",
+      "share the guest who surprised you"
+    ],
+    "content_needs": [
+      "guest secrets",
+      "cross-references"
+    ],
+    "difficulty_levers": [
+      "rooms",
+      "cross-reference depth"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "investigate a hotel full of wizards",
+      "hallway detective at a school camp",
+      "a hotel where every room has a secret"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "receipts_and_logs",
+    "name": "Receipt and phone-log case",
+    "aliases": [
+      "Papers Please",
+      "Her Story",
+      "Telling Lies",
+      "Gone Home"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "document cross-check",
+    "summary": "Compare receipts, call logs and photos across people to find the single inconsistency that cracks the case.",
+    "core_loop": "open item → check against statement → mark mismatch → build theory → submit",
+    "verbs": [
+      "cross check"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "item stack",
+      "statement list",
+      "mismatch marker"
+    ],
+    "rules": [
+      "one mismatch exists per suspect",
+      "only one mismatch is critical",
+      "submitting wrong theory ends case"
+    ],
+    "win": "submit the correct theory",
+    "lose": "wrong theory",
+    "scoring": "mismatches caught",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare mismatches caught",
+      "post a case for friends"
+    ],
+    "content_needs": [
+      "documents with consistent and inconsistent facts"
+    ],
+    "difficulty_levers": [
+      "documents",
+      "noise"
+    ],
+    "tools": [
+      "choice_story",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "find the fake alibi from receipts and texts",
+      "her story style call logs for my teacher mystery",
+      "phone logs cracked the case"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "secret_society_codeword",
+    "name": "Secret society codewords",
+    "aliases": [
+      "Spyfall",
+      "Codenames",
+      "National Treasure",
+      "Hidden agenda"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "passphrases",
+    "summary": "Meet members and learn that each demands a different phrase; deduce which password goes with whom to infiltrate.",
+    "core_loop": "meet member → hear hint → try phrase → feedback → gain trust → reach inner circle",
+    "verbs": [
+      "listen",
+      "guess"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "members",
+      "hint dialogue",
+      "phrase picker",
+      "trust meter"
+    ],
+    "rules": [
+      "each member hints at their phrase",
+      "wrong phrases cost trust",
+      "the inner circle requires 3 trusts"
+    ],
+    "win": "reach the inner circle",
+    "lose": "trust runs out",
+    "scoring": "trust and speed",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a phrase puzzle",
+      "create a secret society for a friend"
+    ],
+    "content_needs": [
+      "member hints",
+      "phrase answers"
+    ],
+    "difficulty_levers": [
+      "number of members",
+      "hint indirectness"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "fuzzy_match",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "infiltrate the wizards' club by guessing passwords",
+      "spy codewords at a school",
+      "secret society initiation with riddles"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "locked_room_impossible_crime",
+    "name": "Locked-room puzzle",
+    "aliases": [
+      "Locked room mystery",
+      "Columbo",
+      "Ace Attorney impossible",
+      "Higurashi"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "how not who",
+    "summary": "The culprit is obvious but the crime seems impossible; pick the facts that explain how it was done.",
+    "core_loop": "read the impossible scene → test hypotheses → eliminate the impossible → pick the mechanism",
+    "verbs": [
+      "hypothesize",
+      "test"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene description",
+      "hypothesis cards",
+      "test results"
+    ],
+    "rules": [
+      "each hypothesis can be tested once",
+      "tests give yes/no",
+      "exactly one mechanism survives"
+    ],
+    "win": "choose the correct mechanism",
+    "lose": "tests exhausted",
+    "scoring": "tests used",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare theories",
+      "stump a friend"
+    ],
+    "content_needs": [
+      "impossible scenes with a mechanism",
+      "hypothesis set"
+    ],
+    "difficulty_levers": [
+      "hypotheses",
+      "tests allowed"
+    ],
+    "tools": [
+      "choice_story",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "locked room mystery at a wizard library",
+      "how did the cookie vanish from a sealed jar",
+      "impossible crime in a snowed-in cabin"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "motive_means_opportunity",
+    "name": "Motive, means, opportunity",
+    "aliases": [
+      "CSI profiling",
+      "Clue",
+      "Criminal Minds",
+      "Law and Order"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "rank suspects",
+    "summary": "For each suspect rate motive, means and opportunity from evidence, and the highest-scoring suspect is the culprit.",
+    "core_loop": "read evidence → score each suspect on three axes → sum → accuse top",
+    "verbs": [
+      "evaluate",
+      "rank"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "suspect cards",
+      "three score sliders",
+      "evidence"
+    ],
+    "rules": [
+      "each piece of evidence adds or removes points",
+      "all three must be present"
+    ],
+    "win": "accuse the top suspect",
+    "lose": "wrong accusation",
+    "scoring": "match with hidden truth",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare rankings",
+      "debate in a Group"
+    ],
+    "content_needs": [
+      "evidence with axis effects",
+      "suspects"
+    ],
+    "difficulty_levers": [
+      "suspects",
+      "evidence ambiguity"
+    ],
+    "tools": [
+      "slider_input",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "profile suspects for the school bake sale theft",
+      "motive means opportunity for a wizard crime",
+      "rank who did it in the group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "handwriting_style_attribution",
+    "name": "Style attribution",
+    "aliases": [
+      "Authorship attribution",
+      "Who wrote this",
+      "Forensic linguistics",
+      "Zodiac cipher"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "style match",
+    "summary": "Compare an anonymous note's phrasing and quirks with samples from suspects to attribute the note.",
+    "core_loop": "read note → read samples → match quirks (spelling, slang) → pick author",
+    "verbs": [
+      "compare",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "anonymous note",
+      "writing samples",
+      "highlighter"
+    ],
+    "rules": [
+      "quirks like spelling, emoji use and catchphrases",
+      "one author matches best",
+      "decoys share a quirk"
+    ],
+    "win": "pick the author",
+    "lose": "wrong pick",
+    "scoring": "correct; quirks noted",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "write a note with your own quirks for friends to attribute",
+      "guess which friend wrote it"
+    ],
+    "content_needs": [
+      "notes with quirks",
+      "suspect samples"
+    ],
+    "difficulty_levers": [
+      "quirk subtlety",
+      "sample count"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "who wrote the threatening note in the group chat",
+      "forensic linguistics detective game",
+      "guess which friend sent the anonymous text"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "reverse_whodunit_hide",
+    "name": "Be the culprit",
+    "aliases": [
+      "Papers Please reverse",
+      "Hitman",
+      "Wise Guys",
+      "The Murder Mystery perpetrator"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "cover your tracks",
+    "summary": "You are the culprit; clean up traces and plant false clues before the detective's inspection counts what's left.",
+    "core_loop": "survey crime scene → remove or plant items → detective inspects → leftover clues counted",
+    "verbs": [
+      "hide",
+      "plant"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "crime scene",
+      "items",
+      "cleanup budget",
+      "detective inspection"
+    ],
+    "rules": [
+      "limited actions",
+      "each trace links to you",
+      "planted false clues can mislead"
+    ],
+    "win": "detective accuses someone else",
+    "lose": "detective accuses you",
+    "scoring": "traces left (fewer is better)",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share your cleanest scene",
+      "be the culprit for a friend"
+    ],
+    "content_needs": [
+      "scenes with traces",
+      "detective logic"
+    ],
+    "difficulty_levers": [
+      "actions",
+      "detective keenness"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "player_drag",
+      "countdown",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "be the culprit at the school pizza party and hide it",
+      "cover up the broken vase before mom checks",
+      "reverse mystery where i'm the thief"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

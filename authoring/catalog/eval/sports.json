@@ -1,0 +1,32 @@
+[
+  {
+    "request": "penalty shootout with my friend",
+    "expect": [
+      "penalty_kick_shootout"
+    ]
+  },
+  {
+    "request": "mini golf course of our apartment",
+    "expect": [
+      "golf_putt_minigolf"
+    ]
+  },
+  {
+    "request": "march madness bracket with my group",
+    "expect": [
+      "fantasy_pick_em"
+    ]
+  },
+  {
+    "request": "8 ball pool with my roommate",
+    "expect": [
+      "pool_billiards"
+    ]
+  },
+  {
+    "request": "home run derby timing game",
+    "expect": [
+      "baseball_bat_timing"
+    ]
+  }
+]

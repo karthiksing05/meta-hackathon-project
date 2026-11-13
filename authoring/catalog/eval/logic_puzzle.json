@@ -1,0 +1,32 @@
+[
+  {
+    "request": "linkedin queens puzzle",
+    "expect": [
+      "queens_placement"
+    ]
+  },
+  {
+    "request": "sudoku but every day with my friends",
+    "expect": [
+      "number_place_grid"
+    ]
+  },
+  {
+    "request": "flow free style connect the dots",
+    "expect": [
+      "flow_connect"
+    ]
+  },
+  {
+    "request": "rush hour car unblock puzzle",
+    "expect": [
+      "parking_unblock"
+    ]
+  },
+  {
+    "request": "nonogram that turns into a picture of my cat",
+    "expect": [
+      "nonogram_picture"
+    ]
+  }
+]

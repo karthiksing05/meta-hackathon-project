@@ -1,0 +1,63 @@
+[
+  {
+    "request": "solitaire",
+    "expect": [
+      "klondike_solitaire"
+    ]
+  },
+  {
+    "request": "spider solitare",
+    "expect": [
+      "spider_solitaire"
+    ]
+  },
+  {
+    "request": "uno",
+    "expect": [
+      "uno_shedding"
+    ]
+  },
+  {
+    "request": "uno but every card is a star wars planet",
+    "expect": [
+      "uno_shedding"
+    ]
+  },
+  {
+    "request": "blackjack",
+    "expect": [
+      "blackjack_21"
+    ]
+  },
+  {
+    "request": "texas holdem w the boys play money",
+    "expect": [
+      "texas_holdem_poker"
+    ]
+  },
+  {
+    "request": "go fish",
+    "expect": [
+      "go_fish_sets"
+    ]
+  },
+  {
+    "request": "top trumps but pokemon stats",
+    "expect": [
+      "card_battle_compare_stats",
+      "card_clash_compare"
+    ]
+  },
+  {
+    "request": "speed / spit card game",
+    "expect": [
+      "speed_card_race"
+    ]
+  },
+  {
+    "request": "gin rummy",
+    "expect": [
+      "rummy_melds"
+    ]
+  }
+]

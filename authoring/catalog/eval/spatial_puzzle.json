@@ -1,0 +1,32 @@
+[
+  {
+    "request": "tetris but the blocks are tacos",
+    "expect": [
+      "line_clear_falling_blocks"
+    ]
+  },
+  {
+    "request": "block blast style puzzle",
+    "expect": [
+      "block_fit_no_gravity"
+    ]
+  },
+  {
+    "request": "jigsaw of our group trip photo",
+    "expect": [
+      "jigsaw_assemble"
+    ]
+  },
+  {
+    "request": "where's waldo but it's my friend",
+    "expect": [
+      "hidden_object"
+    ]
+  },
+  {
+    "request": "monument valley style illusion puzzle",
+    "expect": [
+      "connect_shapes_pipes_3d"
+    ]
+  }
+]

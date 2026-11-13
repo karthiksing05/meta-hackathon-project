@@ -1,0 +1,1335 @@
+[
+  {
+    "id": "simon_sequence_repeat",
+    "name": "Repeat the growing sequence",
+    "aliases": [
+      "Simon",
+      "Simon Says"
+    ],
+    "family": "memory",
+    "summary": "Watch a sequence of lit pads and sounds, then repeat it; it grows by one each round.",
+    "core_loop": "watch the sequence → tap it back → it adds one more → repeat",
+    "verbs": [
+      "watch",
+      "remember",
+      "repeat"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one wrong tap ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "a wrong tap",
+    "scoring": "longest sequence",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's longest sequence"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "pad count"
+    ],
+    "tools": [
+      "sequence_memory",
+      "synth_sound",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "simon says memory game",
+      "repeat the colors",
+      "simon with my friends' faces"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "grid_flash_recall",
+    "name": "Remember the lit cells",
+    "aliases": [
+      "Memory grid",
+      "Chimp test"
+    ],
+    "family": "memory",
+    "summary": "A pattern of cells lights up briefly; tap the same cells from memory.",
+    "core_loop": "watch the pattern → it hides → tap the cells → bigger pattern",
+    "verbs": [
+      "watch",
+      "remember",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each round adds a cell"
+    ],
+    "win": "none; endless",
+    "lose": "too many wrong cells",
+    "scoring": "pattern size reached",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "brain-training duels"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "flash time"
+    ],
+    "tools": [
+      "grid_board",
+      "sequence_memory",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "memory grid game",
+      "chimp test",
+      "remember the lit squares"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "number_order_chimp",
+    "name": "Numbers in order then hidden",
+    "aliases": [
+      "Chimp test",
+      "Ayumu"
+    ],
+    "family": "memory",
+    "summary": "Numbers flash on screen; after the first tap they hide; tap them in order.",
+    "core_loop": "Numbers flash in random spots; after you tap 1 the rest hide, and you tap the remaining spots in number order from memory",
+    "verbs": [
+      "remember",
+      "order"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "numbers hide after the first tap"
+    ],
+    "win": "none; endless",
+    "lose": "a wrong tap",
+    "scoring": "count reached",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat the chimp with friends"
+    ],
+    "difficulty_levers": [
+      "count",
+      "flash time",
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "chimp memory test",
+      "numbers hide then tap in order",
+      "ayumu chimp challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "digit_span",
+    "name": "Remember the digits",
+    "aliases": [
+      "Digit span",
+      "Number memory"
+    ],
+    "family": "memory",
+    "summary": "A number flashes; type it back; it gets one digit longer each round.",
+    "core_loop": "A number flashes, hides, and you type it back; each round it grows by one digit until you miss",
+    "verbs": [
+      "remember",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "one mistake ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "a wrong digit",
+    "scoring": "digits remembered",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare spans with friends"
+    ],
+    "difficulty_levers": [
+      "flash time",
+      "start length",
+      "reverse mode"
+    ],
+    "tools": [
+      "keyboard",
+      "sequence_memory",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "number memory test",
+      "remember the digits",
+      "digit span game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "what_changed_scene",
+    "name": "What changed",
+    "aliases": [
+      "What's different",
+      "Kim's game"
+    ],
+    "family": "memory",
+    "summary": "Study a scene, it hides, then spot what moved, appeared or vanished.",
+    "core_loop": "study the scene → it hides → it returns changed → tap the change",
+    "verbs": [
+      "observe",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one or more changes per round"
+    ],
+    "win": "spot every change",
+    "lose": "wrong taps",
+    "scoring": "changes found",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily scene"
+    ],
+    "difficulty_levers": [
+      "study time",
+      "changes"
+    ],
+    "tools": [
+      "reveal",
+      "image_assets",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "what changed memory game",
+      "kim's game",
+      "spot what moved"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tray_items_recall",
+    "name": "Remember the tray",
+    "aliases": [
+      "Kim's game",
+      "tray memory"
+    ],
+    "family": "memory",
+    "summary": "Study objects on a tray, then list as many as you can.",
+    "core_loop": "Study a tray of objects for a few seconds, then it hides and you type or pick as many items as you remember",
+    "verbs": [
+      "remember",
+      "list"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "answers are fuzzy-matched"
+    ],
+    "win": "name them all",
+    "lose": "none",
+    "scoring": "items recalled",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "party game"
+    ],
+    "difficulty_levers": [
+      "items",
+      "study time",
+      "decoys"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "remember everything on the tray",
+      "memory list game",
+      "baby shower tray game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "face_name_match",
+    "name": "Remember names and faces",
+    "aliases": [
+      "Face memory"
+    ],
+    "family": "memory",
+    "summary": "Meet a set of characters with names, then match names to faces later.",
+    "core_loop": "Meet a set of characters with names, play a distraction round, then match each face to its name",
+    "verbs": [
+      "remember",
+      "match"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "one name per face"
+    ],
+    "win": "match all",
+    "lose": "none",
+    "scoring": "right matches",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "learn your new Group members' names"
+    ],
+    "difficulty_levers": [
+      "faces",
+      "delay",
+      "similar names"
+    ],
+    "tools": [
+      "match_pairs",
+      "image_assets",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "learn names of my new coworkers",
+      "face name memory",
+      "remember who's who"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "card_position_recall",
+    "name": "Where was it",
+    "aliases": [
+      "Position memory"
+    ],
+    "family": "memory",
+    "summary": "Cards show briefly face up; recall where each symbol was.",
+    "core_loop": "memorize the layout → flip down → asked for a symbol → tap its spot",
+    "verbs": [
+      "remember",
+      "locate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each wrong tap costs a life"
+    ],
+    "win": "find every symbol",
+    "lose": "out of lives",
+    "scoring": "found symbols",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "quick challenge"
+    ],
+    "difficulty_levers": [
+      "cards",
+      "flash time"
+    ],
+    "tools": [
+      "grid_board",
+      "sequence_memory",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "remember where the cards were",
+      "position memory game",
+      "card layout memory"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "n_back",
+    "name": "N-back",
+    "aliases": [
+      "N-back",
+      "Dual N-back"
+    ],
+    "family": "memory",
+    "summary": "Tap when the current item matches the one N steps back.",
+    "core_loop": "Items appear one at a time; tap whenever the current item matches the one shown a set number of steps back",
+    "verbs": [
+      "remember",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "misses and false taps count"
+    ],
+    "win": "best accuracy",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "brain training with friends"
+    ],
+    "difficulty_levers": [
+      "how many steps back",
+      "speed",
+      "item types"
+    ],
+    "tools": [
+      "sequence_memory",
+      "speed_ramp",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "n back game",
+      "dual n back training",
+      "working memory test"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "story_recall_quiz",
+    "name": "Remember the story",
+    "aliases": [
+      "Story memory"
+    ],
+    "family": "memory",
+    "summary": "Read or hear a short story, then answer detail questions.",
+    "core_loop": "Read or hear a short story, then it hides and you answer questions about its details",
+    "verbs": [
+      "remember",
+      "answer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "questions on details only"
+    ],
+    "win": "most right",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "read a friend's story then quiz"
+    ],
+    "difficulty_levers": [
+      "story length",
+      "detail",
+      "question count"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "remember the story details",
+      "memory quiz after reading",
+      "listening memory test"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "path_memory_trace",
+    "name": "Remember the path",
+    "aliases": [
+      "Path memory"
+    ],
+    "family": "memory",
+    "summary": "Watch a path drawn across a grid, then trace it back.",
+    "core_loop": "Watch a path draw itself across a grid, then it hides and you trace the same path from memory",
+    "verbs": [
+      "remember",
+      "trace"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "one wrong step ends the round"
+    ],
+    "win": "trace every path",
+    "lose": "a wrong step",
+    "scoring": "path length",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "path length",
+      "grid size",
+      "draw speed"
+    ],
+    "tools": [
+      "grid_board",
+      "sequence_memory",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "remember the path game",
+      "trace the route from memory",
+      "memory maze"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_word_memory",
+    "name": "Remember the color",
+    "aliases": [
+      "Color memory"
+    ],
+    "family": "memory",
+    "summary": "A color shows briefly; recreate it by mixing sliders.",
+    "core_loop": "A color shows for a moment, then hides; mix sliders to recreate it and score by how close you get",
+    "verbs": [
+      "remember",
+      "match"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "score by color distance"
+    ],
+    "win": "closest match",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily color memory"
+    ],
+    "difficulty_levers": [
+      "display time",
+      "slider count",
+      "delay"
+    ],
+    "tools": [
+      "reveal",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "remember the color game",
+      "color memory test",
+      "dialed in color"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "song_note_recall",
+    "name": "Play it back",
+    "aliases": [
+      "Melody memory"
+    ],
+    "family": "memory",
+    "summary": "Hear a short melody, then play it back on pads or keys.",
+    "core_loop": "Hear a short melody on a few pads or keys, then play it back; it grows by a note each round",
+    "verbs": [
+      "listen",
+      "remember",
+      "repeat"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one wrong note ends the round"
+    ],
+    "win": "none; endless",
+    "lose": "a wrong note",
+    "scoring": "notes remembered",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "music friends compare"
+    ],
+    "difficulty_levers": [
+      "tempo",
+      "pads",
+      "start length"
+    ],
+    "tools": [
+      "sequence_memory",
+      "synth_sound"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "play back the melody",
+      "music memory game",
+      "repeat the tune"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shopping_list_recall",
+    "name": "Remember the list",
+    "aliases": [
+      "List memory"
+    ],
+    "family": "memory",
+    "summary": "A list shows; later pick the items from a bigger set.",
+    "core_loop": "Read a shopping list, then it hides; pick the listed items from a larger shelf full of decoys",
+    "verbs": [
+      "remember",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "decoys look similar"
+    ],
+    "win": "pick every item",
+    "lose": "wrong picks",
+    "scoring": "right picks",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "family challenge"
+    ],
+    "difficulty_levers": [
+      "list length",
+      "decoys",
+      "delay"
+    ],
+    "tools": [
+      "quiz",
+      "sequence_memory",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "remember the shopping list",
+      "grocery memory game",
+      "list recall"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "peek_and_place",
+    "name": "Rebuild the picture",
+    "aliases": [
+      "Rebuild memory"
+    ],
+    "family": "memory",
+    "summary": "Study an arrangement of pieces, then rebuild it from memory.",
+    "core_loop": "Study an arrangement of pieces for a few seconds, then rebuild it from memory and compare to the original",
+    "verbs": [
+      "remember",
+      "place"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "score by pieces in the right place"
+    ],
+    "win": "rebuild exactly",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "pieces",
+      "study time",
+      "colors"
+    ],
+    "tools": [
+      "player_drag",
+      "grid_board",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rebuild the pattern from memory",
+      "memory blocks",
+      "copy the arrangement"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cup_shuffle_track",
+    "name": "Follow the cup",
+    "aliases": [
+      "Shell game",
+      "Cups and ball"
+    ],
+    "family": "memory",
+    "summary": "Watch a ball hidden under one cup as the cups shuffle; tap where it ended.",
+    "core_loop": "Watch a ball hidden under one cup, follow the cups as they shuffle, then tap the cup you think hides it",
+    "verbs": [
+      "track",
+      "watch"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "shuffles speed up"
+    ],
+    "win": "find the ball",
+    "lose": "wrong cup",
+    "scoring": "rounds won",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak sharing"
+    ],
+    "difficulty_levers": [
+      "shuffle speed",
+      "cups",
+      "shuffle count"
+    ],
+    "tools": [
+      "reveal",
+      "speed_ramp",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "shell game",
+      "follow the ball under the cup",
+      "cup shuffle challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "memory_palace",
+    "name": "Memory palace",
+    "aliases": [
+      "Method of loci"
+    ],
+    "family": "memory",
+    "summary": "Place items in rooms of a house to remember them, then walk the house to recall them in order.",
+    "core_loop": "Place each item to remember in a room of a house, then walk the house later and recall the items in order",
+    "verbs": [
+      "associate",
+      "remember"
+    ],
+    "inputs": [
+      "drag",
+      "type"
+    ],
+    "rules": [
+      "order must match"
+    ],
+    "win": "recall the whole list in order",
+    "lose": "none",
+    "scoring": "items in order",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "study buddies"
+    ],
+    "difficulty_levers": [
+      "items",
+      "rooms",
+      "delay"
+    ],
+    "tools": [
+      "sequence_memory",
+      "player_drag",
+      "typed_answer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "memory palace trainer",
+      "remember a list with rooms",
+      "method of loci game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "symbol_pair_learn",
+    "name": "Learn the pairs",
+    "aliases": [
+      "Paired associates"
+    ],
+    "family": "memory",
+    "summary": "Learn which symbol goes with which, then recall partners.",
+    "core_loop": "Learn which symbol goes with which partner, then get tested; any missed pairs repeat until you know them all",
+    "verbs": [
+      "learn",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "missed pairs come back sooner"
+    ],
+    "win": "master every pair",
+    "lose": "none",
+    "scoring": "pairs mastered",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "learn a language alphabet with friends"
+    ],
+    "difficulty_levers": [
+      "pairs",
+      "study time",
+      "symbol similarity"
+    ],
+    "tools": [
+      "match_pairs",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "learn the hiragana pairs",
+      "symbol pair memory",
+      "paired associates"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "audio_word_list",
+    "name": "Hear and recall",
+    "aliases": [
+      "Word list recall"
+    ],
+    "family": "memory",
+    "summary": "Hear a list of words, then type as many as you remember.",
+    "core_loop": "Hear a list of words read aloud, then type as many as you can remember in any order",
+    "verbs": [
+      "listen",
+      "remember",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "order doesn't matter"
+    ],
+    "win": "recall them all",
+    "lose": "none",
+    "scoring": "words recalled",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare with friends"
+    ],
+    "difficulty_levers": [
+      "list length",
+      "word speed",
+      "delay"
+    ],
+    "tools": [
+      "audio_clip",
+      "typed_answer",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "listen and remember words",
+      "audio memory test",
+      "recall the word list"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "concentration_photos",
+    "name": "Match our photos",
+    "aliases": [
+      "Photo concentration"
+    ],
+    "family": "memory",
+    "summary": "Flip pairs of your own photos to match them.",
+    "core_loop": "Your own or your Group's photos are laid face down in pairs; flip two at a time and match them all in as few turns as possible",
+    "verbs": [
+      "flip",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "non-matches flip back"
+    ],
+    "win": "match all pairs",
+    "lose": "none",
+    "scoring": "flips",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play"
+    ],
+    "social_hooks": [
+      "made from a Group's photos"
+    ],
+    "difficulty_levers": [
+      "pairs",
+      "time",
+      "shuffle on miss"
+    ],
+    "tools": [
+      "match_pairs",
+      "image_assets",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "memory game with our photos",
+      "flip and match our vacation pics",
+      "photo pairs"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sequence_dance_moves",
+    "name": "Remember the dance",
+    "aliases": [
+      "Dance memory"
+    ],
+    "family": "memory",
+    "summary": "Watch a sequence of moves, then swipe them in order.",
+    "core_loop": "Watch a dancer perform a sequence of moves, then swipe them back in order; each round adds a move",
+    "verbs": [
+      "watch",
+      "remember",
+      "swipe"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "one wrong swipe ends the round"
+    ],
+    "win": "none; endless",
+    "lose": "a wrong move",
+    "scoring": "moves remembered",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "dance-off challenge"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "move set",
+      "start length"
+    ],
+    "tools": [
+      "sequence_memory",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "remember the dance moves",
+      "swipe the dance sequence",
+      "dance memory"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "map_route_memory",
+    "name": "Remember the route",
+    "aliases": [
+      "Route memory"
+    ],
+    "family": "memory",
+    "summary": "Watch a route on a map, then retrace it on a blank map.",
+    "core_loop": "Watch a route trace across a map, then the map goes blank and you retrace the same route",
+    "verbs": [
+      "remember",
+      "trace"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "score by closeness to the route"
+    ],
+    "win": "trace the route",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "city friends"
+    ],
+    "difficulty_levers": [
+      "route length",
+      "map detail",
+      "trace speed"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "remember the route on the map",
+      "navigation memory",
+      "retrace the path"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "remember_the_order_people",
+    "name": "Who came in when",
+    "aliases": [
+      "Arrival memory"
+    ],
+    "family": "memory",
+    "summary": "Characters enter one by one; recall the order they arrived.",
+    "core_loop": "Characters enter a room one by one; afterward, drag them into the order they arrived",
+    "verbs": [
+      "remember",
+      "order"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "order must match"
+    ],
+    "win": "correct order",
+    "lose": "none",
+    "scoring": "positions right",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "party game"
+    ],
+    "difficulty_levers": [
+      "count",
+      "entry speed",
+      "similar looks"
+    ],
+    "tools": [
+      "sort_bins",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "remember who arrived first",
+      "order the characters",
+      "arrival memory"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spot_the_new_one",
+    "name": "Which one is new",
+    "aliases": [
+      "Recognition memory"
+    ],
+    "family": "memory",
+    "summary": "Each round adds an item; tap the one you haven't seen before.",
+    "core_loop": "Each round shows the previous items plus one new one in shuffled spots; tap the item you haven't seen before",
+    "verbs": [
+      "remember",
+      "spot"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one new item each round"
+    ],
+    "win": "none; endless",
+    "lose": "a wrong tap",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak duels"
+    ],
+    "difficulty_levers": [
+      "items per round",
+      "shuffle",
+      "time"
+    ],
+    "tools": [
+      "quiz",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "which one is new memory",
+      "spot the new card",
+      "recognition memory test"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "reverse_sequence",
+    "name": "Repeat it backward",
+    "aliases": [
+      "Backward span"
+    ],
+    "family": "memory",
+    "summary": "Watch a sequence and repeat it in reverse order.",
+    "core_loop": "Watch a sequence of lights or symbols, then repeat it in reverse order; it gets longer each round",
+    "verbs": [
+      "remember",
+      "reverse"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "order is reversed"
+    ],
+    "win": "none; endless",
+    "lose": "a wrong tap",
+    "scoring": "length",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "harder simon for friends"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "start length",
+      "symbol count"
+    ],
+    "tools": [
+      "sequence_memory",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "reverse simon",
+      "repeat it backwards",
+      "backward memory"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

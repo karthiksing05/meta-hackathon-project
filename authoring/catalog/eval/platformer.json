@@ -1,0 +1,32 @@
+[
+  {
+    "request": "mario style level about my school",
+    "expect": [
+      "classic_side_platformer"
+    ]
+  },
+  {
+    "request": "super meat boy hard platformer",
+    "expect": [
+      "precision_platformer"
+    ]
+  },
+  {
+    "request": "fireboy and watergirl with my friend",
+    "expect": [
+      "coop_two_player_platform"
+    ]
+  },
+  {
+    "request": "build a mario maker level for my brother",
+    "expect": [
+      "level_maker_platform"
+    ]
+  },
+  {
+    "request": "jump king rage climbing game",
+    "expect": [
+      "jump_king_fall"
+    ]
+  }
+]

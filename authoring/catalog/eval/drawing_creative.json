@@ -1,0 +1,32 @@
+[
+  {
+    "request": "skribbl but with pokemon words",
+    "expect": [
+      "draw_and_guess_round"
+    ]
+  },
+  {
+    "request": "gartic phone with my friends",
+    "expect": [
+      "telephone_draw_describe"
+    ]
+  },
+  {
+    "request": "a quick draw clone where the ai guesses",
+    "expect": [
+      "doodle_recognizer_race"
+    ]
+  },
+  {
+    "request": "color by number of my cat",
+    "expect": [
+      "color_by_number_reveal"
+    ]
+  },
+  {
+    "request": "a place canvas for our group",
+    "expect": [
+      "collaborative_pixel_canvas"
+    ]
+  }
+]

@@ -1,0 +1,2401 @@
+[
+  {
+    "id": "who_said_it_quote_guess",
+    "name": "Who said it",
+    "aliases": [
+      "Who said it",
+      "guess the speaker",
+      "group chat quotes",
+      "quote attribution"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "attribution",
+    "summary": "Anonymous quotes from the Group's own messages or collected lines appear one at a time, and players guess which friend said each.",
+    "core_loop": "read quote → tap the friend you think said it → see who said it → points",
+    "verbs": [
+      "read",
+      "attribute"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "quote card",
+      "friend avatars",
+      "reveal",
+      "score"
+    ],
+    "rules": [
+      "each quote has one author",
+      "author hidden until guess"
+    ],
+    "win": "most correct attributions",
+    "lose": "none; score attack",
+    "scoring": "1 point per correct, bonus for streaks",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare who knows the Group best",
+      "quotes come from what people write for the game"
+    ],
+    "content_needs": [
+      "quotes supplied by members",
+      "friend roster"
+    ],
+    "difficulty_levers": [
+      "quote count",
+      "number of candidates",
+      "time per quote"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "combo",
+      "reveal",
+      "group_roster",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "who said it with my friend group's chat quotes",
+      "guess which friend said each line",
+      "who said it game for our family"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "whose_answer_anonymous_pool",
+    "name": "Whose answer is it",
+    "aliases": [
+      "Whose answer",
+      "guess the author",
+      "anonymous answers",
+      "Guess Who wrote this",
+      "Quiplash lite"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "attribution",
+    "summary": "Everyone answers the same prompt privately, then answers are shown anonymously and players match each answer to its author.",
+    "core_loop": "answer a prompt → answers shuffled → guess the author for each → reveal authors → points",
+    "verbs": [
+      "write",
+      "attribute"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "prompt",
+      "anonymous answer cards",
+      "guess grid"
+    ],
+    "rules": [
+      "one answer per player",
+      "authors hidden until all guess"
+    ],
+    "win": "most authors guessed",
+    "lose": "none; it cannot be failed",
+    "scoring": "points per correct author",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "everyone sees how well they know each other",
+      "prompts the Group votes in"
+    ],
+    "content_needs": [
+      "prompts",
+      "submitted answers"
+    ],
+    "difficulty_levers": [
+      "prompt spice",
+      "group size",
+      "time to answer"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "quiz",
+      "reveal",
+      "rounds",
+      "score",
+      "group_roster",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "whose answer is it for \"worst date idea\" with my roommates",
+      "anonymous answers and guess who wrote them",
+      "guess who wrote what in our group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "most_likely_to_vote",
+    "name": "Most likely to vote",
+    "aliases": [
+      "Most Likely To",
+      "who is most likely to",
+      "Group superlatives",
+      "Superlatives"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "prediction",
+    "summary": "A prompt such as who is most likely to oversleep is voted on by the Group, and players earn points for predicting the winner.",
+    "core_loop": "read prompt → predict who the Group will vote → everyone votes → reveal the tally → points if you predicted",
+    "verbs": [
+      "vote",
+      "predict"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "prompt",
+      "friend avatars",
+      "vote tally",
+      "score"
+    ],
+    "rules": [
+      "one vote each",
+      "predictors score if the winner matches"
+    ],
+    "win": "guess most winners",
+    "lose": "none; it cannot be failed",
+    "scoring": "points for matching the Group winner",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "funny winners spark chat",
+      "Group results become a share card"
+    ],
+    "content_needs": [
+      "prompts",
+      "roster"
+    ],
+    "difficulty_levers": [
+      "prompt count",
+      "predict vs vote only"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "group_roster",
+      "vote_tally",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "most likely to with my camp friends",
+      "who in our group is most likely to get lost game",
+      "superlatives game for my roommates"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "never_have_i_ever_tally",
+    "name": "Never have I ever tally",
+    "aliases": [
+      "Never Have I Ever",
+      "I have never",
+      "Have you ever"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "self-report",
+    "summary": "Statements about experiences appear, players secretly tap whether they have done it, and the Group sees counts and guesses who did.",
+    "core_loop": "read statement → secretly tap have or never → see counts → guess who did",
+    "verbs": [
+      "read",
+      "confess"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "statement card",
+      "have or never buttons",
+      "counts",
+      "guess list"
+    ],
+    "rules": [
+      "answers are anonymous until revealed",
+      "reveals optional"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "points for correct guesses",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "surprising overlaps",
+      "Group learns each other's histories"
+    ],
+    "content_needs": [
+      "statements"
+    ],
+    "difficulty_levers": [
+      "spice level",
+      "reveal who"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "group_roster",
+      "vote_tally",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "never have i ever for a college friend group",
+      "never have i ever but wholesome",
+      "never have i ever about our trip"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "how_well_do_you_know_me_quiz",
+    "name": "How well do you know me",
+    "aliases": [
+      "How well do you know me",
+      "friend quiz",
+      "Know-me quiz",
+      "Quizzes about me",
+      "BFF test"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "personal quiz",
+    "summary": "A creator writes questions about themselves with the right answers, and friends take the quiz to see who knows them best.",
+    "core_loop": "creator picks answers → friend takes the quiz → each question scored → ranked leaderboard",
+    "verbs": [
+      "read",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "question cards",
+      "answer options",
+      "leaderboard"
+    ],
+    "rules": [
+      "creator sets correct answers",
+      "friends answer in order"
+    ],
+    "win": "highest score",
+    "lose": "none; it cannot be failed",
+    "scoring": "1 point per right answer",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends rank on your leaderboard",
+      "share your quiz in a Group"
+    ],
+    "content_needs": [
+      "creator-written questions and options"
+    ],
+    "difficulty_levers": [
+      "question count",
+      "choices count",
+      "time"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "ghost_score",
+      "friend_answers_store"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "a how well do you know me quiz about me",
+      "bff quiz for my best friend",
+      "quiz my friends about my childhood"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rank_like_the_friend",
+    "name": "Rank like your friend would",
+    "aliases": [
+      "Rank like me",
+      "Predict their ranking",
+      "Top five guess",
+      "Friend ranking"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "ranking prediction",
+    "summary": "A friend ranks a short list, such as snacks or vacations, and others try to guess their order.",
+    "core_loop": "friend ranks items secretly → others drag items into the order they predict → reveal → closeness score",
+    "verbs": [
+      "rank",
+      "predict"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "item cards",
+      "slots",
+      "score"
+    ],
+    "rules": [
+      "score by distance from true position"
+    ],
+    "win": "closest match",
+    "lose": "none; it cannot be failed",
+    "scoring": "sum of position errors",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends see how well they predict each other",
+      "Group shared top fives"
+    ],
+    "content_needs": [
+      "lists",
+      "friend rankings"
+    ],
+    "difficulty_levers": [
+      "item count",
+      "scoring tolerance"
+    ],
+    "tools": [
+      "sort_bins",
+      "rounds",
+      "score",
+      "reveal",
+      "drag_drop_slots",
+      "friend_answers_store"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "rank my top five movies guess game",
+      "guess how my friend ranks pizza toppings",
+      "rank these like my sister would"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "this_or_that_predict",
+    "name": "This or that prediction",
+    "aliases": [
+      "This or That",
+      "Would you rather",
+      "Would you rather predict",
+      "Which would they pick"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "prediction",
+    "summary": "A friend answers a series of either/or choices, and players predict each of their picks.",
+    "core_loop": "see two options → tap what your friend picked → reveal → next",
+    "verbs": [
+      "choose",
+      "predict"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "two option cards",
+      "streak",
+      "reveal"
+    ],
+    "rules": [
+      "one pick per card",
+      "answers hidden until guess"
+    ],
+    "win": "most matches",
+    "lose": "none; it cannot be failed",
+    "scoring": "1 point per match",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "see who knows their friend's tastes",
+      "Group this-or-that rounds"
+    ],
+    "content_needs": [
+      "option pairs",
+      "friend picks"
+    ],
+    "difficulty_levers": [
+      "pair count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "combo",
+      "reveal",
+      "friend_answers_store"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "this or that game about what my best friend would pick",
+      "would you rather predict for my roommates",
+      "this or that for coffee orders"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "friend_favorites_matchup",
+    "name": "Favorites matchup",
+    "aliases": [
+      "Match favorites",
+      "Who loves what",
+      "Friend favorites match"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "matching",
+    "summary": "Match each friend to their favorite thing, such as a snack, show or app, from a shuffled set.",
+    "core_loop": "see friends and items → drag pairs → submit → score",
+    "verbs": [
+      "match",
+      "recall"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "friend avatars",
+      "item cards",
+      "pair lines"
+    ],
+    "rules": [
+      "one item per friend"
+    ],
+    "win": "all pairs correct",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct pair",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "learn favorites",
+      "Group version with all members"
+    ],
+    "content_needs": [
+      "favorites per friend"
+    ],
+    "difficulty_levers": [
+      "friend count",
+      "item category"
+    ],
+    "tools": [
+      "match_pairs",
+      "sort_bins",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster",
+      "friend_answers_store"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "match my friends to their go to snacks",
+      "who loves what game",
+      "match each friend to their favorite show"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "whose_photo_guess",
+    "name": "Whose photo is this",
+    "aliases": [
+      "Whose photo",
+      "guess whose camera roll",
+      "Photo owner guess"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "attribution",
+    "summary": "Photos contributed by Group members appear anonymously and players guess who took or is in each.",
+    "core_loop": "see photo → guess owner → reveal → next",
+    "verbs": [
+      "recognize",
+      "attribute"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "photo card",
+      "friend avatars",
+      "reveal"
+    ],
+    "rules": [
+      "photos opted in by members"
+    ],
+    "win": "most right",
+    "lose": "none; it cannot be failed",
+    "scoring": "1 point per right",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "photo memories surface",
+      "shared photo set"
+    ],
+    "content_needs": [
+      "member-selected photos"
+    ],
+    "difficulty_levers": [
+      "photo count",
+      "blur level"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster",
+      "photo_picker"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "whose photo is it for our trip",
+      "guess whose camera roll this is",
+      "baby photo guess for my family"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "baby_photo_matchup",
+    "name": "Baby photo matchup",
+    "aliases": [
+      "Guess the baby",
+      "Baby photo game",
+      "Who is this baby",
+      "Childhood photos"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "matching",
+    "summary": "Members add childhood photos, and players match each baby photo to the current member.",
+    "core_loop": "see baby photo → pick the member → reveal",
+    "verbs": [
+      "recognize",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "baby photo",
+      "member avatars",
+      "reveal"
+    ],
+    "rules": [
+      "each member has one photo"
+    ],
+    "win": "all matched",
+    "lose": "none; it cannot be failed",
+    "scoring": "1 point per match",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "laugh at photos",
+      "Group icebreaker"
+    ],
+    "content_needs": [
+      "member baby photos"
+    ],
+    "difficulty_levers": [
+      "photo count"
+    ],
+    "tools": [
+      "match_pairs",
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster",
+      "photo_picker"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "baby photo guess for my dorm",
+      "guess which baby is who in our family",
+      "match childhood photos to friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "friend_hot_seat_trivia",
+    "name": "Friend hot seat trivia",
+    "aliases": [
+      "Hot seat",
+      "Trivia about one friend",
+      "Spotlight friend trivia",
+      "Friend of the week quiz"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "spotlight quiz",
+    "summary": "One friend is in the hot seat and the Group answers trivia questions about them, written by the friend or generated from their answers.",
+    "core_loop": "friend answers prompts → others take a quiz about them → scores → friend sees who knows them",
+    "verbs": [
+      "read",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "questions",
+      "choices",
+      "leaderboard"
+    ],
+    "rules": [
+      "spotlight rotates daily or weekly"
+    ],
+    "win": "top scorer",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct answer",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "weekly rotation",
+      "celebrate a birthday with a quiz"
+    ],
+    "content_needs": [
+      "friend's answers",
+      "question templates"
+    ],
+    "difficulty_levers": [
+      "question count",
+      "time per question"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "group_roster",
+      "friend_answers_store",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "birthday quiz about the birthday girl",
+      "friend of the week trivia",
+      "hot seat game about my sister"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "fake_answer_bluff",
+    "name": "Fake answer bluff",
+    "aliases": [
+      "Fibbage",
+      "Bluff",
+      "Balderdash",
+      "Fake answers",
+      "Guess the real fact"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "bluff",
+    "summary": "A true fact about a friend has a blank, players write fake answers, then everyone picks the real one from the mixed list.",
+    "core_loop": "see a fact with a blank → each writes a fake → all answers shown → pick the real one → points for correct and for fooling",
+    "verbs": [
+      "write",
+      "judge"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "fact prompt",
+      "fake answers",
+      "real answer",
+      "scores"
+    ],
+    "rules": [
+      "fakes appear with the real answer",
+      "players cannot pick their own"
+    ],
+    "win": "most points",
+    "lose": "none; it cannot be failed",
+    "scoring": "points for the right pick and for each fooled friend",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "clever fakes become inside jokes",
+      "works for road trips"
+    ],
+    "content_needs": [
+      "facts with blanks"
+    ],
+    "difficulty_levers": [
+      "round count",
+      "time to write"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "fibbage about my roommates",
+      "bluff game with facts about our friend group",
+      "make up fake answers for facts about me"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mind_meld_same_word",
+    "name": "Mind meld",
+    "aliases": [
+      "Mind Meld",
+      "Say the same word",
+      "Wavelength",
+      "One word at a time",
+      "Convergence"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "convergence",
+    "summary": "Two players each secretly pick a word related to a prompt, then try to converge on the same word over rounds.",
+    "core_loop": "both pick a word → reveal → pick again using both words → repeat until match",
+    "verbs": [
+      "think",
+      "match"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "word entry",
+      "round history"
+    ],
+    "rules": [
+      "both reveal together"
+    ],
+    "win": "match in fewest rounds",
+    "lose": "none; it cannot be failed",
+    "scoring": "rounds until match",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "inside jokes emerge",
+      "pairs compete on fewest rounds"
+    ],
+    "content_needs": [
+      "starting prompts"
+    ],
+    "difficulty_levers": [
+      "start word pair"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "rounds",
+      "score",
+      "reveal",
+      "friend_pairing"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "mind meld with my best friend",
+      "say the same word game",
+      "see how in sync we are"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "predict_group_percent",
+    "name": "Predict the Group's percent",
+    "aliases": [
+      "Percentage guess",
+      "What percent of us",
+      "Group poll guess",
+      "Guess the poll"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "estimation",
+    "summary": "A poll question is answered by the Group, and players guess what percentage picked each option.",
+    "core_loop": "read poll → guess a percent → see actual → score closeness",
+    "verbs": [
+      "predict",
+      "estimate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "poll question",
+      "slider",
+      "result bars"
+    ],
+    "rules": [
+      "slider 0 to 100"
+    ],
+    "win": "closest guess",
+    "lose": "none; it cannot be failed",
+    "scoring": "closeness",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "reveals Group habits",
+      "weekly poll"
+    ],
+    "content_needs": [
+      "poll questions"
+    ],
+    "difficulty_levers": [
+      "options count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "vote_tally",
+      "group_roster",
+      "slider_input"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "what percent of our friends would pick pineapple pizza",
+      "guess what the Group voted",
+      "poll prediction game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "who_am_i_friend_clues",
+    "name": "Who am I clue chain",
+    "aliases": [
+      "Who am I",
+      "Guess the friend",
+      "Guess who",
+      "Clue by clue"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "inference",
+    "summary": "Clues about a friend appear one at a time, and the player guesses which friend it describes, with more points for fewer clues.",
+    "core_loop": "see first clue → guess a friend → next clue if wrong → points",
+    "verbs": [
+      "infer",
+      "recognize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "clue cards",
+      "friend avatars",
+      "score"
+    ],
+    "rules": [
+      "clues go from vague to specific"
+    ],
+    "win": "name the friend",
+    "lose": "clues run out",
+    "scoring": "more points for earlier guess",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "clues written by friends",
+      "Group can guess"
+    ],
+    "content_needs": [
+      "clues"
+    ],
+    "difficulty_levers": [
+      "clue count"
+    ],
+    "tools": [
+      "reveal",
+      "rounds",
+      "score",
+      "group_roster",
+      "anonymous_submit",
+      "quiz"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "who am I clues about my group",
+      "guess the friend from five clues",
+      "guess who game for my team"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "shared_memory_timeline",
+    "name": "Shared memory timeline",
+    "aliases": [
+      "Memory lane",
+      "Order our memories",
+      "Friend timeline"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "ordering",
+    "summary": "Events from the Group's shared history are shuffled, and players put them in the correct order.",
+    "core_loop": "see event cards → drag into time order → reveal",
+    "verbs": [
+      "order",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "event cards",
+      "timeline"
+    ],
+    "rules": [
+      "members add events"
+    ],
+    "win": "correct order",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct placement",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "nostalgia",
+      "Group shared history"
+    ],
+    "content_needs": [
+      "events with dates"
+    ],
+    "difficulty_levers": [
+      "event count"
+    ],
+    "tools": [
+      "sort_bins",
+      "rounds",
+      "score",
+      "reveal",
+      "drag_drop_slots",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "order our road trip moments",
+      "timeline of our friend group",
+      "memory lane game for my family"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "inside_joke_origin_match",
+    "name": "Inside joke origin match",
+    "aliases": [
+      "Inside joke quiz",
+      "Where did that joke come from",
+      "Meme origin"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "matching",
+    "summary": "Inside jokes or phrases are matched to their origin stories or the friends involved.",
+    "core_loop": "see phrase → pick the story or person → reveal",
+    "verbs": [
+      "recall",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "phrase cards",
+      "origin options"
+    ],
+    "rules": [
+      "options include decoys"
+    ],
+    "win": "all matched",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "laugh at memories",
+      "new members learn lore"
+    ],
+    "content_needs": [
+      "phrases and origins"
+    ],
+    "difficulty_levers": [
+      "option count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "match_pairs",
+      "group_roster",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "inside joke origin quiz for our group",
+      "match phrase to the story",
+      "lore of our friend group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "compatibility_score_pair",
+    "name": "Compatibility score",
+    "aliases": [
+      "Compatibility test",
+      "Friend match",
+      "How alike are we",
+      "Couple quiz"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "compatibility",
+    "summary": "Two players answer the same questions separately, and the game scores how often their answers match.",
+    "core_loop": "both answer → reveal each question → compat percentage",
+    "verbs": [
+      "choose",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "questions",
+      "answer options",
+      "compat meter"
+    ],
+    "rules": [
+      "both answer same questions"
+    ],
+    "win": "percent matches",
+    "lose": "none; it cannot be failed",
+    "scoring": "percent matching",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "share compat score",
+      "compare with the whole Group"
+    ],
+    "content_needs": [
+      "questions"
+    ],
+    "difficulty_levers": [
+      "question count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "friend_pairing",
+      "friend_answers_store"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "compatibility test with my roommate",
+      "how alike are we quiz",
+      "friend compat score"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "guess_the_count_number_about_friend",
+    "name": "Guess a number about a friend",
+    "aliases": [
+      "Number guess",
+      "How many",
+      "Friend stats",
+      "Estimate"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "estimation",
+    "summary": "Numeric facts about a friend, such as unread messages or countries visited, are estimated and scored by closeness.",
+    "core_loop": "read prompt → enter an estimate → reveal → score",
+    "verbs": [
+      "estimate"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "prompt",
+      "number input",
+      "reveal"
+    ],
+    "rules": [
+      "closest wins"
+    ],
+    "win": "closest",
+    "lose": "none; it cannot be failed",
+    "scoring": "distance from true",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "surprising numbers",
+      "weekly friend stats"
+    ],
+    "content_needs": [
+      "numbers from friends"
+    ],
+    "difficulty_levers": [
+      "number range"
+    ],
+    "tools": [
+      "numeric_input",
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess how many countries my friend visited",
+      "friend stats guessing game",
+      "how many unread emails does my friend have"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spectrum_place_friend",
+    "name": "Spectrum placement",
+    "aliases": [
+      "Wavelength",
+      "Where do they fall",
+      "Spectrum",
+      "Slider guess"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "prediction",
+    "summary": "A spectrum between two extremes is shown and players place a friend, or predict where the friend placed themselves.",
+    "core_loop": "read spectrum → place marker → reveal → distance score",
+    "verbs": [
+      "place",
+      "predict"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "spectrum slider",
+      "marker",
+      "reveal"
+    ],
+    "rules": [
+      "closer is better"
+    ],
+    "win": "closest",
+    "lose": "none; it cannot be failed",
+    "scoring": "closeness",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "opinions vs reality",
+      "Group debates"
+    ],
+    "content_needs": [
+      "spectrums"
+    ],
+    "difficulty_levers": [
+      "spectrum count"
+    ],
+    "tools": [
+      "slider_input",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "where does my friend fall on introvert and extrovert",
+      "spectrum guess game",
+      "place each friend on the slider"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "opinions_agree_disagree",
+    "name": "Hot takes agree or disagree",
+    "aliases": [
+      "Hot takes",
+      "Agree disagree",
+      "Opinion poll guess",
+      "Controversial takes"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "prediction",
+    "summary": "Hot takes are shown and players guess whether a friend agrees or disagrees.",
+    "core_loop": "read take → predict → reveal → tally",
+    "verbs": [
+      "predict"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "hot take card",
+      "agree or disagree buttons",
+      "reveal"
+    ],
+    "rules": [
+      "friend answers beforehand"
+    ],
+    "win": "most correct",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "spark debates",
+      "Group takes"
+    ],
+    "content_needs": [
+      "takes"
+    ],
+    "difficulty_levers": [
+      "take count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "friend_answers_store",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "hot takes my friends agree with",
+      "guess which takes my sister agrees with",
+      "pineapple on pizza hot takes game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "where_was_this_taken",
+    "name": "Where was this taken",
+    "aliases": [
+      "Where was this",
+      "Geo photo guess",
+      "Travel photo guess"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "geo guess",
+    "summary": "Friends' trip photos appear and players guess where they were taken on a map or from options.",
+    "core_loop": "see photo → guess place → reveal → score",
+    "verbs": [
+      "recognize",
+      "locate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "photo",
+      "map",
+      "options"
+    ],
+    "rules": [
+      "answer from list"
+    ],
+    "win": "most right",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct or distance",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "travel stories",
+      "Group trip recap"
+    ],
+    "content_needs": [
+      "trip photos with places"
+    ],
+    "difficulty_levers": [
+      "number of places"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "map_pin_guess",
+      "photo_picker"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "where was this photo taken game from our trip",
+      "guess the place from my friend's travel photo",
+      "trip recap quiz"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "voice_note_guess",
+    "name": "Whose voice",
+    "aliases": [
+      "Voice guess",
+      "Guess the voice",
+      "Whose voice is this",
+      "Audio guess"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "attribution",
+    "summary": "Short voice clips from the Group play anonymously and players guess the speaker.",
+    "core_loop": "play clip → guess → reveal",
+    "verbs": [
+      "listen",
+      "attribute"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "audio player",
+      "avatars"
+    ],
+    "rules": [
+      "clips opted in"
+    ],
+    "win": "most right",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "laugh at voices",
+      "Group voice set"
+    ],
+    "content_needs": [
+      "voice clips"
+    ],
+    "difficulty_levers": [
+      "clip length"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "audio_clip_player",
+      "group_roster",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess whose voice this is",
+      "voice note quiz for my friends",
+      "guess the speaker from a clip"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "whose_doodle_guess",
+    "name": "Whose doodle",
+    "aliases": [
+      "Doodle guess",
+      "Whose drawing",
+      "Draw for the Group"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "attribution",
+    "summary": "Members each draw a simple prompt, and players guess whose drawing each is.",
+    "core_loop": "see drawing → pick the artist → reveal",
+    "verbs": [
+      "recognize",
+      "attribute"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "drawing",
+      "avatars"
+    ],
+    "rules": [
+      "drawings anonymous"
+    ],
+    "win": "most right",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "silly drawings",
+      "Group art wall"
+    ],
+    "content_needs": [
+      "drawings"
+    ],
+    "difficulty_levers": [
+      "drawing count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster",
+      "drawing_canvas"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "whose drawing is this game",
+      "doodle guess for my class",
+      "guess the artist of each doodle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "finish_my_sentence_prediction",
+    "name": "Finish my sentence",
+    "aliases": [
+      "Finish the sentence",
+      "Complete my sentence",
+      "Autocomplete friend"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "prediction",
+    "summary": "A sentence starter written by a friend is completed by players trying to match what the friend wrote.",
+    "core_loop": "see starter → type a completion → reveal the friend's → score by similarity",
+    "verbs": [
+      "type",
+      "predict"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "starter",
+      "answer box",
+      "reveal"
+    ],
+    "rules": [
+      "similarity decided by fuzzy match"
+    ],
+    "win": "closest",
+    "lose": "none; it cannot be failed",
+    "scoring": "similarity",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "see how well you know their voice",
+      "Group finishes each other's sentences"
+    ],
+    "content_needs": [
+      "starters and answers"
+    ],
+    "difficulty_levers": [
+      "starter count"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "quiz",
+      "rounds",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "finish my sentence game with my best friend",
+      "complete the sentence like my sister would",
+      "what would my friend say next"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "friend_bingo_find_someone",
+    "name": "Friend bingo",
+    "aliases": [
+      "Bingo",
+      "Find someone who",
+      "Human bingo",
+      "Group bingo"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "collection",
+    "summary": "A bingo card of traits is filled by marking friends who fit, such as someone who has been to Japan.",
+    "core_loop": "read trait → tap a friend who fits → complete a line",
+    "verbs": [
+      "tap",
+      "collect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "bingo card",
+      "friend list"
+    ],
+    "rules": [
+      "each friend used once"
+    ],
+    "win": "complete line",
+    "lose": "none; it cannot be failed",
+    "scoring": "lines",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "reveals traits",
+      "icebreaker"
+    ],
+    "content_needs": [
+      "traits"
+    ],
+    "difficulty_levers": [
+      "trait difficulty"
+    ],
+    "tools": [
+      "grid_board",
+      "rounds",
+      "score",
+      "group_roster",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "friend bingo for my new team",
+      "find someone who bingo",
+      "human bingo for a party"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "guess_friend_gift_pick",
+    "name": "Pick the gift",
+    "aliases": [
+      "Gift guess",
+      "What would they want",
+      "Secret Santa quiz"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "prediction",
+    "summary": "Players pick which gift a friend would most like from a set, then the friend reveals their favorite.",
+    "core_loop": "see gifts → pick what they would like → reveal",
+    "verbs": [
+      "choose",
+      "predict"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "gift cards",
+      "reveal"
+    ],
+    "rules": [
+      "friend picks beforehand"
+    ],
+    "win": "most matches",
+    "lose": "none; it cannot be failed",
+    "scoring": "per match",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "helps real gifting",
+      "secret santa warm up"
+    ],
+    "content_needs": [
+      "gift lists"
+    ],
+    "difficulty_levers": [
+      "gift count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "friend_answers_store",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "what gift would my friend like quiz",
+      "secret santa guesser",
+      "gift guess game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "caption_photo_funniest_pick",
+    "name": "Funniest caption pick",
+    "aliases": [
+      "Caption this",
+      "Funniest caption",
+      "Meme caption battle",
+      "Caption contest"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "creative vote",
+    "summary": "Players caption a photo, then vote for the best, with the friend in the photo picking too.",
+    "core_loop": "see photo → write caption → vote → winner",
+    "verbs": [
+      "write",
+      "vote"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "photo",
+      "caption cards",
+      "votes"
+    ],
+    "rules": [
+      "can't vote own caption"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "laughs",
+      "winner picked by the friend in the photo"
+    ],
+    "content_needs": [
+      "photos"
+    ],
+    "difficulty_levers": [
+      "caption length"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "rounds",
+      "score",
+      "reveal",
+      "vote_tally",
+      "photo_picker",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "caption this photo of my friend",
+      "meme caption battle for the group",
+      "funniest caption wins"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "polygraph_yes_no",
+    "name": "Polygraph yes or no",
+    "aliases": [
+      "Polygraph",
+      "Lie detector",
+      "Truth or lie",
+      "Yes or no hot seat"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "bluff detection",
+    "summary": "A friend answers yes or no questions, possibly lying, and the Group judges whether each is true.",
+    "core_loop": "friend answers → Group votes truth or lie → reveal",
+    "verbs": [
+      "judge"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "question",
+      "truth or lie buttons",
+      "reveal"
+    ],
+    "rules": [
+      "friend tells truth or lies"
+    ],
+    "win": "best detector",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "surprise reveals",
+      "spotlight friend"
+    ],
+    "content_needs": [
+      "questions"
+    ],
+    "difficulty_levers": [
+      "question count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "vote_tally",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "lie detector with my friend",
+      "truth or lie yes no game",
+      "polygraph game for the group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "twenty_questions_secret_friend",
+    "name": "Twenty questions on a friend",
+    "aliases": [
+      "20 Questions",
+      "Guess the secret",
+      "Yes or no questions"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "deduction",
+    "summary": "Players ask yes or no questions to identify a secret friend, object or memory.",
+    "core_loop": "ask a question → answer yes or no → narrow → guess",
+    "verbs": [
+      "ask",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "question list",
+      "answers",
+      "guess box"
+    ],
+    "rules": [
+      "twenty questions max"
+    ],
+    "win": "guess correctly",
+    "lose": "questions used up",
+    "scoring": "fewer questions",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "friends think of secrets",
+      "Group plays"
+    ],
+    "content_needs": [
+      "secrets"
+    ],
+    "difficulty_levers": [
+      "question count"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "20 questions with my friend as the secret",
+      "guess the friend with yes no questions",
+      "20 questions for a trip"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "chat_sender_guess",
+    "name": "Who sent this",
+    "aliases": [
+      "Who sent this",
+      "Message sender guess",
+      "Group chat guess"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "attribution",
+    "summary": "Messages appear in a chat style, and players guess which friend sent each one.",
+    "core_loop": "see message → pick sender → reveal",
+    "verbs": [
+      "read",
+      "attribute"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "chat bubbles",
+      "avatars"
+    ],
+    "rules": [
+      "messages opted in"
+    ],
+    "win": "most right",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "nostalgic messages",
+      "Group chat history"
+    ],
+    "content_needs": [
+      "messages"
+    ],
+    "difficulty_levers": [
+      "message count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "who sent this game from our group chat",
+      "guess the sender of each message",
+      "chat guesser"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "friend_fact_memory_match",
+    "name": "Friend fact memory match",
+    "aliases": [
+      "Memory",
+      "Concentration",
+      "Match friend to fact"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "memory",
+    "summary": "Cards flip to match each friend to a fact about them.",
+    "core_loop": "flip two cards → friend and fact match → keep pair",
+    "verbs": [
+      "recall",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "face-down cards"
+    ],
+    "rules": [
+      "match a friend card to a fact card"
+    ],
+    "win": "clear all",
+    "lose": "none; it cannot be failed",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends"
+    ],
+    "social_hooks": [
+      "learn facts"
+    ],
+    "content_needs": [
+      "facts"
+    ],
+    "difficulty_levers": [
+      "pair count"
+    ],
+    "tools": [
+      "match_pairs",
+      "sequence_memory",
+      "score",
+      "group_roster",
+      "friend_answers_store"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "memory match with my friends and their facts",
+      "concentration game with friend photos",
+      "memory flip game where the cards are my friends and their facts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "friend_prediction_bet",
+    "name": "Prediction bet on a friend",
+    "aliases": [
+      "Prediction market",
+      "Bet on friends",
+      "Predict this week"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "prediction",
+    "summary": "Players predict what a friend will do or say this week, and results resolve later.",
+    "core_loop": "make prediction → wait → resolve → points",
+    "verbs": [
+      "predict"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "prediction card",
+      "resolve"
+    ],
+    "rules": [
+      "friend resolves"
+    ],
+    "win": "most correct",
+    "lose": "none; it cannot be failed",
+    "scoring": "per correct",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ongoing banter",
+      "weekly Group predictions"
+    ],
+    "content_needs": [
+      "predictions"
+    ],
+    "difficulty_levers": [
+      "window"
+    ],
+    "tools": [
+      "quiz",
+      "score",
+      "group_roster",
+      "vote_tally",
+      "scheduled_resolve"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "bet on whether my friend will cancel plans",
+      "predict my roommate's week",
+      "friend predictions game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "top_pick_duo_quiz",
+    "name": "Duo quiz",
+    "aliases": [
+      "Duo quiz",
+      "Best friends quiz",
+      "Newlywed quiz",
+      "Guess my partner"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "compatibility",
+    "summary": "Two players answer questions about each other, then reveal to score.",
+    "core_loop": "answer about partner → reveal → score",
+    "verbs": [
+      "answer",
+      "predict"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "questions",
+      "reveal"
+    ],
+    "rules": [
+      "both answer"
+    ],
+    "win": "highest score",
+    "lose": "none; it cannot be failed",
+    "scoring": "per match",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "bond",
+      "pair challenge"
+    ],
+    "content_needs": [
+      "questions"
+    ],
+    "difficulty_levers": [
+      "question count"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "friend_pairing"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "best friends quiz",
+      "newlywed quiz for my sister and husband",
+      "partner quiz"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "playlist_owner_guess",
+    "name": "Whose playlist is it",
+    "aliases": [
+      "Spotify Wrapped guess",
+      "whose playlist",
+      "guess the listener",
+      "music taste guess"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "attribution",
+    "summary": "Short lists of favorite songs, shows or apps contributed by Group members are shown anonymously, and players match each list to the friend who made it.",
+    "core_loop": "see an anonymous top-five list → pick the friend you think it belongs to → reveal → next list",
+    "verbs": [
+      "recognize",
+      "attribute"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "anonymous list cards",
+      "friend avatars",
+      "reveal",
+      "score"
+    ],
+    "rules": [
+      "each member contributes one list per round",
+      "lists are hidden from their author's guesses"
+    ],
+    "win": "most lists matched",
+    "lose": "none; score attack",
+    "scoring": "1 point per correct match, bonus for the surprising ones",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "learn each other's tastes",
+      "Group weekly lists"
+    ],
+    "content_needs": [
+      "member-submitted lists"
+    ],
+    "difficulty_levers": [
+      "list length",
+      "category",
+      "group size"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "whose top five songs is this in our group",
+      "guess which friend loves these shows",
+      "match anonymous playlists to my roommates"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

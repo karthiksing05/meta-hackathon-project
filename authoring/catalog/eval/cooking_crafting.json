@@ -1,0 +1,32 @@
+[
+  {
+    "request": "cooking mama style recipe game",
+    "expect": [
+      "step_cooking_minigames"
+    ]
+  },
+  {
+    "request": "little alchemy combine elements",
+    "expect": [
+      "recipe_combine_discover"
+    ]
+  },
+  {
+    "request": "overcooked chaos kitchen with friends",
+    "expect": [
+      "order_assembly_kitchen"
+    ]
+  },
+  {
+    "request": "potion brewing witch game",
+    "expect": [
+      "potion_brew"
+    ]
+  },
+  {
+    "request": "decorate a birthday cake for my friend",
+    "expect": [
+      "bakery_decorate"
+    ]
+  }
+]

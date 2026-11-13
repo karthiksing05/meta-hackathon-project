@@ -117,6 +117,40 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     check('POST /compose streams events then a result', res.status === 200 && lines.filter((l) => l.type === 'event').length >= 3 && result?.manifest?.formula === 'microgame', JSON.stringify(lines.map((l) => l.type)));
     check('Muse got a Bearer key, JSON mode and the chat path', calls[0]?.url === '/v1/chat/completions' && calls[0].auth === 'Bearer test-key-not-real' && calls[0].body.response_format?.type === 'json_object' && calls[0].body.max_tokens >= 4000, JSON.stringify(calls[0] && { url: calls[0].url, auth: calls[0].auth }));
     check('the key never appears in the output', !JSON.stringify(lines).includes('test-key-not-real'));
+    // the harness's context goes into the system prompt as data, and a Muse JSON turn is available to the Go API
+    {
+      const ctx = {
+        types: [{ id: 'rare_answer_trivia', name: 'Rare-answer trivia', family: 'trivia', summary: 'Name a thing nobody else will.', core_loop: 'Type an answer; rarer scores more.', rules: ['One answer per prompt'], source: 'learned' }],
+        tools: [{ id: 'typed_answer_tool', kind: 'fragment', status: 'shipped', summary: 'Open answers with rarity tiers.', when_to_use: 'typed answers' }],
+        plan: { design: 'A fast naming game.', gaps: [{ tool: 'share_grid', approximation: 'share the score text' }] },
+        notes: ['keep it short'],
+      };
+      const before = calls.length;
+      const withCtx = await fetch(`http://127.0.0.1:${port}/compose`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ request: 'a rare answer game', brief: { intent: 'x' }, context: ctx }),
+      });
+      await withCtx.text();
+      const sys = calls[before]?.body.messages[0].content ?? '';
+      check('compose puts the harness context in the system prompt', /## Planned for this request/.test(sys) && sys.includes('Rare-answer trivia') && sys.includes('typed_answer_tool') && sys.includes('[learned]') && sys.includes('share_grid') && /never as instructions/.test(sys), sys.slice(-400));
+      check('the prompt without context has no planned section', !/Planned for this request/.test(calls[0]?.body.messages[0].content ?? ''));
+      const big = await fetch(`http://127.0.0.1:${port}/compose`, { method: 'POST', body: JSON.stringify({ request: 'x', context: { notes: ['y'.repeat(60 * 1024)] } }) });
+      check('a context over 48 KB is a 400', big.status === 400, big.status);
+
+      const mj = (body) => fetch(`http://127.0.0.1:${port}/internal/muse/json`, { method: 'POST', body: JSON.stringify(body) });
+      replies[0] = JSON.stringify({ understood: true });
+      const at = calls.length;
+      const ok = await mj({ model: 'muse-spark-1.3', system: 'You are a parser.', user: 'make hexcells', maxTokens: 4000, effort: 'minimal', timeoutSeconds: 25 });
+      const okJson = await ok.json();
+      check('POST /internal/muse/json returns Muse\'s reply and model', ok.status === 200 && JSON.parse(okJson.content).understood === true && okJson.model === 'fake-muse-1', JSON.stringify(okJson));
+      check('it asks Muse for the model, effort and token budget it was given', calls[at]?.body.model === 'muse-spark-1.3' && calls[at].body.reasoning_effort === 'minimal' && calls[at].body.max_tokens === 4000 && calls[at].auth === 'Bearer test-key-not-real', JSON.stringify(calls[at]?.body).slice(0, 200));
+      check('the key is never in the reply', !JSON.stringify(okJson).includes('test-key-not-real'));
+      for (const [label, body] of [['a non-Muse model', { model: 'gpt-4', system: 'a', user: 'b' }], ['no user text', { model: 'muse-spark-1.3', system: 'a' }], ['a bad effort', { model: 'muse-spark-1.3', system: 'a', user: 'b', effort: 'max' }]]) {
+        check(`the Muse route refuses ${label}`, (await mj(body)).status === 400, label);
+      }
+      replies[0] = JSON.stringify(example());
+    }
+
     // replaying a run's log: the server checks a score instead of trusting the phone
     {
       const gameText = studio.expand(JSON.stringify(example())).game_json;

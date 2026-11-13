@@ -1,0 +1,64 @@
+[
+  {
+    "request": "angry birds",
+    "expect": [
+      "slingshot_structure",
+      "cannon_aim_puzzle"
+    ]
+  },
+  {
+    "request": "angry birds but its pigeons and a bread tower",
+    "expect": [
+      "slingshot_structure"
+    ]
+  },
+  {
+    "request": "knife hit",
+    "expect": [
+      "knife_throw_log"
+    ]
+  },
+  {
+    "request": "beer pong",
+    "expect": [
+      "beer_pong_cups"
+    ]
+  },
+  {
+    "request": "paper toss in the office bin",
+    "expect": [
+      "paper_toss_bin"
+    ]
+  },
+  {
+    "request": "bottle flip challenge",
+    "expect": [
+      "bottle_flip"
+    ]
+  },
+  {
+    "request": "skee ball",
+    "expect": [
+      "skee_ball_roll"
+    ]
+  },
+  {
+    "request": "dude perfect trick shots",
+    "expect": [
+      "trick_shot_bank",
+      "trick_shot_copycat"
+    ]
+  },
+  {
+    "request": "disc golf",
+    "expect": [
+      "frisbee_throw_distance"
+    ]
+  },
+  {
+    "request": "dunk tank my friends avatar",
+    "expect": [
+      "dunk_tank_target"
+    ]
+  }
+]

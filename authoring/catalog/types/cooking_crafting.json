@@ -1,0 +1,851 @@
+[
+  {
+    "id": "step_cooking_minigames",
+    "name": "Cook step by step",
+    "aliases": [
+      "Cooking Mama"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Follow a recipe as a series of quick motions: chop, stir, flip and plate.",
+    "core_loop": "read the step → do the motion (swipe, circle, tap) → next step → plate",
+    "verbs": [
+      "chop",
+      "stir",
+      "flip"
+    ],
+    "inputs": [
+      "swipe",
+      "draw",
+      "tap"
+    ],
+    "rules": [
+      "each step is graded on accuracy",
+      "failed steps lower the dish score"
+    ],
+    "win": "finish the dish",
+    "lose": "none",
+    "scoring": "medal by step scores",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "cook a friend's favorite dish"
+    ],
+    "difficulty_levers": [
+      "step speed",
+      "precision"
+    ],
+    "tools": [
+      "timers",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "cooking mama style game",
+      "chop and stir minigames",
+      "cook my grandma's recipe"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "recipe_combine_discover",
+    "name": "Combine to discover",
+    "aliases": [
+      "Little Alchemy",
+      "Doodle God"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Combine two elements to discover new ones until you've found them all.",
+    "core_loop": "Drag two elements together to see if they make something new, then combine the results further until you've filled the whole discovery book",
+    "verbs": [
+      "combine",
+      "discover"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "only certain pairs combine"
+    ],
+    "win": "discover everything",
+    "lose": "none",
+    "scoring": "items discovered",
+    "session_seconds": [
+      120,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare discoveries with friends"
+    ],
+    "difficulty_levers": [
+      "element count",
+      "hint rate",
+      "recipe depth"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "little alchemy style",
+      "combine elements to discover",
+      "mix things to make new things"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "order_assembly_kitchen",
+    "name": "Assemble orders",
+    "aliases": [
+      "Overcooked",
+      "Burger Shop"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Grab ingredients, prep, cook and assemble orders before the ticket expires.",
+    "core_loop": "Read each ticket, grab and prep ingredients, cook them and assemble the dish before the ticket expires",
+    "verbs": [
+      "prep",
+      "assemble",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "burning food wastes it",
+      "tickets expire"
+    ],
+    "win": "hit the star score",
+    "lose": "none",
+    "scoring": "orders served",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "co-op kitchen with friends"
+    ],
+    "difficulty_levers": [
+      "ticket rate",
+      "prep steps",
+      "stations"
+    ],
+    "tools": [
+      "timers",
+      "sequence_memory",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "overcooked with friends",
+      "assemble burgers before the ticket runs out",
+      "chaotic kitchen co-op"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "potion_brew",
+    "name": "Brew potions",
+    "aliases": [
+      "Potion Craft"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Add ingredients and stir to steer a potion toward the effect you need.",
+    "core_loop": "Add ingredients that push the potion's effect in different directions, stir and heat it, and bottle it when it hits the target effect",
+    "verbs": [
+      "mix",
+      "steer"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "each ingredient moves the potion on a map"
+    ],
+    "win": "brew the order",
+    "lose": "none",
+    "scoring": "potion quality",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "potion shop with friends"
+    ],
+    "difficulty_levers": [
+      "ingredient effects",
+      "target size",
+      "heat control"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "potion brewing game",
+      "mix ingredients for a potion",
+      "witch's cauldron"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bakery_decorate",
+    "name": "Decorate the cake",
+    "aliases": [
+      "Cake decorating"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Pipe frosting, place toppings and write a message to match an order or freestyle.",
+    "core_loop": "Pipe frosting, place toppings and write a message on a cake to match a customer's order or freestyle your own",
+    "verbs": [
+      "decorate",
+      "draw"
+    ],
+    "inputs": [
+      "draw",
+      "drag"
+    ],
+    "rules": [
+      "orders score by match"
+    ],
+    "win": "match the order",
+    "lose": "none",
+    "scoring": "match score",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "decorate a birthday cake for a friend"
+    ],
+    "difficulty_levers": [
+      "order detail",
+      "tools available",
+      "time"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "decorate a birthday cake for my friend",
+      "cake decorating game",
+      "frost and sprinkle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "smoothie_blend_color",
+    "name": "Blend to the color",
+    "aliases": [
+      "Smoothie maker"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Add fruits to blend a smoothie that matches a target color and taste.",
+    "core_loop": "Add fruits to the blender, blend, and compare the color and taste to the target, adjusting until it matches",
+    "verbs": [
+      "mix",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "color blends from ingredients"
+    ],
+    "win": "match the order",
+    "lose": "none",
+    "scoring": "match percent",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily blend"
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "fruits available",
+      "blend count"
+    ],
+    "tools": [
+      "reveal",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "smoothie color matching",
+      "blend fruits to match",
+      "juice bar game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "craft_recipe_grid",
+    "name": "Grid crafting",
+    "aliases": [
+      "Minecraft crafting"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Place items in a grid pattern to craft tools and new materials.",
+    "core_loop": "Gather materials, arrange them in a grid pattern to craft tools and new materials, and use those to craft more",
+    "verbs": [
+      "place",
+      "craft"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "only exact patterns craft"
+    ],
+    "win": "craft the target item",
+    "lose": "none",
+    "scoring": "items crafted",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share recipes"
+    ],
+    "difficulty_levers": [
+      "recipe complexity",
+      "grid size",
+      "hint level"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "minecraft style crafting puzzle",
+      "craft items from patterns",
+      "crafting table game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pottery_wheel",
+    "name": "Throw a pot",
+    "aliases": [
+      "Pottery"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Shape spinning clay into a target vessel by pressing and lifting.",
+    "core_loop": "Press and lift spinning clay to shape it into the target vessel, then fire it and compare the result",
+    "verbs": [
+      "shape"
+    ],
+    "inputs": [
+      "drag",
+      "hold"
+    ],
+    "rules": [
+      "too much pressure collapses the clay"
+    ],
+    "win": "match the shape",
+    "lose": "collapse",
+    "scoring": "match percent",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "share pots"
+    ],
+    "difficulty_levers": [
+      "target shape",
+      "wheel speed",
+      "clay wetness"
+    ],
+    "tools": [
+      "physics_world",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "pottery wheel game",
+      "shape clay on the wheel",
+      "make a vase"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "knitting_pattern",
+    "name": "Knit the pattern",
+    "aliases": [
+      "Knitting"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Tap in rhythm to knit rows that follow a color pattern.",
+    "core_loop": "Read the color pattern for each row and tap stitches in rhythm to knit it, row by row, until the scarf is done",
+    "verbs": [
+      "follow",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong colors show as mistakes"
+    ],
+    "win": "finish the pattern",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "knit a scarf for a friend"
+    ],
+    "difficulty_levers": [
+      "pattern size",
+      "tempo",
+      "colors"
+    ],
+    "tools": [
+      "grid_board",
+      "beat_target"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "knitting game",
+      "follow the scarf pattern",
+      "cozy knitting"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sushi_roll_build",
+    "name": "Roll sushi",
+    "aliases": [
+      "Sushi chef"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Lay rice, fill, roll and slice sushi to order.",
+    "core_loop": "Lay rice on the seaweed, add the ordered fillings, roll it tight and slice it into even pieces",
+    "verbs": [
+      "assemble",
+      "slice"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "uneven slices score less"
+    ],
+    "win": "serve the order",
+    "lose": "none",
+    "scoring": "quality",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "sushi bar challenge"
+    ],
+    "difficulty_levers": [
+      "order complexity",
+      "roll timing",
+      "slice count"
+    ],
+    "tools": [
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "make sushi rolls game",
+      "sushi chef order",
+      "roll and slice sushi"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cocktail_mix_order",
+    "name": "Mix the drink",
+    "aliases": [
+      "Bartender"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Pour, shake and garnish drinks to exact recipes.",
+    "core_loop": "Read the drink order, pour each ingredient in the right amount, shake and garnish it, then serve",
+    "verbs": [
+      "pour",
+      "mix"
+    ],
+    "inputs": [
+      "hold",
+      "swipe"
+    ],
+    "rules": [
+      "pour amounts must match"
+    ],
+    "win": "serve correctly",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "mocktail party challenge"
+    ],
+    "difficulty_levers": [
+      "recipe complexity",
+      "pour precision",
+      "orders at once"
+    ],
+    "tools": [
+      "timers",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "bartender mixing game",
+      "make the mocktail right",
+      "pour and shake drinks"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "jewelry_bead_string",
+    "name": "String the beads",
+    "aliases": [
+      "Bead craft"
+    ],
+    "family": "cooking_crafting",
+    "summary": "String beads in a pattern to make a bracelet.",
+    "core_loop": "Pick beads and string them to follow a pattern or invent your own, then finish the bracelet and share it",
+    "verbs": [
+      "arrange",
+      "design"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "pattern orders score"
+    ],
+    "win": "finish the bracelet",
+    "lose": "none",
+    "scoring": "pattern match",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "make a friendship bracelet for a friend"
+    ],
+    "difficulty_levers": [
+      "pattern length",
+      "bead colors",
+      "time"
+    ],
+    "tools": [
+      "sequence_memory",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "friendship bracelet maker",
+      "bead pattern game",
+      "string the beads"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "blacksmith_forge",
+    "name": "Forge a blade",
+    "aliases": [
+      "Blacksmith"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Heat, hammer on beats and quench metal into a weapon.",
+    "core_loop": "Heat metal to the right glow, hammer it in time with the beat, and quench it at the right moment to forge a blade",
+    "verbs": [
+      "hammer",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "timing affects quality"
+    ],
+    "win": "forge the order",
+    "lose": "none",
+    "scoring": "quality",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "forge rivals"
+    ],
+    "difficulty_levers": [
+      "rhythm speed",
+      "heat window",
+      "quench window"
+    ],
+    "tools": [
+      "beat_target",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "blacksmith forging game",
+      "hammer the sword",
+      "forge to the beat"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "perfume_scent_mix",
+    "name": "Blend a scent",
+    "aliases": [
+      "Perfume"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Mix notes to match a described scent profile.",
+    "core_loop": "Read a described scent profile, add notes to the blend, test it, and adjust until it matches",
+    "verbs": [
+      "mix",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "notes shift the profile"
+    ],
+    "win": "match the profile",
+    "lose": "none",
+    "scoring": "match",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "notes",
+      "profile complexity",
+      "tests allowed"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "perfume mixing game",
+      "blend scents",
+      "make a fragrance"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pancake_flip_timing",
+    "name": "Flip at the right time",
+    "aliases": [
+      "Pancake flip"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Watch each pancake brown and flip it at the perfect moment.",
+    "core_loop": "Watch several pancakes brown on the griddle and flip each at the perfect golden moment before stacking them",
+    "verbs": [
+      "time",
+      "flip"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "flipping late burns it"
+    ],
+    "win": "stack the order",
+    "lose": "too many burnt",
+    "scoring": "pancakes stacked",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "breakfast rush"
+    ],
+    "difficulty_levers": [
+      "heat",
+      "pancakes at once",
+      "flip window"
+    ],
+    "tools": [
+      "timers",
+      "physics_world"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "flip the pancakes game",
+      "perfect pancake timing",
+      "breakfast flipping"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bread_proof_timing",
+    "name": "Bake the bread",
+    "aliases": [
+      "Bakery timer"
+    ],
+    "family": "cooking_crafting",
+    "summary": "Mix, knead, proof and bake with timing for the perfect loaf.",
+    "core_loop": "Mix and knead dough, let it proof, then bake it, timing each step to get the perfect loaf",
+    "verbs": [
+      "time",
+      "knead"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "each stage has an ideal window"
+    ],
+    "win": "perfect loaf",
+    "lose": "none",
+    "scoring": "quality",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "baking club"
+    ],
+    "difficulty_levers": [
+      "windows",
+      "steps",
+      "oven heat"
+    ],
+    "tools": [
+      "timers",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "bake bread game",
+      "knead and proof timing",
+      "sourdough sim"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

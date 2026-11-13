@@ -1,0 +1,2449 @@
+[
+  {
+    "id": "zen_sand_garden_rake",
+    "name": "Zen sand garden",
+    "aliases": [
+      "Zen garden",
+      "Zen Sand",
+      "rake the sand",
+      "Japanese garden toy"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "Drag a rake through sand to draw patterns around placed stones, with soft sound and no goal.",
+    "core_loop": "choose stones → drag the rake to draw lines → smooth to start over → save the pattern",
+    "verbs": [
+      "rake",
+      "arrange"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "sand surface",
+      "rake",
+      "stones",
+      "sound"
+    ],
+    "rules": [
+      "rake lines follow the finger",
+      "stones push the lines around them"
+    ],
+    "win": "no win state: the garden is the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends can leave a rake line in a shared garden",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "a shared garden where each friend adds a line",
+      "send a finished garden as a gift"
+    ],
+    "content_needs": [
+      "rake patterns",
+      "stone sprites"
+    ],
+    "difficulty_levers": [
+      "sand color",
+      "stone count"
+    ],
+    "tools": [
+      "drag_deform",
+      "drawing_canvas",
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a zen garden I can rake with my friends",
+      "sand garden with soft rain sounds",
+      "calming sand raking game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "plant_watering_daily_care",
+    "name": "Daily plant care",
+    "aliases": [
+      "Plant care",
+      "Tiny garden",
+      "Forest",
+      "grow a plant",
+      "Pocket Plants"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "growth",
+    "summary": "A plant grows from seed in real time, and the player waters, sunlights and prunes it in short daily check-ins.",
+    "core_loop": "open the plant → water and give light → watch growth tick → new stage after days",
+    "verbs": [
+      "care",
+      "wait"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "plant",
+      "water can",
+      "sun meter",
+      "growth stages"
+    ],
+    "rules": [
+      "care meter fills over a day",
+      "over-watering stunts growth"
+    ],
+    "win": "plant reaches full bloom",
+    "lose": "none; neglect only slows growth",
+    "scoring": "growth stage reached",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends water your plant",
+      "a shared Group garden"
+    ],
+    "content_needs": [
+      "plant species",
+      "growth stages"
+    ],
+    "difficulty_levers": [
+      "growth speed",
+      "care needs"
+    ],
+    "tools": [
+      "growth_timer",
+      "tap_care",
+      "gallery",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a plant I water every day with my roommates",
+      "virtual bonsai that grows slowly",
+      "grow a flower garden with friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tiny_aquarium_decorate",
+    "name": "Tiny aquarium",
+    "aliases": [
+      "Aquarium",
+      "fish tank",
+      "Fish Fillet",
+      "Tap Tap fish"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "Decorate a small tank with plants, fish and ornaments and watch them live.",
+    "core_loop": "buy or find fish → place decorations → watch behaviors → feed",
+    "verbs": [
+      "decorate",
+      "watch"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "tank",
+      "fish",
+      "decor items",
+      "feed"
+    ],
+    "rules": [
+      "fish need compatible decor",
+      "decor items have a space cost",
+      "fish need hiding spots or open water"
+    ],
+    "win": "no win state: the tank is the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends visit your tank",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "visit a friend's tank",
+      "gift fish"
+    ],
+    "content_needs": [
+      "fish and decor sets"
+    ],
+    "difficulty_levers": [
+      "tank size"
+    ],
+    "tools": [
+      "sticker_library",
+      "drag_drop_slots",
+      "growth_timer",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "decorate an aquarium with neon tetras",
+      "cozy fish tank to relax",
+      "tank where my friends add fish"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pop_it_fidget_board",
+    "name": "Pop-it fidget board",
+    "aliases": [
+      "Pop It",
+      "bubble wrap",
+      "fidget toy",
+      "Satisfying pops"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "fidget",
+    "summary": "Tap rubbery bubbles to flip them, with haptics and sound, until the board is full and resets.",
+    "core_loop": "tap bubbles → feel pop → fill the board → board flips",
+    "verbs": [
+      "pop"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "bubble board",
+      "haptics",
+      "sound"
+    ],
+    "rules": [
+      "each bubble flips once per side",
+      "popped bubbles click with haptics",
+      "a full board flips to the other side"
+    ],
+    "win": "no win state: a calm loop",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; optional pop counter",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compete on pops with friends",
+      "shared board"
+    ],
+    "content_needs": [
+      "board shapes"
+    ],
+    "difficulty_levers": [
+      "board size"
+    ],
+    "tools": [
+      "tap_pop",
+      "audio_synth",
+      "haptics"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "bubble wrap popper",
+      "pop it game in pastel",
+      "fidget board with friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tidy_up_object_sorting",
+    "name": "Tidy the room",
+    "aliases": [
+      "Unpacking",
+      "Tidy up",
+      "Cozy sort",
+      "Organize",
+      "Cleaning game"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "sorting",
+    "summary": "Put scattered objects into the right spots in a room and see it become lived-in, with no timer.",
+    "core_loop": "pick object → drag to a shelf or drawer → room fills → story hints from items",
+    "verbs": [
+      "tidy",
+      "arrange"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "room",
+      "objects",
+      "shelves"
+    ],
+    "rules": [
+      "each object has a few valid homes",
+      "the room's story is told by what you find",
+      "objects can be placed in any valid home"
+    ],
+    "win": "every object is placed",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare how you tidied the same room",
+      "a Group home to decorate"
+    ],
+    "content_needs": [
+      "room layouts",
+      "object sets"
+    ],
+    "difficulty_levers": [
+      "object count",
+      "rooms"
+    ],
+    "tools": [
+      "sort_bins",
+      "drag_drop_slots",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "unpacking style tidy game",
+      "tidy a cozy cabin",
+      "organize a messy desk"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cozy_photo_jigsaw",
+    "name": "Photo jigsaw",
+    "aliases": [
+      "Jigsaw puzzle",
+      "Jigsaw Explorer",
+      "photo puzzle",
+      "Puzzle Page"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "jigsaw",
+    "summary": "Assemble a photo cut into pieces by dragging them into place with edge-snap.",
+    "core_loop": "drag piece to the board → snaps near its place → complete the picture",
+    "verbs": [
+      "assemble"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "pieces",
+      "board",
+      "preview"
+    ],
+    "rules": [
+      "pieces snap near their place",
+      "pieces snap near their place",
+      "edge pieces are highlighted on request"
+    ],
+    "win": "finish the picture",
+    "lose": "none; it cannot be failed",
+    "scoring": "time (optional)",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "puzzle from a friend's photo",
+      "Group completes one together"
+    ],
+    "content_needs": [
+      "images",
+      "cut styles"
+    ],
+    "difficulty_levers": [
+      "piece count",
+      "rotation"
+    ],
+    "tools": [
+      "tile_slide",
+      "image_gallery",
+      "drag_drop_slots",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "jigsaw of our group trip photo",
+      "relaxing jigsaw with cats",
+      "puzzle I can solve together with my roommates"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "yarn_untangle_knots",
+    "name": "Yarn untangle",
+    "aliases": [
+      "Untangle",
+      "Knots",
+      "Yarn sort",
+      "Tangle Master"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "untangle",
+    "summary": "Drag nodes of a tangled yarn graph until no lines cross.",
+    "core_loop": "drag a node → lines move → no crossings left",
+    "verbs": [
+      "untangle"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "nodes",
+      "lines"
+    ],
+    "rules": [
+      "no edge may cross another",
+      "the graph has a crossing-free layout",
+      "nodes can be moved freely"
+    ],
+    "win": "no crossings",
+    "lose": "none; it cannot be failed",
+    "scoring": "time or moves",
+    "session_seconds": [
+      45,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends"
+    ],
+    "content_needs": [
+      "graph puzzles"
+    ],
+    "difficulty_levers": [
+      "node count"
+    ],
+    "tools": [
+      "player_drag",
+      "timer_bar",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "untangle yarn puzzle",
+      "tangle game that is calming",
+      "knot untying puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "guided_breathing_pacer",
+    "name": "Guided breathing",
+    "aliases": [
+      "Breathe",
+      "Calm breathing",
+      "4-7-8",
+      "Headspace breathing"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "wellbeing",
+    "summary": "An expanding and contracting shape paces breaths while the player follows by holding and releasing.",
+    "core_loop": "follow the shape → hold and release in rhythm → streak of synced breaths",
+    "verbs": [
+      "breathe"
+    ],
+    "inputs": [
+      "hold"
+    ],
+    "pieces": [
+      "pacer shape",
+      "breath timing",
+      "streak"
+    ],
+    "rules": [
+      "hold during inhale, release for exhale",
+      "release during exhale",
+      "pattern timings are set by the technique"
+    ],
+    "win": "no win state: a calm session",
+    "lose": "none; it cannot be failed",
+    "scoring": "breaths synced (optional)",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "breathe together with a friend",
+      "Group quiet minute"
+    ],
+    "content_needs": [
+      "patterns"
+    ],
+    "difficulty_levers": [
+      "pattern timing"
+    ],
+    "tools": [
+      "hold_input",
+      "timer_bar",
+      "haptics",
+      "audio_synth"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a breathing exercise game",
+      "4-7-8 breathing with soft colors",
+      "box breathing with my team"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ambient_sound_mixer",
+    "name": "Ambient sound mixer",
+    "aliases": [
+      "White noise",
+      "Rainy Mood",
+      "myNoise",
+      "Ambient mixer",
+      "sleep sounds"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "soundscape",
+    "summary": "Blend sliders for rain, wind, fire and other layers into a personal soundscape.",
+    "core_loop": "move sliders → hear the mix → save the scene",
+    "verbs": [
+      "mix"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "sound layers",
+      "sliders",
+      "scene preview"
+    ],
+    "rules": [
+      "each layer loops",
+      "sliders control layer volume",
+      "scenes can be saved and shared"
+    ],
+    "win": "no win state: the scene",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      30,
+      600
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a scene",
+      "Group study room"
+    ],
+    "content_needs": [
+      "loops"
+    ],
+    "difficulty_levers": [
+      "layers"
+    ],
+    "tools": [
+      "loop_player",
+      "slider_input",
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a rainy cafe sound mixer",
+      "ambient mixer for studying",
+      "make a campfire soundscape"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pebble_cairn_stacking",
+    "name": "Pebble cairn stacking",
+    "aliases": [
+      "Stone stacking",
+      "Cairn",
+      "Rock balance",
+      "Stack the stones"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "balance",
+    "summary": "Stack irregular pebbles into a standing cairn using physics, with gentle feedback.",
+    "core_loop": "pick pebble → drop on the stack → tower wobbles → stays up",
+    "verbs": [
+      "stack"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "pebbles",
+      "base",
+      "wind"
+    ],
+    "rules": [
+      "physics",
+      "falls if tilted past limit",
+      "each pebble has a different shape",
+      "a stack that survives a gust counts"
+    ],
+    "win": "reach a height",
+    "lose": "tower falls",
+    "scoring": "height",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare heights"
+    ],
+    "content_needs": [
+      "pebble shapes"
+    ],
+    "difficulty_levers": [
+      "wind"
+    ],
+    "tools": [
+      "physics_world",
+      "stack_balance",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "cairn stacking game",
+      "stack stones calmly",
+      "rock balance zen"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "water_ripple_touch_toy",
+    "name": "Ripple pond",
+    "aliases": [
+      "Water ripples",
+      "Koi pond",
+      "Pond",
+      "Lily pad toy"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "Touch a pond surface to make ripples that move koi and lilies.",
+    "core_loop": "touch water → ripples spread → fish react",
+    "verbs": [
+      "touch"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "pond",
+      "ripples",
+      "koi",
+      "lilies"
+    ],
+    "rules": [
+      "ripples push objects",
+      "ripples fade slowly",
+      "koi swim toward touch"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a pond"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "fish count"
+    ],
+    "tools": [
+      "physics_world",
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "koi pond to touch",
+      "ripple toy",
+      "lily pad pond"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "firefly_jar_catch",
+    "name": "Firefly jar",
+    "aliases": [
+      "Fireflies",
+      "Catch fireflies",
+      "Night meadow"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "collecting",
+    "summary": "Tap drifting fireflies to collect them in a jar that lights the room as it fills.",
+    "core_loop": "tap fireflies → jar glows → release at dawn",
+    "verbs": [
+      "collect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "fireflies",
+      "jar",
+      "meadow"
+    ],
+    "rules": [
+      "fireflies drift and fade",
+      "fireflies fade if missed",
+      "a full jar lights the scene"
+    ],
+    "win": "fill the jar",
+    "lose": "none; it cannot be failed",
+    "scoring": "count",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "release lights for a friend"
+    ],
+    "content_needs": [
+      "firefly paths"
+    ],
+    "difficulty_levers": [
+      "spawn rate"
+    ],
+    "tools": [
+      "pickups",
+      "spawn_wave",
+      "score",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "catch fireflies at dusk",
+      "firefly jar game",
+      "meadow at night with lights"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cloud_shape_spotting",
+    "name": "Cloud spotting",
+    "aliases": [
+      "Cloud gazing",
+      "What do you see in the clouds",
+      "Shape spotting"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "imagination",
+    "summary": "Drifting clouds are shaped like things and the player finds or names them.",
+    "core_loop": "watch clouds → tap shapes → name or choose",
+    "verbs": [
+      "spot"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "clouds",
+      "shapes list"
+    ],
+    "rules": [
+      "clouds drift slowly",
+      "shapes are generated from the cloud",
+      "naming a shape is optional"
+    ],
+    "win": "find shapes",
+    "lose": "none; it cannot be failed",
+    "scoring": "count",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare what friends see"
+    ],
+    "content_needs": [
+      "cloud shapes"
+    ],
+    "difficulty_levers": [
+      "difficulty"
+    ],
+    "tools": [
+      "image_gallery",
+      "typed_answer",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "find animals in the clouds",
+      "cloud gazing game",
+      "what do you see in the clouds"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "gratitude_journal_garden",
+    "name": "Gratitude garden",
+    "aliases": [
+      "Gratitude journal",
+      "Daily reflection",
+      "Mood garden"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "reflection",
+    "summary": "Write a short note about something good and a flower grows in a garden for each note.",
+    "core_loop": "write a line → flower grows → look back at the garden",
+    "verbs": [
+      "write"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "prompt",
+      "journal box",
+      "garden"
+    ],
+    "rules": [
+      "short entries",
+      "each entry grows one flower",
+      "entries can be kept private"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; streak",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a flower note with a friend",
+      "Group gratitude garden"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "prompts"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "growth_timer",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "gratitude journal that grows a garden",
+      "daily reflection prompts",
+      "thank you notes to friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mood_check_in_weather",
+    "name": "Mood weather check-in",
+    "aliases": [
+      "Mood tracker",
+      "Daylio",
+      "Feelings wheel",
+      "Weather mood"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "reflection",
+    "summary": "Pick your mood as a weather scene and watch a small world shift, with a short reflective prompt.",
+    "core_loop": "choose weather mood → short prompt → scene animates → note saved",
+    "verbs": [
+      "choose",
+      "reflect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "weather wheel",
+      "scene",
+      "prompt"
+    ],
+    "rules": [
+      "one check-in per day",
+      "mood maps to weather",
+      "the scene changes after each check-in"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends can send a kind weather back",
+      "Group mood forecast"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "mood set"
+    ],
+    "tools": [
+      "tap_choice",
+      "typed_answer",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mood check in with weather",
+      "feelings tracker for friends",
+      "daily mood garden"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "paper_boat_river_drift",
+    "name": "Paper boat river",
+    "aliases": [
+      "Paper boat",
+      "Float boat",
+      "River drift",
+      "Lantern river"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "Draw a current into a river and watch paper boats drift along, carrying messages.",
+    "core_loop": "draw current lines → set boats → drift",
+    "verbs": [
+      "draw",
+      "watch"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "river",
+      "boats",
+      "wind"
+    ],
+    "rules": [
+      "boats follow the current",
+      "boats carry a message",
+      "wind changes drift"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send a boat message to a friend"
+    ],
+    "content_needs": [
+      "river maps"
+    ],
+    "difficulty_levers": [
+      "current"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "physics_world",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "paper boat river toy",
+      "float a message down the river",
+      "river with lanterns and boats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rain_window_wipe",
+    "name": "Rain window",
+    "aliases": [
+      "Window wipe",
+      "Fog",
+      "Steamed window"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "Wipe fog off a rainy window to reveal a cozy scene, which fogs back slowly.",
+    "core_loop": "wipe → reveal → fog returns",
+    "verbs": [
+      "wipe"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "window",
+      "fog",
+      "scene"
+    ],
+    "rules": [
+      "fog returns slowly",
+      "fog gathers again after wiping",
+      "rain sound plays softly"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the scene"
+    ],
+    "content_needs": [
+      "scenes"
+    ],
+    "difficulty_levers": [
+      "fog speed"
+    ],
+    "tools": [
+      "drag_deform",
+      "audio_synth"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "wipe the fogged window game",
+      "rainy day cafe window",
+      "train window in the rain"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "constellation_connect_stars",
+    "name": "Constellation connect",
+    "aliases": [
+      "Star connect",
+      "Constellations",
+      "Connect stars"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "puzzle",
+    "summary": "Connect stars to draw a constellation and learn its story.",
+    "core_loop": "connect stars → shape reveals → story",
+    "verbs": [
+      "connect"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "stars",
+      "lines"
+    ],
+    "rules": [
+      "connect in order",
+      "stars are connected in sequence",
+      "a story is told when finished"
+    ],
+    "win": "complete shapes",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "constellation sets"
+    ],
+    "difficulty_levers": [
+      "star count"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "connect stars to draw constellations",
+      "night sky puzzle",
+      "make up our own constellations for the group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "lantern_wish_release",
+    "name": "Lantern wish",
+    "aliases": [
+      "Floating lanterns",
+      "Wish lantern",
+      "Lantern festival"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient social",
+    "summary": "Write a wish on a lantern and release it to float into a shared night sky with friends' lanterns.",
+    "core_loop": "write wish → release → watch lanterns",
+    "verbs": [
+      "write"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "lantern",
+      "sky"
+    ],
+    "rules": [
+      "lantern floats up",
+      "each wish is a short line",
+      "lanterns of friends appear in the same sky"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Group sky of lanterns",
+      "send a wish"
+    ],
+    "content_needs": [
+      "wishes"
+    ],
+    "difficulty_levers": [
+      "none"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "shared_progress",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "lantern wish release with friends",
+      "sky full of lanterns",
+      "birthday wish lantern"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "snow_globe_shake",
+    "name": "Snow globe",
+    "aliases": [
+      "Snow globe",
+      "Shake globe",
+      "Winter scene"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "Shake the phone or swipe to stir snow in a small diorama.",
+    "core_loop": "shake → snow swirls → settles",
+    "verbs": [
+      "shake"
+    ],
+    "inputs": [
+      "tilt",
+      "swipe"
+    ],
+    "pieces": [
+      "globe",
+      "snow",
+      "scene"
+    ],
+    "rules": [
+      "snow settles",
+      "shaking stirs the snow",
+      "the scene inside is changeable"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send a globe"
+    ],
+    "content_needs": [
+      "scenes"
+    ],
+    "difficulty_levers": [
+      "scene"
+    ],
+    "tools": [
+      "physics_world",
+      "tilt_input",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "snow globe with our town",
+      "winter globe",
+      "shake to see snow"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "terrarium_builder",
+    "name": "Terrarium builder",
+    "aliases": [
+      "Terrarium",
+      "Miniature garden",
+      "Moss garden"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "decorating",
+    "summary": "Layer soil, moss, stones and tiny plants in a glass terrarium and watch it grow.",
+    "core_loop": "place layers → plant → light and water",
+    "verbs": [
+      "build",
+      "care"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "jar",
+      "layers",
+      "plants"
+    ],
+    "rules": [
+      "ecosystem balance",
+      "plants need light and water balance",
+      "layers order matters"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "visit friends' jars"
+    ],
+    "content_needs": [
+      "plants"
+    ],
+    "difficulty_levers": [
+      "jar size"
+    ],
+    "tools": [
+      "drag_drop_slots",
+      "growth_timer",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "terrarium builder",
+      "miniature moss garden",
+      "build a jar garden"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "desk_arrange_cozy",
+    "name": "Desk arrangement",
+    "aliases": [
+      "Cozy desk",
+      "Desk decor",
+      "Room layout"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "decorating",
+    "summary": "Arrange items on a desk or shelf for a pleasing composition, with cozy ambient sounds.",
+    "core_loop": "pick item → place → rearrange",
+    "verbs": [
+      "arrange"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "desk",
+      "items"
+    ],
+    "rules": [
+      "snap to grid optional",
+      "items snap softly to a grid",
+      "layouts can be saved"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "swap desk layouts"
+    ],
+    "content_needs": [
+      "items"
+    ],
+    "difficulty_levers": [
+      "item count"
+    ],
+    "tools": [
+      "sticker_library",
+      "drag_drop_slots",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "arrange a cozy desk",
+      "shelf decorating game",
+      "desk setup swap with friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "slow_match_no_timer",
+    "name": "Slow match",
+    "aliases": [
+      "Relaxed match",
+      "No timer match",
+      "Cozy match three"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "matching",
+    "summary": "A relaxed matching puzzle with no timer or penalty, aimed at calm.",
+    "core_loop": "swap tiles → match → chain",
+    "verbs": [
+      "match"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "pieces": [
+      "grid",
+      "tiles"
+    ],
+    "rules": [
+      "no timer or lives",
+      "no moves limit",
+      "a swap that matches clears tiles"
+    ],
+    "win": "clear target",
+    "lose": "none; it cannot be failed",
+    "scoring": "score",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "boards"
+    ],
+    "difficulty_levers": [
+      "colors"
+    ],
+    "tools": [
+      "grid_board",
+      "match_pairs",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "cozy match three with no timer",
+      "relaxed tile matching",
+      "calm candy matching"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dots_one_path_zen",
+    "name": "One-path zen puzzle",
+    "aliases": [
+      "Zen puzzle",
+      "One line puzzle",
+      "Path draw"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "puzzle",
+    "summary": "Draw a single path that covers every dot or tile without lifting.",
+    "core_loop": "drag → cover tiles",
+    "verbs": [
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "dots",
+      "path"
+    ],
+    "rules": [
+      "each used once",
+      "the path must not lift",
+      "each dot is covered exactly once"
+    ],
+    "win": "cover all",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      30,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "levels"
+    ],
+    "difficulty_levers": [
+      "size"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "zen path puzzle",
+      "one line puzzle",
+      "draw one line through all the dots"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "fishing_idle_chill",
+    "name": "Chill fishing",
+    "aliases": [
+      "Fishing",
+      "Chill fishing",
+      "Fishing idle",
+      "Cat Goes Fishing"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "waiting",
+    "summary": "Cast a line, wait for a bite, and reel in with a gentle timing tap.",
+    "core_loop": "cast → wait → bite → reel",
+    "verbs": [
+      "fish"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "pieces": [
+      "line",
+      "bobber",
+      "fish"
+    ],
+    "rules": [
+      "timing window forgiving",
+      "a bite pauses the line",
+      "reel when the ring is green"
+    ],
+    "win": "fish caught",
+    "lose": "none; it cannot be failed",
+    "scoring": "catch log",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "fishing log with friends"
+    ],
+    "content_needs": [
+      "fish"
+    ],
+    "difficulty_levers": [
+      "rarity"
+    ],
+    "tools": [
+      "beat_target",
+      "timer_bar",
+      "collection",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "chill fishing game with a cat",
+      "fishing by a lake",
+      "fishing log with my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "leaf_sweep_autumn",
+    "name": "Autumn sweep",
+    "aliases": [
+      "Leaf blower",
+      "Sweeping",
+      "Satisfying sweep"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "Sweep leaves into piles or clear paths with a gentle broom stroke.",
+    "core_loop": "swipe → leaves move → clear",
+    "verbs": [
+      "sweep"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "leaves",
+      "broom"
+    ],
+    "rules": [
+      "leaves obey physics",
+      "leaves pile at the swipe direction",
+      "a clear area is revealed beneath"
+    ],
+    "win": "clear area",
+    "lose": "none; it cannot be failed",
+    "scoring": "clean percent",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "yards"
+    ],
+    "difficulty_levers": [
+      "leaf count"
+    ],
+    "tools": [
+      "physics_world",
+      "score",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "leaf sweeping game",
+      "autumn yard cleanup",
+      "sweep the leaves off the path"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "asmr_slice_satisfying",
+    "name": "Satisfying slicing",
+    "aliases": [
+      "ASMR",
+      "Satisfying cutting",
+      "Kinetic sand cut",
+      "Slice"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "fidget",
+    "summary": "Slice soft objects with a thin swipe to hear satisfying cuts, with no goal.",
+    "core_loop": "swipe → cut → sound",
+    "verbs": [
+      "slice"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "pieces": [
+      "object",
+      "blade"
+    ],
+    "rules": [
+      "object deforms",
+      "cuts sound by material",
+      "pieces fall apart naturally"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share clips"
+    ],
+    "content_needs": [
+      "objects"
+    ],
+    "difficulty_levers": [
+      "material"
+    ],
+    "tools": [
+      "drag_deform",
+      "audio_synth",
+      "haptics"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "kinetic sand cutting game",
+      "satisfying slicing",
+      "asmr cutting game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "bonsai_pruning_shape",
+    "name": "Bonsai pruning",
+    "aliases": [
+      "Bonsai",
+      "Prune the tree",
+      "Shape tree"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "growth",
+    "summary": "Prune branches over time to shape a bonsai.",
+    "core_loop": "prune → grow → shape",
+    "verbs": [
+      "prune"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tree",
+      "shears"
+    ],
+    "rules": [
+      "branches regrow",
+      "pruned branches regrow over time",
+      "shape guides suggest a style"
+    ],
+    "win": "shape target",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends vote"
+    ],
+    "content_needs": [
+      "trees"
+    ],
+    "difficulty_levers": [
+      "growth"
+    ],
+    "tools": [
+      "growth_timer",
+      "tap_care",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "bonsai pruning game",
+      "grow a bonsai",
+      "tree shaping with friends voting"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "postcard_to_friend",
+    "name": "Postcard to a friend",
+    "aliases": [
+      "Postcard",
+      "Send a note",
+      "Cozy mail"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "social",
+    "summary": "Choose a scene, add a handwritten note and stickers, and send a postcard to a friend.",
+    "core_loop": "choose scene → write → stamp → send",
+    "verbs": [
+      "write"
+    ],
+    "inputs": [
+      "type",
+      "drag"
+    ],
+    "pieces": [
+      "postcard",
+      "stickers"
+    ],
+    "rules": [
+      "short note",
+      "a note has a short limit",
+      "stickers and stamps decorate it"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends"
+    ],
+    "social_hooks": [
+      "brings specific friends closer"
+    ],
+    "content_needs": [
+      "scenes"
+    ],
+    "difficulty_levers": [
+      "none"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "sticker_library",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "send my friend a cozy postcard",
+      "postcards from my trip",
+      "birthday postcard with stickers"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "shared_group_garden",
+    "name": "Shared Group garden",
+    "aliases": [
+      "Group garden",
+      "Community garden",
+      "Shared plot"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "social",
+    "summary": "Group members each water a plot daily to grow one shared garden.",
+    "core_loop": "water → flower grows → streak",
+    "verbs": [
+      "water"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "plots",
+      "watering"
+    ],
+    "rules": [
+      "shared",
+      "everyone waters once a day",
+      "flowers bloom when more than half water"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily check in"
+    ],
+    "content_needs": [
+      "plots"
+    ],
+    "difficulty_levers": [
+      "plot count"
+    ],
+    "tools": [
+      "growth_timer",
+      "tap_care",
+      "shared_progress",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "shared garden for our friend group",
+      "community garden",
+      "grow a garden with my roommates"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "campfire_story_circle",
+    "name": "Campfire story circle",
+    "aliases": [
+      "Campfire",
+      "Story circle",
+      "Round story"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "social",
+    "summary": "Friends take turns adding a line to a warm story around a virtual fire.",
+    "core_loop": "read story → add a line → pass",
+    "verbs": [
+      "write"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "fire",
+      "story"
+    ],
+    "rules": [
+      "one line each",
+      "each player adds one line",
+      "the story may be read aloud at the end"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "friends write together"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "line limit"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "turns",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "campfire story with friends",
+      "cozy story together",
+      "ghost story circle but gentle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "focus_forest_timer",
+    "name": "Focus forest",
+    "aliases": [
+      "Forest app",
+      "Focus timer",
+      "Pomodoro",
+      "Study timer"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "focus",
+    "summary": "Plant a tree and keep the app open to grow it; leaving makes it wither.",
+    "core_loop": "set timer → tree grows → finish",
+    "verbs": [
+      "focus"
+    ],
+    "inputs": [
+      "hold"
+    ],
+    "pieces": [
+      "tree",
+      "timer"
+    ],
+    "rules": [
+      "leaving wilts it",
+      "the tree grows while the app stays open",
+      "leaving early wilts the tree"
+    ],
+    "win": "tree grown",
+    "lose": "tree withers",
+    "scoring": "trees",
+    "session_seconds": [
+      25,
+      1500
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "study with friends"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "duration"
+    ],
+    "tools": [
+      "timer_bar",
+      "growth_timer",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "focus timer with trees",
+      "study with friends timer",
+      "pomodoro garden"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "daily_kindness_card",
+    "name": "Kindness card",
+    "aliases": [
+      "Random acts",
+      "Kindness challenge",
+      "Daily good deed"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "social",
+    "summary": "A daily small kind act is suggested and logged, with friends cheering.",
+    "core_loop": "draw card → do it → log",
+    "verbs": [
+      "do"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "card",
+      "log"
+    ],
+    "rules": [
+      "self report",
+      "one card per day",
+      "logging is self-reported"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "streak",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends cheer"
+    ],
+    "content_needs": [
+      "cards"
+    ],
+    "difficulty_levers": [
+      "none"
+    ],
+    "tools": [
+      "quiz",
+      "score",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "daily kindness cards for friends",
+      "random acts of kindness",
+      "kindness challenge with my family"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sleepy_pet_petting",
+    "name": "Sleepy pet petting",
+    "aliases": [
+      "Pet the cat",
+      "Cat petting",
+      "Purr",
+      "Tamagotchi lite"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "Stroke a sleeping pet with slow swipes to make it purr, stretch and settle into new poses.",
+    "core_loop": "swipe gently → pet reacts → purr level rises → pet falls asleep",
+    "verbs": [
+      "pet"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "pieces": [
+      "pet",
+      "purr meter",
+      "blanket"
+    ],
+    "rules": [
+      "fast swipes wake the pet",
+      "slow strokes raise purr"
+    ],
+    "win": "no win state: the pet falls asleep",
+    "lose": "none; it cannot be failed",
+    "scoring": "purr level shown, no score",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send a sleeping pet to a friend",
+      "compare pets"
+    ],
+    "content_needs": [
+      "pet species and poses"
+    ],
+    "difficulty_levers": [
+      "species",
+      "poses unlocked"
+    ],
+    "tools": [
+      "tap_care",
+      "audio_synth",
+      "haptics",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a sleepy cat I can pet",
+      "pet game that purrs",
+      "virtual dog napping on a couch"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cozy_lofi_room_scene",
+    "name": "Lofi room scene",
+    "aliases": [
+      "Lofi room",
+      "Cozy room",
+      "Window cat room",
+      "Interactive lofi"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "ambient toy",
+    "summary": "A small room scene where tapping objects triggers little animations, sounds and a changing time of day.",
+    "core_loop": "tap lamp → light changes → tap record player → music starts → tap window → weather changes",
+    "verbs": [
+      "tap",
+      "explore"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "room",
+      "interactive objects",
+      "time of day"
+    ],
+    "rules": [
+      "each object triggers one or two reactions"
+    ],
+    "win": "no win state: an ambient scene",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "visit a friend's room",
+      "send a room as a gift"
+    ],
+    "content_needs": [
+      "room scenes",
+      "object animations"
+    ],
+    "difficulty_levers": [
+      "object count"
+    ],
+    "tools": [
+      "tap_care",
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "lofi study room I can tap around in",
+      "cozy bedroom where each object does something",
+      "make my own lofi room scene"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "flower_arrangement_bouquet",
+    "name": "Flower arrangement",
+    "aliases": [
+      "Bouquet",
+      "Flower shop",
+      "Ikebana",
+      "Arrange flowers"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "decorating",
+    "summary": "Place flowers and greenery in a vase to match a color and mood brief, scored softly on harmony.",
+    "core_loop": "read brief → pick flowers → arrange in vase → get a gentle harmony rating",
+    "verbs": [
+      "arrange"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "vase",
+      "flowers",
+      "brief"
+    ],
+    "rules": [
+      "colors from the brief earn harmony"
+    ],
+    "win": "finish a bouquet",
+    "lose": "none; it cannot be failed",
+    "scoring": "harmony rating",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send a bouquet to a friend for their birthday",
+      "vote on bouquets"
+    ],
+    "content_needs": [
+      "flower sprites",
+      "briefs"
+    ],
+    "difficulty_levers": [
+      "flower variety"
+    ],
+    "tools": [
+      "sticker_library",
+      "drag_drop_slots",
+      "color_palette",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "make a birthday bouquet for my friend",
+      "flower arranging game with soft colors",
+      "ikebana puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tea_brewing_ritual",
+    "name": "Tea brewing ritual",
+    "aliases": [
+      "Tea ritual",
+      "Brew tea",
+      "Cozy tea shop"
+    ],
+    "family": "calm_cozy",
+    "subfamily": "process",
+    "summary": "Follow a short brewing ritual: heat water, steep for the right time, pour and enjoy, with calm timing.",
+    "core_loop": "choose tea → heat → steep with the timer ring → pour",
+    "verbs": [
+      "brew",
+      "wait"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "pieces": [
+      "kettle",
+      "teapot",
+      "timer ring"
+    ],
+    "rules": [
+      "steeping time depends on the tea"
+    ],
+    "win": "serve a good cup",
+    "lose": "none; a weak cup is just weak",
+    "scoring": "cup quality",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a cup with a friend",
+      "tea party with a Group"
+    ],
+    "content_needs": [
+      "tea types"
+    ],
+    "difficulty_levers": [
+      "tea variety"
+    ],
+    "tools": [
+      "timer_bar",
+      "tap_care",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "tea brewing game that feels like a ritual",
+      "cozy tea shop",
+      "brew tea for my friend"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "request": "2048 but with dog breeds",
+    "expect": [
+      "merge_doubling_tiles"
+    ]
+  },
+  {
+    "request": "24 card game make the number",
+    "expect": [
+      "make_target_number"
+    ]
+  },
+  {
+    "request": "wordle but with math equations",
+    "expect": [
+      "nerdle_equation_guess"
+    ]
+  },
+  {
+    "request": "60 second arithmetic race with coworkers",
+    "expect": [
+      "mental_math_sprint"
+    ]
+  },
+  {
+    "request": "clear numbers that add up to ten",
+    "expect": [
+      "sum_to_ten_clear"
+    ]
+  }
+]

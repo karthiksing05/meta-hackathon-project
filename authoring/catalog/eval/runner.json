@@ -1,0 +1,32 @@
+[
+  {
+    "request": "subway surfers but at my school",
+    "expect": [
+      "lane_runner"
+    ]
+  },
+  {
+    "request": "flappy bird but the bird is my dog",
+    "expect": [
+      "flappy_tap_flyer"
+    ]
+  },
+  {
+    "request": "crossy road in tokyo",
+    "expect": [
+      "road_crossing_hopper"
+    ]
+  },
+  {
+    "request": "jetpack joyride with a cat",
+    "expect": [
+      "jetpack_hold_runner"
+    ]
+  },
+  {
+    "request": "count masters style math gates",
+    "expect": [
+      "crowd_gate_runner"
+    ]
+  }
+]

@@ -1,0 +1,537 @@
+[
+  {
+    "id": "audio_synth",
+    "kind": "runtime_tool",
+    "name": "Synth sounds",
+    "aliases": [
+      "sound effects",
+      "tones",
+      "beeps",
+      "instrument sounds"
+    ],
+    "summary": "Synthesized sound in rules and feedback: notes with a wave shape, pitch slides and short jingles, with pitch from an expression. Every sound in a game is synthesized.",
+    "when_to_use": "Any game that plays notes or sound effects: instruments, pads, ambient tones, rhythm feedback.",
+    "api": "feedback {sound: {wave, note, ms, slide?, volume?}} or {sound: {wave, notes, step_ms}}; note may be Hz from an expression",
+    "status": "shipped",
+    "notes": "maps to synth_sound (engine v0.2 feedback sound); authoring/SPEC.md 2.9: all sound is synthesized"
+  },
+  {
+    "id": "audio_clip_player",
+    "kind": "runtime_tool",
+    "name": "Melody player",
+    "aliases": [
+      "play a clip",
+      "play the tune",
+      "listen"
+    ],
+    "summary": "Plays a short synthesized melody or sound on cue (a jingle from a note list), so a game can play a prompt the player then answers.",
+    "when_to_use": "Listen-then-answer games with original melodies or tones: repeat the tune, which interval, tempo guessing.",
+    "api": "feedback {sound: {wave, notes: [..], step_ms}} triggered by a rule; notes from content",
+    "status": "shipped",
+    "notes": "maps to synth_sound jingles. Recorded clips, real songs and voices are not available (see audio_clip); content must be original melodies"
+  },
+  {
+    "id": "metronome",
+    "kind": "runtime_tool",
+    "name": "Metronome",
+    "aliases": [
+      "tempo",
+      "beat clock",
+      "bpm"
+    ],
+    "summary": "A steady beat: a timer fires every beat interval, plays a tick and advances a beat counter that other rules sync to.",
+    "when_to_use": "Music making, rhythm games, step sequencers and anything played to a tempo.",
+    "api": "timers every <ms per beat> → incr beat; feedback synth tick; tempo changes use self-rescheduling after timers",
+    "status": "shipped",
+    "notes": "custom rules from timers (every / after) and synth_sound; no fragment yet. every takes a constant, so a changing tempo uses after"
+  },
+  {
+    "id": "step_grid",
+    "kind": "runtime_tool",
+    "name": "Step sequencer grid",
+    "aliases": [
+      "beat grid",
+      "drum machine",
+      "sequencer"
+    ],
+    "summary": "A grid of on/off cells (rows are sounds, columns are steps) that plays back in a loop: a playhead moves one column per beat and triggers the rows that are on.",
+    "when_to_use": "Beat makers, drum pattern copying, step-based music puzzles.",
+    "api": "grid_board for toggles (tap_cell → set_at); metronome timer moves the playhead; per-row synth sound when a cell under the playhead is on",
+    "status": "shipped",
+    "notes": "custom rules from grid_board (up to 10 x 10), timers, grid builtins and synth_sound"
+  },
+  {
+    "id": "note_grid",
+    "kind": "runtime_tool",
+    "name": "Piano-roll grid",
+    "aliases": [
+      "piano roll",
+      "melody grid",
+      "compose notes"
+    ],
+    "summary": "A pitch-by-time grid: place notes on rows (pitches in a scale) and columns (steps), then play the melody back.",
+    "when_to_use": "Melody composing, harmonizing and transcription games.",
+    "api": "grid_board cells (row = pitch, column = step); playback timer plays synth notes with Hz from the row",
+    "status": "shipped",
+    "notes": "custom rules from grid_board (up to 10 x 10), timers and synth_sound (note Hz from an expression)"
+  },
+  {
+    "id": "piano_keys",
+    "kind": "runtime_tool",
+    "name": "Piano keys",
+    "aliases": [
+      "keyboard instrument",
+      "keys",
+      "play notes"
+    ],
+    "summary": "A row of tappable keys that each play a pitch, for playing or answering with notes.",
+    "when_to_use": "Repeat-the-melody, name-the-note and chord games.",
+    "api": "rect nodes with on_tap {input: key, with: {i}}; rule plays synth note for key i; or the keyboard fragment with one letter per note",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and synth_sound; pairs with sequence_memory for repeat-the-tune"
+  },
+  {
+    "id": "sound_pads",
+    "kind": "runtime_tool",
+    "name": "Sound pads",
+    "aliases": [
+      "soundboard",
+      "drum pads",
+      "launchpad"
+    ],
+    "summary": "A few big pads that each play a sound when tapped (held pads can sustain with hold buttons).",
+    "when_to_use": "Soundboards, finger drumming, live jamming.",
+    "api": "rect or circle nodes with on_tap / on_press; each triggers a synth sound",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes, hold_buttons and synth_sound; sequence_memory already draws 3-6 toned pads"
+  },
+  {
+    "id": "haptics",
+    "kind": "runtime_tool",
+    "name": "Haptics",
+    "aliases": [
+      "vibration",
+      "buzz",
+      "taptic"
+    ],
+    "summary": "Phone vibration feedback on game moments: light, medium, heavy, success, warning, error.",
+    "when_to_use": "Fidget, calm and tactile games, and juice on hits and wins.",
+    "api": "feedback {haptic: light | medium | heavy | success | warning | error}",
+    "status": "shipped",
+    "notes": "maps to particles_haptics (engine v0.2 feedback haptic); the iOS host maps it to feedback generators"
+  },
+  {
+    "id": "hold_input",
+    "kind": "runtime_tool",
+    "name": "Hold input",
+    "aliases": [
+      "press and hold",
+      "hold to charge",
+      "hold and release"
+    ],
+    "summary": "Hold a finger down and release it as the input: hold length or release timing is the play.",
+    "when_to_use": "Breathing pacers, charge-and-release throws, hold-to-move.",
+    "api": "node on_press / on_release inputs; record now at press and compare at release",
+    "status": "shipped",
+    "notes": "maps to hold_buttons (engine v0.2.1)"
+  },
+  {
+    "id": "slider_input",
+    "kind": "runtime_tool",
+    "name": "Slider",
+    "aliases": [
+      "slider",
+      "dial",
+      "knob",
+      "fader"
+    ],
+    "summary": "A draggable handle along a track that sets a number between a minimum and maximum.",
+    "when_to_use": "Mixers, budgets, colour mixing, estimates on a scale, volume and tempo controls.",
+    "api": "a track rect plus a handle node with on_drag; value = clamp((pointer.x - x0) / w, 0, 1) mapped to the range",
+    "status": "shipped",
+    "notes": "custom rules from pointer_input (on_drag), clamp and lerp; no fragment yet"
+  },
+  {
+    "id": "drag_drop_slots",
+    "kind": "runtime_tool",
+    "name": "Drag into slots",
+    "aliases": [
+      "drag and drop",
+      "snap to place",
+      "place items"
+    ],
+    "summary": "Drag items onto target slots; an item snaps into a slot it is dropped over, and rules check whether it is the right slot.",
+    "when_to_use": "Decorating, arranging, jigsaw-like placing, matching labels to places, building from parts.",
+    "api": "item nodes with on_drag move state positions; on release (on_release) snap to the slot found with overlaps_rect or nearest dist; set_at records the slot",
+    "status": "shipped",
+    "notes": "custom rules from pointer_input (on_drag), hold_buttons (on_release), overlaps_rect, dist and set_at; no fragment yet"
+  },
+  {
+    "id": "stroke_recorder",
+    "kind": "runtime_tool",
+    "name": "Stroke recorder",
+    "aliases": [
+      "record strokes",
+      "trace input",
+      "finger path"
+    ],
+    "summary": "Records the finger's path while it is down as a list of points per stroke, and draws it back as lines; the replay log keeps it.",
+    "when_to_use": "Drawing, tracing, one-stroke and draw-and-guess games.",
+    "api": "inputs from {\"pointer\": \"down\" | \"move\" | \"up\"} push vec(x, y) into list state; draw each stroke with a poly node (open, up to 256 points)",
+    "status": "shipped",
+    "notes": "custom rules from pointer_input and vector_shapes; one pointer only, 256 points per poly, collection size limits apply. See drawing_canvas for a full canvas"
+  },
+  {
+    "id": "sticker_library",
+    "kind": "content_tool",
+    "name": "Sticker set",
+    "aliases": [
+      "decorations",
+      "items to place",
+      "props"
+    ],
+    "summary": "A themed set of placeable items (stickers, furniture, plants, fish), made as one sprite sheet with a frame per item and a content list of their names.",
+    "when_to_use": "Dress-up, decorating, room arranging and comic building.",
+    "api": "art: one sprite role with a frame per item (image frame = index); content list of item names",
+    "status": "shipped",
+    "notes": "maps to image_assets (sprite frames, as match_pairs' card sprite uses) and the art pipeline; very large sets are limited by sheet size"
+  },
+  {
+    "id": "color_palette",
+    "kind": "runtime_tool",
+    "name": "Colour palette",
+    "aliases": [
+      "swatches",
+      "pick a colour",
+      "paint colours"
+    ],
+    "summary": "A row of colour swatches; tapping one sets the current colour that painting rules use.",
+    "when_to_use": "Colouring, pixel art, colour-by-number and design games.",
+    "api": "swatch rect nodes with on_tap set state color (hex string); grid_board cell_fill returns the hex for painted cells",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and grid_board's cell_fill hex strings"
+  },
+  {
+    "id": "pixel_grid",
+    "kind": "runtime_tool",
+    "name": "Pixel grid",
+    "aliases": [
+      "pixel art",
+      "paint cells"
+    ],
+    "summary": "A grid of cells the player paints one cell at a time with the current colour.",
+    "when_to_use": "Pixel art, colour-by-number, shared pixel canvases.",
+    "api": "grid_board (tap_cell → set_at on a grid or list of hex strings; cell_fill reads it)",
+    "status": "shipped",
+    "notes": "grid_board caps at 10 x 10; larger canvases need custom rect nodes over a grid() state"
+  },
+  {
+    "id": "progress_meter",
+    "kind": "runtime_tool",
+    "name": "Progress meter",
+    "aliases": [
+      "progress bar",
+      "completion"
+    ],
+    "summary": "A bar or ring that fills as a number rises toward a goal.",
+    "when_to_use": "Completion in colouring, collecting and cozy games; any visible goal.",
+    "api": "a rect whose w is bound (=) to progress / goal × width",
+    "status": "shipped",
+    "notes": "plain presentation binding; timer_bar and shared_progress draw similar bars"
+  },
+  {
+    "id": "cooldown_timer",
+    "kind": "runtime_tool",
+    "name": "Cooldown",
+    "aliases": [
+      "wait before next",
+      "recharge"
+    ],
+    "summary": "After an action, it can't be used again until a cooldown passes.",
+    "when_to_use": "Paced actions: placing a pixel, using a power, special moves.",
+    "api": "state ready_at; guard input with now >= ready_at; set ready_at = now + cooldown",
+    "status": "shipped",
+    "notes": "within one run only (now, after timers); cooldowns across runs or across a Group need stored state (growth_timer)"
+  },
+  {
+    "id": "tap_pop",
+    "kind": "runtime_tool",
+    "name": "Tap to pop",
+    "aliases": [
+      "pop bubbles",
+      "fidget board",
+      "bubble wrap"
+    ],
+    "summary": "A board of poppable bubbles: a tap flips one with a sound and haptic; a full board resets.",
+    "when_to_use": "Fidget toys, satisfying tap boards, calm play.",
+    "api": "grid_board tap_cell → set_at popped; cell_fill shows the state; feedback sound and haptic",
+    "status": "shipped",
+    "notes": "custom rules from grid_board, synth_sound and particles_haptics"
+  },
+  {
+    "id": "tap_care",
+    "kind": "runtime_tool",
+    "name": "Care buttons",
+    "aliases": [
+      "water",
+      "feed",
+      "tend"
+    ],
+    "summary": "A few care actions (water, feed, light, prune) that raise needs meters which drain over time.",
+    "when_to_use": "Plant, pet and garden care games.",
+    "api": "button nodes with on_tap raise state meters; a tick or every rule drains them",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and timers, within one run. Care that continues between days needs growth_timer"
+  },
+  {
+    "id": "tap_choice",
+    "kind": "runtime_tool",
+    "name": "Tap a choice",
+    "aliases": [
+      "pick one",
+      "buttons"
+    ],
+    "summary": "A few labelled buttons; tapping one records the pick and moves on.",
+    "when_to_use": "Mood check-ins, polls, simple picks without right answers.",
+    "api": "button nodes with on_tap {input: pick, with: {i}}; or quiz / choice_story for longer sets",
+    "status": "shipped",
+    "notes": "plain tap nodes; quiz and choice_story already draw choice buttons"
+  },
+  {
+    "id": "tap_letters",
+    "kind": "runtime_tool",
+    "name": "Letter tiles",
+    "aliases": [
+      "letter hive",
+      "letter wheel"
+    ],
+    "summary": "A small set of letter tiles; tap letters to spell a word, then submit it to be checked.",
+    "when_to_use": "Make-words-from-these-letters games, letter hives and wheels.",
+    "api": "keyboard fragment with letters = the set plus '<' and '>'; rules build typed and check in_dictionary and the required letter",
+    "status": "shipped",
+    "notes": "keyboard fragment plus the in_dictionary builtin; a hexagon layout needs custom nodes"
+  },
+  {
+    "id": "tile_rack",
+    "kind": "runtime_tool",
+    "name": "Letter rack",
+    "aliases": [
+      "letter tiles rack",
+      "scrabble rack",
+      "anagram letters"
+    ],
+    "summary": "A rack of letter tiles where each tile can be used once per word; tapping moves a tile into the word and back.",
+    "when_to_use": "Longest-word, anagram and unscramble games.",
+    "api": "list state of tiles with a used flag; tile nodes on_tap toggle; submit checks in_dictionary or the answer",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes, list builtins and in_dictionary; word_check handles fixed-length guesses"
+  },
+  {
+    "id": "word_bank",
+    "kind": "runtime_tool",
+    "name": "Word bank",
+    "aliases": [
+      "tap words in order",
+      "sentence builder"
+    ],
+    "summary": "Shuffled word chips; tap them in order to build a sentence, then check it against the answer.",
+    "when_to_use": "Translation, grammar and sentence-order games.",
+    "api": "content list split into words; shuffle at start; chip nodes on_tap push to the built sentence; compare join(built, ' ')",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and split, shuffle, push, join"
+  },
+  {
+    "id": "numeric_input",
+    "kind": "runtime_tool",
+    "name": "Number entry",
+    "aliases": [
+      "number pad",
+      "type a number",
+      "estimate"
+    ],
+    "summary": "Enter a number as the answer, with a number pad, then compare it to the target (exact, closeness or higher/lower).",
+    "when_to_use": "Estimation, price guessing, counts and maths answers.",
+    "api": "keyboard fragment with letters \"1234567890<>\"; parse_int on submit; or slider_input for a range",
+    "status": "shipped",
+    "notes": "keyboard fragment plus parse_int; text_input (building) will add a native number field"
+  },
+  {
+    "id": "dice_roll",
+    "kind": "runtime_tool",
+    "name": "Dice roll",
+    "aliases": [
+      "roll dice",
+      "d6",
+      "random roll"
+    ],
+    "summary": "Rolls one or more dice with seeded randomness and shows the faces.",
+    "when_to_use": "Board games, luck games, probability lessons.",
+    "api": "random_int(1, 6) in an effect (rule body); show the face with text or a sprite frame",
+    "status": "shipped",
+    "notes": "maps to the random_int builtin; seeded, so replays and dailies match"
+  },
+  {
+    "id": "dice",
+    "kind": "runtime_tool",
+    "name": "Dice",
+    "aliases": [
+      "die",
+      "roll and move"
+    ],
+    "summary": "Seeded dice for roll-and-move and luck rules.",
+    "when_to_use": "Roll-and-move boards and dice games.",
+    "api": "random_int(1, sides) in an effect",
+    "status": "shipped",
+    "notes": "same as dice_roll; maps to random_int"
+  },
+  {
+    "id": "flashcard_deck",
+    "kind": "runtime_tool",
+    "name": "Flashcards",
+    "aliases": [
+      "flip cards",
+      "study cards"
+    ],
+    "summary": "A deck of two-sided cards: see the front, flip to the back, then rate how well you knew it.",
+    "when_to_use": "Study, vocabulary and memorization games.",
+    "api": "content lists fronts and backs; tap to flip (state flipped); rating buttons move the card back in the queue",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and list builtins within one run; spacing across days needs srs_scheduler"
+  },
+  {
+    "id": "meters",
+    "kind": "runtime_tool",
+    "name": "Stat meters",
+    "aliases": [
+      "stats",
+      "hp and mana",
+      "resource bars",
+      "gauges"
+    ],
+    "summary": "A few named numbers (HP, gold, trust, heat, stamina) clamped to a range and shown as labelled bars; rules raise and lower them and react at thresholds.",
+    "when_to_use": "RPG stats, story meters, resource balancing, battle HP, reign-style balance games.",
+    "api": "int or float state per meter; incr / set with clamp(); bars are rects with w bound to value / max; when-rules fire at thresholds",
+    "status": "shipped",
+    "notes": "custom rules from state, clamp and bound rect widths; the gold story games keep Clues, Trust and Heat this way. lives covers a single HP count"
+  },
+  {
+    "id": "tap_hotspots",
+    "kind": "runtime_tool",
+    "name": "Tap hotspots",
+    "aliases": [
+      "hidden object",
+      "tap targets",
+      "find in scene",
+      "point and click"
+    ],
+    "summary": "Invisible or drawn tap areas placed on a scene; tapping one marks it found (a clue, a target, a difference), and taps elsewhere can cost a miss.",
+    "when_to_use": "Hidden object, spot-the-difference, point-and-click clues, shooting galleries.",
+    "api": "transparent rect or circle nodes (repeat over a content list of {x, y, r}) with on_tap {input: found, with: {i}}; a pointer down source catches misses",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and pointer_input; bots tap rect/circle ops, so keep a transparent rect under each sprite"
+  },
+  {
+    "id": "inventory",
+    "kind": "runtime_tool",
+    "name": "Inventory",
+    "aliases": [
+      "items held",
+      "backpack",
+      "key items"
+    ],
+    "summary": "A list of items the player holds; picking up adds one, using or combining removes them, and choices or doors check for them.",
+    "when_to_use": "Escape rooms, adventure and story games with key items, crafting.",
+    "api": "list<string> or set state; push / add on pickup, remove on use, has / contains in guards; a row of item icons in the HUD",
+    "status": "shipped",
+    "notes": "custom rules from list and set builtins; choice_story labels can be hidden (empty) by rules when an item is missing"
+  },
+  {
+    "id": "swipe_zones",
+    "kind": "runtime_tool",
+    "name": "Swipe directions",
+    "aliases": [
+      "swipe to dodge",
+      "directional swipe",
+      "swipe up down left right"
+    ],
+    "summary": "Reads a swipe's direction (up, down, left, right) as the input, for dodges, guards and directional answers.",
+    "when_to_use": "Parry and dodge duels, directional reaction games, swipe-to-answer.",
+    "api": "pointer down records the start; pointer up compares the delta: the larger axis and its sign give the direction (as tile_slide does)",
+    "status": "shipped",
+    "notes": "custom rules from pointer_input and the direction constants; tile_slide already reads swipes this way"
+  },
+  {
+    "id": "swipe_cards",
+    "kind": "runtime_tool",
+    "name": "Swipe cards",
+    "aliases": [
+      "swipe left or right",
+      "decision cards",
+      "tinder-style cards"
+    ],
+    "summary": "One card at a time; swipe it left or right (or tap two buttons) to decide, and each side has its own effects.",
+    "when_to_use": "Reign-like balance games, this-or-that, quick decisions with consequences.",
+    "api": "card node with on_drag following the finger; release past a threshold commits left or right; content lists of card text and per-side effects",
+    "status": "shipped",
+    "notes": "custom rules from pointer_input, hold_buttons (on_release) and meters; the gold two_way_speed_sort uses two buttons plus swipe"
+  },
+  {
+    "id": "power_meter",
+    "kind": "runtime_tool",
+    "name": "Draining power",
+    "aliases": [
+      "battery",
+      "power drain",
+      "energy budget"
+    ],
+    "summary": "A power supply that drains over time and faster for each device left on; at zero everything shuts off.",
+    "when_to_use": "Night-shift survival, resource-budget horror and management games.",
+    "api": "timer_bar with drain_mult raised per active device, or a meter drained in a tick rule",
+    "status": "shipped",
+    "notes": "maps to timer_bar (drain_mult, emit_only) or meters"
+  },
+  {
+    "id": "checklist",
+    "kind": "runtime_tool",
+    "name": "Checklist",
+    "aliases": [
+      "task list",
+      "steps to do",
+      "ritual steps"
+    ],
+    "summary": "A list of tasks the player completes in any order; each is ticked off, and finishing all of them wins.",
+    "when_to_use": "Ritual, chore and escape tasks under a clock.",
+    "api": "list<bool> state from a content list; set_at on completion; all(list, d => d) wins",
+    "status": "shipped",
+    "notes": "custom rules from list builtins (set_at, all, count)"
+  },
+  {
+    "id": "camera_feed_switcher",
+    "kind": "runtime_tool",
+    "name": "Camera feeds",
+    "aliases": [
+      "security cameras",
+      "switch views",
+      "monitor rooms"
+    ],
+    "summary": "Tap buttons to switch which room the screen shows; things keep moving in rooms you are not watching.",
+    "when_to_use": "Security-camera horror, monitoring and management games.",
+    "api": "state view (room index) set by button taps; the scene draws only the current room's actors from state that updates for every room in tick",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and tick_rules; not a real camera (the engine camera only scrolls one world)"
+  },
+  {
+    "id": "gaze_check",
+    "kind": "runtime_tool",
+    "name": "Looking away",
+    "aliases": [
+      "don't blink",
+      "only moves when you look away"
+    ],
+    "summary": "Tracks which way the player is looking (the current view or direction); threats move only while not looked at.",
+    "when_to_use": "Don't-look-away horror and freeze-tag mechanics.",
+    "api": "state facing (set by swipes or buttons); threats advance in tick only when not in the facing view",
+    "status": "shipped",
+    "notes": "custom rules from swipe_zones or tap buttons and tick_rules; real eye or head tracking is not available"
+  }
+]

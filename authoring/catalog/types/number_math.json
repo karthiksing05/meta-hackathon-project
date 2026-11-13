@@ -1,0 +1,2077 @@
+[
+  {
+    "id": "merge_doubling_tiles",
+    "name": "Merge doubling tiles",
+    "aliases": [
+      "2048",
+      "Threes"
+    ],
+    "family": "number_math",
+    "summary": "Slide numbered tiles; equal tiles merge into their sum, aiming for a big target tile.",
+    "core_loop": "swipe the board → equal tiles merge → a new tile spawns → keep space open",
+    "verbs": [
+      "slide",
+      "merge",
+      "plan"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "every swipe moves all tiles",
+      "equal tiles merge once per move"
+    ],
+    "win": "reach the target tile",
+    "lose": "the board fills with no moves",
+    "scoring": "sum of merges",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's best tile"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "spawn values"
+    ],
+    "tools": [
+      "tile_slide",
+      "grid_board",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "2048 but with pokemon evolutions",
+      "merge numbers game",
+      "2048 with my friends faces"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "make_target_number",
+    "name": "Hit the target number",
+    "aliases": [
+      "Countdown numbers",
+      "24 game",
+      "Digits"
+    ],
+    "family": "number_math",
+    "summary": "Combine given numbers with + − × ÷ to reach a target exactly.",
+    "core_loop": "pick two numbers → pick an operation → result replaces them → reach the target",
+    "verbs": [
+      "calculate",
+      "combine"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each number used at most once"
+    ],
+    "win": "reach the target exactly",
+    "lose": "none",
+    "scoring": "closeness and steps",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily target shared with friends"
+    ],
+    "difficulty_levers": [
+      "number sizes",
+      "operations"
+    ],
+    "tools": [
+      "grid_board",
+      "daily_seed",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "24 game with cards",
+      "countdown numbers round",
+      "nyt digits clone"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mental_math_sprint",
+    "name": "Mental math sprint",
+    "aliases": [
+      "Math sprint",
+      "Zetamac"
+    ],
+    "family": "number_math",
+    "summary": "Solve as many arithmetic problems as you can in 60 seconds.",
+    "core_loop": "Arithmetic problems appear one after another; type each answer as fast as you can and solve as many as possible in 60 seconds",
+    "verbs": [
+      "calculate",
+      "react"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "one answer per problem"
+    ],
+    "win": "most correct in the time",
+    "lose": "none",
+    "scoring": "correct answers",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "office math race"
+    ],
+    "difficulty_levers": [
+      "operations",
+      "number range",
+      "time limit"
+    ],
+    "tools": [
+      "keyboard",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "zetamac style arithmetic",
+      "60 second math race",
+      "mental math with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "number_sequence_next",
+    "name": "Next in the sequence",
+    "aliases": [
+      "Number sequence quiz"
+    ],
+    "family": "number_math",
+    "summary": "Find the next number in a pattern.",
+    "core_loop": "Read a sequence of numbers, work out the rule behind it, and type the next number before the timer; a hint reveals the rule type",
+    "verbs": [
+      "infer",
+      "calculate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "one rule per sequence"
+    ],
+    "win": "solve every sequence",
+    "lose": "three misses",
+    "scoring": "sequences solved",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "puzzle duels"
+    ],
+    "difficulty_levers": [
+      "rule complexity",
+      "sequence length",
+      "hints"
+    ],
+    "tools": [
+      "keyboard",
+      "lives",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "what comes next number pattern",
+      "iq sequence puzzles",
+      "number pattern game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sum_to_ten_clear",
+    "name": "Clear pairs that sum to ten",
+    "aliases": [
+      "Make 10",
+      "Fruit Box"
+    ],
+    "family": "number_math",
+    "summary": "Drag a box around adjacent numbers that add up to 10 to clear them.",
+    "core_loop": "find numbers summing to 10 → box them → they clear → keep going",
+    "verbs": [
+      "add",
+      "find"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the box's numbers must total exactly 10"
+    ],
+    "win": "clear the most before time",
+    "lose": "none",
+    "scoring": "numbers cleared",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare clears"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "time"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "fruit box make 10 game",
+      "clear numbers that add to 10",
+      "apple sum game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "number_drop_merge",
+    "name": "Drop and merge numbers",
+    "aliases": [
+      "Drop the Number",
+      "X2 Blocks"
+    ],
+    "family": "number_math",
+    "summary": "Drop numbered blocks into columns; matching neighbors merge and double.",
+    "core_loop": "Drop numbered blocks into columns; touching equal blocks merge and double, chains combo, and the round ends when a column overflows",
+    "verbs": [
+      "drop",
+      "merge"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "matching neighbors merge",
+      "a full column ends the game"
+    ],
+    "win": "none; score attack",
+    "lose": "a column overflows",
+    "scoring": "merged values",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "weekly score board"
+    ],
+    "difficulty_levers": [
+      "spawn values",
+      "columns",
+      "drop speed"
+    ],
+    "tools": [
+      "grid_board",
+      "gravity_jump",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "drop the number merge game",
+      "x2 blocks",
+      "merge falling numbers"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "equation_crossword",
+    "name": "Equation crossword",
+    "aliases": [
+      "Math crossword",
+      "Crossmath"
+    ],
+    "family": "number_math",
+    "summary": "Fill blanks so every row and column equation is true.",
+    "core_loop": "pick a blank → place a number → equations check across and down",
+    "verbs": [
+      "calculate",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "each tile used once",
+      "every equation must be true"
+    ],
+    "win": "fill the grid",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "operations"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "math crossword puzzle",
+      "crossmath",
+      "equations grid"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "nerdle_equation_guess",
+    "name": "Guess the equation",
+    "aliases": [
+      "Nerdle"
+    ],
+    "family": "number_math",
+    "summary": "Guess a hidden 8-character equation; tiles color by position like a word deduction game.",
+    "core_loop": "Type a guess at a hidden 8-character equation; tiles color for right place, wrong place or absent, and you narrow it down in six tries",
+    "verbs": [
+      "deduce",
+      "calculate"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "every guess must be a valid equation"
+    ],
+    "win": "solve within 6 guesses",
+    "lose": "out of guesses",
+    "scoring": "guesses used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily share grid"
+    ],
+    "difficulty_levers": [
+      "equation length",
+      "tries",
+      "operators allowed"
+    ],
+    "tools": [
+      "keyboard",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "nerdle game",
+      "wordle for math",
+      "guess the equation daily"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "estimate_quantity",
+    "name": "Estimate the count",
+    "aliases": [
+      "Jar guess",
+      "Estimation 180"
+    ],
+    "family": "number_math",
+    "summary": "Glance at a crowd of objects and estimate how many there are.",
+    "core_loop": "A crowd of objects flashes briefly; type your estimate of how many there were, and score by how close you land",
+    "verbs": [
+      "estimate"
+    ],
+    "inputs": [
+      "type",
+      "drag"
+    ],
+    "rules": [
+      "the view disappears after a few seconds"
+    ],
+    "win": "most points after rounds",
+    "lose": "none",
+    "scoring": "points by percent error",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "jar guessing with friends"
+    ],
+    "difficulty_levers": [
+      "glance time",
+      "count",
+      "object clustering"
+    ],
+    "tools": [
+      "reveal",
+      "keyboard",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "how many jelly beans in the jar",
+      "estimate the crowd size",
+      "quick estimation game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fraction_slice",
+    "name": "Slice the fraction",
+    "aliases": [
+      "Fraction pizza"
+    ],
+    "family": "number_math",
+    "summary": "Cut a shape into the asked-for fraction with swipes.",
+    "core_loop": "Read a fraction, swipe cuts across a shape to slice off that portion, and score by how close your piece is to the target",
+    "verbs": [
+      "estimate",
+      "cut"
+    ],
+    "inputs": [
+      "swipe",
+      "draw"
+    ],
+    "rules": [
+      "accuracy within a tolerance"
+    ],
+    "win": "most accurate cuts",
+    "lose": "none",
+    "scoring": "percent accuracy",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "kids vs parents"
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "shape type",
+      "cuts allowed"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "cut the pizza into thirds",
+      "fraction slicing game",
+      "slice exactly half"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "number_line_place",
+    "name": "Place it on the number line",
+    "aliases": [
+      "Number line estimation"
+    ],
+    "family": "number_math",
+    "summary": "Drop a number in the right spot on a number line.",
+    "core_loop": "A number is shown; drop it at the right spot on a number line and see how far off you were before the next one",
+    "verbs": [
+      "estimate",
+      "place"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "closer is better"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points by distance",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "class challenge"
+    ],
+    "difficulty_levers": [
+      "range",
+      "decimals",
+      "tick marks shown"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "number line game for kids",
+      "place fractions on a line",
+      "estimation number line"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "prime_or_not",
+    "name": "Prime or not",
+    "aliases": [
+      "Prime sort"
+    ],
+    "family": "number_math",
+    "summary": "Swipe each number as prime or composite before time runs out.",
+    "core_loop": "Numbers appear one by one; swipe each as prime or composite before it drops, and the pace speeds up as you go",
+    "verbs": [
+      "judge",
+      "react"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "one swipe per number"
+    ],
+    "win": "survive the round",
+    "lose": "wrong swipe or time",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak duels"
+    ],
+    "difficulty_levers": [
+      "number size",
+      "speed",
+      "lives"
+    ],
+    "tools": [
+      "sort_bins",
+      "timer_bar",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "prime number swipe game",
+      "is it prime quiz",
+      "prime or composite"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "times_table_shooter",
+    "name": "Shoot the right answer",
+    "aliases": [
+      "Math blaster"
+    ],
+    "family": "number_math",
+    "summary": "A problem appears; shoot the falling answer that matches.",
+    "core_loop": "read the problem → aim → shoot the right answer → avoid wrong ones",
+    "verbs": [
+      "calculate",
+      "aim"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong hits cost a life"
+    ],
+    "win": "survive the waves",
+    "lose": "out of lives",
+    "scoring": "right hits",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "kids class board"
+    ],
+    "difficulty_levers": [
+      "operations",
+      "fall speed"
+    ],
+    "tools": [
+      "spawn_wave",
+      "lives",
+      "speed_ramp",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "math blaster game",
+      "shoot the answer to the times table",
+      "arcade math for kids"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coin_change",
+    "name": "Make exact change",
+    "aliases": [
+      "Change maker"
+    ],
+    "family": "number_math",
+    "summary": "Pay an amount using the fewest coins and bills.",
+    "core_loop": "Read a price and tap coins and bills to pay it exactly, using as few pieces as possible to score more",
+    "verbs": [
+      "calculate",
+      "count"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "exact amount only"
+    ],
+    "win": "make every amount",
+    "lose": "none",
+    "scoring": "coins used vs minimum",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "family practice"
+    ],
+    "difficulty_levers": [
+      "coin set",
+      "amount range",
+      "time"
+    ],
+    "tools": [
+      "grid_board",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "make change game",
+      "fewest coins puzzle",
+      "cashier counting game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "balance_scale_math",
+    "name": "Balance the scale",
+    "aliases": [
+      "Algebra scale"
+    ],
+    "family": "number_math",
+    "summary": "Add weights to both pans until the scale balances; solve for the mystery weight.",
+    "core_loop": "Place weights on both pans of a scale, watch it tilt, and balance it to work out the value of the mystery weight",
+    "verbs": [
+      "balance",
+      "solve"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "both sides must be equal"
+    ],
+    "win": "balance the scale",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "intro algebra practice"
+    ],
+    "difficulty_levers": [
+      "unknowns",
+      "weight values",
+      "moves allowed"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "balance scale algebra",
+      "solve for x with weights",
+      "dragonbox style algebra"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dice_math_race",
+    "name": "Dice math race",
+    "aliases": [
+      "Math dice"
+    ],
+    "family": "number_math",
+    "summary": "Roll dice and combine the faces to hit a target before your opponent.",
+    "core_loop": "Roll several dice and combine the faces with arithmetic to hit a target number before your opponent does",
+    "verbs": [
+      "calculate",
+      "race"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "every die used once"
+    ],
+    "win": "hit the most targets",
+    "lose": "none",
+    "scoring": "targets hit",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "family game night"
+    ],
+    "difficulty_levers": [
+      "dice count",
+      "operations allowed",
+      "target size"
+    ],
+    "tools": [
+      "dice",
+      "turns",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "math dice game",
+      "roll and make the target",
+      "dice arithmetic race"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "percent_guess",
+    "name": "Guess the percent",
+    "aliases": [
+      "Percent estimate"
+    ],
+    "family": "number_math",
+    "summary": "See a pie or bar and estimate the percentage shown.",
+    "core_loop": "A pie, bar or filled shape appears; type the percentage you think is filled, and score by how close you are",
+    "verbs": [
+      "estimate"
+    ],
+    "inputs": [
+      "type",
+      "drag"
+    ],
+    "rules": [
+      "answers are whole percents"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points by error",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "data nerds compare"
+    ],
+    "difficulty_levers": [
+      "precision",
+      "chart type",
+      "time"
+    ],
+    "tools": [
+      "reveal",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "guess the percentage of the pie chart",
+      "estimate the bar graph",
+      "percent guessing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "binary_convert",
+    "name": "Binary flip",
+    "aliases": [
+      "Binary game"
+    ],
+    "family": "number_math",
+    "summary": "Flip bits to make a number in binary, against the clock.",
+    "core_loop": "Read a decimal number and flip bit switches until the binary value matches, racing the clock through a set",
+    "verbs": [
+      "convert",
+      "toggle"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each bit is a power of two"
+    ],
+    "win": "match every number",
+    "lose": "timer runs out",
+    "scoring": "numbers matched",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "CS class battle"
+    ],
+    "difficulty_levers": [
+      "bit count",
+      "time",
+      "direction of conversion"
+    ],
+    "tools": [
+      "grid_board",
+      "timer_bar",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "binary number game",
+      "flip the bits to make 37",
+      "learn binary game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "roman_numeral",
+    "name": "Roman numerals",
+    "aliases": [
+      "Roman numeral quiz"
+    ],
+    "family": "number_math",
+    "summary": "Convert numbers to and from Roman numerals.",
+    "core_loop": "Read a number in Arabic or Roman numerals, convert it to the other form, type it, and move to the next",
+    "verbs": [
+      "convert"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "standard subtractive form"
+    ],
+    "win": "convert every number",
+    "lose": "three misses",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trivia night bonus"
+    ],
+    "difficulty_levers": [
+      "range",
+      "direction of conversion",
+      "time"
+    ],
+    "tools": [
+      "keyboard",
+      "lives",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "roman numeral quiz",
+      "convert to roman numerals game",
+      "what year is MCMXCIV"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "greater_less_compare",
+    "name": "Bigger or smaller",
+    "aliases": [
+      "Compare numbers"
+    ],
+    "family": "number_math",
+    "summary": "Tap the larger expression of two, fast.",
+    "core_loop": "Two expressions appear side by side; tap the larger one as fast as you can, with streaks building a multiplier",
+    "verbs": [
+      "compare",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "ties need the equals button"
+    ],
+    "win": "longest streak",
+    "lose": "wrong tap",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak duels"
+    ],
+    "difficulty_levers": [
+      "expression complexity",
+      "speed",
+      "ties possible"
+    ],
+    "tools": [
+      "quiz",
+      "speed_ramp",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "which is bigger math game",
+      "compare fractions fast",
+      "greater than less than"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "math_grid_path",
+    "name": "Path to the target sum",
+    "aliases": [
+      "Sum path"
+    ],
+    "family": "number_math",
+    "summary": "Trace a path through a number grid whose total equals the target.",
+    "core_loop": "Trace a path through a grid of numbers from start to exit so the running total equals the target when you arrive",
+    "verbs": [
+      "add",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each cell once",
+      "must end at the exit"
+    ],
+    "win": "exact target at the exit",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "operations",
+      "target size"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "path that adds to 50",
+      "number maze sum",
+      "trace the right total"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "magic_square",
+    "name": "Magic square",
+    "aliases": [
+      "Magic square"
+    ],
+    "family": "number_math",
+    "summary": "Fill a square so every row, column and diagonal sums the same.",
+    "core_loop": "Place numbers in a square grid so every row, column and diagonal adds to the same total, fixing sums until it works",
+    "verbs": [
+      "calculate",
+      "place"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "every line sums to the magic constant"
+    ],
+    "win": "complete the square",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "puzzle club"
+    ],
+    "difficulty_levers": [
+      "size",
+      "givens",
+      "number set"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "magic square puzzle",
+      "make all rows add to 15",
+      "number square"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "countdown_clock_math",
+    "name": "Beat the clock arithmetic",
+    "aliases": [
+      "Speed arithmetic"
+    ],
+    "family": "number_math",
+    "summary": "Answer a chain where each answer feeds the next before the bar empties.",
+    "core_loop": "start number → apply each step → keep the running total → final answer",
+    "verbs": [
+      "calculate",
+      "remember"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "each step uses the last result"
+    ],
+    "win": "final answer right",
+    "lose": "timer runs out",
+    "scoring": "chains right",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "brain training with friends"
+    ],
+    "difficulty_levers": [
+      "steps",
+      "speed"
+    ],
+    "tools": [
+      "keyboard",
+      "timer_bar",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "chain math game",
+      "running total brain training",
+      "mental arithmetic chain"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "unit_price_compare",
+    "name": "Better deal",
+    "aliases": [
+      "Unit price"
+    ],
+    "family": "number_math",
+    "summary": "Pick which package is the better deal by unit price.",
+    "core_loop": "Two packages show prices and sizes; tap the better deal by unit price, then see the per-unit math",
+    "verbs": [
+      "calculate",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "ties allowed"
+    ],
+    "win": "most right picks",
+    "lose": "none",
+    "scoring": "right picks",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "shopping friends"
+    ],
+    "difficulty_levers": [
+      "price closeness",
+      "unit types",
+      "time"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "which is the better deal game",
+      "unit price quiz",
+      "grocery math"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tip_split",
+    "name": "Split the bill",
+    "aliases": [
+      "Bill split"
+    ],
+    "family": "number_math",
+    "summary": "Split a restaurant bill with tax and tip among friends; type each share.",
+    "core_loop": "Read a restaurant bill, add tax and tip, split it among friends, and type each person's share",
+    "verbs": [
+      "calculate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "round to the cent"
+    ],
+    "win": "every share right",
+    "lose": "none",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "made from your real group dinner"
+    ],
+    "difficulty_levers": [
+      "tip rate",
+      "people",
+      "uneven orders"
+    ],
+    "tools": [
+      "keyboard",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "split the bill game",
+      "tip calculator challenge",
+      "who owes what"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "probability_bet",
+    "name": "Pick the likelier",
+    "aliases": [
+      "Probability game"
+    ],
+    "family": "number_math",
+    "summary": "Choose which of two events is more likely, then see the math.",
+    "core_loop": "Read two possible events and pick which is more likely, then see the odds worked out and a quick simulation",
+    "verbs": [
+      "estimate",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "answers by true probability"
+    ],
+    "win": "most right",
+    "lose": "none",
+    "scoring": "right picks",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "stats class duel"
+    ],
+    "difficulty_levers": [
+      "closeness",
+      "event complexity",
+      "time"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "which is more likely game",
+      "probability intuition quiz",
+      "odds guessing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "graph_point_plot",
+    "name": "Plot the point",
+    "aliases": [
+      "Coordinate plot"
+    ],
+    "family": "number_math",
+    "summary": "Tap the coordinate on a grid as fast as possible.",
+    "core_loop": "Read a pair of coordinates and tap that point on a grid as fast as possible, with points racing through all four quadrants",
+    "verbs": [
+      "locate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "exact cell only"
+    ],
+    "win": "plot every point",
+    "lose": "three misses",
+    "scoring": "points plotted",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "class race"
+    ],
+    "difficulty_levers": [
+      "quadrant",
+      "speed",
+      "grid scale"
+    ],
+    "tools": [
+      "grid_board",
+      "lives",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "plot coordinates game",
+      "tap the point on the graph",
+      "coordinate grid practice"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "angle_estimate",
+    "name": "Guess the angle",
+    "aliases": [
+      "Angle game"
+    ],
+    "family": "number_math",
+    "summary": "Estimate the angle shown in degrees.",
+    "core_loop": "An angle appears; type your estimate in degrees and score by how close you are, with streaks for tight guesses",
+    "verbs": [
+      "estimate"
+    ],
+    "inputs": [
+      "type",
+      "drag"
+    ],
+    "rules": [
+      "answers in degrees"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points by degrees off",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "geometry duel"
+    ],
+    "difficulty_levers": [
+      "precision",
+      "angle range",
+      "time"
+    ],
+    "tools": [
+      "reveal",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "guess the angle game",
+      "estimate degrees",
+      "angle guessing for geometry"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shape_area_calc",
+    "name": "Find the area",
+    "aliases": [
+      "Area puzzle"
+    ],
+    "family": "number_math",
+    "summary": "Calculate a shape's area from given lengths.",
+    "core_loop": "Read a shape with labeled side lengths, compute its area, type it, and check; harder rounds combine shapes",
+    "verbs": [
+      "calculate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "answers exact"
+    ],
+    "win": "solve every shape",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "homework helper battle"
+    ],
+    "difficulty_levers": [
+      "shape complexity",
+      "number size",
+      "time"
+    ],
+    "tools": [
+      "keyboard",
+      "hint",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "area puzzle game",
+      "find the missing length",
+      "geometry area challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "number_bonds_pop",
+    "name": "Pop the pairs",
+    "aliases": [
+      "Number bonds"
+    ],
+    "family": "number_math",
+    "summary": "Pop two bubbles that make the target number.",
+    "core_loop": "Numbered bubbles rise; pop two that add up to the target before they float off the top",
+    "verbs": [
+      "add",
+      "find"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "pairs must make the target"
+    ],
+    "win": "clear the screen",
+    "lose": "bubbles overflow",
+    "scoring": "pairs popped",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "kids leaderboard"
+    ],
+    "difficulty_levers": [
+      "target",
+      "rise speed",
+      "bubble count"
+    ],
+    "tools": [
+      "grid_board",
+      "spawn_wave",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pop bubbles that add to 10",
+      "number bonds game",
+      "bubble math"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rounding_rush",
+    "name": "Round it",
+    "aliases": [
+      "Rounding game"
+    ],
+    "family": "number_math",
+    "summary": "Round numbers to the asked place before time runs out.",
+    "core_loop": "Read a number and round it to the asked place value, typing each answer before the timer runs out",
+    "verbs": [
+      "round",
+      "calculate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "standard rounding"
+    ],
+    "win": "most right",
+    "lose": "timer runs out",
+    "scoring": "right answers",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "class sprint"
+    ],
+    "difficulty_levers": [
+      "place value",
+      "decimals",
+      "time"
+    ],
+    "tools": [
+      "keyboard",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "rounding game for kids",
+      "round to the nearest ten",
+      "rounding race"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sum_tiles_slide",
+    "name": "Slide to the sum",
+    "aliases": [
+      "Sum slider"
+    ],
+    "family": "number_math",
+    "summary": "Slide rows of numbers so each column adds to its target.",
+    "core_loop": "Slide rows of number tiles left or right until every column adds up to its target total",
+    "verbs": [
+      "slide",
+      "add"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "rows wrap around"
+    ],
+    "win": "every column hits target",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "rows",
+      "numbers",
+      "moves allowed"
+    ],
+    "tools": [
+      "tile_slide",
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "slide rows to make sums",
+      "number slider puzzle",
+      "column sum puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "lottery_odds_sim",
+    "name": "Odds simulator",
+    "aliases": [
+      "Odds lab"
+    ],
+    "family": "number_math",
+    "summary": "Set up a bet, simulate thousands of tries and guess the outcome before seeing it.",
+    "core_loop": "Pick a bet, predict how often it wins, then run thousands of simulated tries and compare your guess to the result",
+    "verbs": [
+      "predict",
+      "estimate"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "the simulation is fair and seeded"
+    ],
+    "win": "closest prediction",
+    "lose": "none",
+    "scoring": "points by closeness",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "stats nerds compare"
+    ],
+    "difficulty_levers": [
+      "bet type",
+      "trials",
+      "guess tolerance"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "simulate lottery odds",
+      "how often would I win",
+      "probability simulator game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "number_memory_flash",
+    "name": "Flash numbers",
+    "aliases": [
+      "Flash anzan"
+    ],
+    "family": "number_math",
+    "summary": "Numbers flash quickly; add them all and type the total.",
+    "core_loop": "Numbers flash on screen one at a time; add them in your head and type the total at the end",
+    "verbs": [
+      "add",
+      "remember"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "numbers show once"
+    ],
+    "win": "right total",
+    "lose": "none",
+    "scoring": "longest series right",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "abacus club challenge"
+    ],
+    "difficulty_levers": [
+      "count",
+      "speed",
+      "number size"
+    ],
+    "tools": [
+      "sequence_memory",
+      "keyboard",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "flash anzan game",
+      "add the flashing numbers",
+      "mental abacus training"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fizz_buzz_count",
+    "name": "Count with a rule",
+    "aliases": [
+      "Fizz Buzz"
+    ],
+    "family": "number_math",
+    "summary": "Count up, saying a word instead of numbers that fit a rule.",
+    "core_loop": "see the next number → tap the number or the right word → next",
+    "verbs": [
+      "count",
+      "apply"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "multiples of 3 say fizz, of 5 buzz"
+    ],
+    "win": "reach the target count",
+    "lose": "a wrong tap",
+    "scoring": "count reached",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "pass-the-phone party"
+    ],
+    "difficulty_levers": [
+      "rules",
+      "speed"
+    ],
+    "tools": [
+      "turns",
+      "speed_ramp",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "fizz buzz game",
+      "counting game with rules",
+      "drinking-free fizz buzz for a party"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "digit_sum_reduce",
+    "name": "Reduce to one digit",
+    "aliases": [
+      "Digital root"
+    ],
+    "family": "number_math",
+    "summary": "Repeatedly sum digits to reach a single digit quickly.",
+    "core_loop": "See a large number, add its digits, repeat until one digit is left, and type that root as fast as you can",
+    "verbs": [
+      "calculate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "sum until one digit remains"
+    ],
+    "win": "right root",
+    "lose": "timer runs out",
+    "scoring": "numbers solved",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "quick duels"
+    ],
+    "difficulty_levers": [
+      "number size",
+      "time",
+      "streak target"
+    ],
+    "tools": [
+      "keyboard",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "digital root game",
+      "add the digits until one",
+      "number reduction"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "number_pyramid",
+    "name": "Number pyramid",
+    "aliases": [
+      "Pyramid sums"
+    ],
+    "family": "number_math",
+    "summary": "Each brick is the sum of the two below; fill the missing bricks.",
+    "core_loop": "Each brick equals the sum of the two below it; fill the missing bricks from the given ones until the pyramid checks out",
+    "verbs": [
+      "add",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "each brick equals the two below"
+    ],
+    "win": "fill every brick",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "levels",
+      "givens",
+      "operation"
+    ],
+    "tools": [
+      "grid_board",
+      "keyboard",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "number pyramid puzzle",
+      "brick wall math",
+      "addition pyramid"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "calendar_day_calc",
+    "name": "What day was it",
+    "aliases": [
+      "Doomsday rule"
+    ],
+    "family": "number_math",
+    "summary": "Work out the weekday of a given date.",
+    "core_loop": "Read a date and work out which weekday it falls on, then tap it; faster answers score more",
+    "verbs": [
+      "calculate",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one correct day"
+    ],
+    "win": "most right",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "party trick practice"
+    ],
+    "difficulty_levers": [
+      "year range",
+      "time",
+      "hints"
+    ],
+    "tools": [
+      "quiz",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "what day of the week was my birthday",
+      "doomsday algorithm game",
+      "calendar trick"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "split_the_stack",
+    "name": "Split the pile",
+    "aliases": [
+      "Nim",
+      "Subtraction game"
+    ],
+    "family": "number_math",
+    "summary": "Take objects from piles on your turn; whoever takes the last one wins.",
+    "core_loop": "Take turns removing objects from piles; whoever takes the last object wins, so plan moves to leave a losing position",
+    "verbs": [
+      "plan",
+      "calculate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "take at least one from one pile"
+    ],
+    "win": "take the last object",
+    "lose": "your opponent takes the last",
+    "scoring": "wins",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "challenge a friend"
+    ],
+    "difficulty_levers": [
+      "piles",
+      "take limit",
+      "last-taker loses variant"
+    ],
+    "tools": [
+      "turns",
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "nim game against my friend",
+      "take the last stick",
+      "matchstick strategy"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

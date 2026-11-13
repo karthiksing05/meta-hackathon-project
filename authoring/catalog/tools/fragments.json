@@ -1,0 +1,874 @@
+[
+  {
+    "id": "beat_target",
+    "kind": "fragment",
+    "name": "Beat a friend",
+    "aliases": [
+      "beat my score",
+      "challenge"
+    ],
+    "summary": "Wins the run the moment score passes a friend's score; the HUD shows \"Beat <friend>: <score>\".",
+    "when_to_use": "Friend challenges: \"beat my score\". Pair with score and a lose path (lives, timer_bar or countdown); leave score's own target at 0.",
+    "api": "requires state score:int; the app passes friend_name and target; emits target_beaten once when score > target",
+    "events": [
+      "target_beaten"
+    ],
+    "params": {
+      "friend_name": "string, default \"Maya\", max 12 chars",
+      "target": "int, default 100, 0..100000"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/beat_target.fragment.json"
+  },
+  {
+    "id": "checkpoint",
+    "kind": "fragment",
+    "name": "Checkpoint",
+    "aliases": [
+      "save point",
+      "progress save"
+    ],
+    "summary": "Saves the best progress seen so far at safe moments and hands back a restore value (minus a penalty) after a setback, so a slip does not reset the whole run.",
+    "when_to_use": "Longer runs where losing everything on one mistake would feel harsh: platform stages, wave survival, distance runs.",
+    "api": "game provides function progress_now() -> int and emits checkpoint_reached; bind setback to life_lost or any event; game applies restore_checkpoint {value} itself; provides state checkpoint",
+    "events": [
+      "checkpoint_saved",
+      "restore_checkpoint"
+    ],
+    "params": {
+      "penalty": "int, default 0, 0..100000",
+      "show": "bool, default true",
+      "label": "string, default \"Saved\", max 12 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/checkpoint.fragment.json"
+  },
+  {
+    "id": "choice_story",
+    "kind": "fragment",
+    "name": "Branching story",
+    "aliases": [
+      "choose your own adventure",
+      "visual novel",
+      "interactive fiction"
+    ],
+    "summary": "Scenes of up to four short lines with 2 or 3 choice buttons; each choice leads to another scene, and scenes can be good or bad endings (up to 60 scenes).",
+    "when_to_use": "Story, mystery and choice games; any game where reading and picking a path is the play. Track clues or trust with game state on choice_made.",
+    "api": "game declares state story_lines (4 per scene), story_labels (3 per scene), story_next (3 per scene, scene numbers as strings), story_ends (1 per scene: '', 'good', 'bad'), usually from content; provides state scene and input choose; optional scene and button sprites",
+    "events": [
+      "choice_made",
+      "ending_reached"
+    ],
+    "params": {
+      "read_ms": "duration, default 1200, 0..10000",
+      "good_wins": "bool, default true",
+      "bad_loses": "bool, default true",
+      "text_y": "int, default 150, 40..400",
+      "button_y": "int, default 380, 200..560",
+      "picture_y": "int, default 310, 60..560",
+      "picture_h": "int, default 110, 40..300",
+      "picture_sway": "float, default 0, 0..20"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/choice_story.fragment.json"
+  },
+  {
+    "id": "collide",
+    "kind": "fragment",
+    "name": "Collision check",
+    "aliases": [
+      "hit detection",
+      "overlap"
+    ],
+    "summary": "Circle overlap between the player and a list of points the game owns; emits hit with a grace window, plus particles, shake and haptic.",
+    "when_to_use": "Any dodge, catch-the-bad-thing or obstacle game. Feed it spawns from spawn_wave or the game's own objects; bind lives to hit.",
+    "api": "requires state player:vec2 and function colliders() -> list<vec2>; provides hit_at, safe_until; the game removes the hit object in its own rule on hit",
+    "events": [
+      "hit"
+    ],
+    "params": {
+      "radius": "float, default 28, 2..200",
+      "grace": "duration, default 1000, 0..5000"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/collide.fragment.json"
+  },
+  {
+    "id": "combo",
+    "kind": "fragment",
+    "name": "Combo multiplier",
+    "aliases": [
+      "streak",
+      "multiplier"
+    ],
+    "summary": "A streak counter: each good hit raises combo up to a max, a bad hit resets it; combo_mult (1 + combo) multiplies points.",
+    "when_to_use": "Rhythm, tapping, catching and quiz games where a streak of good moves should pay more.",
+    "api": "game emits hit_good and hit_bad; provides combo, best_combo, combo_mult; emits combo_broken",
+    "events": [
+      "combo_broken"
+    ],
+    "params": {
+      "step": "int, default 1, 1..5",
+      "max": "int, default 8, 2..20",
+      "label": "string, default \"Combo\", max 12 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/combo.fragment.json"
+  },
+  {
+    "id": "countdown",
+    "kind": "fragment",
+    "name": "Countdown clock",
+    "aliases": [
+      "timer",
+      "clock"
+    ],
+    "summary": "A visible clock that counts down and emits time_up at zero, optionally winning or losing the game; it warns in the last seconds.",
+    "when_to_use": "Timed runs: score attack, survive until the clock ends, beat a puzzle before time runs out.",
+    "api": "emits time_up; on_end none | win | lose; does not set the game's time_limit",
+    "events": [
+      "time_up"
+    ],
+    "params": {
+      "ms": "duration, default \"@game.duration_ms\", 1000..600000",
+      "on_end": "enum, none | win | lose, default \"none\"",
+      "warn_at": "duration, default 5000, 0..60000"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/countdown.fragment.json"
+  },
+  {
+    "id": "daily_seed",
+    "kind": "fragment",
+    "name": "Daily seed",
+    "aliases": [
+      "daily puzzle",
+      "puzzle of the day"
+    ],
+    "summary": "Marks a run as the day's shared puzzle. The host passes the day's seed (same for everyone in a Group) so everyone gets the same game; shows \"Daily · <day>\".",
+    "when_to_use": "Daily puzzles and Group daily sets where everyone plays the same board and compares.",
+    "api": "host starts the game with the day's seed and passes day_label; provides state daily:bool; emits nothing",
+    "events": [],
+    "params": {
+      "day_label": "string, default \"Today\", max 20 chars",
+      "enabled": "bool, default true"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/daily_seed.fragment.json"
+  },
+  {
+    "id": "difficulty_curve",
+    "kind": "fragment",
+    "name": "Difficulty curve",
+    "aliases": [
+      "ramp",
+      "difficulty ramp"
+    ],
+    "summary": "One float knob, difficulty, that ramps from a start to an end value over a set time with a chosen easing, then holds.",
+    "when_to_use": "Any action game that should get harder smoothly; read difficulty in spawn gaps, speeds or sizes.",
+    "api": "provides state difficulty:float; curve linear | ease_in | ease_out | ease_in_out",
+    "events": [],
+    "params": {
+      "from": "float, default 0, 0..10",
+      "to": "float, default 1, 0..10",
+      "over": "duration, default 45000, 1000..300000",
+      "curve": "enum, linear | ease_in | ease_out | ease_in_out, default \"linear\""
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/difficulty_curve.fragment.json"
+  },
+  {
+    "id": "endless",
+    "kind": "fragment",
+    "name": "Endless levels",
+    "aliases": [
+      "endless mode",
+      "infinite"
+    ],
+    "summary": "No win condition; a level counter climbs every few seconds and emits level_up so the game can raise difficulty.",
+    "when_to_use": "Endless runners, survival and score-attack games. Needs its own lose path (lives, timer_bar).",
+    "api": "provides state level; emits level_up; sets no objectives; leave time_limit unset",
+    "events": [
+      "level_up"
+    ],
+    "params": {
+      "level_every": "duration, default 8000, 2000..60000"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/endless.fragment.json"
+  },
+  {
+    "id": "fuzzy_match",
+    "kind": "fragment",
+    "name": "Fuzzy answer match",
+    "aliases": [
+      "typo tolerance",
+      "close enough",
+      "answer matching",
+      "forgiving match"
+    ],
+    "summary": "Pure functions that decide whether typed text matches an accepted answer: ignore case, accents, punctuation, a leading article, word order, plurals and number words; forgive typos by length (4 letters or fewer exact, 5-7 one typo, longer at threshold); optional phonetic match. Deterministic.",
+    "when_to_use": "Custom typed-answer rules: names, titles, spells, open answers. typed_answer already uses it, so do not add it there.",
+    "api": "fuzzy_ok(input, entry) -> bool; fuzzy_best(input, entries: list<string>) -> int (-1 if none); fuzzy_score(input, name) -> float 0..1; fuzzy_passes(input, name, score) -> bool; fuzzy_entry(input, entry) -> float; fuzzy_key(s) -> string (normalized). An entry is an answer plus aliases joined by =, e.g. \"hermione granger=hermione\". Spec: authoring/SPEC.md 2.12",
+    "events": [],
+    "params": {
+      "threshold": "float, default 0.82, 0.5..1",
+      "phonetic": "bool, default false"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/fuzzy_match.fragment.json",
+    "example_types": [
+      "rare_answer_trivia",
+      "name_all_x",
+      "guess_the_character"
+    ],
+    "gaps_it_closes": [
+      "exact-only typed answer matching"
+    ]
+  },
+  {
+    "id": "ghost_score",
+    "kind": "fragment",
+    "name": "Friend ghost",
+    "aliases": [
+      "race a friend",
+      "ghost run"
+    ],
+    "summary": "Races a friend's recorded run: a ghost score rises from 0 to the friend's final score over their run time, shown next to yours.",
+    "when_to_use": "Async friend challenges where you watch yourself pull ahead of or fall behind a friend in real time. Pair with beat_target for the win.",
+    "api": "requires state score:int; the app passes friend_name, friend_score and friend_time; provides state ghost; emits passed_ghost and ghost_passed_you once each",
+    "events": [
+      "passed_ghost",
+      "ghost_passed_you"
+    ],
+    "params": {
+      "friend_name": "string, default \"Maya\", max 12 chars",
+      "friend_score": "int, default 300, 0..100000",
+      "friend_time": "duration, default 30000, 1000..600000"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/ghost_score.fragment.json"
+  },
+  {
+    "id": "gravity_jump",
+    "kind": "fragment",
+    "name": "Tap to jump",
+    "aliases": [
+      "jump",
+      "hop",
+      "flappy"
+    ],
+    "summary": "Tap to hop against gravity onto a floor, with an optional double jump; provides the player position and draws the floor and avatar.",
+    "when_to_use": "One-button jumpers and side runners: jump over obstacles, hop for pickups. Conflicts with player_drag and lanes.",
+    "api": "provides state player:vec2 (fixed x) and vel_y; emits jumped and landed; optional avatar and ground sprites",
+    "events": [
+      "jumped",
+      "landed"
+    ],
+    "params": {
+      "gravity": "float, default 1800, 200..5000",
+      "jump_vel": "float, default 720, 100..2000",
+      "floor_y": "float, default 540, 100..640",
+      "x": "float, default 90, 0..360",
+      "double_jump": "bool, default false",
+      "size": "float, default 16, 4..40",
+      "tone": "enum, primary | secondary | accent | ink | danger, default \"primary\""
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/gravity_jump.fragment.json",
+    "notes": "conflicts with player_drag, lanes"
+  },
+  {
+    "id": "grid_board",
+    "kind": "fragment",
+    "name": "Tap grid",
+    "aliases": [
+      "board",
+      "grid",
+      "cells"
+    ],
+    "summary": "A tappable board of square cells (2 to 10 per side) that sends tap_cell; the game paints each cell's colour and label. It has no rules of its own.",
+    "when_to_use": "Board, grid and tile games: match pairs, tic-tac-toe-like boards, pixel picking, minesweeper-like reveals, grid logic puzzles.",
+    "api": "game provides functions cell_fill(c: ivec2) -> string (hex or '') and cell_label(c) -> string; sends input tap_cell {cell}; cell index = c.y * cols + c.x; optional cell sprite",
+    "events": [],
+    "params": {
+      "cols": "int, default 4, 2..10",
+      "rows": "int, default 4, 2..10",
+      "cell_size": "int, default 64, 24..90",
+      "gap": "int, default 8, 0..16",
+      "x": "int, default 36, 0..360",
+      "y": "int, default 180, 0..640"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/grid_board.fragment.json"
+  },
+  {
+    "id": "hint",
+    "kind": "fragment",
+    "name": "Hint button",
+    "aliases": [
+      "help",
+      "clue button"
+    ],
+    "summary": "A limited-use hint button: each tap spends a hint and turns hint_active on for a short cooldown.",
+    "when_to_use": "Puzzles and memory games where a few helps keep players from getting stuck; the game decides what hint_active reveals.",
+    "api": "provides state hints_left and hint_active; emits hint_used",
+    "events": [
+      "hint_used"
+    ],
+    "params": {
+      "uses": "int, default 2, 1..5",
+      "cooldown": "duration, default 3000, 500..10000"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/hint.fragment.json"
+  },
+  {
+    "id": "keyboard",
+    "kind": "fragment",
+    "name": "On-screen keyboard",
+    "aliases": [
+      "letter keys",
+      "keypad"
+    ],
+    "summary": "A grid of on-screen keys, one per character of a letters string; tapping sends press {letter}. Keys colour by the game's key_state.",
+    "when_to_use": "Any typing: word guessing (with word_check), typed answers (with typed_answer), spelling and code entry.",
+    "api": "game provides function key_state(letter) -> int (0 untouched, 1 good, 2 bad), unless word_check or typed_answer provides it; sends input press {letter}; cols * rows >= letters",
+    "events": [],
+    "params": {
+      "letters": "string, default \"abcdefghijklmnopqrstuvwxyz\", max 40 chars",
+      "cols": "int, default 7, 4..10",
+      "rows": "int, default 4, 1..10",
+      "key_size": "int, default 44, 28..60",
+      "gap": "int, default 4, 0..12",
+      "x": "int, default 14, 0..360",
+      "y": "int, default 400, 0..640"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/keyboard.fragment.json"
+  },
+  {
+    "id": "lanes",
+    "kind": "fragment",
+    "name": "Lane switching",
+    "aliases": [
+      "lanes",
+      "lane runner",
+      "swipe lanes"
+    ],
+    "summary": "Moves the avatar one lane left or right (3 to 5 lanes) on a tap of either half of the screen; draws lane strips and the avatar.",
+    "when_to_use": "Lane runners and dodgers: switch lanes to avoid what comes down or grab pickups. Conflicts with player_drag and gravity_jump.",
+    "api": "provides state player:vec2, lane:int and function lane_x(i) -> float; emits lane_changed",
+    "events": [
+      "lane_changed"
+    ],
+    "params": {
+      "count": "int, default 3, 3..5",
+      "x_min": "float, default 80, 0..360",
+      "x_max": "float, default 280, 0..360",
+      "y": "float, default 540, 0..640",
+      "size": "float, default 16, 4..40",
+      "tone": "enum, primary | secondary | accent | ink | danger, default \"primary\""
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/lanes.fragment.json",
+    "notes": "conflicts with player_drag, gravity_jump"
+  },
+  {
+    "id": "lives",
+    "kind": "fragment",
+    "name": "Lives",
+    "aliases": [
+      "hearts",
+      "health"
+    ],
+    "summary": "N lives; each hit costs one and the game is lost at zero. Shows \"Lives: N\" or a row of life sprites.",
+    "when_to_use": "Any game with mistakes that should end the run after a few: dodgers, quizzes (bind hit to answered_wrong), memory games.",
+    "api": "requires event hit (bind it to collide's hit or any wrong-move event); provides state lives; emits life_lost",
+    "events": [
+      "life_lost"
+    ],
+    "params": {
+      "count": "int, default 3, 1..9"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/lives.fragment.json",
+    "notes": "conflicts with sudden_death"
+  },
+  {
+    "id": "match_pairs",
+    "kind": "fragment",
+    "name": "Memory match",
+    "aliases": [
+      "concentration",
+      "flip cards",
+      "pairs"
+    ],
+    "summary": "Face-down cards in pairs on a grid_board; flip two at a time, matches stay up, misses flip back; matching every pair wins.",
+    "when_to_use": "Memory and matching games, with themed card faces per symbol.",
+    "api": "listens to grid_board's tap_cell (cols must equal the board's); provides state cards (symbol, revealed, matched), selected, matches; emits pair_found and pair_missed; optional card sprite",
+    "events": [
+      "pair_found",
+      "pair_missed"
+    ],
+    "params": {
+      "pairs": "int, default 8, 2..12",
+      "cols": "int, default 4, 2..10",
+      "mismatch_ms": "duration, default 800, 200..3000",
+      "x": "int, default 36, 0..360",
+      "y": "int, default 180, 0..640",
+      "cell_size": "int, default 64, 24..90",
+      "gap": "int, default 8, 0..16"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/match_pairs.fragment.json"
+  },
+  {
+    "id": "pickups",
+    "kind": "fragment",
+    "name": "Pickups",
+    "aliases": [
+      "collectibles",
+      "coins",
+      "stars"
+    ],
+    "summary": "Collectibles that appear in place, fall from the top or scroll in from the right; touching one with the player collects it and emits point.",
+    "when_to_use": "Catch and collect games, runners with coins, and any game with things to grab.",
+    "api": "requires state player:vec2 and event point (from score or the game); provides state items and collected; emits collected_one; optional pickup sprite",
+    "events": [
+      "collected_one"
+    ],
+    "params": {
+      "every": "duration, default 1500, 200..10000",
+      "max_alive": "int, default 3, 1..20",
+      "radius": "float, default 12, 4..40",
+      "reach": "float, default 16, 0..60",
+      "lifetime": "duration, default 6000, 0..60000",
+      "x_min": "float, default 40, 0..360",
+      "x_max": "float, default 320, 0..360",
+      "y_min": "float, default 160, 0..640",
+      "y_max": "float, default 520, 0..640",
+      "columns": "int, default 0, 0..8",
+      "fall": "float, default 0, 0..600",
+      "scroll": "float, default 0, 0..600"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/pickups.fragment.json"
+  },
+  {
+    "id": "player_drag",
+    "kind": "fragment",
+    "name": "Drag to steer",
+    "aliases": [
+      "drag",
+      "steer",
+      "follow finger"
+    ],
+    "summary": "Drag to move an avatar along x, y or both, snapping to the finger or gliding toward it; draws the avatar.",
+    "when_to_use": "Dodgers, catchers, paddles and shooters where the player steers directly. Conflicts with gravity_jump and lanes.",
+    "api": "provides state player:vec2; axis x | y | xy; mode follow | glide; optional avatar sprite",
+    "events": [],
+    "params": {
+      "axis": "enum, x | y | xy, default \"x\"",
+      "mode": "enum, follow | glide, default \"follow\"",
+      "start_x": "float, default 180, 0..360",
+      "start_y": "float, default 560, 0..640",
+      "speed": "float, default 420, 50..2000",
+      "margin": "float, default 20, 0..120",
+      "key_step": "float, default 28, 4..120",
+      "size": "float, default 14, 4..60",
+      "tone": "enum, primary | secondary | accent | ink | danger, default \"primary\""
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/player_drag.fragment.json",
+    "notes": "conflicts with gravity_jump, lanes"
+  },
+  {
+    "id": "quiz",
+    "kind": "fragment",
+    "name": "Multiple-choice quiz",
+    "aliases": [
+      "trivia",
+      "quiz",
+      "multiple choice"
+    ],
+    "summary": "Multiple-choice questions (2 to 4 choices) one at a time with a draining time bar; shows the right answer after each pick.",
+    "when_to_use": "Trivia and knowledge quizzes where picking from choices is right. For typed or open answers use typed_answer instead.",
+    "api": "game provides functions quiz_questions(), quiz_choices() (choices per question, flattened) and quiz_answers() (exact correct text), all list<string>; provides question_text, correct_answer, right_count, wrong_count; bind rounds' round_done to question_done and score's point to answered_right",
+    "events": [
+      "answered_right",
+      "answered_wrong",
+      "question_done"
+    ],
+    "params": {
+      "choices": "int, default 3, 2..4",
+      "time_ms": "duration, default 8000, 1000..30000",
+      "goal": "int, default 0, 0..200"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/quiz.fragment.json"
+  },
+  {
+    "id": "reveal",
+    "kind": "fragment",
+    "name": "Progress reveal",
+    "aliases": [
+      "uncover",
+      "hidden message"
+    ],
+    "summary": "Hidden text that uncovers letter by letter as a progress number rises; can win when fully revealed.",
+    "when_to_use": "A message, title or secret that the player earns by playing: a birthday note, a puzzle answer, a story line.",
+    "api": "requires state reveal_progress:int (bind to score or another rising int); provides reveal_text and revealed; emits fully_revealed",
+    "events": [
+      "fully_revealed"
+    ],
+    "params": {
+      "text": "string, default \"Something good is coming\", max 80 chars",
+      "per_piece": "int, default 10, 1..1000",
+      "wins": "bool, default false",
+      "layer": "enum, playfield | overlay, default \"playfield\"",
+      "wrap": "int, default 20, 8..30",
+      "size": "int, default 24, 12..40",
+      "x": "int, default 180, 0..360",
+      "y": "int, default 110, 0..640"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/reveal.fragment.json"
+  },
+  {
+    "id": "rounds",
+    "kind": "fragment",
+    "name": "Rounds",
+    "aliases": [
+      "rounds",
+      "levels",
+      "stages"
+    ],
+    "summary": "A finite run of N rounds; counts round_done events and wins after the last round.",
+    "when_to_use": "Quizzes, typed answers and any game played as a fixed set of rounds or questions.",
+    "api": "requires event round_done; provides state round; emits round_started {index} and all_rounds_done",
+    "events": [
+      "round_started",
+      "all_rounds_done"
+    ],
+    "params": {
+      "count": "int, default 5, 1..20",
+      "label": "string, default \"Round\", max 16 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/rounds.fragment.json"
+  },
+  {
+    "id": "score",
+    "kind": "fragment",
+    "name": "Score",
+    "aliases": [
+      "points"
+    ],
+    "summary": "A score that rises on each point event, with an optional target that wins.",
+    "when_to_use": "Almost every game with points. Not with typed_answer, which keeps its own score.",
+    "api": "provides state score and event point; games may also write score directly",
+    "events": [
+      "point"
+    ],
+    "params": {
+      "points": "int, default 1, 1..1000",
+      "target": "int, default 0, 0..100000",
+      "label": "string, default \"Score\", max 16 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/score.fragment.json"
+  },
+  {
+    "id": "sequence_memory",
+    "kind": "fragment",
+    "name": "Sequence memory",
+    "aliases": [
+      "simon says",
+      "repeat the pattern"
+    ],
+    "summary": "Watch-and-repeat pattern memory on 3 to 6 coloured pads; each success adds one more step, a wrong tap replays the pattern.",
+    "when_to_use": "Memory and rhythm-flavoured games where players repeat a growing sequence.",
+    "api": "sends input pad {index}; provides pattern, pos, showing, lit, best_len; emits sequence_ok, sequence_wrong and pad_ok; optional pad sprite",
+    "events": [
+      "sequence_ok",
+      "sequence_wrong",
+      "pad_ok"
+    ],
+    "params": {
+      "pads": "int, default 4, 3..6",
+      "start_len": "int, default 3, 1..6",
+      "show_ms": "duration, default 500, 150..1500",
+      "target_len": "int, default 8, 0..30",
+      "y": "int, default 250, 100..400"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/sequence_memory.fragment.json"
+  },
+  {
+    "id": "shared_progress",
+    "kind": "fragment",
+    "name": "Group progress",
+    "aliases": [
+      "group goal",
+      "team total",
+      "community goal"
+    ],
+    "summary": "A Group's combined total across everyone's runs: this run's score adds to what the Group already has, toward a shared goal with a progress bar.",
+    "when_to_use": "Cooperative Group challenges: everyone's runs fill one shared goal.",
+    "api": "requires state score:int; the app or backend passes group_name, group_total and goal; provides group_progress; emits goal_reached once",
+    "events": [
+      "goal_reached"
+    ],
+    "params": {
+      "group_name": "string, default \"Hill Street Crew\", max 20 chars",
+      "group_total": "int, default 0, 0..10000000",
+      "goal": "int, default 1000, 1..10000000"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/shared_progress.fragment.json"
+  },
+  {
+    "id": "sort_bins",
+    "kind": "fragment",
+    "name": "Sort into bins",
+    "aliases": [
+      "sorting",
+      "categorize",
+      "this or that"
+    ],
+    "summary": "One item name at a time; tap which of 2 to 4 labelled bins it belongs in, against a per-item timer.",
+    "when_to_use": "Sorting and categorising games: this-or-that, sort the snacks, which house would they be in.",
+    "api": "game provides functions bin_items(b) -> list<string> and bin_label(b) -> string; sends input choose {bin}; provides deck, item_i, right_count, wrong_count, verdict and current_name(); emits sorted_right and sorted_wrong",
+    "events": [
+      "sorted_right",
+      "sorted_wrong"
+    ],
+    "params": {
+      "bins": "int, default 3, 2..4",
+      "item_ms": "duration, default 4000, 1000..20000",
+      "goal": "int, default 12, 0..200"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/sort_bins.fragment.json"
+  },
+  {
+    "id": "spawn_wave",
+    "kind": "fragment",
+    "name": "Spawner",
+    "aliases": [
+      "spawner",
+      "falling objects",
+      "obstacles"
+    ],
+    "summary": "Spawns round objects from one edge at a steady rate and moves them straight across, removing them when they leave.",
+    "when_to_use": "Hazards, enemies or items that stream across the screen: dodgers, catchers, simple shooters. Pair with collide and speed_ramp.",
+    "api": "provides state spawns and spawn_speed; emits spawned; from top | bottom | left | right; optional hazard sprite",
+    "events": [
+      "spawned"
+    ],
+    "params": {
+      "every": "duration, default 800, 150..10000",
+      "from": "enum, top | bottom | left | right, default \"top\"",
+      "speed": "float, default 140, 20..800",
+      "jitter": "float, default 0.25, 0..0.9",
+      "radius": "float, default 14, 4..60",
+      "max_alive": "int, default 12, 1..60",
+      "kind": "string, default \"hazard\", max 24 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/spawn_wave.fragment.json"
+  },
+  {
+    "id": "speed_ramp",
+    "kind": "fragment",
+    "name": "Speed ramp",
+    "aliases": [
+      "speed up",
+      "acceleration"
+    ],
+    "summary": "Raises spawn_speed by a step every few seconds, up to a maximum.",
+    "when_to_use": "Any spawner game that should speed up over time.",
+    "api": "requires state spawn_speed (from spawn_wave)",
+    "events": [],
+    "params": {
+      "every": "duration, default 4000, 1000..30000",
+      "step": "float, default 0.15, 0.01..1",
+      "max": "float, default 2.5, 1..5"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/speed_ramp.fragment.json"
+  },
+  {
+    "id": "tile_slide",
+    "kind": "fragment",
+    "name": "Sliding merge board",
+    "aliases": [
+      "2048",
+      "merge tiles",
+      "slide puzzle"
+    ],
+    "summary": "A 3x3 to 6x6 board where each swipe slides every tile and merges equal neighbours into double value; a new tile appears after each move.",
+    "when_to_use": "Merge puzzles in the slide-and-combine genre, with themed tiles per value.",
+    "api": "sends input slide {dir} from swipes or arrow keys; provides state board and functions best_tile(), can_move(board), merge_line; emits slid, spawn_tile, merged {value}; loses when no move is left; optional tile sprite",
+    "events": [
+      "spawn_tile",
+      "slid",
+      "merged"
+    ],
+    "params": {
+      "size": "int, default 4, 3..6",
+      "start_tiles": "int, default 2, 1..4",
+      "base": "int, default 2, 1..8",
+      "high_pct": "int, default 10, 1..50",
+      "target": "int, default 0, 0..65536",
+      "cell_size": "int, default 76, 30..100",
+      "gap": "int, default 8, 0..16",
+      "x": "int, default 16, 0..360",
+      "y": "int, default 170, 0..640"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/tile_slide.fragment.json"
+  },
+  {
+    "id": "timer_bar",
+    "kind": "fragment",
+    "name": "Draining timer bar",
+    "aliases": [
+      "time bar",
+      "refill timer"
+    ],
+    "summary": "A time bar that drains every tick and refills on a refill event; empty either loses or just emits time_out.",
+    "when_to_use": "Fast games where good moves buy more time: keep-it-going tapping, rapid sorting, speed rounds.",
+    "api": "requires event refill; provides state time_left and drain_mult; emits time_out; on_empty lose | emit_only",
+    "events": [
+      "time_out"
+    ],
+    "params": {
+      "full_ms": "duration, default 6000, 1000..60000",
+      "refill_ms": "duration, default 1500, 0..60000",
+      "drain_rate": "float, default 1, 0.5..4",
+      "on_empty": "enum, lose | emit_only, default \"lose\"",
+      "x": "int, default 30, 0..360",
+      "y": "int, default 76, 0..640",
+      "w": "int, default 300, 20..360",
+      "h": "int, default 10, 4..40"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/timer_bar.fragment.json"
+  },
+  {
+    "id": "turns",
+    "kind": "fragment",
+    "name": "Pass and play",
+    "aliases": [
+      "pass the phone",
+      "hot seat",
+      "party turns"
+    ],
+    "summary": "Pass-and-play for 2 to 4 people on one phone: each takes turns in rotation behind a \"Pass to <name>\" overlay, with running totals.",
+    "when_to_use": "Party and couch games where friends share one phone and compare scores.",
+    "api": "game emits turn_done {points}; provides turn_player, turn_active, turn_totals, turn_no and turn_name(i); emits turn_started and all_turns_done; run play rules only while turn_active",
+    "events": [
+      "turn_started",
+      "all_turns_done"
+    ],
+    "params": {
+      "players": "int, default 2, 2..4",
+      "turns": "int, default 3, 1..10",
+      "p1": "string, default \"Player 1\", max 10 chars",
+      "p2": "string, default \"Player 2\", max 10 chars",
+      "p3": "string, default \"Player 3\", max 10 chars",
+      "p4": "string, default \"Player 4\", max 10 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/turns.fragment.json"
+  },
+  {
+    "id": "typed_answer",
+    "kind": "fragment",
+    "name": "Typed answer",
+    "aliases": [
+      "open answer",
+      "type the answer",
+      "name a"
+    ],
+    "summary": "Open-answer prompts the player answers by typing on the keyboard fragment; answers (with aliases joined by =) are matched forgivingly by the fuzzy_match rules and score by rarity tier (common to legendary), with a per-prompt timer.",
+    "when_to_use": "Typed trivia and naming games (\"name a…\", fill-in, guess the word, rarest-answer trivia): anywhere multiple choice would be wrong.",
+    "api": "pair with keyboard (letters include space, < and >); game provides ta_prompts() and ta_answers() (tiers split by |, answers by ,, aliases by =), both list<string>; provides key_state, prompt_text, ta_progress, ta_points, typed, last_result, last_answer; emits answered_right {points, tier}, answered_wrong, prompt_done; matching ignores case, accents, punctuation, articles, word order, plurals and number words and forgives typos by length (threshold, phonetic params); not with quiz or score",
+    "events": [
+      "answered_right",
+      "answered_wrong",
+      "prompt_done"
+    ],
+    "params": {
+      "time_ms": "duration, default 20000, 5000..60000",
+      "max_len": "int, default 18, 3..30",
+      "common": "int, default 10, 0..1000",
+      "uncommon": "int, default 25, 0..1000",
+      "rare": "int, default 50, 0..1000",
+      "legendary": "int, default 100, 0..1000",
+      "placeholder": "string, default \"Type your answer\", max 30 chars",
+      "threshold": "float, default 0.82, 0.5..1",
+      "phonetic": "bool, default false"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/typed_answer.fragment.json",
+    "notes": "conflicts with quiz, score"
+  },
+  {
+    "id": "waves",
+    "kind": "fragment",
+    "name": "Waves",
+    "aliases": [
+      "wave survival",
+      "enemy waves"
+    ],
+    "summary": "Escalating waves with a break between; a wave ends when its enemies are cleared or after a set time; clearing enough waves wins.",
+    "when_to_use": "Wave survival, tower defense and shooter games with breathers between rounds.",
+    "api": "provides state wave and in_break; emits wave_started {index}, wave_cleared, all_waves_cleared; the game emits enemies_gone in clear mode",
+    "events": [
+      "enemies_gone",
+      "wave_started",
+      "wave_cleared",
+      "all_waves_cleared"
+    ],
+    "params": {
+      "break_ms": "duration, default 2500, 500..15000",
+      "waves_to_win": "int, default 5, 0..30",
+      "end_on": "enum, clear | timer, default \"clear\"",
+      "wave_ms": "duration, default 12000, 2000..60000",
+      "label": "string, default \"Wave\", max 12 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/waves.fragment.json"
+  },
+  {
+    "id": "word_check",
+    "kind": "fragment",
+    "name": "Word guess check",
+    "aliases": [
+      "wordle-like",
+      "guess the word",
+      "letter feedback"
+    ],
+    "summary": "Guess a hidden word with per-letter feedback (right place, in the word, absent) over a limited number of guesses.",
+    "when_to_use": "Hidden-word guessing games with letter feedback, themed word lists, daily words.",
+    "api": "requires state answer (lowercase, exactly length letters) and keyboard's press input; provides key_state(letter), letter_mark(guess, c), guesses, typed, solved; emits word_solved, guess_wrong; emit word_reset to start a new word",
+    "events": [
+      "word_solved",
+      "guess_wrong",
+      "word_reset"
+    ],
+    "params": {
+      "length": "int, default 5, 3..7",
+      "max_guesses": "int, default 6, 3..8",
+      "on_solved": "enum, win | none, default \"win\"",
+      "cell_size": "int, default 40, 24..56",
+      "gap": "int, default 4, 0..12",
+      "y": "int, default 100, 60..400"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/word_check.fragment.json"
+  }
+]

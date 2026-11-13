@@ -1,0 +1,32 @@
+[
+  {
+    "request": "among us but in our group chat",
+    "expect": [
+      "social_deduction_traitor"
+    ]
+  },
+  {
+    "request": "skribbl but only hogwarts words",
+    "expect": [
+      "draw_and_guess"
+    ]
+  },
+  {
+    "request": "codenames with harry potter words",
+    "expect": [
+      "codenames_clue_giver"
+    ]
+  },
+  {
+    "request": "fibbage about weird science facts",
+    "expect": [
+      "fake_answer_fool_friends"
+    ]
+  },
+  {
+    "request": "most likely to for our group chat",
+    "expect": [
+      "who_knows_the_group_vote"
+    ]
+  }
+]

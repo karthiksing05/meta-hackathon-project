@@ -1,0 +1,848 @@
+[
+  {
+    "id": "yahtzee_combos",
+    "name": "Roll for combos",
+    "aliases": [
+      "Yahtzee"
+    ],
+    "family": "dice_luck",
+    "summary": "Roll five dice up to three times to make combinations, then pick a box to score.",
+    "core_loop": "Roll five dice up to three times, keep the ones you want between rolls, and choose a scoring box for the combination you end with",
+    "verbs": [
+      "roll",
+      "choose",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each box can be used once"
+    ],
+    "win": "highest total",
+    "lose": "none",
+    "scoring": "box scores",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "yahtzee with family async"
+    ],
+    "difficulty_levers": [
+      "rerolls",
+      "dice count",
+      "bonus rules"
+    ],
+    "tools": [
+      "dice",
+      "turns",
+      "score",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "yahtzee with my family",
+      "dice combos game",
+      "roll five dice scoring"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "push_luck_dice",
+    "name": "Push your luck",
+    "aliases": [
+      "Farkle",
+      "Pig"
+    ],
+    "family": "dice_luck",
+    "summary": "Keep rolling to build points; a bust loses everything this turn.",
+    "core_loop": "Roll to add points to this turn's total, then decide to bank or keep rolling; a bust loses everything from the turn",
+    "verbs": [
+      "risk",
+      "decide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "rolling no scoring dice busts"
+    ],
+    "win": "first to the target",
+    "lose": "none",
+    "scoring": "banked points",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "farkle night with friends"
+    ],
+    "difficulty_levers": [
+      "target",
+      "bust faces",
+      "dice count"
+    ],
+    "tools": [
+      "dice",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "farkle dice game",
+      "pig dice push your luck",
+      "roll or bank"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coin_flip_streak",
+    "name": "Coin flip streak",
+    "aliases": [
+      "Coin flip"
+    ],
+    "family": "dice_luck",
+    "summary": "Call heads or tails; keep the streak going; bank whenever.",
+    "core_loop": "Call heads or tails before each flip; a right call keeps the streak and grows the payout, and you bank whenever you choose",
+    "verbs": [
+      "guess",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong calls lose the unbanked streak"
+    ],
+    "win": "best banked streak",
+    "lose": "none",
+    "scoring": "streak",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "settle bets with friends"
+    ],
+    "difficulty_levers": [
+      "payout steps",
+      "streak cap",
+      "bank penalty"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "coin flip game",
+      "heads or tails streak",
+      "flip a coin with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "wheel_spin_prize",
+    "name": "Spin the wheel",
+    "aliases": [
+      "Wheel of prizes"
+    ],
+    "family": "dice_luck",
+    "summary": "Spin a prize wheel; segments give points, multipliers or bankrupt.",
+    "core_loop": "Spin a prize wheel and land on points, a multiplier or bankrupt, then choose whether to spin again",
+    "verbs": [
+      "spin",
+      "risk"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "bankrupt resets your points"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "party prize wheel"
+    ],
+    "difficulty_levers": [
+      "segments",
+      "bankrupt slices",
+      "spins allowed"
+    ],
+    "tools": [
+      "reveal",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "spin the wheel game",
+      "prize wheel with friends",
+      "wheel of fortune spin"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "plinko_drop",
+    "name": "Drop the chip",
+    "aliases": [
+      "Plinko"
+    ],
+    "family": "dice_luck",
+    "summary": "Drop a chip from the top and watch it bounce through pegs into a scoring slot.",
+    "core_loop": "Pick where to drop a chip at the top, watch it bounce through the pegs, and score the slot it lands in",
+    "verbs": [
+      "drop",
+      "watch"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the path is random"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "slot points",
+    "session_seconds": [
+      15,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "carnival night"
+    ],
+    "difficulty_levers": [
+      "peg layout",
+      "slot values",
+      "chips per round"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "plinko game",
+      "drop the chip",
+      "price is right plinko"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "slot_reels_fake",
+    "name": "Pull the reels",
+    "aliases": [
+      "Slots (play money)"
+    ],
+    "family": "dice_luck",
+    "summary": "Spin three reels; matching symbols score play-money points.",
+    "core_loop": "Spin three reels of symbols; matching symbols in a line score play-money points",
+    "verbs": [
+      "spin"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no real money"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      15,
+      120
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "symbols",
+      "reels",
+      "payout table"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "fruit slot reels no money",
+      "spin the reels for points",
+      "pretend slot machine"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "scratch_card_reveal",
+    "name": "Scratch to reveal",
+    "aliases": [
+      "Scratch card"
+    ],
+    "family": "dice_luck",
+    "summary": "Scratch off panels; three matching symbols win points.",
+    "core_loop": "Scratch off the panels one by one to reveal symbols; three matching symbols win points",
+    "verbs": [
+      "scratch",
+      "reveal"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "three matches win"
+    ],
+    "win": "win points",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "send a scratch card to a friend"
+    ],
+    "difficulty_levers": [
+      "panels",
+      "symbol variety",
+      "win rate"
+    ],
+    "tools": [
+      "reveal",
+      "drawing_canvas"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "scratch card game",
+      "scratch to reveal prizes",
+      "scratch off with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "roulette_bet_fake",
+    "name": "Wheel bets",
+    "aliases": [
+      "Roulette (play money)"
+    ],
+    "family": "dice_luck",
+    "summary": "Place chips on numbers or colors; spin; payouts by odds.",
+    "core_loop": "Place play-money chips on numbers, colors or groups, spin the wheel, and get paid by the odds of your bets",
+    "verbs": [
+      "bet",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no real money",
+      "standard payouts"
+    ],
+    "win": "grow your chips",
+    "lose": "out of chips",
+    "scoring": "chips",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "table limits",
+      "bet types",
+      "starting chips"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "roulette with fake chips",
+      "red or black game",
+      "practice roulette"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dice_poker",
+    "name": "Dice poker",
+    "aliases": [
+      "Poker Dice",
+      "Liar-free dice poker"
+    ],
+    "family": "dice_luck",
+    "summary": "Roll five dice twice to make the best poker hand against opponents.",
+    "core_loop": "Roll five dice, keep some and reroll the rest once, and compare poker-style hands with your opponents",
+    "verbs": [
+      "roll",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "hands ranked like poker"
+    ],
+    "win": "best hand",
+    "lose": "none",
+    "scoring": "rounds won",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "duel"
+    ],
+    "difficulty_levers": [
+      "rerolls",
+      "hand rankings",
+      "players"
+    ],
+    "tools": [
+      "dice",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "dice poker game",
+      "poker with dice",
+      "witcher dice poker"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ship_captain_crew",
+    "name": "Ship, captain and crew",
+    "aliases": [
+      "Ship Captain Crew"
+    ],
+    "family": "dice_luck",
+    "summary": "Roll for a 6, 5 and 4 in order; the remaining two dice are your cargo score.",
+    "core_loop": "Roll five dice up to three times, locking a 6, then a 5, then a 4 in order; the last two dice are your cargo score",
+    "verbs": [
+      "roll",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "6, 5 and 4 must come in order"
+    ],
+    "win": "highest cargo",
+    "lose": "no ship",
+    "scoring": "cargo",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "bar dice with friends"
+    ],
+    "difficulty_levers": [
+      "rolls",
+      "dice count",
+      "tie rules"
+    ],
+    "tools": [
+      "dice",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "ship captain crew dice",
+      "bar dice game",
+      "6 5 4 dice"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "craps_like_point",
+    "name": "Roll the point",
+    "aliases": [
+      "Craps (play money)"
+    ],
+    "family": "dice_luck",
+    "summary": "Roll to set a point, then hit it again before rolling a seven.",
+    "core_loop": "Roll to set a point number, then keep rolling to hit it again before a seven comes up",
+    "verbs": [
+      "roll",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no real money"
+    ],
+    "win": "hit the point",
+    "lose": "seven out",
+    "scoring": "rounds",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "odds bets",
+      "starting chips",
+      "bet types"
+    ],
+    "tools": [
+      "dice",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "craps practice no money",
+      "hit the point dice",
+      "dice table game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "deal_or_no_deal",
+    "name": "Keep or deal",
+    "aliases": [
+      "Deal or No Deal"
+    ],
+    "family": "dice_luck",
+    "summary": "Open cases to reveal values and decide whether to take the banker's offer.",
+    "core_loop": "Open cases one at a time to reveal values, then decide after each round whether to take the banker's offer or keep going",
+    "verbs": [
+      "risk",
+      "decide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the banker's offer tracks remaining values"
+    ],
+    "win": "take a good deal",
+    "lose": "none",
+    "scoring": "final value",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare with friends"
+    ],
+    "difficulty_levers": [
+      "case count",
+      "offer generosity",
+      "rounds"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "deal or no deal game",
+      "open the cases",
+      "take the banker's offer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "press_your_luck_board",
+    "name": "Big bucks board",
+    "aliases": [
+      "Press Your Luck"
+    ],
+    "family": "dice_luck",
+    "summary": "Stop a flashing board on prizes; whammies wipe you out.",
+    "core_loop": "Stop a flashing board to land on a prize or a whammy that wipes your winnings, then choose to pass or keep playing",
+    "verbs": [
+      "time",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "four whammies and you're out"
+    ],
+    "win": "most winnings",
+    "lose": "four whammies",
+    "scoring": "winnings",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "game show night"
+    ],
+    "difficulty_levers": [
+      "whammy count",
+      "spins earned",
+      "prize sizes"
+    ],
+    "tools": [
+      "reveal",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "press your luck no whammy",
+      "stop the flashing board",
+      "game show luck"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dice_bingo_race",
+    "name": "Roll to fill the card",
+    "aliases": [
+      "Dice bingo"
+    ],
+    "family": "dice_luck",
+    "summary": "Roll dice and mark matching squares; first to complete a line wins.",
+    "core_loop": "Roll dice and mark squares on your card that match the roll; first to complete a line wins",
+    "verbs": [
+      "roll",
+      "mark"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "marks match the roll"
+    ],
+    "win": "complete a line first",
+    "lose": "none",
+    "scoring": "lines",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "family"
+    ],
+    "difficulty_levers": [
+      "card size",
+      "dice count",
+      "line patterns"
+    ],
+    "tools": [
+      "dice",
+      "grid_board",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "dice bingo",
+      "roll and mark game",
+      "family dice bingo"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mystery_box_risk",
+    "name": "Open or walk",
+    "aliases": [
+      "Mystery boxes"
+    ],
+    "family": "dice_luck",
+    "summary": "Open boxes one by one; each could be a prize or a trap that ends your run.",
+    "core_loop": "Open boxes one at a time; each holds a prize or a trap that ends your run, so decide when to keep your haul and walk away",
+    "verbs": [
+      "risk",
+      "decide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "traps end the run unbanked"
+    ],
+    "win": "best banked total",
+    "lose": "trap",
+    "scoring": "banked points",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "risk duels"
+    ],
+    "difficulty_levers": [
+      "trap ratio",
+      "box count",
+      "prize sizes"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mystery box risk game",
+      "open or walk away",
+      "push your luck boxes"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "lucky_draw_raffle",
+    "name": "Group raffle",
+    "aliases": [
+      "Raffle"
+    ],
+    "family": "dice_luck",
+    "summary": "Members join a draw; a winner is picked fairly and announced.",
+    "core_loop": "Group members join a draw, wait for the timer, and a winner is picked fairly at random and announced to the Group",
+    "verbs": [
+      "join",
+      "watch"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one entry per person"
+    ],
+    "win": "win the draw",
+    "lose": "none",
+    "scoring": "none",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "group_daily"
+    ],
+    "social_hooks": [
+      "pick who does the dishes in a Group"
+    ],
+    "difficulty_levers": [
+      "entries",
+      "entry cost",
+      "prize count"
+    ],
+    "tools": [
+      "reveal",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "random raffle for my group",
+      "pick a winner from friends",
+      "who pays for dinner draw"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

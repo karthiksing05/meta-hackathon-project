@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "checklist.schema.json",
+  "title": "family_checklists",
+  "description": "Clarification checklists for one family: what the planner must know before it makes a game of that kind. A checklist with applies_to [\"*\"] is the family default; one naming type ids overrides it for those types. See authoring/catalog/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["family", "checklists"],
+  "properties": {
+    "family": { "type": "string", "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$" },
+    "checklists": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["applies_to", "slots"],
+        "properties": {
+          "applies_to": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^(\\*|[a-z][a-z0-9]*(_[a-z0-9]+)*)$" }
+          },
+          "slots": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 6,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "ask", "why", "need", "default", "choices", "affects"],
+              "properties": {
+                "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$", "maxLength": 40 },
+                "ask": { "type": "string", "minLength": 5, "maxLength": 90 },
+                "why": { "type": "string", "minLength": 5, "maxLength": 300 },
+                "need": { "type": "string", "enum": ["required", "nice"] },
+                "extrapolate_from": { "type": "string", "minLength": 3, "maxLength": 300 },
+                "default": { "type": "string", "minLength": 1, "maxLength": 120 },
+                "ask_when": { "type": "string", "minLength": 3, "maxLength": 300 },
+                "choices": { "type": "array", "minItems": 2, "maxItems": 4, "items": { "type": "string", "minLength": 1, "maxLength": 60 } },
+                "affects": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": { "type": "string", "enum": ["content", "rules", "art", "difficulty", "social"] }
+                },
+                "notes": { "type": "string" }
+              }
+            }
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

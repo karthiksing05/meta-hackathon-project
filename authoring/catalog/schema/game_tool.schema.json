@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "game_tool.schema.json",
+  "title": "game_tool",
+  "description": "One game tool: a building block the composer can use (a fragment, a runtime builtin, a look, or a new runtime, content or server tool). See authoring/catalog/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "summary", "when_to_use", "status"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$", "maxLength": 64 },
+    "kind": { "type": "string", "enum": ["fragment", "builtin", "runtime_tool", "content_tool", "look", "server_tool"] },
+    "name": { "type": "string", "minLength": 2, "maxLength": 80 },
+    "aliases": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 80 } },
+    "summary": { "type": "string", "minLength": 10, "maxLength": 600 },
+    "when_to_use": { "type": "string", "minLength": 5, "maxLength": 600 },
+    "api": { "type": "string", "minLength": 2, "maxLength": 1200 },
+    "events": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "params": { "type": "object", "additionalProperties": { "type": "string" } },
+    "status": { "type": "string", "enum": ["shipped", "building", "planned", "gap"] },
+    "gaps_it_closes": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "example_types": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$" } },
+    "path": { "type": "string", "minLength": 3 },
+    "refs": { "type": "array", "items": { "type": "string", "minLength": 3 } },
+    "notes": { "type": "string" }
+  }
+}

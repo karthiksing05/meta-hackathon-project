@@ -1,0 +1,32 @@
+[
+  {
+    "request": "space invaders with my coworkers faces",
+    "expect": [
+      "fixed_shooter_invaders"
+    ]
+  },
+  {
+    "request": "vampire survivors roguelike with my dog",
+    "expect": [
+      "auto_shooter_survivors"
+    ]
+  },
+  {
+    "request": "worms artillery against my friend",
+    "expect": [
+      "tank_artillery"
+    ]
+  },
+  {
+    "request": "breakout with a picture of my friends",
+    "expect": [
+      "paddle_brick_breaker"
+    ]
+  },
+  {
+    "request": "ballz numbered brick launcher",
+    "expect": [
+      "ball_launcher_bricks"
+    ]
+  }
+]

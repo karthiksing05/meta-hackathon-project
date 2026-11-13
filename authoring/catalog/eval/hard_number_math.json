@@ -1,0 +1,68 @@
+[
+  {
+    "request": "2048 but with hogwarts houses",
+    "expect": [
+      "merge_doubling_tiles"
+    ]
+  },
+  {
+    "request": "nerdle",
+    "expect": [
+      "nerdle_equation_guess",
+      "equation_guess_deduction"
+    ]
+  },
+  {
+    "request": "countdown numbers round make 952 from these",
+    "expect": [
+      "make_target_number",
+      "number_target_arithmetic"
+    ]
+  },
+  {
+    "request": "24 game w cards",
+    "expect": [
+      "make_target_number",
+      "number_target_arithmetic"
+    ]
+  },
+  {
+    "request": "zetamac",
+    "expect": [
+      "mental_math_sprint",
+      "mental_math_chain"
+    ]
+  },
+  {
+    "request": "guess how many jellybeans in the jar",
+    "expect": [
+      "estimate_quantity"
+    ]
+  },
+  {
+    "request": "nim, take sticks, last one loses or wins idk",
+    "expect": [
+      "split_the_stack"
+    ]
+  },
+  {
+    "request": "fruit box make 10 apples",
+    "expect": [
+      "sum_to_ten_clear"
+    ]
+  },
+  {
+    "request": "times tables drill for my 3rd grader",
+    "expect": [
+      "math_fact_drill",
+      "times_tables_speed_drill",
+      "times_table_shooter"
+    ]
+  },
+  {
+    "request": "figure out what day of the week my bday was in 1999",
+    "expect": [
+      "calendar_day_calc"
+    ]
+  }
+]

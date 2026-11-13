@@ -1,0 +1,32 @@
+[
+  {
+    "request": "falling sand game with water and fire",
+    "expect": [
+      "sand_falling_toy"
+    ]
+  },
+  {
+    "request": "cut the rope style candy puzzle",
+    "expect": [
+      "cut_the_rope_feed"
+    ]
+  },
+  {
+    "request": "build a bridge that holds a truck",
+    "expect": [
+      "bridge_builder_load"
+    ]
+  },
+  {
+    "request": "rube goldberg domino chain",
+    "expect": [
+      "chain_reaction_domino"
+    ]
+  },
+  {
+    "request": "blow up the building and watch it fall",
+    "expect": [
+      "destruction_sandbox"
+    ]
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "request": "subway surfers but harry potter",
+    "expect": [
+      "lane_runner"
+    ]
+  },
+  {
+    "request": "chrome dino game",
+    "expect": [
+      "one_tap_auto_runner"
+    ]
+  },
+  {
+    "request": "geometry dash",
+    "expect": [
+      "rhythm_auto_runner",
+      "one_tap_auto_runner"
+    ]
+  },
+  {
+    "request": "flappy bird w my cats face",
+    "expect": [
+      "flappy_tap_flyer"
+    ]
+  },
+  {
+    "request": "crossy road",
+    "expect": [
+      "road_crossing_hopper",
+      "traffic_crossing_frog"
+    ]
+  },
+  {
+    "request": "jetpack joyride",
+    "expect": [
+      "jetpack_hold_runner"
+    ]
+  },
+  {
+    "request": "doodle jump",
+    "expect": [
+      "vertical_jumper"
+    ]
+  },
+  {
+    "request": "slither.io",
+    "expect": [
+      "snake_runner_grow"
+    ]
+  },
+  {
+    "request": "count masters crowd runner thru the gates",
+    "expect": [
+      "crowd_gate_runner"
+    ]
+  },
+  {
+    "request": "altos adventure snowboard down the mountain",
+    "expect": [
+      "downhill_slalom_runner"
+    ]
+  }
+]

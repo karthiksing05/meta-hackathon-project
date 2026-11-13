@@ -1,0 +1,1196 @@
+[
+  {
+    "id": "note_highway_lanes",
+    "name": "Note highway",
+    "aliases": [
+      "Guitar Hero",
+      "Rock Band",
+      "Beatstar"
+    ],
+    "family": "rhythm_music",
+    "summary": "Notes scroll down lanes toward a strike line; tap or hold each lane as the note hits.",
+    "core_loop": "notes scroll down → tap the lane on the line → hold long notes → build a streak",
+    "verbs": [
+      "tap",
+      "hold",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "early or late taps miss",
+      "misses break the streak"
+    ],
+    "win": "finish the song",
+    "lose": "the crowd meter empties",
+    "scoring": "accuracy times streak multiplier",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "challenge friends on the same song"
+    ],
+    "difficulty_levers": [
+      "lanes",
+      "note density",
+      "speed"
+    ],
+    "tools": [
+      "beat_target",
+      "lanes",
+      "combo",
+      "synth_sound"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "guitar hero with our band's song",
+      "tap the notes rhythm game",
+      "beatstar style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "piano_tile_tap",
+    "name": "Tap the black tiles",
+    "aliases": [
+      "Piano Tiles",
+      "Magic Tiles"
+    ],
+    "family": "rhythm_music",
+    "summary": "Black tiles scroll down four columns; tap each one in order and never a white tile.",
+    "core_loop": "Black tiles scroll down four columns; tap each one in order as it arrives, never touching a white tile, as the speed rises",
+    "verbs": [
+      "tap",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "tapping white or missing a tile ends the run"
+    ],
+    "win": "finish the song",
+    "lose": "a wrong tap or missed tile",
+    "scoring": "tiles tapped",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's score on the same song"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "columns",
+      "held tiles"
+    ],
+    "tools": [
+      "beat_target",
+      "lanes",
+      "speed_ramp",
+      "synth_sound"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "piano tiles with taylor swift",
+      "don't tap the white tile",
+      "magic tiles game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "circle_beat_osu",
+    "name": "Hit circles on the beat",
+    "aliases": [
+      "osu!",
+      "Cytus"
+    ],
+    "family": "rhythm_music",
+    "summary": "Circles appear across the screen; tap each as its ring closes on the beat; drag along sliders.",
+    "core_loop": "a ring shrinks → tap the circle when it closes → follow sliders",
+    "verbs": [
+      "tap",
+      "drag",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "timing judges perfect, good or miss"
+    ],
+    "win": "finish the map",
+    "lose": "health runs out",
+    "scoring": "accuracy and combo",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare accuracy"
+    ],
+    "difficulty_levers": [
+      "approach speed",
+      "circle size"
+    ],
+    "tools": [
+      "beat_target",
+      "combo",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "osu style rhythm game",
+      "tap the circles to the beat",
+      "cytus"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "one_button_beat",
+    "name": "One-button rhythm",
+    "aliases": [
+      "Rhythm Doctor",
+      "Rhythm Heaven"
+    ],
+    "family": "rhythm_music",
+    "summary": "Press a single button on a specific beat in a pattern, like the seventh beat of each bar.",
+    "core_loop": "listen to the pattern → press on the target beat → patterns change",
+    "verbs": [
+      "listen",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only the cued beat counts"
+    ],
+    "win": "clear the level",
+    "lose": "too many misses",
+    "scoring": "accuracy",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share perfect runs"
+    ],
+    "difficulty_levers": [
+      "tempo",
+      "swing"
+    ],
+    "tools": [
+      "beat_target",
+      "synth_sound",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "rhythm heaven minigames",
+      "press on the seventh beat",
+      "one button rhythm doctor"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dance_arrows",
+    "name": "Dance arrows",
+    "aliases": [
+      "Dance Dance Revolution",
+      "Just Dance"
+    ],
+    "family": "rhythm_music",
+    "summary": "Arrows scroll up; swipe the matching direction as each reaches the target.",
+    "core_loop": "Arrows scroll up toward a target row; swipe or tap the matching direction as each reaches it, building a streak",
+    "verbs": [
+      "swipe",
+      "time"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "wrong direction or timing misses"
+    ],
+    "win": "finish the song",
+    "lose": "health runs out",
+    "scoring": "accuracy and combo",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "dance-off battles"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "density",
+      "double arrows"
+    ],
+    "tools": [
+      "beat_target",
+      "lanes",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ddr on my phone",
+      "swipe arrows to the beat",
+      "dance dance revolution"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "drum_pads_pattern",
+    "name": "Drum along",
+    "aliases": [
+      "Drum game",
+      "Taiko no Tatsujin"
+    ],
+    "family": "rhythm_music",
+    "summary": "Hit drum pads (center or rim) in rhythm as notes approach.",
+    "core_loop": "notes approach → hit center or rim on time → keep the groove",
+    "verbs": [
+      "tap",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "center and rim notes differ"
+    ],
+    "win": "finish the song",
+    "lose": "health runs out",
+    "scoring": "accuracy",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "drum battles"
+    ],
+    "difficulty_levers": [
+      "tempo",
+      "density"
+    ],
+    "tools": [
+      "beat_target",
+      "lanes",
+      "synth_sound",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "taiko drum game",
+      "drum along to the beat",
+      "tap the drum pads"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "beat_runner_obstacles",
+    "name": "Beat-locked obstacles",
+    "aliases": [
+      "Beat runner",
+      "Crypt of the NecroDancer"
+    ],
+    "family": "rhythm_music",
+    "summary": "You can only move on the beat; movement off-beat fails. Navigate to the exit.",
+    "core_loop": "Move one step per beat through a dungeon; moving off the beat fails, so time each step to dodge enemies and reach the exit",
+    "verbs": [
+      "move",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "off-beat moves are lost"
+    ],
+    "win": "reach the exit",
+    "lose": "hit by an enemy",
+    "scoring": "beats on time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily dungeon"
+    ],
+    "difficulty_levers": [
+      "tempo",
+      "enemies",
+      "level size"
+    ],
+    "tools": [
+      "beat_target",
+      "grid_board",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "move only on the beat",
+      "necrodancer style",
+      "rhythm dungeon"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "clap_rhythm_echo",
+    "name": "Echo the rhythm",
+    "aliases": [
+      "Rhythm echo"
+    ],
+    "family": "rhythm_music",
+    "summary": "Hear a rhythm pattern, then tap it back.",
+    "core_loop": "Hear a clapped rhythm pattern, then tap it back with the right timing; each round the pattern gets longer",
+    "verbs": [
+      "listen",
+      "repeat",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "timing within a window"
+    ],
+    "win": "echo every pattern",
+    "lose": "three misses",
+    "scoring": "patterns matched",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "rhythm duels"
+    ],
+    "difficulty_levers": [
+      "pattern length",
+      "tempo",
+      "timing window"
+    ],
+    "tools": [
+      "beat_target",
+      "sequence_memory",
+      "synth_sound"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "echo the clap rhythm",
+      "repeat the drum pattern",
+      "rhythm memory"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "music_quiz_tempo",
+    "name": "Guess the tempo",
+    "aliases": [
+      "Tempo guess"
+    ],
+    "family": "rhythm_music",
+    "summary": "Tap along to set a BPM; closest to the real tempo scores.",
+    "core_loop": "Listen to a song clip and tap along with the beat; the game estimates your tempo and scores how close it is to the real one",
+    "verbs": [
+      "listen",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "at least 8 taps"
+    ],
+    "win": "closest BPM",
+    "lose": "none",
+    "scoring": "BPM error",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "DJ friends challenge"
+    ],
+    "difficulty_levers": [
+      "genre",
+      "clip length",
+      "tolerance"
+    ],
+    "tools": [
+      "beat_target",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "guess the bpm by tapping",
+      "tap the tempo game",
+      "how good is your timing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "orbit_timing_tap",
+    "name": "Release on the beat into orbit",
+    "aliases": [
+      "Orbit tap"
+    ],
+    "family": "rhythm_music",
+    "summary": "A ball orbits; tap to launch it toward the next ring on the beat.",
+    "core_loop": "A ball orbits a ring; tap on the beat to launch it to the next ring, and miss the timing to fall off",
+    "verbs": [
+      "time",
+      "launch"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "missing the ring ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "a missed ring",
+    "scoring": "rings reached",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streaks"
+    ],
+    "difficulty_levers": [
+      "ring spacing",
+      "tempo",
+      "orbit speed"
+    ],
+    "tools": [
+      "beat_target",
+      "gravity_jump",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "orbit jump rhythm",
+      "launch on the beat",
+      "circle hop game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "music_slice_beat",
+    "name": "Slice on the beat",
+    "aliases": [
+      "Beat Saber"
+    ],
+    "family": "rhythm_music",
+    "summary": "Blocks fly toward you; swipe through them in the arrow's direction, on the beat.",
+    "core_loop": "Blocks fly toward you in time with the music; swipe through each in its arrow's direction on the beat and dodge walls",
+    "verbs": [
+      "swipe",
+      "time"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "wrong direction misses",
+      "bombs cost health"
+    ],
+    "win": "finish the song",
+    "lose": "health empties",
+    "scoring": "accuracy and combo",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compete on the same song"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "density",
+      "walls"
+    ],
+    "tools": [
+      "beat_target",
+      "combo",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "beat saber on phone",
+      "slash blocks to music",
+      "lightsaber rhythm game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "conductor_tempo",
+    "name": "Conduct the orchestra",
+    "aliases": [
+      "Conductor"
+    ],
+    "family": "rhythm_music",
+    "summary": "Swipe in time to keep the orchestra on tempo as the music speeds and slows.",
+    "core_loop": "Swipe in time to conduct an orchestra, keeping them in sync as the music speeds up and slows down",
+    "verbs": [
+      "conduct",
+      "time"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "drifting off tempo makes the music fall apart"
+    ],
+    "win": "finish the piece",
+    "lose": "the orchestra stops",
+    "scoring": "sync accuracy",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share performances"
+    ],
+    "difficulty_levers": [
+      "tempo changes",
+      "time signature",
+      "sections"
+    ],
+    "tools": [
+      "beat_target",
+      "synth_sound",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "conduct the orchestra game",
+      "keep the music on tempo",
+      "be the conductor"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pitch_ear_compare",
+    "name": "Higher or lower note",
+    "aliases": [
+      "Pitch test"
+    ],
+    "family": "rhythm_music",
+    "summary": "Hear two notes and say if the second is higher or lower.",
+    "core_loop": "Hear two notes and tap whether the second is higher or lower; the notes get closer together as you improve",
+    "verbs": [
+      "listen",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "intervals shrink as you improve"
+    ],
+    "win": "longest streak",
+    "lose": "wrong pick",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ear duels"
+    ],
+    "difficulty_levers": [
+      "interval size",
+      "instrument",
+      "time"
+    ],
+    "tools": [
+      "synth_sound",
+      "quiz",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "higher or lower pitch test",
+      "ear training game",
+      "perfect pitch challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "name_that_instrument",
+    "name": "Which instrument",
+    "aliases": [
+      "Instrument quiz"
+    ],
+    "family": "rhythm_music",
+    "summary": "Hear a melody played by an instrument; pick which one.",
+    "core_loop": "Hear a short melody played on one instrument and pick which instrument it is from several options",
+    "verbs": [
+      "listen",
+      "recognize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one instrument per clip"
+    ],
+    "win": "most right",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "band friends"
+    ],
+    "difficulty_levers": [
+      "instrument similarity",
+      "options",
+      "clip length"
+    ],
+    "tools": [
+      "audio_clip",
+      "quiz",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the instrument",
+      "orchestra sound quiz",
+      "which instrument is playing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "lyric_rhythm_type",
+    "name": "Type to the beat",
+    "aliases": [
+      "Type rhythm"
+    ],
+    "family": "rhythm_music",
+    "summary": "Words appear on beats; type each word as its beat lands.",
+    "core_loop": "Words appear on the beat of a track; type each word as its beat lands to keep the music going",
+    "verbs": [
+      "type",
+      "time"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "late words miss"
+    ],
+    "win": "finish the song",
+    "lose": "too many misses",
+    "scoring": "words on time",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "typing rhythm duels"
+    ],
+    "difficulty_levers": [
+      "tempo",
+      "word length",
+      "misses allowed"
+    ],
+    "tools": [
+      "keyboard",
+      "beat_target",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "type the lyrics to the beat",
+      "typing rhythm game",
+      "karaoke typing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "beat_drop_build",
+    "name": "Build the drop",
+    "aliases": [
+      "Drop builder"
+    ],
+    "family": "rhythm_music",
+    "summary": "Add layers on the beat to build tension, then hit the drop at the right moment.",
+    "core_loop": "Add musical layers on the beat to build tension, then hit the drop at exactly the right moment for a big score",
+    "verbs": [
+      "build",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the drop must land on the downbeat"
+    ],
+    "win": "land the drop",
+    "lose": "mistimed drop",
+    "scoring": "crowd hype",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your mix"
+    ],
+    "difficulty_levers": [
+      "layers",
+      "timing window",
+      "tempo"
+    ],
+    "tools": [
+      "synth_sound",
+      "beat_target",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "build up to the beat drop",
+      "dj drop timing game",
+      "edm builder"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "music_memory_simon",
+    "name": "Copy the riff",
+    "aliases": [
+      "Riff copy"
+    ],
+    "family": "rhythm_music",
+    "summary": "Hear a riff on a few pads and copy it; it grows each round.",
+    "core_loop": "Hear a riff played on a few colored pads, then play it back; it grows by one note each round",
+    "verbs": [
+      "listen",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a wrong note ends the round"
+    ],
+    "win": "none; endless",
+    "lose": "wrong note",
+    "scoring": "riff length",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "band challenges"
+    ],
+    "difficulty_levers": [
+      "pads",
+      "tempo",
+      "start length"
+    ],
+    "tools": [
+      "sequence_memory",
+      "synth_sound",
+      "beat_target"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "copy the guitar riff",
+      "music simon",
+      "repeat the riff"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mix_dj_crossfade",
+    "name": "Crossfade the tracks",
+    "aliases": [
+      "DJ mix"
+    ],
+    "family": "rhythm_music",
+    "summary": "Beat-match two tracks and crossfade without a train wreck.",
+    "core_loop": "Adjust two tracks' tempos to match, line up their beats, and crossfade between them without them clashing",
+    "verbs": [
+      "match",
+      "time"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "beats must stay aligned during the fade"
+    ],
+    "win": "a clean mix",
+    "lose": "a train wreck",
+    "scoring": "mix quality",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "DJ battles"
+    ],
+    "difficulty_levers": [
+      "tempo gap",
+      "crossfade time",
+      "track count"
+    ],
+    "tools": [
+      "synth_sound",
+      "beat_target",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "dj mixing game",
+      "beat match two songs",
+      "crossfade challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rhythm_typing_morse",
+    "name": "Tap the rhythm code",
+    "aliases": [
+      "Rhythm code"
+    ],
+    "family": "rhythm_music",
+    "summary": "Tap a word's Morse-like rhythm pattern with long and short presses.",
+    "core_loop": "See a word and tap its rhythm with long and short presses, matching the pattern before the next word comes",
+    "verbs": [
+      "tap",
+      "hold",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "presses are judged by length"
+    ],
+    "win": "tap every word",
+    "lose": "three misses",
+    "scoring": "words right",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "duels"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "word length",
+      "timing window"
+    ],
+    "tools": [
+      "keyboard",
+      "beat_target"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "tap the morse rhythm",
+      "long short press game",
+      "rhythm code"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "band_together",
+    "name": "Each friend one part",
+    "aliases": [
+      "Band jam",
+      "Rock Band co-op"
+    ],
+    "family": "rhythm_music",
+    "summary": "Friends each play one part of the same song (drums, bass, melody); the group score combines everyone.",
+    "core_loop": "pick a part → play your lane → everyone's play combines → group score",
+    "verbs": [
+      "tap",
+      "cooperate"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "each part is played alone, async"
+    ],
+    "win": "finish the song together",
+    "lose": "group meter empties",
+    "scoring": "combined accuracy",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "a Group plays one song together, async"
+    ],
+    "difficulty_levers": [
+      "parts",
+      "difficulty per part"
+    ],
+    "tools": [
+      "beat_target",
+      "lanes",
+      "shared_progress",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "rock band with my friends async",
+      "each of us plays one instrument",
+      "group jam rhythm game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "beat_maze_rotate",
+    "name": "Rotate on the beat",
+    "aliases": [
+      "Beat maze"
+    ],
+    "family": "rhythm_music",
+    "summary": "The maze rotates on each beat; time your steps to the rotation.",
+    "core_loop": "A maze rotates on each beat; step between rotations to work your way to the center without hitting a wall",
+    "verbs": [
+      "time",
+      "move"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "moving during a rotation fails"
+    ],
+    "win": "reach the center",
+    "lose": "a wrong step",
+    "scoring": "beats used",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "tempo",
+      "maze size",
+      "rotation angle"
+    ],
+    "tools": [
+      "beat_target",
+      "grid_board",
+      "rotate"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "maze that spins to the music",
+      "beat timed maze",
+      "rhythm rotation puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "lyric_finish_karaoke",
+    "name": "Sing the missing lyric",
+    "aliases": [
+      "Karaoke fill"
+    ],
+    "family": "rhythm_music",
+    "summary": "The music stops; sing or type the next line.",
+    "core_loop": "An original song plays and stops mid-line; sing or type the next words, and score by how close you get",
+    "verbs": [
+      "recall",
+      "sing"
+    ],
+    "inputs": [
+      "voice",
+      "type"
+    ],
+    "rules": [
+      "words are fuzzy-matched"
+    ],
+    "win": "finish every song",
+    "lose": "three misses",
+    "scoring": "lines right",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "party mode"
+    ],
+    "difficulty_levers": [
+      "era",
+      "options vs typed",
+      "line length"
+    ],
+    "tools": [
+      "audio_clip",
+      "typed_answer",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [
+      "voice_input"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "finish the lyric karaoke",
+      "sing the next line game",
+      "don't forget the lyrics"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

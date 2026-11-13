@@ -1,0 +1,1078 @@
+[
+  {
+    "id": "sand_falling_toy",
+    "name": "Falling sand toy",
+    "aliases": [
+      "Powder Game",
+      "Sandspiel"
+    ],
+    "family": "physics_toy",
+    "summary": "Paint sand, water, fire and plants that fall, flow, burn and grow by their own rules.",
+    "core_loop": "Pick an element like sand, water, fire or seeds, paint it into the scene, and watch it fall, flow, burn or grow by its own rules",
+    "verbs": [
+      "paint",
+      "experiment"
+    ],
+    "inputs": [
+      "draw",
+      "drag"
+    ],
+    "rules": [
+      "each element has simple rules (sand falls, water spreads, fire burns plants)"
+    ],
+    "win": "none; sandbox",
+    "lose": "none",
+    "scoring": "none; share creations",
+    "session_seconds": [
+      60,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share a sand painting with a friend"
+    ],
+    "difficulty_levers": [
+      "elements available",
+      "canvas size",
+      "simulation speed"
+    ],
+    "tools": [
+      "physics_world",
+      "drawing_canvas",
+      "particles_haptics"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "falling sand game",
+      "powder toy sandbox",
+      "paint with sand and water"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ragdoll_launch",
+    "name": "Ragdoll launcher",
+    "aliases": [
+      "Ragdoll physics",
+      "Stair Dismount"
+    ],
+    "family": "physics_toy",
+    "summary": "Launch a floppy ragdoll down stairs or off ramps; more damage scores more.",
+    "core_loop": "Position a floppy ragdoll, launch it down stairs or off ramps, and score by how much it tumbles and bumps",
+    "verbs": [
+      "launch",
+      "watch"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "score by impacts"
+    ],
+    "win": "biggest score",
+    "lose": "none",
+    "scoring": "impact points",
+    "session_seconds": [
+      15,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share best fails with friends"
+    ],
+    "difficulty_levers": [
+      "ramp height",
+      "launch power",
+      "obstacles"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "stair dismount ragdoll",
+      "launch the ragdoll",
+      "ragdoll fall score"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "chain_reaction_domino",
+    "name": "Domino chain reaction",
+    "aliases": [
+      "Dominoes",
+      "Rube Goldberg"
+    ],
+    "family": "physics_toy",
+    "summary": "Place dominoes and objects so one push sets off a chain that hits the goal.",
+    "core_loop": "Place dominoes and objects within a budget, push the first one, and watch the chain reaction until it hits the goal",
+    "verbs": [
+      "place",
+      "plan",
+      "watch"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "only one push allowed"
+    ],
+    "win": "the chain hits the goal",
+    "lose": "the chain stops",
+    "scoring": "pieces used",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "build a chain for friends to watch"
+    ],
+    "difficulty_levers": [
+      "piece budget",
+      "goal distance",
+      "piece types"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "domino chain reaction",
+      "rube goldberg machine game",
+      "set up the dominoes"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "contraption_builder",
+    "name": "Build a contraption",
+    "aliases": [
+      "Poly Bridge",
+      "Besiege",
+      "Fantastic Contraption"
+    ],
+    "family": "physics_toy",
+    "summary": "Build a machine from wheels, rods and motors to carry something to the goal.",
+    "core_loop": "Build a machine from wheels, rods and motors, run it, watch it carry the object, and improve it until it reaches the goal",
+    "verbs": [
+      "build",
+      "test"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "parts cost budget"
+    ],
+    "win": "reach the goal",
+    "lose": "under budget fail",
+    "scoring": "cost and time",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share machines"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "parts",
+      "terrain"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag",
+      "joints"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "build a car from parts",
+      "poly bridge style",
+      "fantastic contraption"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bridge_builder_load",
+    "name": "Bridge builder",
+    "aliases": [
+      "Poly Bridge",
+      "Bridge Constructor"
+    ],
+    "family": "physics_toy",
+    "summary": "Build a bridge from beams under budget that holds a vehicle crossing it.",
+    "core_loop": "Place beams under a budget to build a bridge, test it with a vehicle, see where stress builds, and fix it until it holds",
+    "verbs": [
+      "build",
+      "test"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "beams break past their stress limit"
+    ],
+    "win": "the vehicle crosses",
+    "lose": "the bridge collapses",
+    "scoring": "cost",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share designs"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "span",
+      "vehicle weight"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag",
+      "joints"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "bridge builder game",
+      "poly bridge with trucks",
+      "build a bridge that holds"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cut_the_rope_feed",
+    "name": "Cut the ropes",
+    "aliases": [
+      "Cut the Rope"
+    ],
+    "family": "physics_toy",
+    "summary": "Swipe to cut ropes so a swinging candy lands in a creature's mouth, collecting stars on the way.",
+    "core_loop": "swipe a rope → the candy swings and falls → collect stars → feed",
+    "verbs": [
+      "cut",
+      "time"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "ropes cut instantly"
+    ],
+    "win": "feed the creature",
+    "lose": "the candy falls off screen",
+    "scoring": "stars collected",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share three-star solves"
+    ],
+    "difficulty_levers": [
+      "ropes",
+      "obstacles"
+    ],
+    "tools": [
+      "physics_world",
+      "joints",
+      "pickups"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cut the rope game",
+      "swing the candy into the mouth",
+      "rope cutting puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "water_pour_cups",
+    "name": "Pour the water",
+    "aliases": [
+      "Water puzzle",
+      "Where's My Water"
+    ],
+    "family": "physics_toy",
+    "summary": "Dig or tilt so water flows into a target, avoiding hazards.",
+    "core_loop": "Dig channels or tilt pieces so water flows into the target cups while avoiding hazards that waste it",
+    "verbs": [
+      "dig",
+      "tilt"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "water follows gravity"
+    ],
+    "win": "fill the target",
+    "lose": "water spills into hazards",
+    "scoring": "water saved",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share solves"
+    ],
+    "difficulty_levers": [
+      "obstacles",
+      "water amount",
+      "cup count"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "where's my water style",
+      "guide the water to the pipe",
+      "pour water puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pendulum_swing_hit",
+    "name": "Wrecking ball",
+    "aliases": [
+      "Wrecking ball"
+    ],
+    "family": "physics_toy",
+    "summary": "Swing a wrecking ball to knock down a structure in as few swings as possible.",
+    "core_loop": "Pull back a wrecking ball, release it to swing into a structure, and topple it in as few swings as possible",
+    "verbs": [
+      "swing",
+      "aim"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "swings are limited"
+    ],
+    "win": "topple everything",
+    "lose": "out of swings",
+    "scoring": "swings used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share demolitions"
+    ],
+    "difficulty_levers": [
+      "structure",
+      "swings allowed",
+      "rope length"
+    ],
+    "tools": [
+      "physics_world",
+      "joints",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "wrecking ball game",
+      "knock down the building",
+      "demolition swing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "balloon_float_lift",
+    "name": "Float to the target",
+    "aliases": [
+      "Balloon lift"
+    ],
+    "family": "physics_toy",
+    "summary": "Add or pop balloons to lift an object to a target height without hitting spikes.",
+    "core_loop": "Add or pop balloons to lift an object to a target height, steering it around spikes on the way",
+    "verbs": [
+      "balance",
+      "adjust"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "spikes pop balloons"
+    ],
+    "win": "reach the target",
+    "lose": "falls or pops",
+    "scoring": "balloons used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "spikes",
+      "balloons available",
+      "target height"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "balloon lift puzzle",
+      "float the box up",
+      "pop balloons to steer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gravity_well_orbits",
+    "name": "Orbit sandbox",
+    "aliases": [
+      "Gravity sandbox",
+      "Universe Sandbox"
+    ],
+    "family": "physics_toy",
+    "summary": "Place planets and stars and watch their gravity create orbits and collisions.",
+    "core_loop": "Place planets and stars, set their speed, and watch gravity pull them into orbits or collisions",
+    "verbs": [
+      "place",
+      "experiment"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "gravity is simulated"
+    ],
+    "win": "none; sandbox",
+    "lose": "none",
+    "scoring": "none",
+    "session_seconds": [
+      60,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share a solar system"
+    ],
+    "difficulty_levers": [
+      "bodies",
+      "gravity strength",
+      "simulation speed"
+    ],
+    "tools": [
+      "physics_world",
+      "particles_haptics"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "gravity simulator",
+      "make planets orbit",
+      "solar system sandbox"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "slingshot_orbit_goal",
+    "name": "Slingshot to the goal",
+    "aliases": [
+      "Gravity slingshot"
+    ],
+    "family": "physics_toy",
+    "summary": "Launch a probe so it bends around planets' gravity into the goal.",
+    "core_loop": "Aim and set power to launch a probe that curves around planets' gravity into the goal",
+    "verbs": [
+      "aim",
+      "predict"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "planets pull by gravity"
+    ],
+    "win": "reach the goal",
+    "lose": "crash or drift off",
+    "scoring": "attempts",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share trick shots"
+    ],
+    "difficulty_levers": [
+      "planets",
+      "launch power range",
+      "goal size"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "gravity slingshot puzzle",
+      "launch around planets",
+      "orbit shot game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "jelly_squish",
+    "name": "Squish the jelly",
+    "aliases": [
+      "Jelly toy",
+      "slime simulator"
+    ],
+    "family": "physics_toy",
+    "summary": "Poke, stretch and squish a soft body for satisfying feedback.",
+    "core_loop": "Poke, stretch and squish a soft jelly body with your finger and watch it wobble back when you let go",
+    "verbs": [
+      "squish",
+      "play"
+    ],
+    "inputs": [
+      "drag",
+      "multi_touch"
+    ],
+    "rules": [
+      "none"
+    ],
+    "win": "none; toy",
+    "lose": "none",
+    "scoring": "none",
+    "session_seconds": [
+      15,
+      600
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "send a squishy to a friend"
+    ],
+    "difficulty_levers": [
+      "softness",
+      "jelly size",
+      "spring strength"
+    ],
+    "tools": [
+      "physics_world",
+      "particles_haptics"
+    ],
+    "engine_gaps": [
+      "multi_touch"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "slime simulator",
+      "squishy jelly toy",
+      "satisfying poke game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cloth_cut_toy",
+    "name": "Cut the cloth",
+    "aliases": [
+      "Cloth simulator"
+    ],
+    "family": "physics_toy",
+    "summary": "Tear and swing a cloth simulation with your finger.",
+    "core_loop": "Grab and pull a hanging cloth, tear it with your finger, and watch the pieces swing and fall",
+    "verbs": [
+      "tear",
+      "play"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "cloth tears past a strength"
+    ],
+    "win": "none; toy",
+    "lose": "none",
+    "scoring": "none",
+    "session_seconds": [
+      15,
+      300
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "difficulty_levers": [
+      "cloth strength",
+      "cloth size",
+      "wind"
+    ],
+    "tools": [
+      "physics_world",
+      "joints"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "cloth physics toy",
+      "tear the fabric",
+      "curtain simulation"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fluid_pour_mix",
+    "name": "Mix the fluids",
+    "aliases": [
+      "Fluid toy"
+    ],
+    "family": "physics_toy",
+    "summary": "Pour colored liquids and watch them swirl and mix.",
+    "core_loop": "Pour colored liquids into a container and watch them swirl and mix into new colors",
+    "verbs": [
+      "pour",
+      "stir"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "colors blend realistically"
+    ],
+    "win": "none; toy",
+    "lose": "none",
+    "scoring": "none",
+    "session_seconds": [
+      30,
+      600
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "share a swirl"
+    ],
+    "difficulty_levers": [
+      "viscosity",
+      "colors",
+      "container shape"
+    ],
+    "tools": [
+      "physics_world",
+      "particles_haptics"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "fluid simulation toy",
+      "mix the colors in water",
+      "relaxing liquid toy"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bouncing_balls_sandbox",
+    "name": "Bouncy balls",
+    "aliases": [
+      "Ball pit",
+      "bouncing balls"
+    ],
+    "family": "physics_toy",
+    "summary": "Spawn and fling bouncy balls in a room; tilt to slosh them.",
+    "core_loop": "Spawn bouncy balls in a room, fling them around, and tilt the room to slosh them",
+    "verbs": [
+      "fling",
+      "tilt"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "balls bounce elastically"
+    ],
+    "win": "none; toy",
+    "lose": "none",
+    "scoring": "none",
+    "session_seconds": [
+      15,
+      300
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "difficulty_levers": [
+      "bounce",
+      "ball count",
+      "gravity"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "bouncy ball sandbox",
+      "fill the room with balls",
+      "tilt the ball pit"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "destruction_sandbox",
+    "name": "Smash the building",
+    "aliases": [
+      "Destruction sim",
+      "Teardown"
+    ],
+    "family": "physics_toy",
+    "summary": "Place explosives or swing hammers to bring a structure down in style.",
+    "core_loop": "Place charges or swing hammers to bring a structure down, then score how completely it collapses",
+    "verbs": [
+      "place",
+      "destroy"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "charges are limited"
+    ],
+    "win": "flatten the target",
+    "lose": "none",
+    "scoring": "percent destroyed",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share demolitions"
+    ],
+    "difficulty_levers": [
+      "charges",
+      "structure strength",
+      "tools"
+    ],
+    "tools": [
+      "physics_world",
+      "particles_haptics",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "demolish the building game",
+      "teardown style destruction",
+      "blow up the tower"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "marble_run_build",
+    "name": "Build a marble run",
+    "aliases": [
+      "Marble run"
+    ],
+    "family": "physics_toy",
+    "summary": "Place track pieces so a marble reaches the cup; then watch it run.",
+    "core_loop": "Place track pieces so a dropped marble reaches the cup, then watch it run and fix any spots where it falls off",
+    "verbs": [
+      "build",
+      "test"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the marble obeys gravity"
+    ],
+    "win": "the marble reaches the cup",
+    "lose": "it falls off",
+    "scoring": "pieces used",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "build runs for friends"
+    ],
+    "difficulty_levers": [
+      "pieces",
+      "distance",
+      "piece budget"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "marble run builder",
+      "build a track for the ball",
+      "marble maze maker"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "car_crash_sandbox",
+    "name": "Crash test",
+    "aliases": [
+      "Crash test",
+      "BeamNG-lite"
+    ],
+    "family": "physics_toy",
+    "summary": "Set up a car and a ramp or wall and watch it crumple.",
+    "core_loop": "Set a car's speed, pick a ramp or wall, crash it, and watch the crumple in slow motion",
+    "verbs": [
+      "set",
+      "watch"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "none"
+    ],
+    "win": "none; toy",
+    "lose": "none",
+    "scoring": "none",
+    "session_seconds": [
+      15,
+      180
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "share crashes"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "obstacle type",
+      "car type"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "car crash test simulator",
+      "slow motion crash",
+      "smash cars into walls"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spring_launch_toy",
+    "name": "Spring launcher",
+    "aliases": [
+      "Spring toy"
+    ],
+    "family": "physics_toy",
+    "summary": "Compress springs to launch objects at targets.",
+    "core_loop": "Pull back on a spring, release it to launch an object, and land it on targets around the scene",
+    "verbs": [
+      "pull",
+      "aim"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "power depends on compression"
+    ],
+    "win": "hit every target",
+    "lose": "out of launches",
+    "scoring": "launches used",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trick-shot share"
+    ],
+    "difficulty_levers": [
+      "targets",
+      "spring strength",
+      "obstacles"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "joints"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "spring launcher game",
+      "launch with springs",
+      "boing target"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "magnet_toy",
+    "name": "Magnets",
+    "aliases": [
+      "Magnet toy"
+    ],
+    "family": "physics_toy",
+    "summary": "Move magnets to attract or repel metal pieces into a goal.",
+    "core_loop": "Move magnets around the board to attract or repel metal pieces and guide them into the goal",
+    "verbs": [
+      "move",
+      "attract"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "magnets pull metal only"
+    ],
+    "win": "guide pieces home",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "magnet strength",
+      "pieces",
+      "obstacles"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "magnet puzzle game",
+      "pull the metal with a magnet",
+      "magnetic toy"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

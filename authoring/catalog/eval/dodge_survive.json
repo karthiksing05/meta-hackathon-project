@@ -1,0 +1,32 @@
+[
+  {
+    "request": "dodge falling pianos game",
+    "expect": [
+      "dodge_falling_objects"
+    ]
+  },
+  {
+    "request": "pac-man where my friends are the ghosts",
+    "expect": [
+      "dot_maze_eat"
+    ]
+  },
+  {
+    "request": "undertale style dodge battle",
+    "expect": [
+      "bullet_dodge_arena"
+    ]
+  },
+  {
+    "request": "tron light cycles against my friend",
+    "expect": [
+      "snake_avoid_tail"
+    ]
+  },
+  {
+    "request": "hex-a-gone falling floor party game",
+    "expect": [
+      "hex_floor_fall"
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "request": "make krillion",
+    "expect": [
+      "rare_answer_trivia"
+    ]
+  },
+  {
+    "request": "a family feud game for our thanksgiving",
+    "expect": [
+      "survey_says"
+    ]
+  },
+  {
+    "request": "guess the picture as it slowly unblurs",
+    "expect": [
+      "picture_reveal"
+    ]
+  },
+  {
+    "request": "jeopardy board about our road trip",
+    "expect": [
+      "category_board"
+    ]
+  },
+  {
+    "request": "trivia board game where you collect wedges",
+    "expect": [
+      "trivia_map_board"
+    ]
+  }
+]

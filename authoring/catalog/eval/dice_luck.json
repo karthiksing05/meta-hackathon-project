@@ -1,0 +1,32 @@
+[
+  {
+    "request": "yahtzee with my family",
+    "expect": [
+      "yahtzee_combos"
+    ]
+  },
+  {
+    "request": "farkle push your luck dice",
+    "expect": [
+      "push_luck_dice"
+    ]
+  },
+  {
+    "request": "plinko price is right style",
+    "expect": [
+      "plinko_drop"
+    ]
+  },
+  {
+    "request": "deal or no deal game",
+    "expect": [
+      "deal_or_no_deal"
+    ]
+  },
+  {
+    "request": "random draw to pick who pays for dinner",
+    "expect": [
+      "lucky_draw_raffle"
+    ]
+  }
+]

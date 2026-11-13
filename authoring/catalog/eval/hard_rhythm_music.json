@@ -1,0 +1,67 @@
+[
+  {
+    "request": "guitar hero but kpop",
+    "expect": [
+      "note_highway_lanes"
+    ]
+  },
+  {
+    "request": "piano tiles",
+    "expect": [
+      "piano_tile_tap"
+    ]
+  },
+  {
+    "request": "osu",
+    "expect": [
+      "circle_beat_osu"
+    ]
+  },
+  {
+    "request": "beat saber on my phone",
+    "expect": [
+      "music_slice_beat"
+    ]
+  },
+  {
+    "request": "ddr arrows",
+    "expect": [
+      "dance_arrows",
+      "dance_off_copycat"
+    ]
+  },
+  {
+    "request": "taiko drum game",
+    "expect": [
+      "drum_pads_pattern"
+    ]
+  },
+  {
+    "request": "necrodancer move on the beat",
+    "expect": [
+      "beat_runner_obstacles"
+    ]
+  },
+  {
+    "request": "rhythm heaven one button",
+    "expect": [
+      "one_button_beat"
+    ]
+  },
+  {
+    "request": "rock band w my roomates each on an instrument",
+    "expect": [
+      "band_together",
+      "note_highway_lanes",
+      "live_jam_session_shared"
+    ]
+  },
+  {
+    "request": "dj mixing 2 songs crossfade",
+    "expect": [
+      "mix_dj_crossfade",
+      "dj_crossfade_mashup",
+      "dj_beat_match_sync"
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "request": "rock paper scissors but wizard spells best of five",
+    "expect": [
+      "rps_read_the_opponent"
+    ]
+  },
+  {
+    "request": "street fighter with pizzas",
+    "expect": [
+      "fighting_lite_combo_block"
+    ]
+  },
+  {
+    "request": "typeracer with harry potter quotes",
+    "expect": [
+      "typing_race_duel"
+    ]
+  },
+  {
+    "request": "worms with school mascots",
+    "expect": [
+      "artillery_duel_turns"
+    ]
+  },
+  {
+    "request": "beat my friend's ghost run",
+    "expect": [
+      "ghost_replay_duel"
+    ]
+  }
+]

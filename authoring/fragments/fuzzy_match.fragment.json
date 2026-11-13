@@ -1,0 +1,182 @@
+{
+  "fragment": "fuzzy_match",
+  "version": 1,
+  "describe": "Forgiving matching for anything the player types (names, titles, spells, open answers) when you write your own typed-answer rules. typed_answer already does this, so don't add it there. Pure functions, no rules: `fuzzy_ok(input, entry)` is true when `input` matches the entry; `fuzzy_best(input, entries)` is the index of the best-matching entry in a list<string>, or -1; `fuzzy_score(input, name)` is a 0..1 similarity; `fuzzy_key(s)` is the normalized text. An entry is one answer plus its other accepted names joined by '=', e.g. \"hermione granger=hermione\". Matching ignores case, accents, punctuation, a leading 'the'/'a'/'an', word order, plurals and number words ('three' = '3'), and forgives typos by length: names of 4 letters or fewer must be exact, 5-7 letters allow one typo, longer names pass at `threshold` (so 'cat' never matches 'car' but 'wingardium leviosaa' matches). `phonetic` also accepts names that sound alike. Deterministic: bots, replays and the phone agree.",
+  "params": {
+    "threshold": {
+      "type": "float",
+      "default": 0.82,
+      "min": 0.5,
+      "max": 1
+    },
+    "phonetic": {
+      "type": "bool",
+      "default": false
+    }
+  },
+  "state": {},
+  "functions": {
+    "_fz_apos": {
+      "params": {},
+      "returns": "string",
+      "body": "\"'\""
+    },
+    "_fz_clean": {
+      "params": {
+        "fz_s": "string"
+      },
+      "returns": "string",
+      "body": "join(map(chars(lower(fz_s)), fz_c => if fz_c == _fz_apos() then '' else _fz_fold(fz_c)), '')"
+    },
+    "_fz_fold": {
+      "params": {
+        "fz_c": "string"
+      },
+      "returns": "string",
+      "body": "let fz_i = index_of('àáâãäåāăąçćĉċčďđðèéêëēĕėęěĝğġģĥħìíîïĩīĭįıĵķĺļľŀłñńņňŉòóôõöøōŏőŕŗřśŝşšșţťŧțùúûüũūŭůűųŵýÿŷźżžæœßþ&.’‘ʼ´`!\"#$%()*+,-/:;<=>?@[\\\\]^_{|}~\t\n\r –—‐‑…·•«»“”„¿¡̴̵̶̷̸̡̢̧̨̛̖̗̘̙̜̝̞̟̠̣̤̥̦̩̪̫̬̭̮̯̰̱̲̳̹̺̻̼͇͈͉͍͎̀́̂̃̄̅̆̇̈̉̊̋̌̍̎̏̐̑̒̓̔̽̾̿̀́͂̓̈́͆͊͋͌̕̚ͅ͏͓͔͕͖͙͚͐͑͒͗͛ͣͤͥͦͧͨͩͪͫͬͭͮͯ͘͜͟͢͝͞͠͡', fz_c) in if fz_i < 0 then fz_c else let fz_t = substr('aaaaaaaaacccccdddeeeeeeeeegggghhiiiiiiiiijklllllnnnnnooooooooorrrsssssttttuuuuuuuuuuwyyyzzz*****!!!!!!                                              !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', fz_i, fz_i + 1) in if fz_t == '!' then '' else if fz_t == '*' then get_or(map_of([['æ', 'ae'], ['œ', 'oe'], ['ß', 'ss'], ['þ', 'th'], ['&', ' and ']]), fz_c, fz_c) else fz_t"
+    },
+    "_fz_stem": {
+      "params": {
+        "fz_w": "string"
+      },
+      "returns": "string",
+      "body": "let fz_a = if len(fz_w) > 3 and ends_with(fz_w, 's') and not (ends_with(fz_w, 'ss') or ends_with(fz_w, 'is') or (ends_with(fz_w, 'us') and len(fz_w) > 4)) then substr(fz_w, 0, len(fz_w) - 1) else fz_w in let fz_n = len(fz_a) in if fz_n > 3 and (ends_with(fz_a, 'xe') or ends_with(fz_a, 'she') or ends_with(fz_a, 'che') or ends_with(fz_a, 'sse')) then substr(fz_a, 0, fz_n - 1) else if fz_n > 3 and ends_with(fz_a, 'ie') then concat(substr(fz_a, 0, fz_n - 2), 'y') else if fz_n > 4 and (ends_with(fz_a, 've') or ends_with(fz_a, 'fe')) then concat(substr(fz_a, 0, fz_n - 2), 'f') else if fz_n > 5 and ends_with(fz_a, 'oe') then substr(fz_a, 0, fz_n - 1) else fz_a"
+    },
+    "_fz_words": {
+      "params": {
+        "fz_s": "string"
+      },
+      "returns": "list<string>",
+      "body": "let fz_t = map(filter(split(_fz_clean(fz_s), ' '), fz_x => fz_x != ''), fz_x => _fz_num(fz_x)) in map(if len(fz_t) > 1 and contains(['the', 'a', 'an'], first(fz_t)) then drop(fz_t, 1) else fz_t, fz_x => _fz_stem(fz_x))"
+    },
+    "_fz_num": {
+      "params": {
+        "fz_x": "string"
+      },
+      "returns": "string",
+      "body": "let fz_i = index_of(['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'], fz_x) in if fz_i < 0 then fz_x else str(fz_i)"
+    },
+    "fuzzy_key": {
+      "params": {
+        "fz_s": "string"
+      },
+      "returns": "string",
+      "body": "join(_fz_words(fz_s), ' ')"
+    },
+    "_fz_row": {
+      "params": {
+        "fz_pp": "list<int>",
+        "fz_p": "list<int>",
+        "fz_b": "list<string>",
+        "fz_c": "string",
+        "fz_cp": "string",
+        "fz_i": "int"
+      },
+      "returns": "list<int>",
+      "body": "fold(range(1, len(fz_b) + 1), [fz_i], (fz_r, fz_j) => push(fz_r, let fz_bj = get_or(fz_b, fz_j - 1, '') in let fz_v = min(get_or(fz_p, fz_j, 0) + 1, last(fz_r) + 1, get_or(fz_p, fz_j - 1, 0) + (if fz_c == fz_bj then 0 else 1)) in if fz_i > 1 and fz_j > 1 and fz_c == get_or(fz_b, fz_j - 2, '') and fz_cp == fz_bj then min(fz_v, get_or(fz_pp, fz_j - 2, 0) + 1) else fz_v))"
+    },
+    "_fz_dist": {
+      "params": {
+        "fz_a": "string",
+        "fz_b": "string"
+      },
+      "returns": "int",
+      "body": "let fz_x = chars(fz_a) in let fz_y = chars(fz_b) in if len(fz_x) == 0 then len(fz_y) else if len(fz_y) == 0 then len(fz_x) else last(fold(range(len(fz_x)), {pp: range(len(fz_y) + 1), p: range(len(fz_y) + 1)}, (fz_st, fz_k) => {pp: fz_st.p, p: _fz_row(fz_st.pp, fz_st.p, fz_y, get_or(fz_x, fz_k, ''), get_or(fz_x, fz_k - 1, ''), fz_k + 1)}).p)"
+    },
+    "_fz_ratio": {
+      "params": {
+        "fz_a": "string",
+        "fz_b": "string"
+      },
+      "returns": "float",
+      "body": "if len(fz_a) == 0 and len(fz_b) == 0 then 1.0 else 1.0 - (_fz_dist(fz_a, fz_b) * 1.0) / (max(len(fz_a), len(fz_b)) * 1.0)"
+    },
+    "_fz_uniq": {
+      "params": {
+        "fz_w": "list<string>"
+      },
+      "returns": "list<string>",
+      "body": "sort_by(filter(fz_w, (fz_x, fz_k) => index_of(fz_w, fz_x) == fz_k), fz_x => fz_x)"
+    },
+    "_fz_tset": {
+      "params": {
+        "fz_wa": "list<string>",
+        "fz_wb": "list<string>"
+      },
+      "returns": "float",
+      "body": "let fz_ua = _fz_uniq(fz_wa) in let fz_ub = _fz_uniq(fz_wb) in let fz_in = filter(fz_ua, fz_x => contains(fz_ub, fz_x)) in _fz_ratio(join(concat(fz_in, filter(fz_ua, fz_x => not contains(fz_ub, fz_x))), ' '), join(concat(fz_in, filter(fz_ub, fz_x => not contains(fz_ua, fz_x))), ' '))"
+    },
+    "_fz_sound": {
+      "params": {
+        "fz_s": "string"
+      },
+      "returns": "string",
+      "body": "let fz_c = chars(fz_s) in if len(fz_c) == 0 then '' else fold(drop(fz_c, 1), {o: first(fz_c), d: _fz_code(first(fz_c))}, (fz_st, fz_x) => let fz_d = _fz_code(fz_x) in {o: if fz_d != fz_st.d and fz_d != '0' then concat(fz_st.o, fz_d) else fz_st.o, d: fz_d}).o"
+    },
+    "_fz_code": {
+      "params": {
+        "fz_x": "string"
+      },
+      "returns": "string",
+      "body": "let fz_i = index_of('bfpvcgjkqsxzdtlmnr', fz_x) in if fz_i >= 0 then substr('111122222222334556', fz_i, fz_i + 1) else if contains('aeiouyhw', fz_x) then '0' else fz_x"
+    },
+    "fuzzy_score": {
+      "params": {
+        "fz_in": "string",
+        "fz_nm": "string"
+      },
+      "returns": "float",
+      "body": "let fz_wa = _fz_words(fz_in) in let fz_wb = _fz_words(fz_nm) in if len(fz_wa) == 0 or len(fz_wb) == 0 then 0.0 else let fz_ca = join(fz_wa, '') in let fz_cb = join(fz_wb, '') in if fz_ca == fz_cb then 1.0 else max(_fz_ratio(fz_ca, fz_cb), _fz_tset(fz_wa, fz_wb))"
+    },
+    "_fz_need": {
+      "params": {
+        "fz_nm": "string"
+      },
+      "returns": "float",
+      "body": "let fz_n = len(join(_fz_words(fz_nm), '')) in if fz_n <= 4 then 1.0 else if fz_n <= 7 then min(@threshold, 1.0 - 1.0 / (fz_n * 1.0)) else @threshold"
+    },
+    "fuzzy_passes": {
+      "params": {
+        "fz_in": "string",
+        "fz_nm": "string",
+        "fz_sc": "float"
+      },
+      "returns": "bool",
+      "body": "fz_sc >= _fz_need(fz_nm) or (@phonetic and fz_sc >= 0.6 and len(join(_fz_words(fz_nm), '')) >= 5 and _fz_sound(join(_fz_words(fz_in), '')) == _fz_sound(join(_fz_words(fz_nm), '')))"
+    },
+    "fuzzy_entry": {
+      "params": {
+        "fz_in": "string",
+        "fz_e": "string"
+      },
+      "returns": "float",
+      "body": "fold(split(fz_e, '='), -1.0, (fz_m, fz_nm) => let fz_sc = fuzzy_score(fz_in, fz_nm) in if fz_sc > fz_m and fuzzy_passes(fz_in, fz_nm, fz_sc) then fz_sc else fz_m)"
+    },
+    "fuzzy_best": {
+      "params": {
+        "fz_in": "string",
+        "fz_es": "list<string>"
+      },
+      "returns": "int",
+      "body": "fold(range(len(fz_es)), {i: -1, s: 0.0}, (fz_st, fz_k) => let fz_v = fuzzy_entry(fz_in, get_or(fz_es, fz_k, '')) in if fz_v > fz_st.s then {i: fz_k, s: fz_v} else fz_st).i"
+    },
+    "fuzzy_ok": {
+      "params": {
+        "fz_in": "string",
+        "fz_e": "string"
+      },
+      "returns": "bool",
+      "body": "fuzzy_entry(fz_in, fz_e) >= 0.0"
+    }
+  },
+  "tags": {
+    "mood": [
+      "any"
+    ],
+    "energy": [
+      "low",
+      "medium"
+    ]
+  },
+  "conflicts": []
+}

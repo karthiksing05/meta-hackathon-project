@@ -1,0 +1,32 @@
+[
+  {
+    "request": "like wordle but for movies",
+    "expect": [
+      "five_letter_deduction"
+    ]
+  },
+  {
+    "request": "spelling bee but every word is about baking",
+    "expect": [
+      "letter_honeycomb"
+    ]
+  },
+  {
+    "request": "make a connections puzzle about my friend group",
+    "expect": [
+      "group_four_by_four"
+    ]
+  },
+  {
+    "request": "boggle style game against my roommates",
+    "expect": [
+      "letter_grid_search"
+    ]
+  },
+  {
+    "request": "unscramble the names of disney princesses",
+    "expect": [
+      "anagram_unscramble"
+    ]
+  }
+]

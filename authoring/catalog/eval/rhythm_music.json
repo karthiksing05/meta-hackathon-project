@@ -1,0 +1,32 @@
+[
+  {
+    "request": "guitar hero with our band's song",
+    "expect": [
+      "note_highway_lanes"
+    ]
+  },
+  {
+    "request": "piano tiles with kpop songs",
+    "expect": [
+      "piano_tile_tap"
+    ]
+  },
+  {
+    "request": "beat saber on my phone",
+    "expect": [
+      "music_slice_beat"
+    ]
+  },
+  {
+    "request": "each friend plays one instrument of the same song",
+    "expect": [
+      "band_together"
+    ]
+  },
+  {
+    "request": "rhythm heaven style one button game",
+    "expect": [
+      "one_button_beat"
+    ]
+  }
+]

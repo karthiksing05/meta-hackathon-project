@@ -1,0 +1,226 @@
+[
+  {
+    "request": "a spooky wizard school mystery where my roommate gets framed for stealing something and I have to find the real thief before dawn",
+    "expect": [
+      "clue_gated_whodunit"
+    ],
+    "notes": "gold request (gold_stormglass_affair)"
+  },
+  {
+    "request": "a magic school mystery where my friend is blamed for a theft and I gather clues to catch the real culprit by morning",
+    "expect": [
+      "clue_gated_whodunit"
+    ],
+    "notes": "paraphrase of gold_stormglass_affair"
+  },
+  {
+    "request": "a space opera adventure where I'm a smuggler pulled into a rebellion against an evil empire, with a big escape at the end and maybe a traitor",
+    "expect": [
+      "meter_tradeoff_story"
+    ],
+    "notes": "gold request (gold_last_run_of_the_magpie)"
+  },
+  {
+    "request": "a choose your path space story where I smuggle cargo for rebels and have to escape at the end",
+    "expect": [
+      "meter_tradeoff_story"
+    ],
+    "notes": "paraphrase of gold_last_run_of_the_magpie"
+  },
+  {
+    "request": "a messy rich-kid prep school drama where an anonymous gossip account is leaking everyone's secrets and I have to figure out who runs it",
+    "expect": [
+      "bait_the_leaker"
+    ],
+    "notes": "gold request (gold_the_hostess_knows)"
+  },
+  {
+    "request": "a rich prep school drama where I figure out who is behind the anonymous account spilling secrets",
+    "expect": [
+      "bait_the_leaker"
+    ],
+    "notes": "paraphrase of gold_the_hostess_knows"
+  },
+  {
+    "request": "a heist story game where I pick my crew and plan how to steal back a priceless egg from a crooked collector's masked party, and someone might double-cross me",
+    "expect": [
+      "heist_crew_story"
+    ],
+    "notes": "gold request (gold_saffron_egg_job)"
+  },
+  {
+    "request": "a robbery story where I choose a crew and plan stealing a jewel from a party, with a possible traitor",
+    "expect": [
+      "heist_crew_story"
+    ],
+    "notes": "paraphrase of gold_saffron_egg_job"
+  },
+  {
+    "request": "a stupid brainrot game where you farm aura by tapping on beat",
+    "expect": [
+      "orbit_zone_timing"
+    ],
+    "notes": "gold request (gold_aura_farm)"
+  },
+  {
+    "request": "a brainrot rhythm game where I tap at the right moment to farm aura",
+    "expect": [
+      "orbit_zone_timing"
+    ],
+    "notes": "paraphrase of gold_aura_farm"
+  },
+  {
+    "request": "npc or main character game where weird situations pop up and you have to sort them super fast",
+    "expect": [
+      "two_way_speed_sort"
+    ],
+    "notes": "gold request (gold_npc_or_main)"
+  },
+  {
+    "request": "a fast game where I decide if each situation is npc behavior or main character energy",
+    "expect": [
+      "two_way_speed_sort"
+    ],
+    "notes": "paraphrase of gold_npc_or_main"
+  },
+  {
+    "request": "goblin mode game where you grab snacks at 2am and dodge responsibilities",
+    "expect": [
+      "dodge_collect_waves"
+    ],
+    "notes": "gold request (gold_goblin_snack_run)"
+  },
+  {
+    "request": "a late night goblin game where I grab snacks while avoiding chores flying at me",
+    "expect": [
+      "dodge_collect_waves"
+    ],
+    "notes": "paraphrase of gold_goblin_snack_run"
+  },
+  {
+    "request": "rizz or flop quiz where you pick the least cringe thing to say and judges react",
+    "expect": [
+      "judged_reply_quiz"
+    ],
+    "notes": "gold request (gold_rizz_or_flop)"
+  },
+  {
+    "request": "a quiz where I choose the least cringe reply to my crush and judges score it",
+    "expect": [
+      "judged_reply_quiz"
+    ],
+    "notes": "paraphrase of gold_rizz_or_flop"
+  },
+  {
+    "request": "a broom racing game at a magic school where I dodge storm clouds and grab sparks",
+    "expect": [
+      "lane_dodge_race"
+    ],
+    "notes": "gold request (gold_moonbroom_derby)"
+  },
+  {
+    "request": "a magic broom race where I switch lanes to avoid storms and collect sparks",
+    "expect": [
+      "lane_dodge_race"
+    ],
+    "notes": "paraphrase of gold_moonbroom_derby"
+  },
+  {
+    "request": "a space fighter flying down a narrow canyon shooting drones, with a big boss target at the end",
+    "expect": [
+      "canyon_shooter_boss"
+    ],
+    "notes": "gold request (gold_rift_run)"
+  },
+  {
+    "request": "a starfighter game flying through a canyon shooting drones and fighting a boss",
+    "expect": [
+      "canyon_shooter_boss"
+    ],
+    "notes": "paraphrase of gold_rift_run"
+  },
+  {
+    "request": "an endless runner where I jump across city rooftops at night collecting letters",
+    "expect": [
+      "endless_gap_jumper"
+    ],
+    "notes": "gold request (gold_rooftop_courier)"
+  },
+  {
+    "request": "an endless night runner jumping between rooftops and grabbing letters",
+    "expect": [
+      "endless_gap_jumper"
+    ],
+    "notes": "paraphrase of gold_rooftop_courier"
+  },
+  {
+    "request": "a cozy one-more-try game where you stack cake layers as high as you can",
+    "expect": [
+      "slice_drop_stacker"
+    ],
+    "notes": "gold request (gold_cake_tower)"
+  },
+  {
+    "request": "a relaxing stacking game where I time cake layers to build the tallest cake",
+    "expect": [
+      "slice_drop_stacker"
+    ],
+    "notes": "paraphrase of gold_cake_tower"
+  },
+  {
+    "request": "a which-house-are-you quiz for my friends with a magic school vibe, so we can all post our results in the chat",
+    "expect": [
+      "weighted_personality_quiz"
+    ],
+    "notes": "gold request (gold_which_house)"
+  },
+  {
+    "request": "a magic school sorting quiz so my friends and I can compare which house we got",
+    "expect": [
+      "weighted_personality_quiz"
+    ],
+    "notes": "paraphrase of gold_which_house"
+  },
+  {
+    "request": "a gossip trivia game at a fancy prep school where you guess who wrote each anonymous post, so I can challenge my roommate to beat my score",
+    "expect": [
+      "who_said_it_quiz"
+    ],
+    "notes": "gold request (gold_who_posted)"
+  },
+  {
+    "request": "a prep school gossip game guessing who wrote each anonymous post, to beat my roommate",
+    "expect": [
+      "who_said_it_quiz"
+    ],
+    "notes": "paraphrase of gold_who_posted"
+  },
+  {
+    "request": "a daily space puzzle for our group chat, like decoding a secret message from a rebel ship",
+    "expect": [
+      "letter_cryptogram"
+    ],
+    "notes": "gold request (gold_driftwood_cipher)"
+  },
+  {
+    "request": "a daily code-breaking puzzle where we decode a rebel message for the group chat",
+    "expect": [
+      "letter_cryptogram"
+    ],
+    "notes": "paraphrase of gold_driftwood_cipher"
+  },
+  {
+    "request": "a pass-the-phone party game for a sleepover where we all build something together",
+    "expect": [
+      "pass_play_stacker"
+    ],
+    "notes": "gold request (gold_pillow_fort)"
+  },
+  {
+    "request": "a sleepover game where we pass the phone and take turns adding to one pillow fort",
+    "expect": [
+      "pass_play_stacker"
+    ],
+    "notes": "paraphrase of gold_pillow_fort"
+  }
+]

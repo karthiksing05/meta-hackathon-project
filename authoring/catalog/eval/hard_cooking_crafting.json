@@ -1,0 +1,62 @@
+[
+  {
+    "request": "cooking mama",
+    "expect": [
+      "step_cooking_minigames"
+    ]
+  },
+  {
+    "request": "overcooked w friends",
+    "expect": [
+      "order_assembly_kitchen"
+    ]
+  },
+  {
+    "request": "little alchemy",
+    "expect": [
+      "recipe_combine_discover"
+    ]
+  },
+  {
+    "request": "potion craft",
+    "expect": [
+      "potion_brew"
+    ]
+  },
+  {
+    "request": "minecraft crafting table",
+    "expect": [
+      "craft_recipe_grid"
+    ]
+  },
+  {
+    "request": "bartender mix the cocktail orders",
+    "expect": [
+      "cocktail_mix_order"
+    ]
+  },
+  {
+    "request": "cake decorating",
+    "expect": [
+      "bakery_decorate"
+    ]
+  },
+  {
+    "request": "sushi chef roll and slice",
+    "expect": [
+      "sushi_roll_build"
+    ]
+  },
+  {
+    "request": "blacksmith forge hammer to the beat",
+    "expect": [
+      "blacksmith_forge"
+    ]
+  },
+  {
+    "request": "flip pancakes at the right time",
+    "expect": [
+      "pancake_flip_timing"
+    ]
+  }
+]

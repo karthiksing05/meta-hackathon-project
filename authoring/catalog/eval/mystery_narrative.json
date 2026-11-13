@@ -1,0 +1,32 @@
+[
+  {
+    "request": "harry potter murder mystery where i question the suspects",
+    "expect": [
+      "whodunit_interrogation"
+    ]
+  },
+  {
+    "request": "phoenix wright but the witness is my brother",
+    "expect": [
+      "contradiction_objection"
+    ]
+  },
+  {
+    "request": "a daily murder mystery for our group chat",
+    "expect": [
+      "daily_case_group"
+    ]
+  },
+  {
+    "request": "cluedo style logic grid about a missing cake",
+    "expect": [
+      "elimination_grid_case"
+    ]
+  },
+  {
+    "request": "find which suspect has an impossible alibi",
+    "expect": [
+      "alibi_timeline_grid"
+    ]
+  }
+]

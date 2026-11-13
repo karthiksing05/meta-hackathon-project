@@ -1,0 +1,63 @@
+[
+  {
+    "request": "diner dash",
+    "expect": [
+      "restaurant_rush_serve"
+    ]
+  },
+  {
+    "request": "rollercoaster tycoon",
+    "expect": [
+      "theme_park_build"
+    ]
+  },
+  {
+    "request": "simcity",
+    "expect": [
+      "city_builder_zone",
+      "city_district_zoning"
+    ]
+  },
+  {
+    "request": "stardew valley farming",
+    "expect": [
+      "farm_sim_seasons"
+    ]
+  },
+  {
+    "request": "papas pizzeria",
+    "expect": [
+      "pizza_delivery_rush"
+    ]
+  },
+  {
+    "request": "flight control draw the plane paths",
+    "expect": [
+      "airport_traffic_control"
+    ]
+  },
+  {
+    "request": "lemonade stand",
+    "expect": [
+      "lemonade_stand_weather"
+    ]
+  },
+  {
+    "request": "zoo tycoon",
+    "expect": [
+      "zoo_keeper_habitats"
+    ]
+  },
+  {
+    "request": "barista game make the coffee orders exactly",
+    "expect": [
+      "coffee_shop_orders"
+    ]
+  },
+  {
+    "request": "hay day but its a hogwarts greenhouse",
+    "expect": [
+      "farm_sim_seasons"
+    ]
+  }
+]

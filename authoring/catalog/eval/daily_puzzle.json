@@ -1,0 +1,32 @@
+[
+  {
+    "request": "make krillion",
+    "expect": [
+      "rare_answer_daily"
+    ]
+  },
+  {
+    "request": "a wordle for my friend group's inside jokes",
+    "expect": [
+      "custom_word_pool_deduction"
+    ]
+  },
+  {
+    "request": "connections but all marvel characters",
+    "expect": [
+      "four_group_connections"
+    ]
+  },
+  {
+    "request": "a daily guess the country game",
+    "expect": [
+      "geo_silhouette_distance_guess"
+    ]
+  },
+  {
+    "request": "queens puzzle with cats",
+    "expect": [
+      "queens_region_placement"
+    ]
+  }
+]

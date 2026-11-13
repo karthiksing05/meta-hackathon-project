@@ -1,0 +1,32 @@
+[
+  {
+    "request": "a reigns game but i'm the principal of a school",
+    "expect": [
+      "swipe_ruler_balance"
+    ]
+  },
+  {
+    "request": "oregon trail but with my group chat road trip",
+    "expect": [
+      "survival_supply_trail"
+    ]
+  },
+  {
+    "request": "find all the endings in a haunted elevator story",
+    "expect": [
+      "endings_collector"
+    ]
+  },
+  {
+    "request": "a zork style game where i type commands to escape",
+    "expect": [
+      "text_parser_adventure"
+    ]
+  },
+  {
+    "request": "mad libs about my best friend's birthday",
+    "expect": [
+      "mad_libs_story"
+    ]
+  }
+]

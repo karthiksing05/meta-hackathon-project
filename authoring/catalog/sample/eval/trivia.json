@@ -1,0 +1,4 @@
+[
+  {"request": "make krillion", "expect": ["rare_answer_trivia"]},
+  {"request": "a harry potter krillion", "expect": ["rare_answer_trivia"]}
+]

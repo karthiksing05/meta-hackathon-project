@@ -1,0 +1,197 @@
+[
+  {
+    "id": "group_roster",
+    "kind": "server_tool",
+    "name": "Group or chat roster",
+    "aliases": [
+      "members list",
+      "friend names",
+      "who is playing",
+      "players in the group"
+    ],
+    "summary": "The names (and avatars) of the specific people a game is for: a Group's members, a chat's members or a friend list, handed to the game as content so rules and text can name them.",
+    "when_to_use": "Games about or between specific people: guess who said it, whose photo, story circles, superlatives, team totals that list each member.",
+    "api": "planned: game content gets members [{id, name}] from the play target; the server data exists at GET /v1/groups/{id} (members) and GET /v1/me/friends",
+    "status": "planned",
+    "gaps_it_closes": [
+      "games can name people only through single params (turns p1-p4, beat_target friend_name, shared_progress group_name)"
+    ],
+    "example_types": [
+      "shared_group_garden",
+      "campfire_story_circle",
+      "who_said_it_quote_guess"
+    ],
+    "notes": "today: up to 4 names via the turns fragment's p1-p4 params, one friend via beat_target and ghost_score params, the Group name via shared_progress"
+  },
+  {
+    "id": "vote_tally",
+    "kind": "server_tool",
+    "name": "Friend vote tally",
+    "aliases": [
+      "voting",
+      "pick the best",
+      "judge by friends",
+      "poll"
+    ],
+    "summary": "Friends or a Group's members vote on entries (drawings, captions, beats, predictions), and the server tallies the votes into a winner and per-entry counts.",
+    "when_to_use": "Creative and party games judged by people instead of rules: best drawing, funniest caption, better beat, playlist picks.",
+    "api": "planned: POST a vote {gameId, entryId}; GET tallies per entry; one vote per person per round",
+    "status": "planned",
+    "gaps_it_closes": [
+      "no way to judge a run by other people; scores come only from the game's own rules"
+    ],
+    "example_types": [
+      "one_stroke_challenge",
+      "blind_drawing_reveal",
+      "beat_battle_async"
+    ],
+    "notes": "needs a backend endpoint; not in backend/README.md. Inside one phone, approximate with turns plus a tap-to-vote screen"
+  },
+  {
+    "id": "anonymous_submit",
+    "kind": "server_tool",
+    "name": "Anonymous submissions",
+    "aliases": [
+      "anonymous answers",
+      "secret submissions",
+      "answer pool"
+    ],
+    "summary": "Each member privately submits an answer, quote, caption or clip; the pool is shown without names so others can guess or vote, and authors are revealed at the end.",
+    "when_to_use": "Whose-answer, who-said-it, bluffing (fake answers) and caption games built from what the players themselves write.",
+    "api": "planned: POST a submission {gameId, round, text}; GET the round's pool without author ids, then with them after the reveal",
+    "status": "planned",
+    "gaps_it_closes": [
+      "games can't use content written by the players themselves"
+    ],
+    "example_types": [
+      "whose_answer_anonymous_pool",
+      "who_said_it_quote_guess",
+      "fake_answer_bluff"
+    ],
+    "notes": "related app flow: Make it together (docs/BUBBLES.md 7.4) gathers friends' contributions before Muse makes the game, with canned demo content; there is no server store"
+  },
+  {
+    "id": "friend_pairing",
+    "kind": "server_tool",
+    "name": "Friend pairing",
+    "aliases": [
+      "play with a friend",
+      "duo",
+      "pair up"
+    ],
+    "summary": "Pairs two specific friends on one game over time: both sides' moves, drawings or answers are stored and shown to the other, so a duo can play back and forth.",
+    "when_to_use": "Two-person async games: draw-and-guess with a friend, mind-meld word matching, compatibility quizzes, beat battles.",
+    "api": "planned: create a pair {gameId, friendId}; post my turn; get the friend's latest turn",
+    "status": "planned",
+    "gaps_it_closes": [
+      "friend play today is score-only (score_challenge, ghost_score)"
+    ],
+    "example_types": [
+      "async_draw_something_turns",
+      "mind_meld_same_word",
+      "compatibility_score_pair"
+    ],
+    "notes": "close to async_turns; score_challenge covers the score-only case today"
+  },
+  {
+    "id": "realtime_room",
+    "kind": "server_tool",
+    "name": "Live room",
+    "aliases": [
+      "live session",
+      "buzzer room",
+      "jam room"
+    ],
+    "summary": "A live room where several phones play the same game at once with shared state (a host's quiz with buzzers, a shared jam).",
+    "when_to_use": "Live classroom quizzes, live jams, real-time party games.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "live_multiplayer"
+    ],
+    "notes": "same gap as live_multiplayer. Approximate with game night (everyone plays the same seed and a podium compares) or turns on one phone"
+  },
+  {
+    "id": "scheduled_resolve",
+    "kind": "server_tool",
+    "name": "Resolve later",
+    "aliases": [
+      "prediction market",
+      "check back later",
+      "resolve this week"
+    ],
+    "summary": "Stores predictions or bets now and settles them later, when the outcome is known or a date passes, then notifies the players with the scores.",
+    "when_to_use": "Predict-what-a-friend-will-do games, weekly bets, guesses that settle after an event.",
+    "api": "planned: POST a prediction {gameId, question, pick, resolvesAt}; resolution posted by a member or at the date",
+    "status": "planned",
+    "gaps_it_closes": [
+      "every run ends and scores within one session"
+    ],
+    "example_types": [
+      "friend_prediction_bet"
+    ]
+  },
+  {
+    "id": "gallery",
+    "kind": "server_tool",
+    "name": "Creation gallery",
+    "aliases": [
+      "save my creation",
+      "show friends my drawing",
+      "showcase",
+      "wall"
+    ],
+    "summary": "Keeps what a player made in a run (a drawing, a room, a beat, a garden) and shows it to friends or a Group as a picture or a replay they can watch.",
+    "when_to_use": "Creative, cozy and music-making games whose output is the point: share the result, browse friends' creations.",
+    "api": "planned: store the run's replay (input log) and a poster frame; list a Group's or friend's creations",
+    "status": "planned",
+    "gaps_it_closes": [
+      "results share only a headline and score text, not what was made"
+    ],
+    "example_types": [
+      "zen_sand_garden_rake",
+      "plant_watering_daily_care",
+      "step_sequencer_beat_maker"
+    ],
+    "notes": "runs already produce a replay (input log) and the runtime can draw a poster frame or play a replay (docs/BUBBLES.md 4.3), so a gallery can re-render creations; storing and listing them is what's missing"
+  },
+  {
+    "id": "photo_picker",
+    "kind": "runtime_tool",
+    "name": "Photo picker",
+    "aliases": [
+      "upload a photo",
+      "use my photos",
+      "pick from camera roll"
+    ],
+    "summary": "Lets players add their own photos (from the camera roll or a Group's posts) as game content, for guessing, captions or puzzles.",
+    "when_to_use": "Whose-photo, where-was-this-taken, caption contests and personal photo puzzles.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "games can show only generated art, not people's own photos"
+    ],
+    "example_types": [
+      "whose_photo_guess",
+      "where_was_this_taken",
+      "caption_photo_funniest_pick"
+    ],
+    "notes": "the engine draws image assets, but there is no path from a person's photos into a game's assets, and that also needs a privacy review"
+  },
+  {
+    "id": "camera_capture",
+    "kind": "runtime_tool",
+    "name": "Camera capture",
+    "aliases": [
+      "take a photo",
+      "photo scavenger"
+    ],
+    "summary": "Takes a photo with the phone camera during a run, as an answer or entry.",
+    "when_to_use": "Photo scavenger hunts and take-a-picture-of challenges.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "no camera input"
+    ],
+    "example_types": [
+      "photo_scavenger_prompt"
+    ]
+  }
+]

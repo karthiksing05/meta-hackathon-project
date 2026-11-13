@@ -180,10 +180,13 @@ type JobEvent struct {
 
 // Job is one request to make a game. The app creates it, then polls it.
 type Job struct {
-	ID         string         `bson:"_id"`
-	OwnerID    string         `bson:"ownerId"`
-	Request    string         `bson:"request"`
-	Brief      map[string]any `bson:"brief,omitempty"`
+	ID      string         `bson:"_id"`
+	OwnerID string         `bson:"ownerId"`
+	Request string         `bson:"request"`
+	Brief   map[string]any `bson:"brief,omitempty"`
+	// Context is what the harness worked out before the call (kinds of game, tools, plan). Only the server sets it,
+	// never a client: it goes into the generator's system prompt.
+	Context    map[string]any `bson:"context,omitempty"`
 	Anatomy    string         `bson:"anatomy,omitempty"`    // the agreed game anatomy, kept apart from the 2,000 character request
 	Draft      bool           `bson:"draft,omitempty"`      // the finished game starts unlisted
 	BaseGameID string         `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)

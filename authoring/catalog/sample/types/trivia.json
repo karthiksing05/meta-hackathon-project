@@ -1,0 +1,30 @@
+[
+  {
+    "id": "rare_answer_trivia",
+    "name": "Rare-answer trivia",
+    "aliases": ["Krillion", "rarest answer", "obscure answer game", "Pointless-style"],
+    "family": "trivia",
+    "subfamily": "open answer",
+    "summary": "A category prompt; type one correct answer; rarer correct answers score more.",
+    "core_loop": "read prompt → type an answer before the timer → see its rarity tier and points → next prompt",
+    "verbs": ["type", "recall", "guess"],
+    "inputs": ["type"],
+    "pieces": ["prompt", "answer list with rarity tiers", "timer", "score"],
+    "rules": ["an answer counts if it fuzzy-matches an accepted answer", "points by tier: common 10 … rarest 100"],
+    "win": "highest total after N prompts",
+    "lose": "none; score attack",
+    "scoring": "tiered points per answer",
+    "session_seconds": [60, 180],
+    "players": ["solo", "async_friends", "group_daily"],
+    "social_hooks": ["compare rarest answers with friends", "a Group's daily set"],
+    "content_needs": ["prompts", "accepted answers with tiers and aliases"],
+    "difficulty_levers": ["timer length", "prompt breadth", "tier thresholds"],
+    "tools": ["typed_answer", "keyboard", "fuzzy_match", "rarity_tiers", "timer_bar", "rounds", "score", "daily_seed"],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": ["a harry potter krillion", "trivia where obscure answers win", "name the rarest pokemon"],
+    "status": "reviewed",
+    "source": "seed",
+    "refs": ["https://krillion.io"]
+  }
+]

@@ -1,0 +1,2551 @@
+[
+  {
+    "id": "social_deduction_traitor",
+    "name": "Hidden traitor",
+    "aliases": [
+      "Among Us",
+      "Mafia",
+      "Werewolf",
+      "Town of Salem",
+      "Secret Hitler"
+    ],
+    "family": "party_social",
+    "subfamily": "social deduction",
+    "summary": "Players get secret roles; the traitors blend in and sabotage, and everyone discusses and votes to eject suspects.",
+    "core_loop": "reveal roles → do tasks → discuss → vote → eject → check win",
+    "verbs": [
+      "accuse",
+      "bluff",
+      "vote"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "role cards",
+      "tasks",
+      "discussion chat",
+      "vote screen"
+    ],
+    "rules": [
+      "traitors are a minority",
+      "ejected players reveal role",
+      "crew wins by tasks or ejecting all traitors"
+    ],
+    "win": "crew finish tasks or eject traitors",
+    "lose": "traitors equal crew",
+    "scoring": "win or lose",
+    "session_seconds": [
+      120,
+      180
+    ],
+    "players": [
+      "live",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "play in a Group chat night",
+      "accuse a friend",
+      "replay highlights"
+    ],
+    "content_needs": [
+      "roles and tasks",
+      "vote UI",
+      "short discussion rounds"
+    ],
+    "difficulty_levers": [
+      "players",
+      "traitor ratio",
+      "tasks"
+    ],
+    "tools": [
+      "turns",
+      "rounds",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "among us but in our group chat",
+      "mafia for 6 friends",
+      "werewolf at a sleepover",
+      "among us with hogwarts students"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "charades_act_it_out",
+    "name": "Act it out",
+    "aliases": [
+      "Charades",
+      "Heads Up!",
+      "Pass the Phone",
+      "Sheepshead",
+      "Catch Phrase"
+    ],
+    "family": "party_social",
+    "subfamily": "acting",
+    "summary": "Players act out a secret word without speaking while teammates guess before the timer ends.",
+    "core_loop": "see word → act → team guesses → mark correct or skip → next",
+    "verbs": [
+      "act",
+      "guess"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "word card",
+      "timer",
+      "correct/skip buttons",
+      "score"
+    ],
+    "rules": [
+      "no words or sounds",
+      "skips are limited",
+      "words by category"
+    ],
+    "win": "most correct before timer",
+    "lose": "none; score",
+    "scoring": "words guessed",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "pass the phone",
+      "video call night",
+      "team vs team"
+    ],
+    "content_needs": [
+      "word bank by category and difficulty"
+    ],
+    "difficulty_levers": [
+      "timer",
+      "categories"
+    ],
+    "tools": [
+      "countdown",
+      "timer_bar",
+      "rounds",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "heads up with harry potter characters",
+      "charades for my family reunion",
+      "act it out game for movies"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "draw_and_guess",
+    "name": "Draw and guess",
+    "aliases": [
+      "Pictionary",
+      "Skribbl.io",
+      "Draw Something",
+      "Gartic",
+      "Drawful"
+    ],
+    "family": "party_social",
+    "subfamily": "draw",
+    "summary": "One player draws a secret word; others guess in chat, and earlier correct guesses score more.",
+    "core_loop": "get word → draw on canvas → others guess → timer → reveal → rotate",
+    "verbs": [
+      "draw",
+      "guess"
+    ],
+    "inputs": [
+      "drag",
+      "type"
+    ],
+    "pieces": [
+      "canvas",
+      "word hint blanks",
+      "guess box",
+      "timer"
+    ],
+    "rules": [
+      "no letters in the drawing",
+      "points fall over time",
+      "drawer scores for each correct guess"
+    ],
+    "win": "most points after N rounds",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "draw for friends async",
+      "Group sketchbook"
+    ],
+    "content_needs": [
+      "word lists",
+      "guess matching",
+      "canvas"
+    ],
+    "difficulty_levers": [
+      "word difficulty",
+      "timer",
+      "players"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "typed_answer",
+      "fuzzy_match",
+      "rounds",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "skribbl but only hogwarts words",
+      "pictionary with my group chat",
+      "draw something with my cousins",
+      "draw and guess about school"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "telephone_drawing_chain",
+    "name": "Telephone drawing",
+    "aliases": [
+      "Telephone Pictionary",
+      "Gartic Phone",
+      "Eat Poop You Cat",
+      "Broken Picturephone",
+      "Drawception"
+    ],
+    "family": "party_social",
+    "subfamily": "chain misunderstanding",
+    "summary": "A phrase passes along a chain: draw it, caption the drawing, draw the caption, and the end result is compared to the start.",
+    "core_loop": "write phrase → friend draws → next friend captions → next draws → reveal chain",
+    "verbs": [
+      "draw",
+      "describe"
+    ],
+    "inputs": [
+      "drag",
+      "type"
+    ],
+    "pieces": [
+      "phrase",
+      "canvas",
+      "caption box",
+      "chain reveal"
+    ],
+    "rules": [
+      "each player sees only the previous item",
+      "chains reveal in order",
+      "no scoring needed"
+    ],
+    "win": "laugh at the chain",
+    "lose": "none",
+    "scoring": "laughs and votes",
+    "session_seconds": [
+      120,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends pass a chain async",
+      "share the funniest reveal"
+    ],
+    "content_needs": [
+      "phrase pool",
+      "chain length rules"
+    ],
+    "difficulty_levers": [
+      "players",
+      "chain length"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "keyboard",
+      "turns",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "broken picturephone for my friends",
+      "draw the phrase and pass it",
+      "gartic phone about monsters"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hot_potato_pass",
+    "name": "Hot potato",
+    "aliases": [
+      "Hot Potato",
+      "Pass the Bomb",
+      "Bomb Party",
+      "Tick Tock Boom",
+      "Bomberman bomb pass"
+    ],
+    "family": "party_social",
+    "subfamily": "countdown pass",
+    "summary": "A bomb with a hidden fuse passes between players; each pass requires a quick task, and whoever holds it when it pops loses.",
+    "core_loop": "bomb arrives → complete a tiny task → pass → fuse random → boom",
+    "verbs": [
+      "pass",
+      "perform"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "bomb",
+      "fuse sound",
+      "task prompt",
+      "player ring"
+    ],
+    "rules": [
+      "fuse length hidden",
+      "failed task adds fuse time",
+      "last remaining wins"
+    ],
+    "win": "survive N rounds",
+    "lose": "holding the bomb at boom",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "pass in real life",
+      "Group elimination"
+    ],
+    "content_needs": [
+      "task pool"
+    ],
+    "difficulty_levers": [
+      "task difficulty",
+      "fuse range"
+    ],
+    "tools": [
+      "countdown",
+      "turns",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "pass the bomb with harry potter words",
+      "hot potato for my group chat",
+      "tick tock boom but on my phone"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "truth_or_dare_spinner",
+    "name": "Truth or dare spinner",
+    "aliases": [
+      "Truth or Dare",
+      "Spin the Bottle",
+      "Never Have I Ever",
+      "Would You Rather",
+      "Dirty Minds"
+    ],
+    "family": "party_social",
+    "subfamily": "spin and prompt",
+    "summary": "Spin to pick a player and a card (truth, dare, or confess); prompts are tuned for the group and keep it friendly.",
+    "core_loop": "spin → pick truth or dare → read prompt → do it or pass → next",
+    "verbs": [
+      "spin",
+      "confess"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "spinner",
+      "prompt cards",
+      "player ring"
+    ],
+    "rules": [
+      "pass costs a penalty point",
+      "prompts are curated for tone",
+      "each player gets equal turns"
+    ],
+    "win": "complete all prompts",
+    "lose": "none",
+    "scoring": "dares completed",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "play at parties",
+      "Group version asking each other"
+    ],
+    "content_needs": [
+      "prompts tuned by tone",
+      "spinner"
+    ],
+    "difficulty_levers": [
+      "players",
+      "prompt spice"
+    ],
+    "tools": [
+      "turns",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "truth or dare for a school sleepover",
+      "spin the bottle but friendly",
+      "dares for my class group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "group_confession_tally",
+    "name": "Never have I ever",
+    "aliases": [
+      "Never Have I Ever",
+      "Paranoia",
+      "I Have Never",
+      "Most Likely To",
+      "Fingers Down"
+    ],
+    "family": "party_social",
+    "subfamily": "confession tally",
+    "summary": "Players read a statement; everyone who has done it marks it, and the group sees counts and who is outnumbered.",
+    "core_loop": "statement shown → each taps have/have not → counts appear → laugh",
+    "verbs": [
+      "confess",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "statement card",
+      "have/never buttons",
+      "tally"
+    ],
+    "rules": [
+      "tallies are shown only as counts unless players opt in",
+      "one statement per turn",
+      "no shaming"
+    ],
+    "win": "complete a set",
+    "lose": "none",
+    "scoring": "no score; tally results",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "see how many friends match",
+      "discuss counts in the Group"
+    ],
+    "content_needs": [
+      "statement packs by theme",
+      "tone filters"
+    ],
+    "difficulty_levers": [
+      "statement mix",
+      "player count"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "never have i ever at school edition",
+      "most surprising confession counts",
+      "never have i ever for my study group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "two_truths_one_lie",
+    "name": "Two truths and a lie",
+    "aliases": [
+      "Two Truths and a Lie",
+      "Fibbage lie",
+      "Liar Liar",
+      "Guess Who Lies",
+      "Lie Detector"
+    ],
+    "family": "party_social",
+    "subfamily": "bluff and guess",
+    "summary": "A player writes three statements about themselves, one false; others vote on which is the lie.",
+    "core_loop": "write 3 statements → others vote → reveal the lie → scores",
+    "verbs": [
+      "write",
+      "guess"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "three statement cards",
+      "vote buttons",
+      "reveal"
+    ],
+    "rules": [
+      "the author scores for fooling people",
+      "guessers score for catching",
+      "rotate authors"
+    ],
+    "win": "highest points",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends vote in the Group",
+      "share clever lies"
+    ],
+    "content_needs": [
+      "statement templates",
+      "vote UI"
+    ],
+    "difficulty_levers": [
+      "statements",
+      "players"
+    ],
+    "tools": [
+      "keyboard",
+      "reveal",
+      "turns",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "two truths and a lie with my roommates",
+      "guess which one is false about me",
+      "group lie spotting game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "fake_answer_fool_friends",
+    "name": "Fake answer bluff",
+    "aliases": [
+      "Fibbage",
+      "Balderdash",
+      "Dictionary Game",
+      "Wits & Wagers",
+      "Jackbox Fibbage"
+    ],
+    "family": "party_social",
+    "subfamily": "write plausible fakes",
+    "summary": "A weird fact with a blank is shown; everyone writes a fake answer, then all answers and the real one are voted on.",
+    "core_loop": "read prompt → write fake answers → shuffled with the real one → vote → points",
+    "verbs": [
+      "fool",
+      "guess"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "prompt",
+      "answer input",
+      "shuffled options",
+      "points"
+    ],
+    "rules": [
+      "you cannot vote for your own",
+      "fooling gains points",
+      "finding the truth scores"
+    ],
+    "win": "highest points",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      120,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "write bluffs for friends",
+      "Group night"
+    ],
+    "content_needs": [
+      "prompts with true answers",
+      "fake generator for solo mode"
+    ],
+    "difficulty_levers": [
+      "prompts",
+      "rounds"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "rounds",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "fibbage about harry potter facts",
+      "write fake answers to fool my friends",
+      "balderdash with weird science facts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "caption_judge_funniest",
+    "name": "Caption judge",
+    "aliases": [
+      "Cards Against Humanity",
+      "Apples to Apples",
+      "Quiplash",
+      "What Do You Meme",
+      "Dixit"
+    ],
+    "family": "party_social",
+    "subfamily": "judge round",
+    "summary": "A prompt or picture is shown; players submit captions or cards; the judge picks the funniest and rotates.",
+    "core_loop": "prompt shown → players submit → judge picks → winner scores → judge rotates",
+    "verbs": [
+      "write",
+      "judge"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "prompt",
+      "submission hand",
+      "judge screen"
+    ],
+    "rules": [
+      "the judge sees anonymous entries",
+      "winners score",
+      "judge rotates"
+    ],
+    "win": "most wins",
+    "lose": "none",
+    "scoring": "judge wins",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "submit in a Group chat",
+      "share winning captions"
+    ],
+    "content_needs": [
+      "prompts and pictures",
+      "response cards"
+    ],
+    "difficulty_levers": [
+      "cards",
+      "players"
+    ],
+    "tools": [
+      "keyboard",
+      "rounds",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "caption contest for school photos",
+      "apples to apples but clean",
+      "meme caption battle with friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "word_association_chain",
+    "name": "Word association chain",
+    "aliases": [
+      "Word Chain",
+      "Associations",
+      "Word Association Game",
+      "Say It Fast",
+      "Chain Reaction"
+    ],
+    "family": "party_social",
+    "subfamily": "quick links",
+    "summary": "Each player says a word associated with the previous word within a few seconds without repeats or hesitation.",
+    "core_loop": "see start word → type a related word → timer → next player → no repeats",
+    "verbs": [
+      "associate",
+      "speed"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "word chain",
+      "timer",
+      "repeat check"
+    ],
+    "rules": [
+      "no repeats",
+      "words must relate (validated by player votes or a list)",
+      "hesitation eliminates"
+    ],
+    "win": "last player standing",
+    "lose": "time out or repeat",
+    "scoring": "chain length",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "fast chain with friends",
+      "longest chain in the Group"
+    ],
+    "content_needs": [
+      "word lists",
+      "association validation"
+    ],
+    "difficulty_levers": [
+      "timer",
+      "restrictions"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "countdown",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "word association chain about pokemon",
+      "say a word connected to the last one fast",
+      "associations with my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "codenames_clue_giver",
+    "name": "Clue-giver teams",
+    "aliases": [
+      "Codenames",
+      "Decrypto",
+      "Hint",
+      "Password",
+      "Wavelength"
+    ],
+    "family": "party_social",
+    "subfamily": "one-word clue",
+    "summary": "A clue-giver gives a one-word clue for a number of words on the board; teammates guess, avoiding the trap word.",
+    "core_loop": "clue-giver sees key → gives clue and number → team taps matching words → reveal → next",
+    "verbs": [
+      "clue",
+      "guess"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "5x5 word grid",
+      "key card",
+      "clue box",
+      "trap word"
+    ],
+    "rules": [
+      "clue cannot be on the board",
+      "trap word ends the game",
+      "team with more words wins"
+    ],
+    "win": "find your team's words",
+    "lose": "tap the trap word",
+    "scoring": "words found",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "team vs team on a call",
+      "async clue relays"
+    ],
+    "content_needs": [
+      "word packs",
+      "key cards"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "trap count"
+    ],
+    "tools": [
+      "grid_board",
+      "typed_answer",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "codenames with harry potter words",
+      "one word clues for my group",
+      "spymaster game for 4 friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spyfall_odd_one_out",
+    "name": "One doesn't know",
+    "aliases": [
+      "Spyfall",
+      "Chameleon",
+      "Undercover",
+      "Insider",
+      "Fake Artist Goes to New York"
+    ],
+    "family": "party_social",
+    "subfamily": "hidden outsider",
+    "summary": "Everyone gets the same secret location or word except one player; players ask and answer questions to expose the outsider without revealing the secret.",
+    "core_loop": "everyone sees the word except the spy → players ask questions → vote on the spy → spy guesses the word",
+    "verbs": [
+      "question",
+      "bluff"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "secret card",
+      "question prompts",
+      "vote screen"
+    ],
+    "rules": [
+      "questions must be vague enough to hide the word",
+      "the outsider tries to blend",
+      "outsider gets a final guess"
+    ],
+    "win": "vote out the outsider",
+    "lose": "outsider avoids vote or guesses the word",
+    "scoring": "win/lose",
+    "session_seconds": [
+      120,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "party night",
+      "same game for a Group"
+    ],
+    "content_needs": [
+      "word/location sets",
+      "question prompts"
+    ],
+    "difficulty_levers": [
+      "players",
+      "word obscurity"
+    ],
+    "tools": [
+      "keyboard",
+      "rounds",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "spyfall with school places",
+      "chameleon with harry potter words",
+      "one player has no idea what the word is"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "wavelength_dial_guess",
+    "name": "Dial wavelength",
+    "aliases": [
+      "Wavelength",
+      "Mind Meld",
+      "Just One spectrum",
+      "Rank It",
+      "Clue"
+    ],
+    "family": "party_social",
+    "subfamily": "spectrum guessing",
+    "summary": "A clue-giver sees a hidden target on a spectrum (hot to cold) and gives a clue; teammates set the dial where they think the target is.",
+    "core_loop": "see target → give clue → team sets dial → reveal → closer scores",
+    "verbs": [
+      "clue",
+      "estimate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "spectrum bar",
+      "hidden target",
+      "dial",
+      "score zones"
+    ],
+    "rules": [
+      "clue-giver cannot give numbers",
+      "closer to target scores more",
+      "teams alternate"
+    ],
+    "win": "highest total",
+    "lose": "none",
+    "scoring": "points by distance",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "team up with friends",
+      "compare how well you read each other"
+    ],
+    "content_needs": [
+      "spectrum pairs (hot-cold, good-bad)",
+      "clue prompts"
+    ],
+    "difficulty_levers": [
+      "spectrum width",
+      "zone size"
+    ],
+    "tools": [
+      "slider_input",
+      "reveal",
+      "turns",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "wavelength with hogwarts spectrums",
+      "guess where the target is on a spectrum",
+      "cool to uncool dial with my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cooperative_clue_dedupe",
+    "name": "Cooperative clue dedupe",
+    "aliases": [
+      "Just One",
+      "Codenames Duet",
+      "Hanabi",
+      "The Mind",
+      "Password"
+    ],
+    "family": "party_social",
+    "subfamily": "duplicates cancel",
+    "summary": "A guesser faces a secret word; all others write one-word clues, and duplicate clues are removed before the guesser sees them.",
+    "core_loop": "guesser sees blanks → clue-givers type clues → duplicates removed → guesser sees remaining → guess",
+    "verbs": [
+      "clue",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "secret word",
+      "clue boxes",
+      "removed duplicates",
+      "guess input"
+    ],
+    "rules": [
+      "clues must be one word",
+      "duplicates and invalid clues cancel",
+      "one guess only"
+    ],
+    "win": "guess correctly",
+    "lose": "wrong guess",
+    "scoring": "words guessed across rounds",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "team with friends in a chat",
+      "co-op scoring in a Group"
+    ],
+    "content_needs": [
+      "word list",
+      "duplicate checks"
+    ],
+    "difficulty_levers": [
+      "difficulty",
+      "team size"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "rounds",
+      "score",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "just one but with pokemon names",
+      "co-op clues where duplicates cancel",
+      "one-word clue game with my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "scattergories_letter_round",
+    "name": "Category and letter",
+    "aliases": [
+      "Scattergories",
+      "Stadt Land Fluss",
+      "Categories",
+      "Boggle categories",
+      "Name Place Animal Thing"
+    ],
+    "family": "party_social",
+    "subfamily": "unique answers",
+    "summary": "A letter and a list of categories; fill in an answer per category, with answers that match another player's scoring zero.",
+    "core_loop": "letter shown → type one answer per category → compare → unique ones score",
+    "verbs": [
+      "recall",
+      "be unique"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "letter",
+      "categories",
+      "timer",
+      "answers"
+    ],
+    "rules": [
+      "answers must start with the letter",
+      "duplicates cancel",
+      "validity by group vote"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "unique answers",
+    "session_seconds": [
+      90,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "everyone fills async",
+      "compare unique ones"
+    ],
+    "content_needs": [
+      "categories and letters"
+    ],
+    "difficulty_levers": [
+      "categories",
+      "timer"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "timer_bar",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "scattergories with harry potter categories",
+      "category and letter game with my class",
+      "name place animal thing but modern"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "price_is_right_guess",
+    "name": "Closest guess",
+    "aliases": [
+      "The Price Is Right",
+      "Wits & Wagers",
+      "Guess the Price",
+      "Guess My Weight",
+      "Estimation Game"
+    ],
+    "family": "party_social",
+    "subfamily": "estimate",
+    "summary": "An item or number is shown; each player secretly guesses a value, and the closest without going over (or just the closest) wins.",
+    "core_loop": "item shown → guess a number → reveal → closest scores → next",
+    "verbs": [
+      "estimate",
+      "bid"
+    ],
+    "inputs": [
+      "drag",
+      "type"
+    ],
+    "pieces": [
+      "item card",
+      "guess slider",
+      "reveal"
+    ],
+    "rules": [
+      "closest wins",
+      "going over may disqualify",
+      "items from a theme"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "closest guesses",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends vote on guesses",
+      "Group estimation board"
+    ],
+    "content_needs": [
+      "items with values",
+      "themes"
+    ],
+    "difficulty_levers": [
+      "range",
+      "rule variant"
+    ],
+    "tools": [
+      "slider_input",
+      "rounds",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "guess the price of school lunches",
+      "price is right with pokemon items",
+      "estimate the number of jelly beans"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "emoji_charade_decode",
+    "name": "Emoji decode",
+    "aliases": [
+      "Emoji Pictionary",
+      "Emoji Quiz",
+      "Guess the Emoji",
+      "Emoji Movies",
+      "Text Charades"
+    ],
+    "family": "party_social",
+    "subfamily": "decode",
+    "summary": "A movie, song or phrase is shown as emoji; the group decodes it before time runs out.",
+    "core_loop": "emoji string shown → type guess → timer → reveal → next",
+    "verbs": [
+      "decode",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "emoji string",
+      "guess box",
+      "hint button"
+    ],
+    "rules": [
+      "answers can be abbreviations",
+      "hints cost points",
+      "passes allowed"
+    ],
+    "win": "most correct",
+    "lose": "none",
+    "scoring": "answers correct",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send emoji puzzles to friends",
+      "Group board"
+    ],
+    "content_needs": [
+      "emoji puzzles by category"
+    ],
+    "difficulty_levers": [
+      "difficulty",
+      "hints"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "hint",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "emoji decode for harry potter",
+      "guess the movie from emojis",
+      "send emoji puzzles to my group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "phonetic_mishear_puzzle",
+    "name": "Mishear decode",
+    "aliases": [
+      "Mad Gab",
+      "Misheard Lyrics",
+      "Soramimi",
+      "Say What?",
+      "Mondegreens"
+    ],
+    "family": "party_social",
+    "subfamily": "sound out",
+    "summary": "A string of odd words sounds like a phrase when said aloud; players decode the real phrase.",
+    "core_loop": "odd text shown → read aloud or sound out → type the phrase → check",
+    "verbs": [
+      "decode",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "odd text",
+      "guess box",
+      "hint"
+    ],
+    "rules": [
+      "phonetics match the real phrase",
+      "hint reveals one word",
+      "timer"
+    ],
+    "win": "decode many phrases",
+    "lose": "time out",
+    "scoring": "phrases decoded",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "read the text aloud with friends",
+      "Group chain"
+    ],
+    "content_needs": [
+      "phrases with phonetic spellings"
+    ],
+    "difficulty_levers": [
+      "phrase length",
+      "hints"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "hint",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mad gab but with harry potter spells",
+      "misheard lyrics decode game",
+      "decode weird sounding phrases for my family"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "family_survey_feud",
+    "name": "Survey feud",
+    "aliases": [
+      "Family Feud",
+      "100 to 1",
+      "Survey Says",
+      "Pointless survey",
+      "Top 10"
+    ],
+    "family": "party_social",
+    "subfamily": "most popular answers",
+    "summary": "A survey question was asked of many people; guess the top answers, with more popular answers scoring more.",
+    "core_loop": "question shown → type answer → matches popular ranking → points",
+    "verbs": [
+      "guess",
+      "recall"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "question",
+      "answer board",
+      "strikes"
+    ],
+    "rules": [
+      "three strikes ends the round",
+      "ranks give points",
+      "answers aliased"
+    ],
+    "win": "reveal the whole board",
+    "lose": "three strikes",
+    "scoring": "points on the board",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "team feud with friends",
+      "Group daily board"
+    ],
+    "content_needs": [
+      "question bank with ranked answers",
+      "aliases"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "strikes"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "lives",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "family feud about school",
+      "survey says for my group chat",
+      "top 10 answers for hogwarts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "minute_to_win_it_challenges",
+    "name": "Mini challenge round",
+    "aliases": [
+      "Minute to Win It",
+      "Wii Party",
+      "Mario Party minigames",
+      "WarioWare",
+      "Jackbox Party Pack"
+    ],
+    "family": "party_social",
+    "subfamily": "quick physical tasks",
+    "summary": "A rapid-fire set of short challenges (shake, balance, tap, hold) where players compete for the best score on each.",
+    "core_loop": "challenge prompt → everyone does it → scores recorded → next → sum",
+    "verbs": [
+      "do",
+      "compete"
+    ],
+    "inputs": [
+      "tap",
+      "hold",
+      "tilt"
+    ],
+    "pieces": [
+      "challenge card",
+      "timer",
+      "score list"
+    ],
+    "rules": [
+      "each challenge lasts 10-20 seconds",
+      "best performance wins that point",
+      "sequence is random"
+    ],
+    "win": "highest sum of points",
+    "lose": "none",
+    "scoring": "challenge wins",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "pass the phone or share scores",
+      "Group league"
+    ],
+    "content_needs": [
+      "challenge pool"
+    ],
+    "difficulty_levers": [
+      "challenge count",
+      "difficulty"
+    ],
+    "tools": [
+      "countdown",
+      "rounds",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "minute to win it with school items",
+      "wario ware style rounds with friends",
+      "party challenges to pass the phone around"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "bluffing_dice_liars",
+    "name": "Liar's dice",
+    "aliases": [
+      "Liar's Dice",
+      "Perudo",
+      "Dudo",
+      "Bluff",
+      "Pirates of the Caribbean dice"
+    ],
+    "family": "party_social",
+    "subfamily": "claim and challenge",
+    "summary": "Players secretly roll dice then bid on the total counts across all hands; each raise must go up, and a challenge reveals who lied.",
+    "core_loop": "roll hidden → bid count and face → next player raises or calls → reveal → loser loses a die",
+    "verbs": [
+      "bluff",
+      "call"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "hidden dice",
+      "bid UI",
+      "reveal",
+      "dice left"
+    ],
+    "rules": [
+      "bids must raise",
+      "calling checks all dice",
+      "lose a die when wrong"
+    ],
+    "win": "last with dice",
+    "lose": "no dice left",
+    "scoring": "dice remaining",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "pirate night with friends",
+      "async rounds"
+    ],
+    "content_needs": [
+      "AI bluffing profiles"
+    ],
+    "difficulty_levers": [
+      "players",
+      "dice count"
+    ],
+    "tools": [
+      "random_int",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "liars dice with pirates",
+      "bluffing dice for a sleepover",
+      "perudo with my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mind_meld_sync_tap",
+    "name": "Mind meld",
+    "aliases": [
+      "The Mind",
+      "Wavelength",
+      "Telepathy",
+      "Mind Meld",
+      "Same Wavelength"
+    ],
+    "family": "party_social",
+    "subfamily": "sync without talking",
+    "summary": "Players tap or choose without communicating; the goal is to land on the same item or the same order.",
+    "core_loop": "countdown → choose silently → reveal → matches score → next",
+    "verbs": [
+      "sync",
+      "intuit"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "prompt",
+      "options",
+      "reveal",
+      "match count"
+    ],
+    "rules": [
+      "no talking",
+      "more matches add points",
+      "prompts vary in obviousness"
+    ],
+    "win": "high match count",
+    "lose": "none",
+    "scoring": "matches",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "see how in sync friends are",
+      "Group compatibility"
+    ],
+    "content_needs": [
+      "prompts with options"
+    ],
+    "difficulty_levers": [
+      "prompt obscurity",
+      "rounds"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "shared_progress",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mind meld with my best friend",
+      "pick the same answer without talking",
+      "same wavelength game for the group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "asymmetric_defuse_co_op",
+    "name": "Bomb defusal talk",
+    "aliases": [
+      "Keep Talking and Nobody Explodes",
+      "Spaceteam",
+      "Overcooked talk",
+      "Escape Room co-op",
+      "Operation"
+    ],
+    "family": "party_social",
+    "subfamily": "asymmetric info",
+    "summary": "One player sees a bomb with modules; the others have the manual; they talk it through to defuse before time runs out.",
+    "core_loop": "defuser describes a module → manual holders instruct → defuser acts → timer",
+    "verbs": [
+      "describe",
+      "instruct"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "bomb modules",
+      "manual pages",
+      "timer",
+      "strikes"
+    ],
+    "rules": [
+      "information is split",
+      "errors add strikes",
+      "modules vary"
+    ],
+    "win": "defuse all modules",
+    "lose": "explodes",
+    "scoring": "modules done",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "play on a call",
+      "Group co-op night"
+    ],
+    "content_needs": [
+      "modules and manuals"
+    ],
+    "difficulty_levers": [
+      "module count",
+      "timer"
+    ],
+    "tools": [
+      "countdown",
+      "lives",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "keep talking and nobody explodes with my friends",
+      "spaceteam style co-op",
+      "defuse a cake bomb with one person reading"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "odd_one_out_vote",
+    "name": "Odd one out",
+    "aliases": [
+      "Spot It",
+      "Odd One Out",
+      "Hidden Role Chameleon",
+      "Fake Artist",
+      "Find the Imposter"
+    ],
+    "family": "party_social",
+    "subfamily": "find the different",
+    "summary": "Most players see the same prompt; one sees a slightly different one; all give answers, then vote on who is the odd one.",
+    "core_loop": "prompts → everyone writes an answer → answers revealed → vote → reveal",
+    "verbs": [
+      "answer",
+      "spot"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "prompt",
+      "answer box",
+      "vote screen"
+    ],
+    "rules": [
+      "the odd prompt is similar not identical",
+      "answers reveal differences",
+      "vote scores"
+    ],
+    "win": "catch the odd one",
+    "lose": "odd one hides",
+    "scoring": "points",
+    "session_seconds": [
+      90,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Group night",
+      "share who got caught"
+    ],
+    "content_needs": [
+      "prompt pairs"
+    ],
+    "difficulty_levers": [
+      "pair similarity"
+    ],
+    "tools": [
+      "keyboard",
+      "reveal",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "undercover with school words",
+      "find who got a different prompt",
+      "odd one out game for my class"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "improv_story_dice",
+    "name": "Story-dice improv",
+    "aliases": [
+      "Rory's Story Cubes",
+      "Once Upon a Time",
+      "Fiasco",
+      "Whose Line",
+      "Mad Libs improv"
+    ],
+    "family": "party_social",
+    "subfamily": "improv with prompts",
+    "summary": "Roll symbol dice and tell a story that must include them, in turns, within a short time.",
+    "core_loop": "roll symbols → player tells a story piece → timer → pass → vote best",
+    "verbs": [
+      "tell",
+      "improvise"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "dice faces",
+      "timer",
+      "story log"
+    ],
+    "rules": [
+      "each symbol must appear",
+      "turns pass on a beep",
+      "voting at the end"
+    ],
+    "win": "best story vote",
+    "lose": "none",
+    "scoring": "votes",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "tell stories at a party",
+      "voice message stories in a Group"
+    ],
+    "content_needs": [
+      "symbol sets"
+    ],
+    "difficulty_levers": [
+      "symbols",
+      "time"
+    ],
+    "tools": [
+      "random_int",
+      "countdown",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "story cubes with harry potter symbols",
+      "improv a story from random pictures",
+      "tell a story using these dice"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "who_knows_the_group_vote",
+    "name": "Most likely to",
+    "aliases": [
+      "Most Likely To",
+      "Who's Most Likely To",
+      "Pointless Polls",
+      "Kahoot social",
+      "Jackbox Quiplash vote"
+    ],
+    "family": "party_social",
+    "subfamily": "vote on friends",
+    "summary": "A prompt like 'most likely to oversleep' is shown; everyone votes for a friend, and results reveal the Group's opinion.",
+    "core_loop": "prompt shown → pick a friend → votes tallied → reveal winner",
+    "verbs": [
+      "vote",
+      "laugh"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "prompt",
+      "friend avatars",
+      "tally"
+    ],
+    "rules": [
+      "votes are anonymous",
+      "ties allowed",
+      "a few prompts per round"
+    ],
+    "win": "none; fun",
+    "lose": "none",
+    "scoring": "votes received",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "vote in the Group",
+      "screenshot the winner"
+    ],
+    "content_needs": [
+      "prompts by tone",
+      "Group member list"
+    ],
+    "difficulty_levers": [
+      "prompt tone",
+      "group size"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "shared_progress",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "most likely to for our group chat",
+      "who is most likely to be late",
+      "friends vote on the funniest"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "blind_describe_draw",
+    "name": "Describe and draw",
+    "aliases": [
+      "Describe and Draw",
+      "Pictionary words",
+      "Back-to-Back Drawing",
+      "Draw My Thing",
+      "Telestrations"
+    ],
+    "family": "party_social",
+    "subfamily": "partner describes",
+    "summary": "One player describes a hidden image in words; the partner draws what they hear without seeing it; the two compare.",
+    "core_loop": "describer sees image → describes → drawer draws → compare to original",
+    "verbs": [
+      "describe",
+      "draw"
+    ],
+    "inputs": [
+      "drag",
+      "type"
+    ],
+    "pieces": [
+      "hidden image",
+      "canvas",
+      "chat",
+      "reveal"
+    ],
+    "rules": [
+      "describer cannot name the object",
+      "drawer cannot ask questions",
+      "image shown at the end"
+    ],
+    "win": "closest match",
+    "lose": "none",
+    "scoring": "similarity vote",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "pairs on a call",
+      "share both drawings"
+    ],
+    "content_needs": [
+      "image or prompt set"
+    ],
+    "difficulty_levers": [
+      "image complexity",
+      "time"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "countdown",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "describe and draw with my brother",
+      "draw what i describe without looking",
+      "blind drawing game with friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "emoji_translation_relay",
+    "name": "Emoji relay",
+    "aliases": [
+      "Emoji Telephone",
+      "Telephone game",
+      "Chinese Whispers",
+      "Pass the Message",
+      "Reply All"
+    ],
+    "family": "party_social",
+    "subfamily": "lossy relay",
+    "summary": "A message is passed along a chain, each player re-expressing it in emoji or a few words, and the original and final are compared.",
+    "core_loop": "read message → rewrite in emoji → next friend decodes → reveal",
+    "verbs": [
+      "encode",
+      "decode"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "message",
+      "emoji keyboard",
+      "chain reveal"
+    ],
+    "rules": [
+      "chain length fixed",
+      "each player sees only the last output",
+      "final decode is compared"
+    ],
+    "win": "funniest drift",
+    "lose": "none",
+    "scoring": "votes",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends pass async",
+      "share the final drift"
+    ],
+    "content_needs": [
+      "seed messages"
+    ],
+    "difficulty_levers": [
+      "chain length",
+      "emoji only"
+    ],
+    "tools": [
+      "keyboard",
+      "turns",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "emoji telephone with my friends",
+      "pass a message and see what survives",
+      "pass the secret message through the group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "compliment_roast_spin",
+    "name": "Roast and toast",
+    "aliases": [
+      "Roast Battle",
+      "Compliment Battle",
+      "Kindness Cards",
+      "Cards Against Humanity",
+      "Quiplash"
+    ],
+    "family": "party_social",
+    "subfamily": "kind or silly",
+    "summary": "Spin to pick a friend, then pick from a list a compliment or a gentle roast to send; the friend rates it.",
+    "core_loop": "spin → pick friend → choose compliment or roast → send → friend reacts",
+    "verbs": [
+      "compliment",
+      "tease"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "spinner",
+      "line choices",
+      "reaction buttons"
+    ],
+    "rules": [
+      "roasts are playful and filtered",
+      "friend picks a reaction",
+      "no meanness allowed"
+    ],
+    "win": "everyone gets some",
+    "lose": "none",
+    "scoring": "reactions",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "send kind or silly notes",
+      "Group compliments feed"
+    ],
+    "content_needs": [
+      "lines by tone"
+    ],
+    "difficulty_levers": [
+      "tone",
+      "players"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "roast and toast for my group chat",
+      "compliment spinner for friends",
+      "kind roasts for a birthday"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "group_photo_scavenger",
+    "name": "Group photo scavenger",
+    "aliases": [
+      "Scavenger Hunt",
+      "Snap Challenge",
+      "BeReal prompt",
+      "Photo Bingo",
+      "Geocaching"
+    ],
+    "family": "party_social",
+    "subfamily": "real-world prompts",
+    "summary": "A list of silly things to find or pose with; players snap them and the Group votes on the best.",
+    "core_loop": "prompt list → find the thing → snap or tick → Group votes → points",
+    "verbs": [
+      "find",
+      "pose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "prompt list",
+      "camera/checklist",
+      "vote screen"
+    ],
+    "rules": [
+      "prompts expire after the hour",
+      "photos shared in the Group",
+      "votes decide winners"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "votes",
+    "session_seconds": [
+      120,
+      180
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "do it together in person",
+      "post to the Group"
+    ],
+    "content_needs": [
+      "prompt lists"
+    ],
+    "difficulty_levers": [
+      "prompts",
+      "time"
+    ],
+    "tools": [
+      "pickups",
+      "shared_progress",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "scavenger hunt for our sleepover",
+      "photo bingo for a school trip",
+      "find silly things around the house"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tapping_chain_rhythm_circle",
+    "name": "Rhythm circle",
+    "aliases": [
+      "Clap Circle",
+      "Bunny Bunny",
+      "Concentration",
+      "Cup Song",
+      "Rhythm Heaven"
+    ],
+    "family": "party_social",
+    "subfamily": "pattern pass",
+    "summary": "A rhythm pattern is passed around; each player repeats it and adds one beat; the first to miss is out.",
+    "core_loop": "hear pattern → repeat on beat → add a beat → pass",
+    "verbs": [
+      "listen",
+      "repeat"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "beat track",
+      "pattern",
+      "turn indicator"
+    ],
+    "rules": [
+      "patterns accumulate",
+      "timing windows",
+      "last standing wins"
+    ],
+    "win": "outlast others",
+    "lose": "miss the beat",
+    "scoring": "pattern length",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "pass the phone",
+      "Group chain"
+    ],
+    "content_needs": [
+      "beat patterns"
+    ],
+    "difficulty_levers": [
+      "BPM",
+      "pattern length"
+    ],
+    "tools": [
+      "beat_target",
+      "sequence_memory",
+      "lives",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "clap circle on my phone",
+      "pass a rhythm around my friends",
+      "rhythm memory game for a party"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "categories_rank_consensus",
+    "name": "Rank-it consensus",
+    "aliases": [
+      "Wits & Wagers",
+      "The Game of Things",
+      "Rank It",
+      "Ranking Game",
+      "Top Trumps rank"
+    ],
+    "family": "party_social",
+    "subfamily": "order items together",
+    "summary": "Players individually rank a list; the game compares rankings and rewards the closest to the group consensus.",
+    "core_loop": "list shown → rank → reveal group average → closest scores",
+    "verbs": [
+      "rank",
+      "predict"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "list of 5 items",
+      "rank UI",
+      "average reveal"
+    ],
+    "rules": [
+      "no ties",
+      "scoring by distance from consensus",
+      "lists are fun themes"
+    ],
+    "win": "closest to consensus",
+    "lose": "none",
+    "scoring": "rank distance",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "guess how the Group ranks things",
+      "debate"
+    ],
+    "content_needs": [
+      "ranking lists"
+    ],
+    "difficulty_levers": [
+      "list size",
+      "group size"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "rank these pizza toppings like my friends",
+      "group consensus ranking game",
+      "rank hogwarts houses with my class"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "wager_confidence_bet",
+    "name": "Confidence wager",
+    "aliases": [
+      "Wits & Wagers",
+      "Who Wants to Be a Millionaire lifeline",
+      "Jeopardy final",
+      "Poker-style trivia",
+      "Bet on It"
+    ],
+    "family": "party_social",
+    "subfamily": "bet on knowledge",
+    "summary": "Players answer, then wager points on their confidence, with larger wagers risking more.",
+    "core_loop": "question → answer → set wager → reveal → points updated",
+    "verbs": [
+      "bet",
+      "know"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "question",
+      "answer choices",
+      "wager slider",
+      "score"
+    ],
+    "rules": [
+      "wager at most your points",
+      "wrong answers lose the wager",
+      "rounds escalate"
+    ],
+    "win": "highest points after rounds",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "bluff friends on confidence",
+      "Group leaderboard"
+    ],
+    "content_needs": [
+      "question bank"
+    ],
+    "difficulty_levers": [
+      "wager limits",
+      "rounds"
+    ],
+    "tools": [
+      "quiz",
+      "slider_input",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "jeopardy final wager with my friends",
+      "bet on how sure you are",
+      "wager game on movie trivia"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "secret_santa_gift_match",
+    "name": "Gift match",
+    "aliases": [
+      "Secret Santa",
+      "White Elephant",
+      "Gift Exchange",
+      "Dirty Santa",
+      "Yankee Swap"
+    ],
+    "family": "party_social",
+    "subfamily": "steal or keep",
+    "summary": "Wrapped gifts are opened in turns; each player either opens a new one or steals a revealed gift from someone, with a steal limit.",
+    "core_loop": "open or steal → reveal gift → steal limit → final holdings",
+    "verbs": [
+      "choose",
+      "steal"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "gift pile",
+      "revealed gifts",
+      "steal counter"
+    ],
+    "rules": [
+      "a gift can be stolen up to 2 times",
+      "last player may swap with anyone",
+      "gifts are silly"
+    ],
+    "win": "end with a gift you like",
+    "lose": "none",
+    "scoring": "gift preference vote",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "white elephant party",
+      "Group gift swap"
+    ],
+    "content_needs": [
+      "gift lists"
+    ],
+    "difficulty_levers": [
+      "gift count",
+      "steal limit"
+    ],
+    "tools": [
+      "choice_story",
+      "turns",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "white elephant for our class",
+      "secret santa gift steal game",
+      "gift exchange for the group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

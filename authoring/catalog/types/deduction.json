@@ -1,0 +1,1611 @@
+[
+  {
+    "id": "guess_the_character_yes_no",
+    "name": "Guess the face",
+    "aliases": [
+      "Guess Who"
+    ],
+    "family": "deduction",
+    "summary": "Ask yes/no questions about features to flip down faces until you can name your opponent's secret character.",
+    "core_loop": "ask a yes/no question → flip down faces that don't fit → guess the secret one",
+    "verbs": [
+      "ask",
+      "eliminate",
+      "guess"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only yes/no questions",
+      "a wrong final guess loses"
+    ],
+    "win": "name the secret character first",
+    "lose": "a wrong final guess",
+    "scoring": "questions used",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "play Guess Who with your friends' faces"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "trait variety"
+    ],
+    "tools": [
+      "turns",
+      "grid_board",
+      "reveal",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "guess who with my friends faces",
+      "guess who with star wars characters",
+      "flip the faces game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mystery_suspect_room_weapon",
+    "name": "Suspect, room and weapon",
+    "aliases": [
+      "Clue",
+      "Cluedo"
+    ],
+    "family": "deduction",
+    "summary": "Move between rooms and make suggestions; others secretly disprove them until you can name the suspect, room and weapon.",
+    "core_loop": "move → suggest suspect, room and weapon → someone shows a card → mark your notes → accuse",
+    "verbs": [
+      "deduce",
+      "move",
+      "suggest"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a wrong accusation knocks you out"
+    ],
+    "win": "make the correct accusation",
+    "lose": "a wrong accusation",
+    "scoring": "first to solve",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "a Clue game set in your friend group's house"
+    ],
+    "difficulty_levers": [
+      "suspects",
+      "rooms"
+    ],
+    "tools": [
+      "turns",
+      "grid_board",
+      "reveal",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "clue board game with my roommates",
+      "cluedo in our office",
+      "who did it in the dorm"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hidden_role_werewolf",
+    "name": "Hidden roles at night",
+    "aliases": [
+      "Werewolf",
+      "Mafia"
+    ],
+    "family": "deduction",
+    "summary": "Players get secret roles; at night the wolves pick a victim, by day everyone argues and votes someone out.",
+    "core_loop": "get a role → night actions → day discussion → vote someone out → repeat",
+    "verbs": [
+      "bluff",
+      "vote",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "wolves know each other",
+      "villagers win by voting out every wolf"
+    ],
+    "win": "your team's win condition",
+    "lose": "your team is wiped out",
+    "scoring": "team win",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "a Group game night with friends"
+    ],
+    "difficulty_levers": [
+      "player count",
+      "special roles"
+    ],
+    "tools": [
+      "turns",
+      "live_multiplayer",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "mafia game with my friends online",
+      "werewolf in a group chat",
+      "one night werewolf"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "impostor_among_us",
+    "name": "Find the impostor",
+    "aliases": [
+      "Among Us",
+      "Spyfall"
+    ],
+    "family": "deduction",
+    "summary": "Most players share a secret; one impostor doesn't and must blend in while others try to spot them.",
+    "core_loop": "everyone sees the secret but one → take turns giving hints → vote the impostor",
+    "verbs": [
+      "bluff",
+      "deduce",
+      "vote"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "the impostor must guess the secret if caught"
+    ],
+    "win": "catch the impostor, or as impostor stay hidden or guess the secret",
+    "lose": "the wrong player is voted out",
+    "scoring": "rounds won",
+    "session_seconds": [
+      180,
+      600
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "party night for a Group"
+    ],
+    "difficulty_levers": [
+      "hint rounds",
+      "secret obscurity"
+    ],
+    "tools": [
+      "turns",
+      "typed_answer",
+      "reveal",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "among us word game",
+      "spyfall location game",
+      "find the imposter in my friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "battleship_versus",
+    "name": "Sink the fleet",
+    "aliases": [
+      "Battleship"
+    ],
+    "family": "deduction",
+    "summary": "Place a fleet secretly, then take turns calling shots to find and sink your opponent's ships.",
+    "core_loop": "place ships → call a cell → hit or miss → hunt around hits → sink everything",
+    "verbs": [
+      "guess",
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one shot per turn",
+      "sunk ships are announced"
+    ],
+    "win": "sink every ship",
+    "lose": "your fleet sinks first",
+    "scoring": "shots used",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "async battleship with a friend"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "fleet"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "battleship with my brother",
+      "sink the ships game",
+      "battleship online with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "twenty_questions",
+    "name": "Twenty questions",
+    "aliases": [
+      "20 Questions",
+      "Akinator"
+    ],
+    "family": "deduction",
+    "summary": "Ask up to 20 yes/no questions to figure out what the other player is thinking of.",
+    "core_loop": "One player picks a secret thing; the other asks up to 20 yes or no questions, narrowing the options until they make a final guess",
+    "verbs": [
+      "ask",
+      "deduce"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "20 questions at most"
+    ],
+    "win": "guess the answer",
+    "lose": "out of questions",
+    "scoring": "questions used",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "play it in a group chat"
+    ],
+    "difficulty_levers": [
+      "category",
+      "question limit",
+      "guesses allowed"
+    ],
+    "tools": [
+      "typed_answer",
+      "turns",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "20 questions with friends",
+      "akinator style guessing",
+      "guess what I'm thinking"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "code_breaker_versus",
+    "name": "Duel code-breaker",
+    "aliases": [
+      "Bulls and Cows versus"
+    ],
+    "family": "deduction",
+    "summary": "Two players each set a secret code and race to crack the other's with feedback on each guess.",
+    "core_loop": "Each player sets a secret code, then both take turns guessing the other's and reading right-place and right-color feedback, racing to crack it first",
+    "verbs": [
+      "deduce",
+      "guess"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "feedback gives exact and partial matches"
+    ],
+    "win": "crack their code first",
+    "lose": "they crack yours first",
+    "scoring": "guesses used",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "duel a friend async"
+    ],
+    "difficulty_levers": [
+      "code length",
+      "colors",
+      "turn time"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "mastermind against my friend",
+      "crack each other's code",
+      "bulls and cows duel"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cheat_card_bluff",
+    "name": "Lie about your cards",
+    "aliases": [
+      "Cheat",
+      "BS",
+      "I Doubt It"
+    ],
+    "family": "deduction",
+    "summary": "Play cards face down claiming a rank; others can call your bluff.",
+    "core_loop": "Play cards face down while claiming a rank; others call your bluff or pass, and whoever is caught or wrong picks up the pile",
+    "verbs": [
+      "bluff",
+      "call"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "claims must follow the rank order"
+    ],
+    "win": "empty your hand first",
+    "lose": "none",
+    "scoring": "first out",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "party card game"
+    ],
+    "difficulty_levers": [
+      "deck size",
+      "cards per play",
+      "call penalty"
+    ],
+    "tools": [
+      "turns",
+      "live_multiplayer",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "bs card game online",
+      "cheat card game with friends",
+      "i doubt it"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spy_codeword_teams",
+    "name": "Secret codes between teams",
+    "aliases": [
+      "Decrypto"
+    ],
+    "family": "deduction",
+    "summary": "Give clues to your team about secret code words while the other team tries to intercept.",
+    "core_loop": "read your code → give three clues → your team decodes → the other team intercepts",
+    "verbs": [
+      "clue",
+      "deduce"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "clues must not be too obvious"
+    ],
+    "win": "decode twice or intercept twice",
+    "lose": "two miscommunications",
+    "scoring": "interceptions",
+    "session_seconds": [
+      600,
+      1200
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "team game for a Group"
+    ],
+    "difficulty_levers": [
+      "words",
+      "rounds"
+    ],
+    "tools": [
+      "turns",
+      "typed_answer",
+      "reveal",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "decrypto online",
+      "secret code clue game",
+      "team code word game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "deduce_from_testimony",
+    "name": "Who's lying",
+    "aliases": [
+      "Testimony puzzle"
+    ],
+    "family": "deduction",
+    "summary": "Read statements from suspects; exactly one is lying. Find the liar from the contradictions.",
+    "core_loop": "Read short statements from each suspect, knowing exactly one is lying, find where they contradict, and accuse the liar",
+    "verbs": [
+      "deduce",
+      "reason"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "exactly one liar per case"
+    ],
+    "win": "accuse the liar",
+    "lose": "wrong accusation",
+    "scoring": "cases solved",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily case shared in a Group"
+    ],
+    "difficulty_levers": [
+      "suspects",
+      "statements",
+      "liars count"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "who is lying puzzle",
+      "detective testimony game",
+      "find the liar"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "detective_scene_search",
+    "name": "Search the scene",
+    "aliases": [
+      "Crime scene"
+    ],
+    "family": "deduction",
+    "summary": "Search a scene for clues, then answer who, how and why.",
+    "core_loop": "Search a crime scene for clues, collect them in a notebook, then answer who did it, how and why",
+    "verbs": [
+      "search",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only collected clues can be cited"
+    ],
+    "win": "solve the case",
+    "lose": "wrong answer",
+    "scoring": "clues used",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "case files for friends"
+    ],
+    "difficulty_levers": [
+      "clue count",
+      "red herrings",
+      "question count"
+    ],
+    "tools": [
+      "reveal",
+      "choice_story",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "crime scene investigation game",
+      "find clues and solve the case",
+      "detective search"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "elimination_grid_versus",
+    "name": "Hidden number duel",
+    "aliases": [
+      "Guess my number"
+    ],
+    "family": "deduction",
+    "summary": "Each player hides a number; take turns asking higher or lower questions to find it.",
+    "core_loop": "Each player hides a number; take turns asking higher-or-lower questions to narrow the range and guess the other's first",
+    "verbs": [
+      "ask",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "only higher or lower answers"
+    ],
+    "win": "guess first",
+    "lose": "none",
+    "scoring": "guesses",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "quick duel"
+    ],
+    "difficulty_levers": [
+      "range",
+      "question types",
+      "guess penalty"
+    ],
+    "tools": [
+      "turns",
+      "async_turns",
+      "keyboard"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "guess my number game",
+      "higher or lower duel",
+      "number guessing with a friend"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "odd_one_secret",
+    "name": "Who doesn't know",
+    "aliases": [
+      "Chameleon",
+      "Wavelength-adjacent"
+    ],
+    "family": "deduction",
+    "summary": "Everyone gets the same secret word but one; each says one word about it; vote out the chameleon.",
+    "core_loop": "read the secret → say a related word → vote the chameleon → they get one guess",
+    "verbs": [
+      "bluff",
+      "deduce",
+      "vote"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "the chameleon wins by guessing the secret"
+    ],
+    "win": "find the chameleon",
+    "lose": "the chameleon blends in or guesses",
+    "scoring": "rounds won",
+    "session_seconds": [
+      180,
+      600
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "party mode for a Group"
+    ],
+    "difficulty_levers": [
+      "category",
+      "word clues"
+    ],
+    "tools": [
+      "turns",
+      "typed_answer",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "chameleon party game",
+      "who doesn't know the word",
+      "secret word bluff"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hidden_traitor_mission",
+    "name": "Mission with a traitor",
+    "aliases": [
+      "The Resistance",
+      "Avalon",
+      "Secret Hitler"
+    ],
+    "family": "deduction",
+    "summary": "A team goes on missions; hidden traitors can sabotage. Vote on teams and read the results.",
+    "core_loop": "propose a team → vote → mission succeeds or fails → deduce traitors",
+    "verbs": [
+      "vote",
+      "bluff",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "traitors may sabotage secretly"
+    ],
+    "win": "three successful missions",
+    "lose": "three failed missions",
+    "scoring": "missions won",
+    "session_seconds": [
+      900,
+      1800
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "a Group's game night"
+    ],
+    "difficulty_levers": [
+      "player count",
+      "roles"
+    ],
+    "tools": [
+      "turns",
+      "live_multiplayer",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "avalon resistance online",
+      "secret hitler style game",
+      "traitor in the team"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coin_toss_lie_detector",
+    "name": "Did they cheat",
+    "aliases": [
+      "Cheater detector"
+    ],
+    "family": "deduction",
+    "summary": "Watch a sequence of outcomes and decide whether it's random or rigged.",
+    "core_loop": "Watch a sequence of coin flips or dice outcomes, judge whether it's truly random or secretly rigged, then see the reveal",
+    "verbs": [
+      "judge",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "half the sequences are rigged"
+    ],
+    "win": "most right calls",
+    "lose": "none",
+    "scoring": "right calls",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "stats nerds compare"
+    ],
+    "difficulty_levers": [
+      "sequence length",
+      "rig subtlety",
+      "time"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "is this coin rigged",
+      "spot the fake random",
+      "probability detective"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "secret_word_hint_game",
+    "name": "Hint toward the word",
+    "aliases": [
+      "Just One",
+      "So Clover"
+    ],
+    "family": "deduction",
+    "summary": "Teammates each write a one-word hint; duplicate hints are erased; the guesser uses the rest.",
+    "core_loop": "Teammates each write a one-word hint for the secret word; duplicate hints cancel out, and the guesser uses what's left",
+    "verbs": [
+      "clue",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "duplicate hints are removed"
+    ],
+    "win": "guess the word",
+    "lose": "wrong guess",
+    "scoring": "words guessed",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "co-op for a Group"
+    ],
+    "difficulty_levers": [
+      "team size",
+      "word difficulty",
+      "guesses"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "turns",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "just one party game",
+      "one word hints co-op",
+      "group word guessing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "location_spy",
+    "name": "Where are we",
+    "aliases": [
+      "Spyfall"
+    ],
+    "family": "deduction",
+    "summary": "Everyone knows the location except the spy; ask each other questions and find the spy before they figure out where you are.",
+    "core_loop": "Everyone but the spy knows the location; take turns asking questions, and vote out the spy before they deduce where you are",
+    "verbs": [
+      "ask",
+      "bluff",
+      "deduce"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "the spy may guess the location at any time"
+    ],
+    "win": "find the spy, or as spy name the location",
+    "lose": "wrong vote",
+    "scoring": "rounds won",
+    "session_seconds": [
+      300,
+      600
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "party night"
+    ],
+    "difficulty_levers": [
+      "locations",
+      "timer",
+      "players"
+    ],
+    "tools": [
+      "turns",
+      "typed_answer",
+      "timer_bar",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "spyfall online",
+      "who is the spy",
+      "guess the location bluff game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "murder_mystery_party",
+    "name": "Murder mystery party",
+    "aliases": [
+      "Murder mystery dinner"
+    ],
+    "family": "deduction",
+    "summary": "Each player plays a character with secrets; interview each other and reveal clues each round.",
+    "core_loop": "read your character → reveal clues → question others → accuse",
+    "verbs": [
+      "roleplay",
+      "deduce"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "the murderer may lie; others may not"
+    ],
+    "win": "name the murderer",
+    "lose": "wrong accusation",
+    "scoring": "correct accusations",
+    "session_seconds": [
+      1200,
+      3600
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "dinner party game for friends"
+    ],
+    "difficulty_levers": [
+      "characters",
+      "clue rounds"
+    ],
+    "tools": [
+      "choice_story",
+      "turns",
+      "reveal",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "murder mystery party game",
+      "host a murder mystery for my birthday",
+      "whodunit dinner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "evidence_board",
+    "name": "Connect the evidence",
+    "aliases": [
+      "Evidence board"
+    ],
+    "family": "deduction",
+    "summary": "Pin clues to a board and draw links between people, places and events to find the culprit.",
+    "core_loop": "Pin clues to a board, draw links between people, places and events, and test a theory before you accuse the culprit",
+    "verbs": [
+      "link",
+      "deduce"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "only real connections count"
+    ],
+    "win": "name the culprit with supporting links",
+    "lose": "wrong accusation",
+    "scoring": "links right",
+    "session_seconds": [
+      300,
+      1200
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "solve together with a friend"
+    ],
+    "difficulty_levers": [
+      "clue count",
+      "suspects",
+      "accusations allowed"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal",
+      "choice_story"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "red string evidence board game",
+      "conspiracy board puzzle",
+      "detective corkboard"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "probability_guess_draw",
+    "name": "Draw from the bag",
+    "aliases": [
+      "Bag inference"
+    ],
+    "family": "deduction",
+    "summary": "Draw colored tokens from a hidden bag and guess its contents.",
+    "core_loop": "Draw colored tokens one at a time from a hidden bag, update your estimate, and declare its mix when you're confident",
+    "verbs": [
+      "infer",
+      "estimate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "draws are random with replacement"
+    ],
+    "win": "guess the mix closely",
+    "lose": "none",
+    "scoring": "points by closeness",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "stats class"
+    ],
+    "difficulty_levers": [
+      "bag size",
+      "colors",
+      "draws allowed"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "guess what's in the bag",
+      "draw marbles and infer",
+      "bayes game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hot_cold_search",
+    "name": "Hot and cold search",
+    "aliases": [
+      "Hot or cold"
+    ],
+    "family": "deduction",
+    "summary": "Tap spots to search; feedback says warmer or colder until you find the hidden thing.",
+    "core_loop": "Tap a spot to search; feedback says warmer or colder than your last tap, narrowing in until you find the hidden thing",
+    "verbs": [
+      "search",
+      "infer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "feedback compares to your last tap"
+    ],
+    "win": "find it within taps",
+    "lose": "out of taps",
+    "scoring": "taps used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "hide something for a friend"
+    ],
+    "difficulty_levers": [
+      "area size",
+      "taps allowed",
+      "feedback detail"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hot and cold game",
+      "find the hidden treasure warmer colder",
+      "hide and seek search"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "signal_partner",
+    "name": "Silent signals",
+    "aliases": [
+      "Code Talker",
+      "partner signals"
+    ],
+    "family": "deduction",
+    "summary": "Two partners agree on nothing in advance and try to sync on the same answer from limited signals.",
+    "core_loop": "Two partners see the same options and send one limited signal at a time, trying to land on the same answer without planning ahead",
+    "verbs": [
+      "signal",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no talking allowed"
+    ],
+    "win": "match the most",
+    "lose": "none",
+    "scoring": "matches",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "best-friend sync test"
+    ],
+    "difficulty_levers": [
+      "options",
+      "signal types",
+      "rounds"
+    ],
+    "tools": [
+      "turns",
+      "reveal",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "partner telepathy game",
+      "sync with my best friend",
+      "same answer challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "interrogation",
+    "name": "Interrogate the suspect",
+    "aliases": [
+      "Interrogation"
+    ],
+    "family": "deduction",
+    "summary": "Ask a suspect questions from a list; catch contradictions in their answers.",
+    "core_loop": "Pick questions from a list to ask a suspect, read their answers, catch a contradiction, and confront them with it",
+    "verbs": [
+      "ask",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "limited questions"
+    ],
+    "win": "catch the lie",
+    "lose": "out of questions",
+    "scoring": "contradictions found",
+    "session_seconds": [
+      180,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "case to send a friend"
+    ],
+    "difficulty_levers": [
+      "question budget",
+      "suspects",
+      "lie subtlety"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "interrogate the suspect game",
+      "catch the lie detective",
+      "police interview game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "door_choice_logic",
+    "name": "Pick the right door",
+    "aliases": [
+      "Monty Hall",
+      "door riddles"
+    ],
+    "family": "deduction",
+    "summary": "Choose a door; the host reveals info; decide to stay or switch.",
+    "core_loop": "Pick one of several doors; the host opens a losing door, and you decide whether to stay or switch before the reveal",
+    "verbs": [
+      "choose",
+      "reason"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the host always reveals a goat"
+    ],
+    "win": "win the prize",
+    "lose": "pick a goat",
+    "scoring": "wins over many rounds",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "settle the debate with friends"
+    ],
+    "difficulty_levers": [
+      "doors",
+      "host behavior",
+      "rounds"
+    ],
+    "tools": [
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "monty hall game",
+      "stay or switch doors",
+      "probability doors"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hidden_object_coords",
+    "name": "Guess the coordinates",
+    "aliases": [
+      "Hidden ship coordinates"
+    ],
+    "family": "deduction",
+    "summary": "Find a hidden item using distance feedback on each guess.",
+    "core_loop": "Guess a cell on a grid, see how far it is from the hidden item, and triangulate from several guesses to find it",
+    "verbs": [
+      "triangulate",
+      "infer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "distance is shown as a number"
+    ],
+    "win": "find it in few guesses",
+    "lose": "out of guesses",
+    "scoring": "guesses used",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "guesses",
+      "distance type"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "find the treasure with distances",
+      "triangulation game",
+      "hidden spot finder"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "picture_question_narrow",
+    "name": "Narrow the picture",
+    "aliases": [
+      "Picture 20 questions"
+    ],
+    "family": "deduction",
+    "summary": "A picture is hidden; ask category questions to narrow a grid of candidates.",
+    "core_loop": "A grid of character pictures sits face up; ask yes-or-no category questions, flip down the ruled-out ones, and guess the hidden one",
+    "verbs": [
+      "ask",
+      "eliminate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each question costs a point"
+    ],
+    "win": "guess right",
+    "lose": "out of points",
+    "scoring": "points left",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "kids game"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "question types",
+      "guesses"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "guess the hidden picture game",
+      "narrow down the animal",
+      "picture question game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "true_identity_guess",
+    "name": "Who's behind the mask",
+    "aliases": [
+      "Masked singer guess"
+    ],
+    "family": "deduction",
+    "summary": "Clues and a disguised voice or avatar hint at someone you know; guess who it is.",
+    "core_loop": "Clues about a friend from your group arrive one at a time behind a disguised avatar; guess who it is early to score more",
+    "verbs": [
+      "infer",
+      "guess"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "fewer clues means more points"
+    ],
+    "win": "guess right",
+    "lose": "none",
+    "scoring": "points by clues used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "built from your friends"
+    ],
+    "difficulty_levers": [
+      "clue count",
+      "group size",
+      "guesses"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "masked singer with my friends",
+      "guess who's behind the mask",
+      "disguised friend game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "deck_counting",
+    "name": "Track what's left",
+    "aliases": [
+      "Card counting drill"
+    ],
+    "family": "deduction",
+    "summary": "Cards are dealt one by one; track what's left and predict the next.",
+    "core_loop": "Cards are dealt face up one by one; track what's left in the deck and predict the next card's suit or rank",
+    "verbs": [
+      "remember",
+      "infer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "predictions score by probability"
+    ],
+    "win": "best accuracy",
+    "lose": "none",
+    "scoring": "correct predictions",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "practice with friends"
+    ],
+    "difficulty_levers": [
+      "deck size",
+      "prediction type",
+      "speed"
+    ],
+    "tools": [
+      "sequence_memory",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "card counting practice",
+      "predict the next card",
+      "track the deck"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "alibi_timeline",
+    "name": "Check the alibis",
+    "aliases": [
+      "Alibi puzzle"
+    ],
+    "family": "deduction",
+    "summary": "Line up each suspect's alibi on a timeline to find who had the window.",
+    "core_loop": "Read each suspect's alibi, place it on a shared timeline, and find who had the unaccounted window",
+    "verbs": [
+      "order",
+      "deduce"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each suspect has one gap or none"
+    ],
+    "win": "find the suspect with the window",
+    "lose": "wrong pick",
+    "scoring": "cases solved",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily case"
+    ],
+    "difficulty_levers": [
+      "suspects",
+      "time span",
+      "overlapping alibis"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "check the alibis timeline",
+      "who had the opportunity",
+      "detective timeline puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "heist_inside_man",
+    "name": "Find the inside man",
+    "aliases": [
+      "Heist deduction"
+    ],
+    "family": "deduction",
+    "summary": "During a heist, events go wrong; deduce which crew member is sabotaging.",
+    "core_loop": "During a heist, events go wrong; check who had access to each failure, narrow the crew, and accuse the saboteur",
+    "verbs": [
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each sabotage needed access"
+    ],
+    "win": "name the saboteur",
+    "lose": "wrong accusation",
+    "scoring": "events used",
+    "session_seconds": [
+      180,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "case shared with friends"
+    ],
+    "difficulty_levers": [
+      "crew size",
+      "events",
+      "saboteurs"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "heist with a traitor",
+      "find the saboteur",
+      "who leaked the plan"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

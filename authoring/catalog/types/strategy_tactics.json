@@ -1,0 +1,2720 @@
+[
+  {
+    "id": "grid_squad_tactics",
+    "name": "Grid squad tactics",
+    "aliases": [
+      "Fire Emblem",
+      "XCOM",
+      "Advance Wars",
+      "Final Fantasy Tactics",
+      "Into the Breach"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "turn-based squad",
+    "summary": "Move and attack with a small squad on a grid against a small enemy force, using terrain and range.",
+    "core_loop": "select unit → move within range → attack → end turn → enemies act",
+    "verbs": [
+      "move",
+      "attack",
+      "position"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid map",
+      "3-4 squad units",
+      "enemies",
+      "terrain",
+      "HP"
+    ],
+    "rules": [
+      "units act once per turn",
+      "high ground and cover add bonuses",
+      "units die permanently"
+    ],
+    "win": "defeat all enemies",
+    "lose": "all your units fall",
+    "scoring": "units alive plus turns taken",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare turn counts",
+      "same map for a Group"
+    ],
+    "content_needs": [
+      "map layouts",
+      "unit stats",
+      "enemy AI"
+    ],
+    "difficulty_levers": [
+      "squad size",
+      "enemy count",
+      "terrain"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "fire emblem but my squad is five hamsters",
+      "xcom with school kids vs aliens",
+      "turn based tactics in a haunted mall",
+      "advance wars with pizza armies"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "telegraphed_enemy_puzzle",
+    "name": "Telegraphed-enemy puzzle",
+    "aliases": [
+      "Into the Breach",
+      "Hitman Go",
+      "Hoplite",
+      "Vampire Survivors tactics",
+      "868-HACK"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "foresight puzzle",
+    "summary": "Enemies show exactly what they will do next; you reposition, block and redirect to make them hit each other or nothing.",
+    "core_loop": "see enemy intents → move your pieces → end turn → intents resolve → next wave",
+    "verbs": [
+      "foresee",
+      "redirect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid",
+      "intent arrows",
+      "your units",
+      "buildings to protect"
+    ],
+    "rules": [
+      "all enemy attacks are shown",
+      "pushing units redirects attacks",
+      "buildings lost cost a life"
+    ],
+    "win": "survive N turns with buildings intact",
+    "lose": "buildings all destroyed",
+    "scoring": "buildings left",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race for the cleanest board",
+      "daily puzzle"
+    ],
+    "content_needs": [
+      "intent patterns",
+      "unit abilities"
+    ],
+    "difficulty_levers": [
+      "enemy count",
+      "map size"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "into the breach but the mechs are cats",
+      "telegraphed tactics puzzle where monsters attack my kitchen",
+      "hoplite style board with a dragon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "territory_capture_conquest",
+    "name": "Territory conquest",
+    "aliases": [
+      "Risk",
+      "Civilization",
+      "Polytopia",
+      "Eight Hundred Heroes",
+      "Conquest of Elysium"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "map control",
+    "summary": "Take over neighboring regions by sending armies from your regions; more troops beat fewer, and income follows regions held.",
+    "core_loop": "collect troops → pick source and target → compare strengths → gain region → income grows",
+    "verbs": [
+      "attack",
+      "expand",
+      "reinforce"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "region map",
+      "troop counts",
+      "turn counter",
+      "income"
+    ],
+    "rules": [
+      "attacking needs more troops than the defender",
+      "each region adds income",
+      "capital loss ends the game"
+    ],
+    "win": "own the whole map",
+    "lose": "lose capital",
+    "scoring": "regions held",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "pass-and-play with friends",
+      "shared map in a Group"
+    ],
+    "content_needs": [
+      "region graphs",
+      "AI factions"
+    ],
+    "difficulty_levers": [
+      "region count",
+      "AI aggression"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "risk but the regions are my school hallways",
+      "conquer a small map with cats vs dogs",
+      "polytopia on my phone with a hamster tribe"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "auto_battler_lineup",
+    "name": "Auto-battler lineup",
+    "aliases": [
+      "Auto Chess",
+      "Teamfight Tactics",
+      "Super Auto Pets",
+      "Backpack Battles",
+      "Dota Underlords"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "pre-fight setup",
+    "summary": "Buy and place units in a lineup, then watch the fight resolve automatically; synergies reward the right comp.",
+    "core_loop": "shop with gold → place units → round starts → auto-battle resolves → earn gold",
+    "verbs": [
+      "buy",
+      "arrange"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "shop",
+      "lineup slots",
+      "gold",
+      "battle replay"
+    ],
+    "rules": [
+      "units gain synergy bonuses by tag",
+      "duplicates merge into stronger ones",
+      "losses cost HP"
+    ],
+    "win": "win enough rounds",
+    "lose": "HP zero",
+    "scoring": "rounds won",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share your winning lineup",
+      "ghost lineups from friends"
+    ],
+    "content_needs": [
+      "unit catalog with tags",
+      "shop odds"
+    ],
+    "difficulty_levers": [
+      "gold per round",
+      "synergy size"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "rounds",
+      "lives",
+      "score",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "super auto pets with food",
+      "auto chess with wizards",
+      "auto battler where my lineup is school lunch ladies"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tug_of_war_lane_push",
+    "name": "Lane push elixir",
+    "aliases": [
+      "Clash Royale",
+      "Plants vs Zombies lane",
+      "Bloons",
+      "Lane Wars",
+      "Heroes Charge"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "energy deploy",
+    "summary": "Deploy units from a hand using a refilling energy bar; units walk the lane on their own and push into the enemy base.",
+    "core_loop": "wait for energy → drop a unit → units walk and clash → repeat → towers fall",
+    "verbs": [
+      "deploy",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "energy bar",
+      "unit hand",
+      "lane",
+      "towers"
+    ],
+    "rules": [
+      "units cost energy that refills over time",
+      "counters matter",
+      "the higher-HP tower wins at time-up"
+    ],
+    "win": "destroy more towers",
+    "lose": "your towers fall first",
+    "scoring": "towers destroyed",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "challenge a friend's deck",
+      "ghost deck replays"
+    ],
+    "content_needs": [
+      "unit cards",
+      "counters",
+      "AI behavior"
+    ],
+    "difficulty_levers": [
+      "energy rate",
+      "tower HP",
+      "deck size"
+    ],
+    "tools": [
+      "spawn_wave",
+      "meters",
+      "countdown",
+      "score",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "clash royale but everything is pizza",
+      "lane battler where i play cats vs dogs",
+      "push a lane with units that cost energy"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "fog_scout_and_strike",
+    "name": "Fog scouting",
+    "aliases": [
+      "Stratego",
+      "Battleship",
+      "Starcraft fog",
+      "Advance Wars fog",
+      "Hidden Territory"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "hidden information",
+    "summary": "You cannot see enemy pieces until scouted; spend actions on probes before committing a strike.",
+    "core_loop": "probe a tile → reveal info → commit strike → hit or miss → continue",
+    "verbs": [
+      "probe",
+      "strike"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "fogged grid",
+      "scout tokens",
+      "strike tokens",
+      "intel log"
+    ],
+    "rules": [
+      "probes reveal a number of nearby enemies",
+      "strikes are limited",
+      "every miss gives the enemy a hint"
+    ],
+    "win": "destroy the hidden objective",
+    "lose": "strikes run out",
+    "scoring": "strikes left",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare efficiency",
+      "place hidden fleets for friends"
+    ],
+    "content_needs": [
+      "grid layouts with hidden targets"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "strikes",
+      "probe accuracy"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "lives",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "battleship but it's a cursed pirate hunt",
+      "stratego style hidden pieces on a phone",
+      "find the hidden dragon nests with scouts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "territory_paint_race",
+    "name": "Territory painting race",
+    "aliases": [
+      "Splatoon",
+      "Qix",
+      "Tile Capture",
+      "Paper.io",
+      "Ink Fight"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "claim ground",
+    "summary": "Move to claim tiles; the most territory when time ends wins, and crossing an opponent's trail can steal it.",
+    "core_loop": "move to paint tiles → loop to claim an area → avoid trails → time ends → count",
+    "verbs": [
+      "paint",
+      "loop"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "pieces": [
+      "grid",
+      "painter",
+      "rivals' paint",
+      "timer"
+    ],
+    "rules": [
+      "a closed loop fills its inside",
+      "touching a trail pops that rival",
+      "time limit"
+    ],
+    "win": "most territory at time up",
+    "lose": "popped by a rival",
+    "scoring": "territory percent",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share your fill percent",
+      "rival friends"
+    ],
+    "content_needs": [
+      "arena layouts",
+      "rival behaviors"
+    ],
+    "difficulty_levers": [
+      "arena size",
+      "number of rivals"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "timer_bar",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "paper.io but with ink and cats",
+      "splatoon style territory game for my phone",
+      "paint the school hallway before time runs out"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "influence_court_intrigue",
+    "name": "Court intrigue",
+    "aliases": [
+      "Crusader Kings",
+      "Game of Thrones",
+      "Diplomacy",
+      "Suzerain",
+      "Reigns courts"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "favor network",
+    "summary": "Spend limited favor actions on courtiers; their loyalties shift and the throne goes to whoever you quietly back.",
+    "core_loop": "choose a courtier → bribe, flatter or rumor → loyalties shift → vote → ruler decided",
+    "verbs": [
+      "persuade",
+      "scheme"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "court roster",
+      "loyalty bars",
+      "action tokens",
+      "vote tally"
+    ],
+    "rules": [
+      "each courtier has an ideal favor type",
+      "favors also change allies",
+      "the vote is by majority of loyalty"
+    ],
+    "win": "your candidate wins",
+    "lose": "rival wins",
+    "scoring": "final loyalty margin",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race for the largest margin",
+      "intrigue with friends as courtiers"
+    ],
+    "content_needs": [
+      "courtier traits",
+      "action effects"
+    ],
+    "difficulty_levers": [
+      "courtier count",
+      "action tokens"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "game of thrones court intrigue with high school cliques",
+      "diplomacy style persuasion game",
+      "crusader kings but with cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "unit_counters_triangle",
+    "name": "Counter-unit triangle",
+    "aliases": [
+      "Bastion",
+      "Rock Paper Scissors units",
+      "Kingdom Rush counters",
+      "Age of Empires"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "counter picking",
+    "summary": "Enemy waves arrive in known types; you assemble the countering army before each fight with limited supply.",
+    "core_loop": "preview enemy composition → spend supply on counter units → fight resolves → carry survivors",
+    "verbs": [
+      "counter",
+      "budget"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "enemy preview",
+      "unit shop",
+      "supply",
+      "battle replay"
+    ],
+    "rules": [
+      "each unit type has a counter",
+      "supply limits the army",
+      "survivors carry over"
+    ],
+    "win": "win the final battle",
+    "lose": "army wiped",
+    "scoring": "battles won",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share compositions",
+      "best counter streak"
+    ],
+    "content_needs": [
+      "unit triangle",
+      "enemy lists"
+    ],
+    "difficulty_levers": [
+      "types",
+      "supply"
+    ],
+    "tools": [
+      "sort_bins",
+      "meters",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "age of empires counters with kitchen tools",
+      "rock paper scissors army builder",
+      "counter the dragon's army with cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "formation_then_simulate",
+    "name": "Formation then simulate",
+    "aliases": [
+      "Frozen Synapse",
+      "Battle Brothers",
+      "Lords Mobile",
+      "Total War",
+      "Bad North"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "plan then watch",
+    "summary": "Place your units on a formation grid, then watch both sides fight; reposition between rounds to fix what failed.",
+    "core_loop": "place units → start battle → watch → see weak spot → rearrange → rerun",
+    "verbs": [
+      "arrange",
+      "observe"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "formation grid",
+      "unit chips",
+      "replay",
+      "result report"
+    ],
+    "rules": [
+      "units auto-fight by role",
+      "flanks are weak",
+      "three attempts per battle"
+    ],
+    "win": "win the battle",
+    "lose": "attempts exhausted",
+    "scoring": "attempts used",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share formations",
+      "attack a friend's formation"
+    ],
+    "content_needs": [
+      "roles",
+      "enemy patterns"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "enemy aggression"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "place a formation to stop the zombie horde",
+      "total war with hamsters",
+      "plan then watch a medieval fight"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "blotto_allocation",
+    "name": "Allocate-troops fronts",
+    "aliases": [
+      "Colonel Blotto",
+      "Risk allocation",
+      "Rock Paper Scissors strategy",
+      "Diplomacy orders"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "simultaneous allocation",
+    "summary": "Split a fixed army across several fronts without seeing the opponent's split; win by taking most fronts.",
+    "core_loop": "allocate soldiers per front → opponent splits too → reveal → fronts won counted",
+    "verbs": [
+      "allocate",
+      "bluff"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "fronts",
+      "soldier pool",
+      "reveal"
+    ],
+    "rules": [
+      "tie goes to defender",
+      "soldier total is fixed",
+      "best of N rounds"
+    ],
+    "win": "win most fronts",
+    "lose": "lose most fronts",
+    "scoring": "rounds won",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "beat a friend's hidden split",
+      "async friend picks"
+    ],
+    "content_needs": [
+      "opponent behavior",
+      "fronts"
+    ],
+    "difficulty_levers": [
+      "fronts",
+      "pool size"
+    ],
+    "tools": [
+      "slider_input",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "colonel blotto but with castles and cats",
+      "split your army across 5 fronts",
+      "divide your pizza troops among six hills"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "resource_engine_expand",
+    "name": "Resource engine expand",
+    "aliases": [
+      "Civilization",
+      "Catan",
+      "Terraforming Mars",
+      "Factorio",
+      "Dominion"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "economy snowball",
+    "summary": "Spend resources each turn to expand production, with limited slots so every build is a trade-off against another.",
+    "core_loop": "collect income → pick a build → income grows → hit milestone → repeat",
+    "verbs": [
+      "invest",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "resource bars",
+      "build menu",
+      "turn counter",
+      "goal"
+    ],
+    "rules": [
+      "builds cost resources and take a turn",
+      "some builds boost others",
+      "a deadline turn sets the goal"
+    ],
+    "win": "hit the goal by the deadline",
+    "lose": "miss the deadline",
+    "scoring": "surplus at goal",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare builds",
+      "daily scenario"
+    ],
+    "content_needs": [
+      "build tree",
+      "goals"
+    ],
+    "difficulty_levers": [
+      "resource types",
+      "deadline"
+    ],
+    "tools": [
+      "meters",
+      "turns",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "civilization on my phone for cats",
+      "catan like resource expansion on mars",
+      "build an economy engine and reach the goal in 20 turns"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "worker_placement_slots",
+    "name": "Worker placement",
+    "aliases": [
+      "Agricola",
+      "Lords of Waterdeep",
+      "Stone Age",
+      "Viticulture",
+      "Caverna"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "slot blocking",
+    "summary": "Place workers on action slots; a slot taken blocks others, so order and timing make the difference.",
+    "core_loop": "place a worker → resolve slot → opponent places → slots refill each round → count points",
+    "verbs": [
+      "place",
+      "block"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "action slots",
+      "workers",
+      "resource tracks",
+      "scoring"
+    ],
+    "rules": [
+      "each slot takes one worker per round",
+      "better slots give more points",
+      "goals score at end"
+    ],
+    "win": "most points",
+    "lose": "none; ranking",
+    "scoring": "final points",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "async worker placement with a friend",
+      "Group sharing a board"
+    ],
+    "content_needs": [
+      "slot list",
+      "goal cards"
+    ],
+    "difficulty_levers": [
+      "slots",
+      "rounds"
+    ],
+    "tools": [
+      "turns",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "agricola for my group chat",
+      "place workers on a farm and race",
+      "lords of waterdeep but with school kids"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "siege_choose_the_gate",
+    "name": "Siege planning",
+    "aliases": [
+      "Kingdom Rush siege",
+      "Stronghold",
+      "Total War sieges",
+      "Siege Survival"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "single decision under uncertainty",
+    "summary": "Pick which gate and tool to commit to for a siege, with scouts giving partial info on defenses.",
+    "core_loop": "scout hints → pick method → siege resolves in several stages → result",
+    "verbs": [
+      "scout",
+      "commit"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "castle",
+      "scout reports",
+      "siege tools",
+      "resolution reel"
+    ],
+    "rules": [
+      "scouts reveal half the defenses",
+      "some tools are strong vs some defenses",
+      "siege resolves stage by stage"
+    ],
+    "win": "breach the castle",
+    "lose": "repelled",
+    "scoring": "breach margin",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare siege choices",
+      "defend a castle designed by a friend"
+    ],
+    "content_needs": [
+      "castle defenses",
+      "tool effects"
+    ],
+    "difficulty_levers": [
+      "scout reliability",
+      "tool count"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "siege a castle with a ladder and a catapult",
+      "breach a pizza fortress",
+      "scout then attack the dragon's tower"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pursuit_evasion_graph",
+    "name": "Pursuit on a graph",
+    "aliases": [
+      "Scotland Yard",
+      "Fugitive",
+      "Pacman graph",
+      "Hitman Go",
+      "Letters from Whitechapel"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "cat and mouse",
+    "summary": "Move a pawn along routes of a map while a pursuer closes in; the pursuer's moves are limited by ticket types.",
+    "core_loop": "choose move along route → pursuer moves → clues about position → end after N turns",
+    "verbs": [
+      "evade",
+      "chase"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "route graph",
+      "ticket stock",
+      "pursuers",
+      "last-seen marker"
+    ],
+    "rules": [
+      "tickets limit route types",
+      "pursuer sees you every few turns",
+      "catching ends the round"
+    ],
+    "win": "evade until the turns end",
+    "lose": "caught",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "friend plays pursuer asynchronously",
+      "race for the best escape"
+    ],
+    "content_needs": [
+      "route graphs",
+      "pursuer AI"
+    ],
+    "difficulty_levers": [
+      "graph size",
+      "ticket stock"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "scotland yard but the detective is my cat",
+      "evade a pursuer in a school map",
+      "chase game on a subway map"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "auction_bidding_game",
+    "name": "Sealed-bid auction",
+    "aliases": [
+      "Power Grid auctions",
+      "Modern Art",
+      "Storage Wars",
+      "Dutch auction",
+      "Ra"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "bid with limits",
+    "summary": "Bid your budget for items whose values are only partly known; the best collection after N auctions wins.",
+    "core_loop": "see item → place bid → winner pays → budget shrinks → tally",
+    "verbs": [
+      "bid",
+      "bluff"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "item card",
+      "bid slider",
+      "budgets",
+      "collection"
+    ],
+    "rules": [
+      "items have a hidden true value with a hint",
+      "ties go to the earlier bidder",
+      "unspent money is worth nothing"
+    ],
+    "win": "highest collection value",
+    "lose": "none; ranking",
+    "scoring": "collection value",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "outbid friends",
+      "Group auction night"
+    ],
+    "content_needs": [
+      "item values with hints"
+    ],
+    "difficulty_levers": [
+      "items",
+      "budget"
+    ],
+    "tools": [
+      "slider_input",
+      "turns",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "storage wars with school lockers",
+      "bid for dragon eggs",
+      "auction game where i outbid my friends on pizza"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "repeated_prisoner_dilemma",
+    "name": "Repeated dilemma",
+    "aliases": [
+      "Prisoner's dilemma",
+      "Evolution of Trust",
+      "Golden Balls",
+      "Diplomacy trust",
+      "Split or Steal"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "cooperate or defect",
+    "summary": "Choose to cooperate or defect against an opponent with a strategy across rounds; learn their pattern and exploit or trust.",
+    "core_loop": "choose cooperate/defect → opponent chooses → payoff → repeat → compare totals",
+    "verbs": [
+      "trust",
+      "betray"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "choice buttons",
+      "payoff matrix",
+      "opponent history",
+      "score"
+    ],
+    "rules": [
+      "payoffs follow the classic matrix",
+      "opponent follows a hidden pattern",
+      "rounds are fixed"
+    ],
+    "win": "highest score",
+    "lose": "none",
+    "scoring": "total payoff",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "challenge a friend to the same game async",
+      "compare trust profiles"
+    ],
+    "content_needs": [
+      "opponent strategies",
+      "payoff matrix"
+    ],
+    "difficulty_levers": [
+      "rounds",
+      "opponent strategy"
+    ],
+    "tools": [
+      "rounds",
+      "score",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "split or steal with my friends",
+      "evolution of trust mini game",
+      "golden balls inspired trust game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "supply_line_logistics",
+    "name": "Supply lines",
+    "aliases": [
+      "Hearts of Iron supply",
+      "Frostpunk logistics",
+      "Mini Metro",
+      "Train Valley",
+      "Oxygen Not Included"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "flow routing",
+    "summary": "Route supplies from depots to front lines along a network; a broken or overloaded link starves units.",
+    "core_loop": "place link → supplies flow → forecast shortages → fix routes → survive the phase",
+    "verbs": [
+      "route",
+      "balance"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "network map",
+      "depots",
+      "front lines",
+      "flow numbers"
+    ],
+    "rules": [
+      "links have capacity",
+      "attacks cut links",
+      "units without supply lose strength"
+    ],
+    "win": "all fronts supplied",
+    "lose": "a front collapses",
+    "scoring": "supply uptime",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare uptime",
+      "share a network"
+    ],
+    "content_needs": [
+      "network layouts",
+      "attack events"
+    ],
+    "difficulty_levers": [
+      "links",
+      "capacity"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "supply lines to keep the camp alive",
+      "mini metro for army logistics",
+      "route food to hungry cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "simultaneous_orders_planning",
+    "name": "Simultaneous orders",
+    "aliases": [
+      "Frozen Synapse",
+      "Diplomacy",
+      "Door Kickers",
+      "Mechs vs Minions",
+      "Hostage Negotiation"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "plan then reveal",
+    "summary": "Both sides secretly queue orders for each unit; then all orders resolve at once and you see who read the other better.",
+    "core_loop": "queue orders → lock in → resolve simultaneously → see replay → repeat",
+    "verbs": [
+      "plan",
+      "predict"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "map",
+      "order queues",
+      "replay"
+    ],
+    "rules": [
+      "AI picks by pattern",
+      "orders resolve in the same moment",
+      "collisions cancel"
+    ],
+    "win": "capture the objective",
+    "lose": "all units lost",
+    "scoring": "rounds won",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "async orders against friends",
+      "share a replay"
+    ],
+    "content_needs": [
+      "map layouts",
+      "AI patterns"
+    ],
+    "difficulty_levers": [
+      "units",
+      "AI strength"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "frozen synapse but with school lunches",
+      "diplomacy orders between cats and dogs",
+      "plan simultaneous attacks on a map"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "city_district_zoning",
+    "name": "District zoning",
+    "aliases": [
+      "SimCity",
+      "Cities Skylines",
+      "Dorfromantik",
+      "Islanders",
+      "Tiny Towns"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "adjacency planning",
+    "summary": "Place districts on a small map where adjacencies add or subtract points and resources, balancing needs.",
+    "core_loop": "draw tile → place on map → adjacency bonuses → keep resources positive → fill map",
+    "verbs": [
+      "place",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "map grid",
+      "tile hand",
+      "adjacency rules",
+      "resource bars"
+    ],
+    "rules": [
+      "factories hurt houses nearby",
+      "parks help",
+      "resources must stay positive"
+    ],
+    "win": "highest score at full map",
+    "lose": "resource goes negative",
+    "scoring": "adjacency score",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare layouts of the same tile draw",
+      "Group city"
+    ],
+    "content_needs": [
+      "tile types",
+      "adjacency matrix"
+    ],
+    "difficulty_levers": [
+      "map size",
+      "tile mix"
+    ],
+    "tools": [
+      "grid_board",
+      "score",
+      "meters",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "islanders but with cats",
+      "plan a tiny town without putting the factory by the school",
+      "simcity zoning puzzle for 20 tiles"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "card_territory_duel_board",
+    "name": "Card-driven territory",
+    "aliases": [
+      "Wargame",
+      "Twilight Struggle",
+      "Hearthstone battlegrounds",
+      "Duelyst",
+      "Hero Realms"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "cards on board",
+    "summary": "Play unit cards to board tiles; unit position matters and cards also trigger actions when adjacent.",
+    "core_loop": "draw → place unit → resolve adjacency → attack → end turn",
+    "verbs": [
+      "place",
+      "attack"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "hand",
+      "board",
+      "unit stats",
+      "base HP"
+    ],
+    "rules": [
+      "placement determines attacks",
+      "adjacency boosts",
+      "base HP is the goal"
+    ],
+    "win": "destroy the enemy base",
+    "lose": "your base falls",
+    "scoring": "base HP margin",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "duel a friend async",
+      "ghost decks"
+    ],
+    "content_needs": [
+      "cards",
+      "board geometry"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "hand size"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "duelyst but my deck is school clubs",
+      "place cards on a board to destroy a base",
+      "hearthstone with a grid"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "action_point_heist_squad",
+    "name": "Action-point squad",
+    "aliases": [
+      "Invisible Inc",
+      "Hitman Go",
+      "Shadowrun",
+      "Heat Signature",
+      "Door Kickers"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "action budget",
+    "summary": "A team of specialists spend action points each turn on skills that complement; guards react after you commit.",
+    "core_loop": "spend AP on moves and skills → end turn → guards react → repeat",
+    "verbs": [
+      "spend",
+      "coordinate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "squad",
+      "AP pool",
+      "guards",
+      "objectives"
+    ],
+    "rules": [
+      "each skill costs AP",
+      "guards react by alert level",
+      "objectives must all be done"
+    ],
+    "win": "complete objectives and exit",
+    "lose": "squad caught",
+    "scoring": "AP efficiency",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare plans",
+      "share an elegant solution"
+    ],
+    "content_needs": [
+      "maps with guards",
+      "skills"
+    ],
+    "difficulty_levers": [
+      "squad size",
+      "alert speed"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "invisible inc but the squad is school clubs",
+      "action point heist in a haunted museum",
+      "shadowrun like heist for my phone"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tech_tree_race",
+    "name": "Tech-tree race",
+    "aliases": [
+      "Civilization techs",
+      "Stellaris",
+      "Anno",
+      "Dyson Sphere",
+      "Frostpunk laws"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "research order",
+    "summary": "Choose research order on a small tree; each tech unlocks abilities, and order decides which crisis you can withstand.",
+    "core_loop": "pick research → time passes → crisis hits → see if tech helps → continue",
+    "verbs": [
+      "prioritize",
+      "research"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tech tree",
+      "research points",
+      "crisis list",
+      "colony"
+    ],
+    "rules": [
+      "each crisis is solved by a specific tech",
+      "research takes time",
+      "crises are shown in advance"
+    ],
+    "win": "survive all crises",
+    "lose": "colony collapses",
+    "scoring": "crises survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare orders",
+      "same crises for a Group"
+    ],
+    "content_needs": [
+      "tech tree",
+      "crisis list"
+    ],
+    "difficulty_levers": [
+      "tree depth",
+      "research speed"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "civilization tech tree for a school science fair",
+      "research in the right order to survive a zombie winter",
+      "frostpunk style research choices"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "checkpoint_conquest_runs",
+    "name": "Capture-the-point skirmish",
+    "aliases": [
+      "Command & Conquer",
+      "Warcraft",
+      "Dawn of War",
+      "Company of Heroes",
+      "Starcraft micro"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "hold points",
+    "summary": "Units move between control points; holding more points earns income to deploy more, in a short skirmish.",
+    "core_loop": "deploy → move to point → fight → capture → income grows",
+    "verbs": [
+      "deploy",
+      "position"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "points",
+      "units",
+      "income",
+      "minimap"
+    ],
+    "rules": [
+      "points tick income",
+      "units win by numbers and counters",
+      "time limit"
+    ],
+    "win": "hold most points at time up",
+    "lose": "lose all points",
+    "scoring": "points held",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare control times",
+      "coordinate with a friend"
+    ],
+    "content_needs": [
+      "points layout",
+      "AI waves"
+    ],
+    "difficulty_levers": [
+      "points",
+      "AI strength"
+    ],
+    "tools": [
+      "grid_board",
+      "spawn_wave",
+      "countdown",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rts capture the points between cats and mice",
+      "command and conquer for my phone",
+      "hold more points than the dragon army"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "commander_orders_morale",
+    "name": "Commander and morale",
+    "aliases": [
+      "Total War morale",
+      "Battle for Wesnoth",
+      "Fire Emblem morale",
+      "Banner Saga",
+      "Warhammer"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "morale management",
+    "summary": "Issue a few orders to blocks of troops while their morale rises and falls; flanking and rout decide the fight.",
+    "core_loop": "issue orders → blocks clash → morale shifts → rout or hold → next order",
+    "verbs": [
+      "command",
+      "rally"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "troop blocks",
+      "morale bars",
+      "flanking arrows"
+    ],
+    "rules": [
+      "flank attacks break morale faster",
+      "rallying costs an order",
+      "a routed block can't be recalled"
+    ],
+    "win": "break the enemy line",
+    "lose": "your line routs",
+    "scoring": "morale margin",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a winning flank",
+      "rematch a friend"
+    ],
+    "content_needs": [
+      "blocks",
+      "morale rules"
+    ],
+    "difficulty_levers": [
+      "orders per turn",
+      "morale sensitivity"
+    ],
+    "tools": [
+      "meters",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "total war but my troops are sandwiches",
+      "rally the line against a goblin horde",
+      "morale based battle with cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dice_conquest_duels",
+    "name": "Dice-duel conquest",
+    "aliases": [
+      "Dice Wars",
+      "Risk dice",
+      "Kingdom of Dice",
+      "Fantasy Realms"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "dice stack",
+    "summary": "Each territory holds a stack of dice; attack by rolling your stack against the neighbor's, winning the region on a higher sum.",
+    "core_loop": "pick attacker → pick neighbor → roll both stacks → compare → winners reinforce",
+    "verbs": [
+      "attack",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "territory map",
+      "dice stacks",
+      "roll result"
+    ],
+    "rules": [
+      "dice are added at turn end",
+      "sums decide attacks",
+      "ties favor the defender"
+    ],
+    "win": "own all territories",
+    "lose": "lose all territories",
+    "scoring": "territories held",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare conquest speed",
+      "Group map"
+    ],
+    "content_needs": [
+      "map layouts",
+      "AI behavior"
+    ],
+    "difficulty_levers": [
+      "territories",
+      "dice per turn"
+    ],
+    "tools": [
+      "random_int",
+      "grid_board",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "dice wars but the territories are lunch tables",
+      "risk with dice stacks and cats",
+      "conquer the map by rolling sums"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hidden_rank_capture",
+    "name": "Hidden-rank capture",
+    "aliases": [
+      "Stratego",
+      "Chess variant fog",
+      "Dark chess",
+      "Battleship pieces",
+      "Spy vs Spy"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "bluff pieces",
+    "summary": "Pieces have secret ranks; when two meet the higher wins, so you bluff by moving unknown pieces boldly.",
+    "core_loop": "move a piece → if it meets an enemy, ranks reveal → higher rank wins → capture the flag",
+    "verbs": [
+      "move",
+      "bluff"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "board",
+      "hidden-rank pieces",
+      "flag",
+      "capture log"
+    ],
+    "rules": [
+      "only revealed pieces are known",
+      "bombs defeat attackers",
+      "capturing the flag wins"
+    ],
+    "win": "capture the flag",
+    "lose": "your flag is captured",
+    "scoring": "pieces left",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "async duel with a friend",
+      "share a bluff"
+    ],
+    "content_needs": [
+      "AI behavior",
+      "rank set"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "rank set"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "stratego but with cats",
+      "hidden piece capture the flag",
+      "dark chess on a phone"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "naval_wind_fleet",
+    "name": "Wind-fleet maneuvers",
+    "aliases": [
+      "Sid Meier's Pirates sailing",
+      "Battleship",
+      "Sea Battle",
+      "Wind Waker sailing",
+      "Sail Ho"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "position with constraint",
+    "summary": "Maneuver a fleet around a shifting wind that limits headings; line up broadsides before the enemy does.",
+    "core_loop": "read wind → move ships → line up shot → fire → wind shifts",
+    "verbs": [
+      "maneuver",
+      "aim"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "sea grid",
+      "ships",
+      "wind arrows",
+      "cannon arcs"
+    ],
+    "rules": [
+      "ships cannot sail into the wind",
+      "broadsides hit sideways",
+      "wind changes every two turns"
+    ],
+    "win": "sink the enemy",
+    "lose": "your fleet sinks",
+    "scoring": "ships sunk",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "duel friends",
+      "share a maneuver"
+    ],
+    "content_needs": [
+      "sea maps",
+      "AI approach"
+    ],
+    "difficulty_levers": [
+      "ships",
+      "wind frequency"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "sea battle with cat pirates",
+      "battleship but with wind direction",
+      "sail a fleet around a storm"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "election_campaign_allocation",
+    "name": "Campaign allocation",
+    "aliases": [
+      "Campaign Manager",
+      "Political Animals",
+      "1960 election",
+      "Democracy",
+      "Papers Please politics"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "allocate visits",
+    "summary": "Spend limited days and funds across regions to win a majority of vote points, with polls giving partial feedback.",
+    "core_loop": "read polls → choose region and activity → polls update → repeat → election day",
+    "verbs": [
+      "allocate",
+      "adapt"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "region map",
+      "polls",
+      "funds",
+      "days",
+      "result"
+    ],
+    "rules": [
+      "each region has a leaning and a size",
+      "rallies and ads work differently",
+      "polls are noisy"
+    ],
+    "win": "win the majority",
+    "lose": "lose",
+    "scoring": "final vote share",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare vote shares",
+      "Group election"
+    ],
+    "content_needs": [
+      "regions with leanings",
+      "activity effects"
+    ],
+    "difficulty_levers": [
+      "days",
+      "funds"
+    ],
+    "tools": [
+      "meters",
+      "turns",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "run for school president and pick which grades to visit",
+      "campaign manager with cats",
+      "win the class vote with a limited budget"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "colony_route_4x_mini",
+    "name": "Mini 4X expansion",
+    "aliases": [
+      "Stellaris",
+      "Master of Orion",
+      "Polytopia",
+      "Endless Space",
+      "Offworld Trading"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "explore expand exploit",
+    "summary": "A tiny map where you explore, settle sites, harvest and defend, with an overall turn limit and score.",
+    "core_loop": "scout → settle → harvest → defend → count score",
+    "verbs": [
+      "explore",
+      "expand"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "map",
+      "settlers",
+      "harvesters",
+      "events"
+    ],
+    "rules": [
+      "settling near resources pays more",
+      "rivals expand too",
+      "turn cap"
+    ],
+    "win": "highest score at turn limit",
+    "lose": "capital lost",
+    "scoring": "score",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare maps",
+      "shared seed"
+    ],
+    "content_needs": [
+      "map generator",
+      "AI rivals"
+    ],
+    "difficulty_levers": [
+      "map size",
+      "turns"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "meters",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "settle a planet of hamsters",
+      "polytopia-style mini map",
+      "explore expand exploit with cat colonies"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ecosystem_balance_tuning",
+    "name": "Ecosystem balance",
+    "aliases": [
+      "Spore",
+      "Equilinox",
+      "Eco",
+      "Wildlife park",
+      "Terraria ecology"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "feedback loops",
+    "summary": "Tune predator and prey populations by adding or removing species so the island stays alive for N seasons.",
+    "core_loop": "view population chart → add or remove species → season passes → check trends → repeat",
+    "verbs": [
+      "tune",
+      "predict"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "island",
+      "population chart",
+      "species cards",
+      "seasons"
+    ],
+    "rules": [
+      "predators lower prey but starve without them",
+      "overshoot causes collapse",
+      "events shift populations"
+    ],
+    "win": "survive N seasons",
+    "lose": "a species goes extinct",
+    "scoring": "seasons survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare seasons",
+      "share a stable balance"
+    ],
+    "content_needs": [
+      "species relations",
+      "event deck"
+    ],
+    "difficulty_levers": [
+      "species",
+      "events"
+    ],
+    "tools": [
+      "slider_input",
+      "meters",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "balance wolves and rabbits on an island",
+      "spore ecosystem game for school science",
+      "keep the pond alive for 10 seasons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "evacuation_triage_assign",
+    "name": "Triage and assign",
+    "aliases": [
+      "Overcooked assignments",
+      "Rescue Rangers",
+      "Frostpunk triage",
+      "Plague Inc cure"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "assignment under limits",
+    "summary": "Limited rescuers must be assigned to groups with different urgency; assign the right ones in time or lose them.",
+    "core_loop": "see groups and ETA → assign rescuers → time passes → results → next wave",
+    "verbs": [
+      "assign",
+      "prioritize"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "map",
+      "groups with timers",
+      "rescuer tokens",
+      "safe zone"
+    ],
+    "rules": [
+      "rescuers have speed and capacity",
+      "groups have countdowns",
+      "unassigned groups are lost"
+    ],
+    "win": "save as many as possible",
+    "lose": "all groups lost",
+    "scoring": "people saved",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare saves",
+      "race for fewest losses"
+    ],
+    "content_needs": [
+      "scenarios with timers",
+      "rescuer types"
+    ],
+    "difficulty_levers": [
+      "rescuers",
+      "timers"
+    ],
+    "tools": [
+      "player_drag",
+      "countdown",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "evacuate a school during a dragon attack",
+      "assign rescue teams to flooded villages",
+      "triage the cats before the storm"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "elemental_combo_tactics",
+    "name": "Elemental combo tactics",
+    "aliases": [
+      "Divinity Original Sin",
+      "Wizard of Legend",
+      "Magicka",
+      "Hero Wars",
+      "Final Fantasy Tactics elements"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "chain reactions",
+    "summary": "Combine element tiles on a grid so effects chain (fire spreads on oil, water conducts shock) to defeat enemies cleverly.",
+    "core_loop": "read grid surfaces → cast element → effects chain → enemies damaged → repeat",
+    "verbs": [
+      "combine",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid surfaces",
+      "element spells",
+      "enemies",
+      "reaction preview"
+    ],
+    "rules": [
+      "each element interacts with surfaces",
+      "reaction preview is shown",
+      "limited casts"
+    ],
+    "win": "defeat all enemies in the casts given",
+    "lose": "casts run out",
+    "scoring": "casts left",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a combo",
+      "daily combo puzzle"
+    ],
+    "content_needs": [
+      "surface types",
+      "reaction table"
+    ],
+    "difficulty_levers": [
+      "casts",
+      "enemy HP"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "elemental combo puzzle with wizard cats",
+      "set oil on fire to beat the goblins",
+      "divinity style surface combos"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "push_off_arena",
+    "name": "Push-off arena",
+    "aliases": [
+      "Super Smash Bros",
+      "Sumo",
+      "Brawlhalla",
+      "Duck Game",
+      "Wobbly Life"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "knockback tactics",
+    "summary": "On a small arena, push enemy units off the edge using shove actions; turn order and positioning decide who falls.",
+    "core_loop": "choose unit → move and shove → enemies react → units pushed off edge are out → repeat",
+    "verbs": [
+      "shove",
+      "position"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "arena",
+      "units",
+      "shove preview"
+    ],
+    "rules": [
+      "pushes move units one tile",
+      "chaining pushes pushes others",
+      "edge tiles are danger"
+    ],
+    "win": "last team standing",
+    "lose": "all your units fall",
+    "scoring": "units remaining",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "duel friends async",
+      "share a clever chain"
+    ],
+    "content_needs": [
+      "arena shapes",
+      "unit stats"
+    ],
+    "difficulty_levers": [
+      "arena size",
+      "units"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "sumo tactics with cats on a pizza",
+      "push enemies off a floating island",
+      "turn-based smash bros with hamsters"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "capture_flag_grid",
+    "name": "Capture the flag grid",
+    "aliases": [
+      "Capture the Flag",
+      "Splatoon turf",
+      "Tron",
+      "Pac-Man ghosts",
+      "Hex"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "objective race",
+    "summary": "Two sides on a grid race to snatch the opponent's flag and bring it home while avoiding tags.",
+    "core_loop": "move units → grab flag → carry it home → tags send you back → score",
+    "verbs": [
+      "move",
+      "tag"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid",
+      "flags",
+      "units",
+      "home zones"
+    ],
+    "rules": [
+      "carrying slows movement",
+      "tagging resets the unit",
+      "first to 3 captures wins"
+    ],
+    "win": "capture the flag three times",
+    "lose": "opponent captures first",
+    "scoring": "captures",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "friend as opposing side",
+      "Group ladder"
+    ],
+    "content_needs": [
+      "maps",
+      "AI behavior"
+    ],
+    "difficulty_levers": [
+      "map size",
+      "AI aggression"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "capture the flag in my school",
+      "cat vs dog grid flag game",
+      "tactical capture the flag for two players"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "piece_move_capture_puzzle",
+    "name": "Capture-all piece puzzle",
+    "aliases": [
+      "Chess puzzles",
+      "Chess tactics",
+      "Knight's tour",
+      "Chess Free puzzles",
+      "ChessKid"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "move rules puzzle",
+    "summary": "A few chess-like pieces with fixed move rules; capture all targets in the fewest moves using only the moves they allow.",
+    "core_loop": "view position → move a piece → captures remove targets → repeat → clear board",
+    "verbs": [
+      "plan",
+      "capture"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "board",
+      "move-rule pieces",
+      "targets",
+      "move counter"
+    ],
+    "rules": [
+      "each piece moves only by its rule",
+      "each move must capture or relocate",
+      "minimal solution exists"
+    ],
+    "win": "clear all targets",
+    "lose": "move limit reached",
+    "scoring": "moves under par",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race for par",
+      "daily puzzle"
+    ],
+    "content_needs": [
+      "positions with par",
+      "piece rule sets"
+    ],
+    "difficulty_levers": [
+      "pieces",
+      "par",
+      "board size"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "chess puzzle with a knight and two rooks",
+      "capture all pawns in 5 moves",
+      "knight capture puzzle for the daily"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "kiting_range_skirmish",
+    "name": "Kiting skirmish",
+    "aliases": [
+      "League of Legends kiting",
+      "Vampire Survivors",
+      "Brotato",
+      "Dota last-hit",
+      "Bit Heroes"
+    ],
+    "family": "strategy_tactics",
+    "subfamily": "range management",
+    "summary": "Control a ranged unit that must keep distance from melee enemies, firing between steps, to clear a skirmish.",
+    "core_loop": "move away → fire when in range → enemies approach → retreat → repeat",
+    "verbs": [
+      "kite",
+      "aim"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "arena",
+      "ranged hero",
+      "chasers",
+      "cooldown ring"
+    ],
+    "rules": [
+      "attacks have wind-up",
+      "shooting while standing still",
+      "chasers differ in speed"
+    ],
+    "win": "clear all enemies",
+    "lose": "HP zero",
+    "scoring": "time and HP",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare clear times",
+      "ghost replay"
+    ],
+    "content_needs": [
+      "enemy mixes",
+      "arena"
+    ],
+    "difficulty_levers": [
+      "enemy speed",
+      "attack wind-up"
+    ],
+    "tools": [
+      "player_drag",
+      "spawn_wave",
+      "lives",
+      "ghost_score",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "kiting game where goblins chase my archer cat",
+      "vampire survivors style kiting",
+      "ranged hero versus melee mob"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

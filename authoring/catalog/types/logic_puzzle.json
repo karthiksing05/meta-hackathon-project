@@ -1,0 +1,2544 @@
+[
+  {
+    "id": "number_place_grid",
+    "name": "Number-place grid",
+    "aliases": [
+      "Sudoku"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fill a 9x9 grid so every row, column and box has the digits 1–9 once.",
+    "core_loop": "pick a cell → enter a digit → conflicts highlight → fill the grid",
+    "verbs": [
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each digit once per row, column and 3x3 box"
+    ],
+    "win": "fill the grid correctly",
+    "lose": "none",
+    "scoring": "solve time; mistakes",
+    "session_seconds": [
+      180,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily grid with friends' solve times"
+    ],
+    "difficulty_levers": [
+      "givens count",
+      "technique required"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "daily_seed",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "daily sudoku with my friends",
+      "sudoku but with emojis instead of numbers",
+      "easy sudoku for my grandma"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mini_number_grid",
+    "name": "Mini number grid",
+    "aliases": [
+      "4x4 Sudoku",
+      "Mini Sudoku"
+    ],
+    "family": "logic_puzzle",
+    "summary": "A small 4x4 or 6x6 number-place puzzle for quick sessions.",
+    "core_loop": "Tap a cell in a small 4x4 or 6x6 grid and place a number so no row, column or box repeats, finishing in a few minutes",
+    "verbs": [
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no repeats in rows, columns or regions"
+    ],
+    "win": "fill the grid",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "quick daily race"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "givens shown",
+      "pencil marks"
+    ],
+    "tools": [
+      "grid_board",
+      "daily_seed",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "mini sudoku for kids",
+      "4x4 sudoku daily",
+      "quick sudoku on the bus"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "queens_placement",
+    "name": "Queens on colored regions",
+    "aliases": [
+      "Queens",
+      "LinkedIn Queens",
+      "Star Battle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Place one queen per row, column and colored region with no two touching.",
+    "core_loop": "Place one queen in each row, column and colored region so no two queens touch, marking impossible cells as you go",
+    "verbs": [
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one per row, column and region",
+      "queens can't touch, even diagonally"
+    ],
+    "win": "place every queen",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily shared board, compare times"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "region shapes",
+      "auto-marking"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "daily_seed",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "linkedin queens puzzle",
+      "place one crown per color region",
+      "star battle puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "nonogram_picture",
+    "name": "Picture logic grid",
+    "aliases": [
+      "Nonogram",
+      "Picross",
+      "Griddlers"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Use row and column number clues to fill cells and reveal a hidden picture.",
+    "core_loop": "Read the number clues on each row and column, fill or cross out cells to match them, and watch a hidden picture appear",
+    "verbs": [
+      "deduce",
+      "fill"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "each number is a run of filled cells in order"
+    ],
+    "win": "complete the picture",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      120,
+      1200
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "make a picture of your pet for a friend to solve"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "clue ambiguity",
+      "colors"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "picross of my dog",
+      "nonogram that reveals a pokemon",
+      "paint by numbers logic puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "logic_grid_zebra",
+    "name": "Who-owns-what logic grid",
+    "aliases": [
+      "Zebra puzzle",
+      "Einstein's riddle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Use clues to match people to houses, pets and drinks in a cross grid.",
+    "core_loop": "read a clue → mark yes or no in the grid → deduce → fill every match",
+    "verbs": [
+      "deduce",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each attribute matches exactly one person"
+    ],
+    "win": "fill the grid",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "make one about your friends"
+    ],
+    "difficulty_levers": [
+      "categories",
+      "clue count"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "einstein riddle puzzle",
+      "logic grid about my roommates",
+      "who owns the fish"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "light_switch_toggle",
+    "name": "Lights out",
+    "aliases": [
+      "Lights Out"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Tapping a light toggles it and its neighbors; turn them all off.",
+    "core_loop": "Tap a light to flip it and its neighbors; plan a sequence of taps that turns every light off in as few moves as possible",
+    "verbs": [
+      "toggle",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tap flips a plus shape"
+    ],
+    "win": "turn every light off",
+    "lose": "none",
+    "scoring": "fewer taps",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your tap count"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "starting pattern",
+      "move limit"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "lights out puzzle",
+      "turn off all the lights game",
+      "toggle grid puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sliding_number_puzzle",
+    "name": "Fifteen puzzle",
+    "aliases": [
+      "15 puzzle",
+      "sliding tiles"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Slide numbered tiles into the empty space until they're in order.",
+    "core_loop": "Slide numbered tiles into the one empty space, working row by row until every tile is in order, in as few moves as you can",
+    "verbs": [
+      "slide",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "only tiles next to the gap move"
+    ],
+    "win": "tiles in order",
+    "lose": "none",
+    "scoring": "moves and time",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "turn a friend's photo into the puzzle"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "move limit",
+      "picture tiles"
+    ],
+    "tools": [
+      "tile_slide",
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "15 puzzle with my photo",
+      "sliding tile puzzle",
+      "slide puzzle of our group pic"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "river_crossing",
+    "name": "River crossing",
+    "aliases": [
+      "Wolf goat cabbage",
+      "missionaries and cannibals"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Ferry characters across a river without leaving a forbidden pair alone.",
+    "core_loop": "Pick who rides the boat, cross the river, and check that no forbidden pair is left alone on either bank until everyone is across",
+    "verbs": [
+      "plan",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the boat holds limited riders",
+      "forbidden pairs can't be left alone"
+    ],
+    "win": "everyone across",
+    "lose": "breaking a pairing rule",
+    "scoring": "fewest crossings",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "themed versions about your friends"
+    ],
+    "difficulty_levers": [
+      "riders",
+      "rules",
+      "boat capacity"
+    ],
+    "tools": [
+      "turns",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "wolf goat cabbage puzzle",
+      "river crossing riddle game",
+      "get everyone across safely"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tower_disks",
+    "name": "Move the tower",
+    "aliases": [
+      "Tower of Hanoi"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Move a stack of disks to another peg, never putting a bigger disk on a smaller one.",
+    "core_loop": "Move disks one at a time between pegs, never putting a bigger disk on a smaller one, until the whole tower is on the target peg",
+    "verbs": [
+      "plan",
+      "move"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "one disk at a time",
+      "never bigger on smaller"
+    ],
+    "win": "move the tower",
+    "lose": "none",
+    "scoring": "moves vs minimum",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat the minimum moves"
+    ],
+    "difficulty_levers": [
+      "disk count",
+      "peg count",
+      "move limit"
+    ],
+    "tools": [
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "tower of hanoi game",
+      "move the stack of pancakes",
+      "disk tower puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bridges_connect",
+    "name": "Connect the islands",
+    "aliases": [
+      "Hashi",
+      "Bridges"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Connect numbered islands with bridges so each has its number of bridges and all connect.",
+    "core_loop": "Draw single or double bridges between numbered islands so each island has its number of bridges, none cross, and all connect",
+    "verbs": [
+      "connect",
+      "deduce"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "bridges are straight and don't cross",
+      "at most two between a pair"
+    ],
+    "win": "satisfy every island",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily puzzle times"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "island count",
+      "hint level"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hashi bridges puzzle",
+      "connect the islands",
+      "bridge building logic"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "loop_slitherlink",
+    "name": "Draw the loop",
+    "aliases": [
+      "Slitherlink"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Draw one loop along grid edges; numbers say how many sides of each cell it uses.",
+    "core_loop": "Draw edges on a grid to make one closed loop, where each number says how many of that cell's four sides the loop uses",
+    "verbs": [
+      "deduce",
+      "draw"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "a single loop with no branches"
+    ],
+    "win": "close a valid loop",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily times"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "clue density",
+      "cell shape"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "slitherlink puzzle",
+      "draw one loop through the grid",
+      "loop logic game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "light_up_akari",
+    "name": "Light the room",
+    "aliases": [
+      "Akari",
+      "Light Up"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Place bulbs so every cell is lit; numbered walls say how many bulbs touch them.",
+    "core_loop": "Place bulbs in white cells so every cell is lit, no two bulbs see each other, and numbered walls touch their count of bulbs",
+    "verbs": [
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "bulbs light their row and column until a wall",
+      "bulbs can't see each other"
+    ],
+    "win": "light every cell",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "clue density",
+      "wall count"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "akari light up puzzle",
+      "place lamps to light the room",
+      "light every square"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "kakuro_sums",
+    "name": "Cross sums",
+    "aliases": [
+      "Kakuro"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fill white cells with 1–9 so each run adds to its clue, with no repeats in a run.",
+    "core_loop": "Fill each white run with digits 1 to 9 that add up to its clue with no repeated digit in a run, until the grid is full",
+    "verbs": [
+      "calculate",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no repeated digits within a run"
+    ],
+    "win": "fill every run",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "run length",
+      "hints"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "kakuro puzzle",
+      "cross sums game",
+      "sum crossword"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "killer_cage",
+    "name": "Cages that add up",
+    "aliases": [
+      "Killer Sudoku",
+      "KenKen"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fill a grid where outlined cages must combine to a target with a given operation.",
+    "core_loop": "read a cage → pick numbers → no repeats in rows or columns → solve",
+    "verbs": [
+      "calculate",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "numbers can't repeat in rows or columns",
+      "cages hit their target"
+    ],
+    "win": "fill the grid",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      180,
+      1200
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "operations"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "kenken puzzle",
+      "killer sudoku",
+      "math cage puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tents_trees",
+    "name": "Tents and trees",
+    "aliases": [
+      "Tents"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Place one tent next to each tree; tents can't touch; row and column counts must match.",
+    "core_loop": "Place one tent next to each tree so no tents touch, even diagonally, and each row and column has its listed number of tents",
+    "verbs": [
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tree has one tent",
+      "tents never touch"
+    ],
+    "win": "place every tent",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "camping-themed group puzzle"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "tree density",
+      "hints"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "tents and trees puzzle",
+      "campsite logic game",
+      "place tents next to trees"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "battleship_solitaire",
+    "name": "Find the fleet",
+    "aliases": [
+      "Battleship solitaire",
+      "Bimaru"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Deduce where a fleet of ships hides using row and column ship counts.",
+    "core_loop": "Use row and column counts and a few revealed cells to deduce and place every ship in a hidden fleet",
+    "verbs": [
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "ships don't touch",
+      "counts must match"
+    ],
+    "win": "place the fleet",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      180,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "fleet",
+      "revealed cells"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "battleship logic puzzle",
+      "find the hidden ships",
+      "bimaru solitaire"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "binary_grid",
+    "name": "Two-color grid",
+    "aliases": [
+      "Takuzu",
+      "Binairo",
+      "0h h1"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fill a grid with two colors so no three in a row match and rows and columns balance.",
+    "core_loop": "Fill a grid with two colors so no three in a row match, each row and column is balanced, and no two rows are identical",
+    "verbs": [
+      "deduce",
+      "fill"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no three of a color in a row",
+      "equal colors per row and column",
+      "no two identical rows"
+    ],
+    "win": "fill the grid",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily times"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "givens shown",
+      "mistake checks"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "0h h1 puzzle",
+      "two color grid logic",
+      "takuzu"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pipe_rotate",
+    "name": "Rotate the pipes",
+    "aliases": [
+      "Pipe Mania",
+      "Net",
+      "Plumber"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Rotate pipe tiles so water flows from the source to every outlet.",
+    "core_loop": "Tap pipe tiles to rotate them until water flows from the source to every outlet with no open ends leaking",
+    "verbs": [
+      "rotate",
+      "connect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "every pipe end must connect"
+    ],
+    "win": "water reaches every outlet",
+    "lose": "none",
+    "scoring": "taps and time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share fewest taps"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "leak rule",
+      "wraparound edges"
+    ],
+    "tools": [
+      "grid_board",
+      "tile_slide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rotate pipes to connect the water",
+      "plumber puzzle",
+      "connect the network"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "flow_connect",
+    "name": "Connect the dots without crossing",
+    "aliases": [
+      "Flow Free",
+      "Numberlink"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Connect pairs of matching dots with paths that fill the whole board and never cross.",
+    "core_loop": "Drag a path from each colored dot to its matching pair so paths never cross and together fill every cell of the board",
+    "verbs": [
+      "connect",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "paths can't cross",
+      "every cell must be used"
+    ],
+    "win": "connect all pairs and fill the board",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily board race"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "pairs",
+      "bridges"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "flow free game",
+      "connect the colors without crossing",
+      "numberlink puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "laser_mirror",
+    "name": "Bounce the laser",
+    "aliases": [
+      "Laser maze",
+      "Mirror puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Place and rotate mirrors to guide a laser to its target.",
+    "core_loop": "Place and rotate mirrors on a grid, then fire the laser and adjust until the beam hits every target",
+    "verbs": [
+      "reflect",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "lasers bounce at 90°",
+      "blockers stop the beam"
+    ],
+    "win": "light every target",
+    "lose": "none",
+    "scoring": "mirrors used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share fewest mirrors"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "targets",
+      "mirrors available"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "laser mirror puzzle",
+      "bounce the beam to the target",
+      "light maze"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "parking_unblock",
+    "name": "Unblock the car",
+    "aliases": [
+      "Rush Hour",
+      "Unblock Me"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Slide cars forward and back to clear a path for the red car.",
+    "core_loop": "Slide cars forward or backward along their lanes to open a path so the marked car can drive out, in as few moves as possible",
+    "verbs": [
+      "slide",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "cars slide only along their length"
+    ],
+    "win": "the red car exits",
+    "lose": "none",
+    "scoring": "moves vs minimum",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share move counts"
+    ],
+    "difficulty_levers": [
+      "traffic density",
+      "move limit",
+      "truck count"
+    ],
+    "tools": [
+      "tile_slide",
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rush hour puzzle",
+      "unblock the car game",
+      "parking lot escape puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sokoban_push",
+    "name": "Push the boxes",
+    "aliases": [
+      "Sokoban"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Push boxes onto goal squares; boxes can only be pushed, never pulled.",
+    "core_loop": "Walk around a warehouse and push boxes onto goal squares, careful not to push a box into a corner where it gets stuck",
+    "verbs": [
+      "push",
+      "plan"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "you can push one box at a time, never pull"
+    ],
+    "win": "every box on a goal",
+    "lose": "a box stuck in a corner (undo allowed)",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share move counts"
+    ],
+    "difficulty_levers": [
+      "level size",
+      "boxes",
+      "undo limit"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "sokoban puzzle",
+      "push the crates onto the marks",
+      "warehouse box pusher"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ice_slide_maze",
+    "name": "Ice slide maze",
+    "aliases": [
+      "Ice puzzle",
+      "Slide maze"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Slide across ice until you hit a wall; plan stops to reach the exit.",
+    "core_loop": "Pick a direction and slide across the ice until you hit a rock or wall; plan a chain of stops that reaches the exit",
+    "verbs": [
+      "slide",
+      "plan"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "you can't stop mid-slide"
+    ],
+    "win": "reach the exit",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "rocks placement",
+      "move limit",
+      "maze size"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "ice sliding puzzle",
+      "slide until you hit a rock",
+      "pokemon ice cave puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "one_stroke_path",
+    "name": "One-stroke drawing",
+    "aliases": [
+      "One Line",
+      "Euler path"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Draw a figure in one continuous line without lifting or retracing an edge.",
+    "core_loop": "Trace a figure in one continuous line, using every edge exactly once without lifting your finger or retracing",
+    "verbs": [
+      "trace",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each edge once",
+      "no lifting"
+    ],
+    "win": "trace every edge",
+    "lose": "none",
+    "scoring": "attempts",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share attempts"
+    ],
+    "difficulty_levers": [
+      "edges",
+      "one-way edges",
+      "figure size"
+    ],
+    "tools": [
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "draw it in one line puzzle",
+      "one stroke drawing game",
+      "trace without lifting"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fill_path_grid",
+    "name": "Visit every cell",
+    "aliases": [
+      "One path",
+      "Hamiltonian path"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Draw one path from start that visits every cell exactly once.",
+    "core_loop": "Draw one path from the start cell that visits every open cell exactly once, routing around blocked cells",
+    "verbs": [
+      "plan",
+      "trace"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each cell once",
+      "no diagonal moves"
+    ],
+    "win": "cover every cell",
+    "lose": "none",
+    "scoring": "attempts",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "blockers",
+      "fixed end"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "visit every square once",
+      "fill the grid with one line",
+      "snake path puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "star_battle_regions",
+    "name": "Star battle",
+    "aliases": [
+      "Star Battle",
+      "Two Not Touch"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Place two stars in every row, column and region, never touching.",
+    "core_loop": "Place stars so every row, column and region has the right number, and no two stars touch, even diagonally",
+    "verbs": [
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "two per row, column and region",
+      "no touching"
+    ],
+    "win": "place every star",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      180,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "stars per region",
+      "grid size",
+      "region shapes"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "star battle puzzle",
+      "two not touch",
+      "place stars in regions"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hitori_shade",
+    "name": "Shade the duplicates",
+    "aliases": [
+      "Hitori"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Shade cells so no number repeats in a row or column, shaded cells don't touch, and unshaded cells connect.",
+    "core_loop": "Shade cells so no number repeats in any row or column, no two shaded cells touch, and all unshaded cells stay connected",
+    "verbs": [
+      "deduce",
+      "shade"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "shaded cells can't be side by side",
+      "unshaded cells stay connected"
+    ],
+    "win": "solve the grid",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      180,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "repeat density",
+      "hints"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hitori puzzle",
+      "shade the repeated numbers",
+      "japanese shading puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "nurikabe_islands",
+    "name": "Islands and sea",
+    "aliases": [
+      "Nurikabe"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Shade the sea so each number makes an island of that size and the sea is one connected body.",
+    "core_loop": "Shade cells so each number grows an island of exactly that size, the shaded sea is one connected body, and no 2x2 block is sea",
+    "verbs": [
+      "deduce",
+      "shade"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each island has one number equal to its size",
+      "no 2x2 sea"
+    ],
+    "win": "solve the grid",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      300,
+      1200
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "island count",
+      "hints"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "nurikabe",
+      "islands in the stream puzzle",
+      "shade the water logic"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tangram_fit",
+    "name": "Tangram",
+    "aliases": [
+      "Tangram"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fit seven geometric pieces together to fill a silhouette.",
+    "core_loop": "Drag, rotate and flip seven geometric pieces until together they exactly fill a silhouette with no overlaps",
+    "verbs": [
+      "arrange",
+      "rotate"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "all seven pieces, no overlaps"
+    ],
+    "win": "fill the outline",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "make silhouettes for friends"
+    ],
+    "difficulty_levers": [
+      "silhouette complexity",
+      "outline hints",
+      "flips allowed"
+    ],
+    "tools": [
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "tangram puzzles",
+      "make the cat shape with tangram pieces",
+      "tangram for kids"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "polyomino_pack",
+    "name": "Pack the shapes",
+    "aliases": [
+      "Pentomino",
+      "Katamino"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fit a set of polyomino pieces into a box with no gaps.",
+    "core_loop": "Pick polyomino pieces, rotate them, and place them until they fill the box with no gaps or overlaps",
+    "verbs": [
+      "fit",
+      "rotate"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "pieces can't overlap",
+      "every cell filled"
+    ],
+    "win": "fill the box",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily box"
+    ],
+    "difficulty_levers": [
+      "box size",
+      "pieces",
+      "rotation allowed"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "pentomino puzzle",
+      "fit the shapes in the box",
+      "katamino"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "match_stick_move",
+    "name": "Move the matchsticks",
+    "aliases": [
+      "Matchstick puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Move a set number of matchsticks to fix an equation or make a shape.",
+    "core_loop": "Read the goal, then move the allowed number of matchsticks to fix a wrong equation or turn one shape into another",
+    "verbs": [
+      "move",
+      "reason"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "exactly N moves allowed"
+    ],
+    "win": "make the goal true",
+    "lose": "none",
+    "scoring": "attempts",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share with friends"
+    ],
+    "difficulty_levers": [
+      "moves allowed",
+      "puzzle type",
+      "hints"
+    ],
+    "tools": [
+      "player_drag",
+      "hint",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "matchstick math puzzle",
+      "move one match to fix the equation",
+      "matchstick riddles"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "knights_tour",
+    "name": "Knight's path",
+    "aliases": [
+      "Knight's tour"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Move a knight so it visits every square exactly once.",
+    "core_loop": "Move a knight in L-shaped jumps so it lands on every square of the board exactly once",
+    "verbs": [
+      "plan",
+      "move"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "knight moves only",
+      "each square once"
+    ],
+    "win": "visit every square",
+    "lose": "getting stuck",
+    "scoring": "squares visited",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share boards completed"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "start square",
+      "blocked squares"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "knights tour puzzle",
+      "chess knight visit every square",
+      "horse jumping puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gear_chain",
+    "name": "Gear train",
+    "aliases": [
+      "Gear puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Place gears so turning the first one turns the last in the right direction.",
+    "core_loop": "Place gears on pegs so their teeth mesh from the motor to the last gear, then spin to check it turns the right way",
+    "verbs": [
+      "connect",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "meshed gears spin in opposite directions"
+    ],
+    "win": "the last gear spins correctly",
+    "lose": "none",
+    "scoring": "gears used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "fewest gears challenge"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "gear sizes",
+      "direction required"
+    ],
+    "tools": [
+      "player_drag",
+      "grid_board",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "connect the gears puzzle",
+      "gear train game",
+      "make the wheel turn"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "circuit_logic_gates",
+    "name": "Logic gate circuit",
+    "aliases": [
+      "Logic gates puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Place AND, OR and NOT gates so the outputs light up for the given inputs.",
+    "core_loop": "Place AND, OR and NOT gates and wire them so every output lights correctly for each set of test inputs",
+    "verbs": [
+      "wire",
+      "reason"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "each gate follows its truth table"
+    ],
+    "win": "every output correct",
+    "lose": "none",
+    "scoring": "gates used",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "CS class challenge"
+    ],
+    "difficulty_levers": [
+      "gates available",
+      "inputs",
+      "outputs"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "logic gates puzzle",
+      "build a circuit game",
+      "boolean logic challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "switch_order",
+    "name": "Switches in order",
+    "aliases": [
+      "Switch puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Flip switches in the right order; each one changes others by a hidden rule.",
+    "core_loop": "Flip switches and watch which others change, work out the hidden rule, and find the order that sets every switch right",
+    "verbs": [
+      "experiment",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each switch toggles a fixed set"
+    ],
+    "win": "open the door",
+    "lose": "none",
+    "scoring": "flips used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "escape-room style for friends"
+    ],
+    "difficulty_levers": [
+      "switch count",
+      "rule complexity",
+      "flips allowed"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "escape room switch puzzle",
+      "figure out the switches",
+      "flip the levers in order"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "weigh_balance",
+    "name": "Find the odd one with a scale",
+    "aliases": [
+      "Balance scale puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Use a balance scale a limited number of times to find the odd weight.",
+    "core_loop": "Choose items for each side of a balance scale, read which way it tips, and find the odd weight within the allowed weighings",
+    "verbs": [
+      "weigh",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "only N weighings"
+    ],
+    "win": "find the odd one",
+    "lose": "out of weighings",
+    "scoring": "weighings used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "riddle for friends"
+    ],
+    "difficulty_levers": [
+      "items",
+      "weighings",
+      "heavier or lighter unknown"
+    ],
+    "tools": [
+      "sort_bins",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "12 coins balance puzzle",
+      "find the fake coin with a scale",
+      "weighing riddle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "liar_truth",
+    "name": "Knights and knaves",
+    "aliases": [
+      "Knights and Knaves",
+      "liar puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Some characters always lie, some always tell the truth; work out who is who.",
+    "core_loop": "Read what each character says, test who could be lying, and assign every character as a truth-teller or a liar",
+    "verbs": [
+      "reason",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "liars always lie, knights always tell the truth"
+    ],
+    "win": "assign every role",
+    "lose": "wrong assignment",
+    "scoring": "puzzles solved",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "make one starring your friends"
+    ],
+    "difficulty_levers": [
+      "characters",
+      "statement types",
+      "random speakers"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "knights and knaves puzzle",
+      "who is lying logic game",
+      "truth teller riddle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "water_jugs",
+    "name": "Measure with jugs",
+    "aliases": [
+      "Water jug puzzle",
+      "Die Hard jugs"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fill, empty and pour between jugs to measure an exact amount.",
+    "core_loop": "Fill, empty and pour between jugs of fixed sizes until one of them holds the exact target amount",
+    "verbs": [
+      "pour",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "jugs have fixed sizes, no markings"
+    ],
+    "win": "measure the target",
+    "lose": "none",
+    "scoring": "steps",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share steps"
+    ],
+    "difficulty_levers": [
+      "jug sizes",
+      "jug count",
+      "move limit"
+    ],
+    "tools": [
+      "turns",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "water jug puzzle",
+      "measure 4 gallons with 3 and 5",
+      "die hard jug riddle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_flood",
+    "name": "Flood the board",
+    "aliases": [
+      "Flood-It"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Change the color of the corner region to grow it until the whole board is one color within a move limit.",
+    "core_loop": "Pick a color to recolor your corner region so it absorbs neighbors of that color, and flood the whole board within a move limit",
+    "verbs": [
+      "plan",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "your region absorbs neighbors of the chosen color"
+    ],
+    "win": "one color everywhere within moves",
+    "lose": "out of moves",
+    "scoring": "moves used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily board"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "colors",
+      "moves"
+    ],
+    "tools": [
+      "grid_board",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "flood it game",
+      "fill the board with one color",
+      "color flood daily"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "number_link_chain",
+    "name": "Number chain",
+    "aliases": [
+      "Hidato",
+      "Numbrix"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fill a grid with consecutive numbers so each touches the next.",
+    "core_loop": "Place consecutive numbers in a grid so each one touches the next, filling the gaps around the given numbers",
+    "verbs": [
+      "place",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each number touches the next",
+      "some are given"
+    ],
+    "win": "fill the chain",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "givens shown",
+      "diagonal links"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hidato puzzle",
+      "numbrix",
+      "number path puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rotate_ring_puzzle",
+    "name": "Rotating rings",
+    "aliases": [
+      "Rotation puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Rotate rings of tiles to line up a picture or colors.",
+    "core_loop": "Rotate concentric rings of tiles so their pieces line up into a full picture or matching colored spokes",
+    "verbs": [
+      "rotate",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "rings rotate as a whole"
+    ],
+    "win": "align the picture",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "rings",
+      "tiles",
+      "linked rings"
+    ],
+    "tools": [
+      "tile_slide",
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rotate the rings puzzle",
+      "circle rotation picture",
+      "spin the rings to match"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mastermind_code",
+    "name": "Crack the code",
+    "aliases": [
+      "Mastermind",
+      "Bulls and Cows"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Guess a hidden color or number code; feedback says right-place and right-color counts.",
+    "core_loop": "Guess a hidden code of colors or digits, read how many are right and in place or right but misplaced, and crack it",
+    "verbs": [
+      "deduce",
+      "guess"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "feedback counts but doesn't say which"
+    ],
+    "win": "crack the code within guesses",
+    "lose": "out of guesses",
+    "scoring": "guesses used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "set a code for a friend"
+    ],
+    "difficulty_levers": [
+      "code length",
+      "colors",
+      "repeats allowed"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "mastermind game",
+      "crack the color code",
+      "bulls and cows"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "minesweeper_logic",
+    "name": "Mine sweep",
+    "aliases": [
+      "Minesweeper"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Reveal safe cells; numbers count adjacent mines; flag every mine.",
+    "core_loop": "Reveal a cell, read how many mines touch it, flag cells you're sure of, and clear every safe cell without hitting a mine",
+    "verbs": [
+      "deduce",
+      "reveal"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "a mine ends the game",
+      "numbers count neighbors"
+    ],
+    "win": "clear every safe cell",
+    "lose": "revealing a mine",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily seed race"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "mine density",
+      "no-guess boards"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "daily_seed",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "minesweeper daily",
+      "minesweeper with flowers",
+      "find the bombs logic"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "path_arrows",
+    "name": "Follow the arrows",
+    "aliases": [
+      "Arrows puzzle",
+      "Signpost"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Link cells so each arrow points to the next one in a single path.",
+    "core_loop": "Starting from the first cell, link cells into one path where each arrow points along the direction to the next cell",
+    "verbs": [
+      "deduce",
+      "link"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each cell points to the next"
+    ],
+    "win": "complete the path",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "givens shown",
+      "arrow types"
+    ],
+    "tools": [
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "signpost puzzle",
+      "arrow path logic",
+      "link the arrows"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "symmetry_complete",
+    "name": "Complete the symmetry",
+    "aliases": [
+      "Symmetry puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Fill cells to make the pattern symmetric across the given axis.",
+    "core_loop": "Read the mirror axis and fill cells so the pattern on one side exactly mirrors the other",
+    "verbs": [
+      "mirror",
+      "fill"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the result must match its reflection"
+    ],
+    "win": "perfect symmetry",
+    "lose": "none",
+    "scoring": "mistakes",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "kids and parents"
+    ],
+    "difficulty_levers": [
+      "axes",
+      "pattern size",
+      "time"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "complete the symmetrical picture",
+      "mirror the pattern",
+      "symmetry drawing puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "logic_escape_room",
+    "name": "Escape the room",
+    "aliases": [
+      "Escape room",
+      "The Room"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Find clues and combine items to open a sequence of locks.",
+    "core_loop": "Search a room for clues, combine items, and solve one lock after another until the final door opens",
+    "verbs": [
+      "search",
+      "combine",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each lock has one answer"
+    ],
+    "win": "escape",
+    "lose": "timer runs out",
+    "scoring": "time",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "escape together in a group"
+    ],
+    "difficulty_levers": [
+      "locks",
+      "hints",
+      "red herrings"
+    ],
+    "tools": [
+      "choice_story",
+      "hint",
+      "reveal",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "escape room game for my friends",
+      "digital escape room birthday",
+      "escape the classroom"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cipher_wheel_lock",
+    "name": "Combination lock riddles",
+    "aliases": [
+      "Lock puzzle"
+    ],
+    "family": "logic_puzzle",
+    "summary": "Read riddles to work out each digit of a combination lock.",
+    "core_loop": "Read a riddle for each digit of a combination, work out the numbers, set the lock dials and try to open it",
+    "verbs": [
+      "reason",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "each riddle gives one digit"
+    ],
+    "win": "open the lock",
+    "lose": "none",
+    "scoring": "attempts",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "send a lock to a friend"
+    ],
+    "difficulty_levers": [
+      "digits",
+      "riddle difficulty",
+      "tries"
+    ],
+    "tools": [
+      "hint",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "combination lock riddle",
+      "crack the lock with clues",
+      "lock puzzle game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

@@ -1,0 +1,70 @@
+[
+  {
+    "request": "wordel but its all pokemon names",
+    "expect": [
+      "five_letter_deduction",
+      "five_letter_word_deduction",
+      "custom_word_pool_deduction"
+    ]
+  },
+  {
+    "request": "that nyt game with the 4 groups of 4 words",
+    "expect": [
+      "group_four_by_four",
+      "four_group_connections"
+    ]
+  },
+  {
+    "request": "boggle",
+    "expect": [
+      "letter_grid_search",
+      "boggle_word_grid"
+    ]
+  },
+  {
+    "request": "scrabble but harry potter spells only lol",
+    "expect": [
+      "letter_tile_board"
+    ]
+  },
+  {
+    "request": "hangman w/ marvel characters",
+    "expect": [
+      "hangman"
+    ]
+  },
+  {
+    "request": "the hive one where u make words from 7 letters and one is in the middle",
+    "expect": [
+      "letter_honeycomb",
+      "hex_letter_word_hive"
+    ]
+  },
+  {
+    "request": "contexto",
+    "expect": [
+      "word_guess_hot_cold",
+      "semantic_hot_cold"
+    ]
+  },
+  {
+    "request": "type the falling words before they hit the ground zombie style",
+    "expect": [
+      "falling_words"
+    ]
+  },
+  {
+    "request": "change one letter at a time to get from cat to dog",
+    "expect": [
+      "word_ladder",
+      "word_ladder_climb"
+    ]
+  },
+  {
+    "request": "scattergories for my group chat, letter is random",
+    "expect": [
+      "category_letter",
+      "scattergories_letter_round"
+    ]
+  }
+]

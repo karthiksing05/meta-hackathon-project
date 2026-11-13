@@ -1,0 +1,63 @@
+[
+  {
+    "request": "claw machine",
+    "expect": [
+      "claw_machine"
+    ]
+  },
+  {
+    "request": "hole.io",
+    "expect": [
+      "pickup_snake_vacuum"
+    ]
+  },
+  {
+    "request": "ridiculous fishing",
+    "expect": [
+      "fishing_cast_reel"
+    ]
+  },
+  {
+    "request": "pokemon snap take pics of creatures",
+    "expect": [
+      "butterfly_photo"
+    ]
+  },
+  {
+    "request": "coin pusher arcade",
+    "expect": [
+      "coin_pusher"
+    ]
+  },
+  {
+    "request": "motherload dig for gems",
+    "expect": [
+      "gem_mine_collect"
+    ]
+  },
+  {
+    "request": "easter egg hunt for the kids",
+    "expect": [
+      "egg_hunt_find"
+    ]
+  },
+  {
+    "request": "catch the falling fruit in a basket",
+    "expect": [
+      "basket_catch_falling",
+      "falling_catch_tap"
+    ]
+  },
+  {
+    "request": "gacha capsules collect the whole set",
+    "expect": [
+      "gacha_capsule_collect"
+    ]
+  },
+  {
+    "request": "catch butterflies with a net animal crossing style",
+    "expect": [
+      "bug_net_catch"
+    ]
+  }
+]

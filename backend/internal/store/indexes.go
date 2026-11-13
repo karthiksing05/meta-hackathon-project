@@ -93,6 +93,16 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			{Keys: k("userId", 1), Options: options.Index().SetName("scores_user")},
 			{Keys: k("userId", 1, "updatedAt", -1), Options: options.Index().SetName("scores_user_recent")},
 		},
+		// the game-making catalog (internal/harness; _id is the entry id). Seeded by cmd/dbinit.
+		"game_types": {
+			{Keys: k("family", 1), Options: options.Index().SetName("types_family")},
+			{Keys: k("status", 1), Options: options.Index().SetName("types_status")},
+			{Keys: k("lookupKeys", 1), Options: options.Index().SetName("types_lookup_keys").
+				SetPartialFilterExpression(bson.D{{Key: "lookupKeys", Value: bson.D{{Key: "$exists", Value: true}}}})},
+		},
+		"game_tools": {
+			{Keys: k("kind", 1, "status", 1), Options: options.Index().SetName("tools_kind_status")},
+		},
 	}
 	for coll, models := range plan {
 		if _, err := m.coll(coll).Indexes().CreateMany(ctx, models); err != nil {
@@ -101,3 +111,7 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 	}
 	return nil
 }
+
+// Database is the underlying database, for packages that own their own collections (internal/harness's
+// game_types and game_tools).
+func (m *Mongo) Database() *mongo.Database { return m.db }

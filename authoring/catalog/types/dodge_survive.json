@@ -1,0 +1,989 @@
+[
+  {
+    "id": "dodge_falling_objects",
+    "name": "Dodge what falls",
+    "aliases": [
+      "Falling dodge",
+      "Rain of objects"
+    ],
+    "family": "dodge_survive",
+    "summary": "Things fall from the sky; slide left and right to avoid them as they get faster.",
+    "core_loop": "Objects fall from the sky; slide left and right to avoid them as they come faster and denser, and survive as long as you can",
+    "verbs": [
+      "dodge",
+      "move"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "any hit ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "getting hit",
+    "scoring": "seconds survived",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily seed race"
+    ],
+    "difficulty_levers": [
+      "fall speed",
+      "density",
+      "object size"
+    ],
+    "tools": [
+      "spawn_wave",
+      "speed_ramp",
+      "collide",
+      "player_drag"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dodge the falling pianos",
+      "avoid things raining down",
+      "dodge game with my dog"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bullet_dodge_arena",
+    "name": "Dodge the bullet patterns",
+    "aliases": [
+      "Just Shapes & Beats",
+      "Undertale dodge"
+    ],
+    "family": "dodge_survive",
+    "summary": "Move a small heart or shape in a box while patterns of projectiles sweep through.",
+    "core_loop": "Move a small shape inside a box while patterns of projectiles sweep through it, and weave through each pattern to survive the round",
+    "verbs": [
+      "dodge",
+      "read"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "touching a projectile costs health"
+    ],
+    "win": "survive every pattern",
+    "lose": "out of health",
+    "scoring": "health left",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share clears"
+    ],
+    "difficulty_levers": [
+      "pattern speed",
+      "pattern density",
+      "box size"
+    ],
+    "tools": [
+      "waves",
+      "collide",
+      "lives",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "undertale dodge battle",
+      "dodge the shapes to the music",
+      "bullet pattern survive"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "circle_arena_survive",
+    "name": "Survive in the shrinking arena",
+    "aliases": [
+      "Battle royale circle"
+    ],
+    "family": "dodge_survive",
+    "summary": "Stay inside a shrinking circle while hazards spawn; the edge hurts.",
+    "core_loop": "Stay inside a circle that keeps shrinking while hazards spawn around you; touching the edge costs health",
+    "verbs": [
+      "move",
+      "dodge"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "outside the circle you lose health"
+    ],
+    "win": "survive to the end",
+    "lose": "out of health",
+    "scoring": "time survived",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "last-one-standing with friends"
+    ],
+    "difficulty_levers": [
+      "shrink rate",
+      "hazard spawn rate",
+      "health"
+    ],
+    "tools": [
+      "spawn_wave",
+      "collide",
+      "timer_bar",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "shrinking circle survival",
+      "battle royale zone dodge",
+      "stay in the ring"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hex_floor_fall",
+    "name": "Floor tiles disappear",
+    "aliases": [
+      "Hexagone",
+      "Fall Guys Hex-a-gone"
+    ],
+    "family": "dodge_survive",
+    "summary": "Tiles vanish after you step on them; keep moving and don't fall through.",
+    "core_loop": "Each floor tile crumbles a moment after you step on it; keep moving and plan a path so you don't fall through",
+    "verbs": [
+      "move",
+      "plan"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "every tile you touch falls soon after"
+    ],
+    "win": "be the last standing",
+    "lose": "falling through",
+    "scoring": "time survived",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "last-one-standing with friends"
+    ],
+    "difficulty_levers": [
+      "crumble delay",
+      "floor layers",
+      "rivals"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hex-a-gone floor falling",
+      "tiles disappear when you step",
+      "last one on the floor"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "avoid_the_chaser",
+    "name": "Outrun the chasers",
+    "aliases": [
+      "Pac-Man ghosts",
+      "Tag"
+    ],
+    "family": "dodge_survive",
+    "summary": "Enemies chase you around a maze or field; keep away and collect what you can.",
+    "core_loop": "Enemies chase you around a maze or field; keep moving to stay away from them while collecting items for points",
+    "verbs": [
+      "flee",
+      "collect"
+    ],
+    "inputs": [
+      "swipe",
+      "drag"
+    ],
+    "rules": [
+      "contact ends the run"
+    ],
+    "win": "survive the time",
+    "lose": "caught",
+    "scoring": "items and time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "play tag with friends' faces"
+    ],
+    "difficulty_levers": [
+      "chaser speed",
+      "count",
+      "item spawn rate"
+    ],
+    "tools": [
+      "grid_board",
+      "pickups",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pac-man with my friends as ghosts",
+      "run from the chasers",
+      "tag survive"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dot_maze_eat",
+    "name": "Eat the dots, dodge ghosts",
+    "aliases": [
+      "Pac-Man"
+    ],
+    "family": "dodge_survive",
+    "summary": "Eat every dot in a maze while ghosts hunt you; power pellets let you eat them briefly.",
+    "core_loop": "Move through a maze eating every dot while ghosts hunt you; a power pellet lets you chase and eat them for a short time",
+    "verbs": [
+      "navigate",
+      "eat",
+      "flee"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "ghosts kill on contact unless powered up"
+    ],
+    "win": "eat every dot",
+    "lose": "out of lives",
+    "scoring": "dots and ghosts",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "maze of your neighborhood"
+    ],
+    "difficulty_levers": [
+      "ghost speed",
+      "power duration",
+      "ghost count"
+    ],
+    "tools": [
+      "grid_board",
+      "pickups",
+      "collide",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pac-man in our office",
+      "eat dots avoid ghosts",
+      "maze chomper"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "laser_grid_dodge",
+    "name": "Laser grid",
+    "aliases": [
+      "Laser dodge"
+    ],
+    "family": "dodge_survive",
+    "summary": "Lasers warn, then fire across the grid; step out of their lines in time.",
+    "core_loop": "Warning lines flash across the grid, then lasers fire along them; step off the lines in time and survive each wave",
+    "verbs": [
+      "read",
+      "dodge"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "warnings last a moment"
+    ],
+    "win": "survive the waves",
+    "lose": "hit by a laser",
+    "scoring": "waves survived",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "warning time",
+      "lines per wave",
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "waves",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dodge laser beams grid",
+      "step out of the red lines",
+      "laser warning game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "meteor_shower_space",
+    "name": "Ship in a meteor field",
+    "aliases": [
+      "Meteor dodge"
+    ],
+    "family": "dodge_survive",
+    "summary": "Steer a ship through a field of drifting meteors; grab fuel to keep going.",
+    "core_loop": "Steer a ship through a field of drifting meteors, grabbing fuel cans to keep going farther before you run dry",
+    "verbs": [
+      "steer",
+      "dodge",
+      "collect"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "fuel empties over time"
+    ],
+    "win": "none; endless",
+    "lose": "crash or no fuel",
+    "scoring": "distance",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "distance board"
+    ],
+    "difficulty_levers": [
+      "meteor density",
+      "fuel rate",
+      "ship speed"
+    ],
+    "tools": [
+      "spawn_wave",
+      "pickups",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dodge meteors in space",
+      "asteroid field survival",
+      "spaceship dodge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "zombie_survival_night",
+    "name": "Survive till dawn",
+    "aliases": [
+      "Survive the night"
+    ],
+    "family": "dodge_survive",
+    "summary": "Barricade and move through a map avoiding zombies until sunrise; no weapons.",
+    "core_loop": "With no weapons, hide, move between rooms and patch barricades to avoid zombies until the sun comes up",
+    "verbs": [
+      "hide",
+      "move",
+      "build"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "zombies follow noise"
+    ],
+    "win": "survive till dawn",
+    "lose": "caught",
+    "scoring": "time",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare nights survived"
+    ],
+    "difficulty_levers": [
+      "zombie count",
+      "night length",
+      "barricade strength"
+    ],
+    "tools": [
+      "spawn_wave",
+      "timer_bar",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "survive the zombie night",
+      "hide until sunrise",
+      "zombie escape no guns"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "traffic_crossing_frog",
+    "name": "Cross the lanes",
+    "aliases": [
+      "Frogger"
+    ],
+    "family": "dodge_survive",
+    "summary": "Hop across roads and rivers to reach the far side, then go back for the next.",
+    "core_loop": "Hop across busy roads and ride logs over a river, timing each hop through the gaps, to fill every home slot on the far side",
+    "verbs": [
+      "hop",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "water kills unless on a log"
+    ],
+    "win": "fill every home slot",
+    "lose": "out of lives",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "arcade classic board"
+    ],
+    "difficulty_levers": [
+      "traffic speed",
+      "lanes",
+      "time limit"
+    ],
+    "tools": [
+      "lanes",
+      "collide",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "frogger arcade",
+      "cross the road and river",
+      "frog hop to home"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spike_wheel_avoid",
+    "name": "Spin around the hazards",
+    "aliases": [
+      "Spinning hazards"
+    ],
+    "family": "dodge_survive",
+    "summary": "Your dot orbits a circle; tap to switch direction and avoid incoming spikes.",
+    "core_loop": "Your dot orbits a circle; tap to reverse its direction and avoid incoming spikes for as long as you can",
+    "verbs": [
+      "time",
+      "switch"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a spike hit ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "hit",
+    "scoring": "seconds",
+    "session_seconds": [
+      15,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "quick streaks"
+    ],
+    "difficulty_levers": [
+      "spike speed",
+      "spike rate",
+      "orbit speed"
+    ],
+    "tools": [
+      "collide",
+      "speed_ramp",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "orbit and avoid spikes",
+      "tap to reverse direction",
+      "circle dodge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hide_in_shadows",
+    "name": "Stay in the shadows",
+    "aliases": [
+      "Stealth dodge"
+    ],
+    "family": "dodge_survive",
+    "summary": "Move through spotlights and guard cones without being seen.",
+    "core_loop": "Wait for the right moment, then move between spotlights and guards' view cones to reach the exit without being seen",
+    "verbs": [
+      "sneak",
+      "time"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "being seen restarts the room"
+    ],
+    "win": "reach the exit",
+    "lose": "seen too many times",
+    "scoring": "time and detections",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share stealth runs"
+    ],
+    "difficulty_levers": [
+      "guard count",
+      "cone size",
+      "patrol speed"
+    ],
+    "tools": [
+      "grid_board",
+      "collide",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "sneak past the guards",
+      "stealth spotlight game",
+      "don't get caught"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ball_keep_away",
+    "name": "Keep the ball away",
+    "aliases": [
+      "Keep away"
+    ],
+    "family": "dodge_survive",
+    "summary": "Keep a ball from touching hazards by tilting or nudging the platform.",
+    "core_loop": "Nudge or tilt a platform to keep a rolling ball away from the edges and holes for as long as possible",
+    "verbs": [
+      "balance",
+      "nudge"
+    ],
+    "inputs": [
+      "tilt",
+      "drag"
+    ],
+    "rules": [
+      "the ball rolls with physics"
+    ],
+    "win": "survive the time",
+    "lose": "the ball falls",
+    "scoring": "seconds",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "balance duels"
+    ],
+    "difficulty_levers": [
+      "hole count",
+      "ball speed",
+      "platform size"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "keep the ball on the platform",
+      "tilt balance survive",
+      "don't let it fall"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "storm_shelter_run",
+    "name": "Get to shelter",
+    "aliases": [
+      "Storm run"
+    ],
+    "family": "dodge_survive",
+    "summary": "A storm closes in; dash between shelters to wait out each wave.",
+    "core_loop": "A storm comes in waves; dash between shelters during the calm and hide before each wave hits",
+    "verbs": [
+      "dash",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "outside during a wave hurts"
+    ],
+    "win": "reach the last shelter",
+    "lose": "out of health",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily storm"
+    ],
+    "difficulty_levers": [
+      "wave timing",
+      "shelter spacing",
+      "wave length"
+    ],
+    "tools": [
+      "waves",
+      "checkpoint",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "run between shelters in a storm",
+      "storm survival dash",
+      "tornado escape"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sumo_push_out",
+    "name": "Don't get pushed off",
+    "aliases": [
+      "Sumo",
+      "Fall Guys push"
+    ],
+    "family": "dodge_survive",
+    "summary": "Bump other players or bots off a shrinking platform while staying on.",
+    "core_loop": "Bump other players or bots off a shrinking platform while keeping yourself on; the last one standing wins",
+    "verbs": [
+      "push",
+      "dodge"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "knocked off means out"
+    ],
+    "win": "last one standing",
+    "lose": "knocked off",
+    "scoring": "rounds won",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "party battles"
+    ],
+    "difficulty_levers": [
+      "platform size",
+      "shrink rate",
+      "players"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "sumo push game with friends",
+      "bump others off the platform",
+      "last one on the ice"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gauntlet_dodge_walk",
+    "name": "Walk the gauntlet",
+    "aliases": [
+      "Gauntlet walk"
+    ],
+    "family": "dodge_survive",
+    "summary": "Walk a corridor of swinging axes, saws and crushers by timing each step.",
+    "core_loop": "Walk a corridor of swinging axes, saws and crushers, waiting and timing each step to slip past each hazard",
+    "verbs": [
+      "time",
+      "move"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one hit restarts the corridor"
+    ],
+    "win": "reach the end",
+    "lose": "out of lives",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "hazard speed",
+      "hazard count",
+      "checkpoints"
+    ],
+    "tools": [
+      "collide",
+      "checkpoint",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dodge the swinging axes",
+      "walk the trap corridor",
+      "timing gauntlet"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "snake_avoid_tail",
+    "name": "Avoid your own trail",
+    "aliases": [
+      "Tron light cycles"
+    ],
+    "family": "dodge_survive",
+    "summary": "Your trail stays behind you as a wall; trap opponents and don't hit any trail.",
+    "core_loop": "Your path leaves a wall behind you; steer to box in rivals while never crashing into any trail, including your own",
+    "verbs": [
+      "steer",
+      "plan"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "any trail is a wall"
+    ],
+    "win": "last one moving",
+    "lose": "hit a trail",
+    "scoring": "rounds won",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "light cycle duels with a friend"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "rivals",
+      "arena size"
+    ],
+    "tools": [
+      "grid_board",
+      "collide",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tron light cycles with my friend",
+      "leave a trail wall game",
+      "don't crash into lines"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "flood_rising_escape",
+    "name": "Escape the flood",
+    "aliases": [
+      "Rising water"
+    ],
+    "family": "dodge_survive",
+    "summary": "Water rises; move items and climb to stay above it as long as possible.",
+    "core_loop": "Water rises steadily; climb and stack items to stay above it for as long as possible",
+    "verbs": [
+      "climb",
+      "stack"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "water never stops"
+    ],
+    "win": "survive the time",
+    "lose": "water reaches you",
+    "scoring": "height",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "rise speed",
+      "item supply",
+      "climb routes"
+    ],
+    "tools": [
+      "physics_world",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "escape the rising flood",
+      "stay above the water",
+      "flood survival"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "request": "angry birds with my friends faces",
+    "expect": [
+      "slingshot_structure"
+    ]
+  },
+  {
+    "request": "knife hit spinning log game",
+    "expect": [
+      "knife_throw_log"
+    ]
+  },
+  {
+    "request": "water bottle flip challenge",
+    "expect": [
+      "bottle_flip"
+    ]
+  },
+  {
+    "request": "cup pong with my roommates",
+    "expect": [
+      "beer_pong_cups"
+    ]
+  },
+  {
+    "request": "paper toss in the office",
+    "expect": [
+      "paper_toss_bin"
+    ]
+  }
+]

@@ -348,11 +348,17 @@ func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMe
 		return
 	}
 
+	if c := s.harnessContext(ctx, job); c != nil { // nil (harness off or failed) leaves the job as it was
+		job.Context = c
+	}
 	request := job.Request
 	if job.Anatomy != "" {
 		request += "\n\n" + job.Anatomy
 	}
 	payload := map[string]any{"request": request, "brief": job.Brief}
+	if len(job.Context) > 0 {
+		payload["context"] = job.Context
+	}
 	if job.BaseGameID != "" {
 		if len(job.Brief) == 0 {
 			payload["brief"] = nil // a change keeps the game's own brief

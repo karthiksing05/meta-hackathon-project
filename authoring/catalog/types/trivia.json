@@ -1,0 +1,2437 @@
+[
+  {
+    "id": "multiple_choice_trivia",
+    "name": "Multiple-choice trivia",
+    "aliases": [
+      "Kahoot",
+      "HQ Trivia",
+      "Trivia Crack",
+      "QuizUp"
+    ],
+    "family": "trivia",
+    "summary": "Answer questions by picking one of four options; faster right answers score more.",
+    "core_loop": "read the question → pick one of four answers before the timer → see right or wrong and points → next",
+    "verbs": [
+      "answer",
+      "recall",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one correct option per question",
+      "faster correct answers score more"
+    ],
+    "win": "top the leaderboard after the last question",
+    "lose": "none; score attack",
+    "scoring": "points per correct answer, speed bonus",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Live group trivia night: everyone answers the same question, leaderboard after each round."
+    ],
+    "difficulty_levers": [
+      "question difficulty",
+      "time per question",
+      "options count"
+    ],
+    "tools": [
+      "quiz",
+      "timer_bar",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "kahoot for my friend group",
+      "trivia night about the 2000s",
+      "a star wars trivia quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rare_answer_trivia",
+    "name": "Rare-answer trivia",
+    "aliases": [
+      "Krillion",
+      "Pointless"
+    ],
+    "family": "trivia",
+    "summary": "Type one answer to an open question; correct answers score by how rare they are.",
+    "core_loop": "read prompt → type an answer before the timer → see its rarity tier and points → next prompt",
+    "verbs": [
+      "type",
+      "recall",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "an answer counts if it fuzzy-matches an accepted answer",
+      "points by tier, rarest scores most"
+    ],
+    "win": "highest total after N prompts",
+    "lose": "none; score attack",
+    "scoring": "tiered points per answer",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Compare rarity scores with friends on the same daily prompt."
+    ],
+    "difficulty_levers": [
+      "rarity tiers",
+      "answer pool size",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "keyboard",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "make krillion",
+      "pointless game show",
+      "name a country starting with M, rarer is better"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "survey_says",
+    "name": "Guess the top survey answers",
+    "aliases": [
+      "Family Feud",
+      "Survey Says"
+    ],
+    "family": "trivia",
+    "summary": "Guess the most popular answers to a survey question; more popular answers score more.",
+    "core_loop": "read the survey question → type an answer → it lands on the board or costs a strike → clear the board",
+    "verbs": [
+      "guess",
+      "type",
+      "recall"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "each answer on the board has a share of the survey",
+      "three strikes passes control"
+    ],
+    "win": "clear the board or score most",
+    "lose": "three strikes",
+    "scoring": "points equal to the answer's survey share",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Two teams from a Group face off; strikes pass control."
+    ],
+    "difficulty_levers": [
+      "answers on board",
+      "strikes",
+      "question type"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "reveal",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "family feud with our family",
+      "guess what most people said",
+      "survey says game for a party"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "true_false_blitz",
+    "name": "True or false blitz",
+    "aliases": [
+      "True or False",
+      "Fact or Fiction"
+    ],
+    "family": "trivia",
+    "summary": "Swipe true or false on rapid-fire statements before time runs out.",
+    "core_loop": "read a statement → swipe true or false → keep the streak going as it speeds up",
+    "verbs": [
+      "judge",
+      "react"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "one swipe per statement",
+      "the pace rises"
+    ],
+    "win": "survive the round",
+    "lose": "a wrong swipe or timer",
+    "scoring": "streak and speed",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Streak challenge sent to friends."
+    ],
+    "difficulty_levers": [
+      "statement subtlety",
+      "time per item",
+      "speed ramp"
+    ],
+    "tools": [
+      "quiz",
+      "timer_bar",
+      "speed_ramp",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "true or false science facts",
+      "fact or cap game",
+      "quick true false quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "higher_lower",
+    "name": "Higher or lower",
+    "aliases": [
+      "Higher Lower Game",
+      "Higher or Lower"
+    ],
+    "family": "trivia",
+    "summary": "Guess whether the next item's number (searches, price, population) is higher or lower.",
+    "core_loop": "see two items and one value → guess if the next is higher or lower → reveal → continue",
+    "verbs": [
+      "compare",
+      "guess"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "ties count as correct"
+    ],
+    "win": "longest streak",
+    "lose": "a wrong guess",
+    "scoring": "streak length",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Streak leaderboard in a group."
+    ],
+    "difficulty_levers": [
+      "value closeness",
+      "category"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "combo",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "higher lower game with google searches",
+      "which costs more",
+      "higher or lower populations"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "estimation_closest",
+    "name": "Closest guess wins",
+    "aliases": [
+      "Wits & Wagers",
+      "Guesstimate"
+    ],
+    "family": "trivia",
+    "summary": "Guess a number (year, height, count); closest to the real answer scores most.",
+    "core_loop": "read the question → enter a number → closest guess wins the round",
+    "verbs": [
+      "estimate",
+      "type"
+    ],
+    "inputs": [
+      "type",
+      "drag"
+    ],
+    "rules": [
+      "numbers only",
+      "closest absolute distance wins"
+    ],
+    "win": "most rounds won",
+    "lose": "none",
+    "scoring": "points by closeness",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Everyone in the Group guesses; closest wins the round."
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "unit",
+      "category"
+    ],
+    "tools": [
+      "typed_answer",
+      "reveal",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the year the movie came out",
+      "closest guess wins trivia",
+      "estimation game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "timeline_order",
+    "name": "Put events in order",
+    "aliases": [
+      "Timeline",
+      "Chrono"
+    ],
+    "family": "trivia",
+    "summary": "Place events or inventions on a timeline in the right order.",
+    "core_loop": "draw a card → place it on the timeline → reveal the year → wrong places cost a life",
+    "verbs": [
+      "order",
+      "place",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "cards must sit between earlier and later events"
+    ],
+    "win": "place every card",
+    "lose": "out of lives",
+    "scoring": "cards placed",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play"
+    ],
+    "social_hooks": [
+      "Make a timeline of your friend group's history and send it."
+    ],
+    "difficulty_levers": [
+      "items",
+      "date closeness",
+      "lives"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "reveal",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "timeline card game",
+      "put these inventions in order",
+      "order the taylor swift albums"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "picture_reveal",
+    "name": "Picture reveal",
+    "aliases": [
+      "Catchphrase",
+      "Pixel reveal quiz"
+    ],
+    "family": "trivia",
+    "summary": "An image is revealed bit by bit; guess what it is as early as possible.",
+    "core_loop": "the image reveals tile by tile → type a guess at any time → earlier right guesses score more",
+    "verbs": [
+      "observe",
+      "guess",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "one guess at a time; wrong guesses cost time"
+    ],
+    "win": "name the picture",
+    "lose": "timer runs out",
+    "scoring": "points by how early you guessed",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Group race: earliest correct guess scores most."
+    ],
+    "difficulty_levers": [
+      "reveal speed",
+      "image category"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the picture as it unblurs",
+      "zoomed in photo guess",
+      "pixelated celebrity guessing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "guess_the_person",
+    "name": "Who am I clues",
+    "aliases": [
+      "Who Am I",
+      "20 Questions",
+      "Akinator"
+    ],
+    "family": "trivia",
+    "summary": "Get clues one at a time about a person, place or thing; guess early for more points.",
+    "core_loop": "read a clue → guess or ask for another → solve with as few clues as possible",
+    "verbs": [
+      "infer",
+      "guess",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "each new clue lowers the points"
+    ],
+    "win": "name the answer",
+    "lose": "out of clues",
+    "scoring": "points by clues left",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Write clues about yourself for friends to guess."
+    ],
+    "difficulty_levers": [
+      "clue order",
+      "clue count"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the celebrity from clues",
+      "who am I game",
+      "20 questions with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "geo_guess",
+    "name": "Guess where in the world",
+    "aliases": [
+      "GeoGuessr",
+      "WorldGuessr",
+      "Worldle"
+    ],
+    "family": "trivia",
+    "summary": "See a picture or clue and place a pin on the map; closer pins score more.",
+    "core_loop": "see the clue or image → drop a pin on the map → see the distance → next round",
+    "verbs": [
+      "locate",
+      "guess"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "closer pins score more"
+    ],
+    "win": "most points after rounds",
+    "lose": "none",
+    "scoring": "points by distance",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Same locations for the whole group; distance leaderboard."
+    ],
+    "difficulty_levers": [
+      "clue type",
+      "map scale"
+    ],
+    "tools": [
+      "map_pin",
+      "reveal",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "geoguessr with friends",
+      "guess the country from its shape",
+      "worldle daily"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "flag_and_shape",
+    "name": "Flags and shapes",
+    "aliases": [
+      "Flagle",
+      "Worldle",
+      "Seterra"
+    ],
+    "family": "trivia",
+    "summary": "Name the country or state from its flag or outline.",
+    "core_loop": "A flag or a country or state outline appears; pick or type the place it belongs to, with streaks for consecutive right answers",
+    "verbs": [
+      "recognize",
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "spelling is fuzzy-matched"
+    ],
+    "win": "name them all",
+    "lose": "timer or lives",
+    "scoring": "correct answers",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Streak sharing."
+    ],
+    "difficulty_levers": [
+      "region",
+      "options vs typed",
+      "outline detail"
+    ],
+    "tools": [
+      "quiz",
+      "typed_answer",
+      "fuzzy_match",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the flag",
+      "name the state from its shape",
+      "flag quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "this_or_that_guess",
+    "name": "Which came first",
+    "aliases": [
+      "Which Came First",
+      "Which Is Older"
+    ],
+    "family": "trivia",
+    "summary": "Pick which of two things came first, is bigger, or is older.",
+    "core_loop": "see two items → pick which came first or is bigger → reveal → next",
+    "verbs": [
+      "compare",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one correct pick per pair"
+    ],
+    "win": "longest streak",
+    "lose": "a wrong pick",
+    "scoring": "streak length",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Streak duels between two friends."
+    ],
+    "difficulty_levers": [
+      "closeness",
+      "category"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "combo",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "which came first",
+      "which movie made more money",
+      "is the chicken older than the egg game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "buzzer_race",
+    "name": "Buzz in first",
+    "aliases": [
+      "Jeopardy buzzer",
+      "Quiz Bowl",
+      "University Challenge"
+    ],
+    "family": "trivia",
+    "summary": "Questions are read out word by word; buzz in as soon as you know the answer.",
+    "core_loop": "words of the question appear → buzz when you know it → type the answer before the timer",
+    "verbs": [
+      "buzz",
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "a wrong buzz locks you out of that question"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "earlier buzzes score more; wrong buzz penalty",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Head-to-head buzzer battles in a group."
+    ],
+    "difficulty_levers": [
+      "read speed",
+      "penalty for wrong buzz"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "timer_bar",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "quiz bowl buzzer game",
+      "buzz in when you know it",
+      "trivia race with my roommates"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "category_board",
+    "name": "Category board",
+    "aliases": [
+      "Jeopardy"
+    ],
+    "family": "trivia",
+    "summary": "Pick a category and point value from a board; harder questions are worth more.",
+    "core_loop": "pick a category and value → answer → score or lose those points → pick again",
+    "verbs": [
+      "choose",
+      "answer",
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "higher values are harder",
+      "wrong answers subtract"
+    ],
+    "win": "most points after the board is cleared",
+    "lose": "none",
+    "scoring": "points equal to the cell's value",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Make a board about the group and play together."
+    ],
+    "difficulty_levers": [
+      "board size",
+      "point spread",
+      "final wager"
+    ],
+    "tools": [
+      "grid_board",
+      "quiz",
+      "typed_answer",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "jeopardy board for my class",
+      "jeopardy about our friend group",
+      "jeopardy with five categories"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "wager_trivia",
+    "name": "Wager on your confidence",
+    "aliases": [
+      "Final Jeopardy",
+      "Wits & Wagers"
+    ],
+    "family": "trivia",
+    "summary": "Bet points on how sure you are before seeing the answer.",
+    "core_loop": "see the category → bet points → answer → win or lose the bet",
+    "verbs": [
+      "bet",
+      "answer"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "you can't bet more than you have"
+    ],
+    "win": "most points",
+    "lose": "dropping to zero",
+    "scoring": "wagers won or lost",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Group wagers on each other's answers."
+    ],
+    "difficulty_levers": [
+      "wager cap",
+      "question difficulty"
+    ],
+    "tools": [
+      "quiz",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "trivia where you bet points",
+      "how confident are you quiz",
+      "wager trivia"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ladder_millionaire",
+    "name": "Climb the money ladder",
+    "aliases": [
+      "Who Wants to Be a Millionaire"
+    ],
+    "family": "trivia",
+    "summary": "Answer increasingly hard questions to climb a ladder; one miss drops you to the last safe rung.",
+    "core_loop": "answer a question → climb a rung → use a lifeline if stuck → walk away or keep going",
+    "verbs": [
+      "answer",
+      "choose",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a wrong answer drops you to the last safe rung",
+      "you may walk away with what you have"
+    ],
+    "win": "reach the top rung",
+    "lose": "a wrong answer",
+    "scoring": "the rung you reach",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Share how high you climbed; friends try to beat it."
+    ],
+    "difficulty_levers": [
+      "rungs",
+      "safe points",
+      "lifelines"
+    ],
+    "tools": [
+      "quiz",
+      "difficulty_curve",
+      "checkpoint",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "who wants to be a millionaire game",
+      "climb the ladder trivia",
+      "millionaire with lifelines"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "elimination_trivia",
+    "name": "Last one standing",
+    "aliases": [
+      "HQ Trivia",
+      "The Chase",
+      "Weakest Link"
+    ],
+    "family": "trivia",
+    "summary": "Wrong answers knock you out; the last player left wins.",
+    "core_loop": "everyone answers → wrong answers are out → harder questions → last one in wins",
+    "verbs": [
+      "answer",
+      "survive"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one wrong answer eliminates you"
+    ],
+    "win": "be the last player in",
+    "lose": "a wrong answer",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Group elimination night."
+    ],
+    "difficulty_levers": [
+      "lives",
+      "difficulty ramp"
+    ],
+    "tools": [
+      "quiz",
+      "lives",
+      "rounds",
+      "difficulty_curve"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "hq trivia style elimination",
+      "last one standing quiz",
+      "battle royale trivia"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "chase_head_start",
+    "name": "Outrun the chaser",
+    "aliases": [
+      "The Chase"
+    ],
+    "family": "trivia",
+    "summary": "Answer to move ahead on a board while a chaser who answers better closes in.",
+    "core_loop": "answer to move ahead on the board → the chaser answers to close in → reach home before being caught",
+    "verbs": [
+      "answer",
+      "run"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the chaser starts behind you",
+      "each right answer moves one step"
+    ],
+    "win": "reach home first",
+    "lose": "the chaser catches you",
+    "scoring": "steps ahead at home",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "One friend is the chaser, the others run."
+    ],
+    "difficulty_levers": [
+      "head start",
+      "chaser accuracy"
+    ],
+    "tools": [
+      "quiz",
+      "turns",
+      "lanes",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "the chase game show",
+      "outrun the chaser trivia",
+      "chaser trivia board"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "team_relay_trivia",
+    "name": "Team relay",
+    "aliases": [
+      "Relay Quiz"
+    ],
+    "family": "trivia",
+    "summary": "Teammates take turns answering; each right answer passes the baton.",
+    "core_loop": "your teammate answers → pass to the next → the team's track moves → race the other team",
+    "verbs": [
+      "answer",
+      "cooperate"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "each player answers in turn"
+    ],
+    "win": "your team finishes first",
+    "lose": "none",
+    "scoring": "team distance",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Two teams from a Group race each other."
+    ],
+    "difficulty_levers": [
+      "team size",
+      "time per leg"
+    ],
+    "tools": [
+      "quiz",
+      "turns",
+      "shared_progress",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "team trivia relay",
+      "group quiz where we take turns",
+      "relay race with questions"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "guess_the_price",
+    "name": "Guess the price",
+    "aliases": [
+      "The Price Is Right"
+    ],
+    "family": "trivia",
+    "summary": "Guess the price of a product; closest without going over wins.",
+    "core_loop": "see the item → bid a price → closest without going over wins",
+    "verbs": [
+      "estimate",
+      "bid"
+    ],
+    "inputs": [
+      "type",
+      "drag"
+    ],
+    "rules": [
+      "bids over the real price lose"
+    ],
+    "win": "win the most items",
+    "lose": "none",
+    "scoring": "rounds won",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Group round: everyone bids, closest wins."
+    ],
+    "difficulty_levers": [
+      "over rule",
+      "price range"
+    ],
+    "tools": [
+      "typed_answer",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "price is right game",
+      "guess how much it costs",
+      "closest without going over"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "logo_guess",
+    "name": "Name the logo",
+    "aliases": [
+      "Logo Quiz"
+    ],
+    "family": "trivia",
+    "summary": "Name the brand or team from a cropped or altered logo.",
+    "core_loop": "See a tightly cropped or altered logo, type the brand or team, and reveal more of the logo if stuck at the cost of points",
+    "verbs": [
+      "recognize",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spelling is fuzzy-matched"
+    ],
+    "win": "name every logo",
+    "lose": "timer or lives",
+    "scoring": "points by how little was revealed",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Streak duels."
+    ],
+    "difficulty_levers": [
+      "crop amount",
+      "category",
+      "reveal cost"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "logo quiz",
+      "guess the sports team logo",
+      "name the app icon"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "movie_frame_guess",
+    "name": "Name the movie from a frame",
+    "aliases": [
+      "Framed"
+    ],
+    "family": "trivia",
+    "summary": "Name the movie or show from a single frame, a frame each guess.",
+    "core_loop": "see a still → type the title → each wrong guess shows another frame → solve early",
+    "verbs": [
+      "recognize",
+      "guess",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "six frames at most"
+    ],
+    "win": "name the movie",
+    "lose": "out of frames",
+    "scoring": "fewer frames used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Daily shared puzzle with group scores."
+    ],
+    "difficulty_levers": [
+      "frames",
+      "obscurity"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "framed movie game",
+      "guess the movie from a still",
+      "name the show from a scene"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "connections_trivia",
+    "name": "What connects them",
+    "aliases": [
+      "Only Connect",
+      "Connection round"
+    ],
+    "family": "trivia",
+    "summary": "Find what links a set of clues revealed one at a time.",
+    "core_loop": "see the first clue → guess the link or ask for the next → earlier guesses score more",
+    "verbs": [
+      "connect",
+      "infer",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "clues come one at a time"
+    ],
+    "win": "find the link",
+    "lose": "out of clues",
+    "scoring": "points by clues used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Teams of two in a group."
+    ],
+    "difficulty_levers": [
+      "clues shown",
+      "link obscurity"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "only connect connections round",
+      "what links these four things",
+      "find the connection"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sequence_next",
+    "name": "What comes next",
+    "aliases": [
+      "Only Connect sequences"
+    ],
+    "family": "trivia",
+    "summary": "Given three items in a sequence, name the fourth.",
+    "core_loop": "Read three items that follow a hidden rule, type the fourth, then see the rule revealed; more clues cost points",
+    "verbs": [
+      "infer",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "one sequence rule links the items"
+    ],
+    "win": "name the fourth item",
+    "lose": "timer runs out",
+    "scoring": "points by clues used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Head-to-head."
+    ],
+    "difficulty_levers": [
+      "clues shown",
+      "sequence type",
+      "time"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "what comes next in the sequence",
+      "finish the pattern trivia",
+      "next in sequence quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fill_the_list",
+    "name": "Name them all",
+    "aliases": [
+      "Sporcle",
+      "JetPunk"
+    ],
+    "family": "trivia",
+    "summary": "Name every item in a list (all 50 states, every Pixar film) before time runs out.",
+    "core_loop": "type an answer → it fills its slot → keep going until the list is full or time runs out",
+    "verbs": [
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "answers are fuzzy-matched",
+      "each slot once"
+    ],
+    "win": "fill the whole list",
+    "lose": "timer runs out",
+    "scoring": "slots filled",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Co-op mode: the group fills one list together."
+    ],
+    "difficulty_levers": [
+      "list length",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "reveal",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "name all 50 states",
+      "sporcle quiz about marvel movies",
+      "name every pokemon in 5 minutes"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "click_the_answers",
+    "name": "Click the matching items",
+    "aliases": [
+      "Sporcle click quiz"
+    ],
+    "family": "trivia",
+    "summary": "Click every item in a grid that fits the category; avoid the wrong ones.",
+    "core_loop": "Scan a grid of items and tap every one that fits the category while avoiding decoys, before the clock runs out",
+    "verbs": [
+      "scan",
+      "recognize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong taps cost a life"
+    ],
+    "win": "tap every right item",
+    "lose": "out of lives or time",
+    "scoring": "right items found",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Score sharing."
+    ],
+    "difficulty_levers": [
+      "decoys",
+      "time",
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "lives",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "click all the fruits",
+      "pick every planet",
+      "click quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "match_pairs_trivia",
+    "name": "Match the pairs",
+    "aliases": [
+      "Match Up quiz"
+    ],
+    "family": "trivia",
+    "summary": "Match each item to its partner (capital to country, actor to role).",
+    "core_loop": "tap an item → tap its partner → correct pairs lock → finish the set",
+    "verbs": [
+      "match",
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "each item has exactly one partner"
+    ],
+    "win": "match every pair",
+    "lose": "timer runs out",
+    "scoring": "time and mistakes",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Race friends on the same set."
+    ],
+    "difficulty_levers": [
+      "pairs",
+      "similarity"
+    ],
+    "tools": [
+      "match_pairs",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "match the capital to the country",
+      "match the actor to the character",
+      "pair up quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "speed_round",
+    "name": "Lightning round",
+    "aliases": [
+      "Lightning Round",
+      "Rapid Fire"
+    ],
+    "family": "trivia",
+    "summary": "Answer as many questions as you can in 60 seconds; passing is allowed.",
+    "core_loop": "read the question → answer or pass → as many as possible in 60 seconds",
+    "verbs": [
+      "answer",
+      "react"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "passing costs nothing but time"
+    ],
+    "win": "most answers in the time",
+    "lose": "none",
+    "scoring": "right answers in 60 seconds",
+    "session_seconds": [
+      60,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Score leaderboard for the group."
+    ],
+    "difficulty_levers": [
+      "time",
+      "pass penalty"
+    ],
+    "tools": [
+      "quiz",
+      "typed_answer",
+      "timer_bar",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "60 second lightning round",
+      "rapid fire questions",
+      "speed trivia"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fact_or_fake_news",
+    "name": "Real or fake headline",
+    "aliases": [
+      "Real or Fake",
+      "Two Truths and a Lie"
+    ],
+    "family": "trivia",
+    "summary": "Decide whether a headline or fact is real or made up.",
+    "core_loop": "read the headline → tap real or fake → reveal the source → next",
+    "verbs": [
+      "judge",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "half are real, half invented"
+    ],
+    "win": "most right calls",
+    "lose": "none",
+    "scoring": "right calls",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Friends submit headlines for the group to judge."
+    ],
+    "difficulty_levers": [
+      "plausibility",
+      "source"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "real or fake headlines",
+      "spot the fake news",
+      "is this onion or real"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "riddle_trivia",
+    "name": "Riddle trivia",
+    "aliases": [
+      "Riddles"
+    ],
+    "family": "trivia",
+    "summary": "Answer riddles with a short typed answer; hints cost points.",
+    "core_loop": "Read a trivia riddle, type a short answer, and buy hints that cost points if stuck; the fastest clean answer scores most",
+    "verbs": [
+      "think",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "hints cost points"
+    ],
+    "win": "solve the riddles",
+    "lose": "none",
+    "scoring": "points minus hints",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Send riddles to friends."
+    ],
+    "difficulty_levers": [
+      "hint cost",
+      "difficulty",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "hint",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "riddle quiz",
+      "hard riddles with hints",
+      "riddle game for a road trip"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sound_effect_guess",
+    "name": "Guess the sound",
+    "aliases": [
+      "Sound Quiz"
+    ],
+    "family": "trivia",
+    "summary": "Hear a sound effect and guess what made it.",
+    "core_loop": "Play a short sound effect, pick or type what made it, and earn more for guessing from shorter clips",
+    "verbs": [
+      "listen",
+      "recognize"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "one replay per sound"
+    ],
+    "win": "name every sound",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Party mode."
+    ],
+    "difficulty_levers": [
+      "clip length",
+      "category",
+      "options vs typed"
+    ],
+    "tools": [
+      "audio_clip",
+      "quiz",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the sound",
+      "what animal makes this sound",
+      "video game sound quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "trivia_map_board",
+    "name": "Trivia board game",
+    "aliases": [
+      "Trivial Pursuit"
+    ],
+    "family": "trivia",
+    "summary": "Roll and move around a board; land on a category and answer to collect wedges.",
+    "core_loop": "roll → move → answer the category you land on → earn a wedge for a hub question",
+    "verbs": [
+      "roll",
+      "move",
+      "answer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wedges only come from hub spaces"
+    ],
+    "win": "collect every wedge",
+    "lose": "none",
+    "scoring": "wedges held",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Turn-based with friends."
+    ],
+    "difficulty_levers": [
+      "wedges",
+      "categories"
+    ],
+    "tools": [
+      "turns",
+      "quiz",
+      "grid_board",
+      "dice"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "trivial pursuit with friends",
+      "trivia board game with wedges",
+      "roll and answer game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hot_take_poll",
+    "name": "Guess the group's answer",
+    "aliases": [
+      "Poll guessing",
+      "Herd Mentality"
+    ],
+    "family": "trivia",
+    "summary": "Guess what percentage of the group agreed with a hot take.",
+    "core_loop": "read the hot take → guess what percent of the group agreed → closest wins",
+    "verbs": [
+      "estimate",
+      "predict"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "answers are percentages"
+    ],
+    "win": "closest guesses overall",
+    "lose": "none",
+    "scoring": "points by closeness",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Built on the Group's own poll answers."
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "question type"
+    ],
+    "tools": [
+      "typed_answer",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "herd mentality game",
+      "guess what the group said",
+      "guess the poll result"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "herd_answer",
+    "name": "Match the herd",
+    "aliases": [
+      "Herd Mentality",
+      "Think Alike"
+    ],
+    "family": "trivia",
+    "summary": "Everyone answers the same open question; you score if you match the most common answer.",
+    "core_loop": "Everyone answers the same open question; answers are grouped, and you score for matching the most common answer in your group",
+    "verbs": [
+      "predict",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "answers are grouped by fuzzy match"
+    ],
+    "win": "most matches with the herd",
+    "lose": "none",
+    "scoring": "points for matching the majority",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Group party game."
+    ],
+    "difficulty_levers": [
+      "matching strictness",
+      "question openness"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "turns",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "herd mentality",
+      "say the same answer as everyone",
+      "think alike party game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "guess_the_lyric_artist",
+    "name": "Lyric to artist",
+    "aliases": [
+      "Lyrics Quiz"
+    ],
+    "family": "trivia",
+    "summary": "Read a lyric and name the artist or song.",
+    "core_loop": "Read an original lyric-style line written in an artist's style, type the artist or song style it echoes, and move to the next",
+    "verbs": [
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spelling is fuzzy-matched"
+    ],
+    "win": "name the most",
+    "lose": "timer or lives",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Music-taste duels between friends."
+    ],
+    "difficulty_levers": [
+      "era",
+      "lyric length",
+      "options vs typed"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the song from the lyrics",
+      "which artist sang this lyric",
+      "lyrics quiz 90s"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "guess_the_year",
+    "name": "Guess the year",
+    "aliases": [
+      "WhenTaken",
+      "Guess the Year"
+    ],
+    "family": "trivia",
+    "summary": "See a photo, headline or song and guess the year it's from.",
+    "core_loop": "See a photo, headline or song description, enter the year you think it's from, and score more the closer you land",
+    "verbs": [
+      "estimate",
+      "guess"
+    ],
+    "inputs": [
+      "type",
+      "drag"
+    ],
+    "rules": [
+      "the year must be a whole number"
+    ],
+    "win": "most points after rounds",
+    "lose": "none",
+    "scoring": "points by years off",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Daily shared set."
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "era range"
+    ],
+    "tools": [
+      "typed_answer",
+      "reveal",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess what year this photo is from",
+      "when was this taken",
+      "guess the year from the news"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "blurred_text_quiz",
+    "name": "Read the hidden word",
+    "aliases": [
+      "Blurry quiz"
+    ],
+    "family": "trivia",
+    "summary": "Read a word or brand that's blurred, scrambled or mirrored.",
+    "core_loop": "A word or name appears blurred, scrambled or mirrored; type it as soon as you can read it while the distortion slowly clears",
+    "verbs": [
+      "read",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "the distortion clears slowly"
+    ],
+    "win": "read every word",
+    "lose": "timer runs out",
+    "scoring": "points by speed",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Speed race."
+    ],
+    "difficulty_levers": [
+      "blur level",
+      "clear speed"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the blurry word",
+      "mirrored text quiz",
+      "hidden word image puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "personality_quiz",
+    "name": "Which one are you",
+    "aliases": [
+      "BuzzFeed quiz",
+      "Sorting Hat"
+    ],
+    "family": "trivia",
+    "summary": "Answer questions to be sorted into a character, house or type.",
+    "core_loop": "answer a question → answers add to outcomes → see which one you are",
+    "verbs": [
+      "choose",
+      "reflect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each answer weights one or more outcomes"
+    ],
+    "win": "reach a result",
+    "lose": "none",
+    "scoring": "none; you get a result",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Share your result and see the group's breakdown."
+    ],
+    "difficulty_levers": [
+      "outcomes",
+      "questions"
+    ],
+    "tools": [
+      "choice_story",
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "which hogwarts house am I",
+      "buzzfeed style which character are you",
+      "personality quiz about our group"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bingo_trivia",
+    "name": "Trivia bingo",
+    "aliases": [
+      "Bingo",
+      "Trivia Bingo"
+    ],
+    "family": "trivia",
+    "summary": "Answers fill squares on a bingo card; get a line to win.",
+    "core_loop": "a question is called → answer it → if the answer is on your card, mark it → make a line",
+    "verbs": [
+      "answer",
+      "mark"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a square only counts if your answer was right"
+    ],
+    "win": "complete a line first",
+    "lose": "none",
+    "scoring": "lines completed",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Group plays the same caller."
+    ],
+    "difficulty_levers": [
+      "card size",
+      "pattern"
+    ],
+    "tools": [
+      "grid_board",
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "trivia bingo for our class",
+      "bingo where you answer questions",
+      "music bingo"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "daily_five",
+    "name": "Daily five",
+    "aliases": [
+      "Daily trivia",
+      "Wordle for trivia"
+    ],
+    "family": "trivia",
+    "summary": "Five themed questions a day, same for everyone; share your score grid.",
+    "core_loop": "answer five themed questions → see your share grid → post it",
+    "verbs": [
+      "answer",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one attempt per day"
+    ],
+    "win": "answer all five",
+    "lose": "none",
+    "scoring": "right answers out of five",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Streaks and share grids in the group chat."
+    ],
+    "difficulty_levers": [
+      "topic",
+      "difficulty"
+    ],
+    "tools": [
+      "quiz",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "daily trivia like wordle",
+      "5 questions a day",
+      "daily movie trivia"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sports_stat_trivia",
+    "name": "Sports stat guess",
+    "aliases": [
+      "Immaculate Grid",
+      "Poeltl",
+      "Who Am I sports"
+    ],
+    "family": "trivia",
+    "summary": "Guess the player or team from a stat line or career path.",
+    "core_loop": "see a stat line → type the player or team → hints narrow it → solve",
+    "verbs": [
+      "infer",
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "hints reveal one stat at a time"
+    ],
+    "win": "name the player",
+    "lose": "out of guesses",
+    "scoring": "points by guesses used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Daily grid with rarity scores shared in the group."
+    ],
+    "difficulty_levers": [
+      "sport",
+      "stat obscurity"
+    ],
+    "tools": [
+      "grid_board",
+      "typed_answer",
+      "fuzzy_match",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "immaculate grid baseball",
+      "guess the nba player from stats",
+      "career path quiz soccer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "grid_constraint_trivia",
+    "name": "Grid of two clues",
+    "aliases": [
+      "Immaculate Grid",
+      "Grid trivia"
+    ],
+    "family": "trivia",
+    "summary": "Fill a 3x3 grid where each cell's answer must satisfy its row and column clue.",
+    "core_loop": "pick a cell → type an answer that fits its row and column → rarer answers score more → fill the grid",
+    "verbs": [
+      "recall",
+      "type",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "each answer used once",
+      "nine guesses total"
+    ],
+    "win": "fill the grid",
+    "lose": "out of guesses",
+    "scoring": "cells filled and rarity",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Rarity score compared across the group."
+    ],
+    "difficulty_levers": [
+      "guesses",
+      "clue overlap"
+    ],
+    "tools": [
+      "grid_board",
+      "typed_answer",
+      "fuzzy_match",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "immaculate grid for movies",
+      "3x3 trivia grid",
+      "grid game with row and column clues"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "emoji_trivia",
+    "name": "Emoji trivia",
+    "aliases": [
+      "Guess the Emoji"
+    ],
+    "family": "trivia",
+    "summary": "Guess the movie, song or show from emojis.",
+    "core_loop": "Read a string of emojis, type the movie, song or show title they describe, and take hint letters if stuck",
+    "verbs": [
+      "decode",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spelling is fuzzy-matched"
+    ],
+    "win": "solve the set",
+    "lose": "none",
+    "scoring": "points minus hints",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Write emoji clues for friends."
+    ],
+    "difficulty_levers": [
+      "hint letters",
+      "title length",
+      "category"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the disney movie from emoji",
+      "emoji song quiz",
+      "emoji trivia"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fastest_finger_order",
+    "name": "Fastest finger first",
+    "aliases": [
+      "Fastest Finger First"
+    ],
+    "family": "trivia",
+    "summary": "Put four answers in the correct order as fast as possible.",
+    "core_loop": "see four items → drag them into the right order → fastest right order wins",
+    "verbs": [
+      "order",
+      "react"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "all four must be in order to count"
+    ],
+    "win": "fastest correct order",
+    "lose": "none",
+    "scoring": "time to the right order",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Buzzer race between friends."
+    ],
+    "difficulty_levers": [
+      "items",
+      "time"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "fastest finger first",
+      "order these four fast",
+      "speed ordering quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

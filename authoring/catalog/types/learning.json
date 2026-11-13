@@ -1,0 +1,2446 @@
+[
+  {
+    "id": "spaced_repetition_flashcards",
+    "name": "Spaced-repetition flashcards",
+    "aliases": [
+      "Anki",
+      "Quizlet",
+      "flashcards",
+      "Memrise",
+      "study cards"
+    ],
+    "family": "learning",
+    "subfamily": "recall practice",
+    "summary": "Flip cards, rate how well you remembered, and cards you missed return sooner while easy ones space out.",
+    "core_loop": "see prompt → try to recall → flip to the answer → rate easy/hard/miss → card is rescheduled",
+    "verbs": [
+      "recall",
+      "rate"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "card deck",
+      "flip animation",
+      "rating buttons",
+      "due counter"
+    ],
+    "rules": [
+      "missed cards return in the same session",
+      "easy cards wait longer",
+      "a session ends when due cards are done"
+    ],
+    "win": "clear all due cards",
+    "lose": "none; it cannot be failed",
+    "scoring": "cards mastered and streak days",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends share decks",
+      "Group study streak"
+    ],
+    "content_needs": [
+      "decks of prompt and answer pairs"
+    ],
+    "difficulty_levers": [
+      "deck size",
+      "new cards per day",
+      "intervals"
+    ],
+    "tools": [
+      "flashcard_deck",
+      "srs_scheduler",
+      "rounds",
+      "score",
+      "daily_seed",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "flashcards for my biology midterm",
+      "anki but with harry potter spells",
+      "a deck of my friends' birthdays and facts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "vocab_match_pairs",
+    "name": "Vocabulary pair matching",
+    "aliases": [
+      "Duolingo match",
+      "match the words",
+      "memrise match",
+      "language pairs"
+    ],
+    "family": "learning",
+    "subfamily": "vocabulary",
+    "summary": "Tap a word in one column and its meaning in the other to match pairs before time runs out.",
+    "core_loop": "see two columns → tap a word then its translation → pair locks if right → clear the board",
+    "verbs": [
+      "match",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "two columns of tiles",
+      "timer",
+      "mistake counter"
+    ],
+    "rules": [
+      "a wrong pair flashes and costs time",
+      "cleared pairs disappear"
+    ],
+    "win": "clear all pairs",
+    "lose": "time out",
+    "scoring": "time left and mistakes",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race a friend on the same set",
+      "Group daily set"
+    ],
+    "content_needs": [
+      "word pairs"
+    ],
+    "difficulty_levers": [
+      "pair count",
+      "time",
+      "new vs review words"
+    ],
+    "tools": [
+      "match_pairs",
+      "timer_bar",
+      "score",
+      "rounds",
+      "daily_seed",
+      "quiz"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "duolingo match but for spanish food words",
+      "match chemical symbols to elements",
+      "match the french words to pictures"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "translate_typed_sentence",
+    "name": "Typed translation",
+    "aliases": [
+      "Duolingo translate",
+      "translate the sentence",
+      "language lesson",
+      "Babbel"
+    ],
+    "family": "learning",
+    "subfamily": "translation",
+    "summary": "A sentence in one language must be typed in another, accepting equivalent phrasings.",
+    "core_loop": "read sentence → type translation → check → hearts lost on errors → next",
+    "verbs": [
+      "read",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "sentence",
+      "answer box",
+      "keyboard",
+      "hearts"
+    ],
+    "rules": [
+      "variants accepted via fuzzy match",
+      "wrong answer shows the correct one"
+    ],
+    "win": "finish the lesson",
+    "lose": "lose all hearts",
+    "scoring": "correct answers and streak",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "streak with friends",
+      "Group language challenge"
+    ],
+    "content_needs": [
+      "sentence pairs with accepted variants"
+    ],
+    "difficulty_levers": [
+      "sentence length",
+      "hints",
+      "accent strictness"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "lives",
+      "rounds",
+      "score",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "duolingo style spanish lesson about travel",
+      "translate sentences from japanese to english",
+      "a french lesson with star wars sentences"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "word_bank_sentence_build",
+    "name": "Word-bank sentence builder",
+    "aliases": [
+      "Duolingo word bank",
+      "build the sentence",
+      "tap the words"
+    ],
+    "family": "learning",
+    "subfamily": "translation",
+    "summary": "Build the translation of a sentence by tapping words from a shuffled bank in the right order.",
+    "core_loop": "read sentence → tap words in order → check → next",
+    "verbs": [
+      "read",
+      "order"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "word bank",
+      "answer line",
+      "check button"
+    ],
+    "rules": [
+      "words appear in a bank including decoys",
+      "tapping adds a word to the answer line",
+      "order must match an accepted translation"
+    ],
+    "win": "finish the lesson",
+    "lose": "lose all hearts",
+    "scoring": "correct streak",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share lesson with friends"
+    ],
+    "content_needs": [
+      "sentences and decoys"
+    ],
+    "difficulty_levers": [
+      "decoy count",
+      "sentence length"
+    ],
+    "tools": [
+      "word_bank",
+      "sort_bins",
+      "lives",
+      "rounds",
+      "score",
+      "quiz"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "build the english sentence from the spanish one",
+      "word bank translation for japanese",
+      "lesson with scrambled words"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "listening_dictation",
+    "name": "Listening dictation",
+    "aliases": [
+      "Listen and type",
+      "dictation",
+      "Duolingo listening",
+      "ear dictation"
+    ],
+    "family": "learning",
+    "subfamily": "listening",
+    "summary": "A phrase is read aloud and the player types or orders what they heard.",
+    "core_loop": "hear phrase → type it → compare → replay allowed once",
+    "verbs": [
+      "listen",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "audio player",
+      "answer box",
+      "replay"
+    ],
+    "rules": [
+      "the phrase plays aloud",
+      "replay is allowed once",
+      "accents are lenient"
+    ],
+    "win": "high accuracy",
+    "lose": "none; scored",
+    "scoring": "accuracy",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "audio phrases"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "length"
+    ],
+    "tools": [
+      "tts_audio",
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "dictation practice for italian",
+      "listen and type the sentence",
+      "spelling by ear"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pronunciation_speak_check",
+    "name": "Pronunciation check",
+    "aliases": [
+      "Speak the phrase",
+      "pronunciation game",
+      "ELSA",
+      "Duolingo speaking"
+    ],
+    "family": "learning",
+    "subfamily": "speaking",
+    "summary": "A phrase is shown and the player says it aloud, with a recognizer scoring how close it sounded.",
+    "core_loop": "read phrase → speak → score → retry or next",
+    "verbs": [
+      "speak"
+    ],
+    "inputs": [
+      "voice"
+    ],
+    "pieces": [
+      "phrase",
+      "mic button",
+      "score"
+    ],
+    "rules": [
+      "a phrase is shown",
+      "the recognizer returns a confidence",
+      "retries are allowed"
+    ],
+    "win": "score above threshold",
+    "lose": "none; scored",
+    "scoring": "confidence",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends hear each other attempts"
+    ],
+    "content_needs": [
+      "phrase list"
+    ],
+    "difficulty_levers": [
+      "threshold",
+      "speed"
+    ],
+    "tools": [
+      "speech_input",
+      "score",
+      "rounds",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "practice saying phrases in french",
+      "pronunciation game for tongue twisters",
+      "speaking practice"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "times_tables_speed_drill",
+    "name": "Math fact speed drill",
+    "aliases": [
+      "Times tables",
+      "Prodigy",
+      "multiplication drill",
+      "Math Blaster",
+      "math facts"
+    ],
+    "family": "learning",
+    "subfamily": "math fluency",
+    "summary": "Answer rapid arithmetic facts, with speed raising or lowering the next difficulty.",
+    "core_loop": "see problem → type or tap answer → streak builds → harder facts",
+    "verbs": [
+      "calculate"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "problem",
+      "number pad",
+      "timer",
+      "streak"
+    ],
+    "rules": [
+      "facts adapt to accuracy"
+    ],
+    "win": "reach the target streak",
+    "lose": "time runs out",
+    "scoring": "correct streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "class leaderboard",
+      "compare with siblings"
+    ],
+    "content_needs": [
+      "fact sets"
+    ],
+    "difficulty_levers": [
+      "range",
+      "time per fact"
+    ],
+    "tools": [
+      "keyboard",
+      "typed_answer",
+      "timer_bar",
+      "combo",
+      "score",
+      "speed_ramp",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "times tables race for third graders",
+      "fact fluency with space theme",
+      "math speed drill with a streak"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mental_math_chain",
+    "name": "Mental math chain",
+    "aliases": [
+      "Chain math",
+      "Mental arithmetic",
+      "Number chain"
+    ],
+    "family": "learning",
+    "subfamily": "math fluency",
+    "summary": "A starting number is modified by successive operations shown one at a time, and the player enters the final result.",
+    "core_loop": "see start → each step flashes → type the final number",
+    "verbs": [
+      "calculate",
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "number display",
+      "step flash",
+      "answer box"
+    ],
+    "rules": [
+      "steps flash one at a time",
+      "the player holds a running total in mind",
+      "the final number is typed"
+    ],
+    "win": "correct final answer",
+    "lose": "wrong answer",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "chains"
+    ],
+    "difficulty_levers": [
+      "steps",
+      "speed"
+    ],
+    "tools": [
+      "keyboard",
+      "typed_answer",
+      "sequence_memory",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "mental math chain challenge",
+      "flash anzan like game",
+      "add and subtract in your head with a timer"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "fraction_visual_builder",
+    "name": "Fraction builder",
+    "aliases": [
+      "Fractions",
+      "fraction bars",
+      "visual fractions",
+      "Hands-on equations"
+    ],
+    "family": "learning",
+    "subfamily": "math concept",
+    "summary": "Shade bars or circles to build a given fraction or compare two fractions.",
+    "core_loop": "see target fraction → shade pieces → check → compare",
+    "verbs": [
+      "build",
+      "compare"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "fraction bars",
+      "target",
+      "slider"
+    ],
+    "rules": [
+      "a target fraction is given",
+      "shading parts of a bar or circle builds it",
+      "two fractions can be compared by area"
+    ],
+    "win": "pass the set",
+    "lose": "none; scored by streak",
+    "scoring": "streak",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "class challenge"
+    ],
+    "content_needs": [
+      "fractions"
+    ],
+    "difficulty_levers": [
+      "denominators"
+    ],
+    "tools": [
+      "grid_board",
+      "quiz",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "learn fractions with pizza",
+      "fraction builder for kids",
+      "compare fractions with bars"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "number_line_placement",
+    "name": "Number line placement",
+    "aliases": [
+      "Number line",
+      "estimate on a line",
+      "Fermi number line"
+    ],
+    "family": "learning",
+    "subfamily": "estimation",
+    "summary": "Drag a marker to where a number belongs on a line, learning magnitude.",
+    "core_loop": "see number → place on line → get error → next",
+    "verbs": [
+      "estimate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "number line",
+      "marker",
+      "error readout"
+    ],
+    "rules": [
+      "a number appears",
+      "the player drags a marker to its position",
+      "scale may be linear or logarithmic"
+    ],
+    "win": "low total error",
+    "lose": "none",
+    "scoring": "distance error",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "numbers"
+    ],
+    "difficulty_levers": [
+      "range",
+      "log scale"
+    ],
+    "tools": [
+      "slider_input",
+      "rounds",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "place numbers on a line",
+      "how big is a billion game",
+      "estimate dates on a timeline"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "equation_balance_scale",
+    "name": "Balance scale algebra",
+    "aliases": [
+      "Algebra balance",
+      "Hands on equations",
+      "Balance puzzle"
+    ],
+    "family": "learning",
+    "subfamily": "math concept",
+    "summary": "Keep a scale balanced by performing the same operation on both sides to isolate the unknown.",
+    "core_loop": "see balanced equation → apply operation both sides → isolate x",
+    "verbs": [
+      "algebra",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scale",
+      "weights",
+      "operations"
+    ],
+    "rules": [
+      "a scale shows both sides of an equation",
+      "the same operation must be applied to both sides",
+      "the goal is x alone on one side"
+    ],
+    "win": "isolate the unknown",
+    "lose": "none; scored by moves",
+    "scoring": "fewest moves",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "equations"
+    ],
+    "difficulty_levers": [
+      "complexity"
+    ],
+    "tools": [
+      "grid_board",
+      "rounds",
+      "score",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "learn algebra with a scale",
+      "solve for x with weights",
+      "balance puzzle for algebra"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "geometry_angle_guess",
+    "name": "Angle estimation",
+    "aliases": [
+      "Angle game",
+      "Guess the angle",
+      "protractor game"
+    ],
+    "family": "learning",
+    "subfamily": "estimation",
+    "summary": "An angle is shown and the player drags a ray to match or estimates its degrees.",
+    "core_loop": "see angle → estimate → reveal error",
+    "verbs": [
+      "estimate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "angle",
+      "slider",
+      "error"
+    ],
+    "rules": [
+      "an angle is drawn",
+      "the player sets a ray to match or enters degrees",
+      "error in degrees is shown"
+    ],
+    "win": "low total error over the set",
+    "lose": "none; scored by error",
+    "scoring": "degrees off",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "angles"
+    ],
+    "difficulty_levers": [
+      "tolerance"
+    ],
+    "tools": [
+      "slider_input",
+      "rounds",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the angle game",
+      "estimate degrees",
+      "geometry angle practice with a protractor"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "clock_reading_set",
+    "name": "Clock reading",
+    "aliases": [
+      "Tell time",
+      "read the clock",
+      "set the clock"
+    ],
+    "family": "learning",
+    "subfamily": "skill",
+    "summary": "Read an analog clock or set the hands to a given time.",
+    "core_loop": "see clock → type or set time",
+    "verbs": [
+      "read",
+      "set"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "clock face",
+      "time options"
+    ],
+    "rules": [
+      "an analog clock face shows a time or a target time is given",
+      "hour and minute hands are read or set separately",
+      "answers within a minute count"
+    ],
+    "win": "streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "times"
+    ],
+    "difficulty_levers": [
+      "difficulty"
+    ],
+    "tools": [
+      "quiz",
+      "lives",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "learn to tell time",
+      "set the clock to 4:15",
+      "analog clock practice for kids"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "periodic_element_match",
+    "name": "Periodic table match",
+    "aliases": [
+      "Elements",
+      "periodic table game",
+      "element quiz"
+    ],
+    "family": "learning",
+    "subfamily": "science",
+    "summary": "Match element symbols, names, numbers and groups, or place them on the table.",
+    "core_loop": "see element → match property → place on table",
+    "verbs": [
+      "match",
+      "place"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "table",
+      "element cards"
+    ],
+    "rules": [
+      "each card shows a symbol, name, number or group",
+      "pairs match across two columns or place on the table",
+      "wrong matches cost time"
+    ],
+    "win": "clear the cards",
+    "lose": "time out",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "elements"
+    ],
+    "difficulty_levers": [
+      "property set"
+    ],
+    "tools": [
+      "match_pairs",
+      "grid_board",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "periodic table game for chemistry class",
+      "place elements on the table",
+      "element symbol match"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "chemistry_balance_equation",
+    "name": "Balance the equation",
+    "aliases": [
+      "Balance chemical equations",
+      "ChemBalance"
+    ],
+    "family": "learning",
+    "subfamily": "science",
+    "summary": "Adjust coefficients to balance atoms on both sides of a reaction.",
+    "core_loop": "see equation → change coefficients → atoms counts match",
+    "verbs": [
+      "balance"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "equation",
+      "atom counters"
+    ],
+    "rules": [
+      "coefficients are adjusted with plus and minus",
+      "atom counts on each side must be equal",
+      "coefficients stay in lowest whole numbers"
+    ],
+    "win": "balanced",
+    "lose": "none; scored",
+    "scoring": "moves",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "reactions"
+    ],
+    "difficulty_levers": [
+      "molecule count"
+    ],
+    "tools": [
+      "grid_board",
+      "rounds",
+      "score",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "balance chemical equations game",
+      "chemistry balance puzzle",
+      "equation balancer for class"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "label_diagram_drag_labels",
+    "name": "Label the diagram",
+    "aliases": [
+      "Anatomy labels",
+      "Label the parts",
+      "diagram quiz"
+    ],
+    "family": "learning",
+    "subfamily": "knowledge application",
+    "summary": "Drag labels to the matching parts of a diagram, such as a cell, plant or map.",
+    "core_loop": "see diagram → drag labels → check",
+    "verbs": [
+      "label",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "diagram",
+      "labels"
+    ],
+    "rules": [
+      "a diagram has numbered drop zones",
+      "labels are dragged to the right zones",
+      "wrong labels bounce back"
+    ],
+    "win": "all labels correct",
+    "lose": "time out",
+    "scoring": "accuracy and time",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "diagrams"
+    ],
+    "difficulty_levers": [
+      "label count"
+    ],
+    "tools": [
+      "drag_drop_slots",
+      "sort_bins",
+      "timer_bar",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "label the parts of a cell",
+      "anatomy labeling game",
+      "label the planets in order"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "map_place_pin_quiz",
+    "name": "Map pin quiz",
+    "aliases": [
+      "Seterra",
+      "map quiz",
+      "geography pin",
+      "Where is it"
+    ],
+    "family": "learning",
+    "subfamily": "geography",
+    "summary": "A place name is shown and the player taps its location on a map.",
+    "core_loop": "read name → tap map → distance shown → next",
+    "verbs": [
+      "locate",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "map",
+      "place name",
+      "distance"
+    ],
+    "rules": [
+      "a place name is shown",
+      "tapping the map places a pin",
+      "distance from the true location is shown"
+    ],
+    "win": "high total accuracy",
+    "lose": "none; scored",
+    "scoring": "distance score",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "places"
+    ],
+    "difficulty_levers": [
+      "region",
+      "tolerance"
+    ],
+    "tools": [
+      "map_pin_guess",
+      "rounds",
+      "score",
+      "timer_bar",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "seterra for us states",
+      "pin the countries of africa",
+      "map quiz of my city"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cloze_fill_blank",
+    "name": "Fill in the blank",
+    "aliases": [
+      "Cloze",
+      "fill in the blank",
+      "grammar blanks"
+    ],
+    "family": "learning",
+    "subfamily": "language",
+    "summary": "A sentence has a missing word that the player picks or types.",
+    "core_loop": "read sentence → pick or type → next",
+    "verbs": [
+      "read",
+      "choose"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "sentence",
+      "choices"
+    ],
+    "rules": [
+      "one word is missing",
+      "choices include decoys or the player types the word",
+      "explanations show after each"
+    ],
+    "win": "reach the target streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "sentences"
+    ],
+    "difficulty_levers": [
+      "decoys"
+    ],
+    "tools": [
+      "quiz",
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "fill in the blanks with prepositions",
+      "cloze practice for english",
+      "grammar blanks game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "grammar_error_spot",
+    "name": "Spot the error",
+    "aliases": [
+      "Find the mistake",
+      "grammar check",
+      "Proofreading game"
+    ],
+    "family": "learning",
+    "subfamily": "language",
+    "summary": "A sentence contains one error and the player taps the wrong word.",
+    "core_loop": "read sentence → tap error → explanation",
+    "verbs": [
+      "read",
+      "locate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "sentence",
+      "word tiles"
+    ],
+    "rules": [
+      "each sentence has exactly one error",
+      "tap the wrong word",
+      "a rule note shows after each answer"
+    ],
+    "win": "reach the target streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "sentences"
+    ],
+    "difficulty_levers": [
+      "error type"
+    ],
+    "tools": [
+      "quiz",
+      "lives",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "find the grammar mistake",
+      "proofreading practice",
+      "spot the error in sentences"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spelling_by_audio",
+    "name": "Spell the word",
+    "aliases": [
+      "Spelling bee",
+      "Scripps style",
+      "spell it"
+    ],
+    "family": "learning",
+    "subfamily": "language",
+    "summary": "A word is spoken and the player types the spelling, with definition and use in a sentence as optional hints.",
+    "core_loop": "hear word → type spelling → feedback",
+    "verbs": [
+      "listen",
+      "spell"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "audio",
+      "keyboard",
+      "hints"
+    ],
+    "rules": [
+      "the word is read aloud",
+      "a definition and example sentence can be requested",
+      "spelling must match"
+    ],
+    "win": "reach the target streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "word lists"
+    ],
+    "difficulty_levers": [
+      "difficulty"
+    ],
+    "tools": [
+      "tts_audio",
+      "typed_answer",
+      "keyboard",
+      "lives",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "spelling bee practice for kids",
+      "spell the word you hear",
+      "vocabulary spelling game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "typing_speed_lessons",
+    "name": "Typing lessons",
+    "aliases": [
+      "Typing test",
+      "TypeRacer",
+      "Typing tutor",
+      "Keybr"
+    ],
+    "family": "learning",
+    "subfamily": "skill",
+    "summary": "Type displayed text accurately and quickly, with accuracy and WPM shown.",
+    "core_loop": "see text → type → accuracy and wpm",
+    "verbs": [
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "passage",
+      "keyboard",
+      "wpm readout"
+    ],
+    "rules": [
+      "text is shown above the input",
+      "errors are flagged live",
+      "speed and accuracy are both reported"
+    ],
+    "win": "reach target wpm",
+    "lose": "none; scored",
+    "scoring": "wpm and accuracy",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends on the same text"
+    ],
+    "content_needs": [
+      "passages"
+    ],
+    "difficulty_levers": [
+      "text length"
+    ],
+    "tools": [
+      "keyboard",
+      "typed_answer",
+      "timer_bar",
+      "score",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "typing test with song lyrics",
+      "typing race with friends",
+      "typing tutor for kids"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "block_coding_puzzle",
+    "name": "Block coding puzzle",
+    "aliases": [
+      "Scratch",
+      "Blockly",
+      "Code.org Hour of Code",
+      "Lightbot",
+      "block code"
+    ],
+    "family": "learning",
+    "subfamily": "coding",
+    "summary": "Drag command blocks in order to make a character reach a goal.",
+    "core_loop": "see goal → arrange blocks → run → fix",
+    "verbs": [
+      "program",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "command blocks",
+      "grid",
+      "run button"
+    ],
+    "rules": [
+      "blocks execute top to bottom",
+      "loops and conditions are unlocked gradually",
+      "a block limit makes efficient solutions"
+    ],
+    "win": "reach the goal",
+    "lose": "exceed the block limit",
+    "scoring": "fewest blocks",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share solutions"
+    ],
+    "content_needs": [
+      "levels"
+    ],
+    "difficulty_levers": [
+      "block limit",
+      "loops"
+    ],
+    "tools": [
+      "grid_board",
+      "drag_drop_slots",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "lightbot like coding puzzle",
+      "block coding for kids",
+      "program a robot to reach the star"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "conditional_logic_circuit",
+    "name": "Logic gate circuits",
+    "aliases": [
+      "Logic gates",
+      "circuit puzzle",
+      "Turing complete",
+      "Digital logic"
+    ],
+    "family": "learning",
+    "subfamily": "coding",
+    "summary": "Connect logic gates to produce a required output for given inputs.",
+    "core_loop": "see inputs and target → place gates → test",
+    "verbs": [
+      "build",
+      "test"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "gates",
+      "wires",
+      "truth table"
+    ],
+    "rules": [
+      "inputs and a target output are given",
+      "gates are placed and wired",
+      "the circuit is tested against a truth table"
+    ],
+    "win": "match the truth table",
+    "lose": "none; scored",
+    "scoring": "fewest gates",
+    "session_seconds": [
+      90,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "levels"
+    ],
+    "difficulty_levers": [
+      "gate set"
+    ],
+    "tools": [
+      "drag_drop_slots",
+      "grid_board",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "logic gate puzzle",
+      "digital circuits game",
+      "build an AND gate"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "predict_then_simulate",
+    "name": "Predict then simulate",
+    "aliases": [
+      "Physics prediction",
+      "What happens next",
+      "Predict the result"
+    ],
+    "family": "learning",
+    "subfamily": "science",
+    "summary": "The player predicts the outcome of a physical scenario, then watches the simulation to compare.",
+    "core_loop": "see setup → predict → run simulation → compare",
+    "verbs": [
+      "predict",
+      "observe"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scenario",
+      "choices",
+      "simulation"
+    ],
+    "rules": [
+      "the setup is shown with options",
+      "the player commits before the simulation runs",
+      "the simulation then plays out to compare"
+    ],
+    "win": "reach the target streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "scenarios"
+    ],
+    "difficulty_levers": [
+      "complexity"
+    ],
+    "tools": [
+      "physics_world",
+      "quiz",
+      "reveal",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "predict which ball falls first",
+      "physics prediction game",
+      "what happens to the pendulum"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "true_false_myth_busting",
+    "name": "Myth or fact",
+    "aliases": [
+      "Myth buster",
+      "True or false",
+      "Fact or myth"
+    ],
+    "family": "learning",
+    "subfamily": "knowledge",
+    "summary": "Statements are shown and the player swipes true or false, learning the explanation after each.",
+    "core_loop": "read statement → swipe → explanation",
+    "verbs": [
+      "judge"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "pieces": [
+      "statement card",
+      "explanation"
+    ],
+    "rules": [
+      "each statement is true or false",
+      "an explanation shows after every swipe",
+      "a streak bonus rewards consecutive correct"
+    ],
+    "win": "reach the target streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "statements"
+    ],
+    "difficulty_levers": [
+      "topic"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "myth or fact about space",
+      "true or false swipe game",
+      "fact check game for my class"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "teach_it_back_explain",
+    "name": "Teach it back",
+    "aliases": [
+      "Feynman technique",
+      "Explain it simply",
+      "explain like I'm five"
+    ],
+    "family": "learning",
+    "subfamily": "metacognition",
+    "summary": "The player writes a short explanation of a concept, which is graded for key points.",
+    "core_loop": "read concept → write explanation → score vs key points",
+    "verbs": [
+      "explain"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "concept",
+      "text box",
+      "rubric"
+    ],
+    "rules": [
+      "a concept is named",
+      "the player writes a short explanation",
+      "a rubric of key points is checked"
+    ],
+    "win": "cover the key points",
+    "lose": "none; scored by rubric",
+    "scoring": "rubric hits",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friend rates"
+    ],
+    "content_needs": [
+      "concepts"
+    ],
+    "difficulty_levers": [
+      "rubric size"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "rubric_grader",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "explain photosynthesis simply",
+      "explain it like I'm five",
+      "teach a topic to a friend"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "memory_palace_association",
+    "name": "Association memory",
+    "aliases": [
+      "Memory palace",
+      "Mnemonic",
+      "method of loci"
+    ],
+    "family": "learning",
+    "subfamily": "memory",
+    "summary": "The player places items in imagined locations to remember, then recalls them in order.",
+    "core_loop": "see items → place in rooms → recall",
+    "verbs": [
+      "memorize",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "rooms",
+      "items"
+    ],
+    "rules": [
+      "items are shown briefly",
+      "the player drops each item in a room of an imagined route",
+      "recall asks for items in route order"
+    ],
+    "win": "recall every item in order",
+    "lose": "none; recall is scored",
+    "scoring": "items recalled in the correct slot",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "item lists"
+    ],
+    "difficulty_levers": [
+      "item count"
+    ],
+    "tools": [
+      "drag_drop_slots",
+      "sequence_memory",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "memory palace game",
+      "memorize a shopping list by placing it in rooms",
+      "remember the planets in order"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "unit_conversion_estimation",
+    "name": "Unit conversion",
+    "aliases": [
+      "Fermi problems",
+      "Estimate",
+      "Conversions"
+    ],
+    "family": "learning",
+    "subfamily": "math",
+    "summary": "Estimate or convert between units, reinforcing scale.",
+    "core_loop": "see question → answer",
+    "verbs": [
+      "calculate",
+      "estimate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "question"
+    ],
+    "rules": [
+      "a quantity in one unit is shown",
+      "the player types an estimate in another unit",
+      "answers within a tolerance count"
+    ],
+    "win": "reach the target streak",
+    "lose": "three misses",
+    "scoring": "streak with a tolerance bonus",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "questions"
+    ],
+    "difficulty_levers": [
+      "range"
+    ],
+    "tools": [
+      "numeric_input",
+      "keyboard",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "convert miles to km quickly",
+      "unit conversion game for cooking",
+      "estimate how many seconds are in a month"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "graph_reading_questions",
+    "name": "Read the chart",
+    "aliases": [
+      "Chart reading",
+      "Graph interpretation",
+      "Data literacy"
+    ],
+    "family": "learning",
+    "subfamily": "data",
+    "summary": "A chart is shown and the player answers questions about it.",
+    "core_loop": "view chart → answer → next",
+    "verbs": [
+      "read",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "chart",
+      "question"
+    ],
+    "rules": [
+      "a chart is generated from a data set",
+      "a question asks for a value, a trend or a comparison",
+      "one choice is correct"
+    ],
+    "win": "reach the target streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "charts"
+    ],
+    "difficulty_levers": [
+      "chart type"
+    ],
+    "tools": [
+      "quiz",
+      "lives",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "read the bar chart quiz",
+      "graph questions for science class",
+      "data literacy game with weather charts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "scenario_triage_choices",
+    "name": "Scenario triage",
+    "aliases": [
+      "First aid scenarios",
+      "Decision training",
+      "What would you do"
+    ],
+    "family": "learning",
+    "subfamily": "decision",
+    "summary": "A scenario is described and the player chooses the best action, learning from consequences.",
+    "core_loop": "read scenario → choose → feedback",
+    "verbs": [
+      "decide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scenario",
+      "options"
+    ],
+    "rules": [
+      "a scenario is described in a few lines",
+      "the player picks among actions",
+      "consequences and the best action are explained"
+    ],
+    "win": "finish with a high score",
+    "lose": "none; scored",
+    "scoring": "points per best choice",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "scenarios"
+    ],
+    "difficulty_levers": [
+      "options"
+    ],
+    "tools": [
+      "choice_story",
+      "quiz",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "first aid quiz",
+      "what would you do scenarios",
+      "safety training game for new hires"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "syllogism_valid_invalid",
+    "name": "Valid or invalid",
+    "aliases": [
+      "Syllogisms",
+      "logic reasoning",
+      "Is the argument valid"
+    ],
+    "family": "learning",
+    "subfamily": "logic",
+    "summary": "Arguments are shown and the player decides if the conclusion follows.",
+    "core_loop": "read argument → valid or invalid",
+    "verbs": [
+      "judge"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "argument"
+    ],
+    "rules": [
+      "two premises and a conclusion are shown",
+      "the player says whether the conclusion must follow",
+      "an explanation shows after each answer"
+    ],
+    "win": "reach the target streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "arguments"
+    ],
+    "difficulty_levers": [
+      "complexity"
+    ],
+    "tools": [
+      "quiz",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "valid or invalid logic quiz",
+      "is this argument valid game",
+      "logic reasoning practice with funny arguments"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "probability_odds_game",
+    "name": "Probability odds",
+    "aliases": [
+      "Probability",
+      "odds",
+      "Monty Hall",
+      "Chance"
+    ],
+    "family": "learning",
+    "subfamily": "math concept",
+    "summary": "Simulate chance events and estimate probabilities.",
+    "core_loop": "see setup → estimate → run trials",
+    "verbs": [
+      "estimate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "dice",
+      "cards",
+      "estimate"
+    ],
+    "rules": [
+      "a random setup such as dice, cards or doors is shown",
+      "the player estimates a probability",
+      "a simulation of many trials shows the empirical result"
+    ],
+    "win": "estimate within tolerance",
+    "lose": "none; scored by error",
+    "scoring": "error between estimate and true probability",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "setups"
+    ],
+    "difficulty_levers": [
+      "events"
+    ],
+    "tools": [
+      "dice_roll",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "probability dice game",
+      "monty hall simulator",
+      "guess the odds then see 1000 trials"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "script_stroke_trace",
+    "name": "Script stroke trace",
+    "aliases": [
+      "Kana trace",
+      "kanji",
+      "Hiragana",
+      "Hangul"
+    ],
+    "family": "learning",
+    "subfamily": "language",
+    "summary": "Trace characters of a new script in the right stroke order.",
+    "core_loop": "see character → trace",
+    "verbs": [
+      "trace"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "ghost strokes"
+    ],
+    "rules": [
+      "a ghost character shows stroke order",
+      "strokes must be drawn in order and direction",
+      "accuracy depends on distance to the ghost"
+    ],
+    "win": "trace the set with accuracy above target",
+    "lose": "none; scored by accuracy",
+    "scoring": "accuracy percent",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "scripts"
+    ],
+    "difficulty_levers": [
+      "script"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "shape_match_score",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "learn hiragana by tracing",
+      "kanji stroke game",
+      "practice hangul characters"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "quiz_live_class_buzzer",
+    "name": "Live class quiz",
+    "aliases": [
+      "Kahoot",
+      "Quizizz",
+      "Blooket",
+      "live quiz"
+    ],
+    "family": "learning",
+    "subfamily": "competition",
+    "summary": "A host runs a quiz and everyone answers on their phone, earning points for speed.",
+    "core_loop": "host question → everyone answers → leaderboard",
+    "verbs": [
+      "answer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "question",
+      "answers",
+      "leaderboard"
+    ],
+    "rules": [
+      "the host starts each question for everyone at once",
+      "faster correct answers score more",
+      "a leaderboard shows after each question"
+    ],
+    "win": "top",
+    "lose": "none; it cannot be failed",
+    "scoring": "speed points",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "study group live"
+    ],
+    "content_needs": [
+      "questions"
+    ],
+    "difficulty_levers": [
+      "time per question"
+    ],
+    "tools": [
+      "quiz",
+      "timer_bar",
+      "score",
+      "rounds",
+      "group_roster",
+      "realtime_room"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "kahoot style quiz for my study group",
+      "live quiz for my class",
+      "blooket for our family trivia night"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sentence_order_scramble",
+    "name": "Sentence unscramble",
+    "aliases": [
+      "Unscramble words",
+      "Order the words",
+      "Word order"
+    ],
+    "family": "learning",
+    "subfamily": "language",
+    "summary": "Reorder shuffled words into a grammatical sentence.",
+    "core_loop": "drag words",
+    "verbs": [
+      "order"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "word tiles"
+    ],
+    "rules": [
+      "words are shuffled",
+      "the player drags them into a grammatical order",
+      "several valid orders may be accepted"
+    ],
+    "win": "order all sentences",
+    "lose": "none; scored by streak",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "sentences"
+    ],
+    "difficulty_levers": [
+      "length"
+    ],
+    "tools": [
+      "word_bank",
+      "sort_bins",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "unscramble the sentence game",
+      "put the words in order for english class",
+      "word order practice in spanish"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "budget_decision_sim",
+    "name": "Budget decisions",
+    "aliases": [
+      "Personal finance",
+      "Budget game",
+      "Money smart",
+      "Life sim budget"
+    ],
+    "family": "learning",
+    "subfamily": "financial literacy",
+    "summary": "Allocate a monthly income across needs, wants and savings, then handle surprise events.",
+    "core_loop": "see income → allocate → events hit → month ends → see savings",
+    "verbs": [
+      "allocate",
+      "decide"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "budget sliders",
+      "event cards",
+      "savings meter"
+    ],
+    "rules": [
+      "income is split across needs, wants and savings",
+      "random events add costs or bonuses",
+      "each decision has a consequence shown immediately"
+    ],
+    "win": "end the month with savings above the goal",
+    "lose": "run out of money before the month ends",
+    "scoring": "savings at month end",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare month-end savings with friends",
+      "Group tries the same month"
+    ],
+    "content_needs": [
+      "event deck with costs",
+      "income and goal presets"
+    ],
+    "difficulty_levers": [
+      "income level",
+      "event frequency"
+    ],
+    "tools": [
+      "slider_input",
+      "rounds",
+      "score",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "budget game for teens",
+      "personal finance sim with surprise bills",
+      "money smart month challenge"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

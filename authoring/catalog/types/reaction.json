@@ -1,0 +1,1235 @@
+[
+  {
+    "id": "whack_a_mole",
+    "name": "Whack the pop-ups",
+    "aliases": [
+      "Whack-a-Mole"
+    ],
+    "family": "reaction",
+    "summary": "Targets pop up from holes; tap them before they hide, avoiding decoys.",
+    "core_loop": "Targets pop up from holes for a moment; tap them before they hide, avoid decoys, and keep up as the spawn rate rises",
+    "verbs": [
+      "tap",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "tapping a decoy costs points",
+      "missed targets cost lives"
+    ],
+    "win": "none; score attack",
+    "lose": "out of lives",
+    "scoring": "targets hit",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "put your friends' faces on the moles"
+    ],
+    "difficulty_levers": [
+      "spawn rate",
+      "decoys",
+      "holes"
+    ],
+    "tools": [
+      "spawn_wave",
+      "speed_ramp",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "whack a mole with my boss",
+      "tap the pop up targets",
+      "whack a mole with friends faces"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "reaction_light_test",
+    "name": "Tap when it turns green",
+    "aliases": [
+      "Reaction time test",
+      "Human Benchmark"
+    ],
+    "family": "reaction",
+    "summary": "Wait for the screen to change, then tap as fast as possible; tapping early fails.",
+    "core_loop": "Wait for the screen to change color, then tap as fast as you can; tapping early fails, and you see your time in milliseconds",
+    "verbs": [
+      "wait",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "tapping before the signal is a fault"
+    ],
+    "win": "best average time",
+    "lose": "a false start",
+    "scoring": "milliseconds",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare reaction times in a Group"
+    ],
+    "difficulty_levers": [
+      "random delay range",
+      "rounds",
+      "fake-out signals"
+    ],
+    "tools": [
+      "timers",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "reaction time test",
+      "who has the fastest reflexes",
+      "tap when green"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "quick_draw_duel",
+    "name": "Quick-draw duel",
+    "aliases": [
+      "Western showdown"
+    ],
+    "family": "reaction",
+    "summary": "Two players wait for the signal; the first to tap after it wins; early tap loses.",
+    "core_loop": "Two players wait with fingers ready; the first to tap after the draw signal wins, and anyone tapping early loses",
+    "verbs": [
+      "wait",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "early tap loses the round"
+    ],
+    "win": "win best of five",
+    "lose": "lose best of five",
+    "scoring": "rounds",
+    "session_seconds": [
+      15,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "duel a friend on one phone"
+    ],
+    "difficulty_levers": [
+      "delay range",
+      "fake signals",
+      "rounds"
+    ],
+    "tools": [
+      "timers",
+      "turns",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "cowboy quick draw duel",
+      "who taps first",
+      "reaction duel with my brother"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "falling_catch_tap",
+    "name": "Tap the falling things",
+    "aliases": [
+      "Fruit tap"
+    ],
+    "family": "reaction",
+    "summary": "Things fall from the top; tap the good ones, never the bad.",
+    "core_loop": "Items fall from the top of the screen; tap the good ones, skip the bombs, and keep up as they fall faster",
+    "verbs": [
+      "tap",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "bombs end the run or cost a life"
+    ],
+    "win": "none; endless",
+    "lose": "out of lives",
+    "scoring": "items tapped",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "weekly board"
+    ],
+    "difficulty_levers": [
+      "fall speed",
+      "bomb ratio",
+      "lives"
+    ],
+    "tools": [
+      "spawn_wave",
+      "speed_ramp",
+      "lives",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tap the falling fruit not bombs",
+      "catch stars by tapping",
+      "falling things tap game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "slice_swipe",
+    "name": "Slice what's thrown",
+    "aliases": [
+      "Fruit Ninja"
+    ],
+    "family": "reaction",
+    "summary": "Swipe to slice objects tossed into the air; slicing several at once scores combos; avoid bombs.",
+    "core_loop": "Objects are tossed into the air; swipe through them to slice, chain several in one swipe for combos, and avoid bombs",
+    "verbs": [
+      "swipe",
+      "slice"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "slicing a bomb ends the round"
+    ],
+    "win": "none; score attack",
+    "lose": "slicing a bomb or missing three",
+    "scoring": "sliced items, combo bonus",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat friends' combos"
+    ],
+    "difficulty_levers": [
+      "toss rate",
+      "bombs",
+      "combo window"
+    ],
+    "tools": [
+      "spawn_wave",
+      "combo",
+      "collide",
+      "particles_haptics"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "fruit ninja with vegetables",
+      "slice the flying pizzas",
+      "swipe to slice game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stop_the_bar",
+    "name": "Stop the bar in the zone",
+    "aliases": [
+      "Timing bar",
+      "Stop it"
+    ],
+    "family": "reaction",
+    "summary": "A marker sweeps across a bar; tap to stop it inside the target zone, which shrinks.",
+    "core_loop": "the marker moves → tap to stop → hit the zone → smaller zone",
+    "verbs": [
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "missing the zone ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "stopping outside the zone",
+    "scoring": "zones hit",
+    "session_seconds": [
+      15,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak sharing"
+    ],
+    "difficulty_levers": [
+      "sweep speed",
+      "zone size"
+    ],
+    "tools": [
+      "timer_bar",
+      "speed_ramp",
+      "beat_target"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "stop the bar in the green",
+      "perfect timing tap",
+      "timing bar game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stack_timing_drop",
+    "name": "Time the drop",
+    "aliases": [
+      "Stack timing"
+    ],
+    "family": "reaction",
+    "summary": "A block swings or slides; tap to drop it so it lands neatly on the one below.",
+    "core_loop": "the block moves → tap to drop → overhang is cut → keep stacking",
+    "verbs": [
+      "time",
+      "drop"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "overhanging parts fall off"
+    ],
+    "win": "none; endless",
+    "lose": "missing the stack",
+    "scoring": "height",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "tower height board"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "block width"
+    ],
+    "tools": [
+      "physics_world",
+      "speed_ramp",
+      "gravity_jump"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "stack the blocks timing game",
+      "drop at the right moment",
+      "tower timing tap"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "aim_trainer_targets",
+    "name": "Click the targets",
+    "aliases": [
+      "Aim trainer",
+      "Aim Lab"
+    ],
+    "family": "reaction",
+    "summary": "Targets appear around the screen; tap each as fast and accurately as you can.",
+    "core_loop": "Targets appear around the screen; tap each as fast and accurately as you can before the timer ends",
+    "verbs": [
+      "aim",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "misses cost accuracy"
+    ],
+    "win": "most hits in the time",
+    "lose": "none",
+    "scoring": "hits times accuracy",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "aim duels with friends"
+    ],
+    "difficulty_levers": [
+      "target size",
+      "spawn rate",
+      "moving targets"
+    ],
+    "tools": [
+      "spawn_wave",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "aim trainer game",
+      "tap the targets fast",
+      "aim lab for phone"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_word_stroop",
+    "name": "Tap the ink color",
+    "aliases": [
+      "Stroop test"
+    ],
+    "family": "reaction",
+    "summary": "Color words appear in a different ink color; tap the ink color, not the word.",
+    "core_loop": "A color word appears in a different ink color; tap the ink color, not the word, as the pace speeds up",
+    "verbs": [
+      "react",
+      "inhibit"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the word itself is a trap"
+    ],
+    "win": "most right in the time",
+    "lose": "three mistakes",
+    "scoring": "right answers",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "brain duels"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "colors",
+      "mismatch ratio"
+    ],
+    "tools": [
+      "quiz",
+      "speed_ramp",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "stroop color test",
+      "tap the ink not the word",
+      "color word trick"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "go_no_go",
+    "name": "Tap only the right one",
+    "aliases": [
+      "Go/No-go"
+    ],
+    "family": "reaction",
+    "summary": "Tap when the go signal shows; don't tap on the no-go signal.",
+    "core_loop": "A signal appears; tap fast on the go signal and hold back on the no-go signal, with both getting faster",
+    "verbs": [
+      "react",
+      "inhibit"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "tapping on no-go costs a life"
+    ],
+    "win": "survive the round",
+    "lose": "out of lives",
+    "scoring": "correct responses",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "brain training with friends"
+    ],
+    "difficulty_levers": [
+      "ratio",
+      "speed",
+      "signal similarity"
+    ],
+    "tools": [
+      "spawn_wave",
+      "lives",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tap only the green ones",
+      "go no go game",
+      "don't tap the red"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "swipe_direction_arrows",
+    "name": "Swipe the arrow",
+    "aliases": [
+      "Arrow swipe"
+    ],
+    "family": "reaction",
+    "summary": "Arrows appear; swipe in their direction, or the opposite for red arrows.",
+    "core_loop": "An arrow appears; swipe in its direction, or the opposite way if it's red, as fast as you can",
+    "verbs": [
+      "react",
+      "swipe"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "red arrows reverse the rule"
+    ],
+    "win": "survive the round",
+    "lose": "a wrong swipe",
+    "scoring": "arrows cleared",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak duels"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "reverse ratio",
+      "arrow count"
+    ],
+    "tools": [
+      "speed_ramp",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "swipe the arrow direction game",
+      "reverse arrows",
+      "swipe brain"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "balloon_pop_rising",
+    "name": "Pop the balloons",
+    "aliases": [
+      "Balloon pop"
+    ],
+    "family": "reaction",
+    "summary": "Balloons float up; pop the right colors before they escape.",
+    "core_loop": "Balloons float up; pop only the asked colors before they escape off the top, as they rise faster",
+    "verbs": [
+      "tap",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong colors cost points"
+    ],
+    "win": "none; score attack",
+    "lose": "too many escape",
+    "scoring": "balloons popped",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "birthday version for a friend"
+    ],
+    "difficulty_levers": [
+      "rise speed",
+      "colors",
+      "lives"
+    ],
+    "tools": [
+      "spawn_wave",
+      "speed_ramp",
+      "particles_haptics"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pop the balloons game",
+      "birthday balloon pop",
+      "tap the rising balloons"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tap_counter_speed",
+    "name": "Tap as fast as you can",
+    "aliases": [
+      "Tap race",
+      "button masher"
+    ],
+    "family": "reaction",
+    "summary": "Tap as many times as possible in 10 seconds.",
+    "core_loop": "On go, tap as many times as you can before the timer ends, then compare your count with friends",
+    "verbs": [
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only taps in the time window count"
+    ],
+    "win": "most taps",
+    "lose": "none",
+    "scoring": "tap count",
+    "session_seconds": [
+      10,
+      30
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "tap races in a Group"
+    ],
+    "difficulty_levers": [
+      "duration",
+      "tap zone size",
+      "rounds"
+    ],
+    "tools": [
+      "timers",
+      "score",
+      "leaderboard"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tap as fast as you can",
+      "button mashing race",
+      "10 second tap challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "catch_the_falling_drop",
+    "name": "Catch the drop",
+    "aliases": [
+      "Drop catch"
+    ],
+    "family": "reaction",
+    "summary": "Something drops at a random moment; tap to catch it before it passes a line.",
+    "core_loop": "Wait for an object to drop at a random moment, then tap to catch it before it passes the line; closer catches score more",
+    "verbs": [
+      "wait",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "early taps fail"
+    ],
+    "win": "best catch",
+    "lose": "missed drop",
+    "scoring": "distance from the line",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ruler drop test with friends"
+    ],
+    "difficulty_levers": [
+      "delay",
+      "fall speed",
+      "line position"
+    ],
+    "tools": [
+      "timers",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ruler drop reaction test",
+      "catch the falling stick",
+      "drop catch game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "light_chase_grid",
+    "name": "Chase the lights",
+    "aliases": [
+      "Lights chase"
+    ],
+    "family": "reaction",
+    "summary": "One cell lights at a time; tap it before it moves; it speeds up.",
+    "core_loop": "One cell lights up at a time; tap it before the light moves on, as it speeds up each hit",
+    "verbs": [
+      "tap",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "missing a light costs time"
+    ],
+    "win": "most hits in time",
+    "lose": "none",
+    "scoring": "hits",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "arcade cabinet style"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "grid size",
+      "misses allowed"
+    ],
+    "tools": [
+      "grid_board",
+      "speed_ramp",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "chase the lit square",
+      "light chase reaction",
+      "arcade lights game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "odd_color_tile",
+    "name": "Find the different shade",
+    "aliases": [
+      "Kuku Kube",
+      "Color test"
+    ],
+    "family": "reaction",
+    "summary": "One tile in a grid is a slightly different shade; tap it before time runs out.",
+    "core_loop": "scan the grid → tap the odd shade → the grid gets bigger and closer in color",
+    "verbs": [
+      "spot",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong taps cost time"
+    ],
+    "win": "most rounds",
+    "lose": "timer runs out",
+    "scoring": "rounds cleared",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "color vision duels"
+    ],
+    "difficulty_levers": [
+      "shade gap",
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "speed_ramp",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "find the different color tile",
+      "kuku kube",
+      "color vision test game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dodge_tap_lane",
+    "name": "Tap to switch side",
+    "aliases": [
+      "Two-side dodge"
+    ],
+    "family": "reaction",
+    "summary": "A falling stream of hazards; tap to swap between left and right sides.",
+    "core_loop": "Hazards stream down both sides; tap to swap between the left and right lanes to dodge them",
+    "verbs": [
+      "dodge",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tap swaps side"
+    ],
+    "win": "none; endless",
+    "lose": "hit",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "quick duel"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "hazard density",
+      "lanes"
+    ],
+    "tools": [
+      "lanes",
+      "speed_ramp",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tap to switch sides dodge",
+      "left right dodge",
+      "one button dodge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rhythm_tap_reaction",
+    "name": "Tap on the flash",
+    "aliases": [
+      "Flash tap"
+    ],
+    "family": "reaction",
+    "summary": "Shapes flash in different spots; tap them while lit.",
+    "core_loop": "Shapes flash in different spots; tap each while it's lit, and the flashes get shorter as you go",
+    "verbs": [
+      "react",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "taps outside a flash miss"
+    ],
+    "win": "most hits",
+    "lose": "three misses",
+    "scoring": "hits",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "duels"
+    ],
+    "difficulty_levers": [
+      "flash time",
+      "spots",
+      "simultaneous flashes"
+    ],
+    "tools": [
+      "spawn_wave",
+      "speed_ramp",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "flash tap game",
+      "tap the flashing shapes",
+      "quick flash reflex"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pattern_snap",
+    "name": "Snap on a match",
+    "aliases": [
+      "Snap"
+    ],
+    "family": "reaction",
+    "summary": "Cards flip one by one; slap when two in a row match before the other player.",
+    "core_loop": "Cards flip one at a time onto a pile; slap when two in a row match before the other player to win the pile",
+    "verbs": [
+      "watch",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "slapping on a non-match is a penalty"
+    ],
+    "win": "win all cards",
+    "lose": "lose all cards",
+    "scoring": "cards won",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "head-to-head on one phone"
+    ],
+    "difficulty_levers": [
+      "flip speed",
+      "match rules",
+      "players"
+    ],
+    "tools": [
+      "turns",
+      "reveal",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "snap card game",
+      "slap jack",
+      "slap when they match"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tightrope_hold",
+    "name": "Hold steady",
+    "aliases": [
+      "Hold the line"
+    ],
+    "family": "reaction",
+    "summary": "Keep your finger inside a moving band; drift out and you fail.",
+    "core_loop": "Hold your finger inside a band that drifts around the screen; stay inside as it speeds up, or you fall",
+    "verbs": [
+      "hold",
+      "track"
+    ],
+    "inputs": [
+      "drag",
+      "hold"
+    ],
+    "rules": [
+      "lifting your finger fails"
+    ],
+    "win": "survive the time",
+    "lose": "leaving the band",
+    "scoring": "time held",
+    "session_seconds": [
+      15,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "steady-hand duels"
+    ],
+    "difficulty_levers": [
+      "band width",
+      "speed",
+      "drift pattern"
+    ],
+    "tools": [
+      "player_drag",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "keep your finger on the line",
+      "steady hand game",
+      "don't leave the path"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shoot_the_clay",
+    "name": "Shoot the clay targets",
+    "aliases": [
+      "Skeet",
+      "clay pigeon"
+    ],
+    "family": "reaction",
+    "summary": "Clay targets launch across the sky; tap to shoot them before they fall.",
+    "core_loop": "Clay targets launch across the sky; tap to shoot them before they fall, with bonus points for doubles",
+    "verbs": [
+      "aim",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "limited shots per round"
+    ],
+    "win": "most hits",
+    "lose": "none",
+    "scoring": "targets hit",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trap-shooting with friends"
+    ],
+    "difficulty_levers": [
+      "target speed",
+      "launch rate",
+      "targets per launch"
+    ],
+    "tools": [
+      "spawn_wave",
+      "collide",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "skeet shooting game",
+      "shoot the clay pigeons",
+      "trap shooting"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coin_grab_window",
+    "name": "Grab in the window",
+    "aliases": [
+      "Reflex grab"
+    ],
+    "family": "reaction",
+    "summary": "A prize appears for a split second; grab it before it disappears.",
+    "core_loop": "Wait for a prize to flash for a split second, then grab it before it disappears; the window shrinks each round",
+    "verbs": [
+      "wait",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the window shrinks each round"
+    ],
+    "win": "none; endless",
+    "lose": "missed grab",
+    "scoring": "grabs",
+    "session_seconds": [
+      15,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak"
+    ],
+    "difficulty_levers": [
+      "window size",
+      "delay",
+      "fake prizes"
+    ],
+    "tools": [
+      "timers",
+      "speed_ramp",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "grab the coin fast",
+      "split second reflex grab",
+      "catch it in time"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "crossing_signal",
+    "name": "Cross when safe",
+    "aliases": [
+      "Crossing timing"
+    ],
+    "family": "reaction",
+    "summary": "Traffic passes in patterns; tap to cross during gaps.",
+    "core_loop": "Traffic passes in lanes; tap to cross one lane at a time during gaps until you reach the other side",
+    "verbs": [
+      "time",
+      "cross"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tap crosses one lane"
+    ],
+    "win": "cross every lane",
+    "lose": "hit",
+    "scoring": "lanes crossed",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "duels"
+    ],
+    "difficulty_levers": [
+      "traffic speed",
+      "lanes",
+      "gap size"
+    ],
+    "tools": [
+      "lanes",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "cross the road timing",
+      "tap when it's safe",
+      "traffic gap timing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

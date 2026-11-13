@@ -1,0 +1,971 @@
+[
+  {
+    "id": "slingshot_structure",
+    "name": "Slingshot at structures",
+    "aliases": [
+      "Angry Birds"
+    ],
+    "family": "aim_throw",
+    "summary": "Pull back a slingshot and launch characters to topple structures and knock out targets.",
+    "core_loop": "pull back → aim → release → structures topple → hit every target",
+    "verbs": [
+      "aim",
+      "launch"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "limited shots per level",
+      "special shots have one ability each"
+    ],
+    "win": "knock out every target",
+    "lose": "out of shots",
+    "scoring": "targets hit, stars for shots left",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "launch your friends at a tower",
+      "share three-star levels"
+    ],
+    "difficulty_levers": [
+      "structure strength",
+      "shots"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "angry birds with my friends faces",
+      "slingshot the cats at the castle",
+      "launch birds at towers"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "paper_toss_bin",
+    "name": "Paper toss into the bin",
+    "aliases": [
+      "Paper Toss"
+    ],
+    "family": "aim_throw",
+    "summary": "Flick a crumpled paper into a bin while a fan blows sideways.",
+    "core_loop": "Read the fan's wind arrow, flick a crumpled paper ball into the bin, and adjust as the wind changes after every throw",
+    "verbs": [
+      "flick",
+      "aim"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "the fan's wind curves the throw"
+    ],
+    "win": "longest streak",
+    "lose": "a miss",
+    "scoring": "streak",
+    "session_seconds": [
+      15,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "office streak battles"
+    ],
+    "difficulty_levers": [
+      "wind strength",
+      "distance",
+      "bin size"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "paper toss office game",
+      "throw paper in the trash with wind",
+      "office bin flick"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bottle_flip",
+    "name": "Bottle flip",
+    "aliases": [
+      "Bottle Flip"
+    ],
+    "family": "aim_throw",
+    "summary": "Flick a bottle so it spins and lands upright on furniture.",
+    "core_loop": "Flick a bottle so it spins once and lands upright on a table, shelf or chair, moving to harder spots after each success",
+    "verbs": [
+      "flick",
+      "time"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "landing must be upright"
+    ],
+    "win": "land on every spot",
+    "lose": "falls",
+    "scoring": "flips landed",
+    "session_seconds": [
+      15,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "flip streak challenge"
+    ],
+    "difficulty_levers": [
+      "surface height",
+      "surface size",
+      "fill level"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "water bottle flip game",
+      "flip it onto the table",
+      "bottle flip challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "knife_throw_log",
+    "name": "Knife throw at a spinning log",
+    "aliases": [
+      "Knife Hit"
+    ],
+    "family": "aim_throw",
+    "summary": "Tap to throw knives into a spinning log without hitting a knife already stuck in it.",
+    "core_loop": "tap to throw → it sticks → avoid other knives → clear the log",
+    "verbs": [
+      "time",
+      "throw"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "hitting a stuck knife ends the run",
+      "the spin changes"
+    ],
+    "win": "clear every log",
+    "lose": "hit a knife",
+    "scoring": "logs cleared",
+    "session_seconds": [
+      15,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat friends' stages"
+    ],
+    "difficulty_levers": [
+      "spin speed",
+      "knives"
+    ],
+    "tools": [
+      "collide",
+      "speed_ramp",
+      "rotate"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "knife hit game",
+      "throw knives at the spinning wheel",
+      "knife throwing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "beer_pong_cups",
+    "name": "Toss into cups",
+    "aliases": [
+      "Cup Pong"
+    ],
+    "family": "aim_throw",
+    "summary": "Arc a ball into a rack of cups; sunk cups are removed.",
+    "core_loop": "Aim and set the arc to toss a ball into a rack of cups; each sunk cup is removed, and you re-rack as the rack thins",
+    "verbs": [
+      "aim",
+      "toss"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "cups shrink the target"
+    ],
+    "win": "clear the rack",
+    "lose": "none",
+    "scoring": "throws used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "cup pong with friends"
+    ],
+    "difficulty_levers": [
+      "rack size",
+      "distance",
+      "re-racks allowed"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "cup pong with friends",
+      "toss the ball in the cups",
+      "party pong game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "skee_ball_roll",
+    "name": "Roll for the rings",
+    "aliases": [
+      "Skee-Ball"
+    ],
+    "family": "aim_throw",
+    "summary": "Roll balls up a ramp into scoring rings; the small high ring is worth most.",
+    "core_loop": "Swipe to roll balls up a ramp so they hop into scoring rings, aiming for the small top ring worth the most",
+    "verbs": [
+      "aim",
+      "roll"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "nine balls per game"
+    ],
+    "win": "highest score",
+    "lose": "none",
+    "scoring": "ring points",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "arcade night challenge"
+    ],
+    "difficulty_levers": [
+      "ramp speed",
+      "ring sizes",
+      "balls per round"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "skee ball game",
+      "arcade roll the ball",
+      "boardwalk skee ball"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "catapult_siege",
+    "name": "Catapult siege",
+    "aliases": [
+      "Catapult"
+    ],
+    "family": "aim_throw",
+    "summary": "Adjust angle and counterweight to hurl stones at a castle wall.",
+    "core_loop": "set angle and weight → fire → see the hit → adjust → breach the wall",
+    "verbs": [
+      "aim",
+      "calculate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each shot shows where it landed"
+    ],
+    "win": "breach the wall",
+    "lose": "out of stones",
+    "scoring": "stones used",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "castle siege with a friend"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "wall strength"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "catapult castle siege",
+      "trebuchet game",
+      "launch stones at the wall"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "basket_toss_moving",
+    "name": "Toss into the moving basket",
+    "aliases": [
+      "Moving target toss"
+    ],
+    "family": "aim_throw",
+    "summary": "A basket moves; time your throw to land in it.",
+    "core_loop": "A basket slides back and forth; time each throw so it lands in the basket, which speeds up after each score",
+    "verbs": [
+      "time",
+      "throw"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "the basket speeds up after each catch"
+    ],
+    "win": "most in time",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "carnival challenge"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "basket size",
+      "distance"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "throw into the moving basket",
+      "carnival toss",
+      "timing throw"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ring_toss_bottles",
+    "name": "Ring toss",
+    "aliases": [
+      "Ring toss"
+    ],
+    "family": "aim_throw",
+    "summary": "Flick rings onto bottle necks; tighter clusters score more.",
+    "core_loop": "Aim and flick rings toward a field of bottles; a ring that lands on a neck scores, with tighter clusters worth more",
+    "verbs": [
+      "aim",
+      "flick"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "rings bounce realistically"
+    ],
+    "win": "most ringers",
+    "lose": "none",
+    "scoring": "ringers",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "carnival night"
+    ],
+    "difficulty_levers": [
+      "distance",
+      "ring size",
+      "bottle spacing"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ring toss carnival game",
+      "throw rings on bottles",
+      "fair ring toss"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "axe_throw",
+    "name": "Axe throwing",
+    "aliases": [
+      "Axe throwing"
+    ],
+    "family": "aim_throw",
+    "summary": "Throw an axe end over end; release at the right rotation to stick it in the target.",
+    "core_loop": "Swing back and release the axe at the right moment in its rotation so the blade sticks in the target",
+    "verbs": [
+      "time",
+      "throw"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "the axe must land blade first"
+    ],
+    "win": "best total",
+    "lose": "none",
+    "scoring": "target points",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "axe night with friends"
+    ],
+    "difficulty_levers": [
+      "distance",
+      "rotation speed",
+      "target size"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "axe throwing game",
+      "throw the axe at the target",
+      "lumberjack axe toss"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "egg_toss_catch",
+    "name": "Egg toss",
+    "aliases": [
+      "Egg toss"
+    ],
+    "family": "aim_throw",
+    "summary": "Throw an egg to a partner; they must catch softly; the distance grows.",
+    "core_loop": "Throw an egg gently to a partner, who has to catch it softly; after each catch, you both step farther apart",
+    "verbs": [
+      "throw",
+      "catch"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "hard catches break the egg"
+    ],
+    "win": "farthest distance",
+    "lose": "broken egg",
+    "scoring": "distance",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "partner game on one phone"
+    ],
+    "difficulty_levers": [
+      "distance step",
+      "throw arc",
+      "catch window"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "egg toss game with a friend",
+      "don't break the egg",
+      "throw and catch partner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dart_balloon_pop",
+    "name": "Darts at balloons",
+    "aliases": [
+      "Balloon darts"
+    ],
+    "family": "aim_throw",
+    "summary": "Throw darts at a board of balloons; popped balloons reveal prizes or points.",
+    "core_loop": "Aim and throw darts at a board of balloons; each balloon you pop reveals points or a prize",
+    "verbs": [
+      "aim",
+      "throw"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "some balloons hide penalties"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "carnival prizes for friends"
+    ],
+    "difficulty_levers": [
+      "balloon size",
+      "darts per round",
+      "wobble"
+    ],
+    "tools": [
+      "physics_world",
+      "reveal",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pop balloons with darts",
+      "carnival dart game",
+      "balloon pop prizes"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stone_skip",
+    "name": "Skip a stone",
+    "aliases": [
+      "Stone skipping"
+    ],
+    "family": "aim_throw",
+    "summary": "Flick a stone low and fast across water to get the most skips.",
+    "core_loop": "Set the angle, flick a stone low and fast across the water, and count how many times it skips",
+    "verbs": [
+      "flick",
+      "angle"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "too steep sinks immediately"
+    ],
+    "win": "most skips",
+    "lose": "none",
+    "scoring": "skip count",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "lake day challenge"
+    ],
+    "difficulty_levers": [
+      "water calmness",
+      "stone shape",
+      "angle window"
+    ],
+    "tools": [
+      "physics_world",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "skip stones game",
+      "how many skips",
+      "lake stone skipping"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "trick_shot_bank",
+    "name": "Trick shot",
+    "aliases": [
+      "Trick shots",
+      "Dude Perfect"
+    ],
+    "family": "aim_throw",
+    "summary": "Bounce a ball off walls and objects to land it in a cup.",
+    "core_loop": "Aim a ball to bounce off walls and objects, then release it so it lands in the cup",
+    "verbs": [
+      "aim",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "bounces must land in the cup"
+    ],
+    "win": "land the shot",
+    "lose": "out of tries",
+    "scoring": "tries used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share trick shots"
+    ],
+    "difficulty_levers": [
+      "bounce count",
+      "obstacles",
+      "cup size"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "trick shot game",
+      "bounce the ball into the cup",
+      "dude perfect style shots"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "water_balloon_launch",
+    "name": "Water balloon launcher",
+    "aliases": [
+      "Balloon launcher"
+    ],
+    "family": "aim_throw",
+    "summary": "Use a three-person launcher to arc water balloons at distant targets.",
+    "core_loop": "Pull back a big slingshot launcher, aim, and release to arc water balloons onto distant targets",
+    "verbs": [
+      "aim",
+      "launch"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "wind affects flight"
+    ],
+    "win": "hit every target",
+    "lose": "out of balloons",
+    "scoring": "targets hit",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "summer battle"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "distance",
+      "target size"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "water balloon launcher",
+      "splash the targets",
+      "summer balloon fight"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "snowball_fight",
+    "name": "Snowball fight",
+    "aliases": [
+      "Snowball fight"
+    ],
+    "family": "aim_throw",
+    "summary": "Pop up from cover to throw snowballs; duck to avoid incoming ones.",
+    "core_loop": "Duck behind cover, pop up to aim and throw snowballs at opponents, then duck again before their throws hit you",
+    "verbs": [
+      "aim",
+      "throw",
+      "dodge"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "you're only hittable while up"
+    ],
+    "win": "hit opponents most",
+    "lose": "out of health",
+    "scoring": "hits",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "snowball fight with friends"
+    ],
+    "difficulty_levers": [
+      "enemy count",
+      "enemy accuracy",
+      "snowball supply"
+    ],
+    "tools": [
+      "collide",
+      "lives",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "snowball fight game",
+      "duck and throw snow",
+      "winter fight with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "frisbee_throw_distance",
+    "name": "Disc throw",
+    "aliases": [
+      "Disc golf",
+      "frisbee"
+    ],
+    "family": "aim_throw",
+    "summary": "Throw a disc with curve to reach a basket or catcher in few throws.",
+    "core_loop": "Aim, set the curve and throw the disc, walk to where it lands, and reach the basket in as few throws as possible",
+    "verbs": [
+      "aim",
+      "curve"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "wind and curve affect the path"
+    ],
+    "win": "fewest throws",
+    "lose": "none",
+    "scoring": "throws",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "disc golf round with friends"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "distance",
+      "obstacles"
+    ],
+    "tools": [
+      "physics_world",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "disc golf game",
+      "frisbee throw curve",
+      "throw to the basket"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dunk_tank_target",
+    "name": "Dunk tank",
+    "aliases": [
+      "Dunk tank"
+    ],
+    "family": "aim_throw",
+    "summary": "Hit the small target to dunk a friend's avatar.",
+    "core_loop": "Aim and throw at a small target to tip the seat and dunk a friend's avatar into the tank",
+    "verbs": [
+      "aim",
+      "throw"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "the target is small"
+    ],
+    "win": "dunk them",
+    "lose": "out of balls",
+    "scoring": "throws used",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "dunk your friend"
+    ],
+    "difficulty_levers": [
+      "target size",
+      "distance",
+      "throws allowed"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dunk my friend game",
+      "dunk tank carnival",
+      "hit the target to splash"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

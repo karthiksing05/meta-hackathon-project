@@ -1,0 +1,32 @@
+[
+  {
+    "request": "jenga with my friends",
+    "expect": [
+      "pull_block_tower"
+    ]
+  },
+  {
+    "request": "stack game with swinging blocks",
+    "expect": [
+      "tower_block_stack"
+    ]
+  },
+  {
+    "request": "tricky towers style odd shape stacking",
+    "expect": [
+      "animal_stack_balance"
+    ]
+  },
+  {
+    "request": "balance the drinks on a waiter tray",
+    "expect": [
+      "waiter_tray_balance"
+    ]
+  },
+  {
+    "request": "zen rock balancing",
+    "expect": [
+      "balance_boulder_cairn"
+    ]
+  }
+]

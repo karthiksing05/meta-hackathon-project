@@ -1571,6 +1571,14 @@ exactly `space.microgame`, `input.microgame` and `score.microgame` (params: `run
 `label`). `authoring/expander/wrap.mjs` (`wrapGame`) writes this wrapper, and picks `style.colors`
 from the game so the frame and letterbox match it.
 
+**Score model.** A microgame manifest may carry a top-level `score` (next to `formula` and `brief`):
+what its board ranks, `direction` (`higher` or `lower`), `counts_when` (`finished` or `any`),
+`aggregate` (`best`, `latest`, `sum_week`), `tie_break` (`less time`, `earlier`), `format` (`{n} orders`,
+`{n}%`, `m:ss.t`), `events`, the `bounds` the bots reached plus headroom, and `ranked`. Every score is a
+whole number: time kinds in milliseconds of run time, accuracy in whole percent. No `score` means
+points, higher first, best run, every run counts. It comes from the authoring manifest's `score` block
+(`authoring/SPEC.md` 2.13); the server sorts and checks boards by it, and the app shows `format`.
+
 **Runtime.** `bubble-kit-microgame.js` adapts the engine to the runtime, so the frame (intro, HUD, pop,
 result, share, posters, demos, replays, haptics, mute) works as for any formula:
 
@@ -1597,6 +1605,12 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   `{t, a: "text", v: ["submit" | "change", value]}`. A replay, a resumed run or `BubbleJSRuntime.verify`
   re-sends the same text at the same tick. Several edits in one tick keep only the last. `v` is an
   array, so `BubbleInput` (Swift) keeps it unchanged, and an older runtime ignores the entry.
+- **Typed answers** (`typed_answer` + `keyboard`, `fuzzy_match`; `authoring/SPEC.md` 2.12) are
+  matched by engine functions the fragments carry, generated from `authoring/expander/fuzzy.mjs`:
+  case, accents, punctuation, articles, word order, plurals and length-aware typos are forgiven,
+  aliases come from the answer bank (`answer=alias`). Nothing runs outside the engine, so live play,
+  bots and replays score the same answer the same way. Typing works through the on-screen keyboard fragment
+  (letters and space) or the native text field below.
 - The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. In games with a text
   field it also types: it reads candidate strings from the game's live state (a target word, the words
   on screen) and types one a letter at a time, then presses Done. With probability = skill it picks
@@ -1702,6 +1716,23 @@ and keeps the Bubble's id, brief and lineage, with `version + 1`.
 `lastStats` says whether the first draft validated, how many repair rounds it took, the quality score and
 whether it was polished.
 
+**Score check.** After the gate (and polish), a game with a `score` block goes through
+`authoring/playtest/score-check.mjs` (`MicrogameStudio.scoreCheck(gameJSON, scoreJSON, optionsJSON)`,
+on the runs the last gate played): skill order in the score's direction, an idle bot and a one-input
+spam bot ranking no better than real play, the finish rule, `max_rate_per_s`, every bot run replaying to
+the same phase, time and score (the engine's `verify` where it has it) and the score changing only on its
+`events`. It records `bounds`. Each check is pass, warn or fail; `{ok, ambiguous, checks, bounds, lines}`.
+The pipeline (`authoring/expander/score-step.mjs`) runs it by default for every game with a `score` block
+(`score_check: false` in compose's args opts out). When the code checks pass or are unsure, Muse reviews
+the goal, constraints, end and score parts with the bot runs (`prompt('score_review')`, asked for with
+`ask(system, user, 'score review', {model: 'muse-wonder-1.0', effort: 'high', max_tokens})`;
+`score_review: false` opts out). A failure gets one score-only repair (`prompt('repair_part')`: the part,
+its problems and the parts it depends on), then the checks and the review again. Still failing, the game
+ships with `score.ranked: false` (an unranked board). The game itself never changes in this step. Events:
+`score_checking` ("Checking the score is fair…"), `score_reviewing`, `score_repairing`, `score_checked`.
+compose's result adds `score` (ranked, repaired, reason, checks, review, bounds), and `stats.calls` logs
+every Muse call's purpose, wall time and `usage` when `ask` returns it.
+
 **Quality and polish.** A new game that passes the bots then goes through the quality check
 (`authoring/expander/quality.mjs`, no model): no palette, backdrop or sound, fragment roles or the game's
 own pieces drawn as fallback shapes, placeholder text, the request's theme words missing from what
@@ -1721,6 +1752,11 @@ text (or `{content, model}`), `onEvent` gets `{kind, summary, …}` (the kinds a
 and `argsJSON` is `{request, brief, base?}` (a `base` microgame manifest makes it a revision). A request
 that carries Studio's agreed anatomy (7.13) gets it as its own prompt section, with every rule's check
 as a hard constraint.
+`argsJSON` may also carry the harness `context` (docs/HARNESS_V2.md, "The context the generator receives";
+`MicrogameStudio.version` 3): with tools or types, the system prompt's fragment menu holds only the planned
+tools, plus the matched types and the planned spec; gold examples come from `context.gold_ids` first
+(`examples(request, k, ids)`); `gate_profile` goes to `gate(json, seed, {gate_profile})`. Without it, nothing
+changes. `prompt('system', {examples, context})` gives the same text.
 
 **Key order.** Swift's `JSONValue` writes objects with sorted keys, and the engine reads key order in
 function `params` (positional) and state `init`s (an init reads only earlier state). So games never

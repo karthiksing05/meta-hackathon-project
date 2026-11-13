@@ -1,0 +1,32 @@
+[
+  {
+    "request": "catch the falling donuts with a basket",
+    "expect": [
+      "basket_catch_falling"
+    ]
+  },
+  {
+    "request": "claw machine game to win plushies",
+    "expect": [
+      "claw_machine"
+    ]
+  },
+  {
+    "request": "relaxing fishing game with friends",
+    "expect": [
+      "fishing_cast_reel"
+    ]
+  },
+  {
+    "request": "hole io swallow the city",
+    "expect": [
+      "pickup_snake_vacuum"
+    ]
+  },
+  {
+    "request": "pokemon snap style photo game",
+    "expect": [
+      "butterfly_photo"
+    ]
+  }
+]

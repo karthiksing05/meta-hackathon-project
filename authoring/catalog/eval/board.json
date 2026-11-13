@@ -1,0 +1,32 @@
+[
+  {
+    "request": "chess with my friend async",
+    "expect": [
+      "chess_classic"
+    ]
+  },
+  {
+    "request": "connect four online with my brother",
+    "expect": [
+      "connect_four_drop"
+    ]
+  },
+  {
+    "request": "monopoly with our neighborhood",
+    "expect": [
+      "monopoly_property"
+    ]
+  },
+  {
+    "request": "settlers of catan with friends",
+    "expect": [
+      "settle_trade_build"
+    ]
+  },
+  {
+    "request": "daily chess puzzle in our group",
+    "expect": [
+      "chess_puzzle_mate"
+    ]
+  }
+]
