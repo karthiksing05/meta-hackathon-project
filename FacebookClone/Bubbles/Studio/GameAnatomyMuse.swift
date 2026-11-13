@@ -119,33 +119,66 @@ enum GameAnatomyFixtures {
             out.changed.append(out.rules[index].id)
         }
         let text = change.trimmingCharacters(in: .whitespacesAndNewlines)
+        var note: String?
         if !text.isEmpty {
-            let lower = text.lowercased()
-            if ["lose", "win", "ends", "end", "game over", "score"].contains(where: lower.contains),
+            // One part per change: how it ends, the timing, or a new rule.
+            let short = paraphrase(text)
+            let lower = short.lowercased()
+            if lower.hasPrefix("lose ") || lower.hasPrefix("win ") || lower.contains("game over"),
                let index = out.parts.firstIndex(where: { $0.key == .end }) {
-                out.parts[index].text = GameAnatomy.sentence(text)
-                out.parts[index].details = []
-                out.parts[index].fields = [:]
+                let isLose = !lower.hasPrefix("win ")
+                let prefix = isLose ? "Lose" : "Win"
+                func isLine(_ line: String) -> Bool { line.hasPrefix("\(prefix):") || line.hasPrefix("\(prefix) ") }
+                var details = out.parts[index].details.filter { !isLine($0) }
+                if isLine(out.parts[index].text) { out.parts[index].text = short } else { details.insert(short, at: 0) }
+                out.parts[index].details = details
+                out.parts[index].fields[isLose ? "lose" : "win"] = .string(short)
                 out.parts[index].meta.source = .you
                 out.parts[index].meta.familiarity = .approximate
-                out.parts[index].meta.plan = "custom: an end check from your words"
+                out.parts[index].meta.plan = "custom:grid, neighbors8, count - checks the new \(isLose ? "lose" : "win") condition after each move"
                 out.changed.append(out.parts[index].id)
-            } else if ["faster", "slower", "seconds", "timer", "time", "longer", "shorter"].contains(where: lower.contains),
+                note = "I'll check it with custom rules after each move and confirm it in playtests."
+            } else if ["faster", "slower", "seconds", "timer", "time limit", "longer", "shorter"].contains(where: lower.contains),
                       let index = out.parts.firstIndex(where: { $0.key == .structure }) {
-                out.parts[index].text = GameAnatomy.sentence(text)
-                out.parts[index].details = []
-                out.parts[index].fields = [:]
+                out.parts[index].details = [short] + out.parts[index].details.filter { !$0.hasPrefix("Timing:") }
+                out.parts[index].fields["timing"] = .string(short)
                 out.parts[index].meta.source = .you
                 out.changed.append(out.parts[index].id)
+            } else {
+                out.addRule(short)
+                if let last = out.rules.last { out.changed.append(last.id) }
+                note = "The new rule is mine to work out, so I'll write custom rules for it and check it in playtests."
             }
-            out.addRule(GameAnatomy.sentence(text))
-            if let last = out.rules.last { out.changed.append(last.id) }
         }
-        let slots = out.changed
-        var reply = out.changeSentence(slots)
-        if !text.isEmpty { reply += " The new rule is mine to work out, so I'll write custom rules for it and check it in playtests." }
+        var reply = out.changeSentence(out.changed)
+        if let note { reply += " " + note }
         out.reply = reply
         return out
+    }
+
+    /// The person's words as a short part line: "Actually, you also lose if two crowns touch." →
+    /// "Lose if two crowns touch".
+    static func paraphrase(_ change: String) -> String {
+        var text = change.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
+        let fillers = ["actually,", "actually", "also,", "also", "please", "i want", "i'd like", "can you", "make it so",
+                       "and", "so", "then", "now", "it should be that", "let's", "lets"]
+        var changed = true
+        while changed {
+            changed = false
+            for filler in fillers where text.lowercased().hasPrefix(filler + " ") || text.lowercased() == filler {
+                text = String(text.dropFirst(filler.count)).trimmingCharacters(in: .whitespaces)
+                changed = true
+            }
+        }
+        let subjects = ["you also ", "you ", "players also ", "players ", "the player also ", "the player "]
+        for subject in subjects where text.lowercased().hasPrefix(subject) {
+            text = String(text.dropFirst(subject.count))
+            break
+        }
+        for (from, to) in [("loses ", "lose "), ("wins ", "win "), ("lose when ", "lose if ")] where text.lowercased().hasPrefix(from) {
+            text = to + text.dropFirst(from.count)
+        }
+        return GameAnatomy.sentence(text)
     }
 
     static func decoded(_ text: String) -> GameAnatomy {
