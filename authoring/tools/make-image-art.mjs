@@ -44,6 +44,13 @@ export function decode(bytes) {
 }
 
 function museKey() {
+  // The current key: MUSE_API_KEY in the environment, then the repo's .env, then MuseConfig.json (may be stale).
+  if (process.env.MUSE_API_KEY) return process.env.MUSE_API_KEY;
+  for (const env of [join(REPO, '.env'), resolve(REPO, '../../../.env')]) {
+    if (!existsSync(env)) continue;
+    const m = readFileSync(env, 'utf8').match(/^\s*(?:export\s+)?MUSE_API_KEY\s*=\s*["']?([^"'\s]+)/m);
+    if (m) return m[1];
+  }
   const p = [join(REPO, 'FacebookClone/Bubbles/Studio/MuseConfig.json'), resolve(REPO, '../../../FacebookClone/Bubbles/Studio/MuseConfig.json')].find((f) => existsSync(f));
   if (!p) throw new Error('no MuseConfig.json');
   const cfg = JSON.parse(readFileSync(p, 'utf8'));
