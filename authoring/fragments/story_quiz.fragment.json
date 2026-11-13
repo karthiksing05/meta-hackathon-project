@@ -1,0 +1,758 @@
+{
+  "fragment": "story_quiz",
+  "version": 1,
+  "describe": "A story told as a quiz (a press conference that goes badly, a job interview gone wrong, a documentary narrated by a cat): a scripted clip cut into beats, played IN ORDER (never shuffled). Each beat shows a quote card (who speaks and the setup line), a short ask ('What does he say next?') and `choices` answer buttons. After a pick, a reveal panel shows the real line and the punchline, with `hit_label` or `miss_label` ('CALLED IT' / 'PLOT TWIST'; for an ordered puzzle such as proof steps use e.g. 'CORRECT' / 'NOT YET' and a ranked score), and a Next button (it also moves on by itself after `reveal_ms`). The real line is the funny one: the joke, the twist, the disaster. There are no lives, no timer and no right-or-wrong scoring: the score is `called` (beats where the player picked the real line), shown as story ('Beat 3 of 8', 'You called 5 of 8'), and the game should declare `\"score\": {\"kind\": \"points\", \"ranked\": false, \"format\": \"{n} called\"}`. The game supplies six functions that read `content` lists, one entry per beat: `sq_speakers()` (who is talking, <= 24 chars, e.g. 'Mayor Pemberton'), `sq_lines()` (the setup line on the quote card, <= 120 chars), `sq_asks()` (the question, <= 34 chars, e.g. 'What does he say next?'), `sq_choices()` (all choices flattened, exactly `choices` per beat: beat b owns entries b * `choices` to (b + 1) * `choices` - 1; each <= 56 chars), `sq_answers()` (entry b: the exact text of beat b's real line, one of its choices) and `sq_reveals()` (entry b: the punchline or what happened next, <= 110 chars). Choices are shuffled on screen with the run seed. Optional media per beat: give the game a `panel` sprite (one frame per picture, about 2:1, a cartoon frame of the clip; uploaded photos work the same way) and the beat's picture sits above the quote card; the `media` param maps beats to frames ('0,1,-1,2': beat 2 has no picture), '' means frame = beat. Taps are ignored for `read_ms` after a beat appears. Input `pick {index}` (index on screen) and `next`. Emits `called_it` or `plot_twist` on a pick, `beat_done` after each reveal, and `story_done` after the last beat (with `finish_wins`, the game is won then: every run reaches the end). State: `beat`, `called`, `picks` (list<int>: per beat, the index of the picked choice in the content order, for comparing friends' runs; name `picks` in group_play.result.state), `revealing`, `finished`, `opts`. Draws everything inside the safe area; put the pace and a 'PARODY' tag (when real people appear) in the HUD with the `tag` param.",
+  "params": {
+    "choices": {
+      "type": "int",
+      "default": 3,
+      "min": 2,
+      "max": 4
+    },
+    "read_ms": {
+      "type": "duration",
+      "default": 900,
+      "min": 0,
+      "max": 5000
+    },
+    "reveal_ms": {
+      "type": "duration",
+      "default": 9000,
+      "min": 2000,
+      "max": 30000
+    },
+    "media": {
+      "type": "string",
+      "default": "",
+      "max_len": 120
+    },
+    "tag": {
+      "type": "string",
+      "default": "",
+      "max_len": 14
+    },
+    "pace_label": {
+      "type": "string",
+      "default": "Beat",
+      "max_len": 12
+    },
+    "hit_label": {
+      "type": "string",
+      "default": "CALLED IT",
+      "max_len": 14
+    },
+    "miss_label": {
+      "type": "string",
+      "default": "PLOT TWIST",
+      "max_len": 14
+    },
+    "end_title": {
+      "type": "string",
+      "default": "That’s a wrap",
+      "max_len": 20
+    },
+    "end_line": {
+      "type": "string",
+      "default": "You called",
+      "max_len": 20
+    },
+    "finish_wins": {
+      "type": "bool",
+      "default": true
+    }
+  },
+  "art": {
+    "panel": {
+      "describe": "A cartoon picture for the beats, about 2:1 (e.g. 320 × 160), one frame per picture: the scene of the clip (the podium, the interview room, the cat in the grass). Drawn above the quote card, never under text. Real people only as stylised cartoons.",
+      "color": "accent"
+    }
+  },
+  "requires": {
+    "functions": {
+      "sq_speakers": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "sq_lines": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "sq_asks": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "sq_choices": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "sq_answers": {
+        "params": {},
+        "returns": "list<string>"
+      },
+      "sq_reveals": {
+        "params": {},
+        "returns": "list<string>"
+      }
+    }
+  },
+  "state": {
+    "beat": {
+      "type": "int",
+      "init": "0"
+    },
+    "called": {
+      "type": "int",
+      "init": "0"
+    },
+    "picks": {
+      "type": "list<int>",
+      "init": "[]"
+    },
+    "opts": {
+      "type": "list<string>",
+      "init": "[]"
+    },
+    "picked": {
+      "type": "int",
+      "init": "-1"
+    },
+    "revealing": {
+      "type": "bool",
+      "init": "false"
+    },
+    "finished": {
+      "type": "bool",
+      "init": "false"
+    },
+    "_open_at": {
+      "type": "int",
+      "init": "0"
+    },
+    "_serial": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "beat_count": {
+      "params": {},
+      "returns": "int",
+      "body": "len(sq_answers())"
+    },
+    "beat_speaker": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(sq_speakers(), beat, '')"
+    },
+    "beat_line": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(sq_lines(), beat, '')"
+    },
+    "beat_ask": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(sq_asks(), beat, '')"
+    },
+    "real_line": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(sq_answers(), beat, '')"
+    },
+    "beat_reveal": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(sq_reveals(), beat, '')"
+    },
+    "beat_frame": {
+      "params": {},
+      "returns": "int",
+      "body": "if @media == '' then beat else or_else(parse_int(get_or(split(@media, ','), beat, '-1')), -1)"
+    },
+    "has_picture": {
+      "params": {},
+      "returns": "bool",
+      "body": "@art.panel and beat_frame() >= 0"
+    },
+    "sq_top": {
+      "params": {},
+      "returns": "float",
+      "body": "@game.safe_top + (if @game.safe_top > 0 then 56.0 else 76.0)"
+    },
+    "card_y": {
+      "params": {},
+      "returns": "float",
+      "body": "if has_picture() then sq_top() + 136.0 else sq_top()"
+    },
+    "card_h": {
+      "params": {},
+      "returns": "float",
+      "body": "if has_picture() then 126.0 else 190.0"
+    },
+    "ask_y": {
+      "params": {},
+      "returns": "float",
+      "body": "card_y() + card_h() + 16.0"
+    },
+    "opts_y": {
+      "params": {},
+      "returns": "float",
+      "body": "card_y() + card_h() + 34.0"
+    },
+    "reveal_y": {
+      "params": {},
+      "returns": "float",
+      "body": "card_y() + card_h() + 10.0"
+    },
+    "called_last": {
+      "params": {},
+      "returns": "bool",
+      "body": "picked >= 0 and get_or(opts, picked, '') == real_line()"
+    },
+    "pace_text": {
+      "params": {},
+      "returns": "string",
+      "body": "if finished then 'The end' else @pace_label + ' ' + str(min(beat + 1, beat_count())) + ' of ' + str(beat_count())"
+    },
+    "_opt_state": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "string",
+      "body": "if not revealing then '' else if get_or(opts, k, '') == real_line() then 'real' else if k == picked then 'mine' else ''"
+    }
+  },
+  "events": {
+    "called_it": {},
+    "plot_twist": {},
+    "beat_done": {},
+    "story_done": {},
+    "_open": {},
+    "_auto_next": {
+      "serial": "int"
+    }
+  },
+  "inputs": {
+    "pick": {
+      "payload": {
+        "index": "int"
+      }
+    },
+    "next": {
+      "payload": {}
+    }
+  },
+  "rules": [
+    {
+      "id": "begin",
+      "on": "start",
+      "do": [
+        {
+          "emit": "_open"
+        }
+      ]
+    },
+    {
+      "id": "open",
+      "on": "_open",
+      "do": [
+        {
+          "set": "opts",
+          "to": "shuffle(slice(sq_choices(), beat * @choices, beat * @choices + @choices))"
+        },
+        {
+          "set": "picked",
+          "to": "-1"
+        },
+        {
+          "set": "revealing",
+          "to": "false"
+        },
+        {
+          "set": "_open_at",
+          "to": "now"
+        },
+        {
+          "incr": "_serial"
+        }
+      ]
+    },
+    {
+      "id": "choose",
+      "on": "pick",
+      "when": "not revealing and not finished and now - _open_at >= @read_ms and event.index >= 0 and event.index < len(opts)",
+      "do": [
+        {
+          "set": "picked",
+          "to": "event.index"
+        },
+        {
+          "set": "revealing",
+          "to": "true"
+        },
+        {
+          "push": "picks",
+          "value": "index_of(slice(sq_choices(), beat * @choices, beat * @choices + @choices), opts[event.index])"
+        },
+        {
+          "if": "opts[event.index] == real_line()",
+          "then": [
+            {
+              "incr": "called"
+            },
+            {
+              "emit": "called_it"
+            }
+          ],
+          "else": [
+            {
+              "emit": "plot_twist"
+            }
+          ]
+        },
+        {
+          "after": "@reveal_ms",
+          "emit": "_auto_next",
+          "with": {
+            "serial": "_serial"
+          },
+          "id": "_t_auto"
+        }
+      ]
+    },
+    {
+      "id": "advance",
+      "on": "next",
+      "when": "revealing and not finished",
+      "do": [
+        {
+          "emit": "beat_done"
+        }
+      ]
+    },
+    {
+      "id": "auto_advance",
+      "on": "_auto_next",
+      "when": "revealing and not finished and event.serial == _serial",
+      "do": [
+        {
+          "emit": "beat_done"
+        }
+      ]
+    },
+    {
+      "id": "after_beat",
+      "on": "beat_done",
+      "do": [
+        {
+          "set": "revealing",
+          "to": "false"
+        },
+        {
+          "if": "beat + 1 >= beat_count()",
+          "then": [
+            {
+              "set": "finished",
+              "to": "true"
+            },
+            {
+              "emit": "story_done"
+            }
+          ],
+          "else": [
+            {
+              "incr": "beat"
+            },
+            {
+              "emit": "_open"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": {
+      "include": "@finish_wins",
+      "expr": "finished"
+    },
+    "score": "called"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text",
+          "text": "= pace_text()",
+          "size": 14,
+          "weight": 700,
+          "color": "$ink"
+        }
+      },
+      {
+        "slot": "hud_top",
+        "include": "@tag != ''",
+        "node": {
+          "node": "text",
+          "text": "@tag",
+          "size": 12,
+          "weight": 800,
+          "color": "$accent"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.panel",
+        "node": {
+          "node": "group",
+          "visible": "= has_picture()",
+          "children": [
+            {
+              "node": "rect",
+              "x": "= 180.0 - min(328.0, 116.0 / @art.panel.aspect + 12.0) / 2.0",
+              "y": "= sq_top()",
+              "w": "= min(328.0, 116.0 / @art.panel.aspect + 12.0)",
+              "h": 128,
+              "radius": 16,
+              "fill": "$surface"
+            },
+            {
+              "node": "image",
+              "asset": "@art.panel.id",
+              "frame": "= max(0, beat_frame())",
+              "anchor": "center",
+              "x": 180,
+              "y": "= sq_top() + 64.0",
+              "w": "= min(320.0, 116.0 / @art.panel.aspect)",
+              "h": "= min(116.0, 320.0 * @art.panel.aspect)"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= not finished",
+          "children": [
+            {
+              "node": "rect",
+              "x": 16,
+              "y": "= card_y()",
+              "w": 328,
+              "h": "= card_h()",
+              "radius": 18,
+              "fill": "$surface",
+              "stroke": "$secondary",
+              "stroke_width": 1.5
+            },
+            {
+              "node": "rect",
+              "x": 24,
+              "y": "= card_y() + 16.0",
+              "w": 4,
+              "h": 24,
+              "radius": 2,
+              "fill": "$accent"
+            },
+            {
+              "node": "text",
+              "x": 36,
+              "y": "= card_y() + 20.0",
+              "w": 290,
+              "h": 16,
+              "align": "left",
+              "valign": "middle",
+              "text": "= upper(beat_speaker())",
+              "size": 12,
+              "weight": 800,
+              "color": "$accent"
+            },
+            {
+              "node": "text",
+              "x": 36,
+              "y": "= card_y() + 44.0",
+              "w": 290,
+              "wrap": true,
+              "align": "left",
+              "valign": "top",
+              "text": "= '“' + beat_line() + '”'",
+              "size": "= if has_picture() then 15 else 19",
+              "weight": 600,
+              "color": "$ink"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": "= ask_y()",
+          "anchor": "center",
+          "visible": "= not revealing and not finished",
+          "text": "= beat_ask()",
+          "size": 14,
+          "weight": 700,
+          "color": "$ink"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(@choices)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "group",
+            "visible": "= not revealing and not finished",
+            "children": [
+              {
+                "node": "rect",
+                "x": 20,
+                "y": "= opts_y() + k * 56.0",
+                "w": 320,
+                "h": 50,
+                "radius": 14,
+                "role": "tile",
+                "fill": "$surface",
+                "stroke": "$primary",
+                "stroke_width": 1.5,
+                "on_tap": {
+                  "input": "pick",
+                  "with": {
+                    "index": "k"
+                  }
+                }
+              },
+              {
+                "node": "text",
+                "x": 180,
+                "y": "= opts_y() + 25.0 + k * 56.0",
+                "w": 296,
+                "wrap": true,
+                "anchor": "center",
+                "align": "center",
+                "valign": "middle",
+                "text": "= get_or(opts, k, '')",
+                "size": 15,
+                "weight": 600,
+                "color": "$ink"
+              }
+            ],
+            "animate_on": {
+              "pick": {
+                "when": "event.index == k",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  0.95,
+                  1.02,
+                  1
+                ],
+                "ms": 170
+              }
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= revealing and not finished",
+          "children": [
+            {
+              "node": "rect",
+              "x": 16,
+              "y": "= reveal_y()",
+              "w": 328,
+              "h": 244,
+              "radius": 18,
+              "fill": "$ink"
+            },
+            {
+              "node": "rect",
+              "x": 32,
+              "y": "= reveal_y() + 16.0",
+              "w": 10,
+              "h": 10,
+              "radius": 5,
+              "fill": "= if called_last() then $primary else $danger"
+            },
+            {
+              "node": "text",
+              "x": 50,
+              "y": "= reveal_y() + 13.0",
+              "w": 200,
+              "h": 16,
+              "align": "left",
+              "valign": "middle",
+              "text": "= if called_last() then @hit_label else @miss_label",
+              "size": 12,
+              "weight": 800,
+              "color": "$bg"
+            },
+            {
+              "node": "text",
+              "x": 32,
+              "y": "= reveal_y() + 38.0",
+              "w": 296,
+              "wrap": true,
+              "align": "left",
+              "valign": "top",
+              "text": "= '“' + real_line() + '”'",
+              "size": 16,
+              "weight": 700,
+              "color": "$bg"
+            },
+            {
+              "node": "text",
+              "x": 32,
+              "y": "= reveal_y() + 108.0",
+              "w": 296,
+              "wrap": true,
+              "align": "left",
+              "valign": "top",
+              "text": "= beat_reveal()",
+              "size": 13,
+              "weight": 500,
+              "color": "$bg"
+            },
+            {
+              "node": "rect",
+              "x": 232,
+              "y": "= reveal_y() + 186.0",
+              "w": 100,
+              "h": 44,
+              "radius": 12,
+              "fill": "$primary",
+              "on_tap": {
+                "input": "next"
+              }
+            },
+            {
+              "node": "text",
+              "x": 282,
+              "y": "= reveal_y() + 208.0",
+              "anchor": "center",
+              "text": "= if beat + 1 >= beat_count() then 'Finish' else 'Next'",
+              "size": 15,
+              "weight": 800,
+              "color": "$bg"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= finished",
+          "children": [
+            {
+              "node": "rect",
+              "x": 16,
+              "y": "= sq_top() + 140.0",
+              "w": 328,
+              "h": 150,
+              "radius": 20,
+              "fill": "$ink"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": "= sq_top() + 186.0",
+              "anchor": "center",
+              "text": "@end_title",
+              "size": 26,
+              "weight": 800,
+              "color": "$bg"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": "= sq_top() + 236.0",
+              "anchor": "center",
+              "text": "= @end_line + ' ' + str(called) + ' of ' + str(beat_count())",
+              "size": 17,
+              "weight": 600,
+              "color": "$bg"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "called_it",
+        "do": [
+          {
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": "= opts_y() + 80.0",
+              "count": 16,
+              "color": "$primary",
+              "speed": 200,
+              "size": 5,
+              "ms": 500
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      },
+      {
+        "on": "plot_twist",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "shake": {
+              "px": 4,
+              "ms": 140
+            }
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      },
+      {
+        "on": "beat_done",
+        "do": [
+          {
+            "moment": "tap"
+          }
+        ]
+      },
+      {
+        "on": "story_done",
+        "do": [
+          {
+            "moment": "win"
+          }
+        ]
+      }
+    ]
+  },
+  "tags": {
+    "mood": [
+      "funny",
+      "playful"
+    ],
+    "energy": [
+      "low",
+      "medium"
+    ]
+  },
+  "conflicts": []
+}
