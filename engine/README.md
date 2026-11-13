@@ -7,7 +7,8 @@ draws in the browser. The file format and the engine contract are in
 and [`SPEC-v0.2.md`](SPEC-v0.2.md) (v0.2 additions: assets, image/line/poly
 nodes, camera, typed text, key up and any key, pointer anywhere, physics,
 samples and music, particles and haptics; v0.2.1: hold buttons with
-`on_press`/`on_release`, text `wrap` and outlines, feedback `when`). Three v0.1 games live in
+`on_press`/`on_release`, text `wrap` and outlines, feedback `when`; v0.2.2:
+clipping groups, image crops with `src_*`, and `"hit": "shape"` polys). Three v0.1 games live in
 [`fixtures/`](fixtures) and v0.2 examples in [`examples/`](examples).
 `microgame catalog --json` lists everything a game file can use.
 
@@ -323,7 +324,9 @@ These are decisions taken while building v0.1. They belong in the next revision 
 6. **Float division by zero** is a runtime error, like integer division by zero.
 7. **Setting a vector component** (`set p.x`) isn't supported; set the whole vector.
 8. **Hit-testing** uses untransformed boxes (Part D, question 6), and group rotation and
-   scale don't pass down to children.
+   scale don't pass down to children. v0.2.2: a `clip` group cuts its children's boxes to its
+   own, and a `"hit": "shape"` poly also needs the point inside the polygon (nonzero winding,
+   plain `+ - *` arithmetic, so replays hit-test the same everywhere).
 
 `examples/meteor_dodge.json` is a fourth test game. It covers what the three fixtures
 don't: drag, `repeat`, `tick`, circles, records, enums, `after`, `push` and `remove`.

@@ -41,7 +41,12 @@ function compareFrames(name, step, bin, js) {
       if (k in j) check(near(b[k], j[k]), `${where}: ${k} ${b[k]} vs ${j[k]}`);
     }
     for (const k of ['fill', 'stroke']) if (k in j) check(color(b[k]) === jsonColor(j[k]), `${where}: ${k} ${color(b[k])} vs ${j[k]}`);
-    if (j.op === 'image') check(b.flip_x === j.flip_x && b.flip_y === j.flip_y, `${where}: flips`);
+    if (j.op === 'image') {
+      check(b.flip_x === j.flip_x && b.flip_y === j.flip_y, `${where}: flips`);
+      for (const k of ['src_x', 'src_y', 'src_w', 'src_h']) {
+        check((k in j) ? near(b[k], j[k]) : b[k] === undefined, `${where}: ${k} ${b[k]} vs ${j[k]}`);
+      }
+    }
     if (j.op === 'line') check(color(b.stroke) === jsonColor(j.stroke), `${where}: line stroke`);
     if (j.op === 'poly') {
       check(b.closed === j.closed && b.points.length === 2 * j.points.length, `${where}: poly shape`);
@@ -338,6 +343,88 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
   await new Promise((r) => setTimeout(r, 0));
   check(store.buffers[0] && store.pending.length === 0 && decoded.length === 1, 'the waiting sound decodes once a context exists (even suspended)');
   console.log('assets: sounds that load before audio starts decode later');
+}
+
+// ------------------------------------------------------------ v0.2.2 ----
+// Clipping groups, image source rects and shape hits, end to end through the
+// WASM build.
+{
+  const pic = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 24'><rect width='32' height='24' fill='#f80'/></svg>";
+  const src = JSON.stringify({
+    format: 'microgame/0.2',
+    meta: { title: 'Clip test', instructions: '' },
+    assets: { pic: { svg: pic, w: 32, h: 24 } },
+    state: {
+      inside: { type: 'int', init: '0' },
+      tri: { type: 'int', init: '0' },
+    },
+    inputs: { hit_inside: {}, hit_tri: {} },
+    rules: [{ on: 'hit_inside', do: [{ incr: 'inside' }] }, { on: 'hit_tri', do: [{ incr: 'tri' }] }],
+    objectives: { time_limit: '60s' },
+    presentation: {
+      canvas: { w: 360, h: 640, background: '#000' },
+      root: { node: 'group', children: [
+        { node: 'group', x: 20, y: 40, w: 100, h: 50, clip: true, children: [
+          { node: 'image', asset: 'pic', x: -10, w: 200, h: 150, src_x: 8, src_y: 6, src_w: 16, src_h: 12 },
+          { node: 'rect', w: 200, h: 200, fill: '#FFFFFF20', on_tap: { input: 'hit_inside' } },
+        ] },
+        { node: 'poly', x: 200, y: 300, points: [[0, 0], [60, 0], [30, 60]], hit: 'shape', fill: '#0F0',
+          on_tap: { input: 'hit_tri' } },
+        { node: 'image', asset: 'pic', x: 0, y: 500 },
+      ] },
+    },
+  });
+  const diags = engine.validate(src);
+  check(!diags.some((d) => d.severity === 'error'), `clip test should validate: ${JSON.stringify(diags.slice(0, 3))}`);
+  const bad = engine.validate(src.replace('"src_w":16', '"src_w":0').replace('"w":100,"h":50,', ''));
+  check(bad.some((d) => d.at.endsWith('/src_w') && /greater than 0/.test(d.message)), 'src_w 0 is a validation error');
+  check(bad.some((d) => d.at.endsWith('/clip') && /needs the group's box/.test(d.message)), 'clip without w/h is a validation error');
+
+  const a = engine.load(src, 1), b = engine.load(src, 1);
+  const bin = a.frame(), js = b.frameJSON();
+  compareFrames('clip test', 0, bin, js);
+  check(JSON.stringify(js.ops.map((o) => o.op)) === JSON.stringify(['clip', 'image', 'rect', 'unclip', 'poly', 'image']),
+    `clip test ops: ${js.ops.map((o) => o.op)}`);
+  check(JSON.stringify(js.ops[0]) === JSON.stringify({ op: 'clip', x: 20, y: 40, w: 100, h: 50 }), `clip op: ${JSON.stringify(js.ops[0])}`);
+  check(js.ops[1].src_w === 16 && js.ops[1].src_x === 8 && !('src_x' in js.ops[5]), 'only the cropped image has src fields');
+  check(bin.ops[5].src_w === undefined, 'the pooled image op lost its src fields');
+  // Taps: inside the clip hits the rect; on the rect but outside the clip hits nothing;
+  // the triangle only inside its shape.
+  for (const g of [a, b]) {
+    for (const [x, y] of [[25, 45], [25, 120], [230, 310], [203, 350]]) { g.pointer('down', x, y); g.pointer('up', x, y); }
+    g.step(16);
+  }
+  const st = a.state();
+  check(st.inside === 1 && st.tri === 1, `clip/shape taps: ${JSON.stringify({ inside: st.inside, tri: st.tri })}`);
+  const targets = a.hitTargets();
+  check(targets.some((t) => t.x === 20 && t.y === 40 && t.w === 100 && t.h === 50), `clipped hit target: ${JSON.stringify(targets)}`);
+  check(a.diagnostics().length === 0, `clip test diagnostics ${JSON.stringify(a.diagnostics())}`);
+
+  // The renderer: clip ops become save/clip/restore, the crop the 9-argument drawImage.
+  const { drawFrame, drawImageSrc } = await import('./render.js');
+  const calls = [];
+  const ctx = new Proxy({ canvas: { width: 360, height: 640 } }, {
+    get: (t, k) => (k in t ? t[k] : (...args) => calls.push([k, args])),
+  });
+  const img = { naturalWidth: 64, naturalHeight: 48 }; // a 2x raster of the 32x24 asset
+  const assets = { images: [{ img, ok: true, frames: 1, cols: 1, w: 32, h: 24 }] };
+  drawFrame(ctx, bin, assets);
+  const names = calls.map((c) => c[0]);
+  check(names.filter((n) => n === 'save').length === names.filter((n) => n === 'restore').length, `save/restore balance: ${names}`);
+  const clipAt = names.indexOf('clip', names.indexOf('clip') + 1); // the first clip is the canvas clip
+  const draws = calls.filter((c) => c[0] === 'drawImage');
+  check(clipAt > 0 && names.indexOf('drawImage') > clipAt, 'the cropped image is drawn inside the clip');
+  check(JSON.stringify(draws[0][1].slice(1)) === JSON.stringify([16, 12, 32, 24, 10, 40, 200, 150]), `crop drawImage: ${JSON.stringify(draws[0][1].slice(1))}`);
+  check(JSON.stringify(draws[1][1].slice(1)) === JSON.stringify([0, 0, 64, 48, 0, 500, 32, 24]), `plain drawImage: ${JSON.stringify(draws[1][1].slice(1))}`);
+  // A crop half past the frame's right edge draws only the part inside, into the left half of the box.
+  calls.length = 0;
+  drawImageSrc(ctx, assets.images[0], { x: 0, y: 0, w: 100, h: 50, src_x: 24, src_y: 0, src_w: 16, src_h: 24 }, 0, 0, 64, 48);
+  check(JSON.stringify(calls[0][1].slice(1)) === JSON.stringify([48, 0, 16, 48, 0, 0, 50, 50]), `edge crop: ${JSON.stringify(calls[0] && calls[0][1].slice(1))}`);
+  calls.length = 0;
+  drawImageSrc(ctx, assets.images[0], { x: 0, y: 0, w: 10, h: 10, src_x: 40, src_y: 0, src_w: 8, src_h: 8 }, 0, 0, 64, 48);
+  check(calls.length === 0, 'a crop entirely outside the frame draws nothing');
+  a.dispose(); b.dispose();
+  console.log('v0.2.2: clip ops, image crops and shape hits match between binary and JSON');
 }
 
 if (failures) {

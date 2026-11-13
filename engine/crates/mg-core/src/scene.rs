@@ -196,7 +196,10 @@ pub struct Node {
 #[derive(Clone, Debug)]
 pub enum NodeKind {
     /// Children positioned freely relative to the group's origin.
-    Group { children: Vec<Node> },
+    /// v0.2.2: `w`/`h` (both or neither) give the group an explicit box
+    /// `(0, 0, w, h)` instead of the union of its children; `clip` (needs
+    /// `w`/`h`) clips the children's drawing and hit areas to that box.
+    Group { children: Vec<Node>, w: Option<Prop>, h: Option<Prop>, clip: bool },
     /// Children laid out in a row or column. Size comes from the children.
     Stack { dir: Dir, gap: f64, align: Align, children: Vec<Node> },
     /// `source` (a grid-valued expression; `value` is bound) or `cols`/`rows`.
@@ -250,11 +253,27 @@ pub enum NodeKind {
         frame: Option<Prop>,
         flip_x: Option<Prop>,
         flip_y: Option<Prop>,
+        /// v0.2.2: source rectangle within the frame, in the asset's units
+        /// (its declared frame `w`/`h`). `None` = the whole frame:
+        /// `src_x`/`src_y` default 0, `src_w`/`src_h` to the rest of the frame.
+        src_x: Option<Prop>,
+        src_y: Option<Prop>,
+        src_w: Option<Prop>,
+        src_h: Option<Prop>,
     },
     /// v0.2. Ends relative to the node's origin. Uses `stroke`/`stroke_width`.
     Line { x1: Prop, y1: Prop, x2: Prop, y2: Prop },
     /// v0.2. `points`: `list<vec2|ivec2>` relative to the node's origin.
-    Poly { points: Prop, closed: bool },
+    /// v0.2.2: `hit_shape` (`"hit": "shape"`) hit-tests the polygon itself
+    /// (nonzero winding, like the fill) instead of its bounding box.
+    Poly { points: Prop, closed: bool, hit_shape: bool },
+}
+
+impl NodeKind {
+    /// A plain group (no box, no clip).
+    pub fn group(children: Vec<Node>) -> NodeKind {
+        NodeKind::Group { children, w: None, h: None, clip: false }
+    }
 }
 
 /// `on_tap` / `on_drag` / `on_press` / `on_release`: which input to send and how to build its payload.

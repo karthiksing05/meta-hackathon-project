@@ -268,7 +268,7 @@ fn grid_from_source_binds_cell_and_value() {
 #[test]
 fn group_with_negative_child_in_stack() {
     // Number Merge's board: a group whose backdrop starts at (-8, -8).
-    let group = node(NodeKind::Group { children: vec![at(rect(44.0, 44.0), -8.0, -8.0), rect(28.0, 28.0)] });
+    let group = node(NodeKind::group(vec![at(rect(44.0, 44.0), -8.0, -8.0), rect(28.0, 28.0)]));
     let root = node(NodeKind::Stack { dir: Dir::Column, gap: 0.0, align: Align::Center, children: vec![rect(100.0, 10.0), group] });
     let r = rects(&built(root));
     // Group bounds 44 wide → centered at x = 28; backdrop there, inner rect 8 further in.
@@ -335,7 +335,7 @@ fn defaults_visibility_and_opacity() {
     stroked.stroke = Some(cs("#fff"));
     let mut child = rect(5.0, 5.0);
     child.opacity = Some(c(0.5));
-    let mut group = node(NodeKind::Group { children: vec![hidden, stroked, child] });
+    let mut group = node(NodeKind::group(vec![hidden, stroked, child]));
     group.opacity = Some(c(0.5));
     let s = built(group);
     assert_eq!(s.frame.ops.len(), 2);
@@ -366,7 +366,7 @@ fn hit_targets_topmost_wins_and_with_uses_saved_locals() {
     // An overlapping rect painted later covers cell (1, 1).
     let mut cover = at(rect(10.0, 10.0), 10.0, 10.0);
     cover.on_tap = tap(1, vec![]);
-    let mut s = Scene::new(program(node(NodeKind::Group { children: vec![g, cover] }), Vec::new(), 4));
+    let mut s = Scene::new(program(node(NodeKind::group(vec![g, cover])), Vec::new(), 4));
     s.build(view(&[]), 1);
     assert_eq!(s.hits.len(), 5);
     let h = s.hit_at(15.0, 5.0).unwrap().clone();
@@ -386,7 +386,7 @@ fn hit_targets_topmost_wins_and_with_uses_saved_locals() {
 fn container_target_is_below_child_targets() {
     let mut child = rect(10.0, 10.0);
     child.on_tap = tap(1, vec![]);
-    let mut group = node(NodeKind::Group { children: vec![rect(30.0, 30.0), child] });
+    let mut group = node(NodeKind::group(vec![rect(30.0, 30.0), child]));
     group.on_drag = tap(0, vec![]);
     let s = built(group);
     let tpl = s.tpl.clone();
@@ -634,7 +634,7 @@ fn assets() -> Vec<Asset> {
 }
 
 fn image(asset: &str) -> Node {
-    node(NodeKind::Image { asset: cs(asset), w: None, h: None, frame: None, flip_x: None, flip_y: None })
+    node(NodeKind::Image { asset: cs(asset), w: None, h: None, frame: None, flip_x: None, flip_y: None, src_x: None, src_y: None, src_w: None, src_h: None })
 }
 
 fn scene_with(root: Node, feedback: Vec<Feedback>, camera: Option<Camera>, music: Option<Music>) -> Scene {
@@ -686,7 +686,7 @@ fn image_resolves_asset_defaults_size_and_animates_frames() {
 
 #[test]
 fn image_unknown_or_sound_asset_is_skipped_with_a_diagnostic() {
-    let root = node(NodeKind::Group { children: vec![image("nope"), image("flap"), image("hero")] });
+    let root = node(NodeKind::group(vec![image("nope"), image("flap"), image("hero")]));
     let mut s = scene_with(root, Vec::new(), None, None);
     s.build(view(&[]), 1);
     assert_eq!(s.frame.ops.len(), 1);
@@ -758,7 +758,7 @@ fn line_defaults_and_box() {
 
 #[test]
 fn poly_points_box_paint_and_cap() {
-    let mut p = node(NodeKind::Poly { points: vec2s(&[(0.0, 0.0), (10.0, 0.0), (5.0, -8.0)]), closed: true });
+    let mut p = node(NodeKind::Poly { points: vec2s(&[(0.0, 0.0), (10.0, 0.0), (5.0, -8.0)]), closed: true, hit_shape: false });
     p.anchor = Anchor::Center;
     let s = built(at(p, 50.0, 50.0));
     match &s.frame.ops[0] {
@@ -770,7 +770,7 @@ fn poly_points_box_paint_and_cap() {
         o => panic!("{o:?}"),
     }
     // ivec2 points from state, open, stroked.
-    let mut p = node(NodeKind::Poly { points: Prop::Expr(Expr::State(0)), closed: false });
+    let mut p = node(NodeKind::Poly { points: Prop::Expr(Expr::State(0)), closed: false, hit_shape: false });
     p.stroke = Some(cs("#fff"));
     let mut s = Scene::new(program(p, Vec::new(), 2));
     s.build(view(&[Value::list(vec![Value::IVec2(1, 2), Value::IVec2(3, 4)])]), 1);
@@ -780,7 +780,7 @@ fn poly_points_box_paint_and_cap() {
     }
     // Too many points: capped, one diagnostic.
     let many: Vec<(f64, f64)> = (0..300).map(|i| (i as f64, 0.0)).collect();
-    let s = built(node(NodeKind::Poly { points: vec2s(&many), closed: true }));
+    let s = built(node(NodeKind::Poly { points: vec2s(&many), closed: true, hit_shape: false }));
     match &s.frame.ops[0] {
         DrawOp::Poly(op) => assert_eq!(op.points.len(), MAX_POLY_POINTS),
         o => panic!("{o:?}"),
@@ -797,11 +797,11 @@ fn camera_x_from_state() -> Option<Camera> {
 fn hud_scene() -> Scene {
     let mut hud_btn = rect(40.0, 40.0);
     hud_btn.on_tap = tap(1, vec![Expr::Local(3)]);
-    let mut hud = node(NodeKind::Group { children: vec![hud_btn] });
+    let mut hud = node(NodeKind::group(vec![hud_btn]));
     hud.fixed = true;
     let mut world = at(rect(50.0, 50.0), 160.0, 10.0);
     world.on_tap = tap(0, vec![Expr::Local(3)]);
-    let root = node(NodeKind::Group { children: vec![hud, world] });
+    let root = node(NodeKind::group(vec![hud, world]));
     scene_with(root, Vec::new(), camera_x_from_state(), None)
 }
 
@@ -843,7 +843,7 @@ fn fixed_is_inherited_by_the_subtree_in_stacks_and_repeats() {
     });
     let mut hud = node(NodeKind::Stack { dir: Dir::Row, gap: 1.0, align: Align::Start, children: vec![rep, rect(2.0, 2.0)] });
     hud.fixed = true;
-    let root = node(NodeKind::Group { children: vec![hud, at(rect(1.0, 1.0), 100.0, 100.0)] });
+    let root = node(NodeKind::group(vec![hud, at(rect(1.0, 1.0), 100.0, 100.0)]));
     let mut s = scene_with(root, Vec::new(), Some(Camera { x: c(50.0), y: c(50.0) }), None);
     s.build(view(&[]), 1);
     assert_eq!(rects(&s), vec![(50.0, 50.0, 1.0, 1.0), (0.0, 0.0, 5.0, 5.0), (0.0, 0.0, 5.0, 5.0), (6.0, 0.0, 2.0, 2.0)]);
@@ -875,7 +875,7 @@ fn circles(s: &Scene) -> Vec<mg_core::frame::CircleOp> {
 fn particles_burst_fly_fade_and_expire() {
     let mut hud = rect(10.0, 10.0);
     hud.fixed = true;
-    let root = node(NodeKind::Group { children: vec![hud, rect(5.0, 5.0)] });
+    let root = node(NodeKind::group(vec![hud, rect(5.0, 5.0)]));
     let cam = Some(Camera { x: c(50.0), y: c(0.0) });
     let mut s = scene_with(root, particles_fb(16.0, 360.0, 0.0), cam, None);
     s.build(view(&[]), 1);
@@ -1045,4 +1045,212 @@ fn music_state_follows_status_and_bindings() {
     assert_eq!(s.diags.list.len(), 1);
     // No music section: none.
     assert_eq!(built(rect(1.0, 1.0)).frame.music, None);
+}
+
+// ── v0.2.2: clipping groups, image crops, shape hits ───────────────────────
+
+use crate::build::point_in_poly;
+use mg_core::frame::ClipOp;
+
+fn clip_group(w: f64, h: f64, children: Vec<Node>) -> Node {
+    node(NodeKind::Group { children, w: Some(c(w)), h: Some(c(h)), clip: true })
+}
+
+fn clip_of(op: &DrawOp) -> &ClipOp {
+    match op {
+        DrawOp::Clip(c) => c,
+        o => panic!("not a clip: {o:?}"),
+    }
+}
+
+#[test]
+fn clip_group_wraps_child_ops_and_has_a_fixed_box() {
+    let mut big = at(rect(200.0, 200.0), -20.0, -20.0);
+    big.on_tap = tap(0, vec![]);
+    let g = at(clip_group(100.0, 50.0, vec![big]), 10.0, 20.0);
+    // In a row stack, the next child goes after the group's box (100 wide), not the child's (200).
+    let root = node(NodeKind::Stack { dir: Dir::Row, gap: 0.0, align: Align::Start, children: vec![g, rect(5.0, 5.0)] });
+    let s = built(root);
+    assert_eq!(s.frame.ops.len(), 4);
+    assert_eq!(clip_of(&s.frame.ops[0]), &ClipOp { x: 10.0, y: 20.0, w: 100.0, h: 50.0 });
+    assert_eq!((rect_op(&s, 1).x, rect_op(&s, 1).y), (-10.0, 0.0));
+    assert_eq!(s.frame.ops[2], DrawOp::Unclip);
+    assert_eq!(rect_op(&s, 3).x, 100.0);
+    // The child's hit box is cut to the group's box.
+    assert_eq!(s.hits.len(), 1);
+    let h = &s.hits[0];
+    assert_eq!((h.x, h.y, h.w, h.h), (10.0, 20.0, 100.0, 50.0));
+    assert!(s.hit_at(5.0, 5.0).is_none(), "drawn-over but clipped away");
+    assert!(s.hit_at(150.0, 30.0).is_none());
+    assert!(s.hit_at(50.0, 40.0).is_some());
+    assert!(s.diags.list.is_empty(), "{:?}", s.diags.list);
+}
+
+#[test]
+fn clip_drops_hidden_targets_and_empty_clips() {
+    let mut inside = at(rect(10.0, 10.0), 5.0, 5.0);
+    inside.on_tap = tap(0, vec![]);
+    let mut outside = at(rect(10.0, 10.0), 60.0, 5.0);
+    outside.on_tap = tap(1, vec![]);
+    let s = built(clip_group(50.0, 50.0, vec![inside, outside]));
+    assert_eq!(s.hits.len(), 1);
+    assert!(s.hit_at(65.0, 10.0).is_none());
+    let tpl = s.tpl.clone();
+    assert_eq!(tpl.nodes[s.hit_at(8.0, 8.0).unwrap().node as usize].on_tap.as_ref().unwrap().input, 0);
+    // A clip with nothing drawn inside emits no ops; a group target keeps its box.
+    let mut hidden = rect(10.0, 10.0);
+    hidden.visible = Some(Prop::Const(Value::Bool(false)));
+    let mut g = at(clip_group(30.0, 40.0, vec![hidden]), 7.0, 0.0);
+    g.on_tap = tap(2, vec![]);
+    let s = built(g);
+    assert!(s.frame.ops.is_empty(), "{:?}", s.frame.ops);
+    assert_eq!((s.hits[0].x, s.hits[0].w, s.hits[0].h), (7.0, 30.0, 40.0));
+    // A box without clip: no clip ops, children not cut.
+    let mut child = at(rect(10.0, 10.0), 60.0, 0.0);
+    child.on_tap = tap(0, vec![]);
+    let s = built(node(NodeKind::Group { children: vec![child], w: Some(c(20.0)), h: Some(c(20.0)), clip: false }));
+    assert_eq!(s.frame.ops.len(), 1);
+    assert!(s.hit_at(65.0, 5.0).is_some());
+}
+
+#[test]
+fn nested_clips_intersect_hits_and_follow_the_camera() {
+    let mut r = at(rect(100.0, 100.0), 0.0, 0.0);
+    r.on_tap = tap(0, vec![]);
+    let inner = at(clip_group(40.0, 40.0, vec![r]), 30.0, 0.0);
+    let outer = at(clip_group(50.0, 50.0, vec![inner]), 100.0, 100.0);
+    let mut s = scene_with(outer, Vec::new(), camera_x_from_state(), None);
+    s.build(view(&[Value::Float(20.0)]), 1);
+    // Camera (20, 10) applied to every op.
+    assert_eq!(clip_of(&s.frame.ops[0]), &ClipOp { x: 80.0, y: 90.0, w: 50.0, h: 50.0 });
+    assert_eq!(clip_of(&s.frame.ops[1]), &ClipOp { x: 110.0, y: 90.0, w: 40.0, h: 40.0 });
+    assert_eq!(s.frame.ops[3], DrawOp::Unclip);
+    assert_eq!(s.frame.ops[4], DrawOp::Unclip);
+    // Hit = rect ∩ inner ∩ outer = x 110..130, y 90..130 (screen).
+    let h = &s.hits[0];
+    assert_eq!((h.x, h.y, h.w, h.h), (110.0, 90.0, 20.0, 40.0));
+    assert!(s.hit_at(135.0, 100.0).is_none());
+    assert!(s.hit_at(120.0, 100.0).is_some());
+}
+
+#[test]
+fn fixed_children_of_a_world_clip_are_not_clipped() {
+    let mut hud = at(rect(20.0, 20.0), 200.0, 0.0);
+    hud.fixed = true;
+    hud.on_tap = tap(1, vec![]);
+    let world = rect(100.0, 100.0);
+    let mut s = scene_with(clip_group(50.0, 50.0, vec![world, hud]), Vec::new(), camera_x_from_state(), None);
+    s.build(view(&[Value::Float(0.0)]), 1);
+    // World layer: clip, rect, unclip; then the HUD rect, unclipped.
+    assert!(matches!(s.frame.ops[0], DrawOp::Clip(_)));
+    assert_eq!(s.frame.ops[2], DrawOp::Unclip);
+    assert_eq!((rect_op(&s, 3).x, rect_op(&s, 3).y), (200.0, 0.0));
+    assert!(s.hit_at(210.0, 10.0).is_some());
+}
+
+#[test]
+fn clips_stay_balanced_at_the_op_cap() {
+    let many: Vec<Node> = (0..MAX_RENDER_OPS + 50).map(|_| rect(1.0, 1.0)).collect();
+    let inner = clip_group(10.0, 10.0, vec![clip_group(5.0, 5.0, many)]);
+    let s = built(node(NodeKind::group(vec![rect(1.0, 1.0), inner, rect(2.0, 2.0)])));
+    let ops = &s.frame.ops;
+    assert!(ops.len() <= MAX_RENDER_OPS, "{}", ops.len());
+    let clips = ops.iter().filter(|o| matches!(o, DrawOp::Clip(_))).count();
+    let unclips = ops.iter().filter(|o| matches!(o, DrawOp::Unclip)).count();
+    assert_eq!((clips, unclips), (2, 2));
+    assert_eq!(ops[ops.len() - 1], DrawOp::Unclip);
+    assert!(s.diags.list.iter().any(|d| d.code == Code::Limit));
+}
+
+#[test]
+fn image_src_rect_defaults_and_errors() {
+    let with_src = |sx: Option<Prop>, sy: Option<Prop>, sw: Option<Prop>, sh: Option<Prop>| {
+        let mut n = image("hero");
+        if let NodeKind::Image { src_x, src_y, src_w, src_h, w, h, .. } = &mut n.kind {
+            (*src_x, *src_y, *src_w, *src_h) = (sx, sy, sw, sh);
+            (*w, *h) = (Some(c(200.0)), Some(c(150.0)));
+        }
+        n
+    };
+    // No src props: no source rect in the op (old frames unchanged).
+    let mut s = scene_with(image("hero"), Vec::new(), None, None);
+    s.build(view(&[]), 1);
+    assert_eq!(image_op(&s, 0).src, None);
+    // Explicit crop of the 32x24 frame, stretched to the 200x150 box.
+    let mut s = scene_with(with_src(Some(c(8.0)), Some(c(6.0)), Some(c(16.0)), Some(c(12.0))), Vec::new(), None, None);
+    s.build(view(&[]), 1);
+    let op = image_op(&s, 0);
+    assert_eq!((op.w, op.h, op.src), (200.0, 150.0, Some([8.0, 6.0, 16.0, 12.0])));
+    // Only src_x / src_y: the size defaults to the rest of the frame.
+    let mut s = scene_with(with_src(Some(c(8.0)), Some(c(4.0)), None, None), Vec::new(), None, None);
+    s.build(view(&[]), 1);
+    assert_eq!(image_op(&s, 0).src, Some([8.0, 4.0, 24.0, 20.0]));
+    // A bound size <= 0: nothing drawn, one diagnostic, the box still takes taps.
+    let mut n = with_src(None, None, Some(Prop::Expr(Expr::State(0))), None);
+    n.on_tap = tap(0, vec![]);
+    let mut s = scene_with(n, Vec::new(), None, None);
+    s.build(view(&[Value::Float(0.0)]), 1);
+    assert!(s.frame.ops.is_empty());
+    assert_eq!(s.diags.list.len(), 1, "{:?}", s.diags.list);
+    assert!(s.diags.list[0].message.contains("`src_w` must be greater than 0"), "{}", s.diags.list[0].message);
+    assert!(s.diags.list[0].at.ends_with("/src_w"));
+    assert!(s.hit_at(100.0, 100.0).is_some());
+    s.build(view(&[Value::Float(4.0)]), 2);
+    assert_eq!(image_op(&s, 0).src, Some([0.0, 0.0, 4.0, 24.0]));
+}
+
+#[test]
+fn point_in_poly_nonzero_winding() {
+    let tri = [(0.0, 0.0), (20.0, 0.0), (10.0, 20.0)];
+    assert!(point_in_poly(&tri, 10.0, 5.0));
+    assert!(!point_in_poly(&tri, 2.0, 15.0), "inside the box, outside the triangle");
+    assert!(!point_in_poly(&tri, 30.0, 5.0));
+    // Either orientation.
+    let rev = [(10.0, 20.0), (20.0, 0.0), (0.0, 0.0)];
+    assert!(point_in_poly(&rev, 10.0, 5.0) && !point_in_poly(&rev, 2.0, 15.0));
+    // A self-crossing star: nonzero fills the middle (even-odd would not).
+    let star: Vec<(f64, f64)> = (0..5)
+        .map(|i| {
+            let a = (i as f64 * 144.0 - 90.0).to_radians();
+            (50.0 + 40.0 * a.cos(), 50.0 + 40.0 * a.sin())
+        })
+        .collect();
+    assert!(point_in_poly(&star, 50.0, 50.0));
+    assert!(point_in_poly(&star, 50.0, 15.0), "a point of the star");
+    assert!(!point_in_poly(&star, 20.0, 85.0), "between two points");
+    // Fewer than 3 points have no inside.
+    assert!(!point_in_poly(&[(0.0, 0.0), (10.0, 10.0)], 5.0, 5.0));
+}
+
+#[test]
+fn poly_hit_shape_only_inside_the_polygon() {
+    let tri = || vec2s(&[(0.0, 0.0), (20.0, 0.0), (10.0, 20.0)]);
+    let mut shaped = node(NodeKind::Poly { points: tri(), closed: true, hit_shape: true });
+    shaped.on_tap = tap(0, vec![]);
+    let mut boxed = node(NodeKind::Poly { points: tri(), closed: true, hit_shape: false });
+    boxed.on_tap = tap(1, vec![]);
+    // Shaped poly placed by a stack (shifted) under a camera.
+    let root = node(NodeKind::Stack {
+        dir: Dir::Row,
+        gap: 0.0,
+        align: Align::Start,
+        children: vec![rect(100.0, 1.0), shaped, at(boxed, 50.0, 0.0)],
+    });
+    let mut s = scene_with(at(root, 0.0, 10.0), Vec::new(), camera_x_from_state(), None);
+    s.build(view(&[Value::Float(-5.0)]), 1);
+    // Camera (-5, 10): the shaped triangle's origin is at screen (105, 0).
+    let tpl = s.tpl.clone();
+    let input = |h: Option<&crate::build::HitRec>| h.map(|h| tpl.nodes[h.node as usize].on_tap.as_ref().unwrap().input);
+    assert_eq!(input(s.hit_at(115.0, 5.0)), Some(0), "inside");
+    assert_eq!(input(s.hit_at(107.0, 15.0)), None, "in the box, outside the triangle");
+    assert_eq!(input(s.hit_at(124.0, 1.0)), Some(0));
+    // The box poly (origin at screen 175, 0) still hits its whole box.
+    assert_eq!(input(s.hit_at(177.0, 15.0)), Some(1));
+    // In a clip, a shape hit is the polygon ∩ the clip.
+    let mut p = node(NodeKind::Poly { points: tri(), closed: true, hit_shape: true });
+    p.on_tap = tap(0, vec![]);
+    let s = built(clip_group(20.0, 8.0, vec![p]));
+    assert!(s.hit_at(10.0, 5.0).is_some());
+    assert!(s.hit_at(10.0, 12.0).is_none(), "inside the triangle but clipped");
+    assert!(s.hit_at(1.0, 6.0).is_none(), "inside the clip but outside the triangle");
 }

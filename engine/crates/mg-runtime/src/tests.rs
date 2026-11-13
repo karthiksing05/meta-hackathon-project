@@ -20,7 +20,7 @@ mod v02;
 
 fn empty_program() -> Program {
     let root = Node {
-        kind: NodeKind::Group { children: vec![] },
+        kind: NodeKind::group(vec![]),
         at: Rc::from("/presentation/root"),
         id: None,
         x: None,

@@ -39,8 +39,23 @@ pub fn frame_json(f: &Frame, out: &mut Vec<u8>) {
                 field_num(out, "rotation", m.rotation);
                 field_num(out, "scale", m.scale);
                 field_num(out, "opacity", m.opacity);
+                if let Some([sx, sy, sw, sh]) = m.src {
+                    field_num(out, "src_x", sx);
+                    field_num(out, "src_y", sy);
+                    field_num(out, "src_w", sw);
+                    field_num(out, "src_h", sh);
+                }
                 out.push(b'}');
             }
+            DrawOp::Clip(c) => {
+                out.extend_from_slice(b"{\"op\":\"clip\",\"x\":");
+                num(out, c.x);
+                field_num(out, "y", c.y);
+                field_num(out, "w", c.w);
+                field_num(out, "h", c.h);
+                out.push(b'}');
+            }
+            DrawOp::Unclip => out.extend_from_slice(b"{\"op\":\"unclip\"}"),
             DrawOp::Line(l) => {
                 out.extend_from_slice(b"{\"op\":\"line\",\"x1\":");
                 num(out, l.x1);
@@ -315,6 +330,15 @@ pub const OP_TEXT: u32 = 3;
 pub const OP_IMAGE: u32 = 4;
 pub const OP_LINE: u32 = 5;
 pub const OP_POLY: u32 = 6;
+/// v0.2.2: start clipping to a rectangle (5 words).
+pub const OP_CLIP: u32 = 7;
+/// v0.2.2: end the innermost clip (1 word).
+pub const OP_UNCLIP: u32 = 8;
+/// Image head flags.
+pub const IMAGE_FLIP_X: u32 = 1 << 8;
+pub const IMAGE_FLIP_Y: u32 = 1 << 9;
+/// v0.2.2: 4 more words, the source rectangle `src_x, src_y, src_w, src_h`.
+pub const IMAGE_SRC: u32 = 1 << 10;
 /// v0.2.1 text head flags: an outline follows (`u32 stroke, f32 stroke_width`).
 pub const TEXT_STROKE: u32 = 1 << 8;
 /// v0.2.1 text head flag: several lines; `f32 line_height` follows.
@@ -407,8 +431,17 @@ impl BinEncoder {
         for op in &f.ops {
             match op {
                 DrawOp::Image(m) => {
-                    let flags = m.flip_x as u32 | (m.flip_y as u32) << 1;
-                    put_u32(&mut body, OP_IMAGE | flags << 8);
+                    let mut head = OP_IMAGE;
+                    if m.flip_x {
+                        head |= IMAGE_FLIP_X;
+                    }
+                    if m.flip_y {
+                        head |= IMAGE_FLIP_Y;
+                    }
+                    if m.src.is_some() {
+                        head |= IMAGE_SRC;
+                    }
+                    put_u32(&mut body, head);
                     put_f32(&mut body, m.x);
                     put_f32(&mut body, m.y);
                     put_f32(&mut body, m.w);
@@ -417,7 +450,20 @@ impl BinEncoder {
                     put_f32(&mut body, m.rotation);
                     put_f32(&mut body, m.scale);
                     put_f32(&mut body, m.opacity);
+                    if let Some(src) = m.src {
+                        for v in src {
+                            put_f32(&mut body, v);
+                        }
+                    }
                 }
+                DrawOp::Clip(c) => {
+                    put_u32(&mut body, OP_CLIP);
+                    put_f32(&mut body, c.x);
+                    put_f32(&mut body, c.y);
+                    put_f32(&mut body, c.w);
+                    put_f32(&mut body, c.h);
+                }
+                DrawOp::Unclip => put_u32(&mut body, OP_UNCLIP),
                 DrawOp::Line(l) => {
                     put_u32(&mut body, OP_LINE);
                     put_f32(&mut body, l.x1);
@@ -581,7 +627,7 @@ fn put_f32(out: &mut Vec<u8>, v: f64) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mg_core::frame::{CircleOp, ImageOp, LineOp, MusicState, PolyOp, RectOp, Sound, TextOp, Toast};
+    use mg_core::frame::{CircleOp, ClipOp, ImageOp, LineOp, MusicState, PolyOp, RectOp, Sound, TextOp, Toast};
 
     fn sample(text: &str) -> Frame {
         Frame {
@@ -659,6 +705,7 @@ mod tests {
             rotation: 15.0,
             scale: 1.5,
             opacity: 0.75,
+            src: None,
         }));
         f.ops.push(DrawOp::Line(LineOp {
             x1: 0.0,
@@ -806,6 +853,8 @@ mod tests {
                 OP_IMAGE => {
                     let (x, y, w, h) = (r.f32(), r.f32(), r.f32(), r.f32());
                     let af = r.u32();
+                    let (rotation, scale, opacity) = (r.f32(), r.f32(), r.f32());
+                    let src = (head & IMAGE_SRC != 0).then(|| [r.f32(), r.f32(), r.f32(), r.f32()]);
                     DrawOp::Image(ImageOp {
                         x,
                         y,
@@ -813,13 +862,16 @@ mod tests {
                         h,
                         asset: (af & 0xffff) as u16,
                         frame: (af >> 16) as u16,
-                        flip_x: head & (1 << 8) != 0,
-                        flip_y: head & (2 << 8) != 0,
-                        rotation: r.f32(),
-                        scale: r.f32(),
-                        opacity: r.f32(),
+                        flip_x: head & IMAGE_FLIP_X != 0,
+                        flip_y: head & IMAGE_FLIP_Y != 0,
+                        rotation,
+                        scale,
+                        opacity,
+                        src,
                     })
                 }
+                OP_CLIP => DrawOp::Clip(ClipOp { x: r.f32(), y: r.f32(), w: r.f32(), h: r.f32() }),
+                OP_UNCLIP => DrawOp::Unclip,
                 OP_LINE => DrawOp::Line(LineOp {
                     x1: r.f32(),
                     y1: r.f32(),
@@ -907,7 +959,18 @@ mod tests {
                     for v in [&mut m.x, &mut m.y, &mut m.w, &mut m.h, &mut m.rotation, &mut m.scale, &mut m.opacity] {
                         *v = f32r(*v);
                     }
+                    if let Some(src) = &mut m.src {
+                        for v in src {
+                            *v = f32r(*v);
+                        }
+                    }
                 }
+                DrawOp::Clip(c) => {
+                    for v in [&mut c.x, &mut c.y, &mut c.w, &mut c.h] {
+                        *v = f32r(*v);
+                    }
+                }
+                DrawOp::Unclip => {}
                 DrawOp::Line(l) => {
                     for v in [&mut l.x1, &mut l.y1, &mut l.x2, &mut l.y2, &mut l.stroke_width, &mut l.opacity] {
                         *v = f32r(*v);
@@ -1024,6 +1087,73 @@ mod tests {
         enc.encode(&sample_v2(), &mut out);
         let words = HEADER_WORDS + (12 + 9 + 13) + 9 + 8 + (6 + 6) + 6 + (5 + 4) + (5 + 1) + 4 + 2 + 2;
         assert_eq!(out.len(), 4 * words);
+    }
+
+    /// v0.2.2: a clipped, cropped image.
+    fn sample_v22() -> Frame {
+        let mut f = sample_v2();
+        f.ops.push(DrawOp::Clip(ClipOp { x: 20.0, y: 40.5, w: 200.0, h: 150.25 }));
+        f.ops.push(DrawOp::Image(ImageOp {
+            x: 20.0,
+            y: 40.5,
+            w: 200.0,
+            h: 200.0,
+            asset: 1,
+            frame: 0,
+            flip_x: false,
+            flip_y: true,
+            rotation: 0.0,
+            scale: 1.0,
+            opacity: 1.0,
+            src: Some([8.0, 4.5, 16.0, 12.25]),
+        }));
+        f.ops.push(DrawOp::Unclip);
+        f
+    }
+
+    #[test]
+    fn clip_and_image_src_json() {
+        let mut out = Vec::new();
+        frame_json(&sample_v22(), &mut out);
+        let v: serde_json::Value = serde_json::from_slice(&out).expect("valid JSON");
+        let ops = v["ops"].as_array().unwrap();
+        assert_eq!(ops.len(), 10);
+        // An image without a source rect has no src fields (old frames unchanged).
+        assert!(ops[3].get("src_x").is_none());
+        assert_eq!(ops[7], serde_json::json!({"op": "clip", "x": 20, "y": 40.5, "w": 200, "h": 150.25}));
+        assert_eq!(
+            ops[8],
+            serde_json::json!({"op": "image", "x": 20, "y": 40.5, "w": 200, "h": 200, "asset": 1, "frame": 0,
+                "flip_x": false, "flip_y": true, "rotation": 0, "scale": 1, "opacity": 1,
+                "src_x": 8, "src_y": 4.5, "src_w": 16, "src_h": 12.25})
+        );
+        assert_eq!(ops[9], serde_json::json!({"op": "unclip"}));
+    }
+
+    #[test]
+    fn clip_and_image_src_binary() {
+        let mut enc = BinEncoder::new();
+        let mut strings = Vec::new();
+        let f = sample_v22();
+        let mut out = Vec::new();
+        enc.encode(&f, &mut out);
+        let back = decode(&out, &mut strings);
+        assert_eq!(back.ops, rounded(&f).ops);
+        // The v0.2 frame plus clip 5 words, image with src 9 + 4, unclip 1.
+        let mut v2 = Vec::new();
+        BinEncoder::new().encode(&sample_v2(), &mut v2);
+        assert_eq!(out.len(), v2.len() + 4 * (5 + 13 + 1));
+        // Just the new ops: clip at word 13, the image head (flip_y and the
+        // src flag only) at 18, unclip at 31.
+        let only = Frame { ops: f.ops[7..].to_vec(), ..Frame::default() };
+        let mut out = Vec::new();
+        BinEncoder::new().encode(&only, &mut out);
+        let word = |i: usize| u32::from_le_bytes(out[4 * i..4 * i + 4].try_into().unwrap());
+        assert_eq!(out.len(), 4 * (HEADER_WORDS + 19));
+        assert_eq!(word(HEADER_WORDS), OP_CLIP);
+        assert_eq!(word(HEADER_WORDS + 5), OP_IMAGE | IMAGE_FLIP_Y | IMAGE_SRC);
+        assert_eq!(word(HEADER_WORDS + 18), OP_UNCLIP);
+        assert_eq!(decode(&out, &mut Vec::new()).ops, rounded(&only).ops);
     }
 
     /// v0.2.1: a wrapped, outlined text op.
