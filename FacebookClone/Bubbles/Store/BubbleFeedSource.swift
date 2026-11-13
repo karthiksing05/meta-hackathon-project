@@ -51,12 +51,18 @@ extension BubbleStore {
         guard !isPreview, feedTask == nil, feedState != .end else { return }
         feedState = .loading
         let exclude = Array(Set(feedItems.map(\.bubbleID)))
+        feedGeneration += 1
+        let generation = feedGeneration
         feedTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            defer { self.feedTask = nil }
+            // A reload (account change, Try again) starts a newer request; this one then leaves
+            // the feed alone, so a cancelled request never shows as "Couldn't load".
+            defer { if self.feedGeneration == generation { self.feedTask = nil } }
             _ = await GamesAccount.shared.waitForUser()
+            guard !Task.isCancelled, feedGeneration == generation else { return }
             do {
                 let page = try await api.feed(limit: Self.feedPageSize, sessionID: feedSessionID, exclude: exclude)
+                guard !Task.isCancelled, feedGeneration == generation else { return }
                 var added: [BubbleFeedItem] = []
                 for item in page where !feedItems.contains(where: { $0.id == item.feedItemID }) {
                     guard let bubble = await adopt(item.game) else { continue }
@@ -65,9 +71,11 @@ extension BubbleStore {
                         serverReason: item.reason, why: item.why, team: item.team
                     ))
                 }
+                guard feedGeneration == generation else { return }
                 feedItems.append(contentsOf: added)
                 feedState = added.isEmpty ? .end : .idle
             } catch {
+                guard !Task.isCancelled, feedGeneration == generation else { return }
                 feedState = .failed(error.localizedDescription)
             }
         }
