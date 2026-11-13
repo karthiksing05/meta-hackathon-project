@@ -111,12 +111,13 @@ ${body}
 
   /**
    * Replays a run's input log (microgame-log/1) against the exact game text and checks the result
-   * it claims: {ok, game_hash_ok, steps, recomputed, claimed, problems}.
+   * it claims: {ok, game_hash_ok, steps, recomputed, claimed, problems, result}. result is the end
+   * values of the state named in state (group_play.result.state), or all of the game's state.
    */
-  function verify(gameText, log) {
+  function verify(gameText, log, state) {
     const e = getEngine();
     if (!e) return { ok: false, game_hash_ok: false, steps: 0, recomputed: null, claimed: null, problems: [engineError || "engine unavailable"] };
-    return e.verify(gameText, log);
+    return e.verify(gameText, log, state);
   }
 
   root.MicrogameEngine = Object.freeze({

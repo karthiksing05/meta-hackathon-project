@@ -15,6 +15,8 @@ import SwiftUI
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
 ///   keys: challenge, groups-search, together, remix, story, nextline, learn, length, saves)
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
+/// - `FB_STUDIO_PLAN=normal|questions|gap|opinion|story|loading|failed|off`: Studio's Plan step answers
+///   with a preview plan (`GamePlanFixtures`) instead of the server, for screenshots.
 /// - `FB_API_URL`: overrides the games API base URL (default `https://api.ol4ol.com`). Point it at an
 ///   unreachable host to see the loading and error states.
 /// - `FB_RESUME_DEMO=<seconds>` / `FB_RESUME_AUTO=1`: the Resume prompt in the player (see

@@ -69,7 +69,9 @@ struct StudioView: View {
                 StudioAskStep(model: model)
                     .transition(stageTransition)
             case .brief:
-                StudioBriefStep(model: model)
+                // New games plan first (harness v2, POST /v1/harness/plan); the Brief step shows
+                // when planning is off on the server or for remixes and edits.
+                StudioPlanGate(model: model) { StudioBriefStep(model: model) }
                     .transition(stageTransition)
             case .compose:
                 StudioComposeStep(model: model)

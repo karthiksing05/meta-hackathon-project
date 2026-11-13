@@ -278,6 +278,15 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
     check(!vb.ok && vb.problems.some((p) => p.includes('final.score')), `${name}: a raised score should fail engine.verify`);
     check(!engine.verify(game + ' ', text).game_hash_ok, `${name}: another game file should fail the hash check`);
     check(!engine.verify(game, '{"format":"nope"}').ok, `${name}: a malformed log should fail`);
+    // `result`: the replay's end state, all of it or just the names asked for (group_play.result.state).
+    check(v.result && typeof v.result === 'object' && !Array.isArray(v.result), `${name}: verify should return the end state as result`);
+    const names = Object.keys(v.result);
+    if (names.length) {
+      const one = engine.verify(game, text, [names[0], 'no_such_var']);
+      check(JSON.stringify(one.result) === JSON.stringify({ [names[0]]: v.result[names[0]], no_such_var: null }),
+        `${name}: verify(state) should pick the named values: ${JSON.stringify(one.result)}`);
+      check(JSON.stringify(engine.verify(game, text, names).result) === JSON.stringify(v.result), `${name}: the same replay gives the same end state`);
+    }
   }
   console.log(`engine.verify: ${Object.keys(logs).length} logs verified in WASM, raised scores and other games rejected`);
 }
@@ -306,6 +315,29 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
     rmSync(dir, { recursive: true, force: true });
     console.log(`native verify: ${Object.keys(logs).length} WASM-recorded logs verified, tampered copies rejected`);
   }
+}
+
+// Sounds that load before there's an audio context (muted, or before the first tap) are decoded
+// once one exists, instead of failing for the whole run (Karthik's harness-gap request).
+{
+  const { AssetStore, MusicPlayer } = await import('./render.js');
+  let ctx = null;
+  const decoded = [];
+  const fakeCtx = {
+    state: 'suspended',
+    decodeAudioData(bytes, ok) { decoded.push(bytes.byteLength); const buf = { length: bytes.byteLength }; ok(buf); return Promise.resolve(buf); },
+  };
+  const wav = 'data:audio/wav;base64,' + Buffer.from('RIFF0000WAVEfmt ').toString('base64');
+  const store = new AssetStore([{ id: 0, name: 'beep', kind: 'sound', src: wav }], { audioCtx: () => ctx });
+  await store.ready;
+  check(store.failed.length === 0 && !store.buffers[0] && store.pending.length === 1, 'a sound with no audio context waits instead of failing');
+  store.decodePending();
+  check(store.pending.length === 1, 'still waiting while there is no context');
+  ctx = fakeCtx;
+  new MusicPlayer().sync(null, { playing: true, asset: 0, volume: 1 }, store);
+  await new Promise((r) => setTimeout(r, 0));
+  check(store.buffers[0] && store.pending.length === 0 && decoded.length === 1, 'the waiting sound decodes once a context exists (even suspended)');
+  console.log('assets: sounds that load before audio starts decode later');
 }
 
 if (failures) {

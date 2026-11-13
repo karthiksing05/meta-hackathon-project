@@ -44,6 +44,7 @@ struct BubbleDetailView: View {
                 tags(bubble)
                 museRow(bubble)
                 popInButton(bubble)
+                GroupPlaySendButton(bubble: bubble)
                 stats(bubble)
                 actions(bubble)
                 ShowcaseDetailSection(bubble: bubble)
