@@ -208,12 +208,11 @@ if (engine) {
     g.dispose();
   }
 
-  // typed_answer end to end: one prompt, tap the keyboard, submit, read the result.
-  const LETTERS = 'qwertyuiopasdfghjklzxcvbnm <>';
+  // typed_answer end to end: one prompt, type into the native text field, submit, read the result.
   const typedGame = (answers, params = {}) => {
     const m = JSON.parse(readFileSync(join(authoringDir, 'games', 'typed_answer_min.authoring.json'), 'utf8'));
     m.content = { prompts: ['Name a thing'], answers: [answers] };
-    m.uses[1].params = { ...m.uses[1].params, max_len: 24, ...params };
+    m.uses[0].params = { ...m.uses[0].params, max_len: 24, ...params };
     const out = expand(m, lib);
     const e = out.diagnostics.filter((d) => d.severity === 'error');
     if (e.length) throw new Error(e.map((d) => d.code + ' ' + d.message).join('; '));
@@ -222,14 +221,9 @@ if (engine) {
   const play = (json, text) => {
     const g = engine.load(json, 7);
     g.step(16);
-    for (const ch of text + '>') {
-      const i = LETTERS.indexOf(ch);
-      const x = 9 + (i % 10) * 34 + 15.5, y = 420 + Math.floor(i / 10) * 34 + 15.5;
-      g.frame();
-      g.pointer('down', x, y);
-      g.pointer('up', x, y);
-      g.step(16);
-    }
+    for (let i = 1; i <= text.length; i++) { g.text('change', text.slice(0, i)); g.step(16); }
+    g.text('submit', text);
+    g.text('change', '');
     g.step(16);
     const st = g.state();
     const errs = (g.diagnostics() ?? []).filter((d) => d.severity === 'error');

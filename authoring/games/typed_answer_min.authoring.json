@@ -2,7 +2,6 @@
   "authoring": "microgame-authoring/0.1",
   "meta": { "title": "Rare Finds", "instructions": "Type an answer to each prompt. Rarer right answers score more. Three misses and you're out.", "duration_s": 90 },
   "uses": [
-    { "fragment": "keyboard", "params": { "letters": "qwertyuiopasdfghjklzxcvbnm <>", "cols": 10, "rows": 3, "key_size": 31, "gap": 3, "x": 9, "y": 420 } },
     { "fragment": "typed_answer", "params": { "time_ms": "20s" } },
     { "fragment": "rounds", "params": { "count": 7 }, "bind": { "round_done": "prompt_done" } },
     { "fragment": "lives", "params": { "count": 3 }, "bind": { "hit": "answered_wrong" } }
