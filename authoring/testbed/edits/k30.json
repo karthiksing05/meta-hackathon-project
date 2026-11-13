@@ -1,0 +1,5 @@
+{
+  "playtest": { "progress": "score + idx * 25", "text_candidates": "map([50, 80, 95, 100, 130], p => str(floor(true_price_cents() * p / 10000.0)))" },
+  "art": { "font": "American Typewriter" },
+  "__replace": [["Type dollars and cents, then tap  >", "Type your bid, then press Return"]]
+}
