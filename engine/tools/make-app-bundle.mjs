@@ -126,7 +126,7 @@ ${body}
     engineError: () => engineError,
     Microgame, Game, MicrogameLoadError, MicrogameCrash,
     decodeFrame, rgbaToCss, rgbaToHex,
-    drawFrame, playSound, MusicPlayer, AssetStore, HAPTIC_PATTERNS,
+    drawFrame, fitText, TEXT_MARGIN, playSound, MusicPlayer, AssetStore, HAPTIC_PATTERNS,
     build: Object.freeze({ commit: ${JSON.stringify(commit)}, wasm_bytes: ${wasm.length}, wasm_sha256: ${JSON.stringify(sha)} }),
   });
 })(typeof globalThis !== "undefined" ? globalThis : this);

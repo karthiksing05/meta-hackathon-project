@@ -36,8 +36,11 @@ struct ChatsListView: View {
         .environment(\.defaultMinListRowHeight, 0)
         .scrollDismissesKeyboard(.immediately)
         .refreshable {
-            try? await Task.sleep(nanoseconds: 700_000_000)
+            if await !store.refreshLiveThreads() {
+                try? await Task.sleep(nanoseconds: 700_000_000)
+            }
         }
+        .task { await store.refreshLiveThreads() }
         .safeAreaInset(edge: .top, spacing: 0) {
             header
         }

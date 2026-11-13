@@ -252,6 +252,29 @@ export async function verifyAndFix(input, opts = {}) {
       stages.push({ stage: 'readability', error: String(e?.message ?? e).slice(0, 200) });
     }
   }
+  // The text-fit stage (checks/textfit.mjs): every text inside the canvas margin, its panel or button
+  // and clear of other text, with the longest string of every content pool. Shrinks on the game's
+  // scale, then wraps. Up to 2 rounds, each kept only if the findings fall; presentation only.
+  if (opts.textFit !== false) {
+    try {
+      const { textFitFindings, textFitFix } = await import('./checks/textfit.mjs');
+      let sizes = null;
+      if (lookSpec) { const { specSizes } = await import('../kit/look.mjs'); sizes = [...specSizes(lookSpec)]; }
+      const count = async (g) => (await textFitFindings(g, await sampleDense(g, { engine, maxSeconds: 40, every: 12, ref: original }), { engine })).findings;
+      let cur = await count(game);
+      for (let round = 0; round < 2 && cur.length && !over(); round++) {
+        const r = textFitFix(game, cur, { sizes });
+        if (!r.fixes.length) break;
+        try { engine.load(JSON.stringify(r.game), 1).dispose(); } catch (e) { stages.push({ stage: 'text-fit', error: `fix rejected by the engine: ${String(e?.message ?? e).slice(0, 160)}` }); break; }
+        const next = await count(r.game);
+        if (next.length >= cur.length) break;
+        game = r.game; cur = next;
+        fixes.push(...r.fixes.map((x) => ({ stage: 'text-fit', ...x })));
+      }
+    } catch (e) {
+      stages.push({ stage: 'text-fit', error: String(e?.message ?? e).slice(0, 200) });
+    }
+  }
   let report = await v(game);
   note('built', report);
   if ((!report.pass || opts.always) && !over()) {

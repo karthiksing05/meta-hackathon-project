@@ -3,7 +3,7 @@
  * The microgame engine (Rust compiled to WebAssembly) for the Bubble runtime, plus its frame
  * renderer. Defines `MicrogameEngine`; bubble-kit-microgame.js turns it into the "microgame"
  * formula (docs/BUBBLES.md, "microgame").
- * Built from engine/ at bea2be6; microgame.wasm 1182134 bytes, sha256 3c64ba2678a3495655bdf697f828853b4907326dee7ea30b5e7593670cf470d0.
+ * Built from engine/ at 03303ee; microgame.wasm 1182134 bytes, sha256 3c64ba2678a3495655bdf697f828853b4907326dee7ea30b5e7593670cf470d0.
  */
 (function (root) {
   "use strict";
@@ -532,7 +532,7 @@ function drawFrame(ctx, f, assets, opts = {}) {
     switch (op.op) {
       case 'rect': drawRect(ctx, op); break;
       case 'circle': drawCircle(ctx, op); break;
-      case 'text': drawText(ctx, op); break;
+      case 'text': drawText(ctx, op, f.width, f.height); break;
       case 'image': drawImage(ctx, op, assets); break;
       case 'line': drawLine(ctx, op); break;
       case 'poly': drawPoly(ctx, op); break;
@@ -610,8 +610,8 @@ function drawImage(ctx, op, assets) {
     const fx = (f % cols) * sw, fy = Math.floor(f / cols) * sh;
     if (op.src_w > 0 && op.src_h > 0) drawImageSrc(ctx, a, op, fx, fy, sw, sh);
     else ctx.drawImage(a.img, fx, fy, sw, sh, op.x, op.y, op.w, op.h);
-  } else {
-    // Missing or still loading: a placeholder box with a cross.
+  } else if (typeof globalThis !== 'undefined' && globalThis.MG_DEBUG_PLACEHOLDERS) {
+    // Debug only: a missing or still-loading image shows as a box with a cross.
     ctx.fillStyle = 'rgba(128,128,128,0.25)';
     ctx.fillRect(op.x, op.y, op.w, op.h);
     ctx.strokeStyle = 'rgba(128,128,128,0.8)';
@@ -684,21 +684,115 @@ function fontFor(weight, size, family) {
   return f;
 }
 
-function drawText(ctx, op) {
+/** Text keeps this far from the canvas edges (canvas units). */
+const TEXT_MARGIN = 12;
+/** The smallest the fit shrinks text to, as a fraction of its size. */
+const TEXT_MIN_SCALE = 0.7;
+
+function wrapWords(paras, maxW, measure) {
+  const out = [];
+  for (const p of paras) {
+    const words = p.split(' ').filter((w) => w !== '');
+    if (!words.length) { out.push(''); continue; }
+    let line = '';
+    for (const w of words) {
+      const next = line ? line + ' ' + w : w;
+      if (line && measure(next) > maxW) { out.push(line); line = w; } else line = next;
+    }
+    out.push(line);
+  }
+  return out;
+}
+
+function ellipsize(line, maxW, measure) {
+  if (measure(line) <= maxW) return line;
+  let s = line;
+  while (s.length > 0 && measure(s + '…') > maxW) s = s.slice(0, -1);
+  return s.replace(/\s+$/, '') + '…';
+}
+
+/**
+ * The runtime's text safety net: fits a text op inside its box and inside the canvas, less
+ * TEXT_MARGIN on every side. `measure(line)` is the line's width at `op.size`; W, H the canvas.
+ * Steps, stopping at the first that fits: as drawn; re-wrapped at spaces within the box's lines;
+ * shrunk in 5 % steps down to TEXT_MIN_SCALE (re-wrapped at each); ellipsized at the smallest
+ * size. Then the block is shifted inside the canvas margin. Text whose box center is off the
+ * canvas (sliding in or out) keeps its place. Returns {lines, size, lh, x, y (middle of the first
+ * line), changed, truncated}.
+ */
+function fitText(op, measure, W, H) {
+  const size0 = op.size > 0 ? op.size : 16;
+  const lh0 = op.line_height || size0 * 1.25;
+  const text = String(op.text);
+  const raw = text.split('\n');
+  const cx = op.x + op.w / 2, cy = op.y + op.h / 2;
+  const on = W > 0 && H > 0 && cx >= 0 && cx <= W && cy >= 0 && cy <= H;
+  const M = TEXT_MARGIN;
+  const maxW = Math.max(1, Math.min(op.w > 0 ? op.w : Infinity, on ? W - 2 * M : Infinity));
+  const at = (k) => (line) => measure(line) * k;
+  let lines = raw, k = 1, changed = false, truncated = false;
+  const fits = (ls, kk) => ls.every((l) => at(kk)(l) <= maxW + 0.5);
+  if (!fits(raw, 1)) {
+    changed = true;
+    let found = null;
+    const words = raw.join(' ');
+    for (let s = 1; s >= TEXT_MIN_SCALE - 1e-9 && !found; s -= 0.05) {
+      const room = op.h > 0 ? Math.max(raw.length, Math.floor(op.h / (lh0 * s) + 0.05)) : raw.length;
+      for (const paras of raw.length > 1 ? [raw, [words]] : [raw]) {
+        const ls = wrapWords(paras, maxW, at(s));
+        if (ls.length <= room && fits(ls, s)) { found = { ls, s }; break; }
+      }
+    }
+    if (found) { lines = found.ls; k = found.s; } else {
+      k = TEXT_MIN_SCALE;
+      const room = op.h > 0 ? Math.max(1, Math.floor(op.h / (lh0 * k) + 0.05)) : raw.length;
+      const ls = wrapWords([words], maxW, at(k));
+      if (ls.length > room) { ls.length = room; ls[room - 1] += '…'; }
+      lines = ls.map((l) => ellipsize(l, maxW, at(k)));
+      truncated = true;
+    }
+  }
+  const lh = lh0 * k, size = size0 * k;
+  const lw = Math.max(0, ...lines.map(at(k)));
+  let x = op.align === 'left' ? op.x : op.align === 'right' ? op.x + op.w : cx;
+  const blockH = lh * lines.length;
+  let top = op.valign === 'top' ? op.y : op.valign === 'bottom' ? op.y + op.h - blockH : op.y + (op.h - blockH) / 2;
+  if (on) {
+    const left = op.align === 'left' ? x : op.align === 'right' ? x - lw : x - lw / 2;
+    if (left < M) { x += M - left; changed = true; } else if (left + lw > W - M) { x -= left + lw - (W - M); changed = true; }
+    const pad = (lh - size) / 2, inkTop = top + pad, inkBottom = top + blockH - pad;
+    if (inkBottom - inkTop <= H - 2 * M) {
+      if (inkTop < M) { top += M - inkTop; changed = true; } else if (inkBottom > H - M) { top -= inkBottom - (H - M); changed = true; }
+    }
+  }
+  return { lines, size, lh, x, y: top + lh / 2, changed, truncated };
+}
+
+const widthCache = new Map();
+function measureLine(ctx, font, line) {
+  const key = font + '\u0000' + line;
+  let w = widthCache.get(key);
+  if (w === undefined) {
+    w = ctx.measureText(line).width;
+    if (widthCache.size > 4000) widthCache.clear();
+    widthCache.set(key, w);
+  }
+  return w;
+}
+
+function drawText(ctx, op, W, H) {
   const fill = op.color & 0xff ? op.color : 0;
   const stroke = op.stroke & 0xff && op.stroke_width > 0 ? op.stroke : 0;
   if (!op.text || (!fill && !stroke)) return;
   const saved = transformAround(ctx, op, op.x + op.w / 2, op.y + op.h / 2);
-  ctx.font = fontFor(op.weight, op.size, op.font);
+  const font = fontFor(op.weight, op.size, op.font);
+  ctx.font = font;
   ctx.textAlign = op.align;
   ctx.textBaseline = 'middle';
-  const x = op.align === 'left' ? op.x : op.align === 'right' ? op.x + op.w : op.x + op.w / 2;
-  // Lines are already wrapped by the engine; each sits line_height apart.
-  const lines = op.text.includes('\n') ? op.text.split('\n') : null;
-  const lh = op.line_height || op.size * 1.25;
-  const blockH = lines ? lh * lines.length : lh;
-  let y = op.valign === 'top' ? op.y : op.valign === 'bottom' ? op.y + op.h - blockH : op.y + (op.h - blockH) / 2;
-  y += lh / 2;
+  // Lines are already wrapped by the engine; the fit re-wraps, shrinks or ellipsizes only what
+  // would cross its box or the canvas margin, and keeps the block on the canvas.
+  const fit = fitText(op, (line) => measureLine(ctx, font, line), W, H);
+  if (fit.size !== op.size) ctx.font = fontFor(op.weight, fit.size, op.font);
   if (stroke) {
     // The outline goes under the fill, so only its outer half shows.
     ctx.strokeStyle = rgbaToCss(stroke);
@@ -706,10 +800,11 @@ function drawText(ctx, op) {
     ctx.lineJoin = 'round';
   }
   if (fill) ctx.fillStyle = rgbaToCss(fill);
-  for (const line of lines || [op.text]) {
-    if (stroke) ctx.strokeText(line, x, y);
-    if (fill) ctx.fillText(line, x, y);
-    y += lh;
+  let y = fit.y;
+  for (const line of fit.lines) {
+    if (stroke) ctx.strokeText(line, fit.x, y);
+    if (fill) ctx.fillText(line, fit.x, y);
+    y += fit.lh;
   }
   if (saved) ctx.restore();
 }
@@ -970,7 +1065,7 @@ const HAPTIC_PATTERNS = {
     engineError: () => engineError,
     Microgame, Game, MicrogameLoadError, MicrogameCrash,
     decodeFrame, rgbaToCss, rgbaToHex,
-    drawFrame, playSound, MusicPlayer, AssetStore, HAPTIC_PATTERNS,
-    build: Object.freeze({ commit: "bea2be6", wasm_bytes: 1182134, wasm_sha256: "3c64ba2678a3495655bdf697f828853b4907326dee7ea30b5e7593670cf470d0" }),
+    drawFrame, fitText, TEXT_MARGIN, playSound, MusicPlayer, AssetStore, HAPTIC_PATTERNS,
+    build: Object.freeze({ commit: "03303ee", wasm_bytes: 1182134, wasm_sha256: "3c64ba2678a3495655bdf697f828853b4907326dee7ea30b5e7593670cf470d0" }),
   });
 })(typeof globalThis !== "undefined" ? globalThis : this);

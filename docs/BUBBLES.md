@@ -806,7 +806,7 @@ seed, length, from_user_id, headline, session_id, score, extras`) rides on `Mess
 | Call | Does |
 |---|---|
 | `targets(appStore:kinds:)` | Friends, recent chats (group chats first), your Groups, feed, story, as `BubbleShareTarget` |
-| `send(_:to:note:appStore:bubbleStore:)` | Chat or friend: a message carrying the card. Group or feed: a post carrying it |
+| `send(_:to:note:appStore:bubbleStore:)` | Chat or friend: a message carrying the card. Group or feed: a post carrying it. With live Messenger, `share`/`remix` cards go to the server as `kind: "share"` and `challenge`/`session` cards (not result cards) as `kind: "challenge"` with the score, on `POST /v1/fb/threads/{id}/messages` with the game's server id (`AppStore.sendLiveCard`); other phones get them as `share` or `challenge` cards (headline, game, score; no seed). A card the server can't take stays on this phone |
 | `receive(_:from:in:text:appStore:)` | A card from someone else lands in a chat (a friend's simulated score) |
 | `update(cardID:appStore:_:)` | Changes a card wherever it is ("3 of 5 played", the winner line) |
 | `play(_:router:context:)` | Plays the card's seed and length |
@@ -1708,6 +1708,17 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   `sg_share_line` ("I became king in 6 choices"), the kit's `share()` uses it as `score_text`
   instead of points, and a non-empty `ending` sets the result tag
   `ending=<id>;choices=<choices_used>;path=<sg_path>`. Other microgames keep "N points" and no tag.
+
+- **Text fit (the renderer's safety net).** `drawFrame` draws every text op through
+  `fitText(op, measure, W, H)` (`engine/web/render.js`, also on `MicrogameEngine`): text that would
+  cross its box (`w`) or the canvas less `TEXT_MARGIN` (12 units) on any side is re-wrapped at spaces
+  within the box's lines (`h ÷ line_height`), then shrunk in 5 % steps to 70 % of its size, then
+  ellipsized (`…`) as the last resort; the block is then shifted inside the margin. Text that fits is
+  drawn exactly as before, and text whose box center is off the canvas (sliding in or out) keeps its
+  place. So old games never draw outside the canvas. New games must not lean on it: the verifier's
+  blocking `L_TEXT_FIT` (`authoring/verify/checks/textfit.mjs`) checks the longest string of every
+  content pool, and `verifyAndFix` fixes it before publish. `tools/runtime-tests/microgame-text-fit.js`
+  tests it.
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,

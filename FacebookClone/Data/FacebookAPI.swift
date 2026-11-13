@@ -107,6 +107,12 @@ struct RemoteFBMessage: Decodable, Hashable, Sendable {
     var text: String?
     var imageUrl: String?
     var emoji: String?
+    /// A game the message carries as a playable card (a Curio shared or challenged into the chat).
+    var gameId: String?
+    /// "share" or "challenge" (with `gameId`).
+    var kind: String?
+    /// The sender's score to beat on a challenge card.
+    var score: Int?
     var sentAt: Date
 }
 
@@ -210,10 +216,17 @@ struct FacebookAPILive: Sendable {
         return try await send("POST", "v1/fb/threads", body)
     }
 
-    func sendMessage(threadID: String, text: String?, emoji: String?) async throws -> RemoteFBSent {
+    /// Sends a message. `gameID` (with `kind` "share" or "challenge", and a challenge's `score`) makes it a
+    /// playable game card.
+    func sendMessage(threadID: String, text: String?, emoji: String?, gameID: String? = nil, kind: String? = nil, score: Int? = nil) async throws -> RemoteFBSent {
         var body: [String: Any] = [:]
         if let text { body["text"] = text }
         if let emoji { body["emoji"] = emoji }
+        if let gameID {
+            body["gameId"] = gameID
+            if let kind { body["kind"] = kind }
+            if let score, kind == "challenge" { body["score"] = score }
+        }
         return try await send("POST", "v1/fb/threads/\(threadID)/messages", body)
     }
 

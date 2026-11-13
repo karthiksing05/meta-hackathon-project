@@ -359,6 +359,8 @@ func previewOf(msg model.FBMessage) string {
 		return msg.Text
 	case msg.ImageURL != "":
 		return "Sent a photo"
+	case msg.GameID != "":
+		return "Sent a game"
 	default:
 		return msg.Emoji
 	}
