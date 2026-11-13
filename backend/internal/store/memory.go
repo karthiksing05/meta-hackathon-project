@@ -34,6 +34,7 @@ type Memory struct {
 	sounds     map[string]*model.Sound
 	soundSaves map[string]bool         // soundID|userID
 	runLogs    map[string]model.RunLog // gameID:userID (runlog_stores.go)
+	dailies    map[string]model.GroupDaily
 }
 
 func NewMemory() *Memory {

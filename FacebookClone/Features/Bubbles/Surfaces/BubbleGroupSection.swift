@@ -9,9 +9,12 @@ struct BubbleGroupSection: View {
     @Environment(Router.self) private var router
     @State private var state: FeedLoadState = .idle
     @State private var games: [Bubble] = []
+    @State private var ownsGroup = false
+    @State private var showsDailyPicker = false
 
     var body: some View {
-        let daily = games.first { $0.isDaily }
+        // The server's Daily for today wins; a game whose manifest says "daily" is the fallback.
+        let daily = bubbleStore.dailyBubble(for: group) ?? games.first { $0.isDaily }
         let others = games.filter { $0.id != daily?.id }
         VStack(spacing: 0) {
             switch state {
@@ -38,6 +41,9 @@ struct BubbleGroupSection: View {
                     .padding(12)
                     .background(FBColor.surface)
             }
+            if ownsGroup {
+                GroupDailyOwnerRow(hasDaily: daily != nil) { showsDailyPicker = true }
+            }
             BubbleGroupFeaturedSlots(group: group)
             // The empty state already offers "Make one"; don't offer it twice.
             if group.isMember, !isEmpty {
@@ -48,6 +54,9 @@ struct BubbleGroupSection: View {
             }
         }
         .task(id: group.id) { await load() }
+        .sheet(isPresented: $showsDailyPicker) {
+            GroupDailyPickerSheet(group: group, games: games)
+        }
     }
 
     private var isEmpty: Bool {
@@ -71,6 +80,8 @@ struct BubbleGroupSection: View {
         do {
             games = try await bubbleStore.loadGames(inGroup: group.id)
             state = .end
+            await bubbleStore.loadDaily(for: group)
+            ownsGroup = await bubbleStore.ownsGroup(group)
         } catch GamesAPIError.notFound {
             // Not a Group on the games server.
             games = []

@@ -43,6 +43,9 @@ type Store interface {
 	GroupMembers(ctx context.Context, groupID string) ([]model.GroupMember, error)
 	GroupsOfUser(ctx context.Context, userID string) ([]model.Group, error)
 	GamesByGroup(ctx context.Context, groupID string, limit int) ([]model.Game, error)
+	// PutGroupDaily sets (or replaces) a Group's Daily for one date; LatestGroupDaily is the newest on or before a date.
+	PutGroupDaily(ctx context.Context, d model.GroupDaily) error
+	LatestGroupDaily(ctx context.Context, groupID, onOrBefore string) (*model.GroupDaily, error)
 
 	// RecentScores returns the latest best scores set by the given people, newest first.
 	RecentScores(ctx context.Context, userIDs []string, limit int) ([]model.Score, error)

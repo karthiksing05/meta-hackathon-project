@@ -742,3 +742,24 @@ extension GamesAPILive: GameNotificationsAPI {
         return value
     }
 }
+
+// MARK: - A Group's Daily (`GET`/`POST /v1/groups/{id}/daily`)
+
+extension GamesAPILive {
+    /// The Group's Daily for `date` (the phone's own day, `yyyy-MM-dd`), or the latest before it.
+    /// Throws `.notFound` when the Group has none yet.
+    func groupDaily(groupID: String, date: String) async throws -> RemoteGroupDaily {
+        let daily: RemoteGroupDaily = try await get("v1/groups/\(groupID)/daily", query: [URLQueryItem(name: "date", value: date)], auth: .optional)
+        link(daily.game)
+        return daily
+    }
+
+    /// Makes a game the Group's Daily for `date` (the Group's owner only); the server tells every other member.
+    func setGroupDaily(groupID: String, gameID: String, date: String) async throws -> RemoteGroupDaily {
+        let body = try JSONSerialization.data(withJSONObject: ["gameId": try serverID(gameID), "date": date])
+        let daily: RemoteGroupDaily = try decode(try await send("POST", "v1/groups/\(groupID)/daily", body: body,
+                                                                 contentType: "application/json", auth: .required))
+        link(daily.game)
+        return daily
+    }
+}

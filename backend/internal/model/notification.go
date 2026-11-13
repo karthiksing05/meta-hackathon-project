@@ -11,6 +11,7 @@ const (
 	NotifSessionInvite   = "session_invite"   // someone asked a chat or Group you are in to make a game together
 	NotifRoundStarted    = "round_started"    // someone started a same-seed round with you in it
 	NotifRoundPlayed     = "round_played"     // someone in a round you are in played their run
+	NotifDailyReady      = "daily_ready"      // today's Daily is set in a Group you are in
 )
 
 // Push states of a notification's lock-screen delivery.

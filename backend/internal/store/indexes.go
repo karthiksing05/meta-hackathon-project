@@ -57,6 +57,9 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 		cPushDevices: {
 			{Keys: k("userId", 1), Options: options.Index().SetName("push_devices_user")},
 		},
+		cDailies: {
+			{Keys: k("groupId", 1, "date", -1), Options: options.Index().SetName("daily_group_date")},
+		},
 		cSounds: {
 			{Keys: k("useCount", -1, "createdAt", -1), Options: options.Index().SetName("sounds_trending")},
 			{Keys: k("createdAt", -1), Options: options.Index().SetName("sounds_recent")},

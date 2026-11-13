@@ -78,6 +78,7 @@ struct GroupGamesHubView: View {
         .sheet(isPresented: $showsChallengePicker) {
             GroupChallengePickerSheet(group: group)
         }
+        .task(id: group.id) { await bubbleStore.loadDaily(for: group) }
     }
 
     private var hasGames: Bool {
