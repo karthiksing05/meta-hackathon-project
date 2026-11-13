@@ -2,7 +2,7 @@
 
 *The detailed catalogue of every value proposition. Part of the pitch docs; start at [README.md](README.md).*
 
-## 4. At a glance
+## At a glance
 
 Each value proposition has two evidence ratings, because whether a mechanism works and whether it helps people are different questions.
 
@@ -19,6 +19,8 @@ Each value proposition has two evidence ratings, because whether a mechanism wor
 
 No value proposition has real-user evidence, because we have no real users.
 
+**Status at `6b1cc85`.** Status values are defined in [README.md](README.md#status-at-6b1cc85): **Live** (in the app through the normal UI; other people are synthetic), **Live on one device** (works, but the other side is a bot on the same seed and nothing crosses phones), **Debug/CLI only**, **Not built**, and **Planned**. The tables and entries were first written at `0a3e8f7`; status cells and "How Whims delivers it" lines are updated to `6b1cc85`, while the evidence lines keep the numbers measured then. Key corrections: the Daily is still made from posts only through the CLI or a debug launch; Add friend on the board goes to a bot row; the collaboration features are Live on one device; the recommender and the Group Blend are in the app. VP IDs are kept from earlier drafts; VP-41 and VP-42 are new.
+
 ### Core: the pitch
 
 | ID | Value proposition | Relationship | Why only Facebook | Mechanism | Helps people | Status |
@@ -33,14 +35,14 @@ No value proposition has real-user evidence, because we have no real users.
 
 | ID | Value proposition | Relationship | Why only Facebook | Mechanism | Helps people | Status |
 |---|---|---|---|---|---|---|
-| VP-05 | Make a game for your people in about 30 seconds | You and your people | The game is made for a named Group, Event or friends, and lands in front of them | Measured | Literature | Live |
+| VP-05 | Make a game for your people in about 30 seconds (ready formula) or a minute or two (from scratch) | You and your people | The game is made for a named Group, Event or friends, and lands in front of them | Measured | Literature | Live |
 | VP-06 | A daily reason to clock in that is about your people | You and your Groups | One game per Group, and only Facebook has the Groups | Built | Public data | Live |
 | VP-07 | Meet strangers on an everyday-name network | You and a stranger | Everyday-name norm, opt-in Verified, shared Groups | Built (rows); None (badges) | Hypothesis | Live (rows); Not built (badges) |
 | VP-08 | Everything a newcomer needs, in one app | You and your city | Groups, Events, Marketplace and Dating already live here | Built | Hypothesis | Live |
-| VP-09 | A new way to tell your own story | You and your friends | "Who knows you best" needs real friends | Built (profile tab) | Literature | Live (profile); Not built (Games about me) |
-| VP-10 | Play that ends, ranked for connection | You and your people | Facebook can rank on connection outcomes it can observe | Built; simulated (teammate-reported) | Hypothesis | Live (weights); Not built (recommender) |
+| VP-09 | A new way to tell your own story | You and your friends | "Who knows you best" needs real friends | Built (profile tab) | Literature | Live (profile, Games about me on one device) |
+| VP-10 | Play that ends, ranked for connection | You and your people | Facebook can rank on connection outcomes it can observe | Built; simulated (D27 to D29) | Hypothesis | Live (recommender in the app on `main`) |
 | VP-13 | A friend's replay is an invitation | You and a friend | Bursts land in the feed, Stories and Reels where friends look | Bot-run | Public data | Live |
-| VP-17 | Remix as a reply to a person | You and a friend | Remixes travel between people who know each other | Built | Hypothesis | Live (lineage); Not built (send it back) |
+| VP-17 | Remix as a reply to a person | You and a friend | Remixes travel between people who know each other | Built | Hypothesis | Live (lineage and send it back, one device) |
 | VP-39 | A playable feed as varied as Reels | You and your feed | Facebook's feed and Reels habit, filled by members | Measured (variety); teammate-reported (speed) | Hypothesis | Live |
 
 ### Supporting: for Group hosts and creators
@@ -49,7 +51,7 @@ No value proposition has real-user evidence, because we have no real users.
 |---|---|---|---|---|---|---|
 | VP-18 | A fresh daily ritual admins don't have to write | Your Group | Tens of millions of Groups, each with its own members and posts | Measured (real Muse) | Hypothesis | Debug/CLI only |
 | VP-21 | You decide which of your posts can become a game | You and your Group | Facebook's per-post audience controls | Built | Hypothesis | Live, with named gaps |
-| VP-23 | Credit and an audience you already know | You and your people | Profiles, notifications and a creator program that rewards originals | Built | Hypothesis | Live (profile, lineage); Not built (credits everywhere) |
+| VP-23 | Credit and an audience you already know | You and your people | Profiles, notifications and a creator program that rewards originals | Built | Hypothesis | Live (profile, lineage, remix credits) |
 
 ### Value to Meta
 
@@ -66,24 +68,26 @@ No value proposition has real-user evidence, because we have no real users.
 
 | ID | Value proposition | Who benefits | Why only Facebook | Mechanism | Helps people or Meta | Status |
 |---|---|---|---|---|---|---|
-| VP-34 | The AI does the core work | Makers, judges (AI Integration), Meta's AI org | Muse's value comes from Facebook context | Measured (against a template baseline) | Hypothesis | Live |
+| VP-34 | The AI does the core work: any described idea becomes a game, agreed with the maker | Makers, judges (AI Integration), Meta's AI org | Muse's value comes from Facebook context | Measured (harness eval, D30; template baseline, D7) | Hypothesis | Live |
 | VP-35 | A showcase for the whole Muse family | Meta Superintelligence Labs | First-party models on a first-party surface | Measured | Public data (strategic fit) | Live |
 | VP-36 | Cheap and predictable to run per Group per day | Meta infrastructure and finance | First-party models with no third-party margin | Measured (calls, output tokens) | Hypothesis | Live (cost not priced) |
 | VP-37 | AI content made by and about real people | Feed and Reels, Meta's content strategy | Every Whim carries a real maker and a social context | Measured (variety) | Hypothesis | Live |
+| VP-42 | Agree the game with Muse, and see what's new to it | The maker and Muse | (AI value, not Facebook-specific) | Measured (speed, calibration; D33) | Hypothesis | Live |
 
-### Roadmap: being built, not yet demonstrable
+### Collaboration (formerly "Roadmap"; most now in the app)
 
 | ID | Value proposition | Relationship | Why only Facebook | Mechanism | Helps people | Status |
 |---|---|---|---|---|---|---|
-| VP-14 | Stay close to hometown friends after you move | You and a friend | Facebook holds both the old friends and the new Groups | Public data (format); same-seed primitive bot-run | Literature | Not built |
-| VP-15 | One card the whole group chat plays | You and your friends | Messenger chats next to Groups and Events | Public data (format) | Public data | Not built |
-| VP-19 | Weekly boards and game night that reward newcomers | You and your Group | Needs Groups and Events together | None | Literature | Not built |
-| VP-38 | Make a game together, for and with your people | You, your friends and your Group | The friend graph and Group membership decide who co-makes; credits go to real profiles | None | Literature | Not built |
-| VP-40 | Blends: a game made from two people, and a bracket for everyone you just met | You and someone you just met; everyone at an Event | Friendships and Event guest lists scope who you blend with | None (same-seed primitive bot-run) | Literature | Not built (design and request sent) |
-| VP-11 | Find your scene through what you want to play | You and a new Group | A game in Search links to the Group that plays it | None | Hypothesis | Not built |
-| VP-12 | Learn together, with friends' streaks | You and your friends | Group mastery needs a Group; friends' streaks need friends | Built (answer formula) | Public data | Not built |
+| VP-14 | Stay close to hometown friends after you move | You and a friend | Facebook holds both the old friends and the new Groups | Public data (format); same-seed primitive bot-run | Literature | Live on one device (friends are synthetic) |
+| VP-15 | One card the whole group chat plays | You and your friends | Messenger chats next to Groups and Events | Public data (format) | Public data | Live on one device |
+| VP-19 | Weekly boards and game night that reward newcomers | You and your Group | Needs Groups and Events together | Built | Literature | Live (synthetic members) |
+| VP-38 | Make a game together, for and with your people | You, your friends and your Group | The friend graph and Group membership decide who co-makes; credits go to real profiles | Built | Literature | Live on one device |
+| VP-40 | Blends: a game made from two people, and a bracket for everyone you just met | You and someone you just met; everyone at an Event | Friendships and Event guest lists scope who you blend with | Built (Group Blend); simulated (D29) | Literature | Partly Live: the Group Blend is in the app; two-person Blends and brackets Not built |
+| VP-11 | Find your scene through what you want to play | You and a new Group | A game in Search links to the Group that plays it | Built | Hypothesis | Live |
+| VP-12 | Learn together, with friends' streaks | You and your friends | Group mastery needs a Group; friends' streaks need friends | Built (learn formula) | Public data | Live (synthetic friends' streaks) |
+| VP-41 | Seed the feed: Meta studio accounts and creator-inspired games | Everyone, together; a creator's audience | Groups to play in, a feed to post to, a creator program [27] | None | Hypothesis | Not built (planned, Nov 12 18:00) |
 
-## 6. Each value proposition in detail
+## Each value proposition in detail
 
 Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explained in section 8.
 
@@ -107,7 +111,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **How Whims delivers it.**
   - Live: a Daily card pinned on the Group page, with today's top 3, your rank, a Group streak and copy inviting you to be first on the board; a Daily Whims strip on the Groups tab; a Daily-ready notification; float your result to the Group.
   - The Daily shown in the app today is a hand-made seed game. Generating it from members' posts is Debug/CLI only (VP-18).
-  - Not built: the "Most improved" award (VP-19).
+  - Live: the "Most improved" award on the weekly Group board (VP-19).
 - **Demo.** Narrate the persona: Alex joined New in SF two weeks ago and hasn't posted. They play the Daily, see three members' names around theirs, and share "I got 42. Beat it?" to the Group with one tap.
 - **Metric.** Share of new members whose first action in the Group is a Daily play; share of those who comment or post within 7 days, against members who didn't play; share of Daily players who had never posted before.
 - **Risk and answer.** "Lurkers stay lurkers, and shy people may not want to be ranked." The goal is a first step, not the whole path; Add friend and the profile are one tap away. Boards have a Friends scope, and finite, private-by-default options are being built. This is a hypothesis with a test, not a finding.
@@ -127,7 +131,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Older figures for Events: more than 700 million people used Events monthly in 2017 [17], and more than 100 million a day used Events in 2016 "to discover things they can do with their friends" [18]. These are the latest public figures and are likely stale.
 - **How Whims delivers it.**
   - Live: an Event section, "Who's coming? Learn a few names before you go", with avatars of who is going and who has played; "Make an icebreaker" for guests marked Going; a This or That picnic game.
-  - Not built: a post-event rematch and game night.
+  - Live: quiz night as a Group game night (VP-19). Not built: a post-event rematch tied to the Event.
 - **Demo.** Open the picnic Event, play the who-is-it round in about 15 s, then tap a guest's name on the board to open their profile.
 - **Metric.** Icebreaker plays per Going guest before the Event; Add friend requests between attendees within 7 days; a post-event survey item, "I knew someone's name when I arrived".
 - **Risk and answer.** "The trust study was small, online and about teamwork; a quiz about guests might feel like surveillance." We cite the study as direction, not proof, and section 11 proposes a hallway test. Content comes only from posts guests opted in, and Studio shows exactly which posts it used.
@@ -151,7 +155,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Built: board rows show Add friend with Requested and Confirm states. In the demo, rows are bot runs by synthetic people.
 - **How Whims delivers it.**
   - Live: board with Group, Friends and Everyone scopes; Add friend on non-friend rows; verified-run badge; Watch Burst; notifications when someone beats your score or you pass someone.
-  - Not built: a teammate's recommender that weights Add friend highest in its reward.
+  - Live: Kevin's recommender, in the app on `main`, counts Add friend in its reward (D27).
 - **Demo.** After the Daily, open the Group board, tap Watch Burst on the row just above you, then Add friend. The row changes to Requested.
 - **Metric.** Add friend taps per board view; acceptance within 7 days against Facebook's usual suggestion baseline; share of new friendships within a Group that started from a board.
 - **Risk and answer.** "Strangers adding you because you scored near them could feel spammy or unsafe." Rows only appear for people in a Group or Event you both chose to join, requests go through Facebook's normal friend flow and limits, and there is no open message channel and no mass invite.
@@ -166,10 +170,10 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Every answer in the New in SF Daily was tied to a named member's intro, such as "TORONTO: Priya, a new nurse in town, arrived from here" (D8).
   - Committed sample runs: the "First Hellos" Daily from 5 posts in 39.4 s and the "Picnic Pals" icebreaker from 7 posts in 33.0 s (D10).
 - **How Whims delivers it.**
-  - Live: the Event icebreaker; "Blow a bubble for this group" in Studio with opted-in sources; the guess formula's who-is-it portrait rounds; the answer formula scored against what the Group picked.
+  - Live: the Event icebreaker; "Make a Whim for this group" in Studio with opted-in sources (the card used to say "Blow a bubble for this group"); the guess formula's who-is-it portrait rounds; the answer formula scored against what the Group picked.
   - Debug/CLI only: generating a Group's Daily from opted-in posts works on real Muse through the command-line tool and through Studio's daily mode, which only a debug launch reaches. The Daily shown in the app today is a hand-made seed game. We recommend wiring Daily generation into the normal Group UI before demo day, because it is the core thesis.
-  - Not built: Games about me.
-- **Demo.** In the New in SF Group, tap "Blow a bubble for this group", show the source list and the "Nothing else was read" line, generate, and play a round that asks which newcomer said what.
+  - Live (one device): Games about me.
+- **Demo.** In the New in SF Group, tap "Make a Whim for this group", show the source list and the "Nothing else was read" line, generate, and play a round that asks which newcomer said what.
 - **Metric.** Share of plays on games built from Group or Event context against generic games; completion and Add friend rate per play for each type.
 - **Risk and answer.**
   - "Any app can ask people to type in names and facts." Asking people to re-enter their community is the cold-start problem. Facebook already has the community, the consent surface (per-post settings) and the identity, and the people in the game are one tap from Add friend.
@@ -187,7 +191,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - All bot-run.
 - **How Whims delivers it.**
   - Live: verification in the runtime; verified badges on board rows; the same seed for everyone in a Group's Daily.
-  - Not built: same-seed Challenge Me; endless and finite play as a shared primitive, so a challenge can fix a fair mode (for example, everyone gets 3 lives or 60 seconds); server-side verification and boards in a teammate's Go backend.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): same-seed Challenge Me; length as a shared primitive, so a challenge fixes a fair mode for everyone (for example 10 rounds, 3 lives or 60 seconds).
+  - Not built: server-side replay verification. The Go backend on Prod keeps best scores per user, but does not re-simulate runs.
 - **Demo.** Tap a verified row's Watch Burst: "every score here is a 600-byte log we can replay".
 - **Metric.** Share of board runs verified; disputed scores per 10,000 runs; rematch rate after a verified loss.
 - **Risk and answer.** "Verification proves the inputs produce the score, not that a human entered them." Correct, and we say so. It stops forged scores. Bot-input detection is a later server-side layer, and small, scoped boards lower the payoff for cheating.
@@ -195,6 +200,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 ### 6.2 Supporting: for people and friends
 
 #### VP-05. Make a game for your people in about 30 seconds
+
+*At `6b1cc85`: "about 30 seconds" holds for a ready-formula game (median 28.0 s, D2). A game made from scratch on the microgame engine takes a median 99 s (D30). The in-app copy "about a minute" matches neither (see [open-items.md](open-items.md#proposed-app-fixes)).*
 
 *Now includes former VP-22 (anyone can make games for the long tail of communities).*
 
@@ -210,7 +217,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Each game takes 4 to 6 Muse calls (D9).
 - **How Whims delivers it.**
   - Live: Muse Studio from the Whims tab, Groups, Events and profiles; edit, new look and next level; 6 formulas and 8 looks; remix lineage; an offline fallback so a game always comes out.
-  - Not built: playing the game as soon as it passes its checks, with the cover fading in later (section 11); "Make it with Muse" from Search.
+  - Not built: playing the game as soon as it passes its checks, with the cover fading in later (section 11); "Make it with Muse" from Search is now live.
 - **Demo.** Live: type "a chill game for my new running club about SF hills", show the Studio timeline (brief, formula, validate, playtest, cover), play it and float it to the Group. Keep a recorded backup run in case of venue-network latency.
 - **Metric.** Share of games made for a named audience (Group, Event or friends); plays per game by that audience; makers who make a second game within 7 days; share of Groups with a member-made game within 30 days.
 - **Risk and answer.**
@@ -233,7 +240,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Bot runs of Group and Event games had medians of 13.5 to 23.1 s (D15).
 - **How Whims delivers it.**
   - Live: a daily gate (one scored run a day, same seed for the whole Group); Group and personal streaks; a Daily-ready notification; the Whims tab opens with your Group's Daily near the top.
-  - Not built: a weekly leaderboard (VP-19).
+  - Live: a weekly Group leaderboard (VP-19).
 - **Demo.** Open the Groups tab, show the Daily strip across your Groups, play today's game in about 20 s, and show your rank and the Group streak.
 - **Metric.** Next-day and 7-day return among Daily players (all players who played on a given day, with the base stated); days per week a member opens at least one of their Groups, against control Groups.
 - **Risk and answer.** "No user data; another daily notification is exactly what people mute." True; it is a hypothesis for a pilot. We send one notification per day, only for Groups you're in. Facebook's own 2010 notification limits are the lesson [39].
@@ -266,7 +273,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Evidence.** Whims runs on 6 distribution surfaces and 3 entry points today (D19). Young-adult matches on Facebook Dating were up 10% a year in 2025 [51].
 - **How Whims delivers it.**
   - Live: Whims in Groups, Events, the Home feed, Stories, Reels and Video, Notifications, profiles, the Library in the Menu and the Whims tab.
-  - Not built: Search and Messenger.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): Search and Messenger chats.
 - **Demo.** The newcomer path in 60 seconds: join New in SF, play the Daily, RSVP to the picnic, play the icebreaker and add a friend from the board.
 - **Metric.** Share of Whims players who also RSVP to an Event or join a second Group within 14 days.
 - **Risk and answer.** "Young adults are on Instagram and TikTok." Facebook still reaches 69% of US 18-to-29-year-olds [52], and 49% of all 18-to-29-year-olds use it daily [53]. The gap is a reason to come back, not reach. Section 3.3 covers Instagram.
@@ -283,8 +290,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Self-disclosure is intrinsically rewarding [74].
   - Muse used all 8 looks across 10 games with no hints, so games look like their makers' ideas (D6).
 - **How Whims delivers it.**
-  - Live: a profile Whims tab with games you made, best scores and chains; "Blow a bubble" on your own profile.
-  - Not built: Games about me with a ranked "who knows you best" list; choose-your-own-adventure stories with friends' endings and stories made from your own life.
+  - Live: a profile Whims tab with games you made, best scores and chains; "Make a Whim" on your own profile.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): Games about me with "who knows you best"; choose-your-own-adventure stories (Adventures) with friends' endings ("Maya took the ferry") and stories made from your own life.
 - **Demo.** Open a profile's Whims tab: games made, best scores and a three-level chain. If it has shipped, show "How well do you know me?" with its ranked friends.
 - **Metric.** Share of profile visitors who play a Games-about-me game; friend comments per game; repeat creation; friends who replay to improve their rank.
 - **Risk and answer.** "Quizzes about yourself are old." True. Muse makes them playable, scored and replayable in seconds, which is why most people never made one by hand. Games about a person are made by that person, which also limits abuse (section 5.4).
@@ -304,7 +311,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - A teammate's simulation (5 synthetic worlds of 90 people for 14 days) found that ranking on clicks alone showed bait-averse users 49% clickbait, against 36% for today's feed and 14% for a reward built on finished runs, saves, floats and Add friend. The social reward also raised their pages per session from 5.9 to 7.2 (D21; simulated, teammate-reported, not reproduced by us).
 - **How Whims delivers it.**
   - Live: a daily gate; a relationship-weighted feed with a reason tag on each page; a result sheet that offers "challenge a friend" and "see the Group board".
-  - Not built: the recommender; saves as the main like signal, with an in-game save (people leave a game to save it, not to like it); endless and finite modes.
+  - Live: the recommender (`game-recs.js` 0.5, in the app on `main`; D27 to D29); saves as the main appreciation signal on every surface; endless and finite modes.
 - **Demo.** After a Daily run, show that the result sheet ends in a person (challenge, board, Add friend), not another autoplay. Read the reason tags on the first five feed pages aloud.
 - **Metric.** Share of sessions that end in a social action (friend request, float, challenge, RSVP); friend adds and Group floats per 100 pages; saves per play; session length distribution, aiming for short, social sessions.
 - **Risk and answer.**
@@ -327,7 +334,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Facebook Reels time spent reached all-time highs in Q3 2026 [5].
 - **How Whims delivers it.**
   - Live: Bursts in the Whims tab, feed posts, Stories, Reels and the Video tab; takeover plays the same seed; share to Story from the result sheet; float to feed or Group.
-  - Not built: Messenger and Search.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): Messenger chats and Search.
 - **Demo.** In Reels, a friend's Burst plays. Tap to take over, play the same seed, finish and share your result to your Story. Two surfaces, no installs.
 - **Metric.** Takeover rate on friends' Bursts against strangers'; Burst view to takeover to finished run; new players per shared result.
 - **Risk and answer.** "Feeds full of game replays could feel like Canvas-era game spam." Bursts come from friends and Groups, not mass requests, and the feed ranks relationships first (D20). "Distribution" is also unproven in a single-user prototype: nobody but the maker has seen a share yet.
@@ -340,7 +347,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Evidence.** Facebook's research links composed, targeted interaction with close ties to well-being [70]. Private sharing on Facebook was growing at over 80% a year in 2024 [13].
 - **How Whims delivers it.**
   - Live: remix in Studio, with lineage recorded in the manifest; a "remixed your Whim" notification.
-  - Not built: credits everywhere, remix trees, send it back.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): remix credits and send it back as a playable card. Not built: remix trees.
 - **Demo.** Remix a friend's hill game into a night version, then show the notification the original maker receives.
 - **Metric.** Share of remixes sent back; maker replies or counter-remixes within 48 hours.
 - **Risk and answer.** "Most people won't remix." True, so this is a supporting value; each remix still pulls a second person back in.
@@ -355,7 +362,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Warm switch to the next game: about 3.6 ms at the median on the simulator (D18, teammate-reported, not yet on a phone).
 - **How Whims delivers it.**
   - Live: the Whims tab feed with a warm runtime, 8 looks with look memory, Bursts and takeover.
-  - Not built: a Customize panel; endless and finite play modes.
+  - Live: length settings (endless, rounds, timed, lives) and customizing in Studio.
 - **Demo.** Swipe through four Whims with different looks and formulas, each tagged with why it is in your feed.
 - **Metric.** Swipes to first play; plays per session; "see less" rate.
 - **Risk and answer.** "That is an engagement machine." The feed opens with your Group's Daily and friends' runs, and is ranked for connection (VP-10).
@@ -377,7 +384,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **How Whims delivers it.**
   - Live: a Daily per Group (a hand-made seed game in the app today), sources limited to opted-in posts with the maker able to drop any, the Daily card and streak, 6 formulas and 8 looks with look memory so consecutive games vary.
   - Debug/CLI only: generating the Daily from posts (command line and Studio's daily mode).
-  - Not built: admin opt-in with preview and veto; a Games section, weekly leaderboard and game night (VP-19).
+  - Not built: admin opt-in with preview and veto. Live: a Games tab, weekly leaderboard and quiz night (VP-19).
 - **Supply model.** An admin turns on "Daily" once. Muse then generates each day's game from opted-in posts, and the admin gets a preview and can veto it. Members' own creations are a bonus, not the supply. We expect admin opt-in to be the limiting step; it is a hypothesis with a metric below.
 - **Demo.** Show Studio in daily mode: "Used 5 of 5 opted-in posts ... Nothing else was read", then the Daily pinned on the Group. Say plainly that this path is a debug launch today.
 - **Metric.** Admin opt-in rate and 4-week retention of the feature; weekly active members per Group before and after the Daily; new members' first-week participation; Daily completion over weeks 1 to 8 against a fixed puzzle.
@@ -407,7 +414,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Evidence.** Facebook's creator payouts and originals policy [27]; the Vibes reception [45]; Muse used all 6 formulas and all 8 looks across 10 prompts with no hints (D6).
 - **How Whims delivers it.**
   - Live: a profile Whims tab, Chains (level series), next level, remix lineage and a "remixed your Whim" notification.
-  - Not built: credits everywhere, remix trees, send it back. A path to creator payouts is an idea, not a plan.
+  - Live: remix credits and send it back (one device). Not built: remix trees. A path to creator payouts is an idea, not a plan.
 - **Demo.** Open a maker's profile: their games, a three-level chain and a friend's remix with lineage.
 - **Metric.** Makers with 2 or more games in 30 days; remixes per game; profile visits from game credits.
 - **Risk and answer.** "If Muse does the work, is the maker creating anything?" The maker chooses the idea, the audience, the sources, edits, look and levels. Whether makers feel ownership is untested.
@@ -424,8 +431,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - On the Q1 2026 call, Zuckerberg listed "creating games" among Spark's leading areas [3]. On the Q3 2026 call, he said Muse should not be "a kind of single player game" but should let "your Muses ... work with your friends and your families" [5].
 - **Evidence.** The quotes above [1][2][3][5]. Our benchmark shows the loop working end to end with real Muse latency (D1, D2).
 - **How Whims delivers it.**
-  - Live: Studio; the Whims tab feed; floats; Bursts in Reels and Stories you can take over.
-  - Not built: Make it together (VP-38).
+  - Live: Studio; the Whims tab feed; sharing; Bursts in Reels and Stories you can take over; Make it together on one device (VP-38).
 - **Demo.** Open with the quote on screen, then do it: prompt, wait about 28 s, float to the Group, then play a friend's Burst from the feed.
 - **Metric.** Steps of the quote demonstrated live: prompt, share, see in feed, jump in (all four today). In a pilot, share of created games shared to a person or Group within 24 hours.
 - **Risk and answer.** "If Meta already plans this, a hackathon team adds nothing." Meta's shipped versions (Pocket, Horizon Create) are standalone or creator-to-audience. Whims shows the community version and answers the hard parts: consent from Group posts, fair same-seed competition, a per-Group daily and a playtest gate.
@@ -444,7 +450,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Shipped feed weights rank your Group's Daily (3.0), a friend's Burst (2.2) and an Event icebreaker (2.0) above popular games (0.8) (D20).
 - **How Whims delivers it.**
   - Live: friends' Bursts in the feed and Stories; the Friends board scope; each feed page tagged with its social reason.
-  - Not built: Challenge Me, rivalries on profiles, send it back.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): Challenge Me, rivalries on profiles ("You vs Maya: 3-2 this week"), send it back.
 - **Demo.** Open the Whims tab: the first page is a friend's run, tagged with why it is there. Take over, beat it, and float "Beat it?" to the Group.
 - **Metric.** Share of Whim sessions where the maker, the Group or a board neighbor is a friend or Group member; friend-to-friend interactions per session.
 - **Risk and answer.** "Friend content declined because people prefer entertainment." We are not asking people to choose friends over fun; games are fun that needs friends.
@@ -463,7 +469,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - 49% of all US 18-to-29-year-olds use Facebook daily [53].
 - **How Whims delivers it.**
   - Live: the New in SF Group and picnic Event demo world; the Daily and boards.
-  - Not built: Challenge Me.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): Challenge Me.
 - **Demo.** Frame the 5 minutes as one newcomer's week: on Monday they join the Group and play the Daily, on Thursday they play the icebreaker, on Saturday they go to the picnic, and on Sunday they have a rematch with a new friend.
 - **Metric.** Daily return of 18-to-29-year-old Whims users against matched non-users; share of 18-to-29 Group joins followed by a Whim play.
 - **Risk and answer.** "Teen use of Facebook has collapsed (32% in 2024, down from 71% in 2014-15 [54])." Whims is designed for adults (Meta limits Muse to 18 and over [6]), and young adults are the stated target.
@@ -478,7 +484,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Evidence.** Pocket's US launch [43], its reported limits [44], Horizon's creator focus [42] and the Vibes reception [45].
 - **How Whims delivers it.**
   - Live: Group Daily, Event icebreaker, boards, remix lineage.
-  - Not built: Challenge Me, group-chat play, games in Groups and Search.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): Challenge Me, group-chat play, games in Groups and Search; the Group Blend.
 - **Demo.** One Q&A slide: Pocket makes games for a feed; Horizon gives creators a tool; Whims is where your Group, your Event and your chat play together.
 - **Metric.** Share of Whim plays that happen inside a Group, Event or chat.
 - **Risk and answer.** "Meta could add Groups to Pocket in a sprint." That would validate the thesis. It would still need what we built: opt-in sourcing, same-seed fair boards, per-Group dailies and icebreakers.
@@ -499,7 +505,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Telegram's Hamster Kombat shows paid virality churns: from more than 300 million claimed players to under 44 million monthly [113].
 - **How Whims delivers it.**
   - Design rules: scoped invites only (one friend, a Group board, a chat card); no mass requests; no cash or token rewards; inside core surfaces.
-  - Not built: saves as the quality signal.
+  - Live: saves as the quality signal.
 - **Demo.** Q&A only: "FarmVille showed the graph spreads games; we keep that and drop the spam."
 - **Metric.** Invite acceptance rate; mute or unsubscribe rate on Whim notifications.
 - **Risk and answer.** "Games failed on Facebook twice." Earlier tries were catalogs bolted on. Whims is made by members, about the Group, inside Groups and Events.
@@ -521,7 +527,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Evidence.** The reach and ranking figures above [52][11][5]; the ESA survey [76]; manifests and playtest outputs are shipped. Nothing ad-related is built.
 - **How Whims delivers it.**
   - Live: Group Daily and looks that need little text; manifests, lineage and bot playtests.
-  - Not built: a recommender with playtest priors; sponsored Whims.
+  - Live: a recommender with bot-playtest priors for new games (unvalidated, D29a). Not built: sponsored Whims.
 - **Demo.** Not a demo moment. Use one line each in Q&A.
 - **Metric.** Age spread of players per Group board; completion of brand-new Whims with and without playtest priors; sponsored-Whim completion in a test.
 - **Risk and answer.**
@@ -531,6 +537,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 ### 6.5 Muse and the AI ecosystem
 
 #### VP-34. The AI does the core work: without Muse there is no game about your people
+
+*At `6b1cc85` the strongest evidence for this VP is the microgame harness and the game anatomy, written up in [04-why-ai.md](04-why-ai.md) and VP-42 below: on 12 eval requests, 12 games passed the gate with 88% of must-haves present (D30, Muse-judged). The entry below covers the formula path, measured at `0a3e8f7`. Its line "Muse's added value is content, context and look" is true for formula games only; on the microgame path Muse writes the mechanics too (D31).*
 
 - **Claim.** Muse does the core work: Ember writes the brief; Wonder composes the game with tool calls, writes its content and repairs failed drafts; bots tune difficulty; and Muse Image paints the cover. Without an LLM, the same prompts give valid but mostly off-topic games.
 - **Why Facebook.** The AI's value comes from Facebook context (posts, RSVPs, Group identity).
@@ -552,6 +560,28 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Demo.** Run Studio live with the timeline visible. Then show one slide with the offline result for the neighborhoods prompt next to Muse's San Francisco quiz.
 - **Metric.** Human-rated on-topic rate, Muse against offline; first-draft pass rate; share of created games played by others; in the context test, "mentions real members or facts" and "would you play this with this Group".
 - **Risk and answer.** "Relevance was judged by one agent on 10 prompts." True; a blind human rating is the first item in section 11.
+
+#### VP-41. Seed the feed: Meta studio accounts and creator-inspired games (planned)
+
+- **Claim.** Meta-run "studio" accounts that each own one kind of game (Daily Word, Party Night, Story Club, Quick Arcade, Group Trivia) post a new game every day, and games inspired by famous creators ("A Whim inspired by MrBeast") give a creator's audience something to play together. The feed is never empty, and a creator's fans have a reason to come to Facebook together.
+- **Why Facebook.** The games are played in Groups and the feed, with friends, and Facebook already pays creators and rewards original content [27]. A creator's audience on Facebook can play in its own Groups.
+- **Rationale.** The way back for young adults is a reason for whole friend groups to show up ([01-story.md](01-story.md)). An empty feed is the first thing a new user sees; the server now holds real data only (`0636df3`), so content has to come from somewhere real.
+- **Evidence.** None yet. Karthik's decision, Nov 12 18:00, with a starter list of one game per creator (see [11-roadmap.md](11-roadmap.md#seeding-the-feed-studio-accounts-and-creator-inspired-games)).
+- **How Whims delivers it.** Not built. The accounts and games would live in the backend database (Max's rule: no game data in app code). Muse's prompts ban real people today, so creator games need a prompt exception and a label.
+- **Demo.** Said out loud as planned in beat 3 of the script; not shown.
+- **Metric.** Share of new users whose first play is a studio-account game; plays and shares per creator-inspired game; Group joins that start from one.
+- **Risk and answer.** "Using real creators' names without their consent" is a real right-of-publicity and endorsement risk. Guardrails: label every game "inspired by", never "by"; no face, voice or logo; original mechanics. The right production version is opt-in partnership with creators (see [08-qa.md](08-qa.md#creators-names-and-likeness)).
+
+#### VP-42. Agree the game with Muse, and see what's new to it
+
+- **Claim.** Before Muse builds, it shows "How the game works" part by part, marks each part Known, Approximate or New to Muse, and asks only about what it guessed. After the build, "Change the game" maps a person's words onto the parts it changes. The person controls the *function* of their game, not just its look.
+- **Why Facebook.** Not Facebook-specific: this is AI value. It matters on Facebook because the games are made for specific people, so they have to play the way the maker meant.
+- **Rationale.** Studio used to take a person's style (mood, look, theme) but not their function. Specific requests were where Muse missed most: 63% of must-haves, against 100% for vague ones (D30).
+- **Evidence.** A draft takes 4 to 7 s on the fast model, a change about 3 s (D33). Calibration took over-flagging of "New to Muse" from 10 of 13 parts to 0 (D33). In anatomy mode, titles kept the request and the calm garden became really no-fail, but the run is not scored and gate pass fell to 7 of 11 because the gate expects a losable run (D32).
+- **How Whims delivers it.** Live: the "How the game works" card on Brief, quick answers, "Something off? Tell Muse", "Change the game" on Try, and the anatomy saved with the game on this device for Edit, Remix and Level 2. Not built: syncing the anatomy to friends' devices; a genre-aware gate.
+- **Demo.** Beat 6 of the script: hand a judge the phone and let them change the game.
+- **Metric.** Share of anatomy parts the person edits; scored must-have coverage with and without the anatomy (the next harness run); turns per game.
+- **Risk and answer.** "It slows down 'one sentence'." It adds one card and 4 to 7 s; Muse asks only about guesses.
 
 #### VP-35. A showcase for the whole Muse family
 
@@ -579,7 +609,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Input tokens were not logged, so **we claim no dollar figure**.
 - **How Whims delivers it.**
   - Live: the Studio pipeline; a headless validator and simulator.
-  - Not built: server-side replay verification and boards in a teammate's Go backend.
+  - Not built: server-side replay verification. The backend is live on Prod with per-game leaderboards, but does not re-simulate runs (D36).
 - **Demo.** Q&A answer: "about 5 calls per game; verification is milliseconds".
 - **Metric.** Measured cost per game and per Group Daily once input tokens are logged.
 - **Risk and answer.** "Without input tokens and prices this is hand-waving." We claim only measured call counts and output tokens. Logging input tokens is a small task (section 11).
@@ -594,14 +624,14 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - With no hints, Muse used all 6 formulas and all 8 looks across 10 prompts, so the feed looks varied (D6).
 - **How Whims delivers it.**
   - Live: 8 looks with look memory, remix lineage and notification, a maker on every Whim.
-  - Not built: choose-your-own-adventure stories; a guess-what-they-say-next quiz night with original animated scenes; a teammate's Rust/WASM engine for a new game format.
+  - Live: choose-your-own-adventure stories; a guess-what-they-say-next quiz night with original scenes; Artem's Rust/WASM engine, where Muse writes new mechanics (D30).
 - **Demo.** Scroll three Whims with different looks and formulas, each tagged with its maker and why it is in your feed.
 - **Metric.** Share rate and completion of Whims against AI video; "see less" rate.
 - **Risk and answer.** "Formula games will feel samey." Bench variety was 6 of 6 formulas and 8 of 8 looks, and each game's content is specific to its Group. The format list is growing.
 
-### 6.6 Roadmap: being built now (collaboration first)
+### 6.6 Collaboration (formerly "Roadmap: being built now")
 
-These are the team's current build priority. None is on `beta-version` yet, so none is claimed in the demo unless it lands.
+These were the team's build priority after the judge's note. Since the collaboration batch merged (13:08, Nov 12), most of them are in the app on one device, with synthetic friends whose runs are bots on the same seed. Nothing crosses phones yet. Two-person Blends and brackets are still not built. Each entry's evidence below is from before the batch; its delivery line is updated to `6b1cc85`.
 
 #### VP-14. Stay close to hometown friends after you move
 
@@ -623,8 +653,8 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - The same-seed primitive it needs is shipped and verified (D12).
   - No prototype data for the chat feature itself.
 - **How Whims delivers it.**
-  - Not built: Challenge Me (same-seed head-to-heads in a chat, a head-to-head result, Challenge back) and rivalries on friends' profiles.
-  - Live: the same-seed primitive and the Friends board scope.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): Challenge Me (same-seed head-to-heads in a chat, a head-to-head result, Challenge back) and rivalries on friends' profiles; the same-seed primitive and the Friends board scope.
+  - Not built: challenges that reach another person's phone.
 - **Demo.** If it lands, send today's game to a hometown friend's chat and show the result card and Challenge back. If not, show the Friends board and say plainly that Messenger is in progress.
 - **Metric.** Challenges sent per weekly player; reply and rematch rate; share of challenges sent to friends in a different city.
 - **Risk and answer.**
@@ -645,8 +675,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Apple made challenges with friends a main social feature of its Games app [110].
   - The same-seed Daily the card relies on is shipped (D12).
 - **How Whims delivers it.**
-  - Not built: a group-chat card with a live mini leaderboard and rematch; a guess-what-they-say-next quiz night in group chats.
-  - Live: the same-seed Daily, which is the primitive both use.
+  - Live (in the app since the collaboration batch; one device, with synthetic friends): a group-chat card that becomes a shared session ("3 of 5 played"), with a mini leaderboard and Rematch; a guess-what-they-say-next quiz night in group chats; the same-seed Daily.
 - **Demo.** If it has shipped, drop a card into a 4-person demo chat and show the leaderboard filling. Otherwise, describe it as in progress.
 - **Metric.** Chats with 3 or more players on one card; messages in the chat within an hour of a card; repeat cards per chat per week.
 - **Risk and answer.**
@@ -666,8 +695,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Competition between groups raised cooperation inside each group in a lab game [129], but a prize tournament between groups cut friendships across them [130]. Team formats should pull a Group together without making another Group the enemy (see "Why friendly competition makes friends").
 - **Evidence.** Hall's hours-to-friendship figures [65][66] and Depping's cooperation results [72]. Our bots show a caution: the word game "Fog Words" did not rank by skill (median scores 200, 400 and 300 for low, middle and high skill), so luck-heavy games should reward improvement rather than raw rank (D16).
 - **How Whims delivers it.**
-  - Not built: a Games section, a weekly leaderboard with trophy and Most improved, Challenge the Group, game night.
-  - Live: the Group board and Daily streak.
+  - Live (synthetic members): a Games tab, a weekly leaderboard with Most improved, Challenge the Group, quiz night as game night, the Group board and Daily streak.
 - **Demo.** If it has shipped, open the Group's Games section, show the weekly trophy and a newcomer listed as Most improved, then the game-night Event.
 - **Metric.** Share of weekly winners or Most improved who joined in the last 30 days; game-night RSVP rate among weekly players.
 - **Risk and answer.** "Leaderboards favor the already good." That is why Most improved, cooperative formats (a Group total, team against team) and a Friends scope are in the design.
@@ -680,7 +708,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Cooperation and interdependence each increased closeness between strangers, and interdependence worked through more conversation [72]. Co-making is interdependent by design: one person picks the idea, another the look, another the sources.
   - People value what they make, when it is finished (the IKEA effect) [75]; co-makers share that ownership.
 - **Evidence.** The cooperation [72] and IKEA-effect [75] findings. No prototype data; Studio's edit, new look and next-level steps are the building blocks.
-- **How Whims delivers it.** Not built: co-making with friends or a Group, and credits for every maker. Live: Studio edits, remix lineage and the "remixed your Whim" notification.
+- **How Whims delivers it.** Live (in the app since the collaboration batch; one device, with synthetic friends): Make it together (invite a chat, a friend or a Group to add a question, words, a scene or a level; Muse stitches them; credits name every maker), plus Studio edits, remix lineage and the "remixed your Whim" notification.
 - **Demo.** If it lands: two people add one step each to a game for the Group, and both names appear on its credits.
 - **Metric.** Co-made games per Group; plays by co-makers' friends; Add friend between co-makers who weren't friends.
 - **Risk and answer.** "Committees make worse games." Each step stays small and validated, and the playtest gate still applies. Whether co-making feels fun is untested.
@@ -695,14 +723,14 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - People underestimate how much new acquaintances like them [68] and how much others appreciate being contacted [69]. A Blend gives a concrete, low-stakes reason to reach out after meeting.
   - A bracket keeps the group together after an Event and turns "nice to meet you" into a rematch.
   - Head-to-head play can still build trust when the two players affect each other [72]; Blends add a bonus for evenly matched games that never goes negative, so nobody is matched down (built on a teammate's branch, not yet in the app) (see "Why friendly competition makes friends").
-- **Evidence.** No prototype data; it is a design. Spotify's Blend is the analogy [125]. The pieces it builds on exist: same-seed play and replay verification (D12), the Event icebreaker that already makes a game from guests' intros (D8), and Kevin's recommender, which learns each person's taste from their plays (D21 for its simulation; local branch, not in the app).
+- **Evidence.** For the Group version: Kevin's Group Blend (geometric mean, a misery floor and plus-only fairness) raised the worst-off member's enjoyment from 0.31 (random) to 0.489 and games everyone enjoys from 8.7% to 32.0% across 240 synthetic Groups, within noise of plain averaging (D29, simulated). For the two-person version: no prototype data; Spotify's Blend is the analogy [125]. The pieces exist: same-seed play and replay verification (D12), the Event icebreaker that already makes a game from guests' intros (D8), and the recommender, which learns each person's taste from their plays (in the app on `main`).
 - **How Whims delivers it.**
   - Not built: taste profiles from play history, matching two profiles and blending them into a brief Muse can build from (asked of Kevin's recommender work; design and request sent on Nov 12), a "Blend with" button on a friend's profile and on board rows, and an Event bracket.
-  - Live: the same-seed primitive, verified scores, the Event icebreaker and the Friends board scope.
-- **Demo.** As a labeled "Coming" frame in beat 8 of the story (section 5.2): "A game for Alex and Maya", then a picnic bracket. If a first version lands, make a Blend between two demo profiles and play one round.
+  - Live: the **Group Blend** on Group pages (games picked for everyone, "Make our Blend game" in Studio, and a "taste twin" with Add friend); the same-seed primitive, verified scores, the Event icebreaker and the Friends board scope. The server also has `POST /v1/blend` and a Group blend route (D36).
+- **Demo.** Show the Group Blend on the New in SF page in beat 5 ([07-demo-script.md](07-demo-script.md)). Two-person Blends and brackets are said as next, not shown.
 - **Metric.** Blends started per new friendship; share of Blends finished by both people; Add friend or messages between the two within 7 days; bracket completion per Event; repeat Blends between the same pair.
 - **Risk and answer.**
-  - "This is matchmaking." It isn't: a Blend is only offered between people who are already friends or who went to the same Event, never as a suggestion of strangers. Dating stays out of scope.
+  - "This is matchmaking." It isn't: a two-person Blend is only offered between people who are already friends or who went to the same Event. The Group Blend's "taste twin" is a member of a Group you both joined, the same scope as a board row. Dating stays out of scope.
   - "Play history says little about a person." True for a few plays. A Blend can start from what each person chose to play and make, and from opted-in intros, as the icebreaker does. Whether it feels personal is untested.
   - "A loss in a two-person game could sting." Blends can use cooperative scoring (a shared total) as well as head-to-head, and a bracket can reward Most improved, as the weekly boards do (VP-19).
 
@@ -712,7 +740,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
 - **Why Facebook.** Facebook Search now has an AI Mode, powered by Muse Spark, with answers "grounded in what people are saying publicly across our apps like in Groups and Reels" [24]. People ran more than 2 billion searches a day on Facebook in 2016 (latest public figure, likely stale) [120].
 - **Rationale.** A game about climbing in SF is a friendlier first contact with a community than a list of Groups. In WeChat, over 80% of mini-game users launch games through pull-down menus, search and social sharing [92].
 - **Evidence.** Facebook's AI Mode in Search [24], its search volume [120] and the WeChat launch figures [92]. No prototype data yet.
-- **How Whims delivers it.** Not built: games in Search and "Make it with Muse" from any search.
+- **How Whims delivers it.** Live: games in Search, and "Make it with Muse" when nothing matches (its copy says "about a minute", which is wrong for both build paths; see open-items).
 - **Demo.** Only if it lands: search "bouldering", play a Group's game from the results and tap through to the Group.
 - **Metric.** Group joins that start from a game opened in Search.
 - **Risk and answer.** "TikTok Minis are also found through search [105]." Agreed, this is table stakes. Its value is the link to Groups and Events, which TikTok lacks.
@@ -723,7 +751,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
 - **Why Facebook.** Group mastery needs a Group, and friends' streaks need the friend graph.
 - **Rationale.** Streaks build habits. Duolingo learners who reach a 7-day streak are 3.6 times more likely to complete their course, and allowing two Streak Freezes raised daily active learners by 0.38% (relative) [114].
 - **Evidence.** Duolingo's streak results [114]. Muse's beginner Spanish game was 8 of 8 correct in a spot-check (D8, estimate).
-- **How Whims delivers it.** Live: the answer formula, used for learn games. Not built: Group mastery and friends' streaks.
+- **How Whims delivers it.** Live: the `learn` formula, with a Group mastery meter ("New in SF knows 82% of the hills") and friends' streaks, both synthetic in the demo.
 - **Demo.** Optional: play the Muse-made Spanish game in about 20 s.
 - **Metric.** 7-day streak rate for learners with a friend learning the same topic, against solo learners.
 - **Risk and answer.** "Duolingo already does this." It is a supporting value; the point is learning with your Group, which Duolingo does not host.
