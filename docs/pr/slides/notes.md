@@ -1,33 +1,36 @@
-# Speaker notes and timing (draft 3)
+# Speaker notes and timing (draft 4)
 
-*One block per slide. The budget is 300 s: 205 s of talk and 95 s of demo. Demo 1 starts on slide 1, so the game builds while we talk, and it pays off on slide 3. The video voice-over reads these. Keep claims in step with [../narrative.md](../narrative.md).*
+*One block per slide. The budget is 285 s (190 s of talk and 95 s of demo), leaving 15 s of slack for slide changes and a slow phone. Demo 1 starts on slide 1 so the game builds while we talk. Planning takes 30–60 s plus the tap to agree, and the build about a minute after that, so it should be ready around 1:40–2:10. It pays off after slide 5, at about 1:50. The video voice-over reads these. Keep claims in step with [../narrative.md](../narrative.md).*
 
 | Slide | Talk | Demo | Running total |
 |---|---|---|---|
-| 1 | 20 s | Demo 1 starts: type the sentence, tap Make | 0:20 |
-| 2 | 30 s | | 0:50 |
-| 3 | 20 s | **Demo 1, 40 s:** the plan, the game, play it, post it to a Group | 1:50 |
-| 4 | 30 s | | 2:20 |
-| 5 | 25 s | | 2:45 |
-| 6 | 20 s | | 3:05 |
-| 7 | 20 s | **Demo 2, 25 s:** scroll the feed, a game plays inline with a sound; search shows "Make it with Muse" | 3:50 |
-| 8 | 20 s | **Demo 3, 30 s:** a Group's weekly board → Add friend → start a best of 5 | 4:40 |
-| 9 | 20 s | | 5:00 |
+| 1 | 15 s | Demo 1 starts: say the sentence, tap Make, agree the plan when it appears | 0:15 |
+| 2 | 25 s | | 0:40 |
+| 3 | 20 s | (Demo 1 still building) | 1:00 |
+| 4 | 25 s | | 1:25 |
+| 5 | 25 s | | 1:50 |
+| — | | **Demo 1, 40 s:** the finished game, play it, post it to a Group | 2:30 |
+| 6 | 20 s | | 2:50 |
+| 7 | 20 s | **Demo 2, 25 s:** scroll the feed, a game plays inline with a sound; search shows "Make it with Muse" | 3:35 |
+| 8 | 20 s | **Demo 3, 30 s:** a Group's weekly board → Add friend → start a best of 5 | 4:25 |
+| 9 | 20 s | | 4:45 |
+
+**Demo 1 fallback:** before the talk, make the same game once ("dodge the fog over Twin Peaks") and post it to the demo Group. If the live build isn't done at 1:50, say "it's still being playtested by the bots, so here's one I made this morning", and open that one. Go back to the live one at the end if there's time.
 
 ## 1
-Hi, we're Whims. Make a game on a whim, and play it together, right inside Facebook. *(Type "dodge the fog over Twin Peaks" and tap Make. It builds while we talk.)*
+Hi, we're Whims. Make a game on a whim, and play it together, right inside Facebook. *(Say "dodge the fog over Twin Peaks", tap Make, agree the plan.)*
 
 ## 2
-Short-form is changing: it's becoming something you play. LinkedIn says 86% of its daily players come back the next day; NYT puzzles were played over 11 billion times last year, and the Times added a friends tab. And 98% of young Americans play some kind of game, but only a third of young men, and fewer than one in ten young women, call themselves gamers. We're building for everyone else.
+Short-form is becoming something you play. LinkedIn's daily players come back the next day 86% of the time; NYT puzzles were played 11 billion times last year. And nearly everyone plays, but almost nobody calls themselves a gamer. We build for everyone else.
 
 ## 3
-What's new is that anyone can make one. You say one sentence. Muse agrees with you how it plays, five bots play it, and about a minute later your friends can play it. Here's the one I started a minute ago. *(Demo 1, 40 s.)*
+What's new: anyone can make one. One sentence; Muse agrees with you how it plays, five bots test it, and about a minute later your friends can play it. Mine is building right now; we'll come back to it.
 
 ## 4
-Under the hood, four Muse models. Spark understands the request, and we search 1,280 game types to ground it. Ember writes the brief, Wonder writes and builds the game and repairs it, and Image paints the art. Then a five-bot gate decides if it ships. All of it runs on our server; the phone just plays.
+Four Muse models. Spark understands the request, grounded in 1,280 game types. Ember writes the brief, Wonder writes, builds and repairs the game, Image paints the art. A five-bot gate decides if it ships. It all runs on our server; the phone just plays.
 
 ## 5
-Every game is just JSON, art included. Our Rust engine, compiled to WebAssembly, reads it at runtime and turns it into the game. No build step, about one megabyte. And it's deterministic, so the server replays every score to check it.
+Every game is just JSON, art included. Our Rust engine, compiled to WebAssembly, reads it at runtime and turns it into the game: no build step, about one megabyte. It's deterministic, so the server replays every score to check it. And here's the game I started. *(Demo 1, 40 s.)*
 
 ## 6
 Five of us built this, each running our own AI agents, all synced through one Slack channel, a shared board and one CLAUDE.md. 489 commits in two days. The agents moved fast; the decisions stayed ours.
@@ -39,4 +42,4 @@ Games are a new signal for the feed: finished runs, replays, rematches, friends 
 And it brings people closer. Every Group gets a weekly board; meet someone new on it, and a best of 5 settles it. Challenges, quiz nights and remixes are built on the server and coming to the app next. *(Demo 3, 30 s.)*
 
 ## 9
-It's not a loop to grind; it's a ritual you share. A daily game with your Group, a rematch with a friend. Anyone can make a game. Everyone can play it together. Thank you.
+Endless loops lose people: about 3% are still playing a month later. A shared ritual is different: a weekly board with your Group, a rematch with a friend. Anyone can make a game. Everyone can play it together. Thank you.

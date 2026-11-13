@@ -158,6 +158,11 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
 .grid6 .tile .b { font-size: 32px; } .grid6 .tile .s { font-size: 22px; }
 .signals { margin-top: 34px; font-size: 27px; line-height: 1.4; }
 .signals b { font-weight: 800; }
+.mini { margin-top: 44px; max-width: 1100px; display: flex; flex-direction: column; gap: 12px; }
+.mrow { display: grid; grid-template-columns: 420px 1fr; align-items: center; gap: 20px; font-size: 22px; color: rgba(255,255,255,.9); }
+.mt { height: 40px; background: rgba(255,255,255,.18); border-radius: 12px; overflow: hidden; }
+.mf { height: 100%; background: #fff; color: #5B3FE0; border-radius: 12px; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: flex-end; padding-right: 14px; min-width: 70px; }
+.msrc { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -217,7 +222,7 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
   <div class="foot"><span class="src">Illustrations drawn by us, not screenshots. YPulse 2026; Pew 2015 (via Bayan's review). Also: WeChat Mini Games pass 500M monthly players [91].</span><span class="pg"></span></div>
 </section>
 
-<!-- 3. Point 2: anyone can make one. Demo 1 pays off here. -->
+<!-- 3. Point 2: anyone can make one. Demo 1 is still building; it pays off after slide 5. -->
 <section class="slide">
   <div class="bar"></div>
   <div class="kicker">Anyone can make one</div>
@@ -253,7 +258,7 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
   <div class="foot"><span class="src">Harness numbers: docs/pr/09-evidence.md and the harness evals on main.</span><span class="pg"></span></div>
 </section>
 
-<!-- 5. Point 5: the engine -->
+<!-- 5. Point 5: the engine. Demo 1 pays off after this slide. -->
 <section class="slide">
   <div class="bar"></div>
   <div class="kicker">The engine</div>
@@ -348,7 +353,7 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
     <div class="tile"><span class="tag2">In the app</span><div class="b">Weekly Group boards</div><div class="s">A fresh race every week, and an Add friend button next to people you don't know yet.</div></div>
     <div class="tile"><span class="tag2">In the app</span><div class="b">Sounds</div><div class="s">Put a song behind your game, like Reels audio. Credited, licensed tracks.</div></div>
     <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Challenges</div><div class="s">Send a game to your Group or a friend with your score to beat.</div></div>
-    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Quiz nights</div><div class="s">A Group plays the same questions together, live.</div></div>
+    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Quiz nights</div><div class="s">A Group plays the same questions, then compares.</div></div>
     <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Remix</div><div class="s">Every remix remembers the game it came from, so credit flows back.</div></div>
   </div>
   <div class="foot"><span class="src">89% of Gen Z say games can help them make new friends (ESA Essential Facts, 2025).</span><span class="pg"></span></div>
@@ -358,7 +363,12 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
 <section class="slide close">
   <div class="kicker" style="color:#fff;-webkit-text-fill-color:#fff">Not a loop to grind. A ritual you share.</div>
   <h2>Anyone can make a game. Everyone can play it <span style="opacity:.85">together</span>.</h2>
-  <div class="lede">A daily game with your Group, a rematch with a friend, a best of 5 with someone new: a reason to come back to Facebook, together. Creators get something to show; players give back a score, a remix, a challenge.</div>
+  <div class="lede">A weekly board with your Group, a rematch with a friend, a best of 5 with someone new: a reason to come back to Facebook, together. Creators get something to show; players give back a score, a remix, a challenge.</div>
+  <div class="mini">
+    <div class="mrow"><span>Endless hyper-casual loops, day 30</span><div class="mt"><div class="mf" style="width:27%">3%</div></div></div>
+    <div class="mrow"><span>Sports, racing, tabletop, day 30</span><div class="mt"><div class="mf" style="width:100%">8–11%</div></div></div>
+    <div class="msrc">Players still playing a month later. Appodeal, Mobile Casual Benchmarks 2025. A loop alone doesn't make a habit; a shared ritual does.</div>
+  </div>
   <div class="foot"><span>Made with Muse Spark, Ember, Wonder and Image · Karthik · Kevin · Max · Bayan · Artem</span><span>Thank you</span></div>
 </section>
 

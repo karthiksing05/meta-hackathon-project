@@ -71,7 +71,7 @@ Games are a new signal for the feed, like any other media engagement: what you p
 
 - **Best of 5** ("the five-game showdown") every time you meet someone new: wired in the app.
 - **Group weekly boards:** in the app (`GroupWeeklyBoardView`), with Add friend next to people you don't know.
-- **Challenges** to your Groups and friends, **quiz nights** and **making a game together**: built on the server. *The app still shows "Not available yet" for these; say so if asked.*
+- **Challenges** to your Groups and friends, **quiz nights** and **making a game together**: built on the server. Group play is async: everyone plays the same seed in their own time, then compares. Never say "live". *The app still shows "Not available yet" for these; say so if asked.*
 - **Remix:** the server records `remixOf`. Say plainly which steps aren't in the app yet.
 - **Sounds:** pick a sound to play behind a game, like Reels audio (CC-BY library with credit).
 
@@ -88,5 +88,5 @@ This isn't about one prompt. It's about making Facebook cool again, togetherness
 
 - "Changing a game" (revise) failed on Prod before `279283a`, and one revise took 221 s. Don't claim "about 18 seconds for each refinement" until it's checked on Prod.
 - Messenger, Feed posts, Stories and Reels in the app still run on mock data.
-- Generated games have no covers. The Daily isn't built. The live DB is nearly empty, so the demo needs seeded games.
+- Generated games have no covers. The Daily isn't built, so the close says "a weekly board with your Group", not "a daily game". The live DB is nearly empty, so the demo needs seeded games.
 - Lock-screen push isn't verified (no APNs key yet). The notifications inbox works.
