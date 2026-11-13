@@ -246,34 +246,68 @@ private struct BubbleResultHero: View {
 
     /// The Bubble's own colors, custom ones included (LOOKS.md); the layout never changes.
     private var palette: BubblePalette { bubble.palette }
+    /// The game's app theme (docs/BUBBLES.md, "App theme"): its colors, display font and wordmark.
+    private var theme: GameThemeResolved? { GameThemeCenter.shared.resolved(for: bubble) }
+    private var themeBG: UInt32? { theme?.theme.palette.bg }
+    private var isDarkBG: Bool { themeBG.map { GameThemeColor.luminance($0) < 0.45 } ?? palette.isDark }
+    /// The game's ink when its theme has one that reads on its background, else the Glow ink.
+    private var ink: Color {
+        if let bg = themeBG, let hex = theme?.theme.palette.ink,
+           abs(GameThemeColor.luminance(bg) - GameThemeColor.luminance(hex)) > 0.4 {
+            return Color(hex: hex)
+        }
+        if themeBG != nil { return isDarkBG ? .white : Color(hex: 0x141414) }
+        return palette.ink
+    }
     /// Behind small labels: light on light palettes, dark on dark ones, so ink stays legible.
-    private var labelFill: Color { palette.isDark ? Color.black.opacity(0.28) : Color.white.opacity(0.5) }
+    private var labelFill: Color { isDarkBG ? Color.black.opacity(0.28) : Color.white.opacity(0.5) }
+
+    @ViewBuilder
+    private var background: some View {
+        if let bg = themeBG {
+            let surface = theme?.theme.palette.surface ?? bg
+            LinearGradient(colors: [Color(hex: bg), Color(hex: surface)], startPoint: .top, endPoint: .bottom)
+            if let cover = theme?.cover {
+                // The game's art, quiet behind the score.
+                // Overlaid on a clear rect so the image never sizes the card.
+                Color.clear
+                    .overlay {
+                        Image(uiImage: cover)
+                            .resizable()
+                            .scaledToFill()
+                    }
+                    .clipped()
+                    .opacity(0.22)
+                    .allowsHitTesting(false)
+            }
+        } else {
+            palette.gradient
+        }
+    }
 
     var body: some View {
         ZStack {
-            palette.gradient
-            ambientOrbs
+            background
+            if themeBG == nil { ambientOrbs }
             celebration
             VStack(spacing: 6) {
                 badge
-                Text("\(bubble.emoji) \(bubble.title)")
-                    .font(.fbName)
-                    .foregroundStyle(palette.ink)
-                    .lineLimit(1)
+                GameWordmark(bubble: bubble, size: 24, color: ink, alignment: .center, maxHeight: 56)
+                    .frame(maxWidth: .infinity)
                 Text(shownScore.withCommas)
-                    .font(.system(size: 54, weight: .bold, design: .rounded)) // Display text: the run's score
+                    .font((theme ?? .empty).numberFont(size: 54)) // Display text: the run's score
                     .monospacedDigit()
-                    .foregroundStyle(palette.ink)
-                    .bubbleGlow(palette.glow, radius: 10, opacity: 0.7)
+                    .foregroundStyle(ink)
+                    .bubbleGlow(themeBG == nil ? palette.glow : .clear, radius: 10, opacity: 0.7)
                     .contentTransition(.numericText(value: Double(shownScore)))
                     .accessibilityLabel("Score \(shownScore)")
                 Text(bestLine)
                     .font(.fbMetaEmphasized)
-                    .foregroundStyle(palette.ink.opacity(0.8))
+                    .foregroundStyle(ink.opacity(0.8))
                 if streak > 1 {
                     Label("\(streak)-day streak", systemImage: "flame.fill")
                         .font(.fbCaptionEmphasized)
-                        .foregroundStyle(palette.ink)
+                        .foregroundStyle(ink)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
                         .background(labelFill, in: Capsule())
@@ -302,17 +336,17 @@ private struct BubbleResultHero: View {
                 Text(previousBest == nil ? "First score!" : "New best!")
                     .font(.fbCaptionEmphasized)
             }
-            .foregroundStyle(BubbleGlow.ink)
+            .foregroundStyle(themeBG == nil ? BubbleGlow.ink : bubble.themeOnAccent(theme))
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
-            .background(BubbleGlow.brandGradient, in: Capsule())
+            .background(themeBG == nil ? AnyShapeStyle(BubbleGlow.brandGradient) : AnyShapeStyle(bubble.themeAccent(theme)), in: Capsule())
             .overlay(Capsule().strokeBorder(Color.white.opacity(0.8), lineWidth: 1))
             .scaleEffect(isCelebrating ? 1 : 0.85)
             .bubbleGlow(.white, radius: 8, opacity: isCelebrating ? 0.8 : 0.3)
         } else {
             Text(outcome == .success ? "You made it" : "Nice run")
                 .font(.fbCaptionEmphasized)
-                .foregroundStyle(palette.ink.opacity(0.85))
+                .foregroundStyle(ink.opacity(0.85))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
                 .background(labelFill, in: Capsule())
@@ -348,7 +382,7 @@ private struct BubbleResultHero: View {
             ForEach(0..<10, id: \.self) { index in
                 let angle = Double(index) / 10 * 2 * .pi + 0.3
                 let distance: CGFloat = index.isMultiple(of: 2) ? 120 : 84
-                BubbleOrb(size: index.isMultiple(of: 3) ? 22 : 14, tint: palette.accents[index % palette.accents.count])
+                BubbleOrb(size: index.isMultiple(of: 3) ? 22 : 14, tint: themeBG == nil ? palette.accents[index % palette.accents.count] : bubble.themeAccent(theme))
                     .offset(
                         x: isCelebrating ? cos(angle) * distance : 0,
                         y: isCelebrating ? sin(angle) * distance * 0.7 : 0

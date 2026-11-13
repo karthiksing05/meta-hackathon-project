@@ -64,6 +64,9 @@ struct MainTabView: View {
         }
         .fullScreenCover(item: $router.bubblePlayRequest) { request in
             BubblePlayerView(request: request)
+                // Clear behind the player, so the tapped cover can zoom out of the screen below
+                // (`GameHandoffZoom`); the player draws its own full-bleed backdrop.
+                .presentationBackground(.clear)
         }
         .fullScreenCover(item: $router.studioLaunch) { launch in
             StudioView(launch: launch)

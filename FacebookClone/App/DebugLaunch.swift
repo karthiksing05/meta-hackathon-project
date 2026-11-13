@@ -10,7 +10,7 @@ import SwiftUI
 /// - `FB_AUTH=screen|guest`: force the sign-in screen, or continue as a guest
 /// - `FB_OPEN`: one of
 ///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `find-friends`, `sound:<id>`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
-///   `play-file:<path>` (a game manifest JSON file on the Mac running the simulator: added for this session and played),
+///   `card:<id>` (a game's feed card in a post; `FB_HANDOFF_AUTOTAP=1` taps it), `play-file:<path>` (a game manifest JSON file on the Mac running the simulator: added for this session and played),
 ///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
@@ -74,6 +74,15 @@ enum DebugLaunch {
             Task { @MainActor in
                 let bubble = await bubbleStore.loadGame(id: arg)
                 router.play(bubble?.id ?? arg)
+            }
+        case "card":
+            // A game's feed card as a post (FB_OPEN=card:<server id>); FB_HANDOFF_AUTOTAP=1 taps it
+            // after 2.5 s to show the cover-to-game zoom (GameHandoffZoom).
+            Task { @MainActor in
+                guard let bubble = await bubbleStore.loadGame(id: arg) else { return }
+                let post = Post(author: bubble.creator, text: "Try this one")
+                post.bubbleID = bubble.id
+                router.push(.post(post))
             }
         case "play-file":
             if let data = FileManager.default.contents(atPath: arg), let manifest = try? BubbleManifest.decode(data) {

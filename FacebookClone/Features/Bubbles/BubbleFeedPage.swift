@@ -281,10 +281,9 @@ private struct BubbleFeedCaption: View {
             creatorRow
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    Text(bubble.title)
-                        .font(.fbHeadline)
-                        .foregroundStyle(Color.white)
-                        .lineLimit(1)
+                    // The game's wordmark (its art, or its title in its own display font).
+                    GameWordmark(bubble: bubble, size: 24, maxHeight: 56)
+                        .fixedSize(horizontal: false, vertical: true)
                     if bubble.isMadeWithMuse {
                         Image(systemName: "sparkles")
                             .font(.system(size: FBIconSize.small, weight: .semibold))

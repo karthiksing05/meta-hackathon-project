@@ -8,6 +8,7 @@ struct BubblePostAttachment: View {
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(Router.self) private var router
+    @State private var coverFrame: CGRect = .zero
 
     var body: some View {
         if let bubble = bubbleStore.bubble(id: bubbleID) {
@@ -19,47 +20,44 @@ struct BubblePostAttachment: View {
 
     private func card(_ bubble: Bubble) -> some View {
         let shape = RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
+        // The game's theme (docs/BUBBLES.md, "App theme"): its cover full bleed, its wordmark over
+        // it, its palette on the Play button and the border. Nil while loading: Glow fallbacks.
+        let theme = GameThemeCenter.shared.resolved(for: bubble)
+        let accent = bubble.themeAccent(theme)
         return VStack(alignment: .leading, spacing: 0) {
             Button {
-                Haptics.light()
-                router.play(bubble.id, replay: post.bubbleReplay)
+                startPlay(bubble)
             } label: {
-                BubbleCoverView(bubble: bubble)
-                    .aspectRatio(16.0 / 10.0, contentMode: .fit)
+                Color.clear
+                    .aspectRatio(4.0 / 5.0, contentMode: .fit)
+                    .overlay { GameCoverArt(bubble: bubble) }
+                    .clipped()
                     .frame(maxWidth: .infinity)
+                    .overlay(alignment: .bottom) { coverTitle(bubble) }
                     .overlay(alignment: .topLeading) { badge(bubble) }
-                    .overlay(alignment: .bottomTrailing) { burstChip }
+                    .overlay(alignment: .topTrailing) { burstChip }
+                    .modifier(GameHandoffSource(frame: $coverFrame))
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(post.bubbleReplay == nil ? "Play \(bubble.title)" : "Watch the replay, then play \(bubble.title)")
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(bubble.title)
-                    .font(.fbName)
-                    .foregroundStyle(FBColor.primaryText)
-                    .lineLimit(1)
-                Text(bubble.rule)
-                    .font(.fbMeta)
-                    .foregroundStyle(FBColor.secondaryText)
-                    .lineLimit(2)
                 if let line = scoreLine(bubble) {
                     Text(line)
                         .font(.fbMeta.weight(.semibold))
                         .foregroundStyle(FBColor.primaryText)
                         .lineLimit(1)
-                        .padding(.top, 2)
                 }
                 HStack(spacing: 8) {
                     Button {
-                        Haptics.light()
-                        router.play(bubble.id, replay: post.bubbleReplay)
+                        startPlay(bubble)
                     } label: {
-                        Label("Play", systemImage: "sparkles")
-                            .font(.fbName)
-                            .foregroundStyle(BubbleGlow.ink)
+                        Label("Play", systemImage: "play.fill")
+                            .font((theme ?? .empty).bodyFont(size: 16, weight: .bold))
+                            .foregroundStyle(bubble.themeOnAccent(theme))
                             .frame(maxWidth: .infinity, minHeight: 36)
-                            .background(BubbleGlow.brandGradient, in: Capsule())
+                            .background(accent, in: Capsule())
                     }
                     .buttonStyle(.plain)
                     Button {
@@ -75,14 +73,47 @@ struct BubblePostAttachment: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel("Open the board for \(bubble.title)")
                 }
-                .padding(.top, 4)
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(FBColor.inputBackground)
         }
         .clipShape(shape)
-        .overlay { shape.strokeBorder(BubbleGlow.palette(bubble.paletteID).top.opacity(0.7), lineWidth: 1) }
+        .overlay { shape.strokeBorder(accent.opacity(0.7), lineWidth: 1) }
+        #if DEBUG
+        .task {
+            guard DebugLaunch.value("FB_HANDOFF_AUTOTAP") == "1" else { return }
+            try? await Task.sleep(for: .seconds(2.5))
+            startPlay(bubble)
+        }
+        #endif
+        .animation(.easeOut(duration: 0.25), value: theme == nil)
+    }
+
+    /// The game's wordmark and rule over a soft scrim at the bottom of the cover.
+    private func coverTitle(_ bubble: Bubble) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            GameWordmark(bubble: bubble, size: 28, maxHeight: 72)
+                .shadow(color: .black.opacity(0.35), radius: 3, y: 1)
+            Text(bubble.rule)
+                .font(.fbMeta)
+                .foregroundStyle(Color.white.opacity(0.92))
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.top, 36)
+        .padding(.bottom, 12)
+        .background(
+            LinearGradient(colors: [.black.opacity(0), .black.opacity(0.62)], startPoint: .top, endPoint: .bottom)
+        )
+    }
+
+    /// Plays the game, zooming this cover into it (`GameHandoffZoom`).
+    private func startPlay(_ bubble: Bubble) {
+        Haptics.light()
+        GameHandoff.begin(bubble.id, frame: coverFrame, cornerRadius: FBMetrics.radiusLarge)
+        router.play(bubble.id, replay: post.bubbleReplay)
     }
 
     private func badge(_ bubble: Bubble) -> some View {

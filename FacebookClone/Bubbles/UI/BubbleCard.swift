@@ -10,7 +10,7 @@ enum BubbleCardStyle {
     case wide
 }
 
-/// A Bubble's cover: its Muse Image art when there is one, otherwise a Glow gradient in the
+/// A Bubble's cover: its declared app cover, its Muse Image cover, or its backdrop art; otherwise a Glow gradient in the
 /// Bubble's palette with drifting orbs and its emoji. Fills exactly the frame it is given.
 struct BubbleCoverView: View {
     let bubble: Bubble
@@ -20,7 +20,14 @@ struct BubbleCoverView: View {
         let palette = BubbleGlow.palette(bubble.paletteID)
         ZStack {
             background(palette)
-            if let data = bubble.coverImageData {
+            if let art = themeCover {
+                // The game's own art (presentation.app.cover, else its backdrop asset): full bleed.
+                Image(uiImage: art)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
+            } else if let data = bubble.coverImageData {
                 RemoteImage(url: nil, data: data, placeholder: .clear)
             } else {
                 GeometryReader { proxy in
@@ -41,6 +48,14 @@ struct BubbleCoverView: View {
         }
         .clipped()
         .accessibilityHidden(true)
+    }
+
+    /// A declared app cover wins over the server cover; the game's backdrop only fills in when
+    /// there is no server cover (docs/BUBBLES.md, "App theme").
+    private var themeCover: UIImage? {
+        guard let resolved = GameThemeCenter.shared.resolved(for: bubble), let cover = resolved.cover else { return nil }
+        if resolved.theme.hasDeclaredCover { return cover }
+        return bubble.coverImageData == nil ? cover : nil
     }
 
     /// A game that picked a non-default preset keeps its colors; the default and custom palettes

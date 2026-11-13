@@ -667,6 +667,44 @@ Every Bubble looks like itself; every Bubble has the same frame.
 The frame borrows the game's font and colors so it never clashes, but its **layout and motion
 never change**.
 
+#### App theme: `presentation.app`
+
+A game can say how the app around it should look, so the feed card, the tap into the player and the
+result card feel like the game. It is a top-level manifest key (the engine game's own
+`presentation.app`, inside `content.game_json`, is also read; the manifest's wins):
+
+```json
+"presentation": {
+  "app": {
+    "cover": "cover",
+    "wordmark": "wordmark",
+    "palette": { "bg": "#12100E", "surface": "#2A2826", "ink": "#FAF1DE", "primary": "#EDCC95", "accent": "#9A6841", "on_primary": "#12100E" },
+    "fonts": { "display": "Playfair Display", "body": { "family": "DM Sans", "src": "data:font/woff2;base64,..." } }
+  }
+}
+```
+
+- `cover`, `wordmark`: an asset id in the engine game's `assets` (its `image`), a `data:` URI or an
+  https URL. The cover is Muse Image art drawn full bleed (the card is 4:5, the player is the phone
+  screen, so keep the subject in the middle). The wordmark is the game's name as art on a
+  transparent background (PNG or WebP), shown instead of the title text.
+- `palette`: `#RRGGBB` colors; any may be missing. `primary` is the Play button and accents,
+  `on_primary` its text; `bg`/`surface`/`ink` color the result card.
+- `fonts`: a family name from the bundled game fonts (`authoring/fonts/fonts.json`), or
+  `{family, src}` with the game's own woff2 (`data:` URI or https URL). The app registers it with
+  Core Text and uses `display` for the wordmark fallback, the player title and the result score.
+- Everything is optional and **presentation only**: it never changes rules, seeds or replays.
+
+**Fallbacks** (games without the field, iOS `GameAppTheme.resolve`): cover from the server cover
+(`coverUrl`), else the game's `backdrop` image asset, else an exact still of its first frame;
+palette from `presentation.tokens`, else `style.colors`, else Glow; fonts from the families the
+game's text nodes use (a display-role family first). An SVG backdrop is not used as a cover.
+
+**Handoff.** Tapping a game's cover in a feed post zooms that cover from the card to full screen
+(no slide-up), shows the game underneath at full opacity, then fades the cover out, so the first
+thing you see is the game's art and nothing flashes (`GameHandoffZoom`). The Facebook chrome
+(navigation and tab bars) never takes a game's theme.
+
 **2. The look: different for every Bubble.** Muse picks it for each game from the brief. It stays the
 same across gameplay, poster frames, cover art and cards. Manifest `style` fields:
 

@@ -46,12 +46,15 @@ struct BubblePlayerView: View {
     /// The saved run the next start fast-forwards through (cleared once the runtime resumed it).
     @State private var resumeLog: BubbleInputLog?
     private let resumeStore = RunResumeStores.current
+    /// The cover this player was opened from, zoomed into the game (`GameHandoffZoom`).
+    @State private var handoff: GameHandoff.Source?
 
     init(request: BubblePlayRequest) {
         self.request = request
         _bubbleID = State(initialValue: request.bubbleID)
         _mode = State(initialValue: request.replay.map { .replay($0) } ?? .play)
         _isWatchingBurst = State(initialValue: request.replay != nil)
+        _handoff = State(initialValue: MainActor.assumeIsolated { GameHandoff.take(for: request.bubbleID) })
     }
 
     private var bubble: Bubble? { bubbleStore.bubble(id: bubbleID) }
@@ -108,6 +111,7 @@ struct BubblePlayerView: View {
             ToastHost()
                 .padding(.bottom, 24)
         }
+        .modifier(GameHandoffZoom(bubble: bubble, source: handoff))
         .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: failure)
         .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: result?.id)
         .onAppear(perform: appear)
@@ -194,7 +198,7 @@ struct BubblePlayerView: View {
             }
             VStack(alignment: .leading, spacing: 1) {
                 Text(bubble.title)
-                    .font(.fbName)
+                    .font((GameThemeCenter.shared.resolved(for: bubble) ?? .empty).displayFont(size: 17))
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
                 if isWatchingBurst, let owner = burstOwner(in: bubble) {

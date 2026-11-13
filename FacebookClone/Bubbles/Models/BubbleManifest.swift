@@ -374,6 +374,10 @@ struct BubbleManifest: Codable, Hashable, Identifiable, Sendable {
     var length: BubbleLength?
     /// "Games about me": whose game this is and which template made it (docs/BUBBLES.md 7.4).
     var about: BubbleAboutMe?
+    /// How the game dresses the app around it: `presentation.app` {cover, wordmark, palette,
+    /// fonts} (docs/BUBBLES.md, "App theme"). Kept as JSON so it round-trips; read it through
+    /// `GameAppTheme.resolve(manifest:)`. Nil for games without it.
+    var presentation: JSONValue?
 
     init(
         id: String,
@@ -416,7 +420,7 @@ struct BubbleManifest: Codable, Hashable, Identifiable, Sendable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, version, title, formula, brief, structure, lineage, chain, style, concepts, glue, content, seed, studio, length, about
+        case id, version, title, formula, brief, structure, lineage, chain, style, concepts, glue, content, seed, studio, length, about, presentation
         case oneLineRule = "one_line_rule"
         case engineVersion = "engine_version"
     }
@@ -448,6 +452,7 @@ struct BubbleManifest: Codable, Hashable, Identifiable, Sendable {
         engineVersion = (try? c.decodeIfPresent(Int.self, forKey: .engineVersion)) ?? 1
         length = try? c.decodeIfPresent(BubbleLength.self, forKey: .length)
         about = try? c.decodeIfPresent(BubbleAboutMe.self, forKey: .about)
+        presentation = (try? c.decodeIfPresent(JSONValue.self, forKey: .presentation)).flatMap { $0.object == nil ? nil : $0 }
     }
 }
 

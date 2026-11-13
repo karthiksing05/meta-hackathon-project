@@ -202,7 +202,13 @@ final class Router {
     func play(_ request: BubblePlayRequest) {
         MainActor.assumeIsolated {
             PresentationGate.whenIdle { [weak self] in
-                self?.bubblePlayRequest = request
+                // A tap on a game's cover zooms that cover into the player (`GameHandoffZoom`),
+                // so the player appears without the usual slide up.
+                var transaction = Transaction()
+                transaction.disablesAnimations = GameHandoff.isPending(for: request.bubbleID)
+                withTransaction(transaction) {
+                    self?.bubblePlayRequest = request
+                }
             }
         }
     }
