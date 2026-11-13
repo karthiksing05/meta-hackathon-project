@@ -222,77 +222,6 @@
     "refs": []
   },
   {
-    "id": "two_truths_one_lie_friend",
-    "name": "Two truths and a lie",
-    "aliases": [
-      "Two truths and a lie",
-      "2T1L",
-      "Spot the lie",
-      "Truth or bluff"
-    ],
-    "family": "guess_your_friends",
-    "subfamily": "bluff detection",
-    "summary": "A friend enters two true and one false statements about themselves, and the rest guess the lie.",
-    "core_loop": "friend writes three statements → others read → vote which is the lie → reveal → score",
-    "verbs": [
-      "read",
-      "judge"
-    ],
-    "inputs": [
-      "tap",
-      "type"
-    ],
-    "pieces": [
-      "three statements",
-      "vote",
-      "reveal"
-    ],
-    "rules": [
-      "exactly one statement is false",
-      "guessers vote before reveal"
-    ],
-    "win": "guess the lie",
-    "lose": "none; it cannot be failed",
-    "scoring": "points for correct lie and for fooling others",
-    "session_seconds": [
-      60,
-      180
-    ],
-    "players": [
-      "async_friends",
-      "group_daily"
-    ],
-    "social_hooks": [
-      "friends learn surprising facts",
-      "Group rounds rotate the author"
-    ],
-    "content_needs": [
-      "statements from friends"
-    ],
-    "difficulty_levers": [
-      "statement count",
-      "vagueness"
-    ],
-    "tools": [
-      "quiz",
-      "rounds",
-      "score",
-      "reveal",
-      "group_roster",
-      "anonymous_submit"
-    ],
-    "engine_gaps": [],
-    "gate_profile": "trivia",
-    "example_prompts": [
-      "two truths and a lie game for my new team",
-      "2 truths 1 lie about my summer",
-      "two truths and a lie with our group trip"
-    ],
-    "status": "seed",
-    "source": "seed-karthik",
-    "refs": []
-  },
-  {
     "id": "never_have_i_ever_tally",
     "name": "Never have I ever tally",
     "aliases": [
@@ -2392,6 +2321,78 @@
       "best friends quiz",
       "newlywed quiz for my sister and husband",
       "partner quiz"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "playlist_owner_guess",
+    "name": "Whose playlist is it",
+    "aliases": [
+      "Spotify Wrapped guess",
+      "whose playlist",
+      "guess the listener",
+      "music taste guess"
+    ],
+    "family": "guess_your_friends",
+    "subfamily": "attribution",
+    "summary": "Short lists of favorite songs, shows or apps contributed by Group members are shown anonymously, and players match each list to the friend who made it.",
+    "core_loop": "see an anonymous top-five list → pick the friend you think it belongs to → reveal → next list",
+    "verbs": [
+      "recognize",
+      "attribute"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "anonymous list cards",
+      "friend avatars",
+      "reveal",
+      "score"
+    ],
+    "rules": [
+      "each member contributes one list per round",
+      "lists are hidden from their author's guesses"
+    ],
+    "win": "most lists matched",
+    "lose": "none; score attack",
+    "scoring": "1 point per correct match, bonus for the surprising ones",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "learn each other's tastes",
+      "Group weekly lists"
+    ],
+    "content_needs": [
+      "member-submitted lists"
+    ],
+    "difficulty_levers": [
+      "list length",
+      "category",
+      "group size"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score",
+      "reveal",
+      "group_roster",
+      "anonymous_submit"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "whose top five songs is this in our group",
+      "guess which friend loves these shows",
+      "match anonymous playlists to my roommates"
     ],
     "status": "seed",
     "source": "seed-karthik",

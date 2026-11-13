@@ -12,12 +12,6 @@
     ]
   },
   {
-    "request": "two truths and a lie with my team",
-    "expect": [
-      "two_truths_one_lie_friend"
-    ]
-  },
-  {
     "request": "who is most likely to get lost game",
     "expect": [
       "most_likely_to_vote"
@@ -27,6 +21,18 @@
     "request": "fibbage but about my roommates",
     "expect": [
       "fake_answer_bluff"
+    ]
+  },
+  {
+    "request": "a playlist guessing game for my roommates",
+    "expect": [
+      "playlist_owner_guess"
+    ]
+  },
+  {
+    "request": "two truths and a lie with my team",
+    "expect": [
+      "two_truths_one_lie"
     ]
   }
 ]
