@@ -271,7 +271,9 @@ function answerGrid(n, box, ctx) {
     node: 'rect', x: 0, y: 0, w: tileW, h: tileH, radius: s.radius.m,
     fill: n.sprite ? (state ? `= if ${state} == 'good' then $success else if ${state} == 'bad' then $danger else '#00000000'` : '#00000000') : fill,
     ...(n.sprite ? { opacity: 0.85 } : { stroke: '$line', stroke_width: s.stroke.thin }),
-    transition: { fill: { ms: MOTION.fast.ms, ease: MOTION.fast.ease } },
+    // A tile whose state recolours it changes fill and text together: with a fill transition the text
+    // flips first and reads dark on dark for a moment, and an answer that ends the game freezes there.
+    ...(state ? {} : { transition: { fill: { ms: MOTION.fast.ms, ease: MOTION.fast.ease } } }),
     ...(n.on_tap ? { on_tap: clone(n.on_tap) } : {}),
   });
   kids.push(fitTextNode(n.text ?? '', { x: SPACE.m, y: 0, w: tileW - SPACE.m * 2, h: tileH }, { step: cols === 2 ? 'label' : 'body', weight: 600, color, maxLines: 2, prefer: 'line' }));

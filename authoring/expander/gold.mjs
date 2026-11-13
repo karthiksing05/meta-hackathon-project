@@ -12,11 +12,12 @@ const GROUP_HINTS = {
   story: 'story adventure choose choices choice path ending endings mystery detective narrative drama plot ' +
     'heist scandal rebellion journey quest interactive fiction branching decide',
   party: 'brainrot brain rot meme memes aura rizz sigma npc delulu goblin chaotic stupid funny silly absurd ' +
-    'chaos cringe vibe vibes skit party unhinged',
+    'chaos cringe vibe vibes skit party unhinged parody kahoot press conference interview documentary',
   arcade: 'dodge run runner race racing jump jumping shoot shooter fly flying avoid catch stack stacking ' +
     'endless arcade speed reflex action platformer collect dash swerve',
   puzzle: 'puzzle puzzles wordle word words letter letters guess connections group groups grouping categories ' +
-    'category crossword logic grid daily brain teaser riddle ladder sudoku solve clue clues deduce nyt linkedin',
+    'category crossword logic grid daily brain teaser riddle ladder sudoku solve clue clues deduce nyt linkedin ' +
+    'chess checkmate history timeline etymology proof estimate experiment science math geography brainy fermi estimation',
   social: 'quiz trivia which personality sort sorting house puzzle riddle cipher word guess daily friends ' +
     'group chat pass phone turns together challenge sleepover party team',
 };

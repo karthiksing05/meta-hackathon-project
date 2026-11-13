@@ -1,0 +1,223 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "One Move",
+    "instructions": "White to move. Only one of the four moves is checkmate: find it. Every wrong move is a check or a threat that fails, and costs a life.",
+    "duration_s": 180
+  },
+  "uses": [
+    {
+      "fragment": "quiz",
+      "params": {
+        "choices": 4,
+        "time_ms": "25s",
+        "goal": 0,
+        "reveal_ms": "3200ms",
+        "cols": 2,
+        "lines": 2
+      }
+    },
+    {
+      "fragment": "rounds",
+      "params": {
+        "count": 6,
+        "label": "Puzzle"
+      },
+      "bind": {
+        "round_done": "question_done"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "bind": {
+        "hit": "answered_wrong"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 100,
+        "label": "Score"
+      },
+      "bind": {
+        "point": "answered_right"
+      }
+    }
+  ],
+  "functions": {
+    "quiz_questions": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "if locked and len(opts) > 0 then content_whys else map(content_names, n => n + ': White mates in one')"
+    },
+    "quiz_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_choices"
+    },
+    "quiz_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_answers"
+    }
+  },
+  "objectives": {
+    "time_limit": "180s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "ui": "picture",
+          "sprite": "board",
+          "frame": "= get_or(order, qi, 0)",
+          "aspect": 1,
+          "max_h": 300
+        }
+      }
+    ]
+  },
+  "score": {
+    "kind": "points",
+    "measures": "mates found",
+    "unit": "points",
+    "direction": "higher",
+    "counts_when": "any",
+    "aggregate": "best",
+    "format": "{n}",
+    "events": [
+      "answer"
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "canvas": "tall",
+    "tokens": {}
+  },
+  "art": {
+    "style": "A walnut club board under a lamp: warm wood squares, brass coordinates, plain carved pieces.",
+    "palette": {
+      "bg": "#22170F",
+      "surface": "#33241A",
+      "primary": "#C9A66B",
+      "secondary": "#8C6B4A",
+      "accent": "#7FB069",
+      "ink": "#F5E9D7",
+      "danger": "#D9534F"
+    },
+    "type": {
+      "kit": "look/1",
+      "vibe": "elegant",
+      "pairing": "gallery",
+      "seed": 5
+    },
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 780'><rect width='360' height='780' fill='#22170F'/><g opacity='0.08' fill='#C9A66B'><rect x='64' y='-16' width='64' height='64'/><rect x='192' y='-16' width='64' height='64'/><rect x='320' y='-16' width='64' height='64'/><rect x='0' y='48' width='64' height='64'/><rect x='128' y='48' width='64' height='64'/><rect x='256' y='48' width='64' height='64'/><rect x='64' y='112' width='64' height='64'/><rect x='192' y='112' width='64' height='64'/><rect x='320' y='112' width='64' height='64'/><rect x='0' y='176' width='64' height='64'/><rect x='128' y='176' width='64' height='64'/><rect x='256' y='176' width='64' height='64'/><rect x='64' y='240' width='64' height='64'/><rect x='192' y='240' width='64' height='64'/><rect x='320' y='240' width='64' height='64'/><rect x='0' y='304' width='64' height='64'/><rect x='128' y='304' width='64' height='64'/><rect x='256' y='304' width='64' height='64'/><rect x='64' y='368' width='64' height='64'/><rect x='192' y='368' width='64' height='64'/><rect x='320' y='368' width='64' height='64'/><rect x='0' y='432' width='64' height='64'/><rect x='128' y='432' width='64' height='64'/><rect x='256' y='432' width='64' height='64'/><rect x='64' y='496' width='64' height='64'/><rect x='192' y='496' width='64' height='64'/><rect x='320' y='496' width='64' height='64'/><rect x='0' y='560' width='64' height='64'/><rect x='128' y='560' width='64' height='64'/><rect x='256' y='560' width='64' height='64'/><rect x='64' y='624' width='64' height='64'/><rect x='192' y='624' width='64' height='64'/><rect x='320' y='624' width='64' height='64'/><rect x='0' y='688' width='64' height='64'/><rect x='128' y='688' width='64' height='64'/><rect x='256' y='688' width='64' height='64'/><rect x='64' y='752' width='64' height='64'/><rect x='192' y='752' width='64' height='64'/><rect x='320' y='752' width='64' height='64'/></g></svg>"
+    },
+    "sprites": {
+      "board": {
+        "svg": [
+          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='192' y='234'>♟︎</text><text x='224' y='234'>♟︎</text><text x='256' y='234'>♟︎</text><text x='160' y='266'>♜︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='224' y='42'>♚︎</text><text x='192' y='74'>♟︎</text><text x='224' y='74'>♟︎</text><text x='256' y='74'>♟︎</text></g></svg>",
+          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='256' y='138'>♛︎</text><text x='96' y='170'>♝︎</text><text x='160' y='170'>♟︎</text><text x='32' y='234'>♟︎</text><text x='64' y='234'>♟︎</text><text x='96' y='234'>♟︎</text><text x='128' y='234'>♟︎</text><text x='192' y='234'>♟︎</text><text x='224' y='234'>♟︎</text><text x='256' y='234'>♟︎</text><text x='32' y='266'>♜︎</text><text x='64' y='266'>♞︎</text><text x='96' y='266'>♝︎</text><text x='160' y='266'>♚︎</text><text x='224' y='266'>♞︎</text><text x='256' y='266'>♜︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='32' y='42'>♜︎</text><text x='96' y='42'>♝︎</text><text x='128' y='42'>♛︎</text><text x='160' y='42'>♚︎</text><text x='192' y='42'>♝︎</text><text x='256' y='42'>♜︎</text><text x='32' y='74'>♟︎</text><text x='64' y='74'>♟︎</text><text x='96' y='74'>♟︎</text><text x='128' y='74'>♟︎</text><text x='192' y='74'>♟︎</text><text x='224' y='74'>♟︎</text><text x='256' y='74'>♟︎</text><text x='96' y='106'>♞︎</text><text x='192' y='106'>♞︎</text><text x='160' y='138'>♟︎</text></g></svg>",
+          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='224' y='138'>♞︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='224' y='42'>♜︎</text><text x='256' y='42'>♚︎</text><text x='224' y='74'>♟︎</text><text x='256' y='74'>♟︎</text></g></svg>",
+          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='64' y='74'>♜︎</text><text x='192' y='106'>♞︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='256' y='42'>♚︎</text></g></svg>",
+          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='192' y='106'>♝︎</text><text x='256' y='106'>♛︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='224' y='42'>♚︎</text><text x='192' y='74'>♟︎</text><text x='256' y='74'>♟︎</text><text x='224' y='106'>♟︎</text></g></svg>",
+          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='224' y='74'>♜︎</text><text x='224' y='266'>♚︎</text><text x='256' y='266'>♜︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='32' y='42'>♚︎</text></g></svg>",
+          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='224' y='138'>♞︎</text><text x='256' y='138'>♛︎</text><text x='128' y='202'>♝︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='192' y='42'>♜︎</text><text x='224' y='42'>♚︎</text><text x='192' y='74'>♟︎</text><text x='224' y='74'>♟︎</text><text x='256' y='74'>♟︎</text></g></svg>",
+          "<svg viewBox='0 0 288 288'><defs><pattern id='c' width='64' height='64' patternUnits='userSpaceOnUse' x='16' y='16'><rect width='64' height='64' fill='#EAD7B7'/><rect width='32' height='32' x='32' fill='#A9764E'/><rect width='32' height='32' y='32' fill='#A9764E'/></pattern></defs><rect width='288' height='288' rx='10' fill='#3B2A1E'/><rect x='16' y='16' width='256' height='256' fill='url(#c)'/><g font-size='9' fill='#C9A66B' text-anchor='middle' font-family='Helvetica'><text x='32' y='283'>a</text><text x='8' y='35'>8</text><text x='64' y='283'>b</text><text x='8' y='67'>7</text><text x='96' y='283'>c</text><text x='8' y='99'>6</text><text x='128' y='283'>d</text><text x='8' y='131'>5</text><text x='160' y='283'>e</text><text x='8' y='163'>4</text><text x='192' y='283'>f</text><text x='8' y='195'>3</text><text x='224' y='283'>g</text><text x='8' y='227'>2</text><text x='256' y='283'>h</text><text x='8' y='259'>1</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#FFF' stroke='#1B1410' stroke-width='1.4'><text x='192' y='234'>♟︎</text><text x='224' y='234'>♟︎</text><text x='256' y='234'>♟︎</text><text x='128' y='266'>♜︎</text><text x='224' y='266'>♚︎</text></g><g font-size='27' text-anchor='middle' font-family='Apple Symbols,Segoe UI Symbol,DejaVu Sans,serif' fill='#1B1410' stroke='#F5E9D7' stroke-width='0.6'><text x='64' y='42'>♚︎</text><text x='32' y='74'>♟︎</text><text x='64' y='74'>♟︎</text><text x='96' y='74'>♟︎</text></g></svg>"
+        ],
+        "color": "#C9A66B"
+      }
+    }
+  },
+  "sound": {
+    "set": "chime",
+    "volume": 0.6,
+    "music": false
+  },
+  "feel": {
+    "particles": true,
+    "shake": true,
+    "haptics": true
+  },
+  "content": {
+    "names": [
+      "Back rank",
+      "Scholar’s trap",
+      "Smothered",
+      "Arabian",
+      "Bishop’s guard",
+      "The ladder",
+      "Greek gift",
+      "Corridor"
+    ],
+    "whys": [
+      "Re8: the king’s own pawns block every escape square.",
+      "Qxf7: the bishop guards f7. Bxf7+ lets the king run to e7.",
+      "Nf7: walled in by its own rook and pawns, the king can’t move.",
+      "Rh7: the knight guards the rook. Rb8+ lets the king out to g7.",
+      "Qg7: the bishop on f6 guards the queen. Qf8+ just loses her.",
+      "Rh8: the other rook holds the 7th rank. Rg8+ lets the king out.",
+      "Qxh7: bishop and knight both guard h7. Bxh7+ lets the king hide.",
+      "Rd8: the king’s own pawns wall off its escape squares."
+    ],
+    "choices": [
+      "Re8",
+      "Re7",
+      "Rb1",
+      "h4",
+      "Bxf7",
+      "Qxe5",
+      "Qxh7",
+      "Qxf7",
+      "Nxh7",
+      "Kf2",
+      "Nf7",
+      "Ne6",
+      "Nd7",
+      "Rh7",
+      "Rb8",
+      "Rg7",
+      "Qg7",
+      "Qxh7",
+      "Qf8",
+      "Bg5",
+      "Rg8",
+      "Ra7",
+      "Rb7",
+      "Rh8",
+      "Qxf7",
+      "Nxh7",
+      "Qxh7",
+      "Bxh7",
+      "Rd6",
+      "Rd8",
+      "Rd7",
+      "Rb1"
+    ],
+    "answers": [
+      "Re8",
+      "Qxf7",
+      "Nf7",
+      "Rh7",
+      "Qg7",
+      "Rh8",
+      "Qxh7",
+      "Rd8"
+    ],
+    "theme_words": [
+      "chess",
+      "checkmate",
+      "mate in one",
+      "puzzle"
+    ]
+  },
+  "playtest": {
+    "progress": "score"
+  }
+}

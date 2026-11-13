@@ -274,7 +274,8 @@
       "who owns the fish"
     ],
     "status": "seed",
-    "source": "kevin"
+    "source": "kevin",
+    "notes": "On the tall canvas the HUD covers the top of the playfield: start the clue card at y 186 or lower, one clue per line, and keep every label and the how-to line inside x 20..340. Column headers are short words. Group play compares solve time on the same seed (lower is better)."
   },
   {
     "id": "light_switch_toggle",

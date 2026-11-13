@@ -1,0 +1,208 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Purr Earth",
+    "instructions": "A cat narrates a wildlife film and keeps getting distracted. At each beat, guess what he really says.",
+    "duration_s": 240
+  },
+  "uses": [
+    {
+      "fragment": "story_quiz",
+      "params": {
+        "choices": 4,
+        "read_ms": "900ms",
+        "time_ms": "15s",
+        "reveal_ms": "9s",
+        "media": "0,1,2,-1,-1,0,1,2",
+        "pace_label": "Scene"
+      }
+    }
+  ],
+  "functions": {
+    "sq_speakers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_speakers"
+    },
+    "sq_lines": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_lines"
+    },
+    "sq_asks": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_asks"
+    },
+    "sq_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_choices"
+    },
+    "sq_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_answers"
+    },
+    "sq_reveals": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_reveals"
+    }
+  },
+  "objectives": {
+    "time_limit": "240s",
+    "on_timeout": "win"
+  },
+  "score": {
+    "kind": "points",
+    "measures": "scenes where you guessed what the cat really said",
+    "unit": "called",
+    "ranked": false,
+    "format": "{n} called",
+    "events": [
+      "pick"
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "canvas": "tall",
+    "tokens": {}
+  },
+  "art": {
+    "style": "A sunlit field-guide documentary: cream paper, savanna gold, moss green, a smug orange cartoon cat.",
+    "palette": {
+      "bg": "#F4EBD6",
+      "surface": "#FFF8EA",
+      "primary": "#2F7D5B",
+      "secondary": "#B9A27A",
+      "accent": "#A9520F",
+      "ink": "#2E2A24",
+      "danger": "#B8402F"
+    },
+    "type": {
+      "kit": "look/1",
+      "vibe": "wild_nature",
+      "pairing": "field_guide",
+      "seed": 3
+    },
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 780'><rect width='360' height='780' fill='#F4EBD6'/><g fill='#E7D7B4'><circle cx='30' cy='60' r='40'/><circle cx='320' cy='120' r='40'/><circle cx='60' cy='700' r='40'/><circle cx='300' cy='740' r='40'/><circle cx='180' cy='30' r='40'/></g><path d='M0 742 q30 -26 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 L360 780 L0 780 Z' fill='#D9C392'/></svg>"
+    },
+    "sprites": {
+      "panel": {
+        "svg": [
+          "<svg viewBox='0 0 320 160'><rect width='320' height='160' fill='#F7D58B'/><circle cx='262' cy='42' r='24' fill='#F6B94B'/><rect x='18' y='70' width='6' height='54' fill='#7A5A3A'/><ellipse cx='21' cy='66' rx='34' ry='10' fill='#6E8F4A'/><path d='M0 128 L0 124 L10 114 L20 124 L30 114 L40 124 L50 114 L60 124 L70 114 L80 124 L90 114 L100 124 L110 114 L120 124 L130 114 L140 124 L150 114 L160 124 L170 114 L180 124 L190 114 L200 124 L210 114 L220 124 L230 114 L240 124 L250 114 L260 124 L270 114 L280 124 L290 114 L300 124 L310 114 L320 124 L320 128 L320 160 L0 160 Z' fill='#C9A24B'/><g><ellipse cx='210' cy='112' rx='18' ry='13' fill='#9AA3AE'/><circle cx='224' cy='100' r='8' fill='#9AA3AE'/><circle cx='227' cy='98' r='1.6' fill='#2E2A24'/><path d='M231 101 l6 2 l-6 2 Z' fill='#E08A3C'/><path d='M205 124 l-2 8 M214 124 l2 8' stroke='#E08A3C' stroke-width='2'/></g><g><path d='M72.2 118.3 L75.5 98.5 L86.5 108.4 Z' fill='#E08A3C'/><path d='M111.8 118.3 L108.5 98.5 L97.5 108.4 Z' fill='#E08A3C'/><circle cx='92' cy='126' r='22' fill='#E99A4C'/><path d='M81 107.3 q11 6.6 22 0' stroke='#C46E25' stroke-width='2.6399999999999997' fill='none'/><ellipse cx='83.64' cy='124.9' rx='3.52' ry='4.84' fill='#2E2A24'/><ellipse cx='100.36' cy='124.9' rx='3.52' ry='4.84' fill='#2E2A24'/><circle cx='87.74' cy='123.36' r='1.3199999999999998' fill='#FFF'/><circle cx='104.46' cy='123.36' r='1.3199999999999998' fill='#FFF'/><path d='M89.8 131.5 l2.2 2.2 l2.2 -2.2 Z' fill='#B8402F'/><path d='M92 133.7 q-4.4 5.5 -7.699999999999999 1.1 M92 133.7 q4.4 5.5 7.699999999999999 1.1' stroke='#2E2A24' stroke-width='1.3199999999999998' fill='none'/><path d='M79.9 130.4 l-13.2 -1.76 M79.9 133.04 l-13.2 2.2 M104.1 130.4 l13.2 -1.76 M104.1 133.04 l13.2 2.2' stroke='#5A4A3A' stroke-width='0.88'/></g><path d='M0 152 L0 148 L10 138 L20 148 L30 138 L40 148 L50 138 L60 148 L70 138 L80 148 L90 138 L100 148 L110 138 L120 148 L130 138 L140 148 L150 138 L160 148 L170 138 L180 148 L190 138 L200 148 L210 138 L220 148 L230 138 L240 148 L250 138 L260 148 L270 138 L280 148 L290 138 L300 148 L310 138 L320 148 L320 152 L320 160 L0 160 Z' fill='#B48F3E'/></svg>",
+          "<svg viewBox='0 0 320 160'><rect width='320' height='160' fill='#8C6A4A'/><rect x='0' y='118' width='320' height='42' fill='#6E5238'/><path d='M70 0 L250 0 L300 160 L20 160 Z' fill='#F7D58B' opacity='0.55'/><ellipse cx='160' cy='132' rx='46' ry='20' fill='#E99A4C'/><path d='M200 132 q34 -6 30 -40' stroke='#E99A4C' stroke-width='9' fill='none' stroke-linecap='round'/><g><path d='M133 81.5 L137.5 54.5 L152.5 68 Z' fill='#E08A3C'/><path d='M187 81.5 L182.5 54.5 L167.5 68 Z' fill='#E08A3C'/><circle cx='160' cy='92' r='30' fill='#E99A4C'/><path d='M145 66.5 q15 9 30 0' stroke='#C46E25' stroke-width='3.5999999999999996' fill='none'/><ellipse cx='148.6' cy='90.5' rx='4.8' ry='6.6' fill='#2E2A24'/><ellipse cx='171.4' cy='90.5' rx='4.8' ry='6.6' fill='#2E2A24'/><circle cx='150.1' cy='88.4' r='1.7999999999999998' fill='#FFF'/><circle cx='172.9' cy='88.4' r='1.7999999999999998' fill='#FFF'/><path d='M157 99.5 l3 3 l3 -3 Z' fill='#B8402F'/><path d='M160 102.5 q-6 7.5 -10.5 1.5 M160 102.5 q6 7.5 10.5 1.5' stroke='#2E2A24' stroke-width='1.7999999999999998' fill='none'/><path d='M143.5 98 l-18 -2.4 M143.5 101.6 l-18 3 M176.5 98 l18 -2.4 M176.5 101.6 l18 3' stroke='#5A4A3A' stroke-width='1.2'/></g><path d='M128 52 l10 -14 l10 10 l12 -16 l12 16 l10 -10 l10 14 Z' fill='#F2C14E' stroke='#C2621A' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 320 160'><rect width='320' height='160' fill='#D9E6D0'/><rect x='0' y='126' width='320' height='34' fill='#B9A27A'/><g><path d='M136.6 74.9 L140.5 51.5 L153.5 63.2 Z' fill='#E08A3C'/><path d='M183.4 74.9 L179.5 51.5 L166.5 63.2 Z' fill='#E08A3C'/><circle cx='160' cy='84' r='26' fill='#E99A4C'/><path d='M147 61.900000000000006 q13 7.8 26 0' stroke='#C46E25' stroke-width='3.12' fill='none'/><ellipse cx='150.12' cy='82.7' rx='4.16' ry='5.72' fill='#2E2A24'/><ellipse cx='169.88' cy='82.7' rx='4.16' ry='5.72' fill='#2E2A24'/><circle cx='148.42' cy='80.88' r='1.56' fill='#FFF'/><circle cx='168.18' cy='80.88' r='1.56' fill='#FFF'/><path d='M157.4 90.5 l2.6 2.6 l2.6 -2.6 Z' fill='#B8402F'/><path d='M160 93.1 q-5.2 6.5 -9.1 1.3 M160 93.1 q5.2 6.5 9.1 1.3' stroke='#2E2A24' stroke-width='1.56' fill='none'/><path d='M145.7 89.2 l-15.6 -2.08 M145.7 92.32 l-15.6 2.6 M174.3 89.2 l15.6 -2.08 M174.3 92.32 l15.6 2.6' stroke='#5A4A3A' stroke-width='1.04'/></g><path d='M96 96 L224 96 L232 150 L88 150 Z' fill='#C79A62'/><path d='M96 96 L72 80 L150 80 L160 96 Z' fill='#B5874F'/><path d='M224 96 L248 80 L170 80 L160 96 Z' fill='#B5874F'/><path d='M120 120 L200 120' stroke='#9E7444' stroke-width='3'/><text x='160' y='142' font-size='11' font-weight='700' fill='#6E4E2A' text-anchor='middle' font-family='Georgia'>CREW LUNCH</text></svg>"
+        ],
+        "color": "#E99A4C"
+      }
+    }
+  },
+  "sound": {
+    "set": "cozy",
+    "volume": 0.7,
+    "music": false
+  },
+  "feel": {
+    "particles": false,
+    "shake": false,
+    "haptics": true
+  },
+  "content": {
+    "speakers": [
+      "Sir Whiskers, narrating",
+      "Sir Whiskers, narrating",
+      "Sir Whiskers, narrating",
+      "Producer, off camera",
+      "Sir Whiskers, narrating",
+      "Sir Whiskers, narrating",
+      "Sir Whiskers, narrating",
+      "Sir Whiskers, narrating"
+    ],
+    "lines": [
+      "Here on the vast savanna of the back garden, the mighty gazelle grazes in peace.",
+      "We turn now to the noble lion, lord of all he surveys.",
+      "In the wild, every creature must find shelter from the elements.",
+      "Whiskers, we need you to describe the great migration of the wildebeest.",
+      "Behold the elusive red dot. No hunter has ever caught it.",
+      "The water hole, where predator and prey drink side by side.",
+      "At last the sun sets on the plains, and the great hunt begins.",
+      "This has been Purr Earth. Next week, we explore…"
+    ],
+    "asks": [
+      "What does he say next?",
+      "Who is the lion?",
+      "Where does he find shelter?",
+      "How does he reply?",
+      "What does he add?",
+      "Does he drink?",
+      "What is the hunt for?",
+      "What do they explore?"
+    ],
+    "choices": [
+      "That is a pigeon. I am going to eat it.",
+      "Its herd is never far away.",
+      "It has not yet noticed the lion.",
+      "It is grazing near the fence.",
+      "The old king of the savanna.",
+      "Me. Look how majestic I am in this light.",
+      "A young male, far from his pride.",
+      "An old king, guarding the river.",
+      "Some build nests high in the trees.",
+      "Under the thick hedge.",
+      "This box is mine now. Nature is healing.",
+      "The burrow keeps the family warm.",
+      "Of course. Thousands cross the river each year.",
+      "Can we do it after my nap?",
+      "Gladly. Roll the film.",
+      "No.",
+      "Tonight I will be the first. I have trained my whole life.",
+      "It is only ever seen at dusk.",
+      "Scientists still argue about what it is.",
+      "It moves faster than any cat.",
+      "Only when the lions have left.",
+      "I will not. I drink from the tap, like royalty.",
+      "Even old enemies share it in the dry season.",
+      "Crocodiles wait beneath the surface.",
+      "Only the strongest will eat tonight.",
+      "Fresh antelope on the plain.",
+      "Whoever opens the can. Dinner is at six.",
+      "The pride moves silently through the grass.",
+      "…the frozen tundra of the far north.",
+      "…the deep blue sea.",
+      "…the rainforest canopy.",
+      "…the inside of that drawer you keep closed."
+    ],
+    "answers": [
+      "That is a pigeon. I am going to eat it.",
+      "Me. Look how majestic I am in this light.",
+      "This box is mine now. Nature is healing.",
+      "No.",
+      "Tonight I will be the first. I have trained my whole life.",
+      "I will not. I drink from the tap, like royalty.",
+      "Whoever opens the can. Dinner is at six.",
+      "…the inside of that drawer you keep closed."
+    ],
+    "reveals": [
+      "The pigeon notices. The pigeon leaves. The narrator says this was the plan.",
+      "The camera holds on the narrator for eleven uninterrupted minutes.",
+      "The box held the film crew’s lunch. It no longer does.",
+      "Filming stops for a nap anyway. Nobody asked who decided.",
+      "He does not catch it. He has asked us to cut this part.",
+      "A crew member turns on the tap. It is in his contract.",
+      "The great hunt lasts four seconds and ends at a bowl.",
+      "Next week’s episode was filmed entirely inside a drawer. It won an award."
+    ],
+    "theme_words": [
+      "nature documentary",
+      "cat",
+      "narrator",
+      "savanna"
+    ]
+  },
+  "playtest": {
+    "progress": "beat"
+  }
+}

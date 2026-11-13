@@ -520,7 +520,7 @@
     ],
     "summary": "Multiple-choice questions (2 to 4 choices) one at a time with a draining time bar; shows the right answer after each pick.",
     "when_to_use": "Trivia and knowledge quizzes where picking from choices is right. For typed or open answers use typed_answer instead.",
-    "api": "game provides functions quiz_questions(), quiz_choices() (choices per question, flattened) and quiz_answers() (exact correct text), all list<string>; provides question_text, correct_answer, right_count, wrong_count; bind rounds' round_done to question_done and score's point to answered_right",
+    "api": "game provides functions quiz_questions(), quiz_choices() (choices per question, flattened) and quiz_answers() (exact correct text), all list<string>; provides question_text, correct_answer, right_count, wrong_count; bind rounds' round_done to question_done and score's point to answered_right; quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+); quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+); the answer tiles are the kit’s controls band: put extra lines (partial credit, a tip) in the HUD or the question card, never a panel over the tiles",
     "events": [
       "answered_right",
       "answered_wrong",
@@ -529,7 +529,10 @@
     "params": {
       "choices": "int, default 3, 2..4",
       "time_ms": "duration, default 8000, 1000..30000",
-      "goal": "int, default 0, 0..200"
+      "goal": "int, default 0, 0..200",
+      "reveal_ms": "duration, default 700, 300..8000 (longer when quiz_questions() shows notes while locked)",
+      "cols": "int, default 1, 1..2 (2 columns for short answers, leaving room for a picture)",
+      "lines": "int, default 3, 1..4 (question card lines)"
     },
     "status": "shipped",
     "path": "authoring/fragments/quiz.fragment.json"
@@ -1169,7 +1172,8 @@
     "params": {
       "choices": "int, default 3, 2..4",
       "time_ms": "duration, default 8000, 1000..30000",
-      "goal": "int, default 0, 0..200"
+      "goal": "int, default 0, 0..200",
+      "reveal_ms": "duration, default 700, 300..8000"
     },
     "status": "shipped",
     "path": "authoring/fragments/picture_quiz.fragment.json",
@@ -1216,5 +1220,49 @@
       "mirror_double_difference"
     ],
     "notes": "the bot gate finds differences in about 3 s (it taps every object), so it flags too_short for one pair; people take 20-60 s. A gate profile for search games is requested from Bayan"
+  },
+  {
+    "id": "story_quiz",
+    "kind": "fragment",
+    "name": "Story quiz (a clip told in beats)",
+    "aliases": [
+      "kahoot story",
+      "guess the next line",
+      "what happens next",
+      "interactive skit",
+      "story told as a quiz",
+      "press conference gone wrong",
+      "parody interview"
+    ],
+    "summary": "A scripted clip cut into beats played in order: a quote card (speaker and line, optional picture per beat), a countdown and up to 4 Kahoot-coloured tiles, then a reveal panel with the real line and the punchline. Unranked by default: the score counts lines called.",
+    "when_to_use": "Funny or story-first quizzes where the real answer is the joke or twist (a press conference that goes badly, a job interview gone wrong, a documentary narrated by a cat), and ordered step-by-step quizzes where each beat follows the last (proof steps, a recipe, a timeline). Not for shuffled trivia (quiz) or branching stories (choice_story).",
+    "api": "game provides sq_speakers(), sq_lines(), sq_asks(), sq_choices() (choices per beat, flattened), sq_answers() (the real line, one of its choices) and sq_reveals(), all list<string> read from content; provides beat, called, picks (list<int>, the picked choice per beat in content order: put it in group_play.result.state), revealing, finished; inputs pick {index} and next; declare score {kind: points, ranked: false} for a story; params media (frames per beat, -1 none), tag (a PARODY label in the HUD), pace_label, hit_label, miss_label",
+    "events": [
+      "called_it",
+      "plot_twist",
+      "beat_done",
+      "story_done"
+    ],
+    "params": {
+      "choices": "int, default 4, 2..4 (Kahoot-coloured tiles, 2 x 2)",
+      "read_ms": "duration, default 900, 0..5000",
+      "time_ms": "duration, default 15000, 0..60000 (countdown per beat; 0 for none; running out reveals with no pick)",
+      "reveal_ms": "duration, default 9000, 2000..30000",
+      "media": "string, default '', per-beat frame list like '0,1,-1'",
+      "tag": "string, default '', up to 14 chars",
+      "pace_label": "string, default 'Beat'",
+      "hit_label": "string, default 'CALLED IT'",
+      "miss_label": "string, default 'PLOT TWIST'",
+      "end_title": "string, default 'That’s a wrap'",
+      "sync_label": "string, default 'In sync with the chaos:'",
+      "finish_wins": "bool, default true"
+    },
+    "status": "shipped",
+    "example_types": [
+      "next_line_story_quiz",
+      "narrator_voice_story_quiz",
+      "proof_step_order"
+    ],
+    "path": "authoring/fragments/story_quiz.fragment.json"
   }
 ]

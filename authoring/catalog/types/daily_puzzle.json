@@ -612,10 +612,8 @@
     ],
     "tools": [
       "typed_answer",
-      "fuzzy_match",
       "reveal",
       "rounds",
-      "score",
       "daily_seed"
     ],
     "engine_gaps": [],
@@ -989,11 +987,8 @@
     ],
     "tools": [
       "typed_answer",
-      "fuzzy_match",
       "rarity_tiers",
-      "timer_bar",
       "rounds",
-      "score",
       "daily_seed"
     ],
     "engine_gaps": [],

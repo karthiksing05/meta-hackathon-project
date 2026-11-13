@@ -1,0 +1,241 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "First Things First",
+    "instructions": "Two moments from history, from different worlds. Tap the one that happened first. A wrong call costs a life; streaks score extra.",
+    "duration_s": 150
+  },
+  "uses": [
+    {
+      "fragment": "quiz",
+      "params": {
+        "choices": 2,
+        "time_ms": "9s",
+        "goal": 0,
+        "reveal_ms": "2600ms",
+        "lines": 3
+      }
+    },
+    {
+      "fragment": "rounds",
+      "params": {
+        "count": 10,
+        "label": "Pair"
+      },
+      "bind": {
+        "round_done": "question_done"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "bind": {
+        "hit": "answered_wrong"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 100,
+        "label": "Score"
+      },
+      "bind": {
+        "point": "answered_right"
+      }
+    }
+  ],
+  "state": {
+    "streak": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "quiz_questions": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "if locked and len(opts) > 0 then content_notes else map(content_notes, n => 'Which came first?')"
+    },
+    "quiz_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_choices"
+    },
+    "quiz_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_answers"
+    }
+  },
+  "rules": [
+    {
+      "id": "streak_up",
+      "on": "answered_right",
+      "do": [
+        {
+          "incr": "streak"
+        },
+        {
+          "incr": "score",
+          "by": "25 * min(streak - 1, 4)"
+        }
+      ]
+    },
+    {
+      "id": "streak_reset",
+      "on": "answered_wrong",
+      "do": [
+        {
+          "set": "streak",
+          "to": "0"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "150s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "ui": "picture",
+          "sprite": "scene",
+          "aspect": 1.25,
+          "max_h": 190
+        }
+      }
+    ]
+  },
+  "score": {
+    "kind": "points",
+    "measures": "points for pairs put in the right order, with a streak bonus",
+    "unit": "points",
+    "direction": "higher",
+    "counts_when": "any",
+    "aggregate": "best",
+    "format": "{n}",
+    "events": [
+      "answer"
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "canvas": "tall",
+    "tokens": {}
+  },
+  "art": {
+    "style": "A museum timeline at night: deep green walls, brass labels, tick marks of centuries along the edges.",
+    "palette": {
+      "bg": "#13241F",
+      "surface": "#1E3830",
+      "primary": "#D9A441",
+      "secondary": "#6E9A86",
+      "accent": "#E07A5F",
+      "ink": "#F1E9D8",
+      "danger": "#D1495B"
+    },
+    "type": {
+      "kit": "look/1",
+      "vibe": "myth_ancient",
+      "pairing": "scroll",
+      "seed": 11
+    },
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 780'><rect width='360' height='780' fill='#13241F'/><g stroke='#2B4A40' stroke-width='2'><line x1='12' y1='0' x2='12' y2='780'/><line x1='348' y1='0' x2='348' y2='780'/></g><g fill='#2B4A40'><rect x='6' y='8' width='16' height='2'/><rect x='344' y='8' width='16' height='2'/><rect x='4' y='38' width='10' height='2'/><rect x='340' y='38' width='10' height='2'/><rect x='6' y='68' width='10' height='2'/><rect x='344' y='68' width='10' height='2'/><rect x='4' y='98' width='10' height='2'/><rect x='340' y='98' width='10' height='2'/><rect x='6' y='128' width='10' height='2'/><rect x='344' y='128' width='10' height='2'/><rect x='4' y='158' width='16' height='2'/><rect x='340' y='158' width='16' height='2'/><rect x='6' y='188' width='10' height='2'/><rect x='344' y='188' width='10' height='2'/><rect x='4' y='218' width='10' height='2'/><rect x='340' y='218' width='10' height='2'/><rect x='6' y='248' width='10' height='2'/><rect x='344' y='248' width='10' height='2'/><rect x='4' y='278' width='10' height='2'/><rect x='340' y='278' width='10' height='2'/><rect x='6' y='308' width='16' height='2'/><rect x='344' y='308' width='16' height='2'/><rect x='4' y='338' width='10' height='2'/><rect x='340' y='338' width='10' height='2'/><rect x='6' y='368' width='10' height='2'/><rect x='344' y='368' width='10' height='2'/><rect x='4' y='398' width='10' height='2'/><rect x='340' y='398' width='10' height='2'/><rect x='6' y='428' width='10' height='2'/><rect x='344' y='428' width='10' height='2'/><rect x='4' y='458' width='16' height='2'/><rect x='340' y='458' width='16' height='2'/><rect x='6' y='488' width='10' height='2'/><rect x='344' y='488' width='10' height='2'/><rect x='4' y='518' width='10' height='2'/><rect x='340' y='518' width='10' height='2'/><rect x='6' y='548' width='10' height='2'/><rect x='344' y='548' width='10' height='2'/><rect x='4' y='578' width='10' height='2'/><rect x='340' y='578' width='10' height='2'/><rect x='6' y='608' width='16' height='2'/><rect x='344' y='608' width='16' height='2'/><rect x='4' y='638' width='10' height='2'/><rect x='340' y='638' width='10' height='2'/><rect x='6' y='668' width='10' height='2'/><rect x='344' y='668' width='10' height='2'/><rect x='4' y='698' width='10' height='2'/><rect x='340' y='698' width='10' height='2'/><rect x='6' y='728' width='10' height='2'/><rect x='344' y='728' width='10' height='2'/><rect x='4' y='758' width='16' height='2'/><rect x='340' y='758' width='16' height='2'/></g><text x='180' y='60' font-size='13' fill='#2B4A40' text-anchor='middle' font-family='Georgia' letter-spacing='6'>MMXXVI · MCCCXXV · 1096 · 1843</text><text x='180' y='740' font-size='13' fill='#2B4A40' text-anchor='middle' font-family='Georgia' letter-spacing='6'>2560 BC · 1889 · 1977 · 150 MYA</text></svg>"
+    },
+    "sprites": {
+      "scene": {
+        "svg": "<svg viewBox='0 0 160 200'><defs><linearGradient id='b' x1='0' x2='1'><stop offset='0' stop-color='#9C7424'/><stop offset='0.5' stop-color='#E9C16A'/><stop offset='1' stop-color='#9C7424'/></linearGradient></defs><rect x='28' y='14' width='104' height='14' rx='4' fill='url(#b)'/><rect x='28' y='172' width='104' height='14' rx='4' fill='url(#b)'/><rect x='36' y='28' width='6' height='144' fill='#7A5A1E'/><rect x='118' y='28' width='6' height='144' fill='#7A5A1E'/><path d='M48 30 L112 30 Q112 78 84 98 L84 102 Q112 122 112 170 L48 170 Q48 122 76 102 L76 98 Q48 78 48 30 Z' fill='#CFE3DA' opacity='0.35' stroke='#E9C16A' stroke-width='2'/><path d='M58 52 L102 52 Q98 74 80 90 Q62 74 58 52 Z' fill='#D9A441'/><path d='M80 98 L80 150' stroke='#D9A441' stroke-width='2'/><path d='M54 168 Q80 136 106 168 Z' fill='#D9A441'/><circle cx='66' cy='44' r='3' fill='#F1E9D8' opacity='0.7'/></svg>",
+        "color": "#D9A441"
+      }
+    }
+  },
+  "sound": {
+    "set": "chime",
+    "volume": 0.7,
+    "music": false
+  },
+  "feel": {
+    "particles": true,
+    "shake": true,
+    "haptics": true
+  },
+  "content": {
+    "notes": [
+      "Oxford was teaching by 1096. Tenochtitlan was founded in 1325, over 200 years later.",
+      "Alexander Bain patented a fax in 1843. Bell’s telephone patent came in 1876.",
+      "The pyramid went up around 2560 BC. Mammoths lived on Wrangel Island until about 2000 BC.",
+      "Nintendo began making playing cards in 1889. The Model T arrived in 1908.",
+      "Sliced bread was first sold in 1928. Pluto was spotted in 1930.",
+      "Harvard opened in 1636. Calculus took shape in the 1660s to 1680s.",
+      "Star Wars opened in May 1977. France’s last guillotine execution was that September.",
+      "The Tube opened in 1863. The Tokugawa shogunate fell in 1868.",
+      "Döbereiner’s lighter dates from 1823. The friction match came in 1826.",
+      "The Diners Club card launched in 1950. Hillary and Tenzing summited in 1953.",
+      "Ray Tomlinson sent email in 1971. The first handheld cellphone call was in 1973.",
+      "John Logie Baird demonstrated television in 1926. Fleming found penicillin in 1928.",
+      "Stegosaurus lived about 150 million years ago, T. rex about 68. T. rex is closer in time to us.",
+      "KDKA in Pittsburgh went on air in 1920. The Ottoman sultanate was abolished in 1922."
+    ],
+    "choices": [
+      "Oxford starts teaching",
+      "Aztecs found Tenochtitlan",
+      "First telephone",
+      "First fax machine",
+      "Great Pyramid built",
+      "Last woolly mammoths die",
+      "First Ford Model T",
+      "Nintendo founded",
+      "Sliced bread on sale",
+      "Pluto discovered",
+      "Calculus invented",
+      "Harvard founded",
+      "Star Wars opens",
+      "France’s last guillotining",
+      "Japan’s shogunate ends",
+      "London Tube opens",
+      "First lighter",
+      "First friction match",
+      "Everest first climbed",
+      "First credit card",
+      "First email sent",
+      "First mobile phone call",
+      "Penicillin discovered",
+      "First TV demonstration",
+      "Stegosaurus lives",
+      "T. rex lives",
+      "Ottoman Empire ends",
+      "First radio broadcast"
+    ],
+    "answers": [
+      "Oxford starts teaching",
+      "First fax machine",
+      "Great Pyramid built",
+      "Nintendo founded",
+      "Sliced bread on sale",
+      "Harvard founded",
+      "Star Wars opens",
+      "London Tube opens",
+      "First lighter",
+      "First credit card",
+      "First email sent",
+      "First TV demonstration",
+      "Stegosaurus lives",
+      "First radio broadcast"
+    ],
+    "theme_words": [
+      "history",
+      "timeline",
+      "which came first",
+      "dates"
+    ]
+  },
+  "playtest": {
+    "progress": "score"
+  }
+}
