@@ -1,0 +1,51 @@
+{
+  "fragment": "geo_distance",
+  "version": 1,
+  "describe": "Distance and compass direction between two places on the globe, for guess-the-place games without a map tap (guess a country by name, then see how far and which way the answer is). Points are vec(lon, lat) in degrees, usually from the `geo` section's `geo_target()` list. `geo_km(a, b)` is the great-circle distance in whole km; `geo_dir(a, b)` is the 8-point compass direction from a to b ('N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', or '' when they are the same place); `geo_closeness(a, b)` is 0 to 100 (100 = the same place, 0 = the other side of the world). Only arithmetic, sin, cos and sqrt, so replays match. Draws nothing and has no state.",
+  "params": {},
+  "functions": {
+    "_sq": { "params": { "v": "float" }, "returns": "float", "body": "v * v" },
+    "_asin_poly": {
+      "params": { "x": "float", "q": "float" },
+      "returns": "float",
+      "body": "x * (1.0 + q * (0.16666666666666666 + q * (0.075 + q * (0.044642857142857144 + q * (0.030381944444444444 + q * (0.022372159090909092 + q * 0.017352764423076924))))))"
+    },
+    "_asin": {
+      "params": { "x": "float" },
+      "returns": "float",
+      "body": "if x <= 0.5 then _asin_poly(x, x * x) else 1.5707963267948966 - 2.0 * _asin_poly(sqrt((1.0 - x) / 2.0), (1.0 - x) / 2.0)"
+    },
+    "_hav": {
+      "params": { "a": "vec2", "b": "vec2" },
+      "returns": "float",
+      "body": "_sq(sin((b.y - a.y) * 0.008726646259971648)) + cos(a.y * 0.017453292519943295) * cos(b.y * 0.017453292519943295) * _sq(sin((b.x - a.x) * 0.008726646259971648))"
+    },
+    "geo_km": {
+      "params": { "a": "vec2", "b": "vec2" },
+      "returns": "int",
+      "body": "round(12742.0 * _asin(min(1.0, sqrt(max(0.0, _hav(a, b))))))"
+    },
+    "geo_closeness": {
+      "params": { "a": "vec2", "b": "vec2" },
+      "returns": "int",
+      "body": "max(0, min(100, round(100.0 - geo_km(a, b) / 200.15)))"
+    },
+    "_dlon": {
+      "params": { "a": "vec2", "b": "vec2" },
+      "returns": "float",
+      "body": "if b.x - a.x > 180.0 then b.x - a.x - 360.0 else if b.x - a.x < -180.0 then b.x - a.x + 360.0 else b.x - a.x"
+    },
+    "_dir": {
+      "params": { "dx": "float", "dy": "float" },
+      "returns": "string",
+      "body": "if abs(dx) < 0.01 and abs(dy) < 0.01 then '' else if abs(dy) > 2.414 * abs(dx) then (if dy > 0.0 then 'N' else 'S') else if abs(dx) > 2.414 * abs(dy) then (if dx > 0.0 then 'E' else 'W') else (if dy > 0.0 then 'N' else 'S') + (if dx > 0.0 then 'E' else 'W')"
+    },
+    "geo_dir": {
+      "params": { "a": "vec2", "b": "vec2" },
+      "returns": "string",
+      "body": "_dir(_dlon(a, b) * cos((a.y + b.y) * 0.008726646259971648), b.y - a.y)"
+    }
+  },
+  "tags": { "mood": ["any"], "energy": ["low"] },
+  "conflicts": []
+}
