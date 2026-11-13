@@ -69,7 +69,7 @@ No value proposition has real-user evidence, because we have no real users.
 | VP-34 | The AI does the core work | Makers, judges (AI Integration), Meta's AI org | Muse's value comes from Facebook context | Measured (against a template baseline) | Hypothesis | Live |
 | VP-35 | A showcase for the whole Muse family | Meta Superintelligence Labs | First-party models on a first-party surface | Measured | Public data (strategic fit) | Live |
 | VP-36 | Cheap and predictable to run per Group per day | Meta infrastructure and finance | First-party models with no third-party margin | Measured (calls, output tokens) | Hypothesis | Live (cost not priced) |
-| VP-37 | AI content made by and about real people | Feed and Reels, Meta's content strategy | Every Bubble carries a real maker and a social context | Measured (variety) | Hypothesis | Live |
+| VP-37 | AI content made by and about real people | Feed and Reels, Meta's content strategy | Every Whim carries a real maker and a social context | Measured (variety) | Hypothesis | Live |
 
 ### Roadmap: being built, not yet demonstrable
 
@@ -91,7 +91,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 #### VP-02. A first move in a Group that isn't a post
 
-- **Claim.** A newcomer, or a member who has never posted, can take part on day one by playing the Group's Daily Bubble. They land on the Group board next to members' names without writing an intro.
+- **Claim.** A newcomer, or a member who has never posted, can take part on day one by playing the Group's Daily Whim. They land on the Group board next to members' names without writing an intro.
 - **Why Facebook.** The Daily needs a Group: a membership list that scopes the board, members' posts as content, and a Group page to pin it to. Almost 1.8 billion people use Groups monthly [14], and Meta's own guide for people in their 20s points movers to "thousands of Facebook Groups that can help you meet new people in your city" [15].
 - **Rationale.** Posting to strangers is a high-stakes act; playing a 15-second game is not.
   - For adults who had just moved, playing video games together went with closeness, while time at work or school did not [66].
@@ -104,8 +104,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - 22% of adults under 50 say they often feel lonely or isolated, against 9% of those 50 and older; 16% of all adults feel that way all or most of the time [58].
   - In-person time with friends for ages 15 to 24 fell from about 150 to 40 minutes a day between 2003 and 2020 [59].
   - The Group Daily "Fog Words" had a median bot run of 13.5 s (D15, bot-run; people will be slower).
-- **How Bubbles delivers it.**
-  - Live: a Daily card pinned on the Group page, with today's top 3, your rank, a Group streak and copy inviting you to be first on the board; a Daily Bubbles strip on the Groups tab; a Daily-ready notification; float your result to the Group.
+- **How Whims delivers it.**
+  - Live: a Daily card pinned on the Group page, with today's top 3, your rank, a Group streak and copy inviting you to be first on the board; a Daily Whims strip on the Groups tab; a Daily-ready notification; float your result to the Group.
   - The Daily shown in the app today is a hand-made seed game. Generating it from members' posts is Debug/CLI only (VP-18).
   - Not built: the "Most improved" award (VP-19).
 - **Demo.** Narrate the persona: she joined New in SF two weeks ago and hasn't posted. She plays the Daily, sees three members' names around hers, and floats "I got 42. Beat it?" to the Group with one tap.
@@ -125,7 +125,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Each round pairs a guest's name with facts from their intro, such as "Arrived from Berlin last week" (D8).
   - The median bot run of the icebreaker was 13.6 s (D15).
   - Older figures for Events: more than 700 million people used Events monthly in 2017 [17], and more than 100 million a day used Events in 2016 "to discover things they can do with their friends" [18]. These are the latest public figures and are likely stale.
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: an Event section, "Who's coming? Learn a few names before you go", with avatars of who is going and who has played; "Make an icebreaker" for guests marked Going; a This or That picnic game.
   - Not built: a post-event rematch and game night.
 - **Demo.** Open the picnic Event, play the who-is-it round in about 15 s, then tap a guest's name on the board to open their profile.
@@ -134,7 +134,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 #### VP-04. A leaderboard that works as an introduction
 
-- **Claim.** Every Bubble Board row for someone you don't know yet has their name, a profile link, Watch Burst and Add friend, so playing the same game becomes a reason to connect.
+- **Claim.** Every board row for someone you don't know yet has their name, a profile link, Watch Burst and Add friend, so playing the same game becomes a reason to connect.
 - **Why Facebook.** For a newcomer, the board's value comes from shared context, not the friend graph: rows appear for people in a Group or Event you both chose to join, under everyday names [30]. Other networks handle this differently:
   - LinkedIn's game leaderboards group players by their connections and company [81].
   - Discord and Reddit are pseudonymous.
@@ -149,8 +149,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Context, not evidence for this mechanism: in ESA's 2025 survey (YouGov, n=5,000 US adults), 70% of Gen Z players and 61% of Millennial players said they have met people through games they otherwise wouldn't have [76] (industry survey; about online games generally, not leaderboards).
   - Context: 61% of US adults say close friends are extremely or very important for a fulfilling life, more than marriage (23%) or money (24%) [57].
   - Built: board rows show Add friend with Requested and Confirm states. In the demo, rows are bot runs by synthetic people.
-- **How Bubbles delivers it.**
-  - Live: Bubble Board with Group, Friends and Everyone scopes; Add friend on non-friend rows; verified-run badge; Watch Burst; notifications when someone beats your score or you pass someone.
+- **How Whims delivers it.**
+  - Live: board with Group, Friends and Everyone scopes; Add friend on non-friend rows; verified-run badge; Watch Burst; notifications when someone beats your score or you pass someone.
   - Not built: a teammate's recommender that weights Add friend highest in its reward.
 - **Demo.** After the Daily, open the Group board, tap Watch Burst on the row just above you, then Add friend. The row changes to Requested.
 - **Metric.** Add friend taps per board view; acceptance within 7 days against Facebook's usual suggestion baseline; share of new friendships within a Group that started from a board.
@@ -165,7 +165,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Real Muse runs used 7 of 7 attendees' opted-in posts for the picnic icebreaker and 5 of 5 opted-in Group posts for the Daily, and the Studio timeline says "Nothing else was read" (D8).
   - Every answer in the New in SF Daily was tied to a named member's intro, such as "TORONTO: Priya, a new nurse in town, arrived from here" (D8).
   - Committed sample runs: the "First Hellos" Daily from 5 posts in 39.4 s and the "Picnic Pals" icebreaker from 7 posts in 33.0 s (D10).
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: the Event icebreaker; "Blow a bubble for this group" in Studio with opted-in sources; the guess formula's who-is-it portrait rounds; the answer formula scored against what the Group picked.
   - Debug/CLI only: generating a Group's Daily from opted-in posts works on real Muse through the command-line tool and through Studio's daily mode, which only a debug launch reaches. The Daily shown in the app today is a hand-made seed game. We recommend wiring Daily generation into the normal Group UI before demo day, because it is the core thesis.
   - Not built: Games about me.
@@ -185,7 +185,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Verifying a run costs about 4.06 ms of CPU in Node (D14).
   - Median score rose with bot skill on 12 of 13 games, so boards reward skill (D16).
   - All bot-run.
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: verification in the runtime; verified badges on board rows; the same seed for everyone in a Group's Daily.
   - Not built: same-seed Challenge Me; endless and finite play as a shared primitive, so a challenge can fix a fair mode (for example, everyone gets 3 lives or 60 seconds); server-side verification and boards in a teammate's Go backend.
 - **Demo.** Tap a verified row's Watch Burst: "every score here is a 600-byte log we can replay".
@@ -208,8 +208,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Benchmark of 10 real Muse runs: 10 of 10 valid and bot-tested, median 28.0 s (range 15.7 to 40.9 s), and 43 Muse calls with 0 failures (D1, D2, measured).
   - The game itself is ready at a median 21.0 s, before its cover; the app does not show it until the cover is done (D3).
   - Each game takes 4 to 6 Muse calls (D9).
-- **How Bubbles delivers it.**
-  - Live: Muse Studio from the Bubbles tab, Groups, Events and profiles; edit, new look and next level; 6 formulas and 8 looks; remix lineage; an offline fallback so a game always comes out.
+- **How Whims delivers it.**
+  - Live: Muse Studio from the Whims tab, Groups, Events and profiles; edit, new look and next level; 6 formulas and 8 looks; remix lineage; an offline fallback so a game always comes out.
   - Not built: playing the game as soon as it passes its checks, with the cover fading in later (section 11); "Make it with Muse" from Search.
 - **Demo.** Live: type "a chill game for my new running club about SF hills", show the Studio timeline (brief, formula, validate, playtest, cover), play it and float it to the Group. Keep a recorded backup run in case of venue-network latency.
 - **Metric.** Share of games made for a named audience (Group, Event or friends); plays per game by that audience; makers who make a second game within 7 days; share of Groups with a member-made game within 30 days.
@@ -231,8 +231,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - NYT puzzles were played over 11.2 billion times in 2025 [82].
   - 49% of all US 18-to-29-year-olds use Facebook daily (TikTok 47%, YouTube 66%) [53].
   - Bot runs of Group and Event games had medians of 13.5 to 23.1 s (D15).
-- **How Bubbles delivers it.**
-  - Live: a daily gate (one scored run a day, same seed for the whole Group); Group and personal streaks; a Daily-ready notification; the Bubbles tab opens with your Group's Daily near the top.
+- **How Whims delivers it.**
+  - Live: a daily gate (one scored run a day, same seed for the whole Group); Group and personal streaks; a Daily-ready notification; the Whims tab opens with your Group's Daily near the top.
   - Not built: a weekly leaderboard (VP-19).
 - **Demo.** Open the Groups tab, show the Daily strip across your Groups, play today's game in about 20 s, and show your rank and the Group streak.
 - **Metric.** Next-day and 7-day return among Daily players (all players who played on a given day, with the base stated); days per week a member opens at least one of their Groups, against control Groups.
@@ -242,12 +242,12 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 - **Claim.** Because players use everyday names and share a Group or Event, moving from a game to a friend request feels safer than on handle-based platforms.
 - **Why Facebook.** Facebook's everyday-name norm [30], plus opt-in Facebook Verified, which checks a video selfie against existing profile photos to confirm "there is a real person on the other side of a profile" [21]. Rivals are adding identity after the fact: Discord moved to teen-default settings with face or ID checks in 2026 [99], and X said Communities were "used by less than 0.4% of users" yet "contributed to 80% of spam reports, financial scams, and malware" [100].
-- **Rationale.** Bubbles asks people to add, and later meet, strangers. The trust layer matters as much as the game. Research on friendships formed in games found toxicity a strong negative predictor of in-game social capital [72].
+- **Rationale.** Whims asks people to add, and later meet, strangers. The trust layer matters as much as the game. Research on friendships formed in games found toxicity a strong negative predictor of in-game social capital [72].
 - **Evidence.**
   - Facebook asks for "the name that your friends call you in everyday life" [30].
   - Meta estimated that "less than 3% of our worldwide DAP consisted solely of violating accounts" in Q4 2024 (family-wide) [12].
   - Verified badges launched on Profiles and Groups in July 2026 [21].
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: profile links and Add friend on rows; a verified-run badge.
   - Not built: showing Facebook Verified badges on board rows and icebreakers.
 - **Demo.** On a board row, show the profile with the shared Group before tapping Add friend.
@@ -256,19 +256,19 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 #### VP-08. Everything a newcomer needs, already in one app
 
-- **Claim.** Bubbles ties the surfaces a newcomer already uses on Facebook (Groups, Events, Marketplace, Dating) to a shared activity, with no new app or network.
+- **Claim.** Whims ties the surfaces a newcomer already uses on Facebook (Groups, Events, Marketplace, Dating) to a shared activity, with no new app or network.
 - **Why Facebook.**
   - Meta says young adults arrive at life moments, "moving, going to college, getting their first job or apartment" [13].
   - One in three young adults on Facebook in the US uses Marketplace daily (2026) [22]. An earlier figure, on a different base, was one in four young-adult daily users in the US and Canada (2025) [23].
   - Meta tested a Local tab pulling together Marketplace, Groups and Events in 10 US cities, including San Francisco [14].
   - The standalone Gaming app closed in 2022, with its features moved into Facebook [37]. Meta's first Groups app closed in 2017, and its 2026 Groups app, Forum, syncs with Facebook Groups [25][49].
 - **Rationale.** The newcomer's to-do list (furnish, find work, find people, find things to do) already lives on Facebook. What is missing is the step that turns finding a Group or Event into taking part.
-- **Evidence.** Bubbles runs on 6 distribution surfaces and 3 entry points today (D19). Young-adult matches on Facebook Dating were up 10% a year in 2025 [51].
-- **How Bubbles delivers it.**
-  - Live: Bubbles in Groups, Events, the Home feed, Stories, Reels and Video, Notifications, profiles, the Library in the Menu and the Bubbles tab.
+- **Evidence.** Whims runs on 6 distribution surfaces and 3 entry points today (D19). Young-adult matches on Facebook Dating were up 10% a year in 2025 [51].
+- **How Whims delivers it.**
+  - Live: Whims in Groups, Events, the Home feed, Stories, Reels and Video, Notifications, profiles, the Library in the Menu and the Whims tab.
   - Not built: Search and Messenger.
 - **Demo.** The newcomer path in 60 seconds: join New in SF, play the Daily, RSVP to the picnic, play the icebreaker and add a friend from the board.
-- **Metric.** Share of Bubbles players who also RSVP to an Event or join a second Group within 14 days.
+- **Metric.** Share of Whims players who also RSVP to an Event or join a second Group within 14 days.
 - **Risk and answer.** "Young adults are on Instagram and TikTok." Facebook still reaches 69% of US 18-to-29-year-olds [52], and 49% of all 18-to-29-year-olds use it daily [53]. The gap is a reason to come back, not reach. Section 3.3 covers Instagram.
 
 #### VP-09. A new way to tell your own story
@@ -282,10 +282,10 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Evidence.**
   - Self-disclosure is intrinsically rewarding [74].
   - Muse used all 8 looks across 10 games with no hints, so games look like their makers' ideas (D6).
-- **How Bubbles delivers it.**
-  - Live: a profile Bubbles tab with games you made, best scores and chains; "Blow a bubble" on your own profile.
+- **How Whims delivers it.**
+  - Live: a profile Whims tab with games you made, best scores and chains; "Blow a bubble" on your own profile.
   - Not built: Games about me with a ranked "who knows you best" list; choose-your-own-adventure stories with friends' endings and stories made from your own life.
-- **Demo.** Open a profile's Bubbles tab: games made, best scores and a three-level chain. If it has shipped, show "How well do you know me?" with its ranked friends.
+- **Demo.** Open a profile's Whims tab: games made, best scores and a three-level chain. If it has shipped, show "How well do you know me?" with its ranked friends.
 - **Metric.** Share of profile visitors who play a Games-about-me game; friend comments per game; repeat creation; friends who replay to improve their rank.
 - **Risk and answer.** "Quizzes about yourself are old." True. Muse makes them playable, scored and replayable in seconds, which is why most people never made one by hand. Games about a person are made by that person, which also limits abuse (section 5.4).
 
@@ -302,13 +302,13 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Evidence.**
   - Shipped feed weights rank relationships first (D20).
   - A teammate's simulation (5 synthetic worlds of 90 people for 14 days) found that ranking on clicks alone showed bait-averse users 49% clickbait, against 36% for today's feed and 14% for a reward built on finished runs, saves, floats and Add friend. The social reward also raised their pages per session from 5.9 to 7.2 (D21; simulated, teammate-reported, not reproduced by us).
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: a daily gate; a relationship-weighted feed with a reason tag on each page; a result sheet that offers "challenge a friend" and "see the Group board".
   - Not built: the recommender; saves as the main like signal, with an in-game save (people leave a game to save it, not to like it); endless and finite modes.
 - **Demo.** After a Daily run, show that the result sheet ends in a person (challenge, board, Add friend), not another autoplay. Read the reason tags on the first five feed pages aloud.
 - **Metric.** Share of sessions that end in a social action (friend request, float, challenge, RSVP); friend adds and Group floats per 100 pages; saves per play; session length distribution, aiming for short, social sessions.
 - **Risk and answer.**
-  - "The Bubbles tab is still an endless vertical feed." A fair tension that our own design review raised. The feed opens with your Group's Daily and friends' runs and ranks by relationships; we would measure social outcomes, not minutes.
+  - "The Whims tab is still an endless vertical feed." A fair tension that our own design review raised. The feed opens with your Group's Daily and friends' runs and ranks by relationships; we would measure social outcomes, not minutes.
   - "Simulated people prove nothing." Agreed; we use the simulation to choose an objective, not as evidence of impact.
 
 #### VP-13. A friend's replay is an invitation, not just a clip
@@ -323,10 +323,10 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Meta's own data says removing loading blockers from Instant Games gave "~2x as many players successfully passing the loading step" [32].
 - **Evidence.**
   - A Burst's input log is 600 bytes at the median (D13, bot-run).
-  - Bubbles runs on 6 distribution surfaces plus 3 entry points (D19).
+  - Whims runs on 6 distribution surfaces plus 3 entry points (D19).
   - Facebook Reels time spent reached all-time highs in Q3 2026 [5].
-- **How Bubbles delivers it.**
-  - Live: Bursts in the Bubbles tab, feed posts, Stories, Reels and the Video tab; takeover plays the same seed; share to Story from the result sheet; float to feed or Group.
+- **How Whims delivers it.**
+  - Live: Bursts in the Whims tab, feed posts, Stories, Reels and the Video tab; takeover plays the same seed; share to Story from the result sheet; float to feed or Group.
   - Not built: Messenger and Search.
 - **Demo.** In Reels, a friend's Burst plays. Tap to take over, play the same seed, finish and share your result to your Story. Two surfaces, no installs.
 - **Metric.** Takeover rate on friends' Bursts against strangers'; Burst view to takeover to finished run; new players per shared result.
@@ -338,8 +338,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Why Facebook.** Remix trees on TikTok connect strangers by interest. On Facebook, a remix travels between people who know each other, through notifications, Messenger and profiles.
 - **Rationale.** A remix sent back is targeted interaction with someone you know, the kind linked to well-being [70]. Zuckerberg describes AI making it "easier to create and remix content" [9].
 - **Evidence.** Facebook's research links composed, targeted interaction with close ties to well-being [70]. Private sharing on Facebook was growing at over 80% a year in 2024 [13].
-- **How Bubbles delivers it.**
-  - Live: remix in Studio, with lineage recorded in the manifest; a "remixed your Bubble" notification.
+- **How Whims delivers it.**
+  - Live: remix in Studio, with lineage recorded in the manifest; a "remixed your Whim" notification.
   - Not built: credits everywhere, remix trees, send it back.
 - **Demo.** Remix a friend's hill game into a night version, then show the notification the original maker receives.
 - **Metric.** Share of remixes sent back; maker replies or counter-remixes within 48 hours.
@@ -347,16 +347,16 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 #### VP-39. A playable feed as varied as Reels
 
-- **Claim.** The Bubbles tab is a vertical feed of playable games that switches games in milliseconds, with games that vary in formula, look and content, so scrolling games feels as fresh as scrolling Reels.
-- **Why Facebook.** Facebook already has the vertical-video habit and Reels at all-time highs in time spent (Q3 2026) [5]. Bubbles fills that habit with games made by members for their own Groups, not studio catalogs.
+- **Claim.** The Whims tab is a vertical feed of playable games that switches games in milliseconds, with games that vary in formula, look and content, so scrolling games feels as fresh as scrolling Reels.
+- **Why Facebook.** Facebook already has the vertical-video habit and Reels at all-time highs in time spent (Q3 2026) [5]. Whims fills that habit with games made by members for their own Groups, not studio catalogs.
 - **Rationale.** People come back to feeds for variety. Zuckerberg predicted "content in our feeds that you can interact with and it'll interact back" [8].
 - **Evidence.**
   - Muse used all 6 formulas and all 8 looks across 10 prompts with no hints (D6, measured).
   - Warm switch to the next game: about 3.6 ms at the median on the simulator (D18, teammate-reported, not yet on a phone).
-- **How Bubbles delivers it.**
-  - Live: the Bubbles tab feed with a warm runtime, 8 looks with look memory, Bursts and takeover.
+- **How Whims delivers it.**
+  - Live: the Whims tab feed with a warm runtime, 8 looks with look memory, Bursts and takeover.
   - Not built: a Customize panel; endless and finite play modes.
-- **Demo.** Swipe through four Bubbles with different looks and formulas, each tagged with why it is in your feed.
+- **Demo.** Swipe through four Whims with different looks and formulas, each tagged with why it is in your feed.
 - **Metric.** Swipes to first play; plays per session; "see less" rate.
 - **Risk and answer.** "That is an engagement machine." The feed opens with your Group's Daily and friends' runs, and is ranked for connection (VP-10).
 
@@ -374,7 +374,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Evidence.**
   - Real Muse made a Group Daily from 5 of 5 opted-in posts in 28.8 s, with one automatic repair (D5, D8).
   - The Daily's five answers were each tied to a named member's intro (D8).
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: a Daily per Group (a hand-made seed game in the app today), sources limited to opted-in posts with the maker able to drop any, the Daily card and streak, 6 formulas and 8 looks with look memory so consecutive games vary.
   - Debug/CLI only: generating the Daily from posts (command line and Studio's daily mode).
   - Not built: admin opt-in with preview and veto; a Games section, weekly leaderboard and game night (VP-19).
@@ -385,14 +385,14 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 #### VP-21. You decide which of your posts can become a game
 
-- **Claim.** Muse reads only posts their authors marked for Bubbles, and every game shows which posts it used and that nothing else was read.
-- **Why Facebook.** Facebook's per-post audience controls are the natural home for a "use in Bubbles" opt-in. Meta's standard for games is social play while "limiting data sharing outside of Meta" [32]; a first-party feature meets that by design.
+- **Claim.** Muse reads only posts their authors marked for Whims, and every game shows which posts it used and that nothing else was read.
+- **Why Facebook.** Facebook's per-post audience controls are the natural home for a "use in Whims" opt-in. Meta's standard for games is social play while "limiting data sharing outside of Meta" [32]; a first-party feature meets that by design.
 - **Rationale.** Games made from people's intros are only welcome if people agreed. Visible provenance makes consent checkable.
 - **Evidence.**
   - Built: posts carry an `allowsBubbles` flag; Studio lists only opted-in posts; the timeline reads "Used 7 of 7 opted-in posts ... Nothing else was read" (D8).
   - Muse is instructed to use only the first names it is given, never to invent facts or vote counts, and to keep content kind.
   - Game glue code runs sandboxed, with no network, page access, timers or eval.
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: opt-in-only sources, the maker can drop any, a provenance line, the sandbox.
   - Not built: an opt-in toggle in the post composer (opt-ins are set in demo data today), a separate moderation step, and a "remove me from this game" action.
 - **Demo.** In Studio's sources list, uncheck one post and show the timeline confirming which posts were used.
@@ -405,8 +405,8 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Why Facebook.** Facebook paid creators nearly $3 billion in 2025 and is putting "greater emphasis on rewarding original content creators" [27]. A credited game maker is an original creator by construction.
 - **Rationale.** Credits make creation a conversation between people rather than anonymous AI output. Meta's anonymous AI video feed, Vibes, was headlined as "AI slop" [45]. People value what they make when they finish it [75].
 - **Evidence.** Facebook's creator payouts and originals policy [27]; the Vibes reception [45]; Muse used all 6 formulas and all 8 looks across 10 prompts with no hints (D6).
-- **How Bubbles delivers it.**
-  - Live: a profile Bubbles tab, Chains (level series), next level, remix lineage and a "remixed your Bubble" notification.
+- **How Whims delivers it.**
+  - Live: a profile Whims tab, Chains (level series), next level, remix lineage and a "remixed your Whim" notification.
   - Not built: credits everywhere, remix trees, send it back. A path to creator payouts is an idea, not a plan.
 - **Demo.** Open a maker's profile: their games, a three-level chain and a friend's remix with lineage.
 - **Metric.** Makers with 2 or more games in 30 days; remixes per game; profile visits from game credits.
@@ -416,42 +416,42 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 #### VP-24. A working version of a product Meta's CEO has described
 
-- **Claim.** Bubbles is a working, mobile, friends-first 2D build of the loop Zuckerberg described: make a game from a prompt, share it with people you care about, and play it from your feed.
+- **Claim.** Whims is a working, mobile, friends-first 2D build of the loop Zuckerberg described: make a game from a prompt, share it with people you care about, and play it from your feed.
 - **Why Facebook.** The statement is Meta's, the models are Meta's and the surfaces are Facebook's. On the Q4 2025 call (2026-01-28), he said: "you can imagine people being able to, easily through a prompt, create a world or create a game and be able to share that with people who they care about and you see it in your feed and you can jump right into it". He added: "Our feeds will become more interactive overall" [1].
 - **Rationale.** A product lead funds work that de-risks a stated company bet.
   - Meta's Muse Spark launch advertises "custom websites and mini-games straight from a prompt" that you can "share ... with friends" [2].
-  - The same launch says Muse will reach people "in places like search bars, group chats, posts, and more", and offers answers "grounded in what your group is discussing" [2]. Bubbles in Search and in group chats (being built) are exactly those placements.
+  - The same launch says Muse will reach people "in places like search bars, group chats, posts, and more", and offers answers "grounded in what your group is discussing" [2]. Whims in Search and in group chats (being built) are exactly those placements.
   - On the Q1 2026 call, Zuckerberg listed "creating games" among Spark's leading areas [3]. On the Q3 2026 call, he said Muse should not be "a kind of single player game" but should let "your Muses ... work with your friends and your families" [5].
 - **Evidence.** The quotes above [1][2][3][5]. Our benchmark shows the loop working end to end with real Muse latency (D1, D2).
-- **How Bubbles delivers it.**
-  - Live: Studio; the Bubbles tab feed; floats; Bursts in Reels and Stories you can take over.
+- **How Whims delivers it.**
+  - Live: Studio; the Whims tab feed; floats; Bursts in Reels and Stories you can take over.
   - Not built: Make it together (VP-38).
 - **Demo.** Open with the quote on screen, then do it: prompt, wait about 28 s, float to the Group, then play a friend's Burst from the feed.
 - **Metric.** Steps of the quote demonstrated live: prompt, share, see in feed, jump in (all four today). In a pilot, share of created games shared to a person or Group within 24 hours.
-- **Risk and answer.** "If Meta already plans this, a hackathon team adds nothing." Meta's shipped versions (Pocket, Horizon Create) are standalone or creator-to-audience. Bubbles shows the community version and answers the hard parts: consent from Group posts, fair same-seed competition, a per-Group daily and a playtest gate.
+- **Risk and answer.** "If Meta already plans this, a hackathon team adds nothing." Meta's shipped versions (Pocket, Horizon Create) are standalone or creator-to-audience. Whims shows the community version and answers the hard parts: consent from Group posts, fair same-seed competition, a per-Group daily and a playtest gate.
 
 #### VP-25. Bringing friends back into Facebook time
 
-- **Claim.** Bubbles makes friend-to-friend interaction the content: beat my score, rematch, remix, play my Burst.
+- **Claim.** Whims makes friend-to-friend interaction the content: beat my score, rematch, remix, play my Burst.
 - **Why Facebook.** Meta has publicly committed to this. On the Q4 2024 call: "I'm excited this year to get back to some OG Facebook" [7]. In March 2025: "the magic of friends has fallen away" and "Social media should feel social", with a promise of "more fun, simple experiences to help you connect" [20].
 - **Rationale.**
   - Zuckerberg testified in 2025 that "The friend part has gone down quite a bit" [46].
   - A slide in Meta's opening presentation at the FTC trial showed friends' content falling from 22% (2023) to 17% (2025) of Facebook time, as reported by The Keyword [47] (medium confidence; not for slides).
   - Facebook needs formats that need a friend to finish. Games are entertainment that is better with friends: Roblox reports co-play sessions are typically 1.9 times longer than solo sessions [93].
-  - Bubbles uses AI to bring you to people, not to replace them.
+  - Whims uses AI to bring you to people, not to replace them.
 - **Evidence.**
   - Meta's own statements [7][20][46], the trial slide [47] and Roblox's co-play figure [93].
   - Shipped feed weights rank your Group's Daily (3.0), a friend's Burst (2.2) and an Event icebreaker (2.0) above popular games (0.8) (D20).
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: friends' Bursts in the feed and Stories; the Friends board scope; each feed page tagged with its social reason.
   - Not built: Challenge Me, rivalries on profiles, send it back.
-- **Demo.** Open the Bubbles tab: the first page is a friend's run, tagged with why it is there. Take over, beat it, and float "Beat it?" to the Group.
-- **Metric.** Share of Bubble sessions where the maker, the Group or a board neighbor is a friend or Group member; friend-to-friend interactions per session.
+- **Demo.** Open the Whims tab: the first page is a friend's run, tagged with why it is there. Take over, beat it, and float "Beat it?" to the Group.
+- **Metric.** Share of Whim sessions where the maker, the Group or a board neighbor is a friend or Group member; friend-to-friend interactions per session.
 - **Risk and answer.** "Friend content declined because people prefer entertainment." We are not asking people to choose friends over fun; games are fun that needs friends.
 
 #### VP-26. Fits Meta's young-adult priority
 
-- **Claim.** Young adults already have Facebook accounts but not a daily habit. Bubbles targets the gap Meta discloses as a long-term focus and a competitive risk.
+- **Claim.** Young adults already have Facebook accounts but not a daily habit. Whims targets the gap Meta discloses as a long-term focus and a competitive risk.
 - **Why Facebook.**
   - Reach already exists: 69% of US 18-to-29-year-olds use Facebook [52].
   - Meta's FY2024 10-K says it has "announced plans to focus product decisions on optimizing the young adult experience in the long term". It also says: "We believe that some users, particularly younger users, are aware of and actively engaging with other products and services similar to, or as a substitute for, our products and services" [12]. We could not check whether the FY2025 10-K keeps both sentences.
@@ -461,31 +461,31 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - More than 40 million US and Canada young-adult daily users in May 2024, "the highest in three years" (latest public figure) [13].
   - In October 2024, Meta still reported "positive trends with young adults, especially in the US" [10].
   - 49% of all US 18-to-29-year-olds use Facebook daily [53].
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: the New in SF Group and picnic Event demo world; the Daily and boards.
   - Not built: Challenge Me.
 - **Demo.** Frame the 5 minutes as one newcomer's week: on Monday she joins the Group and plays the Daily, on Thursday she plays the icebreaker, on Saturday she goes to the picnic, and on Sunday she has a rematch with a new friend.
-- **Metric.** Daily return of 18-to-29-year-old Bubbles users against matched non-users; share of 18-to-29 Group joins followed by a Bubble play.
-- **Risk and answer.** "Teen use of Facebook has collapsed (32% in 2024, down from 71% in 2014-15 [54])." Bubbles is designed for adults (Meta limits Muse to 18 and over [6]), and young adults are the stated target.
+- **Metric.** Daily return of 18-to-29-year-old Whims users against matched non-users; share of 18-to-29 Group joins followed by a Whim play.
+- **Risk and answer.** "Teen use of Facebook has collapsed (32% in 2024, down from 71% in 2014-15 [54])." Whims is designed for adults (Meta limits Muse to 18 and over [6]), and young adults are the stated target.
 
 #### VP-28. The social layer Meta's AI-game products lack
 
-- **Claim.** Meta has prompt-to-game generators but no place where those games bring a Group, an Event or a chat together. Bubbles is that layer and could host games from any Meta generator.
+- **Claim.** Meta has prompt-to-game generators but no place where those games bring a Group, an Event or a chat together. Whims is that layer and could host games from any Meta generator.
 - **Why Facebook.**
   - Pocket, Meta's standalone app for prompt-made "gizmos", rolled out across the US in August 2026 [43]. Per Business Insider (as reported by Digital Trends), Pocket runs on Muse Spark, has no direct messages, and Meta has no plans to integrate it with its other apps [44] (secondary source).
   - Horizon Create and Horizon Studio games run in Facebook and Instagram feeds for creators [42]; the announcement does not mention Groups, Events or Messenger.
-- **Rationale.** AI media with no social anchor draws backlash (Vibes [45]). Positioning Bubbles as the complement turns the likely objection "isn't this Pocket?" into a strength.
+- **Rationale.** AI media with no social anchor draws backlash (Vibes [45]). Positioning Whims as the complement turns the likely objection "isn't this Pocket?" into a strength.
 - **Evidence.** Pocket's US launch [43], its reported limits [44], Horizon's creator focus [42] and the Vibes reception [45].
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: Group Daily, Event icebreaker, boards, remix lineage.
   - Not built: Challenge Me, group-chat play, games in Groups and Search.
-- **Demo.** One Q&A slide: Pocket makes games for a feed; Horizon gives creators a tool; Bubbles is where your Group, your Event and your chat play together.
-- **Metric.** Share of Bubble plays that happen inside a Group, Event or chat.
+- **Demo.** One Q&A slide: Pocket makes games for a feed; Horizon gives creators a tool; Whims is where your Group, your Event and your chat play together.
+- **Metric.** Share of Whim plays that happen inside a Group, Event or chat.
 - **Risk and answer.** "Meta could add Groups to Pocket in a sprint." That would validate the thesis. It would still need what we built: opt-in sourcing, same-seed fair boards, per-Group dailies and icebreakers.
 
 #### VP-29. Facebook's games history, without its old mistakes
 
-- **Claim.** Facebook proved social games spread through its graph and learned what goes wrong. Bubbles keeps the reach and drops request spam, studio dependence and separate apps.
+- **Claim.** Facebook proved social games spread through its graph and learned what goes wrong. Whims keeps the reach and drops request spam, studio dependence and separate apps.
 - **Why Facebook.**
   - No other Western network has run social games at this scale. FarmVille had 32 million players a day in 2010 [38], Zynga was 12% of Facebook's 2011 revenue [40], and more than 250 million people played games on Facebook.com monthly in 2013 [41].
   - Games still live in the main app: when Meta closed the standalone Gaming app in 2022, a spokesperson said the main app is where "hundreds of millions of people play games, watch gaming video, and connect in gaming Groups each month" [37].
@@ -497,18 +497,18 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - FarmVille's notification drop (82.8 million to 78.4 million monthly users) [39].
   - The Gaming app's features moved into the main app [37].
   - Telegram's Hamster Kombat shows paid virality churns: from more than 300 million claimed players to under 44 million monthly [113].
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Design rules: scoped invites only (one friend, a Group board, a chat card); no mass requests; no cash or token rewards; inside core surfaces.
   - Not built: saves as the quality signal.
 - **Demo.** Q&A only: "FarmVille showed the graph spreads games; we keep that and drop the spam."
-- **Metric.** Invite acceptance rate; mute or unsubscribe rate on Bubble notifications.
-- **Risk and answer.** "Games failed on Facebook twice." Earlier tries were catalogs bolted on. Bubbles is made by members, about the Group, inside Groups and Events.
+- **Metric.** Invite acceptance rate; mute or unsubscribe rate on Whim notifications.
+- **Risk and answer.** "Games failed on Facebook twice." Earlier tries were catalogs bolted on. Whims is made by members, about the Group, inside Groups and Events.
 
 #### VP-31. Further upside for Meta: generations, ranking signals and revenue
 
 *Now includes former VP-32 (ranking signals) and VP-33 (revenue paths). These are hypotheses for Q&A, not part of the pitch.*
 
-- **Claim.** Beyond young adults, Bubbles offers three kinds of upside. A Group's game can include long-time locals and travel across languages. Structured manifests give ranking cold-start signals. Sponsored Bubbles are a possible future ad format.
+- **Claim.** Beyond young adults, Whims offers three kinds of upside. A Group's game can include long-time locals and travel across languages. Structured manifests give ranking cold-start signals. Sponsored Whims are a possible future ad format.
 - **Why Facebook.**
   - Facebook reaches 69% of 18-to-29-year-olds, 78% of 30-to-49, 71% of 50-to-64 and 59% of 65 and over. Instagram reaches 41% of 50-to-64 and 21% of 65 and over [52].
   - About 90% of Facebook's daily users were outside the US and Canada at the last regional breakdown (our arithmetic: 1,905 million of 2,110 million, December 2023) [11].
@@ -516,14 +516,14 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Nearly 10 million advertisers used at least one of Meta's AI creative tools in Q3 2026 [5].
 - **Rationale.**
   - Long-time locals are a newcomer's best guides to a city. 49% of adult players say games helped them stay connected to friends and family [76].
-  - Bot playtest results (score spread, run length) act as quality priors for new Bubbles.
+  - Bot playtest results (score spread, run length) act as quality priors for new Whims.
   - A product lead will ask how this makes money. The honest answer is indirect (engagement on existing ad-supported surfaces), with a speculative direct path. We found no Meta playable-ad roadmap.
 - **Evidence.** The reach and ranking figures above [52][11][5]; the ESA survey [76]; manifests and playtest outputs are shipped. Nothing ad-related is built.
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: Group Daily and looks that need little text; manifests, lineage and bot playtests.
-  - Not built: a recommender with playtest priors; sponsored Bubbles.
+  - Not built: a recommender with playtest priors; sponsored Whims.
 - **Demo.** Not a demo moment. Use one line each in Q&A.
-- **Metric.** Age spread of players per Group board; completion of brand-new Bubbles with and without playtest priors; sponsored-Bubble completion in a test.
+- **Metric.** Age spread of players per Group board; completion of brand-new Whims with and without playtest priors; sponsored-Whim completion in a test.
 - **Risk and answer.**
   - "The demo is US-only and English." Agreed; this is headroom, not a tested claim.
   - "Ads in games about your friends feel invasive." We would keep sponsorship opt-in for Groups and Events, never in personal games, and use game data for content ranking only, never ads.
@@ -536,7 +536,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 - **Why Facebook.** The AI's value comes from Facebook context (posts, RSVPs, Group identity).
   - Any frontier model given the same posts would also make on-topic games, so the template comparison below proves the AI is essential, not that Facebook is.
   - The Facebook-specific claim is that the context and the surfaces only exist here. We have not yet measured what the context adds; section 11 proposes the test.
-  - Meta says Facebook was "the second largest driver of Meta AI engagement" in 2025 [8]. Bubbles gives people a frequent, social reason to use Muse there.
+  - Meta says Facebook was "the second largest driver of Meta AI engagement" in 2025 [8]. Whims gives people a frequent, social reason to use Muse there.
 - **Rationale.** The brief says: "If your feature would work just as well without AI, keep pushing." We tested exactly that by running the same 10 prompts through our offline composer, which picks a formula by keyword and fills a template.
 - **Evidence.** The template baseline is D7; relevance was judged by one agent, not by users.
   - Offline composer: 10 of 10 valid in a median 0.068 s, but only 2 on-topic, 2 partly and 6 off-topic, with the paper look 7 times in 10.
@@ -544,7 +544,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Examples from the offline side: a brunch poll for "a quiz about the city's neighborhoods", and template San Francisco words for "learn Spanish words".
   - Keyword matching picked the same formula as Muse on 8 of 10 prompts, so Muse's added value is content, context and look, not the choice of game type.
   - The repair loop is real AI work: 9 of 10 first drafts passed, and Wonder fixed the tenth in one 12.4 s turn (D5).
-- **How Bubbles delivers it.** Live:
+- **How Whims delivers it.** Live:
   - Ember writes the brief (10 of 10 runs; median 1.9 s).
   - Wonder composes with 8 tools (list_formulas, get_formula, get_concepts, write_content, paint_cover, validate_manifest, playtest, finalize) and writes the content (9 of 10 runs). Ember wrote content once, a word list in run 02.
   - A 5-bot playtest runs, with up to 2 repair rounds.
@@ -562,9 +562,9 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - People interacting with Meta AI daily rose 60% after the Muse Spark rebuild [4].
   - Facebook is the second-largest driver of Meta AI engagement [8].
 - **Evidence.** Every benchmark run used muse-ember-1.0, muse-wonder-1.0 and muse-image-1.0. muse-spark-1.3 was configured as a fallback and never needed (D4). The brief requires Spark, Wonder or Ember; Wonder and Ember power every game.
-- **How Bubbles delivers it.** Live: the Studio pipeline, with the model named on each timeline step; edit, new look and level 2. Debug/CLI only: daily mode.
+- **How Whims delivers it.** Live: the Studio pipeline, with the model named on each timeline step; edit, new look and level 2. Debug/CLI only: daily mode.
 - **Demo.** Point at the timeline: Ember's brief at about 2 s, Wonder picks a formula at about 7 s, Image paints in parallel, and the game is ready at about 21 s.
-- **Metric.** Muse calls per game and failure rate (0 of 43 in the bench); weekly Muse sessions started from Bubbles.
+- **Metric.** Muse calls per game and failure rate (0 of 43 in the bench); weekly Muse sessions started from Whims.
 - **Risk and answer.** "Spark isn't used." The brief accepts any of the three; we say exactly how each model is used.
 
 #### VP-36. Cheap and predictable to run per Group per day
@@ -577,7 +577,7 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
   - Cover: median 2,257 image output tokens; 4 to 6 calls per game (D9).
   - Verifying a run costs 4.06 ms of CPU in Node (D14).
   - Input tokens were not logged, so **we claim no dollar figure**.
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Live: the Studio pipeline; a headless validator and simulator.
   - Not built: server-side replay verification and boards in a teammate's Go backend.
 - **Demo.** Q&A answer: "about 5 calls per game; verification is milliseconds".
@@ -586,17 +586,17 @@ Every entry uses the same eight fields. Our own data IDs (D1 to D26) are explain
 
 #### VP-37. AI content made by and about real people
 
-- **Claim.** Bubbles is AI-made content anchored to a human maker, a Group and remix credits, rather than an anonymous pile of AI media. It is AI that brings you to people, not AI that replaces them.
-- **Why Facebook.** Zuckerberg describes a third era of social content: "as AI makes it easier to create and remix content, we're going to add yet another huge corpus of content on top of those" [9]. Every Bubble carries a real maker credit and a social context from the graph.
+- **Claim.** Whims is AI-made content anchored to a human maker, a Group and remix credits, rather than an anonymous pile of AI media. It is AI that brings you to people, not AI that replaces them.
+- **Why Facebook.** Zuckerberg describes a third era of social content: "as AI makes it easier to create and remix content, we're going to add yet another huge corpus of content on top of those" [9]. Every Whim carries a real maker credit and a social context from the graph.
 - **Rationale.** Backlash against anonymous AI media (Vibes [45]) shows the risk. A social anchor and a playable format give AI content a reason to be shared.
 - **Evidence.**
   - Zuckerberg's framing [9] and the Vibes reception [45].
   - With no hints, Muse used all 6 formulas and all 8 looks across 10 prompts, so the feed looks varied (D6).
-- **How Bubbles delivers it.**
-  - Live: 8 looks with look memory, remix lineage and notification, a maker on every Bubble.
+- **How Whims delivers it.**
+  - Live: 8 looks with look memory, remix lineage and notification, a maker on every Whim.
   - Not built: choose-your-own-adventure stories; a guess-what-they-say-next quiz night with original animated scenes; a teammate's Rust/WASM engine for a new game format.
-- **Demo.** Scroll three Bubbles with different looks and formulas, each tagged with its maker and why it is in your feed.
-- **Metric.** Share rate and completion of Bubbles against AI video; "see less" rate.
+- **Demo.** Scroll three Whims with different looks and formulas, each tagged with its maker and why it is in your feed.
+- **Metric.** Share rate and completion of Whims against AI video; "see less" rate.
 - **Risk and answer.** "Formula games will feel samey." Bench variety was 6 of 6 formulas and 8 of 8 looks, and each game's content is specific to its Group. The format list is growing.
 
 ### 6.6 Roadmap: being built now (collaboration first)
@@ -622,14 +622,14 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Roblox co-play sessions run 1.9 times longer than solo [93].
   - The same-seed primitive it needs is shipped and verified (D12).
   - No prototype data for the chat feature itself.
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Not built: Challenge Me (same-seed head-to-heads in a chat, a head-to-head result, Challenge back) and rivalries on friends' profiles.
   - Live: the same-seed primitive and the Friends board scope.
 - **Demo.** If it lands, send today's game to a hometown friend's chat and show the result card and Challenge back. If not, show the Friends board and say plainly that Messenger is in progress.
 - **Metric.** Challenges sent per weekly player; reply and rematch rate; share of challenges sent to friends in a different city.
 - **Risk and answer.**
   - "Facebook pulled Instant Games out of Messenger on iOS in 2019 [36]." Facebook's announcement gave no reason [36], so we don't guess at one. We send a card (a seed and a score), and the game opens in Facebook's built-in runtime.
-  - On App Store policy: guideline 4.7 allows "HTML5 and JavaScript mini apps and mini games" inside apps. It requires filtering objectionable material, a way to report content, blocking abusive users, an index of the software with universal links, and an age restriction mechanism [124]. Bubbles are JSON manifests run by a fixed JavaScript runtime, so they fall under 4.7. Reporting, the index and the age gate are not built.
+  - On App Store policy: guideline 4.7 allows "HTML5 and JavaScript mini apps and mini games" inside apps. It requires filtering objectionable material, a way to report content, blocking abusive users, an index of the software with universal links, and an age restriction mechanism [124]. Whims are JSON manifests run by a fixed JavaScript runtime, so they fall under 4.7. Reporting, the index and the age gate are not built.
 
 #### VP-15. One card the whole group chat plays
 
@@ -644,7 +644,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Facebook's own Instant Games offered leaderboards and challenges in Messenger group threads in 2016 [33].
   - Apple made challenges with friends a main social feature of its Games app [110].
   - The same-seed Daily the card relies on is shipped (D12).
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Not built: a group-chat card with a live mini leaderboard and rematch; a guess-what-they-say-next quiz night in group chats.
   - Live: the same-seed Daily, which is the primitive both use.
 - **Demo.** If it has shipped, drop a card into a 4-person demo chat and show the leaderboard filling. Otherwise, describe it as in progress.
@@ -665,7 +665,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - "Most improved" keeps newcomers in contention against members who have played for months.
   - Competition between groups raised cooperation inside each group in a lab game [129], but a prize tournament between groups cut friendships across them [130]. Team formats should pull a Group together without making another Group the enemy (see "Why friendly competition makes friends").
 - **Evidence.** Hall's hours-to-friendship figures [65][66] and Depping's cooperation results [72]. Our bots show a caution: the word game "Fog Words" did not rank by skill (median scores 200, 400 and 300 for low, middle and high skill), so luck-heavy games should reward improvement rather than raw rank (D16).
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Not built: a Games section, a weekly leaderboard with trophy and Most improved, Challenge the Group, game night.
   - Live: the Group board and Daily streak.
 - **Demo.** If it has shipped, open the Group's Games section, show the weekly trophy and a newcomer listed as Most improved, then the game-night Event.
@@ -680,7 +680,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - Cooperation and interdependence each increased closeness between strangers, and interdependence worked through more conversation [72]. Co-making is interdependent by design: one person picks the idea, another the look, another the sources.
   - People value what they make, when it is finished (the IKEA effect) [75]; co-makers share that ownership.
 - **Evidence.** The cooperation [72] and IKEA-effect [75] findings. No prototype data; Studio's edit, new look and next-level steps are the building blocks.
-- **How Bubbles delivers it.** Not built: co-making with friends or a Group, and credits for every maker. Live: Studio edits, remix lineage and the "remixed your Bubble" notification.
+- **How Whims delivers it.** Not built: co-making with friends or a Group, and credits for every maker. Live: Studio edits, remix lineage and the "remixed your Whim" notification.
 - **Demo.** If it lands: two people add one step each to a game for the Group, and both names appear on its credits.
 - **Metric.** Co-made games per Group; plays by co-makers' friends; Add friend between co-makers who weren't friends.
 - **Risk and answer.** "Committees make worse games." Each step stays small and validated, and the playtest gate still applies. Whether co-making feels fun is untested.
@@ -696,7 +696,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
   - A bracket keeps the group together after an Event and turns "nice to meet you" into a rematch.
   - Head-to-head play can still build trust when the two players affect each other [72]; Blends add a bonus for evenly matched games that never goes negative, so nobody is matched down (built on a teammate's branch, not yet in the app) (see "Why friendly competition makes friends").
 - **Evidence.** No prototype data; it is a design. Spotify's Blend is the analogy [125]. The pieces it builds on exist: same-seed play and replay verification (D12), the Event icebreaker that already makes a game from guests' intros (D8), and Kevin's recommender, which learns each person's taste from their plays (D21 for its simulation; local branch, not in the app).
-- **How Bubbles delivers it.**
+- **How Whims delivers it.**
   - Not built: taste profiles from play history, matching two profiles and blending them into a brief Muse can build from (asked of Kevin's recommender work; design and request sent on Nov 12), a "Blend with" button on a friend's profile and on board rows, and an Event bracket.
   - Live: the same-seed primitive, verified scores, the Event icebreaker and the Friends board scope.
 - **Demo.** As a labeled "Coming" frame in beat 8 of the story (section 5.2): "A game for Alex and Maya", then a picnic bracket. If a first version lands, make a Blend between two demo profiles and play one round.
@@ -712,7 +712,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
 - **Why Facebook.** Facebook Search now has an AI Mode, powered by Muse Spark, with answers "grounded in what people are saying publicly across our apps like in Groups and Reels" [24]. People ran more than 2 billion searches a day on Facebook in 2016 (latest public figure, likely stale) [120].
 - **Rationale.** A game about climbing in SF is a friendlier first contact with a community than a list of Groups. In WeChat, over 80% of mini-game users launch games through pull-down menus, search and social sharing [92].
 - **Evidence.** Facebook's AI Mode in Search [24], its search volume [120] and the WeChat launch figures [92]. No prototype data yet.
-- **How Bubbles delivers it.** Not built: games in Search and "Make it with Muse" from any search.
+- **How Whims delivers it.** Not built: games in Search and "Make it with Muse" from any search.
 - **Demo.** Only if it lands: search "bouldering", play a Group's game from the results and tap through to the Group.
 - **Metric.** Group joins that start from a game opened in Search.
 - **Risk and answer.** "TikTok Minis are also found through search [105]." Agreed, this is table stakes. Its value is the link to Groups and Events, which TikTok lacks.
@@ -723,7 +723,7 @@ These are the team's current build priority. None is on `beta-version` yet, so n
 - **Why Facebook.** Group mastery needs a Group, and friends' streaks need the friend graph.
 - **Rationale.** Streaks build habits. Duolingo learners who reach a 7-day streak are 3.6 times more likely to complete their course, and allowing two Streak Freezes raised daily active learners by 0.38% (relative) [114].
 - **Evidence.** Duolingo's streak results [114]. Muse's beginner Spanish game was 8 of 8 correct in a spot-check (D8, estimate).
-- **How Bubbles delivers it.** Live: the answer formula, used for learn games. Not built: Group mastery and friends' streaks.
+- **How Whims delivers it.** Live: the answer formula, used for learn games. Not built: Group mastery and friends' streaks.
 - **Demo.** Optional: play the Muse-made Spanish game in about 20 s.
 - **Metric.** 7-day streak rate for learners with a friend learning the same topic, against solo learners.
 - **Risk and answer.** "Duolingo already does this." It is a supporting value; the point is learning with your Group, which Duolingo does not host.

@@ -12,7 +12,7 @@
 | "3.57 degrees of separation" as newcomer evidence | A 2016 global average says nothing about a newcomer's board rows. Kept only for hometown friends (VP-14). |
 | TikTok's 32-person chat cap and X's retired Communities as rebuttals in the short answer | Weak rivals; kept only in the section 7 table. |
 | Oishi and Schimmack (2010) [73] | The study is about moves in childhood predicting adult well-being, especially for introverts, not about relocating as a young adult. Adult movers are covered by Hall [65][66] and the Census [63]. |
-| Pew's teen gaming stat (47% of teen players made a friend online) [55] and teen creativity stat [56] | Teens are out of scope; Bubbles is for adults. |
+| Pew's teen gaming stat (47% of teen players made a friend online) [55] and teen creativity stat [56] | Teens are out of scope; Whims is for adults. |
 | Wordle bringing "tens of millions of new users" to the Times [86] | Not needed once VP-13 focused on playable shares. |
 | "NYT total plays still rose" | Our source gives Wordle's plays for 2024 and 2025 but no NYT total for 2024, so the rise isn't shown. |
 | Seed games' studio times, play and like counts; the Group's member count; the Event's Going count; mutual-friend counts | Hand-written or synthetic demo data (D25). |

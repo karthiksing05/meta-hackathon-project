@@ -26,7 +26,7 @@
 
 **Decisions pending.**
 
-- **The name.** "Bubbles" stays until Karthik picks from brand round 3 (pastel blue to violet, no "blow", maybe a storytelling feel). The Group card still says "Blow a bubble for this group", and the tracker calls Studio "Blow your own"; both conflict with the no-"blow" direction.
+- **The name.** "Whims" stays until Karthik picks from brand round 3 (pastel blue to violet, no "blow", maybe a storytelling feel). The Group card still says "Blow a bubble for this group", and the tracker calls Studio "Blow your own"; both conflict with the no-"blow" direction.
 - **The one moment judges remember.** Candidates: the Add friend tap on the board, the live Muse build, a rematch landing in the group chat, or the Blend.
 - **Story order:** open on wonder (5.2) or on the Group's Daily (Bayan).
 - **Whether to mention the AI-agent build story,** since judges score Muse use.
@@ -39,14 +39,14 @@
 
 - Messenger group-chat play and Challenge Me (not wired at `0a3e8f7`).
 - Import the real Muse games we demo (First Hellos, Picnic Pals, Hill Drift, Send It); none were in the build at `0a3e8f7`.
-- Bubbles in Facebook Search and "Make it with Muse".
+- Whims in Facebook Search and "Make it with Muse".
 - The collaboration batch: Games in Groups, making games together, Games about me, story games, Learn, quiz night, length settings and the Customize panel.
 - The "New" badge, or drop it from beat 9.
 - Labeled "Coming" frames for Challenge Me, story games and Blends.
 - Rework the tracker's demo around closer together (still open on the tracker).
 - An opt-in switch on posts, or a clear answer for how authors opt in.
 - The blue-to-purple rebrand in the app (code and BUBBLES.md §2 still show lilac, pink and peach).
-- The public README and docs: the README doesn't mention Bubbles, lists a Marketplace tab and says the code has never been compiled; FEATURE_PARITY.md shows the old tab bar; the BUBBLES.md seed table leaves out This or That: Picnic and Trivia Thursday: SF.
+- The public README and docs: the README doesn't mention Whims, lists a Marketplace tab and says the code has never been compiled; FEATURE_PARITY.md shows the old tab bar; the BUBBLES.md seed table leaves out This or That: Picnic and Trivia Thursday: SF.
 - Confirm the backups exist: offline composer, pre-made real Muse games, the paused seed library.
 - Don't claim Muse reads photos: Spark 1.3 is listed for photos, but photo input isn't built.
 - Fix or stop citing the seeds' "Made with Muse" stamps and invented times (some dated Nov 10).

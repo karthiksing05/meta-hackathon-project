@@ -10,8 +10,8 @@
 |---|---|---|---|
 | AI Integration | 30% | "AI does real work and feels like a natural part of the product, not a cosmetic add-on." | Ember writes the brief; Wonder composes the game through 8 tools, writes content from Group and Event posts and repairs failed drafts; Image paints the cover (VP-34, VP-35). Against a template baseline, 6 of 10 games were off-topic (D7). Per-Group dailies are impossible to hand-write at scale (VP-18). |
 | Product Thinking and User Impact | 25% | "Solves a clear young-adult need, fits naturally on Facebook, and gives people a reason to come back." | Need: friends in a new city (the core five, section 2). Fit: built on Groups, Events, friends and the feed (section 3). Return: the loop and north star in section 9. |
-| Execution & Demo | 25% | "A working, polished demo that does what you say it does, with no unnecessary mockups." | Studio runs live on real Muse (10 of 10, median 28.0 s, D1 and D2). Bubbles is on 6 distribution surfaces and 3 entry points (D19), and 318 runtime tests pass (D17). Every status is labeled Live, Debug/CLI only or Not built, and the roadmap is kept apart. |
-| Originality and Cohesion | 20% | "A distinct, ambitious idea where every part cohesively supports solving the user problem." | Facebook Groups have members but no shared moment; Bubbles gives every Group and Event a daily shared moment that Muse writes from the community itself, played on one seed, so a score next to a stranger becomes an introduction. The five core value propositions are one chain (section 2). |
+| Execution & Demo | 25% | "A working, polished demo that does what you say it does, with no unnecessary mockups." | Studio runs live on real Muse (10 of 10, median 28.0 s, D1 and D2). Whims is on 6 distribution surfaces and 3 entry points (D19), and 318 runtime tests pass (D17). Every status is labeled Live, Debug/CLI only or Not built, and the roadmap is kept apart. |
+| Originality and Cohesion | 20% | "A distinct, ambitious idea where every part cohesively supports solving the user problem." | Facebook Groups have members but no shared moment; Whims gives every Group and Event a daily shared moment that Muse writes from the community itself, played on one seed, so a score next to a stranger becomes an introduction. The five core value propositions are one chain (section 2). |
 
 ### 10.2 The four named needs
 
@@ -26,11 +26,11 @@
 
 | Place | Where we fit | Where we deliberately don't |
 |---|---|---|
-| Marketplace | Bubbles complements the newcomer's Marketplace habit (VP-08). | No games in listings: buying and selling should stay fast and trusted. |
+| Marketplace | Whims complements the newcomer's Marketplace habit (VP-08). | No games in listings: buying and selling should stay fast and trusted. |
 | Groups | The center: Daily, boards, Games section, game night (VP-02, VP-18, VP-19). | No auto-posting without admin opt-in. |
 | Events | Icebreakers before you meet; game night as an Event (VP-03). | We don't replace the Event; play leads to showing up. |
 | Dating | Lessons transfer (everyday names, low-pressure first contact). Young-adult matches on Facebook Dating were up 10% a year in 2025 [51], so Meta already uses Facebook to help young adults meet people. | Out of scope: we chose friendship, a lower-stakes and wider need. |
 | Gaming | A new kind of social gaming made by members (VP-05, VP-29). | No studio catalog, no cash or token rewards. |
 | Messenger | Challenge Me and group-chat play (VP-14, VP-15, not built). | No heavy game engine in the thread; a light card. |
-| Feed, Reels and Profile | Bursts, floats, a playable feed, the profile Bubbles tab, Games about me (VP-09, VP-13, VP-39). | No maximizing of minutes; finite daily play. |
+| Feed, Reels and Profile | Bursts, floats, a playable feed, the profile Whims tab, Games about me (VP-09, VP-13, VP-39). | No maximizing of minutes; finite daily play. |
 | Something new | Playable, AI-made posts about your own people (VP-01, VP-37). | |

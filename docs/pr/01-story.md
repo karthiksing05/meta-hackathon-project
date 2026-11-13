@@ -14,7 +14,7 @@ Alternates:
 2. **(K)** A space where people express themselves and share that expression with others through Facebook.
 3. Describe a game in a sentence and Muse builds it, for a Group, an Event or everyone. (The in-app copy says "Describe a game and Muse makes it in about a minute.")
 
-"Bubbles" is a working name; swap in the final one when Karthik picks it (5.5).
+"Whims" is a working name; swap in the final one when Karthik picks it (5.5).
 
 **The 45-second version.** For the project page, or the opening if the slot is cut short. Read aloud, it runs about 45 seconds.
 
@@ -28,7 +28,7 @@ Alternates:
 >
 > Facebook already knows who your people are. Now it can give them something to play together: made from one sentence, any sentence, as many as you want.
 
-*What's real in it.* "About thirty seconds" is measured: a median of 28.0 s over 10 real Muse runs, every game bot-tested before it ships (D2, D5). The Daily Bubble and remixing a friend's game are on `beta-version`. Group-chat play, Challenge Me and game nights (VP-14, VP-15, VP-19) are not built yet. The sample sentences, the lava remix and "four versions by tonight" are illustrations, not data. The pitch claims limitless *ideas*; the games still run on the six game types the runtime knows, so in Q&A say "any idea that fits a dodge, timing, merge, guess, sort or answer game, and the list grows with each type we add."
+*What's real in it.* "About thirty seconds" is measured: a median of 28.0 s over 10 real Muse runs, every game bot-tested before it ships (D2, D5). The Daily Whim and remixing a friend's game are on `beta-version`. Group-chat play, Challenge Me and game nights (VP-14, VP-15, VP-19) are not built yet. The sample sentences, the lava remix and "four versions by tonight" are illustrations, not data. The pitch claims limitless *ideas*; the games still run on the six game types the runtime knows, so in Q&A say "any idea that fits a dodge, timing, merge, guess, sort or answer game, and the list grows with each type we add."
 
 #### Line bank
 
@@ -54,18 +54,18 @@ Every line we have, for slides, voice-over and the project page. Lines are for u
 | None of the viral one-off games use your friends as content. Facebook has your friends, Groups and Events. | Why Facebook | VP-01 | Slack, Nov 11 19:42; Taxonomy canvas §5, §8 |
 | Remove Muse and nothing gets made: no briefs, no games, no daily content, no covers. | AI test | VP-34 | docs/BUBBLES.md §1 |
 | A standalone app has none of these: Groups, Events, the friend graph, Stories, Reels, Messenger. | Why Facebook (Messenger is not wired yet) | VP-08, VP-28 | docs/BUBBLES.md §1 |
-| A new Daily Bubble every day, streaks, and friends beating your score. | Reason to come back | VP-06 | docs/BUBBLES.md §1 |
+| A new Daily Whim every day, streaks, and friends beating your score. | Reason to come back | VP-06 | docs/BUBBLES.md §1 |
 | Walk into the picnic already knowing three people's names. | Event icebreaker | VP-03 | docs/BUBBLES.md §1 |
-| The Group leaderboard puts names to faces before you meet. | Daily Bubble and board | VP-04 | docs/BUBBLES.md §1 |
+| The Group leaderboard puts names to faces before you meet. | Daily Whim and board | VP-04 | docs/BUBBLES.md §1 |
 | Muse writes the brief, composes the game from our library, writes the small custom code, playtests it and paints the cover. | AI beat in one sentence | VP-34 | docs/BUBBLES.md §1 |
 | Every bubble is playtested before anyone pops in. | Studio loading copy | VP-05, VP-18 | StudioComposeStep.swift |
-| The same game for everyone in the group today. | Daily Bubble | VP-02, VP-16 | StudioAskStep.swift, StudioFloatStep.swift |
+| The same game for everyone in the group today. | Daily Whim | VP-02, VP-16 | StudioAskStep.swift, StudioFloatStep.swift |
 | Replays you can take over. | Bursts | VP-13 | BubbleBurstReelLayer.swift |
 | The feed ranks for friendships made, not just time spent. | Recommender | VP-10 | Slack, Nov 12 11:37 (Kevin's agent) |
 | A non-designer never has to pick a gravity value. | Creation is easy | VP-05 | Taxonomy canvas §9 part 3 |
 | Muse can't set gravity to an unplayable value. | Safe composition | VP-34 | Concept library canvas §3 |
 | Most hits are an older game with one twist applied. | Originality | VP-37 | Taxonomy canvas §9 part 4 |
 | The library grows from what people actually make. | A system that compounds | VP-34 | Concept library canvas §6 |
-| Tomorrow's Daily Bubble is the reason to come back. | Close | VP-06 | Build tracker "Demo" step 5 |
+| Tomorrow's Daily Whim is the reason to come back. | Close | VP-06 | Build tracker "Demo" step 5 |
 | Why this belongs on Facebook and nowhere else. | Framing of this whole document | VP-01 (section 3) | Slack, Nov 12 11:49 |
 | Warm competition words: "your move", "beat my 34", "rematch", "You and Maya: 12 games together". | Copy on challenge and board screens | VP-04, VP-14 | Brand ideas, Nov 12 11:52 |

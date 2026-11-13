@@ -4,7 +4,7 @@
 
 ### 10.4 "AI should be essential, not decorative"
 
-| What the brief names | What Muse does in Bubbles | Honest strength |
+| What the brief names | What Muse does in Whims | Honest strength |
 |---|---|---|
 | Understand what you're looking for better than a search box | Ember reads one sentence as mood, energy, competition and audience, and writes an editable brief in about 2 s (D4). | Moderate. The brief is real work but simple; the Search feature is not built. |
 | Match you with the right people or communities | The feed ranks by relationship and boards offer Add friend; the recommender would reward new friendships; Blends would turn two people's tastes into one game (VP-04, VP-10, VP-40). | Moderate. Matching comes mostly from the graph, not from Muse today; Blends is not built. |

@@ -4,9 +4,9 @@
 
 ## 1. Thesis
 
-**Facebook has young adults' people but has stopped giving them a reason to open it, or to come back. Bubbles makes a daily ritual collaborative: every Group, Event and group chat gets games its own members make with Muse, about themselves, played on one seed, so making one is a reason to open Facebook, and a new Daily, a challenge and a rematch are reasons to return.**
+**Facebook has young adults' people but has stopped giving them a reason to open it, or to come back. Whims makes a daily ritual collaborative: every Group, Event and group chat gets games its own members make with Muse, about themselves, played on one seed, so making one is a reason to open Facebook, and a new Daily, a challenge and a rematch are reasons to return.**
 
-Bubbles is about bringing people closer together, which is the mission Facebook has stated since 2017: to "build community and bring the world closer together" [12][50]. It does that in three ways:
+Whims is about bringing people closer together, which is the mission Facebook has stated since 2017: to "build community and bring the world closer together" [12][50]. It does that in three ways:
 
 - **Play together.** Everyone in a Group or at an Event gets the same game.
 - **Compete together.** Same-seed scores are fair, so a board row next to a stranger is a reason to say hello.
@@ -26,7 +26,7 @@ Prompt-to-game generation is no longer rare (YouTube, Roblox and Meta's own Pock
 
 The pitch itself, from the one-liner to the 5-minute story and the Q&A, is section 5.
 
-## 2. How Bubbles brings people closer together
+## 2. How Whims brings people closer together
 
 Each step of the ladder is a value proposition. Each one names the relationship it builds.
 
@@ -68,17 +68,17 @@ Competition can also divide. Competition between groups raised cooperation insid
 - **Plus-only fairness in Blends.** Blends favor evenly matched games with a bonus that fades to zero as skills drift apart and never goes negative, and members the Blend has served least get a boost without anyone being pushed down (VP-40). Weekly boards add Most improved, so it isn't only for the best player (VP-19). Blends: built on a teammate's branch, not yet in the app.
 - **Opt-in.** You choose to play, to float a score and to challenge someone. No mass invites, no cash rewards (VP-29).
 
-The Bubble Board with Add friend is Live, with bot runs by synthetic people. Challenge Me, group-chat play and Blends are Not built.
+The board with Add friend is Live, with bot runs by synthetic people. Challenge Me, group-chat play and Blends are Not built.
 
 ### How the solution maps to the problem
 
 | Problem point | Feature | Facebook surface | Status |
 |---|---|---|---|
-| 1, 3. A reason to open the Group, and a first move that isn't a post | Daily Bubble from members' opted-in posts (VP-02, VP-01) | Groups | Live (Daily generation: Debug/CLI only) |
+| 1, 3. A reason to open the Group, and a first move that isn't a post | Daily Whim from members' opted-in posts (VP-02, VP-01) | Groups | Live (Daily generation: Debug/CLI only) |
 | 3, 4. Meeting strangers in person, cold | Event icebreaker made from guests' intros (VP-03) | Events | Live |
-| 3, 4. No path from stranger to friend | Bubble Board with fair, same-seed scores and Add friend (VP-04, VP-16) | Groups, Events, profiles | Live (rows are synthetic people) |
+| 3, 4. No path from stranger to friend | board with fair, same-seed scores and Add friend (VP-04, VP-16) | Groups, Events, profiles | Live (rows are synthetic people) |
 | 1, 2. No daily ritual that brings people back | One Daily per Group, and a playable feed of replays (VP-06, VP-39) | Groups, feed, Stories, Reels | Live |
-| All. A game about your people would otherwise need a developer | Muse Studio: one sentence to a game (VP-05, VP-34) | Bubbles tab, Groups, Events | Live |
+| All. A game about your people would otherwise need a developer | Muse Studio: one sentence to a game (VP-05, VP-34) | Whims tab, Groups, Events | Live |
 | 2, 5. Group chats and old friendships go quiet | Challenge Me and one card the whole chat plays (VP-14, VP-15) | Messenger | Not built |
 | 4. Time together is scarce | Make a game together; weekly boards and game night (VP-38, VP-19) | Groups, Events | Not built |
 | 4. Strangers you just met stay strangers | Blends and an Event bracket (VP-40) | Events, profiles | Not built |

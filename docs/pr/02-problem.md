@@ -6,7 +6,7 @@
 
 **Problem.** Facebook still has everyone's people, but it has stopped giving young adults a reason to open it, or a reason to keep opening it. Teen use fell from 71% in 2014-15 to 32% in 2024 [54], and daily use now peaks among people aged 30 to 64 [53]. Their friends, Groups and Events are all there, but there is little to *do* with them, so a visit rarely becomes a habit.
 
-**Solution.** Other apps and news sites keep people coming back with small daily rituals: a streak, a daily puzzle, one game everyone in the chat talks about. We took that idea and made it collaborative. Bubbles is a space inside Facebook where anyone turns one sentence into a tiny game with Meta's Muse models, made from and for their own Group, Event or friends, and played together on the same seed. Making one is a reason to open Facebook. A new Daily, a friend's challenge and a rematch are reasons to come back. And because the game is about your people, a score next to a stranger becomes an introduction.
+**Solution.** Other apps and news sites keep people coming back with small daily rituals: a streak, a daily puzzle, one game everyone in the chat talks about. We took that idea and made it collaborative. Whims is a space inside Facebook where anyone turns one sentence into a tiny game with Meta's Muse models, made from and for their own Group, Event or friends, and played together on the same seed. Making one is a reason to open Facebook. A new Daily, a friend's challenge and a rematch are reasons to come back. And because the game is about your people, a score next to a stranger becomes an introduction.
 
 ### Who has the problem
 
@@ -16,7 +16,7 @@ Young adults, roughly 18 to 29, whose people are on Facebook but who have no rea
 - **A quiet group chat.** Her hometown friends' chat used to be busy. Now it is a birthday message every few months.
 - **A Group that only posts announcements.** Her running club's Group posts the Saturday route and nothing else. Members show up, run and leave.
 
-The newcomer is the sharpest case, and the one our demo follows. The same gap exists for anyone whose people are on Facebook but have nothing to do together there, and Bubbles is built so anyone can make a game for any of their people.
+The newcomer is the sharpest case, and the one our demo follows. The same gap exists for anyone whose people are on Facebook but have nothing to do together there, and Whims is built so anyone can make a game for any of their people.
 
 ### The problem, in detail
 
@@ -36,4 +36,4 @@ The newcomer is the sharpest case, and the one our demo follows. The same gap ex
 
 ### Where this came from
 
-Karthik's first brainstorm was a playable layer across Facebook: tiny games anyone makes with Muse, shown in the feed, on Stories and profiles, with leaderboards, remixes and linked levels, and a look as distinct as the Muse brand. The team's problem statement asked which young-adult need it served and why someone would open Facebook again, and Bayan proposed tying it to making friends in a new city. After a judge's feedback on 2026-11-12, Karthik made "closer together" the top priority: every feature has to bring specific people closer through Facebook's own surfaces, by friendly competition, shared stories and self-expression, and Kevin and Karthik's Blends idea came from that turn. Karthik then sharpened the problem to Facebook itself: people need a reason to be on Facebook and a reason to stay, and Bubbles answers both with a collaborative take on the daily rituals of other social apps and news sites. This section states that current framing.
+Karthik's first brainstorm was a playable layer across Facebook: tiny games anyone makes with Muse, shown in the feed, on Stories and profiles, with leaderboards, remixes and linked levels, and a look as distinct as the Muse brand. The team's problem statement asked which young-adult need it served and why someone would open Facebook again, and Bayan proposed tying it to making friends in a new city. After a judge's feedback on 2026-11-12, Karthik made "closer together" the top priority: every feature has to bring specific people closer through Facebook's own surfaces, by friendly competition, shared stories and self-expression, and Kevin and Karthik's Blends idea came from that turn. Karthik then sharpened the problem to Facebook itself: people need a reason to be on Facebook and a reason to stay, and Whims answers both with a collaborative take on the daily rituals of other social apps and news sites. This section states that current framing.

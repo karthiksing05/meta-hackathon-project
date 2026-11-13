@@ -48,10 +48,10 @@ All runs were on 2026-11-12 against commit `0a3e8f7` unless noted. No real users
 
 | ID | Metric | Value | Label |
 |---|---|---|---|
-| D19 | Places in the app with Bubbles | 9 in all. 6 distribution surfaces: Home feed posts, Stories, Reels and the Video tab, Groups (page and tab), Events, profiles. 3 entry points: the Bubbles tab, Notifications, the Library in the Menu. Messenger and Search: 0 so far | Measured (code count) |
+| D19 | Places in the app with Whims | 9 in all. 6 distribution surfaces: Home feed posts, Stories, Reels and the Video tab, Groups (page and tab), Events, profiles. 3 entry points: the Whims tab, Notifications, the Library in the Menu. Messenger and Search: 0 so far | Measured (code count) |
 | D20 | Feed candidate weights | Group Daily 3.0, friend's Burst 2.2, Event icebreaker 2.0, new nearby 1.8, Group member's Burst 1.6, next level 1.2, popular 0.8, your own 0.6 | Shipped configuration, not a result |
 | D21 | Recommender simulation | 5 synthetic worlds of 90 people for 14 days, about 20% clickbait. Bait-averse users: clickbait share 36% today, 49% when ranking on taps alone, 14% with the social reward; pages per session 5.9 to 7.2. Bait-loving users: 6.8 to 10.2 pages | Simulated; teammate-reported, not reproduced by us |
-| D22 | Code size | 68 Bubbles Swift files (20,908 lines) in an app of 183 Swift files (53,101 lines), plus 12,332 lines of runtime JS, CSS and HTML; 13 seed games; 6 formulas, 55 concepts, 8 looks | Measured |
+| D22 | Code size | 68 Whims Swift files (20,908 lines) in an app of 183 Swift files (53,101 lines), plus 12,332 lines of runtime JS, CSS and HTML; 13 seed games; 6 formulas, 55 concepts, 8 looks | Measured |
 | D23 | Installs | Builds running on 4 team iPhones (iOS 18.6 and iOS 26) | Teammate-reported (installs, not usage) |
 | D24 | Rust/WASM engine for a new format | 124 tests pass; 50 seeds times 1,000 random inputs per test game gave 0 runtime errors; state hashes match between native and WASM | Teammate-reported, not reproduced by us; not in the app |
 | D25 | Demo world | 1 Group, 1 Event, 10 newcomers with intros. The Group's 2,814 members, the picnic's 46 going, mutual-friend counts on board rows, and the play and like counts on seed games are synthetic | Synthetic |
