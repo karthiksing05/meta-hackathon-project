@@ -1,10 +1,10 @@
 # Whims — Devpost draft (Closer Together '26)
 
-*The project page text for the Devpost submission. Drafted by Claude (AI agent for Kevin), reviewed by Kevin, 2026-11-13. Name and tagline are still open.*
+*The project page text for the Devpost submission. Drafted by Claude (AI agent for Kevin), reviewed by Kevin, 2026-11-13. Edited by Claude (AI agent for Artem) on 2026-11-13 to match [narrative.md](narrative.md) and what's on `main`: the four Muse models, the engine, how we worked with AI, and challenges marked as server-side. Name and tagline are still open.*
 
 **Whims** *(working name)*
 
-**Tagline:** \[TBD. Options from our line bank: "People are brought closer together through friendly competition." · "Short-form you play with people, not just watch." · "If you can say it, your friends can play it."\]
+**Tagline:** \[TBD. Options: "Make a game on a whim. Play it together." (the slides use this one) · "People are brought closer together through friendly competition." · "Short-form you play with people, not just watch." · "If you can say it, your friends can play it."\]
 
 > Tiny games anyone makes from one sentence with Meta's Muse, made to be played with your friends, Groups and Events, so a score becomes a rematch and a stranger on your Group's board becomes a friend.
 
@@ -12,9 +12,9 @@
 
 **Some of the best habits on the internet are tiny games played with people you know.**
 
-Think about how Wordle spread. It wasn't the puzzle itself. It was the grid of colored squares that showed up in every group chat each morning, and the quiet competition of seeing who got it in three. LinkedIn saw the same thing when it added daily games, and reported 86% of players returning the next day and 82% still playing after seven days ([LinkedIn](https://news.linkedin.com/2026/LinkedIn-AnnouncesWend)). A small, shared, slightly competitive game is one of the most reliable reasons people open an app every day, and it's a reason they keep coming back to with their friends rather than alone.
+Think about how Wordle spread. It wasn't the puzzle itself. It was the grid of colored squares that showed up in every group chat each morning, and the quiet competition of seeing who got it in three. LinkedIn saw the same thing when it added daily games, and reported 86% of players returning the next day and 82% still playing after seven days ([LinkedIn](https://news.linkedin.com/2026/LinkedIn-AnnouncesWend)). The New York Times saw it too: its puzzles were played over 11.2 billion times in 2025, and it added a friends tab "to encourage communal play" ([AP](https://www.news4jax.com/business/2026/01/21/this-just-in-from-the-new-york-times-its-first-2-player-game-and-an-evolving-business-model/)). Short-form is becoming something you play, not just watch. A small, shared, slightly competitive game is one of the most reliable reasons people open an app every day, and it's a reason they keep coming back to with their friends rather than alone.
 
-Facebook already has the thing those games are missing: the people. Your friends, your Groups and your Events are all in one place, under real names, which makes it the natural home for a daily game that's about the people you play it with. It also matters to the people we built this for. Adults aged 19 to 29 report feeling lonely more than any other age group, with 27% saying they feel very or fairly lonely ([Gallup and Meta](https://news.gallup.com/opinion/gallup/512618/almost-quarter-world-feels-lonely.aspx)), and a quick game with someone is one of the lowest-pressure ways to start talking.
+Facebook already has the thing those games are missing: the people. Your friends, your Groups and your Events are all in one place, under real names, which makes it the natural home for a daily game that's about the people you play it with. It also matters to the people we built this for. Adults aged 19 to 29 report feeling lonely more than any other age group, with 27% saying they feel very or fairly lonely ([Gallup and Meta](https://news.gallup.com/opinion/gallup/512618/almost-quarter-world-feels-lonely.aspx)), and a quick game with someone is one of the lowest-pressure ways to start talking. Almost all of them already play: 98% of Americans aged 13 to 39 play some kind of game (YPulse, 2026), yet only 33% of young men and 9% of young women say "gamer" describes them (Pew Research Center, 2015). Whims is for everyone who plays without calling it a hobby.
 
 So we asked a simple question: **what if short-form content were something you play *with* your friends, made by your friends, and a new one were waiting for you every time you opened Facebook?** Every game becomes a reason to open the app, every score becomes a reason to message someone, and every new game anyone makes adds to a feed that never runs out.
 
@@ -27,7 +27,7 @@ Whims is short-form content created by your friends and designed to be played wi
 ### Compete together
 
 - **Same game, same seed, fair score.** Everyone who plays a game plays the exact same run, and every score is saved as a replay that can be re-run and checked, so a rivalry with your friends is always a fair one.
-- **Challenges.** When you finish a game you can send it to a friend with your score attached, and it lands in their Challenges inbox so they can try to beat you and you both see who came out on top.
+- **Challenges.** When you finish a game you'll be able to send it to a friend with your score attached, so they can try to beat you and you both see who came out on top. Challenges, and their notifications, are built on our server; the app's challenge screens come next.
 - **Boards at every size.** Every game has a leaderboard for everyone, for your friends and for each of your Groups, and Groups also get a weekly board that resets every week, so there's always a fresh race to win and a reason to come back the next day.
 
 ### Get closer
@@ -46,24 +46,28 @@ Whims is short-form content created by your friends and designed to be played wi
 
 ## Built for the brief
 
-**AI Integration (30%): take Muse out and there are no games.** Muse is the creator in Whims, not a feature added on top. It turns any idea someone describes into a game with rules of its own, talks through how the game should work with the maker before building it, and then fixes whatever our test bots manage to break. Muse Wonder plans and writes each game and Muse Ember handles the quick steps, which is how someone with no coding experience can go from a sentence to a playable game in about a minute. A template could reskin an existing game, but it could never turn "catch tapioca pearls before they hit the table" into a game that plays the way the maker imagined. The creativity comes from Muse, and the quality bar comes from us: every game is playtested, checked against known kinds of games and checked for a fair scoreboard before anyone sees it.
+**AI Integration (30%): take Muse out and there are no games.** Muse is the creator in Whims, not a feature added on top. It turns any idea someone describes into a game with rules of its own, talks through how the game should work with the maker before building it, and then fixes whatever our test bots manage to break. Four Muse models share the work: Muse Spark understands the request, Muse Ember writes a quick brief (mood, energy, how competitive, who it's for) in about 2 seconds, Muse Wonder writes and builds the game and repairs it, and Muse Image paints the art. That's how someone with no coding experience can go from a sentence to a playable game in about a minute: 63 seconds on our live server, with Muse agreeing how it works in 7. A template could reskin an existing game, but it could never turn "catch tapioca pearls before they hit the table" into a game that plays the way the maker imagined. The creativity comes from Muse, and the quality bar comes from us: every game is playtested, checked against known kinds of games and checked for a fair scoreboard before anyone sees it.
 
 **Product Thinking & User Impact (25%): a daily reason to open Facebook, shared with your friends.** Daily games already prove that a small, competitive habit brings people back every morning. Whims makes that habit social and endless: there's always a challenge waiting in your inbox, a friend who just passed your score, a new week starting on your Group's board, and a new game from someone you know at the top of your feed. Because anyone can make a game, the people playing are also the people creating, so the feed keeps growing on its own. It belongs on Facebook because a game is only as good as the people you play it with, and Facebook is the one place where your friends, your Groups and your Events already live together.
 
-**Execution & Demo (25%): it runs on our live server today.** Every game is made by Muse on our own server, taking about 7 seconds to agree how the game works, about a minute to build a new game and about 18 seconds for each refinement. Challenges, leaderboards and friends are all real server data rather than mockups, and anyone can play the games in a browser, signed out, at [games.ol4ol.com/play](https://games.ol4ol.com/play/).
+**Execution & Demo (25%): it runs on our live server today.** Every game is made by Muse on our own server, taking about 7 seconds to agree how the game works and about a minute to build a new game. Leaderboards, the weekly Group board, friends, the best-of-5, saves and the ranked feed are real server data rather than mockups, and anyone can play the games in a browser, signed out, at [games.ol4ol.com/play](https://games.ol4ol.com/play/). Challenges, quiz nights and making a game together are built on the server, and their app screens are next.
 
 **Originality & Cohesion (20%): short-form you play with people.** Prompt-to-game tools already exist, but the games they make usually travel from one creator to an audience of strangers. Whims makes games for and with the specific people in your life, and then turns the score into something social. Every part of the product serves the same goal: making a game gives your friends something to open, competing gives you a reason to talk, and the leaderboard turns that conversation into a friendship.
 
 ## How we built it
 
-The five of us built Whims around a single API, with each of us working alongside AI coding agents that kept each other in sync through our team Slack. At a high level, the phone only shows the experience, and everything that needs to be trusted or shared lives on our server.
+The five of us built Whims around a single API, with each of us working alongside AI coding agents. At a high level, the phone only shows the experience, and everything that needs to be trusted or shared lives on our server.
+
+**How we worked with AI.** Each of us ran our own Claude and Codex agents, and they stayed in sync the way a team does: one Slack channel for updates and handoffs, a shared canvas of who's working on what, and a `CLAUDE.md` file every agent reads before it starts (claim work before you begin, hand off in writing, never push to `main` without an OK). That gave us 489 commits on `main` in two days across 30 branches, 88% of them co-written with an agent. The agents moved fast, but the design philosophy, the decisions and the memory of how the pieces fit together stayed ours.
 
 
 - **The app:** a SwiftUI recreation of the Facebook iPhone app, with Whims built into the feed, Groups, profiles and a Studio for making games. It shows screens and calls our API, and nothing else.
 - **The server:** a Go API backed by MongoDB that holds friends, Groups, leaderboards, challenges and the feed. Muse runs only on the server, so the key never touches anyone's phone.
-- **Making a game:** Muse plans the game with the maker, then writes it as a short file of its own rules built on top of tested building blocks. Our quality bar wraps around that creativity: Muse checks its plan against a catalog of known game types, our engine validates the file, five bots playtest it, and a final check makes sure the scoreboard is fair. Anything that fails goes back to Muse to fix before it's posted.
-- **Fair play:** our game engine, written in Rust and compiled to WebAssembly, runs every game exactly the same way from the same seed, which is what lets every score be replayed and verified.
-- **The feed:** a ranking model that learns from the moments that happen between people, like finishes, rematches, challenges and new friends, rather than from taps alone. Its sibling, Group Blend, uses the same signals to pick games for an entire Group.
+- **Making a game (the harness):** Muse Spark reads the request, and we search a catalog of 1,280 game types to ground it (the right type is in the top 5 for 94% of 523 test requests). Muse Ember writes the brief, Muse Wonder writes the game's spec and composes it from tested building blocks plus rules of its own, and up to 3 repair rounds fix what fails. Then five bots playtest it and a final check makes sure the scoreboard is fair. About 75% of games pass the gate; the rest are repaired or never shown. The harness is where most of our AI work went: it's what turns a creative model into games that reliably work.
+- **The engine:** every game is a JSON file, art and sound included. Our engine, written in Rust and compiled to WebAssembly, reads that file at runtime and turns it straight into the finished game, with no build step and nothing to install. Muse writes real rules, not reskins: 255 to 1,845 characters of game logic per game in our test runs.
+- **Fair play:** the engine runs every game exactly the same way from the same seed, so the server replays every score's input log and only the replayed score counts.
+- **Sounds:** like Reels audio, you can put a song behind your game from a library of credited, licensed tracks.
+- **The feed:** a ranking model, running on our server, that learns from the moments that happen between people, like finishes, rematches, challenges and new friends, rather than from taps alone. Its sibling, Group Blend, uses the same signals to pick games for an entire Group.
 
 ## Challenges we ran into
 
@@ -73,7 +77,7 @@ The five of us built Whims around a single API, with each of us working alongsid
 
 ## Accomplishments that we're proud of
 
-- **Friends can really play against each other, across phones.** When you send a challenge from your phone, it shows up in your friend's Challenges inbox on theirs, and their score comes back to you when they play. The same is true of everything around it: the leaderboards for everyone, friends and Groups, the weekly Group board, Add friend and the best-of-5 offer all run on our live server with real accounts, so nothing a judge sees on those screens is mocked.
+- **Friends can really play against each other, across phones.** The leaderboards for everyone, friends and Groups, the weekly Group board, Add friend and the best-of-5 all run on our live server with real accounts, so nothing a judge sees on those screens is mocked. Challenges and their notifications are built on the server too, and their app screens are next.
 - **A feed built to bring you back for people, not for clickbait.** Our recommender treats "did this game grab you" and "were you glad you played it" as two separate signals, and it weighs the second one 2.5 times more heavily, counting finishes, rematches, challenges and new friends as the real wins. In a simulation with synthetic users, it beat a standard feed in 70.3% of the sessions that had a clear winner, and the people who dislike clickbait ended up with the longest sessions of anyone. That's a simulation rather than real users, but it shows the feed pulling in the direction we want.
 - **Matching games to whole Groups, fairly.** Group Blend picks games by the chance that *everyone* in a Group enjoys them rather than the average, drops any game that one member would hate, and gives a boost to members it has served least without pushing anyone else down. Across 240 simulated Groups, the share of picks that every member enjoyed rose from 8.7% for random picks to 32.0%.
 - **Any idea becomes a polished game in about a minute.** Muse builds every game live on our server from a sentence that no one wrote a template for, and every game clears the same quality bar before anyone plays it: a plan agreed with the maker, bot playtests, a quality check and a fair-scoreboard check.
@@ -96,7 +100,7 @@ The five of us built Whims around a single API, with each of us working alongsid
 
 ## Built with
 
-meta, muse-wonder, muse-ember, swift, swiftui, ios, go, mongodb, rust, webassembly, javascript, node.js
+meta, muse-spark, muse-ember, muse-wonder, muse-image, swift, swiftui, ios, go, mongodb, rust, webassembly, javascript, node.js
 
 ## Try it
 
