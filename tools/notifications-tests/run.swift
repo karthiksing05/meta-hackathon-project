@@ -6,6 +6,12 @@ actor NotificationTestAPI: GameNotificationsAPI {
     var pending: CheckedContinuation<RemoteGameNotificationPage, Error>?
     var suspendNext = false
     var readAllCalls = 0
+    var suspendWrite = false
+    var pendingWrite: CheckedContinuation<Void, Never>?
+    var readRequests: [Bool] = []
+    func pauseNextWrite() { suspendWrite = true }
+    var writeIsWaiting: Bool { pendingWrite != nil }
+    func resumeWrite() { pendingWrite?.resume(); pendingWrite = nil }
     func configure(_ pages: [RemoteGameNotificationPage], fail: Bool = false, suspend: Bool = false) {
         self.pages = pages; failWrites = fail; suspendNext = suspend
     }
@@ -20,6 +26,11 @@ actor NotificationTestAPI: GameNotificationsAPI {
     var isWaiting: Bool { pending != nil }
     func setGameNotificationRead(id: String, read: Bool) async throws {
         if failWrites { throw URLError(.notConnectedToInternet) }
+        readRequests.append(read)
+        if suspendWrite {
+            suspendWrite = false
+            await withCheckedContinuation { pendingWrite = $0 }
+        }
     }
     func markAllGameNotificationsRead() async throws { readAllCalls += 1 }
     func registerGamePushDevice(installationID: String, token: String, environment: String) async throws {}
@@ -93,6 +104,16 @@ struct NotificationTests {
         await inbox.setRead(item, read: true)
         await api.resume(firstPage); await staleGet.value
         precondition(inbox.items[0].isRead && inbox.unreadCount == 71, "stale GET undid read mutation")
+
+        // A second read-state action is queued, never silently dropped behind the first.
+        await api.pauseNextWrite()
+        let reading = Task { await inbox.setRead(item, read: true) }
+        while !(await api.writeIsWaiting) { await Task.yield() }
+        let unreading = Task { await inbox.setRead(item, read: false) }
+        await Task.yield()
+        await api.resumeWrite()
+        await reading.value; await unreading.value
+        precondition(!inbox.items[0].isRead, "rapid unread action was dropped")
 
         // A push ID is resolved through this account's server inbox, not its untrusted payload.
         await api.configure([firstPage, lastPage])

@@ -16,12 +16,15 @@ final class GameNotificationInbox {
     @ObservationIgnored private let api: any GameNotificationsAPI
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var mutationID: UUID?
+    @ObservationIgnored private var accountEpoch = UUID()
+    @ObservationIgnored private var mutationWaiters: [CheckedContinuation<Void, Never>] = []
 
     init(api: any GameNotificationsAPI) { self.api = api }
 
     func useAccount(_ id: String?) {
         guard accountID != id else { return }
         accountID = id
+        accountEpoch = UUID()
         generation = UUID()
         items = []
         unreadCount = 0
@@ -29,6 +32,7 @@ final class GameNotificationInbox {
         errorMessage = nil
         isLoading = false
         mutationID = nil
+        resumeMutationWaiters()
     }
 
     func reload() async { await load(cursor: nil) }
@@ -58,13 +62,20 @@ final class GameNotificationInbox {
     }
 
     func setRead(_ item: RemoteGameNotification, read: Bool) async {
-        guard accountID != nil, mutationID == nil else { return }
+        let account = accountEpoch
+        await waitForMutation()
+        guard accountID != nil, accountEpoch == account, !Task.isCancelled else { return }
         generation = UUID() // invalidate any list request that started before this write
         isLoading = false
         let request = generation
         let mutation = UUID()
         mutationID = mutation
-        defer { if mutationID == mutation { mutationID = nil } }
+        defer {
+            if mutationID == mutation {
+                mutationID = nil
+                resumeMutationWaiters()
+            }
+        }
         do {
             try await api.setGameNotificationRead(id: item.id, read: read)
             guard generation == request else { return }
@@ -80,13 +91,20 @@ final class GameNotificationInbox {
     }
 
     func markAllRead() async {
-        guard accountID != nil, mutationID == nil else { return }
+        let account = accountEpoch
+        await waitForMutation()
+        guard accountID != nil, accountEpoch == account, !Task.isCancelled else { return }
         generation = UUID() // invalidate any list request that started before this write
         isLoading = false
         let request = generation
         let mutation = UUID()
         mutationID = mutation
-        defer { if mutationID == mutation { mutationID = nil } }
+        defer {
+            if mutationID == mutation {
+                mutationID = nil
+                resumeMutationWaiters()
+            }
+        }
         do {
             try await api.markAllGameNotificationsRead()
             guard generation == request else { return }
@@ -118,6 +136,20 @@ final class GameNotificationInbox {
             if generation == request { errorMessage = Self.message(for: error) }
         }
         return nil
+    }
+
+    /// Serialize rapid read/unread and mark-all actions instead of dropping a tap while a
+    /// previous write is on the network. Account changes release and invalidate all waiters.
+    private func waitForMutation() async {
+        while mutationID != nil {
+            await withCheckedContinuation { mutationWaiters.append($0) }
+        }
+    }
+
+    private func resumeMutationWaiters() {
+        let waiters = mutationWaiters
+        mutationWaiters = []
+        waiters.forEach { $0.resume() }
     }
 
     private static func message(for error: Error) -> String {
