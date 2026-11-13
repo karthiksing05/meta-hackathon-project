@@ -21,7 +21,7 @@ import (
 // (internal/recs). The phone sends what happened (events) and asks what to show next; the server
 // keeps each person's model, so nothing about ranking lives in the app.
 //
-//	GET  /v1/feed?limit=&sessionID=            -> the next pages, ranked (the one feed endpoint)
+//	GET  /v1/feed?limit=&sessionID=&exclude=   -> the next pages, ranked (the one feed endpoint)
 //	POST /v1/feed/events                       -> also teaches my model (signed in)
 //	POST /v1/blend     {group, members, count} -> games and a game spec for a set of people
 //	GET  /v1/me/recs                           -> my model's summary and taste profile
@@ -125,6 +125,7 @@ type rankPick struct {
 type feedItem struct {
 	model.GameView
 	FeedItemID string  `json:"feedItemID"`
+	BaseID     string  `json:"baseId,omitempty"` // the game's family: copies, remixes and variants share it
 	Reason     string  `json:"reason"`
 	Why        string  `json:"why,omitempty"`
 	Score      float64 `json:"score"`
@@ -133,13 +134,14 @@ type feedItem struct {
 	Team       string  `json:"team,omitempty"`
 }
 
-// feed is the one feed endpoint: GET /v1/feed?limit=10&sessionID=...
+// feed is the one feed endpoint: GET /v1/feed?limit=10&sessionID=...&exclude=...
 //
-// Every page it returns is chosen by Kevin's recommender. A signed-in person gets pages from their own
-// model, and the server remembers what it showed them this session (so the next call continues, with no
-// repeats nearby). A signed-out caller gets the recommender's cold-start ranking, nothing is remembered,
-// and they can pass exclude=<id,id,...> to skip games they already have. Only if ranking is switched off
-// on the server (RECS_RUNTIMES=0) does it fall back to newest first, with reason "newest".
+// Every page it returns is ordered by Kevin's recommender, inside the page rules in feedpage.go: one entry per
+// game family, never a family twice in one session, sponsored games only at fixed positions. A signed-in
+// person's session is kept with their model; a guest's is kept in memory under its sessionID (the server makes
+// one up and returns it when the caller sends none). exclude=<id,id,...> (ids or slugs) skips games the caller
+// already has, signed in or not. Only if ranking is switched off on the server (RECS_RUNTIMES=0) does the order
+// fall back to newest first, with reason "newest"; the page rules still apply.
 func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	count := limitParam(r, 10, 30)
@@ -157,48 +159,20 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u := userFrom(r)
+	if u == nil && sessionID == "" {
+		sessionID = "g_" + auth.NewID(12) // a guest's pages need a session to continue from
+	}
 	var exclude []string
-	if u == nil {
-		for _, id := range strings.Split(q.Get("exclude"), ",") {
-			if id = strings.TrimSpace(id); id != "" && len(exclude) < 200 {
-				exclude = append(exclude, id)
-			}
+	for _, id := range strings.Split(q.Get("exclude"), ",") {
+		if id = strings.TrimSpace(id); id != "" && len(exclude) < 200 {
+			exclude = append(exclude, id)
 		}
-	}
-	if len(exclude) > 0 {
-		skip := map[string]bool{}
-		for _, id := range exclude {
-			skip[id] = true
-		}
-		kept := games[:0:0]
-		for _, g := range games {
-			if !skip[g.ID] {
-				kept = append(kept, g)
-			}
-		}
-		games = kept
-	}
-	if len(games) == 0 {
-		writeJSON(w, 200, map[string]any{"items": []any{}})
-		return
-	}
-	if !s.recsEnabled() {
-		page := games[:min(count, len(games))]
-		views, err := s.views(r, page)
-		if err != nil {
-			s.serverErr(w, r, err)
-			return
-		}
-		items := make([]feedItem, len(views))
-		for i, v := range views {
-			items[i] = feedItem{GameView: v, FeedItemID: "fi_" + auth.NewID(6), Reason: "newest"}
-		}
-		writeJSON(w, 200, map[string]any{"items": items})
-		return
 	}
 
 	now := time.Now().UTC()
 	rec := &model.RecsRecord{}
+	anonKey := "anon|" + sessionID
+	var anon anonFeed
 	if u != nil {
 		unlock := s.recsLocks.lock(u.ID)
 		defer unlock()
@@ -207,103 +181,158 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if (sessionID != "" && sessionID != rec.FeedSession) || (!rec.FeedAt.IsZero() && now.Sub(rec.FeedAt) > sessionGap) {
-			rec.Feed, rec.FeedKeys = nil, nil // a new session starts a new page list
+			rec.Feed, rec.FeedKeys, rec.FeedSeen, rec.FeedShown = nil, nil, nil, 0 // a new session starts a new page list
 		}
 		if sessionID != "" {
 			rec.FeedSession = sessionID
 		}
+	} else {
+		unlock := s.recsLocks.lock(anonKey)
+		defer unlock()
+		anon = s.anonFeeds.get(anonKey, now)
+		rec.Feed, rec.FeedSeen, rec.FeedShown = append([]string(nil), anon.seen...), anon.seen, anon.shown
 	}
-	who := "anon|" + sessionID
-	if u != nil {
-		who = u.ID
-	}
-	// The recommender can show a game again once a different reason applies (it was "popular", now it is "nearby").
-	// A person scrolling one session shouldn't see the same game twice while there are games they haven't seen, so
-	// ask for extra picks and put the unseen ones first.
-	seenThisSession := map[string]bool{}
-	for _, id := range rec.Feed {
-		seenThisSession[id] = true
-	}
-	ask := count
-	if len(seenThisSession) > 0 {
-		ask = min(count+len(seenThisSession), 30)
-	}
-	h := fnv.New32a()
-	h.Write([]byte(who + "|" + strconv.Itoa(len(rec.Feed)+len(exclude)) + "|" + strconv.Itoa(today())))
-	input, _ := json.Marshal(map[string]any{
-		"candidates": candidatesFor(games, s.loadSocial(r.Context(), u), now), "summaries": summariesOf(games), "feed": nonNil(rec.Feed), "feedKeys": nonNil(rec.FeedKeys),
-		"count": ask, "seed": h.Sum32(), "day": today(), "now": now.UnixMilli(),
-	})
-	var reply struct {
-		Picks []rankPick `json:"picks"`
-	}
-	state, err := s.Recs.Run(r.Context(), rec.State, func(sess recsSession) error {
-		out, err := sess.Rank(input)
-		if err != nil {
-			return err
+
+	sc := s.loadSocial(r.Context(), u)
+	pool := buildPool(games, sc, seenSet(rec.FeedSeen), exclude)
+	start := rec.FeedShown
+
+	var page []rankedGame
+	var state string
+	if !s.recsEnabled() {
+		org, spon := make([]rankedGame, len(pool.organic)), make([]rankedGame, len(pool.sponsored))
+		for i, g := range pool.organic {
+			org[i] = rankedGame{g, rankPick{GameID: g.ID, Reason: "newest"}}
 		}
-		return json.Unmarshal(out, &reply)
-	})
-	if err != nil {
-		s.Log.Error("recs: rank failed", "err", err)
-		writeErr(w, 503, "ranking is unavailable right now")
-		return
-	}
-	byID := map[string]model.Game{}
-	for _, g := range games {
-		byID[g.ID] = g
-	}
-	var shown []model.Game
-	var picks []rankPick
-	onPage := map[string]bool{}
-	ordered := reply.Picks
-	if len(seenThisSession) > 0 { // unseen games first; games already shown only fill what is left
-		var fresh, again []rankPick
-		for _, p := range reply.Picks {
-			if seenThisSession[p.GameID] {
-				again = append(again, p)
-			} else {
-				fresh = append(fresh, p)
+		for i, g := range pool.sponsored {
+			spon[i] = rankedGame{g, rankPick{GameID: g.ID, Reason: "newest"}}
+		}
+		page = layoutPage(org, spon, start, count)
+	} else {
+		who := "anon|" + sessionID
+		if u != nil {
+			who = u.ID
+		}
+		h := fnv.New32a()
+		h.Write([]byte(who + "|" + strconv.Itoa(start+len(exclude)) + "|" + strconv.Itoa(today())))
+		seed := h.Sum32()
+		summaries := summariesOf(games)
+		var org, spon []rankedGame
+		state, err = s.Recs.Run(r.Context(), rec.State, func(sess recsSession) error {
+			var err error
+			if org, err = rankPool(sess, pool.organic, count, sc, now, summaries, rec, seed); err != nil {
+				return err
 			}
+			spon, err = rankPool(sess, pool.sponsored, count, sc, now, summaries, rec, seed^0x5f3759df)
+			return err
+		})
+		if err != nil {
+			s.Log.Error("recs: rank failed", "err", err)
+			writeErr(w, 503, "ranking is unavailable right now")
+			return
 		}
-		ordered = append(fresh, again...)
+		page = layoutPage(org, spon, start, count)
 	}
-	for _, p := range ordered {
-		if len(picks) >= count {
-			break
-		}
-		if onPage[p.GameID] {
-			continue // a page never shows the same game twice
-		}
-		if g, ok := byID[p.GameID]; ok {
-			onPage[p.GameID] = true
-			shown = append(shown, g)
-			picks = append(picks, p)
-		}
+
+	shown := make([]model.Game, len(page))
+	for i, p := range page {
+		shown[i] = p.g
 	}
 	views, err := s.views(r, shown)
 	if err != nil {
 		s.serverErr(w, r, err)
 		return
 	}
-	items := make([]feedItem, len(picks))
-	for i, p := range picks {
-		items[i] = feedItem{GameView: views[i], FeedItemID: "fi_" + auth.NewID(6), Reason: p.Reason, Why: p.Why,
-			Score: p.Score, Hook: p.Hook, Unproven: p.Unproven, Team: p.Team}
-		rec.Feed = append(rec.Feed, p.GameID)
-		rec.FeedKeys = append(rec.FeedKeys, p.GameID+"|"+p.Reason+"|"+orDash(p.RunUserID))
+	items := make([]feedItem, len(page))
+	for i, p := range page {
+		base := pool.bases[p.g.ID]
+		items[i] = feedItem{GameView: views[i], FeedItemID: "fi_" + auth.NewID(6), BaseID: base, Reason: p.p.Reason, Why: p.p.Why,
+			Score: p.p.Score, Hook: p.p.Hook, Unproven: p.p.Unproven, Team: p.p.Team}
+		rec.Feed = append(rec.Feed, p.g.ID)
+		rec.FeedKeys = append(rec.FeedKeys, p.g.ID+"|"+p.p.Reason+"|"+orDash(p.p.RunUserID))
+		rec.FeedSeen = appendSeen(rec.FeedSeen, p.g.ID, base)
 	}
-	if u != nil { // only a signed-in person's session and model are kept
+	rec.FeedShown += len(page)
+	if u != nil { // a signed-in person's session and model are kept with their model
 		if n := len(rec.Feed) - maxFeedHistory; n > 0 {
 			rec.Feed, rec.FeedKeys = rec.Feed[n:], rec.FeedKeys[n:]
 		}
-		rec.State, rec.FeedAt, rec.UpdatedAt = state, now, now
+		if s.recsEnabled() {
+			rec.State = state
+		}
+		rec.FeedAt, rec.UpdatedAt = now, now
 		if err := s.Store.PutRecs(r.Context(), rec); err != nil {
 			s.serverErr(w, r, err)
 			return
 		}
+	} else {
+		s.anonFeeds.put(anonKey, anonFeed{seen: rec.FeedSeen, shown: rec.FeedShown, at: now})
 	}
-	writeJSON(w, 200, map[string]any{"items": items})
+	writeJSON(w, 200, map[string]any{"items": items, "sessionID": sessionID})
+}
+
+// rankedGame is a game the recommender placed, with why.
+type rankedGame struct {
+	g model.Game
+	p rankPick
+}
+
+// rankPool asks the recommender to order a page's worth of games from pool, a list with one game per unseen
+// family. Every candidate is unseen, so the recommender can only choose among new games. It may name a game twice
+// in one answer (its repeat window is short), so picks are kept once each and it is asked again, without the games
+// it has already given, until the page is full or the pool is empty.
+func rankPool(sess recsSession, pool []model.Game, want int, sc *socialContext, now time.Time, summaries []map[string]any,
+	rec *model.RecsRecord, seed uint32) ([]rankedGame, error) {
+	var out []rankedGame
+	left := append([]model.Game(nil), pool...)
+	feed := append([]string(nil), rec.Feed...)
+	keys := append([]string(nil), rec.FeedKeys...)
+	for round := 0; round < 4 && len(out) < want && len(left) > 0; round++ {
+		need := want - len(out)
+		input, _ := json.Marshal(map[string]any{
+			"candidates": candidatesFor(left, sc, now), "summaries": summaries, "feed": nonNil(feed), "feedKeys": nonNil(keys),
+			"count": min(need*2, 60), "seed": seed + uint32(round), "day": today(), "now": now.UnixMilli(),
+		})
+		raw, err := sess.Rank(input)
+		if err != nil {
+			return nil, err
+		}
+		var reply struct {
+			Picks []rankPick `json:"picks"`
+		}
+		if err := json.Unmarshal(raw, &reply); err != nil {
+			return nil, err
+		}
+		byID := map[string]int{}
+		for i, g := range left {
+			byID[g.ID] = i
+		}
+		taken := map[string]bool{}
+		for _, p := range reply.Picks {
+			if len(out) >= want {
+				break
+			}
+			i, ok := byID[p.GameID]
+			if !ok || taken[p.GameID] {
+				continue
+			}
+			taken[p.GameID] = true
+			out = append(out, rankedGame{left[i], p})
+			feed = append(feed, p.GameID)
+			keys = append(keys, p.GameID+"|"+p.Reason+"|"+orDash(p.RunUserID))
+		}
+		if len(taken) == 0 {
+			break // the recommender has nothing more to give from this pool
+		}
+		kept := left[:0:0]
+		for _, g := range left {
+			if !taken[g.ID] {
+				kept = append(kept, g)
+			}
+		}
+		left = kept
+	}
+	return out, nil
 }
 
 func orDash(s *string) string {

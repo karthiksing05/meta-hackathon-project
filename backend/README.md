@@ -282,14 +282,24 @@ inside the API, on a pure-Go JavaScript engine (goja). The app does no ranking: 
 reports what happened. Each signed-in person's model (posteriors, taste, bait lean, calibration history) is kept in
 Mongo (`recs_state`); the pages shown this session are kept with it.
 
-- **The one feed:** `GET /v1/feed?limit=10&sessionID=...` (limit 1-30) -> `{items: [...]}`. Every item is the game's own
-  object plus `feedItemID`, `reason`, `why`, `score`, `hook`, `unproven` (and `team` when interleaving is on). Every page is
-  chosen by the recommender. Signed in: it uses that person's model, remembers what it showed them this session (so the next
-  call continues, with no repeats nearby), and a new `sessionID`, or 30 minutes idle, starts a new page list. Signed out: the
-  recommender's cold-start ranking, nothing remembered, and `exclude=<id,id,...>` skips games the caller already has. When few
-  games exist the same game can come back once the repeat window has passed. Only if ranking is switched off on the server
-  does it fall back to newest first (`reason: "newest"`). Candidates are the newest 300 games, all offered on equal terms: the
-  server has no ranking logic of its own. The app should send `feedItemID` and the game's `id` back in its page events.
+- **The one feed:** `GET /v1/feed?limit=10&sessionID=...&exclude=...` (limit 1-30) -> `{items: [...], sessionID}`. Every item
+  is the game's own object plus `feedItemID`, `baseId`, `reason`, `why`, `score`, `hook`, `unproven` (and `team` when
+  interleaving is on). The recommender orders every page (signed in: that person's model; signed out: its cold-start
+  ranking), inside these page rules (`internal/api/feedpage.go`):
+  - **One entry per family.** A base game, its Group copies (its slug plus a suffix), its remixes (`remixOf`) and same-titled
+    variants (same formula and sponsor) are one family. The feed shows the member that suits the viewer (a copy in one of
+    their Groups, then their own, then a friend's, then the open game) and every item carries the family's `baseId`.
+  - **Never twice in one session.** The server keeps what it showed this session (signed in: with the person's model;
+    signed out: in memory for 30 idle minutes) and never shows a game or its family again. That list is the cursor, so
+    pages never overlap however scores move. A new `sessionID`, or 30 minutes idle, starts over. A guest that sends no
+    `sessionID` gets one back to continue with. When every family has been shown the page is empty: the end of the feed.
+  - `exclude=<id or slug,...>` (up to 200) skips games the caller already has, and their families, signed in or not.
+  - **Ads at fixed positions.** Sponsored games go only in every fifth card of a session (positions 4, 9, 14, ... from 0);
+    an ad slot with no ad left takes a regular game, and once the regular games run out the remaining ads fill the end.
+
+  Only if ranking is switched off on the server does the order fall back to newest first (`reason: "newest"`), under the same
+  rules. Candidates are the newest 300 games, all offered on equal terms. The app should send `feedItemID` and the game's
+  `id` back in its page events.
 - **Learning:** `POST /v1/feed/events` from a signed-in person also teaches their model. A feed page event
   (`gameID`, `feedItemID` or `position`, `dwellSec`, `tookOver`, `runsFinished`, `replays`, `saved`, `liked`, `floated`,
   `openedBoard`, `addedFriend`, `remixed`, `social`, `with`, `quitMidRun`, `endedSession`) becomes `observe`; an off-feed

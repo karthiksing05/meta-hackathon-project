@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"fmt"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -131,5 +132,57 @@ func TestNoBrandAccountsMeansNoSponsors(t *testing.T) {
 	id := waitJob(t, ts, tok, o["jobId"].(string), "done")["game"].(map[string]any)["id"].(string)
 	if code, _ := do(t, "PUT", ts.URL+"/v1/games/"+id+"/sponsor", tok, js(map[string]any{"name": "Anyone"}), "application/json"); code != 403 {
 		t.Fatalf("with no brand accounts: %d", code)
+	}
+}
+
+// Sponsored games sit at fixed session positions (every fifth card) across pages, never repeat, and only fill the
+// end once the regular games run out.
+func TestSponsoredGamesSitAtFixedFeedPositions(t *testing.T) {
+	ts := serverWithBrands(t, "", "fizzco")
+	brand, maker := register(t, ts, "fizzco"), register(t, ts, "maker")
+	for i := 0; i < 4; i++ {
+		code, g := publish(t, ts.URL, brand, fmt.Sprintf(`{"id":"ad-%d","title":"Fizz %d","one_line_rule":"x","formula":"dodge"}`, i, i))
+		if code != 201 {
+			t.Fatalf("publish ad: %d %v", code, g)
+		}
+		if code, _ := do(t, "PUT", ts.URL+"/v1/games/"+g["id"].(string)+"/sponsor", brand, js(map[string]any{"name": "Fizz Co"}), "application/json"); code != 200 {
+			t.Fatalf("sponsor: %d", code)
+		}
+	}
+	for i := 0; i < 11; i++ {
+		if code, g := publish(t, ts.URL, maker, fmt.Sprintf(`{"id":"plain-%d","title":"Plain %d","one_line_rule":"x","formula":"guess"}`, i, i)); code != 201 {
+			t.Fatalf("publish: %d %v", code, g)
+		}
+	}
+	viewer := register(t, ts, "viewer")
+	for _, who := range []string{viewer, ""} {
+		var cards []map[string]any
+		for page := 0; page < 10; page++ {
+			_, out := do(t, "GET", ts.URL+"/v1/feed?limit=3&sessionID=ads", who, nil, "")
+			items := out["items"].([]any)
+			if len(items) == 0 {
+				break
+			}
+			for _, it := range items {
+				cards = append(cards, it.(map[string]any))
+			}
+		}
+		if len(cards) != 15 {
+			t.Fatalf("all 15 games once: %d", len(cards))
+		}
+		seen := map[string]bool{}
+		for p, c := range cards {
+			id := c["id"].(string)
+			if seen[id] {
+				t.Fatalf("repeat at %d: %s", p, id)
+			}
+			seen[id] = true
+			ad := c["sponsor"] != nil
+			// positions 4 and 9 are ad slots; the 11 regular games take 0-3, 5-8, 10, 11 and 12; two ads are left for 13-14
+			wantAd := p == 4 || p == 9 || p >= 13
+			if ad != wantAd {
+				t.Fatalf("signedIn=%v position %d: sponsored=%v, want %v", who != "", p, ad, wantAd)
+			}
+		}
 	}
 }

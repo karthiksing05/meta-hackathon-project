@@ -68,6 +68,7 @@ type Server struct {
 	genSem      chan struct{} // one slot per job running at once
 	genHealth   genHealthCache
 	recsLocks   userLocks
+	anonFeeds   anonFeeds // guests' feed sessions (feedpage.go)
 	jobRuns     sync.Map  // job id -> *jobRun, for the jobs running now
 	seriesLocks userLocks // one series at a time, so two runs can't overwrite each other
 	scoreLocks  userLocks // one person's score on one game: read the old, write the new
