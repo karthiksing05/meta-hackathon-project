@@ -257,6 +257,8 @@ final class StudioModel {
     var caption = ""
     /// True while sharing is in progress (publish, challenges, record), until the game page opens.
     var isPopping = false
+    /// "Post" confirms the feed post in its own sheet, so the feed hook skips its toast.
+    @ObservationIgnored private var postsQuietly = false
     /// Friends to challenge (or send it to) when sharing, by user id, in pick order.
     var challengeIDs: [String] = []
     @ObservationIgnored var didPickDefaultFriendsFlag = false
@@ -297,6 +299,7 @@ final class StudioModel {
         loadSavedAnatomy()
         #if DEBUG
         if let demo = DebugLaunch.value("FB_STUDIO_MEDIA_DEMO") { media.debugFill(demo) }
+        debugShowResultIfRequested()
         #endif
         isReady = true
         Task { @MainActor in _ = await bubbleStore.loadMyGroups() }
@@ -1409,7 +1412,8 @@ final class StudioModel {
                 to: group,
                 message: message.isEmpty ? defaultCaption(for: first) : message,
                 appStore: appStore,
-                bubbleStore: bubbleStore
+                bubbleStore: bubbleStore,
+                showsToast: !postsQuietly
             )
         }
 
@@ -1477,6 +1481,30 @@ final class StudioModel {
         if isEditMode { return false }
         if case .event = destination { return false }
         return true
+    }
+
+    /// Whether the Try step's primary action is "Post" (a new game to my feed). Edits save, and
+    /// a Daily goes to its Group through the Share step.
+    var postsFromTry: Bool { !isEditMode && mode != .daily }
+
+    /// What the Post composer starts with: "Made a Curio: Hill Hopper".
+    var postCaptionSuggestion: String {
+        let title = levels.first?.manifest.title ?? ""
+        return title.isEmpty ? "Made a \(ProductName.singular) with Muse" : "Made a \(ProductName.singular): \(title)"
+    }
+
+    /// "Post": publishes the game (its server draft goes public) and posts it to my own feed,
+    /// audience Friends, with `text` as the caption. Sends nothing to friends: the posted sheet
+    /// offers that next. Returns the new game and the feed post's id.
+    func commitPost(caption text: String) -> StudioPostOutcome? {
+        destination = .feed
+        caption = text
+        challengeIDs = []
+        postsQuietly = true
+        defer { postsQuietly = false }
+        guard let outcome = commitFloat(), let bubble = bubbleStore?.bubble(id: outcome.bubbleID) else { return nil }
+        let post = appStore?.posts.first { $0.bubbleID == bubble.id && $0.author.isMe }
+        return StudioPostOutcome(bubbleID: bubble.id, postID: post?.id)
     }
 
     func defaultCaption(for bubble: Bubble) -> String {
@@ -1678,3 +1706,36 @@ extension StudioModel {
         }
     }
 }
+
+/// What "Post" made: the game, and its post on my feed (nil if the post couldn't be found).
+struct StudioPostOutcome: Identifiable, Equatable {
+    let bubbleID: String
+    let postID: String?
+
+    var id: String { bubbleID }
+}
+
+#if DEBUG
+extension StudioModel {
+    /// `FB_STUDIO_STEP=result` with `FB_OPEN=studio-result[:<game id>]`: opens on the Try step
+    /// with an existing game standing in for what Muse made (a copy with a new id), so the result
+    /// step and "Post" can be screenshotted without a Muse call. The copy is never sent to the
+    /// server as a draft, so posting it publishes nothing there.
+    fileprivate func debugShowResultIfRequested() {
+        guard DebugLaunch.value("FB_STUDIO_STEP") == "result", mode == .create, let base = baseBubble else { return }
+        var manifest = base.manifest
+        manifest.id = Self.newID(from: manifest.title)
+        manifest.chain = nil
+        levels = [StudioResult(
+            manifest: manifest,
+            cover: base.coverImageData,
+            isOffline: false,
+            duration: 48,
+            models: base.manifest.studio?.models ?? [],
+            isExisting: false
+        )]
+        baseBubble = nil
+        stage = .tryIt
+    }
+}
+#endif

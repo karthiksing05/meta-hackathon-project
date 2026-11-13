@@ -14,6 +14,9 @@ import SwiftUI
 ///   `cancel` stops the build after 8 s. Point `FB_API_URL` at a local stand-in server for
 ///   these: a real build makes a game on the live server.
 ///
+/// - `FB_STUDIO_STEP=result` with `FB_OPEN=studio-result[:<id>]`: opens on Try with an existing
+///   game as the result (no Muse call); `FB_STUDIO_POST=compose|posted|done` then drives "Post".
+///
 /// Every game is made on the server (`/v1/generate`); there is no scripted or offline run.
 struct StudioView: View {
     let launch: StudioLaunch
@@ -24,6 +27,12 @@ struct StudioView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var model: StudioModel
     @State private var isConfirmingClose = false
+    /// "Post": the composer is open.
+    @State private var isComposingPost = false
+    /// Posted, waiting for the composer to close before "Posted to your feed" opens.
+    @State private var pendingPosted: StudioPostOutcome?
+    /// "Posted to your feed" with the share options.
+    @State private var posted: StudioPostOutcome?
 
     init(launch: StudioLaunch) {
         self.launch = launch
@@ -64,6 +73,7 @@ struct StudioView: View {
         }
         #if DEBUG
         .task { await debugAutoBuild() }
+        .task { await debugAutoPost() }
         #endif
         .confirmationDialog(closeTitle, isPresented: $isConfirmingClose, titleVisibility: .visible) {
             Button(model.isEditMode ? "Discard changes" : "Discard", role: .destructive) {
@@ -73,6 +83,59 @@ struct StudioView: View {
             Button("Keep editing", role: .cancel) {}
         } message: {
             Text(model.isComposing ? "Muse will stop working on it." : "You can't undo this.")
+        }
+        .sheet(isPresented: $isComposingPost, onDismiss: showPosted) {
+            StudioPostComposer(model: model, onPost: post)
+        }
+        .sheet(item: $posted) { outcome in
+            StudioPostedSheet(bubbleID: outcome.bubbleID, groups: postGroups, onDone: finishPosting)
+        }
+    }
+
+    // MARK: Post
+
+    /// Publishes the game and posts it to my feed, then closes the composer; "Posted to your
+    /// feed" opens once it's gone.
+    private func post(_ caption: String) {
+        guard !model.isPopping, !model.levels.isEmpty else { return }
+        Haptics.medium()
+        model.isPopping = true
+        Task { @MainActor in
+            await Task.yield()
+            let outcome = model.commitPost(caption: caption)
+            model.isPopping = false
+            guard let outcome else {
+                appStore.showToast("Couldn't post it. Try again.", symbol: "exclamationmark.circle")
+                return
+            }
+            GameSound.play(.publish, haptic: true)
+            model.saveAnatomy(gameIDs: [outcome.bubbleID] + model.levels.map(\.manifest.id))
+            pendingPosted = outcome
+            isComposingPost = false
+        }
+    }
+
+    private func showPosted() {
+        guard let outcome = pendingPosted else { return }
+        pendingPosted = nil
+        posted = outcome
+    }
+
+    /// My Groups for "Share to a Group": the games server's, then the app's, without repeats.
+    private var postGroups: [FBGroup] {
+        var seen = Set<String>()
+        return (model.myGroups + appStore.myGroups).filter { seen.insert($0.id).inserted }
+    }
+
+    /// "Done": closes Studio onto Home, scrolled to the top where the new post is.
+    private func finishPosting() {
+        posted = nil
+        model.stopAll()
+        router.selectedTab = .home
+        router.popToRoot(.home)
+        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            router.scrollToTopSignals[.home, default: 0] += 1
         }
     }
 
@@ -92,7 +155,7 @@ struct StudioView: View {
                 StudioComposeStep(model: model)
                     .transition(stageTransition)
             case .tryIt:
-                StudioTryStep(model: model)
+                StudioTryStep(model: model, onPost: { isComposingPost = true })
                     .transition(stageTransition)
             case .float:
                 StudioShareStep(model: model, onShare: float)
@@ -102,6 +165,21 @@ struct StudioView: View {
     }
 
     #if DEBUG
+    /// `FB_STUDIO_POST=compose|posted|done` (with `FB_OPEN=studio-result`): opens the Post
+    /// composer, then posts, then taps Done, for screenshots without touches.
+    private func debugAutoPost() async {
+        guard let how = DebugLaunch.value("FB_STUDIO_POST") else { return }
+        try? await Task.sleep(nanoseconds: 2_500_000_000)
+        guard model.stage == .tryIt, model.postsFromTry else { return }
+        isComposingPost = true
+        guard how != "compose" else { return }
+        try? await Task.sleep(nanoseconds: 2_500_000_000)
+        post(model.postCaptionSuggestion)
+        guard how == "done" else { return }
+        try? await Task.sleep(nanoseconds: 4_000_000_000)
+        finishPosting()
+    }
+
     /// `FB_STUDIO_BUILD` (see the top of this file).
     private func debugAutoBuild() async {
         guard let how = DebugLaunch.value("FB_STUDIO_BUILD"), model.mode == .create else { return }
