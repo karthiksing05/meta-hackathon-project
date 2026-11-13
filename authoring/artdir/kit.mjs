@@ -7,7 +7,7 @@
 //
 // Deterministic: the same frame pixels, words and id give the same kit.
 
-import { chooseLook, lookFromChoice, lookChoice } from '../kit/look.mjs';
+import { chooseLook, lookFromChoice, lookChoice, characterfulPairing } from '../kit/look.mjs';
 import { paletteFromFrame } from './palette.mjs';
 import { calmZones } from './sheets.mjs';
 
@@ -36,8 +36,9 @@ export function shapeFor(vibe) { return { ...SHAPES[FAMILY[vibe] ?? 'calm'], fam
  */
 export function kitFromFrame({ frame, words = '', gameId = '', vibe = null, pairing = null, mode = null, shape = null }) {
   const pal = paletteFromFrame(frame, { mode });
-  let spec = chooseLook(words, gameId);
-  if (vibe) spec = lookFromChoice({ vibe, pairing: pairing ?? undefined, seed: spec.seed });
+  // The vibe's most characterful pairing (vibes.mjs BOLD) unless the direction names one.
+  let spec = chooseLook(words, gameId, { characterful: true });
+  if (vibe) spec = lookFromChoice({ vibe, pairing: pairing ?? characterfulPairing(vibe, spec.seed), seed: spec.seed });
   return {
     kit: 'artdir/1',
     mode: pal.mode,

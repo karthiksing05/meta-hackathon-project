@@ -748,6 +748,272 @@
       "bytes": 13672,
       "caps_only": false,
       "mono": false
+    },
+    "lilita": {
+      "family": "Lilita One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/lilitaone",
+      "designer": "Juan Montoreano",
+      "copyright": "Copyright (c) 2011 Juan Montoreano (juan@remolacha.biz), with Reserved Font Names \\",
+      "files": {
+        "400": "gamefont-lilita-400.woff2"
+      },
+      "bytes": 9740,
+      "caps_only": false,
+      "mono": false
+    },
+    "bagel": {
+      "family": "Bagel Fat One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/bagelfatone",
+      "designer": "Kyungwon Kim, JAMO",
+      "copyright": "Copyright 2022 The Bagel Fat Project Authors (https://github.com/JAMO-TYPEFACE/BagelFat)",
+      "files": {
+        "400": "gamefont-bagel-400.woff2"
+      },
+      "bytes": 15508,
+      "caps_only": false,
+      "mono": false
+    },
+    "shrikhand": {
+      "family": "Shrikhand",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/shrikhand",
+      "designer": "Jonny Pinhorn",
+      "copyright": "Copyright (c) 2015 Jonny Pinhorn (jonpinhorn.typedesign@gmail.com)",
+      "files": {
+        "400": "gamefont-shrikhand-400.woff2"
+      },
+      "bytes": 14960,
+      "caps_only": false,
+      "mono": false
+    },
+    "rubik_mono": {
+      "family": "Rubik Mono One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/rubikmonoone",
+      "designer": "Hubert and Fischer",
+      "copyright": "Copyright 2015 The Rubik Project Authors (mail@hubertfischer.com)",
+      "files": {
+        "400": "gamefont-rubik_mono-400.woff2"
+      },
+      "bytes": 7708,
+      "caps_only": true,
+      "mono": true
+    },
+    "luckiest": {
+      "family": "Luckiest Guy",
+      "role": "display",
+      "license": "Apache-2.0",
+      "source": "https://github.com/google/fonts/tree/main/apache/luckiestguy",
+      "designer": "Astigmatic",
+      "copyright": "Copyright (c) 2010 by Brian J. Bonislawsky DBA Astigmatic (AOETI). All rights reserved. Available under the Apache 2.0 licence. http://www.apache.org/licenses/LICENSE-2.0.html",
+      "files": {
+        "400": "gamefont-luckiest-400.woff2"
+      },
+      "bytes": 16172,
+      "caps_only": true,
+      "mono": false
+    },
+    "permanent_marker": {
+      "family": "Permanent Marker",
+      "role": "display",
+      "license": "Apache-2.0",
+      "source": "https://github.com/google/fonts/tree/main/apache/permanentmarker",
+      "designer": "Font Diner",
+      "copyright": "Copyright (c) 2010 by Font Diner, Inc. All rights reserved.",
+      "files": {
+        "400": "gamefont-permanent_marker-400.woff2"
+      },
+      "bytes": 28276,
+      "caps_only": false,
+      "mono": false
+    },
+    "titan": {
+      "family": "Titan One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/titanone",
+      "designer": "Rodrigo Fuenzalida",
+      "copyright": "Copyright (c) 2011 Rodrigo Fuenzalida (hello@rfuenzalida.com), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-titan-400.woff2"
+      },
+      "bytes": 10328,
+      "caps_only": false,
+      "mono": false
+    },
+    "black_ops": {
+      "family": "Black Ops One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/blackopsone",
+      "designer": "James Grieshaber, Eben Sorkin",
+      "copyright": "Copyright 2022 The PinyonScript Project Authors (https://github.com/SorkinType/Black-Ops)",
+      "files": {
+        "400": "gamefont-black_ops-400.woff2"
+      },
+      "bytes": 20624,
+      "caps_only": false,
+      "mono": false
+    },
+    "bungee_shade": {
+      "family": "Bungee Shade",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/bungeeshade",
+      "designer": "David Jonathan Ross",
+      "copyright": "Copyright 2023 The Bungee Project Authors (https://github.com/djrrb/Bungee)",
+      "files": {
+        "400": "gamefont-bungee_shade-400.woff2"
+      },
+      "bytes": 20336,
+      "caps_only": true,
+      "mono": false
+    },
+    "faster": {
+      "family": "Faster One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/fasterone",
+      "designer": "Eduardo Tunni",
+      "copyright": "Copyright 2012 The Faster Project Authors (https://github.com/etunni/faster), with Reserved Font Name \\'Faster\\'",
+      "files": {
+        "400": "gamefont-faster-400.woff2"
+      },
+      "bytes": 12252,
+      "caps_only": false,
+      "mono": false
+    },
+    "nosifer": {
+      "family": "Nosifer",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/nosifer",
+      "designer": "Typomondo",
+      "copyright": "Copyright (c) 2011, Vernon Adams DBA Typomondo (vern@newtypography.co.uk), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-nosifer-400.woff2"
+      },
+      "bytes": 14488,
+      "caps_only": true,
+      "mono": false
+    },
+    "pirata": {
+      "family": "Pirata One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/pirataone",
+      "designer": "Rodrigo Fuenzalida, Nicolas Massi",
+      "copyright": "Copyright (c) 2012, Rodrigo Fuenzalida (hello@rfuenzalida.com), Nicolas Massi (www.taip.com.ar / abc.taip.com.ar / nmassi@gmail.com), with Reserved Font Name \\'Pirata\\'",
+      "files": {
+        "400": "gamefont-pirata-400.woff2"
+      },
+      "bytes": 8384,
+      "caps_only": false,
+      "mono": false
+    },
+    "knewave": {
+      "family": "Knewave",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/knewave",
+      "designer": "Tyler Finck",
+      "copyright": "Copyright (c) 2011 by Tyler Finck (tylerfinck@gmail.com). All rights reserved.",
+      "files": {
+        "400": "gamefont-knewave-400.woff2"
+      },
+      "bytes": 16400,
+      "caps_only": false,
+      "mono": false
+    },
+    "zen_dots": {
+      "family": "Zen Dots",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/zendots",
+      "designer": "Yoshimichi Ohira",
+      "copyright": "Copyright 2021 The Dots Project Authors (https://github.com/googlefonts/zen-dots)",
+      "files": {
+        "400": "gamefont-zen_dots-400.woff2"
+      },
+      "bytes": 7628,
+      "caps_only": false,
+      "mono": false
+    },
+    "cherry_bomb": {
+      "family": "Cherry Bomb One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/cherrybombone",
+      "designer": "Satsuyako",
+      "copyright": "Copyright 2019 The Cherry Bomb Project Authors (https://github.com/satsuyako/CherryBomb)",
+      "files": {
+        "400": "gamefont-cherry_bomb-400.woff2"
+      },
+      "bytes": 14752,
+      "caps_only": false,
+      "mono": false
+    },
+    "metal_mania": {
+      "family": "Metal Mania",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/metalmania",
+      "designer": "Open Window",
+      "copyright": "Copyright (c) 2012 by Open Window (dathanboardman@gmail.com) with Reseved Font Name \\",
+      "files": {
+        "400": "gamefont-metal_mania-400.woff2"
+      },
+      "bytes": 66396,
+      "caps_only": false,
+      "mono": false
+    },
+    "boogaloo": {
+      "family": "Boogaloo",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/boogaloo",
+      "designer": "John Vargas Beltrán",
+      "copyright": "Copyright (c) 2011, John Vargas Beltran (www.johnvargasbeltran.com|john.vargasbeltran@gmail.com), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-boogaloo-400.woff2"
+      },
+      "bytes": 9688,
+      "caps_only": false,
+      "mono": false
+    },
+    "racing_sans": {
+      "family": "Racing Sans One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/racingsansone",
+      "designer": "Impallari Type",
+      "copyright": "Copyright (c) 2012, Pablo Impallari (www.impallari.com|impallari@gmail.com) and Rodrigo Fuenzalida (www.rfuenzalida.com), with Reserved Font Name Racing Sans.",
+      "files": {
+        "400": "gamefont-racing_sans-400.woff2"
+      },
+      "bytes": 13524,
+      "caps_only": false,
+      "mono": false
+    },
+    "sedgwick": {
+      "family": "Sedgwick Ave Display",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/sedgwickavedisplay",
+      "designer": "Pedro Vergani, Kevin Burke",
+      "copyright": "Copyright 2017 The Sedgwick Ave Project Authors (https://github.com/googlefonts/sedgwickave)",
+      "files": {
+        "400": "gamefont-sedgwick-400.woff2"
+      },
+      "bytes": 22916,
+      "caps_only": false,
+      "mono": false
     }
   }
 }

@@ -2,6 +2,8 @@
 //
 //   chooseLook(words, gameId)       → spec: the vibe the words point to, one of its pairings and a
 //                                     modular scale, both picked by the game id
+//   chooseLook(words, gameId, {characterful: true}) → the same from the vibe's characterful
+//                                     pairings (vibes.mjs BOLD: Rye, Creepster, Luckiest Guy, …)
 //   lookFromChoice({vibe, pairing, seed})  → the same spec from the compact `art.type` block
 //   applyLook(game, spec)           → a copy of the game (engine game.json) with every text node on the
 //                                     pairing's fonts, weights, case and scale, text colours on the
@@ -222,11 +224,22 @@ function buildSpec(vibe, basePairing, seed) {
  * The look for a game: the vibe its words point to, then the game id picks one of the vibe's
  * pairings and a scale inside the pairing's ranges. Same words and id → same look.
  */
-export function chooseLook(words, gameId = '') {
+export function chooseLook(words, gameId = '', { characterful = false } = {}) {
   const vibe = vibeFor(words);
   const seed = hash32(`${gameId}`);
-  const pairing = vibe.pairings[seed % vibe.pairings.length];
+  // characterful: the vibe's most expressive pairings (vibes.mjs BOLD) when it has any.
+  const pool = characterful && vibe.bold?.length ? vibe.bold : vibe.pairings;
+  const pairing = pool[seed % pool.length];
   return buildSpec(vibe, pairing, seed);
+}
+
+/** A vibe's pairings: the classic ones, then its characterful ones (vibes.mjs BOLD). */
+export function allPairings(vibe) { return [...vibe.pairings, ...(vibe.bold ?? [])]; }
+
+/** The id of the characterful pairing a seed picks in a vibe (vibes.mjs BOLD), or undefined. */
+export function characterfulPairing(vibeId, seed = 0) {
+  const bold = VIBES.find((v) => v.id === vibeId)?.bold ?? [];
+  return bold.length ? bold[(seed >>> 0) % bold.length].id : undefined;
 }
 
 /** The compact block a manifest carries in `art.type`: {kit, vibe, pairing, seed}. */
@@ -238,7 +251,7 @@ export function lookChoice(spec) {
 export function lookFromChoice(choice) {
   const vibe = VIBES.find((v) => v.id === choice?.vibe);
   if (!vibe) throw new Error(`unknown vibe '${choice?.vibe}'`);
-  const pairing = vibe.pairings.find((p) => p.id === choice.pairing) ?? (choice.pairing === undefined ? vibe.pairings[(choice.seed >>> 0) % vibe.pairings.length] : null);
+  const pairing = allPairings(vibe).find((p) => p.id === choice.pairing) ?? (choice.pairing === undefined ? vibe.pairings[(choice.seed >>> 0) % vibe.pairings.length] : null);
   if (!pairing) throw new Error(`vibe ${vibe.id} has no pairing '${choice.pairing}'`);
   return buildSpec(vibe, pairing, (choice.seed ?? 0) >>> 0);
 }
@@ -251,7 +264,7 @@ export function lookChoiceErrors(choice) {
   if (choice.kit !== undefined && choice.kit !== LOOK_KIT) errs.push(`art.type.kit is '${LOOK_KIT}'`);
   const vibe = VIBES.find((v) => v.id === choice.vibe);
   if (!vibe) errs.push(`art.type.vibe '${choice.vibe}' isn't one of ${VIBES.map((v) => v.id).join(', ')}`);
-  else if (choice.pairing !== undefined && !vibe.pairings.some((p) => p.id === choice.pairing)) errs.push(`art.type.pairing '${choice.pairing}' isn't one of ${vibe.pairings.map((p) => p.id).join(', ')}`);
+  else if (choice.pairing !== undefined && !allPairings(vibe).some((p) => p.id === choice.pairing)) errs.push(`art.type.pairing '${choice.pairing}' isn't one of ${allPairings(vibe).map((p) => p.id).join(', ')}`);
   if (choice.seed !== undefined && !(Number.isInteger(choice.seed) && choice.seed >= 0)) errs.push('art.type.seed must be a whole number ≥ 0');
   return errs;
 }
@@ -582,7 +595,7 @@ export function lookCheck(game, spec, { words = null, explicit = false } = {}) {
   // Theme: the display font against the vibe the words point to.
   if (words && !explicit) {
     const vibe = vibeFor(words);
-    const vibeFams = new Set(vibe.pairings.flatMap((p) => [p.display, p.text, p.numerals]).filter(Boolean).map((id) => fontOf(id)?.family));
+    const vibeFams = new Set(allPairings(vibe).flatMap((p) => [p.display, p.text, p.numerals]).filter(Boolean).map((id) => fontOf(id)?.family));
     const big = texts.reduce((b, t) => (maxSize(t.n) > maxSize(b.n) ? t : b), texts[0]);
     const f = big.n.font ?? 'system';
     if (!vibeFams.has(f)) add('S_THEME_MISMATCH', `${big.at}/font`, `the headline font ${f} isn't one of the ${vibe.id} vibe's fonts (${[...vibeFams].join(', ')})`);

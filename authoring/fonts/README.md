@@ -74,3 +74,22 @@ Small web-font library for the game renderer. Fonts come from the google/fonts r
 | rubik | Rubik | text | OFL-1.1 | 500, 700 | https://github.com/google/fonts/tree/main/ofl/rubik |
 | outfit | Outfit | text | OFL-1.1 | 500, 700 | https://github.com/google/fonts/tree/main/ofl/outfit |
 | barlow_cond_italic | Barlow Condensed Italic | display | OFL-1.1 | 700 | https://github.com/google/fonts/tree/main/ofl/barlowcondensed |
+| lilita | Lilita One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/lilitaone |
+| bagel | Bagel Fat One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/bagelfatone |
+| shrikhand | Shrikhand | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/shrikhand |
+| rubik_mono | Rubik Mono One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/rubikmonoone |
+| luckiest | Luckiest Guy | display | Apache-2.0 | 400 | https://github.com/google/fonts/tree/main/apache/luckiestguy |
+| permanent_marker | Permanent Marker | display | Apache-2.0 | 400 | https://github.com/google/fonts/tree/main/apache/permanentmarker |
+| titan | Titan One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/titanone |
+| black_ops | Black Ops One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/blackopsone |
+| bungee_shade | Bungee Shade | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/bungeeshade |
+| faster | Faster One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/fasterone |
+| nosifer | Nosifer | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/nosifer |
+| pirata | Pirata One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/pirataone |
+| knewave | Knewave | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/knewave |
+| zen_dots | Zen Dots | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/zendots |
+| cherry_bomb | Cherry Bomb One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/cherrybombone |
+| metal_mania | Metal Mania | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/metalmania |
+| boogaloo | Boogaloo | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/boogaloo |
+| racing_sans | Racing Sans One | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/racingsansone |
+| sedgwick | Sedgwick Ave Display | display | OFL-1.1 | 400 | https://github.com/google/fonts/tree/main/ofl/sedgwickavedisplay |
