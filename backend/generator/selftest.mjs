@@ -71,6 +71,9 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   const m = out.manifest;
   check('the prompt for a change carries the game being changed', /make it faster/.test(muse.prompts[0]) && muse.prompts[0].includes('Change it as asked'), muse.prompts[0]?.slice(0, 200));
   check('a change is a new game with a new id, lineage and level', m.id !== first.manifest.id && /^mg-[a-z0-9-]+-[a-z0-9]{4}$/.test(m.id) && m.lineage?.remix_of === 'aaaaaaaaaaaaaaaaaaaaaaaa' && m.chain?.index === 2 && m.chain.prev === first.manifest.id && m.chain.next === null && /^chain-/.test(m.chain.id) && m.chain.title, JSON.stringify({ id: m.id, lineage: m.lineage, chain: m.chain }));
+  const grouped = { ...first.manifest, group_play: { mode: 'group_round', same_seed: true, result: { kind: 'score', compare: 'score' } }, structure: { cadence: 'daily', scope: 'group:g123', setter: 'ai' } };
+  const kept = (await compose({ request: 'make it faster', brief, base: grouped, remixOf: 'bbbbbbbbbbbbbbbbbbbbbbbb' }, { studio, muse: new ScriptedMuse([example()]) })).manifest;
+  check('a change keeps the base game\'s group_play and its Group scope', kept.group_play?.mode === 'group_round' && kept.structure?.scope === 'group:g123', JSON.stringify({ gp: kept.group_play, st: kept.structure }));
   let err;
   try { await compose({ request: 'x', brief, base: { title: 'x', content: {} } }, { studio, muse: new ScriptedMuse([example()]) }); } catch (e) { err = e; }
   check("a game without its authoring source can't be changed", !!err && /authoring_json/.test(err.message), err?.message);
@@ -82,13 +85,14 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   const muse = { isConfigured: true, async chatJSON(body) { seen.push(body); return { content: '{}', model: body.model, usage: { prompt_tokens: 5, completion_tokens: 7, total_tokens: 12, calls: 1 } }; } };
   const old = { version: 2, async compose(args, ask) {
     const draft = await ask('SYSTEM', 'USER', 'microgame draft');
-    const review = await ask('SYSTEM', 'REVIEW', 'score review', { model: 'muse-wonder-1.0', effort: 'high', max_tokens: 12000 });
+    const review = await ask('SYSTEM', 'REVIEW', 'score review', { model: 'muse-wonder-1.0', effort: 'high', max_tokens: 12000, timeout_s: 60 });
     return { manifest: { title: 'x' }, draft, review };
   } };
   const ctx = { types: [{ id: 't', name: 'A kind of game', summary: 's' }], tools: [{ id: 'lives', summary: 'N lives' }] };
   const out = await compose({ request: 'x', brief, context: ctx }, { studio: old, muse, model: 'muse-ember-1.0' });
   check('an older bundle gets the planned section on compose calls only', /Planned for this request/.test(seen[0].system) && !/Planned for this request/.test(seen[1].system), seen.map((b) => b.system.length).join(','));
   check('ask honours the model, effort and token budget it is given', seen[1].model === 'muse-wonder-1.0' && seen[1].reasoningEffort === 'high' && seen[1].maxTokens === 12000 && seen[0].model === 'muse-ember-1.0', JSON.stringify(seen.map((b) => [b.model, b.reasoningEffort, b.maxTokens])));
+  check('a capped call (timeout_s) gets that timeout and one attempt', seen[1].timeout === 60 && seen[1].maxAttempts === 1 && seen[0].timeout === undefined, JSON.stringify(seen.map((b) => [b.timeout, b.maxAttempts])));
   check('ask returns the tokens used with the reply', out.draft.usage?.total_tokens === 12 && out.review.model === 'muse-wonder-1.0', JSON.stringify(out.draft));
   const v3 = [];
   const modern = { version: 3, async compose(args, ask) { v3.push(args.context); await ask('SYSTEM', 'USER', 'microgame draft'); return { manifest: { title: 'x' } }; } };
@@ -328,6 +332,7 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     const aj = await a1.json();
     const call = calls[before];
     check('POST /anatomy returns the anatomy', a1.status === 200 && aj.anatomy?.anatomy === 'game-anatomy/0.1' && aj.anatomy.title === 'Fog Garden', JSON.stringify(aj).slice(0, 200));
+    check('the anatomy prompt keeps real names the person gives', /keep their real names, as written/.test(call?.body.messages[0].content ?? '') && !/Synthetic people only/.test(call?.body.messages[0].content ?? ''));
     check('anatomy uses the fast model, low effort and the engine fragment list', call?.body.model === 'muse-ember-1.0' && call.body.reasoning_effort === 'low' && /Fragment library/.test(call.body.messages[0].content) && /- reveal:/.test(call.body.messages[0].content), JSON.stringify(call && { model: call.body.model, effort: call.body.reasoning_effort }));
     const withAnswer = structuredClone(anatomy);
     withAnswer.parts.core_loop.question = 'How many tries?';

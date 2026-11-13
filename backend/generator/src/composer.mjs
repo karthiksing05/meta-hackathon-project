@@ -130,6 +130,8 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
     const body = { model: options?.model || model, system: planned && !options?.model ? system + '\n' + planned : system, user };
     if (options?.max_tokens) body.maxTokens = Number(options.max_tokens);
     if (options?.effort !== undefined) body.reasoningEffort = options.effort;
+    // A capped call (the score review's timeout_s): one attempt within the cap, so a retry never runs past it.
+    if (Number(options?.timeout_s) > 0) { body.timeout = Number(options.timeout_s); body.maxAttempts = 1; }
     const started = Date.now();
     const r = await muse.chatJSON(body);
     console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'muse call', purpose, model: r.model, ms: Date.now() - started, usage: r.usage }));
@@ -158,6 +160,13 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   }
   const m = out.manifest;
   if (base) {
+    // A change keeps how the game is played together and where it lives: the base's group_play when the new
+    // manifest has none, and its Group or Event scope when the change was made without one (no harness context).
+    if (base.group_play && !m.group_play) m.group_play = base.group_play;
+    const scope = base.structure?.scope;
+    if (base.structure && typeof base.structure === 'object' && (!m.structure || (scope && scope !== 'everyone' && (m.structure.scope ?? 'everyone') === 'everyone'))) {
+      m.structure = { ...base.structure, ...(m.structure ?? {}), ...(scope ? { scope } : {}) };
+    }
     m.id = `mg-${slug(m.title ?? base.title ?? 'game') || 'game'}-${suffix()}`; // never the base game's own id
     if (remixOf) m.lineage = { ...(m.lineage ?? {}), remix_of: String(remixOf) };
     if (level && level > 1) {
