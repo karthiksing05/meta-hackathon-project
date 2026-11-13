@@ -77,6 +77,24 @@ export class MuseClient {
     }
   }
 
+  /**
+   * One image from muse-image-1.0 (the responses API's image_generation tool). guide: an optional PNG the model
+   * sees with the prompt (the game's real layout). Returns {png: Buffer, model, seconds}.
+   */
+  async image({ prompt, size = '1024x1024', guide = null, model = 'muse-image-1.0', timeout = 150, maxAttempts = 2 }) {
+    if (!this.isConfigured) throw new MuseError('Muse is not configured on this server.');
+    const content = [{ type: 'input_text', text: prompt }];
+    if (guide) content.push({ type: 'input_image', image_url: 'data:image/png;base64,' + Buffer.from(guide).toString('base64') });
+    const started = Date.now();
+    const data = await this.#send('responses', {
+      model, store: false, input: [{ role: 'user', content }],
+      tools: [{ type: 'image_generation', enable_image_search: false, enable_web_search: false, enable_shell: false, reasoning_strength: 'low', size, output_format: 'png' }],
+    }, { timeout, maxAttempts });
+    const call = (data?.output ?? []).find((x) => x?.type === 'image_generation_call' && x.result);
+    if (!call) throw new MuseError(`${model} returned no image (${data?.status ?? 'no status'}${data?.incomplete_details ? ': ' + JSON.stringify(data.incomplete_details) : ''}).`);
+    return { png: Buffer.from(call.result, 'base64'), model: data.model ?? model, seconds: (Date.now() - started) / 1000 };
+  }
+
   /** One system + user turn in JSON mode. Returns the reply text and the model that answered.
    *  Asks again once if the reply holds no JSON object. */
   async chatJSON({ model, system, user, maxTokens = 16000, reasoningEffort = 'medium', timeout = 150, maxAttempts = 2 }) {
