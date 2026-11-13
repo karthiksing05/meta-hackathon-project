@@ -1152,7 +1152,9 @@
       "rounds",
       "daily_seed",
       "share_grid",
-      "map_geometry"
+      "map_geometry",
+      "country_outline",
+      "geo_distance"
     ],
     "engine_gaps": [],
     "gate_profile": "puzzle",

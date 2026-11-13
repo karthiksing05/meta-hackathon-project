@@ -489,52 +489,64 @@
     "notes": "physics_world stacks unrotated boxes and circles (no tipping); the gold slice_drop_stacker and pass_play_stacker fake it with overhang rules"
   },
   {
-    "id": "map_pin",
-    "kind": "runtime_tool",
-    "name": "Map pin",
-    "aliases": [
-      "drop a pin",
-      "tap the map"
-    ],
-    "summary": "Tap a map to place a pin; the pin's position converts to map coordinates for scoring by distance.",
-    "when_to_use": "Geography guessing and place-finding games.",
-    "status": "planned",
-    "gaps_it_closes": [
-      "no accurate map art"
-    ],
-    "notes": "tapping and distance work today (pointer_input, dist); the map picture must be geographically accurate, which generated art can't promise"
-  },
-  {
     "id": "map_pin_guess",
     "kind": "runtime_tool",
     "name": "Map pin guess",
     "aliases": [
-      "where is it",
-      "geo guess"
+      "pin the city",
+      "where in the world is it",
+      "geo guess game"
     ],
-    "summary": "Shows a clue, the player pins a guess on a map, and the score falls with the distance from the true place.",
-    "when_to_use": "Where-was-this-taken, find-the-country and place quizzes.",
-    "status": "planned",
+    "summary": "Shows a clue, the player pins a guess on a real map, and the score falls with the great-circle distance from the true place.",
+    "when_to_use": "Where-was-this-taken, pin-the-capital, find-the-country and place quizzes. Compose it from geo_map + map_pin + rounds + lives with a `geo` section (target: capital or label).",
+    "status": "building",
     "gaps_it_closes": [
       "no accurate map art"
     ],
-    "notes": "same building blocks as map_pin plus place coordinates as content (map_geometry)"
+    "notes": "Example game Pin the Capital passes the gate and the score check. Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md). Photos for where-was-this-taken are a separate gap (photo_picker, image_gallery).",
+    "api": "composed: uses geo_map, map_pin, rounds (round_done = pin_done), lives (hit = pin_far), score; game functions map_target() = get_or(geo_target(), current, vec(0.0, 0.0)), map_can_pin(), map_focus() = if pin_shown then current else -1; rule on pinned: incr score by pin_points(event.km)",
+    "events": [
+      "pinned",
+      "pin_far",
+      "pin_done"
+    ],
+    "example_types": [
+      "map_place_pin_quiz",
+      "geo_guess",
+      "where_was_this_taken"
+    ],
+    "path": "authoring/content/geo/examples/pin_the_capital.json"
   },
   {
     "id": "map_geometry",
     "kind": "content_tool",
-    "name": "Place coordinates",
+    "name": "Geography content pack",
     "aliases": [
       "distance and direction",
-      "lat long"
+      "lat long",
+      "country outlines",
+      "capital cities data",
+      "natural earth data"
     ],
-    "summary": "Latitude and longitude for the places in a game, so rules can report the distance and compass direction between a guess and the answer.",
-    "when_to_use": "Distance-and-direction geography puzzles.",
-    "status": "planned",
+    "summary": "Checked place data built at build time from Natural Earth (public domain): 177 countries and the 51 US states and DC with simplified outlines, label points, bounding boxes, continent and subregion, capitals with coordinates, and aliases. A game names places; coordinates and outlines come only from the pack.",
+    "when_to_use": "Any geography game: the `geo` section picks or names places from a pack, and the geo step writes their names, capitals, coordinates and outlines into the game.",
+    "status": "building",
+    "notes": "Built by tools/make-geo-pack.mjs from ne_110m_admin_0_countries, ne_110m_populated_places_simple and ne_110m_admin_1_states_provinces (v5). world.json 147 KB, us_states.json 25 KB; a game carries only its own places (10–30 KB with the map). No flags (Natural Earth has none; see the request) and no cities beyond capitals yet.",
+    "api": "authoring/content/geo/<pack>.json (geo-pack/1); manifest `geo` {pack, places | pick {region, count, min_area, seed}, target: label|capital, map, outline, quiz {choices, ask: name|capital}}; expander/geo.mjs applyGeo(manifest, packs); unknown places are A_GEO_PLACE errors",
+    "example_types": [
+      "map_place_pin_quiz",
+      "capital_match",
+      "geo_guess",
+      "lit_country_quiz",
+      "map_reveal_trivia"
+    ],
+    "path": "authoring/content/geo/world.json",
+    "refs": [
+      "https://www.naturalearthdata.com/about/terms-of-use/"
+    ],
     "gaps_it_closes": [
       "no trusted place data"
-    ],
-    "notes": "the maths is shipped builtins (sin, cos, sqrt, atan2); the coordinates must come from a checked source, not from Muse's memory"
+    ]
   },
   {
     "id": "semantic_rank",

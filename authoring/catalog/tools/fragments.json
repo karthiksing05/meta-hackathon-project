@@ -961,5 +961,132 @@
     ],
     "path": "authoring/fragments/npc_judge.fragment.json",
     "notes": "content comes from the npc_lines content step; a typed version (player writes the line) needs live_judge, which is a gap"
+  },
+  {
+    "id": "geo_map",
+    "kind": "fragment",
+    "name": "Real map with a lit-up place",
+    "aliases": [
+      "world map",
+      "map on screen",
+      "show the country on a map",
+      "highlight a country",
+      "country lit up on a map"
+    ],
+    "summary": "A geographically accurate map (world, a continent, a subregion or the US states) drawn from Natural Earth outlines, with one place filled in the accent colour and a pulsing ring at its label point so small countries still show.",
+    "when_to_use": "Any game that shows a map: which-country-is-this quizzes, showing the country after an answer, a map behind a pin game, a Group's countries or states. Never ask the model to draw a map; write a `geo` section and use this.",
+    "api": "manifest `geo` {pack: world|us_states, places: [names] or pick: {region, count, min_area, seed}, map: {x, y, w, h, view: world|fit|<continent>|<subregion>|[w,s,e,n]}}; game provides map_focus(): int (index into the geo places, -1 for none); the geo step provides geo_names(), geo_ids(), geo_capitals(), geo_continents(), geo_target() (list<vec2> lon/lat), geo_rings(), geo_ring_place(), geo_label() and the sprite `map`",
+    "params": {
+      "x": "float, set by the geo step",
+      "y": "float, set by the geo step",
+      "w": "float, set by the geo step",
+      "h": "float, set by the geo step",
+      "ring": "bool, default true: pulsing ring at the lit place"
+    },
+    "status": "building",
+    "gaps_it_closes": [
+      "no accurate map art",
+      "map_pin"
+    ],
+    "example_types": [
+      "map_reveal_trivia",
+      "lit_country_quiz",
+      "map_place_pin_quiz",
+      "geo_guess",
+      "capital_match"
+    ],
+    "path": "authoring/fragments/geo_map.fragment.json",
+    "notes": "Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md)."
+  },
+  {
+    "id": "map_pin",
+    "kind": "fragment",
+    "name": "Map pin",
+    "aliases": [
+      "drop a pin",
+      "tap the map",
+      "pin on map",
+      "where in the world"
+    ],
+    "summary": "Tap the map to drop a pin; the great-circle distance to the answer in whole km sets the round's points (1000 falling to 0 at zero_km), a pin past far_km emits pin_far, and the pin, a line to the answer and the distance show before the next round.",
+    "when_to_use": "Pin-the-city, where-in-the-world and closest-guess-wins geography games, with geo_map underneath. Bind rounds' round_done to pin_done and lives' hit to pin_far.",
+    "api": "game provides map_target(): vec2 (vec(lon, lat), usually get_or(geo_target(), i, vec(0.0, 0.0))) and map_can_pin(): bool; provides state pin_at, pin_km, pin_shown, functions map_lonlat(p), map_screen(ll), pin_points(km), input map_tap {at: vec2}; the geo step sets x, y, w, h, ax, ay, kx, ky",
+    "events": [
+      "pinned",
+      "pin_far",
+      "pin_done"
+    ],
+    "params": {
+      "far_km": "int, default 2500, 50..20000",
+      "zero_km": "int, default 5000, 100..20000",
+      "reveal_ms": "duration, default 1500, 300..5000",
+      "grid": "bool, default true: faint 30-degree grid dots",
+      "x, y, w, h, ax, ay, kx, ky": "float, set by the geo step"
+    },
+    "status": "building",
+    "gaps_it_closes": [
+      "no accurate map art",
+      "tap position to longitude and latitude"
+    ],
+    "example_types": [
+      "map_place_pin_quiz",
+      "geo_guess",
+      "where_was_this_taken"
+    ],
+    "path": "authoring/fragments/map_pin.fragment.json",
+    "notes": "Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md). Distance uses only arithmetic, sin, cos and sqrt (an asin series, no atan2 or pow), so replays match; the engine agrees with a JS great circle within 0.5 km in tools/test-geo.mjs."
+  },
+  {
+    "id": "geo_distance",
+    "kind": "fragment",
+    "name": "Distance and direction on the globe",
+    "aliases": [
+      "geo distance score",
+      "how far and which way",
+      "hot and cold on a map",
+      "geo_distance_score"
+    ],
+    "summary": "geo_km(a, b) great-circle km, geo_dir(a, b) 8-point compass direction and geo_closeness(a, b) 0–100 between two vec(lon, lat) points, deterministic in the engine.",
+    "when_to_use": "Guess-the-country-by-name puzzles that answer with distance and direction, closest-guess scoring, and any rule that needs how far apart two places are.",
+    "api": "provides geo_km(a: vec2, b: vec2): int, geo_dir(a, b): string, geo_closeness(a, b): int; points are vec(lon, lat), usually from geo_target()",
+    "status": "building",
+    "gaps_it_closes": [
+      "no trusted distance maths in rules"
+    ],
+    "example_types": [
+      "geo_silhouette_distance_guess",
+      "geo_guess"
+    ],
+    "path": "authoring/fragments/geo_distance.fragment.json",
+    "notes": "Pure maths: works on today's engine with any vec(lon, lat) points. The coordinates themselves must come from the geo section (map_geometry), never from Muse."
+  },
+  {
+    "id": "country_outline",
+    "kind": "fragment",
+    "name": "Country or state outline",
+    "aliases": [
+      "country silhouette",
+      "guess the shape",
+      "outline of a country",
+      "state shapes"
+    ],
+    "summary": "One country's or US state's outline drawn big and alone, its main land mass fitted to a rect, from Natural Earth: guess the place from its shape.",
+    "when_to_use": "Guess-the-country (or state) from its outline, silhouette dailies, and shape rounds in geography trivia.",
+    "api": "manifest `geo` with `outline: {x, y, w, h}`; game provides outline_focus(): int; the geo step provides geo_outline(), geo_outline_place() and sets the rect",
+    "params": {
+      "x, y, w, h": "float, set by the geo step"
+    },
+    "status": "building",
+    "gaps_it_closes": [
+      "no accurate map art"
+    ],
+    "example_types": [
+      "spell_the_country",
+      "flag_and_shape",
+      "geo_silhouette_distance_guess",
+      "outline_pick_quiz"
+    ],
+    "path": "authoring/fragments/country_outline.fragment.json",
+    "notes": "Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md)."
   }
 ]
