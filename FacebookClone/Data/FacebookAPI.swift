@@ -164,6 +164,11 @@ struct FacebookAPILive: Sendable {
         return try await get("v1/fb/posts", q)
     }
 
+    /// One person's own posts, newest first.
+    func posts(authorID: String, limit: Int = 50) async throws -> RemoteFBPostPage {
+        try await get("v1/fb/posts", [URLQueryItem(name: "authorId", value: authorID), URLQueryItem(name: "limit", value: String(limit))])
+    }
+
     func reels(limit: Int = 30) async throws -> RemoteFBPostPage {
         try await get("v1/fb/reels", [URLQueryItem(name: "limit", value: String(limit))])
     }
