@@ -11,6 +11,8 @@
 !FacebookClone/Bubbles/Studio/web/microgame-studio.js
 # the game catalog the harness and dbinit read
 !authoring/catalog
+# the requirements code the planner runs in goja
+!authoring/expander/requirements.mjs
 **/*_test.go
 **/node_modules
 **/*.env

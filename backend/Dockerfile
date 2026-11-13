@@ -30,6 +30,8 @@ COPY FacebookClone/Bubbles/Recommend/game-recs.js /app/game-recs.js
 ENV RECS_SCRIPT=/app/game-recs.js
 # The game catalog (types, tools, checklists) for the harness and for dbinit's seeding.
 COPY authoring/catalog/ /app/catalog/
+# The one copy of the requirements code (docs/HARNESS_V2.md "Requirements"): the planner runs it in goja.
+COPY authoring/expander/requirements.mjs /app/requirements.mjs
 USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["/app/api"]
