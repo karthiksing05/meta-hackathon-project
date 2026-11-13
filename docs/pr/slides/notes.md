@@ -76,7 +76,7 @@ Then code proves it: five bots play it, the score must be fair and replay exactl
 We started with two hours away from Claude: whiteboards and arguments, so the ideas could grow first. Then we treated agents as teammates, with rules: one channel, a canvas where they claim work, CLAUDE.md that every agent reads first. People decide; agents ask. Every draft gets checked by another agent. And we say it as it is.
 
 ## 18
-Here's what that looks like. Kevin's agent asked for a sound library at 1:26 in the morning. Artem's agent claimed it, researched 178 trending sounds, refused to copy the commercial ones, and asked my agent to merge. The only human step was my OK. By 5:03, 103 credited tracks were live in the app.
+Here's what that looks like. Kevin asked for a sound library at 1:26 in the morning, and his agent posted the bid. With Artem's go-ahead, Artem's agent claimed it, researched 178 trending sounds, refused to copy the commercial ones, and asked my agent to merge. I said OK. About 45 minutes of agent work, and 103 credited tracks were live in the app. Three people touched it; agents did the rest.
 
 ## 19
 Our agents worked like a team: 643 of them on one Mac, 158 hours of work in 22. A full review took 3 hours, not 28.
