@@ -456,9 +456,11 @@ struct RemoteProfile: Decodable, Identifiable, Hashable, Sendable {
     var avatarURL: String?
     /// The profile cover's color, `"#RRGGBB"`.
     var coverColor: String?
+    /// How many friends they have: only `GET /v1/users/{id}` sends it.
+    var friendCount: Int?
 
     enum CodingKeys: String, CodingKey {
-        case id, username, displayName, bio, isFriend, role, coverColor
+        case id, username, displayName, bio, isFriend, role, coverColor, friendCount
         case avatarURL = "avatarUrl"
     }
 
@@ -472,6 +474,7 @@ struct RemoteProfile: Decodable, Identifiable, Hashable, Sendable {
         role = try c.decodeIfPresent(String.self, forKey: .role)
         avatarURL = try c.decodeIfPresent(String.self, forKey: .avatarURL)
         coverColor = try c.decodeIfPresent(String.self, forKey: .coverColor)
+        friendCount = try c.decodeIfPresent(Int.self, forKey: .friendCount)
     }
 }
 

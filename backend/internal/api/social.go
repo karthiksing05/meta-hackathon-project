@@ -77,7 +77,16 @@ func (s *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	if me := userFrom(r); me != nil {
 		friends, _ = s.friendSet(r.Context(), me.ID)
 	}
-	writeJSON(w, 200, profileOf(*u, friends))
+	// The profile page shows "N friends"; without the count every account read as 0.
+	theirs, err := s.Store.Friends(r.Context(), u.ID)
+	if err != nil {
+		s.serverErr(w, r, err)
+		return
+	}
+	writeJSON(w, 200, struct {
+		profile
+		FriendCount int `json:"friendCount"`
+	}{profileOf(*u, friends), len(theirs)})
 }
 
 func (s *Server) listFriends(w http.ResponseWriter, r *http.Request) {

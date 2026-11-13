@@ -206,7 +206,8 @@ final class ServerBracketService: BracketService {
 /// Bracket copy, in one place.
 enum BracketCopy {
     static func title(_ name: String) -> String { "You vs \(name)" }
-    static let subtitle = "Best of 5 · same games, same seeds"
+    /// "Best of 3", "Best of 5": the match's own length (a friend with fewer games gets a shorter one).
+    static func subtitle(rounds: Int) -> String { "Best of \(max(rounds, 1)) · same games, same seeds" }
     static func start(_ name: String) -> String { "Play \(name): best of 5" }
     static let play = "Play"
     static let replay = "Again"

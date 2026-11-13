@@ -49,7 +49,7 @@ struct BracketCardView: View {
                 Text(BracketCopy.title(opponent.firstName))
                     .font(.fbHeadline)
                     .foregroundStyle(FBColor.primaryText)
-                Text(BracketCopy.subtitle)
+                Text(BracketCopy.subtitle(rounds: bracket.rounds.count))
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
             }
