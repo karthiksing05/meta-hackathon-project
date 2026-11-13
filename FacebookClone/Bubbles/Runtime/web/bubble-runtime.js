@@ -5329,6 +5329,7 @@
     textShown: false,
     textRun: null,
     textLayout: "",
+    textLift: 0,
     // fx pools
     pX: null, pY: null, pVX: null, pVY: null, pLife: null, pMax: null, pSize: null, pKind: null, pCol: null, pNext: 0,
     rX: null, rY: null, rR: null, rMax: null, rLife: null, rCol: null, rNext: 0,
@@ -5423,7 +5424,47 @@
         e.preventDefault();
         this.onText("submit");
       });
+      // The iPhone keyboard covers the bottom of the screen: while the field has focus, lift the
+      // whole game just enough to keep the field (and a little room below it) in view. Drawing only:
+      // pointer mapping reads the root's on-screen rect, and the game's coordinates don't change.
+      const relift = () => this.liftForKeyboard();
+      t.addEventListener("focus", () => { relift(); setTimeout(relift, 120); setTimeout(relift, 400); });
+      t.addEventListener("blur", () => this.liftForKeyboard(true));
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", relift);
+        window.visualViewport.addEventListener("scroll", relift);
+      }
       return t;
+    },
+
+    // Lifts #bubble-root so the focused text field sits above the keyboard (visualViewport is the
+    // part of the page the keyboard leaves visible). `drop` (or no focus) puts the game back.
+    liftForKeyboard(drop) {
+      const d = this.dom, t = d && d.text;
+      if (!t) return;
+      const root = d.root;
+      const focused = !drop && document.activeElement === t && this.textShown;
+      let lift = 0;
+      if (focused) {
+        // iOS scrolls the page to reveal a focused field, by more than needed and taking the top
+        // of the game (HUD, prompt) under the status bar. Undo that; the lift below moves only as
+        // far as the keyboard requires.
+        if (window.scrollY || window.scrollX) window.scrollTo(0, 0);
+        const vv = window.visualViewport;
+        const visibleBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+        const visibleTop = vv ? vv.offsetTop : 0;
+        const prev = this.textLift || 0;
+        const r = t.getBoundingClientRect();
+        // The field's place with no lift (the rect already includes the current one).
+        const top = r.top + prev, bottom = r.bottom + prev;
+        const room = Math.round(Math.min(24, Math.max(8, (bottom - top) * 0.4)));
+        lift = Math.max(0, Math.ceil(bottom + room - visibleBottom));
+        // Never push the field's top above what's visible.
+        lift = Math.min(lift, Math.max(0, Math.floor(top - visibleTop - 8)));
+      }
+      if (lift === (this.textLift || 0)) return;
+      this.textLift = lift;
+      root.style.transform = lift ? "translateY(" + -lift + "px)" : "";
     },
 
     // Typed text goes through the run's input queue, like pointer actions: applied at the start of
@@ -5454,6 +5495,7 @@
         this.textLayout = "";
         if (document.activeElement === t) t.blur();
         t.classList.add("hidden");
+        this.liftForKeyboard(true);
         return;
       }
       const live = this.mode === "play";
