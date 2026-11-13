@@ -37,6 +37,7 @@ func (m *Memory) DeleteGame(ctx context.Context, gameID string) error {
 			delete(m.scores, k)
 		}
 	}
+	m.deleteRunLogsLocked(gameID)
 	return nil
 }
 
@@ -65,6 +66,9 @@ func (m *Mongo) DeleteGame(ctx context.Context, gameID string) error {
 	}
 	by := bson.D{{Key: "gameId", Value: gameID}}
 	if _, err := m.coll(cLikes).DeleteMany(ctx, by); err != nil {
+		return err
+	}
+	if _, err := m.coll(cRunLogs).DeleteMany(ctx, by); err != nil {
 		return err
 	}
 	_, err = m.coll(cScores).DeleteMany(ctx, by)

@@ -208,9 +208,10 @@ func (s *Server) submitScored(w http.ResponseWriter, r *http.Request, g *model.G
 		writeErr(w, 503, "checking scores is not set up on this server")
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, maxLogBytes+4096)
+	r.Body = http.MaxBytesReader(w, r.Body, maxLogBytes+maxReplayBytes+4096)
 	var in struct {
-		Log json.RawMessage `json:"log"`
+		Log    json.RawMessage `json:"log"`
+		Replay json.RawMessage `json:"replay"` // the runtime's replay of the same run, for friends to watch (runlogs.go)
 	}
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		var tooBig *http.MaxBytesError
@@ -230,6 +231,11 @@ func (s *Server) submitScored(w http.ResponseWriter, r *http.Request, g *model.G
 	}
 	if logText == "" || logText == "null" || len(logText) > maxLogBytes {
 		writeErr(w, 400, "this game ranks verified runs: send the run's log (up to 256 KB)")
+		return
+	}
+	replay, err := parseReplay(in.Replay)
+	if err != nil {
+		writeErr(w, 400, err.Error())
 		return
 	}
 	text, err := s.gameText(r.Context(), g)
@@ -288,13 +294,16 @@ func (s *Server) submitScored(w http.ResponseWriter, r *http.Request, g *model.G
 		s.serverErr(w, r, err)
 		return
 	}
+	s.keepRunLog(r.Context(), neu, replay, logText)
 	s.writeBoard(w, r, g, extra)
 }
 
 // scoreRow is a board row with its score as it should be shown.
 type scoreRow struct {
 	model.Score
-	Display string `json:"display"`
+	Display         string `json:"display"`
+	ReplayAvailable bool   `json:"replayAvailable,omitempty"` // the caller may watch this run (runlogs.go)
+	ReplayURL       string `json:"replayUrl,omitempty"`
 }
 
 // writeBoard answers with a game's board (scope and limit as the leaderboard route takes them), shaped by its score model.
@@ -307,6 +316,7 @@ func (s *Server) writeBoard(w http.ResponseWriter, r *http.Request, g *model.Gam
 	for i, row := range rows {
 		items[i] = scoreRow{Score: row, Display: displayScore(g, row.Score)}
 	}
+	s.markReplays(r.Context(), g, userFrom(r), items)
 	out := map[string]any{"items": items, "ranked": g.Score.Ranked()}
 	if g.Score != nil {
 		out["direction"], out["format"] = g.Score.Direction, g.Score.Format

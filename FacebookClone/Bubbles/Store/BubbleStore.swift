@@ -235,7 +235,7 @@ final class BubbleStore {
             guard let self else { return }
             do {
                 // The engine log lets the server replay the run (required for games with a score model).
-                let rows = try await api.submitScore(entry.score, log: log, gameID: gameID)
+                let rows = try await api.submitScore(entry.score, log: log, replay: entry.replay, gameID: gameID)
                 apply(rows, to: bubble, keepingReplay: entry)
             } catch {
                 boardStates[bubble.id] = .failed(error.localizedDescription)

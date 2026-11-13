@@ -83,7 +83,8 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     }
 
     func scores(gameID: String) async throws -> [RemoteScore] {
-        let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", auth: .none)
+        // Signed in, the server marks the rows whose runs I may watch (`replayAvailable`).
+        let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", auth: .optional)
         return board.items
     }
 
@@ -91,7 +92,7 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         var query = [URLQueryItem(name: "scope", value: scope)]
         if let groupID { query.append(URLQueryItem(name: "groupId", value: groupID)) }
         let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", query: query,
-                                                    auth: scope == "everyone" ? .none : .required)
+                                                    auth: scope == "everyone" ? .optional : .required)
         return board.items
     }
 
@@ -103,12 +104,27 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     /// replayed run: the server replays `log` (the engine's `microgame-log/1`) and ignores `score`; a
     /// plain `{score}` is refused (400). Older games keep using `score` and ignore `log`.
     func submitScore(_ score: Int, log: String?, gameID: String) async throws -> [RemoteScore] {
+        try await submitScore(score, log: log, replay: nil, gameID: gameID)
+    }
+
+    /// The same, with the runtime's replay of the run: the server keeps it with the score so friends
+    /// and Group-mates can watch it from the board (`replayAvailable`).
+    func submitScore(_ score: Int, log: String?, replay: BubbleInputLog?, gameID: String) async throws -> [RemoteScore] {
         var payload: [String: Any] = ["score": score]
         if let log, !log.isEmpty { payload["log"] = log }
+        if let replay, let data = try? JSONEncoder().encode(replay),
+           let object = try? JSONSerialization.jsonObject(with: data) {
+            payload["replay"] = object
+        }
         let body = try JSONSerialization.data(withJSONObject: payload)
         let data = try await send("POST", "v1/games/\(try serverID(gameID))/scores", body: body,
                                   contentType: "application/json", auth: .required)
         return (try decode(data) as RemoteScoreboard).items
+    }
+
+    /// `GET /v1/games/{id}/runs/{userId}/log`: a friend's or Group-mate's run to watch (403 otherwise).
+    func runReplay(gameID: String, userID: String) async throws -> RemoteRunReplay {
+        try await get("v1/games/\(try serverID(gameID))/runs/\(userID)/log", auth: .required)
     }
 
     func setSaved(_ saved: Bool, gameID: String) async throws -> SaveState {
@@ -307,6 +323,24 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     func blend(groupID: String, count: Int) async throws -> RemoteBlend {
         let body = try JSONSerialization.data(withJSONObject: ["count": count])
         let data = try await send("POST", "v1/groups/\(groupID)/blend", body: body, contentType: "application/json", auth: .required)
+        let blend: RemoteBlend = try decode(data)
+        blend.picks.compactMap(\.game).forEach(link)
+        return blend
+    }
+
+    /// A Blend for me and one friend (`POST /v1/blend` with the two of us): games for both, and a
+    /// spec Studio makes "a game for the two of us" from.
+    func pairBlend(myID me: String, myName: String, friendID: String, friendName: String, count: Int) async throws -> RemoteBlend {
+        let pairID = "pair-" + [me, friendID].sorted().joined(separator: "-")
+        let body = try JSONSerialization.data(withJSONObject: [
+            "group": ["id": pairID, "name": "\(myName) & \(friendName)"],
+            "members": [
+                ["userID": me, "name": myName, "isFriend": true],
+                ["userID": friendID, "name": friendName, "isFriend": true],
+            ],
+            "count": count,
+        ] as [String: Any])
+        let data = try await send("POST", "v1/blend", body: body, contentType: "application/json", auth: .required)
         let blend: RemoteBlend = try decode(data)
         blend.picks.compactMap(\.game).forEach(link)
         return blend

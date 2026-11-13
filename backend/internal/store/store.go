@@ -157,6 +157,12 @@ type Store interface {
 	ScoreOf(ctx context.Context, gameID, userID string) (*model.Score, error)
 	PutScore(ctx context.Context, s model.Score) error
 	Leaderboard(ctx context.Context, gameID string, limit int) ([]model.Score, error)
+
+	// Run logs: the replay behind a person's counted score (one per person and game, replaced with the score).
+	// RunLogScores says which of the given people have one on a game, with the score it set, without loading the logs.
+	PutRunLog(ctx context.Context, l model.RunLog) error
+	RunLogOf(ctx context.Context, gameID, userID string) (*model.RunLog, error)
+	RunLogScores(ctx context.Context, gameID string, userIDs []string) (map[string]int64, error)
 }
 
 // LooksLikeID reports whether a game key has the shape of a server-generated id (24 lowercase hex).

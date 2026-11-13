@@ -205,6 +205,7 @@ struct BubblePodium: View {
                 .font(.fbName)
                 .foregroundStyle(FBColor.primaryText)
                 .lineLimit(1)
+            BoardWatchReplayButton(entry: entry, bubble: bubble, short: true)
             VStack(spacing: 2) {
                 Text("\(rank)")
                     .font(.system(size: 22, weight: .bold, design: .rounded)) // Display text: podium rank
@@ -268,20 +269,7 @@ struct BubbleBoardRow: View {
                     Text(entry.score.withCommas + " pts")
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
-                    if let replay = entry.replay {
-                        Button {
-                            router.play(bubble.id, replay: replay)
-                        } label: {
-                            Label("Watch replay", systemImage: "play.circle.fill")
-                                .font(.fbMetaEmphasized)
-                                .foregroundStyle(FBColor.accent)
-                                .labelStyle(.titleAndIcon)
-                                .frame(minHeight: 28)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Watch replay, \(entry.user.name)")
-                    }
+                    BoardWatchReplayButton(entry: entry, bubble: bubble)
                 }
             }
             Spacer(minLength: 0)
@@ -317,6 +305,61 @@ struct BubbleBoardRow: View {
             }
             .buttonStyle(.fb(.tinted, expand: false, height: 32))
             .accessibilityLabel("Add \(entry.user.name) as a friend")
+        }
+    }
+}
+
+// MARK: - Watch replay
+
+/// "Watch replay" on a board entry: plays its run as a Burst. Your own run is on the row already;
+/// a friend's or Group-mate's comes from the server (`replayAvailable`) when tapped.
+struct BoardWatchReplayButton: View {
+    let entry: BubbleScore
+    let bubble: Bubble
+    /// The podium's narrow columns: "Watch".
+    var short = false
+
+    @Environment(Router.self) private var router
+    @Environment(AppStore.self) private var appStore
+    @Environment(BubbleStore.self) private var bubbleStore
+    @State private var loading = false
+
+    var body: some View {
+        if entry.replay != nil || entry.hasServerReplay {
+            Button(action: watch) {
+                HStack(spacing: 4) {
+                    if loading {
+                        ProgressView().controlSize(.mini)
+                    }
+                    Label(short ? "Watch" : "Watch replay", systemImage: "play.circle.fill")
+                        .labelStyle(.titleAndIcon)
+                }
+                .font(.fbMetaEmphasized)
+                .foregroundStyle(FBColor.accent)
+                .frame(minHeight: 28)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(loading)
+            .accessibilityLabel("Watch replay, \(entry.user.name)")
+        }
+    }
+
+    private func watch() {
+        if let replay = entry.replay {
+            router.play(bubble.id, replay: replay)
+            return
+        }
+        loading = true
+        Task { @MainActor in
+            defer { loading = false }
+            do {
+                if let replay = try await bubbleStore.watchableReplay(for: entry, in: bubble) {
+                    router.play(bubble.id, replay: replay)
+                }
+            } catch {
+                appStore.showToast("Couldn't load \(entry.user.firstName)'s run: \(error.localizedDescription)", symbol: "exclamationmark.circle")
+            }
         }
     }
 }
