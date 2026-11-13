@@ -1,0 +1,435 @@
+{
+  "format": "story-graph/1",
+  "request": "Retro RPG where I'm a stray cat building a gang to take over the alley",
+  "made_by": "muse-wonder-1.0 (effort low) via authoring/tools/story-muse.mjs, 0 repair round(s), 2026-11-12",
+  "title": "Stray Cat: Alley Empire",
+  "premise": "You are a stray cat building a gang to take over the alley from Alpha.",
+  "start": "alley",
+  "vars": [
+    {
+      "id": "gang",
+      "label": "Gang",
+      "kind": "stat",
+      "init": 0,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "id": "fish",
+      "label": "Fish",
+      "kind": "stat",
+      "init": 1,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "id": "energy",
+      "label": "Energy",
+      "kind": "stat",
+      "init": 3,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "id": "bell",
+      "label": "Bell",
+      "kind": "item"
+    },
+    {
+      "id": "key",
+      "label": "Key",
+      "kind": "item"
+    },
+    {
+      "id": "kind",
+      "label": "Kind",
+      "kind": "flag"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "alley",
+      "place": "Your alley",
+      "text": "You wake hungry behind the bins. Alpha rules this alley, but his gang looks thin tonight.",
+      "choices": [
+        {
+          "label": "Scavenge market stalls",
+          "to": "market",
+          "do": "fish+1",
+          "note": "+1 fish"
+        },
+        {
+          "label": "Dig in the dumpster",
+          "to": "dumpster"
+        },
+        {
+          "label": "Follow a crying kitten",
+          "to": "kitten"
+        }
+      ]
+    },
+    {
+      "id": "market",
+      "place": "Fish market",
+      "text": "You weave between boots. Fish glisten on ice and every stray watches you.",
+      "choices": [
+        {
+          "label": "Snatch a whole fish",
+          "to": "fishmonger",
+          "do": "fish+2 energy-1",
+          "note": "+2 fish, -1 energy"
+        },
+        {
+          "label": "Meow for scraps",
+          "to": "lair",
+          "do": "fish+1",
+          "note": "+1 fish"
+        },
+        {
+          "label": "Slip to home alley",
+          "to": "lair"
+        }
+      ]
+    },
+    {
+      "id": "fishmonger",
+      "place": "Fish market",
+      "text": "You land on the counter. The fishmonger lifts a broom as nearby cats cheer you on.",
+      "choices": [
+        {
+          "label": "Grab fish and run",
+          "to": "lair",
+          "do": "fish+1 energy-1",
+          "note": "+1 fish, -1 energy"
+        },
+        {
+          "label": "Charm the fishmonger",
+          "to": "lair",
+          "do": "fish+1 gang+1",
+          "note": "+1 fish, +1 gang"
+        },
+        {
+          "label": "Drop down and flee",
+          "to": "lair"
+        }
+      ]
+    },
+    {
+      "id": "dumpster",
+      "place": "Big dumpster",
+      "text": "You pry the lid. Something shiny glints beside stale tuna and old bones.",
+      "choices": [
+        {
+          "label": "Take the shiny key",
+          "to": "lair",
+          "do": "key",
+          "note": "Get the key"
+        },
+        {
+          "label": "Eat stale tuna",
+          "to": "lair",
+          "do": "fish+1 energy-1",
+          "note": "+1 fish, -1 energy"
+        },
+        {
+          "label": "Head to home alley",
+          "to": "lair"
+        }
+      ]
+    },
+    {
+      "id": "kitten",
+      "place": "Drainpipe nook",
+      "text": "You find a tiny kitten shivering by a drainpipe. It stares at your fish.",
+      "choices": [
+        {
+          "label": "Share a fish",
+          "to": "lair",
+          "if": "fish>=1",
+          "do": "fish-1 kind",
+          "note": "-1 fish, remember kindness"
+        },
+        {
+          "label": "Curl around kitten",
+          "to": "lair",
+          "do": "kind energy-1",
+          "note": "-1 energy, remember kindness"
+        },
+        {
+          "label": "Shoo the kitten",
+          "to": "lair",
+          "do": "gang+1",
+          "note": "+1 gang, look tough"
+        }
+      ]
+    },
+    {
+      "id": "lair",
+      "place": "Cardboard lair",
+      "text": "You drag your haul to a cardboard lair. Recruits will need food, nerve, or a reason.",
+      "choices": [
+        {
+          "label": "Feed Miso a fish",
+          "to": "miso",
+          "if": "fish>=1",
+          "do": "fish-1",
+          "note": "-1 fish, recruit Miso"
+        },
+        {
+          "label": "Call the roof twins",
+          "to": "twins",
+          "if": "gang>=1",
+          "note": "Needs 1 gang"
+        },
+        {
+          "label": "Rest until nightfall",
+          "to": "rooftop",
+          "do": "energy+1",
+          "note": "+1 energy"
+        }
+      ]
+    },
+    {
+      "id": "miso",
+      "place": "Cardboard lair",
+      "text": "Miso the bruiser joins you, scarred and loyal. He cracks his claws for orders.",
+      "enter": "gang+1",
+      "choices": [
+        {
+          "label": "Train on the rooftops",
+          "to": "rooftop",
+          "if": "energy>=1",
+          "do": "energy-1 gang+1",
+          "note": "-1 energy, +1 gang"
+        },
+        {
+          "label": "Meet the roof twins",
+          "to": "twins"
+        },
+        {
+          "label": "Visit the kind human",
+          "to": "shop"
+        }
+      ]
+    },
+    {
+      "id": "twins",
+      "place": "Low rooftop",
+      "text": "The roof twins join in perfect sync. Your gang now moves like one shadow.",
+      "enter": "gang+2",
+      "choices": [
+        {
+          "label": "Scout Alpha's yard",
+          "to": "yard"
+        },
+        {
+          "label": "Climb toward the bells",
+          "to": "rooftop"
+        },
+        {
+          "label": "Visit the kind human",
+          "to": "shop"
+        }
+      ]
+    },
+    {
+      "id": "shop",
+      "place": "Corner shop",
+      "text": "You slip into a warm shop. A human offers food, safety, and a soft collar.",
+      "choices": [
+        {
+          "label": "Accept a warm home",
+          "to": "end_pet"
+        },
+        {
+          "label": "Beg at back door",
+          "to": "night_gate",
+          "do": "fish+2 energy-1",
+          "note": "+2 fish, -1 energy"
+        },
+        {
+          "label": "Slip toward the yard",
+          "to": "yard"
+        }
+      ]
+    },
+    {
+      "id": "rooftop",
+      "place": "Moonlit rooftops",
+      "text": "You cross slick tiles above the alley. Bells, Alpha's yard, and freedom all glint below.",
+      "choices": [
+        {
+          "label": "Climb the bell tower",
+          "to": "bell_tower"
+        },
+        {
+          "label": "Scout Alpha's yard",
+          "to": "yard"
+        },
+        {
+          "label": "Drop to corner shop",
+          "to": "shop"
+        }
+      ]
+    },
+    {
+      "id": "bell_tower",
+      "place": "Bell tower",
+      "text": "You reach the bell tower and hook a bright bell collar. Every alley cat hears it.",
+      "enter": "bell",
+      "choices": [
+        {
+          "label": "Ring bell for gang",
+          "to": "yard",
+          "do": "gang+1",
+          "note": "+1 gang"
+        },
+        {
+          "label": "Follow the moon scent",
+          "to": "moon_roof",
+          "if": "kind",
+          "note": "Needs a kind memory"
+        },
+        {
+          "label": "Sneak to Alpha's yard",
+          "to": "yard"
+        }
+      ]
+    },
+    {
+      "id": "moon_roof",
+      "place": "Silver roof",
+      "text": "You find a silver roof where strange cats bathe in moonlight and watch you kindly.",
+      "choices": [
+        {
+          "label": "Join the moon cats",
+          "to": "end_moon"
+        },
+        {
+          "label": "Return for final fight",
+          "to": "yard"
+        },
+        {
+          "label": "Settle on warm roof",
+          "to": "end_legend"
+        }
+      ]
+    },
+    {
+      "id": "yard",
+      "place": "Alpha's yard",
+      "text": "You face Alpha in his yard. His gang circles, the dogcatcher's van idles outside.",
+      "choices": [
+        {
+          "label": "Challenge Alpha now",
+          "to": "end_exile",
+          "routes": [
+            {
+              "if": "gang>=3 & bell",
+              "to": "end_king"
+            },
+            {
+              "if": "gang>=2",
+              "to": "end_legend"
+            }
+          ]
+        },
+        {
+          "label": "Open the back gate",
+          "to": "night_gate",
+          "if": "key",
+          "do": "gang+1",
+          "note": "Key opens it, +1 gang"
+        },
+        {
+          "label": "Retreat to night gate",
+          "to": "night_gate"
+        }
+      ]
+    },
+    {
+      "id": "night_gate",
+      "place": "Night gate",
+      "text": "You reach the night gate as the dogcatcher rounds the corner with a net.",
+      "choices": [
+        {
+          "label": "Slip past dogcatcher",
+          "to": "end_legend",
+          "if": "energy>=1",
+          "do": "energy-1",
+          "note": "-1 energy"
+        },
+        {
+          "label": "Follow your kind memory",
+          "to": "end_moon",
+          "if": "kind",
+          "note": "Needs a kind memory"
+        },
+        {
+          "label": "Face the dogcatcher",
+          "to": "end_pound"
+        }
+      ]
+    },
+    {
+      "id": "end_king",
+      "text": "You ring the bell, your gang charges, and Alpha bows. The alley is yours.",
+      "ending": {
+        "title": "Alley Monarch",
+        "tone": "good",
+        "rank": 1,
+        "share": "I became Alley Monarch in {choices} choices with {gang} gang!"
+      }
+    },
+    {
+      "id": "end_moon",
+      "text": "You leave the alley war behind and vanish with the moon cats over the roofs.",
+      "ending": {
+        "title": "Moon Cat",
+        "tone": "secret",
+        "rank": 2,
+        "share": "I found the secret Moon Cat ending in {choices} choices!"
+      }
+    },
+    {
+      "id": "end_legend",
+      "text": "You survive the night unbowed. Cats whisper your name, though Alpha keeps his yard.",
+      "ending": {
+        "title": "Alley Legend",
+        "tone": "neutral",
+        "rank": 3,
+        "share": "I became an Alley Legend in {choices} choices with {gang} gang!"
+      }
+    },
+    {
+      "id": "end_pet",
+      "text": "You trade the alley for warm laps and regular meals. It is safe, soft, and small.",
+      "ending": {
+        "title": "House Cat",
+        "tone": "neutral",
+        "rank": 4,
+        "share": "I became a House Cat in {choices} choices!"
+      }
+    },
+    {
+      "id": "end_exile",
+      "text": "Alpha drives you beyond the bins before your gang can form. The night turns cold.",
+      "ending": {
+        "title": "Exiled Stray",
+        "tone": "bad",
+        "rank": 5,
+        "share": "I was exiled as a stray in {choices} choices with {gang} gang."
+      }
+    },
+    {
+      "id": "end_pound",
+      "text": "The net drops. You wake in a cage, dreaming of rooftops you almost ruled.",
+      "ending": {
+        "title": "Caught by the Net",
+        "tone": "bad",
+        "rank": 6,
+        "share": "I got caught by the net in {choices} choices."
+      }
+    }
+  ]
+}
