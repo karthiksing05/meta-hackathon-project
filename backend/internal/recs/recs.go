@@ -82,7 +82,7 @@ type Options struct {
 	ScriptPath string // game-recs.js; empty finds it (see findScript)
 	Runtimes   int
 	Overrides  map[string]any
-	Timeout   time.Duration // per call; a runaway script is interrupted
+	Timeout    time.Duration // per call; a runaway script is interrupted
 }
 
 func New(o Options) (*Engine, error) {
