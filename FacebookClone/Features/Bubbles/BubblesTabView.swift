@@ -9,6 +9,7 @@ import UIKit
 ///
 /// DEBUG launch variables (see `DebugLaunch`):
 /// - `FB_FEED_INDEX=n`: start on page n.
+/// - `FB_FEED_GAME=<id>`: that game (a server id or slug) is the first page.
 /// - `FB_FAKE_RESULT=1`: show the result sheet for the first page without playing.
 /// - `FB_FEED_TAKEOVER=1`: take over the first page as if it were tapped.
 /// - `FB_FEED_PLAYER=s`: open the current page in the full-screen player, and close it s seconds later.
