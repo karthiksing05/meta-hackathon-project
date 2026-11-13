@@ -600,7 +600,8 @@ final class StudioModel {
             var note: String?
             do {
                 drafted = try await service.draftBrief(request)
-            } catch is CancellationError {
+            } catch is CancellationError where Task.isCancelled {
+                // Replaced by a newer draft or Studio closed; they own `isDraftingBrief`.
                 return
             } catch {
                 note = "I couldn't reach Muse just now, so I filled in the basics. Change anything you like."
@@ -731,6 +732,8 @@ final class StudioModel {
     /// Starts Muse. `.create` uses the reviewed brief; `.tweak` and `.nextLevel` build on the
     /// current level. `newLook` redraws the current level in another look (a tweak).
     func startCompose(_ kind: StudioComposeKind, offline: Bool = false, newLook: StudioLook? = nil) {
+        // A second tap while the step animates away would restart Muse from scratch.
+        guard !isComposing else { return }
         let request: StudioRequest
         switch kind {
         case .create:
@@ -958,6 +961,8 @@ final class StudioModel {
         composeTask?.cancel()
         briefTask?.cancel()
         advanceTask?.cancel()
+        // A cancelled draft never clears this, which left "Next" stuck on "Muse is reading".
+        isDraftingBrief = false
     }
 
     // MARK: Compose progress (header bubble)

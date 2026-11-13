@@ -46,6 +46,11 @@ struct StudioView: View {
         }
         .onAppear {
             model.attach(bubbleStore: bubbleStore, appStore: appStore)
+            // Back after `onDisappear` stopped the auto-advance: don't strand a finished build on
+            // the compose step, which has no buttons once Muse is done.
+            if model.stage == .compose && model.isFinished {
+                model.go(to: .tryIt)
+            }
         }
         .onDisappear {
             model.stopAll()
