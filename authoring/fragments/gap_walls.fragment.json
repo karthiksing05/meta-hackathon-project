@@ -1,0 +1,121 @@
+{
+  "fragment": "gap_walls",
+  "version": 1,
+  "describe": "Scrolling walls with one gap each: the classic pipe obstacle of tap-to-flap games. Use it instead of hand-writing pipes: it draws the walls and tests the collision with the same numbers, so what the player sees is what hurts. Pairs with `gravity_jump` with `flap: true` (which provides `player`), with `score` (which counts `point`) and, for the classic one-hit genre, `lives` with count 1 (the first hit ends the run). Every `spacing` px a wall `width` px wide appears past the right edge and scrolls left at `speed` px/s, with a gap of `gap` px at a random height (kept `gap_margin` px from the top and bottom). The gap narrows toward `gap_min` over `narrow_over` ms of play; set `gap_min` equal to `gap` for a fixed gap. The first wall comes after `first_after` ms. Walls are removed once off screen. Requires state `player: vec2`; set `player_r` to about 1.1 × the `size` of `gravity_jump` (the avatar is drawn 2.8 × size wide). Contact between the circle (`player`, `player_r`) and either part of a wall (top or bottom, drawn exactly as tested; the top part is treated as reaching up forever, so flying over off the top of the screen is no escape) emits `hit` once per wall, after which that wall stops colliding. `lives` listens for `hit`. When `player` is past a wall's right edge without having hit it, it emits `passed` and `point` once per wall. Draws each wall's two parts in `playfield` (the game's `wall` sprite stretched to the part, with an optional `wall_cap` at the gap edge, else plain rectangles). A hit plays the `hit` sound moment, a burst of particles, a light shake and a haptic; `score` plays the sound for `point`.",
+  "params": {
+    "speed":       { "type": "float", "default": 150.0, "min": 40.0, "max": 400.0 },
+    "spacing":     { "type": "float", "default": 220.0, "min": 120.0, "max": 400.0 },
+    "width":       { "type": "float", "default": 64.0, "min": 24.0, "max": 120.0 },
+    "gap":         { "type": "float", "default": 180.0, "min": 80.0, "max": 300.0 },
+    "gap_min":     { "type": "float", "default": 130.0, "min": 60.0, "max": 300.0 },
+    "narrow_over": { "type": "duration", "default": 40000, "min": 1000, "max": 300000 },
+    "gap_margin":  { "type": "float", "default": 70.0, "min": 20.0, "max": 150.0 },
+    "player_r":    { "type": "float", "default": 18.0, "min": 2.0, "max": 60.0 },
+    "first_after": { "type": "duration", "default": 1200, "min": 0, "max": 10000 }
+  },
+  "art": {
+    "wall":     { "describe": "One wall part (a pipe, a pillar, a branch), a tall sprite stretched to the part's exact rectangle, so draw it as a straight vertical column that still looks right when stretched. The same sprite is used for the top part and the bottom part, unflipped.", "color": "primary" },
+    "wall_cap": { "describe": "Optional rim for the end of each wall part at the gap, exactly as wide as the wall (a wide, short sprite). It sits flush on the gap edge, inside the wall, and never reaches into the gap.", "color": "primary" }
+  },
+  "requires": {
+    "state": { "player": "vec2" },
+    "events": { "point": {} }
+  },
+  "types": {
+    "_Wall": { "id": "int", "x": "float", "top": "float", "bot": "float", "hit": "bool", "passed": "bool" }
+  },
+  "state": {
+    "walls":    { "type": "list<_Wall>", "init": "[]" },
+    "_seq":     { "type": "int", "init": "0" },
+    "_travel":  { "type": "float", "init": "0.0" },
+    "_hit_at":  { "type": "vec2", "init": "vec(0.0, 0.0)" }
+  },
+  "functions": {
+    "_touching": {
+      "params": { "w": "_Wall" },
+      "returns": "bool",
+      "body": "(player.x - clamp(player.x, w.x, w.x + @width)) * (player.x - clamp(player.x, w.x, w.x + @width)) + min((player.y - clamp(player.y, -100000.0, w.top)) * (player.y - clamp(player.y, -100000.0, w.top)), (player.y - clamp(player.y, w.bot, @game.canvas_h)) * (player.y - clamp(player.y, w.bot, @game.canvas_h))) < @player_r * @player_r"
+    }
+  },
+  "events": {
+    "hit": {},
+    "passed": {}
+  },
+  "rules": [
+    {
+      "id": "scroll",
+      "on": "tick",
+      "do": [
+        { "set": "walls", "to": "map(walls, w => {...w, x: w.x - @speed * event.dt / 1000.0})" },
+        { "remove": "walls", "where": "w => w.x < -@width - 4.0" },
+        { "set": "_travel", "to": "_travel + @speed * event.dt / 1000.0" }
+      ]
+    },
+    {
+      "id": "spawn",
+      "on": "tick",
+      "when": "now >= @first_after and (len(walls) == 0 or _travel >= @spacing)",
+      "do": [
+        { "let": { "g": "@gap - max(0.0, @gap - @gap_min) * min(1.0, now / @narrow_over)" } },
+        { "let": { "mid": "random_float(@gap_margin + g / 2.0, @game.canvas_h - @gap_margin - g / 2.0)" } },
+        { "set": "walls", "to": "push(walls, {id: _seq, x: @game.canvas_w, top: mid - g / 2.0, bot: mid + g / 2.0, hit: false, passed: false})" },
+        { "incr": "_seq" },
+        { "set": "_travel", "to": "0.0" }
+      ]
+    },
+    {
+      "id": "crash",
+      "on": "tick",
+      "when": "any(walls, w => not w.hit and _touching(w))",
+      "do": [
+        { "let": { "hurt": "filter(walls, w => not w.hit and _touching(w))" } },
+        { "set": "walls", "to": "map(walls, w => if not w.hit and _touching(w) then {...w, hit: true} else w)" },
+        { "set": "_hit_at", "to": "player" },
+        { "for_each": "hurt", "as": "h", "do": [ { "emit": "hit" } ] }
+      ]
+    },
+    {
+      "id": "clear",
+      "on": "tick",
+      "when": "any(walls, w => not w.passed and w.x + @width < player.x)",
+      "do": [
+        { "let": { "done": "filter(walls, w => not w.passed and not w.hit and w.x + @width < player.x)" } },
+        { "set": "walls", "to": "map(walls, w => if not w.passed and w.x + @width < player.x then {...w, passed: true} else w)" },
+        { "for_each": "done", "as": "d", "do": [ { "emit": "passed" }, { "emit": "point" } ] }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat", "source": "walls", "as": "w", "key": "w.id",
+          "template": {
+            "node": "group", "x": "= w.x", "y": 0, "role": "hazard",
+            "children": [
+              { "include": "@art.wall", "node": "image", "asset": "@art.wall.id", "x": 0, "y": -60.0, "w": "@width", "h": "= w.top + 60.0" },
+              { "include": "@art.wall", "node": "image", "asset": "@art.wall.id", "x": 0, "y": "= w.bot", "w": "@width", "h": "= @game.canvas_h - w.bot" },
+              { "include": "@art.wall and @art.wall_cap", "node": "image", "asset": "@art.wall_cap.id", "x": 0, "y": "= w.top - @width * @art.wall_cap.aspect", "w": "@width", "h": "= @width * @art.wall_cap.aspect" },
+              { "include": "@art.wall and @art.wall_cap", "node": "image", "asset": "@art.wall_cap.id", "x": 0, "y": "= w.bot", "w": "@width", "h": "= @width * @art.wall_cap.aspect" },
+              { "include": "not @art.wall", "node": "rect", "x": 0, "y": -60.0, "w": "@width", "h": "= w.top + 60.0", "fill": "$surface", "stroke": "$primary", "stroke_width": 3, "radius": 6 },
+              { "include": "not @art.wall", "node": "rect", "x": 0, "y": "= w.bot", "w": "@width", "h": "= @game.canvas_h - w.bot", "fill": "$surface", "stroke": "$primary", "stroke_width": 3, "radius": 6 }
+            ]
+          }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "hit", "do": [
+        { "moment": "hit" },
+        { "particles": { "x": "= _hit_at.x", "y": "= _hit_at.y", "count": 18, "color": "$danger", "speed": 240, "size": 5, "ms": 420 } },
+        { "shake": { "px": 5, "ms": 160 } },
+        { "haptic": "medium" }
+      ] },
+      { "on": "passed", "do": [ { "haptic": "light" } ] }
+    ]
+  },
+  "tags": { "mood": ["tense", "playful"], "energy": ["medium", "high"] },
+  "conflicts": []
+}
