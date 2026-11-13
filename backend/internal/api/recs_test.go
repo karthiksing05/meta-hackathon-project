@@ -229,3 +229,65 @@ func TestBlend(t *testing.T) {
 		t.Fatalf("too many members: %d", code)
 	}
 }
+
+// A signed-in search keeps text relevance first but moves games the person has loved up, using the
+// recommender; signed out, or with ranking off, the order is the plain text-match order.
+func TestSearchUsesTheRecommender(t *testing.T) {
+	ts := serverWithRecs(t, true)
+	maker := register(t, ts, "maker")
+	ids := publishGames(t, ts, maker) // published in order, so the first is the oldest
+	oldest := ids[0]
+
+	_, anon := do(t, "GET", ts.URL+"/v1/search?q=game", "", nil, "")
+	items := anon["items"].([]any)
+	if anon["personalized"] != false || len(items) != 6 || items[5].(map[string]any)["id"] != oldest {
+		t.Fatalf("signed out: the oldest game is last in text order (newest first), personalized false: %v", anon)
+	}
+
+	total := 0
+	for u := 0; u < 8; u++ {
+		tok := register(t, ts, fmt.Sprintf("searcher%d", u))
+		var events []any
+		for i := 0; i < 12; i++ {
+			events = append(events, map[string]any{"eventID": fmt.Sprintf("e%d", i), "gameID": oldest, "feedItemID": fmt.Sprintf("f%d", i),
+				"dwellSec": 20, "tookOver": true, "runsFinished": 2, "replays": 2, "saved": true, "floated": true})
+		}
+		post(t, ts.URL, tok, map[string]any{"events": events})
+		_, res := do(t, "GET", ts.URL+"/v1/search?q=game", tok, nil, "")
+		if res["personalized"] != true {
+			t.Fatalf("signed in should be personalized: %v", res)
+		}
+		list := res["items"].([]any)
+		if len(list) != 6 {
+			t.Fatalf("every match is still returned: %v", list)
+		}
+		for i, it := range list {
+			if it.(map[string]any)["id"] == oldest {
+				total += i
+			}
+		}
+	}
+	if total >= 8*5 {
+		t.Fatalf("the loved game should move up from last place (5) on average, positions summed to %d over 8 people", total)
+	}
+
+	// paging past the reordered pool still works, and a search that matches nothing is empty, not an error
+	tok := register(t, ts, "pager")
+	if _, res := do(t, "GET", ts.URL+"/v1/search?q=zzzz", tok, nil, ""); len(res["items"].([]any)) != 0 {
+		t.Fatalf("no matches: %v", res)
+	}
+	_, p1 := do(t, "GET", ts.URL+"/v1/search?q=game&limit=2", tok, nil, "")
+	if p1["nextCursor"] != "2" || len(p1["items"].([]any)) != 2 {
+		t.Fatalf("page 1: %v", p1)
+	}
+	if _, p2 := do(t, "GET", ts.URL+"/v1/search?q=game&limit=2&cursor=2", tok, nil, ""); len(p2["items"].([]any)) != 2 {
+		t.Fatalf("page 2: %v", p2)
+	}
+
+	off := serverWithRecs(t, false)
+	mt := register(t, off, "maker2")
+	publishGames(t, off, mt)
+	if _, res := do(t, "GET", off.URL+"/v1/search?q=game", register(t, off, "viewer2"), nil, ""); res["personalized"] != false {
+		t.Fatalf("with ranking off the order is plain: %v", res)
+	}
+}

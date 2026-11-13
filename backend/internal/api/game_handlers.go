@@ -111,21 +111,45 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 	if offset < 0 || offset > 10000 {
 		offset = 0
 	}
-	games, err := s.Store.Search(r.Context(), q, tag, limit+1, offset)
-	if err != nil {
-		s.serverErr(w, r, err)
-		return
-	}
+	var games []model.Game
+	var err error
 	next := ""
-	if len(games) > limit {
-		games, next = games[:limit], strconv.Itoa(offset+limit)
+	personalized := false
+	if u := userFrom(r); u != nil && s.recsEnabled() && offset+limit <= searchPool {
+		// Signed in: the best text matches are reordered with the person's taste, by Kevin's recommender.
+		var pool []model.Game
+		if pool, err = s.Store.Search(r.Context(), q, tag, searchPool+1, 0); err != nil {
+			s.serverErr(w, r, err)
+			return
+		}
+		more := len(pool) > searchPool
+		if more {
+			pool = pool[:searchPool]
+		}
+		pool = s.personalizeSearch(r.Context(), u, q+"|"+tag, pool)
+		end := min(offset+limit, len(pool))
+		if offset < len(pool) {
+			games = pool[offset:end]
+		}
+		if end < len(pool) || more {
+			next = strconv.Itoa(end) // past the reordered pool, pages continue in plain text-match order
+		}
+		personalized = true
+	} else {
+		if games, err = s.Store.Search(r.Context(), q, tag, limit+1, offset); err != nil {
+			s.serverErr(w, r, err)
+			return
+		}
+		if len(games) > limit {
+			games, next = games[:limit], strconv.Itoa(offset+limit)
+		}
 	}
 	items, err := s.views(r, games)
 	if err != nil {
 		s.serverErr(w, r, err)
 		return
 	}
-	writeJSON(w, 200, map[string]any{"items": items, "nextCursor": next})
+	writeJSON(w, 200, map[string]any{"items": items, "nextCursor": next, "personalized": personalized})
 }
 
 func (s *Server) gameOr404(w http.ResponseWriter, r *http.Request) (*model.Game, bool) {

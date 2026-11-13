@@ -27,10 +27,12 @@ import (
 //	GET  /v1/me/recs                           -> my model's summary and taste profile
 
 const (
-	maxCandidates  = 300
-	sessionGap     = 30 * time.Minute
-	maxFeedHistory = 200
-	maxBlendMember = 12
+	searchPool       = 50  // the best text matches that a signed-in search reorders with the person's taste
+	searchRecsWeight = 0.4 // how much of the final order comes from the recommender (the rest is text relevance)
+	maxCandidates    = 300
+	sessionGap       = 30 * time.Minute
+	maxFeedHistory   = 200
+	maxBlendMember   = 12
 )
 
 // userLocks serializes one person's load-run-save round trips, so two requests can't overwrite each other.
@@ -83,16 +85,13 @@ func summariesOf(games []model.Game) []map[string]any {
 	return out
 }
 
-// candidatesOf offers every game: new ones get a small push, popular ones a push that grows with
-// plays and saves. (There is no friends graph on the server yet, so no "from your people" reasons.)
-func candidatesOf(games []model.Game, now time.Time) []map[string]any {
+// candidatesOf offers every game on equal terms (reason "popular", weight 1, which adds nothing to a
+// score). The server has no ranking logic of its own: which game comes first is decided entirely by
+// Kevin's recommender, from each game's description and each person's model.
+func candidatesOf(games []model.Game) []map[string]any {
 	out := make([]map[string]any, len(games))
 	for i, g := range games {
-		reason, weight := "popular", 1+math.Min(1, math.Log1p(float64(g.Plays)+3*float64(g.Likes))/6)
-		if now.Sub(g.CreatedAt) < 48*time.Hour {
-			reason, weight = "new", 1.3
-		}
-		out[i] = map[string]any{"gameID": g.ID, "reason": reason, "runUserID": nil, "weight": weight}
+		out[i] = map[string]any{"gameID": g.ID, "reason": "popular", "runUserID": nil, "weight": 1.0}
 	}
 	return out
 }
@@ -172,7 +171,7 @@ func (s *Server) myFeed(w http.ResponseWriter, r *http.Request) {
 	h := fnv.New32a()
 	h.Write([]byte(u.ID + "|" + strconv.Itoa(len(rec.Feed)) + "|" + strconv.Itoa(today())))
 	input, _ := json.Marshal(map[string]any{
-		"candidates": candidatesOf(games, now), "summaries": summariesOf(games), "feed": nonNil(rec.Feed), "feedKeys": nonNil(rec.FeedKeys),
+		"candidates": candidatesOf(games), "summaries": summariesOf(games), "feed": nonNil(rec.Feed), "feedKeys": nonNil(rec.FeedKeys),
 		"count": in.Count, "seed": h.Sum32(), "day": today(), "now": now.UnixMilli(),
 	})
 	var reply struct {
@@ -549,4 +548,70 @@ func (s *Server) memberProfile(ctx context.Context, m blendMember) map[string]an
 	p["id"], p["name"], p["isMe"], p["isFriend"], p["skill"] = m.UserID, name, false, m.IsFriend, m.Skill
 	p["themes"] = nonNil(m.Themes)
 	return p
+}
+
+// personalizeSearch reorders a search's best text matches with the person's taste. The text match
+// still counts most: each game's final position blends its text-relevance rank (60%) with its
+// recommender rank (40%). It asks Kevin's recommender to rank only these games and keeps the answer
+// out of the person's saved model and page history, since a search result isn't a page they were shown.
+func (s *Server) personalizeSearch(ctx context.Context, u *model.User, query string, pool []model.Game) []model.Game {
+	if len(pool) < 2 {
+		return pool
+	}
+	rec, err := s.loadRecs(ctx, u.ID)
+	if err != nil {
+		return pool
+	}
+	h := fnv.New32a()
+	h.Write([]byte(u.ID + "|" + query))
+	input, _ := json.Marshal(map[string]any{
+		"candidates": candidatesOf(pool), "summaries": summariesOf(pool), "feed": []string{}, "feedKeys": []string{},
+		"count": len(pool), "seed": h.Sum32(), "day": today(), "now": time.Now().UnixMilli(),
+	})
+	var reply struct {
+		Picks []rankPick `json:"picks"`
+	}
+	if _, err := s.Recs.Run(ctx, rec.State, func(sess recsSession) error {
+		out, err := sess.Rank(input)
+		if err != nil {
+			return err
+		}
+		return json.Unmarshal(out, &reply)
+	}); err != nil {
+		s.Log.Warn("recs: search personalization skipped", "err", err)
+		return pool
+	}
+	// A game can be picked twice once the repeat window passes: keep its first place, and put any
+	// game the recommender didn't place after the others, in text order.
+	recRank := map[string]int{}
+	for _, p := range reply.Picks {
+		if _, ok := recRank[p.GameID]; !ok {
+			recRank[p.GameID] = len(recRank)
+		}
+	}
+	for _, g := range pool {
+		if _, ok := recRank[g.ID]; !ok {
+			recRank[g.ID] = len(recRank)
+		}
+	}
+	type scored struct {
+		g     model.Game
+		fused float64
+		text  int
+	}
+	rows := make([]scored, len(pool))
+	for i, g := range pool {
+		rows[i] = scored{g, (1-searchRecsWeight)*float64(i) + searchRecsWeight*float64(recRank[g.ID]), i}
+	}
+	sort.SliceStable(rows, func(i, j int) bool {
+		if rows[i].fused != rows[j].fused {
+			return rows[i].fused < rows[j].fused
+		}
+		return rows[i].text < rows[j].text
+	})
+	out := make([]model.Game, len(rows))
+	for i, r := range rows {
+		out[i] = r.g
+	}
+	return out
 }
