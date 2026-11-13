@@ -185,14 +185,36 @@ export async function verifyAndFix(input, opts = {}) {
   const fixes = [];
   // The look stage (kit/look.mjs lookFix): every text node on the game's own fonts, scale and palette,
   // before anything is measured. Presentation only, so the proof covers it like the other fixes.
+  let lookSpec = null;
   if (opts.look !== false) {
     try {
       const { lookForBuilt, lookFix } = await import('../kit/look.mjs');
       const { spec } = lookForBuilt({ ...built0, game: original });
+      lookSpec = spec;
       const r = lookFix(original, spec);
       if (r.changed || r.tokens?.length) { game = r.game; fixes.push({ stage: 'look', changed: r.changed, tokens: r.tokens ?? [] }); }
     } catch (e) {
       stages.push({ stage: 'look', error: String(e?.message ?? e).slice(0, 200) });
+    }
+  }
+  // The readability stage (kit/readability.mjs): text over busy or low-contrast pixels gets a plate, an
+  // outline or a recolour from the look, judged on frames rasterised in code (no Chrome). Up to 2 rounds;
+  // presentation only, so the proof covers it.
+  if (opts.readability !== false) {
+    try {
+      const { readabilityFindings, readabilityFix } = await import('../kit/readability.mjs');
+      const { inflateSync } = await import('node:zlib');
+      const inflate = (b) => new Uint8Array(inflateSync(b));
+      for (let round = 0; round < 2; round++) {
+        const f = readabilityFindings(game, await sampleDense(game, { engine, maxSeconds: 60, ref: original }), { inflate });
+        if (!f.length) break;
+        const r = readabilityFix(game, f, { spec: lookSpec });
+        if (!r.fixes?.length) break;
+        game = r.game;
+        fixes.push(...r.fixes.map((x) => ({ stage: 'readability', ...x })));
+      }
+    } catch (e) {
+      stages.push({ stage: 'readability', error: String(e?.message ?? e).slice(0, 200) });
     }
   }
   let report = await v(game);
