@@ -12,6 +12,7 @@
 // <dir>/rebuild.json (gate, verifier stages, proof). Needs MG_ENGINE_DIR.
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expandAndValidate } from '../expander/cli.mjs';
@@ -31,6 +32,13 @@ export function mergePatch(target, patch) {
   return out;
 }
 
+/** A hash of everything in a game but its presentation: equal hashes, the same rules (seeded runs still verify). */
+export function rulesHash(game) {
+  const g = typeof game === 'string' ? JSON.parse(game) : game;
+  const { presentation: _p, ...rules } = g ?? {};
+  return createHash('sha256').update(JSON.stringify(rules)).digest('hex').slice(0, 16);
+}
+
 /**
  * manifest: a built game (content.authoring_json). opts: {tall, edits, fix (default true), engine}.
  * Returns {manifest, record}.
@@ -45,11 +53,19 @@ export async function rebuild(manifest, { tall = false, edits = null, fix = true
   if (edits) { const { __replace: _r, ...patch } = edits; authoring = mergePatch(authoring, patch); }
   // A manifest written for 360 × 640 (no look.canvas) keeps its coordinates and is lifted onto the
   // tall canvas as a whole (legacy-tall.mjs); one written for the tall canvas expands as it is.
-  const r = await expandAndValidate({ formula: 'microgame', content: { authoring_json: JSON.stringify(authoring) } });
-  if (r.errors.length) return { manifest: null, record: { ok: false, errors: r.errors.slice(0, 8) } };
+  let r = await expandAndValidate({ formula: 'microgame', content: { authoring_json: JSON.stringify(authoring) } });
+  let asBuilt = false;
+  if (r.errors.length) {
+    // A game made with fragments the library has since moved past (an older version): keep its
+    // stored game as built and fix only its presentation.
+    if (!r.errors.some((e) => e.code === 'A_FRAGMENT_VERSION') || !manifest.content.game_json) return { manifest: null, record: { ok: false, errors: r.errors.slice(0, 8) } };
+    const built = JSON.parse(manifest.content.game_json);
+    r = { game: built, playtestGame: built, errors: [] };
+    asBuilt = true;
+  }
   // The gate plays the playtest copy (the model's progress and text candidates), as the pipeline does.
   const gate = await playtest(JSON.stringify(r.playtestGame ?? r.game), { seed: 1, maxSeconds, profile });
-  const record = { ok: true, gate: { passed: gate.passed, profile: gate.profile, flags: gate.flags.filter((f) => f.blocking).map((f) => f.code) } };
+  const record = { ok: true, asBuilt, gate: { passed: gate.passed, profile: gate.profile, flags: gate.flags.filter((f) => f.blocking).map((f) => f.code) } };
   let game = r.game;
   if (tall) {
     const lifted = liftToTall(game);
@@ -72,6 +88,8 @@ export async function rebuild(manifest, { tall = false, edits = null, fix = true
     record.blocking = res.report.blocking;
     record.byCode = res.report.byCode;
   }
+  // Against the game on Prod: the same rules hash means its seeded runs and boards still verify.
+  if (manifest.content.game_json) record.sameRules = rulesHash(manifest.content.game_json) === rulesHash(game);
   const out = { ...manifest, content: { ...manifest.content, authoring_json: JSON.stringify(authoring), game_json: JSON.stringify(game) } };
   return { manifest: out, record };
 }

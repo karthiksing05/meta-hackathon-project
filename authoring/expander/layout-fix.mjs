@@ -88,7 +88,8 @@ export function keepWords(game) {
   walkNodes(game.presentation?.root, (t, ptr) => {
     if (t.node !== 'text' || t.wrap !== true || !isNum(t.w)) return;
     const weight = isNum(t.weight) ? t.weight : 400;
-    const fits = (txt, size) => longestWord(wordsOf(txt)) <= engineLineChars(t.w, size, weight);
+    // Letter-spaced text must stay on one line; other text must keep each word on a line.
+    const fits = (txt, size) => (typeof txt === "string" && txt.includes("\u200A") ? [...txt].length : longestWord(wordsOf(txt))) <= engineLineChars(t.w, size, weight);
     const sizeNow = isNum(t.size) ? t.size : t.size === undefined ? 16 : null;
     // A bound size (an expression): its smallest step is what a long word meets.
     const boundMin = isExpr(t.size) ? Math.min(...[...t.size.matchAll(/\b(\d+(?:\.\d+)?)\b/g)].map((m) => +m[1]).filter((v) => v >= MIN_TEXT && v <= 120), 120) : null;
@@ -531,7 +532,8 @@ export function plateLabels(game, geometry) {
         // A separate sprite that moves (a chaser behind the hero) is not the text's piece; a piece in
         // the text's own template (a card and its caption) is, moving or not.
         if (pg?.moving && !/\/(template|cell|item)(\/|$)/.test(ptr)) return false;
-        return !!b && (b.x1 - b.x0) * (b.y1 - b.y0) < 0.35 * W * H && (cx >= b.x0 - 1 && cx <= b.x1 + 1 && cy >= b.y0 - 1 && cy <= b.y1 + 1);
+        // A full-width band (a road or river lane the play runs through) is a region, not a piece.
+        return !!b && (b.x1 - b.x0) < 0.9 * W && (b.x1 - b.x0) * (b.y1 - b.y0) < 0.35 * W * H && (cx >= b.x0 - 1 && cx <= b.x1 + 1 && cy >= b.y0 - 1 && cy <= b.y1 + 1);
       });
       if (onPiece) continue;
     }

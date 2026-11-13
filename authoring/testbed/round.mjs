@@ -48,12 +48,12 @@ for (const g of ring.games) {
   try { sheet = (await shoot(res.manifest, { out: join(out, 'shots'), name: g.key, engine })).sheet; } catch (e) { sheet = `render failed: ${e.message}`; }
   const row = {
     key: g.key, tall: !!(res.record.lift?.rules && res.record.lift?.replays), gate: res.record.gate.passed, gateFlags: res.record.gate.flags,
-    stages: res.record.stages?.join(' → '), proof: res.record.proof, lift: res.record.lift, blocking: rep.blocking, warnings: rep.warnings,
+    stages: res.record.stages?.join(' → '), proof: res.record.proof, lift: res.record.lift,  sameRules: res.record.sameRules ?? null, asBuilt: !!res.record.asBuilt, blocking: rep.blocking, warnings: rep.warnings,
     codes: Object.entries(rep.byCode).filter(([, v]) => v.block).map(([k, v]) => `${k}×${v.block}`).join(' '),
     sheet, s: ((Date.now() - t0) / 1000).toFixed(0),
   };
   rows.push(row);
-  console.log(`${g.key}: gate ${row.gate ? 'pass' : 'FAIL ' + row.gateFlags.join(',')} | ${row.stages} | final ${rep.blocking} blocking (${row.codes}) | proof ${JSON.stringify(row.proof)} | lift ${JSON.stringify(row.lift ?? null)} | ${row.s}s`);
+  console.log(`${g.key}: gate ${row.gate ? 'pass' : 'FAIL ' + row.gateFlags.join(',')} | ${row.stages} | final ${rep.blocking} blocking (${row.codes}) | sameRules ${row.sameRules}${row.asBuilt ? " (as built)" : ""} | proof ${JSON.stringify(row.proof)} | lift ${JSON.stringify(row.lift ?? null)} | ${row.s}s`);
   for (const f of rep.findings.filter((x) => x.severity === 'block')) console.log(`   ${f.code} ${f.node} ${f.frame} ×${f.frames}: ${f.message}`);
 }
 const table = ['| game | canvas | gate | blocking | codes | proof |', '|---|---|---|---|---|---|',
