@@ -30,9 +30,11 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     var manifestURL: URL
     var coverURL: URL?
     var createdAt: Date
+    /// A draft: in the owner's creations, not in the feed or search until it is published.
+    var unlisted = false
 
     enum CodingKeys: String, CodingKey {
-        case id, slug, title, description, tags, formula, likes, plays, finishes, likedByMe, remixOf, createdAt
+        case id, slug, title, description, tags, formula, likes, plays, finishes, likedByMe, remixOf, createdAt, unlisted
         case groupID = "groupId"
         case eventID = "eventId"
         case ownerID = "ownerId"
@@ -63,6 +65,7 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
         manifestURL = try c.decode(URL.self, forKey: .manifestURL)
         coverURL = try c.decodeIfPresent(URL.self, forKey: .coverURL)
         createdAt = try c.decode(Date.self, forKey: .createdAt)
+        unlisted = (try? c.decodeIfPresent(Bool.self, forKey: .unlisted)) ?? false
     }
 
     init(

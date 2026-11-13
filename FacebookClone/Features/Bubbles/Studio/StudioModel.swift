@@ -220,6 +220,10 @@ final class StudioModel {
     /// Set when the run changes a game the server has (a tweak, a new look, the next level, a
     /// remix): `POST /v1/generate {baseGameId, ...}`. Nil for a new game.
     @ObservationIgnored private var runRevision: GameRevision?
+    /// Games the server made in this session, still drafts: the level's app id to the id the
+    /// server knows it by (the manifest id it sent, linked to its server id). Shared ones are
+    /// published (`publishDrafts`); the rest are deleted when Studio is discarded.
+    @ObservationIgnored private(set) var drafts: [String: String] = [:]
 
     // Try it
     var levels: [StudioResult] = []
@@ -890,6 +894,7 @@ final class StudioModel {
         }
         applyBaseUpdate(event.baseUpdate)
         let manifest = fixedUp(made)
+        if runIsServer { drafts[manifest.id] = made.id }
         let models = Self.models(in: events, manifest: manifest)
         let result = StudioResult(
             manifest: manifest,
@@ -1326,6 +1331,7 @@ final class StudioModel {
 
         let sentTo = isEditMode ? [] : sendToFriends(first, appStore: appStore, bubbleStore: bubbleStore)
         saveMakeRecords(for: published, sentTo: sentTo)
+        publishDrafts(newLevels.map(\.manifest.id))
 
         if isEditMode, !levels.contains(where: \.isExisting) {
             toast = "Saved as a new version of \(baseTitle)"
@@ -1342,6 +1348,42 @@ final class StudioModel {
             toast += " · Sent to \(sentTo.count == 1 ? sentTo[0].name : "\(sentTo.count) friends")"
         }
         return openID.map { ($0, toast) }
+    }
+
+    /// Lists the shared levels on the server: Studio makes every game as a draft
+    /// (`POST /v1/creations/{id}/publish`). Tries twice; a level that still fails stays a draft,
+    /// playable by link, and the person hears so.
+    private func publishDrafts(_ levelIDs: [String]) {
+        let ids = levelIDs.compactMap { drafts.removeValue(forKey: $0) }
+        guard !ids.isEmpty else { return }
+        let generator = GameGeneratorFactory.current
+        let appStore = appStore
+        Task { @MainActor in
+            var failed = 0
+            for id in ids {
+                do {
+                    try await generator.publish(gameID: id)
+                } catch {
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
+                    do { try await generator.publish(gameID: id) } catch { failed += 1 }
+                }
+            }
+            if failed > 0 {
+                appStore?.showToast("Couldn't put it in the feed yet. Friends can still play it from your share.", symbol: "exclamationmark.triangle")
+            }
+        }
+    }
+
+    /// Studio was discarded: deletes the drafts this session made (best effort), so dropped
+    /// builds and tweaks don't pile up in the person's games.
+    func discardDrafts() {
+        let ids = Array(drafts.values)
+        drafts = [:]
+        guard !ids.isEmpty else { return }
+        let generator = GameGeneratorFactory.current
+        Task.detached {
+            for id in ids { await generator.discard(gameID: id) }
+        }
     }
 
     /// Floats to the feed or a Group make a post; Event icebreakers live on the Event.

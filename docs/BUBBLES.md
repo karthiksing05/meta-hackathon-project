@@ -1729,7 +1729,9 @@ so Build, Try, Share and "How Muse made it" are unchanged. Optional fields (`dat
 be at most 2,000 characters; the agreed anatomy goes in its own `anatomy` field (up to 16 KB; the
 server adds it to what Muse reads), for new games, remixes and anatomy changes. New games are sent
 with `draft: true` (changes are drafts by default), so a build the person drops never reaches the
-feed. `polishing` events (the quality check's polish round) show as one more fix round. The server
+feed. Share publishes the shared levels (`POST /v1/creations/{id}/publish`, `GameGenerator.publish`);
+Discard deletes the session's drafts (`DELETE /v1/creations/{id}`, `GameGenerator.discard`); levels a
+tweak replaced stay unlisted drafts, and the Library skips drafts (`RemoteGame.unlisted`). `polishing` events (the quality check's polish round) show as one more fix round. The server
 runs one job per person: a start that hears "you already have a game being made" right after a
 cancel waits and tries again for about 8 s (shown as waiting for a slot). The games API client is always the live server (`GamesAPIFactory.current`,
 base URL `https://api.ol4ol.com`, `FB_API_URL` overrides it in DEBUG); the app signs in once at launch
