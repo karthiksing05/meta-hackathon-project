@@ -91,6 +91,9 @@ final class GamesAccount {
     func signOut() async {
         task?.cancel()
         task = nil
+        await GamePushNotifications.shared.unregister()
+        GamePushNotifications.shared.clearForSignOut()
+        GameNotificationInbox.shared.useAccount(nil)
         let api = GamesAPILive.shared
         await api.signOut()
         await api.setAutoSignIn(false)
