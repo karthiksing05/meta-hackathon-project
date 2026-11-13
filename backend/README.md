@@ -145,20 +145,14 @@ Mongo (`recs_state`); the pages shown this session are kept with it.
 - Games carry what the recommender describes them by (`mood`, `energy`, `competition`, `look`, `scope`, `isDaily`, and the
   playtest bots' runs for generated games), read from the manifest when a game is published.
 
-## People, friends, Groups and the demo world
+## People, friends and Groups
 
-Everything the app used to keep as local demo data lives on the server: the cast (people), who is a friend, which Groups and
-Events exist and who is in them. People are accounts; a *demo* person (`synthetic: true`) has no password and can never sign in.
-The feed's candidates come from this real data (the same reasons the app's own feed used: a friend's best run `friendBurst` 2.2,
-a Group member's `groupBurst` 1.6, `daily` 3, `icebreaker` 2, `nearby` 1.8, `nextLevel` 1.2, `yours` 0.6, `popular` 0.8); the
-order is still decided only by the recommender. Group Blend takes its members, friend flags and skill from the server.
-
-`deploy.sh seed` (or `go run ./cmd/seed`) puts the app's demo world on the server: 10 people with ids like `sf-maya-okafor`, the
-friendships inside the cast, the New in SF Group and the newcomers picnic Event (with members), the app's 32 seed games (owned by
-the cast, remixes linked to their originals), and what each person scored on each game, from real bot runs of the game runtime
-(`internal/seed/tools/make-scores.cjs`). Running it again changes nothing. The person using the app makes the cast their friends
-with `PUT /v1/me/friends/{id}` and joins the Group with `PUT /v1/groups/group-newinsf/members/me`. The data under
-`internal/seed/data` is copied from the app (`FacebookClone/Bubbles/Seeds`; `internal/seed/SOURCE_COMMIT`).
+All of this is real server data, with no demo or mock records: people are accounts, friendships and Group membership are made by
+people through the API, and games come from Muse and uploads. The feed's candidates come from this data (the same reasons the app's
+own feed generator used: a friend's best run `friendBurst` 2.2, a Group member's `groupBurst` 1.6, `daily` 3, `icebreaker` 2,
+`nearby` 1.8, `nextLevel` 1.2, `yours` 0.6, `popular` 0.8); the order is decided only by the recommender. Group Blend takes its members
+and friend flags from the server, and a member's taste from what they have actually played. With no history yet, the recommender falls
+back to its own neutral defaults. The server holds no cast, seed games or invented scores.
 
 ## Web player (for testing)
 

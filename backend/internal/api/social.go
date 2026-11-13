@@ -36,12 +36,11 @@ type profile struct {
 	Username    string `json:"username"`
 	DisplayName string `json:"displayName"`
 	Bio         string `json:"bio,omitempty"`
-	Synthetic   bool   `json:"synthetic,omitempty"`
 	IsFriend    bool   `json:"isFriend,omitempty"`
 }
 
 func profileOf(u model.User, friends map[string]bool) profile {
-	return profile{ID: u.ID, Username: u.Username, DisplayName: u.DisplayName, Bio: u.Bio, Synthetic: u.Synthetic, IsFriend: friends[u.ID]}
+	return profile{ID: u.ID, Username: u.Username, DisplayName: u.DisplayName, Bio: u.Bio, IsFriend: friends[u.ID]}
 }
 
 func idSet(ids []string) map[string]bool {
@@ -344,9 +343,6 @@ func (s *Server) membersForBlend(ctx context.Context, g *model.Group, me *model.
 	out := make([]blendMember, 0, len(users))
 	for _, u := range users {
 		bm := blendMember{UserID: u.ID, Name: u.DisplayName, IsFriend: friends[u.ID], Bio: u.Bio}
-		if u.Skill > 0 {
-			bm.Skill = map[string]any{"overall": u.Skill}
-		}
 		out = append(out, bm)
 	}
 	return out, nil

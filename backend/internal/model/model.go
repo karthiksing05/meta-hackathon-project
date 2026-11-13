@@ -11,8 +11,6 @@ type User struct {
 	PasswordHash string    `bson:"passwordHash" json:"-"`
 	CreatedAt    time.Time `bson:"createdAt" json:"createdAt"`
 	Bio          string    `bson:"bio,omitempty" json:"bio,omitempty"`
-	Synthetic    bool      `bson:"synthetic,omitempty" json:"synthetic,omitempty"` // a demo person: no password, never signs in
-	Skill        float64   `bson:"skill,omitempty" json:"-"`                       // 0..1, how well they play; used by Group Blend
 }
 
 type RefreshToken struct {

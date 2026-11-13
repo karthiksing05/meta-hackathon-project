@@ -380,20 +380,3 @@ func zipManifest(manifest []byte) (*bytes.Buffer, error) {
 	}
 	return &zb, err
 }
-
-// PublishManifest stores a game from its manifest as if the owner had uploaded it (used by the seed
-// tool). bots are the playtest runs, if any.
-func (s *Server) PublishManifest(ctx context.Context, owner *model.User, manifest []byte, bots []model.BotRun) (*model.Game, error) {
-	zb, err := zipManifest(manifest)
-	if err != nil {
-		return nil, err
-	}
-	g, perr := s.publishPackage(ctx, owner, zb, bots)
-	if perr != nil {
-		if perr.Err != nil {
-			return nil, perr.Err
-		}
-		return nil, errors.New(perr.Msg)
-	}
-	return g, nil
-}
