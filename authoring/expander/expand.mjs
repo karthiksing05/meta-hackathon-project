@@ -10,6 +10,7 @@ import { compileSound, MOMENTS } from './sound.mjs';
 import { applyUiKit, kitTokens } from './ui-kit.mjs';
 import { normalizeScore, unknownScoreEvents } from './score.mjs';
 import { pickCanvas, fitLayout, safeArea } from './canvas.mjs';
+import { applyLook, lookFromChoice } from '../kit/look.mjs';
 
 export const STANDARD_TOKENS = ['primary', 'secondary', 'accent', 'ink', 'bg', 'danger', 'surface'];
 export const SLOTS = { hud_top: 3, hud_bottom: 2, playfield: Infinity, overlay: Infinity };
@@ -694,6 +695,9 @@ export function expand(manifest, lib, options = {}) {
       : uses.find((u) => u.out.textField) ? { text_field: clone(uses.find((u) => u.out.textField).out.textField) } : {}),
   };
   if (sound.music) map('/presentation/music', 'game', '/sound/music');
+  // The game's own look (art.type, authoring/kit): every text node on its pairing's fonts, its scale
+  // and its palette. Presentation only.
+  if (art.type) applyLook(out, lookFromChoice(art.type), { inPlace: true });
 
   // Sprites nothing draws are probably a mistake (a role name typo, or a fragment that was dropped).
   for (const e of gameSlots) collectAssetNames(e.node, usedSprites);

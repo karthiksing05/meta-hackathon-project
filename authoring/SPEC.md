@@ -396,7 +396,13 @@ comes from the look preset and the fragments' fallback shapes.
   `look.tokens`.
 - **`font`** is one of: `system`, `Inter`, `Fraunces`, `Space Grotesk`, `Silkscreen`, `Avenir Next`,
   `Futura`, `Gill Sans`, `Optima`, `Georgia`, `Baskerville`, `American Typewriter`, `Chalkboard SE`,
-  `Marker Felt`, `Noteworthy`, `Menlo`, `Courier New`.
+  `Marker Felt`, `Noteworthy`, `Menlo`, `Courier New`. Any family the app bundles (`authoring/fonts/fonts.json`, e.g. `Bowlby One`,
+  `Cinzel`, `Press Start 2P`) is allowed too.
+- **`type`** is the game's look (`authoring/kit/README.md`): `{ "kit": "look/1", "vibe": "game_show",
+  "pairing": "marquee", "seed": 123 }`, normally written by the pipeline from the plan's words and the
+  game id. The expander sets every text node on the pairing's fonts, weights, case and modular scale,
+  text colours on the palette, and the pairing's outline under display text. An unknown vibe or
+  pairing is `A_ART_FIELD` at `/art/type`.
 - **`backdrop`** is one sprite drawn under everything at the canvas size (360 × 640).
 - **`sprites`** maps a name (lowercase, digits and `_`, up to 24 characters; not `backdrop` or
   `music`) to a sprite. A sprite named after a role a fragment draws (1.7) is drawn by that fragment;

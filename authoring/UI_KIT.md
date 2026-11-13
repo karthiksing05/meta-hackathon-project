@@ -85,6 +85,13 @@ button with `enabled` and `progress`), and the HUD counters of `score rounds liv
 diff_spots`. Layout params that the kit now decides (`keyboard.x/y/key_size/gap`,
 `choice_story.text_y/button_y/picture_y`, `story_vars.place_y/card_y`) are accepted and ignored.
 
+## 2b. Fonts and the type scale come from the game's look
+
+The fixed type steps above are where Muse writes sizes; the game's own look (`authoring/kit/`,
+`art.type`) then moves every text node onto its vibe's pairing and modular scale, so games don't
+share a house font or scale. `kitRegions(canvas)` gives the fixed HUD band, play area and control
+band (tall canvas: y 114–162, 174–496, 508–660).
+
 ## 3. Layout regions
 
 The canvas size is one constant, `CANVAS` in `expander/ui-style.mjs` (360 × 640 today; a look or the
