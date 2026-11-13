@@ -259,6 +259,17 @@ type Group struct {
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 }
 
+// GroupDaily is the game a Group plays on one day: everyone gets the same game, so the board is fair. One per Group and
+// date (YYYY-MM-DD, as the person who set it chose); setting it again for the same date replaces the game.
+type GroupDaily struct {
+	ID        string    `bson:"_id" json:"-"` // groupId + ":" + date
+	GroupID   string    `bson:"groupId" json:"groupId"`
+	Date      string    `bson:"date" json:"date"`
+	GameID    string    `bson:"gameId" json:"gameId"`
+	SetBy     string    `bson:"setBy" json:"setBy"`
+	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
+}
+
 // GroupMember is one person in a Group or Event.
 type GroupMember struct {
 	GroupID  string    `bson:"groupId" json:"groupId"`

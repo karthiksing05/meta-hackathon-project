@@ -55,9 +55,10 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/me/recs` | bearer | my model's summary and taste profile |
 | `GET /v1/users/{id}` | optional | a person's public profile (`isFriend` when signed in) |
 | `GET /v1/me/friends`, `PUT`/`DELETE /v1/me/friends/{id}` | bearer | my friends; add or remove one (mutual, immediate) |
-| `GET /v1/groups?kind=&mine=1`, `POST /v1/groups` | optional / bearer | Groups and Events; create one |
+| `GET /v1/groups?kind=&mine=1`, `POST /v1/groups` | optional / bearer | Groups and Events; create one: `{kind, name, category?, about?, coverSeed?, private?, id?}`. `id` (optional) is a stable id the app's other surfaces already use, such as the demo world's `group-newinsf` (3 to 48 lowercase letters, digits or dashes, starting with a letter; 409 if taken); without it the server makes one |
 | `GET /v1/groups/{id}`, `PUT`/`DELETE /v1/groups/{id}/members/me` | optional / bearer | one with its members; join or leave |
 | `GET /v1/groups/{id}/games` | optional | games made for it |
+| `GET /v1/groups/{id}/daily?date=YYYY-MM-DD`, `POST /v1/groups/{id}/daily` `{gameId, date?}` | optional / bearer (the Group's owner) | the Group's Daily: one game everyone plays that day. GET returns the Daily for `date` or the latest before it, `{groupId, date, gameId, setBy, createdAt, isToday, game}` (404: none yet); the app sends its own calendar day (default: today in UTC). POST sets or replaces the day's game (a listed game, or your own draft) and sends every other member a `daily_ready` notification; Groups only (422 for an Event) |
 | `GET /v1/groups/{id}/leaderboard?week=2026-W46` | bearer (members) | the Group's weekly board: members ranked by rank points across the Group's games (10, 7, 5, 3, 2, then 1 for each game; ties share a place); `{week, items: [{user, points, gamesPlayed, rank, rankChange}]}`; ISO weeks in UTC, default this week |
 | `GET /v1/users?q=` | bearer | find people: username prefix or the start of a display-name word, 2 to 40 characters |
 | `POST /v1/groups/{id}/blend`, `GET /v1/groups/{id}/blend-inputs` | bearer (members) | Blend for the group's members, taken from the server's data; each member's skill, taste and recent games |
@@ -198,6 +199,7 @@ Kinds, and what makes them:
 - `group_game`: `POST /v1/groups/{id}/game-shares {gameId, eventId}`. A member shares a game into a Group; every other member is notified. `eventId` is the post's stable id (4 to 100 characters), so a retry makes no second notification. The Group must be a Group (not an Event) and the sender in it.
 - `friend_challenge`: a friend sent you `POST /v1/challenges` (`challengeId`) or started `POST /v1/series` with you (`seriesId`).
 - `leaderboard_lost`: someone took first place from you on a ranked game. Only the former first place hears it, only when a counted score changes the leader, by the game's direction and tie-break. Own improvements, scores below first, empty boards and unranked games make nothing. Score writes on one game are serialized.
+- `daily_ready`: `POST /v1/groups/{id}/daily` by the Group's owner. Every other member hears "Today's Daily in <Group> is ready" (`gameId`, `groupId`). Once per member, date and game, so setting the same Daily again notifies nobody twice.
 - `viral_match`: a public game with many distinct players in a window whose description is close to your learned taste (the cosine of `game-recs.js`'s `describe(...).x` and your taste vector). Defaults: 100 players in 24 h, cosine 0.85, at least 5 learned pages, one a day, never your own game or one you played, each game once. Tune with `VIRAL_MIN_PLAYERS`, `VIRAL_WINDOW`, `VIRAL_COSINE`, `VIRAL_MIN_PAGES`, `VIRAL_PER_DAY`, `VIRAL_INTERVAL`; `VIRAL_MATCH=0` turns it off. A person whose taste has dislikes pulls away from a game's vector, so the cosine of 0.85 is a strict bar; expect to calibrate it on real data.
 
 One row per (person, source) at most, so a retried trigger never notifies twice. The inbox works with no push configured.
@@ -264,6 +266,8 @@ own feed generator used: a friend's best run `friendBurst` 2.2, a Group member's
 `nearby` 1.8, `nextLevel` 1.2, `yours` 0.6, `popular` 0.8); the order is decided only by the recommender. Group Blend takes its members
 and friend flags from the server, and a member's taste from what they have actually played. With no history yet, the recommender falls
 back to its own neutral defaults. The server holds no cast, seed games or invented scores.
+The demo's New in SF world is made through the public API by `tools/demo-seed/seed.mjs` (synthetic accounts, the Group and
+the picnic Event with the app's ids, scoped copies of real Muse games, scores from replayed bot runs and today's Daily).
 
 ## Web player (for testing)
 

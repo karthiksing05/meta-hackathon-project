@@ -8,6 +8,7 @@ const (
 	NotifFriendChallenge = "friend_challenge" // a friend challenged you, or started a best-of with you
 	NotifLeaderboardLost = "leaderboard_lost" // someone took first place from you
 	NotifViralMatch      = "viral_match"      // a game many people are playing that fits your taste
+	NotifDailyReady      = "daily_ready"      // today's Daily is set in a Group you are in
 )
 
 // Push states of a notification's lock-screen delivery.

@@ -32,6 +32,7 @@ type Memory struct {
 	devices    map[string]model.PushDevice
 	sounds     map[string]*model.Sound
 	soundSaves map[string]bool // soundID|userID
+	dailies    map[string]model.GroupDaily
 }
 
 func NewMemory() *Memory {

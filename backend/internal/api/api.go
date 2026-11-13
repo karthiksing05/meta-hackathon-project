@@ -163,6 +163,8 @@ func (s *Server) Handler() http.Handler {
 			r.Route("/{id}", func(r chi.Router) {
 				r.With(s.optionalAuth).Get("/", s.getGroup)
 				r.With(s.optionalAuth).Get("/games", s.groupGames)
+				r.With(s.optionalAuth).Get("/daily", s.getGroupDaily)
+				r.With(s.requireAuth).Post("/daily", s.setGroupDaily)
 				r.With(s.requireAuth).Get("/leaderboard", s.groupLeaderboard)
 				r.With(s.requireAuth).Post("/game-shares", s.shareGameToGroup)
 				r.With(s.requireAuth).Put("/members/me", s.setMembership(true))

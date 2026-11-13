@@ -196,23 +196,39 @@ func (s *Server) groupOr404(w http.ResponseWriter, r *http.Request) (*model.Grou
 
 func (s *Server) createGroup(w http.ResponseWriter, r *http.Request) {
 	var in struct {
-		Kind, Name, Category, About string
-		Private                     bool
+		ID, Kind, Name, Category, About, CoverSeed string
+		Private                                    bool
 	}
 	if !decode(w, r, &in) {
 		return
 	}
 	in.Name = strings.TrimSpace(in.Name)
-	if n := len([]rune(in.Name)); n < 2 || n > 80 || len(in.About) > 500 || len(in.Category) > 40 {
+	if n := len([]rune(in.Name)); n < 2 || n > 80 || len(in.About) > 500 || len(in.Category) > 40 || len(in.CoverSeed) > 60 {
 		writeErr(w, 400, "a group needs a name of 2 to 80 characters")
 		return
 	}
 	if in.Kind != "event" {
 		in.Kind = "group"
 	}
+	id := "grp_" + auth.NewID(8)
+	if in.ID != "" {
+		// a stable id the app's other surfaces already use (the demo world's "group-newinsf"); never an existing one
+		if !groupIDRE.MatchString(in.ID) {
+			writeErr(w, 400, "id must be 3 to 48 lowercase letters, digits or dashes, starting with a letter")
+			return
+		}
+		if _, err := s.Store.GroupByID(r.Context(), in.ID); err == nil {
+			writeErr(w, 409, "that id is taken")
+			return
+		} else if !errors.Is(err, store.ErrNotFound) {
+			s.serverErr(w, r, err)
+			return
+		}
+		id = in.ID
+	}
 	me := userFrom(r)
 	now := time.Now().UTC().Truncate(time.Millisecond)
-	g := &model.Group{ID: "grp_" + auth.NewID(8), Kind: in.Kind, Name: in.Name, Category: in.Category, About: in.About, Private: in.Private, OwnerID: me.ID, CreatedAt: now}
+	g := &model.Group{ID: id, Kind: in.Kind, Name: in.Name, Category: in.Category, About: in.About, CoverSeed: in.CoverSeed, Private: in.Private, OwnerID: me.ID, CreatedAt: now}
 	if err := s.Store.UpsertGroup(r.Context(), g); err != nil {
 		s.serverErr(w, r, err)
 		return
