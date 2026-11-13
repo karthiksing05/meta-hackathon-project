@@ -1,0 +1,52 @@
+{
+  "family": "rhythm_music",
+  "notes": "Songs are original: the beat, notes and any melody are generated (synth_sound, melody_clip). A named song or artist becomes a style hint, said in the plan.",
+  "checklists": [
+    {
+      "applies_to": ["*"],
+      "slots": [
+        {
+          "id": "music_style",
+          "ask": "What kind of music should you play along to?",
+          "why": "Picks the tempo, the groove and the sounds of every note and clip.",
+          "need": "required",
+          "extrapolate_from": "a genre, era, artist, game or instrument named in the request, or the theme",
+          "default": "upbeat synth pop",
+          "ask_when": "the request names no genre, era or theme",
+          "choices": ["upbeat synth pop", "8-bit game music", "drums and percussion", "chill lo-fi"],
+          "affects": ["content"]
+        },
+        {
+          "id": "tempo",
+          "ask": "Chill, steady or frantic?",
+          "why": "Sets the bpm and how fast notes come, which is most of the difficulty.",
+          "need": "nice",
+          "extrapolate_from": "'fast', 'hard', 'relaxing', 'for kids' in the request",
+          "default": "steady",
+          "choices": ["chill", "steady", "frantic"],
+          "affects": ["difficulty", "rules"]
+        },
+        {
+          "id": "input_style",
+          "ask": "Tap lanes, tap anywhere, or hold?",
+          "why": "Lanes are the classic note highway; one-button is easiest on a phone; holds add long notes.",
+          "need": "nice",
+          "extrapolate_from": "'lanes', 'guitar', 'one button', 'hold' in the request, or a named game",
+          "default": "tap lanes",
+          "choices": ["tap lanes", "tap anywhere", "tap and hold"],
+          "affects": ["rules"]
+        },
+        {
+          "id": "audience",
+          "ask": "Beat a friend's score, or play solo?",
+          "why": "A friend's score becomes the target to beat; a Group gets a shared song of the day.",
+          "need": "required",
+          "extrapolate_from": "'beat my score', 'friends', 'group', 'band' in the request, or the Studio target",
+          "default": "beat a friend's score",
+          "choices": ["beat a friend's score", "just me", "a Group daily"],
+          "affects": ["social"]
+        }
+      ]
+    }
+  ]
+}

@@ -28,5 +28,18 @@
     "expect": [
       "trivia_map_board"
     ]
+  },
+  {
+    "request": "\"Finish the Saying\" trivia game featuring sayings from around the world, with the country shown on a map once I answer",
+    "expect": [
+      "map_reveal_trivia"
+    ],
+    "notes": "Kevin #11"
+  },
+  {
+    "request": "food trivia that shows each dish's country on a map",
+    "expect": [
+      "map_reveal_trivia"
+    ]
   }
 ]

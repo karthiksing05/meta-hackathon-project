@@ -12,6 +12,8 @@
 import * as P from './prompts.mjs';
 import { verifyScore } from './score-step.mjs';
 import { normalizeScore, unknownScoreEvents } from './score.mjs';
+import { groupPlayBlock } from './group-play.mjs';
+import { wantsStory, composeStory } from './story-compose.mjs';
 
 /** The spec's score as a manifest block: bounds dropped (the bots set them), unknown events dropped. */
 export function adoptSpecScore(specScore, game) {
@@ -134,58 +136,79 @@ export async function composeGame({ request, brief, base = null, context = null 
     const gateOptions = context?.gate_profile ? { gate_profile: String(context.gate_profile) } : undefined;
     const first = base ? P.revise(base.authoring_json, request, brief) : P.compose(request, brief);
 
-    let reply;
-    let lastError;
-    for (let attempt = 1; attempt <= 2 && reply === undefined; attempt++) {
-      emit({ kind: 'drafting', attempt });
-      try { reply = await call(system, first, 'microgame draft'); } catch (e) { lastError = e; }
-    }
-    if (reply === undefined) throw lastError ?? new GenerationError('Muse returned no manifest.');
-
-    // Expand, repair, gate (one more repair for blocking flags). Keeps the best valid version.
-    let repairs = 0;
-    let playtestRepairUsed = false;
-    let best = null;
+    // Stories (the plan uses branching_story): Muse writes a story graph that our checker walks, the
+    // compiler builds and the story bots gate. Anything that fails falls back to the normal compose.
     let chosen = null;
-    while (!chosen) {
-      live();
-      emit({ kind: 'expanding' });
-      const expansion = studio.expand(reply);
-      const shown = expansion.authoring_json ?? reply;
-      if (stats.firstDraftValid === null) stats.firstDraftValid = !!expansion.ok;
-      if (!expansion.ok) {
-        const issues = P.issues(expansion);
-        if (repairs >= maxRepairRounds) {
-          if (best) { chosen = best; break; }
-          throw new GenerationError(`Muse's microgame still doesn't validate: ${issues[0] ?? 'unknown error'}`, issues);
-        }
-        repairs++;
-        stats.repairRounds = repairs;
-        emit({ kind: 'repairing', round: repairs, issues });
-        reply = await call(system, P.repair(request, shown, issues, repairs), `microgame repair ${repairs}`);
-        continue;
+    let story = null;
+    if (!base && wantsStory(context) && typeof studio.storyGate === 'function') {
+      try {
+        story = await composeStory({ request, context, brief }, studio, { call, emit });
+      } catch (e) {
+        if (e instanceof GenerationError) throw e;
+        story = { fallback: String(e?.message ?? e), notes: [] };
       }
-      emit({ kind: 'playtesting', bots: BOT_COUNT });
-      const report = await studio.gate(expansion.playtest_game_json || expansion.game_json, 1, gateOptions);
-      const blocking = blockingOf(report);
-      emit({ kind: 'playtested', passed: !!report.passed, headline: report.summary ?? '', blocking: blocking.map((f) => `${f.code}: ${f.message}`) });
-      if (report.passed) {
+      stats.story = { used: !!story.expansion, notes: story.notes ?? [], ...(story.fallback ? { fallback: story.fallback } : {}) };
+      if (story.expansion) {
+        chosen = { expansion: story.expansion, report: story.report };
+        stats.firstDraftValid = true;
         stats.passedGate = true;
-        chosen = { expansion, report };
-        break;
+      } else stats.story.notes.push(`fell back to the normal compose: ${story.fallback}`);
+    }
+
+    if (!chosen) {
+      let reply;
+      let lastError;
+      for (let attempt = 1; attempt <= 2 && reply === undefined; attempt++) {
+        emit({ kind: 'drafting', attempt });
+        try { reply = await call(system, first, 'microgame draft'); } catch (e) { lastError = e; }
       }
-      if (!best || blocking.length < blockingOf(best.report).length) best = { expansion, report };
-      if (playtestRepairUsed) { chosen = best; break; }
-      playtestRepairUsed = true;
-      stats.playtestRepair = true;
-      emit({ kind: 'repairing', round: repairs + 1, issues: blocking.map((f) => `${f.code}: ${f.message}`) });
-      reply = await call(system, P.playtestRepair(request, shown, report), 'microgame playtest repair');
+      if (reply === undefined) throw lastError ?? new GenerationError('Muse returned no manifest.');
+
+      // Expand, repair, gate (one more repair for blocking flags). Keeps the best valid version.
+      let repairs = 0;
+      let playtestRepairUsed = false;
+      let best = null;
+      while (!chosen) {
+        live();
+        emit({ kind: 'expanding' });
+        const expansion = studio.expand(reply);
+        const shown = expansion.authoring_json ?? reply;
+        if (stats.firstDraftValid === null) stats.firstDraftValid = !!expansion.ok;
+        if (!expansion.ok) {
+          const issues = P.issues(expansion);
+          if (repairs >= maxRepairRounds) {
+            if (best) { chosen = best; break; }
+            throw new GenerationError(`Muse's microgame still doesn't validate: ${issues[0] ?? 'unknown error'}`, issues);
+          }
+          repairs++;
+          stats.repairRounds = repairs;
+          emit({ kind: 'repairing', round: repairs, issues });
+          reply = await call(system, P.repair(request, shown, issues, repairs), `microgame repair ${repairs}`);
+          continue;
+        }
+        emit({ kind: 'playtesting', bots: BOT_COUNT });
+        const report = await studio.gate(expansion.playtest_game_json || expansion.game_json, 1, gateOptions);
+        const blocking = blockingOf(report);
+        emit({ kind: 'playtested', passed: !!report.passed, headline: report.summary ?? '', blocking: blocking.map((f) => `${f.code}: ${f.message}`) });
+        if (report.passed) {
+          stats.passedGate = true;
+          chosen = { expansion, report };
+          break;
+        }
+        if (!best || blocking.length < blockingOf(best.report).length) best = { expansion, report };
+        if (playtestRepairUsed) { chosen = best; break; }
+        playtestRepairUsed = true;
+        stats.playtestRepair = true;
+        emit({ kind: 'repairing', round: repairs + 1, issues: blocking.map((f) => `${f.code}: ${f.message}`) });
+        reply = await call(system, P.playtestRepair(request, shown, report), 'microgame playtest repair');
+      }
     }
 
     // Polish: a new game that passed the bots but reads as unfinished gets one more round. The
     // polished version ships only if it validates, passes the bots and scores higher.
     let quality = studio.quality(chosen.expansion.authoring_json, base ? '' : request);
-    if (polish && !base && chosen.report.passed && P.needsPolish(quality)) {
+    // A story is checked path by path against its graph; a polish rewrite would skip that, so stories keep their build.
+    if (polish && !base && !story?.expansion && chosen.report.passed && P.needsPolish(quality)) {
       try {
         emit({ kind: 'polishing', issues: quality.lines });
         const text = await call(system, P.polish(request, chosen.expansion.authoring_json, quality.lines), 'microgame polish');
@@ -234,6 +257,14 @@ export async function composeGame({ request, brief, base = null, context = null 
       ...(base?.emoji ? { emoji: base.emoji } : {}),
       ...(score?.model ? { score: score.model } : {}),
     });
+    // Group play: how friends compare this game's runs (the spec's social part, kept consistent with the score).
+    // A story compares by ending (best first) with the endings the compiled graph really has.
+    // The plan's display line is kept when it shows the ending ("{ending} in {choices} choices").
+    const planned = context?.plan?.spec?.social;
+    const display = /\{ending\}/.test(String(planned?.result?.display ?? '')) ? planned.result.display : story?.groupResult?.display;
+    const social = story?.groupResult ? { ...(planned ?? {}), result: { ...story.groupResult, display } } : planned;
+    const together = groupPlayBlock(social, score?.model ?? expansion.score ?? null);
+    if (together) manifest.group_play = together;
     stats.seconds = Math.round((Date.now() - started) / 100) / 10;
     stats.quality = quality.score;
     manifest.studio = { models: stats.models, created_at: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), duration_sec: stats.seconds, offline: false };

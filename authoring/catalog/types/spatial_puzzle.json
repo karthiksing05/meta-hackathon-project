@@ -916,8 +916,10 @@
       "time"
     ],
     "tools": [
-      "image_assets",
-      "reveal",
+      "diff_spots",
+      "anomaly_generator",
+      "lives",
+      "score",
       "timer_bar"
     ],
     "engine_gaps": [],
@@ -928,7 +930,15 @@
       "hard spot the difference"
     ],
     "status": "seed",
-    "source": "kevin"
+    "source": "kevin",
+    "content_needs": [
+      "one scene as placed shapes, text and emoji (spot-diff.mjs makes the pair and the key)"
+    ],
+    "pieces": [
+      "two pictures",
+      "found rings",
+      "miss counter"
+    ]
   },
   {
     "id": "hidden_object",

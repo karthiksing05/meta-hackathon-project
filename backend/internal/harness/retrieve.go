@@ -126,10 +126,11 @@ type Request struct {
 
 // Timings are in milliseconds.
 type Timings struct {
-	Understand int64 `json:"understand_ms"`
-	Retrieve   int64 `json:"retrieve_ms"`
-	Lookup     int64 `json:"lookup_ms"`
-	Total      int64 `json:"total_ms"`
+	Understand   int64  `json:"understand_ms"`
+	UnderstoodBy string `json:"understood_by,omitempty"` // muse, keywords, given, or "keywords (muse failed: …)"
+	Retrieve     int64  `json:"retrieve_ms"`
+	Lookup       int64  `json:"lookup_ms"`
+	Total        int64  `json:"total_ms"`
 }
 
 // ContextPack is what steps 1–3 hand the planner.
@@ -172,6 +173,7 @@ func (h *Harness) Context(ctx context.Context, req Request) (ContextPack, error)
 		pack.Understanding = u
 	}
 	pack.Timings.Understand = ms(time.Since(t0))
+	pack.Timings.UnderstoodBy = pack.Understood
 
 	// 2. retrieve
 	t1 := time.Now()

@@ -1,0 +1,51 @@
+{
+  "family": "deduction",
+  "notes": "Type-specific checklists for the free-question games (docs/harness-gaps/open-text.md). The family default is left to the deduction family's writer.",
+  "checklists": [
+    {
+      "applies_to": ["lateral_thinking_yes_no", "interrogate_typed_questions"],
+      "slots": [
+        {
+          "id": "story_source",
+          "ask": "A story Muse makes up, or one you name?",
+          "why": "A named classic riddle is used as the case; otherwise Muse writes an original one. Either way Muse writes the fact bank at build time.",
+          "need": "required",
+          "extrapolate_from": "a quoted riddle or a 'like the one where...' in the request",
+          "default": "an original story",
+          "choices": ["an original story", "the classic I named", "one about our Group's in-jokes"],
+          "affects": ["content"]
+        },
+        {
+          "id": "theme",
+          "ask": "What world should the mystery be set in?",
+          "why": "Sets the people, places and objects in the setup and every fact.",
+          "need": "nice",
+          "extrapolate_from": "named franchise, place, job or topic in the request",
+          "default": "everyday life",
+          "choices": ["everyday life", "a show or franchise", "spooky", "office"],
+          "affects": ["content", "art"]
+        },
+        {
+          "id": "question_budget",
+          "ask": "How many questions do players get?",
+          "why": "The budget is the difficulty and the score: fewer questions used scores more.",
+          "need": "nice",
+          "extrapolate_from": "'20 questions', 'hard', 'quick' in the request",
+          "default": "20",
+          "choices": ["10", "20", "30"],
+          "affects": ["rules", "difficulty"]
+        },
+        {
+          "id": "audience",
+          "ask": "One case a day for a Group, or play anytime?",
+          "why": "A Group daily gives everyone the same case (same seed) so they can compare question counts.",
+          "need": "nice",
+          "extrapolate_from": "'daily', 'for our group', 'group chat' in the request",
+          "default": "play anytime",
+          "choices": ["play anytime", "one Group every day"],
+          "affects": ["social", "content"]
+        }
+      ]
+    }
+  ]
+}

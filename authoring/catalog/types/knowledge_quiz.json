@@ -43,10 +43,12 @@
       "labels shown"
     ],
     "tools": [
-      "grid_board",
-      "reveal",
+      "geo_map",
+      "map_pin",
+      "map_geometry",
       "score",
-      "timer_bar"
+      "timer_bar",
+      "lives"
     ],
     "engine_gaps": [],
     "gate_profile": "puzzle",
@@ -56,7 +58,8 @@
       "seterra but for europe"
     ],
     "status": "seed",
-    "source": "kevin"
+    "source": "kevin",
+    "notes": "Taps resolve to a country with geo_map's geo_place_at(pointer). Taps resolve to a country with geo_map's geo_place_at(pointer)."
   },
   {
     "id": "label_the_diagram",
@@ -213,7 +216,9 @@
       "quiz",
       "match_pairs",
       "typed_answer",
-      "lives"
+      "lives",
+      "map_geometry",
+      "geo_map"
     ],
     "engine_gaps": [],
     "gate_profile": "trivia",
@@ -223,7 +228,8 @@
       "capitals game for my kid"
     ],
     "status": "seed",
-    "source": "kevin"
+    "source": "kevin",
+    "notes": "Capitals come from the geo pack (geo.quiz.ask = capital). Capitals come from the geo pack (geo.quiz.ask = capital)."
   },
   {
     "id": "vocab_flashcard_quiz",
@@ -655,7 +661,9 @@
       "typed_answer",
       "fuzzy_match",
       "lives",
-      "daily_seed"
+      "daily_seed",
+      "country_outline",
+      "map_geometry"
     ],
     "engine_gaps": [],
     "gate_profile": "trivia",
@@ -665,7 +673,8 @@
       "name the state outlines"
     ],
     "status": "seed",
-    "source": "kevin"
+    "source": "kevin",
+    "notes": "Outlines from the geo pack; the pack's aliases go into the answer bank. Outlines from the geo pack; the pack's aliases go into the answer bank."
   },
   {
     "id": "timeline_drag_learning",
@@ -2740,5 +2749,151 @@
     ],
     "status": "seed",
     "source": "kevin"
+  },
+  {
+    "id": "lit_country_quiz",
+    "name": "Which country is lit up?",
+    "aliases": [
+      "map quiz",
+      "geography trivia with maps",
+      "name the highlighted country",
+      "Seterra name mode"
+    ],
+    "family": "knowledge_quiz",
+    "subfamily": "geography",
+    "summary": "A country lights up on a real world (or continent) map and you pick its name from neighbouring countries before the bar runs out.",
+    "core_loop": "see the lit-up country → pick its name from three or four neighbours → next country",
+    "verbs": [
+      "recognize",
+      "locate",
+      "answer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "map",
+      "lit-up country",
+      "answer buttons"
+    ],
+    "rules": [
+      "the wrong choices are the country's nearest neighbours",
+      "a miss costs a life"
+    ],
+    "win": "name every country in the round",
+    "lose": "run out of lives",
+    "scoring": "points per country named",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "the same map for the whole Group, best score on the board",
+      "a map of the countries a Group has visited"
+    ],
+    "content_needs": [
+      "places from the geo pack (picked or named)"
+    ],
+    "difficulty_levers": [
+      "region",
+      "smallest country size",
+      "time per country",
+      "choices"
+    ],
+    "tools": [
+      "geo_map",
+      "quiz",
+      "map_geometry",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "trivia geography game with maps featured on the screen",
+      "name the highlighted country on a map of Africa",
+      "which European country is lit up"
+    ],
+    "status": "seed",
+    "source": "gap-maps",
+    "notes": "Kevin's prompt #7. Example game: authoring/content/geo/examples/map_spotter.json. Places, outlines and coordinates come from the geo content pack (map_geometry, Natural Earth), never from Muse."
+  },
+  {
+    "id": "outline_pick_quiz",
+    "name": "Name it from its outline",
+    "aliases": [
+      "state shapes",
+      "country silhouettes",
+      "guess the state from its shape",
+      "guess the country from its shape",
+      "US states by shape"
+    ],
+    "family": "knowledge_quiz",
+    "subfamily": "geography",
+    "summary": "A country's or US state's outline appears alone, big and filled in; pick its name from its neighbours before the bar runs out.",
+    "core_loop": "see the outline → pick the place from four neighbours → next outline",
+    "verbs": [
+      "recognize",
+      "recall",
+      "answer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "outline",
+      "answer buttons"
+    ],
+    "rules": [
+      "the outline has no map around it",
+      "the wrong choices are its nearest neighbours"
+    ],
+    "win": "name every outline in the round",
+    "lose": "run out of lives",
+    "scoring": "points per outline named",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "a US Group plays its own states",
+      "challenge a friend to beat your shapes score"
+    ],
+    "content_needs": [
+      "places from the geo pack (countries or US states)"
+    ],
+    "difficulty_levers": [
+      "region",
+      "time per outline",
+      "choices"
+    ],
+    "tools": [
+      "country_outline",
+      "quiz",
+      "map_geometry",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the US state from its shape",
+      "country silhouettes quiz for Europe",
+      "name the state from its outline for our road trip group"
+    ],
+    "status": "seed",
+    "source": "gap-maps",
+    "variant_of": "spell_the_country",
+    "notes": "Multiple-choice sibling of spell_the_country. Example game: authoring/content/geo/examples/state_shapes.json. Places, outlines and coordinates come from the geo content pack (map_geometry, Natural Earth), never from Muse."
   }
 ]

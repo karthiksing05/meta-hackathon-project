@@ -1,0 +1,121 @@
+{
+  "family": "story_choice",
+  "checklists": [
+    {
+      "applies_to": [
+        "*"
+      ],
+      "slots": [
+        {
+          "id": "hero_and_world",
+          "ask": "Who are you in the story, and where does it happen?",
+          "why": "The hero and the world set every scene, the choices that make sense, and the art.",
+          "need": "required",
+          "extrapolate_from": "a named character, franchise, place or role in the request (\"Princess Leia\", \"a stray cat\", \"a medieval peasant\")",
+          "default": "an original fantasy hero",
+          "ask_when": "the request names no hero, role or world at all",
+          "choices": [
+            "a named character",
+            "an everyday version of me",
+            "an animal",
+            "an original fantasy hero"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        },
+        {
+          "id": "goal_and_best_ending",
+          "ask": "What counts as the best ending?",
+          "why": "The best ending is the goal the score ranks first, so the whole graph is built to make it reachable but earned.",
+          "need": "required",
+          "extrapolate_from": "the verb of the request: escape, become king, take over the alley, solve it, survive the day",
+          "default": "escape or win",
+          "choices": [
+            "escape or win",
+            "rise to the top",
+            "solve the mystery",
+            "win someone over"
+          ],
+          "affects": [
+            "content",
+            "rules"
+          ]
+        },
+        {
+          "id": "choice_limit",
+          "ask": "Should there be a choice limit, like \"in 10 choices or less\"?",
+          "why": "A limit sets max_choices and an out-of-choices ending, and makes \"fewest choices\" the tie-break friends compare.",
+          "need": "nice",
+          "extrapolate_from": "\"in N choices\", \"N moves\", \"or less\", \"speedrun\" in the request",
+          "default": "no limit, about 6-10 choices a run",
+          "choices": [
+            "no limit, about 6-10 choices a run",
+            "10 choices",
+            "5 choices"
+          ],
+          "affects": [
+            "rules",
+            "difficulty",
+            "social"
+          ]
+        },
+        {
+          "id": "stats_and_items",
+          "ask": "What should build up as you play?",
+          "why": "Stats and items are what make choices matter later: they gate routes and endings and show in the HUD.",
+          "need": "nice",
+          "extrapolate_from": "nouns that can grow: coin, favor, gang, trust, affection, energy, suspicion",
+          "default": "a couple of stats",
+          "choices": [
+            "a couple of stats",
+            "items that unlock choices",
+            "just the endings"
+          ],
+          "affects": [
+            "rules",
+            "content",
+            "difficulty"
+          ]
+        },
+        {
+          "id": "cast",
+          "ask": "Should people from your Group be in the story?",
+          "why": "A Group cast makes the story about specific friends; only names and details given in the request are used.",
+          "need": "nice",
+          "extrapolate_from": "\"starring our group\", \"my friends\", names in the request, or a Group target in Studio",
+          "default": "no, an original cast",
+          "choices": [
+            "no, an original cast",
+            "yes, the Group as side characters",
+            "yes, the Group as rivals"
+          ],
+          "affects": [
+            "content",
+            "social"
+          ]
+        },
+        {
+          "id": "tone",
+          "ask": "Should it feel funny, epic or tense?",
+          "why": "Tone sets the voice of every scene, how harsh bad endings are, and the look and sound.",
+          "need": "nice",
+          "extrapolate_from": "words like brainrot, silly, epic, spooky, cozy, or the franchise's usual tone",
+          "default": "light and funny",
+          "choices": [
+            "light and funny",
+            "epic",
+            "tense",
+            "cozy"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        }
+      ]
+    }
+  ],
+  "notes": "Planned as a branching_story graph (docs/harness-gaps/story.md): these slots fill premise, goal ending, max_choices, vars and the cast."
+}

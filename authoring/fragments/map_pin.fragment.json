@@ -1,0 +1,163 @@
+{
+  "fragment": "map_pin",
+  "version": 1,
+  "describe": "Tap the map to drop a pin; the distance to the answer is measured on the globe (great circle) in whole km, with plain arithmetic plus sin, cos and sqrt, so replays match. Use with geo_map and a `geo` section: the geo step fills this use's rect (`x`, `y`, `w`, `h`) and projection (`ax`, `ay`, `kx`, `ky`: canvas = (ax + lon * kx, ay - lat * ky)), so don't set those yourself. The game supplies `map_target()` (vec2: the answer as vec(lon, lat), usually `get_or(geo_target(), index, vec(0.0, 0.0))`) and `map_can_pin()` (bool: pins are taken only while it is true). A tap (input `map_tap {at}`) sets `pin_at`, `pin_km` and `pin_shown`, emits `pinned {km}`, and `pin_far` when km > `far_km`; after `reveal_ms` it emits `pin_done`, the end of the round (bind rounds' `round_done` to it). While the pin shows it draws the pin, a line to the answer and the distance. `pin_points(km)` gives 0 to 1000 points, falling linearly to 0 at `zero_km`; add them to `score` yourself. Faint dots on the 30-degree grid help players aim.",
+  "params": {
+    "x": { "type": "float", "default": 5.0, "min": 0.0, "max": 360.0 },
+    "y": { "type": "float", "default": 92.0, "min": 0.0, "max": 640.0 },
+    "w": { "type": "float", "default": 350.0, "min": 40.0, "max": 360.0 },
+    "h": { "type": "float", "default": 136.0, "min": 40.0, "max": 640.0 },
+    "ax": { "type": "float", "default": 180.0, "min": -100000.0, "max": 100000.0 },
+    "ay": { "type": "float", "default": 160.0, "min": -100000.0, "max": 100000.0 },
+    "kx": { "type": "float", "default": 0.97, "min": 0.01, "max": 10000.0 },
+    "ky": { "type": "float", "default": 0.97, "min": 0.01, "max": 10000.0 },
+    "far_km": { "type": "int", "default": 2500, "min": 50, "max": 20000 },
+    "zero_km": { "type": "int", "default": 5000, "min": 100, "max": 20000 },
+    "reveal_ms": { "type": "duration", "default": 1500, "min": 300, "max": 5000 },
+    "grid": { "type": "bool", "default": true }
+  },
+  "requires": {
+    "functions": {
+      "map_target": { "params": {}, "returns": "vec2" },
+      "map_can_pin": { "params": {}, "returns": "bool" }
+    }
+  },
+  "state": {
+    "pin_at": { "type": "vec2", "init": "vec(0.0, 0.0)" },
+    "pin_km": { "type": "int", "init": "0" },
+    "pin_shown": { "type": "bool", "init": "false" }
+  },
+  "functions": {
+    "map_lonlat": {
+      "params": { "p": "vec2" },
+      "returns": "vec2",
+      "body": "vec((p.x - @ax) / @kx, (@ay - p.y) / @ky)"
+    },
+    "map_screen": {
+      "params": { "ll": "vec2" },
+      "returns": "vec2",
+      "body": "vec(@ax + ll.x * @kx, @ay - ll.y * @ky)"
+    },
+    "_asin_poly": {
+      "params": { "x": "float", "q": "float" },
+      "returns": "float",
+      "body": "x * (1.0 + q * (0.16666666666666666 + q * (0.075 + q * (0.044642857142857144 + q * (0.030381944444444444 + q * (0.022372159090909092 + q * 0.017352764423076924))))))"
+    },
+    "_asin": {
+      "params": { "x": "float" },
+      "returns": "float",
+      "body": "if x <= 0.5 then _asin_poly(x, x * x) else 1.5707963267948966 - 2.0 * _asin_poly(sqrt((1.0 - x) / 2.0), (1.0 - x) / 2.0)"
+    },
+    "_sq": { "params": { "v": "float" }, "returns": "float", "body": "v * v" },
+    "_hav": {
+      "params": { "a": "vec2", "b": "vec2" },
+      "returns": "float",
+      "body": "_sq(sin((b.y - a.y) * 0.008726646259971648)) + cos(a.y * 0.017453292519943295) * cos(b.y * 0.017453292519943295) * _sq(sin((b.x - a.x) * 0.008726646259971648))"
+    },
+    "_km": {
+      "params": { "a": "vec2", "b": "vec2" },
+      "returns": "int",
+      "body": "round(12742.0 * _asin(min(1.0, sqrt(max(0.0, _hav(a, b))))))"
+    },
+    "pin_points": {
+      "params": { "km": "int" },
+      "returns": "int",
+      "body": "max(0, round(1000.0 - 1000.0 * km / @zero_km))"
+    },
+    "_grid_dots": {
+      "params": {},
+      "returns": "list<vec2>",
+      "body": "filter(map(range(55), i => map_screen(vec(-150.0 + 30.0 * (i % 11), -60.0 + 30.0 * (i / 11)))), p => p.x > @x + 4.0 and p.x < @x + @w - 4.0 and p.y > @y + 4.0 and p.y < @y + @h - 4.0)"
+    }
+  },
+  "events": {
+    "pinned": { "km": "int" },
+    "pin_far": {},
+    "pin_done": {},
+    "_pin_end": {}
+  },
+  "inputs": {
+    "map_tap": { "payload": { "at": "vec2" } }
+  },
+  "rules": [
+    {
+      "id": "drop",
+      "on": "map_tap",
+      "when": "map_can_pin() and not pin_shown",
+      "do": [
+        { "set": "pin_at", "to": "event.at" },
+        { "set": "pin_shown", "to": "true" },
+        { "set": "pin_km", "to": "_km(map_lonlat(event.at), map_target())" },
+        { "emit": "pinned", "with": { "km": "pin_km" } },
+        { "if": "pin_km > @far_km", "then": [ { "emit": "pin_far" } ] },
+        { "after": "@reveal_ms", "emit": "_pin_end", "id": "_t_pin" }
+      ]
+    },
+    {
+      "id": "lift",
+      "on": "_pin_end",
+      "do": [
+        { "set": "pin_shown", "to": "false" },
+        { "emit": "pin_done" }
+      ]
+    }
+  ],
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect", "x": "@x", "y": "@y", "w": "@w", "h": "@h", "fill": "#00000000",
+          "on_tap": { "input": "map_tap", "with": { "at": "pointer" } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@grid",
+        "node": {
+          "node": "repeat", "source": "_grid_dots()", "as": "g", "key": "index",
+          "template": { "node": "circle", "x": "= g.x", "y": "= g.y", "r": 1.5, "fill": "$ink", "opacity": 0.35 }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= pin_shown",
+          "children": [
+            {
+              "node": "line",
+              "x1": "= pin_at.x", "y1": "= pin_at.y",
+              "x2": "= map_screen(map_target()).x", "y2": "= map_screen(map_target()).y",
+              "stroke": "$ink", "stroke_width": 2
+            },
+            { "node": "circle", "x": "= map_screen(map_target()).x", "y": "= map_screen(map_target()).y", "r": 5, "fill": "$primary", "stroke": "$ink", "stroke_width": 1.5 },
+            { "node": "circle", "x": "= pin_at.x", "y": "= pin_at.y", "r": 6, "fill": "$danger", "stroke": "$ink", "stroke_width": 1.5 },
+            {
+              "node": "text", "x": "= @x + @w / 2.0", "y": "= @y + @h + 18.0", "anchor": "center",
+              "size": 18, "weight": 700, "color": "$ink",
+              "text": "= str(pin_km) + ' km away'"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "map_tap",
+        "when": "pin_shown",
+        "do": [
+          { "moment": "tap" },
+          { "particles": { "x": "= pin_at.x", "y": "= pin_at.y", "count": 10, "color": "$danger", "speed": 120, "size": 4, "ms": 400 } },
+          { "haptic": "light" }
+        ]
+      },
+      {
+        "on": "pin_far",
+        "do": [ { "moment": "hit" }, { "shake": { "px": 4, "ms": 140 } }, { "haptic": "warning" } ]
+      }
+    ]
+  },
+  "tags": { "mood": ["any"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

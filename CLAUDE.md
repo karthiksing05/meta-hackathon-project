@@ -257,6 +257,9 @@ tools/bubble-studio/build.sh
   - `docs/STYLE_GUIDE.md` covers design tokens, components, copy and code conventions.
   - `docs/FEATURE_PARITY.md` tracks the Facebook features.
 - **Demo content:**
-  - All people, posts, Groups and Events are synthetic.
-  - Don't add real people, real brands or real businesses.
-  - Games are original: genre mechanics are fine, copies of existing games aren't.
+  - The people in the app (profiles, friends, Group members and their posts) are synthetic.
+  - **Real brand, creator, franchise and character names are allowed** (Karthik's decision, 2026-11-12). That
+    covers game titles, themes, sponsored posts, and games in the style of a creator or brand. Keep the names as
+    the person wrote them; don't swap in made-up stand-ins.
+  - Never make a photorealistic image of a real person. Use a cartoon or caricature style instead.
+  - Never copy recorded songs or other audio. Muse writes original melodies.

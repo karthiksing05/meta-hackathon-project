@@ -139,7 +139,7 @@ parts.
 | `progression` | the difficulty arc: what ramps and when (3 steps), plus `difficulty_levers` | bot scores rise with skill; the ramp is visible |
 | `end` | win, lose, and how a run ends (time out, lives gone, target reached, all prompts done) | every run ends within `session_seconds` |
 | `score` | the score model below | the score check below |
-| `social` | what is shared, the challenge shape (same seed), and how the Group board reads | the share text has no spoilers; the challenge reuses the seed |
+| `social` | group play: how friends play it together (same seed, each on their own turn, compared after), what a result is (score, ending, picks) and how results compare (score, ending, agreement), the round length and the line posted back to the thread | same seed always; an agreement result is unranked; an ending result names its endings and the share line spoils none; the round fits the run; see "Group play" below |
 | `feel` | the juice moments, sound set and the look (Bayan's style kit takes over from here) | Bayan's art checks |
 
 - **The planner fills the parts in order.** Theme, goal, loop and pieces come first; then constraints, progression
@@ -237,6 +237,28 @@ effort about 500–650 prompt and 2,000–2,900 completion tokens, 21–27 s.
 sort and aggregate by it (`$min` for `lower`), reject out-of-bounds or unfinished runs as the model says, and send
 `format` to the app.
 
+### Group play (Karthik, 2026-11-12; docs/harness-gaps/group-play.md)
+
+There is no live multiplayer. Every game is a single-player run that people play on the **same seed**, each on their
+own turn, in a chat thread or a Group, and the results are compared after: head-to-head (`same_seed_async`), a best
+of 3 or 5 (`series`), everyone in the chat or Group ranked (`group_round`), the Group's week (`weekly_board`), or,
+for games with no right answer, how closely people agree (`opinion_compare`).
+
+- **The result** (`social.result`): `score` compares by the score model; `ending` (story games) by the ending's place
+  in `endings`, then the score; `picks` + `agreement` (ratings, tier lists, this-or-that) by the share of picks that
+  match a friend's or the group's, with `score.ranked: false`; `creation` + `none` side by side. `state` names the game
+  state that holds the result at the end, so the server can read it from the replay.
+- **Defaults** (Go, `social.go`): series for skill families, a Group round for quiz, word, daily and party families,
+  head-to-head otherwise; an opinion request ("rate", "tier list", "favourite", "vs everyone") or a consensus type
+  compares agreement; story games compare the ending. Muse moves off the default only with `social.reason`.
+- **Checks:** `same_seed` is always true; `round_seconds` (30–90 s) fits inside `end.session_seconds`, and a run that
+  can't end within 180 s is flagged; `share_line` is one line with `{result}`, never naming an answer or an ending.
+- **Compose** (`group-play.mjs`): every random draw comes from the run seed, nothing from the device, clock, locale or
+  name; one clear result line; the manifest gets `group_play` next to `score`.
+- **Request checks** (need the request, run after the spec checks): a goal that copies a schema example, a capped
+  goal ("in 10 choices or less") scored per use, and an opinion request scored like a quiz are problems for the
+  repair round. Request words that name an unbuilt tool's alias get a gap entry, never dropped silently.
+
 ### 5–6. Compose and check (today's pipeline, with a smaller prompt)
 
 - `prompts.system` takes the plan's types and tools in place of the full fragment catalog. Gold examples are still
@@ -253,6 +275,20 @@ sort and aggregate by it (`$min` for `lower`), reject out-of-bounds or unfinishe
 
   This is the genre-aware gate that blocked 4 of 11 anatomy-run games. That layer is Bayan's, in
   `authoring/playtest/`; we agree the profile names with him.
+- **Stories take their own branch** (`expander/story-compose.mjs`, docs/harness-gaps/story.md; Studio API 4). When
+  the plan uses `branching_story` (in `tool_ids`, or a chosen type's tools):
+  1. Muse writes a `story-graph/1` (`STORY_GRAPH_SYSTEM`), with the Group cast when the context has `group` or `cast`.
+  2. The checker walks every path; errors, or the `S_SAME_BUTTON` warning, get one repair round.
+  3. The graph compiles to `choice_story` + `story_vars` with its score model; `studio.storyGate` plays a route to
+     every ending plus 7 random readers and checks the engine against the graph on every move.
+  4. The score check reads those runs (shortest = pro, random = regular, worst = new player), and `group_play`
+     compares the compiled endings, best first. Stories skip the polish rewrite, which would bypass the graph check.
+
+  Anything that fails falls back to the normal compose, and `stats.story` says why. Measured on Kevin's #17 (real
+  Muse, 2026-11-12): plan 39 s (2 calls), then story draft 42 s, one repair 18 s, score review 103 s; 6/6 endings,
+  ranked.
+- **The spam check** compares the best one-input spam run with the median of the regular or random players. A tie,
+  or a win within 10% of the score range, is a warning for the review; a clear win fails.
 
 ## The catalog
 
@@ -471,7 +507,9 @@ request" section when `MicrogameStudio.version >= 3`, or the types and plan go i
         "end": {"win": "…", "lose": "", "ends_when": ["all_prompts_done"], "session_seconds": [60, 120]},
         "score": {"kind": "tiered_points", "measures": "rarity points per answer", "unit": "points", "direction": "higher",
                   "counts_when": "any", "aggregate": "best", "tie_break": "less time", "format": "{n} points", "events": ["answer_scored"]},
-        "social": {"share": "…", "challenge": "…", "same_seed": true, "board": "…"},
+        "social": {"mode": "group_round", "modes": ["same_seed_async", "series", "group_round", "weekly_board"], "round_seconds": 90,
+                   "result": {"kind": "score", "compare": "score", "display": "{score}"}, "share_line": "{name}: {result} on {title}. Your turn.",
+                   "board": "…", "same_seed": true},
         "feel": {"juice": ["…"], "sounds": "…", "look": "…"}
       },
       "design": {"pitch": "…", "theme": ["…"], "verb": "…", "twist": "…", "arc": ["…"]},
@@ -506,6 +544,10 @@ sending.
 - **Score default:** the kind comes from the type's `scoring` text, else its family. Muse may override it only with
   a `reason`; otherwise Go puts the default back.
 - **Repair:** parts that still fail get one repair round. Anything left goes in `spec_issues`.
+- **Clarify:** slots borrowed from a type the plan didn't choose are defaults only, never questions; the planner never
+  asks who plays (the send sheet picks the chat or Group) or a theme for unthemed content.
+- **Which understander ran** is in the context's notes, `understanding.by` and `timings.understood_by` (`muse`, `given`,
+  or `keywords (muse failed: …)`).
 
 **On by default since 2026-11-12 (Karthik). `HARNESS_CONTEXT=0` or `off` is the kill switch:**
 - the API runs steps 1–4 for each new game (100 s budget) and sets `Job.Context`; any failure sends no context;

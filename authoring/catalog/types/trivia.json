@@ -445,10 +445,13 @@
       "image category"
     ],
     "tools": [
+      "zoom_reveal",
+      "picture_quiz",
       "reveal",
       "typed_answer",
       "fuzzy_match",
-      "timer_bar"
+      "timer_bar",
+      "image_gallery"
     ],
     "engine_gaps": [],
     "gate_profile": "trivia",
@@ -559,7 +562,10 @@
       "map scale"
     ],
     "tools": [
+      "geo_map",
       "map_pin",
+      "map_geometry",
+      "geo_distance",
       "reveal",
       "score",
       "daily_seed"
@@ -619,7 +625,9 @@
       "quiz",
       "typed_answer",
       "fuzzy_match",
-      "rounds"
+      "rounds",
+      "country_outline",
+      "map_geometry"
     ],
     "engine_gaps": [],
     "gate_profile": "trivia",
@@ -629,7 +637,8 @@
       "flag quiz"
     ],
     "status": "seed",
-    "source": "kevin"
+    "source": "kevin",
+    "notes": "Shapes work today (country_outline); flags need a public-domain flag set (see docs/harness-gaps/maps.md). Shapes work today (country_outline); flags need a public-domain flag set (see docs/harness-gaps/maps.md)."
   },
   {
     "id": "this_or_that_guess",
@@ -2433,5 +2442,81 @@
     ],
     "status": "seed",
     "source": "kevin"
+  },
+  {
+    "id": "map_reveal_trivia",
+    "name": "Answer, then see it on the map",
+    "aliases": [
+      "trivia with a map",
+      "sayings from around the world",
+      "where is this from",
+      "shows the country on a map",
+      "trivia with the country on a map"
+    ],
+    "family": "trivia",
+    "subfamily": "geography",
+    "summary": "Multiple-choice trivia where every question belongs to a place; after each answer the place lights up on a real world map, so a round of sayings, foods or festivals becomes a little trip around the world.",
+    "core_loop": "read the question → pick an answer → the country lights up on the map → next question",
+    "verbs": [
+      "answer",
+      "recall",
+      "learn"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "question",
+      "answer buttons",
+      "world map",
+      "lit-up country"
+    ],
+    "rules": [
+      "each question is tied to one country from the geo pack",
+      "the country is shown only after the answer",
+      "wrong answers cost a life"
+    ],
+    "win": "finish the rounds",
+    "lose": "run out of lives",
+    "scoring": "points per right answer",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "a Group plays the same ten places and compares scores",
+      "questions about the countries a Group's members come from"
+    ],
+    "content_needs": [
+      "one question per place, with choices and the answer",
+      "the places named from the pack"
+    ],
+    "difficulty_levers": [
+      "time per question",
+      "how famous the places are",
+      "lives"
+    ],
+    "tools": [
+      "quiz",
+      "geo_map",
+      "map_geometry",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "finish the saying trivia with sayings from around the world, showing the country on a map once I answer",
+      "food trivia where the dish's country lights up on a map after each answer",
+      "festivals of the world quiz with a map"
+    ],
+    "status": "seed",
+    "source": "gap-maps",
+    "notes": "Kevin's prompt #11. The game writes geo.places in question order and map_focus() = if locked then get_or(order, qi, -1) else -1. Places, outlines and coordinates come from the geo content pack (map_geometry, Natural Earth), never from Muse. Sayings and quotes must be traditional or original, not copyrighted text."
   }
 ]

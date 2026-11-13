@@ -1,0 +1,461 @@
+{
+  "fragment": "diff_spots",
+  "version": 1,
+  "describe": "Spot the difference: two pictures, one above the other, and the player taps each place where they differ. The game supplies the answer key as two functions, `diff_points()` (list<ivec2>, the centre of each difference in the picture's own units, 0 to `scene_w` across) `diff_radii()` (list<int>, each one's tap radius in the same units) and `diff_decoys()` (list<ivec2>, the centres of the objects that did NOT change; tapping one is a miss, like any other wrong tap, and they give the playtest bots the same places to look that a person scans). `authoring/expander/spot-diff.mjs` writes both, and the two sprites, from one scene; never guess the key by eye. The pictures are the game's `picture_a` and `picture_b` sprites, drawn `w` wide and `h` tall at (`x`, `y_a`) and (`x`, `y_b`). A tap on a difference in either picture emits `spot_found` (once per difference; both pictures get a ring there) and sets `last_spot`; a tap elsewhere on a picture emits `spot_missed`. Finding all of them emits `all_spots_found`, and with `wins` true that wins. State: `found` (list<int> of found indices), `found_count`, `last_spot`. Bind score's `point` to `spot_found`, and lives' `hit` (or a timer penalty) to `spot_missed`. Shows `found_count / total` in the HUD.",
+  "params": {
+    "x": {
+      "type": "int",
+      "default": 20,
+      "min": 0,
+      "max": 200
+    },
+    "y_a": {
+      "type": "int",
+      "default": 84,
+      "min": 0,
+      "max": 600
+    },
+    "y_b": {
+      "type": "int",
+      "default": 340,
+      "min": 0,
+      "max": 600
+    },
+    "w": {
+      "type": "int",
+      "default": 320,
+      "min": 120,
+      "max": 360
+    },
+    "h": {
+      "type": "int",
+      "default": 240,
+      "min": 80,
+      "max": 320
+    },
+    "scene_w": {
+      "type": "int",
+      "default": 320,
+      "min": 64,
+      "max": 1024
+    },
+    "pad": {
+      "type": "int",
+      "default": 6,
+      "min": 0,
+      "max": 30
+    },
+    "wins": {
+      "type": "bool",
+      "default": true
+    },
+    "label": {
+      "type": "string",
+      "default": "Found",
+      "max_len": 16
+    }
+  },
+  "art": {
+    "picture_a": {
+      "describe": "The first picture, the whole scene, w x h. Made by spot-diff.mjs from the scene, not drawn by hand.",
+      "color": "accent"
+    },
+    "picture_b": {
+      "describe": "The second picture: the same scene with the changes. Made by spot-diff.mjs with picture_a.",
+      "color": "accent"
+    }
+  },
+  "requires": {
+    "functions": {
+      "diff_points": {
+        "params": {},
+        "returns": "list<ivec2>"
+      },
+      "diff_radii": {
+        "params": {},
+        "returns": "list<int>"
+      },
+      "diff_decoys": {
+        "params": {},
+        "returns": "list<ivec2>"
+      }
+    }
+  },
+  "state": {
+    "found": {
+      "type": "list<int>",
+      "init": "[]"
+    },
+    "found_count": {
+      "type": "int",
+      "init": "0"
+    },
+    "last_spot": {
+      "type": "int",
+      "init": "-1"
+    },
+    "_done": {
+      "type": "bool",
+      "init": "false"
+    }
+  },
+  "functions": {
+    "spot_total": {
+      "params": {},
+      "returns": "int",
+      "body": "len(diff_points())"
+    },
+    "_k": {
+      "params": {},
+      "returns": "float",
+      "body": "(@w * 1.0) / (@scene_w * 1.0)"
+    }
+  },
+  "events": {
+    "spot_found": {},
+    "spot_missed": {},
+    "all_spots_found": {}
+  },
+  "inputs": {
+    "_spot": {
+      "payload": {
+        "i": "int"
+      }
+    },
+    "_miss": {
+      "payload": {}
+    }
+  },
+  "rules": [
+    {
+      "id": "find",
+      "on": "_spot",
+      "when": "not _done and event.i >= 0 and event.i < spot_total() and not contains(found, event.i)",
+      "do": [
+        {
+          "set": "found",
+          "to": "push(found, event.i)"
+        },
+        {
+          "incr": "found_count"
+        },
+        {
+          "set": "last_spot",
+          "to": "event.i"
+        },
+        {
+          "emit": "spot_found"
+        },
+        {
+          "if": "found_count >= spot_total()",
+          "then": [
+            {
+              "emit": "all_spots_found"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miss",
+      "on": "_miss",
+      "when": "not _done",
+      "do": [
+        {
+          "emit": "spot_missed"
+        }
+      ]
+    },
+    {
+      "id": "finish",
+      "on": "all_spots_found",
+      "do": [
+        {
+          "set": "_done",
+          "to": "true"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": {
+      "include": "@wins",
+      "expr": "_done"
+    }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "include": "@art.picture_a",
+        "node": {
+          "node": "image",
+          "asset": "@art.picture_a.id",
+          "x": "@x",
+          "y": "@y_a",
+          "w": "@w",
+          "h": "@h"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.picture_a",
+        "node": {
+          "node": "rect",
+          "x": "@x",
+          "y": "@y_a",
+          "w": "@w",
+          "h": "@h",
+          "radius": 8,
+          "fill": "$surface"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.picture_b",
+        "node": {
+          "node": "image",
+          "asset": "@art.picture_b.id",
+          "x": "@x",
+          "y": "@y_b",
+          "w": "@w",
+          "h": "@h"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.picture_b",
+        "node": {
+          "node": "rect",
+          "x": "@x",
+          "y": "@y_b",
+          "w": "@w",
+          "h": "@h",
+          "radius": 8,
+          "fill": "$surface"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": "@x",
+          "y": "@y_a",
+          "w": "@w",
+          "h": "@h",
+          "fill": "#00000000",
+          "stroke": "$ink",
+          "stroke_width": 2,
+          "on_tap": {
+            "input": "_miss",
+            "with": {}
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": "@x",
+          "y": "@y_b",
+          "w": "@w",
+          "h": "@h",
+          "fill": "#00000000",
+          "stroke": "$ink",
+          "stroke_width": 2,
+          "on_tap": {
+            "input": "_miss",
+            "with": {}
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(len(diff_decoys()))",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "group",
+            "children": [
+              {
+                "node": "circle",
+                "x": "= @x + get_or(diff_decoys(), k, vec(0, 0)).x * _k()",
+                "y": "= @y_a + get_or(diff_decoys(), k, vec(0, 0)).y * _k()",
+                "r": "= 10.0 * _k() + @pad",
+                "fill": "#00000000",
+                "on_tap": {
+                  "input": "_miss",
+                  "with": {}
+                }
+              },
+              {
+                "node": "circle",
+                "x": "= @x + get_or(diff_decoys(), k, vec(0, 0)).x * _k()",
+                "y": "= @y_b + get_or(diff_decoys(), k, vec(0, 0)).y * _k()",
+                "r": "= 10.0 * _k() + @pad",
+                "fill": "#00000000",
+                "on_tap": {
+                  "input": "_miss",
+                  "with": {}
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(spot_total())",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "group",
+            "children": [
+              {
+                "node": "circle",
+                "x": "= @x + get_or(diff_points(), k, vec(0, 0)).x * _k()",
+                "y": "= @y_a + get_or(diff_points(), k, vec(0, 0)).y * _k()",
+                "r": "= get_or(diff_radii(), k, 12) * _k() + @pad",
+                "fill": "#00000000",
+                "stroke": "= if contains(found, k) then $accent else '#00000000'",
+                "stroke_width": 3,
+                "on_tap": {
+                  "input": "_spot",
+                  "with": {
+                    "i": "k"
+                  }
+                },
+                "animate_on": {
+                  "spot_found": {
+                    "when": "last_spot == k",
+                    "prop": "scale",
+                    "keys": [
+                      1.4,
+                      0.9,
+                      1
+                    ],
+                    "ms": 260
+                  }
+                }
+              },
+              {
+                "node": "circle",
+                "x": "= @x + get_or(diff_points(), k, vec(0, 0)).x * _k()",
+                "y": "= @y_b + get_or(diff_points(), k, vec(0, 0)).y * _k()",
+                "r": "= get_or(diff_radii(), k, 12) * _k() + @pad",
+                "fill": "#00000000",
+                "stroke": "= if contains(found, k) then $accent else '#00000000'",
+                "stroke_width": 3,
+                "on_tap": {
+                  "input": "_spot",
+                  "with": {
+                    "i": "k"
+                  }
+                },
+                "animate_on": {
+                  "spot_found": {
+                    "when": "last_spot == k",
+                    "prop": "scale",
+                    "keys": [
+                      1.4,
+                      0.9,
+                      1
+                    ],
+                    "ms": 260
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text",
+          "text": "= @label + ': ' + str(found_count) + ' / ' + str(spot_total())",
+          "size": 18,
+          "weight": 600,
+          "color": "$ink",
+          "role": "hud",
+          "animate_on": {
+            "spot_found": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.25,
+                1
+              ],
+              "ms": 180
+            }
+          }
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "spot_found",
+        "do": [
+          {
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": "= @x + get_or(diff_points(), last_spot, vec(0, 0)).x * _k()",
+              "y": "= @y_b + get_or(diff_points(), last_spot, vec(0, 0)).y * _k()",
+              "count": 12,
+              "color": "@art.picture_b.color",
+              "speed": 170,
+              "size": 5,
+              "ms": 420
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "spot_missed",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "shake": {
+              "px": 4,
+              "ms": 140
+            }
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      },
+      {
+        "on": "all_spots_found",
+        "do": [
+          {
+            "moment": "level"
+          }
+        ]
+      }
+    ]
+  },
+  "tags": {
+    "mood": [
+      "calm",
+      "focused",
+      "playful"
+    ],
+    "energy": [
+      "low",
+      "medium"
+    ]
+  },
+  "conflicts": []
+}

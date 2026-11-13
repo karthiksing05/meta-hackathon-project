@@ -1,0 +1,240 @@
+{
+  "fragment": "npc_judge",
+  "version": 1,
+  "describe": "A character judges what you say (rizz simulator, convince the bouncer, a debate or roast judge, a caption contest with a judge): each round the character says a line, the player taps one of `choices` replies, and the character rates it 0-100 with a band label and a reaction. All ratings and reactions are written at build time (the npc_lines content step), so play needs no AI and replays exactly. The game supplies four functions that read `content` lists: `nj_lines()` (list<string>, the character's line each round, <= 90 chars), `nj_options()` (list<string>, the reply choices flattened: round r owns entries r * `choices` to r * `choices` + `choices` - 1, <= 60 chars each), `nj_ratings()` (list<string>, same layout, each a whole number '0' to '100': how the character rates that reply; give every round one clearly best reply >= 75, one flop < 25 and the rest between) and `nj_reactions()` (list<string>, same layout: the character's reply to it, <= 70 chars). Replies are shown in a shuffled order. `labels` names the bands low to high, split by '|' (e.g. \"cringe|mid|smooth|W rizz\"); a rating falls in band floor(rating * bands / 101). Tapping a reply (input `nj_pick {index}`) adds the rating to `nj_points` and emits `judged {rating, band}`, plus `judged_high` (rating >= `high_at`) or `judged_low` (rating < `low_at`); running out of `time_ms` (0 = no timer) counts as rating 0. After `reveal_ms` it emits `line_done` and moves on (bind rounds' `round_done` to it; bind lives' `hit` to `judged_low` for a lose path). It sets the score (`nj_points`), so don't also use score. State: `nj_points`, `last_rating`, `last_label`, `last_reaction`, `high_count`, `low_count`, `picked`, `locked`. Draws the character's speech bubble at the top, the verdict in the middle and the replies from y 330. With the game's `judge` sprite it draws the character (a drawn caricature, never photorealistic; real names stay as written) beside the bubble; with `button` the replies draw it.",
+  "params": {
+    "choices": { "type": "int", "default": 3, "min": 2, "max": 4 },
+    "time_ms": { "type": "duration", "default": 12000, "min": 0, "max": 60000 },
+    "reveal_ms": { "type": "duration", "default": 1800, "min": 600, "max": 5000 },
+    "labels": { "type": "string", "default": "Cringe|Meh|Smooth|Legendary", "max_len": 60 },
+    "high_at": { "type": "int", "default": 75, "min": 1, "max": 100 },
+    "low_at": { "type": "int", "default": 25, "min": 0, "max": 99 }
+  },
+  "art": {
+    "judge": {
+      "describe": "The character who judges, a head-and-shoulders portrait about 90 × 90 at the top left. A real person or character the request names keeps their name; draw them as a caricature, never photorealistic.",
+      "color": "accent"
+    },
+    "button": {
+      "describe": "A reply button, 320 × 58 (keep the middle calm: the reply text is drawn on top).",
+      "color": "surface"
+    }
+  },
+  "requires": {
+    "functions": {
+      "nj_lines": { "params": {}, "returns": "list<string>" },
+      "nj_options": { "params": {}, "returns": "list<string>" },
+      "nj_ratings": { "params": {}, "returns": "list<string>" },
+      "nj_reactions": { "params": {}, "returns": "list<string>" }
+    }
+  },
+  "inputs": {
+    "nj_pick": { "payload": { "index": "int" } }
+  },
+  "state": {
+    "order": { "type": "list<int>", "init": "[]" },
+    "ri": { "type": "int", "init": "0" },
+    "opts": { "type": "list<int>", "init": "[]" },
+    "picked": { "type": "int", "init": "-1" },
+    "locked": { "type": "bool", "init": "true" },
+    "nj_points": { "type": "int", "init": "0" },
+    "last_rating": { "type": "int", "init": "-1" },
+    "last_label": { "type": "string", "init": "''" },
+    "last_reaction": { "type": "string", "init": "''" },
+    "high_count": { "type": "int", "init": "0" },
+    "low_count": { "type": "int", "init": "0" },
+    "_serial": { "type": "int", "init": "0" },
+    "_until": { "type": "int", "init": "0" }
+  },
+  "functions": {
+    "line_id": { "params": {}, "returns": "int", "body": "get_or(order, ri, 0)" },
+    "judge_line": { "params": {}, "returns": "string", "body": "get_or(nj_lines(), line_id(), '')" },
+    "_slot": { "params": { "k": "int" }, "returns": "int", "body": "line_id() * @choices + get_or(opts, k, 0)" },
+    "option_text": { "params": { "k": "int" }, "returns": "string", "body": "get_or(nj_options(), _slot(k), '')" },
+    "option_rating": {
+      "params": { "k": "int" },
+      "returns": "int",
+      "body": "clamp(or_else(parse_int(get_or(nj_ratings(), _slot(k), '0')), 0), 0, 100)"
+    },
+    "_bands": { "params": {}, "returns": "list<string>", "body": "split(@labels, '|')" },
+    "band_of": {
+      "params": { "r": "int" },
+      "returns": "int",
+      "body": "clamp(floor((clamp(r, 0, 100) * len(_bands())) / 101), 0, max(0, len(_bands()) - 1))"
+    },
+    "band_label": { "params": { "r": "int" }, "returns": "string", "body": "trim(get_or(_bands(), band_of(r), ''))" },
+    "_fill": {
+      "params": { "k": "int" },
+      "returns": "string",
+      "body": "if not locked or k != picked then '' else if last_rating >= @high_at then 'high' else if last_rating < @low_at then 'low' else 'mid'"
+    }
+  },
+  "events": {
+    "judged": { "rating": "int", "band": "int" },
+    "judged_high": {},
+    "judged_low": {},
+    "line_done": {},
+    "_line": {},
+    "_timeout": { "serial": "int" },
+    "_reveal_end": {}
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        { "set": "order", "to": "shuffle(range(len(nj_lines())))" },
+        { "emit": "_line" }
+      ]
+    },
+    {
+      "id": "line",
+      "on": "_line",
+      "do": [
+        { "if": "ri >= len(order)", "then": [{ "set": "order", "to": "shuffle(order)" }, { "set": "ri", "to": "0" }] },
+        { "set": "opts", "to": "shuffle(range(@choices))" },
+        { "set": "picked", "to": "-1" },
+        { "set": "last_rating", "to": "-1" },
+        { "set": "last_label", "to": "''" },
+        { "set": "last_reaction", "to": "''" },
+        { "set": "locked", "to": "false" },
+        { "incr": "_serial" },
+        {
+          "if": "@time_ms > 0",
+          "then": [
+            { "set": "_until", "to": "now + @time_ms" },
+            { "after": "@time_ms", "emit": "_timeout", "with": { "serial": "_serial" }, "id": "_t_line" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pick",
+      "on": "nj_pick",
+      "when": "not locked and event.index >= 0 and event.index < @choices",
+      "do": [
+        { "set": "locked", "to": "true" },
+        { "set": "picked", "to": "event.index" },
+        { "let": { "r": "option_rating(event.index)" } },
+        { "set": "last_rating", "to": "r" },
+        { "set": "last_label", "to": "band_label(r)" },
+        { "set": "last_reaction", "to": "get_or(nj_reactions(), _slot(event.index), '')" },
+        { "set": "nj_points", "to": "nj_points + r" },
+        { "emit": "judged", "with": { "rating": "r", "band": "band_of(r)" } },
+        { "if": "r >= @high_at", "then": [{ "incr": "high_count" }, { "emit": "judged_high" }] },
+        { "if": "r < @low_at", "then": [{ "incr": "low_count" }, { "emit": "judged_low" }] },
+        { "after": "@reveal_ms", "emit": "_reveal_end", "id": "_t_reveal" }
+      ]
+    },
+    {
+      "id": "run_out",
+      "on": "_timeout",
+      "when": "not locked and event.serial == _serial",
+      "do": [
+        { "set": "locked", "to": "true" },
+        { "set": "last_rating", "to": "0" },
+        { "set": "last_label", "to": "band_label(0)" },
+        { "set": "last_reaction", "to": "'…'" },
+        { "emit": "judged", "with": { "rating": "0", "band": "0" } },
+        { "incr": "low_count" },
+        { "emit": "judged_low" },
+        { "after": "@reveal_ms", "emit": "_reveal_end", "id": "_t_reveal" }
+      ]
+    },
+    { "id": "reveal_end", "on": "_reveal_end", "do": [{ "emit": "line_done" }] },
+    { "id": "next", "on": "line_done", "do": [{ "incr": "ri" }, { "emit": "_line" }] }
+  ],
+  "objectives": {
+    "score": "nj_points"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            { "include": "@art.judge", "node": "image", "asset": "@art.judge.id", "x": 16, "y": 60, "w": 90, "h": 90 },
+            {
+              "node": "rect", "x": "= if @art.judge then 114 else 20", "y": 60, "w": "= if @art.judge then 230 else 320", "h": 112,
+              "radius": 16, "fill": "$surface", "stroke": "$secondary", "stroke_width": 2
+            },
+            {
+              "node": "text", "x": "= if @art.judge then 126 else 32", "y": 68, "w": "= if @art.judge then 206 else 296", "h": 96,
+              "wrap": true, "align": "left", "valign": "middle", "size": 16, "weight": 700, "color": "$ink",
+              "text": "= judge_line()"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect", "x": 20, "y": 182, "h": 6, "radius": 3,
+          "w": "= if locked or @time_ms <= 0 then 0.0 else max(0.0, 320.0 * ((_until - now) * 1.0) / (@time_ms * 1.0))",
+          "fill": "= if _until - now < @time_ms / 4 then $danger else $primary"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 20, "y": 198, "w": 320, "h": 40, "align": "center", "valign": "middle",
+          "size": 30, "weight": 900,
+          "color": "= if last_rating >= @high_at then $primary else if last_rating >= 0 and last_rating < @low_at then $danger else $accent",
+          "text": "= if last_rating < 0 then '' else upper(last_label)"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 20, "y": 240, "w": 320, "h": 22, "align": "center", "valign": "middle",
+          "size": 13, "weight": 800, "color": "$secondary",
+          "text": "= if last_rating < 0 then '' else concat(str(last_rating), ' / 100')"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 20, "y": 264, "w": 320, "h": 56, "wrap": true, "align": "center", "valign": "top",
+          "size": 15, "weight": 600, "color": "$ink",
+          "text": "= last_reaction"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat", "source": "range(@choices)", "as": "k", "key": "k",
+          "template": {
+            "node": "group",
+            "children": [
+              { "include": "@art.button", "node": "image", "asset": "@art.button.id", "x": 20, "y": "= 330 + k * 68", "w": 320, "h": 58, "role": "tile" },
+              {
+                "node": "rect", "x": 20, "y": "= 330 + k * 68", "w": 320, "h": 58, "radius": 14, "role": "tile",
+                "fill": "= if _fill(k) == 'high' then $primary else if _fill(k) == 'low' then $danger else if _fill(k) == 'mid' then $accent else if @art.button then '#00000000' else $surface",
+                "opacity": "= if locked and k != picked then 0.45 else 1.0",
+                "transition": { "fill": { "ms": 120, "ease": "out" } },
+                "on_tap": { "input": "nj_pick", "with": { "index": "k" } }
+              },
+              {
+                "node": "text", "x": 32, "y": "= 330 + k * 68", "w": 296, "h": 58, "wrap": true, "align": "center", "valign": "middle",
+                "size": 15, "weight": 600, "color": "$ink", "opacity": "= if locked and k != picked then 0.45 else 1.0",
+                "text": "= option_text(k)"
+              }
+            ],
+            "animate_on": { "nj_pick": { "when": "event.index == k", "prop": "scale", "keys": [1, 0.95, 1.03, 1], "ms": 170 } }
+          }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "judged_high", "do": [{ "moment": "combo" }, { "particles": { "x": 180, "y": 218, "count": 22, "color": "@art.judge.color", "speed": 240, "size": 5, "ms": 600 } }, { "haptic": "success" }] },
+      { "on": "judged", "when": "event.rating >= @low_at and event.rating < @high_at", "do": [{ "moment": "pickup" }] },
+      { "on": "judged_low", "do": [{ "moment": "hit" }, { "shake": { "px": 6, "ms": 180 } }, { "haptic": "warning" }] }
+    ]
+  },
+  "tags": {
+    "mood": ["any"],
+    "energy": ["low", "medium"]
+  },
+  "conflicts": ["quiz", "score", "choice_story"]
+}

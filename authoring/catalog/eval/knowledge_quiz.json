@@ -28,5 +28,27 @@
     "expect": [
       "periodic_table_fill"
     ]
+  },
+  {
+    "request": "Trivia geography game with maps featured on the screen",
+    "expect": [
+      "lit_country_quiz",
+      "map_place_pin_quiz",
+      "map_click_quiz"
+    ],
+    "notes": "Kevin #7"
+  },
+  {
+    "request": "guess the state from its shape for our US road trip group",
+    "expect": [
+      "outline_pick_quiz",
+      "spell_the_country"
+    ]
+  },
+  {
+    "request": "which country is highlighted on the map of Asia",
+    "expect": [
+      "lit_country_quiz"
+    ]
   }
 ]
