@@ -262,16 +262,17 @@ struct StudioPlanGate<Brief: View>: View {
         .onAppear {
             guard usesPlan else { return }
             plan.showsBrief = false
-            plan.start(model.effectivePrompt)
+            plan.start(model.effectivePrompt, groupID: model.serverAudienceGroupID)
         }
     }
 
-    /// Builds with the plan's answers and changes. Today they go to `/v1/generate` folded into the
-    /// request text: the prompt is swapped for the folded text only while `startCompose` builds the
-    /// request (synchronously), then restored, so Describe still shows what the person typed.
-    /// TODO(build): send `handoff.generateFields` (`spec`, `answers`) once `/v1/generate` takes them.
+    /// Builds the agreed plan: `/v1/generate` gets its `spec` and `answers` (`model.pendingPlan`), so
+    /// the server builds this plan and doesn't plan again. The answers and changes also go folded
+    /// into the request text: the prompt is swapped for the folded text only while `startCompose`
+    /// builds the request (synchronously), then restored, so Describe still shows what was typed.
     private func build(_ handoff: StudioPlanHandoff) {
         StudioPlanMemory.lastHandoff = handoff
+        model.pendingPlan = handoff
         let typed = model.prompt
         let folded = handoff.foldedRequest
         if folded != model.effectivePrompt { model.prompt = folded }

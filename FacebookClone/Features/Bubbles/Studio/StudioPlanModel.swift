@@ -3,10 +3,10 @@ import SwiftUI
 /// The Plan step's state: Muse plans the game on the server (`HarnessPlanClient`), the person reads
 /// the plan, answers up to 2 questions, changes a part in words if they like, and builds.
 ///
-/// What it sends forward is a `StudioPlanHandoff`: `{request, spec, answers}`. The build will pass
-/// those on once `POST /v1/generate` accepts `spec` and `answers` (asked of Max). Until then the
-/// answers and changes are folded into the request text (`foldedRequest`), which today's
-/// `/v1/generate` already reads, and the server re-plans from that text.
+/// What it sends forward is a `StudioPlanHandoff`: `{request, spec, answers}`. The build passes
+/// `spec` and `answers` to `POST /v1/generate` (`NewGameExtras`), so the server builds this plan and
+/// doesn't plan again; the answers and changes also go folded into the request text.
+/// A game for a Group is planned with its `groupId`, so the plan already uses the Group's people.
 @MainActor
 @Observable
 final class StudioPlanModel {
@@ -31,6 +31,8 @@ final class StudioPlanModel {
     var answers: [String: String] = [:]
     /// The person chose the full Brief ("More options").
     var showsBrief = false
+    /// The server Group the game is planned for (`groupId` on the plan request).
+    private(set) var groupID: String?
 
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private let client: HarnessPlanClient
@@ -39,12 +41,14 @@ final class StudioPlanModel {
         self.client = client
     }
 
-    /// Plans `text` unless this model already has (or is making) a plan for it.
-    func start(_ text: String) {
+    /// Plans `text` (for the server Group `groupID`, if any) unless this model already has (or is
+    /// making) a plan for it.
+    func start(_ text: String, groupID: String? = nil) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        if trimmed == original, phase != .idle, !isFailed { return }
+        if trimmed == original, groupID == self.groupID, phase != .idle, !isFailed { return }
         original = trimmed
+        self.groupID = groupID
         changes = []
         answers = [:]
         run(trimmed)
@@ -89,9 +93,9 @@ final class StudioPlanModel {
         withAnimation(.easeInOut(duration: 0.25)) {
             phase = .planning(started: Date())
         }
-        task = Task { [weak self, client] in
+        task = Task { [weak self, client, groupID] in
             do {
-                let outcome = try await client.plan(request: text)
+                let outcome = try await client.plan(request: text, groupID: groupID)
                 guard let self, !Task.isCancelled else { return }
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.9)) {
                     switch outcome {
@@ -162,9 +166,8 @@ final class StudioPlanModel {
 }
 
 /// What the Plan step sends to the build: `{request, spec, answers}` (plus changes in words).
-///
-/// TODO(build): pass `spec` and `answers` to `POST /v1/generate` once it accepts them (asked of
-/// Max). Until then `foldedRequest` carries the answers and changes as text.
+/// `StudioModel.newGameExtras` sends `spec` and `answers` (as `{slot: answer}`) to
+/// `POST /v1/generate`; `foldedRequest` carries the answers and changes as text too.
 struct StudioPlanHandoff: Equatable, Sendable {
     var request: String
     var spec: JSONValue?
