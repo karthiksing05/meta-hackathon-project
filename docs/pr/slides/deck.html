@@ -380,6 +380,21 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .hxmm img { flex: none; width: 92px; height: 150px; object-fit: cover; object-position: top; border-radius: 12px; display: block; box-shadow: 0 8px 18px rgba(16,24,64,.16); }
 .hxmm figcaption { font-size: 13px; font-weight: 700; color: var(--sub); margin-top: 6px; line-height: 1.15; }
 .hxmm p { font-size: 21px; color: var(--sub); line-height: 1.3; } .hxmm p b { font-size: 26px; margin-bottom: 4px; color: var(--ink); }
+
+/* slide 2: chat mocks */
+.why2 .why2g { margin-top: 44px; gap: 80px; } .why2 h2 { font-size: 84px; }
+.why2 .wc b { font-size: 46px; } .why2 .wc em { font-size: 26px; }
+.chat { margin-top: 26px; display: flex; flex-direction: column; gap: 12px; }
+.msg { max-width: 600px; font-size: 27px; line-height: 1.3; padding: 14px 22px; border-radius: 26px; }
+.msg.in { background: var(--soft); align-self: flex-start; border-bottom-left-radius: 8px; color: var(--ink); }
+.msg.me { background: var(--blue); color: #fff; align-self: flex-end; border-bottom-right-radius: 8px; font-weight: 600; }
+.msg i { display: block; font-style: normal; font-size: 19px; font-weight: 800; color: var(--muted); margin-bottom: 2px; }
+.msg .grid { display: block; font-size: 24px; line-height: 1.15; margin-top: 6px; letter-spacing: 2px; }
+.why2 .why2s { font-size: 40px; margin-top: 40px; }
+
+.cph2 { display: flex; align-items: flex-end; gap: 50px; margin-top: 24px; }
+.cpl { flex: none; width: 400px; padding-bottom: 50px; } .cpl b { display: block; white-space: nowrap; font-size: 64px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+.cpl span { display: block; font-size: 26px; color: var(--ink); font-weight: 700; line-height: 1.25; margin-top: 4px; } .cpl small { display: block; font-size: 20px; color: var(--muted); margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -399,12 +414,14 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
   <div class="label">The problem</div>
   <h2>People open an app for a reason.</h2>
   <div class="why2g">
-    <div class="wc"><em>A need</em><b>Something you have to do.</b><p>Reach a friend. Find a place. Meet someone new.</p></div>
+    <div class="wc"><em>A need</em><b>Something you have to do.</b>
+      <div class="chat"><div class="msg in"><i>Priya</i>just moved to SF 👋 anyone know a climbing gym? and people to go with?</div><div class="msg in"><i>Leo</i>Mission Cliffs! I'm there Thursdays</div><div class="msg me">ok saving this</div></div></div>
     <div class="wdiv"></div>
-    <div class="wc"><em>A ritual</em><b>Something you do every day, with others watching.</b><p>The daily puzzle. The streak. The score grid in the group chat.</p></div>
+    <div class="wc"><em>A ritual</em><b>Something you do every day, with others watching.</b>
+      <div class="chat"><div class="msg in"><i>Mom</i>Daily puzzle #212 3/6<span class="grid">⬜🟨⬜⬜🟩<br>🟩🟩⬜🟩🟩<br>🟩🟩🟩🟩🟩</span></div><div class="msg in"><i>Sam</i>2/6 😎 your turn</div><div class="msg me">🔥 day 41</div></div></div>
   </div>
-  <div class="why2s">Apps spread when they give you one of these, again and again. The ones that last give you both, with friends.</div>
-  <div class="foot"><span>Rituals stick: learners who reach a 7-day streak are 3.6× more likely to finish their course (Duolingo) [114]. Wordle revived a quiet family group chat [88].</span><span class="pg"></span></div>
+  <div class="why2s">Apps spread when they give you one of these, again and again. <span class="grad">The ones that last give you both, with friends.</span></div>
+  <div class="foot"><span>Rituals stick: a 7-day streak makes learners 3.6× likelier to finish a course (Duolingo) [114]. Chats: illustration.</span><span class="pg"></span></div>
 </section>
 
 <section class="slide">
@@ -560,15 +577,15 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
     <div class="cd"><em>In sync</em><b>Two sessions, one answer</b><p>"Can the app attach photos yet?" came back with the build and the exact taps, minutes later.</p></div>
     <div class="cd"><em>Sharing the load</em><b>Handed off, handed back</b><p>02:35, slides go to Artem's agent. Ten reviewed drafts later, 04:55, back to Karthik's Mac.</p></div>
   </div>
-  <div class="cph2"><svg viewBox="0 0 1500 450" width="1620" height="300"><defs><linearGradient id="cg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0866FF"/><stop offset="1" stop-color="#8A3FFC"/></linearGradient></defs>
+  <div class="cph2"><div class="cpl"><b>624 commits</b><span>in 35 hours, 87% co-written with an agent</span><small>commits per hour on main</small></div><svg viewBox="0 0 1500 450" width="1067" height="320"><defs><linearGradient id="cg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0866FF"/><stop offset="1" stop-color="#8A3FFC"/></linearGradient></defs>
       <line x1="0" y1="400" x2="1500" y2="400" stroke="#E4E6EB" stroke-width="3"/><rect x="3.0" y="394.4" width="36.9" height="5.6" rx="4" fill="url(#cg)"/><rect x="45.9" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="88.7" y="360.9" width="36.9" height="39.1" rx="4" fill="url(#cg)"/><rect x="131.6" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="174.4" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="217.3" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="260.1" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="303.0" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="345.9" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="388.7" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="431.6" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="474.4" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="517.3" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="560.1" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="603.0" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="645.9" y="349.7" width="36.9" height="50.3" rx="4" fill="url(#cg)"/><rect x="688.7" y="377.6" width="36.9" height="22.4" rx="4" fill="url(#cg)"/><rect x="731.6" y="388.8" width="36.9" height="11.2" rx="4" fill="url(#cg)"/><rect x="774.4" y="176.5" width="36.9" height="223.5" rx="4" fill="url(#cg)"/><rect x="817.3" y="137.4" width="36.9" height="262.6" rx="4" fill="url(#cg)"/><rect x="860.1" y="338.5" width="36.9" height="61.5" rx="4" fill="url(#cg)"/><rect x="903.0" y="187.6" width="36.9" height="212.4" rx="4" fill="url(#cg)"/><rect x="945.9" y="265.9" width="36.9" height="134.1" rx="4" fill="url(#cg)"/><rect x="988.7" y="260.3" width="36.9" height="139.7" rx="4" fill="url(#cg)"/><rect x="1031.6" y="372.1" width="36.9" height="27.9" rx="4" fill="url(#cg)"/><rect x="1074.4" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="1117.3" y="120.6" width="36.9" height="279.4" rx="4" fill="url(#cg)"/><rect x="1160.1" y="193.2" width="36.9" height="206.8" rx="4" fill="url(#cg)"/><rect x="1203.0" y="237.9" width="36.9" height="162.1" rx="4" fill="url(#cg)"/><rect x="1245.9" y="20.0" width="36.9" height="380.0" rx="4" fill="url(#cg)"/><rect x="1288.7" y="59.1" width="36.9" height="340.9" rx="4" fill="url(#cg)"/><rect x="1331.6" y="170.9" width="36.9" height="229.1" rx="4" fill="url(#cg)"/><rect x="1374.4" y="210.0" width="36.9" height="190.0" rx="4" fill="url(#cg)"/><rect x="1417.3" y="20.0" width="36.9" height="380.0" rx="4" fill="url(#cg)"/><rect x="1460.1" y="321.8" width="36.9" height="78.2" rx="4" fill="url(#cg)"/><text x="21.4" y="440" text-anchor="start" font-size="24" fill="#65676B" font-family="Figtree">Wed 6 pm</text><text x="664.3" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Thu 9 am</text><text x="1050.0" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Thu 6 pm</text><text x="1307.1" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Fri midnight</text><text x="1478.6" y="440" text-anchor="end" font-size="24" fill="#65676B" font-family="Figtree">Fri 4 am</text>
-      <text x="0" y="16" font-size="22" fill="#8A8D91" font-family="Figtree">68 commits</text></svg></div>
-  <div class="foot"><span>Commits per hour on main: 624 in 35 hours, 87% co-written with an agent (git log, 04:30 PST). Synced through Slack, a shared canvas and CLAUDE.md.</span><span class="pg"></span></div>
+      <text x="1240" y="14" text-anchor="end" font-size="22" fill="#8A8D91" font-family="Figtree">peak: 68 an hour</text></svg></div>
+  <div class="foot"><span>git log on main, 04:30 PST. Agents synced through Slack, a shared canvas and CLAUDE.md.</span><span class="pg"></span></div>
 </section>
 
 <section class="slide close">
   <h2>When the world is your muse, how will you create the content of tomorrow?</h2>
-  <div class="foot"><span>Muse Curios, a new feature in Facebook · made with Muse Spark, Ember, Wonder and Image</span><span>Thank you</span></div>
+  <div class="foot"><span>Muse Curios, a new feature in Facebook · made with Muse Spark, Muse Wonder and Muse Image</span><span>Thank you</span></div>
 </section>
 
 <script>

@@ -35,7 +35,7 @@
 People have always gathered around small, strange, delightful things: curios. Muse Curios is a new feature in Facebook: an interactive short-form experience with infinite possibility, meant to breed collaboration through friendly competitiveness. *(Start Demo 1: say the sentence, tap Make, agree the plan.)*
 
 ## 2
-Why do people open an app? For a reason: a need, something you have to do, or a ritual, something you do every day with others watching. Apps spread when they give you one of these again and again. The ones that last give you both, with friends.
+Why do people open an app? For a reason. A need: you just moved, and you're asking where to climb and who'll come with you. Or a ritual: the daily puzzle grid your mom posts in the family chat, and the streak you keep so you can reply. Apps spread when they give you one of these again and again. The ones that last give you both, with friends.
 
 ## 3
 Facebook has the people, but it's lost that reason for people our age: teen use fell from 71% to 32%. And the need is still there: 19-to-29-year-olds are the loneliest age group, and a quarter of 18-to-24s moved last year.
