@@ -54,7 +54,7 @@ Muse Curios is a new feature in Facebook: short-form content created by your fri
 
 **Product Thinking & User Impact (25%): a daily reason to open Facebook, shared with your friends.** Daily games already prove that a small, competitive habit brings people back every morning. Muse Curios makes that habit social and endless: there's always a challenge waiting in your inbox, a friend who just passed your score, a new week starting on your Group's board, and a new game from someone you know at the top of your feed. Because anyone can make a game, the people playing are also the people creating, so the feed keeps growing on its own. It belongs on Facebook because a game is only as good as the people you play it with, and Facebook is the one place where your friends, your Groups and your Events already live together.
 
-**Execution & Demo (25%): it runs on our live server today.** Every game is made by Muse on our own server, agreeing the plan with the maker first and then taking about a minute to build the game. Leaderboards, the weekly Group board, friends, the best-of-5, saves and the ranked feed are real server data rather than mockups, and anyone can play the games in a browser, signed out, at [games.ol4ol.com/play](https://games.ol4ol.com/play/). Challenges, quiz nights and making a game together are built on the server, and their app screens are next.
+**Execution & Demo (25%): it runs on our live server today.** Every game is made by Muse on our own server, agreeing the plan with the maker first and then taking about a minute to build the game. Leaderboards, the weekly Group board, friends, the best-of-5, saves and the ranked feed are real server data rather than mockups. Challenges, quiz nights and making a game together are built on the server, and their app screens are next.
 
 **Originality & Cohesion (20%): short-form you play with people.** Prompt-to-game tools already exist, but the games they make usually travel from one creator to an audience of strangers. Muse Curios makes games for and with the specific people in your life, and then turns the score into something social. Every part of the product serves the same goal: making a game gives your friends something to open, competing gives you a reason to talk, and the leaderboard turns that conversation into a friendship.
 
@@ -116,6 +116,5 @@ meta, muse-spark, muse-ember, muse-wonder, muse-image, swift, swiftui, ios, go, 
 
 ## Try it
 
-- **Play in your browser:** [games.ol4ol.com/play](https://games.ol4ol.com/play/)
 - **Code:** [github.com/karthiksing05/meta-hackathon-project](https://github.com/karthiksing05/meta-hackathon-project)
 - **Demo video:** \[TBD\]
