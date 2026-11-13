@@ -1,0 +1,32 @@
+[
+  {
+    "request": "duolingo style spanish lesson about travel",
+    "expect": [
+      "translate_typed_sentence"
+    ]
+  },
+  {
+    "request": "anki but with harry potter spells",
+    "expect": [
+      "spaced_repetition_flashcards"
+    ]
+  },
+  {
+    "request": "kahoot style quiz for my study group",
+    "expect": [
+      "quiz_live_class_buzzer"
+    ]
+  },
+  {
+    "request": "lightbot like coding puzzle",
+    "expect": [
+      "block_coding_puzzle"
+    ]
+  },
+  {
+    "request": "seterra for us states",
+    "expect": [
+      "map_place_pin_quiz"
+    ]
+  }
+]
