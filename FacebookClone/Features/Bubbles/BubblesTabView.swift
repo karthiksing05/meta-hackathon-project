@@ -455,7 +455,7 @@ private struct BubbleFeedHeader: View {
                 router.push(.challengesInbox)
             }
             .overlay(alignment: .topTrailing) {
-                let open = ChallengeInbox.shared.openCount
+                let open = ChallengeInbox.shared.openCount + ServerBracketService.shared.yourTurnCount
                 if open > 0 {
                     Text("\(open)")
                         .font(.fbMicroEmphasized)

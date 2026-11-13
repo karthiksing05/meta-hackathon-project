@@ -165,6 +165,32 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return try await get("v1/groups/\(groupID)/leaderboard", query: q, auth: .required)
     }
 
+    /// Starts a best-of-N with a friend (`POST /v1/series {opponentId, games}`, 1 to 5 microgames).
+    func startSeries(opponentID: String, gameIDs: [String]) async throws -> RemoteSeries {
+        let games = try gameIDs.map { try serverID($0) }
+        let body = try JSONSerialization.data(withJSONObject: ["opponentId": opponentID, "games": games])
+        let series: RemoteSeries = try decode(try await send("POST", "v1/series", body: body, contentType: "application/json", auth: .required))
+        series.rounds.compactMap(\.game).forEach(link)
+        return series
+    }
+
+    /// My series, newest first (`GET /v1/series`).
+    func seriesList() async throws -> [RemoteSeries] {
+        let items = (try await get("v1/series", auth: .required) as RemoteList<RemoteSeries>).items
+        items.flatMap(\.rounds).compactMap(\.game).forEach(link)
+        return items
+    }
+
+    /// Submits my run of a round: the engine's input log as text (`POST /v1/series/{id}/rounds/{n} {log}`).
+    /// The server replays it and keeps the replayed score.
+    func submitSeriesRound(seriesID: String, round: Int, log: String) async throws -> RemoteSeries {
+        let body = try JSONSerialization.data(withJSONObject: ["log": log])
+        let series: RemoteSeries = try decode(try await send("POST", "v1/series/\(seriesID)/rounds/\(round)", body: body,
+                                                            contentType: "application/json", auth: .required, timeout: 30))
+        series.rounds.compactMap(\.game).forEach(link)
+        return series
+    }
+
     func friends() async throws -> [RemoteProfile] {
         (try await get("v1/me/friends", auth: .required) as RemoteList<RemoteProfile>).items
     }

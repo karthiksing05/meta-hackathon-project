@@ -3,8 +3,9 @@ import Foundation
 // Get-to-know brackets (docs/BUBBLES.md 7.14): when you meet someone new (a new friend, or Add
 // friend next to a stranger on a Group board), the app proposes a best of three: one quick-hands
 // game, one words or trivia game, one "about you" game, each on a seed shared by the two of you.
-// The model and the planner live here; `BracketService` holds brackets (local today, the server's
-// /v1/brackets later).
+// The model and the planner live here; `BracketService` holds brackets: the server's series
+// (`ServerBracketService`, /v1/series), so both people play the same games on the same seeds and the
+// server replays every run to check its score.
 
 /// What each round is for, so the three games feel different.
 enum BracketTheme: String, Codable, CaseIterable, Sendable {
@@ -61,12 +62,13 @@ struct BracketRound: Codable, Hashable, Identifiable, Sendable {
     var mine: Int?
     var theirs: Int?
     var theirsReplay: BubbleInputLog?
-    /// True while the other side is the local stand-in (a bot run of the real runtime), not the person.
-    var theirsIsLocalStandIn = false
+    /// The server's verdict once both have played (it breaks equal scores on time).
+    var decided: BracketSide?
 
     var id: Int { index }
 
     var winner: BracketSide? {
+        if let decided { return decided }
         guard let mine, let theirs else { return nil }
         return mine > theirs ? .me : theirs > mine ? .them : .tie
     }
@@ -79,13 +81,21 @@ struct FriendBracket: Codable, Hashable, Identifiable, Sendable {
     var createdAt: Date
     var rounds: [BracketRound]
 
+    /// Rounds needed to win (best of 5 needs 3); from the server when it says.
+    var winsNeeded: Int?
+    /// The server's status and verdict, when the bracket is a server series.
+    var isDoneOnServer: Bool?
+    var serverWinner: BracketSide?
+
     var myWins: Int { rounds.filter { $0.winner == .me }.count }
     var theirWins: Int { rounds.filter { $0.winner == .them }.count }
-    /// Best of three: over at two wins, or when every round is played.
-    var isFinished: Bool { myWins >= 2 || theirWins >= 2 || rounds.allSatisfy { $0.winner != nil } }
+    var needed: Int { winsNeeded ?? (rounds.count / 2 + 1) }
+    /// Over when someone has won more than half the rounds, or when every round is decided.
+    var isFinished: Bool { isDoneOnServer ?? (myWins >= needed || theirWins >= needed || rounds.allSatisfy { $0.winner != nil }) }
 
     var winner: BracketSide? {
         guard isFinished else { return nil }
+        if let serverWinner { return serverWinner }
         return myWins > theirWins ? .me : theirWins > myWins ? .them : .tie
     }
 
@@ -109,7 +119,7 @@ protocol BracketService: AnyObject {
 }
 
 enum BracketServices {
-    @MainActor static var current: BracketService { LocalBracketService.shared }
+    @MainActor static var current: BracketService { ServerBracketService.shared }
 }
 
 /// Picks the three games for two people: one per theme, different games, stable for the pair.

@@ -547,3 +547,54 @@ struct RemoteGroupWeeklyBoard: Decodable, Sendable {
         case week, groupID = "groupId", games, items
     }
 }
+
+// MARK: - Series (`/v1/series`): best-of-N with a friend on the same games and seeds
+
+struct RemoteSeriesPlay: Decodable, Hashable, Sendable {
+    var played: Bool
+    /// The replayed score (hidden for the other side until you've played the round).
+    var score: Int?
+    var timeMs: Int?
+}
+
+struct RemoteSeriesRound: Decodable, Hashable, Sendable {
+    /// 1-based.
+    var n: Int
+    var gameID: String
+    var game: RemoteGame?
+    /// The server's seed: play the round with it as the run seed.
+    var seed: Int
+    var mine: RemoteSeriesPlay
+    var theirs: RemoteSeriesPlay
+    /// `me`, `them` or `draw`, once both have played.
+    var winner: String?
+
+    enum CodingKeys: String, CodingKey {
+        case n, gameID = "gameId", game, seed, mine, theirs, winner
+    }
+}
+
+struct RemoteSeries: Decodable, Identifiable, Hashable, Sendable {
+    struct Tally: Decodable, Hashable, Sendable {
+        var me: Int
+        var them: Int
+        var draws: Int
+        // The server writes these keys capitalized.
+        enum CodingKeys: String, CodingKey { case me = "Me", them = "Them", draws = "Draws" }
+    }
+
+    var id: String
+    /// `active` or `done`.
+    var status: String
+    var opponent: RemoteProfile
+    /// `me` or `them`.
+    var startedBy: String
+    var rounds: [RemoteSeriesRound]
+    var tally: Tally
+    var winsNeeded: Int
+    /// `me`, `them` or `draw`, when done.
+    var winner: String?
+    var createdAt: Date
+
+    var isDone: Bool { status == "done" }
+}

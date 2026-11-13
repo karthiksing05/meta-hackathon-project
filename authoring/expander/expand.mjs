@@ -672,6 +672,8 @@ export function expand(manifest, lib, options = {}) {
     root,
     feedback: feedback.map((f) => f.item),
     ...(sound.music ? { music: sound.music.presentation } : {}),
+    // Where the app's text field goes for games with a text input (SPEC 2.2), as written.
+    ...(manifest.presentation?.text_field ? { text_field: clone(manifest.presentation.text_field) } : {}),
   };
   if (sound.music) map('/presentation/music', 'game', '/sound/music');
 
@@ -683,12 +685,20 @@ export function expand(manifest, lib, options = {}) {
   if (!Object.keys(art.tokens).length) map('/presentation/tokens', `look:${lookId}`, '/tokens');
   map('/presentation/canvas', `look:${lookId}`, '/canvas');
 
-  // ---- playtest probe (SPEC 4): a copy of the game with a hidden progress value for bots ----
+  // ---- playtest probe (SPEC 2.6): a copy of the game with hidden values for bots: a progress
+  // number, and the strings worth submitting to a text input ----
   let playtestGame;
-  if (manifest.playtest?.progress) {
+  const pt = manifest.playtest;
+  if (pt?.progress || pt?.text_candidates) {
     playtestGame = clone(out);
-    playtestGame.state = { ...(playtestGame.state || {}), __progress: { type: 'float', init: '0.0' } };
-    playtestGame.rules = [...playtestGame.rules, { id: '__progress', on: 'tick', do: [{ set: '__progress', to: `${manifest.playtest.progress} * 1.0` }] }];
+    if (pt.text_candidates) {
+      playtestGame.state = { ...(playtestGame.state || {}), __text_candidates: { type: 'list<string>', init: '[]' } };
+      playtestGame.rules = [...playtestGame.rules, { id: '__text_candidates', on: 'tick', do: [{ set: '__text_candidates', to: pt.text_candidates }] }];
+    }
+    if (pt.progress) {
+      playtestGame.state = { ...(playtestGame.state || {}), __progress: { type: 'float', init: '0.0' } };
+      playtestGame.rules = [...playtestGame.rules, { id: '__progress', on: 'tick', do: [{ set: '__progress', to: `${pt.progress} * 1.0` }] }];
+    }
   }
 
   // ---- score model (SPEC 2.13): not part of game.json (the engine's file is strict); returned beside it ----

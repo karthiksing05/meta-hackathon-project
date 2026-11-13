@@ -108,7 +108,9 @@ final class BubbleRuntimePool: NSObject, WKScriptMessageHandler {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
         configuration.mediaTypesRequiringUserActionForPlayback = []
-        configuration.preferences.isTextInteractionEnabled = false
+        // On, so a microgame's text field (bubble-kit-microgame.js) can take focus and type. The
+        // game surface stays unselectable through CSS (`user-select: none`, no touch callout).
+        configuration.preferences.isTextInteractionEnabled = true
         configuration.userContentController = WKUserContentController()
         self.configuration = configuration
         super.init()

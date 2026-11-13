@@ -12,9 +12,9 @@ struct BestOfFiveOffer: Identifiable, Hashable {
     var id: String { friendID }
 }
 
-/// Offered right after you add a friend: five quick games, head to head, first to 3 wins.
-/// Each round is a server challenge ("beat my score", `POST /v1/challenges`); results show in
-/// Challenges. Same-seed rounds with verified scores come when the server serves series.
+/// Offered right after you add a friend: a best of 5 on the server (`POST /v1/series`), the same
+/// games and seeds for both of you, each run checked by replaying it on the server. Starting it
+/// drops you straight into round 1; the match lives in Challenges and on their profile.
 struct BestOfFiveOfferSheet: View {
     let offer: BestOfFiveOffer
 
@@ -26,18 +26,13 @@ struct BestOfFiveOfferSheet: View {
     @State private var sending = false
     @State private var error: String?
 
-    /// Five quick, scored games from the server's feed: microgames first, no dailies.
-    private var games: [Bubble] {
-        var seen = Set<String>()
-        let pool = bubbleStore.feedBubbles.filter { !$0.serverID.isEmpty && !$0.isDaily && seen.insert($0.serverID).inserted }
-        let micro = pool.filter { $0.formula.rawValue == "microgame" }
-        let rest = pool.filter { $0.formula.rawValue != "microgame" }
-        return Array((micro + rest).prefix(5))
-    }
+    /// Five quick, scored microgames from the server's feed (a series needs microgames: the server
+    /// replays every round to check its score).
+    private var games: [Bubble] { ServerBracketService.shared.pickGames(with: offer.friendID) }
 
     /// "a best of 5" with five games; with fewer on the server, says how many.
     private func matchName(_ count: Int) -> String {
-        count >= 5 ? "a best of 5" : count == 1 ? "a 1-game challenge" : "a \(count)-game challenge"
+        count >= 5 ? "a best of 5" : count == 1 ? "a 1-game match" : "a best of \(count)"
     }
 
     var body: some View {
@@ -53,7 +48,7 @@ struct BestOfFiveOfferSheet: View {
                     Text("You and \(friend.firstName) are friends")
                         .font(.fbTitle)
                         .foregroundStyle(FBColor.primaryText)
-                    Text(picks.count >= 5 ? "Break the ice with a best of 5: five quick games, first to 3 wins." : "Break the ice with \(matchName(picks.count)): quick games, head to head.")
+                    Text(picks.count >= 5 ? "Break the ice with a best of 5: the same five quick games and seeds for both of you, first to 3 wins." : "Break the ice with \(matchName(picks.count)): the same games and seeds for both of you.")
                         .font(.fbBody)
                         .foregroundStyle(FBColor.secondaryText)
                         .multilineTextAlignment(.center)
@@ -99,7 +94,7 @@ struct BestOfFiveOfferSheet: View {
                 } label: {
                     HStack(spacing: 8) {
                         if sending { ProgressView().tint(.white) }
-                        Text("Challenge \(friend.firstName) to \(matchName(picks.count))")
+                        Text("Play \(friend.firstName): \(matchName(picks.count))")
                     }
                 }
                 .buttonStyle(.fb(.primary, height: 44))
@@ -122,13 +117,18 @@ struct BestOfFiveOfferSheet: View {
         error = nil
         Task { @MainActor in
             do {
-                let sent = try await ChallengeInbox.shared.send(gameIDs: picks.map(\.id), to: offer.friendID)
+                let match = try await ServerBracketService.shared.start(with: offer.friendID, games: picks)
                 Haptics.success()
-                appStore.showToast("Sent \(friend.firstName) \(sent) \(sent == 1 ? "game" : "games") to play", symbol: "trophy.fill")
                 dismiss()
-                router.push(.challengesInbox)
+                // Straight into round 1: one obvious next step.
+                if let first = match.nextRound {
+                    router.play(BubblePlayRequest(bubbleID: first.gameID, seed: first.seed, length: first.length))
+                } else {
+                    router.push(.challengesInbox)
+                }
+                appStore.showToast("\(matchName(picks.count).prefix(1).uppercased() + matchName(picks.count).dropFirst()) with \(friend.firstName): round 1 is yours", symbol: "trophy.fill")
             } catch {
-                self.error = "Couldn't send: \(error.localizedDescription)"
+                self.error = "Couldn't start: \(error.localizedDescription)"
                 Haptics.warning()
             }
             sending = false

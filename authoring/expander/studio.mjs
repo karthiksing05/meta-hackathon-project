@@ -316,13 +316,20 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     if (!diagnostics.some((d) => d.severity === 'error')) {
       const e = engine();
       diagnostics.push(...e.validate(JSON.stringify(game)).map((d) => finish(translate(d, result.sourceMap), manifest)));
-      // The playtest copy adds the model's own `playtest.progress` expression: check it too.
+      // The playtest copy adds the model's own `playtest.progress` and `playtest.text_candidates`
+      // expressions (hidden rules and state named after them): check them too.
       if (playtestGame && !diagnostics.some((d) => d.severity === 'error')) {
-        const rules = playtestGame.rules?.length ?? 0;
+        const added = {};
+        (playtestGame.rules ?? []).forEach((r, i) => { if (r.id === '__progress' || r.id === '__text_candidates') added[`/rules/${i}`] = r.id; });
+        const hintAt = (at) => {
+          if (!at) return null;
+          for (const [prefix, id] of Object.entries(added)) if (at === prefix || at.startsWith(`${prefix}/`)) return id;
+          const m = /^\/state\/(__progress|__text_candidates)(\/|$)/.exec(at);
+          return m ? m[1] : null;
+        };
         for (const d of e.validate(JSON.stringify(playtestGame))) {
-          if (d.at && (d.at.startsWith(`/rules/${rules - 1}`) || d.at.startsWith('/state/__progress'))) {
-            diagnostics.push(finish({ ...d, at: '/playtest/progress', engine_at: d.at, span: undefined, origin: 'game', audience: 'model' }, manifest));
-          }
+          const id = hintAt(d.at);
+          if (id) diagnostics.push(finish({ ...d, at: `/playtest/${id.slice(2)}`, engine_at: d.at, span: undefined, origin: 'game', audience: 'model' }, manifest));
         }
       }
       // Games travel as JSON text (game_json below, content.game_json in the Bubble), so key order

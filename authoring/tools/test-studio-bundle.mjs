@@ -80,6 +80,42 @@ if (cat.fragments.length < 30 || cat.looks.length < 4 || !cat.prompt.fragments.i
   else console.log(`malformed manifest -> ${r4.diagnostics[0].code} (${r4.diagnostics[0].audience})`);
 }
 
+// ---- typed answers: a text input, presentation.text_field and playtest.text_candidates (SPEC 2.2, 2.6) ----
+{
+  const typed = {
+    authoring: 'microgame-authoring/0.1',
+    meta: { title: 'Ferry Call', instructions: 'Type the word on the sign and press Done.', duration_s: 40 },
+    uses: [],
+    state: { target: { type: 'string', init: 'pick(content_words)' }, boarded: { type: 'int', init: '0' }, misses: { type: 'int', init: '0' } },
+    inputs: { answer: { payload: { value: 'string' }, from: [{ text: 'submit', with: { value: 'text.value' }, placeholder: 'Type the word', max_len: 12 }] } },
+    rules: [{ id: 'answer', on: 'answer', do: [{ if: 'lower(trim(event.value)) == target',
+      then: [{ incr: 'boarded' }, { set: 'target', to: 'pick(filter(content_words, w => w != target))' }], else: [{ incr: 'misses' }] }] }],
+    objectives: { win: 'boarded >= 6', lose: 'misses >= 3', score: 'boarded * 10', time_limit: '40s', on_timeout: 'lose' },
+    presentation: { slots: [{ slot: 'playfield', node: { node: 'text', x: 180, y: 200, anchor: 'center', text: '= upper(target)', size: 34 } }], feedback: [],
+      text_field: { x: 40, y: 470, w: 280, h: 48, size: 20 } },
+    look: { id: 'neon' },
+    content: { words: ['fog', 'pier', 'gull', 'tide', 'wharf', 'sail', 'kelp', 'buoy', 'dock', 'wave'] },
+    playtest: { text_candidates: 'content_words' },
+  };
+  const r = JSON.parse(S.expand(JSON.stringify(typed)));
+  const pg = r.playtest_game;
+  if (!r.ok) fail(`typed answers: ${JSON.stringify(r.diagnostics.filter((d) => d.severity === 'error'))}`);
+  else if (JSON.stringify(r.game.presentation.text_field) !== JSON.stringify(typed.presentation.text_field) || !pg?.state?.__text_candidates || r.game.state.__text_candidates) {
+    fail('typed answers: text_field goes to the game, __text_candidates only to the playtest copy');
+  } else {
+    // Without a text action the bots could only tap, and nobody would score.
+    const g = JSON.parse(await S.gate(r.playtest_game_json, 1));
+    const n = await playtest(r.playtest_game_json);
+    const texts = n.runs.reduce((k, run) => k + run.replay.actions.filter((a) => a.action.kind === 'text').length, 0);
+    console.log(`typed answers -> bundle gate: ${g.summary}; node gate: ${texts} text submits`);
+    if (!texts || !g.runs.some((run) => run.outcome === 'success') || !n.runs.some((run) => run.outcome === 'success')) fail('typed answers: the gate bots should submit the words and win');
+  }
+  const bad = JSON.parse(S.expand(JSON.stringify({ ...typed, playtest: { text_candidates: 'content_words + nope' } })));
+  const e = bad.diagnostics.find((x) => x.severity === 'error');
+  if (bad.ok || !e || e.at !== '/playtest/text_candidates') fail(`bad playtest.text_candidates: ${JSON.stringify(bad.diagnostics)}`);
+  else console.log(`bad playtest.text_candidates -> ${e.code} at ${e.at} (${e.audience})`);
+}
+
 // ---- the games ----
 const lib = loadLibrary(authoringDir);
 const rows = [];

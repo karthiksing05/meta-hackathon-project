@@ -4,7 +4,7 @@
 
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { loadEngine } from '../expander/engine.mjs';
-import { DT, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, apply, LOOKAHEAD_STEPS, probeDeadInputs, analyze, summarize } from './bots.mjs';
+import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize } from './bots.mjs';
 
 export { DEFAULT_BOTS, analyze, summarize, gameObject };
 
@@ -39,7 +39,7 @@ function playOne(engine, json, game, sources, bot, seed, maxSeconds) {
     let nextDecision = 0;
     while (steps < maxSteps && g.phase() === 'playing') {
       if (steps >= nextDecision) {
-        const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null);
+        const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null, sources.text ? textCandidates(g, rng) : null);
         let choice;
         if (rng() < bot.skill) {
           let best = -Infinity;
