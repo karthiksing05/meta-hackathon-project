@@ -261,5 +261,65 @@
       "Hooks the heat-change sting to the public `round_started {index}` event instead of reaching for the quiz's private `_ask`."
     ],
     "themes": "rizz dating flirt pickup lines cringe love island bachelor dialogue"
+  },
+  {
+    "id": "gold_the_podium",
+    "file": "authoring/games/gold_the_podium.authoring.json",
+    "request": "a funny press conference where the mayor’s new bridge goes really badly, as a kahoot quiz where you guess what he says next",
+    "brief": {
+      "intent": "a story told as a quiz: a press conference that goes badly",
+      "mood": [
+        "funny",
+        "chaotic"
+      ],
+      "energy": "low",
+      "competition": "compare"
+    },
+    "genre": "story quiz",
+    "themes": "press conference politician interview gone wrong news parody kahoot skit clip",
+    "fragments_used": [
+      "story_quiz"
+    ],
+    "why_its_good": [
+      "The clip is cut into 8 beats that escalate: on-budget claims, a bridge that stops short, a hot mic, a non-apology.",
+      "The real line is always worse than the tame guesses, so the reveal lands as a punchline, and the reveal panel adds what happened next.",
+      "Nothing is lost and nothing is timed: it is unranked (score kind points, ranked false), and friends compare how in sync their picks were (picks in group_play).",
+      "Three cartoon panels are mapped onto the beats with the media param, and the HUD reads as story (\"Beat 3 of 8\")."
+    ],
+    "pitfalls_avoided": [
+      "Shuffling story beats (quiz shuffles; story_quiz plays in order).",
+      "Making the right answer the sensible one: in a story quiz the real line is the joke.",
+      "Scoring a story as a ranked contest.",
+      "Inventing quotes from real people: the mayor is fictional; with real people use tag PARODY and cartoon art."
+    ]
+  },
+  {
+    "id": "gold_purr_earth",
+    "file": "authoring/games/gold_purr_earth.authoring.json",
+    "request": "a nature documentary narrated by a cat who keeps getting distracted, where you guess what he says next",
+    "brief": {
+      "intent": "a story quiz with a narrator who has a consistent comic voice",
+      "mood": [
+        "funny",
+        "cozy"
+      ],
+      "energy": "low",
+      "competition": "compare"
+    },
+    "genre": "story quiz",
+    "themes": "nature documentary cat narrator animal parody cooking show commentator",
+    "fragments_used": [
+      "story_quiz"
+    ],
+    "why_its_good": [
+      "The narrator’s logic is consistent (everything is about him, his box, his dinner), so by beat 4 you can call his lines: guessing is satisfying, not random.",
+      "Some beats have a picture and some are text only (media \"0,1,2,-1,-1,0,1,2\"), and the layout moves the quote card up when there is no picture.",
+      "A light cream look with a field-guide pairing, so it never looks like the dark news-desk Podium."
+    ],
+    "pitfalls_avoided": [
+      "Random jokes with no pattern",
+      "A picture on every beat when the text is the joke",
+      "Lives or timers in a story"
+    ]
   }
 ]

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "gold_first_things_first",
+    "file": "authoring/games/gold_first_things_first.authoring.json",
+    "request": "a which-came-first history game where you guess which of two events happened earlier",
+    "brief": {
+      "intent": "a brainy chronology quiz with surprising pairs",
+      "mood": [
+        "clever",
+        "calm"
+      ],
+      "energy": "medium",
+      "competition": "score"
+    },
+    "genre": "brainy quiz",
+    "themes": "history timeline dates which came first chronology trivia science inventions",
+    "fragments_used": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "why_its_good": [
+      "Every pair crosses domains (Oxford and the Aztecs, the fax and the telephone, Star Wars and the guillotine), so you reason from anchors instead of recalling one date.",
+      "During the reveal the question card shows both dates and the gap (quiz_questions() returns the notes while locked, reveal_ms 2600), so every answer teaches something.",
+      "Short tile labels (one line each) keep all tiles at one size; a single hourglass picture fills the middle.",
+      "Ranked points with a streak bonus written as two small game rules, lives for a real way to lose."
+    ],
+    "pitfalls_avoided": [
+      "Trivia that is pure recall of one fact",
+      "A 700 ms reveal nobody can read",
+      "Tiles with long labels that shrink to different sizes",
+      "An empty middle on the tall canvas"
+    ]
+  },
+  {
+    "id": "gold_one_move",
+    "file": "authoring/games/gold_one_move.authoring.json",
+    "request": "a mate in one chess puzzle game where you pick the move that checkmates",
+    "brief": {
+      "intent": "chess tactics: find the mating move",
+      "mood": [
+        "clever",
+        "focused"
+      ],
+      "energy": "low",
+      "competition": "score"
+    },
+    "genre": "brainy puzzle",
+    "themes": "chess checkmate mate in one tactics puzzle board game strategy",
+    "fragments_used": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "why_its_good": [
+      "Each position was checked with a move generator: exactly one candidate mates, and each wrong one is a check or threat that fails for a concrete reason the reveal names.",
+      "The board is one sprite with a frame per puzzle, drawn by the kit picture component (frame = get_or(order, qi, 0)), so it is never covered by text.",
+      "Two columns of short move tiles (quiz cols 2) leave the middle of the screen to the board.",
+      "Notation is shown without + or #, so the answer isn’t given away by a symbol."
+    ],
+    "pitfalls_avoided": [
+      "Unchecked positions with two mates or none",
+      "A board made of 64 tap targets under the 44 pt minimum",
+      "Check symbols that give the answer away"
+    ]
+  }
+]
