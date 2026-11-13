@@ -191,8 +191,12 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   check('GENERATOR_LAYOUT=0 turns the layout hooks off', (await composeHooks({ muse: new ScriptedMuse([]), env: { GENERATOR_LAYOUT: '0' } })).hooks === null);
   const out = await compose({ request: 'a calm fog game', brief }, { studio, muse: new ScriptedMuse([example()]), env: {} });
   check('stats.layout and stats.requirements come back on the result', out.stats.layout && typeof out.stats.layout.counts?.score === 'number' && out.stats.layout.pixels === false && Array.isArray(out.stats.layout.warnings) && typeof out.stats.layoutFixes === 'number' && out.stats.requirements && 'must_passed' in out.stats.requirements, JSON.stringify({ layout: out.stats.layout, fixes: out.stats.layoutFixes, req: out.stats.requirements }));
-  const docker = (await import('node:fs')).readFileSync(join(here, '..', 'Dockerfile'), 'utf8');
-  check('the generator image copies every authoring module the hooks import', AUTHORING_FILES.every((f) => docker.includes('authoring/' + f)), AUTHORING_FILES.filter((f) => !docker.includes('authoring/' + f)).join(', '));
+  const fs = await import('node:fs');
+  const dockerfile = join(here, '..', 'Dockerfile');
+  if (fs.existsSync(dockerfile)) { // in the repository; inside the image, the modules simply have to load (above)
+    const docker = fs.readFileSync(dockerfile, 'utf8');
+    check('the generator image copies every authoring module the hooks import', AUTHORING_FILES.every((f) => docker.includes('authoring/' + f)), AUTHORING_FILES.filter((f) => !docker.includes('authoring/' + f)).join(', '));
+  }
 }
 
 {
