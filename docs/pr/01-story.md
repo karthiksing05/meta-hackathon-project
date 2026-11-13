@@ -45,7 +45,14 @@ Two ways to seed it (planned, Karthik's decision at 18:00 on Nov 12; nothing bel
 
 ## 4. What we designed: short-form content you play *with* people
 
-Short-form video is made to be watched alone. We designed a short-form format made to be shared: a game that takes seconds to start and under a couple of minutes to play, built for people to **collaborate, connect, compete and get excited together**. Every game is played on the same seed by everyone it's sent to, so a score is a fair comparison and a reason to talk. See [06-closer-together-and-engagement.md](06-closer-together-and-engagement.md).
+**This is the part to market hardest: Whims is collaborative.** Short-form video is made to be watched alone. We designed a short-form format made to be shared: a game that takes seconds to start and under a couple of minutes to play, built for people to **collaborate, connect, compete and get excited together**. Every game is played on the same seed by everyone it's sent to, so a score is a fair comparison and a reason to talk. Four ways to play together, each with a named surface:
+
+- **Make together.** Make it together: a chat, a friend or a Group adds a question, words, a scene or a level, and Muse stitches them into one game whose credits name every maker (live on one device).
+- **Play together.** One card in a group chat becomes a shared session everyone plays ("3 of 5 played"); a Group's quiz night fills a lobby (live on one device).
+- **Compete together.** Challenge Me, Challenge back and a weekly Group board with Most improved (live on one device).
+- **Get to know someone new.** Meet someone new, and Whims sets up a **3-game get-to-know-you bracket** for the two of you. *In progress* on branch `fe-qol`, not merged and not built on `main`. The Group Blend's "taste twin" with Add friend is the live first step.
+
+See [06-closer-together-and-engagement.md](06-closer-together-and-engagement.md).
 
 ## 5. What we built: Whims
 
@@ -55,6 +62,8 @@ Short-form video is made to be watched alone. We designed a short-form format ma
 - **Our engagement story.** A hand-written, explainable recommender ranks the Whims feed on the phone and on the server. It rewards finished runs, saves, shares and Add friend, and keeps clickbait down for people who don't want it. In a simulation with synthetic people, it won **70.3%** of decided sessions against today's feed (95% CI 68 to 72%) [D27]. That is a simulation, not users, and it *loses* to its own greedy version (47.0%) [D27]. The return loop: a new Daily tomorrow, a friend who passed your score, an Event this weekend, a rematch. See [06](06-closer-together-and-engagement.md#the-engagement-story) and [09-evidence.md](09-evidence.md).
 
 ## 6. Why AI is needed: any idea, made playable, made with you
+
+**The bounds are close to limitless, and we can say why.** Muse doesn't pick from a catalog: it writes the game's rules in our engine's rule language (state, inputs, timers, physics, scrolling worlds, typed text, art and sound) and adds custom rules where none exist. In a review of 10 hard test ideas, from a Wordle-style word game to Connections-style grouping, a Queens-style logic puzzle and a crossword, 9 fit the format today (D32). What the engine can't do yet is a short, named list, and it is our roadmap, not a hedge: a game-defined share grid, segment collision, joints, rotated shapes, device sensors (tilt and gyro), live multiplayer and 3D. When a request needs one of those, Muse says so on the anatomy card ("New to Muse") instead of quietly building something else.
 
 A template can reskin a game. It can't turn "a Wordle about our Group" or "dodge the fog over Twin Peaks, but gravity flips every tap" into a game that plays the way the person meant. Muse can:
 
@@ -96,7 +105,7 @@ Alternates:
 >
 > Facebook already knows who your people are. Now it can give them something to play together: made from one sentence, any sentence, as many as you want.
 
-*What's real in it, at `6b1cc85`.* "About thirty seconds" is true only for a ready-formula game: a median of 28.0 s over 10 real Muse runs, each bot-tested (D2, D5). A game made from scratch on the microgame engine took a median of 99 s in the harness baseline (D30), so for the cable car or the heist say "a minute or two". Challenge Me, group-chat play, quiz night and remixing are in the app, with synthetic friends whose runs are bots on the same seed; nothing crosses phones yet. "Every Group wakes up to a new game every morning" is the design: the in-app Daily is a hand-made seed, and making a Daily from posts runs only through the CLI or a debug launch. The sample sentences, the lava remix and "four versions by tonight" are illustrations, not data. On "any idea": Muse now writes new mechanics, and 9 of 10 test ideas (Wordle-style, Connections-style and others) fit the format, but none of those 9 has been built and played, and calm or puzzle games are blocked by a gate that expects a run to be losable (D32). Say "most ideas you can describe, and we show you which parts are new to Muse".
+*What's real in it, at `6b1cc85`.* "About thirty seconds" is true only for a ready-formula game: a median of 28.0 s over 10 real Muse runs, each bot-tested (D2, D5). A game made from scratch on the microgame engine took a median of 99 s in the harness baseline (D30), so for the cable car or the heist say "a minute or two". Challenge Me, group-chat play, quiz night and remixing are in the app, with synthetic friends whose runs are bots on the same seed; nothing crosses phones yet. "Every Group wakes up to a new game every morning" is the design: the in-app Daily is a hand-made seed, and making a Daily from posts runs only through the CLI or a debug launch. The sample sentences, the lava remix and "four versions by tonight" are illustrations, not data. On "any idea": Muse now writes new mechanics, and 9 of 10 test ideas (Wordle-style, Connections-style and others) fit the format, but none of those 9 has been built and played, and calm or puzzle games are blocked by a gate that expects a run to be losable (D32). Say it big and true: "if you can describe it in 2D, Muse can write it", then name the short list of engine gaps as what's next ([04-why-ai.md](04-why-ai.md#3-what-we-measured-and-how-much-to-trust-it)).
 
 #### Line bank
 
@@ -141,3 +150,5 @@ Every line we have, for slides, voice-over and the project page. Lines are for u
 | Short-form content you play with people, not just watch. | What we designed | VP-39, VP-25 | Karthik, Nov 12 |
 | Muse tells you which parts of your game are new to it. | The AI beat | VP-34 | docs/BUBBLES.md 7.13 |
 | What game would MrBeast make? (planned; inspired-by label) | Seeding the feed | VP-41 | Karthik, Nov 12 18:00 |
+| If you can describe it, it can be a game: Muse writes the rules, not picks a template. 9 of 10 hard ideas fit today, and the rest is a named list we're building. | The "limitless" beat (why AI) | VP-34, VP-42 | Karthik, Nov 12 (bus notes); D32 |
+| Games are better with people, so we made games you make, play and meet people through, together. | Marketing the collaboration | VP-38, VP-15, VP-40 | Karthik, Nov 12 (bus notes) |

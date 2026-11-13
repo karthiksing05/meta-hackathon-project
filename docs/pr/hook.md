@@ -2,7 +2,7 @@
 
 *Options for the first 15 to 30 seconds of the pitch, before the story "Facebook isn't attractive to young adults" begins. Part of the pitch docs; start at [README.md](README.md).*
 
-The story spine is in [01-story.md](01-story.md) and the timed script in [07-demo-script.md](07-demo-script.md). Whatever hook we pick, it has to end by 0:25, and the presenter should have typed the Studio sentence and tapped Make by about 0:20, so the build runs during the "why" (see the script). Karthik wants to try all kinds of things, so this file lists 11 options: his two first, then nine more.
+The story spine is in [01-story.md](01-story.md) and the timed script in [07-demo-script.md](07-demo-script.md). Whatever hook we pick, it has to end by 0:25, and the presenter should have typed the Studio sentence and tapped Make by about 0:20, so the build runs during the "why" (see the script). Karthik wants to try all kinds of things, so this file lists 12 options: his two first, then ten more. Option 12 was added after his note "Need to market the collaborative aspect of the app!", and it is now the recommended pick.
 
 **What is real in the app for these openings** (commit `6b1cc85`):
 
@@ -206,6 +206,24 @@ The story spine is in [01-story.md](01-story.md) and the timed script in [07-dem
 
 **Hand-off.** "Who we built this for" into step 2, the personal "why".
 
+## 12. Three friends, one game (collaborative)
+
+**Logline.** A group chat makes a game together in 25 seconds, and the hook is who's in the credits.
+
+**Script (25 s).**
+- 0:00. The mirrored phone shows the "New in SF crew" chat. The presenter: "Every group chat says 'we should do something'. Watch this one do it."
+- 0:04. They start **Make it together** in the chat: "Our game: you're a cable car." Contributions arrive from the chat, each with an avatar: Maya adds "dodge the fog banks", Diego "sourdough is a power-up", Priya "night shift mode after 30 s".
+- 0:14. Muse stitches them. The card reads "Made by Maya, Diego, Priya and you". Everyone in the chat plays it on the same seed; "2 of 4 played".
+- 0:20. "Four people made that together in under half a minute, inside Facebook. Funny thing: none of us our age would have opened Facebook to do it. Here's why."
+
+**What it needs.** The live app on one device: Make it together and the chat are in the app. **The friends' contributions are canned lines from demo people** (`TogetherCopy.cannedContributions`) arriving in the chat, not real people on other phones, and the stitched build takes as long as a Muse build does, so pre-make the stitched game, show the contributions arriving live, and cut to the finished card. Say "demo friends" if asked.
+
+**Rubric.** Originality and Cohesion (20%) and Product (25%): collaboration is the product, shown first. It also previews the AI (Muse stitching four people's ideas).
+
+**Risk and fallback.** Contributions arrive with short delays; a stitched build can take a minute or more, so don't wait for it live. A judge may ask whether the friends are real: they are demo people, and cross-phone play is not built yet. Fallback: a screenshot sequence of the chat and the credits card.
+
+**Hand-off.** "None of us would have opened Facebook to do it. Here's why" is spine step 1. It also sets up beat 4 of the script (the Make it together game in the feed).
+
 ---
 
 ## Comparison
@@ -223,11 +241,12 @@ The story spine is in [01-story.md](01-story.md) and the timed script in [07-dem
 | 9 | Sound first, in the dark | 20 s | Venue audio | Execution | Audio fails | No |
 | 10 | The rewind | 25 s | Live app, animation | Cohesion | Synthetic history | Animation |
 | 11 | Show of hands | 15 s | A willing room | Product | Loyal judges | No |
+| 12 | Three friends, one game | 25 s | Live app; a pre-made stitched game | Cohesion, Product (collaboration) | Build time; canned friends | Friends' contributions are canned demo lines; the stitched game is pre-made |
 
 ## Recommendation
 
-**Pick: 2, the notification opening, told with Alex and Maya from 8.** It shows the product doing the one thing the pitch is about (pulling someone back to Facebook because of a friend) in the first five seconds, it runs on the real app, and it hands off to the hook with no seam: "the first time Facebook has made me want to open it in years". It costs nothing from the AI beat, which stays the strongest moment at 3:05. The only staged part is the buzz, and we say so if asked.
+**Pick: 12, three friends, one game, with the notification buzz from 2 as an optional 3-second pre-roll** (Maya's message is what pulls the presenter into the chat). Karthik's note says the collaborative side is what we most need to market, and 12 shows it in the first seconds: four people making one game together inside Facebook, with every name in the credits. It runs on the real app, leads straight into the hook ("none of us would have opened Facebook to do it"), and previews the AI without spending the judge moment in beat 6. Be honest that the friends are demo people.
 
-**Runner-up: 3, a judge names a game.** It is the strongest single piece of AI evidence and very memorable, but it is riskier at 0:00 (network, gate, a real person's name) and it spends the judge hand-off we planned for beat 6. Use it instead of 2 if the venue network is proven on the day, and then cut the beat-6 hand-off to a quick "Change the game" by the presenter.
+**Runner-up: 2, the notification opening, told with Alex and Maya from 8.** Lower risk (no build at all), and still about a friend: it shows the product pulling someone back to Facebook in five seconds. Use it if the Make it together flow isn't solid on the phone build.
 
-**Worth testing in rehearsal:** 9 (sound first) as a 5-second pre-roll before 2, and 6 (44%) as the one-line fallback if anything goes wrong at the start.
+**Also worth rehearsing:** 3 (a judge names a game) if the venue network is proven on the day, then cut beat 6's hand-off; 9 (sound first) as a 5-second pre-roll; 6 (44%) as the one-line fallback if anything breaks at the start.

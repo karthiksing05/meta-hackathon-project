@@ -79,10 +79,38 @@ Notes on the list: Ms Rachel's audience is small children, which conflicts with 
 | Design block, no-LLM quality check and one polish round | Artem's next step for the harness | Just started at 17:19 |
 | Style kit (Muse as style director and illustrator) | Muse's own art is weak: characters and palettes (D31) | Uncommitted prototype on Bayan's machine; not run on iOS (D37) |
 
+## Muse harness ideas (Karthik's bus notes)
+
+Roadmap items for the Studio harness; none is built. Owner to ask: Artem (harness and anatomy).
+
+| Idea | What it would do | Why |
+|---|---|---|
+| A/B options | Muse offers two versions of a part (a rule, an ending, a look) and the maker picks one | Faster than describing a change; shows Muse's range |
+| Back-and-forth | A longer conversation before and after the build, beyond today's anatomy questions and "Change the game" | Lets vague ideas become specific without a perfect first sentence |
+| Tap-to-edit | Tap a thing in the playing game (a piece, a score, a rule's effect) to change it | Edits where you see the problem, not in text |
+| Thumbnail vs preview | Decide whether the feed shows a still thumbnail or a short live preview of each game | Speed and data cost against how inviting the feed feels |
+| Endless-runner support | Fragments and gate settings for endless runners (a run that only ends when you lose) | A top genre for short play |
+| Trivia support | Fragments for question banks, timers and rare-answer scoring | Supports the "intellectual game" ask ([07](07-demo-script.md#prepare-two-more-games-karthiks-bus-notes)) |
+
+## Engine gaps, as the roadmap
+
+The engine can express almost any 2D game idea today (9 of 10 hard ideas in the audit, D32). These seven named gaps are what's next, each one a feature, not a fuzzy limit. Muse already knows the list and flags requests that need one as "New to Muse".
+
+| Gap | Unlocks | Ask |
+|---|---|---|
+| `share_grid` | Wordle-style spoiler-free result grids | Artem |
+| `segment_collision` | Thin walls, lasers, line-drawing games | Artem |
+| `joints` | Ragdolls, chains, bridges | Artem |
+| `rotated_shapes` | Spinning platforms, tilted obstacles | Artem |
+| `device_sensors` | **Tilt and gyro control** (Karthik's ask), shake | Artem: a device-motion input, the CoreMotion bridge, and replays that record it |
+| `live_multiplayer` | Real-time play together (today's shared play is async on one seed) | Artem and Max |
+| `3d` | 3D games | Later |
+
 ## Bring people closer, next
 
 | Item | VP | State |
 |---|---|---|
+| Meet someone new, then a 3-game get-to-know-you bracket | VP-40 | **In progress** on branch `fe-qol`, not merged |
 | Two-person Blends and "Blend with" on profiles and board rows | VP-40 | Not built; the Group Blend is live |
 | Event brackets for everyone you met | VP-40 | Not built |
 | Facebook Verified badges on board rows and icebreakers | VP-07 | Not built |

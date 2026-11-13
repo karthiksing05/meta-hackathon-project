@@ -64,7 +64,14 @@ Familiarity is mechanical, not the model's mood: Studio recalibrates Muse's repl
 
 **The earlier audit** (10 real Muse runs at 15:10, before the eval suite; D31): 6 of 10 first drafts were valid, 6 of 10 games couldn't be lost, and 5 of 10 used made-up feedback syntax. Those mistakes are what the gold set and the gate's repair loop now target.
 
-**Is the engine the limit?** No. A read-only review found 9 of 10 test ideas (Wordle-style, Connections-style, Queens-style, a crossword and others) can be expressed in the format today; the only gap is a game-defined share grid (D32). None of those 9 has been built and played yet. The real blockers are a prompt that still steers toward reskins and a gate that assumes action games. So don't claim "any idea becomes playable" yet: say "most ideas you can describe, and Muse tells you which parts are new to it".
+**How far does it go? Close to limitless, for 2D.** This is the claim to make on stage, and it is true as stated:
+
+- **What Muse can use.** The microgame format (v0.2) gives Muse state, rules with checks, inputs (tap, drag, hold, swipe, pointer anywhere, typed text), timers, an optional deterministic arcade physics layer, a scrolling camera with a fixed HUD, images, SVG and sprite sheets, synthesized sound and music, particles and haptics. Where no fragment fits, Muse writes custom rules from the engine's builtins (D31: 255 to 1,845 characters per game).
+- **What that covers.** Word games, grouping puzzles, logic grids, quizzes, adventures, runners, dodgers, stackers, rhythm and reaction games, physics toys. In the audit, 9 of 10 hard ideas fit (D32).
+- **What's next, by name.** Seven engine gaps, each one a roadmap item rather than a fuzzy limit: a game-defined share grid, segment collision, joints, rotated shapes, device sensors (tilt and gyro), live multiplayer and 3D ([11-roadmap.md](11-roadmap.md#make-any-idea-true)). Muse knows the list, so a request that needs one is flagged "New to Muse" before the build.
+- **What we haven't done yet.** Built and played the 9 expressible ideas, and made the gate genre-aware so calm and puzzle games pass. Say "fits the format", not "we've built it".
+
+**Is the engine the limit?** No. A read-only review found 9 of 10 test ideas (Wordle-style, Connections-style, Queens-style, a crossword and others) can be expressed in the format today; the only gap is a game-defined share grid (D32). None of those 9 has been built and played yet. The real blockers are a prompt that still steers toward reskins and a gate that assumes action games. So the honest line is: "if you can describe it in 2D, Muse can write it; here is the short list of what we're adding next". Don't say "we've built every kind of game".
 
 **One real end-to-end run** (D34): "a bouncy pinball game about fog over the bay" built in 1 fix round, passed the gate, then took 2 revisions and a challenge to 3 friends, in about 3.5 minutes in all.
 

@@ -115,6 +115,24 @@ The board with Add friend is Live, with bot runs by synthetic people. Challenge 
 
 The loop: Daily, then board, then Add friend, then Event, then rematch, then the next Daily.
 
+## Marketing the collaboration
+
+Karthik's note: "Need to market the collaborative aspect of the app!" Most AI game makers stop at "you made a game". Whims is about what happens *between people* around the game, and that is what the pitch should sell. The collaborative features, with their real status:
+
+| Together, how | What happens | Surface | Status |
+|---|---|---|---|
+| Make it together | A chat, a friend or a Group each add a question, words, a scene or a level; Muse stitches them into one game; credits name every maker | Messenger, Groups, Studio | Live on one device |
+| Play together | One card in a group chat becomes a shared session everyone plays on the same seed ("3 of 5 played"), with a mini board and Rematch | Messenger | Live on one device |
+| Game night | A Group's quiz night: a lobby fills, everyone plays the same seed, a podium closes it | Groups | Live on one device |
+| Compete together | Challenge Me, Challenge back, a weekly Group board with Most improved, "You vs Maya: 3-2 this week" | Messenger, Groups, profiles | Live on one device |
+| Remix as a reply | A remix credits and notifies the maker and can go back to them as a playable card | Notifications, Messenger | Live on one device |
+| Stories together | Adventures where you see which ending each friend found ("Maya took the ferry") | Feed, Messenger | Live on one device |
+| Get to know someone | Group Blend: games for everyone and a "taste twin" to add | Groups | Live |
+| Meet someone new | **A 3-game get-to-know-you bracket** for two people who just met | Profiles, Events | **In progress** on `fe-qol`, not merged |
+| A game from two people | Two-person Blends and an Event bracket for everyone you met | Profiles, Events | Not built |
+
+**How to say it.** "Games are better with people. So in Whims you make them together, play them together, compete, and meet people through them." Lead with a moment between two people (see [hook.md](hook.md) option 12), not with the generator.
+
 ## The engagement story
 
 **What we want more of: moments with people, not minutes.** Whims is short-form and low pressure on purpose: a run takes seconds, a Daily allows one scored run, and every result sheet ends in a person (challenge, board, Add friend), not autoplay. The recommender is built to match.

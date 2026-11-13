@@ -19,6 +19,19 @@ Things that are built but say something untrue, or that the pitch leans on. Each
 | 7 | **No real push notification** | The app has in-app notifications only | Any "your phone buzzes" opening is staged ([hook.md](hook.md)) | Optional: a local notification for "Maya beat your score" in debug builds, for the demo |
 | 8 | **Recommender off means an empty Group Blend** | `GroupBlendSection` shows nothing when the recommender is off or the Group is too small | Beat 5 of the script relies on it | Leave `FB_RECS` unset on the demo phone; check the section on the phone build |
 
+## Asks from Karthik's bus notes
+
+Karthik's notes from the evening of Nov 12, recorded here so they aren't lost. None of these has been asked in Slack by this branch.
+
+| Note (verbatim where quoted) | What it needs | Owner to ask | State |
+|---|---|---|---|
+| "Explain that bounds are truly limitless with the games that are possible." | Done in the docs: [01-story.md](01-story.md) step 6, [04-why-ai.md](04-why-ai.md), the demo script and the line bank. The claim is framed as "if you can describe a 2D game, Muse can write it", with the seven engine gaps as the roadmap | (docs) | Written |
+| "Have a game that can be gyro controlled?" | Device sensors are a named engine gap (`device_sensors`). Needs a device-motion input source in the engine, the runtime bridge passing CoreMotion readings into the WebView, and replay logs that record them | **Artem** (engine) | Ask, not started |
+| "Definitely need to prepare an intellectual game (Krillion for Harry Potter?)" | **Clarify "Krillion" with Karthik.** Our notes describe Krillion as a 2026 daily trivia game where rare answers score more. Three candidates the harness can build today are in [07-demo-script.md](07-demo-script.md#prepare-two-more-games-karthiks-bus-notes): "Rarest Spell", "Sort the Sorting" and "Who Cast It?" | Karthik (clarify); whoever runs Studio before the demo | Proposed |
+| "Need to market the collaborative aspect of the app!" | Done in the docs: [01-story.md](01-story.md) step 4, [06](06-closer-together-and-engagement.md#marketing-the-collaboration), [hook.md](hook.md) option 12 and the demo script beats 4 to 6 | (docs) | Written |
+| Meet someone new, then a 3-game get-to-know-you bracket | Being built on branch `fe-qol`, not merged. The docs call it "in progress" | The `fe-qol` owner | In progress |
+| Muse harness ideas: A/B options, back-and-forth, tap-to-edit, thumbnail vs preview, endless-runner and trivia support | Roadmap items in [11-roadmap.md](11-roadmap.md#muse-harness-ideas-karthiks-bus-notes) | Artem (harness) | Roadmap |
+
 **Numbers we reconciled.** Each of these numbers is used the same way, with its label, everywhere in docs/pr.
 
 | Number | What it is | Label |

@@ -36,7 +36,7 @@
 | A separate "new creator class" and "interactive supply for Reels" | Merged into VP-05, VP-23, VP-13 and VP-39. |
 | Using game data for ads | Dropped on purpose. VP-31 limits data use to content ranking. |
 | "Our case does not rest on the generator" (earlier thesis) | Reversed at `6b1cc85`: the harness and anatomy make the generator half the case ([04-why-ai.md](04-why-ai.md)). Kept, corrected, in [06](06-closer-together-and-engagement.md) |
-| "Say any idea that fits six types" as the Q&A hedge | Muse now writes new mechanics on the microgame engine. Replaced by "most ideas you can describe, and Muse tells you which parts are new to it" |
+| "Say any idea that fits six types" as the Q&A hedge | Muse now writes new mechanics on the microgame engine. Replaced by "if you can describe it in 2D, Muse can write it", with the seven named engine gaps as the roadmap |
 | 68.5% interleaving win | Superseded by 70.3% after a repeat-window bug fix (D27) |
 | "Muse is told never to copy a game's name" | Superseded for requested themes: names a person asks for are honored; copying a specific game's levels or art is still out |
 | Three "Coming" frames (95 s) in the demo | Replaced by one spoken "planned" line; most of what they showed is now in the app on one device |
