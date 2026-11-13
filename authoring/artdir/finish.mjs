@@ -44,9 +44,12 @@ export async function seededLogProof(oldText, newText, { n = 6, seed = 1 } = {})
     const r = playRun(oldText, { seed: seed + (i % 3), skill, botSeed: 1000 + i });
     if (!r) { runs.push({ skill, error: true, equal: false }); continue; }
     const a = verify(oldText, r.log), b = verify(newText, r.log);
-    const sc = (v) => Math.round(v?.score ?? v?.status?.score ?? NaN);
-    const ph = (v) => v?.phase ?? v?.status?.phase ?? null;
-    runs.push({ skill, phase: r.phase, score: r.score, replayed: sc(b), equal: sc(a) === sc(b) && ph(a) === ph(b) && sc(a) === r.score });
+    // MicrogameEngine.verify: {recomputed: {phase, score, state_hash}}; the log's game hash names the
+    // old text, so only the recomputed run is compared.
+    const sc = (v) => Math.round(v?.recomputed?.score ?? v?.score ?? NaN);
+    const ph = (v) => v?.recomputed?.phase ?? v?.phase ?? null;
+    const hs = (v) => v?.recomputed?.state_hash ?? null;
+    runs.push({ skill, phase: r.phase, score: r.score, replayed: sc(b), equal: sc(a) === sc(b) && ph(a) === ph(b) && hs(a) === hs(b) && sc(a) === r.score });
   }
   return { same: runs.filter((r) => r.equal).length, runs };
 }
@@ -121,7 +124,7 @@ export async function finish(prod, game, { kit = null, seeded = false, seedRuns 
   record.logicHash.same = record.logicHash.prod === record.logicHash.built;
   if (seeded && !record.logicHash.same) { record.ok = false; record.why = 'seeded game: logic hash changed'; }
   if (seeded && seedRuns > 0) {
-    record.seededLogs = await seededLogProof(prod.content.game_json, JSON.stringify(built), { n: seedRuns });
+    record.seededLogs = await seededLogProof(prod.content.game_json, JSON.stringify(built), { n: seedRuns, seed: Number(prod.seed) || 1 });
     if (record.seededLogs.same !== record.seededLogs.runs.length) { record.ok = false; record.why = (record.why ? record.why + '; ' : '') + 'a seeded run log replays differently'; }
   }
   const prodGate = await playtest(JSON.stringify(old), { seed: 1, maxSeconds: 120, profile });
