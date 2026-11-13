@@ -295,7 +295,12 @@
       "vs everyone",
       "what everyone picked",
       "group consensus",
-      "how in sync are we"
+      "how in sync are we",
+      "compare to everyone",
+      "compared to everyone",
+      "compares to everyone",
+      "everyone else's list",
+      "see what everyone picked"
     ],
     "summary": "For games with no right answer (ratings, tier lists, rankings, this-or-that): keeps each player's picks from the replay, and returns how closely they agree with a friend, with the chat or Group, and with everyone, plus the group's pick per item.",
     "when_to_use": "Opinion games: the plan's social.result.compare agreement and mode opinion_compare. The score stays unranked.",
@@ -326,5 +331,72 @@
     "api": "planned: MicrogameEngine.verify(game, log) -> {..., result: {<state name>: value}}",
     "status": "planned",
     "notes": "Today verify returns phase, time and score only. Request for Artem in docs/harness-gaps/group-play.md."
+  },
+  {
+    "id": "server_aggregate",
+    "kind": "server_tool",
+    "name": "Everyone's answers, tallied",
+    "aliases": [
+      "see what everyone said",
+      "what percent of people",
+      "most popular answer",
+      "everyone else's answers",
+      "compare with other players",
+      "how many people picked"
+    ],
+    "summary": "The server tallies every player's answer or pick per prompt (from verified replays) and returns the shares, so a game can show \"62% picked the same\" or reward the most or least popular answer.",
+    "when_to_use": "Polls, opinion games, survey-style or Family Feud-style rounds, rarity scored from real players instead of a fixed answer bank.",
+    "api": "planned: POST /v1/games/{id}/picks {log} (picks from the replay's end state); GET /v1/games/{id}/tally?prompt=&scope=everyone|friends|group -> {items: [{answer, share}]}",
+    "params": {
+      "scope": "everyone | friends | group"
+    },
+    "events": [
+      "tally_ready"
+    ],
+    "status": "planned",
+    "gaps_it_closes": [
+      "games can't compare a player's answer with everyone's"
+    ],
+    "notes": "The same request as opinion_aggregate (docs/harness-gaps/group-play.md, Max). Until then: compare picks between two friends, and never invent a group average. Kevin32 #18."
+  },
+  {
+    "id": "free_text_question",
+    "kind": "runtime_tool",
+    "name": "Free-text questions answered live",
+    "aliases": [
+      "ask it any question",
+      "type any question",
+      "ask anything",
+      "chat with the character",
+      "ask questions in my own words"
+    ],
+    "summary": "The player types any question in their own words and gets an answer from a model while playing.",
+    "when_to_use": "Interrogations, lateral-thinking puzzles and character chats where the questions can't be listed ahead of time.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "typed questions get answers only from a build-time bank"
+    ],
+    "notes": "No Muse while someone plays (replays must verify). Approximate with qa_bank: typed yes/no questions matched against a build-time fact bank (docs/harness-gaps/open-text.md). Kevin32 #26."
+  },
+  {
+    "id": "persistent_progress",
+    "kind": "server_tool",
+    "name": "Saved progress across runs",
+    "aliases": [
+      "save my progress",
+      "continue where i left off",
+      "keep my progress",
+      "progress across days",
+      "level up over time",
+      "unlock across runs"
+    ],
+    "summary": "Keeps a player's progress between runs and days (unlocks, levels, a collection, stats) on the server, so the next run starts where the last one ended.",
+    "when_to_use": "RPGs, idle games, collections and pets whose point is growing over many sessions.",
+    "api": "planned: GET/PUT /v1/games/{id}/save (a small JSON state, versioned with the game); the run reads it as a param",
+    "status": "planned",
+    "gaps_it_closes": [
+      "every run starts fresh"
+    ],
+    "notes": "Replays stay verifiable if the save is an input to the run (recorded in the log). Until then: checkpoint within a run, and next_level makes a new game per stage. Kevin32 S3."
   }
 ]
