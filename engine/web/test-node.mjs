@@ -265,6 +265,23 @@ for (const k of ['image', 'line', 'poly', 'synth', 'music', 'wrapped', 'outlined
 }
 console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
 
+// The same logs verify in WASM (engine.verify, what a server or phone calls), and tampering fails.
+{
+  for (const [name, text] of Object.entries(logs)) {
+    const game = readFileSync(new URL(`../examples/${name}.json`, here), 'utf8');
+    const v = engine.verify(game, text);
+    check(v.ok && v.game_hash_ok && v.problems.length === 0, `${name}: engine.verify rejected a good log: ${JSON.stringify(v.problems)}`);
+    check(v.recomputed?.score === JSON.parse(text).final.score, `${name}: recomputed score differs`);
+    const bad = JSON.parse(text);
+    bad.final.score = (bad.final.score ?? 0) + 100;
+    const vb = engine.verify(game, bad);
+    check(!vb.ok && vb.problems.some((p) => p.includes('final.score')), `${name}: a raised score should fail engine.verify`);
+    check(!engine.verify(game + ' ', text).game_hash_ok, `${name}: another game file should fail the hash check`);
+    check(!engine.verify(game, '{"format":"nope"}').ok, `${name}: a malformed log should fail`);
+  }
+  console.log(`engine.verify: ${Object.keys(logs).length} logs verified in WASM, raised scores and other games rejected`);
+}
+
 // Logs recorded in WASM verify natively (microgame verify), and a tampered one fails.
 {
   const targetDir = process.env.CARGO_TARGET_DIR || new URL('../target', here).pathname;

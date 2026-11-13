@@ -1550,6 +1550,14 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
 - The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. It drives posters,
   demos and smoke runs. It's generic, so the runtime tests skip the skill checks for microgame seeds;
   game quality is gated by `authoring/playtest` and the engine's replay tests.
+- **Verifiable scores** (for challenges and leaderboards). When a run is won or lost, the kit puts the
+  engine's input log in `state.microgame.log`: `microgame-log/1` JSON text with the seed, the game's
+  hash, every input and the final `{state_hash, phase, score, time_ms}`. Submit it with the score.
+  `MicrogameEngine.verify(content.game_json, log)` replays it and returns `{ok, game_hash_ok, steps,
+  recomputed, claimed, problems}`. It runs anywhere the engine bundle loads: the app, a friend's
+  phone, or the server's Node generator. An edited score, a removed input or another game file fails.
+  `tools/runtime-tests/microgame-verify.js` plays every microgame seed through the real runtime
+  and checks that honest logs verify and raised scores don't.
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
