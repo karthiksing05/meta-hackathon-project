@@ -133,6 +133,19 @@ loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, s
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
 
+Image-first art (`backend/generator/src/cast.mjs`, on by default): every character, person, creature, food, product and
+recognizable object in a Muse Curio is a Muse Image painting in one style. Right after the plan, the cast comes from
+`spec.visual.assets`, `spec.theme.named` and "hosted by X" in the request (characters get neutral, happy and react
+poses), and two image calls start in parallel with compose: the backdrop and ONE sprite sheet for the whole cast on a
+chroma key, sliced on its grid (`authoring/artdir/sheets.mjs`). Compose is told the asset ids and that figures must use
+them. After compose the paintings go into the built game's assets directly (no re-expand, so the verified presentation
+stays), and a consistency loop (`authoring/verify/checks/art-consistency.mjs`, V_* codes, also a verifier check) swaps
+shape figures, SVG figures, emoji art and pictures from another generation to a painted sprite, paints what's missing in
+one extra sheet, or removes it; then the verifier runs again. At most 4 image calls per build; a change (`baseGameId`)
+reuses the base game's paintings and paints only new cast members. `stats.art` has each call's seconds and
+`consistency: {checked, swapped, generated, removed, remaining}`. `GENERATOR_IMAGE_ART=0` (or `GENERATOR_IMAGE_FIRST=0`)
+turns it off; any image failure keeps compose's own art.
+
 Compose's server-side hooks (`backend/generator/src/hooks.mjs`, docs/HARNESS_V2.md "Picture art" and "Layout"): the layout
 fixes run before each gate and the layout lint after (`authoring/expander/layout-fix.mjs`, `authoring/playtest/layout-check.mjs`,
 copied into the image; no Chrome, so structural fixes only; `GENERATOR_LAYOUT=0` turns them off). With `GENERATOR_IMAGE_ART=1`,

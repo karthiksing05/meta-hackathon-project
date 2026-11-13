@@ -112,6 +112,10 @@ How to fill it
     buttons, keys, lanes, walls, bins, color-coded sets, anything with a number, letter or word on it, and pieces with
     several frames or variants that must stay consistent.
   "engine" = the engine draws it from shapes and text (counters, bars, plain markers). No art needed.
+  Every character, person, mascot, creature, food, product and recognizable object is "image", never "svg": the
+    whole game is painted by one image model in one style (one sprite sheet, so a character's poses and every object
+    match), and a vector figure next to painted ones looks like a different game. Shapes are only for UI geometry
+    (bars, rings, dots, grids, panels, buttons) and particles.
   Give the reason in a few words. At most 6 assets may be "image".
 - prompt (only for "image", and for the backdrop): a detailed prompt for the image model, 40-120 words. For a sprite:
   the single subject, its pose and angle, its silhouette, its colors in the palette, the style's line and shading,

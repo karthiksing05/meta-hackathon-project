@@ -15,6 +15,9 @@
 !authoring/expander/requirements.mjs
 # the modules behind the generator's compose hooks (backend/generator/src/hooks.mjs)
 !authoring/expander/image-codec.mjs
+!authoring/expander/image-pixels.mjs
+!authoring/artdir/sheets.mjs
+!authoring/artdir/prompts.mjs
 !authoring/expander/layout-fix.mjs
 !authoring/expander/engine.mjs
 !authoring/playtest/layout-check.mjs

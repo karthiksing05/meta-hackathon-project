@@ -5,7 +5,15 @@
 // and stamps a revision's lineage.
 
 import { paintArt, imageArtOn } from './art.mjs';
-import { composeHooks, pictureArtOn } from './hooks.mjs';
+import { composeHooks, pictureArtOn, findAuthoring } from './hooks.mjs';
+import { castFromPlan, castBrief, contextWithCast, startCastArt, finishCastArt, stripBase, matchSprite } from './cast.mjs';
+
+/** Image-first art (src/cast.mjs): on by default; GENERATOR_IMAGE_ART=0 (or GENERATOR_IMAGE_FIRST=0) turns it off. */
+export const imageFirstOn = (env = process.env) => imageArtOn(env) && !pictureArtOn(env) && !['0', 'off', 'false', 'no'].includes(String(env.GENERATOR_IMAGE_FIRST ?? '').trim().toLowerCase());
+/** How long compose waits for the first pictures, from when they started (the art's 4-minute cap). */
+export const ART_WAIT_MS = 240000;
+/** No extra picture round after this much of the job (the repair cut-off). */
+export const ART_ROUND_CUTOFF_MS = 9 * 60 * 1000;
 import { applyMedia, mediaBrief } from './media.mjs';
 
 export { summarize } from './events.mjs';
@@ -209,12 +217,55 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   // picture sprites it draws; the real pictures go in after the gate. New games only.
   const media = !base && Array.isArray(context.media) && context.media.length ? context.media : null;
   if (media) request = request + '\n' + mediaBrief(media);
+  // Image-first art (src/cast.mjs): the cast comes from the plan, and the backdrop and ONE sprite sheet for the whole
+  // cast start now, in parallel with compose. Compose is told the asset ids and that every figure uses them. A change
+  // (baseGameId) reuses the base game's painted sprites and backdrop and paints only new cast members.
+  const jobStart = Date.now();
+  let castArt = null;
+  if (imageFirstOn(env) && typeof muse.image === 'function') {
+    try {
+      const spec = context?.plan?.spec ?? null;
+      const stripped = base ? stripBase(base) : null;
+      const basePool = stripped?.pool ?? {};
+      if (stripped) base = stripped.base;
+      const all = castFromPlan({ spec, request });
+      const fresh = all.filter((c) => !basePool[c.id] && !basePool[c.of] && !matchSprite(c.name, Object.keys(basePool), []));
+      const visual = spec?.visual ?? null;
+      if (visual || fresh.length || Object.keys(basePool).length) {
+        const state = startCastArt({ cast: fresh, visual, spec, title: String(request).split('\n')[0].slice(0, 80), muse, dir: findAuthoring(env), canvas, signal, paintBackdrop: !stripped?.backdrop, baseArt: stripped?.art ?? null });
+        castArt = { state, basePool, baseBackdrop: stripped?.backdrop ?? null };
+        const listed = [...fresh, ...Object.keys(basePool).map((id) => ({ id, name: id.replace(/_/g, ' '), pose: null }))];
+        request = request + castBrief(listed);
+        context = contextWithCast(context, fresh);
+        // The bundle's own picture art would paint the same pictures again.
+        if (hooks) { const { image: _i, decode: _d, deflate: _f, ...rest } = hooks; hooks = Object.keys(rest).length ? rest : null; }
+        onEvent({ kind: 'painting', count: state.imageCalls, summary: `Muse is painting the cast (${fresh.length} ${fresh.length === 1 ? 'picture' : 'pictures'}) while it writes the game` });
+      }
+    } catch (e) {
+      console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'image-first off for this job', error: String(e?.message ?? e).slice(0, 200) }));
+      castArt = null;
+    }
+  }
   const out = await studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))), hooks);
+  if (castArt) {
+    try {
+      const { state } = castArt;
+      const waited = await Promise.race([state.done.then(() => true), new Promise((r) => setTimeout(() => r(false), Math.max(0, state.started + ART_WAIT_MS - Date.now())).unref?.())]);
+      if (!waited) state.errors.push('the first pictures ran past the art time cap');
+      const art = await finishCastArt({ manifest: out.manifest, state: waited ? state : { ...state, backdrop: null, sprites: {}, own: new Set() }, studio, muse, basePool: castArt.basePool, baseBackdrop: castArt.baseBackdrop, dir: findAuthoring(env), signal, deadline: jobStart + ART_ROUND_CUTOFF_MS });
+      out.manifest = art.manifest;
+      out.stats = { ...(out.stats ?? {}), art: { ...art.report, mode: 'image-first' } };
+      console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'image-first art', applied: art.report.applied, calls: art.report.calls, consistency: art.report.consistency, errors: art.report.errors }));
+      if (art.report.applied) onEvent({ kind: 'painted', count: art.report.painted?.length ?? 0, summary: `Painted ${art.report.painted?.length ?? 0} pictures in one style` });
+    } catch (e) {
+      out.stats = { ...(out.stats ?? {}), art: { applied: false, mode: 'image-first', error: String(e?.message ?? e).slice(0, 300) } };
+    }
+  }
   // The art step paints what the plan's visual stage marked "image". New games only for now: a revision sends the
   // whole authoring manifest back through Muse, and painted images would ride along as base64. With
   // GENERATOR_IMAGE_ART=1 the bundle's picture art (the hooks above) draws instead, so this step stays out.
   const visual = context?.plan?.spec?.visual;
-  if (visual && !base && imageArtOn(env) && !pictureArtOn(env) && typeof muse.image === 'function') {
+  if (!castArt && visual && !base && imageArtOn(env) && !pictureArtOn(env) && typeof muse.image === 'function') {
     try {
       const art = await paintArt({ manifest: out.manifest, visual, muse, studio, renderFrame, signal, onEvent: (e) => onEvent(e) });
       out.manifest = art.manifest;

@@ -141,9 +141,10 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   };
   const context = { version: 'harness-context/1', types: [], tools: [], plan: { spec: { spec: 'game-spec/1', theme: { world: 'a foggy bay' }, visual } } };
 
+  const LEGACY = { GENERATOR_IMAGE_FIRST: '0' }; // the per-asset art step (image-first is src/cast.mjs, tested below)
   const muse = new PaintingMuse([withSprites()]);
   const events = [];
-  const out = await compose({ request: 'a calm fog game', brief, context }, { studio, muse, onEvent: (e) => events.push(e), env: {} });
+  const out = await compose({ request: 'a calm fog game', brief, context }, { studio, muse, onEvent: (e) => events.push(e), env: LEGACY });
   const a = JSON.parse(out.manifest.content.authoring_json);
   check('the art step paints the backdrop and the named sprite', out.stats.art?.applied === true && out.stats.art.painted.includes('backdrop') && out.stats.art.painted.includes(sprite), JSON.stringify(out.stats.art));
   check('the backdrop is a 360x640 JPEG and the sprite a PNG with alpha', a.art.backdrop?.image?.startsWith('data:image/jpeg;base64,') && a.art.sprites[sprite]?.image?.startsWith('data:image/png;base64,') && a.art.sprites[sprite].w <= 128,
@@ -160,12 +161,12 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   // A painted sprite changes its node's size (its aspect), so the new presentation stands and the verifier runs on it.
   check('the art step verifies the painted game again', out.stats.art.keptLayout === false && out.stats.layoutAfterArt?.ran === true && !out.stats.layoutAfterArt.error, JSON.stringify({ kept: out.stats.art.keptLayout, after: out.stats.layoutAfterArt }));
   const backdropOnly = { ...context, plan: { ...context.plan, spec: { ...context.plan.spec, visual: { ...visual, assets: [] } } } };
-  const bOut = await compose({ request: 'a calm fog game', brief, context: backdropOnly }, { studio, muse: new PaintingMuse([withSprites()]), env: {} });
+  const bOut = await compose({ request: 'a calm fog game', brief, context: backdropOnly }, { studio, muse: new PaintingMuse([withSprites()]), env: LEGACY });
   check('a painted backdrop alone keeps the verified presentation', bOut.stats.art?.painted?.includes('backdrop') && bOut.stats.art.keptLayout === true && bOut.stats.layoutAfterArt?.ran === true, JSON.stringify({ art: bOut.stats.art?.painted, kept: bOut.stats.art?.keptLayout, after: bOut.stats.layoutAfterArt }));
   check('a painted tall game stays tall (the re-expand gets the canvas compose used)', JSON.parse(out.manifest.content.game_json).presentation?.canvas?.h === 780 && out.stats.canvas === 'tall', JSON.parse(out.manifest.content.game_json).presentation?.canvas);
 
   const failing = new PaintingMuse([withSprites()], { fail: ['A misty bay'] });
-  const half = await compose({ request: 'a calm fog game', brief, context }, { studio, muse: failing, env: {} });
+  const half = await compose({ request: 'a calm fog game', brief, context }, { studio, muse: failing, env: LEGACY });
   const ha = JSON.parse(half.manifest.content.authoring_json);
   check('a failed painting keeps that asset\'s own art', half.stats.art.applied && !half.stats.art.painted.includes('backdrop') && half.stats.art.kept.some((k) => k.id === 'backdrop') && !String(ha.art.backdrop?.image ?? '').startsWith('data:image/jpeg'), JSON.stringify(half.stats.art));
 
@@ -174,7 +175,7 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   check('GENERATOR_IMAGE_ART=0 turns the art step off', off.images.length === 0 && !offOut.stats.art);
 
   const rev = new PaintingMuse([withSprites()]);
-  await compose({ request: 'make it faster', brief, base: out.manifest, context }, { studio, muse: rev, env: {} });
+  await compose({ request: 'make it faster', brief, base: out.manifest, context }, { studio, muse: rev, env: LEGACY });
   check('a revision is not repainted', rev.images.length === 0);
 
   // GENERATOR_IMAGE_ART=1: the bundle's picture art draws through compose's hooks (image, decode, deflate) instead
@@ -186,8 +187,128 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   check('picture art emits drawing and drawn events', picEvents.some((e) => e.kind === 'drawing') && picEvents.some((e) => e.kind === 'drawn' && e.ok === true), JSON.stringify(picEvents.filter((e) => /draw/.test(e.kind))));
   check('the game with pictures still validates', studio.expand(pic.manifest.content.authoring_json).ok);
   const unset = new PaintingMuse([withSprites()]);
-  const unsetOut = await compose({ request: 'a calm fog game', brief, context: picCtx }, { studio, muse: unset, env: {} });
+  const unsetOut = await compose({ request: 'a calm fog game', brief, context: picCtx }, { studio, muse: unset, env: LEGACY });
   check('without GENERATOR_IMAGE_ART=1 the hooks draw nothing', !unsetOut.stats.image_art, JSON.stringify(unsetOut.stats.image_art));
+  // ---- image-first art (src/cast.mjs): the cast from the plan, one sheet in parallel with compose, the swap pass ----
+  const C = await import('./src/cast.mjs');
+  const { findAuthoring } = await import('./src/hooks.mjs');
+  await C.loadArtModules(findAuthoring({}));
+  const KEYS = { magenta: [255, 0, 255], green: [0, 255, 0] };
+  const sheetPNG = (n, cols, rows, key, size = 256) => {
+    const data = new Uint8ClampedArray(size * size * 4);
+    const cw = size / cols, ch = size / rows;
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const i = (y * size + x) * 4;
+      const c = Math.floor(x / cw), r = Math.floor(y / ch), k = r * cols + c;
+      const inside = k < n && Math.hypot(x - (c + 0.5) * cw, y - (r + 0.5) * ch) < Math.min(cw, ch) * 0.3;
+      const rgb = inside ? [40 + k * 13, 90, 200 - k * 9] : KEYS[key];
+      data[i] = rgb[0]; data[i + 1] = rgb[1]; data[i + 2] = rgb[2]; data[i + 3] = 255;
+    }
+    return encodePNG({ w: size, h: size, data });
+  };
+  class SheetMuse extends ScriptedMuse {
+    constructor(replies) { super(replies); this.images = []; }
+    async image({ prompt, size }) {
+      this.images.push({ prompt, size });
+      const m = prompt.match(/exactly (\d+) separate subjects arranged in a grid of (\d+) columns and (\d+) rows/);
+      if (m) return { png: sheetPNG(+m[1], +m[2], +m[3], /pure green/.test(prompt.split('Background:')[1] ?? '') ? 'green' : 'magenta'), model: 'muse-image-1.0', seconds: 0.1 };
+      const [w, h] = size.split('x').map((v) => Math.round(Number(v) / 4));
+      return { png: painting(w, h, false), model: 'muse-image-1.0', seconds: 0.1 };
+    }
+  }
+
+  const hpSpec = {
+    theme: { world: 'Hogwarts', named: ['Albus Dumbledore', 'Harry Potter', 'Gryffindor'] },
+    visual: {
+      style: 'storybook watercolor', scene: 'the Great Hall', palette: { colors: { bg: '#20142E', ink: '#F7EBD0', accent: '#E8B33A' } },
+      backdrop: { id: 'backdrop', render: 'image', prompt: 'The Great Hall at night.' },
+      assets: [
+        { id: 'char_dumbledore', piece: 'host', depicts: 'Albus Dumbledore', render: 'svg' },
+        { id: 'answer_box', piece: 'input box', depicts: 'answer box', render: 'svg' },
+        { id: 'golden_snitch', piece: 'reward', depicts: 'golden snitch', render: 'image' },
+        { id: 'meter_fill', piece: 'timer', depicts: 'timer bar', render: 'engine' },
+      ],
+    },
+  };
+  const cast = C.castFromPlan({ spec: hpSpec, request: 'Harry Potter rare-answer typing game hosted by Dumbledore' });
+  const ids = cast.map((c) => c.id);
+  check('cast: the host gets three poses, objects one, UI and engine pieces none',
+    JSON.stringify(ids) === JSON.stringify(['char_dumbledore', 'char_dumbledore_happy', 'char_dumbledore_react', 'golden_snitch']) && cast[0].host === true && cast[3].kind === 'object', JSON.stringify(ids));
+  const named = C.castFromPlan({ spec: { theme: { named: ['Hermione Granger', 'Ron Weasley', 'wand'] } }, request: 'a quiz hosted by Albus Dumbledore' });
+  check('cast: without a visual stage the host and named people come in, characters get two poses',
+    named[0].name === 'Albus Dumbledore' && named[0].host && named.filter((c) => c.of === named[3]?.of).length === 2 && named.some((c) => c.id === 'wand' && c.kind === 'object'), JSON.stringify(named.map((c) => c.id)));
+  const many = C.castFromPlan({ spec: { theme: { named: Array.from({ length: 12 }, (_, i) => `Person ${String.fromCharCode(65 + i)}${String.fromCharCode(65 + i)}`) } } });
+  check('cast: never more than one 4 x 4 sheet', many.length <= 16 && many.length >= 12, many.length);
+  check('the compose brief names every asset id and forbids shape figures', ids.every((id) => C.castBrief(cast).includes(id)) && /never built from circles/.test(C.castBrief(cast)));
+  const ctxCast = C.contextWithCast({ plan: { spec: hpSpec } }, cast);
+  check('the cast goes into the spec as painted assets', ids.every((id) => ctxCast.plan.spec.visual.assets.some((a) => a.id === id && a.render === 'image')));
+
+  // Slicing: one sheet, the chroma key, trimmed and padded square.
+  const { sheets } = await C.loadArtModules(findAuthoring({}));
+  const sheet = decodePNG(sheetPNG(4, 2, 2, 'magenta'));
+  const sliced = C.sliceSheet(sheets, sheet, [{ id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'd' }], 'magenta');
+  const sa = sliced.sprites.a;
+  check('a sheet slices into one square, keyed, trimmed sprite per cell', Object.keys(sliced.sprites).length === 4 && sa.w === sa.h && sa.w < 128 && sa.data[3] === 0 && sa.data[((sa.h >> 1) * sa.w + (sa.w >> 1)) * 4 + 3] === 255, JSON.stringify({ method: sliced.method, w: sa?.w, h: sa?.h }));
+  check('the sheet key avoids the palette (purple robes get green)', C.keyFor(['#7A2BC2', '#B030C0']) === 'green' && C.keyFor(['#2E8B57']) === 'magenta');
+
+  // The swap pass: shape figures, SVG figures and emoji among painted pictures.
+  const png = 'data:image/png;base64,' + Buffer.from(encodePNG({ w: 4, h: 4, data: new Uint8ClampedArray(64).fill(200) })).toString('base64');
+  const FIG = "<svg viewBox='0 0 8 8'><circle cx='4' cy='4' r='3'/></svg>";
+  const pool = new Map([['char_dumbledore', { image: png, w: 64, h: 64 }]]);
+  const view = {
+    sprites: { char_dumbledore: { svg: FIG }, hermione: { svg: FIG }, answer_box: { svg: FIG }, golden_snitch: { image: png, w: 8, h: 8 } },
+    tree: { slots: [
+      { slot: 'playfield', node: { node: 'group', id: 'dumbledore', x: 20, y: 300, on_tap: 'poke', children: [{ node: 'circle', x: 40, y: 40, r: 30 }, { node: 'path', d: 'M0 0' }, { node: 'circle', x: 30, y: 35, r: 3 }, { node: 'circle', x: 50, y: 35, r: 3 }, { node: 'rect', x: 10, y: 70, w: 60, h: 40 }] } },
+      { slot: 'hud_top', node: { node: 'text', text: '🦉', size: 40 } },
+      { slot: 'hud_top', node: { node: 'group', id: 'score_plate', children: [{ node: 'rect', x: 0, y: 0, w: 80, h: 30 }, { node: 'text', text: '= str(score)' }] } },
+    ] },
+  };
+  const own = new Set(['golden_snitch']);
+  const r1 = C.consistencyRound(view, { pool, own, cast });
+  const swappedNode = view.tree.slots[0].node;
+  check('swap: a shape figure named like a cast member becomes its sprite, handlers kept, box square',
+    swappedNode.node === 'image' && swappedNode.asset === 'char_dumbledore' && swappedNode.on_tap === 'poke' && swappedNode.w === swappedNode.h && !swappedNode.children, JSON.stringify(swappedNode));
+  check('swap: an SVG cast sprite takes the painting; UI sprites and UI groups stay shapes',
+    view.sprites.char_dumbledore.image === png && view.sprites.answer_box.svg && view.tree.slots[2].node.node === 'group', JSON.stringify(r1.codes));
+  check('swap: what has no painting is listed to paint, an emoji to remove', r1.missing.some((m) => m.id === 'hermione') && r1.removable.length === 1, JSON.stringify(r1));
+  const removed = C.removeLeftovers(view, [...r1.missing, ...r1.removable]);
+  const { artConsistency } = await import('../../authoring/verify/checks/art-consistency.mjs');
+  check('after removal nothing mixed is left', removed === 2 && artConsistency({ sprites: view.sprites, tree: view.tree }).length === 0, JSON.stringify(artConsistency({ sprites: view.sprites, tree: view.tree })));
+  check('the consistency check is silent on an all-SVG game', artConsistency({ sprites: { a: { svg: '<svg/>' }, hero: { svg: '<svg/>' } }, tree: view.tree }).length === 0);
+
+  // End to end with a scripted Muse: backdrop and sheet in parallel with compose, the consistency loop, the verifier after.
+  const fCtx = { ...context, plan: { ...context.plan, spec: { ...context.plan.spec, theme: { world: 'a foggy bay', named: [] }, visual: { ...visual, assets: [{ id: sprite, piece: 'player', depicts: 'small boat', render: 'image' }] } } } };
+  const firstMuse = new SheetMuse([withSprites()]);
+  const first = await compose({ request: 'a calm fog game', brief, context: fCtx }, { studio, muse: firstMuse, env: {} });
+  const fa = JSON.parse(first.manifest.content.authoring_json);
+  const fg = JSON.parse(first.manifest.content.game_json);
+  const art = first.stats.art ?? {};
+  check('image-first: on by default, backdrop and one sheet painted, the cast sprite is a painting',
+    art.mode === 'image-first' && art.applied && art.calls.some((c) => c.kind === 'backdrop') && art.calls.filter((c) => c.kind === 'sheet').length === 1 && /^data:image\/png/.test(fa.art.sprites[sprite]?.image ?? '') && /^data:image\/png/.test(fg.assets[sprite]?.image ?? ''), JSON.stringify({ art: { ...art, painted: art.painted }, s: fa.art.sprites[sprite] && Object.keys(fa.art.sprites[sprite]) }));
+  check('image-first: compose was told the asset ids', /PICTURES \(image-first art, required\)/.test(firstMuse.prompts[0] ?? '') && firstMuse.prompts[0].includes(sprite));
+  check('image-first: at most 4 image calls, consistency recorded, 0 non-image figures', firstMuse.images.length <= 4 && art.consistency && typeof art.consistency.checked === 'number' && art.non_image_figures === 0, JSON.stringify({ n: firstMuse.images.length, c: art.consistency, f: art.non_image_figures }));
+  check('image-first: the game stays tall and the verifier runs again after the pictures', fg.presentation?.canvas?.h === 780 && fg.assets.backdrop?.h === 780 && first.stats.layoutAfterArt?.ran === true, JSON.stringify({ canvas: fg.presentation?.canvas, after: first.stats.layoutAfterArt }));
+  check('image-first: the built game still validates', studio.expand(first.manifest.content.authoring_json, { canvas: 'tall' }).ok);
+
+  // A change (Make level 2) reuses the base game's paintings and backdrop: no new backdrop, nothing repainted.
+  const lvlMuse = new SheetMuse([withSprites()]);
+  const lvl = await compose({ request: 'make it faster', brief, base: first.manifest, level: 2, context: fCtx }, { studio, muse: lvlMuse, env: {} });
+  const la = JSON.parse(lvl.manifest.content.authoring_json);
+  check('level 2: the base paintings come back, no backdrop or sheet repainted', !lvlMuse.images.some((i) => i.size === '1024x1536') && lvlMuse.images.length === 0 && /^data:image\/png/.test(la.art.sprites[sprite]?.image ?? '') && /^data:image\/jpeg/.test(la.art.backdrop?.image ?? ''), JSON.stringify({ calls: lvlMuse.images.length, art: lvl.stats.art }));
+  check('level 2: the base pictures never ride into the compose prompt', lvlMuse.prompts.length > 0 && !lvlMuse.prompts.some((p) => p.includes('data:image/png')));
+  // A content filter on the sheet: one retry with the proper names taken out, within the 4-call cap.
+  class FilterMuse extends SheetMuse {
+    async image(args) {
+      if (/Game sprite sheet/.test(args.prompt) && /Boaty/.test(args.prompt)) { this.images.push(args); throw new Error('Muse answered 400: The response was filtered due to the prompt triggering our content management policy.'); }
+      return super.image(args);
+    }
+  }
+  const fMuse = new FilterMuse([withSprites()]);
+  const fCtx2 = { ...fCtx, plan: { ...fCtx.plan, spec: { ...fCtx.plan.spec, theme: { world: 'a foggy bay', named: ['Boaty McBoatface'] }, visual: { ...fCtx.plan.spec.visual, assets: [{ id: sprite, piece: 'player', depicts: 'Boaty McBoatface, a small boat', render: 'image' }] } } } };
+  const filteredOut = await compose({ request: 'a calm fog game', brief, context: fCtx2 }, { studio, muse: fMuse, env: {} });
+  const fsheet = (filteredOut.stats.art?.calls ?? []).find((c) => c.kind === 'sheet');
+  check('a filtered sheet is retried once without the names, and the cast is still painted', fsheet?.retried && !fMuse.images.at(-1).prompt.includes('Boaty') && fMuse.images.length <= 4 && /^data:image\/png/.test(JSON.parse(filteredOut.manifest.content.authoring_json).art.sprites[sprite]?.image ?? ''), JSON.stringify({ calls: filteredOut.stats.art?.calls, n: fMuse.images.length }));
+  check('withoutNames swaps names for plain words', C.withoutNames('Dumbledore (cartoon Albus Dumbledore host)', ['Albus Dumbledore']) === 'the character (cartoon the character host)', C.withoutNames('Dumbledore (cartoon Albus Dumbledore host)', ['Albus Dumbledore']));
 }
 
 // ---- the layout hooks: fixes before the gate and the lint after, no Chrome ----
