@@ -227,6 +227,7 @@ func (s *Server) createChallenge(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
+	s.notifyChallenge(r.Context(), c, g, *me)
 	writeJSON(w, 201, c)
 }
 

@@ -229,9 +229,11 @@ func (s *Server) submitScore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u := userFrom(r)
-	err := s.Store.SubmitScore(r.Context(), model.Score{
-		GameID: g.ID, UserID: u.ID, Username: u.Username, Score: int64(in.Score),
-		UpdatedAt: time.Now().UTC().Truncate(time.Millisecond),
+	err := s.watchLeader(r.Context(), g, func() error {
+		return s.Store.SubmitScore(r.Context(), model.Score{
+			GameID: g.ID, UserID: u.ID, Username: u.Username, Score: int64(in.Score),
+			UpdatedAt: time.Now().UTC().Truncate(time.Millisecond),
+		})
 	})
 	if err != nil {
 		s.serverErr(w, r, err)

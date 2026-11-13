@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/api"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/apns"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/config"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
@@ -82,13 +83,28 @@ func run(log *slog.Logger) error {
 			log.Info("harness loaded", "types", nt, "tools", nl)
 		}
 	}
+	var push api.PushSender
+	if len(cfg.APNSKeyPEM) > 0 || cfg.APNSKeyID != "" || cfg.APNSTeamID != "" || cfg.APNSTopic != "" {
+		c, err := apns.New(apns.Config{KeyPEM: cfg.APNSKeyPEM, KeyID: cfg.APNSKeyID, TeamID: cfg.APNSTeamID, Topic: cfg.APNSTopic})
+		if err != nil {
+			log.Warn("push notifications are off: APNs is not set up correctly", "err", err.Error())
+		} else {
+			push = c
+			log.Info("push notifications on", "topic", cfg.APNSTopic)
+		}
+	}
 	srv := api.New(api.Options{
 		Store: st, Packages: pk, Signer: auth.NewSigner(cfg.JWTSecret, cfg.AccessTTL),
 		RefreshTTL: cfg.RefreshTTL, GamesBaseURL: cfg.GamesBaseURL, CORSOrigins: cfg.CORSOrigins,
 		MaxUploadMB: cfg.MaxUploadMB, Log: log,
 		Recs: engine, GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
 		HarnessContext: cfg.HarnessContext, Harness: hs0, Planner: planner, SponsorUsers: cfg.SponsorUsers, DebugDelete: cfg.DebugDelete,
+		Push: push,
+		Viral: api.ViralOptions{Off: cfg.ViralOff, MinPlayers: cfg.ViralMinPlayers, Window: cfg.ViralWindow, Cosine: cfg.ViralCosine,
+			MinPages: cfg.ViralMinPages, PerDay: cfg.ViralPerDay, Interval: cfg.ViralInterval},
 	})
+	go srv.RunPush(ctx)
+	go srv.RunViral(ctx)
 	if n, err := st.FailStaleJobs(ctx, "The server restarted while this game was being made. Please try again."); err != nil {
 		log.Warn("could not clear stale generation jobs", "err", err)
 	} else if n > 0 {

@@ -51,6 +51,10 @@ type Options struct {
 	SponsorUsers map[string]bool
 	Harness      *harness.Harness
 	Planner      *harness.Planner
+	// Viral tunes viral_match notifications (viral.go); the zero value gives the defaults.
+	Viral ViralOptions
+	// Push sends lock-screen notifications (internal/apns). Nil turns pushes off; the inbox still works.
+	Push PushSender
 }
 
 type Server struct {
@@ -62,6 +66,8 @@ type Server struct {
 	jobRuns     sync.Map  // job id -> *jobRun, for the jobs running now
 	seriesLocks userLocks // one series at a time, so two runs can't overwrite each other
 	scoreLocks  userLocks // one person's score on one game: read the old, write the new
+	leaderLocks userLocks // one game's board: a change of first place is seen whole
+	pushWake    chan struct{}
 }
 
 // recsSession is one person's loaded recommender state (see internal/recs).
@@ -77,7 +83,7 @@ func New(o Options) *Server {
 	if o.GeneratePerHour < 1 {
 		o.GeneratePerHour = 6
 	}
-	return &Server{Options: o, authLimiter: newLimiter(10, time.Minute), genSem: make(chan struct{}, o.GenerateConcurrent)}
+	return &Server{Options: o, authLimiter: newLimiter(10, time.Minute), genSem: make(chan struct{}, o.GenerateConcurrent), pushWake: make(chan struct{}, 1)}
 }
 
 func (s *Server) Handler() http.Handler {
@@ -122,6 +128,11 @@ func (s *Server) Handler() http.Handler {
 		// People, friends and Groups
 		r.With(s.requireAuth).Get("/users", s.searchUsers)
 		r.With(s.optionalAuth).Get("/users/{id}", s.getUser)
+		r.With(s.requireAuth).Get("/me/notifications", s.listNotifications)
+		r.With(s.requireAuth).Put("/me/notifications/read", s.readAllNotifications)
+		r.With(s.requireAuth).Put("/me/notifications/{id}/read", s.readNotification)
+		r.With(s.requireAuth).Put("/me/push-devices/{installationId}", s.putPushDevice)
+		r.With(s.requireAuth).Delete("/me/push-devices/{installationId}", s.deletePushDevice)
 		r.With(s.requireAuth).Get("/me/likes", s.myLikes)
 		r.With(s.requireAuth).Get("/me/moments", s.myMoments)
 		r.Delete("/debug/games/{id}", s.debugDeleteGame) // off unless DEBUG_DELETE=1
@@ -153,6 +164,7 @@ func (s *Server) Handler() http.Handler {
 				r.With(s.optionalAuth).Get("/", s.getGroup)
 				r.With(s.optionalAuth).Get("/games", s.groupGames)
 				r.With(s.requireAuth).Get("/leaderboard", s.groupLeaderboard)
+				r.With(s.requireAuth).Post("/game-shares", s.shareGameToGroup)
 				r.With(s.requireAuth).Put("/members/me", s.setMembership(true))
 				r.With(s.requireAuth).Delete("/members/me", s.setMembership(false))
 				r.With(s.requireAuth).Post("/blend", s.groupBlend)

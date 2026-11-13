@@ -3,6 +3,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -37,6 +38,22 @@ type Config struct {
 	// SponsorUsers are the brand accounts (SPONSOR_USERS, comma separated, lowercase) that may mark a game sponsored.
 	SponsorUsers map[string]bool
 
+	// APNs (lock-screen notifications). All four are needed; without them the inbox still works and no push is sent.
+	// The .p8 key is given as APNS_KEY_P8_B64 (base64 of the PEM, one line) or APNS_KEY_P8 (the PEM itself).
+	// viral_match (see internal/api/viral.go): VIRAL_MATCH=0 turns it off; the rest tune it.
+	ViralOff        bool
+	ViralMinPlayers int
+	ViralWindow     time.Duration
+	ViralCosine     float64
+	ViralMinPages   int
+	ViralPerDay     int
+	ViralInterval   time.Duration
+
+	APNSKeyPEM []byte
+	APNSKeyID  string
+	APNSTeamID string
+	APNSTopic  string // the app's bundle id
+
 	// Ranking (game-recs.js). RecsRuntimes is how many recommender runtimes run at once (0 turns ranking off).
 	// RecsInterleave is "" (off), "baseline", or a variant name such as "noBait": mixes each feed with a control.
 	RecsRuntimes   int
@@ -63,6 +80,17 @@ func Load() (*Config, error) {
 		HarnessContext:     harnessOn(os.Getenv("HARNESS_CONTEXT")),
 		DebugDelete:        flagOn(os.Getenv("DEBUG_DELETE")),
 		SponsorUsers:       usernameSet(os.Getenv("SPONSOR_USERS")),
+		ViralOff:           offFlag(os.Getenv("VIRAL_MATCH")),
+		ViralMinPlayers:    int(envInt("VIRAL_MIN_PLAYERS", 100)),
+		ViralWindow:        envDur("VIRAL_WINDOW", 24*time.Hour),
+		ViralCosine:        envFloat("VIRAL_COSINE", 0.85),
+		ViralMinPages:      int(envInt("VIRAL_MIN_PAGES", 5)),
+		ViralPerDay:        int(envInt("VIRAL_PER_DAY", 1)),
+		ViralInterval:      envDur("VIRAL_INTERVAL", 10*time.Minute),
+		APNSKeyPEM:         apnsKey(os.Getenv("APNS_KEY_P8_B64"), os.Getenv("APNS_KEY_P8")),
+		APNSKeyID:          strings.TrimSpace(os.Getenv("APNS_KEY_ID")),
+		APNSTeamID:         strings.TrimSpace(os.Getenv("APNS_TEAM_ID")),
+		APNSTopic:          strings.TrimSpace(os.Getenv("APNS_TOPIC")),
 
 		RecsRuntimes:   int(envInt("RECS_RUNTIMES", 2)),
 		RecsInterleave: os.Getenv("RECS_INTERLEAVE"),
@@ -116,6 +144,36 @@ func flagOn(v string) bool {
 		return true
 	}
 	return false
+}
+
+// offFlag is true when a switch is set to 0, off, false or no.
+func offFlag(v string) bool {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "0", "off", "false", "no":
+		return true
+	}
+	return false
+}
+
+func envFloat(k string, def float64) float64 {
+	if f, err := strconv.ParseFloat(strings.TrimSpace(os.Getenv(k)), 64); err == nil && f > 0 {
+		return f
+	}
+	return def
+}
+
+// apnsKey reads the .p8 key: base64 of the PEM wins, else the PEM as given (with \n written out as a newline).
+func apnsKey(b64, pem string) []byte {
+	if b64 = strings.TrimSpace(b64); b64 != "" {
+		if raw, err := base64.StdEncoding.DecodeString(b64); err == nil {
+			return raw
+		}
+		return nil
+	}
+	if pem = strings.TrimSpace(pem); pem != "" {
+		return []byte(strings.ReplaceAll(pem, `\n`, "\n"))
+	}
+	return nil
 }
 
 // usernameSet reads a comma-separated list of usernames into a lowercase set.

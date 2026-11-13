@@ -28,6 +28,8 @@ type Memory struct {
 	challenges []model.Challenge
 	series     map[string]*model.Series
 	rounds     map[string]*model.Round
+	notifs     map[string]*model.Notification
+	devices    map[string]model.PushDevice
 	sounds     map[string]*model.Sound
 	soundSaves map[string]bool // soundID|userID
 }
@@ -40,6 +42,7 @@ func NewMemory() *Memory {
 		friends: map[string]map[string]bool{}, groups: map[string]*model.Group{}, members: map[string]map[string]model.GroupMember{},
 		series: map[string]*model.Series{},
 		rounds: map[string]*model.Round{},
+		notifs: map[string]*model.Notification{}, devices: map[string]model.PushDevice{},
 		sounds: map[string]*model.Sound{}, soundSaves: map[string]bool{},
 	}
 }
@@ -523,6 +526,24 @@ func (m *Memory) FailStaleJobs(ctx context.Context, reason string) (int, error) 
 		}
 	}
 	return n, nil
+}
+
+func (m *Memory) RecsUserIDs(ctx context.Context, limit int) ([]string, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	rows := make([]model.RecsRecord, 0, len(m.recs))
+	for _, r := range m.recs {
+		rows = append(rows, r)
+	}
+	sort.Slice(rows, func(i, j int) bool { return rows[i].UpdatedAt.After(rows[j].UpdatedAt) })
+	var out []string
+	for _, r := range rows {
+		if len(out) >= limit {
+			break
+		}
+		out = append(out, r.UserID)
+	}
+	return out, nil
 }
 
 func (m *Memory) GetRecs(ctx context.Context, userID string) (*model.RecsRecord, error) {

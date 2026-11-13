@@ -72,6 +72,7 @@ type Store interface {
 
 	// Recommender state, one record per person.
 	GetRecs(ctx context.Context, userID string) (*model.RecsRecord, error)
+	RecsUserIDs(ctx context.Context, limit int) ([]string, error) // people who have a recommender model, most recently active first
 	PutRecs(ctx context.Context, r *model.RecsRecord) error
 	// Game generation jobs.
 	InsertJob(ctx context.Context, j *model.Job) error
@@ -110,6 +111,20 @@ type Store interface {
 	AddSoundUse(ctx context.Context, soundID string, delta int64) error
 	SetGameSound(ctx context.Context, gameID string, gs *model.GameSound) error // nil takes the sound off
 	GamesBySound(ctx context.Context, soundID, order string, limit int) ([]model.Game, error)
+
+	// Notifications: a person's inbox, which is also the push outbox, and the devices that can get pushes. A (user, source)
+	// pair is unique: InsertNotification reports false when it was already there (a retried trigger).
+	InsertNotification(ctx context.Context, n *model.Notification) (bool, error)
+	NotificationsFor(ctx context.Context, userID string, limit int, cur *NotifCursor) ([]model.Notification, error) // newest first
+	CountUnreadNotifications(ctx context.Context, userID string) (int64, error)
+	SetNotificationRead(ctx context.Context, userID, id string, read bool, now time.Time) error
+	MarkAllNotificationsRead(ctx context.Context, userID string, now time.Time) error
+	PutPushDevice(ctx context.Context, d model.PushDevice) error
+	DeletePushDevice(ctx context.Context, installationID, userID string) error // userID "" deletes it whoever owns it
+	DeletePushDevicesFor(ctx context.Context, userID string) error
+	PushDevicesFor(ctx context.Context, userID string) ([]model.PushDevice, error)
+	DuePushes(ctx context.Context, now time.Time, limit int) ([]model.Notification, error)
+	UpdatePush(ctx context.Context, id, state string, attempts int, next time.Time, errMsg string) error
 
 	// Rounds: a game, a seed and a set of people who each play it on their own time (chat or Group).
 	InsertRound(ctx context.Context, r *model.Round) error

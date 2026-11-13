@@ -265,6 +265,9 @@ func (s *Server) createSeries(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
+	if first, err := s.Store.GameByID(ctx, se.Rounds[0].GameID); err == nil {
+		s.notifySeries(ctx, se, first, *me)
+	}
 	v, err := s.seriesFor(r, se)
 	if err != nil {
 		s.serverErr(w, r, err)

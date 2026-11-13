@@ -20,7 +20,7 @@
   #bubble-root { position: relative; width: 390px; height: 844px; transform: scale(var(--scale, 1)); transform-origin: 0 0; border-radius: 28px; overflow: hidden;
                  box-shadow: 0 6px 30px rgba(40,40,90,.3); }
   #side { width: 300px; max-width: 100%; }
-  #games { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 14px; }
+  #games { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 14px; max-height: calc(100vh - 150px); min-height: 160px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
   #games a { display: block; padding: 8px 10px; border-radius: 10px; text-decoration: none; color: inherit; background: rgba(120,120,160,.14); }
   #games a.current { outline: 2px solid #5b5bd6; }
   #games small { opacity: .7; display: block; }

@@ -71,6 +71,7 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/sounds?tab=trending\|for_you\|saved\|recent&q=`, `GET /v1/sounds/{id}`, `GET /v1/sounds/{id}/games?sort=top\|recent`, `PUT\|DELETE /v1/sounds/{id}/save`, `POST /v1/sounds` | optional / bearer | the sound library: loops that play behind games (see [Sounds](#sounds)) |
 | `PUT\|DELETE /v1/games/{id}/sound` | bearer (owner) | put a sound behind a game `{soundId, offsetMs?, mix?}`, or take it off |
 | `PUT /v1/creations/{id}` | bearer (owner) | a new build of your own game as `application/zip`: keeps the id, likes, plays, scores, sound and sponsor; takes the title, rule, tags, score model, `group_play` and files from the new package (send the same score model or the board re-ranks). The old files stay on the games host, unlinked |
+| `GET /v1/me/notifications`, `PUT /v1/me/notifications/{id}/read`, `PUT /v1/me/notifications/read`, `PUT`/`DELETE /v1/me/push-devices/{installationId}`, `POST /v1/groups/{id}/game-shares` | bearer | the notification inbox, push devices and Group game shares (see [Notifications](#notifications)) |
 | `POST /v1/rounds`, `GET /v1/rounds`, `GET /v1/rounds/{id}`, `POST /v1/rounds/{id}/plays`, `GET /v1/games/{id}/agreement` | bearer | same-seed rounds in a chat or a Group, and how opinion games compare (see [Rounds](#rounds-same-seed-play-in-a-chat-or-a-group)) |
 | `POST /v1/series`, `GET /v1/series`, `GET /v1/series/{id}`, `POST /v1/series/{id}/rounds/{n}` | bearer | best-of-N with a friend on the same games and seeds; scores come from replaying the run's input log in the engine (see [Series](#series)) |
 
@@ -177,6 +178,20 @@ A best-of-N between two friends. `POST /v1/series {opponentId, games: [gameId, .
 The phone derives the engine's seed from the round's seed, so `log.seed` is not the round's `seed`. The first run on a round fixes the engine seed and the second must match it. A round is decided when both have played: the higher score wins, a
 tie goes to the lower `time_ms`, otherwise it is a draw. The series ends when someone has won more than half the rounds or every round is decided. You can't see the other player's score for a round until you have played it. A friend starting a series, and a
 friend playing a round, show up in `GET /v1/me/moments` as `series_invited` and `series_round`.
+
+## Notifications
+
+A per-person inbox that doubles as the push outbox. `GET /v1/me/notifications?limit=&cursor=` returns `{items: [{id, kind, title, body, gameId?, groupId?, challengeId?, seriesId?, createdAt, readAt?}], nextCursor?, unreadCount}` (newest first; `nextCursor` is opaque). `PUT /v1/me/notifications/{id}/read {read}` (`read` defaults to true) and `PUT /v1/me/notifications/read` (all) return `{unreadCount}`.
+
+Kinds, and what makes them:
+- `group_game`: `POST /v1/groups/{id}/game-shares {gameId, eventId}`. A member shares a game into a Group; every other member is notified. `eventId` is the post's stable id (4 to 100 characters), so a retry makes no second notification. The Group must be a Group (not an Event) and the sender in it.
+- `friend_challenge`: a friend sent you `POST /v1/challenges` (`challengeId`) or started `POST /v1/series` with you (`seriesId`).
+- `leaderboard_lost`: someone took first place from you on a ranked game. Only the former first place hears it, only when a counted score changes the leader, by the game's direction and tie-break. Own improvements, scores below first, empty boards and unranked games make nothing. Score writes on one game are serialized.
+- `viral_match`: a public game with many distinct players in a window whose description is close to your learned taste (the cosine of `game-recs.js`'s `describe(...).x` and your taste vector). Defaults: 100 players in 24 h, cosine 0.85, at least 5 learned pages, one a day, never your own game or one you played, each game once. Tune with `VIRAL_MIN_PLAYERS`, `VIRAL_WINDOW`, `VIRAL_COSINE`, `VIRAL_MIN_PAGES`, `VIRAL_PER_DAY`, `VIRAL_INTERVAL`; `VIRAL_MATCH=0` turns it off. A person whose taste has dislikes pulls away from a game's vector, so the cosine of 0.85 is a strict bar; expect to calibrate it on real data.
+
+One row per (person, source) at most, so a retried trigger never notifies twice. The inbox works with no push configured.
+
+Push: `PUT /v1/me/push-devices/{installationId} {token, environment: "sandbox"|"production"}` registers a device (the token is the hex APNs token; an installation moves to the account that registered it last); `DELETE` on the same route removes it, and `POST /v1/auth/logout` also takes an optional `installationId` and revokes that installation for the account whose refresh token it is. With APNs configured (`APNS_KEY_P8_B64` or `APNS_KEY_P8`, `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_TOPIC` = the app's bundle id; from GitHub: secret `APNS_KEY_P8` and the ids as variables or secrets) each new row with a registered device is pushed as `{aps: {alert: {title, body}, sound: "default", "thread-id": kind}, notificationId, kind, gameId?, groupId?, challengeId?, seriesId?}`. Pushes are leased before sending, retried with a growing delay (up to 6 tries) when Apple or the network fails, and a refused token drops the device. Nothing logs a token or the key. Without APNs the server stores the inbox and sends nothing.
 
 ## Rounds: same-seed play in a chat or a Group
 

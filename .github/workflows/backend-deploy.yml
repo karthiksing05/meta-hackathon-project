@@ -140,10 +140,24 @@ jobs:
           SPONSOR_USERS: ${{ vars.SPONSOR_USERS || secrets.SPONSOR_USERS }}
           HARNESS_CONTEXT: ${{ vars.HARNESS_CONTEXT || secrets.HARNESS_CONTEXT }}
           GENERATOR_IMAGE_ART: ${{ vars.GENERATOR_IMAGE_ART || secrets.GENERATOR_IMAGE_ART }}
+          # Push notifications (APNs): the .p8 key is a secret (paste the whole file); the ids are plain settings.
+          APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
+          APNS_KEY_ID: ${{ vars.APNS_KEY_ID || secrets.APNS_KEY_ID }}
+          APNS_TEAM_ID: ${{ vars.APNS_TEAM_ID || secrets.APNS_TEAM_ID }}
+          APNS_TOPIC: ${{ vars.APNS_TOPIC || secrets.APNS_TOPIC }}
+          VIRAL_MATCH: ${{ vars.VIRAL_MATCH || secrets.VIRAL_MATCH }}
+          VIRAL_MIN_PLAYERS: ${{ vars.VIRAL_MIN_PLAYERS || secrets.VIRAL_MIN_PLAYERS }}
+          VIRAL_COSINE: ${{ vars.VIRAL_COSINE || secrets.VIRAL_COSINE }}
         run: |
           [ -z "$DEBUG_DELETE" ] || API_ENV=$(printf '%s\nDEBUG_DELETE=%s' "$API_ENV" "$DEBUG_DELETE")
           [ -z "$SPONSOR_USERS" ] || API_ENV=$(printf '%s\nSPONSOR_USERS=%s' "$API_ENV" "$SPONSOR_USERS")
           [ -z "$HARNESS_CONTEXT" ] || API_ENV=$(printf '%s\nHARNESS_CONTEXT=%s' "$API_ENV" "$HARNESS_CONTEXT")
+          # the key goes in as one base64 line, so the env file stays one setting per line
+          [ -z "$APNS_KEY_P8" ] || API_ENV=$(printf '%s\nAPNS_KEY_P8_B64=%s' "$API_ENV" "$(printf '%s\n' "$APNS_KEY_P8" | base64 | tr -d '\n')")
+          for k in APNS_KEY_ID APNS_TEAM_ID APNS_TOPIC VIRAL_MATCH VIRAL_MIN_PLAYERS VIRAL_COSINE; do
+            v=$(eval "printf '%s' \"\$$k\"")
+            [ -z "$v" ] || API_ENV=$(printf '%s\n%s=%s' "$API_ENV" "$k" "$v")
+          done
           [ -z "$GENERATOR_IMAGE_ART" ] || GENERATOR_ENV=$(printf '%s\nGENERATOR_IMAGE_ART=%s' "$GENERATOR_ENV" "$GENERATOR_IMAGE_ART")
           API_ENV=$(printf '%s' "$API_ENV" | sed '/^$/d'); GENERATOR_ENV=$(printf '%s' "$GENERATOR_ENV" | sed '/^$/d')
           S="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes $USER_@$HOST"

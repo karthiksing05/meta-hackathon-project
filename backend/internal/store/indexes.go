@@ -48,6 +48,15 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 				Options: options.Index().SetName("games_search").
 					SetWeights(bson.D{{Key: "title", Value: 10}, {Key: "tags", Value: 5}, {Key: "description", Value: 1}})},
 		},
+		cNotifications: {
+			{Keys: k("userId", 1, "source", 1), Options: options.Index().SetUnique(true).SetName("notif_user_source")},
+			{Keys: k("userId", 1, "createdAt", -1, "_id", -1), Options: options.Index().SetName("notif_inbox")},
+			{Keys: k("pushState", 1, "nextPushAt", 1), Options: options.Index().SetName("notif_push_due").
+				SetPartialFilterExpression(bson.D{{Key: "pushState", Value: "pending"}})},
+		},
+		cPushDevices: {
+			{Keys: k("userId", 1), Options: options.Index().SetName("push_devices_user")},
+		},
 		cSounds: {
 			{Keys: k("useCount", -1, "createdAt", -1), Options: options.Index().SetName("sounds_trending")},
 			{Keys: k("createdAt", -1), Options: options.Index().SetName("sounds_recent")},
