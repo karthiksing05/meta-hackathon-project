@@ -8,7 +8,7 @@
         {
           "id": "judge_character",
           "ask": "Who is doing the judging?",
-          "why": "The character's voice writes every rating and reaction. Real people become a generic or caricature stand-in, never their likeness.",
+          "why": "The character's voice writes every rating and reaction. A named real person or character keeps their name; their portrait is a drawn caricature, never photorealistic.",
           "need": "required",
           "extrapolate_from": "named character, job or archetype in the request (barista, bouncer, crush, boss)",
           "default": "a stylish stranger",

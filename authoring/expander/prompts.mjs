@@ -39,6 +39,39 @@ export function hasPlan(context) {
   return !!context && typeof context === 'object' && (listOf(context.tools, 24).length > 0 || listOf(context.types, 6).length > 0);
 }
 
+/** The tool ids a plan uses: plan.tool_ids plus the tools of the chosen types (or the first type). */
+export function plannedTools(context) {
+  const plan = context?.plan && typeof context.plan === 'object' ? context.plan : {};
+  const types = listOf(context?.types, 6);
+  const chosen = listOf(plan.type_ids, 6).length ? types.filter((t) => plan.type_ids.includes(t?.id)) : types.slice(0, 1);
+  return new Set([...listOf(plan.tool_ids, 40), ...chosen.flatMap((t) => listOf(t?.tools, 40))].filter((x) => typeof x === 'string'));
+}
+
+/**
+ * Compose rules for the content tools the plan uses (the gap agents' requests, docs/harness-gaps/*.md):
+ * melody clips (audio.md), spot-the-difference scenes and zoom pictures (images.md), maps (maps.md).
+ */
+export function toolRules(context) {
+  const ids = plannedTools(context);
+  const lines = [];
+  if (['geo_map', 'map_pin', 'country_outline', 'geo_distance', 'map_pin_guess', 'map_geometry'].some((t) => ids.has(t))) {
+    lines.push('- Maps: write a "geo" section ({"pack": "world" | "us_states", "places": [names] or "pick": {"region", "count", "seed"}, "target": "label" | "capital", "map": {"x", "y", "w", "h", "view"}, "quiz": {"choices", "ask"}}) and use geo_map / map_pin / country_outline / geo_distance with the functions it writes (geo_names, geo_target, geo_choices…). Never draw a map or write coordinates yourself; places come from the pack by their common English names.');
+  }
+  if (ids.has('melody_clip') || ids.has('play_clip')) {
+    lines.push('- Listening questions: write "sound": {"clips": [...]}, one clip per question, in the same order as the questions in content (clip i plays for question i). Prefer 2-bar clips. Write each era\'s own rhythm on purpose (swing, shuffle, syncopation, backbeat, dotted notes; name the drums groove), never just straight eighths, and keep every tune original. Give the quiz time_ms of at least (replays + 1) x the longest clip + 3600 ms.');
+  }
+  if (ids.has('diff_spots')) {
+    lines.push('- Spot the difference: don\'t draw the two pictures. Write ONE scene as "content": {"scene": {"w": 320, "h": 240, "bg": "#hex", "objects": [{"id", "shape": "rect|circle|ellipse|text|poly|line", geometry (x, y, w, h, r, rx, ry, radius, points, x1..y2), "fill", "stroke", "fixed": true for the background and layout, "alt": [other texts] on text objects}]}, "scene_count": 3-9, "scene_seed": n}. Give at least scene_count + 3 small, separate objects that aren\'t fixed. The expander draws picture_a and picture_b and writes diff_points, diff_radii and diff_decoys from it, so never write those yourself.');
+  }
+  if (ids.has('zoom_reveal') || ids.has('picture_quiz')) {
+    lines.push('- Zoom pictures: list zoom_reveal first in "uses", give each "picture" sprite w and h 512, and keep the telling detail near the middle of the picture (the zoom starts there).');
+  }
+  if (ids.has('generated_image') || ids.has('image_gallery')) {
+    lines.push('- Pictures are drawn as SVG sprites in this game (generated pictures aren\'t available yet). Draw each one clearly enough to recognise; real people only as cartoons or caricatures.');
+  }
+  return lines;
+}
+
 /**
  * The menu for one game, from the harness context: the planned tools (fragments expanded to their full
  * specs from the catalog), what the game is (the matched types), and the spec to follow. Everything in it
@@ -80,6 +113,8 @@ export function planMenu(catalog, context) {
   const spec = [];
   if (plan.spec) spec.push('The game spec (game-spec/1). Build exactly this; every part is decided:', clip(JSON.stringify(plan.spec), 12000));
   if (plan.spec?.score) spec.push('', 'Copy spec.score into the manifest as a top-level "score" block (without bounds), with events renamed to the event or input names your game really emits.');
+  const tooling = toolRules(context);
+  if (tooling.length) spec.push('', 'How to use the planned content tools:', ...tooling);
   const together = groupPlayRules(plan.spec?.social);
   if (together.length) spec.push('', ...together);
   if (plan.anatomy) spec.push('', 'The agreed anatomy:', clip(typeof plan.anatomy === 'string' ? plan.anatomy : JSON.stringify(plan.anatomy), 6000));
@@ -113,7 +148,7 @@ ${DESIGN}
 
 ## What makes a game good (the examples below all do this)
 - It's the game the person asked for. Use the verb they described. If no fragment does that, write custom rules (types, state, events, inputs, rules) rather than turning their idea into a different game with their theme painted on. Fragments are for the parts they fit.
-- It's set in the person's world. Every word in design.theme shows up in the title, the names, the content and the art. A theme, franchise, show or brand the person asks for ("a Star Wars game", "like Harry Potter") is welcome: use its real names, characters, places and words. Never add one nobody asked for, never copy another game's levels, art or exact text, and no real people. The examples use invented names only because nobody asked for a franchise; copy their structure and polish, not their names.
+- It's set in the person's world. Every word in design.theme shows up in the title, the names, the content and the art. A theme, franchise, show or brand the person asks for ("a Star Wars game", "like Harry Potter") is welcome: use its real names, characters, places and words. Real brands, creators, franchises, characters and real people the person names keep their real names, as written: no made-up stand-ins. Draw real people only as cartoons or caricatures, never photorealistic, and never copy recorded songs or audio. Never add a name nobody asked for, and never copy another game's levels, art or exact text. The examples use invented names only because nobody asked for a franchise; copy their structure and polish, not their names.
 - It looks made, not generated. A new game always has "art": a palette for the mood, a font, a backdrop that draws the setting (depth, light, a few details at the edges, a quiet middle), and a sprite for every role its fragments draw and every piece it draws itself, with a silhouette, shading and a highlight. The player stands out from hazards by shape and color. Your own pieces are image nodes with sprites, never bare rectangles or circles.
 - It sounds right: a "sound" set that fits the mood, and one or two moment overrides that fit the theme.
 - It has a voice. Put real writing in content: lines for a hit, a miss and a streak, names for waves or levels, and 3–5 end lines or ranks that depend on the score. Specific nouns from the world, funny or vivid, never placeholder text like "Item 1" or "Option A".
@@ -144,6 +179,7 @@ If a named game isn't here and the request doesn't say how it plays, pick the cl
 - meta.title is at most 40 characters; meta.duration_s is the expected run length.
 - Put the game's words and lists in content (read them as content_<key>), not inside expressions.
 - Use the standard color tokens ($primary $secondary $accent $ink $bg $danger $surface); define extra tokens in look.tokens if you need them. Pick a look.id from the list below.
+- For maps, write a "geo" section (see geo_map) and use geo_map / map_pin / country_outline / geo_distance; never draw maps or write coordinates yourself.
 - When score alone doesn't show progress (lights switched off, distance to a goal, lives kept), add "playtest": {"progress": "<expr>"} so the bots know what doing better means.
 - Expressions use single-quoted strings, and floats are written with a decimal point (1.0, not 1) where a float is expected.
 - Mistakes Muse made before; don't: invent feedback keys (a feedback entry is {"on", "do"} as in the format), invent node kinds (no "ellipse" or "arc": use the engine's list), call a builtin with the wrong number of arguments, read a content key that isn't in content, leave a fragment's required name unbound, give a quiz less than 6 s per question.

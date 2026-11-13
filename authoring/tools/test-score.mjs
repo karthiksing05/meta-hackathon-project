@@ -118,6 +118,21 @@ const run = (label, outcome, score, seconds) => ({ bot: { label }, ok: true, out
   ok(status(idleWins, 'idle') === 'fail', 'an idle bot above the regular fails');
 }
 
+{ // Spam against the median regular, with a margin (story agent, 2026-11-12: one noisy random reader failed 2 of 4 stories).
+  const score = S.normalizeScore({ kind: 'points', events: ['ending_reached'] }).score;
+  // story-like runs: pro 6025, random readers 1000 / 3050 / 2000 (median 2000), worst 0; range 0..6025
+  const runs = [run('pro', 'success', 6025, 60), run('regular', 'success', 1000, 50), run('regular, seed 2', 'success', 3050, 55), run('regular, seed 3', 'success', 2000, 52), run('new player', 'success', 0, 40)];
+  const spamAt = (v) => analyzeScore(score, runs, { idle: run('idle', 'timeout', 0, 180), spam: [{ ...run('spam tap', 'success', v, 45), input: 'tap at 180,400' }] });
+  ok(status(spamAt(2000), 'spam') === 'warn', 'spam ties the median regular: warn');
+  ok(status(spamAt(2500), 'spam') === 'warn', `spam edges the median by 500 of a 6025 range: warn (${spamAt(2500).find((c) => c.id === 'spam').message})`);
+  ok(status(spamAt(3050), 'spam') === 'fail', 'spam beats the median by 1050 (17% of the range): fail');
+  ok(status(spamAt(2900), 'spam') === 'fail' && /median regular player .*of 3/.test(spamAt(2900).find((c) => c.id === 'spam').message), 'the message names the median of 3');
+  // the old rule compared one regular run: beating the lowest random reader (1000) is no longer a failure
+  ok(status(spamAt(1500), 'spam') === 'pass', 'spam below the median passes even when it beats one random reader');
+  const random = runs.map((r) => (r.bot.label.startsWith('regular') ? { ...r, bot: { label: r.bot.label.replace('regular', 'random') } } : r));
+  ok(status(analyzeScore(score, random, { spam: [run('spam', 'success', 4000, 45)] }), 'spam') === 'fail', 'random-labelled readers count as the median too');
+}
+
 { // A Krillion-style tiered game: rarer answers score more; everything counts.
   const score = S.normalizeScore({ kind: 'tiered_points', measures: 'rarity points over 7 prompts', unit: 'pts', events: ['typed_answer__submit'] }).score;
   const runs = [run('new player', 'success', 30, 140), run('regular', 'success', 90, 140), run('pro', 'success', 160, 140), run('regular, seed 2', 'success', 80, 140), run('regular, seed 3', 'success', 110, 140)];

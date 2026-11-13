@@ -533,7 +533,7 @@ an existing game, keep its art and sound unless the request is about them.
   for a franchise or theme, draw its world and characters in your own style, but never trace a
   logo or copy another game's art.
 
-"sound": { "set": "<classic|soft|arcade|chime|retro|cozy>", "volume": 0..1, "music": true|false|"<lullaby|drift|bounce|chip>", "moments": {...} }
+"sound": { "set": "<classic|soft|arcade|chime|retro|cozy>", "volume": 0..1, "music": true|false|"<lullaby|drift|bounce|chip>", "moments": {...}, "clips": [ {"style", "bpm", "bars", "lead", "chords"} ] }
 - Pick the set from the mood and energy of the brief: soft or cozy for calm, arcade or retro for
   fast, chime for puzzles. Moments: tap pickup hit combo level countdown win lose; override one
   with a preset name, {"wave","note","slide","ms","volume"} or {"wave","notes":[...],"step_ms"},

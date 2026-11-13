@@ -3,7 +3,7 @@
  "meta": {
   "title": "Ask Me Why",
   "instructions": "Read the strange story. Type yes or no questions and tap Ask. When you know what happened, type it and tap Solve.",
-  "duration_s": 240
+  "duration_s": 150
  },
  "uses": [
   {
@@ -48,7 +48,7 @@
   }
  },
  "objectives": {
-  "time_limit": "240s",
+  "time_limit": "150s",
   "on_timeout": "lose"
  },
  "playtest": {

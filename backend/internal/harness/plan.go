@@ -163,7 +163,10 @@ Rules
 - theme: when the person names a theme, franchise or brand, keep those words verbatim (source "you"). Honor it in
   names, art and words; the mechanics stay original, and never copy a specific existing game's levels, layouts or art.
 - Played by touch on a phone: taps, drags, swipes and an on-screen keyboard. Plain words, sentence case, short texts.
-- length_s is 10 to 180 seconds. Synthetic people only.
+- length_s is 10 to 180 seconds.
+- Names: real brands, creators, franchises, characters and real people the person names keep their real names, as
+  written (no made-up stand-ins). Real people are drawn only as cartoons or caricatures, never photorealistic, and no
+  recorded song or audio is copied.
 - Group play: every game is a single-player run that friends play on the same seed, each on their own turn, in a chat or
   a Group, and compare after. So it must be fair on a shared seed (every random draw from the seed, nothing from the
   device or the clock), a round fits a chat (30-90 s), and the run ends on one clear result line. A game with no right

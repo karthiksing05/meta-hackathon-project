@@ -161,7 +161,7 @@ export function bankPrompt({ request, count = 1, theme = '', puzzle = null } = {
     '- Order facts most specific first: a 2-group fact before a 1-group fact on the same concept.',
     '- solve: the concepts a correct explanation must mention (usually 2 groups), generous with synonyms.',
     '- Write original puzzles. A well-known folk riddle the person names is fine; never copy text from a book',
-    '  or site.',
+    '  or site. Use real brand, franchise, creator and character names exactly as the person wrote them.',
   ].join('\n');
   const fixed = puzzle ? `Use exactly this case (copy setup and solution):\nSetup: ${puzzle.setup}\nSolution: ${puzzle.solution}\n` : '';
   const user = `Request: ${request}\n${theme ? `Theme: ${theme}\n` : ''}${fixed}Write ${puzzle ? 1 : count} case${!puzzle && count > 1 ? 's' : ''}.`;

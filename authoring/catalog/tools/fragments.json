@@ -961,7 +961,7 @@
     ],
     "summary": "Each round a character says a line and the player picks one of 2-4 replies; the character rates it 0-100 into named bands (\"cringe\" to \"W rizz\") with a reaction line. Ratings and reactions are written by Muse at build time, so play is deterministic and replays.",
     "when_to_use": "Rizz and pickup-line simulators, convince-the-bouncer or the boss, a debate or roast judge, caption contests judged by a character, interview and negotiation games where a character scores what you say. The honest stand-in for \"type anything and an AI judges it\".",
-    "api": "game provides nj_lines() (line per round), nj_options(), nj_ratings() (whole numbers 0-100 as strings), nj_reactions(), the last three flattened with `choices` entries per round; provides judge_line(), option_text(k), option_rating(k), band_label(r), state nj_points, last_rating, last_label, last_reaction, high_count, low_count, picked, locked; input nj_pick {index}; bind rounds round_done to line_done and lives hit to judged_low; art roles judge (a generic or caricature character) and button; not with quiz, score or choice_story",
+    "api": "game provides nj_lines() (line per round), nj_options(), nj_ratings() (whole numbers 0-100 as strings), nj_reactions(), the last three flattened with `choices` entries per round; provides judge_line(), option_text(k), option_rating(k), band_label(r), state nj_points, last_rating, last_label, last_reaction, high_count, low_count, picked, locked; input nj_pick {index}; bind rounds round_done to line_done and lives hit to judged_low; art roles judge (a drawn character; real names as written, never photorealistic) and button; not with quiz, score or choice_story",
     "events": [
       "judged",
       "judged_high",
@@ -1009,7 +1009,7 @@
       "h": "float, set by the geo step",
       "ring": "bool, default true: pulsing ring at the lit place"
     },
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no accurate map art",
       "map_pin"
@@ -1049,7 +1049,7 @@
       "grid": "bool, default true: faint 30-degree grid dots",
       "x, y, w, h, ax, ay, kx, ky": "float, set by the geo step"
     },
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no accurate map art",
       "tap position to longitude and latitude"
@@ -1075,7 +1075,7 @@
     "summary": "geo_km(a, b) great-circle km, geo_dir(a, b) 8-point compass direction and geo_closeness(a, b) 0–100 between two vec(lon, lat) points, deterministic in the engine.",
     "when_to_use": "Guess-the-country-by-name puzzles that answer with distance and direction, closest-guess scoring, and any rule that needs how far apart two places are.",
     "api": "provides geo_km(a: vec2, b: vec2): int, geo_dir(a, b): string, geo_closeness(a, b): int; points are vec(lon, lat), usually from geo_target()",
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no trusted distance maths in rules"
     ],
@@ -1102,7 +1102,7 @@
     "params": {
       "x, y, w, h": "float, set by the geo step"
     },
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no accurate map art"
     ],
