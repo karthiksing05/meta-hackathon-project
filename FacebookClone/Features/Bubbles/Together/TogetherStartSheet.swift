@@ -1,10 +1,10 @@
 import SwiftUI
 
 /// "Make it together": pick what friends add (a question, words, a scene or a level), name the
-/// game, and invite a group chat, a friend or a Group. Start sends the invite card and opens the
-/// session, where contributions arrive.
+/// game, and invite one of your Groups or some friends. Start makes the session on the server,
+/// which notifies everyone invited, and opens it.
 struct TogetherStartSheet: View {
-    /// A target to preselect: "group:<id>", "chat:<id>" or "friend:<id>" (empty picks the first target).
+    /// A target to preselect: "group:<id>" or "friend:<id>" (empty picks the first Group).
     var preset: String = ""
     let onStarted: (String) -> Void
 
@@ -15,32 +15,22 @@ struct TogetherStartSheet: View {
     @State private var kind: TogetherAskKind = .question
     @State private var title = TogetherCopy.defaultTitle(.question)
     @State private var ask = TogetherCopy.defaultAsk(.question)
-    @State private var targetID: String?
     @State private var editedTitle = false
     @State private var editedAsk = false
-    /// A preset Group you're not a member of still shows, first.
-    @State private var extraTarget: BubbleShareTarget?
+    /// Your server Groups and friends (the only people a session can invite).
+    @State private var groups: [RemoteGroup] = []
+    @State private var friends: [RemoteProfile] = []
+    @State private var loading = true
+    /// The Group picked, or nil when friends are picked.
+    @State private var groupID: String?
+    @State private var pickedFriends: Set<String> = []
+    @State private var starting = false
+    @State private var failure: String?
 
     private let columns = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
 
-    private var targets: [BubbleShareTarget] {
-        var list = BubbleSocialHub.targets(appStore: appStore, kinds: [.chat, .group, .friend])
-        // Group chats first, then Groups, then friends; drop 1:1 chats that duplicate a friend.
-        list = list.filter { target in
-            guard target.kind == .chat, let chat = appStore.conversations.first(where: { $0.id == target.targetID }) else { return true }
-            return chat.isGroup
-        }
-        let order: [BubbleShareTarget.Kind: Int] = [.chat: 0, .group: 1, .friend: 2]
-        let sorted = list.enumerated().sorted { a, b in
-            let oa = order[a.element.kind] ?? 9, ob = order[b.element.kind] ?? 9
-            return oa != ob ? oa < ob : a.offset < b.offset
-        }.map(\.element)
-        var seen = Set<String>()
-        return ([extraTarget].compactMap { $0 } + sorted).filter { seen.insert($0.id).inserted }.prefix(10).map { $0 }
-    }
-
-    private var selected: BubbleShareTarget? {
-        targets.first { $0.id == targetID } ?? targets.first
+    private var canStart: Bool {
+        !starting && (groupID != nil || !pickedFriends.isEmpty) && !title.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     var body: some View {
@@ -64,7 +54,7 @@ struct TogetherStartSheet: View {
                 }
             }
         }
-        .onAppear(perform: applyPreset)
+        .task { await loadPeople() }
     }
 
     // MARK: Sections
@@ -149,7 +139,9 @@ struct TogetherStartSheet: View {
     private var invitePicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionTitle(TogetherCopy.invite)
-            if targets.isEmpty {
+            if loading {
+                LiveDataStateView(kind: .loading, title: TogetherCopy.loadingPeople)
+            } else if groups.isEmpty && friends.isEmpty {
                 Text(TogetherCopy.noTargets)
                     .font(.fbBody)
                     .foregroundStyle(FBColor.secondaryText)
@@ -157,33 +149,65 @@ struct TogetherStartSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
             } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(targets.enumerated()), id: \.element.id) { index, target in
-                        if index > 0 { HairlineDivider().padding(.leading, 64) }
-                        targetRow(target)
-                    }
+                if !groups.isEmpty {
+                    Text(TogetherCopy.startInGroups)
+                        .font(.fbMetaEmphasized)
+                        .foregroundStyle(FBColor.secondaryText)
+                    rows(groups.map { g in
+                        row(id: "group:\(g.id)", title: g.name, subtitle: TogetherCopy.targetSubtitle(.group, people: g.memberCount),
+                            art: AnyView(TogetherBadge(symbol: "person.3.fill", size: 40)), on: groupID == g.id) {
+                            groupID = g.id
+                            pickedFriends = []
+                        }
+                    })
                 }
-                .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                if !friends.isEmpty {
+                    Text(TogetherCopy.startWithFriends)
+                        .font(.fbMetaEmphasized)
+                        .foregroundStyle(FBColor.secondaryText)
+                        .padding(.top, 4)
+                    rows(friends.map { f in
+                        row(id: "friend:\(f.id)", title: f.shownName, subtitle: TogetherCopy.targetSubtitle(.friend, people: 1),
+                            art: AnyView(AvatarView(user: bubbleStore.person(id: f.id, name: f.shownName, isFriend: true), size: 40)),
+                            on: pickedFriends.contains(f.id)) {
+                            groupID = nil
+                            if pickedFriends.contains(f.id) { pickedFriends.remove(f.id) } else { pickedFriends.insert(f.id) }
+                        }
+                    })
+                }
+            }
+            if let failure {
+                Label(failure, systemImage: "exclamationmark.circle")
+                    .font(.fbMeta)
+                    .foregroundStyle(FBColor.secondaryText)
             }
         }
     }
 
-    private func targetRow(_ target: BubbleShareTarget) -> some View {
-        let isOn = selected?.id == target.id
-        let people = peopleCount(target)
-        return Button {
+    private func rows(_ items: [AnyView]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                if index > 0 { HairlineDivider().padding(.leading, 64) }
+                item
+            }
+        }
+        .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+    }
+
+    private func row(id: String, title: String, subtitle: String, art: AnyView, on isOn: Bool, action: @escaping () -> Void) -> AnyView {
+        AnyView(Button {
             Haptics.selection()
-            targetID = target.id
+            action()
         } label: {
             HStack(spacing: 12) {
-                targetArt(target)
+                art
                     .frame(width: 40, height: 40)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(target.title)
+                    Text(title)
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
                         .lineLimit(1)
-                    Text(TogetherCopy.targetSubtitle(target.kind, people: people))
+                    Text(subtitle)
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                         .lineLimit(1)
@@ -198,27 +222,8 @@ struct TogetherStartSheet: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(target.title), \(TogetherCopy.targetSubtitle(target.kind, people: people))")
-        .accessibilityAddTraits(isOn ? .isSelected : [])
-    }
-
-    @ViewBuilder
-    private func targetArt(_ target: BubbleShareTarget) -> some View {
-        switch target.kind {
-        case .chat:
-            let chat = appStore.conversations.first { $0.id == target.targetID }
-            TogetherMakersStack(users: Array((chat?.participants ?? []).prefix(2)), size: 30, limit: 2)
-        case .friend:
-            AvatarView(user: appStore.user(id: target.targetID) ?? bubbleStore.resolvePerson(target.targetID), size: 40)
-        case .group:
-            if let group = appStore.group(id: target.targetID) {
-                StudioGroupThumbnail(group: group, size: 40)
-            } else {
-                TogetherBadge(symbol: "person.3.fill", size: 40)
-            }
-        case .feed, .story:
-            TogetherBadge(symbol: "globe.americas.fill", size: 40)
-        }
+        .accessibilityLabel("\(title), \(subtitle)")
+        .accessibilityAddTraits(isOn ? .isSelected : []))
     }
 
     private var startBar: some View {
@@ -227,10 +232,10 @@ struct TogetherStartSheet: View {
             Button {
                 start()
             } label: {
-                Label(TogetherCopy.startButton, systemImage: "paperplane.fill")
+                if starting { ProgressView() } else { Label(TogetherCopy.startButton, systemImage: "paperplane.fill") }
             }
             .buttonStyle(.fb(.primary, height: 44))
-            .disabled(selected == nil || title.trimmingCharacters(in: .whitespaces).isEmpty)
+            .disabled(!canStart)
             .padding(FBMetrics.screenPadding)
         }
         .background(FBColor.surface)
@@ -258,42 +263,53 @@ struct TogetherStartSheet: View {
         }
     }
 
-    private func applyPreset() {
-        guard targetID == nil else { return }
+    /// Your server Groups and friends, then the preset (a Group or a friend) or the first Group.
+    private func loadPeople() async {
+        guard loading else { return }
+        _ = await GamesAccount.shared.waitForUser()
+        async let g = try? GamesAPIFactory.current.groups(kind: "group", mine: true)
+        async let f = try? GamesAPIFactory.current.friends()
+        groups = await g ?? []
+        friends = await f ?? []
+        loading = false
         let parts = preset.split(separator: ":", maxSplits: 1).map(String.init)
-        if parts.count == 2, let kind = BubbleShareTarget.Kind(rawValue: parts[0]) {
-            let id = "\(kind.rawValue):\(parts[1])"
-            if targets.contains(where: { $0.id == id }) {
-                targetID = id
-            } else if kind == .group, let group = appStore.group(id: parts[1]) {
-                let target = BubbleShareTarget(kind: .group, targetID: group.id, title: group.name)
-                extraTarget = target
-                targetID = target.id
-            }
-        }
-        if targetID == nil {
-            targetID = targets.first?.id
+        if parts.count == 2, parts[0] == "group", groups.contains(where: { $0.id == parts[1] }) {
+            groupID = parts[1]
+        } else if parts.count == 2, parts[0] == "friend", friends.contains(where: { $0.id == parts[1] }) {
+            pickedFriends = [parts[1]]
+        } else {
+            groupID = groups.first?.id
         }
         // editedTitle/editedAsk flip on the first onChange; reset after setup.
-        DispatchQueue.main.async {
-            editedTitle = false
-            editedAsk = false
-        }
-    }
-
-    private func peopleCount(_ target: BubbleShareTarget) -> Int {
-        switch target.kind {
-        case .chat: return (appStore.conversations.first { $0.id == target.targetID }?.participants.count ?? 0) + 1
-        case .group: return appStore.group(id: target.targetID)?.memberCount ?? 0
-        default: return 1
-        }
+        editedTitle = false
+        editedAsk = false
     }
 
     private func start() {
-        guard let target = selected else { return }
-        Haptics.success()
-        let session = TogetherCenter.shared.start(kind: kind, title: title, ask: ask, target: target, appStore: appStore, bubbleStore: bubbleStore)
-        dismiss()
-        onStarted(session.id)
+        guard canStart else { return }
+        let target: RoundTarget
+        let members: [String]
+        if let groupID {
+            target = RoundTarget(kind: .group, id: groupID)
+            members = []
+        } else {
+            let ids = Array(pickedFriends)
+            target = RoundTarget(kind: .chat, id: RoundsCenter.chatID(for: ids + [GamesAccount.shared.userID ?? ""]))
+            members = ids
+        }
+        starting = true
+        failure = nil
+        Task { @MainActor in
+            do {
+                let session = try await TogetherCenter.shared.start(kind: kind, title: title, ask: ask, target: target, members: members,
+                                                                    bubbleStore: bubbleStore)
+                Haptics.success()
+                dismiss()
+                onStarted(session.id)
+            } catch {
+                failure = TogetherCopy.couldNot(error.localizedDescription)
+                starting = false
+            }
+        }
     }
 }

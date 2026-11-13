@@ -146,7 +146,7 @@ struct ChallengesInboxView: View {
                         .foregroundStyle(FBColor.tertiaryText)
                 } else {
                     ForEach(c.responses, id: \.userID) { r in
-                        Text("\(r.username): \(Int(r.score.rounded()).withCommas)\(r.beat ? " · beat you" : "")")
+                        Text("\(r.shownName): \(r.display ?? Int(r.score.rounded()).withCommas)\(r.beat ? " · beat you" : "")")
                             .font(.fbMetaEmphasized)
                             .foregroundStyle(r.beat ? FBColor.notificationRed : FBColor.online)
                     }

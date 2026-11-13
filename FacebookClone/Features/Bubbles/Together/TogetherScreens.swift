@@ -4,7 +4,6 @@ import SwiftUI
 ///
 /// QA targets, `FB_OPEN=feature:together/<screen>[/<arg>]`:
 ///   start[/<group:id | chat:id | friend:id>]   start a co-made game: what friends add, who to invite
-///   (co-making sessions aren't on the server, so start offers "Make one for the Group" instead)
 ///   aboutme[/<template>]                        'Games about me': the template picker, or a template's
 ///                                               form (how-well, first-month, favorite-spot)
 ///   profile/<userID or me>                      'Games about <name>' with who knows them best
@@ -15,7 +14,7 @@ enum TogetherScreens {
     static func destination(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "session":
-            TogetherSessionView(sessionID: route.arg == "demo" || route.arg.isEmpty ? TogetherCopy.demoSessionID : route.arg)
+            TogetherSessionView(sessionID: route.arg)
         case "profile":
             TogetherAboutPage(userID: route.arg)
         case "start", "aboutme":
@@ -30,9 +29,7 @@ enum TogetherScreens {
     @ViewBuilder
     static func sheet(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
-        case "start":
-            TogetherStartUnavailableSheet(target: route.arg)
-        case "aboutme":
+        case "start", "aboutme":
             TogetherRouterSheet(route: route)
         default:
             NavigationStack {
@@ -216,7 +213,7 @@ enum TogetherCopy {
         switch kind {
         case .chat: return people > 1 ? "Group chat · \(people) people" : "Chat"
         case .friend: return "Friend"
-        case .group: return "Group · contributions arrive as a post"
+        case .group: return "Group · \(people) \(people == 1 ? "member" : "members")"
         case .feed: return "Your feed"
         case .story: return "Your story"
         }
@@ -239,7 +236,18 @@ enum TogetherCopy {
     static let addYoursButton = "Add yours"
     static let openButton = "Open"
     static let playButton = "Play"
-    static let sessionGone = "This game is on another phone"
+    static let sessionGone = "This session isn't here"
+    static let sessionGoneDetail = "Only the people in the chat or the Group can see it."
+    static let theGroup = "the Group"
+    static let loadingSession = "Loading the session…"
+    static let makingIt = "Muse is making it…"
+    static let makingItDetail = "Everyone's entries go in, credited to who wrote them. This takes a few minutes."
+    static func waitingForStarter(_ name: String) -> String { "\(name) makes the game once everyone has added" }
+    static func makeFailed(_ message: String) -> String { "Muse couldn't make it: \(message)" }
+    static func couldNot(_ message: String) -> String { "Couldn't do that: \(message)" }
+    static let startWithFriends = "Friends"
+    static let startInGroups = "Your Groups"
+    static let loadingPeople = "Loading your Groups and friends…"
     static func addedCount(_ count: Int) -> String { count == 1 ? "1 added" : "\(count) added" }
     static let answerLabel = "Answer"
     static let questionStitched = "Stitched into the game"
@@ -321,9 +329,9 @@ enum TogetherCopy {
     static let scenePlaceholder = "What happens in your scene?"
     static let levelPlaceholder = "Describe your level"
     static let addButton = "Add"
-    static let stitchButton = "Stitch with Muse"
+    static let stitchButton = "Make it with Muse"
     static let stitchHint = "Muse keeps everyone's wording and credits every maker."
-    static let stitchNeedsMore = "Stitch once a friend has added something."
+    static let stitchNeedsMore = "Make it once someone has added something."
     static func liveTitle(_ title: String) -> String { "\(title) is live" }
     static let openGame = "Open"
     static let openChat = "Open chat"
@@ -410,24 +418,4 @@ enum TogetherCopy {
     static func aboutMeCardHeadline(_ title: String) -> String { title }
     static let aboutMeSendNote = "Made a game about me. Who knows me best? ✨"
     static let aboutMeCardDetail = "Play to see if you know them best"
-}
-
-/// "Make it together" while co-making sessions aren't on the server: says so, and offers to make
-/// the game in Studio for the same Group (or for you, from a chat or a friend).
-struct TogetherStartUnavailableSheet: View {
-    /// `group:<id>`, `chat:<id>`, `friend:<id>` or empty.
-    let target: String
-
-    @Environment(Router.self) private var router
-
-    var body: some View {
-        let groupID = target.hasPrefix("group:") ? String(target.dropFirst("group:".count)) : nil
-        LiveDataUnavailableSheet(
-            title: "Make it together",
-            message: LiveDataCopy.sessions,
-            action: LiveDataStateView.Action(title: groupID == nil ? "Make one" : "Make one for the Group", symbol: "sparkles") {
-                router.openStudio(StudioLaunch(mode: .create, groupID: groupID))
-            }
-        )
-    }
 }

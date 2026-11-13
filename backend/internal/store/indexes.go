@@ -69,6 +69,9 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			{Keys: k("playerA", 1, "createdAt", -1), Options: options.Index().SetName("series_a")},
 			{Keys: k("playerB", 1, "createdAt", -1), Options: options.Index().SetName("series_b")},
 		},
+		cSessions: {
+			{Keys: k("targetKind", 1, "targetId", 1, "createdAt", -1), Options: options.Index().SetName("sessions_target")},
+		},
 		cChallenges: {
 			{Keys: k("fromId", 1, "createdAt", -1), Options: options.Index().SetName("challenges_from")},
 			{Keys: k("toIds", 1, "createdAt", -1), Options: options.Index().SetName("challenges_to")},

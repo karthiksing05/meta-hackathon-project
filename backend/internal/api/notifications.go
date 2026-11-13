@@ -22,7 +22,7 @@ import (
 
 // Notifications: an inbox per person, which is also the push outbox, and the triggers that fill it.
 //
-//	GET  /v1/me/notifications?limit=&cursor=      -> {items:[{id,kind,title,body,gameId?,groupId?,challengeId?,seriesId?,createdAt,readAt?}], nextCursor?, unreadCount}
+//	GET  /v1/me/notifications?limit=&cursor=      -> {items:[{id,kind,title,body,gameId?,groupId?,challengeId?,seriesId?,roundId?,sessionId?,createdAt,readAt?}], nextCursor?, unreadCount}
 //	PUT  /v1/me/notifications/{id}/read {read}    (read defaults to true)    -> {unreadCount}
 //	PUT  /v1/me/notifications/read                mark everything read       -> {unreadCount}
 //	PUT  /v1/me/push-devices/{installationId} {token, environment: sandbox|production}
@@ -30,7 +30,8 @@ import (
 //	POST /v1/groups/{id}/game-shares {gameId, eventId}   a member shares a game into the Group; retry-safe on eventId
 //
 // Kinds: group_game (a Group post), friend_challenge (a challenge or a series), leaderboard_lost (first place taken),
-// viral_match (a game many people play that fits your taste). A (person, source) pair makes one row at most, so a retried
+// viral_match (a game many people play that fits your taste), session_invite (make a game together: sessions.go),
+// round_started and round_played (a same-seed round you are in: rounds.go). A (person, source) pair makes one row at most, so a retried
 // trigger never notifies twice. The inbox works with no push configured; pushes go out only when APNs is set up
 // (APNS_* in api.env) and the person has a registered device.
 const (
@@ -359,7 +360,8 @@ func pushPayload(n model.Notification) []byte {
 		"aps":            map[string]any{"alert": map[string]string{"title": n.Title, "body": n.Body}, "sound": "default", "thread-id": n.Kind},
 		"notificationId": n.ID, "kind": n.Kind,
 	}
-	for k, v := range map[string]string{"gameId": n.GameID, "groupId": n.GroupID, "challengeId": n.ChallengeID, "seriesId": n.SeriesID} {
+	for k, v := range map[string]string{"gameId": n.GameID, "groupId": n.GroupID, "challengeId": n.ChallengeID, "seriesId": n.SeriesID,
+		"roundId": n.RoundID, "sessionId": n.SessionID} {
 		if v != "" {
 			p[k] = v
 		}

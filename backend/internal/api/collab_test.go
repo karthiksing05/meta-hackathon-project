@@ -117,6 +117,9 @@ func TestChallengesAndMoments(t *testing.T) {
 	if s0["direction"] != "sent" || len(resp) != 1 || resp[0].(map[string]any)["beat"] != true {
 		t.Fatalf("sent: %v", s0)
 	}
+	if r0 := resp[0].(map[string]any); r0["displayName"] == "" || r0["displayName"] == nil || r0["display"] != "40" {
+		t.Fatalf("a response carries a name and the shown score: %v", r0)
+	}
 	_, ams := do(t, "GET", ts.URL+"/v1/me/moments", ann, nil, "")
 	if len(ams["moments"].([]any)) != 0 {
 		t.Fatalf("the sender gets no moment for their own challenge: %v", ams)

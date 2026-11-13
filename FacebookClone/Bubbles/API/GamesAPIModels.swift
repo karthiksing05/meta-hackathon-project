@@ -633,12 +633,18 @@ enum GamesAPICoding {
 struct RemoteChallengeResponse: Decodable, Hashable, Sendable {
     var userID: String
     var username: String
+    /// The name to show (the server falls back to the username).
+    var displayName: String?
     var score: Double
+    /// The score as the game shows it ("1:02.4", "12 moves"). The app never formats it itself.
+    var display: String?
     var beat: Bool
 
     enum CodingKeys: String, CodingKey {
-        case userID = "userId", username, score, beat
+        case userID = "userId", username, displayName, score, display, beat
     }
+
+    var shownName: String { (displayName?.isEmpty == false ? displayName : nil) ?? username }
 }
 
 /// "Beat my score": one game, the sender's best when sent, and how each side is doing.
