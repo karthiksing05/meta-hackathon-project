@@ -7,6 +7,7 @@
 import { paintArt, imageArtOn } from './art.mjs';
 import { composeHooks, pictureArtOn, findAuthoring } from './hooks.mjs';
 import { castFromPlan, castBrief, contextWithCast, startCastArt, finishCastArt, stripBase, matchSprite } from './cast.mjs';
+import { baseSummary, planRemix, repaintCast, remixBrief, rebuildRequest, remixReport, remixRules, genreChange, genreNote, loopCheck } from './remix.mjs';
 
 /** Image-first art (src/cast.mjs): on by default; GENERATOR_IMAGE_ART=0 (or GENERATOR_IMAGE_FIRST=0) turns it off. */
 export const imageFirstOn = (env = process.env) => imageArtOn(env) && !pictureArtOn(env) && !['0', 'off', 'false', 'no'].includes(String(env.GENERATOR_IMAGE_FIRST ?? '').trim().toLowerCase());
@@ -206,6 +207,29 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   // Studio bundle version 3 and up put the harness context into the prompt themselves (only the planned tools in the
   // menu, plus the spec and the matched gold examples). An older bundle only gets the additive section, and only on
   // compose calls, not on the score review or repair that name their own model.
+  // A remix of a game with no authoring source (hand-built or older games): Muse rebuilds it from the published game
+  // with the change applied, as a new game (docs/REMIX.md). The lineage, group play and scope still come from the base.
+  const original = base;
+  const asked = request; // the person's own words, before any steering is added
+  const hasAuthoring = (b) => typeof b?.content?.authoring_json === 'string' && b.content.authoring_json.trim().startsWith('{');
+  let rebuilt = false;
+  if (base && !hasAuthoring(base)) {
+    if (!base?.content?.game_json && !base?.title) throw new GenerationError('The game to remix has no source to build from.');
+    request = rebuildRequest(base, request);
+    base = null;
+    rebuilt = true;
+    onEvent({ kind: 'remix_rebuilt', summary: 'The original has no editable source, so Muse is rebuilding it from the published game with your change' });
+  }
+  // Every remix: the core loop and goal are locked, content, format, style, effects, sound and copy are free. A request
+  // to change the genre is declined (an event) and steered back to the loop.
+  if (original) {
+    const gc = genreChange(asked, baseSummary(original));
+    if (gc) {
+      request += genreNote(gc);
+      onEvent({ kind: 'remix_declined', summary: `Kept the game's core loop: a remix can't turn it into a ${gc.genre}, so Muse applies the rest of the change`, declined: gc.text });
+    }
+    request += remixRules();
+  }
   const bundled = (studio.version ?? 0) >= 3;
   const planned = bundled ? '' : contextSection(context);
   // Parallel lanes (src/lanes.mjs): every Muse call goes through one limiter (about 4 at once) and onto the job's
@@ -251,20 +275,42 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   // (baseGameId) reuses the base game's painted sprites and backdrop and paints only new cast members.
   const jobStart = Date.now();
   let castArt = null;
+  let remix = null; // a change's art plan (src/remix.mjs): which base pictures it repaints
   if (imageFirstOn(env) && typeof muse.image === 'function') {
     try {
       const spec = context?.plan?.spec ?? null;
       const stripped = base ? stripBase(base) : null;
-      const basePool = stripped?.pool ?? {};
+      const allBase = stripped?.pool ?? {};
       if (stripped) base = stripped.base;
+      // A remix repaints what the change names (a new main character, new side characters, a restyle) under the
+      // SAME sprite ids, so every figure that drew the old picture draws the new one; the rest keep their paintings.
+      let summary = null;
+      if (stripped) {
+        summary = baseSummary(original);
+        remix = await planRemix({ summary, request: asked, muse, signal, model });
+        if (remix.repaint.length || remix.backdrop) onEvent({ kind: 'remix_plan', summary: `Muse will repaint ${remix.repaint.map((r) => `${r.id} as ${r.depicts}`).join(', ') || 'the background'} and keep the rest`, repaint: remix.repaint, backdrop: remix.backdrop, source: remix.source });
+        else if (remix.error) onEvent({ kind: 'remix_plan', summary: 'Keeping every picture from the original', source: remix.source, error: remix.error });
+      }
+      const repaintIds = new Set((remix?.repaint ?? []).map((r) => r.id));
+      const basePool = Object.fromEntries(Object.entries(allBase).filter(([id]) => !repaintIds.has(id)));
       const all = castFromPlan({ spec, request });
-      const fresh = all.filter((c) => !basePool[c.id] && !basePool[c.of] && !matchSprite(c.name, Object.keys(basePool), []));
-      const visual = spec?.visual ?? null;
+      const fresh = [...repaintCast(remix ?? { repaint: [] }), ...all.filter((c) => !repaintIds.has(c.id) && !repaintIds.has(c.of) && !basePool[c.id] && !basePool[c.of] && !matchSprite(c.name, Object.keys(basePool), []))];
+      let visual = spec?.visual ?? null;
+      if (!visual && remix && (fresh.length || remix.backdrop)) {
+        // The base's style frame: its palette and its style words with the old cast's names taken out (a restyle
+        // brings its own words), so the new pictures sit with the kept ones.
+        const names = summary.theme.filter((t) => /^[A-Z]/.test(t)).sort((a, b) => b.length - a.length);
+        let style = remix.style || summary.style;
+        for (const n of names) style = style.split(n).join('');
+        style = style.replace(/\s{2,}/g, ' ').replace(/\s+([,.;])/g, '$1').trim();
+        visual = { style: style || 'bright, clean illustrated cartoon game art with bold outlines', palette: { colors: Object.fromEntries(summary.palette.map((c, i) => [`c${i}`, c])) },
+          ...(remix.backdrop ? { scene: remix.backdrop, backdrop: { id: 'backdrop', render: 'image', prompt: remix.backdrop } } : {}) };
+      }
       if (visual || fresh.length || Object.keys(basePool).length) {
-        const state = startCastArt({ cast: fresh, visual, spec, title: String(request).split('\n')[0].slice(0, 80), muse, dir: findAuthoring(env), canvas, signal, paintBackdrop: !stripped?.backdrop, baseArt: stripped?.art ?? null });
-        castArt = { state, basePool, baseBackdrop: stripped?.backdrop ?? null };
+        const state = startCastArt({ cast: fresh, visual, spec, title: String(request).split('\n')[0].slice(0, 80), muse, dir: findAuthoring(env), canvas, signal, paintBackdrop: !stripped?.backdrop || !!remix?.backdrop, baseArt: stripped?.art ?? null });
+        castArt = { state, basePool, allBase, baseBackdrop: stripped?.backdrop ?? null };
         const listed = [...fresh, ...Object.keys(basePool).map((id) => ({ id, name: id.replace(/_/g, ' '), pose: null }))];
-        request = request + castBrief(listed);
+        request = request + castBrief(listed) + (remix ? remixBrief(remix, Object.keys(basePool)) : '');
         context = contextWithCast(context, fresh);
         // The bundle's own picture art would paint the same pictures again.
         if (hooks) { const { image: _i, decode: _d, deflate: _f, ...rest } = hooks; hooks = Object.keys(rest).length ? rest : null; }
@@ -272,6 +318,7 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
       }
     } catch (e) {
       console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'image-first off for this job', error: String(e?.message ?? e).slice(0, 200) }));
+      if (base) onEvent({ kind: 'remix_art_failed', summary: 'The pictures could not be planned, so the remix keeps the original art', error: String(e?.message ?? e).slice(0, 200) });
       castArt = null;
     }
   }
@@ -289,6 +336,13 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
     } catch (e) {
       out.stats = { ...(out.stats ?? {}), art: { applied: false, mode: 'image-first', error: String(e?.message ?? e).slice(0, 300) } };
     }
+  }
+  // A remix says what it repainted and what kept the original painting; a repaint that didn't land is an event.
+  if (remix) {
+    const report = remixReport({ plan: remix, manifest: out.manifest, basePool: castArt?.allBase ?? {} });
+    out.stats = { ...(out.stats ?? {}), remix: report };
+    if (report.failed.length) onEvent({ kind: 'remix_art_failed', summary: `Muse couldn't repaint ${report.failed.join(', ')}`, failed: report.failed, errors: out.stats.art?.errors ?? [] });
+    else if (report.repaint.length) onEvent({ kind: 'remix_painted', summary: `Repainted ${report.repaint.map((r) => r.depicts).join(', ')}; kept ${report.kept.length} original ${report.kept.length === 1 ? 'picture' : 'pictures'}` });
   }
   // The art step paints what the plan's visual stage marked "image". New games only for now: a revision sends the
   // whole authoring manifest back through Muse, and painted images would ride along as base64. With
@@ -318,8 +372,23 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
     await timeline.run('art', 'verify after pictures', () => verifyAfterPictures(out, { hooks, studio }));
   }
   out.stats = { ...(out.stats ?? {}), ...laneStats(context, timeline, bank) };
+  // The loop check (deterministic): the remix keeps the base's formula, its end states and a score pointing the same
+  // way. A lost or flipped score or a new formula fails the job; changed end states are an event.
+  if (original && hasAuthoring(original)) {
+    const lc = loopCheck(original, out.manifest);
+    out.stats = { ...(out.stats ?? {}), remix: { ...(out.stats?.remix ?? {}), loop: lc } };
+    if (lc.hard.length) throw new GenerationError(`The remix changed the game's core loop (${lc.hard.join('; ')}), so it was not published.`, lc.hard);
+    if (lc.soft.length) onEvent({ kind: 'remix_loop_changed', summary: `Heads up: ${lc.soft.join('; ')}`, issues: lc.soft });
+  }
+  if (rebuilt) out.stats = { ...(out.stats ?? {}), remix: { ...(out.stats?.remix ?? {}), rebuilt: true } };
   const m = out.manifest;
-  if (base) {
+  // Never a silent copy: a change whose game is byte for byte the original's says so (an event and stats.remix).
+  if (original && hasAuthoring(original) && m.content?.game_json === original.content?.game_json) {
+    out.stats = { ...(out.stats ?? {}), remix: { ...(out.stats?.remix ?? {}), unchanged: true } };
+    onEvent({ kind: 'remix_unchanged', summary: 'Muse kept the game exactly as it was; try saying what to change more specifically' });
+  }
+  if (original) {
+    base = original;
     // A change keeps how the game is played together and where it lives: the base's group_play when the new
     // manifest has none, and its Group or Event scope when the change was made without one (no harness context).
     if (base.group_play && !m.group_play) m.group_play = base.group_play;

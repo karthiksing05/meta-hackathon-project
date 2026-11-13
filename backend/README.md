@@ -133,7 +133,7 @@ loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, s
 `muse-wonder-1.0`), the expander and engine check it, up to 3 repair rounds, five bots playtest it, a quality check and one polish round, then `wrap`. It runs the committed
 `microgame-studio.js` and `bubble-kit-microgame-engine.js` bundles from the app's folders (`FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js`,
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
-and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
+and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. A remix keeps the core loop and goal and changes what was asked (content, answering format, style, effects, sprites); a base without an authoring source is rebuilt from its published game. It adds job events `remix_plan`, `remix_painted`, `remix_art_failed`, `remix_declined`, `remix_loop_changed`, `remix_unchanged` and `remix_rebuilt`, and fails the job when the score is lost or flipped (docs/REMIX.md). Not built yet: Muse-made covers and the classic (non-microgame) formulas.
 
 Image-first art (`backend/generator/src/cast.mjs`, on by default): every character, person, creature, food, product and
 recognizable object in a Muse Curio is a Muse Image painting in one style. Right after the plan, the cast comes from

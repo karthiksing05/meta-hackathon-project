@@ -78,7 +78,49 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   check('context.group alone (no plan) scopes the game to that Group', forGroup.structure?.scope === 'group:grp_fog', JSON.stringify(forGroup.structure));
   let err;
   try { await compose({ request: 'x', brief, base: { title: 'x', content: {} } }, { studio, muse: new ScriptedMuse([example()]) }); } catch (e) { err = e; }
-  check("a game without its authoring source can't be changed", !!err && /authoring_json/.test(err.message), err?.message);
+  check('a game without its authoring source is rebuilt as a remix, not refused', !err, err?.message);
+}
+
+// ---- remix rules (docs/REMIX.md): the core loop and goal are locked; content, format, style, effects are free ----
+{
+  const R = await import('./src/remix.mjs');
+  const fsx = await import('node:fs');
+  const trivia = () => JSON.parse(fsx.readFileSync(join(here, '../../authoring/games/gold_kit_trivia_night_market.authoring.json'), 'utf8'));
+  const tBase = (await compose({ request: 'a food trivia night', brief }, { studio, muse: new ScriptedMuse([trivia()]), env: {}, hooks: null })).manifest;
+  // A topic swap on a trivia game stays trivia.
+  const hp = trivia();
+  hp.content.questions = hp.content.questions.map((q, i) => `Harry Potter question ${i + 1}: which house?`);
+  const topicMuse = new ScriptedMuse([hp]);
+  const topic = await compose({ request: 'make the questions about Harry Potter', brief, base: tBase, remixOf: 'g-trivia' }, { studio, muse: topicMuse, env: {}, hooks: null });
+  check('remix rules: a topic swap on a trivia game stays trivia (loop check passes, quiz kept, new questions)', topic.stats.remix?.loop?.ok === true && /Harry Potter question/.test(topic.manifest.content.authoring_json) && JSON.parse(topic.manifest.content.authoring_json).uses.some((u) => u.fragment === 'quiz'), JSON.stringify(topic.stats.remix));
+  check('remix rules: the compose prompt says what is locked and what is free', topicMuse.prompts.some((p) => /REMIX RULES/.test(p) && /LOCKED/.test(p) && /trivia game stays a trivia game/.test(p) && /answering format/.test(p)), topicMuse.prompts[0]?.slice(-600));
+  // A genre-change request keeps the loop: declined with an event, steered back, and the result is still trivia.
+  const genreEvents = [];
+  const genreMuse = new ScriptedMuse([hp]);
+  const genre = await compose({ request: 'turn this trivia game into an endless runner with Mario', brief, base: tBase, remixOf: 'g-trivia' }, { studio, muse: genreMuse, env: {}, hooks: null, onEvent: (e) => genreEvents.push(e) });
+  check('remix rules: a genre-change request is declined (event) and the loop is kept', genreEvents.some((e) => e.kind === 'remix_declined') && genreMuse.prompts.some((p) => /do not change the genre/.test(p)) && genre.stats.remix?.loop?.ok === true, JSON.stringify({ kinds: genreEvents.map((e) => e.kind), loop: genre.stats.remix?.loop }));
+  check('remix rules: a content or style request is not taken for a genre change', R.genreChange('make the questions about Harry Potter and the art pixel style') === null && R.genreChange('make it a quiz about cats', { title: 'Cat Quiz', rule: 'answer', pitch: '', theme: [] }) === null && R.genreChange('turn it into a platformer', { title: 'Food Trivia', rule: '', pitch: '', theme: [] })?.genre === 'platformer');
+  // An answering-format change is allowed: multiple choice to type-in changes the fragments, not the loop.
+  const A0 = JSON.parse(tBase.content.authoring_json);
+  const asManifest = (A) => ({ formula: 'microgame', content: { authoring_json: JSON.stringify(A) } });
+  const typed = structuredClone(A0);
+  typed.uses = typed.uses.map((u) => (u.fragment === 'quiz' ? { fragment: 'type_answer', params: { prompt: 'Type it' }, version: 1 } : u));
+  check('remix rules: an answering-format change (multiple choice to type-in) is allowed', R.loopCheck(tBase, asManifest(typed)).ok);
+  // Effects can be added or removed.
+  const fx = structuredClone(A0);
+  fx.uses = [...fx.uses, { fragment: 'confetti', params: {}, version: 1 }];
+  const noFx = structuredClone(A0);
+  noFx.look = { ...(noFx.look ?? {}), juice: 'none' };
+  noFx.uses = noFx.uses.filter((u) => u.fragment !== 'lives');
+  check('remix rules: effects and juice can be added or removed', R.loopCheck(tBase, asManifest(fx)).ok && R.loopCheck(tBase, asManifest(noFx)).ok);
+  // The locked part: a flipped or missing score fails, changed end states are flagged.
+  const flipped = structuredClone(A0); flipped.score = { ...flipped.score, direction: 'lower', counts_when: 'finished' };
+  const noScore = structuredClone(A0); delete noScore.score; delete noScore.objectives.score;
+  const ends = structuredClone(A0); ends.objectives = { ...ends.objectives, on_timeout: 'win' };
+  check('remix rules: a flipped or lost score is a hard failure, new end states a warning', R.loopCheck(tBase, asManifest(flipped)).hard.length === 1 && R.loopCheck(tBase, asManifest(noScore)).hard.length >= 1 && R.loopCheck(tBase, asManifest(ends)).soft.length === 1 && !R.loopCheck(tBase, asManifest(ends)).hard.length);
+  let loopErr = null;
+  try { await compose({ request: 'make lower scores better', brief, base: tBase, remixOf: 'g-trivia' }, { studio, muse: new ScriptedMuse([flipped]), env: {}, hooks: null }); } catch (e) { loopErr = e; }
+  check('remix rules: a remix that flips the score is not published (job error)', loopErr?.name === 'GenerationError' && /core loop/.test(loopErr.message), String(loopErr?.message));
 }
 
 // ---- in-process: Muse call options, usage, and the section an older bundle still needs ----
@@ -296,6 +338,64 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   const la = JSON.parse(lvl.manifest.content.authoring_json);
   check('level 2: the base paintings come back, no backdrop or sheet repainted', !lvlMuse.images.some((i) => i.size === '1024x1536') && lvlMuse.images.length === 0 && /^data:image\/png/.test(la.art.sprites[sprite]?.image ?? '') && /^data:image\/jpeg/.test(la.art.backdrop?.image ?? ''), JSON.stringify({ calls: lvlMuse.images.length, art: lvl.stats.art }));
   check('level 2: the base pictures never ride into the compose prompt', lvlMuse.prompts.length > 0 && !lvlMuse.prompts.some((p) => p.includes('data:image/png')));
+
+  // ---- remix (src/remix.mjs, docs/REMIX.md): repaint what the change names, keep the rest ----
+  {
+    const R = await import('./src/remix.mjs');
+    const solid = (v) => 'data:image/png;base64,' + Buffer.from(encodePNG({ w: 8, h: 8, data: new Uint8ClampedArray(256).fill(v) })).toString('base64');
+    const remixBase = () => {
+      const m = structuredClone(first.manifest);
+      const A = JSON.parse(m.content.authoring_json), G = JSON.parse(m.content.game_json);
+      for (const [id, v] of [['avatar', 101], ['fogbank', 151], ['life', 201]]) { A.art.sprites[id] = { image: solid(v), w: 64, h: 64 }; G.assets[id] = { image: solid(v), w: 64, h: 64 }; }
+      A.design = { ...(A.design ?? {}), theme: ['Boaty', 'fog'] };
+      m.content = { ...m.content, authoring_json: JSON.stringify(A), game_json: JSON.stringify(G) };
+      m.id = 'mg-base-game'; m.group_play = { mode: 'async', result: { kind: 'score', compare: 'score' } };
+      return m;
+    };
+    const assetsOf = (o) => JSON.parse(o.manifest.content.game_json).assets;
+    const reply = () => { const m = withSprites(); m.design = { ...(m.design ?? {}), pitch: 'remixed' }; return m; };
+    const baseM = remixBase();
+    const BA = JSON.parse(baseM.content.game_json).assets;
+
+    // 1. A sprite swap planned by Muse repaints that sprite under its old id; the others keep their paintings.
+    const swapMuse = new SheetMuse([{ repaint: [{ id: 'avatar', depicts: 'Mario', kind: 'character' }], restyle: false, style: 'cut paper', backdrop: null }, reply()]);
+    const swapEvents = [];
+    const swap = await compose({ request: 'make the main character Mario', brief, base: baseM, remixOf: 'g-base' }, { studio, muse: swapMuse, env: {}, onEvent: (e) => swapEvents.push(e) });
+    const sa = assetsOf(swap);
+    check('remix: a sprite swap repaints that sprite (new Muse Image art under the old id)', /^data:image\/png/.test(sa.avatar?.image ?? '') && sa.avatar.image !== BA.avatar.image && swap.stats.remix?.repaint?.[0]?.painted === true && swapMuse.images.some((i) => /Mario/.test(i.prompt)), JSON.stringify({ remix: swap.stats.remix, art: swap.stats.art?.errors }));
+    check('remix: the swap keeps the other paintings, the lineage, a new id and group play', sa.fogbank?.image === BA.fogbank.image && swap.manifest.lineage?.remix_of === 'g-base' && swap.manifest.id !== 'mg-base-game' && swap.manifest.group_play?.mode === 'async', JSON.stringify({ fog: sa.fogbank?.image === BA.fogbank.image, lineage: swap.manifest.lineage, id: swap.manifest.id }));
+    check('remix: compose is told which ids are repainted and as what', swapMuse.prompts.some((p) => /REMIX PICTURES/.test(p) && /avatar: Mario/.test(p)) && swapEvents.some((e) => e.kind === 'remix_plan') && swapEvents.some((e) => e.kind === 'remix_painted'), JSON.stringify(swapEvents.map((e) => e.kind)));
+
+    // 2. A partial swap when the Muse plan fails: the words pick the main character; the rest stay as they were.
+    const partMuse = new SheetMuse(['not json', reply()]);
+    const part = await compose({ request: 'make the main character a pirate ship', brief, base: remixBase(), remixOf: 'g-base' }, { studio, muse: partMuse, env: {} });
+    const pa = assetsOf(part);
+    check('remix: a partial swap repaints only the main character and keeps the other sprites', part.stats.remix?.source === 'words' && part.stats.remix.repaint.map((r) => r.id).join() === 'avatar' && pa.avatar.image !== BA.avatar.image && pa.fogbank?.image === BA.fogbank.image && (pa.life ? pa.life.image === BA.life.image : true), JSON.stringify(part.stats.remix));
+    const words = R.heuristicRemixPlan({ sprites: [{ id: 'avatar', character: true }, { id: 'chaser', character: true }, { id: 'coin', character: false }] }, 'make the main character Mario and the side characters Boo ghosts');
+    check('remix words: main and side characters map to the right sprites', JSON.stringify(words.repaint) === JSON.stringify([{ id: 'avatar', depicts: 'Mario', kind: 'character' }, { id: 'chaser', depicts: 'Boo ghosts', kind: 'character' }]), JSON.stringify(words.repaint));
+
+    // 3. A base with no authoring source is rebuilt from the published game, not refused.
+    const bare = remixBase();
+    bare.content = { game_json: bare.content.game_json };
+    const bareMuse = new SheetMuse([reply()]);
+    const bareEvents = [];
+    const rebuilt = await compose({ request: 'make the main character a pirate ship', brief, base: bare, remixOf: 'g-base' }, { studio, muse: bareMuse, env: {}, onEvent: (e) => bareEvents.push(e) });
+    check('remix: a base without authoring_json is rebuilt as a new game with the change', bareEvents.some((e) => e.kind === 'remix_rebuilt') && bareMuse.prompts.some((p) => /Remake this published game/.test(p) && /pirate ship/.test(p) && !p.includes('data:image/png')) && rebuilt.manifest.lineage?.remix_of === 'g-base' && rebuilt.manifest.id !== 'mg-base-game' && rebuilt.stats.remix?.rebuilt === true && studio.expand(rebuilt.manifest.content.authoring_json, { canvas: 'tall' }).ok, JSON.stringify({ kinds: bareEvents.map((e) => e.kind), lineage: rebuilt.manifest.lineage }));
+
+    // 4. A rules-only change keeps all the art: no plan call, no image call.
+    const rulesMuse = new SheetMuse([reply()]);
+    const rules = await compose({ request: 'make it twice as fast and give three lives', brief, base: remixBase(), remixOf: 'g-base' }, { studio, muse: rulesMuse, env: {} });
+    const ra = assetsOf(rules);
+    check('remix: a rules-only change keeps every painting and paints nothing', rulesMuse.images.length === 0 && ra.avatar?.image === BA.avatar.image && ra.fogbank?.image === BA.fogbank.image && (rules.stats.remix?.repaint ?? []).length === 0 && !rulesMuse.prompts.some((p) => /plan the art for a remix/.test(p)), JSON.stringify({ n: rulesMuse.images.length, remix: rules.stats.remix }));
+    check('remix: the verifier still ran on each remix', [swap, part, rules].every((o) => o.stats.layout?.verifier === true || o.stats.layoutAfterArt?.ran === true), JSON.stringify([swap, part, rules].map((o) => [o.stats.layout?.verifier, o.stats.layoutAfterArt?.ran])));
+
+    // 5. A failed repaint is an event and a stats entry, never a silent copy.
+    class NoSheetMuse extends SheetMuse { async image(args) { this.images.push(args); throw new Error('image service down'); } }
+    const failMuse = new NoSheetMuse([{ repaint: [{ id: 'avatar', depicts: 'Mario', kind: 'character' }], style: '', backdrop: null }, reply()]);
+    const failEvents = [];
+    const failed = await compose({ request: 'make the main character Mario', brief, base: remixBase(), remixOf: 'g-base' }, { studio, muse: failMuse, env: {}, onEvent: (e) => failEvents.push(e) });
+    check('remix: a repaint that fails is reported (event and stats.remix.failed)', failed.stats.remix?.failed?.includes('avatar') && failEvents.some((e) => e.kind === 'remix_art_failed') && assetsOf(failed).avatar?.image !== BA.avatar.image, JSON.stringify({ remix: failed.stats.remix, kinds: failEvents.map((e) => e.kind) }));
+  }
   // A content filter on the sheet: one retry with the proper names taken out, within the 4-call cap.
   class FilterMuse extends SheetMuse {
     async image(args) {
