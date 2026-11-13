@@ -534,7 +534,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
    * (or {content, model}); onEvent gets {kind, summary, …}. base (a microgame manifest with
    * content.authoring_json) makes it a revision.
    */
-  async function compose(argsJSON, ask, onEvent) {
+  async function compose(argsJSON, ask, onEvent, media = null) {
     const a = typeof argsJSON === 'string' ? JSON.parse(argsJSON) : argsJSON;
     let base = null;
     if (a.base) {
@@ -548,6 +548,9 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       maxRepairRounds: a.max_repair_rounds, polish: a.polish !== false,
       // On by default; score_check: false or score_review: false opt out.
       scoreCheck: a.score_check !== false, scoreReview: a.score_review !== false,
+      // Picture art: {image, decode, deflate} from the caller (functions, so not in argsJSON); used when the
+      // plan says art "image" (docs/harness-gaps/images.md).
+      media: media && typeof media === 'object' ? media : null,
     });
     return JSON.stringify(out);
   }

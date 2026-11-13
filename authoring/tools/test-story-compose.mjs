@@ -41,7 +41,7 @@ const ctx = {
     spec: { spec: 'game-spec/1', social: { mode: 'same_seed_async', share_line: '{name}: {result} on {title}. Your turn.', result: { kind: 'ending', compare: 'ending', display: '{ending} in {choices} choices' } } } },
 };
 
-async function run(replies, c = ctx) {
+async function run(replies, c = ctx, media = undefined) {
   const asked = [];
   const ask = async (system, user, purpose) => {
     asked.push({ purpose, user });
@@ -50,7 +50,7 @@ async function run(replies, c = ctx) {
     return typeof r === 'function' ? r(user) : r;
   };
   const events = [];
-  const out = JSON.parse(await S.compose(JSON.stringify({ request, brief: { intent: 'become king' }, context: c, polish: false }), ask, (e) => events.push(e)));
+  const out = JSON.parse(await S.compose(JSON.stringify({ request, brief: { intent: 'become king' }, context: c, polish: false }), ask, (e) => events.push(e), media));
   return { out, asked, events };
 }
 
@@ -89,6 +89,33 @@ async function run(replies, c = ctx) {
   const tide = readFileSync(join(authoringDir, 'games', 'tide_taps.authoring.json'), 'utf8');
   const { asked } = await run({ 'microgame draft': tide, 'score review': '{"ok": true, "issues": []}' }, { ...ctx, types: [{ id: 'tap_game', tools: ['tap_targets'] }], plan: { ...ctx.plan, type_ids: ['tap_game'], tool_ids: [] } });
   ok(asked[0].purpose === 'microgame draft', 'a non-story plan never asks for a story graph');
+}
+
+{ // picture art for a story: portraits and stills from muse-image, re-expanded within the 512 KB budget
+  const zlib = (await import('node:zlib')).default;
+  const C = await import('../expander/image-codec.mjs');
+  const deflate = (b) => new Uint8Array(zlib.deflateSync(b, { level: 9 }));
+  const decode = (b) => C.decodePNG(b, (x) => new Uint8Array(zlib.inflateSync(x)));
+  const calls = [];
+  const image = async ({ prompt, purpose }) => {
+    calls.push(purpose);
+    const lineup = /(\d+) head-and-shoulders portrait busts side by side/.exec(prompt);
+    const key = /pure green/.test(prompt) ? [2, 250, 4] : /pure blue/.test(prompt) ? [3, 2, 250] : [250, 3, 248];
+    const w = 960, h = lineup ? 480 : 640, data = new Uint8Array(w * h * 4), n = lineup ? Number(lineup[1]) : 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const k = Math.floor(x / (w / Math.max(1, n)));
+      const inside = n && Math.hypot(x - (k + 0.5) * (w / n), y - h / 2) < 90;
+      data.set(n ? (inside ? [60 + 25 * k, 90, 180, 255] : [...key, 255]) : [x % 256, y % 256, 140, 255], (y * w + x) * 4);
+    }
+    return { bytes: C.encodePNG({ w, h, data }, deflate) };
+  };
+  const pctx = { ...ctx, plan: { ...ctx.plan, art: 'image', spec: { ...ctx.plan.spec, theme: { art_style: 'illuminated storybook' } } } };
+  const { out } = await run({ 'story graph': graphText('kevin_17_peasant_king'), 'score review': '{"ok": true, "issues": []}', 'story art direction': '{}' }, pctx, { image, decode, deflate });
+  const authoring = JSON.parse(out.manifest.content.authoring_json);
+  const sv = (authoring.uses ?? []).find((u) => u.fragment === 'story_vars');
+  ok(calls.length >= 1 && out.manifest.art_record?.license === 'generated' && out.stats.image_art?.kind === 'story', `story pictures: ${calls.length} image calls, ${JSON.stringify(out.stats.image_art)}`);
+  ok(sv?.params?.stills !== undefined && authoring.art?.sprites?.portrait?.image?.startsWith('data:image/'), 'the story carries portraits and stills');
+  ok(out.gate.passed && out.manifest.group_play?.result?.compare === 'ending', 'the story still plays and compares endings');
 }
 
 console.log(`story compose: ${passed} passed, ${failed} failed`);

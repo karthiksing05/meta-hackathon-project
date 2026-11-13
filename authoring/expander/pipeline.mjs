@@ -14,6 +14,15 @@ import { verifyScore } from './score-step.mjs';
 import { normalizeScore, unknownScoreEvents } from './score.mjs';
 import { groupPlayBlock, structureFor } from './group-play.mjs';
 import { wantsStory, composeStory } from './story-compose.mjs';
+import { makeImageArt, applyImageArt, makeStoryArt, applyStoryArt } from './image-art.mjs';
+
+/** The art budget for games drawn by muse-image (svg.mjs SVG_LIMITS.image_art_bytes). */
+export const IMAGE_ART_BUDGET = 512 * 1024;
+
+/** Whether this job draws its pictures with muse-image: the plan asks for it and the caller can make images. */
+export function wantsImageArt(context, media) {
+  return context?.plan?.art === 'image' && typeof media?.image === 'function' && typeof media?.decode === 'function' && typeof media?.deflate === 'function';
+}
 
 /**
  * The spec's score as a manifest block: bounds dropped (the bots set them), unknown events dropped.
@@ -70,6 +79,8 @@ export function summarize(e) {
     case 'score_checked': return e.ranked ? `Score checked: ranked board, ${e.order}` : `Unranked board${e.reason ? `: ${e.reason}` : ''}`;
     case 'done': return `${e.title} is ready`;
     case 'failed': return `Couldn't finish: ${e.reason}`;
+    case 'drawing': return 'Muse is drawing the pictures';
+    case 'drawn': return e.ok ? `Drew ${e.pictures} pictures` : `Kept the drawn-in art: ${e.reason}`;
     default: return '';
   }
 }
@@ -118,7 +129,7 @@ const blockingOf = (report) => (report.flags ?? []).filter((f) => f.blocking);
  * each returning a parsed object (gate a Promise). opts: { ask, onEvent, signal, maxRepairRounds, polish }.
  * Returns { manifest, stats, bots, gate, quality }. Throws GenerationError when the game never validates.
  */
-export async function composeGame({ request, brief, base = null, context = null }, studio, { ask, onEvent = () => {}, signal, maxRepairRounds = MAX_REPAIR_ROUNDS, polish = true, scoreCheck = true, scoreReview = true } = {}) {
+export async function composeGame({ request, brief, base = null, context = null }, studio, { ask, onEvent = () => {}, signal, maxRepairRounds = MAX_REPAIR_ROUNDS, polish = true, scoreCheck = true, scoreReview = true, media = null } = {}) {
   const started = Date.now();
   const stats = { firstDraftValid: null, repairRounds: 0, playtestRepair: false, passedGate: false, polished: false, museCalls: 0, models: [], examples: [], seconds: 0, calls: [] };
   const emit = (e) => onEvent({ ...e, summary: summarize(e) });
@@ -272,8 +283,41 @@ export async function composeGame({ request, brief, base = null, context = null 
       if (score?.authoring_json) expansion = { ...expansion, authoring_json: score.authoring_json };
       stats.score = score ? { ranked: score.ranked, repaired: score.repaired, reviews: score.reviews ?? 0, review: score.review?.ok ?? null } : null;
     }
+    // Picture art (docs/harness-gaps/images.md): when the plan says art "image" and the caller can make
+    // images, muse-image redraws the pictures behind the same asset ids, so rules and replays don't change
+    // and no re-gate is needed. Any failure keeps the SVG art.
+    let imageArt = null;
+    if (wantsImageArt(context, media)) {
+      emit({ kind: 'drawing' });
+      const spec = context.plan.spec ?? null;
+      const style = spec?.theme?.art_style ?? null;
+      const deps = { image: media.image, decode: media.decode, deflate: media.deflate, ask: call };
+      const t0 = Date.now();
+      try {
+        let authoring = expansion.authoring;
+        try { authoring = JSON.parse(expansion.authoring_json); } catch { /* keep the expansion's */ }
+        if (story?.expansion) {
+          const art = await makeStoryArt({ authoring, request, spec, style }, deps, { budget: IMAGE_ART_BUDGET });
+          const again = studio.expand(JSON.stringify(applyStoryArt(authoring, art)));
+          if (!again?.ok) throw new Error(`the story with pictures doesn't build: ${(again?.diagnostics ?? []).filter((d) => d.severity === 'error').map((d) => d.code).join(', ') || 'unknown'}`);
+          expansion = { ...expansion, game_json: again.game_json, authoring_json: again.authoring_json ?? JSON.stringify(applyStoryArt(authoring, art)) };
+          imageArt = { kind: 'story', record: art.record, stats: art.stats };
+        } else {
+          const art = await makeImageArt({ game: expansion.game, authoring, request, spec, style }, deps, { budget: IMAGE_ART_BUDGET });
+          if (!Object.keys(art.assets ?? {}).length) throw new Error('no pictures to draw (the game has no sprite or backdrop assets)');
+          imageArt = { kind: 'game', art, record: art.record, stats: art.stats };
+        }
+        stats.image_art = { kind: imageArt.kind, image_calls: imageArt.stats?.image_calls ?? null, text_calls: imageArt.stats?.text_calls ?? null, tokens: imageArt.stats?.tokens ?? null, budget: imageArt.stats?.budget ?? null, seconds: Math.round((Date.now() - t0) / 100) / 10, style: style ?? null };
+        emit({ kind: 'drawn', ok: true, pictures: imageArt.record?.pictures?.length ?? Object.keys(imageArt.art?.assets ?? {}).length });
+      } catch (e) {
+        if (e?.name === 'GenerationError') throw e;
+        imageArt = null;
+        stats.image_art = { failed: String(e?.message ?? e).slice(0, 300), seconds: Math.round((Date.now() - t0) / 100) / 10 };
+        emit({ kind: 'drawn', ok: false, reason: stats.image_art.failed });
+      }
+    }
     const title = expansion.game?.meta?.title ?? 'microgame';
-    const manifest = studio.wrap({
+    let manifest = studio.wrap({
       id: base?.id ?? `mg-${slug(title) || 'game'}-${randomSuffix()}`,
       game_json: expansion.game_json,
       authoring_json: expansion.authoring_json,
@@ -282,6 +326,8 @@ export async function composeGame({ request, brief, base = null, context = null 
       ...(base?.emoji ? { emoji: base.emoji } : {}),
       ...(score?.model ? { score: score.model } : {}),
     });
+    if (imageArt?.kind === 'game') manifest = applyImageArt(manifest, imageArt.art);
+    else if (imageArt?.kind === 'story') manifest.art_record = imageArt.record;
     // Group play: how friends compare this game's runs (the spec's social part, kept consistent with the score).
     // A story compares by ending (best first) with the endings the compiled graph really has.
     // The plan's display line is kept when it shows the ending ("{ending} in {choices} choices").

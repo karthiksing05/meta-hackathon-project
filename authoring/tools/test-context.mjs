@@ -139,5 +139,44 @@ async function compose(args, reply) {
   ok(!/earlier picks/.test(String(P.planMenu(catalog, SAMPLES.dodge).spec)), 'no picks, no section');
 }
 
+{ // picture art: plan.art "image" plus the caller's image/decode/deflate → muse-image pictures behind the same ids
+  const zlib = (await import('node:zlib')).default;
+  const C = await import('../expander/image-codec.mjs');
+  const deflate = (b) => new Uint8Array(zlib.deflateSync(b, { level: 9 }));
+  const decode = (b) => C.decodePNG(b, (x) => new Uint8Array(zlib.inflateSync(x)));
+  const keyOf = (p) => (/pure green/.test(p) ? [2, 250, 4] : /pure blue/.test(p) ? [3, 2, 250] : [250, 3, 248]);
+  const imageCalls = [];
+  const image = async ({ prompt, purpose }) => {
+    imageCalls.push(purpose);
+    const grid = /(\d+) separate subjects arranged in a (\d+) columns x (\d+) rows/.exec(prompt);
+    const [n, cols, rows] = grid ? grid.slice(1).map(Number) : [1, 1, 1];
+    const w = 960, h = 640, data = new Uint8Array(w * h * 4), key = keyOf(prompt);
+    const cw = w / cols, ch = h / rows, r = Math.min(cw, ch) * 0.3;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const k = Math.floor(y / ch) * cols + Math.floor(x / cw);
+      const inside = grid && k < n && Math.hypot(x - ((k % cols) + 0.5) * cw, y - (Math.floor(k / cols) + 0.5) * ch) < r;
+      data.set(grid ? (inside ? [40 + 30 * k, 120, 200, 255] : [...key, 255]) : [x % 256, y % 256, 128, 255], (y * w + x) * 4);
+    }
+    return { bytes: C.encodePNG({ w, h, data }, deflate) };
+  };
+  const ctx = { ...SAMPLES.dodge, gold_ids: ['gold_rift_run'], plan: { ...SAMPLES.dodge.plan, art: 'image', spec: { ...SAMPLES.dodge.plan.spec, theme: { art_style: 'pixel art' } } } };
+  const rift = JSON.parse(readFileSync(join(authoringDir, 'games', 'gold_rift_run.authoring.json'), 'utf8'));
+  const reply = (purpose) => (/score review/.test(purpose) ? { ok: true, issues: [] } : /direction/.test(purpose) ? {} : rift);
+  const events = [];
+  const ask = async (s, u, purpose) => ({ content: JSON.stringify(reply(purpose)), model: 'fake' });
+  const out = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: ctx }), ask, (e) => events.push(e), { image, decode, deflate }));
+  const game = JSON.parse(out.manifest.content.game_json);
+  const pictures = Object.values(game.assets ?? {}).filter((a) => typeof a.image === 'string' && a.image.startsWith('data:image/'));
+  ok(pictures.length >= 1 && out.manifest.art_record?.license === 'generated' && out.stats.image_art?.image_calls >= 1 && out.stats.image_art.style === 'pixel art', `image art: ${pictures.length} pictures, ${JSON.stringify(out.stats.image_art)}`);
+  ok(events.some((e) => e.kind === 'drawing' && e.summary === 'Muse is drawing the pictures'), 'image art: the drawing event');
+  ok(out.gate.passed && JSON.stringify(game.rules) === JSON.stringify(JSON.parse(JSON.parse(B.expand(JSON.stringify(rift))).game_json).rules), 'image art: same rules, gate result kept');
+  // a failing image model keeps the SVG art; no art "image" draws nothing
+  const failing = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: ctx }), ask, () => {}, { image: async () => { throw new Error('429 busy'); }, decode, deflate }));
+  ok(!failing.manifest.art_record && /429|no picture|busy/.test(failing.stats.image_art?.failed ?? '') && failing.gate.passed, `image art failure keeps the SVG art (${failing.stats.image_art?.failed})`);
+  const before = imageCalls.length;
+  const plain = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), ask, () => {}, { image, decode, deflate }));
+  ok(imageCalls.length === before && !plain.stats.image_art && !plain.manifest.art_record, 'no plan.art: no pictures drawn');
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

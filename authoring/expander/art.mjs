@@ -49,9 +49,11 @@ export function compileArt(art, canvas, err) {
     else out.font = art.font;
   }
 
-  let total = 0;
+  let total = 0, svgTotal = 0, pictures = 0;
   const addAsset = (id, asset) => {
     total += utf8Length(asset.svg ?? asset.image ?? '');
+    if (asset.image !== undefined) pictures++;
+    else svgTotal += utf8Length(asset.svg ?? '');
     out.assets[id] = asset;
   };
 
@@ -74,7 +76,10 @@ export function compileArt(art, canvas, err) {
       out.sprites[name] = { id: name, frames: s.asset.frames ?? 1, aspect: Math.round((s.asset.h / s.asset.w) * 1000) / 1000, color: s.color };
     }
   }
-  if (total > SVG_LIMITS.art_bytes) err('A_ART_SIZE', '/art', `the art adds up to ${Math.ceil(total / 1024)} KB; the limit is ${SVG_LIMITS.art_bytes / 1024} KB. Simplify the SVGs`);
+  // Picture art (muse-image) gets the larger budget; the SVGs in it still fit the SVG budget.
+  const limit = pictures ? SVG_LIMITS.image_art_bytes : SVG_LIMITS.art_bytes;
+  if (total > limit) err('A_ART_SIZE', '/art', `the art adds up to ${Math.ceil(total / 1024)} KB; the limit is ${limit / 1024} KB. ${pictures ? 'Use fewer or smaller pictures' : 'Simplify the SVGs'}`);
+  else if (pictures && svgTotal > SVG_LIMITS.art_bytes) err('A_ART_SIZE', '/art', `the SVG art adds up to ${Math.ceil(svgTotal / 1024)} KB; the limit is ${SVG_LIMITS.art_bytes / 1024} KB. Simplify the SVGs`);
   return out;
 }
 

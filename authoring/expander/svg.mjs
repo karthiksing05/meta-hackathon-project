@@ -16,6 +16,9 @@ export const SVG_LIMITS = {
   elements: 2000,
   depth: 32,
   image_bytes: 512 * 1024,
+  // The art budget when the art holds pictures (muse-image art, docs/harness-gaps/images.md); SVG art alone
+  // stays within art_bytes.
+  image_art_bytes: 512 * 1024,
 };
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
