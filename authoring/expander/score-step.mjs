@@ -109,6 +109,9 @@ export async function verifyScore({ expansion, gameJson, request = '', spec = nu
     let game = null;
     try { game = JSON.parse(gameJson); } catch { /* checked by the engine anyway */ }
     if (n2.diagnostics.some((d) => d.severity === 'error') || (game && unknownScoreEvents(n2.score, game).length)) break;
+    // The plan's score wins here too: a repair that moves a score of the plan's kind to another kind is the
+    // drift compose just undid (Kevin32 #17 rerun: a story's points score repaired into time_to_complete).
+    if (spec?.score?.kind && model.kind === spec.score.kind && n2.score.kind !== model.kind) { out.repairRejected = `kept the plan's ${model.kind} (the repair wanted ${n2.score.kind})`; break; }
     model = n2.score;
     out.repaired = true;
     out.authoring_json = JSON.stringify({ ...(expansion.authoring ?? {}), score: rest });

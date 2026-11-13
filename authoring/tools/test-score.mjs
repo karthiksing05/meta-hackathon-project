@@ -332,6 +332,11 @@ const draftOr = (manifest, rest) => (purpose, user) => (/score/.test(purpose) ? 
   ok(a && a.score.kind === 'count_in_time' && a.block.events[0] === 'puzzle_solved', `adopt with fallback events: ${JSON.stringify(a?.block)}`);
   const kept = adoptSpecScore({ kind: 'count_in_time', events: ['puzzle_solved', 'nope'] }, game, ['combine_ok']);
   ok(kept.block.events.join() === 'puzzle_solved', 'the spec\'s events win when the game has them');
+  // a repair can't move a score of the plan's kind to another kind (#17 rerun: points -> time_to_complete)
+  const rc = [];
+  const toTime = async (s, u, p) => { rc.push(p); return p === 'score repair' ? '{"score": {"kind": "time_to_complete", "measures": "ms to win", "unit": "ms", "direction": "lower", "counts_when": "finished", "format": "m:ss.t", "events": ["p"]}}' : '{"ok": false, "issues": [{"part": "score", "problem": "farmable", "fix": "use time"}]}'; };
+  const st = await verifyScore({ expansion: expansion({ kind: 'points', events: ['p'] }), gameJson: '{"events": {"p": {}}}', spec: { score: { kind: 'points' } } }, studioWith([{ id: 'skill_order', status: 'pass', message: '' }]), { call: toTime });
+  ok(st.model.kind === 'points' && !st.repaired && /kept the plan's points/.test(st.repairRejected ?? '') && rc.filter((p) => p === 'score review').length === 1, `the plan's kind survives a repair (${st.model.kind}, ${st.repairRejected})`);
 }
 
 console.log(`${passed} passed, ${failed} failed`);
