@@ -10,6 +10,8 @@ still differ.
 | `vibes.mjs` | The vibe table: 27 vibes, each with match words, a system fallback stack and 2–3 pairings. |
 | `look.mjs` | `chooseLook`, `lookFromChoice`, `applyLook`, `lookCheck`, `lookFix`, `lookForBuilt` (pure JS; the Studio bundle packs it). |
 | `font-data.mjs` | Generated facts per bundled font (family, role, kind, weights, average advance). |
+| `readability.mjs` | `S_READABILITY`: every word against the pixels behind it, and the fix (palette colour → outline or soft plate → solid plate). |
+| `raster.mjs`, `jpeg.mjs` | The Chrome-free compositor: engine draw lists, SVG sprites, PNG and baseline JPEG pictures. |
 | `make-fonts.mjs` | Writes `font-data.mjs` and the app's `game-fonts.css` from `authoring/fonts/`. `--check` reports stale files. |
 | `look-sheets.mjs` | Before/after contact sheets, the proof and verifier counts, and the same-vibe twin sheet. |
 | `test-look.mjs` | Tests (library, licences, table, choosing, applying, checks, expander, regions). |
@@ -26,6 +28,16 @@ captions), optional `numerals` (scores, timers, counters), case rules (`display`
 (which of the text font's two weights labels and titles use), a treatment (`none`, `outline`,
 `heavy`: an engine text stroke under display text in the ground colour that contrasts most), a
 ratio range and a body-size range.
+
+## Variation inside a pairing
+
+The game id also varies the pairing's details (`varyPairing` in `look.mjs`), so two games of one
+vibe look related but not identical: title case (upper or as written, never for script or
+blackletter faces), label weight, tracking (hair spaces, U+200A, between the letters of short
+display lines and capital labels: the engine draws no letter spacing), the display treatment (one
+step to a neighbour: none ↔ outline ↔ heavy), the numerals face (from the vibe's own numerals), and
+for sporty vibes (`racing_sport`, `cartoon_action`, `meme_brainrot`, `game_show`) a 2–7° tilt on
+short display lines in about half the games.
 
 ## The scale
 
@@ -63,6 +75,28 @@ finding as a warning, since its look is only inferred.
 | `S_ALIGNMENT` | warn | static text on too many edges and centres |
 | `S_PALETTE_CLASH` | warn | primary and accent both off the backdrop's hues |
 | `S_THEME_MISMATCH` | warn | the headline font isn't one of the vibe's fonts (games without `art.type`) |
+
+## Readability (`S_READABILITY`, block)
+
+`readability.mjs` composites up to 36 sampled frames per game in JS (`raster.mjs`: rects, circles,
+lines, polys, clips, SVG sprites through a small SVG rasterizer, PNG pictures through
+`image-codec.mjs`, baseline JPEG backdrops through `jpeg.mjs`), with the text left out. For each text
+op it takes the pixels under the ink box and the 10th-percentile WCAG contrast of the text colour
+(at its opacity) against them. Small text needs 4.5:1, large text (≥ 22, or bold ≥ 700 at 18.5+)
+3:1; small text on a busy background (luminance spread over 0.13) fails without an outline even
+when the contrast passes. An outline of 2+ units that contrasts 3:1 with the fill is the ground the
+glyphs sit on. Fades (an op fainter than its node's own opacity) are skipped. No Chrome needed, so
+it runs on the generator's server; `verify/checks/readability.mjs` registers it.
+
+The fix, in order, presentation only:
+1. A text colour from the game's palette that passes on every failing frame (`<role>_ink`, then ink
+   and the on-colours, then the grounds; never neon for big text). One choice per (colour, step),
+   so a role keeps one colour. Colour expressions get a replacement per token they can pick.
+2. The look's treatment: display text, and text with no box, gets an outline in the palette ground
+   that contrasts most (3 units for heavy looks and big type, else 2). Body text gets a soft plate:
+   a palette ground at 85 % (`$plate`) with the look's corner radius (0 for pixel vibes, 12 for
+   cute and cartoon ones, 4 for classic ones, else 8), hugging a literal centred line.
+3. A solid plate (`$plate_solid`) when the soft one isn't enough.
 
 ## Fonts on the phone and in Chrome
 

@@ -82,6 +82,10 @@ for (const l of looks) {
   ok(s.caption.size >= 12, 'nothing under 12');
   ok(specFamilies(l).length <= (l.numerals ? 3 : 2), 'at most 2 families (3 with numerals)');
 }
+ok(new Set(looks.map((l) => JSON.stringify([l.case, l.tracking, l.treatment, l.numerals?.family, l.tilt]))).size >= 4, 'same vibe → details vary by id (case, tracking, treatment, numerals, tilt)', looks.map((l) => [l.case.display, l.tracking.display, l.treatment, l.numerals?.family, l.tilt]));
+const sporty = Array.from({ length: 12 }, (_, i) => chooseLook({ request: 'Max Verstappen F1 game' }, `f1-${i}`));
+ok(sporty.some((l) => l.tilt < 0) && sporty.some((l) => !l.tilt), 'sporty vibes tilt some games, not all');
+ok(chooseLook({ request: 'a calm game' }, 'x').tilt === 0, 'calm vibes never tilt');
 ok(widthFactor('press_start', 400) < 0.7 && widthFactor('barlow_cond', 500) === 1, 'wide faces are set smaller; text faces never grow');
 
 // ---------- applying ----------
@@ -116,6 +120,14 @@ ok(!spec.numerals || tn[2].font === spec.numerals.family, 'score in the numerals
 ok(tn.every((n) => !/'#/.test(String(n.color)) && !/^#/.test(String(n.color))), 'text colours are tokens', tn.map((n) => n.color));
 ok(Object.keys(LOOK_CODES).length === 8, 'eight look codes');
 
+// ---------- every pairing (incl. one family for text and display) gives numeric sizes ----------
+for (const v of VIBES) for (const p of v.pairings) for (const seed of [0, 1, 2, 7]) {
+  const sp = lookFromChoice({ vibe: v.id, pairing: p.id, seed });
+  const out = applyLook(game, sp).game;
+  const bad = textNodes(out).map((t) => t.n).filter((n) => !(typeof n.size === 'number' && n.size > 0) && !(typeof n.size === 'string' && !/undefined|NaN/.test(n.size)));
+  ok(!bad.length, `${v.id}/${p.id} seed ${seed}: every size defined${p.display === p.text ? ' (one family)' : ''}`, bad.map((n) => n.size));
+}
+
 // ---------- the expander applies art.type ----------
 const { expand, loadLibrary } = await import('../expander/expand.mjs');
 const lib = loadLibrary(join(root, 'authoring'));
@@ -132,6 +144,45 @@ const g = r.game ?? r.out;
 ok(g && textNodes(g).every((t) => specFamilies(spec).includes(t.n.font)), 'the expander sets the look', g && textNodes(g).map((t) => t.n.font));
 const bad = expand({ ...m, art: { type: { vibe: 'nope' } } }, lib);
 ok(bad.diagnostics.some((d) => d.code === 'A_ART_FIELD' && d.at === '/art/type'), 'a bad art.type is A_ART_FIELD');
+
+// ---------- readability (Chrome-free) ----------
+{
+  const { compositeFrame, rasterSvg } = await import('./raster.mjs');
+  const { legibility, needFor, readabilityFix, readabilityFindings } = await import('./readability.mjs');
+  const fr = { width: 40, height: 20, background: '#FFFFFF', ops: [{ op: 'rect', x: 0, y: 0, w: 20, h: 20, fill: '#000000FF', stroke: 0, stroke_width: 0, radius: 0, opacity: 1, scale: 1, rotation: 0 }] };
+  const r = compositeFrame(fr, {});
+  ok(r.data[0] === 0 && r.data[(10 * 40 + 30) * 3] === 255, 'compositor paints rects over the background');
+  const bm = rasterSvg("<svg viewBox='0 0 10 10'><rect width='10' height='5' fill='#ff0000'/><circle cx='5' cy='7.5' r='2' fill='#00f'/></svg>", 10, 10);
+  ok(bm.data[0] === 255 && bm.data[3] === 1 && bm.data[(7 * 10 + 5) * 4 + 2] === 255, 'SVG rasterizer: rect and circle', [...bm.data.slice(0, 4)]);
+  ok(legibility([0, 0, 0], [[255, 255, 255]]).p10 > 20 && legibility([128, 128, 128], [[120, 120, 120]]).p10 < 1.2, 'legibility is WCAG contrast');
+  ok(legibility([255, 255, 255], [[250, 250, 250]], { outline: [0, 0, 0] }).p10 > 15, 'an outline is the text\'s ground');
+  ok(needFor(16, 400) === 4.5 && needFor(24, 400) === 3 && needFor(19, 700) === 3, 'thresholds');
+  const { loadEngine } = await import('../expander/engine.mjs');
+  let eng = null; try { eng = (await loadEngine()).engine; } catch { /* none */ }
+  if (eng) {
+    const { sampleDense } = await import('../verify/frames.mjs');
+    const rg = {
+      format: 'microgame/0.2', meta: { title: 'Read test', instructions: 'Tap.' }, assets: {}, state: { score: { type: 'int', init: '0' } },
+      inputs: {}, rules: [], objectives: { score: 'score', time_limit: '3s' },
+      presentation: { canvas: { w: 360, h: 640, background: '$bg' }, tokens: { bg: '#20203A', surface: '#2C2C4A', ink: '#F4F4FF', primary: '#3A3A66', accent: '#FFD23F' },
+        root: { node: 'group', children: [
+          { node: 'text', x: 20, y: 100, w: 320, h: 30, text: 'Hard to read here', size: 16, color: '$primary' },
+          { node: 'text', x: 20, y: 200, w: 320, h: 40, text: 'BIG TITLE', size: 30, color: '#30304F' },
+          { node: 'text', x: 20, y: 300, w: 320, h: 30, text: 'Fine', size: 16, color: '$ink' },
+        ] } },
+    };
+    if (eng.validate(JSON.stringify(rg)).filter((d) => d.severity === 'error').length === 0) {
+      const s0 = await sampleDense(rg, { engine: eng, maxSeconds: 4 });
+      const f0 = readabilityFindings(rg, s0);
+      ok(f0.length === 2 && f0.every((f) => f.node), 'two unreadable lines found', f0.map((f) => f.message));
+      const fx = readabilityFix(rg, f0, {});
+      const s1 = await sampleDense(fx.game, { engine: eng, maxSeconds: 4 });
+      ok(readabilityFindings(fx.game, s1).length === 0, 'fixed with the palette', fx.fixes);
+      ok(fx.fixes.every((x) => /^\$|on \$/.test(x.detail.split(' → ').pop()) || x.kind !== 'color'), 'fixes use palette tokens');
+      ok(JSON.stringify(fx.game.rules) === JSON.stringify(rg.rules), 'readability fix leaves rules');
+    } else ok(false, 'readability fixture validates', eng.validate(JSON.stringify(rg)).filter((d) => d.severity === 'error'));
+  }
+}
 
 // ---------- the fixed regions ----------
 const { kitRegions } = await import('../expander/ui-style.mjs');

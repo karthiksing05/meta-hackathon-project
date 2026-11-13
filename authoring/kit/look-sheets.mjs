@@ -10,13 +10,33 @@
 // that two games with one vibe still get different looks.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { applyLook, lookCheck, lookForBuilt, chooseLook, gameIdentity } from './look.mjs';
 import { readBuilt } from '../playtest/requirements-check.mjs';
 import { sampleDense } from '../verify/frames.mjs';
 import { renderFrames, CHROME } from '../playtest/frame-render.mjs';
 import { loadEngine } from '../expander/engine.mjs';
+import { readabilityFindings, readabilityFix } from './readability.mjs';
+import { inflateSync } from 'node:zlib';
+
+const inflate = (b) => new Uint8Array(inflateSync(b));
+/** The look, then the readability fix on the looked game. Returns {game, before, after, fixes}. */
+async function lookAndRead(game, spec) {
+  const looked = applyLook(game, spec).game;
+  const s0 = await sampleDense(game, { engine, maxSeconds: 60 });
+  const before = readabilityFindings(game, s0, { inflate }).length;
+  let g = looked, fixes = [];
+  for (let round = 0; round < 2; round++) {
+    const s = await sampleDense(g, { engine, maxSeconds: 60, ref: game });
+    const f = readabilityFindings(g, s, { inflate });
+    if (!f.length) break;
+    const r = readabilityFix(g, f, { spec });
+    g = r.game; fixes.push(...r.fixes);
+  }
+  const s2 = await sampleDense(g, { engine, maxSeconds: 60, ref: game });
+  return { game: g, before, after: readabilityFindings(g, s2, { inflate }).length, fixes };
+}
 
 const args = process.argv.slice(2);
 const outDir = args.find((a) => !a.startsWith('--'));
@@ -48,8 +68,16 @@ async function shots(game, ref = null) {
 function snapshot(html, png, w, h) {
   const file = png.replace(/\.png$/, '.html');
   writeFileSync(file, html);
-  execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files', `--user-data-dir=${join(dirname(png), '.chrome')}`,
-    `--window-size=${w},${h}`, `--screenshot=${png}`, '--virtual-time-budget=8000', 'file://' + file], { stdio: 'ignore', timeout: 120000 });
+  // Chrome sometimes exits non-zero in teardown after writing the file: keep the file, retry otherwise.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try { rmSync(png, { force: true }); } catch { /* none */ }
+    try {
+      execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files', `--user-data-dir=${join(dirname(png), `.chrome-${attempt}`)}`,
+        `--window-size=${w},${h}`, `--screenshot=${png}`, '--virtual-time-budget=8000', 'file://' + file], { stdio: 'ignore', timeout: 120000 });
+    } catch { /* checked below */ }
+    if (existsSync(png)) return;
+  }
+  console.log(`  (no screenshot for ${png})`);
 }
 
 const fontsCss = () => readFileSync(new URL('../../FacebookClone/Bubbles/Runtime/web/game-fonts.css', import.meta.url), 'utf8')
@@ -66,7 +94,7 @@ figcaption{color:#99a;font-size:11px;margin-top:3px;max-width:200px}.sp{display:
 
 function specLine(spec) {
   const s = spec.steps;
-  return `${spec.vibe}/${spec.pairing} · ${spec.families.display} + ${spec.families.text}${spec.numerals ? ` + ${spec.numerals.family} (numerals)` : ''} · scale ${s.caption.size}/${s.label.size}/${s.body.size}/${s.title.size}/${s.display.size}/${s.hero.size} (×${spec.ratio} on ${spec.base}) · ${spec.treatment} · display ${spec.case.display}`;
+  return `${spec.vibe}/${spec.pairing} · ${spec.families.display} + ${spec.families.text}${spec.numerals ? ` + ${spec.numerals.family} (numerals)` : ''} · scale ${s.caption.size}/${s.label.size}/${s.body.size}/${s.title.size}/${s.display.size}/${s.hero.size} (×${spec.ratio} on ${spec.base}) · ${spec.treatment} · display ${spec.case.display}, tracking ${spec.tracking.display}/${spec.tracking.label}${spec.tilt ? ` · tilt ${spec.tilt}°` : ''}`;
 }
 
 const summary = [];
@@ -77,14 +105,16 @@ for (const file of files) {
   const key = basename(dirname(file)).match(/^[a-z]?\d+$|^k\d+|^s\d+/i) ? basename(dirname(file)) : basename(file).replace(/\.json$/, '');
   const { spec, words } = lookForBuilt({ manifest: built.manifest, authoring: built.authoring, game: built.game });
   const before = built.game;
-  const after = applyLook(before, spec).game;
+  const lr = await lookAndRead(before, spec);
+  const after = lr.game;
   const f0 = lookCheck(before, spec, { words }).map((f) => f.code);
   const f1 = lookCheck(after, spec, { words, explicit: true }).map((f) => f.code);
   const { proveUnchanged } = await import('../verify/prove.mjs');
   const proof = await proveUnchanged(before, after, { engine });
   const b = await shots(before);
   const a = await shots(after, before);
-  const entry = { key, title: built.manifest?.title ?? before.meta?.title, look: specLine(spec), lookBefore: f0, lookAfter: f1, proof: { rules: proof.rules, replays: proof.replays } };
+  const kinds = lr.fixes.reduce((m, x) => ({ ...m, [x.kind]: (m[x.kind] ?? 0) + 1 }), {});
+  const entry = { key, title: built.manifest?.title ?? before.meta?.title, look: specLine(spec), lookBefore: f0, lookAfter: f1, readability: { before: lr.before, after: lr.after, fixes: kinds }, proof: { rules: proof.rules, replays: proof.replays } };
   if (doVerify) {
     const { verify } = await import('../verify/verify.mjs');
     const rb = await verify(raw, { engine });
@@ -97,7 +127,7 @@ for (const file of files) {
   const r = row(`${key} · ${entry.title}`, entry.look, cells);
   rowsAll.push(row(`${key} · ${entry.title}`, entry.look, [cells[0], cells[3], cells[1], cells[4]]));
   snapshot(page([r], ''), join(outDir, `${key}.png`), 1290, 470);
-  console.log(`${key}: ${entry.look}\n   look ${f0.join(' ') || '-'} → ${f1.join(' ') || '-'}; proof rules ${proof.rules} replays ${proof.replays}${entry.blocking ? `; blocking ${entry.blocking.before} → ${entry.blocking.after} (L_ ${entry.blocking.beforeL} → ${entry.blocking.afterL})${entry.newL.length ? ' new: ' + entry.newL.join(' | ') : ''}` : ''}`);
+  console.log(`${key}: ${entry.look}\n   look ${f0.join(' ') || '-'} → ${f1.join(' ') || '-'}; S_READABILITY ${lr.before} → ${lr.after} ${JSON.stringify(kinds)}; proof rules ${proof.rules} replays ${proof.replays}${entry.blocking ? `; blocking ${entry.blocking.before} → ${entry.blocking.after} (L_ ${entry.blocking.beforeL} → ${entry.blocking.afterL})${entry.newL.length ? ' new: ' + entry.newL.join(' | ') : ''}` : ''}`);
 }
 if (files.length) {
   for (let i = 0; i < rowsAll.length; i += 5) snapshot(page(rowsAll.slice(i, i + 5), ''), join(outDir, `overview-${i / 5 + 1}.png`), 900, 60 + 470 * Math.min(5, rowsAll.length - i));
@@ -121,6 +151,6 @@ if (twin) {
   }
   snapshot(page(rows, ''), join(outDir, 'same-vibe.png'), 700, 60 + 470 * rows.length);
   const same = specs.every((s) => s.vibe === specs[0].vibe);
-  const distinct = new Set(specs.map((s) => `${s.pairing}|${s.ratio}|${s.base}`)).size === specs.length;
-  console.log(`same vibe ${same} (${specs[0].vibe}); looks distinct ${distinct}: ${specs.map((s) => `${s.pairing} ×${s.ratio}/${s.base}`).join(', ')}`);
+  const distinct = new Set(specs.map((s) => `${s.pairing}|${s.ratio}|${s.base}|${JSON.stringify([s.case, s.tracking, s.treatment, s.numerals?.family, s.tilt])}`)).size === specs.length;
+  console.log(`same vibe ${same} (${specs[0].vibe}); looks distinct ${distinct}: ${specs.map((s) => specLine(s)).join(' | ')}`);
 }

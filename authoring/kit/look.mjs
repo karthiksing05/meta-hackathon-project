@@ -143,7 +143,42 @@ function stepFonts(p) {
   };
 }
 
-function buildSpec(vibe, pairing, seed) {
+// Vibes where a slight tilt on display text fits (sport, cartoon, game show energy).
+const TILT_VIBES = new Set(['racing_sport', 'cartoon_action', 'meme_brainrot', 'game_show']);
+const NEXT_TREATMENT = { none: 'outline', outline: 'heavy', heavy: 'outline' };
+
+/**
+ * The pairing as this game wears it: details vary by the game id so two games of one vibe look
+ * related but not identical: title case, label weight, tracking, the display treatment, a tilt for
+ * sporty vibes, and the numerals face (from the vibe's own numerals).
+ */
+function varyPairing(vibe, pairing, seed) {
+  const v = rng(seed ^ 0x9e3779b9);
+  const draws = Array.from({ length: 8 }, () => v());
+  const disp = fontOf(pairing.display);
+  const scripty = ['script', 'hand', 'blackletter'].includes(disp?.cls) || disp?.caps;
+  const pool = [...new Set([pairing.numerals, ...vibe.pairings.map((p) => p.numerals)].filter(Boolean))];
+  const flip = (w) => (w === 'strong' ? 'regular' : 'strong');
+  const round2 = (x) => Math.round(x * 100) / 100;
+  return {
+    ...pairing,
+    case: {
+      display: pairing.case.display === 'asis' && !scripty && draws[0] < 0.35 ? 'upper' : pairing.case.display,
+      label: pairing.case.label === 'asis' && draws[1] < 0.3 ? 'upper' : pairing.case.label,
+    },
+    tracking: {
+      display: round2(pairing.tracking.display + [0, 0, 0.03, 0.06][Math.floor(draws[2] * 4)]),
+      label: round2(pairing.tracking.label + [0, 0.04, 0.08][Math.floor(draws[3] * 3)]),
+    },
+    weights: { ...pairing.weights, label: draws[4] < 0.3 ? flip(pairing.weights.label) : pairing.weights.label },
+    treatment: draws[5] < 0.4 ? NEXT_TREATMENT[pairing.treatment] : pairing.treatment,
+    numerals: pairing.numerals && pool.length > 1 ? pool[Math.floor(draws[6] * pool.length)] : pairing.numerals,
+    tilt: TILT_VIBES.has(vibe.id) && draws[7] < 0.5 ? -(2 + Math.floor(draws[7] * 6)) : 0,
+  };
+}
+
+function buildSpec(vibe, basePairing, seed) {
+  const pairing = varyPairing(vibe, basePairing, seed);
   const r = rng(seed ^ 0x5bd1e995);
   const ratio = Math.round((pairing.ratio[0] + (pairing.ratio[1] - pairing.ratio[0]) * r()) * 1000) / 1000;
   const base = pairing.base[0] + Math.floor(r() * (pairing.base[1] - pairing.base[0] + 1));
@@ -177,6 +212,7 @@ function buildSpec(vibe, pairing, seed) {
     case: pairing.case,
     tracking: pairing.tracking,
     treatment: pairing.treatment,
+    tilt: pairing.tilt,
     fallback: vibe.fallback,
     systemStacks: Object.fromEntries([pairing.display, pairing.text, pairing.numerals].filter(Boolean).map((id) => [fam(id), SYSTEM_STACKS[fontOf(id).cls]])),
   };
@@ -290,7 +326,8 @@ export function isNumeral(n) {
   if (/'[^']*[A-Za-z][^']*'/.test(body)) return false; // has words in it
   return /^(str|format_\w+|floor|round|ceil|int|abs|max|min)\s*\(/.test(body) || /^[a-z_][a-z0-9_.]*$/i.test(body);
 }
-const literalText = (n) => (typeof n.text === 'string' && !isExpr(n.text) ? n.text : null);
+// Literal text without the hair spaces tracking adds (so lengths and checks see the words).
+const literalText = (n) => (typeof n.text === 'string' && !isExpr(n.text) ? n.text.replace(/\u200A/g, '') : null);
 
 /** Display fonts are for short lines; long or wrapped text stays in the text font. */
 function displayOk(n, step) {
@@ -380,6 +417,18 @@ function styleText(n, spec, tokens, addToken) {
     if (lit !== null) n.text = lit.toUpperCase();
     else if (isExpr(n.text) && !/^=\s*upper\(/.test(n.text)) n.text = `= upper(${n.text.slice(1).trim()})`;
   }
+  // Tracking: hair spaces between the letters of short display lines and capital labels (the engine
+  // draws no letter spacing), so the pairing's tracking shows.
+  const lit2 = literalText(n);
+  if (lit2 !== null && !String(n.text).includes('\u200A') && !numeral && lit2.length >= 2) {
+    const isDisplay = st.id === spec.ids.display && (step === 'display' || step === 'hero' || step === 'title') && lit2.length <= 18 && n.wrap !== true;
+    const isLabel = upper && (step === 'label' || step === 'caption') && lit2.length <= 16;
+    const em = isDisplay ? spec.tracking.display : isLabel ? spec.tracking.label : 0;
+    if (em >= 0.05) n.text = [...lit2].join(em >= 0.1 ? '\u200A\u200A' : '\u200A');
+  }
+  // Tilt: sporty vibes may set short display lines at a slight angle.
+  if (spec.tilt && !numeral && lit2 !== null && st.id === spec.ids.display && (step === 'display' || step === 'hero') && n.wrap !== true && n.rotation === undefined) n.rotation = spec.tilt;
+
   // Colours: literals snap to the palette; big text in a glowing colour gets the palette's softer tone.
   const snap = (ref) => {
     if (typeof ref !== 'string' || ref.startsWith('$')) return ref;
