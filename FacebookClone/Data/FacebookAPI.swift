@@ -71,6 +71,8 @@ struct RemoteFBPost: Decodable, Hashable, Sendable {
     var audio: String?
     var sponsored: Bool?
     var allowsGames: Bool?
+    /// The game the post carries as a playable card (a Curio posted from Muse Studio).
+    var gameId: String?
     var reactions: [String: Int]?
     var myReaction: String?
     var comments: [RemoteFBComment]?
@@ -174,9 +176,10 @@ struct FacebookAPILive: Sendable {
         (try await get("v1/fb/threads", [URLQueryItem(name: "messages", value: String(messages))], signIn: true) as Items<RemoteFBThread>).items
     }
 
-    func createPost(text: String, groupID: String?, background: Int?, feeling: String?, location: String?) async throws -> RemoteFBPost {
+    func createPost(text: String, groupID: String?, background: Int?, feeling: String?, location: String?, gameID: String? = nil) async throws -> RemoteFBPost {
         var body: [String: Any] = ["text": text]
         if let groupID { body["groupId"] = groupID }
+        if let gameID { body["gameId"] = gameID }
         if let background { body["background"] = background }
         if let feeling { body["feeling"] = feeling }
         if let location { body["location"] = location }

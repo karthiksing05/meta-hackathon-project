@@ -2,9 +2,10 @@ import Foundation
 
 extension BubbleSurfaceHooks {
     /// Floats a Bubble as a post: into `group` when given, otherwise to my feed. Pass `result` to
-    /// attach the run as a Burst ("I got 42, beat it"). Returns the new post.
+    /// attach the run as a Burst ("I got 42, beat it"). Returns the new post. `showsToast: false`
+    /// when the caller confirms the post itself (Studio's "Posted to your feed").
     @discardableResult
-    static func float(_ bubble: Bubble, result: BubbleRunResult?, to group: FBGroup?, message: String, appStore: AppStore, bubbleStore: BubbleStore) -> Post? {
+    static func float(_ bubble: Bubble, result: BubbleRunResult?, to group: FBGroup?, message: String, appStore: AppStore, bubbleStore: BubbleStore, showsToast: Bool = true) -> Post? {
         let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
         let text: String
         if !trimmed.isEmpty {
@@ -31,7 +32,9 @@ extension BubbleSurfaceHooks {
             }
         }
         FeedEventReporter.shared.note(.floated, gameID: bubble.id)
-        appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
+        if showsToast {
+            appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
+        }
         return post
     }
 }

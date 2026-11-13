@@ -5,6 +5,8 @@ import SwiftUI
 /// (`POST /v1/generate {baseGameId, ...}`), and each one is a new game.
 struct StudioTryStep: View {
     @Bindable var model: StudioModel
+    /// "Post": opens the post composer (`StudioPostComposer`).
+    var onPost: () -> Void = {}
     @FocusState private var isTweakFocused: Bool
 
     var body: some View {
@@ -58,18 +60,33 @@ struct StudioTryStep: View {
                         .buttonStyle(.studioSecondary(expand: false, height: 44))
                         .accessibilityHint("Muse makes a harder next level that links to this one as a level chain")
                     }
-                    Button {
-                        isTweakFocused = false
-                        Haptics.selection()
-                        model.go(to: .float)
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: model.isEditMode && model.levels.count == 1 ? "checkmark" : "paperplane.fill")
-                                .font(.system(size: FBIconSize.medium, weight: .bold))
-                            Text(model.isEditMode && model.levels.count == 1 ? "Save changes" : "Share with friends")
+                    if model.postsFromTry {
+                        // The main action: post it to my feed, like Facebook's Post button.
+                        Button {
+                            isTweakFocused = false
+                            Haptics.selection()
+                            onPost()
+                        } label: {
+                            Text("Post")
+                                .frame(maxWidth: .infinity)
                         }
+                        .buttonStyle(.fb(.primary, height: 44))
+                        .disabled(model.isPopping || model.isComposing)
+                        .accessibilityHint("Posts this \(ProductName.singular) to your feed for your friends to play")
+                    } else {
+                        Button {
+                            isTweakFocused = false
+                            Haptics.selection()
+                            model.go(to: .float)
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: model.isEditMode && model.levels.count == 1 ? "checkmark" : "paperplane.fill")
+                                    .font(.system(size: FBIconSize.medium, weight: .bold))
+                                Text(model.isEditMode && model.levels.count == 1 ? "Save changes" : "Share with friends")
+                            }
+                        }
+                        .buttonStyle(.studioPrimary)
                     }
-                    .buttonStyle(.studioPrimary)
                 }
             }
             .task {

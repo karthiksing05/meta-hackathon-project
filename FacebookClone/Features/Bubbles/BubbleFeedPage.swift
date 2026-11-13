@@ -56,15 +56,9 @@ struct BubbleFeedPage: View {
                 .padding(.top, model.insetTop + 12)
             }
             if !isTakenOver {
+                // Sponsored pages carry their "Ad" tag in the creator row, not over the game.
                 chrome
                     .transition(.opacity)
-                if let sponsor = item.sponsor {
-                    SponsoredHeader(sponsor: sponsor)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                        .padding(.top, model.insetTop + 44)
-                        .padding(.horizontal, FBMetrics.screenPadding)
-                        .transition(.opacity)
-                }
             }
             if let failure {
                 EngineErrorCard(failure: failure, onRetry: model.retry)
@@ -89,6 +83,9 @@ struct BubbleFeedPage: View {
     /// Starts the game in place, and counts it toward retiring the "Tap to play" hint.
     private func play() {
         showsTapHint = false
+        if item.sponsor != nil {
+            FeedEventReporter.shared.sponsorTap(gameID: bubble.id)
+        }
         FeedHints.notePlayed()
         actions.takeOver()
     }
@@ -151,23 +148,28 @@ struct BubbleFeedPage: View {
                 .onTapGesture(perform: play)
                 .accessibilityHidden(true)
             bottomScrim
-            if showsTapHint {
+            if showsTapHint && item.sponsor == nil {
                 FeedTapToPlayHint()
                     .frame(maxHeight: .infinity)
                     .offset(y: 120)
                     .transition(.opacity.combined(with: .scale(scale: reduceMotion ? 1 : 0.92)))
             }
-            HStack(alignment: .bottom, spacing: 8) {
+            HStack(alignment: .bottom, spacing: 12) {
                 BubbleFeedCaption(item: item, bubble: bubble, run: run, sound: sound, onOpenBoard: { actions.openBoard(bubble) },
-                                  onOpenProfile: actions.openProfile, onOpenSound: openSound, onPlay: play)
+                                  onOpenProfile: actions.openProfile, onOpenSound: openSound)
+                    .padding(.bottom, 4)
                 BubbleFeedRail(bubble: bubble, actions: actions, showsSaveTip: showsSaveTip, sound: sound,
                                isSoundPlaying: isLive && LibrarySoundPlayer.shared.isPlaying, onOpenSound: openSound) {
                     withAnimation(GameMotion.resolved(GameMotion.reveal, reduceMotion: reduceMotion)) { showsSaveTip = false }
                 }
+                // The rail keeps its full width so its labels ("Board", "Remix") never clip;
+                // the caption wraps or truncates instead.
+                .fixedSize()
+                .layoutPriority(1)
             }
             .padding(.leading, FBMetrics.screenPadding)
-            .padding(.trailing, 6)
-            .padding(.bottom, 12)
+            .padding(.trailing, 8)
+            .padding(.bottom, 16)
         }
     }
 
@@ -176,13 +178,14 @@ struct BubbleFeedPage: View {
         LinearGradient(
             stops: [
                 .init(color: Color.black.opacity(0), location: 0),
-                .init(color: Color.black.opacity(0.3), location: 0.4),
-                .init(color: Color.black.opacity(0.7), location: 1),
+                .init(color: Color.black.opacity(0.25), location: 0.3),
+                .init(color: Color.black.opacity(0.55), location: 0.6),
+                .init(color: Color.black.opacity(0.78), location: 1),
             ],
             startPoint: .top,
             endPoint: .bottom
         )
-        .frame(height: 320)
+        .frame(height: 380)
         .frame(maxWidth: .infinity)
         .allowsHitTesting(false)
     }
@@ -220,6 +223,9 @@ enum FeedHints {
 /// A small, quiet "Tap to play" pill low over the game. The hand breathes on the clock
 /// (`TimelineView`), and holds still under Reduce Motion. Taps pass through to the game.
 private struct FeedTapToPlayHint: View {
+    enum Style { case pill, inline }
+    var style: Style = .pill
+
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -234,10 +240,11 @@ private struct FeedTapToPlayHint: View {
                 .font(.fbMetaEmphasized)
                 .lineLimit(1)
         }
-        .foregroundStyle(Color.white)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background(Color.black.opacity(0.38), in: Capsule())
+        .foregroundStyle(Color.white.opacity(style == .inline ? 0.85 : 1))
+        .padding(.horizontal, style == .inline ? 10 : 12)
+        .padding(.vertical, style == .inline ? 5 : 7)
+        .background(Color.white.opacity(style == .inline ? 0.14 : 0), in: Capsule())
+        .background(Color.black.opacity(style == .inline ? 0 : 0.38), in: Capsule())
         .overlay(Capsule().strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5))
         .allowsHitTesting(false)
         .accessibilityHidden(true)
@@ -255,17 +262,38 @@ private struct BubbleFeedCaption: View {
     let onOpenBoard: () -> Void
     let onOpenProfile: (User) -> Void
     let onOpenSound: () -> Void
-    let onPlay: () -> Void
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(Router.self) private var router
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             captionBody
             if let sponsor = item.sponsor {
-                SponsoredFooter(sponsor: sponsor, gameID: bubble.id, onPlay: onPlay)
-                    .padding(.top, 4)
+                sponsorLine(sponsor)
+            }
+        }
+    }
+
+    /// Sponsored pages: a small "Tap to play" (the whole page plays it) and, when the brand has
+    /// a page, a quiet "Learn more" link. No big CTA box over the game.
+    private func sponsorLine(_ sponsor: RemoteSponsor) -> some View {
+        HStack(spacing: 10) {
+            FeedTapToPlayHint(style: .inline)
+            if let url = sponsor.url {
+                Button {
+                    FeedEventReporter.shared.sponsorTap(gameID: bubble.id)
+                    openURL(url)
+                } label: {
+                    Text("Learn more")
+                        .font(.fbMetaEmphasized)
+                        .foregroundStyle(Color.white.opacity(0.85))
+                        .underline()
+                        .frame(minHeight: 28)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -326,12 +354,20 @@ private struct BubbleFeedCaption: View {
                     .font(.fbMeta)
                     .foregroundStyle(Color.white.opacity(0.75))
                     .lineLimit(1)
+                    .fixedSize()
+                if item.sponsor != nil {
+                    Text("·")
+                        .font(.fbMeta)
+                        .foregroundStyle(Color.white.opacity(0.75))
+                    AdBadge()
+                        .fixedSize()
+                }
             }
             .frame(minHeight: 28)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(bubble.creator.isMe ? "You" : bubble.creator.name), view profile")
+        .accessibilityLabel("\(bubble.creator.isMe ? "You" : bubble.creator.name)\(item.sponsor.map { ", ad by \($0.name)" } ?? ""), view profile")
     }
 
     // MARK: Social line
@@ -426,12 +462,21 @@ private struct BubbleFeedCaption: View {
         default:
             break
         }
-        // The server's own line about why this page, shown as is.
-        if let why = item.why, parts.count < 3 {
+        // The recommender's own line about why this page is a debugging aid, not product copy:
+        // shown only in DEBUG builds launched with `FB_FEED_WHY=1`.
+        if Self.showsWhy, let why = item.why, parts.count < 3 {
             parts.append(why)
         }
         return parts
     }
+
+    private static let showsWhy: Bool = {
+        #if DEBUG
+        return ProcessInfo.processInfo.environment["FB_FEED_WHY"] == "1"
+        #else
+        return false
+        #endif
+    }()
 
     /// "Newcomers' picnic in Dolores Park" → "Newcomers' picnic".
     private static func shortEventTitle(_ event: FBEvent) -> String {

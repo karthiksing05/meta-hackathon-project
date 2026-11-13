@@ -72,6 +72,10 @@ func TestFBPostsReelsReactionsComments(t *testing.T) {
 	if top["items"].([]any)[0].(map[string]any)["id"] != mine["id"] {
 		t.Fatalf("my post is not first: %v", top)
 	}
+	code, game := do(t, "POST", ts.URL+"/v1/fb/posts", tok, js(map[string]any{"text": "Made a Curio: Hill Hopper", "gameId": "hill-hopper"}), "application/json")
+	if code != 201 || game["gameId"] != "hill-hopper" {
+		t.Fatalf("game post: %d %v", code, game)
+	}
 	if code, _ := do(t, "POST", ts.URL+"/v1/fb/posts", tok, js(map[string]any{"text": "  "}), "application/json"); code != 400 {
 		t.Fatalf("empty post: %d", code)
 	}

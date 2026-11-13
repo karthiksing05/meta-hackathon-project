@@ -387,7 +387,8 @@ func validPhotoURL(u string) bool {
 	return err == nil && p.Scheme == "https" && p.Host != "" && len(u) <= 1000
 }
 
-// POST /v1/fb/posts {text, groupId?, background?, feeling?, location?, photoUrls?}: a post by the signed-in person.
+// POST /v1/fb/posts {text, groupId?, background?, feeling?, location?, photoUrls?, gameId?}: a post by the signed-in
+// person. gameId attaches a game as a playable card.
 func (s *Server) fbCreatePost(w http.ResponseWriter, r *http.Request) {
 	f, _ := s.fb()
 	var in struct {
@@ -397,17 +398,18 @@ func (s *Server) fbCreatePost(w http.ResponseWriter, r *http.Request) {
 		Feeling    string   `json:"feeling"`
 		Location   string   `json:"location"`
 		PhotoURLs  []string `json:"photoUrls"`
+		GameID     string   `json:"gameId"`
 	}
 	if !decode(w, r, &in) {
 		return
 	}
 	in.Text = strings.TrimSpace(in.Text)
-	if len([]rune(in.Text)) > 5000 || len(in.Feeling) > 40 || len(in.Location) > 120 || len(in.GroupID) > 80 || len(in.PhotoURLs) > 10 {
+	if len([]rune(in.Text)) > 5000 || len(in.Feeling) > 40 || len(in.Location) > 120 || len(in.GroupID) > 80 || len(in.PhotoURLs) > 10 || len(in.GameID) > 80 {
 		writeErr(w, 400, "post too long")
 		return
 	}
-	if in.Text == "" && len(in.PhotoURLs) == 0 {
-		writeErr(w, 400, "text or photoUrls required")
+	if in.Text == "" && len(in.PhotoURLs) == 0 && in.GameID == "" {
+		writeErr(w, 400, "text, photoUrls or gameId required")
 		return
 	}
 	if in.Background != nil && (*in.Background < 0 || *in.Background > 31) {
@@ -415,7 +417,7 @@ func (s *Server) fbCreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p := model.FBPost{ID: "p_" + auth.NewID(10), Kind: "post", AuthorID: userFrom(r).ID, GroupID: in.GroupID, Text: in.Text,
-		Background: in.Background, Feeling: in.Feeling, Location: in.Location, CreatedAt: time.Now().UTC().Truncate(time.Millisecond)}
+		Background: in.Background, Feeling: in.Feeling, Location: in.Location, GameID: strings.TrimSpace(in.GameID), CreatedAt: time.Now().UTC().Truncate(time.Millisecond)}
 	for _, u := range in.PhotoURLs {
 		if !validPhotoURL(u) {
 			writeErr(w, 400, "photoUrls must be https URLs")
