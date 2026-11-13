@@ -21,9 +21,11 @@ import { pickGold, goldPromptText } from './gold.mjs';
 import { qualityReport, qualityLines } from './quality.mjs';
 import * as Prompts from './prompts.mjs';
 import { composeGame } from './pipeline.mjs';
+import { makeVariants } from './variants.mjs';
 
 // 3: compose takes a harness `context` (trimmed menu, gold_ids, spec, gate_profile) and checks scores.
-export const STUDIO_API_VERSION = 4; // 4: storyGate, and compose builds stories from a story graph
+// 4: storyGate, and compose builds stories from a story graph.
+export const STUDIO_API_VERSION = 5; // 5: variants (2-3 versions of one plan, docs/harness-gaps/variants.md)
 /** Random readers the story gate plays; the spam check compares with their median, so more is steadier. */
 export const STORY_RANDOM_READERS = 7;
 
@@ -541,7 +543,18 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       if (!authoring) throw new Error('the base game has no content.authoring_json, so it can\'t be revised');
       base = { id: b.id, title: b.title, one_line_rule: b.one_line_rule ?? b.oneLineRule, brief: b.brief, seed: b.seed, emoji: b.style?.emoji, authoring_json: authoring };
     }
-    const local = {
+    const out = await composeGame({ request: a.request, brief: a.brief, base, context: a.context ?? null }, localStudio(), {
+      ask, onEvent: typeof onEvent === 'function' ? onEvent : () => {},
+      maxRepairRounds: a.max_repair_rounds, polish: a.polish !== false,
+      // On by default; score_check: false or score_review: false opt out.
+      scoreCheck: a.score_check !== false, scoreReview: a.score_review !== false,
+    });
+    return JSON.stringify(out);
+  }
+
+  /** The Studio as plain objects, for the pipeline and the variants step (one copy for app and server). */
+  function localStudio() {
+    return {
       catalog: () => JSON.parse(catalog()),
       examples: (request, k, ids) => JSON.parse(examplesFor(request, k, ids)),
       expand: (text) => JSON.parse(expand(text)),
@@ -551,14 +564,22 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       quality: (text, request) => JSON.parse(quality(text, request)),
       wrap: (opts) => JSON.parse(wrap(opts)),
     };
-    const out = await composeGame({ request: a.request, brief: a.brief, base, context: a.context ?? null }, local, {
-      ask, onEvent: typeof onEvent === 'function' ? onEvent : () => {},
-      maxRepairRounds: a.max_repair_rounds, polish: a.polish !== false,
-      // On by default; score_check: false or score_review: false opt out.
-      scoreCheck: a.score_check !== false, scoreReview: a.score_review !== false,
-    });
-    return JSON.stringify(out);
   }
 
-  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, storyGate, scoreCheck, wrap, examples: examplesFor, quality, prompt, compose });
+  /**
+   * Versions of one plan (expander/variants.mjs makeVariants): variants({request, brief, context, n, axes?,
+   * mode?}, ask, onEvent) → Promise of JSON text {variants, recommended, dropped, axes, stats}. Each version
+   * is a compose (or a restyle of version a), gated; the ones that fail are dropped.
+   */
+  async function variants(argsJSON, ask, onEvent) {
+    const a = typeof argsJSON === 'string' ? JSON.parse(argsJSON) : argsJSON;
+    const events = typeof onEvent === 'function' ? onEvent : () => {};
+    const studio = {
+      ...localStudio(),
+      compose: async (args, askFn, onEv) => JSON.parse(await compose(JSON.stringify(args), askFn, onEv)),
+    };
+    return JSON.stringify(await makeVariants(a, studio, { ask, onEvent: events }));
+  }
+
+  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, storyGate, scoreCheck, wrap, examples: examplesFor, quality, prompt, compose, variants });
 }

@@ -126,5 +126,18 @@ async function compose(args, reply) {
   ok(sure.out.stats.systemChars < unsure.out.stats.systemChars, 'one example makes the prompt smaller');
 }
 
+{ // the bundle's variants entry point (Studio API 5): versions of one plan through the same local Studio
+  ok(B.version === 5 && typeof B.variants === 'function', `bundle API ${B.version} has variants`);
+  const ask = async (system, user, purpose) => ({ content: JSON.stringify(/score review/.test(purpose) ? { ok: true, issues: [] } : /alternatives|variant/.test(purpose) && !/draft|repair|polish/.test(purpose) ? { alternatives: [] } : tide), model: 'fake' });
+  const v = JSON.parse(await B.variants(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, context: { ...SAMPLES.dodge, gold_ids: ['gold_rift_run'] }, n: 2, mode: 'separate' }), ask, () => {}));
+  ok(Array.isArray(v.variants) && v.variants.length >= 1 && v.variants.every((x) => x.manifest?.variant?.id) && v.stats?.muse_calls >= 1, `variants through the bundle: ${v.variants?.map((x) => `${x.id} ${x.axis}`).join(', ')}; dropped ${v.dropped?.length}`);
+  // planMenu: the twist of a twist version is a rule, and earlier picks are listed
+  const menu = P.planMenu(catalog, { ...SAMPLES.dodge, preferences: [{ axis: 'look', chosen: { label: 'Cozy Watercolor', value: 'soft washes' }, rejected: [{ label: 'Flat Cute' }] }], plan: { ...SAMPLES.dodge.plan, spec: { ...SAMPLES.dodge.plan.spec, loop: { verb: 'dodge', twist: 'Sacrifice 5 s for 2x points' } } } });
+  const text = String(menu.spec);
+  ok(/This version's twist .*Sacrifice 5 s/.test(text), 'planMenu calls out the twist');
+  ok(/earlier picks/.test(text) && /Cozy Watercolor/.test(text) && /Flat Cute/.test(text), 'planMenu lists the earlier picks');
+  ok(!/earlier picks/.test(String(P.planMenu(catalog, SAMPLES.dodge).spec)), 'no picks, no section');
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

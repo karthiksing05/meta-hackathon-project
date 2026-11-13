@@ -7,6 +7,7 @@
 // Pure: no disk, no network.
 
 import { groupPlayRules } from './group-play.mjs';
+import { preferencesOf, preferenceNote } from './variants.mjs';
 
 /** The anatomy block Studio puts in a request (GameAnatomy.agreedText), split from the rest. */
 export function splitAnatomy(request) {
@@ -113,6 +114,13 @@ export function planMenu(catalog, context) {
   const spec = [];
   if (plan.spec) spec.push('The game spec (game-spec/1). Build exactly this; every part is decided:', clip(JSON.stringify(plan.spec), 12000));
   if (plan.spec?.score) spec.push('', 'Copy spec.score into the manifest as a top-level "score" block (without bounds), with events renamed to the event or input names your game really emits.');
+  // A twist version (variants.mjs) carries its rule on spec.loop.twist: a rule to build, not a note.
+  const twist = plan.spec?.loop?.twist;
+  if (typeof twist === 'string' && twist.trim()) spec.push('', `This version's twist (a rule the game must have, shown on screen): ${clip(twist.trim(), 300)}`);
+  // The person's earlier picks between versions (variants.mjs applyPick). context.notes stays out of the
+  // prompt: those are the harness's notes for people (who understood the request, what the planner fixed).
+  const prefs = preferencesOf(context).flatMap((p) => { try { return [preferenceNote(p)]; } catch { return []; } });
+  if (prefs.length) spec.push('', 'The person\'s earlier picks (lean that way unless the spec says otherwise):', ...prefs.slice(0, 4).map((l) => `- ${clip(l, 300)}`));
   const sponsor = plan.spec?.theme?.sponsor ?? context.understanding?.sponsor;
   if (sponsor && typeof sponsor === 'object' && sponsor.name) {
     spec.push('', `Sponsored by ${clip(sponsor.name, 60)}: put "${clip(sponsor.name, 60)}" in the title or the intro card (meta.instructions), use its products${Array.isArray(sponsor.products) && sponsor.products.length ? ` (${sponsor.products.slice(0, 5).map((p) => clip(p, 40)).join(', ')})` : ''} as the game's pieces and content, and match its tone${sponsor.tone ? ` (${clip(sponsor.tone, 60)})` : ''}. Its real name, colors and logo are fine; keep it fun, not an ad.`);
