@@ -1,0 +1,32 @@
+[
+  {
+    "request": "guess which of my friends said each quote",
+    "expect": [
+      "who_said_it_quote_guess"
+    ]
+  },
+  {
+    "request": "how well do my friends know me quiz",
+    "expect": [
+      "how_well_do_you_know_me_quiz"
+    ]
+  },
+  {
+    "request": "two truths and a lie with my team",
+    "expect": [
+      "two_truths_one_lie_friend"
+    ]
+  },
+  {
+    "request": "who is most likely to get lost game",
+    "expect": [
+      "most_likely_to_vote"
+    ]
+  },
+  {
+    "request": "fibbage but about my roommates",
+    "expect": [
+      "fake_answer_bluff"
+    ]
+  }
+]
