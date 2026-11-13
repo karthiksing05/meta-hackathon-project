@@ -4,7 +4,7 @@ import Observation
 // Quiz nights (docs/BUBBLES.md 7.7): a live-feeling "guess what they say next" night in a Group or
 // a group chat. Everyone plays the same scenes (one seed, one length). Members' sides need the
 // server to run the night (docs/APP_LIVE_DATA_PLAN.md, Stage 4); nobody's side is simulated, and
-// the lobby says "Not available yet" (NextlineScreens).
+// the lobby is a server round now (QuizNightRoundsView in NextlineScreens).
 
 /// One answered round, from a run's share tag (`r=1:1.8:1:868|...`).
 struct QuizRound: Hashable, Sendable {

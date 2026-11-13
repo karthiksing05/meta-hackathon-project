@@ -101,6 +101,28 @@ func (w *World) StoriesAt(now time.Time) []model.FBStory {
 	return out
 }
 
+// Anchor is the demo world's most recent post: how far its stored time has drifted from "MinutesAgo before now"
+// says how much the whole world should move to look recent again.
+func (w *World) Anchor() (id string, minutesAgo int, ok bool) {
+	for _, p := range w.Posts {
+		if !ok || p.MinutesAgo < minutesAgo {
+			id, minutesAgo, ok = p.ID, p.MinutesAgo, true
+		}
+	}
+	return id, minutesAgo, ok
+}
+
+// IDs lists the demo world's post (and reel) ids and story ids.
+func (w *World) IDs() (posts, stories []string) {
+	for _, p := range w.Posts {
+		posts = append(posts, p.ID)
+	}
+	for _, s := range w.Stories {
+		stories = append(stories, s.ID)
+	}
+	return posts, stories
+}
+
 // ThreadsFor copies the template chats for one person: their id replaces Me, thread and message ids are prefixed
 // with a short form of theirs so each person has their own copies.
 func (w *World) ThreadsFor(userID string, now time.Time) ([]model.FBThread, []model.FBMessage) {
