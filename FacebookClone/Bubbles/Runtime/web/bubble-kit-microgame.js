@@ -164,9 +164,14 @@
   // The game's own background past its canvas, out to the screen's edges, so no band shows the
   // look's plain color instead (docs/BUBBLES.md 4.6, "Filling the screen"): the canvas
   // background color, then the backdrop (an image op covering the canvas, among the first few
-  // ops) mirrored across each edge so it continues without a seam, dimmed a little so the canvas
-  // edge still reads. Drawing only: nothing here touches game state.
-  const BLEED_DIM = 0.14;
+  // ops) mirrored across each edge so it continues without a seam. Left and right (a narrow strip
+  // at most) are mirrored as they are, dimmed a hair. Above and below, where a 9:16 game leaves
+  // the room under the player's bars, the mirror is softened (so text or faces in the backdrop
+  // don't show up upside down) and shaded toward the screen's edge, like a scrim under the bars.
+  // Drawing only: nothing here touches game state.
+  const BLEED_SIDE_DIM = 0.06;
+  const BLEED_EDGE_DIM = 0.12, BLEED_FAR_DIM = 0.42;
+  const BLEED_SOFT_DOWN = 12; // the softened copy is drawn this many times smaller, then scaled up
 
   function backdropOp(sess, f) {
     const n = Math.min(4, f.ops.length);
@@ -176,6 +181,31 @@
       if (op.x <= 2 && op.y <= 2 && op.x + op.w >= sess.cw - 2 && op.y + op.h >= sess.ch - 2) return op;
     }
     return null;
+  }
+
+  // A soft (blurred) copy of one backdrop frame, made once and cached on the session: drawn small
+  // and scaled back up with smoothing, which blurs on every WebKit (no canvas filter needed).
+  function softBackdrop(sess, a, sx, sy, sw, sh) {
+    const key = sx + "," + sy + "," + sw + "," + sh;
+    const c = sess.bleedSoft;
+    if (c && c.img === a.img && c.key === key) return c.canvas;
+    let out = null;
+    try {
+      const w = Math.max(2, Math.round(sw / BLEED_SOFT_DOWN)), h = Math.max(2, Math.round(sh / BLEED_SOFT_DOWN));
+      const small = document.createElement("canvas");
+      small.width = w; small.height = h;
+      const sc = small.getContext("2d");
+      sc.imageSmoothingEnabled = true;
+      sc.drawImage(a.img, sx, sy, sw, sh, 0, 0, w, h);
+      out = document.createElement("canvas");
+      out.width = w * 4; out.height = h * 4;
+      const oc = out.getContext("2d");
+      oc.imageSmoothingEnabled = true;
+      if ("imageSmoothingQuality" in oc) oc.imageSmoothingQuality = "high";
+      oc.drawImage(small, 0, 0, w * 4, h * 4);
+    } catch (e) { out = null; }
+    sess.bleedSoft = { img: a.img, key, canvas: out };
+    return out;
   }
 
   function paintBleed(gfx, sess, f, L) {
@@ -197,6 +227,7 @@
       const sw = a.img.naturalWidth / cols, sh = a.img.naturalHeight / rows;
       const fr = (op.frame || 0) % frames;
       const sx = (fr % cols) * sw, sy = Math.floor(fr / cols) * sh;
+      const soft = hasDOM ? softBackdrop(sess, a, sx, sy, sw, sh) : null;
       // Tiles the size of the backdrop around it, mirrored along each axis they're offset on
       // (odd steps), so every shared edge matches; only the ones the view reaches.
       const tw = op.w * k, th = op.h * k, bx = cx0 + op.x * k, by = cy0 + op.y * k;
@@ -209,19 +240,32 @@
           ctx.save();
           ctx.translate(bx + ix * tw + (fx ? tw : 0), by + iy * th + (fy ? th : 0));
           ctx.scale(fx ? -1 : 1, fy ? -1 : 1);
-          // A hair of overlap hides the seam between tiles.
-          ctx.drawImage(a.img, sx, sy, sw, sh, -0.25, -0.25, tw + 0.5, th + 0.5);
+          // A hair of overlap hides the seam between tiles. Above and below: the soft copy.
+          if (iy !== 0 && soft) ctx.drawImage(soft, 0, 0, soft.width, soft.height, -0.25, -0.25, tw + 0.5, th + 0.5);
+          else ctx.drawImage(a.img, sx, sy, sw, sh, -0.25, -0.25, tw + 0.5, th + 0.5);
           ctx.restore();
         }
       }
     }
-    // Dim what lies outside the canvas.
-    ctx.globalAlpha = BLEED_DIM;
+    // Shade what lies outside the canvas: a hair at the sides, and above and below a scrim that
+    // deepens toward the screen's edge.
     ctx.fillStyle = "#000";
-    ctx.beginPath();
-    ctx.rect(v.x0 - 1, v.y0 - 1, v.w + 2, v.h + 2);
-    ctx.rect(cx0, cy0, cx1 - cx0, cy1 - cy0);
-    ctx.fill("evenodd");
+    if (cx0 > v.x0 || cx1 < v.x1) {
+      ctx.globalAlpha = BLEED_SIDE_DIM;
+      const y0 = Math.max(v.y0, cy0), y1 = Math.min(v.y1, cy1);
+      if (cx0 > v.x0) ctx.fillRect(v.x0 - 1, y0, cx0 - v.x0 + 1, y1 - y0);
+      if (cx1 < v.x1) ctx.fillRect(cx1, y0, v.x1 - cx1 + 1, y1 - y0);
+    }
+    ctx.globalAlpha = 1;
+    const scrim = (near, far) => {
+      const g = ctx.createLinearGradient(0, near, 0, far);
+      g.addColorStop(0, "rgba(0,0,0," + BLEED_EDGE_DIM + ")");
+      g.addColorStop(1, "rgba(0,0,0," + BLEED_FAR_DIM + ")");
+      ctx.fillStyle = g;
+      ctx.fillRect(v.x0 - 1, Math.min(near, far) - (far < near ? 1 : 0), v.w + 2, Math.abs(far - near) + 1);
+    };
+    if (cy0 > v.y0) scrim(cy0, v.y0);
+    if (cy1 < v.y1) scrim(cy1, v.y1);
     ctx.restore();
   }
 

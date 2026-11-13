@@ -211,12 +211,14 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   let refusedEnv = null;
   try { await compose({ request: 'a calm fog game', brief }, { studio, muse: new ScriptedMuse([example()]), env: { GENERATOR_LAYOUT_BLOCK: '1' }, hooks: blocker }); } catch (e) { refusedEnv = e; }
   check('GENERATOR_LAYOUT_BLOCK=1 does the same', refusedEnv?.name === 'GenerationError', String(refusedEnv?.message));
-  // The canvas switch: GENERATOR_CANVAS=tall (or context.canvas) builds 360 × 780; classic stays 360 × 640.
+  // The canvas switch: tall (360 × 780) by default; GENERATOR_CANVAS=classic builds 360 × 640; context.canvas wins.
   const heightOf = (o) => JSON.parse(o.manifest.content.game_json).presentation?.canvas?.h;
   const tallMuse = new ScriptedMuse([example()]);
   const tall = await compose({ request: 'a calm fog game', brief }, { studio, muse: tallMuse, env: { GENERATOR_CANVAS: 'tall' }, hooks: null });
   const classic = await compose({ request: 'a calm fog game', brief, context: { canvas: 'classic' } }, { studio, muse: new ScriptedMuse([example()]), env: { GENERATOR_CANVAS: 'tall' }, hooks: null });
-  check('GENERATOR_CANVAS=tall builds the tall canvas; context.canvas wins', heightOf(tall) === 780 && heightOf(classic) === 640 && tall.stats.canvas === 'tall' && heightOf(out) === 640, JSON.stringify({ tall: heightOf(tall), classic: heightOf(classic), plain: heightOf(out) }));
+  const classicEnv = await compose({ request: 'a calm fog game', brief }, { studio, muse: new ScriptedMuse([example()]), env: { GENERATOR_CANVAS: 'classic' }, hooks: null });
+  const tallCtx = await compose({ request: 'a calm fog game', brief, context: { canvas: 'tall' } }, { studio, muse: new ScriptedMuse([example()]), env: { GENERATOR_CANVAS: 'classic' }, hooks: null });
+  check('tall by default; GENERATOR_CANVAS=classic builds 360 × 640; context.canvas wins', heightOf(tall) === 780 && tall.stats.canvas === 'tall' && heightOf(out) === 780 && out.stats.canvas === 'tall' && heightOf(classic) === 640 && classic.stats.canvas === 'classic' && heightOf(classicEnv) === 640 && heightOf(tallCtx) === 780, JSON.stringify({ tall: heightOf(tall), classic: heightOf(classic), classicEnv: heightOf(classicEnv), tallCtx: heightOf(tallCtx), plain: heightOf(out) }));
   // AUTHORING_FILES must hold every relative import (static or literal dynamic) of the modules it lists.
   const fsm = await import('node:fs');
   const { findAuthoring } = await import('./src/hooks.mjs');

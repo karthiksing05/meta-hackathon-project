@@ -556,8 +556,15 @@ changes the game world, so replays and scores are the same on every device:
   `authoring/expander/canvas.mjs`). On a 19.5:9 phone it fills the screen; key content (taps, the
   HUD, text) stays in the safe area, clear of the bars. Every microgame also *bleeds*: past its
   canvas the kit paints the canvas background color and mirrors the backdrop (an image op covering
-  the canvas among the first four) across each edge, dimmed 14%, so a 360 × 640 game never shows
-  plain bands. Drawing only.
+  the canvas among the first four) across each edge, so a 360 × 640 game never shows plain bands.
+  At the sides the mirror is dimmed 6%; above and below it is softened (so text in the backdrop
+  never shows upside down) under a scrim that deepens from 12% at the canvas edge to 42% at the
+  screen's edge. Drawing only.
+- *The player's insets.* The full-screen player keeps the game clear of its top bar (safe area +
+  58 pt) and of the home indicator only: its bottom bar shows only during a replay or after a run.
+  On an iPhone 14 Pro (393 × 852 pt) a 360 × 640 game so takes the full width (393 × 699, from
+  y 118), with the bleed under the status bar and top bar, and a 360 × 780 game fills every edge
+  with its safe area between the bars.
 
 **Insets and posters (additions).** `insets` are `{top, bottom, left, right}` in points (each
 optional): the playfield fits inside them, the look's background still fills the screen, and the

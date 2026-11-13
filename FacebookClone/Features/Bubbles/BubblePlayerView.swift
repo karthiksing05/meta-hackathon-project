@@ -137,9 +137,13 @@ struct BubblePlayerView: View {
         }
     }
 
-    /// Space the top bar (close, title) and bottom bar (Burst pill, Play again) take.
+    /// Space the top bar (close, title) takes. The game keeps its top line clear of it.
     private static let topBarHeight: CGFloat = 58
-    private static let bottomBarHeight: CGFloat = 68
+    // The bottom bar (Burst pill, Play again) shows only while a replay plays or after a run ends,
+    // and never takes taps from a live run, so the game only keeps clear of the home indicator.
+    // That lets a 9:16 game take the phone's full width (393 pt on an iPhone 14 Pro: 393 x 699
+    // between the top bar and the home indicator) with its bleed painting the rest, and a tall
+    // 360 x 780 game reach every edge (docs/BUBBLES.md 4.6, "Filling the screen").
 
     private func game(_ bubble: Bubble, safeArea: EdgeInsets) -> some View {
         BubbleWebView(
@@ -153,7 +157,7 @@ struct BubblePlayerView: View {
             reducedMotion: reduceMotion,
             restartToken: restartToken,
             insetTop: safeArea.top + Self.topBarHeight,
-            insetBottom: safeArea.bottom + Self.bottomBarHeight,
+            insetBottom: safeArea.bottom,
             resume: resumeLog
         ) { message in
             handle(message, in: bubble)
