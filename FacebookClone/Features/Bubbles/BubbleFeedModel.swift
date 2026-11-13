@@ -395,6 +395,23 @@ final class BubbleFeedModel {
         }
     }
 
+    // MARK: Recommender
+
+    /// Tells the recommender (GameRecommender) about the live page.
+    private func noteRecs(_ signal: GameRecommender.Signal) {
+        guard let bubbleID = item(id: liveItemID)?.bubbleID else { return }
+        GameRecommender.shared.note(signal, gameID: bubbleID)
+    }
+
+    /// Leaving the tab pauses the page; coming back resumes it (or starts a new session).
+    private func noteVisibility(_ visible: Bool) {
+        if visible {
+            GameRecommender.shared.feedVisible(feedItemID: currentItem?.id, gameID: currentItem?.bubbleID)
+        } else {
+            GameRecommender.shared.feedHidden()
+        }
+    }
+
     // MARK: Messages
 
     private func handle(_ message: BubbleBridgeMessage, itemID: String) {
