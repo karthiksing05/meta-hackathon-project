@@ -52,6 +52,56 @@ Rendered in headless Chrome with the real engine and renderer: the zoom crop, th
 
 **Not wired yet (planner and compose are the group-play agent's):** compose has no "scene" content slot, so Muse can't yet ask for a spot-difference pair. Wanted prompt change: when the plan uses `diff_spots`, ask Muse for `content.scene` in the `spot-diff.mjs` format (in the header comment) and call `makeSpotDifference` + `toAuthoring` in the pipeline before expanding. For zoom games, tell Muse to list `zoom_reveal` first, give the `picture` sprite `w`/`h` 512, and keep pictures detailed in the middle. The new fragments reach the server with the next Studio bundle rebuild (`node authoring/tools/make-studio-bundle.mjs`); I didn't rebuild it to avoid colliding with other agents.
 
+## Option B built: generated sprites, backdrops and story portraits (2026-11-13)
+
+`authoring/expander/image-art.mjs` (with `image-pixels.mjs` and `image-codec.mjs`, pure JS) runs **after the gate and
+polish** on a game that already plays. It swaps the picture behind each asset id the game already has (same ids, w, h,
+frames), so rules, state, hitboxes and replays are untouched: on six of Kevin's games the game_json differs only in
+`assets`, and each new `authoring_json` still expands. CLI: `authoring/tools/make-image-art.mjs`; tests:
+`authoring/tools/test-image-art.mjs` (67 checks, no network).
+
+- **One style sheet per game:** a requested style (`pixel art`, `80s anime`, `Ghibli watercolor`, `LEGO`,
+  `claymation`, … or free text) or the default bold cartoon, plus the game's palette and the spec's tone.
+- **Art direction:** one `muse-spark-1.3` call (low effort, ~2k tokens, 12–27 s) describes each role, the backdrop and
+  any real people; without it, role names and `spec.theme.named` are used.
+- **One sheet call for all sprites** (up to 9 roles, a grid on a flat chroma key the art direction picks to avoid the
+  sprites' own colors), one backdrop call, in parallel. Then key (border-sampled key, un-mix and despill on edges),
+  slice (the grid's cells, or connected regions in reading order when the model ignores the grid; specks join the
+  nearest subject), trim, fit to the asset's box, downscale (area average), sharpen, and encode: sprites as 8-bit
+  palette PNG (3–7 KB at 128 px), the backdrop as JPEG (calmed toward the game's background, more for loud ones).
+- **Sheet vs one call per role** (#3, #19, S9): the sheet is 2 calls and 35–57k tokens with one consistent style; per
+  role is 6–8 calls, 90–138k tokens for the sprites alone, 37–59 s, and the styles drift (objects grow faces and legs).
+  The sheet is the default.
+- **Stories** (`branching_story`): a character lineup (one call, head-and-shoulders busts) sliced into portraits, then
+  up to 5 key-scene stills drawn with `/images/edits` and the keyed lineup as the reference image, so faces and
+  outfits stay the same. `story_vars` draws them (art roles `still`, `portrait`; params `stills`, `cast_at`, one frame
+  per scene, `.`-separated, -1 for none; scenes inherit their nearest parent's still).
+- **Real people:** every image prompt passes `guardPrompt`: a named real person becomes "a stylised cartoon
+  caricature of …", photo words become "illustrated", and the prompt says never photorealistic. Brands are untouched.
+- **Refusals:** `muse-image-1.0` refuses some franchise names (all Star Wars prompts we tried, even "Princess Leia in a
+  white gown, cartoon"; brainrot, Labubu and Liquid Death are fine). A refused prompt is rewritten once by Muse
+  without the names (described visually instead) and retried, then with the known names replaced.
+- **Record:** `manifest.art_record` (`image-art/1`): model, `license: "generated"` per picture, style, key, the
+  prompt per picture, and who was caricatured.
+
+| Game | Calls (image + text) | Tokens (image / text) | Wall | Art |
+|---|---|---|---|---|
+| #3 Tung Tung runner, 7 sprites | 2 + 1 | 36k / 2k | 30 s* | 161 KB |
+| #9 cats Angry Birds, 4 | 2 + 1 | 46k / 2k | 37 s | 81 KB |
+| #19 Bombardiro Galaga, 5 | 2 + 1 | 35k / 2k | 33 s | 80 KB |
+| #27 PvZ houseplants, 9 | 2 + 1 | 46k / 3k | 46 s | 140 KB |
+| S3 Labubu, 3 | 2 + 1 | 57k / 2k | 44 s | 100 KB |
+| S9 Liquid Death, 6 | 2 + 1 | 35k / 2k | 36 s | 86 KB |
+| #1 Leia story, 80s anime, 4 cast + 5 stills | 6 + 7 (refusal rewrites) | 127k / 14k | 86 s | 170 KB |
+| #17 peasant story, 4 cast + 5 stills | 6 + 1 | 116k / 3k | 98 s | 183 KB |
+| #24 alley cats story, pixel art, 4 cast + 5 stills | 6 + 1 | 94k / 4k | 84 s | 148 KB |
+
+\* art direction cached; #1 partly cached (lineup and 2 stills). Image calls ask for the default WebP: PNG output took 71–89 s a call against 13–24 s.
+
+**Budget.** Everything fits today's 192 KB at 128 px sprites and a 450–540 px backdrop. Phone-sharp art (sprites drawn at
+64–80 canvas units on a 3× screen) wants 192 px sprites and a 1080 px backdrop: 230–335 KB on these six games
+(`fitBudget` uses that ladder when the budget is raised above 256 KB). Requested: 512 KB for `art: "image"` games, or games-host URLs.
+
 ## Requests
 
 **For Artem (engine):**
