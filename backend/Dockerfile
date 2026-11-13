@@ -56,10 +56,14 @@ COPY FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js FacebookCl
 # Compose's server-side hooks (src/hooks.mjs AUTHORING_FILES): the picture codec, the layout fixes and lint, and the
 # blocking layout verifier (authoring/verify/), with what they import. No Chrome in the image, so the verifier runs
 # without pixels (estimated text widths, shapes-only contrast) and only the structural layout fixes run.
-COPY authoring/expander/image-codec.mjs authoring/expander/layout-fix.mjs authoring/expander/engine.mjs authoring/expander/canvas.mjs authoring/expander/requirements.mjs authoring/expander/verify-layout.mjs /app/authoring/expander/
+COPY authoring/expander/image-codec.mjs authoring/expander/layout-fix.mjs authoring/expander/engine.mjs authoring/expander/canvas.mjs authoring/expander/requirements.mjs authoring/expander/verify-layout.mjs authoring/expander/ui-style.mjs /app/authoring/expander/
 COPY authoring/playtest/layout-check.mjs authoring/playtest/bots.mjs authoring/playtest/frame-render.mjs authoring/playtest/fill-check.mjs authoring/playtest/requirements-check.mjs /app/authoring/playtest/
 COPY authoring/verify/verify.mjs authoring/verify/registry.mjs authoring/verify/frames.mjs authoring/verify/scene.mjs authoring/verify/solve.mjs authoring/verify/prove.mjs /app/authoring/verify/
-COPY authoring/verify/checks/fill.mjs authoring/verify/checks/layout.mjs authoring/verify/checks/requirements.mjs authoring/verify/checks/style.mjs authoring/verify/checks/targets.mjs /app/authoring/verify/checks/
+COPY authoring/verify/checks/fill.mjs authoring/verify/checks/layout.mjs authoring/verify/checks/look.mjs authoring/verify/checks/requirements.mjs authoring/verify/checks/style.mjs authoring/verify/checks/targets.mjs /app/authoring/verify/checks/
+# The look kit (the verifier's look stage and S_* checks): its font metrics are compiled into font-data.mjs, and the
+# font list and metrics they come from ride along. No font files: nothing renders text in the image.
+COPY authoring/kit/look.mjs authoring/kit/font-data.mjs authoring/kit/vibes.mjs authoring/kit/README.md /app/authoring/kit/
+COPY authoring/fonts/fonts.json authoring/fonts/metrics.json /app/authoring/fonts/
 RUN addgroup -g 10001 app && adduser -D -u 10001 -G app app
 USER 10001:10001
 ENV NODE_ENV=production PORT=8090 GENERATOR_VENDOR_DIR=/app/vendor GENERATOR_AUTHORING_DIR=/app/authoring
