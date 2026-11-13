@@ -1,0 +1,174 @@
+{
+ "_about": "A real on-device MicrogameComposer run with real Muse (muse-wonder-1.0), 2026-11-12, prompt 'a memory pairs game of vintage-style travel postcards'. Times and summaries are from its log; per-bot runs exist only for the final playtest. The queue phase is made up (the run had no queue). Replayed by GameGeneratorMock.",
+ "request": "a memory pairs game of vintage-style travel postcards",
+ "queue": [
+  {
+   "t": 0,
+   "position": 2
+  },
+  {
+   "t": 3,
+   "position": 1
+  }
+ ],
+ "queueSeconds": 6,
+ "events": [
+  {
+   "t": 0.0,
+   "seq": 1,
+   "kind": "drafting",
+   "summary": "Muse is drafting the game",
+   "data": {
+    "model": "muse-wonder-1.0",
+    "attempt": 1
+   }
+  },
+  {
+   "t": 33.6,
+   "seq": 2,
+   "kind": "expanding",
+   "summary": "Building and checking the game"
+  },
+  {
+   "t": 33.7,
+   "seq": 3,
+   "kind": "playtesting",
+   "summary": "5 test players are trying it",
+   "data": {
+    "bots": 5
+   }
+  },
+  {
+   "t": 36.7,
+   "seq": 4,
+   "kind": "playtested",
+   "summary": "Playtest flagged: the bot survived 57 s and scored 0",
+   "issues": [
+    "Nobody scored: every bot finished with 0 points. Check the score concept and that the content gives points.",
+    "No bot won or scored: it can't be won or scored."
+   ],
+   "data": {
+    "passed": false,
+    "spread": "5 bots scored 0 over 37–90 s · 5 lost"
+   }
+  },
+  {
+   "t": 36.7,
+   "seq": 5,
+   "kind": "repairing",
+   "summary": "Fixing 2 issues",
+   "issues": [
+    "no_score: Nobody scored: every bot finished with 0 points. Check the score concept and that the content gives points.",
+    "no_win_or_score: No bot won or scored: it can't be won or scored."
+   ],
+   "data": {
+    "round": 1,
+    "model": "muse-wonder-1.0"
+   }
+  },
+  {
+   "t": 73.5,
+   "seq": 6,
+   "kind": "expanding",
+   "summary": "Building and checking the game"
+  },
+  {
+   "t": 73.5,
+   "seq": 7,
+   "kind": "repairing",
+   "summary": "Fixing 2 issues",
+   "issues": [
+    "A_PARAM_RANGE at /uses/4/params/count: lives.count = 12 is outside 1..9",
+    "The fragment 'lives' (uses[4]) can't be used with these params. Change its params or drop it."
+   ],
+   "data": {
+    "round": 1,
+    "model": "muse-wonder-1.0"
+   }
+  },
+  {
+   "t": 103.3,
+   "seq": 8,
+   "kind": "expanding",
+   "summary": "Building and checking the game"
+  },
+  {
+   "t": 103.4,
+   "seq": 9,
+   "kind": "playtesting",
+   "summary": "5 test players are trying it",
+   "data": {
+    "bots": 5
+   }
+  },
+  {
+   "t": 104.3,
+   "seq": 10,
+   "kind": "playtested",
+   "summary": "Playtested: the bot cleared it in 28 s and scored 400",
+   "data": {
+    "passed": true,
+    "spread": "5 bots scored 300–400 over 24–60 s · 1 lost, 4 cleared it",
+    "runs": [
+     {
+      "bot": "new player",
+      "skill": 0.35,
+      "outcome": "success",
+      "score": 400,
+      "seconds": 43.7
+     },
+     {
+      "bot": "regular",
+      "skill": 0.7,
+      "outcome": "success",
+      "score": 400,
+      "seconds": 28.1
+     },
+     {
+      "bot": "pro",
+      "skill": 0.95,
+      "outcome": "fail",
+      "score": 300,
+      "seconds": 60.0
+     },
+     {
+      "bot": "regular, seed 2",
+      "skill": 0.7,
+      "outcome": "success",
+      "score": 400,
+      "seconds": 23.6
+     },
+     {
+      "bot": "regular, seed 3",
+      "skill": 0.7,
+      "outcome": "success",
+      "score": 400,
+      "seconds": 47.7
+     }
+    ]
+   }
+  },
+  {
+   "t": 104.3,
+   "seq": 11,
+   "kind": "done",
+   "summary": "Postcard Pairs is ready",
+   "data": {
+    "fragments": [
+     "grid_board",
+     "match_pairs",
+     "hint",
+     "score",
+     "lives"
+    ]
+   }
+  }
+ ],
+ "fail": {
+  "afterSeq": 8,
+  "t": 105.0,
+  "summary": "Couldn't finish: Muse's microgame still doesn't validate",
+  "error": "Muse's microgame still doesn't validate after 3 fix rounds."
+ },
+ "manifest": "generate-replay-postcard-pairs-manifest"
+}

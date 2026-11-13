@@ -143,6 +143,50 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         clearTokens()
     }
 
+    // MARK: Generation (raw calls for `GameGeneratorLive`)
+
+    /// `POST /v1/generate`; needs an account. Returns the reply body.
+    func generationStart(body: Data) async throws -> Data {
+        try await send("POST", "v1/generate", body: body, contentType: "application/json", auth: .required)
+    }
+
+    /// `GET /v1/generate/{id}`, with `?after=<seq>` when given.
+    func generationJob(id: String, after: Int?) async throws -> Data {
+        let query = after.map { [URLQueryItem(name: "after", value: String($0))] } ?? []
+        return try await send("GET", "v1/generate/\(id)", query: query, auth: .required)
+    }
+
+    /// `GET /v1/generate`: my jobs.
+    func generationJobs() async throws -> Data {
+        try await send("GET", "v1/generate", auth: .required)
+    }
+
+    /// `DELETE /v1/generate/{id}`. Best effort: 404 and 405 (not there, or not supported yet) and
+    /// network errors are ignored.
+    func generationCancel(id: String) async {
+        _ = try? await send("DELETE", "v1/generate/\(id)", auth: .required)
+    }
+
+    /// A file the server points at (a game's `manifestUrl`), as raw bytes. Relative URLs resolve
+    /// against the base URL; the token goes only to the API's own host.
+    func fetch(_ url: URL) async throws -> Data {
+        let absolute = url.scheme == nil ? URL(string: url.relativeString, relativeTo: baseURL)?.absoluteURL ?? url : url
+        var request = URLRequest(url: absolute, timeoutInterval: Self.uploadTimeout)
+        if absolute.host == baseURL.host, let token = try? await accessToken(required: false) {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        do {
+            let (data, response) = try await session.data(for: request)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            guard (200..<300).contains(status) else { throw Self.error(status, data) }
+            return data
+        } catch let error as GamesAPIError {
+            throw error
+        } catch {
+            throw GamesAPIError.network((error as? URLError)?.localizedDescription ?? error.localizedDescription)
+        }
+    }
+
     // MARK: Requests
 
     private enum Auth { case none, optional, required }
