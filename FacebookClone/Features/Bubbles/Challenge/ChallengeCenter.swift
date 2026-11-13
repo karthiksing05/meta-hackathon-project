@@ -4,9 +4,8 @@ import Observation
 /// Challenge Me and group-chat sessions (docs/BUBBLES.md 7.2): 1:1 same-seed challenges, shared
 /// sessions, rivalry tallies and live card updates. Owner: challenge.
 ///
-/// The other side of a challenge (their runs, replies, history) needs server endpoints that don't
-/// exist yet (docs/APP_LIVE_DATA_PLAN.md, Stage 4). Until then no challenge or session starts and
-/// nobody's run is simulated; the entry points say "Not available yet".
+/// A friend's challenge goes to the server (`POST /v1/challenges`, `ChallengeInbox`); a Group or
+/// group chat plays a server round (`RoundsCenter`, `/v1/rounds`). Nobody's run is simulated here.
 @MainActor
 @Observable
 final class ChallengeCenter {

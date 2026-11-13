@@ -200,6 +200,24 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return series
     }
 
+    // MARK: Calls for extensions in other files (rounds; GamesAPILive+Rounds.swift)
+
+    /// A signed-in JSON call; returns the reply body. Errors are `GamesAPIError`.
+    func authedJSON(_ method: String, _ path: String, query: [URLQueryItem] = [], body: Data? = nil,
+                    timeout: TimeInterval = 8) async throws -> Data {
+        try await send(method, path, query: query, body: body, contentType: body == nil ? nil : "application/json",
+                       auth: .required, timeout: timeout)
+    }
+
+    /// Decodes a reply with the API's date format.
+    func decodeReply<T: Decodable>(_ data: Data) throws -> T { try decode(data) }
+
+    /// A game's server id from an app id or slug (throws `unknownGame`).
+    func serverGameID(_ id: String) throws -> String { try serverID(id) }
+
+    /// Remembers the slug of a game that came inside another reply.
+    func remember(_ game: RemoteGame) { link(game) }
+
     // MARK: Game plan (harness v2)
 
     /// `POST /v1/harness/plan {request}`: the raw reply, for `HarnessPlanClient`.

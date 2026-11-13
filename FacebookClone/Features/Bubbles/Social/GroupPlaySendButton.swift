@@ -12,7 +12,9 @@ import SwiftUI
 /// - the Group's week and opinion games: `RemixShareSheet` (a playable card to a chat or Group,
 ///   with no "beat me" line, since opinion games have no winner).
 ///
-/// When server rounds (`POST /v1/rounds`) land, the challenge and Group routes move to them.
+/// A microgame on the server goes to a server round instead (`RoundDestinationSheet`,
+/// `POST /v1/rounds`): pick a Group or friends, everyone plays the server's seed, the server replays
+/// each run and ranks them (or says how in sync an opinion game's picks are).
 struct GroupPlaySendButton: View {
     let bubble: Bubble
     /// Known already (Studio's plan). Nil reads `group_play` from the published manifest.
@@ -23,7 +25,7 @@ struct GroupPlaySendButton: View {
     @State private var sheet: Sheet?
 
     private enum Sheet: String, Identifiable {
-        case challenge, share, series
+        case challenge, share, series, round
         var id: String { rawValue }
     }
 
@@ -58,11 +60,17 @@ struct GroupPlaySendButton: View {
                 GroupPlaySeriesPicker(bubble: bubble, bestOf: resolved.bestOf)
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
+            case .round:
+                RoundDestinationSheet(bubble: bubble, mode: resolved.mode == .series ? nil : resolved.mode.rawValue)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }
 
     private func route(for info: GroupPlayInfo) -> Sheet {
+        let onServer = bubble.formula == .microgame && !bubble.serverID.isEmpty
+        if onServer, info.mode != .series { return .round }
         switch info.mode {
         case .sameSeedAsync, .groupRound:
             return info.compare == "agreement" ? .share : .challenge
