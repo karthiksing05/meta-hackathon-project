@@ -62,7 +62,8 @@ export async function rebuild(manifest, { tall = false, edits = null, fix = true
   // Bot runs for the verifier, in the game's own coordinates.
   const runs = game === r.game ? gate.runs : gate.runs.map((run) => ({ ...run, replay: run.replay && { ...run.replay, actions: (run.replay.actions ?? []).map((a) => (a.action.kind === 'tap' ? { ...a, action: { ...a.action, y: a.action.y + 70 } } : a)) } }));
   if (fix) {
-    const res = await verifyAndFix(game, { runs, engine: eng });
+    // As a manifest, so the look stage and the look checks read the game's own art.type, id and words.
+    const res = await verifyAndFix({ ...manifest, content: { ...manifest.content, authoring_json: JSON.stringify(authoring), game_json: JSON.stringify(game) } }, { runs, engine: eng });
     record.runs = runs;
     game = res.game;
     record.stages = res.stages.map((s) => `${s.stage} ${s.blocking}`);
