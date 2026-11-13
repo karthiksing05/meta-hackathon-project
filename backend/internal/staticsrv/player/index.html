@@ -5,58 +5,146 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Game player</title>
 <link rel="stylesheet" href="runtime/bubble-glow.css">
+<link rel="stylesheet" href="runtime/game-fonts.css">
 <style>
-  :root { color-scheme: light dark; }
-  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: #eef0fb; color: #1b1b2f; }
-  @media (prefers-color-scheme: dark) { body { background: #12121f; color: #e8e8f6; } }
-  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px; position: sticky; top: 0; z-index: 20;
-           background: inherit; border-bottom: 1px solid rgba(120,120,160,.25); }
-  header h1 { font-size: 15px; margin: 0 8px 0 0; }
-  input, select, button { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(120,120,160,.45); background: transparent; color: inherit; }
-  input { width: 250px; max-width: 60vw; }
-  button { cursor: pointer; background: #5b5bd6; color: #fff; border-color: transparent; }
-  main { display: flex; flex-wrap: wrap; gap: 16px; padding: 14px; align-items: flex-start; justify-content: center; }
-  #stage-wrap { width: calc(390px * var(--scale, 1)); height: calc(844px * var(--scale, 1)); }
-  #bubble-root { position: relative; width: 390px; height: 844px; transform: scale(var(--scale, 1)); transform-origin: 0 0; border-radius: 28px; overflow: hidden;
-                 box-shadow: 0 6px 30px rgba(40,40,90,.3); }
-  #side { width: 300px; max-width: 100%; }
-  #games { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 14px; max-height: calc(100vh - 150px); min-height: 160px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
-  #games a { display: block; padding: 8px 10px; border-radius: 10px; text-decoration: none; color: inherit; background: rgba(120,120,160,.14); }
-  #games a.current { outline: 2px solid #5b5bd6; }
-  #games small { opacity: .7; display: block; }
-  #log { font: 11px/1.4 ui-monospace, Menlo, monospace; max-height: 220px; overflow: auto; background: rgba(120,120,160,.12); padding: 8px; border-radius: 10px; white-space: pre-wrap; }
-  #meta { margin: 6px 0 12px; }
-  .err { color: #c0392b; }
-  #actions { margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
-  #actions[hidden] { display: none; }
-  #del { background: #c0392b; align-self: flex-start; }
-  #del:disabled { opacity: .45; cursor: default; }
+  :root {
+    color-scheme: light dark;
+    --bg: #eef0fb; --panel: #ffffff; --ink: #1b1b2f; --muted: #6b6b85; --line: rgba(100,100,150,.22);
+    --chip: rgba(100,100,160,.12); --accent: #5b5bd6; --accent-ink: #fff; --danger: #c0392b; --ok: #1f9d55;
+    --bar-h: 52px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11111d; --panel: #1a1a2b; --ink: #e8e8f6; --muted: #9a9ab5; --line: rgba(160,160,220,.2); --chip: rgba(160,160,230,.14); --danger: #ff6b5b; --ok: #4cd08a; }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; }
+  button, input, select { font: inherit; color: inherit; }
+  input, select { padding: 7px 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel); min-width: 0; }
+  input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button { padding: 7px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: transparent; color: var(--accent-ink); }
+  button.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
+  button:disabled { opacity: .45; cursor: default; }
+  [hidden] { display: none !important; }
+
+  /* ---- top bar ---- */
+  .bar { height: var(--bar-h); display: flex; align-items: center; gap: 10px; padding: 0 14px; background: var(--panel); border-bottom: 1px solid var(--line); position: relative; z-index: 30; }
+  .bar h1 { font-size: 15px; margin: 0 6px 0 0; white-space: nowrap; }
+  .bar form { display: flex; gap: 6px; flex: 0 1 340px; min-width: 0; }
+  .bar form input { flex: 1; }
+  .bar .grow { flex: 1; }
+  .bar label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--muted); }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; background: var(--chip); font-size: 12px; white-space: nowrap; cursor: default; }
+  .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .pill.ok i { background: var(--ok); } .pill.bad i { background: var(--danger); } .pill.bad { cursor: pointer; }
+  #listToggle { display: none; }
+
+  /* ---- three columns: games, stage, details ---- */
+  .app { height: calc(100% - var(--bar-h)); display: grid; grid-template-columns: 300px minmax(0, 1fr) 320px; grid-template-rows: minmax(0, 1fr); }
+  .col { min-height: 0; min-width: 0; }
+  #list { display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); }
+  #list .head { padding: 12px 12px 8px; display: grid; gap: 8px; }
+  #load2 { display: none; gap: 6px; } #load2 input { flex: 1; }
+  #list .count { color: var(--muted); font-size: 12px; }
+  #games { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 8px 10px; display: flex; flex-direction: column; gap: 5px; }
+  #games a { display: block; padding: 8px 10px; border-radius: 10px; text-decoration: none; color: inherit; background: var(--chip); border: 2px solid transparent; }
+  #games a:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+  #games a.current { border-color: var(--accent); }
+  #games a b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #games small { display: block; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #games .note { color: var(--muted); padding: 10px 4px; }
+  #more { margin: 0 8px 12px; }
+
+  #stage-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; overflow: hidden; }
+  #stage-wrap { flex: none; width: calc(390px * var(--scale, 1)); height: calc(844px * var(--scale, 1)); }
+  #bubble-root { position: relative; width: 390px; height: 844px; transform: scale(var(--scale, 1)); transform-origin: 0 0; border-radius: 28px; overflow: hidden; background: #000; box-shadow: 0 8px 34px rgba(30,30,80,.32); }
+  #empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 28px; color: #fff; z-index: 2; background: rgba(20,20,40,.55); pointer-events: none; }
+  #empty.gone { display: none; }
+  .controls { flex: none; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; max-width: 100%; }
+  #status { color: var(--muted); font-size: 13px; }
+  #status.err { color: var(--danger); }
+
+  #info { overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px; border-left: 1px solid var(--line); background: var(--panel); overscroll-behavior: contain; }
+  .card { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 8px; }
+  .card h2 { margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  #meta .title { font-size: 17px; font-weight: 700; }
+  #meta .rule { color: var(--ink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { padding: 2px 9px; border-radius: 99px; background: var(--chip); font-size: 12px; }
+  .chip.ad { background: color-mix(in srgb, #e0a100 28%, transparent); } .chip.draft { background: color-mix(in srgb, var(--danger) 22%, transparent); }
+  .facts { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; margin: 0; }
+  .facts dt { color: var(--muted); } .facts dd { margin: 0; word-break: break-word; }
+  #lb ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+  #lb li { display: flex; gap: 8px; font-size: 13px; } #lb li span:nth-child(2) { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #lb li span:first-child { color: var(--muted); width: 1.5em; text-align: right; }
+  #log { font: 11px/1.4 ui-monospace, Menlo, Consolas, monospace; max-height: 200px; overflow: auto; background: var(--chip); padding: 8px; border-radius: 8px; white-space: pre-wrap; margin: 0; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .muted { color: var(--muted); }
+
+  #toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 16px; border-radius: 10px; z-index: 60; max-width: 90vw; box-shadow: 0 6px 24px rgba(0,0,0,.3); }
+
+  /* ---- narrower windows: the list becomes a drawer and the details go under the game ---- */
+  @media (max-width: 1100px) { .app { grid-template-columns: 260px minmax(0, 1fr); } #info { display: none; } body.show-info #info { display: flex; position: fixed; right: 0; top: var(--bar-h); bottom: 0; width: min(340px, 92vw); z-index: 25; box-shadow: -8px 0 30px rgba(0,0,0,.25); } }
+  @media (max-width: 760px) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    #list { position: fixed; left: 0; top: var(--bar-h); bottom: 0; width: min(340px, 92vw); z-index: 25; transform: translateX(-102%); transition: transform .18s; box-shadow: 8px 0 30px rgba(0,0,0,.25); }
+    body.show-list #list { transform: none; }
+    #listToggle { display: inline-block; }
+    .bar h1, #load { display: none; } .bar label span { display: none; } #load2 { display: flex; }
+  }
 </style>
 </head>
 <body>
-<header>
+<header class="bar">
+  <button id="listToggle" type="button" aria-label="Show the games list">Games</button>
   <h1>Game player</h1>
   <form id="load" onsubmit="return false">
-    <input id="ref" placeholder="game id or slug" autocomplete="off" spellcheck="false">
-    <button id="go" type="submit">Play</button>
+    <input id="ref" placeholder="game id or slug" autocomplete="off" spellcheck="false" aria-label="Game id or slug">
+    <button class="primary" id="go" type="submit">Open</button>
   </form>
-  <select id="mode" title="play yourself, or watch a bot"><option value="play">Play</option><option value="demo">Watch a bot</option></select>
-  <label><input id="sound" type="checkbox" style="width:auto"> sound</label>
-  <span id="status"></span>
+  <select id="mode" title="Play yourself, or watch a bot play" aria-label="Mode"><option value="play">Play</option><option value="demo">Watch a bot</option></select>
+  <label><input id="sound" type="checkbox" style="width:auto"><span>Sound</span></label>
+  <span class="grow"></span>
+  <button id="infoToggle" type="button">Details</button>
+  <span id="api" class="pill" title="The API this page talks to"><i></i><span>API</span></span>
 </header>
-<main>
-  <div id="stage-wrap"><div id="bubble-root" class="palette-lilac-haze"><canvas id="bubble-canvas"></canvas></div></div>
-  <div id="side">
-    <div id="meta"></div>
-    <div id="actions" hidden>
-      <button id="del" type="button" disabled title="Debug: delete the game that is open, with its saves and scores. Needs DEBUG_DELETE=1 on the server.">Delete this game</button>
+<div class="app">
+  <aside id="list" class="col">
+    <div class="head">
+      <form id="load2" class="narrow-only" onsubmit="return false">
+        <input id="ref2" placeholder="game id or slug" autocomplete="off" spellcheck="false" aria-label="Game id or slug">
+        <button class="primary" type="submit">Open</button>
+      </form>
+      <input id="search" type="search" placeholder="Search games" autocomplete="off" aria-label="Search games">
+      <div class="count" id="count"></div>
     </div>
-    <strong>Games on the server</strong>
-    <div id="games">Loading…</div>
-    <strong>Messages</strong>
-    <div id="log"></div>
-  </div>
-</main>
+    <div id="games" aria-live="polite"><div class="note">Loading…</div></div>
+    <button id="more" type="button" hidden>Load more</button>
+  </aside>
+  <main id="stage-col" class="col">
+    <div id="stage-wrap">
+      <div id="bubble-root" class="palette-lilac-haze"><canvas id="bubble-canvas"></canvas>
+        <div id="empty"><div><strong id="emptyTitle">Pick a game</strong><br><span id="emptyText">Choose one from the list, or type an id above.</span></div></div>
+      </div>
+    </div>
+    <div class="controls">
+      <span id="status"></span>
+      <button id="restart" type="button" disabled>Restart</button>
+      <button id="copy" type="button" disabled>Copy link</button>
+    </div>
+  </main>
+  <aside id="info" class="col">
+    <section class="card" id="meta"><h2>Game</h2><div class="muted">Nothing open.</div></section>
+    <section class="card" id="lb" hidden><h2>Leaderboard</h2><div id="lbBody"></div></section>
+    <section class="card" id="actions" hidden>
+      <h2>Debug</h2>
+      <button id="del" class="danger" type="button" disabled title="Delete the game that is open, with its saves and scores. Needs DEBUG_DELETE=1 on the server.">Delete this game</button>
+    </section>
+    <section class="card"><details><summary>Messages</summary><pre id="log"></pre></details></section>
+  </aside>
+</div>
+<div id="toast" hidden></div>
 
 <!-- The app's own runtime, so a game looks and plays here as it does in the app. Load order matters. -->
 <script src="runtime/bubble-runtime.js"></script>
@@ -78,31 +166,56 @@
   const $ = (id) => document.getElementById(id);
   const q = new URLSearchParams(location.search);
 
-  // Where the API is: ?api=..., or api.<domain> when this page is on games.<domain>.
+  // Where the API is: ?api=..., or api.<domain> when this page is on games.<domain>, or :8080 on localhost.
   const apiBase = (q.get("api") || (/^games\./.test(location.hostname)
     ? location.protocol + "//api." + location.hostname.slice(6)
     : location.hostname === "localhost" || location.hostname === "127.0.0.1" ? location.protocol + "//" + location.hostname + ":8080" : "")).replace(/\/$/, "");
 
-  function fit() {
-    const s = Math.min(1, (window.innerHeight - 70) / 844, (window.innerWidth - 20) / 390);
-    document.documentElement.style.setProperty("--scale", String(Math.max(0.3, s)));
+  // The page's own state lives in the address, so a reload or a shared link comes back the same.
+  const state = { game: q.get("game") || "", mode: q.get("mode") === "demo" ? "demo" : "play", sound: q.get("sound") === "1" };
+  function href(over) {
+    const s = Object.assign({}, state, over);
+    const p = new URLSearchParams();
+    if (s.game) p.set("game", s.game);
+    if (q.get("api")) p.set("api", q.get("api"));
+    if (s.mode === "demo") p.set("mode", "demo");
+    if (s.sound) p.set("sound", "1");
+    const t = p.toString();
+    return location.pathname + (t ? "?" + t : "");
   }
-  window.addEventListener("resize", fit);
-  fit();
+  $("mode").value = state.mode;
+  $("sound").checked = state.sound;
+  $("ref").value = $("ref2").value = state.game;
 
+  // ---- small helpers ----
   const logEl = $("log");
   function note(msg) {
-    const d = new Date().toLocaleTimeString();
-    logEl.textContent += d + "  " + msg + "\n";
+    logEl.textContent += new Date().toLocaleTimeString() + "  " + msg + "\n";
     logEl.scrollTop = logEl.scrollHeight;
   }
-  function fail(msg) {
-    $("status").innerHTML = "";
-    const s = document.createElement("span");
-    s.className = "err";
-    s.textContent = msg;
-    $("status").appendChild(s);
-    note("error: " + msg);
+  let toastTimer = 0;
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 3500);
+  }
+  function setStatus(msg, isErr) {
+    $("status").textContent = msg || "";
+    $("status").className = isErr ? "err" : "";
+    if (isErr) note("error: " + msg);
+  }
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  async function getJSON(url) {
+    const r = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!r.ok) { const e = new Error(r.status === 404 ? "not found" : "the server answered " + r.status); e.status = r.status; throw e; }
+    return r.json();
   }
 
   if (window.BubbleHost) {
@@ -113,111 +226,250 @@
     };
   }
 
-  async function getJSON(url) {
-    const r = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!r.ok) throw new Error(url + " answered " + r.status);
-    return r.json();
+  // ---- fit the phone to the space the stage has ----
+  const stageCol = $("stage-col");
+  function fit() {
+    const w = stageCol.clientWidth - 24, h = stageCol.clientHeight - 24 - 44;
+    const s = Math.max(0.3, Math.min(1, h / 844, w / 390));
+    document.documentElement.style.setProperty("--scale", String(s));
   }
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stageCol);
+  window.addEventListener("resize", fit);
+  fit();
 
-  // ---- deleting the open game (debug only: the server must have DEBUG_DELETE=1; there is no sign-in) ----
-  let current = null; // the game that is open: {id, title}
+  // ---- API status ----
+  async function checkApi() {
+    const pill = $("api"), label = pill.querySelector("span");
+    if (!apiBase) { pill.className = "pill bad"; label.textContent = "no API address"; pill.title = "Add ?api=https://api... to the address"; return false; }
+    try {
+      const r = await fetch(apiBase + "/readyz", { cache: "no-store" });
+      const ok = r.ok;
+      pill.className = "pill " + (ok ? "ok" : "bad");
+      label.textContent = ok ? "API ok" : "API not ready";
+      pill.title = apiBase;
+      return ok;
+    } catch (e) {
+      pill.className = "pill bad";
+      label.textContent = "API unreachable";
+      pill.title = apiBase + " (click to retry)";
+      return false;
+    }
+  }
+  $("api").addEventListener("click", () => { if ($("api").classList.contains("bad")) { checkApi().then(() => { loadList(true); if (state.game && !current) openGame(state.game); }); } });
+
+  // ---- the games list: search, newest first, load more ----
+  const PAGE = 30;
+  let listToken = 0, nextCursor = "", shown = new Set();
+  function listLink(g) {
+    const a = el("a");
+    a.href = href({ game: g.slug || g.id });
+    a.dataset.ref = g.slug || g.id;
+    a.dataset.id = g.id;
+    a.appendChild(el("b", "", g.title || g.id));
+    const bits = [g.formula, g.ownerUsername && "by " + g.ownerUsername, g.likes ? "♥ " + g.likes : ""].filter(Boolean);
+    if (g.sponsor) bits.unshift("Ad");
+    a.appendChild(el("small", "", bits.join(" · ")));
+    if (isCurrent(g)) a.classList.add("current");
+    return a;
+  }
+  function isCurrent(g) { return current && (current.id === g.id); }
+  async function loadList(reset) {
+    const box = $("games"), token = ++listToken;
+    if (reset) { nextCursor = ""; shown = new Set(); box.textContent = ""; box.appendChild(el("div", "note", "Loading…")); $("more").hidden = true; }
+    if (!apiBase) { box.textContent = ""; box.appendChild(el("div", "note", "Add ?api=https://api... to the address to list games. You can still open a game by id.")); $("count").textContent = ""; return; }
+    const term = $("search").value.trim();
+    try {
+      const url = apiBase + "/v1/search?limit=" + PAGE + (term ? "&q=" + encodeURIComponent(term) : "") + (nextCursor ? "&cursor=" + encodeURIComponent(nextCursor) : "");
+      const out = await getJSON(url);
+      if (token !== listToken) return; // a newer search replaced this one
+      if (reset) box.textContent = "";
+      for (const g of out.items || []) {
+        if (shown.has(g.id)) continue;
+        shown.add(g.id);
+        box.appendChild(listLink(g));
+      }
+      nextCursor = out.nextCursor || "";
+      $("more").hidden = !nextCursor;
+      $("count").textContent = shown.size ? shown.size + (nextCursor ? "+" : "") + " game" + (shown.size === 1 ? "" : "s") + (term ? " matching “" + term + "”" : "") : "";
+      if (!shown.size) box.appendChild(el("div", "note", term ? "No games match “" + term + "”." : "No games on the server yet."));
+      const cur = box.querySelector("a.current");
+      if (cur && reset) cur.scrollIntoView({ block: "nearest" });
+    } catch (e) {
+      if (token !== listToken) return;
+      if (reset) box.textContent = "";
+      const n = el("div", "note", "Couldn't load the list (" + e.message + "). ");
+      const b = el("button", "", "Try again");
+      b.addEventListener("click", () => loadList(true));
+      n.appendChild(b);
+      box.appendChild(n);
+      $("more").hidden = true;
+    }
+  }
+  let searchTimer = 0;
+  $("search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadList(true), 250); });
+  $("more").addEventListener("click", () => loadList(false));
+
+  // ---- the open game ----
+  let current = null; // {id, title}
   function setCurrent(game) {
     current = game;
     $("actions").hidden = !game;
     $("del").disabled = !game || !apiBase;
-    if (!apiBase) $("del").title = "Needs the API address (?api=https://api...)";
+    $("restart").disabled = $("copy").disabled = !game;
+    document.querySelectorAll("#games a").forEach((a) => a.classList.toggle("current", !!game && a.dataset.id === game.id));
   }
-  async function removeCurrent() {
-    const g = current;
-    const r = await fetch(apiBase + "/v1/debug/games/" + encodeURIComponent(g.id), { method: "DELETE" });
-    if (r.status === 403) throw new Error("debug delete is off on this server (set DEBUG_DELETE=1 in api.env and restart the API)");
-    if (r.status === 404) throw new Error("that game is already gone");
-    if (r.status !== 204) throw new Error("the server answered " + r.status);
-    note("deleted " + g.id + " (" + g.title + ")");
-    $("meta").textContent = "Deleted " + g.title + ".";
-    $("status").textContent = "Deleted";
-    setCurrent(null);
-    history.replaceState(null, "", location.pathname + (q.get("api") ? "?api=" + encodeURIComponent(q.get("api")) : ""));
-    listGames();
+  function showEmpty(title, text) {
+    $("emptyTitle").textContent = title;
+    $("emptyText").textContent = text || "";
+    $("empty").classList.remove("gone");
   }
+
+  // The package lives under its storage key, which is the game's id until it is replaced; the API says where it is now.
+  async function resolve(ref) {
+    if (apiBase) {
+      const g = await getJSON(apiBase + "/v1/games/" + encodeURIComponent(ref));
+      return { url: g.manifestUrl, game: g };
+    }
+    if (/^[a-f0-9]{24}$/.test(ref)) return { url: location.origin + "/" + ref + "/manifest.json", game: null };
+    throw new Error("give a 24-character game id, or add ?api=https://api... so a slug can be looked up");
+  }
+
+  function fact(dl, k, v) { if (v === undefined || v === null || v === "") return; dl.appendChild(el("dt", "", k)); dl.appendChild(el("dd", "", String(v))); }
+  function renderMeta(m, found, ref) {
+    const g = found.game, box = $("meta");
+    box.textContent = "";
+    box.appendChild(el("h2", "", "Game"));
+    box.appendChild(el("div", "title", (g && g.title) || m.title || ref));
+    const rule = (g && g.description) || m.one_line_rule;
+    if (rule) box.appendChild(el("div", "rule", rule));
+    const chips = el("div", "chips");
+    if (g && g.sponsor) chips.appendChild(el("span", "chip ad", "Ad · " + g.sponsor.name));
+    if (g && g.unlisted) chips.appendChild(el("span", "chip draft", "Draft"));
+    for (const t of ((g && g.tags) || (m.brief && m.brief.mood) || []).slice(0, 8)) chips.appendChild(el("span", "chip", t));
+    if (chips.childNodes.length) box.appendChild(chips);
+    const dl = el("dl", "facts");
+    fact(dl, "By", g && g.ownerUsername);
+    fact(dl, "Type", (g && g.formula) || m.formula);
+    fact(dl, "Level", g && g.level > 1 ? g.level : "");
+    fact(dl, "Likes", g && g.likes);
+    fact(dl, "Plays", g && g.plays);
+    if (g && g.score) fact(dl, "Ranks", (g.score.ranked === false ? "unranked" : (g.score.direction === "lower" ? "lowest" : "highest") + " " + (g.score.measures || g.score.kind || "score")));
+    if (g && g.group_play) fact(dl, "Group play", g.group_play.mode + " · " + (g.group_play.result && g.group_play.result.compare));
+    fact(dl, "Id", g && g.id);
+    if (dl.childNodes.length) box.appendChild(dl);
+    const links = el("div", "chips");
+    const a = el("a", "", "manifest.json");
+    a.href = found.url; a.target = "_blank"; a.rel = "noopener";
+    links.appendChild(a);
+    box.appendChild(links);
+  }
+
+  async function renderBoard(game) {
+    const card = $("lb"), body = $("lbBody");
+    if (!apiBase || !game) { card.hidden = true; return; }
+    try {
+      const out = await getJSON(apiBase + "/v1/games/" + encodeURIComponent(game.id) + "/leaderboard?limit=10");
+      const items = out.items || [];
+      body.textContent = "";
+      card.hidden = false;
+      if (out.ranked === false) { body.appendChild(el("div", "muted", "This game isn't ranked.")); return; }
+      if (!items.length) { body.appendChild(el("div", "muted", "No scores yet.")); return; }
+      const ol = el("ol");
+      items.forEach((r, i) => {
+        const li = el("li");
+        li.appendChild(el("span", "", String(i + 1)));
+        li.appendChild(el("span", "", r.username || r.userId || "?"));
+        li.appendChild(el("span", "", r.display || String(r.score)));
+        ol.appendChild(li);
+      });
+      body.appendChild(ol);
+    } catch (e) { card.hidden = true; }
+  }
+
+  async function openGame(ref) {
+    setStatus("Loading…");
+    showEmpty("Loading…", "");
+    let found, m;
+    try {
+      found = await resolve(ref);
+      m = await getJSON(found.url);
+    } catch (e) {
+      const msg = e.status === 404 ? "That game isn't on the server (it may have been deleted)." : "Couldn't open the game: " + e.message;
+      showEmpty("Couldn't open it", msg);
+      setStatus(msg, true);
+      $("meta").innerHTML = "";
+      $("meta").appendChild(el("h2", "", "Game"));
+      $("meta").appendChild(el("div", "muted", "Nothing open."));
+      return;
+    }
+    try {
+      const v = Bubble.validate(m);
+      note("validate: " + (v.ok ? "ok" : JSON.stringify(v.errors)));
+      const payload = {
+        manifest: m, mode: state.mode, player: { name: "Tester", best: null },
+        muted: !state.sound, reduced_motion: false, insets: { top: 0, bottom: 0, left: 0, right: 0 },
+      };
+      const prep = JSON.parse(BubbleHost.prepare(payload));
+      note("prepare: " + JSON.stringify(prep));
+      const act = JSON.parse(BubbleHost.activate(prep.key, JSON.stringify(payload)));
+      note("activate: " + JSON.stringify(act));
+    } catch (e) {
+      showEmpty("This game won't start", e.message);
+      setStatus("The runtime refused the game: " + e.message, true);
+      return;
+    }
+    $("empty").classList.add("gone");
+    renderMeta(m, found, ref);
+    setCurrent({ id: found.game ? found.game.id : ref, title: (found.game && found.game.title) || m.title || ref });
+    renderBoard(current);
+    document.title = (current.title || "Game") + " · Game player";
+    setStatus(state.mode === "demo" ? "A bot is playing" : "Tap the game to start");
+  }
+
+  // ---- delete (debug only: needs DEBUG_DELETE=1 on the server; there is no sign-in) ----
   $("del").addEventListener("click", async () => {
     if (!current || !apiBase) return;
-    if (!confirm('Delete "' + current.title + '"?\n\nThis removes the game, its saves and its scores for everyone. It can\'t be undone.')) return;
-    try { await removeCurrent(); } catch (e) { fail(e.message); }
-  });
-
-  async function manifestUrlFor(ref) {
-    if (/^[a-f0-9]{24}$/.test(ref)) return { url: location.origin + "/" + ref + "/manifest.json", game: null };
-    if (!apiBase) throw new Error("give a 24-character game id, or ?api=https://api... so a slug can be looked up");
-    const g = await getJSON(apiBase + "/v1/games/" + encodeURIComponent(ref));
-    return { url: g.manifestUrl, game: g };
-  }
-
-  async function play(ref) {
-    $("status").textContent = "Loading…";
-    const found = await manifestUrlFor(ref);
-    const m = await getJSON(found.url);
-    const v = Bubble.validate(m);
-    note("validate: " + (v.ok ? "ok" : JSON.stringify(v.errors)));
-    $("meta").innerHTML = "";
-    const h = document.createElement("div");
-    h.innerHTML = "<strong></strong> <small></small><br><a target=_blank rel=noopener>manifest.json</a>";
-    h.querySelector("strong").textContent = m.title || ref;
-    h.querySelector("small").textContent = [m.formula, (m.brief && m.brief.mood || []).join(", ")].filter(Boolean).join(" · ");
-    h.querySelector("a").href = found.url;
-    $("meta").appendChild(h);
-    if (m.one_line_rule) { const p = document.createElement("div"); p.textContent = m.one_line_rule; $("meta").appendChild(p); }
-
-    const payload = {
-      manifest: m, mode: $("mode").value, player: { name: "Tester", best: null },
-      muted: !$("sound").checked, reduced_motion: false, insets: { top: 0, bottom: 0, left: 0, right: 0 },
-    };
-    const prep = JSON.parse(BubbleHost.prepare(payload));
-    note("prepare: " + JSON.stringify(prep));
-    const act = JSON.parse(BubbleHost.activate(prep.key, JSON.stringify(payload)));
-    note("activate: " + JSON.stringify(act));
-    $("status").textContent = "Tap the game to start";
-    setCurrent({ id: found.game ? found.game.id : ref, title: m.title || ref });
-    history.replaceState(null, "", "?game=" + encodeURIComponent(ref) + (q.get("api") ? "&api=" + encodeURIComponent(q.get("api")) : ""));
-    document.querySelectorAll("#games a").forEach((a) => a.classList.toggle("current", a.dataset.ref === ref || a.dataset.id === ref));
-  }
-
-  async function listGames() {
-    const box = $("games");
-    if (!apiBase) { box.textContent = "Type a game id above."; return; }
+    const g = current;
+    if (!confirm('Delete "' + g.title + '"?\n\nThis removes the game, its saves and its scores for everyone. It can\'t be undone.')) return;
     try {
-      const out = await getJSON(apiBase + "/v1/feed?limit=30");
-      box.textContent = "";
-      if (!out.items.length) { box.textContent = "No games on the server yet."; return; }
-      const seen = new Set(); // the ranked feed can repeat a game once few are left: list each once
-      for (const g of out.items) {
-        if (seen.has(g.id)) continue;
-        seen.add(g.id);
-        const a = document.createElement("a");
-        a.href = "?game=" + encodeURIComponent(g.slug || g.id) + (q.get("api") ? "&api=" + encodeURIComponent(q.get("api")) : "");
-        a.dataset.ref = g.slug || g.id;
-        a.dataset.id = g.id;
-        a.textContent = g.title;
-        const s = document.createElement("small");
-        s.textContent = [g.formula, g.ownerUsername && "by " + g.ownerUsername, g.why].filter(Boolean).join(" · ");
-        a.appendChild(s);
-        box.appendChild(a);
-      }
-    } catch (e) {
-      box.textContent = "Couldn't load the list: " + e.message;
-    }
-  }
-
-  $("load").addEventListener("submit", () => {
-    const ref = $("ref").value.trim();
-    if (ref) location.search = "?game=" + encodeURIComponent(ref) + (q.get("api") ? "&api=" + encodeURIComponent(q.get("api")) : "");
+      const r = await fetch(apiBase + "/v1/debug/games/" + encodeURIComponent(g.id), { method: "DELETE" });
+      if (r.status === 403) throw new Error("debug delete is off on this server (set DEBUG_DELETE=1 in api.env or the GitHub variable, then redeploy)");
+      if (r.status === 404) throw new Error("that game is already gone");
+      if (r.status !== 204) throw new Error("the server answered " + r.status);
+    } catch (e) { setStatus(e.message, true); toast(e.message); return; }
+    note("deleted " + g.id + " (" + g.title + ")");
+    toast("Deleted " + g.title);
+    location.href = href({ game: "" }) + (q.get("api") ? "&" : "?") + "deleted=" + encodeURIComponent(g.title); // a clean page: nothing of the deleted game keeps running
   });
-  for (const id of ["mode", "sound"]) $(id).addEventListener("change", () => { const r = q.get("game"); if (r) location.reload(); });
 
-  listGames();
-  const initial = q.get("game");
-  if (initial) { $("ref").value = initial; play(initial).catch((e) => fail(e.message)); }
-  else $("status").textContent = "Pick a game";
+  $("restart").addEventListener("click", () => location.reload());
+  $("copy").addEventListener("click", async () => {
+    const url = location.origin + href({});
+    try { await navigator.clipboard.writeText(url); toast("Link copied"); } catch (e) { toast(url); }
+  });
+
+  // ---- the bar ----
+  for (const [form, input] of [["load", "ref"], ["load2", "ref2"]]) $(form).addEventListener("submit", () => {
+    const ref = $(input).value.trim();
+    if (ref) location.href = href({ game: ref });
+  });
+  // mode and sound live in the address, so a reload keeps them
+  for (const id of ["mode", "sound"]) $(id).addEventListener("change", () => {
+    state.mode = $("mode").value;
+    state.sound = $("sound").checked;
+    history.replaceState(null, "", href({}));
+    if (state.game) location.reload();
+  });
+  $("listToggle").addEventListener("click", () => { document.body.classList.toggle("show-list"); document.body.classList.remove("show-info"); });
+  $("infoToggle").addEventListener("click", () => { document.body.classList.toggle("show-info"); document.body.classList.remove("show-list"); });
+  $("games").addEventListener("click", (e) => { if (e.target.closest("a")) document.body.classList.remove("show-list"); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") document.body.classList.remove("show-list", "show-info"); });
+
+  // ---- go ----
+  if (q.get("deleted")) { toast("Deleted " + q.get("deleted")); history.replaceState(null, "", href({})); }
+  checkApi().then(() => loadList(true));
+  if (state.game) openGame(state.game);
+  else { showEmpty("Pick a game", "Choose one from the list, or type an id above."); setStatus(""); }
 })();
 </script>
 </body>
