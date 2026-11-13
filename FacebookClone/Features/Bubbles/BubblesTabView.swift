@@ -169,16 +169,14 @@ struct BubblesTabView: View {
                     FeedPagerScrollObserver(
                         onBegin: { byUser in model.scrollDidBegin(byUser: byUser) },
                         onSettle: { index in model.scrollDidSettle(at: index) },
-                        onAttach: { pageBy in model.pageBy = pageBy }
+                        onAttach: { pageBy in model.pageBy = pageBy },
+                        lockedIndex: lockedPageIndex
                     )
                 }
             }
             .scrollIndicators(.hidden)
             .scrollTargetBehavior(FeedPagingBehavior())
             .scrollPosition(id: $model.currentID, anchor: .top)
-            // While you play, the game keeps its touches (a clearly vertical swipe on it still pages,
-            // see `swipeWhilePlaying`). With its result card up, the feed above the card scrolls.
-            .scrollDisabled(model.isTakenOver && model.result == nil)
             .onChange(of: realignToken) { _, _ in
                 // Puts the page's top back at the top, even when the pager kept the page id but
                 // was left between pages.
@@ -194,6 +192,16 @@ struct BubblesTabView: View {
         .padding(.bottom, bottomInset)
         .opacity(pagerOpacity)
         .modifier(BubbleFeedScrollProbe())
+    }
+
+    /// While you play, the pager is held on the game's page: its pan is switched off in UIKit and
+    /// any drift (the keyboard, a cover) snaps back to this page. `.scrollDisabled` isn't used:
+    /// toggling it made the paged ScrollView jump to the top (offset 10 on the phone) or stop
+    /// between pages when the game ended. With the result card up, the feed scrolls again (one
+    /// swipe moves on); a clearly vertical swipe on a tap-only game also pages (`swipeWhilePlaying`).
+    private var lockedPageIndex: Int? {
+        guard model.isTakenOver, model.result == nil, let live = model.liveItemID else { return nil }
+        return bubbleStore.feedItems.firstIndex { $0.id == live }
     }
 
     @ViewBuilder

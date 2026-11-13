@@ -20,6 +20,8 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
     var onSettle: (Int) -> Void
     /// Hands the feed a way to turn one page (+1 next, -1 previous), once the pager is found.
     var onAttach: (@escaping (Int) -> Void) -> Void = { _ in }
+    /// While set, the pager is held on this page: no pan, and any drift snaps back here.
+    var lockedIndex: Int? = nil
 
     func makeUIView(context: Context) -> ObserverView {
         let view = ObserverView()
@@ -28,6 +30,7 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
         view.onBegin = onBegin
         view.onSettle = onSettle
         view.onAttach = onAttach
+        view.lockedIndex = lockedIndex
         return view
     }
 
@@ -35,6 +38,7 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
         view.onBegin = onBegin
         view.onSettle = onSettle
         view.onAttach = onAttach
+        view.lockedIndex = lockedIndex
     }
 
     static func dismantleUIView(_ view: ObserverView, coordinator: ()) {
@@ -45,6 +49,13 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
         var onBegin: (Bool) -> Void = { _ in }
         var onSettle: (Int) -> Void = { _ in }
         var onAttach: (@escaping (Int) -> Void) -> Void = { _ in }
+        var lockedIndex: Int? {
+            didSet {
+                guard lockedIndex != oldValue else { return }
+                scrollView?.panGestureRecognizer.isEnabled = lockedIndex == nil
+                FeedScrollLog.log("lock page \(lockedIndex.map(String.init) ?? "off")")
+            }
+        }
 
         private weak var scrollView: UIScrollView?
         private var observation: NSKeyValueObservation?
@@ -81,6 +92,7 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
             guard let found = candidate as? UIScrollView, found !== scrollView else { return }
             observation?.invalidate()
             scrollView = found
+            found.panGestureRecognizer.isEnabled = lockedIndex == nil
             lastOffset = found.contentOffset.y
             FeedScrollLog.log("observer attached height=\(Int(found.bounds.height)) offset=\(Int(found.contentOffset.y))")
             FeedScrollLog.watchMemoryWarnings()
@@ -148,7 +160,10 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
             let top = scrollView.adjustedContentInset.top
             let position = scrollView.contentOffset.y + top
             let maxIndex = max(0, Int(((scrollView.contentSize.height - height) / height).rounded()))
-            let index = min(max(0, Int((position / height).rounded())), maxIndex)
+            let nearest = min(max(0, Int((position / height).rounded())), maxIndex)
+            // Held on the game's page: whatever moved the pager (a keyboard, a cover, a reset to
+            // the top), it goes back to that page, not the nearest one.
+            let index = lockedIndex.map { min(max(0, $0), maxIndex) } ?? nearest
             let target = CGFloat(index) * height - top
             if abs(scrollView.contentOffset.y - target) > 1 {
                 // Resting between pages: snap onto the nearest one; that scroll settles again.
