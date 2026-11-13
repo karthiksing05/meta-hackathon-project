@@ -44,7 +44,7 @@ extension MusePrompts {
       "theme":      {"text": string, META}
      }}
     META is: "source": "you"|"guess", "familiarity": "known"|"approximate"|"unfamiliar", \
-    "plan": "fragment:<id>"|"custom:<what the custom rules do>"|"gate:<playtest check>"|"engine-gap:<name>", \
+    "plan": "fragment:<id>"|"custom:<builtin>, <builtin> - <what they do>"|"gate:<playtest check>"|"engine-gap:<name>", \
     "question": string|null, "options": [string]
     """
 
@@ -61,12 +61,14 @@ extension MusePrompts {
 
         How to fill it
         - source: "you" when the person's words say it (even loosely), "guess" when you chose it.
-        - familiarity, judged against the fragment library below: "known" when one fragment does it as is (plan \
-        "fragment:<id>"); "approximate" when a fragment gets close but needs tuning or a small custom rule; \
-        "unfamiliar" when nothing in the library does it and you'd write it from scratch with custom rules (plan \
-        "custom:<what>"). Be honest: unfamiliar parts are how the person learns what's new to you. Use \
-        "engine-gap:<name>" only for what a 2D touch game can't do at all (camera, voice, live online multiplayer). \
-        Use "gate:<check>" for a rule that a playtest must confirm (e.g. every daily puzzle is solvable).
+        - familiarity is mechanical, not a feeling. Decide it from the plan:
+          "known": it maps to a fragment listed below (plan "fragment:<id>", tuned by params is fine).
+          "approximate": no fragment, but custom rules built from the engine builtins below do it (plan \
+        "custom:<builtin>, <builtin> - <what they do>", e.g. "custom:grid, neighbors8, count - two crowns may not touch").
+          "unfamiliar": it needs something the engine doesn't have (plan "engine-gap:<name>": camera, voice, live online \
+        multiplayer, 3D), or you have no clear plan from the builtins. Most parts are known or approximate; a part is \
+        new to you only when you can't name the builtins that build it.
+        - Use "gate:<check>" for a rule that a playtest must confirm (e.g. every daily puzzle is solvable).
         - question: only on parts that are a guess AND not known. When there are such parts, ask 1 to 3 questions in \
         total, on the guesses that most change how the game plays (a board size, a number of tries, what happens on a \
         mistake). One short question each, with 2–4 short "options" (your pick first). Every other question is null.
@@ -87,8 +89,9 @@ extension MusePrompts {
 
         Fragment library (what the engine already knows):
         \(fragments)
-        Beyond fragments the engine runs custom state (numbers, lists, grids, positions), events, inputs and rules, \
-        so most new mechanics are buildable with custom rules.
+        Engine builtins for custom rules (beyond fragments): custom state as int, float, string, list, set, map, grid \
+        and vec; events, timers (every, after) and typed input (tap, drag, swipe, tap_cell, key presses); and the \
+        functions \(GameAnatomy.promptBuiltins.joined(separator: ", ")).
         """
     }
 

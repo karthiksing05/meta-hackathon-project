@@ -1655,7 +1655,12 @@ plan format):
 
 Every part and rule also carries `source` (`you` | `guess`), `familiarity` (`known` | `approximate` |
 `unfamiliar`, shown as Known / Approximate / New to Muse), `plan` (`fragment:<id>` | `custom:<what>` |
-`gate:<check>` | `engine-gap:<name>`), `question` and `options`. Muse asks questions only on guessed parts
+`gate:<check>` | `engine-gap:<name>`), `question` and `options`. Familiarity is mechanical: **known** maps to a
+listed fragment; **approximate** is custom rules from named engine builtins (`custom:grid, neighbors8, count - …`;
+the list is `GameAnatomy.promptBuiltins`); **unfamiliar** needs an engine gap or has no builtin plan.
+`GameAnatomy.calibrated(knownFragments:)` enforces it on Muse's reply: an unfamiliar part with a listed
+fragment or a builtins-only `custom:` plan becomes approximate, and a "known" part without a fragment becomes
+approximate. Muse asks questions only on guessed parts
 it doesn't know; vague requests get concrete picks marked as guesses. Decoding is lenient (missing fields
 get defaults, unknown familiarity reads as approximate, a `{"anatomy": {...}}` wrapper is accepted).
 Revisions add top-level `changed` (`"end"`, `"rules.2"`, ...) and `reply` ("This changes rule 2 and how it

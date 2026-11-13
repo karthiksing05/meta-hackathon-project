@@ -106,7 +106,10 @@ struct AnatomyMeta: Hashable, Sendable {
         let rest = parts.count > 1 ? parts[1] : ""
         switch kind {
         case "fragment": return rest.isEmpty ? nil : "Built from the \(rest.replacingOccurrences(of: "_", with: " ")) block, tuned for this game"
-        case "custom": return rest.isEmpty ? "Muse writes custom rules for this" : "Muse writes custom rules: \(rest)"
+        case "custom":
+            // "grid, neighbors8 - two crowns may not touch": people read the part after the builtins.
+            let what = rest.range(of: " - ").map { String(rest[$0.upperBound...]) } ?? rest
+            return what.isEmpty ? "Muse writes custom rules for this" : "Muse writes custom rules: \(what)"
         case "gate": return rest.isEmpty ? "Muse checks this in playtests" : "Muse checks this in playtests: \(rest)"
         case "engine-gap", "engine_gap", "gap": return "The game engine can't do this yet\(rest.isEmpty ? "" : " (\(rest))"), so Muse will get as close as it can"
         default: return plan
@@ -518,6 +521,83 @@ struct GameAnatomy: Hashable, Sendable {
         if let plan = meta.plan { bits.append("plan \(plan)") }
         if let answer = meta.answer { bits.append("answer: \(answer)") }
         return " [\(bits.joined(separator: "; "))]"
+    }
+
+    // MARK: Calibration
+
+    /// Engine builtins named in the prompt (`mg-core/src/builtins.rs`, the ones that build mechanics).
+    static let promptBuiltins = [
+        "cells", "coords", "neighbors4", "neighbors8", "in_grid", "in_bounds", "grid_map", "set_at", "count", "filter", "fold",
+        "map_of", "set_of", "sum", "min_of", "max_of", "sort_by", "shuffle", "pick", "random_int", "random_float", "chance",
+        "weighted", "hash", "in_dictionary", "chars", "split", "join", "contains", "index_of", "dist", "overlaps_circle",
+        "overlaps_rect", "clamp", "lerp", "range", "zip",
+    ]
+
+    /// Words a `custom:` plan may use and still count as "built from builtins": the builtins, the
+    /// state types, the input and timer names, and the joining words between them.
+    static let builtinVocabulary: Set<String> = Set(promptBuiltins).union([
+        "abs", "add", "all", "any", "concat", "drop", "first", "last", "find", "get_or", "has", "insert_at", "keys", "len",
+        "length", "lower", "upper", "map", "max", "min", "push", "put", "remove", "remove_at", "repeat", "replace", "reverse",
+        "rotate", "round", "slice", "take", "trim", "values", "vec", "grid", "list", "set", "int", "float", "string", "bool",
+        "state", "event", "events", "timer", "timers", "every", "after", "input", "tap", "tap_cell", "drag", "swipe", "key",
+        "keys", "press", "typed", "counter", "score",
+    ])
+
+    private static let planFillers: Set<String> = ["and", "or", "with", "plus", "then", "of", "a", "an", "the", "per", "on"]
+
+    /// True when a `custom:` plan names only builtins before its description ("custom:grid, neighbors8 - …").
+    static func planUsesOnlyBuiltins(_ plan: String?) -> Bool {
+        guard let plan, let colon = plan.firstIndex(of: ":"),
+              plan[..<colon].trimmingCharacters(in: .whitespaces).lowercased() == "custom" else { return false }
+        var rest = String(plan[plan.index(after: colon)...])
+        for separator in [" - ", " – ", " — ", ";", ":", "("] {
+            if let range = rest.range(of: separator) { rest = String(rest[..<range.lowerBound]) }
+        }
+        let tokens = rest.lowercased().split { !($0.isLetter || $0.isNumber || $0 == "_") }.map(String.init)
+            .filter { !planFillers.contains($0) }
+        return !tokens.isEmpty && tokens.contains { promptBuiltins.contains($0) || builtinVocabulary.contains($0) }
+            && tokens.allSatisfy { builtinVocabulary.contains($0) }
+    }
+
+    /// Applies the familiarity rule mechanically: "New to Muse" only for engine gaps or parts with no
+    /// builtin plan. An unfamiliar part whose plan is a listed fragment, or a `custom:` plan made only
+    /// of builtins, becomes approximate; a "known" part without a listed fragment becomes approximate.
+    func calibrated(knownFragments: Set<String>) -> GameAnatomy {
+        func fix(_ meta: AnatomyMeta) -> AnatomyMeta {
+            var meta = meta
+            let plan = meta.plan?.trimmingCharacters(in: .whitespaces) ?? ""
+            let lower = plan.lowercased()
+            let fragmentID = lower.hasPrefix("fragment:")
+                ? String(lower.dropFirst("fragment:".count)).trimmingCharacters(in: .whitespaces) : nil
+            switch meta.familiarity {
+            case .unfamiliar:
+                if lower.hasPrefix("engine-gap") { break }
+                if let fragmentID, knownFragments.contains(fragmentID) || knownFragments.isEmpty {
+                    meta.familiarity = .approximate
+                } else if Self.planUsesOnlyBuiltins(plan) {
+                    meta.familiarity = .approximate
+                }
+            case .known:
+                if fragmentID == nil, !lower.hasPrefix("gate") { meta.familiarity = .approximate }
+            case .approximate:
+                break
+            }
+            if meta.familiarity == .known { meta.question = nil; meta.options = [] }
+            return meta
+        }
+        var out = self
+        for index in out.parts.indices { out.parts[index].meta = fix(out.parts[index].meta) }
+        for index in out.rules.indices { out.rules[index].meta = fix(out.rules[index].meta) }
+        return out
+    }
+
+    /// Fragment ids from prompt lines ("- grid_board: …").
+    static func fragmentIDs(in lines: String) -> Set<String> {
+        Set(lines.split(separator: "\n").compactMap { line in
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard trimmed.hasPrefix("- "), let colon = trimmed.firstIndex(of: ":") else { return nil }
+            return String(trimmed[trimmed.index(trimmed.startIndex, offsetBy: 2)..<colon]).lowercased()
+        })
     }
 
     // MARK: Helpers

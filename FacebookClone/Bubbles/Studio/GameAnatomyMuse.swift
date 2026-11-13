@@ -24,7 +24,8 @@ struct GameAnatomyMuse: Sendable {
         try await ask(
             system: MusePrompts.anatomySystem(fragments: fragments),
             user: MusePrompts.anatomyUser(request: request, audience: audience),
-            purpose: "anatomy"
+            purpose: "anatomy",
+            fragments: fragments
         )
     }
 
@@ -34,11 +35,15 @@ struct GameAnatomyMuse: Sendable {
         try await ask(
             system: MusePrompts.anatomySystem(fragments: fragments),
             user: MusePrompts.anatomyReviseUser(anatomy: anatomy.json, request: request, change: change, answers: anatomy.answers, afterPlaying: afterPlaying),
-            purpose: afterPlaying ? "anatomy change" : "anatomy refine"
+            purpose: afterPlaying ? "anatomy change" : "anatomy refine",
+            fragments: fragments
         )
     }
 
-    private func ask(system: String, user: String, purpose: String) async throws -> GameAnatomy {
+    /// Muse's reply, decoded, then calibrated (`GameAnatomy.calibrated`) unless `calibrates` is off.
+    var calibrates = true
+
+    private func ask(system: String, user: String, purpose: String, fragments: String) async throws -> GameAnatomy {
         let client = self.client
         let model = self.model
         let options = MuseClient.ChatOptions(maxTokens: 12_000, reasoningEffort: reasoningEffort, timeout: timeout, maxAttempts: 2, purpose: purpose)
@@ -48,7 +53,7 @@ struct GameAnatomyMuse: Sendable {
         guard let anatomy = GameAnatomy.decode(value) else {
             throw MuseError.invalidReply("\(model) didn't return a game anatomy")
         }
-        return anatomy
+        return calibrates ? anatomy.calibrated(knownFragments: GameAnatomy.fragmentIDs(in: fragments)) : anatomy
     }
 
     /// The engine's fragment list for the prompt: the live microgame catalog when it loads quickly,
