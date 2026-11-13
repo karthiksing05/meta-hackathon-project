@@ -217,7 +217,7 @@ back to its own neutral defaults. The server holds no cast, seed games or invent
 The games host serves a small player at **`https://games.<domain>/play/`** (`/play/?game=<24-character id or slug>`). It runs the
 app's own game runtime in the browser (read from `FacebookClone/Bubbles/Runtime/web`; the games image copies that folder to `/app/player/runtime`), loads the game's `manifest.json` from the games host, and boots it, so a game looks and plays as it does in the
 app. A microgame runs on Artem's Rust engine (WebAssembly) with its game script from `content.game_json`. The page lists the games
-from `GET /v1/feed`, can watch a bot play, and logs the runtime's messages. The API allows the games host's origin for CORS.
+from `GET /v1/feed`, can watch a bot play, and logs the runtime's messages. A red **Delete this game** button removes the open game (and its saves and scores) after a confirmation: it asks the owner to sign in (the page keeps the token for the tab only) and calls `DELETE /v1/creations/{id}`; anyone else gets "only the game's owner can delete it". The API allows the games host's origin for CORS.
 Refresh the runtime copy from `main` when the app's runtime changes.
 
 ## Event log and recommender support
