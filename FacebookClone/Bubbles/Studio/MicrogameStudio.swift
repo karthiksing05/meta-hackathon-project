@@ -250,6 +250,18 @@ enum MicrogameStudioError: Error, LocalizedError {
         return catalog
     }
 
+    /// The gold examples closest to `request` (authoring/gold/, picked by expander/gold.mjs), as prompt
+    /// text with each one's request, why it works, the mistakes it avoids and its manifest.
+    func examples(for request: String, count: Int = 2) async throws -> (ids: [String], text: String) {
+        let text = try await call("return MicrogameStudio.examples(request, count)",
+                                  arguments: ["request": request, "count": count],
+                                  operation: "pick examples", timeout: timeouts.catalog)
+        guard let json = try? JSONValue.parse(text), let prompt = json["text"]?.string else {
+            throw MicrogameStudioError.badReply("examples didn't return text")
+        }
+        return ((json["ids"]?.array ?? []).compactMap(\.string), prompt)
+    }
+
     /// Expands an authoring manifest (or a microgame Bubble wrapper) and validates it in the engine.
     /// Problems come back as diagnostics, not errors; this throws only when the page fails.
     func expand(_ authoring: JSONValue) async throws -> MicrogameExpansion {

@@ -1636,3 +1636,8 @@ events by `seq`, and fetches the finished game's manifest from `manifestUrl` wit
 (`data` on events, `position`, `code`) are used when present. It's chosen by `FB_API=live` or
 `FB_GENERATE=mock` (`App/DebugLaunch.swift`); otherwise Studio uses the on-device composer. Tweaks and
 next levels stay on-device (`revise` reads the server game's `content.authoring_json`).
+
+**Gold examples.** Muse's prompt shows the two gold games closest to the request (`authoring/gold/`, 16
+hand-made games paired with requests; `expander/gold.mjs` picks them and `MicrogameStudio.examples(for:)`
+returns them). When a request names a franchise, the prompt asks for an original homage.
+`MicrogameComposer.lastStats.examples` records which were used.

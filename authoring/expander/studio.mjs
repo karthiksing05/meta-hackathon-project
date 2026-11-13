@@ -11,6 +11,7 @@ import { expand as expandManifest, translate } from './expand.mjs';
 import { wrapGame } from './wrap.mjs';
 import { playtestAsync, DEFAULT_BOTS } from '../playtest/gate-async.mjs';
 import { sortSafe } from './stable.mjs';
+import { pickGold, goldPromptText } from './gold.mjs';
 
 export const STUDIO_API_VERSION = 1;
 
@@ -221,11 +222,12 @@ function unwrap(v) {
 // ---------- the API ----------
 
 /**
- * data: {library: {fragments, looks}, engineCatalog, formatRules, examples: [{name, manifest}], build}
+ * data: {library: {fragments, looks}, engineCatalog, formatRules, examples: [{name, manifest}],
+ *        gold: [{id, request, group, genre, title, brief, why_its_good, pitfalls_avoided, manifest}], build}
  * getEngine(): the engine (`MicrogameEngine.getEngine()`), or null with engineError() saying why.
  */
 export function createStudio(data, { getEngine, engineError = () => null } = {}) {
-  const { library, engineCatalog = {}, formatRules = '', examples = [], build = {} } = data;
+  const { library, engineCatalog = {}, formatRules = '', examples = [], gold = [], build = {} } = data;
   let catalogCache = null;
   const randomBuiltins = new Set((engineCatalog.builtins || []).filter((b) => b.random).map((b) => b.name));
   const safe = (doc) => sortSafe(doc, { isRandom: (n) => randomBuiltins.has(n) });
@@ -259,6 +261,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       engine: engineCatalog,
       format_rules: formatRules,
       examples,
+      gold: gold.map(({ manifest, ...e }) => e),
       bots: DEFAULT_BOTS,
       prompt: {
         fragments: fragments.map(fragmentText).join('\n'),
@@ -387,5 +390,17 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     return JSON.stringify(wrapGame(opts));
   }
 
-  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, wrap });
+  /**
+   * The gold examples closest to a request, as prompt text (expander/gold.mjs): {ids, text}.
+   * Falls back to the fixed examples when there is no gold set.
+   */
+  function examplesFor(request, k = 2) {
+    const picked = pickGold(String(request || ''), gold, Number(k) || 2);
+    if (!picked.length) {
+      return JSON.stringify({ ids: examples.map((e) => e.name), text: examples.map((e) => `### ${e.name}\n${JSON.stringify(e.manifest)}`).join('\n\n') });
+    }
+    return JSON.stringify({ ids: picked.map((e) => e.id), text: goldPromptText(picked) });
+  }
+
+  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, wrap, examples: examplesFor });
 }

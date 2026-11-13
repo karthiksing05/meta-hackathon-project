@@ -7,7 +7,9 @@ import Foundation
 enum MicrogamePrompts {
     // MARK: System
 
-    static func system(_ catalog: MicrogameCatalog) -> String {
+    /// `examples`: prompt text for the gold examples closest to the request
+    /// (`MicrogameStudio.examples(for:)`); nil uses the catalog's fixed examples.
+    static func system(_ catalog: MicrogameCatalog, examples: String? = nil) -> String {
         """
         You design microgames for Bubbles: tiny, original games people make and play inside Facebook on a phone.
         A microgame is written as an authoring manifest (JSON). An expander combines it with a library of tested \
@@ -34,6 +36,11 @@ enum MicrogamePrompts {
         - Expressions use single-quoted strings, and floats are written with a decimal point (1.0, not 1) where \
         a float is expected.
         - Everything is synthetic and original: no real people, brands, businesses or copies of existing games.
+        - When a request names a franchise, film, show, book or game ("like Harry Potter", "Star Wars style"), \
+        make an original homage to its genre and tropes: invent every name, character, place, house, spell and \
+        ship. Never use the franchise's own names, quotes or logos.
+        - Aim for the quality of the examples below: specific, funny or vivid writing; a difficulty curve; \
+        art for every role; a sound set that fits; real ways to win and to lose.
 
         ## The authoring format
 
@@ -51,9 +58,9 @@ enum MicrogamePrompts {
 
         \(catalog.prompt.engine)
 
-        ## Complete examples that validate and pass the bots
+        ## Complete examples that validate and pass the bots (the closest to this request)
 
-        \(catalog.prompt.examples)
+        \(examples ?? catalog.prompt.examples)
         """
     }
 

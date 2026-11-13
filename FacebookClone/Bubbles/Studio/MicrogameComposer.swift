@@ -104,6 +104,8 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
         var museCalls = 0
         var seconds: Double = 0
         var models: [String] = []
+        /// The gold examples put in Muse's prompt (authoring/gold/).
+        var examples: [String] = []
     }
 
     let muse: any MicrogameMuse
@@ -130,7 +132,9 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
         lastStats = Stats()
         do {
             let catalog = try await studio.catalog()
-            let system = MicrogamePrompts.system(catalog)
+            let examples = try? await studio.examples(for: request)
+            lastStats.examples = examples?.ids ?? []
+            let system = MicrogamePrompts.system(catalog, examples: examples?.text)
             let draft = try await draft(system: system, user: MicrogamePrompts.compose(request: request, brief: brief), onEvent: onEvent)
             let (expansion, _) = try await check(draft, system: system, request: request, onEvent: onEvent)
             let title = expansion.game["meta"]?["title"]?.string ?? "microgame"
@@ -163,7 +167,9 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
                 throw ComposerError.noAuthoring
             }
             let catalog = try await studio.catalog()
-            let system = MicrogamePrompts.system(catalog)
+            let examples = try? await studio.examples(for: "\(bubble.title). \(bubble.oneLineRule) \(request)")
+            lastStats.examples = examples?.ids ?? []
+            let system = MicrogamePrompts.system(catalog, examples: examples?.text)
             let draft = try await draft(system: system, user: MicrogamePrompts.revise(authoring: authoring, request: request, brief: bubble.brief), onEvent: onEvent)
             let (expansion, _) = try await check(draft, system: system, request: request, onEvent: onEvent)
             var manifest = try await studio.wrap(expansion, id: bubble.id, brief: bubble.brief, emoji: bubble.style.emoji, seed: bubble.seed)
