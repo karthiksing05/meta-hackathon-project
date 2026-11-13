@@ -12,6 +12,7 @@ struct SavesStatsView: View {
         Group {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
+                    .task(id: bubble.id) { bubbleStore.loadSavers(for: bubble) }
             } else {
                 ContentUnavailableView("This \(ProductName.singular) didn't load", systemImage: "sparkles", description: Text("It isn't available anymore."))
             }
@@ -36,7 +37,18 @@ struct SavesStatsView: View {
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                 }
-                if savers.isEmpty {
+                if case .failed(let message) = bubbleStore.saverStates[bubble.id] {
+                    LiveDataStateView(kind: .failed(message), title: "Couldn't load who saved it") {
+                        bubbleStore.loadSavers(for: bubble, force: true)
+                    }
+                } else if savers.isEmpty, bubbleStore.saverStates[bubble.id] == .loading {
+                    LiveDataStateView(kind: .loading, title: "Loading who saved it…")
+                } else if savers.isEmpty, bubble.saveCount > 0 {
+                    Text(SavesCopy.noFriendsSaved(bubble.saveCount))
+                        .font(.fbMeta)
+                        .foregroundStyle(FBColor.secondaryText)
+                        .frame(maxWidth: .infinity)
+                } else if savers.isEmpty {
                     emptyState(bubble)
                 } else {
                     VStack(spacing: 0) {

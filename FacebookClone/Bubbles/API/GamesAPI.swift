@@ -9,6 +9,8 @@ import Foundation
 //     let game = try await api.game(id: slugOrServerID)                // a slug or a 24-hex server id
 //     let board = try await api.scores(gameID: game.id)                // one global board per game
 //     _ = try await api.setSaved(true, gameID: game.id)                // PUT /like; needs an account
+//     let saved = try await api.savedGames()                           // GET /v1/me/likes
+//     let who = try await api.saves(gameID: game.id)                   // {count, friends}
 //     try await api.sendFeedEvents([...])                              // what happened on each page
 //
 // `GamesAPILive` also adopts `GamesAuth`. The app signs in once at launch (`GamesAccount`).
@@ -31,6 +33,11 @@ protocol GamesAPI: Sendable {
     func submitScore(_ score: Int, gameID: String) async throws -> [RemoteScore]
     /// A save is a like on the server.
     func setSaved(_ saved: Bool, gameID: String) async throws -> SaveState
+    /// The games I saved, newest first (`GET /v1/me/likes`); needs an account.
+    func savedGames() async throws -> [RemoteGame]
+    /// How many people saved a game, and which of my friends did (`GET /v1/games/{id}/likes`).
+    /// Signed out, `friends` is empty.
+    func saves(gameID: String) async throws -> RemoteGameSaves
     /// Feed page events and off-feed moments (`POST /v1/feed/events`), in batches of 100.
     func sendFeedEvents(_ events: [FeedEvent]) async throws
 
@@ -46,6 +53,15 @@ protocol GamesAPI: Sendable {
     func blend(groupID: String, count: Int) async throws -> RemoteBlend
     /// My own games (`GET /v1/creations`).
     func creations() async throws -> [RemoteGame]
+
+    // Game anatomy (docs/BUBBLES.md 7.13): the server asks Muse; one short call each (about 5 to
+    // 10 s), answered in the reply as a `game-anatomy/0.1` object. Decode it with
+    // `GameAnatomy.decode`. 503: Muse isn't set up; 502: Muse's reply wasn't an anatomy.
+    /// `POST /v1/anatomy {request, audience?}`: Muse takes an idea apart into its working parts.
+    func anatomy(request: String, audience: String?) async throws -> JSONValue
+    /// `POST /v1/anatomy/revise {anatomy, change, request?, afterPlaying?}`: the anatomy with the
+    /// change (and any answers in it) folded in, plus `changed` and `reply`.
+    func reviseAnatomy(_ anatomy: JSONValue, change: String, request: String?, afterPlaying: Bool) async throws -> JSONValue
 }
 
 /// Accounts.

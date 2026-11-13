@@ -26,6 +26,8 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     private let decoder = GamesAPICoding.decoder()
     private static let timeout: TimeInterval = 8
     private static let uploadTimeout: TimeInterval = 60
+    /// The server gives Muse 70 s for an anatomy turn.
+    private static let anatomyTimeout: TimeInterval = 75
 
     init(baseURL: URL, autoSignIn: Bool = false, session: URLSession? = nil) {
         self.baseURL = baseURL
@@ -105,6 +107,16 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return try decode(data)
     }
 
+    func savedGames() async throws -> [RemoteGame] {
+        let games = (try await get("v1/me/likes", query: [URLQueryItem(name: "limit", value: "100")], auth: .required) as RemoteList<RemoteGame>).items
+        games.forEach(link)
+        return games
+    }
+
+    func saves(gameID: String) async throws -> RemoteGameSaves {
+        try await get("v1/games/\(try serverID(gameID))/likes", auth: .optional)
+    }
+
     func sendFeedEvents(_ events: [FeedEvent]) async throws {
         let wire: [[String: Any]] = events.compactMap { e in
             guard let id = ids.serverID(for: e.gameID) else { return nil }
@@ -180,6 +192,28 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         let games = (try await get("v1/creations", auth: .required) as RemoteList<RemoteGame>).items
         games.forEach(link)
         return games
+    }
+
+    // MARK: Game anatomy
+
+    func anatomy(request: String, audience: String?) async throws -> JSONValue {
+        var body: [String: JSONValue] = ["request": .string(request)]
+        if let audience = audience?.trimmingCharacters(in: .whitespacesAndNewlines), !audience.isEmpty {
+            body["audience"] = .string(audience)
+        }
+        return try await anatomyCall("v1/anatomy", body)
+    }
+
+    func reviseAnatomy(_ anatomy: JSONValue, change: String, request: String?, afterPlaying: Bool) async throws -> JSONValue {
+        var body: [String: JSONValue] = ["anatomy": anatomy, "change": .string(change), "afterPlaying": .bool(afterPlaying)]
+        if let request, !request.isEmpty { body["request"] = .string(request) }
+        return try await anatomyCall("v1/anatomy/revise", body)
+    }
+
+    private func anatomyCall(_ path: String, _ body: [String: JSONValue]) async throws -> JSONValue {
+        let data = try await send("POST", path, body: try GamesAPICoding.encoder().encode(JSONValue.object(body)),
+                                  contentType: "application/json", auth: .required, timeout: Self.anatomyTimeout)
+        return try decode(data)
     }
 
     /// Remembers a game's slug so later calls by slug go to its server id.

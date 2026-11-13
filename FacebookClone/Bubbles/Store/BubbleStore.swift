@@ -28,6 +28,10 @@ final class BubbleStore {
     var boardStates: [String: FeedLoadState] = [:]
     /// Friends and Group boards from the server, by `boardKey` (the everyone board is `bubble.scores`).
     var scopedBoards: [String: [BubbleScore]] = [:]
+    /// Who saved each game, as far as the server says (`GET /v1/games/{id}/likes`), by game id.
+    var saverStates: [String: BubbleSaversState] = [:]
+    /// Your saved games for the Library (`GET /v1/me/likes`).
+    var savedGamesState: FeedLoadState = .idle
 
     @ObservationIgnored let appStore: AppStore
 

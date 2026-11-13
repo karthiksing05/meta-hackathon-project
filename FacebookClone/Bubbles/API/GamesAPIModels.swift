@@ -127,6 +127,26 @@ struct SaveState: Codable, Hashable, Sendable {
     var likedByMe: Bool
 }
 
+/// `GET /v1/games/{id}/likes`: how many people saved the game, and which of the caller's friends
+/// did (each with `isFriend` set). Signed out, `friends` is empty.
+struct RemoteGameSaves: Decodable, Sendable {
+    var count: Int
+    var friends: [RemoteProfile]
+
+    enum CodingKeys: String, CodingKey { case count, friends }
+
+    init(count: Int, friends: [RemoteProfile] = []) {
+        self.count = count
+        self.friends = friends
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        count = try c.decodeIfPresent(Int.self, forKey: .count) ?? 0
+        friends = try c.decodeIfPresent([RemoteProfile].self, forKey: .friends) ?? []
+    }
+}
+
 /// An account, as the server returns it.
 struct RemoteUser: Codable, Identifiable, Hashable, Sendable {
     var id: String

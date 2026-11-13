@@ -113,6 +113,7 @@ enum SavesCopy {
     static func savedBy(_ who: String) -> String { "Saved by \(who)" }
     static func savedByCount(_ n: Int) -> String { "Saved by \(n.fbCompact) \(n == 1 ? "person" : "people")" }
     static func andMore(_ n: Int) -> String { "and \(n.fbCompact) more" }
+    static func noFriendsSaved(_ n: Int) -> String { "\(savedByCount(n)). None of your friends have saved it yet." }
     static func mutual(_ n: Int) -> String { n == 1 ? "1 mutual friend" : "\(n) mutual friends" }
     static func libraryWeekly(_ n: Int) -> String { "Your games were saved \(n.fbCompact) \(n == 1 ? "time" : "times") this week" }
     static func milestone(_ title: String, _ n: Int) -> String { "\(title) just passed \(n.fbCompact) saves." }
