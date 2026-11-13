@@ -1,4 +1,4 @@
-# Bubbles backend
+# Muse Curios backend
 
 Go + Chi API, a small static server for published game packages, MongoDB 8 for metadata and social data.
 Production runs on one Vultr server behind a Cloudflare Tunnel: the API is at https://api.ol4ol.com and the
@@ -234,7 +234,7 @@ Kinds, and what makes them:
 - `round_started`: someone started `POST /v1/rounds` with you in it (`roundId`, `gameId`; `groupId` for a Group round).
 - `round_played`: a member of a round you are in played their run; the body is their result line (`roundId`, `gameId`).
 - `leaderboard_lost`: someone took first place from you on a ranked game. Only the former first place hears it, only when a counted score changes the leader, by the game's direction and tie-break. Own improvements, scores below first, empty boards and unranked games make nothing. Score writes on one game are serialized.
-- `daily_ready`: `POST /v1/groups/{id}/daily` by the Group's owner. Every other member hears "Today's Daily in <Group> is ready" (`gameId`, `groupId`). Once per member, date and game, so setting the same Daily again notifies nobody twice.
+- `daily_ready`: `POST /v1/groups/{id}/daily` by the Group's owner. Every other member hears "Today's Curio in <Group> is ready" (`gameId`, `groupId`). Once per member, date and game, so setting the same Daily again notifies nobody twice.
 - `viral_match`: a public game with many distinct players in a window whose description is close to your learned taste (the cosine of `game-recs.js`'s `describe(...).x` and your taste vector). Defaults: 100 players in 24 h, cosine 0.85, at least 5 learned pages, one a day, never your own game or one you played, each game once. Tune with `VIRAL_MIN_PLAYERS`, `VIRAL_WINDOW`, `VIRAL_COSINE`, `VIRAL_MIN_PAGES`, `VIRAL_PER_DAY`, `VIRAL_INTERVAL`; `VIRAL_MATCH=0` turns it off. A person whose taste has dislikes pulls away from a game's vector, so the cosine of 0.85 is a strict bar; expect to calibrate it on real data.
 
 One row per (person, source) at most, so a retried trigger never notifies twice. The inbox works with no push configured.
