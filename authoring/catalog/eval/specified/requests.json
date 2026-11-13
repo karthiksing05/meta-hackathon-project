@@ -1,0 +1,339 @@
+[
+  {
+    "id": "sp01", "general": "gen01",
+    "request": "The Office trivia with 12 questions only about Season 3, 4 answer choices each, and a 15-second timer per question",
+    "expect": [
+      {"id": "r1", "quote": "12 questions", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 12}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "only about Season 3", "kind": "content", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "4 answer choices each", "kind": "count", "target": {"measure": "choices", "op": "==", "value": 4}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "a 15-second timer per question", "kind": "timer", "target": {"measure": "per_question_seconds", "op": "==", "value": 15}, "must": true, "verify": "code"},
+      {"id": "r5", "quote": "The Office", "kind": "content", "target": {"text": ["Office"], "match": "all"}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "gen01", "general_of": "sp01",
+    "request": "The Office trivia game"
+  },
+  {
+    "id": "sp02", "general": "gen02",
+    "request": "Snake game in pixel art using only greens and black, where the snake speeds up every 5 apples and you have 3 lives",
+    "expect": [
+      {"id": "r1", "quote": "pixel art", "kind": "style", "target": null, "must": true, "verify": "judge"},
+      {"id": "r2", "quote": "only greens and black", "kind": "style", "target": {"palette": {"only": ["green", "black"]}}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "the snake speeds up every 5 apples", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "you have 3 lives", "kind": "lose", "target": {"measure": "lives", "op": "==", "value": 3}, "must": true, "verify": "playtest"}
+    ]
+  },
+  {
+    "id": "gen02", "general_of": "sp02",
+    "request": "Snake game"
+  },
+  {
+    "id": "sp03", "general": "gen03",
+    "request": "Endless runner with 4 lanes where I swipe, not tap, to change lanes, and a boss drone appears every 30 seconds",
+    "expect": [
+      {"id": "r1", "quote": "4 lanes", "kind": "count", "target": {"measure": "lanes", "op": "==", "value": 4}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "I swipe", "kind": "control", "target": {"input": "swipe"}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "not tap", "kind": "control", "target": {"input_not": "tap"}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "a boss drone appears every 30 seconds", "kind": "rule", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "gen03", "general_of": "sp03",
+    "request": "Endless runner game"
+  },
+  {
+    "id": "sp04", "general": "gen04",
+    "request": "Word scramble using these 5 words: pancake, lantern, giraffe, velvet, compass. 45-second timer, and wrong answers cost 2 seconds",
+    "expect": [
+      {"id": "r1", "quote": "these 5 words: pancake, lantern, giraffe, velvet, compass", "kind": "content", "target": {"text": ["pancake", "lantern", "giraffe", "velvet", "compass"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "5 words", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 5}, "must": false, "verify": "code"},
+      {"id": "r3", "quote": "45-second timer", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 45}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "wrong answers cost 2 seconds", "kind": "rule", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "gen04", "general_of": "sp04",
+    "request": "Word scramble game"
+  },
+  {
+    "id": "sp05", "general": "gen05",
+    "request": "Space shooter with 3 waves getting harder, the boss shows up in wave 3, and I have 3 lives",
+    "expect": [
+      {"id": "r1", "quote": "3 waves", "kind": "structure", "target": {"measure": "waves", "op": "==", "value": 3}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "getting harder", "kind": "structure", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "the boss shows up in wave 3", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "I have 3 lives", "kind": "lose", "target": {"measure": "lives", "op": "==", "value": 3}, "must": true, "verify": "playtest"}
+    ]
+  },
+  {
+    "id": "gen05", "general_of": "sp05",
+    "request": "Space shooter game"
+  },
+  {
+    "id": "sp06", "general": "gen06",
+    "request": "Trivia game where the host roasts you in Gen Z slang after every wrong answer, 10 questions about 2000s pop music",
+    "expect": [
+      {"id": "r1", "quote": "the host roasts you in Gen Z slang", "kind": "tone", "target": null, "must": true, "verify": "judge"},
+      {"id": "r2", "quote": "after every wrong answer", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "10 questions", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 10}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "about 2000s pop music", "kind": "content", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "gen06", "general_of": "sp06",
+    "request": "Pop music trivia game"
+  },
+  {
+    "id": "sp07", "general": "gen07",
+    "request": "Memory card matching game with 8 pairs of ocean animals, a 60-second timer, and double points if you match 3 pairs in a row",
+    "expect": [
+      {"id": "r1", "quote": "8 pairs", "kind": "count", "target": {"measure": "pairs", "op": "==", "value": 8}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "of ocean animals", "kind": "content", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "a 60-second timer", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 60}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "double points if you match 3 pairs in a row", "kind": "rule", "target": {"state_reaches": {"name": "mult|multiplier|double|bonus", "op": ">=", "value": 2}}, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "gen07", "general_of": "sp07",
+    "request": "Memory matching game"
+  },
+  {
+    "id": "sp08", "general": "gen08",
+    "request": "Whack-a-mole with 9 holes in a 3x3 grid, golden moles worth 5 points, and the game ends after 40 seconds",
+    "expect": [
+      {"id": "r1", "quote": "9 holes in a 3x3 grid", "kind": "count", "target": {"measure": "holes", "op": "==", "value": 9}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "golden moles worth 5 points", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "the game ends after 40 seconds", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 40}, "must": true, "verify": "playtest"}
+    ]
+  },
+  {
+    "id": "gen08", "general_of": "sp08",
+    "request": "Whack-a-mole game"
+  },
+  {
+    "id": "sp09", "general": "gen09",
+    "request": "Best of 3 rock paper scissors against my brother, where each round has a 5-second countdown and the winner gets a crown",
+    "expect": [
+      {"id": "r1", "quote": "Best of 3", "kind": "structure", "target": {"measure": "rounds", "op": "==", "value": 3}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "against my brother", "kind": "social", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "each round has a 5-second countdown", "kind": "timer", "target": {"measure": "per_question_seconds", "op": "==", "value": 5}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "the winner gets a crown", "kind": "win", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "gen09", "general_of": "sp09",
+    "request": "Rock paper scissors game"
+  },
+  {
+    "id": "sp10", "general": "gen10",
+    "request": "Trivia for my book club of 6 about Pride and Prejudice, 8 multiple choice questions, no timer",
+    "expect": [
+      {"id": "r1", "quote": "for my book club of 6", "kind": "social", "target": null, "must": false, "verify": "judge"},
+      {"id": "r2", "quote": "about Pride and Prejudice", "kind": "content", "target": {"text": ["Darcy", "Elizabeth"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "8 multiple choice questions", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 8}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "multiple choice", "kind": "control", "target": {"input_not": "type"}, "must": true, "verify": "code"},
+      {"id": "r5", "quote": "no timer", "kind": "rule", "target": {"no": "timer"}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "gen10", "general_of": "sp10",
+    "request": "Book trivia game"
+  },
+  {
+    "id": "sp11", "source": "kevin #17",
+    "request": "Choose your own adventure where I'm a medieval peasant trying to become king in 10 choices or less",
+    "expect": [
+      {"id": "r1", "quote": "in 10 choices or less", "kind": "count", "target": {"measure": "choices_made", "op": "<=", "value": 10}, "must": true, "verify": "playtest"},
+      {"id": "r2", "quote": "trying to become king", "kind": "win", "target": {"text": ["king"], "match": "all"}, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "I'm a medieval peasant", "kind": "content", "target": {"text": ["peasant"], "match": "all"}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp12", "source": "sponsored S2",
+    "request": "Dress to Impress sponsored runway game where I get a theme, dress up in 90 seconds, and the crowd votes",
+    "expect": [
+      {"id": "r1", "quote": "dress up in 90 seconds", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 90}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "I get a theme", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "the crowd votes", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "Dress to Impress", "kind": "content", "target": {"text": ["Dress to Impress"], "match": "all"}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp13", "source": "sponsored S12",
+    "request": "HeyTea ordering game where I have 60 seconds to build my order and it tells me my drink personality",
+    "expect": [
+      {"id": "r1", "quote": "I have 60 seconds", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 60}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "it tells me my drink personality", "kind": "win", "target": {"text": ["personality"], "match": "all"}, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "HeyTea", "kind": "content", "target": {"text": ["HeyTea"], "match": "all"}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp14", "source": "sponsored S13",
+    "request": "Uniqlo shopping game where I have $100 to pack for a ski trip without freezing or going over budget",
+    "expect": [
+      {"id": "r1", "quote": "I have $100", "kind": "count", "target": {"measure": "budget", "op": "==", "value": 100}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "without freezing", "kind": "lose", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "or going over budget", "kind": "lose", "target": null, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "Uniqlo", "kind": "content", "target": {"text": ["Uniqlo"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r5", "quote": "pack for a ski trip", "kind": "content", "target": {"text": ["ski"], "match": "all"}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp15",
+    "request": "Flappy-style game with a paper airplane, gaps that shrink every 10 pipes, only pastel blue and white colors, and one hit ends the run",
+    "expect": [
+      {"id": "r1", "quote": "a paper airplane", "kind": "content", "target": {"text": ["plane"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "gaps that shrink every 10 pipes", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "only pastel blue and white colors", "kind": "style", "target": {"palette": {"only": ["blue", "white"]}}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "one hit ends the run", "kind": "lose", "target": {"measure": "lives", "op": "==", "value": 1}, "must": true, "verify": "playtest"}
+    ]
+  },
+  {
+    "id": "sp16",
+    "request": "Math sprint: 20 addition problems with numbers under 50, a 60-second clock, and each wrong answer takes 3 seconds off",
+    "expect": [
+      {"id": "r1", "quote": "20 addition problems", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 20}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "with numbers under 50", "kind": "content", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "a 60-second clock", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 60}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "each wrong answer takes 3 seconds off", "kind": "rule", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "sp17",
+    "request": "Typing game where I type the names of the 8 planets in order before 30 seconds run out",
+    "expect": [
+      {"id": "r1", "quote": "I type", "kind": "control", "target": {"input": "type"}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "the names of the 8 planets", "kind": "content", "target": {"text": ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "in order", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "before 30 seconds run out", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 30}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp18",
+    "request": "Breakout with 5 rows of bricks, the ball speeds up after every row cleared, 2 lives, neon orange and purple colors",
+    "expect": [
+      {"id": "r1", "quote": "5 rows of bricks", "kind": "count", "target": {"measure": "rows", "op": "==", "value": 5}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "the ball speeds up after every row cleared", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "2 lives", "kind": "lose", "target": {"measure": "lives", "op": "==", "value": 2}, "must": true, "verify": "playtest"},
+      {"id": "r4", "quote": "neon orange and purple colors", "kind": "style", "target": {"palette": {"include": ["orange", "purple"]}}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp19",
+    "request": "Quiz about my friend group's inside jokes with Priya, Marcus and Jo: 6 questions, and the loser has to buy coffee, shown on the end screen",
+    "expect": [
+      {"id": "r1", "quote": "Priya, Marcus and Jo", "kind": "content", "target": {"text": ["Priya", "Marcus", "Jo"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "6 questions", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 6}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "the loser has to buy coffee, shown on the end screen", "kind": "social", "target": {"text": ["coffee"], "match": "all"}, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "my friend group's inside jokes", "kind": "social", "target": null, "must": false, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "sp20",
+    "request": "Block stacker on a board 8 columns wide, where clearing 2 lines at once shows a 'DOUBLE!' message, and the speed goes up every 30 seconds",
+    "expect": [
+      {"id": "r1", "quote": "a board 8 columns wide", "kind": "count", "target": {"measure": "columns", "op": "==", "value": 8}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "shows a 'DOUBLE!' message", "kind": "tone", "target": {"text": ["DOUBLE!"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "clearing 2 lines at once", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "the speed goes up every 30 seconds", "kind": "rule", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "sp21",
+    "request": "Geography game with 10 flags from South America only, typed answers not multiple choice, 3 strikes and you're out",
+    "expect": [
+      {"id": "r1", "quote": "10 flags", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 10}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "from South America only", "kind": "content", "target": {"text": ["Brazil", "Argentina"], "match": "any"}, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "typed answers", "kind": "control", "target": {"input": "type"}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "not multiple choice", "kind": "control", "target": {"input_not": "choice"}, "must": true, "verify": "code"},
+      {"id": "r5", "quote": "3 strikes and you're out", "kind": "lose", "target": {"measure": "lives", "op": "==", "value": 3}, "must": true, "verify": "playtest"}
+    ]
+  },
+  {
+    "id": "sp22",
+    "request": "Pizza shop game where I make exactly 5 pizzas, each order lists 3 toppings, and every wrong topping costs 1 of my 3 stars",
+    "expect": [
+      {"id": "r1", "quote": "exactly 5 pizzas", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 5}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "each order lists 3 toppings", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "every wrong topping costs 1 of my 3 stars", "kind": "lose", "target": {"measure": "lives", "op": "==", "value": 3}, "must": true, "verify": "playtest"}
+    ]
+  },
+  {
+    "id": "sp23",
+    "request": "Calm garden game with no timer and no way to lose, in a watercolor style with soft greens, where I water 12 plants until they bloom",
+    "expect": [
+      {"id": "r1", "quote": "no timer", "kind": "rule", "target": {"no": "timer"}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "no way to lose", "kind": "lose", "target": {"no": "lose"}, "must": true, "verify": "playtest"},
+      {"id": "r3", "quote": "a watercolor style", "kind": "style", "target": null, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "soft greens", "kind": "style", "target": {"palette": {"include": ["green"]}}, "must": true, "verify": "code"},
+      {"id": "r5", "quote": "water 12 plants", "kind": "count", "target": {"measure": "questions", "op": "==", "value": 12}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp24",
+    "request": "Dodge game where I drag a cat left and right to avoid falling cucumbers; it lasts exactly 45 seconds and surviving to the end wins",
+    "expect": [
+      {"id": "r1", "quote": "I drag a cat left and right", "kind": "control", "target": {"input": "drag"}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "falling cucumbers", "kind": "content", "target": {"text": ["cucumber"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "it lasts exactly 45 seconds", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 45}, "must": true, "verify": "playtest"},
+      {"id": "r4", "quote": "surviving to the end wins", "kind": "win", "target": {"timeout_is": "win"}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp25",
+    "request": "Emoji guess-the-movie game with 7 rounds, where each round reveals 3 emojis one at a time and earlier guesses score more",
+    "expect": [
+      {"id": "r1", "quote": "7 rounds", "kind": "structure", "target": {"measure": "questions", "op": "==", "value": 7}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "each round reveals 3 emojis one at a time", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "earlier guesses score more", "kind": "rule", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "sp26",
+    "request": "Pirate hangman with 6 wrong guesses allowed, words only about the sea, and a narrator who talks like a pirate",
+    "expect": [
+      {"id": "r1", "quote": "6 wrong guesses allowed", "kind": "lose", "target": {"measure": "lives", "op": "==", "value": 6}, "must": true, "verify": "playtest"},
+      {"id": "r2", "quote": "words only about the sea", "kind": "content", "target": null, "must": true, "verify": "judge"},
+      {"id": "r3", "quote": "a narrator who talks like a pirate", "kind": "tone", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "sp27",
+    "request": "Simon-says memory game with 4 colored pads (red, blue, yellow, green) where the sequence grows by 1 each round and the game ends at your first mistake",
+    "expect": [
+      {"id": "r1", "quote": "4 colored pads", "kind": "count", "target": {"measure": "pads", "op": "==", "value": 4}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "(red, blue, yellow, green)", "kind": "style", "target": {"palette": {"include": ["red", "blue", "yellow", "green"]}}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "the sequence grows by 1 each round", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r4", "quote": "the game ends at your first mistake", "kind": "lose", "target": {"measure": "lives", "op": "==", "value": 1}, "must": true, "verify": "playtest"}
+    ]
+  },
+  {
+    "id": "sp28",
+    "request": "Rhythm tapping game at 120 BPM with 3 lanes, 'Perfect' and 'Good' timing labels, and a song that lasts 60 seconds",
+    "expect": [
+      {"id": "r1", "quote": "at 120 BPM", "kind": "rule", "target": {"measure": "bpm", "op": "==", "value": 120}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "3 lanes", "kind": "count", "target": {"measure": "lanes", "op": "==", "value": 3}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "'Perfect' and 'Good' timing labels", "kind": "tone", "target": {"text": ["Perfect", "Good"], "match": "all"}, "must": true, "verify": "code"},
+      {"id": "r4", "quote": "a song that lasts 60 seconds", "kind": "timer", "target": {"measure": "run_seconds", "op": "==", "value": 60}, "must": true, "verify": "code"}
+    ]
+  },
+  {
+    "id": "sp29",
+    "request": "Penalty shootout against a goalkeeper, best of 5 kicks, swipe to aim, and the keeper gets faster after each save",
+    "expect": [
+      {"id": "r1", "quote": "best of 5 kicks", "kind": "structure", "target": {"measure": "questions", "op": "==", "value": 5}, "must": true, "verify": "code"},
+      {"id": "r2", "quote": "swipe to aim", "kind": "control", "target": {"input": "swipe"}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "the keeper gets faster after each save", "kind": "rule", "target": null, "must": true, "verify": "judge"}
+    ]
+  },
+  {
+    "id": "sp30",
+    "request": "Cookie clicker where each tap earns 1 cookie, upgrades cost 10, 50 and 200 cookies, and I win at 1,000 cookies",
+    "expect": [
+      {"id": "r1", "quote": "each tap earns 1 cookie", "kind": "rule", "target": null, "must": true, "verify": "judge"},
+      {"id": "r2", "quote": "upgrades cost 10, 50 and 200 cookies", "kind": "rule", "target": {"numbers": [10, 50, 200]}, "must": true, "verify": "code"},
+      {"id": "r3", "quote": "I win at 1,000 cookies", "kind": "win", "target": {"measure": "win_at", "op": "==", "value": 1000}, "must": true, "verify": "code"}
+    ]
+  }
+]
