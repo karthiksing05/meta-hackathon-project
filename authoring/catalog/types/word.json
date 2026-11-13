@@ -1820,60 +1820,6 @@
     "source": "kevin"
   },
   {
-    "id": "compound_word_chain",
-    "name": "Compound word chain",
-    "aliases": [
-      "Chain Reaction",
-      "Compound chains"
-    ],
-    "family": "word",
-    "summary": "Each word joins the next into a compound word (sun → flower → pot).",
-    "core_loop": "see a gap in the chain → guess the word that joins both neighbors → letters reveal over time",
-    "verbs": [
-      "guess",
-      "link"
-    ],
-    "inputs": [
-      "type"
-    ],
-    "rules": [
-      "each word forms a compound with its neighbors"
-    ],
-    "win": "complete the chain",
-    "lose": "none",
-    "scoring": "points per word, fewer letters revealed is better",
-    "session_seconds": [
-      60,
-      300
-    ],
-    "players": [
-      "solo",
-      "async_friends",
-      "live"
-    ],
-    "social_hooks": [
-      "Head-to-head reveal-a-letter race."
-    ],
-    "difficulty_levers": [
-      "chain length",
-      "letters revealed"
-    ],
-    "tools": [
-      "typed_answer",
-      "reveal",
-      "sequence_memory"
-    ],
-    "engine_gaps": [],
-    "gate_profile": "puzzle",
-    "example_prompts": [
-      "fire truck stop sign word chain",
-      "compound word puzzle",
-      "chain reaction game show"
-    ],
-    "status": "seed",
-    "source": "kevin"
-  },
-  {
     "id": "prefix_suffix",
     "name": "Shared prefix or suffix",
     "aliases": [
