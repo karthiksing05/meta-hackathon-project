@@ -1331,5 +1331,78 @@
     ],
     "status": "seed",
     "source": "kevin"
+  },
+  {
+    "id": "sound_pairs_memory",
+    "name": "Sound memory cards",
+    "aliases": [
+      "Sound memory game",
+      "Memory game with sounds",
+      "Concentration with sounds",
+      "Audio matching pairs"
+    ],
+    "family": "memory",
+    "subfamily": "listening memory",
+    "summary": "A memory card game where face-down cards make sounds instead of showing pictures: each flipped card plays a short tune, and you match the pairs that sound the same.",
+    "core_loop": "flip a card → hear its tune → flip another → match the pair by ear → clear the board",
+    "verbs": [
+      "flip",
+      "listen",
+      "match",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "face-down cards",
+      "card sounds",
+      "move counter"
+    ],
+    "rules": [
+      "cards show no picture until matched",
+      "a flipped card plays its tune",
+      "two cards with the same tune stay open"
+    ],
+    "win": "clear the board",
+    "lose": "run out of moves",
+    "scoring": "fewer moves scores more",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "fewest moves beats a friend"
+    ],
+    "content_needs": [
+      "one short clip per symbol, clearly different from each other"
+    ],
+    "difficulty_levers": [
+      "pairs",
+      "how alike the tunes are",
+      "move limit"
+    ],
+    "tools": [
+      "grid_board",
+      "match_pairs",
+      "melody_clip",
+      "score",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "memory card game where each card makes a sound",
+      "match the pairs by listening, no pictures",
+      "audio memory game with instrument sounds"
+    ],
+    "status": "seed",
+    "source": "gap_audio",
+    "notes": "The game adds its own feedback on grid_board tap_cell: {sound: {asset: \"= 'clip_' + str(cards[event.cell.y * cols + event.cell.x].symbol)\"}}. Clips about 1 s each (one bar at a fast bpm)."
   }
 ]

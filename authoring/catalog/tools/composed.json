@@ -24,11 +24,50 @@
       "play the tune",
       "listen"
     ],
-    "summary": "Plays a short synthesized melody or sound on cue (a jingle from a note list), so a game can play a prompt the player then answers.",
+    "summary": "Plays a short synthesized melody or sound on cue: a jingle from a note list (one wave, even steps), or a rendered melody clip (melody_clip) with chords, bass and drums, so a game can play a prompt the player then answers.",
     "when_to_use": "Listen-then-answer games with original melodies or tones: repeat the tune, which interval, tempo guessing.",
-    "api": "feedback {sound: {wave, notes: [..], step_ms}} triggered by a rule; notes from content",
+    "api": "feedback {sound: {wave, notes: [..], step_ms}} triggered by a rule, notes from content or an expression; or feedback {sound: {asset: \"clip_<i>\"}} for a melody_clip (the asset may be an expression); the play_clip fragment wires a clip to each quiz question",
     "status": "shipped",
-    "notes": "maps to synth_sound jingles. Recorded clips, real songs and voices are not available (see audio_clip); content must be original melodies"
+    "notes": "jingles map to synth_sound; clips to melody_clip and play_clip. Recorded clips, real songs and voices are not available (see audio_clip); content must be original melodies"
+  },
+  {
+    "id": "melody_clip",
+    "kind": "content_tool",
+    "name": "Melody clips",
+    "aliases": [
+      "original tune",
+      "music clip",
+      "era music",
+      "guess the decade",
+      "original jingle",
+      "sound clip",
+      "short song clip"
+    ],
+    "summary": "Short original music clips the model writes as notes (a lead line, chords, an optional bass line and drums) with an era style (50s, 60s, 70s, 80s, 90s, 00s, 10s, chip, baroque or plain) that picks the instruments, groove and recording colour. The expander renders each clip at build time into a WAV sound asset clip_<i>, so the game ships its audio and replays stay exact.",
+    "when_to_use": "Listen-and-answer content: guess the decade or genre by ear, which instrument, name the jingle, sound pairs, pitch and interval quizzes with real chords. Use with play_clip for a clip per quiz question, or play a clip from any feedback with {sound: {asset: \"clip_3\"}}. Write original tunes only; never a real song's melody.",
+    "api": "manifest sound.clips: [clip, ...] (up to 12, each under 10 s, all under 80 s; over 30 s of clips they are stored 8-bit). clip = {style: 50s|60s|70s|80s|90s|00s|10s|chip|baroque|plain, bpm 50-200, bars 1-8, meter 4|3, lead: \"A4/8 C5 E5 r/4 G5/2\" (note+octave or r, durations /1 /2 /4 /8 /16, dotted /4., a duration carries to the next notes), chords: \"Am F C G\" (one per bar, or Am/2; m 7 maj7 m7 m7b5 dim dim7 aug sus2 sus4 add9 6 m6 9 5), bass: auto|none|root|root8|octave|walk|root_fifth|offbeat|sub|notes, drums: auto|none|shuffle|backbeat|disco|gated|house|breakbeat|rnb|trap|chip|waltz|{kick, snare, hat, open, clap, tamb, rim: \"x...X...\"}, lead_sound|chord_sound|bass_sound: sine triangle square pulse chip saw supersaw brass strings pad organ piano epiano bell pluck harpsichord flute bass synth_bass fm_bass sub chip_bass, comp: pad stabs offbeat strum arp boogie block, swing 0-1, label}. Clip i becomes asset clip_<i>; play it with feedback {sound: {asset: \"clip_<i>\"}} or an expression like \"= 'clip_' + str(event.clip)\". Errors A_SOUND_CLIP at /sound/clips/<i>/<field>.",
+    "params": {
+      "style": "enum, default plain: 50s 60s 70s 80s 90s 00s 10s chip baroque plain",
+      "bpm": "int, default from the style, 50..200",
+      "bars": "int, default 4, 1..8 (the clip must stay under 10 s)",
+      "lead": "string of notes, up to 128 tokens",
+      "chords": "string of chord symbols, up to 64",
+      "drums": "groove name, auto, none or a pattern object"
+    },
+    "status": "shipped",
+    "gaps_it_closes": [
+      "all sound is synthesized; no recorded clips",
+      "no way to play a different tune per question"
+    ],
+    "example_types": [
+      "era_by_ear_quiz",
+      "tune_recall_snippet",
+      "sound_pairs_memory",
+      "name_that_instrument",
+      "instrument_by_ear"
+    ],
+    "path": "authoring/expander/melody.mjs",
+    "notes": "Rendered by the expander (pure JS, no Math.sin/exp/random), so the same clip is the same bytes in Node and JavaScriptCore. Presentation only: the engine never reads audio. Real songs, recordings and voices stay out (audio_clip, tts_audio). Muse writes valid notation first try (16/16 clips in two real-Muse runs); era identity comes mostly from the style, so ask for era rhythm explicitly. docs/harness-gaps/audio.md."
   },
   {
     "id": "metronome",

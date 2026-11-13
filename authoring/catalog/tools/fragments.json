@@ -456,6 +456,32 @@
     "path": "authoring/fragments/pickups.fragment.json"
   },
   {
+    "id": "play_clip",
+    "kind": "fragment",
+    "name": "Play the clip",
+    "aliases": [
+      "hear a clip",
+      "listen and answer",
+      "play again button",
+      "replay the tune"
+    ],
+    "summary": "Hear a clip, then pick an answer: plays the game's melody clip for each quiz question shortly after it appears and draws a Play again button (limited replays, not while playing) above the question.",
+    "when_to_use": "Any listen-then-answer quiz with melody_clip content: guess the decade, which instrument, name the jingle. Pair with quiz (clip i = question i, in content order), rounds, score and lives. Give quiz a time_ms of at least (replays + 1) x clip_ms + delay_ms + 3000.",
+    "api": "requires quiz (state order, qi, locked; event question_done); game writes sound.clips; sends input replay_clip; provides clip_now, replays_left, current_clip(); emits clip_play {clip}",
+    "events": [
+      "clip_play"
+    ],
+    "params": {
+      "clips": "int, default 4, 1..12 (the number of clips; question indexes wrap)",
+      "replays": "int, default 2, 0..5",
+      "delay_ms": "duration, default 600, 100..3000",
+      "clip_ms": "duration, default 6000, 500..10000 (the longest clip)",
+      "label": "string, default \"Play again\", max 14 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/play_clip.fragment.json"
+  },
+  {
     "id": "player_drag",
     "kind": "fragment",
     "name": "Drag to steer",

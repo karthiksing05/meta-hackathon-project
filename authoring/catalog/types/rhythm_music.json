@@ -747,7 +747,8 @@
       "clip length"
     ],
     "tools": [
-      "audio_clip",
+      "melody_clip",
+      "play_clip",
       "quiz",
       "rounds"
     ],

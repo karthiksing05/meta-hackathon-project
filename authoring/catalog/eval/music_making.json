@@ -28,5 +28,24 @@
     "expect": [
       "sing_pitch_match"
     ]
+  },
+  {
+    "request": "Guess the decade game where I hear a short synth melody and pick the era it sounds like",
+    "expect": [
+      "era_by_ear_quiz"
+    ],
+    "notes": "Kevin #20"
+  },
+  {
+    "request": "which decade is this song from quiz for my family",
+    "expect": [
+      "era_by_ear_quiz"
+    ]
+  },
+  {
+    "request": "name that tune with made up jingles",
+    "expect": [
+      "tune_recall_snippet"
+    ]
   }
 ]

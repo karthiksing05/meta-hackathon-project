@@ -345,13 +345,17 @@
       "bird call",
       "spoken word"
     ],
-    "summary": "Recorded or sampled sound clips as content (animal calls, instruments, spoken words, music snippets) for listen-and-answer games.",
-    "when_to_use": "Name-that-sound, listening quizzes, instrument-by-ear.",
+    "summary": "Recorded or sampled sound clips as content (animal calls, real instruments, spoken words, everyday sound effects) from a licensed or CC0 sound library, for listen-and-answer games.",
+    "when_to_use": "Name-that-sound and guess-the-sound-effect games that need real recordings. For music, use melody_clip (original tunes, shipped).",
     "status": "planned",
     "gaps_it_closes": [
-      "all sound is synthesized; no recorded clips"
+      "no recorded sounds (animals, objects, voices)"
     ],
-    "notes": "original synth melodies work today (audio_clip_player). Real songs and recordings can't be copied into games"
+    "notes": "Original synth melodies ship as melody_clip. Real songs and recordings can't be copied into games; a library must be CC0 or licensed with the source recorded. Kevin's sound-library idea (Slack, 22:29) belongs to Artem and Max; see docs/harness-gaps/audio.md, Requests.",
+    "api": "planned, compatible with melody_clip: sound.clips entries may be {library: \"<sound id>\"} next to note clips; the server resolves the id to a URL or data URI and the asset is still clip_<i>, so play_clip and feedback {sound: {asset}} work unchanged",
+    "example_types": [
+      "sound_effect_guess"
+    ]
   },
   {
     "id": "growth_timer",
