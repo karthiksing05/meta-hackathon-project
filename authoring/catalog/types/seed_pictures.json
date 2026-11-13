@@ -1,0 +1,164 @@
+[
+  {
+    "id": "zoom_out_picture_trivia",
+    "name": "Zoom-out picture trivia",
+    "aliases": [
+      "wildlife photo trivia",
+      "guess the animal close-up",
+      "what is this close-up",
+      "zoom out and guess",
+      "extreme close-up quiz"
+    ],
+    "family": "trivia",
+    "subfamily": "picture identification",
+    "summary": "Each round starts on a tiny crop of a picture (an animal's eye, a texture, a corner of a landmark) that zooms out over a few seconds; tap the right answer before it's obvious, and early answers score more.",
+    "core_loop": "see a tiny crop → it zooms out → tap a choice → whole picture shows → next round",
+    "verbs": [
+      "recognize",
+      "guess",
+      "observe"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "picture window",
+      "zoom",
+      "answer choices",
+      "lives"
+    ],
+    "rules": [
+      "the picture starts several times magnified and zooms out by the clock",
+      "an answer shows the whole picture",
+      "points fall the longer you wait",
+      "a wrong answer or running out of time costs a life"
+    ],
+    "win": "get through every round",
+    "lose": "out of lives",
+    "scoring": "points per right answer, plus a bonus for how zoomed in it still was",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "the same pictures for everyone that day, so a Group compares who named them earliest",
+      "challenge a friend to beat your early-guess bonus"
+    ],
+    "content_needs": [
+      "one picture per round, detailed all the way in (SVG frames today; generated_image or picture_pack for photos)",
+      "the answer and 3 near-miss choices per picture"
+    ],
+    "difficulty_levers": [
+      "starting zoom",
+      "zoom time",
+      "how alike the choices are",
+      "how famous the subject is"
+    ],
+    "tools": [
+      "zoom_reveal",
+      "picture_quiz",
+      "rounds",
+      "lives",
+      "score",
+      "daily_seed",
+      "image_gallery",
+      "generated_image",
+      "picture_pack"
+    ],
+    "engine_gaps": [
+      "image_clip"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "Wildlife photography trivia: zoom in on a tiny crop of a photo and guess the animal before it zooms out",
+      "Extreme close-up quiz of kitchen objects",
+      "Zoomed in guess the Pokemon before it zooms out",
+      "Guess the bird from a close-up of its feathers"
+    ],
+    "status": "seed",
+    "source": "gap-images",
+    "refs": [],
+    "notes": "authoring/games/zoom_safari.authoring.json is the worked example (SVG animals, passes the gate). Photos are generated (generated_image) or CC0 (picture_pack), never of people."
+  },
+  {
+    "id": "cartoon_quote_guess",
+    "name": "Cartoon quote guess",
+    "aliases": [
+      "cartoon speech bubble quiz",
+      "what is the cartoon saying",
+      "funny quote with a picture",
+      "guess the translation"
+    ],
+    "family": "trivia",
+    "subfamily": "quote with a picture",
+    "summary": "A funny cartoon character (a generic caricature, never a real person's likeness) says a line in a speech bubble, often in another language or as half a saying; pick what it means or how it ends.",
+    "core_loop": "see the cartoon and its line → pick the meaning or the ending → the reveal shows the answer with a reaction → next",
+    "verbs": [
+      "read",
+      "guess",
+      "translate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "cartoon character",
+      "speech bubble",
+      "answer choices"
+    ],
+    "rules": [
+      "each round is one character and one line",
+      "the choices include believable wrong meanings",
+      "characters are invented caricatures, never a real person's face or name"
+    ],
+    "win": "get through every line",
+    "lose": "out of lives",
+    "scoring": "right answers, faster is more",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the funniest line with the Group",
+      "friends compare how many they got"
+    ],
+    "content_needs": [
+      "lines with their meanings and 3 wrong meanings (public-domain sayings or written by Muse)",
+      "one cartoon character per line (SVG or generated_image in a cartoon style)"
+    ],
+    "difficulty_levers": [
+      "how idiomatic the lines are",
+      "how close the wrong meanings are",
+      "time per line"
+    ],
+    "tools": [
+      "picture_choice",
+      "picture_quiz",
+      "zoom_reveal",
+      "rounds",
+      "lives",
+      "score",
+      "generated_image"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "Guess what the French person is saying: quotes from funny famous French people with funny images of French people",
+      "Guess what the grumpy cartoon chef is saying in Italian",
+      "Funny cartoon grandmas say old sayings and I guess what they mean"
+    ],
+    "status": "seed",
+    "source": "gap-images",
+    "refs": [],
+    "notes": "When a request names real or famous people, the plan says so plainly: the pictures are cartoon caricatures of invented characters (a beret-wearing baker, not a real person), and quotes are public-domain sayings or written for the game, not attributed to real people."
+  }
+]

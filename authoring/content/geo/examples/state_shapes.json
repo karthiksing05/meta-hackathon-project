@@ -1,0 +1,36 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "State Shapes",
+    "instructions": "A US state's outline appears. Tap its name before the bar runs out. Twelve states; the second miss ends the run.",
+    "duration_s": 90
+  },
+  "geo": {
+    "pack": "us_states",
+    "pick": { "region": "world", "count": 14, "seed": 5 },
+    "outline": { "x": 40, "y": 96, "w": 280, "h": 130 },
+    "quiz": { "choices": 4, "ask": "name" }
+  },
+  "uses": [
+    { "fragment": "country_outline" },
+    { "fragment": "quiz", "params": { "choices": 4, "time_ms": 3000, "goal": 0 } },
+    { "fragment": "rounds", "params": { "count": 12, "label": "State" }, "bind": { "round_done": "question_done" } },
+    { "fragment": "lives", "params": { "count": 2 }, "bind": { "hit": "answered_wrong" } },
+    { "fragment": "score", "params": { "points": 10, "label": "Score" }, "bind": { "point": "answered_right" } }
+  ],
+  "functions": {
+    "quiz_questions": { "params": {}, "returns": "list<string>", "body": "map(geo_names(), n => '')" },
+    "quiz_choices": { "params": {}, "returns": "list<string>", "body": "geo_choices()" },
+    "quiz_answers": { "params": {}, "returns": "list<string>", "body": "geo_names()" },
+    "outline_focus": { "params": {}, "returns": "int", "body": "get_or(order, qi, -1)" }
+  },
+  "objectives": { "time_limit": "90s", "on_timeout": "lose" },
+  "look": { "id": "paper", "tokens": {} },
+  "art": {
+    "style": "Road-trip postcard: warm cream paper, a teal state shape with a dark outline.",
+    "palette": { "bg": "#FBF6EC", "surface": "#EFE6D2", "primary": "#2A9D8F", "secondary": "#6D5BD0", "accent": "#E9A23B", "ink": "#24323F", "danger": "#D1495B" },
+    "font": "Avenir Next"
+  },
+  "sound": { "set": "chime", "music": false },
+  "score": { "kind": "points", "measures": "states named from their shape", "unit": "points", "direction": "higher", "counts_when": "any", "aggregate": "best", "tie_break": "less time", "format": "{n}", "events": ["answered_right"] }
+}

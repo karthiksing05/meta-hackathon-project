@@ -138,6 +138,7 @@
       "healing"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "lives",
       "meters",
@@ -365,6 +366,7 @@
       "stat variance"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "score"
@@ -667,6 +669,7 @@
       "team size"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "pickups",
       "meters",
@@ -1262,6 +1265,7 @@
       "food costs"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "lives",
@@ -1559,6 +1563,7 @@
     ],
     "tools": [
       "random_int",
+      "branching_story",
       "choice_story",
       "lives",
       "score"
@@ -1926,6 +1931,7 @@
       "price swing"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "score",
@@ -2372,6 +2378,7 @@
       "ghost speeds"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "lives",
       "meters",
@@ -2443,6 +2450,7 @@
       "chain length"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "pickups",
       "shared_progress",
@@ -2660,6 +2668,7 @@
       "roles needed"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "score"
@@ -2733,6 +2742,7 @@
     ],
     "tools": [
       "meters",
+      "branching_story",
       "choice_story",
       "score"
     ],
@@ -2746,5 +2756,84 @@
     "status": "seed",
     "source": "seed-karthik",
     "refs": []
+  },
+  {
+    "status": "seed",
+    "source": "gap-story",
+    "id": "gang_recruit_story_rpg",
+    "name": "Recruit-a-crew story RPG",
+    "family": "adventure_rpg",
+    "subfamily": "story RPG",
+    "aliases": [
+      "build a gang",
+      "recruit a party",
+      "retro RPG story",
+      "take over the alley",
+      "crew building adventure"
+    ],
+    "summary": "A light RPG told in scenes: win over recruits one by one (feed them, beat them, trade favors), gather an item or two, then make a final play for the territory. Gang size and respect decide which routes open.",
+    "core_loop": "meet a character → pick how to win them (or fight) → gang and respect change → item unlocks a shortcut → final showdown routes on your stats",
+    "verbs": [
+      "recruit",
+      "choose",
+      "fight",
+      "trade"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene text",
+      "choice buttons",
+      "gang and respect stats",
+      "bag of items",
+      "rival boss"
+    ],
+    "rules": [
+      "each recruit adds to the gang stat or is an item of its own",
+      "the showdown needs gang ≥ N or a specific item",
+      "fighting raises respect but can cost a recruit"
+    ],
+    "win": "take over the territory",
+    "lose": "run out of the alley or get caught",
+    "scoring": "ending rank, then gang size",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare gang size and ending with friends",
+      "\"I ruled the alley with 4 cats\""
+    ],
+    "content_needs": [
+      "story graph of 16-30 scenes",
+      "recruit characters",
+      "stats and items",
+      "ranked endings"
+    ],
+    "difficulty_levers": [
+      "showdown threshold",
+      "recruit costs",
+      "rival strength"
+    ],
+    "tools": [
+      "branching_story",
+      "choice_story",
+      "story_vars",
+      "score",
+      "stat_block",
+      "inventory"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "retro RPG where I'm a stray cat building a gang to take over the alley",
+      "recruit a crew of pigeons to rule the park",
+      "build a band of misfit knights and storm the castle"
+    ]
   }
 ]

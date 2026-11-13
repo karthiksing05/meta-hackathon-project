@@ -1,0 +1,83 @@
+{
+  "family": "knowledge_quiz",
+  "checklists": [
+    {
+      "applies_to": [
+        "lit_country_quiz",
+        "outline_pick_quiz",
+        "map_click_quiz",
+        "capital_match",
+        "spell_the_country"
+      ],
+      "slots": [
+        {
+          "id": "region",
+          "ask": "Which part of the world?",
+          "why": "Picks the places and the map view (world, a continent, or the US states pack).",
+          "need": "required",
+          "extrapolate_from": "a continent, country or \"US states\" named in the request, or the Group's home region",
+          "default": "whole world",
+          "choices": [
+            "whole world",
+            "Europe",
+            "Africa",
+            "US states"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        },
+        {
+          "id": "show",
+          "ask": "Lit up on a map, or the outline alone?",
+          "why": "geo_map (country on a map) or country_outline (shape only); outlines are harder.",
+          "need": "nice",
+          "extrapolate_from": "\"shape\", \"outline\" or \"silhouette\" means the outline; \"map\" means the map",
+          "default": "on a map",
+          "choices": [
+            "on a map",
+            "outline alone"
+          ],
+          "affects": [
+            "rules",
+            "art"
+          ]
+        },
+        {
+          "id": "answer_mode",
+          "ask": "Pick from choices, type the name, or tap the map?",
+          "why": "quiz choices, typed_answer with the pack's aliases, or map_pin with geo_place_at.",
+          "need": "nice",
+          "extrapolate_from": "\"type\", \"spell\" or \"tap on the map\" in the request",
+          "default": "pick from choices",
+          "choices": [
+            "pick from choices",
+            "type the name",
+            "tap the map"
+          ],
+          "affects": [
+            "rules",
+            "difficulty"
+          ]
+        },
+        {
+          "id": "how_hard",
+          "ask": "Big, well-known places or every one?",
+          "why": "Sets min_area in geo.pick: tiny countries are hard to see and to name.",
+          "need": "nice",
+          "default": "big ones",
+          "choices": [
+            "big ones",
+            "every one"
+          ],
+          "affects": [
+            "difficulty",
+            "content"
+          ]
+        }
+      ],
+      "notes": "Geography quizzes. Places, outlines and capitals always come from the geo pack (map_geometry); never ask the model to draw a map or write coordinates."
+    }
+  ]
+}

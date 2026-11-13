@@ -1,0 +1,242 @@
+{
+  "fragment": "zoom_reveal",
+  "version": 1,
+  "describe": "A picture in a square window that starts zoomed in on a small crop and zooms out to the whole picture over `zoom_ms`: guess what it is before it's obvious. The pictures are the frames of the game's `picture` sprite (one frame per round); the game supplies `zoom_index()` (int, which frame to show now) and `zoom_hold()` (bool, true shows the whole picture at once, e.g. after an answer). The zoom restarts on the `zoom_restart` event and at start (bind it to the round's next-question event, e.g. quiz's `question_done`). It starts `zoom_from` times magnified around (`focus_x`, `focus_y`), fractions of the picture (0.5, 0.5 is the centre), and the crop point shifts a little per frame when `jitter` is true. Provides `zoom_left()` (int, 100 at the tightest crop down to 0 when fully zoomed out, by the clock even while held, so an answer rule can read it) so the game can pay more for early guesses, and `zoom_scale()`. List zoom_reveal FIRST in `uses`: there is no clipping, so the window is cut out by drawing the background colour around it, and later fragments (answer buttons, text) draw on top. The zoom is driven by the game clock, so replays look and score the same.",
+  "params": {
+    "x": {
+      "type": "int",
+      "default": 40,
+      "min": 0,
+      "max": 340
+    },
+    "y": {
+      "type": "int",
+      "default": 76,
+      "min": 0,
+      "max": 620
+    },
+    "size": {
+      "type": "int",
+      "default": 280,
+      "min": 80,
+      "max": 360
+    },
+    "zoom_from": {
+      "type": "float",
+      "default": 6,
+      "min": 1,
+      "max": 16
+    },
+    "zoom_ms": {
+      "type": "duration",
+      "default": 8000,
+      "min": 500,
+      "max": 60000
+    },
+    "focus_x": {
+      "type": "float",
+      "default": 0.5,
+      "min": 0,
+      "max": 1
+    },
+    "focus_y": {
+      "type": "float",
+      "default": 0.5,
+      "min": 0,
+      "max": 1
+    },
+    "jitter": {
+      "type": "bool",
+      "default": true
+    },
+    "frame": {
+      "type": "bool",
+      "default": true
+    }
+  },
+  "art": {
+    "picture": {
+      "describe": "The round pictures, one frame each, square and detailed all the way in (it is shown up to zoom_from times bigger). Give the sprite w and h of 512 so it stays sharp when zoomed.",
+      "color": "accent"
+    }
+  },
+  "requires": {
+    "functions": {
+      "zoom_index": {
+        "params": {},
+        "returns": "int"
+      },
+      "zoom_hold": {
+        "params": {},
+        "returns": "bool"
+      }
+    },
+    "events": {
+      "zoom_restart": {}
+    }
+  },
+  "state": {
+    "_since": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "zoom_left": {
+      "params": {},
+      "returns": "int",
+      "body": "clamp(100 - ((now - _since) * 100) / @zoom_ms, 0, 100)"
+    },
+    "zoom_scale": {
+      "params": {},
+      "returns": "float",
+      "body": "if zoom_hold() then 1.0 else 1.0 + (@zoom_from - 1.0) * (zoom_left() * 1.0) / 100.0"
+    },
+    "_fx": {
+      "params": {},
+      "returns": "float",
+      "body": "if @jitter then clamp(@focus_x + (hash(zoom_index() * 7 + 1) - 0.5) * 0.3, 0.15, 0.85) else @focus_x"
+    },
+    "_fy": {
+      "params": {},
+      "returns": "float",
+      "body": "if @jitter then clamp(@focus_y + (hash(zoom_index() * 7 + 2) - 0.5) * 0.3, 0.15, 0.85) else @focus_y"
+    }
+  },
+  "rules": [
+    {
+      "id": "begin",
+      "on": "start",
+      "do": [
+        {
+          "set": "_since",
+          "to": "now"
+        }
+      ]
+    },
+    {
+      "id": "restart",
+      "on": "zoom_restart",
+      "do": [
+        {
+          "set": "_since",
+          "to": "now"
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "include": "@art.picture",
+        "node": {
+          "node": "image",
+          "asset": "@art.picture.id",
+          "frame": "= zoom_index()",
+          "x": "= @x - _fx() * @size * (zoom_scale() - 1.0)",
+          "y": "= @y - _fy() * @size * (zoom_scale() - 1.0)",
+          "w": "= @size * zoom_scale()",
+          "h": "= @size * zoom_scale()"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.picture",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "x": "@x",
+              "y": "@y",
+              "w": "@size",
+              "h": "@size",
+              "radius": 12,
+              "fill": "$surface"
+            },
+            {
+              "node": "circle",
+              "x": "= @x + _fx() * @size",
+              "y": "= @y + _fy() * @size",
+              "r": "= @size * 0.08 * zoom_scale()",
+              "fill": "$accent"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": 0,
+          "w": "@game.canvas_w",
+          "h": "@y",
+          "fill": "$bg"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": "= @y + @size",
+          "w": "@game.canvas_w",
+          "h": "= @game.canvas_h - @y - @size",
+          "fill": "$bg"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": "@y",
+          "w": "@x",
+          "h": "@size",
+          "fill": "$bg"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": "= @x + @size",
+          "y": "@y",
+          "w": "= @game.canvas_w - @x - @size",
+          "h": "@size",
+          "fill": "$bg"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@frame",
+        "node": {
+          "node": "rect",
+          "x": "@x",
+          "y": "@y",
+          "w": "@size",
+          "h": "@size",
+          "radius": 4,
+          "fill": "#00000000",
+          "stroke": "$ink",
+          "stroke_width": 3
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "tags": {
+    "mood": [
+      "curious",
+      "playful"
+    ],
+    "energy": [
+      "low",
+      "medium"
+    ]
+  },
+  "conflicts": []
+}

@@ -1,0 +1,103 @@
+{
+  "format": "story-graph/1",
+  "title": "Turnips to Throne",
+  "premise": "You're Wat, a turnip farmer, and the old king has no heir.",
+  "request": "Choose your own adventure where I'm a medieval peasant trying to become king in 10 choices or less",
+  "start": "field",
+  "max_choices": 10,
+  "on_limit": "still_peasant",
+  "vars": [
+    { "id": "coin", "label": "Coin", "kind": "stat", "init": 0, "min": 0, "max": 6 },
+    { "id": "favor", "label": "Favor", "kind": "stat", "init": 0, "min": 0, "max": 6 },
+    { "id": "sword", "label": "Sword", "kind": "item" },
+    { "id": "seal", "label": "Seal", "kind": "item" },
+    { "id": "rebel", "kind": "flag" }
+  ],
+  "nodes": [
+    { "id": "field", "place": "The turnip field", "text": "You are Wat, a turnip farmer. The old king has no heir, and the castle road is open today.",
+      "choices": [
+        { "label": "Sell turnips at market", "to": "market", "do": "coin+2", "note": "+2 coin" },
+        { "label": "Follow the knights", "to": "knights" },
+        { "label": "Visit the hedge witch", "to": "witch" } ] },
+    { "id": "market", "place": "Market square", "text": "A smith sells a rusty sword. A herald cries that the king seeks a champion.",
+      "choices": [
+        { "label": "Buy the sword (2 coin)", "if": "coin>=2", "do": "coin-2 sword", "to": "herald", "note": "You got a rusty sword" },
+        { "label": "Bribe a castle guard", "if": "coin>=1", "do": "-coin +favor", "to": "gate" },
+        { "label": "Ask the herald", "to": "herald" } ] },
+    { "id": "knights", "place": "The king's road", "text": "The knights laugh at your hoe, but their squire has the flu. Someone must carry the banner.",
+      "choices": [
+        { "label": "Carry the banner", "do": "+favor", "to": "battle", "note": "+1 favor" },
+        { "label": "Steal a spare horse", "do": "rebel", "to": "outlaw" } ] },
+    { "id": "witch", "place": "Hedge witch's hut", "text": "The witch squints at your palm. ‘A crown or a noose,’ she cackles. ‘Coin tips the scale.’",
+      "choices": [
+        { "label": "Sell her turnips", "do": "coin+1", "to": "road", "note": "+1 coin" },
+        { "label": "Ask for a blessing", "do": "+favor", "to": "road", "note": "Fate leans your way" },
+        { "label": "Laugh and leave", "to": "road" } ] },
+    { "id": "road", "place": "The castle road", "text": "A merchant's cart is stuck in the mud. Bandits watch from the trees.",
+      "choices": [
+        { "label": "Push the cart free", "do": "coin+2", "to": "gate", "note": "The merchant pays you" },
+        { "label": "Warn the merchant", "do": "+favor", "to": "gate", "note": "+1 favor" },
+        { "label": "Join the bandits", "do": "rebel", "to": "outlaw" } ] },
+    { "id": "herald", "place": "The tourney field", "text": "The tourney is at noon. Entry needs a sword, or a noble who will vouch for you.",
+      "choices": [
+        { "label": "Go home, it's hopeless", "to": "turnips" },
+        { "label": "Enter the tourney", "if": "sword", "to": "tourney" },
+        { "label": "Find a noble", "to": "gate" } ] },
+    { "id": "gate", "place": "Castle gate", "text": "A guard blocks the gate. Inside, the dying king is choosing an heir.",
+      "choices": [
+        { "label": "Flatter the guard", "if": "favor>=2", "to": "hall" },
+        { "label": "Sneak in the kitchen", "to": "kitchen" },
+        { "label": "Wait for a better day", "to": "road", "routes": [ { "if": "favor>=4", "to": "hall" } ] } ] },
+    { "id": "battle", "place": "Bandit ambush", "text": "Bandits ambush the knights. The banner falls in the mud and the captain is down.",
+      "choices": [
+        { "label": "Raise the banner", "do": "favor+2", "to": "victory", "note": "+2 favor" },
+        { "label": "Drag the captain away", "do": "+favor", "to": "victory", "note": "+1 favor" },
+        { "label": "Run for it", "to": "turnips" } ] },
+    { "id": "victory", "place": "After the battle", "text": "The knights win. The captain owes you his life and offers to take you to court.",
+      "choices": [
+        { "label": "Go to court with him", "do": "+favor", "to": "hall" },
+        { "label": "Ask him for a sword", "do": "sword", "to": "herald", "note": "You got a sword" } ] },
+    { "id": "outlaw", "place": "Outlaw camp", "text": "The outlaws cheer their new member. Tonight they rob the royal treasury.",
+      "choices": [
+        { "label": "Lead the raid", "to": "treasury" },
+        { "label": "Betray them", "do": "favor+2 rebel=0", "to": "gate", "note": "The guards are grateful" } ] },
+    { "id": "treasury", "place": "Royal treasury", "text": "Gold glitters in the dark, and the royal seal lies on a velvet pillow.",
+      "choices": [
+        { "label": "Take the royal seal", "do": "seal", "to": "hall", "note": "You took the seal" },
+        { "label": "Fill your pockets", "do": "coin+4", "to": "dungeon" } ] },
+    { "id": "kitchen", "place": "Castle kitchen", "text": "The cook shoves a tray at you. ‘You're late! The king wants his soup!’",
+      "choices": [
+        { "label": "Carry the soup in", "do": "+favor", "to": "hall" },
+        { "label": "Taste it first", "to": "plot" } ] },
+    { "id": "plot", "place": "Castle kitchen", "text": "The soup is poisoned! The steward did it. Warn the king, or squeeze the steward?",
+      "choices": [
+        { "label": "Warn the king", "do": "favor+3", "to": "hall", "note": "+3 favor" },
+        { "label": "Blackmail the steward", "do": "coin+3 rebel", "to": "hall", "note": "+3 coin" } ] },
+    { "id": "tourney", "place": "The tourney", "text": "Noon. Your rusty sword against a duke in gold armor. The crowd is laughing.",
+      "choices": [
+        { "label": "Fight with honor", "to": "jester", "routes": [ { "if": "favor>=2", "to": "champion" } ] },
+        { "label": "Fight dirty", "do": "rebel favor+2", "to": "champion" } ] },
+    { "id": "champion", "place": "The tourney", "text": "You win! The crowd roars, and the king calls his new champion to the throne room.",
+      "choices": [
+        { "label": "Kneel before the king", "do": "favor+2", "to": "hall" } ] },
+    { "id": "hall", "place": "Throne room", "text": "The dying king studies you. ‘Why should a farmer rule?’ The whole court holds its breath.",
+      "choices": [
+        { "label": "Because I know hunger", "if": "favor>=4", "to": "crowned" },
+        { "label": "Show the royal seal", "if": "seal", "to": "usurper" },
+        { "label": "Because I am loyal", "to": "hand", "routes": [ { "if": "rebel", "to": "dungeon" } ] } ] },
+    { "id": "crowned", "text": "The king smiles and gives you his crown. The turnip farmer is king, and bread is cheap forever.",
+      "ending": { "title": "Long Live King Wat", "tone": "good", "rank": 1, "share": "I became king in {choices} choices" } },
+    { "id": "usurper", "text": "With the seal you forge a decree. You rule, but every night you hear footsteps outside.",
+      "ending": { "title": "The Usurper", "tone": "secret", "rank": 2, "share": "I stole the crown in {choices} choices" } },
+    { "id": "hand", "text": "The king names you his Hand. Not a crown, but the crown listens to you now.",
+      "ending": { "title": "Hand of the King", "tone": "good", "rank": 3, "share": "I became Hand of the King in {choices} choices" } },
+    { "id": "jester", "text": "You trip on your own sword. The crowd loves it. You become the court jester.",
+      "ending": { "title": "The Court Jester", "tone": "neutral", "rank": 4, "share": "I became the court jester" } },
+    { "id": "turnips", "text": "You go home to your turnips. They don't ask why you came back.",
+      "ending": { "title": "Back to the Turnips", "tone": "neutral", "rank": 5, "share": "I went back to my turnips" } },
+    { "id": "still_peasant", "text": "The sun sets. The king picks his cousin, and you are still a peasant with muddy boots.",
+      "ending": { "title": "Still a Peasant", "tone": "bad", "rank": 5, "share": "I ran out of choices" } },
+    { "id": "dungeon", "text": "Guards drag you to the dungeon. Your cellmate also wanted to be king.",
+      "ending": { "title": "The Dungeon", "tone": "bad", "rank": 6, "share": "I ended up in the dungeon" } }
+  ]
+}

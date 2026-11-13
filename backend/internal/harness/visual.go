@@ -120,7 +120,8 @@ How to fill it
   layout's quiet areas, by position), the light, and the palette. No characters, game pieces, text, numbers or UI.
 - readability: 3-6 short testable rules for this game ("the HUD text sits on a solid surface", "hazards are the only
   red things", "no text over the play area").
-- Synthetic people only. A franchise the person named may be drawn; never copy another game's art.`
+- Real people, brands and franchises the person named may be drawn with their real names; real people only as a
+  cartoon or caricature, never photorealistic. Never copy another game's art.`
 
 // planVisual runs the visual stage and puts the result on plan.Spec.Visual. Errors become notes.
 func (p *Planner) planVisual(ctx context.Context, plan *Plan, in PlanInput) {

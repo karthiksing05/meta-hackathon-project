@@ -144,7 +144,7 @@
     "api": "node image {asset, w, h, frame, flip_x, flip_y, rotation, scale}; art roles avatar, hazard, pickup, tile, card, ...",
     "status": "shipped",
     "path": "engine/SPEC-v0.2.md",
-    "notes": "engine v0.2; bots tap rect/circle ops, so sprites need a transparent rect under them"
+    "notes": "engine v0.2; bots tap rect/circle ops, so sprites need a transparent rect under them. Limits (authoring/expander/art.mjs, svg.mjs): SVG or data: URI images only (no outside URLs from the expander), 24 KB per SVG sprite, 512 KB per image, 32 sprites, 192 KB of art in total; the engine allows 4 MB per data: URI and https URLs. Node w, h, x, y, scale, frame and asset can be bound expressions, so pictures can zoom and pan by the game clock; there is no per-node clip (image_clip)"
   },
   {
     "id": "particles_haptics",

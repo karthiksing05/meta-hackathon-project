@@ -3,7 +3,8 @@
 //
 //   - skill order: pro ≥ regular ≥ new player in the score's direction (new player above pro fails);
 //   - an idle bot (no input) ranks no better than the bots that play;
-//   - a spam bot (one input, repeated ten times a second) doesn't beat the regular bot;
+//   - a spam bot (one input, repeated ten times a second) doesn't clearly beat the median regular bot
+//     (a tie or a win within 10% of the score range is a warning);
 //   - no run beats a declared `bounds.max_rate_per_s`;
 //   - the finish rule: finished-only models have a finished bot run, and unfinished runs don't count;
 //   - every gate run, replayed from its input log, gives the same phase, time and score (and, where
@@ -23,6 +24,8 @@ import { runValue, runCounts, compareRuns, formatScore } from '../expander/score
 export const SPAM_EVERY_STEPS = 6; // ten inputs a second
 export const MAX_SPAM_INPUTS = 8;
 export const HEADROOM = 0.5;
+/** A spam run this close to the median regular player (a share of the score range) is a warning, not a failure. */
+export const SPAM_MARGIN = 0.1;
 
 const statusOf = (g) => asObject(g.status());
 
@@ -198,13 +201,22 @@ export function analyzeScore(score, runs, { idle = null, spam = [] } = {}) {
     else add('idle', 'pass', `Doing nothing ranks lowest (${fmt(idle)}).`);
   }
 
-  // Spam.
+  // Spam: the best spam run against the median of the regular (or random) players, so one noisy
+  // regular run can't fail a game. A tie or a small win (within SPAM_MARGIN of the score range) is
+  // ambiguous; a clear win means the score can be farmed.
   const spamOk = spam.filter((r) => r.ok !== false);
   if (spamOk.length) {
     const best = spamOk.slice().sort((a, b) => compareRuns(score, b, a))[0];
     const what = best.input ? ` (${best.input})` : '';
-    if (regular && better(best, regular)) add('spam', 'fail', `Repeating one input${what} (${fmt(best)}) beats a regular player (${fmt(regular)}): the score can be farmed.`);
-    else if (regular && runCounts(score, best) && compareRuns(score, best, regular) === 0 && runValue(score, best) !== 0) add('spam', 'warn', `Repeating one input${what} ties a regular player (${fmt(best)}).`);
+    const typical = ok.filter((r) => /^(regular|random)/.test(label(r))).sort((a, b) => compareRuns(score, a, b));
+    const median = typical.length ? typical[typical.length >> 1] : null;
+    const counted = [...ok, ...(idle && idle.ok !== false ? [idle] : []), ...spamOk].filter((r) => runCounts(score, r)).map((r) => runValue(score, r));
+    const range = counted.length ? Math.max(1, Math.max(...counted) - Math.min(...counted)) : 1;
+    const gap = median && runCounts(score, best) && runCounts(score, median) ? Math.abs(runValue(score, best) - runValue(score, median)) : Infinity;
+    const vs = median ? `the median regular player (${fmt(median)}${typical.length > 1 ? `, of ${typical.length}` : ''})` : '';
+    if (median && better(best, median) && gap > SPAM_MARGIN * range) add('spam', 'fail', `Repeating one input${what} (${fmt(best)}) clearly beats ${vs}: the score can be farmed.`);
+    else if (median && better(best, median)) add('spam', 'warn', `Repeating one input${what} (${fmt(best)}) edges ${vs}, within ${Math.round(SPAM_MARGIN * 100)}% of the score range.`);
+    else if (median && runCounts(score, best) && compareRuns(score, best, median) === 0 && runValue(score, best) !== 0) add('spam', 'warn', `Repeating one input${what} ties ${vs}.`);
     else add('spam', 'pass', `Repeating one input scores at most ${fmt(best)}.`);
   }
 

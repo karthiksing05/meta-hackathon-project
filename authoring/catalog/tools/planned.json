@@ -8,18 +8,21 @@
       "type freely",
       "system keyboard"
     ],
-    "summary": "A native text field in the game runtime kit, so typing has spaces, numbers and autocorrect, and replays record the text. The engine already has text submit/change input sources; the phone and bot runtime do not show the field yet.",
-    "when_to_use": "Typed answers longer than one word, numbers, names, free-text prompts; replaces the on-screen keyboard fragment for typing.",
-    "api": "inputs.<name>.from: {\"text\": \"submit\" | \"change\", placeholder?, max_len?} with text {value}; presentation.text_field {x, y, w, h, size}",
+    "summary": "A native text field for typing (system keyboard: spaces, numbers, punctuation, autocorrect, dictation), with the submitted text recorded in the replay log. The engine has it (input sources {\"text\": \"submit\"} and {\"text\": \"change\"}, presentation.text_field, replay and verify record the text); the app runtime (bubble-kit-microgame.js) and the JS playtest bots don't drive it yet, so games type on the keyboard fragment grid.",
+    "when_to_use": "Plan for it in typed games (typed_answer, qa_bank, fill-in, name-the-thing), but compose with the keyboard fragment until it ships: the phone shows no field for a text source today, and the bots never type, so a game that only takes text fails the gate.",
+    "api": "inputs.<name>.from: [{\"text\": \"submit\" | \"change\", \"placeholder\"?: string, \"max_len\"?: int <= 200}] with record text {value: string}; presentation.text_field {x, y, w, h, size}; the field clears after submit; engine JS: game.text(\"submit\" | \"change\", value); replay log line {\"t\": ms, \"text\": \"submit\", \"value\": \"...\"}",
     "status": "building",
     "gaps_it_closes": [
-      "typing only through the keyboard fragment grid"
+      "typing only through the keyboard fragment grid",
+      "no spaces, digits, punctuation or autocorrect in typed answers"
     ],
     "example_types": [
-      "rare_answer_trivia"
+      "rare_answer_trivia",
+      "lateral_thinking_yes_no",
+      "twenty_questions"
     ],
     "path": "engine/SPEC-v0.2.md",
-    "notes": "runtime side lives in FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame.js"
+    "notes": "engine side done (SPEC-v0.2 section 4, mg-cli sim types random text). Needed: Artem, the field in bubble-kit-microgame.js; Bayan, bots that type (a playtest.texts list). Request text in docs/harness-gaps/open-text.md"
   },
   {
     "id": "answer_bank",
@@ -134,11 +137,19 @@
       "turn-based with friends",
       "correspondence play"
     ],
-    "summary": "Turn-based play between friends on their own phones: the server stores the game state and whose move it is, and notifies the next player.",
-    "when_to_use": "Board, word and strategy games played move by move over hours, not on one phone (that is the turns fragment).",
-    "api": "create match {gameId, players}; submit move; get match state",
+    "summary": "Turn-based play between friends on their own phones, move by move: the server stores the game state and whose move it is, and tells the next player. Unlike group play, the players share one board.",
+    "when_to_use": "Board, word and strategy games where each move depends on the other player's last move (a correspondence match). Most games don't need it: same-seed rounds (chat_round) compare separate runs.",
+    "api": "planned: POST /v1/matches {gameId, players[]}; POST /v1/matches/{id}/moves {move, log}; GET /v1/matches/{id} -> {state, turn, moves}",
     "status": "planned",
-    "notes": "needs a backend endpoint; challenges today are score-only"
+    "notes": "Needs Max (match store) and Artem (a game that resumes from a stored state and a move list, replay-verified move by move). Until then, approximate with the turns fragment on one phone, or a same-seed round.",
+    "params": {
+      "players": "2-4",
+      "turn_timeout_hours": "default 24"
+    },
+    "events": [
+      "match.your_turn",
+      "match.finished"
+    ]
   },
   {
     "id": "drawing_canvas",
@@ -334,13 +345,17 @@
       "bird call",
       "spoken word"
     ],
-    "summary": "Recorded or sampled sound clips as content (animal calls, instruments, spoken words, music snippets) for listen-and-answer games.",
-    "when_to_use": "Name-that-sound, listening quizzes, instrument-by-ear.",
+    "summary": "Recorded or sampled sound clips as content (animal calls, real instruments, spoken words, everyday sound effects) from a licensed or CC0 sound library, for listen-and-answer games.",
+    "when_to_use": "Name-that-sound and guess-the-sound-effect games that need real recordings. For music, use melody_clip (original tunes, shipped).",
     "status": "planned",
     "gaps_it_closes": [
-      "all sound is synthesized; no recorded clips"
+      "no recorded sounds (animals, objects, voices)"
     ],
-    "notes": "original synth melodies work today (audio_clip_player). Real songs and recordings can't be copied into games"
+    "notes": "Original synth melodies ship as melody_clip. Real songs and recordings can't be copied into games; a library must be CC0 or licensed with the source recorded. Kevin's sound-library idea (Slack, 22:29) belongs to Artem and Max; see docs/harness-gaps/audio.md, Requests.",
+    "api": "planned, compatible with melody_clip: sound.clips entries may be {library: \"<sound id>\"} next to note clips; the server resolves the id to a URL or data URI and the asset is still clip_<i>, so play_clip and feedback {sound: {asset}} work unchanged",
+    "example_types": [
+      "sound_effect_guess"
+    ]
   },
   {
     "id": "growth_timer",
@@ -478,52 +493,64 @@
     "notes": "physics_world stacks unrotated boxes and circles (no tipping); the gold slice_drop_stacker and pass_play_stacker fake it with overhang rules"
   },
   {
-    "id": "map_pin",
-    "kind": "runtime_tool",
-    "name": "Map pin",
-    "aliases": [
-      "drop a pin",
-      "tap the map"
-    ],
-    "summary": "Tap a map to place a pin; the pin's position converts to map coordinates for scoring by distance.",
-    "when_to_use": "Geography guessing and place-finding games.",
-    "status": "planned",
-    "gaps_it_closes": [
-      "no accurate map art"
-    ],
-    "notes": "tapping and distance work today (pointer_input, dist); the map picture must be geographically accurate, which generated art can't promise"
-  },
-  {
     "id": "map_pin_guess",
     "kind": "runtime_tool",
     "name": "Map pin guess",
     "aliases": [
-      "where is it",
-      "geo guess"
+      "pin the city",
+      "where in the world is it",
+      "geo guess game"
     ],
-    "summary": "Shows a clue, the player pins a guess on a map, and the score falls with the distance from the true place.",
-    "when_to_use": "Where-was-this-taken, find-the-country and place quizzes.",
-    "status": "planned",
+    "summary": "Shows a clue, the player pins a guess on a real map, and the score falls with the great-circle distance from the true place.",
+    "when_to_use": "Where-was-this-taken, pin-the-capital, find-the-country and place quizzes. Compose it from geo_map + map_pin + rounds + lives with a `geo` section (target: capital or label).",
+    "status": "shipped",
     "gaps_it_closes": [
       "no accurate map art"
     ],
-    "notes": "same building blocks as map_pin plus place coordinates as content (map_geometry)"
+    "notes": "Example game Pin the Capital passes the gate and the score check. Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md). Photos for where-was-this-taken are a separate gap (photo_picker, image_gallery).",
+    "api": "composed: uses geo_map, map_pin, rounds (round_done = pin_done), lives (hit = pin_far), score; game functions map_target() = get_or(geo_target(), current, vec(0.0, 0.0)), map_can_pin(), map_focus() = if pin_shown then current else -1; rule on pinned: incr score by pin_points(event.km)",
+    "events": [
+      "pinned",
+      "pin_far",
+      "pin_done"
+    ],
+    "example_types": [
+      "map_place_pin_quiz",
+      "geo_guess",
+      "where_was_this_taken"
+    ],
+    "path": "authoring/content/geo/examples/pin_the_capital.json"
   },
   {
     "id": "map_geometry",
     "kind": "content_tool",
-    "name": "Place coordinates",
+    "name": "Geography content pack",
     "aliases": [
       "distance and direction",
-      "lat long"
+      "lat long",
+      "country outlines",
+      "capital cities data",
+      "natural earth data"
     ],
-    "summary": "Latitude and longitude for the places in a game, so rules can report the distance and compass direction between a guess and the answer.",
-    "when_to_use": "Distance-and-direction geography puzzles.",
-    "status": "planned",
+    "summary": "Checked place data built at build time from Natural Earth (public domain): 177 countries and the 51 US states and DC with simplified outlines, label points, bounding boxes, continent and subregion, capitals with coordinates, and aliases. A game names places; coordinates and outlines come only from the pack.",
+    "when_to_use": "Any geography game: the `geo` section picks or names places from a pack, and the geo step writes their names, capitals, coordinates and outlines into the game.",
+    "status": "shipped",
+    "notes": "Built by tools/make-geo-pack.mjs from ne_110m_admin_0_countries, ne_110m_populated_places_simple and ne_110m_admin_1_states_provinces (v5). world.json 147 KB, us_states.json 25 KB; a game carries only its own places (10–30 KB with the map). No flags (Natural Earth has none; see the request) and no cities beyond capitals yet.",
+    "api": "authoring/content/geo/<pack>.json (geo-pack/1); manifest `geo` {pack, places | pick {region, count, min_area, seed}, target: label|capital, map, outline, quiz {choices, ask: name|capital}}; expander/geo.mjs applyGeo(manifest, packs); unknown places are A_GEO_PLACE errors",
+    "example_types": [
+      "map_place_pin_quiz",
+      "capital_match",
+      "geo_guess",
+      "lit_country_quiz",
+      "map_reveal_trivia"
+    ],
+    "path": "authoring/content/geo/world.json",
+    "refs": [
+      "https://www.naturalearthdata.com/about/terms-of-use/"
+    ],
     "gaps_it_closes": [
       "no trusted place data"
-    ],
-    "notes": "the maths is shipped builtins (sin, cos, sqrt, atan2); the coordinates must come from a checked source, not from Muse's memory"
+    ]
   },
   {
     "id": "semantic_rank",
@@ -547,17 +574,18 @@
     "kind": "content_tool",
     "name": "Picture set",
     "aliases": [
-      "pictures",
-      "image set",
+      "set of pictures per round",
+      "one picture per round",
       "photos to guess"
     ],
-    "summary": "A set of themed pictures as game content (scenes, objects, places), one per round.",
-    "when_to_use": "Picture puzzles, spot-the-shape, jigsaws, frame-reveal guessing.",
-    "status": "planned",
+    "summary": "A set of themed pictures as game content (scenes, objects, animals, places), one per round, as the frames of one picture sprite.",
+    "when_to_use": "Picture puzzles, close-up guessing, picture trivia, jigsaws, frame-reveal guessing.",
+    "status": "building",
     "gaps_it_closes": [
       "art roles are sprites for pieces, not a list of full pictures per round"
     ],
-    "notes": "the art pipeline makes sprites with frames (image_assets); a sheet of full-screen pictures per round is untested"
+    "notes": "SVG frames work today (zoom_reveal, picture_quiz). A raster sheet needs a build-time step that tiles generated or CC0 pictures into one JPEG under the 192 KB art budget (about 6 pictures at 384 px); requested from Max",
+    "api": "art.sprites.picture = {svg: [one SVG per round], w: 512, h: 512} (works today); raster rounds = one image sheet {image: data URI, frames, cols} made at build time"
   },
   {
     "id": "image_generator",
@@ -573,7 +601,7 @@
     "gaps_it_closes": [
       "art is made once at build time, not during play"
     ],
-    "notes": "muse-image-1.0 exists on the server, but games run offline and deterministically; a live call breaks replays and needs a server round trip"
+    "notes": "muse-image-1.0 exists (about 13-18 s, 1600-1920 px WebP, ~0.5 MB), but games run offline and deterministically; a live call breaks replays and needs a server round trip. Build-time pictures are generated_image"
   },
   {
     "id": "image_similarity",
@@ -839,15 +867,164 @@
     "name": "Anomaly variants",
     "aliases": [
       "spot the difference",
-      "what changed"
+      "what changed",
+      "spot the difference generator",
+      "make differences"
     ],
-    "summary": "Builds versions of one scene where some have a small change (an object moved, recoloured or missing), with the answer recorded.",
-    "when_to_use": "Spot-the-anomaly, what-changed and spot-the-difference rounds.",
-    "api": "planned: a base scene as a list of placed objects plus per-round edits {object, change}",
-    "status": "planned",
+    "summary": "Builds two versions of one scene: the scene as written, and a copy where N objects are recolored, removed, moved, resized or say something else, with each change's hitbox recorded. Deterministic from a seed.",
+    "when_to_use": "Spot-the-difference, what-changed and find-the-anomaly rounds. Muse writes the scene (simple placed shapes, text and emoji); code makes the changes, so the answer key always matches the pictures.",
+    "api": "authoring/expander/spot-diff.mjs: makeSpotDifference(scene {w, h, bg, objects: [{id, shape rect|circle|ellipse|text|poly|line, geometry, fill, fixed?, alt?}]}, {count 3..9, seed, kinds}) -> {a, b, diffs [{id, kind, x, y, r, box}], decoys, problems}; toAuthoring(result) -> {art.sprites picture_a/picture_b, functions diff_points/diff_radii/diff_decoys} for diff_spots. CLI: authoring/tools/make-diff-game.mjs",
+    "status": "shipped",
     "gaps_it_closes": [
       "no paired picture variants"
     ],
-    "notes": "works today if the scene is drawn from object lists in state (the changes are rule edits); changes inside one generated picture are not possible"
+    "notes": "SVG only: changes inside one generated raster picture are not possible (no inpainting); a raster pair would need Muse Image editing. The compose step does not call it yet: the planner needs a \"scene\" content slot and a call to toAuthoring (see docs/harness-gaps/images.md)",
+    "path": "authoring/expander/spot-diff.mjs",
+    "example_types": [
+      "spot_difference",
+      "what_changed_scene",
+      "what_changed_room",
+      "mirror_double_difference"
+    ]
+  },
+  {
+    "id": "qa_bank_content",
+    "kind": "content_tool",
+    "name": "Yes/no fact bank",
+    "aliases": [
+      "answer bank for questions",
+      "fact table",
+      "intent bank",
+      "qa bank"
+    ],
+    "summary": "Build-time content step for qa_bank games: Muse writes each case (setup, hidden solution), 30-60 facts with a yes/no/irrelevant/partly reply and the concept words players use, and the solutions; then plays it (40 probe questions with true replies), and repairs the facts the matcher gets wrong, once. Checked by checkBank (shape, every fact's own question lands on it, no stop-word groups).",
+    "when_to_use": "Every qa_bank game: lateral puzzles, twenty questions, interrogations. One bank per case; a daily puzzle is one case per day.",
+    "api": "bankPrompt({request, count, puzzle?}) -> qa-bank/1 {cases: [{title, setup, solution, facts: [{ask, reply, key, match: [[words]], also_ask}], solve: [[[words]]], hints}]}; probePrompt(case) -> {questions: [{q, reply}]}; probeFailures(case, questions); repairPrompt(bank, failures); toContent(bank) -> {qa_setups, qa_reveals, qa_facts, qa_solves} (authoring/expander/qa-bank.mjs); CLI authoring/tools/qa-bank-muse.mjs --refine",
+    "status": "building",
+    "gaps_it_closes": [
+      "no LLM at play time for free questions"
+    ],
+    "example_types": [
+      "lateral_thinking_yes_no",
+      "twenty_questions",
+      "interrogate_typed_questions"
+    ],
+    "path": "authoring/expander/qa-bank.mjs",
+    "notes": "module and CLI built and measured (3 Muse calls, about 2 min, per case); not yet called by the generator's compose step, which would need a content-step hook in pipeline.mjs"
+  },
+  {
+    "id": "npc_lines",
+    "kind": "content_tool",
+    "name": "Judged replies",
+    "aliases": [
+      "rated replies",
+      "pickup lines with ratings",
+      "reply options with scores"
+    ],
+    "summary": "Build-time content step for npc_judge: per round, the character's line, 3-4 replies in the person's theme, a 0-100 rating of each in the character's voice (one clearly best, one flop) and the character's reaction to each.",
+    "when_to_use": "Rizz, convince-the-bouncer, roast or debate judges, caption contests with a judge: any npc_judge game.",
+    "api": "planned: npc_lines({theme, character, rounds, choices}) -> {lines[], options[], ratings[], reactions[]} flattened per round for nj_lines/nj_options/nj_ratings/nj_reactions; today compose writes these straight into content",
+    "status": "planned",
+    "example_types": [
+      "npc_rates_your_line",
+      "convince_the_gatekeeper"
+    ]
+  },
+  {
+    "id": "live_judge",
+    "kind": "server_tool",
+    "name": "Live AI answer while playing",
+    "aliases": [
+      "ask muse while playing",
+      "ai judge",
+      "llm npc",
+      "free chat npc",
+      "rate anything i type"
+    ],
+    "summary": "A server endpoint the game calls during play to have Muse answer a question or judge free text the bank doesn't cover; the answer is stored with the run and written into the replay log, so verification replays the recorded answer instead of calling Muse again.",
+    "when_to_use": "Not available. Plan typed-judging ideas (rate my own pickup line, free chat with a character, judge my caption) as npc_judge with written replies, or qa_bank with an \"Ask another way\" miss, and say in the plan that live judging is a gap.",
+    "api": "proposed: POST /v1/games/{id}/ask {run_id, seq, text} -> {reply, label?, rating?} (Muse Spark at minimal effort, 5-12 s); the engine receives it as an input event {\"ask_reply\": {seq, reply}} logged like any input; verify replays the log; per-user rate limits and a moderation pass",
+    "status": "gap",
+    "gaps_it_closes": [
+      "questions or text outside the build-time bank"
+    ],
+    "example_types": [
+      "lateral_thinking_yes_no",
+      "npc_rates_your_line"
+    ],
+    "notes": "needs Max (endpoint, cost, abuse limits) and Artem (an async host input that the runtime injects and the replay log records); 5-20 s per Muse call is too slow per turn for most games. See docs/harness-gaps/open-text.md"
+  },
+  {
+    "id": "generated_image",
+    "kind": "server_tool",
+    "name": "Pictures made at build time",
+    "aliases": [
+      "muse image",
+      "generate pictures for the game",
+      "ai pictures for the game",
+      "generated illustrations"
+    ],
+    "summary": "While a game is being made, the server asks muse-image-1.0 for each picture the plan needs (an animal, a scene, a cartoon character), shrinks it, and stores it with the game, so every player sees the same pictures and replays verify.",
+    "when_to_use": "Picture rounds that need more than flat SVG can draw: wildlife or nature close-ups, painterly scenes, cartoon caricatures of generic characters. Never photos or likenesses of real people: a real person in the request becomes a generic cartoon character, and the plan says so.",
+    "api": "planned: plan.content.pictures = [{id, prompt, style}] -> server returns {id, src (data URI or games-host URL), w, h, license: \"generated\"}; the expander puts them in one sprite sheet (image_gallery)",
+    "status": "planned",
+    "gaps_it_closes": [
+      "games can only show pictures Muse can draw as SVG"
+    ],
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "zoomed_image_guess",
+      "cartoon_quote_guess",
+      "picture_reveal"
+    ],
+    "notes": "tested 2026-11-12 from the Mac: 2 calls, 13.3 s and 17.7 s, 1920x1280 and 1600x1600 WebP (538 KB and 620 KB; the size parameter was ignored), photo-real quality; a 384 px JPEG is 32-43 KB. Needs Max (generation in the job, storage) and Bayan (style consistency); see docs/harness-gaps/images.md"
+  },
+  {
+    "id": "picture_pack",
+    "kind": "content_tool",
+    "name": "Public-domain picture packs",
+    "aliases": [
+      "real photos",
+      "wildlife photos",
+      "cc0 pictures",
+      "stock photos"
+    ],
+    "summary": "Curated packs of real photos under CC0 or public-domain terms (for example Wikimedia Commons or iNaturalist CC0 observations), each with its source URL, author and license recorded, pre-shrunk for games.",
+    "when_to_use": "When the request wants real photos rather than generated ones: wildlife photo trivia, landmarks, food close-ups. Never photos of people.",
+    "api": "planned: packs/<topic>.json [{answer, aliases, src, w, h, source_url, author, license}] on the games host; the plan picks a pack and N entries by seed",
+    "status": "planned",
+    "gaps_it_closes": [
+      "no real photos with a known license"
+    ],
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "zoomed_image_guess",
+      "where_was_this_taken"
+    ],
+    "notes": "needs a one-time curation pass and storage on Max's games host; generated_image is the faster path for the demo"
+  },
+  {
+    "id": "image_clip",
+    "kind": "runtime_tool",
+    "name": "Clipped image window",
+    "aliases": [
+      "crop an image",
+      "clip to a rect",
+      "image source rect",
+      "mask an image"
+    ],
+    "summary": "Draw part of an image: a group that clips its children to its box, or an image node with a source rectangle, so a picture can zoom or pan inside a window without covering the screen around it.",
+    "when_to_use": "Zoom-out reveals over a backdrop, magnifier and spotlight effects, sliding-window pictures, jigsaw pieces cut from one picture.",
+    "api": "requested from Artem: group prop clip: true (clip children to the group box), or image props src_x, src_y, src_w, src_h (fractions of the frame)",
+    "status": "gap",
+    "gaps_it_closes": [
+      "zoom_reveal masks with $bg rects, hiding the backdrop around its window"
+    ],
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "zoomed_image_guess",
+      "hidden_object"
+    ],
+    "notes": "the renderer already clips the whole frame (render.js drawFrame); a per-group clip is a save/clip/restore around the subtree"
   }
 ]

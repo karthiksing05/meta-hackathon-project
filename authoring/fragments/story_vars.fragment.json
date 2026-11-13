@@ -1,0 +1,240 @@
+{
+  "fragment": "story_vars",
+  "version": 1,
+  "describe": "Stats, items, conditions, effects, a choice limit, ranked endings and a share line on top of `choice_story`. Normally written by the story-graph compiler (authoring/expander/story-graph.mjs) from a `story-graph/1`, not by hand. The game supplies the source lists as state from content: `sg_src_labels` and `sg_src_next` (3 per scene, like choice_story's), and per choice (index s*3+c) `sg_need` (a condition: atoms `<var index>>=<n>` or `<var index><=<n>` joined by '&', alternatives by '|'; '' = always open), `sg_do` (effects: space-separated `<var index>:<delta>` or `<var index>:=<value>`), `sg_route` (`<condition>~<scene>` alternatives joined by ';', checked after the choice's effects, first match wins), `sg_note` (a toast); per scene `sg_enter` (effects on arrival), `sg_place` (a small label over the text), `sg_end_title`, `sg_end_id`, `sg_end_tag` ('Ending 2 of 5'), `sg_end_points` (digits) and `sg_share` (a share template with {choices}, {limit}, {ending} and {<var id>}); per variable `sg_var` (ids), `sg_label`, `sg_kind` ('stat', 'item' or 'flag'), `sg_init`, `sg_lo`, `sg_hi` and `sg_weight` (score points per unit, digits). Only open choices are shown, packed into the first buttons. With `limit` > 0, the limit-th choice that doesn't reach an ending goes to scene `limit_to`. The run is won or lost `curtain_ms` after the ending appears (good endings win), so the ending can be read. Score: the ending's points, plus `bonus` per unused choice on a good ending, plus each variable times its weight; it changes only on `ending_reached`. Provides `ending` (the ending's id, '' before) and `choices_used` (the group-play story result, HARNESS_V2 social.result kind ending), `sg_vals` (list<int>), `sg_used`, `sg_end` (scene index of the ending, -1 before), `sg_share_line` and `sg_path` (choice indices taken, dot-separated).",
+  "params": {
+    "limit": { "type": "int", "default": 0, "min": 0, "max": 30 },
+    "limit_to": { "type": "int", "default": -1, "min": -1, "max": 59 },
+    "bonus": { "type": "int", "default": 25, "min": 0, "max": 100 },
+    "curtain_ms": { "type": "duration", "default": 3500, "min": 500, "max": 10000 },
+    "place_y": { "type": "int", "default": 112, "min": 40, "max": 400 },
+    "card_y": { "type": "int", "default": 404, "min": 200, "max": 560 }
+  },
+  "requires": {
+    "state": {
+      "scene": "int",
+      "story_labels": "list<string>",
+      "story_next": "list<string>",
+      "story_ends": "list<string>",
+      "sg_src_labels": "list<string>",
+      "sg_src_next": "list<string>",
+      "sg_need": "list<string>",
+      "sg_do": "list<string>",
+      "sg_route": "list<string>",
+      "sg_note": "list<string>",
+      "sg_enter": "list<string>",
+      "sg_place": "list<string>",
+      "sg_end_title": "list<string>",
+      "sg_end_id": "list<string>",
+      "sg_end_tag": "list<string>",
+      "sg_end_points": "list<string>",
+      "sg_share": "list<string>",
+      "sg_var": "list<string>",
+      "sg_label": "list<string>",
+      "sg_kind": "list<string>",
+      "sg_init": "list<string>",
+      "sg_lo": "list<string>",
+      "sg_hi": "list<string>",
+      "sg_weight": "list<string>"
+    },
+    "events": {
+      "choice_made": { "scene": "int", "choice": "int" },
+      "ending_reached": { "good": "bool" }
+    }
+  },
+  "state": {
+    "sg_vals": { "type": "list<int>", "init": "[]" },
+    "sg_used": { "type": "int", "init": "0" },
+    "sg_end": { "type": "int", "init": "-1" },
+    "sg_note_text": { "type": "string", "init": "''" },
+    "sg_note_at": { "type": "int", "init": "-100000" },
+    "sg_verdict": { "type": "string", "init": "''" },
+    "sg_path": { "type": "string", "init": "''" },
+    "sg_share_line": { "type": "string", "init": "''" },
+    "ending": { "type": "string", "init": "''" },
+    "choices_used": { "type": "int", "init": "0" }
+  },
+  "functions": {
+    "sg_int": { "params": { "txt": "string" }, "returns": "int", "body": "or_else(parse_int(trim(txt)), 0)" },
+    "sg_part": { "params": { "txt": "string", "sep": "string", "k": "int" }, "returns": "string", "body": "trim(get_or(split(txt, sep), k, ''))" },
+    "sg_atom": {
+      "params": { "atom": "string", "vs": "list<int>" },
+      "returns": "bool",
+      "body": "if atom == '' then true else if len(split(atom, '>=')) == 2 then get_or(vs, sg_int(sg_part(atom, '>=', 0)), 0) >= sg_int(sg_part(atom, '>=', 1)) else if len(split(atom, '<=')) == 2 then get_or(vs, sg_int(sg_part(atom, '<=', 0)), 0) <= sg_int(sg_part(atom, '<=', 1)) else false"
+    },
+    "sg_holds": {
+      "params": { "cond": "string", "vs": "list<int>" },
+      "returns": "bool",
+      "body": "trim(cond) == '' or any(split(cond, '|'), alt => all(split(alt, '&'), a => sg_atom(trim(a), vs)))"
+    },
+    "sg_apply": {
+      "params": { "vs": "list<int>", "fx": "string" },
+      "returns": "list<int>",
+      "body": "let toks = filter(split(fx, ' '), t => trim(t) != '') in map(range(len(vs)), i => clamp(fold(filter(toks, t => sg_part(t, ':', 0) == str(i)), get_or(vs, i, 0), (acc, t) => let v = sg_part(t, ':', 1) in if starts_with(v, '=') then sg_int(substr(v, 1, 12)) else acc + sg_int(v)), sg_int(get_or(sg_lo, i, '0')), sg_int(get_or(sg_hi, i, '1'))))"
+    },
+    "sg_open": {
+      "params": { "s": "int", "c": "int" },
+      "returns": "bool",
+      "body": "get_or(sg_src_labels, s * 3 + c, '') != '' and sg_holds(get_or(sg_need, s * 3 + c, ''), sg_vals)"
+    },
+    "sg_shown": { "params": { "s": "int" }, "returns": "list<int>", "body": "filter(range(3), c => sg_open(s, c))" },
+    "sg_target": {
+      "params": { "s": "int", "c": "int" },
+      "returns": "string",
+      "body": "let nv = sg_apply(sg_vals, get_or(sg_do, s * 3 + c, '')) in let picked = fold(reverse(filter(split(get_or(sg_route, s * 3 + c, ''), ';'), r => trim(r) != '')), get_or(sg_src_next, s * 3 + c, ''), (acc, r) => if sg_holds(sg_part(r, '~', 0), nv) then sg_part(r, '~', 1) else acc) in if @limit > 0 and @limit_to >= 0 and sg_used + 1 >= @limit and get_or(story_ends, sg_int(picked), '') == '' then str(@limit_to) else picked"
+    },
+    "sg_labels_now": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "let opn = sg_shown(scene) in map(range(len(sg_src_labels)), i => if i / 3 != scene then '' else let o = get_or(opn, i % 3, -1) in if o < 0 then '' else get_or(sg_src_labels, scene * 3 + o, ''))"
+    },
+    "sg_next_now": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "let opn = sg_shown(scene) in map(range(len(sg_src_next)), i => if i / 3 != scene then '' else let o = get_or(opn, i % 3, -1) in if o < 0 then '' else sg_target(scene, o))"
+    },
+    "sg_good_end": { "params": {}, "returns": "bool", "body": "sg_end >= 0 and get_or(story_ends, sg_end, '') == 'good'" },
+    "sg_score": {
+      "params": {},
+      "returns": "int",
+      "body": "if sg_end < 0 then 0 else sg_int(get_or(sg_end_points, sg_end, '0')) + (if sg_good_end() and @limit > 0 then max(0, @limit - sg_used) * @bonus else 0) + sum(map(range(len(sg_vals)), i => get_or(sg_vals, i, 0) * sg_int(get_or(sg_weight, i, '0'))))"
+    },
+    "sg_share_text": {
+      "params": {},
+      "returns": "string",
+      "body": "fold(range(len(sg_var)), replace(replace(replace(get_or(sg_share, sg_end, ''), '{choices}', str(sg_used)), '{limit}', str(@limit)), '{ending}', get_or(sg_end_title, sg_end, '')), (acc, i) => replace(acc, '{' + get_or(sg_var, i, '') + '}', str(get_or(sg_vals, i, 0))))"
+    },
+    "sg_stats_text": {
+      "params": {},
+      "returns": "string",
+      "body": "join(map(filter(range(len(sg_vals)), i => get_or(sg_kind, i, '') == 'stat'), i => get_or(sg_label, i, '') + ' ' + str(get_or(sg_vals, i, 0))), '  ·  ')"
+    },
+    "sg_bag_text": {
+      "params": {},
+      "returns": "string",
+      "body": "let held = filter(range(len(sg_vals)), i => get_or(sg_kind, i, '') == 'item' and get_or(sg_vals, i, 0) > 0) in if len(held) == 0 then '' else 'Bag: ' + join(map(held, i => get_or(sg_label, i, '')), ', ')"
+    }
+  },
+  "events": {
+    "sg_curtain": {}
+  },
+  "rules": [
+    {
+      "id": "setup",
+      "on": "start",
+      "do": [
+        { "set": "sg_vals", "to": "sg_apply(map(sg_init, v => sg_int(v)), get_or(sg_enter, 0, ''))" },
+        { "set": "story_labels", "to": "sg_labels_now()" },
+        { "set": "story_next", "to": "sg_next_now()" }
+      ]
+    },
+    {
+      "id": "apply_choice",
+      "on": "choice_made",
+      "do": [
+        { "let": { "picked": "get_or(sg_shown(event.scene), event.choice, -1)" } },
+        {
+          "if": "picked >= 0",
+          "then": [
+            { "let": { "msg": "get_or(sg_note, event.scene * 3 + picked, '')" } },
+            { "set": "sg_vals", "to": "sg_apply(sg_vals, get_or(sg_do, event.scene * 3 + picked, ''))" },
+            { "set": "sg_used", "to": "sg_used + 1" },
+            { "set": "choices_used", "to": "sg_used" },
+            { "set": "sg_path", "to": "if sg_path == '' then str(picked) else sg_path + '.' + str(picked)" },
+            { "if": "msg != ''", "then": [ { "set": "sg_note_text", "to": "msg" }, { "set": "sg_note_at", "to": "now" } ] },
+            { "set": "sg_vals", "to": "sg_apply(sg_vals, get_or(sg_enter, scene, ''))" }
+          ]
+        },
+        { "set": "story_labels", "to": "sg_labels_now()" },
+        { "set": "story_next", "to": "sg_next_now()" }
+      ]
+    },
+    {
+      "id": "on_ending",
+      "on": "ending_reached",
+      "do": [
+        { "set": "sg_end", "to": "scene" },
+        { "set": "ending", "to": "get_or(sg_end_id, scene, '')" },
+        { "set": "sg_share_line", "to": "sg_share_text()" },
+        { "after": "@curtain_ms", "emit": "sg_curtain" }
+      ]
+    },
+    {
+      "id": "curtain",
+      "on": "sg_curtain",
+      "do": [
+        { "set": "sg_verdict", "to": "if sg_good_end() then 'won' else 'lost'" }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "sg_verdict == 'won'",
+    "lose": "sg_verdict == 'lost'",
+    "score": "sg_score()"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "include": "@limit > 0",
+        "node": {
+          "node": "text", "size": 15, "weight": 700, "color": "$ink", "role": "hud",
+          "text": "= if sg_end >= 0 then str(sg_used) + ' of ' + str(@limit) else 'Choice ' + str(min(sg_used + 1, @limit)) + ' of ' + str(@limit)",
+          "animate_on": { "choice_made": { "prop": "scale", "keys": [1, 1.2, 1], "ms": 280 } }
+        }
+      },
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text", "size": 15, "weight": 600, "color": "$ink", "role": "hud",
+          "text": "= sg_stats_text()"
+        }
+      },
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "text", "size": 14, "weight": 500, "color": "$ink", "opacity": 0.85,
+          "text": "= sg_bag_text()"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 180, "y": "@place_y", "anchor": "center", "size": 13, "weight": 700, "color": "$accent",
+          "text": "= upper(get_or(sg_place, scene, ''))",
+          "opacity": "= if now - sg_note_at < 2400 then 0.0 else 1.0",
+          "transition": { "opacity": { "ms": 250, "ease": "out" } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text", "x": 180, "y": "@place_y", "anchor": "center", "size": 15, "weight": 700, "color": "$primary",
+          "text": "= sg_note_text",
+          "opacity": "= if now - sg_note_at < 2400 then 1.0 else 0.0",
+          "transition": { "opacity": { "ms": 250, "ease": "out" } }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= sg_end >= 0",
+          "animate_on": { "ending_reached": { "prop": "opacity", "keys": [0, 0, 1], "ms": 900 } },
+          "children": [
+            { "node": "text", "x": 180, "y": "= @card_y", "anchor": "center", "size": 13, "weight": 700, "color": "$accent", "text": "= upper(get_or(sg_end_tag, max(sg_end, 0), ''))" },
+            { "node": "text", "x": 180, "y": "= @card_y + 32", "anchor": "center", "size": 23, "weight": 700, "color": "$primary", "text": "= get_or(sg_end_title, max(sg_end, 0), '')" },
+            { "node": "text", "x": 180, "y": "= @card_y + 68", "anchor": "center", "size": 15, "weight": 600, "color": "$ink", "text": "= sg_share_line" },
+            { "node": "text", "x": 180, "y": "= @card_y + 96", "anchor": "center", "size": 13, "weight": 500, "color": "$ink", "opacity": 0.7, "text": "= str(sg_score()) + ' points'" }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "choice_made", "when": "sg_note_at == now", "do": [ { "moment": "pickup" }, { "haptic": "light" } ] },
+      { "on": "ending_reached", "do": [ { "moment": "level" } ] }
+    ]
+  },
+  "tags": { "mood": ["playful", "calm"], "energy": ["low"] },
+  "conflicts": []
+}

@@ -60,6 +60,7 @@
       "subtlety of lie"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "hint",
       "reveal",
@@ -208,6 +209,7 @@
       "patience"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "lives",
       "hint",
@@ -423,6 +425,7 @@
       "scene detail"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "hint",
@@ -494,6 +497,7 @@
       "openings allowed"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "hint",
       "reveal"
@@ -564,6 +568,7 @@
       "statement entanglement"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "timer_bar",
       "score"
@@ -781,6 +786,7 @@
       "herring count"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "countdown",
       "timer_bar",
@@ -1220,6 +1226,7 @@
       "tone strictness"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "score"
@@ -1291,6 +1298,7 @@
       "trust sensitivity"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "lives",
@@ -1363,6 +1371,7 @@
       "hint obliqueness"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "hint",
       "reveal",
@@ -1504,6 +1513,7 @@
       "case difficulty"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "hint",
       "score",
@@ -1576,6 +1586,7 @@
       "distractions"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "score"
@@ -1716,6 +1727,7 @@
       "plausibility of false options"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "lives",
       "score"
@@ -1789,6 +1801,7 @@
       "time"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "countdown",
       "hint",
@@ -2141,6 +2154,7 @@
       "cross-reference depth"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "hint",
@@ -2210,6 +2224,7 @@
       "noise"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "hint",
       "score"
@@ -2282,6 +2297,7 @@
       "hint indirectness"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "meters",
       "fuzzy_match",
@@ -2353,6 +2369,7 @@
       "tests allowed"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "hint",
       "score"
@@ -2493,6 +2510,7 @@
       "sample count"
     ],
     "tools": [
+      "branching_story",
       "choice_story",
       "reveal",
       "score"
