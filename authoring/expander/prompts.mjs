@@ -6,6 +6,8 @@
 //
 // Pure: no disk, no network.
 
+import { groupPlayRules } from './group-play.mjs';
+
 /** The anatomy block Studio puts in a request (GameAnatomy.agreedText), split from the rest. */
 export function splitAnatomy(request) {
   const text = String(request || '');
@@ -78,6 +80,8 @@ export function planMenu(catalog, context) {
   const spec = [];
   if (plan.spec) spec.push('The game spec (game-spec/1). Build exactly this; every part is decided:', clip(JSON.stringify(plan.spec), 12000));
   if (plan.spec?.score) spec.push('', 'Copy spec.score into the manifest as a top-level "score" block (without bounds), with events renamed to the event or input names your game really emits.');
+  const together = groupPlayRules(plan.spec?.social);
+  if (together.length) spec.push('', ...together);
   if (plan.anatomy) spec.push('', 'The agreed anatomy:', clip(typeof plan.anatomy === 'string' ? plan.anatomy : JSON.stringify(plan.anatomy), 6000));
   if (plan.design && !plan.spec) spec.push('', 'Planned design:', clip(JSON.stringify(plan.design), 1800));
   const gaps = listOf(plan.gaps, 8);

@@ -12,6 +12,7 @@
 import * as P from './prompts.mjs';
 import { verifyScore } from './score-step.mjs';
 import { normalizeScore, unknownScoreEvents } from './score.mjs';
+import { groupPlayBlock } from './group-play.mjs';
 
 /** The spec's score as a manifest block: bounds dropped (the bots set them), unknown events dropped. */
 export function adoptSpecScore(specScore, game) {
@@ -234,6 +235,9 @@ export async function composeGame({ request, brief, base = null, context = null 
       ...(base?.emoji ? { emoji: base.emoji } : {}),
       ...(score?.model ? { score: score.model } : {}),
     });
+    // Group play: how friends compare this game's runs (the spec's social part, kept consistent with the score).
+    const together = groupPlayBlock(context?.plan?.spec?.social, score?.model ?? expansion.score ?? null);
+    if (together) manifest.group_play = together;
     stats.seconds = Math.round((Date.now() - started) / 100) / 10;
     stats.quality = quality.score;
     manifest.studio = { models: stats.models, created_at: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), duration_sec: stats.seconds, offline: false };
