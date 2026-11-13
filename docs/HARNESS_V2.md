@@ -275,6 +275,20 @@ for games with no right answer, how closely people agree (`opinion_compare`).
 
   This is the genre-aware gate that blocked 4 of 11 anatomy-run games. That layer is Bayan's, in
   `authoring/playtest/`; we agree the profile names with him.
+- **Stories take their own branch** (`expander/story-compose.mjs`, docs/harness-gaps/story.md; Studio API 4). When
+  the plan uses `branching_story` (in `tool_ids`, or a chosen type's tools):
+  1. Muse writes a `story-graph/1` (`STORY_GRAPH_SYSTEM`), with the Group cast when the context has `group` or `cast`.
+  2. The checker walks every path; errors, or the `S_SAME_BUTTON` warning, get one repair round.
+  3. The graph compiles to `choice_story` + `story_vars` with its score model; `studio.storyGate` plays a route to
+     every ending plus 7 random readers and checks the engine against the graph on every move.
+  4. The score check reads those runs (shortest = pro, random = regular, worst = new player), and `group_play`
+     compares the compiled endings, best first. Stories skip the polish rewrite, which would bypass the graph check.
+
+  Anything that fails falls back to the normal compose, and `stats.story` says why. Measured on Kevin's #17 (real
+  Muse, 2026-11-12): plan 39 s (2 calls), then story draft 42 s, one repair 18 s, score review 103 s; 6/6 endings,
+  ranked.
+- **The spam check** compares the best one-input spam run with the median of the regular or random players. A tie,
+  or a win within 10% of the score range, is a warning for the review; a clear win fails.
 
 ## The catalog
 
