@@ -4,7 +4,7 @@ import SwiftUI
 
 // DEBUG-only Studio helpers for screenshots and end-to-end runs (documented in StudioView.swift):
 // `FB_STUDIO_STEP`, `FB_STUDIO_LOOK`, `FB_STUDIO_SERVICE=scripted`, `FB_STUDIO_SPEED`,
-// `FB_STUDIO_FAIL`, `FB_STUDIO_AUTOPILOT` (`=build` stops on Try).
+// `FB_STUDIO_FAIL`, `FB_STUDIO_AUTOPILOT` (`=build` stops on Try), `FB_STUDIO_ANATOMY`.
 
 extension StudioModel {
     /// Applies `FB_STUDIO_STEP` and `FB_STUDIO_AUTOPILOT`. Called once from `attach`.
@@ -38,6 +38,7 @@ extension StudioModel {
             if sources.count > 2 { sources[2].isIncluded = false }
         }
         brief = StudioDebugData.brief(scope: audience.scope, mode: mode)
+        applyDebugAnatomy()
 
         switch step {
         case "brief":
@@ -80,6 +81,23 @@ extension StudioModel {
             stage = step == "try" ? .tryIt : .float
         default:
             break
+        }
+    }
+
+    /// `FB_STUDIO_ANATOMY=fixture` shows a fixture anatomy ("How the game works") for the request
+    /// with no Muse call; `answered` also answers its first question; `chat` adds two "Change the
+    /// game" turns on Try (one made, one waiting). Any value keeps later anatomy calls on the
+    /// fixtures. The fixture is picked from the request: word, grid or dodge.
+    private func applyDebugAnatomy() {
+        guard usesAnatomy, let value = DebugLaunch.value("FB_STUDIO_ANATOMY") else { return }
+        anatomyThread.load(GameAnatomyFixtures.anatomy(for: effectivePrompt), request: effectivePrompt)
+        if value == "answered" || value == "chat", let anatomy = anatomyThread.anatomy,
+           let slot = anatomy.openQuestions.first, let option = anatomy.meta(slot: slot)?.options.first {
+            anatomyThread.answer(option, slot: slot)
+        }
+        if value == "chat" {
+            anatomyThread.debugAddTurn("Actually, you also lose if two crowns touch, even diagonally", status: .applied)
+            anatomyThread.debugAddTurn("Give a hint after a minute", status: .proposed)
         }
     }
 

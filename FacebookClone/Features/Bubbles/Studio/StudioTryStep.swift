@@ -21,8 +21,14 @@ struct StudioTryStep: View {
                     StudioTrySlots(model: model)
                     // SOUND SECTION: between Customize and Tweak.
                     soundSection
-                    StudioTweakCard(model: model, isFocused: $isTweakFocused)
-                        .id("tweak")
+                    if model.showsAnatomyChat {
+                        // New games: change it through how the game works (docs/BUBBLES.md 7.13).
+                        StudioAnatomyChatCard(model: model)
+                            .id("chat")
+                    } else {
+                        StudioTweakCard(model: model, isFocused: $isTweakFocused)
+                            .id("tweak")
+                    }
                 }
                 .padding(.horizontal, FBMetrics.screenPadding)
                 .padding(.top, FBSpacing.s)
@@ -61,10 +67,12 @@ struct StudioTryStep: View {
                 }
             }
             .task {
-                // DEBUG screenshots: FB_STUDIO_SCROLL=details shows the details and the look.
-                guard DebugLaunch.value("FB_STUDIO_SCROLL") == "details" else { return }
+                // DEBUG screenshots: FB_STUDIO_SCROLL=details shows the details and the look;
+                // FB_STUDIO_SCROLL=chat shows "Change the game".
+                let target = DebugLaunch.value("FB_STUDIO_SCROLL")
+                guard target == "details" || target == "chat" else { return }
                 try? await Task.sleep(nanoseconds: 400_000_000)
-                proxy.scrollTo("details", anchor: .bottom)
+                proxy.scrollTo(target ?? "details", anchor: .bottom)
             }
         }
         .task {

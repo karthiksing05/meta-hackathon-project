@@ -12,6 +12,10 @@ struct StudioBriefStep: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: FBSpacing.l) {
                     StudioMuseSaysCard(model: model)
+                    if model.usesAnatomy {
+                        StudioAnatomyCard(thread: model.anatomyThread)
+                            .id("anatomy")
+                    }
                     StudioBriefCard(model: model)
                     if model.showsSources {
                         StudioSourcesCard(model: model)
@@ -24,10 +28,12 @@ struct StudioBriefStep: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .task {
-                // DEBUG screenshots: FB_STUDIO_SCROLL=sources shows the opted-in posts.
-                guard DebugLaunch.value("FB_STUDIO_SCROLL") == "sources" else { return }
+                // DEBUG screenshots: FB_STUDIO_SCROLL=sources shows the opted-in posts;
+                // `anatomy`, `anatomy-rules` or `anatomy-<part>` (e.g. `anatomy-pieces`) a part of
+                // "How the game works".
+                guard let target = DebugLaunch.value("FB_STUDIO_SCROLL"), target == "sources" || target.hasPrefix("anatomy") else { return }
                 try? await Task.sleep(nanoseconds: 400_000_000)
-                proxy.scrollTo("sources", anchor: .bottom)
+                proxy.scrollTo(target, anchor: target == "sources" ? .bottom : .top)
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {

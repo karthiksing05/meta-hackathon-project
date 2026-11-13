@@ -188,6 +188,9 @@ final class StudioModel {
     /// Set when Muse couldn't draft the brief and Studio filled in the basics.
     var briefNote: String?
     var sources: [StudioSourceItem] = []
+    /// How the game works, agreed with Muse before the build and changed on Try
+    /// (docs/BUBBLES.md 7.13). New games only (`usesAnatomy`).
+    let anatomyThread = StudioAnatomyThread()
 
     // Compose
     var composeKind: StudioComposeKind = .create
@@ -598,6 +601,7 @@ final class StudioModel {
         isDraftingBrief = true
         briefNote = nil
         let request = makeRequest(mode: mode, prompt: effectivePrompt, base: baseBubble?.manifest, brief: nil, look: lookHint)
+        draftAnatomyIfNeeded()
         let service = service
         briefTask = Task { [weak self] in
             var drafted: BubbleBrief?
@@ -735,7 +739,8 @@ final class StudioModel {
 
     /// Starts Muse. `.create` uses the reviewed brief; `.tweak` and `.nextLevel` build on the
     /// current level. `newLook` redraws the current level in another look (a tweak).
-    func startCompose(_ kind: StudioComposeKind, offline: Bool = false, newLook: StudioLook? = nil) {
+    /// `text` replaces `tweakText` for a tweak (the "Change the game" thread's mapped change).
+    func startCompose(_ kind: StudioComposeKind, offline: Bool = false, newLook: StudioLook? = nil, text tweak: String? = nil) {
         // A second tap while the step animates away would restart Muse from scratch.
         guard !isComposing else { return }
         let request: StudioRequest
@@ -744,7 +749,7 @@ final class StudioModel {
             request = makeRequest(mode: mode == .edit ? .create : mode, prompt: effectivePrompt, base: baseBubble?.manifest, brief: briefForRun, look: lookHint)
         case .tweak:
             guard let current = currentResult else { return }
-            let text = tweakText.trimmingCharacters(in: .whitespacesAndNewlines)
+            let text = (tweak ?? tweakText).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !text.isEmpty else { return }
             request = makeRequest(mode: .edit, prompt: text, base: current.manifest, brief: nil, look: newLook)
         case .nextLevel:
@@ -968,6 +973,7 @@ final class StudioModel {
         composeTask?.cancel()
         briefTask?.cancel()
         advanceTask?.cancel()
+        anatomyThread.cancel()
         // A cancelled draft never clears this, which left "Next" stuck on "Muse is reading".
         isDraftingBrief = false
     }
@@ -1396,6 +1402,8 @@ extension StudioModel {
         if let existing = brief.notes?.trimmingCharacters(in: .whitespacesAndNewlines), !existing.isEmpty { notes.append(existing) }
         if let soundHint { notes.append("Sounds: \(soundHint).") }
         if let length { notes.append("Length: \(length.label).") }
+        // Microgames read the anatomy in the request text instead (`microgameRequestText`).
+        if !buildsMicrogame, let anatomy = agreedAnatomyText { notes.append(anatomy) }
         brief.notes = notes.isEmpty ? nil : notes.joined(separator: " ")
         return brief
     }
@@ -1440,6 +1448,7 @@ extension StudioModel {
         } else if audience == .friends, !names.isEmpty {
             text += " (for my friends \(names.joined(separator: ", ")))"
         }
+        if let anatomy = agreedAnatomyText { text += "\n\n" + anatomy }
         return text
     }
 
