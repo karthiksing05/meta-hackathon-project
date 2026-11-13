@@ -20,6 +20,16 @@ extension BubbleSurfaceHooks {
         post.bubbleID = bubble.id
         post.bubbleReplay = result?.replay ?? bubble.featuredRun?.replay
         post.isUploading = false
+        if let group {
+            let eventID = post.id // one stable server event per post, including a retry
+            Task { @MainActor in
+                do {
+                    try await GamesAPILive.shared.shareGameToGroup(gameID: bubble.id, groupID: group.id, eventID: eventID)
+                } catch {
+                    appStore.showToast("Your post was created, but Group alerts couldn't be sent. Check your connection.", symbol: "exclamationmark.circle")
+                }
+            }
+        }
         FeedEventReporter.shared.note(.floated, gameID: bubble.id)
         appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
         return post
