@@ -68,6 +68,14 @@ const POLICIES = [
   { key: "greedy", name: "Formula, Thompson off (greedy)", over: { stages: { bandit: false } } },
   { key: "formula", name: "Formula (v0.5 defaults)", over: {} }
 ];
+// --metric adds two greedy rankers that differ only in what they optimize: clicks (CTR, the
+// usual engagement target) or our grab-and-satisfaction reward. Same posteriors, nothing else on.
+if (argv.includes("--metric")) {
+  POLICIES.push(
+    { key: "ctrOnly", name: "Clicks only (CTR), greedy", over: { stages: { reward: false, bandit: false, calibration: false, coldStart: false, bait: false } } },
+    { key: "rewardOnly", name: "Our reward only, greedy", over: { stages: { reward: true, bandit: false, calibration: false, coldStart: false, bait: false } } }
+  );
+}
 // --ablate adds the formula with one part off, to see where its payoff goes (diagnosis, not tuning).
 if (argv.includes("--ablate")) {
   POLICIES.push(
@@ -90,7 +98,7 @@ function run(world, policy, seed) {
   const glob = { fin: {}, vSum: {}, n: {} };
   const out = {};
   Object.keys(TYPES).forEach((t) => {
-    out[t] = { pages: 0, sessions: 0, util: 0, regret: 0, slop: 0, fav: 0, latePages: 0, lateUtil: 0, lateRegret: 0, lateSessions: 0, lateSessPages: 0, byDay: [] };
+    out[t] = { pages: 0, sessions: 0, util: 0, regret: 0, slop: 0, hooky: 0, fav: 0, latePages: 0, lateUtil: 0, lateRegret: 0, lateSessions: 0, lateSessPages: 0, byDay: [] };
   });
 
   for (let day = 0; day < DAYS; day++) {
@@ -145,7 +153,7 @@ function run(world, policy, seed) {
         }
         pages++;
         const isFav = item.summary.formula === fav ? 1 : 0;
-        m.pages++; m.util += b.util; m.regret += regret; m.slop += item.slop ? 1 : 0; m.fav += isFav;
+        m.pages++; m.util += b.util; m.regret += regret; m.slop += item.slop ? 1 : 0; m.hooky += item.H >= 0.6 ? 1 : 0; m.fav += isFav;
         md.pages++; md.regret += regret; md.fav += isFav;
         if (late) { m.latePages++; m.lateUtil += b.util; m.lateRegret += regret; }
       }
@@ -188,6 +196,20 @@ for (const t of Object.keys(TYPES)) {
     console.log("  " + p.name.padEnd(34) + f3(m.lateUtil / m.latePages).padStart(9) + f3(m.lateRegret / m.latePages).padStart(11) + (m.lateSessPages / m.lateSessions).toFixed(1).padStart(12) +
       pc(m.slop / m.pages).padStart(8) + pc(m.fav / m.pages).padStart(13) + span(0, 0).padStart(11) + span(1, 2).padStart(8) + span(3, 6).padStart(8) + span(7, 13).padStart(8));
   }
+}
+if (argv.includes("--json")) {
+  const outJSON = {};
+  for (const p of POLICIES) {
+    outJSON[p.key] = { name: p.name };
+    for (const t of Object.keys(TYPES)) {
+      const m = totals[p.key][t];
+      const span = (a, b) => { let pg = 0, rg = 0; for (let d = a; d <= b && d < DAYS; d++) { if (m.byDay[d]) { pg += m.byDay[d].pages; rg += m.byDay[d].regret; } } return pg ? rg / pg : null; };
+      outJSON[p.key][t] = { joy: m.lateUtil / m.latePages, regret: m.lateRegret / m.latePages, pagesPerSession: m.lateSessPages / m.lateSessions,
+        slop: m.slop / m.pages, hooky: m.hooky / m.pages, fav: m.fav / m.pages,
+        regretByDay: [span(0, 0), span(1, 2), span(3, 6), span(7, 13)] };
+    }
+  }
+  require("fs").writeFileSync(opt("--json", "eval-bench.json"), JSON.stringify(outJSON, null, 1));
 }
 console.log("\nfav formula = share of all pages from the person's own favorite formula (the oracle would show it often but not always).");
 console.log(((Date.now() - t0) / 1000).toFixed(1) + " s");
