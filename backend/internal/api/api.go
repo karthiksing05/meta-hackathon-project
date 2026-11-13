@@ -99,6 +99,24 @@ func (s *Server) Handler() http.Handler {
 			r.With(s.requireAuth).Post("/scores", s.submitScore)
 		})
 
+		// People, friends and Groups
+		r.With(s.optionalAuth).Get("/users/{id}", s.getUser)
+		r.With(s.requireAuth).Get("/me/friends", s.listFriends)
+		r.With(s.requireAuth).Put("/me/friends/{id}", s.setFriend(true))
+		r.With(s.requireAuth).Delete("/me/friends/{id}", s.setFriend(false))
+		r.Route("/groups", func(r chi.Router) {
+			r.With(s.optionalAuth).Get("/", s.listGroups)
+			r.With(s.requireAuth).Post("/", s.createGroup)
+			r.Route("/{id}", func(r chi.Router) {
+				r.With(s.optionalAuth).Get("/", s.getGroup)
+				r.With(s.optionalAuth).Get("/games", s.groupGames)
+				r.With(s.requireAuth).Put("/members/me", s.setMembership(true))
+				r.With(s.requireAuth).Delete("/members/me", s.setMembership(false))
+				r.With(s.requireAuth).Post("/blend", s.groupBlend)
+				r.With(s.requireAuth).Get("/blend-inputs", s.groupBlendInputs)
+			})
+		})
+
 		// Ranking: the recommender runs on the server, so the app asks what to show and reports what happened.
 		r.With(s.requireAuth).Get("/me/recs", s.myRecs)
 		r.With(s.requireAuth).Post("/blend", s.blend)

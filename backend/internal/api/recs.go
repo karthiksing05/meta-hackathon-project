@@ -220,7 +220,7 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 	h := fnv.New32a()
 	h.Write([]byte(who + "|" + strconv.Itoa(len(rec.Feed)+len(exclude)) + "|" + strconv.Itoa(today())))
 	input, _ := json.Marshal(map[string]any{
-		"candidates": candidatesOf(games), "summaries": summariesOf(games), "feed": nonNil(rec.Feed), "feedKeys": nonNil(rec.FeedKeys),
+		"candidates": candidatesFor(games, s.loadSocial(r.Context(), u), now), "summaries": summariesOf(games), "feed": nonNil(rec.Feed), "feedKeys": nonNil(rec.FeedKeys),
 		"count": count, "seed": h.Sum32(), "day": today(), "now": now.UnixMilli(),
 	})
 	var reply struct {
@@ -475,20 +475,35 @@ func (s *Server) blend(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 400, "the signed-in person must be one of the members")
 		return
 	}
+	s.runBlend(w, r, in)
+}
+
+// runBlend runs a Blend for already-validated members; the signed-in person is one of them.
+func (s *Server) runBlend(w http.ResponseWriter, r *http.Request, in blendIn) {
+	u := userFrom(r)
+	if in.Count < 1 {
+		in.Count = 8
+	}
+	in.Count = min(in.Count, 20)
+	if in.Group.Name == "" {
+		in.Group.Name = "your Group"
+	}
 	games, err := s.Store.AllGames(r.Context(), maxCandidates)
 	if err != nil {
 		s.serverErr(w, r, err)
 		return
 	}
+	friends, _ := s.friendSet(r.Context(), u.ID) // who is a friend comes from the server, not the caller
 
 	// Profiles of the members the server knows.
 	members := make([]map[string]any, 0, len(in.Members))
 	for _, m := range in.Members {
-		member := map[string]any{"id": m.UserID, "name": m.Name, "isMe": m.UserID == u.ID, "isFriend": m.IsFriend || m.UserID == u.ID, "skill": m.Skill}
+		member := map[string]any{"id": m.UserID, "name": m.Name, "isMe": m.UserID == u.ID, "isFriend": friends[m.UserID] || m.UserID == u.ID, "skill": m.Skill}
 		if m.Bio != "" || len(m.Themes) > 0 {
 			member["hints"] = map[string]any{"bio": m.Bio, "themes": nonNil(m.Themes)}
 		}
 		if m.UserID != u.ID {
+			m.IsFriend = friends[m.UserID]
 			if p := s.memberProfile(r.Context(), m); p != nil {
 				member["profile"] = p
 			}

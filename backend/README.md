@@ -50,6 +50,12 @@ treat the exact shapes as the first version and change them together with the cl
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
 | `GET /v1/games/{id}/leaderboard`, `POST /v1/games/{id}/scores` | none / bearer | best score per user |
 | `GET /v1/me/recs` | bearer | my model's summary and taste profile |
+| `GET /v1/users/{id}` | optional | a person's public profile (`isFriend` when signed in) |
+| `GET /v1/me/friends`, `PUT`/`DELETE /v1/me/friends/{id}` | bearer | my friends; add or remove one (mutual, immediate) |
+| `GET /v1/groups?kind=&mine=1`, `POST /v1/groups` | optional / bearer | Groups and Events; create one |
+| `GET /v1/groups/{id}`, `PUT`/`DELETE /v1/groups/{id}/members/me` | optional / bearer | one with its members; join or leave |
+| `GET /v1/groups/{id}/games` | optional | games made for it |
+| `POST /v1/groups/{id}/blend`, `GET /v1/groups/{id}/blend-inputs` | bearer (members) | Blend for the group's members, taken from the server's data; each member's skill, taste and recent games |
 | `POST /v1/blend` | bearer | games and a game spec for a set of people: `{group, members, count}` |
 | `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; see [Making games](#making-games-muse-lives-here) |
 | `GET /v1/generate/{id}`, `GET /v1/generate` | bearer | a job's status, steps and finished game; my recent jobs |
@@ -138,6 +144,21 @@ Mongo (`recs_state`); the pages shown this session are kept with it.
   The golden test replays a fixed call sequence made by Node and fails if the Go engine's answers differ.
 - Games carry what the recommender describes them by (`mood`, `energy`, `competition`, `look`, `scope`, `isDaily`, and the
   playtest bots' runs for generated games), read from the manifest when a game is published.
+
+## People, friends, Groups and the demo world
+
+Everything the app used to keep as local demo data lives on the server: the cast (people), who is a friend, which Groups and
+Events exist and who is in them. People are accounts; a *demo* person (`synthetic: true`) has no password and can never sign in.
+The feed's candidates come from this real data (the same reasons the app's own feed used: a friend's best run `friendBurst` 2.2,
+a Group member's `groupBurst` 1.6, `daily` 3, `icebreaker` 2, `nearby` 1.8, `nextLevel` 1.2, `yours` 0.6, `popular` 0.8); the
+order is still decided only by the recommender. Group Blend takes its members, friend flags and skill from the server.
+
+`deploy.sh seed` (or `go run ./cmd/seed`) puts the app's demo world on the server: 10 people with ids like `sf-maya-okafor`, the
+friendships inside the cast, the New in SF Group and the newcomers picnic Event (with members), the app's 32 seed games (owned by
+the cast, remixes linked to their originals), and what each person scored on each game, from real bot runs of the game runtime
+(`internal/seed/tools/make-scores.cjs`). Running it again changes nothing. The person using the app makes the cast their friends
+with `PUT /v1/me/friends/{id}` and joins the Group with `PUT /v1/groups/group-newinsf/members/me`. The data under
+`internal/seed/data` is copied from the app (`FacebookClone/Bubbles/Seeds`; `internal/seed/SOURCE_COMMIT`).
 
 ## Web player (for testing)
 

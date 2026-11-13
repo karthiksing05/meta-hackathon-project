@@ -15,7 +15,7 @@ COPY backend/cmd ./cmd
 COPY backend/internal ./internal
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/api ./cmd/api \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/dbinit ./cmd/dbinit \
- && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/games ./cmd/games
+ && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/seed ./cmd/seed  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/games ./cmd/games
 
 FROM alpine:3.21 AS base
 # wget (busybox) is used by the container healthchecks.
@@ -24,7 +24,7 @@ RUN apk add --no-cache ca-certificates tzdata \
 
 FROM base AS api
 LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hackathon-project"
-COPY --from=build /out/api /out/dbinit /app/
+COPY --from=build /out/api /out/dbinit /out/seed /app/
 USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["/app/api"]

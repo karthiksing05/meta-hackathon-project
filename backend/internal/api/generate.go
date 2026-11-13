@@ -340,21 +340,13 @@ func (s *Server) finishJob(ctx context.Context, job model.Job, owner model.User,
 		s.failJob(ctx, job.ID, "The game maker returned no game.")
 		return
 	}
-	var zb bytes.Buffer
-	zw := zip.NewWriter(&zb)
-	w, err := zw.Create("manifest.json")
-	if err == nil {
-		_, err = w.Write(l.Manifest) // the exact bytes: never re-encoded here
-	}
-	if err == nil {
-		err = zw.Close()
-	}
+	zb, err := zipManifest(l.Manifest)
 	if err != nil {
 		log.Error("generate: could not package", "err", err)
 		s.failJob(ctx, job.ID, "Couldn't save the game.")
 		return
 	}
-	g, perr := s.publishPackage(context.WithoutCancel(ctx), &owner, &zb, l.Bots)
+	g, perr := s.publishPackage(context.WithoutCancel(ctx), &owner, zb, l.Bots)
 	if perr != nil {
 		if perr.Err != nil {
 			log.Error("generate: could not publish", "err", perr.Err)
@@ -373,4 +365,35 @@ func (s *Server) finishJob(ctx context.Context, job model.Job, owner model.User,
 		log.Error("generate: could not record the finished job", "err", err)
 	}
 	log.Info("generate: done", "game", g.ID, "slug", g.Slug)
+}
+
+// zipManifest packs manifest.json, the exact bytes and never re-encoded, into a game package.
+func zipManifest(manifest []byte) (*bytes.Buffer, error) {
+	var zb bytes.Buffer
+	zw := zip.NewWriter(&zb)
+	w, err := zw.Create("manifest.json")
+	if err == nil {
+		_, err = w.Write(manifest)
+	}
+	if err == nil {
+		err = zw.Close()
+	}
+	return &zb, err
+}
+
+// PublishManifest stores a game from its manifest as if the owner had uploaded it (used by the seed
+// tool). bots are the playtest runs, if any.
+func (s *Server) PublishManifest(ctx context.Context, owner *model.User, manifest []byte, bots []model.BotRun) (*model.Game, error) {
+	zb, err := zipManifest(manifest)
+	if err != nil {
+		return nil, err
+	}
+	g, perr := s.publishPackage(ctx, owner, zb, bots)
+	if perr != nil {
+		if perr.Err != nil {
+			return nil, perr.Err
+		}
+		return nil, errors.New(perr.Msg)
+	}
+	return g, nil
 }

@@ -3,6 +3,7 @@
 #
 #   deploy.sh deploy <image-tag>    deploy a commit SHA; roll back automatically if /readyz fails
 #   deploy.sh rollback              redeploy the previously deployed tag
+#   deploy.sh seed                  put the demo world on the server (people, friends, Group, seed games, scores)
 #   deploy.sh restart-generator     recreate the generator (after changing generator.env)
 #   deploy.sh status                show the running tags
 #
@@ -89,6 +90,14 @@ case "$cmd" in
     echo "$prev" > "$STATE/current_tag"
     [ -n "$cur" ] && echo "$cur" > "$STATE/previous_tag"
     echo "rolled back to $prev"
+    ;;
+  seed)
+    # Put the demo world on the server (people, friends, a Group and an Event, the seed games and their scores).
+    # Safe to run again. Uses the API image of the deployed tag, with the API's environment.
+    tag=$(cat "$STATE/current_tag" 2>/dev/null || true)
+    [ -n "$tag" ] || { echo "no deployed tag recorded" >&2; exit 1; }
+    export API_IMAGE="$PREFIX/bubbles-api:$tag" GAMES_IMAGE="$PREFIX/bubbles-games:$tag" GENERATOR_IMAGE="$PREFIX/bubbles-generator:$tag"
+    "${COMPOSE[@]}" run --rm --no-deps --entrypoint /app/seed api
     ;;
   restart-generator)
     # Recreate the generator so it re-reads /etc/game-platform/generator.env (e.g. after adding the Muse key).

@@ -252,6 +252,9 @@ var (
 
 type manifestMeta struct {
 	ID    string `json:"id"` // optional: kept as the game's slug when it is unique
+	Chain struct {
+		Index int `json:"index"`
+	} `json:"chain"`
 	Style struct {
 		Look string `json:"look"`
 	} `json:"style"`
@@ -329,6 +332,9 @@ func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Read
 		g.Slug = slug
 	}
 	g.GroupID, g.EventID = scopeIDs(&m)
+	if m.Chain.Index > 1 && m.Chain.Index < 1000 {
+		g.Level = m.Chain.Index
+	}
 	g.Mood, g.Energy, g.Competition = normTags(m.Brief.Mood), strings.ToLower(strings.TrimSpace(m.Brief.Energy)), strings.ToLower(strings.TrimSpace(m.Brief.Competition))
 	g.Look, g.IsDaily, g.Bots = strings.ToLower(strings.TrimSpace(m.Style.Look)), strings.EqualFold(m.Structure.Cadence, "daily"), bots
 	switch {

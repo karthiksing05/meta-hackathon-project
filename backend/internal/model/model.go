@@ -44,6 +44,7 @@ type Game struct {
 	Competition   string    `bson:"competition,omitempty"`
 	Look          string    `bson:"look,omitempty"`
 	Scope         string    `bson:"scope,omitempty"` // "everyone", "group" or "event"
+	Level         int       `bson:"level,omitempty"` // position in a chain of levels (2 and up are later levels)
 	IsDaily       bool      `bson:"isDaily,omitempty"`
 	Bots          []BotRun  `bson:"bots,omitempty"` // the playtest bots' runs, for the recommender's quality prior
 	Likes         int64     `bson:"likes"`          // "saves are the likes": one counter

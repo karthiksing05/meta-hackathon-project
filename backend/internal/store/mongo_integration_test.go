@@ -269,3 +269,89 @@ func TestMongoRecsState(t *testing.T) {
 		t.Fatalf("record: %+v %v", got, err)
 	}
 }
+
+// People, friends, Groups and recent scores.
+func TestMongoSocial(t *testing.T) {
+	uri := os.Getenv("MONGO_TEST_URI")
+	if uri == "" {
+		t.Skip("MONGO_TEST_URI not set")
+	}
+	ctx := context.Background()
+	m, err := store.ConnectMongo(ctx, uri, "bubbles_test_social_"+time.Now().Format("150405"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.Close(ctx)
+	defer m.DropDatabase(ctx)
+	if err := m.EnsureIndexes(ctx); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	for _, u := range []model.User{
+		{ID: "sf-maya", Email: "maya@cast.invalid", Username: "sf_maya", DisplayName: "Maya", Synthetic: true, Skill: 0.9, CreatedAt: now},
+		{ID: "u2", Email: "b@example.com", Username: "bee", DisplayName: "Bee", CreatedAt: now},
+	} {
+		u := u
+		if err := m.CreateUser(ctx, &u); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if u, err := m.UserByUsername(ctx, "sf_maya"); err != nil || !u.Synthetic || u.Skill != 0.9 {
+		t.Fatalf("by username: %+v %v", u, err)
+	}
+	if us, _ := m.UsersByIDs(ctx, []string{"sf-maya", "u2", "nobody"}); len(us) != 2 {
+		t.Fatalf("by ids: %v", us)
+	}
+
+	for i := 0; i < 2; i++ { // idempotent, both directions
+		if err := m.AddFriend(ctx, "sf-maya", "u2"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if f, _ := m.Friends(ctx, "u2"); len(f) != 1 || f[0] != "sf-maya" {
+		t.Fatalf("friends: %v", f)
+	}
+	m.RemoveFriend(ctx, "u2", "sf-maya")
+	if f, _ := m.Friends(ctx, "sf-maya"); len(f) != 0 {
+		t.Fatalf("after removing: %v", f)
+	}
+
+	g := &model.Group{ID: "group-x", Kind: "group", Name: "X", CreatedAt: now}
+	if err := m.UpsertGroup(ctx, g); err != nil {
+		t.Fatal(err)
+	}
+	g.Name = "X renamed"
+	m.UpsertGroup(ctx, g)
+	m.UpsertGroup(ctx, &model.Group{ID: "event-y", Kind: "event", Name: "Y", CreatedAt: now})
+	for i := 0; i < 2; i++ {
+		m.AddGroupMember(ctx, model.GroupMember{GroupID: "group-x", UserID: "u2", JoinedAt: now})
+	}
+	m.AddGroupMember(ctx, model.GroupMember{GroupID: "group-x", UserID: "sf-maya", Role: "owner", JoinedAt: now})
+	if got, _ := m.GroupByID(ctx, "group-x"); got.Name != "X renamed" {
+		t.Fatalf("group: %+v", got)
+	}
+	if list, _ := m.ListGroups(ctx, 10); len(list) != 2 {
+		t.Fatalf("groups: %v", list)
+	}
+	if ms, _ := m.GroupMembers(ctx, "group-x"); len(ms) != 2 {
+		t.Fatalf("members: %v", ms)
+	}
+	if gs, _ := m.GroupsOfUser(ctx, "u2"); len(gs) != 1 || gs[0].ID != "group-x" {
+		t.Fatalf("groups of user: %v", gs)
+	}
+	m.RemoveGroupMember(ctx, "group-x", "u2")
+	if ms, _ := m.GroupMembers(ctx, "group-x"); len(ms) != 1 {
+		t.Fatalf("after leaving: %v", ms)
+	}
+
+	id := "c0123456789abcdef0123456"
+	m.InsertGame(ctx, &model.Game{ID: id, OwnerID: "u2", Title: "G", Slug: "g", GroupID: "group-x", StorageKey: id, ManifestPath: "manifest.json", Level: 2, CreatedAt: now})
+	if gs, _ := m.GamesByGroup(ctx, "group-x", 10); len(gs) != 1 || gs[0].Level != 2 {
+		t.Fatalf("games by group: %v", gs)
+	}
+	m.SubmitScore(ctx, model.Score{GameID: id, UserID: "sf-maya", Username: "sf_maya", Score: 12, UpdatedAt: now})
+	m.SubmitScore(ctx, model.Score{GameID: id, UserID: "u2", Username: "bee", Score: 5, UpdatedAt: now.Add(time.Second)})
+	if sc, _ := m.RecentScores(ctx, []string{"sf-maya", "u2"}, 10); len(sc) != 2 || sc[0].UserID != "u2" {
+		t.Fatalf("recent scores, newest first: %v", sc)
+	}
+}
