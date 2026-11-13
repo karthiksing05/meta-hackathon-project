@@ -106,6 +106,12 @@ final class BubbleRuntimePool: NSObject, WKScriptMessageHandler {
     private var isTopUpScheduled = false
     private let posterCache = NSCache<NSString, UIImage>()
     private var posterTasks: [String: Task<UIImage?, Never>] = [:]
+    /// Bumped each time a still is found to have been drawn before its images loaded. A draw that began under an older
+    /// number is stale: it is not cached or written, so an artless still can never replace the redraw.
+    private var posterGenerations: [String: Int] = [:]
+    /// Poster files are written and deleted here, one at a time in the order they were asked, so a delete is never
+    /// overtaken by the write it was meant to remove.
+    private let posterIO = DispatchQueue(label: "bubble.poster.io", qos: .utility)
     private var explicitPosterSize: CGSize?
 
     /// The top inset posters are drawn with: the Bubbles tab's. The runtime keeps the HUD and the playfield clear of the
@@ -258,21 +264,30 @@ final class BubbleRuntimePool: NSObject, WKScriptMessageHandler {
     /// with `poster_update`). The cached still is missing art the live game has, so forget it and tell whoever shows it
     /// to draw it again. Without this the incomplete still stayed, on disk too, and the page jumped to the live game.
     fileprivate func invalidatePoster(forKey key: String) {
+        posterGenerations[key, default: 0] += 1
+        posterTasks[key] = nil // a draw already running began under the old number; the redraw starts fresh
         let cacheKey = posterCacheKey(key)
         posterCache.removeObject(forKey: cacheKey as NSString)
         if let url = Self.posterFileURL(forKey: cacheKey) {
-            try? FileManager.default.removeItem(at: url)
+            posterIO.async { try? FileManager.default.removeItem(at: url) }
         }
         onPosterStale?(key)
     }
 
+    /// The number a draw of this session's still starts under (see `posterGenerations`).
+    fileprivate func posterGeneration(forKey key: String) -> Int {
+        posterGenerations[key, default: 0]
+    }
+
     /// Keeps a poster rendered by a host (JPEG data) in memory and on disk.
-    fileprivate func storePoster(_ data: Data, forKey key: String) -> UIImage? {
+    /// Nil for a stale draw (one that began before its still was found to be incomplete): nothing is kept.
+    fileprivate func storePoster(_ data: Data, forKey key: String, generation: Int) -> UIImage? {
+        guard generation == posterGenerations[key, default: 0] else { return nil }
         guard let image = UIImage(data: data, scale: Self.posterScale) else { return nil }
         let cacheKey = posterCacheKey(key)
         cache(image, forKey: cacheKey)
         if let url = Self.posterFileURL(forKey: cacheKey) {
-            DispatchQueue.global(qos: .utility).async {
+            posterIO.async {
                 Self.writePoster(data, to: url)
             }
         }
@@ -707,6 +722,7 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
     /// session first if needed. Cached in the pool (memory and disk) by key.
     func poster(key: String, manifest: BubbleManifest, size: CGSize) async -> UIImage? {
         if let cached = BubbleRuntimePool.shared.cachedPoster(forKey: key) { return cached }
+        let generation = BubbleRuntimePool.shared.posterGeneration(forKey: key)
         let scale = BubbleRuntimePool.posterScale
         await whenLoaded()
         guard capability == .sessions, size.width > 1, size.height > 1 else { return nil }
@@ -739,7 +755,7 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
         let began = CACurrentMediaTime()
         guard let dataURL = await call(script, arguments: ["key": key, "options": options.jsonString()]),
               let data = Self.data(fromDataURL: dataURL),
-              let image = BubbleRuntimePool.shared.storePoster(data, forKey: key) else { return nil }
+              let image = BubbleRuntimePool.shared.storePoster(data, forKey: key, generation: generation) else { return nil }
         BubbleRuntimePerf.note(String(format: "poster %@ %.1fms", key, (CACurrentMediaTime() - began) * 1000))
         return image
     }
