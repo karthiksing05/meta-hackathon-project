@@ -533,6 +533,50 @@ text with their own rules use `fuzzy_match`. Both match with the same determinis
   `tools/test-fuzzy.mjs` checks the JS rules, that the fragments are current, and (with an engine)
   that the engine agrees with the JS on every case.
 
+### 2.13 Score model
+
+`"score"` is optional. It says what the game's board ranks and how, so a time trial ranks the fastest
+first and a run that quits early can't win. Without it, the board ranks points, higher first, best run,
+every run counts.
+
+```json
+"score": { "kind": "count_in_time", "measures": "orders served before the timer ends", "unit": "orders",
+           "direction": "higher", "counts_when": "any", "aggregate": "best", "tie_break": "earlier",
+           "format": "{n} orders", "events": ["order_done"] }
+```
+
+| `kind` | Ranks | `direction` | `counts_when` | Default `format` |
+|---|---|---|---|---|
+| `points` | points | higher | any | `{n}` |
+| `time_to_complete` | ms to finish (the run time) | lower (required) | finished (required) | `m:ss.t` |
+| `count_in_time` | how many in the time | higher | any | `{n}` |
+| `survival_time` | ms alive (the run time) | higher | any | `m:ss.t` |
+| `accuracy` | whole percent, 0–100 | higher | finished (required) | `{n}%` |
+| `distance` | distance | higher | any | `{n} m` |
+| `tiered_points` | rarity-tier points (Krillion-style) | higher | any | `{n}` |
+| `streak` | best run of correct | higher | any | `{n}` |
+
+- **Every score is a whole number.** Time kinds rank the engine's run time in whole milliseconds
+  (`source: "time"`, the default for them); the others rank `objectives.score`, rounded. `source:
+  "score"` makes a time kind rank `objectives.score` instead.
+- `counts_when: "finished"`: only won runs go on the board. A lower-is-better score must use it.
+- `aggregate`: `best`, `latest` or `sum_week`. `tie_break`: `less time` or `earlier`.
+- `format`: text with one `{n}` (`"{n} orders"`, `"{n}%"`) or a time: `m:ss.t`, `m:ss`, `s.t` (the value
+  is milliseconds). It's how the app and share text show the score.
+- `events`: the events or inputs that change the score (`tick` if it grows with time). The score
+  check fails a game whose score changes on anything else.
+- `bounds` (`min`, `max`, `max_rate_per_s`) are recorded by the score check from the bot runs; a
+  `max_rate_per_s` you give is checked against them. `ranked: false` says the board is just a list
+  (calm and no-fail games).
+
+The model never goes into `game.json` (the engine's file is strict). The expander returns it beside the
+game and `wrap.mjs` puts it at the top of the wrapped manifest as `score`, with the recorded `bounds`
+and `ranked`. `expander/score.mjs` has the defaults and checks (`A_SCORE_*` errors).
+After the bot gate, `playtest/score-check.mjs` checks the board is fair: skill order in the score's
+direction, an idle bot and a one-input spam bot ranking no better than real play, the finish rule,
+`max_rate_per_s`, every bot run replaying to the same phase, time and score (`verify` where the engine
+has it), and the score changing only on `events`.
+
 ## 3. Expander
 
 The expander is deterministic: the same manifest and library versions give byte-identical output.

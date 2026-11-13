@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { rewrite, rewriteType, namesIn, tokenize, stringLiteral, durationMs, safeText, PLACEHOLDER_NAME } from './expr.mjs';
 import { compileArt } from './art.mjs';
 import { compileSound, MOMENTS } from './sound.mjs';
+import { normalizeScore, unknownScoreEvents } from './score.mjs';
 
 export const STANDARD_TOKENS = ['primary', 'secondary', 'accent', 'ink', 'bg', 'danger', 'surface'];
 export const SLOTS = { hud_top: 3, hud_bottom: 2, playfield: Infinity, overlay: Infinity };
@@ -690,7 +691,12 @@ export function expand(manifest, lib, options = {}) {
     playtestGame.rules = [...playtestGame.rules, { id: '__progress', on: 'tick', do: [{ set: '__progress', to: `${manifest.playtest.progress} * 1.0` }] }];
   }
 
-  return { game: out, sourceMap, diagnostics: diags, playtestGame };
+  // ---- score model (SPEC 2.13): not part of game.json (the engine's file is strict); returned beside it ----
+  const scored = normalizeScore(manifest.score);
+  diags.push(...scored.diagnostics);
+  for (const name of unknownScoreEvents(scored.score, out)) err('A_SCORE_EVENTS', '/score/events', `score.events names '${name}', which is no event or input in this game`, { hint: didYouMean(name, [...Object.keys(out.events ?? {}), ...Object.keys(out.inputs ?? {})]) });
+
+  return { game: out, sourceMap, diagnostics: diags, playtestGame, score: scored.score, scoreDeclared: scored.declared };
 }
 
 // ---------- feel and sound moments (SPEC 2.9, 2.10) ----------

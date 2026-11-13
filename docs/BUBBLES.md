@@ -1564,6 +1564,14 @@ exactly `space.microgame`, `input.microgame` and `score.microgame` (params: `run
 `label`). `authoring/expander/wrap.mjs` (`wrapGame`) writes this wrapper, and picks `style.colors`
 from the game so the frame and letterbox match it.
 
+**Score model.** A microgame manifest may carry a top-level `score` (next to `formula` and `brief`):
+what its board ranks, `direction` (`higher` or `lower`), `counts_when` (`finished` or `any`),
+`aggregate` (`best`, `latest`, `sum_week`), `tie_break` (`less time`, `earlier`), `format` (`{n} orders`,
+`{n}%`, `m:ss.t`), `events`, the `bounds` the bots reached plus headroom, and `ranked`. Every score is a
+whole number: time kinds in milliseconds of run time, accuracy in whole percent. No `score` means
+points, higher first, best run, every run counts. It comes from the authoring manifest's `score` block
+(`authoring/SPEC.md` 2.13); the server sorts and checks boards by it, and the app shows `format`.
+
 **Runtime.** `bubble-kit-microgame.js` adapts the engine to the runtime, so the frame (intro, HUD, pop,
 result, share, posters, demos, replays, haptics, mute) works as for any formula:
 
@@ -1673,6 +1681,13 @@ authoring manifest, with fragment versions pinned, as text in `content.authoring
 and keeps the Bubble's id, brief and lineage, with `version + 1`.
 `lastStats` says whether the first draft validated, how many repair rounds it took, the quality score and
 whether it was polished.
+
+**Score check.** After the gate (and polish), a game with a `score` block goes through
+`authoring/playtest/score-check.mjs` (`MicrogameStudio.scoreCheck(gameJSON, scoreJSON, optionsJSON)`,
+on the runs the last gate played): skill order in the score's direction, an idle bot and a one-input
+spam bot ranking no better than real play, the finish rule, `max_rate_per_s`, every bot run replaying to
+the same phase, time and score (the engine's `verify` where it has it) and the score changing only on its
+`events`. It records `bounds`. Each check is pass, warn or fail; `{ok, ambiguous, checks, bounds, lines}`.
 
 **Quality and polish.** A new game that passes the bots then goes through the quality check
 (`authoring/expander/quality.mjs`, no model): no palette, backdrop or sound, fragment roles or the game's

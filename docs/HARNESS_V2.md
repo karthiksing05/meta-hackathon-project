@@ -164,7 +164,7 @@ Today every leaderboard keeps the highest score and sorts highest first (`$max`,
   "direction": "higher | lower",
   "counts_when": "finished | any",
   "aggregate": "best | latest | sum_week",
-  "tie_break": "less time | fewer mistakes | earlier",
+  "tie_break": "less time | earlier",
   "format": "{n} orders | m:ss.t | {n}%",
   "bounds": { "min": 0, "max": 60, "max_rate_per_s": 2 },
   "events": ["order_done"]
@@ -174,14 +174,25 @@ Today every leaderboard keeps the highest score and sorts highest first (`$max`,
 | Kind | What ranks | Direction | Counts when |
 |---|---|---|---|
 | `points` | points | higher | any |
-| `time_to_complete` | seconds to finish | lower | finished only |
+| `time_to_complete` | ms to finish | lower | finished only |
 | `count_in_time` | how many in N s | higher | any |
-| `survival_time` | seconds alive | higher | any |
-| `accuracy` | percent correct | higher | finished only |
+| `survival_time` | ms alive | higher | any |
+| `accuracy` | whole percent correct (0–100) | higher | finished only |
 | `tiered_points` | rarity-tier points (Krillion) | higher | any |
 | `streak` | best run of correct | higher | any |
 
-Notes on the fields:
+Notes on the fields (contract agreed with Max, 2026-11-12):
+- **Where it lives:** a top-level `score` in the published `manifest.json`, next to `formula` and `brief`
+  (`wrap.mjs` puts it there). Never in `game.json`: the engine's game file is strict. No block means
+  points, higher, best, every run counts.
+- **Units: every score is an integer.** `time_to_complete` and `survival_time` are whole milliseconds (the
+  engine's `time_ms` for the run); `accuracy` is a whole percent, 0–100; the others are counts or points.
+  `bounds` use the same units. `format` time patterns (`m:ss.t`, `m:ss`, `s.t`) read milliseconds.
+- `tie_break` is `less time` or `earlier`. `aggregate` is `best`, `latest` or `sum_week` (Max does
+  `sum_week` later).
+- **Replays:** the server requires the replay log for games with a score block and reads `phase` and
+  `time_ms` from the engine replay, so a finished run is one that replays to `won`. The score check
+  replays every bot run and fails a game whose replay doesn't give the reported phase, time and score.
 - `counts_when: finished` means a run that times out doesn't go on the board. Without it, a time trial would reward
   quitting early.
 - `bounds` come from the bots, not from Muse. The gate records the range the bots actually reached, plus headroom.

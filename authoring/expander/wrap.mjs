@@ -41,8 +41,10 @@ export function styleColors(game) {
 }
 
 /**
- * opts: {id, game, authoring?, title?, oneLineRule?, emoji?, brief?, style?, seed?, lineage?}
- * Title and rule default to the game's meta.
+ * opts: {id, game, authoring?, title?, oneLineRule?, emoji?, brief?, style?, seed?, lineage?, score?}
+ * Title and rule default to the game's meta. `score` is the score model (score.mjs, SPEC.md 2.13): it
+ * goes on the manifest as a top-level `score`, next to `formula` and `brief`. Without it, boards rank
+ * points, higher first, as before.
  */
 export function wrapGame(opts) {
   const { id, game } = opts;
@@ -56,6 +58,7 @@ export function wrapGame(opts) {
     title: (opts.title || meta.title || 'Microgame').slice(0, 60),
     one_line_rule: rule.slice(0, 120),
     formula: 'microgame',
+    ...(opts.score ? { score: opts.score } : {}),
     brief: opts.brief || { intent: rule, audience: 'everyone', mood: ['playful'], energy: 'medium', competition: 'friendly' },
     structure: { cadence: 'endless', scope: 'everyone', setter: 'ai' },
     lineage: opts.lineage || { parent: null, operators: [], remix_of: null },

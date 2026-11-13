@@ -10,6 +10,8 @@
 import { expand as expandManifest, translate } from './expand.mjs';
 import { wrapGame } from './wrap.mjs';
 import { playtestAsync, DEFAULT_BOTS } from '../playtest/gate-async.mjs';
+import { checkScore } from '../playtest/score-check.mjs';
+import { normalizeScore } from './score.mjs';
 import { sortSafe } from './stable.mjs';
 import { pickGold, goldPromptText } from './gold.mjs';
 import { qualityReport, qualityLines } from './quality.mjs';
@@ -235,6 +237,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
   const randomBuiltins = new Set((engineCatalog.builtins || []).filter((b) => b.random).map((b) => b.name));
   const safe = (doc) => sortSafe(doc, { isRandom: (n) => randomBuiltins.has(n) });
 
+  const gated = new Map(); // game json → {runs, seed, maxSeconds} from the last few gate calls
   const engine = () => {
     const e = getEngine ? getEngine() : null;
     if (!e) throw new Error(`microgame engine unavailable: ${engineError() || 'not loaded'}`);
@@ -338,6 +341,9 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       authoring_json: JSON.stringify(manifest),
       game_json: game ? JSON.stringify(game) : null,
       playtest_game_json: playtestGame ? JSON.stringify(playtestGame) : game ? JSON.stringify(game) : null,
+      // The score model (score.mjs): defaults when the manifest has no score block (score_declared false).
+      score: result.score ?? null,
+      score_declared: !!result.scoreDeclared,
       diagnostics,
       ms: { expand: round1(t1 - t0), validate: round1(validateMs) },
     });
@@ -350,6 +356,9 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     const json = typeof gameJSON === 'string' ? gameJSON : JSON.stringify(gameJSON);
     const maxSeconds = options.max_seconds ?? 180;
     const res = await playtestAsync(e, json, { seed: Number(seed) || 1, maxSeconds, ...(options.slice_ms ? { sliceMs: options.slice_ms } : {}) });
+    // The score check replays these runs, inputs and all; the JSON below only carries counts.
+    gated.set(json, { runs: res.runs, seed: Number(seed) || 1, maxSeconds });
+    while (gated.size > 4) gated.delete(gated.keys().next().value);
     return JSON.stringify({
       passed: res.passed,
       summary: res.summary,
@@ -368,6 +377,22 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
         inputs: r.replay.actions.length,
       })),
     });
+  }
+
+  /**
+   * The score check (playtest/score-check.mjs) on a game the gate played: the runs come from that gate
+   * call (it gates the game again when they're gone). scoreJSON: the model (expand's `score`, or a raw
+   * score block). Resolves to JSON {ok, ambiguous, checks, bounds, lines, runs}.
+   */
+  async function scoreCheck(gameJSON, scoreJSON, optionsJSON) {
+    const options = optionsJSON ? (typeof optionsJSON === 'string' ? JSON.parse(optionsJSON) : optionsJSON) : {};
+    const json = typeof gameJSON === 'string' ? gameJSON : JSON.stringify(gameJSON);
+    const raw = typeof scoreJSON === 'string' ? JSON.parse(scoreJSON) : scoreJSON;
+    const model = normalizeScore(raw).score;
+    if (!gated.has(json)) await gate(json, options.seed ?? 1, { max_seconds: options.max_seconds ?? 180 });
+    const g = gated.get(json);
+    const res = await checkScore(engine(), json, g.runs, model, { seed: g.seed, maxSeconds: g.maxSeconds });
+    return JSON.stringify(res);
   }
 
   /**
@@ -468,5 +493,5 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     return JSON.stringify(out);
   }
 
-  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, wrap, examples: examplesFor, quality, prompt, compose });
+  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, scoreCheck, wrap, examples: examplesFor, quality, prompt, compose });
 }
