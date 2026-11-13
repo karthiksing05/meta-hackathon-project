@@ -89,7 +89,7 @@ func TestRankedFeed(t *testing.T) {
 	}
 
 	tok := register(t, ts, "viewer")
-	// signed out works too: the recommender's cold-start ranking, nothing remembered, exclude skips games already held
+	// signed out works too: the recommender's cold-start ranking, and exclude skips games already held
 	_, anon := feedPage(t, ts, "", map[string]any{"count": 3})
 	if len(anon) != 3 || anon[0]["feedItemID"] == "" {
 		t.Fatalf("signed-out feed: %v", anon)
@@ -117,14 +117,10 @@ func TestRankedFeed(t *testing.T) {
 	if len(second) < 1 || len(second) > 2 {
 		t.Fatalf("second page: %v", second)
 	}
-	// Games the person hasn't seen come first. The recommender holds back new, unproven games, so only a few are
-	// eligible: a game already shown may fill the page, but never ahead of one they haven't seen.
-	repeated := false
+	// a game already shown this session never comes back
 	for _, it := range second {
 		if seen[it["id"].(string)] {
-			repeated = true
-		} else if repeated {
-			t.Fatalf("an unseen game came after a repeat: %v", second)
+			t.Fatalf("a repeat in one session: %v", second)
 		}
 	}
 	// a bad count is clamped, not rejected
@@ -334,6 +330,93 @@ func TestFeedNeverRepeatsAGameOnAPage(t *testing.T) {
 		}
 		if len(items) != 1 {
 			t.Fatalf("one game, one item: %d", len(items))
+		}
+		// and the session is then at its end: the one game is never shown again
+		if _, again := feedPage(t, ts, tok, map[string]any{"count": 10, "sessionID": "s1"}); len(again) != 0 {
+			t.Fatalf("the same game again in one session: %v", again)
+		}
+	}
+}
+
+// A catalogue with copies and remixes, paged to its end: never a game or a family twice in one session, whoever
+// asks and whether or not the recommender is on.
+func TestFeedSessionNeverRepeatsAGameOrAFamily(t *testing.T) {
+	for _, ranked := range []bool{true, false} {
+		ts := serverWithRecs(t, ranked)
+		maker := register(t, ts, "maker")
+		formulas := []string{"dodge", "time", "merge", "guess", "answer", "group"}
+		bases := map[string]bool{}
+		for i := 0; i < 24; i++ {
+			slug := fmt.Sprintf("mg-game-%02d-abcd", i)
+			m := fmt.Sprintf(`{"id":%q,"title":"Game %02d","one_line_rule":"x","formula":%q,"brief":{"mood":["calm"]}}`, slug, i, formulas[i%len(formulas)])
+			code, g := publish(t, ts.URL, maker, m)
+			if code != 201 {
+				t.Fatalf("publish: %d %v", code, g)
+			}
+			bases[g["id"].(string)] = true
+			if i%4 == 0 { // a Group-style copy (slug plus a suffix) and a remix of every fourth game
+				for _, cm := range []string{
+					fmt.Sprintf(`{"id":%q,"title":"Game %02d","one_line_rule":"x","formula":%q}`, slug+"-newinsf", i, formulas[i%len(formulas)]),
+					fmt.Sprintf(`{"id":"remix-%02d","title":"Game %02d, faster","one_line_rule":"x","formula":"dodge","lineage":{"remix_of":%q}}`, i, i, g["id"]),
+				} {
+					if code, out := publish(t, ts.URL, maker, cm); code != 201 {
+						t.Fatalf("publish copy: %d %v", code, out)
+					}
+				}
+			}
+		}
+		viewer := register(t, ts, "viewer")
+		for _, who := range []string{viewer, ""} {
+			ids, families := map[string]bool{}, map[string]bool{}
+			sid := ""
+			for page := 0; page < 20; page++ {
+				url := ts.URL + "/v1/feed?limit=7"
+				if sid != "" {
+					url += "&sessionID=" + sid
+				} else if who != "" {
+					url += "&sessionID=s1"
+				}
+				code, out := do(t, "GET", url, who, nil, "")
+				if code != 200 {
+					t.Fatalf("page %d: %d %v", page, code, out)
+				}
+				if who == "" {
+					if sid, _ = out["sessionID"].(string); sid == "" { // a guest without a session gets one to continue with
+						t.Fatal("a guest page without a sessionID")
+					}
+				}
+				items := out["items"].([]any)
+				if len(items) == 0 {
+					break
+				}
+				for _, it := range items {
+					m := it.(map[string]any)
+					id, base := m["id"].(string), m["baseId"].(string)
+					if ids[id] || families[base] {
+						t.Fatalf("ranked=%v signedIn=%v page %d repeats %s (family %s)", ranked, who != "", page, id, base)
+					}
+					ids[id], families[base] = true, true
+				}
+			}
+			if len(families) != len(bases) {
+				t.Fatalf("ranked=%v signedIn=%v: %d families shown, want %d", ranked, who != "", len(families), len(bases))
+			}
+			for b := range families {
+				if !bases[b] {
+					t.Fatalf("a family's base is not its oldest game: %s", b)
+				}
+			}
+		}
+		// a new session starts over
+		if _, out := do(t, "GET", ts.URL+"/v1/feed?limit=7&sessionID=s2", viewer, nil, ""); len(out["items"].([]any)) != 7 {
+			t.Fatalf("a new session: %v", out)
+		}
+		// exclude works signed in too, by id or slug, and takes the whole family with it
+		_, out := do(t, "GET", ts.URL+"/v1/feed?limit=30&sessionID=s3&exclude=mg-game-00-abcd-newinsf", viewer, nil, "")
+		for _, it := range out["items"].([]any) {
+			if strings.HasPrefix(it.(map[string]any)["title"].(string), "Game 00") {
+				t.Fatalf("an excluded family came back: %v", it)
+			}
 		}
 	}
 }

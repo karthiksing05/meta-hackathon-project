@@ -250,6 +250,8 @@ type RecsRecord struct {
 	Feed        []string  `bson:"feed,omitempty"`
 	FeedKeys    []string  `bson:"feedKeys,omitempty"`
 	FeedSession string    `bson:"feedSession,omitempty"`
+	FeedSeen    []string  `bson:"feedSeen,omitempty"`  // games shown this session and their base ids: never shown again
+	FeedShown   int       `bson:"feedShown,omitempty"` // cards shown this session, for the fixed ad slots
 	FeedAt      time.Time `bson:"feedAt,omitempty"`
 	UpdatedAt   time.Time `bson:"updatedAt"`
 }
