@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -247,6 +248,19 @@ func planUser(in PlanInput, lists []checklistFor) string {
 	if u.Sponsor != nil {
 		sp, _ := json.Marshal(u.Sponsor)
 		fmt.Fprintf(&sb, "Sponsor: %s (put it in spec.theme.sponsor)\n", sp)
+	}
+	if len(in.Context.Preferences) > 0 {
+		sb.WriteString("The person's earlier picks between versions (lean that way):\n")
+		for _, p := range in.Context.Preferences {
+			var not []string
+			for _, r := range p.Rejected {
+				not = append(not, strconv.Quote(r.Label))
+			}
+			fmt.Fprintf(&sb, "- %s: chose %q%s over %s\n", p.Axis, p.Chosen.Label, map[bool]string{true: " (" + clip(p.Chosen.Value, 160) + ")", false: ""}[p.Chosen.Value != ""], strings.Join(not, ", "))
+		}
+		if lookPreference(in.Context.Preferences) != nil && !namesStyle(in.Request) {
+			sb.WriteString("The request names no art style, so the look pick fills spec.theme.look and settles any art style slot (guessed false).\n")
+		}
 	}
 	sb.WriteString("\n")
 	types, _ := json.Marshal(in.Context.Types)

@@ -12,14 +12,14 @@ import (
 // Understanding is step 1's answer: the request turned into fields the index can match. Verbs, inputs and
 // families use the catalog's own vocabulary.
 type Understanding struct {
-	NamedRefs   []string `json:"named_refs"`   // games, apps or sites the request names ("Krillion", "Subway Surfers")
-	Verbs       []string `json:"verbs"`        // what the player does, from the catalog's verbs
-	Inputs      []string `json:"inputs"`       // how the player does it, from the catalog's inputs
-	Families    []string `json:"families"`     // the catalog families it belongs to
-	Theme       []string `json:"theme"`        // what it should look and feel like ("Harry Potter", "Hogwarts")
-	Keywords    []string `json:"keywords"`     // other words that describe the mechanic
-	Players     string   `json:"players"`      // solo, pass_and_play, async_friends, group_daily, live
-	UnknownRefs []string `json:"unknown_refs"` // named refs the model says it doesn't know
+	NamedRefs   []string `json:"named_refs"`        // games, apps or sites the request names ("Krillion", "Subway Surfers")
+	Verbs       []string `json:"verbs"`             // what the player does, from the catalog's verbs
+	Inputs      []string `json:"inputs"`            // how the player does it, from the catalog's inputs
+	Families    []string `json:"families"`          // the catalog families it belongs to
+	Theme       []string `json:"theme"`             // what it should look and feel like ("Harry Potter", "Hogwarts")
+	Keywords    []string `json:"keywords"`          // other words that describe the mechanic
+	Players     string   `json:"players"`           // solo, pass_and_play, async_friends, group_daily, live
+	UnknownRefs []string `json:"unknown_refs"`      // named refs the model says it doesn't know
 	Sponsor     *Sponsor `json:"sponsor,omitempty"` // a brand that sponsors the game ("Nike sponsored …")
 }
 

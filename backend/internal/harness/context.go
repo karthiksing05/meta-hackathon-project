@@ -28,6 +28,34 @@ type GenContext struct {
 	GateProfile   string          `json:"gate_profile,omitempty"`
 	Learned       []ContextType   `json:"learned"`
 	Notes         []string        `json:"notes"`
+	Preferences   []Preference    `json:"preferences,omitempty"`
+}
+
+// Preference is one earlier pick between versions of a game (variants.mjs applyPick): on one axis (look,
+// twist, arc, type), the version the person kept and the ones they passed over.
+type Preference struct {
+	Axis     string           `json:"axis"`
+	Chosen   PreferenceSide   `json:"chosen"`
+	Rejected []PreferenceSide `json:"rejected,omitempty"`
+	At       string           `json:"at,omitempty"`
+}
+
+// PreferenceSide is one version in a pick.
+type PreferenceSide struct {
+	ID     string `json:"id,omitempty"`
+	GameID string `json:"game_id,omitempty"`
+	Label  string `json:"label"`
+	Value  string `json:"value,omitempty"`
+}
+
+// lookPreference is the latest look pick with a value, or nil.
+func lookPreference(prefs []Preference) *Preference {
+	for i := len(prefs) - 1; i >= 0; i-- {
+		if prefs[i].Axis == "look" && strings.TrimSpace(prefs[i].Chosen.Value+prefs[i].Chosen.Label) != "" {
+			return &prefs[i]
+		}
+	}
+	return nil
 }
 
 // ContextUnder is the understanding as the generator sees it.

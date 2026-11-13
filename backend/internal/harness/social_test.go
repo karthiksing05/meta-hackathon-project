@@ -290,3 +290,23 @@ func TestStackHeightTopOut(t *testing.T) {
 		t.Error("rows cleared is fine")
 	}
 }
+
+func TestLookPreference(t *testing.T) {
+	prefs := []Preference{{Axis: "look", Chosen: PreferenceSide{Label: "Cozy Watercolor", Value: "soft watercolor washes"}, Rejected: []PreferenceSide{{Label: "Flat Cute"}}}}
+	in := PlanInput{Request: "a game about catching tea foam", Context: GenContext{Preferences: prefs}}
+	s := baseSpec()
+	plan := &Plan{Clarify: []Clarify{{Slot: "picture_style", Value: "flat", Guessed: true, Question: "Which style?", Choices: []string{"a", "b"}}, {Slot: "theme", Value: "tea", Guessed: true}}}
+	applyLookPreference(&s, plan, in)
+	if s.Theme.Look != "soft watercolor washes" || plan.Clarify[0].Guessed || plan.Clarify[0].Question != "" || !plan.Clarify[1].Guessed {
+		t.Errorf("look pick not applied: %q %+v", s.Theme.Look, plan.Clarify)
+	}
+	s2 := baseSpec()
+	s2.Theme.Look = "pixel art"
+	applyLookPreference(&s2, &Plan{}, PlanInput{Request: "a pixel art tea game", Context: GenContext{Preferences: prefs}})
+	if s2.Theme.Look != "pixel art" {
+		t.Error("a request that names a style keeps its own look")
+	}
+	if u := planUser(in, nil); !strings.Contains(u, `look: chose "Cozy Watercolor"`) || !strings.Contains(u, "fills spec.theme.look") {
+		t.Errorf("planUser lacks the picks:\n%s", u)
+	}
+}

@@ -122,6 +122,9 @@ type Request struct {
 	Understanding *Understanding `json:"understanding,omitempty"`
 	// NoLookup turns step 3 off for this request.
 	NoLookup bool `json:"no_lookup,omitempty"`
+	// Preferences are the person's earlier picks between versions (docs/harness-gaps/variants.md), from the
+	// server's profile store. They go into the context and the planner prompt.
+	Preferences []Preference `json:"preferences,omitempty"`
 }
 
 // Timings are in milliseconds.

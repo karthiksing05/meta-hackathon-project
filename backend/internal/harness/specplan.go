@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -144,6 +145,7 @@ func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessag
 		spec.Theme.Sponsor = &sp
 		plan.Notes = append(plan.Notes, "theme: sponsor "+sp.Name+" copied from the understanding")
 	}
+	applyLookPreference(spec, plan, in)
 	plan.Spec = spec
 	plan.Issues = uniq(problems)
 	return nil
@@ -263,4 +265,39 @@ func repairUser(in PlanInput, parts map[string]json.RawMessage, problems, failin
 	whole, _ := json.Marshal(parts)
 	fmt.Fprintf(&sb, "The spec:\n%s\n\nProblems:\n- %s\n\nRewrite: %s", whole, strings.Join(problems, "\n- "), strings.Join(failing, ", "))
 	return sb.String()
+}
+
+// reStyleWords are words that name an art style (variants.mjs STYLE_WORDS): a request with one keeps its own look.
+var reStyleWords = regexp.MustCompile(`(?i)\b(pixel|8[- ]?bit|16[- ]?bit|retro|neon|synthwave|vaporwave|watercolou?r|cartoon|anime|manga|chibi|kawaii|cute|minimal(ist)?|flat|low[- ]?poly|3d|clay|claymation|noir|sketch|hand[- ]?drawn|doodle|crayon|paper|cut[- ]?out|comic|pastel|ukiyo|art deco|cyberpunk|steampunk|gothic|realistic|photo|monochrome|black and white|lego|isometric|storybook|riso|halftone|glitch|y2k|cozy|spooky|art style|drawn like|looks like|aesthetic|vibe)\b`)
+
+func namesStyle(request string) bool { return reStyleWords.MatchString(request) }
+
+// lookSlot reports a checklist slot about the art style.
+func lookSlot(id string) bool {
+	return id == "look" || id == "picture_style" || id == "art_style" || id == "visual_style" || id == "style"
+}
+
+// applyLookPreference: when the person picked a look before and this request names no style, the pick is
+// the look (spec.theme.look), and the art style slot it settles is theirs (guessed false), not a question.
+func applyLookPreference(spec *Spec, plan *Plan, in PlanInput) {
+	p := lookPreference(in.Context.Preferences)
+	if p == nil || namesStyle(in.Request) {
+		return
+	}
+	look := strings.TrimSpace(p.Chosen.Value)
+	if look == "" {
+		look = strings.TrimSpace(p.Chosen.Label)
+	}
+	if spec != nil && spec.Theme.Look != look {
+		spec.Theme.Look = look
+		plan.Notes = append(plan.Notes, fmt.Sprintf("theme: look %q from the person's earlier pick", clip(look, 80)))
+	}
+	for i := range plan.Clarify {
+		if lookSlot(plan.Clarify[i].Slot) {
+			plan.Clarify[i].Value = look
+			plan.Clarify[i].Guessed = false
+			plan.Clarify[i].Question = ""
+			plan.Clarify[i].Choices = nil
+		}
+	}
 }
