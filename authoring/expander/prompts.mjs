@@ -211,3 +211,87 @@ export function issues(expansion) {
 export function needsPolish(report) {
   return !!report && (report.major > 0 || report.score < 85);
 }
+
+// ---------- the score review and per-part repairs (docs/HARNESS_V2.md "Score verification") ----------
+
+/** How the caller should ask Muse for the score review: the one place the harness spends thinking. */
+export const SCORE_REVIEW_OPTIONS = Object.freeze({ model: 'muse-wonder-1.0', effort: 'high', max_tokens: 12000 });
+/** A part repair is small: the same model, default effort. */
+export const REPAIR_PART_OPTIONS = Object.freeze({ model: 'muse-wonder-1.0', effort: 'medium', max_tokens: 8000 });
+
+export const SCORE_REVIEW_SYSTEM = `You review the scoring of tiny phone games before their leaderboards go live. Friends compare scores on these boards, so a score must reward playing well, rank in the right direction, and be impossible to farm.
+
+You get four parts of a game's spec (goal, constraints, end, score), what playtest bots scored, and the results of code checks. Answer these:
+1. Does the score measure the goal, or something easier to farm?
+2. Is the direction right (higher or lower is better)?
+3. Can a player raise it without playing well: idling, spamming one input, quitting early, stalling?
+4. Are ties likely, and does tie_break ("less time" or "earlier") settle them?
+5. Does the format read naturally ("{n} orders", "{n}%", "m:ss.t" for milliseconds)?
+
+Score contract: every score is a whole number. time_to_complete and survival_time are milliseconds of run time; accuracy is a whole percent 0-100; the rest are counts or points. counts_when "finished" keeps runs that didn't win off the board, and a lower-is-better score must use it. aggregate is best, latest or sum_week. bounds come from the bots, so never ask for them.
+
+Reply with one JSON object and nothing else:
+{"ok": true|false, "issues": [{"part": "score|goal|constraints|end", "problem": "<one sentence>", "fix": "<one concrete change, naming fields and values>"}]}
+ok is true only when nothing below would let an unfair or misleading board go live. Minor wording is not an issue. An empty issues list means ok.`;
+
+const partText = (name, value) => `### ${name}\n${typeof value === 'string' ? value : JSON.stringify(value, null, 1)}`;
+
+/** parts: {goal, constraints, end, score} (score.mjs scoreParts). bots: lines. checks: [{id, status, message}]. */
+export function scoreReview(parts, bots = [], checks = [], request = '') {
+  return [
+    request ? `The person asked for: ${splitAnatomy(request).request}` : '',
+    '',
+    ...['goal', 'constraints', 'end', 'score'].map((p) => partText(p, parts?.[p] ?? null)),
+    '',
+    '### Bot runs (same seed; "doesn\'t count" means the run is kept off the board)',
+    ...bots.map((l) => `- ${l}`),
+    '',
+    '### Code checks',
+    ...checks.map((c) => `- ${c.status}: ${c.id}: ${c.message}`),
+    '',
+    'Review the score. Reply with the JSON object.',
+  ].join('\n').trim();
+}
+
+export const REPAIR_PART_SYSTEM = `You fix one part of a tiny phone game's spec. You get the part, the problems found in it, and the parts it is built on, which you must not change. Reply with one JSON object holding only the fixed part under its name, for example {"score": {...}}. No text around it.`;
+
+/**
+ * One failing part, its issues ({problem, fix} or strings) and the parts it depends on (their values),
+ * per docs/HARNESS_V2.md "Repairs are per part".
+ */
+export function repairPart(part, value, issues = [], dependsOn = {}) {
+  const lines = [`Fix the "${part}" part.`, '', partText(part, value), '', 'Problems:'];
+  for (const i of issues) lines.push(`- ${typeof i === 'string' ? i : `${i.problem}${i.fix ? ` Fix: ${i.fix}` : ''}`}`);
+  const deps = Object.entries(dependsOn).filter(([, v]) => v !== undefined && v !== null);
+  if (deps.length) {
+    lines.push('', 'It is built on these parts (keep them as they are):');
+    for (const [k, v] of deps) lines.push(partText(k, v));
+  }
+  if (part === 'score') {
+    lines.push('', 'The score fields: kind (points | time_to_complete | count_in_time | survival_time | accuracy | distance | tiered_points | streak), measures, unit, direction (higher | lower), counts_when (finished | any), aggregate (best | latest | sum_week), tie_break (less time | earlier), format, events (the event or input names that change the score), ranked (false only when no fair ranking is possible). Leave out bounds: the bots record them. Whole numbers only: time kinds rank milliseconds of run time.');
+  }
+  lines.push('', `Reply with {"${part}": <the fixed part>}.`);
+  return lines.join('\n');
+}
+
+/** The first JSON object in a reply, or null. */
+export function replyObject(text) {
+  const s = String(text ?? '');
+  const start = s.indexOf('{');
+  if (start < 0) return null;
+  for (let end = s.lastIndexOf('}'); end > start; end = s.lastIndexOf('}', end - 1)) {
+    try { return JSON.parse(s.slice(start, end + 1)); } catch { /* shorter */ }
+  }
+  return null;
+}
+
+/** The review's verdict, or null when the reply isn't one. */
+export function parseScoreReview(text) {
+  const o = replyObject(text);
+  if (!o || typeof o.ok !== 'boolean') return null;
+  const issues = (Array.isArray(o.issues) ? o.issues : [])
+    .filter((i) => i && typeof i === 'object' && i.problem)
+    .map((i) => ({ part: ['score', 'goal', 'constraints', 'end'].includes(i.part) ? i.part : 'score', problem: String(i.problem).slice(0, 400), fix: String(i.fix ?? '').slice(0, 400) }));
+  // ok is Muse's verdict; issues listed beside ok: true are notes, not blockers.
+  return { ok: o.ok === true, issues };
+}

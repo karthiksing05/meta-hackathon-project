@@ -227,6 +227,12 @@ It returns `{ok, issues: [{part, problem, fix}]}`.
 **3. A failed check repairs only the `score` part**, plus `goal` if the review says the goal itself isn't
 measurable. At most one round. If it still fails, the game ships with an honest "unranked" board.
 
+**Built (2026-11-12):** `authoring/expander/score.mjs` (model), `authoring/playtest/score-check.mjs` (code
+checks), `authoring/expander/score-step.mjs` (review, one repair, unranked fallback), on by default for
+games with a score block. Measured on real Muse (muse-wonder-1.0): a review at high effort is about 1,000
+prompt tokens and 1,500–6,600 completion tokens (almost all reasoning), 15–75 s; a score repair at medium
+effort about 500–650 prompt and 2,000–2,900 completion tokens, 21–27 s.
+
 **Server side (Max):** the game record stores `score` (direction, aggregate, counts_when, format, bounds). Boards
 sort and aggregate by it (`$min` for `lower`), reject out-of-bounds or unfinished runs as the model says, and send
 `format` to the app.

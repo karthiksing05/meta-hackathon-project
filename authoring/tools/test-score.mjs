@@ -5,7 +5,9 @@
 //   3. playtest/score-check.mjs on fake runs: a time trial, a farmable points game, a Krillion-style
 //      tiered game and a calm no-fail game;
 //   4. with a built engine (MG_ENGINE_DIR): the whole check through the real engine;
-//   5. the committed Studio bundle (engine included): expand → gate → scoreCheck → wrap.
+//   5. the committed Studio bundle (engine included): expand → gate → scoreCheck → wrap;
+//   6. prompts: the score review and per-part repair, and parsing their replies;
+//   7. the pipeline's score step through the bundle's compose, with a fake Muse.
 // Usage: node authoring/tools/test-score.mjs
 
 import { readFileSync } from 'node:fs';
@@ -13,6 +15,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import * as S from '../expander/score.mjs';
+import * as P from '../expander/prompts.mjs';
 import { expand, loadLibrary } from '../expander/expand.mjs';
 import { wrapGame } from '../expander/wrap.mjs';
 import { analyzeScore, recordBounds, checkScore, instrumentEvents } from '../playtest/score-check.mjs';
@@ -198,6 +201,98 @@ const B = loadBundle();
   const m = JSON.parse(B.wrap(JSON.stringify({ id: 'mg-t', game_json: x.game_json, authoring_json: x.authoring_json, score: { ...x.score, bounds: c.bounds, ranked: true } })));
   ok(m.score?.ranked === true && m.score.bounds.max === c.bounds.max, 'bundle: wrap puts the checked model on the manifest');
   console.log(`bundle score check: ${Date.now() - t0} ms (gate + check), bounds ${JSON.stringify(c.bounds)}`);
+}
+
+// ---------- 6. prompts ----------
+
+{
+  const parts = S.scoreParts(tide, { kind: 'points' });
+  ok(parts.goal && parts.constraints && parts.end && parts.score.kind === 'points', 'scoreParts reads goal, constraints, end and score from a manifest');
+  const spec = S.scoreParts({ spec: { goal: 'clear 20 orders', constraints: '60 s', end: 'timer or 20 orders', score: { kind: 'count_in_time' } } });
+  ok(spec.goal === 'clear 20 orders' && spec.end === 'timer or 20 orders', 'scoreParts prefers a game-spec/1 spec');
+  const u = P.scoreReview(parts, ['pro: lost after 61 s, 270'], [{ id: 'spam', status: 'pass', message: 'ok' }], 'shells at low tide');
+  ok(/### goal/.test(u) && /### score/.test(u) && /pro: lost/.test(u) && /pass: spam/.test(u), 'the review prompt carries the parts, bot runs and checks');
+  ok(/less time/.test(P.SCORE_REVIEW_SYSTEM) && !/fewer mistakes/.test(P.SCORE_REVIEW_SYSTEM), 'the review states the agreed tie_break values');
+  ok(P.SCORE_REVIEW_OPTIONS.model === 'muse-wonder-1.0' && P.SCORE_REVIEW_OPTIONS.effort === 'high', 'the review asks for muse-wonder-1.0 at high effort');
+  const r = P.repairPart('score', { kind: 'points' }, [{ problem: 'spam wins', fix: 'count orders' }], { goal: 'serve orders', constraints: '60 s', end: 'timer' });
+  ok(/Fix the "score" part/.test(r) && /spam wins Fix: count orders/.test(r) && /### goal/.test(r) && !/### theme/.test(r), 'repairPart sends the part, its problems and only the parts it depends on');
+  ok(P.parseScoreReview('```json\n{"ok": false, "issues": [{"part": "score", "problem": "farmable", "fix": "x"}]}\n```').issues[0].problem === 'farmable', 'parseScoreReview reads a fenced reply');
+  ok(P.parseScoreReview('no verdict') === null, 'parseScoreReview returns null without a verdict');
+  ok(P.parseScoreReview('{"ok": true, "issues": []}').ok === true, 'parseScoreReview ok');
+}
+
+// ---------- 7. the pipeline's score step (bundle compose, fake Muse) ----------
+
+const lightsManifest = JSON.parse(readFileSync(join(authoringDir, 'games', 'lights_out.authoring.json'), 'utf8'));
+async function composeWith(manifest, reply, args = {}) {
+  const calls = [];
+  const events = [];
+  const ask = async (system, user, purpose, options) => {
+    calls.push({ purpose, options: options ?? null, user });
+    const r = reply(purpose, user);
+    if (r instanceof Error) throw r;
+    return { content: typeof r === 'string' ? r : JSON.stringify(r), model: 'fake', usage: { prompt_tokens: 1, completion_tokens: 1 } };
+  };
+  const out = JSON.parse(await B.compose(JSON.stringify({ request: 'test', brief: { intent: 'test' }, polish: false, ...args }), ask, (e) => events.push(e)));
+  return { out, calls, events, purposes: calls.map((c) => c.purpose) };
+}
+const draftOr = (manifest, rest) => (purpose, user) => (/score/.test(purpose) ? rest(purpose, user) : manifest);
+{
+  const t0 = Date.now();
+  // A fair game: the checks pass and the review agrees.
+  const fair = await composeWith({ ...tide, score: { kind: 'points', unit: 'points', events: ['point'] } }, draftOr({ ...tide, score: { kind: 'points', unit: 'points', events: ['point'] } }, () => ({ ok: true, issues: [] })));
+  ok(fair.out.manifest.score?.ranked === true && fair.out.manifest.score.bounds?.max > 0, `fair: ranked with bounds (${JSON.stringify(fair.out.manifest.score)})`);
+  const rc = fair.calls.find((c) => c.purpose === 'score review');
+  ok(rc && rc.options?.model === 'muse-wonder-1.0' && rc.options.effort === 'high', 'fair: the review went to muse-wonder-1.0 at high effort');
+  ok(fair.events.some((e) => e.kind === 'score_checking' && e.summary === 'Checking the score is fair…'), 'fair: "Checking the score is fair…" event');
+  ok(fair.events.some((e) => e.kind === 'score_checked' && /ranked board, highest first/.test(e.summary)), 'fair: score_checked says ranked');
+  ok(fair.out.stats.calls.some((c) => c.purpose === 'score review' && typeof c.ms === 'number' && c.usage), 'fair: each Muse call is logged with time and usage');
+  ok(fair.out.score?.ranked === true && fair.out.score.checks.length > 4, 'fair: the result carries the score report');
+
+  // Lights out counting every run: the idle bot wins. The repair makes it finished-only.
+  const lightsScore = { kind: 'points', events: ['tap_cell'] };
+  const fixedScore = { kind: 'points', measures: 'lights out with the fewest moves', counts_when: 'finished', events: ['tap_cell'], unit: 'points' };
+  const rep = await composeWith({ ...lightsManifest, score: lightsScore }, draftOr({ ...lightsManifest, score: lightsScore }, (p) => (p === 'score repair' ? { score: fixedScore } : { ok: true, issues: [] })));
+  ok(rep.purposes.filter((p) => p === 'score repair').length === 1, `repair: exactly one score repair (${rep.purposes.join(', ')})`);
+  ok(rep.purposes.indexOf('score repair') < rep.purposes.lastIndexOf('score review') || !rep.purposes.includes('score review'), 'repair: no review before the code checks pass');
+  ok(rep.out.manifest.score?.counts_when === 'finished', 'repair: the repaired model ships');
+  ok(JSON.parse(rep.out.manifest.content.authoring_json).score?.counts_when === 'finished', 'repair: the authoring manifest keeps the repaired score block');
+  console.log(`lights_out after the repair: ranked ${rep.out.manifest.score?.ranked}${rep.out.score?.reason ? ` (${rep.out.score.reason})` : ''}`);
+  ok(typeof rep.out.manifest.score?.ranked === 'boolean', `repair: ranked is decided (${rep.out.manifest.score?.ranked}; ${rep.out.score?.reason ?? 'no reason'})`);
+  const repUser = rep.calls.find((c) => c.purpose === 'score repair')?.user ?? '';
+  ok(/### goal/.test(repUser) && /### end/.test(repUser) && /Doing nothing/.test(repUser), 'repair: Muse saw the failing check and the parts it depends on');
+
+  // Farmable and the repair doesn't help: unranked.
+  const stuck = await composeWith({ ...lightsManifest, score: lightsScore }, draftOr({ ...lightsManifest, score: lightsScore }, (p) => (p === 'score repair' ? { score: lightsScore } : { ok: true, issues: [] })));
+  ok(stuck.out.manifest.score?.ranked === false, 'still failing after one repair: ranked false');
+  ok(stuck.events.some((e) => e.kind === 'score_checked' && /^Unranked board/.test(e.summary)), 'still failing: "Unranked board" event');
+  ok(stuck.purposes.filter((p) => p === 'score repair').length === 1, 'still failing: at most one repair');
+
+  // The review rejects a game the code checks pass; the repair is accepted on the second review.
+  let reviews = 0;
+  const rr = await composeWith({ ...tide, score: { kind: 'points', events: ['point'] } }, draftOr({ ...tide, score: { kind: 'points', events: ['point'] } }, (p) => {
+    if (p === 'score repair') return { score: { kind: 'points', unit: 'shells', measures: 'shells tapped before the tide comes in', events: ['point'] } };
+    reviews++;
+    return reviews === 1 ? { ok: false, issues: [{ part: 'score', problem: 'The format says nothing about shells.', fix: 'format "{n} shells"' }] } : { ok: true, issues: [] };
+  }));
+  ok(rr.out.manifest.score?.ranked === true && rr.out.manifest.score.format === '{n} shells', 'review issue → repair → ranked with the new format');
+
+  // Muse unreachable for the review: the code checks decide.
+  const down = await composeWith({ ...tide, score: { kind: 'points', events: ['point'] } }, draftOr({ ...tide, score: { kind: 'points', events: ['point'] } }, () => new Error('Muse timed out')));
+  ok(down.out.manifest.score?.ranked === true && down.out.score.review?.ok === null, 'review unreachable: a clean code check still ranks');
+
+  // Calm, no fail: ranked false is honored without any checks.
+  const calm = await composeWith({ ...tide, score: { ranked: false } }, draftOr({ ...tide, score: { ranked: false } }, () => { throw new Error('no call expected'); }));
+  ok(calm.out.manifest.score?.ranked === false && !calm.purposes.some((p) => /score/.test(p)) && !calm.events.some((e) => e.kind === 'score_checking'), 'calm ranked:false: no checks, no Muse, unranked board');
+
+  // No score block: nothing changes (no score on the manifest, no score events).
+  const none = await composeWith(tide, draftOr(tide, () => { throw new Error('no call expected'); }));
+  ok(!('score' in none.out.manifest) && !none.events.some((e) => /score/.test(e.kind)) && none.out.score === null, 'no score block: the pipeline is unchanged');
+
+  // Opt-out.
+  const off = await composeWith({ ...tide, score: { kind: 'points' } }, draftOr({ ...tide, score: { kind: 'points' } }, () => ({ ok: true, issues: [] })), { score_check: false });
+  ok(!off.events.some((e) => /score/.test(e.kind)) && !off.purposes.some((p) => /score/.test(p)), 'score_check: false opts out');
+  console.log(`pipeline score step: ${Math.round((Date.now() - t0) / 100) / 10} s for 8 composes`);
 }
 
 console.log(`${passed} passed, ${failed} failed`);

@@ -445,7 +445,9 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
    * Muse's prompts (expander/prompts.mjs), so the app and the server send the same text:
    * prompt('system', {examples}) · prompt('compose', {request, brief}) · prompt('revise', {authoring, request, brief})
    * · prompt('repair', {request, manifest, issues, round}) · prompt('playtest_repair', {request, manifest, report})
-   * · prompt('polish', {request, manifest, lines}) · prompt('issues', {expansion}). Returns a string
+   * · prompt('polish', {request, manifest, lines}) · prompt('issues', {expansion})
+   * · prompt('score_review_system') · prompt('score_review', {parts, bots, checks, request})
+   * · prompt('repair_part_system') · prompt('repair_part', {part, value, issues, depends_on}). Returns a string
    * (issues: a JSON list of lines).
    */
   function prompt(name, argsJSON) {
@@ -458,6 +460,10 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       case 'playtest_repair': return Prompts.playtestRepair(a.request ?? '', a.manifest ?? '', a.report ?? {});
       case 'polish': return Prompts.polish(a.request ?? '', a.manifest ?? '', a.lines ?? []);
       case 'issues': return JSON.stringify(Prompts.issues(a.expansion ?? {}));
+      case 'score_review_system': return Prompts.SCORE_REVIEW_SYSTEM;
+      case 'score_review': return Prompts.scoreReview(a.parts ?? {}, a.bots ?? [], a.checks ?? [], a.request ?? '');
+      case 'repair_part_system': return Prompts.REPAIR_PART_SYSTEM;
+      case 'repair_part': return Prompts.repairPart(a.part ?? 'score', a.value ?? null, a.issues ?? [], a.depends_on ?? {});
       default: throw new Error(`no prompt named '${name}'`);
     }
   }
@@ -483,12 +489,15 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       examples: (request, k) => JSON.parse(examplesFor(request, k)),
       expand: (text) => JSON.parse(expand(text)),
       gate: async (json, seed) => JSON.parse(await gate(json, seed)),
+      scoreCheck: async (json, model) => JSON.parse(await scoreCheck(json, model)),
       quality: (text, request) => JSON.parse(quality(text, request)),
       wrap: (opts) => JSON.parse(wrap(opts)),
     };
     const out = await composeGame({ request: a.request, brief: a.brief, base }, local, {
       ask, onEvent: typeof onEvent === 'function' ? onEvent : () => {},
       maxRepairRounds: a.max_repair_rounds, polish: a.polish !== false,
+      // On by default; score_check: false or score_review: false opt out.
+      scoreCheck: a.score_check !== false, scoreReview: a.score_review !== false,
     });
     return JSON.stringify(out);
   }

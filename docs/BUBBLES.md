@@ -1688,6 +1688,16 @@ on the runs the last gate played): skill order in the score's direction, an idle
 spam bot ranking no better than real play, the finish rule, `max_rate_per_s`, every bot run replaying to
 the same phase, time and score (the engine's `verify` where it has it) and the score changing only on its
 `events`. It records `bounds`. Each check is pass, warn or fail; `{ok, ambiguous, checks, bounds, lines}`.
+The pipeline (`authoring/expander/score-step.mjs`) runs it by default for every game with a `score` block
+(`score_check: false` in compose's args opts out). When the code checks pass or are unsure, Muse reviews
+the goal, constraints, end and score parts with the bot runs (`prompt('score_review')`, asked for with
+`ask(system, user, 'score review', {model: 'muse-wonder-1.0', effort: 'high', max_tokens})`;
+`score_review: false` opts out). A failure gets one score-only repair (`prompt('repair_part')`: the part,
+its problems and the parts it depends on), then the checks and the review again. Still failing, the game
+ships with `score.ranked: false` (an unranked board). The game itself never changes in this step. Events:
+`score_checking` ("Checking the score is fair…"), `score_reviewing`, `score_repairing`, `score_checked`.
+compose's result adds `score` (ranked, repaired, reason, checks, review, bounds), and `stats.calls` logs
+every Muse call's purpose, wall time and `usage` when `ask` returns it.
 
 **Quality and polish.** A new game that passes the bots then goes through the quality check
 (`authoring/expander/quality.mjs`, no model): no palette, backdrop or sound, fragment roles or the game's

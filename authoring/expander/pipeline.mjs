@@ -1,12 +1,16 @@
 // Muse makes a microgame, start to finish, in one place for every caller (docs/BUBBLES.md 7.12):
 //   gold examples → Muse drafts (design first) → expand + validate → repair (up to 3 rounds)
-//   → five-bot gate (one repair for blocking flags) → quality check → one polish round → wrap.
+//   → five-bot gate (one repair for blocking flags) → quality check → one polish round
+//   → score check (games with a score block: code checks, Muse review, one score repair) → wrap.
 // The server's generator calls it through the Studio bundle (MicrogameStudio.compose); the app's
 // MicrogameComposer.swift runs the same steps with the same prompts (MicrogameStudio.prompt).
 //
-// Pure: Muse is a function the caller passes in, `ask(system, user, purpose) → Promise<text>`.
+// Pure: Muse is a function the caller passes in, `ask(system, user, purpose, options) → Promise<text>`
+// (or {content, model, usage}). options, when given, is {model, effort, max_tokens}: the score review
+// asks for muse-wonder-1.0 at high effort; callers that ignore it still work.
 
 import * as P from './prompts.mjs';
+import { verifyScore } from './score-step.mjs';
 
 export const MAX_REPAIR_ROUNDS = 3;
 export const BOT_COUNT = 5;
@@ -26,6 +30,10 @@ export function summarize(e) {
     }
     case 'playtesting': return `${e.bots} test players are trying it`;
     case 'playtested': return e.passed ? `Playtested: ${e.headline}` : `Playtest flagged: ${e.headline}`;
+    case 'score_checking': return 'Checking the score is fair…';
+    case 'score_reviewing': return 'Muse is reviewing the score';
+    case 'score_repairing': return 'Fixing the score';
+    case 'score_checked': return e.ranked ? `Score checked: ranked board, ${e.order}` : `Unranked board${e.reason ? `: ${e.reason}` : ''}`;
     case 'done': return `${e.title} is ready`;
     case 'failed': return `Couldn't finish: ${e.reason}`;
     default: return '';
@@ -76,18 +84,21 @@ const blockingOf = (report) => (report.flags ?? []).filter((f) => f.blocking);
  * each returning a parsed object (gate a Promise). opts: { ask, onEvent, signal, maxRepairRounds, polish }.
  * Returns { manifest, stats, bots, gate, quality }. Throws GenerationError when the game never validates.
  */
-export async function composeGame({ request, brief, base = null }, studio, { ask, onEvent = () => {}, signal, maxRepairRounds = MAX_REPAIR_ROUNDS, polish = true } = {}) {
+export async function composeGame({ request, brief, base = null }, studio, { ask, onEvent = () => {}, signal, maxRepairRounds = MAX_REPAIR_ROUNDS, polish = true, scoreCheck = true, scoreReview = true } = {}) {
   const started = Date.now();
-  const stats = { firstDraftValid: null, repairRounds: 0, playtestRepair: false, passedGate: false, polished: false, museCalls: 0, models: [], examples: [], seconds: 0 };
+  const stats = { firstDraftValid: null, repairRounds: 0, playtestRepair: false, passedGate: false, polished: false, museCalls: 0, models: [], examples: [], seconds: 0, calls: [] };
   const emit = (e) => onEvent({ ...e, summary: summarize(e) });
   const live = () => { if (signal?.aborted) throw new GenerationError('The job was cancelled or ran out of time.'); };
-  const call = async (system, user, purpose) => {
+  // Every Muse call is logged with its wall time and, when the caller returns it, its token usage.
+  const call = async (system, user, purpose, options) => {
     live();
-    const r = await ask(system, user, purpose);
+    const t0 = Date.now();
+    const r = await (options ? ask(system, user, purpose, options) : ask(system, user, purpose));
     stats.museCalls++;
     const text = typeof r === 'string' ? r : r?.content ?? '';
     const model = typeof r === 'object' && r?.model;
     if (model && !stats.models.includes(model)) stats.models.push(model);
+    stats.calls.push({ purpose, ms: Date.now() - t0, chars: { system: system.length, user: user.length }, ...(model ? { model } : {}), ...(typeof r === 'object' && r?.usage ? { usage: r.usage } : {}) });
     return text;
   };
   request = String(request ?? '').trim();
@@ -182,7 +193,14 @@ export async function composeGame({ request, brief, base = null }, studio, { ask
       }
     }
 
-    const { expansion } = chosen;
+    let { expansion } = chosen;
+    // The score step: games with a score block get a checked model (bounds, ranked) on the manifest.
+    let score = null;
+    if (scoreCheck && expansion.score_declared && typeof studio.scoreCheck === 'function') {
+      score = await verifyScore({ expansion, gameJson: expansion.playtest_game_json || expansion.game_json, request }, studio, { call, emit, review: scoreReview });
+      if (score?.authoring_json) expansion = { ...expansion, authoring_json: score.authoring_json };
+      stats.score = score ? { ranked: score.ranked, repaired: score.repaired, reviews: score.reviews ?? 0, review: score.review?.ok ?? null } : null;
+    }
     const title = expansion.game?.meta?.title ?? 'microgame';
     const manifest = studio.wrap({
       id: base?.id ?? `mg-${slug(title) || 'game'}-${randomSuffix()}`,
@@ -191,13 +209,15 @@ export async function composeGame({ request, brief, base = null }, studio, { ask
       brief,
       seed: base?.seed ?? 1 + Math.floor(Math.random() * 999999),
       ...(base?.emoji ? { emoji: base.emoji } : {}),
+      ...(score?.model ? { score: score.model } : {}),
     });
     stats.seconds = Math.round((Date.now() - started) / 100) / 10;
     stats.quality = quality.score;
     manifest.studio = { models: stats.models, created_at: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), duration_sec: stats.seconds, offline: false };
     emit({ kind: 'done', title: manifest.title ?? title });
     const bots = (chosen.report.runs ?? []).map((r) => ({ skill: Number(r.bot?.skill ?? 0), score: Math.round(Number(r.score ?? 0)), sec: Math.round(Number(r.seconds ?? 0) * 10) / 10 }));
-    return { manifest, stats, bots, gate: { passed: !!chosen.report.passed, summary: chosen.report.summary ?? '' }, quality };
+    const scoreReport = score ? { ranked: score.ranked, repaired: score.repaired, reason: score.reason || null, checks: score.check?.checks ?? [], review: score.review ?? null, bounds: score.check?.bounds ?? null } : null;
+    return { manifest, stats, bots, gate: { passed: !!chosen.report.passed, summary: chosen.report.summary ?? '' }, quality, score: scoreReport };
   } catch (e) {
     stats.seconds = Math.round((Date.now() - started) / 100) / 10;
     emit({ kind: 'failed', reason: e?.message ?? String(e), issues: e?.issues });
