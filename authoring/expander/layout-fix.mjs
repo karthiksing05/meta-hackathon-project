@@ -138,12 +138,15 @@ export function fixContrast(game, findings) {
     if (!t || t.node !== 'text') continue;
     const back = rgb(f.backdrop ?? '#808080');
     const cur = tokenColor(game, t.color);
-    // Even backdrop: the palette color that reads best on it.
-    if ((f.backdrop_spread ?? 9) < 1.6 && !isExpr(t.color)) {
+    // Even backdrop: the palette color that reads best on it. Not for a template node (a key, a
+    // cell): the finding saw one instance, and its siblings may sit on other fills; those get an
+    // outline, which reads on any fill.
+    const inTemplate = /\/(cell|template|item|node)(\/|$)/.test(f.node);
+    if ((f.backdrop_spread ?? 9) < 1.6 && !isExpr(t.color) && !inTemplate) {
       const best = palette.map((p) => ({ ...p, c: contrast(rgb(p.hex), back) })).sort((a, b) => b.c - a.c)[0];
       const size = isNum(t.size) ? t.size : 16;
       if (best && best.c >= (size >= 18 ? 3 : 4.5)) {
-        fixes.push({ kind: 'contrast', node: f.node, detail: `color ${t.color} → ${best.ref} (${best.c.toFixed(1)}:1 on ${f.backdrop})` });
+        fixes.push({ kind: 'contrast', node: f.node, recolor: { from: t.color }, detail: `color ${t.color} → ${best.ref} (${best.c.toFixed(1)}:1 on ${f.backdrop})` });
         t.color = best.ref; continue;
       }
     }
@@ -285,6 +288,26 @@ export async function fixLayout(game, { findings = null, pixels = null, engine =
   const n = fixes.length;
   step('hud_panel', (g) => hudPanel(g, found));
   if (fixes.length > n) found = await lint();
+  const m = fixes.length;
   step('contrast', (g) => fixContrast(g, found));
+  // A recolor judged on one frame can lose on another (a scrolling backdrop, a lit tile). Check
+  // again; where the text still fails, put the old color back and outline it instead.
+  const recolored = fixes.slice(m).filter((f) => f.recolor);
+  if (recolored.length) {
+    const still = new Set((await lint()).filter((f) => f.code === 'L_LOW_CONTRAST').map((f) => f.node));
+    step('contrast', (g) => {
+      const out = [];
+      for (const r of recolored.filter((x) => still.has(x.node))) {
+        const t = getAt(g, r.node);
+        const hex = tokenColor(g, r.recolor.from);
+        if (!t || !hex) continue;
+        t.color = r.recolor.from;
+        const plate = paletteCandidates(g).map((p) => ({ ...p, c: contrast(rgb(p.hex), rgb(hex)) })).sort((a, b) => b.c - a.c)[0];
+        outline(t, plate, out, { node: r.node });
+        r.detail += ' (reverted)';
+      }
+      return out;
+    });
+  }
   return { game: cur, fixes, dropped };
 }
