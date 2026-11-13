@@ -14,6 +14,17 @@ import * as P from './prompts.mjs';
 import { normalizeScore, unknownScoreEvents, scoreParts, PART_DEPENDS } from './score.mjs';
 
 export const MAX_SCORE_REPAIRS = 1;
+/** The review gives up after this many ms and the code checks decide (P.SCORE_REVIEW_OPTIONS.timeout_s). */
+export const REVIEW_TIMEOUT_MS = 60000;
+/** The reason an unranked board gives when no bot could finish a finished-only run. */
+export const BOTS_CANT_JUDGE = "the test bots couldn't finish a run, so they can't judge this score";
+
+/** Resolves to the promise's value, or rejects with a TimeoutError after ms. */
+function withTimeout(promise, ms) {
+  let timer;
+  const t = new Promise((_, reject) => { timer = setTimeout(() => reject(Object.assign(new Error(`no answer in ${Math.round(ms / 1000)} s`), { name: 'TimeoutError' })), ms); });
+  return Promise.race([promise, t]).finally(() => clearTimeout(timer));
+}
 
 const failsOf = (check) => (check?.checks ?? []).filter((c) => c.status === 'fail');
 
@@ -29,7 +40,7 @@ export function orderText(model) {
  * Returns {model, ranked, check, review, repaired, authoring_json} or null when there is no score block
  * (the board keeps the old default, and the manifest gets no `score`).
  */
-export async function verifyScore({ expansion, gameJson, request = '', spec = null }, studio, { call, emit = () => {}, review: doReview = true, maxRepairs = MAX_SCORE_REPAIRS } = {}) {
+export async function verifyScore({ expansion, gameJson, request = '', spec = null }, studio, { call, emit = () => {}, review: doReview = true, maxRepairs = MAX_SCORE_REPAIRS, reviewTimeoutMs = REVIEW_TIMEOUT_MS } = {}) {
   if (!expansion?.score_declared || typeof studio.scoreCheck !== 'function') return null;
   let model = expansion.score;
   // The planner's spec parts (game-spec/1), when there is one, are what the review and repair read.
@@ -44,7 +55,7 @@ export async function verifyScore({ expansion, gameJson, request = '', spec = nu
     emit({ kind: 'score_reviewing' });
     out.reviews++;
     try {
-      const text = await call(P.SCORE_REVIEW_SYSTEM, P.scoreReview(scoreParts(authoring, m), check.lines ?? [], check.checks ?? [], request), 'score review', P.SCORE_REVIEW_OPTIONS);
+      const text = await withTimeout(call(P.SCORE_REVIEW_SYSTEM, P.scoreReview(scoreParts(authoring, m), check.lines ?? [], check.checks ?? [], request), 'score review', P.SCORE_REVIEW_OPTIONS), reviewTimeoutMs);
       return P.parseScoreReview(text) ?? { ok: null, issues: [], error: 'the review reply was not a verdict' };
     } catch (e) {
       if (e?.name === 'GenerationError') throw e; // cancelled
@@ -67,6 +78,19 @@ export async function verifyScore({ expansion, gameJson, request = '', spec = nu
   };
 
   let issues = await round(model);
+  // No bot finished a finished-only run: the bots can't judge the score, which is not the score's fault.
+  // No repair (it used to move points games to counts_when "finished" and make it worse); an honest
+  // unranked board with that reason.
+  const fails = failsOf(out.check);
+  if (fails.length && fails.every((c) => c.id === 'finish')) {
+    out.ranked = false;
+    out.reason = BOTS_CANT_JUDGE;
+    out.botsCantJudge = true;
+    const { ranked: _r0, ...plain0 } = model;
+    out.model = { ...plain0, ranked: false };
+    emit({ kind: 'score_checked', ranked: false, order: orderText(model), reason: out.reason });
+    return out;
+  }
   for (let n = 0; issues.length && n < maxRepairs; n++) {
     emit({ kind: 'score_repairing', issues: issues.map((i) => i.problem) });
     const parts = scoreParts(authoring, model);

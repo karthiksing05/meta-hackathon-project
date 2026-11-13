@@ -113,6 +113,10 @@ export function planMenu(catalog, context) {
   const spec = [];
   if (plan.spec) spec.push('The game spec (game-spec/1). Build exactly this; every part is decided:', clip(JSON.stringify(plan.spec), 12000));
   if (plan.spec?.score) spec.push('', 'Copy spec.score into the manifest as a top-level "score" block (without bounds), with events renamed to the event or input names your game really emits.');
+  const sponsor = plan.spec?.theme?.sponsor ?? context.understanding?.sponsor;
+  if (sponsor && typeof sponsor === 'object' && sponsor.name) {
+    spec.push('', `Sponsored by ${clip(sponsor.name, 60)}: put "${clip(sponsor.name, 60)}" in the title or the intro card (meta.instructions), use its products${Array.isArray(sponsor.products) && sponsor.products.length ? ` (${sponsor.products.slice(0, 5).map((p) => clip(p, 40)).join(', ')})` : ''} as the game's pieces and content, and match its tone${sponsor.tone ? ` (${clip(sponsor.tone, 60)})` : ''}. Its real name, colors and logo are fine; keep it fun, not an ad.`);
+  }
   const tooling = toolRules(context);
   if (tooling.length) spec.push('', 'How to use the planned content tools:', ...tooling);
   const together = groupPlayRules(plan.spec?.social);
@@ -334,7 +338,9 @@ export function needsPolish(report) {
 // ---------- the score review and per-part repairs (docs/HARNESS_V2.md "Score verification") ----------
 
 /** How the caller should ask Muse for the score review: the one place the harness spends thinking. */
-export const SCORE_REVIEW_OPTIONS = Object.freeze({ model: 'muse-wonder-1.0', effort: 'high', max_tokens: 12000 });
+// timeout_s: callers should stop waiting after this; score-step also gives up on its own after it (Kevin32: two
+// reviews hung for 150 s and timed out whole builds).
+export const SCORE_REVIEW_OPTIONS = Object.freeze({ model: 'muse-wonder-1.0', effort: 'high', max_tokens: 12000, timeout_s: 60 });
 /** A part repair is small: the same model, default effort. */
 export const REPAIR_PART_OPTIONS = Object.freeze({ model: 'muse-wonder-1.0', effort: 'medium', max_tokens: 8000 });
 
@@ -387,7 +393,7 @@ export function repairPart(part, value, issues = [], dependsOn = {}) {
     for (const [k, v] of deps) lines.push(partText(k, v));
   }
   if (part === 'score') {
-    lines.push('', 'The score fields: kind (points | time_to_complete | count_in_time | survival_time | accuracy | distance | tiered_points | streak), measures, unit, direction (higher | lower), counts_when (finished | any), aggregate (best | latest | sum_week), tie_break (less time | earlier), format, events (the event or input names that change the score), ranked (false only when no fair ranking is possible). Leave out bounds: the bots record them. Whole numbers only: time kinds rank milliseconds of run time.');
+    lines.push('', 'The score fields: kind (points | time_to_complete | count_in_time | survival_time | accuracy | distance | tiered_points | streak), measures, unit, direction (higher | lower), counts_when (finished | any), aggregate (best | latest | sum_week), tie_break (less time | earlier), format, events (the event or input names that change the score), ranked (false only when no fair ranking is possible). Leave out bounds: the bots record them. Whole numbers only: time kinds rank milliseconds of run time. Keep counts_when "any" for points, count_in_time, survival_time, distance, tiered_points and streak: only time_to_complete and accuracy count finished runs, and a finished-only board stays empty when nobody wins.');
   }
   lines.push('', `Reply with {"${part}": <the fixed part>}.`);
   return lines.join('\n');

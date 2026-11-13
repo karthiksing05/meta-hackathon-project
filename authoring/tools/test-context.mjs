@@ -114,5 +114,17 @@ async function compose(args, reply) {
   ok(g.gate_profile === 'calm', 'gate: gate_profile passes through');
 }
 
+{ // one gold example when the top type is a confident catalog match (Kevin32: median system prompt 126k chars)
+  const { goldCount } = await import('../expander/pipeline.mjs');
+  ok(goldCount({ types: [{ source: 'seed', match: { score: 0.97 } }] }) === 1 && goldCount({ types: [{ source: 'learned', match: { score: 1 } }] }) === 2 && goldCount({ types: [{ match: { score: 0.6 } }] }) === 2 && goldCount(null) === 2, 'goldCount: 1 when confident, else 2');
+  const base = { ...SAMPLES.dodge, gold_ids: ['gold_rift_run', 'gold_cake_tower'] };
+  const typesAt = (score) => base.types.map((t, i) => (i === 0 ? { ...t, source: 'seed', match: { score, reasons: [] } } : t));
+  const sure = await compose({ context: { ...base, types: typesAt(0.95) } }, (p) => (/score review/.test(p) ? { ok: true, issues: [] } : tide));
+  const unsure = await compose({ context: { ...base, types: typesAt(0.5) } }, (p) => (/score review/.test(p) ? { ok: true, issues: [] } : tide));
+  ok(sure.out.stats.examples.length === 1 && unsure.out.stats.examples.length === 2, `examples: ${sure.out.stats.examples.length} confident, ${unsure.out.stats.examples.length} not`);
+  console.log(`  system prompt: ${unsure.out.stats.systemChars} chars with 2 gold examples, ${sure.out.stats.systemChars} with 1 (${Math.round((100 * (unsure.out.stats.systemChars - sure.out.stats.systemChars)) / unsure.out.stats.systemChars)}% less)`);
+  ok(sure.out.stats.systemChars < unsure.out.stats.systemChars, 'one example makes the prompt smaller');
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

@@ -310,5 +310,29 @@ const draftOr = (manifest, rest) => (purpose, user) => (/score/.test(purpose) ? 
   console.log(`pipeline score step: ${Math.round((Date.now() - t0) / 100) / 10} s for 8 composes`);
 }
 
+{ // Kevin32 fixes: no finisher means the bots can't judge; the review is capped; the plan's score wins over drift.
+  const { verifyScore, BOTS_CANT_JUDGE } = await import('../expander/score-step.mjs');
+  const { adoptSpecScore } = await import('../expander/pipeline.mjs');
+  const expansion = (score) => ({ score_declared: true, score: S.normalizeScore(score).score, authoring: { score } });
+  const studioWith = (checks) => ({ scoreCheck: async () => ({ ok: !checks.some((c) => c.status === 'fail'), checks, lines: [] }) });
+  const calls = [];
+  const call = async (sys, user, purpose) => { calls.push(purpose); return '{"ok": true, "issues": []}'; };
+  const nf = await verifyScore({ expansion: expansion({ kind: 'time_to_complete', events: ['done'] }), gameJson: '{}' }, studioWith([{ id: 'finish', status: 'fail', message: 'no bot finished' }, { id: 'skill_order', status: 'pass', message: '' }]), { call });
+  ok(nf.ranked === false && nf.reason === BOTS_CANT_JUDGE && nf.botsCantJudge && calls.length === 0, `no finisher: unranked "bots can't judge", no repair (${calls.join(', ')})`);
+  const both = await verifyScore({ expansion: expansion({ kind: 'points', events: ['p'] }), gameJson: '{}' }, studioWith([{ id: 'finish', status: 'fail', message: '' }, { id: 'spam', status: 'fail', message: 'farmed' }]), { call: async (s, u, p) => { calls.push(p); return p === 'score repair' ? 'nope' : '{"ok": true}'; } });
+  ok(!both.botsCantJudge && calls.includes('score repair'), 'a real score fault next to it still goes to repair');
+  const t0 = Date.now();
+  const hung = await verifyScore({ expansion: expansion({ kind: 'points', events: ['p'] }), gameJson: '{}' }, studioWith([{ id: 'skill_order', status: 'pass', message: '' }]), { call: () => new Promise(() => {}), reviewTimeoutMs: 50 });
+  ok(Date.now() - t0 < 2000 && hung.review?.ok === null && /no answer/.test(hung.review.error) && hung.ranked === true, `a hung review gives up and the code checks decide (${Date.now() - t0} ms)`);
+  ok(P.SCORE_REVIEW_OPTIONS.timeout_s === 60, 'the review options carry a 60 s timeout for callers');
+  ok(/Keep counts_when "any" for points/.test(P.repairPart('score', { kind: 'points' }, ['x'])), 'repairPart keeps points games counting every run');
+  // drift: the spec's kind with the game's own events when the spec's don't exist
+  const game = { events: { combine_ok: {}, puzzle_solved: {} }, inputs: {} };
+  const a = adoptSpecScore({ kind: 'count_in_time', measures: 'sets solved', events: ['set_solved'] }, game, ['puzzle_solved']);
+  ok(a && a.score.kind === 'count_in_time' && a.block.events[0] === 'puzzle_solved', `adopt with fallback events: ${JSON.stringify(a?.block)}`);
+  const kept = adoptSpecScore({ kind: 'count_in_time', events: ['puzzle_solved', 'nope'] }, game, ['combine_ok']);
+  ok(kept.block.events.join() === 'puzzle_solved', 'the spec\'s events win when the game has them');
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

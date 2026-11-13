@@ -67,8 +67,27 @@ export function groupPlayRules(social) {
     lines.push('- No right answer: the player\'s picks (ratings, ranks, tiers or this-or-that) are the result. Keep each pick in state (`picks`, in prompt order) so friends\' runs can be compared. Never call a pick right or wrong, and don\'t score how many picks were made.');
   }
   if (b.result.state) lines.push(`- Keep the result in state named ${b.result.state.map((s) => `\`${s}\``).join(', ')} at the end of the run.`);
+  if (b.mode === 'weekly_board') lines.push('- It is a Group\'s daily game: use the daily_seed fragment so everyone gets the same course each day.');
   lines.push(`- The line posted back to the thread is "${b.share_line}": it never names an answer or an ending.`);
   return lines;
+}
+
+/**
+ * The manifest's `structure` (docs/BUBBLES.md 4.2) from how the game is played together: cadence "daily"
+ * when the game uses or plans daily_seed or its mode is the Group's weekly board, else "endless"; scope
+ * "group:<id>" or "event:<id>" when the job is for a Group or Event (context.group / context.scope), else
+ * "everyone". Before this, every game shipped {endless, everyone, ai} (Kevin32).
+ */
+export function structureFor({ groupPlay = null, authoring = null, context = null } = {}) {
+  const uses = Array.isArray(authoring?.uses) ? authoring.uses.map((u) => u?.fragment) : [];
+  const plan = context?.plan && typeof context.plan === 'object' ? context.plan : {};
+  const planned = Array.isArray(plan.tool_ids) ? plan.tool_ids : [];
+  const daily = uses.includes('daily_seed') || planned.includes('daily_seed') || groupPlay?.mode === 'weekly_board';
+  let scope = 'everyone';
+  const g = context?.group;
+  if (g && typeof g === 'object' && typeof g.id === 'string' && g.id) scope = `${g.kind === 'event' ? 'event' : 'group'}:${g.id}`;
+  else if (typeof context?.scope === 'string' && /^(everyone|(group|event):[\w-]+)$/.test(context.scope)) scope = context.scope;
+  return { cadence: daily ? 'daily' : 'endless', scope, setter: 'ai' };
 }
 
 /** Fills a share line or display for one player: {name}, {title}, {result}, {score}, {ending}, {choices}, {agreement}. */

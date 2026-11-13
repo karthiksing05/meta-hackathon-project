@@ -50,5 +50,14 @@ ok(G.agreement(['S', 'A', 'B'], ['S', 'A', 'C']) === 67, 'tiers agree 2 of 3');
 ok(G.agreement([5, 4, 1], [5, 4, 1]) === 100 && G.agreement([5, 1], [1, 5]) < 50, 'ratings');
 ok(G.agreement([1], [1, 2]) === null, 'different lengths are not comparable');
 
+// structure follows group play and the job's target (Kevin32: always {endless, everyone, ai})
+ok(JSON.stringify(G.structureFor({})) === JSON.stringify({ cadence: 'endless', scope: 'everyone', setter: 'ai' }), 'default structure');
+ok(G.structureFor({ authoring: { uses: [{ fragment: 'daily_seed' }] } }).cadence === 'daily', 'daily_seed in the game makes it daily');
+ok(G.structureFor({ context: { plan: { tool_ids: ['daily_seed'] } } }).cadence === 'daily', 'a planned daily_seed makes it daily');
+ok(G.structureFor({ groupPlay: { mode: 'weekly_board' } }).cadence === 'daily', 'a weekly board game is daily');
+ok(G.structureFor({ context: { group: { id: 'pickle-crew' } } }).scope === 'group:pickle-crew' && G.structureFor({ context: { group: { id: 'picnic', kind: 'event' } } }).scope === 'event:picnic', 'a Group or Event job is scoped to it');
+ok(G.structureFor({ context: { scope: 'group:x y' } }).scope === 'everyone', 'a malformed scope is ignored');
+ok(/daily_seed/.test(G.groupPlayRules({ mode: 'weekly_board', result: { compare: 'score' } }).join('\n')), 'weekly board rules ask for daily_seed');
+
 console.log(`group play: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

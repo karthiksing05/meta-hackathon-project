@@ -12,20 +12,38 @@
 import * as P from './prompts.mjs';
 import { verifyScore } from './score-step.mjs';
 import { normalizeScore, unknownScoreEvents } from './score.mjs';
-import { groupPlayBlock } from './group-play.mjs';
+import { groupPlayBlock, structureFor } from './group-play.mjs';
 import { wantsStory, composeStory } from './story-compose.mjs';
 
-/** The spec's score as a manifest block: bounds dropped (the bots set them), unknown events dropped. */
-export function adoptSpecScore(specScore, game) {
+/**
+ * The spec's score as a manifest block: bounds dropped (the bots set them), unknown events dropped.
+ * fallbackEvents: the game's own score events, used when none of the spec's events exist in the game.
+ */
+export function adoptSpecScore(specScore, game, fallbackEvents = null) {
   const { bounds: _b, reason: _r, ...block } = specScore;
   const unknown = new Set(unknownScoreEvents({ events: Array.isArray(block.events) ? block.events : [] }, game ?? {}));
   if (Array.isArray(block.events)) {
     block.events = block.events.filter((e) => !unknown.has(e));
     if (!block.events.length) delete block.events;
   }
+  if (!block.events && Array.isArray(fallbackEvents) && fallbackEvents.length) block.events = [...fallbackEvents];
   const n = normalizeScore(block);
   if (n.diagnostics.some((d) => d.severity === 'error')) return null;
   return { score: n.score, block };
+}
+
+/** The top type's match score above which one gold example is enough (the examples are most of the prompt). */
+export const CONFIDENT_MATCH = 0.85;
+
+/**
+ * How many gold examples compose shows: 1 when the plan's top type is a confident catalog match (not
+ * learned from the web), else 2. Gold examples are about 45k characters each (Kevin32: a median system
+ * prompt of 126k characters).
+ */
+export function goldCount(context) {
+  const top = Array.isArray(context?.types) ? context.types[0] : null;
+  const confident = !!top && top.source !== 'learned' && Number(top.match?.score) >= CONFIDENT_MATCH;
+  return confident ? 1 : 2;
 }
 
 export const MAX_REPAIR_ROUNDS = 3;
@@ -126,7 +144,8 @@ export async function composeGame({ request, brief, base = null, context = null 
     const lookup = base ? `${base.title ?? ''}. ${base.one_line_rule ?? ''} ${request}` : request;
     let examples = null;
     try {
-      const ex = studio.examples(lookup, 2, Array.isArray(context?.gold_ids) ? context.gold_ids : null);
+      const ex = studio.examples(lookup, goldCount(context), Array.isArray(context?.gold_ids) ? context.gold_ids : null);
+      stats.goldExamples = ex.ids?.length ?? null;
       examples = ex.text;
       stats.examples = ex.ids ?? [];
     } catch { /* fall back to the catalog's examples */ }
@@ -236,11 +255,17 @@ export async function composeGame({ request, brief, base = null, context = null 
     let { expansion } = chosen;
     // The score step: games with a score block get a checked model (bounds, ranked) on the manifest.
     let score = null;
-    // A plan whose spec has a score, and a manifest without one: the spec's score, with events this game has.
+    // The plan's score wins: a manifest without one, or one whose kind drifted from the plan's (Kevin32: 5 of
+    // 31 games, e.g. make-24 drifting to a farmable count of combines), takes the spec's score with the
+    // events this game has. A spec score that doesn't validate leaves the manifest's as it is.
     const specScore = context?.plan?.spec?.score;
-    if (!expansion.score_declared && specScore && typeof specScore === 'object') {
-      const adopted = adoptSpecScore(specScore, expansion.game);
-      if (adopted) expansion = { ...expansion, score: adopted.score, score_declared: true, authoring: { ...expansion.authoring, score: adopted.block }, authoring_json: JSON.stringify({ ...expansion.authoring, score: adopted.block }) };
+    if (specScore && typeof specScore === 'object' && specScore.kind && (!expansion.score_declared || expansion.score?.kind !== specScore.kind)) {
+      const drifted = expansion.score_declared ? expansion.score?.kind : null;
+      const adopted = adoptSpecScore(specScore, expansion.game, drifted ? expansion.score?.events : null);
+      if (adopted) {
+        expansion = { ...expansion, score: adopted.score, score_declared: true, authoring: { ...expansion.authoring, score: adopted.block }, authoring_json: JSON.stringify({ ...expansion.authoring, score: adopted.block }) };
+        if (drifted) stats.scoreDrift = { from: drifted, to: adopted.score.kind };
+      }
     }
     if (scoreCheck && expansion.score_declared && typeof studio.scoreCheck === 'function') {
       score = await verifyScore({ expansion, gameJson: expansion.playtest_game_json || expansion.game_json, request, spec: context?.plan?.spec ?? null }, studio, { call, emit, review: scoreReview });
@@ -265,6 +290,7 @@ export async function composeGame({ request, brief, base = null, context = null 
     const social = story?.groupResult ? { ...(planned ?? {}), result: { ...story.groupResult, display } } : planned;
     const together = groupPlayBlock(social, score?.model ?? expansion.score ?? null);
     if (together) manifest.group_play = together;
+    manifest.structure = structureFor({ groupPlay: together, authoring: expansion.authoring, context });
     stats.seconds = Math.round((Date.now() - started) / 100) / 10;
     stats.quality = quality.score;
     manifest.studio = { models: stats.models, created_at: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), duration_sec: stats.seconds, offline: false };
