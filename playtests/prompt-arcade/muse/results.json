@@ -1,0 +1,162 @@
+{
+  "brainrot": {
+    "title": "Beast Brainrot Quiz",
+    "passed": false,
+    "summary": "5 bots scored 700 over 6–14 s · 5 won",
+    "updated": {
+      "title": "Beast Brainrot Quiz",
+      "passed": false,
+      "summary": "5 bots scored 1375–2300 over 9–17 s · 5 won",
+      "artApplied": true,
+      "polished": false,
+      "examples": [
+        "gold_who_posted",
+        "gold_aura_farm"
+      ]
+    }
+  },
+  "cars": {
+    "title": "Better Brand Bout",
+    "passed": true,
+    "summary": "5 bots scored 11–20 over 20–25 s · 1 lost, 4 won",
+    "updated": {
+      "title": "Brand Bracket",
+      "passed": true,
+      "summary": "5 bots scored 13–14 over 25–40 s · 1 lost, 4 won",
+      "artApplied": true,
+      "polished": false,
+      "examples": [
+        "gold_aura_farm",
+        "gold_cake_tower"
+      ]
+    }
+  },
+  "cats": {
+    "title": "Catapult Cats",
+    "passed": true,
+    "summary": "5 bots scored 300–400 over 60 s · 5 lost",
+    "updated": {
+      "title": "Catapult Cats",
+      "passed": true,
+      "summary": "5 bots scored 0–600 over 25–27 s · 2 lost, 3 won",
+      "artApplied": true,
+      "polished": false,
+      "examples": [
+        "gold_cake_tower",
+        "gold_aura_farm"
+      ]
+    }
+  },
+  "crossing": {
+    "title": "Spinning Cat Crossing",
+    "passed": true,
+    "summary": "5 bots scored 190–200 over 5–25 s · 1 lost, 4 won",
+    "updated": {
+      "title": "Spinning Cat Crossing",
+      "passed": true,
+      "summary": "5 bots scored 50–270 over 13–60 s · 4 lost, 1 won",
+      "artApplied": true,
+      "polished": false,
+      "examples": [
+        "gold_aura_farm",
+        "gold_cake_tower"
+      ]
+    }
+  },
+  "geography": {
+    "title": "Map Clue Trivia",
+    "passed": false,
+    "summary": "5 bots scored 700–800 over 7–14 s · 5 won",
+    "updated": {
+      "title": "Geography Map It Right",
+      "passed": true,
+      "summary": "5 bots scored 100–700 over 10–30 s · 2 lost, 3 won",
+      "artApplied": true,
+      "polished": true,
+      "examples": [
+        "gold_who_posted",
+        "gold_aura_farm"
+      ]
+    }
+  },
+  "jeopardy": {
+    "title": "Clue Board Challenge",
+    "passed": true,
+    "summary": "5 bots scored 600–1800 over 52–90 s · 3 lost, 2 won",
+    "updated": {
+      "title": "Pick Your Clue",
+      "passed": true,
+      "summary": "5 bots scored 1200–2450 over 90 s · 5 lost",
+      "artApplied": true,
+      "polished": false,
+      "examples": [
+        "gold_aura_farm",
+        "gold_cake_tower"
+      ]
+    }
+  },
+  "lego": {
+    "title": "Bedroom Brickfield",
+    "passed": true,
+    "summary": "5 bots scored 100–140 over 9–90 s · 5 lost",
+    "updated": {
+      "title": "Bedroom Brickfield",
+      "passed": false,
+      "summary": "5 bots scored 23–34 over 2–5 s · 3 lost, 2 won",
+      "artApplied": true,
+      "polished": false,
+      "examples": [
+        "gold_aura_farm",
+        "gold_cake_tower"
+      ]
+    }
+  },
+  "leia": {
+    "title": "Leia: Death Star Escape",
+    "passed": true,
+    "summary": "5 bots scored 100–300 over 6–90 s · 4 lost, 1 won",
+    "updated": {
+      "title": "Leia Escapes the Death Star",
+      "passed": false,
+      "summary": "5 bots scored 20–160 over 4–14 s · 3 lost, 2 won",
+      "artApplied": true,
+      "polished": false,
+      "examples": [
+        "gold_last_run_of_the_magpie",
+        "gold_driftwood_cipher"
+      ]
+    }
+  },
+  "myth": {
+    "title": "Aegean Dive Trivia",
+    "passed": false,
+    "summary": "5 bots scored 500–600 over 5–10 s · 5 won",
+    "updated": {
+      "title": "Mythic Deep Dive",
+      "passed": false,
+      "summary": "5 bots scored 0 over 90 s · 5 lost",
+      "artApplied": true,
+      "polished": false,
+      "examples": [
+        "gold_aura_farm",
+        "gold_cake_tower"
+      ]
+    }
+  },
+  "runner": {
+    "title": "Tung Tung Night Run",
+    "passed": true,
+    "summary": "5 bots scored 195–615 over 10–45 s · 4 lost, 1 won",
+    "updated": {
+      "title": "Sahur Subway Chase",
+      "passed": true,
+      "summary": "5 bots scored 103–450 over 17–60 s · 3 lost, 2 won",
+      "artApplied": true,
+      "polished": true,
+      "examples": [
+        "gold_pillow_fort",
+        "gold_last_run_of_the_magpie"
+      ]
+    }
+  }
+}
