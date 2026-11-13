@@ -137,6 +137,9 @@ struct StudioLaunch: Identifiable {
     var length: BubbleLength? = nil
     /// "Use this sound": the game is made with this library sound behind it.
     var sound: RemoteGameSound? = nil
+    /// A Blend's game spec ("a game for the two of us", `POST /v1/blend`). `prompt` carries its
+    /// prompt; the generate call takes the spec itself once Studio sends it.
+    var blendSpec: RemoteBlend.Spec? = nil
 }
 
 enum ComposerStartAction: Hashable {

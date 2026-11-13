@@ -300,6 +300,24 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return blend
     }
 
+    /// A Blend for me and one friend (`POST /v1/blend` with the two of us): games for both, and a
+    /// spec Studio makes "a game for the two of us" from.
+    func pairBlend(myID me: String, myName: String, friendID: String, friendName: String, count: Int) async throws -> RemoteBlend {
+        let pairID = "pair-" + [me, friendID].sorted().joined(separator: "-")
+        let body = try JSONSerialization.data(withJSONObject: [
+            "group": ["id": pairID, "name": "\(myName) & \(friendName)"],
+            "members": [
+                ["userID": me, "name": myName, "isFriend": true],
+                ["userID": friendID, "name": friendName, "isFriend": true],
+            ],
+            "count": count,
+        ] as [String: Any])
+        let data = try await send("POST", "v1/blend", body: body, contentType: "application/json", auth: .required)
+        let blend: RemoteBlend = try decode(data)
+        blend.picks.compactMap(\.game).forEach(link)
+        return blend
+    }
+
     func creations() async throws -> [RemoteGame] {
         let games = (try await get("v1/creations", auth: .required) as RemoteList<RemoteGame>).items
         games.forEach(link)
