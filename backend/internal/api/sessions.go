@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -207,7 +208,7 @@ func (s *Server) createSession(w http.ResponseWriter, r *http.Request) {
 // canSeeSession: a chat session's members, or anyone in the session's Group.
 func (s *Server) canSeeSession(r *http.Request, se *model.Session) bool {
 	me := userFrom(r)
-	if hasID(se.Members, me.ID) {
+	if slices.Contains(se.Members, me.ID) {
 		return true
 	}
 	return se.TargetKind == "group" && s.isMember(r.Context(), se.TargetID, me.ID)
@@ -348,7 +349,7 @@ func (s *Server) addSessionEntry(w http.ResponseWriter, r *http.Request) {
 	}
 	now := time.Now().UTC().Truncate(time.Millisecond)
 	se.Entries = append(se.Entries, model.SessionEntry{ID: auth.NewID(8), MakerID: me.ID, Text: text, At: now})
-	if !hasID(se.Members, me.ID) { // a Group member who wasn't in the first invite joins by adding
+	if !slices.Contains(se.Members, me.ID) { // a Group member who wasn't in the first invite joins by adding
 		se.Members = append(se.Members, me.ID)
 	}
 	se.UpdatedAt = now

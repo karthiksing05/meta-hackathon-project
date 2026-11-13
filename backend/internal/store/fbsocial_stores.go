@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"sync"
 	"time"
@@ -283,7 +284,7 @@ func (m *Memory) FBThreadsFor(ctx context.Context, userID string, limit int) ([]
 	defer f.mu.Unlock()
 	var out []model.FBThread
 	for _, t := range f.threads {
-		if has(t.Members, userID) {
+		if slices.Contains(t.Members, userID) {
 			out = append(out, cloneThread(t))
 		}
 	}

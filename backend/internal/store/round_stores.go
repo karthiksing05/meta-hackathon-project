@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"slices"
 	"sort"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -28,15 +29,6 @@ func cloneRound(r *model.Round) model.Round {
 		c.Plays[k] = v
 	}
 	return c
-}
-
-func has(list []string, id string) bool {
-	for _, x := range list {
-		if x == id {
-			return true
-		}
-	}
-	return false
 }
 
 func newestRounds(out []model.Round, limit int) []model.Round {
@@ -85,7 +77,7 @@ func (m *Memory) RoundsForUser(ctx context.Context, userID string, limit int) ([
 	defer m.mu.Unlock()
 	var out []model.Round
 	for _, r := range m.rounds {
-		if has(r.Members, userID) {
+		if slices.Contains(r.Members, userID) {
 			out = append(out, cloneRound(r))
 		}
 	}

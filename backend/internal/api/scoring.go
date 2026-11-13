@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -208,32 +207,12 @@ func (s *Server) submitScored(w http.ResponseWriter, r *http.Request, g *model.G
 		writeErr(w, 503, "checking scores is not set up on this server")
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, maxLogBytes+maxReplayBytes+4096)
-	var in struct {
-		Log    json.RawMessage `json:"log"`
-		Replay json.RawMessage `json:"replay"` // the runtime's replay of the same run, for friends to watch (runlogs.go)
-	}
-	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-		var tooBig *http.MaxBytesError
-		if errors.As(err, &tooBig) {
-			writeErr(w, 413, "that run's log is too large")
-		} else {
-			writeErr(w, 400, "invalid JSON body")
-		}
+	run, ok := readRunBody(w, r, maxLogBytes+maxReplayBytes+4096, "this game ranks verified runs: send the run's log (up to 256 KB)", false)
+	if !ok {
 		return
 	}
-	logText := string(in.Log)
-	if len(in.Log) > 0 && in.Log[0] == '"' {
-		if json.Unmarshal(in.Log, &logText) != nil {
-			writeErr(w, 400, "log must be the run's log")
-			return
-		}
-	}
-	if logText == "" || logText == "null" || len(logText) > maxLogBytes {
-		writeErr(w, 400, "this game ranks verified runs: send the run's log (up to 256 KB)")
-		return
-	}
-	replay, err := parseReplay(in.Replay)
+	logText := run.Log
+	replay, err := parseReplay(run.Replay)
 	if err != nil {
 		writeErr(w, 400, err.Error())
 		return
@@ -248,18 +227,7 @@ func (s *Server) submitScored(w http.ResponseWriter, r *http.Request, g *model.G
 		writeErr(w, code, msg)
 		return
 	}
-	if !res.OK || !res.GameHashOK || res.Recomputed == nil {
-		reason := "the run didn't check out"
-		if !res.GameHashOK {
-			reason = "that run wasn't played on this game"
-		} else if len(res.Problems) > 0 {
-			reason = "the run didn't check out: " + res.Problems[0]
-		}
-		writeErr(w, 422, reason)
-		return
-	}
-	if p := res.Recomputed.Phase; p != "won" && p != "lost" {
-		writeErr(w, 422, "the run isn't finished")
+	if !requireFinishedRun(w, res, "that run wasn't played on this game") {
 		return
 	}
 	sm := g.Score

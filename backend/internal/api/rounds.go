@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -398,7 +399,7 @@ func (s *Server) roundFor(r *http.Request, rd *model.Round, g *model.Game) (roun
 func (s *Server) roundOr404(w http.ResponseWriter, r *http.Request) (*model.Round, *model.Game, bool) {
 	ctx, me := r.Context(), userFrom(r)
 	rd, err := s.Store.RoundByID(ctx, chi.URLParam(r, "id"))
-	if err != nil || !hasID(rd.Members, me.ID) { // never reveal other people's rounds
+	if err != nil || !slices.Contains(rd.Members, me.ID) { // never reveal other people's rounds
 		if err != nil && !errors.Is(err, store.ErrNotFound) {
 			s.serverErr(w, r, err)
 		} else {
@@ -411,15 +412,6 @@ func (s *Server) roundOr404(w http.ResponseWriter, r *http.Request) (*model.Roun
 		g = nil // the game was deleted: the results still show
 	}
 	return rd, g, true
-}
-
-func hasID(list []string, id string) bool {
-	for _, x := range list {
-		if x == id {
-			return true
-		}
-	}
-	return false
 }
 
 func (s *Server) getRound(w http.ResponseWriter, r *http.Request) {
@@ -470,7 +462,7 @@ func (s *Server) listRounds(w http.ResponseWriter, r *http.Request) {
 	items := []roundDoc{}
 	for i := range list {
 		rd := &list[i]
-		if !hasID(rd.Members, me.ID) { // only the rounds you are in
+		if !slices.Contains(rd.Members, me.ID) { // only the rounds you are in
 			continue
 		}
 		g, gerr := s.Store.GameByID(ctx, rd.GameID)
@@ -495,37 +487,11 @@ func (s *Server) playRound(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 503, "checking results is not set up on this server")
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, maxLogBytes+4096)
-	var in struct {
-		Log json.RawMessage `json:"log"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
-		var tooBig *http.MaxBytesError
-		if errors.As(err, &tooBig) {
-			writeErr(w, 413, "that run's log is too large")
-		} else {
-			writeErr(w, 400, "invalid JSON body")
-		}
+	run, ok := readRunBody(w, r, maxLogBytes+4096, "log is required (up to 256 KB)", true)
+	if !ok {
 		return
 	}
-	logText := string(in.Log)
-	if len(in.Log) > 0 && in.Log[0] == '"' { // the log as text, the way the app sends it
-		if json.Unmarshal(in.Log, &logText) != nil {
-			writeErr(w, 400, "log must be the run's log")
-			return
-		}
-	}
-	if logText == "" || len(logText) > maxLogBytes {
-		writeErr(w, 400, "log is required (up to 256 KB)")
-		return
-	}
-	var head struct {
-		Seed json.Number `json:"seed"`
-	}
-	if json.Unmarshal([]byte(logText), &head) != nil || head.Seed == "" {
-		writeErr(w, 400, "log must be a microgame-log/1 run")
-		return
-	}
+	logText, headSeed := run.Log, run.Seed
 
 	ctx, me := r.Context(), userFrom(r)
 	unlock := s.seriesLocks.lock("round:" + chi.URLParam(r, "id")) // two runs can't overwrite each other
@@ -560,27 +526,16 @@ func (s *Server) playRound(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, code, msg)
 		return
 	}
-	if !res.OK || !res.GameHashOK || res.Recomputed == nil {
-		reason := "the run didn't check out"
-		if !res.GameHashOK {
-			reason = "that run wasn't played on this round's game"
-		} else if len(res.Problems) > 0 {
-			reason = "the run didn't check out: " + res.Problems[0]
-		}
-		writeErr(w, 422, reason)
-		return
-	}
-	if res.Recomputed.Phase != "won" && res.Recomputed.Phase != "lost" {
-		writeErr(w, 422, "the run isn't finished")
+	if !requireFinishedRun(w, res, "that run wasn't played on this round's game") {
 		return
 	}
 	// Everyone plays the same seed. The phone derives the engine's seed from the round's, so the log's seed is not the
 	// round's; the first run sets it and every other run has to match.
-	if rd.LogSeed != "" && rd.LogSeed != head.Seed.String() {
+	if rd.LogSeed != "" && rd.LogSeed != headSeed {
 		writeErr(w, 422, "that run wasn't played on this round's seed")
 		return
 	}
-	rd.LogSeed = head.Seed.String()
+	rd.LogSeed = headSeed
 	e := model.RoundEntry{Score: int64(math.Round(res.Recomputed.Score)), TimeMs: int64(math.Round(res.Recomputed.TimeMs)), At: now,
 		Result: resultState(g, res.Result)}
 	if g.Score != nil {
