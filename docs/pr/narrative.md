@@ -14,7 +14,7 @@ Interactive mini-experiences keep people in their apps, and the industry is movi
 | NYT Games is a habit at scale | Puzzles played over 11.2 billion times in 2025 | [82] |
 | The NYT is moving to play *together* | A friends tab "to encourage communal play"; its first 2-player game (Jan 2026) | [84], [82] |
 | One puzzle for the whole world fades | Wordle: 5.3B plays in 2024 → 4.2B in 2025 | [83] |
-| Meta is already moving to interactive formats | Instagram has 3B monthly users; Meta is building games into Threads chats | [115], [116] |
+| Meta is already moving to interactive formats | Instagram has 3B monthly users; Meta is building games into Threads chats | [115], [116]. Shown on slide 2 next to an illustration of an Instagram poll (drawn by us, not a screenshot) |
 | Social mini-games work at huge scale | WeChat Mini Games passed 500M monthly users | [91] |
 
 *Open:* a cited stat for Instagram's interactive formats (polls, quizzes, stickers). Bayan's review doesn't have one.
@@ -27,7 +27,7 @@ The friction is gone: everyone can make and share a game, not just developers.
 
 - **Everyone plays; few call themselves gamers** (Bayan's review, `research/short-games-lit-review.md`): 98% of US 13–39-year-olds play some kind of game (YPulse, 2026); 75% of Gen Z play on mobile (GWI, 2026); 79% of Gen Z play with friends (ESA, 2025); only 33% of young men and 9% of young women say "gamer" describes them (Pew, 2015).
 
-- A game was made on the live server in **63 s**. Muse agreed how it works in **7 s**, and **5 bots** played it before anyone saw it.
+- **About a minute to build once the plan is agreed**, with **5 bots** playing it before anyone sees it. (A run on the live server took 63 s, and Muse agreed how it works in 7 s, but that was before harness v2 planning was on by default; planning adds about 30–60 s. Re-time one live run before quoting seconds. The demo shows the real time on stage.)
 - Facebook's Instant Games proved no-install games work at Facebook's scale: over 20 billion sessions by December 2018 [34]. But every one of those games was made by a developer (nearly 200 titles at the 2018 opening [35]). Muse removes that bottleneck.
 - You make it by describing it in one sentence. Muse shows you how it will work, part by part, before it builds.
 
@@ -56,12 +56,12 @@ Every game is JSON, assets included. Our Rust engine, compiled to WebAssembly, p
 
 - Muse writes real rules, not reskins: 255 to 1,845 characters of game logic per game in 10 real runs (D31).
 - Deterministic: the same input log replays to the same score, which is how the server verifies scores.
-- Small: the engine adds about 1.5 MB, and 8 to 15 ms to the first microgame (03-what-we-built).
+- Small: 1,092 KiB of WebAssembly, 389 KiB gzipped (`engine/README.md`). Say "about 1 MB".
 - Expressive: 9 of 10 hard test ideas (Wordle-style, Connections, Queens, a crossword…) fit the format (D32).
 
 ## 6. Ranking subplot
 
-Games are a new signal for the feed, like any other media engagement: what you play, finish, replay and share shapes what you see next.
+Games are a new signal for the feed, like any other media engagement: what you play, finish, replay and share shapes what you see next. The new data: finished runs, replays, rematches, challenges sent, friends added from a board. Where it shows up: Groups, Search and the feed.
 
 - The ranker runs on the server, unchanged from Kevin's JS. In simulation it beat today's feed in **70.3%** of sessions (68–72%). *Simulated.*
 - **Group Blend:** games every member enjoys went from **8.7% to 32%**. *Simulated.*
@@ -70,7 +70,8 @@ Games are a new signal for the feed, like any other media engagement: what you p
 ## 7. Collaboration
 
 - **Best of 5** ("the five-game showdown") every time you meet someone new: wired in the app.
-- **Challenges** to your Groups and friends, **Group weekly boards**, **quiz nights** and **making a game together**: built on the server. *The app still shows "Not available yet" for these; say so if asked.*
+- **Group weekly boards:** in the app (`GroupWeeklyBoardView`), with Add friend next to people you don't know.
+- **Challenges** to your Groups and friends, **quiz nights** and **making a game together**: built on the server. *The app still shows "Not available yet" for these; say so if asked.*
 - **Remix:** the server records `remixOf`. Say plainly which steps aren't in the app yet.
 - **Sounds:** pick a sound to play behind a game, like Reels audio (CC-BY library with credit).
 
@@ -81,7 +82,7 @@ This isn't about one prompt. It's about making Facebook cool again, togetherness
 - People come back for rituals, and the ones that last are shared (LinkedIn [79]; the NYT friends tab [84]).
 - Endless loops lose people: hyper-casual games keep about 3% of players at day 30, against 8–11% for sports, racing and tabletop (Appodeal, 2025). Wordle's one-a-day limit is what made it a habit.
 - Games are social: 89% of Gen Z say games can help them make new friends (ESA, 2025). Comparing scores predicts continued play (Esteves et al., 2021).
-- Interactivity creates value between creators and viewers: creators get something to show, and viewers get something to give back (a score, a remix, a challenge).
+- Interactivity creates value between creators and viewers: creators get something to show, and viewers get something to give back (a score, a remix, a challenge). Karthik's words were "viewers can donate to creators"; tipping isn't built, so it's his call whether to add it as a labeled "next".
 
 ## Careful with
 

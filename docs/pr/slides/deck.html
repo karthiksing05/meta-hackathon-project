@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- The pitch deck as HTML (16:9, 1920x1080 slides). Open in Chrome to present (arrow keys), or run
-     render.sh to export one PNG per slide and a PDF. Text follows ../narrative.md; change claims there first.
-     Font: Figtree (OFL, fonts/), the closest open match we found to Meta's typeface. -->
+     render.sh to export one PNG per slide and a PDF, then make-pptx.py for Keynote. Text follows
+     ../narrative.md; change claims there first. Font: Figtree (OFL, fonts/). -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -59,7 +59,7 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
 .chip { display: inline-block; font-size: 20px; font-weight: 700; color: #fff; background: var(--grad);
   border-radius: 999px; padding: 6px 16px; margin-top: 16px; }
 .big { display: flex; align-items: baseline; gap: 36px; margin-top: 36px; }
-.big .n { font-size: 190px; font-weight: 900; letter-spacing: -.05em; line-height: .9; }
+.big .n { white-space: nowrap; font-size: 190px; font-weight: 900; letter-spacing: -.05em; line-height: .9; }
 .big .l { font-size: 38px; font-weight: 600; color: var(--sub); line-height: 1.3; max-width: 1200px; }
 .note { margin-top: 56px; font-size: 30px; line-height: 1.4; color: var(--ink); max-width: 1500px; }
 .note b { font-weight: 800; }
@@ -123,79 +123,115 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
 .close h2 { font-size: 110px; max-width: 1600px; }
 .close .lede { color: rgba(255,255,255,.9); }
 .close .foot { color: rgba(255,255,255,.75); }
+
+/* format illustrations (slide 2): drawn by us, not screenshots */
+.formats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-top: 34px; }
+.fmt { background: var(--soft); border-radius: 36px; padding: 30px 34px 30px; display: flex; flex-direction: column; }
+.fmt .art { height: 210px; border-radius: 24px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.fmt .who { font-size: 24px; font-weight: 700; color: var(--sub); margin-top: 22px; }
+.fmt .num { font-size: 58px; font-weight: 800; letter-spacing: -.02em; line-height: 1.05; margin-top: 6px; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+.fmt .what { font-size: 24px; line-height: 1.3; font-weight: 500; margin-top: 6px; }
+.fmt .cite { font-size: 18px; color: #8A8D91; margin-top: 12px; }
+.ig { background: linear-gradient(160deg, #3a3f9e, #8A3FFC); }
+.ig .sticker { background: #fff; border-radius: 22px; padding: 18px 20px; width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+.ig .q { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 12px; }
+.ig .opt { height: 38px; border-radius: 12px; background: #EEF0F3; margin-top: 8px; position: relative; overflow: hidden; font-size: 17px; font-weight: 700; display: flex; align-items: center; padding: 0 12px; justify-content: space-between; }
+.ig .opt i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #0866FF55, #8A3FFC55); }
+.ig .opt span { position: relative; }
+.li { background: #fff; border: 3px solid var(--line); }
+.li .g { display: grid; grid-template-columns: repeat(6, 30px); gap: 3px; }
+.li .g b { width: 30px; height: 30px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.li .streak { position: absolute; top: 16px; right: 18px; font-size: 18px; font-weight: 800; color: var(--ink); }
+.ny { background: #fff; border: 3px solid var(--line); flex-direction: column; gap: 8px; }
+.ny .g { display: grid; grid-template-columns: repeat(4, 76px); gap: 6px; }
+.ny .g b { height: 40px; border-radius: 8px; background: #EFEFE6; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; letter-spacing: .03em; }
+.ny .g b.s { background: #F9DF6D; } 
+.ny .tabs { display: flex; gap: 8px; font-size: 15px; font-weight: 800; }
+.ny .tabs span { padding: 4px 12px; border-radius: 999px; background: #EFEFE6; } .ny .tabs span.on { background: #1C1E21; color: #fff; }
+.gamers { margin-top: 24px; font-size: 27px; line-height: 1.35; }
+.gamers b { font-weight: 800; }
+.people { display: flex; flex-direction: column; gap: 12px; }
+.people .pill { padding: 14px 22px; font-size: 26px; }
+.people .pill small { font-size: 18px; }
+.grid6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 46px; }
+.grid6 .tile { padding: 28px 32px; }
+.grid6 .tile .b { font-size: 32px; } .grid6 .tile .s { font-size: 22px; }
+.signals { margin-top: 34px; font-size: 27px; line-height: 1.4; }
+.signals b { font-weight: 800; }
 </style>
 </head>
 <body>
 
-<!-- 1. Title -->
+<!-- 1. Title. Demo 1 starts here: type the sentence, let the game build while we talk. -->
 <section class="slide title">
   <div class="orb" style="width:900px;height:900px;right:-260px;top:-320px"></div>
   <div class="orb" style="width:520px;height:520px;right:320px;bottom:-300px;opacity:.18"></div>
   <h1>Whims</h1>
   <div class="tag">Make a game on a whim. Play it together.</div>
   <div class="lede">Tiny games anyone makes from one sentence with Meta's Muse models, played with your friends and Groups, right inside Facebook.</div>
-  <div class="foot"><span>Closer Together '26 · Karthik, Kevin, Max, Bayan, Artem</span><span>Name is a placeholder</span></div>
+  <div class="foot"><span>Closer Together '26 · Karthik, Kevin, Max, Bayan, Artem</span><span></span></div>
 </section>
 
-<!-- 2. Point 1: the next form of short-form -->
+<!-- 2. Point 1: the next short-form (+ point 2's "everyone plays") -->
 <section class="slide">
   <div class="bar"></div>
   <div class="kicker">The next short-form</div>
-  <h2>Short-form is becoming something you <span class="grad">play</span>, not just watch.</h2>
-  <div class="cards">
-    <div class="card">
-      <div class="who">LinkedIn games</div>
+  <h2 style="font-size:68px">Short-form is becoming something you <span class="grad">play</span>, not just watch.</h2>
+  <div class="formats">
+    <div class="fmt">
+      <div class="art ig"><div class="sticker"><div class="q">Best boba topping?</div>
+        <div class="opt"><i style="width:64%"></i><span>Pearls</span><span>64%</span></div>
+        <div class="opt"><i style="width:36%"></i><span>Pudding</span><span>36%</span></div></div></div>
+      <div class="who">Interactive Instagram formats</div>
+      <div class="num">3B</div>
+      <div class="what">monthly Instagram users, and Meta is building games into Threads chats.</div>
+      <div class="cite">Thurrott, 2025 [115]; TechCrunch, 2026 [116]</div>
+    </div>
+    <div class="fmt">
+      <div class="art li"><div class="streak">🔥 Day 12</div><div class="g">
+        <b style="background:#C9B8FF"></b><b style="background:#C9B8FF">♛</b><b style="background:#A8D1FF"></b><b style="background:#A8D1FF"></b><b style="background:#FFD6A5"></b><b style="background:#FFD6A5"></b>
+        <b style="background:#C9B8FF"></b><b style="background:#B8F0C8"></b><b style="background:#B8F0C8"></b><b style="background:#A8D1FF">♛</b><b style="background:#FFD6A5"></b><b style="background:#FFB8C8"></b>
+        <b style="background:#B8F0C8">♛</b><b style="background:#B8F0C8"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#FFD6A5"></b><b style="background:#FFB8C8"></b>
+        <b style="background:#B8F0C8"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#FFB8C8">♛</b><b style="background:#FFB8C8"></b>
+        <b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#E8E0A0">♛</b><b style="background:#FFB8C8"></b><b style="background:#FFB8C8"></b><b style="background:#FFB8C8"></b>
+        <b style="background:#D0D0D0">♛</b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b>
+      </div></div>
+      <div class="who">LinkedIn daily games</div>
       <div class="num">86%</div>
       <div class="what">of players come back the next day; 82% are still playing after a week.</div>
       <div class="cite">LinkedIn Newsroom, 2026 (company-reported) [79]</div>
     </div>
-    <div class="card">
+    <div class="fmt">
+      <div class="art ny"><div class="tabs"><span>Today</span><span class="on">Friends</span></div><div class="g">
+        <b class="s">PEARL</b><b class="s">MATCHA</b><b class="s">TARO</b><b class="s">MANGO</b>
+        <b>STRAW</b><b>CUP</b><b>ICE</b><b>LID</b>
+        <b>SHAKE</b><b>STIR</b><b>POUR</b><b>SIP</b>
+      </div></div>
       <div class="who">NYT Games</div>
       <div class="num">11.2B</div>
-      <div class="what">puzzle plays in 2025, and the Times added a friends tab "to encourage communal play".</div>
+      <div class="what">puzzle plays in 2025, plus a friends tab "to encourage communal play".</div>
       <div class="cite">AP, 2026 [82]; NYT Q1 2025 remarks [84]</div>
     </div>
-    <div class="card">
-      <div class="who">WeChat Mini Games</div>
-      <div class="num">500M</div>
-      <div class="what">monthly players: social mini-games already work at this scale.</div>
-      <div class="cite">PocketGamer.biz, 2026 [91]</div>
-    </div>
   </div>
-  <div class="foot"><span class="src">Numbers in [brackets] refer to docs/pr/sources.md. Instagram interactive-format stat to come (Bayan's review).</span><span class="pg"></span></div>
+  <div class="gamers"><b>98%</b> of Americans aged 13–39 play some kind of game, yet only <b>33%</b> of young men and <b>9%</b> of young women call themselves gamers. We build for everyone else.</div>
+  <div class="foot"><span class="src">Illustrations drawn by us, not screenshots. YPulse 2026; Pew 2015 (via Bayan's review). Also: WeChat Mini Games pass 500M monthly players [91].</span><span class="pg"></span></div>
 </section>
 
-
-<!-- 3. Point 2 setup: everyone plays -->
-<section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">Everyone plays</div>
-  <h2>Almost everyone plays. Almost nobody calls themselves a <span class="grad">gamer</span>.</h2>
-  <div class="chart">
-    <div class="row"><div class="lab">Play some kind of game<small>US, ages 13–39 · YPulse, 2026</small></div><div class="track"><div class="fill" style="width:98%">98%</div></div></div>
-    <div class="row"><div class="lab">Gen Z who play with friends<small>US · ESA Essential Facts, 2025</small></div><div class="track"><div class="fill" style="width:79%">79%</div></div></div>
-    <div class="row"><div class="lab">Young men who say "gamer" fits<small>US, ages 18–29 · Pew, 2015</small></div><div class="track"><div class="fill grey" style="width:33%">33%</div></div></div>
-    <div class="row"><div class="lab">Young women who say "gamer" fits<small>US, ages 18–29 · Pew, 2015</small></div><div class="track"><div class="fill grey" style="width:9%">9%</div></div></div>
-  </div>
-  <div class="note">Whims is for the <b>98%</b>: games you play with your people, not a hobby you have to identify with.</div>
-  <div class="foot"><span class="src">Bayan's literature review (docs/pr/research/short-games-lit-review.md).</span><span class="pg"></span></div>
-</section>
-
-<!-- 4. Point 2: anyone can make one -->
+<!-- 3. Point 2: anyone can make one. Demo 1 pays off here. -->
 <section class="slide">
   <div class="bar"></div>
   <div class="kicker">Anyone can make one</div>
-  <h2>One sentence in. A game your friends can play, <span class="grad">a minute later</span>.</h2>
+  <h2>One sentence in. A game your friends can <span class="grad">play</span>.</h2>
   <div class="flow">
     <div class="step"><div class="t">You say</div><div class="b">"Dodge the fog over Twin Peaks"</div><div class="s">One sentence, typed or spoken.</div></div>
     <div class="arrow">→</div>
-    <div class="step"><div class="t">Muse agrees</div><div class="b">How it plays, part by part</div><div class="s">In 7 s, before it builds anything.</div><span class="chip">Muse</span></div>
+    <div class="step"><div class="t">Muse agrees</div><div class="b">How it plays, part by part</div><div class="s">Before it builds anything.</div><span class="chip">Muse</span></div>
     <div class="arrow">→</div>
     <div class="step"><div class="t">Bots test it</div><div class="b">5 bots play it first</div><div class="s">A game nobody can win never ships.</div></div>
     <div class="arrow">→</div>
     <div class="step"><div class="t">You share it</div><div class="b">To your Group, a friend, the feed</div><div class="s">Scores verified on the server.</div></div>
   </div>
-  <div class="big"><div class="n grad">63 s</div><div class="l">from the sentence to a playable, bot-tested game, on the live server.</div></div>
+  <div class="big"><div class="n grad">~1 min</div><div class="l">to build a playable, bot-tested game once the plan is agreed. No code, no developer.</div></div>
   <div class="foot"><span class="src">Facebook's Instant Games reached 20B+ sessions by 2018, but every game was made by a developer [34][35]. Muse removes that bottleneck.</span><span class="pg"></span></div>
 </section>
 
@@ -242,23 +278,23 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
     <div class="fact"><div class="v grad">0</div><div class="d">build steps or installs: the JSON, art included, becomes the game.</div></div>
     <div class="fact"><div class="v grad">255–1,845</div><div class="d">characters of game logic Muse wrote per game, in 10 real runs.</div></div>
     <div class="fact"><div class="v grad">Same score</div><div class="d">every replay: the server re-runs each input log, so scores can't be faked.</div></div>
-    <div class="fact"><div class="v grad">~1.5 MB</div><div class="d">engine size, 8–15 ms to start the first game.</div></div>
+    <div class="fact"><div class="v grad">~1 MB</div><div class="d">of WebAssembly (389 KB gzipped) runs every game.</div></div>
   </div>
-  <div class="foot"><span class="src">docs/pr/09-evidence.md (D31) and 03-what-we-built.md. The code above is illustrative.</span><span class="pg"></span></div>
+  <div class="foot"><span class="src">docs/pr/09-evidence.md (D31); engine/README.md (1,092 KiB, 389 KiB gzipped). The code above is illustrative.</span><span class="pg"></span></div>
 </section>
 
-
-<!-- Point 4: how we worked with AI -->
+<!-- 6. Point 4: how we worked with AI -->
 <section class="slide">
   <div class="bar"></div>
   <div class="kicker">How we built it</div>
   <h2>Five people, a team of AI agents, <span class="grad">one channel</span>.</h2>
-  <div class="agents">
-    <div class="col3">
-      <div class="pill">Karthik<small>harness, Studio, pitch</small></div>
-      <div class="pill">Artem<small>engine, app, sounds</small></div>
+  <div class="agents" style="margin-top:40px">
+    <div class="people">
+      <div class="pill">Karthik<small>harness, Studio, front end, visuals, pitch</small></div>
+      <div class="pill">Artem<small>engine, app integration, sounds</small></div>
       <div class="pill">Max<small>backend and server</small></div>
-      <div class="pill">Kevin · Bayan<small>ranking · authoring, gate</small></div>
+      <div class="pill">Kevin<small>ranking, Group Blend, notifications</small></div>
+      <div class="pill">Bayan<small>authoring layer, playtest gate</small></div>
     </div>
     <div class="arrow">→</div>
     <div class="hub"><div class="b">Each person ran their own agents</div><div class="s">Claude and Codex agents synced through one Slack channel, a shared "who's working on what" canvas and a <b>CLAUDE.md</b> every agent reads first: claim before you start, hand off in writing, never push to main without an OK.</div></div>
@@ -269,82 +305,61 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
       <div class="pill" style="font-size:54px">88%<small>of commits co-written with an agent</small></div>
     </div>
   </div>
-  <div class="note">One design philosophy, set by us. The agents moved fast; <b>the decisions, and the memory of how it all fits, stayed ours.</b></div>
-  <div class="foot"><span class="src">Counts from git on main, 2026-11-13 02:50 PST (430 of 489 commits credit Claude or Codex).</span><span class="pg"></span></div>
+  <div class="note" style="margin-top:36px">One design philosophy, set by us. The agents moved fast; <b>the decisions, and the memory of how it all fits, stayed ours.</b></div>
+  <div class="foot"><span class="src">Counts from git on main, 2026-11-13 03:00 PST (430 of 489 commits credit Claude or Codex). Recount before export.</span><span class="pg"></span></div>
 </section>
 
-<!-- Point 6: ranking -->
+<!-- 7. Point 6: ranking. Demo 2. -->
 <section class="slide">
   <div class="bar"></div>
   <div class="kicker">Ranking</div>
   <h2>Playing shapes your feed, like any other <span class="grad">engagement</span>.</h2>
-  <div class="two">
+  <div class="two" style="margin-top:36px">
     <div>
       <h3>A ranker that learns from play</h3>
-      <div class="vbars">
+      <div class="vbars" style="height:300px">
         <div class="vb"><div class="v">50%</div><div class="col grey" style="height:50%"></div></div>
         <div class="vb"><div class="v grad">70.3%</div><div class="col" style="height:70.3%"></div></div>
       </div>
-      <div class="vlabels"><div>Even split</div><div>Sessions where our feed won</div></div>
-      <div class="cap">Interleaved against today's feed: ours won 70.3% of sessions (95% CI 68–72%). Simulated people.</div>
+      <div class="vlabels"><div>A tie (50%), the line to beat</div><div>Sessions where our feed won</div></div>
+      <div class="cap">Interleaved against today's feed (95% CI 68–72%). Simulated people.</div>
     </div>
     <div>
       <h3>Group Blend</h3>
-      <div class="vbars">
+      <div class="vbars" style="height:300px">
         <div class="vb"><div class="v">8.7%</div><div class="col grey" style="height:8.7%"></div></div>
         <div class="vb"><div class="v grad">32%</div><div class="col" style="height:32%"></div></div>
       </div>
-      <div class="vlabels"><div>Before</div><div>With Group Blend</div></div>
-      <div class="cap">Games every member of a Group enjoys. Simulated Groups.</div>
+      <div class="vlabels"><div>Random picks</div><div>With Group Blend</div></div>
+      <div class="cap">Picks every member of a Group enjoys. 240 simulated Groups.</div>
     </div>
   </div>
-  <div class="foot"><span class="src">What you play, finish, replay, share and make is a new signal: it ties into Groups, Search and the feed. docs/RANKING.md.</span><span class="pg"></span></div>
+  <div class="signals"><b>New signals games give us:</b> finished runs, replays, rematches, challenges sent, friends added from a board. <b>Where they show up:</b> Groups, Search and the feed.</div>
+  <div class="foot"><span class="src">docs/RANKING.md. The ranker runs on our server.</span><span class="pg"></span></div>
 </section>
 
-<!-- Point 7: collaboration -->
+<!-- 8. Point 7: collaboration. Demo 3. -->
 <section class="slide">
   <div class="bar"></div>
   <div class="kicker">Closer together</div>
   <h2>Games are how you <span class="grad">meet</span>, rival and remix each other.</h2>
-  <div class="grid4">
+  <div class="grid6">
     <div class="tile"><span class="tag2">In the app</span><div class="b">Best of 5</div><div class="s">Meet someone new in a Group? Five quick games decide it. Same seed, verified scores.</div></div>
+    <div class="tile"><span class="tag2">In the app</span><div class="b">Weekly Group boards</div><div class="s">A fresh race every week, and an Add friend button next to people you don't know yet.</div></div>
     <div class="tile"><span class="tag2">In the app</span><div class="b">Sounds</div><div class="s">Put a song behind your game, like Reels audio. Credited, licensed tracks.</div></div>
-    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Challenges</div><div class="s">Challenge your Group or a friend; weekly Group boards and quiz nights.</div></div>
-    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Remix</div><div class="s">Every remix remembers the game it came from, so credit flows back to the maker.</div></div>
+    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Challenges</div><div class="s">Send a game to your Group or a friend with your score to beat.</div></div>
+    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Quiz nights</div><div class="s">A Group plays the same questions together, live.</div></div>
+    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Remix</div><div class="s">Every remix remembers the game it came from, so credit flows back.</div></div>
   </div>
   <div class="foot"><span class="src">89% of Gen Z say games can help them make new friends (ESA Essential Facts, 2025).</span><span class="pg"></span></div>
 </section>
 
-<!-- Point 8: the broad goal -->
-<section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">Why it matters</div>
-  <h2>Not a loop to grind. A <span class="grad">ritual</span> you share.</h2>
-  <div class="two">
-    <div>
-      <h3>Endless loops lose people</h3>
-      <div class="vbars" style="height:300px">
-        <div class="vb"><div class="v">3%</div><div class="col grey" style="height:27%"></div></div>
-        <div class="vb"><div class="v">8–11%</div><div class="col grey" style="height:100%"></div></div>
-      </div>
-      <div class="vlabels"><div>Hyper-casual, day 30</div><div>Sports, racing, tabletop, day 30</div></div>
-      <div class="cap">Appodeal, Mobile Casual Benchmarks 2025. Wordle's one-a-day limit is what made it a habit.</div>
-    </div>
-    <div>
-      <h3>Shared rituals bring people back</h3>
-      <div class="note" style="margin-top:20px">A daily game with your Group, a rematch with a friend, a best of 5 with someone new: <b>a reason to log on again and again</b>, on your schedule.</div>
-      <div class="note">Creators get something to show; viewers get something to give back: <b>a score, a remix, a challenge.</b></div>
-    </div>
-  </div>
-  <div class="foot"><span class="src">We pitch coming back, not traffic to the rest of the app: the research shows habit and retention, not spillover.</span><span class="pg"></span></div>
-</section>
-
-<!-- Close -->
+<!-- 9. Point 8 + close -->
 <section class="slide close">
-  <div class="kicker" style="color:#fff;-webkit-text-fill-color:#fff">Whims</div>
+  <div class="kicker" style="color:#fff;-webkit-text-fill-color:#fff">Not a loop to grind. A ritual you share.</div>
   <h2>Anyone can make a game. Everyone can play it <span style="opacity:.85">together</span>.</h2>
-  <div class="lede">Made with Muse Spark, Ember, Wonder and Image. Played on Facebook.</div>
-  <div class="foot"><span>Karthik · Kevin · Max · Bayan · Artem</span><span>Thank you</span></div>
+  <div class="lede">A daily game with your Group, a rematch with a friend, a best of 5 with someone new: a reason to come back to Facebook, together. Creators get something to show; players give back a score, a remix, a challenge.</div>
+  <div class="foot"><span>Made with Muse Spark, Ember, Wonder and Image · Karthik · Kevin · Max · Bayan · Artem</span><span>Thank you</span></div>
 </section>
 
 <script>
