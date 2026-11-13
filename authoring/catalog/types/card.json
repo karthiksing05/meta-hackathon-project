@@ -1,0 +1,1037 @@
+[
+  {
+    "id": "klondike_solitaire",
+    "name": "Klondike solitaire",
+    "aliases": [
+      "Solitaire",
+      "Klondike"
+    ],
+    "family": "card",
+    "summary": "Build four foundation piles from ace to king by moving alternating-color runs in the tableau.",
+    "core_loop": "draw from stock → move runs → free aces → build foundations",
+    "verbs": [
+      "sort",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "tableau runs alternate colors and descend",
+      "only kings fill empty columns"
+    ],
+    "win": "all cards on foundations",
+    "lose": "no moves left",
+    "scoring": "moves and time",
+    "session_seconds": [
+      180,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily deal with friends' times"
+    ],
+    "difficulty_levers": [
+      "draw 1 or 3",
+      "passes"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "daily_seed",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "solitaire for my grandma",
+      "daily klondike",
+      "classic solitaire with cat cards"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spider_solitaire",
+    "name": "Spider solitaire",
+    "aliases": [
+      "Spider Solitaire"
+    ],
+    "family": "card",
+    "summary": "Build full same-suit runs from king to ace to clear them from the tableau.",
+    "core_loop": "move runs → build same-suit sequences → clear full runs",
+    "verbs": [
+      "sort",
+      "plan"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "only same-suit runs move together"
+    ],
+    "win": "clear every card",
+    "lose": "no moves",
+    "scoring": "moves",
+    "session_seconds": [
+      300,
+      1200
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "suits"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "spider solitaire 2 suits",
+      "spider solitaire daily",
+      "card sorting solitaire"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "freecell",
+    "name": "FreeCell",
+    "aliases": [
+      "FreeCell"
+    ],
+    "family": "card",
+    "summary": "Use four free cells to sort every card onto foundations; nearly every deal is solvable.",
+    "core_loop": "park cards in free cells → move → build foundations",
+    "verbs": [
+      "plan",
+      "sort"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "free cells hold one card each"
+    ],
+    "win": "all cards home",
+    "lose": "stuck",
+    "scoring": "moves",
+    "session_seconds": [
+      180,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily deal"
+    ],
+    "difficulty_levers": [
+      "free cells"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "freecell daily",
+      "freecell solitaire",
+      "plan the cards"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pyramid_solitaire_13",
+    "name": "Pairs to thirteen",
+    "aliases": [
+      "Pyramid Solitaire",
+      "TriPeaks"
+    ],
+    "family": "card",
+    "summary": "Remove exposed pairs that add to 13, or cards one higher or lower, to clear the layout.",
+    "core_loop": "find exposed pairs → remove → uncover more",
+    "verbs": [
+      "match",
+      "calculate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only uncovered cards count"
+    ],
+    "win": "clear the layout",
+    "lose": "no moves",
+    "scoring": "cards left",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "layout"
+    ],
+    "tools": [
+      "grid_board",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "pyramid solitaire",
+      "tripeaks solitaire",
+      "add to 13 cards"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "blackjack_21",
+    "name": "Twenty-one",
+    "aliases": [
+      "Blackjack"
+    ],
+    "family": "card",
+    "summary": "Draw cards to get closer to 21 than the dealer without going over.",
+    "core_loop": "see your hand → hit or stand → dealer plays → win or lose",
+    "verbs": [
+      "decide",
+      "calculate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "going over 21 busts",
+      "the dealer hits below 17"
+    ],
+    "win": "beat the dealer",
+    "lose": "bust or the dealer wins",
+    "scoring": "chips (no real money)",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "chip leaderboard with friends"
+    ],
+    "difficulty_levers": [
+      "decks"
+    ],
+    "tools": [
+      "turns",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "blackjack with fake chips",
+      "21 card game",
+      "practice blackjack with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "texas_holdem_poker",
+    "name": "Texas hold'em",
+    "aliases": [
+      "Poker",
+      "Hold'em"
+    ],
+    "family": "card",
+    "summary": "Two hole cards and five shared; bet, raise or fold; best five-card hand wins.",
+    "core_loop": "deal → bet → flop → bet → turn → river → showdown",
+    "verbs": [
+      "bet",
+      "bluff",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "standard hand rankings",
+      "play-money chips only"
+    ],
+    "win": "win the chips",
+    "lose": "out of chips",
+    "scoring": "chips",
+    "session_seconds": [
+      600,
+      3600
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "home game with friends"
+    ],
+    "difficulty_levers": [
+      "blinds"
+    ],
+    "tools": [
+      "turns",
+      "reveal",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "poker night with friends play money",
+      "texas hold em",
+      "poker with my group"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "uno_shedding",
+    "name": "Match color or number",
+    "aliases": [
+      "Uno",
+      "Crazy Eights"
+    ],
+    "family": "card",
+    "summary": "Play a card matching the top card's color or number; action cards skip, reverse and draw.",
+    "core_loop": "match the top card → play actions → shout when one left → empty your hand",
+    "verbs": [
+      "match",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "must draw if you can't play",
+      "call when one card left"
+    ],
+    "win": "empty your hand first",
+    "lose": "none",
+    "scoring": "cards left",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "uno night with friends"
+    ],
+    "difficulty_levers": [
+      "action cards"
+    ],
+    "tools": [
+      "turns",
+      "reveal",
+      "live_multiplayer",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "uno with my friends online",
+      "crazy eights card game",
+      "match color or number cards"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "war_card_flip",
+    "name": "War",
+    "aliases": [
+      "War"
+    ],
+    "family": "card",
+    "summary": "Both players flip a card; higher takes both; ties start a war.",
+    "core_loop": "flip → compare → winner takes → war on ties",
+    "verbs": [
+      "flip",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "pure luck"
+    ],
+    "win": "take every card",
+    "lose": "lose every card",
+    "scoring": "cards held",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "quick game with a kid"
+    ],
+    "difficulty_levers": [
+      "none"
+    ],
+    "tools": [
+      "turns",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "war card game",
+      "flip and compare cards",
+      "simple card game for kids"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "go_fish_sets",
+    "name": "Go fish",
+    "aliases": [
+      "Go Fish",
+      "Happy Families"
+    ],
+    "family": "card",
+    "summary": "Ask others for ranks to collect sets of four.",
+    "core_loop": "ask for a rank → get cards or go fish → collect sets",
+    "verbs": [
+      "ask",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "you must hold a card of the rank you ask for"
+    ],
+    "win": "most sets",
+    "lose": "none",
+    "scoring": "sets",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "family card night"
+    ],
+    "difficulty_levers": [
+      "players"
+    ],
+    "tools": [
+      "turns",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "go fish card game",
+      "happy families",
+      "collect sets of four"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hearts_trick_avoid",
+    "name": "Hearts",
+    "aliases": [
+      "Hearts"
+    ],
+    "family": "card",
+    "summary": "Avoid taking hearts and the queen of spades in tricks, or shoot the moon.",
+    "core_loop": "pass three cards → follow suit → avoid points → shoot the moon",
+    "verbs": [
+      "plan",
+      "avoid"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "follow suit if you can",
+      "hearts can't lead until broken"
+    ],
+    "win": "lowest score",
+    "lose": "reaching 100",
+    "scoring": "points",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "hearts with friends"
+    ],
+    "difficulty_levers": [
+      "passing"
+    ],
+    "tools": [
+      "turns",
+      "reveal",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hearts card game with friends",
+      "avoid the queen of spades",
+      "classic hearts"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spades_bid_tricks",
+    "name": "Spades",
+    "aliases": [
+      "Spades"
+    ],
+    "family": "card",
+    "summary": "Bid how many tricks you'll take with a partner; spades are trump.",
+    "core_loop": "bid → play tricks → meet the bid",
+    "verbs": [
+      "bid",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "spades always trump"
+    ],
+    "win": "reach 500",
+    "lose": "bags penalty",
+    "scoring": "points",
+    "session_seconds": [
+      900,
+      1800
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "partner spades night"
+    ],
+    "difficulty_levers": [
+      "bidding"
+    ],
+    "tools": [
+      "turns",
+      "reveal",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "spades with my partner online",
+      "bid tricks card game",
+      "spades night"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rummy_melds",
+    "name": "Rummy",
+    "aliases": [
+      "Gin Rummy",
+      "Rummy"
+    ],
+    "family": "card",
+    "summary": "Draw and discard to form sets and runs, then knock or go out.",
+    "core_loop": "draw → form sets and runs → discard → knock",
+    "verbs": [
+      "collect",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "sets of 3+ same rank; runs in suit"
+    ],
+    "win": "go out first",
+    "lose": "none",
+    "scoring": "deadwood points",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "rummy with grandma"
+    ],
+    "difficulty_levers": [
+      "deck count"
+    ],
+    "tools": [
+      "turns",
+      "sort_bins",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "gin rummy online",
+      "rummy card game",
+      "make sets and runs"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "speed_card_race",
+    "name": "Speed",
+    "aliases": [
+      "Speed",
+      "Spit"
+    ],
+    "family": "card",
+    "summary": "Race to play cards one higher or lower onto two center piles at the same time as your opponent.",
+    "core_loop": "watch the piles → slap down cards fast → empty your hand",
+    "verbs": [
+      "react",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no turns",
+      "plays are one up or down"
+    ],
+    "win": "empty your hand first",
+    "lose": "none",
+    "scoring": "cards left",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "head-to-head on one phone"
+    ],
+    "difficulty_levers": [
+      "pile count"
+    ],
+    "tools": [
+      "live_multiplayer",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "speed card game",
+      "spit card race",
+      "fast card game for two"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "higher_lower_cards",
+    "name": "Higher or lower cards",
+    "aliases": [
+      "Higher or Lower",
+      "Acey Deucey"
+    ],
+    "family": "card",
+    "summary": "Guess whether the next card is higher or lower; keep the streak.",
+    "core_loop": "see a card → guess → reveal → continue",
+    "verbs": [
+      "guess",
+      "risk"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "ties lose"
+    ],
+    "win": "longest streak",
+    "lose": "wrong guess",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak challenge"
+    ],
+    "difficulty_levers": [
+      "deck tracking"
+    ],
+    "tools": [
+      "reveal",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "higher or lower card game",
+      "guess the next card",
+      "card streak"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "memory_card_concentration_deck",
+    "name": "Deck concentration",
+    "aliases": [
+      "Card concentration"
+    ],
+    "family": "card",
+    "summary": "Flip two cards from a full deck to find matching ranks.",
+    "core_loop": "flip two → match ranks → clear",
+    "verbs": [
+      "flip",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "non-matches flip back"
+    ],
+    "win": "clear the deck",
+    "lose": "none",
+    "scoring": "flips",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play"
+    ],
+    "social_hooks": [
+      "family"
+    ],
+    "difficulty_levers": [
+      "deck size"
+    ],
+    "tools": [
+      "match_pairs",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "card concentration with a deck",
+      "match ranks memory",
+      "flip cards"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cribbage_peg",
+    "name": "Cribbage",
+    "aliases": [
+      "Cribbage"
+    ],
+    "family": "card",
+    "summary": "Make fifteens, pairs and runs; peg points around the board.",
+    "core_loop": "discard to the crib → play to 31 → count hands → peg",
+    "verbs": [
+      "count",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "standard cribbage scoring"
+    ],
+    "win": "first to 121",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "cribbage with grandpa"
+    ],
+    "difficulty_levers": [
+      "counting help"
+    ],
+    "tools": [
+      "turns",
+      "score",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cribbage online with my dad",
+      "fifteen two cribbage",
+      "peg board card game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "euchre_trump",
+    "name": "Euchre",
+    "aliases": [
+      "Euchre"
+    ],
+    "family": "card",
+    "summary": "Pick trump and take three of five tricks with your partner.",
+    "core_loop": "pick trump → play tricks → win three",
+    "verbs": [
+      "plan",
+      "bid"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "bowers are the top trumps"
+    ],
+    "win": "first to 10",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      600,
+      1200
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "euchre with friends"
+    ],
+    "difficulty_levers": [
+      "difficulty"
+    ],
+    "tools": [
+      "turns",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "euchre online",
+      "midwest card game euchre",
+      "pick trump"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "collect_sets_trade",
+    "name": "Trade to make sets",
+    "aliases": [
+      "Pit",
+      "trading cards"
+    ],
+    "family": "card",
+    "summary": "Shout-trade cards to collect a full set of one commodity first.",
+    "core_loop": "offer cards → trade → complete a set → ring",
+    "verbs": [
+      "trade",
+      "collect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "trades are blind"
+    ],
+    "win": "complete a set first",
+    "lose": "none",
+    "scoring": "sets",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "chaotic party trading"
+    ],
+    "difficulty_levers": [
+      "players"
+    ],
+    "tools": [
+      "live_multiplayer",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pit trading card game",
+      "trade to complete a set",
+      "stock trading party"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "card_battle_compare_stats",
+    "name": "Compare stats cards",
+    "aliases": [
+      "Top Trumps"
+    ],
+    "family": "card",
+    "summary": "Pick a stat on your top card; higher stat wins both cards.",
+    "core_loop": "read your card → pick a stat → compare → winner takes",
+    "verbs": [
+      "choose",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the winner picks next"
+    ],
+    "win": "take all cards",
+    "lose": "lose all cards",
+    "scoring": "cards held",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "top trumps with our friends' stats"
+    ],
+    "difficulty_levers": [
+      "stat spread"
+    ],
+    "tools": [
+      "turns",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "top trumps with my friends",
+      "compare stats card game",
+      "super trumps"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "solitaire_golf",
+    "name": "Golf solitaire",
+    "aliases": [
+      "Golf"
+    ],
+    "family": "card",
+    "summary": "Clear columns by playing cards one higher or lower than the waste pile.",
+    "core_loop": "play up or down → clear columns → draw when stuck",
+    "verbs": [
+      "sequence",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no wrapping from king to ace"
+    ],
+    "win": "clear every column",
+    "lose": "stock empty",
+    "scoring": "cards left",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "wrapping"
+    ],
+    "tools": [
+      "grid_board",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "golf solitaire",
+      "up or down solitaire",
+      "clear the columns"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

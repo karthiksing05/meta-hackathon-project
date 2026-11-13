@@ -1,0 +1,32 @@
+[
+  {
+    "request": "tamagotchi with my best friend",
+    "expect": [
+      "virtual_pet_needs"
+    ]
+  },
+  {
+    "request": "a pet our whole group chat raises together",
+    "expect": [
+      "co_parent_pet_group"
+    ]
+  },
+  {
+    "request": "breed dragons for rare colors",
+    "expect": [
+      "pet_breeding_traits"
+    ]
+  },
+  {
+    "request": "dress up my cat",
+    "expect": [
+      "pet_dress_up"
+    ]
+  },
+  {
+    "request": "teach my dog tricks nintendogs",
+    "expect": [
+      "pet_training_tricks"
+    ]
+  }
+]

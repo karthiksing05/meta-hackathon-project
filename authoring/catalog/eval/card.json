@@ -1,0 +1,32 @@
+[
+  {
+    "request": "solitaire for my grandma",
+    "expect": [
+      "klondike_solitaire"
+    ]
+  },
+  {
+    "request": "uno with my friends online",
+    "expect": [
+      "uno_shedding"
+    ]
+  },
+  {
+    "request": "poker night with friends play money",
+    "expect": [
+      "texas_holdem_poker"
+    ]
+  },
+  {
+    "request": "top trumps with my friends stats",
+    "expect": [
+      "card_battle_compare_stats"
+    ]
+  },
+  {
+    "request": "spades with my partner",
+    "expect": [
+      "spades_bid_tricks"
+    ]
+  }
+]

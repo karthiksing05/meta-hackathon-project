@@ -1,0 +1,32 @@
+[
+  {
+    "request": "cookie clicker but with pizzas",
+    "expect": [
+      "tap_clicker_cookie"
+    ]
+  },
+  {
+    "request": "idle tycoon lemonade stand",
+    "expect": [
+      "idle_tycoon_business"
+    ]
+  },
+  {
+    "request": "tap together with my group to hit a goal",
+    "expect": [
+      "cookie_group_goal"
+    ]
+  },
+  {
+    "request": "merge planes idle game",
+    "expect": [
+      "merge_idle_generators"
+    ]
+  },
+  {
+    "request": "universal paperclips style upgrade game",
+    "expect": [
+      "upgrade_tree_numbers"
+    ]
+  }
+]

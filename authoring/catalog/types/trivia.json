@@ -461,65 +461,6 @@
     "source": "kevin"
   },
   {
-    "id": "audio_name_that_tune",
-    "name": "Name that tune",
-    "aliases": [
-      "Heardle",
-      "Name That Tune",
-      "SongPop"
-    ],
-    "family": "trivia",
-    "summary": "Hear a short clip of a song and name it as quickly as possible.",
-    "core_loop": "play a short clip → type the song → each skip lengthens the clip → solve early",
-    "verbs": [
-      "listen",
-      "recall",
-      "type"
-    ],
-    "inputs": [
-      "type",
-      "tap"
-    ],
-    "rules": [
-      "each skip or wrong guess lengthens the clip"
-    ],
-    "win": "name the song",
-    "lose": "out of clips",
-    "scoring": "fewer seconds needed is better",
-    "session_seconds": [
-      30,
-      120
-    ],
-    "players": [
-      "solo",
-      "async_friends",
-      "group_daily"
-    ],
-    "social_hooks": [
-      "Shared daily song; compare how many seconds each friend needed."
-    ],
-    "difficulty_levers": [
-      "clip length",
-      "era",
-      "genre"
-    ],
-    "tools": [
-      "audio_clip",
-      "typed_answer",
-      "fuzzy_match",
-      "rounds"
-    ],
-    "engine_gaps": [],
-    "gate_profile": "trivia",
-    "example_prompts": [
-      "heardle but for 2010s pop",
-      "guess the song from the intro",
-      "songpop with friends"
-    ],
-    "status": "seed",
-    "source": "kevin"
-  },
-  {
     "id": "guess_the_person",
     "name": "Who am I clues",
     "aliases": [

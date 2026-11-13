@@ -1,0 +1,949 @@
+[
+  {
+    "id": "basket_catch_falling",
+    "name": "Catch with a basket",
+    "aliases": [
+      "Fruit catch",
+      "Egg catcher"
+    ],
+    "family": "catch_collect",
+    "summary": "Move a basket to catch good items falling from above; avoid bombs.",
+    "core_loop": "slide → catch good items → avoid bad ones → speed rises",
+    "verbs": [
+      "catch",
+      "move"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "missing good items costs lives",
+      "catching bombs ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "out of lives",
+    "scoring": "items caught",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "catch your friends' favorite foods"
+    ],
+    "difficulty_levers": [
+      "fall speed",
+      "bad ratio"
+    ],
+    "tools": [
+      "spawn_wave",
+      "pickups",
+      "lives",
+      "player_drag"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "catch falling fruit with a basket",
+      "egg catcher game",
+      "catch the donuts"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "claw_machine",
+    "name": "Claw machine",
+    "aliases": [
+      "Claw machine",
+      "crane game"
+    ],
+    "family": "catch_collect",
+    "summary": "Steer a claw over prizes, drop it and hope it holds.",
+    "core_loop": "move the claw → drop → grab → carry to the chute",
+    "verbs": [
+      "aim",
+      "time"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "grip strength is random"
+    ],
+    "win": "win a prize",
+    "lose": "out of tries",
+    "scoring": "prizes won",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "win prizes for friends"
+    ],
+    "difficulty_levers": [
+      "grip strength"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "claw machine game",
+      "win a plushie crane game",
+      "arcade claw"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fishing_cast_reel",
+    "name": "Fishing",
+    "aliases": [
+      "Fishing",
+      "Ridiculous Fishing"
+    ],
+    "family": "catch_collect",
+    "summary": "Cast a line, wait for a bite, then reel with tension so the line doesn't snap.",
+    "core_loop": "cast → wait → strike on the bite → reel with tension",
+    "verbs": [
+      "cast",
+      "wait",
+      "reel"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "too much tension snaps the line"
+    ],
+    "win": "catch the target fish",
+    "lose": "none",
+    "scoring": "fish caught and size",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "fishing tournament with friends"
+    ],
+    "difficulty_levers": [
+      "fish strength"
+    ],
+    "tools": [
+      "timer_bar",
+      "hold_buttons",
+      "pickups"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "fishing game with friends",
+      "reel in the big fish",
+      "relaxing lake fishing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bug_net_catch",
+    "name": "Catch with a net",
+    "aliases": [
+      "Bug catching"
+    ],
+    "family": "catch_collect",
+    "summary": "Swipe a net to catch fluttering bugs or butterflies; rare ones are faster.",
+    "core_loop": "spot a bug → swipe the net → catch → collect the set",
+    "verbs": [
+      "swipe",
+      "catch"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "bugs flee when you get close"
+    ],
+    "win": "catch every kind",
+    "lose": "none",
+    "scoring": "collection",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trade rare bugs with friends"
+    ],
+    "difficulty_levers": [
+      "bug speed",
+      "rarity"
+    ],
+    "tools": [
+      "pickups",
+      "spawn_wave",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "catch butterflies with a net",
+      "bug collection game",
+      "firefly catching"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pickup_snake_vacuum",
+    "name": "Vacuum the room",
+    "aliases": [
+      "Hole.io",
+      "vacuum"
+    ],
+    "family": "catch_collect",
+    "summary": "Steer a hole or vacuum that swallows smaller things and grows.",
+    "core_loop": "steer → swallow smaller items → grow → swallow bigger",
+    "verbs": [
+      "steer",
+      "grow"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "you can only swallow smaller things"
+    ],
+    "win": "biggest by the timer",
+    "lose": "none",
+    "scoring": "size",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "swallow-off with friends"
+    ],
+    "difficulty_levers": [
+      "time",
+      "item sizes"
+    ],
+    "tools": [
+      "physics_world",
+      "pickups",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hole io game",
+      "swallow the city",
+      "vacuum everything up"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gem_mine_collect",
+    "name": "Dig for gems",
+    "aliases": [
+      "Mining",
+      "Motherload"
+    ],
+    "family": "catch_collect",
+    "summary": "Dig downward through soil and rock, collecting gems before fuel runs out.",
+    "core_loop": "dig → collect gems → watch fuel → return to sell",
+    "verbs": [
+      "dig",
+      "collect"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "deeper means rarer gems",
+      "fuel runs out"
+    ],
+    "win": "sell the most",
+    "lose": "stranded without fuel",
+    "scoring": "value collected",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "depth bragging"
+    ],
+    "difficulty_levers": [
+      "fuel",
+      "rock hardness"
+    ],
+    "tools": [
+      "grid_board",
+      "pickups",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dig for gems game",
+      "motherload mining",
+      "mine down for treasure"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coin_pusher",
+    "name": "Coin pusher",
+    "aliases": [
+      "Coin Pusher"
+    ],
+    "family": "catch_collect",
+    "summary": "Drop coins onto a moving shelf to push others over the edge.",
+    "core_loop": "drop a coin → the shelf pushes → coins fall into your tray",
+    "verbs": [
+      "drop",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "coins only fall off the front"
+    ],
+    "win": "win the most",
+    "lose": "out of coins",
+    "scoring": "coins won",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "arcade night"
+    ],
+    "difficulty_levers": [
+      "shelf speed"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "coin pusher arcade",
+      "push coins off the edge",
+      "penny falls"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "magnet_collect",
+    "name": "Magnet sweep",
+    "aliases": [
+      "Magnet sweep"
+    ],
+    "family": "catch_collect",
+    "summary": "Drag a magnet across a field to pull in metal scraps while avoiding mines.",
+    "core_loop": "drag the magnet → pull scraps in → avoid mines",
+    "verbs": [
+      "sweep",
+      "collect"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "mines are magnetic too"
+    ],
+    "win": "collect a quota",
+    "lose": "hit a mine",
+    "scoring": "scraps collected",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "sweep race"
+    ],
+    "difficulty_levers": [
+      "mine count"
+    ],
+    "tools": [
+      "physics_world",
+      "pickups",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "magnet collecting game",
+      "sweep up the metal",
+      "magnet field"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "treasure_dive",
+    "name": "Dive for treasure",
+    "aliases": [
+      "Diving"
+    ],
+    "family": "catch_collect",
+    "summary": "Dive down to grab treasure before your air runs out; surface to refill.",
+    "core_loop": "dive → grab treasure → watch air → surface",
+    "verbs": [
+      "dive",
+      "collect"
+    ],
+    "inputs": [
+      "drag",
+      "hold"
+    ],
+    "rules": [
+      "air empties with depth"
+    ],
+    "win": "bank the most treasure",
+    "lose": "run out of air",
+    "scoring": "treasure banked",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "dive challenge"
+    ],
+    "difficulty_levers": [
+      "air",
+      "depth"
+    ],
+    "tools": [
+      "pickups",
+      "timer_bar",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dive for treasure underwater",
+      "grab gold before air runs out",
+      "deep sea diving"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gacha_capsule_collect",
+    "name": "Collect the set",
+    "aliases": [
+      "Capsule collection"
+    ],
+    "family": "catch_collect",
+    "summary": "Earn capsules from play and collect a full set; duplicates trade in.",
+    "core_loop": "play → earn capsules → open → complete the set",
+    "verbs": [
+      "collect",
+      "trade"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "duplicates convert to tokens"
+    ],
+    "win": "complete the set",
+    "lose": "none",
+    "scoring": "set completion",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trade duplicates with friends"
+    ],
+    "difficulty_levers": [
+      "set size"
+    ],
+    "tools": [
+      "reveal",
+      "pickups",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "collect all the capsule toys",
+      "complete the sticker album",
+      "gacha with no money"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "egg_hunt_find",
+    "name": "Egg hunt",
+    "aliases": [
+      "Easter egg hunt"
+    ],
+    "family": "catch_collect",
+    "summary": "Find hidden eggs in a scene before time runs out.",
+    "core_loop": "search → tap hidden eggs → find them all",
+    "verbs": [
+      "search",
+      "find"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong taps cost time"
+    ],
+    "win": "find all the eggs",
+    "lose": "timer runs out",
+    "scoring": "eggs found",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "hide eggs in a scene for friends"
+    ],
+    "difficulty_levers": [
+      "hidden count"
+    ],
+    "tools": [
+      "image_assets",
+      "reveal",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "easter egg hunt game",
+      "find the hidden eggs",
+      "egg hunt for kids"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "star_catch_jump",
+    "name": "Jump for stars",
+    "aliases": [
+      "Star catcher"
+    ],
+    "family": "catch_collect",
+    "summary": "Jump between clouds to grab stars before they fade.",
+    "core_loop": "jump → grab stars → avoid falling",
+    "verbs": [
+      "jump",
+      "collect"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "stars fade over time"
+    ],
+    "win": "collect the quota",
+    "lose": "falling",
+    "scoring": "stars collected",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "night sky race"
+    ],
+    "difficulty_levers": [
+      "fade time"
+    ],
+    "tools": [
+      "gravity_jump",
+      "pickups",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "catch the stars by jumping",
+      "star collecting platform",
+      "grab stars before they fade"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "garden_harvest",
+    "name": "Harvest race",
+    "aliases": [
+      "Harvest"
+    ],
+    "family": "catch_collect",
+    "summary": "Pick ripe crops as they ripen; overripe ones rot.",
+    "core_loop": "watch crops → pick ripe ones → avoid rotten",
+    "verbs": [
+      "tap",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "ripeness changes color"
+    ],
+    "win": "harvest the most",
+    "lose": "none",
+    "scoring": "crops harvested",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "farm race with friends"
+    ],
+    "difficulty_levers": [
+      "ripening speed"
+    ],
+    "tools": [
+      "grid_board",
+      "timers",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "harvest the ripe crops game",
+      "pick the tomatoes in time",
+      "farm harvest race"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "snow_catch_tongue",
+    "name": "Catch the snowflakes",
+    "aliases": [
+      "Snowflake catcher"
+    ],
+    "family": "catch_collect",
+    "summary": "Move to catch snowflakes; each one is unique and adds to your collection.",
+    "core_loop": "move → catch flakes → avoid hail",
+    "verbs": [
+      "catch",
+      "move"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "hail ends the round"
+    ],
+    "win": "catch the most",
+    "lose": "hit by hail",
+    "scoring": "flakes caught",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "winter calm share"
+    ],
+    "difficulty_levers": [
+      "fall speed"
+    ],
+    "tools": [
+      "spawn_wave",
+      "pickups",
+      "player_drag"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "catch snowflakes game",
+      "winter calm catch",
+      "snowflake collector"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "leaf_rake_pile",
+    "name": "Rake the leaves",
+    "aliases": [
+      "Rake leaves"
+    ],
+    "family": "catch_collect",
+    "summary": "Swipe to rake falling leaves into a pile before the wind scatters them.",
+    "core_loop": "swipe → gather leaves → pile up before gusts",
+    "verbs": [
+      "sweep",
+      "gather"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "gusts scatter loose leaves"
+    ],
+    "win": "biggest pile",
+    "lose": "none",
+    "scoring": "pile size",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "calm fall challenge"
+    ],
+    "difficulty_levers": [
+      "wind gusts"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "rake the leaves game",
+      "fall leaf pile",
+      "sweep leaves before the wind"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bubble_wand_catch",
+    "name": "Blow and catch bubbles",
+    "aliases": [
+      "Bubble catch"
+    ],
+    "family": "catch_collect",
+    "summary": "Blow bubbles, then pop them in color order.",
+    "core_loop": "blow → bubbles float → pop in order",
+    "verbs": [
+      "blow",
+      "pop"
+    ],
+    "inputs": [
+      "tap",
+      "voice"
+    ],
+    "rules": [
+      "wrong order pops cost points"
+    ],
+    "win": "pop them all in order",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "toddler and parent"
+    ],
+    "difficulty_levers": [
+      "bubble count"
+    ],
+    "tools": [
+      "spawn_wave",
+      "sequence_memory"
+    ],
+    "engine_gaps": [
+      "voice_input"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "blow and pop bubbles",
+      "bubble game for toddlers",
+      "pop in order"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pac_collect_maze",
+    "name": "Collect in a maze",
+    "aliases": [
+      "Maze collect"
+    ],
+    "family": "catch_collect",
+    "summary": "Collect every item in a maze while hazards patrol.",
+    "core_loop": "move → grab items → avoid patrols → clear the maze",
+    "verbs": [
+      "navigate",
+      "collect"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "patrol contact ends the run"
+    ],
+    "win": "collect everything",
+    "lose": "caught",
+    "scoring": "items",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily maze"
+    ],
+    "difficulty_levers": [
+      "patrols"
+    ],
+    "tools": [
+      "grid_board",
+      "pickups",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "collect all the coins in the maze",
+      "maze pickup game",
+      "patrol avoid collect"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "butterfly_photo",
+    "name": "Photo safari",
+    "aliases": [
+      "Pokemon Snap"
+    ],
+    "family": "catch_collect",
+    "summary": "Ride through a scene and snap photos of creatures doing interesting things.",
+    "core_loop": "ride → spot creatures → snap at the right moment → rate photos",
+    "verbs": [
+      "aim",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "photos are scored on pose and framing"
+    ],
+    "win": "best photo album",
+    "lose": "none",
+    "scoring": "photo score",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your best shots"
+    ],
+    "difficulty_levers": [
+      "creature speed"
+    ],
+    "tools": [
+      "camera_scroll",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "pokemon snap style photo safari",
+      "take photos of animals game",
+      "wildlife photography ride"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

@@ -1,0 +1,665 @@
+[
+  {
+    "id": "virtual_pet_needs",
+    "name": "Virtual pet",
+    "aliases": [
+      "Tamagotchi",
+      "Neopets"
+    ],
+    "family": "nurture_pet",
+    "summary": "Feed, clean, play with and rest a pet whose needs drop over real time.",
+    "core_loop": "check meters → feed or play or clean → the pet grows → evolves",
+    "verbs": [
+      "care",
+      "feed",
+      "play"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "needs drop with real time",
+      "neglect makes it sick"
+    ],
+    "win": "raise it to adulthood",
+    "lose": "it runs away from neglect",
+    "scoring": "days cared for",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "co-parent a pet with a friend"
+    ],
+    "difficulty_levers": [
+      "need decay rate"
+    ],
+    "tools": [
+      "timers",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "tamagotchi style pet",
+      "virtual pet with my friend",
+      "take care of a digital pet"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pet_dress_up",
+    "name": "Dress up the pet",
+    "aliases": [
+      "Pet dress up"
+    ],
+    "family": "nurture_pet",
+    "summary": "Choose outfits and accessories for a pet and share the look.",
+    "core_loop": "pick items → style → photo → share",
+    "verbs": [
+      "style",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "none"
+    ],
+    "win": "none; creative",
+    "lose": "none",
+    "scoring": "likes from friends",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share outfits for friends to vote"
+    ],
+    "difficulty_levers": [
+      "item count"
+    ],
+    "tools": [
+      "image_assets",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "dress up my cat game",
+      "pet outfit maker",
+      "style the puppy"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pet_training_tricks",
+    "name": "Train tricks",
+    "aliases": [
+      "Nintendogs"
+    ],
+    "family": "nurture_pet",
+    "summary": "Teach a pet tricks by repeating commands and rewarding success.",
+    "core_loop": "give a command → the pet tries → reward → it learns",
+    "verbs": [
+      "train",
+      "repeat"
+    ],
+    "inputs": [
+      "tap",
+      "voice"
+    ],
+    "rules": [
+      "repetition raises the trick level"
+    ],
+    "win": "learn every trick",
+    "lose": "none",
+    "scoring": "tricks learned",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "show off tricks to friends"
+    ],
+    "difficulty_levers": [
+      "learning rate"
+    ],
+    "tools": [
+      "timers",
+      "sequence_memory"
+    ],
+    "engine_gaps": [
+      "voice_input"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "teach my dog tricks game",
+      "nintendogs style",
+      "pet training"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pet_breeding_traits",
+    "name": "Breed for traits",
+    "aliases": [
+      "Breeding sim"
+    ],
+    "family": "nurture_pet",
+    "summary": "Pair creatures to pass on colors and traits; aim for a rare combination.",
+    "core_loop": "pick parents → hatch → see traits → breed again",
+    "verbs": [
+      "breed",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "traits follow simple inheritance"
+    ],
+    "win": "breed the target",
+    "lose": "none",
+    "scoring": "generations",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "trade creatures with friends"
+    ],
+    "difficulty_levers": [
+      "trait count"
+    ],
+    "tools": [
+      "reveal",
+      "timers",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "breed creatures for rare colors",
+      "genetics pet game",
+      "dragon breeding"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "plant_care_grow",
+    "name": "Grow a plant",
+    "aliases": [
+      "Plant care"
+    ],
+    "family": "nurture_pet",
+    "summary": "Water and give light to a plant over days; it grows and blooms.",
+    "core_loop": "water → adjust light → wait → bloom",
+    "verbs": [
+      "care",
+      "wait"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "over or under watering wilts it"
+    ],
+    "win": "bloom",
+    "lose": "the plant dies",
+    "scoring": "days alive",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "gift a plant to a friend"
+    ],
+    "difficulty_levers": [
+      "needs"
+    ],
+    "tools": [
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "grow a plant game",
+      "water my virtual plant",
+      "houseplant care"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "egg_hatch_warmth",
+    "name": "Hatch the egg",
+    "aliases": [
+      "Egg hatch"
+    ],
+    "family": "nurture_pet",
+    "summary": "Keep an egg warm and turned until it hatches into a surprise creature.",
+    "core_loop": "warm → turn → wait → hatch",
+    "verbs": [
+      "care",
+      "wait"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "temperature must stay in range"
+    ],
+    "win": "hatch it",
+    "lose": "the egg cools",
+    "scoring": "hatch quality",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "hatch together in a Group"
+    ],
+    "difficulty_levers": [
+      "range width"
+    ],
+    "tools": [
+      "timers",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "hatch an egg game",
+      "keep the egg warm",
+      "surprise creature egg"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "aquarium_keep",
+    "name": "Fish tank",
+    "aliases": [
+      "Aquarium"
+    ],
+    "family": "nurture_pet",
+    "summary": "Feed fish, clean the tank and add decorations; fish grow and breed.",
+    "core_loop": "feed → clean → decorate → watch",
+    "verbs": [
+      "care",
+      "decorate"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "dirty water makes fish sick"
+    ],
+    "win": "keep the tank healthy",
+    "lose": "none",
+    "scoring": "fish count",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "visit friends' tanks"
+    ],
+    "difficulty_levers": [
+      "dirt rate"
+    ],
+    "tools": [
+      "timers",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "virtual fish tank",
+      "aquarium care game",
+      "feed my fish"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pet_walk_explore",
+    "name": "Walk the pet",
+    "aliases": [
+      "Walk"
+    ],
+    "family": "nurture_pet",
+    "summary": "Take a pet on walks to find items and meet other pets.",
+    "core_loop": "walk → explore → find things → come home",
+    "verbs": [
+      "walk",
+      "explore"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "energy limits walk length"
+    ],
+    "win": "finish the walk",
+    "lose": "none",
+    "scoring": "finds",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "meet friends' pets on walks"
+    ],
+    "difficulty_levers": [
+      "walk length"
+    ],
+    "tools": [
+      "pickups",
+      "camera_scroll"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "walk my dog game",
+      "explore with my pet",
+      "dog walking"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pet_groom_wash",
+    "name": "Groom the pet",
+    "aliases": [
+      "Pet salon"
+    ],
+    "family": "nurture_pet",
+    "summary": "Wash, dry, brush and trim a pet to make it happy.",
+    "core_loop": "wash → dry → brush → trim → reveal",
+    "verbs": [
+      "groom"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "tools must be used in order"
+    ],
+    "win": "a happy pet",
+    "lose": "none",
+    "scoring": "happiness",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "pet salon for friends' pets"
+    ],
+    "difficulty_levers": [
+      "steps"
+    ],
+    "tools": [
+      "sequence_memory",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "pet salon grooming",
+      "wash the dog game",
+      "trim the puppy"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pet_rescue_shelter",
+    "name": "Run a shelter",
+    "aliases": [
+      "Pet shelter"
+    ],
+    "family": "nurture_pet",
+    "summary": "Care for rescued pets and match them with the right adopters.",
+    "core_loop": "care → read adopter profiles → match → home found",
+    "verbs": [
+      "care",
+      "match"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "bad matches return"
+    ],
+    "win": "find homes",
+    "lose": "none",
+    "scoring": "adoptions",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "shelter run by a Group"
+    ],
+    "difficulty_levers": [
+      "pet count"
+    ],
+    "tools": [
+      "sort_bins",
+      "timers"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "pet rescue shelter game",
+      "match pets with owners",
+      "adoption sim"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "creature_evolve_care",
+    "name": "Raise to evolve",
+    "aliases": [
+      "Digimon",
+      "evolve by care"
+    ],
+    "family": "nurture_pet",
+    "summary": "How you care for a creature decides what it evolves into.",
+    "core_loop": "care in a style → it evolves → discover forms",
+    "verbs": [
+      "care",
+      "discover"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "care choices steer evolution"
+    ],
+    "win": "discover every form",
+    "lose": "none",
+    "scoring": "forms",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare evolutions"
+    ],
+    "difficulty_levers": [
+      "branches"
+    ],
+    "tools": [
+      "timers",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "digimon style evolve by care",
+      "raise a monster",
+      "care decides evolution"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "co_parent_pet_group",
+    "name": "Group pet",
+    "aliases": [
+      "Group pet"
+    ],
+    "family": "nurture_pet",
+    "summary": "A pet the whole Group shares; each member's care adds up.",
+    "core_loop": "each member checks in → feeds or plays → the pet thrives",
+    "verbs": [
+      "care",
+      "cooperate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "needs drop if nobody checks in"
+    ],
+    "win": "keep the pet happy for a week",
+    "lose": "the pet gets sad",
+    "scoring": "streak",
+    "session_seconds": [
+      15,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "the whole Group raises one pet"
+    ],
+    "difficulty_levers": [
+      "decay rate"
+    ],
+    "tools": [
+      "shared_progress",
+      "timers",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a pet for our group chat",
+      "raise a pet together with friends",
+      "group tamagotchi"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pet_mood_read",
+    "name": "Read the mood",
+    "aliases": [
+      "Pet mood"
+    ],
+    "family": "nurture_pet",
+    "summary": "Read a pet's body language and pick what it needs.",
+    "core_loop": "read the signals → pick the need → see the reaction",
+    "verbs": [
+      "read",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong picks upset the pet"
+    ],
+    "win": "keep it happy",
+    "lose": "none",
+    "scoring": "right reads",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "learn pet signals"
+    ],
+    "difficulty_levers": [
+      "subtlety"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "what does my dog need game",
+      "read the cat's mood",
+      "pet body language"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

@@ -384,60 +384,6 @@
     "source": "kevin"
   },
   {
-    "id": "liar_dice_bluff",
-    "name": "Bluff about hidden dice",
-    "aliases": [
-      "Liar's Dice",
-      "Perudo"
-    ],
-    "family": "deduction",
-    "summary": "Everyone rolls hidden dice and bids on how many of a face are on the table; call bluff to challenge.",
-    "core_loop": "roll hidden dice → raise the bid or call liar → loser drops a die",
-    "verbs": [
-      "bid",
-      "bluff",
-      "estimate"
-    ],
-    "inputs": [
-      "tap"
-    ],
-    "rules": [
-      "each bid must raise the last",
-      "calling wrong loses a die"
-    ],
-    "win": "be the last with dice",
-    "lose": "lose all your dice",
-    "scoring": "dice left",
-    "session_seconds": [
-      300,
-      900
-    ],
-    "players": [
-      "pass_and_play",
-      "live"
-    ],
-    "social_hooks": [
-      "game night in a Group"
-    ],
-    "difficulty_levers": [
-      "dice per player"
-    ],
-    "tools": [
-      "dice",
-      "turns",
-      "live_multiplayer"
-    ],
-    "engine_gaps": [],
-    "gate_profile": "puzzle",
-    "example_prompts": [
-      "liars dice with friends",
-      "perudo pirate dice",
-      "bluff dice game"
-    ],
-    "status": "seed",
-    "source": "kevin"
-  },
-  {
     "id": "cheat_card_bluff",
     "name": "Lie about your cards",
     "aliases": [

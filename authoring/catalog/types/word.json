@@ -61,64 +61,6 @@
     "source": "kevin"
   },
   {
-    "id": "multi_board_deduction",
-    "name": "Several boards at once",
-    "aliases": [
-      "Quordle",
-      "Dordle",
-      "Octordle"
-    ],
-    "family": "word",
-    "summary": "One guess fills 2–8 hidden-word boards at the same time; solve them all within a shared guess budget.",
-    "core_loop": "type one guess → it scores on every unsolved board → solve boards one by one → finish all within the budget",
-    "verbs": [
-      "deduce",
-      "type",
-      "guess"
-    ],
-    "inputs": [
-      "type"
-    ],
-    "rules": [
-      "each guess applies to all boards at once",
-      "a solved board stops taking letters"
-    ],
-    "win": "solve every board within the guess budget",
-    "lose": "run out of guesses with boards unsolved",
-    "scoring": "guesses left over",
-    "session_seconds": [
-      120,
-      480
-    ],
-    "players": [
-      "solo",
-      "async_friends"
-    ],
-    "social_hooks": [
-      "Race a friend on the same set of boards; fewest total guesses wins."
-    ],
-    "difficulty_levers": [
-      "number of boards",
-      "guess budget",
-      "word length"
-    ],
-    "tools": [
-      "word_check",
-      "keyboard",
-      "grid_board",
-      "daily_seed"
-    ],
-    "engine_gaps": [],
-    "gate_profile": "puzzle",
-    "example_prompts": [
-      "wordle with 4 boards",
-      "a harder wordle where you solve two words at once",
-      "quordle but space themed"
-    ],
-    "status": "seed",
-    "source": "kevin"
-  },
-  {
     "id": "letter_honeycomb",
     "name": "Letter honeycomb",
     "aliases": [

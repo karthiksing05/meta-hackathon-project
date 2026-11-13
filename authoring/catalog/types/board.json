@@ -1,0 +1,1061 @@
+[
+  {
+    "id": "chess_classic",
+    "name": "Chess",
+    "aliases": [
+      "Chess"
+    ],
+    "family": "board",
+    "summary": "Move pieces by their rules to checkmate the opponent's king.",
+    "core_loop": "move a piece → respond to threats → checkmate",
+    "verbs": [
+      "plan",
+      "attack"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "standard chess rules"
+    ],
+    "win": "checkmate",
+    "lose": "get checkmated",
+    "scoring": "win, draw or loss",
+    "session_seconds": [
+      300,
+      3600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "async chess with friends"
+    ],
+    "difficulty_levers": [
+      "time control"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "chess with my friend async",
+      "play chess online with friends",
+      "chess game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "chess_puzzle_mate",
+    "name": "Mate in N",
+    "aliases": [
+      "Chess puzzles"
+    ],
+    "family": "board",
+    "summary": "Find the forced checkmate in N moves.",
+    "core_loop": "study the board → play the first move → the reply comes → finish the mate",
+    "verbs": [
+      "calculate",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "only the best line counts"
+    ],
+    "win": "find the mate",
+    "lose": "a wrong move",
+    "scoring": "puzzles solved",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily puzzle shared in a Group"
+    ],
+    "difficulty_levers": [
+      "moves to mate",
+      "difficulty"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "daily chess puzzle",
+      "mate in two",
+      "chess tactics with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "checkers_draughts",
+    "name": "Checkers",
+    "aliases": [
+      "Checkers",
+      "Draughts"
+    ],
+    "family": "board",
+    "summary": "Move diagonally and jump to capture; reach the far row to crown a king.",
+    "core_loop": "move diagonally → jump captures → crown kings → take all",
+    "verbs": [
+      "plan",
+      "capture"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "captures are mandatory"
+    ],
+    "win": "capture every piece",
+    "lose": "lose every piece",
+    "scoring": "pieces left",
+    "session_seconds": [
+      300,
+      1200
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "checkers with grandpa"
+    ],
+    "difficulty_levers": [
+      "captures forced"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "checkers with my friend",
+      "draughts online",
+      "king me"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "connect_four_drop",
+    "name": "Four in a row",
+    "aliases": [
+      "Connect Four"
+    ],
+    "family": "board",
+    "summary": "Drop discs into columns; first to connect four wins.",
+    "core_loop": "pick a column → drop → block → connect four",
+    "verbs": [
+      "plan",
+      "block"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "discs fall to the lowest open slot"
+    ],
+    "win": "four in a row",
+    "lose": "the opponent does",
+    "scoring": "wins",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "connect four with a friend"
+    ],
+    "difficulty_levers": [
+      "board size"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns",
+      "gravity_jump"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "connect four with my friend",
+      "four in a row online",
+      "drop discs game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tic_tac_toe_variants",
+    "name": "Tic-tac-toe and bigger",
+    "aliases": [
+      "Tic-tac-toe",
+      "Ultimate tic-tac-toe",
+      "Gomoku"
+    ],
+    "family": "board",
+    "summary": "Place marks to get a line; bigger boards and nested boards add depth.",
+    "core_loop": "place a mark → block → make a line",
+    "verbs": [
+      "place",
+      "block"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "three (or five) in a row wins"
+    ],
+    "win": "make a line",
+    "lose": "the opponent does",
+    "scoring": "wins",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "quick duel in a chat"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "line length"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "ultimate tic tac toe with a friend",
+      "gomoku five in a row",
+      "tic tac toe in the group chat"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "reversi_flip",
+    "name": "Flip to your color",
+    "aliases": [
+      "Othello",
+      "Reversi"
+    ],
+    "family": "board",
+    "summary": "Place discs to sandwich and flip the opponent's discs; most discs wins.",
+    "core_loop": "place → flip sandwiched discs → hold corners → count",
+    "verbs": [
+      "place",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "moves must flip at least one disc"
+    ],
+    "win": "most discs at the end",
+    "lose": "fewer discs",
+    "scoring": "disc count",
+    "session_seconds": [
+      180,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "othello with friends"
+    ],
+    "difficulty_levers": [
+      "board size"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "othello with my roommate",
+      "reversi online",
+      "flip the discs game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "go_territory",
+    "name": "Go",
+    "aliases": [
+      "Go",
+      "Baduk",
+      "Weiqi"
+    ],
+    "family": "board",
+    "summary": "Place stones to surround territory and capture groups with no liberties.",
+    "core_loop": "place a stone → capture surrounded groups → claim territory → count",
+    "verbs": [
+      "place",
+      "surround"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "groups with no liberties are captured"
+    ],
+    "win": "more territory",
+    "lose": "less territory",
+    "scoring": "points",
+    "session_seconds": [
+      600,
+      3600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "async go with a friend"
+    ],
+    "difficulty_levers": [
+      "board size"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "go game 9x9 with a friend",
+      "baduk online",
+      "weiqi"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mancala_sow",
+    "name": "Sowing stones",
+    "aliases": [
+      "Mancala",
+      "Kalah",
+      "Oware"
+    ],
+    "family": "board",
+    "summary": "Pick up stones from a pit and sow them around the board; capture by landing right.",
+    "core_loop": "pick a pit → sow → extra turn or capture → most stones",
+    "verbs": [
+      "count",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "landing in your store gives another turn"
+    ],
+    "win": "most stones in your store",
+    "lose": "fewer stones",
+    "scoring": "stones",
+    "session_seconds": [
+      180,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "mancala with my sister"
+    ],
+    "difficulty_levers": [
+      "stones per pit"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "mancala online",
+      "kalah board game",
+      "sow the stones"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "backgammon_race",
+    "name": "Backgammon",
+    "aliases": [
+      "Backgammon"
+    ],
+    "family": "board",
+    "summary": "Roll dice to race your checkers home, hitting lone opponent checkers.",
+    "core_loop": "roll → move checkers → hit blots → bear off",
+    "verbs": [
+      "roll",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "single checkers can be hit"
+    ],
+    "win": "bear off all first",
+    "lose": "the opponent does",
+    "scoring": "points",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "backgammon with dad"
+    ],
+    "difficulty_levers": [
+      "doubling cube"
+    ],
+    "tools": [
+      "dice",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "backgammon with my dad",
+      "online backgammon",
+      "race checkers home"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ludo_race_home",
+    "name": "Race your tokens home",
+    "aliases": [
+      "Ludo",
+      "Parcheesi",
+      "Sorry!"
+    ],
+    "family": "board",
+    "summary": "Roll to move tokens around the board; land on others to send them home.",
+    "core_loop": "roll → move → capture → bring all tokens home",
+    "verbs": [
+      "roll",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a six releases a token",
+      "landing on an opponent sends it home"
+    ],
+    "win": "all tokens home first",
+    "lose": "none",
+    "scoring": "tokens home",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "ludo with cousins"
+    ],
+    "difficulty_levers": [
+      "dice"
+    ],
+    "tools": [
+      "dice",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "ludo with my cousins",
+      "sorry board game online",
+      "parcheesi"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "snakes_ladders",
+    "name": "Snakes and ladders",
+    "aliases": [
+      "Chutes and Ladders"
+    ],
+    "family": "board",
+    "summary": "Roll and move; ladders lift you, snakes drop you.",
+    "core_loop": "roll → move → climb or slide → reach 100",
+    "verbs": [
+      "roll"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "pure luck"
+    ],
+    "win": "reach the last square",
+    "lose": "none",
+    "scoring": "turns",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "play with kids"
+    ],
+    "difficulty_levers": [
+      "board layout"
+    ],
+    "tools": [
+      "dice",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "snakes and ladders with my kid",
+      "chutes and ladders",
+      "dice race board"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "monopoly_property",
+    "name": "Property trading",
+    "aliases": [
+      "Monopoly",
+      "Rento"
+    ],
+    "family": "board",
+    "summary": "Roll around a board buying properties, charging rent and building houses.",
+    "core_loop": "roll → buy → collect rent → build → bankrupt others",
+    "verbs": [
+      "roll",
+      "trade",
+      "buy"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "complete sets to build"
+    ],
+    "win": "last one solvent",
+    "lose": "bankrupt",
+    "scoring": "net worth",
+    "session_seconds": [
+      1200,
+      3600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "property game with friends' places"
+    ],
+    "difficulty_levers": [
+      "starting cash"
+    ],
+    "tools": [
+      "dice",
+      "turns",
+      "async_turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "monopoly with our neighborhood",
+      "property trading board game",
+      "monopoly online with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "settle_trade_build",
+    "name": "Settle and trade",
+    "aliases": [
+      "Catan"
+    ],
+    "family": "board",
+    "summary": "Roll for resources, trade with others, and build roads and settlements to reach 10 points.",
+    "core_loop": "roll → collect resources → trade → build → score",
+    "verbs": [
+      "trade",
+      "build",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the robber blocks a tile"
+    ],
+    "win": "first to 10 points",
+    "lose": "none",
+    "scoring": "victory points",
+    "session_seconds": [
+      1800,
+      3600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "catan night with friends"
+    ],
+    "difficulty_levers": [
+      "map"
+    ],
+    "tools": [
+      "dice",
+      "turns",
+      "async_turns",
+      "grid_board"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "settlers of catan with friends",
+      "trade sheep for wood game",
+      "catan online"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "nine_mens_morris",
+    "name": "Mill game",
+    "aliases": [
+      "Nine Men's Morris"
+    ],
+    "family": "board",
+    "summary": "Place and move pieces to form mills of three, which remove an opponent's piece.",
+    "core_loop": "place → form mills → remove → move",
+    "verbs": [
+      "place",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "a mill removes one opposing piece"
+    ],
+    "win": "reduce the opponent to two",
+    "lose": "reduced to two",
+    "scoring": "pieces left",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "async duel"
+    ],
+    "difficulty_levers": [
+      "flying rule"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "nine mens morris",
+      "mill board game",
+      "morris online"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "chinese_checkers_hop",
+    "name": "Hop across the star",
+    "aliases": [
+      "Chinese Checkers",
+      "Halma"
+    ],
+    "family": "board",
+    "summary": "Hop marbles across a star board into the opposite corner.",
+    "core_loop": "move or chain hops → reach the far corner",
+    "verbs": [
+      "hop",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "hops can chain"
+    ],
+    "win": "all marbles home first",
+    "lose": "none",
+    "scoring": "moves",
+    "session_seconds": [
+      600,
+      1200
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "family game night"
+    ],
+    "difficulty_levers": [
+      "players"
+    ],
+    "tools": [
+      "grid_board",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "chinese checkers with family",
+      "hop the marbles",
+      "halma"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shogi_xiangqi",
+    "name": "Shogi or Xiangqi",
+    "aliases": [
+      "Shogi",
+      "Xiangqi"
+    ],
+    "family": "board",
+    "summary": "Regional chess variants: captured pieces return to play in shogi; xiangqi has a palace and river.",
+    "core_loop": "move → capture → drop or cross the river → mate",
+    "verbs": [
+      "plan",
+      "attack"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "variant rules"
+    ],
+    "win": "checkmate",
+    "lose": "checkmated",
+    "scoring": "result",
+    "session_seconds": [
+      600,
+      3600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "play with friends"
+    ],
+    "difficulty_levers": [
+      "variant"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "shogi online",
+      "xiangqi chinese chess",
+      "japanese chess with drops"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dots_boxes",
+    "name": "Dots and boxes",
+    "aliases": [
+      "Dots and Boxes"
+    ],
+    "family": "board",
+    "summary": "Draw lines between dots; completing a box scores it and grants another turn.",
+    "core_loop": "draw a line → close boxes → avoid giving boxes → most boxes",
+    "verbs": [
+      "plan",
+      "draw"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "closing a box gives another turn"
+    ],
+    "win": "most boxes",
+    "lose": "fewer boxes",
+    "scoring": "boxes",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "classic duel"
+    ],
+    "difficulty_levers": [
+      "grid size"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "dots and boxes with a friend",
+      "draw lines make boxes",
+      "boxes game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hex_connect_sides",
+    "name": "Connect your sides",
+    "aliases": [
+      "Hex"
+    ],
+    "family": "board",
+    "summary": "Place stones to connect your two sides of a rhombus board; there are no draws.",
+    "core_loop": "place → block → connect",
+    "verbs": [
+      "plan",
+      "block"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "no draws are possible"
+    ],
+    "win": "connect your sides",
+    "lose": "the opponent connects",
+    "scoring": "wins",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "async duel"
+    ],
+    "difficulty_levers": [
+      "board size"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hex board game",
+      "connect the sides game",
+      "hex with a friend"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stratego_hidden_ranks",
+    "name": "Hidden ranks",
+    "aliases": [
+      "Stratego"
+    ],
+    "family": "board",
+    "summary": "Pieces have hidden ranks revealed only in combat; capture the flag.",
+    "core_loop": "move → attack → ranks revealed → capture the flag",
+    "verbs": [
+      "plan",
+      "bluff"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "higher rank wins combat"
+    ],
+    "win": "capture the flag",
+    "lose": "lose the flag",
+    "scoring": "win",
+    "session_seconds": [
+      900,
+      1800
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "duel"
+    ],
+    "difficulty_levers": [
+      "army"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "reveal",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "stratego online",
+      "capture the flag board game",
+      "hidden ranks"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_board_crossword",
+    "name": "Crossword tile board",
+    "aliases": [
+      "Scrabble-style duel"
+    ],
+    "family": "board",
+    "summary": "Duel version of the tile board with a shared word bank.",
+    "core_loop": "play tiles → score → swap",
+    "verbs": [
+      "spell",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "words must connect"
+    ],
+    "win": "highest score",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      600,
+      1800
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "async with friends"
+    ],
+    "difficulty_levers": [
+      "rack size"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "async_turns",
+      "word_check"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "scrabble duel async",
+      "word board with my friend",
+      "tile word duel"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

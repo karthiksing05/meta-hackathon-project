@@ -1,0 +1,32 @@
+[
+  {
+    "request": "diner dash style restaurant",
+    "expect": [
+      "restaurant_rush_serve"
+    ]
+  },
+  {
+    "request": "stardew valley farm with friends",
+    "expect": [
+      "farm_sim_seasons"
+    ]
+  },
+  {
+    "request": "flight control land the planes",
+    "expect": [
+      "airport_traffic_control"
+    ]
+  },
+  {
+    "request": "papas pizzeria style game",
+    "expect": [
+      "pizza_delivery_rush"
+    ]
+  },
+  {
+    "request": "build a theme park",
+    "expect": [
+      "theme_park_build"
+    ]
+  }
+]

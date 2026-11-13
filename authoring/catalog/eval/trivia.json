@@ -12,9 +12,9 @@
     ]
   },
   {
-    "request": "heardle but for k-pop",
+    "request": "guess the picture as it slowly unblurs",
     "expect": [
-      "audio_name_that_tune"
+      "picture_reveal"
     ]
   },
   {
