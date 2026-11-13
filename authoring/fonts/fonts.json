@@ -1,0 +1,753 @@
+{
+  "version": 1,
+  "families": {
+    "bungee": {
+      "family": "Bungee",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/bungee",
+      "designer": "David Jonathan Ross",
+      "copyright": "Copyright 2023 The Bungee Project Authors (https://github.com/djrrb/Bungee)",
+      "files": {
+        "400": "gamefont-bungee-400.woff2"
+      },
+      "bytes": 8888,
+      "caps_only": true,
+      "mono": false
+    },
+    "monoton": {
+      "family": "Monoton",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/monoton",
+      "designer": "Vernon Adams",
+      "copyright": "Copyright (c) 2011, Vernon Adams (vern@newtypography.co.uk) with Reserved Font Name \\'Monoton\\'. All rights reserved.",
+      "files": {
+        "400": "gamefont-monoton-400.woff2"
+      },
+      "bytes": 15780,
+      "caps_only": true,
+      "mono": false
+    },
+    "righteous": {
+      "family": "Righteous",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/righteous",
+      "designer": "Astigmatic",
+      "copyright": "Copyright (c) 2011 by Brian J. Bonislawsky DBA Astigmatic (AOETI) (astigma@astigmatic.com), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-righteous-400.woff2"
+      },
+      "bytes": 11520,
+      "caps_only": false,
+      "mono": false
+    },
+    "bowlby": {
+      "family": "Bowlby One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/bowlbyone",
+      "designer": "Vernon Adams",
+      "copyright": "Copyright (c) 2011 by vernon adams (vern@newtypography.co.uk), with Reserved Font Names \\",
+      "files": {
+        "400": "gamefont-bowlby-400.woff2"
+      },
+      "bytes": 20344,
+      "caps_only": false,
+      "mono": false
+    },
+    "press_start": {
+      "family": "Press Start 2P",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/pressstart2p",
+      "designer": "CodeMan38",
+      "copyright": "Copyright 2012 The Press Start 2P Project Authors (cody@zone38.net), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-press_start-400.woff2"
+      },
+      "bytes": 4180,
+      "caps_only": false,
+      "mono": true
+    },
+    "vt323": {
+      "family": "VT323",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/vt323",
+      "designer": "Peter Hull",
+      "copyright": "Copyright 2011, The VT323 Project Authors (peter.hull@oikoi.com)",
+      "files": {
+        "400": "gamefont-vt323-400.woff2"
+      },
+      "bytes": 6148,
+      "caps_only": false,
+      "mono": true
+    },
+    "silkscreen": {
+      "family": "Silkscreen",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/silkscreen",
+      "designer": "Jason Kottke",
+      "copyright": "Copyright 2001 The Silkscreen Project Authors (https://github.com/googlefonts/silkscreen)",
+      "files": {
+        "400": "gamefont-silkscreen-400.woff2",
+        "700": "gamefont-silkscreen-700.woff2"
+      },
+      "bytes": 5608,
+      "caps_only": true,
+      "mono": false
+    },
+    "creepster": {
+      "family": "Creepster",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/creepster",
+      "designer": "Sideshow",
+      "copyright": "Copyright (c) 2011, Font Diner, Inc DBA Sideshow (diner@fontdiner.com), with Reserved Font Names \\",
+      "files": {
+        "400": "gamefont-creepster-400.woff2"
+      },
+      "bytes": 26600,
+      "caps_only": true,
+      "mono": false
+    },
+    "dm_serif": {
+      "family": "DM Serif Display",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/dmserifdisplay",
+      "designer": "Colophon Foundry",
+      "copyright": "Copyright 2014 - 2017 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name \\'Source\\'. Copyright 2019 Google LLC.",
+      "files": {
+        "400": "gamefont-dm_serif-400.woff2"
+      },
+      "bytes": 16772,
+      "caps_only": false,
+      "mono": false
+    },
+    "playfair": {
+      "family": "Playfair Display",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/playfairdisplay",
+      "designer": "Claus Eggers Sørensen",
+      "copyright": "Copyright 2017 The Playfair Display Project Authors (https://github.com/clauseggers/Playfair-Display), with Reserved Font Name \\",
+      "files": {
+        "800": "gamefont-playfair-800.woff2"
+      },
+      "bytes": 19392,
+      "caps_only": false,
+      "mono": false
+    },
+    "orbitron": {
+      "family": "Orbitron",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/orbitron",
+      "designer": "Matt McInerney",
+      "copyright": "Copyright 2018 The Orbitron Project Authors (https://github.com/theleagueof/orbitron)",
+      "files": {
+        "800": "gamefont-orbitron-800.woff2"
+      },
+      "bytes": 6272,
+      "caps_only": false,
+      "mono": false
+    },
+    "unifraktur": {
+      "family": "UnifrakturMaguntia",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/unifrakturmaguntia",
+      "designer": "j. \\'mach\\' wust",
+      "copyright": "Copyright (c) 2010 j. \\'mach\\' wust (j.mach.wust@gmail.com) with Reserved Font Name UnifrakturMaguntia. Copyright (c) 2009 Peter Wiegel (wiegel@peter-wiegel.de). This Font Software is licensed under the SIL Open Font License, Version 1.1.",
+      "files": {
+        "400": "gamefont-unifraktur-400.woff2"
+      },
+      "bytes": 22812,
+      "caps_only": false,
+      "mono": false
+    },
+    "uncial": {
+      "family": "Uncial Antiqua",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/uncialantiqua",
+      "designer": "Astigmatic",
+      "copyright": "Copyright (c) 2011 by Brian J. Bonislawsky DBA Astigmatic (AOETI) (astigma@astigmatic.com), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-uncial-400.woff2"
+      },
+      "bytes": 18556,
+      "caps_only": false,
+      "mono": false
+    },
+    "cinzel": {
+      "family": "Cinzel",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/cinzel",
+      "designer": "Natanael Gama",
+      "copyright": "Copyright 2020 The Cinzel Project Authors (https://github.com/NDISCOVER/Cinzel)",
+      "files": {
+        "700": "gamefont-cinzel-700.woff2"
+      },
+      "bytes": 14200,
+      "caps_only": true,
+      "mono": false
+    },
+    "chewy": {
+      "family": "Chewy",
+      "role": "display",
+      "license": "Apache-2.0",
+      "source": "https://github.com/google/fonts/tree/main/apache/chewy",
+      "designer": "Sideshow",
+      "copyright": "Copyright (c) 2010 by Font Diner, Inc DBA Sideshow. All rights reserved.",
+      "files": {
+        "400": "gamefont-chewy-400.woff2"
+      },
+      "bytes": 16408,
+      "caps_only": false,
+      "mono": false
+    },
+    "archivo_black": {
+      "family": "Archivo Black",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/archivoblack",
+      "designer": "Omnibus-Type",
+      "copyright": "Copyright 2017 The Archivo Black Project Authors (https://github.com/Omnibus-Type/ArchivoBlack)",
+      "files": {
+        "400": "gamefont-archivo_black-400.woff2"
+      },
+      "bytes": 8928,
+      "caps_only": false,
+      "mono": false
+    },
+    "syne": {
+      "family": "Syne",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/syne",
+      "designer": "Bonjour Monde, Lucas Descroix, George Triantafyllakos",
+      "copyright": "Copyright 2019 The Syne Project Authors (https://gitlab.com/bonjour-monde/fonderie/syne-typeface)",
+      "files": {
+        "800": "gamefont-syne-800.woff2"
+      },
+      "bytes": 11564,
+      "caps_only": false,
+      "mono": false
+    },
+    "audiowide": {
+      "family": "Audiowide",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/audiowide",
+      "designer": "Astigmatic",
+      "copyright": "Copyright (c) 2012 by Brian J. Bonislawsky DBA Astigmatic (AOETI) (astigma@astigmatic.com), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-audiowide-400.woff2"
+      },
+      "bytes": 12828,
+      "caps_only": false,
+      "mono": false
+    },
+    "michroma": {
+      "family": "Michroma",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/michroma",
+      "designer": "Vernon Adams",
+      "copyright": "Copyright 2011 The Michroma Project Authors (https://github.com/googlefonts/Michroma-font)",
+      "files": {
+        "400": "gamefont-michroma-400.woff2"
+      },
+      "bytes": 10100,
+      "caps_only": false,
+      "mono": false
+    },
+    "bangers": {
+      "family": "Bangers",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/bangers",
+      "designer": "Vernon Adams",
+      "copyright": "Copyright 2010 The Bangers Project Authors (https://github.com/googlefonts/bangers)",
+      "files": {
+        "400": "gamefont-bangers-400.woff2"
+      },
+      "bytes": 14772,
+      "caps_only": true,
+      "mono": false
+    },
+    "dela_gothic": {
+      "family": "Dela Gothic One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/delagothicone",
+      "designer": "artakana",
+      "copyright": "Copyright 2020 The Dela Gothic Project Authors (https://github.com/syakuzen/DelaGothic)",
+      "files": {
+        "400": "gamefont-dela_gothic-400.woff2"
+      },
+      "bytes": 10648,
+      "caps_only": false,
+      "mono": false
+    },
+    "teko": {
+      "family": "Teko",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/teko",
+      "designer": "Indian Type Foundry",
+      "copyright": "Copyright 2023 The Teko Project Authors (https://www.github.com/googlefonts/teko)",
+      "files": {
+        "600": "gamefont-teko-600.woff2"
+      },
+      "bytes": 7216,
+      "caps_only": false,
+      "mono": false
+    },
+    "alfa_slab": {
+      "family": "Alfa Slab One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/alfaslabone",
+      "designer": "JM Solé",
+      "copyright": "Copyright 2016 The Alfa Slab One Project Authors (http://www.jmsole.cl | info@jmsole.cl), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-alfa_slab-400.woff2"
+      },
+      "bytes": 9192,
+      "caps_only": false,
+      "mono": false
+    },
+    "rye": {
+      "family": "Rye",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/rye",
+      "designer": "Nicole Fally",
+      "copyright": "Copyright (c) 2012, Sorkin Type Co (eben@eyebytes.com) with Reserved Font Name \\'Rye\\'",
+      "files": {
+        "400": "gamefont-rye-400.woff2"
+      },
+      "bytes": 22320,
+      "caps_only": false,
+      "mono": false
+    },
+    "lobster": {
+      "family": "Lobster",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/lobster",
+      "designer": "Impallari Type",
+      "copyright": "Copyright 2010 The Lobster Project Authors (https://github.com/impallari/The-Lobster-Font), with Reserved Font Name \\",
+      "files": {
+        "400": "gamefont-lobster-400.woff2"
+      },
+      "bytes": 15344,
+      "caps_only": false,
+      "mono": false
+    },
+    "pacifico": {
+      "family": "Pacifico",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/pacifico",
+      "designer": "Vernon Adams, Jacques Le Bailly, Botjo Nikoltchev, Ani Petrova",
+      "copyright": "Copyright 2018 The Pacifico Project Authors (https://github.com/googlefonts/Pacifico)",
+      "files": {
+        "400": "gamefont-pacifico-400.woff2"
+      },
+      "bytes": 17060,
+      "caps_only": false,
+      "mono": false
+    },
+    "abril": {
+      "family": "Abril Fatface",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/abrilfatface",
+      "designer": "TypeTogether",
+      "copyright": "Copyright (c) 2011, Copyright (c) 2011, TypeTogether (www.type-together.com info@type-together.com), with Reserved Font Names \\",
+      "files": {
+        "400": "gamefont-abril-400.woff2"
+      },
+      "bytes": 12176,
+      "caps_only": false,
+      "mono": false
+    },
+    "poiret": {
+      "family": "Poiret One",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/poiretone",
+      "designer": "Denis Masharov",
+      "copyright": "Copyright 2011 The Poiret One Project Authors (https://github.com/alexeiva/poiretone)",
+      "files": {
+        "400": "gamefont-poiret-400.woff2"
+      },
+      "bytes": 9748,
+      "caps_only": false,
+      "mono": false
+    },
+    "special_elite": {
+      "family": "Special Elite",
+      "role": "display",
+      "license": "Apache-2.0",
+      "source": "https://github.com/google/fonts/tree/main/apache/specialelite",
+      "designer": "Astigmatic",
+      "copyright": "Copyright (c) 2010 by Brian J. Bonislawsky DBA Astigmatic (AOETI). All rights reserved. Available under the Apache 2.0 licence. http://www.apache.org/licenses/LICENSE-2.0.html",
+      "files": {
+        "400": "gamefont-special_elite-400.woff2"
+      },
+      "bytes": 51704,
+      "caps_only": false,
+      "mono": false
+    },
+    "oswald": {
+      "family": "Oswald",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/oswald",
+      "designer": "Vernon Adams, Kalapi Gajjar, Cyreal",
+      "copyright": "Copyright 2016 The Oswald Project Authors (https://github.com/googlefonts/OswaldFont)",
+      "files": {
+        "500": "gamefont-oswald-500.woff2",
+        "700": "gamefont-oswald-700.woff2"
+      },
+      "bytes": 21824,
+      "caps_only": false,
+      "mono": false
+    },
+    "space_mono": {
+      "family": "Space Mono",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/spacemono",
+      "designer": "Colophon Foundry",
+      "copyright": "Copyright 2016 The Space Mono Project Authors (https://github.com/googlefonts/spacemono)",
+      "files": {
+        "400": "gamefont-space_mono-400.woff2",
+        "700": "gamefont-space_mono-700.woff2"
+      },
+      "bytes": 14960,
+      "caps_only": false,
+      "mono": true
+    },
+    "share_tech_mono": {
+      "family": "Share Tech Mono",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/sharetechmono",
+      "designer": "Carrois Apostrophe",
+      "copyright": "Copyright (c) 2012, Carrois Type Design, Ralph du Carrois (www.carrois.com post@carrois.com), with Reserved Font Name \\'Share\\'",
+      "files": {
+        "400": "gamefont-share_tech_mono-400.woff2"
+      },
+      "bytes": 6972,
+      "caps_only": false,
+      "mono": true
+    },
+    "im_fell": {
+      "family": "IM Fell English",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/imfellenglish",
+      "designer": "Igino Marini",
+      "copyright": "© 2007 Igino Marini (www.iginomarini.com mail@iginomarini.com) With Reserved Font Name IM FELL English Roman",
+      "files": {
+        "400": "gamefont-im_fell-400.woff2"
+      },
+      "bytes": 57896,
+      "caps_only": false,
+      "mono": false
+    },
+    "cormorant": {
+      "family": "Cormorant Garamond",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/cormorantgaramond",
+      "designer": "Christian Thalmann",
+      "copyright": "Copyright 2015 The Cormorant Project Authors (github.com/CatharsisFonts/Cormorant)",
+      "files": {
+        "500": "gamefont-cormorant-500.woff2",
+        "700": "gamefont-cormorant-700.woff2"
+      },
+      "bytes": 35436,
+      "caps_only": false,
+      "mono": false
+    },
+    "fredoka": {
+      "family": "Fredoka",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/fredoka",
+      "designer": "Milena Brandão, Hafontia",
+      "copyright": "Copyright 2016 The Fredoka Project Authors (https://github.com/hafontia/Fredoka-One)",
+      "files": {
+        "500": "gamefont-fredoka-500.woff2",
+        "700": "gamefont-fredoka-700.woff2"
+      },
+      "bytes": 29912,
+      "caps_only": false,
+      "mono": false
+    },
+    "baloo": {
+      "family": "Baloo 2",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/baloo2",
+      "designer": "Ek Type",
+      "copyright": "Copyright 2019 The Baloo 2 Project Authors (https://github.com/EkType/Baloo2)",
+      "files": {
+        "500": "gamefont-baloo-500.woff2",
+        "700": "gamefont-baloo-700.woff2"
+      },
+      "bytes": 34260,
+      "caps_only": false,
+      "mono": false
+    },
+    "patrick_hand": {
+      "family": "Patrick Hand",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/patrickhand",
+      "designer": "Patrick Wagesreiter",
+      "copyright": "Copyright (c) 2010-2012 Patrick Wagesreiter (mail@patrickwagesreiter.at)",
+      "files": {
+        "400": "gamefont-patrick_hand-400.woff2"
+      },
+      "bytes": 13140,
+      "caps_only": false,
+      "mono": false
+    },
+    "nunito": {
+      "family": "Nunito",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/nunito",
+      "designer": "Vernon Adams, Cyreal, Jacques Le Bailly",
+      "copyright": "Copyright 2014 The Nunito Project Authors (https://github.com/googlefonts/nunito)",
+      "files": {
+        "500": "gamefont-nunito-500.woff2",
+        "700": "gamefont-nunito-700.woff2"
+      },
+      "bytes": 26048,
+      "caps_only": false,
+      "mono": false
+    },
+    "caveat": {
+      "family": "Caveat",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/caveat",
+      "designer": "Impallari Type",
+      "copyright": "Copyright 2014 The Caveat Project Authors (https://github.com/googlefonts/caveat)",
+      "files": {
+        "500": "gamefont-caveat-500.woff2",
+        "700": "gamefont-caveat-700.woff2"
+      },
+      "bytes": 52616,
+      "caps_only": false,
+      "mono": false
+    },
+    "space_grotesk": {
+      "family": "Space Grotesk",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/spacegrotesk",
+      "designer": "Florian Karsten",
+      "copyright": "Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk)",
+      "files": {
+        "500": "gamefont-space_grotesk-500.woff2",
+        "700": "gamefont-space_grotesk-700.woff2"
+      },
+      "bytes": 21476,
+      "caps_only": false,
+      "mono": false
+    },
+    "archivo": {
+      "family": "Archivo",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/archivo",
+      "designer": "Omnibus-Type",
+      "copyright": "Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)",
+      "files": {
+        "500": "gamefont-archivo-500.woff2",
+        "700": "gamefont-archivo-700.woff2"
+      },
+      "bytes": 23140,
+      "caps_only": false,
+      "mono": false
+    },
+    "mplus_rounded": {
+      "family": "M PLUS Rounded 1c",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/mplusrounded1c",
+      "designer": "Coji Morishita, M+ Fonts Project",
+      "copyright": "Copyright 2016 The Rounded M+ Project Authors.",
+      "files": {
+        "500": "gamefont-mplus_rounded-500.woff2",
+        "700": "gamefont-mplus_rounded-700.woff2"
+      },
+      "bytes": 28104,
+      "caps_only": false,
+      "mono": false
+    },
+    "barlow_cond": {
+      "family": "Barlow Condensed",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/barlowcondensed",
+      "designer": "Jeremy Tribby",
+      "copyright": "Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)",
+      "files": {
+        "500": "gamefont-barlow_cond-500.woff2",
+        "700": "gamefont-barlow_cond-700.woff2"
+      },
+      "bytes": 24444,
+      "caps_only": false,
+      "mono": false
+    },
+    "lora": {
+      "family": "Lora",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/lora",
+      "designer": "Cyreal",
+      "copyright": "Copyright 2011 The Lora Project Authors (https://github.com/cyrealtype/Lora-Cyrillic), with Reserved Font Name \\",
+      "files": {
+        "500": "gamefont-lora-500.woff2",
+        "700": "gamefont-lora-700.woff2"
+      },
+      "bytes": 38024,
+      "caps_only": false,
+      "mono": false
+    },
+    "josefin": {
+      "family": "Josefin Sans",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/josefinsans",
+      "designer": "Santiago Orozco",
+      "copyright": "Copyright 2010 The Josefin Sans Project Authors (https://github.com/ThomasJockin/JosefinSansFont-master), with Reserved Font Name \\",
+      "files": {
+        "500": "gamefont-josefin-500.woff2",
+        "700": "gamefont-josefin-700.woff2"
+      },
+      "bytes": 20984,
+      "caps_only": false,
+      "mono": false
+    },
+    "courier_prime": {
+      "family": "Courier Prime",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/courierprime",
+      "designer": "Alan Dague-Greene",
+      "copyright": "Copyright 2015 The Courier Prime Project Authors (https://github.com/quoteunquoteapps/CourierPrime).",
+      "files": {
+        "400": "gamefont-courier_prime-400.woff2",
+        "700": "gamefont-courier_prime-700.woff2"
+      },
+      "bytes": 21728,
+      "caps_only": false,
+      "mono": true
+    },
+    "libre_baskerville": {
+      "family": "Libre Baskerville",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/librebaskerville",
+      "designer": "Impallari Type",
+      "copyright": "Copyright 2012 The Libre Baskerville Project Authors (https://github.com/impallari/Libre-Baskerville)",
+      "files": {
+        "400": "gamefont-libre_baskerville-400.woff2",
+        "700": "gamefont-libre_baskerville-700.woff2"
+      },
+      "bytes": 34488,
+      "caps_only": false,
+      "mono": false
+    },
+    "dm_sans": {
+      "family": "DM Sans",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/dmsans",
+      "designer": "Colophon Foundry",
+      "copyright": "Copyright 2014 The DM Sans Project Authors (https://github.com/googlefonts/dm-fonts)",
+      "files": {
+        "500": "gamefont-dm_sans-500.woff2",
+        "700": "gamefont-dm_sans-700.woff2"
+      },
+      "bytes": 23812,
+      "caps_only": false,
+      "mono": false
+    },
+    "work_sans": {
+      "family": "Work Sans",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/worksans",
+      "designer": "Wei Huang",
+      "copyright": "Copyright 2019 The Work Sans Project Authors (https://github.com/weiweihuanghuang/Work-Sans)",
+      "files": {
+        "500": "gamefont-work_sans-500.woff2",
+        "700": "gamefont-work_sans-700.woff2"
+      },
+      "bytes": 31476,
+      "caps_only": false,
+      "mono": false
+    },
+    "rubik": {
+      "family": "Rubik",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/rubik",
+      "designer": "Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani",
+      "copyright": "Copyright 2015 The Rubik Project Authors (https://github.com/googlefonts/rubik)",
+      "files": {
+        "500": "gamefont-rubik-500.woff2",
+        "700": "gamefont-rubik-700.woff2"
+      },
+      "bytes": 32904,
+      "caps_only": false,
+      "mono": false
+    },
+    "outfit": {
+      "family": "Outfit",
+      "role": "text",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/outfit",
+      "designer": "Smartsheet Inc, Rodrigo Fuenzalida",
+      "copyright": "Copyright 2021 The Outfit Project Authors (https://github.com/Outfitio/Outfit-Fonts)",
+      "files": {
+        "500": "gamefont-outfit-500.woff2",
+        "700": "gamefont-outfit-700.woff2"
+      },
+      "bytes": 24784,
+      "caps_only": false,
+      "mono": false
+    },
+    "barlow_cond_italic": {
+      "family": "Barlow Condensed Italic",
+      "role": "display",
+      "license": "OFL-1.1",
+      "source": "https://github.com/google/fonts/tree/main/ofl/barlowcondensed",
+      "designer": "Jeremy Tribby",
+      "copyright": "Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)",
+      "files": {
+        "700": "gamefont-barlow_cond_italic-700i.woff2"
+      },
+      "bytes": 13672,
+      "caps_only": false,
+      "mono": false
+    }
+  }
+}

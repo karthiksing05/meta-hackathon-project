@@ -1,0 +1,505 @@
+/* Bundled game fonts (subset woff2). Generated; see authoring/fonts/README.md. */
+@font-face {
+  font-family: "Bungee";
+  src: url("gamefont-bungee-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Monoton";
+  src: url("gamefont-monoton-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Righteous";
+  src: url("gamefont-righteous-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Bowlby One";
+  src: url("gamefont-bowlby-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("gamefont-press_start-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "VT323";
+  src: url("gamefont-vt323-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Silkscreen";
+  src: url("gamefont-silkscreen-400.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Silkscreen";
+  src: url("gamefont-silkscreen-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Creepster";
+  src: url("gamefont-creepster-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DM Serif Display";
+  src: url("gamefont-dm_serif-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Playfair Display";
+  src: url("gamefont-playfair-800.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Orbitron";
+  src: url("gamefont-orbitron-800.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "UnifrakturMaguntia";
+  src: url("gamefont-unifraktur-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Uncial Antiqua";
+  src: url("gamefont-uncial-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Cinzel";
+  src: url("gamefont-cinzel-700.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Chewy";
+  src: url("gamefont-chewy-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Archivo Black";
+  src: url("gamefont-archivo_black-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Syne";
+  src: url("gamefont-syne-800.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Audiowide";
+  src: url("gamefont-audiowide-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Michroma";
+  src: url("gamefont-michroma-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Bangers";
+  src: url("gamefont-bangers-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Dela Gothic One";
+  src: url("gamefont-dela_gothic-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Teko";
+  src: url("gamefont-teko-600.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Alfa Slab One";
+  src: url("gamefont-alfa_slab-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Rye";
+  src: url("gamefont-rye-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Lobster";
+  src: url("gamefont-lobster-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Pacifico";
+  src: url("gamefont-pacifico-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Abril Fatface";
+  src: url("gamefont-abril-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Poiret One";
+  src: url("gamefont-poiret-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Special Elite";
+  src: url("gamefont-special_elite-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Oswald";
+  src: url("gamefont-oswald-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Oswald";
+  src: url("gamefont-oswald-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Space Mono";
+  src: url("gamefont-space_mono-400.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Space Mono";
+  src: url("gamefont-space_mono-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Share Tech Mono";
+  src: url("gamefont-share_tech_mono-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "IM Fell English";
+  src: url("gamefont-im_fell-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("gamefont-cormorant-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("gamefont-cormorant-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Fredoka";
+  src: url("gamefont-fredoka-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Fredoka";
+  src: url("gamefont-fredoka-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Baloo 2";
+  src: url("gamefont-baloo-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Baloo 2";
+  src: url("gamefont-baloo-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Patrick Hand";
+  src: url("gamefont-patrick_hand-400.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Nunito";
+  src: url("gamefont-nunito-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Nunito";
+  src: url("gamefont-nunito-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Caveat";
+  src: url("gamefont-caveat-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Caveat";
+  src: url("gamefont-caveat-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("gamefont-space_grotesk-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("gamefont-space_grotesk-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Archivo";
+  src: url("gamefont-archivo-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Archivo";
+  src: url("gamefont-archivo-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "M PLUS Rounded 1c";
+  src: url("gamefont-mplus_rounded-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "M PLUS Rounded 1c";
+  src: url("gamefont-mplus_rounded-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("gamefont-barlow_cond-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("gamefont-barlow_cond-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Lora";
+  src: url("gamefont-lora-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Lora";
+  src: url("gamefont-lora-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Josefin Sans";
+  src: url("gamefont-josefin-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Josefin Sans";
+  src: url("gamefont-josefin-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Courier Prime";
+  src: url("gamefont-courier_prime-400.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Courier Prime";
+  src: url("gamefont-courier_prime-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Libre Baskerville";
+  src: url("gamefont-libre_baskerville-400.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Libre Baskerville";
+  src: url("gamefont-libre_baskerville-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("gamefont-dm_sans-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("gamefont-dm_sans-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Work Sans";
+  src: url("gamefont-work_sans-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Work Sans";
+  src: url("gamefont-work_sans-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Rubik";
+  src: url("gamefont-rubik-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Rubik";
+  src: url("gamefont-rubik-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Outfit";
+  src: url("gamefont-outfit-500.woff2") format("woff2");
+  font-weight: 100 599;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Outfit";
+  src: url("gamefont-outfit-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Barlow Condensed Italic";
+  src: url("gamefont-barlow_cond_italic-700i.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
