@@ -12,8 +12,11 @@ import { wrapGame } from './wrap.mjs';
 import { playtestAsync, DEFAULT_BOTS } from '../playtest/gate-async.mjs';
 import { sortSafe } from './stable.mjs';
 import { pickGold, goldPromptText } from './gold.mjs';
+import { qualityReport, qualityLines } from './quality.mjs';
+import * as Prompts from './prompts.mjs';
+import { composeGame } from './pipeline.mjs';
 
-export const STUDIO_API_VERSION = 1;
+export const STUDIO_API_VERSION = 2;
 
 const now = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
 const round1 = (x) => Math.round(x * 10) / 10;
@@ -402,5 +405,68 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     return JSON.stringify({ ids: picked.map((e) => e.id), text: goldPromptText(picked) });
   }
 
-  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, wrap, examples: examplesFor });
+  /**
+   * The quality check (expander/quality.mjs) on an authoring manifest (JSON text or object) for a
+   * request: {score, major, issues, lines}. lines are ready for Muse's polish turn.
+   */
+  function quality(manifestJSON, request = '') {
+    const input = typeof manifestJSON === 'string' ? parseLoose(manifestJSON) : manifestJSON;
+    const manifest = unwrap(input);
+    const report = qualityReport(manifest, { request: String(request || ''), library });
+    return JSON.stringify({ ...report, lines: qualityLines(report) });
+  }
+
+  /**
+   * Muse's prompts (expander/prompts.mjs), so the app and the server send the same text:
+   * prompt('system', {examples}) · prompt('compose', {request, brief}) · prompt('revise', {authoring, request, brief})
+   * · prompt('repair', {request, manifest, issues, round}) · prompt('playtest_repair', {request, manifest, report})
+   * · prompt('polish', {request, manifest, lines}) · prompt('issues', {expansion}). Returns a string
+   * (issues: a JSON list of lines).
+   */
+  function prompt(name, argsJSON) {
+    const a = typeof argsJSON === 'string' ? JSON.parse(argsJSON || '{}') : (argsJSON || {});
+    switch (name) {
+      case 'system': return Prompts.system(JSON.parse(catalog()), { examples: a.examples ?? null });
+      case 'compose': return Prompts.compose(a.request ?? '', a.brief ?? null);
+      case 'revise': return Prompts.revise(a.authoring ?? '', a.request ?? '', a.brief ?? null);
+      case 'repair': return Prompts.repair(a.request ?? '', a.manifest ?? '', a.issues ?? [], a.round ?? 1);
+      case 'playtest_repair': return Prompts.playtestRepair(a.request ?? '', a.manifest ?? '', a.report ?? {});
+      case 'polish': return Prompts.polish(a.request ?? '', a.manifest ?? '', a.lines ?? []);
+      case 'issues': return JSON.stringify(Prompts.issues(a.expansion ?? {}));
+      default: throw new Error(`no prompt named '${name}'`);
+    }
+  }
+
+  /**
+   * The whole pipeline (expander/pipeline.mjs) for callers that can hand Muse in as a function, like
+   * the server: compose({request, brief, base?}, ask, onEvent) → Promise of JSON text
+   * {manifest, stats, bots, gate, quality}. ask(system, user, purpose) → Promise of the reply text
+   * (or {content, model}); onEvent gets {kind, summary, …}. base (a microgame manifest with
+   * content.authoring_json) makes it a revision.
+   */
+  async function compose(argsJSON, ask, onEvent) {
+    const a = typeof argsJSON === 'string' ? JSON.parse(argsJSON) : argsJSON;
+    let base = null;
+    if (a.base) {
+      const b = a.base;
+      const authoring = typeof b.content?.authoring_json === 'string' ? b.content.authoring_json : (b.content?.authoring ? JSON.stringify(b.content.authoring) : null);
+      if (!authoring) throw new Error('the base game has no content.authoring_json, so it can\'t be revised');
+      base = { id: b.id, title: b.title, one_line_rule: b.one_line_rule ?? b.oneLineRule, brief: b.brief, seed: b.seed, emoji: b.style?.emoji, authoring_json: authoring };
+    }
+    const local = {
+      catalog: () => JSON.parse(catalog()),
+      examples: (request, k) => JSON.parse(examplesFor(request, k)),
+      expand: (text) => JSON.parse(expand(text)),
+      gate: async (json, seed) => JSON.parse(await gate(json, seed)),
+      quality: (text, request) => JSON.parse(quality(text, request)),
+      wrap: (opts) => JSON.parse(wrap(opts)),
+    };
+    const out = await composeGame({ request: a.request, brief: a.brief, base }, local, {
+      ask, onEvent: typeof onEvent === 'function' ? onEvent : () => {},
+      maxRepairRounds: a.max_repair_rounds, polish: a.polish !== false,
+    });
+    return JSON.stringify(out);
+  }
+
+  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, wrap, examples: examplesFor, quality, prompt, compose });
 }

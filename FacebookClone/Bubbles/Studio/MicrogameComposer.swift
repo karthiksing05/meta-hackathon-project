@@ -106,6 +106,10 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
         var models: [String] = []
         /// The gold examples put in Muse's prompt (authoring/gold/).
         var examples: [String] = []
+        /// The quality check's score for the game that shipped (authoring/expander/quality.mjs).
+        var quality: Int?
+        /// Whether a polish round (quality issues sent back to Muse) produced the game that shipped.
+        var polished = false
     }
 
     let muse: any MicrogameMuse
@@ -131,12 +135,12 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
         let started = Date()
         lastStats = Stats()
         do {
-            let catalog = try await studio.catalog()
             let examples = try? await studio.examples(for: request)
             lastStats.examples = examples?.ids ?? []
-            let system = MicrogamePrompts.system(catalog, examples: examples?.text)
-            let draft = try await draft(system: system, user: MicrogamePrompts.compose(request: request, brief: brief), onEvent: onEvent)
-            let (expansion, _) = try await check(draft, system: system, request: request, onEvent: onEvent)
+            let system = try await MicrogamePrompts.system(studio, examples: examples?.text)
+            let draft = try await draft(system: system, user: MicrogamePrompts.compose(studio, request: request, brief: brief), onEvent: onEvent)
+            let checked = try await check(draft, system: system, request: request, onEvent: onEvent)
+            let (expansion, _) = await polish(checked, system: system, request: request, onEvent: onEvent)
             let title = expansion.game["meta"]?["title"]?.string ?? "microgame"
             let id = "mg-\(StudioManifestBuilder.slug(title).isEmpty ? "game" : StudioManifestBuilder.slug(title))-\(StudioManifestBuilder.randomSuffix())"
             var manifest = try await studio.wrap(expansion, id: id, brief: brief, emoji: nil, seed: Int.random(in: 1...999_999))
@@ -166,11 +170,10 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
             } else {
                 throw ComposerError.noAuthoring
             }
-            let catalog = try await studio.catalog()
             let examples = try? await studio.examples(for: "\(bubble.title). \(bubble.oneLineRule) \(request)")
             lastStats.examples = examples?.ids ?? []
-            let system = MicrogamePrompts.system(catalog, examples: examples?.text)
-            let draft = try await draft(system: system, user: MicrogamePrompts.revise(authoring: authoring, request: request, brief: bubble.brief), onEvent: onEvent)
+            let system = try await MicrogamePrompts.system(studio, examples: examples?.text)
+            let draft = try await draft(system: system, user: MicrogamePrompts.revise(studio, authoring: authoring, request: request, brief: bubble.brief), onEvent: onEvent)
             let (expansion, _) = try await check(draft, system: system, request: request, onEvent: onEvent)
             var manifest = try await studio.wrap(expansion, id: bubble.id, brief: bubble.brief, emoji: bubble.style.emoji, seed: bubble.seed)
             manifest.version = bubble.version + 1
@@ -236,7 +239,7 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
                 repairs += 1
                 lastStats.repairRounds = repairs
                 onEvent(.repairing(round: repairs, issues: issues))
-                reply = try await ask(system: system, user: MicrogamePrompts.repair(request: request, manifest: shown, issues: issues, round: repairs),
+                reply = try await ask(system: system, user: MicrogamePrompts.repair(studio, request: request, manifest: shown, issues: issues, round: repairs),
                                          purpose: "microgame repair \(repairs)")
                 continue
             }
@@ -254,8 +257,39 @@ final class ScriptedMicrogameMuse: MicrogameMuse, @unchecked Sendable {
             playtestRepairUsed = true
             lastStats.playtestRepair = true
             onEvent(.repairing(round: repairs + 1, issues: report.blocking.map { "\($0.code): \($0.message)" }))
-            reply = try await ask(system: system, user: MicrogamePrompts.playtestRepair(request: request, manifest: shown, report: report),
+            reply = try await ask(system: system, user: MicrogamePrompts.playtestRepair(studio, request: request, manifest: shown, report: report),
                                      purpose: "microgame playtest repair")
+        }
+    }
+
+    /// The polish round (prompts.mjs `polish`): a new game that passed the bots but still reads as
+    /// unfinished next to the gold set (quality.mjs) goes back to Muse once. The polished version
+    /// ships only if it validates, scores higher and passes the bots; otherwise the checked one does.
+    /// Shown as one more fix round, so Studio's screens need no new step.
+    private func polish(_ checked: (MicrogameExpansion, StudioPlaytest.Report), system: String, request: String,
+                        onEvent: @MainActor (Event) -> Void) async -> (MicrogameExpansion, StudioPlaytest.Report) {
+        guard checked.1.passed, let quality = try? await studio.quality(checked.0, request: request) else { return checked }
+        lastStats.quality = quality.score
+        guard quality.needsPolish else { return checked }
+        do {
+            onEvent(.repairing(round: lastStats.repairRounds + 1, issues: quality.lines))
+            let manifest = checked.0.authoringJSON.isEmpty ? checked.0.authoring.jsonString() : checked.0.authoringJSON
+            let reply = try await ask(system: system, user: MicrogamePrompts.polish(studio, request: request, manifest: manifest, lines: quality.lines),
+                                      purpose: "microgame polish")
+            onEvent(.expanding)
+            let expansion = try await studio.expand(text: reply)
+            guard expansion.ok, let better = try? await studio.quality(expansion, request: request), better.score > quality.score else { return checked }
+            onEvent(.playtesting(bots: StudioPlaytest.bots.count))
+            let report = try await studio.gate(expansion, seed: 1)
+            onEvent(.playtested(report))
+            guard report.passed else { return checked }
+            lastStats.quality = better.score
+            lastStats.polished = true
+            return (expansion, report)
+        } catch {
+            // Polish is a bonus: keep the game that already passed.
+            Self.log("polish skipped: \(error.localizedDescription)")
+            return checked
         }
     }
 

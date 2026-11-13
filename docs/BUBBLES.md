@@ -1568,6 +1568,9 @@ screens call them.
     func expand(text: String) async throws -> MicrogameExpansion   // model output: keeps its key order
     func gate(_ e: MicrogameExpansion, seed: Int) async throws -> StudioPlaytest.Report
     func wrap(_ e: MicrogameExpansion, id: String, brief: BubbleBrief?, emoji: String?) async throws -> BubbleManifest
+    func examples(for request: String, count: Int = 2) async throws -> (ids: [String], text: String)
+    func prompt(_ name: String, _ args: [String: JSONValue]) async throws -> String   // prompts.mjs
+    func quality(_ e: MicrogameExpansion, request: String) async throws -> MicrogameQuality  // quality.mjs
 }
 @MainActor final class MicrogameComposer {
     init(muse: any MicrogameMuse = MuseClient.studio, studio: MicrogameStudio = .shared, maxRepairRounds: Int = 3)
@@ -1585,9 +1588,12 @@ protocol MicrogameMuse { func chatJSON(model:system:user:options:) async throws 
 are `MicrogameStudioError` (page missing, load failed, engine unavailable, JavaScript, timed out). A call
 that times out throws the page away; the next call loads a fresh one.
 
-**Flow.** `compose`: the system prompt (`MicrogamePrompts.system`) is built from `catalog()` at run time:
-every fragment's `describe`, params, requires, provides and slots, the looks, the engine catalog, the
-format rules (SPEC.md 1.1–1.4 and 2) and three complete example manifests. Muse's reply text goes to
+**Flow.** `compose`: the system prompt (`MicrogamePrompts.system`, text from
+`authoring/expander/prompts.mjs`) is built from the catalog at run time: every fragment's `describe`,
+params, requires, provides and slots, the looks, the engine catalog, the format rules (SPEC.md 1.1–1.4
+and 2) and the two closest gold games. Muse starts its reply with a `design` block (pitch, theme items,
+verb, twist, a three-step arc, lose and win, juice, look, voice); the expander ignores it, and it stays in
+`content.authoring_json` for later changes. Muse's reply text goes to
 `expand(text:)`. Model errors go back with their pointers, for up to `maxRepairRounds`. Then the gate
 (the five `StudioPlaytest` bots, the same flags; runs capped at 180 s as in `authoring/playtest`); blocking
 flags get one more repair. If neither version passes, the one with fewer blocking flags ships, and the
@@ -1595,7 +1601,28 @@ flags get one more repair. If neither version passes, the one with fewer blockin
 authoring manifest, with fragment versions pinned, as text in `content.authoring_json`, and sets `studio`
 (models, time). `revise` starts from `content.authoring_json` (the text, so Muse sees the real key order)
 and keeps the Bubble's id, brief and lineage, with `version + 1`.
-`lastStats` says whether the first draft validated and how many repair rounds it took.
+`lastStats` says whether the first draft validated, how many repair rounds it took, the quality score and
+whether it was polished.
+
+**Quality and polish.** A new game that passes the bots then goes through the quality check
+(`authoring/expander/quality.mjs`, no model): no palette, backdrop or sound, fragment roles or the game's
+own pieces drawn as fallback shapes, placeholder text, the request's theme words missing from what
+players read, no ramp in an action game, thin content, no writing of its own, a generic title. Each
+issue is major (−15) or minor (−5) from 100; the 16 gold games score 100. Any major issue, or a score
+under 85, sends the lines back to Muse for one polish round (prompts.mjs `polish`: keep how it plays,
+fix the art, sound, words and feedback). The polished version ships only if it validates, scores higher
+and passes the bots. In the app it shows as one more fix round.
+
+**One source for the app and the server.** The prompts, the quality check and the whole loop live in
+the Studio bundle, so the server's generator and the app send Muse the same text:
+`MicrogameStudio.prompt(name, argsJSON)` (`system`, `compose`, `revise`, `repair`, `playtest_repair`,
+`polish`, `issues`), `MicrogameStudio.quality(manifestJSON, request)` → `{score, major, issues, lines}`,
+and `MicrogameStudio.compose(argsJSON, ask, onEvent)` → a Promise of `{manifest, stats, bots, gate,
+quality}` (`authoring/expander/pipeline.mjs`), where `ask(system, user, purpose)` returns Muse's reply
+text (or `{content, model}`), `onEvent` gets `{kind, summary, …}` (the kinds above plus `polishing`),
+and `argsJSON` is `{request, brief, base?}` (a `base` microgame manifest makes it a revision). A request
+that carries Studio's agreed anatomy (7.13) gets it as its own prompt section, with every rule's check
+as a hard constraint.
 
 **Key order.** Swift's `JSONValue` writes objects with sorted keys, and the engine reads key order in
 function `params` (positional) and state `init`s (an init reads only earlier state). So games never
@@ -1639,7 +1666,10 @@ next levels stay on-device (`revise` reads the server game's `content.authoring_
 
 **Gold examples.** Muse's prompt shows the two gold games closest to the request (`authoring/gold/`, 16
 hand-made games paired with requests; `expander/gold.mjs` picks them and `MicrogameStudio.examples(for:)`
-returns them). A theme or franchise the person asks for is kept; the gold games themselves are original.
+returns them). Each entry's `themes` (words people type for that kind of game, franchises included) is used
+for matching only. Each example is shown as the reply Muse should give: its `design`, then the manifest.
+A theme or franchise the person asks for is kept, with its real names; the gold games themselves are
+original.
 `MicrogameComposer.lastStats.examples` records which were used.
 
 ### 7.13 Game anatomy: agreeing how the game works

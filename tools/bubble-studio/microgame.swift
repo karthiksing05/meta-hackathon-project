@@ -79,7 +79,7 @@ func fakeMicrogameMuse() -> ScriptedMicrogameMuse {
     let catalog: MicrogameCatalog
     do { catalog = try await studio.catalog() } catch { fail(error.localizedDescription) }
     say("Studio page ready in \(String(format: "%.2f s", Date().timeIntervalSince(started))): \(catalog.fragments.count) fragments, \(catalog.looks.count) looks, " +
-        "\(catalog.examples.count) examples, writes \(catalog.gameFormat); system prompt \(MicrogamePrompts.system(catalog).count) chars")
+        "\(catalog.examples.count) examples, writes \(catalog.gameFormat); system prompt \((try? await MicrogamePrompts.system(studio))?.count ?? 0) chars")
     say("")
 
     let composer = MicrogameComposer(muse: muse, studio: studio, maxRepairRounds: args.int("repairs") ?? 3)
@@ -124,6 +124,7 @@ func fakeMicrogameMuse() -> ScriptedMicrogameMuse {
     }
     let stats = composer.lastStats
     say("Examples in the prompt: \(stats.examples.isEmpty ? "the fixed set" : stats.examples.joined(separator: ", "))")
+    say("Quality: \(stats.quality.map { "\($0)/100" } ?? "not checked")\(stats.polished ? " after a polish round" : "")")
     say("Muse: \(stats.museCalls) calls (\(stats.models.joined(separator: ", "))) · first draft \(stats.firstDraftValid == true ? "valid" : "invalid") · " +
         "\(stats.repairRounds) repair rounds\(stats.playtestRepair ? " + 1 playtest repair" : "") · \(secondsText(stats.seconds))")
     if !composer.libraryIssues.isEmpty {

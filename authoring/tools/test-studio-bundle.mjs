@@ -133,6 +133,28 @@ for (const name of games) {
   rows.push(row);
 }
 
+// Prompts, quality and the whole pipeline (prompts.mjs, quality.mjs, pipeline.mjs) through the bundle.
+{
+  console.log('\n== prompts, quality, compose');
+  const sys = S.prompt('system', '{}');
+  if (!sys.includes('"design"') || !sys.includes('## Fragments')) fail('prompt system: missing the design block or the library');
+  const anat = S.prompt('compose', JSON.stringify({ request: 'a deflect game\n\nAgreed game anatomy (follow the rules and mechanics exactly, not just the look):\n1. Shots bounce.', brief: { intent: 'x' } }));
+  if (!anat.includes('It is the spec') || anat.indexOf('Agreed game anatomy') < anat.indexOf('Brief:')) fail('prompt compose: the anatomy is not its own section');
+  for (const name of ['revise', 'repair', 'playtest_repair', 'polish']) if (typeof S.prompt(name, '{}') !== 'string') fail(`prompt ${name}`);
+  const read = (f) => readFileSync(join(authoringDir, 'games', f), 'utf8');
+  const plainQ = JSON.parse(S.quality(read('tide_taps.authoring.json'), 'a jellyfish tapping game'));
+  const goldQ = JSON.parse(S.quality(read('gold_aura_farm.authoring.json'), 'a stupid brainrot game where you farm aura by tapping on beat'));
+  console.log(`  quality: tide_taps ${plainQ.score} (${plainQ.major} major), gold_aura_farm ${goldQ.score}`);
+  if (!(goldQ.score === 100 && plainQ.major > 0)) fail('quality: gold should score 100 and a plain game should have major issues');
+  const replies = ['{"authoring":"microgame-authoring/0.1","meta":{"title":"x"},"uses":[{"fragment":"scor"}]}', read('tide_taps.authoring.json'), read('gold_aura_farm.authoring.json')];
+  let n = 0;
+  const kinds = [];
+  const out = JSON.parse(await S.compose(JSON.stringify({ request: 'a brainrot game where you farm aura by tapping on beat', brief: { intent: 'farm aura' } }),
+    async () => ({ content: replies[Math.min(n++, replies.length - 1)], model: 'scripted' }), (e) => kinds.push(e.kind)));
+  console.log(`  compose: ${kinds.join(' → ')} · quality ${out.quality.score} · polished ${out.stats.polished}`);
+  if (!out.stats.polished || out.quality.score !== 100 || out.manifest.formula !== 'microgame' || !kinds.includes('polishing')) fail('compose: the polish round should replace the plain game with the better one');
+}
+
 console.log('\ngame               expand ms   bundle gate s   node gate s   pass (bundle/node)');
 for (const r of rows) {
   console.log(`${r.name.padEnd(18)} ${r.expandMs.toFixed(1).padStart(9)}   ${r.gateS.toFixed(2).padStart(13)}   ${(r.nodeS ?? NaN).toFixed(2).padStart(11)}   ${r.passed}/${r.nodePassed ?? '-'}`);
