@@ -16,7 +16,7 @@
 //        one JSON turn on the fast model; 503 muse_not_configured, 429 busy, 502 when Muse's reply isn't an anatomy
 //   POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?} -> {content, model, usage}
 //        one JSON turn on a Muse model, for the Go API's harness steps; the key never leaves this container
-//   POST /verify          {game, log} (both as text)               -> the engine's replay result {ok, game_hash_ok, recomputed, claimed, problems}
+//   POST /verify          {game, log, state?: [names]} (text)               -> the engine's replay result {ok, game_hash_ok, recomputed, claimed, problems}
 //   GET /healthz -> {"status":"ok","museConfigured":bool,"fragments":n}
 
 import { createServer } from 'node:http';
@@ -111,7 +111,8 @@ async function verifyRun(req, res) {
     return json(res, 400, { error: 'game and log are required, both as text' });
   }
   try {
-    return json(res, 200, studio.verify(input.game, input.log));
+    const names = Array.isArray(input.state) ? input.state.filter((n) => typeof n === 'string').slice(0, 12) : undefined;
+    return json(res, 200, studio.verify(input.game, input.log, names));
   } catch (e) {
     log('verify failed', { error: String(e?.message ?? e).slice(0, 200) });
     return json(res, 500, { error: 'verify_failed' });

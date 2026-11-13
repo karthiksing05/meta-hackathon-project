@@ -554,7 +554,7 @@ func (s *Server) playRound(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
-	res, code, msg := s.verifyRun(ctx, text, logText)
+	res, code, msg := s.verifyRun(ctx, text, logText, groupPlayOf(g).Result.State...)
 	if res == nil {
 		writeErr(w, code, msg)
 		return

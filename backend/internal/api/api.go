@@ -180,6 +180,7 @@ func (s *Server) Handler() http.Handler {
 			r.Use(s.requireAuth)
 			r.Get("/", s.listCreations)
 			r.Post("/", s.createCreation)
+			r.Put("/{id}", s.replaceCreation)
 			r.Get("/{id}", s.getCreation)
 			r.Get("/{id}/source", s.creationSource)
 			r.Post("/{id}/publish", s.publishCreation)

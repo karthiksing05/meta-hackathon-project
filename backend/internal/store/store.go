@@ -52,6 +52,9 @@ type Store interface {
 	DeleteRefresh(ctx context.Context, hash string) error
 
 	InsertGame(ctx context.Context, g *model.Game) error
+	// ReplaceGameContent swaps what a package holds (files, title, rule, tags, score model, group_play, ...) on an existing
+	// game and keeps its id, owner, likes, plays, scores, sound, sponsor and draft state.
+	ReplaceGameContent(ctx context.Context, g *model.Game) error
 	GameByID(ctx context.Context, id string) (*model.Game, error)
 	GameBySlug(ctx context.Context, slug string) (*model.Game, error)
 	AllGames(ctx context.Context, limit int) ([]model.Game, error) // newest first
