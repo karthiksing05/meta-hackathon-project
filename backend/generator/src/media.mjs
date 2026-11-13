@@ -215,6 +215,7 @@ export function mediaBrief(media) {
     for (const f of (Array.isArray(m.frames) ? m.frames : []).slice(0, 12)) out.push(`  frame at ${sec(f.t)}: ${str(f.desc ?? '', 160) || '(no description)'}  [picture: ${f.asset}]`);
     const a = m.assets ?? {};
     if (a.clip) out.push(`  [picture: ${a.clip}, the whole clip as a slideshow]`);
+    if (a.beats && Array.isArray(m.beats) && m.beats.length) out.push(`  [picture: ${a.beats}, one still per beat, in order: draw it with "frame" set to the beat's index (0 to ${Math.min(8, m.beats.length) - 1}) to show that beat, e.g. one quiz question or story step per beat in content order with "frame": "= get_or(order, qi, 0)"]`);
     if (a.restyled) out.push(`  [picture: ${a.restyled}, this photo's subject redrawn as a cartoon game sprite with a transparent background: use it for a character]`);
   }
   const note = media.find((m) => m.note)?.note;
@@ -304,6 +305,11 @@ export async function applyMedia({ manifest, media, files, studio, muse = null, 
       if (!inBeat.length) inBeat = [nearest((bt.t + bt.end) / 2)];
       jobs.push({ name: bt.asset, kind: 'clip', jpgs: inBeat.slice(0, 6).map((x) => x.jpg), seconds: Math.max(1, (bt.end - bt.t) / 1000) });
     }
+    if (m.assets?.beats && used(m.assets.beats) && Array.isArray(m.beats) && m.beats.length) {
+      // One still per beat (a little into it, past the cut), frame k = beat k; no fps: the game picks the frame.
+      const stills = m.beats.slice(0, 8).map((bt) => nearest(bt.t + Math.min(1500, (bt.end - bt.t) / 2)).jpg);
+      jobs.push({ name: m.assets.beats, kind: 'sheet', jpgs: stills });
+    }
     if (m.assets?.clip && used(m.assets.clip)) {
       const pick = frames.length <= 8 ? frames : Array.from({ length: 8 }, (_, i) => frames[Math.floor((i * frames.length) / 8)]);
       jobs.push({ name: m.assets.clip, kind: 'clip', jpgs: pick.map((x) => x.jpg), seconds: Math.max(1, (m.durationMs ?? 8000) / 1000) });
@@ -340,13 +346,16 @@ export async function applyMedia({ manifest, media, files, studio, muse = null, 
         return { j, uri: dataURI('image/jpeg', b), w: 160, h: Math.max(1, Math.round((160 * s.h) / s.w)) };
       }
       if (!(await hasFFmpeg())) {
+        if (j.kind === 'sheet') throw new Error('a beat sheet needs ffmpeg');
         const s = jpegSize(j.jpgs[0]) ?? { w: 16, h: 9 };
         return { j, uri: dataURI('image/jpeg', j.jpgs[0]), w: 160, h: Math.max(1, Math.round((160 * s.h) / s.w)) }; // one still frame
       }
       const b = await sheet(j.jpgs, Math.round(px * 0.8), q + 2);
       const s = jpegSize(b) ?? { w: 16 * j.jpgs.length, h: 9 };
       const frameW = s.w / j.jpgs.length;
-      return { j, uri: dataURI('image/jpeg', b), w: 160, h: Math.max(1, Math.round((160 * s.h) / frameW)), frames: j.jpgs.length, fps: Math.max(0.5, Math.round((j.jpgs.length / j.seconds) * 100) / 100) };
+      // A clip plays on the presentation clock (fps); a beat sheet holds still and the game picks the frame (fps 0).
+      const fps = j.kind === 'clip' ? Math.max(0.5, Math.round((j.jpgs.length / j.seconds) * 100) / 100) : 0;
+      return { j, uri: dataURI('image/jpeg', b), w: 160, h: Math.max(1, Math.round((160 * s.h) / frameW)), frames: j.jpgs.length, fps };
     } catch (e) {
       j.failed = String(e?.message ?? e).slice(0, 200);
       return null;
@@ -371,7 +380,7 @@ export async function applyMedia({ manifest, media, files, studio, muse = null, 
   const nextArt = { ...art, sprites: { ...sprites } };
   for (const e of fits) {
     const was = sprites[e.j.name] ?? {};
-    nextArt.sprites[e.j.name] = { image: e.uri, w: e.w, h: e.h, ...(e.frames > 1 ? { frames: e.frames, cols: e.frames, fps: e.fps } : {}), ...(was.color ? { color: was.color } : {}) };
+    nextArt.sprites[e.j.name] = { image: e.uri, w: e.w, h: e.h, ...(e.frames > 1 ? { frames: e.frames, cols: e.frames, ...(e.fps > 0 ? { fps: e.fps } : {}) } : {}), ...(was.color ? { color: was.color } : {}) };
   }
   const expansion = studio.expand(JSON.stringify({ ...authoring, art: nextArt }));
   if (!expansion.ok) {

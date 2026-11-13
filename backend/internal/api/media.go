@@ -645,7 +645,9 @@ func mediaContext(items []*mediastore.Item, note string, restyle bool) []map[str
 				beats = append(beats, map[string]any{"t": b.T, "end": b.End, "text": b.Text, "asset": fmt.Sprintf("%s_beat%d", pre, j+1)})
 			}
 			entry["beats"] = beats
-			entry["assets"] = map[string]string{"clip": pre + "_clip"}
+			// clip: the whole video as a timed-frame slideshow; beats: one still per beat, frame k = beat k (for a
+			// question or story step per beat, picked with "frame").
+			entry["assets"] = map[string]string{"clip": pre + "_clip", "beats": pre + "_beats"}
 			if len(it.Cuts) > 0 {
 				entry["cuts"] = it.Cuts
 			}
