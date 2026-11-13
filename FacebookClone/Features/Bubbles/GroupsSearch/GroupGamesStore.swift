@@ -102,6 +102,11 @@ final class GroupGamesStore {
                                     isMostImproved: row.user.id == improvedID, gamesPlayed: row.gamesPlayed)
                 }
                 weeklyStates[group.id] = .idle
+            } catch GamesAPIError.notFound {
+                // Not a Group on the games server (the app's own Groups): an empty week, whose
+                // empty state offers a game, not a failure to retry forever.
+                weekly[group.id] = []
+                weeklyStates[group.id] = .idle
             } catch {
                 weeklyStates[group.id] = .failed(error.localizedDescription)
             }

@@ -47,17 +47,12 @@ struct GroupGameBoardsSection: View {
                 Task { await load() }
             }
         } else if games.isEmpty {
-            LiveDataStateView(
-                kind: .empty(group.isMember ? "Make one for the Group and its best scores show up here." : "Join the Group to play its games and get on the boards."),
-                title: "No boards yet",
-                action: group.isMember
-                    ? LiveDataStateView.Action(title: "Make one for the Group", symbol: "sparkles") {
-                        router.openStudio(StudioLaunch(mode: .create, groupID: group.id))
-                    }
-                    : LiveDataStateView.Action(title: "Join the Group", symbol: "person.3.fill") {
-                        bubbleStore.join(group) { Task { await load() } }
-                    }
-            )
+            // The weekly board card above already offers "Make one for the Group" (or "Join the
+            // Group"), so this stays a quiet line instead of a second button.
+            Text("Each game's best scores show up here once the Group has games.")
+                .font(.fbMeta)
+                .foregroundStyle(FBColor.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
         } else {
             VStack(spacing: 14) {
                 ForEach(games.prefix(maxGames)) { game in
