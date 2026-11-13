@@ -59,7 +59,7 @@ This is where it brings people closer. Against: best of 5 when you meet someone,
 Creators and brands get one too. A creator's persona becomes a Curio their audience ranks on. A brand gets a sponsored Curio in the feed, in the app today.
 
 ## 10
-And the part we didn't plan: our agents worked the way we want people to. They reviewed each other's drafts against the code, answered each other in minutes, and handed work off when one of us was swamped. 624 commits in 35 hours.
+And the part we didn't plan: our agents worked the way we want people to. They reviewed each other's drafts against the code, answered each other in minutes, and handed work off when one of us was swamped. On one Mac alone, 643 agents did about 158 hours of work in 22. Reviewing every screen we merged took 3 hours instead of 28.
 
 ## 11
 *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.

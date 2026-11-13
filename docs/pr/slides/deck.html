@@ -433,6 +433,23 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .bo5 em { font-style: normal; font-size: 19px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; text-align: center; line-height: 1.1; background: var(--grad); -webkit-background-clip: text; color: transparent; }
 .bo5 .r { width: 26px; height: 26px; border-radius: 50%; border: 4px solid; border-image: none; border-color: #C9B8FF #8DB4FF #8DB4FF #C9B8FF; }
 .bo5 i { font-style: normal; font-size: 15px; color: var(--muted); text-align: center; line-height: 1.2; margin-top: 4px; }
+
+/* no footers on any slide (Karthik, 2026-11-13) */
+.slide .foot { display: none !important; }
+
+/* slide 10: collaboration counts and task speed */
+.wf2 { display: grid; grid-template-columns: 330px 1fr; gap: 50px; margin-top: 30px; }
+.nums { display: flex; flex-direction: column; gap: 16px; }
+.nums b { display: block; font-size: 56px; font-weight: 900; line-height: 1; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+.nums span { display: block; font-size: 20px; color: var(--sub); line-height: 1.25; margin-top: 4px; }
+.tkey { font-size: 19px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.tkey i { width: 26px; height: 14px; border-radius: 4px; display: inline-block; } .tkey i.bs { margin-left: 18px; }
+.tb { display: grid; grid-template-columns: 210px 1fr; gap: 16px; align-items: center; padding: 10px 0; border-top: 2px solid #EEF0F3; }
+.tl b { display: block; font-size: 22px; font-weight: 800; line-height: 1.15; } .tl span { font-size: 17px; color: var(--muted); font-weight: 700; }
+.tbars { display: grid; grid-template-columns: max-content 1fr; align-items: center; column-gap: 12px; row-gap: 6px; }
+.tbars > div { height: 22px; border-radius: 6px; } .bw { background: var(--grad); } .bs { background: #D5D9E0; }
+.tbars em { white-space: nowrap; font-style: normal; font-size: 19px; font-weight: 800; color: var(--ink); } .tbars em.g { color: var(--muted); }
+.slide .cards3.wf { margin-top: 26px; } .wf .cd { padding: 20px 24px; } .wf .cd p { font-size: 21px !important; } .wf .cd b { font-size: 28px !important; } .wf .cd em { font-size: 18px !important; }
 </style>
 </head>
 <body>
@@ -591,7 +608,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
     <div class="ccr duo">
       <figure class="pp a"><div class="lp iph"><div class="scr" id="lpscr"><i class="di"></i>Karthik<br><small>live</small></div></div><figcaption><b>Karthik</b>his phone</figcaption></figure>
       <div class="bo5"><em>Best of 5</em><span class="r"></span><span class="r"></span><span class="r"></span><span class="r"></span><span class="r"></span><i>same Curios, same seeds</i></div>
-      <figure class="pp b"><div class="lp iph"><div class="scr" id="lpscr2"><i class="di"></i>Someone new<br><small>live</small></div></div><figcaption><b>Someone from his Group</b>they haven't met yet</figcaption></figure>
+      <figure class="pp b"><div class="lp iph"><div class="scr" id="lpscr2"><i class="di"></i>Bayan<br><small>live</small></div></div><figcaption><b>Bayan</b>Bayan's phone</figcaption></figure>
     </div>
   </div>
   <div class="foot"><span>Same seed for everyone; boards only show Groups you share; everything is opt-in. <b style="color:#0866FF">Blue</b> = competing · <b style="color:#8A3FFC">violet</b> = collaborating</span><span class="pg"></span></div>
@@ -626,9 +643,11 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
     <div class="cd"><em>In sync</em><b>Two sessions, one answer</b><p>"Can the app attach photos yet?" came back with the build and the exact taps, minutes later.</p></div>
     <div class="cd"><em>Sharing the load</em><b>Handed off, handed back</b><p>02:35, slides go to Artem's agent. Ten reviewed drafts later, 04:55, back to Karthik's Mac.</p></div>
   </div>
-  <div class="cph2"><div class="cpl"><b>624 commits</b><span>in 35 hours, 87% co-written with an agent</span><small>commits per hour on main</small></div><svg viewBox="0 0 1500 450" width="1067" height="320"><defs><linearGradient id="cg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0866FF"/><stop offset="1" stop-color="#8A3FFC"/></linearGradient></defs>
-      <line x1="0" y1="400" x2="1500" y2="400" stroke="#E4E6EB" stroke-width="3"/><rect x="3.0" y="394.4" width="36.9" height="5.6" rx="4" fill="url(#cg)"/><rect x="45.9" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="88.7" y="360.9" width="36.9" height="39.1" rx="4" fill="url(#cg)"/><rect x="131.6" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="174.4" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="217.3" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="260.1" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="303.0" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="345.9" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="388.7" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="431.6" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="474.4" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="517.3" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="560.1" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="603.0" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="645.9" y="349.7" width="36.9" height="50.3" rx="4" fill="url(#cg)"/><rect x="688.7" y="377.6" width="36.9" height="22.4" rx="4" fill="url(#cg)"/><rect x="731.6" y="388.8" width="36.9" height="11.2" rx="4" fill="url(#cg)"/><rect x="774.4" y="176.5" width="36.9" height="223.5" rx="4" fill="url(#cg)"/><rect x="817.3" y="137.4" width="36.9" height="262.6" rx="4" fill="url(#cg)"/><rect x="860.1" y="338.5" width="36.9" height="61.5" rx="4" fill="url(#cg)"/><rect x="903.0" y="187.6" width="36.9" height="212.4" rx="4" fill="url(#cg)"/><rect x="945.9" y="265.9" width="36.9" height="134.1" rx="4" fill="url(#cg)"/><rect x="988.7" y="260.3" width="36.9" height="139.7" rx="4" fill="url(#cg)"/><rect x="1031.6" y="372.1" width="36.9" height="27.9" rx="4" fill="url(#cg)"/><rect x="1074.4" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="1117.3" y="120.6" width="36.9" height="279.4" rx="4" fill="url(#cg)"/><rect x="1160.1" y="193.2" width="36.9" height="206.8" rx="4" fill="url(#cg)"/><rect x="1203.0" y="237.9" width="36.9" height="162.1" rx="4" fill="url(#cg)"/><rect x="1245.9" y="20.0" width="36.9" height="380.0" rx="4" fill="url(#cg)"/><rect x="1288.7" y="59.1" width="36.9" height="340.9" rx="4" fill="url(#cg)"/><rect x="1331.6" y="170.9" width="36.9" height="229.1" rx="4" fill="url(#cg)"/><rect x="1374.4" y="210.0" width="36.9" height="190.0" rx="4" fill="url(#cg)"/><rect x="1417.3" y="20.0" width="36.9" height="380.0" rx="4" fill="url(#cg)"/><rect x="1460.1" y="321.8" width="36.9" height="78.2" rx="4" fill="url(#cg)"/><text x="21.4" y="440" text-anchor="start" font-size="24" fill="#65676B" font-family="Figtree">Wed 6 pm</text><text x="664.3" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Thu 9 am</text><text x="1050.0" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Thu 6 pm</text><text x="1307.1" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Fri midnight</text><text x="1478.6" y="440" text-anchor="end" font-size="24" fill="#65676B" font-family="Figtree">Fri 4 am</text>
-      <text x="1240" y="14" text-anchor="end" font-size="22" fill="#8A8D91" font-family="Figtree">peak: 68 an hour</text></svg></div>
+  <div class="wf2">
+    <div class="nums"><div><b>643</b><span>agents on one Mac: 3 lead sessions and 640 helpers</span></div><div><b>80</b><span>messages sent session to session, no human typing</span></div><div><b>7×</b><span>158 agent-hours of work in 22.5 hours</span></div></div>
+    <div class="tasks"><div class="tkey"><i class="bw"></i>with a team of agents <i class="bs"></i>one session alone (estimated)</div>
+<div class="tb"><div class="tl"><b>Review every merged screen</b><span>278 agents</span></div><div class="tbars"><div class="bw" style="width:91px"></div><em>3.1 h</em><div class="bs" style="width:840px"></div><em class="g">28 h</em></div></div><div class="tb"><div class="tl"><b>Build 21 new Curios</b><span>21 agents</span></div><div class="tbars"><div class="bw" style="width:28px"></div><em>57 min</em><div class="bs" style="width:236px"></div><em class="g">7.9 h</em></div></div><div class="tb"><div class="tl"><b>Ship 9 collaboration features</b><span>21 agents</span></div><div class="tbars"><div class="bw" style="width:51px"></div><em>1.7 h</em><div class="bs" style="width:141px"></div><em class="g">4.7 h</em></div></div></div>
+  </div>
   <div class="foot"><span>git log on main, 04:30 PST. Agents synced through Slack, a shared canvas and CLAUDE.md.</span><span class="pg"></span></div>
 </section>
 
