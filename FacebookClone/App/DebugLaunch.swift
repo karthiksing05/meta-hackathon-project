@@ -10,6 +10,7 @@ import SwiftUI
 /// - `FB_AUTH=screen|guest`: force the sign-in screen, or continue as a guest
 /// - `FB_OPEN`: one of
 ///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `find-friends`, `sound:<id>`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
+///   `play-file:<path>` (a game manifest JSON file on the Mac running the simulator: added for this session and played),
 ///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
@@ -63,6 +64,10 @@ enum DebugLaunch {
             Task { @MainActor in
                 let bubble = await bubbleStore.loadGame(id: arg)
                 router.play(bubble?.id ?? arg)
+            }
+        case "play-file":
+            if let data = FileManager.default.contents(atPath: arg), let manifest = try? BubbleManifest.decode(data) {
+                router.play(bubbleStore.publish(manifest).id)
             }
         case "burst":
             let replay = bubbleStore.bubble(id: arg)?.featuredRun?.replay
