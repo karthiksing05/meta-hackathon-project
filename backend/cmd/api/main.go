@@ -87,7 +87,7 @@ func run(log *slog.Logger) error {
 		RefreshTTL: cfg.RefreshTTL, GamesBaseURL: cfg.GamesBaseURL, CORSOrigins: cfg.CORSOrigins,
 		MaxUploadMB: cfg.MaxUploadMB, Log: log,
 		Recs: engine, GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
-		HarnessContext: cfg.HarnessContext, Harness: hs0, Planner: planner,
+		HarnessContext: cfg.HarnessContext, Harness: hs0, Planner: planner, SponsorUsers: cfg.SponsorUsers,
 	})
 	if n, err := st.FailStaleJobs(ctx, "The server restarted while this game was being made. Please try again."); err != nil {
 		log.Warn("could not clear stale generation jobs", "err", err)

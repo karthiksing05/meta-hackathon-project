@@ -45,8 +45,10 @@ type Options struct {
 	// The game-making harness (internal/harness). HarnessContext turns on the job context and
 	// POST /v1/harness/plan; on by default, HARNESS_CONTEXT=0 turns it off.
 	HarnessContext bool
-	Harness        *harness.Harness
-	Planner        *harness.Planner
+	// SponsorUsers are the usernames (lowercase) of brand accounts: only they can mark a game as sponsored.
+	SponsorUsers map[string]bool
+	Harness      *harness.Harness
+	Planner      *harness.Planner
 }
 
 type Server struct {
@@ -103,6 +105,8 @@ func (s *Server) Handler() http.Handler {
 
 		r.Route("/games/{id}", func(r chi.Router) {
 			r.With(s.optionalAuth).Get("/", s.getGame)
+			r.With(s.requireAuth).Put("/sponsor", s.setGameSponsor)
+			r.With(s.requireAuth).Delete("/sponsor", s.clearGameSponsor)
 			r.With(s.requireAuth).Put("/sound", s.setGameSound)
 			r.With(s.requireAuth).Delete("/sound", s.clearGameSound)
 			r.With(s.requireAuth).Put("/like", s.like(true))

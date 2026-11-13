@@ -122,6 +122,12 @@ loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, s
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
 
+## Sponsored games
+
+A brand's playable game shown in the feed like an ad. The server decides what is sponsored; the app draws a card for any game or feed item that carries `sponsor: {name, avatarUrl?, cta, url?}` (`cta` defaults to "Play now"; no `sponsor` means not sponsored).
+`PUT /v1/games/{id}/sponsor {name, avatarUrl?, cta?, url?}` (its owner, and only a **brand account**) marks a game; `DELETE` takes it off; `POST /v1/generate` takes `sponsor` too. Brand accounts are the usernames in `SPONSOR_USERS` (api.env, comma separated;
+none by default), so a person can't pass their own game off as an ad. Avatar and link must be http(s). Tapping a card is a feed moment event, `{kind: "sponsor_tap", gameID}`. Demo brands must be fictional (CLAUDE.md); the server doesn't check names.
+
 ## Sounds
 
 Loops that play behind games in the feed, like TikTok sounds. A sound is a published package, stored and served like a game (`https://games.<domain>/<soundId>/<file>`): a zip with a `manifest.json`

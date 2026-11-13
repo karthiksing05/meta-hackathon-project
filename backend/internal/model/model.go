@@ -51,6 +51,7 @@ type Game struct {
 	CreatedAt     time.Time   `bson:"createdAt"`
 	Score         *ScoreModel `bson:"score,omitempty"`    // what the board ranks and how (nil: points, higher first)
 	Sound         *GameSound  `bson:"sound,omitempty"`    // the sound that plays behind it
+	Sponsor       *Sponsor    `bson:"sponsor,omitempty"`  // a brand's playable ad
 	Unlisted      bool        `bson:"unlisted,omitempty"` // a draft: reachable by id and in its owner's creations, but not in the feed, search or Group lists
 }
 
@@ -74,6 +75,7 @@ type GameView struct {
 	ManifestURL   string         `json:"manifestUrl"`
 	CoverURL      string         `json:"coverUrl,omitempty"`
 	Unlisted      bool           `json:"unlisted,omitempty"`
+	Sponsor       *Sponsor       `json:"sponsor,omitempty"`
 	Sound         *GameSoundView `json:"sound,omitempty"`
 	Score         *ScoreView     `json:"score,omitempty"`
 	CreatedAt     time.Time      `json:"createdAt"`
@@ -194,6 +196,7 @@ type Job struct {
 	Context    map[string]any `bson:"context,omitempty"`
 	Anatomy    string         `bson:"anatomy,omitempty"`    // the agreed game anatomy, kept apart from the 2,000 character request
 	Sound      *GameSound     `bson:"sound,omitempty"`      // put behind the finished game
+	Sponsor    *Sponsor       `bson:"sponsor,omitempty"`    // set on the finished game (brand accounts only)
 	Draft      bool           `bson:"draft,omitempty"`      // the finished game starts unlisted
 	BaseGameID string         `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)
 	NextLevel  bool           `bson:"nextLevel,omitempty"`

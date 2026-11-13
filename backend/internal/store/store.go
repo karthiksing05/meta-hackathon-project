@@ -94,6 +94,9 @@ type Store interface {
 	SetGameUnlisted(ctx context.Context, gameID string, unlisted bool) error
 	DeleteGame(ctx context.Context, gameID string) error
 
+	// SetGameSponsor marks a game as a brand's ad, or takes the mark off (nil).
+	SetGameSponsor(ctx context.Context, gameID string, sp *model.Sponsor) error
+
 	// Sounds: loops that play behind games. Files are a published package; these keep the records, saves and use counts.
 	InsertSound(ctx context.Context, s *model.Sound) error
 	SoundByID(ctx context.Context, id string) (*model.Sound, error)

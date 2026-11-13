@@ -616,3 +616,36 @@ func TestMongoSoundsAndScores(t *testing.T) {
 		t.Fatalf("replaced: %v", s)
 	}
 }
+
+func TestMongoGameSponsor(t *testing.T) {
+	uri := os.Getenv("MONGO_TEST_URI")
+	if uri == "" {
+		t.Skip("MONGO_TEST_URI not set")
+	}
+	ctx := context.Background()
+	m, err := store.ConnectMongo(ctx, uri, "bubbles_test_sponsor_"+time.Now().Format("150405"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.Close(ctx)
+	defer m.DropDatabase(ctx)
+	id := "a0123456789abcdef0123456"
+	if err := m.InsertGame(ctx, &model.Game{ID: id, OwnerID: "u1", Title: "Ad", Description: "d", StorageKey: id, ManifestPath: "manifest.json", CreatedAt: time.Now().UTC().Truncate(time.Millisecond)}); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.SetGameSponsor(ctx, id, &model.Sponsor{Name: "Fizz Co", CTA: "Play now", URL: "https://fizz.example.com"}); err != nil {
+		t.Fatal(err)
+	}
+	if g, _ := m.GameByID(ctx, id); g.Sponsor == nil || g.Sponsor.Name != "Fizz Co" || g.Sponsor.URL != "https://fizz.example.com" {
+		t.Fatalf("sponsor: %+v", g.Sponsor)
+	}
+	if err := m.SetGameSponsor(ctx, id, nil); err != nil {
+		t.Fatal(err)
+	}
+	if g, _ := m.GameByID(ctx, id); g.Sponsor != nil {
+		t.Fatalf("after removing: %+v", g.Sponsor)
+	}
+	if err := m.SetGameSponsor(ctx, "b0123456789abcdef0123456", nil); err != store.ErrNotFound {
+		t.Fatalf("a missing game: %v", err)
+	}
+}
