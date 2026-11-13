@@ -206,6 +206,7 @@ arguments, `-4` too many games.
 | `mg_status(h)`, `mg_meta(h)`, `mg_state_json(h)`, `mg_diagnostics(h)` | JSON |
 | `mg_state_hash(h)` | 16 hex digits |
 | `mg_restart(h, seed_f64)` | `NaN` keeps the current seed |
+| `mg_verify(ptr, len)` | replays a log against a game: `{ok, recomputed, problems, …}` (below) |
 | `mg_panic_message()`, `mg_live_games()` | debugging |
 
 ## Challenges and verifiable replays
@@ -254,6 +255,16 @@ match `final`, and 1 otherwise, listing each mismatch (an edited score, a
 removed input or step, a different game file). A call whose step index
 doesn't match the steps replayed so far is reported too. `--json` prints
 `{ok, game_hash_ok, steps, recomputed, claimed, problems}`.
+
+The same check runs in WebAssembly: `mg_verify(ptr, len)` takes UTF-8 JSON
+`{"game": <exact game file text>, "log": <log text or object>}` and returns the
+same `{ok, game_hash_ok, steps, recomputed, claimed, problems}`. In JS it is
+`engine.verify(gameText, log)` (or `Microgame.verify`), and in the app's
+bundle `MicrogameEngine.verify(game_json, log)`. So a Node server that loads
+the engine bundle (the games generator already does) can verify a submitted
+run without the native CLI. `mg_hit_targets` also counts as a frame build in
+the log, since it builds the layout the next tap hits; the app's runtime calls
+it before every tap.
 
 A server can treat the log as the score submission: store it, run
 `verify`, and rank by the recomputed score.
