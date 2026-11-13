@@ -11,7 +11,8 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
-const R = require(join(here, '..', 'game-recs.js'));
+// The one copy of the recommender lives in the app's folders (backend/internal/recs/recs.go, scriptRel).
+const R = require(join(here, '..', '..', '..', '..', 'FacebookClone', 'Bubbles', 'Recommend', 'game-recs.js'));
 const app = R.app;
 
 const formulas = ['dodge', 'time', 'merge', 'guess', 'group', 'answer', 'make'];
