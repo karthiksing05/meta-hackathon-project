@@ -693,7 +693,7 @@
   function share(sdk) {
     var a = sdk.state.answer;
     var m = sdk.manifest || {};
-    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Bubble");
+    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Game");
     if (!a) return { headline: title, score_text: sdk.score + " points" };
     var total = a.total();
     var marks = [];

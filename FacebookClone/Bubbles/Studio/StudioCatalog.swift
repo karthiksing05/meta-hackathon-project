@@ -323,9 +323,9 @@ struct StudioPalette: Sendable, Hashable {
     var colors: BubbleColors
 
     static let all: [StudioPalette] = [
-        StudioPalette(id: "lilac-haze", top: "#C9B8FF", bottom: "#FFC8E8", mood: "cozy, soft, daily rituals",
-                      words: "lilac, rose pink, mint and butter yellow",
-                      colors: BubbleColors(bgTop: "#C9B8FF", bgBottom: "#FFC8E8", ink: "#2E1F5E", primary: "#9EF0DA", secondary: "#FFE59A", accent: "#9AD4FF", danger: "#FF9EC9")),
+        StudioPalette(id: "lilac-haze", top: "#C9B8FF", bottom: "#E6EEFF", mood: "cozy, soft, daily rituals",
+                      words: "lilac, pale ice blue, mint and butter yellow",
+                      colors: BubbleColors(bgTop: "#C9B8FF", bgBottom: "#E6EEFF", ink: "#2E1F5E", primary: "#9EF0DA", secondary: "#FFE59A", accent: "#9AD4FF", danger: "#FF5C8A")),
         StudioPalette(id: "peach-fizz", top: "#FFC2B0", bottom: "#FFE7A8", mood: "warm, sunny, food and picnics",
                       words: "peach, butter yellow, pink and sky blue",
                       colors: BubbleColors(bgTop: "#FFC2B0", bgBottom: "#FFE7A8", ink: "#4D2238", primary: "#FF8FB8", secondary: "#8FD6FF", accent: "#B8F2A6", danger: "#C9A8FF")),

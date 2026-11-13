@@ -325,8 +325,8 @@ enum StudioLookArt {
     // MARK: Glow: gradient, soap bubbles with halos
 
     private static let iridescent = Gradient(colors: [
-        Color(hex: 0xFF9EC9), Color(hex: 0xFFE59A), Color(hex: 0x9EF0DA),
-        Color(hex: 0x9AD4FF), Color(hex: 0xC9B8FF), Color(hex: 0xFF9EC9),
+        Color(hex: 0xADD8FF), Color(hex: 0xB8BFFF), Color(hex: 0xC9B2FF),
+        Color(hex: 0xE6EEFF), Color(hex: 0x9AD4FF), Color(hex: 0xADD8FF),
     ])
 
     private static func glow(_ context: inout GraphicsContext, _ size: CGSize, _ colors: StudioLookColors) {

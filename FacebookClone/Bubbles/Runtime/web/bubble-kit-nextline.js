@@ -753,7 +753,7 @@
   function share(sdk) {
     var a = sdk.state.nextline;
     var m = sdk.manifest || {};
-    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Bubble");
+    var title = (m.style && m.style.emoji ? m.style.emoji + " " : "") + (m.title || "Game");
     if (!a) return { headline: title, score_text: sdk.score + " points" };
     var played = a.results.filter(function (r) { return !!r; });
     var marks = played.map(function (r) { return r.mark; });

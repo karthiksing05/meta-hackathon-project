@@ -37,8 +37,8 @@ struct BubblePalette: Identifiable, Hashable {
 enum BubbleGlow {
     static let lilacHaze = BubblePalette(
         id: "lilac-haze", name: "Lilac haze",
-        topHex: 0xC9B8FF, bottomHex: 0xFFC8E8, inkHex: 0x2E1F5E, glowHex: 0xFFFFFF,
-        accentHexes: [0x9EF0DA, 0xFFE59A, 0x9AD4FF, 0xFF9EC9]
+        topHex: 0xC9B8FF, bottomHex: 0xE6EEFF, inkHex: 0x2E1F5E, glowHex: 0xFFFFFF,
+        accentHexes: [0x9EF0DA, 0xFFE59A, 0x9AD4FF, 0xB8A6FF]
     )
     static let peachFizz = BubblePalette(
         id: "peach-fizz", name: "Peach fizz",

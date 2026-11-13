@@ -46,7 +46,8 @@ enum StudioGlow {
 // MARK: - Backdrop
 
 /// The soft brand-gradient wash behind every Studio step. Slowly drifting glows; still with
-/// Reduce Motion. Tints toward the Bubble's palette once there is one.
+/// Reduce Motion. Always the blue-violet brand stops (the game's own colors stay in its card);
+/// a dark game palette only softens it.
 struct StudioBackdrop: View {
     var palette: BubblePalette? = nil
 
@@ -83,11 +84,7 @@ struct StudioBackdrop: View {
     }
 
     private var blobColors: [Color] {
-        guard let palette else { return [BubbleGlow.lilac, BubbleGlow.pink, BubbleGlow.peach] }
-        if palette.isDark {
-            return Array(palette.accents.prefix(3))
-        }
-        return [palette.top, palette.bottom, palette.accents.first ?? BubbleGlow.peach]
+        [GameColor.violet, GameColor.periwinkle, GameColor.sky]
     }
 
     private func blob(_ color: Color, diameter: CGFloat, opacity: Double) -> some View {

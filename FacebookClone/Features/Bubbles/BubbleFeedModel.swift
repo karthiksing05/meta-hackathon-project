@@ -105,6 +105,7 @@ final class BubbleFeedModel {
     func setVisible(_ visible: Bool) {
         guard visible != isVisible else { return }
         isVisible = visible
+        noteVisibility(visible)
         if visible {
             releaseTask?.cancel()
             if host != nil, liveItemID != nil, liveItemID == currentID {
@@ -128,6 +129,9 @@ final class BubbleFeedModel {
     func pageDidChange(to id: String?) {
         guard let store, let id, let index = store.feedItems.firstIndex(where: { $0.id == id }) else { return }
         store.noteFeedPosition(index)
+        if isVisible {
+            GameRecommender.shared.pageShown(feedItemID: id, gameID: store.feedItems[index].bubbleID)
+        }
         settleTask?.cancel()
         settleTask = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 90_000_000)
@@ -161,6 +165,7 @@ final class BubbleFeedModel {
             isTakenOver = true
         }
         host.restartInPlay()
+        noteRecs(.runStarted)
         Haptics.light()
     }
 
@@ -211,6 +216,7 @@ final class BubbleFeedModel {
             }
         }
         host?.restartInPlay()
+        noteRecs(.runStarted)
     }
 
     #if DEBUG
@@ -372,6 +378,23 @@ final class BubbleFeedModel {
         failure = nil
     }
 
+    // MARK: Recommender
+
+    /// Tells the recommender (GameRecommender) about the live page.
+    private func noteRecs(_ signal: GameRecommender.Signal) {
+        guard let bubbleID = item(id: liveItemID)?.bubbleID else { return }
+        GameRecommender.shared.note(signal, gameID: bubbleID)
+    }
+
+    /// Leaving the tab pauses the page; coming back resumes it (or starts a new session).
+    private func noteVisibility(_ visible: Bool) {
+        if visible {
+            GameRecommender.shared.feedVisible(feedItemID: currentItem?.id, gameID: currentItem?.bubbleID)
+        } else {
+            GameRecommender.shared.feedHidden()
+        }
+    }
+
     // MARK: Messages
 
     private func handle(_ message: BubbleBridgeMessage, itemID: String) {
@@ -384,6 +407,7 @@ final class BubbleFeedModel {
         case .takeover:
             if !isTakenOver {
                 liveScore = 0
+                noteRecs(.runStarted)
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
                     isTakenOver = true
                 }
@@ -407,6 +431,7 @@ final class BubbleFeedModel {
         liveScore = runResult.score
         let previous = store.bestScore(of: store.appStore.me, in: bubble)?.score
         store.record(runResult, in: bubble)
+        GameRecommender.shared.note(.runFinished, gameID: bubble.id)
         result = BubbleResultContext(bubbleID: bubble.id, result: runResult, previousBest: previous)
     }
 }

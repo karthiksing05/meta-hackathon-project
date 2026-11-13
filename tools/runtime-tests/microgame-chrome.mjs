@@ -92,7 +92,7 @@ try {
     const act = JSON.parse(await evaluate(`BubbleHost.activate(${JSON.stringify(id)}, ${JSON.stringify(JSON.stringify({ mode: 'play', muted: true }))})`));
     await sleep(600);
     const [cx, cy] = await pt(0.5, 0.5);
-    await touch('touchStart', cx, cy); await touch('touchEnd', cx, cy); // the intro card's "Tap to pop in"
+    await touch('touchStart', cx, cy); await touch('touchEnd', cx, cy); // the intro card's "Tap to play"
     await sleep(900);
     for (const step of PLANS[id] || [{ tap: [0.5, 0.5] }]) {
       if (step.tap) {
