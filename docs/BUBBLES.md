@@ -1613,7 +1613,25 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
 - The engine steps once per runtime tick (1000/60 ms), so replays and bot runs are deterministic. The
   engine is seeded from the run's RNG.
 - Its frames draw in one `space` layer, scaled to fit the 360×640 playfield. Audio goes through the
-  runtime's master gain (`fx.audio()`, new), so mute applies. Haptics and toasts go through `fx`.
+  runtime's master gain (`fx.audio()`, new), so mute applies. Haptics go through `fx`; the kit draws
+  toasts and shake itself (next item).
+- **Toasts, shake and pulses** (drawing only; runs, replays and `verify` are unchanged). The kit's
+  pure helpers are `Bubble.microgameMotion`, tested in `tools/runtime-tests/checks.js`.
+  - *Toasts:* one at a time, the newest replacing the last, at most 22 characters (the first clause
+    if it fits, else whole words and "…"). Each sits in a **toast lane**: a band that no text op and no
+    tap target crosses, just under the HUD first, then the first free band down (then up) the safe
+    area. With no free band there is no toast. It fades in (120 ms) and out in place, with no rise and
+    no scale pop. It lasts at most 900 ms (or the toast's own `ms` if shorter), and fades out within
+    90 ms as soon as the screen's words change, so it never crosses into the next round. A counter
+    ticking up doesn't count as a change. A toast fired in the same frame as a `success` haptic (a right
+    answer, which the game shows with its own colours) isn't drawn.
+  - *Shake:* the engine's shakes in one moment fold into one episode of at most 3 units for 150 ms,
+    decaying, and only within 800 ms of the player's own pointer input (never on a timeout). Only art
+    moves: text, tap targets, the HUD bands and the backdrop stay still (the frame is drawn in runs
+    of ops, each with its own offset). With nothing to move, or with clip ops, the shake becomes a
+    short tint at the canvas edges instead.
+  - *Pulses:* text ops are drawn at a scale between 1/1.08 and 1.08 whatever the game asks. Icon
+    pulses (1.15× at most) are held by the verifier's motion fixes (`authoring/verify/README.md`).
   Sound assets decode with `fx.audioContext()` (the shared context, created even while muted or
   suspended), and a sound that loads before any context exists decodes as soon as one does, so a run
   that opened muted or before the first tap still has its sounds and music once audio starts.

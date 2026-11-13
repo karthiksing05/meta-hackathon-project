@@ -135,6 +135,10 @@
       fonts: hasDOM ? gameFonts(gameJSON(sdk.content)) : [],
       fontsSince: Date.now(),
       fontsOk: !hasDOM,
+      clockMs: 0,        // drawing clock (runtime ticks), for toasts and shake
+      lastInput: null,   // clockMs of the player's last pointer down
+      shake: { prev: 0, start: null, amp: 0 },
+      toast: null,
     };
     sessions.set(sdk.state, sess);
     if (finalizer) finalizer.register(sdk.state, game);
@@ -236,6 +240,199 @@
   function toGame(sess, x, y) { return [(x - sess.ox) / sess.s, (y - sess.oy) / sess.s]; }
   function toField(sess, x, y) { return [sess.ox + x * sess.s, sess.oy + y * sess.s]; }
 
+  // ---- motion: toasts, shake and pulses ----------------------------------------------------
+
+  // How the shell shows a game's feedback motion (docs/BUBBLES.md, "microgame", "Toasts, shake and
+  // pulses"). Drawing only: nothing here touches game state, so runs, replays and verify are the
+  // same as before.
+  //   Toasts: one at a time, in a lane that crosses no text and no tap target (just under the HUD,
+  //     else the first free band), at most TOAST_MAX_CHARS, fading in and out in place (no rise,
+  //     no pop), gone after at most TOAST_MAX_MS and cleared as soon as the screen's words change
+  //     (the next round; a counter ticking up doesn't count). A toast in the same frame as a "success" haptic (a right answer, which
+  //     the game already shows with its own colours) isn't drawn.
+  //   Shake: the engine's shakes in one moment fold into one, at most SHAKE_MAX_PX for SHAKE_MS,
+  //     and only after the player's own input (never on a timeout). Text, tap targets, the HUD
+  //     bands and the backdrop stay still; only art moves. With nothing to move, the shake becomes
+  //     a short edge tint.
+  //   Pulses: text is drawn at no more than TEXT_SCALE_MAX (or less than 1 / TEXT_SCALE_MAX) scale.
+  const TOAST_MAX_CHARS = 22, TOAST_MAX_MS = 900, TOAST_FADE_IN = 120, TOAST_FADE_OUT = 180, TOAST_CLEAR_MS = 90, TOAST_SIZE = 15;
+  const SHAKE_MAX_PX = 3, SHAKE_MS = 150, SHAKE_INPUT_MS = 800;
+  const TEXT_SCALE_MAX = 1.08;
+
+  /** A toast's copy cut to TOAST_MAX_CHARS: its first clause if that fits, else whole words and "…". Null when empty. */
+  function toastCopy(text) {
+    const t = String(text == null ? "" : text).replace(/\s+/g, " ").trim();
+    if (!t) return null;
+    if (t.length <= TOAST_MAX_CHARS) return t;
+    const clause = t.split(/\s[—–-]\s|[.!?;:,](?:\s|$)/)[0].trim();
+    if (clause.length >= 3 && clause.length <= TOAST_MAX_CHARS) return clause;
+    let out = "";
+    for (const w of t.split(" ")) {
+      if ((out ? out.length + 1 : 0) + w.length > TOAST_MAX_CHARS - 1) break;
+      out = out ? out + " " + w : w;
+    }
+    return out ? out + "…" : t.slice(0, TOAST_MAX_CHARS - 1) + "…";
+  }
+
+  function textBox(op) {
+    const s = op.scale || 1, cx = op.x + op.w / 2, cy = op.y + op.h / 2;
+    return { x0: cx - (op.w * s) / 2, y0: cy - (op.h * s) / 2, x1: cx + (op.w * s) / 2, y1: cy + (op.h * s) / 2 };
+  }
+
+  /**
+   * The toast lane: the center y (canvas units) of a band `h` tall and `w` wide, centered across the
+   * canvas, that no text op and no tap target crosses. Looks just under the HUD first (the lowest
+   * text in the top fifth of the safe area), then down the screen, then up from there. Null when
+   * no band is free.
+   */
+  function toastLane(ops, targets, cw, ch, tall, w, h) {
+    const top = tall ? ch * SAFE_TOP : ch * 0.04, bottom = tall ? ch * (1 - SAFE_BOTTOM) : ch * 0.96;
+    const boxes = [];
+    for (const op of ops) if (op.op === "text" && op.text && op.opacity > 0.05) boxes.push(textBox(op));
+    for (const t of targets || []) boxes.push({ x0: t.x, y0: t.y, x1: t.x + t.w, y1: t.y + t.h });
+    let hud = top;
+    for (const b of boxes) if ((b.y0 + b.y1) / 2 < top + (bottom - top) * 0.2) hud = Math.max(hud, b.y1);
+    const x0 = (cw - w) / 2, x1 = (cw + w) / 2, pad = 3;
+    const free = (y) => y - h / 2 >= top && y + h / 2 <= bottom &&
+      boxes.every((b) => b.x1 <= x0 || b.x0 >= x1 || b.y1 <= y - h / 2 - pad || b.y0 >= y + h / 2 + pad);
+    const start = hud + pad + h / 2;
+    for (let y = start; y + h / 2 <= bottom; y += 2) if (free(y)) return y;
+    for (let y = start - 2; y - h / 2 >= top; y -= 2) if (free(y)) return y;
+    return null;
+  }
+
+  /** A text signature with numbers masked: changes when the screen's words change (a new round), not when a counter ticks. */
+  function wordsSig(ops) {
+    let s = "";
+    for (const op of ops) if (op.op === "text" && op.text && op.opacity > 0.05) s += String(op.text).replace(/\b\d+\b/g, "#") + "|";
+    return s;
+  }
+
+  /** Starts a toast from the frame's toasts (the last one wins), or null when none should show. */
+  function nextToast(sess, f, now) {
+    if (!f.toasts.length) return null;
+    if ((f.haptics || []).some((h) => h === "success")) return null;
+    const text = toastCopy(f.toasts[f.toasts.length - 1].text);
+    if (!text) return null;
+    const ms = f.toasts[f.toasts.length - 1].ms;
+    const size = TOAST_SIZE;
+    const w = Math.min(sess.cw - 16, text.length * size * 0.56 + 28), h = size * 1.9;
+    let targets = [];
+    try { targets = sess.game.hitTargets() || []; } catch (e) { targets = []; }
+    const y = toastLane(f.ops, targets, sess.cw, sess.ch, sess.tall, w, h);
+    if (y == null) return null;
+    return { text, y, w, h, size, born: now, life: Math.min(TOAST_MAX_MS, ms > 0 ? ms : TOAST_MAX_MS), sig: wordsSig(f.ops), cleared: null };
+  }
+
+  /** The toast's opacity at `now` (0 once it's over). */
+  function toastAlpha(t, now) {
+    const age = now - t.born;
+    const end = t.cleared != null ? Math.min(t.born + t.life, t.cleared + TOAST_CLEAR_MS) : t.born + t.life;
+    if (now >= end) return 0;
+    return Math.max(0, Math.min(1, age / TOAST_FADE_IN, (end - now) / (t.cleared != null ? TOAST_CLEAR_MS : TOAST_FADE_OUT)));
+  }
+
+  function drawToast(ctx, sess, t, alpha) {
+    const k = sess.s, cx = sess.ox + (sess.cw / 2) * k, cy = sess.oy + t.y * k, w = t.w * k, h = t.h * k;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = "rgba(12,14,24,0.78)";
+    const r = h / 2, x = cx - w / 2, y = cy - h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    const fam = sess.fonts && sess.fonts[0] ? `"${sess.fonts[0]}", ` : "";
+    ctx.font = `700 ${t.size * k}px ${fam}-apple-system, system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(t.text, cx, cy, w - 12 * k);
+    ctx.restore();
+  }
+
+  /**
+   * The shake to apply now: {amp, age} or null. A new engine shake (its amplitude rising) starts one
+   * episode if the player gave input in the last SHAKE_INPUT_MS and no episode is running; the
+   * episode lasts SHAKE_MS at most SHAKE_MAX_PX, decaying.
+   */
+  function shakeNow(sh, enginePx, now, lastInput) {
+    const rising = enginePx > sh.prev + 0.05;
+    sh.prev = enginePx;
+    if (rising && !(sh.start != null && now - sh.start < SHAKE_MS) && lastInput != null && now - lastInput <= SHAKE_INPUT_MS) {
+      sh.start = now;
+      sh.amp = Math.min(SHAKE_MAX_PX, enginePx);
+    }
+    if (sh.start == null || now - sh.start >= SHAKE_MS) return null;
+    return { amp: sh.amp * (1 - (now - sh.start) / SHAKE_MS), age: now - sh.start };
+  }
+
+  /** Whether an op may move with the shake: art only (no text, tap targets, HUD bands or backdrop). */
+  function shakeable(op, targets, cw, ch, tall) {
+    if (op.op === "text" || op.op === "clip" || op.op === "unclip") return false;
+    let b;
+    if (op.op === "circle") { const r = Math.abs(op.r * (op.scale || 1)); b = { x0: op.x - r, y0: op.y - r, x1: op.x + r, y1: op.y + r }; }
+    else if (op.op === "line") b = { x0: Math.min(op.x1, op.x2), y0: Math.min(op.y1, op.y2), x1: Math.max(op.x1, op.x2), y1: Math.max(op.y1, op.y2) };
+    else if (op.op === "poly") return true;
+    else b = { x0: op.x, y0: op.y, x1: op.x + op.w, y1: op.y + op.h };
+    if ((b.x1 - b.x0) * (b.y1 - b.y0) >= 0.7 * cw * ch) return false;
+    const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+    const top = tall ? ch * SAFE_TOP + 100 : ch * 0.15, bottom = tall ? ch * (1 - SAFE_BOTTOM) - 72 : ch * 0.9;
+    if (cy < top || cy > bottom) return false;
+    for (const t of targets) if (cx >= t.x && cx <= t.x + t.w && cy >= t.y && cy <= t.y + t.h) return false;
+    return true;
+  }
+
+  /** Text ops scaled past TEXT_SCALE_MAX come back clamped (a copy of the frame only when needed). */
+  function clampTextScale(f) {
+    let ops = null;
+    for (let i = 0; i < f.ops.length; i++) {
+      const op = f.ops[i];
+      if (op.op !== "text" || !(op.scale > TEXT_SCALE_MAX || (op.scale > 0 && op.scale < 1 / TEXT_SCALE_MAX))) continue;
+      if (!ops) ops = f.ops.slice();
+      ops[i] = Object.assign({}, op, { scale: Math.max(1 / TEXT_SCALE_MAX, Math.min(TEXT_SCALE_MAX, op.scale)) });
+    }
+    return ops ? Object.assign({}, f, { ops }) : f;
+  }
+
+  /** Draws a frame with the shake applied to art ops only (runs of ops drawn with their own offset), or an edge tint. */
+  function drawShaken(ctx, L, f, sess, assets, shake) {
+    const base = { clear: false, k: sess.s, ox: sess.ox, oy: sess.oy, noShake: true };
+    let targets = [];
+    try { targets = sess.game.hitTargets() || []; } catch (e) { targets = []; }
+    const hasClip = f.ops.some((o) => o.op === "clip");
+    const moves = hasClip ? [] : f.ops.map((o) => shakeable(o, targets, sess.cw, sess.ch, sess.tall));
+    if (!moves.some(Boolean)) {
+      L.drawFrame(ctx, f, assets, base);
+      // Nothing to move: a short tint at the canvas edges instead.
+      const k = sess.s, a = 0.35 * (shake.amp / SHAKE_MAX_PX), e = 10 * k;
+      const x = sess.ox, y = sess.oy, w = sess.cw * k, h = sess.ch * k;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, a));
+      ctx.fillStyle = "#FF4D6D";
+      ctx.fillRect(x, y, w, e); ctx.fillRect(x, y + h - e, w, e);
+      ctx.fillRect(x, y, e, h); ctx.fillRect(x + w - e, y, e, h);
+      ctx.restore();
+      return;
+    }
+    const dx = (Math.random() * 2 - 1) * shake.amp * sess.s, dy = (Math.random() * 2 - 1) * shake.amp * sess.s;
+    let i = 0;
+    while (i < f.ops.length) {
+      let j = i;
+      while (j < f.ops.length && moves[j] === moves[i]) j++;
+      const part = Object.assign({}, f, { ops: f.ops.slice(i, j), background: i === 0 ? f.background : 0 });
+      L.drawFrame(ctx, part, assets, moves[i] ? Object.assign({}, base, { ox: sess.ox + dx, oy: sess.oy + dy }) : base);
+      i = j;
+    }
+  }
+
+  // Pure parts, for the runtime tests (tools/runtime-tests/checks.js).
+  B.microgameMotion = { toastCopy, toastLane, toastAlpha, shakeNow, shakeable, clampTextScale, TOAST_MAX_CHARS, TOAST_MAX_MS, SHAKE_MAX_PX, SHAKE_MS, TEXT_SCALE_MAX };
+
   // ---- concepts --------------------------------------------------------------------------
 
   B.defineConcept({
@@ -275,6 +472,7 @@
         if (sdk.ended) return;
         const g = sess.game;
         g.step(STEP_MS);
+        sess.clockMs += STEP_MS;
         const st = g.status();
         sess.status = st;
         const m = sdk.state.microgame;
@@ -287,19 +485,29 @@
       sdk.layer(sdk.Z.space, (gfx) => {
         const L = lib();
         if (!L) return;
-        const f = sess.game.frame();
-        paintBleed(gfx, sess, f, L);
+        const raw = sess.game.frame();
+        paintBleed(gfx, sess, raw, L);
         // Until the game's fonts are in (at most FONT_WAIT_MS), draw the frame without its text.
         const ready = fontsReady(sess);
-        L.drawFrame(gfx.ctx, ready ? f : Object.assign({}, f, { ops: f.ops.filter((o) => o.op !== "text") }), sess.assets, { clear: false, k: sess.s, ox: sess.ox, oy: sess.oy });
+        const f = clampTextScale(ready ? raw : Object.assign({}, raw, { ops: raw.ops.filter((o) => o.op !== "text") }));
+        const now = sess.clockMs;
+        const shake = shakeNow(sess.shake, raw.shake || 0, now, sess.lastInput);
+        if (shake) drawShaken(gfx.ctx, L, f, sess, sess.assets, shake);
+        else L.drawFrame(gfx.ctx, f, sess.assets, { clear: false, k: sess.s, ox: sess.ox, oy: sess.oy, noShake: true });
+        // Toasts: the newest one replaces the last; a change in the screen's words fades it out.
+        const nt = nextToast(sess, raw, now);
+        if (nt) sess.toast = nt;
+        const t = sess.toast;
+        if (t) {
+          if (t.cleared == null && wordsSig(raw.ops) !== t.sig) t.cleared = now;
+          const a = toastAlpha(t, now);
+          if (a > 0) { if (ready) drawToast(gfx.ctx, sess, t, a); } else if (now > t.born) sess.toast = null;
+        }
         // Side effects queued since the last drawn frame. Drawing is presentation-only, so none of
         // this touches game state (bot, poster and replay runs stay deterministic).
         const out = audioOut(sdk);
         if (out) for (const s of f.audio) L.playSound(out, s, sess.assets);
         for (const h of f.haptics) sdk.fx.haptic(h);
-        for (const t of f.toasts) {
-          if (t.text) sdk.fx.float(t.text, W / 2, H * 0.28);
-        }
         if (sess.music) {
           // A library sound playing behind the game (`backing`) replaces the game's own music.
           sess.music.sync(out && !out.backing ? out : null, f.music, sess.assets);
@@ -334,6 +542,7 @@
         s.game.hitTargets();
         s.game.pointer("down", x, y);
         s.down = { x, y, tick: sdk.tick };
+        s.lastInput = s.clockMs;
       });
       sdk.on("pointer.move", (e) => {
         const s = sess();

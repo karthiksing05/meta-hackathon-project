@@ -474,6 +474,46 @@
       ok(B.validate(n).ok, "a normalized manifest still validates");
     }
 
+    // ------------------------------------------------------------------ microgame motion
+    section("Microgame motion (toasts, shake, pulses)");
+    const MM = B.microgameMotion;
+    if (ok(!!MM, "the microgame kit exposes its motion helpers")) {
+      ok(MM.toastCopy("Correct decade! +100") === "Correct decade! +100", "a short toast keeps its copy");
+      ok(MM.toastCopy("Not that era — listen for the hint") === "Not that era", "a long toast keeps its first clause");
+      const cut = MM.toastCopy("Absolutely wonderful timing every single time");
+      ok(cut.length <= MM.TOAST_MAX_CHARS && /…$/.test(cut), "a long toast with no short clause is cut on a word", cut);
+      ok(MM.toastCopy("   ") === null, "an empty toast is dropped");
+      // Guess the Decade's screen: HUD row at the top, the play button and its labels, four answers.
+      const txt = (t, x, y, w, h) => ({ op: "text", text: t, x, y, w, h, scale: 1, opacity: 1 });
+      const ops = [txt("Round 1 of 10", 40, 39, 110, 22), txt("Score: 0", 180, 39, 80, 22), txt("Listen", 151, 182, 57, 19),
+        txt("Replay: 1", 143, 206, 74, 16), txt("Tap the glowing button for your one replay", 50, 228, 260, 15)];
+      const targets = [0, 1, 2, 3].map((k) => ({ x: 30, y: 270 + k * 72, w: 300, h: 60 })).concat([{ x: 140, y: 104, w: 80, h: 80 }]);
+      const y = MM.toastLane(ops, targets, 360, 640, false, 200, 28);
+      const clear = y != null && ops.every((o) => o.y + o.h <= y - 14 || o.y >= y + 14) && targets.every((t) => t.y + t.h <= y - 14 || t.y >= y + 14 || t.x + t.w <= 80 || t.x >= 280);
+      ok(clear, "the toast lane crosses no text and no tap target", String(y));
+      const full = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => ({ x: 0, y: k * 64, w: 360, h: 60 }));
+      ok(MM.toastLane([], full, 360, 640, false, 200, 28) === null, "no free band: no toast");
+      const t = { born: 0, life: 700, cleared: null };
+      ok(MM.toastAlpha(t, 0) === 0 && MM.toastAlpha(t, 300) === 1 && MM.toastAlpha(t, 700) === 0, "a toast fades in, holds and is gone by its life");
+      ok(MM.toastAlpha({ born: 0, life: 900, cleared: 300 }, 300 + 200) === 0, "a cleared toast is gone within its fade-out");
+      // Shake: three engine shakes in one moment fold into one capped episode; no shake without input.
+      const sh = { prev: 0, start: null, amp: 0 };
+      const a = MM.shakeNow(sh, 6, 1000, 950);
+      ok(a && a.amp <= MM.SHAKE_MAX_PX, "a shake is capped at " + MM.SHAKE_MAX_PX + " units", JSON.stringify(a));
+      MM.shakeNow(sh, 5, 1016, 950);
+      const b2 = MM.shakeNow(sh, 6, 1033, 950);
+      ok(b2 && sh.start === 1000, "a second shake in the same moment folds into the first");
+      ok(MM.shakeNow(sh, 0, 1000 + MM.SHAKE_MS, 950) === null, "a shake lasts at most " + MM.SHAKE_MS + " ms");
+      const idle = { prev: 0, start: null, amp: 0 };
+      ok(MM.shakeNow(idle, 6, 9000, 1000) === null, "no shake without the player's input (a timeout)");
+      ok(!MM.shakeable({ op: "text", x: 0, y: 300, w: 10, h: 10 }, [], 360, 640, false), "text never shakes");
+      ok(!MM.shakeable({ op: "image", x: 30, y: 270, w: 300, h: 60, scale: 1 }, targets, 360, 640, false), "a tap target never shakes");
+      ok(!MM.shakeable({ op: "image", x: 0, y: 0, w: 360, h: 640, scale: 1 }, [], 360, 640, false), "the backdrop never shakes");
+      ok(MM.shakeable({ op: "image", x: 150, y: 300, w: 40, h: 40, scale: 1 }, [], 360, 640, false), "art in the playfield may shake");
+      const fr = MM.clampTextScale({ ops: [{ op: "text", scale: 1.25 }, { op: "image", scale: 1.6 }] });
+      ok(fr.ops[0].scale === MM.TEXT_SCALE_MAX && fr.ops[1].scale === 1.6, "text pulses are capped, art scale is left alone");
+    }
+
     // ------------------------------------------------------------------ speed
     section("Speed (" + env.engine + ", " + (env.clock || "wall") + " ms)");
     const long = byId["hill-hopper"] || base;
