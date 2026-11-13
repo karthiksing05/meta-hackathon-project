@@ -85,6 +85,14 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return board.items
     }
 
+    func scores(gameID: String, scope: String, groupID: String?) async throws -> [RemoteScore] {
+        var query = [URLQueryItem(name: "scope", value: scope)]
+        if let groupID { query.append(URLQueryItem(name: "groupId", value: groupID)) }
+        let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", query: query,
+                                                    auth: scope == "everyone" ? .none : .required)
+        return board.items
+    }
+
     func submitScore(_ score: Int, gameID: String) async throws -> [RemoteScore] {
         let body = try JSONSerialization.data(withJSONObject: ["score": score])
         let data = try await send("POST", "v1/games/\(try serverID(gameID))/scores", body: body,

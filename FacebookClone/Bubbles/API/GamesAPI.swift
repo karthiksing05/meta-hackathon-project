@@ -24,6 +24,9 @@ protocol GamesAPI: Sendable {
     func publish(_ package: GamePackage) async throws -> RemoteGame
     /// The game's one global board, best first (`GET /v1/games/{id}/leaderboard`).
     func scores(gameID: String) async throws -> [RemoteScore]
+    /// A board limited to my friends (and me) or a Group's members: `?scope=friends|group&groupId=`.
+    /// Friends needs sign-in; group needs membership.
+    func scores(gameID: String, scope: String, groupID: String?) async throws -> [RemoteScore]
     /// The server keeps the signed-in person's best. Returns the board.
     func submitScore(_ score: Int, gameID: String) async throws -> [RemoteScore]
     /// A save is a like on the server.

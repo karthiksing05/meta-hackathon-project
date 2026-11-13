@@ -26,6 +26,8 @@ final class BubbleStore {
     var feedState: FeedLoadState = .idle
     /// Games whose board is loading, and boards that failed, by game id.
     var boardStates: [String: FeedLoadState] = [:]
+    /// Friends and Group boards from the server, by `boardKey` (the everyone board is `bubble.scores`).
+    var scopedBoards: [String: [BubbleScore]] = [:]
 
     @ObservationIgnored let appStore: AppStore
 
@@ -117,12 +119,16 @@ final class BubbleStore {
     /// board per game, so `.friends` and `.group` are empty until it serves those scopes
     /// (docs/APP_LIVE_DATA_PLAN.md, Stage 4); screens say so.
     func leaderboard(for bubble: Bubble, scope: BubbleBoardScope) -> [BubbleScore] {
-        guard scope == .everyone else { return [] }
-        return bubble.scores
+        guard scope != .everyone else { return bubble.scores }
+        return scopedBoards[Self.boardKey(bubble.id, scope, groupID: scope == .group ? bubble.group?.id : nil)] ?? []
     }
 
-    /// Whether the server serves a board for this scope yet.
-    static func serves(_ scope: BubbleBoardScope) -> Bool { scope == .everyone }
+    /// The server serves every scope (`GET /v1/games/{id}/leaderboard?scope=`).
+    static func serves(_ scope: BubbleBoardScope) -> Bool { true }
+
+    static func boardKey(_ bubbleID: String, _ scope: BubbleBoardScope, groupID: String?) -> String {
+        "\(bubbleID)|\(scope.rawValue)|\(groupID ?? "")"
+    }
 
     func bestScore(of user: User, in bubble: Bubble) -> BubbleScore? {
         bestScore(ofUserID: user.id, in: bubble)
