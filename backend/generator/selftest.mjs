@@ -185,6 +185,10 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     req.on('end', () => {
       calls.push({ url: req.url, auth: req.headers.authorization, body: JSON.parse(body || '{}') });
       res.writeHead(200, { 'Content-Type': 'application/json' });
+      if (req.url === '/v1/responses') { // an image: the image_generation tool's reply
+        res.end(JSON.stringify({ model: 'fake-image-1', status: 'completed', output: [{ type: 'image_generation_call', result: Buffer.from('PNGBYTES').toString('base64') }] }));
+        return;
+      }
       res.end(JSON.stringify({ model: 'fake-muse-1', usage: { prompt_tokens: 11, completion_tokens: 22, total_tokens: 33 }, choices: [{ message: { role: 'assistant', content: replies[0] }, finish_reason: 'stop' }] }));
     });
   });
@@ -247,6 +251,19 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
         check(`the Muse route refuses ${label}`, (await mj(body)).status === 400, label);
       }
       replies[0] = JSON.stringify(example());
+
+      // one picture from Muse Image
+      const mi = (body) => fetch(`http://127.0.0.1:${port}/internal/muse/image`, { method: 'POST', body: JSON.stringify(body) });
+      const ai = calls.length;
+      const img = await mi({ prompt: 'a fox in a scarf, flat colors', size: '1024x1024', guide: Buffer.from('guide-png').toString('base64') });
+      const imgJson = await img.json();
+      const sent = calls[ai]?.body;
+      check('POST /internal/muse/image returns the picture, the model and the time', img.status === 200 && Buffer.from(imgJson.png_base64, 'base64').toString() === 'PNGBYTES' && imgJson.model === 'fake-image-1' && imgJson.seconds >= 0, JSON.stringify(imgJson).slice(0, 160));
+      check('the image call carries the prompt, the guide, the size and the key', calls[ai]?.url === '/v1/responses' && sent?.model === 'muse-image-1.0' && sent.input[0].content[0].text.includes('fox') && sent.input[0].content[1]?.type === 'input_image' && sent.tools[0].size === '1024x1024' && calls[ai].auth === 'Bearer test-key-not-real', JSON.stringify(sent).slice(0, 200));
+      check('the key is never in the image reply', !JSON.stringify(imgJson).includes('test-key-not-real'));
+      for (const [label, body] of [['no prompt', { size: '1024x1024' }], ['a size it does not know', { prompt: 'x', size: '99x99' }], ['a guide that is not base64', { prompt: 'x', guide: 'not base64!!' }]]) {
+        check(`the image route refuses ${label}`, (await mi(body)).status === 400, label);
+      }
     }
 
     // replaying a run's log: the server checks a score instead of trusting the phone

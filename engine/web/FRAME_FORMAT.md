@@ -102,17 +102,47 @@ The JSON text op always has `line_height`, `stroke` (a color or `null`) and
 flags misreads frames with outlined or multi-line text, so always pair the
 wasm with the `microgame.js` built next to it.
 
-**Image** (tag 4, 9 words, v0.2). `x, y, w, h` is the box the frame is drawn
-into. Head flags: bit 8 `flip_x`, bit 9 `flip_y`.
+**Image** (tag 4, 9 or 13 words, v0.2). `x, y, w, h` is the box the frame is
+drawn into. Head flags: bit 8 `flip_x`, bit 9 `flip_y`, bit 10 (v0.2.2) the
+op carries a source rectangle.
 
 ```
 u32 head=4|flags, f32 x, f32 y, f32 w, f32 h, u32 asset | frame << 16,
-f32 rotation, f32 scale, f32 opacity
+f32 rotation, f32 scale, f32 opacity,
+[f32 src_x, f32 src_y, f32 src_w, f32 src_h]   if head bit 10 (v0.2.2)
 ```
 
 `asset` is the id from `mg_assets(h)`. The sheet's source rect for `frame`
 is column `frame % cols`, row `floor(frame / cols)`, each cell
 `natural_width / cols` by `natural_height / ceil(frames / cols)`.
+
+v0.2.2 source rectangle: only part of that cell is drawn, stretched to the
+box. `src_*` are in the asset's declared units (its `w`/`h` from `mg_assets`,
+one frame), so the shell scales them by `cell_width / w` and
+`cell_height / h` to get pixels. `src_w` and `src_h` are always > 0. The
+shell cuts the rectangle to the cell and the box by the same proportion, so
+parts outside the frame are transparent and never show the next frame of a
+sheet (`drawImageSrc` in `render.js`). Without bit 10 the whole cell is
+drawn; `decodeFrame` leaves `src_*` undefined and the JSON op has no `src_*`
+fields.
+
+**Clip** (tag 7, 5 words, v0.2.2) and **Unclip** (tag 8, 1 word). A `clip`
+group's children are wrapped in a pair: every op between them is clipped to
+the rectangle (canvas units, camera applied), and pairs nest (the clips
+intersect). Draw `clip` as `save(); beginPath(); rect(x, y, w, h); clip()`
+and `unclip` as `restore()`. The engine always balances them (a clip that
+drew nothing is dropped, and room for every `unclip` is kept under the op
+cap); `drawFrame` also restores any left open at the end of the frame.
+They carry no opacity or scale.
+
+```
+u32 head=7, f32 x, f32 y, f32 w, f32 h
+u32 head=8
+```
+
+JSON: `{"op": "clip", "x", "y", "w", "h"}` and `{"op": "unclip"}`. The magic
+stays `MGF2`: a v0.2 decoder rejects tags 7 and 8 (`bad op tag`), and frames
+from games that don't use clipping or crops are unchanged, byte for byte.
 
 **Line** (tag 5, 8 words, v0.2). Absolute end points (camera applied).
 
@@ -179,7 +209,8 @@ Audio, toasts and haptics hold only what fired since the previous frame call
 ## Size
 
 A rect is 48 bytes, a text op 52 (60 with an outline, 4 more for several
-lines), an image 36, a line 32, and a triangle 48,
+lines), an image 36 (52 with a source rectangle), a line 32, a triangle 48,
+and a clip / unclip pair 24,
 with no per-frame string cost after the first frame. Measured averages per
 frame (binary vs JSON): Lights Out (27 ops) 1.4 KB vs 4.1 KB, Snake (226 ops)
 10.9 KB vs 32 KB, Lantern Ridge (98 ops, images and polys) 4.5 KB vs 16.7 KB,

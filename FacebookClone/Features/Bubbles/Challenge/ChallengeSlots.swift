@@ -100,7 +100,8 @@ struct ChallengeResultAction: View {
                 } label: {
                     Label(ChallengeCopy.challengeMe, systemImage: "flag.checkered")
                 }
-                .buttonStyle(.fb(.tinted, height: 44))
+                // The result card's one primary action: send this run to beat.
+                .buttonStyle(.fb(.primary, height: 48))
                 .accessibilityHint(ChallengeCopy.challengeMeHint)
             }
         }

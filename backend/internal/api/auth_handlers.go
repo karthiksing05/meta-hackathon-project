@@ -137,10 +137,14 @@ func (s *Server) refresh(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 	var in struct {
-		RefreshToken string `json:"refreshToken"`
+		RefreshToken   string `json:"refreshToken"`
+		InstallationID string `json:"installationId"` // optional: this installation stops getting pushes for the account
 	}
 	if decode(w, r, &in) && in.RefreshToken != "" {
-		s.Store.DeleteRefresh(r.Context(), auth.HashToken(in.RefreshToken))
+		// Taking the token (it is single use) says whose session this is, so only their device can be revoked.
+		if t, err := s.Store.TakeRefresh(r.Context(), auth.HashToken(in.RefreshToken)); err == nil && t != nil && in.InstallationID != "" {
+			_ = s.Store.DeletePushDevice(r.Context(), in.InstallationID, t.UserID)
+		}
 	}
 	w.WriteHeader(http.StatusNoContent)
 }

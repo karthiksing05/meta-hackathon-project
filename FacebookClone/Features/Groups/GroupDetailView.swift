@@ -33,13 +33,21 @@ struct GroupDetailView: View {
     @State private var isFollowing = true
     @State private var notificationsOn = true
     @State private var viewer: GroupsViewerItem?
+    /// The post you just made here, highlighted for a moment after scrolling to it.
+    @State private var highlightedPostID: String?
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                header
-                tabChips
-                tabContent
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 0) {
+                    header
+                    tabChips
+                    tabContent
+                }
+            }
+            .onAppear { revealNewPost(proxy) }
+            .onChange(of: canRevealNewPost) { _, can in
+                if can { revealNewPost(proxy) }
             }
         }
         .background(FBColor.background)
@@ -68,6 +76,37 @@ struct GroupDetailView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("You'll stop seeing posts from this group in your feed.")
+        }
+    }
+
+    // MARK: Your new post
+
+    /// A post you just made here is waiting, and nothing (the player, Studio, a sheet) covers
+    /// this page.
+    private var canRevealNewPost: Bool {
+        guard let reveal = store.groupPostReveal, reveal.groupID == group.id else { return false }
+        return router.bubblePlayRequest == nil && router.studioLaunch == nil && router.bubbleSheet == nil
+            && router.createPostRequest == nil
+    }
+
+    /// Lands on Featured, scrolls the new post into view and highlights it for a moment, so
+    /// sharing a game or a challenge here ends where you can see it.
+    private func revealNewPost(_ proxy: ScrollViewProxy) {
+        guard canRevealNewPost, let reveal = store.groupPostReveal else { return }
+        store.groupPostReveal = nil
+        guard reveal.isFresh, canSeeContent else { return }
+        if tab != .featured { tab = .featured }
+        Task { @MainActor in
+            // Let the tab lay out and a closing sheet finish first.
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            withAnimation(.easeInOut(duration: 0.35)) {
+                proxy.scrollTo(reveal.postID, anchor: .center)
+                highlightedPostID = reveal.postID
+            }
+            try? await Task.sleep(nanoseconds: 1_400_000_000)
+            withAnimation(.easeOut(duration: 0.4)) {
+                if highlightedPostID == reveal.postID { highlightedPostID = nil }
+            }
         }
     }
 
@@ -247,6 +286,14 @@ struct GroupDetailView: View {
                 } else {
                     ForEach(posts) { post in
                         PostCard(post: post)
+                            .overlay {
+                                if highlightedPostID == post.id {
+                                    FBColor.tintedBlueBackground.opacity(0.55)
+                                        .allowsHitTesting(false)
+                                        .transition(.opacity)
+                                }
+                            }
+                            .id(post.id)
                         FeedSeparator()
                     }
                 }

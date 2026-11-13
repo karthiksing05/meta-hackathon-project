@@ -2,9 +2,8 @@ import SwiftUI
 
 /// Screens and launch hooks for the "challenge" feature (docs/BUBBLES.md 7.2). Owner: challenge.
 ///
-/// Challenges need server endpoints (send and list challenges, the other side's runs) that don't
-/// exist yet (docs/APP_LIVE_DATA_PLAN.md, Stage 4), so the picker sheets say "Not available yet"
-/// and nothing is staged or simulated. `FB_OPEN=feature:challenge/picker/<id>` shows that sheet.
+/// Challenges go to the server (`POST /v1/challenges`). `FB_OPEN=feature:challenge/picker/<bubbleID>`
+/// shows the Challenge Me picker; `feature:challenge/friend/<userID>` the game picker for a friend.
 enum ChallengeScreens {
     /// A pushed screen (`Route.bubbleFeature`).
     @MainActor
@@ -23,8 +22,10 @@ enum ChallengeScreens {
     @ViewBuilder
     static func sheet(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
-        case "picker", "friend":
-            LiveDataUnavailableSheet(title: "Challenges", message: LiveDataCopy.challenges)
+        case "picker":
+            ChallengePickerSheet(bubbleID: route.arg, draft: nil)
+        case "friend":
+            ChallengeGamePickerSheet(userID: route.arg)
         default:
             BubbleFeaturePlaceholder(route: route)
         }
@@ -146,7 +147,7 @@ enum ChallengeCopy {
     static let versus = "vs"
     static let winner = "Winner"
     static let bubbleGone = "This \(ProductName.singular) didn't load"
-    static let bubbleGoneNote = "It isn't available anymore."
+    static let bubbleGoneNote = "It may have been deleted, or the connection dropped."
     static let challengeSentShort = "Challenge sent"
     static let challengeMeHint = "Send this run to a friend, a chat or a Group to beat on the same course"
     static func challengeName(_ name: String) -> String { "Challenge \(name)" }

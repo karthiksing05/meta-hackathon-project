@@ -16,7 +16,8 @@
 //        one JSON turn on the fast model; 503 muse_not_configured, 429 busy, 502 when Muse's reply isn't an anatomy
 //   POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?} -> {content, model, usage}
 //        one JSON turn on a Muse model, for the Go API's harness steps; the key never leaves this container
-//   POST /verify          {game, log} (both as text)               -> the engine's replay result {ok, game_hash_ok, recomputed, claimed, problems}
+//   POST /internal/muse/image {prompt, size?, guide?, timeoutSeconds?}  -> {png_base64, model, seconds}   (one muse-image-1.0 picture)
+//   POST /verify          {game, log, state?: [names]} (text)               -> the engine's replay result {ok, game_hash_ok, recomputed, claimed, problems}
 //   GET /healthz -> {"status":"ok","museConfigured":bool,"fragments":n}
 
 import { createServer } from 'node:http';
@@ -31,7 +32,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const env = process.env;
 const PORT = Number(env.PORT ?? 8090);
 const MAX_CONCURRENT = Number(env.GENERATOR_MAX_CONCURRENT ?? 2);
-const JOB_TIMEOUT_MS = Number(env.GENERATOR_JOB_TIMEOUT_SECONDS ?? 540) * 1000;
+const JOB_TIMEOUT_MS = Number(env.GENERATOR_JOB_TIMEOUT_SECONDS ?? 780) * 1000;
 const MODEL = env.MUSE_MODEL || 'muse-wonder-1.0';
 // A change to a game sends the whole stored manifest (the game script alone can be 150 KB or more).
 const COMPOSE_BODY_LIMIT = 8 * 1024 * 1024;
@@ -99,6 +100,47 @@ async function museJSON(req, res) {
   }
 }
 
+/**
+ * One picture from muse-image-1.0, for the Go API's picture steps. The key stays in this container.
+ *   {prompt, size?, guide?: base64 PNG, timeoutSeconds?} -> {png_base64, model, seconds}
+ * A picture takes 13-18 s and returns about 0.5-3 MB, so the caller shrinks it and keeps it with the game.
+ */
+const IMAGE_SIZES = ['1024x1024', '1536x1024', '1024x1536', '512x512', '768x768'];
+async function museImage(req, res) {
+  let input;
+  try {
+    input = await readBody(req, 6 * 1024 * 1024);
+  } catch {
+    return json(res, 400, { error: 'invalid JSON body' });
+  }
+  const prompt = typeof input.prompt === 'string' ? input.prompt.trim() : '';
+  const size = input.size ?? '1024x1024';
+  if (!prompt || prompt.length > 4000) return json(res, 400, { error: 'prompt is required (up to 4000 characters)' });
+  if (!IMAGE_SIZES.includes(size)) return json(res, 400, { error: `size must be one of ${IMAGE_SIZES.join(', ')}` });
+  let guide = null;
+  if (input.guide != null) {
+    if (typeof input.guide !== 'string' || input.guide.length > 4 * 1024 * 1024 || !/^[A-Za-z0-9+/=]+$/.test(input.guide)) {
+      return json(res, 400, { error: 'guide must be a base64 PNG (up to 4 MB)' });
+    }
+    guide = Buffer.from(input.guide, 'base64');
+  }
+  const timeout = Math.min(170, Math.max(10, Number(input.timeoutSeconds) || 150));
+  if (!muse.isConfigured) return json(res, 503, { error: 'muse_not_configured' });
+  if (running >= MAX_CONCURRENT + 6) return json(res, 429, { error: 'busy' });
+  running++;
+  const started = Date.now();
+  try {
+    const r = await muse.image({ prompt, size, guide, timeout, maxAttempts: 1 });
+    log('muse image ok', { model: r.model, seconds: (Date.now() - started) / 1000, bytes: r.png.length });
+    return json(res, 200, { png_base64: r.png.toString('base64'), model: r.model, seconds: r.seconds });
+  } catch (e) {
+    log('muse image failed', { seconds: (Date.now() - started) / 1000, error: String(e?.message ?? e).slice(0, 200) });
+    return json(res, 502, { error: 'muse_failed', message: String(e?.message ?? e).slice(0, 300) });
+  } finally {
+    running--;
+  }
+}
+
 /** Replays a run's log against the exact game text, so a score can be trusted without trusting the phone. */
 async function verifyRun(req, res) {
   let input;
@@ -111,7 +153,8 @@ async function verifyRun(req, res) {
     return json(res, 400, { error: 'game and log are required, both as text' });
   }
   try {
-    return json(res, 200, studio.verify(input.game, input.log));
+    const names = Array.isArray(input.state) ? input.state.filter((n) => typeof n === 'string').slice(0, 12) : undefined;
+    return json(res, 200, studio.verify(input.game, input.log, names));
   } catch (e) {
     log('verify failed', { error: String(e?.message ?? e).slice(0, 200) });
     return json(res, 500, { error: 'verify_failed' });
@@ -161,6 +204,7 @@ const server = createServer(async (req, res) => {
     }
     if (req.method === 'POST' && req.url === '/verify') return verifyRun(req, res);
     if (req.method === 'POST' && req.url === '/internal/muse/json') return museJSON(req, res);
+    if (req.method === 'POST' && req.url === '/internal/muse/image') return museImage(req, res);
     if (req.method === 'POST' && (req.url === '/anatomy' || req.url === '/anatomy/revise')) return anatomy(req, res);
     if (req.method !== 'POST' || req.url !== '/compose') return json(res, 404, { error: 'not found' });
 

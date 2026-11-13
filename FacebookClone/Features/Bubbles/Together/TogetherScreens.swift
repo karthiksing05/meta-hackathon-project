@@ -4,7 +4,7 @@ import SwiftUI
 ///
 /// QA targets, `FB_OPEN=feature:together/<screen>[/<arg>]`:
 ///   start[/<group:id | chat:id | friend:id>]   start a co-made game: what friends add, who to invite
-///   (start says "Not available yet": co-making sessions need the server)
+///   (co-making sessions aren't on the server, so start offers "Make one for the Group" instead)
 ///   aboutme[/<template>]                        'Games about me': the template picker, or a template's
 ///                                               form (how-well, first-month, favorite-spot)
 ///   profile/<userID or me>                      'Games about <name>' with who knows them best
@@ -31,7 +31,7 @@ enum TogetherScreens {
     static func sheet(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "start":
-            LiveDataUnavailableSheet(title: "Make it together", message: LiveDataCopy.sessions)
+            TogetherStartUnavailableSheet(target: route.arg)
         case "aboutme":
             TogetherRouterSheet(route: route)
         default:
@@ -410,4 +410,24 @@ enum TogetherCopy {
     static func aboutMeCardHeadline(_ title: String) -> String { title }
     static let aboutMeSendNote = "Made a game about me. Who knows me best? ✨"
     static let aboutMeCardDetail = "Play to see if you know them best"
+}
+
+/// "Make it together" while co-making sessions aren't on the server: says so, and offers to make
+/// the game in Studio for the same Group (or for you, from a chat or a friend).
+struct TogetherStartUnavailableSheet: View {
+    /// `group:<id>`, `chat:<id>`, `friend:<id>` or empty.
+    let target: String
+
+    @Environment(Router.self) private var router
+
+    var body: some View {
+        let groupID = target.hasPrefix("group:") ? String(target.dropFirst("group:".count)) : nil
+        LiveDataUnavailableSheet(
+            title: "Make it together",
+            message: LiveDataCopy.sessions,
+            action: LiveDataStateView.Action(title: groupID == nil ? "Make one" : "Make one for the Group", symbol: "sparkles") {
+                router.openStudio(StudioLaunch(mode: .create, groupID: groupID))
+            }
+        )
+    }
 }

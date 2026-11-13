@@ -40,7 +40,7 @@ func (s *Server) views(r *http.Request, games []model.Game) ([]model.GameView, e
 			ID: g.ID, Title: g.Title, Description: g.Description, Tags: nonNil(g.Tags), Formula: g.Formula,
 			OwnerID: g.OwnerID, OwnerUsername: g.OwnerUsername, Likes: g.Likes, Plays: g.Plays,
 			Finishes: g.Finishes, LikedByMe: liked[g.ID], RemixOf: g.RemixOf,
-			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID, Unlisted: g.Unlisted, Score: g.Score.View(), Sponsor: g.Sponsor,
+			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID, Unlisted: g.Unlisted, Score: g.Score.View(), Sponsor: g.Sponsor, GroupPlay: g.GroupPlay,
 			PackageURL: base, ManifestURL: base + g.ManifestPath, CreatedAt: g.CreatedAt,
 		}
 		if g.CoverPath != "" {
@@ -229,9 +229,11 @@ func (s *Server) submitScore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u := userFrom(r)
-	err := s.Store.SubmitScore(r.Context(), model.Score{
-		GameID: g.ID, UserID: u.ID, Username: u.Username, Score: int64(in.Score),
-		UpdatedAt: time.Now().UTC().Truncate(time.Millisecond),
+	err := s.watchLeader(r.Context(), g, func() error {
+		return s.Store.SubmitScore(r.Context(), model.Score{
+			GameID: g.ID, UserID: u.ID, Username: u.Username, Score: int64(in.Score),
+			UpdatedAt: time.Now().UTC().Truncate(time.Millisecond),
+		})
 	})
 	if err != nil {
 		s.serverErr(w, r, err)
@@ -275,7 +277,9 @@ type manifestMeta struct {
 	Lineage struct {
 		RemixOf string `json:"remix_of"`
 	} `json:"lineage"`
-	Score *manifestScore `json:"score"` // what the board ranks and how (scoring.go)
+	Bots      json.RawMessage    `json:"bots"`  // playtest runs an uploaded game brings; generated games send theirs separately
+	Score     *manifestScore     `json:"score"` // what the board ranks and how (scoring.go)
+	GroupPlay *manifestGroupPlay `json:"group_play"`
 }
 
 // publishError is a failed publish: Status and Msg are safe to show; Err (when set) is an internal failure.
@@ -288,6 +292,12 @@ type publishError struct {
 // publishPackage unpacks and validates a game package (a zip with manifest.json), stores it under a
 // new server-generated id and records the game. Uploads and generated games both go through it.
 func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Reader, bots []model.BotRun) (*model.Game, *publishError) {
+	return s.publish(ctx, u, body, bots, nil)
+}
+
+// publish is publishPackage, or with replace set, a new build of that game: the package goes under a fresh storage key
+// and the game keeps its id, owner, likes, plays, scores, sound and sponsor (the store swaps only what the package holds).
+func (s *Server) publish(ctx context.Context, u *model.User, body io.Reader, bots []model.BotRun, replace *model.Game) (*model.Game, *publishError) {
 	id := auth.NewID(12) // server-generated; clients never choose ids or paths
 	var m manifestMeta
 	pkg, err := s.Packages.Publish(ctx, id, body, func(p *pkgstore.Package) error {
@@ -299,7 +309,7 @@ func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Read
 			return errors.New("manifest needs a title (max 80 characters) and a one_line_rule (max 300)")
 		}
 		if slug := strings.ToLower(strings.TrimSpace(m.ID)); slugRE.MatchString(slug) {
-			if _, err := s.Store.GameBySlug(ctx, slug); err == nil {
+			if ex, err := s.Store.GameBySlug(ctx, slug); err == nil && (replace == nil || ex.ID != replace.ID) {
 				return errors.New("a game with this manifest id already exists; use a different id")
 			}
 		}
@@ -333,7 +343,14 @@ func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Read
 	if m.Chain.Index > 1 && m.Chain.Index < 1000 {
 		g.Level = m.Chain.Index
 	}
+	if len(bots) == 0 {
+		var mb []model.BotRun
+		if json.Unmarshal(m.Bots, &mb) == nil { // an unreadable block is ignored, never a reason to refuse the game
+			bots = cleanBots(mb)
+		}
+	}
 	g.Score = scoreModelFrom(m.Score)
+	g.GroupPlay = groupPlayFrom(m.GroupPlay)
 	g.Mood, g.Energy, g.Competition = normTags(m.Brief.Mood), strings.ToLower(strings.TrimSpace(m.Brief.Energy)), strings.ToLower(strings.TrimSpace(m.Brief.Competition))
 	g.Look, g.IsDaily, g.Bots = strings.ToLower(strings.TrimSpace(m.Style.Look)), strings.EqualFold(m.Structure.Cadence, "daily"), bots
 	switch {
@@ -350,6 +367,23 @@ func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Read
 		} else if orig, err := s.Store.GameBySlug(ctx, rm); err == nil {
 			g.RemixOf = orig.ID
 		}
+	}
+	if replace != nil {
+		g.ID, g.OwnerID, g.OwnerUsername, g.CreatedAt = replace.ID, replace.OwnerID, replace.OwnerUsername, replace.CreatedAt
+		if g.RemixOf == "" {
+			g.RemixOf = replace.RemixOf
+		}
+		if len(g.Bots) == 0 {
+			g.Bots = replace.Bots // keep the playtest runs when the new build brings none
+		}
+		if err := s.Store.ReplaceGameContent(ctx, g); err != nil {
+			return nil, &publishError{Status: 500, Msg: "internal error", Err: err}
+		}
+		fresh, err := s.Store.GameByID(ctx, g.ID)
+		if err != nil {
+			return nil, &publishError{Status: 500, Msg: "internal error", Err: err}
+		}
+		return fresh, nil
 	}
 	if err := s.Store.InsertGame(ctx, g); err != nil {
 		if errors.Is(err, store.ErrConflict) {
@@ -378,6 +412,34 @@ func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
 	}
 	v, _ := s.views(r, []model.Game{*g})
 	writeJSON(w, 201, v[0])
+}
+
+// PUT /v1/creations/{id} (application/zip): a new build of one of your games. It keeps the game's id, likes, plays, scores,
+// sound and sponsor; the title, rule, tags, score model, group_play and files come from the new package. Send the same
+// score model, or the existing board is ranked by the new one. The old files stay on the games host, unlinked.
+func (s *Server) replaceCreation(w http.ResponseWriter, r *http.Request) {
+	g, ok := s.ownedOr404(w, r)
+	if !ok {
+		return
+	}
+	if ct := r.Header.Get("Content-Type"); !strings.HasPrefix(ct, "application/zip") {
+		writeErr(w, 415, "send the game package as application/zip")
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, s.MaxUploadMB<<20+1)
+	unlock := s.seriesLocks.lock("replace:" + g.ID) // two replacements of one game don't interleave
+	defer unlock()
+	ng, perr := s.publish(r.Context(), userFrom(r), r.Body, nil, g)
+	if perr != nil {
+		if perr.Err != nil {
+			s.serverErr(w, r, perr.Err)
+		} else {
+			writeErr(w, perr.Status, perr.Msg)
+		}
+		return
+	}
+	v, _ := s.views(r, []model.Game{*ng})
+	writeJSON(w, 200, v[0])
 }
 
 // scopeIDs reads the Group and Event a game belongs to from the manifest's structure block.

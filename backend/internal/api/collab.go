@@ -227,6 +227,7 @@ func (s *Server) createChallenge(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
+	s.notifyChallenge(r.Context(), c, g, *me)
 	writeJSON(w, 201, c)
 }
 
@@ -349,6 +350,7 @@ func (s *Server) myMoments(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	out = append(out, s.roundMoments(ctx, me.ID, limit, who)...)
 	evs, err := s.Store.MomentsWith(ctx, me.ID, limit)
 	if err != nil {
 		s.serverErr(w, r, err)

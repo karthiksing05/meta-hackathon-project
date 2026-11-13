@@ -34,9 +34,11 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     var sound: RemoteGameSound?
     /// Set when the game is an ad (a brand account marked it; the server decides).
     var sponsor: RemoteSponsor?
+    /// A draft: in the owner's creations, not in the feed or search until it is published.
+    var unlisted = false
 
     enum CodingKeys: String, CodingKey {
-        case id, slug, title, description, tags, formula, likes, plays, finishes, likedByMe, remixOf, createdAt, sound, sponsor
+        case id, slug, title, description, tags, formula, likes, plays, finishes, likedByMe, remixOf, createdAt, sound, sponsor, unlisted
         case groupID = "groupId"
         case eventID = "eventId"
         case ownerID = "ownerId"
@@ -69,6 +71,7 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
         createdAt = try c.decode(Date.self, forKey: .createdAt)
         sound = try? c.decodeIfPresent(RemoteGameSound.self, forKey: .sound)
         sponsor = (try? c.decodeIfPresent(RemoteSponsor.self, forKey: .sponsor)).flatMap { $0?.name.isEmpty == false ? $0 : nil }
+        unlisted = (try? c.decodeIfPresent(Bool.self, forKey: .unlisted)) ?? false
     }
 
     init(

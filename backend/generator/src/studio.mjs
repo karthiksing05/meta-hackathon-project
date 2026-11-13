@@ -68,10 +68,13 @@ export function loadStudio(files = findBundles()) {
     version: Number(S.version) || 0,
     /** The engine bundle's global, for tests that play a game to make a log. */
     engine: () => context.MicrogameEngine,
-    verify(gameText, log) {
+    verify(gameText, log, names) {
       const E = context.MicrogameEngine;
       if (!E?.verify) throw new Error('the engine bundle has no verify(); update bubble-kit-microgame-engine.js');
-      return JSON.parse(JSON.stringify(E.verify(String(gameText), typeof log === 'string' ? log : JSON.stringify(log))));
+      const text = typeof log === 'string' ? log : JSON.stringify(log);
+      // names (optional): the end-state variables to report as `result`; without them the engine reports every one
+      const r = Array.isArray(names) && names.length ? E.verify(String(gameText), text, names) : E.verify(String(gameText), text);
+      return JSON.parse(JSON.stringify(r));
     },
     /**
      * The whole pipeline (draft, repair, gate, quality check, polish, wrap), from the bundle.

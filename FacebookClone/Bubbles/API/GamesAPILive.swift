@@ -200,6 +200,14 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return series
     }
 
+    // MARK: Game plan (harness v2)
+
+    /// `POST /v1/harness/plan {request}`: the raw reply, for `HarnessPlanClient`.
+    func gamePlanRaw(body: Data) async throws -> Data {
+        try await send("POST", "v1/harness/plan", body: body, contentType: "application/json",
+                       auth: .required, timeout: HarnessPlanClient.timeout)
+    }
+
     // MARK: Sounds (backend/README.md, "Sounds")
 
     /// The library: `GET /v1/sounds?tab=trending|for_you|saved|recent&q=&limit=`. `saved` needs sign-in.
@@ -383,6 +391,16 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     /// network errors are ignored.
     func generationCancel(id: String) async {
         _ = try? await send("DELETE", "v1/generate/\(id)", auth: .required)
+    }
+
+    /// `POST /v1/creations/{id}/publish`: lists a draft (owner only).
+    func creationPublish(id: String) async throws {
+        _ = try await send("POST", "v1/creations/\(id)/publish", auth: .required)
+    }
+
+    /// `DELETE /v1/creations/{id}`: deletes one of my games with its saves and scores. Best effort.
+    func creationDelete(id: String) async {
+        _ = try? await send("DELETE", "v1/creations/\(id)", auth: .required)
     }
 
     /// A file the server points at (a game's `manifestUrl`), as raw bytes. Relative URLs resolve
@@ -605,3 +623,5 @@ struct GamesKeychain: Sendable {
         SecItemDelete(query(account) as CFDictionary)
     }
 }
+
+extension GamesAPILive: GamePlanTransport {}

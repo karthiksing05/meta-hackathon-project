@@ -16,7 +16,10 @@
 //! Content bounds: rect `(0,0,w,h)`; circle `(-r,-r,r,r)` (so `x`/`y` is its
 //! center either way); text its box; group / repeat the union of their
 //! children; stack its packed size; grid `cols*cell+(cols-1)*gap` square;
-//! v0.2 image `(0,0,w,h)`, line and poly the bounding box of their points.
+//! v0.2 image `(0,0,w,h)`, line and poly the bounding box of their points;
+//! v0.2.2 a group with `w`/`h` is `(0,0,w,h)`, and with `clip` its children's
+//! ops sit between a `Clip`/`Unclip` pair and their hit records are cut to
+//! that box. A `"hit": "shape"` poly's hit record also carries its points.
 //!
 //! v0.2: after layout, non-`fixed` ops and hit records are shifted by
 //! `-camera`, and the frame is ordered world ops, particles, fixed ops (see
@@ -35,7 +38,7 @@ use std::rc::Rc;
 
 use mg_core::color::{parse_color, Rgba};
 use mg_core::frame::{
-    note_to_hz, CircleOp, DrawOp, Frame, Haptic, ImageOp, LineOp, MusicState, PolyOp, RectOp, Sound, SoundKind,
+    note_to_hz, CircleOp, ClipOp, DrawOp, Frame, Haptic, ImageOp, LineOp, MusicState, PolyOp, RectOp, Sound, SoundKind,
     TextOp, Toast, Wave,
 };
 use mg_core::hash::splitmix64;
@@ -122,7 +125,38 @@ fn shift_op(op: &mut DrawOp, dx: f64, dy: f64) {
                 pt.1 += dy;
             }
         }
+        DrawOp::Clip(c) => {
+            c.x += dx;
+            c.y += dy;
+        }
+        DrawOp::Unclip => {}
     }
+}
+
+/// Nonzero-winding point-in-polygon test (the canvas default fill rule, so
+/// it matches what's drawn). The polygon is implicitly closed; fewer than 3
+/// points have no inside. Points exactly on an edge may go either way.
+pub fn point_in_poly(pts: &[(f64, f64)], x: f64, y: f64) -> bool {
+    if pts.len() < 3 {
+        return false;
+    }
+    let mut winding = 0i32;
+    let mut prev = pts[pts.len() - 1];
+    for &cur in pts {
+        let (x0, y0) = prev;
+        let (x1, y1) = cur;
+        // Which side of the edge (x0,y0)->(x1,y1) the point is on (> 0: left).
+        let side = (x1 - x0) * (y - y0) - (x - x0) * (y1 - y0);
+        if y0 <= y {
+            if y1 > y && side > 0.0 {
+                winding += 1;
+            }
+        } else if y1 <= y && side < 0.0 {
+            winding -= 1;
+        }
+        prev = cur;
+    }
+    winding != 0
 }
 
 /// A tappable / draggable region recorded during layout.
@@ -137,6 +171,29 @@ pub struct HitRec {
     pub saved: (u32, u32),
     /// A `fixed` (HUD) node: its pointer values are canvas coordinates.
     pub fixed: bool,
+    /// v0.2.2 `"hit": "shape"` poly: the point must also be inside these
+    /// points (offset by `shape_at`). `x, y, w, h` stays the (clipped)
+    /// bounding box, so a box test runs first.
+    pub shape: Option<Rc<[(f64, f64)]>>,
+    pub shape_at: (f64, f64),
+}
+
+impl HitRec {
+    #[inline]
+    pub fn contains(&self, x: f64, y: f64) -> bool {
+        x >= self.x
+            && x <= self.x + self.w
+            && y >= self.y
+            && y <= self.y + self.h
+            && self.shape.as_ref().is_none_or(|pts| point_in_poly(pts, x - self.shape_at.0, y - self.shape_at.1))
+    }
+    #[inline]
+    fn translate(&mut self, dx: f64, dy: f64) {
+        self.x += dx;
+        self.y += dy;
+        self.shape_at.0 += dx;
+        self.shape_at.1 += dy;
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -266,6 +323,8 @@ pub struct Scene {
     shake_ms: f64,
     shake_start: f64,
     ops_capped: bool,
+    /// Ops kept free for the `Unclip`s of the clips open during layout.
+    clip_reserve: usize,
     pub builds: u64,
 }
 
@@ -316,6 +375,7 @@ impl Scene {
             shake_ms: 0.0,
             shake_start: 0.0,
             ops_capped: false,
+            clip_reserve: 0,
             builds: 0,
         }
     }
@@ -709,6 +769,7 @@ impl Scene {
         self.scratch.clear();
         self.frame.width = tpl.canvas_w;
         self.frame.height = tpl.canvas_h;
+        self.clip_reserve = 0;
 
         let mut b = Builder {
             t: &tpl,
@@ -809,8 +870,7 @@ impl Scene {
         }
         if cx != 0.0 || cy != 0.0 {
             for h in self.hits.iter_mut().filter(|h| !h.fixed) {
-                h.x -= cx;
-                h.y -= cy;
+                h.translate(-cx, -cy);
             }
         }
         if n_fixed > 0 || self.hits.iter().any(|h| h.fixed) {
@@ -821,7 +881,7 @@ impl Scene {
 
     /// Topmost hit record containing the point (last in paint order wins).
     pub fn hit_at(&self, x: f64, y: f64) -> Option<&HitRec> {
-        self.hits.iter().rev().find(|h| x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h)
+        self.hits.iter().rev().find(|h| h.contains(x, y))
     }
 
     /// Evaluates a binding's `with` against saved node locals + pointer.
@@ -1069,7 +1129,7 @@ impl Builder<'_> {
     /// True (and reported once) when the frame already holds `MAX_RENDER_OPS` ops.
     #[inline]
     fn ops_full(&mut self) -> bool {
-        if self.s.frame.ops.len() < MAX_RENDER_OPS {
+        if self.s.frame.ops.len() + self.s.clip_reserve < MAX_RENDER_OPS {
             return false;
         }
         if !self.s.ops_capped {
@@ -1093,9 +1153,65 @@ impl Builder<'_> {
             shift_op(op, dx, dy);
         }
         for h in &mut self.s.hits[hit0..hit1] {
-            h.x += dx;
-            h.y += dy;
+            h.translate(dx, dy);
         }
+    }
+
+    /// v0.2.2: lays out a group's children clipped to `(0, 0, w, h)`: a
+    /// `Clip` / `Unclip` pair around their ops (none if they drew nothing),
+    /// and their hit boxes cut to the box (dropped when outside it). Fixed
+    /// children of a non-fixed group are drawn in the HUD layer, outside
+    /// the clip, so they aren't clipped.
+    fn clipped_children(&mut self, id: u32, children: &[u32], opacity: f64, ctx: u64, w: f64, h: f64) {
+        let fixed = self.node(id).fixed;
+        let w = w.max(0.0);
+        let h = h.max(0.0);
+        let op0 = self.s.frame.ops.len();
+        // Room for the clip and its unclip; the unclip stays reserved.
+        let clipped = self.s.frame.ops.len() + self.s.clip_reserve + 2 <= MAX_RENDER_OPS;
+        if clipped {
+            self.push_op(id, DrawOp::Clip(ClipOp { x: 0.0, y: 0.0, w, h }));
+            self.s.clip_reserve += 1;
+        } else {
+            self.ops_full();
+        }
+        let hit0 = self.s.hits.len();
+        for &c in children {
+            self.place_free(c, opacity, ctx, 0.0, 0.0);
+        }
+        if clipped {
+            self.s.clip_reserve -= 1;
+            if self.s.frame.ops.len() == op0 + 1 {
+                // Nothing drawn inside: drop the clip.
+                self.s.frame.ops.pop();
+                self.s.op_fixed.pop();
+            } else {
+                self.s.frame.ops.push(DrawOp::Unclip);
+                self.s.op_fixed.push(fixed);
+            }
+        }
+        // Cut the children's hit boxes to the group's box.
+        let hits = &mut self.s.hits;
+        let mut keep = hit0;
+        for i in hit0..hits.len() {
+            let r = &mut hits[i];
+            if !(r.fixed && !fixed) {
+                let x0 = r.x.max(0.0);
+                let y0 = r.y.max(0.0);
+                let x1 = (r.x + r.w).min(w);
+                let y1 = (r.y + r.h).min(h);
+                if x1 < x0 || y1 < y0 {
+                    continue;
+                }
+                r.x = x0;
+                r.y = y0;
+                r.w = x1 - x0;
+                r.h = y1 - y0;
+            }
+            hits.swap(keep, i);
+            keep += 1;
+        }
+        hits.truncate(keep);
     }
 
     /// Lays out a node and places it freely at `(ox, oy) + (x, y)` using its
@@ -1136,14 +1252,29 @@ impl Builder<'_> {
         let x = self.num_m(n.x.as_ref(), id, ctx, PropName::X, "x", 0.0);
         let y = self.num_m(n.y.as_ref(), id, ctx, PropName::Y, "y", 0.0);
         let hit0 = self.s.hits.len();
+        let mut shape: Option<Rc<[(f64, f64)]>> = None;
 
         let b = match &n.kind {
-            TKind::Group { children } => {
+            TKind::Group { children, w: None, .. } => {
                 let mut b = Bounds::EMPTY;
                 for &c in children {
                     b = b.union(self.place_free(c, opacity, ctx, 0.0, 0.0));
                 }
                 b
+            }
+            TKind::Group { children, w, h, clip } => {
+                // v0.2.2: an explicit box, optionally clipping.
+                let w = self.num_m(w.as_ref(), id, ctx, PropName::W, "w", 0.0);
+                let h = self.num_m(h.as_ref(), id, ctx, PropName::H, "h", 0.0);
+                let (w, h) = (if w.is_finite() { w } else { 0.0 }, if h.is_finite() { h } else { 0.0 });
+                if *clip {
+                    self.clipped_children(id, children, opacity, ctx, w, h);
+                } else {
+                    for &c in children {
+                        self.place_free(c, opacity, ctx, 0.0, 0.0);
+                    }
+                }
+                Bounds::new(0.0, 0.0, w.max(0.0), h.max(0.0))
             }
             TKind::Stack { dir, gap, align, children } => self.stack(*dir, *gap, *align, children, opacity, ctx),
             TKind::Grid { source, cols, rows, cell_size, gap, cell, cell_slot, value_slot } => {
@@ -1251,7 +1382,7 @@ impl Builder<'_> {
                 }));
                 Bounds::new(0.0, 0.0, w.max(0.0), h.max(0.0))
             }
-            TKind::Image { asset, w, h, frame, flip_x, flip_y } => {
+            TKind::Image { asset, w, h, frame, flip_x, flip_y, src } => {
                 let Some(asset) = self.asset(asset, id, true) else { return Some((Bounds::EMPTY, x, y)) };
                 let AssetKind::Image { w: aw, h: ah, frames, fps, .. } = self.program.assets[asset as usize].kind else {
                     return Some((Bounds::EMPTY, x, y));
@@ -1275,19 +1406,28 @@ impl Builder<'_> {
                 let flip_y = flip_y.as_ref().and_then(|p| self.get(p, id, "flip_y")).unwrap_or(false);
                 let rotation = self.num_m(n.rotation.as_ref(), id, ctx, PropName::Rotation, "rotation", 0.0);
                 let scale = self.num_m(n.scale.as_ref(), id, ctx, PropName::Scale, "scale", 1.0);
-                self.push_op(id, DrawOp::Image(ImageOp {
-                    x: 0.0,
-                    y: 0.0,
-                    w,
-                    h,
-                    asset,
-                    frame: frame as u16,
-                    flip_x,
-                    flip_y,
-                    rotation,
-                    scale,
-                    opacity,
-                }));
+                // A bad source rectangle draws nothing (reported once); the
+                // box still lays out and takes taps.
+                let src = match src {
+                    None => Some(None),
+                    Some(src) => self.image_src(id, src, aw, ah).map(Some),
+                };
+                if let Some(src) = src {
+                    self.push_op(id, DrawOp::Image(ImageOp {
+                        x: 0.0,
+                        y: 0.0,
+                        w,
+                        h,
+                        asset,
+                        frame: frame as u16,
+                        flip_x,
+                        flip_y,
+                        rotation,
+                        scale,
+                        opacity,
+                        src,
+                    }));
+                }
                 Bounds::new(0.0, 0.0, w.max(0.0), h.max(0.0))
             }
             TKind::Line { x1, y1, x2, y2 } => {
@@ -1304,7 +1444,7 @@ impl Builder<'_> {
                 self.push_op(id, DrawOp::Line(LineOp { x1, y1, x2, y2, stroke, stroke_width: sw.max(0.0), opacity }));
                 Bounds::new(x1.min(x2), y1.min(y2), x1.max(x2), y1.max(y2))
             }
-            TKind::Poly { points, closed } => {
+            TKind::Poly { points, closed, hit_shape } => {
                 let pts = match points {
                     P::C(p) => p.0.clone(),
                     p => self.get(p, id, "points").map(|p: Points| p.0).unwrap_or_else(|| Rc::from(Vec::new())),
@@ -1324,6 +1464,9 @@ impl Builder<'_> {
                 for &(px, py) in pts {
                     b = b.union(Bounds::new(px, py, px, py));
                 }
+                if *hit_shape && n.is_target() {
+                    shape = Some(Rc::from(pts));
+                }
                 let (fill, stroke, stroke_width) = self.paint(n, id, ctx);
                 self.push_op(id, DrawOp::Poly(PolyOp { points: pts.to_vec(), closed: *closed, fill, stroke, stroke_width, opacity }));
                 b
@@ -1341,11 +1484,36 @@ impl Builder<'_> {
                 node: id,
                 saved: (s0, self.s.saved.len() as u32),
                 fixed: n.fixed,
+                shape,
+                shape_at: (0.0, 0.0),
             };
             // Before descendants, so a more specific child target wins.
             self.s.hits.insert(hit0, rec);
         }
         Some((b, x, y))
+    }
+
+    /// v0.2.2: an image's source rectangle `[x, y, w, h]` in asset units.
+    /// `x`/`y` default 0, `w`/`h` the rest of the frame. `None` (reported)
+    /// when a value isn't finite or the size isn't positive.
+    fn image_src(&mut self, id: u32, src: &[Option<P<f64>>; 4], aw: f64, ah: f64) -> Option<[f64; 4]> {
+        let sx = self.num(src[0].as_ref(), id, "src_x", 0.0);
+        let sy = self.num(src[1].as_ref(), id, "src_y", 0.0);
+        let sw = self.num(src[2].as_ref(), id, "src_w", aw - sx);
+        let sh = self.num(src[3].as_ref(), id, "src_h", ah - sy);
+        for (name, v) in [("src_x", sx), ("src_y", sy)] {
+            if !v.is_finite() {
+                self.report_eval(id, name, format!("`{name}` must be a finite number, got {v}"));
+                return None;
+            }
+        }
+        for (name, v) in [("src_w", sw), ("src_h", sh)] {
+            if !(v > 0.0 && v.is_finite()) {
+                self.report_eval(id, name, format!("`{name}` must be greater than 0, got {v}"));
+                return None;
+            }
+        }
+        Some([sx, sy, sw, sh])
     }
 
     /// Fill / stroke / stroke width. Fill defaults to black only when neither

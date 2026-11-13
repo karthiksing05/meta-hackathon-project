@@ -136,7 +136,11 @@ or when a restart cancels the press; pointer is the up position. With on_press: 
                              "stroke_width", "color", "size"],
         "eases": ["linear", "in", "out", "in_out", "spring"],
         "kinds": [
-            { "node": "group", "props": {"children": "list of nodes, positioned relative to the group"} },
+            { "node": "group", "props": {"children": "list of nodes, positioned relative to the group",
+                "w": "num (v0.2.2, with h): an explicit box (0, 0, w, h) instead of the children's union",
+                "h": "num (v0.2.2, with w)",
+                "clip": "bool (v0.2.2, default false; needs w and h): children are drawn and hit-tested only inside the box"},
+              "notes": "clip + an image with src_*: a zoomed crop; fixed children of a non-fixed group aren't clipped" },
             { "node": "stack", "props": {"dir": "row | column (default)", "gap": "num (default 0)",
                 "align": "start | center (default) | end", "children": "list of nodes"},
               "notes": "size comes from the children" },
@@ -158,12 +162,18 @@ or when a restart cancels the press; pointer is the up position. With on_press: 
             { "node": "image", "since": "0.2", "props": {"asset": "asset id (literal or = string expression)",
                 "w": "num (default: the asset's w)", "h": "num (default: the asset's h)",
                 "frame": "int (default floor(t * fps / 1000) % frames on the presentation clock)",
-                "flip_x": "bool", "flip_y": "bool"} },
+                "flip_x": "bool", "flip_y": "bool",
+                "src_x": "num (v0.2.2, default 0): left of the drawn part of the frame, in the asset's w/h units",
+                "src_y": "num (v0.2.2, default 0): top of the drawn part",
+                "src_w": "num > 0 (v0.2.2, default the rest of the frame): width of the drawn part",
+                "src_h": "num > 0 (v0.2.2, default the rest of the frame): height of the drawn part"},
+              "notes": "src_* crops the frame and stretches the crop to w x h (a zoom); parts outside the frame are transparent" },
             { "node": "line", "since": "0.2", "props": {"x1": "num (default 0)", "y1": "num (default 0)",
                 "x2": "num (required)", "y2": "num (required)"},
               "notes": "ends relative to the node's origin; uses stroke and stroke_width (default 2)" },
             { "node": "poly", "since": "0.2", "props": {"points": "list<vec2|ivec2> relative to the node's origin (max 256)",
-                "closed": "bool (default true)"},
+                "closed": "bool (default true)",
+                "hit": "box (default) | shape (v0.2.2): taps hit only inside the polygon (nonzero winding, like the fill)"},
               "notes": "uses fill, stroke, stroke_width; a literal list over the limit is an E_LIMIT at validation" },
         ],
     })
@@ -410,6 +420,15 @@ mod tests {
         assert!(c["feedback"]["entry"]["when"].as_str().unwrap().contains("pure"));
         let bounce = c["physics"]["collision_options"].as_array().unwrap().iter().find(|o| o["option"] == "bounce").unwrap();
         assert!(bounce["default"].as_str().unwrap().contains("larger"));
+    }
+
+    #[test]
+    fn catalog_has_the_v022_additions() {
+        let c = catalog();
+        let kind = |k: &str| c["nodes"]["kinds"].as_array().unwrap().iter().find(|n| n["node"] == k).unwrap().clone();
+        assert!(kind("group")["props"]["clip"].as_str().unwrap().contains("needs w and h"));
+        assert!(kind("image")["props"]["src_w"].as_str().unwrap().contains("> 0"));
+        assert!(kind("poly")["props"]["hit"].as_str().unwrap().contains("nonzero"));
     }
 
     #[test]

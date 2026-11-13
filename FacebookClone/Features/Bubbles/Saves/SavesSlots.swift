@@ -22,7 +22,7 @@ struct SavesResultAction: View {
                 Label(bubble.isSaved ? SavesCopy.saved : SavesCopy.save, systemImage: bubble.isSaved ? "bookmark.fill" : "bookmark")
                     .symbolEffect(.bounce, value: bounce)
             }
-            .buttonStyle(.fb(.primary, height: 48))
+            .buttonStyle(.fb(.tinted, height: 44))
             .accessibilityLabel(bubble.isSaved ? "Unsave \(bubble.title)" : "Save \(bubble.title)")
             .accessibilityValue(SavesCopy.savesCount(bubble.saveCount))
             if let proof = SavesSocialProof.text(for: bubble, in: bubbleStore) {

@@ -70,6 +70,9 @@ treat the exact shapes as the first version and change them together with the cl
 | `POST /v1/creations/{id}/publish`, `DELETE /v1/creations/{id}` | bearer (owner) | list a draft in the feed, search and its Group; delete a game with its saves and scores (the files stay on the games host under their unguessable id) |
 | `GET /v1/sounds?tab=trending\|for_you\|saved\|recent&q=`, `GET /v1/sounds/{id}`, `GET /v1/sounds/{id}/games?sort=top\|recent`, `PUT\|DELETE /v1/sounds/{id}/save`, `POST /v1/sounds` | optional / bearer | the sound library: loops that play behind games (see [Sounds](#sounds)) |
 | `PUT\|DELETE /v1/games/{id}/sound` | bearer (owner) | put a sound behind a game `{soundId, offsetMs?, mix?}`, or take it off |
+| `PUT /v1/creations/{id}` | bearer (owner) | a new build of your own game as `application/zip`: keeps the id, likes, plays, scores, sound and sponsor; takes the title, rule, tags, score model, `group_play` and files from the new package (send the same score model or the board re-ranks). The old files stay on the games host, unlinked |
+| `GET /v1/me/notifications`, `PUT /v1/me/notifications/{id}/read`, `PUT /v1/me/notifications/read`, `PUT`/`DELETE /v1/me/push-devices/{installationId}`, `POST /v1/groups/{id}/game-shares` | bearer | the notification inbox, push devices and Group game shares (see [Notifications](#notifications)) |
+| `POST /v1/rounds`, `GET /v1/rounds`, `GET /v1/rounds/{id}`, `POST /v1/rounds/{id}/plays`, `GET /v1/games/{id}/agreement` | bearer | same-seed rounds in a chat or a Group, and how opinion games compare (see [Rounds](#rounds-same-seed-play-in-a-chat-or-a-group)) |
 | `POST /v1/series`, `GET /v1/series`, `GET /v1/series/{id}`, `POST /v1/series/{id}/rounds/{n}` | bearer | best-of-N with a friend on the same games and seeds; scores come from replaying the run's input log in the engine (see [Series](#series)) |
 
 Scores are whole numbers (a fractional score is rejected). A manifest `id` that is a lowercase slug
@@ -175,6 +178,38 @@ A best-of-N between two friends. `POST /v1/series {opponentId, games: [gameId, .
 The phone derives the engine's seed from the round's seed, so `log.seed` is not the round's `seed`. The first run on a round fixes the engine seed and the second must match it. A round is decided when both have played: the higher score wins, a
 tie goes to the lower `time_ms`, otherwise it is a draw. The series ends when someone has won more than half the rounds or every round is decided. You can't see the other player's score for a round until you have played it. A friend starting a series, and a
 friend playing a round, show up in `GET /v1/me/moments` as `series_invited` and `series_round`.
+
+An uploaded or replaced game may carry `bots` at the top of its `manifest.json`: up to 20 playtest runs `[{skill: 0-1, score, sec?}]`, kept for the recommender's quality prior like a generated game's. A malformed block is ignored, never a reason to refuse the upload.
+
+The generator service also has `POST /internal/muse/image {prompt, size?, guide?: base64 PNG}` -> `{png_base64, model, seconds}` (one `muse-image-1.0` picture, 13-18 s, private network only, sizes 512 to 1536). It is the building block for picture games; nothing in the API calls it yet.
+
+## Notifications
+
+A per-person inbox that doubles as the push outbox. `GET /v1/me/notifications?limit=&cursor=` returns `{items: [{id, kind, title, body, gameId?, groupId?, challengeId?, seriesId?, createdAt, readAt?}], nextCursor?, unreadCount}` (newest first; `nextCursor` is opaque). `PUT /v1/me/notifications/{id}/read {read}` (`read` defaults to true) and `PUT /v1/me/notifications/read` (all) return `{unreadCount}`.
+
+Kinds, and what makes them:
+- `group_game`: `POST /v1/groups/{id}/game-shares {gameId, eventId}`. A member shares a game into a Group; every other member is notified. `eventId` is the post's stable id (4 to 100 characters), so a retry makes no second notification. The Group must be a Group (not an Event) and the sender in it.
+- `friend_challenge`: a friend sent you `POST /v1/challenges` (`challengeId`) or started `POST /v1/series` with you (`seriesId`).
+- `leaderboard_lost`: someone took first place from you on a ranked game. Only the former first place hears it, only when a counted score changes the leader, by the game's direction and tie-break. Own improvements, scores below first, empty boards and unranked games make nothing. Score writes on one game are serialized.
+- `viral_match`: a public game with many distinct players in a window whose description is close to your learned taste (the cosine of `game-recs.js`'s `describe(...).x` and your taste vector). Defaults: 100 players in 24 h, cosine 0.85, at least 5 learned pages, one a day, never your own game or one you played, each game once. Tune with `VIRAL_MIN_PLAYERS`, `VIRAL_WINDOW`, `VIRAL_COSINE`, `VIRAL_MIN_PAGES`, `VIRAL_PER_DAY`, `VIRAL_INTERVAL`; `VIRAL_MATCH=0` turns it off. A person whose taste has dislikes pulls away from a game's vector, so the cosine of 0.85 is a strict bar; expect to calibrate it on real data.
+
+One row per (person, source) at most, so a retried trigger never notifies twice. The inbox works with no push configured.
+
+Push: `PUT /v1/me/push-devices/{installationId} {token, environment: "sandbox"|"production"}` registers a device (the token is the hex APNs token; an installation moves to the account that registered it last); `DELETE` on the same route removes it, and `POST /v1/auth/logout` also takes an optional `installationId` and revokes that installation for the account whose refresh token it is. With APNs configured (`APNS_KEY_P8_B64` or `APNS_KEY_P8`, `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_TOPIC` = the app's bundle id; from GitHub: secret `APNS_KEY_P8` and the ids as variables or secrets) each new row with a registered device is pushed as `{aps: {alert: {title, body}, sound: "default", "thread-id": kind}, notificationId, kind, gameId?, groupId?, challengeId?, seriesId?}`. Pushes are leased before sending, retried with a growing delay (up to 6 tries) when Apple or the network fails, and a refused token drops the device. Nothing logs a token or the key. Without APNs the server stores the inbox and sends nothing.
+
+## Rounds: same-seed play in a chat or a Group
+
+Group play has no live multiplayer and no server chats. Someone sends a game into a chat thread or a Group; everyone plays the same single-player run on the server's seed whenever they like; the results compare afterwards. The round keeps its own result lines, so it is the thread.
+
+- A game's `group_play` (the manifest's top-level block) is stored on the game and returned as `group_play` on `GET /v1/games/{id}` and in every game view: `{mode, modes, round_seconds, result: {kind, compare, display, endings?, state?}, share_line, best_of?, same_seed}`. `compare` is `score`, `ending`, `agreement` or `none`. The app reads it to know what Send starts.
+- `POST /v1/rounds {gameId, target: {kind: "chat"|"group", id}, members?: [userId], mode?}` starts a round. A chat round needs `members` (friends of yours, up to 20 people with you). A Group round needs you in the Group; with no `members` it is the whole Group. `mode` defaults to the game's. `series` is refused: a best-of is `POST /v1/series`. The server picks the `seed` and sets `length` from `group_play.round_seconds`.
+- `POST /v1/rounds/{id}/plays {log}` takes a run's input log (as for a series round). It is replayed in the engine against the game's exact text, so only the replayed score, time and end state count. The first run fixes the engine seed and every later run must match it. A member can play once. The play appends a line to `lines`: the game's `share_line` filled with `{name}`, `{title}`, `{result}`, `{score}`, `{ending}`, `{choices}`, with `{result}` from `group_play.result.display`. Only the end-state variables named in `group_play.result.state` are kept, as `result` on the play.
+- `GET /v1/rounds/{id}` (members only; a stranger gets 404) and `GET /v1/rounds?target=chat:<id>|group:<id>` (no `target`: the rounds you are in). A round ends when everyone has played or 24 hours (`closesAt`) after it started; `finished` and `winnerId` are set then. `order` is everyone who played, best first: by the game's score model (direction, `counts_when`, tie-break), or for `compare: "ending"` by the ending's place in `endings` (best first) and then the score. A tie for first has no `winnerId`. An opinion game (`compare: "agreement"`) has no `order` and no winner; each player sees `agreement`, their match with each other player (0 to 100).
+- Moments (`GET /v1/me/moments`): `round_started` (someone started one with you), `round_played` (a member played) and `round_finished`.
+
+`GET /v1/games/{id}/agreement` compares picks in an opinion game: `?with=<friendId>`, `?scope=friends` or `?scope=group&groupId=<id>`. It returns `{agreement: 0-100, players, items: [{item, mine, group, share}]}`, built from each person's latest replay-checked `picks` in their rounds. `group` is the most common pick among the others and `share` the share of the others who picked what you did. It answers 409 until you and someone else have each played a round of the game, 422 for a game whose result is not picks.
+
+`POST /v1/generate` also takes `spec` (a game-spec/1 from `POST /v1/harness/plan`: the server uses it as the plan and does not plan again) and `answers` (`{slot: answer}` for the plan's clarifying questions; they replace the planner's guesses). Both are for new games only.
 
 ## Ranking (the recommender runs here)
 

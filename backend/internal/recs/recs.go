@@ -149,6 +149,26 @@ func (s *Session) call(method string, args ...string) (string, error) {
 // Rank orders candidates for the person. Input and output are the file's JSON (see game-recs.js `rank`).
 func (s *Session) Rank(input []byte) ([]byte, error) { return s.bytes("rank", input) }
 
+// Vector is how the recommender describes a game: its feature vector and that vector's length, from the file's own
+// `describe` (summary is one game summary as JSON). It is what a person's learned taste is compared with.
+func (s *Session) Vector(summary []byte) ([]float64, float64, error) {
+	if err := s.v.rt.Set("__summary", string(summary)); err != nil {
+		return nil, 0, err
+	}
+	val, err := s.v.rt.RunString(`(function () { var d = GameRecs.describe(JSON.parse(__summary), GameRecs.params()); return JSON.stringify({ x: d.x, norm: d.norm }); })()`)
+	if err != nil {
+		return nil, 0, fmt.Errorf("recs: describe: %w", err)
+	}
+	var out struct {
+		X    []float64 `json:"x"`
+		Norm float64   `json:"norm"`
+	}
+	if err := json.Unmarshal([]byte(val.String()), &out); err != nil {
+		return nil, 0, err
+	}
+	return out.X, out.Norm, nil
+}
+
 // Describe teaches the loaded runtime what the given games are (summaries is a JSON array of game
 // summaries). The recommender keeps those descriptions in memory, not in the saved state, so every
 // Run that calls Observe, Signal or GroupBlend on games must Describe them first. It is cheap: a rank

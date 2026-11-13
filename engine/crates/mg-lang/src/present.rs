@@ -43,16 +43,16 @@ const EASES: &[&str] = &["linear", "in", "out", "in_out", "spring"];
 
 fn kind_keys(kind: &str) -> &'static [&'static str] {
     match kind {
-        "group" => &["children"],
+        "group" => &["children", "w", "h", "clip"],
         "stack" => &["dir", "gap", "align", "children"],
         "grid" => &["source", "cols", "rows", "cell_size", "gap", "cell"],
         "repeat" => &["source", "as", "key", "template", "item"],
         "rect" => &["w", "h", "radius"],
         "circle" => &["r"],
         "text" => &["text", "size", "font", "weight", "color", "w", "h", "align", "valign", "wrap"],
-        "image" => &["asset", "w", "h", "frame", "flip_x", "flip_y"],
+        "image" => &["asset", "w", "h", "frame", "flip_x", "flip_y", "src_x", "src_y", "src_w", "src_h"],
         "line" => &["x1", "y1", "x2", "y2"],
-        "poly" => &["points", "closed"],
+        "poly" => &["points", "closed", "hit"],
         _ => &[],
     }
 }
@@ -312,7 +312,7 @@ impl Checker {
         self.begin(root);
         let pointer_slot = self.alloc();
         let empty_node = |at: &str| Node {
-            kind: NodeKind::Group { children: Vec::new() },
+            kind: NodeKind::group(Vec::new()),
             at: Rc::from(at),
             id: None,
             x: None,
@@ -406,7 +406,7 @@ impl Checker {
 
     fn node(&mut self, v: &J, at: &str) -> Node {
         let mut node = Node {
-            kind: NodeKind::Group { children: Vec::new() },
+            kind: NodeKind::group(Vec::new()),
             at: Rc::from(at),
             id: None,
             x: None,
@@ -485,7 +485,7 @@ impl Checker {
         // can see them; the grid/repeat's own props see only outer locals.
         let mark = self.scope_mark();
         node.kind = match kind {
-            "group" => NodeKind::Group { children: self.children(m, at) },
+            "group" => self.group_node(m, at),
             "stack" => {
                 let dir = match self.word(m, "dir", at, &["row", "column"]) {
                     Some("row") => Dir::Row,
@@ -564,6 +564,10 @@ impl Checker {
                     frame: self.opt_prop(m, "frame", at, PK::Int),
                     flip_x: self.opt_prop(m, "flip_x", at, PK::Bool),
                     flip_y: self.opt_prop(m, "flip_y", at, PK::Bool),
+                    src_x: self.opt_prop(m, "src_x", at, PK::Num),
+                    src_y: self.opt_prop(m, "src_y", at, PK::Num),
+                    src_w: self.positive_prop(m, "src_w", at),
+                    src_h: self.positive_prop(m, "src_h", at),
                 }
             }
             "line" => {
@@ -594,7 +598,8 @@ impl Checker {
                         true
                     }
                 };
-                NodeKind::Poly { points, closed }
+                let hit_shape = matches!(self.word(m, "hit", at, &["box", "shape"]), Some("shape"));
+                NodeKind::Poly { points, closed, hit_shape }
             }
             _ => unreachable!(),
         };
@@ -620,6 +625,51 @@ impl Checker {
             node.animate_on = self.animate_on(a, &ptr(at, "animate_on"));
         }
         node
+    }
+
+    /// v0.2.2 group: `children`, an optional box `w`/`h` (both or neither)
+    /// and `clip` (a literal bool; needs the box).
+    fn group_node(&mut self, m: &Obj, at: &str) -> NodeKind {
+        let w = self.opt_prop(m, "w", at, PK::Num);
+        let h = self.opt_prop(m, "h", at, PK::Num);
+        let clip = match m.get("clip") {
+            None => false,
+            Some(J::Bool(b)) => *b,
+            Some(other) => {
+                self.pres_err(&ptr(at, "clip"), format!("'clip' must be true or false, found {}", json_kind(other)), None);
+                false
+            }
+        };
+        let example = || Some("like {\"node\": \"group\", \"w\": 200, \"h\": 120, \"clip\": true, \"children\": [...]}".to_string());
+        match (&w, &h) {
+            (Some(_), None) => self.pres_err(at, "a group with 'w' also needs 'h'", example()),
+            (None, Some(_)) => self.pres_err(at, "a group with 'h' also needs 'w'", example()),
+            (None, None) if clip => self.pres_err(
+                &ptr(at, "clip"),
+                "'clip' needs the group's box: give the group 'w' and 'h'",
+                example(),
+            ),
+            _ => {}
+        }
+        NodeKind::Group { children: self.children(m, at), w, h, clip }
+    }
+
+    /// An optional number prop that must be > 0 when it's a constant
+    /// (image `src_w` / `src_h`). Bound values are checked each frame.
+    fn positive_prop(&mut self, m: &Obj, key: &str, at: &str) -> Option<Prop> {
+        let p = self.opt_prop(m, key, at, PK::Num)?;
+        if let Prop::Const(v) = &p {
+            if let Some(n) = v.as_f64() {
+                if !(n > 0.0 && n.is_finite()) {
+                    self.pres_err(
+                        &ptr(at, key),
+                        format!("'{key}' must be greater than 0, found {n}"),
+                        Some("the source rectangle is in the asset's units, like \"src_w\": 16 for a 16-wide crop".into()),
+                    );
+                }
+            }
+        }
+        Some(p)
     }
 
     fn required_prop(&mut self, m: &Obj, key: &str, at: &str, pk: PK) -> Prop {

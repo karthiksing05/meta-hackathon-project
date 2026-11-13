@@ -7,7 +7,8 @@ draws in the browser. The file format and the engine contract are in
 and [`SPEC-v0.2.md`](SPEC-v0.2.md) (v0.2 additions: assets, image/line/poly
 nodes, camera, typed text, key up and any key, pointer anywhere, physics,
 samples and music, particles and haptics; v0.2.1: hold buttons with
-`on_press`/`on_release`, text `wrap` and outlines, feedback `when`). Three v0.1 games live in
+`on_press`/`on_release`, text `wrap` and outlines, feedback `when`; v0.2.2:
+clipping groups, image crops with `src_*`, and `"hit": "shape"` polys). Three v0.1 games live in
 [`fixtures/`](fixtures) and v0.2 examples in [`examples/`](examples).
 `microgame catalog --json` lists everything a game file can use.
 
@@ -257,10 +258,15 @@ doesn't match the steps replayed so far is reported too. `--json` prints
 `{ok, game_hash_ok, steps, recomputed, claimed, problems}`.
 
 The same check runs in WebAssembly: `mg_verify(ptr, len)` takes UTF-8 JSON
-`{"game": <exact game file text>, "log": <log text or object>}` and returns the
-same `{ok, game_hash_ok, steps, recomputed, claimed, problems}`. In JS it is
-`engine.verify(gameText, log)` (or `Microgame.verify`), and in the app's
-bundle `MicrogameEngine.verify(game_json, log)`. So a Node server that loads
+`{"game": <exact game file text>, "log": <log text or object>, "state"?: [names]}`
+and returns the same `{ok, game_hash_ok, steps, recomputed, claimed, problems}`
+plus `result`: the end values of the game's state after the replay. With
+`state` (the manifest's `group_play.result.state`, e.g. `["ending",
+"choices_used"]`) it holds just those names (unknown ones are `null`);
+without it, every state variable. A server compares story endings and opinion
+picks from this, never from the phone. In JS it is
+`engine.verify(gameText, log, state?)` (or `Microgame.verify`), and in the app's
+bundle `MicrogameEngine.verify(game_json, log, state?)`. So a Node server that loads
 the engine bundle (the games generator already does) can verify a submitted
 run without the native CLI. `mg_hit_targets` also counts as a frame build in
 the log, since it builds the layout the next tap hits; the app's runtime calls
@@ -318,7 +324,14 @@ These are decisions taken while building v0.1. They belong in the next revision 
 6. **Float division by zero** is a runtime error, like integer division by zero.
 7. **Setting a vector component** (`set p.x`) isn't supported; set the whole vector.
 8. **Hit-testing** uses untransformed boxes (Part D, question 6), and group rotation and
-   scale don't pass down to children.
+   scale don't pass down to children. v0.2.2: a `clip` group cuts its children's boxes to its
+   own, and a `"hit": "shape"` poly also needs the point inside the polygon (nonzero winding,
+   plain `+ - *` arithmetic, so replays hit-test the same everywhere).
+9. **Math is the same on every target.** `sin`, `cos`, `log2`, `atan2`, `angle`, `pow` and
+   the rest go through `mg-runtime/src/mathx.rs` (fdlibm/musl ports using only correctly
+   rounded `+ - * /` and `sqrt`), never the platform's libm, whose last bits differ between
+   macOS, Linux and WASM. `mathx::tests::pinned_bits` pins exact `atan2`/`pow` results and
+   `web/test-node.mjs` checks the WASM build gives the same bits.
 
 `examples/meteor_dodge.json` is a fourth test game. It covers what the three fixtures
 don't: drag, `repeat`, `tick`, circles, records, enums, `after`, `push` and `remove`.

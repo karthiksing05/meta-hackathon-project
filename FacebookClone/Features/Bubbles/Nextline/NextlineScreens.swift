@@ -9,7 +9,8 @@ import SwiftUI
 ///   results/<bubbleID>          the latest finished night on that Bubble's podium
 ///
 /// Quiz nights need the server to run the night and collect everyone's answers
-/// (docs/APP_LIVE_DATA_PLAN.md, Stage 4), so `night` says "Not available yet".
+/// (docs/APP_LIVE_DATA_PLAN.md, Stage 4), which isn't there yet, so `night` says so and offers the
+/// Group's games instead (`QuizNightUnavailableView`).
 enum NextlineScreens {
     /// A pushed screen (`Route.bubbleFeature`).
     @MainActor
@@ -17,9 +18,7 @@ enum NextlineScreens {
     static func destination(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "night", "live":
-            LiveDataStateView(kind: .notAvailable(LiveDataCopy.quizNight), title: "Quiz night")
-                .frame(maxHeight: .infinity)
-                .background(FBColor.surface)
+            QuizNightUnavailableView(placeID: route.arg)
         case "podium":
             QuizNightPodiumView(nightID: route.arg)
         case "results":
@@ -147,5 +146,34 @@ enum NextlineCopy {
         default: suffix = "th"
         }
         return "\(n)\(suffix)"
+    }
+}
+
+/// A quiz night while the server can't run one: says so kindly, and offers the Group's games
+/// (or the games tab, from a group chat).
+struct QuizNightUnavailableView: View {
+    /// A Group id or a group chat id.
+    let placeID: String
+
+    @Environment(AppStore.self) private var appStore
+    @Environment(Router.self) private var router
+
+    var body: some View {
+        let isGroup = appStore.group(id: placeID) != nil
+        LiveDataStateView(
+            kind: .notAvailable(LiveDataCopy.quizNight),
+            title: NextlineCopy.quizNight,
+            action: LiveDataStateView.Action(title: isGroup ? "Play the Group's games" : "Play something", symbol: "play.fill") {
+                if isGroup {
+                    router.push(.bubbleFeature(GroupsSearchScreens.gamesRoute(for: placeID)))
+                } else {
+                    router.select(.bubbles)
+                }
+            }
+        )
+        .frame(maxHeight: .infinity)
+        .background(FBColor.surface)
+        .navigationTitle(NextlineCopy.quizNight)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
