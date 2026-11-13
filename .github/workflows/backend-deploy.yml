@@ -135,8 +135,8 @@ jobs:
           fi
           # The key goes over SSH stdin (never on a command line) into a root-only file on the server, which
           # the generator container reads when it is recreated by the deploy below. GitHub masks it in logs.
-          printf 'MUSE_API_KEY=%s
-' "$MUSE_API_KEY" | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST"             'umask 077 && cat > /etc/game-platform/generator.env.new && mv /etc/game-platform/generator.env.new /etc/game-platform/generator.env'
+          printf 'MUSE_API_KEY=%s\n' "$MUSE_API_KEY" | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" \
+            'umask 077 && cat > /etc/game-platform/generator.env.new && mv /etc/game-platform/generator.env.new /etc/game-platform/generator.env'
       - name: Deploy (rolls back automatically if /readyz fails)
         env:
           HOST: ${{ secrets.VPS_HOST }}
