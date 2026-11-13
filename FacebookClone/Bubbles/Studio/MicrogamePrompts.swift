@@ -40,6 +40,14 @@ enum MicrogamePrompts {
         is clearly what they asked for. Never add one nobody asked for, and never copy another game's levels, \
         art or exact text. The examples below use invented names only because nobody asked for a franchise; \
         follow their structure, not their names.
+        - Genre conventions: keep the core rules of the genre the person named or clearly implied, even when the \
+        brief asks for a relaxed mood. Make it gentler with speed, gap size or time, never by breaking the genre. \
+        Tap-to-flap or flappy-style: one hit ends the run (1 life), score is obstacles passed, endless or a target, \
+        difficulty from speed and gap size; use gravity_jump with flap: true plus gap_walls. Endless runner: one hit \
+        or a few lives, score is distance. Match-pairs: no lives, count moves or time. Quiz: no lives unless asked. \
+        Snake-like: a growing tail, one hit ends it. 2048 or merge: a full board ends it.
+        - Prefer a library fragment that does the mechanic over hand-written rules and drawing. When you must \
+        hand-write obstacles, draw and collide with the same numbers, so the hit area matches what's drawn.
         - Aim for the quality of the examples below: specific, funny or vivid writing; a difficulty curve; \
         art for every role; a sound set that fits; real ways to win and to lose.
 
