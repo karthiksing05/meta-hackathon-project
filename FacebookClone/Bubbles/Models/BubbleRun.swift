@@ -82,6 +82,9 @@ struct BubbleRunResult: Codable, Hashable, Sendable {
     var durationSec: Double
     var replay: BubbleInputLog
     var share: BubbleShareArtifact
+    /// Microgames only: the engine's input log (`microgame-log/1` JSON text) for server checks
+    /// (`MicrogameEngine.verify`). Nil for other formulas.
+    var engineLog: String?
 
     init(outcome: BubbleOutcome, score: Int, durationSec: Double, replay: BubbleInputLog, share: BubbleShareArtifact) {
         self.outcome = outcome
@@ -94,6 +97,7 @@ struct BubbleRunResult: Codable, Hashable, Sendable {
     enum CodingKeys: String, CodingKey {
         case outcome, score, replay, share
         case durationSec = "duration_sec"
+        case engineLog = "engine_log"
     }
 
     init(from decoder: Decoder) throws {
@@ -108,6 +112,7 @@ struct BubbleRunResult: Codable, Hashable, Sendable {
         replay = (try? c.decode(BubbleInputLog.self, forKey: .replay)) ?? BubbleInputLog(seed: 1)
         share = (try? c.decode(BubbleShareArtifact.self, forKey: .share))
             ?? BubbleShareArtifact(headline: "", scoreText: "\(score)")
+        engineLog = try? c.decodeIfPresent(String.self, forKey: .engineLog)
     }
 }
 

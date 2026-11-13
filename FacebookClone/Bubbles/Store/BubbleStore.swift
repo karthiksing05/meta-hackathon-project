@@ -28,6 +28,8 @@ final class BubbleStore {
     var boardStates: [String: FeedLoadState] = [:]
     /// Friends and Group boards from the server, by `boardKey` (the everyone board is `bubble.scores`).
     var scopedBoards: [String: [BubbleScore]] = [:]
+    /// The engine input log of your latest microgame run, by game id (`BubbleRunResult.engineLog`).
+    @ObservationIgnored var lastEngineLogs: [String: String] = [:]
     /// Who saved each game, as far as the server says (`GET /v1/games/{id}/likes`), by game id.
     var saverStates: [String: BubbleSaversState] = [:]
     /// Your saved games for the Library (`GET /v1/me/likes`).
@@ -209,6 +211,8 @@ final class BubbleStore {
     @discardableResult
     func record(_ result: BubbleRunResult, in bubble: Bubble) -> BubbleScore {
         refreshDayIfNeeded()
+        // A microgame run's engine log, for the series round it may belong to (ServerSeries).
+        lastEngineLogs[bubble.id] = result.engineLog
         let entry = BubbleScore(
             user: appStore.me,
             score: result.score,

@@ -5867,6 +5867,9 @@
         duration_sec: Math.round((run.tick / TICK_RATE) * 100) / 100,
         replay: run.replayLog(),
         share,
+        // Microgames: the engine's own input log (microgame-log/1), which a server replays with
+        // MicrogameEngine.verify to check the score (series rounds, challenges).
+        engine_log: run.state && run.state.microgame && typeof run.state.microgame.log === "string" ? run.state.microgame.log : undefined,
       });
       this.showResultCard();
     },

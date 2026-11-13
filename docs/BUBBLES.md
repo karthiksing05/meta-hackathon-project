@@ -1583,7 +1583,8 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   recomputed, claimed, problems}`. It runs anywhere the engine bundle loads: the app, a friend's
   phone, or the server's Node generator. An edited score, a removed input or another game file fails.
   `tools/runtime-tests/microgame-verify.js` plays every microgame seed through the real runtime
-  and checks that honest logs verify and raised scores don't.
+  and checks that honest logs verify and raised scores don't. The runtime's `result` message carries
+  it to Swift as `engine_log` (`BubbleRunResult.engineLog`), which series rounds submit (7.14).
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
@@ -1813,54 +1814,29 @@ the content prompt; covers still carry no text or logos).
 DEBUG: the anatomy fixtures and `FB_STUDIO_ANATOMY`/`FB_STUDIO_STEP` were removed in Stage 4;
 `FB_STUDIO_SCROLL=anatomy|anatomy-rules|anatomy-<part>` (Brief) or `chat` (Try).
 
-### 7.14 Get-to-know brackets (bracket)
+### 7.14 Matches with a friend: best of 5 on the server (bracket)
 
-Meeting someone new should come with something to do together. When you become friends (you
-confirm, or they accept: `AppStore` posts `Notification.Name.friendshipStarted`), or you tap Add
-friend next to a stranger on a Group's weekly board or a game's board, the app proposes a **best of
-three** with that person: round 1 **Quick hands** (dodge, timing, microgame, merge), round 2 **Words
-and trivia** (guess, quiz night, answer, learn), round 3 **Get to know you** (answer, adventure,
-sort). Each round is a different game on a seed shared by the two of you (and the game's length), so
-it's the same course. The card (`BracketCardView`) shows both faces, the standing ("You 1 – 0
-Maya"), each round's game and both scores, and the winner; each round's Play opens the player on the
-round's seed. It sits at the top of their profile (`BubbleProfileHeaderSlots`), which also offers
-"Get to know Maya: 3 quick games" when there is none. Each round you finish posts a line to your 1:1
-chat ("Our bracket, round 1 (Hill Hopper): me 42 · you 39"); the final result goes to the chat and,
-for a bracket that started on a Group board, to the Group as a playable share card.
+Meeting someone new should come with something to do together. Adding a friend on the server (Find
+friends, the Group Blend's Add friend) posts `gamesFriendAdded`, and the app offers **a best of 5**
+(`BestOfFiveOfferSheet`): five quick microgames from the server's feed, the same games and the same
+seeds for both of you, first to 3 wins. "Play Maya: best of 5" starts it and drops you straight into
+round 1. A friend's profile has the same card (`BracketProfileCard`), or one tap to start a match.
 
-**Files** (`Features/Bubbles/Bracket/`): `FriendBracket.swift` (model, `BracketService` protocol,
-`BracketPlanner`), `LocalBracketService.swift` (today's implementation, in memory for the launch),
-`BracketLocalOpponent.swift` (**local stand-in**: the other person's rounds are bot runs of the real
-runtime on the same seed, through `BubbleStore.runtimeWorker`, marked `theirsIsLocalStandIn`),
-`BracketCardView.swift`, `BracketHooks.swift` (install, `didFinish`, `met`). Shared edits: one line
-each in `BubbleFeatureRouter` (install, didFinish), `BubbleFeatureSlots` (profile header),
-`AppStore` (the friendship notification), `GroupWeeklyBoardActions.addFriend` and `BubbleBoardView`.
-DEBUG: `FB_BRACKET=<userID>[:played]`.
+**Server-backed and checked** (`ServerBracketService`, Max's `/v1/series`, `backend/README.md` "Series"):
+- `POST /v1/series {opponentId, games}` creates the match; the server picks each round's seed.
+- Each round's Play opens the player on the round's seed (`BubblePlayRequest(seed:)`). When the run
+  ends, the runtime's result carries the engine's input log (`engine_log`, `microgame-log/1`, see
+  7.11), `BubbleStore.record` keeps it (`lastEngineLogs`), and `BracketHooks.didFinish` submits it:
+  `POST /v1/series/{id}/rounds/{n} {log}`. The server replays the log with `MicrogameEngine.verify`
+  against the game's stored `game_json` and keeps the **replayed** score and time; both players'
+  engine seeds must match. The other side's score stays hidden until you've played the round.
+- A round goes to the higher score, then the lower time; the match ends when someone has won more
+  than half the rounds or every round is decided (`winsNeeded`, `winner`).
+- Matches in play sit at the top of **Challenges** ("Your matches", `BracketCardView`), and rounds
+  waiting on you add to the trophy's badge. Nothing is simulated: the other side's rounds come from
+  the other person.
 
-**One offer per Add friend.** A server friendship (Find friends, the Group Blend's Add friend) posts
-`gamesFriendAdded`, and that tap gets the Challenges best-of-5 offer (`BestOfFiveOfferSheet`) and
-nothing from brackets. Brackets never pop up there: they live as the "Getting to know" card on the
-person's profile, start from its button, start quietly from Add friend on a game or Group weekly
-board (which use the local friend request and get no best-of-5 offer), and announce themselves with a
-toast only for friendships made through the local friend requests (`friendshipStarted`). When the
-server serves same-seed series, the bracket's rounds can become that series and the two merge.
-
-**Server endpoints the backend would need** (so `LocalBracketService` and `BracketLocalOpponent`
-can be swapped for a `GamesAPI`-backed service with no screen changes). Picking games, seeds and
-winners moves to the server; runs are verified like any score (seed plus replay).
-
-| Call | Body | Returns |
-|---|---|---|
-| `POST /v1/brackets` | `{opponent_id, origin: {kind: "new_friend" \| "group" \| "event", id?}}` | the bracket (an open one with that person if it exists) |
-| `GET /v1/brackets?with=<user_id>` | — | `{brackets: [bracket]}`, newest first |
-| `GET /v1/brackets/<id>` | — | the bracket |
-| `POST /v1/brackets/<id>/rounds/<index>/runs` | `{score, replay}` (the `BubbleInputLog`; its seed must be the round's) | the bracket, with your best score on that round |
-
-A bracket: `{id, created_at, origin, players: [user_id, user_id], rounds: [{index, theme: "reflex" |
-"words" | "about_you", game_id, seed, length, scores: {<user_id>: {score, replay_id, verified}}}],
-standing: {<user_id>: wins}, winner_id: string | null, finished: bool}`. Best of three: finished at
-two wins or when all three rounds have both scores. Events the app should hear (push or the
-notifications feed): `bracket.proposed` (a new friend; the app shows the card), `bracket.round_played`
-(the other person's score landed), `bracket.finished`. Posting the round lines to the chat and the
-final card to the Group can stay in the app (it already sends messages and Group posts) or move to the
-server with these events.
+**Files** (`Features/Bubbles/Bracket/`): `FriendBracket.swift` (model, `BracketService`, planner),
+`ServerBracketService.swift` (the server series, the round submission and copy), `BracketCardView.swift`,
+`BracketHooks.swift` (install, `didFinish`, `met`). `met` (Add friend on a board) starts nothing
+unless the person is already a server friend. Debug: `FB_BEST_OF_5=<userID>` shows the offer.
