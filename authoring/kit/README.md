@@ -7,7 +7,7 @@ still differ.
 
 | File | What it does |
 |---|---|
-| `vibes.mjs` | The vibe table: 27 vibes, each with match words, a system fallback stack and 2–3 pairings. |
+| `vibes.mjs` | The vibe table: 27 vibes, each with match words, a system fallback stack and 2–3 pairings. Plus `BOLD`: 1–3 characterful pairings per vibe (Rye, Creepster, Nosifer, Luckiest Guy, Bagel Fat One, Monoton, Faster One, …) that `chooseLook(words, id, {characterful: true})` and the art pipeline (`artdir/kit.mjs`) pick first; display faces for titles, HUD numbers and big words, always on a readable text face. |
 | `look.mjs` | `chooseLook`, `lookFromChoice`, `applyLook`, `lookCheck`, `lookFix`, `lookForBuilt` (pure JS; the Studio bundle packs it). |
 | `font-data.mjs` | Generated facts per bundled font (family, role, kind, weights, average advance). |
 | `readability.mjs` | `S_READABILITY`: every word against the pixels behind it, and the fix (palette colour → outline or soft plate → solid plate). |

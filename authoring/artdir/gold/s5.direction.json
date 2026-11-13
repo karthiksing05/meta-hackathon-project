@@ -1,0 +1,68 @@
+{
+ "title": "Duolingo: Unhinged Owl Streak Sprint",
+ "gameId": "97915d706f0339c134ed3786",
+ "words": "duolingo owl language lesson streak spanish cartoon cheerful",
+ "vibe": "cartoon_action",
+ "style": "bright clean cartoon illustration in the style of the Duolingo app: chunky rounded shapes, bold simple forms, smooth flat shading with soft highlights, cheerful saturated colors, friendly and playful",
+ "palette": [
+  "#58CC02",
+  "#89E219",
+  "#1CB0F6",
+  "#FFC800",
+  "#FF4B4B",
+  "#FFFFFF",
+  "#3C3C3C"
+ ],
+ "frame": {
+  "scene": "a cheerful sunny sky-blue background with a few puffy white clouds near the top and soft rolling bright green hills along the bottom edge",
+  "focal": "Duo, the round bright green Duolingo owl with big round eyes, a small orange beak and orange feet, large in the upper middle of the screen, cheering with both wings up, beside a big blank white rounded flash card",
+  "hud": "one wide blank white rounded plaque at the very top",
+  "controls": "four wide blank white rounded answer buttons stacked in the lower half, each with a thick light grey bottom lip"
+ },
+ "backdrop": {
+  "scene": "a cheerful sunny sky-blue sky with a few puffy white clouds near the top and soft rolling bright green hills along the bottom edge",
+  "calm": "the middle of the screen is open, plain soft sky blue with a gentle light gradient"
+ },
+ "wordmark": {
+  "text": "Unhinged Owl Streak Sprint",
+  "key": "magenta",
+  "lettering": "chunky rounded bold cartoon letters like the Duolingo logo, bright feather green with a darker green bottom lip and a thick white outline, bouncy and friendly"
+ },
+ "sprites": {
+  "key": "magenta",
+  "px": 256,
+  "set": "Subjects 1 to 4 are the same character, Duo the Duolingo owl: a round chubby bright green owl with big round white eyes and dark pupils, a small orange beak, orange feet and short wings, in the same size and front view, each with the expression and pose described.",
+  "items": [
+   {
+    "id": "owl_calm",
+    "text": "Duo standing calmly with a small friendly smile, wings at his sides"
+   },
+   {
+    "id": "owl_happy",
+    "text": "Duo cheering with both wings up in the air, eyes sparkling, beak open in a big grin"
+   },
+   {
+    "id": "owl_feral",
+    "text": "Duo unhinged and intense, huge wide eyes with tiny pinprick pupils, feathers ruffled and sticking out, leaning forward menacingly"
+   },
+   {
+    "id": "owl_sad",
+    "text": "Duo disappointed, wings drooping, head down, one big tear"
+   },
+   {
+    "id": "flame",
+    "text": "a chunky rounded cartoon streak flame, orange outside and yellow inside"
+   },
+   {
+    "id": "heart",
+    "text": "a chunky glossy red cartoon heart with a white shine"
+   }
+  ]
+ },
+ "ui": {
+  "material": "chunky clean white rounded plastic like the Duolingo app buttons, with a thick light grey bottom lip",
+  "button": "a thicker grey bottom lip so it looks pressable",
+  "key": "magenta",
+  "corner": 40
+ }
+}

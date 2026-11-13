@@ -275,5 +275,108 @@ export const VIBES = [
   },
 ];
 
+// The characterful pairings per vibe (art direction v2): the most expressive display face that
+// suits the vibe, for titles, HUD numbers and big words, on a readable text face. The art pipeline
+// (chooseLook with {characterful: true}) picks among these first; `pairings` stay as they were, so
+// every game already pinned to one (art.type) keeps its fonts. Pairing ids are unique per vibe.
+export const BOLD = {
+  game_show: [
+    P('neon_marquee', 'bungee_shade', 'archivo', { numerals: 'teko', dcase: 'upper', lcase: 'upper', treatment: 'none', ratio: [1.25, 1.3] }),
+    P('pop_quiz', 'luckiest', 'rubik', { numerals: 'luckiest', treatment: 'heavy', ratio: [1.25, 1.3] }),
+  ],
+  retro_80s: [
+    P('outrun', 'monoton', 'barlow_cond', { numerals: 'vt323', lcase: 'upper', ltrack: 0.12, ratio: [1.25, 1.3], base: [16, 17] }),
+    P('arcade_mall', 'bungee_shade', 'josefin', { numerals: 'teko', lcase: 'upper', treatment: 'none' }),
+  ],
+  pixel_arcade: [
+    P('high_score', 'press_start', 'vt323', { numerals: 'press_start', dcase: 'upper', lcase: 'upper', treatment: 'heavy', base: [17, 17], ratio: [1.2, 1.25] }),
+    P('block_party', 'rubik_mono', 'space_mono', { numerals: 'press_start', lcase: 'upper', treatment: 'outline', ratio: [1.2, 1.25] }),
+  ],
+  space_saga: [
+    P('warp', 'zen_dots', 'space_grotesk', { numerals: 'share_tech_mono', lcase: 'upper', ltrack: 0.1, ratio: [1.2, 1.25] }),
+  ],
+  cyber_tech: [
+    P('ops', 'black_ops', 'share_tech_mono', { numerals: 'share_tech_mono', lcase: 'upper', ratio: [1.2, 1.25] }),
+    P('overclock', 'zen_dots', 'space_mono', { numerals: 'space_mono', ratio: [1.2, 1.25], base: [15, 16] }),
+  ],
+  meme_brainrot: [
+    P('chonk', 'bagel', 'rubik', { numerals: 'bagel', treatment: 'heavy', ratio: [1.25, 1.333] }),
+    P('sharpie_caption', 'permanent_marker', 'outfit', { numerals: 'luckiest', treatment: 'heavy', ratio: [1.25, 1.3] }),
+    P('loud', 'luckiest', 'baloo', { numerals: 'luckiest', treatment: 'heavy', ratio: [1.25, 1.333] }),
+  ],
+  cartoon_action: [
+    P('cartoon_title', 'luckiest', 'fredoka', { numerals: 'luckiest', treatment: 'heavy', ratio: [1.25, 1.333] }),
+    P('chunky', 'titan', 'rubik', { numerals: 'titan', treatment: 'heavy', ratio: [1.25, 1.3] }),
+  ],
+  cute_collectible: [
+    P('bagel_shop', 'bagel', 'nunito', { numerals: 'bagel', treatment: 'none', ratio: [1.2, 1.25], base: [16, 17] }),
+    P('cherry', 'cherry_bomb', 'mplus_rounded', { numerals: 'fredoka', treatment: 'none', ratio: [1.25, 1.3] }),
+    P('gumdrop', 'lilita', 'fredoka', { numerals: 'lilita', treatment: 'outline', ratio: [1.2, 1.25] }),
+  ],
+  garden_cozy: [
+    P('greenhouse', 'boogaloo', 'nunito', { numerals: 'fredoka', treatment: 'none', ratio: [1.25, 1.3], base: [16, 17] }),
+    P('seedling', 'titan', 'work_sans', { numerals: 'titan', treatment: 'none', ratio: [1.2, 1.25] }),
+  ],
+  medieval_quest: [
+    P('banner', 'pirata', 'lora', { treatment: 'none', ratio: [1.25, 1.3], base: [16, 17] }),
+  ],
+  spooky: [
+    P('slasher', 'nosifer', 'cormorant', { treatment: 'outline', ratio: [1.2, 1.25], base: [16, 17] }),
+    P('creature_feature', 'creepster', 'courier_prime', { numerals: 'courier_prime', treatment: 'heavy', ratio: [1.25, 1.333], base: [15, 16] }),
+  ],
+  noir_mystery: [
+    P('pulp_cover', 'shrikhand', 'courier_prime', { lcase: 'upper', ratio: [1.25, 1.3], base: [15, 16] }),
+  ],
+  office_corporate: [
+    P('sticky_note', 'permanent_marker', 'dm_sans', { numerals: 'space_mono', ratio: [1.2, 1.25] }),
+  ],
+  racing_sport: [
+    P('checkered', 'faster', 'barlow_cond', { numerals: 'teko', dcase: 'upper', lcase: 'upper', treatment: 'outline', ratio: [1.25, 1.3], base: [16, 17] }),
+    P('podium', 'racing_sans', 'oswald', { numerals: 'teko', dcase: 'upper', lcase: 'upper', treatment: 'heavy', ratio: [1.25, 1.333], base: [16, 17] }),
+  ],
+  wild_west: [
+    P('wanted_poster', 'rye', 'barlow_cond', { numerals: 'rye', dcase: 'upper', lcase: 'upper', treatment: 'outline', ratio: [1.25, 1.3], base: [16, 17] }),
+  ],
+  midcentury: [
+    P('groovy', 'shrikhand', 'josefin', { lcase: 'upper', ltrack: 0.1, treatment: 'outline', ratio: [1.25, 1.333] }),
+    P('far_out', 'boogaloo', 'outfit', { treatment: 'none', ratio: [1.25, 1.3] }),
+  ],
+  jazz_deco: [
+    P('deco_neon', 'monoton', 'cormorant', { lcase: 'upper', ltrack: 0.12, ratio: [1.25, 1.3], base: [16, 17] }),
+  ],
+  notebook: [
+    P('marker', 'permanent_marker', 'patrick_hand', { numerals: 'patrick_hand', ratio: [1.25, 1.333], base: [16, 17] }),
+  ],
+  tropical: [
+    P('surf_brush', 'knewave', 'nunito', { treatment: 'outline', ratio: [1.25, 1.3] }),
+    P('jolly_roger', 'pirata', 'outfit', { lcase: 'upper', treatment: 'none', ratio: [1.25, 1.3] }),
+  ],
+  wild_nature: [
+    P('trail_badge', 'lilita', 'work_sans', { numerals: 'lilita', lcase: 'upper', ratio: [1.25, 1.3] }),
+  ],
+  food_fun: [
+    P('candy_shop', 'bagel', 'outfit', { numerals: 'bagel', treatment: 'heavy', ratio: [1.25, 1.333] }),
+    P('soda_fountain', 'shrikhand', 'rubik', { numerals: 'lilita', treatment: 'outline', ratio: [1.25, 1.3] }),
+    P('snack_pack', 'lilita', 'rubik', { numerals: 'lilita', treatment: 'heavy', ratio: [1.2, 1.25] }),
+  ],
+  music_party: [
+    P('headbanger', 'metal_mania', 'barlow_cond', { numerals: 'teko', lcase: 'upper', treatment: 'outline', ratio: [1.25, 1.3], base: [16, 17] }),
+    P('tag_wall', 'sedgwick', 'rubik', { numerals: 'teko', treatment: 'heavy', ratio: [1.25, 1.333] }),
+    P('synth_club', 'monoton', 'dm_sans', { numerals: 'share_tech_mono', ratio: [1.25, 1.3] }),
+  ],
+  word_puzzle: [
+    P('letter_blocks', 'rubik_mono', 'work_sans', { numerals: 'rubik_mono', ratio: [1.2, 1.25] }),
+    P('chunky_tiles', 'lilita', 'dm_sans', { numerals: 'lilita', ratio: [1.25, 1.3] }),
+  ],
+  trivia_world: [
+    P('globe_show', 'titan', 'outfit', { numerals: 'titan', treatment: 'outline', ratio: [1.2, 1.25] }),
+  ],
+  clean_modern: [
+    P('punchy', 'lilita', 'outfit', { ratio: [1.2, 1.25] }),
+    P('mono_pop', 'rubik_mono', 'dm_sans', { numerals: 'space_mono', ratio: [1.2, 1.25] }),
+  ],
+};
+for (const v of VIBES) v.bold = BOLD[v.id] ?? [];
+
 export const VIBE_IDS = VIBES.map((v) => v.id);
 export const DEFAULT_VIBE = 'clean_modern';

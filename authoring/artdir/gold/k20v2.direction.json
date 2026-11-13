@@ -1,0 +1,76 @@
+{
+ "title": "Guess the Decade",
+ "gameId": "dca2283a1b53cd83a57173d0",
+ "words": "guess the decade synth melody retro 80s synthwave cassette radio music",
+ "vibe": "retro_80s",
+ "style": "clean flat vector synthwave poster art, crisp geometric shapes, a big striped sunset sun, layered mountain silhouettes, a glowing perspective grid floor, smooth gradients, subtle glow, no texture",
+ "palette": [
+  "#140A2E",
+  "#2A1356",
+  "#FF4FA3",
+  "#FFB547",
+  "#3DE7FF",
+  "#F3EEFF"
+ ],
+ "frame": {
+  "scene": "a retro 1980s synthwave night: deep indigo sky with a few stars, a huge striped orange-to-pink sunset sun sitting on a horizon of violet mountain silhouettes, a glowing magenta perspective grid floor below",
+  "focal": "a round glowing cyan play button in front of the sun, ringed with a soft sound-wave halo",
+  "hud": "two small blank dark rounded plaques side by side at the top",
+  "controls": "four wide stacked dark translucent rounded answer bars with thin cyan outlines over the grid floor"
+ },
+ "wordmark": {
+  "text": "Guess the Decade",
+  "key": "green",
+  "lettering": "1980s synthwave chrome title lettering: bold italic letters with a hot pink to orange sunset gradient fill, a cyan neon outline and a chrome bevel, like a retro arcade logo"
+ },
+ "seeded": true,
+ "backdrop": {
+  "scene": "the same retro synthwave night: deep indigo starry sky, a huge striped orange-to-pink sunset sun on a horizon of violet mountain silhouettes, a glowing magenta perspective grid floor below",
+  "calm": "the lower half over the grid floor is calm and dark enough for answer bars, and the band around the sun stays clear for one play button"
+ },
+ "sprites": {
+  "key": "green",
+  "px": 200,
+  "set": "Every subject is a glowing neon retro object drawn in the same synthwave poster style, chunky and simple, readable at a small size.",
+  "items": [
+   {
+    "id": "play",
+    "text": "a round glowing cyan neon play button: a dark disc with a bright cyan rim and a bold pink triangle play symbol in the middle"
+   },
+   {
+    "id": "life",
+    "text": "a small neon pink cassette tape seen straight on"
+   },
+   {
+    "id": "d70",
+    "text": "a sparkling silver disco ball"
+   },
+   {
+    "id": "d80",
+    "text": "a chunky retro boombox with two big speakers"
+   },
+   {
+    "id": "d90",
+    "text": "a shiny compact disc"
+   },
+   {
+    "id": "d00",
+    "text": "a silver flip phone, opened"
+   },
+   {
+    "id": "d10",
+    "text": "a modern smartphone with white earbuds"
+   },
+   {
+    "id": "d20",
+    "text": "a pair of wireless earbuds in an open charging case"
+   }
+  ]
+ },
+ "ui": {
+  "material": "dark translucent indigo glass with a glowing cyan neon tube rim",
+  "button": "a soft pink neon glow under it so it looks pressable",
+  "key": "green",
+  "corner": 44
+ }
+}

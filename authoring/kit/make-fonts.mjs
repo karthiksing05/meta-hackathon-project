@@ -30,6 +30,11 @@ export const CLASSES = {
   caveat: 'hand', space_grotesk: 'sans', archivo: 'sans', mplus_rounded: 'rounded', barlow_cond: 'condensed',
   lora: 'serif', josefin: 'geometric', courier_prime: 'typewriter', libre_baskerville: 'serif', dm_sans: 'sans',
   work_sans: 'sans', rubik: 'rounded', outfit: 'geometric', barlow_cond_italic: 'condensed',
+  // Characterful display faces (art direction v2): titles, HUD numbers and big words only.
+  lilita: 'rounded', bagel: 'rounded', shrikhand: 'script', rubik_mono: 'display_sans', luckiest: 'display_sans',
+  permanent_marker: 'hand', titan: 'rounded', black_ops: 'display_sans', bungee_shade: 'display_sans', faster: 'display_sans',
+  nosifer: 'hand', pirata: 'blackletter', knewave: 'hand', zen_dots: 'geometric', cherry_bomb: 'rounded',
+  metal_mania: 'blackletter', boogaloo: 'rounded', racing_sans: 'condensed', sedgwick: 'hand',
 };
 
 /** iPhone system faces for each kind, nearest first. */

@@ -8,8 +8,8 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FONT_DATA } from './font-data.mjs';
-import { VIBES } from './vibes.mjs';
-import { chooseLook, lookFromChoice, lookChoice, lookChoiceErrors, applyLook, lookCheck, lookFix, rankVibes, specSizes, specFamilies, textNodes, widthFactor, LOOK_CODES } from './look.mjs';
+import { VIBES, BOLD } from './vibes.mjs';
+import { chooseLook, characterfulPairing, allPairings, lookFromChoice, lookChoice, lookChoiceErrors, applyLook, lookCheck, lookFix, rankVibes, specSizes, specFamilies, textNodes, widthFactor, LOOK_CODES } from './look.mjs';
 import { FONTS } from '../expander/art.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -51,6 +51,55 @@ for (const v of VIBES) {
     ok(p.ratio[0] >= 1.125 && p.ratio[1] <= 1.4 && p.ratio[0] <= p.ratio[1], `${v.id}/${p.id} ratio range`);
   }
 }
+
+// ---------- the characterful display faces (art direction v2) ----------
+const metricsJson = JSON.parse(readFileSync(join(root, 'authoring/fonts/metrics.json'), 'utf8'));
+const CHARACTERFUL = ['lilita', 'bagel', 'shrikhand', 'rubik_mono', 'luckiest', 'permanent_marker', 'titan', 'black_ops', 'bungee_shade',
+  'faster', 'nosifer', 'pirata', 'knewave', 'zen_dots', 'cherry_bomb', 'metal_mania', 'boogaloo', 'racing_sans', 'sedgwick'];
+ok(CHARACTERFUL.length >= 15, 'at least 15 new display faces');
+for (const id of CHARACTERFUL) {
+  const f = FONT_DATA[id];
+  ok(f?.role === 'display', `${id} is a display face`);
+  const m = metricsJson[id]?.['400'];
+  ok(m && m.upm > 0 && m.cap > 0.5 && m.avg > 0.3 && m.avg_caps > 0.3, `${id} has measured metrics`, m && { cap: m.cap, avg: m.avg });
+  ok(m && [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?'].every((c) => m.adv[c] > 0), `${id} draws every capital and digit`);
+  const file = join(web, fonts[id]?.files?.['400'] ?? 'missing');
+  ok(existsSync(file) && readFileSync(file).subarray(0, 4).toString('latin1') === 'wOF2', `${id} ships a woff2`);
+  ok(Object.values(BOLD).flat().some((p) => p.display === id || p.numerals === id), `${id} is used by a characterful pairing`);
+}
+const boldVibes = VIBES.filter((v) => v.bold.some((p) => CHARACTERFUL.includes(p.display)));
+ok(boldVibes.length >= 8, 'at least 8 vibes map to a new display face', boldVibes.length);
+ok(Object.keys(BOLD).every((id) => VIBES.some((v) => v.id === id)), 'BOLD names only known vibes');
+for (const v of VIBES) {
+  const pids = allPairings(v).map((p) => p.id);
+  ok(new Set(pids).size === pids.length, `${v.id} pairing ids are unique`, pids);
+  for (const p of v.bold) {
+    for (const r of ['display', 'text', 'numerals']) if (p[r]) ok(!!FONT_DATA[p[r]], `${v.id}/${p.id} ${r} font ${p[r]} exists`);
+    ok(FONT_DATA[p.display]?.role === 'display', `${v.id}/${p.id} display face is a display font`);
+    const t = FONT_DATA[p.text];
+    ok(t && t.role === 'text' || p.text === 'vt323', `${v.id}/${p.id} text face ${p.text} is a reading face`);
+    ok(t && Math.max(...Object.values(t.avg)) <= 0.62, `${v.id}/${p.id} text font ${p.text} is narrow enough`);
+    ok(!seenPair.has(`${p.display}+${p.text}`), `${v.id}/${p.id} is a pairing no other vibe uses`, `${p.display}+${p.text}`);
+    seenPair.add(`${p.display}+${p.text}`);
+    ok(p.ratio[0] >= 1.125 && p.ratio[1] <= 1.4 && p.ratio[0] <= p.ratio[1], `${v.id}/${p.id} ratio range`);
+    const sp = lookFromChoice({ vibe: v.id, pairing: p.id, seed: 3 });
+    ok(sp.pairing === p.id && sp.steps.hero.id === p.display && sp.steps.body.id === p.text, `${v.id}/${p.id} round-trips through art.type`);
+    ok(lookChoiceErrors({ vibe: v.id, pairing: p.id, seed: 3 }).length === 0, `${v.id}/${p.id} is a valid art.type`);
+  }
+}
+for (const [req, faces] of [
+  ['Red Dead style wild west outlaw showdown', ['rye']],
+  ['haunted house horror zombie game', ['nosifer', 'creepster']],
+  ['Galaga style pixel shooter', ['press_start', 'rubik_mono']],
+  ['Labubu blind box kawaii collectible', ['bagel', 'cherry_bomb', 'lilita']],
+  ['Max Verstappen F1 game', ['faster', 'racing_sans']],
+  ['80s synthwave outrun', ['monoton', 'bungee_shade']],
+]) {
+  const got = new Set(Array.from({ length: 8 }, (_, i) => chooseLook({ request: req }, `g${i}`, { characterful: true }).ids.display));
+  ok([...got].every((f) => faces.includes(f)), `characterful "${req.slice(0, 30)}" → ${faces.join('/')}`, [...got]);
+}
+ok(chooseLook({ request: 'Galaga style pixel shooter' }, 'x').pairing === chooseLook({ request: 'Galaga style pixel shooter' }, 'x', {}).pairing, 'chooseLook without characterful is unchanged');
+ok(characterfulPairing('wild_west', 5) === 'wanted_poster' && characterfulPairing('myth_ancient', 5) === undefined, 'characterfulPairing');
 
 // ---------- choosing ----------
 const want = [
@@ -121,7 +170,7 @@ ok(tn.every((n) => !/'#/.test(String(n.color)) && !/^#/.test(String(n.color))), 
 ok(Object.keys(LOOK_CODES).length === 8, 'eight look codes');
 
 // ---------- every pairing (incl. one family for text and display) gives numeric sizes ----------
-for (const v of VIBES) for (const p of v.pairings) for (const seed of [0, 1, 2, 7]) {
+for (const v of VIBES) for (const p of allPairings(v)) for (const seed of [0, 1, 2, 7]) {
   const sp = lookFromChoice({ vibe: v.id, pairing: p.id, seed });
   const out = applyLook(game, sp).game;
   const bad = textNodes(out).map((t) => t.n).filter((n) => !(typeof n.size === 'number' && n.size > 0) && !(typeof n.size === 'string' && !/undefined|NaN/.test(n.size)));

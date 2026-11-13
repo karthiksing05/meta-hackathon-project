@@ -504,3 +504,136 @@
   font-style: normal;
   font-display: block;
 }
+@font-face {
+  font-family: "Lilita One";
+  src: url("gamefont-lilita-400.woff2") format("woff2"), local("ArialRoundedMTBold"), local("Arial Rounded MT Bold"), local("Avenir Next");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Bagel Fat One";
+  src: url("gamefont-bagel-400.woff2") format("woff2"), local("ArialRoundedMTBold"), local("Arial Rounded MT Bold"), local("Avenir Next");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Shrikhand";
+  src: url("gamefont-shrikhand-400.woff2") format("woff2"), local("SnellRoundhand-Bold"), local("Snell Roundhand"), local("Noteworthy");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Rubik Mono One";
+  src: url("gamefont-rubik_mono-400.woff2") format("woff2"), local("Futura-CondensedExtraBold"), local("AvenirNext-Heavy"), local("Futura");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Luckiest Guy";
+  src: url("gamefont-luckiest-400.woff2") format("woff2"), local("Futura-CondensedExtraBold"), local("AvenirNext-Heavy"), local("Futura");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Permanent Marker";
+  src: url("gamefont-permanent_marker-400.woff2") format("woff2"), local("ChalkboardSE-Bold"), local("Chalkboard SE"), local("Noteworthy");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Titan One";
+  src: url("gamefont-titan-400.woff2") format("woff2"), local("ArialRoundedMTBold"), local("Arial Rounded MT Bold"), local("Avenir Next");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Black Ops One";
+  src: url("gamefont-black_ops-400.woff2") format("woff2"), local("Futura-CondensedExtraBold"), local("AvenirNext-Heavy"), local("Futura");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Bungee Shade";
+  src: url("gamefont-bungee_shade-400.woff2") format("woff2"), local("Futura-CondensedExtraBold"), local("AvenirNext-Heavy"), local("Futura");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Faster One";
+  src: url("gamefont-faster-400.woff2") format("woff2"), local("Futura-CondensedExtraBold"), local("AvenirNext-Heavy"), local("Futura");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Nosifer";
+  src: url("gamefont-nosifer-400.woff2") format("woff2"), local("ChalkboardSE-Bold"), local("Chalkboard SE"), local("Noteworthy");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Pirata One";
+  src: url("gamefont-pirata-400.woff2") format("woff2"), local("Baskerville-SemiBold"), local("Baskerville"), local("Georgia");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Knewave";
+  src: url("gamefont-knewave-400.woff2") format("woff2"), local("ChalkboardSE-Bold"), local("Chalkboard SE"), local("Noteworthy");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Zen Dots";
+  src: url("gamefont-zen_dots-400.woff2") format("woff2"), local("Futura-Medium"), local("Futura"), local("Avenir Next");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Cherry Bomb One";
+  src: url("gamefont-cherry_bomb-400.woff2") format("woff2"), local("ArialRoundedMTBold"), local("Arial Rounded MT Bold"), local("Avenir Next");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Metal Mania";
+  src: url("gamefont-metal_mania-400.woff2") format("woff2"), local("Baskerville-SemiBold"), local("Baskerville"), local("Georgia");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Boogaloo";
+  src: url("gamefont-boogaloo-400.woff2") format("woff2"), local("ArialRoundedMTBold"), local("Arial Rounded MT Bold"), local("Avenir Next");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Racing Sans One";
+  src: url("gamefont-racing_sans-400.woff2") format("woff2"), local("AvenirNextCondensed-Bold"), local("Avenir Next Condensed"), local("Helvetica Neue");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Sedgwick Ave Display";
+  src: url("gamefont-sedgwick-400.woff2") format("woff2"), local("ChalkboardSE-Bold"), local("Chalkboard SE"), local("Noteworthy");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
