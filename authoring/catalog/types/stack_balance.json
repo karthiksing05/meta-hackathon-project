@@ -1,0 +1,824 @@
+[
+  {
+    "id": "tower_block_stack",
+    "name": "Stack the swinging block",
+    "aliases": [
+      "Tower Bloxx",
+      "Stack"
+    ],
+    "family": "stack_balance",
+    "summary": "A block swings above the tower; drop it so it lands centered; overhangs are cut off.",
+    "core_loop": "the block swings → tap to drop → it lands → overhang trims → next",
+    "verbs": [
+      "time",
+      "drop"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "the block shrinks by the overhang",
+      "a full miss ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "a miss",
+    "scoring": "height",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "tower height board with friends"
+    ],
+    "difficulty_levers": [
+      "swing speed"
+    ],
+    "tools": [
+      "physics_world",
+      "speed_ramp",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "stack game with my friends faces",
+      "tower bloxx",
+      "stack the blocks high"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pull_block_tower",
+    "name": "Pull blocks from the tower",
+    "aliases": [
+      "Jenga"
+    ],
+    "family": "stack_balance",
+    "summary": "Pull a block from a tower and place it on top without knocking it over.",
+    "core_loop": "pick a block → pull gently → place on top → next player",
+    "verbs": [
+      "pull",
+      "balance"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the tower wobbles with physics"
+    ],
+    "win": "the other player topples it",
+    "lose": "you topple it",
+    "scoring": "blocks pulled",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "pass-and-play with friends"
+    ],
+    "difficulty_levers": [
+      "tower height"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "jenga with my friends",
+      "pull blocks tower game",
+      "wobbly tower"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "animal_stack_balance",
+    "name": "Stack odd shapes",
+    "aliases": [
+      "Animal tower",
+      "Tricky Towers"
+    ],
+    "family": "stack_balance",
+    "summary": "Stack oddly shaped pieces as high as possible; they wobble and slide.",
+    "core_loop": "drop a piece → it settles → stack higher → don't topple",
+    "verbs": [
+      "drop",
+      "balance"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "pieces keep physics after landing"
+    ],
+    "win": "reach the height goal",
+    "lose": "the stack falls",
+    "scoring": "height",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "race friends to the line"
+    ],
+    "difficulty_levers": [
+      "piece shapes"
+    ],
+    "tools": [
+      "physics_world",
+      "gravity_jump",
+      "camera_scroll"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "stack animals on top of each other",
+      "tricky towers",
+      "stack funny shapes"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "balance_scale_place",
+    "name": "Balance the scale",
+    "aliases": [
+      "Balance game"
+    ],
+    "family": "stack_balance",
+    "summary": "Place weights on both sides of a beam so it stays level.",
+    "core_loop": "place a weight → the beam tips → place another → keep level",
+    "verbs": [
+      "place",
+      "balance"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the beam must stay level for 3 seconds"
+    ],
+    "win": "keep it balanced",
+    "lose": "it tips over",
+    "scoring": "weights placed",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "weight variety"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "balance the scale game",
+      "seesaw balance",
+      "level the beam"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "plate_spin_keep",
+    "name": "Keep the plates spinning",
+    "aliases": [
+      "Plate spinning"
+    ],
+    "family": "stack_balance",
+    "summary": "Tap plates to keep them spinning; a slowing plate wobbles and falls.",
+    "core_loop": "watch plates → tap slow ones → keep all spinning",
+    "verbs": [
+      "tend",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "plates slow over time"
+    ],
+    "win": "survive the time",
+    "lose": "a plate falls",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "streak battles"
+    ],
+    "difficulty_levers": [
+      "plate count"
+    ],
+    "tools": [
+      "timers",
+      "speed_ramp",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "plate spinning game",
+      "keep everything spinning",
+      "circus juggling plates"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "waiter_tray_balance",
+    "name": "Carry the tray",
+    "aliases": [
+      "Waiter balance"
+    ],
+    "family": "stack_balance",
+    "summary": "Tilt to balance a tray of drinks while walking to the table.",
+    "core_loop": "walk → tilt → keep the drinks steady → deliver",
+    "verbs": [
+      "balance",
+      "walk"
+    ],
+    "inputs": [
+      "tilt",
+      "drag"
+    ],
+    "rules": [
+      "drinks spill on steep tilts"
+    ],
+    "win": "deliver every drink",
+    "lose": "spill too many",
+    "scoring": "drinks delivered",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "restaurant rush with friends"
+    ],
+    "difficulty_levers": [
+      "tray load"
+    ],
+    "tools": [
+      "physics_world",
+      "pickups"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "balance the tray waiter game",
+      "don't spill the drinks",
+      "carry the cups"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stick_balance_finger",
+    "name": "Balance the stick",
+    "aliases": [
+      "Balance stick"
+    ],
+    "family": "stack_balance",
+    "summary": "Keep a stick upright on your fingertip by moving under it.",
+    "core_loop": "the stick tips → move under it → keep it up",
+    "verbs": [
+      "balance",
+      "react"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the stick falls past an angle"
+    ],
+    "win": "balance for the time",
+    "lose": "the stick falls",
+    "scoring": "seconds",
+    "session_seconds": [
+      15,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "balance duels"
+    ],
+    "difficulty_levers": [
+      "stick length"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "balance a stick on your finger",
+      "inverted pendulum game",
+      "broom balance"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tightrope_walk",
+    "name": "Tightrope walk",
+    "aliases": [
+      "Tightrope"
+    ],
+    "family": "stack_balance",
+    "summary": "Walk a tightrope, tapping left and right to correct your lean.",
+    "core_loop": "lean → correct → step → reach the end",
+    "verbs": [
+      "balance",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "tilt"
+    ],
+    "rules": [
+      "lean too far and you fall"
+    ],
+    "win": "cross the rope",
+    "lose": "fall",
+    "scoring": "distance",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daredevil challenge"
+    ],
+    "difficulty_levers": [
+      "wind"
+    ],
+    "tools": [
+      "physics_world",
+      "timers"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tightrope walker game",
+      "balance on a rope",
+      "circus wire walk"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stack_drop_cards",
+    "name": "House of cards",
+    "aliases": [
+      "House of cards"
+    ],
+    "family": "stack_balance",
+    "summary": "Place cards to build a tower that has to survive a breeze.",
+    "core_loop": "place cards → build levels → the breeze tests it",
+    "verbs": [
+      "place",
+      "balance"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "cards must lean on each other"
+    ],
+    "win": "survive the breeze",
+    "lose": "collapse",
+    "scoring": "levels",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share heights"
+    ],
+    "difficulty_levers": [
+      "wind"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "build a house of cards",
+      "card tower game",
+      "stack cards"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sandcastle_stack",
+    "name": "Build a sandcastle before the tide",
+    "aliases": [
+      "Sandcastle"
+    ],
+    "family": "stack_balance",
+    "summary": "Build up a sandcastle tall enough before the tide washes in.",
+    "core_loop": "stack sand → shape → beat the tide",
+    "verbs": [
+      "build",
+      "race"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "waves erode low parts"
+    ],
+    "win": "reach the height",
+    "lose": "the tide wins",
+    "scoring": "height",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beach day challenge"
+    ],
+    "difficulty_levers": [
+      "tide speed"
+    ],
+    "tools": [
+      "physics_world",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "sandcastle building race",
+      "beat the tide",
+      "beach sand tower"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "burger_stack_order",
+    "name": "Stack the order",
+    "aliases": [
+      "Burger stack"
+    ],
+    "family": "stack_balance",
+    "summary": "Catch falling ingredients in the right order to build the ordered burger.",
+    "core_loop": "read the order → catch pieces in order → finish",
+    "verbs": [
+      "catch",
+      "order"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "wrong pieces ruin the stack"
+    ],
+    "win": "complete the order",
+    "lose": "the stack topples",
+    "scoring": "orders done",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "food truck rush"
+    ],
+    "difficulty_levers": [
+      "order length"
+    ],
+    "tools": [
+      "physics_world",
+      "pickups",
+      "sort_bins"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "stack the burger order",
+      "catch ingredients in order",
+      "burger tower"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "balance_boulder_cairn",
+    "name": "Rock cairn",
+    "aliases": [
+      "Rock balance"
+    ],
+    "family": "stack_balance",
+    "summary": "Stack natural rocks into a balanced cairn by finding resting points.",
+    "core_loop": "pick a rock → rotate → find balance → stack",
+    "verbs": [
+      "balance",
+      "rotate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "rocks settle with physics"
+    ],
+    "win": "build the cairn to height",
+    "lose": "collapse",
+    "scoring": "height",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "calm share"
+    ],
+    "difficulty_levers": [
+      "rock shapes"
+    ],
+    "tools": [
+      "physics_world",
+      "rotate"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "rock balancing game",
+      "stack stones zen",
+      "cairn builder"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "seesaw_launch",
+    "name": "Seesaw launch",
+    "aliases": [
+      "Seesaw"
+    ],
+    "family": "stack_balance",
+    "summary": "Drop a weight on one end of a seesaw to launch a character to a target height.",
+    "core_loop": "choose weight → drop → launch → land",
+    "verbs": [
+      "choose",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "heavier means higher"
+    ],
+    "win": "reach the target",
+    "lose": "miss",
+    "scoring": "attempts",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "weights"
+    ],
+    "tools": [
+      "physics_world"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "seesaw launch game",
+      "catapult with a seesaw",
+      "launch the clown"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "crowd_lift_balance",
+    "name": "Stack people",
+    "aliases": [
+      "Human pyramid"
+    ],
+    "family": "stack_balance",
+    "summary": "Stack acrobats into a pyramid; each needs support below.",
+    "core_loop": "place acrobats → keep weight centered → finish the pyramid",
+    "verbs": [
+      "place",
+      "balance"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each acrobat needs two below"
+    ],
+    "win": "complete the pyramid",
+    "lose": "collapse",
+    "scoring": "acrobats placed",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "difficulty_levers": [
+      "pyramid size"
+    ],
+    "tools": [
+      "physics_world",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "human pyramid game",
+      "stack acrobats",
+      "cheerleader pyramid"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "balance_ball_maze",
+    "name": "Balance board maze",
+    "aliases": [
+      "Labyrinth board"
+    ],
+    "family": "stack_balance",
+    "summary": "Tilt a board to roll a ball through a maze past holes.",
+    "core_loop": "tilt → the ball rolls → avoid holes → reach the end",
+    "verbs": [
+      "tilt",
+      "balance"
+    ],
+    "inputs": [
+      "tilt",
+      "drag"
+    ],
+    "rules": [
+      "holes end the run"
+    ],
+    "win": "reach the end",
+    "lose": "fall in a hole",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "holes"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "checkpoint"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "wooden labyrinth tilt maze",
+      "balance the ball around holes",
+      "tilt maze"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stacking_cups_speed",
+    "name": "Speed stacking",
+    "aliases": [
+      "Cup stacking"
+    ],
+    "family": "stack_balance",
+    "summary": "Stack and unstack cups in a pattern as fast as possible.",
+    "core_loop": "follow the pattern → stack → unstack → stop the clock",
+    "verbs": [
+      "stack",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "knocking a cup adds a penalty"
+    ],
+    "win": "fastest time",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "speed stacking battles"
+    ],
+    "difficulty_levers": [
+      "pattern"
+    ],
+    "tools": [
+      "timers",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "cup stacking speed game",
+      "sport stacking",
+      "stack the cups fast"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

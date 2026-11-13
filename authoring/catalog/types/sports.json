@@ -1,0 +1,1603 @@
+[
+  {
+    "id": "penalty_kick_shootout",
+    "name": "Penalty shootout",
+    "aliases": [
+      "Penalty Shooters",
+      "FIFA penalties"
+    ],
+    "family": "sports",
+    "summary": "Swipe to curve a shot past the keeper, then dive to save the other side's kick.",
+    "core_loop": "swipe to shoot → keeper dives → switch → tap to dive for saves → best of five",
+    "verbs": [
+      "aim",
+      "swipe",
+      "guess"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "swipe curve bends the ball",
+      "sudden death after five"
+    ],
+    "win": "win the shootout",
+    "lose": "lose the shootout",
+    "scoring": "goals scored minus conceded",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "shootout with a friend, async"
+    ],
+    "difficulty_levers": [
+      "keeper skill",
+      "goal size"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "collide",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "penalty shootout with my friend",
+      "world cup penalty kicks",
+      "soccer penalty game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "basketball_flick_shot",
+    "name": "Flick to shoot hoops",
+    "aliases": [
+      "Basketball",
+      "Pop-A-Shot"
+    ],
+    "family": "sports",
+    "summary": "Flick the ball toward the hoop; arc and power decide the shot; the hoop may move.",
+    "core_loop": "flick → the ball arcs → swish or rim → next ball",
+    "verbs": [
+      "flick",
+      "aim"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "the moving hoop speeds up"
+    ],
+    "win": "most baskets in the time",
+    "lose": "none",
+    "scoring": "baskets, swish bonus",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "carnival shootout with friends"
+    ],
+    "difficulty_levers": [
+      "hoop movement",
+      "time"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "timer_bar",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "basketball flick game",
+      "shoot hoops with friends",
+      "arcade basketball"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "golf_putt_minigolf",
+    "name": "Mini golf",
+    "aliases": [
+      "Golf Battle",
+      "Mini Golf King"
+    ],
+    "family": "sports",
+    "summary": "Drag back to set aim and power, then putt around obstacles in as few strokes as possible.",
+    "core_loop": "drag back → release → the ball rolls and bounces → sink it",
+    "verbs": [
+      "aim",
+      "putt"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each stroke counts"
+    ],
+    "win": "sink every hole",
+    "lose": "none",
+    "scoring": "strokes vs par",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "mini golf course of our office",
+      "play rounds with friends"
+    ],
+    "difficulty_levers": [
+      "slopes",
+      "obstacles"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "mini golf with friends",
+      "putt putt course of my house",
+      "golf battle style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "golf_swing_meter",
+    "name": "Golf swing meter",
+    "aliases": [
+      "Golf swing"
+    ],
+    "family": "sports",
+    "summary": "Tap to start the swing, again for power, and again for accuracy on a sweeping meter.",
+    "core_loop": "tap start → tap power → tap accuracy → watch the ball fly",
+    "verbs": [
+      "time",
+      "aim"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wind affects flight"
+    ],
+    "win": "lowest score over holes",
+    "lose": "none",
+    "scoring": "strokes",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "weekend round with friends"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "meter speed"
+    ],
+    "tools": [
+      "timer_bar",
+      "physics_world",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "golf swing timing game",
+      "three click golf",
+      "driving range game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bowling_roll",
+    "name": "Bowling",
+    "aliases": [
+      "Bowling",
+      "Wii Bowling"
+    ],
+    "family": "sports",
+    "summary": "Swipe to roll the ball with spin into the pins; strikes and spares score bonuses.",
+    "core_loop": "aim → swipe with spin → pins fall → second roll",
+    "verbs": [
+      "aim",
+      "swipe"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "ten frames",
+      "strikes and spares carry bonus"
+    ],
+    "win": "best score after 10 frames",
+    "lose": "none",
+    "scoring": "standard bowling score",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "bowling night with friends"
+    ],
+    "difficulty_levers": [
+      "lane oil",
+      "spin control"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "bowling game with friends",
+      "strike or spare",
+      "wii bowling style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "baseball_bat_timing",
+    "name": "Hit the pitch",
+    "aliases": [
+      "Home run derby"
+    ],
+    "family": "sports",
+    "summary": "Time your swing to the pitch; better timing sends it farther.",
+    "core_loop": "the pitch comes → tap to swing → distance by timing → next pitch",
+    "verbs": [
+      "time",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "early or late swings foul or miss"
+    ],
+    "win": "most home runs",
+    "lose": "none",
+    "scoring": "home runs and distance",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "home run derby with friends"
+    ],
+    "difficulty_levers": [
+      "pitch speed",
+      "pitch type"
+    ],
+    "tools": [
+      "beat_target",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "home run derby game",
+      "time the swing baseball",
+      "batting cage"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pitcher_aim",
+    "name": "Pitch it",
+    "aliases": [
+      "Pitching"
+    ],
+    "family": "sports",
+    "summary": "Aim pitches at the corners; the batter swings at the predictable ones.",
+    "core_loop": "pick a pitch → aim → throw → strike or hit",
+    "verbs": [
+      "aim",
+      "choose"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the batter learns patterns"
+    ],
+    "win": "strike out the side",
+    "lose": "three hits",
+    "scoring": "strikeouts",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "duel a friend as batter"
+    ],
+    "difficulty_levers": [
+      "batter skill"
+    ],
+    "tools": [
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pitching game",
+      "strike out the batter",
+      "baseball pitcher duel"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tennis_rally",
+    "name": "Tennis rally",
+    "aliases": [
+      "Tennis Clash",
+      "Pong"
+    ],
+    "family": "sports",
+    "summary": "Swipe to return the ball; placement and timing win points.",
+    "core_loop": "the ball comes → move and swipe → place the return → win the point",
+    "verbs": [
+      "time",
+      "aim",
+      "swipe"
+    ],
+    "inputs": [
+      "swipe",
+      "drag"
+    ],
+    "rules": [
+      "out of bounds loses the point"
+    ],
+    "win": "win the match",
+    "lose": "lose the match",
+    "scoring": "points",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "tennis with a friend"
+    ],
+    "difficulty_levers": [
+      "ball speed",
+      "opponent skill"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "collide",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tennis game with friends",
+      "pong but tennis",
+      "tennis rally swipe"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pong_paddle",
+    "name": "Paddle ball",
+    "aliases": [
+      "Pong"
+    ],
+    "family": "sports",
+    "summary": "Move your paddle to return the ball; miss and the other side scores.",
+    "core_loop": "move the paddle → return the ball → angle shots → first to 11",
+    "verbs": [
+      "move",
+      "react"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the ball speeds up each hit"
+    ],
+    "win": "first to 11",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "two-player on one phone"
+    ],
+    "difficulty_levers": [
+      "ball speed"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pong with my friend on one phone",
+      "classic paddle ball",
+      "air pong"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "air_hockey",
+    "name": "Air hockey",
+    "aliases": [
+      "Air Hockey"
+    ],
+    "family": "sports",
+    "summary": "Slide your mallet to smack the puck into the opponent's goal.",
+    "core_loop": "slide → hit the puck → defend → score",
+    "verbs": [
+      "slide",
+      "hit",
+      "defend"
+    ],
+    "inputs": [
+      "drag",
+      "multi_touch"
+    ],
+    "rules": [
+      "the puck keeps momentum"
+    ],
+    "win": "first to 7",
+    "lose": "none",
+    "scoring": "goals",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "head-to-head on one phone"
+    ],
+    "difficulty_levers": [
+      "puck speed"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [
+      "multi_touch"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "air hockey two player",
+      "table hockey game",
+      "puck smash"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "soccer_flick_goal",
+    "name": "Flick soccer",
+    "aliases": [
+      "Flick Soccer"
+    ],
+    "family": "sports",
+    "summary": "Flick the ball past a wall of defenders into the net.",
+    "core_loop": "flick → curve around defenders → score",
+    "verbs": [
+      "flick",
+      "aim"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "defenders jump"
+    ],
+    "win": "most goals",
+    "lose": "none",
+    "scoring": "goals",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "free kick challenge"
+    ],
+    "difficulty_levers": [
+      "wall size"
+    ],
+    "tools": [
+      "physics_world",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "free kick soccer game",
+      "curve it around the wall",
+      "flick soccer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "juggle_keepy_uppy",
+    "name": "Keepy-uppy",
+    "aliases": [
+      "Keepy uppy",
+      "Juggle the ball"
+    ],
+    "family": "sports",
+    "summary": "Tap the ball to keep it in the air; don't let it touch the ground.",
+    "core_loop": "tap under the ball → it bounces up → keep it going",
+    "verbs": [
+      "tap",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tap pops it up"
+    ],
+    "win": "none; endless",
+    "lose": "the ball hits the ground",
+    "scoring": "touches",
+    "session_seconds": [
+      15,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "streak battles"
+    ],
+    "difficulty_levers": [
+      "gravity",
+      "ball size"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "keepy uppy soccer game",
+      "keep the ball up",
+      "juggle challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "archery_aim",
+    "name": "Archery",
+    "aliases": [
+      "Archery"
+    ],
+    "family": "sports",
+    "summary": "Pull back, account for wind and release to hit the bullseye.",
+    "core_loop": "draw → adjust for wind → release → score rings",
+    "verbs": [
+      "aim",
+      "steady"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "wind changes each shot"
+    ],
+    "win": "best total",
+    "lose": "none",
+    "scoring": "ring points",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "archery tournament with friends"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "distance"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "archery game with wind",
+      "bullseye challenge",
+      "bow and arrow target"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "darts_throw",
+    "name": "Darts",
+    "aliases": [
+      "Darts",
+      "501"
+    ],
+    "family": "sports",
+    "summary": "Flick darts at a board; play 501 down to zero, finishing on a double.",
+    "core_loop": "flick → the dart lands → subtract the score → finish exactly",
+    "verbs": [
+      "aim",
+      "flick",
+      "calculate"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "you must finish on a double"
+    ],
+    "win": "reach zero first",
+    "lose": "none",
+    "scoring": "darts used",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "pub darts with friends"
+    ],
+    "difficulty_levers": [
+      "wobble"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "darts 501 with friends",
+      "flick darts game",
+      "pub darts"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cornhole_toss",
+    "name": "Bag toss",
+    "aliases": [
+      "Cornhole"
+    ],
+    "family": "sports",
+    "summary": "Toss bags onto a board; in the hole scores most.",
+    "core_loop": "aim → toss → land on the board or in → alternate",
+    "verbs": [
+      "aim",
+      "toss"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "bags can knock others"
+    ],
+    "win": "first to 21",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "tailgate game with friends"
+    ],
+    "difficulty_levers": [
+      "wind"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "cornhole game with friends",
+      "bag toss tailgate",
+      "beanbag toss"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "curling_slide",
+    "name": "Curling",
+    "aliases": [
+      "Curling"
+    ],
+    "family": "sports",
+    "summary": "Slide stones toward the target and sweep to steer; closest stones score.",
+    "core_loop": "aim → release → sweep → end scoring",
+    "verbs": [
+      "slide",
+      "sweep"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "only stones closer than the opponent's best score"
+    ],
+    "win": "most points after ends",
+    "lose": "none",
+    "scoring": "stones scored",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "winter olympics with friends"
+    ],
+    "difficulty_levers": [
+      "ice speed"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "curling game",
+      "winter olympics curling",
+      "slide the stones"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sprint_button_mash",
+    "name": "Track sprint",
+    "aliases": [
+      "Track and Field"
+    ],
+    "family": "sports",
+    "summary": "Alternate taps to sprint; time the hurdle jumps.",
+    "core_loop": "tap left and right fast → jump hurdles → cross the line",
+    "verbs": [
+      "tap",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "rhythm beats raw speed"
+    ],
+    "win": "fastest time",
+    "lose": "false start",
+    "scoring": "time",
+    "session_seconds": [
+      10,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "olympic sprint with friends"
+    ],
+    "difficulty_levers": [
+      "hurdles"
+    ],
+    "tools": [
+      "timers",
+      "ghost_score",
+      "beat_target"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "track and field button mash",
+      "100m sprint game",
+      "hurdle race"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "swimming_stroke_rhythm",
+    "name": "Swim stroke rhythm",
+    "aliases": [
+      "Swim race"
+    ],
+    "family": "sports",
+    "summary": "Tap in rhythm to stroke; breathe at the right time to keep stamina.",
+    "core_loop": "tap strokes in rhythm → breathe → flip at the wall → finish",
+    "verbs": [
+      "time",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "bad rhythm costs speed"
+    ],
+    "win": "win the race",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "race friends"
+    ],
+    "difficulty_levers": [
+      "lane length"
+    ],
+    "tools": [
+      "beat_target",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "swimming race game",
+      "tap to swim",
+      "olympic swim rhythm"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "skateboard_tricks",
+    "name": "Skate tricks",
+    "aliases": [
+      "Skate",
+      "Tony Hawk"
+    ],
+    "family": "sports",
+    "summary": "Swipe combos to do tricks off ramps and rails; land clean for points.",
+    "core_loop": "approach → swipe a trick → land → chain combos",
+    "verbs": [
+      "swipe",
+      "time"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "bailing loses the combo"
+    ],
+    "win": "best run score",
+    "lose": "none",
+    "scoring": "trick points times combo",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share trick runs"
+    ],
+    "difficulty_levers": [
+      "ramp layout"
+    ],
+    "tools": [
+      "combo",
+      "physics_world",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "skateboard trick game",
+      "tony hawk style",
+      "skate tricks combo"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "surf_wave_ride",
+    "name": "Ride the wave",
+    "aliases": [
+      "Surfing"
+    ],
+    "family": "sports",
+    "summary": "Ride a wave, carving up and down the face to stay in the pocket and do tricks.",
+    "core_loop": "carve → stay ahead of the break → trick → ride out",
+    "verbs": [
+      "carve",
+      "balance"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "falling ends the ride"
+    ],
+    "win": "longest ride",
+    "lose": "wipeout",
+    "scoring": "ride score",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "surf session sharing"
+    ],
+    "difficulty_levers": [
+      "wave size"
+    ],
+    "tools": [
+      "physics_world",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "surfing game",
+      "ride the wave",
+      "surf tricks"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ski_jump_distance",
+    "name": "Ski jump",
+    "aliases": [
+      "Ski jump"
+    ],
+    "family": "sports",
+    "summary": "Time the takeoff and hold your form for distance; land cleanly.",
+    "core_loop": "descend → tap at the lip → balance in the air → land",
+    "verbs": [
+      "time",
+      "balance"
+    ],
+    "inputs": [
+      "tap",
+      "tilt"
+    ],
+    "rules": [
+      "bad landings lose points"
+    ],
+    "win": "longest jump",
+    "lose": "crash",
+    "scoring": "distance and style",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "olympic duel"
+    ],
+    "difficulty_levers": [
+      "wind"
+    ],
+    "tools": [
+      "physics_world",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ski jumping game",
+      "time the takeoff",
+      "olympic ski jump"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "boxing_punch_dodge",
+    "name": "Boxing",
+    "aliases": [
+      "Punch-Out",
+      "boxing"
+    ],
+    "family": "sports",
+    "summary": "Read the opponent's tells, dodge, then counterpunch.",
+    "core_loop": "watch tells → dodge → counter → knock out",
+    "verbs": [
+      "dodge",
+      "punch",
+      "read"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "taking hits drains stamina"
+    ],
+    "win": "knock out the opponent",
+    "lose": "knocked out",
+    "scoring": "rounds and hits",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "fight a friend's character"
+    ],
+    "difficulty_levers": [
+      "opponent speed"
+    ],
+    "tools": [
+      "turns",
+      "lives",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "punch out style boxing",
+      "dodge and punch game",
+      "boxing with my brother"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "table_tennis",
+    "name": "Ping pong",
+    "aliases": [
+      "Table tennis"
+    ],
+    "family": "sports",
+    "summary": "Swipe to return with topspin or slice; place it where the opponent isn't.",
+    "core_loop": "ball comes → swipe with spin → place it → win the rally",
+    "verbs": [
+      "swipe",
+      "time"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "spin changes the bounce"
+    ],
+    "win": "win the game to 11",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "ping pong with friends"
+    ],
+    "difficulty_levers": [
+      "ball speed"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ping pong game",
+      "table tennis with spin",
+      "pong with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "volleyball_bump",
+    "name": "Volleyball rally",
+    "aliases": [
+      "Volleyball"
+    ],
+    "family": "sports",
+    "summary": "Bump, set and spike; keep the ball off your side.",
+    "core_loop": "bump → set → spike → defend",
+    "verbs": [
+      "time",
+      "hit"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "three touches per side"
+    ],
+    "win": "first to 15",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "beach volleyball with friends"
+    ],
+    "difficulty_levers": [
+      "ball speed"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "beach volleyball game",
+      "spike the ball",
+      "volleyball with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fantasy_pick_em",
+    "name": "Pick the winners",
+    "aliases": [
+      "Pick'em",
+      "bracket picks"
+    ],
+    "family": "sports",
+    "summary": "Pick game winners before they happen; score points when your picks come true.",
+    "core_loop": "see matchups → pick winners → results come in → leaderboard",
+    "verbs": [
+      "predict",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "picks lock at game time"
+    ],
+    "win": "top the group leaderboard",
+    "lose": "none",
+    "scoring": "right picks",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "bracket challenge for a Group"
+    ],
+    "difficulty_levers": [
+      "upset weighting"
+    ],
+    "tools": [
+      "leaderboard",
+      "async_turns",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "march madness bracket with friends",
+      "nfl pick em group",
+      "world cup predictions"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hockey_shootout",
+    "name": "Hockey shootout",
+    "aliases": [
+      "Hockey shootout"
+    ],
+    "family": "sports",
+    "summary": "Deke the goalie and shoot; then play goalie for their shot.",
+    "core_loop": "skate in → deke → shoot → swap to goalie",
+    "verbs": [
+      "deke",
+      "shoot",
+      "save"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "goalie reacts to dekes"
+    ],
+    "win": "win the shootout",
+    "lose": "lose the shootout",
+    "scoring": "goals",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "shootout with a friend"
+    ],
+    "difficulty_levers": [
+      "goalie skill"
+    ],
+    "tools": [
+      "physics_world",
+      "turns",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hockey shootout game",
+      "deke the goalie",
+      "ice hockey penalty"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pool_billiards",
+    "name": "Pool",
+    "aliases": [
+      "8 Ball Pool",
+      "Billiards"
+    ],
+    "family": "sports",
+    "summary": "Aim the cue, set power and spin, and pocket your balls before your opponent.",
+    "core_loop": "aim → set power → shoot → pocket balls → sink the 8",
+    "verbs": [
+      "aim",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "sinking the 8 early loses",
+      "scratches give ball in hand"
+    ],
+    "win": "sink your group then the 8",
+    "lose": "sink the 8 early",
+    "scoring": "balls pocketed",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "8 ball with friends"
+    ],
+    "difficulty_levers": [
+      "aim guides"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "8 ball pool with my friend",
+      "billiards game",
+      "pool shots"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "football_field_goal",
+    "name": "Kick the field goal",
+    "aliases": [
+      "Field goal kick"
+    ],
+    "family": "sports",
+    "summary": "Flick to kick field goals from farther out in wind.",
+    "core_loop": "set the angle → flick → wind curves it → make it",
+    "verbs": [
+      "flick",
+      "aim"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "distance increases each make"
+    ],
+    "win": "most made",
+    "lose": "three misses",
+    "scoring": "field goals made",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "kicker challenge"
+    ],
+    "difficulty_levers": [
+      "wind",
+      "distance"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "field goal kicker game",
+      "kick it through the uprights",
+      "football kick"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "quarterback_throw",
+    "name": "QB throw to receivers",
+    "aliases": [
+      "QB throw"
+    ],
+    "family": "sports",
+    "summary": "Lead your receivers with a throw before defenders close in.",
+    "core_loop": "snap → read routes → throw ahead → catch or pick",
+    "verbs": [
+      "aim",
+      "lead",
+      "read"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "throws behind receivers get picked"
+    ],
+    "win": "complete the drive",
+    "lose": "intercepted",
+    "scoring": "yards",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "throwing challenge"
+    ],
+    "difficulty_levers": [
+      "coverage"
+    ],
+    "tools": [
+      "physics_world",
+      "collide",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "quarterback throwing game",
+      "throw to the receiver",
+      "qb challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "skate_rink_figure",
+    "name": "Figure skating combo",
+    "aliases": [
+      "Figure skating"
+    ],
+    "family": "sports",
+    "summary": "Trace patterns and time jumps to music for a routine score.",
+    "core_loop": "trace → jump on cues → land → routine score",
+    "verbs": [
+      "trace",
+      "time"
+    ],
+    "inputs": [
+      "draw",
+      "tap"
+    ],
+    "rules": [
+      "falls deduct"
+    ],
+    "win": "best routine score",
+    "lose": "none",
+    "scoring": "points",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share routines"
+    ],
+    "difficulty_levers": [
+      "difficulty"
+    ],
+    "tools": [
+      "beat_target",
+      "score",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "figure skating routine game",
+      "trace and spin",
+      "olympic skating"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

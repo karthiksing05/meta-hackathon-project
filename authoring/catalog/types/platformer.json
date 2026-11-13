@@ -1,0 +1,1339 @@
+[
+  {
+    "id": "classic_side_platformer",
+    "name": "Side-scrolling platformer",
+    "aliases": [
+      "Super Mario Bros.",
+      "Sonic",
+      "Celeste"
+    ],
+    "family": "platformer",
+    "summary": "Run and jump across platforms, stomp enemies and reach the flag at the end of each level.",
+    "core_loop": "move → jump gaps and enemies → grab coins → reach the flag",
+    "verbs": [
+      "run",
+      "jump",
+      "stomp"
+    ],
+    "inputs": [
+      "tap",
+      "hold",
+      "swipe"
+    ],
+    "rules": [
+      "falling into a pit or touching enemies costs a life",
+      "stomping defeats enemies"
+    ],
+    "win": "reach the end of the level",
+    "lose": "out of lives",
+    "scoring": "coins and time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends' ghosts on the same level"
+    ],
+    "difficulty_levers": [
+      "gap size",
+      "enemy count"
+    ],
+    "tools": [
+      "gravity_jump",
+      "camera_scroll",
+      "collide",
+      "pickups",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "mario style level about my school",
+      "platformer with my cat",
+      "side scroller with friends' ghosts"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "precision_platformer",
+    "name": "Precision platformer",
+    "aliases": [
+      "Celeste",
+      "Super Meat Boy",
+      "Getting Over It"
+    ],
+    "family": "platformer",
+    "summary": "Tight jumps and wall slides through short, hard rooms; instant respawn.",
+    "core_loop": "attempt the room → die → respawn instantly → master it → next room",
+    "verbs": [
+      "jump",
+      "dash",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "swipe",
+      "hold"
+    ],
+    "rules": [
+      "one touch of a hazard restarts the room"
+    ],
+    "win": "clear every room",
+    "lose": "none; deaths are counted",
+    "scoring": "deaths and time",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare death counts"
+    ],
+    "difficulty_levers": [
+      "room difficulty",
+      "dash count"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint",
+      "collide",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "super meat boy hard levels",
+      "celeste style dash",
+      "rage platformer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "single_screen_platform",
+    "name": "Single-screen climb",
+    "aliases": [
+      "Donkey Kong",
+      "Jump King"
+    ],
+    "family": "platformer",
+    "summary": "Climb a single screen of ladders and platforms to the top while barrels roll down.",
+    "core_loop": "climb ladders → jump hazards → reach the top",
+    "verbs": [
+      "climb",
+      "jump",
+      "dodge"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "touching a hazard costs a life"
+    ],
+    "win": "reach the top",
+    "lose": "out of lives",
+    "scoring": "time and points",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "arcade-score board"
+    ],
+    "difficulty_levers": [
+      "hazard rate"
+    ],
+    "tools": [
+      "gravity_jump",
+      "collide",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "donkey kong with barrels",
+      "climb to the top dodging",
+      "arcade ladder climber"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "jump_king_fall",
+    "name": "Charge-jump climber",
+    "aliases": [
+      "Jump King",
+      "Only Up"
+    ],
+    "family": "platformer",
+    "summary": "Charge each jump; one bad jump can drop you far down the tower.",
+    "core_loop": "hold to charge → release to jump → land → climb higher",
+    "verbs": [
+      "charge",
+      "jump"
+    ],
+    "inputs": [
+      "hold"
+    ],
+    "rules": [
+      "no air control",
+      "falls can cost a lot of progress"
+    ],
+    "win": "reach the top",
+    "lose": "none",
+    "scoring": "height and time",
+    "session_seconds": [
+      120,
+      1800
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "rage together"
+    ],
+    "difficulty_levers": [
+      "platform spacing"
+    ],
+    "tools": [
+      "gravity_jump",
+      "camera_scroll",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "jump king style rage game",
+      "only up climb",
+      "charge jump tower"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coin_collect_level",
+    "name": "Collect everything",
+    "aliases": [
+      "Collectathon"
+    ],
+    "family": "platformer",
+    "summary": "Explore a level to collect every coin or star before the exit opens.",
+    "core_loop": "explore → collect items → the exit opens → leave",
+    "verbs": [
+      "explore",
+      "collect",
+      "jump"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "the exit opens when all are collected"
+    ],
+    "win": "collect all and exit",
+    "lose": "timer runs out",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "race friends"
+    ],
+    "difficulty_levers": [
+      "items",
+      "hiding spots"
+    ],
+    "tools": [
+      "gravity_jump",
+      "pickups",
+      "camera_scroll"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "collect all the stars level",
+      "explore and collect platformer",
+      "find every coin"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "key_door_platformer",
+    "name": "Keys and doors",
+    "aliases": [
+      "Key platformer"
+    ],
+    "family": "platformer",
+    "summary": "Find keys to open colored doors in the right order to reach the exit.",
+    "core_loop": "explore → grab a key → open its door → reach the exit",
+    "verbs": [
+      "explore",
+      "plan",
+      "jump"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "each key opens one door color"
+    ],
+    "win": "reach the exit",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share fastest routes"
+    ],
+    "difficulty_levers": [
+      "keys"
+    ],
+    "tools": [
+      "gravity_jump",
+      "pickups",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "find the keys platformer",
+      "locked doors puzzle platformer",
+      "key and door levels"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "metroidvania_explore",
+    "name": "Interconnected exploration",
+    "aliases": [
+      "Metroid",
+      "Hollow Knight"
+    ],
+    "family": "platformer",
+    "summary": "Explore a connected map; new abilities open paths you couldn't reach before.",
+    "core_loop": "explore → find an ability → return to blocked paths → go deeper",
+    "verbs": [
+      "explore",
+      "jump",
+      "fight"
+    ],
+    "inputs": [
+      "tap",
+      "swipe",
+      "hold"
+    ],
+    "rules": [
+      "abilities gate areas"
+    ],
+    "win": "reach the final area",
+    "lose": "out of health (respawn at save)",
+    "scoring": "map percent",
+    "session_seconds": [
+      600,
+      3600
+    ],
+    "players": [
+      "solo"
+    ],
+    "social_hooks": [
+      "share map completion"
+    ],
+    "difficulty_levers": [
+      "map size"
+    ],
+    "tools": [
+      "gravity_jump",
+      "camera_scroll",
+      "checkpoint",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hollow knight style explore",
+      "metroidvania map",
+      "unlock double jump to explore"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "puzzle_platformer_switches",
+    "name": "Switch and lever platformer",
+    "aliases": [
+      "Fireboy and Watergirl",
+      "Braid-lite"
+    ],
+    "family": "platformer",
+    "summary": "Press switches and move blocks to open the way through each room.",
+    "core_loop": "find switches → move blocks → open paths → exit",
+    "verbs": [
+      "jump",
+      "push",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "some switches need to stay held"
+    ],
+    "win": "reach the exit",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily room"
+    ],
+    "difficulty_levers": [
+      "switch count"
+    ],
+    "tools": [
+      "gravity_jump",
+      "grid_board",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "puzzle platformer with switches",
+      "push blocks to reach the door",
+      "lever platformer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coop_two_player_platform",
+    "name": "Two-character co-op",
+    "aliases": [
+      "Fireboy and Watergirl",
+      "Pico Park"
+    ],
+    "family": "platformer",
+    "summary": "Two characters with different abilities must help each other to the exit.",
+    "core_loop": "swap characters → each clears what only they can → both exit",
+    "verbs": [
+      "cooperate",
+      "jump"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "both must reach the exit"
+    ],
+    "win": "both reach the exit",
+    "lose": "either dies",
+    "scoring": "time",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "play with a friend on one phone"
+    ],
+    "difficulty_levers": [
+      "character abilities"
+    ],
+    "tools": [
+      "gravity_jump",
+      "turns",
+      "checkpoint",
+      "live_multiplayer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "fireboy and watergirl with my friend",
+      "two player co-op platformer",
+      "pico park"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "auto_jump_steer",
+    "name": "Steer while auto-jumping",
+    "aliases": [
+      "Doodle steer"
+    ],
+    "family": "platformer",
+    "summary": "The character jumps automatically; you only steer left and right.",
+    "core_loop": "it jumps → steer onto platforms → avoid hazards",
+    "verbs": [
+      "steer"
+    ],
+    "inputs": [
+      "tilt",
+      "drag"
+    ],
+    "rules": [
+      "jumps are automatic"
+    ],
+    "win": "reach the goal",
+    "lose": "falling",
+    "scoring": "height",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share heights"
+    ],
+    "difficulty_levers": [
+      "platform spacing"
+    ],
+    "tools": [
+      "gravity_jump",
+      "collide"
+    ],
+    "engine_gaps": [
+      "device_sensors"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "auto jumping game where you steer",
+      "tilt to land",
+      "bounce steer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ghost_trail_coop",
+    "name": "Cooperate with your past self",
+    "aliases": [
+      "Echo platformer"
+    ],
+    "family": "platformer",
+    "summary": "Record a run; your recorded ghost repeats it while you play again to solve together.",
+    "core_loop": "record a run → replay with the ghost → use both to solve",
+    "verbs": [
+      "plan",
+      "record"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "the ghost repeats exactly"
+    ],
+    "win": "reach the exit",
+    "lose": "none",
+    "scoring": "runs used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "puzzle sharing"
+    ],
+    "difficulty_levers": [
+      "ghost count"
+    ],
+    "tools": [
+      "ghost_score",
+      "gravity_jump",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cooperate with your past self",
+      "ghost replay puzzle platformer",
+      "time echo"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gravity_switch_platform",
+    "name": "Gravity switch puzzle",
+    "aliases": [
+      "Gravity switching"
+    ],
+    "family": "platformer",
+    "summary": "Flip gravity to walk on ceilings and walls to reach the exit.",
+    "core_loop": "flip gravity → fall to a new surface → reach the exit",
+    "verbs": [
+      "flip",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "gravity flips are limited"
+    ],
+    "win": "reach the exit",
+    "lose": "falling into spikes",
+    "scoring": "flips used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "flips"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "gravity switch platformer",
+      "walk on the ceiling puzzle",
+      "flip gravity level"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dash_platformer",
+    "name": "Dash and recover",
+    "aliases": [
+      "Dash platformer"
+    ],
+    "family": "platformer",
+    "summary": "Dash midair in eight directions; you recover the dash on landing or touching crystals.",
+    "core_loop": "jump → dash → refresh dash → cross gaps",
+    "verbs": [
+      "jump",
+      "dash"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "one dash per refresh"
+    ],
+    "win": "reach the exit",
+    "lose": "hazard touch",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "dash refreshes"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "celeste dash levels",
+      "dash platformer",
+      "air dash game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "wall_slide_ninja",
+    "name": "Ninja wall slides",
+    "aliases": [
+      "Wall ninja"
+    ],
+    "family": "platformer",
+    "summary": "Slide down and jump off walls to climb shafts and avoid traps.",
+    "core_loop": "slide down walls → wall-jump → climb → reach the top",
+    "verbs": [
+      "wall_jump",
+      "climb"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "holding a wall slows your fall"
+    ],
+    "win": "reach the top",
+    "lose": "traps",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "shaft width"
+    ],
+    "tools": [
+      "gravity_jump",
+      "collide",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ninja wall jumping levels",
+      "wall slide climb",
+      "ninja platformer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "grappling_platformer",
+    "name": "Grapple to cross",
+    "aliases": [
+      "Grapple platformer"
+    ],
+    "family": "platformer",
+    "summary": "Shoot a grappling hook to swing across gaps and pull to ledges.",
+    "core_loop": "aim the hook → attach → swing → release onto a ledge",
+    "verbs": [
+      "aim",
+      "swing"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "only some surfaces can be hooked"
+    ],
+    "win": "reach the exit",
+    "lose": "falling",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "hook range"
+    ],
+    "tools": [
+      "gravity_jump",
+      "physics_world",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "grappling hook platformer",
+      "swing across gaps",
+      "hook and pull level"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "boss_platformer",
+    "name": "Platform boss fight",
+    "aliases": [
+      "Cuphead",
+      "Mega Man boss"
+    ],
+    "family": "platformer",
+    "summary": "Dodge a boss's attack patterns and hit its weak points while jumping between platforms.",
+    "core_loop": "learn patterns → dodge → hit the weak spot → next phase",
+    "verbs": [
+      "dodge",
+      "jump",
+      "shoot"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "the boss has phases"
+    ],
+    "win": "defeat the boss",
+    "lose": "out of health",
+    "scoring": "time and hits taken",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share no-hit runs"
+    ],
+    "difficulty_levers": [
+      "boss speed",
+      "phases"
+    ],
+    "tools": [
+      "gravity_jump",
+      "collide",
+      "waves",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "cuphead style boss fight",
+      "platform boss battle",
+      "dodge the boss attacks"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "level_maker_platform",
+    "name": "Make a level for friends",
+    "aliases": [
+      "Super Mario Maker"
+    ],
+    "family": "platformer",
+    "summary": "Build a platformer level from tiles, then send it for friends to try.",
+    "core_loop": "place tiles and enemies → test it → share → friends play",
+    "verbs": [
+      "build",
+      "design",
+      "play"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "a level must be beaten by its maker before sharing"
+    ],
+    "win": "friends finish your level",
+    "lose": "none",
+    "scoring": "clears and likes",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "build levels for each other"
+    ],
+    "difficulty_levers": [
+      "tile set"
+    ],
+    "tools": [
+      "grid_board",
+      "gravity_jump",
+      "next_level",
+      "async_turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "mario maker with my friends",
+      "build a level for my brother",
+      "level editor platformer"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shrink_grow_platform",
+    "name": "Size-shifting platformer",
+    "aliases": [
+      "Size platformer"
+    ],
+    "family": "platformer",
+    "summary": "Shrink to fit tunnels and grow to push heavy objects or jump higher.",
+    "core_loop": "switch size → solve the room → exit",
+    "verbs": [
+      "resize",
+      "jump",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "small is light, big is heavy"
+    ],
+    "win": "reach the exit",
+    "lose": "hazards",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily"
+    ],
+    "difficulty_levers": [
+      "rooms"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "shrink and grow platformer",
+      "size changing puzzle",
+      "tiny and giant levels"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_swap_platform",
+    "name": "Color-swap platforms",
+    "aliases": [
+      "Color world"
+    ],
+    "family": "platformer",
+    "summary": "Platforms of your current color are solid; switch colors to make paths appear.",
+    "core_loop": "switch color → platforms appear or vanish → jump through",
+    "verbs": [
+      "switch",
+      "jump",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "only your color is solid"
+    ],
+    "win": "reach the exit",
+    "lose": "falling",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "switch timing"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "color switching platformer",
+      "only your color is solid",
+      "swap colors to jump"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bounce_pads_platform",
+    "name": "Bounce pads",
+    "aliases": [
+      "Bounce platformer"
+    ],
+    "family": "platformer",
+    "summary": "Use springs, bumpers and trampolines to fling across levels.",
+    "core_loop": "land on pads → bounce → aim the landing",
+    "verbs": [
+      "bounce",
+      "aim"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "bounce height depends on fall height"
+    ],
+    "win": "reach the exit",
+    "lose": "hazards",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "pad layout"
+    ],
+    "tools": [
+      "gravity_jump",
+      "physics_world",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "trampoline platformer",
+      "bounce pad levels",
+      "springy jumping game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "one_button_platform",
+    "name": "One-button platformer",
+    "aliases": [
+      "One button"
+    ],
+    "family": "platformer",
+    "summary": "Everything is controlled with one button: tap to jump, hold to jump higher.",
+    "core_loop": "tap or hold → clear gaps → reach the end",
+    "verbs": [
+      "jump",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "only one input"
+    ],
+    "win": "reach the end",
+    "lose": "falling",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "quick share"
+    ],
+    "difficulty_levers": [
+      "gap sizes"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint",
+      "hold_buttons"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "one button platformer",
+      "hold to jump higher",
+      "simple jump levels"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "time_rewind_platform",
+    "name": "Rewind time",
+    "aliases": [
+      "Braid",
+      "Prince of Persia rewind"
+    ],
+    "family": "platformer",
+    "summary": "Rewind time after mistakes; some objects ignore the rewind and become puzzles.",
+    "core_loop": "play → make a mistake → rewind → use objects that don't rewind",
+    "verbs": [
+      "rewind",
+      "plan"
+    ],
+    "inputs": [
+      "hold",
+      "tap"
+    ],
+    "rules": [
+      "rewind is limited"
+    ],
+    "win": "reach the exit",
+    "lose": "none",
+    "scoring": "rewinds used",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "puzzle share"
+    ],
+    "difficulty_levers": [
+      "rewind budget"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rewind time platformer",
+      "braid style puzzle",
+      "undo time jumps"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ice_slippery_platform",
+    "name": "Slippery ice level",
+    "aliases": [
+      "Ice level"
+    ],
+    "family": "platformer",
+    "summary": "Momentum carries you on ice; plan stops and jumps.",
+    "core_loop": "build speed → slide → time jumps → exit",
+    "verbs": [
+      "slide",
+      "jump"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "ice keeps momentum"
+    ],
+    "win": "reach the exit",
+    "lose": "falling",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "slipperiness"
+    ],
+    "tools": [
+      "gravity_jump",
+      "physics_world",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ice level platformer",
+      "slippery jumps",
+      "frozen cave level"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dark_lantern_platform",
+    "name": "Platforming in the dark",
+    "aliases": [
+      "Lantern platformer"
+    ],
+    "family": "platformer",
+    "summary": "You see only near your lantern; find fuel to keep the light alive.",
+    "core_loop": "explore → find fuel → light grows → exit",
+    "verbs": [
+      "explore",
+      "jump"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "the light shrinks over time"
+    ],
+    "win": "reach the exit",
+    "lose": "the light goes out",
+    "scoring": "fuel left",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "spooky share"
+    ],
+    "difficulty_levers": [
+      "fuel rate"
+    ],
+    "tools": [
+      "gravity_jump",
+      "pickups",
+      "camera_scroll"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dark platformer with a lantern",
+      "spooky cave jumps",
+      "light runs out"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rising_lava_climb",
+    "name": "Climb ahead of rising lava",
+    "aliases": [
+      "Rising lava"
+    ],
+    "family": "platformer",
+    "summary": "Lava rises from below; climb fast and pick routes.",
+    "core_loop": "climb → lava rises → don't get caught",
+    "verbs": [
+      "climb",
+      "jump"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "the lava never stops"
+    ],
+    "win": "reach the top",
+    "lose": "caught by lava",
+    "scoring": "height",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends"
+    ],
+    "difficulty_levers": [
+      "lava speed"
+    ],
+    "tools": [
+      "gravity_jump",
+      "camera_scroll",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "floor is lava climb",
+      "escape rising lava",
+      "climb before the flood"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

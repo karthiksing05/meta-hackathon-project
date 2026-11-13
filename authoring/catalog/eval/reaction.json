@@ -18,15 +18,15 @@
     ]
   },
   {
-    "request": "hot potato party game on one phone",
-    "expect": [
-      "hot_potato_pass"
-    ]
-  },
-  {
     "request": "find the slightly different color tile",
     "expect": [
       "odd_color_tile"
+    ]
+  },
+  {
+    "request": "tap the falling fruit but not the bombs",
+    "expect": [
+      "falling_catch_tap"
     ]
   }
 ]

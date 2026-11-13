@@ -1,0 +1,32 @@
+[
+  {
+    "request": "mario kart with my friends",
+    "expect": [
+      "kart_racing_items"
+    ]
+  },
+  {
+    "request": "hill climb racing physics game",
+    "expect": [
+      "hill_climb_physics"
+    ]
+  },
+  {
+    "request": "race my friend's ghost lap",
+    "expect": [
+      "time_trial_ghost"
+    ]
+  },
+  {
+    "request": "drag race shifting game",
+    "expect": [
+      "drag_race_shift"
+    ]
+  },
+  {
+    "request": "marble race with our names on the marbles",
+    "expect": [
+      "marble_race_bet"
+    ]
+  }
+]

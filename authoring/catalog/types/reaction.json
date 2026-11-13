@@ -687,56 +687,6 @@
     "source": "kevin"
   },
   {
-    "id": "hot_potato_pass",
-    "name": "Pass before it blows",
-    "aliases": [
-      "Hot potato"
-    ],
-    "family": "reaction",
-    "summary": "A timer ticks down; complete a quick action and pass the phone before it explodes.",
-    "core_loop": "get the potato → do the action → pass → it blows on someone",
-    "verbs": [
-      "react",
-      "pass"
-    ],
-    "inputs": [
-      "tap"
-    ],
-    "rules": [
-      "the timer is hidden"
-    ],
-    "win": "not holding it when it blows",
-    "lose": "holding it at the end",
-    "scoring": "rounds survived",
-    "session_seconds": [
-      60,
-      300
-    ],
-    "players": [
-      "pass_and_play"
-    ],
-    "social_hooks": [
-      "pass-and-play party game"
-    ],
-    "difficulty_levers": [
-      "fuse length"
-    ],
-    "tools": [
-      "turns",
-      "timers",
-      "reveal"
-    ],
-    "engine_gaps": [],
-    "gate_profile": "arcade",
-    "example_prompts": [
-      "hot potato party game",
-      "pass the phone before it explodes",
-      "bomb pass"
-    ],
-    "status": "seed",
-    "source": "kevin"
-  },
-  {
     "id": "catch_the_falling_drop",
     "name": "Catch the drop",
     "aliases": [
