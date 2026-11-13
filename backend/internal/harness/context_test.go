@@ -111,7 +111,7 @@ func TestGeneratorMuse(t *testing.T) {
 		b, _ := io.ReadAll(r.Body)
 		var body map[string]any
 		_ = json.Unmarshal(b, &body)
-		if body["model"] != ModelSpark || body["maxTokens"] != float64(4000) || body["system"] == "" || body["user"] != "hi" {
+		if body["model"] != ModelSpark || body["maxTokens"] != float64(4000) || body["timeoutSeconds"] != float64(25) || body["effort"] != "minimal" || body["system"] == "" || body["user"] != "hi" {
 			t.Errorf("body = %v", body)
 		}
 		json.NewEncoder(w).Encode(map[string]string{"content": "```json\n{\"ok\": true}\n```", "model": ModelSpark})
@@ -130,9 +130,36 @@ func TestGeneratorMuse(t *testing.T) {
 	}))
 	defer slow.Close()
 	g := UnderstandMuse(slow.URL)
-	g.Timeout = 100 * time.Millisecond
-	if _, err := g.JSON(context.Background(), "s", "u"); err == nil || !strings.Contains(err.Error(), "didn't answer") {
-		t.Fatalf("timeout err = %v", err)
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	if _, err := g.JSON(ctx, "s", "u"); err == nil {
+		t.Fatal("a slow generator should time out")
+	}
+
+	// 429 is retried once; 503 is ErrMuseNotConfigured; 502 carries the message
+	var hits int
+	codes := []int{429, 200}
+	flaky := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		code := codes[min(hits, len(codes)-1)]
+		hits++
+		w.WriteHeader(code)
+		if code == 200 {
+			json.NewEncoder(w).Encode(map[string]string{"content": `{"ok":1}`, "model": "m"})
+		}
+	}))
+	defer flaky.Close()
+	g = UnderstandMuse(flaky.URL)
+	g.Backoff = time.Millisecond
+	if _, err := g.JSON(context.Background(), "s", "u"); err != nil || hits != 2 {
+		t.Fatalf("429 retry: err %v, hits %d", err, hits)
+	}
+	hits, codes = 0, []int{503}
+	if _, err := g.JSON(context.Background(), "s", "u"); err != ErrMuseNotConfigured {
+		t.Fatalf("503: %v", err)
+	}
+	hits, codes = 0, []int{429, 429}
+	if _, err := g.JSON(context.Background(), "s", "u"); err == nil || hits != 2 {
+		t.Fatalf("two 429s should fail after one retry: %v, hits %d", err, hits)
 	}
 	if _, err := UnderstandMuse("").JSON(context.Background(), "s", "u"); err == nil {
 		t.Fatal("empty GENERATOR_URL should fail")

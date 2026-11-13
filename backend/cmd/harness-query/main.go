@@ -34,7 +34,7 @@ func main() {
 		k        = flag.Int("k", 6, "types and direct tools to return")
 		noLookup = flag.Bool("no-lookup", false, "never look anything up")
 		budget   = flag.Duration("fetch-budget", 4*time.Second, "time for all web fetching for one name")
-		museWait = flag.Duration("muse-timeout", 15*time.Second, "timeout for each Muse call (production: 15 s)")
+		museWait = flag.Duration("muse-timeout", 25*time.Second, "timeout for each understand and lookup Muse call (production: 25 s)")
 		withPlan = flag.Bool("plan", false, "also run the planner (muse-wonder-1.0, 12000 tokens, 90 s; needs --muse) and print the game spec")
 		chain    = flag.Bool("chain", false, "with --plan: fill the spec in three chained calls instead of one")
 	)

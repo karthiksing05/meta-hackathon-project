@@ -19,16 +19,15 @@ const (
 )
 
 // UnderstandMuse and LookupMuse are the generator transports the API uses for steps 1 and 3:
-// muse-spark-1.3, 4000 tokens, 15 s. Effort is "minimal": measured 2026-11-12, "low" spends 500-800
-// reasoning tokens and 7-18 s even on a one-line prompt, which misses the 15 s budget; "minimal" answers
-// in about 5 s.
+// muse-spark-1.3, 4000 tokens, 25 s (Max, 2026-11-12). Effort is "minimal": measured 2026-11-12, "low"
+// spends 500-800 reasoning tokens and 7-18 s even on a one-line prompt; "minimal" answers in about 5-12 s.
 func UnderstandMuse(generatorURL string) *GeneratorMuse {
-	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 15 * time.Second}
+	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 25 * time.Second}
 }
 
 // LookupMuse is the transport for the lookup summary.
 func LookupMuse(generatorURL string) *GeneratorMuse {
-	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 15 * time.Second}
+	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 25 * time.Second}
 }
 
 // PlanEffort is the planner's reasoning effort.
@@ -39,18 +38,23 @@ func PlanMuse(generatorURL string) *GeneratorMuse {
 	return &GeneratorMuse{URL: generatorURL, Model: ModelWonder, MaxTokens: 12000, Effort: PlanEffort, Timeout: 90 * time.Second}
 }
 
+// ErrMuseNotConfigured is the generator's 503 muse_not_configured: callers fall back to keywords.
+var ErrMuseNotConfigured = errors.New("harness: Muse is not configured on the generator")
+
 // GeneratorMuse is the production MuseJSON transport: the generator service holds the Muse key, and the
 // API calls it on the private network:
 //
-//	POST {GENERATOR_URL}/internal/muse/json {model, system, user, maxTokens?, effort?} -> {content, model}
+//	POST {GENERATOR_URL}/internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?} -> {content, model}
 //
-// The API never reads the key.
+// Errors: 400 bad input, 429 busy (retried once after a short backoff), 502 muse_failed, 503
+// muse_not_configured (ErrMuseNotConfigured). The API never reads the key.
 type GeneratorMuse struct {
 	URL       string // GENERATOR_URL, e.g. http://generator:8090
 	Model     string
 	MaxTokens int
-	Effort    string
-	Timeout   time.Duration // default 15 s
+	Effort    string        // minimal, low, medium or high
+	Timeout   time.Duration // sent as timeoutSeconds; default 25 s
+	Backoff   time.Duration // before the one retry on 429; default 2 s
 	HTTP      *http.Client
 }
 
@@ -61,11 +65,13 @@ func (g *GeneratorMuse) JSON(ctx context.Context, system, user string) (json.Raw
 	}
 	timeout := g.Timeout
 	if timeout <= 0 {
-		timeout = 15 * time.Second
+		timeout = 25 * time.Second
 	}
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	body := map[string]any{"model": g.Model, "system": system, "user": user}
+	backoff := g.Backoff
+	if backoff <= 0 {
+		backoff = 2 * time.Second
+	}
+	body := map[string]any{"model": g.Model, "system": system, "user": user, "timeoutSeconds": int(timeout.Seconds())}
 	if g.MaxTokens > 0 {
 		body["maxTokens"] = g.MaxTokens
 	}
@@ -73,45 +79,77 @@ func (g *GeneratorMuse) JSON(ctx context.Context, system, user string) (json.Raw
 		body["effort"] = g.Effort
 	}
 	b, _ := json.Marshal(body)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(g.URL, "/")+"/internal/muse/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
 	hc := g.HTTP
 	if hc == nil {
 		hc = http.DefaultClient
 	}
+	for attempt := 0; ; attempt++ {
+		// the generator enforces timeoutSeconds on Muse; allow it a little longer to answer
+		cctx, cancel := context.WithTimeout(ctx, timeout+10*time.Second)
+		status, data, err := g.post(cctx, hc, b)
+		cancel()
+		if err != nil {
+			if ctx.Err() != nil {
+				return nil, ctx.Err()
+			}
+			if cctx.Err() != nil {
+				return nil, fmt.Errorf("harness: Muse (via the generator) didn't answer within %s", timeout)
+			}
+			return nil, fmt.Errorf("harness: couldn't reach the generator: %w", err)
+		}
+		switch status {
+		case http.StatusOK:
+			var reply struct {
+				Content string `json:"content"`
+				Model   string `json:"model"`
+			}
+			if err := json.Unmarshal(data, &reply); err != nil {
+				return nil, fmt.Errorf("harness: generator reply: %w", err)
+			}
+			if obj := ExtractObject(reply.Content); obj != nil {
+				return obj, nil
+			}
+			return nil, fmt.Errorf("harness: %s didn't return a JSON object", reply.Model)
+		case http.StatusTooManyRequests:
+			if attempt == 0 {
+				select {
+				case <-time.After(backoff):
+					continue
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				}
+			}
+			return nil, errors.New("harness: the generator is busy")
+		case http.StatusServiceUnavailable:
+			return nil, ErrMuseNotConfigured
+		default:
+			var e struct {
+				Error   string `json:"error"`
+				Message string `json:"message"`
+			}
+			_ = json.Unmarshal(data, &e)
+			msg := strings.TrimSpace(e.Error + " " + e.Message)
+			if msg == "" {
+				msg = firstN(string(data), 200)
+			}
+			return nil, fmt.Errorf("harness: generator answered %d: %s", status, msg)
+		}
+	}
+}
+
+func (g *GeneratorMuse) post(ctx context.Context, hc *http.Client, body []byte) (int, []byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(g.URL, "/")+"/internal/muse/json", bytes.NewReader(body))
+	if err != nil {
+		return 0, nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
 	res, err := hc.Do(req)
 	if err != nil {
-		if ctx.Err() != nil {
-			return nil, fmt.Errorf("harness: Muse (via the generator) didn't answer within %s", timeout)
-		}
-		return nil, fmt.Errorf("harness: couldn't reach the generator: %w", err)
+		return 0, nil, err
 	}
 	defer res.Body.Close()
-	data, _ := io.ReadAll(io.LimitReader(res.Body, 4<<20))
-	if res.StatusCode != http.StatusOK {
-		var e struct {
-			Error string `json:"error"`
-		}
-		_ = json.Unmarshal(data, &e)
-		if e.Error == "" {
-			e.Error = firstN(string(data), 200)
-		}
-		return nil, fmt.Errorf("harness: generator answered %d: %s", res.StatusCode, e.Error)
-	}
-	var reply struct {
-		Content string `json:"content"`
-		Model   string `json:"model"`
-	}
-	if err := json.Unmarshal(data, &reply); err != nil {
-		return nil, fmt.Errorf("harness: generator reply: %w", err)
-	}
-	if obj := ExtractObject(reply.Content); obj != nil {
-		return obj, nil
-	}
-	return nil, fmt.Errorf("harness: %s didn't return a JSON object", reply.Model)
+	data, err := io.ReadAll(io.LimitReader(res.Body, 4<<20))
+	return res.StatusCode, data, err
 }
 
 // MuseClient is a direct MuseJSON transport for the CLI only (the key comes from MUSE_API_KEY): Muse's
@@ -123,7 +161,7 @@ type MuseClient struct {
 	Model           string        // default muse-spark-1.3
 	MaxTokens       int           // default 4000 (the reasoning models come back empty below that)
 	ReasoningEffort string        // default "minimal" (see UnderstandMuse)
-	Timeout         time.Duration // per call; default 15 s
+	Timeout         time.Duration // per call; default 25 s
 	HTTP            *http.Client
 }
 
@@ -151,7 +189,7 @@ func (c *MuseClient) JSON(ctx context.Context, system, user string) (json.RawMes
 	}
 	timeout := c.Timeout
 	if timeout <= 0 {
-		timeout = 15 * time.Second
+		timeout = 25 * time.Second
 	}
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
