@@ -2,6 +2,8 @@ package api_test
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -30,15 +32,58 @@ func TestGenerateForAGroupSendsContextGroup(t *testing.T) {
 	if code, out := startJob(t, ts, ann, map[string]any{"request": "a fog game", "groupId": "grp_nope"}); code != 404 {
 		t.Fatalf("an unknown group: %d %v", code, out)
 	}
-	code, out := startJob(t, ts, ann, map[string]any{"request": "a fog game", "groupId": gid})
+	do(t, "PUT", ts.URL+"/v1/groups/"+gid+"/members/me", bob, nil, "")
+	code, out := startJob(t, ts, bob, map[string]any{"request": "a fog game", "groupId": gid})
 	if code != 202 {
 		t.Fatalf("start: %d %v", code, out)
 	}
-	waitJob(t, ts, ann, out["jobId"].(string), "done")
+	waitJob(t, ts, bob, out["jobId"].(string), "done")
 	c, _ := composeBody(t, gen)["context"].(map[string]any)
 	grp, _ := c["group"].(map[string]any)
-	if grp["id"] != gid || grp["kind"] != "group" {
+	if grp["id"] != gid || grp["kind"] != "group" || grp["name"] != "Fog Club" {
 		t.Fatalf("context sent to /compose: %v", c)
+	}
+	// The members by display name only, the maker first: no emails or ids.
+	ms, _ := grp["members"].([]any)
+	if len(ms) != 2 || ms[0].(map[string]any)["name"] != "bob" || ms[1].(map[string]any)["name"] != "ann" {
+		t.Fatalf("members in context.group: %v", grp["members"])
+	}
+	if raw, _ := json.Marshal(grp); strings.Contains(string(raw), "@") {
+		t.Fatalf("context.group carries an email: %s", raw)
+	}
+}
+
+// Planning for a Group: the plan prompt names the Group and its people; only members may ask.
+func TestHarnessPlanForAGroup(t *testing.T) {
+	hg := newHarnessGenerator(t)
+	ts := serverWithHarness(t, hg.URL, true)
+	ann, bob, cat := register(t, ts, "ann"), register(t, ts, "bob"), register(t, ts, "cat")
+	code, g := do(t, "POST", ts.URL+"/v1/groups", ann, js(map[string]any{"name": "Pickle Crew", "category": "Social"}), "application/json")
+	if code != 201 {
+		t.Fatalf("group: %d %v", code, g)
+	}
+	gid := g["id"].(string)
+	do(t, "PUT", ts.URL+"/v1/groups/"+gid+"/members/me", bob, nil, "")
+	body := func(id string) io.Reader {
+		return js(map[string]any{"request": "a quiz about our group", "groupId": id})
+	}
+	if code, _ := do(t, "POST", ts.URL+"/v1/harness/plan", cat, body(gid), "application/json"); code != 403 {
+		t.Fatalf("a non-member: %d", code)
+	}
+	if code, _ := do(t, "POST", ts.URL+"/v1/harness/plan", ann, body("grp_nope"), "application/json"); code != 404 {
+		t.Fatalf("an unknown group: %d", code)
+	}
+	if code, out := do(t, "POST", ts.URL+"/v1/harness/plan", ann, body(gid), "application/json"); code != 200 {
+		t.Fatalf("plan: %d %v", code, out)
+	}
+	hg.mu.Lock()
+	defer hg.mu.Unlock()
+	if len(hg.planUsers) == 0 {
+		t.Fatal("no plan call")
+	}
+	last := hg.planUsers[len(hg.planUsers)-1]
+	if !strings.Contains(last, `"Pickle Crew"`) || !strings.Contains(last, "ann, bob") || strings.Contains(last, "@example.com") {
+		t.Fatalf("plan prompt about the group: %s", last)
 	}
 }
 

@@ -129,6 +129,8 @@ type Request struct {
 	// Sponsor is the server's sponsor record for this job (a brand account's game, model.Sponsor): when the request
 	// doesn't name a sponsor itself, the understanding carries this one, so the plan's spec.theme gets it.
 	Sponsor *Sponsor `json:"sponsor,omitempty"`
+	// Group is the Group or Event the game is made for (its name and members' display names), for the plan.
+	Group *Group `json:"group,omitempty"`
 }
 
 // Timings are in milliseconds.

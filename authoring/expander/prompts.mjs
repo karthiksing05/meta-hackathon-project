@@ -75,6 +75,18 @@ export function toolRules(context) {
 }
 
 /**
+ * The Group a game is made for (context.group {id, kind, name, members: [{name}]}, from the API): one
+ * paragraph naming it and its people, or '' when there is no name. Only the names the API sends.
+ */
+export function groupNote(context) {
+  const g = context?.group;
+  if (!g || typeof g !== 'object' || typeof g.name !== 'string' || !g.name.trim()) return '';
+  const what = g.kind === 'event' ? 'Event' : 'Group';
+  const names = listOf(g.members, 20).map((m) => (typeof m === 'string' ? m : m?.name)).filter((n) => typeof n === 'string' && n.trim()).map((n) => clip(n.trim(), 40));
+  return `Made for the ${what} "${clip(g.name.trim(), 80)}"${names.length ? `, whose members are ${names.join(', ')}` : ''}. When the request or the spec is about this ${what} or its people ("our group", "us", a quiz about each other, icebreakers, a cast starring us), use the ${what}'s name and these names in the title, the cast, the questions and the content. Use only these names, never invent facts about them, and never add anyone else.`;
+}
+
+/**
  * The menu for one game, from the harness context: the planned tools (fragments expanded to their full
  * specs from the catalog), what the game is (the matched types), and the spec to follow. Everything in it
  * is data; entries learned from the web are marked.
@@ -132,6 +144,8 @@ export function planMenu(catalog, context) {
   if (sponsor && typeof sponsor === 'object' && sponsor.name) {
     spec.push('', `Sponsored by ${clip(sponsor.name, 60)}: put "${clip(sponsor.name, 60)}" in the title or the intro card (meta.instructions), use its products${Array.isArray(sponsor.products) && sponsor.products.length ? ` (${sponsor.products.slice(0, 5).map((p) => clip(p, 40)).join(', ')})` : ''} as the game's pieces and content, and match its tone${sponsor.tone ? ` (${clip(sponsor.tone, 60)})` : ''}. Its real name, colors and logo are fine; keep it fun, not an ad.`);
   }
+  const forGroup = groupNote(context);
+  if (forGroup) spec.push('', forGroup);
   const tooling = toolRules(context);
   if (tooling.length) spec.push('', 'How to use the planned content tools:', ...tooling);
   const together = groupPlayRules(plan.spec?.social);
@@ -224,7 +238,11 @@ ${plan.spec}
 ` : ''}` : `## Fragments (the library)
 
 ${p.fragments ?? ''}
-`}
+${groupNote(context) ? `
+## Who it's for
+
+${groupNote(context)}
+` : ''}`}
 ## Looks
 
 ${p.looks ?? ''}

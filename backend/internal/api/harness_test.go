@@ -58,6 +58,7 @@ type harnessGenerator struct {
 	gen       *fakeGenerator
 	mu        sync.Mutex
 	museCalls []string // the model of each call
+	planUsers []string // the user prompt of each plan call
 	museFail  bool
 }
 
@@ -75,6 +76,9 @@ func newHarnessGenerator(t *testing.T) *harnessGenerator {
 		_ = json.Unmarshal(b, &in)
 		h.mu.Lock()
 		h.museCalls = append(h.museCalls, in.Model)
+		if in.Model == harness.ModelWonder {
+			h.planUsers = append(h.planUsers, in.User)
+		}
 		fail := h.museFail
 		h.mu.Unlock()
 		if fail {
