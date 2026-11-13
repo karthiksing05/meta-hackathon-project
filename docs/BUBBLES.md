@@ -1814,9 +1814,15 @@ turns the server's events (`kind` + `summary`) into the same `StudioEvent`s as `
 so Build, Try, Share and "How Muse made it" are unchanged. Optional fields (`data` on events, `position`,
 `code`) are used when present; the server puts each step's details (`round`, `passed`, `headline`,
 `bots`) on the event itself, and `GenerationEvent.data` falls back to the whole event. Changes to a game
-(`{baseGameId, change?, look?, nextLevel?}`, 4.4) use the same job and polling. `request` may be at
-most 2,000 characters, so when the agreed anatomy would push a new game's request past that, it goes
-in the brief's `notes` instead. The games API client is always the live server (`GamesAPIFactory.current`,
+(`{baseGameId, change?, look?, nextLevel?, anatomy?}`, 4.4) use the same job and polling. `request` may
+be at most 2,000 characters; the agreed anatomy goes in its own `anatomy` field (up to 16 KB; the
+server adds it to what Muse reads), for new games, remixes and anatomy changes. New games are sent
+with `draft: true` (changes are drafts by default), so a build the person drops never reaches the
+feed. Share publishes the shared levels (`POST /v1/creations/{id}/publish`, `GameGenerator.publish`);
+Discard deletes the session's drafts (`DELETE /v1/creations/{id}`, `GameGenerator.discard`); levels a
+tweak replaced stay unlisted drafts, and the Library skips drafts (`RemoteGame.unlisted`). `polishing` events (the quality check's polish round) show as one more fix round. The server
+runs one job per person: a start that hears "you already have a game being made" right after a
+cancel waits and tries again for about 8 s (shown as waiting for a slot). The games API client is always the live server (`GamesAPIFactory.current`,
 base URL `https://api.ol4ol.com`, `FB_API_URL` overrides it in DEBUG); the app signs in once at launch
 with a device account (`GamesAccount`). There is no mock client.
 
@@ -1882,8 +1888,8 @@ the card says why.
   the change; after local edits or answers, "Have Muse check my changes" folds them in.
 - *The build*: `GameAnatomy.agreedText(request:)` ("Agreed game anatomy (follow the rules and mechanics
   exactly, not just the look)", with the person's request verbatim and a requested theme kept as said) is
-  appended to the microgame request text (`microgameRequestText`, so repair rounds see it too) or, for
-  formula games, to the brief's `notes`. `MicrogamePrompts` is unchanged.
+  sent as the job's `anatomy` field (`POST /v1/generate`), and the server appends it to the request
+  Muse reads, so repair rounds see it too. `MicrogamePrompts` is unchanged.
 - *Try step*: "Change the game" replaces "Tweak it" when there is an anatomy. Each message is first mapped
   onto the anatomy (Muse's reply, the updated parts, anything new to Muse); "Make the change" makes the
   updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`, a change on the

@@ -186,12 +186,13 @@ extension BubbleStore {
         }
     }
 
-    /// Your own games (`GET /v1/creations`), for the Library.
+    /// Your own games (`GET /v1/creations`), for the Library. Drafts (Studio builds and tweaks
+    /// that were never shared) stay out.
     @MainActor
     func loadMyGames() async {
         guard !isPreview, await GamesAccount.shared.waitForUser() != nil,
               let games = try? await api.creations() else { return }
-        for game in games {
+        for game in games where !game.unlisted {
             await adopt(game)
         }
     }

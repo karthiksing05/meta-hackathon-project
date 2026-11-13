@@ -53,6 +53,7 @@ struct StudioView: View {
         }
         .confirmationDialog(closeTitle, isPresented: $isConfirmingClose, titleVisibility: .visible) {
             Button(model.isEditMode ? "Discard changes" : "Discard", role: .destructive) {
+                model.discardDrafts()
                 close()
             }
             Button("Keep editing", role: .cancel) {}

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Makes a game from scratch on the server (`GameGenerator`: Max's `/v1/generate`, or its mock) and
+/// Makes a game from scratch on the server (`GameGenerator`: Max's `/v1/generate`) and
 /// turns the job into the same `StudioEvent`s the on-device path (`StudioMicrogameBridge`) yields, so
 /// the Build storyboard, the timeline, Try, Share and "How Muse made it" can't tell them apart.
 ///
@@ -24,11 +24,14 @@ enum StudioGenerateBridge {
         with generator: any GameGenerator,
         request: String,
         brief: BubbleBrief,
+        anatomy: String?,
+        draft: Bool,
         sound: RemoteGameSound? = nil,
         onReport: @escaping @MainActor (UUID, StudioPlaytest.Report) -> Void,
         onWait: @escaping @MainActor (Wait?) -> Void
     ) -> AsyncThrowingStream<StudioEvent, Error> {
-        events(from: generator.generate(request: request, brief: brief, sound: sound), onReport: onReport, onWait: onWait)
+        events(from: generator.generate(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound),
+               onReport: onReport, onWait: onWait)
     }
 
     /// A change to a game the server has; the result is a new game (`remixOf` is the base).
@@ -75,7 +78,7 @@ enum StudioGenerateBridge {
                             case .failed: failedEvent = event
                             case .other: break
                             default:
-                                if event.kind == .repairing { repairs += 1 }
+                                if event.kind == .repairing || event.kind == .polishing { repairs += 1 }
                                 let (studioEvent, report) = studioEvent(for: event, model: model, repairs: repairs, elapsed: elapsed())
                                 if let report { onReport(studioEvent.id, report) }
                                 continuation.yield(studioEvent)
@@ -128,6 +131,17 @@ enum StudioGenerateBridge {
                 step: .repair,
                 title: title.nonEmpty ?? "Fixing issues",
                 detail: "Round \(round): sent back to Muse with where each one is",
+                model: model,
+                elapsed: elapsed,
+                issues: issues.isEmpty ? nil : Array(issues)
+            ), nil)
+        case .polishing:
+            // The quality check's one polish round; it reads as one more fix round (docs/BUBBLES.md 7.12).
+            let issues = (event.issues ?? []).prefix(4).map(StudioMicrogameBridge.readableIssue)
+            return (StudioEvent(
+                step: .repair,
+                title: title.nonEmpty ?? "Polishing the details",
+                detail: "Muse gives the art, sound and words one more pass, keeping how it plays",
                 model: model,
                 elapsed: elapsed,
                 issues: issues.isEmpty ? nil : Array(issues)
