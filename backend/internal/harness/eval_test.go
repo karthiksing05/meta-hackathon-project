@@ -48,7 +48,7 @@ func TestRetrievalEval(t *testing.T) {
 		rr         float64
 		unknownIDs int
 	}
-	total := agg{}
+	total, hard := agg{}, agg{}
 	var misses []string
 	for _, f := range files {
 		b, err := os.ReadFile(f)
@@ -98,11 +98,19 @@ func TestRetrievalEval(t *testing.T) {
 		total.hit5 += a.hit5
 		total.rr += a.rr
 		total.unknownIDs += a.unknownIDs
+		if strings.HasPrefix(name, "hard_") {
+			hard.n += a.n
+			hard.hit5 += a.hit5
+			hard.rr += a.rr
+		}
 	}
 	if total.n == 0 {
 		t.Skip("no eval cases")
 	}
 	t.Logf("%-22s n=%3d  recall@5=%.2f  MRR=%.2f%s  (target recall@5 ≥ 0.90)", "ALL", total.n, float64(total.hit5)/float64(total.n), total.rr/float64(total.n), unknownNote(total.unknownIDs))
+	if hard.n > 0 {
+		t.Logf("%-22s n=%3d  recall@5=%.2f  MRR=%.2f  (the eval/hard_*.json files)", "HARD", hard.n, float64(hard.hit5)/float64(hard.n), hard.rr/float64(hard.n))
+	}
 	for _, m := range misses {
 		t.Logf("  miss: %s", m)
 	}

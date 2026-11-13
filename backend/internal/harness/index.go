@@ -278,6 +278,8 @@ type Index struct {
 	toolByID map[string]int
 	typeByID map[string]int
 	vocab    Vocab
+	// vocabTerms are the stemmed words of every family, verb and input in the catalog
+	vocabTerms map[string]bool
 
 	typeBM  *bm25f
 	toolBM  *bm25f
@@ -306,6 +308,14 @@ func NewIndex(ctx context.Context, cat *Catalog, embedder Embedder) (*Index, err
 		ix.toolByID[t.ID] = i
 	}
 	ix.vocab = VocabOf(ix.types)
+	ix.vocabTerms = map[string]bool{}
+	for _, list := range [][]string{ix.vocab.Families, ix.vocab.Verbs, ix.vocab.Inputs} {
+		for _, w := range list {
+			for _, t := range Tokens(strings.ReplaceAll(w, "_", " ")) {
+				ix.vocabTerms[t] = true
+			}
+		}
+	}
 
 	typeTexts := make([][]string, len(ix.types))
 	typeNames := make([][]string, len(ix.types))
@@ -452,6 +462,24 @@ func queryTerms(text string, u Understanding) []weightedTerm {
 			}
 		}
 	}
+	// synonyms of the request's words, well below the words themselves ("obscure" also finds "rare")
+	base := make([]string, 0, len(w))
+	for t, x := range w {
+		if x >= 0.5 {
+			base = append(base, t)
+		}
+	}
+	sort.Strings(base)
+	for _, t := range base {
+		if !useSynonyms {
+			break
+		}
+		for _, syn := range Synonyms(t) {
+			if cur, ok := w[syn]; !ok || cur < synonymWeight*w[t] {
+				w[syn] = synonymWeight * w[t]
+			}
+		}
+	}
 	out := make([]weightedTerm, 0, len(w))
 	for t, x := range w {
 		out = append(out, weightedTerm{t, x})
@@ -526,6 +554,49 @@ func phrases(text string, u Understanding) []string {
 	return out
 }
 
+// Trigram matching is for names and typos ("krilion"). A phrase made only of the catalog's own vocabulary
+// (a family, verb or input word such as "trivia" or "tap") or of words in at least commonShare of all types
+// is ordinary description, which BM25 already scores, so trigrams skip it. Game names stay in even when
+// many types list them ("wordle").
+const commonShare = 0.05
+
+// Retrieval knobs, also used to compare variants in the eval.
+var (
+	useSynonyms             = true
+	useSynonymsInUnderstand = true
+	synonymWeight           = 0.4 // a synonym's weight relative to the word it came from
+	skipCommonPhrases       = true
+)
+
+func (ix *Index) namePhrases(phr []string, u Understanding) []string {
+	if !skipCommonPhrases {
+		return phr
+	}
+	named := map[string]bool{}
+	for _, r := range u.NamedRefs {
+		named[Fold(r)] = true
+	}
+	limit := int(commonShare * float64(len(ix.types)))
+	out := phr[:0]
+	for _, p := range phr {
+		if named[p] {
+			out = append(out, p)
+			continue
+		}
+		common := true
+		for _, t := range Tokens(p) {
+			if !ix.vocabTerms[t] && (limit < 1 || ix.typeBM.df[t] < limit) {
+				common = false
+				break
+			}
+		}
+		if !common {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
 type scored struct {
 	doc   int
 	score float64
@@ -587,7 +658,7 @@ func (ix *Index) Search(ctx context.Context, q Query) (Result, error) {
 		topTools = 6
 	}
 	terms := queryTerms(q.Text, q.Understanding)
-	phr := phrases(q.Text, q.Understanding)
+	phr := ix.namePhrases(phrases(q.Text, q.Understanding), q.Understanding)
 
 	rankings := map[string]map[int]int{}
 	weights := map[string]float64{"bm25": weightBM25, "trigram": weightTrigram, "facets": weightFacet}

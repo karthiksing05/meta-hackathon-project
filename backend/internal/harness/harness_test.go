@@ -378,3 +378,23 @@ func TestPhrasesDropThemeWords(t *testing.T) {
 		t.Error("named ref dropped")
 	}
 }
+
+func TestSynonymsExpandQuery(t *testing.T) {
+	terms := map[string]float64{}
+	for _, wt := range queryTerms("trivia where obscure answers win", Understanding{}) {
+		terms[wt.term] = wt.weight
+	}
+	if w := terms[Stem("rare")]; w <= 0 || w >= 1 {
+		t.Errorf("obscure should add rare at a lower weight, got %v", w)
+	}
+	if terms["trivia"] != 1 {
+		t.Errorf("the request's own words keep full weight: %v", terms["trivia"])
+	}
+	if !contains(Synonyms(synonymTerm("least popular")), Stem("rare")) {
+		t.Error("multi-word synonym missing")
+	}
+	u, _ := KeywordUnderstander{}.Understand(context.Background(), "doodle a cat", VocabOf(testCatalog().Types))
+	if !contains(u.Inputs, "draw") {
+		t.Errorf("doodle should read as the draw input: %+v", u.Inputs)
+	}
+}

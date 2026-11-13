@@ -143,25 +143,28 @@ var (
 func (KeywordUnderstander) Understand(_ context.Context, request string, vocab Vocab) (Understanding, error) {
 	u := Understanding{}
 	folded := " " + Fold(strings.ReplaceAll(request, "_", " ")) + " "
-	stems := " " + strings.Join(stemSeq(strings.Fields(folded)), " ") + " "
-
-	contains := func(word string) bool {
-		k := " " + vocabKey(word) + " "
-		return strings.Contains(stems, k)
+	// Families and verbs match the request's own words. Inputs also match synonyms ("doodle" reads as
+	// draw, "typing" as type): measured on the eval, synonyms for verbs and families pull in too much
+	// ("beat my friend's ghost" is not a rhythm game), while BM25 uses them at a low weight instead.
+	stems := " " + strings.Join(Tokens(folded), " ") + " "
+	withSyn := stems
+	if useSynonymsInUnderstand {
+		withSyn = synonymText(folded)
 	}
+	in := func(text, word string) bool { return strings.Contains(text, " "+vocabKey(word)+" ") }
 	for _, f := range vocab.Families {
-		if contains(f) {
+		if in(stems, f) {
 			u.Families = append(u.Families, f)
 		}
 	}
 	for _, v := range vocab.Verbs {
-		if contains(v) {
+		if in(stems, v) {
 			u.Verbs = append(u.Verbs, v)
 		}
 	}
-	for _, in := range vocab.Inputs {
-		if contains(in) {
-			u.Inputs = append(u.Inputs, in)
+	for _, x := range vocab.Inputs {
+		if in(withSyn, x) {
+			u.Inputs = append(u.Inputs, x)
 		}
 	}
 
