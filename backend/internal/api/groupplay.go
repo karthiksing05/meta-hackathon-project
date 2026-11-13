@@ -60,6 +60,21 @@ func groupPlayFrom(in *manifestGroupPlay) *model.GroupPlay {
 	return gp
 }
 
+// cleanBots keeps up to 20 playtest runs with sane numbers (skill 0 to 1, a score, a time up to an hour).
+func cleanBots(in []model.BotRun) []model.BotRun {
+	var out []model.BotRun
+	for _, b := range in {
+		if len(out) >= 20 {
+			break
+		}
+		if b.Skill != b.Skill || b.Skill < 0 || b.Skill > 1 || b.Score < -1e9 || b.Score > 1e9 || b.Sec != b.Sec || b.Sec < 0 || b.Sec > 3600 {
+			continue
+		}
+		out = append(out, b)
+	}
+	return out
+}
+
 // nameList keeps up to max short, non-empty names.
 func nameList(in []string, max int) []string {
 	var out []string

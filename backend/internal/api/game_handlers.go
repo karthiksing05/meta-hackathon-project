@@ -277,6 +277,7 @@ type manifestMeta struct {
 	Lineage struct {
 		RemixOf string `json:"remix_of"`
 	} `json:"lineage"`
+	Bots      json.RawMessage    `json:"bots"`  // playtest runs an uploaded game brings; generated games send theirs separately
 	Score     *manifestScore     `json:"score"` // what the board ranks and how (scoring.go)
 	GroupPlay *manifestGroupPlay `json:"group_play"`
 }
@@ -341,6 +342,12 @@ func (s *Server) publish(ctx context.Context, u *model.User, body io.Reader, bot
 	g.GroupID, g.EventID = scopeIDs(&m)
 	if m.Chain.Index > 1 && m.Chain.Index < 1000 {
 		g.Level = m.Chain.Index
+	}
+	if len(bots) == 0 {
+		var mb []model.BotRun
+		if json.Unmarshal(m.Bots, &mb) == nil { // an unreadable block is ignored, never a reason to refuse the game
+			bots = cleanBots(mb)
+		}
 	}
 	g.Score = scoreModelFrom(m.Score)
 	g.GroupPlay = groupPlayFrom(m.GroupPlay)

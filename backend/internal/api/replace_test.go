@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -70,5 +71,22 @@ func TestReplaceCreation(t *testing.T) {
 	}
 	if code, _ := put(ann, g3["id"].(string), zipOf(v2), "application/zip"); code != 422 {
 		t.Fatalf("replace with a taken manifest id: %d", code)
+	}
+}
+
+// A manifest may bring playtest bots; a malformed block never refuses the upload.
+func TestUploadWithBots(t *testing.T) {
+	ts, _ := newServer(t)
+	ann := register(t, ts, "ann")
+	for i, bots := range []string{
+		`[{"skill":0.3,"score":12,"sec":20},{"skill":0.9,"score":40,"sec":35}]`,
+		`"nonsense"`,
+		`[{"skill":7,"score":1},{"skill":0.5,"score":1e12}]`,
+	} {
+		m := fmt.Sprintf(`{"id":"bots-%d","title":"Bots %d","one_line_rule":"x","formula":"guess","bots":%s}`, i, i, bots)
+		z := makeZip(t, map[string]string{"manifest.json": m, "game.js": "console.log(1)"})
+		if code, out := do(t, "POST", ts.URL+"/v1/creations", ann, bytes.NewReader(z), "application/zip"); code != 201 {
+			t.Fatalf("upload with bots %s: %d %v", bots, code, out)
+		}
 	}
 }

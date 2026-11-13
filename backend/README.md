@@ -179,6 +179,10 @@ The phone derives the engine's seed from the round's seed, so `log.seed` is not 
 tie goes to the lower `time_ms`, otherwise it is a draw. The series ends when someone has won more than half the rounds or every round is decided. You can't see the other player's score for a round until you have played it. A friend starting a series, and a
 friend playing a round, show up in `GET /v1/me/moments` as `series_invited` and `series_round`.
 
+An uploaded or replaced game may carry `bots` at the top of its `manifest.json`: up to 20 playtest runs `[{skill: 0-1, score, sec?}]`, kept for the recommender's quality prior like a generated game's. A malformed block is ignored, never a reason to refuse the upload.
+
+The generator service also has `POST /internal/muse/image {prompt, size?, guide?: base64 PNG}` -> `{png_base64, model, seconds}` (one `muse-image-1.0` picture, 13-18 s, private network only, sizes 512 to 1536). It is the building block for picture games; nothing in the API calls it yet.
+
 ## Notifications
 
 A per-person inbox that doubles as the push outbox. `GET /v1/me/notifications?limit=&cursor=` returns `{items: [{id, kind, title, body, gameId?, groupId?, challengeId?, seriesId?, createdAt, readAt?}], nextCursor?, unreadCount}` (newest first; `nextCursor` is opaque). `PUT /v1/me/notifications/{id}/read {read}` (`read` defaults to true) and `PUT /v1/me/notifications/read` (all) return `{unreadCount}`.
