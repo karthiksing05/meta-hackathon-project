@@ -67,6 +67,8 @@ function textOnSprite(scenes, add) {
   }
 }
 
+const canvasArea = (ctx) => (ctx.game?.presentation?.canvas?.w ?? 360) * (ctx.game?.presentation?.canvas?.h ?? 640);
+
 export const check = {
   id: 'layout',
   family: 'L',
@@ -77,6 +79,9 @@ export const check = {
     const add = (f, key) => { const k = `${f.code}|${key}`; const p = out.get(k); if (p) p.frames++; else out.set(k, { ...f, frames: 1 }); };
     for (const f of lintSample(ctx.sample, { measures: ctx.measures })) {
       if (DROPPED.has(f.code)) continue;
+      // A tall lane or a big region is a place to tap, not a key that needs a label (hand-check:
+      // rhythm lanes with their names under them were the lint's false positives).
+      if (f.code === 'L_EMPTY_LABEL' && f.box && f.box.w * f.box.h > 0.06 * canvasArea(ctx)) continue;
       const { code, severity: _s, detail, hint, frame, node, frames, ...extra } = f;
       out.set(`${code}|lint|${node ?? JSON.stringify(f.box)}|${f.other ?? ''}`, { ...finding(code, { severity: severityOf(f), node, frame, message: detail, hint, ...extra }), frames });
     }

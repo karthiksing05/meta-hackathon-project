@@ -198,13 +198,23 @@ export async function verifyAndFix(input, opts = {}) {
   const vi = (g) => verify(g, { ...inner, engine, ref: original });
   const withMove = (g, m) => { const c = JSON.parse(JSON.stringify(g)); setAt(c, m.node, JSON.parse(JSON.stringify(m.patch))); return c; };
   const related = (a, b) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
+  const keep = (list) => fixes.push(...list.map(({ patch: _p, ...x }) => ({ stage: 'solver', ...x })));
+  // Outlines only raise contrast and draw nothing new: applied straight from the pixel-measured
+  // report (the inner loop doesn't sample pixels, so it can't see them help).
+  const outlines = async (rep) => {
+    const list = (await solveLayout(game, rep, { engine })).moves.filter((m) => m.kind === 'outline');
+    for (const m of list) game = withMove(game, m);
+    keep(list);
+    return list.length;
+  };
+  if (report.blocking) await outlines(report);
   let cur = report.blocking ? await vi(game) : report;
   for (let round = 0; round < (opts.solverRounds ?? 3) && cur.blocking; round++) {
-    // Round one also sees the pixel-measured findings (contrast) of the full report.
+    // Round one also sees the pixel-measured findings of the full report.
     const { moves } = await solveLayout(game, round === 0 && report.blocking >= cur.blocking ? report : cur, { engine });
     const touched = [];
     let kept = 0;
-    for (const m of moves.slice(0, opts.maxMoves ?? 16)) {
+    for (const m of moves.filter((x) => x.kind !== 'outline').slice(0, opts.maxMoves ?? 16)) {
       if (touched.some((t) => related(t, m.node))) continue;
       const g2 = withMove(game, m);
       const r2 = await vi(g2);
@@ -219,12 +229,24 @@ export async function verifyAndFix(input, opts = {}) {
       if (!accept) continue;
       game = accept.g; cur = accept.r; kept++;
       touched.push(...accept.list.map((x) => x.node));
-      fixes.push(...accept.list.map(({ patch: _p, ...x }) => ({ stage: 'solver', ...x })));
+      keep(accept.list);
     }
     stages.push({ stage: `solver ${round + 1}`, blocking: cur.blocking, warnings: cur.warnings, byCode: cur.byCode, moves: kept });
     if (!kept) break;
   }
   if (fixes.some((f) => f.stage === 'solver')) { report = await v(game); note('final', report); }
+  // The pixel-measured report can still show what the inner loop couldn't see (contrast on art,
+  // widths in frames it measured itself): one more pass judged by the full verifier.
+  if (report.blocking && (opts.finalPass ?? true)) {
+    let changed = (await outlines(report)) > 0;
+    if (changed) report = await v(game);
+    for (const m of (await solveLayout(game, report, { engine })).moves.filter((x) => x.kind !== 'outline').slice(0, 4)) {
+      const g2 = withMove(game, m);
+      const r2 = await v(g2);
+      if (r2.blocking < report.blocking) { game = g2; report = r2; keep([m]); changed = true; }
+    }
+    if (changed) note('final pass', report);
+  }
   const proof = game === original ? { rules: true, replays: true, note: 'unchanged' } : await proveUnchanged(original, game, { engine, runs: opts.runs ?? null });
   if (!proof.rules || !proof.replays) {
     // A fix that changes play is not a layout fix: ship the original, with its findings.
