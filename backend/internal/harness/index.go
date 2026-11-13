@@ -493,12 +493,29 @@ func phrases(text string, u Understanding) []string {
 	for _, r := range u.NamedRefs {
 		out = append(out, Fold(r))
 	}
+	// theme words shouldn't be fuzzy-matched to game names ("hogwarts" is not a game, and "potter" is not
+	// "pottery"): drop every phrase made only of theme words, unless it is also a named ref
+	themeWords := map[string]bool{}
 	for _, th := range u.Theme {
-		// theme names shouldn't be fuzzy-matched to game names ("hogwarts" is not a game)
-		f := Fold(th)
+		for _, w := range strings.Fields(Fold(th)) {
+			themeWords[w] = true
+		}
+	}
+	named := map[string]bool{}
+	for _, r := range u.NamedRefs {
+		named[Fold(r)] = true
+	}
+	if len(themeWords) > 0 {
 		kept := out[:0]
 		for _, p := range out {
-			if p != f {
+			allTheme := true
+			for _, w := range strings.Fields(p) {
+				if !themeWords[w] {
+					allTheme = false
+					break
+				}
+			}
+			if !allTheme || named[p] {
 				kept = append(kept, p)
 			}
 		}

@@ -371,10 +371,12 @@ type Vocab struct {
 	Inputs   []string `json:"inputs"`
 }
 
-// VocabOf collects the vocabulary of a set of types, sorted. Families and inputs also include the schema's
-// full lists, so the understanding step can name a family no entry uses yet.
+// VocabOf collects the vocabulary of a set of types. Families and inputs are sorted and also include the
+// schema's full lists, so the understanding step can name a family no entry uses yet; verbs are ordered by
+// how many types use them, most first.
 func VocabOf(types []GameType) Vocab {
-	f, v, in := map[string]bool{}, map[string]bool{}, map[string]bool{}
+	f, in := map[string]bool{}, map[string]bool{}
+	verbCount := map[string]int{}
 	for _, x := range Families {
 		f[x] = true
 	}
@@ -385,14 +387,29 @@ func VocabOf(types []GameType) Vocab {
 		if t.Family != "" {
 			f[t.Family] = true
 		}
-		for _, x := range t.Verbs {
-			v[x] = true
+		for _, x := range uniq(t.Verbs) {
+			verbCount[x]++
 		}
 		for _, x := range t.Inputs {
 			in[x] = true
 		}
 	}
-	return Vocab{Families: sortedKeys(f), Verbs: sortedKeys(v), Inputs: sortedKeys(in)}
+	return Vocab{Families: sortedKeys(f), Verbs: byCount(verbCount), Inputs: sortedKeys(in)}
+}
+
+// byCount sorts by how many types use each word, most first, then alphabetically.
+func byCount(m map[string]int) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if m[out[i]] != m[out[j]] {
+			return m[out[i]] > m[out[j]]
+		}
+		return out[i] < out[j]
+	})
+	return out
 }
 
 func sortedKeys(m map[string]bool) []string {

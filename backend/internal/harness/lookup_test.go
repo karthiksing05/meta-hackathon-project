@@ -39,6 +39,8 @@ func wikiServer(t *testing.T, hits *atomic.Int32) *httptest.Server {
 				return
 			}
 			fmt.Fprint(w, `{"pages":[]}`)
+		case r.URL.Path == "/w/api.php":
+			fmt.Fprint(w, `{"query":{"pages":{"1":{"extract":"Intro.\n\n== Gameplay ==\nShapes fall; a full row clears and scores.\n=== Modes ===\nMarathon.\n\n== Reception ==\nGood."}}}}`)
 		case strings.HasPrefix(r.URL.Path, "/api/rest_v1/page/summary/"):
 			fmt.Fprint(w, `{"title":"Tetrominoes Deluxe","description":"puzzle video game","extract":"Players rotate falling shapes to complete rows, which then clear.","content_urls":{"desktop":{"page":"https://en.wikipedia.org/wiki/Tetrominoes_Deluxe"}}}`)
 		default:
@@ -166,6 +168,9 @@ func TestLookupWikipediaAndRejections(t *testing.T) {
 	gt, ev, err := lk.Find(context.Background(), "Tetrominoes Deluxe", "make tetrominoes deluxe", v)
 	if err != nil || gt == nil || len(ev) != 1 || ev[0].Kind != "wikipedia" {
 		t.Fatalf("wikipedia lookup: %v %+v %v", gt, ev, err)
+	}
+	if !strings.Contains(ev[0].Text, "Gameplay: Shapes fall; a full row clears and scores. Marathon.") || strings.Contains(ev[0].Text, "Good.") {
+		t.Errorf("gameplay section: %q", ev[0].Text)
 	}
 	if _, _, err := lk.Find(context.Background(), "Jane Smithson", "x", v); err != ErrNoEvidence {
 		t.Errorf("a non-game page should give no evidence, got %v", err)

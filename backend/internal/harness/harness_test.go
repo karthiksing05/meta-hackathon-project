@@ -366,3 +366,15 @@ func TestExtractObject(t *testing.T) {
 		}
 	}
 }
+
+func TestPhrasesDropThemeWords(t *testing.T) {
+	u := Understanding{NamedRefs: []string{"Krillion"}, Theme: []string{"Harry Potter"}}
+	for _, p := range phrases("a harry potter krillion", u) {
+		if p == "potter" || p == "harry" || p == "harry potter" {
+			t.Errorf("theme phrase %q kept", p)
+		}
+	}
+	if !contains(phrases("a harry potter krillion", u), "krillion") {
+		t.Error("named ref dropped")
+	}
+}

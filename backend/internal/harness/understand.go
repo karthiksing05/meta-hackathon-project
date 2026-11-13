@@ -51,13 +51,17 @@ Reply with one JSON object and nothing else:
 - players: one of solo, pass_and_play, async_friends, group_daily, live.
 - unknown_refs: named_refs you do not confidently know as games. Be honest: if you are not sure what a name is, list it here and do not guess its mechanic.`
 
+// promptVerbs is how many of the catalog's verbs (most used first) the understanding prompt lists. The
+// whole list (400+) makes Muse slower without changing what it picks for most requests.
+const promptVerbs = 150
+
 // Understand implements Understander.
 func (m MuseUnderstander) Understand(ctx context.Context, request string, vocab Vocab) (Understanding, error) {
 	if m.Muse == nil {
 		return Understanding{}, fmt.Errorf("harness: no Muse client")
 	}
 	user := fmt.Sprintf("Vocabulary\nfamilies: %s\nverbs: %s\ninputs: %s\n\nRequest: %s",
-		strings.Join(vocab.Families, ", "), strings.Join(vocab.Verbs, ", "), strings.Join(vocab.Inputs, ", "), request)
+		strings.Join(vocab.Families, ", "), strings.Join(vocab.Verbs[:min(len(vocab.Verbs), promptVerbs)], ", "), strings.Join(vocab.Inputs, ", "), request)
 	raw, err := m.Muse.JSON(ctx, understandSystem, user)
 	if err != nil {
 		return Understanding{}, err

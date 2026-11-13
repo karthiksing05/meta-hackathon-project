@@ -19,14 +19,16 @@ const (
 )
 
 // UnderstandMuse and LookupMuse are the generator transports the API uses for steps 1 and 3:
-// muse-spark-1.3, 4000 tokens, 15 s.
+// muse-spark-1.3, 4000 tokens, 15 s. Effort is "minimal": measured 2026-11-12, "low" spends 500-800
+// reasoning tokens and 7-18 s even on a one-line prompt, which misses the 15 s budget; "minimal" answers
+// in about 5 s.
 func UnderstandMuse(generatorURL string) *GeneratorMuse {
-	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "low", Timeout: 15 * time.Second}
+	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 15 * time.Second}
 }
 
 // LookupMuse is the transport for the lookup summary.
 func LookupMuse(generatorURL string) *GeneratorMuse {
-	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "low", Timeout: 15 * time.Second}
+	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 15 * time.Second}
 }
 
 // PlanMuse is the planner's transport (muse-wonder-1.0, 12000 tokens, 90 s), for when the planner lands.
@@ -117,7 +119,7 @@ type MuseClient struct {
 	BaseURL         string        // default https://api.meta.ai/v1
 	Model           string        // default muse-spark-1.3
 	MaxTokens       int           // default 4000 (the reasoning models come back empty below that)
-	ReasoningEffort string        // default "low"
+	ReasoningEffort string        // default "minimal" (see UnderstandMuse)
 	Timeout         time.Duration // per call; default 15 s
 	HTTP            *http.Client
 }
@@ -138,7 +140,7 @@ func (c *MuseClient) JSON(ctx context.Context, system, user string) (json.RawMes
 	budget := max(c.MaxTokens, 4000)
 	effort := c.ReasoningEffort
 	if effort == "" {
-		effort = "low"
+		effort = "minimal"
 	}
 	hc := c.HTTP
 	if hc == nil {

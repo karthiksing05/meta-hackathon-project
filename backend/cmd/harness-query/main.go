@@ -8,7 +8,8 @@
 // --muse uses Muse (Spark) to understand the request and turns on the web lookup (Wikipedia and the
 // game's own site, then Muse writes a learned entry). The key is read from the MUSE_API_KEY environment
 // variable only, never from a flag or a file, and is never printed. MUSE_BASE_URL and MUSE_MODEL override
-// the endpoint (https://api.meta.ai/v1) and model (muse-spark-1.3). The catalog comes from
+// the endpoint (https://api.meta.ai/v1) and model (muse-spark-1.3); MUSE_EFFORT the reasoning effort
+// (minimal). The catalog comes from
 // authoring/catalog (or --catalog, or $HARNESS_CATALOG).
 package main
 
@@ -32,6 +33,7 @@ func main() {
 		k        = flag.Int("k", 6, "types and direct tools to return")
 		noLookup = flag.Bool("no-lookup", false, "never look anything up")
 		budget   = flag.Duration("fetch-budget", 4*time.Second, "time for all web fetching for one name")
+		museWait = flag.Duration("muse-timeout", 15*time.Second, "timeout for each Muse call (production: 15 s)")
 	)
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: harness-query [flags] \"request\"\n")
@@ -52,7 +54,8 @@ func main() {
 			fmt.Fprintln(os.Stderr, "harness-query: --muse needs MUSE_API_KEY in the environment")
 			os.Exit(2)
 		}
-		muse := &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"), Model: os.Getenv("MUSE_MODEL")}
+		muse := &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"), Model: os.Getenv("MUSE_MODEL"),
+			ReasoningEffort: os.Getenv("MUSE_EFFORT"), Timeout: *museWait}
 		cfg.Understander = harness.MuseUnderstander{Muse: muse}
 		lk := harness.NewLookup(muse)
 		lk.FetchBudget = *budget
