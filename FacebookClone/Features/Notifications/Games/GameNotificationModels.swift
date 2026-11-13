@@ -46,3 +46,21 @@ protocol GameNotificationsAPI: Sendable {
     func unregisterGamePushDevice(installationID: String) async throws
     func shareGameToGroup(gameID: String, groupID: String, eventID: String) async throws
 }
+
+/// Value-only routing keeps all four kinds testable without UI or a notification payload.
+enum GameNotificationDestination: Equatable, Sendable {
+    case challenges, leaderboard(String), game(String), group(String), inbox
+}
+
+extension RemoteGameNotification {
+    var destination: GameNotificationDestination {
+        switch kind {
+        case "friend_challenge": return .challenges
+        case "leaderboard_lost": return gameID.map(GameNotificationDestination.leaderboard) ?? .inbox
+        case "group_game":
+            if let id = gameID { return .game(id) }
+            return groupID.map(GameNotificationDestination.group) ?? .inbox
+        default: return gameID.map(GameNotificationDestination.game) ?? .inbox
+        }
+    }
+}

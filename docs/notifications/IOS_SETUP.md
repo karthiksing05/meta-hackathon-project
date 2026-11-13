@@ -24,12 +24,12 @@ Facebook **Groups only**, not Messenger group chats (Kevin's clarification).
 - Cold-start taps wait for sign-in. A push's ID is resolved through the current account's
   authenticated inbox before routing; payload destinations alone aren't trusted. A missing
   or very old item leaves the user in Notifications. Challenges open Challenges, lost first
-  place opens the game board, Group games open that Group's games, and viral games open the
+  place opens the game board, Group shares open the shared game (or the Group's games if no game is attached), and viral games open the
   game page. Unknown kinds degrade to the game page or inbox.
 - Group shares call the server with the new post's stable ID as `eventId`. Errors are reported
   instead of claiming that other members received alerts. No eligibility runs on the phone.
 
-## Apple provisioning (required for actual remote push)
+## Apple provisioning (deferred by Kevin; required for actual remote push)
 
 No signing team, Xcode project, or shared provisioning settings were changed by this work.
 Someone with access to the team's Apple Developer account must:
@@ -42,6 +42,19 @@ Someone with access to the team's Apple Developer account must:
    uses production; explicitly override for ad hoc distribution that uses a production profile.
 4. Give Max the APNs key ID, team ID, bundle ID/topic and `.p8` key through the team's secure
    secret channel. Never put the private key in this repository, Slack messages, or app bundle.
+   An opt-in signing configuration is provided, without altering the shared project:
+
+   ```
+   xcodebuild -project FacebookClone.xcodeproj -scheme FacebookClone \
+     -xcconfig docs/notifications/PushNotifications.xcconfig \
+     -destination 'generic/platform=iOS' \
+     -derivedDataPath /private/tmp/notifications-device-build \
+     -allowProvisioningUpdates build
+   ```
+
+   For production profiles append `APS_ENVIRONMENT=production APNS_ENVIRONMENT=production`.
+   Pass `DEVELOPMENT_TEAM=<team ID>` if using another team.
+
 5. Have Max configure the sender on the server. Backend inbox endpoints should work even when
    its APNs sender is disabled. Logout should revoke the installation server-side as well, to
    cover a phone going offline during unregister; this is a backend responsibility.

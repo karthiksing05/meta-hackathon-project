@@ -50,6 +50,16 @@ struct NotificationTests {
         let firstPage = RemoteGameNotificationPage(items: [item], nextCursor: "page2", unreadCount: 72)
         let lastPage = RemoteGameNotificationPage(items: [item, second], nextCursor: nil, unreadCount: 72)
 
+        precondition(item.destination == .challenges)
+        precondition(second.destination == .game("g2"))
+        let boardJSON = Data(#"{"id":"board","kind":"leaderboard_lost","title":"New leader","body":"Try again","gameId":"g3","createdAt":"2026-11-13T08:00:00Z"}"#.utf8)
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        let boardItem = try decoder.decode(RemoteGameNotification.self, from: boardJSON)
+        precondition(boardItem.destination == .leaderboard("g3") && !boardItem.isRead)
+        let groupJSON = Data(#"{"id":"group","kind":"group_game","title":"Shared game","body":"Try it","gameId":"g4","groupId":"club","createdAt":"2026-11-13T08:00:00Z"}"#.utf8)
+        let groupItem = try decoder.decode(RemoteGameNotification.self, from: groupJSON)
+        precondition(groupItem.destination == .game("g4"), "a shared game need not have been made for the Group")
+
         inbox.useAccount("alice")
         await api.configure([firstPage, lastPage])
         await inbox.reload(); await inbox.loadMore()

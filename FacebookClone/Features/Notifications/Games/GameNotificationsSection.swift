@@ -13,7 +13,15 @@ struct GameNotificationsSection: View {
 
     var body: some View {
         if GamesAccount.shared.userID != nil {
-            Section {
+            Group {
+                Text("Games")
+                    .font(.fbTitle)
+                    .foregroundStyle(FBColor.primaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                    .padding(.bottom, 4)
+                    .gameNotificationListRow()
                 GamePushPermissionRow()
                     .gameNotificationListRow()
                 if let error = inbox.errorMessage {
@@ -65,12 +73,6 @@ struct GameNotificationsSection: View {
                         .disabled(inbox.isLoading)
                         .gameNotificationListRow()
                 }
-            } header: {
-                Text("Games")
-                    .font(.fbTitle)
-                    .foregroundStyle(FBColor.primaryText)
-                    .textCase(nil)
-                    .padding(.vertical, 8)
             }
         }
     }
@@ -92,7 +94,7 @@ private struct GameNotificationRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title).font(.fbHeadline).foregroundStyle(FBColor.primaryText)
                     Text(item.body).font(.fbBody).foregroundStyle(FBColor.primaryText)
-                    Text(item.createdAt, style: .relative)
+                    Text(item.createdAt.fbShort)
                         .font(.fbCaption)
                         .foregroundStyle(item.isRead ? FBColor.secondaryText : FBColor.accent)
                 }

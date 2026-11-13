@@ -55,17 +55,12 @@ struct GameNotificationsLifecycle: ViewModifier {
 @MainActor
 enum GameNotificationNavigation {
     static func open(_ item: RemoteGameNotification, router: Router) {
-        switch item.kind {
-        case "friend_challenge":
-            router.push(.challengesInbox)
-        case "leaderboard_lost":
-            if let id = item.gameID { router.push(.bubbleBoard(id)) }
-        case "group_game":
-            if let id = item.groupID {
-                router.push(.bubbleFeature(GroupsSearchScreens.gamesRoute(for: id)))
-            } else if let id = item.gameID { router.push(.bubble(id)) }
-        default:
-            if let id = item.gameID { router.push(.bubble(id)) }
+        switch item.destination {
+        case .challenges: router.push(.challengesInbox)
+        case .leaderboard(let id): router.push(.bubbleBoard(id))
+        case .game(let id): router.push(.bubble(id))
+        case .group(let id): router.push(.bubbleFeature(GroupsSearchScreens.gamesRoute(for: id)))
+        case .inbox: break
         }
     }
 }
