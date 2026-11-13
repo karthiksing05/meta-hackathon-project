@@ -137,15 +137,18 @@ still verify.
 This check is static, on the manifest; yours is dynamic, on rendered frames. To avoid
 duplicate codes: `S_*` is this file's prefix, please keep `L_*` for findings that need frames
 (moving actors entering the HUD band, text measured wider than its box at run time, overlaps
-between dynamic nodes, sprites crossing the score). Where the two overlap in meaning, the pairs
-are: `S_HUD_BAND` ↔ your HUD-band intrusion, `S_TEXT_OVERFLOW` ↔ your measured overflow,
-`S_TEXT_OVERLAP` ↔ your text overlap, `S_TOUCH_TARGET` ↔ your hit-target size. The kit's regions
+between dynamic nodes, sprites crossing the score). Where the two overlap in meaning (your codes from `playtest/LAYOUT.md`): `S_HUD_BAND` ↔
+`L_OVERLAP_HUD`, `S_TEXT_OVERFLOW` ↔ `L_TEXT_OVERFLOW`, `S_TEXT_OVERLAP` ↔ `L_OVERLAP_TEXT`,
+`S_TOUCH_TARGET` ↔ `L_TARGET_SMALL`, `S_CONTRAST` ↔ `L_LOW_CONTRAST`, `S_FONT_SCALE` ↔
+`L_TEXT_SMALL`. Order in the pipeline: style fix on the manifest first, then expand, then your
+lint and `layout-fix.mjs` on frames. With the kit's HUD bar in place, your HUD-panel fix should find
+nothing to do (the bar is a solid `$surface` panel drawn over the playfield). The kit's regions
 are exported by `applyUiKit(...).regions` (hud, top, playfield, controls, hud_bottom) if you want
 to check frames against the same bands.
 
 ## 5. Results on last night's Muse games
 
-Across the 46 Muse games in the kevin32 and s15 sets (the style check run on each game's own
+Across the 45 Muse games built last night (kevin32 #1–31 and s15 S1–S15 except S7; #32 and S7 have no build; the style check run on each game's own
 manifest):
 
 - 1,599 findings before, 156 of them errors. The most common: `S_OFF_GRID` 500, `S_TEXT_UNBOXED` 374,
