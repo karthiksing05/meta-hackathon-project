@@ -14,8 +14,9 @@
 //   R_  the person's requirements               (requirements-check.mjs, via checks/requirements.mjs)
 //   F_  fill: bleed bands, background, HUD band (fill-check.mjs, via checks/fill.mjs)
 //   M_  motion and transitions                 (checks/motion.mjs: motion.mjs, motion-fix.mjs)
-//   V_  visual identity (V_SPRITE_DUP: two different things drawn with the same sprite)
-//                                               (reserved for the sprite-distinctness check)
+//   V_  visual identity (V_SPRITE_DUP: two different things drawn with the same sprite, reserved for the
+//       sprite-distinctness check; V_VECTOR_FIGURE, V_SVG_FIGURE: a figure drawn from shapes or SVG,
+//       checks/figures.mjs)
 
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -29,7 +30,7 @@ export const FAMILIES = {
   S: 'style tokens and tree',
   R: 'requirements',
   F: 'fill (checks/fill.mjs → playtest/fill-check.mjs)',
-  V: 'visual identity (reserved: V_SPRITE_DUP)',
+  V: 'visual identity (checks/figures.mjs: V_VECTOR_FIGURE, V_SVG_FIGURE; reserved: V_SPRITE_DUP)',
   M: 'motion and transitions over contiguous frames (checks/motion.mjs → motion.mjs, motion-fix.mjs)',
 };
 

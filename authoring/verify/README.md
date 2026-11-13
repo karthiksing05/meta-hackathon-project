@@ -15,6 +15,7 @@ impossible to ship. No Muse calls: everything here is code.
 | `checks/readability.mjs` | `S_READABILITY`: each word against the pixels behind it (10th-percentile contrast), composited in JS so it needs no Chrome (`authoring/kit/readability.mjs`). |
 | `checks/look.mjs` | The look checks (`S_FONT_FAMILIES`, `S_TYPE_SCALE`, …): the game against its own fonts, scale and palette (`authoring/kit/README.md`). |
 | `checks/requirements.mjs` | Adapter for `requirements-check.mjs` (`R_*`), when requirements are passed. |
+| `checks/figures.mjs` | `V_VECTOR_FIGURE`: a character, food or product drawn from engine shapes (clusters on the frames, figure names on the tree); `V_SVG_FIGURE`: one drawn as an SVG sprite. |
 | `checks/fill.mjs` | Adapter for `playtest/fill-check.mjs` (`F_*`): aspect, background coverage, HUD band, bleed bands, score owner. |
 | `solve.mjs` | The layout solver, the last resort. |
 | `prove.mjs` | Proof that a fix is presentation only: same rules, same replay state hashes. |
@@ -22,7 +23,7 @@ impossible to ship. No Muse calls: everything here is code.
 | `motion.mjs`, `motion-fix.mjs`, `checks/motion.mjs` | The motion classes (`M_*`), their fixes and the check. |
 | `motion-strips.mjs` | 50 ms strips around transitions, drawn as the old (`--shell old`) or current (`--shell new`) shell shows them. |
 | `test-motion.mjs` | Motion tests on the Guess the Decade fixture (33). Needs `MG_ENGINE_DIR`. |
-| `test-verify.mjs` | Tests (28). Needs `MG_ENGINE_DIR`. |
+| `test-verify.mjs` | Tests (43). Needs `MG_ENGINE_DIR`. |
 
 ```sh
 MG_ENGINE_DIR=<engine dir> node authoring/verify/verify.mjs <manifest-or-game.json>... [--fix] [--out=<dir>] [--runs=<runs.json>] [--json] [--no-pixels]
@@ -96,6 +97,8 @@ Every code belongs to a failure class in `docs/games/FAILURE_CLASSES.md`, the on
 | `F_ASPECT`, `F_HUD_OUT_OF_BAND`, `F_SCORE_HIDDEN` | warn | fill: canvas aspect, HUD outside its band, no score shown | the fill fix |
 | `M_SHAKE`, `M_TEXT_UNSTABLE`, `M_PULSE`, `M_POP`, `M_TRANSITION_OVERLAP`, `M_TRANSITION_STYLE` | block | motion over contiguous frames (`checks/motion.mjs`, `motion.mjs`): excess or stacked shake, text that jumps, slides or over-pulses, icon over-pulse, pops and flicker, next labels on the last state's colours or particles over text, inconsistent fades (docs/games/FAILURE_CLASSES.md FC-50 to FC-55) | `motion-fix.mjs`, the motion stage of `verifyAndFix`: one 3-unit shake on the fail moment, fixed HUD slots, pulses capped, the look's fade on the events that change words, reveal transitions dropped, short bursts |
 | `M_TEXT_HOLD` | warn | words up for less time than reading them takes (FC-56) | – (rules) |
+| `V_VECTOR_FIGURE` | block | a figure drawn from engine shapes (`checks/figures.mjs`, FC-13). **Clusters**, held in 2+ frames and a fifth of the frames their main shape shows in: *eyes* (a filled circle holding two matching small circles side by side, at most 4 dots), *head* (a filled circle on a non-bar shape 0.3 to 1.3 times its width, centred, touching its top), *limbs* (a mirrored pair of matching shapes, each under 45 % of its area, touching a filled circle). Never: shapes holding text, bars (rect over 3.5:1), single or concentric rings, rows and columns of equal shapes, particles (untagged circles and rects). **Names**: a group, repeat or grid whose id or name (or two of its shapes' ids, or its one literal label) names a character, food or product (owl, chef, burrito, labubu, mascot, player, phone …; `FIGURE_WORDS`) and draws 2+ shapes and no image; a UI word in the name (bar, hp, ring, button, grid, particle …; `UI_WORDS`) exempts it | none in code: a Muse Image sprite (`authoring/ARTDIR.md`, the art step) |
+| `V_SVG_FIGURE` | warn | an image node on a hand-written SVG asset whose id names a figure (`avatar`, `burrito`, `owl` …). Warn only: 17 of 64 games on Prod drew their sprites this way (2026-11-13) | a Muse Image sprite |
 | `V_SPRITE_DUP` | reserved (drop `checks/sprite-dup.mjs`) | two different things drawn with one sprite | (the sprite-distinctness check) |
 
 Units: the canvas is 360 units wide and drawn about 390 pt wide, so 1 unit ≈ 1.08 pt.

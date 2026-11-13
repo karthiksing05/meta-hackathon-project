@@ -160,5 +160,58 @@ const opts = { engine, maxSeconds: 8, pixels: false };
   ok(fx.game.presentation.root.children[0].visible === false, 'an empty box is hidden', fx.fixes);
 }
 
+// --- FC-13 V_VECTOR_FIGURE: figures drawn from shapes block; bars, rings, rows, grids and particles don't.
+{
+  const figs = async (children, extra) => (await verify(base(children, extra), { ...opts, only: ['vector-figures'] })).findings.filter((f) => f.code.startsWith('V_'));
+  const label = { node: 'text', x: 180, y: 30, anchor: 'center', size: 18, weight: 700, color: '$ink', text: "= 'Score: ' + str(taps)" };
+  // an owl from circles: body, two eyes with pupils, two ear triangles
+  const owl = await figs([label, { node: 'group', x: 0, y: 0, children: [
+    { node: 'circle', x: 180, y: 320, r: 60, fill: '#8B5A2B' },
+    { node: 'poly', points: [[130, 285], [140, 240], [160, 275]], fill: '#8B5A2B' },
+    { node: 'poly', points: [[230, 285], [220, 240], [200, 275]], fill: '#8B5A2B' },
+    { node: 'circle', x: 157, y: 305, r: 16, fill: '#FFFFFF' }, { node: 'circle', x: 203, y: 305, r: 16, fill: '#FFFFFF' },
+    { node: 'circle', x: 157, y: 305, r: 7, fill: '#111111' }, { node: 'circle', x: 203, y: 305, r: 7, fill: '#111111' },
+  ] }]);
+  ok(owl.some((f) => f.code === 'V_VECTOR_FIGURE' && f.severity === 'block' && /eyes/.test(f.rule)), 'an owl from circles is V_VECTOR_FIGURE (eyes)', owl);
+  ok(owl.some((f) => /limbs/.test(f.rule ?? '')), 'its ears are a mirrored pair (limbs)', owl.map((f) => f.rule));
+  // a person: a circle head on a rect body, moving together
+  const person = await figs([label,
+    { node: 'circle', x: 180, y: '= 200 + y * 0.2', r: 22, fill: '#F2C9A0' },
+    { node: 'rect', x: 158, y: '= 222 + y * 0.2', w: 44, h: 70, radius: 8, fill: '#2F6FDE' },
+  ]);
+  ok(person.some((f) => f.code === 'V_VECTOR_FIGURE' && /head/.test(f.rule)), 'a person from a circle and a rect is V_VECTOR_FIGURE (head)', person);
+  // a burrito group named in its id, drawn from shapes with no image
+  const burrito = await figs([label, { node: 'group', id: 'burrito', children: [
+    { node: 'rect', x: 120, y: 300, w: 120, h: 50, radius: 25, fill: '#E8C27A' },
+    { node: 'rect', x: 130, y: 310, w: 100, h: 10, radius: 5, fill: '#5DAA3C' },
+  ] }]);
+  ok(burrito.some((f) => f.code === 'V_VECTOR_FIGURE' && f.rule === 'name' && f.node === '/presentation/root/children/1'), 'a "burrito" group of shapes is V_VECTOR_FIGURE (name)', burrito);
+  // the same group with a picture in it is fine; UI names are fine
+  const pic = await figs([label, { node: 'group', id: 'burrito', children: [
+    { node: 'image', asset: 'block', x: 120, y: 300, w: 120, h: 50 }, { node: 'rect', x: 120, y: 360, w: 120, h: 8, fill: '#5DAA3C' }, { node: 'rect', x: 120, y: 372, w: 60, h: 8, fill: '#5DAA3C' },
+  ] }, { node: 'group', id: 'player_hp_bar', children: [{ node: 'rect', x: 20, y: 60, w: 200, h: 10, fill: '#333333' }, { node: 'rect', x: 20, y: 60, w: '= 2.0 * taps', h: 10, fill: '#2F6FDE' }] }]);
+  ok(!pic.some((f) => f.severity === 'block'), 'a named group with an image, and a "player_hp_bar", are not figures', pic);
+  // not figures: a row of equal dots, a progress bar with a knob, a single ring, a 4×4 grid of dots,
+  // concentric rings, a column of beads, a die face of five pips, particles on tap
+  const neg = await figs([label,
+    { node: 'repeat', source: 'range(5)', as: 'k', key: 'k', template: { node: 'circle', x: '= 100 + k * 40', y: 120, r: 14, fill: '#2F6FDE' } },
+    { node: 'rect', x: 40, y: 170, w: 280, h: 12, radius: 6, fill: '#DDDDDD' }, { node: 'circle', x: 160, y: 176, r: 14, fill: '#2F6FDE' },
+    { node: 'circle', x: 80, y: 260, r: 40, fill: '#00000000', stroke: '#2F6FDE', stroke_width: 6 },
+    { node: 'circle', x: 270, y: 260, r: 40, fill: '#2F6FDE' }, { node: 'circle', x: 270, y: 260, r: 26, fill: '#FFFFFF' }, { node: 'circle', x: 270, y: 260, r: 12, fill: '#2F6FDE' },
+    { node: 'grid', cols: 4, rows: 4, cell_size: 30, gap: 10, x: 100, y: 330, cell: { node: 'circle', x: 15, y: 15, r: 10, fill: '#2F6FDE' } },
+    { node: 'repeat', source: 'range(3)', as: 'k', key: 'k', template: { node: 'circle', x: 40, y: '= 360 + k * 30', r: 15, fill: '#C0392B' } },
+    { node: 'circle', x: 300, y: 420, r: 34, fill: '#FFFFFF' },
+    ...[[285, 405], [315, 405], [300, 420], [285, 435], [315, 435]].map(([x, y]) => ({ node: 'circle', x, y, r: 5, fill: '#111111' })),
+    { node: 'rect', x: 120, y: 500, w: 120, h: 56, radius: 12, fill: '$accent', on_tap: { input: 'tap' } },
+    { node: 'text', x: 180, y: 528, anchor: 'center', size: 18, weight: 700, color: '#FFFFFF', text: 'Tap' },
+  ], { feedback: undefined });
+  ok(!neg.some((f) => f.code === 'V_VECTOR_FIGURE'), 'bars, rings, rows, grids, beads and pips are not figures', neg);
+  // a figure-named SVG sprite warns
+  const svg = await figs([label, { node: 'image', asset: 'owl', x: 140, y: 300, w: 80, h: 80 }], { assets: { owl: { svg: "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><circle cx='5' cy='5' r='5'/></svg>", w: 80, h: 80 } } });
+  ok(svg.some((f) => f.code === 'V_SVG_FIGURE' && f.severity === 'warn') && !svg.some((f) => f.severity === 'block'), 'an "owl" SVG sprite is V_SVG_FIGURE (warn)', svg);
+  // the clean game has none
+  ok(!(await figs(clean().presentation.root.children)).length, 'the clean game has no figure findings');
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
