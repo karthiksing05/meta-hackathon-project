@@ -117,6 +117,14 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     check('POST /compose streams events then a result', res.status === 200 && lines.filter((l) => l.type === 'event').length >= 3 && result?.manifest?.formula === 'microgame', JSON.stringify(lines.map((l) => l.type)));
     check('Muse got a Bearer key, JSON mode and the chat path', calls[0]?.url === '/v1/chat/completions' && calls[0].auth === 'Bearer test-key-not-real' && calls[0].body.response_format?.type === 'json_object' && calls[0].body.max_tokens >= 4000, JSON.stringify(calls[0] && { url: calls[0].url, auth: calls[0].auth }));
     check('the key never appears in the output', !JSON.stringify(lines).includes('test-key-not-real'));
+    // a change sends the stored manifest, which is far bigger than a small request body
+    const fat = { ...result.manifest, content: { ...result.manifest.content, padding: 'x'.repeat(400 * 1024) } };
+    const rv = await fetch(`http://127.0.0.1:${port}/compose`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ request: 'make it faster', base: fat, remixOf: 'aaaaaaaaaaaaaaaaaaaaaaaa' }),
+    });
+    const rvLines = (await rv.text()).trim().split(String.fromCharCode(10)).map((l) => JSON.parse(l));
+    check('a change with a 400 KB base manifest is accepted', rv.status === 200 && rvLines.some((l) => l.type === 'result'), rv.status + ' ' + JSON.stringify(rvLines.map((l) => l.type)));
     const bad = await fetch(`http://127.0.0.1:${port}/compose`, { method: 'POST', body: '{"request":""}' });
     check('an empty request is a 400', bad.status === 400, bad.status);
 
