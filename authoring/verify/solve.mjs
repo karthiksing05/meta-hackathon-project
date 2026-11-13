@@ -21,9 +21,24 @@
 import { getAt } from '../expander/layout-fix.mjs';
 import { walkNodes, parseColor, contrast, instrument, opBox } from '../playtest/layout-check.mjs';
 import { MIN_TARGET, MIN_GAP } from './checks/targets.mjs';
+import { bands as fillBands } from '../playtest/fill-check.mjs';
+import { isTall } from '../expander/canvas.mjs';
 import { analyze, area, decodeTag } from './scene.mjs';
 
 export const BANDS = { top: [0, 0.14], play: [0.14, 0.86], bottom: [0.86, 1] };
+
+/**
+ * The three bands in canvas units. A tall 360 × 780 canvas keeps its bleed bands (under the phone's
+ * bars) empty: the HUD bands sit inside the safe area (fill-check.mjs's bands). A legacy 360 × 640
+ * canvas uses the fractions above.
+ */
+export function bandRanges(W, H) {
+  if (isTall({ w: W, h: H })) {
+    const b = fillBands({ w: W, h: H });
+    return { top: [b.hudTop.y0, b.hudTop.y1], play: [b.hudTop.y1, b.hudBottom.y0], bottom: [b.hudBottom.y0, b.hudBottom.y1] };
+  }
+  return Object.fromEntries(Object.entries(BANDS).map(([k, [a, b]]) => [k, [a * H, b * H]]));
+}
 const MIN_TEXT = 11;
 const CELL = 4;
 const PAD = 4;
@@ -171,8 +186,8 @@ function findSlot(grid, box, w, h, bandOrder) {
   const { W, H } = grid;
   const cw = Math.ceil((w + 2 * PAD) / CELL), chh = Math.ceil((h + 2 * PAD) / CELL);
   for (const band of bandOrder) {
-    const [f0, f1] = BANDS[band];
-    const y0 = Math.floor((f0 * H) / CELL), y1 = Math.floor((f1 * H) / CELL);
+    const [a0, a1] = bandRanges(W, H)[band];
+    const y0 = Math.ceil(a0 / CELL), y1 = Math.floor(a1 / CELL);
     let best = null;
     for (let cy = y0; cy + chh <= y1; cy++) for (let cx = 0; cx + cw <= grid.cw; cx++) {
       if (!grid.free(cx, cy, cx + cw, cy + chh)) continue;
@@ -185,7 +200,7 @@ function findSlot(grid, box, w, h, bandOrder) {
   return null;
 }
 
-const bandOf = (box, H) => { const c = (box.y0 + box.y1) / 2 / H; return c < BANDS.top[1] ? 'top' : c > BANDS.bottom[0] ? 'bottom' : 'play'; };
+const bandOf = (box, W, H) => { const r = bandRanges(W, H), c = (box.y0 + box.y1) / 2; return c < r.top[1] ? 'top' : c > r.bottom[0] ? 'bottom' : 'play'; };
 
 // ---------------------------------------------------------------- the solver ----
 
@@ -302,7 +317,7 @@ export async function solveLayout(game, report, { sample = null, measures = null
       const moves = path.x1 - path.x0 > own.w + 4 || path.y1 - path.y0 > own.h + 4;
       const bw = Math.min(W - 2 * PAD, own.w), bh = own.h;
       if (bh > 0.3 * H) continue; // not a UI block
-      const home = bandOf(path, H);
+      const home = bandOf(path, W, H);
       const order = [home, ...['top', 'bottom', 'play'].filter((b) => b !== home)];
       let slot = findSlot(grid, path, bw, bh, order);
       let shrink = 1;

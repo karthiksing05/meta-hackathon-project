@@ -42,7 +42,7 @@ const opts = { engine, maxSeconds: 8, pixels: false };
 // --- registry
 {
   const ids = allChecks().map((c) => c.id);
-  ok(['layout', 'targets', 'style', 'requirements'].every((i) => ids.includes(i)), 'built-in checks load', ids);
+  ok(['layout', 'targets', 'style', 'requirements', 'fill'].every((i) => ids.includes(i)), 'built-in checks load', ids);
   ok(codeInfo('L_TAP_THROUGH')?.severity === 'block' && codeInfo('L_TEXT_SMALL')?.severity === 'warn', 'codes carry severities');
   register({ id: 'test-fill', family: 'F', codes: { F_TEST_EMPTY: { severity: 'warn', title: 't', hint: 'h' } }, needs: ['game'], run: () => [finding('F_TEST_EMPTY', { message: 'empty' })] });
   const r = await verify(clean(), opts);
