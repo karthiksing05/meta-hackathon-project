@@ -48,6 +48,7 @@ func (s *Server) views(r *http.Request, games []model.Game) ([]model.GameView, e
 		}
 		out[i] = v
 	}
+	s.attachSoundViews(r.Context(), games, out)
 	return out, nil
 }
 

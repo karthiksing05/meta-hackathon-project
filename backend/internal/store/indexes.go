@@ -40,11 +40,21 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			// the manifest's own id: unique when present
 			{Keys: k("slug", 1), Options: options.Index().SetUnique(true).SetName("slug_unique").
 				SetPartialFilterExpression(bson.D{{Key: "slug", Value: bson.D{{Key: "$exists", Value: true}}}})},
+			{Keys: k("sound.id", 1, "createdAt", -1), Options: options.Index().SetName("sound_games").
+				SetPartialFilterExpression(bson.D{{Key: "sound.id", Value: bson.D{{Key: "$exists", Value: true}}}})},
 			{Keys: k("groupId", 1, "createdAt", -1), Options: options.Index().SetName("group_newest").
 				SetPartialFilterExpression(bson.D{{Key: "groupId", Value: bson.D{{Key: "$exists", Value: true}}}})},
 			{Keys: k("title", "text", "tags", "text", "description", "text"),
 				Options: options.Index().SetName("games_search").
 					SetWeights(bson.D{{Key: "title", Value: 10}, {Key: "tags", Value: 5}, {Key: "description", Value: 1}})},
+		},
+		cSounds: {
+			{Keys: k("useCount", -1, "createdAt", -1), Options: options.Index().SetName("sounds_trending")},
+			{Keys: k("createdAt", -1), Options: options.Index().SetName("sounds_recent")},
+		},
+		cSoundSaves: {
+			{Keys: k("userId", 1), Options: options.Index().SetName("sound_saves_by_user")},
+			{Keys: k("soundId", 1), Options: options.Index().SetName("sound_saves_by_sound")},
 		},
 		cSeries: {
 			{Keys: k("playerA", 1, "createdAt", -1), Options: options.Index().SetName("series_a")},

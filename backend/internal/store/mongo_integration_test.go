@@ -481,3 +481,138 @@ func TestMongoSeriesAndDrafts(t *testing.T) {
 		t.Fatalf("deleting twice: %v", err)
 	}
 }
+
+func TestMongoSoundsAndScores(t *testing.T) {
+	uri := os.Getenv("MONGO_TEST_URI")
+	if uri == "" {
+		t.Skip("MONGO_TEST_URI not set")
+	}
+	ctx := context.Background()
+	m, err := store.ConnectMongo(ctx, uri, "bubbles_test_sounds_"+time.Now().Format("150405"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.Close(ctx)
+	defer m.DropDatabase(ctx)
+	if err := m.EnsureIndexes(ctx); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC().Truncate(time.Millisecond)
+
+	// sounds: trending is the most used, search matches the start of a word, saves are per person and idempotent
+	for i, title := range []string{"Rainy Lofi", "Chip Sprint"} {
+		sd := &model.Sound{ID: "s" + string(rune('1'+i)), Title: title, OwnerID: "u1", OwnerUsername: "ann", Kind: "library", StorageKey: "s" + string(rune('1'+i)), AudioPath: "loop.m4a", CreatedAt: now.Add(time.Duration(i) * time.Second)}
+		if err := m.InsertSound(ctx, sd); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := m.InsertSound(ctx, &model.Sound{ID: "s1"}); err != store.ErrConflict {
+		t.Fatalf("duplicate sound: %v", err)
+	}
+	if err := m.AddSoundUse(ctx, "s1", 3); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.AddSoundUse(ctx, "s1", -10); err != nil { // never below zero
+		t.Fatal(err)
+	}
+	if s, _ := m.SoundByID(ctx, "s1"); s.UseCount != 0 {
+		t.Fatalf("use count floor: %d", s.UseCount)
+	}
+	m.AddSoundUse(ctx, "s2", 2)
+	if got, err := m.FindSounds(ctx, store.SoundQuery{Order: "trending", Limit: 10}); err != nil || len(got) != 2 || got[0].ID != "s2" {
+		t.Fatalf("trending: %v %v", got, err)
+	}
+	if got, _ := m.FindSounds(ctx, store.SoundQuery{Order: "recent", Limit: 10}); got[0].ID != "s2" {
+		t.Fatalf("recent: %v", got)
+	}
+	if got, _ := m.FindSounds(ctx, store.SoundQuery{Q: "lof", Limit: 10}); len(got) != 1 || got[0].ID != "s1" {
+		t.Fatalf("search: %v", got)
+	}
+	if got, _ := m.FindSounds(ctx, store.SoundQuery{Q: ".*", Limit: 10}); len(got) != 0 {
+		t.Fatalf("a pattern is text: %v", got)
+	}
+	for i := 0; i < 2; i++ {
+		if n, err := m.SetSoundSaved(ctx, "s1", "ub", true); err != nil || n != 1 {
+			t.Fatalf("save %d: %d %v", i, n, err)
+		}
+	}
+	if set, _ := m.SoundsSavedSet(ctx, "ub", []string{"s1", "s2"}); !set["s1"] || set["s2"] {
+		t.Fatalf("saved set: %v", set)
+	}
+	if got, _ := m.FindSounds(ctx, store.SoundQuery{SavedBy: "ub", Limit: 10}); len(got) != 1 || got[0].ID != "s1" {
+		t.Fatalf("saved tab: %v", got)
+	}
+	if n, _ := m.SetSoundSaved(ctx, "s1", "ub", false); n != 0 {
+		t.Fatalf("unsave: %d", n)
+	}
+	if _, err := m.SetSoundSaved(ctx, "nope", "ub", true); err != store.ErrNotFound {
+		t.Fatalf("saving a missing sound: %v", err)
+	}
+
+	// a sound on a game, and the games that use it (drafts left out)
+	for i, id := range []string{"a0123456789abcdef0123456", "b0123456789abcdef0123456"} {
+		g := &model.Game{ID: id, OwnerID: "u1", Title: "Game", Description: "d", StorageKey: id, ManifestPath: "manifest.json", CreatedAt: now.Add(time.Duration(i) * time.Second)}
+		if err := m.InsertGame(ctx, g); err != nil {
+			t.Fatal(err)
+		}
+		if err := m.SetGameSound(ctx, id, &model.GameSound{ID: "s2", OffsetMs: 1000, Mix: 0.5}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	m.SetGameUnlisted(ctx, "b0123456789abcdef0123456", true)
+	if got, err := m.GamesBySound(ctx, "s2", "recent", 10); err != nil || len(got) != 1 || got[0].Sound == nil || got[0].Sound.OffsetMs != 1000 {
+		t.Fatalf("games by sound: %v %v", got, err)
+	}
+	if err := m.SetGameSound(ctx, "a0123456789abcdef0123456", nil); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := m.GamesBySound(ctx, "s2", "top", 10); len(got) != 0 {
+		t.Fatalf("after taking the sound off: %v", got)
+	}
+	if err := m.SetGameSound(ctx, "c0123456789abcdef0123456", nil); err != store.ErrNotFound {
+		t.Fatalf("a missing game: %v", err)
+	}
+
+	// score-aware boards: ordering by direction and tie-break, one person's score, replacing it
+	put := func(user string, score, timeMs int64, at time.Duration) {
+		if err := m.PutScore(ctx, model.Score{GameID: "g1", UserID: user, Username: user, Score: score, TimeMs: timeMs, UpdatedAt: now.Add(at)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	put("a", 50, 9000, 0)
+	put("b", 30, 7000, time.Second)
+	put("c", 30, 5000, 2*time.Second)
+	order := func(o model.BoardOrder) string {
+		rows, err := m.Board(ctx, "g1", 10, o)
+		if err != nil {
+			t.Fatal(err)
+		}
+		s := ""
+		for _, r := range rows {
+			s += r.UserID
+		}
+		return s
+	}
+	if got := order(model.BoardOrder{}); got != "abc" { // higher first; equal scores: the earlier first
+		t.Fatalf("higher first: %s", got)
+	}
+	if got := order(model.BoardOrder{Lower: true, TieByTime: true}); got != "cba" { // lower first; equal scores: the shorter run first
+		t.Fatalf("lower first, less time: %s", got)
+	}
+	if got := order(model.BoardOrder{Lower: true}); got != "bca" {
+		t.Fatalf("lower first, earlier: %s", got)
+	}
+	if got := order(model.BoardOrder{Recent: true}); got != "cba" {
+		t.Fatalf("newest first: %s", got)
+	}
+	if s, err := m.ScoreOf(ctx, "g1", "b"); err != nil || s.Score != 30 || s.TimeMs != 7000 {
+		t.Fatalf("score of: %v %v", s, err)
+	}
+	if _, err := m.ScoreOf(ctx, "g1", "zz"); err != store.ErrNotFound {
+		t.Fatalf("no score: %v", err)
+	}
+	put("b", 20, 6000, 3*time.Second) // replaced, not kept as the best: that is the API's call
+	if s, _ := m.ScoreOf(ctx, "g1", "b"); s.Score != 20 {
+		t.Fatalf("replaced: %v", s)
+	}
+}

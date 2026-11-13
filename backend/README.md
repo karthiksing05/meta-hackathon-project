@@ -68,6 +68,8 @@ treat the exact shapes as the first version and change them together with the cl
 | `POST /v1/creations` | bearer | upload a package zip (`Content-Type: application/zip`) |
 | `GET /v1/creations`, `GET /v1/creations/{id}`, `GET /v1/creations/{id}/source` | bearer | the caller's games (drafts included, with `unlisted: true`); private editable source as a zip |
 | `POST /v1/creations/{id}/publish`, `DELETE /v1/creations/{id}` | bearer (owner) | list a draft in the feed, search and its Group; delete a game with its saves and scores (the files stay on the games host under their unguessable id) |
+| `GET /v1/sounds?tab=trending\|for_you\|saved\|recent&q=`, `GET /v1/sounds/{id}`, `GET /v1/sounds/{id}/games?sort=top\|recent`, `PUT\|DELETE /v1/sounds/{id}/save`, `POST /v1/sounds` | optional / bearer | the sound library: loops that play behind games (see [Sounds](#sounds)) |
+| `PUT\|DELETE /v1/games/{id}/sound` | bearer (owner) | put a sound behind a game `{soundId, offsetMs?, mix?}`, or take it off |
 | `POST /v1/series`, `GET /v1/series`, `GET /v1/series/{id}`, `POST /v1/series/{id}/rounds/{n}` | bearer | best-of-N with a friend on the same games and seeds; scores come from replaying the run's input log in the engine (see [Series](#series)) |
 
 Scores are whole numbers (a fractional score is rejected). A manifest `id` that is a lowercase slug
@@ -119,6 +121,18 @@ loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, s
 `microgame-studio.js` and `bubble-kit-microgame-engine.js` bundles from the app's folders (`FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js`,
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
+
+## Sounds
+
+Loops that play behind games in the feed, like TikTok sounds. A sound is a published package, stored and served like a game (`https://games.<domain>/<soundId>/<file>`): a zip with a `manifest.json`
+`{"title": "...", "audio": "loop.m4a", "cover": "cover.png"?, "duration_ms"?, "bpm"?, "kind": "library" | "original"?}`, the audio file (m4a, mp3, ogg or wav) and an optional cover (png, jpg, webp). `POST /v1/sounds` (application/zip, signed in) publishes it.
+
+- **Find them:** `GET /v1/sounds?tab=trending|for_you|saved|recent&q=&limit=` returns `{items: [{id, title, creator, creatorId, kind, durationMs, bpm, audioUrl, coverUrl, useCount, saves, savedByMe, createdAt}]}`.
+  `trending` is the most used, then newest. `for_you` ranks like trending until the recommender learns sound affinity. `saved` needs sign-in. `q` matches the start of a word in the title or the creator's name.
+- **A sound's page:** `GET /v1/sounds/{id}` and `GET /v1/sounds/{id}/games?sort=top|recent` (`{items: [games], total}`; drafts are left out). `PUT|DELETE /v1/sounds/{id}/save` is idempotent and returns `{saves, savedByMe}`.
+- **On a game:** every game and feed item gains `sound: {id, title, creator, audioUrl, coverUrl, offsetMs, mix}` when it has one. `offsetMs` is where in the loop to start; `mix` is 0 (only the game's own sound) to 1 (only the sound), 0.7 by default.
+  `POST /v1/generate` takes `soundId`, `offsetMs` and `mix`; a change to a game (`baseGameId`) keeps the original's sound unless it names another. `PUT /v1/games/{id}/sound {soundId, offsetMs?, mix?}` (its owner) sets or changes it; `DELETE` takes it off. Each sound counts the games that use it (`useCount`).
+- A sound is presentation only: it never changes a replay or a score check. Not built yet: original sounds made automatically from a game's own music (the server can't render audio), sound events on the feed, and a personal "for you" ranking.
 
 ## Score-aware boards
 
