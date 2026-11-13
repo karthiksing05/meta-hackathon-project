@@ -29,7 +29,7 @@
 Hi, we're Muse Curios: tiny games anyone makes from an idea with Muse, played with your people, right inside Facebook. *(Say "dodge the fog over Twin Peaks", tap Make, agree the plan.)*
 
 ## 2
-A curio is something small, rare or curious. A Muse Curio is a tiny game anyone makes from an idea, and plays with their people.
+A curio is something small, rare or curious. A Curio is a tiny game anyone makes from an idea with Muse, and plays with their people.
 
 ## 3
 Short-form is becoming something you play. LinkedIn's daily players come back the next day 86% of the time; NYT puzzles were played 11 billion times last year. And nearly everyone plays, but almost nobody calls themselves a gamer. We build for everyone else.
