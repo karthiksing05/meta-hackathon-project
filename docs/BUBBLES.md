@@ -1634,6 +1634,15 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   and checks that honest logs verify and raised scores don't. The engine logs text calls itself, so
   typed answers verify like taps. The runtime's `result` message carries the log to Swift as
   `engine_log` (`BubbleRunResult.engineLog`), which series rounds submit (7.14).
+  `verify` also returns `result`, the replay's end state: `MicrogameEngine.verify(game, log,
+  ["ending", "choices_used"])` gives just those names (unknown ones are `null`), the manifest's
+  `group_play.result.state`; without names it gives every state variable. Servers compare story
+  endings and opinion picks from it, never from the phone (harness-gaps/group-play.md).
+  `tools/runtime-tests/microgame-story-share.js` checks it.
+- **Story results** (story_vars, harness-gaps/story.md). When the game's state has a non-empty
+  `sg_share_line` ("I became king in 6 choices"), the kit's `share()` uses it as `score_text`
+  instead of points, and a non-empty `ending` sets the result tag
+  `ending=<id>;choices=<choices_used>;path=<sg_path>`. Other microgames keep "N points" and no tag.
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
