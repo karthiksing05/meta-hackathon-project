@@ -493,14 +493,14 @@ func planSlots(lists []checklistFor, typeIDs []string) slotSet {
 
 // requestNeeds are the unbuilt tools whose name or an alias appears in the request as whole words.
 func requestNeeds(request string, tools []GameTool) []GameTool {
-	req := " " + strings.Join(Tokens(Fold(request)), " ") + " "
+	req := " " + Fold(request) + " " // whole words, no stemming or stopwords: "say it" must not match "saying"
 	var out []GameTool
 	for _, t := range tools {
 		if t.Status != "planned" && t.Status != "gap" {
 			continue
 		}
 		for _, a := range append([]string{t.Name}, t.Aliases...) {
-			words := Tokens(Fold(a))
+			words := strings.Fields(Fold(a))
 			if len(words) == 0 || (len(words) == 1 && len(words[0]) < 3) {
 				continue
 			}

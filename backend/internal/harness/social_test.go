@@ -169,6 +169,10 @@ func TestRequestNeeds(t *testing.T) {
 	if got := requestNeeds("Guess the decade where I hear a short synth melody", tools); len(got) != 1 || got[0].ID != "audio_clip" {
 		t.Errorf("hear: %+v", got)
 	}
+	// stopwords count: the alias "say it" is not the word "saying" (Kevin32 #11)
+	if got := requestNeeds(`"Finish the Saying" trivia game featuring sayings`, []GameTool{{ID: "speech_input", Status: "gap", Aliases: []string{"say it"}}}); len(got) != 0 {
+		t.Errorf("say it: %+v", got)
+	}
 	if got := requestNeeds("roadmap of a city", tools); len(got) != 0 {
 		t.Errorf("whole words only: %+v", got)
 	}
