@@ -47,6 +47,9 @@ type PackageStore interface {
 	ReadManifest(ctx context.Context, id string) ([]byte, error)
 	// WriteSourceZip streams the private editable source (the zip's source/ folder) as a zip.
 	WriteSourceZip(ctx context.Context, id string, w io.Writer) error
+	// EnsureLightManifest makes a sibling of manifest.json without content.authoring_json when that is worth it (light.go),
+	// and reports its file name. False means serve the full manifest.
+	EnsureLightManifest(ctx context.Context, id string) (string, bool)
 	// Ready reports whether the store can accept uploads.
 	Ready(ctx context.Context) error
 }

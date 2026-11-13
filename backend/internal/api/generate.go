@@ -224,9 +224,19 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 				Authoring string `json:"authoring_json"`
 			} `json:"content"`
 		}
-		if base == nil || json.Unmarshal(in.BaseManifest, &bm) != nil || bm.Content.Authoring == "" {
+		if base == nil || json.Unmarshal(in.BaseManifest, &bm) != nil {
 			writeErr(w, 400, "baseManifest needs baseGameId and content.authoring_json")
 			return
+		}
+		if bm.Content.Authoring == "" {
+			// The phone plays a game from its light manifest (no authoring source). Its edits still count; the source
+			// they apply to is the stored game's.
+			filled, ok := s.withStoredAuthoring(r.Context(), base, in.BaseManifest)
+			if !ok {
+				writeErr(w, 400, "baseManifest needs baseGameId and content.authoring_json")
+				return
+			}
+			in.BaseManifest = filled
 		}
 	} else {
 		in.BaseManifest = nil

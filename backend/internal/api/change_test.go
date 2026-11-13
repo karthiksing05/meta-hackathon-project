@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestChangeAGame(t *testing.T) {
@@ -173,13 +174,32 @@ func TestDraftsAnatomyAndBaseManifest(t *testing.T) {
 	if g := waitJob(t, ts, other, o["jobId"].(string), "done")["game"].(map[string]any); g["unlisted"] != true || feedIDs()[g["id"].(string)] {
 		t.Fatalf("draft:true: %v", g)
 	}
-	// a baseManifest needs a base game and its authoring source
-	for _, body := range []map[string]any{
-		{"request": "x", "baseManifest": json.RawMessage(custom)},
-		{"baseGameId": baseID, "change": "x", "baseManifest": json.RawMessage(`{"title":"no source"}`)},
-	} {
-		if code, _ := do(t, "POST", ts.URL+"/v1/generate", other, js(body), "application/json"); code != 400 {
-			t.Fatalf("%v: %d", body, code)
+	// a baseManifest needs a base game
+	if code, _ := do(t, "POST", ts.URL+"/v1/generate", other, js(map[string]any{"request": "x", "baseManifest": json.RawMessage(custom)}), "application/json"); code != 400 {
+		t.Fatalf("a baseManifest with no base game: %d", code)
+	}
+	// ...but not its authoring source: the phone plays games from a light manifest without one, so the server fills it in
+	// from the stored game and keeps the phone's edits
+	code, o = do(t, "POST", ts.URL+"/v1/generate", other, js(map[string]any{
+		"baseGameId": baseID, "change": "x", "baseManifest": json.RawMessage(`{"title":"Edited on the phone","content":{}}`),
+	}), "application/json")
+	if code != 202 {
+		t.Fatalf("a baseManifest without authoring_json: %d %v", code, o)
+	}
+	// the fake generator hands back the same manifest id, so this job ends as failed; what matters is what it was sent
+	for i := 0; i < 100; i++ {
+		_, jv := do(t, "GET", ts.URL+"/v1/generate/"+o["jobId"].(string), other, nil, "")
+		if jv["status"] == "done" || jv["status"] == "failed" {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	gen.mu.Lock()
+	last = gen.requests[len(gen.requests)-1]
+	gen.mu.Unlock()
+	for _, want := range []string{`"title":"Edited on the phone"`, `authoring_json`, `authoring`} {
+		if !strings.Contains(last, want) {
+			t.Fatalf("generator request lacks %s: %.500s", want, last)
 		}
 	}
 }

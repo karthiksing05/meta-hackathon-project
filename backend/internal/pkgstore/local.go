@@ -23,6 +23,7 @@ import (
 type Local struct {
 	root   string
 	limits Limits
+	light  lightMemo // which packages have a light manifest (light.go)
 }
 
 func NewLocal(root string, l Limits) (*Local, error) {

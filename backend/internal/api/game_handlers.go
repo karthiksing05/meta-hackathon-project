@@ -36,12 +36,20 @@ func (s *Server) views(r *http.Request, games []model.Game) ([]model.GameView, e
 	out := make([]model.GameView, len(games))
 	for i, g := range games {
 		base := s.GamesBaseURL + "/" + g.StorageKey + "/"
+		manifestURL := base + g.ManifestPath
+		if viewer := userFrom(r); viewer == nil || viewer.ID != g.OwnerID {
+			// Playing needs only game_json. Without authoring_json (which holds every image a second time) the file is
+			// often half the size. The owner keeps the full one: the sound editor reads the authoring source from it.
+			if name, ok := s.Packages.EnsureLightManifest(r.Context(), g.StorageKey); ok {
+				manifestURL = base + name
+			}
+		}
 		v := model.GameView{
 			ID: g.ID, Title: g.Title, Description: g.Description, Tags: nonNil(g.Tags), Formula: g.Formula,
 			OwnerID: g.OwnerID, OwnerUsername: g.OwnerUsername, Likes: g.Likes, Plays: g.Plays,
 			Finishes: g.Finishes, LikedByMe: liked[g.ID], RemixOf: g.RemixOf,
 			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID, Unlisted: g.Unlisted, Score: g.Score.View(), Sponsor: g.Sponsor, GroupPlay: g.GroupPlay,
-			PackageURL: base, ManifestURL: base + g.ManifestPath, CreatedAt: g.CreatedAt,
+			PackageURL: base, ManifestURL: manifestURL, CreatedAt: g.CreatedAt,
 		}
 		if g.CoverPath != "" {
 			v.CoverURL = base + g.CoverPath
