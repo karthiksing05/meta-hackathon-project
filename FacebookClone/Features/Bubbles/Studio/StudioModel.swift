@@ -4,7 +4,7 @@ import SwiftUI
 
 // MARK: - Flow types
 
-/// The five steps of Muse Studio: describe it, read the brief, watch Muse compose, try it, float it.
+/// The five steps of Muse Studio: describe it, read the brief, watch Muse build it, try it, share it.
 enum StudioStage: Int, CaseIterable, Identifiable, Comparable {
     case ask
     case brief
@@ -18,9 +18,9 @@ enum StudioStage: Int, CaseIterable, Identifiable, Comparable {
         switch self {
         case .ask: return "Describe"
         case .brief: return "Brief"
-        case .compose: return "Compose"
+        case .compose: return "Build"
         case .tryIt: return "Try it"
-        case .float: return "Float it"
+        case .float: return "Share"
         }
     }
 
@@ -166,8 +166,24 @@ final class StudioModel {
     /// The look the person picked; nil means Muse picks. Sent as `StudioRequest.paletteHint`.
     var lookHint: StudioLook?
 
+    // Collaboration (docs/BUBBLES.md 7)
+    /// Co-makers, contributions, about-me answers, own story, lesson notes. From the launch;
+    /// features' Studio entries may set it.
+    var social: StudioSocialContext?
+    /// The length picked in Customize; nil lets Muse pick. Owner: length.
+    var length: BubbleLength?
+    /// Tuning knobs picked in Customize, by knob id. Owner: length.
+    var tuning: [String: JSONValue]?
+
     // Brief
     var brief: BubbleBrief?
+    /// The sound set picked on the brief ("soft", "bright", "dreamy"); nil lets Muse pick. Sent to
+    /// Muse in the brief's notes.
+    var soundHint: String?
+    /// True when Muse builds this one from scratch on the microgame engine
+    /// (`StudioMicrogameBridge`) instead of a ready formula. Set when the brief arrives; the
+    /// Brief step can switch it.
+    var buildsMicrogame = false
     var isDraftingBrief = false
     /// Set when Muse couldn't draft the brief and Studio filled in the basics.
     var briefNote: String?
@@ -191,6 +207,12 @@ final class StudioModel {
     /// applied when the new level floats.
     var pendingBaseChain: BubbleChainLink?
     @ObservationIgnored var lastRequest: StudioRequest?
+    /// True while (or after) the current run goes through `MicrogameComposer`.
+    var runIsMicrogame = false
+    /// Real playtest reports from the microgame composer, by the event that carried them.
+    var playtestReports: [UUID: StudioPlaytest.Report] = [:]
+    /// What each finished run did, by game id, for "How Muse made it" (saved on share).
+    @ObservationIgnored var makeRecords: [String: MakeRecord] = [:]
     /// The new look a "Tweak it" run asked for (Try it's look menu).
     @ObservationIgnored private var runLookChange: StudioLook?
 
@@ -201,10 +223,14 @@ final class StudioModel {
     /// Focus "Tweak it" when the Try step appears (edit mode).
     var focusTweak = false
 
-    // Float it
+    // Share
     var destination: StudioDestination = .feed
     var caption = ""
+    /// True while sharing is in progress (publish, challenges, record), until the game page opens.
     var isPopping = false
+    /// Friends to challenge (or send it to) when sharing, by user id, in pick order.
+    var challengeIDs: [String] = []
+    @ObservationIgnored var didPickDefaultFriendsFlag = false
     /// Bumped to ask `StudioView` to float (pop, publish, open). The autopilot uses it.
     var floatSignal = 0
 
@@ -229,6 +255,8 @@ final class StudioModel {
 
         baseBubble = launch.baseBubbleID.flatMap { bubbleStore.bubble(id: $0) }
         prompt = launch.prompt
+        social = launch.social
+        length = launch.length
         audience = initialAudience()
         destination = defaultDestination(for: audience)
         refreshSources()
@@ -375,15 +403,15 @@ final class StudioModel {
 
     // MARK: Copy by mode
 
-    var baseTitle: String { baseBubble?.title ?? "your bubble" }
+    var baseTitle: String { baseBubble?.title ?? "your \(ProductName.singular)" }
 
     var heroTitle: String {
         switch mode {
-        case .create: return "Blow a bubble"
+        case .create: return "Make \(ProductName.withArticle)"
         case .edit: return "Edit \(baseTitle)"
         case .remix: return "Remix \(baseTitle)"
         case .nextLevel: return "Level \((baseBubble?.levelIndex ?? 1) + 1) of \(baseTitle)"
-        case .daily: return "Today's Daily Bubble"
+        case .daily: return "Today's Daily \(ProductName.singular)"
         }
     }
 
@@ -403,11 +431,11 @@ final class StudioModel {
 
     var topBarSubtitle: String {
         switch mode {
-        case .create: return levels.count > 1 ? "\(levels.count) levels" : "New bubble"
+        case .create: return levels.count > 1 ? "\(levels.count) levels" : "New \(ProductName.singular)"
         case .edit: return "Editing \(baseTitle)"
         case .remix: return "Remix of \(baseTitle)"
         case .nextLevel: return "Level \((baseBubble?.levelIndex ?? 1) + 1) of \(baseTitle)"
-        case .daily: return "Daily Bubble · \(audienceName)"
+        case .daily: return "Daily \(ProductName.singular) · \(audienceName)"
         }
     }
 
@@ -424,7 +452,7 @@ final class StudioModel {
         switch mode {
         case .remix: return "Remix \(baseTitle) with a fresh twist"
         case .nextLevel: return "Level \((baseBubble?.levelIndex ?? 1) + 1) of \(baseTitle): same feel, a little harder"
-        case .daily: return "Today's Daily Bubble for \(audienceName)"
+        case .daily: return "Today's Daily \(ProductName.singular) for \(audienceName)"
         default: return ""
         }
     }
@@ -466,9 +494,9 @@ final class StudioModel {
         "Dodge the fog rolling over Twin Peaks",
         "Sort taquerias, bakeries and coffee spots by neighborhood",
         "Stack picnic snacks without tipping the blanket",
-        "Pop the right bubble before the tide comes in at Ocean Beach",
+        "Catch the right shell before the tide comes in at Ocean Beach",
         "A cozy guessing game about my first week in SF",
-        "Merge little bubbles into one giant Dolores Park bubble",
+        "Merge little clouds into one giant Dolores Park cloud",
     ]
 
     var showsAudiencePicker: Bool { mode == .create || mode == .remix }
@@ -536,8 +564,25 @@ final class StudioModel {
             formulaHint: formulaHint,
             paletteHint: look?.rawValue,
             date: requestMode == .daily ? BubbleStore.dayKey(Date()) : nil,
-            creatorName: me?.firstName ?? "Alex"
+            creatorName: me?.firstName ?? "Alex",
+            length: length,
+            tuning: tuning,
+            social: socialContext(for: requestMode)
         )
+    }
+
+    /// `social`, plus the base Bubble's creator for remixes (the "Remix of … by …" credit).
+    private func socialContext(for requestMode: StudioMode) -> StudioSocialContext? {
+        var context = social
+        if requestMode == .remix, let base = baseBubble {
+            var filled = context ?? StudioSocialContext()
+            if filled.baseCreatorID == nil {
+                filled.baseCreatorID = base.creator.id
+                filled.baseCreatorName = base.creator.isMe ? nil : base.creator.firstName
+            }
+            context = filled
+        }
+        return context
     }
 
     // MARK: Ask → Brief
@@ -564,6 +609,7 @@ final class StudioModel {
             self.isDraftingBrief = false
             self.brief = self.normalized(drafted ?? self.localBrief())
             self.briefNote = note
+            self.buildsMicrogame = self.suggestsMicrogame
             self.go(to: .brief)
         }
     }
@@ -688,7 +734,7 @@ final class StudioModel {
         let request: StudioRequest
         switch kind {
         case .create:
-            request = makeRequest(mode: mode == .edit ? .create : mode, prompt: effectivePrompt, base: baseBubble?.manifest, brief: brief, look: lookHint)
+            request = makeRequest(mode: mode == .edit ? .create : mode, prompt: effectivePrompt, base: baseBubble?.manifest, brief: briefForRun, look: lookHint)
         case .tweak:
             guard let current = currentResult else { return }
             let text = tweakText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -748,6 +794,7 @@ final class StudioModel {
         draftCover = nil
         sourcesUsed = nil
         sawOfflineEvent = offline
+        playtestReports = [:]
         isComposing = true
         composeStartedAt = Date()
         lastEventAt = composeStartedAt
@@ -756,8 +803,17 @@ final class StudioModel {
 
         let stream: AsyncThrowingStream<StudioEvent, Error>
         if offline, let composer = offlineComposer {
+            runIsMicrogame = false
             stream = composer.composeOffline(request)
+        } else if let microgame = microgameStream(for: request, kind: kind) {
+            runIsMicrogame = true
+            stream = microgame
         } else {
+            runIsMicrogame = false
+            var request = request
+            // The formula pipeline doesn't make microgames; "Microgame" in the picker means the
+            // engine path above.
+            if request.formulaHint == .microgame { request.formulaHint = nil }
             stream = service.compose(request)
         }
         composeTask = Task { [weak self] in
@@ -769,7 +825,7 @@ final class StudioModel {
                 }
                 guard let self, !Task.isCancelled else { return }
                 if self.isComposing {
-                    self.fail(StudioFailure(message: "Muse stopped before the bubble was ready.", detail: nil))
+                    self.fail(StudioFailure(message: "Muse stopped before your \(ProductName.singular) was ready.", detail: nil))
                 }
             } catch is CancellationError {
                 return
@@ -824,6 +880,17 @@ final class StudioModel {
             isExisting: false,
             sourcesUsed: event.sourcesUsed ?? sourcesUsed ?? []
         )
+        makeRecords[manifest.id] = MakeRecord.build(
+            gameID: manifest.id,
+            events: events,
+            reports: playtestReports,
+            isMicrogame: runIsMicrogame || manifest.formula == .microgame,
+            concepts: concepts.isEmpty ? manifest.conceptIDs : concepts,
+            models: models,
+            seconds: result.duration,
+            isOffline: result.isOffline,
+            sourcesUsed: result.sourcesUsed
+        )
         switch composeKind {
         case .create:
             levels = [result]
@@ -843,7 +910,8 @@ final class StudioModel {
         }
         isComposing = false
         composeEndedAt = Date()
-        Haptics.success()
+        // Formula and microgame runs both end here.
+        GameSound.play(.ready, haptic: true)
         advanceTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: 1_300_000_000)
             guard let self, !Task.isCancelled, self.stage == .compose, !self.isComposing, self.failure == nil else { return }
@@ -1047,7 +1115,7 @@ final class StudioModel {
         }
         let text = error.localizedDescription
         return StudioFailure(
-            message: "Something interrupted Muse while it was making your bubble. Your brief is saved.",
+            message: "Something interrupted Muse while it was making your \(ProductName.singular). Your brief is saved.",
             detail: text.count <= 140 ? text : nil
         )
     }
@@ -1074,6 +1142,16 @@ final class StudioModel {
     func updateRule(_ rule: String) {
         guard levels.indices.contains(selectedLevel) else { return }
         levels[selectedLevel].manifest.oneLineRule = rule
+    }
+
+    /// Swaps the selected level's game for an edited copy (the Sounds section's set, music and
+    /// loudness changes, or a Muse sound tweak). Keeps the level's id, so it keeps its place, cover
+    /// and make record.
+    func replaceManifest(_ manifest: BubbleManifest) {
+        guard levels.indices.contains(selectedLevel) else { return }
+        var updated = manifest
+        updated.id = levels[selectedLevel].manifest.id
+        levels[selectedLevel].manifest = updated
     }
 
     /// A transient Bubble for cover and card views (not in the store).
@@ -1155,7 +1233,7 @@ final class StudioModel {
     }
 
     var floatButtonTitle: String {
-        isEditMode && levels.count == 1 ? "Save changes" : "Float it"
+        isEditMode && levels.count == 1 ? "Save changes" : "Share"
     }
 
     func requestFloat() {
@@ -1223,14 +1301,20 @@ final class StudioModel {
             )
         }
 
+        let sentTo = isEditMode ? [] : sendToFriends(first, appStore: appStore, bubbleStore: bubbleStore)
+        saveMakeRecords(for: published, sentTo: sentTo)
+
         if isEditMode {
             toast = published.count == 1 ? "Changes saved with a new level" : "Changes saved with \(published.count) new levels"
         } else if isDaily, let group {
-            toast = "Today's Daily Bubble is live in \(group.name)"
+            toast = "Today's Daily \(ProductName.singular) is live in \(group.name)"
         } else if published.count > 1 {
-            toast = "Floated \(published.count) levels to \(destinationName)"
+            toast = "Shared \(published.count) levels to \(destinationName)"
         } else {
-            toast = "Floated to \(destinationName)"
+            toast = "Shared to \(destinationName)"
+        }
+        if !sentTo.isEmpty {
+            toast += " · Sent to \(sentTo.count == 1 ? sentTo[0].name : "\(sentTo.count) friends")"
         }
         return openID.map { ($0, toast) }
     }
@@ -1243,10 +1327,10 @@ final class StudioModel {
     }
 
     func defaultCaption(for bubble: Bubble) -> String {
-        if mode == .daily { return "Today's Daily Bubble is here. Pop in!" }
-        if mode == .nextLevel { return "Level \(bubble.levelIndex ?? 2) of \(baseTitle) is out. Pop in!" }
-        if mode == .remix { return "I remixed \(baseTitle). Pop in!" }
-        return "I blew a new bubble with Muse. Pop in!"
+        if mode == .daily { return "Today's Daily \(ProductName.singular) is here. Play now!" }
+        if mode == .nextLevel { return "Level \(bubble.levelIndex ?? 2) of \(baseTitle) is out. Play now!" }
+        if mode == .remix { return "I remixed \(baseTitle). Play it!" }
+        return "I made a new \(ProductName.singular) with Muse. Play it!"
     }
 }
 
@@ -1255,5 +1339,181 @@ private extension StudioModel {
     nonisolated static func capitalizedFirst(_ text: String) -> String {
         guard let first = text.first else { return text }
         return first.uppercased() + text.dropFirst()
+    }
+}
+
+// MARK: - Microgames (docs/BUBBLES.md 7.12)
+
+extension StudioModel {
+    /// Whether this Studio can build a microgame at all: real Muse is configured, and it's a new
+    /// game (edits, remixes and levels of formula games stay on their formula).
+    var canBuildMicrogame: Bool {
+        #if DEBUG
+        if service is StudioScriptedService { return false }
+        #endif
+        return StudioMicrogameBridge.isAvailable && mode == .create
+    }
+
+    /// The default for `buildsMicrogame` when the brief arrives: the person picked "Microgame", or
+    /// Muse picks and the request reads like arcade or physics play.
+    var suggestsMicrogame: Bool {
+        guard canBuildMicrogame else { return false }
+        #if DEBUG
+        if DebugLaunch.value("FB_STUDIO_MICROGAME") == "1" { return true }
+        #endif
+        if formulaHint == .microgame { return true }
+        return formulaHint == nil && StudioMicrogameBridge.fits(effectivePrompt)
+    }
+
+    /// Switches the brief between a ready formula and a game made from scratch.
+    func setBuildsMicrogame(_ value: Bool) {
+        buildsMicrogame = value && canBuildMicrogame
+        if !buildsMicrogame, formulaHint == .microgame { formulaHint = nil }
+    }
+
+    /// After a microgame run fails: make it again with a ready formula.
+    func useFormulaInstead() {
+        setBuildsMicrogame(false)
+        startCompose(.create)
+    }
+
+    /// The brief as sent to Muse: the reviewed brief, plus the sound and length picked on it.
+    var briefForRun: BubbleBrief? {
+        guard var brief else { return nil }
+        var notes: [String] = []
+        if let existing = brief.notes?.trimmingCharacters(in: .whitespacesAndNewlines), !existing.isEmpty { notes.append(existing) }
+        if let soundHint { notes.append("Sounds: \(soundHint).") }
+        if let length { notes.append("Length: \(length.label).") }
+        brief.notes = notes.isEmpty ? nil : notes.joined(separator: " ")
+        return brief
+    }
+
+    /// The microgame composer's stream when this run should use it; nil keeps the formula pipeline.
+    func microgameStream(for request: StudioRequest, kind: StudioComposeKind) -> AsyncThrowingStream<StudioEvent, Error>? {
+        guard StudioMicrogameBridge.isAvailable else { return nil }
+        #if DEBUG
+        if service is StudioScriptedService { return nil }
+        #endif
+        let onReport: @MainActor (UUID, StudioPlaytest.Report) -> Void = { [weak self] id, report in
+            self?.playtestReports[id] = report
+        }
+        switch kind {
+        case .create:
+            guard buildsMicrogame, canBuildMicrogame else { return nil }
+            let brief = request.brief ?? briefForRun ?? BubbleBrief(intent: request.prompt, audience: request.scope)
+            return StudioMicrogameBridge.compose(request: microgameRequestText(request), brief: brief, onReport: onReport)
+        case .tweak, .nextLevel:
+            guard let base = request.base, StudioMicrogameBridge.canRevise(base) else { return nil }
+            return StudioMicrogameBridge.revise(base, request: request.prompt, onReport: onReport)
+        }
+    }
+
+    /// The request as Muse reads it for a microgame: what the person typed, plus who it's for.
+    private func microgameRequestText(_ request: StudioRequest) -> String {
+        var text = request.prompt
+        let names = request.audienceNames.prefix(6)
+        if let scope = request.scopeName {
+            text += names.isEmpty ? " (for \(scope))" : " (for \(scope): \(names.joined(separator: ", ")))"
+        } else if audience == .friends, !names.isEmpty {
+            text += " (for my friends \(names.joined(separator: ", ")))"
+        }
+        return text
+    }
+
+    /// Microgames can't be redrawn in a Studio look; their art comes from the game itself.
+    var currentResultTakesLooks: Bool {
+        currentResult.map { $0.manifest.formula != .microgame } ?? true
+    }
+}
+
+// MARK: - Share: people
+
+extension StudioModel {
+    /// Friends you can challenge from the Share step: the demo cast first, then other friends.
+    var friendChoices: [User] {
+        guard let appStore else { return [] }
+        let targets = BubbleSocialHub.targets(appStore: appStore, kinds: [.friend])
+        var people = targets.compactMap { appStore.user(id: $0.targetID) }
+        // The default rival (Maya) leads, when she's a friend.
+        if let rival = appStore.user(id: BubbleSocialCast.rivalID), rival.isFriend, !people.contains(where: { $0.id == rival.id }) {
+            people.insert(rival, at: 0)
+        } else if let index = people.firstIndex(where: { $0.id == BubbleSocialCast.rivalID }), index > 0 {
+            people.insert(people.remove(at: index), at: 0)
+        }
+        return Array(people.prefix(12))
+    }
+
+    /// Picks three friends the first time the Share step shows, so "Challenge Maya, Leo and
+    /// Priya" is one tap. People in the audience Group or Event come first.
+    func pickDefaultFriendsIfNeeded() {
+        guard !didPickDefaultFriendsFlag, !isEditMode else { return }
+        didPickDefaultFriendsFlag = true
+        let choices = friendChoices
+        let audienceIDs = Set((audienceGroup?.memberSample ?? []).map(\.id) + (audienceEvent?.friendsGoing ?? []).map(\.id))
+        let ordered = choices.filter { audienceIDs.contains($0.id) } + choices.filter { !audienceIDs.contains($0.id) }
+        challengeIDs = Array(ordered.prefix(3).map(\.id))
+    }
+
+    func toggleFriend(_ id: String) {
+        if let index = challengeIDs.firstIndex(of: id) {
+            challengeIDs.remove(at: index)
+        } else {
+            challengeIDs.append(id)
+        }
+    }
+
+    var challengedPeople: [User] {
+        challengeIDs.compactMap { id in appStore?.user(id: id) }
+    }
+
+    /// Microgames go out as a "play with me" share card; other games as a same-seed challenge.
+    var sendsChallenge: Bool {
+        levels.first.map { $0.manifest.formula != .microgame } ?? true
+    }
+
+    /// The headline friends see on the chat card.
+    func cardHeadline(for title: String) -> String {
+        sendsChallenge ? ChallengeCopy.canYouBeatMe(title) : RemixCopy.shareHeadline(title: title)
+    }
+
+    /// Sends the new game to the picked friends through the existing paths: a challenge through
+    /// `BubbleSocialHub` (ChallengeCenter opens it and posts `challenge_sent`), or for a microgame
+    /// a share card through `RemixCenter` (posts `share`). Returns who got it.
+    fileprivate func sendToFriends(_ bubble: Bubble, appStore: AppStore, bubbleStore: BubbleStore) -> [MakeRecord.Person] {
+        var sent: [MakeRecord.Person] = []
+        for person in challengedPeople {
+            let target = BubbleShareTarget(kind: .friend, targetID: person.id, title: person.name)
+            let ok: Bool
+            if bubble.formula == .microgame {
+                ok = RemixCenter.shared.share(bubble, to: target, score: nil, result: nil, request: nil, note: "", appStore: appStore, bubbleStore: bubbleStore)
+            } else {
+                let center = ChallengeCenter.shared
+                let card = center.card(for: center.bestDraft(for: bubble), bubble: bubble, target: target)
+                ok = BubbleSocialHub.send(card, to: target, appStore: appStore, bubbleStore: bubbleStore)
+            }
+            if ok { sent.append(MakeRecord.Person(id: person.id, name: person.firstName)) }
+        }
+        return sent
+    }
+
+    /// Keeps what Muse did for each published level, for its page.
+    fileprivate func saveMakeRecords(for published: [Bubble], sentTo: [MakeRecord.Person]) {
+        for (index, bubble) in published.enumerated() {
+            let level = levels.first { $0.manifest.id == bubble.id } ?? levels.first { !$0.isExisting && $0.manifest.title == bubble.title }
+            let made = level.flatMap { makeRecords[$0.manifest.id] }
+            var record = made ?? MakeRecord.build(
+                gameID: bubble.id, events: [], reports: [:], isMicrogame: bubble.formula == .microgame,
+                concepts: bubble.formula == .microgame ? StudioMicrogameBridge.fragments(of: bubble.manifest) : bubble.manifest.conceptIDs,
+                models: bubble.manifest.studio?.models ?? [], seconds: bubble.manifest.studio?.durationSec,
+                isOffline: bubble.manifest.studio?.offline ?? false, sourcesUsed: level?.sourcesUsed ?? []
+            )
+            record.gameID = bubble.id
+            if index == 0 {
+                record.sentTo = sentTo
+                record.sharedTo = destinationName
+            }
+            record.madeAt = Date()
+            MakeRecordStore.shared.save(record)
+        }
     }
 }

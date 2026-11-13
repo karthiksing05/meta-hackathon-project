@@ -1,0 +1,71 @@
+{
+  "id": "mg-gust-glider",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Gust Glider",
+  "one_line_rule": "Tap, click or press Space to flap.",
+  "formula": "microgame",
+  "brief": {
+    "intent": "Tap, click or press Space to flap.",
+    "audience": "everyone",
+    "mood": [
+      "playful"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "glow",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#BDE8F5",
+      "bg_bottom": "#BDE8F5",
+      "ink": "#141414",
+      "primary": "#3A7D44",
+      "secondary": "#2B5F33",
+      "accent": "#58A05F",
+      "danger": "#FF6B6B"
+    },
+    "font": "rounded",
+    "motif": "none",
+    "emoji": "🪶",
+    "mood_preset": "playful"
+  },
+  "concepts": [
+    {
+      "use": "space.microgame"
+    },
+    {
+      "use": "input.microgame"
+    },
+    {
+      "use": "score.microgame",
+      "params": {
+        "label": "points"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "game_json": "{\"format\":\"microgame/0.2\",\"meta\":{\"title\":\"Gust Glider\",\"instructions\":\"Tap, click or press Space to flap. Glide through 20 gaps in the reeds. Don't touch the reeds or the ground.\",\"duration_s\":60},\"assets\":{\"puff\":{\"svg\":\"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 28' width='108' height='28'><g><circle cx='17' cy='15' r='11' fill='#FFB84C'/><ellipse cx='15' cy='19' rx='7' ry='4' fill='#FFE3A8'/><path d='M27 13 L34 15.5 L27 18 Z' fill='#F2542D'/><circle cx='21' cy='11' r='3.4' fill='#fff'/><circle cx='22' cy='11' r='1.7' fill='#1F2041'/><ellipse cx='11' cy='9' rx='7' ry='3.5' transform='rotate(-25 11 9)' fill='#F28C28'/></g><g transform='translate(36 0)'><circle cx='17' cy='15' r='11' fill='#FFB84C'/><ellipse cx='15' cy='19' rx='7' ry='4' fill='#FFE3A8'/><path d='M27 13 L34 15.5 L27 18 Z' fill='#F2542D'/><circle cx='21' cy='11' r='3.4' fill='#fff'/><circle cx='22' cy='11' r='1.7' fill='#1F2041'/><ellipse cx='10' cy='15' rx='7.5' ry='3.5' fill='#F28C28'/></g><g transform='translate(72 0)'><circle cx='17' cy='15' r='11' fill='#FFB84C'/><ellipse cx='15' cy='19' rx='7' ry='4' fill='#FFE3A8'/><path d='M27 13 L34 15.5 L27 18 Z' fill='#F2542D'/><circle cx='21' cy='11' r='3.4' fill='#fff'/><circle cx='22' cy='11' r='1.7' fill='#1F2041'/><ellipse cx='11' cy='21' rx='7' ry='3.5' transform='rotate(25 11 21)' fill='#F28C28'/></g></svg>\",\"w\":36,\"h\":28,\"frames\":3,\"cols\":3,\"fps\":12},\"sky\":{\"svg\":\"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 640' width='360' height='640'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#5BC0EB'/><stop offset='0.7' stop-color='#BDE8F5'/><stop offset='1' stop-color='#FDF6E3'/></linearGradient></defs><rect width='360' height='640' fill='url(#g)'/><circle cx='280' cy='120' r='38' fill='#FFF3B0' opacity='0.9'/><circle cx='280' cy='120' r='54' fill='#FFF3B0' opacity='0.25'/></svg>\",\"w\":360,\"h\":640},\"cloud\":{\"svg\":\"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 40' width='90' height='40'><g fill='#fff' opacity='0.85'><circle cx='25' cy='25' r='15'/><circle cx='45' cy='18' r='17'/><circle cx='65' cy='26' r='13'/><rect x='18' y='25' width='55' height='15' rx='7'/></g></svg>\",\"w\":90,\"h\":40}},\"types\":{\"Glider\":{\"x\":\"float\",\"y\":\"float\",\"vy\":\"float\",\"r\":\"float\"},\"Reed\":{\"x\":\"float\",\"y\":\"float\",\"vx\":\"float\",\"w\":\"float\",\"h\":\"float\",\"top\":\"bool\",\"scored\":\"bool\"},\"Box\":{\"x\":\"float\",\"y\":\"float\",\"w\":\"float\",\"h\":\"float\"}},\"state\":{\"glider\":{\"type\":\"Glider\",\"init\":\"{x: 110.0, y: 300.0, vy: 0.0, r: 12.0}\"},\"reeds\":{\"type\":\"list<Reed>\",\"init\":\"[]\"},\"ground\":{\"type\":\"Box\",\"init\":\"{x: 180.0, y: 612.0, w: 360.0, h: 56.0}\"},\"phase\":{\"type\":{\"enum\":[\"ready\",\"flying\",\"crashed\"]},\"init\":\"'ready'\"},\"score\":{\"type\":\"int\",\"init\":\"0\"},\"last_gap\":{\"type\":\"float\",\"init\":\"300.0\"}},\"functions\":{\"gap_size\":{\"params\":{\"s\":\"int\"},\"returns\":\"float\",\"body\":\"max(122.0, 168.0 - s * 2.5)\"}},\"events\":{\"crash\":{},\"crashed\":{},\"passed\":{\"n\":\"int\"},\"spawn_reeds\":{},\"game_over\":{}},\"inputs\":{\"flap\":{\"payload\":{},\"when\":\"phase != 'crashed'\",\"from\":[{\"pointer\":\"down\"},{\"key\":\"Space\"},{\"key\":\"ArrowUp\"}]}},\"rules\":[{\"id\":\"first_flap\",\"on\":\"flap\",\"when\":\"phase == 'ready'\",\"do\":[{\"set\":\"phase\",\"to\":\"'flying'\"},{\"emit\":\"spawn_reeds\"}]},{\"id\":\"flap\",\"on\":\"flap\",\"when\":\"phase == 'flying'\",\"do\":[{\"set\":\"glider.vy\",\"to\":\"-430.0\"}]},{\"id\":\"hover\",\"on\":\"tick\",\"when\":\"phase == 'ready'\",\"do\":[{\"set\":\"glider\",\"to\":\"{...glider, vy: 0.0, y: 300 + 8 * sin(now / 160)}\"}]},{\"id\":\"spawn_timer\",\"on\":{\"every\":\"1500ms\"},\"when\":\"phase == 'flying'\",\"do\":[{\"emit\":\"spawn_reeds\"}]},{\"id\":\"spawn\",\"on\":\"spawn_reeds\",\"do\":[{\"let\":{\"gap\":\"gap_size(score)\"}},{\"let\":{\"mid\":\"clamp(random_float(last_gap - 170, last_gap + 170), 140.0, 470.0)\"}},{\"let\":{\"top_end\":\"mid - gap / 2\",\"bot_start\":\"mid + gap / 2\"}},{\"push\":\"reeds\",\"value\":\"{x: 400.0, y: (top_end - 300) / 2, vx: -150.0, w: 56.0, h: top_end + 300, top: true, scored: false}\"},{\"push\":\"reeds\",\"value\":\"{x: 400.0, y: (bot_start + 600) / 2, vx: -150.0, w: 56.0, h: 600 - bot_start, top: false, scored: false}\"},{\"set\":\"last_gap\",\"to\":\"mid\"}]},{\"id\":\"score_gaps\",\"on\":\"tick\",\"when\":\"phase == 'flying'\",\"do\":[{\"let\":{\"n\":\"count(reeds, p => not p.top and not p.scored and p.x + p.w / 2 < glider.x - glider.r)\"}},{\"if\":\"n > 0\",\"then\":[{\"set\":\"reeds\",\"to\":\"map(reeds, p => if not p.top and p.x + p.w / 2 < glider.x - glider.r then {...p, scored: true} else p)\"},{\"incr\":\"score\",\"by\":\"n\"},{\"emit\":\"passed\",\"with\":{\"n\":\"score\"}}]},{\"remove\":\"reeds\",\"where\":\"p => p.x < -60\"}]},{\"id\":\"crash\",\"on\":\"crash\",\"when\":\"phase == 'flying'\",\"do\":[{\"set\":\"phase\",\"to\":\"'crashed'\"},{\"set\":\"reeds\",\"to\":\"map(reeds, p => {...p, vx: 0.0})\"},{\"set\":\"glider.vy\",\"to\":\"-260.0\"},{\"emit\":\"crashed\"},{\"after\":\"900ms\",\"emit\":\"game_over\"}]},{\"id\":\"game_over\",\"on\":\"game_over\",\"do\":[{\"end\":\"lose\"}]}],\"physics\":{\"gravity\":[0,1500],\"bounds\":[0,0,360,640],\"bodies\":{\"glider\":{\"state\":\"glider\",\"bounded\":true,\"max_speed\":900},\"reeds\":{\"state\":\"reeds\",\"gravity\":0},\"ground\":{\"state\":\"ground\",\"static\":true}},\"collisions\":[{\"a\":\"glider\",\"b\":\"reeds\",\"emit\":\"crash\"},{\"a\":\"glider\",\"b\":\"ground\",\"solid\":true,\"emit\":\"crash\"}]},\"objectives\":{\"win\":\"score >= 20\",\"score\":\"score\",\"time_limit\":\"120s\",\"on_timeout\":\"lose\"},\"presentation\":{\"canvas\":{\"w\":360,\"h\":640,\"background\":\"$sky\"},\"tokens\":{\"sky\":\"#BDE8F5\",\"hill_far\":\"#9ED8A5\",\"hill_near\":\"#6CBF73\",\"reed\":\"#3A7D44\",\"reed_cap\":\"#2B5F33\",\"reed_light\":\"#58A05F\",\"soil\":\"#C98B4F\",\"soil_dark\":\"#A86E3A\",\"grass\":\"#7CC26F\",\"ink\":\"#1F2041\",\"paper\":\"#FFFFFF\"},\"root\":{\"node\":\"group\",\"children\":[{\"node\":\"image\",\"asset\":\"sky\",\"x\":0,\"y\":0},{\"node\":\"image\",\"asset\":\"cloud\",\"x\":\"= 360 - fmod(now * 0.012 + 40, 450.0)\",\"y\":90,\"opacity\":0.9},{\"node\":\"image\",\"asset\":\"cloud\",\"x\":\"= 360 - fmod(now * 0.02 + 260, 450.0)\",\"y\":200,\"scale\":0.7,\"opacity\":0.8},{\"node\":\"poly\",\"fill\":\"$hill_far\",\"points\":\"= let s = now * 0.018 in let k = floor(s / 40) in concat(map(range(12), i => vec((k + i) * 40.0 - s, 470 + 30 * sin((k + i) * 0.9) + 14 * cos((k + i) * 2.3))), [vec(440.0, 640.0), vec(-40.0, 640.0)])\"},{\"node\":\"poly\",\"fill\":\"$hill_near\",\"points\":\"= let s = now * 0.05 in let k = floor(s / 60) in concat(map(range(9), i => vec((k + i) * 60.0 - s, 535 + 18 * sin((k + i) * 1.7))), [vec(480.0, 640.0), vec(-60.0, 640.0)])\"},{\"node\":\"repeat\",\"source\":\"reeds\",\"as\":\"p\",\"template\":{\"node\":\"group\",\"children\":[{\"node\":\"rect\",\"x\":\"= p.x - p.w / 2\",\"y\":\"= p.y - p.h / 2\",\"w\":\"= p.w\",\"h\":\"= p.h\",\"radius\":6,\"fill\":\"$reed\"},{\"node\":\"rect\",\"x\":\"= p.x - p.w / 2 + 8\",\"y\":\"= p.y - p.h / 2\",\"w\":8,\"h\":\"= p.h\",\"fill\":\"$reed_light\",\"opacity\":0.6},{\"node\":\"rect\",\"x\":\"= p.x - p.w / 2 - 5\",\"y\":\"= if p.top then p.y + p.h / 2 - 22 else p.y - p.h / 2\",\"w\":\"= p.w + 10\",\"h\":22,\"radius\":6,\"fill\":\"$reed_cap\"}]}},{\"node\":\"rect\",\"x\":0,\"y\":584,\"w\":360,\"h\":56,\"fill\":\"$soil\"},{\"node\":\"repeat\",\"source\":\"range(17)\",\"as\":\"i\",\"template\":{\"node\":\"line\",\"x\":\"= i * 24 - fmod(now * 0.15, 24.0)\",\"y\":600,\"x1\":0,\"y1\":0,\"x2\":14,\"y2\":26,\"stroke\":\"$soil_dark\",\"stroke_width\":5}},{\"node\":\"rect\",\"x\":0,\"y\":580,\"w\":360,\"h\":10,\"fill\":\"$grass\"},{\"node\":\"image\",\"asset\":\"puff\",\"anchor\":\"center\",\"x\":\"= glider.x\",\"y\":\"= glider.y\",\"rotation\":\"= if phase == 'ready' then 0 else clamp(glider.vy / 9, -28, 75)\",\"frame\":\"= if phase == 'crashed' then 1 else floor(now / 80) % 3\"},{\"node\":\"text\",\"fixed\":true,\"x\":180,\"y\":70,\"anchor\":\"center\",\"text\":\"= str(score)\",\"size\":54,\"weight\":800,\"color\":\"$paper\",\"stroke\":\"$ink\",\"stroke_width\":3,\"animate_on\":{\"passed\":{\"prop\":\"scale\",\"keys\":[1,1.25,1],\"ms\":180}}},{\"node\":\"text\",\"fixed\":true,\"x\":180,\"y\":360,\"anchor\":\"center\",\"visible\":\"= phase == 'ready'\",\"text\":\"Tap to flap\",\"size\":26,\"weight\":700,\"color\":\"$ink\",\"opacity\":\"= 0.6 + 0.4 * sin(now / 200)\"}]},\"feedback\":[{\"on\":\"flap\",\"do\":[{\"sound\":{\"wave\":\"sine\",\"note\":\"A4\",\"slide\":\"E5\",\"ms\":90,\"volume\":0.35}}]},{\"on\":\"passed\",\"do\":[{\"sound\":{\"wave\":\"triangle\",\"notes\":[\"E5\",\"B5\"],\"step_ms\":60,\"volume\":0.45}},{\"haptic\":\"light\"}]},{\"on\":\"crashed\",\"do\":[{\"particles\":{\"x\":\"= glider.x\",\"y\":\"= glider.y\",\"count\":24,\"color\":\"#FFB84C\",\"speed\":260,\"size\":4,\"ms\":700,\"gravity\":700}},{\"particles\":{\"x\":\"= glider.x\",\"y\":\"= glider.y\",\"count\":10,\"color\":\"#F28C28\",\"speed\":160,\"size\":6,\"ms\":500}},{\"shake\":{\"px\":9,\"ms\":280}},{\"haptic\":\"heavy\"},{\"sound\":{\"wave\":\"sawtooth\",\"note\":\"C4\",\"slide\":\"C2\",\"ms\":320,\"volume\":0.5}}]},{\"on\":\"win\",\"do\":[{\"sound\":{\"wave\":\"triangle\",\"notes\":[\"C5\",\"E5\",\"G5\",\"C6\",\"G5\",\"C6\"],\"step_ms\":90}},{\"haptic\":\"success\"},{\"particles\":{\"x\":180,\"y\":320,\"count\":48,\"color\":\"#FFD166\",\"speed\":320,\"ms\":1200,\"gravity\":400}}]}]}}"
+  },
+  "seed": 1004,
+  "_seed": {
+    "creator_id": "sf-diego-ramirez",
+    "created_hours_ago": 7,
+    "play_count": 1320,
+    "like_count": 318,
+    "save_count": 382
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "id": "learn-hola-meetup",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Hola! Meetup Basics",
+  "one_line_rule": "Learn the greetings for the language-exchange meetup, then practice.",
+  "formula": "learn",
+  "brief": {
+    "intent": "practice greetings before the language-exchange meetup",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "warm",
+      "curious"
+    ],
+    "energy": "low",
+    "competition": "light"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "paper",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#EEF1FF",
+      "bg_bottom": "#E2DEFA",
+      "ink": "#1E1F4B",
+      "primary": "#5B7CFA",
+      "secondary": "#8E6CF0",
+      "accent": "#3FA7C8",
+      "danger": "#C0392B"
+    },
+    "font": "rounded",
+    "motif": "dots",
+    "emoji": "👋",
+    "mood_preset": "warm",
+    "cover_prompt": "paper cutout speech bubbles saying hola on a soft periwinkle paper background, flat shapes with offset shadows"
+  },
+  "concepts": [
+    {
+      "use": "space.lesson_desk"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.lesson_practice",
+      "params": {
+        "pass_ratio": 0.5
+      }
+    },
+    {
+      "use": "score.mastery"
+    },
+    {
+      "use": "feel.mood_preset",
+      "params": {
+        "preset": "warm"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "topic": "Spanish greetings",
+    "subject": "the greetings",
+    "lesson": {
+      "title": "Hola! Meetup Basics",
+      "points": [
+        "¡Hola! means hello, and ¿Cómo estás? asks how you are.",
+        "Mucho gusto means nice to meet you.",
+        "Gracias means thank you; de nada means you're welcome.",
+        "Me llamo… means my name is…, and ¿Cómo te llamas? asks a name."
+      ]
+    },
+    "questions": [
+      {
+        "q": "What does ¿Cómo estás? mean?",
+        "choices": [
+          "What's your name?",
+          "How are you?",
+          "Where are you from?"
+        ],
+        "answer": 1,
+        "explain": "¿Cómo estás? is the everyday way to ask how someone is doing.",
+        "point": 0
+      },
+      {
+        "q": "You meet someone new. You say…",
+        "choices": [
+          "Mucho gusto",
+          "De nada",
+          "Adiós"
+        ],
+        "answer": 0,
+        "explain": "Mucho gusto means nice to meet you, the classic first-meeting line.",
+        "point": 1
+      },
+      {
+        "q": "How do you say thank you?",
+        "choices": [
+          "Hola",
+          "De nada",
+          "Gracias"
+        ],
+        "answer": 2,
+        "explain": "Gracias means thank you.",
+        "point": 2
+      },
+      {
+        "q": "Someone says gracias. You reply…",
+        "choices": [
+          "De nada",
+          "Gracias",
+          "Me llamo"
+        ],
+        "answer": 0,
+        "explain": "De nada means you're welcome, literally it's nothing.",
+        "point": 2
+      },
+      {
+        "q": "What does Me llamo Alex mean?",
+        "choices": [
+          "I'm calling Alex",
+          "I like Alex",
+          "My name is Alex"
+        ],
+        "answer": 2,
+        "explain": "Me llamo literally means I call myself, so Me llamo Alex is my name is Alex.",
+        "point": 3
+      },
+      {
+        "q": "What does ¡Hola! mean?",
+        "choices": [
+          "Hello!",
+          "Goodbye!",
+          "Thanks!"
+        ],
+        "answer": 0,
+        "explain": "¡Hola! is hello, and it works any time of day.",
+        "point": 0
+      },
+      {
+        "q": "How do you ask someone's name?",
+        "choices": [
+          "¿Cómo estás?",
+          "¿Cómo te llamas?",
+          "¿Qué tal el día?"
+        ],
+        "answer": 1,
+        "explain": "¿Cómo te llamas? asks what you call yourself, so it means what's your name?",
+        "point": 3
+      },
+      {
+        "q": "A good answer to ¿Cómo estás? is…",
+        "choices": [
+          "De nada",
+          "Me llamo bien",
+          "Bien, gracias"
+        ],
+        "answer": 2,
+        "explain": "Bien, gracias means fine, thanks: an answer plus a thank you.",
+        "point": 0
+      }
+    ]
+  },
+  "seed": 2026111402,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-11T18:00:00Z",
+    "duration_sec": 38.6,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-lena-fischer",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 30,
+    "play_count": 167,
+    "like_count": 41,
+    "save_count": 49
+  }
+}

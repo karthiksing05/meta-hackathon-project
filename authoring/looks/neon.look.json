@@ -1,0 +1,24 @@
+{
+  "look": "neon",
+  "version": 1,
+  "describe": "Night-sky neon: deep navy ground, cyan and magenta light, crisp sans type.",
+  "font": "Inter",
+  "tokens": {
+    "primary": "#00E5FF",
+    "secondary": "#7C5CFF",
+    "accent": "#FF3DB4",
+    "ink": "#E8ECFF",
+    "bg": "#0A0F24",
+    "surface": "#151C3A",
+    "danger": "#FF4D6D"
+  },
+  "layout": {
+    "node": "group",
+    "children": [
+      { "node": "group", "x": 0, "y": 0, "children": [ { "slot": "playfield" } ] },
+      { "node": "stack", "dir": "row", "gap": 28, "align": "center", "x": 180, "y": 48, "anchor": "center", "children": [ { "slot": "hud_top" } ] },
+      { "node": "stack", "dir": "row", "gap": 28, "align": "center", "x": 180, "y": 608, "anchor": "center", "children": [ { "slot": "hud_bottom" } ] },
+      { "node": "group", "x": 0, "y": 0, "children": [ { "slot": "overlay" } ] }
+    ]
+  }
+}

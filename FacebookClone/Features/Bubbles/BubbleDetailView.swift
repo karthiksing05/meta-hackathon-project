@@ -11,17 +11,18 @@ struct BubbleDetailView: View {
     @Environment(Router.self) private var router
 
     @State private var showFloat = false
+    @State private var showShare = false
 
     var body: some View {
         Group {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
             } else {
-                ContentUnavailableView("Bubble not found", systemImage: "bubbles.and.sparkles", description: Text("It may have been removed."))
+                ContentUnavailableView("\(ProductName.singular) not found", systemImage: "sparkles", description: Text("It may have been removed."))
             }
         }
         .background(FBColor.surface)
-        .navigationTitle("Bubble")
+        .navigationTitle(ProductName.singular)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -30,12 +31,15 @@ struct BubbleDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 hero(bubble)
                 titleBlock(bubble)
+                ShowcaseDetailSection(bubble: bubble, part: .sent)
                 creatorRow(bubble)
                 tags(bubble)
                 museRow(bubble)
                 popInButton(bubble)
                 stats(bubble)
                 actions(bubble)
+                ShowcaseDetailSection(bubble: bubble)
+                BubbleDetailSlots(bubble: bubble)
                 burstPreview(bubble)
                 boardPreview(bubble)
                 chainRow(bubble)
@@ -53,6 +57,9 @@ struct BubbleDetailView: View {
             BubbleFloatSheet(bubble: bubble) { showFloat = false }
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showShare) {
+            RemixShareSheet(bubble: bubble)
         }
     }
 
@@ -95,7 +102,7 @@ struct BubbleDetailView: View {
                     Text(bubble.creator.id == appStore.me.id ? "You" : bubble.creator.name)
                         .font(.fbName)
                         .foregroundStyle(FBColor.primaryText)
-                    Text("Blown \(bubble.createdAt.formatted(.relative(presentation: .named)))")
+                    Text("Made \(bubble.createdAt.formatted(.relative(presentation: .named)))")
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                 }
@@ -114,8 +121,12 @@ struct BubbleDetailView: View {
     private func tags(_ bubble: Bubble) -> some View {
         FlowLayout(spacing: 8, lineSpacing: 8) {
             BubbleTagPill(symbol: bubble.formula.symbol, text: bubble.formula.title)
+            // Skip the category when it repeats the formula ("Learn · Learn").
+            if bubble.category != .play, bubble.category.title != bubble.formula.title {
+                BubbleTagPill(symbol: bubble.category.symbol, text: bubble.category.title, highlighted: true)
+            }
             if bubble.isDaily {
-                BubbleTagPill(symbol: "sun.max.fill", text: bubble.group.map { "Daily Bubble · \($0.name)" } ?? "Daily Bubble", highlighted: true)
+                BubbleTagPill(symbol: "sun.max.fill", text: bubble.group.map { "Daily \(ProductName.singular) · \($0.name)" } ?? "Daily \(ProductName.singular)", highlighted: true)
             }
             if bubble.isIcebreaker {
                 BubbleTagPill(symbol: "hands.sparkles.fill", text: "Icebreaker for \(bubble.event?.title ?? "the Event")", highlighted: true)
@@ -150,7 +161,7 @@ struct BubbleDetailView: View {
             HStack(spacing: 8) {
                 Image(systemName: "play.fill")
                     .font(.system(size: FBIconSize.large, weight: .bold))
-                Text("Pop in")
+                Text("Play")
                     .font(.fbTitle)
             }
             .foregroundStyle(BubbleGlow.ink)
@@ -161,23 +172,14 @@ struct BubbleDetailView: View {
             .bubbleGlow(BubbleGlow.pink, radius: 10, opacity: 0.35)
         }
         .buttonStyle(.pressable)
-        .accessibilityLabel("Pop in to \(bubble.title)")
+        .accessibilityLabel("Play \(bubble.title)")
     }
 
     private func stats(_ bubble: Bubble) -> some View {
         HStack(spacing: 16) {
             Label("\(bubble.playCount.fbCompact) plays", systemImage: "play.circle")
-            Button {
-                withAnimation(.spring(duration: 0.25)) { bubbleStore.toggleLike(bubble) }
-                Haptics.light()
-            } label: {
-                Label("\(bubble.likeCount.fbCompact) likes", systemImage: bubble.isLiked ? "heart.fill" : "heart")
-                    .foregroundStyle(bubble.isLiked ? FBColor.notificationRed : FBColor.secondaryText)
-                    .frame(minHeight: 44)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(bubble.isLiked ? "Unlike" : "Like")
+            Label(SavesCopy.savesCount(bubble.saveCount), systemImage: bubble.isSaved ? "bookmark.fill" : "bookmark")
+                .foregroundStyle(bubble.isSaved ? FBColor.accent : FBColor.secondaryText)
             Spacer(minLength: 0)
         }
         .font(.fbMeta)
@@ -194,10 +196,10 @@ struct BubbleDetailView: View {
                     router.openStudio(StudioLaunch(mode: .remix, baseBubbleID: bubble.id))
                 }
                 actionButton(bubble.isSaved ? "Saved" : "Save", symbol: bubble.isSaved ? "bookmark.fill" : "bookmark") {
-                    bubbleStore.toggleSave(bubble)
+                    bubbleStore.toggleSave(bubble, source: .detail)
                     appStore.showToast(bubble.isSaved ? "Saved to your Library" : "Removed from saved", symbol: bubble.isSaved ? "bookmark.fill" : "bookmark.slash")
                 }
-                actionButton("Float", symbol: "arrowshape.turn.up.right") { showFloat = true }
+                actionButton("Share", symbol: "arrowshape.turn.up.right") { showShare = true }
             }
             if mine {
                 HStack(spacing: 8) {
@@ -231,7 +233,7 @@ struct BubbleDetailView: View {
     private func burstPreview(_ bubble: Bubble) -> some View {
         if let run = bubble.featuredRun {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Burst")
+                Text("Replay")
                     .font(.fbTitle)
                     .foregroundStyle(FBColor.primaryText)
                     .accessibilityAddTraits(.isHeader)
@@ -278,7 +280,7 @@ struct BubbleDetailView: View {
         let mine = rows.firstIndex { $0.user.id == appStore.me.id }
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text("Bubble Board")
+                Text("Board")
                     .font(.fbTitle)
                     .foregroundStyle(FBColor.primaryText)
                     .accessibilityAddTraits(.isHeader)
@@ -292,7 +294,7 @@ struct BubbleDetailView: View {
                 Spacer()
             }
             if rows.isEmpty {
-                Text("No scores yet. Pop in and be first on the board.")
+                Text("No scores yet. Play and be first on the board.")
                     .font(.fbBody)
                     .foregroundStyle(FBColor.secondaryText)
                     .padding(.vertical, 12)
@@ -308,7 +310,7 @@ struct BubbleDetailView: View {
             Button {
                 router.push(.bubbleBoard(bubble.id))
             } label: {
-                Text("See Bubble Board")
+                Text("See board")
             }
             .buttonStyle(.fb(.secondary, expand: true, height: 40))
             .padding(.top, 6)
@@ -321,7 +323,7 @@ struct BubbleDetailView: View {
             let levels = bubbleStore.chain(chainID)
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Bubble Chain")
+                    Text("Level chain")
                         .font(.fbTitle)
                         .foregroundStyle(FBColor.primaryText)
                         .accessibilityAddTraits(.isHeader)
@@ -392,7 +394,7 @@ struct BubbleFloatSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Float it to…")
+            Text("Share to…")
                 .font(.fbTitle)
                 .foregroundStyle(FBColor.primaryText)
                 .padding(.horizontal, FBMetrics.screenPadding)
@@ -400,7 +402,7 @@ struct BubbleFloatSheet: View {
                 .padding(.bottom, 8)
             ScrollView {
                 VStack(spacing: 0) {
-                    destination(title: "Your feed", subtitle: "Friends can pop in from Home", avatar: AnyView(AvatarView(user: appStore.me, size: FBAvatarSize.post))) {
+                    destination(title: "Your feed", subtitle: "Friends can play from Home", avatar: AnyView(AvatarView(user: appStore.me, size: FBAvatarSize.post))) {
                         send(to: nil, name: "your feed")
                     }
                     ForEach(appStore.myGroups) { group in
@@ -441,12 +443,12 @@ struct BubbleFloatSheet: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Float to \(title)")
+        .accessibilityLabel("Share to \(title)")
     }
 
     private func send(to group: FBGroup?, name: String) {
-        BubbleSurfaceHooks.float(bubble, result: nil, to: group, message: "Pop in to \(bubble.title)", appStore: appStore, bubbleStore: bubbleStore)
-        appStore.showToast("Floated to \(name)", symbol: "checkmark.circle.fill")
+        BubbleSurfaceHooks.float(bubble, result: nil, to: group, message: "Play \(bubble.title)", appStore: appStore, bubbleStore: bubbleStore)
+        appStore.showToast("Shared to \(name)", symbol: "checkmark.circle.fill")
         onDone()
     }
 }

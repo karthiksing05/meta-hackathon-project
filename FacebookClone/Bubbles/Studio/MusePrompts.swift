@@ -183,7 +183,13 @@ enum MusePrompts {
         A good Bubble lasts 10–120 s with the bot, can be failed and can score. Ease the first seconds and let it ramp up. \
         Playtests use a weak, a typical and a strong bot; when a playtest flags the game as too short, too hard or too easy, \
         change params (speed, gaps, gravity, rounds, tries, timers) rather than the formula.
-        """
+        """ + formulaGuideSection
+    }
+
+    /// Per-formula guidance from the feature formulas (`StudioFormulaHints`), empty when none.
+    static var formulaGuideSection: String {
+        let guides = StudioFormulaHints.composerGuides
+        return guides.isEmpty ? "" : "\n\n## Formula notes\n" + guides
     }
 
     static func composerUser(
@@ -290,6 +296,12 @@ enum MusePrompts {
             lines.append("")
             lines.append("Base Bubble “\(base.title)” v\(base.version) (draft form):")
             lines.append(baseDraft.jsonString())
+        }
+
+        let social = StudioSocialHooks.promptLines(request)
+        if !social.isEmpty {
+            lines.append("")
+            lines.append(contentsOf: social)
         }
 
         lines.append("")

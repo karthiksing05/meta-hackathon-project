@@ -1,6 +1,7 @@
 #!/bin/sh
 # Builds the bubble-studio CLI (Muse Studio on macOS): the shared Bubble models and the Studio
-# harness from the app, plus main.swift, linked with JavaScriptCore.
+# harness from the app, plus main.swift and the microgame mode, linked with JavaScriptCore and WebKit
+# (the microgame Studio runs in a hidden WKWebView).
 #
 #   tools/bubble-studio/build.sh [OUTPUT_DIR]
 #
@@ -18,8 +19,10 @@ xcrun --sdk macosx swiftc \
   ${OPT:--Onone} \
   -module-name BubbleStudio \
   -framework JavaScriptCore \
+  -framework WebKit \
   FacebookClone/Bubbles/Models/*.swift \
   FacebookClone/Bubbles/Studio/*.swift \
   tools/bubble-studio/main.swift \
+  tools/bubble-studio/microgame.swift \
   -o "$OUT/bubble-studio"
 echo "Built $OUT/bubble-studio"

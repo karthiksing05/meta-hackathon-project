@@ -1,0 +1,24 @@
+{
+  "look": "riso",
+  "version": 1,
+  "describe": "Risograph print: two bold inks over lavender paper, chunky geometric type.",
+  "font": "Space Grotesk",
+  "tokens": {
+    "primary": "#5B4BDB",
+    "secondary": "#FF6FAE",
+    "accent": "#2BB3A3",
+    "ink": "#2A2357",
+    "bg": "#F3F1FA",
+    "surface": "#DCD7F0",
+    "danger": "#E2445C"
+  },
+  "layout": {
+    "node": "group",
+    "children": [
+      { "node": "group", "x": 0, "y": 0, "children": [ { "slot": "playfield" } ] },
+      { "node": "stack", "dir": "row", "gap": 24, "align": "center", "x": 180, "y": 52, "anchor": "center", "children": [ { "slot": "hud_top" } ] },
+      { "node": "stack", "dir": "row", "gap": 24, "align": "center", "x": 180, "y": 604, "anchor": "center", "children": [ { "slot": "hud_bottom" } ] },
+      { "node": "group", "x": 0, "y": 0, "children": [ { "slot": "overlay" } ] }
+    ]
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "id": "remix-moving-day-diego",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Moving Day: Fourth Floor Walk-up",
+  "one_line_rule": "No elevator. Tap to lift your box past the stairwell clutter, three bumps and you're out.",
+  "formula": "dodge",
+  "brief": {
+    "intent": "Alex's Moving Day but it's my fourth floor walk-up",
+    "audience": "friends",
+    "mood": [
+      "funny"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": "moving-day",
+    "operators": [
+      "remix",
+      "re-skin",
+      "re-content"
+    ],
+    "remix_of": "moving-day",
+    "remix_of_title": "Moving Day",
+    "remix_of_creator_id": "me",
+    "remix_of_creator_name": "Alex"
+  },
+  "chain": null,
+  "style": {
+    "look": "pixel",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#E7ECFF",
+      "bg_bottom": "#C9D3FB",
+      "ink": "#1D2152",
+      "primary": "#4C6EF5",
+      "secondary": "#845EF7",
+      "accent": "#FCC419",
+      "danger": "#7048E8"
+    },
+    "font": "rounded",
+    "motif": "city",
+    "emoji": "🪜",
+    "mood_preset": "funny",
+    "cover_prompt": "pixel art of a cardboard box floating up a narrow stairwell past bikes and plants, cool blue light"
+  },
+  "concepts": [
+    {
+      "use": "space.side_scroll",
+      "params": {
+        "speed": 2.5,
+        "backdrop": "city",
+        "ground": true
+      }
+    },
+    {
+      "use": "entity.avatar",
+      "params": {
+        "size": 16,
+        "emoji": "📦"
+      }
+    },
+    {
+      "use": "entity.obstacle",
+      "params": {
+        "style": "stack",
+        "width": 64
+      }
+    },
+    {
+      "use": "input.tap"
+    },
+    {
+      "use": "behavior.gravity",
+      "params": {
+        "strength": 0.33
+      }
+    },
+    {
+      "use": "behavior.impulse",
+      "params": {
+        "strength": 6.2
+      }
+    },
+    {
+      "use": "behavior.spawn_stream",
+      "params": {
+        "spacing": 232,
+        "gap": 192,
+        "gap_shrink": 14,
+        "variance": 0.45
+      }
+    },
+    {
+      "use": "behavior.speed_ramp",
+      "params": {
+        "rate": 0.07,
+        "max": 1.6,
+        "delay": 3
+      }
+    },
+    {
+      "use": "rule.lives",
+      "params": {
+        "lives": 3,
+        "grace": 55
+      }
+    },
+    {
+      "use": "score.count",
+      "params": {
+        "on": "entity.passed",
+        "points": 1,
+        "label": "boxes"
+      }
+    },
+    {
+      "use": "flow.run_retry"
+    },
+    {
+      "use": "feel.mood_preset"
+    },
+    {
+      "use": "feel.sfx_on_action"
+    },
+    {
+      "use": "share.score_card",
+      "params": {
+        "label": "boxes",
+        "brag": "my move in one game"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "theme": "carrying boxes up a fourth floor walk-up",
+    "obstacle_labels": [
+      "Landing",
+      "Neighbor's bike",
+      "Plants",
+      "Couch",
+      "Laundry",
+      "Mailboxes",
+      "Stroller",
+      "4th floor"
+    ],
+    "avatar_emoji": "📦"
+  },
+  "seed": 4242,
+  "studio": {
+    "models": [
+      "muse-wonder-1.0",
+      "muse-ember-1.0",
+      "muse-image-1.0"
+    ],
+    "created_at": "2026-11-12T18:00:00Z",
+    "duration_sec": 36.0,
+    "offline": false
+  },
+  "_seed": {
+    "creator_id": "sf-diego-ramirez",
+    "created_hours_ago": 3,
+    "play_count": 38,
+    "like_count": 12,
+    "save_count": 9
+  }
+}

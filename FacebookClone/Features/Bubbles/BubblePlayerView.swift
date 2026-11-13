@@ -6,7 +6,8 @@ import SwiftUI
 /// the same seed. Otherwise it starts with the Bubble's intro card. When a run ends the result
 /// sheet shows your score, best and rank, and offers play again, float, story and next level.
 ///
-/// DEBUG: `FB_FAKE_RESULT=1` shows the result sheet without playing.
+/// DEBUG: `FB_FAKE_RESULT=1` shows the result sheet without playing; `FB_ENGINE_FAIL=1` shows the
+/// engine error card.
 struct BubblePlayerView: View {
     let request: BubblePlayRequest
 
@@ -26,7 +27,12 @@ struct BubblePlayerView: View {
     @State private var lastResult: BubbleResultContext?
     @State private var lastResultAt = Date.distantPast
     @State private var restartToken = 0
-    @State private var isMuted = false
+    /// The game's session has drawn (`ready` or later from the runtime).
+    @State private var isLive = false
+    /// Set when the game didn't start; shows `EngineErrorCard`.
+    @State private var failure: EngineFailure?
+    /// Bumped by "Try again": a new web view, so a fresh host lease and a fresh start.
+    @State private var attempt = 0
 
     init(request: BubblePlayRequest) {
         self.request = request
@@ -43,6 +49,22 @@ struct BubblePlayerView: View {
             if let bubble {
                 GeometryReader { proxy in
                     game(bubble, safeArea: proxy.safeAreaInsets)
+                        .id(attempt)
+                }
+                // The poster (an exact still of the first frame) stays over the game until it has
+                // drawn, then fades: no pop from blank. It comes back over a failed runtime page.
+                PosterReveal(poster: nil, isLive: isLive && failure == nil, showsLoader: false) {
+                    BubblePosterView(bubble: bubble, showsEmoji: false)
+                }
+                .ignoresSafeArea()
+                .accessibilityHidden(true)
+                EngineLoadingView(
+                    isLoading: !isLive && failure == nil,
+                    label: EngineLoadingView.label(for: bubble.manifest)
+                )
+                if let failure {
+                    EngineErrorCard(failure: failure, onRetry: retry, secondaryTitle: "Close", onSecondary: { dismiss() })
+                    .transition(.opacity)
                 }
                 VStack(spacing: 0) {
                     topBar(bubble)
@@ -62,10 +84,19 @@ struct BubblePlayerView: View {
                 context: context,
                 onPlayAgain: playAgain,
                 onSeeBoard: openBoard,
-                onNextLevel: playNextLevel
+                onNextLevel: playNextLevel,
+                request: request,
+                exitPlayer: exitPlayer
             )
         }
+        .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: failure)
         .onAppear(perform: appear)
+        .task(id: "\(bubbleID)#\(attempt)") {
+            // A start that never reports `ready` gets the error card and a retry, not an endless loader.
+            try? await Task.sleep(for: EngineFailure.startTimeout)
+            guard !Task.isCancelled, !isLive, failure == nil, bubble != nil else { return }
+            failure = EngineFailure(kind: .timedOut)
+        }
     }
 
     // MARK: Layers
@@ -77,7 +108,7 @@ struct BubblePlayerView: View {
             BubblePosterView(bubble: bubble, showsEmoji: false)
                 .ignoresSafeArea()
         } else {
-            BubbleGlow.lilacHaze.gradient
+            GameColor.gradient
                 .ignoresSafeArea()
         }
     }
@@ -88,12 +119,12 @@ struct BubblePlayerView: View {
 
     private func game(_ bubble: Bubble, safeArea: EdgeInsets) -> some View {
         BubbleWebView(
-            manifest: bubble.manifest,
+            manifest: effectiveManifest(bubble),
             mode: mode,
             playerName: appStore.me.firstName,
             bestScore: bubbleStore.bestScore(of: appStore.me, in: bubble)?.score,
             isActive: scenePhase == .active,
-            isMuted: isMuted,
+            isMuted: GameSound.isMuted,
             reducedMotion: reduceMotion,
             restartToken: restartToken,
             insetTop: safeArea.top + Self.topBarHeight,
@@ -105,7 +136,28 @@ struct BubblePlayerView: View {
         .accessibilityLabel("\(bubble.title). \(bubble.rule)")
     }
 
+    /// The Bubble's manifest, with the request's seed and length for the Bubble it was opened on
+    /// (challenges, sessions, game nights). Next levels play their own.
+    private func effectiveManifest(_ bubble: Bubble) -> BubbleManifest {
+        bubble.id == request.bubbleID ? request.effectiveManifest(bubble.manifest) : bubble.manifest
+    }
+
+    /// The request that applies to `bubble`: the launch request, or a plain one after a level change.
+    private func activeRequest(for bubble: Bubble) -> BubblePlayRequest {
+        bubble.id == request.bubbleID ? request : BubblePlayRequest(bubbleID: bubble.id)
+    }
+
     private func topBar(_ bubble: Bubble) -> some View {
+        VStack(spacing: 8) {
+            topBarRow(bubble)
+            if !isWatchingBurst {
+                BubblePlayerBannerSlots(bubble: bubble, request: activeRequest(for: bubble), score: score)
+                    .environment(\.bubblePlayerStarted, hasStarted)
+            }
+        }
+    }
+
+    private func topBarRow(_ bubble: Bubble) -> some View {
         HStack(spacing: 10) {
             circleButton("xmark", label: "Close") {
                 dismiss()
@@ -116,7 +168,7 @@ struct BubblePlayerView: View {
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
                 if isWatchingBurst, let owner = burstOwner(in: bubble) {
-                    Text(owner.isMe ? "Your Burst" : "\(owner.firstName)'s Burst")
+                    Text(owner.isMe ? "Your replay" : "\(owner.firstName)'s replay")
                         .font(.fbMeta)
                         .foregroundStyle(Color.white.opacity(0.85))
                         .lineLimit(1)
@@ -130,15 +182,16 @@ struct BubblePlayerView: View {
                 BubbleScorePill(score: score)
                     .transition(.scale.combined(with: .opacity))
             }
-            circleButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off") {
+            BubblePlayerTopBarSlots(bubble: bubble, request: activeRequest(for: bubble))
+            circleButton(GameSound.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: GameSound.isMuted ? "Turn sound on" : "Turn sound off") {
                 Haptics.light()
-                isMuted.toggle()
+                GameSound.toggleMute()
             }
         }
         .padding(.horizontal, 12)
         .padding(.top, 4)
         .shadow(color: Color.black.opacity(0.2), radius: 3, y: 1)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: hasStarted)
+        .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: hasStarted)
     }
 
     @ViewBuilder
@@ -166,22 +219,12 @@ struct BubblePlayerView: View {
             }
             .buttonStyle(.fb(.primary, expand: false, height: 44))
             .padding(.bottom, 24)
-            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
         }
     }
 
     private var missing: some View {
-        VStack(spacing: 16) {
-            ContentUnavailableView(
-                "This Bubble popped",
-                systemImage: "bubbles.and.sparkles",
-                description: Text("It isn't available anymore.")
-            )
-            Button("Close") {
-                dismiss()
-            }
-            .buttonStyle(.fb(.primary, expand: false, height: 40))
-        }
+        EngineErrorCard(detail: EngineErrorCard.goneDetail, secondaryTitle: "Close", onSecondary: { dismiss() })
     }
 
     private func circleButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
@@ -194,7 +237,7 @@ struct BubblePlayerView: View {
                 .frame(width: 44, height: 44)
                 .contentShape(Circle())
         }
-        .buttonStyle(.plain)
+        .gamePress(scale: 0.9)
         .accessibilityLabel(label)
     }
 
@@ -210,12 +253,25 @@ struct BubblePlayerView: View {
         if let replay = mode.replayLog, let run = bubble.scores.first(where: { $0.replay == replay }) {
             return run.user.isMe ? "Tap to beat your \(run.score.withCommas)" : "Tap to beat \(run.user.firstName)'s \(run.score.withCommas)"
         }
-        return "Tap to pop in"
+        return "Tap to play"
     }
 
     // MARK: Messages
 
     private func handle(_ message: BubbleBridgeMessage, in bubble: Bubble) {
+        switch message {
+        case .ready, .phase, .score, .takeover:
+            if !isLive && failure == nil {
+                isLive = true
+            }
+        case .error(let message) where EngineFailure.stopsGame(message):
+            // The runtime stopped the game and drew its own error page; cover it and offer a retry.
+            failure = EngineFailure(kind: .failed, message: message)
+            isLive = false
+            return
+        default:
+            break
+        }
         switch message {
         case .takeover:
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -247,7 +303,14 @@ struct BubblePlayerView: View {
         lastResultAt = Date()
         score = runResult.score
         let previous = bubbleStore.bestScore(of: appStore.me, in: bubble)?.score
-        bubbleStore.record(runResult, in: bubble)
+        let played = activeRequest(for: bubble)
+        var runResult = runResult
+        if runResult.replay.length == nil, let length = played.length {
+            // The replay says which length it was played with, so verification replays it exactly.
+            runResult.replay.length = length
+        }
+        let entry = bubbleStore.record(runResult, in: bubble)
+        BubbleFeatureRouter.didFinish(entry, in: bubble, request: played, appStore: appStore, bubbleStore: bubbleStore)
         let context = BubbleResultContext(bubbleID: bubble.id, result: runResult, previousBest: previous)
         lastResult = context
         result = context
@@ -257,12 +320,25 @@ struct BubblePlayerView: View {
 
     private func appear() {
         #if DEBUG
+        // FB_ENGINE_FAIL=1 shows the engine error card; "Try again" then starts the game for real.
+        if DebugLaunch.value("FB_ENGINE_FAIL") == "1", attempt == 0 {
+            failure = EngineFailure(kind: .failed, message: "Simulated by FB_ENGINE_FAIL")
+        }
         if DebugLaunch.value("FB_FAKE_RESULT") == "1", let bubble {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 showFakeResult(for: bubble)
             }
         }
         #endif
+    }
+
+    /// "Try again" on the error card: a new web view leases a host and starts the game afresh.
+    private func retry() {
+        failure = nil
+        isLive = false
+        hasStarted = false
+        score = 0
+        attempt += 1
     }
 
     private func playAgain() {
@@ -284,12 +360,23 @@ struct BubblePlayerView: View {
         }
     }
 
+    /// Closes the result sheet and the player, then runs `action` (open Studio, a chat, a page).
+    private func exitPlayer(_ action: @escaping () -> Void) {
+        result = nil
+        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            action()
+        }
+    }
+
     private func playNextLevel(_ next: Bubble) {
         result = nil
         lastResult = nil
         score = 0
         hasStarted = false
         isWatchingBurst = false
+        isLive = false
+        failure = nil
         mode = .play
         bubbleID = next.id
     }

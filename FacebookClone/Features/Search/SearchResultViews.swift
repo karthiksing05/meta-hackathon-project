@@ -48,6 +48,7 @@ struct SearchPersonRow: View {
                             .font(.fbMeta)
                             .foregroundStyle(FBColor.secondaryText)
                             .lineLimit(1)
+                        SearchPersonGamesStrip(user: user)
                     }
                     Spacer(minLength: 0)
                 }

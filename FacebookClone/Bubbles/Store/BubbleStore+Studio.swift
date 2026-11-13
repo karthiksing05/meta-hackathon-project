@@ -29,6 +29,12 @@ extension BubbleStore {
         if let dailyGroup, let first = published.first {
             dailyBubbleIDs[dailyGroup.id] = first.id
         }
+        // Collaboration features react to what was made (docs/BUBBLES.md 7.1).
+        let made = published
+        let store = self
+        MainActor.assumeIsolated {
+            BubbleFeatureRouter.didPublish(made, appStore: store.appStore, bubbleStore: store)
+        }
         return published
     }
 

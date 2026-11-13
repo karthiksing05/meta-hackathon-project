@@ -1,0 +1,122 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Daily Garden Pairs",
+    "instructions": "Everyone gets the same garden today. Tap two tiles to find the matching pairs. Six slips and the garden wilts.",
+    "duration_s": 60
+  },
+  "uses": [
+    {
+      "fragment": "grid_board",
+      "params": {
+        "cols": 4,
+        "rows": 3,
+        "cell_size": 64,
+        "gap": 8,
+        "x": 36,
+        "y": 200
+      }
+    },
+    {
+      "fragment": "match_pairs",
+      "params": {
+        "pairs": 6,
+        "cols": 4,
+        "mismatch_ms": 700
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 100,
+        "label": "Score"
+      },
+      "bind": {
+        "point": "pair_found"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 6
+      },
+      "bind": {
+        "hit": "pair_missed"
+      }
+    },
+    {
+      "fragment": "daily_seed",
+      "params": {
+        "day_label": "Nov 12"
+      }
+    }
+  ],
+  "functions": {
+    "face_color": {
+      "params": {
+        "s": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['#E4572E', '#3A6EA5', '#6BAF7B', '#E9B44C', '#8E5BA8', '#2FA5A0'], s, '#7A6A55')"
+    },
+    "face_letter": {
+      "params": {
+        "s": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['R', 'B', 'L', 'S', 'P', 'M'], s, '?')"
+    },
+    "shown": {
+      "params": {
+        "c": "ivec2"
+      },
+      "returns": "bool",
+      "body": "let i = c.y * 4 + c.x in i < len(cards) and (cards[i].revealed or cards[i].matched)"
+    },
+    "cell_fill": {
+      "params": {
+        "c": "ivec2"
+      },
+      "returns": "string",
+      "body": "if shown(c) then face_color(cards[c.y * 4 + c.x].symbol) else ''"
+    },
+    "cell_label": {
+      "params": {
+        "c": "ivec2"
+      },
+      "returns": "string",
+      "body": "if shown(c) then face_letter(cards[c.y * 4 + c.x].symbol) else ''"
+    }
+  },
+  "objectives": {
+    "time_limit": "60s",
+    "on_timeout": "lose",
+    "score": "matches * 100"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "text": "= if daily then 'DAILY GARDEN PAIRS' else 'GARDEN PAIRS'",
+          "x": 180,
+          "y": 130,
+          "anchor": "center",
+          "size": 24,
+          "weight": 700,
+          "color": "$ink"
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "content": {},
+  "playtest": {
+    "progress": "matches * 100 + lives"
+  }
+}

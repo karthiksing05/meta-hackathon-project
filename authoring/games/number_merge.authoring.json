@@ -1,0 +1,101 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Number Merge",
+    "instructions": "Swipe or use the arrow keys to slide tiles. Equal tiles merge. Reach 128.",
+    "duration_s": 180
+  },
+  "uses": [
+    {
+      "fragment": "tile_slide",
+      "params": {
+        "size": 4,
+        "target": 128
+      }
+    }
+  ],
+  "types": {},
+  "state": {
+    "score": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {},
+  "events": {},
+  "inputs": {},
+  "rules": [
+    {
+      "id": "cash_in",
+      "on": "merged",
+      "do": [
+        {
+          "incr": "score",
+          "by": "event.value"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "score": "score",
+    "time_limit": "180s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 110,
+          "anchor": "center",
+          "size": 28,
+          "weight": 700,
+          "color": "$ink",
+          "text": "= 'Score: ' + str(score)"
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "look": {
+    "id": "riso",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Risograph print: cream paper with grain, pink-teal-blue ink blobs, halftone tiles with misregistered shadows.",
+    "palette": {
+      "bg": "#F6F1E7",
+      "surface": "#E4DDF0"
+    },
+    "font": "Futura",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><rect width='360' height='640' fill='#F6F1E7'/><circle cx='60' cy='560' r='130' fill='#FF6FAE' opacity='0.22'/><circle cx='310' cy='70' r='110' fill='#2BB3A3' opacity='0.2'/><circle cx='330' cy='600' r='70' fill='#5B4BDB' opacity='0.14'/><path d='M0 150 h360' stroke='#2A2357' stroke-width='1' stroke-dasharray='3 6' opacity='0.25'/><circle cx='0' cy='0' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='53' cy='97' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='106' cy='194' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='159' cy='291' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='212' cy='388' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='265' cy='485' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='318' cy='582' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='11' cy='39' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='64' cy='136' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='117' cy='233' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='170' cy='330' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='223' cy='427' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='276' cy='524' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='329' cy='621' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='22' cy='78' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='75' cy='175' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='128' cy='272' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='181' cy='369' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='234' cy='466' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='287' cy='563' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='340' cy='20' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='33' cy='117' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='86' cy='214' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='139' cy='311' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='192' cy='408' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='245' cy='505' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='298' cy='602' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='351' cy='59' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='44' cy='156' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='97' cy='253' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='150' cy='350' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='203' cy='447' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='256' cy='544' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='309' cy='1' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='2' cy='98' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='55' cy='195' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='108' cy='292' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='161' cy='389' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='214' cy='486' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='267' cy='583' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='320' cy='40' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='13' cy='137' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='66' cy='234' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='119' cy='331' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='172' cy='428' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='225' cy='525' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='278' cy='622' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='331' cy='79' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='24' cy='176' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='77' cy='273' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='130' cy='370' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='183' cy='467' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='236' cy='564' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='289' cy='21' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='342' cy='118' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='35' cy='215' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='88' cy='312' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='141' cy='409' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='194' cy='506' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='247' cy='603' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='300' cy='60' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='353' cy='157' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='46' cy='254' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='99' cy='351' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='152' cy='448' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='205' cy='545' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='258' cy='2' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='311' cy='99' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='4' cy='196' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='57' cy='293' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='110' cy='390' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='163' cy='487' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='216' cy='584' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='269' cy='41' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='322' cy='138' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='15' cy='235' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='68' cy='332' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='121' cy='429' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='174' cy='526' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='227' cy='623' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='280' cy='80' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='333' cy='177' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='26' cy='274' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='79' cy='371' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='132' cy='468' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='185' cy='565' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='238' cy='22' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='291' cy='119' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='344' cy='216' r='0.9' fill='#2A2357' opacity='0.12'/><circle cx='37' cy='313' r='0.9' fill='#2A2357' opacity='0.12'/></svg>"
+    },
+    "sprites": {
+      "tile": {
+        "svg": [
+          "<svg viewBox='0 0 76 76'><defs><pattern id='h' width='5' height='5' patternUnits='userSpaceOnUse'><circle cx='2.5' cy='2.5' r='1' fill='#FFFFFF' opacity='0.35'/></pattern></defs><rect x='3' y='4' width='70' height='70' rx='9' fill='#5B4BDB' opacity='0.85'/><rect x='1' y='1' width='70' height='70' rx='9' fill='#E6E1F7'/><rect x='1' y='1' width='70' height='70' rx='9' fill='url(#h)'/><path d='M8 12 q8 -6 16 0' stroke='#5B4BDB' stroke-width='2.2' fill='none' stroke-linecap='round' opacity='0.6'/><circle cx='8' cy='68' r='1.8' fill='#5B4BDB' opacity='0.7'/></svg>",
+          "<svg viewBox='0 0 76 76'><defs><pattern id='h' width='5' height='5' patternUnits='userSpaceOnUse'><circle cx='2.5' cy='2.5' r='1' fill='#FFFFFF' opacity='0.35'/></pattern></defs><rect x='3' y='4' width='70' height='70' rx='9' fill='#2BB3A3' opacity='0.85'/><rect x='1' y='1' width='70' height='70' rx='9' fill='#CDE7F5'/><rect x='1' y='1' width='70' height='70' rx='9' fill='url(#h)'/><path d='M8 12 q8 -6 16 0' stroke='#2BB3A3' stroke-width='2.2' fill='none' stroke-linecap='round' opacity='0.6'/><circle cx='8' cy='68' r='1.8' fill='#2BB3A3' opacity='0.7'/><circle cx='14' cy='68' r='1.8' fill='#2BB3A3' opacity='0.7'/></svg>",
+          "<svg viewBox='0 0 76 76'><defs><pattern id='h' width='5' height='5' patternUnits='userSpaceOnUse'><circle cx='2.5' cy='2.5' r='1' fill='#FFFFFF' opacity='0.35'/></pattern></defs><rect x='3' y='4' width='70' height='70' rx='9' fill='#2A2357' opacity='0.85'/><rect x='1' y='1' width='70' height='70' rx='9' fill='#FF6FAE'/><rect x='1' y='1' width='70' height='70' rx='9' fill='url(#h)'/><path d='M8 12 q8 -6 16 0' stroke='#2A2357' stroke-width='2.2' fill='none' stroke-linecap='round' opacity='0.6'/><circle cx='8' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='14' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='20' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/></svg>",
+          "<svg viewBox='0 0 76 76'><defs><pattern id='h' width='5' height='5' patternUnits='userSpaceOnUse'><circle cx='2.5' cy='2.5' r='1' fill='#FFFFFF' opacity='0.35'/></pattern></defs><rect x='3' y='4' width='70' height='70' rx='9' fill='#2A2357' opacity='0.85'/><rect x='1' y='1' width='70' height='70' rx='9' fill='#E2445C'/><rect x='1' y='1' width='70' height='70' rx='9' fill='url(#h)'/><path d='M8 12 q8 -6 16 0' stroke='#2A2357' stroke-width='2.2' fill='none' stroke-linecap='round' opacity='0.6'/><circle cx='8' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='14' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='20' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='26' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/></svg>",
+          "<svg viewBox='0 0 76 76'><defs><pattern id='h' width='5' height='5' patternUnits='userSpaceOnUse'><circle cx='2.5' cy='2.5' r='1' fill='#FFFFFF' opacity='0.35'/></pattern></defs><rect x='3' y='4' width='70' height='70' rx='9' fill='#2A2357' opacity='0.85'/><rect x='1' y='1' width='70' height='70' rx='9' fill='#2BB3A3'/><rect x='1' y='1' width='70' height='70' rx='9' fill='url(#h)'/><path d='M8 12 q8 -6 16 0' stroke='#2A2357' stroke-width='2.2' fill='none' stroke-linecap='round' opacity='0.6'/><circle cx='8' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='14' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='20' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='26' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='32' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/></svg>",
+          "<svg viewBox='0 0 76 76'><defs><pattern id='h' width='5' height='5' patternUnits='userSpaceOnUse'><circle cx='2.5' cy='2.5' r='1' fill='#FFFFFF' opacity='0.35'/></pattern></defs><rect x='3' y='4' width='70' height='70' rx='9' fill='#FF6FAE' opacity='0.85'/><rect x='1' y='1' width='70' height='70' rx='9' fill='#5B4BDB'/><rect x='1' y='1' width='70' height='70' rx='9' fill='url(#h)'/><path d='M8 12 q8 -6 16 0' stroke='#FF6FAE' stroke-width='2.2' fill='none' stroke-linecap='round' opacity='0.6'/><circle cx='8' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='14' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='20' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='26' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='32' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='38' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/></svg>",
+          "<svg viewBox='0 0 76 76'><defs><pattern id='h' width='5' height='5' patternUnits='userSpaceOnUse'><circle cx='2.5' cy='2.5' r='1' fill='#FFFFFF' opacity='0.35'/></pattern></defs><rect x='3' y='4' width='70' height='70' rx='9' fill='#FF6FAE' opacity='0.85'/><rect x='1' y='1' width='70' height='70' rx='9' fill='#2A2357'/><rect x='1' y='1' width='70' height='70' rx='9' fill='url(#h)'/><path d='M8 12 q8 -6 16 0' stroke='#FF6FAE' stroke-width='2.2' fill='none' stroke-linecap='round' opacity='0.6'/><circle cx='8' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='14' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='20' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='26' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='32' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='38' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/><circle cx='44' cy='68' r='1.8' fill='#FF6FAE' opacity='0.7'/></svg>",
+          "<svg viewBox='0 0 76 76'><defs><pattern id='h' width='5' height='5' patternUnits='userSpaceOnUse'><circle cx='2.5' cy='2.5' r='1' fill='#FFFFFF' opacity='0.35'/></pattern></defs><rect x='3' y='4' width='70' height='70' rx='9' fill='#2A2357' opacity='0.85'/><rect x='1' y='1' width='70' height='70' rx='9' fill='#F5A623'/><rect x='1' y='1' width='70' height='70' rx='9' fill='url(#h)'/><path d='M8 12 q8 -6 16 0' stroke='#2A2357' stroke-width='2.2' fill='none' stroke-linecap='round' opacity='0.6'/><circle cx='8' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='14' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='20' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='26' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='32' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='38' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='44' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/><circle cx='50' cy='68' r='1.8' fill='#2A2357' opacity='0.7'/></svg>"
+        ],
+        "color": "#FF6FAE"
+      }
+    }
+  },
+  "sound": {
+    "set": "retro",
+    "music": false,
+    "volume": 0.7
+  },
+  "content": {},
+  "playtest": {
+    "progress": "score + 10 * count(values(board), v => v == 0)"
+  }
+}

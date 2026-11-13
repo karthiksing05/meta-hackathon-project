@@ -58,7 +58,7 @@ struct BubbleStoryContentView: View {
         }
     }
 
-    private var title: String { bubble?.title ?? "A Bubble" }
+    private var title: String { bubble?.title ?? ProductName.withArticleCapitalized }
 
     private var palette: BubblePalette { BubbleGlow.palette(bubble?.paletteID) }
 
@@ -88,7 +88,7 @@ struct BubbleStoryContentView: View {
     private var stickers: some View {
         VStack(spacing: 10) {
             VStack(spacing: 8) {
-                sticker("\(bubble?.emoji ?? "🫧") \(title)", size: 20)
+                sticker("\(bubble?.emoji ?? "✨") \(title)", size: 20)
                     .rotationEffect(.degrees(-3))
                 sticker(scoreText, size: 15, filled: true)
                     .rotationEffect(.degrees(2))
@@ -126,8 +126,8 @@ struct BubbleStoryContentView: View {
             popIn()
         } label: {
             HStack(spacing: 8) {
-                Image(systemName: "bubbles.and.sparkles.fill")
-                Text("Pop in")
+                Image(systemName: "sparkles")
+                Text("Play")
             }
             .font(.system(size: 17, weight: .bold, design: .rounded))
             .foregroundStyle(BubbleGlow.ink)
@@ -137,7 +137,7 @@ struct BubbleStoryContentView: View {
             .bubbleGlow(.white, radius: 14, opacity: 0.7)
         }
         .buttonStyle(.pressable)
-        .accessibilityLabel("Pop in to \(title)")
+        .accessibilityLabel("Play \(title)")
         .accessibilityHint("Opens the game")
     }
 

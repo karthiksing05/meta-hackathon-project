@@ -17,6 +17,9 @@ Commands
           [--recent-looks a,b]   looks of earlier Bubbles, so this one varies (the app remembers these itself)
           --out FILE.json [--cover FILE.webp] [--timeline FILE.txt] [--offline]
   models                                 Muse models this key can use
+  --microgame TEXT [--fake-muse] [--out FILE.json] [--repairs N] [--revise FILE.json] [--fake-good FILE]
+                                         Make a microgame (MicrogameComposer, docs/BUBBLES.md 7.12) in a hidden
+                                         WKWebView. --fake-muse: a scripted Muse (a broken manifest, then a good one)
 
 Options
   --runtime-dir DIR   Runtime scripts (default FacebookClone/Bubbles/Runtime/web)
@@ -34,6 +37,7 @@ struct Arguments {
     static let valueOptions: Set<String> = [
         "runtime-dir", "world", "config", "seed", "skill", "bot-seed", "max-ticks", "prompt", "mode", "group", "event",
         "base", "out", "cover", "date", "sources", "formula", "palette", "timeline", "recent-looks",
+        "microgame", "repairs", "revise", "fake-good",
     ]
 
     init(_ raw: [String]) {
@@ -438,8 +442,14 @@ func runPrompts() async {
 
 // MARK: - Main
 
+if let prompt = args.value("microgame") {
+    await runMicrogame(prompt)
+    exit(0)
+}
+
 switch args.positional.first {
 case "catalog": runCatalog()
+case "microgame": await runMicrogame(args.value("prompt") ?? args.positional.dropFirst().joined(separator: " "))
 case "validate": runValidate()
 case "simulate": await runSimulate()
 case "brief": await runBrief()

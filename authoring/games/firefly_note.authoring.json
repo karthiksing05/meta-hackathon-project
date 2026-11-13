@@ -1,0 +1,165 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Firefly Note",
+    "instructions": "Catch the fireflies to uncover Ari's secret note. Tap empty dark and you lose time. Run out of glow and the note stays hidden.",
+    "duration_s": 90
+  },
+  "uses": [
+    {
+      "fragment": "score",
+      "params": {
+        "points": 20,
+        "label": "Fireflies"
+      }
+    },
+    {
+      "fragment": "timer_bar",
+      "params": {
+        "full_ms": 7000,
+        "refill_ms": 1800,
+        "drain_rate": 1.3,
+        "on_empty": "lose"
+      }
+    },
+    {
+      "fragment": "reveal",
+      "params": {
+        "per_piece": 10,
+        "wins": true,
+        "layer": "overlay",
+        "wrap": 18,
+        "size": 26,
+        "x": 180,
+        "y": 140
+      },
+      "bind": {
+        "reveal_progress": "score"
+      }
+    }
+  ],
+  "state": {
+    "fx": {
+      "type": "float",
+      "init": "random_float(60.0, 300.0)"
+    },
+    "fy": {
+      "type": "float",
+      "init": "random_float(300.0, 560.0)"
+    },
+    "fr": {
+      "type": "float",
+      "init": "30.0"
+    }
+  },
+  "events": {
+    "refill": {}
+  },
+  "inputs": {
+    "tap": {
+      "payload": {
+        "x": "float",
+        "y": "float"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "load_note",
+      "on": "start",
+      "do": [
+        {
+          "set": "reveal_text",
+          "to": "content_message"
+        }
+      ]
+    },
+    {
+      "id": "catch",
+      "on": "tap",
+      "do": [
+        {
+          "if": "overlaps_circle(vec(event.x, event.y), 1.0, vec(fx, fy), fr + 10.0)",
+          "then": [
+            {
+              "emit": "point"
+            },
+            {
+              "emit": "refill"
+            },
+            {
+              "set": "fx",
+              "to": "random_float(fr + 10.0, 350.0 - fr)"
+            },
+            {
+              "set": "fy",
+              "to": "random_float(300.0, 560.0)"
+            }
+          ],
+          "else": [
+            {
+              "decr": "time_left",
+              "by": "500.0"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 0,
+          "y": 0,
+          "w": 360,
+          "h": 640,
+          "fill": "#00000000",
+          "on_tap": {
+            "input": "tap",
+            "with": {
+              "x": "pointer.x",
+              "y": "pointer.y"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": "= fx",
+          "y": "= fy",
+          "r": "= fr + 14.0",
+          "fill": "$accent",
+          "opacity": 0.25
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": "= fx",
+          "y": "= fy",
+          "r": "= fr",
+          "fill": "$accent",
+          "role": "pickup"
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {}
+  },
+  "content": {
+    "message": "Ari's top three: pancakes, kites and sing-alongs"
+  },
+  "playtest": {
+    "progress": "score * 1.0 + time_left / 100.0"
+  }
+}

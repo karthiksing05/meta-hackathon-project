@@ -10,6 +10,8 @@ enum ProfileSection: String, CaseIterable, Identifiable {
     case videos = "Videos"
 
     var id: String { rawValue }
+    /// The chip label. The games section reads the product name, which may change.
+    var title: String { self == .bubbles ? ProductName.display : rawValue }
 }
 
 struct ProfilePhotoRequest: Identifiable {
@@ -121,6 +123,7 @@ struct ProfileView: View {
                 }
                 ProfileActionButtons(user: user)
                     .padding(.top, 4)
+                BubbleProfileHeaderSlots(user: user)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 12)
@@ -258,7 +261,7 @@ struct ProfileView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(sections) { item in
-                    ChipView(title: item.rawValue, isSelected: section == item) {
+                    ChipView(title: item.title, isSelected: section == item) {
                         Haptics.selection()
                         withAnimation(.easeInOut(duration: 0.15)) {
                             section = item

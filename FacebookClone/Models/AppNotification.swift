@@ -57,6 +57,9 @@ final class AppNotification: Identifiable, Hashable {
     var thumbnailURL: URL?
     /// Friend requests answered from the notification row.
     var requestAction: FriendRequestAction?
+    /// Bubbles: where tapping goes for collaboration notifications ("Maya beat your 34. Rematch?"
+    /// opens the chat). Nil keeps the default (play or open the Bubble).
+    var bubbleAction: BubbleFeatureRoute?
 
     init(
         id: String = UUID().uuidString,
@@ -89,6 +92,7 @@ final class AppNotification: Identifiable, Hashable {
         self.bubbleID = bubbleID
         self.thumbnailURL = thumbnailURL
         self.requestAction = nil
+        self.bubbleAction = nil
     }
 
     /// "Maria Lopez", "Maria Lopez and Sam Lee", "Maria Lopez, Sam Lee and 3 others".

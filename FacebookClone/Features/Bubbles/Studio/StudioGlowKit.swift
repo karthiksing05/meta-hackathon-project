@@ -23,9 +23,10 @@ enum StudioGlow {
     static let track = translucent(light: 0x2E1F5E, lightAlpha: 0.12, dark: 0xFFFFFF, darkAlpha: 0.14)
 
     // Muse model tints (timeline chips).
-    static let wonder = Color(hex: 0xB9A7FF)
-    static let ember = Color(hex: 0xFFAE85)
-    static let image = Color(hex: 0xFF9ECF)
+    // Kept apart from each other but inside the blue-violet brand (amber for Ember's warmth).
+    static let wonder = GameColor.violet
+    static let ember = Color(hex: 0xFFD27A)
+    static let image = Color(hex: 0x9EE6F0)
     static let spark = Color(hex: 0x7FE0C8)
     static let device = Color(hex: 0x9AC2FF)
     static let offline = Color(hex: 0xB4B8C8)

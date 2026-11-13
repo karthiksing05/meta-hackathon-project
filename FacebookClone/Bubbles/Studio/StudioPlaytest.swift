@@ -100,7 +100,7 @@ enum StudioPlaytest {
             let wins = done.filter { $0.outcome == "success" }.count
             let timeouts = done.filter { $0.outcome == "timeout" }.count
             var outcomes: [String] = []
-            if fails > 0 { outcomes.append("\(fails) popped") }
+            if fails > 0 { outcomes.append("\(fails) lost") }
             if wins > 0 { outcomes.append("\(wins) cleared it") }
             if timeouts > 0 { outcomes.append("\(timeouts) still going at \(Int(StudioPlaytest.maxSeconds)) s") }
             if !outcomes.isEmpty { parts.append(outcomes.joined(separator: ", ")) }
@@ -182,8 +182,8 @@ enum StudioPlaytest {
             let isFail = fails.count * 2 >= done.count
             flags.append(Flag(code: "too_short",
                               message: isFail
-                                ? "Too short and too hard: runs end after about \(lasted) s. A good Bubble lasts 10–120 s; ease the start (slower speed, wider gaps, gentler gravity, more tries)."
-                                : "Too short: runs are over in about \(lasted) s. A good Bubble lasts 10–120 s; add rounds, items or tries.",
+                                ? "Too short and too hard: runs end after about \(lasted) s. A good game lasts 10–120 s; ease the start (slower speed, wider gaps, gentler gravity, more tries)."
+                                : "Too short: runs are over in about \(lasted) s. A good game lasts 10–120 s; add rounds, items or tries.",
                               blocking: true))
         }
 
@@ -195,7 +195,7 @@ enum StudioPlaytest {
 
         if let pro, pro.outcome == "fail", pro.seconds < 8, median >= 10 {
             flags.append(Flag(code: "too_hard",
-                              message: "Too hard: even the strongest bot popped after \(Int(pro.seconds.rounded())) s.",
+                              message: "Too hard: even the strongest bot lost after \(Int(pro.seconds.rounded())) s.",
                               blocking: true))
         } else if let regular, regular.outcome == "fail", regular.seconds < 10, median >= 10 {
             flags.append(Flag(code: "too_hard",

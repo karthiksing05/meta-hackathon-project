@@ -164,7 +164,9 @@ struct BubbleLookSpec: Sendable, Hashable {
     ]
 
     /// Looks each formula leans toward when the words don't decide.
-    static let formulaLeans: [String: [String]] = [
+    static let formulaLeans: [String: [String]] = baseFormulaLeans.merging(StudioFormulaHints.looks) { builtIn, _ in builtIn }
+
+    static let baseFormulaLeans: [String: [String]] = [
         "guess": ["ink", "chalk", "riso"], "answer": ["riso", "paper", "chalk"], "group": ["chalk", "paper"],
         "time": ["riso", "clay", "pixel"], "merge": ["clay", "glow"], "dodge": ["paper", "pixel", "neon", "glow"],
     ]

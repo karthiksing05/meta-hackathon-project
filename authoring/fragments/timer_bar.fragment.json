@@ -1,0 +1,89 @@
+{
+  "fragment": "timer_bar",
+  "version": 1,
+  "describe": "A draining time bar. `time_left` falls by `dt * drain_mult` every tick; `refill` adds `refill_ms` (capped at `full_ms`). At zero it emits `time_out` and, with on_empty lose, ends the game. Other rules may raise `drain_mult` or subtract from `time_left` for penalties.",
+  "params": {
+    "full_ms":    { "type": "duration", "default": 6000, "min": 1000, "max": 60000 },
+    "refill_ms":  { "type": "duration", "default": 1500, "min": 0, "max": 60000 },
+    "drain_rate": { "type": "float", "default": 1.0, "min": 0.5, "max": 4.0 },
+    "on_empty":   { "type": "enum", "values": ["lose", "emit_only"], "default": "lose" },
+    "x": { "type": "int", "default": 30, "min": 0, "max": 360 },
+    "y": { "type": "int", "default": 76, "min": 0, "max": 640 },
+    "w": { "type": "int", "default": 300, "min": 20, "max": 360 },
+    "h": { "type": "int", "default": 10, "min": 4, "max": 40 }
+  },
+  "requires": {
+    "events": { "refill": {} }
+  },
+  "state": {
+    "time_left": { "type": "float", "init": "@full_ms * 1.0" },
+    "drain_mult": { "type": "float", "init": "@drain_rate" },
+    "_spent": { "type": "bool", "init": "false" }
+  },
+  "events": {
+    "time_out": {}
+  },
+  "rules": [
+    {
+      "id": "drain",
+      "on": "tick",
+      "when": "not _spent",
+      "do": [
+        { "set": "time_left", "to": "time_left - event.dt * drain_mult" },
+        {
+          "if": "time_left <= 0.0",
+          "then": [
+            { "set": "time_left", "to": "0.0" },
+            { "set": "_spent", "to": "true" },
+            { "emit": "time_out" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "refill",
+      "on": "refill",
+      "when": "not _spent",
+      "do": [ { "set": "time_left", "to": "min(@full_ms * 1.0, time_left + @refill_ms)" } ]
+    },
+    {
+      "id": "rearm",
+      "on": "refill",
+      "include": "@on_empty == 'emit_only'",
+      "when": "_spent",
+      "do": [
+        { "set": "time_left", "to": "min(@full_ms * 1.0, @refill_ms * 1.0)" },
+        { "set": "_spent", "to": "false" }
+      ]
+    },
+    {
+      "id": "finish",
+      "on": "time_out",
+      "include": "@on_empty == 'lose'",
+      "do": [ { "end": "lose" } ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "overlay",
+        "node": { "node": "rect", "x": "@x", "y": "@y", "w": "@w", "h": "@h", "radius": 5, "fill": "$surface" }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "rect", "x": "@x", "y": "@y",
+          "w": "= max(0.0, @w * min(1.0, time_left / (@full_ms * 1.0)))",
+          "h": "@h", "radius": 5,
+          "fill": "= if time_left < @full_ms * 0.25 then $danger else $primary"
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "time_out", "do": [ { "moment": "hit" }, { "shake": { "px": 6, "ms": 200 } }, { "haptic": "warning" } ] }
+    ]
+  },
+  "tags": { "mood": ["tense"], "energy": ["high"] },
+  "conflicts": []
+}

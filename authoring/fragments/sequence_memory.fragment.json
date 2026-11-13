@@ -1,0 +1,467 @@
+{
+  "fragment": "sequence_memory",
+  "version": 1,
+  "describe": "Watch-and-repeat pattern memory. `pads` coloured pads (3 to 6) sit on the board; the game lights `start_len` of them one by one (each stays lit `show_ms`), then the player taps them back in the same order (input `pad {index}` is sent by the pad rects; taps are ignored while the pattern is showing). Repeating the whole pattern emits `sequence_ok` and adds one more step to it; a wrong tap emits `sequence_wrong` and replays the same pattern from the start. `pad_ok` is emitted for every correct tap (handy for points). State: `pattern` (list<int>), `pos` (taps matched so far this round), `showing`, `lit` (pad now lit, -1 for none) and `best_len` (longest pattern completed). With `target_len` above 0, completing a pattern of that length wins; with 0 it is endless, so the game needs its own lose path (lives bound to `sequence_wrong`, a countdown). Draws a status line and the pads around the canvas centre; `y` is the centre of the first pad row. Requires nothing and sets no score. Each pad has its own tone. With the game's `pad` sprite the pads draw it (frame = pad index).",
+  "params": {
+    "pads": {
+      "type": "int",
+      "default": 4,
+      "min": 3,
+      "max": 6
+    },
+    "start_len": {
+      "type": "int",
+      "default": 3,
+      "min": 1,
+      "max": 6
+    },
+    "show_ms": {
+      "type": "duration",
+      "default": 500,
+      "min": 150,
+      "max": 1500
+    },
+    "target_len": {
+      "type": "int",
+      "default": 8,
+      "min": 0,
+      "max": 30
+    },
+    "y": {
+      "type": "int",
+      "default": 250,
+      "min": 100,
+      "max": 400
+    }
+  },
+  "art": {
+    "pad": {
+      "describe": "A pad, one frame per pad (give svg as a list), drawn 96 × 96. It is dimmed until it lights up, so make it bright.",
+      "color": "primary"
+    }
+  },
+  "requires": {},
+  "state": {
+    "pattern": {
+      "type": "list<int>",
+      "init": "[]"
+    },
+    "pos": {
+      "type": "int",
+      "init": "0"
+    },
+    "showing": {
+      "type": "bool",
+      "init": "true"
+    },
+    "lit": {
+      "type": "int",
+      "init": "-1"
+    },
+    "best_len": {
+      "type": "int",
+      "init": "0"
+    },
+    "_si": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "_cols": {
+      "params": {},
+      "returns": "int",
+      "body": "if @pads == 4 then 2 else 3"
+    },
+    "_pad_x": {
+      "params": {
+        "i": "int"
+      },
+      "returns": "float",
+      "body": "180.0 + ((i % _cols()) * 2 - (_cols() - 1)) * 56.0"
+    },
+    "_pad_y": {
+      "params": {
+        "i": "int"
+      },
+      "returns": "float",
+      "body": "@y * 1.0 + (i / _cols()) * 112.0"
+    },
+    "_pad_color": {
+      "params": {
+        "i": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['#E4572E', '#3A6EA5', '#6BAF7B', '#E9B44C', '#8E5BA8', '#2FA5A0'], i, '#7A6A55')"
+    }
+  },
+  "events": {
+    "sequence_ok": {},
+    "sequence_wrong": {},
+    "pad_ok": {},
+    "_begin_show": {},
+    "_light": {},
+    "_dark": {},
+    "_unlit": {}
+  },
+  "inputs": {
+    "pad": {
+      "payload": {
+        "index": "int"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        {
+          "set": "pattern",
+          "to": "map(range(@start_len), n => pick(range(@pads)))"
+        },
+        {
+          "emit": "_begin_show"
+        }
+      ]
+    },
+    {
+      "id": "begin_show",
+      "on": "_begin_show",
+      "do": [
+        {
+          "set": "showing",
+          "to": "true"
+        },
+        {
+          "set": "pos",
+          "to": "0"
+        },
+        {
+          "set": "_si",
+          "to": "0"
+        },
+        {
+          "set": "lit",
+          "to": "-1"
+        },
+        {
+          "after": "700ms",
+          "emit": "_light",
+          "id": "_t_light"
+        }
+      ]
+    },
+    {
+      "id": "light",
+      "on": "_light",
+      "when": "_si < len(pattern)",
+      "do": [
+        {
+          "set": "lit",
+          "to": "pattern[_si]"
+        },
+        {
+          "after": "@show_ms",
+          "emit": "_dark",
+          "id": "_t_dark"
+        }
+      ]
+    },
+    {
+      "id": "show_over",
+      "on": "_light",
+      "when": "_si >= len(pattern)",
+      "do": [
+        {
+          "set": "lit",
+          "to": "-1"
+        },
+        {
+          "set": "showing",
+          "to": "false"
+        }
+      ]
+    },
+    {
+      "id": "dark",
+      "on": "_dark",
+      "do": [
+        {
+          "set": "lit",
+          "to": "-1"
+        },
+        {
+          "incr": "_si"
+        },
+        {
+          "after": "@show_ms / 2",
+          "emit": "_light",
+          "id": "_t_light"
+        }
+      ]
+    },
+    {
+      "id": "unlit",
+      "on": "_unlit",
+      "when": "not showing",
+      "do": [
+        {
+          "set": "lit",
+          "to": "-1"
+        }
+      ]
+    },
+    {
+      "id": "tap_pad",
+      "on": "pad",
+      "when": "not showing and event.index >= 0 and event.index < @pads",
+      "do": [
+        {
+          "if": "event.index == pattern[pos]",
+          "then": [
+            {
+              "set": "lit",
+              "to": "event.index"
+            },
+            {
+              "after": "160ms",
+              "emit": "_unlit",
+              "id": "_t_unlit"
+            },
+            {
+              "incr": "pos"
+            },
+            {
+              "emit": "pad_ok"
+            },
+            {
+              "if": "pos >= len(pattern)",
+              "then": [
+                {
+                  "set": "best_len",
+                  "to": "len(pattern)"
+                },
+                {
+                  "push": "pattern",
+                  "value": "pick(range(@pads))"
+                },
+                {
+                  "emit": "sequence_ok"
+                },
+                {
+                  "emit": "_begin_show"
+                }
+              ]
+            }
+          ],
+          "else": [
+            {
+              "emit": "sequence_wrong"
+            },
+            {
+              "emit": "_begin_show"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": {
+      "include": "@target_len > 0",
+      "expr": "best_len >= @target_len"
+    }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": "= @y - 70",
+          "anchor": "center",
+          "size": 20,
+          "weight": 600,
+          "color": "$ink",
+          "text": "= if showing then 'Watch the pattern... (best ' + str(best_len) + ')' else 'Your turn: ' + str(pos) + ' of ' + str(len(pattern)) + ' (best ' + str(best_len) + ')'"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(@pads)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "group",
+            "children": [
+              {
+                "include": "@art.pad",
+                "node": "image",
+                "asset": "@art.pad.id",
+                "frame": "= k",
+                "x": "= _pad_x(k) - 48.0",
+                "y": "= _pad_y(k) - 48.0",
+                "w": 96,
+                "h": 96,
+                "role": "tile",
+                "opacity": "= if lit == k then 1.0 else 0.35",
+                "transition": {
+                  "opacity": {
+                    "ms": 90,
+                    "ease": "out"
+                  }
+                }
+              },
+              {
+                "include": "@art.pad",
+                "node": "rect",
+                "x": "= _pad_x(k) - 48.0",
+                "y": "= _pad_y(k) - 48.0",
+                "w": 96,
+                "h": 96,
+                "radius": 24,
+                "fill": "#00000000",
+                "on_tap": {
+                  "input": "pad",
+                  "with": {
+                    "index": "k"
+                  }
+                }
+              },
+              {
+                "include": "not @art.pad",
+                "node": "rect",
+                "x": "= _pad_x(k) - 48.0",
+                "y": "= _pad_y(k) - 48.0",
+                "w": 96,
+                "h": 96,
+                "radius": 24,
+                "role": "tile",
+                "fill": "= _pad_color(k)",
+                "opacity": "= if lit == k then 1.0 else 0.35",
+                "transition": {
+                  "opacity": {
+                    "ms": 90,
+                    "ease": "out"
+                  }
+                },
+                "on_tap": {
+                  "input": "pad",
+                  "with": {
+                    "index": "k"
+                  }
+                }
+              }
+            ],
+            "animate_on": {
+              "pad": {
+                "when": "event.index == k",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  0.9,
+                  1.05,
+                  1
+                ],
+                "ms": 170
+              },
+              "_light": {
+                "when": "lit == k",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  1.1,
+                  1
+                ],
+                "ms": 200
+              }
+            }
+          }
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "_light",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "= get_or([330.0, 392.0, 494.0, 587.0, 659.0, 784.0], lit, 440.0)",
+              "ms": 180,
+              "volume": 0.5
+            }
+          }
+        ]
+      },
+      {
+        "on": "pad",
+        "when": "not showing",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "= get_or([330.0, 392.0, 494.0, 587.0, 659.0, 784.0], event.index, 440.0)",
+              "ms": 120,
+              "volume": 0.45
+            }
+          }
+        ]
+      },
+      {
+        "on": "sequence_ok",
+        "do": [
+          {
+            "moment": "combo"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": "= _pad_y(0) + 60.0",
+              "count": 24,
+              "color": "@art.pad.color",
+              "speed": 240,
+              "size": 6,
+              "ms": 600
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      },
+      {
+        "on": "sequence_wrong",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "shake": {
+              "px": 6,
+              "ms": 200
+            }
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      }
+    ]
+  },
+  "tags": {
+    "mood": [
+      "calm",
+      "focused"
+    ],
+    "energy": [
+      "low",
+      "medium"
+    ]
+  },
+  "conflicts": []
+}

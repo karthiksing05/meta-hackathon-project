@@ -1,0 +1,284 @@
+{
+  "format": "microgame/0.1",
+  "meta": {
+    "title": "Number Merge",
+    "instructions": "Swipe or use the arrow keys to slide tiles. Equal tiles merge. Reach 128.",
+    "duration_s": 180
+  },
+  "types": {
+    "MergeResult": {
+      "cells": "list<int>",
+      "gained": "int"
+    }
+  },
+  "state": {
+    "board": {
+      "type": "grid<int>",
+      "init": "grid(4, 4, 0)"
+    },
+    "score": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "merge_line": {
+      "params": {
+        "line": "list<int>"
+      },
+      "returns": "MergeResult",
+      "body": "let packed = fold(filter(line, v => v != 0), {out: [], locked: true, gained: 0}, (acc, v) => if not acc.locked and last(acc.out) == v then {out: set_at(acc.out, len(acc.out) - 1, v * 2), locked: true, gained: acc.gained + v * 2} else {out: push(acc.out, v), locked: false, gained: acc.gained}) in {cells: concat(packed.out, repeat(0, len(line) - len(packed.out))), gained: packed.gained}"
+    },
+    "can_move": {
+      "params": {
+        "b": "grid<int>"
+      },
+      "returns": "bool",
+      "body": "any([up, down, left, right], d => any(lines(b, d), l => merge_line(map(l, c => b[c])).cells != map(l, c => b[c])))"
+    }
+  },
+  "events": {
+    "spawn_tile": {}
+  },
+  "inputs": {
+    "slide": {
+      "payload": {
+        "dir": "ivec2"
+      },
+      "from": [
+        {
+          "swipe": "any",
+          "with": {
+            "dir": "swipe.dir"
+          }
+        },
+        {
+          "key": "ArrowUp",
+          "with": {
+            "dir": "up"
+          }
+        },
+        {
+          "key": "ArrowDown",
+          "with": {
+            "dir": "down"
+          }
+        },
+        {
+          "key": "ArrowLeft",
+          "with": {
+            "dir": "left"
+          }
+        },
+        {
+          "key": "ArrowRight",
+          "with": {
+            "dir": "right"
+          }
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "setup",
+      "on": "start",
+      "do": [
+        {
+          "emit": "spawn_tile"
+        },
+        {
+          "emit": "spawn_tile"
+        }
+      ]
+    },
+    {
+      "id": "spawn",
+      "on": "spawn_tile",
+      "do": [
+        {
+          "let": {
+            "spot": "pick(filter(cells(board), c => board[c] == 0))"
+          }
+        },
+        {
+          "set": "board[spot]",
+          "to": "weighted([2, 4], [9, 1])"
+        }
+      ]
+    },
+    {
+      "id": "slide",
+      "on": "slide",
+      "do": [
+        {
+          "let": {
+            "before": "board"
+          }
+        },
+        {
+          "for_each": "lines(board, event.dir)",
+          "as": "line",
+          "do": [
+            {
+              "let": {
+                "r": "merge_line(map(line, c => board[c]))"
+              }
+            },
+            {
+              "set": "board",
+              "to": "write_line(board, line, r.cells)"
+            },
+            {
+              "incr": "score",
+              "by": "r.gained"
+            }
+          ]
+        },
+        {
+          "if": "board != before",
+          "then": [
+            {
+              "emit": "spawn_tile"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "any(values(board), v => v >= 128)",
+    "lose": "not can_move(board)",
+    "score": "score",
+    "time_limit": "180s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "canvas": {
+      "w": 360,
+      "h": 640,
+      "background": "$bg"
+    },
+    "tokens": {
+      "bg": "#F3F1FA",
+      "board": "#C9C3E3",
+      "dark": "#3D3566",
+      "light": "#FFFFFF",
+      "tiles": [
+        "#DCD7F0",
+        "#C7D7FA",
+        "#A9C1F7",
+        "#8BA8F2",
+        "#7C8CEB",
+        "#8A72E0",
+        "#9B5BD6",
+        "#B347C9"
+      ]
+    },
+    "root": {
+      "node": "stack",
+      "dir": "column",
+      "gap": 24,
+      "align": "center",
+      "x": 180,
+      "y": 320,
+      "anchor": "center",
+      "children": [
+        {
+          "node": "text",
+          "text": "= 'Score: ' + str(score)",
+          "size": 26,
+          "weight": 700,
+          "color": "$dark"
+        },
+        {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "x": -8,
+              "y": -8,
+              "w": 344,
+              "h": 344,
+              "radius": 10,
+              "fill": "$board"
+            },
+            {
+              "node": "grid",
+              "source": "board",
+              "cell_size": 76,
+              "gap": 8,
+              "cell": {
+                "node": "group",
+                "children": [
+                  {
+                    "node": "rect",
+                    "w": 76,
+                    "h": 76,
+                    "radius": 6,
+                    "fill": "= get_or($tiles, round(log2(max(value, 1))), '#3C3A32')",
+                    "transition": {
+                      "fill": {
+                        "ms": 100,
+                        "ease": "out"
+                      }
+                    },
+                    "animate_on": {
+                      "spawn_tile": {
+                        "when": "value != 0",
+                        "prop": "scale",
+                        "keys": [
+                          0.9,
+                          1.05,
+                          1
+                        ],
+                        "ms": 120
+                      }
+                    }
+                  },
+                  {
+                    "node": "text",
+                    "w": 76,
+                    "h": 76,
+                    "align": "center",
+                    "valign": "middle",
+                    "text": "= if value == 0 then '' else str(value)",
+                    "size": "= if value >= 100 then 28 else 34",
+                    "weight": 700,
+                    "color": "= if value <= 4 then $dark else $light"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "feedback": [
+      {
+        "on": "slide",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "A4",
+              "ms": 40
+            }
+          }
+        ]
+      },
+      {
+        "on": "win",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "C6",
+              "ms": 300
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,317 @@
+{
+  "fragment": "match_pairs",
+  "version": 1,
+  "describe": "Memory match over 2 x `pairs` face-down cards, shuffled at start. It listens to the input `tap_cell` (from grid_board) and turns the card at index cell.y * `cols` + cell.x, so `cols` must equal the board's cols. Once two cards are face up they stay visible for `mismatch_ms` (taps are ignored meanwhile); then a matching pair stays matched and emits `pair_found`, otherwise both flip back and `pair_missed` is emitted. Matching every pair wins. The game draws cards by reading `cards[i].symbol`, `.revealed` and `.matched` (symbols are ints 0 to pairs - 1); the board needs at least 2 x `pairs` cells. With the game's `card` sprite (one frame per symbol, frame = symbol), it draws each face-up card itself over the board at `x`, `y`, `cell_size` and `gap` (set them to grid_board's). A pair sparkles and pops; a miss plays the `hit` moment.",
+  "params": {
+    "pairs": {
+      "type": "int",
+      "default": 8,
+      "min": 2,
+      "max": 12
+    },
+    "cols": {
+      "type": "int",
+      "default": 4,
+      "min": 2,
+      "max": 10
+    },
+    "mismatch_ms": {
+      "type": "duration",
+      "default": 800,
+      "min": 200,
+      "max": 3000
+    },
+    "x": {
+      "type": "int",
+      "default": 36,
+      "min": 0,
+      "max": 360
+    },
+    "y": {
+      "type": "int",
+      "default": 180,
+      "min": 0,
+      "max": 640
+    },
+    "cell_size": {
+      "type": "int",
+      "default": 64,
+      "min": 24,
+      "max": 90
+    },
+    "gap": {
+      "type": "int",
+      "default": 8,
+      "min": 0,
+      "max": 16
+    }
+  },
+  "art": {
+    "card": {
+      "describe": "A card face: a sprite with one frame per symbol (give svg as a list, one SVG per symbol), drawn cell_size square on face-up cards.",
+      "color": "accent"
+    }
+  },
+  "requires": {
+    "inputs": {
+      "tap_cell": {
+        "cell": "ivec2"
+      }
+    }
+  },
+  "types": {
+    "Card": {
+      "symbol": "int",
+      "revealed": "bool",
+      "matched": "bool"
+    }
+  },
+  "state": {
+    "cards": {
+      "type": "list<Card>",
+      "init": "[]"
+    },
+    "selected": {
+      "type": "list<int>",
+      "init": "[]"
+    },
+    "matches": {
+      "type": "int",
+      "init": "0"
+    },
+    "_last_a": {
+      "type": "int",
+      "init": "-1"
+    },
+    "_last_b": {
+      "type": "int",
+      "init": "-1"
+    }
+  },
+  "events": {
+    "pair_found": {},
+    "pair_missed": {},
+    "_check": {},
+    "_resolve": {}
+  },
+  "rules": [
+    {
+      "id": "deal",
+      "on": "start",
+      "do": [
+        {
+          "set": "cards",
+          "to": "map(shuffle(concat(range(@pairs), range(@pairs))), s => {symbol: s, revealed: false, matched: false})"
+        }
+      ]
+    },
+    {
+      "id": "flip",
+      "on": "tap_cell",
+      "when": "len(selected) < 2 and event.cell.y * @cols + event.cell.x >= 0 and event.cell.y * @cols + event.cell.x < len(cards) and not cards[event.cell.y * @cols + event.cell.x].matched and not cards[event.cell.y * @cols + event.cell.x].revealed",
+      "do": [
+        {
+          "let": {
+            "i": "event.cell.y * @cols + event.cell.x"
+          }
+        },
+        {
+          "set": "cards",
+          "to": "set_at(cards, i, {symbol: cards[i].symbol, revealed: true, matched: false})"
+        },
+        {
+          "push": "selected",
+          "value": "i"
+        },
+        {
+          "if": "len(selected) == 2",
+          "then": [
+            {
+              "emit": "_check"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "check",
+      "on": "_check",
+      "do": [
+        {
+          "after": "@mismatch_ms",
+          "emit": "_resolve",
+          "id": "_resolve_timer"
+        }
+      ]
+    },
+    {
+      "id": "resolve",
+      "on": "_resolve",
+      "do": [
+        {
+          "let": {
+            "a": "selected[0]",
+            "b": "selected[1]"
+          }
+        },
+        {
+          "set": "_last_a",
+          "to": "a"
+        },
+        {
+          "set": "_last_b",
+          "to": "b"
+        },
+        {
+          "if": "cards[a].symbol == cards[b].symbol",
+          "then": [
+            {
+              "set": "cards",
+              "to": "set_at(set_at(cards, a, {symbol: cards[a].symbol, revealed: true, matched: true}), b, {symbol: cards[b].symbol, revealed: true, matched: true})"
+            },
+            {
+              "incr": "matches"
+            },
+            {
+              "set": "selected",
+              "to": "[]"
+            },
+            {
+              "emit": "pair_found"
+            }
+          ],
+          "else": [
+            {
+              "set": "cards",
+              "to": "set_at(set_at(cards, a, {symbol: cards[a].symbol, revealed: false, matched: false}), b, {symbol: cards[b].symbol, revealed: false, matched: false})"
+            },
+            {
+              "set": "selected",
+              "to": "[]"
+            },
+            {
+              "emit": "pair_missed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "matches >= @pairs"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text",
+          "text": "= 'Pairs: ' + str(matches) + ' / ' + str(@pairs)",
+          "size": 18,
+          "weight": 600,
+          "color": "$ink",
+          "role": "hud"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.card",
+        "node": {
+          "node": "repeat",
+          "source": "range(len(cards))",
+          "as": "i",
+          "key": "i",
+          "template": {
+            "node": "image",
+            "asset": "@art.card.id",
+            "frame": "= cards[i].symbol",
+            "x": "= @x + (i % @cols) * (@cell_size + @gap)",
+            "y": "= @y + (i / @cols) * (@cell_size + @gap)",
+            "w": "@cell_size",
+            "h": "@cell_size",
+            "visible": "= cards[i].revealed or cards[i].matched",
+            "animate_on": {
+              "tap_cell": {
+                "when": "event.cell.y * @cols + event.cell.x == i",
+                "prop": "scale",
+                "keys": [
+                  0.6,
+                  1.08,
+                  1
+                ],
+                "ms": 200
+              },
+              "pair_found": {
+                "when": "i == _last_a or i == _last_b",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  1.2,
+                  1
+                ],
+                "ms": 260
+              }
+            }
+          }
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "pair_found",
+        "do": [
+          {
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": "= @x + (_last_a % @cols) * (@cell_size + @gap) + @cell_size / 2",
+              "y": "= @y + (_last_a / @cols) * (@cell_size + @gap) + @cell_size / 2",
+              "count": 14,
+              "color": "@art.card.color",
+              "speed": 180,
+              "size": 5,
+              "ms": 500
+            }
+          },
+          {
+            "particles": {
+              "x": "= @x + (_last_b % @cols) * (@cell_size + @gap) + @cell_size / 2",
+              "y": "= @y + (_last_b / @cols) * (@cell_size + @gap) + @cell_size / 2",
+              "count": 14,
+              "color": "@art.card.color",
+              "speed": 180,
+              "size": 5,
+              "ms": 500
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "pair_missed",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      }
+    ]
+  },
+  "tags": {
+    "mood": [
+      "calm",
+      "playful"
+    ],
+    "energy": [
+      "low",
+      "medium"
+    ]
+  },
+  "conflicts": []
+}

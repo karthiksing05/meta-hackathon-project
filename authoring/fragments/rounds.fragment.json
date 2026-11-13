@@ -1,0 +1,53 @@
+{
+  "fragment": "rounds",
+  "version": 1,
+  "describe": "A finite run of N rounds. The game emits `round_done` when it finishes a round. `round` counts finished rounds from 0; `round_started {index}` is emitted at the start (index 0) and after each `round_done` that leaves rounds to play; `all_rounds_done` is emitted after the last one and wins the game (`round >= count`). HUD shows `<label> n of N`.",
+  "params": {
+    "count": { "type": "int", "default": 5, "min": 1, "max": 20 },
+    "label": { "type": "string", "default": "Round", "max_len": 16 }
+  },
+  "requires": {
+    "events": { "round_done": {} }
+  },
+  "state": {
+    "round": { "type": "int", "init": "0" }
+  },
+  "events": {
+    "round_started": { "index": "int" },
+    "all_rounds_done": {}
+  },
+  "rules": [
+    {
+      "id": "first_round",
+      "on": "start",
+      "do": [ { "emit": "round_started", "with": { "index": "0" } } ]
+    },
+    {
+      "id": "advance",
+      "on": "round_done",
+      "when": "round < @count",
+      "do": [
+        { "incr": "round" },
+        {
+          "if": "round < @count",
+          "then": [ { "emit": "round_started", "with": { "index": "round" } } ],
+          "else": [ { "emit": "all_rounds_done" } ]
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "round >= @count"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": { "node": "text", "text": "= @label + ' ' + str(min(round + 1, @count)) + ' of ' + str(@count)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
+      }
+    ],
+    "feedback": []
+  },
+  "tags": { "mood": ["any"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

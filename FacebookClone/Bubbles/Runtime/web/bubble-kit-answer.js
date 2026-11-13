@@ -12,6 +12,10 @@
 //
 // State: state.answer (rounds, progress, results; the rule), state.answer_stage (the space),
 // state.choices / state.choices_locked (for input.select), state.answer_score.
+//
+// Length (docs/BUBBLES.md 7.9): rounds from content by default. Rounds: length.rounds questions
+// (content cycles). Timed, lives and endless keep asking: the clock ends a timed run; misses spend
+// lives (rule.lives, else sdk.lengthMiss); endless ends on the first miss unless rule.lives is there.
 (function () {
   "use strict";
   var root = typeof globalThis !== "undefined" ? globalThis : this;
@@ -218,7 +222,7 @@
         var idx = clamp(a.index, 0, a.rounds.length - 1);
         var round = a.rounds[idx];
         var total = a.total();
-        if (params.progress && !flowDots) {
+        if (params.progress && !flowDots && !a.unbounded) {
           var gap = 20, x0 = W / 2 - (total - 1) * gap / 2;
           for (var i = 0; i < total; i++) {
             var res = a.results[i];
@@ -231,7 +235,7 @@
         g.pill(20, 104, 320, 128, { fill: ro.card || ro.light, alpha: ro.card ? 1 : ro.dark ? 0.16 : 0.66, radius: 30, glow: 0.8, glowColor: ro.light });
         // Only the glow look strokes an unfilled pill; other looks give the card their own edge.
         if (lookOf(g) === "glow") g.pill(20, 104, 320, 128, { fill: null, stroke: edge(g, ro), strokeWidth: 2, radius: 30 });
-        var head = (a.crowd ? a.crowd + " · " : "") + "Round " + (idx + 1) + " of " + total;
+        var head = (a.crowd ? a.crowd + " · " : "") + "Round " + (idx + 1) + (a.unbounded ? "" : " of " + total);
         g.text(head, W / 2, 126, { size: 12, weight: 700, color: ro.ink, alpha: 0.65, maxWidth: 290 });
         var fit = fitText(g, round.prompt, 284, 84, 26, 15, 3, 800);
         drawLines(g, fit, W / 2, 176, { color: ro.ink, weight: 800, maxWidth: 296 });
@@ -329,6 +333,17 @@
     var rounds = buildRounds(sdk, mode, params.shuffle_rounds, params.shuffle_choices);
     var content = sdk.content || {};
     var driven = !sdk.has("flow.rounds");
+    // Length (docs/BUBBLES.md 7.9): rounds mode plays exactly length.rounds rounds and a locked
+    // timed, lives or endless length keeps going, so the content cycles; unbounded runs drop the
+    // "of N" from the header. With no flow.rounds, misses spend lives or end an endless run here.
+    var L = sdk.length || {};
+    var unbounded = !!L.locked && !L.rounds;
+    var contentCount = rounds.length;
+    if (contentCount && (L.rounds || unbounded)) {
+      var want = L.rounds || 200;
+      for (var k = contentCount; k < want; k++) rounds.push(rounds[k % contentCount]);
+      if (rounds.length > want) rounds.length = want;
+    }
     var a = sdk.state.answer = {
       mode: mode,
       crowd: isStr(content.crowd) ? String(content.crowd).slice(0, 24) : "",
@@ -346,7 +361,12 @@
       subcaption: "",
       over: false,
       driven: driven,
-      total: function () { var fr = sdk.state.rounds; return fr && typeof fr.total === "number" && !driven ? fr.total : rounds.length; }
+      unbounded: unbounded,
+      total: function () {
+        if (unbounded) return Math.max(a.index + 1, a.results.length);
+        var fr = sdk.state.rounds;
+        return fr && typeof fr.total === "number" && !driven ? fr.total : rounds.length;
+      }
     };
     // flow.rounds plays min(count, this).
     sdk.state.rounds_available = Math.max(1, rounds.length);
@@ -405,6 +425,11 @@
       });
       sdk.emit("guess.made", { correct: res.good });
       if (!res.good) sdk.emit("entity.hit", { x: t ? t.x : W / 2, y: t ? t.y : 380, reason: timedOut ? "timeout" : "miss", delay: a.revealTicks + 6 });
+      if (driven && !res.good && L.locked && !sdk.ended && !sdk.has("rule.lives") && (L.mode === "endless" || (L.mode === "lives" && !sdk.lengthMiss()))) {
+        a.over = true;
+        sdk.emit("rule.fail", { reason: "length", rounds: a.index + 1 });
+        sdk.end("fail", { delay: a.revealTicks + 6 });
+      }
       if (!driven) sdk.emit("round.done", { correct: res.good });
       // Feel.
       if (res.good) {
@@ -427,6 +452,8 @@
       if (driven || a.over) return;
       startRound(clamp(Math.floor(num(e.index, 0)), 0, rounds.length - 1));
     });
+    // Driven runs (no flow.rounds) count their own rounds.
+    sdk.on("round.end", function () { if (driven) sdk.lengthRound(); });
 
     sdk.on("input.select", function (e) {
       if (a.phase !== "ask" || a.over || sdk.ended) return;
@@ -456,11 +483,12 @@
         sdk.emit("round.end", { index: a.index, correct: res.good });
         if (a.index + 1 >= rounds.length) {
           a.over = true; a.phase = "done";
+          if (sdk.ended) return;
           sdk.emit("rule.success", { rounds: rounds.length });
           sdk.fx.sound("success");
           sdk.fx.haptic("success");
           sdk.end("success", { rounds: rounds.length });
-        } else startRound(a.index + 1);
+        } else if (!sdk.ended) startRound(a.index + 1);
       }
     });
 
@@ -711,6 +739,18 @@
       }
     },
     validateContent: validateContent,
+    // Length (docs/BUBBLES.md 7.9): one pass through the content's rounds by default.
+    length: {
+      modes: ["rounds", "timed", "lives", "endless"],
+      default: { mode: "rounds" },
+      numbers: { rounds: 8, seconds: 60, lives: 3 },
+      infer: { rounds: ["content:rounds"] },
+      knobs: {
+        timer: { concept: "rule.answer_key|rule.consensus", param: "round_seconds", label: "Seconds per question", min: 4, max: 15 },
+        speed: { concept: "flow.rounds", param: "pause", label: "Pace", min: 70, max: 150, invert: true },
+      },
+      describe: "Rounds: questions. Timed: as many as you can. Lives: wrong answers you can take. Endless: until a wrong answer.",
+    },
     bot: { describe: "Thinks for 1–3 s (faster with skill), then picks the right answer or the crowd favorite with probability 0.3–0.95 by skill; otherwise a plausible wrong pick weighted by the votes.", decide: decide },
     share: share,
     example: {

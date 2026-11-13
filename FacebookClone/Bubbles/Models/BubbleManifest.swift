@@ -1,7 +1,8 @@
 import Foundation
 
-/// The seven core formulas from the taxonomy canvas (section 9). The runtime supports
-/// dodge, guess, group, answer, time and merge; `make` is reserved.
+/// The seven core formulas from the taxonomy canvas (section 9), plus the collaboration batch's
+/// story, nextline and learn (docs/BUBBLES.md, 7). The runtime supports all but `make`, which is
+/// reserved.
 enum BubbleFormula: String, Codable, CaseIterable, Sendable {
     case dodge
     case time
@@ -10,6 +11,16 @@ enum BubbleFormula: String, Codable, CaseIterable, Sendable {
     case group
     case answer
     case make
+    /// Branching stories you play (docs/BUBBLES.md 7.6). Labeled "Adventure", never "Story", so it
+    /// isn't confused with Facebook Stories.
+    case story
+    /// Guess what they say next: a quiz-night party game (docs/BUBBLES.md 7.7).
+    case nextline
+    /// A short lesson, practice and a recap (docs/BUBBLES.md 7.8).
+    case learn
+    /// Any game the Rust/WASM microgame engine runs: the whole game is in `content.game`
+    /// (engine/SPEC-v0.2.md), played by bubble-kit-microgame.js (docs/BUBBLES.md, "microgame").
+    case microgame
 
     var title: String {
         switch self {
@@ -20,6 +31,10 @@ enum BubbleFormula: String, Codable, CaseIterable, Sendable {
         case .group: return "Sort"
         case .answer: return "Answer"
         case .make: return "Make"
+        case .story: return "Adventure"
+        case .nextline: return "Next line"
+        case .learn: return "Learn"
+        case .microgame: return "Microgame"
         }
     }
 
@@ -33,6 +48,20 @@ enum BubbleFormula: String, Codable, CaseIterable, Sendable {
         case .group: return "square.grid.2x2"
         case .answer: return "text.bubble"
         case .make: return "paintbrush.pointed"
+        case .story: return "signpost.right.and.left"
+        case .nextline: return "quote.bubble"
+        case .learn: return "graduationcap"
+        case .microgame: return "gamecontroller"
+        }
+    }
+
+    /// The category chip this formula shows (docs/BUBBLES.md 7). `.play` shows no chip.
+    var category: BubbleCategory {
+        switch self {
+        case .story: return .adventure
+        case .nextline: return .party
+        case .learn: return .learn
+        default: return .play
         }
     }
 }
@@ -120,20 +149,44 @@ struct BubbleStructure: Codable, Hashable, Sendable {
 }
 
 /// Where a Bubble came from: its parent and the operators applied (taxonomy canvas, part 4).
+///
+/// Remix credit and co-makers (docs/BUBBLES.md 7.4 and 7.5): `remixOfTitle` and
+/// `remixOfCreatorName` carry the "Remix of Hill Drift by Leo" credit so it survives even when the
+/// original isn't on this device; `makers` lists everyone who made a co-made Bubble ("Made by Maya,
+/// Leo and you"). All optional, so older manifests decode unchanged.
 struct BubbleLineage: Codable, Hashable, Sendable {
     var parent: String?
     var operators: [String]
     var remixOf: String?
+    var remixOfTitle: String?
+    var remixOfCreatorID: String?
+    var remixOfCreatorName: String?
+    var makers: [BubbleMaker]?
 
-    init(parent: String? = nil, operators: [String] = [], remixOf: String? = nil) {
+    init(
+        parent: String? = nil,
+        operators: [String] = [],
+        remixOf: String? = nil,
+        remixOfTitle: String? = nil,
+        remixOfCreatorID: String? = nil,
+        remixOfCreatorName: String? = nil,
+        makers: [BubbleMaker]? = nil
+    ) {
         self.parent = parent
         self.operators = operators
         self.remixOf = remixOf
+        self.remixOfTitle = remixOfTitle
+        self.remixOfCreatorID = remixOfCreatorID
+        self.remixOfCreatorName = remixOfCreatorName
+        self.makers = makers
     }
 
     enum CodingKeys: String, CodingKey {
-        case parent, operators
+        case parent, operators, makers
         case remixOf = "remix_of"
+        case remixOfTitle = "remix_of_title"
+        case remixOfCreatorID = "remix_of_creator_id"
+        case remixOfCreatorName = "remix_of_creator_name"
     }
 
     init(from decoder: Decoder) throws {
@@ -141,6 +194,10 @@ struct BubbleLineage: Codable, Hashable, Sendable {
         parent = try c.decodeIfPresent(String.self, forKey: .parent)
         operators = (try? c.decodeIfPresent([String].self, forKey: .operators)) ?? []
         remixOf = try c.decodeIfPresent(String.self, forKey: .remixOf)
+        remixOfTitle = try? c.decodeIfPresent(String.self, forKey: .remixOfTitle)
+        remixOfCreatorID = try? c.decodeIfPresent(String.self, forKey: .remixOfCreatorID)
+        remixOfCreatorName = try? c.decodeIfPresent(String.self, forKey: .remixOfCreatorName)
+        makers = try? c.decodeIfPresent([BubbleMaker].self, forKey: .makers)
     }
 }
 
@@ -312,6 +369,11 @@ struct BubbleManifest: Codable, Hashable, Identifiable, Sendable {
     var studio: StudioStamp?
     /// The runtime contract this manifest was compiled and playtested against (docs/BUBBLES.md, 4.8).
     var engineVersion: Int
+    /// How long a run lasts: endless, rounds, timed or lives (docs/BUBBLES.md 7.9). Nil uses the
+    /// formula's default.
+    var length: BubbleLength?
+    /// "Games about me": whose game this is and which template made it (docs/BUBBLES.md 7.4).
+    var about: BubbleAboutMe?
 
     init(
         id: String,
@@ -329,7 +391,9 @@ struct BubbleManifest: Codable, Hashable, Identifiable, Sendable {
         content: JSONValue = .object([:]),
         seed: Int = 1,
         studio: StudioStamp? = nil,
-        engineVersion: Int = 1
+        engineVersion: Int = 1,
+        length: BubbleLength? = nil,
+        about: BubbleAboutMe? = nil
     ) {
         self.id = id
         self.version = version
@@ -347,10 +411,12 @@ struct BubbleManifest: Codable, Hashable, Identifiable, Sendable {
         self.seed = seed
         self.studio = studio
         self.engineVersion = engineVersion
+        self.length = length
+        self.about = about
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, version, title, formula, brief, structure, lineage, chain, style, concepts, glue, content, seed, studio
+        case id, version, title, formula, brief, structure, lineage, chain, style, concepts, glue, content, seed, studio, length, about
         case oneLineRule = "one_line_rule"
         case engineVersion = "engine_version"
     }
@@ -380,6 +446,8 @@ struct BubbleManifest: Codable, Hashable, Identifiable, Sendable {
         }
         studio = try? c.decodeIfPresent(StudioStamp.self, forKey: .studio)
         engineVersion = (try? c.decodeIfPresent(Int.self, forKey: .engineVersion)) ?? 1
+        length = try? c.decodeIfPresent(BubbleLength.self, forKey: .length)
+        about = try? c.decodeIfPresent(BubbleAboutMe.self, forKey: .about)
     }
 }
 

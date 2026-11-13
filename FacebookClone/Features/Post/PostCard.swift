@@ -166,7 +166,9 @@ struct PostCard: View {
         if let poll = post.poll {
             PostPollView(post: post, poll: poll)
         }
-        if let bubbleID = post.bubbleID {
+        if let card = post.bubbleCard {
+            BubbleChatCardView(card: card, placement: .post(post))
+        } else if let bubbleID = post.bubbleID {
             BubblePostAttachment(post: post, bubbleID: bubbleID)
         }
         if let shared = post.sharedPost {

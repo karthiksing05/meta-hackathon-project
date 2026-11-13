@@ -1,4 +1,0 @@
-.env
-deploy/env/*.env
-data/
-*.test

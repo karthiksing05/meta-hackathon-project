@@ -1,0 +1,12 @@
+[package]
+name = "mg-runtime"
+description = "Deterministic game runtime: evaluator, builtins, effects, scheduler, objectives"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+mg-core.workspace = true
+
+[dev-dependencies]
+mg-lang.workspace = true

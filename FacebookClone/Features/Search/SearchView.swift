@@ -4,6 +4,7 @@ private enum SearchFilter: String, CaseIterable, Identifiable {
     case all = "All"
     case posts = "Posts"
     case people = "People"
+    case games = "Games"
     case groups = "Groups"
     case pages = "Pages"
     case marketplace = "Marketplace"
@@ -15,9 +16,12 @@ private enum SearchFilter: String, CaseIterable, Identifiable {
 /// Search screen (Route.search).
 struct SearchView: View {
     var initialQuery: String = ""
+    /// Open on the Games filter (Bubbles deep links, docs/BUBBLES.md 7.3).
+    var startsOnGames = false
 
     @Environment(AppStore.self) private var store
     @Environment(Router.self) private var router
+    @Environment(BubbleStore.self) private var bubbleStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var query = ""
@@ -58,6 +62,7 @@ struct SearchView: View {
             if !didPrefill {
                 didPrefill = true
                 query = initialQuery
+                if startsOnGames { filter = .games }
             }
         }
         .confirmationDialog("Clear search history?", isPresented: $confirmClear, titleVisibility: .visible) {
@@ -85,7 +90,7 @@ struct SearchView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Back")
-            SearchField(placeholder: "Search Facebook", text: $query, autoFocus: true) {
+            SearchField(placeholder: "Search Facebook", text: $query, autoFocus: initialQuery.isEmpty) {
                 store.addRecentSearch(query)
             }
         }
@@ -237,12 +242,18 @@ struct SearchView: View {
 
     private var resultsContent: some View {
         let results = store.search(trimmedQuery)
+        let games = gamesMatching(query: trimmedQuery, in: bubbleStore)
         return VStack(alignment: .leading, spacing: 0) {
             chips
-            if results.isEmpty {
-                emptyState
+            if results.isEmpty && games.isEmpty {
+                if filter == .games {
+                    SearchGamesEmptyState(query: trimmedQuery)
+                } else {
+                    emptyState
+                    SearchMakeWithMuseRow(query: trimmedQuery)
+                }
             } else {
-                resultSections(results)
+                resultSections(results, games: games)
             }
         }
         .padding(.bottom, 24)
@@ -290,12 +301,21 @@ struct SearchView: View {
     }
 
     @ViewBuilder
-    private func resultSections(_ results: SearchResults) -> some View {
+    private func resultSections(_ results: SearchResults, games: [Bubble]) -> some View {
         if shows(.people) && !results.people.isEmpty {
             SearchSectionTitle(title: "People")
             ForEach(limit(results.people, for: .people)) { user in
                 SearchPersonRow(user: user, query: trimmedQuery, open: open)
             }
+        }
+        if shows(.games) && !games.isEmpty {
+            SearchSectionTitle(title: GroupsSearchCopy.gamesSection)
+            ForEach(limit(games, for: .games)) { bubble in
+                SearchGameRow(bubble: bubble, query: trimmedQuery, open: open)
+            }
+        }
+        if filter == .all && games.isEmpty {
+            SearchMakeWithMuseRow(query: trimmedQuery)
         }
         if shows(.pages) && !results.pages.isEmpty {
             SearchSectionTitle(title: "Pages")
@@ -323,14 +343,17 @@ struct SearchView: View {
             SearchSectionTitle(title: "Posts")
             postResults(results.posts)
         }
-        if filter != .all && isFilterEmpty(results) {
+        if filter == .games && games.isEmpty {
+            SearchGamesEmptyState(query: trimmedQuery)
+        } else if filter != .all && isFilterEmpty(results, games: games) {
             emptyState
         }
     }
 
-    private func isFilterEmpty(_ results: SearchResults) -> Bool {
+    private func isFilterEmpty(_ results: SearchResults, games: [Bubble]) -> Bool {
         switch filter {
-        case .all: return results.isEmpty
+        case .all: return results.isEmpty && games.isEmpty
+        case .games: return games.isEmpty
         case .posts: return results.posts.isEmpty
         case .people: return results.people.isEmpty
         case .groups: return results.groups.isEmpty

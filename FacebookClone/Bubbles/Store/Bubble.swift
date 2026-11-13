@@ -71,6 +71,9 @@ final class Bubble: Identifiable, Hashable {
     var likeCount: Int
     var isLiked: Bool
     var isSaved: Bool
+    /// How many people saved it. Saves are the likes (docs/BUBBLES.md 7.10): show this where likes
+    /// would be. Seeds set it with `_seed.save_count`; `toggleSave` keeps it in step.
+    var saveCount: Int
     /// Everyone's runs, best first is not guaranteed; use `BubbleStore.leaderboard`.
     var scores: [BubbleScore]
     /// The run shown as a Burst before you take over.
@@ -89,6 +92,7 @@ final class Bubble: Identifiable, Hashable {
         likeCount: Int = 0,
         isLiked: Bool = false,
         isSaved: Bool = false,
+        saveCount: Int = 0,
         scores: [BubbleScore] = [],
         featuredRun: BubbleScore? = nil,
         history: [BubbleManifest] = []
@@ -104,6 +108,7 @@ final class Bubble: Identifiable, Hashable {
         self.likeCount = likeCount
         self.isLiked = isLiked
         self.isSaved = isSaved
+        self.saveCount = saveCount
         self.scores = scores
         self.featuredRun = featuredRun
         self.history = history
@@ -116,12 +121,14 @@ final class Bubble: Identifiable, Hashable {
     /// The colors this Bubble really uses, custom colors included (LOOKS.md). Use for anything
     /// Bubble-specific: accents, backgrounds behind posters.
     var palette: BubblePalette { BubbleGlow.palette(for: manifest.style) }
-    var emoji: String { manifest.style.emoji ?? "🫧" }
+    var emoji: String { manifest.style.emoji ?? "✨" }
     var isDaily: Bool { manifest.structure.isDaily }
     var isIcebreaker: Bool { manifest.structure.eventID != nil }
     var chainID: String? { manifest.chain?.id }
     var levelIndex: Int? { manifest.chain?.index }
     var isMadeWithMuse: Bool { manifest.structure.setter == "ai" || manifest.studio != nil }
+    /// The chip next to the formula: Adventure, Quiz night, Learn, or none (`.play`).
+    var category: BubbleCategory { formula.category }
 
     static func == (lhs: Bubble, rhs: Bubble) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }

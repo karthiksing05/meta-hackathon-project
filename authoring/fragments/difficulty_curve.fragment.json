@@ -1,0 +1,35 @@
+{
+  "fragment": "difficulty_curve",
+  "version": 1,
+  "describe": "One knob, `difficulty` (float), that ramps from `from` to `to` over `over` ms of play, then holds at `to`. `curve` shapes the ramp: linear, ease_in (slow start), ease_out (fast start) or ease_in_out. Requires nothing and sets no objectives; the game reads `difficulty` in its own rules (spawn gaps, speeds, sizes), for example `speed = 60.0 + 80.0 * difficulty`.",
+  "params": {
+    "from":  { "type": "float", "default": 0.0, "min": 0.0, "max": 10.0 },
+    "to":    { "type": "float", "default": 1.0, "min": 0.0, "max": 10.0 },
+    "over":  { "type": "duration", "default": 45000, "min": 1000, "max": 300000 },
+    "curve": { "type": "enum", "values": ["linear", "ease_in", "ease_out", "ease_in_out"], "default": "linear" }
+  },
+  "requires": {},
+  "state": {
+    "difficulty": { "type": "float", "init": "@from" },
+    "_elapsed": { "type": "float", "init": "0.0" }
+  },
+  "rules": [
+    {
+      "id": "ramp",
+      "on": "tick",
+      "when": "_elapsed < @over * 1.0",
+      "do": [
+        { "set": "_elapsed", "to": "min(@over * 1.0, _elapsed + event.dt)" },
+        { "let": { "t": "_elapsed / (@over * 1.0)" } },
+        {
+          "set": "difficulty",
+          "to": "lerp(@from, @to, if @curve == 'ease_in' then t * t else if @curve == 'ease_out' then 1.0 - (1.0 - t) * (1.0 - t) else if @curve == 'ease_in_out' then (if t < 0.5 then 2.0 * t * t else 1.0 - (2.0 - 2.0 * t) * (2.0 - 2.0 * t) / 2.0) else t)"
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": { "slots": [], "feedback": [] },
+  "tags": { "mood": ["tense"], "energy": ["medium", "high"] },
+  "conflicts": []
+}

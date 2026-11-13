@@ -342,6 +342,8 @@ struct MessengerBubble: View {
     private var content: some View {
         if message.isUnsent {
             unsentBubble
+        } else if let card = message.bubbleCard {
+            BubbleChatCardView(card: card, placement: .chat(messageID: message.id, isFromMe: isFromMe))
         } else if let emoji = message.bigEmoji {
             Text(emoji)
                 .font(.system(size: 44)) // Display text

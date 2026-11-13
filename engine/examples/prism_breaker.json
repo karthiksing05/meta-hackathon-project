@@ -1,0 +1,171 @@
+{
+  "format": "microgame/0.2",
+  "meta": {
+    "title": "Prism Breaker",
+    "instructions": "Drag (or use the arrow keys) to move the paddle. Bounce the orb into the crystals and shatter all of them. Where the orb hits the paddle sets its angle. You have 3 orbs.",
+    "duration_s": 90
+  },
+  "types": {
+    "Orb":    { "x": "float", "y": "float", "vx": "float", "vy": "float", "r": "float" },
+    "Paddle": { "x": "float", "y": "float", "w": "float", "h": "float" },
+    "Brick":  { "x": "float", "y": "float", "w": "float", "h": "float", "hp": "int", "row": "int" }
+  },
+  "state": {
+    "orb":    { "type": "Orb", "init": "{x: 180.0, y: 561.0, vx: 0.0, vy: 0.0, r: 8.0}" },
+    "paddle": { "type": "Paddle", "init": "{x: 180.0, y: 580.0, w: 84.0, h: 14.0}" },
+    "bricks": { "type": "list<Brick>", "init": "map(coords(7, 5), c => {x: 38.0 + c.x * 48, y: 120.0 + c.y * 26, w: 44.0, h: 20.0, hp: if c.y == 0 then 2 else 1, row: c.y})" },
+    "phase":  { "type": { "enum": ["serve", "play", "out"] }, "init": "'serve'" },
+    "lives":  { "type": "int", "init": "3" },
+    "broken": { "type": "int", "init": "0" },
+    "points": { "type": "int", "init": "0" }
+  },
+  "functions": {
+    "speed": { "params": { "n": "int" }, "returns": "float", "body": "min(340.0 + n * 7, 560.0)" }
+  },
+  "events": {
+    "paddle_hit": {},
+    "brick_hit":  { "b": "int" },
+    "edge":       { "a": "int" },
+    "launch":     {},
+    "shatter":    { "x": "float", "y": "float", "row": "int" },
+    "lost_orb":   {}
+  },
+  "inputs": {
+    "move": { "payload": { "x": "float" } },
+    "nudge": {
+      "payload": { "dx": "float" },
+      "from": [
+        { "key": "ArrowLeft",  "with": { "dx": "-28" } },
+        { "key": "ArrowRight", "with": { "dx": "28" } }
+      ]
+    },
+    "serve_now": {
+      "payload": {},
+      "when": "phase == 'serve'",
+      "from": [ { "key": "Space" } ]
+    }
+  },
+  "rules": [
+    { "id": "first_serve", "on": "start", "do": [ { "after": "1200ms", "emit": "launch", "id": "serve" } ] },
+    { "id": "drag", "on": "move", "do": [ { "set": "paddle.x", "to": "clamp(event.x, paddle.w / 2, 360 - paddle.w / 2)" } ] },
+    { "id": "keys", "on": "nudge", "do": [ { "set": "paddle.x", "to": "clamp(paddle.x + event.dx, paddle.w / 2, 360 - paddle.w / 2)" } ] },
+    { "id": "serve_now", "on": "serve_now", "do": [ { "cancel": "serve" }, { "emit": "launch" } ] },
+    { "id": "launch", "on": "launch", "when": "phase == 'serve'", "do": [
+      { "set": "phase", "to": "'play'" },
+      { "let": { "a": "random_float(-0.5, 0.5)" } },
+      { "set": "orb", "to": "{...orb, vx: speed(broken) * sin(a), vy: -speed(broken) * cos(a)}" }
+    ] },
+    { "id": "paddle_hit", "on": "paddle_hit", "when": "phase == 'play' and orb.vy <= 0", "do": [
+      { "let": { "off": "clamp((orb.x - paddle.x) / (paddle.w / 2), -1.0, 1.0)" } },
+      { "let": { "a": "off * 1.05" } },
+      { "set": "orb", "to": "{...orb, vx: speed(broken) * sin(a), vy: -speed(broken) * cos(a)}" }
+    ] },
+    { "id": "brick_hit", "on": "brick_hit", "when": "bricks[event.b].hp > 0", "do": [
+      { "decr": "bricks[event.b].hp" },
+      { "if": "bricks[event.b].hp == 0", "then": [
+        { "incr": "broken" },
+        { "incr": "points", "by": "10 * (5 - bricks[event.b].row)" },
+        { "emit": "shatter", "with": { "x": "bricks[event.b].x", "y": "bricks[event.b].y", "row": "bricks[event.b].row" } }
+      ] }
+    ] },
+    { "id": "edge", "on": "edge", "when": "phase == 'play' and orb.y >= 640 - orb.r - 1", "do": [
+      { "set": "phase", "to": "'out'" },
+      { "decr": "lives" },
+      { "set": "orb", "to": "{...orb, vx: 0.0, vy: 0.0}" },
+      { "emit": "lost_orb" },
+      { "if": "lives > 0", "then": [ { "after": "700ms", "emit": "launch", "id": "serve" } ] }
+    ] },
+    { "id": "reserve", "on": "launch", "when": "phase == 'out'", "do": [
+      { "set": "phase", "to": "'serve'" },
+      { "after": "900ms", "emit": "launch", "id": "serve" }
+    ] },
+    { "id": "carry", "on": "tick", "do": [
+      { "remove": "bricks", "where": "b => b.hp <= 0" },
+      { "if": "phase != 'play'", "then": [
+        { "set": "orb", "to": "{...orb, x: paddle.x, y: paddle.y - paddle.h / 2 - orb.r - 1, vx: 0.0, vy: 0.0}" }
+      ] },
+      { "if": "phase == 'play' and abs(orb.vy) < 60", "then": [
+        { "set": "orb.vy", "to": "if orb.vy < 0 then -90.0 else 90.0" }
+      ] }
+    ] }
+  ],
+  "physics": {
+    "gravity": [0, 0],
+    "bounds": [0, 0, 360, 640],
+    "bodies": {
+      "orb":    { "state": "orb", "bounded": true, "bounce": 1, "gravity": 0 },
+      "paddle": { "state": "paddle", "static": true },
+      "bricks": { "state": "bricks", "static": true }
+    },
+    "collisions": [
+      { "a": "orb", "b": "paddle", "solid": true, "emit": "paddle_hit" },
+      { "a": "orb", "b": "bricks", "solid": true, "emit": "brick_hit" }
+    ],
+    "on_bounds": [ { "body": "orb", "emit": "edge" } ]
+  },
+  "objectives": {
+    "win": "broken >= 35",
+    "lose": "lives <= 0",
+    "score": "points + lives * 50",
+    "time_limit": "180s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "canvas": { "w": 360, "h": 640, "background": "$bg" },
+    "tokens": {
+      "bg": "#0E0B1F", "grid": "#1D1838", "paddle": "#F4F1EA", "orb": "#7DF9FF", "ink": "#E9E4FF", "dim": "#6F6797",
+      "rows": ["#FF5D8F", "#FF9F45", "#FFD23F", "#3BCEAC", "#5C7CFA"]
+    },
+    "root": {
+      "node": "group",
+      "children": [
+        { "node": "repeat", "source": "range(10)", "as": "i", "template": {
+          "node": "poly", "closed": true, "stroke": "$grid", "stroke_width": 2, "fill": "#00000000",
+          "x": "= (i % 5) * 80 + 20", "y": "= 260 + floor(i / 5) * 140",
+          "points": "[vec(0, 0), vec(40, 70), vec(-40, 70)]", "opacity": 0.8 } },
+        { "node": "line", "x": 0, "y": 0, "x1": 2, "y1": 0, "x2": 2, "y2": 640, "stroke": "$dim", "stroke_width": 3 },
+        { "node": "line", "x": 0, "y": 0, "x1": 358, "y1": 0, "x2": 358, "y2": 640, "stroke": "$dim", "stroke_width": 3 },
+        { "node": "line", "x": 0, "y": 0, "x1": 0, "y1": 2, "x2": 360, "y2": 2, "stroke": "$dim", "stroke_width": 3 },
+        { "node": "repeat", "source": "bricks", "as": "b", "key": "b.x * 1000 + b.y", "template": {
+          "node": "group", "children": [
+            { "node": "rect", "x": "= b.x - b.w / 2", "y": "= b.y - b.h / 2", "w": "= b.w", "h": "= b.h", "radius": 4,
+              "fill": "= $rows[b.row]", "opacity": "= if b.hp >= 2 then 1 else 0.85",
+              "stroke": "= if b.hp >= 2 then '#FFFFFF' else '#00000000'", "stroke_width": 2 },
+            { "node": "poly", "x": "= b.x - b.w / 2", "y": "= b.y - b.h / 2",
+              "points": "[vec(4, 4), vec(16, 4), vec(8, 12)]", "fill": "#FFFFFF", "opacity": 0.35 }
+          ] } },
+        { "node": "line", "visible": "= phase == 'serve'", "x": "= orb.x", "y": "= orb.y",
+          "x1": 0, "y1": -12, "x2": 0, "y2": -70, "stroke": "$orb", "stroke_width": 2, "opacity": "= 0.3 + 0.3 * abs(sin(now / 200))" },
+        { "node": "rect", "anchor": "center", "x": "= paddle.x", "y": "= paddle.y", "w": "= paddle.w", "h": "= paddle.h", "radius": 7, "fill": "$paddle",
+          "animate_on": { "paddle_hit": { "prop": "scale", "keys": [1, 1.08, 1], "ms": 120 } } },
+        { "node": "circle", "x": "= orb.x", "y": "= orb.y", "r": "= orb.r", "fill": "$orb" },
+        { "node": "circle", "x": "= orb.x", "y": "= orb.y", "r": "= orb.r + 6", "fill": "$orb", "opacity": 0.2 },
+        { "node": "rect", "x": 0, "y": 40, "w": 360, "h": 600, "fill": "#00000000",
+          "on_drag": { "input": "move", "with": { "x": "pointer.x" } } },
+        { "node": "text", "x": 16, "y": 14, "text": "= str(points)", "size": 20, "weight": 800, "color": "$ink" },
+        { "node": "repeat", "source": "range(3)", "as": "i", "template": {
+          "node": "circle", "x": "= 340 - i * 20", "y": 26, "r": 6, "fill": "= if i < lives then $orb else $grid" } },
+        { "node": "text", "x": 180, "y": 400, "anchor": "center", "visible": "= phase == 'serve'", "text": "Get ready", "size": 22, "weight": 700, "color": "$ink" }
+      ]
+    },
+    "feedback": [
+      { "on": "paddle_hit", "do": [ { "sound": { "wave": "square", "note": "G4", "ms": 50, "volume": 0.3 } }, { "haptic": "light" } ] },
+      { "on": "brick_hit",  "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 40, "volume": 0.3 } } ] },
+      { "on": "shatter", "do": [
+        { "particles": { "x": "= event.x", "y": "= event.y", "count": 16, "color": "= $rows[event.row]", "speed": 200, "size": 4, "ms": 500, "gravity": 500 } },
+        { "sound": { "wave": "triangle", "note": "E6", "slide": "B6", "ms": 70, "volume": 0.35 } },
+        { "haptic": "medium" }
+      ] },
+      { "on": "lost_orb", "do": [
+        { "shake": { "px": 8, "ms": 300 } },
+        { "haptic": "error" },
+        { "sound": { "wave": "sawtooth", "note": "E3", "slide": "E2", "ms": 300, "volume": 0.4 } }
+      ] },
+      { "on": "win", "do": [
+        { "sound": { "wave": "triangle", "notes": ["C5", "G5", "C6", "E6", "G6"], "step_ms": 70 } },
+        { "haptic": "success" },
+        { "particles": { "x": 180, "y": 300, "count": 64, "color": "#FFD23F", "speed": 300, "ms": 1200, "gravity": 300 } }
+      ] }
+    ]
+  }
+}

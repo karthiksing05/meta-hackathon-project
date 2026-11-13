@@ -112,7 +112,8 @@ struct BubbleBotRun: Codable, Sendable {
 /// The headless runtime on its own serial queue (`BubbleJSRuntime` isn't thread-safe): bot runs
 /// for the roster and replay checks for your scores. Everything here runs off the main thread.
 final class BubbleRuntimeWorker {
-    private let queue = DispatchQueue(label: "com.karthiksing05.fbclone.bubbles.runtime", qos: .utility)
+    /// Internal (not private) so `BubbleOpponentRuns.swift` can queue one-off bot runs here too.
+    let queue = DispatchQueue(label: "com.karthiksing05.fbclone.bubbles.runtime", qos: .utility)
     /// Touched only on `queue`.
     private var runtime: BubbleJSRuntime?
     private var didFailToLoad = false
@@ -202,7 +203,8 @@ final class BubbleRuntimeWorker {
         }
     }
 
-    private func loadRuntime() -> BubbleJSRuntime? {
+    /// Call on `queue` only.
+    func loadRuntime() -> BubbleJSRuntime? {
         if let runtime { return runtime }
         guard !didFailToLoad else { return nil }
         do {
@@ -481,6 +483,10 @@ extension BubbleStore {
         case .group: return 4...16
         case .answer: return 2...10
         case .make: return 1...20
+        case .story: return 20...120
+        case .nextline: return 200...1_600
+        case .learn: return 3...12
+        case .microgame: return 10...400
         }
     }
 

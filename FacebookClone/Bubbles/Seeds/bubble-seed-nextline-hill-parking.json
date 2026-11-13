@@ -1,0 +1,307 @@
+{
+  "id": "nextline-hill-parking",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Hill Parking",
+  "one_line_rule": "Guess what the new neighbors say next.",
+  "formula": "nextline",
+  "brief": {
+    "intent": "a quiz night about new neighbors on a steep street",
+    "audience": "group:group-newinsf",
+    "mood": [
+      "playful",
+      "silly"
+    ],
+    "energy": "medium",
+    "competition": "friendly",
+    "occasion": "party"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "group:group-newinsf",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "clay",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#EEF3FF",
+      "bg_bottom": "#DCE6FB",
+      "ink": "#1B2559",
+      "primary": "#3D6FE0",
+      "secondary": "#7B61D9",
+      "accent": "#3BA3D0",
+      "danger": "#B3261E"
+    },
+    "font": "rounded",
+    "motif": "hills",
+    "emoji": "🚗",
+    "mood_preset": "playful",
+    "cover_prompt": "soft clay toy diorama of a tiny car parked on a very steep street with three cute shape characters waving, studio backdrop"
+  },
+  "concepts": [
+    {
+      "use": "space.nextline_stage"
+    },
+    {
+      "use": "entity.line_tiles"
+    },
+    {
+      "use": "input.select"
+    },
+    {
+      "use": "rule.next_line",
+      "params": {
+        "round_seconds": 8
+      }
+    },
+    {
+      "use": "score.quick_answer"
+    }
+  ],
+  "glue": {},
+  "content": {
+    "episodes": [
+      {
+        "title": "Steep",
+        "setting": "Moving day on the steepest street in town.",
+        "cast": [
+          {
+            "name": "Bo",
+            "shape": "round",
+            "role": "primary"
+          },
+          {
+            "name": "Tess",
+            "shape": "tall",
+            "role": "secondary"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Bo",
+            "text": "Is that your car on the hill?"
+          },
+          {
+            "who": "Tess",
+            "text": "Yes! Just moved in. Is that okay?"
+          },
+          {
+            "who": "Bo",
+            "text": "Your wheels aren't curbed."
+          },
+          {
+            "who": "Tess",
+            "text": "What does curbed mean?"
+          }
+        ],
+        "next_who": "Bo",
+        "answer": "It means your car won't visit the bay without you.",
+        "decoys": [
+          "It means you parked too far out.",
+          "It's a kind of street sweeping.",
+          "It means you need a permit."
+        ],
+        "reveal_emoji": "🛞"
+      },
+      {
+        "title": "Sweeping day",
+        "setting": "There's a ticket on the windshield.",
+        "cast": [
+          {
+            "name": "Tess",
+            "shape": "tall",
+            "role": "secondary"
+          },
+          {
+            "name": "Bo",
+            "shape": "round",
+            "role": "primary"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Tess",
+            "text": "Why is there a ticket on my car?"
+          },
+          {
+            "who": "Bo",
+            "text": "Tuesday is street sweeping."
+          },
+          {
+            "who": "Tess",
+            "text": "But it's Tuesday... oh."
+          },
+          {
+            "who": "Bo",
+            "text": "Welcome to the neighborhood."
+          }
+        ],
+        "next_who": "Tess",
+        "answer": "So that's what the giant broom truck was.",
+        "decoys": [
+          "I'll frame it as a souvenir.",
+          "Can I park in your garage?",
+          "Do you know a good bakery?"
+        ],
+        "reveal_emoji": "🧹"
+      },
+      {
+        "title": "Uphill start",
+        "setting": "A new neighbor offers to help.",
+        "cast": [
+          {
+            "name": "Milo",
+            "shape": "star",
+            "role": "accent"
+          },
+          {
+            "name": "Tess",
+            "shape": "tall",
+            "role": "secondary"
+          },
+          {
+            "name": "Bo",
+            "shape": "round",
+            "role": "primary"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Milo",
+            "text": "Need help? I'm Milo, from 4B."
+          },
+          {
+            "who": "Tess",
+            "text": "My car keeps rolling back on the hill."
+          },
+          {
+            "who": "Milo",
+            "text": "Handbrake, gas, then let go slowly."
+          },
+          {
+            "who": "Tess",
+            "text": "And if that doesn't work?"
+          }
+        ],
+        "next_who": "Milo",
+        "answer": "Then we push, and Bo films it.",
+        "decoys": [
+          "Then you call a tow truck.",
+          "Then you sell the car.",
+          "Then you try a flatter street."
+        ],
+        "reveal_emoji": "🎬"
+      },
+      {
+        "title": "The perfect spot",
+        "setting": "A spot opens up right out front.",
+        "cast": [
+          {
+            "name": "Bo",
+            "shape": "round",
+            "role": "primary"
+          },
+          {
+            "name": "Milo",
+            "shape": "star",
+            "role": "accent"
+          },
+          {
+            "name": "Tess",
+            "shape": "tall",
+            "role": "secondary"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Bo",
+            "text": "Someone's leaving the spot out front!"
+          },
+          {
+            "who": "Milo",
+            "text": "I'll guard it with my body."
+          },
+          {
+            "who": "Tess",
+            "text": "I'm three blocks away. Hold on!"
+          },
+          {
+            "who": "Milo",
+            "text": "A van is circling. Hurry!"
+          }
+        ],
+        "next_who": "Tess",
+        "answer": "Lie down and look like a traffic cone!",
+        "decoys": [
+          "Let them have it. I'll take the bus.",
+          "Ask them to come back later.",
+          "I'll just park in the driveway."
+        ],
+        "reveal_emoji": "🚧"
+      },
+      {
+        "title": "Housewarming",
+        "setting": "Tess is throwing a party.",
+        "cast": [
+          {
+            "name": "Tess",
+            "shape": "tall",
+            "role": "secondary"
+          },
+          {
+            "name": "Bo",
+            "shape": "round",
+            "role": "primary"
+          },
+          {
+            "name": "Milo",
+            "shape": "star",
+            "role": "accent"
+          }
+        ],
+        "lines": [
+          {
+            "who": "Tess",
+            "text": "Thanks for all the parking help, you two."
+          },
+          {
+            "who": "Bo",
+            "text": "That's what neighbors are for."
+          },
+          {
+            "who": "Milo",
+            "text": "So, about your housewarming party..."
+          },
+          {
+            "who": "Tess",
+            "text": "Everyone's invited! Where will they park?"
+          }
+        ],
+        "next_who": "Bo",
+        "answer": "Tell them to bring their own hill.",
+        "decoys": [
+          "I'll save my garage for you.",
+          "There's a lot by the park.",
+          "Let's move the party to my place."
+        ],
+        "reveal_emoji": "🏠"
+      }
+    ]
+  },
+  "seed": 2026111402,
+  "_seed": {
+    "creator_id": "sf-omar-haddad",
+    "group_id": "group-newinsf",
+    "created_hours_ago": 20,
+    "play_count": 41,
+    "like_count": 15,
+    "save_count": 12
+  }
+}

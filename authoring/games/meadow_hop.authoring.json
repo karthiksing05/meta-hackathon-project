@@ -1,0 +1,82 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Meadow Hop",
+    "instructions": "Tap to hop over the tree stumps on the way to the picnic. Grab the floating acorns, tap again in the air for a second hop, and five bumps ends the picnic.",
+    "duration_s": 45
+  },
+  "uses": [
+    { "fragment": "gravity_jump", "params": { "gravity": 1800.0, "jump_vel": 700.0, "floor_y": 540.0, "x": 90.0, "double_jump": true, "tone": "accent" } },
+    { "fragment": "score", "params": { "points": 10, "label": "Acorns" } },
+    { "fragment": "lives", "params": { "count": 5 } },
+    { "fragment": "collide", "params": { "radius": 28.0, "grace": 1000 } },
+    { "fragment": "pickups", "params": { "every": 1600, "max_alive": 3, "radius": 12.0, "reach": 18.0, "lifetime": 0, "y_min": 410.0, "y_max": 500.0, "scroll": 190.0 } },
+    { "fragment": "speed_ramp", "params": { "every": 8000, "step": 0.12, "max": 1.5 } },
+    { "fragment": "countdown", "params": { "on_end": "none" } }
+  ],
+  "types": {
+    "Stump": { "id": "int", "x": "float" }
+  },
+  "state": {
+    "stumps": { "type": "list<Stump>", "init": "[]" },
+    "stump_seq": { "type": "int", "init": "0" },
+    "spawn_speed": { "type": "float", "init": "1.0" }
+  },
+  "functions": {
+    "colliders": {
+      "params": {},
+      "returns": "list<vec2>",
+      "body": "map(stumps, s => vec(s.x, 540.0))"
+    }
+  },
+  "rules": [
+    {
+      "id": "plant_stump",
+      "on": { "every": "700ms" },
+      "when": "not any(stumps, s => s.x > 240.0)",
+      "do": [
+        { "if": "random_int(0, 2) > 0", "then": [
+          { "set": "stumps", "to": "push(stumps, {id: stump_seq, x: 390.0})" },
+          { "incr": "stump_seq" }
+        ] }
+      ]
+    },
+    {
+      "id": "roll",
+      "on": "tick",
+      "do": [
+        { "set": "stumps", "to": "map(stumps, s => {...s, x: s.x - 190.0 * spawn_speed * event.dt / 1000.0})" },
+        { "remove": "stumps", "where": "s => s.x < -30.0" }
+      ]
+    },
+    {
+      "id": "splat",
+      "on": "hit",
+      "do": [
+        { "remove": "stumps", "where": "s => abs(s.x - hit_at.x) < 60.0" }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "45s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat", "source": "stumps", "as": "s", "key": "s.id",
+          "template": { "node": "rect", "x": "= s.x - 14.0", "y": 526, "w": 28, "h": 28, "fill": "$danger", "role": "hazard" }
+        }
+      }
+    ],
+    "feedback": [
+      { "on": "hit", "do": [ { "sound": { "wave": "sawtooth", "note": "C2", "ms": 180 } } ] },
+      { "on": "win", "do": [ { "sound": { "wave": "triangle", "note": "C6", "ms": 300 } } ] }
+    ]
+  },
+  "look": { "id": "paper", "tokens": { "accent": "#8A5A2B", "primary": "#4F8A5B" } },
+  "content": {},
+  "playtest": { "progress": "score + lives * 100" }
+}

@@ -48,6 +48,14 @@ struct StudioRequest: Codable, Hashable, Sendable {
     /// Daily: the day the Bubble is for, "yyyy-MM-dd".
     var date: String?
     var creatorName: String
+    /// The length the creator picked in Customize (docs/BUBBLES.md 7.9). Nil lets Muse pick.
+    var length: BubbleLength?
+    /// Tuning knobs from Customize, by knob id ("speed", "difficulty", "lives", "rounds",
+    /// "timer"). Owner: length.
+    var tuning: [String: JSONValue]?
+    /// Who else is involved: the remixed Bubble's creator, co-makers and their contributions, a
+    /// "Games about me" template (docs/BUBBLES.md 7).
+    var social: StudioSocialContext?
 
     init(
         mode: StudioMode = .create,
@@ -61,7 +69,10 @@ struct StudioRequest: Codable, Hashable, Sendable {
         formulaHint: BubbleFormula? = nil,
         paletteHint: String? = nil,
         date: String? = nil,
-        creatorName: String = "Alex"
+        creatorName: String = "Alex",
+        length: BubbleLength? = nil,
+        tuning: [String: JSONValue]? = nil,
+        social: StudioSocialContext? = nil
     ) {
         self.mode = mode
         self.prompt = prompt
@@ -75,6 +86,64 @@ struct StudioRequest: Codable, Hashable, Sendable {
         self.paletteHint = paletteHint
         self.date = date
         self.creatorName = creatorName
+        self.length = length
+        self.tuning = tuning
+        self.social = social
+    }
+}
+
+/// One contribution to a co-made Bubble (docs/BUBBLES.md 7.4): a question, a word list, a scene
+/// or a level. `kind` is "question", "words", "scene" or "level"; `text` holds it as written.
+struct StudioContribution: Codable, Hashable, Sendable {
+    var makerID: String
+    var makerName: String
+    var kind: String
+    var text: String
+
+    init(makerID: String, makerName: String, kind: String, text: String) {
+        self.makerID = makerID
+        self.makerName = makerName
+        self.kind = kind
+        self.text = text
+    }
+}
+
+/// The people around a Studio request. Filled by the app (StudioModel.makeRequest), read by the
+/// prompt and finalize hooks (StudioFormulaHints.swift).
+struct StudioSocialContext: Codable, Hashable, Sendable {
+    /// Remix: the original's creator, for the "Remix of <title> by <name>" credit. Owner: remix.
+    var baseCreatorID: String?
+    var baseCreatorName: String?
+    /// Co-making: everyone who made it, the starter first. Owner: together.
+    var makers: [BubbleMaker]
+    /// Co-making: what each maker added. Owner: together.
+    var contributions: [StudioContribution]
+    /// "Games about me": the template id and the answers, by question. Owner: together.
+    var aboutMeTemplate: String?
+    var aboutMeAnswers: [String: String]
+    /// Own-story adventures ("my first week in SF"): the story as told. Owner: story.
+    var personalStory: String?
+    /// Lessons from pasted notes. Owner: learn.
+    var lessonNotes: String?
+
+    init(
+        baseCreatorID: String? = nil,
+        baseCreatorName: String? = nil,
+        makers: [BubbleMaker] = [],
+        contributions: [StudioContribution] = [],
+        aboutMeTemplate: String? = nil,
+        aboutMeAnswers: [String: String] = [:],
+        personalStory: String? = nil,
+        lessonNotes: String? = nil
+    ) {
+        self.baseCreatorID = baseCreatorID
+        self.baseCreatorName = baseCreatorName
+        self.makers = makers
+        self.contributions = contributions
+        self.aboutMeTemplate = aboutMeTemplate
+        self.aboutMeAnswers = aboutMeAnswers
+        self.personalStory = personalStory
+        self.lessonNotes = lessonNotes
     }
 }
 

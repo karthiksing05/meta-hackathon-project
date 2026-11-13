@@ -25,10 +25,10 @@ extension BubbleSurfaceHooks {
                 groupID: group ? BubbleDemo.groupID : nil, bubbleID: bubble.id
             ))
         }
-        add("daily", .bubbleDaily, nil, "Today's Daily Bubble in \(groupName) is ready. Pop in before the fog lifts.", daily, minutes: 12)
+        add("daily", .bubbleDaily, nil, "Today's Daily \(ProductName.singular) in \(groupName) is ready. Play before the fog lifts.", daily, minutes: 12)
         add("beat", .bubbleScore, person("sf-diego-ramirez", fallback: 0), "beat your score in \(hop?.title ?? "Hill Hopper"). Take it back?", hop, minutes: 48)
-        add("remix", .bubbleRemix, person("sf-priya-natarajan", fallback: 1), "remixed your Bubble.", mine ?? hop, minutes: 130)
-        add("played", .bubblePlayed, person("sf-jordan-brooks", fallback: 2), "played your Bubble.", mine ?? hop, minutes: 300)
+        add("remix", .bubbleRemix, person("sf-priya-natarajan", fallback: 1), "remixed your \(ProductName.singular).", mine ?? hop, minutes: 130)
+        add("played", .bubblePlayed, person("sf-jordan-brooks", fallback: 2), "played your \(ProductName.singular).", mine ?? hop, minutes: 300)
         appStore.notifications.insert(contentsOf: rows, at: 0)
     }
 
