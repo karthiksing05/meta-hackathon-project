@@ -685,5 +685,28 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
   child.kill();
 }
 
+// ---- parallel lanes: the limiter, the bank merge and the timeline in stats ----
+{
+  const { limiter, bankMerge, BANK_MARK } = await import('./src/lanes.mjs');
+  const limit = limiter(2);
+  let active = 0, peak = 0;
+  await Promise.all([1, 2, 3, 4, 5].map(() => limit(async () => { active++; peak = Math.max(peak, active); await new Promise((r) => setTimeout(r, 10)); active--; })));
+  check('the limiter keeps at most n calls at once', peak === 2, peak);
+  const line = 'Hermione Granger=Hermione,Harry Potter|Neville Longbottom=Neville|Luna Lovegood|Hannah Abbott';
+  const bm = bankMerge({ content: { ta_answers: line } });
+  const reply = JSON.stringify({ content: { answers: [BANK_MARK, 'a,b|c|d|e'] } });
+  const merged = JSON.parse(bm.fromMuse(reply));
+  check('the bank mark becomes the whole bank', merged.content.answers[0] === line && bm.merged === 1, JSON.stringify(merged));
+  const shown = 'Fix this: ' + JSON.stringify(JSON.stringify(merged));
+  check('a prompt shows Muse the mark, not the bank', !bm.toMuse(shown).includes('Neville') && bm.toMuse(shown).includes(BANK_MARK), bm.toMuse(shown).slice(0, 200));
+
+  const g = example();
+  const ctx = { version: 'harness-context/1', types: [], tools: [], timeline: [{ lane: 'harness', stage: 'understand', start_ms: 0, end_ms: 900 }, { lane: 'lookup', stage: 'bank fetch', start_ms: 5, end_ms: 1500 }, { lane: 'harness', stage: 'plan', start_ms: 950, end_ms: 4000 }], lookup: { fired: true, answers: 4 } };
+  const out = await compose({ request: 'a calm fog game', brief, context: ctx }, { studio, muse: new ScriptedMuse([g]), env: {} });
+  const tl = out.stats.timeline ?? [];
+  check('stats.timeline has the harness lanes and the compose lane after them', tl.some((l) => l.lane === 'lookup') && tl.some((l) => l.lane === 'compose' && l.start_ms >= 4000) && out.stats.parallel?.lanes?.length >= 3, JSON.stringify(out.stats.parallel));
+  check('stats.lookup carries the bank lookup', out.stats.lookup?.fired === true && out.stats.lookup.merged === 0, JSON.stringify(out.stats.lookup));
+}
+
 console.log(failures ? `\n${failures} check(s) FAILED` : '\nall checks passed');
 process.exit(failures ? 1 : 0);

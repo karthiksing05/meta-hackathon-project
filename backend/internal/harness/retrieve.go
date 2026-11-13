@@ -207,8 +207,18 @@ func (h *Harness) Context(ctx context.Context, req Request) (ContextPack, error)
 	targets := h.lookupTargets(pack, res)
 	if len(targets) > 0 && !req.NoLookup {
 		learnedAny := false
-		for _, tg := range targets {
-			rep := h.lookupOne(ctx, req.Text, tg.ref, tg.reason, ix.Vocab())
+		// each name is looked up at once (they are independent); the reports keep the targets' order
+		reps := make([]LookupReport, len(targets))
+		var wg sync.WaitGroup
+		for i, tg := range targets {
+			wg.Add(1)
+			go func(i int, tg lookupTarget) {
+				defer wg.Done()
+				reps[i] = h.lookupOne(ctx, req.Text, tg.ref, tg.reason, ix.Vocab())
+			}(i, tg)
+		}
+		wg.Wait()
+		for _, rep := range reps {
 			pack.Lookups = append(pack.Lookups, rep)
 			if rep.Learned != nil {
 				pack.Learned = append(pack.Learned, *rep.Learned)

@@ -43,24 +43,46 @@ func (h *Harness) Build(ctx context.Context, req Request, planner *Planner) (*Bu
 	if planner == nil {
 		return nil, errors.New("harness: no planner")
 	}
+	t0 := time.Now()
+	// the answer-bank lane starts now for a rarity request, alongside understand, retrieve and plan
+	bank := h.speculativeBank(ctx, req, t0)
 	pack, err := h.Context(ctx, req)
 	if err != nil {
+		if bank != nil {
+			bank.cancel()
+		}
 		return nil, err
 	}
 	gc, err := BuildContext(pack)
 	if err != nil {
+		if bank != nil {
+			bank.cancel()
+		}
 		return nil, err
 	}
 	gc.Preferences = req.Preferences
 	t := time.Now()
+	planStart := ms(t.Sub(t0))
 	plan, err := planner.Plan(ctx, PlanInput{Request: req.Text, Pack: pack, Context: gc, Fragments: h.Index().Fragments(), Unbuilt: h.Index().Unbuilt(), Group: req.Group, Media: req.Media})
 	if err != nil {
+		if bank != nil {
+			bank.cancel()
+		}
 		return nil, err
 	}
+	planMs := ms(time.Since(t))
 	if err := AttachPlan(&gc, plan); err != nil {
 		return nil, err
 	}
-	b := &Built{Pack: pack, Context: gc, Plan: plan, PlanMs: ms(time.Since(t))}
+	gc.Timeline = harnessLanes(pack.Timings, planStart, planStart+planMs)
+	h.finishBank(ctx, bank, req, pack, &gc, plan, t0)
+	if err := AttachPlan(&gc, plan); err != nil { // again, with the bank's note
+		gc.Content = nil
+		if err := AttachPlan(&gc, plan); err != nil {
+			return nil, err
+		}
+	}
+	b := &Built{Pack: pack, Context: gc, Plan: plan, PlanMs: planMs}
 	b.Pack.Timings.Total += b.PlanMs
 	return b, nil
 }
@@ -68,6 +90,13 @@ func (h *Harness) Build(ctx context.Context, req Request, planner *Planner) (*Bu
 // BuildGiven is Build for a game-spec the person already agreed: steps 1 to 3 run as usual, but the plan is not made
 // again. The given spec is the plan's spec, and the types come from retrieval. It is used when the app sends `spec`.
 func (h *Harness) BuildGiven(ctx context.Context, req Request, spec *Spec) (*Built, error) {
+	t0 := time.Now()
+	bank := h.speculativeBank(ctx, req, t0)
+	defer func() {
+		if bank != nil {
+			bank.cancel()
+		}
+	}()
 	pack, err := h.Context(ctx, req)
 	if err != nil {
 		return nil, err
@@ -85,6 +114,14 @@ func (h *Harness) BuildGiven(ctx context.Context, req Request, spec *Spec) (*Bui
 	}
 	if err := AttachPlan(&gc, plan); err != nil {
 		return nil, err
+	}
+	gc.Timeline = harnessLanes(pack.Timings, 0, 0)
+	h.finishBank(ctx, bank, req, pack, &gc, plan, t0)
+	if err := AttachPlan(&gc, plan); err != nil {
+		gc.Content = nil
+		if err := AttachPlan(&gc, plan); err != nil {
+			return nil, err
+		}
 	}
 	return &Built{Pack: pack, Context: gc, Plan: plan}, nil
 }

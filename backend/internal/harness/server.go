@@ -22,10 +22,12 @@ func NewForServer(ctx context.Context, db *mongo.Database, generatorURL string) 
 		}
 		learned = MongoLearned{DB: db}
 	}
+	lk := NewLookup(LookupMuse(generatorURL))
+	lk.BankMuse = BankMuse(generatorURL)
 	h, err := New(ctx, Config{
 		Source:       src,
 		Understander: MuseUnderstander{Muse: UnderstandMuse(generatorURL)},
-		Lookup:       NewLookup(LookupMuse(generatorURL)),
+		Lookup:       lk,
 		Learned:      learned,
 	})
 	if err != nil {

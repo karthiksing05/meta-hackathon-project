@@ -29,6 +29,29 @@ type GenContext struct {
 	Learned       []ContextType   `json:"learned"`
 	Notes         []string        `json:"notes"`
 	Preferences   []Preference    `json:"preferences,omitempty"`
+	// Content is data the harness fetched for the game (bank.go): the answer bank for a rarity game, cited.
+	Content *ContextContent `json:"content,omitempty"`
+	// Timeline is each harness stage's start and end (ms from the job's start), so stats can show the parallel lanes.
+	Timeline []Lane `json:"timeline,omitempty"`
+	// Lookup says what the answer-bank lookup did (stats.lookup).
+	Lookup *BankStats `json:"lookup,omitempty"`
+}
+
+// ContextContent is fetched content for the game.
+type ContextContent struct {
+	AnswerBank *AnswerBank `json:"answer_bank,omitempty"`
+	// TAAnswers is the bank as one typed_answer ta_answers() entry (tiers by |, answers by ,, aliases by =).
+	TAAnswers string `json:"ta_answers,omitempty"`
+}
+
+// Lane is one stage on the timeline: its lane (the stages in one lane run one after another; lanes run side by
+// side), its start and end in ms from the start, and a note.
+type Lane struct {
+	Lane    string `json:"lane"`
+	Stage   string `json:"stage"`
+	StartMs int64  `json:"start_ms"`
+	EndMs   int64  `json:"end_ms"`
+	Note    string `json:"note,omitempty"`
 }
 
 // Preference is one earlier pick between versions of a game (variants.mjs applyPick): on one axis (look,

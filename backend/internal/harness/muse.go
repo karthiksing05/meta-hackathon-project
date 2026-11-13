@@ -25,6 +25,11 @@ func UnderstandMuse(generatorURL string) *GeneratorMuse {
 	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 25 * time.Second}
 }
 
+// BankMuse is the transport for the answer bank's tiering call (bank.go): a longer reply, inside BankBudget.
+func BankMuse(generatorURL string) *GeneratorMuse {
+	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 8000, Effort: "minimal", Timeout: 18 * time.Second}
+}
+
 // LookupMuse is the transport for the lookup summary.
 func LookupMuse(generatorURL string) *GeneratorMuse {
 	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 25 * time.Second}
