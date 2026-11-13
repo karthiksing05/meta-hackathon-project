@@ -11,6 +11,8 @@ import UIKit
 /// - `FB_FEED_INDEX=n`: start on page n.
 /// - `FB_FAKE_RESULT=1`: show the result sheet for the first page without playing.
 /// - `FB_FEED_TAKEOVER=1`: take over the first page as if it were tapped.
+/// - `FB_FEED_PLAYER=s`: open the current page in the full-screen player, and close it s seconds later.
+/// - `FB_FEED_TAKEOVER_END=s`: with `FB_FEED_TAKEOVER=1`, close the game (the X) s seconds after it starts.
 /// - `FB_FEED_AUTOSCROLL=s`: move to the next page every s seconds (for timing warm switches).
 /// - `FB_PERF=1`: the perf overlay (prepare, activate, switch time, fps).
 struct BubblesTabView: View {
@@ -26,6 +28,10 @@ struct BubblesTabView: View {
     @State private var isPlayingAgain = false
     /// Fades the pager in after a jump (scroll to top).
     @State private var pagerOpacity: Double = 1
+    /// The page to come back to after you close a game (the X) or a screen over the tab closes.
+    @State private var returnPageID: String?
+    /// Bumped to snap the pager back onto a whole page (`realignPager`).
+    @State private var realignToken = 0
 
     /// Header height below the status bar.
     private static let headerHeight: CGFloat = 52
@@ -87,6 +93,9 @@ struct BubblesTabView: View {
             .onChange(of: geometry.size) { _, _ in
                 updateLayout(geometry)
             }
+            .onChange(of: realignToken) { _, _ in
+                updateLayout(geometry)
+            }
         }
         .background(Color.black)
         .toolbar(.hidden, for: .navigationBar)
@@ -103,7 +112,20 @@ struct BubblesTabView: View {
         }
         .onAppear(perform: appear)
         .onChange(of: isVisible) { _, visible in
+            if !visible {
+                returnPageID = model.currentID
+            }
             model.setVisible(visible)
+            if visible {
+                realignPager()
+            }
+        }
+        .onChange(of: model.isTakenOver) { _, takenOver in
+            if takenOver {
+                returnPageID = model.currentID
+            } else {
+                realignPager()
+            }
         }
         .onChange(of: GameSound.isMuted) { _, _ in
             model.applyMute()
@@ -131,20 +153,32 @@ struct BubblesTabView: View {
     /// exactly the visible height.
     private func pager(bottomInset: CGFloat) -> some View {
         @Bindable var model = model
-        return ScrollView(.vertical) {
-            LazyVStack(spacing: 0) {
-                ForEach(bubbleStore.feedItems) { item in
-                    page(for: item)
-                        .containerRelativeFrame([.horizontal, .vertical])
-                        .id(item.id)
+        return ScrollViewReader { proxy in
+            ScrollView(.vertical) {
+                LazyVStack(spacing: 0) {
+                    ForEach(bubbleStore.feedItems) { item in
+                        page(for: item)
+                            .containerRelativeFrame([.horizontal, .vertical])
+                            .id(item.id)
+                    }
+                }
+                .scrollTargetLayout()
+            }
+            .scrollIndicators(.hidden)
+            .scrollTargetBehavior(.paging)
+            .scrollPosition(id: $model.currentID, anchor: .top)
+            .scrollDisabled(model.isTakenOver)
+            .onChange(of: realignToken) { _, _ in
+                // Puts the page's top back at the top, even when the pager kept the page id but
+                // was left between pages.
+                guard let id = model.currentID else { return }
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    proxy.scrollTo(id, anchor: .top)
                 }
             }
-            .scrollTargetLayout()
         }
-        .scrollIndicators(.hidden)
-        .scrollTargetBehavior(.paging)
-        .scrollPosition(id: $model.currentID, anchor: .top)
-        .scrollDisabled(model.isTakenOver)
         .ignoresSafeArea(edges: [.top, .bottom])
         .padding(.bottom, bottomInset)
         .opacity(pagerOpacity)
@@ -288,6 +322,29 @@ struct BubblesTabView: View {
         model.insetTop = insets.top + Self.headerHeight
     }
 
+    /// After you close a game (the X, or the result sheet) or come back from a screen over the tab:
+    /// the keyboard a game's text field left up goes, and the pager goes back to the page you were
+    /// on, on a whole page. Toggling scrolling during the game, the keyboard, and a full-screen
+    /// cover closing can each leave a paged ScrollView off its page (iOS 18) or reset to the top.
+    /// Once on the next run loop, and once more after a cover's close animation has finished.
+    private func realignPager() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        guard let id = returnPageID ?? model.currentID else { return }
+        let snap = {
+            guard !model.isTakenOver, bubbleStore.feedItems.contains(where: { $0.id == id }) else { return }
+            if model.currentID != id {
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    model.currentID = id
+                }
+            }
+            realignToken += 1
+        }
+        DispatchQueue.main.async(execute: snap)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: snap)
+    }
+
     /// The header button flips the app-wide game mute (`GameSound`); the feed follows it.
     private func toggleMute() {
         Haptics.light()
@@ -298,6 +355,7 @@ struct BubblesTabView: View {
     /// pages it passes (they flash black), unlike a swipe.
     private func scrollToTop() {
         guard let first = bubbleStore.feedItems.first, model.currentID != first.id else { return }
+        returnPageID = first.id
         if model.isTakenOver {
             model.endTakeover()
         }
@@ -379,23 +437,43 @@ struct BubblesTabView: View {
     private func applyDebugLaunch() {
         guard !didApplyDebug else { return }
         didApplyDebug = true
-        if let index = DebugLaunch.value("FB_FEED_INDEX").flatMap(Int.init), index > 0 {
-            // One page at a time: a long jump in a lazy stack lands on estimated heights.
+        let index = DebugLaunch.value("FB_FEED_INDEX").flatMap(Int.init) ?? 0
+        let takesOver = DebugLaunch.value("FB_FEED_TAKEOVER") == "1"
+        let endAfter = DebugLaunch.value("FB_FEED_TAKEOVER_END").flatMap(Double.init)
+        let playerFor = DebugLaunch.value("FB_FEED_PLAYER").flatMap(Double.init)
+        if index > 0 || takesOver || playerFor != nil {
             Task { @MainActor in
-                for step in 1...index where step < bubbleStore.feedItems.count {
-                    try? await Task.sleep(nanoseconds: 60_000_000)
-                    model.currentID = bubbleStore.feedItems[step].id
+                // The live feed can arrive after the tab appears: wait for the page (up to 20 s).
+                for _ in 0..<200 where bubbleStore.feedItems.count <= index {
+                    try? await Task.sleep(nanoseconds: 100_000_000)
                 }
+                // One page at a time: a long jump in a lazy stack lands on estimated heights.
+                if index > 0 {
+                    for step in 1...index where step < bubbleStore.feedItems.count {
+                        try? await Task.sleep(nanoseconds: 60_000_000)
+                        model.currentID = bubbleStore.feedItems[step].id
+                    }
+                }
+                if let playerFor, let item = model.currentItem {
+                    try? await Task.sleep(nanoseconds: 1_500_000_000)
+                    router.play(item.bubbleID)
+                    try? await Task.sleep(nanoseconds: UInt64(playerFor * 1_000_000_000))
+                    router.bubblePlayRequest = nil
+                }
+                guard takesOver else { return }
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                model.takeOver()
+                guard let endAfter, endAfter > 0 else { return }
+                for _ in 0..<200 where !model.isTakenOver {
+                    try? await Task.sleep(nanoseconds: 100_000_000)
+                }
+                try? await Task.sleep(nanoseconds: UInt64(endAfter * 1_000_000_000))
+                model.endTakeover()
             }
         }
         if DebugLaunch.value("FB_FAKE_RESULT") == "1" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                 model.showFakeResult()
-            }
-        }
-        if DebugLaunch.value("FB_FEED_TAKEOVER") == "1" {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                model.takeOver()
             }
         }
     }
