@@ -32,6 +32,9 @@ struct BubbleScore: Identifiable, Hashable {
     /// True once the replay was re-simulated headless and reached exactly this score
     /// (`BubbleJSRuntime.verify`, docs/BUBBLES.md 4.8). Bubble Boards mark these runs.
     var isVerified: Bool
+    /// The server kept this run and you may watch it (a friend's or Group-mate's): `replay` is
+    /// fetched on tap (`BubbleStore.watchableReplay`).
+    var hasServerReplay = false
 
     init(
         id: String = UUID().uuidString,

@@ -233,8 +233,29 @@ struct BubbleBoardRow: View {
 
     @Environment(Router.self) private var router
     @Environment(AppStore.self) private var appStore
+    @Environment(BubbleStore.self) private var bubbleStore
+    @State private var loadingReplay = false
 
     private var isMe: Bool { entry.user.id == appStore.me.id }
+
+    /// Plays the row's run as a Burst: the one on the row, or a friend's from the server.
+    private func watch() {
+        if let replay = entry.replay {
+            router.play(bubble.id, replay: replay)
+            return
+        }
+        loadingReplay = true
+        Task { @MainActor in
+            defer { loadingReplay = false }
+            do {
+                if let replay = try await bubbleStore.watchableReplay(for: entry, in: bubble) {
+                    router.play(bubble.id, replay: replay)
+                }
+            } catch {
+                appStore.showToast("Couldn't load \(entry.user.firstName)'s run: \(error.localizedDescription)", symbol: "exclamationmark.circle")
+            }
+        }
+    }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -268,18 +289,24 @@ struct BubbleBoardRow: View {
                     Text(entry.score.withCommas + " pts")
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
-                    if let replay = entry.replay {
+                    if entry.replay != nil || entry.hasServerReplay {
                         Button {
-                            router.play(bubble.id, replay: replay)
+                            watch()
                         } label: {
-                            Label("Watch replay", systemImage: "play.circle.fill")
-                                .font(.fbMetaEmphasized)
-                                .foregroundStyle(FBColor.accent)
-                                .labelStyle(.titleAndIcon)
-                                .frame(minHeight: 28)
-                                .contentShape(Rectangle())
+                            HStack(spacing: 4) {
+                                if loadingReplay {
+                                    ProgressView().controlSize(.mini)
+                                }
+                                Label("Watch replay", systemImage: "play.circle.fill")
+                                    .labelStyle(.titleAndIcon)
+                            }
+                            .font(.fbMetaEmphasized)
+                            .foregroundStyle(FBColor.accent)
+                            .frame(minHeight: 28)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .disabled(loadingReplay)
                         .accessibilityLabel("Watch replay, \(entry.user.name)")
                     }
                 }

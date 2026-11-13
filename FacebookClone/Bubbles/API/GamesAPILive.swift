@@ -103,12 +103,27 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     /// replayed run: the server replays `log` (the engine's `microgame-log/1`) and ignores `score`; a
     /// plain `{score}` is refused (400). Older games keep using `score` and ignore `log`.
     func submitScore(_ score: Int, log: String?, gameID: String) async throws -> [RemoteScore] {
+        try await submitScore(score, log: log, replay: nil, gameID: gameID)
+    }
+
+    /// The same, with the runtime's replay of the run: the server keeps it with the score so friends
+    /// and Group-mates can watch it from the board (`replayAvailable`).
+    func submitScore(_ score: Int, log: String?, replay: BubbleInputLog?, gameID: String) async throws -> [RemoteScore] {
         var payload: [String: Any] = ["score": score]
         if let log, !log.isEmpty { payload["log"] = log }
+        if let replay, let data = try? JSONEncoder().encode(replay),
+           let object = try? JSONSerialization.jsonObject(with: data) {
+            payload["replay"] = object
+        }
         let body = try JSONSerialization.data(withJSONObject: payload)
         let data = try await send("POST", "v1/games/\(try serverID(gameID))/scores", body: body,
                                   contentType: "application/json", auth: .required)
         return (try decode(data) as RemoteScoreboard).items
+    }
+
+    /// `GET /v1/games/{id}/runs/{userId}/log`: a friend's or Group-mate's run to watch (403 otherwise).
+    func runReplay(gameID: String, userID: String) async throws -> RemoteRunReplay {
+        try await get("v1/games/\(try serverID(gameID))/runs/\(userID)/log", auth: .required)
     }
 
     func setSaved(_ saved: Bool, gameID: String) async throws -> SaveState {
