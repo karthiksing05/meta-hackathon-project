@@ -10,7 +10,8 @@ import SwiftUI
 /// `RunResumeStores.current` saves the latest, so the next open offers Resume or Start over
 /// (`ResumePromptCard`). Resume replays the saved log at full speed and continues it.
 ///
-/// DEBUG: `FB_FAKE_RESULT=1` shows the result sheet without playing; `FB_ENGINE_FAIL=1` shows the
+/// DEBUG: `FB_FAKE_RESULT=1` shows the result card without playing (`player` does it only here,
+/// not also on the games tab underneath); `FB_ENGINE_FAIL=1` shows the
 /// engine error card. `FB_RESUME_DEMO=<seconds>` saves a run that many seconds into the game's
 /// featured run (so the Resume prompt shows); `FB_RESUME_AUTO=1` then taps Resume.
 struct BubblePlayerView: View {
@@ -83,6 +84,12 @@ struct BubblePlayerView: View {
                     Spacer(minLength: 0)
                     bottomBar(bubble)
                 }
+                // The finished game stays in view behind the result card, dimmed and softened;
+                // tapping it closes the card (Play again stays at the bottom).
+                ResultBackdropScrim(isShown: result != nil, onTap: closeResult)
+                if let context = result {
+                    resultCard(context)
+                }
                 if let offer = resumeOffer {
                     ResumePromptCard(
                         saved: offer,
@@ -101,17 +108,8 @@ struct BubblePlayerView: View {
             ToastHost()
                 .padding(.bottom, 24)
         }
-        .sheet(item: $result) { context in
-            BubbleResultSheet(
-                context: context,
-                onPlayAgain: playAgain,
-                onSeeBoard: openBoard,
-                onNextLevel: playNextLevel,
-                request: request,
-                exitPlayer: exitPlayer
-            )
-        }
         .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: failure)
+        .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: result?.id)
         .onAppear(perform: appear)
         .task(id: "\(bubbleID)#\(attempt)") {
             // A start that never reports `ready` gets the error card and a retry, not an endless loader.
@@ -246,6 +244,34 @@ struct BubblePlayerView: View {
         }
     }
 
+    /// The result card over the game's final frame (inline, not a sheet: see `BubbleResultSheet`).
+    private func resultCard(_ context: BubbleResultContext) -> some View {
+        GeometryReader { proxy in
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                BubbleResultSheet(
+                    context: context,
+                    onPlayAgain: playAgain,
+                    onSeeBoard: openBoard,
+                    onNextLevel: playNextLevel,
+                    request: request,
+                    exitPlayer: exitPlayer,
+                    onClose: closeResult
+                )
+                .frame(height: proxy.size.height * 0.72)
+            }
+        }
+        .id(context.id)
+        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+        .zIndex(2)
+    }
+
+    private func closeResult() {
+        withAnimation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion)) {
+            result = nil
+        }
+    }
+
     private var missing: some View {
         EngineErrorCard(detail: EngineErrorCard.goneDetail, secondaryTitle: "Close", onSecondary: { dismiss() })
     }
@@ -355,7 +381,7 @@ struct BubblePlayerView: View {
         if DebugLaunch.value("FB_ENGINE_FAIL") == "1", attempt == 0 {
             failure = EngineFailure(kind: .failed, message: "Simulated by FB_ENGINE_FAIL")
         }
-        if DebugLaunch.value("FB_FAKE_RESULT") == "1", let bubble {
+        if ["1", "player"].contains(DebugLaunch.value("FB_FAKE_RESULT") ?? ""), let bubble {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 showFakeResult(for: bubble)
             }
