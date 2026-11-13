@@ -524,3 +524,26 @@ struct RemoteChallenge: Decodable, Identifiable, Hashable, Sendable {
         case id, direction, game, from, toIDs = "toIds", score, myScore, beaten, responses, createdAt
     }
 }
+
+// MARK: - Group weekly board (`GET /v1/groups/{id}/leaderboard?week=`)
+
+/// One member on a Group's weekly board. Points are rank points summed over the Group's games
+/// (1st 10, 2nd 7, 3rd 5, 4th 3, 5th 2, then 1); `rankChange` is last week's rank minus this week's.
+struct RemoteGroupStanding: Decodable, Hashable, Sendable {
+    var user: RemoteProfile
+    var points: Int
+    var gamesPlayed: Int
+    var rank: Int
+    var rankChange: Int
+}
+
+struct RemoteGroupWeeklyBoard: Decodable, Sendable {
+    var week: String
+    var groupID: String?
+    var games: Int?
+    var items: [RemoteGroupStanding]
+
+    enum CodingKeys: String, CodingKey {
+        case week, groupID = "groupId", games, items
+    }
+}

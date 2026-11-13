@@ -84,6 +84,10 @@ struct GroupWeeklyBoardCard: View {
         .padding(.vertical, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(FBColor.surface)
+        .task(id: group.id) { GroupGamesStore.shared.loadWeekly(group: group, in: bubbleStore) }
+        .onReceive(NotificationCenter.default.publisher(for: .gamesAccountChanged)) { _ in
+            GroupGamesStore.shared.loadWeekly(group: group, in: bubbleStore)
+        }
     }
 
     private var header: some View {
@@ -162,10 +166,21 @@ struct GroupWeeklyBoardCard: View {
         }
     }
 
-    /// The weekly board needs the server's Group boards (not served yet).
+    @ViewBuilder
     private var emptyState: some View {
-        LiveDataStateView(kind: .notAvailable(LiveDataCopy.groupBoards), title: "Weekly board")
-            .accessibilityElement(children: .combine)
+        let state = GroupGamesStore.shared.weeklyStates[group.id] ?? .loading
+        if state.isLoading {
+            LiveDataStateView(kind: .loading, title: "Loading this week's board…")
+        } else if let failure = state.failure {
+            LiveDataStateView(kind: .failed(failure), title: group.isMember ? "Couldn't load the board" : "Join the Group to see its board") {
+                GroupGamesStore.shared.loadWeekly(group: group, in: bubbleStore)
+            }
+        } else {
+            Text("Nobody has played the Group's games this week. Play one to take the top spot.")
+                .font(.fbMeta)
+                .foregroundStyle(FBColor.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

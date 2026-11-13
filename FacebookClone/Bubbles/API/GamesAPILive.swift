@@ -151,6 +151,20 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         _ = try await send("POST", "v1/challenges", body: body, contentType: "application/json", auth: .required)
     }
 
+    /// People whose username or a word of their display name starts with `query`
+    /// (`GET /v1/users?q=`, 2 to 40 characters; never includes you or anyone's email).
+    func searchUsers(_ query: String, limit: Int = 20) async throws -> [RemoteProfile] {
+        let q = [URLQueryItem(name: "q", value: query), URLQueryItem(name: "limit", value: String(limit))]
+        return (try await get("v1/users", query: q, auth: .required) as RemoteList<RemoteProfile>).items
+    }
+
+    /// A Group's weekly board (`GET /v1/groups/{id}/leaderboard?week=`, members only). `week` is
+    /// `2026-W46`; nil is this week.
+    func groupWeeklyBoard(groupID: String, week: String? = nil) async throws -> RemoteGroupWeeklyBoard {
+        let q = week.map { [URLQueryItem(name: "week", value: $0)] } ?? []
+        return try await get("v1/groups/\(groupID)/leaderboard", query: q, auth: .required)
+    }
+
     func friends() async throws -> [RemoteProfile] {
         (try await get("v1/me/friends", auth: .required) as RemoteList<RemoteProfile>).items
     }

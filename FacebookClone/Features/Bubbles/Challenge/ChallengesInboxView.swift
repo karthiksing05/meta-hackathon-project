@@ -28,6 +28,16 @@ struct ChallengesInboxView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Challenges")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    router.push(.findFriends)
+                } label: {
+                    Image(systemName: "person.badge.plus")
+                }
+                .accessibilityLabel("Find friends")
+            }
+        }
         .refreshable { inbox.reload() }
         .onAppear { inbox.reload() }
     }
@@ -50,6 +60,9 @@ struct ChallengesInboxView: View {
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                     .multilineTextAlignment(.center)
+                Button("Find friends") { router.push(.findFriends) }
+                    .buttonStyle(.fb(.primary, expand: false, height: 36))
+                    .padding(.top, 6)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
