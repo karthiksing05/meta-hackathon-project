@@ -130,8 +130,15 @@ Compose's server-side hooks (`backend/generator/src/hooks.mjs`, docs/HARNESS_V2.
 fixes run before each gate and the layout lint after (`authoring/expander/layout-fix.mjs`, `authoring/playtest/layout-check.mjs`,
 copied into the image; no Chrome, so structural fixes only; `GENERATOR_LAYOUT=0` turns them off). With `GENERATOR_IMAGE_ART=1`,
 muse-image-1.0 draws the pictures of an art-heavy plan (`plan.art: "image"`) in place of the older art step; `GENERATOR_IMAGE_ART=0`
-turns both off. A finished job's `stats` carries `requirements` (`{must_passed, must_total, note, gaps}`), `layout`
-(`{counts, pixels, warnings}`), `layoutFixes` and, when pictures were drawn, `image_art`.
+turns both off. The blocking layout verifier (`authoring/verify/`, through `authoring/expander/verify-layout.mjs`) replaces the
+fixes when it loads: verify, code fixes, solver, a proof that rules and replays are unchanged, then a layout repair round
+for what still blocks. No Chrome in the image, so it runs without pixels (estimated text widths, shapes-only contrast);
+`GENERATOR_LAYOUT_VERIFY=0` falls back to the fixes alone. It refuses to publish a game that still blocks only with
+`context.layout_block: true` or `GENERATOR_LAYOUT_BLOCK=1` (off by default). `GENERATOR_CANVAS=tall` builds 360 × 780 games
+(`classic`, 360 × 640, by default; `context.canvas` wins). A finished job's `stats` carries `requirements`
+(`{must_passed, must_total, note, gaps}`), `layout` (the verifier's `{verifier, pass, blocking, warnings, byCode, reverted,
+findings}`, or the lint's `{counts, pixels, warnings}` without it), `layoutBlocking`, `layoutVerifyMs`, `layoutRepairs`,
+`layoutFixes`, `canvas` and, when pictures were drawn, `image_art`.
 
 ## Sponsored games
 

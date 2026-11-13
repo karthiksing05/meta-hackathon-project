@@ -187,10 +187,51 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
 {
   const { composeHooks, AUTHORING_FILES } = await import('./src/hooks.mjs');
   const made = await composeHooks({ muse: new ScriptedMuse([]), env: {} });
-  check('layout hooks load from the authoring modules, picture art stays off by default', typeof made.hooks?.fixLayout === 'function' && typeof made.hooks?.layoutCheck === 'function' && !made.hooks.image, JSON.stringify(made));
+  check('layout hooks load from the authoring modules, picture art stays off by default', typeof made.hooks?.fixLayout === 'function' && typeof made.hooks?.layoutCheck === 'function' && typeof made.hooks?.verifyLayout === 'function' && !made.hooks.image, JSON.stringify(made));
   check('GENERATOR_LAYOUT=0 turns the layout hooks off', (await composeHooks({ muse: new ScriptedMuse([]), env: { GENERATOR_LAYOUT: '0' } })).hooks === null);
-  const out = await compose({ request: 'a calm fog game', brief }, { studio, muse: new ScriptedMuse([example()]), env: {} });
-  check('stats.layout and stats.requirements come back on the result', out.stats.layout && typeof out.stats.layout.counts?.score === 'number' && out.stats.layout.pixels === false && Array.isArray(out.stats.layout.warnings) && typeof out.stats.layoutFixes === 'number' && out.stats.requirements && 'must_passed' in out.stats.requirements, JSON.stringify({ layout: out.stats.layout, fixes: out.stats.layoutFixes, req: out.stats.requirements }));
+  const noVerify = await composeHooks({ muse: new ScriptedMuse([]), env: { GENERATOR_LAYOUT_VERIFY: '0' } });
+  check('GENERATOR_LAYOUT_VERIFY=0 keeps fixLayout and drops the verifier', typeof noVerify.hooks?.fixLayout === 'function' && !noVerify.hooks.verifyLayout);
+  const events = [];
+  const t0 = Date.now();
+  const out = await compose({ request: 'a calm fog game', brief }, { studio, muse: new ScriptedMuse([example()]), env: {}, onEvent: (e) => events.push(e) });
+  const verifyMs = out.stats.layoutVerifyMs;
+  console.log(`  (verifier without pixels: ${verifyMs} ms of a ${Date.now() - t0} ms compose)`);
+  check('the verifier runs before the gate, without Chrome, and its report is stats.layout', out.stats.layout?.verifier === true && typeof out.stats.layout.blocking === 'number' && Array.isArray(out.stats.layout.findings) && out.stats.layoutBlocking === out.stats.layout.blocking && typeof verifyMs === 'number' && !out.stats.layoutVerifyError
+    && events.findIndex((e) => e.kind === 'verifying') >= 0 && events.findIndex((e) => e.kind === 'verified') < events.findIndex((e) => e.kind === 'playtesting') && out.stats.requirements && 'must_passed' in out.stats.requirements, JSON.stringify({ layout: out.stats.layout, ms: verifyMs, err: out.stats.layoutVerifyError, kinds: events.map((e) => e.kind) }));
+  const legacy = await compose({ request: 'a calm fog game', brief }, { studio, muse: new ScriptedMuse([example()]), env: { GENERATOR_LAYOUT_VERIFY: '0' } });
+  check('without the verifier: fixLayout before the gate and the lint in stats.layout', legacy.stats.layout && typeof legacy.stats.layout.counts?.score === 'number' && legacy.stats.layout.pixels === false && Array.isArray(legacy.stats.layout.warnings) && typeof legacy.stats.layoutFixes === 'number', JSON.stringify({ layout: legacy.stats.layout, fixes: legacy.stats.layoutFixes }));
+  // A verifier that always blocks: a layout repair round with the hints, then layout_block decides.
+  const blocker = { verifyLayout: async (gameJson) => ({ game_json: gameJson, fixes: [], reverted: false, report: { pass: false, blocking: 1, warnings: 0, findings: [{ code: 'L_OVERLAP_TEXT', severity: 'block', node: '/presentation/x', message: 'text over text', hint: 'move it' }] } }) };
+  const blockMuse = new ScriptedMuse([example()]);
+  const shipped = await compose({ request: 'a calm fog game', brief, context: { canvas: 'classic' } }, { studio, muse: blockMuse, env: {}, hooks: blocker });
+  check('a blocking layout gets a repair round with the hints, then ships with its findings (layout_block off)', shipped.stats.layoutRepairs >= 1 && shipped.stats.layoutBlocking === 1 && shipped.stats.layout.findings[0]?.code === 'L_OVERLAP_TEXT' && blockMuse.prompts.some((p) => p.includes('L_OVERLAP_TEXT') && p.includes('move it')), JSON.stringify({ repairs: shipped.stats.layoutRepairs, blocking: shipped.stats.layoutBlocking }));
+  let refused = null;
+  try { await compose({ request: 'a calm fog game', brief, context: { layout_block: true } }, { studio, muse: new ScriptedMuse([example()]), env: {}, hooks: blocker }); } catch (e) { refused = e; }
+  check('context.layout_block refuses to publish while the layout blocks', refused?.name === 'GenerationError' && /blocking/.test(refused.message), String(refused?.message));
+  let refusedEnv = null;
+  try { await compose({ request: 'a calm fog game', brief }, { studio, muse: new ScriptedMuse([example()]), env: { GENERATOR_LAYOUT_BLOCK: '1' }, hooks: blocker }); } catch (e) { refusedEnv = e; }
+  check('GENERATOR_LAYOUT_BLOCK=1 does the same', refusedEnv?.name === 'GenerationError', String(refusedEnv?.message));
+  // The canvas switch: GENERATOR_CANVAS=tall (or context.canvas) builds 360 × 780; classic stays 360 × 640.
+  const heightOf = (o) => JSON.parse(o.manifest.content.game_json).presentation?.canvas?.h;
+  const tallMuse = new ScriptedMuse([example()]);
+  const tall = await compose({ request: 'a calm fog game', brief }, { studio, muse: tallMuse, env: { GENERATOR_CANVAS: 'tall' }, hooks: null });
+  const classic = await compose({ request: 'a calm fog game', brief, context: { canvas: 'classic' } }, { studio, muse: new ScriptedMuse([example()]), env: { GENERATOR_CANVAS: 'tall' }, hooks: null });
+  check('GENERATOR_CANVAS=tall builds the tall canvas; context.canvas wins', heightOf(tall) === 780 && heightOf(classic) === 640 && tall.stats.canvas === 'tall' && heightOf(out) === 640, JSON.stringify({ tall: heightOf(tall), classic: heightOf(classic), plain: heightOf(out) }));
+  // AUTHORING_FILES must hold every relative import (static or literal dynamic) of the modules it lists.
+  const fsm = await import('node:fs');
+  const { findAuthoring } = await import('./src/hooks.mjs');
+  const adir = findAuthoring({});
+  const missing = [];
+  for (const f of AUTHORING_FILES) {
+    const src = fsm.readFileSync(join(adir, f), 'utf8');
+    for (const m of src.matchAll(/(?:from\s+|import\s*\(\s*|^import\s+)['"](\.[^'"]+)['"]/gm)) {
+      const rel = join(dirname(f), m[1]);
+      if (!AUTHORING_FILES.includes(rel)) missing.push(`${f} -> ${rel}`);
+    }
+  }
+  const checksDir = join(adir, 'verify', 'checks');
+  for (const f of fsm.readdirSync(checksDir).filter((x) => x.endsWith('.mjs') && !x.startsWith('test-'))) if (!AUTHORING_FILES.includes('verify/checks/' + f)) missing.push('verify/checks/' + f);
+  check('AUTHORING_FILES holds everything the hooks import (and every verifier check)', !missing.length, missing.join(', '));
   const fs = await import('node:fs');
   const dockerfile = join(here, '..', 'Dockerfile');
   if (fs.existsSync(dockerfile)) { // in the repository; inside the image, the modules simply have to load (above)
