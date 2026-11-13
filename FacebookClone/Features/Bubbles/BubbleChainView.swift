@@ -137,5 +137,5 @@ struct BubbleChainView: View {
 }
 
 #Preview {
-    NavigationStack { BubbleChainView(chainID: "chain-hill-hopper") }.previewEnvironment()
+    NavigationStack { BubbleChainView(chainID: "preview-chain") }.previewEnvironment()
 }

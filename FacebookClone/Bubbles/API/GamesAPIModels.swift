@@ -9,7 +9,7 @@ import Foundation
 /// One game as the server describes it (`GameView`).
 struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     var id: String
-    /// The manifest's lowercase slug (`hill-hopper`), when it had one.
+    /// The manifest's lowercase slug (`my-game`), when it had one.
     var slug: String?
     /// The Group or Event the game was made for (manifest `structure.group_id` / `event_id`).
     var groupID: String?
@@ -125,6 +125,26 @@ struct RemoteScoreboard: Codable, Hashable, Sendable {
 struct SaveState: Codable, Hashable, Sendable {
     var likes: Int
     var likedByMe: Bool
+}
+
+/// `GET /v1/games/{id}/likes`: how many people saved the game, and which of the caller's friends
+/// did (each with `isFriend` set). Signed out, `friends` is empty.
+struct RemoteGameSaves: Decodable, Sendable {
+    var count: Int
+    var friends: [RemoteProfile]
+
+    enum CodingKeys: String, CodingKey { case count, friends }
+
+    init(count: Int, friends: [RemoteProfile] = []) {
+        self.count = count
+        self.friends = friends
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        count = try c.decodeIfPresent(Int.self, forKey: .count) ?? 0
+        friends = try c.decodeIfPresent([RemoteProfile].self, forKey: .friends) ?? []
+    }
 }
 
 /// An account, as the server returns it.
@@ -464,4 +484,66 @@ enum GamesAPICoding {
     }
 
     static func encoder() -> JSONEncoder { JSONEncoder() }
+}
+
+// MARK: - Challenges (`GET`/`POST /v1/challenges`)
+
+/// A friend's best on a challenged game (sent challenges).
+struct RemoteChallengeResponse: Decodable, Hashable, Sendable {
+    var userID: String
+    var username: String
+    var score: Double
+    var beat: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case userID = "userId", username, score, beat
+    }
+}
+
+/// "Beat my score": one game, the sender's best when sent, and how each side is doing.
+struct RemoteChallenge: Decodable, Identifiable, Hashable, Sendable {
+    var id: String
+    /// `sent` or `received`.
+    var direction: String
+    var game: RemoteGame?
+    var from: RemoteProfile
+    var toIDs: [String]
+    /// The score to beat.
+    var score: Double
+    /// Received: my best on the game, if I've played it.
+    var myScore: Double?
+    /// Received: I've beaten it.
+    var beaten: Bool
+    /// Sent: the friends who have played, and how they did.
+    var responses: [RemoteChallengeResponse]
+    var createdAt: Date
+
+    var isReceived: Bool { direction == "received" }
+
+    enum CodingKeys: String, CodingKey {
+        case id, direction, game, from, toIDs = "toIds", score, myScore, beaten, responses, createdAt
+    }
+}
+
+// MARK: - Group weekly board (`GET /v1/groups/{id}/leaderboard?week=`)
+
+/// One member on a Group's weekly board. Points are rank points summed over the Group's games
+/// (1st 10, 2nd 7, 3rd 5, 4th 3, 5th 2, then 1); `rankChange` is last week's rank minus this week's.
+struct RemoteGroupStanding: Decodable, Hashable, Sendable {
+    var user: RemoteProfile
+    var points: Int
+    var gamesPlayed: Int
+    var rank: Int
+    var rankChange: Int
+}
+
+struct RemoteGroupWeeklyBoard: Decodable, Sendable {
+    var week: String
+    var groupID: String?
+    var games: Int?
+    var items: [RemoteGroupStanding]
+
+    enum CodingKeys: String, CodingKey {
+        case week, groupID = "groupId", games, items
+    }
 }

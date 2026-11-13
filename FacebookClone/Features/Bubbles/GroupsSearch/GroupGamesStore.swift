@@ -3,12 +3,9 @@ import Observation
 
 /// The Group's weekly games leaderboard (docs/BUBBLES.md 7.3). Owner: groups-search.
 ///
-/// Every Group game gives points by rank each day: 1st 5, 2nd 3, 3rd 2, anyone else who played 1.
-/// "This week" is the last 7 days, today included; "last week" is the 7 days before that.
-///
-/// The board needs Group boards and dated runs from the server, which it doesn't serve yet
-/// (docs/APP_LIVE_DATA_PLAN.md, Stage 4), so the standings are empty and the board says "Not
-/// available yet". No history is made up.
+/// The server ranks it (`GET /v1/groups/{id}/leaderboard?week=`): each of the Group's games awards
+/// rank points among the members who played it this ISO week (1st 10, 2nd 7, 3rd 5, 4th 3, 5th 2,
+/// then 1), summed per member. Nothing is computed or made up on the phone.
 @MainActor
 @Observable
 final class GroupGamesStore {
@@ -78,9 +75,37 @@ final class GroupGamesStore {
         return weeklyStandings(group: group, in: bubbleStore)
     }
 
-    /// The weekly board for a Group. Empty until the server serves Group boards.
+    /// The weekly board for a Group, as the server last sent it (`loadWeekly`).
     func weeklyStandings(group: FBGroup, in bubbleStore: BubbleStore, now: Date = Date()) -> [Standing] {
-        []
+        weekly[group.id] ?? []
+    }
+
+    /// Weekly boards by Group id, from `GET /v1/groups/{id}/leaderboard`.
+    private(set) var weekly: [String: [Standing]] = [:]
+    /// Loading or failed (with the server's message), by Group id.
+    private(set) var weeklyStates: [String: FeedLoadState] = [:]
+
+    /// Fetches this week's board. Points and ranks come from the server; the phone only picks the
+    /// "Most improved" label (the biggest climb, leader excluded).
+    func loadWeekly(group: FBGroup, in bubbleStore: BubbleStore) {
+        guard weeklyStates[group.id] != .loading else { return }
+        weeklyStates[group.id] = .loading
+        Task { @MainActor in
+            do {
+                let board = try await GamesAPIFactory.current.groupWeeklyBoard(groupID: group.id)
+                let improvedID = board.items.filter { $0.rank > 1 && $0.rankChange > 0 }.max { $0.rankChange < $1.rankChange }?.user.id
+                weekly[group.id] = board.items.map { row in
+                    let user = bubbleStore.person(id: row.user.id, name: row.user.displayName.isEmpty ? row.user.username : row.user.displayName,
+                                                  isFriend: row.user.isFriend)
+                    return Standing(user: user, points: row.points, lastWeekPoints: 0, rank: row.rank,
+                                    rankChange: row.rankChange == 0 ? nil : row.rankChange,
+                                    isMostImproved: row.user.id == improvedID, gamesPlayed: row.gamesPlayed)
+                }
+                weeklyStates[group.id] = .idle
+            } catch {
+                weeklyStates[group.id] = .failed(error.localizedDescription)
+            }
+        }
     }
 
     /// Who's in the Group besides you: its members on the server.

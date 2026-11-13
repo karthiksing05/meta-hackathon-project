@@ -85,7 +85,10 @@ struct BubbleBoardView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: myRowVisible)
         .onAppear {
-            bubbleStore.loadScores(for: bubble)
+            bubbleStore.loadScores(for: bubble, scope: current)
+        }
+        .onChange(of: current) { _, scope in
+            bubbleStore.loadScores(for: bubble, scope: scope)
         }
     }
 
@@ -119,14 +122,13 @@ struct BubbleBoardView: View {
 
     @ViewBuilder
     private func empty(_ bubble: Bubble, scope: BubbleBoardScope) -> some View {
-        let state = bubbleStore.boardStates[bubble.id] ?? .idle
-        if !BubbleStore.serves(scope) {
-            LiveDataStateView(kind: .notAvailable("The server keeps one board for everyone. \(scope.title) boards come when it serves them."))
-        } else if state.isLoading {
+        let key = scope == .everyone ? bubble.id : BubbleStore.boardKey(bubble.id, scope, groupID: scope == .group ? bubble.group?.id : nil)
+        let state = bubbleStore.boardStates[key] ?? .idle
+        if state.isLoading {
             LiveDataStateView(kind: .loading, title: "Loading the board…")
         } else if let failure = state.failure {
             LiveDataStateView(kind: .failed(failure), title: "Couldn't load the board") {
-                bubbleStore.loadScores(for: bubble)
+                bubbleStore.loadScores(for: bubble, scope: scope)
             }
         } else {
             emptyBoard(bubble, scope: scope)
@@ -136,7 +138,7 @@ struct BubbleBoardView: View {
     private func emptyBoard(_ bubble: Bubble, scope: BubbleBoardScope) -> some View {
         VStack(spacing: 12) {
             BubbleOrb(size: 64)
-            Text(scope == .friends ? "None of your friends have played yet" : "Nobody's on the board yet")
+            Text(scope == .friends ? "None of your friends have played yet" : scope == .group ? "Nobody in the Group has played yet" : "Nobody's on the board yet")
                 .font(.fbHeadline)
                 .foregroundStyle(FBColor.primaryText)
                 .multilineTextAlignment(.center)

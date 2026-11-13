@@ -9,8 +9,8 @@ import SwiftUI
 ///   customize/<bubbleID>          Studio editing <bubbleID>, scrolled to the Customize panel
 ///   intro/<bubbleID>/<mode>       the player on <bubbleID> locked to a mode, showing the intro card:
 ///                                 timed (60 seconds), rounds (10 rounds), lives (3 lives), endless
-///   e.g. customize/hill-hopper, intro/hill-hopper/timed, intro/newinsf-fog-or-sun/rounds,
-///        intro/cable-car-catch/lives (short ids work in FB_OPEN: intro/fog-or-sun/rounds)
+///   <bubbleID> is a game the server sent this session (its slug or server id); a short id
+///   matches the end of a slug in FB_OPEN. Nothing opens when no fetched game matches.
 enum LengthScreens {
     /// A pushed screen (`Route.bubbleFeature`): length opens other screens instead (see `open`).
     @MainActor
@@ -47,14 +47,14 @@ enum LengthScreens {
         }
     }
 
-    /// `FB_OPEN=feature:length/...` (DEBUG): the routes open real screens with seed data, so there
-    /// is nothing to stage.
+    /// `FB_OPEN=feature:length/...` (DEBUG): the routes open real screens on a game the server
+    /// sent, so there is nothing to stage.
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
         guard route.screen == "intro" || route.screen == "customize" else { return open(route, router: router) }
         var parts = route.arg.split(separator: "/", maxSplits: 1).map(String.init)
         guard let id = parts.first, !id.isEmpty else { return false }
-        // Short ids work too ("fog-or-sun" finds "newinsf-fog-or-sun").
+        // Short ids work too: "<short>" finds a fetched game whose id ends in "-<short>".
         guard let bubble = bubbleStore.bubble(id: id) ?? bubbleStore.bubbles.first(where: { $0.id.hasSuffix("-" + id) }) else { return false }
         parts[0] = bubble.id
         return open(BubbleFeatureRoute(route.feature, route.screen, parts.joined(separator: "/")), router: router)

@@ -204,6 +204,36 @@ extension BubbleStore {
         }
     }
 
+    /// Loads a friends or Group board (`?scope=friends|group&groupId=`). `groupID` defaults to the
+    /// Group the game was made for. Its load state is under the same key in `boardStates`.
+    func loadScores(for bubble: Bubble, scope: BubbleBoardScope, groupID: String? = nil) {
+        guard scope != .everyone else { return loadScores(for: bubble) }
+        let group = scope == .group ? (groupID ?? bubble.group?.id) : nil
+        if scope == .group && group == nil { return }
+        let key = Self.boardKey(bubble.id, scope, groupID: group)
+        guard !isPreview, boardStates[key] != .loading else { return }
+        boardStates[key] = .loading
+        let gameID = bubble.serverID
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                let rows = try await api.scores(gameID: gameID, scope: scope.rawValue, groupID: group)
+                scopedBoards[key] = rows.map { self.scoreRow($0) }
+                boardStates[key] = .idle
+            } catch {
+                boardStates[key] = .failed(error.localizedDescription)
+            }
+        }
+    }
+
+    /// One server board row as an app score.
+    func scoreRow(_ row: RemoteScore) -> BubbleScore {
+        let myID = GamesAccount.shared.userID
+        let user = row.userID == myID ? appStore.me : person(id: row.userID, name: row.username)
+        return BubbleScore(id: "\(row.userID)-\(Int(row.updatedAt.timeIntervalSince1970))", user: user, score: row.points,
+                           achievedAt: row.updatedAt, day: Self.dayKey(row.updatedAt), replay: nil, share: nil)
+    }
+
     /// Replaces the board with the server's rows. Your own row keeps the replay of the run you
     /// just played (the server keeps scores only), so sharing it still works.
     func apply(_ rows: [RemoteScore], to bubble: Bubble, keepingReplay mine: BubbleScore?) {

@@ -256,10 +256,19 @@ Swift types: `BubbleBridgeMessage`, `BubbleRunResult`, `BubbleInputLog` in
   (`GameGeneratorFactory.current`, `POST /v1/generate`, 7.12). `StudioGenerateBridge` turns the job
   into `StudioEvent`s (`compose, validate, repair, playtest, polish, done`); the `done` event carries
   the manifest.
-- **Not available yet.** Tweaks, a new look, next levels and remixes need a server revise endpoint,
-  so they fail with `LiveDataCopy.revise`. The game anatomy is not drafted (7.13).
+- **Changes.** Tweaks (`startCompose(.tweak)`, "Change the game", the Sound card's free text), a new
+  look (`changeLook(to:)`, `look`), the next level (`startCompose(.nextLevel)`, `nextLevel: true`) and
+  remix, next-level and edit launches go to `POST /v1/generate {baseGameId, change?, look?, nextLevel?,
+  brief?}` as a `GameRevision` (`StudioModel.runRevision`). It is the same job and polling as a new
+  game (`GameGenerator.generate(revision:)`, `StudioGenerateBridge.revise`), so Build shows the same
+  steps; a change can take minutes. The result is always a **new** server game with `remixOf` set to
+  the base: Studio keeps the server's manifest id (it links to the new server id), a tweaked level
+  replaces the one on Try, and saving an edit shares it as a new version. `baseGameId` is the Bubble's
+  `serverID`, or for a level made this session its app id (the client maps it). Only the person's
+  words go as `change` (at most 1,800 characters); the base game already follows its anatomy.
 - Modes: `create`, `edit` (change an existing Bubble), `remix` (fork), `next_level` (new linked
-  Bubble in the chain), `daily` (a Group's Daily Bubble). Only `create` and `daily` can build today.
+  Bubble in the chain), `daily` (a Group's Daily Bubble). `create` and `daily` make a new game; the
+  others change their base game.
 
 ### 4.5 App state
 
@@ -272,7 +281,7 @@ boards and the Studio service. It keeps nothing of its own and invents nothing (
 | A game | its server object plus the manifest at `manifestUrl` and the cover at `coverUrl`; `GET /v1/games/{id}` when a screen opens one that isn't loaded (`loadGame`) |
 | Boards | `GET /v1/games/{id}/leaderboard` (one global board; Friends and Group tabs say "Not available yet") |
 | Your run | `POST /v1/games/{id}/scores`, then the returned board |
-| Saves (= likes) | `PUT`/`DELETE /v1/games/{id}/like` |
+| Saves (= likes) | `PUT`/`DELETE /v1/games/{id}/like`; your saved games `GET /v1/me/likes` (Library's Saved section, `loadSavedGames`); who saved a game `GET /v1/games/{id}/likes` → `{count, friends}` (`loadSavers`, `saverStates`) |
 | Search | `GET /v1/search?q=` (Facebook Search's Games results) |
 | Your games | `GET /v1/creations` (Library) |
 | Group Blend | `POST /v1/groups/{id}/blend` (Group page, members only) |
@@ -677,8 +686,9 @@ Each look is a skin over the same `g` primitives. Kit code does not change per l
 > `POST /v1/groups/{id}/blend`. What needs server work first shows "Not available yet"
 > (`LiveDataStateView`, copy in `LiveDataCopy`): challenges and group-chat sessions (7.2), making
 > together (7.4), quiz nights (7.7), the Group weekly board (7.3), friends' story paths (7.6), and
-> friends' and Group boards. Saves (7.10) name only you as a saver; the server sends counts, not
-> who. Cards you share still go to the app's Messenger chats, which are Stage 5.
+> friends' and Group boards. Saves (7.10) name you and the friends who saved a game
+> (`GET /v1/games/{id}/likes`); everyone else is a count. Cards you share still go to the app's
+> Messenger chats, which are Stage 5.
 
 Every Bubble should bring specific people closer (friends, a Group, a group chat, people from an
 Event) through Facebook's own surfaces: friends, Groups, Messenger chats, Search, profiles and the
@@ -1502,9 +1512,10 @@ you first when saved, never the creator, never more than `saveCount`),
 **Who saved it.** The feed caption shows one social line: a friend's best to beat (opens the board)
 or, when no friend has a run, 'Saved by …' (opens the list). Long-pressing the feed's Save button
 (or the VoiceOver action 'See everyone who saved it') pushes `feature:saves/stats/<id>`.
-`SavesStatsView` lists savers friends first with Add friend for non-friends
-(`appStore.sendRequest(to:)`, then `BubbleSocialSignals.post(.addFriendFromGame, ...)`). The Bubble
-page shows the top three for your own Bubbles.
+`SavesStatsView` lists you and the friends who saved it (`GET /v1/games/{id}/likes`, loaded once
+per game per session by `BubbleStore.loadSavers`, skipped when nobody but you saved it or you're
+signed out), then "and N more" for savers the server doesn't name. It shows loading and "Try again"
+states. The Bubble page shows the top three for your own Bubbles.
 
 **Seeds.** Every seed's `_seed` block has `save_count` (hill-hopper 1,240 down to 17).
 
@@ -1550,6 +1561,14 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
 - The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. It drives posters,
   demos and smoke runs. It's generic, so the runtime tests skip the skill checks for microgame seeds;
   game quality is gated by `authoring/playtest` and the engine's replay tests.
+- **Verifiable scores** (for challenges and leaderboards). When a run is won or lost, the kit puts the
+  engine's input log in `state.microgame.log`: `microgame-log/1` JSON text with the seed, the game's
+  hash, every input and the final `{state_hash, phase, score, time_ms}`. Submit it with the score.
+  `MicrogameEngine.verify(content.game_json, log)` replays it and returns `{ok, game_hash_ok, steps,
+  recomputed, claimed, problems}`. It runs anywhere the engine bundle loads: the app, a friend's
+  phone, or the server's Node generator. An edited score, a removed input or another game file fails.
+  `tools/runtime-tests/microgame-verify.js` plays every microgame seed through the real runtime
+  and checks that honest logs verify and raised scores don't.
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
@@ -1689,7 +1708,11 @@ is the only implementation) polls `GET /v1/generate/{jobId}` every 1–2 s, dedu
 fetches the finished game's manifest from `manifestUrl` without re-encoding it. `StudioGenerateBridge`
 turns the server's events (`kind` + `summary`) into the same `StudioEvent`s as `StudioMicrogameBridge`,
 so Build, Try, Share and "How Muse made it" are unchanged. Optional fields (`data` on events, `position`,
-`code`) are used when present. The games API client is always the live server (`GamesAPIFactory.current`,
+`code`) are used when present; the server puts each step's details (`round`, `passed`, `headline`,
+`bots`) on the event itself, and `GenerationEvent.data` falls back to the whole event. Changes to a game
+(`{baseGameId, change?, look?, nextLevel?}`, 4.4) use the same job and polling. `request` may be at
+most 2,000 characters, so when the agreed anatomy would push a new game's request past that, it goes
+in the brief's `notes` instead. The games API client is always the live server (`GamesAPIFactory.current`,
 base URL `https://api.ol4ol.com`, `FB_API_URL` overrides it in DEBUG); the app signs in once at launch
 with a device account (`GamesAccount`). There is no mock client.
 
@@ -1704,10 +1727,13 @@ original.
 ### 7.13 Game anatomy: agreeing how the game works
 
 > **Live data (Stage 4).** The app's Muse call (`GameAnatomyMuse.swift`, `MuseAnatomyPrompts.swift`)
-> and the fixtures are deleted. Until the server has an anatomy endpoint, the Brief step's "How the
-> game works" card and Try's "Change the game" card say "Not available yet"
-> (`StudioAnatomyThread.isAvailable`). The format, the model (`GameAnatomy.swift`) and the views
-> stay, and a game's saved anatomy still loads.
+> and the fixtures are deleted. The server asks Muse instead (`POST /v1/anatomy {request, audience?}`
+> and `POST /v1/anatomy/revise {anatomy, change, request?, afterPlaying?}`, both answered in the reply
+> with the `game-anatomy/0.1` object, about 5 to 10 s; the prompts moved to
+> `backend/generator/src/anatomy.mjs`). The app decodes it (`GameAnatomy.decode`) and calibrates it
+> with the engine's fragment ids from `MicrogameStudio.catalog()`. Errors show the server's words: 503
+> "Muse is not set up on this server yet", 502 "Muse couldn't take this game apart", with Try again
+> (or "Make it as written" on Try).
 
 Studio used to take a person's *style* (mood, look, theme) but not their *function*. The game anatomy is
 Muse's read of how the game works, part by part, agreed with the person before the build and changed
@@ -1739,12 +1765,11 @@ get defaults, unknown familiarity reads as approximate, a `{"anatomy": {...}}` w
 Revisions add top-level `changed` (`"end"`, `"rules.2"`, ...) and `reply` ("This changes rule 2 and how it
 ends."); Studio also diffs the two versions itself when `changed` is missing.
 
-**Muse.** `GameAnatomyMuse` (`draft`, `revise`), one JSON turn on the fast model (about 5 s; the planner
-took 30–55 s for the same reads). Prompts: `MuseAnatomyPrompts.swift` (`MusePrompts.anatomySystem`,
-`anatomyUser`, `anatomyReviseUser`); the system prompt lists the microgame fragments (live catalog,
-or a built-in list) so Muse can judge what it knows. Without a Muse key, or with `FB_STUDIO_ANATOMY`,
-Studio uses `GameAnatomyFixtures` (a word guess, a grid logic puzzle with parts new to Muse, and a dodge
-game in the request's theme).
+**Muse.** On the server (`GamesAPI.anatomy(request:audience:)` and
+`reviseAnatomy(_:change:request:afterPlaying:)`), one JSON turn on the fast model. The server's system
+prompt lists the microgame fragments so Muse can judge what it knows; the answers the person gave
+travel inside the anatomy (`answer` on each part). There are no fixtures: when the server can't answer,
+the card says why.
 
 **In Studio** (`StudioAnatomyThread`, `StudioAnatomyCard`, `StudioAnatomyChat`):
 - *Brief step*: "How the game works" drafts alongside the brief. Summary ("Muse understood 13 parts; 2 are
@@ -1757,8 +1782,9 @@ game in the request's theme).
   formula games, to the brief's `notes`. `MicrogamePrompts` is unchanged.
 - *Try step*: "Change the game" replaces "Tweak it" when there is an anatomy. Each message is first mapped
   onto the anatomy (Muse's reply, the updated parts, anything new to Muse); "Make the change" makes the
-  updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`) with the person's
-  words, what changes and the updated anatomy. The last 6 turns stay visible.
+  updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`, a change on the
+  server, 4.4) with the person's words, what changes and the changed parts' new wording (the game
+  already follows the rest). The last 6 turns stay visible.
 - *Saved with the game*: on share or save, the agreed anatomy goes into the game's make record on this
   device (`MakeRecord.anatomyJSON` and `anatomyRequest`; the manifest is unchanged). Edit, Remix and the
   next level load it (`StudioModel.loadSavedAnatomy`), so they keep "Change the game", and a remix shows

@@ -4,6 +4,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppStore.self) private var store
     @State private var showSplash = DebugLaunch.value("FB_SKIP_SPLASH") == nil
+    @State private var bestOfFive: BestOfFiveOffer?
 
     init() {
         // Before the first NavigationStack exists: Facebook's white bars on iOS 17 and 18.
@@ -12,11 +13,11 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            if store.isLoggedIn {
+            if store.isLoggedIn && GamesAccount.shared.state != .signedOut {
                 MainTabView()
                     .transition(.opacity)
             } else {
-                LoggedOutView()
+                SignInView()
                     .transition(.opacity)
             }
 
@@ -27,9 +28,24 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: store.isLoggedIn)
+        .animation(.easeInOut(duration: 0.3), value: GamesAccount.shared.state)
         .overlay(alignment: .bottom) {
             ToastHost()
                 .padding(.bottom, 72)
+        }
+        // A new friend gets a best-of-5 offer (BestOfFiveOfferSheet).
+        .sheet(item: $bestOfFive) { offer in
+            BestOfFiveOfferSheet(offer: offer)
+        }
+        .task {
+            // FB_BEST_OF_5=<userID> (debug): show the offer as if that friend was just added.
+            if let id = DebugLaunch.value("FB_BEST_OF_5"), !id.isEmpty {
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                bestOfFive = BestOfFiveOffer(friendID: id)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .gamesFriendAdded)) { note in
+            if let id = note.object as? String, !id.isEmpty { bestOfFive = BestOfFiveOffer(friendID: id) }
         }
         .task {
             try? await Task.sleep(nanoseconds: 900_000_000)
@@ -119,75 +135,3 @@ struct SplashView: View {
     }
 }
 
-/// Shown after "Log out". Tapping the saved profile signs back in. There are no password fields.
-struct LoggedOutView: View {
-    @Environment(AppStore.self) private var store
-    @State private var isLoggingIn = false
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Text("English (US)")
-                .font(.fbMeta)
-                .foregroundStyle(FBColor.secondaryText)
-                .padding(.top, 12)
-
-            Spacer()
-
-            FacebookLogo(size: 64)
-                .padding(.bottom, 48)
-
-            Button {
-                logIn()
-            } label: {
-                HStack(spacing: 12) {
-                    AvatarView(user: store.me, size: FBAvatarSize.row)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(store.me.name)
-                            .font(.fbHeadline)
-                            .foregroundStyle(FBColor.primaryText)
-                        Text("Tap to continue")
-                            .font(.fbMeta)
-                            .foregroundStyle(FBColor.secondaryText)
-                    }
-                    Spacer()
-                    if isLoggingIn {
-                        ProgressView()
-                    } else {
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(FBColor.secondaryText)
-                    }
-                }
-                .padding(14)
-                .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
-                        .stroke(FBColor.divider, lineWidth: 1)
-                }
-            }
-            .buttonStyle(.pressable)
-            .disabled(isLoggingIn)
-            .padding(.horizontal, FBMetrics.screenPadding)
-
-            Spacer()
-
-            Text("This is a demo build. Accounts and data are stored on this device only.")
-                .font(.fbCaption)
-                .foregroundStyle(FBColor.tertiaryText)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-                .padding(.bottom, 16)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(FBColor.background.ignoresSafeArea())
-    }
-
-    private func logIn() {
-        isLoggingIn = true
-        Haptics.light()
-        Task {
-            try? await Task.sleep(nanoseconds: 700_000_000)
-            isLoggingIn = false
-            store.logIn()
-        }
-    }
-}

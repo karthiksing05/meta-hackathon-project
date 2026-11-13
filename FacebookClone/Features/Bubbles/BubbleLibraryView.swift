@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Games you can play: yours (from the server), your Groups', friends', chains, saved and the ones
-/// your feed brought this session.
+/// Games you can play: yours (`/v1/creations`), your Groups', friends', chains, saved
+/// (`/v1/me/likes`) and the ones your feed brought this session.
 struct BubbleLibraryView: View {
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(Router.self) private var router
@@ -20,11 +20,18 @@ struct BubbleLibraryView: View {
                 chips
                 if query.isEmpty && formula == nil { blowBanner }
                 BubbleLibraryHeaderSlots()
-                if sections.isEmpty {
+                if sections.isEmpty, bubbleStore.savedGamesState.isLoading {
+                    LiveDataStateView(kind: .loading, title: "Loading your saved \(ProductName.plural)…")
+                } else if sections.isEmpty {
                     emptyState
                 } else {
                     ForEach(sections) { section in
                         sectionView(section)
+                    }
+                }
+                if let failure = bubbleStore.savedGamesState.failure {
+                    LiveDataStateView(kind: .failed(failure), title: "Couldn't load your saved \(ProductName.plural)") {
+                        Task { await bubbleStore.loadSavedGames() }
                     }
                 }
             }
@@ -33,6 +40,7 @@ struct BubbleLibraryView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .task { await bubbleStore.loadMyGames() }
+        .task { await bubbleStore.loadSavedGames() }
         .background(FBColor.surface)
         .navigationTitle("Library")
         .navigationBarTitleDisplayMode(.inline)

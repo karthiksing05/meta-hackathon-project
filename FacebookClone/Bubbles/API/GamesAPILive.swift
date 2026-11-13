@@ -26,6 +26,8 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     private let decoder = GamesAPICoding.decoder()
     private static let timeout: TimeInterval = 8
     private static let uploadTimeout: TimeInterval = 60
+    /// The server gives Muse 70 s for an anatomy turn.
+    private static let anatomyTimeout: TimeInterval = 75
 
     init(baseURL: URL, autoSignIn: Bool = false, session: URLSession? = nil) {
         self.baseURL = baseURL
@@ -85,6 +87,14 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return board.items
     }
 
+    func scores(gameID: String, scope: String, groupID: String?) async throws -> [RemoteScore] {
+        var query = [URLQueryItem(name: "scope", value: scope)]
+        if let groupID { query.append(URLQueryItem(name: "groupId", value: groupID)) }
+        let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", query: query,
+                                                    auth: scope == "everyone" ? .none : .required)
+        return board.items
+    }
+
     func submitScore(_ score: Int, gameID: String) async throws -> [RemoteScore] {
         let body = try JSONSerialization.data(withJSONObject: ["score": score])
         let data = try await send("POST", "v1/games/\(try serverID(gameID))/scores", body: body,
@@ -95,6 +105,16 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     func setSaved(_ saved: Bool, gameID: String) async throws -> SaveState {
         let data = try await send(saved ? "PUT" : "DELETE", "v1/games/\(try serverID(gameID))/like", auth: .required)
         return try decode(data)
+    }
+
+    func savedGames() async throws -> [RemoteGame] {
+        let games = (try await get("v1/me/likes", query: [URLQueryItem(name: "limit", value: "100")], auth: .required) as RemoteList<RemoteGame>).items
+        games.forEach(link)
+        return games
+    }
+
+    func saves(gameID: String) async throws -> RemoteGameSaves {
+        try await get("v1/games/\(try serverID(gameID))/likes", auth: .optional)
     }
 
     func sendFeedEvents(_ events: [FeedEvent]) async throws {
@@ -115,6 +135,34 @@ actor GamesAPILive: GamesAPI, GamesAuth {
 
     func user(id: String) async throws -> RemoteProfile {
         try await get("v1/users/\(id)", auth: .optional)
+    }
+
+    /// The challenges I sent and received, newest first (`GET /v1/challenges`).
+    func challenges() async throws -> [RemoteChallenge] {
+        let items = (try await get("v1/challenges", auth: .required) as RemoteList<RemoteChallenge>).items
+        for item in items { if let game = item.game { link(game) } }
+        return items
+    }
+
+    /// "Beat my score" to friends (`POST /v1/challenges {gameId, toUserIds}`). The server takes my
+    /// best on the game as the score to beat.
+    func sendChallenge(gameID: String, toUserIDs: [String]) async throws {
+        let body = try JSONSerialization.data(withJSONObject: ["gameId": try serverID(gameID), "toUserIds": toUserIDs])
+        _ = try await send("POST", "v1/challenges", body: body, contentType: "application/json", auth: .required)
+    }
+
+    /// People whose username or a word of their display name starts with `query`
+    /// (`GET /v1/users?q=`, 2 to 40 characters; never includes you or anyone's email).
+    func searchUsers(_ query: String, limit: Int = 20) async throws -> [RemoteProfile] {
+        let q = [URLQueryItem(name: "q", value: query), URLQueryItem(name: "limit", value: String(limit))]
+        return (try await get("v1/users", query: q, auth: .required) as RemoteList<RemoteProfile>).items
+    }
+
+    /// A Group's weekly board (`GET /v1/groups/{id}/leaderboard?week=`, members only). `week` is
+    /// `2026-W46`; nil is this week.
+    func groupWeeklyBoard(groupID: String, week: String? = nil) async throws -> RemoteGroupWeeklyBoard {
+        let q = week.map { [URLQueryItem(name: "week", value: $0)] } ?? []
+        return try await get("v1/groups/\(groupID)/leaderboard", query: q, auth: .required)
     }
 
     func friends() async throws -> [RemoteProfile] {
@@ -160,6 +208,28 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return games
     }
 
+    // MARK: Game anatomy
+
+    func anatomy(request: String, audience: String?) async throws -> JSONValue {
+        var body: [String: JSONValue] = ["request": .string(request)]
+        if let audience = audience?.trimmingCharacters(in: .whitespacesAndNewlines), !audience.isEmpty {
+            body["audience"] = .string(audience)
+        }
+        return try await anatomyCall("v1/anatomy", body)
+    }
+
+    func reviseAnatomy(_ anatomy: JSONValue, change: String, request: String?, afterPlaying: Bool) async throws -> JSONValue {
+        var body: [String: JSONValue] = ["anatomy": anatomy, "change": .string(change), "afterPlaying": .bool(afterPlaying)]
+        if let request, !request.isEmpty { body["request"] = .string(request) }
+        return try await anatomyCall("v1/anatomy/revise", body)
+    }
+
+    private func anatomyCall(_ path: String, _ body: [String: JSONValue]) async throws -> JSONValue {
+        let data = try await send("POST", path, body: try GamesAPICoding.encoder().encode(JSONValue.object(body)),
+                                  contentType: "application/json", auth: .required, timeout: Self.anatomyTimeout)
+        return try decode(data)
+    }
+
     /// Remembers a game's slug so later calls by slug go to its server id.
     private func link(_ game: RemoteGame) {
         if let slug = game.slug { ids.link(localID: slug, serverID: game.id) }
@@ -170,6 +240,13 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     // MARK: GamesAuth
 
     var isSignedIn: Bool { tokens != nil }
+
+    /// This phone already made its own (guest) account on an earlier launch.
+    var hasDeviceAccount: Bool { keychain.read("device") != nil }
+
+    /// Off while signed out, so a call that needs an account fails instead of quietly creating a
+    /// guest account behind the sign-in screen.
+    func setAutoSignIn(_ on: Bool) { autoSignIn = on }
 
     func register(email: String, username: String, displayName: String, password: String) async throws -> RemoteUser {
         let body = try JSONSerialization.data(withJSONObject: [

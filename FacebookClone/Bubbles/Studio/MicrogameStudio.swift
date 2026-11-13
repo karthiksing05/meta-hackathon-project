@@ -95,6 +95,17 @@ struct MicrogameExpansion: Sendable {
     var libraryErrors: [MicrogameDiagnostic] { errors.filter { $0.audience == .library } }
 }
 
+/// The quality check's verdict (authoring/expander/quality.mjs): 0–100, the number of major issues,
+/// and one line per issue, ready for Muse's polish turn.
+struct MicrogameQuality: Sendable, Hashable {
+    var score: Int
+    var major: Int
+    var lines: [String]
+
+    /// Worth a polish round: any major issue, or a score under 85 (prompts.mjs `needsPolish`).
+    var needsPolish: Bool { major > 0 || score < 85 }
+}
+
 /// What Muse can build microgames from, read from the bundle so the prompt can't drift.
 struct MicrogameCatalog: Sendable {
     struct Fragment: Sendable, Hashable {
@@ -260,6 +271,26 @@ enum MicrogameStudioError: Error, LocalizedError {
             throw MicrogameStudioError.badReply("examples didn't return text")
         }
         return ((json["ids"]?.array ?? []).compactMap(\.string), prompt)
+    }
+
+    /// One of Muse's prompts from the bundle (authoring/expander/prompts.mjs), the same text the
+    /// server's generator sends: "system", "compose", "revise", "repair", "playtest_repair", "polish".
+    func prompt(_ name: String, _ args: [String: JSONValue]) async throws -> String {
+        try await call("return MicrogameStudio.prompt(name, args)",
+                       arguments: ["name": name, "args": JSONValue.object(args).jsonString()],
+                       operation: "write the prompt", timeout: timeouts.catalog)
+    }
+
+    /// The quality check (authoring/expander/quality.mjs) on an expansion's authoring manifest:
+    /// what still reads as unfinished next to the gold games. `request` enables the theme check.
+    func quality(_ e: MicrogameExpansion, request: String) async throws -> MicrogameQuality {
+        let text = try await call("return MicrogameStudio.quality(json, request)",
+                                  arguments: ["json": e.authoringJSON.isEmpty ? e.authoring.jsonString() : e.authoringJSON, "request": request],
+                                  operation: "check the game's quality", timeout: timeouts.expand)
+        guard let json = try? JSONValue.parse(text), let score = json["score"]?.int else {
+            throw MicrogameStudioError.badReply("quality didn't return a score")
+        }
+        return MicrogameQuality(score: score, major: json["major"]?.int ?? 0, lines: (json["lines"]?.array ?? []).compactMap(\.string))
     }
 
     /// Expands an authoring manifest (or a microgame Bubble wrapper) and validates it in the engine.

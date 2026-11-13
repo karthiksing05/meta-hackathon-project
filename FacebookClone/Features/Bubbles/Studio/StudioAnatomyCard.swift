@@ -62,9 +62,19 @@ struct StudioAnatomyCard: View {
                 }
             } else if thread.isWorking {
                 loading
-            } else {
-                // The server has no anatomy endpoint yet, and the app asks no model itself.
-                LiveDataStateView(kind: .notAvailable(thread.note ?? LiveDataCopy.anatomy))
+            } else if let note = thread.note {
+                // The server's words for what went wrong (503: Muse isn't set up; 502: a bad reply).
+                VStack(alignment: .leading, spacing: FBSpacing.s) {
+                    Text(note)
+                        .font(.fbBody)
+                        .foregroundStyle(FBColor.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Try again") {
+                        Haptics.light()
+                        thread.draft(request: thread.request, audience: thread.audience)
+                    }
+                    .buttonStyle(.studioSecondary(expand: false, height: 40))
+                }
             }
             if thread.isWorking && thread.anatomy != nil {
                 HStack(spacing: FBSpacing.s) {
