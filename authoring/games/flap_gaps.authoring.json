@@ -1,0 +1,21 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Flap Gaps",
+    "instructions": "Tap to flap and fly the bird through the gaps in the walls. Three bumps end the run. Pass 12 walls to win.",
+    "duration_s": 60
+  },
+  "uses": [
+    { "fragment": "gravity_jump", "params": { "gravity": 700.0, "jump_vel": 300.0, "floor_y": 596.0, "x": 92.0, "flap": true, "size": 16.0, "tone": "accent" } },
+    { "fragment": "gap_walls", "params": { "speed": 90.0, "spacing": 260.0, "width": 56.0, "gap": 300.0, "gap_min": 260.0, "narrow_over": "40s", "gap_margin": 60.0, "player_r": 17.6, "first_after": "1500ms" } },
+    { "fragment": "score", "params": { "points": 1, "target": 12, "label": "Walls" } },
+    { "fragment": "lives", "params": { "count": 3 } }
+  ],
+  "objectives": {
+    "time_limit": "60s",
+    "on_timeout": "lose"
+  },
+  "look": { "id": "paper", "tokens": {} },
+  "content": {},
+  "playtest": { "progress": "score * 100" }
+}

@@ -4,7 +4,7 @@
 
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { loadEngine } from '../expander/engine.mjs';
-import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, analyze, summarize } from './bots.mjs';
+import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize } from './bots.mjs';
 
 export { DEFAULT_BOTS, analyze, summarize, gameObject };
 
@@ -96,8 +96,13 @@ export async function playtest(gameJson, { seed = 1, bots = DEFAULT_BOTS, maxSec
     worker.once('message', resolve);
     worker.once('error', reject);
   })));
-  const flags = analyze(runs, { maxSeconds });
-  return { runs, flags, passed: !flags.some((f) => f.blocking), summary: summarize(runs, maxSeconds) };
+  let inputProbe = null;
+  try {
+    const { engine } = await loadEngine();
+    inputProbe = probeDeadInputs(engine, json, sources, { seed });
+  } catch { /* the mash probe is advisory: a failure here never fails the gate */ }
+  const flags = analyze(runs, { maxSeconds, inputProbe, game: inputsOf(json) });
+  return { runs, flags, inputProbe, passed: !flags.some((f) => f.blocking), summary: summarize(runs, maxSeconds) };
 }
 
 if (!isMainThread && workerData?.json) {

@@ -157,6 +157,77 @@ export function apply(g, action) {
   }
 }
 
+/**
+ * Whether an input would do nothing right now. Inputs are queued until the next step, so this forks
+ * the game twice, sends the input to one fork, steps both once and compares their state hashes: the
+ * same hash means no rule took the input, or a rule's `when` blocked it. Returns null when it can't
+ * tell (an engine without `fork()` or `stateHash()`).
+ */
+export function isDeadInput(g, action) {
+  if (typeof g.fork !== 'function' || typeof g.stateHash !== 'function') return null;
+  let ref = null;
+  let withInput = null;
+  try {
+    ref = g.fork();
+    withInput = g.fork();
+    apply(withInput, action);
+    ref.step(DT);
+    withInput.step(DT);
+    return ref.stateHash() === withInput.stateHash();
+  } catch {
+    return null;
+  } finally {
+    try { ref?.dispose(); } catch { /* ignore */ }
+    try { withInput?.dispose(); } catch { /* ignore */ }
+  }
+}
+
+const MASH_STEPS_BETWEEN = 10;
+const MASH_MAX_SECONDS = 30;
+const MASH_MIN_INPUTS = 20;
+const DEAD_WARN = 0.5;
+const DEAD_BLOCK = 0.75;
+
+/**
+ * Mashes the game's anywhere-inputs the way a person does, to see which ones do nothing. Every
+ * ~170 ms it sends a random key or swipe and checks with `isDeadInput` whether that input had any effect. The bots
+ * can't measure this themselves: a look-ahead bot never sends an input that does nothing, so a
+ * jump that ignores presses in the air looks fine to them. Taps aren't probed: whether a tap does
+ * anything depends on where it lands, so a dead tap says little. Returns {sent, dead, byKind: {kind:
+ * {sent, dead}}}; `sent` is 0 when the game has no keys or swipes or the engine can't fork.
+ */
+export function probeDeadInputs(engine, json, sources, { seed = 1 } = {}) {
+  const stats = { sent: 0, dead: 0, byKind: {} };
+  const rng = mulberry32(0x5eed1e55);
+  const maxSteps = Math.round((MASH_MAX_SECONDS * 1000) / DT);
+  const g = engine.load(json, seed);
+  try {
+    if (typeof g.fork !== 'function' || typeof g.stateHash !== 'function') return stats;
+    let steps = 0;
+    while (steps < maxSteps && g.phase() === 'playing') {
+      if (steps % MASH_STEPS_BETWEEN === 0) {
+        const open = candidatesFor({}, { ...sources, pointer: false }, rng).filter((c) => c.kind !== 'noop');
+        if (open.length) {
+          const action = open[Math.floor(rng() * open.length)];
+          const dead = isDeadInput(g, action);
+          if (dead !== null) {
+            const kind = (stats.byKind[action.kind] ??= { sent: 0, dead: 0 });
+            stats.sent++;
+            kind.sent++;
+            if (dead) { stats.dead++; kind.dead++; }
+          }
+          apply(g, action);
+        }
+      }
+      g.step(DT);
+      steps++;
+    }
+  } finally {
+    try { g.dispose(); } catch { /* ignore */ }
+  }
+  return stats;
+}
+
 // ---------- analysis ----------
 
 export function median(values) {
@@ -166,7 +237,7 @@ export function median(values) {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-export function analyze(runs, { maxSeconds = 180 } = {}) {
+export function analyze(runs, { maxSeconds = 180, inputProbe = null, game = null } = {}) {
   const flags = [];
   const flag = (code, message, blocking) => flags.push({ code, message, blocking });
   const done = runs.filter((r) => r.ok);
@@ -227,7 +298,38 @@ export function analyze(runs, { maxSeconds = 180 } = {}) {
   if (!wins.length && maxScore <= 0) flag('no_win_or_score', 'No bot won or scored: it can\'t be won or scored.', true);
   if (med > 120) flag('too_long', `Too long: the median run is ${secs(med)} s; a good game lasts 10–120 s.`, true);
 
+  deadInputFlag(inputProbe, game, flag);
+
   return flags;
+}
+
+const KIND_NAMES = { key: ['key press', 'key presses'], swipe: ['swipe', 'swipes'] };
+
+// The rules that take a key or swipe input but only run `when` something holds: the likely blockers.
+function guardedRules(game, kind) {
+  const inputs = Object.entries(game?.inputs ?? {})
+    .filter(([, input]) => (input.from ?? []).some((f) => (kind === 'key' ? f.key : f.swipe)))
+    .map(([name]) => name);
+  return (game?.rules ?? []).filter((r) => inputs.includes(r.on) && r.when && r.when !== 'true');
+}
+
+/**
+ * Flags `dead_inputs` when most of the keys or swipes the mash probe sent changed nothing. Warning
+ * from half, blocking from three quarters: a game where three of four presses vanish is broken, while
+ * lane and board games legitimately ignore a few (a swipe into a wall).
+ */
+function deadInputFlag(probe, game, flag) {
+  const worst = Object.entries(probe?.byKind ?? {})
+    .filter(([kind, k]) => KIND_NAMES[kind] && k.sent >= MASH_MIN_INPUTS)
+    .map(([kind, k]) => ({ kind, ...k, share: k.dead / k.sent }))
+    .sort((a, b) => b.share - a.share)[0];
+  if (!worst || worst.share < DEAD_WARN) return;
+  const [one, many] = KIND_NAMES[worst.kind];
+  const guards = guardedRules(game, worst.kind).slice(0, 2)
+    .map((r) => `rule \`${r.id ?? r.on}\` only runs when \`${r.when}\``);
+  const cause = guards.length ? `${guards.join('; ')}, so a ${one} is ignored whenever that is false` : `no rule reacts to them at that moment`;
+  flag('dead_inputs', `Most ${many} (${worst.dead} of ${worst.sent}) did nothing when a player mashed them: ${cause}. `
+    + `Make the ${one} work whenever the player presses it (for a jump: let it work in the air too), or give it another effect.`, worst.share >= DEAD_BLOCK);
 }
 
 export function summarize(runs, maxSeconds = 180) {

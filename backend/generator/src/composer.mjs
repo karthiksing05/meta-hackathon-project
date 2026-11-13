@@ -4,6 +4,8 @@
 // connects it to Muse and to the job: it passes Muse in as a function, stops when the job is cancelled,
 // and stamps a revision's lineage.
 
+import { paintArt, imageArtOn } from './art.mjs';
+
 export { summarize } from './events.mjs';
 
 export class GenerationError extends Error {
@@ -64,6 +66,13 @@ export function contextSection(ctx) {
   if (plan) {
     if (plan.design) out.push('', 'Planned design: ' + clip(plan.design, 1800));
     if (plan.anatomy) out.push('', 'Planned anatomy: ' + clip(plan.anatomy, 6000));
+    const spec = plan.spec && typeof plan.spec === 'object' ? plan.spec : null;
+    if (spec) {
+      const { visual, ...parts } = spec;
+      out.push('', 'Planned spec (game-spec/1; build to it): ' + clip(parts, 6000));
+      const art = visualSection(visual);
+      if (art) out.push('', art);
+    }
     if (Array.isArray(plan.gaps) && plan.gaps.length) {
       out.push('', 'The engine can\'t do these yet, so approximate them as noted:');
       for (const g of plan.gaps.slice(0, 8)) out.push(`- ${clip(g.tool, 60)}: ${clip(g.approximation ?? g.status ?? '', 220)}`);
@@ -75,13 +84,41 @@ export function contextSection(ctx) {
 }
 
 /**
+ * The art direction the planner wrote (spec.visual), as compose needs it: the names to give the sprites, the
+ * palette and the screen plan. The image prompts stay out: the art step (art.mjs) paints those assets after
+ * the gate, so compose only draws a stand-in SVG for them.
+ */
+export function visualSection(visual) {
+  if (!visual || typeof visual !== 'object') return '';
+  const out = ['Planned art direction (follow it):'];
+  if (visual.style) out.push(`- style: ${clip(visual.style, 300)}`);
+  if (visual.scene) out.push(`- scene: ${clip(visual.scene, 300)}`);
+  const colors = visual.palette?.colors;
+  if (colors && typeof colors === 'object') out.push(`- palette (use these as art.palette): ${clip(colors, 400)}`);
+  const l = visual.layout ?? {};
+  if (l.hud || l.play || l.controls) out.push(`- layout: HUD ${clip(l.hud ?? '', 160)}; play area ${clip(l.play ?? '', 160)}; controls ${clip(l.controls ?? '', 160)}`);
+  const assets = Array.isArray(visual.assets) ? visual.assets.slice(0, 24) : [];
+  if (assets.length) {
+    out.push('- sprites: name each art.sprites entry exactly by its id below (fragment roles keep their role name), and draw every one:');
+    for (const a of assets) {
+      const how = a.render === 'image' ? 'a painter replaces it after the playtest, so draw a simple, well-proportioned stand-in in its colors'
+        : a.render === 'engine' ? 'drawn by the engine from shapes and text, no sprite needed'
+          : 'draw it carefully as SVG: it must read exactly at play size';
+      out.push(`  - ${clip(a.id, 24)} (${clip(a.piece ?? '', 60)}): ${clip(a.depicts ?? '', 80)}; ${clip(a.reads_as ?? '', 160)} [${a.render}: ${how}]`);
+    }
+  }
+  for (const r of (Array.isArray(visual.readability) ? visual.readability.slice(0, 6) : [])) out.push(`- readability: ${clip(r, 160)}`);
+  return out.join('\n');
+}
+
+/**
  * compose({request, brief, base?, remixOf?, level?, context?}, {muse, studio, model, onEvent, signal})
  *   -> {manifest, stats, bots, gate, quality}
  * base: the stored manifest of the game being changed (it must carry content.authoring_json). The result is
  * always a new game: a fresh id, `lineage.remix_of` set to remixOf, and `chain.index` set to level.
  * Throws GenerationError when the game never validates, or whatever Muse or the page threw.
  */
-export async function compose({ request, brief, base = null, remixOf = null, level = null, context = null }, { muse, studio, model = 'muse-wonder-1.0', onEvent = () => {}, signal }) {
+export async function compose({ request, brief, base = null, remixOf = null, level = null, context = null }, { muse, studio, model = 'muse-wonder-1.0', onEvent = () => {}, signal, renderFrame = null, env = process.env }) {
   // Studio bundle version 3 and up put the harness context into the prompt themselves (only the planned tools in the
   // menu, plus the spec and the matched gold examples). An older bundle only gets the additive section, and only on
   // compose calls, not on the score review or repair that name their own model.
@@ -98,6 +135,18 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
     return { content: r.content, model: r.model, usage: r.usage };
   };
   const out = await studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))));
+  // The art step paints what the plan's visual stage marked "image". New games only for now: a revision sends the
+  // whole authoring manifest back through Muse, and painted images would ride along as base64.
+  const visual = context?.plan?.spec?.visual;
+  if (visual && !base && imageArtOn(env) && typeof muse.image === 'function') {
+    try {
+      const art = await paintArt({ manifest: out.manifest, visual, muse, studio, renderFrame, signal, onEvent: (e) => onEvent(e) });
+      out.manifest = art.manifest;
+      out.stats = { ...(out.stats ?? {}), art: art.report };
+    } catch (e) {
+      out.stats = { ...(out.stats ?? {}), art: { applied: false, error: String(e?.message ?? e).slice(0, 300) } };
+    }
+  }
   const m = out.manifest;
   if (base) {
     m.id = `mg-${slug(m.title ?? base.title ?? 'game') || 'game'}-${suffix()}`; // never the base game's own id
