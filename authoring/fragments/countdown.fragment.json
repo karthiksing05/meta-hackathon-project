@@ -35,18 +35,7 @@
   "objectives": {},
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top",
-        "node": {
-          "node": "text",
-          "text": "= str(max(0, ceil((@ms - now) / 1000.0))) + 's'",
-          "size": 18, "weight": 600,
-          "color": "= if @ms - now <= @warn_at then $danger else $ink",
-          "transition": { "color": { "ms": 200, "ease": "out" } },
-          "animate_on": { "_warn_tick": { "prop": "scale", "keys": [1, 1.3, 1], "ms": 200 } },
-          "role": "hud"
-        }
-      }
+      {"slot":"hud_top","node":{"ui":"stat","label":"Time","value":"= str(max(0, ceil((@ms - now) / 1000.0))) + 's'","color":"= if @ms - now <= @warn_at then $danger else $ink","transition":{"color":{"ms":200,"ease":"out"}},"animate_on":{"_warn_tick":{"prop":"scale","keys":[1,1.3,1],"ms":200}}}}
     ],
     "feedback": [
       { "on": "_warn_tick", "do": [ { "moment": "countdown" } ] },

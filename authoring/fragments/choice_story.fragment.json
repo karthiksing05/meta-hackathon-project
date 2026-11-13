@@ -72,60 +72,10 @@
   },
   "presentation": {
     "slots": [
-      {
-        "slot": "playfield",
-        "node": {
-          "node": "repeat", "source": "range(4)", "as": "k", "key": "k",
-          "template": {
-            "node": "text", "x": 180, "y": "= @text_y + k * 30", "anchor": "center", "size": 20, "weight": 500, "color": "$ink",
-            "text": "= get_or(story_lines, scene * 4 + k, '')",
-            "animate_on": { "choice_made": { "prop": "opacity", "keys": [0, 1], "ms": 350 } }
-          }
-        }
-      },
-      {
-        "slot": "playfield",
-        "include": "@art.scene",
-        "node": {
-          "node": "image", "asset": "@art.scene.id", "frame": "= scene", "anchor": "center",
-          "x": 180, "y": "@picture_y", "rotation": "= sin(now / 650.0) * @picture_sway",
-          "w": "= min(300.0, @picture_h / @art.scene.aspect)", "h": "= min(300.0, @picture_h / @art.scene.aspect) * @art.scene.aspect",
-          "animate_on": { "choice_made": { "prop": "opacity", "keys": [0, 1], "ms": 450 } }
-        }
-      },
-      {
-        "slot": "playfield",
-        "node": {
-          "node": "repeat", "source": "range(3)", "as": "c", "key": "c",
-          "template": {
-            "node": "group", "x": 30, "y": "= @button_y + c * 64",
-            "visible": "= get_or(story_labels, scene * 3 + c, '') != '' and not _ended",
-            "opacity": "= if now >= _ready_at then 1.0 else 0.4",
-            "transition": { "opacity": { "ms": 250, "ease": "out" } },
-            "animate_on": { "choose": { "when": "event.choice == c", "prop": "scale", "keys": [1, 0.94, 1.03, 1], "ms": 170 } },
-            "children": [
-              {
-                "include": "@art.button",
-                "node": "image", "asset": "@art.button.id", "w": 300, "h": 52, "role": "tile"
-              },
-              {
-                "include": "@art.button",
-                "node": "rect", "w": 300, "h": 52, "radius": 12, "fill": "#00000000",
-                "on_tap": { "input": "choose", "with": { "choice": "c" } }
-              },
-              {
-                "include": "not @art.button",
-                "node": "rect", "w": 300, "h": 52, "radius": 12, "fill": "$surface", "role": "tile",
-                "on_tap": { "input": "choose", "with": { "choice": "c" } }
-              },
-              {
-                "node": "text", "x": 150, "y": 26, "anchor": "center", "size": 17, "weight": 600, "color": "$ink",
-                "text": "= get_or(story_labels, scene * 3 + c, '')"
-              }
-            ]
-          }
-        }
-      }
+      {"slot":"playfield","node":{"ui":"dialog","text":"= join(filter(slice(story_lines, scene * 4, scene * 4 + 4), (l) => l != ''), ' ')","lines":6,"animate_on":{"choice_made":{"prop":"opacity","keys":[0,1],"ms":350}}}},
+      {"slot":"playfield","include":"@art.scene","node":{"ui":"picture","sprite":"@art.scene.id","frame":"= scene","aspect":"@art.scene.aspect","max_h":"@picture_h","animate_on":{"choice_made":{"prop":"opacity","keys":[0,1],"ms":450}}}},
+      {"slot":"playfield","include":"@art.button","node":{"ui":"choice_list","count":3,"as":"c","text":"= get_or(story_labels, scene * 3 + c, '')","visible_item":"= get_or(story_labels, scene * 3 + c, '') != '' and not _ended","dim":"= now < _ready_at","on_tap":{"input":"choose","with":{"choice":"c"}},"sprite":"@art.button.id"}},
+      {"slot":"playfield","include":"not @art.button","node":{"ui":"choice_list","count":3,"as":"c","text":"= get_or(story_labels, scene * 3 + c, '')","visible_item":"= get_or(story_labels, scene * 3 + c, '') != '' and not _ended","dim":"= now < _ready_at","on_tap":{"input":"choose","with":{"choice":"c"}}}}
     ],
     "feedback": [
       { "on": "choice_made", "do": [ { "moment": "tap" }, { "haptic": "light" } ] },

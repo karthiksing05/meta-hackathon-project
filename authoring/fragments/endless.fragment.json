@@ -32,10 +32,7 @@
   "objectives": {},
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top",
-        "node": { "node": "text", "text": "= 'Level ' + str(level)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
-      }
+      {"slot":"hud_top","node":{"ui":"stat","label":"Level","value":"= str(level)","color":"$ink"}}
     ],
     "feedback": [
       { "on": "level_up", "do": [ { "moment": "level" }, { "haptic": "light" } ] }
