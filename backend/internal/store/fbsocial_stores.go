@@ -37,6 +37,9 @@ type FBStore interface {
 	FBInsertMessages(ctx context.Context, ms []model.FBMessage) error                                        // also moves each thread's lastAt and lastText
 	FBMessages(ctx context.Context, threadID string, before time.Time, limit int) ([]model.FBMessage, error) // newest first
 	FBCountUnread(ctx context.Context, threadID, userID string, since time.Time) (int64, error)
+	// FBShiftTimes moves the given posts (with their comments) and stories later by delta: the demo world is kept
+	// recent without reseeding, so reactions and comments on it survive.
+	FBShiftTimes(ctx context.Context, postIDs, storyIDs []string, delta time.Duration) error
 }
 
 type FBPostQuery struct {
@@ -571,6 +574,60 @@ func (m *Mongo) FBMessages(ctx context.Context, threadID string, before time.Tim
 func (m *Mongo) FBCountUnread(ctx context.Context, threadID, userID string, since time.Time) (int64, error) {
 	return m.coll(cFBMessages).CountDocuments(ctx, bson.D{{Key: "threadId", Value: threadID},
 		{Key: "senderId", Value: bson.D{{Key: "$ne", Value: userID}}}, {Key: "sentAt", Value: bson.D{{Key: "$gt", Value: since}}}})
+}
+
+func (m *Mongo) FBShiftTimes(ctx context.Context, postIDs, storyIDs []string, delta time.Duration) error {
+	ms := delta.Milliseconds()
+	if len(postIDs) > 0 {
+		shiftComments := bson.D{{Key: "$map", Value: bson.D{
+			{Key: "input", Value: bson.D{{Key: "$ifNull", Value: bson.A{"$comments", bson.A{}}}}},
+			{Key: "in", Value: bson.D{{Key: "$mergeObjects", Value: bson.A{"$$this",
+				bson.D{{Key: "createdAt", Value: bson.D{{Key: "$add", Value: bson.A{"$$this.createdAt", ms}}}}}}}}},
+		}}}
+		pipe := mongoPipeline(bson.D{{Key: "$set", Value: bson.D{
+			{Key: "createdAt", Value: bson.D{{Key: "$add", Value: bson.A{"$createdAt", ms}}}},
+			{Key: "comments", Value: shiftComments},
+		}}})
+		if _, err := m.coll(cFBPosts).UpdateMany(ctx, bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: postIDs}}}}, pipe); err != nil {
+			return err
+		}
+	}
+	if len(storyIDs) > 0 {
+		pipe := mongoPipeline(bson.D{{Key: "$set", Value: bson.D{{Key: "createdAt", Value: bson.D{{Key: "$add", Value: bson.A{"$createdAt", ms}}}}}}})
+		if _, err := m.coll(cFBStories).UpdateMany(ctx, bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: storyIDs}}}}, pipe); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func mongoPipeline(stages ...bson.D) bson.A {
+	out := bson.A{}
+	for _, s := range stages {
+		out = append(out, s)
+	}
+	return out
+}
+
+func (m *Memory) FBShiftTimes(ctx context.Context, postIDs, storyIDs []string, delta time.Duration) error {
+	f := m.fb()
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	for _, id := range postIDs {
+		if p, ok := f.posts[id]; ok {
+			p.CreatedAt = p.CreatedAt.Add(delta)
+			for i := range p.Comments {
+				p.Comments[i].CreatedAt = p.Comments[i].CreatedAt.Add(delta)
+			}
+		}
+	}
+	for _, id := range storyIDs {
+		if s, ok := f.stories[id]; ok {
+			s.CreatedAt = s.CreatedAt.Add(delta)
+			f.stories[id] = s
+		}
+	}
+	return nil
 }
 
 var (

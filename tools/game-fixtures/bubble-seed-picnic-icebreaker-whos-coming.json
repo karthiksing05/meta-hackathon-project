@@ -107,7 +107,7 @@
       {
         "id": "sf-maya-okafor",
         "name": "Maya Okafor",
-        "avatar": "https://randomuser.me/api/portraits/women/44.jpg",
+        "avatar": "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Maya%20Okafor",
         "facts": [
           "Runs the Lands End trail every Saturday",
           "Moved from Austin three weeks ago",
@@ -117,7 +117,7 @@
       {
         "id": "sf-diego-ramirez",
         "name": "Diego Ramírez",
-        "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
+        "avatar": "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Diego%20Ram%C3%ADrez",
         "facts": [
           "Bakes too much sourdough",
           "Lives in the Mission",
@@ -127,7 +127,7 @@
       {
         "id": "sf-priya-natarajan",
         "name": "Priya Natarajan",
-        "avatar": "https://randomuser.me/api/portraits/women/65.jpg",
+        "avatar": "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Priya%20Natarajan",
         "facts": [
           "Works night shifts as a nurse",
           "Moved from Toronto",
@@ -137,7 +137,7 @@
       {
         "id": "sf-lena-fischer",
         "name": "Lena Fischer",
-        "avatar": "https://randomuser.me/api/portraits/women/21.jpg",
+        "avatar": "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Lena%20Fischer",
         "facts": [
           "Swims in the cold water at Aquatic Park",
           "Arrived from Berlin last week",
@@ -147,7 +147,7 @@
       {
         "id": "sf-jordan-brooks",
         "name": "Jordan Brooks",
-        "avatar": "https://randomuser.me/api/portraits/men/57.jpg",
+        "avatar": "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Jordan%20Brooks",
         "facts": [
           "Cooks in a restaurant kitchen",
           "Wants to learn to surf at Ocean Beach",
@@ -157,7 +157,7 @@
       {
         "id": "sf-omar-haddad",
         "name": "Omar Haddad",
-        "avatar": "https://randomuser.me/api/portraits/men/71.jpg",
+        "avatar": "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Omar%20Haddad",
         "facts": [
           "Bikes up every hill",
           "Plays pickup soccer on Sundays",
@@ -167,7 +167,7 @@
       {
         "id": "sf-chloe-nguyen",
         "name": "Chloe Nguyen",
-        "avatar": "https://randomuser.me/api/portraits/women/9.jpg",
+        "avatar": "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Chloe%20Nguyen",
         "facts": [
           "Runs a Thursday trivia team",
           "Is still getting used to the fog",

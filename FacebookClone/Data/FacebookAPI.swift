@@ -164,6 +164,12 @@ struct FacebookAPILive: Sendable {
         (try await get("v1/fb/stories") as Items<RemoteFBStoryGroup>).items
     }
 
+    /// `GET /v1/fb/people?ids=`: Personas and accounts, with the same cartoon avatars the posts use.
+    func people(ids: [String]) async throws -> [RemoteFBPerson] {
+        guard !ids.isEmpty else { return [] }
+        return (try await get("v1/fb/people", [URLQueryItem(name: "ids", value: ids.prefix(100).joined(separator: ","))]) as Items<RemoteFBPerson>).items
+    }
+
     func threads(messages: Int = 30) async throws -> [RemoteFBThread] {
         (try await get("v1/fb/threads", [URLQueryItem(name: "messages", value: String(messages))], signIn: true) as Items<RemoteFBThread>).items
     }
