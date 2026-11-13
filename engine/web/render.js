@@ -140,8 +140,8 @@ function drawImage(ctx, op, assets) {
     const fx = (f % cols) * sw, fy = Math.floor(f / cols) * sh;
     if (op.src_w > 0 && op.src_h > 0) drawImageSrc(ctx, a, op, fx, fy, sw, sh);
     else ctx.drawImage(a.img, fx, fy, sw, sh, op.x, op.y, op.w, op.h);
-  } else {
-    // Missing or still loading: a placeholder box with a cross.
+  } else if (typeof globalThis !== 'undefined' && globalThis.MG_DEBUG_PLACEHOLDERS) {
+    // Debug only: a missing or still-loading image shows as a box with a cross.
     ctx.fillStyle = 'rgba(128,128,128,0.25)';
     ctx.fillRect(op.x, op.y, op.w, op.h);
     ctx.strokeStyle = 'rgba(128,128,128,0.8)';

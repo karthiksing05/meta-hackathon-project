@@ -64,7 +64,7 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
         private var lastOffset: CGFloat = .nan
 
         /// How long the offset has to hold still before the pager counts as settled.
-        private static let quietInterval: TimeInterval = 0.12
+        private static let quietInterval: TimeInterval = 0.06
 
         override func didMoveToWindow() {
             super.didMoveToWindow()
@@ -93,6 +93,8 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
             observation?.invalidate()
             scrollView = found
             found.panGestureRecognizer.isEnabled = lockedIndex == nil
+            // Snap like Reels: the page lands quickly instead of drifting.
+            found.decelerationRate = .fast
             lastOffset = found.contentOffset.y
             FeedScrollLog.log("observer attached height=\(Int(found.bounds.height)) offset=\(Int(found.contentOffset.y))")
             FeedScrollLog.watchMemoryWarnings()
@@ -188,7 +190,9 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
 /// long fling still moves only one page, like Reels.
 struct FeedPagingBehavior: ScrollTargetBehavior {
     /// Points per millisecond (the units of `context.velocity`).
-    static let flickVelocity: CGFloat = 0.5
+    static let flickVelocity: CGFloat = 0.25
+    /// A slow drag turns the page once it has moved this share of the screen (Reels-like).
+    static let dragShare: CGFloat = 0.22
     /// How far the scroll view coasts per unit of release velocity: the natural target sits about
     /// this many milliseconds of velocity past the release point (measured on iOS 26.5).
     static let coastMilliseconds: CGFloat = 660
@@ -209,7 +213,7 @@ struct FeedPagingBehavior: ScrollTargetBehavior {
             let dragged = releaseY - startPage * height
             if abs(velocity) > Self.flickVelocity {
                 page = startPage + (velocity > 0 ? 1 : -1)
-            } else if abs(dragged) > height / 2 {
+            } else if abs(dragged) > height * Self.dragShare {
                 page = startPage + (dragged > 0 ? 1 : -1)
             } else {
                 page = startPage
