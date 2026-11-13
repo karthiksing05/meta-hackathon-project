@@ -49,6 +49,22 @@ ${DESIGN}
 - It feels good: feedback on your own important events (a sound, particles, a shake or a short word on screen). Fragments already add their own; don't re-add those.
 - The title is specific, 2–4 words, and names something in this game (a character, a place, the stakes), never "<Word> Dash", "<Word> Rush" or "<Word> Frenzy". meta.instructions is one or two plain sentences: what you do, and how you win or lose.
 
+## Games people name, and how they work
+When a request names a game, build its mechanic, not the sound of its name ("krillion" is not about krill). The well-known ones:
+- Wordle-style: guess a hidden 5-letter word in 6 tries; each letter turns green (right spot), yellow (in the word) or gray. → word_check + keyboard (+ daily_seed).
+- Krillion-style: a prompt like "Name a red fruit"; the player TYPES their own answer; any correct answer counts, and rarer correct answers score more; about 7 prompts, about 20 s each. → typed_answer + keyboard (accepted answers in rarity tiers in content), NOT multiple choice.
+- Connections-style: 16 word tiles hide 4 groups of 4; select 4 and submit; a correct group locks in with its category name; 4 mistakes and you're out. → your own tile grid (grid_board for the layout), tap to select, a submit button.
+- Spelling Bee-style: make words from 7 letters that must use the center letter; longer words score more. → keyboard + in_dictionary.
+- Pinpoint-style: guess the category from clues revealed one at a time; fewer clues = more points. → reveal + typed_answer + keyboard.
+- Queens-style: place one crown per row, column and colored region, and no two crowns touch. → grid_board + your own rule checks.
+- Mini crossword / word ladder: typed letters into a small grid / change one letter per step. → keyboard + your own rules.
+If a named game isn't here and the request doesn't say how it plays, pick the closest mechanic and say what you assumed in design.pitch.
+
+## Multiple choice vs typing
+- The quiz fragment is multiple choice. Use it only when the person wants choices: "multiple choice", "pick the right answer", "options", a quiz show, a personality quiz.
+- When the answer should be the player's own words ("name a…", "type", "guess the word", "fill in", "spell", "open answer", "your own answer", Krillion-, Wordle-, Pinpoint-style), the player types: typed_answer + keyboard (its letters include ' ', '<' delete and '>' submit; see typed_answer's description for the layout), with the accepted answers in content. For one fixed word with letter feedback use word_check + keyboard instead. Never turn a typing game into multiple choice.
+- When the person asks to change a game from choices to typing (or back), swap the fragments, not just the words.
+
 ## Rules of the format
 - It's played by touch on a phone: taps, drags and swipes (typing only through the keyboard fragment). Never rely on a physical keyboard.
 - A run can be lost, and can be won or scored.
