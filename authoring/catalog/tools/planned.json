@@ -1,32 +1,5 @@
 [
   {
-    "id": "fuzzy_match",
-    "kind": "runtime_tool",
-    "name": "Fuzzy answer match",
-    "aliases": [
-      "typo tolerance",
-      "close enough",
-      "answer matching"
-    ],
-    "summary": "Does a typed answer match an accepted one? Normalizes case, accents, punctuation and articles, checks aliases, then a Damerau-Levenshtein ratio, a token-set ratio, plural and stem folding, and optionally a phonetic key. Deterministic, no LLM.",
-    "when_to_use": "Any typed or open answer: trivia, naming, guess the character, spelling with tolerance.",
-    "api": "fuzzy.match(input, accepted[], {threshold}) -> {ok, best, score, tier}",
-    "events": [],
-    "params": {
-      "threshold": "0..1, default 0.82"
-    },
-    "status": "building",
-    "gaps_it_closes": [
-      "typed_answer matches only exact text with a trailing-s fold"
-    ],
-    "example_types": [
-      "rare_answer_trivia",
-      "name_all_x",
-      "guess_the_character"
-    ],
-    "path": "docs/HARNESS_V2.md"
-  },
-  {
     "id": "text_input",
     "kind": "runtime_tool",
     "name": "Native text field",

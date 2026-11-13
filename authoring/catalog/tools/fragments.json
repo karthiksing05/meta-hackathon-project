@@ -198,6 +198,35 @@
     "path": "authoring/fragments/endless.fragment.json"
   },
   {
+    "id": "fuzzy_match",
+    "kind": "fragment",
+    "name": "Fuzzy answer match",
+    "aliases": [
+      "typo tolerance",
+      "close enough",
+      "answer matching",
+      "forgiving match"
+    ],
+    "summary": "Pure functions that decide whether typed text matches an accepted answer: ignore case, accents, punctuation, a leading article, word order, plurals and number words; forgive typos by length (4 letters or fewer exact, 5-7 one typo, longer at threshold); optional phonetic match. Deterministic.",
+    "when_to_use": "Custom typed-answer rules: names, titles, spells, open answers. typed_answer already uses it, so do not add it there.",
+    "api": "fuzzy_ok(input, entry) -> bool; fuzzy_best(input, entries: list<string>) -> int (-1 if none); fuzzy_score(input, name) -> float 0..1; fuzzy_passes(input, name, score) -> bool; fuzzy_entry(input, entry) -> float; fuzzy_key(s) -> string (normalized). An entry is an answer plus aliases joined by =, e.g. \"hermione granger=hermione\". Spec: authoring/SPEC.md 2.12",
+    "events": [],
+    "params": {
+      "threshold": "float, default 0.82, 0.5..1",
+      "phonetic": "bool, default false"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/fuzzy_match.fragment.json",
+    "example_types": [
+      "rare_answer_trivia",
+      "name_all_x",
+      "guess_the_character"
+    ],
+    "gaps_it_closes": [
+      "exact-only typed answer matching"
+    ]
+  },
+  {
     "id": "ghost_score",
     "kind": "fragment",
     "name": "Friend ghost",
@@ -764,9 +793,9 @@
       "type the answer",
       "name a"
     ],
-    "summary": "Open-answer prompts the player answers by typing on the keyboard fragment; listed answers score by rarity tier (common to legendary), with a per-prompt timer.",
+    "summary": "Open-answer prompts the player answers by typing on the keyboard fragment; answers (with aliases joined by =) are matched forgivingly by the fuzzy_match rules and score by rarity tier (common to legendary), with a per-prompt timer.",
     "when_to_use": "Typed trivia and naming games (\"name a…\", fill-in, guess the word, rarest-answer trivia): anywhere multiple choice would be wrong.",
-    "api": "pair with keyboard (letters include space, < and >); game provides ta_prompts() and ta_answers() (tiers split by |, answers by ,), both list<string>; provides key_state, prompt_text, ta_progress, ta_points, typed, last_result; emits answered_right {points, tier}, answered_wrong, prompt_done; matching is case-insensitive with a trailing-s fold; not with quiz or score",
+    "api": "pair with keyboard (letters include space, < and >); game provides ta_prompts() and ta_answers() (tiers split by |, answers by ,, aliases by =), both list<string>; provides key_state, prompt_text, ta_progress, ta_points, typed, last_result, last_answer; emits answered_right {points, tier}, answered_wrong, prompt_done; matching ignores case, accents, punctuation, articles, word order, plurals and number words and forgives typos by length (threshold, phonetic params); not with quiz or score",
     "events": [
       "answered_right",
       "answered_wrong",
@@ -779,7 +808,9 @@
       "uncommon": "int, default 25, 0..1000",
       "rare": "int, default 50, 0..1000",
       "legendary": "int, default 100, 0..1000",
-      "placeholder": "string, default \"Type your answer\", max 30 chars"
+      "placeholder": "string, default \"Type your answer\", max 30 chars",
+      "threshold": "float, default 0.82, 0.5..1",
+      "phonetic": "bool, default false"
     },
     "status": "shipped",
     "path": "authoring/fragments/typed_answer.fragment.json",
