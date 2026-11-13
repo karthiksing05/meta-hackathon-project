@@ -13,6 +13,13 @@ import { pickCanvas, fitLayout, safeArea } from './canvas.mjs';
 import { applyLook, lookFromChoice } from '../kit/look.mjs';
 
 export const STANDARD_TOKENS = ['primary', 'secondary', 'accent', 'ink', 'bg', 'danger', 'surface'];
+/**
+ * What a fragment may read: the standard roles, plus what the kit (ui-kit.mjs kitTokens) defines for every game:
+ * the on-colours (text on a filled role, computed against the fills the game really uses, so a label on a $primary
+ * button reads whatever the palette is) and the `<role>_ink` text variants (small text in a role colour, 4.5:1 on
+ * bg and surface).
+ */
+export const FRAGMENT_TOKENS = [...STANDARD_TOKENS, 'on_primary', 'on_secondary', 'on_accent', 'on_danger', 'on_surface', 'on_bg', 'primary_ink', 'secondary_ink', 'accent_ink', 'danger_ink'];
 export const SLOTS = { hud_top: 3, hud_bottom: 2, playfield: Infinity, overlay: Infinity };
 const SECTIONS = ['types', 'state', 'functions', 'events', 'inputs'];
 const FRAGMENT_FORBIDDEN_OBJECTIVES = ['time_limit', 'on_timeout'];
@@ -478,7 +485,7 @@ export function expand(manifest, lib, options = {}) {
       },
       token: (tok) => {
         const name = tok.slice(1).replace(/\[.*$/, '');
-        if (!STANDARD_TOKENS.includes(name)) libErr('A_UNKNOWN_TOKEN', '', `${frag.fragment} uses $${name}; fragments may only use ${STANDARD_TOKENS.map((t) => '$' + t).join(' ')}`);
+        if (!FRAGMENT_TOKENS.includes(name)) libErr('A_UNKNOWN_TOKEN', '', `${frag.fragment} uses $${name}; fragments may only use ${FRAGMENT_TOKENS.map((t) => '$' + t).join(' ')}`);
       },
       keepRole: options.keepRole === true,
     };

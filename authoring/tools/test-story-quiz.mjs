@@ -32,6 +32,61 @@ for (const [id, m] of Object.entries(manifests)) {
   }
 }
 
+// ---------- 1b. the tiles and the Next label take the game's palette, with readable ink ----------
+// Prod 2026-11-13: the tiles were hard-coded Kahoot colours (red, blue, mustard, green) whatever the person asked for,
+// and "Next" was the page colour on $primary (2.19:1 on a pastel palette).
+{
+  const { contrast, parseColor } = await import('../playtest/layout-check.mjs');
+  const KAHOOT = ['#D01937', '#1368CE', '#9A6B00', '#1F7A0A'];
+  // Resolves "= if k == 0 then $a else if k == 1 then $b ... else $d" (or a plain "$x") for tile k.
+  const pickFor = (expr, k) => {
+    const toks = [...String(expr).matchAll(/\$([a-z_0-9]+)/g)].map((x) => x[1]);
+    return String(expr).startsWith('$') ? toks[0] : toks[Math.min(k, toks.length - 1)];
+  };
+  const find = (n, pred, out = []) => { if (!n || typeof n !== 'object') return out; if (pred(n)) out.push(n); for (const v of Object.values(n)) if (v && typeof v === 'object') find(v, pred, out); return out; };
+  const hue = (hex) => {
+    const [r, g, b] = parseColor(hex).slice(0, 3).map((v) => v / 255);
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    if (d < 0.08) return null; // grey: no hue
+    const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return (h * 60 + 360) % 360;
+  };
+  const indigoViolet = { bg: '#F4F2FF', surface: '#E6E1FF', primary: '#3F37C9', secondary: '#6D28D9', accent: '#8B5CF6', ink: '#1E1B4B', danger: '#7C3AED' };
+  const cases = [...Object.entries(manifests).map(([id, m]) => [id, m]), ['indigo and violet, no yellow', { ...manifests.gold_the_podium, art: { ...manifests.gold_the_podium.art, palette: indigoViolet } }]];
+  for (const [id, m] of cases) {
+    const r = expand(m, lib);
+    ok(!r.diagnostics.some((d) => d.severity === 'error'), `${id}: expands with the palette tiles (${r.diagnostics.filter((d) => d.severity === 'error').map((d) => d.message).join('; ')})`);
+    const g = r.game;
+    const tokens = g.presentation.tokens;
+    const tile = find(g.presentation.root, (n) => n.node === 'rect' && typeof n.fill === 'string' && n.fill.includes('$secondary') && n.on_tap?.input === 'pick')[0];
+    const label = find(g.presentation.root, (n) => n.node === 'text' && typeof n.text === 'string' && n.text.includes('get_or(opts, k'))[0];
+    const next = find(g.presentation.root, (n) => n.node === 'text' && typeof n.text === 'string' && n.text.includes("'Next'"))[0];
+    ok(tile && label && next, `${id}: finds the tiles, their labels and Next`);
+    if (!tile || !label || !next) continue;
+    const fills = [0, 1, 2, 3].map((k) => tokens[pickFor(tile.fill, k)]);
+    const inks = [0, 1, 2, 3].map((k) => tokens[pickFor(label.color, k)]);
+    ok(fills.every((c) => parseColor(c)) && new Set(fills.map((c) => c.toUpperCase())).size === 4, `${id}: four distinct tile colours from the palette (${fills.join(' ')})`);
+    ok(!fills.some((c) => KAHOOT.includes(String(c).toUpperCase())), `${id}: no Kahoot colours (${fills.join(' ')})`);
+    ok(!JSON.stringify(g.presentation.root).includes('#D01937'), `${id}: the Kahoot red is gone from the presentation`);
+    fills.forEach((c, k) => ok(contrast(parseColor(inks[k]), parseColor(c)) >= 4.5, `${id}: tile ${k} label reads (${inks[k]} on ${c}: ${contrast(parseColor(inks[k]), parseColor(c)).toFixed(2)}:1)`));
+    const nextInk = tokens[pickFor(next.color, 0)];
+    ok(contrast(parseColor(nextInk), parseColor(tokens.primary)) >= 4.5, `${id}: Next reads on $primary (${nextInk} on ${tokens.primary})`);
+    if (id.startsWith('indigo')) {
+      const yellow = fills.filter((c) => { const h = hue(c); return h != null && h >= 40 && h <= 70; });
+      ok(!yellow.length, `${id}: no yellow tile (${fills.join(' ')})`);
+      ok(fills.every((c) => { const h = hue(c); return h == null || (h >= 225 && h <= 290); }), `${id}: every tile is indigo, violet or a neutral from the palette (${fills.map((c) => `${c}:${Math.round(hue(c) ?? -1)}`).join(' ')})`);
+    }
+  }
+  // Published story quizzes (The Podium, Purr Earth) keep their rules: the palette change is presentation only.
+  const { createHash } = await import('node:crypto');
+  const rulesHash = (game) => { const { presentation: _p, ...rest } = game; return createHash('sha256').update(JSON.stringify(rest)).digest('hex').slice(0, 16); };
+  const RULES = { gold_the_podium: '7da4f6ad7e091f0e', gold_purr_earth: '14d61cc47fad6291' };
+  for (const [id, h] of Object.entries(RULES)) {
+    const got = rulesHash(expand(manifests[id], lib).game);
+    ok(got === h, `${id}: rules unchanged (rules hash ${got}, published ${h})`);
+  }
+}
+
 // ---------- 2. the engine ----------
 let engine = null;
 try {

@@ -165,7 +165,10 @@ Too many nodes in a slot is `A_SLOT_FULL`. Nodes in a slot keep `uses` order, th
 fragment's `feedback` entries are appended to the game's in the same order.
 
 Fragments use only the **standard token roles**: `$primary $secondary $accent $ink $bg $danger
-$surface`. Anything else is `A_UNKNOWN_TOKEN`. Games may also define their own tokens (2.4).
+$surface`, plus what the kit defines for every game: the on-colours for text on a filled role
+(`$on_primary $on_secondary $on_accent $on_danger $on_surface $on_bg`, computed against the fills the game
+really uses) and the text variants for small text in a role colour (`$primary_ink $secondary_ink
+$accent_ink $danger_ink`, 4.5:1 on bg and surface). Anything else is `A_UNKNOWN_TOKEN`. Games may also define their own tokens (2.4).
 
 Nodes may carry `"role": "avatar" | "hazard" | "pickup" | "tile" | "hud"`, which tells the look how to
 skin them. The engine doesn't have `role` yet (Artem's call), so for now the expander removes it from
