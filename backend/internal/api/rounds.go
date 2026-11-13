@@ -343,6 +343,7 @@ func (s *Server) createRound(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
+	s.notifyRound(ctx, rd, g, *me, "")
 	v, err := s.roundFor(r, rd, g)
 	if err != nil {
 		s.serverErr(w, r, err)
@@ -594,6 +595,7 @@ func (s *Server) playRound(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
+	s.notifyRound(ctx, rd, g, *me, rd.Lines[len(rd.Lines)-1].Text)
 	v, err := s.roundFor(r, rd, g)
 	if err != nil {
 		s.serverErr(w, r, err)
@@ -623,4 +625,25 @@ func (s *Server) roundMoments(ctx context.Context, me string, limit int, who fun
 		}
 	}
 	return out
+}
+
+// notifyRound tells the round's other members it started (line "") or that someone played (line is their result line).
+func (s *Server) notifyRound(ctx context.Context, rd *model.Round, g *model.Game, from model.User, line string) {
+	name := shownName(from)
+	kind, source := model.NotifRoundStarted, "round:"+rd.ID
+	title, body := name+" started a round", "Play "+g.Title+": everyone gets the same run"
+	if line != "" {
+		kind, source = model.NotifRoundPlayed, "round:"+rd.ID+":played:"+from.ID
+		title, body = name+" played "+g.Title, line
+	}
+	for _, id := range rd.Members {
+		if id == from.ID {
+			continue
+		}
+		n := model.Notification{UserID: id, Kind: kind, GameID: g.ID, RoundID: rd.ID, Source: source, Title: title, Body: body}
+		if rd.TargetKind == "group" {
+			n.GroupID = rd.TargetID
+		}
+		s.notify(ctx, n)
+	}
 }

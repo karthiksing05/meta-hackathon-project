@@ -134,6 +134,12 @@ type Store interface {
 	RoundsForTarget(ctx context.Context, kind, id string, limit int) ([]model.Round, error)
 	RoundsForGame(ctx context.Context, gameID string, limit int) ([]model.Round, error)
 
+	// Sessions: making a game together in a chat or a Group (questions, words, scenes or levels people add).
+	InsertSession(ctx context.Context, s *model.Session) error
+	SessionByID(ctx context.Context, id string) (*model.Session, error)
+	ReplaceSession(ctx context.Context, s *model.Session) error
+	SessionsForTarget(ctx context.Context, kind, id string, limit int) ([]model.Session, error) // newest first
+
 	// Series: best-of-N between two friends with server-checked scores.
 	InsertSeries(ctx context.Context, s *model.Series) error
 	SeriesByID(ctx context.Context, id string) (*model.Series, error)
