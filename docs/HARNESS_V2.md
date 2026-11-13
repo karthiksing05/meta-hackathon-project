@@ -381,16 +381,23 @@ Use existing fragment ids where they fit (`ls authoring/fragments`).
    - seeding is idempotent, because `dbinit` runs on every deploy;
    - learned entries are never overwritten by the seed.
 3. **Go calls Muse through the generator.** The route is
-   `POST /internal/muse/json {model, system, user, maxTokens?, effort?} -> {content, model}`, on the private network.
-   The API never reads the key. The two steps call it with:
+   `POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?} -> {content, model}`, on the
+   private network. The API never reads the key. The steps call it with:
 
-   | Step | Model | `maxTokens` | Timeout |
-   |---|---|---|---|
-   | understand | `muse-spark-1.3` | 4000 | 15 s |
-   | plan | `muse-wonder-1.0` | 12000 | 90 s |
-   | lookup summary | `muse-spark-1.3` | 4000 | 15 s |
+   | Step | Model | `maxTokens` | `timeoutSeconds` | `effort` |
+   |---|---|---|---|---|
+   | understand | `muse-spark-1.3` | 4000 | 25 | `minimal` |
+   | plan | `muse-wonder-1.0` | 12000 | 90 | `low` |
+   | lookup summary | `muse-spark-1.3` | 4000 | 25 | `minimal` |
 
-   All three ask for one JSON object.
+   All three ask for one JSON object. `effort` is `minimal`, `low`, `medium` or `high`. Measured 2026-11-12:
+   spark-1.3 at `low` takes 7–18 s even on a one-line prompt, and at `minimal` about 5–12 s.
+
+   Errors:
+   - 400: bad input;
+   - 429: busy, retried once after 2 s;
+   - 502: `muse_failed`;
+   - 503: `muse_not_configured`; understanding then falls back to keywords.
 4. **Web lookup.** Wikipedia plus a page the person named, with the fetcher rules in step 3 above. There is no search
    key.
 5. **Merging.** `harness-v2` stays ours. Max merges nothing from it into `backend-api` until we say it's ready and the
@@ -422,11 +429,30 @@ nothing changes.
        "api": "…", "params": {}, "events": []}
     ],
     "plan": {
-      "anatomy": {"format": "game-anatomy/0.1", "…": "…"},
+      "anatomy": {"anatomy": "game-anatomy/0.1", "title": "…", "genre": "word", "parts": {"…": "…"}},
+      "spec": {
+        "spec": "game-spec/1",
+        "theme": {"world": "…", "named": ["Harry Potter"], "tone": "…", "look": "…", "terms": ["…"]},
+        "goal": {"text": "…", "target": "find the rarest answer in each of 5 prompts", "measure": "rarity points"},
+        "loop": {"verb": "type", "sees": "…", "input": "type", "feedback": "…", "cycle_seconds": 12},
+        "pieces": {"items": [{"name": "prompt", "role": "…", "count": "5", "content": "answer bank with tiers"}]},
+        "constraints": {"items": [{"kind": "time", "value": "10 s", "enforced_by": "…", "hud": "timer bar"}]},
+        "progression": {"steps": [{"at": "prompt 1", "change": "…"}, {"at": "…", "change": "…"}, {"at": "…", "change": "…"}], "levers": ["…"]},
+        "end": {"win": "…", "lose": "", "ends_when": ["all_prompts_done"], "session_seconds": [60, 120]},
+        "score": {"kind": "tiered_points", "measures": "rarity points per answer", "unit": "points", "direction": "higher",
+                  "counts_when": "any", "aggregate": "best", "tie_break": "less time", "format": "{n} points", "events": ["answer_scored"]},
+        "social": {"share": "…", "challenge": "…", "same_seed": true, "board": "…"},
+        "feel": {"juice": ["…"], "sounds": "…", "look": "…"}
+      },
       "design": {"pitch": "…", "theme": ["…"], "verb": "…", "twist": "…", "arc": ["…"]},
       "type_ids": ["rare_answer_trivia"],
+      "blend": "rare-answer scoring from rare_answer_trivia",
       "tool_ids": ["typed_answer", "keyboard", "fuzzy_match", "rarity_tiers", "timer_bar"],
-      "gaps": [{"tool": "rarity_tiers", "status": "planned", "approximation": "tiers written into content as answer lists"}]
+      "gaps": [{"tool": "rarity_tiers", "status": "planned", "approximation": "tiers written into content as answer lists", "familiarity": "approximate"}],
+      "clarify": [{"slot": "theme", "value": "Harry Potter", "guessed": false},
+                  {"slot": "audience", "value": "friends", "guessed": true, "question": "Who plays?", "choices": ["friends", "anyone"]}],
+      "spec_issues": [],
+      "notes": ["…what Go corrected…"]
     },
     "gold_ids": ["gold_who_posted"],
     "gate_profile": "trivia",
@@ -438,6 +464,23 @@ nothing changes.
 
 Limits: at most 6 types and 24 tools. The `context` is at most 48 KB of JSON, and Go trims long fields before
 sending.
+
+**How the spec is checked.** The spec's parts and validator are in `backend/internal/harness/spec.go`:
+- **Each part:** required fields and enums; the goal must be measurable, and `score.measures` must use the goal's
+  measure words.
+- **Fixed by Go:**
+  - `score.direction` and `counts_when` follow the kind's row in the table;
+  - every score is an integer: the ms kinds have unit `ms` and format `m:ss.t`, and accuracy is a whole `%`;
+  - `tie_break` is `less time` or `earlier`;
+  - `bounds` is always cleared, because the gate sets it from the bots.
+- **Score default:** the kind comes from the type's `scoring` text, else its family. Muse may override it only with
+  a `reason`; otherwise Go puts the default back.
+- **Repair:** parts that still fail get one repair round. Anything left goes in `spec_issues`.
+
+**Behind `HARNESS_CONTEXT=1`, off by default:**
+- the API runs steps 1–4 for each new game (100 s budget) and sets `Job.Context`; any failure sends no context;
+- `POST /v1/harness/plan {request}` returns `{plan, clarify, spec, types, timings}`, so the app can ask the 0–2
+  questions before the build.
 
 ## Open questions
 
