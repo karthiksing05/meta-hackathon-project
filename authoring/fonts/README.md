@@ -5,6 +5,7 @@ Small web-font library for the game renderer. Fonts come from the google/fonts r
 - `fonts.json`: per family id: CSS family name, role, license, source, designer, copyright, files by weight, byte size, `caps_only`, `mono`.
 - `metrics.json`: per id and weight: units per em, ascent/descent/cap/x height in em, advance widths in em (kerning ignored) for ASCII plus a few punctuation glyphs, `avg` and `avg_caps` advance, `digits_tabular`.
 - `licenses/<id>.txt`: license text for each family (M PLUS Rounded 1c ships no license file in google/fonts; the sibling M+ `OFL.txt` is used).
+- `authoring/kit/make-fonts.mjs` writes `game-fonts.css` (with `local()` system fallbacks per face) and `authoring/kit/font-data.mjs` from these two files; the vibe table that pairs them is `authoring/kit/vibes.mjs`.
 - The shipped files live in `FacebookClone/Bubbles/Runtime/web/gamefont-<id>-<weight>.woff2` (italic: `<weight>i`), registered in `game-fonts.css` in the same folder.
   Two-weight families register regular as `font-weight: 100 599` and bold as `600 900`; single-weight families use `100 900` so the browser never fakes bold.
   Barlow Condensed BoldItalic is registered as its own family, "Barlow Condensed Italic".
