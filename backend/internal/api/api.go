@@ -107,6 +107,7 @@ func (s *Server) Handler() http.Handler {
 			r.With(s.rateLimit).Post("/refresh", s.refresh)
 			r.Post("/logout", s.logout)
 			r.With(s.requireAuth).Get("/me", s.me)
+			r.With(s.requireAuth, s.rateLimit).Post("/password", s.changePassword)
 		})
 		r.With(s.optionalAuth).Get("/feed", s.feed) // the one feed: ranked by the recommender
 		r.With(s.optionalAuth).Post("/feed/events", s.feedEvents)

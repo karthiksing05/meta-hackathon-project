@@ -152,3 +152,30 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 func (s *Server) me(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, userFrom(r))
 }
+
+// changePassword sets a new password for the signed-in person after checking the current one.
+func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
+	var in struct{ CurrentPassword, NewPassword string }
+	if !decode(w, r, &in) {
+		return
+	}
+	if len(in.NewPassword) < 8 || len(in.NewPassword) > 72 {
+		writeErr(w, 400, "password must be 8-72 characters")
+		return
+	}
+	u, err := s.Store.UserByID(r.Context(), userFrom(r).ID)
+	if err != nil || u.PasswordHash == "" || !auth.CheckPassword(u.PasswordHash, in.CurrentPassword) {
+		writeErr(w, 401, "wrong password")
+		return
+	}
+	hash, err := auth.HashPassword(in.NewPassword)
+	if err != nil {
+		s.serverErr(w, r, err)
+		return
+	}
+	if err := s.Store.SetPasswordHash(r.Context(), u.ID, hash); err != nil {
+		s.serverErr(w, r, err)
+		return
+	}
+	w.WriteHeader(204)
+}

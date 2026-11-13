@@ -28,6 +28,8 @@ type Store interface {
 	UsersByIDs(ctx context.Context, ids []string) ([]model.User, error)
 	// UpdateUserProfile saves a person's display name, bio, avatar and cover color (the other fields are kept).
 	UpdateUserProfile(ctx context.Context, u *model.User) error
+	// SetPasswordHash replaces a person's password hash.
+	SetPasswordHash(ctx context.Context, id, hash string) error
 	// SearchUsers finds people whose username starts with q, or a word of whose display name does (q lowercase).
 	SearchUsers(ctx context.Context, q string, limit int) ([]model.User, error)
 
