@@ -90,6 +90,10 @@ export function instrument(game) {
       inTemplate: parents.some((p) => ['grid', 'repeat'].includes(p.node.node)),
       text: node.node === 'text' ? String(node.text ?? '') : null,
       wrap: node.node === 'text' && node.wrap === true,
+      // Faded by an opacity animation (its own or a parent's) and its resting opacity: a frame caught
+      // mid-fade is a moment, not the look (contrast is judged at rest, as kit/readability.mjs does).
+      fades: chain.some((n) => Object.values(n.animate_on ?? {}).some((a) => a?.prop === 'opacity') || n.animate?.prop === 'opacity'),
+      restOpacity: chain.reduce((o, n) => o * (typeof n.opacity === 'number' ? n.opacity : 1), 1),
       parents,
     });
   });
@@ -284,22 +288,30 @@ export function contrast(a, b) { const la = luminance(a), lb = luminance(b); ret
 export const toHex = (c) => '#' + c.slice(0, 3).map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('').toUpperCase();
 const blend = (top, a, under) => [0, 1, 2].map((i) => top[i] * a + under[i] * (1 - a));
 
-/** Without pixels: the color under (x, y) from the shapes painted before op index `upto`; null when an image is in the way. */
-function shapeColorAt(frame, upto, x, y) {
+/**
+ * Without pixels: the color under (x, y) from the shapes painted before op index `upto`; null when an
+ * image is in the way. An image is only in the way until an opaque shape covers it: a button or card
+ * drawn over a picture backdrop has a known colour (the generator has no Chrome, so without this every
+ * label on a game with a backdrop picture went unchecked).
+ */
+export function shapeColorAt(frame, upto, x, y) {
   let col = parseColor(frame.background)?.slice(0, 3) ?? [255, 255, 255];
+  let unknown = false;
   for (let i = 0; i < upto; i++) {
     const op = frame.ops[i];
     if (op.op === 'text' || op.op === 'line' || !(op.opacity > 0)) continue;
     const b = opBox(op);
     if (!b || !contains(b, x, y)) continue;
-    if (op.op === 'image') { if (area(b) > 0) return null; continue; }
+    if (op.op === 'image') { if (area(b) > 0) unknown = true; continue; }
     if (op.op === 'circle') { const r = (b.x1 - b.x0) / 2; if ((x - op.x) ** 2 + (y - op.y) ** 2 > r * r) continue; }
     if (op.op === 'poly' && !inPoly(op.points ?? [], x, y)) continue;
     const f = parseColor(op.fill);
     if (!f || f[3] === 0) continue;
-    col = blend(f, f[3] * Math.min(1, op.opacity), col);
+    const a = f[3] * Math.min(1, op.opacity);
+    if (a >= 0.999) unknown = false;
+    col = blend(f, a, col);
   }
-  return col;
+  return unknown ? null : col;
 }
 function inPoly(pts, x, y) {
   let c = false;
@@ -429,7 +441,8 @@ export function lintSample(sample, { measures = null } = {}) {
         if (samples.length < 8) samples = [];
       }
       const eff = textContrast(op, samples);
-      if (eff != null && (op.opacity ?? 1) > 0.5) {
+      const midFade = !!t.n?.fades && (op.opacity ?? 1) < (t.n.restOpacity ?? 1) - 0.02;
+      if (eff != null && (op.opacity ?? 1) > 0.5 && !midFade) {
         const large = size >= 18 || (size >= 14 && op.weight >= 600);
         const need = large ? 3 : 4.5;
         const mean = [0, 1, 2].map((k) => samples.reduce((s, x) => s + x[k], 0) / samples.length);

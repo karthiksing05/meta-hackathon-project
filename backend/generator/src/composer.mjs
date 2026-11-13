@@ -113,6 +113,60 @@ export function visualSection(visual) {
   return out.join('\n');
 }
 
+/** The most of a failed job's last manifest kept in its stats (pictures are left out first). */
+export const LAST_MANIFEST_MAX = 256 * 1024;
+
+/**
+ * A failed compose's stats for the job record, with `lastManifest`: the last authoring manifest the pipeline built
+ * (the pipeline puts it on the error), as JSON text, so the failure can be read and replayed. Pictures and sounds
+ * (data: URIs) are cut to a stub; past LAST_MANIFEST_MAX it is left out and `lastManifestBytes` says how big it was.
+ */
+export function failureStats(e) {
+  const stats = e?.stats && typeof e.stats === 'object' ? { ...e.stats } : {};
+  const text = typeof e?.lastManifest === 'string' ? e.lastManifest : null;
+  if (!text) return Object.keys(stats).length ? stats : undefined;
+  const slim = text.replace(/"data:([a-z]+\/[a-z0-9.+-]+);base64,[A-Za-z0-9+/=]+"/gi, (_, type) => `"data:${type};base64,(left out)"`);
+  if (slim.length <= LAST_MANIFEST_MAX) stats.lastManifest = slim;
+  else stats.lastManifestBytes = slim.length;
+  return stats;
+}
+
+/** The verifier's time after the art step: it runs on a game that already passed it once. */
+export const ART_VERIFY_MS = 30000;
+
+/**
+ * Verifies and fixes the final game after the art or media step (presentation only, proved by the verifier). The
+ * fixed game ships when the verifier kept its fixes and blocks on no more than the build did; stats.layoutAfterArt
+ * says what happened. Any failure keeps the game as it was.
+ */
+export async function verifyAfterPictures(out, { hooks, studio }) {
+  const t0 = Date.now();
+  const note = { ran: true };
+  try {
+    let engine = null;
+    try { engine = studio.engine?.()?.getEngine?.() ?? null; } catch { engine = null; }
+    const v = await hooks.verifyLayout(out.manifest.content.game_json, { ...(engine ? { engine } : {}), authoring: out.manifest.content.authoring_json, budgetMs: ART_VERIFY_MS });
+    const before = out.stats?.layoutBlocking;
+    const blocking = v?.report?.blocking ?? 0;
+    note.blocking = blocking;
+    note.fixes = v?.fixes?.length ?? 0;
+    note.reverted = !!v?.reverted;
+    if (note.fixes && !v.reverted && v.game_json && (typeof before !== 'number' || blocking <= before)) {
+      out.manifest = { ...out.manifest, content: { ...out.manifest.content, game_json: v.game_json } };
+      note.applied = true;
+    }
+    if (v?.report && (note.applied || !note.fixes)) {
+      const r = v.report;
+      out.stats = { ...out.stats, layoutBlocking: blocking, layout: { ...(out.stats?.layout ?? {}), verifier: true, pass: !!r.pass, blocking, warnings: r.warnings ?? 0, byCode: r.byCode ?? null, findings: (r.findings ?? []).slice(0, 30) } };
+    }
+  } catch (e) {
+    note.error = String(e?.message ?? e).slice(0, 200);
+  }
+  note.ms = Date.now() - t0;
+  out.stats = { ...out.stats, layoutAfterArt: note };
+  return out;
+}
+
 /**
  * compose({request, brief, base?, remixOf?, level?, context?}, {muse, studio, model, onEvent, signal})
  *   -> {manifest, stats, bots, gate, quality}
@@ -177,6 +231,11 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
     } catch (e) {
       out.stats = { ...(out.stats ?? {}), media: { applied: false, error: String(e?.message ?? e).slice(0, 300) } };
     }
+  }
+  // New pictures change the pixels behind the words, so the layout verifier runs once more on the game that ships
+  // (readability on): a label that read on the stand-in backdrop may not on the painted one.
+  if ((out.stats?.art?.applied || out.stats?.media?.applied) && typeof hooks?.verifyLayout === 'function' && context?.layout_fix !== false) {
+    await verifyAfterPictures(out, { hooks, studio });
   }
   const m = out.manifest;
   if (base) {

@@ -1,7 +1,7 @@
 {
   "fragment": "story_quiz",
   "version": 1,
-  "describe": "A story told as a quiz (a press conference that goes badly, a job interview gone wrong, a documentary narrated by a cat): a scripted clip cut into beats, played IN ORDER (never shuffled). Each beat shows the scene (an optional picture), a quote card (who speaks and the setup line), a short ask ('What does he say next?'), a countdown (`time_ms`, 0 for none) and up to 4 Kahoot-coloured answer tiles in a 2 x 2 grid. After a pick, a reveal panel shows the real line and the punchline, with `hit_label` or `miss_label` ('CALLED IT' / 'PLOT TWIST'; for an ordered puzzle such as proof steps use e.g. 'CORRECT' / 'NOT YET' and a ranked score), and a Next button (it also moves on by itself after `reveal_ms`). The real line is the funny one: the joke, the twist, the disaster. Running out of time reveals the real line with no pick (picks gets -1). There are no lives and no right-or-wrong scoring: the score is `called` (beats where the player picked the real line), shown as story ('Beat 3 of 8', the end card 'In sync with the chaos: 5 of 8'), and the game should declare `\"score\": {\"kind\": \"points\", \"ranked\": false, \"format\": \"{n} called\"}`. The game supplies six functions that read `content` lists, one entry per beat: `sq_speakers()` (who is talking, <= 24 chars, e.g. 'Mayor Pemberton'), `sq_lines()` (the setup line on the quote card, <= 120 chars), `sq_asks()` (the question, <= 34 chars, e.g. 'What does he say next?'), `sq_choices()` (all choices flattened, exactly `choices` per beat: beat b owns entries b * `choices` to (b + 1) * `choices` - 1; each <= 48 chars), `sq_answers()` (entry b: the exact text of beat b's real line, one of its choices) and `sq_reveals()` (entry b: the punchline or what happened next, <= 110 chars). Choices are shuffled on screen with the run seed. Optional media per beat: give the game a `panel` sprite (one frame per picture, about 2:1, a cartoon frame of the clip; uploaded photos work the same way) and the beat's picture sits above the quote card; the `media` param maps beats to frames ('0,1,-1,2': beat 2 has no picture), '' means frame = beat. Taps are ignored for `read_ms` after a beat appears. Input `pick {index}` (index on screen) and `next`. Emits `called_it` or `plot_twist` on a pick, `beat_done` after each reveal, and `story_done` after the last beat (with `finish_wins`, the game is won then: every run reaches the end). State: `beat`, `called`, `picks` (list<int>: per beat, the index of the picked choice in the content order, for comparing friends' runs; name `picks` in group_play.result.state), `revealing`, `finished`, `opts`. Draws everything inside the safe area; put the pace and a 'PARODY' tag (when real people appear) in the HUD with the `tag` param. Set the game's `feel` to `{\"particles\": false}`: the reveal panel covers the tiles, so a tap burst would land on the punchline.",
+  "describe": "A story told as a quiz (a press conference that goes badly, a job interview gone wrong, a documentary narrated by a cat): a scripted clip cut into beats, played IN ORDER (never shuffled). Each beat shows the scene (an optional picture), a quote card (who speaks and the setup line), a short ask ('What does he say next?'), a countdown (`time_ms`, 0 for none) and up to 4 answer tiles in a 2 x 2 grid, coloured from the game's own palette ($primary, $secondary, $accent and $ink, each with its readable on-colour), so the palette the person asked for is the one on the tiles. After a pick, a reveal panel shows the real line and the punchline, with `hit_label` or `miss_label` ('CALLED IT' / 'PLOT TWIST'; for an ordered puzzle such as proof steps use e.g. 'CORRECT' / 'NOT YET' and a ranked score), and a Next button (it also moves on by itself after `reveal_ms`). The real line is the funny one: the joke, the twist, the disaster. Running out of time reveals the real line with no pick (picks gets -1). There are no lives and no right-or-wrong scoring: the score is `called` (beats where the player picked the real line), shown as story ('Beat 3 of 8', the end card 'In sync with the chaos: 5 of 8'), and the game should declare `\"score\": {\"kind\": \"points\", \"ranked\": false, \"format\": \"{n} called\"}`. The game supplies six functions that read `content` lists, one entry per beat: `sq_speakers()` (who is talking, <= 24 chars, e.g. 'Mayor Pemberton'), `sq_lines()` (the setup line on the quote card, <= 120 chars), `sq_asks()` (the question, <= 34 chars, e.g. 'What does he say next?'), `sq_choices()` (all choices flattened, exactly `choices` per beat: beat b owns entries b * `choices` to (b + 1) * `choices` - 1; each <= 48 chars), `sq_answers()` (entry b: the exact text of beat b's real line, one of its choices) and `sq_reveals()` (entry b: the punchline or what happened next, <= 110 chars). Choices are shuffled on screen with the run seed. Optional media per beat: give the game a `panel` sprite (one frame per picture, about 2:1, a cartoon frame of the clip; uploaded photos work the same way) and the beat's picture sits above the quote card; the `media` param maps beats to frames ('0,1,-1,2': beat 2 has no picture), '' means frame = beat. Taps are ignored for `read_ms` after a beat appears. Input `pick {index}` (index on screen) and `next`. Emits `called_it` or `plot_twist` on a pick, `beat_done` after each reveal, and `story_done` after the last beat (with `finish_wins`, the game is won then: every run reaches the end). State: `beat`, `called`, `picks` (list<int>: per beat, the index of the picked choice in the content order, for comparing friends' runs; name `picks` in group_play.result.state), `revealing`, `finished`, `opts`. Draws everything inside the safe area; put the pace and a 'PARODY' tag (when real people appear) in the HUD with the `tag` param. Set the game's `feel` to `{\"particles\": false}`: the reveal panel covers the tiles, so a tap burst would land on the punchline.",
   "params": {
     "choices": {
       "type": "int",
@@ -474,7 +474,7 @@
           "text": "@tag",
           "size": 12,
           "weight": 800,
-          "color": "$accent"
+          "color": "$accent_ink"
         }
       },
       {
@@ -543,7 +543,7 @@
               "text": "= upper(beat_speaker())",
               "size": 12,
               "weight": 800,
-              "color": "$accent"
+              "color": "$accent_ink"
             },
             {
               "node": "text",
@@ -622,7 +622,7 @@
                 "h": 76,
                 "radius": 14,
                 "role": "tile",
-                "fill": "= tile_fill(k)",
+                "fill": "= if k == 0 then $primary else if k == 1 then $secondary else if k == 2 then $accent else $ink",
                 "on_tap": {
                   "input": "pick",
                   "with": {
@@ -642,7 +642,7 @@
                 "text": "= get_or(opts, k, '')",
                 "size": 13,
                 "weight": 600,
-                "color": "#FFFFFF"
+                "color": "= if k == 0 then $on_primary else if k == 1 then $on_secondary else if k == 2 then $on_accent else $bg"
               }
             ],
             "animate_on": {
@@ -744,7 +744,7 @@
               "text": "= if beat + 1 >= beat_count() then 'Finish' else 'Next'",
               "size": 15,
               "weight": 800,
-              "color": "$bg"
+              "color": "$on_primary"
             }
           ]
         }

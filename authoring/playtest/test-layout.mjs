@@ -243,5 +243,23 @@ const pixels = chromeAvailable();
   ok(fx.every((x) => x.kind === 'words'), 'fixes are reported as words', fx);
 }
 
+// --- shapes-only contrast over a backdrop picture (Prod B1, 2026-11-13: "Next" in the page colour on $primary
+// passed the server because a full-screen picture sat under the button)
+{
+  const { shapeColorAt } = await import('./layout-check.mjs');
+  const frame = { width: 360, height: 640, background: '#EEF2FF', ops: [
+    { op: 'image', x: 0, y: 0, w: 360, h: 640, asset: 0, opacity: 1 },
+    { op: 'rect', x: 232, y: 534, w: 100, h: 44, fill: '#7AA8E8', opacity: 1 },
+    { op: 'rect', x: 20, y: 100, w: 100, h: 44, fill: '#7AA8E880', opacity: 1 },
+    { op: 'text', x: 264, y: 547, w: 35, h: 17, text: 'Next', color: '#EEF2FF', size: 14, weight: 700, opacity: 1 },
+  ] };
+  const c = shapeColorAt(frame, 3, 282, 556);
+  ok(c && Math.round(c[0]) === 0x7A && Math.round(c[2]) === 0xE8, 'an opaque button over a backdrop picture has a known colour', c);
+  ok(shapeColorAt(frame, 3, 60, 300) === null, 'the bare picture is still unknown', shapeColorAt(frame, 3, 60, 300));
+  ok(shapeColorAt(frame, 3, 60, 120) === null, 'a see-through plate over the picture is still unknown');
+  const lint = lintSample({ frames: [{ key: 'f', label: 'play', frame }], nodes: [null] });
+  ok(lint.some((f) => f.code === 'L_LOW_CONTRAST' && /Next/.test(f.detail)), 'the lint flags the label without Chrome', lint);
+}
+
 console.log(`layout tests: ${passed} passed, ${failed} failed${pixels ? '' : ' (no Chrome: pixel checks skipped)'}`);
 process.exit(failed ? 1 : 0);

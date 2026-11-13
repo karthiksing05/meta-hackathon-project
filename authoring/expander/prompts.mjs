@@ -360,6 +360,12 @@ export const REPAIR_HINTS = [
     test: (d) => /\bvec2\b|pointer/.test(`${d.message ?? ''} ${d.at ?? ''}`),
     hint: "`pointer` is a vec2 (x and y together, canvas units), not a number. Use `pointer.x` or `pointer.y` where a float is wanted (a payload field, a state float, a comparison or arithmetic with numbers), and pass the whole `pointer` only where a vec2 is declared. To build a vec2 from numbers write `vec(x, y)`; to compare two points compare their parts (`abs(a.x - b.x) < r and abs(a.y - b.y) < r`, or `sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)) < r`), never `a < b`. Example: input payload {\"x\": \"float\"} with `\"with\": {\"x\": \"pointer.x\"}`, or payload {\"at\": \"vec2\"} with `\"with\": {\"at\": \"pointer\"}`. A field declared int needs `floor(pointer.x)`.",
   },
+  {
+    // Prod, 2026-11-13: Muse repeated this for three rounds in two jobs (content_words, content_end_lines).
+    code: 'A_UNKNOWN_CONTENT',
+    test: () => true,
+    hint: "every content_<key> an expression reads needs an entry with exactly that key at the top level of \"content\", without the content_ prefix, holding a string or a list of strings. An expression that reads content_words needs \"content\": {\"words\": [\"fog\", \"hill\", \"pier\"]}. Not nested (no \"content\": {\"lists\": {\"words\": [...]}}), not with the prefix in the key (no \"content_words\": [...]), and not in state, design or a function. Write the real words now, or change the expression to read a key content already has; keep the other content keys as they are.",
+  },
 ];
 
 /** "E_UNKNOWN_NAME at /rules/1/do/0/to: no state named 'x' (did you mean 'y'?)" */

@@ -16,6 +16,7 @@ import { groupPlayBlock, structureFor } from './group-play.mjs';
 import { wantsStory, composeStory } from './story-compose.mjs';
 import { makeImageArt, applyImageArt, makeStoryArt, applyStoryArt } from './image-art.mjs';
 import { repairRequest } from './requirements.mjs';
+import { missingContentKeys, repairContent } from './content-repair.mjs';
 import { judgeRequirements, needsJudge, readBuilt, repairTargets, gapEntries, honestNote } from '../playtest/requirements-check.mjs';
 
 /** The art budget for games drawn by muse-image (svg.mjs SVG_LIMITS.image_art_bytes). */
@@ -152,6 +153,8 @@ export async function composeGame({ request, brief, base = null, context = null 
   const H = hooks ?? media ?? {};
   const started = Date.now();
   const stats = { firstDraftValid: null, repairRounds: 0, playtestRepair: false, passedGate: false, polished: false, museCalls: 0, models: [], examples: [], seconds: 0, calls: [] };
+  // The last authoring manifest the loop built, put on a failure (e.lastManifest) so a failed job can be debugged.
+  let lastShown = null;
   const emit = (e) => onEvent({ ...e, summary: summarize(e) });
   const live = () => { if (signal?.aborted) throw new GenerationError('The job was cancelled or ran out of time.'); };
   // Every Muse call is logged with its wall time and, when the caller returns it, its token usage.
@@ -329,15 +332,35 @@ export async function composeGame({ request, brief, base = null, context = null 
       // While layout repair rounds run: the valid build with the fewest blocking layout findings, so a repair
       // that breaks the manifest or makes the layout worse never costs the game it started from.
       let layoutBest = null;
+      // Content keys Muse was already asked to add (A_UNKNOWN_CONTENT): if one is still missing after that
+      // round, the code fills it with an empty value instead of asking again.
+      const contentAsked = new Set();
       while (!chosen) {
         live();
         emit({ kind: 'expanding' });
         let expansion = studio.expand(reply);
-        const shown = expansion.authoring_json ?? reply;
         if (stats.firstDraftValid === null) stats.firstDraftValid = !!expansion.ok;
+        // An expression reads content_<key> that content doesn't have: fixed in code before Muse is asked
+        // (content-repair.mjs: a misplaced or misnamed key, else an empty value once Muse has had its try or on
+        // the last round). stats.contentRepairs lists what changed.
+        const missing = !expansion.ok && expansion.authoring ? missingContentKeys(expansion.diagnostics) : [];
+        if (missing.length) {
+          const cr = repairContent(expansion.authoring, missing, { fill: repairs >= maxRepairRounds ? true : contentAsked });
+          if (cr.fixes.length) {
+            const again = studio.expand(JSON.stringify(cr.manifest));
+            stats.contentRepairs = [...(stats.contentRepairs ?? []), ...cr.fixes];
+            if (again.ok || missingContentKeys(again.diagnostics).length < missing.length) {
+              expansion = again;
+              reply = again.authoring_json ?? JSON.stringify(cr.manifest);
+            }
+          }
+        }
+        const shown = expansion.authoring_json ?? reply;
+        lastShown = shown;
         let verified = null;
         if (!expansion.ok) {
           const issues = P.issues(expansion);
+          for (const k of missingContentKeys(expansion.diagnostics)) contentAsked.add(k);
           if (repairs >= maxRepairRounds) {
             if (best) { chosen = best; break; }
             if (!layoutBest) throw new GenerationError(`Muse's microgame still doesn't validate: ${issues[0] ?? 'unknown error'}`, issues);
@@ -569,7 +592,10 @@ export async function composeGame({ request, brief, base = null, context = null 
   } catch (e) {
     stats.seconds = Math.round((Date.now() - started) / 100) / 10;
     emit({ kind: 'failed', reason: e?.message ?? String(e), issues: e?.issues });
-    if (e && typeof e === 'object') e.stats = stats;
+    if (e && typeof e === 'object') {
+      e.stats = stats;
+      if (lastShown && e.lastManifest === undefined) e.lastManifest = lastShown;
+    }
     throw e;
   }
 }

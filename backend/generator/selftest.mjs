@@ -156,6 +156,13 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   check('the backdrop prompt carries the quiet areas and no pieces', muse.images.some((i) => i.size === '1024x1536' && i.prompt.includes('the top 80 px') && /no characters/.test(i.prompt)));
   check('painting events have summaries', events.some((e) => e.kind === 'painting' && /painting 2 pieces/.test(e.summary)));
   check('the art is within the budget', out.stats.art.bytes <= 192 * 1024, out.stats.art.bytes);
+  // The re-expand with the painted art keeps the verifier's fixed presentation, and the verifier runs again on the painted game.
+  // A painted sprite changes its node's size (its aspect), so the new presentation stands and the verifier runs on it.
+  check('the art step verifies the painted game again', out.stats.art.keptLayout === false && out.stats.layoutAfterArt?.ran === true && !out.stats.layoutAfterArt.error, JSON.stringify({ kept: out.stats.art.keptLayout, after: out.stats.layoutAfterArt }));
+  const backdropOnly = { ...context, plan: { ...context.plan, spec: { ...context.plan.spec, visual: { ...visual, assets: [] } } } };
+  const bOut = await compose({ request: 'a calm fog game', brief, context: backdropOnly }, { studio, muse: new PaintingMuse([withSprites()]), env: {} });
+  check('a painted backdrop alone keeps the verified presentation', bOut.stats.art?.painted?.includes('backdrop') && bOut.stats.art.keptLayout === true && bOut.stats.layoutAfterArt?.ran === true, JSON.stringify({ art: bOut.stats.art?.painted, kept: bOut.stats.art?.keptLayout, after: bOut.stats.layoutAfterArt }));
+  check('a painted tall game stays tall (the re-expand gets the canvas compose used)', JSON.parse(out.manifest.content.game_json).presentation?.canvas?.h === 780 && out.stats.canvas === 'tall', JSON.parse(out.manifest.content.game_json).presentation?.canvas);
 
   const failing = new PaintingMuse([withSprites()], { fail: ['A misty bay'] });
   const half = await compose({ request: 'a calm fog game', brief, context }, { studio, muse: failing, env: {} });
@@ -239,7 +246,84 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   if (fs.existsSync(dockerfile)) { // in the repository; inside the image, the modules simply have to load (above)
     const docker = fs.readFileSync(dockerfile, 'utf8');
     check('the generator image copies every authoring module the hooks import', AUTHORING_FILES.every((f) => docker.includes('authoring/' + f)), AUTHORING_FILES.filter((f) => !docker.includes('authoring/' + f)).join(', '));
+    // The build context is an allow-list (Dockerfile.dockerignore): a module the Dockerfile copies but the list leaves
+    // out fails the image build. Last matching line wins, as in Docker.
+    const ignore = fs.readFileSync(join(here, '..', 'Dockerfile.dockerignore'), 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
+    const globRe = (g) => new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '(?:.*/)?').replace(/\*/g, '[^/]*') + '(?:/.*)?$');
+    const allowed = (path) => { let ok = true; for (const l of ignore) { const neg = l.startsWith('!'); if (globRe(neg ? l.slice(1) : l).test(path)) ok = neg; } return ok; };
+    const shut = AUTHORING_FILES.filter((f) => !allowed('authoring/' + f));
+    check('the build context (Dockerfile.dockerignore) lets in every authoring module the image copies', !shut.length, shut.join(', '));
   }
+}
+
+// ---- Prod build B1 (2026-11-13): a "Next" label in the page colour on $primary (2.19:1) that the server passed ----
+// The as-shipped game is the fixture. Without Chrome the verifier missed it twice over: the shapes-only contrast gave
+// up on any text over a backdrop picture (even on an opaque button), and the readability stage's 36 frames never
+// caught the label (up 350 ms of a 30 s run). Both checks must see it now, and verifyAndFix must fix it.
+{
+  const fs = await import('node:fs');
+  const { composeHooks, findAuthoring } = await import('./src/hooks.mjs');
+  const { pathToFileURL } = await import('node:url');
+  const m = JSON.parse(fs.readFileSync(join(here, 'fixtures', 'story-quiz-next-contrast.manifest.json'), 'utf8'));
+  const next = '/presentation/root/children/1/children/5/children/6';
+  const engine = studio.engine().getEngine();
+  const { verify } = await import(pathToFileURL(join(findAuthoring({}), 'verify/verify.mjs')).href);
+  const before = await verify(m, { engine, pixels: false, measures: null });
+  const seen = before.findings.filter((f) => f.node === next && f.severity === 'block').map((f) => f.code);
+  check('B1: without Chrome the verifier blocks on the "Next" label (L_LOW_CONTRAST and S_READABILITY)', seen.includes('L_LOW_CONTRAST') && seen.includes('S_READABILITY'), JSON.stringify(before.findings.map((f) => [f.code, f.node, f.severity])));
+  const { hooks } = await composeHooks({ env: {} });
+  const v = await hooks.verifyLayout(m.content.game_json, { engine, authoring: m.content.authoring_json, budgetMs: 60000 });
+  const contrastLeft = v.report.findings.filter((f) => f.severity === 'block' && /CONTRAST|READABILITY/.test(f.code));
+  check('B1: the server\'s verifyAndFix re-inks the label and ships with no contrast or readability block', !v.reverted && v.fixes.some((f) => f.node === next && f.stage === 'readability') && !contrastLeft.length,
+    JSON.stringify({ reverted: v.reverted, fixes: v.fixes.filter((f) => f.node === next), left: contrastLeft }));
+  const fixed = JSON.parse(v.game_json).presentation.root.children[1].children[5].children[6];
+  check('B1: the label is on a palette ink, not the page colour', fixed.color !== '$bg' && typeof fixed.color === 'string', JSON.stringify(fixed));
+}
+
+// ---- the art step re-expands: it keeps the verified presentation only when nothing else changed ----
+{
+  const { keepVerifiedPresentation } = await import('./src/art.mjs');
+  const built = studio.expand(JSON.stringify(example()));
+  const verified = JSON.parse(built.game_json);
+  verified.presentation = { ...verified.presentation, verified_marker: true };
+  const manifest = { content: { authoring_json: built.authoring_json, game_json: JSON.stringify(verified) } };
+  const same = keepVerifiedPresentation(studio, manifest, built);
+  check('keepVerifiedPresentation puts the verified presentation back when only assets changed', same.kept && JSON.parse(same.game_json).presentation.verified_marker === true);
+  const changed = JSON.parse(built.game_json);
+  changed.rules = [...(changed.rules ?? []), { id: 'zz_new' }];
+  const other = keepVerifiedPresentation(studio, manifest, { ...built, game_json: JSON.stringify(changed) });
+  check('...and keeps the new expansion when the rules changed', !other.kept && other.game_json === JSON.stringify(changed));
+}
+
+// ---- A_UNKNOWN_CONTENT is fixed in code (authoring/expander/content-repair.mjs), in the bundle's pipeline ----
+{
+  const withRead = (key, content) => {
+    const m = example();
+    m.functions = { ...(m.functions ?? {}), zz_list: { params: {}, returns: 'list<string>', body: `content_${key}` } };
+    m.content = { ...(m.content ?? {}), ...content };
+    return m;
+  };
+  // The prefix written into the key: moved before Muse is asked, so no repair round.
+  const moved = new ScriptedMuse([withRead('zz_words', { content_zz_words: ['fog', 'pier'] })]);
+  const a = await compose({ request: 'a calm fog game', brief }, { studio, muse: moved, env: {}, hooks: null });
+  check('a misplaced content key is moved in code, with no repair round', a.stats.repairRounds === 0 && a.stats.contentRepairs?.[0]?.kind === 'moved' && JSON.parse(a.manifest.content.authoring_json).content.zz_words?.length === 2, JSON.stringify({ rounds: a.stats.repairRounds, fixes: a.stats.contentRepairs }));
+  // Missing for real: Muse gets one round with the hint; when it repeats the error, the code fills an empty list.
+  const repeat = new ScriptedMuse([withRead('zz_end_lines', {})]);
+  const b = await compose({ request: 'a calm fog game', brief }, { studio, muse: repeat, env: {}, hooks: null });
+  check('a content key Muse leaves out twice is filled in code after one repair round', b.stats.repairRounds === 1 && b.stats.contentRepairs?.some((f) => f.key === 'zz_end_lines' && f.kind === 'defaulted') && repeat.prompts.some((p) => p.includes('without the content_ prefix')), JSON.stringify({ rounds: b.stats.repairRounds, fixes: b.stats.contentRepairs }));
+}
+
+// ---- a failed job keeps its last manifest ----
+{
+  const { failureStats, LAST_MANIFEST_MAX } = await import('./src/composer.mjs');
+  let err;
+  try { await compose({ request: 'x', brief }, { studio, muse: new ScriptedMuse([{ uses: 7 }]), env: {} }); } catch (e) { err = e; }
+  const s = failureStats(err);
+  check('a failed compose carries its last manifest into the job stats', typeof s?.lastManifest === 'string' && JSON.parse(s.lastManifest).uses === 7 && typeof s.museCalls === 'number', JSON.stringify(s)?.slice(0, 300));
+  const pic = failureStats({ stats: {}, lastManifest: JSON.stringify({ art: { backdrop: { image: 'data:image/jpeg;base64,' + 'A'.repeat(1000) } } }) });
+  check('pictures in the last manifest are cut to a stub', pic.lastManifest.includes('data:image/jpeg;base64,(left out)') && pic.lastManifest.length < 200, pic.lastManifest);
+  const big = failureStats({ stats: {}, lastManifest: JSON.stringify({ text: 'x'.repeat(LAST_MANIFEST_MAX + 10) }) });
+  check('an oversized last manifest is left out, with its size', big.lastManifest === undefined && big.lastManifestBytes > LAST_MANIFEST_MAX);
 }
 
 {

@@ -16,6 +16,7 @@ import { spawn } from 'node:child_process';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { expandOptionsFor, keepVerifiedPresentation } from './art.mjs';
 import { cutOut, dataURI, decodePNG, encodePNG, fit } from './pixels.mjs';
 
 export class MediaError extends Error {
@@ -382,12 +383,15 @@ export async function applyMedia({ manifest, media, files, studio, muse = null, 
     const was = sprites[e.j.name] ?? {};
     nextArt.sprites[e.j.name] = { image: e.uri, w: e.w, h: e.h, ...(e.frames > 1 ? { frames: e.frames, cols: e.frames, ...(e.fps > 0 ? { fps: e.fps } : {}) } : {}), ...(was.color ? { color: was.color } : {}) };
   }
-  const expansion = studio.expand(JSON.stringify({ ...authoring, art: nextArt }));
+  const expansion = studio.expand(JSON.stringify({ ...authoring, art: nextArt }), expandOptionsFor(manifest));
   if (!expansion.ok) {
     report.error = 'the pictures did not validate: ' + JSON.stringify((expansion.diagnostics ?? []).filter((d) => d.severity === 'error').slice(0, 2));
     return done(manifest);
   }
-  const rewrapped = studio.wrap({ id: manifest.id, game_json: expansion.game_json, authoring_json: expansion.authoring_json, brief: manifest.brief, seed: manifest.seed, ...(manifest.style?.emoji ? { emoji: manifest.style.emoji } : {}) });
+  // Keep the layout verifier's fixes (art.mjs keepVerifiedPresentation): the re-expand rebuilds the presentation.
+  const kept = keepVerifiedPresentation(studio, manifest, expansion);
+  report.keptLayout = kept.kept;
+  const rewrapped = studio.wrap({ id: manifest.id, game_json: kept.game_json, authoring_json: expansion.authoring_json, brief: manifest.brief, seed: manifest.seed, ...(manifest.style?.emoji ? { emoji: manifest.style.emoji } : {}) });
   const next = {
     ...manifest,
     content: rewrapped.content,
