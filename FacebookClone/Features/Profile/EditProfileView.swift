@@ -4,6 +4,7 @@ import PhotosUI
 /// Edit profile screen (pushed). Edits are local copies until "Save".
 struct EditProfileView: View {
     @Environment(AppStore.self) private var store
+    @Environment(BubbleStore.self) private var bubbleStore
     @Environment(\.dismiss) private var dismiss
 
     enum Field: Hashable {
@@ -11,6 +12,8 @@ struct EditProfileView: View {
     }
 
     private static let bioLimit = 101
+    /// Cover colors to pick instead of a photo (`coverColor` on the server), pastel blue to violet.
+    private static let coverColors = ["#B6E3F4", "#9CC9FF", "#7A8CFF", "#9B8CFF", "#C0AEDE", "#D1D4F9"]
     private static let relationshipOptions = [
         "Single", "In a relationship", "Engaged", "Married", "It's complicated", "Prefer not to say",
     ]
@@ -24,6 +27,7 @@ struct EditProfileView: View {
     @State private var school = ""
     @State private var relationship = ""
     @State private var website = ""
+    @State private var coverColor: String?
     @State private var loaded = false
     @State private var showDiscard = false
     @State private var avatarItem: PhotosPickerItem?
@@ -41,6 +45,7 @@ struct EditProfileView: View {
             || school != me.school
             || relationship != me.relationship
             || website != (me.website ?? "")
+            || coverColor != me.coverColor
     }
 
     private var canSave: Bool {
@@ -123,6 +128,7 @@ struct EditProfileView: View {
         school = me.school
         relationship = me.relationship
         website = me.website ?? ""
+        coverColor = me.coverColor
         loaded = true
     }
 
@@ -139,6 +145,15 @@ struct EditProfileView: View {
             relationship: relationship,
             website: trimmedSite.isEmpty ? nil : trimmedSite
         )
+        let me = store.me
+        let pickedColor = coverColor != me.coverColor ? coverColor : nil
+        if let pickedColor {
+            // A picked color replaces the cover photo.
+            me.coverColor = pickedColor
+            me.coverURL = nil
+            me.coverData = nil
+        }
+        bubbleStore.saveMyProfile(displayName: me.name, bio: me.bio, coverColor: pickedColor)
         Haptics.success()
         dismiss()
     }
@@ -163,10 +178,51 @@ struct EditProfileView: View {
                 ProfileEditActionLabel(title: "Edit")
             }
         }) {
+            VStack(alignment: .leading, spacing: 10) {
+                coverPreview
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 160)
+                    .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                coverColorRow
+            }
+        }
+    }
+
+    /// The picked color, else the photo.
+    @ViewBuilder
+    private var coverPreview: some View {
+        let showsColor = coverColor != store.me.coverColor || (store.me.coverURL == nil && store.me.coverData == nil)
+        if showsColor, let color = Color(serverHex: coverColor) {
+            LinearGradient(colors: [color, color.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else {
             RemoteImage(url: store.me.coverURL, data: store.me.coverData)
-                .frame(maxWidth: .infinity)
-                .frame(height: 160)
-                .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+        }
+    }
+
+    private var coverColorRow: some View {
+        HStack(spacing: 10) {
+            Text("Or a color")
+                .font(.fbMeta)
+                .foregroundStyle(FBColor.secondaryText)
+            ForEach(EditProfileView.coverColors, id: \.self) { hex in
+                let isSelected = coverColor?.uppercased() == hex
+                Button {
+                    Haptics.selection()
+                    coverColor = hex
+                } label: {
+                    Circle()
+                        .fill(Color(serverHex: hex) ?? FBColor.skeleton)
+                        .frame(width: 28, height: 28)
+                        .overlay {
+                            Circle().strokeBorder(isSelected ? FBColor.brandBlue : FBColor.divider, lineWidth: isSelected ? 3 : 1)
+                        }
+                        .frame(width: 36, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Cover color \(hex)")
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+            }
         }
     }
 

@@ -28,6 +28,8 @@ final class User: Identifiable, Hashable {
     /// Set when the signed-in user picks a new photo from their library.
     var avatarData: Data?
     var coverData: Data?
+    /// `"#RRGGBB"` from the server: the profile cover when there's no cover photo.
+    var coverColor: String?
     var bio: String
     var city: String
     var hometown: String

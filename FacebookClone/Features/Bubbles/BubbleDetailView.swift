@@ -420,7 +420,7 @@ struct BubbleFloatSheet: View {
                             title: group.name,
                             subtitle: "Group",
                             avatar: AnyView(
-                                RemoteImage(url: group.coverURL)
+                                GroupsCoverImage(group: group)
                                     .frame(width: FBAvatarSize.post, height: FBAvatarSize.post)
                                     .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
                             )

@@ -33,6 +33,7 @@ struct ProfileView: View {
 
     @Environment(AppStore.self) private var store
     @Environment(Router.self) private var router
+    @Environment(BubbleStore.self) private var bubbleStore
 
     @State private var section: ProfileSection = .posts
     @State private var photoRequest: ProfilePhotoRequest?
@@ -80,6 +81,10 @@ struct ProfileView: View {
             if shouldShow != showsNavTitle {
                 showsNavTitle = shouldShow
             }
+        }
+        .task(id: user.id) {
+            // Picture, bio and cover color from the games server, when it has this person.
+            await bubbleStore.refreshProfile(user)
         }
         .fullScreenCover(item: $photoRequest) { request in
             PhotoViewer(media: request.media, startIndex: request.startIndex)
@@ -148,7 +153,7 @@ struct ProfileView: View {
                 startIndex: 0
             )
         } label: {
-            RemoteImage(url: user.coverURL, data: user.coverData)
+            coverPicture
                 .frame(maxWidth: .infinity)
                 .frame(height: coverHeight)
                 .clipped()
@@ -163,6 +168,16 @@ struct ProfileView: View {
                 .padding(12)
                 .accessibilityLabel("Edit cover photo")
             }
+        }
+    }
+
+    /// The cover photo, else the profile's `coverColor` from the server, else the gray placeholder.
+    @ViewBuilder
+    private var coverPicture: some View {
+        if user.coverURL == nil, user.coverData == nil, let color = Color(serverHex: user.coverColor) {
+            LinearGradient(colors: [color, color.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else {
+            RemoteImage(url: user.coverURL, data: user.coverData)
         }
     }
 

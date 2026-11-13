@@ -180,6 +180,17 @@ struct RemoteUser: Codable, Identifiable, Hashable, Sendable {
     var username: String
     var displayName: String
     var createdAt: Date
+    /// Set by the person (`PATCH /v1/me/profile`); nil until they do.
+    var bio: String?
+    /// An https picture; nil means the cartoon from the username.
+    var avatarURL: String?
+    /// The profile cover's color, `"#RRGGBB"`.
+    var coverColor: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, email, username, displayName, createdAt, bio, coverColor
+        case avatarURL = "avatarUrl"
+    }
 }
 
 /// `register`, `login` and `refresh` responses. Never log this.
@@ -436,9 +447,14 @@ struct RemoteProfile: Decodable, Identifiable, Hashable, Sendable {
     var isFriend: Bool
     /// Group members only: `owner` or nil.
     var role: String?
+    /// The picture the person chose (DiceBear or any https URL); nil means the cartoon from the username.
+    var avatarURL: String?
+    /// The profile cover's color, `"#RRGGBB"`.
+    var coverColor: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, username, displayName, bio, isFriend, role
+        case id, username, displayName, bio, isFriend, role, coverColor
+        case avatarURL = "avatarUrl"
     }
 
     init(from decoder: Decoder) throws {
@@ -449,6 +465,8 @@ struct RemoteProfile: Decodable, Identifiable, Hashable, Sendable {
         bio = try c.decodeIfPresent(String.self, forKey: .bio)
         isFriend = try c.decodeIfPresent(Bool.self, forKey: .isFriend) ?? false
         role = try c.decodeIfPresent(String.self, forKey: .role)
+        avatarURL = try c.decodeIfPresent(String.self, forKey: .avatarURL)
+        coverColor = try c.decodeIfPresent(String.self, forKey: .coverColor)
     }
 }
 
@@ -464,9 +482,20 @@ struct RemoteGroup: Decodable, Identifiable, Hashable, Sendable {
     var memberCount: Int
     var isMember: Bool
     var createdAt: Date?
+    /// `open`, `request` or `invite` (the server fills in the default).
+    var joinPolicy: String
+    /// The Group wants new members.
+    var recruiting: Bool
+    /// `"#RRGGBB"`, for the cover when the Group has no picture.
+    var coverColor: String?
+    /// I asked to join and wait for the owner.
+    var requested: Bool
+    /// The owner only: people waiting to join.
+    var requestCount: Int
 
     enum CodingKeys: String, CodingKey {
         case id, kind, name, category, about, memberCount, isMember, createdAt
+        case joinPolicy, recruiting, coverColor, requested, requestCount
         case isPrivate = "private"
         case ownerID = "ownerId"
     }
@@ -483,6 +512,11 @@ struct RemoteGroup: Decodable, Identifiable, Hashable, Sendable {
         memberCount = try c.decodeIfPresent(Int.self, forKey: .memberCount) ?? 0
         isMember = try c.decodeIfPresent(Bool.self, forKey: .isMember) ?? false
         createdAt = try? c.decodeIfPresent(Date.self, forKey: .createdAt)
+        joinPolicy = try c.decodeIfPresent(String.self, forKey: .joinPolicy) ?? (isPrivate ? "invite" : "open")
+        recruiting = try c.decodeIfPresent(Bool.self, forKey: .recruiting) ?? false
+        coverColor = try c.decodeIfPresent(String.self, forKey: .coverColor)
+        requested = try c.decodeIfPresent(Bool.self, forKey: .requested) ?? false
+        requestCount = try c.decodeIfPresent(Int.self, forKey: .requestCount) ?? 0
     }
 }
 

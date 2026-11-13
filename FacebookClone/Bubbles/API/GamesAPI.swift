@@ -48,6 +48,18 @@ protocol GamesAPI: Sendable {
     func groups(kind: String?, mine: Bool) async throws -> [RemoteGroup]
     func group(id: String) async throws -> RemoteGroupDetail
     func setMember(_ isMember: Bool, groupID: String) async throws
+    /// `PUT /v1/groups/{id}/members/me`, by the Group's join policy: an open Group joins you, a
+    /// request Group records your ask (202), an invite Group refuses (403 `invite_only`).
+    func joinGroup(id: String) async throws -> GroupJoinOutcome
+    /// `PUT /v1/groups/{id}/members/{userId}`: a member adds someone, or the owner of a request
+    /// Group approves an ask.
+    func addGroupMember(groupID: String, userID: String) async throws
+    /// `GET /v1/groups/{id}/requests` (the owner only): the people asking to join, oldest first.
+    func groupJoinRequests(groupID: String) async throws -> [RemoteProfile]
+    /// `PATCH /v1/groups/{id}` (the owner only): changes only the fields that are set.
+    func updateGroup(id: String, _ change: GroupSettingsChange) async throws -> RemoteGroup
+    /// `PATCH /v1/me/profile`: changes only the fields that are set; returns me.
+    func updateMyProfile(_ change: ProfileChange) async throws -> RemoteUser
     func groupGames(id: String) async throws -> [RemoteGame]
     /// Group Blend from the server's data about the members (`POST /v1/groups/{id}/blend`).
     func blend(groupID: String, count: Int) async throws -> RemoteBlend
