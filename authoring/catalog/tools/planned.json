@@ -793,5 +793,88 @@
       "device_sensors"
     ],
     "notes": "same gap as device_sensors; approximate with drag or swipe"
+  },
+  {
+    "id": "flashlight_mask",
+    "kind": "runtime_tool",
+    "name": "Flashlight beam",
+    "aliases": [
+      "darkness",
+      "torch",
+      "light circle"
+    ],
+    "summary": "The scene is dark except a beam or circle of light the player moves; only what's inside it is visible.",
+    "when_to_use": "Dark exploration, horror and hide-and-seek.",
+    "status": "planned",
+    "gaps_it_closes": [
+      "no masking or clipping in rendering"
+    ],
+    "notes": "approximate: draw objects only when dist to the light is under the radius, over a dark background; a true mask with soft edges needs engine support"
+  },
+  {
+    "id": "light_mask",
+    "kind": "runtime_tool",
+    "name": "Limited light",
+    "aliases": [
+      "matches",
+      "light rationing"
+    ],
+    "summary": "A light radius that shrinks as its fuel runs down and resets when refuelled; only things inside it are shown.",
+    "when_to_use": "Light-rationing horror and survival exploration.",
+    "status": "planned",
+    "gaps_it_closes": [
+      "no masking or clipping in rendering"
+    ],
+    "notes": "same approximation as flashlight_mask, with the radius from a timer_bar"
+  },
+  {
+    "id": "vision_cone",
+    "kind": "runtime_tool",
+    "name": "Vision cone",
+    "aliases": [
+      "line of sight",
+      "guard view",
+      "stealth detection"
+    ],
+    "summary": "Guards see in a cone; the player is spotted when inside a guard's cone and range, unless cover blocks the view.",
+    "when_to_use": "Stealth games and sneaking puzzles.",
+    "status": "planned",
+    "gaps_it_closes": [
+      "no line-of-sight test against walls"
+    ],
+    "notes": "the cone test works in rules (angle, dist, atan2) and a poly can draw it; blocking by cover needs segment_collision"
+  },
+  {
+    "id": "spatial_audio",
+    "kind": "runtime_tool",
+    "name": "Directional sound",
+    "aliases": [
+      "stereo panning",
+      "where is the sound coming from"
+    ],
+    "summary": "Plays a sound so it seems to come from a direction (left, right, behind).",
+    "when_to_use": "Locate-the-sound games and audio horror.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "no stereo panning"
+    ],
+    "notes": "synth sounds have wave, pitch, length and volume but no pan; approximate direction with pitch or volume cues"
+  },
+  {
+    "id": "anomaly_generator",
+    "kind": "content_tool",
+    "name": "Anomaly variants",
+    "aliases": [
+      "spot the difference",
+      "what changed"
+    ],
+    "summary": "Builds versions of one scene where some have a small change (an object moved, recoloured or missing), with the answer recorded.",
+    "when_to_use": "Spot-the-anomaly, what-changed and spot-the-difference rounds.",
+    "api": "planned: a base scene as a list of placed objects plus per-round edits {object, change}",
+    "status": "planned",
+    "gaps_it_closes": [
+      "no paired picture variants"
+    ],
+    "notes": "works today if the scene is drawn from object lists in state (the changes are rule edits); changes inside one generated picture are not possible"
   }
 ]

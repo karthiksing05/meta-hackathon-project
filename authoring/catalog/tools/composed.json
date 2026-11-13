@@ -397,5 +397,141 @@
     "api": "content lists fronts and backs; tap to flip (state flipped); rating buttons move the card back in the queue",
     "status": "shipped",
     "notes": "custom rules from tap nodes and list builtins within one run; spacing across days needs srs_scheduler"
+  },
+  {
+    "id": "meters",
+    "kind": "runtime_tool",
+    "name": "Stat meters",
+    "aliases": [
+      "stats",
+      "hp and mana",
+      "resource bars",
+      "gauges"
+    ],
+    "summary": "A few named numbers (HP, gold, trust, heat, stamina) clamped to a range and shown as labelled bars; rules raise and lower them and react at thresholds.",
+    "when_to_use": "RPG stats, story meters, resource balancing, battle HP, reign-style balance games.",
+    "api": "int or float state per meter; incr / set with clamp(); bars are rects with w bound to value / max; when-rules fire at thresholds",
+    "status": "shipped",
+    "notes": "custom rules from state, clamp and bound rect widths; the gold story games keep Clues, Trust and Heat this way. lives covers a single HP count"
+  },
+  {
+    "id": "tap_hotspots",
+    "kind": "runtime_tool",
+    "name": "Tap hotspots",
+    "aliases": [
+      "hidden object",
+      "tap targets",
+      "find in scene",
+      "point and click"
+    ],
+    "summary": "Invisible or drawn tap areas placed on a scene; tapping one marks it found (a clue, a target, a difference), and taps elsewhere can cost a miss.",
+    "when_to_use": "Hidden object, spot-the-difference, point-and-click clues, shooting galleries.",
+    "api": "transparent rect or circle nodes (repeat over a content list of {x, y, r}) with on_tap {input: found, with: {i}}; a pointer down source catches misses",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and pointer_input; bots tap rect/circle ops, so keep a transparent rect under each sprite"
+  },
+  {
+    "id": "inventory",
+    "kind": "runtime_tool",
+    "name": "Inventory",
+    "aliases": [
+      "items held",
+      "backpack",
+      "key items"
+    ],
+    "summary": "A list of items the player holds; picking up adds one, using or combining removes them, and choices or doors check for them.",
+    "when_to_use": "Escape rooms, adventure and story games with key items, crafting.",
+    "api": "list<string> or set state; push / add on pickup, remove on use, has / contains in guards; a row of item icons in the HUD",
+    "status": "shipped",
+    "notes": "custom rules from list and set builtins; choice_story labels can be hidden (empty) by rules when an item is missing"
+  },
+  {
+    "id": "swipe_zones",
+    "kind": "runtime_tool",
+    "name": "Swipe directions",
+    "aliases": [
+      "swipe to dodge",
+      "directional swipe",
+      "swipe up down left right"
+    ],
+    "summary": "Reads a swipe's direction (up, down, left, right) as the input, for dodges, guards and directional answers.",
+    "when_to_use": "Parry and dodge duels, directional reaction games, swipe-to-answer.",
+    "api": "pointer down records the start; pointer up compares the delta: the larger axis and its sign give the direction (as tile_slide does)",
+    "status": "shipped",
+    "notes": "custom rules from pointer_input and the direction constants; tile_slide already reads swipes this way"
+  },
+  {
+    "id": "swipe_cards",
+    "kind": "runtime_tool",
+    "name": "Swipe cards",
+    "aliases": [
+      "swipe left or right",
+      "decision cards",
+      "tinder-style cards"
+    ],
+    "summary": "One card at a time; swipe it left or right (or tap two buttons) to decide, and each side has its own effects.",
+    "when_to_use": "Reign-like balance games, this-or-that, quick decisions with consequences.",
+    "api": "card node with on_drag following the finger; release past a threshold commits left or right; content lists of card text and per-side effects",
+    "status": "shipped",
+    "notes": "custom rules from pointer_input, hold_buttons (on_release) and meters; the gold two_way_speed_sort uses two buttons plus swipe"
+  },
+  {
+    "id": "power_meter",
+    "kind": "runtime_tool",
+    "name": "Draining power",
+    "aliases": [
+      "battery",
+      "power drain",
+      "energy budget"
+    ],
+    "summary": "A power supply that drains over time and faster for each device left on; at zero everything shuts off.",
+    "when_to_use": "Night-shift survival, resource-budget horror and management games.",
+    "api": "timer_bar with drain_mult raised per active device, or a meter drained in a tick rule",
+    "status": "shipped",
+    "notes": "maps to timer_bar (drain_mult, emit_only) or meters"
+  },
+  {
+    "id": "checklist",
+    "kind": "runtime_tool",
+    "name": "Checklist",
+    "aliases": [
+      "task list",
+      "steps to do",
+      "ritual steps"
+    ],
+    "summary": "A list of tasks the player completes in any order; each is ticked off, and finishing all of them wins.",
+    "when_to_use": "Ritual, chore and escape tasks under a clock.",
+    "api": "list<bool> state from a content list; set_at on completion; all(list, d => d) wins",
+    "status": "shipped",
+    "notes": "custom rules from list builtins (set_at, all, count)"
+  },
+  {
+    "id": "camera_feed_switcher",
+    "kind": "runtime_tool",
+    "name": "Camera feeds",
+    "aliases": [
+      "security cameras",
+      "switch views",
+      "monitor rooms"
+    ],
+    "summary": "Tap buttons to switch which room the screen shows; things keep moving in rooms you are not watching.",
+    "when_to_use": "Security-camera horror, monitoring and management games.",
+    "api": "state view (room index) set by button taps; the scene draws only the current room's actors from state that updates for every room in tick",
+    "status": "shipped",
+    "notes": "custom rules from tap nodes and tick_rules; not a real camera (the engine camera only scrolls one world)"
+  },
+  {
+    "id": "gaze_check",
+    "kind": "runtime_tool",
+    "name": "Looking away",
+    "aliases": [
+      "don't blink",
+      "only moves when you look away"
+    ],
+    "summary": "Tracks which way the player is looking (the current view or direction); threats move only while not looked at.",
+    "when_to_use": "Don't-look-away horror and freeze-tag mechanics.",
+    "api": "state facing (set by swipes or buttons); threats advance in tick only when not in the facing view",
+    "status": "shipped",
+    "notes": "custom rules from swipe_zones or tap buttons and tick_rules; real eye or head tracking is not available"
   }
 ]
