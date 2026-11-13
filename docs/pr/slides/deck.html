@@ -731,11 +731,33 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .aidc small { display: block; font-size: 17px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 4px; margin-bottom: 10px; }
 .aidc p { font-size: 22px; line-height: 1.32; color: var(--sub); padding: 10px 0; border-top: 2px solid #E1E4E8; } .aidc p b { color: var(--ink); }
 .aipv { margin-top: 26px; font-size: 22px; font-weight: 700; color: var(--sub); text-align: center; }
+
+/* fill the empty bottoms (Karthik: no obvious empty whitespace) */
+.slide.v1 .bots { margin-top: 40px; } .slide.v1 .bot { padding: 28px; } .slide.v1 .bot b { font-size: 34px; } .slide.v1 .bot span { font-size: 24px; }
+.slide.v1 .prof { margin-top: 44px; } .slide.v1 .vrules { margin-top: 50px; } .slide.v1 .vrules b { font-size: 34px; } .slide.v1 .vrules p { font-size: 27px; margin-top: 6px; }
+.slide.v1 .vcases { margin-top: 56px; } .slide.v1 .vcs { padding: 32px 36px; } .slide.v1 .vcs em { font-size: 22px; } .slide.v1 .vcs p { font-size: 30px; margin-top: 10px; }
+.slide.v2 .v2g { margin-top: 56px; flex: 1; } .slide.v2 .ladder em { font-size: 28px; } .slide.v2 .rung { margin-top: 44px; } .slide.v2 .rung b { font-size: 36px; } .slide.v2 .rung i { height: 70px; border-radius: 14px; } .slide.v2 .rung span { font-size: 20px; margin-top: -2px; }
+.slide.v2 .ladder p { font-size: 30px; margin-top: 44px; } .slide.v2 .v2r { gap: 34px; } .slide.v2 .vck { font-size: 30px; padding-left: 52px; } .slide.v2 .vck::before { font-size: 34px; }
+.slide.v2 .vcs { padding: 28px 32px; } .slide.v2 .vcs em { font-size: 22px; } .slide.v2 .vcs p { font-size: 29px; }
+.slide.v3 .v3sub { font-size: 29px; } .slide.v3 .v3g { margin-top: 40px; } .slide.v3 .exv { height: 270px; } .slide.v3 .ex b { font-size: 30px; margin-top: 14px; } .slide.v3 .ex p { font-size: 24px; }
+.slide.v3 .vres { margin-top: 50px; row-gap: 18px; } .slide.v3 .vres > b { font-size: 30px; } .slide.v3 .vb span { font-size: 26px; } .slide.v3 .vb em { font-size: 28px; } .slide.v3 .vb .bars i { height: 16px; }
+.slide.wfb .hfa { margin-top: 44px; flex: 1; margin-bottom: 0; } .slide.wfb .hc { padding: 28px 32px; } .slide.wfb .hc em { font-size: 26px; } .slide.wfb .hc p { font-size: 22px !important; margin-top: 15px !important; line-height: 1.34; }
+.slide.ais .aiflow { margin-top: 56px; } .slide.ais .aist { padding: 32px 30px 34px; } .slide.ais .aist p { font-size: 27px; } .slide.ais .ailoop { margin-top: 26px; font-size: 26px; }
+.slide.ais .aifb { margin-top: 48px; padding-top: 50px; } .slide.ais .aifb div { padding: 20px 18px 24px; } .slide.ais .aifb b { font-size: 27px; } .slide.ais .aifb span { font-size: 21px; }
+.slide.aid .aidg { margin-top: 50px; } .slide.aid .aidc { padding: 30px 28px 24px; } .slide.aid .aidc em { font-size: 33px; } .slide.aid .aidc p { font-size: 25px; padding: 13px 0; } .slide.aid .aipv { margin-top: 34px; font-size: 25px; }
+.slide.v3 .vb { grid-template-columns: 300px 1fr 150px; } .slide.ais .aiflow { margin-top: 44px; } .slide.ais .aifb { margin-top: 40px; }
+.slide.thes { padding-top: 124px; padding-bottom: 70px; }
+.slide.thes .tq { padding: 36px 36px; } .slide.thes .tq em { font-size: 28px; } .slide.thes .tq b { font-size: 48px; margin-top: 12px; } .slide.thes .tq p { font-size: 28px; margin-top: 18px; }
+.slide.thes .tans { margin-top: 40px; padding: 34px 46px; font-size: 45px; } .slide.thes .tlow { margin-top: 32px; font-size: 36px; }
+.def .dfan { position: absolute; right: 150px; top: 96px; width: 800px; height: 540px; }
+.def .dfan img { position: absolute; left: var(--x); top: var(--y); width: 230px; height: 414px; object-fit: cover; border-radius: 26px; transform: rotate(var(--r)); box-shadow: 0 0 0 6px #fff, 0 24px 50px rgba(16,24,64,.22); }
+.def .dfan p { position: absolute; bottom: 0; right: 10px; font-size: 22px; font-weight: 700; color: var(--muted); }
 </style>
 </head>
 <body>
 
 <section class="slide def">
+  <div class="dfan"><img src="img/muse-golden-smore.png" style="--r:-9deg;--x:0px;--y:40px"><img src="img/muse-11-finish-the-saying.png" style="--r:-3deg;--x:190px;--y:8px"><img src="img/muse-mrbeast-trivia.png" style="--r:3deg;--x:380px;--y:0px"><img src="img/muse-19-crocodilo-vs-pineapples.png" style="--r:9deg;--x:570px;--y:30px"><p>Four Curios made by Muse</p></div>
   <div class="mark">Muse <span class="grad">Curios</span> <span class="feat">a new feature in Facebook</span></div>
   <div class="hw">cu·rio</div>
   <div class="pr">\ ˈkyu̇r-ē-ˌō \ &nbsp;<i>noun</i>, plural <b style="color:var(--ink)">curios</b></div>
@@ -1084,7 +1106,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
   <h2>Every Curio is a sensor.</h2>
   <p class="aisub">A post tells Facebook you looked. A Curio tells it whether you enjoyed it, how good you are and who you played with.</p>
   <div class="aidg">
-    <div class="aidc b"><em>In a play</em><small>ranks the feed today</small><p>Started it, or skipped it in 1.2 s</p><p>Finished a run</p><p>Played it again, and again</p><p>Quit halfway</p><p>Closed the app on it</p><p>Saved it</p></div>
+    <div class="aidc b"><em>In a play</em><small>ranks the feed today</small><p>Started it, or skipped it fast</p><p>Finished a run</p><p>Played it again, and again</p><p>Quit halfway</p><p>Closed the app on it</p><p>Saved it</p></div>
     <div class="aidc v"><em>Between people</em><small>ranks the feed today</small><p><b>Added a friend from a board:</b> the strongest signal</p><p>Challenge sent, accepted, won</p><p>Played together in a chat or Group</p><p>Made one together</p><p>Remixed it</p><p>Shared it</p></div>
     <div class="aidc g"><em>In the Curio itself</em><small>ranks the feed today</small><p>24 features from its plan: kind of game, mood, energy, competition, look</p><p>Five bot playtests: does skill show in the score?</p><p>Same-seed scores, replayed: how good you really are</p></div>
     <div class="aidc n"><em>What's next</em><small>collected, not used yet</small><p>What people ask Muse for, in their own words: themes, franchises, creators</p><p>The photos people turn into Curios</p><p>The sounds they pick</p><p>The brand Curios they finish</p></div>
