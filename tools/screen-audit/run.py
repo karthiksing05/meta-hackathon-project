@@ -64,12 +64,14 @@ def shoot(udid, path):
 
 
 def size_changed(a, b):
-    """The game's side edges moved between the feed and playing (a shrunken preview that grows)."""
-    la, lb = a["lines"], b["lines"]
+    """A side band appears, goes or moves between the feed and playing (a shrunken preview that
+    grows). Only lines scan.py counted as bands: a game's own lines change as it plays."""
     for side in ("left", "right"):
-        xa = la.get(side, {}).get("x_pt", 0) if side in la and la[side]["fraction"] >= 0.9 else 0
-        xb = lb.get(side, {}).get("x_pt", 0) if side in lb and lb[side]["fraction"] >= 0.9 else 0
-        if abs(xa - xb) >= 3:
+        def band(r):
+            if not any(i.startswith(side + " band") for i in r.get("issues", [])):
+                return 0
+            return r["lines"][side]["x_pt"]
+        if abs(band(a) - band(b)) >= 3:
             return True
     return False
 
@@ -109,7 +111,22 @@ def main():
     ap.add_argument("--max-wait", type=float, default=40)
     ap.add_argument("--play-wait", type=float, default=7)
     ap.add_argument("--no-install", action="store_true")
+    ap.add_argument("--rescan", action="store_true", help="re-check the screenshots already in --out (no simulator)")
+    ap.add_argument("--notes", default="", help="JSON file {id: note} shown in the report (e.g. reviewed game-side issues)")
     a = ap.parse_args()
+    if a.rescan:
+        with open(os.path.join(a.out, "results.json")) as f:
+            results = json.load(f)
+        for rec in results:
+            for state in ("feed", "playing"):
+                if rec.get(state + "_shot") and os.path.exists(rec[state + "_shot"]):
+                    rec[state] = scan.scan(rec[state + "_shot"])
+            rec["size_changed"] = bool(rec.get("feed") and rec.get("playing") and size_changed(rec["feed"], rec["playing"]))
+            rec["pass"] = bool(rec.get("feed", {}).get("pass") and rec.get("playing", {}).get("pass") and not rec["size_changed"])
+        with open(os.path.join(a.out, "results.json"), "w") as f:
+            json.dump(results, f, indent=1)
+        write_report(results, a.out, a.notes)
+        return
 
     shots = os.path.join(a.out, "shots")
     os.makedirs(shots, exist_ok=True)
@@ -160,23 +177,32 @@ def main():
             json.dump(results, f, indent=1)
 
     simctl("terminate", a.udid, BUNDLE, check=False)
-    contact_sheet(results, a.out, os.path.join(a.out, "contact-sheet.png"))
+    write_report(results, a.out, a.notes)
+
+
+def write_report(results, out, notes_path=""):
+    notes = {}
+    if notes_path and os.path.exists(notes_path):
+        with open(notes_path) as f:
+            notes = json.load(f)
+    contact_sheet(results, out, os.path.join(out, "contact-sheet.png"))
     passed = sum(1 for r in results if r["pass"])
     lines = [
         "# Screen audit",
         "",
         f"{passed} of {len(results)} base Curios pass (feed page and playing state, edge to edge, same size).",
         "",
-        "| Curio | id | Feed | Playing | Size change |",
-        "|---|---|---|---|---|",
+        "| Curio | id | Feed | Playing | Size change | Review |",
+        "|---|---|---|---|---|---|",
     ]
     for r in results:
         f = r.get("feed", {})
         p = r.get("playing", {})
         lines.append(f"| {r['title']} | `{r['id']}` | {'ok' if f.get('pass') else ', '.join(f.get('issues', []))} | "
-                     f"{'ok' if p.get('pass') else ', '.join(p.get('issues', []))} | {'yes' if r['size_changed'] else 'no'} |")
+                     f"{'ok' if p.get('pass') else ', '.join(p.get('issues', []))} | {'yes' if r['size_changed'] else 'no'} | "
+                     f"{notes.get(r['id'], '')} |")
     lines += ["", "Contact sheet: contact-sheet.png (green = pass, red = fail). Raw numbers: results.json."]
-    with open(os.path.join(a.out, "report.md"), "w") as f:
+    with open(os.path.join(out, "report.md"), "w") as f:
         f.write("\n".join(lines) + "\n")
     print(f"{passed}/{len(results)} pass")
 

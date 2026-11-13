@@ -23,9 +23,10 @@ from PIL import Image, ImageFilter
 TAB_PT = 83          # tab bar + home indicator
 HEADER_PT = 114      # status bar + feed header (or the takeover bar)
 EDGE_PT = 60         # how far in from an edge a band line may sit
-LINE_FRACTION = 0.6  # share of rows (or columns) a line must cross
+LINE_FRACTION = 0.6  # share of rows (or columns) a candidate line must cross (a band: 0.85)
 EDGE_DIFF = 8        # per-channel step (across 3 px) that counts as an edge
-QUIET_STD = 40.0     # a strip with nothing sharper than this (detail()) counts as a band
+QUIET_STD = 25.0     # a strip with nothing sharper than this (detail()) counts as a band
+                     # (runtime bleed measures 10-15; game lanes and panels 35 and up)
 
 
 def load(path):
@@ -106,7 +107,7 @@ def scan(path):
         q = detail(img, strip)
         width_pt = (x if side == "left" else W - x) / s
         lines[side] = {"x_pt": round(width_pt, 1), "fraction": round(frac, 2), "strip_detail": round(q, 1)}
-        if width_pt >= 2 and (q < QUIET_STD or frac >= 0.9):
+        if width_pt >= 2 and q < QUIET_STD and frac >= 0.85:
             issues.append(f"{side} band {width_pt:.0f} pt")
 
     # Top and bottom bands (full-width horizontal line with a quiet strip outside it).
