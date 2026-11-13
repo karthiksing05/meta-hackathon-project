@@ -1240,5 +1240,284 @@
       "authoring/games/gold_pillow_fort.authoring.json"
     ],
     "notes": "mechanic of gold game gold_pillow_fort"
+  },
+  {
+    "status": "reviewed",
+    "source": "gold",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "next_line_story_quiz",
+    "name": "Next-line story quiz",
+    "aliases": [
+      "story quiz",
+      "kahoot story",
+      "guess what they say next",
+      "press conference gone wrong",
+      "interview gone wrong"
+    ],
+    "family": "story_choice",
+    "subfamily": "scripted clip",
+    "summary": "A short scripted scene (a press conference, an interview, a cooking show) cut into beats. At each beat you guess the next line from three; the reveal shows the real line, which is always the funniest, and what happened next.",
+    "core_loop": "read the quote card → guess the next line → reveal the real line and the punchline → next beat → end card: how many you called",
+    "verbs": [
+      "read",
+      "guess",
+      "laugh"
+    ],
+    "pieces": [
+      "quote card",
+      "speaker name",
+      "three guesses",
+      "reveal panel",
+      "cartoon panel per beat"
+    ],
+    "rules": [
+      "beats play in order, never shuffled",
+      "the real line is the joke, the twist or the disaster, and the other guesses are plausible but tame",
+      "no lives and no timer: nothing is lost",
+      "each beat escalates the scene"
+    ],
+    "win": "reach the end of the clip",
+    "scoring": "unranked: lines called out of the beats; friends compare how often they picked the same lines",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "social_hooks": [
+      "see how in sync you were with a friend",
+      "share the line that got you"
+    ],
+    "content_needs": [
+      "8 beats: speaker, setup line, ask, the real line, two tame guesses, the punchline"
+    ],
+    "difficulty_levers": [
+      "how plausible the tame guesses are"
+    ],
+    "tools": [
+      "story_quiz"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a press conference where the mayor’s new bridge goes really badly, as a quiz where you guess what he says",
+      "a funny clip of a politician interview going wrong broken into kahoot questions",
+      "a job interview gone wrong where you guess the candidate’s next answer"
+    ],
+    "refs": [
+      "authoring/games/gold_the_podium.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_the_podium. Real people only as labelled parody (tag PARODY) with cartoon art; never write a quote that reads as real reporting."
+  },
+  {
+    "status": "reviewed",
+    "source": "gold",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "narrator_voice_story_quiz",
+    "name": "Narrator-voice story quiz",
+    "aliases": [
+      "documentary narrated by a cat",
+      "nature documentary parody",
+      "commentary quiz",
+      "guess the narrator"
+    ],
+    "family": "story_choice",
+    "subfamily": "scripted clip",
+    "variant_of": "next_line_story_quiz",
+    "summary": "A character narrates a film (a cat hosting a nature documentary, a toddler on a cooking show) and keeps going off script. Once you learn their voice you can guess their next line; the reveal shows what they really said.",
+    "core_loop": "read the narration → guess the narrator’s next line → reveal → learn the voice → next scene",
+    "verbs": [
+      "read",
+      "guess"
+    ],
+    "pieces": [
+      "quote card",
+      "three guesses",
+      "reveal panel",
+      "cartoon panels on some scenes"
+    ],
+    "rules": [
+      "the narrator’s logic is consistent, so later beats are guessable",
+      "some beats have a picture, some are text only",
+      "nothing is lost"
+    ],
+    "win": "reach the end",
+    "scoring": "unranked: lines called; friends compare picks",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "social_hooks": [
+      "compare picks with a friend"
+    ],
+    "content_needs": [
+      "8 beats in one consistent comic voice"
+    ],
+    "tools": [
+      "story_quiz"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a nature documentary narrated by a cat who keeps getting distracted",
+      "a cooking show hosted by a toddler where you guess what he says next",
+      "a sports commentator who only cares about the snacks"
+    ],
+    "refs": [
+      "authoring/games/gold_purr_earth.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_purr_earth"
+  },
+  {
+    "status": "reviewed",
+    "source": "gold",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "which_came_first_pairs",
+    "name": "Which came first (pairs)",
+    "aliases": [
+      "which came first",
+      "timeline pairs",
+      "older or newer",
+      "history higher lower"
+    ],
+    "family": "trivia",
+    "subfamily": "chronology",
+    "summary": "Two events from different worlds (a university and an empire, a gadget and an invention); tap the one that happened first. The reveal gives both dates. Pairs are picked so intuition misleads and you reason from anchors.",
+    "core_loop": "read two events → tap the earlier one → see both dates and the gap → streak or lose a life",
+    "verbs": [
+      "compare",
+      "reason",
+      "recall"
+    ],
+    "pieces": [
+      "two event tiles",
+      "question card that turns into the dates",
+      "lives",
+      "streak"
+    ],
+    "rules": [
+      "each pair crosses domains so no single date answers it",
+      "the reveal shows both years",
+      "a wrong call costs a life; a streak adds a bonus"
+    ],
+    "win": "get through the pairs",
+    "lose": "lose all lives",
+    "scoring": "100 per right call + streak bonus",
+    "session_seconds": [
+      40,
+      120
+    ],
+    "social_hooks": [
+      "same pairs for the group, compare scores"
+    ],
+    "content_needs": [
+      "pairs with verified dates and a one-line note"
+    ],
+    "difficulty_levers": [
+      "how surprising the pairs are",
+      "time per pair"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "a which came first history game",
+      "guess which happened earlier, nintendo or the model t",
+      "a timeline quiz with surprising pairs"
+    ],
+    "refs": [
+      "authoring/games/gold_first_things_first.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_first_things_first. Shows the notes in the question card while locked (quiz reveal_ms)."
+  },
+  {
+    "status": "reviewed",
+    "source": "gold",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "mate_in_one_choice",
+    "name": "Mate in one (pick the move)",
+    "aliases": [
+      "mate in one",
+      "chess puzzle",
+      "checkmate puzzle",
+      "chess tactics"
+    ],
+    "family": "board",
+    "subfamily": "chess tactics",
+    "variant_of": "chess_puzzle_mate",
+    "summary": "A chess position drawn as a picture and four candidate moves in notation; exactly one is checkmate. Every wrong move is a plausible check that fails for a concrete reason, so you must calculate escape squares.",
+    "core_loop": "study the board → pick one of four moves → reveal why it mates or fails → next position",
+    "verbs": [
+      "calculate",
+      "choose"
+    ],
+    "pieces": [
+      "board picture per puzzle",
+      "four move tiles",
+      "explanation"
+    ],
+    "rules": [
+      "one candidate mates; the others check or threaten but fail",
+      "positions are verified with a chess engine before shipping",
+      "a wrong move costs a life"
+    ],
+    "win": "solve the set",
+    "lose": "lose all lives",
+    "scoring": "100 per mate",
+    "session_seconds": [
+      40,
+      180
+    ],
+    "social_hooks": [
+      "same puzzles for the group"
+    ],
+    "content_needs": [
+      "positions (FEN) checked by a move generator",
+      "one sentence why"
+    ],
+    "difficulty_levers": [
+      "pattern difficulty",
+      "time per puzzle"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "mate in one chess puzzles",
+      "a chess tactics quiz for my chess club",
+      "find the checkmate"
+    ],
+    "refs": [
+      "authoring/games/gold_one_move.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_one_move. The board is a sprite with one frame per puzzle (picture, frame = get_or(order, qi, 0)); never invent a position without checking it."
   }
 ]

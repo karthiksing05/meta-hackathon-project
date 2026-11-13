@@ -1,0 +1,274 @@
+[
+  {
+    "status": "seed",
+    "source": "seed",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "word_root_match",
+    "name": "Word-root match (etymology)",
+    "aliases": [
+      "etymology quiz",
+      "root words",
+      "word origins",
+      "latin and greek roots"
+    ],
+    "family": "word",
+    "subfamily": "etymology",
+    "summary": "A word and four candidates: tap the one that shares its root. Distractors look alike but come from different roots, and the reveal names the root and its meaning.",
+    "core_loop": "read the word → pick the true relative → reveal the root and meaning → next",
+    "verbs": [
+      "decompose",
+      "compare"
+    ],
+    "rules": [
+      "exactly one candidate shares the root",
+      "distractors share letters, not roots",
+      "the reveal teaches the root"
+    ],
+    "win": "finish the rounds",
+    "lose": "lose all lives",
+    "scoring": "points per right pick, streak bonus",
+    "session_seconds": [
+      40,
+      120
+    ],
+    "content_needs": [
+      "words with verified etymologies and look-alike distractors",
+      "a one-line root note each"
+    ],
+    "difficulty_levers": [
+      "how close the distractors look"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "an etymology game where you match words that share a root",
+      "which word comes from the same latin root",
+      "root words quiz for word nerds"
+    ],
+    "notes": "Use quiz with reveal_ms 2500+ and quiz_questions() returning the root notes while locked."
+  },
+  {
+    "status": "seed",
+    "source": "seed",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "fermi_magnitude",
+    "name": "Fermi estimate (order of magnitude)",
+    "aliases": [
+      "fermi estimate",
+      "fermi problem",
+      "estimation duel",
+      "how many piano tuners"
+    ],
+    "family": "number_math",
+    "subfamily": "estimation",
+    "summary": "An estimation question (how many piano tuners in Chicago?) and choices that are orders of magnitude apart. The exact magnitude scores full points, one off scores some; the reveal shows the reasoning chain.",
+    "core_loop": "read the question → break it into factors → pick a magnitude → see the estimate chain → next",
+    "verbs": [
+      "estimate",
+      "decompose"
+    ],
+    "rules": [
+      "choices are powers of ten apart",
+      "near misses score partial points",
+      "the reveal shows a factor chain"
+    ],
+    "win": "finish the rounds",
+    "scoring": "full points for the right magnitude, partial for one off",
+    "session_seconds": [
+      40,
+      120
+    ],
+    "content_needs": [
+      "questions with a reference value and a short factor chain"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "a fermi estimation game",
+      "guess the order of magnitude: how many golf balls fit in a bus",
+      "an estimation duel for my engineering friends"
+    ],
+    "notes": "Partial credit: on answered_wrong compare picked option to the answer (quiz state picked, opts)."
+  },
+  {
+    "status": "seed",
+    "source": "seed",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "proof_step_order",
+    "name": "Proof step order",
+    "aliases": [
+      "order the proof",
+      "proof puzzle",
+      "logic steps in order"
+    ],
+    "family": "logic_puzzle",
+    "subfamily": "ordering",
+    "summary": "A classic proof (√2 is irrational, infinitely many primes) told step by step: at each step pick which statement comes next from three. The order is forced by logic, so you follow the argument rather than recall it.",
+    "core_loop": "read the steps so far → pick the next step → reveal why it follows → next step",
+    "verbs": [
+      "reason",
+      "order"
+    ],
+    "rules": [
+      "steps are asked in order, never shuffled",
+      "wrong options are true-sounding but don’t follow yet",
+      "the reveal says why the step follows"
+    ],
+    "win": "finish the proof",
+    "scoring": "steps placed right (accuracy)",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "content_needs": [
+      "a proof cut into 6 to 8 steps",
+      "plausible wrong next steps",
+      "one-line justifications"
+    ],
+    "tools": [
+      "story_quiz"
+    ],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "put the steps of a proof in order",
+      "a game where you rebuild the proof that root 2 is irrational",
+      "a math proof puzzle for my study group"
+    ],
+    "notes": "story_quiz with hit_label CORRECT, miss_label NOT YET and a ranked accuracy score."
+  },
+  {
+    "status": "seed",
+    "source": "seed",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "country_from_clues",
+    "name": "Country from clues",
+    "aliases": [
+      "guess the country",
+      "capital clues",
+      "geography deduction",
+      "five clues"
+    ],
+    "family": "trivia",
+    "subfamily": "geography",
+    "summary": "Clues about a country appear one at a time, vaguest first (climate, then neighbours, then a river, then the capital’s initial). Answer early for more points: you deduce from partial clues instead of waiting for the giveaway.",
+    "core_loop": "read a clue → answer now or wait for the next → points fall with each clue → reveal",
+    "verbs": [
+      "deduce",
+      "recall"
+    ],
+    "rules": [
+      "clues go from vague to specific",
+      "answering earlier scores more",
+      "a wrong answer costs a life"
+    ],
+    "win": "finish the rounds",
+    "lose": "lose all lives",
+    "scoring": "points by how few clues you needed",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "content_needs": [
+      "countries with 4 to 5 graded true clues"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the country from clues",
+      "a geography deduction game with capital clues",
+      "five clues to name the country"
+    ]
+  },
+  {
+    "status": "seed",
+    "source": "seed",
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "id": "predict_the_experiment",
+    "name": "Predict the experiment",
+    "aliases": [
+      "what happens next science",
+      "physics predictions",
+      "science intuition quiz"
+    ],
+    "family": "learning",
+    "subfamily": "science",
+    "summary": "A short experiment setup (a feather and a hammer dropped on the Moon, a water balloon over a candle) and three outcomes. Pick one; the reveal explains the principle. Outcomes are chosen so naive intuition is often wrong.",
+    "core_loop": "read the setup → predict the outcome → reveal the result and the principle → next",
+    "verbs": [
+      "predict",
+      "reason"
+    ],
+    "rules": [
+      "every setup is a real, repeatable experiment",
+      "one distractor is the common misconception",
+      "the reveal names the principle"
+    ],
+    "win": "finish the rounds",
+    "lose": "lose all lives",
+    "scoring": "points per right prediction, streak bonus",
+    "session_seconds": [
+      40,
+      150
+    ],
+    "content_needs": [
+      "experiments with a verified outcome and a one-line principle"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "predict the outcome of science experiments",
+      "a physics intuition quiz",
+      "guess what happens in each experiment"
+    ],
+    "notes": "Use quiz reveal_ms 2500+ and show the principle in the question card while locked."
+  }
+]

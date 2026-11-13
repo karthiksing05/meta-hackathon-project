@@ -104,9 +104,8 @@
     ],
     "tools": [
       "typed_answer",
-      "fuzzy_match",
-      "timer_bar",
-      "score"
+      "rounds",
+      "lives"
     ],
     "engine_gaps": [],
     "gate_profile": "trivia",
@@ -116,7 +115,8 @@
       "name a country starting with M, rarer is better"
     ],
     "status": "seed",
-    "source": "kevin"
+    "source": "kevin",
+    "notes": "typed_answer sets the score (tiered points) and draws its own time bar, so never add score or timer_bar."
   },
   {
     "id": "survey_says",

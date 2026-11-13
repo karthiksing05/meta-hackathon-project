@@ -1,0 +1,58 @@
+[
+  {
+    "request": "a press conference that goes really badly as a kahoot quiz",
+    "expect": [
+      "next_line_story_quiz"
+    ]
+  },
+  {
+    "request": "a nature documentary narrated by a cat, guess what he says",
+    "expect": [
+      "narrator_voice_story_quiz",
+      "next_line_story_quiz"
+    ]
+  },
+  {
+    "request": "which came first, history edition",
+    "expect": [
+      "which_came_first_pairs"
+    ]
+  },
+  {
+    "request": "mate in one chess puzzles",
+    "expect": [
+      "mate_in_one_choice",
+      "chess_puzzle_mate"
+    ]
+  },
+  {
+    "request": "etymology game about word roots",
+    "expect": [
+      "word_root_match"
+    ]
+  },
+  {
+    "request": "fermi estimation questions",
+    "expect": [
+      "fermi_magnitude"
+    ]
+  },
+  {
+    "request": "order the steps of a math proof",
+    "expect": [
+      "proof_step_order"
+    ]
+  },
+  {
+    "request": "guess the country from clues",
+    "expect": [
+      "country_from_clues"
+    ]
+  },
+  {
+    "request": "predict what happens in science experiments",
+    "expect": [
+      "predict_the_experiment"
+    ]
+  }
+]

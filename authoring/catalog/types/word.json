@@ -626,10 +626,9 @@
       "answer length shown"
     ],
     "tools": [
-      "keyboard",
-      "word_check",
-      "hint",
-      "daily_seed"
+      "typed_answer",
+      "rounds",
+      "hint"
     ],
     "engine_gaps": [],
     "gate_profile": "puzzle",
@@ -639,7 +638,8 @@
       "one cryptic a day"
     ],
     "status": "seed",
-    "source": "kevin"
+    "source": "kevin",
+    "notes": "Typed on the iPhone keyboard with typed_answer (one tier per clue: the answer); the drawn keyboard is only for letter-tile games."
   },
   {
     "id": "hangman",

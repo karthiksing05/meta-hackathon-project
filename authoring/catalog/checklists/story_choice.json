@@ -115,6 +115,78 @@
           ]
         }
       ]
+    },
+    {
+      "applies_to": [
+        "next_line_story_quiz",
+        "narrator_voice_story_quiz"
+      ],
+      "slots": [
+        {
+          "id": "scene",
+          "ask": "What scene is the clip? Who is talking?",
+          "why": "The scene sets the speaker, the escalation and the pictures for every beat.",
+          "need": "required",
+          "extrapolate_from": "the setting in the request (a press conference, an interview, a cooking show, a documentary)",
+          "default": "a press conference that goes badly",
+          "choices": [
+            "a press conference that goes badly",
+            "a job interview gone wrong",
+            "a cooking show disaster",
+            "a documentary with a distracted narrator"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        },
+        {
+          "id": "real_people",
+          "ask": "Are real people in it?",
+          "why": "Real people are only allowed as labelled parody with cartoon art: the PARODY tag goes on screen and no line may read as real reporting.",
+          "need": "required",
+          "extrapolate_from": "named politicians, celebrities or creators in the request",
+          "default": "no, fictional characters",
+          "choices": [
+            "no, fictional characters",
+            "yes, as labelled parody"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        },
+        {
+          "id": "beats",
+          "ask": "How long should the clip be?",
+          "why": "Beats set the run length; 8 beats fits a chat round.",
+          "need": "nice",
+          "default": "8 beats",
+          "choices": [
+            "6 beats",
+            "8 beats",
+            "10 beats"
+          ],
+          "affects": [
+            "content"
+          ]
+        },
+        {
+          "id": "pictures",
+          "ask": "Should beats have pictures?",
+          "why": "A cartoon panel per beat makes it read like a clip; uploads can replace them.",
+          "need": "nice",
+          "default": "a few cartoon panels",
+          "choices": [
+            "a few cartoon panels",
+            "text only",
+            "my own photos"
+          ],
+          "affects": [
+            "art"
+          ]
+        }
+      ]
     }
   ],
   "notes": "Planned as a branching_story graph (docs/harness-gaps/story.md): these slots fill premise, goal ending, max_choices, vars and the cast."
