@@ -8,6 +8,7 @@
 
 import { groupPlayRules } from './group-play.mjs';
 import { preferencesOf, preferenceNote } from './variants.mjs';
+import { requirementsSection } from './requirements.mjs';
 
 /** The anatomy block Studio puts in a request (GameAnatomy.agreedText), split from the rest. */
 export function splitAnatomy(request) {
@@ -112,7 +113,13 @@ export function planMenu(catalog, context) {
 
   const plan = context.plan && typeof context.plan === 'object' ? context.plan : {};
   const spec = [];
-  if (plan.spec) spec.push('The game spec (game-spec/1). Build exactly this; every part is decided:', clip(JSON.stringify(plan.spec), 12000));
+  if (plan.spec) {
+    // The requirements go in their own quoted section, not twice.
+    const { requirements, ...rest } = plan.spec;
+    spec.push('The game spec (game-spec/1). Build exactly this; every part is decided:', clip(JSON.stringify(rest), 12000));
+    const reqs = requirementsSection(requirements);
+    if (reqs) spec.push('', reqs);
+  }
   if (plan.spec?.score) spec.push('', 'Copy spec.score into the manifest as a top-level "score" block (without bounds), with events renamed to the event or input names your game really emits.');
   // A twist version (variants.mjs) carries its rule on spec.loop.twist: a rule to build, not a note.
   const twist = plan.spec?.loop?.twist;

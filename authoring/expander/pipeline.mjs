@@ -15,6 +15,8 @@ import { normalizeScore, unknownScoreEvents } from './score.mjs';
 import { groupPlayBlock, structureFor } from './group-play.mjs';
 import { wantsStory, composeStory } from './story-compose.mjs';
 import { makeImageArt, applyImageArt, makeStoryArt, applyStoryArt } from './image-art.mjs';
+import { repairRequest } from './requirements.mjs';
+import { judgeRequirements, needsJudge, readBuilt, repairTargets, gapEntries, honestNote } from '../playtest/requirements-check.mjs';
 
 /** The art budget for games drawn by muse-image (svg.mjs SVG_LIMITS.image_art_bytes). */
 export const IMAGE_ART_BUDGET = 512 * 1024;
@@ -80,6 +82,7 @@ export function summarize(e) {
     case 'done': return `${e.title} is ready`;
     case 'failed': return `Couldn't finish: ${e.reason}`;
     case 'drawing': return 'Muse is drawing the pictures';
+    case 'requirements_checked': return e.must_total ? `Checked what you asked for: ${e.must_passed} of ${e.must_total} must-haves` : 'Checked what you asked for';
     case 'drawn': return e.ok ? `Drew ${e.pictures} pictures` : `Kept the drawn-in art: ${e.reason}`;
     default: return '';
   }
@@ -163,7 +166,8 @@ export async function composeGame({ request, brief, base = null, context = null 
     // A harness context trims the menu to the plan's tools and adds the spec (prompts.mjs planMenu).
     const system = P.system(catalog, { examples, context });
     stats.systemChars = system.length;
-    const gateOptions = context?.gate_profile ? { gate_profile: String(context.gate_profile) } : undefined;
+    // trace keeps each run's replay for the requirements check.
+    const gateOptions = { trace: true, ...(context?.gate_profile ? { gate_profile: String(context.gate_profile) } : {}) };
     const first = base ? P.revise(base.authoring_json, request, brief) : P.compose(request, brief);
 
     // Stories (the plan uses branching_story): Muse writes a story graph that our checker walks, the
@@ -328,6 +332,48 @@ export async function composeGame({ request, brief, base = null, context = null 
     });
     if (imageArt?.kind === 'game') manifest = applyImageArt(manifest, imageArt.art);
     else if (imageArt?.kind === 'story') manifest.art_record = imageArt.record;
+    // Requirements (docs/HARNESS_V2.md "Requirements"): the person's own words checked in the built game, by
+    // code and by the gate's runs replayed with a trace; no Muse call. The judge and one targeted repair
+    // cost Muse calls on every game, so they run only when context.requirements_repair is true.
+    const requirements = Array.isArray(context?.plan?.spec?.requirements) ? context.plan.spec.requirements : [];
+    let reqRepaired = null;
+    if (requirements.length && typeof studio.requirementsCheck === 'function') {
+      const gameForTrace = expansion.playtest_game_json || expansion.game_json;
+      try {
+        let report = await studio.requirementsCheck(gameForTrace, manifest, requirements, null);
+        let judged = false;
+        if (context?.requirements_repair === true) {
+          const built = readBuilt(manifest);
+          const toJudge = needsJudge(requirements, built);
+          if (toJudge.length) {
+            try {
+              const judge = await judgeRequirements(toJudge, built, (s, u, purpose, o) => call(s, typeof u === 'string' ? u : JSON.stringify(u), purpose, o));
+              report = await studio.requirementsCheck(gameForTrace, manifest, requirements, judge);
+              judged = true;
+            } catch (e) { if (e?.name === 'GenerationError') throw e; }
+          }
+          const failures = repairTargets(report);
+          if (failures.length && !base) {
+            try {
+              const revised = await composeGame({ request: repairRequest(failures), brief, base: { id: manifest.id, title: manifest.title, one_line_rule: manifest.one_line_rule, brief, seed: manifest.seed, authoring_json: manifest.content.authoring_json }, context: { ...context, requirements_repair: false } }, studio, { ask, onEvent, signal, maxRepairRounds, polish: false, scoreCheck, scoreReview, media: null });
+              const after = revised.stats?.requirements;
+              if (revised.gate?.passed && after && after.must_passed > report.summary.must_passed) reqRepaired = revised;
+            } catch (e) { if (e?.name === 'GenerationError') throw e; }
+          }
+        }
+        stats.requirements = { must_passed: report.summary.must_passed, must_total: report.summary.must_total, note: honestNote(report), gaps: gapEntries(report), passed: report.summary.passed, total: report.summary.total, unknown: report.summary.unknown, traced: report.traced ?? 0, judged };
+      } catch (e) {
+        if (e?.name === 'GenerationError') throw e;
+        stats.requirements = { must_passed: null, must_total: requirements.filter((r) => r.must).length, note: '', gaps: [], error: String(e?.message ?? e).slice(0, 200) };
+      }
+    } else {
+      stats.requirements = { must_passed: 0, must_total: 0, note: '', gaps: [] };
+    }
+    emit({ kind: 'requirements_checked', must_passed: stats.requirements.must_passed, must_total: stats.requirements.must_total });
+    if (reqRepaired) {
+      reqRepaired.stats = { ...reqRepaired.stats, museCalls: stats.museCalls + (reqRepaired.stats?.museCalls ?? 0), requirementsRepair: { before: stats.requirements, after: reqRepaired.stats.requirements } };
+      return reqRepaired;
+    }
     // Group play: how friends compare this game's runs (the spec's social part, kept consistent with the score).
     // A story compares by ending (best first) with the endings the compiled graph really has.
     // The plan's display line is kept when it shows the ending ("{ending} in {choices} choices").

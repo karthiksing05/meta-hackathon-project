@@ -22,6 +22,8 @@ import { qualityReport, qualityLines } from './quality.mjs';
 import * as Prompts from './prompts.mjs';
 import { composeGame } from './pipeline.mjs';
 import { makeVariants } from './variants.mjs';
+import { apply as applyAction } from '../playtest/bots.mjs';
+import { traceRuns, checkRequirements, readBuilt } from '../playtest/requirements-check.mjs';
 
 // 3: compose takes a harness `context` (trimmed menu, gold_ids, spec, gate_profile) and checks scores.
 // 4: storyGate, and compose builds stories from a story graph.
@@ -407,8 +409,30 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
         ms: r.ms,
         seed: r.replay.seed,
         inputs: r.replay.actions.length,
+        // trace: true keeps each run's replay, so a requirements check can play it back with a state trace.
+        ...(options.trace ? { replay: r.replay } : {}),
       })),
     });
+  }
+
+  /**
+   * The requirements check (playtest/requirements-check.mjs) on a built game, with no Muse: code checks on
+   * the manifest, and the gate's runs (from the last gate or story gate of this game) replayed with a state
+   * trace. requirementsCheck(gameJSON, manifestJSON, requirementsJSON, judgeJSON?) → JSON
+   * {results, summary, traced}. judge: judgeRequirements' {id: {met, evidence}}, when the caller ran it.
+   */
+  async function requirementsCheck(gameJSON, manifestJSON, requirementsJSON, judgeJSON) {
+    const json = typeof gameJSON === 'string' ? gameJSON : JSON.stringify(gameJSON);
+    const manifest = typeof manifestJSON === 'string' ? JSON.parse(manifestJSON) : manifestJSON;
+    const requirements = typeof requirementsJSON === 'string' ? JSON.parse(requirementsJSON) : requirementsJSON;
+    const judge = judgeJSON ? (typeof judgeJSON === 'string' ? JSON.parse(judgeJSON) : judgeJSON) : null;
+    const g = gated.get(json);
+    let trace = null;
+    if (g?.runs?.length) {
+      try { trace = traceRuns(engine(), json, g.runs, { apply: applyAction }); } catch { trace = null; }
+    }
+    const report = checkRequirements(Array.isArray(requirements) ? requirements : [], readBuilt(manifest), { trace, judge });
+    return JSON.stringify({ ...report, traced: trace ? trace.filter((t) => !t.error).length : 0 });
   }
 
   /**
@@ -566,6 +590,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       storyGate: async (json, graph, manifest) => JSON.parse(await storyGate(json, graph, manifest)),
       quality: (text, request) => JSON.parse(quality(text, request)),
       wrap: (opts) => JSON.parse(wrap(opts)),
+      requirementsCheck: async (json, manifest, reqs, judge) => JSON.parse(await requirementsCheck(json, JSON.stringify(manifest), JSON.stringify(reqs), judge ? JSON.stringify(judge) : null)),
     };
   }
 
@@ -584,5 +609,5 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     return JSON.stringify(await makeVariants(a, studio, { ask, onEvent: events }));
   }
 
-  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, storyGate, scoreCheck, wrap, examples: examplesFor, quality, prompt, compose, variants });
+  return Object.freeze({ version: STUDIO_API_VERSION, build, catalog, expand, gate, storyGate, scoreCheck, wrap, examples: examplesFor, quality, prompt, compose, variants, requirementsCheck });
 }

@@ -178,5 +178,33 @@ async function compose(args, reply) {
   ok(imageCalls.length === before && !plain.stats.image_art && !plain.manifest.art_record, 'no plan.art: no pictures drawn');
 }
 
+{ // requirements: quoted in the prompt once, checked in every built game with no Muse call; judge + repair opt-in
+  const reqs = [
+    { id: 'r1', quote: '12 questions', kind: 'count', target: { measure: 'questions', op: '==', value: 12 }, must: true, verify: 'code' },
+    { id: 'r2', quote: 'cozy', kind: 'tone', target: null, must: false, verify: 'judge' },
+  ];
+  const ctx = { ...SAMPLES.dodge, plan: { ...SAMPLES.dodge.plan, spec: { ...SAMPLES.dodge.plan.spec, requirements: reqs } } };
+  const menu = String(P.planMenu(catalog, ctx).spec);
+  ok(/Requirements you must meet, quoted/.test(menu) && menu.split('"12 questions"').length === 2 && !/"requirements":/.test(menu), 'planMenu quotes the requirements once, outside the spec JSON');
+  const run = async (c) => {
+    const purposes = [], events = [];
+    const ask = async (s, u, purpose) => { purposes.push(purpose); return { content: JSON.stringify(/score review/.test(purpose) ? { ok: true, issues: [] } : /judge/.test(purpose) ? { results: [{ id: 'r1', met: false, evidence: 'no questions' }, { id: 'r2', met: true, evidence: 'soft colors' }] } : tide), model: 'fake' }; };
+    const out = JSON.parse(await B.compose(JSON.stringify({ request: 'cozy trivia with 12 questions', brief: { intent: 'x' }, polish: false, context: c }), ask, (e) => events.push(e)));
+    return { out, purposes, events };
+  };
+  const plain = await run(ctx);
+  const r = plain.out.stats.requirements;
+  ok(r && r.must_total === 1 && typeof r.must_passed === 'number' && Array.isArray(r.gaps) && typeof r.note === 'string', `stats.requirements: ${JSON.stringify(r)}`);
+  ok(r.must_passed === 0 && r.gaps.length === 1 && r.note === '', 'a must code can\'t confirm is a gap, with no note (not a known miss)');
+  const missing = await run({ ...ctx, plan: { ...ctx.plan, spec: { ...ctx.plan.spec, requirements: [{ id: 'r1', quote: 'Zanzibar', kind: 'content', target: { text: ['Zanzibar'] }, must: true, verify: 'code' }] } } });
+  ok(missing.out.stats.requirements.must_passed === 0 && /Zanzibar/.test(missing.out.stats.requirements.note) && missing.out.stats.requirements.gaps[0]?.quote === 'Zanzibar', `a missed must gets a gap entry and an honest note: ${missing.out.stats.requirements.note}`);
+  ok(!plain.purposes.some((p) => /judge|requirements/.test(p)), `no judge or repair by default (${plain.purposes.join(', ')})`);
+  ok(plain.events.some((e) => e.kind === 'requirements_checked' && /0 of 1/.test(e.summary)), 'requirements_checked event');
+  const opted = await run({ ...ctx, requirements_repair: true });
+  ok(opted.purposes.includes('requirements judge') && opted.purposes.filter((p) => /microgame (draft|revision)/.test(p)).length >= 2 && opted.out.stats.requirements?.judged === true, `requirements_repair: judge and one revise (${opted.purposes.join(', ')})`);
+  const none = await run(SAMPLES.dodge);
+  ok(none.out.stats.requirements?.must_total === 0, 'no requirements: zeros');
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
