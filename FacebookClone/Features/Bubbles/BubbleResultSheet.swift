@@ -213,7 +213,7 @@ struct BubbleResultSheet: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 didFloat = true
             }
-            appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
+            // BubbleSurfaceHooks.float already shows "Shared to <Group>"; a second toast restarted it.
         } else {
             appStore.showToast("Couldn't share this right now", symbol: "exclamationmark.circle")
         }
