@@ -455,8 +455,9 @@ struct BubbleFloatSheet: View {
     }
 
     private func send(to group: FBGroup?, name: String) {
+        // BubbleSurfaceHooks.float shows the "Shared to …" toast itself.
         BubbleSurfaceHooks.float(bubble, result: nil, to: group, message: "Play \(bubble.title)", appStore: appStore, bubbleStore: bubbleStore)
-        appStore.showToast("Shared to \(name)", symbol: "checkmark.circle.fill")
+        Haptics.success()
         onDone()
     }
 }
