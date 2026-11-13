@@ -27,6 +27,7 @@ struct RemoteGameNotification: Decodable, Identifiable, Hashable, Sendable {
         case "friend_challenge": return "flag.checkered"
         case "leaderboard_lost": return "trophy.fill"
         case "viral_match": return "sparkles"
+        case "daily_ready": return "sun.max.fill"
         default: return "gamecontroller.fill"
         }
     }
@@ -57,7 +58,8 @@ extension RemoteGameNotification {
         switch kind {
         case "friend_challenge": return .challenges
         case "leaderboard_lost": return gameID.map(GameNotificationDestination.leaderboard) ?? .inbox
-        case "group_game":
+        case "group_game", "daily_ready":
+            // today's Daily opens the game, ready to play; without one, the Group's games
             if let id = gameID { return .game(id) }
             return groupID.map(GameNotificationDestination.group) ?? .inbox
         default: return gameID.map(GameNotificationDestination.game) ?? .inbox
