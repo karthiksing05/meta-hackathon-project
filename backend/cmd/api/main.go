@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/config"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/mediastore"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/pkgstore"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/recs"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/store"
@@ -54,6 +56,11 @@ func run(log *slog.Logger) error {
 	pk, err := pkgstore.NewLocal(cfg.GamesRoot, pkgstore.Limits{
 		MaxUploadBytes: cfg.MaxUploadMB << 20, MaxUnpackedBytes: cfg.MaxUnpackMB << 20, MaxFileBytes: 50 << 20,
 	})
+	if err != nil {
+		return err
+	}
+	// The person's own photos and videos, on the games volume but outside published/ (never served by the games host).
+	media, err := mediastore.New(filepath.Join(cfg.GamesRoot, "media"), cfg.MediaMaxItems, cfg.MediaMaxMB<<20)
 	if err != nil {
 		return err
 	}
@@ -99,7 +106,7 @@ func run(log *slog.Logger) error {
 		MaxUploadMB: cfg.MaxUploadMB, Log: log,
 		Recs: engine, GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
 		HarnessContext: cfg.HarnessContext, Harness: hs0, Planner: planner, SponsorUsers: cfg.SponsorUsers, DebugDelete: cfg.DebugDelete,
-		Push: push,
+		Push: push, Media: media,
 		Viral: api.ViralOptions{Off: cfg.ViralOff, MinPlayers: cfg.ViralMinPlayers, Window: cfg.ViralWindow, Cosine: cfg.ViralCosine,
 			MinPages: cfg.ViralMinPages, PerDay: cfg.ViralPerDay, Interval: cfg.ViralInterval},
 	})

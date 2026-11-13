@@ -3,6 +3,7 @@ package api_test
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -41,10 +42,9 @@ func newFakeGenerator(t *testing.T) *fakeGenerator {
 		case r.URL.Path == "/healthz":
 			fmt.Fprintf(w, `{"status":"ok","museConfigured":%v,"fragments":33}`, configured)
 		case r.URL.Path == "/compose" && r.Method == "POST":
-			body := make([]byte, 1<<16)
-			n, _ := r.Body.Read(body)
+			body, _ := io.ReadAll(r.Body)
 			g.mu.Lock()
-			g.requests = append(g.requests, string(body[:n]))
+			g.requests = append(g.requests, string(body))
 			g.mu.Unlock()
 			w.Header().Set("Content-Type", "application/x-ndjson")
 			fl := w.(http.Flusher)

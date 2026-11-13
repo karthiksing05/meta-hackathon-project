@@ -155,7 +155,7 @@ func (p *Planner) planVisual(ctx context.Context, plan *Plan, in PlanInput) {
 
 func visualUser(in PlanInput, plan *Plan) string {
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Request: %q\n\n", in.Request)
+	sb.WriteString(requestLine(in))
 	spec, _ := json.Marshal(plan.Spec)
 	fmt.Fprintf(&sb, "The game spec:\n%s\n\n", spec)
 	if d, err := json.Marshal(plan.Design); err == nil {

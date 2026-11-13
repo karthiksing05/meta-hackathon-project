@@ -25,6 +25,10 @@ type Config struct {
 	CORSOrigins  []string
 	MaxUploadMB  int64
 	MaxUnpackMB  int64
+	// Uploads to make games from (POST /v1/media), kept in <GamesRoot>/media: per person, MEDIA_MAX_ITEMS items
+	// and MEDIA_MAX_MB megabytes in all.
+	MediaMaxItems int
+	MediaMaxMB    int64
 
 	// Game generation. The API never talks to Muse: it calls the generator service, which holds the key.
 	GeneratorURL       string // empty turns generation off
@@ -73,6 +77,9 @@ func Load() (*Config, error) {
 		GamesBaseURL: strings.TrimRight(env("GAMES_BASE_URL", "http://localhost:8081"), "/"),
 		MaxUploadMB:  envInt("MAX_UPLOAD_MB", 50),
 		MaxUnpackMB:  envInt("MAX_UNPACKED_MB", 200),
+
+		MediaMaxItems: int(envInt("MEDIA_MAX_ITEMS", 40)),
+		MediaMaxMB:    envInt("MEDIA_MAX_MB", 400),
 
 		GeneratorURL:       strings.TrimRight(os.Getenv("GENERATOR_URL"), "/"),
 		GenerateConcurrent: int(envInt("GENERATE_CONCURRENT", 2)),

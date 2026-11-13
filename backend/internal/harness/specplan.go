@@ -252,7 +252,7 @@ func failingParts(problems []string) []string {
 
 func stageUser(in PlanInput, parts map[string]json.RawMessage, stage []string) string {
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Request: %q\n\n", in.Request)
+	sb.WriteString(requestLine(in))
 	if len(in.Context.Types) > 0 {
 		t := in.Context.Types[0]
 		fmt.Fprintf(&sb, "Main game type: %s (%s): %s Loop: %s Win: %s Scoring: %s\n\n", t.ID, t.Family, t.Summary, t.CoreLoop, t.Win, t.Scoring)
@@ -264,7 +264,7 @@ func stageUser(in PlanInput, parts map[string]json.RawMessage, stage []string) s
 
 func repairUser(in PlanInput, parts map[string]json.RawMessage, problems, failing []string) string {
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Request: %q\n\n", in.Request)
+	sb.WriteString(requestLine(in))
 	whole, _ := json.Marshal(parts)
 	fmt.Fprintf(&sb, "The spec:\n%s\n\nProblems:\n- %s\n\nRewrite: %s", whole, strings.Join(problems, "\n- "), strings.Join(failing, ", "))
 	return sb.String()

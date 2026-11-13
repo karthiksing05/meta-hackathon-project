@@ -33,12 +33,12 @@ const planEndpointBudget = 115 * time.Second
 
 // harnessContext returns the generator context for a new game, or nil when the harness is off, the job
 // changes an existing game, or anything fails.
-func (s *Server) harnessContext(ctx context.Context, job model.Job) map[string]any {
+func (s *Server) harnessContext(ctx context.Context, job model.Job, media []map[string]any) map[string]any {
 	if !s.HarnessContext || s.Harness == nil || s.Planner == nil || job.BaseGameID != "" || len(job.Context) > 0 {
 		return nil
 	}
 	var given *harness.Spec
-	req := harness.Request{Text: job.Request}
+	req := harness.Request{Text: job.Request, Media: mediaRequestText(media)}
 	if job.Preferences != "" {
 		_ = json.Unmarshal([]byte(job.Preferences), &req.Preferences)
 	}
@@ -87,6 +87,7 @@ func (s *Server) harnessContext(ctx context.Context, job model.Job) map[string]a
 type harnessPlanIn struct {
 	Request     string               `json:"request"`
 	Preferences []harness.Preference `json:"preferences"` // the person's earlier picks between versions
+	mediaIn                          // the person's own photos and video (media.go)
 }
 
 // maxPreferences caps the picks a request may carry (one per axis is the usual; variants.md keeps the latest per axis).
@@ -112,7 +113,17 @@ func (s *Server) harnessPlan(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 400, fmt.Sprintf("preferences can hold up to %d picks", maxPreferences))
 		return
 	}
-	b, err := s.Harness.Build(ctx, harness.Request{Text: in.Request, Preferences: in.Preferences}, s.Planner)
+	items, msg := s.checkMedia(userFrom(r).ID, &in.mediaIn)
+	if msg != "" {
+		writeErr(w, 400, msg)
+		return
+	}
+	var media []map[string]any
+	if len(items) > 0 {
+		s.describeMedia(ctx, items, in.MediaNote)
+		media = mediaContext(items, in.MediaNote, in.MediaRestyle)
+	}
+	b, err := s.Harness.Build(ctx, harness.Request{Text: in.Request, Media: mediaRequestText(media), Preferences: in.Preferences}, s.Planner)
 	switch {
 	case errors.Is(err, harness.ErrMuseNotConfigured):
 		writeErr(w, 503, "Muse is not set up on this server yet")
@@ -127,14 +138,18 @@ func (s *Server) harnessPlan(w http.ResponseWriter, r *http.Request) {
 		types = append(types, map[string]any{"id": t.ID, "name": t.Name, "family": t.Family, "score": t.Match.Score})
 	}
 	timings := b.Pack.Timings
-	writeJSON(w, 200, map[string]any{
+	out := map[string]any{
 		"plan":    b.Plan,
 		"clarify": b.Plan.Clarify,
 		"spec":    b.Plan.Spec,
 		"types":   types,
 		"timings": map[string]int64{"understand_ms": timings.Understand, "retrieve_ms": timings.Retrieve,
 			"lookup_ms": timings.Lookup, "plan_ms": b.PlanMs, "total_ms": timings.Total},
-	})
+	}
+	if len(media) > 0 {
+		out["media"] = media
+	}
+	writeJSON(w, 200, out)
 }
 
 const (

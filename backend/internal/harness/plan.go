@@ -120,6 +120,17 @@ type PlanInput struct {
 	Unbuilt []GameTool
 	// Requirements are the person's stated requirements (the planner's first stage fills them).
 	Requirements []Requirement
+	// Media is the person's photos and video, described (Request.Media).
+	Media string
+}
+
+// requestLine is the "Request:" opening of each planner prompt, with the person's media after it.
+func requestLine(in PlanInput) string {
+	s := fmt.Sprintf("Request: %q\n\n", in.Request)
+	if strings.TrimSpace(in.Media) != "" {
+		s += strings.TrimSpace(in.Media) + "\nBuild the game on this media as the request says: questions about what happens in it, its people or pets as characters, its places as backdrops. The media's asset names (m1_f1, m1_beat1, m2_photo, ...) are pictures the game can show.\n\n"
+	}
+	return s
 }
 
 const planSystem = `You are Muse Studio's game planner. A person asked for a tiny phone game. A search of our game catalog found
@@ -266,7 +277,7 @@ func (p *Planner) checklistsFor(types []ContextType) []checklistFor {
 
 func planUser(in PlanInput, lists []checklistFor) string {
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "Request: %q\n\n", in.Request)
+	sb.WriteString(requestLine(in))
 	u := in.Context.Understanding
 	fmt.Fprintf(&sb, "Understood: named %v, theme %v, verbs %v, inputs %v, families %v, players %s\n",
 		u.NamedRefs, u.Theme, u.Verbs, u.Inputs, u.Families, u.Players)

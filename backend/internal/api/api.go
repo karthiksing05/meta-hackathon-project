@@ -18,6 +18,7 @@ import (
 
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/mediastore"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/model"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/pkgstore"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/recs"
@@ -53,6 +54,10 @@ type Options struct {
 	Planner      *harness.Planner
 	// Viral tunes viral_match notifications (viral.go); the zero value gives the defaults.
 	Viral ViralOptions
+	// Media keeps the photos and videos people make games from (media.go); nil turns uploads off.
+	Media *mediastore.Store
+	// MediaTools overrides how video frames and Muse's descriptions are made (tests); nil uses the generator.
+	MediaTools MediaTools
 	// Push sends lock-screen notifications (internal/apns). Nil turns pushes off; the inbox still works.
 	Push PushSender
 }
@@ -183,6 +188,14 @@ func (s *Server) Handler() http.Handler {
 		r.With(s.requireAuth).Post("/anatomy", s.anatomy("/anatomy"))
 		r.With(s.requireAuth).Post("/anatomy/revise", s.anatomy("/anatomy/revise"))
 		r.With(s.requireAuth).Post("/harness/plan", s.harnessPlan)
+		r.Route("/media", func(r chi.Router) {
+			r.Use(s.requireAuth)
+			r.Post("/", s.uploadMedia)
+			r.Get("/{id}", s.getMedia)
+			r.Get("/{id}/thumb", s.mediaFile("thumb.jpg"))
+			r.Get("/{id}/files/{file}", s.mediaFile(""))
+			r.Delete("/{id}", s.deleteMedia)
+		})
 		r.Route("/generate", func(r chi.Router) {
 			r.Use(s.requireAuth)
 			r.Get("/", s.listJobs)

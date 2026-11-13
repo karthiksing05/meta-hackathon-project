@@ -53,7 +53,7 @@ func (h *Harness) Build(ctx context.Context, req Request, planner *Planner) (*Bu
 	}
 	gc.Preferences = req.Preferences
 	t := time.Now()
-	plan, err := planner.Plan(ctx, PlanInput{Request: req.Text, Pack: pack, Context: gc, Fragments: h.Index().Fragments(), Unbuilt: h.Index().Unbuilt()})
+	plan, err := planner.Plan(ctx, PlanInput{Request: req.Text, Media: req.Media, Pack: pack, Context: gc, Fragments: h.Index().Fragments(), Unbuilt: h.Index().Unbuilt()})
 	if err != nil {
 		return nil, err
 	}

@@ -75,6 +75,8 @@ type generateIn struct {
 	Preferences []harness.Preference `json:"preferences"`
 	OffsetMs    *int64               `json:"offsetMs"`
 	Mix         *float64             `json:"mix"`
+	// Media: the person's own uploads to build from (media.go), what to do with them, and whether to restyle photos.
+	mediaIn
 }
 
 // genHealthCache remembers the generator's last health answer for a few seconds.
@@ -150,6 +152,15 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	specJSON, answers, specMsg := checkSpecAnswers(&in, base != nil)
 	if specMsg != "" {
 		writeErr(w, 400, specMsg)
+		return
+	}
+	mediaItems, msg := s.checkMedia(userFrom(r).ID, &in.mediaIn)
+	if msg != "" {
+		writeErr(w, 400, msg)
+		return
+	}
+	if len(mediaItems) > 0 && base != nil {
+		writeErr(w, 400, "media are for a new game, not a change")
 		return
 	}
 	var sponsor *model.Sponsor
@@ -258,6 +269,10 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		job.Anatomy = a
 	}
 	job.Spec, job.Answers = specJSON, answers
+	for _, it := range mediaItems {
+		job.Media = append(job.Media, it.ID)
+	}
+	job.MediaNote, job.MediaRestyle = in.MediaNote, in.MediaRestyle && len(mediaItems) > 0
 	job.Sound = sound
 	job.Sponsor = sponsor
 	if group != nil {
@@ -436,8 +451,22 @@ func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMe
 		return
 	}
 
-	if c := s.harnessContext(ctx, job); c != nil { // nil (harness off or failed) leaves the job as it was
+	// The person's photos and video: Muse vision describes them first, so the plan and compose can build on them.
+	var media []map[string]any
+	var mediaFiles map[string]any
+	if items := s.jobMedia(job); len(items) > 0 {
+		s.describeMedia(ctx, items, job.MediaNote)
+		media = mediaContext(items, job.MediaNote, job.MediaRestyle)
+		mediaFiles = s.mediaFiles(items)
+	}
+	if c := s.harnessContext(ctx, job, media); c != nil { // nil (harness off or failed) leaves the job as it was
 		job.Context = c
+	}
+	if len(media) > 0 {
+		if job.Context == nil {
+			job.Context = map[string]any{}
+		}
+		job.Context["media"] = media
 	}
 	request := job.Request
 	if job.Anatomy != "" {
@@ -456,6 +485,9 @@ func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMe
 	}
 	if len(job.Context) > 0 {
 		payload["context"] = job.Context
+	}
+	if len(mediaFiles) > 0 {
+		payload["media_files"] = mediaFiles
 	}
 	if job.BaseGameID != "" {
 		if len(job.Brief) == 0 {
@@ -568,6 +600,9 @@ func (s *Server) finishJob(ctx context.Context, job model.Job, owner model.User,
 		}
 		s.failJob(ctx, job.ID, "Couldn't save the game: "+perr.Msg)
 		return
+	}
+	if len(job.Media) > 0 {
+		s.linkMediaToGame(owner.ID, job.Media, g.ID) // deleting the game deletes them
 	}
 	if job.Sponsor != nil {
 		if err := s.Store.SetGameSponsor(context.WithoutCancel(ctx), g.ID, job.Sponsor); err != nil {

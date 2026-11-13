@@ -129,6 +129,10 @@ type Request struct {
 	// Sponsor is the server's sponsor record for this job (a brand account's game, model.Sponsor): when the request
 	// doesn't name a sponsor itself, the understanding carries this one, so the plan's spec.theme gets it.
 	Sponsor *Sponsor `json:"sponsor,omitempty"`
+	// Media describes the person's own photos and video (the API's context.media, as text). The planner's prompts get
+	// it after the request; understanding and the stated requirements read only Text, so the media's words never
+	// become requirements.
+	Media string `json:"media,omitempty"`
 }
 
 // Timings are in milliseconds.

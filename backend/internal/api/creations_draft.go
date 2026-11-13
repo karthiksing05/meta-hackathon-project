@@ -11,7 +11,7 @@ import (
 //	POST   /v1/creations/{id}/publish   put the game in the feed, search and its Group's list
 //	DELETE /v1/creations/{id}           remove the game, its saves and its scores (owner only)
 //
-// The game's files stay in storage; only the record goes, so the game can no longer be found or opened through the API.
+// The game's package files stay in storage (only the record goes), but the photos and videos it was made from are deleted, so the game can no longer be found or opened through the API.
 
 func (s *Server) publishCreation(w http.ResponseWriter, r *http.Request) {
 	g, ok := s.ownedOr404(w, r)
@@ -40,5 +40,6 @@ func (s *Server) deleteCreation(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
+	s.deleteGameMedia(g.OwnerID, g.ID) // the photos and videos it was made from go with it
 	w.WriteHeader(http.StatusNoContent)
 }

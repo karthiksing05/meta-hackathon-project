@@ -20,6 +20,7 @@ func (s *Server) debugDeleteGame(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
+	s.deleteGameMedia(g.OwnerID, g.ID)
 	s.Log.Warn("debug delete: a game was deleted without sign-in", "game", g.ID, "title", g.Title, "owner", g.OwnerUsername)
 	w.WriteHeader(http.StatusNoContent)
 }

@@ -58,7 +58,14 @@ type harnessGenerator struct {
 	gen       *fakeGenerator
 	mu        sync.Mutex
 	museCalls []string // the model of each call
+	museUser  []string // the user prompt of each call
 	museFail  bool
+}
+
+func (h *harnessGenerator) museUsers() []string {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return append([]string(nil), h.museUser...)
 }
 
 func newHarnessGenerator(t *testing.T) *harnessGenerator {
@@ -75,6 +82,7 @@ func newHarnessGenerator(t *testing.T) *harnessGenerator {
 		_ = json.Unmarshal(b, &in)
 		h.mu.Lock()
 		h.museCalls = append(h.museCalls, in.Model)
+		h.museUser = append(h.museUser, in.User)
 		fail := h.museFail
 		h.mu.Unlock()
 		if fail {
