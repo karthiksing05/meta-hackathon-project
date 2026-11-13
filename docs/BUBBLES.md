@@ -527,6 +527,21 @@ host takes over when the page settles.
 ships, fills in every default and pins `engine_version`. Devices only check `engine_version` and
 prepare. The full validator runs in Studio and the CLI, not on every play.
 
+**Resume (closing mid-run keeps the run).** While a play run is under way the host posts
+`{type: "checkpoint", key, tick, score, replay}` every 2 s and when it pauses (the app going to the
+background), where `replay` is the run's log so far (`seed`, `tick_rate`, `total_ticks`, `inputs`,
+`length`). Nothing is posted before the first tap, in the first second, or once the run is ending.
+The player saves the latest checkpoint per game (`RunResumeStoring`, local today:
+`Features/Bubbles/Resume/`), keyed by the session key (id, version and content hash, so the same
+seed and length), and clears it when the run ends or on Play again. The next open shows Resume or
+Start over. Resume activates with `options.resume` (the saved log; play mode only, read from the
+activate options and used once): the runtime makes the run with that seed, fast-forwards silently
+through the saved inputs to `total_ticks` (`Bubble.resumeRun(run, saved)`), stops replaying, and
+shows a "Welcome back · Tap to keep going" card (it posts `{type: "resumed", tick, score}`). The run
+keeps recording, so the finished log holds every input once and verifies like a run played in one
+sitting (`tools/runtime-tests` checks this for every seed). Burst replays and the feed's in-place
+play don't save checkpoints.
+
 **Every score is verifiable.** Runs are deterministic: the seed plus the pointer log reproduces the
 run exactly. `BubbleJSRuntime.verify(_:replay:claimedScore:)` re-simulates a run headless; the app
 marks verified runs on the Bubble Board. A server would do the same before accepting a score.

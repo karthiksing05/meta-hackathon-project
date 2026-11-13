@@ -28,6 +28,8 @@ struct BubbleSessionOptions: Hashable {
     /// Space at the top and bottom the runtime keeps clear for app chrome, in points.
     var insetTop: CGFloat = 0
     var insetBottom: CGFloat = 0
+    /// Play mode: a saved partial run to fast-forward through and continue (docs/BUBBLES.md 4.8).
+    var resume: BubbleInputLog? = nil
 
     /// The `activate` options (and the non-manifest part of the `prepare`/`boot` payload).
     var jsonObject: [String: JSONValue] {
@@ -46,6 +48,9 @@ struct BubbleSessionOptions: Hashable {
         ]
         if let log = mode.replayLog, let replay = try? JSONValue.encode(log) {
             object["replay"] = replay
+        }
+        if let resume, let saved = try? JSONValue.encode(resume) {
+            object["resume"] = saved
         }
         return object
     }
