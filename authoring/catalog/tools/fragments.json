@@ -520,7 +520,7 @@
     ],
     "summary": "Multiple-choice questions (2 to 4 choices) one at a time with a draining time bar; shows the right answer after each pick.",
     "when_to_use": "Trivia and knowledge quizzes where picking from choices is right. For typed or open answers use typed_answer instead.",
-    "api": "game provides functions quiz_questions(), quiz_choices() (choices per question, flattened) and quiz_answers() (exact correct text), all list<string>; provides question_text, correct_answer, right_count, wrong_count; bind rounds' round_done to question_done and score's point to answered_right; quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+); quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+)",
+    "api": "game provides functions quiz_questions(), quiz_choices() (choices per question, flattened) and quiz_answers() (exact correct text), all list<string>; provides question_text, correct_answer, right_count, wrong_count; bind rounds' round_done to question_done and score's point to answered_right; quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+); quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+); the answer tiles are the kit’s controls band: put extra lines (partial credit, a tip) in the HUD or the question card, never a panel over the tiles",
     "events": [
       "answered_right",
       "answered_wrong",

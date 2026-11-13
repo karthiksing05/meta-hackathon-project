@@ -109,7 +109,7 @@
       "guess the order of magnitude: how many golf balls fit in a bus",
       "an estimation duel for my engineering friends"
     ],
-    "notes": "Partial credit: on answered_wrong compare picked option to the answer (quiz state picked, opts)."
+    "notes": "Partial credit: on answered_wrong compare the picked option to the answer (quiz state picked, opts). Show the factor chain in the question card during the reveal (quiz_questions() returns the chains while locked, reveal_ms 4000+) and the partial-credit line in the HUD; never draw your own panel or text over the answer tiles."
   },
   {
     "status": "seed",
