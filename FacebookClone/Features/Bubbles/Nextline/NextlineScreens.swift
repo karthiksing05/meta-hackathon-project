@@ -8,9 +8,8 @@ import SwiftUI
 ///   podium/<nightID>            a night's podium, round by round, Rematch
 ///   results/<bubbleID>          the latest finished night on that Bubble's podium
 ///
-/// Quiz nights need the server to run the night and collect everyone's answers
-/// (docs/APP_LIVE_DATA_PLAN.md, Stage 4), which isn't there yet, so `night` says so and offers the
-/// Group's games instead (`QuizNightUnavailableView`).
+/// `night` is a server round on a quiz game in that Group or chat (`QuizNightRoundsView`,
+/// `RoundsListView`): the server picks the seed, replays every run and ranks the night.
 enum NextlineScreens {
     /// A pushed screen (`Route.bubbleFeature`).
     @MainActor
@@ -18,7 +17,7 @@ enum NextlineScreens {
     static func destination(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "night", "live":
-            QuizNightUnavailableView(placeID: route.arg)
+            QuizNightRoundsView(placeID: route.arg)
         case "podium":
             QuizNightPodiumView(nightID: route.arg)
         case "results":
@@ -149,31 +148,25 @@ enum NextlineCopy {
     }
 }
 
-/// A quiz night while the server can't run one: says so kindly, and offers the Group's games
-/// (or the games tab, from a group chat).
-struct QuizNightUnavailableView: View {
+/// A quiz night on the server: a same-seed Group (or chat) round on a quiz game
+/// (`POST /v1/rounds`, mode `group_round`). Everyone answers the same questions on the server's
+/// seed; the server replays each run and ranks the night. The scenes-style nextline nights stay
+/// off: the server only checks microgame runs.
+struct QuizNightRoundsView: View {
     /// A Group id or a group chat id.
     let placeID: String
 
     @Environment(AppStore.self) private var appStore
-    @Environment(Router.self) private var router
+    @Environment(BubbleStore.self) private var bubbleStore
 
     var body: some View {
-        let isGroup = appStore.group(id: placeID) != nil
-        LiveDataStateView(
-            kind: .notAvailable(LiveDataCopy.quizNight),
-            title: NextlineCopy.quizNight,
-            action: LiveDataStateView.Action(title: isGroup ? "Play the Group's games" : "Play something", symbol: "play.fill") {
-                if isGroup {
-                    router.push(.bubbleFeature(GroupsSearchScreens.gamesRoute(for: placeID)))
-                } else {
-                    router.select(.bubbles)
-                }
-            }
-        )
-        .frame(maxHeight: .infinity)
-        .background(FBColor.surface)
-        .navigationTitle(NextlineCopy.quizNight)
-        .navigationBarTitleDisplayMode(.inline)
+        if let group = appStore.group(id: placeID) ?? bubbleStore.resolveGroup(placeID) {
+            RoundsListView(target: RoundTarget(kind: .group, id: group.id), placeName: group.name, quiz: true)
+        } else if let chat = appStore.conversations.first(where: { $0.id == placeID }) {
+            RoundsListView(target: RoundTarget(kind: .chat, id: chat.id), placeName: chat.title,
+                           chatMembers: chat.participants.filter { !$0.isMe && GameIDMap.isServerID($0.id) }.map(\.id), quiz: true)
+        } else {
+            RoundsListView(target: RoundTarget(kind: .group, id: placeID), placeName: NextlineCopy.quizNight, quiz: true)
+        }
     }
 }

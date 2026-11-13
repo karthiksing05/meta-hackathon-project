@@ -102,6 +102,15 @@ final class GroupGamesStore {
                                     isMostImproved: row.user.id == improvedID, gamesPlayed: row.gamesPlayed)
                 }
                 weeklyStates[group.id] = .idle
+                // Last week's winner, from the server's board for the week before this one.
+                if let previous = Self.previousISOWeek(board.week),
+                   let last = try? await GamesAPIFactory.current.groupWeeklyBoard(groupID: group.id, week: previous),
+                   let top = last.items.first(where: { $0.rank == 1 }) {
+                    lastWeekChampions[group.id] = bubbleStore.person(id: top.user.id, name: top.user.displayName.isEmpty ? top.user.username : top.user.displayName,
+                                                                     isFriend: top.user.isFriend)
+                } else {
+                    lastWeekChampions[group.id] = nil
+                }
             } catch GamesAPIError.notFound {
                 // Not a Group on the games server (the app's own Groups): an empty week, whose
                 // empty state offers a game, not a failure to retry forever.
@@ -123,9 +132,25 @@ final class GroupGamesStore {
         return ids.filter { $0 != me }
     }
 
-    /// Last week's winner. Needs the server's Group boards, so none yet.
+    /// Last week's winners by Group id, from `GET /v1/groups/{id}/leaderboard?week=<last week>`.
+    private(set) var lastWeekChampions: [String: User] = [:]
+
+    /// Last week's winner on the server's board, once `loadWeekly` has fetched it.
     func lastWeekChampion(group: FBGroup, in bubbleStore: BubbleStore, now: Date = Date()) -> User? {
-        nil
+        lastWeekChampions[group.id]
+    }
+
+    /// The ISO week before `2026-W46` (`2026-W45`), as the server names weeks (UTC).
+    nonisolated static func previousISOWeek(_ week: String) -> String? {
+        let parts = week.components(separatedBy: "-W")
+        guard parts.count == 2, let year = Int(parts[0]), let number = Int(parts[1]) else { return nil }
+        var calendar = Calendar(identifier: .iso8601)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .gmt
+        guard let start = calendar.date(from: DateComponents(weekOfYear: number, yearForWeekOfYear: year)),
+              let previous = calendar.date(byAdding: .day, value: -7, to: start) else { return nil }
+        let c = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: previous)
+        guard let y = c.yearForWeekOfYear, let w = c.weekOfYear else { return nil }
+        return String(format: "%04d-W%02d", y, w)
     }
 
     nonisolated static func ranks(_ totals: [String: Int]) -> [String: Int] {
