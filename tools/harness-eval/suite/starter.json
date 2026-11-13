@@ -1,0 +1,231 @@
+[
+  {
+    "id": "franchise-saber",
+    "source": "starter",
+    "category": "franchise",
+    "request": "a star wars game where I deflect blaster shots with a lightsaber",
+    "specificity": "specific",
+    "must_have": [
+      "a recognisable Star Wars feel in the words or art (for example Jedi, lightsaber, blaster, droid, the Force, a galaxy far away)",
+      "a lightsaber (or glowing energy blade) that the player moves or swings",
+      "blaster shots or bolts flying at the player",
+      "deflecting or blocking the shots is the main action, and missing one hurts"
+    ],
+    "nice_to_have": ["deflected shots bounce back", "it gets faster over time", "a saber-hum or blaster sound"],
+    "must_not": [
+      "no Star Wars theme at all (generic shapes, generic space, or an unrelated theme)",
+      "copies another existing game's exact mechanics or art"
+    ],
+    "theme_terms": ["star wars", "jedi", "sith", "lightsaber", "saber", "blaster", "bolt", "laser", "droid", "the force", "force", "trooper", "padawan", "galaxy", "deflect"],
+    "custom_rule": null,
+    "feel": "fast, heroic, reflex",
+    "who_with": "friends who love the films"
+  },
+  {
+    "id": "franchise-wizard-broom",
+    "source": "starter",
+    "category": "franchise",
+    "request": "a harry potter game where I fly a broomstick and catch the golden snitch",
+    "specificity": "specific",
+    "must_have": [
+      "a recognisable Harry Potter / wizarding-school feel in the words or art (for example Hogwarts, Quidditch, wizard, wand, house colors)",
+      "the player flies or steers a broomstick (or a rider on one)",
+      "a small fast golden flying ball (the snitch) to chase and catch",
+      "catching the snitch is how you score or win"
+    ],
+    "nice_to_have": ["bludgers or obstacles to dodge", "the snitch dodges or speeds up"],
+    "must_not": [
+      "no wizarding theme at all",
+      "copies another existing game's exact mechanics or art"
+    ],
+    "theme_terms": ["harry potter", "hogwarts", "quidditch", "snitch", "golden", "broom", "broomstick", "wizard", "wand", "seeker", "bludger", "spell", "owl"],
+    "custom_rule": null,
+    "feel": "swoopy, chase, magical",
+    "who_with": "my cousins"
+  },
+  {
+    "id": "theme-pirates",
+    "source": "starter",
+    "category": "generic-theme",
+    "request": "a pirate game where I steer my ship around sea monsters and grab floating treasure",
+    "specificity": "some",
+    "must_have": [
+      "a pirate theme in the words or art (ship, captain, treasure, sea, skull flag, gold)",
+      "the player steers a ship",
+      "sea monsters (or similar sea hazards) to avoid",
+      "treasure to collect for points"
+    ],
+    "nice_to_have": ["waves or a sea background", "a pirate-voiced instruction line"],
+    "must_not": ["no pirate or sea theme", "copies another existing game's exact mechanics or art"],
+    "theme_terms": ["pirate", "ship", "captain", "treasure", "gold", "doubloon", "sea", "ocean", "kraken", "monster", "sail", "skull", "chest", "arr"],
+    "custom_rule": null,
+    "feel": "adventurous, a bit silly",
+    "who_with": "my kids"
+  },
+  {
+    "id": "theme-cooking",
+    "source": "starter",
+    "category": "generic-theme",
+    "request": "a cooking game where I flip pancakes before they burn",
+    "specificity": "some",
+    "must_have": [
+      "a cooking or kitchen theme in the words or art",
+      "pancakes (or a clear stand-in) on a pan or griddle",
+      "flipping at the right moment is the main action",
+      "pancakes burn if you wait too long, and that costs you"
+    ],
+    "nice_to_have": ["several pans at once", "a perfect-flip bonus", "a stack that grows"],
+    "must_not": ["no cooking theme", "copies another existing game's exact mechanics or art"],
+    "theme_terms": ["cook", "cooking", "kitchen", "pancake", "flip", "pan", "griddle", "burn", "burnt", "chef", "batter", "syrup", "breakfast", "stack"],
+    "custom_rule": "a pancake cooks over time; flip it in the right window, and it burns if left too long",
+    "feel": "cozy but frantic",
+    "who_with": "my roommates"
+  },
+  {
+    "id": "rule-gravity-flip",
+    "source": "starter",
+    "category": "custom-rule",
+    "request": "a game where gravity flips every time I tap",
+    "specificity": "some",
+    "must_have": [
+      "something the player controls falls under gravity",
+      "each tap reverses the direction of gravity (up/down)",
+      "obstacles or hazards to avoid by flipping at the right time"
+    ],
+    "nice_to_have": ["it speeds up", "a distance or survival score"],
+    "must_not": ["tapping does something other than flipping gravity (for example a normal jump)", "copies another existing game's exact mechanics or art"],
+    "theme_terms": ["gravity", "flip", "upside", "ceiling", "floor", "fall", "invert"],
+    "custom_rule": "every tap reverses gravity (falls up instead of down, and back)",
+    "feel": "twitchy, clever",
+    "who_with": "anyone"
+  },
+  {
+    "id": "rule-color-swap",
+    "source": "starter",
+    "category": "custom-rule",
+    "request": "a game where the colors swap every 10 seconds and you must match the new one",
+    "specificity": "some",
+    "must_have": [
+      "a current target color the player must match",
+      "the target color changes on a timer about every 10 seconds",
+      "the player is rewarded for matching the current color and penalised for the old or wrong one",
+      "the game shows the player which color is current"
+    ],
+    "nice_to_have": ["a warning before the swap", "the swaps speed up"],
+    "must_not": ["the target color never changes, or changes on taps instead of on a timer", "copies another existing game's exact mechanics or art"],
+    "theme_terms": ["color", "colour", "swap", "match", "switch", "change", "target", "seconds"],
+    "custom_rule": "every 10 seconds the target color changes; only the current color counts",
+    "feel": "focused, brain-teaser",
+    "who_with": "coworkers"
+  },
+  {
+    "id": "specific-rover",
+    "source": "starter",
+    "category": "multi-constraint",
+    "request": "a 45-second space game where I drag a little rover to collect crystals: blue ones are worth 1, gold ones are worth 5, red ones end the run. It should speed up every 15 seconds and show a combo counter.",
+    "specificity": "specific",
+    "must_have": [
+      "a space / planet theme with a rover the player drags",
+      "blue crystals worth 1 point",
+      "gold crystals worth 5 points",
+      "red crystals that end the run",
+      "the run lasts about 45 seconds",
+      "the game speeds up every 15 seconds",
+      "a visible combo counter"
+    ],
+    "nice_to_have": ["crystals glow", "a short end-of-run summary"],
+    "must_not": ["drag replaced by tapping", "red crystals only cost points instead of ending the run"],
+    "theme_terms": ["space", "rover", "crystal", "planet", "blue", "gold", "red", "combo", "mars", "moon"],
+    "custom_rule": "three crystal kinds with exact values (blue 1, gold 5, red ends the run), 45 s run, speed-up every 15 s",
+    "feel": "arcadey",
+    "who_with": "my brother"
+  },
+  {
+    "id": "vague-book-club",
+    "source": "starter",
+    "category": "vague",
+    "request": "something fun for my book club",
+    "specificity": "vague",
+    "must_have": [
+      "something tied to books or reading (books, pages, words, stories, bookmarks, a library)",
+      "a clear one-line goal a non-gamer understands"
+    ],
+    "nice_to_have": ["words or literary content", "a gentle, social feel", "scores worth comparing in the group"],
+    "must_not": ["violent or hyper-twitchy action that doesn't suit a book club", "nothing to do with books or reading"],
+    "theme_terms": ["book", "books", "read", "reading", "page", "pages", "story", "chapter", "library", "word", "words", "novel", "bookmark", "author", "shelf"],
+    "custom_rule": null,
+    "feel": "cozy, clever, social",
+    "who_with": "my book club"
+  },
+  {
+    "id": "vague-a-game",
+    "source": "starter",
+    "category": "vague",
+    "request": "a game",
+    "specificity": "vague",
+    "must_have": [
+      "a clear, specific theme or setting the game commits to (not just abstract shapes)",
+      "a clear one-line goal"
+    ],
+    "nice_to_have": ["a small twist that makes it feel fresh"],
+    "must_not": ["nothing but unlabelled abstract shapes with no theme"],
+    "theme_terms": [],
+    "custom_rule": null,
+    "feel": "anything",
+    "who_with": "anyone"
+  },
+  {
+    "id": "vague-game-night",
+    "source": "starter",
+    "category": "vague",
+    "request": "surprise me for game night",
+    "specificity": "vague",
+    "must_have": [
+      "a clear, specific theme or setting the game commits to",
+      "something a group can take turns at and compare scores on"
+    ],
+    "nice_to_have": ["a surprising twist", "a party / game-night feel"],
+    "must_not": ["nothing but unlabelled abstract shapes with no theme"],
+    "theme_terms": ["game night", "party", "friends", "turn", "high score", "beat"],
+    "custom_rule": null,
+    "feel": "lively, surprising",
+    "who_with": "friends at game night"
+  },
+  {
+    "id": "calm-garden",
+    "source": "starter",
+    "category": "calm",
+    "request": "a calm, no-fail game where I water a garden and watch flowers bloom. Nobody should ever lose.",
+    "specificity": "specific",
+    "must_have": [
+      "a garden theme: watering, plants, flowers",
+      "flowers bloom as you water them",
+      "no way to lose (no game over, no failure state, no lives)",
+      "a calm, slow pace"
+    ],
+    "nice_to_have": ["soft sounds", "the garden fills up as a visible sense of progress"],
+    "must_not": ["a lose condition or game over", "fast or stressful timers"],
+    "theme_terms": ["garden", "water", "watering", "flower", "flowers", "bloom", "plant", "seed", "petal", "sprout", "grow"],
+    "custom_rule": "no fail state at all",
+    "feel": "calm, relaxing",
+    "who_with": "my grandma"
+  },
+  {
+    "id": "group-reflex-duel",
+    "source": "starter",
+    "category": "competitive-group",
+    "request": "a competitive game for my running club to see who has the fastest reflexes; we'll compare scores",
+    "specificity": "some",
+    "must_have": [
+      "a reflex / reaction-speed challenge",
+      "a score that clearly measures how fast or accurate you were, so players can compare",
+      "a running or sport flavor in the words or art"
+    ],
+    "nice_to_have": ["a starting-gun or race-start motif", "reaction time shown in milliseconds"],
+    "must_not": ["no score to compare", "a calm, untimed puzzle"],
+    "theme_terms": ["run", "running", "race", "sprint", "runner", "track", "start", "reflex", "reaction", "fast", "fastest", "finish", "lap"],
+    "custom_rule": null,
+    "feel": "competitive, punchy",
+    "who_with": "my running club"
+  }
+]
