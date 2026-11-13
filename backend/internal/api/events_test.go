@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -216,5 +218,32 @@ func TestSlugsAndIntegerScores(t *testing.T) {
 	}
 	if code, _ := do(t, "GET", ts.URL+"/v1/games/Not_A_Slug!", "", nil, ""); code != 404 {
 		t.Fatalf("junk id: %d", code)
+	}
+}
+
+// Microgames travel as exact JSON text in the manifest (key order matters), so the stored
+// manifest must be byte for byte what was uploaded: the server only reads it, never rewrites it.
+func TestManifestIsStoredByteForByte(t *testing.T) {
+	ts, root := newServer(t)
+	tok := register(t, ts, "bytes")
+	game := `{"z_first":1,"a_second":[3,2,1],"nested":{"b":1,"a":2}}`
+	m := map[string]any{"id": "byte-game", "title": "Bytes", "one_line_rule": "r", "content": map[string]any{"game_json": game}}
+	raw, _ := json.Marshal(m)
+	manifestText := string(raw) + "\n"
+	code, g := publish(t, ts.URL, tok, manifestText)
+	if code != 201 {
+		t.Fatalf("publish: %d %v", code, g)
+	}
+	got, err := os.ReadFile(filepath.Join(root, "published", g["id"].(string), "manifest.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != manifestText {
+		t.Fatalf("manifest changed on the way in:\nwant %q\n got %q", manifestText, got)
+	}
+	var back map[string]any
+	json.Unmarshal(got, &back)
+	if back["content"].(map[string]any)["game_json"] != game {
+		t.Fatalf("game_json is no longer the same string")
 	}
 }
