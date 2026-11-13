@@ -310,6 +310,16 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         _ = try? await send("DELETE", "v1/generate/\(id)", auth: .required)
     }
 
+    /// `POST /v1/creations/{id}/publish`: lists a draft (owner only).
+    func creationPublish(id: String) async throws {
+        _ = try await send("POST", "v1/creations/\(id)/publish", auth: .required)
+    }
+
+    /// `DELETE /v1/creations/{id}`: deletes one of my games with its saves and scores. Best effort.
+    func creationDelete(id: String) async {
+        _ = try? await send("DELETE", "v1/creations/\(id)", auth: .required)
+    }
+
     /// A file the server points at (a game's `manifestUrl`), as raw bytes. Relative URLs resolve
     /// against the base URL; the token goes only to the API's own host.
     func fetch(_ url: URL) async throws -> Data {

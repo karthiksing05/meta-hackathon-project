@@ -369,7 +369,7 @@ extension StudioModel {
     /// rebuilds the game with its changed parts (a change on the server).
     func makeAnatomyChange(_ id: UUID) {
         guard !isComposing, let text = anatomyThread.confirm(id) else { return }
-        startCompose(.tweak, text: text)
+        startCompose(.tweak, text: text, anatomy: agreedAnatomyText)
     }
 
     /// Muse couldn't map it: make the change from the person's words alone.
