@@ -22,7 +22,7 @@ Karthik's words, verbatim, with the question mark:
 
 > When the world is your muse, how will you create the content of tomorrow?
 
-It goes on the title slide, at the top of the Devpost page and at the end of the video. Don't shorten or paraphrase it.
+It goes on the last slide only (never slide 1), in the Devpost tagline field and at the end of the video. Don't shorten or paraphrase it.
 
 ## Words
 
@@ -44,7 +44,8 @@ It goes on the title slide, at the top of the Devpost page and at the end of the
 
 - **No pink.** The app's `reelsPink` stays in the app; it never appears in the pitch.
 - **Font:** Figtree (SIL Open Font License, `slides/fonts/`), our open stand-in for Meta's typeface. Weights: 800 for titles and big numbers, 700 for labels and kickers, 500–600 for body and captions. Install it on the presenting Mac before importing `deck.pptx`. The app itself uses SF Pro.
-- **Title slide:** "Muse" in ink, "Curios" in the gradient, on white.
+- **Slide 1 (the definition):** the wordmark "Muse" in ink, "Curios" in the gradient, on white.
+- **Slide look (Karthik, 2026-11-13):** one idea per slide, about 15 words or fewer on screen, big type, layouts that vary (one number, a statement, a screenshot, a dark slide). The gradient on a title word on 2–3 slides at most. No decorative blobs or arrows; cards only for real lists. One big number per stat slide, with its source line.
 
 ## Numbers and labels
 

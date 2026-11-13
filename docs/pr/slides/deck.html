@@ -1,432 +1,248 @@
 <!doctype html>
-<!-- The pitch deck as HTML (16:9, 1920x1080 slides). Open in Chrome to present (arrow keys), or run
-     render.sh to export one PNG per slide and a PDF, then make-pptx.py for Keynote. Text follows
-     ../narrative.md; change claims there first. Font: Figtree (OFL, fonts/). -->
+<!-- The pitch deck (draft 7, Karthik's restructure): one idea per slide, big type, layouts that vary,
+     real app screenshots in img/. 1920x1080 slides. Open in Chrome to present (arrow keys), or run
+     render.sh (PNGs + PDF) and make-pptx.py (Keynote). Claims follow ../narrative.md; rules in ../STYLE.md.
+     Speaker notes carry everything that isn't on screen. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Muse Curios: pitch deck (draft)</title>
+<title>Muse Curios: pitch deck</title>
 <style>
 @font-face { font-family: "Figtree"; src: url("fonts/Figtree.ttf") format("truetype"); font-weight: 300 900; }
-:root {
-  --blue: #0866FF; --purple: #8A3FFC; --ink: #1C1E21; --sub: #65676B; --line: #E4E6EB; --soft: #F0F2F5;
-  --grad: linear-gradient(120deg, var(--blue) 0%, var(--purple) 100%);
-}
+:root { --blue: #0866FF; --violet: #8A3FFC; --ink: #1C1E21; --sub: #65676B; --soft: #F0F2F5; --muted: #8A8D91;
+  --grad: linear-gradient(120deg, var(--blue), var(--violet)); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { background: #111; font-family: "Figtree", system-ui, sans-serif; color: var(--ink); }
-.slide { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: #fff;
-  padding: 110px 140px; display: flex; flex-direction: column; margin: 0 auto 40px; }
+.slide { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: #fff; padding: 120px 150px;
+  display: flex; flex-direction: column; margin: 0 auto 40px; }
 @page { size: 1920px 1080px; margin: 0; }
 @media print { html, body { background: #fff; } .slide { margin: 0; page-break-after: always; } }
 body.one .slide { display: none; margin: 0; } body.one .slide.on { display: flex; }
-
-/* type */
-.kicker { font-size: 30px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-  background: var(--grad); -webkit-background-clip: text; color: transparent; margin-bottom: 28px; }
-h1 { font-size: 92px; line-height: 1.04; font-weight: 800; letter-spacing: -.02em; }
-h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02em; max-width: 1500px; }
 .grad { background: var(--grad); -webkit-background-clip: text; color: transparent; }
-.lede { font-size: 36px; line-height: 1.35; color: var(--sub); margin-top: 30px; max-width: 1350px; font-weight: 500; }
-.foot { position: absolute; left: 140px; right: 140px; bottom: 54px; font-size: 19px; color: #8A8D91;
-  display: flex; justify-content: space-between; gap: 40px; }
-.foot .src { max-width: 1400px; line-height: 1.4; }
-.bar { position: absolute; left: 0; top: 0; height: 12px; width: 100%; background: var(--grad); }
+.label { position: absolute; top: 64px; left: 150px; font-size: 24px; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
+.foot { position: absolute; left: 150px; right: 150px; bottom: 56px; display: flex; justify-content: space-between;
+  font-size: 22px; color: var(--muted); }
+h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025em; }
+.line { font-size: 44px; line-height: 1.3; font-weight: 500; color: var(--sub); margin-top: 36px; max-width: 1300px; }
+.dark { background: #0E1015; color: #fff; } .dark .label, .dark .foot { color: #8C93A3; } .dark .line { color: #B9C0CE; }
 
-/* title slide */
-.title { background: var(--grad); color: #fff; justify-content: center; }
-.title .orb { position: absolute; border-radius: 50%; filter: blur(10px); opacity: .35; background: #fff; }
-.title h1 { font-size: 200px; letter-spacing: -.04em; }
-.title .tag { font-size: 54px; font-weight: 600; margin-top: 18px; }
-.title .lede { color: rgba(255,255,255,.88); font-size: 38px; }
-.title .foot { color: rgba(255,255,255,.75); }
+/* 1. definition + wordmark */
+.def .mark { font-size: 56px; font-weight: 800; letter-spacing: -.02em; }
+.def .hw { font-size: 230px; font-weight: 800; letter-spacing: -.035em; line-height: 1; margin-top: 110px; }
+.def .pr { font-size: 40px; color: var(--sub); margin-top: 22px; }
+.def ol { list-style: none; margin-top: 64px; display: flex; flex-direction: column; gap: 26px; }
+.def li { font-size: 42px; line-height: 1.3; font-weight: 500; display: grid; grid-template-columns: 64px 1fr; max-width: 1500px; }
+.def li b.n { font-weight: 800; color: var(--blue); }
 
-/* stat cards */
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-top: 70px; }
-.card { background: var(--soft); border-radius: 36px; padding: 48px 46px; display: flex; flex-direction: column; min-height: 420px; }
-.card .who { font-size: 28px; font-weight: 700; color: var(--sub); }
-.card .num { font-size: 120px; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin: 26px 0 18px;
-  background: var(--grad); -webkit-background-clip: text; color: transparent; }
-.card .what { font-size: 30px; line-height: 1.3; font-weight: 500; }
-.card .cite { margin-top: auto; padding-top: 22px; font-size: 20px; color: #8A8D91; }
-
-/* flow */
-.flow { display: flex; align-items: stretch; gap: 0; margin-top: 50px; }
-.step { flex: 1; background: var(--soft); border-radius: 30px; padding: 38px 34px; position: relative; }
-.step .t { font-size: 22px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .05em; }
-.step .b { font-size: 34px; font-weight: 700; margin-top: 14px; line-height: 1.2; }
-.step .s { font-size: 24px; color: var(--sub); margin-top: 12px; line-height: 1.35; }
-.arrow { width: 70px; display: flex; align-items: center; justify-content: center; font-size: 44px; color: var(--purple); font-weight: 800; }
-.chip { display: inline-block; font-size: 20px; font-weight: 700; color: #fff; background: var(--grad);
-  border-radius: 999px; padding: 6px 16px; margin-top: 16px; }
-.big { display: flex; align-items: baseline; gap: 36px; margin-top: 36px; }
-.big .n { white-space: nowrap; font-size: 190px; font-weight: 900; letter-spacing: -.05em; line-height: .9; }
-.big .l { font-size: 38px; font-weight: 600; color: var(--sub); line-height: 1.3; max-width: 1200px; }
-.note { margin-top: 56px; font-size: 30px; line-height: 1.4; color: var(--ink); max-width: 1500px; }
-.note b { font-weight: 800; }
-
-/* pipeline */
-.pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; margin-top: 44px; }
-.pipe .step { min-height: 230px; }
-.pipe .idx { font-size: 22px; font-weight: 800; color: var(--purple); }
-.split { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 28px; }
-.panel { border: 3px solid var(--line); border-radius: 30px; padding: 26px 36px; }
-.panel h3 { font-size: 30px; font-weight: 800; margin-bottom: 14px; }
-.panel p { font-size: 26px; line-height: 1.4; color: var(--sub); }
-
-/* engine */
-.engine { display: grid; grid-template-columns: 1.15fr 100px .62fr 100px .8fr; align-items: center; margin-top: 36px; }
-.code { background: #0E1015; color: #D7DAE0; border-radius: 30px; padding: 36px 40px; font: 500 23px/1.5 ui-monospace, Menlo, monospace; white-space: pre; }
-.code .k { color: #7FB0FF; } .code .s { color: #C9A7FF; } .code .n { color: #8EE6B5; }
-.core { aspect-ratio: 1; border-radius: 40px; background: var(--grad); color: #fff; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; text-align: center; font-weight: 800; font-size: 46px; line-height: 1.1; }
-.core small { font-size: 24px; font-weight: 600; opacity: .9; margin-top: 12px; }
-.phone { justify-self: center; width: 210px; height: 400px; border-radius: 52px; background: #0E1015; padding: 14px; }
-.phone .scr { width: 100%; height: 100%; border-radius: 40px; background: linear-gradient(180deg, #1a2a6c, #6a3fd0);
-  position: relative; overflow: hidden; }
-.phone .scr i { position: absolute; border-radius: 50%; background: #FFD43B; }
-.phone .scr b { position: absolute; left: 24px; top: 28px; color: #fff; font-size: 26px; font-weight: 800; }
-.facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 40px; }
-.fact .v { font-size: 64px; font-weight: 800; letter-spacing: -.02em; }
-.fact .d { font-size: 24px; color: var(--sub); line-height: 1.35; margin-top: 6px; }
-
-/* charts */
-.chart { margin-top: 56px; display: flex; flex-direction: column; gap: 30px; }
-.row { display: grid; grid-template-columns: 520px 1fr; align-items: center; gap: 30px; }
-.row .lab { font-size: 30px; font-weight: 600; line-height: 1.25; }
-.row .lab small { display: block; font-size: 21px; color: var(--sub); font-weight: 500; margin-top: 4px; }
-.track { height: 84px; background: var(--soft); border-radius: 22px; position: relative; overflow: hidden; }
-.fill { height: 100%; border-radius: 22px; background: var(--grad); display: flex; align-items: center; justify-content: flex-end;
-  padding-right: 26px; color: #fff; font-size: 38px; font-weight: 800; min-width: 130px; }
-.fill.grey { background: #BCC0C4; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; margin-top: 50px; }
-.two h3 { font-size: 34px; font-weight: 800; margin-bottom: 8px; }
-.two .cap { font-size: 23px; color: var(--sub); line-height: 1.35; margin-top: 18px; }
-.vbars { display: flex; align-items: flex-end; gap: 40px; height: 360px; margin-top: 26px; border-bottom: 3px solid var(--line); }
-.vb { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
-.vb .col { width: 100%; border-radius: 20px 20px 0 0; background: var(--grad); }
-.vb .col.grey { background: #BCC0C4; }
-.vb .v { font-size: 46px; font-weight: 800; margin-bottom: 10px; }
-.vlabels { display: flex; gap: 40px; } .vlabels div { flex: 1; text-align: center; font-size: 22px; color: var(--sub); margin-top: 12px; line-height: 1.3; }
-.tag2 { display: inline-block; font-size: 20px; font-weight: 800; padding: 6px 14px; border-radius: 999px; background: #E7F3FF; color: var(--blue); }
-.tag2.soon { background: #F0EBFF; color: var(--purple); }
-.grid4 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 50px; }
-.tile { background: var(--soft); border-radius: 30px; padding: 34px 40px; }
-.tile .b { font-size: 36px; font-weight: 800; margin: 14px 0 8px; }
-.tile .s { font-size: 25px; color: var(--sub); line-height: 1.35; }
-.agents { display: grid; grid-template-columns: 1fr 90px 1.1fr 90px 1fr; align-items: center; margin-top: 56px; }
-.col3 { display: flex; flex-direction: column; gap: 18px; }
-.pill { background: var(--soft); border-radius: 22px; padding: 20px 26px; font-size: 28px; font-weight: 700; }
-.pill small { display: block; font-size: 20px; color: var(--sub); font-weight: 500; margin-top: 2px; }
-.hub { background: var(--grad); color: #fff; border-radius: 36px; padding: 40px; }
-.hub .b { font-size: 38px; font-weight: 800; } .hub .s { font-size: 24px; opacity: .92; margin-top: 10px; line-height: 1.4; }
-.close { background: var(--grad); color: #fff; justify-content: center; }
-.close h2 { font-size: 110px; max-width: 1600px; }
-.close .lede { color: rgba(255,255,255,.9); }
-.close .foot { color: rgba(255,255,255,.75); }
-
-/* format illustrations (slide 2): drawn by us, not screenshots */
-.formats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-top: 34px; }
-.fmt { background: var(--soft); border-radius: 36px; padding: 30px 34px 30px; display: flex; flex-direction: column; }
-.fmt .art { height: 210px; border-radius: 24px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.fmt .who { font-size: 24px; font-weight: 700; color: var(--sub); margin-top: 22px; }
-.fmt .num { font-size: 58px; font-weight: 800; letter-spacing: -.02em; line-height: 1.05; margin-top: 6px; background: var(--grad); -webkit-background-clip: text; color: transparent; }
-.fmt .what { font-size: 24px; line-height: 1.3; font-weight: 500; margin-top: 6px; }
-.fmt .cite { font-size: 18px; color: #8A8D91; margin-top: 12px; }
-.ig { background: linear-gradient(160deg, #3a3f9e, #8A3FFC); }
-.ig .sticker { background: #fff; border-radius: 22px; padding: 18px 20px; width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
-.ig .q { font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 12px; }
-.ig .opt { height: 38px; border-radius: 12px; background: #EEF0F3; margin-top: 8px; position: relative; overflow: hidden; font-size: 17px; font-weight: 700; display: flex; align-items: center; padding: 0 12px; justify-content: space-between; }
-.ig .opt i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #0866FF55, #8A3FFC55); }
-.ig .opt span { position: relative; }
-.li { background: #fff; border: 3px solid var(--line); }
-.li .g { display: grid; grid-template-columns: repeat(6, 30px); gap: 3px; }
-.li .g b { width: 30px; height: 30px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
-.li .streak { position: absolute; top: 16px; right: 18px; font-size: 18px; font-weight: 800; color: var(--ink); }
-.ny { background: #fff; border: 3px solid var(--line); flex-direction: column; gap: 8px; }
-.ny .g { display: grid; grid-template-columns: repeat(4, 76px); gap: 6px; }
-.ny .g b { height: 40px; border-radius: 8px; background: #EFEFE6; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; letter-spacing: .03em; }
-.ny .g b.s { background: #F9DF6D; } 
-.ny .tabs { display: flex; gap: 8px; font-size: 15px; font-weight: 800; }
-.ny .tabs span { padding: 4px 12px; border-radius: 999px; background: #EFEFE6; } .ny .tabs span.on { background: #1C1E21; color: #fff; }
-.gamers { margin-top: 24px; font-size: 27px; line-height: 1.35; }
-.gamers b { font-weight: 800; }
-.people { display: flex; flex-direction: column; gap: 12px; }
-.people .pill { padding: 14px 22px; font-size: 26px; }
-.people .pill small { font-size: 18px; }
-.grid6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 46px; }
-.grid6 .tile { padding: 28px 32px; }
-.grid6 .tile .b { font-size: 32px; } .grid6 .tile .s { font-size: 22px; }
-.signals { margin-top: 34px; font-size: 27px; line-height: 1.4; }
-.signals b { font-weight: 800; }
-.mini { margin-top: 44px; max-width: 1100px; display: flex; flex-direction: column; gap: 12px; }
-.mrow { display: grid; grid-template-columns: 420px 1fr; align-items: center; gap: 20px; font-size: 22px; color: rgba(255,255,255,.9); }
-.mt { height: 40px; background: rgba(255,255,255,.18); border-radius: 12px; overflow: hidden; }
-.mf { height: 100%; background: #fff; color: #5B3FE0; border-radius: 12px; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: flex-end; padding-right: 14px; min-width: 70px; }
-.msrc { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 4px; }
-.ig { gap: 18px; padding: 14px; }
-.reel { width: 46%; height: 100%; display: flex; flex-direction: column; gap: 5px; }
-.reel .vid { flex: 1; border-radius: 14px; background: linear-gradient(180deg,#1b1f3a,#3b2a7a); position: relative; display: flex; align-items: center; justify-content: center; }
-.reel .pause { color: #fff; font-size: 26px; opacity: .9; }
-.reel .cap { position: absolute; bottom: 6px; left: 8px; right: 8px; color: #fff; font-size: 12px; font-weight: 700; text-align: center; }
-.reel .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-.reel .opts b { background: #fff; border-radius: 7px; font-size: 10.5px; font-weight: 800; padding: 5px 5px; color: #1C1E21; }
+/* 2. formats: three pictures */
+.formats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; margin-top: 56px; }
+.art { height: 360px; border-radius: 34px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+.fmt .stat { font-size: 64px; font-weight: 800; letter-spacing: -.02em; margin-top: 34px; }
+.fmt .cap { font-size: 28px; color: var(--sub); margin-top: 6px; line-height: 1.3; }
+.ig { background: linear-gradient(180deg, #232a5c, #5b33c6); gap: 22px; padding: 24px; }
+.reel { width: 48%; height: 100%; display: flex; flex-direction: column; gap: 8px; }
+.reel .vid { flex: 1; border-radius: 18px; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 40px; }
+.reel .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.reel .opts b { background: #fff; border-radius: 9px; height: 34px; }
 .reel .opts b.win { background: #B8F0C8; }
-.reel .lbl { color: #fff; font-size: 13px; font-weight: 800; text-align: center; }
-.finger .ring { width: 74px; height: 74px; border-radius: 50%; border: 4px dashed #fff; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 34px; }
-/* title slide: white, "Muse" plain and "Games" in the gradient (Karthik, 2026-11-13) */
-.title2 { justify-content: center; background: #fff; }
-.title2 .orb { position: absolute; border-radius: 50%; filter: blur(40px); opacity: .22; background: var(--grad); }
-.title2 h1 { font-size: 190px; letter-spacing: -.04em; line-height: 1; }
-.title2 h1 .plain { color: var(--ink); }
-.title2 .tag { font-size: 46px; font-weight: 700; margin-top: 26px; max-width: 1450px; line-height: 1.2; }
-.title2 .lede { font-size: 36px; }
-.title2 .bar2 { position: absolute; left: 0; bottom: 0; height: 14px; width: 100%; background: var(--grad); }
-/* definition slide */
-.dict { justify-content: center; }
-.dict .hw { font-size: 150px; font-weight: 800; letter-spacing: -.02em; line-height: 1; }
-.dict .pr { font-size: 38px; color: var(--sub); margin-top: 18px; }
-.dict .pr b { color: var(--ink); }
-.dict ol { list-style: none; margin-top: 60px; display: flex; flex-direction: column; gap: 40px; max-width: 1500px; }
-.dict li { display: grid; grid-template-columns: 70px 1fr; font-size: 44px; line-height: 1.3; font-weight: 500; }
-.dict li .n { font-weight: 800; background: var(--grad); -webkit-background-clip: text; color: transparent; }
-.dict .src { font-size: 22px; color: #8A8D91; margin-top: 8px; }
-.dict .eg { font-size: 30px; color: var(--sub); margin-top: 10px; font-style: italic; }
+.ring { width: 110px; height: 110px; border-radius: 50%; border: 5px dashed #fff; }
+.li { background: #fff; border: 4px solid #E4E6EB; }
+.li .g { display: grid; grid-template-columns: repeat(6, 46px); gap: 5px; }
+.li .g b { width: 46px; height: 46px; border-radius: 7px; }
+.ny { background: #fff; border: 4px solid #E4E6EB; }
+.ny .g { display: grid; grid-template-columns: repeat(4, 104px); gap: 9px; }
+.ny .g b { height: 64px; border-radius: 10px; background: #EFEFE6; }
+.ny .g b.s { background: #F9DF6D; }
+
+/* single big number */
+.num { justify-content: center; }
+.num .n { font-size: 380px; font-weight: 800; letter-spacing: -.05em; line-height: .9; }
+.num .line { font-size: 52px; color: var(--ink); max-width: 1400px; }
+.num .src { font-size: 24px; color: var(--muted); margin-top: 28px; }
+
+/* screenshot + text */
+.shot { flex-direction: row; align-items: center; gap: 110px; }
+.phone { flex: none; width: 430px; height: 932px; border-radius: 64px; background: #0E1015; padding: 14px; box-shadow: 0 40px 80px rgba(16,24,64,.18); }
+.phone img { width: 100%; height: 100%; border-radius: 52px; object-fit: cover; object-position: top; display: block; }
+.shot .txt h2 { font-size: 110px; }
+
+.shotcard { flex: none; width: 640px; }
+.shotcard img { width: 640px; height: 817px; object-fit: cover; border-radius: 40px; display: block; box-shadow: 0 40px 80px rgba(16,24,64,.18); }
+.cap2 { font-size: 22px; color: var(--muted); margin-top: 18px; }
+.bleed .pic.live { display: flex; align-items: center; justify-content: center; background: #E4E6EB; }
+.lp { width: 430px; height: 900px; border-radius: 64px; background: #0E1015; padding: 14px; }
+.lp .scr { width: 100%; height: 100%; border-radius: 52px; border: 3px dashed #5a6070; color: #B9C0CE; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 40px; font-weight: 700; padding: 30px; }
+.lp .scr small { font-size: 22px; font-weight: 500; margin-top: 16px; color: #8C93A3; }
+/* the four models: a typographic list */
+.models { margin-top: 64px; display: flex; flex-direction: column; gap: 22px; }
+.models div { display: grid; grid-template-columns: 330px 1fr; align-items: baseline; font-size: 46px; font-weight: 500; color: var(--sub); }
+.models div b { font-size: 72px; font-weight: 800; color: var(--ink); letter-spacing: -.02em; }
+.gate { margin-top: 56px; font-size: 40px; font-weight: 700; }
+
+/* engine (dark) */
+.eng { flex-direction: row; align-items: center; gap: 100px; }
+.code { flex: none; width: 820px; font: 500 34px/1.55 ui-monospace, Menlo, monospace; color: #D7DAE0; white-space: pre; }
+.code .k { color: #7FB0FF; } .code .s { color: #C9A7FF; } .code .n { color: #8EE6B5; }
+.eng h2 { font-size: 92px; }
+
+/* statement */
+.stmt { justify-content: center; }
+.stmt h2 { font-size: 120px; max-width: 1550px; }
+
+/* full-bleed screenshot */
+.bleed { padding: 0; flex-direction: row; background: var(--soft); }
+.bleed .side { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 120px 0 150px; }
+.bleed .side h2 { font-size: 92px; }
+.bleed .pic { flex: none; width: 760px; height: 1080px; overflow: hidden; }
+.bleed .pic img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+
+/* close: the tagline */
+.close { background: var(--grad); color: #fff; justify-content: center; }
+.close h2 { font-size: 112px; max-width: 1600px; line-height: 1.08; }
+.close .foot { color: rgba(255,255,255,.8); }
+.close .mark { position: absolute; top: 64px; left: 150px; font-size: 40px; font-weight: 800; }
 </style>
 </head>
 <body>
 
-<!-- 1. Title. Demo 1 starts here: type the sentence, let the game build while we talk. -->
-<section class="slide title2">
-  <div class="orb" style="width:900px;height:900px;right:-260px;top:-320px"></div>
-  <div class="orb" style="width:520px;height:520px;right:320px;bottom:-300px;opacity:.18"></div>
-  <h1><span class="plain">Muse</span> <span class="grad">Curios</span></h1>
-  <div class="tag">When the world is your muse, how will you create the content of tomorrow?</div>
-  <div class="lede">Tiny games anyone makes from an idea with Meta's Muse models, played with your friends and Groups, right inside Facebook.</div>
-  <div class="foot"><span>Closer Together '26 · Karthik, Kevin, Max, Bayan, Artem</span><span></span></div>
-</section>
-
-
-<!-- 2. Definition (~10 s) -->
-<section class="slide dict">
-  <div class="bar"></div>
+<!-- 1. Definition + wordmark. Demo 1 starts here. -->
+<section class="slide def">
+  <div class="mark">Muse <span class="grad">Curios</span></div>
   <div class="hw">cu·rio</div>
-  <div class="pr">\ ˈkyu̇r-ē-ˌō \ &nbsp;<i>noun</i> &nbsp;·&nbsp; plural <b>curios</b></div>
+  <div class="pr">\ ˈkyu̇r-ē-ˌō \ &nbsp;<i>noun</i>, plural <b style="color:var(--ink)">curios</b></div>
   <ol>
-    <li><span class="n">1</span><div>something (such as a decorative object) considered novel, rare, or bizarre : <i>curiosity</i><div class="src">Merriam-Webster</div></div></li>
-    <li><span class="n">2</span><div><b>Curio</b> <i>(Muse Curios)</i> : a tiny game anyone makes from an idea with Meta's Muse, and plays with their people<div class="eg">"Fog Chase, a Curio by Dev"</div></div></li>
+    <li><b class="n">1</b><span>something (such as a decorative object) considered novel, rare, or bizarre <span style="color:var(--muted)">(Merriam-Webster)</span></span></li>
+    <li><b class="n">2</b><span>a tiny game anyone makes with Muse, played with your people</span></li>
   </ol>
-  <div class="foot"><span class="src">Sense 1 and pronunciation: Merriam-Webster, "curio" (clipped from <i>curiosity</i>). Sense 2: ours.</span><span class="pg"></span></div>
+  <div class="foot"><span>Karthik · Kevin · Max · Bayan · Artem</span><span>Closer Together '26</span></div>
 </section>
 
-<!-- 2. Point 1: the next short-form (+ point 2's "everyone plays") -->
+<!-- 2. Impact: the formats -->
 <section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">The next short-form</div>
-  <h2 style="font-size:68px">Short-form is becoming something you <span class="grad">play</span>, not just watch.</h2>
+  <div class="label">Product &amp; impact</div>
+  <h2 style="margin-top:20px">Short-form is becoming something you play.</h2>
   <div class="formats">
     <div class="fmt">
-      <div class="art ig">
-        <div class="reel">
-          <div class="vid"><span class="pause">❚❚</span><span class="cap">"And then I told the senator…"</span></div>
-          <div class="opts"><b>A. "…nice tie"</b><b class="win">B. "…you're on mute"</b><b>C. "…I'm a cat"</b><b>D. "…wrong room"</b></div>
-          <div class="lbl">Guess what they say</div>
-        </div>
-        <div class="reel">
-          <div class="vid finger"><span class="ring">☝︎</span><span class="cap">Place your finger here</span></div>
-          <div class="lbl">Hold-to-play Reel</div>
-        </div>
-      </div>
-      <div class="who">Interactive Instagram formats</div>
-      <div class="num">3B</div>
-      <div class="what">people on Instagram, where Reels like these are spreading.</div>
-      <div class="cite">Thurrott, 2025 [115]. No stat yet on the Reel formats themselves</div>
+      <div class="art ig"><div class="reel"><div class="vid">❚❚</div><div class="opts"><b></b><b class="win"></b><b></b><b></b></div></div><div class="reel"><div class="vid"><div class="ring"></div></div></div></div>
+      <div class="stat">3B</div><div class="cap">people on Instagram, where Reels like these are spreading [115]</div>
     </div>
     <div class="fmt">
-      <div class="art li"><div class="streak">🔥 Day 12</div><div class="g">
-        <b style="background:#C9B8FF"></b><b style="background:#C9B8FF">♛</b><b style="background:#A8D1FF"></b><b style="background:#A8D1FF"></b><b style="background:#FFD6A5"></b><b style="background:#FFD6A5"></b>
-        <b style="background:#C9B8FF"></b><b style="background:#B8F0C8"></b><b style="background:#B8F0C8"></b><b style="background:#A8D1FF">♛</b><b style="background:#FFD6A5"></b><b style="background:#FFB8C8"></b>
-        <b style="background:#B8F0C8">♛</b><b style="background:#B8F0C8"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#FFD6A5"></b><b style="background:#FFB8C8"></b>
-        <b style="background:#B8F0C8"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#FFB8C8">♛</b><b style="background:#FFB8C8"></b>
-        <b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#E8E0A0">♛</b><b style="background:#FFB8C8"></b><b style="background:#FFB8C8"></b><b style="background:#FFB8C8"></b>
-        <b style="background:#D0D0D0">♛</b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b>
+      <div class="art li"><div class="g">
+        <b style="background:#C9B8FF"></b><b style="background:#C9B8FF"></b><b style="background:#A8D1FF"></b><b style="background:#A8D1FF"></b><b style="background:#FFD6A5"></b><b style="background:#FFD6A5"></b>
+        <b style="background:#C9B8FF"></b><b style="background:#B8F0C8"></b><b style="background:#B8F0C8"></b><b style="background:#A8D1FF"></b><b style="background:#FFD6A5"></b><b style="background:#FFB8C8"></b>
+        <b style="background:#B8F0C8"></b><b style="background:#B8F0C8"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#FFD6A5"></b><b style="background:#FFB8C8"></b>
+        <b style="background:#B8F0C8"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#E8E0A0"></b><b style="background:#FFB8C8"></b><b style="background:#FFB8C8"></b>
+        <b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#E8E0A0"></b><b style="background:#FFB8C8"></b><b style="background:#FFB8C8"></b><b style="background:#FFB8C8"></b>
+        <b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b><b style="background:#D0D0D0"></b>
       </div></div>
-      <div class="who">LinkedIn daily games</div>
-      <div class="num">86%</div>
-      <div class="what">of players come back the next day; 82% are still playing after a week.</div>
-      <div class="cite">LinkedIn Newsroom, 2026 (company-reported) [79]</div>
+      <div class="stat">86%</div><div class="cap">of LinkedIn's daily players come back the next day (company-reported) [79]</div>
     </div>
     <div class="fmt">
-      <div class="art ny"><div class="tabs"><span>Today</span><span class="on">Friends</span></div><div class="g">
-        <b class="s">PEARL</b><b class="s">MATCHA</b><b class="s">TARO</b><b class="s">MANGO</b>
-        <b>STRAW</b><b>CUP</b><b>ICE</b><b>LID</b>
-        <b>SHAKE</b><b>STIR</b><b>POUR</b><b>SIP</b>
-      </div></div>
-      <div class="who">NYT Games</div>
-      <div class="num">11.2B</div>
-      <div class="what">puzzle plays in 2025, plus a friends tab "to encourage communal play".</div>
-      <div class="cite">AP, 2026 [82]; NYT Q1 2025 remarks [84]</div>
+      <div class="art ny"><div class="g"><b class="s"></b><b class="s"></b><b class="s"></b><b class="s"></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div></div>
+      <div class="stat">11.2B</div><div class="cap">NYT puzzle plays in 2025, now with a friends tab [82][84]</div>
     </div>
   </div>
-  <div class="gamers"><b>98%</b> of Americans aged 13–39 play some kind of game, yet only <b>33%</b> of young men and <b>9%</b> of young women call themselves gamers. We build for everyone else.</div>
-  <div class="foot"><span class="src">Illustrations drawn by us, not screenshots. YPulse 2026; Pew 2015 (Bayan's review). Also: WeChat Mini Games, 500M monthly players [91].</span><span class="pg"></span></div>
+  <div class="foot"><span>Drawn by us, not screenshots. [n] = docs/pr/sources.md</span><span class="pg"></span></div>
 </section>
 
-<!-- 3. Point 2: anyone can make one. Demo 1 is still building; it pays off after slide 5. -->
-<section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">Anyone can make one</div>
-  <h2>One sentence in. A Curio your friends can <span class="grad">play</span>.</h2>
-  <div class="flow">
-    <div class="step"><div class="t">You say</div><div class="b">"Dodge the fog over Twin Peaks"</div><div class="s">One sentence, typed or spoken.</div></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="t">Muse agrees</div><div class="b">How it plays, part by part</div><div class="s">Before it builds anything.</div><span class="chip">Muse</span></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="t">Bots test it</div><div class="b">5 bots play it first</div><div class="s">A game nobody can win never ships.</div></div>
-    <div class="arrow">→</div>
-    <div class="step"><div class="t">You share it</div><div class="b">To your Group, a friend, the feed</div><div class="s">Scores verified on the server.</div></div>
-  </div>
-  <div class="big"><div class="n grad">~1 min</div><div class="l">to build a playable, bot-tested game once the plan is agreed. No code, no developer.</div></div>
-  <div class="foot"><span class="src">Facebook's Instant Games reached 20B+ sessions by 2018, but every game was made by a developer [34][35]. Muse removes that bottleneck.</span><span class="pg"></span></div>
+<!-- 3. Impact: one number -->
+<section class="slide num">
+  <div class="label">Product &amp; impact</div>
+  <div class="n grad">98%</div>
+  <div class="line">of Americans aged 13–39 play games. Only 9% of young women call themselves gamers.</div>
+  <div class="src">YPulse, 2026; Pew Research Center, 2015</div>
+  <div class="foot"><span></span><span class="pg"></span></div>
 </section>
 
-<!-- 4. Point 3: the AI stack and the harness -->
-<section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">The AI stack</div>
-  <h2>Four Muse models, one <span class="grad">harness</span> that makes them reliable.</h2>
-  <div class="pipe">
-    <div class="step"><div class="idx">01 · SPARK</div><div class="b">Understands the request</div><div class="s">Then retrieval over 1,280 game types: the right one is in the top 5 for 94% of 523 test requests.</div></div>
-    <div class="step"><div class="idx">02 · EMBER</div><div class="b">Writes the brief</div><div class="s">Mood, energy, competitiveness and audience, in about 2 s.</div></div>
-    <div class="step"><div class="idx">03 · WONDER</div><div class="b">Writes and builds the game</div><div class="s">The spec, the rules and the content, then up to 3 repair rounds.</div></div>
-    <div class="step"><div class="idx">04 · IMAGE</div><div class="b">Paints the art</div><div class="s">Characters and scenes, drawn for this game.</div></div>
+<!-- 4. Originality: anyone can make one (real screenshot). Demo 1 is building. -->
+<section class="slide shot">
+  <div class="label">Originality</div>
+  <div class="shotcard"><img src="img/curio-play.png" alt="A Curio being played in the app"><div class="cap2">A real Curio in the app: "Catch the Right Shell"</div></div>
+  <div class="txt">
+    <h2>Anyone can make one.</h2>
+    <div class="line">One sentence. Muse agrees how it plays, five bots test it, and it's ready in about a minute.</div>
   </div>
-  <div class="split">
-    <div class="panel"><h3>Then it has to pass</h3><p>A 5-bot playtest gate and a score check. About 75% of games pass; the rest are repaired or never shown.</p></div>
-    <div class="panel"><h3>Server, not phone</h3><p>Muse, the data, ranking and score checks all run on our server. The app only shows the game and plays it. The Muse key never leaves the server.</p></div>
-  </div>
-  <div class="foot"><span class="src">Harness numbers: docs/pr/09-evidence.md and the harness evals on main.</span><span class="pg"></span></div>
+  <div class="foot"><span></span><span class="pg"></span></div>
 </section>
 
-<!-- 5. Point 5: the engine. Demo 1 pays off after this slide. -->
+<!-- 5. AI: the models and the harness -->
 <section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">The engine</div>
-  <h2 style="font-size:68px">Every game is <span class="grad">JSON</span>. Our Rust engine plays it.</h2>
-  <div class="engine">
-    <div class="code"><span class="k">"rules"</span>: [{
+  <div class="label">AI integration</div>
+  <h2 style="margin-top:20px">Four Muse models. One harness.</h2>
+  <div class="models">
+    <div><b>Spark</b><span>reads the request, across 1,280 game types</span></div>
+    <div><b>Ember</b><span>writes the brief</span></div>
+    <div><b>Wonder</b><span>writes the game, and repairs it</span></div>
+    <div><b>Image</b><span>paints the art</span></div>
+  </div>
+  <div class="gate">Then five bots play every Curio before anyone else does.</div>
+  <div class="foot"><span>Top-5 retrieval 0.94 on 523 test requests; about 75% pass the gate (docs/pr/09-evidence.md)</span><span class="pg"></span></div>
+</section>
+
+<!-- 6. AI: the engine (dark). Demo 1 pays off after this slide. -->
+<section class="slide dark eng">
+  <div class="label">AI integration</div>
+  <div class="code"><span class="k">"rules"</span>: [{
   <span class="k">"on"</span>: <span class="s">"tap"</span>,
   <span class="k">"do"</span>: [<span class="s">"flip_gravity"</span>],
   <span class="k">"score"</span>: <span class="n">+1</span>
 }],
-<span class="k">"art"</span>: { <span class="k">"fog"</span>: <span class="s">"&lt;svg…&gt;"</span> },
-<span class="k">"sound"</span>: <span class="s">"spooky_synth"</span></div>
-    <div class="arrow">→</div>
-    <div class="core">Rust<br>→ WASM<small>parsed at runtime</small></div>
-    <div class="arrow">→</div>
-    <div class="phone"><div class="scr"><b>Twin Peaks Fog</b>
-      <i style="width:60px;height:60px;left:90px;top:230px"></i>
-      <i style="width:200px;height:200px;left:-40px;top:120px;background:rgba(255,255,255,.18)"></i>
-      <i style="width:160px;height:160px;left:100px;top:290px;background:rgba(255,255,255,.12)"></i></div></div>
+<span class="k">"art"</span>: { <span class="k">"fog"</span>: <span class="s">"&lt;svg…&gt;"</span> }</div>
+  <div>
+    <h2>Every Curio is JSON. Our Rust engine plays it.</h2>
+    <div class="line">About 1 MB of WebAssembly. The same score on every replay, so the server can check it.</div>
   </div>
-  <div class="facts">
-    <div class="fact"><div class="v grad">0</div><div class="d">build steps or installs: the JSON, art included, becomes the game.</div></div>
-    <div class="fact"><div class="v grad">255–1,845</div><div class="d">characters of game logic Muse wrote per game, in 10 real runs.</div></div>
-    <div class="fact"><div class="v grad">Same score</div><div class="d">every replay: the server re-runs each input log, so scores can't be faked.</div></div>
-    <div class="fact"><div class="v grad">~1 MB</div><div class="d">of WebAssembly (389 KB gzipped) runs every game.</div></div>
-  </div>
-  <div class="foot"><span class="src">docs/pr/09-evidence.md (D31); engine/README.md (1,092 KiB, 389 KiB gzipped). The code above is illustrative.</span><span class="pg"></span></div>
+  <div class="foot"><span>engine/README.md: 1,092 KiB, 389 KiB gzipped. The code is illustrative.</span><span class="pg"></span></div>
 </section>
 
-<!-- 6. Point 4: how we worked with AI -->
-<section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">How we built it</div>
-  <h2>Five people, a team of AI agents, <span class="grad">one channel</span>.</h2>
-  <div class="agents" style="margin-top:40px">
-    <div class="people">
-      <div class="pill">Karthik<small>harness, Studio, front end, visuals, pitch</small></div>
-      <div class="pill">Artem<small>engine, app integration, sounds</small></div>
-      <div class="pill">Max<small>backend and server</small></div>
-      <div class="pill">Kevin<small>ranking, Group Blend, notifications</small></div>
-      <div class="pill">Bayan<small>authoring layer, playtest gate</small></div>
-    </div>
-    <div class="arrow">→</div>
-    <div class="hub"><div class="b">Each person ran their own agents</div><div class="s">Claude and Codex agents synced through one Slack channel, a shared "who's working on what" canvas and a <b>CLAUDE.md</b> every agent reads first: claim before you start, hand off in writing, never push to main without an OK.</div></div>
-    <div class="arrow">→</div>
-    <div class="col3">
-      <div class="pill" style="font-size:54px">489<small>commits on main in two days</small></div>
-      <div class="pill" style="font-size:54px">30<small>branches, each with an owner</small></div>
-      <div class="pill" style="font-size:54px">88%<small>of commits co-written with an agent</small></div>
-    </div>
-  </div>
-  <div class="note" style="margin-top:36px">One design philosophy, set by us. The agents moved fast; <b>the decisions, and the memory of how it all fits, stayed ours.</b></div>
-  <div class="foot"><span class="src">Counts from git on main, 2026-11-13 03:00 PST (430 of 489 commits credit Claude or Codex). Recount before export.</span><span class="pg"></span></div>
+<!-- 7. Execution: how we built it -->
+<section class="slide stmt">
+  <div class="label">Execution</div>
+  <h2>489 commits in two days. Five people, each running their own AI agents.</h2>
+  <div class="line">One Slack channel, one shared board, one CLAUDE.md. The decisions stayed ours.</div>
+  <div class="foot"><span>Counted from git on main; 430 of 489 commits credit Claude or Codex.</span><span class="pg"></span></div>
 </section>
 
-<!-- 7. Point 6: ranking. Demo 2. -->
-<section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">Ranking</div>
-  <h2>Playing shapes your feed, like any other <span class="grad">engagement</span>.</h2>
-  <div class="two" style="margin-top:36px">
-    <div>
-      <h3>A ranker that learns from play</h3>
-      <div class="vbars" style="height:300px">
-        <div class="vb"><div class="v">50%</div><div class="col grey" style="height:50%"></div></div>
-        <div class="vb"><div class="v grad">70.3%</div><div class="col" style="height:70.3%"></div></div>
-      </div>
-      <div class="vlabels"><div>A tie (50%), the line to beat</div><div>Sessions where our feed won</div></div>
-      <div class="cap">Interleaved against today's feed (95% CI 68–72%). Simulated people.</div>
-    </div>
-    <div>
-      <h3>Group Blend</h3>
-      <div class="vbars" style="height:300px">
-        <div class="vb"><div class="v">8.7%</div><div class="col grey" style="height:8.7%"></div></div>
-        <div class="vb"><div class="v grad">32%</div><div class="col" style="height:32%"></div></div>
-      </div>
-      <div class="vlabels"><div>Random picks</div><div>With Group Blend</div></div>
-      <div class="cap">Picks every member of a Group enjoys. 240 simulated Groups.</div>
-    </div>
-  </div>
-  <div class="signals"><b>New signals games give us:</b> finished runs, replays, rematches, challenges sent, friends added from a board. <b>Where they show up:</b> Groups, Search and the feed.</div>
-  <div class="foot"><span class="src">docs/RANKING.md. The ranker runs on our server.</span><span class="pg"></span></div>
+<!-- 8. Impact: ranking, one number. Demo 2. -->
+<section class="slide num">
+  <div class="label">Product &amp; impact</div>
+  <div class="n">70.3%</div>
+  <div class="line">of sessions, our ranker beat today's feed. Playing shapes what you see next.</div>
+  <div class="src">Simulated people, 95% CI 68–72%. Group Blend: games every member enjoys, 8.7% → 32%, also simulated.</div>
+  <div class="foot"><span></span><span class="pg"></span></div>
 </section>
 
-<!-- 8. Point 7: collaboration. Demo 3. -->
-<section class="slide">
-  <div class="bar"></div>
-  <div class="kicker">Closer together</div>
-  <h2>Games are how you <span class="grad">meet</span>, rival and remix each other.</h2>
-  <div class="grid6">
-    <div class="tile"><span class="tag2">In the app</span><div class="b">Best of 5</div><div class="s">Meet someone new in a Group? Five quick games decide it. Same seed, verified scores.</div></div>
-    <div class="tile"><span class="tag2">In the app</span><div class="b">Weekly Group boards</div><div class="s">A fresh race every week, and an Add friend button next to people you don't know yet.</div></div>
-    <div class="tile"><span class="tag2">In the app</span><div class="b">Sounds</div><div class="s">Put a song behind your game, like Reels audio. Credited, licensed tracks.</div></div>
-    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Challenges</div><div class="s">Send a game to your Group or a friend with your score to beat.</div></div>
-    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Quiz nights</div><div class="s">A Group plays the same questions, then compares.</div></div>
-    <div class="tile"><span class="tag2 soon">On the server, app next</span><div class="b">Remix</div><div class="s">Every remix remembers the game it came from, so credit flows back.</div></div>
+<!-- 9. Originality: together (full-bleed screenshot). Demo 3. -->
+<section class="slide bleed">
+  <div class="label">Originality</div>
+  <div class="side">
+    <h2>Meet on the board. Settle it in a best of 5.</h2>
+    <div class="line">Weekly Group boards and best of 5 are in the app. Challenges and remix are next.</div>
   </div>
-  <div class="foot"><span class="src">89% of Gen Z say games can help them make new friends (ESA Essential Facts, 2025).</span><span class="pg"></span></div>
+  <div class="pic live"><div class="lp"><div class="scr">Live phone<br><small>Demo 3: the Group's weekly board → Add friend → best of 5</small></div></div></div>
 </section>
 
-<!-- 9. Point 8 + close -->
+<!-- 10. Impact: the ritual, one number -->
+<section class="slide num">
+  <div class="label">Product &amp; impact</div>
+  <div class="n">3%</div>
+  <div class="line">of endless-loop players are still playing a month later. A ritual you share keeps them.</div>
+  <div class="src">Hyper-casual games at day 30, against 8–11% for sports, racing and tabletop (Appodeal, 2025)</div>
+  <div class="foot"><span></span><span class="pg"></span></div>
+</section>
+
+<!-- 11. The tagline, only here -->
 <section class="slide close">
-  <div class="kicker" style="color:#fff;-webkit-text-fill-color:#fff">Not a loop to grind. A ritual you share.</div>
-  <h2>Anyone can make a Curio. Everyone can play it <span style="opacity:.85">together</span>.</h2>
-  <div class="lede">A weekly board with your Group, a rematch with a friend, a best of 5 with someone new: a reason to come back to Facebook, together. Creators get something to show; players give back a score, a remix, a challenge.</div>
-  <div class="mini">
-    <div class="mrow"><span>Endless hyper-casual loops, day 30</span><div class="mt"><div class="mf" style="width:20%">3%</div></div></div>
-    <div class="mrow"><span>Sports, racing, tabletop, day 30</span><div class="mt"><div class="mf" style="width:73%">8–11%</div></div></div>
-    <div class="msrc">Players still playing a month later; bars on a 0–15% scale. Appodeal, Mobile Casual Benchmarks 2025. A loop alone doesn't make a habit; a shared ritual does.</div>
-  </div>
-  <div class="foot"><span>Muse Curios · made with Muse Spark, Ember, Wonder and Image · Karthik · Kevin · Max · Bayan · Artem</span><span>Thank you</span></div>
+  <div class="mark">Muse Curios</div>
+  <h2>When the world is your muse, how will you create the content of tomorrow?</h2>
+  <div class="foot"><span>Made with Muse Spark, Ember, Wonder and Image</span><span>Thank you</span></div>
 </section>
 
 <script>
-// #N shows only slide N (used by render.sh); arrow keys page through when presenting.
 const slides = [...document.querySelectorAll('.slide')];
+slides.forEach((sl, i) => { const p = sl.querySelector('.pg'); if (p) p.textContent = i + 1; });
 function show(n) { document.body.classList.add('one'); slides.forEach((s, i) => s.classList.toggle('on', i === n)); }
 let cur = parseInt(location.hash.slice(1), 10);
-document.querySelectorAll('.slide').forEach((sl, i) => { const p = sl.querySelector('.pg'); if (p) p.textContent = i + 1; });
 if (!isNaN(cur)) show(cur - 1);
 addEventListener('keydown', (e) => {
   if (isNaN(cur)) cur = 1;

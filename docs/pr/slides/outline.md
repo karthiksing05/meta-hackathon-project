@@ -1,20 +1,20 @@
-# Slide outline (draft 6)
+# Slide outline (draft 7: Karthik's restructure)
 
-*Follows [../narrative.md](../narrative.md) point by point. 5-minute demo plus 3 minutes of Q&A: 10 slides, timed in [notes.md](notes.md) (190 s of talk, 95 s of demo, 15 s of slack).*
+*One idea per slide, big type, about 15 words or fewer on screen; the rest is in [notes.md](notes.md). The middle slides each answer one rubric line (a small label in the corner). 11 slides, 180 s of talk + 95 s of demo = 4:35, 25 s of slack.*
 
-| # | Slide | Narrative point | Demo beat |
-|---|---|---|---|
-| 1 | Title: **Muse** (plain) **Curios** (gradient); tagline "When the world is your muse, how will you create the content of tomorrow?" | — | **Demo 1 starts** |
-| 2 | Definition: cu·rio \ ˈkyu̇r-ē-ˌō \ noun, plural curios. 1. Merriam-Webster's sense; 2. Curio (Muse Curios), ours. ~10 s | — | |
-| 3 | Short-form you play: drawings of two Instagram Reel formats (guess what they say; place your finger here), a LinkedIn daily puzzle and an NYT word grid, each with a cited stat; 98% play vs 33% / 9% "gamers" | 1, 2 | |
-| 4 | Anyone can make one: sentence → Muse agrees → 5 bots → share; about a minute to build once planned | 2 | (Demo 1 still building) |
-| 5 | The AI stack: Spark, Ember, Wonder, Image; the harness and the gate; server vs phone | 3 | |
-| 6 | The engine: JSON → Rust/WASM → game; ~1 MB (389 KB gzipped); replayable scores | 5 | **Demo 1 pays off after this slide (40 s), with a pre-made fallback** |
-| 7 | How we built it: five people → their agents → one channel, canvas and `CLAUDE.md`; 489 commits, 30 branches, 88% | 4 | |
-| 8 | Ranking: 70.3% vs a tie (50%); Group Blend 8.7% → 32% (both simulated); the new signals and where they show up | 6 | **Demo 2 (25 s)** |
-| 9 | Closer together: best of 5, weekly Group boards, sounds (in the app); challenges, quiz nights (same questions, then compare; not live), remix (on the server, app next) | 7 | **Demo 3 (30 s)** |
-| 10 | Close: "Not a loop to grind. A ritual you share." + a small day-30 retention chart (3% vs 8–11%) + "Anyone can make a game. Everyone can play it together." Says "a weekly board with your Group" (the Daily isn't built) | 8 | |
+| # | Layout | Rubric | On screen | Demo |
+|---|---|---|---|---|
+| 1 | Dictionary entry + wordmark | — | **Muse** *Curios*; cu·rio, pronunciation, noun, plural; 1. Merriam-Webster's sense; 2. a tiny game anyone makes with Muse, played with your people; team in the footer | **Demo 1 starts** |
+| 2 | Three drawings | Impact | "Short-form is becoming something you play." Reel formats (3B [115]), LinkedIn daily (86% [79]), NYT (11.2B [82][84]) | |
+| 3 | One number | Impact | **98%** play games; only 9% of young women call themselves gamers | |
+| 4 | Real screenshot + headline | Originality | A real Curio in the app; "Anyone can make one." | (building) |
+| 5 | Typographic list | AI | "Four Muse models. One harness." Spark, Ember, Wonder, Image; five bots play every Curio | |
+| 6 | Dark, code + headline | AI | "Every Curio is JSON. Our Rust engine plays it." ~1 MB; same score every replay | **Demo 1 pays off after this slide** |
+| 7 | Statement | Execution | "489 commits in two days. Five people, each running their own AI agents." | |
+| 8 | One number | Impact | **70.3%** of sessions, our ranker beat today's feed (simulated) | **Demo 2** |
+| 9 | Half text, half live phone | Originality | "Meet on the board. Settle it in a best of 5." | **Demo 3** (Live Video in the phone frame) |
+| 10 | One number | Impact | **3%** of endless-loop players still play a month later | |
+| 11 | Gradient, tagline only | — | "When the world is your muse, how will you create the content of tomorrow?" | |
 
-**Name and tagline:** Karthik's (2026-11-13); rules in [../STYLE.md](../STYLE.md).
-**Karthik's calls:** keep "a score, a remix, a challenge" for point 8, or add viewer donations to creators as a labeled "next" (not built). Keep WeChat as a footnote on slide 2, or drop it. Present with (a) Keynote + Live Video or (b) the HTML/PDF + QuickTime. The name.
-**Before export:** recount commits (slide 6), re-time one live build with harness v2 planning on (slide 3 says "about a minute once planned"), and confirm the Instagram stat (we cite users + Threads games; no stat on interactive formats themselves yet).
+**Screenshots:** the app still says "Whims" on every screen (the rename in the app is separate work), and the live database is nearly empty, so for now slide 4 uses a crop of a real Curio being played (no app chrome), and slide 9 is a frame for the live phone. Swap in a real Group board screenshot once the app is renamed and the demo world is seeded.
+**Karthik's calls:** clip approach, (a) Keynote + Live Video or (b) HTML/PDF + QuickTime, viewer donations, WeChat (dropped from the deck for now), whose Mac presents.
