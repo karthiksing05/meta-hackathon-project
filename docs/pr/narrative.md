@@ -4,6 +4,16 @@
 
 **Name:** "Muse Curios"; one game is "a Curio" (Karthik's decision, 2026-11-13). **Tagline:** "When the world is your muse, how will you create the content of tomorrow?" Rules in [STYLE.md](STYLE.md).
 
+## Story arc (Karthik, 2026-11-13, ~04:15 PST)
+
+**Thesis:** people don't grow close by watching the same thing. They grow close by doing something together, or against each other. Short-form taught a generation to watch alone; Muse Curios, a new feature in Facebook, turns short-form into something you play *with* your people, and Facebook is where your people are.
+
+**Visual motif:** blue = competing (boards, best of 5, challenges); violet = collaborating (making together, remixes, Group play). The brand gradient runs from competition into collaboration.
+
+- **Act I · Why.** 1 Curio (the definition). 2 The philosophy: together and against both lead to closer (interdependence predicts ties, .45 bridging / .30 bonding [72]; STEP UP, +920 steps a day for groups of three on a weekly leaderboard [127]; play went with closeness after a move [66]). 3 The tension: teens on Facebook 71% → 32% [54], 19–29 the loneliest at 27% [60], while 98% play games. 4 The shift: short-form you play (the mock clip, LinkedIn 86% [79], the NYT friends tab [84]); the ones that last are shared (Wordle 5.3B → 4.2B [83]).
+- **Act II · How** (AI gets the most room). 5 Anyone can make one (every Instant Game was made by a developer [34][35]). 6 The harness as one pipeline. 7 The engine and fair play: competition only brings people together if it's fair.
+- **Act III · What it does for people.** 8 Compete → collaborate (board → "How did you get 44?" → Add friend → best of 5 → make together / remix). Guardrail line: boards are scoped to Groups you share, seeds are fair, everything's opt-in (competition can divide: Robbers Cave [130]). 9 Play becomes a signal (simulated). 10 Built the way it works: a collaborative product, built collaboratively. 11 A ritual, not a loop (3% vs 8–11%, Appodeal 2025), then the tagline, its only appearance.
+
 ## 1. The next form of short-form content
 
 Interactive mini-experiences keep people in their apps, and the industry is moving that way.

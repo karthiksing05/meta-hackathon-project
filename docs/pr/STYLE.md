@@ -6,7 +6,7 @@
 
 | Use | Write | Examples |
 |---|---|---|
-| The feature | **Muse Curios** | "Muse Curios brings people closer through tiny games." |
+| The feature | **Muse Curios**, a new feature in Facebook | "Muse Curios, a new feature in Facebook, brings people closer through tiny games." Never imply a separate app: the app is Facebook. |
 | One game we make | **a Curio** (capital C) | "Make a Curio", "Fog Chase, a Curio by Dev", "Today's Curio in your Group" |
 | Where only one word fits (a tab, a button, a chip) | **Curios** | the Curios tab |
 | The dictionary word (slide 2 only) | curio (lower case) | "cu·rio, noun" |
@@ -41,6 +41,7 @@ It goes on the last slide only (never slide 1), in the Devpost tagline field and
 | Secondary | `#65676B` | Captions and labels |
 | Surface | `#F0F2F5` | Cards |
 | Grey bars | `#BCC0C4` | The baseline in charts (the line to beat) |
+| Meaning | blue = competing, violet = collaborating | Tag features with their color (boards, best of 5 and challenges blue; making together, remix and Group play violet). Used once on the philosophy slide, then quietly |
 
 - **No pink.** The app's `reelsPink` stays in the app; it never appears in the pitch.
 - **Font:** Figtree (SIL Open Font License, `slides/fonts/`), our open stand-in for Meta's typeface. Weights: 800 for titles and big numbers, 700 for labels and kickers, 500–600 for body and captions. Install it on the presenting Mac before importing `deck.pptx`. The app itself uses SF Pro.
