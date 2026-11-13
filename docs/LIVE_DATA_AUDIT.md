@@ -26,13 +26,18 @@ that screens read. The app makes API calls and draws results; it does not rank, 
 Deleted from `backend/`: `internal/recs/game-recs.js`, `internal/staticsrv/player/runtime/`, `generator/vendor/`.
 The web player is the only browser viewer the backend serves.
 
-## App side: still mock or local (for Karthik's agent; backend requests are in Slack)
+## App side: done (Karthik's agent, branch `backend-api`, staged as in `docs/APP_LIVE_DATA_PLAN.md`)
+
+| Stage | What changed |
+|---|---|
+| 0 Client | `GamesAPIFactory.current` is always `GamesAPILive.shared` (no `FB_API`, no mock). `GamesAccount` signs in once at launch with the device account. The client covers feed, search, game, leaderboard, scores, saves, feed events, users, friends, Groups, Group games, Blend and creations. `GamesAPIMock.swift`, `GameGeneratorMock.swift` and `API/Fixtures/` are deleted; `GameGeneratorFactory.current` is always the server. |
+
+## App side: still mock or local
 
 These are in the app and must go; where the server cannot yet serve the data, the request is listed.
 
 | App code | Problem | Server replacement |
 |---|---|---|
-| `Bubbles/API/GamesAPIMock.swift`, `GameGeneratorMock.swift`, `FB_API` default `mock` | Mock is the default; screens do not use `GamesAPIFactory` | Live only; delete the mocks |
 | `Data/MockData.swift`, `Data/MockContent.swift` (2,600 lines) | Hardcoded people, posts, Groups | `/v1/users`, `/v1/groups`, `/v1/me/friends` (posts/Events: request to backend) |
 | `Bubbles/Store/BubbleSocialCast.swift`, `BubbleFeedRoster.swift`, `BubbleOpponentRuns.swift` | Hardcoded friends, rival "Maya", chats, opponent runs | Friends/Groups/scores endpoints; challenges and moments inbox are requests to backend |
 | `Studio/StudioDemoWorld.swift`, `OfflineComposer.swift` | Fake world and offline game composer | `/v1/generate`; delete |

@@ -14,8 +14,8 @@ import Foundation
 // When the job is done, `game` is the normal `RemoteGame`; its manifest is fetched from
 // `manifestUrl` and decoded as is (`content.game_json` stays the exact text the server wrote).
 //
-//     let generator = GameGeneratorFactory.current          // nil: Studio keeps the on-device composer
-//     for try await update in generator!.generate(request: "...", brief: brief) { ... }
+//     let generator = GameGeneratorFactory.current          // always the server
+//     for try await update in generator.generate(request: "...", brief: brief) { ... }
 //
 // Cancelling the consuming task ends the job (`DELETE`, best effort).
 
@@ -287,19 +287,6 @@ extension GameGenerator {
 // MARK: - Choosing one
 
 enum GameGeneratorFactory {
-    /// The generator for this launch, or nil to keep the on-device `MicrogameComposer`.
-    /// - `FB_GENERATE=mock`: replays a recorded run (`GameGeneratorMock`); `mock-plain` without the
-    ///   optional fields; `mock-fail` fails partway (`FB_GENERATE_FAIL_CODE` picks the code).
-    /// - `FB_GENERATE=device`: the on-device composer even with `FB_API=live`.
-    /// - `FB_API=live`: the server (`GameGeneratorLive`).
-    /// Release builds read no launch variables, so they use the on-device composer.
-    static var current: (any GameGenerator)? {
-        switch DebugLaunch.value("FB_GENERATE")?.lowercased() {
-        case "mock": return GameGeneratorMock(variant: .full)
-        case "mock-plain": return GameGeneratorMock(variant: .plain)
-        case "mock-fail": return GameGeneratorMock(variant: .fail(code: DebugLaunch.value("FB_GENERATE_FAIL_CODE") ?? "invalid_after_repairs"))
-        case "device", "off": return nil
-        default: return GamesAPIConfig.mode == .live ? GameGeneratorLive.shared : nil
-        }
-    }
+    /// The server (`GameGeneratorLive`). The app never makes games on the device.
+    static var current: any GameGenerator { GameGeneratorLive.shared }
 }

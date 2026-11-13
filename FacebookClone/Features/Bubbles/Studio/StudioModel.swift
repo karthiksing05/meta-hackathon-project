@@ -1370,7 +1370,7 @@ extension StudioModel {
         #if DEBUG
         if service is StudioScriptedService { return false }
         #endif
-        return (StudioMicrogameBridge.isAvailable || GameGeneratorFactory.current != nil) && mode == .create
+        return mode == .create
     }
 
     /// The default for `buildsMicrogame` when the brief arrives: the person picked "Microgame", or
@@ -1411,9 +1411,8 @@ extension StudioModel {
 
     /// The microgame composer's stream when this run should use it; nil keeps the formula pipeline.
     ///
-    /// New games go to the server when there is a generator for this launch (`GameGeneratorFactory`:
-    /// `FB_API=live`, or `FB_GENERATE=mock`), otherwise to the on-device composer. Tweaks and next
-    /// levels always run on-device (server v1 makes new games only).
+    /// New games go to the server (`GameGeneratorFactory`). Tweaks and next levels still run on the
+    /// device until Stage 3 of docs/APP_LIVE_DATA_PLAN.md.
     func microgameStream(for request: StudioRequest, kind: StudioComposeKind) -> AsyncThrowingStream<StudioEvent, Error>? {
         #if DEBUG
         if service is StudioScriptedService { return nil }
@@ -1425,15 +1424,11 @@ extension StudioModel {
         case .create:
             guard buildsMicrogame, canBuildMicrogame else { return nil }
             let brief = request.brief ?? briefForRun ?? BubbleBrief(intent: request.prompt, audience: request.scope)
-            if let generator = GameGeneratorFactory.current {
-                runIsServer = true
-                return StudioGenerateBridge.compose(
-                    with: generator, request: microgameRequestText(request), brief: brief, onReport: onReport,
-                    onWait: { [weak self] wait in self?.generationWait = wait }
-                )
-            }
-            guard StudioMicrogameBridge.isAvailable else { return nil }
-            return StudioMicrogameBridge.compose(request: microgameRequestText(request), brief: brief, onReport: onReport)
+            runIsServer = true
+            return StudioGenerateBridge.compose(
+                with: GameGeneratorFactory.current, request: microgameRequestText(request), brief: brief, onReport: onReport,
+                onWait: { [weak self] wait in self?.generationWait = wait }
+            )
         case .tweak, .nextLevel:
             guard StudioMicrogameBridge.isAvailable, let base = request.base, StudioMicrogameBridge.canRevise(base) else { return nil }
             return StudioMicrogameBridge.revise(base, request: request.prompt, onReport: onReport)

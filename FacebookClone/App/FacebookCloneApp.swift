@@ -18,6 +18,8 @@ struct FacebookCloneApp: App {
             SettingsKey.showReactionCounts: true,
         ])
         let store = AppStore()
+        // The games server account: every game, score, friend and Group comes from the API.
+        MainActor.assumeIsolated { GamesAccount.shared.signIn() }
         let bubbleStore = BubbleStore(appStore: store)
         bubbleStore.studio = BubbleStudioFactory.make()
         BubbleSurfaceHooks.install(appStore: store, bubbleStore: bubbleStore)

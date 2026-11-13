@@ -18,8 +18,6 @@ import SwiftUI
 /// - `FB_STUDIO_ANATOMY=fixture|answered|chat`: "How the game works" from a fixture (no Muse call);
 ///   `answered` answers its first question, `chat` adds "Change the game" turns on Try.
 /// - `FB_STUDIO_MICROGAME=1`: build it as a microgame when Muse (or a server generator) is available.
-/// - `FB_GENERATE=mock|mock-plain|mock-fail` (+ `FB_GENERATE_SPEED`): make the microgame as a
-///   server job from a recorded run (see `App/DebugLaunch.swift`).
 struct StudioView: View {
     let launch: StudioLaunch
 

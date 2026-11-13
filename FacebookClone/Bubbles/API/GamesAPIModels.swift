@@ -1,14 +1,19 @@
 import Foundation
 
-// Wire models for the games backend (backend/README.md on `backend-api` at 17e4ce7), plus the
-// request and result types of the client. Server JSON is camelCase; ids are Strings (24 hex
-// characters, made by the server); scores are Doubles. Foundation only.
+// Wire models for the games backend (backend/README.md), plus the request and result types of the
+// client. Server JSON is camelCase; game ids are Strings (24 hex characters, made by the server);
+// scores are whole numbers. Foundation only.
 
 // MARK: - Server models
 
 /// One game as the server describes it (`GameView`).
 struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     var id: String
+    /// The manifest's lowercase slug (`hill-hopper`), when it had one.
+    var slug: String?
+    /// The Group or Event the game was made for (manifest `structure.group_id` / `event_id`).
+    var groupID: String?
+    var eventID: String?
     var title: String
     var description: String
     var tags: [String]
@@ -27,7 +32,9 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     var createdAt: Date
 
     enum CodingKeys: String, CodingKey {
-        case id, title, description, tags, formula, likes, plays, finishes, likedByMe, remixOf, createdAt
+        case id, slug, title, description, tags, formula, likes, plays, finishes, likedByMe, remixOf, createdAt
+        case groupID = "groupId"
+        case eventID = "eventId"
         case ownerID = "ownerId"
         case ownerUsername
         case packageURL = "packageUrl"
@@ -38,6 +45,9 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id)
+        slug = try c.decodeIfPresent(String.self, forKey: .slug).flatMap { $0.isEmpty ? nil : $0 }
+        groupID = try c.decodeIfPresent(String.self, forKey: .groupID).flatMap { $0.isEmpty ? nil : $0 }
+        eventID = try c.decodeIfPresent(String.self, forKey: .eventID).flatMap { $0.isEmpty ? nil : $0 }
         title = try c.decode(String.self, forKey: .title)
         description = try c.decodeIfPresent(String.self, forKey: .description) ?? ""
         tags = try c.decodeIfPresent([String].self, forKey: .tags) ?? []
@@ -56,12 +66,12 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     }
 
     init(
-        id: String, title: String, description: String = "", tags: [String] = [], formula: String = "",
+        id: String, slug: String? = nil, groupID: String? = nil, eventID: String? = nil, title: String, description: String = "", tags: [String] = [], formula: String = "",
         ownerID: String = "", ownerUsername: String = "", likes: Int = 0, plays: Int = 0, finishes: Int = 0,
         likedByMe: Bool = false, remixOf: String? = nil, packageURL: URL, manifestURL: URL,
         coverURL: URL? = nil, createdAt: Date
     ) {
-        self.id = id; self.title = title; self.description = description; self.tags = tags
+        self.id = id; self.slug = slug; self.groupID = groupID; self.eventID = eventID; self.title = title; self.description = description; self.tags = tags
         self.formula = formula; self.ownerID = ownerID; self.ownerUsername = ownerUsername
         self.likes = likes; self.plays = plays; self.finishes = finishes; self.likedByMe = likedByMe
         self.remixOf = remixOf; self.packageURL = packageURL; self.manifestURL = manifestURL
@@ -134,37 +144,243 @@ struct AuthTokens: Codable, Sendable {
     var user: RemoteUser?
 }
 
-// MARK: - Events
+// MARK: - Feed
 
-/// What the app reports about a game. The server accepts only the first ten kinds; the rest are
-/// app-only and are dropped by the live client before sending.
-enum GameEventKind: String, Codable, CaseIterable, Sendable {
-    case view, play, finish, quit, skip, replay, like, unlike, share, remix
-    // App-only (no server endpoint yet): dropped by the live client.
-    case challengeSent = "challenge_sent"
-    case challengeAccepted = "challenge_accepted"
-    case challengeWon = "challenge_won"
+/// One page of `GET /v1/feed`: the game plus why the recommender picked it.
+struct RemoteFeedItem: Decodable, Identifiable, Hashable, Sendable {
+    var game: RemoteGame
+    /// The server's id for this page; sent back in page events.
+    var feedItemID: String
+    /// The recommender's reason (`friendBurst`, `groupBurst`, `daily`, `icebreaker`, `nearby`,
+    /// `nextLevel`, `yours`, `popular`, or `newest` when ranking is off).
+    var reason: String
+    /// A short line about why, when the server sends one. Shown as is.
+    var why: String?
+    var unproven: Bool
+    /// `A` or `B` when the server interleaves; sent back in page events.
+    var team: String?
 
-    var isAcceptedByServer: Bool {
-        switch self {
-        case .challengeSent, .challengeAccepted, .challengeWon: return false
-        default: return true
-        }
+    var id: String { feedItemID }
+
+    enum CodingKeys: String, CodingKey {
+        case feedItemID, reason, why, unproven, team
+    }
+
+    init(from decoder: Decoder) throws {
+        game = try RemoteGame(from: decoder)
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        feedItemID = try c.decodeIfPresent(String.self, forKey: .feedItemID) ?? game.id
+        reason = try c.decodeIfPresent(String.self, forKey: .reason) ?? ""
+        why = try c.decodeIfPresent(String.self, forKey: .why).flatMap { $0.isEmpty ? nil : $0 }
+        unproven = try c.decodeIfPresent(Bool.self, forKey: .unproven) ?? false
+        team = try c.decodeIfPresent(String.self, forKey: .team).flatMap { $0.isEmpty ? nil : $0 }
     }
 }
 
-struct GameEvent: Hashable, Sendable {
-    /// A local id (slug) or a server id; the live client maps slugs.
-    var gameID: String
-    var kind: GameEventKind
-    var value: Double
-    var at: Date
+struct RemoteFeedPage: Decodable, Sendable {
+    var items: [RemoteFeedItem]
 
-    init(gameID: String, kind: GameEventKind, value: Double = 0, at: Date = Date()) {
-        self.gameID = gameID
-        self.kind = kind
-        self.value = value
-        self.at = at
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        items = try c.decodeIfPresent([RemoteFeedItem].self, forKey: .items) ?? []
+    }
+
+    enum CodingKeys: String, CodingKey { case items }
+}
+
+/// One `POST /v1/feed/events` event: a feed page the person saw, or an off-feed moment (`kind`).
+/// Field names are the server's (backend/README.md, "Event log").
+struct FeedEvent: Hashable, Sendable {
+    var eventID: String = UUID().uuidString
+    var gameID: String
+    var feedItemID: String?
+    var position: Int?
+    var sessionID: String?
+    var reason: String?
+    var team: String?
+    var dwellSec: Double?
+    var tookOver = false
+    var runsFinished = 0
+    var replays = 0
+    var saved = false
+    var liked = false
+    var floated = false
+    var openedBoard = false
+    var addedFriend = false
+    var remixed = false
+    var quitMidRun = false
+    var endedSession = false
+    var social: [String] = []
+    var with: [String] = []
+    /// Set for an off-feed moment (any short snake_case name).
+    var kind: String?
+    var at = Date()
+
+    /// The wire form. Booleans and empty lists are left out.
+    func wire(serverGameID: String) -> [String: Any] {
+        var out: [String: Any] = ["eventID": eventID, "gameID": serverGameID]
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        out["ts"] = iso.string(from: at)
+        if let kind {
+            out["kind"] = kind
+            if !with.isEmpty { out["with"] = with }
+            return out
+        }
+        if let feedItemID { out["feedItemID"] = feedItemID }
+        if let position { out["position"] = position }
+        if let sessionID { out["sessionID"] = sessionID }
+        if let reason, !reason.isEmpty { out["reason"] = reason }
+        if let team { out["team"] = team }
+        if let dwellSec { out["dwellSec"] = (dwellSec * 10).rounded() / 10 }
+        let flags: [(String, Bool)] = [
+            ("tookOver", tookOver), ("saved", saved), ("liked", liked), ("floated", floated),
+            ("openedBoard", openedBoard), ("addedFriend", addedFriend), ("remixed", remixed),
+            ("quitMidRun", quitMidRun), ("endedSession", endedSession),
+        ]
+        for (key, value) in flags where value { out[key] = true }
+        if runsFinished > 0 { out["runsFinished"] = runsFinished }
+        if replays > 0 { out["replays"] = replays }
+        if !social.isEmpty { out["social"] = social }
+        if !with.isEmpty { out["with"] = with }
+        return out
+    }
+}
+
+// MARK: - People and Groups
+
+/// A person's public profile (`GET /v1/users/{id}`, friends, Group members).
+struct RemoteProfile: Decodable, Identifiable, Hashable, Sendable {
+    var id: String
+    var username: String
+    var displayName: String
+    var bio: String?
+    var isFriend: Bool
+    /// Group members only: `owner` or nil.
+    var role: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, username, displayName, bio, isFriend, role
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        username = try c.decodeIfPresent(String.self, forKey: .username) ?? ""
+        displayName = try c.decodeIfPresent(String.self, forKey: .displayName) ?? ""
+        bio = try c.decodeIfPresent(String.self, forKey: .bio)
+        isFriend = try c.decodeIfPresent(Bool.self, forKey: .isFriend) ?? false
+        role = try c.decodeIfPresent(String.self, forKey: .role)
+    }
+}
+
+/// A Group or an Event (`kind` is `group` or `event`).
+struct RemoteGroup: Decodable, Identifiable, Hashable, Sendable {
+    var id: String
+    var kind: String
+    var name: String
+    var category: String?
+    var about: String?
+    var isPrivate: Bool
+    var ownerID: String?
+    var memberCount: Int
+    var isMember: Bool
+    var createdAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id, kind, name, category, about, memberCount, isMember, createdAt
+        case isPrivate = "private"
+        case ownerID = "ownerId"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        kind = try c.decodeIfPresent(String.self, forKey: .kind) ?? "group"
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        category = try c.decodeIfPresent(String.self, forKey: .category)
+        about = try c.decodeIfPresent(String.self, forKey: .about)
+        isPrivate = try c.decodeIfPresent(Bool.self, forKey: .isPrivate) ?? false
+        ownerID = try c.decodeIfPresent(String.self, forKey: .ownerID)
+        memberCount = try c.decodeIfPresent(Int.self, forKey: .memberCount) ?? 0
+        isMember = try c.decodeIfPresent(Bool.self, forKey: .isMember) ?? false
+        createdAt = try? c.decodeIfPresent(Date.self, forKey: .createdAt)
+    }
+}
+
+/// `GET /v1/groups/{id}`: the Group and its members.
+struct RemoteGroupDetail: Decodable, Sendable {
+    var group: RemoteGroup
+    var members: [RemoteProfile]
+
+    enum CodingKeys: String, CodingKey { case group, members }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        group = try c.decode(RemoteGroup.self, forKey: .group)
+        members = try c.decodeIfPresent([RemoteProfile].self, forKey: .members) ?? []
+    }
+}
+
+/// `{items: [...]}` replies.
+struct RemoteList<Item: Decodable & Sendable>: Decodable, Sendable {
+    var items: [Item]
+
+    enum CodingKeys: String, CodingKey { case items }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        items = try c.decodeIfPresent([Item].self, forKey: .items) ?? []
+    }
+}
+
+/// A Group's Blend, made on the server from what the members actually play
+/// (`POST /v1/groups/{id}/blend`; Kevin's `groupBlend` in game-recs.js, run by the API).
+struct RemoteBlend: Decodable, Sendable {
+    struct Pick: Decodable, Identifiable, Sendable {
+        let gameID: String
+        /// "Everyone's pick" or "For Maya & you".
+        let label: String
+        let why: String
+        /// The game, attached by the server.
+        let game: RemoteGame?
+
+        var id: String { gameID }
+    }
+
+    /// The Blend game, in the shape of a brief, plus a prompt Studio takes as is.
+    struct Spec: Decodable, Sendable {
+        let formula: String?
+        let mood: [String]?
+        let energy: String?
+        let competition: String?
+        let why: String?
+        let prompt: String
+    }
+
+    /// Someone in the Group with a taste like yours whom you aren't friends with yet.
+    struct Twin: Decodable, Identifiable, Sendable {
+        let userID: String
+        let name: String
+        let why: String
+
+        var id: String { userID }
+    }
+
+    let picks: [Pick]
+    let spec: Spec?
+    /// Mean pairwise taste similarity, 0...1.
+    let cohesion: Double?
+    let twins: [Twin]
+
+    enum CodingKeys: String, CodingKey { case picks, spec, cohesion, twins }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        picks = (try? c.decodeIfPresent([Pick].self, forKey: .picks)) ?? []
+        spec = try? c.decodeIfPresent(Spec.self, forKey: .spec)
+        cohesion = try? c.decodeIfPresent(Double.self, forKey: .cohesion)
+        twins = (try? c.decodeIfPresent([Twin].self, forKey: .twins)) ?? []
     }
 }
 
@@ -227,36 +443,6 @@ enum StoredZip {
 private extension Data {
     mutating func u16(_ v: UInt16) { append(contentsOf: [UInt8(v & 0xFF), UInt8(v >> 8)]) }
     mutating func u32(_ v: UInt32) { u16(UInt16(v & 0xFFFF)); u16(UInt16(v >> 16)) }
-}
-
-// MARK: - Mock-only features (no server endpoints yet)
-
-/// A challenge to friends: "beat my 34". Mock only until the backend has the endpoint.
-struct ChallengeRequest: Codable, Hashable, Sendable {
-    var gameID: String
-    var toUserIDs: [String]
-    var score: Double?
-    var seed: Int?
-    var message: String?
-}
-
-struct Challenge: Codable, Identifiable, Hashable, Sendable {
-    var id: String
-    var gameID: String
-    var fromUserID: String
-    var toUserIDs: [String]
-    var score: Double?
-    var seed: Int?
-    var message: String?
-    var createdAt: Date
-}
-
-/// What a Group has in common and a few games for it (Kevin's Group Blend). Mock only for now.
-struct GroupBlendSummary: Codable, Hashable, Sendable {
-    var groupID: String
-    var headline: String
-    var sharedTraits: [String]
-    var suggestedGameIDs: [String]
 }
 
 // MARK: - Coding

@@ -1,18 +1,19 @@
 import Foundation
 import Security
 
-// The live client for Max's Go API (backend/README.md on `backend-api`, commit 17e4ce7).
+// The live client for Max's Go API (backend/README.md).
 //
 // Auth: `Authorization: Bearer <accessToken>`; access tokens last 15 minutes and refresh tokens
 // rotate on every use (`POST /v1/auth/refresh` consumes the old one). Tokens live in the Keychain
 // (this-device-only, available after first unlock) and are never logged. Refreshes are serialized
 // so two requests never spend the same refresh token.
 //
-// Reads (feed, game, leaderboard, events) work signed out; saves, scores and publishing need an
-// account. Set `autoSignIn` to create and use a device account on the first call that needs one.
+// Reads (feed, game, leaderboard, events) work signed out; saves, scores, friends and publishing
+// need an account. The shared client signs in as a device account on the first call that needs one
+// (`autoSignIn`); `GamesAccount` also signs in once at launch.
 
 actor GamesAPILive: GamesAPI, GamesAuth {
-    static let shared = GamesAPILive(baseURL: GamesAPIConfig.baseURL)
+    static let shared = GamesAPILive(baseURL: GamesAPIConfig.baseURL, autoSignIn: true)
 
     let baseURL: URL
     /// When true, calls that need an account sign in as a device account first (see `signInAsDevice`).
@@ -44,14 +45,30 @@ actor GamesAPILive: GamesAPI, GamesAuth {
 
     // MARK: GamesAPI
 
-    func feed(cursor: String?) async throws -> RemoteGamePage {
-        var query = [URLQueryItem(name: "limit", value: "20")]
+    func feed(limit: Int, sessionID: String?, exclude: [String]) async throws -> [RemoteFeedItem] {
+        var query = [URLQueryItem(name: "limit", value: String(max(1, min(limit, 30))))]
+        if let sessionID, !sessionID.isEmpty { query.append(URLQueryItem(name: "sessionID", value: sessionID)) }
+        let skip = exclude.compactMap { ids.serverID(for: $0) }.prefix(200)
+        if !skip.isEmpty { query.append(URLQueryItem(name: "exclude", value: skip.joined(separator: ","))) }
+        let page: RemoteFeedPage = try await get("v1/feed", query: query, auth: .optional)
+        page.items.forEach(link)
+        return page.items
+    }
+
+    func search(query text: String, tag: String?, cursor: String?) async throws -> RemoteGamePage {
+        var query = [URLQueryItem(name: "q", value: text), URLQueryItem(name: "limit", value: "20")]
+        if let tag, !tag.isEmpty { query.append(URLQueryItem(name: "tag", value: tag)) }
         if let cursor, !cursor.isEmpty { query.append(URLQueryItem(name: "cursor", value: cursor)) }
-        return try await get("v1/feed", query: query, auth: .optional)
+        let page: RemoteGamePage = try await get("v1/search", query: query, auth: .optional)
+        page.items.forEach(link)
+        return page
     }
 
     func game(id: String) async throws -> RemoteGame {
-        try await get("v1/games/\(try serverID(id))", auth: .optional)
+        // A slug the app hasn't linked yet goes to the server as is ({id} may be a slug).
+        let game: RemoteGame = try await get("v1/games/\(ids.serverID(for: id) ?? id)", auth: .optional)
+        link(game)
+        return game
     }
 
     func publish(_ package: GamePackage) async throws -> RemoteGame {
@@ -59,15 +76,16 @@ actor GamesAPILive: GamesAPI, GamesAuth {
                                   auth: .required, timeout: Self.uploadTimeout)
         let game: RemoteGame = try decode(data)
         if let local = package.localID { ids.link(localID: local, serverID: game.id) }
+        link(game)
         return game
     }
 
-    func scores(gameID: String, scope: BubbleBoardScope) async throws -> [RemoteScore] {
+    func scores(gameID: String) async throws -> [RemoteScore] {
         let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", auth: .none)
         return board.items
     }
 
-    func submitScore(_ score: Double, gameID: String) async throws -> [RemoteScore] {
+    func submitScore(_ score: Int, gameID: String) async throws -> [RemoteScore] {
         let body = try JSONSerialization.data(withJSONObject: ["score": score])
         let data = try await send("POST", "v1/games/\(try serverID(gameID))/scores", body: body,
                                   contentType: "application/json", auth: .required)
@@ -79,31 +97,75 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return try decode(data)
     }
 
-    func sendEvents(_ events: [GameEvent]) async throws {
+    func sendFeedEvents(_ events: [FeedEvent]) async throws {
         let wire: [[String: Any]] = events.compactMap { e in
-            guard e.kind.isAcceptedByServer, let id = try? serverID(e.gameID) else { return nil }
-            var item: [String: Any] = ["gameId": id, "type": e.kind.rawValue, "at": Int64(e.at.timeIntervalSince1970 * 1000)]
-            if e.value != 0 { item["value"] = e.value }
-            return item
+            guard let id = ids.serverID(for: e.gameID) else { return nil }
+            return e.wire(serverGameID: id)
         }
+        let signedIn = tokens != nil
         for start in stride(from: 0, to: wire.count, by: 100) {
-            let chunk = Array(wire[start..<min(start + 100, wire.count)])
-            let body = try JSONSerialization.data(withJSONObject: ["deviceId": ids.deviceID, "events": chunk])
+            var payload: [String: Any] = ["events": Array(wire[start..<min(start + 100, wire.count)])]
+            if !signedIn { payload["deviceId"] = ids.deviceID }
+            let body = try JSONSerialization.data(withJSONObject: payload)
             _ = try await send("POST", "v1/feed/events", body: body, contentType: "application/json", auth: .optional)
         }
     }
 
-    func sendChallenge(_ challenge: ChallengeRequest) async throws -> Challenge {
-        throw GamesAPIError.notSupported("Challenges")
+    // MARK: People, friends and Groups
+
+    func user(id: String) async throws -> RemoteProfile {
+        try await get("v1/users/\(id)", auth: .optional)
     }
 
-    func challenges() async throws -> [Challenge] {
-        throw GamesAPIError.notSupported("Challenges")
+    func friends() async throws -> [RemoteProfile] {
+        (try await get("v1/me/friends", auth: .required) as RemoteList<RemoteProfile>).items
     }
 
-    func blend(groupID: String) async throws -> GroupBlendSummary {
-        throw GamesAPIError.notSupported("Group Blend")
+    func setFriend(_ isFriend: Bool, userID: String) async throws {
+        _ = try await send(isFriend ? "PUT" : "DELETE", "v1/me/friends/\(userID)", auth: .required)
     }
+
+    func groups(kind: String?, mine: Bool) async throws -> [RemoteGroup] {
+        var query: [URLQueryItem] = []
+        if let kind { query.append(URLQueryItem(name: "kind", value: kind)) }
+        if mine { query.append(URLQueryItem(name: "mine", value: "1")) }
+        return (try await get("v1/groups", query: query, auth: .optional) as RemoteList<RemoteGroup>).items
+    }
+
+    func group(id: String) async throws -> RemoteGroupDetail {
+        try await get("v1/groups/\(id)", auth: .optional)
+    }
+
+    func setMember(_ isMember: Bool, groupID: String) async throws {
+        _ = try await send(isMember ? "PUT" : "DELETE", "v1/groups/\(groupID)/members/me", auth: .required)
+    }
+
+    func groupGames(id: String) async throws -> [RemoteGame] {
+        let games = (try await get("v1/groups/\(id)/games", auth: .optional) as RemoteList<RemoteGame>).items
+        games.forEach(link)
+        return games
+    }
+
+    func blend(groupID: String, count: Int) async throws -> RemoteBlend {
+        let body = try JSONSerialization.data(withJSONObject: ["count": count])
+        let data = try await send("POST", "v1/groups/\(groupID)/blend", body: body, contentType: "application/json", auth: .required)
+        let blend: RemoteBlend = try decode(data)
+        blend.picks.compactMap(\.game).forEach(link)
+        return blend
+    }
+
+    func creations() async throws -> [RemoteGame] {
+        let games = (try await get("v1/creations", auth: .required) as RemoteList<RemoteGame>).items
+        games.forEach(link)
+        return games
+    }
+
+    /// Remembers a game's slug so later calls by slug go to its server id.
+    private func link(_ game: RemoteGame) {
+        if let slug = game.slug { ids.link(localID: slug, serverID: game.id) }
+    }
+
+    private func link(_ item: RemoteFeedItem) { link(item.game) }
 
     // MARK: GamesAuth
 
@@ -134,6 +196,10 @@ actor GamesAPILive: GamesAPI, GamesAuth {
                                       displayName: "Player", password: creds["password"]!)
         if let raw = try? JSONEncoder().encode(creds) { keychain.write("device", raw) }
         return user
+    }
+
+    func me() async throws -> RemoteUser {
+        try await get("v1/auth/me", auth: .required)
     }
 
     func signOut() async {
