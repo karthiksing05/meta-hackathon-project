@@ -31,9 +31,12 @@ func LookupMuse(generatorURL string) *GeneratorMuse {
 	return &GeneratorMuse{URL: generatorURL, Model: ModelSpark, MaxTokens: 4000, Effort: "minimal", Timeout: 15 * time.Second}
 }
 
-// PlanMuse is the planner's transport (muse-wonder-1.0, 12000 tokens, 90 s), for when the planner lands.
+// PlanEffort is the planner's reasoning effort.
+var PlanEffort = "low"
+
+// PlanMuse is the planner's transport (muse-wonder-1.0, 12000 tokens, 90 s).
 func PlanMuse(generatorURL string) *GeneratorMuse {
-	return &GeneratorMuse{URL: generatorURL, Model: ModelWonder, MaxTokens: 12000, Effort: "medium", Timeout: 90 * time.Second}
+	return &GeneratorMuse{URL: generatorURL, Model: ModelWonder, MaxTokens: 12000, Effort: PlanEffort, Timeout: 90 * time.Second}
 }
 
 // GeneratorMuse is the production MuseJSON transport: the generator service holds the Muse key, and the

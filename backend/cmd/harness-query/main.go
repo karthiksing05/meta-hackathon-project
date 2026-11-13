@@ -9,7 +9,8 @@
 // game's own site, then Muse writes a learned entry). The key is read from the MUSE_API_KEY environment
 // variable only, never from a flag or a file, and is never printed. MUSE_BASE_URL and MUSE_MODEL override
 // the endpoint (https://api.meta.ai/v1) and model (muse-spark-1.3); MUSE_EFFORT the reasoning effort
-// (minimal). The catalog comes from
+// (minimal); MUSE_PLAN_EFFORT the planner's. --plan also runs the planner and prints the plan (with
+// --json, the whole generator context). The catalog comes from
 // authoring/catalog (or --catalog, or $HARNESS_CATALOG).
 package main
 
@@ -34,6 +35,8 @@ func main() {
 		noLookup = flag.Bool("no-lookup", false, "never look anything up")
 		budget   = flag.Duration("fetch-budget", 4*time.Second, "time for all web fetching for one name")
 		museWait = flag.Duration("muse-timeout", 15*time.Second, "timeout for each Muse call (production: 15 s)")
+		withPlan = flag.Bool("plan", false, "also run the planner (muse-wonder-1.0, 12000 tokens, 90 s; needs --muse) and print the game spec")
+		chain    = flag.Bool("chain", false, "with --plan: fill the spec in three chained calls instead of one")
 	)
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: harness-query [flags] \"request\"\n")
@@ -48,6 +51,7 @@ func main() {
 	ctx := context.Background()
 	src := &harness.DirSource{Dir: *catalog}
 	cfg := harness.Config{Source: src, Options: harness.Options{TopTypes: *k, TopTools: *k}}
+	var planner *harness.Planner
 	if *useMuse {
 		key := strings.TrimSpace(os.Getenv("MUSE_API_KEY"))
 		if key == "" {
@@ -60,11 +64,52 @@ func main() {
 		lk := harness.NewLookup(muse)
 		lk.FetchBudget = *budget
 		cfg.Lookup = lk
+		if *withPlan {
+			dir := *catalog
+			if dir == "" {
+				dir, _ = harness.FindCatalogDir()
+			}
+			lists, _, err := harness.LoadChecklists(dir)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "harness-query: checklists:", err)
+				os.Exit(1)
+			}
+			effort := os.Getenv("MUSE_PLAN_EFFORT")
+			if effort == "" {
+				effort = harness.PlanEffort
+			}
+			planner = &harness.Planner{Checklists: lists, Chain: *chain, Muse: &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"),
+				Model: harness.ModelWonder, MaxTokens: 12000, ReasoningEffort: effort, Timeout: 90 * time.Second}}
+		}
 	}
 	h, err := harness.New(ctx, cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "harness-query:", err)
 		os.Exit(1)
+	}
+	if *withPlan {
+		if planner == nil {
+			fmt.Fprintln(os.Stderr, "harness-query: --plan needs --muse")
+			os.Exit(2)
+		}
+		b, err := h.Build(ctx, harness.Request{Text: req, NoLookup: *noLookup}, planner)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "harness-query: plan:", err)
+			os.Exit(1)
+		}
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		enc.SetEscapeHTML(false)
+		if *asJSON {
+			_ = enc.Encode(b.Context)
+			return
+		}
+		nt, nl := h.Index().Len()
+		printPack(b.Pack, nt, nl, len(src.Skipped))
+		printPlan(b.Plan, b.PlanMs)
+		fmt.Println("\nspec")
+		_ = enc.Encode(b.Plan.Spec)
+		return
 	}
 	pack, err := h.Context(ctx, harness.Request{Text: req, NoLookup: *noLookup})
 	if err != nil {
@@ -147,4 +192,46 @@ func printPack(p harness.ContextPack, nTypes, nTools, skipped int) {
 	}
 	fmt.Printf("\ntimings: understand %d ms, retrieve %d ms, lookup %d ms, total %d ms\n",
 		p.Timings.Understand, p.Timings.Retrieve, p.Timings.Lookup, p.Timings.Total)
+}
+
+func printPlan(p *harness.Plan, planMs int64) {
+	fmt.Printf("\nplan (%d ms):", planMs)
+	for _, c := range p.Calls {
+		fmt.Printf(" %s %d ms;", c.Step, c.Ms)
+	}
+	fmt.Printf("\n  types %s", strings.Join(p.TypeIDs, ", "))
+	if p.Blend != "" {
+		fmt.Printf(" (%s)", p.Blend)
+	}
+	fmt.Printf("\n  tools %s\n", strings.Join(p.ToolIDs, ", "))
+	for _, g := range p.Gaps {
+		fmt.Printf("  gap %s (%s): %s\n", g.Tool, g.Status, g.Approximation)
+	}
+	for _, c := range p.Clarify {
+		how := "from the request"
+		if c.Guessed {
+			how = "guessed"
+		}
+		fmt.Printf("  slot %-16s %q (%s)", c.Slot, c.Value, how)
+		if c.Question != "" {
+			fmt.Printf("  ASK %q %v", c.Question, c.Choices)
+		}
+		fmt.Println()
+	}
+	if s := p.Spec; s != nil {
+		sc := s.Score
+		fmt.Printf("  goal: %s [target %q, measure %q]\n", s.Goal.Text, s.Goal.Target, s.Goal.Measure)
+		fmt.Printf("  score: %s, %s is better, counts when %s, %s, tie %s, format %q, measures %q, events %v",
+			sc.Kind, sc.Direction, sc.CountsWhen, sc.Aggregate, sc.TieBreak, sc.Format, sc.Measures, sc.Events)
+		if sc.Reason != "" {
+			fmt.Printf(", reason %q", sc.Reason)
+		}
+		fmt.Println()
+	}
+	for _, i := range p.Issues {
+		fmt.Printf("  spec issue: %s\n", i)
+	}
+	for _, n := range p.Notes {
+		fmt.Printf("  note: %s\n", n)
+	}
 }
