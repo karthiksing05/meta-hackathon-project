@@ -1,14 +1,14 @@
-# Speaker notes and timing (draft 11)
+# Speaker notes and timing (draft 12)
 
-*Shape follows the organizers' guidance (2026-11-13): the problem (30–45 s), the demo as one complete journey (about 2.5 min), how Muse powers it (about 45 s), how we built it with AI (about 60 s). Thesis (Karthik): there's no better way to connect than playing a game. Slide numbers match the Keynote deck (22 slides; the live phone is on slides 9 and 10).*
+*Shape follows the organizers' guidance (2026-11-13): the problem (30–45 s), the demo as one complete journey (about 2.5 min), how Muse powers it (about 45 s), how we built it with AI (about 60 s). Thesis (Karthik): there's no better way to connect than playing a game. Slide numbers match the Keynote deck (26 slides; the live phones are on slides 10 and 11).*
 
 | Slides | Section | Talk | Running total |
 |---|---|---|---|
-| 1–6 | 01 The problem | 45 s | 0:45 |
-| 7–11 | 02 The demo, live on Karthik's iPhone (Bayan's phone joins on 10) | 2:30 | 3:15 |
-| 12–15 | 03 How Muse powers it | 55 s | 4:10 |
-| 16–20 | 04 How we built it | 75 s | 5:25 |
-| 21–22 | Call to action and tagline | 10 s | 5:35 |
+| 1–7 | 01 The problem, ending on the thesis | 55 s | 0:55 |
+| 8–12 | 02 The demo, live on Karthik's iPhone (Bayan's phone joins on 11) | 2:30 | 3:25 |
+| 13–18 | 03 The harness: one request traced, then the three checks | 1:20 | 4:45 |
+| 19–24 | 04 Our process, ending on what the harness taught us | 1:30 | 6:15 |
+| 25–26 | Call to action and tagline | 10 s | 6:25 |
 
 **Pre-show checklist (the morning of the demo, on the presenting phone):**
 1. Signed in as the presenter's own account, member of the demo Group.
@@ -28,7 +28,7 @@
 Curio: something small and delightful. Muse Curios is a new feature in Facebook: tiny games anyone can make, built to bring people together.
 
 ## 2
-*(Section header, no talk; click straight on.)*
+*(Section header: "The problem". Click straight on.)*
 
 ## 3
 There's no better way to connect than playing a game. It's how families keep up, how strangers break the ice, and how a big, mixed group finds common ground over Monopoly or a deck of cards.
@@ -43,50 +43,62 @@ Play is filling that gap: LinkedIn puzzles at work, 11 billion NYT puzzles a yea
 And on Reels, every game ends with "tell me your score" in the comments, where it scrolls away among strangers.
 
 ## 7
-*(Section header; click straight on.)*
+So here's our thesis. People connect best by playing together. Facebook still has the people, but lost the reason to come back. And play is already everywhere, but the score goes nowhere. So: put the game inside Facebook, played with the people you know and the ones you're about to meet, and let anyone make one with Muse.
 
 ## 8
-A Curio turns that into a real Group score. Here's the journey.
+*(Section header: "The demo". Click straight on.)*
 
 ## 9
-*(Live, about 1:40.)* I open Facebook and go to Curios: my friends' Curios come first, with their scores. *(Scroll; one plays with its sound.)* I'll make one: "dodge the fog over Twin Peaks". Muse shows me its plan, I agree, and it builds while I keep going. Max challenged our Harry Potter fans Group to beat his 44. *(Play it.)* Here's our weekly board, and someone I haven't met yet, so: Add friend.
+A Curio turns that into a real Group score. Here's the journey.
 
 ## 10
-*(Live, about 40 s; Bayan's phone joins.)* And when you meet someone, a best of 5 settles it. Bayan and I play the same Curios on the same seeds, so it's fair. *(Round 1.)* Every Curio is better with someone else.
+*(Live, about 1:40.)* I open Facebook and go to Curios: my friends' Curios come first, with their scores. *(Scroll; one plays with its sound.)* I'll make one: "dodge the fog over Twin Peaks". Muse shows me its plan, I agree, and it builds while I keep going. Max challenged our Harry Potter fans Group to beat his 44. *(Play it.)* Here's our weekly board, and someone I haven't met yet, so: Add friend.
 
 ## 11
-*(10 s.)* Brands and creators get one too: this sponsored Curio is in the feed today. *(Back on the phone: the Curio Muse just made is ready; post it to the Group.)*
+*(Live, about 40 s; Bayan's phone joins.)* And when you meet someone, a best of 5 settles it. Bayan and I play the same Curios on the same seeds, so it's fair. *(Round 1.)* Every Curio is better with someone else.
 
 ## 12
-*(Section header.)* How does Muse make that game in about a minute, and make it good?
+*(10 s.)* Brands and creators get one too: this sponsored Curio is in the feed today. *(Back on the phone: the Curio Muse just made is ready; post it to the Group.)*
 
 ## 13
-The design problem: your creativity on one side, the format a Group needs on the other. Muse Spark reads the idea, we ground it in 1,300 game types, Muse Wonder plans it with your words as requirements, Muse Image paints it. Personalization nothing else can do.
+*(Section header: "The harness".)* How does Muse make that game in about a minute, and make it good?
 
 ## 14
-Here's everything inside it. Muse does the creative work: Spark reads, Wonder plans and writes, Image paints. Code does the rest: it searches the catalog, quotes your words, and proves the game.
+The design problem: your creativity on one side, the format a Group needs on the other. Muse Spark reads the idea, we ground it in 1,300 game types, Muse Wonder plans it with your words as requirements, Muse Image paints it. Personalization nothing else can do.
 
 ## 15
-Then code proves it: five bots play it, the score must be fair and replay exactly, and every frame is checked against 29 failure classes. Unreadable text on 45 builds: 178 down to 2.
+Here's one real request, traced. Someone asks for a golden retriever's disastrous first shift as a waiter: five beats, four answers, an eight-second timer. Muse Spark reads it: a story, five beats. Code grounds it in our catalog of 1,305 game types: story_quiz. Muse Wonder plans it, with those words kept as must-haves. Muse Wonder and Muse Image compose it: two text calls and one painted backdrop. Then code proves it: all five bots reached an ending, they got 2 to 5 right, zero blocking findings, published. And it works for games we'd never seen: "Krillion, but Greek mythology" found the rare-answer format, and for Harry Potter it read Wikipedia and kept a 52-answer bank.
 
 ## 16
-*(Section header.)* And how we built it.
+First: is it playable? Five bots play every game to the end, from a new player to a pro. Each game has a profile, like arcade, puzzle or story, that decides what counts as broken: a bot winning in under 15 seconds, controls that do nothing, a story that never ends. A speed-reading game was built three times on our server and blocked three times, because a bot could win instantly. It never reached anyone's feed.
 
 ## 17
-We started with two hours away from Claude: whiteboards and arguments, so the ideas could grow first. Then we treated agents as teammates, with rules: one channel, a canvas where they claim work, CLAUDE.md that every agent reads first. People decide; agents ask. Every draft gets checked by another agent. And we say it as it is.
+Second: does it feel right? Difficulty you can feel means skill has to show in the score: the pro beats the regular, who beats the new player, and a bot that does nothing ranks last. If the new player beats the pro, the score measures luck, and the game is blocked. Mashing a button can't win, scores can't be impossible, and every run replays to the same score; the server replays real players too. Biscuit's bots got 2 to 5 right, in 22 to 33 seconds. That spread is what makes you want a rematch.
 
 ## 18
-Here's what that looks like. Kevin asked for a sound library at 1:26 in the morning, and his agent posted the bid. With Artem's go-ahead, Artem's agent claimed it, researched 178 trending sounds, refused to copy the commercial ones, and asked my agent to merge. I said OK. About 45 minutes of agent work, and 103 credited tracks were live in the app. Three people touched it; agents did the rest.
+Third: does it look right? Every bot run is replayed and checked every tenth of a second against 29 failure classes. Real cases: a "Wave 1 of 5" banner at 1.48 to 1 contrast, "SCORE" split into "SCOR / E", a timer lost against the moon. Fixes may only change how it looks, then they're proven again. On 45 real builds, unreadable text went from 178 to 2.
 
 ## 19
-Our agents worked like a team: 643 of them on one Mac, 158 hours of work in 22. A full review took 3 hours, not 28.
+*(Section header: "Our process".)* And how we built it.
 
 ## 20
-AI fell short when Muse guessed from one giant prompt, when Muse Image refused franchise names, and when agents stated wrong facts confidently. So we built the harness, retries and budgets, and let code check our work.
+We started with two hours away from Claude: whiteboards and arguments, so the ideas could grow first. Then we treated agents as teammates, with rules: one channel, a canvas where they claim work, CLAUDE.md that every agent reads first. People decide; agents ask. Every draft gets checked by another agent. And we say it as it is.
 
 ## 21
-Through Curios, we'll end the awkward first conversation, create a new kind of short-form media you play, and make everyone a creator. So tonight: make a Curio, and send it to someone you want to know better.
+Here's what that looks like. Kevin asked for a sound library at 1:26 in the morning, and his agent posted the bid. With Artem's go-ahead, Artem's agent claimed it, researched 178 trending sounds, refused to copy the commercial ones, and asked my agent to merge. I said OK. About 45 minutes of agent work, and 103 credited tracks were live in the app. Three people touched it; agents did the rest.
 
 ## 22
+Our agents worked like a team: 643 of them on one Mac, 158 hours of work in 22. A full review took 3 hours, not 28.
+
+## 23
+AI fell short when Muse guessed from one giant prompt, when Muse Image refused franchise names, and when agents stated wrong facts confidently. So we built the harness, retries and budgets, and let code check our work.
+
+## 24
+And the harness itself taught us the most. One giant prompt of 137,000 characters missed what people asked for, so now we search the catalog first and send Muse only what the plan picked: must-haves met went from 94 to 98 percent. Muse Image refused franchise names, so we retry once with a plain description, then fall back to drawn art. Muse's own art step undid the verifier's layout fixes, so we keep the verified layout and check again. Wikipedia timed out, so we waited longer and built without it if needed. Parallel steps took a build from 197 to 161 seconds. And people missed unreadable text, so code checks every frame.
+
+## 25
+Through Curios, we'll end the awkward first conversation, create a new kind of short-form media you play, and make everyone a creator. So tonight: make a Curio, and send it to someone you want to know better.
+
+## 26
 *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.
 

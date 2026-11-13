@@ -21,3 +21,12 @@
 - **Slide 9:** Real screen from the app (main, 03303ee). Creator payouts [27].
 - **Slide 10:** Agent transcripts on Karthik's Mac, 2026-11-11 21:54 to 2026-11-13 06:52 PST (3 lead sessions, 640 subagents and workflow agents; teammates' machines not counted). "Active time" sums the gaps under 5 minutes between an agent's events. "One session alone (estimated)" = the sum of every agent's active time in that task, so it ignores coordination overhead. Tasks: review-merged-surfaces workflow (278 agents, 3.07 h wall, 28.1 h summed), curio-new-games (21 agents, 0.95 h, 7.9 h), together-features (21 agents, 1.72 h, 4.7 h). 80 = cross-session messages received by the two lead sessions. Overall 158.4 agent-hours vs 22.5 h of wall-clock activity. Agents synced through Slack, a shared canvas and CLAUDE.md.
 - **Slide 11:** Muse Curios, a new feature in Facebook · made with Muse Spark, Muse Wonder and Muse Image
+
+## Draft 12 additions (slide numbers as of the 26-slide deck)
+
+- **7 (thesis):** restates slides 3–6; Pew topline (71% → 31%) as on slide 4.
+- **15 (one request, traced):** Biscuit's First Day, job a564a35d39e11bb780a41c1a on Prod: story_quiz, 5/5 bots reached an ending (scores 2–5, 22–33 s), 0 blocking findings, Muse Image backdrop, 2 Muse text calls + 1 image call, published as ed793361a7b4f6fce5a0c5b7. Catalog size 1,305 types. Greek mythology / Harry Potter rare-answer run: 3 Wikipedia pages, 400 candidates, 52-answer bank (Harness Evolution session).
+- **16 (is it playable?):** 5 DEFAULT_BOTS (0.35 / 0.7 / 0.95 / 0.7 seed 2 / 0.7 seed 3), 8 gate profiles, FAST_WIN_SECONDS = 15; speed-read format rejected 3/3 by the gate.
+- **17 (does it feel right?):** score-check: skill order, idle not above players, spam bot not beating the median regular, replay determinism, whole numbers; server-side replay for real scores.
+- **18 (does it look right?):** verifier on origin/main: frames every 100 ms, motion every 50 ms, 29 failure classes; Windowsill Defense 1.48:1 (33 blocking), Wrath of Zeus "SCOR / E", Fog Over the Bay 1.04:1, Burrito Beat title overflow; 45 builds: unreadable text 178→2, motion 411→34, overlaps 432→136.
+- **24 (harness struggles):** prompt 136,944 chars → 105,608–114,465; must-haves 94% (46/49) → 98% (48/49) on 13 builds; Muse Image 400 on franchise names in 2 of 2; art step undoing layout fixes; Wikipedia timeout 4 s → 12 s; parallel lanes 197 s → 161 s.
