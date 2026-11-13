@@ -63,7 +63,7 @@
       "anonymous_submit"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "who said it with my friend group's chat quotes",
       "guess which friend said each line",
@@ -139,7 +139,7 @@
       "anonymous_submit"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "whose answer is it for \"worst date idea\" with my roommates",
       "anonymous answers and guess who wrote them",
@@ -211,7 +211,7 @@
       "reveal"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "most likely to with my camp friends",
       "who in our group is most likely to get lost game",
@@ -282,7 +282,7 @@
       "anonymous_submit"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "two truths and a lie game for my new team",
       "2 truths 1 lie about my summer",
@@ -352,7 +352,7 @@
       "reveal"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "never have i ever for a college friend group",
       "never have i ever but wholesome",
@@ -424,7 +424,7 @@
       "friend_answers_store"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "a how well do you know me quiz about me",
       "bff quiz for my best friend",
@@ -494,7 +494,7 @@
       "friend_answers_store"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "rank my top five movies guess game",
       "guess how my friend ranks pizza toppings",
@@ -564,7 +564,7 @@
       "friend_answers_store"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "this or that game about what my best friend would pick",
       "would you rather predict for my roommates",
@@ -634,7 +634,7 @@
       "friend_answers_store"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "match my friends to their go to snacks",
       "who loves what game",
@@ -702,7 +702,7 @@
       "photo_picker"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "whose photo is it for our trip",
       "guess whose camera roll this is",
@@ -771,7 +771,7 @@
       "photo_picker"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "baby photo guess for my dorm",
       "guess which baby is who in our family",
@@ -818,7 +818,7 @@
     ],
     "players": [
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "weekly rotation",
@@ -841,7 +841,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "birthday quiz about the birthday girl",
       "friend of the week trivia",
@@ -891,7 +891,7 @@
       300
     ],
     "players": [
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "clever fakes become inside jokes",
@@ -915,7 +915,7 @@
       "anonymous_submit"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "fibbage about my roommates",
       "bluff game with facts about our friend group",
@@ -963,7 +963,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "inside jokes emerge",
@@ -985,7 +985,7 @@
       "friend_pairing"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "mind meld with my best friend",
       "say the same word game",
@@ -1032,7 +1032,7 @@
     ],
     "players": [
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "reveals Group habits",
@@ -1054,7 +1054,7 @@
       "slider_input"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "what percent of our friends would pick pineapple pizza",
       "guess what the Group voted",
@@ -1122,7 +1122,7 @@
       "quiz"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "who am I clues about my group",
       "guess the friend from five clues",
@@ -1188,7 +1188,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "order our road trip moments",
       "timeline of our friend group",
@@ -1255,7 +1255,7 @@
       "anonymous_submit"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "inside joke origin quiz for our group",
       "match phrase to the story",
@@ -1302,7 +1302,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "share compat score",
@@ -1323,7 +1323,7 @@
       "friend_answers_store"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "compatibility test with my roommate",
       "how alike are we quiz",
@@ -1391,7 +1391,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "guess how many countries my friend visited",
       "friend stats guessing game",
@@ -1458,7 +1458,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "where does my friend fall on introvert and extrovert",
       "spectrum guess game",
@@ -1525,7 +1525,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "hot takes my friends agree with",
       "guess which takes my sister agrees with",
@@ -1592,7 +1592,7 @@
       "photo_picker"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "where was this photo taken game from our trip",
       "guess the place from my friend's travel photo",
@@ -1660,7 +1660,7 @@
       "anonymous_submit"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "guess whose voice this is",
       "voice note quiz for my friends",
@@ -1726,7 +1726,7 @@
       "drawing_canvas"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "whose drawing is this game",
       "doodle guess for my class",
@@ -1794,7 +1794,7 @@
       "reveal"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "finish my sentence game with my best friend",
       "complete the sentence like my sister would",
@@ -1840,7 +1840,7 @@
     ],
     "players": [
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "reveals traits",
@@ -1860,7 +1860,7 @@
       "shared_progress"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "friend bingo for my new team",
       "find someone who bingo",
@@ -1926,7 +1926,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "what gift would my friend like quiz",
       "secret santa guesser",
@@ -1973,7 +1973,7 @@
       240
     ],
     "players": [
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "laughs",
@@ -1996,7 +1996,7 @@
       "anonymous_submit"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "caption this photo of my friend",
       "meme caption battle for the group",
@@ -2041,7 +2041,7 @@
       180
     ],
     "players": [
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "surprise reveals",
@@ -2062,7 +2062,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "lie detector with my friend",
       "truth or lie yes no game",
@@ -2109,7 +2109,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "friends think of secrets",
@@ -2130,7 +2130,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "20 questions with my friend as the secret",
       "guess the friend with yes no questions",
@@ -2196,7 +2196,7 @@
       "anonymous_submit"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "who sent this game from our group chat",
       "guess the sender of each message",
@@ -2258,10 +2258,11 @@
       "friend_answers_store"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "memory match with my friends and their facts",
-      "concentration game with friend photos"
+      "concentration game with friend photos",
+      "memory flip game where the cards are my friends and their facts"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -2320,7 +2321,7 @@
       "scheduled_resolve"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "bet on whether my friend will cancel plans",
       "predict my roommate's week",
@@ -2366,7 +2367,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "bond",
@@ -2386,7 +2387,7 @@
       "friend_pairing"
     ],
     "engine_gaps": [],
-    "gate_profile": "guess_your_friends",
+    "gate_profile": "trivia",
     "example_prompts": [
       "best friends quiz",
       "newlywed quiz for my sister and husband",

@@ -44,7 +44,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "every friend takes a turn drawing",
@@ -70,7 +70,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "a skribbl with only star wars words",
       "pictionary with my friends",
@@ -140,7 +140,7 @@
       "friend_pairing"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "draw something with my best friend",
       "async drawing game with a friend",
@@ -189,7 +189,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "hilarious chains to share",
@@ -212,7 +212,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "gartic phone for my group",
       "drawing telephone with harry potter prompts",
@@ -277,7 +277,7 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "draw a cat in one line",
       "one stroke challenge with my friends",
@@ -342,7 +342,7 @@
       "vote_tally"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "blind drawing with friends",
       "draw a dog without seeing",
@@ -411,7 +411,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "draw a perfect circle game",
       "trace the star",
@@ -479,7 +479,7 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "draw this logo from memory",
       "remember and draw the picture",
@@ -548,7 +548,7 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "quick draw with my friends",
       "an AI that guesses my doodles",
@@ -615,7 +615,7 @@
       "gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "turn this scribble into something",
       "complete the scribble with my friends",
@@ -682,7 +682,7 @@
       "reveal"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "color by number of our group photo",
       "paint by number cat",
@@ -749,7 +749,7 @@
       "gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "pixel art of my dog",
       "make a pixel avatar",
@@ -811,7 +811,7 @@
       "gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "coloring book with my friends' names",
       "mandala coloring",
@@ -858,7 +858,7 @@
     ],
     "players": [
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "Group art",
@@ -879,7 +879,7 @@
       "cooldown_timer"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "a place canvas for our group",
       "shared pixel wall",
@@ -925,7 +925,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "silly creatures",
@@ -945,7 +945,7 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "exquisite corpse drawing with friends",
       "draw monsters in parts",
@@ -1011,7 +1011,7 @@
       "vote_tally"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "make a space scene with stickers",
       "sticker diorama of my town",
@@ -1076,7 +1076,7 @@
       "vote_tally"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "dress up a character in a halloween theme",
       "avatar maker for my friend group",
@@ -1141,7 +1141,7 @@
       "gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "monster mixer",
       "mix animals",
@@ -1187,7 +1187,7 @@
       180
     ],
     "players": [
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "laughs"
@@ -1206,10 +1206,11 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "caption these drawings",
-      "caption battle with my friends"
+      "caption battle with my friends",
+      "funniest caption wins for our group doodles"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -1269,7 +1270,7 @@
       "gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "mandala drawer",
       "symmetry doodle app",
@@ -1332,7 +1333,7 @@
       "color_palette"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "spirograph maker",
       "string art",
@@ -1398,7 +1399,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "color matching game",
       "mix paints to match",
@@ -1461,10 +1462,11 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "pick the colors from this image",
-      "color eyedropper game"
+      "color eyedropper game",
+      "match the colors of a sunset photo"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -1525,10 +1527,11 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "tangram game",
-      "fill the silhouette with shapes"
+      "fill the silhouette with shapes",
+      "tangram puzzle with animal silhouettes"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -1587,7 +1590,7 @@
       "gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "pottery wheel",
       "clay shaping",
@@ -1654,7 +1657,7 @@
       "lives"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "save the dog from bees",
       "draw a wall game",
@@ -1719,7 +1722,7 @@
       "ghost_score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "draw a car that climbs hills",
       "draw your own wheel",
@@ -1782,10 +1785,11 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "draw a line for the ball",
-      "marble ramp drawing"
+      "marble ramp drawing",
+      "draw a ramp so the ball reaches the star"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -1847,10 +1851,11 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "what is missing puzzle",
-      "fix the picture game"
+      "fix the picture game",
+      "spot what is missing in the picture and draw it"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -1909,7 +1914,7 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "trace the alphabet",
       "calligraphy practice",
@@ -1972,7 +1977,7 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "build a face game",
       "mr potato head style",
@@ -2016,7 +2021,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "post"
@@ -2034,10 +2039,11 @@
       "vote_tally"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "speed sketch with a theme",
-      "30 second doodle"
+      "30 second doodle",
+      "30 second sketch battle with the group chat"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -2099,7 +2105,7 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "prompt golf with my friends",
       "write a prompt to match this picture",
@@ -2163,10 +2169,11 @@
       "gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "meme maker for the group",
-      "caption these memes"
+      "caption these memes",
+      "make a meme about monday mornings"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -2227,10 +2234,11 @@
       "gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "make a three panel comic about our trip",
-      "comic strip builder with friends"
+      "comic strip builder with friends",
+      "three panel comic about my cat"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -2289,10 +2297,11 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "connect the dots",
-      "dot to dot cat"
+      "dot to dot cat",
+      "connect the dots to reveal a dinosaur"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -2348,9 +2357,11 @@
       "vote_tally"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
-      "draw a house with only triangles"
+      "draw a house with only triangles",
+      "draw a castle with only circles",
+      "draw my dog using only squares"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -2408,10 +2419,11 @@
       "vote_tally"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "decorate a cozy room with a theme",
-      "room makeover with votes"
+      "room makeover with votes",
+      "decorate a haunted house room for halloween"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -2451,7 +2463,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "share set"
@@ -2470,10 +2482,11 @@
       "vote_tally"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
       "photo scavenger hunt with my roommates",
-      "find five blue things"
+      "find five blue things",
+      "scavenger hunt where we photograph things that are yellow"
     ],
     "status": "seed",
     "source": "seed-karthik",
@@ -2513,7 +2526,7 @@
     ],
     "players": [
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "funny stories"
@@ -2531,9 +2544,11 @@
       "group_roster"
     ],
     "engine_gaps": [],
-    "gate_profile": "drawing_creative",
+    "gate_profile": "calm",
     "example_prompts": [
-      "build a story with my friends line by line"
+      "build a story with my friends line by line",
+      "one sentence each story with my roommates",
+      "write a spooky story with friends one line at a time"
     ],
     "status": "seed",
     "source": "seed-karthik",

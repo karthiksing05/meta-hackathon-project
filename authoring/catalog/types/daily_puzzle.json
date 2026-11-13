@@ -71,7 +71,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "a wordle for my friend group's inside jokes",
       "wordle but only harry potter spells",
@@ -150,7 +150,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "quordle but with pokemon names",
       "two board wordle I can do on the bus",
@@ -225,7 +225,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "a wordle for my friend group's inside jokes",
       "wordle with the names of everyone in our family",
@@ -305,7 +305,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "connections but all marvel characters",
       "make me a connections puzzle for our friend group",
@@ -386,7 +386,7 @@
       "shared_progress"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "a spelling bee with only soccer words",
       "spelling bee but the center letter changes every round",
@@ -463,7 +463,7 @@
       "shared_progress"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "a strands about harry potter houses",
       "word search where the words share a secret theme",
@@ -544,7 +544,7 @@
       "shared_progress"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "a mini crossword with all nba clues",
       "daily crossword I can finish in a minute",
@@ -620,7 +620,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "pinpoint but with disney movies",
       "what do these have in common game",
@@ -694,7 +694,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "queens but with cats instead of crowns",
       "a daily logic grid like linkedin queens",
@@ -768,7 +768,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "tango but with pizza and ice cream",
       "a sun and moon logic puzzle",
@@ -845,7 +845,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "crossclimb but with sports words",
       "word ladder from cat to dog",
@@ -919,7 +919,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "zip but every number is a donut",
       "a one-line path puzzle for my commute",
@@ -999,7 +999,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "a harry potter krillion",
       "make krillion",
@@ -1078,7 +1078,7 @@
       "image_gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "framed but only studio ghibli",
       "a daily guess the movie from stills",
@@ -1155,7 +1155,7 @@
       "map_geometry"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "worldle but states only",
       "a daily guess the country game",
@@ -1231,7 +1231,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "costcodle but for ikea stuff",
       "guess the price of the item game",
@@ -1306,7 +1306,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "a 24 game for my math class",
       "countdown numbers round",
@@ -1383,7 +1383,7 @@
       "tile_rack"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "longest word game from nine letters",
       "word build game with spaceship letters only",
@@ -1458,7 +1458,7 @@
       "shared_progress"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "boggle with only food words",
       "word hunt with a timer for road trips",
@@ -1531,7 +1531,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "nonogram that reveals a cat",
       "picross for a coffee break",
@@ -1606,7 +1606,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "minesweeper where mines are cats",
       "a quick minesweeper with 3 lives",
@@ -1684,7 +1684,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "poeltl but for premier league players",
       "a pokedle for digimon",
@@ -1758,7 +1758,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "contexto but about music",
       "semantle for my friend group",
@@ -1830,7 +1830,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "higher lower with followers of famous cartoon characters",
       "which has more game about video games",
@@ -1905,7 +1905,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "guess the disney movie from emojis",
       "emoji puzzles about our trip",
@@ -1978,7 +1978,7 @@
       "drag_drop_slots"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "timeline game for star wars",
       "put events in order game",
@@ -2054,7 +2054,7 @@
       "tile_rack"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "unscramble names of our friend group",
       "jumble game with pokemon",
@@ -2127,7 +2127,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "cryptogram with song lyrics",
       "send a secret message my friend has to decode",
@@ -2203,7 +2203,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "heardle for 2000s pop",
       "name that tune for my roommates' playlist",
@@ -2279,7 +2279,7 @@
       "image_gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "zoomed in guess the pokemon",
       "pixelated game where you guess the cartoon",
@@ -2353,7 +2353,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "mastermind with candy colors",
       "bulls and cows with 4 digits",
@@ -2425,7 +2425,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "nerdle with fractions",
       "math wordle for my kid sister",
@@ -2497,7 +2497,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "letter boxed with only candy words",
       "chain words from a square puzzle",
@@ -2569,7 +2569,7 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "mahjong solitaire with animal tiles",
       "tile matching game for a quiet minute",
@@ -2641,7 +2641,7 @@
       "drag_drop_slots"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "rank these rides by height",
       "sort the planets in order",
@@ -2713,7 +2713,7 @@
       "score"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "family feud about our group's habits",
       "survey says game about video games",
@@ -2785,7 +2785,7 @@
       "share_grid"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "maze puzzle with 20 moves",
       "a daily labyrinth",
@@ -2855,7 +2855,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "slide puzzle using my group photo",
       "15 puzzle with a dog picture",
@@ -2921,7 +2921,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "lights out but with lanterns",
       "5x5 flip puzzle",
@@ -2990,7 +2990,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "flow free with space stations",
       "connect the dots puzzle in colors",
@@ -3060,7 +3060,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "kenken for my math club",
       "a 4x4 sum cage puzzle",
@@ -3131,7 +3131,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "6x6 sudoku with emojis",
       "daily sudoku",
@@ -3199,7 +3199,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "odd one out about cartoon animals",
       "which one doesn't belong game",
@@ -3270,7 +3270,7 @@
       "image_gallery"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "spot the difference with our group photo",
       "find five things that changed",
@@ -3341,7 +3341,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "kuku kube but with pastel",
       "color shade test",
@@ -3412,7 +3412,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "a riddle a day for my family chat",
       "lateral thinking puzzle about a mystery",
@@ -3483,7 +3483,7 @@
       "daily_seed"
     ],
     "engine_gaps": [],
-    "gate_profile": "daily_puzzle",
+    "gate_profile": "puzzle",
     "example_prompts": [
       "word chain where every pair is a phrase",
       "compound word links",
