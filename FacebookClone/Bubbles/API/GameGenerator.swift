@@ -124,6 +124,14 @@ struct GenerationJob: Decodable, Sendable {
 struct GenerationEvent: Decodable, Hashable, Sendable {
     enum Kind: String, Sendable {
         case drafting, expanding, repairing, polishing, playtesting, playtested, done, failed, other
+        /// Harness v2's score step (authoring/expander/score-step.mjs): code checks, Muse's review, one
+        /// score-only repair, then the verdict (`ranked`, `order`, `reason`).
+        case scoreChecking = "score_checking"
+        case scoreReviewing = "score_reviewing"
+        case scoreRepairing = "score_repairing"
+        case scoreChecked = "score_checked"
+        /// The visual stage's art pass (backend/generator/src/art.mjs): `count` pieces.
+        case painting, painted
     }
 
     var seq: Int

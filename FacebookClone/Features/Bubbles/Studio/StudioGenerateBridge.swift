@@ -163,6 +163,33 @@ enum StudioGenerateBridge {
                 elapsed: elapsed,
                 issues: passed || notes.isEmpty ? nil : Array(notes.prefix(3))
             ), report)
+        case .scoreChecking:
+            return (StudioEvent(step: .validate, title: title.nonEmpty ?? "Checking the score is fair",
+                                detail: "Code checks the score against the test players' runs", elapsed: elapsed), nil)
+        case .scoreReviewing:
+            return (StudioEvent(step: .validate, title: title.nonEmpty ?? "Muse is reviewing the score",
+                                detail: "The goal, the end and how points add up, with the test runs", model: model, elapsed: elapsed), nil)
+        case .scoreRepairing:
+            let issues = (event.issues ?? []).prefix(4).map(StudioMicrogameBridge.readableIssue)
+            return (StudioEvent(step: .repair, title: title.nonEmpty ?? "Fixing the score",
+                                detail: "Only the score changes; the game plays the same", model: model, elapsed: elapsed,
+                                issues: issues.isEmpty ? nil : Array(issues)), nil)
+        case .scoreChecked:
+            let ranked = event.data?["ranked"]?.bool ?? true
+            let order = event.data?["order"]?.string
+            let reason = event.data?["reason"]?.string
+            let detail = ranked
+                ? (order.map { "A ranked board: \($0)" } ?? "A ranked board: friends can beat each other's scores")
+                : (reason.map { "An unranked board: \($0)" } ?? "An unranked board: runs are listed, not ranked")
+            return (StudioEvent(step: .validate, title: title.nonEmpty ?? (ranked ? "Score checked" : "Unranked board"),
+                                detail: detail, elapsed: elapsed), nil)
+        case .painting:
+            let count = event.data?["count"]?.int
+            return (StudioEvent(step: .cover, title: title.nonEmpty ?? "Muse is painting the art",
+                                detail: count.map { "\($0) \($0 == 1 ? "piece" : "pieces"), in the game's look" } ?? "In the game's look",
+                                model: model, elapsed: elapsed), nil)
+        case .painted:
+            return (StudioEvent(step: .cover, title: title.nonEmpty ?? "Art painted", elapsed: elapsed), nil)
         case .done, .failed, .other:
             return (StudioEvent(step: .polish, title: title, elapsed: elapsed), nil)
         }
