@@ -7,7 +7,7 @@
 # backend/Dockerfile.dockerignore keeps the rest of the repository (the iOS app, engine, docs) out of the context.
 # No secrets are copied into or built into any image; they arrive as environment at run time.
 
-FROM golang:1.25-alpine AS build
+FROM golang:1.26-alpine AS build
 WORKDIR /src
 COPY backend/go.mod backend/go.sum ./
 RUN go mod download
