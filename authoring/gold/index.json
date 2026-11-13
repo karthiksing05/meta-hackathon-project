@@ -256,6 +256,67 @@
     "title": "The Saffron Egg Job"
   },
   {
+    "id": "gold_kit_story_gull_rock",
+    "file": "authoring/games/gold_kit_story_gull_rock.authoring.json",
+    "request": "a short choose your own adventure about a lighthouse keeper in a storm trying to save a boat",
+    "design": {
+      "pitch": "Your first night keeping the Gull Rock light, a small boat is drifting toward the reef in a storm: choose between the lamp, the jetty and the radio, and spare the lamp oil if you can.",
+      "theme": [
+        "Gull Rock",
+        "the keeper",
+        "the lamp room",
+        "the jetty",
+        "the radio room",
+        "the harbour lifeboat",
+        "lamp oil",
+        "the reef"
+      ],
+      "verb": "Read each scene and tap one of two or three choices.",
+      "twist": "The cautious-sounding choices (radio for help, wait, rest, take them aboard) lead to the bad endings, and lamp oil is a resource: each can left is worth 50 at the end.",
+      "arc": [
+        "Scene 1: the storm and the boat; three places to go.",
+        "Middle: the lamp room, the jetty or the radio room, each with its own picture; pouring oil or lighting flares costs a can.",
+        "Endings: two good (the light held, a new keeper) and two bad (one breath too long, too small a boat), shown for 4.5 s before the result card."
+      ],
+      "lose": "Reach one of the two bad endings.",
+      "win": "Reach one of the two good endings. Score: ending points (500, 400, 100 or 50) plus 50 for each can of oil left.",
+      "juice": [
+        "Each choice: a click, a light haptic and the scene picture scaling in.",
+        "Spending oil: a chime, gold sparks and the Lamp oil stat pulsing.",
+        "A good ending: a shimmer and a gold particle shower; a bad one: a falling sound, a shake and a warning haptic."
+      ],
+      "look": "A storybook storm at sea: slate-blue night, rain streaks, a red-and-white lighthouse and a honey-gold beam. Kit tokens: dusk theme, sea-blue base, gold accent, storybook family. Font: Georgia.",
+      "voice": "Quiet, concrete storybook prose in short lines: \"The rowboat bucks like a horse.\""
+    },
+    "brief": {
+      "intent": "Make choices as a lighthouse keeper saving a boat in a storm",
+      "audience": "people who like short stories",
+      "mood": [
+        "cozy",
+        "tense"
+      ],
+      "energy": "low",
+      "competition": "friendly"
+    },
+    "genre": "branching story",
+    "fragments_used": [
+      "choice_story"
+    ],
+    "why_its_good": [
+      "Built on the UI kit (`ui: game-style/1`): `choice_story` draws the story in a kit `dialog` and the choices as a kit `choice_list`; the game adds a kit `text` caption for the place name (`order: -1` puts it above the dialog), a `{\"ui\": \"picture\"}` whose `frame` follows the scene, two HUD `stat`s (the hour and the lamp oil) and a `result_card`. No coordinates anywhere.",
+      "A story you can lose and replay: four endings, two of them bad, a resource (oil) that changes the score, and a 4.5 s hold on the ending scene before the result card so the last lines can be read.",
+      "All words live in `content` (scene lines, labels, routes, places, ending titles, oil costs), and small pure functions (`info`, `place`, `oil_cost`) read them."
+    ],
+    "pitfalls_avoided": [
+      "The story lists are kept in step: 4 lines, 3 labels and 3 routes per scene and one ending tag per scene, for all 13 scenes.",
+      "Endings don't end the game instantly (`good_wins`/`bad_loses` off): a curtain event sets the verdict after 4.5 s, so the ending text isn't hidden under the result card.",
+      "No hand-placed text: the place name and the HUD are kit components, so long names fit instead of running off the screen."
+    ],
+    "themes": "lighthouse keeper storm sea boat rescue choose your own adventure interactive fiction story branching",
+    "group": "story",
+    "title": "The Keeper of Gull Rock"
+  },
+  {
     "id": "gold_aura_farm",
     "file": "authoring/games/gold_aura_farm.authoring.json",
     "request": "a stupid brainrot game where you farm aura by tapping on beat",
@@ -803,6 +864,72 @@
     "title": "Cake Tower"
   },
   {
+    "id": "gold_kit_arcade_bramble_basket",
+    "file": "authoring/games/gold_kit_arcade_bramble_basket.authoring.json",
+    "request": "a cute catching game where you move a basket to catch falling berries and avoid spiky things",
+    "design": {
+      "pitch": "Drag a willow basket across a sunny meadow to catch falling berries for 45 seconds, chase rare gold berries and dodge the spiky burrs.",
+      "theme": [
+        "Bramble Basket",
+        "berries",
+        "gold berries",
+        "burrs",
+        "willow basket",
+        "picnic meadow",
+        "streak"
+      ],
+      "verb": "Drag left and right to glide the basket under falling berries while avoiding burrs.",
+      "twist": "A catch streak multiplies berries (x2 from 6, x3 from 15) but any dropped berry or burr prick resets it, and burrs get more common as the 40-second difficulty curve rises.",
+      "arc": [
+        "0-10 s: slow berries, few burrs; the basket glides to your finger.",
+        "10-30 s: drops fall faster and burrs reach about a third of drops; banners call out each streak multiplier.",
+        "30-45 s: fast mixed rain; the clock turns red for the last 5 seconds and surviving wins."
+      ],
+      "lose": "Three burr pricks (three heart lives) end the picnic.",
+      "win": "Survive the 45-second clock. Score: 10 per berry times the streak multiplier, plus 40 more per gold berry.",
+      "juice": [
+        "Catch: violet particles and a pluck; a gold berry adds a gold burst and a sparkle.",
+        "Streak x2 and x3: an amber banner, a rising sound and a success haptic.",
+        "Burr prick: a red \"Ouch! Streak lost\" banner, particles, a shake and a crunch."
+      ],
+      "look": "A picnic meadow at golden hour: pale mint sky, rolling hills, a woven basket, violet berries, gold berries and brown burrs. Kit tokens: soft theme, leaf-green base, amber accent, rounded family. Font: Avenir Next.",
+      "voice": "Cheerful and short: \"Streak! Berries now x2\", \"Ouch! Streak lost\", \"A basket full of berries\"."
+    },
+    "brief": {
+      "intent": "Catch falling berries in a basket and dodge burrs",
+      "audience": "everyone, casual players",
+      "mood": [
+        "cute",
+        "playful"
+      ],
+      "energy": "medium",
+      "competition": "high score"
+    },
+    "genre": "catcher / dodge arcade",
+    "fragments_used": [
+      "player_drag",
+      "score",
+      "lives",
+      "countdown",
+      "collide",
+      "difficulty_curve"
+    ],
+    "why_its_good": [
+      "Built on the UI kit (`ui: game-style/1`): the HUD is a kit bar of three chips drawn by the fragments (score, heart lives, the countdown that turns red), the streak calls are kit `banner`s and the end is a kit `result_card`. Only the real actors (berries, burrs, the basket) have coordinates, and they spawn at y 96, inside the playfield under the HUD bar.",
+      "Skill shows: the streak multiplier rewards clean play and burrs ramp up with `difficulty_curve`; bots scored 280 to 1,080 and two of five lost.",
+      "Berries and burrs are one `drops` list drawn by two `repeat`s (berries use frame 1 for gold), so spawning, falling and removal stay in three short rules."
+    ],
+    "pitfalls_avoided": [
+      "No floating \"+10\" text nodes: run-time text in hand-made boxes overflows; the kit banner fits its text.",
+      "The score fragment's `point` is emitted by the game (it has no payload), not bound to the `caught {x, y, gold}` event, which would be a payload mismatch.",
+      "Rules never read `status` (presentation only); the spawn rule just runs every 480 ms.",
+      "Burr hits go through `collide`, which gives grace, particles and the life loss; the game only removes the burr near `hit_at`."
+    ],
+    "themes": "catch falling fruit basket berries dodge picnic garden cute casual drag catcher",
+    "group": "arcade",
+    "title": "Bramble Basket"
+  },
+  {
     "id": "gold_which_house",
     "file": "authoring/games/gold_which_house.authoring.json",
     "request": "a which-house-are-you quiz for my friends with a magic school vibe, so we can all post our results in the chat",
@@ -1069,5 +1196,69 @@
     "themes": "sleepover jenga stacking pass and play hot seat party build together",
     "group": "social",
     "title": "Pillow Fort Night"
+  },
+  {
+    "id": "gold_kit_trivia_night_market",
+    "file": "authoring/games/gold_kit_trivia_night_market.authoring.json",
+    "request": "a food trivia game set at a night market, multiple choice, fast answers should be worth more",
+    "design": {
+      "pitch": "Fifteen stalls at a lantern-lit night market, one food question each: 100 for every right answer plus a tip for answering fast, and you need 2,700 in takings before the last stall closes.",
+      "theme": [
+        "night market",
+        "stalls",
+        "takings",
+        "tips",
+        "paper lanterns",
+        "noodle stall",
+        "steamed buns",
+        "closing time"
+      ],
+      "verb": "Read the question and tap one of four shuffled answers before the lantern bar drains.",
+      "twist": "Speed is money: a right answer within 4 seconds earns a full 100 tip, falling to nothing at 10 seconds, so the target is only reachable by answering fast and missing at most one.",
+      "arc": [
+        "Stalls 1-5: a question card with a 12 s timer bar, four answer tiles and the noodle stall picture; a green banner shows the tip you earned.",
+        "Stalls 6-10: the takings stat creeps toward 2,700 and a red banner names the right answer whenever you miss or run out of time.",
+        "Stalls 11-15: every slow answer now matters; at 2,700 the market celebrates and the result card shows your takings and best tip."
+      ],
+      "lose": "Three wrong answers put out the three lantern lives, or all 15 stalls pass without reaching 2,700.",
+      "win": "Reach 2,700 takings: 100 per right answer plus a tip of up to 100 for answering fast.",
+      "juice": [
+        "Right answer: the tile turns green, particles, a coin sound, a success haptic and a green \"Fresh! +100, tip +N\" banner.",
+        "Wrong or too slow: the right tile lights green, yours red, a shake, a buzz and a red \"It was …\" banner.",
+        "A tip of 70 or more plays an extra chirp; each new stall plays a two-note chime."
+      ],
+      "look": "A warm night market: indigo sky, strings of paper lanterns and a noodle stall with a striped awning. Kit tokens: night theme, violet base, amber accent, rounded family. Font: Avenir Next.",
+      "voice": "Friendly stall-holder patter: \"Fresh! +100\", \"Too slow: Rice\", \"Best night at the market\"."
+    },
+    "brief": {
+      "intent": "Answer food trivia fast enough to hit a takings target",
+      "audience": "friends who like quizzes and food",
+      "mood": [
+        "cozy",
+        "playful"
+      ],
+      "energy": "medium",
+      "competition": "high score"
+    },
+    "genre": "multiple-choice trivia with a speed bonus",
+    "fragments_used": [
+      "quiz",
+      "score",
+      "lives"
+    ],
+    "why_its_good": [
+      "Built on the UI kit (`ui: game-style/1`): the `quiz` fragment draws the question card, timer and answer grid; the HUD is three kit chips (takings from `score`, lantern lives from `lives`, and the game's own `{\"ui\": \"stat\"}` for the stall count); the playfield is a `{\"ui\": \"picture\"}` and the overlay is two `banner`s and a `result_card`. There is not a single x or y in the presentation, and the style check finds nothing.",
+      "A real challenge for a trivia game: a score target (`score.target` 2,700) that is only reachable with speed tips, a 15-stall limit enforced by one rule on `question_done`, and three lives. Bots scored 2,400 to 2,800 and two of five lost.",
+      "Feedback says what happened: a green banner with the exact tip earned, or a red one naming the right answer, both driven by the quiz's own `locked`, `picked` and `opts` state."
+    ],
+    "pitfalls_avoided": [
+      "No hand-placed text or rects: Muse games that place their own cards overlap the timer and answers. The kit lays out the top, playfield, controls and overlay regions.",
+      "The tip uses the game's own `asked_at` clock (set on `start` and `question_done`), not the fragment's private `_until`, which a game can't read.",
+      "The quiz can be lost: with only `rounds` it would always be won, so the target plus a stall limit gives it a real lose path.",
+      "Every answer is checked: each question's four choices contain the exact answer text."
+    ],
+    "themes": "food trivia quiz night market street food cooking cuisine general knowledge multiple choice pub quiz",
+    "group": "social",
+    "title": "Night Market Bites"
   }
 ]

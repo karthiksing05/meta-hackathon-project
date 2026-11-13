@@ -41,10 +41,7 @@
   },
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top",
-        "node": { "node": "text", "text": "= @label + ' ' + str(min(round + 1, @count)) + ' of ' + str(@count)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
-      }
+      {"slot":"hud_top","node":{"ui":"stat","label":"@label","value":"= str(min(round + 1, @count)) + ' / ' + str(@count)","color":"$ink"}}
     ],
     "feedback": []
   },

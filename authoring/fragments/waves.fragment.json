@@ -73,14 +73,8 @@
   },
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top", "include": "@waves_to_win > 0",
-        "node": { "node": "text", "text": "= @label + ' ' + str(max(1, wave)) + ' of ' + str(@waves_to_win)", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
-      },
-      {
-        "slot": "hud_top", "include": "@waves_to_win == 0",
-        "node": { "node": "text", "text": "= @label + ' ' + str(max(1, wave))", "size": 18, "weight": 600, "color": "$ink", "role": "hud" }
-      }
+      {"slot":"hud_top","include":"@waves_to_win > 0","node":{"ui":"stat","label":"@label","value":"= str(max(1, wave)) + ' / ' + str(@waves_to_win)","color":"$ink"}},
+      {"slot":"hud_top","include":"@waves_to_win == 0","node":{"ui":"stat","label":"@label","value":"= str(max(1, wave))","color":"$ink"}}
     ],
     "feedback": [
       { "on": "wave_started", "do": [ { "moment": "level" } ] },

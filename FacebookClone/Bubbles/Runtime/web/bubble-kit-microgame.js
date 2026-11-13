@@ -46,6 +46,36 @@
   const lib = () => (typeof MicrogameEngine !== "undefined" ? MicrogameEngine : null);
   const hasDOM = typeof document !== "undefined" && typeof Image !== "undefined";
 
+  // ---- game fonts --------------------------------------------------------------------------
+
+  // Each game names its own fonts (a pairing from authoring/kit/vibes.mjs). The faces are declared
+  // in game-fonts.css; a face only loads when first used, which would draw a game's first frames in
+  // the fallback font. So every face starts loading when the host page loads (the files are in the
+  // app bundle, about 1 MB), and a game whose fonts aren't in yet draws its first frames without
+  // text for up to FONT_WAIT_MS. Drawing only: the engine steps the same either way.
+  const FONT_WAIT_MS = 1200;
+  const fontsDone = (function preloadFonts() {
+    if (!hasDOM || !document.fonts || typeof document.fonts.forEach !== "function") return null;
+    const faces = [];
+    try { document.fonts.forEach((f) => faces.push(f)); } catch (e) { return null; }
+    let done = false;
+    Promise.all(faces.map((f) => f.load().catch(() => null))).then(() => { done = true; });
+    return () => done;
+  })();
+  function gameFonts(json) {
+    const out = new Set();
+    const re = /"font"\s*:\s*"([^"]+)"/g;
+    let m;
+    while ((m = re.exec(json))) if (m[1] !== "system") out.add(m[1]);
+    return [...out];
+  }
+  function fontsReady(sess) {
+    if (sess.fontsOk || !fontsDone) return true;
+    if (fontsDone() || Date.now() - sess.fontsSince > FONT_WAIT_MS) { sess.fontsOk = true; return true; }
+    try { sess.fontsOk = sess.fonts.every((f) => document.fonts.check(`16px "${f}"`)); } catch (e) { sess.fontsOk = true; }
+    return sess.fontsOk;
+  }
+
   // ---- engine sessions -------------------------------------------------------------------
 
   // One session per run, keyed by the run's state object (sdk.state is per run and shared with
@@ -102,6 +132,9 @@
       musicTimer: null,
       down: null,
       status: game.status(),
+      fonts: hasDOM ? gameFonts(gameJSON(sdk.content)) : [],
+      fontsSince: Date.now(),
+      fontsOk: !hasDOM,
     };
     sessions.set(sdk.state, sess);
     if (finalizer) finalizer.register(sdk.state, game);
@@ -256,7 +289,9 @@
         if (!L) return;
         const f = sess.game.frame();
         paintBleed(gfx, sess, f, L);
-        L.drawFrame(gfx.ctx, f, sess.assets, { clear: false, k: sess.s, ox: sess.ox, oy: sess.oy });
+        // Until the game's fonts are in (at most FONT_WAIT_MS), draw the frame without its text.
+        const ready = fontsReady(sess);
+        L.drawFrame(gfx.ctx, ready ? f : Object.assign({}, f, { ops: f.ops.filter((o) => o.op !== "text") }), sess.assets, { clear: false, k: sess.s, ox: sess.ox, oy: sess.oy });
         // Side effects queued since the last drawn frame. Drawing is presentation-only, so none of
         // this touches game state (bot, poster and replay runs stay deterministic).
         const out = audioOut(sdk);

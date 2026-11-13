@@ -30,30 +30,8 @@
   },
   "presentation": {
     "slots": [
-      {
-        "slot": "hud_top", "include": "not @art.life",
-        "node": {
-          "node": "text", "text": "= 'Lives: ' + str(lives)", "size": 18, "weight": 600, "color": "$ink", "role": "hud",
-          "animate_on": { "life_lost": { "prop": "scale", "keys": [1, 1.35, 1], "ms": 220 } }
-        }
-      },
-      {
-        "slot": "hud_top", "include": "@art.life",
-        "node": {
-          "node": "group", "role": "hud",
-          "children": [
-            {
-              "node": "repeat", "source": "range(@count)", "as": "k", "key": "k",
-              "template": {
-                "node": "image", "asset": "@art.life.id", "x": "= k * 24", "y": 0, "w": 22, "h": "= 22.0 * @art.life.aspect",
-                "opacity": "= if k < lives then 1.0 else 0.22",
-                "transition": { "opacity": { "ms": 250, "ease": "out" } },
-                "animate_on": { "life_lost": { "when": "k == lives", "prop": "scale", "keys": [1, 1.6, 0.7, 1], "ms": 320 } }
-              }
-            }
-          ]
-        }
-      }
+      {"slot":"hud_top","include":"not @art.life","node":{"ui":"stat","label":"Lives","value":"= str(lives)","color":"$ink","animate_on":{"life_lost":{"prop":"scale","keys":[1,1.35,1],"ms":220}}}},
+      {"slot":"hud_top","include":"@art.life","node":{"node":"group","role":"hud","children":[{"node":"repeat","source":"range(@count)","as":"k","key":"k","template":{"node":"image","asset":"@art.life.id","x":"= k * 24","y":0,"w":22,"h":"= 22.0 * @art.life.aspect","opacity":"= if k < lives then 1.0 else 0.22","transition":{"opacity":{"ms":250,"ease":"out"}},"animate_on":{"life_lost":{"when":"k == lives","prop":"scale","keys":[1,1.6,0.7,1],"ms":320}}}}]}}
     ],
     "feedback": [
       { "on": "life_lost", "do": [ { "shake": { "px": 6, "ms": 200 } }, { "haptic": "warning" } ] }
