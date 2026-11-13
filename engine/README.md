@@ -327,6 +327,11 @@ These are decisions taken while building v0.1. They belong in the next revision 
    scale don't pass down to children. v0.2.2: a `clip` group cuts its children's boxes to its
    own, and a `"hit": "shape"` poly also needs the point inside the polygon (nonzero winding,
    plain `+ - *` arithmetic, so replays hit-test the same everywhere).
+9. **Math is the same on every target.** `sin`, `cos`, `log2`, `atan2`, `angle`, `pow` and
+   the rest go through `mg-runtime/src/mathx.rs` (fdlibm/musl ports using only correctly
+   rounded `+ - * /` and `sqrt`), never the platform's libm, whose last bits differ between
+   macOS, Linux and WASM. `mathx::tests::pinned_bits` pins exact `atan2`/`pow` results and
+   `web/test-node.mjs` checks the WASM build gives the same bits.
 
 `examples/meteor_dodge.json` is a fourth test game. It covers what the three fixtures
 don't: drag, `repeat`, `tick`, circles, records, enums, `after`, `push` and `remove`.

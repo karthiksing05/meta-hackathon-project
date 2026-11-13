@@ -347,7 +347,7 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
 
 // ------------------------------------------------------------ v0.2.2 ----
 // Clipping groups, image source rects and shape hits, end to end through the
-// WASM build.
+// WASM build; then atan2 / pow bits pinned against the native build.
 {
   const pic = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 24'><rect width='32' height='24' fill='#f80'/></svg>";
   const src = JSON.stringify({
@@ -357,6 +357,9 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
     state: {
       inside: { type: 'int', init: '0' },
       tri: { type: 'int', init: '0' },
+      pins: { type: 'list<float>', init: '[atan2(1.0, 2.0), atan2(-3.5, 0.25), atan2(0.1, -7.0), atan2(5.0, -5.0), ' +
+        'atan2(-0.3, -0.7), atan2(123.456, 0.001), pow(1.5, 2.5), pow(10.0, -0.75), pow(0.9, 123.4), pow(7.0, 1.0 / 3.0), ' +
+        'pow(-2.5, 3.0), pow(3.7, 64.5), pow(2.0, 0.5)]' },
     },
     inputs: { hit_inside: {}, hit_tri: {} },
     rules: [{ on: 'hit_inside', do: [{ incr: 'inside' }] }, { on: 'hit_tri', do: [{ incr: 'tri' }] }],
@@ -400,6 +403,15 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
   check(targets.some((t) => t.x === 20 && t.y === 40 && t.w === 100 && t.h === 50), `clipped hit target: ${JSON.stringify(targets)}`);
   check(a.diagnostics().length === 0, `clip test diagnostics ${JSON.stringify(a.diagnostics())}`);
 
+  // atan2 / pow: the same bits as mg-runtime's mathx::tests::pinned_bits (native).
+  const pins = [0x3fddac670561bb4fn, 0xbff7fde80870c2a0n, 0x400904ba0292380fn, 0x4002d97c7f3321d2n, 0xc005e4c36ca0118an,
+    0x3ff921f2d5ecda27n, 0x40060b9fd68a4555n, 0x3fc6c310e3769f3en, 0x3ec2eece0829394an, 0x3ffe9b5dba58189dn,
+    0xc02f400000000000n, 0x478ad2994caef6e2n, 0x3ff6a09e667f3bcdn];
+  const dv = new DataView(new ArrayBuffer(8));
+  const bits = (v) => { dv.setFloat64(0, v); return dv.getBigUint64(0); };
+  check(Array.isArray(st.pins) && st.pins.length === pins.length, `pins: ${JSON.stringify(st.pins)}`);
+  (st.pins || []).forEach((v, i) => check(bits(v) === pins[i], `pin ${i}: wasm ${v} (0x${bits(v).toString(16)}) vs native 0x${pins[i].toString(16)}`));
+
   // The renderer: clip ops become save/clip/restore, the crop the 9-argument drawImage.
   const { drawFrame, drawImageSrc } = await import('./render.js');
   const calls = [];
@@ -424,7 +436,7 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
   drawImageSrc(ctx, assets.images[0], { x: 0, y: 0, w: 10, h: 10, src_x: 40, src_y: 0, src_w: 8, src_h: 8 }, 0, 0, 64, 48);
   check(calls.length === 0, 'a crop entirely outside the frame draws nothing');
   a.dispose(); b.dispose();
-  console.log('v0.2.2: clip ops, image crops and shape hits match between binary and JSON');
+  console.log('v0.2.2: clip ops, image crops and shape hits match between binary and JSON; atan2/pow bits match native');
 }
 
 if (failures) {

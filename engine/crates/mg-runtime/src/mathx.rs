@@ -568,4 +568,36 @@ mod tests {
         assert_eq!(atan2(1.0, 1.0), std::f64::consts::FRAC_PI_4);
         assert_eq!(atan2(f64::INFINITY, f64::NEG_INFINITY), 3.0 * PI / 4.0);
     }
+
+    /// Exact bits, so any change to these kernels (or a target that
+    /// computes them differently) fails here. `engine/web/test-node.mjs`
+    /// checks the same values through the WASM build. Native `f64::powf`
+    /// on macOS differs from `pow` in the last bits for (1.5, 2.5),
+    /// (10, -0.75) and (3.7, 64.5): that's why games never call it.
+    #[test]
+    fn pinned_bits() {
+        let atan2_pins: [(f64, f64, u64); 6] = [
+            (1.0, 2.0, 0x3fdd_ac67_0561_bb4f),
+            (-3.5, 0.25, 0xbff7_fde8_0870_c2a0),
+            (0.1, -7.0, 0x4009_04ba_0292_380f),
+            (5.0, -5.0, 0x4002_d97c_7f33_21d2),
+            (-0.3, -0.7, 0xc005_e4c3_6ca0_118a),
+            (123.456, 0.001, 0x3ff9_21f2_d5ec_da27),
+        ];
+        for (y, x, bits) in atan2_pins {
+            assert_eq!(atan2(y, x).to_bits(), bits, "atan2({y}, {x}) = {}", atan2(y, x));
+        }
+        let pow_pins: [(f64, f64, u64); 7] = [
+            (1.5, 2.5, 0x4006_0b9f_d68a_4555),
+            (10.0, -0.75, 0x3fc6_c310_e376_9f3e),
+            (0.9, 123.4, 0x3ec2_eece_0829_394a),
+            (7.0, 1.0 / 3.0, 0x3ffe_9b5d_ba58_189d),
+            (-2.5, 3.0, 0xc02f_4000_0000_0000),
+            (3.7, 64.5, 0x478a_d299_4cae_f6e2),
+            (2.0, 0.5, 0x3ff6_a09e_667f_3bcd),
+        ];
+        for (x, y, bits) in pow_pins {
+            assert_eq!(pow(x, y).to_bits(), bits, "pow({x}, {y}) = {}", pow(x, y));
+        }
+    }
 }
