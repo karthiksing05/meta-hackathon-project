@@ -6,7 +6,7 @@
 
 /**
  * verifyLayout(gameJSON, opts) → {game_json, report, fixes, proof, reverted, stages, ms}.
- * opts: verifyAndFix's ({engine, pixels, runs, maxSeconds, ...}). pixels: false with measures: null runs
+ * opts: {authoring} plus verifyAndFix's ({engine, pixels, runs, maxSeconds, ...}). pixels: false with measures: null runs
  * without Chrome at all (the structural path the generator image uses).
  * report is the verifier's JSON report with findings trimmed to {code, severity, node, frame, message, hint}.
  */
@@ -14,7 +14,10 @@ export async function verifyLayout(gameJSON, opts = {}) {
   const t0 = Date.now();
   const { verifyAndFix } = await import('../verify/verify.mjs');
   const game = typeof gameJSON === 'string' ? JSON.parse(gameJSON) : gameJSON;
-  const res = await verifyAndFix(game, opts);
+  // opts.authoring (object or JSON text): the game's authoring manifest, so the look stage and the look
+  // checks hold the game to its own art.type.
+  const { authoring = null, ...fixOpts } = opts;
+  const res = await verifyAndFix(authoring ? { game, authoring } : game, fixOpts);
   const { findings = [], ...rest } = res.report ?? {};
   return {
     game_json: JSON.stringify(res.game),

@@ -165,22 +165,38 @@ export async function verify(input, opts = {}) {
 }
 
 /**
- * The flow before the gate: verify → code fixes → verify → layout solver → verify → proof.
+ * The flow before the gate: look → verify → code fixes → verify → layout solver → verify → proof.
  * Returns {game, report (final), stages: [{stage, blocking, warnings, byCode}], fixes, proof}.
+ * Pass a manifest or {game, authoring} (not a bare game) so the look checks hold the game to its art.type.
  */
 export async function verifyAndFix(input, opts = {}) {
-  const { game: original } = readInput(input);
+  const { game: original, built: built0 } = readInput(input);
+  // Every verify sees the game with its manifest and authoring (the look checks read art.type from them).
+  const hasBuilt = !!built0?.manifest || Object.keys(built0?.authoring ?? {}).length > 0;
+  const withBuilt = (g) => (hasBuilt ? { manifest: built0.manifest, authoring: built0.authoring, game: g } : g);
   const engine = opts.engine ?? (await loadEngine()).engine;
   const { fixLayout } = await import('../expander/layout-fix.mjs');
   const { solveLayout } = await import('./solve.mjs');
   const { proveUnchanged } = await import('./prove.mjs');
   const stages = [];
   const note = (stage, r) => stages.push({ stage, blocking: r.blocking, warnings: r.warnings, byCode: r.byCode });
-  const v = (g) => verify(g, { ...opts, engine, ref: g === original ? null : original });
-  let report = await v(original);
-  note('built', report);
+  const v = (g) => verify(withBuilt(g), { ...opts, engine, ref: g === original ? null : original });
   let game = original;
   const fixes = [];
+  // The look stage (kit/look.mjs lookFix): every text node on the game's own fonts, scale and palette,
+  // before anything is measured. Presentation only, so the proof covers it like the other fixes.
+  if (opts.look !== false) {
+    try {
+      const { lookForBuilt, lookFix } = await import('../kit/look.mjs');
+      const { spec } = lookForBuilt({ ...built0, game: original });
+      const r = lookFix(original, spec);
+      if (r.changed || r.tokens?.length) { game = r.game; fixes.push({ stage: 'look', changed: r.changed, tokens: r.tokens ?? [] }); }
+    } catch (e) {
+      stages.push({ stage: 'look', error: String(e?.message ?? e).slice(0, 200) });
+    }
+  }
+  let report = await v(game);
+  note('built', report);
   if (!report.pass || opts.always) {
     const fixed = await fixLayout(game, { engine, pixels: opts.pixels ?? null });
     if (fixed.fixes.length) {
@@ -195,7 +211,7 @@ export async function verifyAndFix(input, opts = {}) {
   // kept if a follow-up move from the solver then brings the count down.
   const { setAt } = await import('./solve.mjs');
   const inner = { ...opts, pixels: false, widthCache: opts.widthCache ?? new Map() };
-  const vi = (g) => verify(g, { ...inner, engine, ref: original });
+  const vi = (g) => verify(withBuilt(g), { ...inner, engine, ref: original });
   const withMove = (g, m) => { const c = JSON.parse(JSON.stringify(g)); setAt(c, m.node, JSON.parse(JSON.stringify(m.patch))); return c; };
   const related = (a, b) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
   const keep = (list) => fixes.push(...list.map(({ patch: _p, ...x }) => ({ stage: 'solver', ...x })));
