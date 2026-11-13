@@ -2,7 +2,8 @@ import Foundation
 
 // Server-side game generation (Max's `POST /v1/generate`, posted 2026-11-12 16:01 PST).
 //
-//     POST /v1/generate               {"request", "brief": BubbleBrief, "anatomy"?, "draft"?}  -> 202 {"jobId"}
+//     POST /v1/generate               {"request", "brief": BubbleBrief, "anatomy"?, "draft"?,
+//                                      "media"?, "mediaNote"?, "mediaRestyle"?}  -> 202 {"jobId"}
 //     POST /v1/generate               {"baseGameId", "change"?, "look"?, "nextLevel"?, "brief"?, "anatomy"?}
 //                                     -> 202 {"jobId"}: change a game (a tweak, a new look, the next
 //                                        level or a remix). The result is always a new game with
@@ -37,8 +38,9 @@ import Foundation
 protocol GameGenerator: Sendable {
     /// `POST /v1/generate`; returns the job id. `anatomy` is the agreed anatomy text; `draft` keeps
     /// the finished game out of the feed until `publish`; `sound` is a library sound to play behind
-    /// it (`soundId`, `offsetMs`, `mix`).
-    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?) async throws -> String
+    /// it (`soundId`, `offsetMs`, `mix`); `media` is the person's uploaded photos and video
+    /// (`media`, `mediaNote`, `mediaRestyle`, sent only when there are ids).
+    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?, media: GameMediaInput) async throws -> String
     /// `POST /v1/generate` with `baseGameId`: a change to a game the server has. Returns the job id.
     func start(revision: GameRevision) async throws -> String
     /// `GET /v1/generate/{id}`, with `after` = the last `seq` seen (nil on the first poll).
@@ -241,10 +243,15 @@ enum GameGenerationError: LocalizedError, Equatable {
 // MARK: - Polling
 
 extension GameGenerator {
+    /// `start` without media.
+    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?) async throws -> String {
+        try await start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound, media: .none)
+    }
+
     /// Starts a job and streams it to the end. Cancelling the consumer cancels the job.
     func generate(request: String, brief: BubbleBrief, anatomy: String? = nil, draft: Bool = true,
-                  sound: RemoteGameSound? = nil) -> AsyncThrowingStream<GenerationUpdate, Error> {
-        stream { try await start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound) }
+                  sound: RemoteGameSound? = nil, media: GameMediaInput = .none) -> AsyncThrowingStream<GenerationUpdate, Error> {
+        stream { try await start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound, media: media) }
     }
 
     /// Starts a change to an existing game and streams it to the end, exactly like a new game. A

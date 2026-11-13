@@ -27,10 +27,11 @@ enum StudioGenerateBridge {
         anatomy: String?,
         draft: Bool,
         sound: RemoteGameSound? = nil,
+        media: GameMediaInput = .none,
         onReport: @escaping @MainActor (UUID, StudioPlaytest.Report) -> Void,
         onWait: @escaping @MainActor (Wait?) -> Void
     ) -> AsyncThrowingStream<StudioEvent, Error> {
-        events(from: generator.generate(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound),
+        events(from: generator.generate(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound, media: media),
                onReport: onReport, onWait: onWait)
     }
 

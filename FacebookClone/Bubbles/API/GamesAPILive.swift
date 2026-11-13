@@ -208,6 +208,47 @@ actor GamesAPILive: GamesAPI, GamesAuth {
                        auth: .required, timeout: HarnessPlanClient.timeout)
     }
 
+    // MARK: Media (for `MediaUploadClient`)
+
+    /// `POST /v1/media` (multipart), with `delegate` getting the upload's progress. Needs an
+    /// account; refreshes and retries once on 401, like `send`.
+    func mediaUpload(body: Data, contentType: String, delegate: URLSessionTaskDelegate) async throws -> Data {
+        let token = try await accessToken(required: true)
+        var (data, status) = try await performUpload(body, contentType, token, delegate)
+        if status == 401 {
+            if let fresh = try? await refreshTokens() {
+                (data, status) = try await performUpload(body, contentType, fresh.accessToken, delegate)
+            } else {
+                clearTokens()
+            }
+        }
+        guard (200..<300).contains(status) else { throw Self.error(status, data) }
+        return data
+    }
+
+    /// `DELETE /v1/media/{id}`. Best effort.
+    func mediaDelete(id: String) async {
+        _ = try? await send("DELETE", "v1/media/\(id)", auth: .required)
+    }
+
+    private func performUpload(_ body: Data, _ contentType: String, _ token: String?, _ delegate: URLSessionTaskDelegate) async throws -> (Data, Int) {
+        var request = URLRequest(url: baseURL.appendingPathComponent("v1/media"), timeoutInterval: MediaUploadClient.timeout)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        if let token { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        do {
+            let (data, response) = try await session.upload(for: request, from: body, delegate: delegate)
+            return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch let error as URLError where error.code == .cancelled {
+            throw CancellationError()
+        } catch {
+            throw GamesAPIError.network((error as? URLError)?.localizedDescription ?? error.localizedDescription)
+        }
+    }
+
     // MARK: Facebook surfaces (backend/README.md, "Facebook surfaces")
 
     /// A raw `/v1/fb/...` call for `FacebookAPILive`, with this client's tokens. `signIn` needs an account

@@ -39,7 +39,9 @@ struct HarnessPlanClient: Sendable {
     /// The server takes 1 to 2,000 characters of request.
     static let maxRequestCharacters = 2_000
 
-    func plan(request: String) async throws -> Outcome {
+    /// `media` adds the person's uploaded photos and video (`media`, `mediaNote`, `mediaRestyle`)
+    /// when there are any.
+    func plan(request: String, media: GameMediaInput = .none) async throws -> Outcome {
         #if DEBUG
         if let fixture = DebugLaunch.value("FB_STUDIO_PLAN") {
             return try await GamePlanFixtures.answer(fixture, request: request)
@@ -47,7 +49,9 @@ struct HarnessPlanClient: Sendable {
         #endif
         let text = String(request.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.maxRequestCharacters))
         guard !text.isEmpty, let transport else { return .unavailable }
-        let body = try JSONSerialization.data(withJSONObject: ["request": text])
+        var payload: [String: Any] = ["request": text]
+        media.add(to: &payload)
+        let body = try JSONSerialization.data(withJSONObject: payload)
         do {
             return .plan(try GamePlan.decode(try await transport.gamePlanRaw(body: body)))
         } catch GamesAPIError.notFound {
