@@ -70,6 +70,7 @@ extension AppStore {
         }
         guard GamesAccount.shared.state == .signedIn else { return }
         live.accountID = GamesAccount.shared.userID
+        await applyLiveIdentity()
         do {
             let threads = try await FacebookAPILive.shared.threads(messages: 30)
             applyLiveThreads(threads)
@@ -77,6 +78,28 @@ extension AppStore {
         } catch {
             fellBackToMock(error)
         }
+    }
+
+    /// The signed-in account becomes "me" (name and cartoon avatar), unless it is this phone's guest
+    /// account, which keeps the demo identity. The account's server friends join `people` as friends.
+    /// Best effort: on any failure the mock identity and friends stay.
+    @MainActor
+    private func applyLiveIdentity() async {
+        guard let accountID = live.accountID else { return }
+        let friendProfiles = (try? await GamesAPILive.shared.friends()) ?? []
+        let ids = [accountID] + friendProfiles.map(\.id)
+        guard let found = try? await FacebookAPILive.shared.people(ids: ids) else { return }
+        if let mine = found.first(where: { $0.id == accountID }), !GamesAccount.shared.isGuest {
+            me.firstName = mine.firstName
+            me.lastName = mine.lastName ?? ""
+            if let avatar = mine.avatarUrl.flatMap(URL.init(string:)) { me.avatarURL = avatar }
+            if let bio = mine.bio, !bio.isEmpty { me.bio = bio }
+        }
+        for person in found where person.id != accountID {
+            let user = liveUser(person)
+            if !user.isPage { user.friendship = .friends }
+        }
+        me.friendCount = friends.count
     }
 
     @MainActor

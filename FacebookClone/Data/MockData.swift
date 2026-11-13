@@ -4,7 +4,8 @@ import Foundation
 /// buffer for infinite scrolling, stories, reels, videos, chats, notifications,
 /// Marketplace listings and events. Seeded, so every launch starts the same.
 ///
-/// Images come from picsum.photos (scenery) and randomuser.me (portraits).
+/// Images come from picsum.photos (scenery) and DiceBear (cartoon avatars, never photos of real people).
+/// Avatars match the server's demo world (backend/internal/fbseed), so a person looks the same in both.
 /// Videos are public sample streams. Without a network the UI falls back to
 /// placeholders and initials.
 final class MockDataFactory {
@@ -39,7 +40,7 @@ final class MockDataFactory {
             id: "me",
             firstName: "Alex",
             lastName: "Rivera",
-            avatarURL: MockDataFactory.portrait(female: false, index: 32),
+            avatarURL: MockDataFactory.cartoon("Alex Rivera"),
             coverURL: MockDataFactory.photo("cover-me", 1200, 450),
             bio: "Designer by day, trail runner on weekends 🏃‍♂️ Coffee first ☕️",
             city: "San Francisco, California",
@@ -212,8 +213,11 @@ final class MockDataFactory {
         URL(string: "https://picsum.photos/seed/\(seed)/\(width)/\(height)")
     }
 
-    static func portrait(female: Bool, index: Int) -> URL? {
-        URL(string: "https://randomuser.me/api/portraits/\(female ? "women" : "men")/\(index % 100).jpg")
+    /// A DiceBear cartoon for a name: the same URL the server's demo world uses (`make_world.py`).
+    static func cartoon(_ name: String) -> URL? {
+        let safe = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
+        let seed = name.addingPercentEncoding(withAllowedCharacters: safe) ?? name
+        return URL(string: "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=\(seed)")
     }
 
     /// Public sample videos (MP4 and HLS). The poster image shows if one fails to load.
@@ -321,7 +325,7 @@ final class MockDataFactory {
                 id: "user-\(index)",
                 firstName: firstName,
                 lastName: lastName,
-                avatarURL: MockDataFactory.portrait(female: female, index: (index * 7 + 3) % 100),
+                avatarURL: MockDataFactory.cartoon("\(firstName) \(lastName)"),
                 coverURL: MockDataFactory.photo("cover-\(index)", 1200, 450),
                 bio: chance(0.7) ? pickText(MockContent.bios) : "",
                 city: pickText(MockContent.cities),
@@ -1285,7 +1289,7 @@ extension MockDataFactory {
                 id: info.id,
                 firstName: info.firstName,
                 lastName: info.lastName,
-                avatarURL: MockDataFactory.portrait(female: info.female, index: info.portrait),
+                avatarURL: MockDataFactory.cartoon("\(info.firstName) \(info.lastName)"),
                 coverURL: MockDataFactory.photo("cover-\(info.id)", 1200, 450),
                 bio: info.intro,
                 city: "San Francisco, California",

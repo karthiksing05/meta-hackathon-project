@@ -46,6 +46,15 @@ final class GamesAccount {
         task = Task { @MainActor [weak self] in
             let api = GamesAPILive.shared
             do {
+                #if DEBUG
+                // `FB_LOGIN_EMAIL` + `FB_LOGIN_PASSWORD` (DEBUG launches only): sign in as a test
+                // account, so two-account flows can be driven on a simulator. Never logged.
+                if let email = DebugLaunch.value("FB_LOGIN_EMAIL"), let password = DebugLaunch.value("FB_LOGIN_PASSWORD") {
+                    self?.finish(try await api.login(email: email, password: password))
+                    self?.task = nil
+                    return
+                }
+                #endif
                 if await api.isSignedIn, let current = try? await api.me() {
                     self?.finish(current)
                 } else if await api.hasDeviceAccount || Self.automatedLaunch {
