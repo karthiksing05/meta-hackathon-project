@@ -49,6 +49,25 @@ export function bands(canvas = CANVAS) {
   };
 }
 
+/** Height of the fixed control band (answer tiles, buttons, a keypad) at the bottom of the safe area. */
+export const CONTROL_BAND_H = 152;
+
+/**
+ * The three fixed screen regions a game's own nodes are placed in, for a canvas. On the tall
+ * 360 × 780 canvas they sit inside the safe area (y 110–684):
+ *   hud       the HUD band            y 114–162 (tall) / 24–72 (640)
+ *   play      the play area           from 12 under the HUD band to 12 above the control band
+ *   controls  the control band        CONTROL_BAND_H tall, ending 24 above the safe bottom
+ * plus `strip` (the bottom strip, when a game uses hud_bottom) and `safe`.
+ */
+export function kitRegions(canvas = CANVAS) {
+  const b = bands(canvas);
+  const hud = { ...b.hud };
+  const controls = { x: b.gutter, y: b.controlsBottom - CONTROL_BAND_H, w: canvas.w - b.gutter * 2, h: CONTROL_BAND_H };
+  const top = hud.y + hud.h + 12;
+  return { hud, play: { x: 0, y: top, w: canvas.w, h: controls.y - 12 - top }, controls, strip: { ...b.hudBottom }, safe: b.safe };
+}
+
 // ---------- the scales (fixed: Muse never picks a size) ----------
 
 /** The 4 pt grid. Every static position and size the kit writes is a multiple of GRID. */
