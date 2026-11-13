@@ -368,3 +368,116 @@ func TestMongoSocial(t *testing.T) {
 		t.Fatalf("recent scores, newest first: %v", sc)
 	}
 }
+
+func TestMongoSeriesAndDrafts(t *testing.T) {
+	uri := os.Getenv("MONGO_TEST_URI")
+	if uri == "" {
+		t.Skip("MONGO_TEST_URI not set")
+	}
+	ctx := context.Background()
+	m, err := store.ConnectMongo(ctx, uri, "bubbles_test_series_"+time.Now().Format("150405"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.Close(ctx)
+	defer m.DropDatabase(ctx)
+	if err := m.EnsureIndexes(ctx); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC().Truncate(time.Millisecond)
+
+	// a series round-trips, including the plays keyed by user
+	se := &model.Series{ID: "s1", PlayerA: "ua", PlayerB: "ub", WinsNeeded: 2, CreatedAt: now,
+		Rounds: []model.SeriesRound{{N: 1, GameID: "g1", Seed: 7, Plays: map[string]model.RoundPlay{}}}}
+	if err := m.InsertSeries(ctx, se); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.InsertSeries(ctx, se); err != store.ErrConflict {
+		t.Fatalf("duplicate series: %v", err)
+	}
+	got, err := m.SeriesByID(ctx, "s1")
+	if err != nil || got.Rounds[0].Seed != 7 {
+		t.Fatalf("series: %v %v", got, err)
+	}
+	got.Rounds[0].LogSeed = "111"
+	got.Rounds[0].Plays["ub"] = model.RoundPlay{Score: 50, TimeMs: 4000, At: now}
+	if err := m.ReplaceSeries(ctx, got); err != nil {
+		t.Fatal(err)
+	}
+	again, _ := m.SeriesByID(ctx, "s1")
+	if p := again.Rounds[0].Plays["ub"]; p.Score != 50 || p.TimeMs != 4000 || again.Rounds[0].LogSeed != "111" {
+		t.Fatalf("replaced series: %+v", again.Rounds[0])
+	}
+	if err := m.ReplaceSeries(ctx, &model.Series{ID: "nope"}); err != store.ErrNotFound {
+		t.Fatalf("replace a missing series: %v", err)
+	}
+	if list, err := m.SeriesForUser(ctx, "ub", 10); err != nil || len(list) != 1 {
+		t.Fatalf("series for the opponent: %v %v", list, err)
+	}
+	if _, err := m.SeriesByID(ctx, "zzz"); err != store.ErrNotFound {
+		t.Fatalf("missing series: %v", err)
+	}
+
+	// drafts stay out of every public list; delete removes a game with its saves and scores
+	for i, id := range []string{"a0123456789abcdef0123456", "b0123456789abcdef0123456"} {
+		g := &model.Game{ID: id, OwnerID: "ua", Title: "Fog " + string(rune('A'+i)), Description: "a game", Tags: []string{"cozy"},
+			StorageKey: id, ManifestPath: "manifest.json", GroupID: "grp", CreatedAt: now.Add(time.Duration(i) * time.Second)}
+		if err := m.InsertGame(ctx, g); err != nil {
+			t.Fatal(err)
+		}
+	}
+	draft := "b0123456789abcdef0123456"
+	if err := m.SetGameUnlisted(ctx, draft, true); err != nil {
+		t.Fatal(err)
+	}
+	count := func(label string, n int, games []model.Game, err error) {
+		t.Helper()
+		if err != nil || len(games) != n {
+			t.Fatalf("%s: %d games (want %d), %v", label, len(games), n, err)
+		}
+	}
+	all, err := m.AllGames(ctx, 10)
+	count("all games", 1, all, err)
+	feed, err := m.Feed(ctx, 10, store.Cursor{})
+	count("feed", 1, feed, err)
+	found, err := m.Search(ctx, "", "cozy", 10, 0)
+	count("tag search", 1, found, err)
+	text, err := m.Search(ctx, "fog", "", 10, 0)
+	count("text search", 1, text, err)
+	group, err := m.GamesByGroup(ctx, "grp", 10)
+	count("group games", 1, group, err)
+	mine, err := m.GamesByOwner(ctx, "ua", 10, store.Cursor{})
+	count("the owner's own games", 2, mine, err)
+	if g, err := m.GameByID(ctx, draft); err != nil || !g.Unlisted {
+		t.Fatalf("a draft is reachable by id: %v %v", g, err)
+	}
+	if err := m.SetGameUnlisted(ctx, draft, false); err != nil {
+		t.Fatal(err)
+	}
+	feed, err = m.Feed(ctx, 10, store.Cursor{})
+	count("feed after publishing", 2, feed, err)
+	if err := m.SetGameUnlisted(ctx, "c0123456789abcdef0123456", true); err != store.ErrNotFound {
+		t.Fatalf("unlisting a missing game: %v", err)
+	}
+	if _, err := m.SetLike(ctx, draft, "ub", true); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.SubmitScore(ctx, model.Score{GameID: draft, UserID: "ub", Username: "ub", Score: 9, UpdatedAt: now}); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.DeleteGame(ctx, draft); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.GameByID(ctx, draft); err != store.ErrNotFound {
+		t.Fatalf("deleted game: %v", err)
+	}
+	if rows, _ := m.Leaderboard(ctx, draft, 10); len(rows) != 0 {
+		t.Fatalf("scores of a deleted game: %v", rows)
+	}
+	if set, _ := m.LikedSet(ctx, "ub", []string{draft}); len(set) != 0 {
+		t.Fatalf("saves of a deleted game: %v", set)
+	}
+	if err := m.DeleteGame(ctx, draft); err != store.ErrNotFound {
+		t.Fatalf("deleting twice: %v", err)
+	}
+}

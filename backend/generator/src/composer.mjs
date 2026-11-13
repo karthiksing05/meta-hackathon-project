@@ -44,7 +44,16 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   if (base) {
     m.id = `mg-${slug(m.title ?? base.title ?? 'game') || 'game'}-${suffix()}`; // never the base game's own id
     if (remixOf) m.lineage = { ...(m.lineage ?? {}), remix_of: String(remixOf) };
-    if (level && level > 1) m.chain = { ...(m.chain ?? {}), index: level };
+    if (level && level > 1) {
+      const was = base.chain ?? {};
+      m.chain = {
+        id: was.id ?? `chain-${slug(was.title ?? base.title ?? 'game') || 'game'}`,
+        index: level,
+        title: was.title ?? base.title ?? m.title ?? 'Game',
+        prev: base.id ?? null, // the manifest id of the level it follows
+        next: null,
+      };
+    }
   }
   return out;
 }

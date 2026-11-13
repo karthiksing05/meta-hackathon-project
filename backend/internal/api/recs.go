@@ -217,11 +217,22 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 	if u != nil {
 		who = u.ID
 	}
+	// The recommender can show a game again once a different reason applies (it was "popular", now it is "nearby").
+	// A person scrolling one session shouldn't see the same game twice while there are games they haven't seen, so
+	// ask for extra picks and put the unseen ones first.
+	seenThisSession := map[string]bool{}
+	for _, id := range rec.Feed {
+		seenThisSession[id] = true
+	}
+	ask := count
+	if len(seenThisSession) > 0 {
+		ask = min(count+len(seenThisSession), 30)
+	}
 	h := fnv.New32a()
 	h.Write([]byte(who + "|" + strconv.Itoa(len(rec.Feed)+len(exclude)) + "|" + strconv.Itoa(today())))
 	input, _ := json.Marshal(map[string]any{
 		"candidates": candidatesFor(games, s.loadSocial(r.Context(), u), now), "summaries": summariesOf(games), "feed": nonNil(rec.Feed), "feedKeys": nonNil(rec.FeedKeys),
-		"count": count, "seed": h.Sum32(), "day": today(), "now": now.UnixMilli(),
+		"count": ask, "seed": h.Sum32(), "day": today(), "now": now.UnixMilli(),
 	})
 	var reply struct {
 		Picks []rankPick `json:"picks"`
@@ -244,8 +255,28 @@ func (s *Server) feed(w http.ResponseWriter, r *http.Request) {
 	}
 	var shown []model.Game
 	var picks []rankPick
-	for _, p := range reply.Picks {
+	onPage := map[string]bool{}
+	ordered := reply.Picks
+	if len(seenThisSession) > 0 { // unseen games first; games already shown only fill what is left
+		var fresh, again []rankPick
+		for _, p := range reply.Picks {
+			if seenThisSession[p.GameID] {
+				again = append(again, p)
+			} else {
+				fresh = append(fresh, p)
+			}
+		}
+		ordered = append(fresh, again...)
+	}
+	for _, p := range ordered {
+		if len(picks) >= count {
+			break
+		}
+		if onPage[p.GameID] {
+			continue // a page never shows the same game twice
+		}
 		if g, ok := byID[p.GameID]; ok {
+			onPage[p.GameID] = true
 			shown = append(shown, g)
 			picks = append(picks, p)
 		}

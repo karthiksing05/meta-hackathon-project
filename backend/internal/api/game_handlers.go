@@ -40,7 +40,7 @@ func (s *Server) views(r *http.Request, games []model.Game) ([]model.GameView, e
 			ID: g.ID, Title: g.Title, Description: g.Description, Tags: nonNil(g.Tags), Formula: g.Formula,
 			OwnerID: g.OwnerID, OwnerUsername: g.OwnerUsername, Likes: g.Likes, Plays: g.Plays,
 			Finishes: g.Finishes, LikedByMe: liked[g.ID], RemixOf: g.RemixOf,
-			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID,
+			Slug: g.Slug, GroupID: g.GroupID, EventID: g.EventID, Unlisted: g.Unlisted,
 			PackageURL: base, ManifestURL: base + g.ManifestPath, CreatedAt: g.CreatedAt,
 		}
 		if g.CoverPath != "" {

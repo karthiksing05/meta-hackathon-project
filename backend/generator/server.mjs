@@ -14,6 +14,7 @@
 //   POST /anatomy         {request, audience?}                      -> 200 {anatomy: game-anatomy/0.1 ...}
 //   POST /anatomy/revise  {anatomy, change, request?, afterPlaying?} -> 200 {anatomy: ...}  (the same shape)
 //        one JSON turn on the fast model; 503 muse_not_configured, 429 busy, 502 when Muse's reply isn't an anatomy
+//   POST /verify          {game, log} (both as text)               -> the engine's replay result {ok, game_hash_ok, recomputed, claimed, problems}
 //   GET /healthz -> {"status":"ok","museConfigured":bool,"fragments":n}
 
 import { createServer } from 'node:http';
@@ -58,6 +59,25 @@ async function readBody(req, limit = 64 * 1024) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
 }
 
+/** Replays a run's log against the exact game text, so a score can be trusted without trusting the phone. */
+async function verifyRun(req, res) {
+  let input;
+  try {
+    input = await readBody(req, COMPOSE_BODY_LIMIT);
+  } catch {
+    return json(res, 400, { error: 'invalid JSON body' });
+  }
+  if (typeof input.game !== 'string' || !input.game || typeof input.log !== 'string' || !input.log) {
+    return json(res, 400, { error: 'game and log are required, both as text' });
+  }
+  try {
+    return json(res, 200, studio.verify(input.game, input.log));
+  } catch (e) {
+    log('verify failed', { error: String(e?.message ?? e).slice(0, 200) });
+    return json(res, 500, { error: 'verify_failed' });
+  }
+}
+
 /** One anatomy turn: the draft from a request, or a revision of an agreed anatomy. */
 async function anatomy(req, res) {
   let input;
@@ -99,6 +119,7 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET' && req.url === '/healthz') {
       return json(res, 200, { status: 'ok', museConfigured: muse.isConfigured, fragments });
     }
+    if (req.method === 'POST' && req.url === '/verify') return verifyRun(req, res);
     if (req.method === 'POST' && (req.url === '/anatomy' || req.url === '/anatomy/revise')) return anatomy(req, res);
     if (req.method !== 'POST' || req.url !== '/compose') return json(res, 404, { error: 'not found' });
 
@@ -109,7 +130,7 @@ const server = createServer(async (req, res) => {
       return json(res, 400, { error: 'invalid JSON body' });
     }
     const request = String(input.request ?? '').trim();
-    if (!request || request.length > 2000) return json(res, 400, { error: 'request must be 1 to 2000 characters' });
+    if (!request || request.length > 20000) return json(res, 400, { error: 'request must be 1 to 20000 characters' });
     if (!muse.isConfigured) return json(res, 503, { error: 'muse_not_configured' });
     if (running >= MAX_CONCURRENT) return json(res, 429, { error: 'busy' });
 

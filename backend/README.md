@@ -62,11 +62,13 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/users?q=` | bearer | find people: username prefix or the start of a display-name word, 2 to 40 characters |
 | `POST /v1/groups/{id}/blend`, `GET /v1/groups/{id}/blend-inputs` | bearer (members) | Blend for the group's members, taken from the server's data; each member's skill, taste and recent games |
 | `POST /v1/blend` | bearer | games and a game spec for a set of people: `{group, members, count}` |
-| `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; or change one: `{baseGameId, change?, look?, nextLevel?}` (a tweak, a new look, a next level or a remix; always a new game with `remixOf` set); see [Making games](#making-games-muse-lives-here) |
+| `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; or change one: `{baseGameId, change?, look?, nextLevel?, baseManifest?}` (a tweak, a new look, a next level or a remix; always a new game with `remixOf` set, and a draft until published). Also `anatomy` (the agreed anatomy text, up to 16 KB, kept apart from the 2,000 character request) and `draft` (true holds a new game back; false publishes a change at once); see [Making games](#making-games-muse-lives-here) |
 | `POST /v1/anatomy`, `POST /v1/anatomy/revise` | bearer | Muse takes an idea apart into its working parts: `{request, audience?}`, then `{anatomy, change, request?, afterPlaying?}`; both return `game-anatomy/0.1` (docs/BUBBLES.md 7.13) |
-| `GET /v1/generate/{id}`, `GET /v1/generate` | bearer | a job's status, steps and finished game; my recent jobs |
+| `GET /v1/generate/{id}`, `GET /v1/generate`, `DELETE /v1/generate/{id}` | bearer | a job's status, steps and finished game; my recent jobs; cancel a queued or running job (it ends as failed with "Cancelled.") |
 | `POST /v1/creations` | bearer | upload a package zip (`Content-Type: application/zip`) |
-| `GET /v1/creations`, `GET /v1/creations/{id}`, `GET /v1/creations/{id}/source` | bearer | the caller's games; private editable source as a zip |
+| `GET /v1/creations`, `GET /v1/creations/{id}`, `GET /v1/creations/{id}/source` | bearer | the caller's games (drafts included, with `unlisted: true`); private editable source as a zip |
+| `POST /v1/creations/{id}/publish`, `DELETE /v1/creations/{id}` | bearer (owner) | list a draft in the feed, search and its Group; delete a game with its saves and scores (the files stay on the games host under their unguessable id) |
+| `POST /v1/series`, `GET /v1/series`, `GET /v1/series/{id}`, `POST /v1/series/{id}/rounds/{n}` | bearer | best-of-N with a friend on the same games and seeds; scores come from replaying the run's input log in the engine (see [Series](#series)) |
 
 Scores are whole numbers (a fractional score is rejected). A manifest `id` that is a lowercase slug
 (`hill-hopper`) is kept as the game's unique `slug`; publishing a second game with the same slug is refused (422).
@@ -117,6 +119,16 @@ loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, s
 `microgame-studio.js` and `bubble-kit-microgame-engine.js` bundles from the app's folders (`FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js`,
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
+
+## Series
+
+A best-of-N between two friends. `POST /v1/series {opponentId, games: [gameId, ...]}` (1 to 5 microgames, a friend only) returns the series with a server-picked `seed` per round. Each player then plays every round and sends
+`POST /v1/series/{id}/rounds/{n} {log}`: the run's input log (`microgame-log/1`, as text, up to 256 KB). The API hands it to the generator service, which replays it with `MicrogameEngine.verify` against the game's exact stored
+`content.game_json`. The server rejects the run unless the replay is `ok`, the game hash matches and the run is finished (won or lost), and it keeps the **replayed** score and time, never the claimed ones.
+
+The phone derives the engine's seed from the round's seed, so `log.seed` is not the round's `seed`. The first run on a round fixes the engine seed and the second must match it. A round is decided when both have played: the higher score wins, a
+tie goes to the lower `time_ms`, otherwise it is a draw. The series ends when someone has won more than half the rounds or every round is decided. You can't see the other player's score for a round until you have played it. A friend starting a series, and a
+friend playing a round, show up in `GET /v1/me/moments` as `series_invited` and `series_round`.
 
 ## Ranking (the recommender runs here)
 
