@@ -1,0 +1,2542 @@
+[
+  {
+    "id": "draw_and_guess_round",
+    "name": "Draw and guess",
+    "aliases": [
+      "Pictionary",
+      "Skribbl",
+      "skribbl.io",
+      "Draw Something",
+      "Gartic",
+      "Charades on paper"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "draw and guess",
+    "summary": "One player sketches a secret word on a canvas while others race to type the answer, with faster guesses earning more.",
+    "core_loop": "drawer sees word → sketches → guessers type → word revealed on correct guess → roles rotate",
+    "verbs": [
+      "draw",
+      "guess",
+      "type"
+    ],
+    "inputs": [
+      "draw",
+      "type"
+    ],
+    "pieces": [
+      "canvas",
+      "secret word",
+      "guess chat",
+      "timer",
+      "score"
+    ],
+    "rules": [
+      "drawer cannot write letters",
+      "guesses via fuzzy match",
+      "faster guess = more points"
+    ],
+    "win": "highest total after rotation",
+    "lose": "none; it cannot be failed",
+    "scoring": "points to guessers by speed and to drawer per guesser",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "every friend takes a turn drawing",
+      "Group guesses live"
+    ],
+    "content_needs": [
+      "word lists by theme"
+    ],
+    "difficulty_levers": [
+      "time per drawing",
+      "word difficulty",
+      "hint letters"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "turns",
+      "timer_bar",
+      "score",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "a skribbl with only star wars words",
+      "pictionary with my friends",
+      "draw something but with anime"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "async_draw_something_turns",
+    "name": "Draw something by turns",
+    "aliases": [
+      "Draw Something",
+      "pass the drawing",
+      "async Pictionary",
+      "Draw with friends"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "draw and guess",
+    "summary": "Players alternate between drawing a word for a friend to guess and guessing the friend's drawing, over days.",
+    "core_loop": "pick a word → draw → send → friend guesses → friend draws back",
+    "verbs": [
+      "draw",
+      "guess"
+    ],
+    "inputs": [
+      "draw",
+      "type"
+    ],
+    "pieces": [
+      "word choices",
+      "canvas",
+      "replay of strokes"
+    ],
+    "rules": [
+      "drawer picks easy, medium or hard word",
+      "guess replays drawing"
+    ],
+    "win": "longest streak with a friend",
+    "lose": "none; it cannot be failed",
+    "scoring": "coins per word by difficulty",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ongoing duel with one friend",
+      "streak counters"
+    ],
+    "content_needs": [
+      "word lists"
+    ],
+    "difficulty_levers": [
+      "word difficulty"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "score",
+      "friend_pairing"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "draw something with my best friend",
+      "async drawing game with a friend",
+      "draw words and send them"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "telephone_draw_describe",
+    "name": "Drawing telephone",
+    "aliases": [
+      "Telephone",
+      "Gartic Phone",
+      "Broken Telephone",
+      "Telestrations",
+      "Eat Poop You Cat"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "chain",
+    "summary": "A phrase passes along a chain where each player alternately draws the previous phrase or describes the previous drawing, and the chain is revealed at the end.",
+    "core_loop": "get a phrase → draw it → next player describes → next draws → reveal full chain",
+    "verbs": [
+      "draw",
+      "describe"
+    ],
+    "inputs": [
+      "draw",
+      "type"
+    ],
+    "pieces": [
+      "phrase",
+      "canvas",
+      "chain reveal"
+    ],
+    "rules": [
+      "each player sees only the previous step"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "hilarious chains to share",
+      "each friend one link"
+    ],
+    "content_needs": [
+      "starting phrases"
+    ],
+    "difficulty_levers": [
+      "chain length",
+      "time per step"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "typed_answer",
+      "keyboard",
+      "turns",
+      "reveal",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "gartic phone for my group",
+      "drawing telephone with harry potter prompts",
+      "telephone drawing chain"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "one_stroke_challenge",
+    "name": "One-line drawing",
+    "aliases": [
+      "One line challenge",
+      "Single stroke",
+      "One-stroke drawing",
+      "Don't lift your finger"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "constraint draw",
+    "summary": "Draw a recognizable prompt without lifting a finger, with judging by friends or a recognizer.",
+    "core_loop": "see prompt → draw in a single stroke → submit → vote or auto-score",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "canvas",
+      "prompt",
+      "stroke limit"
+    ],
+    "rules": [
+      "only one stroke"
+    ],
+    "win": "best drawing",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes or recognizer score",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "vote on best"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "prompt difficulty"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "vote_tally",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "draw a cat in one line",
+      "one stroke challenge with my friends",
+      "single line drawing prompts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "blind_drawing_reveal",
+    "name": "Blind drawing",
+    "aliases": [
+      "Blind drawing",
+      "Draw with eyes closed",
+      "Hidden canvas",
+      "Draw it blind"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "constraint draw",
+    "summary": "The canvas hides strokes while the player draws a prompt, then reveals the result.",
+    "core_loop": "see prompt → draw blind → reveal → share",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "hidden canvas",
+      "prompt",
+      "reveal"
+    ],
+    "rules": [
+      "strokes invisible until end"
+    ],
+    "win": "funniest",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "funny reveals shared"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "time"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "reveal",
+      "timer_bar",
+      "vote_tally"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "blind drawing with friends",
+      "draw a dog without seeing",
+      "hidden canvas drawing game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "trace_shape_accuracy",
+    "name": "Trace the shape",
+    "aliases": [
+      "Trace",
+      "Perfect circle",
+      "Draw a perfect shape",
+      "Accuracy trace"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "accuracy",
+    "summary": "Trace a shape or draw a perfect form and earn a score for how close the stroke is to the target.",
+    "core_loop": "see shape → trace or draw → compute similarity → score",
+    "verbs": [
+      "trace"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "target shape",
+      "canvas",
+      "accuracy readout"
+    ],
+    "rules": [
+      "score from distance of stroke to target"
+    ],
+    "win": "best score",
+    "lose": "none; it cannot be failed",
+    "scoring": "similarity percent",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "leaderboard",
+      "best of the week"
+    ],
+    "content_needs": [
+      "target shapes"
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "speed"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "shape_match_score",
+      "score",
+      "rounds",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "draw a perfect circle game",
+      "trace the star",
+      "shape accuracy challenge"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "draw_from_memory",
+    "name": "Draw from memory",
+    "aliases": [
+      "Memory draw",
+      "Draw it from memory",
+      "Remember and draw"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "memory",
+    "summary": "A reference image shows briefly, then hides, and the player draws it from memory and is compared to the original.",
+    "core_loop": "see image 5 s → hidden → draw → compare",
+    "verbs": [
+      "recall",
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "reference",
+      "canvas",
+      "compare overlay"
+    ],
+    "rules": [
+      "look time is limited"
+    ],
+    "win": "best match",
+    "lose": "none; it cannot be failed",
+    "scoring": "similarity",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare drawings",
+      "Group same image"
+    ],
+    "content_needs": [
+      "reference images"
+    ],
+    "difficulty_levers": [
+      "look time",
+      "complexity"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "shape_match_score",
+      "reveal",
+      "countdown",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "draw this logo from memory",
+      "remember and draw the picture",
+      "memory sketch"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "doodle_recognizer_race",
+    "name": "Doodle recognizer race",
+    "aliases": [
+      "Quick Draw",
+      "Quick, Draw!",
+      "Google Quick Draw",
+      "AI guesses your doodle"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "recognition",
+    "summary": "The player draws prompts and a recognizer tries to name it before time ends.",
+    "core_loop": "see prompt → draw → recognizer guesses → next",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "canvas",
+      "prompt",
+      "recognizer guesses"
+    ],
+    "rules": [
+      "each prompt 20 s"
+    ],
+    "win": "name recognized",
+    "lose": "time",
+    "scoring": "number recognized",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare counts",
+      "Group sets"
+    ],
+    "content_needs": [
+      "prompt lists"
+    ],
+    "difficulty_levers": [
+      "time",
+      "recognizer strictness"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "image_recognizer",
+      "timer_bar",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "quick draw with my friends",
+      "an AI that guesses my doodles",
+      "draw prompts and the computer guesses"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "complete_the_scribble",
+    "name": "Complete the scribble",
+    "aliases": [
+      "Complete the doodle",
+      "Scribble prompt",
+      "Finish the doodle",
+      "Doodle starter"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "A random scribble is shown and the player adds to it to make a creature or scene, shared for votes.",
+    "core_loop": "see scribble → draw additions → share → vote",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "scribble starter",
+      "canvas",
+      "gallery"
+    ],
+    "rules": [
+      "any addition allowed"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "gallery of same scribble",
+      "friends vote"
+    ],
+    "content_needs": [
+      "scribble starters"
+    ],
+    "difficulty_levers": [
+      "starter complexity"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "vote_tally",
+      "rounds",
+      "score",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "turn this scribble into something",
+      "complete the scribble with my friends",
+      "doodle starters"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "color_by_number_reveal",
+    "name": "Color by number",
+    "aliases": [
+      "Color by number",
+      "Happy Color",
+      "Paint by number",
+      "Pixel art colorer"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "coloring",
+    "summary": "Tap numbered regions to fill with matching colors and reveal a picture.",
+    "core_loop": "pick color → tap matching numbers → complete image",
+    "verbs": [
+      "tap",
+      "color"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "numbered regions",
+      "palette",
+      "progress"
+    ],
+    "rules": [
+      "region must match number"
+    ],
+    "win": "complete picture",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share finished art",
+      "Group mural"
+    ],
+    "content_needs": [
+      "image templates"
+    ],
+    "difficulty_levers": [
+      "region count"
+    ],
+    "tools": [
+      "grid_board",
+      "color_palette",
+      "progress_meter",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "color by number of our group photo",
+      "paint by number cat",
+      "pixel coloring"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "free_pixel_art_canvas",
+    "name": "Pixel art canvas",
+    "aliases": [
+      "Pixel art",
+      "Pixilart",
+      "Pixel painter",
+      "Place pixel"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Draw on a small pixel grid with a limited palette, optionally with a prompt or theme.",
+    "core_loop": "pick color → tap pixels → submit",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "tap",
+      "draw"
+    ],
+    "pieces": [
+      "pixel grid",
+      "palette",
+      "prompt"
+    ],
+    "rules": [
+      "limited grid and palette"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "post to Group wall",
+      "theme weeks"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "palette size"
+    ],
+    "tools": [
+      "pixel_grid",
+      "color_palette",
+      "drawing_canvas",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "pixel art of my dog",
+      "make a pixel avatar",
+      "daily pixel prompt"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "coloring_book_fill",
+    "name": "Coloring book",
+    "aliases": [
+      "Coloring book",
+      "Adult coloring",
+      "Relaxing coloring"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "coloring",
+    "summary": "Tap regions of a line drawing to fill with chosen colors.",
+    "core_loop": "pick color → tap region → fill",
+    "verbs": [
+      "color"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "line art",
+      "palette"
+    ],
+    "rules": [
+      "none"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share colored page"
+    ],
+    "content_needs": [
+      "line art"
+    ],
+    "difficulty_levers": [
+      "palette size"
+    ],
+    "tools": [
+      "color_palette",
+      "fill_region",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "coloring book with my friends' names",
+      "mandala coloring",
+      "relaxing coloring"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "collaborative_pixel_canvas",
+    "name": "Shared canvas",
+    "aliases": [
+      "r/Place",
+      "Place",
+      "Shared canvas",
+      "Collaborative wall",
+      "Pixel war"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "collaborative",
+    "summary": "A big canvas that every member can paint on, one pixel or stroke at a time, with cooldowns.",
+    "core_loop": "choose color → place → wait cooldown",
+    "verbs": [
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "shared canvas",
+      "cooldown",
+      "palette"
+    ],
+    "rules": [
+      "cooldown between placements"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "group_daily",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "Group art",
+      "coordinated drawings"
+    ],
+    "content_needs": [
+      "canvas"
+    ],
+    "difficulty_levers": [
+      "cooldown",
+      "canvas size"
+    ],
+    "tools": [
+      "pixel_grid",
+      "color_palette",
+      "shared_progress",
+      "group_roster",
+      "cooldown_timer"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "a place canvas for our group",
+      "shared pixel wall",
+      "collaborative art"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "exquisite_corpse_fold",
+    "name": "Fold-over drawing",
+    "aliases": [
+      "Exquisite corpse",
+      "Consequences drawing",
+      "Fold paper drawing",
+      "Body parts drawing"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "collaborative",
+    "summary": "A creature is drawn in segments by different players who see only a sliver of the previous section.",
+    "core_loop": "draw head → hide → next draws body → hide → next draws legs → reveal",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "folded sheet",
+      "sliver view",
+      "reveal"
+    ],
+    "rules": [
+      "each sees only a few pixels"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "silly creatures",
+      "each friend one segment"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "segments"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "turns",
+      "reveal",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "exquisite corpse drawing with friends",
+      "draw monsters in parts",
+      "fold paper game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sticker_scene_builder",
+    "name": "Sticker scene builder",
+    "aliases": [
+      "Sticker book",
+      "Scene builder",
+      "Diorama",
+      "Collage"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Drag stickers onto a backdrop to make a scene matching a theme.",
+    "core_loop": "choose backdrop → drag stickers → submit",
+    "verbs": [
+      "place",
+      "arrange"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "backdrop",
+      "stickers",
+      "toolbar"
+    ],
+    "rules": [
+      "stickers resize and rotate"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "post to Group",
+      "theme challenges"
+    ],
+    "content_needs": [
+      "sticker packs"
+    ],
+    "difficulty_levers": [
+      "sticker set"
+    ],
+    "tools": [
+      "sticker_library",
+      "drag_drop_slots",
+      "gallery",
+      "vote_tally"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "make a space scene with stickers",
+      "sticker diorama of my town",
+      "collage game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "avatar_dress_up",
+    "name": "Dress-up creator",
+    "aliases": [
+      "Dress up",
+      "Avatar maker",
+      "Bitmoji maker",
+      "Character creator"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Combine hair, outfit and accessories to style a character matching a theme and share it.",
+    "core_loop": "pick pieces → preview → submit",
+    "verbs": [
+      "choose",
+      "style"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "character",
+      "part tabs",
+      "theme"
+    ],
+    "rules": [
+      "one piece per slot"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "post outfits",
+      "Group fashion show"
+    ],
+    "content_needs": [
+      "part libraries"
+    ],
+    "difficulty_levers": [
+      "part count"
+    ],
+    "tools": [
+      "sticker_library",
+      "gallery",
+      "vote_tally"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "dress up a character in a halloween theme",
+      "avatar maker for my friend group",
+      "fashion show with friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "monster_part_mixer",
+    "name": "Monster mixer",
+    "aliases": [
+      "Monster maker",
+      "Mix and match",
+      "Hybrid creature",
+      "Spore creature"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Mix heads, bodies and limbs into a creature that fits a theme or fights.",
+    "core_loop": "swap parts → compare stats → name it",
+    "verbs": [
+      "combine"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "body parts",
+      "preview",
+      "name box"
+    ],
+    "rules": [
+      "three slots"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share monsters",
+      "trade"
+    ],
+    "content_needs": [
+      "part libraries"
+    ],
+    "difficulty_levers": [
+      "part count"
+    ],
+    "tools": [
+      "sticker_library",
+      "typed_answer",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "monster mixer",
+      "mix animals",
+      "create a creature for our team mascot"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "caption_the_drawing_vote",
+    "name": "Caption vote",
+    "aliases": [
+      "Caption the drawing",
+      "Drawings caption battle",
+      "Cards Against drawing"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative vote",
+    "summary": "A drawing is shown and players write captions then vote.",
+    "core_loop": "see drawing → write caption → vote",
+    "verbs": [
+      "write",
+      "vote"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "drawing",
+      "captions",
+      "votes"
+    ],
+    "rules": [
+      "no vote on own"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "live_friends"
+    ],
+    "social_hooks": [
+      "laughs"
+    ],
+    "content_needs": [
+      "drawings"
+    ],
+    "difficulty_levers": [
+      "caption length"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "vote_tally",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "caption these drawings",
+      "caption battle with my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "kaleidoscope_symmetry_draw",
+    "name": "Symmetry draw",
+    "aliases": [
+      "Kaleidoscope draw",
+      "Mandala maker",
+      "Symmetry sketch",
+      "Doodle mirror"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Draw strokes that repeat around a center or across a mirror to make patterns.",
+    "core_loop": "pick symmetry → draw → save",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "canvas with mirrors",
+      "palette"
+    ],
+    "rules": [
+      "each stroke repeated"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share patterns"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "symmetry count"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "color_palette",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "mandala drawer",
+      "symmetry doodle app",
+      "kaleidoscope for my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spirograph_pattern_maker",
+    "name": "Spirograph pattern maker",
+    "aliases": [
+      "Spirograph",
+      "Geometric art",
+      "String art",
+      "Gear drawing"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Select gears or nails and watch curves form, then adjust to make a pattern.",
+    "core_loop": "choose params → generate → save",
+    "verbs": [
+      "tune"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "parameter sliders",
+      "canvas"
+    ],
+    "rules": [
+      "none"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share creations"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "parameter range"
+    ],
+    "tools": [
+      "slider_input",
+      "gallery",
+      "color_palette"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "spirograph maker",
+      "string art",
+      "geometric pattern generator"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "color_mixing_match_target",
+    "name": "Color mixing target",
+    "aliases": [
+      "Mix colors",
+      "Paint mixing",
+      "Color match",
+      "Hue matching"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "color skill",
+    "summary": "Mix base colors in amounts to match a target swatch.",
+    "core_loop": "see target → adjust sliders → submit → score",
+    "verbs": [
+      "mix"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "target swatch",
+      "sliders",
+      "mix preview"
+    ],
+    "rules": [
+      "mix from primary colors"
+    ],
+    "win": "highest accuracy",
+    "lose": "none; it cannot be failed",
+    "scoring": "color distance",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare accuracy"
+    ],
+    "content_needs": [
+      "target colors"
+    ],
+    "difficulty_levers": [
+      "primary count"
+    ],
+    "tools": [
+      "slider_input",
+      "color_mixer",
+      "rounds",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "color matching game",
+      "mix paints to match",
+      "paint mixing puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "color_palette_from_image",
+    "name": "Palette from the scene",
+    "aliases": [
+      "Palette match",
+      "Color pick",
+      "Eyedropper challenge"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "color skill",
+    "summary": "Pick colors from a scene to match a palette.",
+    "core_loop": "see palette → sample colors → match",
+    "verbs": [
+      "sample"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "image",
+      "palette"
+    ],
+    "rules": [
+      "match palette"
+    ],
+    "win": "best match",
+    "lose": "none; it cannot be failed",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare"
+    ],
+    "content_needs": [
+      "images"
+    ],
+    "difficulty_levers": [
+      "palette size"
+    ],
+    "tools": [
+      "color_palette",
+      "image_gallery",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "pick the colors from this image",
+      "color eyedropper game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tangram_shape_build",
+    "name": "Tangram builder",
+    "aliases": [
+      "Tangram",
+      "Pentomino",
+      "Shape puzzle",
+      "Block puzzle"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "spatial",
+    "summary": "Arrange shapes to fill an outline.",
+    "core_loop": "drag pieces → rotate → fill",
+    "verbs": [
+      "arrange"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "pieces",
+      "outline"
+    ],
+    "rules": [
+      "no overlap"
+    ],
+    "win": "fill outline",
+    "lose": "none; it cannot be failed",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "time compare"
+    ],
+    "content_needs": [
+      "outlines"
+    ],
+    "difficulty_levers": [
+      "piece count"
+    ],
+    "tools": [
+      "drag_drop_slots",
+      "tile_slide",
+      "timer_bar",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "tangram game",
+      "fill the silhouette with shapes"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pottery_wheel_shaper",
+    "name": "Pottery wheel",
+    "aliases": [
+      "Pottery",
+      "Clay wheel",
+      "Ceramic simulator",
+      "Shape the clay"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "simulation",
+    "summary": "Use finger pressure on a spinning clay form to shape a vase, then glaze and display it.",
+    "core_loop": "spin → shape → glaze → share",
+    "verbs": [
+      "shape"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "wheel",
+      "clay",
+      "glaze"
+    ],
+    "rules": [
+      "none"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share pots"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "none"
+    ],
+    "tools": [
+      "drag_deform",
+      "color_palette",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "pottery wheel",
+      "clay shaping",
+      "make a vase"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "draw_to_protect_walls",
+    "name": "Draw to protect",
+    "aliases": [
+      "Brain Test",
+      "Draw to save",
+      "Save the dog",
+      "Draw a wall"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "physics draw",
+    "summary": "The player draws a barrier to protect a character from hazards, such as bees, for a few seconds.",
+    "core_loop": "see hazard → draw shield → hazard simulates → survive",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "character",
+      "hazard",
+      "ink limit"
+    ],
+    "rules": [
+      "limited ink"
+    ],
+    "win": "survive",
+    "lose": "hit",
+    "scoring": "stars by ink used",
+    "session_seconds": [
+      15,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare ink"
+    ],
+    "content_needs": [
+      "levels"
+    ],
+    "difficulty_levers": [
+      "ink limit",
+      "hazard"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "physics_world",
+      "timer_bar",
+      "score",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "save the dog from bees",
+      "draw a wall game",
+      "draw a shield"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "draw_your_vehicle",
+    "name": "Draw your vehicle",
+    "aliases": [
+      "Draw Climber",
+      "Draw a car",
+      "Wheel drawing",
+      "Draw to ride"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "physics draw",
+    "summary": "Players draw a vehicle shape that then drives over terrain.",
+    "core_loop": "draw → go → distance",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "canvas",
+      "terrain",
+      "distance"
+    ],
+    "rules": [
+      "stroke becomes body"
+    ],
+    "win": "distance",
+    "lose": "crash",
+    "scoring": "distance",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "distance race"
+    ],
+    "content_needs": [
+      "terrains"
+    ],
+    "difficulty_levers": [
+      "terrain"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "physics_world",
+      "score",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "draw a car that climbs hills",
+      "draw your own wheel",
+      "vehicle drawing game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "draw_ramp_guide_ball",
+    "name": "Draw a ramp",
+    "aliases": [
+      "Line Rider",
+      "Draw lines for ball",
+      "Marble ramp"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "physics draw",
+    "summary": "Draw lines so a ball rolls into a target.",
+    "core_loop": "draw → play → score",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "ball",
+      "target",
+      "ink"
+    ],
+    "rules": [
+      "ink limit"
+    ],
+    "win": "hit target",
+    "lose": "miss",
+    "scoring": "ink",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "levels"
+    ],
+    "difficulty_levers": [
+      "ink"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "physics_world",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "draw a line for the ball",
+      "marble ramp drawing"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "fix_the_picture_missing_piece",
+    "name": "Missing piece",
+    "aliases": [
+      "Brain Test missing part",
+      "What is missing",
+      "Fix the drawing"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "puzzle",
+    "summary": "A picture is missing an element, and the player draws or places it.",
+    "core_loop": "see picture → add the missing piece → verify",
+    "verbs": [
+      "draw",
+      "deduce"
+    ],
+    "inputs": [
+      "draw",
+      "drag"
+    ],
+    "pieces": [
+      "picture",
+      "tools"
+    ],
+    "rules": [
+      "one correct piece"
+    ],
+    "win": "solve",
+    "lose": "time",
+    "scoring": "time",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "pictures"
+    ],
+    "difficulty_levers": [
+      "difficulty"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "shape_match_score",
+      "hint",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "what is missing puzzle",
+      "fix the picture game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "trace_letters_calligraphy",
+    "name": "Letter tracing",
+    "aliases": [
+      "Handwriting practice",
+      "Calligraphy",
+      "Trace letters"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "accuracy",
+    "summary": "Trace letters or characters with stroke order and get scored.",
+    "core_loop": "see letter → trace → score",
+    "verbs": [
+      "trace"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "ghost letter",
+      "canvas"
+    ],
+    "rules": [
+      "follow strokes"
+    ],
+    "win": "accuracy",
+    "lose": "none; it cannot be failed",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "alphabets"
+    ],
+    "difficulty_levers": [
+      "letter set"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "shape_match_score",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "trace the alphabet",
+      "calligraphy practice",
+      "learn kanji strokes"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "build_a_face_features",
+    "name": "Build a face",
+    "aliases": [
+      "Mr. Potato Head",
+      "Face maker",
+      "Photofit",
+      "Facial composite"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Assemble facial features to match a description or a friend.",
+    "core_loop": "read description → pick features → compare",
+    "verbs": [
+      "assemble"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "features",
+      "head"
+    ],
+    "rules": [
+      "none"
+    ],
+    "win": "match description",
+    "lose": "none; it cannot be failed",
+    "scoring": "similarity",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends build each other"
+    ],
+    "content_needs": [
+      "feature sets"
+    ],
+    "difficulty_levers": [
+      "feature count"
+    ],
+    "tools": [
+      "sticker_library",
+      "drag_drop_slots",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "build a face game",
+      "mr potato head style",
+      "composite sketch"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "speed_sketch_round",
+    "name": "Speed sketch round",
+    "aliases": [
+      "Speed draw",
+      "Draw fast",
+      "60 second draw"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "speed",
+    "summary": "Draw the prompt fast, then share for votes.",
+    "core_loop": "prompt → draw 30s → vote",
+    "verbs": [
+      "draw"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "canvas",
+      "timer"
+    ],
+    "rules": [
+      "time limit"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      45,
+      90
+    ],
+    "players": [
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "post"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "time"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "stroke_recorder",
+      "timer_bar",
+      "vote_tally"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "speed sketch with a theme",
+      "30 second doodle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "prompt_the_picture_match",
+    "name": "Prompt the picture",
+    "aliases": [
+      "Prompt battle",
+      "AI picture prompt",
+      "Write a prompt to match",
+      "Prompt golf"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "prompting",
+    "summary": "A target picture is shown and players write a short prompt for an image generator; the closest result wins.",
+    "core_loop": "see target → write prompt → image generated → compare",
+    "verbs": [
+      "write"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "target image",
+      "prompt box",
+      "generated image",
+      "similarity"
+    ],
+    "rules": [
+      "short prompt limit"
+    ],
+    "win": "best match",
+    "lose": "none; it cannot be failed",
+    "scoring": "similarity",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare prompts"
+    ],
+    "content_needs": [
+      "target images"
+    ],
+    "difficulty_levers": [
+      "word limit"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "image_generator",
+      "image_similarity",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "prompt golf with my friends",
+      "write a prompt to match this picture",
+      "ai prompt battle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "meme_template_filler",
+    "name": "Meme maker",
+    "aliases": [
+      "Meme maker",
+      "Meme template",
+      "Make a meme",
+      "Caption meme"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Pick a template and caption it, then share for votes.",
+    "core_loop": "pick template → type captions → submit → vote",
+    "verbs": [
+      "write"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "template",
+      "text boxes"
+    ],
+    "rules": [
+      "none"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "meme wall"
+    ],
+    "content_needs": [
+      "templates"
+    ],
+    "difficulty_levers": [
+      "template list"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "vote_tally",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "meme maker for the group",
+      "caption these memes"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "comic_strip_builder",
+    "name": "Comic strip builder",
+    "aliases": [
+      "Comic maker",
+      "Strip builder",
+      "Panel story"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Fill three panels with art, speech and characters to tell a short story.",
+    "core_loop": "pick panels → place sprites → write lines → share",
+    "verbs": [
+      "compose",
+      "write"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "panels",
+      "characters",
+      "speech"
+    ],
+    "rules": [
+      "three panels"
+    ],
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "post strips"
+    ],
+    "content_needs": [
+      "sprites"
+    ],
+    "difficulty_levers": [
+      "panel count"
+    ],
+    "tools": [
+      "sticker_library",
+      "typed_answer",
+      "keyboard",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "make a three panel comic about our trip",
+      "comic strip builder with friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dot_to_dot_reveal",
+    "name": "Dot to dot",
+    "aliases": [
+      "Connect the dots",
+      "Dot to dot",
+      "Join the dots"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "puzzle",
+    "summary": "Connect numbered dots in order to reveal a picture.",
+    "core_loop": "tap dots in order → reveal",
+    "verbs": [
+      "connect"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "dots",
+      "lines"
+    ],
+    "rules": [
+      "ascending order"
+    ],
+    "win": "complete",
+    "lose": "none; it cannot be failed",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "pictures"
+    ],
+    "difficulty_levers": [
+      "dot count"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "connect the dots",
+      "dot to dot cat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "draw_with_shapes_only",
+    "name": "Shapes-only drawing",
+    "aliases": [
+      "Shape challenge",
+      "Draw with only circles",
+      "Geometry doodle"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "constraint draw",
+    "summary": "Draw a prompt using only a given set of shapes.",
+    "core_loop": "prompt → place shapes → vote",
+    "verbs": [
+      "compose"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "shape tools"
+    ],
+    "rules": [
+      "only certain shapes"
+    ],
+    "win": "best",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "vote"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "shape set"
+    ],
+    "tools": [
+      "drag_drop_slots",
+      "sticker_library",
+      "vote_tally"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "draw a house with only triangles"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "room_decor_challenge",
+    "name": "Decorate the room",
+    "aliases": [
+      "Home design",
+      "Room decorating",
+      "Interior designer"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "creative",
+    "summary": "Decorate a room to match a style brief and have friends vote.",
+    "core_loop": "read brief → place furniture → submit → vote",
+    "verbs": [
+      "arrange"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "room",
+      "furniture",
+      "brief"
+    ],
+    "rules": [
+      "budget"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends vote"
+    ],
+    "content_needs": [
+      "furniture packs"
+    ],
+    "difficulty_levers": [
+      "budget"
+    ],
+    "tools": [
+      "sticker_library",
+      "drag_drop_slots",
+      "vote_tally"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "decorate a cozy room with a theme",
+      "room makeover with votes"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "photo_scavenger_prompt",
+    "name": "Photo scavenger hunt",
+    "aliases": [
+      "Scavenger hunt",
+      "Photo prompt",
+      "Capture red things"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "camera",
+    "summary": "Take photos matching a list of prompts within a time, such as something red.",
+    "core_loop": "see prompt → take photo → submit",
+    "verbs": [
+      "capture"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "camera",
+      "prompt list"
+    ],
+    "rules": [
+      "time"
+    ],
+    "win": "most prompts",
+    "lose": "none; it cannot be failed",
+    "scoring": "prompts",
+    "session_seconds": [
+      180,
+      900
+    ],
+    "players": [
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "share set"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "prompt count"
+    ],
+    "tools": [
+      "camera_capture",
+      "photo_picker",
+      "timer_bar",
+      "score",
+      "vote_tally"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "photo scavenger hunt with my roommates",
+      "find five blue things"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "story_chain_one_line",
+    "name": "Story chain",
+    "aliases": [
+      "Story chain",
+      "One sentence story",
+      "Collaborative story"
+    ],
+    "family": "drawing_creative",
+    "subfamily": "collaborative",
+    "summary": "Each player adds one line to build a story together.",
+    "core_loop": "read story → add line → pass",
+    "verbs": [
+      "write"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "story",
+      "line box"
+    ],
+    "rules": [
+      "one line each"
+    ],
+    "win": "finish",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "funny stories"
+    ],
+    "content_needs": [
+      "openers"
+    ],
+    "difficulty_levers": [
+      "line limit"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "turns",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "drawing_creative",
+    "example_prompts": [
+      "build a story with my friends line by line"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

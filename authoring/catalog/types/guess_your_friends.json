@@ -105,7 +105,7 @@
       "authors hidden until all guess"
     ],
     "win": "most authors guessed",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "points per correct author",
     "session_seconds": [
       120,
@@ -180,7 +180,7 @@
       "predictors score if the winner matches"
     ],
     "win": "guess most winners",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "points for matching the Group winner",
     "session_seconds": [
       60,
@@ -252,7 +252,7 @@
       "guessers vote before reveal"
     ],
     "win": "guess the lie",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "points for correct lie and for fooling others",
     "session_seconds": [
       60,
@@ -321,8 +321,8 @@
       "answers are anonymous until revealed",
       "reveals optional"
     ],
-    "win": "none",
-    "lose": "none",
+    "win": "no win state: the game ends when the player finishes, saves or shares the result",
+    "lose": "none; it cannot be failed",
     "scoring": "points for correct guesses",
     "session_seconds": [
       60,
@@ -393,7 +393,7 @@
       "friends answer in order"
     ],
     "win": "highest score",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "1 point per right answer",
     "session_seconds": [
       60,
@@ -463,7 +463,7 @@
       "score by distance from true position"
     ],
     "win": "closest match",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "sum of position errors",
     "session_seconds": [
       60,
@@ -534,7 +534,7 @@
       "answers hidden until guess"
     ],
     "win": "most matches",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "1 point per match",
     "session_seconds": [
       45,
@@ -603,7 +603,7 @@
       "one item per friend"
     ],
     "win": "all pairs correct",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct pair",
     "session_seconds": [
       45,
@@ -672,7 +672,7 @@
       "photos opted in by members"
     ],
     "win": "most right",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "1 point per right",
     "session_seconds": [
       45,
@@ -741,7 +741,7 @@
       "each member has one photo"
     ],
     "win": "all matched",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "1 point per match",
     "session_seconds": [
       60,
@@ -810,7 +810,7 @@
       "spotlight rotates daily or weekly"
     ],
     "win": "top scorer",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct answer",
     "session_seconds": [
       60,
@@ -884,7 +884,7 @@
       "players cannot pick their own"
     ],
     "win": "most points",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "points for the right pick and for each fooled friend",
     "session_seconds": [
       120,
@@ -955,7 +955,7 @@
       "both reveal together"
     ],
     "win": "match in fewest rounds",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "rounds until match",
     "session_seconds": [
       60,
@@ -1024,7 +1024,7 @@
       "slider 0 to 100"
     ],
     "win": "closest guess",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "closeness",
     "session_seconds": [
       45,
@@ -1159,7 +1159,7 @@
       "members add events"
     ],
     "win": "correct order",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct placement",
     "session_seconds": [
       60,
@@ -1225,7 +1225,7 @@
       "options include decoys"
     ],
     "win": "all matched",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct",
     "session_seconds": [
       45,
@@ -1294,7 +1294,7 @@
       "both answer same questions"
     ],
     "win": "percent matches",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "percent matching",
     "session_seconds": [
       60,
@@ -1362,7 +1362,7 @@
       "closest wins"
     ],
     "win": "closest",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "distance from true",
     "session_seconds": [
       45,
@@ -1430,7 +1430,7 @@
       "closer is better"
     ],
     "win": "closest",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "closeness",
     "session_seconds": [
       45,
@@ -1496,7 +1496,7 @@
       "friend answers beforehand"
     ],
     "win": "most correct",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct",
     "session_seconds": [
       45,
@@ -1563,7 +1563,7 @@
       "answer from list"
     ],
     "win": "most right",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct or distance",
     "session_seconds": [
       60,
@@ -1630,7 +1630,7 @@
       "clips opted in"
     ],
     "win": "most right",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct",
     "session_seconds": [
       45,
@@ -1697,7 +1697,7 @@
       "drawings anonymous"
     ],
     "win": "most right",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct",
     "session_seconds": [
       60,
@@ -1764,7 +1764,7 @@
       "similarity decided by fuzzy match"
     ],
     "win": "closest",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "similarity",
     "session_seconds": [
       45,
@@ -1832,7 +1832,7 @@
       "each friend used once"
     ],
     "win": "complete line",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "lines",
     "session_seconds": [
       120,
@@ -1897,7 +1897,7 @@
       "friend picks beforehand"
     ],
     "win": "most matches",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per match",
     "session_seconds": [
       45,
@@ -1966,7 +1966,7 @@
       "can't vote own caption"
     ],
     "win": "most votes",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "votes",
     "session_seconds": [
       90,
@@ -2034,7 +2034,7 @@
       "friend tells truth or lies"
     ],
     "win": "best detector",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct",
     "session_seconds": [
       60,
@@ -2167,7 +2167,7 @@
       "messages opted in"
     ],
     "win": "most right",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct",
     "session_seconds": [
       45,
@@ -2232,7 +2232,7 @@
       "match a friend card to a fact card"
     ],
     "win": "clear all",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "moves",
     "session_seconds": [
       60,
@@ -2293,7 +2293,7 @@
       "friend resolves"
     ],
     "win": "most correct",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per correct",
     "session_seconds": [
       20,
@@ -2358,7 +2358,7 @@
       "both answer"
     ],
     "win": "highest score",
-    "lose": "none",
+    "lose": "none; it cannot be failed",
     "scoring": "per match",
     "session_seconds": [
       60,
