@@ -395,6 +395,11 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .cph2 { display: flex; align-items: flex-end; gap: 50px; margin-top: 24px; }
 .cpl { flex: none; width: 400px; padding-bottom: 50px; } .cpl b { display: block; white-space: nowrap; font-size: 64px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; color: transparent; }
 .cpl span { display: block; font-size: 26px; color: var(--ink); font-weight: 700; line-height: 1.25; margin-top: 4px; } .cpl small { display: block; font-size: 20px; color: var(--muted); margin-top: 12px; }
+
+.srow { display: flex; gap: 44px; align-items: flex-start; margin-top: 40px; } .srow .sgrid { flex: 1; margin-top: 0; gap: 34px; }
+.spon .sc { padding: 32px 36px; } .spon .sc p { font-size: 27px; margin-top: 18px; } .spon .sc em { font-size: 26px; } .spon .sc p.sev { font-size: 21px; }
+.sph { margin: 0; flex: none; width: 330px; } .sph img { width: 330px; height: 640px; object-fit: cover; object-position: top; border-radius: 34px; display: block; box-shadow: 0 24px 48px rgba(16,24,64,.18); }
+.sph figcaption { font-size: 22px; font-weight: 700; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -553,7 +558,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 <section class="slide spon">
   <div class="label">Who it's for · Product</div>
   <h2>Creators and brands get a Curio, too.</h2>
-  <div class="sgrid">
+  <div class="srow"><div class="sgrid">
     <div class="sc"><em>Creators</em>
       <p><b>Turn a persona into a Curio</b> the audience plays and ranks on.</p>
       <p><b>"Tell me your score" becomes a real board</b>, and every remix credits the maker.</p>
@@ -561,12 +566,14 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
       <p class="sev">Facebook paid creators nearly $3B in 2025 and rewards original work [27].</p>
       <span class="chip srv">creator program and payouts: proposal</span></div>
     <div class="sc"><em>Brands</em>
-      <p><b>A sponsored Curio in the feed</b>: brand name, a "Sponsored" tag and Play now. <span class="chip app">in the app</span></p>
-      <p><b>Real brands, real products</b> (HeyTea, Crumbl, Chipotle and more) in the brand's colors; we never draw their logos.</p>
+      <p><b>A sponsored Curio in the feed</b>: brand name, an Ad tag and Play now. <span class="chip app">in the app</span></p>
+      <p><b>Real brands, real products</b>: Liquid Death, Chipotle, HeyTea, Crumbl and more, in the brand's own look.</p>
       <p><b>A brand challenge a whole Group plays together.</b> <span class="chip srv">proposal</span></p>
       <span class="chip srv">ad targeting and payouts: proposal</span></div>
   </div>
-  <div class="foot"><span>Sponsored post card: in the app on main (584ea69); `sponsor` field on feed posts. Creator payouts [27].</span><span class="pg"></span></div>
+    <figure class="sph"><img src="img/app-sponsored.png" alt="A sponsored Curio card in the app"><figcaption>A sponsored Curio, in the app</figcaption></figure>
+  </div>
+  <div class="foot"><span>Real screen from the app (main, 03303ee). Creator payouts [27].</span><span class="pg"></span></div>
 </section>
 
 <section class="slide">
