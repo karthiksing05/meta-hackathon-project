@@ -29,10 +29,11 @@ export function orderText(model) {
  * Returns {model, ranked, check, review, repaired, authoring_json} or null when there is no score block
  * (the board keeps the old default, and the manifest gets no `score`).
  */
-export async function verifyScore({ expansion, gameJson, request = '' }, studio, { call, emit = () => {}, review: doReview = true, maxRepairs = MAX_SCORE_REPAIRS } = {}) {
+export async function verifyScore({ expansion, gameJson, request = '', spec = null }, studio, { call, emit = () => {}, review: doReview = true, maxRepairs = MAX_SCORE_REPAIRS } = {}) {
   if (!expansion?.score_declared || typeof studio.scoreCheck !== 'function') return null;
   let model = expansion.score;
-  const authoring = expansion.authoring ?? {};
+  // The planner's spec parts (game-spec/1), when there is one, are what the review and repair read.
+  const authoring = spec ? { ...(expansion.authoring ?? {}), spec } : (expansion.authoring ?? {});
   if (model.ranked === false) {
     emit({ kind: 'score_checked', ranked: false, reason: 'the game keeps an unranked board' });
     return { model, ranked: false, check: null, review: null, repaired: false, authoring_json: null };
@@ -86,7 +87,7 @@ export async function verifyScore({ expansion, gameJson, request = '' }, studio,
     if (n2.diagnostics.some((d) => d.severity === 'error') || (game && unknownScoreEvents(n2.score, game).length)) break;
     model = n2.score;
     out.repaired = true;
-    out.authoring_json = JSON.stringify({ ...authoring, score: rest });
+    out.authoring_json = JSON.stringify({ ...(expansion.authoring ?? {}), score: rest });
     if (model.ranked === false) { issues = [{ part: 'score', problem: 'The repair marked the board unranked.', fix: '' }]; break; }
     issues = await round(model);
   }

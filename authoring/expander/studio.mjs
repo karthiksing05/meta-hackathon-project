@@ -18,7 +18,8 @@ import { qualityReport, qualityLines } from './quality.mjs';
 import * as Prompts from './prompts.mjs';
 import { composeGame } from './pipeline.mjs';
 
-export const STUDIO_API_VERSION = 2;
+// 3: compose takes a harness `context` (trimmed menu, gold_ids, spec, gate_profile) and checks scores.
+export const STUDIO_API_VERSION = 3;
 
 const now = () => (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
 const round1 = (x) => Math.round(x * 10) / 10;
@@ -271,6 +272,8 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       bots: DEFAULT_BOTS,
       prompt: {
         fragments: fragments.map(fragmentText).join('\n'),
+        // Each fragment's spec alone, so a harness context can build a menu of just the planned tools.
+        fragment_specs: Object.fromEntries(fragments.map((f) => [f.id, fragmentText(f)])),
         looks: looks.map(lookText).join('\n'),
         engine: engineText(engineCatalog, format),
         format: formatRules,
@@ -355,7 +358,8 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     const e = engine();
     const json = typeof gameJSON === 'string' ? gameJSON : JSON.stringify(gameJSON);
     const maxSeconds = options.max_seconds ?? 180;
-    const res = await playtestAsync(e, json, { seed: Number(seed) || 1, maxSeconds, ...(options.slice_ms ? { sliceMs: options.slice_ms } : {}) });
+    // gate_profile (from the type, via the harness context) is passed through for the genre-aware gate.
+    const res = await playtestAsync(e, json, { seed: Number(seed) || 1, maxSeconds, ...(options.slice_ms ? { sliceMs: options.slice_ms } : {}), ...(options.gate_profile ? { profile: options.gate_profile } : {}) });
     // The score check replays these runs, inputs and all; the JSON below only carries counts.
     gated.set(json, { runs: res.runs, seed: Number(seed) || 1, maxSeconds });
     while (gated.size > 4) gated.delete(gated.keys().next().value);
@@ -363,6 +367,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       passed: res.passed,
       summary: res.summary,
       max_seconds: maxSeconds,
+      ...(options.gate_profile ? { gate_profile: options.gate_profile } : {}),
       ms: res.ms,
       flags: res.flags,
       runs: res.runs.map((r) => ({
@@ -419,11 +424,15 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
   }
 
   /**
-   * The gold examples closest to a request, as prompt text (expander/gold.mjs): {ids, text}.
+   * The gold examples closest to a request, as prompt text (expander/gold.mjs): {ids, text}. ids (from a
+   * harness context's gold_ids) are picked first.
    * Falls back to the fixed examples when there is no gold set.
    */
-  function examplesFor(request, k = 2) {
-    const picked = pickGold(String(request || ''), gold, Number(k) || 2);
+  function examplesFor(request, k = 2, ids = null) {
+    const n = Number(k) || 2;
+    // A harness context's gold_ids come first; words fill the rest.
+    const wanted = Array.isArray(ids) ? ids.map((id) => gold.find((e) => e.id === id)).filter(Boolean).slice(0, n) : [];
+    const picked = wanted.length >= n ? wanted : [...wanted, ...pickGold(String(request || ''), gold.filter((e) => !wanted.includes(e)), n - wanted.length)];
     if (!picked.length) {
       return JSON.stringify({ ids: examples.map((e) => e.name), text: examples.map((e) => `### ${e.name}\n${JSON.stringify(e.manifest)}`).join('\n\n') });
     }
@@ -453,7 +462,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
   function prompt(name, argsJSON) {
     const a = typeof argsJSON === 'string' ? JSON.parse(argsJSON || '{}') : (argsJSON || {});
     switch (name) {
-      case 'system': return Prompts.system(JSON.parse(catalog()), { examples: a.examples ?? null });
+      case 'system': return Prompts.system(JSON.parse(catalog()), { examples: a.examples ?? null, context: a.context ?? null });
       case 'compose': return Prompts.compose(a.request ?? '', a.brief ?? null);
       case 'revise': return Prompts.revise(a.authoring ?? '', a.request ?? '', a.brief ?? null);
       case 'repair': return Prompts.repair(a.request ?? '', a.manifest ?? '', a.issues ?? [], a.round ?? 1);
@@ -486,14 +495,14 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     }
     const local = {
       catalog: () => JSON.parse(catalog()),
-      examples: (request, k) => JSON.parse(examplesFor(request, k)),
+      examples: (request, k, ids) => JSON.parse(examplesFor(request, k, ids)),
       expand: (text) => JSON.parse(expand(text)),
-      gate: async (json, seed) => JSON.parse(await gate(json, seed)),
+      gate: async (json, seed, opts) => JSON.parse(await gate(json, seed, opts)),
       scoreCheck: async (json, model) => JSON.parse(await scoreCheck(json, model)),
       quality: (text, request) => JSON.parse(quality(text, request)),
       wrap: (opts) => JSON.parse(wrap(opts)),
     };
-    const out = await composeGame({ request: a.request, brief: a.brief, base }, local, {
+    const out = await composeGame({ request: a.request, brief: a.brief, base, context: a.context ?? null }, local, {
       ask, onEvent: typeof onEvent === 'function' ? onEvent : () => {},
       maxRepairRounds: a.max_repair_rounds, polish: a.polish !== false,
       // On by default; score_check: false or score_review: false opt out.

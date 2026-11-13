@@ -429,6 +429,19 @@ The job gains an optional `context`. With it, `compose` builds the menu section 
 It does this instead of pasting the whole catalog. Gold examples are picked by `gold_ids` first. Without `context`,
 nothing changes.
 
+**Built in the Studio bundle (API version 3, 2026-11-12).** `MicrogameStudio.compose({request, brief, base?, context})`
+passes `context` to `prompts.system`: with `tools` or `types`, the "Fragments" section holds only the planned
+fragments' full specs (other tools listed with their summary and API, the rest of the library named in one
+line), followed by "What this game is" (the types) and "The spec to follow" (`plan.spec`, `plan.anatomy`,
+`plan.gaps`, and an instruction to copy `spec.score` into the manifest's `score`). Gold examples come from
+`gold_ids` first, then by words. `gate_profile` goes to the gate's options. A manifest without a score block
+adopts `plan.spec.score` (events the game lacks are dropped) for the score check. Measured on three sample
+contexts built from the catalog (same gold examples, so the difference is the menu): 136,944 characters before;
+114,465 (trivia, 9 tools), 108,068 (dodge, 7) and 105,608 (puzzle, 4) after. The fragment menu goes from
+36,581 to 3,700–12,500 characters; the gold examples (about 90,000) are now the bulk.
+The generator should pass `context` into `studio.compose` and stop appending its own "Planned for this
+request" section when `MicrogameStudio.version >= 3`, or the types and plan go in twice.
+
 ```json
 {
   "context": {

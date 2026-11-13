@@ -11,6 +11,20 @@
 
 import * as P from './prompts.mjs';
 import { verifyScore } from './score-step.mjs';
+import { normalizeScore, unknownScoreEvents } from './score.mjs';
+
+/** The spec's score as a manifest block: bounds dropped (the bots set them), unknown events dropped. */
+export function adoptSpecScore(specScore, game) {
+  const { bounds: _b, reason: _r, ...block } = specScore;
+  const unknown = new Set(unknownScoreEvents({ events: Array.isArray(block.events) ? block.events : [] }, game ?? {}));
+  if (Array.isArray(block.events)) {
+    block.events = block.events.filter((e) => !unknown.has(e));
+    if (!block.events.length) delete block.events;
+  }
+  const n = normalizeScore(block);
+  if (n.diagnostics.some((d) => d.severity === 'error')) return null;
+  return { score: n.score, block };
+}
 
 export const MAX_REPAIR_ROUNDS = 3;
 export const BOT_COUNT = 5;
@@ -84,7 +98,7 @@ const blockingOf = (report) => (report.flags ?? []).filter((f) => f.blocking);
  * each returning a parsed object (gate a Promise). opts: { ask, onEvent, signal, maxRepairRounds, polish }.
  * Returns { manifest, stats, bots, gate, quality }. Throws GenerationError when the game never validates.
  */
-export async function composeGame({ request, brief, base = null }, studio, { ask, onEvent = () => {}, signal, maxRepairRounds = MAX_REPAIR_ROUNDS, polish = true, scoreCheck = true, scoreReview = true } = {}) {
+export async function composeGame({ request, brief, base = null, context = null }, studio, { ask, onEvent = () => {}, signal, maxRepairRounds = MAX_REPAIR_ROUNDS, polish = true, scoreCheck = true, scoreReview = true } = {}) {
   const started = Date.now();
   const stats = { firstDraftValid: null, repairRounds: 0, playtestRepair: false, passedGate: false, polished: false, museCalls: 0, models: [], examples: [], seconds: 0, calls: [] };
   const emit = (e) => onEvent({ ...e, summary: summarize(e) });
@@ -110,11 +124,14 @@ export async function composeGame({ request, brief, base = null }, studio, { ask
     const lookup = base ? `${base.title ?? ''}. ${base.one_line_rule ?? ''} ${request}` : request;
     let examples = null;
     try {
-      const ex = studio.examples(lookup, 2);
+      const ex = studio.examples(lookup, 2, Array.isArray(context?.gold_ids) ? context.gold_ids : null);
       examples = ex.text;
       stats.examples = ex.ids ?? [];
     } catch { /* fall back to the catalog's examples */ }
-    const system = P.system(catalog, { examples });
+    // A harness context trims the menu to the plan's tools and adds the spec (prompts.mjs planMenu).
+    const system = P.system(catalog, { examples, context });
+    stats.systemChars = system.length;
+    const gateOptions = context?.gate_profile ? { gate_profile: String(context.gate_profile) } : undefined;
     const first = base ? P.revise(base.authoring_json, request, brief) : P.compose(request, brief);
 
     let reply;
@@ -149,7 +166,7 @@ export async function composeGame({ request, brief, base = null }, studio, { ask
         continue;
       }
       emit({ kind: 'playtesting', bots: BOT_COUNT });
-      const report = await studio.gate(expansion.playtest_game_json || expansion.game_json, 1);
+      const report = await studio.gate(expansion.playtest_game_json || expansion.game_json, 1, gateOptions);
       const blocking = blockingOf(report);
       emit({ kind: 'playtested', passed: !!report.passed, headline: report.summary ?? '', blocking: blocking.map((f) => `${f.code}: ${f.message}`) });
       if (report.passed) {
@@ -178,7 +195,7 @@ export async function composeGame({ request, brief, base = null }, studio, { ask
           const q2 = studio.quality(expansion.authoring_json, request);
           if (q2.score > quality.score) {
             emit({ kind: 'playtesting', bots: BOT_COUNT });
-            const report = await studio.gate(expansion.playtest_game_json || expansion.game_json, 1);
+            const report = await studio.gate(expansion.playtest_game_json || expansion.game_json, 1, gateOptions);
             emit({ kind: 'playtested', passed: !!report.passed, headline: report.summary ?? '', blocking: blockingOf(report).map((f) => `${f.code}: ${f.message}`) });
             if (report.passed) {
               chosen = { expansion, report };
@@ -196,8 +213,14 @@ export async function composeGame({ request, brief, base = null }, studio, { ask
     let { expansion } = chosen;
     // The score step: games with a score block get a checked model (bounds, ranked) on the manifest.
     let score = null;
+    // A plan whose spec has a score, and a manifest without one: the spec's score, with events this game has.
+    const specScore = context?.plan?.spec?.score;
+    if (!expansion.score_declared && specScore && typeof specScore === 'object') {
+      const adopted = adoptSpecScore(specScore, expansion.game);
+      if (adopted) expansion = { ...expansion, score: adopted.score, score_declared: true, authoring: { ...expansion.authoring, score: adopted.block }, authoring_json: JSON.stringify({ ...expansion.authoring, score: adopted.block }) };
+    }
     if (scoreCheck && expansion.score_declared && typeof studio.scoreCheck === 'function') {
-      score = await verifyScore({ expansion, gameJson: expansion.playtest_game_json || expansion.game_json, request }, studio, { call, emit, review: scoreReview });
+      score = await verifyScore({ expansion, gameJson: expansion.playtest_game_json || expansion.game_json, request, spec: context?.plan?.spec ?? null }, studio, { call, emit, review: scoreReview });
       if (score?.authoring_json) expansion = { ...expansion, authoring_json: score.authoring_json };
       stats.score = score ? { ranked: score.ranked, repaired: score.repaired, reviews: score.reviews ?? 0, review: score.review?.ok ?? null } : null;
     }

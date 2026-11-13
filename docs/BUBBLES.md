@@ -1718,6 +1718,11 @@ text (or `{content, model}`), `onEvent` gets `{kind, summary, …}` (the kinds a
 and `argsJSON` is `{request, brief, base?}` (a `base` microgame manifest makes it a revision). A request
 that carries Studio's agreed anatomy (7.13) gets it as its own prompt section, with every rule's check
 as a hard constraint.
+`argsJSON` may also carry the harness `context` (docs/HARNESS_V2.md, "The context the generator receives";
+`MicrogameStudio.version` 3): with tools or types, the system prompt's fragment menu holds only the planned
+tools, plus the matched types and the planned spec; gold examples come from `context.gold_ids` first
+(`examples(request, k, ids)`); `gate_profile` goes to `gate(json, seed, {gate_profile})`. Without it, nothing
+changes. `prompt('system', {examples, context})` gives the same text.
 
 **Key order.** Swift's `JSONValue` writes objects with sorted keys, and the engine reads key order in
 function `params` (positional) and state `init`s (an init reads only earlier state). So games never
