@@ -19,12 +19,12 @@ tell application "Keynote"
 		if class of itm is not image then
 			set n to n + 1
 			if n ≤ 2 then
-				set width of itm to 240
-				set height of itm to 532
+				set width of itm to 314
+				set height of itm to 680
 				if n is 1 then
-					set position of itm to {1142, 249}
+					set position of itm to {1005, 251}
 				else
-					set position of itm to {1518, 249}
+					set position of itm to {1445, 251}
 				end if
 			end if
 		end if
