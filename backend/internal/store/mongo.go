@@ -54,6 +54,9 @@ const (
 	cScores  = "scores"
 	cJobs    = "generation_jobs"
 	cRecs    = "recs_state"
+	cFriends = "friends"
+	cGroups  = "groups"
+	cMembers = "group_members"
 )
 
 func (m *Mongo) coll(n string) *mongo.Collection { return m.db.Collection(n) }
@@ -564,4 +567,142 @@ func (m *Mongo) GetRecs(ctx context.Context, userID string) (*model.RecsRecord, 
 func (m *Mongo) PutRecs(ctx context.Context, r *model.RecsRecord) error {
 	_, err := m.coll(cRecs).ReplaceOne(ctx, bson.D{{Key: "_id", Value: r.UserID}}, r, options.Replace().SetUpsert(true))
 	return err
+}
+
+func (m *Mongo) UserByUsername(ctx context.Context, username string) (*model.User, error) {
+	return m.userBy(ctx, bson.D{{Key: "username", Value: username}})
+}
+
+func (m *Mongo) UsersByIDs(ctx context.Context, ids []string) ([]model.User, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	cur, err := m.coll(cUsers).Find(ctx, bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}})
+	if err != nil {
+		return nil, err
+	}
+	var out []model.User
+	return out, cur.All(ctx, &out)
+}
+
+func (m *Mongo) AddFriend(ctx context.Context, a, b string) error {
+	now := time.Now().UTC()
+	for _, p := range [][2]string{{a, b}, {b, a}} {
+		_, err := m.coll(cFriends).UpdateOne(ctx, bson.D{{Key: "_id", Value: p[0] + "|" + p[1]}},
+			bson.D{{Key: "$setOnInsert", Value: bson.D{{Key: "userId", Value: p[0]}, {Key: "friendId", Value: p[1]}, {Key: "createdAt", Value: now}}}},
+			options.UpdateOne().SetUpsert(true))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *Mongo) RemoveFriend(ctx context.Context, a, b string) error {
+	_, err := m.coll(cFriends).DeleteMany(ctx, bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: bson.A{a + "|" + b, b + "|" + a}}}}})
+	return err
+}
+
+func (m *Mongo) Friends(ctx context.Context, userID string) ([]string, error) {
+	cur, err := m.coll(cFriends).Find(ctx, bson.D{{Key: "userId", Value: userID}}, options.Find().SetSort(bson.D{{Key: "friendId", Value: 1}}))
+	if err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		FriendID string `bson:"friendId"`
+	}
+	if err := cur.All(ctx, &rows); err != nil {
+		return nil, err
+	}
+	out := make([]string, len(rows))
+	for i, r := range rows {
+		out[i] = r.FriendID
+	}
+	return out, nil
+}
+
+func (m *Mongo) UpsertGroup(ctx context.Context, g *model.Group) error {
+	_, err := m.coll(cGroups).ReplaceOne(ctx, bson.D{{Key: "_id", Value: g.ID}}, g, options.Replace().SetUpsert(true))
+	return err
+}
+
+func (m *Mongo) GroupByID(ctx context.Context, id string) (*model.Group, error) {
+	var g model.Group
+	if err := m.coll(cGroups).FindOne(ctx, bson.D{{Key: "_id", Value: id}}).Decode(&g); err != nil {
+		return nil, mapErr(err)
+	}
+	return &g, nil
+}
+
+func (m *Mongo) ListGroups(ctx context.Context, limit int) ([]model.Group, error) {
+	cur, err := m.coll(cGroups).Find(ctx, bson.D{}, options.Find().SetSort(bson.D{{Key: "_id", Value: 1}}).SetLimit(int64(limit)))
+	if err != nil {
+		return nil, err
+	}
+	var out []model.Group
+	return out, cur.All(ctx, &out)
+}
+
+func (m *Mongo) AddGroupMember(ctx context.Context, gm model.GroupMember) error {
+	_, err := m.coll(cMembers).UpdateOne(ctx, bson.D{{Key: "_id", Value: gm.GroupID + "|" + gm.UserID}},
+		bson.D{{Key: "$setOnInsert", Value: bson.D{{Key: "groupId", Value: gm.GroupID}, {Key: "userId", Value: gm.UserID},
+			{Key: "role", Value: gm.Role}, {Key: "joinedAt", Value: gm.JoinedAt}}}},
+		options.UpdateOne().SetUpsert(true))
+	return err
+}
+
+func (m *Mongo) RemoveGroupMember(ctx context.Context, groupID, userID string) error {
+	_, err := m.coll(cMembers).DeleteOne(ctx, bson.D{{Key: "_id", Value: groupID + "|" + userID}})
+	return err
+}
+
+func (m *Mongo) GroupMembers(ctx context.Context, groupID string) ([]model.GroupMember, error) {
+	cur, err := m.coll(cMembers).Find(ctx, bson.D{{Key: "groupId", Value: groupID}}, options.Find().SetSort(bson.D{{Key: "userId", Value: 1}}))
+	if err != nil {
+		return nil, err
+	}
+	var out []model.GroupMember
+	return out, cur.All(ctx, &out)
+}
+
+func (m *Mongo) GroupsOfUser(ctx context.Context, userID string) ([]model.Group, error) {
+	cur, err := m.coll(cMembers).Find(ctx, bson.D{{Key: "userId", Value: userID}})
+	if err != nil {
+		return nil, err
+	}
+	var rows []model.GroupMember
+	if err := cur.All(ctx, &rows); err != nil {
+		return nil, err
+	}
+	ids := make([]string, len(rows))
+	for i, r := range rows {
+		ids[i] = r.GroupID
+	}
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	gc, err := m.coll(cGroups).Find(ctx, bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}}, options.Find().SetSort(bson.D{{Key: "_id", Value: 1}}))
+	if err != nil {
+		return nil, err
+	}
+	var out []model.Group
+	return out, gc.All(ctx, &out)
+}
+
+func (m *Mongo) GamesByGroup(ctx context.Context, groupID string, limit int) ([]model.Game, error) {
+	f := bson.D{{Key: "$or", Value: bson.A{bson.D{{Key: "groupId", Value: groupID}}, bson.D{{Key: "eventId", Value: groupID}}}}}
+	return m.findGames(ctx, f, options.Find().SetSort(newestFirst).SetLimit(int64(limit)))
+}
+
+func (m *Mongo) RecentScores(ctx context.Context, userIDs []string, limit int) ([]model.Score, error) {
+	if len(userIDs) == 0 {
+		return nil, nil
+	}
+	cur, err := m.coll(cScores).Find(ctx, bson.D{{Key: "userId", Value: bson.D{{Key: "$in", Value: userIDs}}}},
+		options.Find().SetSort(bson.D{{Key: "updatedAt", Value: -1}}).SetLimit(int64(limit)))
+	if err != nil {
+		return nil, err
+	}
+	var out []model.Score
+	return out, cur.All(ctx, &out)
 }

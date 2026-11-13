@@ -340,8 +340,10 @@ func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Read
 		g.Scope = "everyone"
 	}
 	if rm := m.Lineage.RemixOf; rm != "" {
-		if _, err := s.Store.GameByID(ctx, rm); err == nil {
-			g.RemixOf = rm
+		if orig, err := s.Store.GameByID(ctx, rm); err == nil {
+			g.RemixOf = orig.ID
+		} else if orig, err := s.Store.GameBySlug(ctx, rm); err == nil {
+			g.RemixOf = orig.ID
 		}
 	}
 	if err := s.Store.InsertGame(ctx, g); err != nil {

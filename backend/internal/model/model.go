@@ -10,6 +10,9 @@ type User struct {
 	DisplayName  string    `bson:"displayName" json:"displayName"`
 	PasswordHash string    `bson:"passwordHash" json:"-"`
 	CreatedAt    time.Time `bson:"createdAt" json:"createdAt"`
+	Bio          string    `bson:"bio,omitempty" json:"bio,omitempty"`
+	Synthetic    bool      `bson:"synthetic,omitempty" json:"synthetic,omitempty"` // a demo person: no password, never signs in
+	Skill        float64   `bson:"skill,omitempty" json:"-"`                       // 0..1, how well they play; used by Group Blend
 }
 
 type RefreshToken struct {
@@ -214,4 +217,25 @@ type RecsRecord struct {
 	FeedSession string    `bson:"feedSession,omitempty"`
 	FeedAt      time.Time `bson:"feedAt,omitempty"`
 	UpdatedAt   time.Time `bson:"updatedAt"`
+}
+
+// Group is a Group or an Event: a set of people the games can be scoped to. Kind is "group" or "event".
+type Group struct {
+	ID        string    `bson:"_id" json:"id"`
+	Kind      string    `bson:"kind" json:"kind"`
+	Name      string    `bson:"name" json:"name"`
+	Category  string    `bson:"category,omitempty" json:"category,omitempty"`
+	About     string    `bson:"about,omitempty" json:"about,omitempty"`
+	Private   bool      `bson:"private,omitempty" json:"private,omitempty"`
+	CoverSeed string    `bson:"coverSeed,omitempty" json:"coverSeed,omitempty"`
+	OwnerID   string    `bson:"ownerId,omitempty" json:"ownerId,omitempty"`
+	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
+}
+
+// GroupMember is one person in a Group or Event.
+type GroupMember struct {
+	GroupID  string    `bson:"groupId" json:"groupId"`
+	UserID   string    `bson:"userId" json:"userId"`
+	Role     string    `bson:"role,omitempty" json:"role,omitempty"` // "owner" or "" for a member
+	JoinedAt time.Time `bson:"joinedAt" json:"joinedAt"`
 }

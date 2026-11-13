@@ -66,10 +66,22 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			{Keys: k("status", 1), Options: options.Index().SetName("jobs_status")},
 			{Keys: k("createdAt", 1), Options: options.Index().SetExpireAfterSeconds(30 * day).SetName("jobs_ttl")},
 		},
+		// friendships (one row per direction), Groups and their members
+		cFriends: {
+			{Keys: k("userId", 1, "friendId", 1), Options: options.Index().SetName("friends_user")},
+		},
+		cGroups: {
+			{Keys: k("kind", 1, "name", 1), Options: options.Index().SetName("groups_kind")},
+		},
+		cMembers: {
+			{Keys: k("groupId", 1, "userId", 1), Options: options.Index().SetName("members_group")},
+			{Keys: k("userId", 1), Options: options.Index().SetName("members_user")},
+		},
 		// leaderboards
 		cScores: {
 			{Keys: k("gameId", 1, "score", -1, "updatedAt", 1), Options: options.Index().SetName("leaderboard")},
 			{Keys: k("userId", 1), Options: options.Index().SetName("scores_user")},
+			{Keys: k("userId", 1, "updatedAt", -1), Options: options.Index().SetName("scores_user_recent")},
 		},
 	}
 	for coll, models := range plan {

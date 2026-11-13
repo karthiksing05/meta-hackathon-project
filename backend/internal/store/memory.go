@@ -22,6 +22,9 @@ type Memory struct {
 	eventID map[string]bool
 	jobs    map[string]*model.Job
 	recs    map[string]model.RecsRecord
+	friends map[string]map[string]bool // user -> friends
+	groups  map[string]*model.Group
+	members map[string]map[string]model.GroupMember // group -> user -> member
 }
 
 func NewMemory() *Memory {
@@ -29,6 +32,7 @@ func NewMemory() *Memory {
 		users: map[string]*model.User{}, refresh: map[string]model.RefreshToken{},
 		games: map[string]*model.Game{}, likes: map[string]bool{}, scores: map[string]model.Score{},
 		eventID: map[string]bool{}, jobs: map[string]*model.Job{}, recs: map[string]model.RecsRecord{},
+		friends: map[string]map[string]bool{}, groups: map[string]*model.Group{}, members: map[string]map[string]model.GroupMember{},
 	}
 }
 
@@ -530,4 +534,162 @@ func (m *Memory) PutRecs(ctx context.Context, r *model.RecsRecord) error {
 	c.FeedKeys = append([]string(nil), r.FeedKeys...)
 	m.recs[r.UserID] = c
 	return nil
+}
+
+func (m *Memory) UserByUsername(ctx context.Context, username string) (*model.User, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, u := range m.users {
+		if u.Username == username {
+			c := *u
+			return &c, nil
+		}
+	}
+	return nil, ErrNotFound
+}
+
+func (m *Memory) UsersByIDs(ctx context.Context, ids []string) ([]model.User, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []model.User
+	for _, id := range ids {
+		if u, ok := m.users[id]; ok {
+			out = append(out, *u)
+		}
+	}
+	return out, nil
+}
+
+func (m *Memory) AddFriend(ctx context.Context, a, b string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, p := range [][2]string{{a, b}, {b, a}} {
+		if m.friends[p[0]] == nil {
+			m.friends[p[0]] = map[string]bool{}
+		}
+		m.friends[p[0]][p[1]] = true
+	}
+	return nil
+}
+
+func (m *Memory) RemoveFriend(ctx context.Context, a, b string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.friends[a], b)
+	delete(m.friends[b], a)
+	return nil
+}
+
+func (m *Memory) Friends(ctx context.Context, userID string) ([]string, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []string
+	for id := range m.friends[userID] {
+		out = append(out, id)
+	}
+	sort.Strings(out)
+	return out, nil
+}
+
+func (m *Memory) UpsertGroup(ctx context.Context, g *model.Group) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	c := *g
+	m.groups[g.ID] = &c
+	return nil
+}
+
+func (m *Memory) GroupByID(ctx context.Context, id string) (*model.Group, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if g, ok := m.groups[id]; ok {
+		c := *g
+		return &c, nil
+	}
+	return nil, ErrNotFound
+}
+
+func (m *Memory) ListGroups(ctx context.Context, limit int) ([]model.Group, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []model.Group
+	for _, g := range m.groups {
+		out = append(out, *g)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
+}
+
+func (m *Memory) AddGroupMember(ctx context.Context, gm model.GroupMember) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.members[gm.GroupID] == nil {
+		m.members[gm.GroupID] = map[string]model.GroupMember{}
+	}
+	if _, ok := m.members[gm.GroupID][gm.UserID]; !ok {
+		m.members[gm.GroupID][gm.UserID] = gm
+	}
+	return nil
+}
+
+func (m *Memory) RemoveGroupMember(ctx context.Context, groupID, userID string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.members[groupID], userID)
+	return nil
+}
+
+func (m *Memory) GroupMembers(ctx context.Context, groupID string) ([]model.GroupMember, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []model.GroupMember
+	for _, gm := range m.members[groupID] {
+		out = append(out, gm)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].UserID < out[j].UserID })
+	return out, nil
+}
+
+func (m *Memory) GroupsOfUser(ctx context.Context, userID string) ([]model.Group, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []model.Group
+	for gid, ms := range m.members {
+		if _, ok := ms[userID]; ok {
+			if g, ok := m.groups[gid]; ok {
+				out = append(out, *g)
+			}
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out, nil
+}
+
+func (m *Memory) GamesByGroup(ctx context.Context, groupID string, limit int) ([]model.Game, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.sorted(func(g *model.Game) bool { return g.GroupID == groupID || g.EventID == groupID }, limit, Cursor{}), nil
+}
+
+func (m *Memory) RecentScores(ctx context.Context, userIDs []string, limit int) ([]model.Score, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	want := map[string]bool{}
+	for _, id := range userIDs {
+		want[id] = true
+	}
+	var out []model.Score
+	for _, sc := range m.scores {
+		if want[sc.UserID] {
+			out = append(out, sc)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].UpdatedAt.After(out[j].UpdatedAt) })
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
 }

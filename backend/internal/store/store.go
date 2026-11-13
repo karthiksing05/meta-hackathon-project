@@ -24,6 +24,26 @@ type Store interface {
 	CreateUser(ctx context.Context, u *model.User) error // ErrConflict on duplicate email or username
 	UserByEmail(ctx context.Context, email string) (*model.User, error)
 	UserByID(ctx context.Context, id string) (*model.User, error)
+	UserByUsername(ctx context.Context, username string) (*model.User, error)
+	UsersByIDs(ctx context.Context, ids []string) ([]model.User, error)
+
+	// Friendships are mutual: adding one adds both directions.
+	AddFriend(ctx context.Context, a, b string) error
+	RemoveFriend(ctx context.Context, a, b string) error
+	Friends(ctx context.Context, userID string) ([]string, error)
+
+	// Groups and Events.
+	UpsertGroup(ctx context.Context, g *model.Group) error
+	GroupByID(ctx context.Context, id string) (*model.Group, error)
+	ListGroups(ctx context.Context, limit int) ([]model.Group, error)
+	AddGroupMember(ctx context.Context, m model.GroupMember) error // idempotent
+	RemoveGroupMember(ctx context.Context, groupID, userID string) error
+	GroupMembers(ctx context.Context, groupID string) ([]model.GroupMember, error)
+	GroupsOfUser(ctx context.Context, userID string) ([]model.Group, error)
+	GamesByGroup(ctx context.Context, groupID string, limit int) ([]model.Game, error)
+
+	// RecentScores returns the latest best scores set by the given people, newest first.
+	RecentScores(ctx context.Context, userIDs []string, limit int) ([]model.Score, error)
 
 	PutRefresh(ctx context.Context, t model.RefreshToken) error
 	TakeRefresh(ctx context.Context, hash string) (*model.RefreshToken, error) // single use

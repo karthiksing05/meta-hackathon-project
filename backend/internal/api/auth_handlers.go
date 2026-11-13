@@ -103,7 +103,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
-	if !auth.CheckPassword(u.PasswordHash, in.Password) {
+	if u.PasswordHash == "" || !auth.CheckPassword(u.PasswordHash, in.Password) { // demo people have no password
 		writeErr(w, 401, "wrong email or password")
 		return
 	}
