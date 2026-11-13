@@ -1,0 +1,3496 @@
+[
+  {
+    "id": "five_letter_word_deduction",
+    "name": "Five-letter word deduction",
+    "aliases": [
+      "Wordle",
+      "wordle clone",
+      "guess the word",
+      "5 letter word game",
+      "Lingo",
+      "Jotto"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word deduction",
+    "summary": "Guess a hidden five-letter word in six tries, with each guess colored by which letters are right, misplaced or absent.",
+    "core_loop": "type a valid word → colored feedback per letter → use clues to narrow → repeat until solved or six guesses are spent",
+    "verbs": [
+      "type",
+      "deduce",
+      "eliminate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "hidden word",
+      "6x5 board",
+      "on-screen keyboard",
+      "letter feedback colors",
+      "valid-word list"
+    ],
+    "rules": [
+      "guess must be a real word",
+      "green = right place, yellow = in word elsewhere, gray = absent",
+      "repeated letters are counted per occurrence"
+    ],
+    "win": "solve in six guesses",
+    "lose": "use all six guesses without solving",
+    "scoring": "fewer guesses is better, shown as an emoji grid",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the colored grid without spoilers",
+      "compare guess counts in a Group",
+      "one shared word per day"
+    ],
+    "content_needs": [
+      "answer words list",
+      "allowed guess list"
+    ],
+    "difficulty_levers": [
+      "word length",
+      "guess count",
+      "hard mode forcing revealed hints",
+      "themed word list"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "word_check",
+      "grid_board",
+      "rounds",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "a wordle for my friend group's inside jokes",
+      "wordle but only harry potter spells",
+      "wordle with 4 letters for a quick break",
+      "daily word game like wordle but about space"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "multi_board_word_deduction",
+    "name": "Multi-board word deduction",
+    "aliases": [
+      "Quordle",
+      "Dordle",
+      "Octordle",
+      "Wordle with four boards",
+      "Duotrigordle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word deduction",
+    "summary": "Solve several word-deduction boards at once, where every guess is applied to all boards and the boards have shared guess budget.",
+    "core_loop": "type one word → it scores on every board → pick next guess to help the unsolved boards → solve all before running out",
+    "verbs": [
+      "type",
+      "deduce",
+      "prioritize"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "2-4 boards",
+      "shared guess counter",
+      "keyboard colored per board",
+      "valid-word list"
+    ],
+    "rules": [
+      "one guess applies to all unsolved boards",
+      "total guesses are limited to a few more than the board count",
+      "solved boards lock"
+    ],
+    "win": "solve every board",
+    "lose": "run out of guesses with a board unsolved",
+    "scoring": "boards solved then guesses left",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race a friend on the same four words",
+      "share which board was the hardest"
+    ],
+    "content_needs": [
+      "answer words list",
+      "allowed guess list"
+    ],
+    "difficulty_levers": [
+      "board count",
+      "guess budget",
+      "word length"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "word_check",
+      "grid_board",
+      "lives",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "quordle but with pokemon names",
+      "two board wordle I can do on the bus",
+      "a dordle for my roommates"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "custom_word_pool_deduction",
+    "name": "Custom word pool deduction",
+    "aliases": [
+      "wordle with custom words",
+      "personalized wordle",
+      "Wordle for my friends",
+      "Wordle maker"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word deduction",
+    "summary": "A letter-deduction game where the secret words come from a pool the creator or Group wrote, such as names, places and in-jokes.",
+    "core_loop": "see word length → guess → colored feedback → solve a word from your own world",
+    "verbs": [
+      "type",
+      "deduce"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "secret word from a custom pool",
+      "board",
+      "keyboard",
+      "feedback colors"
+    ],
+    "rules": [
+      "guess must be in the pool or the common word list",
+      "feedback as in letter deduction"
+    ],
+    "win": "solve before guesses run out",
+    "lose": "guesses run out",
+    "scoring": "fewer guesses scores more",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "the Group suggests the words",
+      "friends guess the one made for them",
+      "inside-joke word of the day"
+    ],
+    "content_needs": [
+      "words and names supplied by the maker",
+      "hints per word"
+    ],
+    "difficulty_levers": [
+      "pool size",
+      "word length",
+      "allowed guess list size"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "word_check",
+      "fuzzy_match",
+      "grid_board",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "a wordle for my friend group's inside jokes",
+      "wordle with the names of everyone in our family",
+      "wordle of my college dorm's slang"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "four_group_connections",
+    "name": "Four-group connections",
+    "aliases": [
+      "Connections",
+      "NYT Connections",
+      "Only Connect wall",
+      "Connect the words",
+      "sort 16 words into groups"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "categorize",
+    "summary": "Sixteen tiles hide four themed groups of four, and the player finds each group by selecting four tiles that share a link.",
+    "core_loop": "scan tiles → select four you think belong together → submit → group locks in or a mistake is counted → solve all four",
+    "verbs": [
+      "tap",
+      "group",
+      "infer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "16 tiles",
+      "four hidden categories",
+      "mistake counter",
+      "difficulty-colored reveals"
+    ],
+    "rules": [
+      "select exactly four then submit",
+      "a correct group locks and shows its theme",
+      "one-away feedback is allowed",
+      "four mistakes ends the puzzle"
+    ],
+    "win": "find all four groups",
+    "lose": "four mistakes",
+    "scoring": "groups solved without mistakes",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the grid of difficulty colors",
+      "compare who found the purple group",
+      "make a puzzle for your friends"
+    ],
+    "content_needs": [
+      "four groups of four with red herrings",
+      "one theme label per group"
+    ],
+    "difficulty_levers": [
+      "red herring overlap",
+      "wordplay vs plain categories",
+      "mistakes allowed"
+    ],
+    "tools": [
+      "grid_board",
+      "sort_bins",
+      "match_pairs",
+      "lives",
+      "reveal",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "connections but all marvel characters",
+      "make me a connections puzzle for our friend group",
+      "connections with red herrings about 90s cartoons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hex_letter_word_hive",
+    "name": "Hex-letter word hive",
+    "aliases": [
+      "Spelling Bee",
+      "NYT Spelling Bee",
+      "honeycomb word game",
+      "Word Hive",
+      "Letter Boxed lite"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word building",
+    "summary": "Seven letters around a center letter form as many words as possible, each containing the center letter, with a pangram worth a bonus.",
+    "core_loop": "see seven letters → build words of four or more letters using the center → submit → climb rank tiers",
+    "verbs": [
+      "type",
+      "tap",
+      "spell"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "hexagon of seven letters",
+      "center letter",
+      "found-word list",
+      "rank meter"
+    ],
+    "rules": [
+      "words need four or more letters",
+      "center letter required",
+      "letters may repeat",
+      "pangram uses all seven"
+    ],
+    "win": "reach top rank or find all words",
+    "lose": "none, play until done",
+    "scoring": "points per word with pangram bonus, rank by percent of max",
+    "session_seconds": [
+      90,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends see each other's rank",
+      "Group shares one hive and pools found words"
+    ],
+    "content_needs": [
+      "letter set",
+      "dictionary",
+      "pangram"
+    ],
+    "difficulty_levers": [
+      "letter count",
+      "minimum word length",
+      "rank thresholds"
+    ],
+    "tools": [
+      "tap_letters",
+      "word_check",
+      "fuzzy_match",
+      "score",
+      "hint",
+      "daily_seed",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "a spelling bee with only soccer words",
+      "spelling bee but the center letter changes every round",
+      "honeycomb word game for my team chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "letter_snake_theme_words",
+    "name": "Theme-word letter trail",
+    "aliases": [
+      "Strands",
+      "NYT Strands",
+      "word trail",
+      "theme word find"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word search",
+    "summary": "A grid of letters hides theme words that tile the whole board, and the player drags paths of adjacent letters to find them against a clue.",
+    "core_loop": "read the theme clue → drag across adjacent letters → locked if it is a theme word → leftover words from the dictionary earn hints → fill the board",
+    "verbs": [
+      "drag",
+      "spell",
+      "infer"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "letter grid",
+      "theme clue",
+      "found-word highlights",
+      "hint meter"
+    ],
+    "rules": [
+      "paths use adjacent letters including diagonals",
+      "every letter belongs to exactly one theme word",
+      "a spanning word covers the theme"
+    ],
+    "win": "fill the whole grid",
+    "lose": "none; hints are earned",
+    "scoring": "fewer hints used",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the color grid",
+      "Group solves a themed grid together"
+    ],
+    "content_needs": [
+      "grid with placed theme words",
+      "clue",
+      "non-theme dictionary"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "clue vagueness",
+      "hint cost"
+    ],
+    "tools": [
+      "grid_board",
+      "word_check",
+      "hint",
+      "reveal",
+      "daily_seed",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "a strands about harry potter houses",
+      "word search where the words share a secret theme",
+      "theme word trail about summer"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mini_crossword",
+    "name": "Mini crossword",
+    "aliases": [
+      "NYT Mini",
+      "Mini crossword",
+      "5x5 crossword",
+      "speed crossword",
+      "The Crossword"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "crossword",
+    "summary": "A tiny five-by-five crossword filled by typing answers to across and down clues, played against the clock.",
+    "core_loop": "read clue → type letters in the cell → advance to the next clue → finish the grid fast",
+    "verbs": [
+      "type",
+      "solve",
+      "recall"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "small grid",
+      "across and down clues",
+      "timer",
+      "keyboard"
+    ],
+    "rules": [
+      "answers cross and must agree",
+      "wrong cells flash on check",
+      "timer runs until the grid is correct"
+    ],
+    "win": "fill the grid correctly",
+    "lose": "none",
+    "scoring": "faster time is better, hints add a penalty",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "leaderboard of times among friends",
+      "Group has one daily grid",
+      "write a clue set for a friend"
+    ],
+    "content_needs": [
+      "grid fill",
+      "clues"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "clue difficulty",
+      "check button on or off"
+    ],
+    "tools": [
+      "grid_board",
+      "keyboard",
+      "hint",
+      "reveal",
+      "timer_bar",
+      "score",
+      "daily_seed",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "a mini crossword with all nba clues",
+      "daily crossword I can finish in a minute",
+      "make a crossword about our group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "category_clue_pinpoint",
+    "name": "Category pinpoint",
+    "aliases": [
+      "Pinpoint",
+      "LinkedIn Pinpoint",
+      "guess the category",
+      "what do these have in common"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "inference",
+    "summary": "Up to five clues are revealed one at a time, all linked by one hidden category, and the player guesses the category as early as possible.",
+    "core_loop": "see first clue → guess or reveal the next clue → guess the category → score by how few clues were needed",
+    "verbs": [
+      "guess",
+      "infer"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "clue cards revealed in order",
+      "category answer",
+      "guess box"
+    ],
+    "rules": [
+      "clues get more specific",
+      "wrong guess costs a reveal",
+      "the answer accepts close synonyms"
+    ],
+    "win": "name the category",
+    "lose": "all clues revealed and wrong",
+    "scoring": "fewer clues gives more points",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share clue count",
+      "friends write clue sets for each other"
+    ],
+    "content_needs": [
+      "category with five ordered clues",
+      "accepted phrasings"
+    ],
+    "difficulty_levers": [
+      "clue count",
+      "answer breadth",
+      "vagueness of early clues"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "reveal",
+      "rounds",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "pinpoint but with disney movies",
+      "what do these have in common game",
+      "a pinpoint about our friend group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "queens_region_placement",
+    "name": "Colored region queens",
+    "aliases": [
+      "Queens",
+      "LinkedIn Queens",
+      "n-queens colored regions",
+      "crown puzzle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "logic grid",
+    "summary": "Place one piece in every row, column and colored region of a grid so none touch, including diagonally.",
+    "core_loop": "tap cells to cycle empty, mark, piece → apply constraints → eliminate → place all pieces",
+    "verbs": [
+      "tap",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "square grid",
+      "colored regions",
+      "piece markers",
+      "error highlighting"
+    ],
+    "rules": [
+      "one piece per row, column and region",
+      "pieces may not touch even diagonally",
+      "puzzle has one solution"
+    ],
+    "win": "place every piece",
+    "lose": "none; timer only",
+    "scoring": "time to solve",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare times with friends",
+      "Group daily grid"
+    ],
+    "content_needs": [
+      "region layouts guaranteed unique"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "region irregularity",
+      "mistake highlighting"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "timer_bar",
+      "score",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "queens but with cats instead of crowns",
+      "a daily logic grid like linkedin queens",
+      "queens puzzle 7x7"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "binary_symbol_grid",
+    "name": "Binary symbol grid",
+    "aliases": [
+      "Tango",
+      "LinkedIn Tango",
+      "Takuzu",
+      "Binairo",
+      "sun and moon puzzle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "logic grid",
+    "summary": "Fill a grid with two symbols so no more than two match in a row, each row and column is balanced, and linked cells follow their sign.",
+    "core_loop": "tap a cell to cycle symbol → use given clues and equal/opposite marks → deduce forced cells → complete grid",
+    "verbs": [
+      "tap",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "6x6 grid",
+      "two symbols",
+      "equal and opposite markers",
+      "preset cells"
+    ],
+    "rules": [
+      "no three same symbols adjacent",
+      "each row and column has equal counts",
+      "sign marks force same or different"
+    ],
+    "win": "fill the grid legally",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race a friend's time",
+      "Group shares a daily board"
+    ],
+    "content_needs": [
+      "unique-solution puzzles with given cells"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "pre-filled count",
+      "sign marks shown"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "timer_bar",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "tango but with pizza and ice cream",
+      "a sun and moon logic puzzle",
+      "binary puzzle for my study group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "word_ladder_climb",
+    "name": "Word ladder climb",
+    "aliases": [
+      "Crossclimb",
+      "LinkedIn Crossclimb",
+      "word ladder",
+      "doublets",
+      "change one letter"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word chain",
+    "summary": "Climb a ladder of words by changing one letter each step, guided by clues, then reorder the rungs to reveal the top and bottom link.",
+    "core_loop": "read clue → type the matching word → words lock at their rungs → reorder middle words so each differs by one letter → solve end words",
+    "verbs": [
+      "type",
+      "order",
+      "spell"
+    ],
+    "inputs": [
+      "type",
+      "drag"
+    ],
+    "pieces": [
+      "clued rungs",
+      "drag handles",
+      "end-word clues"
+    ],
+    "rules": [
+      "each adjacent word differs by one letter",
+      "clues fix each word",
+      "end words connect"
+    ],
+    "win": "complete the ladder",
+    "lose": "none",
+    "scoring": "time with hint penalties",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "time race",
+      "make a ladder between two friend names"
+    ],
+    "content_needs": [
+      "word ladders with clues"
+    ],
+    "difficulty_levers": [
+      "ladder length",
+      "clue difficulty",
+      "one-letter-off hints"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "word_check",
+      "sort_bins",
+      "hint",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "crossclimb but with sports words",
+      "word ladder from cat to dog",
+      "a ladder game about our school"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "numbered_path_connect",
+    "name": "Numbered path connect",
+    "aliases": [
+      "Zip",
+      "LinkedIn Zip",
+      "connect the dots in order",
+      "numbered path puzzle",
+      "Hamiltonian path puzzle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "path puzzle",
+    "summary": "Draw a single path through every cell of a grid, touching the numbered cells in order.",
+    "core_loop": "drag from 1 → route through cells → hit each number in order → fill every cell without crossing",
+    "verbs": [
+      "drag",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "grid",
+      "numbered waypoints",
+      "path trail",
+      "undo"
+    ],
+    "rules": [
+      "path visits each cell once",
+      "numbers visited in ascending order",
+      "cannot cross itself"
+    ],
+    "win": "cover the grid ending at the last number",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare times",
+      "Group leaderboard on one board"
+    ],
+    "content_needs": [
+      "solvable path grids"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "waypoint count",
+      "walls"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "timer_bar",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "zip but every number is a donut",
+      "a one-line path puzzle for my commute",
+      "numbered dots puzzle with walls"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rare_answer_daily",
+    "name": "Rare-answer category quiz",
+    "aliases": [
+      "Krillion",
+      "krillion",
+      "Pointless",
+      "Pointless-style",
+      "rarest answer",
+      "obscure answer game"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "open-answer trivia",
+    "summary": "A category prompt; type one correct answer, and the rarer the answer among known correct ones, the more points it scores.",
+    "core_loop": "read prompt → type an answer → see its rarity tier and points → next prompt → total score",
+    "verbs": [
+      "type",
+      "recall"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "category prompt",
+      "answer tiers",
+      "timer",
+      "total"
+    ],
+    "rules": [
+      "answer must fuzzy-match an accepted one",
+      "points by tier",
+      "one answer per prompt"
+    ],
+    "win": "highest total after the set",
+    "lose": "none",
+    "scoring": "tiered points per answer",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare rarest answers",
+      "Group daily set",
+      "leaderboard of who found the rarest"
+    ],
+    "content_needs": [
+      "prompts",
+      "accepted answers with tiers and aliases"
+    ],
+    "difficulty_levers": [
+      "timer length",
+      "prompt breadth",
+      "tier thresholds"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "rarity_tiers",
+      "timer_bar",
+      "rounds",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "a harry potter krillion",
+      "make krillion",
+      "krillion about our friend group's trips",
+      "trivia where obscure answers win"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "frame_reveal_guess",
+    "name": "Frame-by-frame reveal guess",
+    "aliases": [
+      "Framed",
+      "Framed movie game",
+      "guess the movie from stills",
+      "Heardle for film",
+      "Moviedle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "media identification",
+    "summary": "A famous work is shown through a sequence of stills that each reveal more, and the player guesses the title from the earliest one possible.",
+    "core_loop": "view first still → guess or skip to next still → title accepted or after six guesses fail → score by stills used",
+    "verbs": [
+      "guess",
+      "recognize"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "still frames in order",
+      "search box",
+      "skip button",
+      "guess count"
+    ],
+    "rules": [
+      "each wrong guess or skip reveals another frame",
+      "title search accepts close matches"
+    ],
+    "win": "identify the title",
+    "lose": "all frames used",
+    "scoring": "more points for earlier guess",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share frames-needed",
+      "friends curate stills for each other"
+    ],
+    "content_needs": [
+      "image sets in progressive reveal order",
+      "title and aliases"
+    ],
+    "difficulty_levers": [
+      "frame count",
+      "obscurity of stills",
+      "title list size"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "reveal",
+      "rounds",
+      "score",
+      "daily_seed",
+      "image_gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "framed but only studio ghibli",
+      "a daily guess the movie from stills",
+      "guess the show from six screenshots"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "geo_silhouette_distance_guess",
+    "name": "Silhouette and distance guess",
+    "aliases": [
+      "Worldle",
+      "Globle",
+      "country guessing game",
+      "Tradle",
+      "guess the country by shape"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "geography guess",
+    "summary": "A hidden place appears as a silhouette, and each guess reveals its distance and compass direction from the target.",
+    "core_loop": "see outline → guess a place → get distance and direction → narrow → solve within six tries",
+    "verbs": [
+      "type",
+      "infer"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "silhouette image",
+      "guess box",
+      "distance and bearing readout",
+      "guess list"
+    ],
+    "rules": [
+      "six guesses",
+      "feedback is distance and direction",
+      "optional hide of the silhouette"
+    ],
+    "win": "name the place",
+    "lose": "out of guesses",
+    "scoring": "guess count",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the arrow grid",
+      "Group compares guess counts"
+    ],
+    "content_needs": [
+      "place list with outlines and coordinates"
+    ],
+    "difficulty_levers": [
+      "silhouette shown or hidden",
+      "guess count",
+      "place set"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "reveal",
+      "rounds",
+      "daily_seed",
+      "share_grid",
+      "map_geometry"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "worldle but states only",
+      "a daily guess the country game",
+      "worldle for fictional places from my fantasy novel"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "price_guess_higher_lower",
+    "name": "Price guess higher or lower",
+    "aliases": [
+      "Costcodle",
+      "Price is Right",
+      "guess the price",
+      "Pricedle",
+      "Priceless"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "numeric estimation",
+    "summary": "Guess the price of an item from its picture, and each guess is told higher or lower until the exact value is reached.",
+    "core_loop": "see item → enter a price → told higher or lower → narrow → hit it within the tries",
+    "verbs": [
+      "estimate",
+      "type"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "item picture",
+      "number entry",
+      "guess history"
+    ],
+    "rules": [
+      "six guesses",
+      "feedback higher or lower",
+      "within a small tolerance counts"
+    ],
+    "win": "land on the price",
+    "lose": "out of guesses",
+    "scoring": "fewer guesses",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compete to guess nearest",
+      "Group daily item"
+    ],
+    "content_needs": [
+      "item images and true values"
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "guess count",
+      "item category"
+    ],
+    "tools": [
+      "numeric_input",
+      "keyboard",
+      "reveal",
+      "rounds",
+      "score",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "costcodle but for ikea stuff",
+      "guess the price of the item game",
+      "price guessing for my family's grocery run"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "number_target_arithmetic",
+    "name": "Number target arithmetic",
+    "aliases": [
+      "Countdown numbers",
+      "24 game",
+      "The Number Game",
+      "Digits",
+      "Make 24"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "numbers",
+    "summary": "Combine a handful of given numbers with arithmetic operations to reach a target number.",
+    "core_loop": "see numbers and target → tap numbers and operators → build expression → reach or get as close as possible",
+    "verbs": [
+      "combine",
+      "calculate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "number tiles",
+      "operator buttons",
+      "target",
+      "expression row"
+    ],
+    "rules": [
+      "each number used at most once",
+      "only integer results are allowed",
+      "operators are plus, minus, times, divide"
+    ],
+    "win": "hit the target exactly",
+    "lose": "time runs out",
+    "scoring": "closeness to target and speed",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share best solution length",
+      "Group solves the same set"
+    ],
+    "content_needs": [
+      "number sets with guaranteed solutions"
+    ],
+    "difficulty_levers": [
+      "target size",
+      "tile count",
+      "timer"
+    ],
+    "tools": [
+      "grid_board",
+      "timer_bar",
+      "score",
+      "hint",
+      "rounds",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "a 24 game for my math class",
+      "countdown numbers round",
+      "make 100 with these six numbers"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "letters_longest_word_round",
+    "name": "Longest word from letters",
+    "aliases": [
+      "Countdown letters",
+      "Word Hunt",
+      "Anagrams",
+      "longest word",
+      "Scrabble lite"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word building",
+    "summary": "Given a random set of nine letters, build the longest valid word using each letter at most once.",
+    "core_loop": "see letters → rearrange → type or tile the word → submit → compare with the best word",
+    "verbs": [
+      "spell",
+      "rearrange"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "nine letter tiles",
+      "word row",
+      "timer",
+      "best-word reveal"
+    ],
+    "rules": [
+      "each tile used once",
+      "valid dictionary word",
+      "timer limits"
+    ],
+    "win": "longest word wins the round",
+    "lose": "none",
+    "scoring": "length of word squared",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare words with friends",
+      "Group daily letter set"
+    ],
+    "content_needs": [
+      "letter sets",
+      "dictionary"
+    ],
+    "difficulty_levers": [
+      "time",
+      "letter count",
+      "vowel balance"
+    ],
+    "tools": [
+      "word_check",
+      "timer_bar",
+      "rounds",
+      "score",
+      "daily_seed",
+      "tile_rack"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "longest word game from nine letters",
+      "word build game with spaceship letters only",
+      "countdown but with 30 seconds"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "boggle_word_grid",
+    "name": "Boggle word grid",
+    "aliases": [
+      "Boggle",
+      "Word Hunt",
+      "Scrabble Go",
+      "4x4 word grid",
+      "Word Cookies lite"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word search",
+    "summary": "Find as many words as possible by dragging through adjacent letters on a 4x4 grid before time ends.",
+    "core_loop": "swipe path through adjacent letters → release to submit → word scores by length → keep going until timer ends",
+    "verbs": [
+      "drag",
+      "spell"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "4x4 letter grid",
+      "timer",
+      "found list",
+      "score"
+    ],
+    "rules": [
+      "letters must be adjacent",
+      "a cell is used once per word",
+      "minimum three letters"
+    ],
+    "win": "highest score in time",
+    "lose": "time runs out",
+    "scoring": "points by word length",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "same grid for the Group, rank scores",
+      "word of the day shown"
+    ],
+    "content_needs": [
+      "boards and dictionary"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "time",
+      "minimum length"
+    ],
+    "tools": [
+      "grid_board",
+      "word_check",
+      "timer_bar",
+      "score",
+      "daily_seed",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "boggle with only food words",
+      "word hunt with a timer for road trips",
+      "4x4 letter swipe game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "nonogram_daily",
+    "name": "Nonogram pictures",
+    "aliases": [
+      "Picross",
+      "Nonograms",
+      "Griddlers",
+      "Paint by numbers logic",
+      "Hanjie"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "logic grid",
+    "summary": "Number clues beside each row and column tell how many consecutive cells to fill, revealing a picture when solved.",
+    "core_loop": "read row and column clues → fill or mark cells → deduce → complete the picture",
+    "verbs": [
+      "tap",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid",
+      "clue numbers",
+      "marks",
+      "picture reveal"
+    ],
+    "rules": [
+      "clue runs are in order with gaps between them",
+      "one solution"
+    ],
+    "win": "solve the picture",
+    "lose": "none",
+    "scoring": "time and mistakes",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the finished picture",
+      "Group builds a mural"
+    ],
+    "content_needs": [
+      "puzzle bitmaps with clues"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "mistake check",
+      "picture theme"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "reveal",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "nonogram that reveals a cat",
+      "picross for a coffee break",
+      "make a nonogram of our team logo"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "minesweeper_daily",
+    "name": "Mine-field clear",
+    "aliases": [
+      "Minesweeper",
+      "mine game",
+      "Minesweeper daily",
+      "Mines",
+      "flag the bombs"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "logic grid",
+    "summary": "Reveal safe cells on a grid where numbers tell how many neighbors hold mines, flagging every mine.",
+    "core_loop": "tap cell → number shows adjacent mines → deduce → flag mines → reveal all safe cells",
+    "verbs": [
+      "tap",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "pieces": [
+      "grid",
+      "number cells",
+      "flags",
+      "mine counter"
+    ],
+    "rules": [
+      "first tap is safe",
+      "number counts neighboring mines",
+      "a mine ends the game"
+    ],
+    "win": "reveal all safe cells",
+    "lose": "reveal a mine",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "same seed for Group",
+      "compare times"
+    ],
+    "content_needs": [
+      "mine layouts from seed"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "mine density",
+      "flag mode"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "lives",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "minesweeper where mines are cats",
+      "a quick minesweeper with 3 lives",
+      "daily minesweeper for my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "attribute_compare_guess",
+    "name": "Attribute compare guess",
+    "aliases": [
+      "Poeltl",
+      "Pokedle",
+      "LoLdle",
+      "Wheeldle",
+      "Guess the character",
+      "Heads or Tails guess"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "attribute deduction",
+    "summary": "Guess a hidden person or character, and each guess reveals which of its attributes match, are higher or lower, or differ.",
+    "core_loop": "type a guess from the list → see attribute tiles colored → narrow → repeat → find the secret",
+    "verbs": [
+      "type",
+      "deduce"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "guess list",
+      "attribute columns",
+      "color feedback",
+      "secret"
+    ],
+    "rules": [
+      "attributes include categories and numbers",
+      "numbers show up or down arrows",
+      "guess must be in the roster"
+    ],
+    "win": "name the secret",
+    "lose": "out of guesses",
+    "scoring": "fewer guesses",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends try to find your secret",
+      "Group daily secret"
+    ],
+    "content_needs": [
+      "roster with attributes"
+    ],
+    "difficulty_levers": [
+      "attribute count",
+      "roster size",
+      "guess limit"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "grid_board",
+      "rounds",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "poeltl but for premier league players",
+      "a pokedle for digimon",
+      "character guesser for our friend group where attributes are things like height and favorite food"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "semantic_hot_cold",
+    "name": "Semantic hot or cold",
+    "aliases": [
+      "Semantle",
+      "Contexto",
+      "word similarity game",
+      "guess by meaning",
+      "Hot and cold word"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word association",
+    "summary": "Guess a secret word, and each guess reports how close its meaning is to the secret, ranking guesses by closeness.",
+    "core_loop": "type a word → see its closeness rank → move toward meaning → find the word",
+    "verbs": [
+      "type",
+      "infer"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "guess history sorted by closeness",
+      "rank meter",
+      "guess box"
+    ],
+    "rules": [
+      "guess must be a word",
+      "feedback is a rank or similarity score",
+      "unlimited guesses with hints"
+    ],
+    "win": "find the secret word",
+    "lose": "give up",
+    "scoring": "number of guesses",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare guess counts",
+      "Group works one word together"
+    ],
+    "content_needs": [
+      "words with closeness ranking from embeddings"
+    ],
+    "difficulty_levers": [
+      "hint count",
+      "word difficulty"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "semantic_rank",
+      "hint",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "contexto but about music",
+      "semantle for my friend group",
+      "guess the secret word by meaning"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "higher_lower_stat_chain",
+    "name": "Higher or lower stat chain",
+    "aliases": [
+      "Higher Lower",
+      "The Higher Lower Game",
+      "Google higher lower",
+      "which has more"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "estimation",
+    "summary": "Two items are shown, and the player picks which has more of a stat, with the winner staying for the next comparison until a miss.",
+    "core_loop": "see two items → pick higher → reveal real number → continue streak",
+    "verbs": [
+      "compare",
+      "guess"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "two cards",
+      "streak counter",
+      "revealed values"
+    ],
+    "rules": [
+      "one tap per round",
+      "a miss ends the run"
+    ],
+    "win": "longest streak",
+    "lose": "first wrong answer",
+    "scoring": "streak length",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "streak leaderboard in the Group",
+      "friends beat your run"
+    ],
+    "content_needs": [
+      "items with numeric values"
+    ],
+    "difficulty_levers": [
+      "stat family",
+      "closeness of values",
+      "lives"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score",
+      "combo",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "higher lower with followers of famous cartoon characters",
+      "which has more game about video games",
+      "higher or lower for my town's facts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "emoji_decode_phrase",
+    "name": "Emoji decode",
+    "aliases": [
+      "Emoji puzzle",
+      "Emojle",
+      "guess the movie from emojis",
+      "rebus puzzle",
+      "Pictionary in emoji"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "decoding",
+    "summary": "A row of emoji spells out a title, phrase or place, and the player types or selects the answer.",
+    "core_loop": "read emoji → decode → type the phrase → check",
+    "verbs": [
+      "decode",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "emoji row",
+      "answer box",
+      "hint"
+    ],
+    "rules": [
+      "answer matches phrase",
+      "aliases accepted",
+      "hint reveals one word"
+    ],
+    "win": "type the phrase",
+    "lose": "time out",
+    "scoring": "speed and hints",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends build emoji puzzles for each other",
+      "Group daily emoji"
+    ],
+    "content_needs": [
+      "emoji sequences with answers"
+    ],
+    "difficulty_levers": [
+      "answer length",
+      "emoji count",
+      "multiple choice or free text"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "hint",
+      "rounds",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "guess the disney movie from emojis",
+      "emoji puzzles about our trip",
+      "rebus puzzle game about meme titles"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "timeline_order_events",
+    "name": "Timeline ordering",
+    "aliases": [
+      "Timeline",
+      "Chronology",
+      "order the events",
+      "Hisordle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "ordering",
+    "summary": "Place events in the correct chronological order by inserting each into a growing timeline.",
+    "core_loop": "see an event card → drop it where it belongs on the line → right placement keeps it → wrong costs a life → fill the timeline",
+    "verbs": [
+      "drag",
+      "order",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "event card",
+      "timeline",
+      "lives"
+    ],
+    "rules": [
+      "insert into the right gap",
+      "wrong placement removes the card and a life"
+    ],
+    "win": "place all cards",
+    "lose": "lives gone",
+    "scoring": "cards placed",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare how far each friend got",
+      "Group's shared life events timeline"
+    ],
+    "content_needs": [
+      "events with dates"
+    ],
+    "difficulty_levers": [
+      "lives",
+      "date granularity",
+      "era range"
+    ],
+    "tools": [
+      "sort_bins",
+      "lives",
+      "rounds",
+      "score",
+      "daily_seed",
+      "drag_drop_slots"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "timeline game for star wars",
+      "put events in order game",
+      "timeline of our friend group's year"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "scramble_unscramble",
+    "name": "Scramble and unscramble",
+    "aliases": [
+      "Jumble",
+      "anagram game",
+      "word scramble",
+      "Unscramble"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "anagram",
+    "summary": "Scrambled letters of a word must be rearranged to form the answer, often with a category hint.",
+    "core_loop": "see scramble → rearrange tiles → submit → next",
+    "verbs": [
+      "rearrange",
+      "spell"
+    ],
+    "inputs": [
+      "tap",
+      "drag",
+      "type"
+    ],
+    "pieces": [
+      "scrambled tiles",
+      "answer row",
+      "category hint",
+      "timer"
+    ],
+    "rules": [
+      "answer is one valid word",
+      "hint on demand"
+    ],
+    "win": "unscramble all in time",
+    "lose": "time",
+    "scoring": "words solved",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race to unscramble",
+      "friend sends scrambled names"
+    ],
+    "content_needs": [
+      "word list with categories"
+    ],
+    "difficulty_levers": [
+      "word length",
+      "timer",
+      "hint cost"
+    ],
+    "tools": [
+      "word_check",
+      "hint",
+      "timer_bar",
+      "rounds",
+      "score",
+      "daily_seed",
+      "tile_rack"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "unscramble names of our friend group",
+      "jumble game with pokemon",
+      "anagram dash 60 seconds"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cryptogram_substitution",
+    "name": "Cryptogram cipher",
+    "aliases": [
+      "Cryptogram",
+      "Cryptoquote",
+      "decode the quote",
+      "cipher puzzle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "decoding",
+    "summary": "A famous or custom line is encrypted with a letter substitution, and the player deduces the mapping to reveal it.",
+    "core_loop": "see cipher → tap a letter and assign a plaintext letter → pattern recognition → reveal the message",
+    "verbs": [
+      "decode",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "cipher text",
+      "mapping table",
+      "hint button"
+    ],
+    "rules": [
+      "each cipher letter maps to one plain letter",
+      "mapping is consistent"
+    ],
+    "win": "decode the whole line",
+    "lose": "none",
+    "scoring": "time and hints",
+    "session_seconds": [
+      120,
+      360
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "decode a message from a friend",
+      "Group gets one daily quote"
+    ],
+    "content_needs": [
+      "quotes or custom messages"
+    ],
+    "difficulty_levers": [
+      "message length",
+      "hint count",
+      "punctuation visible"
+    ],
+    "tools": [
+      "grid_board",
+      "keyboard",
+      "hint",
+      "reveal",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "cryptogram with song lyrics",
+      "send a secret message my friend has to decode",
+      "daily cipher puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "song_snippet_guess",
+    "name": "Song snippet guess",
+    "aliases": [
+      "Heardle",
+      "Heardle clone",
+      "guess the song",
+      "name that tune",
+      "Song Pop-lite"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "audio identification",
+    "summary": "A short clip of a track plays, growing longer after each miss, and the player names the song.",
+    "core_loop": "hear 1 s → guess or skip → hear longer → name the track",
+    "verbs": [
+      "listen",
+      "guess"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "audio clip lengths",
+      "search box",
+      "skip",
+      "guess count"
+    ],
+    "rules": [
+      "clips lengthen 1, 2, 4, 7, 11, 16 s",
+      "wrong guess or skip costs a step"
+    ],
+    "win": "name the track",
+    "lose": "clips exhausted",
+    "scoring": "earlier correct guess scores more",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share guess count",
+      "playlist of friends' songs"
+    ],
+    "content_needs": [
+      "clips and titles"
+    ],
+    "difficulty_levers": [
+      "clip lengths",
+      "catalog size",
+      "era"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "audio_clip_player",
+      "reveal",
+      "rounds",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "heardle for 2000s pop",
+      "name that tune for my roommates' playlist",
+      "guess the song from the first second"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "zoomed_image_guess",
+    "name": "Zoomed or blurred image guess",
+    "aliases": [
+      "Gamedle",
+      "Zoomed",
+      "guess the picture",
+      "pixel reveal game",
+      "Guess the game by its art"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "image identification",
+    "summary": "A tightly cropped or pixelated image slowly widens or sharpens, and the player names the subject as early as possible.",
+    "core_loop": "see tiny crop → guess or reveal → name it",
+    "verbs": [
+      "recognize",
+      "type"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "zoomed image",
+      "reveal steps",
+      "guess box"
+    ],
+    "rules": [
+      "each step reveals more",
+      "wrong guess steps forward"
+    ],
+    "win": "identify the subject",
+    "lose": "steps exhausted",
+    "scoring": "earlier is better",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends submit images from their camera roll",
+      "Group daily"
+    ],
+    "content_needs": [
+      "images and answers"
+    ],
+    "difficulty_levers": [
+      "reveal steps",
+      "image category",
+      "blur type"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "reveal",
+      "rounds",
+      "score",
+      "daily_seed",
+      "image_gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "zoomed in guess the pokemon",
+      "pixelated game where you guess the cartoon",
+      "guess the object from a closeup"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "code_breaker_mastermind",
+    "name": "Code breaker",
+    "aliases": [
+      "Mastermind",
+      "Bulls and Cows",
+      "Numberle",
+      "Cows and bulls",
+      "code guessing"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "code deduction",
+    "summary": "Crack a hidden code of colors or digits using feedback that tells how many are correct and how many are in the right spot.",
+    "core_loop": "enter a guess → pegs show exact and partial matches → refine → crack the code",
+    "verbs": [
+      "deduce",
+      "enter"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "code slots",
+      "color or digit palette",
+      "peg feedback"
+    ],
+    "rules": [
+      "feedback counts exact and misplaced only",
+      "no per-position hints"
+    ],
+    "win": "crack code in limit",
+    "lose": "attempts used",
+    "scoring": "fewer attempts",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "set a code for a friend",
+      "Group daily code"
+    ],
+    "content_needs": [
+      "secret codes"
+    ],
+    "difficulty_levers": [
+      "code length",
+      "symbols",
+      "attempt limit"
+    ],
+    "tools": [
+      "grid_board",
+      "rounds",
+      "lives",
+      "score",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "mastermind with candy colors",
+      "bulls and cows with 4 digits",
+      "code breaker my roommate sets for me"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "equation_guess_deduction",
+    "name": "Equation deduction",
+    "aliases": [
+      "Nerdle",
+      "Mathler",
+      "math wordle",
+      "equation wordle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "math deduction",
+    "summary": "Guess a hidden equation made of digits and operators, with colored feedback per symbol like a word game.",
+    "core_loop": "type an equation → colors show right, misplaced or absent symbols → refine",
+    "verbs": [
+      "type",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "equation row",
+      "digit and operator keys",
+      "feedback colors"
+    ],
+    "rules": [
+      "equation must be valid and equal",
+      "same coloring as a word game"
+    ],
+    "win": "solve the equation",
+    "lose": "guesses used",
+    "scoring": "guess count",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the grid",
+      "Group daily"
+    ],
+    "content_needs": [
+      "equations"
+    ],
+    "difficulty_levers": [
+      "length",
+      "operator set",
+      "guess count"
+    ],
+    "tools": [
+      "keyboard",
+      "typed_answer",
+      "grid_board",
+      "rounds",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "nerdle with fractions",
+      "math wordle for my kid sister",
+      "equation guess game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "letter_boxed_sides",
+    "name": "Letter-box word chain",
+    "aliases": [
+      "Letter Boxed",
+      "NYT Letter Boxed",
+      "Square words",
+      "box word chain"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word chain",
+    "summary": "Letters sit on the four sides of a square, and the player chains words so each next letter is on a different side and each word starts with the last letter of the previous word, using all letters.",
+    "core_loop": "tap letters to spell → chain words → cover all letters in few words",
+    "verbs": [
+      "spell",
+      "chain"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "square with letters on sides",
+      "word chain list"
+    ],
+    "rules": [
+      "consecutive letters come from different sides",
+      "next word starts with last letter",
+      "use every letter"
+    ],
+    "win": "use all letters in a target number of words",
+    "lose": "none",
+    "scoring": "fewer words",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share word count",
+      "Group tries to beat par"
+    ],
+    "content_needs": [
+      "letter boxes with guaranteed solutions"
+    ],
+    "difficulty_levers": [
+      "letter count",
+      "par words",
+      "dictionary"
+    ],
+    "tools": [
+      "word_check",
+      "hint",
+      "grid_board",
+      "score",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "letter boxed with only candy words",
+      "chain words from a square puzzle",
+      "box puzzle for my friends' names"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tile_pair_clear",
+    "name": "Tile pair clear",
+    "aliases": [
+      "Tiles",
+      "NYT Tiles",
+      "Mahjong solitaire",
+      "Shanghai",
+      "match pairs to clear"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "matching",
+    "summary": "Clear a layered pile of tiles by matching free pairs, with free tiles being those not covered or blocked on both sides.",
+    "core_loop": "spot free matching tiles → tap pair → clear → unblock more → clear the pile",
+    "verbs": [
+      "tap",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tile layout",
+      "free-tile highlight",
+      "shuffle"
+    ],
+    "rules": [
+      "only uncovered tiles may match",
+      "pairs must be identical or in a set"
+    ],
+    "win": "clear all tiles",
+    "lose": "no moves left",
+    "scoring": "time and moves",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare times",
+      "Group solves a shared layout"
+    ],
+    "content_needs": [
+      "layouts and tile sets"
+    ],
+    "difficulty_levers": [
+      "layer count",
+      "tile varieties",
+      "shuffle uses"
+    ],
+    "tools": [
+      "match_pairs",
+      "grid_board",
+      "timer_bar",
+      "daily_seed",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "mahjong solitaire with animal tiles",
+      "tile matching game for a quiet minute",
+      "clear the pile of tiles puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rank_list_drag_order",
+    "name": "Rank by attribute",
+    "aliases": [
+      "Ordle",
+      "Rankdle",
+      "order the list",
+      "sort by size game"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "ordering",
+    "summary": "Items must be dragged into order by a hidden or stated attribute, such as population, price or size, with correctness feedback.",
+    "core_loop": "see shuffled items → drag into order → submit → see which are in the right place",
+    "verbs": [
+      "drag",
+      "order"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "item cards",
+      "slots",
+      "reveal of true values"
+    ],
+    "rules": [
+      "order from largest to smallest",
+      "feedback marks correct slots"
+    ],
+    "win": "get the order exactly right",
+    "lose": "attempt limit",
+    "scoring": "attempts",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friend debate over the order",
+      "Group daily"
+    ],
+    "content_needs": [
+      "items with values"
+    ],
+    "difficulty_levers": [
+      "item count",
+      "attempts",
+      "attribute"
+    ],
+    "tools": [
+      "sort_bins",
+      "rounds",
+      "score",
+      "daily_seed",
+      "share_grid",
+      "drag_drop_slots"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "rank these rides by height",
+      "sort the planets in order",
+      "order game about the ages of our friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "survey_top_answer",
+    "name": "Survey top answers",
+    "aliases": [
+      "Family Feud",
+      "100 Survey Says",
+      "Family Fortunes",
+      "What would the group say"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "prediction",
+    "summary": "A survey question has a ranked list of answers from a poll, and the player guesses what people said, with points by rank.",
+    "core_loop": "read question → type an answer → see if on the board and its rank → strikes for misses",
+    "verbs": [
+      "type",
+      "predict"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "survey question",
+      "answer board",
+      "strike counter"
+    ],
+    "rules": [
+      "accepted answers with points",
+      "three strikes ends the round"
+    ],
+    "win": "fill the board or best score",
+    "lose": "three strikes",
+    "scoring": "points by rank",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "poll your own Group to build the board",
+      "compare scores"
+    ],
+    "content_needs": [
+      "question with ranked answers"
+    ],
+    "difficulty_levers": [
+      "strikes",
+      "board size"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "lives",
+      "reveal",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "family feud about our group's habits",
+      "survey says game about video games",
+      "what did 100 people say"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "daily_maze_fewest_moves",
+    "name": "Daily maze fewest moves",
+    "aliases": [
+      "Maze",
+      "Labyrinth",
+      "daily maze",
+      "Shortest path puzzle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "path puzzle",
+    "summary": "Navigate a maze to the exit with as few moves as possible, optionally collecting items on the way.",
+    "core_loop": "see maze → swipe to move → reach exit → compare move count to par",
+    "verbs": [
+      "swipe",
+      "plan"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "pieces": [
+      "maze",
+      "player",
+      "exit",
+      "move counter"
+    ],
+    "rules": [
+      "walls block",
+      "each swipe is one move"
+    ],
+    "win": "reach the exit under par",
+    "lose": "none",
+    "scoring": "moves vs par",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare move counts",
+      "Group shares one maze"
+    ],
+    "content_needs": [
+      "mazes with par"
+    ],
+    "difficulty_levers": [
+      "size",
+      "par",
+      "sliding vs stepwise"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "score",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "maze puzzle with 20 moves",
+      "a daily labyrinth",
+      "ice sliding puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sliding_image_puzzle",
+    "name": "Sliding image puzzle",
+    "aliases": [
+      "15 puzzle",
+      "sliding puzzle",
+      "slide tiles",
+      "tile slide"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "spatial",
+    "summary": "Slide tiles in a frame to restore a scrambled picture or number order.",
+    "core_loop": "see scramble → slide tiles into the gap → restore order",
+    "verbs": [
+      "slide",
+      "plan"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "tile frame",
+      "gap",
+      "move counter"
+    ],
+    "rules": [
+      "only tiles next to the gap move"
+    ],
+    "win": "restore the picture",
+    "lose": "none",
+    "scoring": "moves and time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race to solve the same scramble",
+      "a Group photo puzzle"
+    ],
+    "content_needs": [
+      "image and scramble"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "photo vs numbers"
+    ],
+    "tools": [
+      "tile_slide",
+      "grid_board",
+      "timer_bar",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "slide puzzle using my group photo",
+      "15 puzzle with a dog picture",
+      "3x3 slider for my phone"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "lights_out_toggle",
+    "name": "Light toggle grid",
+    "aliases": [
+      "Lights Out",
+      "Flip puzzle",
+      "Tap to toggle",
+      "Tic flip"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "logic grid",
+    "summary": "Tapping a cell flips it and its neighbors, and the player turns every cell off.",
+    "core_loop": "tap cell → neighbors flip → plan → turn all off",
+    "verbs": [
+      "tap",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid of lights",
+      "move counter"
+    ],
+    "rules": [
+      "tap toggles self and neighbors"
+    ],
+    "win": "all lights off",
+    "lose": "none",
+    "scoring": "fewest moves",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "move race",
+      "Group daily"
+    ],
+    "content_needs": [
+      "solvable start boards"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "pattern complexity"
+    ],
+    "tools": [
+      "grid_board",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "lights out but with lanterns",
+      "5x5 flip puzzle",
+      "toggle grid puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "flow_pair_paths",
+    "name": "Pair flow paths",
+    "aliases": [
+      "Flow Free",
+      "Flow",
+      "connect same colors",
+      "Pipes"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "path puzzle",
+    "summary": "Connect each matching pair of colored dots with a path that fills the board without any paths crossing.",
+    "core_loop": "drag from a dot → route to match → paths cannot cross → fill every cell",
+    "verbs": [
+      "drag",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "grid",
+      "paired dots",
+      "paths"
+    ],
+    "rules": [
+      "paths do not cross",
+      "all cells filled"
+    ],
+    "win": "connect all pairs and fill grid",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race times",
+      "Group daily board"
+    ],
+    "content_needs": [
+      "boards with a unique solution"
+    ],
+    "difficulty_levers": [
+      "size",
+      "pair count"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "flow free with space stations",
+      "connect the dots puzzle in colors",
+      "pipe puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cage_arithmetic_grid",
+    "name": "Cage arithmetic grid",
+    "aliases": [
+      "KenKen",
+      "Calcudoku",
+      "Killer Sudoku-lite",
+      "Sum cage puzzle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "number logic",
+    "summary": "Fill a grid with digits such that no digit repeats in any row or column, and each cage's digits combine to its stated target by the given operation.",
+    "core_loop": "read cage target → deduce digits → fill the grid",
+    "verbs": [
+      "deduce",
+      "calculate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid",
+      "cages",
+      "target numbers",
+      "number pad"
+    ],
+    "rules": [
+      "no repeats in row or column",
+      "cages meet target"
+    ],
+    "win": "fill correctly",
+    "lose": "none",
+    "scoring": "time",
+    "session_seconds": [
+      120,
+      360
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare solve times"
+    ],
+    "content_needs": [
+      "puzzles with unique solutions"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "operations used"
+    ],
+    "tools": [
+      "grid_board",
+      "keyboard",
+      "hint",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "kenken for my math club",
+      "a 4x4 sum cage puzzle",
+      "calcudoku with pizza toppings"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mini_sudoku",
+    "name": "Mini sudoku",
+    "aliases": [
+      "Sudoku",
+      "6x6 Sudoku",
+      "Sudoku daily",
+      "Number place"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "number logic",
+    "summary": "Fill a small grid with digits so each row, column and box has each digit exactly once.",
+    "core_loop": "read givens → deduce → place digits → complete",
+    "verbs": [
+      "deduce",
+      "place"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "6x6 grid",
+      "boxes",
+      "number pad",
+      "note marks"
+    ],
+    "rules": [
+      "no repeated digit in any row, column or box"
+    ],
+    "win": "complete the grid",
+    "lose": "none",
+    "scoring": "time and mistakes",
+    "session_seconds": [
+      90,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compete on the same puzzle",
+      "Group board"
+    ],
+    "content_needs": [
+      "puzzles with unique solution"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "givens",
+      "notes enabled"
+    ],
+    "tools": [
+      "grid_board",
+      "keyboard",
+      "hint",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "6x6 sudoku with emojis",
+      "daily sudoku",
+      "sudoku with only 4 numbers"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "odd_one_out_pick",
+    "name": "Odd one out",
+    "aliases": [
+      "Odd One Out",
+      "Which doesn't belong",
+      "Spot the different one"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "categorization",
+    "summary": "Several items are shown and the player picks the one that does not share the quality the others do.",
+    "core_loop": "see four items → pick the odd one → explain optional → next",
+    "verbs": [
+      "compare",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "four item cards",
+      "timer"
+    ],
+    "rules": [
+      "one item breaks the pattern"
+    ],
+    "win": "most correct",
+    "lose": "three misses",
+    "scoring": "correct streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends argue the answer",
+      "Group builds odd-one-out sets"
+    ],
+    "content_needs": [
+      "sets of items with rule"
+    ],
+    "difficulty_levers": [
+      "number of items",
+      "subtlety of rule"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "odd one out about cartoon animals",
+      "which one doesn't belong game",
+      "odd one out for our friend group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spot_the_difference_pair",
+    "name": "Spot the difference",
+    "aliases": [
+      "Spot the difference",
+      "Find the differences",
+      "Find five changes",
+      "Hidden changes"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "visual search",
+    "summary": "Two near-identical images are shown and the player taps differences between them.",
+    "core_loop": "compare images → tap differences → count them → finish",
+    "verbs": [
+      "tap",
+      "scan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "two images",
+      "diff counter",
+      "hint"
+    ],
+    "rules": [
+      "tap difference on either image",
+      "wrong taps cost time"
+    ],
+    "win": "find all differences",
+    "lose": "time out",
+    "scoring": "time",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race with a friend",
+      "Group photo diff"
+    ],
+    "content_needs": [
+      "image pairs with diff regions"
+    ],
+    "difficulty_levers": [
+      "difference count",
+      "image size"
+    ],
+    "tools": [
+      "collide",
+      "hint",
+      "timer_bar",
+      "score",
+      "daily_seed",
+      "image_gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "spot the difference with our group photo",
+      "find five things that changed",
+      "spot the difference in a kitchen scene"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "odd_color_tile_pick",
+    "name": "Odd color tile",
+    "aliases": [
+      "Kuku Kube",
+      "Color blind test",
+      "Find the different shade",
+      "Hue pick"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "visual perception",
+    "summary": "A grid of tiles with one slightly different shade appears, and the player taps the odd tile before time runs out.",
+    "core_loop": "see grid → tap the tile with a different shade → grid grows → shades get closer",
+    "verbs": [
+      "tap",
+      "scan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid of tiles",
+      "timer",
+      "score"
+    ],
+    "rules": [
+      "one tile differs",
+      "difference shrinks each level"
+    ],
+    "win": "highest level",
+    "lose": "wrong tap or time out",
+    "scoring": "level reached",
+    "session_seconds": [
+      30,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "score leaderboard",
+      "Group daily seed"
+    ],
+    "content_needs": [
+      "color families"
+    ],
+    "difficulty_levers": [
+      "time",
+      "shade difference",
+      "grid growth"
+    ],
+    "tools": [
+      "grid_board",
+      "timer_bar",
+      "score",
+      "speed_ramp",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "kuku kube but with pastel",
+      "color shade test",
+      "find the odd tile"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "daily_riddle_typed",
+    "name": "Daily riddle",
+    "aliases": [
+      "Riddle of the day",
+      "Lateral thinking puzzle",
+      "Brain teaser",
+      "Situation puzzle"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "riddle",
+    "summary": "A short riddle or lateral-thinking situation is posed, and the player types the answer with optional progressive hints.",
+    "core_loop": "read riddle → type guess → hints reveal one at a time → answer",
+    "verbs": [
+      "think",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "riddle text",
+      "hint steps",
+      "answer box"
+    ],
+    "rules": [
+      "guesses accepted via fuzzy match",
+      "hints reduce points"
+    ],
+    "win": "solve the riddle",
+    "lose": "give up",
+    "scoring": "hints used",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends try your riddle",
+      "Group solves together"
+    ],
+    "content_needs": [
+      "riddles with accepted answers"
+    ],
+    "difficulty_levers": [
+      "riddle difficulty",
+      "hint count"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "hint",
+      "reveal",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "a riddle a day for my family chat",
+      "lateral thinking puzzle about a mystery",
+      "riddles with a fantasy theme"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "compound_word_chain",
+    "name": "Compound word chain",
+    "aliases": [
+      "Chain words",
+      "Word Chain",
+      "Link words",
+      "Compound link"
+    ],
+    "family": "daily_puzzle",
+    "subfamily": "word association",
+    "summary": "Chain words where each pair forms a compound or phrase, such as sun → flower → pot, until the chain closes.",
+    "core_loop": "read starter → pick or type linking word → continue → close loop",
+    "verbs": [
+      "chain",
+      "spell"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "chain of words",
+      "word bank"
+    ],
+    "rules": [
+      "each adjacent pair forms a valid compound or phrase"
+    ],
+    "win": "complete the chain",
+    "lose": "time out",
+    "scoring": "time and chain length",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends add links",
+      "Group chains"
+    ],
+    "content_needs": [
+      "word pairs"
+    ],
+    "difficulty_levers": [
+      "chain length",
+      "timer"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "word_check",
+      "timer_bar",
+      "rounds",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "daily_puzzle",
+    "example_prompts": [
+      "word chain where every pair is a phrase",
+      "compound word links",
+      "link the words"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]
