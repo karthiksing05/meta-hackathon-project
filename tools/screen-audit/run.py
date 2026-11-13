@@ -6,7 +6,7 @@ a size change between the two states).
 Usage:
   DEVELOPER_DIR=/Applications/Xcode-26.6.app/Contents/Developer \\
   tools/screen-audit/run.py --udid <simulator> --app <DerivedData>/Build/Products/Debug-iphonesimulator/FacebookClone.app \\
-      --out <dir> [--ids id1,id2] [--limit n] [--feed-wait 11] [--play-wait 14]
+      --out <dir> [--ids id1,id2] [--limit n] [--feed-wait 4] [--play-wait 7] [--max-wait 40]
 
 Games come from GET https://api.ol4ol.com/v1/games/stats; Group copies (a groupID) are skipped.
 Each game is pinned as the feed's first page with the DEBUG launch variable FB_FEED_GAME, and the
@@ -105,8 +105,9 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--ids", default="")
     ap.add_argument("--limit", type=int, default=0)
-    ap.add_argument("--feed-wait", type=float, default=11)
-    ap.add_argument("--play-wait", type=float, default=14)
+    ap.add_argument("--feed-wait", type=float, default=4)
+    ap.add_argument("--max-wait", type=float, default=40)
+    ap.add_argument("--play-wait", type=float, default=7)
     ap.add_argument("--no-install", action="store_true")
     a = ap.parse_args()
 
@@ -136,6 +137,14 @@ def main():
             path = os.path.join(shots, f"{gid}-{state}.png")
             try:
                 launch(a.udid, extra)
+                # Wait for the page to draw (the feed can take a while), then let it settle.
+                start = time.time()
+                time.sleep(4)
+                while time.time() - start < a.max_wait:
+                    shoot(a.udid, path)
+                    if "blank page" not in scan.scan(path)["issues"]:
+                        break
+                    time.sleep(2)
                 time.sleep(wait)
                 shoot(a.udid, path)
                 rec[state + "_shot"] = path

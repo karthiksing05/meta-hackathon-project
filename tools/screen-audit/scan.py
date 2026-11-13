@@ -129,9 +129,12 @@ def scan(path):
 
     # A blank page (the game never drew): nearly no detail across the middle.
     mid = detail(img, (0, my0, W, my1))
-    if mid < 8:
+    # Share of near-black pixels in the middle: the feed's "Loading" state and an undrawn page.
+    gray = img.crop((0, my0, W, my1)).convert("L").resize((100, 100))
+    dark = sum(gray.histogram()[:12]) / 10000.0
+    if mid < 8 or dark > 0.93:
         issues.append("blank page")
-    return {"file": path, "pass": not issues, "issues": issues, "lines": lines, "middle_detail": round(mid, 1)}
+    return {"file": path, "pass": not issues, "issues": issues, "lines": lines, "middle_detail": round(mid, 1), "dark": round(dark, 2)}
 
 
 if __name__ == "__main__":
