@@ -24,8 +24,10 @@ enum GameSoundCue: String, CaseIterable, Sendable {
 
 /// The app's sound: the audio session, one persisted mute, app cues and sound previews.
 ///
-/// - **Session.** `.ambient` with `.mixWithOthers`, so the ring/silent switch mutes game and app
-///   sounds and people's music keeps playing. Video with sound borrows `.playback` through
+/// - **Session.** `.ambient` with `.mixWithOthers` by default, so the silent switch mutes app cues
+///   and people's music keeps playing. A running game with sound on holds `.playback` with
+///   `.mixWithOthers` through `beginGamePlayback(_:)`, so it is heard with the silent switch on
+///   (like Reels) and music still keeps playing. Video with sound borrows `.playback` through
 ///   `beginPlayback(_:)` / `endPlayback(_:)` (or `withPlayback { }`) and gives it back.
 /// - **Mute.** `GameSound.isMuted` is persisted and observable. The games tab, the player and Studio
 ///   all read it, and running games get `mute`/`unmute` through their host.
@@ -58,6 +60,7 @@ final class GameSound {
     private func setMuted(_ value: Bool) {
         guard value != muted else { return }
         muted = value
+        GameSound.debugLog("mute -> \(value ? "muted" : "sound on")")
         if value { stopMusic() }
     }
 
@@ -144,6 +147,20 @@ final class GameSound {
 
     nonisolated static func endPlayback(_ owner: AnyObject) {
         SessionBroker.shared.release(owner)
+    }
+
+    /// A running game with sound on: hold `.playback` mixed with other apps, so the game is heard
+    /// with the silent switch on and people's music keeps playing. Pair with `endPlayback(_:)`.
+    /// Web Audio in a `WKWebView` plays under the app's session, so `.ambient` would silence it.
+    nonisolated static func beginGamePlayback(_ owner: AnyObject) {
+        SessionBroker.shared.hold(owner, mixes: true)
+    }
+
+    /// DEBUG builds: one line in the device console (Console.app, filter "GameSound").
+    nonisolated static func debugLog(_ message: @autoclosure () -> String) {
+        #if DEBUG
+        NSLog("[GameSound] %@", message())
+        #endif
     }
 
     /// Runs `body` with the session in `.playback`, then gives it back to `.ambient`. For one-off
@@ -403,20 +420,31 @@ private final class SessionBroker: @unchecked Sendable {
     private let lock = NSLock()
     private var holders: [ObjectIdentifier: WeakOwner] = [:]
     private var inPlayback = false
+    /// The `.playback` options in effect: mixable while every holder is a game.
+    private var playbackMixes = false
 
-    private struct WeakOwner { weak var object: AnyObject? }
+    private struct WeakOwner {
+        weak var object: AnyObject?
+        var mixes: Bool
+    }
 
-    func hold(_ owner: AnyObject) {
+    /// `mixes`: a game (`.mixWithOthers`, `.default` mode) rather than video (`.moviePlayback`).
+    func hold(_ owner: AnyObject, mixes: Bool = false) {
         lock.lock()
         prune()
-        holders[ObjectIdentifier(owner)] = WeakOwner(object: owner)
-        let switchNow = !inPlayback
+        let id = ObjectIdentifier(owner)
+        if holders[id]?.object === owner, holders[id]?.mixes == mixes, inPlayback {
+            lock.unlock()
+            return
+        }
+        holders[id] = WeakOwner(object: owner, mixes: mixes)
+        let wantMix = holders.values.allSatisfy(\.mixes)
+        let switchNow = !inPlayback || wantMix != playbackMixes
         inPlayback = true
+        playbackMixes = wantMix
         lock.unlock()
         guard switchNow else { return }
-        let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(.playback, mode: .moviePlayback)
-        try? session.setActive(true)
+        setPlayback(mixes: wantMix)
     }
 
     func release(_ owner: AnyObject) {
@@ -425,8 +453,13 @@ private final class SessionBroker: @unchecked Sendable {
         prune()
         let backToAmbient = inPlayback && holders.isEmpty
         if backToAmbient { inPlayback = false }
+        // The last video went and only games remain: back to mixing with other apps.
+        let wantMix = !holders.isEmpty && holders.values.allSatisfy(\.mixes)
+        let remix = inPlayback && wantMix && !playbackMixes
+        if remix { playbackMixes = true }
         lock.unlock()
         if backToAmbient { setAmbient() }
+        if remix { setPlayback(mixes: true) }
     }
 
     /// The default: `.ambient`, mixing with other apps, muted by the silent switch.
@@ -446,7 +479,11 @@ private final class SessionBroker: @unchecked Sendable {
         lock.unlock()
         let session = AVAudioSession.sharedInstance()
         if !playback && session.category != .ambient { setAmbient() }
-        try? session.setActive(true)
+        do {
+            try session.setActive(true)
+        } catch {
+            GameSound.debugLog("setActive(true) failed: \(error.localizedDescription)")
+        }
     }
 
     /// After the engine stops: lets other apps' audio know they can resume, unless video holds it.
@@ -460,7 +497,27 @@ private final class SessionBroker: @unchecked Sendable {
     }
 
     private func setAmbient() {
-        try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+            GameSound.debugLog("session -> ambient (silent switch mutes)")
+        } catch {
+            GameSound.debugLog("session -> ambient failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func setPlayback(mixes: Bool) {
+        let session = AVAudioSession.sharedInstance()
+        do {
+            if mixes {
+                try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            } else {
+                try session.setCategory(.playback, mode: .moviePlayback)
+            }
+            try session.setActive(true)
+            GameSound.debugLog("session -> playback\(mixes ? " (mixes with others)" : "") active, silent switch ignored; output volume \(session.outputVolume)")
+        } catch {
+            GameSound.debugLog("session -> playback failed: \(error.localizedDescription)")
+        }
     }
 
     /// Owners that were freed without `release` give the session back too.

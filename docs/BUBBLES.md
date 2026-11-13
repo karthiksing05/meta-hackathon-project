@@ -224,6 +224,11 @@ Swift to call `BubbleHost.boot(payloadJSON)`:
   `poster` draws one still frame. Tapping during `replay` or `demo` **takes over**: the runtime
   restarts the same seed in `play` mode and posts `takeover`.
 - Swift → JS: `BubbleHost.command({"type": "pause" | "resume" | "restart" | "mute" | "unmute"})`.
+  `unmute`, `resume`, a tap and the page becoming visible again all resume the Web Audio context
+  when it is `suspended` or `interrupted` (iOS interrupts it for calls, Siri and other apps).
+  While a session is unmuted and not paused, the host holds the app's audio session in
+  `.playback` with `.mixWithOthers` (`GameSound.beginGamePlayback`), so games are heard with the
+  silent switch on and people's music keeps playing.
 - JS → Swift: `window.webkit.messageHandlers.bubble.postMessage({...})`:
 
 | `type` | Fields |

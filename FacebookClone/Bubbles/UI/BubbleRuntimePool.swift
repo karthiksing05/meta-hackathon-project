@@ -386,6 +386,11 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
     private var startGeneration = 0
     /// Restarted after a web content process crash.
     private var lastStart: (key: String, manifest: BubbleManifest, options: BubbleSessionOptions)?
+    /// The active session's sound, as last told to the page. While it is audible the host holds
+    /// the audio session in `.playback` (`GameSound.beginGamePlayback`), so the silent switch
+    /// doesn't silence the game.
+    private var soundMuted = true
+    private var soundPaused = true
 
     init(serial: Int, configuration: WKWebViewConfiguration) {
         self.serial = serial
@@ -540,6 +545,9 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
         lastStart = (key, manifest, options)
         activeKey = key
         activeMode = options.mode
+        soundMuted = options.isMuted
+        soundPaused = false
+        updateSoundHold()
         var outcome: BubbleStartOutcome
         switch capability {
         case .sessions:
@@ -707,6 +715,14 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
 
     /// `BubbleHost.command`: `pause`, `resume`, `restart`, `mute` or `unmute`, for the active session.
     func command(_ type: String) {
+        switch type {
+        case "mute": soundMuted = true
+        case "unmute": soundMuted = false
+        case "pause": soundPaused = true
+        case "resume", "restart": soundPaused = false
+        default: break
+        }
+        updateSoundHold()
         guard isLoaded, capability == .sessions || capability == .bootOnly else { return }
         webView.callAsyncJavaScript(
             "if (window.BubbleHost && typeof BubbleHost.command === 'function') { BubbleHost.command({ type: type }) } return ''",
@@ -785,6 +801,16 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
         }
     }
 
+    /// Holds `.playback` while this host's game is audible, and gives it back otherwise.
+    private func updateSoundHold() {
+        let audible = isLeased && activeKey != nil && !soundMuted && !soundPaused
+        if audible {
+            GameSound.beginGamePlayback(self)
+        } else {
+            GameSound.endPlayback(self)
+        }
+    }
+
     fileprivate func resetForPool() {
         command("pause")
         handlers.removeAll()
@@ -794,6 +820,8 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
     }
 
     fileprivate func shutDown() {
+        soundPaused = true
+        updateSoundHold()
         handlers.removeAll()
         lastStart = nil
         webView.stopLoading()

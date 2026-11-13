@@ -5078,8 +5078,14 @@
     },
     unlock() {
       if (this.muted) return;
-      const ctx = this.ensure();
-      if (ctx && ctx.state === "suspended" && typeof ctx.resume === "function") ctx.resume().catch(() => {});
+      let ctx = this.ensure();
+      if (ctx && ctx.state === "closed") {
+        this.ctx = null;
+        ctx = this.ensure();
+      }
+      // iOS leaves the context "interrupted" (not "suspended") after a call, Siri or another app
+      // takes the audio session; resume either, or the game stays silent until it is reloaded.
+      if (ctx && ctx.state !== "running" && typeof ctx.resume === "function") ctx.resume().catch(() => {});
     },
     tone(t, type, f0, f1, dur, vol) {
       const ctx = this.ctx;
@@ -5282,7 +5288,10 @@
       document.addEventListener("visibilitychange", () => {
         this.hidden = document.visibilityState === "hidden";
         if (this.hidden) this.stopLoop();
-        else this.maybeLoop();
+        else {
+          Sound.unlock();
+          this.maybeLoop();
+        }
       });
       this.resize();
     },
@@ -5560,6 +5569,7 @@
             this.stopLoop();
             break;
           case "resume":
+            Sound.unlock();
             if (!this.paused) break;
             this.paused = false;
             this.lastTs = 0;
