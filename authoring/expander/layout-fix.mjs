@@ -20,6 +20,7 @@
 // Each fix is validated with the engine and dropped if the game stops loading.
 
 import { loadEngine } from './engine.mjs';
+import { FONT_DATA } from '../kit/font-data.mjs';
 import { layoutCheck, instrument, walkNodes, parseColor, contrast, MIN_TEXT, engineLineChars, longestWord } from '../playtest/layout-check.mjs';
 
 const CHAR_EM = 0.63; // the engine's bold width per character (0.6 × 1.05)
@@ -84,7 +85,7 @@ function wordsOf(text) {
  */
 export function keepWords(game) {
   const fixes = [];
-  const W = game.canvas?.width ?? 360;
+  const W = game.presentation?.canvas?.w ?? 360;
   walkNodes(game.presentation?.root, (t, ptr) => {
     if (t.node !== 'text' || t.wrap !== true || !isNum(t.w)) return;
     const weight = isNum(t.weight) ? t.weight : 400;
@@ -130,6 +131,59 @@ export function keepWords(game) {
     }
   });
   return fixes;
+}
+
+/** A font's widest average advance (em) at a weight, capitals or not, from the look kit's metrics. */
+export function fontEm(family, weight = 400) {
+  const f = Object.values(FONT_DATA).find((x) => x.family === family);
+  if (!f) return null;
+  const w = String(f.weights.reduce((b, x) => (Math.abs(x - weight) < Math.abs(b - weight) ? x : b), f.weights[0]));
+  return Math.max(f.avg?.[w] ?? 0, f.avgCaps?.[w] ?? 0) || null;
+}
+
+/**
+ * Size bounds written as `room / (len(text) × 0.63)` assume the engine's character width; a wide
+ * face (Monoton, Bungee) or an outline needs more. The bound takes the font's own advance from the
+ * look kit's metrics (font-data.mjs), plus the stroke. Mutates.
+ */
+export function fontAwareFit(game) {
+  const fixes = [];
+  walkNodes(game.presentation?.root, (t, ptr) => {
+    if (t.node !== 'text' || !isExpr(t.size) || !t.font) return;
+    const em = fontEm(t.font, isNum(t.weight) ? t.weight : 400);
+    if (!em) return;
+    const stroke = isNum(t.stroke_width) ? t.stroke_width : 0;
+    const need = +(Math.max(em, CHAR_EM) * (1 + stroke / 20)).toFixed(3);
+    if (need <= CHAR_EM + 0.005) return;
+    const next = t.size.replace(/\*\s*0\.63\)/g, `* ${need})`);
+    if (next === t.size) return;
+    t.size = next;
+    fixes.push({ kind: 'em', node: ptr, detail: `size bound uses ${t.font}'s width (${need} em, not 0.63)` });
+  });
+  return fixes;
+}
+
+/**
+ * Stray shapes (FC-10, checks/shapes.mjs findings): an empty box is hidden; a panel painted off the
+ * look takes the look's $surface (and $line for a literal outline). Returns {game, fixes}.
+ */
+export function fixShapes(game, strays) {
+  const g = clone(game);
+  const fixes = [];
+  for (const f of strays ?? []) {
+    const n = getAt(g, f.node);
+    if (!n || n.node !== 'rect') continue;
+    if (f.off) {
+      const before = n.fill;
+      n.fill = '$surface';
+      if (typeof n.stroke === 'string' && n.stroke.startsWith('#')) n.stroke = g.presentation?.tokens?.line ? '$line' : '$primary';
+      fixes.push({ kind: 'shape', node: f.node, detail: `off-look panel ${before} → $surface` });
+    } else if (f.empty && n.visible === undefined && !n.on_tap && !n.on_drag) {
+      n.visible = false;
+      fixes.push({ kind: 'shape', node: f.node, detail: 'empty box hidden' });
+    }
+  }
+  return { game: g, fixes };
 }
 
 /** Fits tile and button labels; centers labels anchored on their tile's corner. Mutates `game`. */
@@ -548,6 +602,13 @@ export function plateLabels(game, geometry) {
     const textHex = tokenColor(game, t.color ?? '$ink') ?? '#FFFFFF';
     const plate = palette.map((p) => ({ ...p, c: contrast(rgb(p.hex), rgb(textHex)) })).sort((a, b) => b.c - a.c)[0];
     if (!plate || plate.c < 4.5) continue;
+    // Words that change (a judge line, a combo call) shrink with their length so the badge stays on
+    // the canvas: the room around the text's centre, in the font's own width.
+    if (isExpr(t.text) && isNum(SIZE_OF(t)) && center) {
+      const room = isNum(t.x) ? Math.max(60, 2 * Math.min(t.x, W - t.x) - (moving ? 18 : 22) - 8) : W - 32;
+      const em = Math.max(CHAR_EM, fontEm(t.font, isNum(t.weight) ? t.weight : 400) ?? 0);
+      t.size = `= max(${MIN_TEXT}, min(${SIZE_OF(t)}, ${room} / (max(1, ${lenExpr(t)}) * ${+em.toFixed(3)})))`;
+    }
     const S = sizeExpr(t);
     const pad = moving ? 18 : 22;
     const w = isNum(SIZE_OF(t)) && !isExpr(t.text) ? Math.round([...String(t.text)].length * SIZE_OF(t) * CHAR_EM + pad) : `= ${lenExpr(t)} * ${S} * ${CHAR_EM} + ${pad}`;
@@ -782,6 +843,7 @@ export async function fixLayout(game, { findings = null, pixels = null, engine =
   };
   step('fit', fitText);
   step('words', keepWords);
+  step('em', fontAwareFit);
   step('gap', spaceTargets);
   step('inset', insetCells);
   step('lanes', softenLanes);

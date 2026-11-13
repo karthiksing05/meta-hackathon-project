@@ -57,6 +57,8 @@ engine's topmost-first list, at the same relative spot), so the bots play the sa
 
 ## Codes
 
+Every code belongs to a failure class in `docs/games/FAILURE_CLASSES.md`, the one list of what a game must never show.
+
 `block` stops the publish (or triggers repair); `warn` is reported only.
 
 | Code | Severity | Meaning | Fix (in order) |
@@ -82,6 +84,8 @@ engine's topmost-first list, at the same relative spot), so the bots play the sa
 | `S_*` | as the style check says (`error` → block) | tokens and tree, before play | the UI kit |
 | `S_FONT_FAMILIES`, `S_TYPE_SCALE`, `S_TEXT_COLORS`, `S_NEON_TEXT` | block | the game off its own look: families outside its pairing, sizes off its scale, literal or glowing text colours | `kit/look.mjs` `lookFix` |
 | `S_READABILITY` | block | text under 4.5:1 (small) or 3:1 (large) in the worst 10 % of the pixels behind it, or small text on a busy background, on any sampled frame | `kit/readability.mjs` `readabilityFix`: palette colour, outline or soft plate, solid plate |
+| `S_HUD_READABILITY` | block | a timer, score or other HUD readout (HUD-tagged text in the top or bottom band) under 4.5:1 at any size on any frame (`checks/hud.mjs`, FC-02) | the readability fixer held to 4.5:1 |
+| `S_STRAY_SHAPE` | block | a still box that is empty in every frame, a large opaque panel in a literal colour far from the look's surfaces, or one a quarter off the canvas (`checks/shapes.mjs`, FC-10) | `layout-fix.mjs` `fixShapes` before the readability stage: hide an empty box, repaint an off-look panel `$surface` |
 | `S_WEIGHT_MIX`, `S_ALIGNMENT`, `S_PALETTE_CLASH`, `S_THEME_MISMATCH` | warn | weights, ragged edges, palette vs backdrop, fonts vs the vibe | `lookFix` (fonts and weights) |
 | `R_*` | a failed must blocks; others warn | the person's requirements | `requirements.mjs` repair |
 | `F_BG_GAP`, `F_BACKDROP_SHORT`, `F_KEY_IN_BLEED`, `F_DOUBLE_HUD` | block | fill (`fill-check.mjs`): background gaps, key content under the phone's bars, two score HUDs | the fill fix |

@@ -21,6 +21,8 @@ import { isNeon, stepOf } from './look.mjs';
 import { analyze } from '../verify/scene.mjs';
 
 export const READABILITY_CODE = 'S_READABILITY';
+export const HUD_READABILITY_CODE = 'S_HUD_READABILITY';
+export const HUD_NEED = 4.5;
 export const P_WORST = 0.1;
 export const BUSY_SPREAD = 0.13;
 export const MAX_FRAMES = 36;
@@ -75,7 +77,7 @@ export function pickFrames(frames, max = MAX_FRAMES) {
  * Returns [{code, severity, node, frame, frames, message, p10, need, size, busy, pixels (a sample
  * of the worst backgrounds), color, text}].
  */
-export function readabilityFindings(game, sample, { measures = null, inflate = null, maxFrames = MAX_FRAMES } = {}) {
+export function readabilityFindings(game, sample, { measures = null, inflate = null, maxFrames = MAX_FRAMES, only = null, minNeed = 0, code = READABILITY_CODE } = {}) {
   const scene = analyze(sample, game, measures);
   const picked = new Set(pickFrames(sample.frames, maxFrames).map((f) => f.key));
   const ids = (sample.assets ?? []).map((a) => a.name ?? a.id);
@@ -88,7 +90,7 @@ export function readabilityFindings(game, sample, { measures = null, inflate = n
   const pieceFor = (ptr) => { if (!pieces.has(ptr)) pieces.set(ptr, pieceOf(game, ptr)?.ptr ?? null); return pieces.get(ptr); };
   for (const s of scene) {
     if (!picked.has(s.f.key)) continue;
-    const texts = s.items.filter((it) => it.op.op === 'text' && it.op.text && String(it.op.text).trim());
+    const texts = s.items.filter((it) => it.op.op === 'text' && it.op.text && String(it.op.text).trim() && (!only || only(it)));
     if (!texts.length) continue;
     const r = compositeFrame(s.f.frame, bitmaps, { assetIds: ids });
     for (const it of texts) {
@@ -128,7 +130,7 @@ export function readabilityFindings(game, sample, { measures = null, inflate = n
       const alpha = Math.min(1, (op.opacity ?? 1) * fill[3]);
       const outline = st && ratio(lumRGB(...fill), lumRGB(...st)) >= 3 ? st.slice(0, 3) : null;
       const { p10, spread } = legibility(fill.slice(0, 3), px, { alpha, outline });
-      const need = needFor(op.size, op.weight);
+      const need = Math.max(minNeed, needFor(op.size, op.weight));
       const busy = !outline && op.size < 22 && spread > BUSY_SPREAD && p10 < 7;
       if (it.node && pieceFor(it.node)) {
         const pp = pieceFor(it.node);
@@ -158,7 +160,7 @@ export function readabilityFindings(game, sample, { measures = null, inflate = n
       // from a new worst frame (a fix that passes on the samples must pass where it was worst).
       if (!prev || prev.samples < 6 || worse) for (let i = 0; i < px.length; i += Math.max(1, Math.floor(px.length / 300))) keep.push(px[i]);
       byNode.set(k, {
-        code: READABILITY_CODE, severity: 'block', node: it.node, frame: worse ? s.f.key : prev.frame, frames: (prev?.frames ?? 0) + 1,
+        code, severity: 'block', node: it.node, frame: worse ? s.f.key : prev.frame, frames: (prev?.frames ?? 0) + 1,
         p10: worse ? p10 : prev.p10, need, size: op.size, weight: op.weight, busy: (prev?.busy ?? false) || busy, spread: Math.max(spread, prev?.spread ?? 0),
         color: normHex(typeof op.color === 'string' ? op.color.slice(0, 7) : null), text: String(op.text).slice(0, 28), pixels: keep, samples: (prev?.samples ?? 0) + 1,
         box: worse ? box : prev.box,
@@ -235,7 +237,10 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
   const tokens = g.presentation.tokens = { ...(g.presentation.tokens ?? {}) };
   const tok = (n) => normHex(tokens[n]);
   const fixes = [];
-  const list = findings.filter((f) => f.code === READABILITY_CODE && f.node && f.pixels?.length)
+  // S_HUD_READABILITY findings hold HUD text to 4.5:1 at any size; one finding per node, the strictest.
+  const strict = new Map();
+  for (const f of findings) if ((f.code === READABILITY_CODE || f.code === HUD_READABILITY_CODE) && f.node && f.pixels?.length && (!strict.has(f.node) || f.need > strict.get(f.node).need)) strict.set(f.node, f);
+  const list = [...strict.values()]
     // Deepest and last first, so inserting a group never moves a pointer still to be fixed.
     .sort((a, b) => cmpPtr(b.node, a.node));
   // One plate style per game, and one colour choice per (colour, step) role.
