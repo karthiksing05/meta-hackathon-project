@@ -22,6 +22,7 @@ authoring/catalog/
                                    server.json     backend features games plug into (leaderboard, challenges, Groups)
                                    planned.json    tools being built or planned, and engine gaps (status gap)
   eval/<family>.json             JSON array of eval cases for that family's types (seed_gold.json for gold)
+  checklists/<family>.json       clarification checklists for that family: one JSON object (not an array)
   sample/                        a tiny valid catalog to copy from (not loaded)
   check.mjs                      the checker
 ```
@@ -90,6 +91,38 @@ No other fields are allowed.
 `{"request": string (3–300 chars), "expect": [type id, …] (≥ 1, each must exist), "notes"?: string}`. `expect` lists
 the types a good retrieval returns in its top 5. Each family packet adds about 5.
 
+## Clarification checklist (`checklists/<family>.json`)
+
+What the planner must know before it makes a game of a family, and how to get it without asking much. One file per
+family, holding one object (`schema/checklist.schema.json`):
+
+```json
+{"family": "daily_puzzle", "checklists": [
+  {"applies_to": ["*"], "slots": [
+    {"id": "theme", "ask": "What should today's puzzle be about?", "why": "…", "need": "required",
+     "extrapolate_from": "named franchise or topic in the request", "default": "general knowledge",
+     "ask_when": "the request names no topic", "choices": ["general knowledge", "a show or franchise"],
+     "affects": ["content", "art"]}]},
+  {"applies_to": ["four_group_connections"], "slots": ["…"]}]}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `family` | string | a family from the enum; must equal the file name |
+| `checklists` | object[] | ≥ 1 |
+| `checklists[].applies_to` | string[] | `["*"]` (alone) for the family default, or type ids **of this family**. A type-specific checklist replaces the default for those types. Each id appears in one checklist only |
+| `checklists[].slots` | object[] | 3–6 slots, ids unique within the checklist |
+| `slot.id` | string | snake_case, ≤ 40 chars |
+| `slot.ask` | string | the question as a person would read it, 5–90 chars |
+| `slot.why` | string | what the answer changes, 5–300 chars |
+| `slot.need` | enum | `required` (the planner must fill it, by guessing or asking) or `nice` (default is fine) |
+| `slot.extrapolate_from` | string | optional: where in the request or context to find the answer |
+| `slot.default` | string | the value used when nothing in the request says otherwise; usually one of `choices` (warning if not) |
+| `slot.ask_when` | string | optional: when to ask instead of guessing |
+| `slot.choices` | string[] | 2–4 short options, shown as tap answers when asked |
+| `slot.affects` | enum[] | ≥ 1 of `content`, `rules`, `art`, `difficulty`, `social` |
+| `notes` | string | optional, on the file, a checklist or a slot |
+
 ## Enums
 
 - **family** (42): `word`, `trivia`, `knowledge_quiz`, `logic_puzzle`, `number_math`, `spatial_puzzle`,
@@ -123,13 +156,16 @@ Node 18+, no npm packages. Exit 1 on any error.
 fewer than 3 example prompts); an id that isn't snake_case or is used twice anywhere; an entry in
 `types/<family>.json` with another family; an eval `expect` id that isn't a type; a type id used in `tools`; a
 `variant_of` that doesn't resolve; near-duplicates at trigram Jaccard ≥ 0.8 (unless same family and one is
-`variant_of` the other).
+`variant_of` the other); a checklist file that breaks its schema (slot count, choice count, `ask` over 90
+characters), names an unknown family or one that isn't its file name, lists a type id that doesn't exist or is in
+another family, lists an id twice, or repeats a slot id in one checklist.
 
 **Warnings:** tool ids in `tools`/`engine_gaps` not defined yet (one line per missing tool, ranked by how many types
 want it); near-duplicates at ≥ 0.6; a repeated example prompt; a types file that isn't a family name, `seed_*` or
-`learned_*`.
+`learned_*`; a family with types but no checklist file; a checklist file with no `["*"]` default; a slot
+default that isn't one of its choices.
 
 Near-duplicates use character trigrams of `name + summary + core_loop` (lowercased, accents and punctuation removed).
 
-**Summary line:** types per family, total types, tools by status, missing tools ranked by demand, eval cases,
+**Summary line:** types per family, total types, tools by status, missing tools ranked by demand, eval cases, checklists and slots,
 duplicate pairs, error and warning counts.

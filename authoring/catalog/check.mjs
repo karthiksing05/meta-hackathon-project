@@ -70,6 +70,7 @@ const loadSchema = (f) => JSON.parse(fs.readFileSync(path.join(HERE, 'schema', f
 const TYPE_SCHEMA = loadSchema('game_type.schema.json');
 const TOOL_SCHEMA = loadSchema('game_tool.schema.json');
 const EVAL_SCHEMA = loadSchema('eval.schema.json');
+const CHECKLIST_SCHEMA = loadSchema('checklist.schema.json');
 const FAMILIES = TYPE_SCHEMA.properties.family.enum;
 const TOOL_STATUSES = TOOL_SCHEMA.properties.status.enum;
 
@@ -183,6 +184,61 @@ for (const { file, stem, items } of evalFiles) {
   });
 }
 
+// ---------- clarification checklists: checklists/<family>.json, one object per file ----------
+const checklistFamilies = new Set();
+let checklistCount = 0, checklistSlots = 0;
+const checklistDir = path.join(ROOT, 'checklists');
+const familyOfType = new Map(types.filter((t) => typeof t.id === 'string').map((t) => [t.id, t.family]));
+for (const f of fs.existsSync(checklistDir) ? fs.readdirSync(checklistDir).filter((f) => f.endsWith('.json')).sort() : []) {
+  const rel = `checklists/${f}`;
+  const stem = f.replace(/\.json$/, '');
+  let data;
+  try { data = JSON.parse(fs.readFileSync(path.join(checklistDir, f), 'utf8')); }
+  catch (e) { err(rel, `not valid JSON: ${e.message}`); continue; }
+  if (typeOf(data) !== 'object') { err(rel, 'must hold one JSON object {family, checklists}'); continue; }
+  const fam = data.family;
+  if (typeof fam === 'string') {
+    if (!FAMILIES.includes(fam)) err(rel, `family "${fam}" is not a family`);
+    else checklistFamilies.add(fam);
+    if (fam !== stem) err(rel, `family "${fam}" in ${stem}.json; the file name must be the family`);
+  }
+  if (ONLY_FAMILY && fam !== ONLY_FAMILY) continue;
+  const problems = [];
+  validate(CHECKLIST_SCHEMA, data, '', problems);
+  problems.forEach((p) => err(rel, p));
+  const claimed = new Map(); // applies_to id -> checklist index
+  (Array.isArray(data.checklists) ? data.checklists : []).forEach((cl, ci) => {
+    const where = `${rel}#${ci}`;
+    checklistCount++;
+    const applies = Array.isArray(cl?.applies_to) ? cl.applies_to : [];
+    if (applies.includes('*') && applies.length > 1) err(where, 'applies_to: "*" stands alone (the family default)');
+    for (const id of applies) {
+      if (typeof id !== 'string') continue;
+      if (claimed.has(id)) err(where, `applies_to "${id}" is already covered by checklist #${claimed.get(id)}`);
+      else claimed.set(id, ci);
+      if (id === '*') continue;
+      if (!familyOfType.has(id)) err(where, `applies_to "${id}" is not a type id`);
+      else if (familyOfType.get(id) !== fam) err(where, `applies_to "${id}" is in family ${familyOfType.get(id)}, not ${fam}`);
+    }
+    const seen = new Set();
+    for (const s of Array.isArray(cl?.slots) ? cl.slots : []) {
+      checklistSlots++;
+      if (typeof s?.id !== 'string') continue;
+      if (seen.has(s.id)) err(where, `slot id "${s.id}" is used twice in this checklist`);
+      seen.add(s.id);
+      if (typeof s.default === 'string' && Array.isArray(s.choices) && !s.choices.some((c) => String(c).toLowerCase() === s.default.toLowerCase())) {
+        warn(where, `slot "${s.id}": default "${s.default}" is not one of its choices`);
+      }
+    }
+  });
+  if (!claimed.has('*')) warn(rel, 'no family default checklist (applies_to ["*"])');
+}
+const familiesWithTypes = [...new Set(types.map((t) => t.family).filter((f) => FAMILIES.includes(f)))].sort();
+for (const fam of familiesWithTypes) {
+  if (ONLY_FAMILY && fam !== ONLY_FAMILY) continue;
+  if (!checklistFamilies.has(fam)) warn('checklists', `family ${fam} has types but no checklists/${fam}.json`);
+}
+
 // ---------- near-duplicates: character-trigram Jaccard on name + summary + core_loop ----------
 const gramIndex = new Map();
 function grams(text) {
@@ -253,6 +309,9 @@ const summary = {
   tools_by_kind: toolsByKind,
   missing_tools: missingRanked,
   eval_cases: evalCases,
+  checklist_families: checklistFamilies.size,
+  checklists: checklistCount,
+  checklist_slots: checklistSlots,
   near_duplicate_pairs: dupPairs.length,
   tool_example_types_not_defined: undefinedExampleTypes,
   errors: errors.length,
@@ -267,7 +326,7 @@ if (AS_JSON) {
   if (errors.length || warnings.length) console.log('');
   const fam = Object.entries(summary.types_per_family).map(([f, n]) => `${f} ${n}`).join(', ') || 'none';
   console.log(`types per family: ${fam}`);
-  console.log(`types ${summary.types_total} in ${summary.families_with_types}/${summary.families_total} families · tools ${summary.tools_total} (${TOOL_STATUSES.map((s) => `${s} ${toolsByStatus[s]}`).join(', ')}) · eval cases ${evalCases}`);
+  console.log(`types ${summary.types_total} in ${summary.families_with_types}/${summary.families_total} families · tools ${summary.tools_total} (${TOOL_STATUSES.map((s) => `${s} ${toolsByStatus[s]}`).join(', ')}) · eval cases ${evalCases} · checklists ${checklistCount} (${checklistSlots} slots) in ${checklistFamilies.size} families`);
   const top = missingRanked.slice(0, 15).map((m) => `${m.id} ×${m.wanted_by}`).join(', ');
   console.log(`missing tools: ${missingRanked.length}${top ? ` (${top}${missingRanked.length > 15 ? ', …' : ''})` : ''}`);
   console.log(`near-duplicate pairs ≥ ${DUP_WARN}: ${dupPairs.length} · ${errors.length} error(s), ${warnings.length} warning(s)`);

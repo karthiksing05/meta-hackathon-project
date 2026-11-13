@@ -100,6 +100,28 @@ whole manifests. It writes the existing `game-anatomy/0.1` and the design block,
 - `gaps`: tools with status `planned` or `gap` that the idea needs. Each gap gets the approximation it will use
   instead (the existing familiarity field: `known`, `approximate` or `new to Muse`).
 
+### Clarification checklists
+
+Each family has a checklist of what must be settled before a game of that kind can be made
+(`authoring/catalog/checklists/<family>.json`, format in `authoring/catalog/README.md`). A type can have its own
+checklist, which replaces the family default. Retrieval sends the checklist of each retrieved type with its card.
+
+The planner works through the slots:
+
+- **Fill from the request.** It fills each slot from the request and the context (`extrapolate_from`), and says
+  what it guessed.
+- **Default.** A slot nothing speaks to takes its `default`.
+- **Ask.** It asks only when `ask_when` holds for a `required` slot, using the slot's `ask` and `choices`.
+  **At most 2 questions per game.** Everything else is a visible guess the person can change.
+
+The results go into the anatomy (`game-anatomy/0.1`, docs/BUBBLES.md 7.13):
+
+- a slot read from the request is `source: you`;
+- a guessed or defaulted slot is `source: guess`;
+- an asked slot carries `question` and `options` from the slot.
+
+The values then steer content, rules, art, difficulty and social settings, as each slot's `affects` lists.
+
 ### 5–6. Compose and check (today's pipeline, with a smaller prompt)
 
 - `prompts.system` takes the plan's types and tools in place of the full fragment catalog. Gold examples are still

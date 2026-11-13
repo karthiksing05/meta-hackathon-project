@@ -1,0 +1,172 @@
+{
+  "family": "daily_puzzle",
+  "checklists": [
+    {
+      "applies_to": ["*"],
+      "slots": [
+        {
+          "id": "theme",
+          "ask": "What should today's puzzle be about?",
+          "why": "The theme picks every word, answer or picture in the puzzle, so it is the content brief.",
+          "need": "required",
+          "extrapolate_from": "named franchise, topic, Group name or in-joke in the request",
+          "default": "general knowledge",
+          "ask_when": "the request names no topic and no Group whose interests are known",
+          "choices": ["general knowledge", "a show or franchise", "our Group's in-jokes", "food"],
+          "affects": ["content", "art"]
+        },
+        {
+          "id": "audience",
+          "ask": "Who plays it: one Group every day, or anyone?",
+          "why": "A Group daily needs the same seed for every member and a shared result to compare.",
+          "need": "required",
+          "extrapolate_from": "'for our group', 'group chat', 'friends', 'daily' in the request, or the Studio target",
+          "default": "one Group every day",
+          "choices": ["one Group every day", "anyone", "me and one friend"],
+          "affects": ["social", "rules"]
+        },
+        {
+          "id": "difficulty",
+          "ask": "Should it be a quick win or a real brain-burner?",
+          "why": "Sets the size of the board, how many tries there are and how obscure the answers get.",
+          "need": "nice",
+          "extrapolate_from": "'easy', 'hard', 'for my mom', 'for kids', 'brutal' in the request",
+          "default": "medium",
+          "choices": ["easy", "medium", "hard"],
+          "affects": ["difficulty", "content"]
+        },
+        {
+          "id": "session_length",
+          "ask": "About how long should one day's puzzle take?",
+          "why": "Daily puzzles are a habit; the length decides the number of rounds or the board size.",
+          "need": "nice",
+          "extrapolate_from": "'quick', 'coffee break', 'commute' in the request",
+          "default": "2 minutes",
+          "choices": ["1 minute", "2 minutes", "5 minutes"],
+          "affects": ["rules", "difficulty"]
+        },
+        {
+          "id": "result_share",
+          "ask": "After solving, share just the score or a spoiler-free grid?",
+          "why": "Comparing results is the social hook; a grid needs the share_grid gap, so score text is what ships today.",
+          "need": "nice",
+          "extrapolate_from": "'post results', 'compare in the chat' in the request",
+          "default": "score text",
+          "choices": ["score text", "spoiler-free grid"],
+          "affects": ["social"]
+        }
+      ]
+    },
+    {
+      "applies_to": ["five_letter_word_deduction", "multi_board_word_deduction", "custom_word_pool_deduction"],
+      "slots": [
+        {
+          "id": "word_source",
+          "ask": "Hidden words from a theme, or words your Group writes?",
+          "why": "Themed words come from the word list tool; Group-written words need submissions from members.",
+          "need": "required",
+          "extrapolate_from": "a named theme, or 'our names', 'inside jokes' in the request",
+          "default": "a theme",
+          "choices": ["a theme", "words my Group writes", "everyday words"],
+          "affects": ["content", "social"]
+        },
+        {
+          "id": "word_length",
+          "ask": "How long are the hidden words?",
+          "why": "The word_check fragment takes 3 to 7 letters; length changes difficulty a lot.",
+          "need": "nice",
+          "extrapolate_from": "a stated length or a named game that fixes it",
+          "default": "5",
+          "choices": ["4", "5", "6"],
+          "affects": ["rules", "difficulty"]
+        },
+        {
+          "id": "guesses",
+          "ask": "How many guesses per word?",
+          "why": "Fewer guesses make it harder; word_check allows 3 to 8.",
+          "need": "nice",
+          "default": "6",
+          "choices": ["4", "6", "8"],
+          "affects": ["difficulty"]
+        },
+        {
+          "id": "theme",
+          "ask": "What should the hidden words be about?",
+          "why": "Picks the word list.",
+          "need": "required",
+          "extrapolate_from": "named franchise or topic in the request",
+          "default": "everyday words",
+          "ask_when": "word_source is a theme and the request names none",
+          "choices": ["everyday words", "a show or franchise", "food", "animals"],
+          "affects": ["content"]
+        }
+      ]
+    },
+    {
+      "applies_to": ["four_group_connections"],
+      "slots": [
+        {
+          "id": "theme",
+          "ask": "What world should the four groups come from?",
+          "why": "Every group, label and red herring is written from it.",
+          "need": "required",
+          "extrapolate_from": "named franchise, topic or Group in the request",
+          "default": "general knowledge",
+          "choices": ["general knowledge", "a show or franchise", "our Group's in-jokes"],
+          "affects": ["content"]
+        },
+        {
+          "id": "red_herrings",
+          "ask": "Sneaky overlaps between groups, or fair and friendly?",
+          "why": "Overlapping tiles are what make the hardest group hard.",
+          "need": "nice",
+          "default": "a few",
+          "choices": ["none", "a few", "lots"],
+          "affects": ["difficulty", "content"]
+        },
+        {
+          "id": "mistakes",
+          "ask": "How many wrong guesses before it's over?",
+          "why": "Sets the lives count.",
+          "need": "nice",
+          "default": "4",
+          "choices": ["3", "4", "unlimited"],
+          "affects": ["rules", "difficulty"]
+        }
+      ]
+    },
+    {
+      "applies_to": ["rare_answer_daily"],
+      "slots": [
+        {
+          "id": "topic",
+          "ask": "What should the answer categories be about?",
+          "why": "Each prompt asks for answers in a category; the answer bank and tiers are written from it.",
+          "need": "required",
+          "extrapolate_from": "named franchise or topic ('a harry potter krillion')",
+          "default": "general knowledge",
+          "choices": ["general knowledge", "a show or franchise", "sports", "food"],
+          "affects": ["content"]
+        },
+        {
+          "id": "prompts",
+          "ask": "How many prompts a day?",
+          "why": "Sets the rounds and the session length.",
+          "need": "nice",
+          "default": "5",
+          "choices": ["3", "5", "8"],
+          "affects": ["rules"]
+        },
+        {
+          "id": "answer_time",
+          "ask": "How long to type each answer?",
+          "why": "The typed_answer timer: shorter rewards quick recall over thinking of obscure answers.",
+          "need": "nice",
+          "default": "20 seconds",
+          "choices": ["10 seconds", "20 seconds", "40 seconds"],
+          "affects": ["difficulty"]
+        }
+      ]
+    }
+  ]
+}
