@@ -10,7 +10,7 @@
 | … | Intro slides | Demo 1 builds in the background. Don't touch the phone. | — |
 | after the stack slide | Empty Live Video slide | **Demo 1 payoff:** the finished Curio. Play it for about 10 s, then post it to Harry Potter fans. | 40 |
 | on the ranking / stack slide | — | **Demo 2:** scroll the Curios feed. A Curio plays inline with its sound. Search for something that doesn't exist, and "Make it with Muse" appears. | 25 |
-| on the collaboration slide | — | **Demo 3:** Harry Potter fans' weekly board (Max, Bayan, Artem, Kevin) → tap Add friend on someone you don't know → start a best of 5. | 30 |
+| on the collaboration slide | — | **Demo 3:** Harry Potter fans' weekly board (Max, Bayan, Artem, Kevin) → tap Add friend on someone you don't know → best of 5 with Bayan, from his profile (see PHONES.md). | 30 |
 | end | Tagline | Phone down. Pause on the tagline. | — |
 
 Total demo time is 95 s. The talk has to fit in the rest, so stay at or under 4:45 to leave slack.
@@ -59,8 +59,9 @@ Don't show any ranking numbers on the phone. The 70.3% on the slide is simulated
 
 1. Open Harry Potter fans → its weekly board. Max, Bayan, Artem and Kevin are on it with Karthik.
 2. Point to a row for someone you aren't friends with yet: *"same Curio, same seed, so the board is fair."*
-3. **Add friend** → the row changes to Requested.
-4. Start a **best of 5** with them.
+3. **Add friend** → the row changes to Requested. (A best of 5 can't start from here until they accept, so don't try it on stage.)
+4. Then start the **best of 5** from **Bayan's profile** ("Play Bayan: best of 5"), since Bayan is already a friend. Bayan's phone joins on slide 11: Challenges (the trophy), pull to refresh. Tapping the notification doesn't open the match yet. Full steps: [PHONES.md](PHONES.md).
+   - **Only one best of 5 per pair, ever (for now):** a finished match can't be replaced. Rehearse with other accounts and keep Karthik vs Bayan unplayed for the stage.
 5. If someone asks: challenges to friends and Groups, quiz nights, making one together and remix are on the server, and the app screens are next. Say it plainly.
 
 ## Pre-show checklist (the morning of the pitch)
