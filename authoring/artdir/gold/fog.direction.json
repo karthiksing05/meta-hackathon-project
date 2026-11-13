@@ -1,0 +1,54 @@
+{
+  "title": "Fog Over the Bay",
+  "gameId": "8728f0bbcc52f67f75574de4",
+  "words": "fog bay san francisco night calm lighthouse golden gate moon cozy",
+  "vibe": "wild_nature",
+  "pairing": "field_guide",
+  "style": "soft painterly gouache storybook illustration, calm and cozy, smooth brushy gradients, rounded simple shapes, moonlit teal and deep navy with warm lamplight accents",
+  "palette": [
+    "#0E2A3B",
+    "#14424F",
+    "#2B6F7A",
+    "#9FD3D0",
+    "#FFE3A3",
+    "#F6EFE2"
+  ],
+  "frame": {
+    "scene": "San Francisco Bay at night seen from the water: a calm deep teal bay filling the lower two thirds, the red Golden Gate Bridge small and hazy on the far left horizon, a tiny lighthouse with a warm lamp on a rock at the right edge, a pale full moon high in a navy sky",
+    "focal": "a cute soft white fog cloud with a sleepy smile drifting over the water, with a few tiny twinkling light glints on the water around it",
+    "hud": "one small blank frosted rounded plaque at the top",
+    "controls": "calm open water"
+  },
+  "backdrop": {
+    "scene": "seen from higher above the water: the far shore, the red Golden Gate Bridge on the left, the lighthouse on its rock on the right and the full moon all sit in a thin band of night sky at the very top, with the horizon only 18% down from the top edge; calm moonlit teal water fills everything below the horizon, down to the bottom edge, with no fog cloud and no glints",
+    "calm": "the water from 20% of the height down to the bottom is smooth and calm with only soft gentle ripples and a faint moonlight path"
+  },
+  "sprites": {
+    "key": "magenta",
+    "despill": "hard",
+    "px": 192,
+    "items": [
+      {
+        "id": "fog",
+        "text": "a cute soft fluffy white fog cloud with a sleepy closed-eye smile, wide and puffy, pale blue shading underneath"
+      },
+      {
+        "id": "glint",
+        "text": "a single twinkling moonlight glint on water: a small bright four-pointed pale gold star sparkle over a tiny teal ripple ring"
+      },
+      {
+        "id": "puff",
+        "text": "a small wisp of soft white fog, a little trailing puff with no face"
+      },
+      {
+        "id": "lamp",
+        "text": "a small cozy lighthouse lamp room glowing warm yellow with a red roof, as a round badge emblem"
+      }
+    ]
+  },
+  "ui": {
+    "key": "magenta",
+    "material": "frosted sea glass: a soft translucent pale teal face with a thin warm brass rim and rounded corners",
+    "corner": 44
+  }
+}
