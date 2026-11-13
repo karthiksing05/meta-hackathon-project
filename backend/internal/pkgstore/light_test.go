@@ -116,3 +116,36 @@ func TestEnsureLightManifest(t *testing.T) {
 		t.Fatal("manifest.json must never change")
 	}
 }
+
+// The app's "How Muse made it" screen reads the fragment names from content.authoring when there is no authoring_json,
+// so the light manifest keeps just those names and nothing else of the source.
+func TestLightManifestKeepsFragmentNames(t *testing.T) {
+	authoring := `{"uses":[{"fragment":"timer_bar","params":{"img":"data:image/png;base64,SECRETART"}},{"fragment":"lives"},{"nofragment":1}],"pad":"` + strings.Repeat("A", 40<<10) + `"}`
+	raw := manifestWith(authoring)
+	light, ok := LightManifest(raw, MinLightSavings)
+	if !ok {
+		t.Fatal("no light manifest")
+	}
+	var m struct {
+		Content map[string]json.RawMessage `json:"content"`
+	}
+	if err := json.Unmarshal(light, &m); err != nil {
+		t.Fatal(err)
+	}
+	if got := string(m.Content["authoring"]); got != `{"uses":[{"fragment":"timer_bar"},{"fragment":"lives"}]}` {
+		t.Fatalf("authoring summary: %s", got)
+	}
+	if bytes.Contains(light, []byte("SECRETART")) || bytes.Contains(light, []byte("params")) {
+		t.Fatal("nothing but the fragment names may be kept")
+	}
+	// an authoring object that is already there is left alone
+	withObj := bytes.Replace(raw, []byte(`"extra":"kept"`), []byte(`"extra":"kept","authoring":{"mine":1}`), 1)
+	light2, _ := LightManifest(withObj, MinLightSavings)
+	var m2 struct {
+		Content map[string]json.RawMessage `json:"content"`
+	}
+	json.Unmarshal(light2, &m2)
+	if string(m2.Content["authoring"]) != `{"mine":1}` {
+		t.Fatalf("an existing authoring object must stay: %s", m2.Content["authoring"])
+	}
+}

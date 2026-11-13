@@ -33,8 +33,18 @@ func LightManifest(raw []byte, minBytes int) ([]byte, bool) {
 	if json.Unmarshal(top["content"], &content) != nil {
 		return nil, false
 	}
-	if a, ok := content["authoring_json"]; !ok || len(a) < minBytes {
+	a, ok := content["authoring_json"]
+	if !ok || len(a) < minBytes {
 		return nil, false
+	}
+	// The app's "How Muse made it" screen lists the fragments a game uses, read from content.authoring when authoring_json
+	// is missing. Keep just those names, so a light manifest still shows them (no art, no params, nothing editable).
+	if _, has := content["authoring"]; !has {
+		if uses := fragmentUses(a); uses != nil {
+			if b, err := marshalRaw(map[string]any{"uses": uses}); err == nil {
+				content["authoring"] = b
+			}
+		}
 	}
 	delete(content, "authoring_json")
 	c, err := marshalRaw(content)
@@ -47,6 +57,30 @@ func LightManifest(raw []byte, minBytes int) ([]byte, bool) {
 		return nil, false
 	}
 	return out, true
+}
+
+// fragmentUses reads the `uses[].fragment` names out of an authoring_json value (a JSON string holding JSON), as
+// [{"fragment": name}, ...]. Nil when there are none or it can't be read.
+func fragmentUses(authoringJSON json.RawMessage) []map[string]string {
+	var text string
+	if json.Unmarshal(authoringJSON, &text) != nil {
+		return nil
+	}
+	var a struct {
+		Uses []struct {
+			Fragment string `json:"fragment"`
+		} `json:"uses"`
+	}
+	if json.Unmarshal([]byte(text), &a) != nil {
+		return nil
+	}
+	var out []map[string]string
+	for _, u := range a.Uses {
+		if u.Fragment != "" {
+			out = append(out, map[string]string{"fragment": u.Fragment})
+		}
+	}
+	return out
 }
 
 // marshalRaw encodes without escaping <, > and &, so embedded raw values keep their bytes.
