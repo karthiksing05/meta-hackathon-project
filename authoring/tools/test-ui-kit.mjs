@@ -151,7 +151,7 @@ ok(Object.keys(COMPONENTS).length >= 18, 'component catalog');
 // ---- one canvas constant; a tall canvas moves the bottom bands and never lets regions overlap ----
 for (const canvas of [CANVAS, { w: 360, h: 780 }]) {
   const b = bands(canvas);
-  ok(b.controlsBottom === canvas.h - 24 && b.hudBottom.y + b.hudBottom.h <= canvas.h && b.hud.y + b.hud.h < b.top, `bands for ${canvas.w}x${canvas.h}`);
+  ok(b.controlsBottom === b.safe.y1 - 24 && b.hudBottom.y + b.hudBottom.h <= canvas.h && b.hud.y + b.hud.h < b.top, `bands for ${canvas.w}x${canvas.h}`);
   const tall = { ...lib, looks: Object.fromEntries(Object.entries(lib.looks).map(([k, v]) => [k, { ...v, canvas }])) };
   const r = expand(all, tall);
   ok(!r.diagnostics.some((d) => d.severity === 'error') && r.game.presentation.canvas.h === canvas.h, `all-components game on ${canvas.w}x${canvas.h}`);

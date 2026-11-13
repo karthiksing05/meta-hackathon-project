@@ -9,6 +9,8 @@
 // Builds on Bayan's HUD-panel findings (authoring/harness/layout-experiment/hud.mjs: solid panels,
 // 4.5:1 text, small HUD type) and his style-kit vocabulary (authoring/harness/style/).
 
+import { LEGACY_CANVAS, isTall, safeArea } from './canvas.mjs';
+
 export const STYLE_KIT = 'game-style/1';
 
 // ---------- the canvas and its fixed bands ----------
@@ -18,7 +20,7 @@ export const STYLE_KIT = 'game-style/1';
  * the style check all derive from it (a look or game.json can still pass its own canvas). Taller
  * canvases (e.g. 360 × 780 for 19.5:9 phones) give the playfield the extra height.
  */
-export const CANVAS = { w: 360, h: 640 };
+export const CANVAS = { ...LEGACY_CANVAS };
 
 /**
  * The fixed rectangles every game is laid out in, for a canvas. Nothing the kit places can cross a
@@ -30,14 +32,20 @@ export const CANVAS = { w: 360, h: 640 };
  *   controlsBottom  where controls end with no strip   h − 24
  */
 export function bands(canvas = CANVAS) {
+  // On a tall canvas (canvas.mjs) everything sits in the safe area: the top and bottom bleed bands
+  // run under the phone's bars and carry only background.
   const w = canvas.w, h = canvas.h, gutter = 12;
+  const tall = isTall(canvas);
+  const safe = safeArea(canvas);
+  const hudY = tall ? safe.y0 + 4 : 24;
   return {
     canvas: { w, h },
     gutter,
-    hud: { x: gutter, y: 24, w: w - gutter * 2, h: 48 },
-    top: 84,
-    hudBottom: { x: gutter, y: h - 40, w: w - gutter * 2, h: 36 },
-    controlsBottom: h - 24,
+    safe,
+    hud: { x: gutter, y: hudY, w: w - gutter * 2, h: 48 },
+    top: hudY + 48 + 12,
+    hudBottom: { x: gutter, y: safe.y1 - (tall ? 40 : 40), w: w - gutter * 2, h: 36 },
+    controlsBottom: safe.y1 - 24,
   };
 }
 

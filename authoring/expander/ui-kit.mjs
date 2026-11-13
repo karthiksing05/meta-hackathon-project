@@ -46,11 +46,12 @@ let HUD = { y: 24, h: 48 };
 let BOTTOM = CANVAS.h - 24;
 let HUD_BOTTOM_H = 36;
 let HUD_BOTTOM_Y = CANVAS.h - 40;
+let SAFE_Y0 = 0;
 function useCanvas(canvas) {
   const b = bands(canvas);
   CANVAS_W = b.canvas.w; CANVAS_H = b.canvas.h; GUTTER = b.gutter;
   HUD = { y: b.hud.y, h: b.hud.h }; BOTTOM = b.controlsBottom;
-  HUD_BOTTOM_H = b.hudBottom.h; HUD_BOTTOM_Y = b.hudBottom.y;
+  HUD_BOTTOM_H = b.hudBottom.h; HUD_BOTTOM_Y = b.hudBottom.y; SAFE_Y0 = b.safe.y0;
 }
 const isExpr = (v) => typeof v === 'string' && v.startsWith('=');
 const g4 = (v) => Math.round(v / GRID) * GRID;
@@ -474,7 +475,7 @@ export function applyUiKit(slotNodes, { manifest = {}, lookLayout = null, palett
   const regions = {};
   const hasHud = slotNodes.hud_top.length > 0;
   const hasHudBottom = slotNodes.hud_bottom.length > 0;
-  regions.hud = hasHud ? { x: GUTTER, y: HUD.y, w: CANVAS_W - GUTTER * 2, h: HUD.h } : { x: GUTTER, y: 0, w: CANVAS_W - GUTTER * 2, h: SPACE.l };
+  regions.hud = hasHud ? { x: GUTTER, y: HUD.y, w: CANVAS_W - GUTTER * 2, h: HUD.h } : { x: GUTTER, y: SAFE_Y0, w: CANVAS_W - GUTTER * 2, h: SPACE.l };
   regions.hud_bottom = hasHudBottom ? { x: GUTTER, y: HUD_BOTTOM_Y, w: CANVAS_W - GUTTER * 2, h: HUD_BOTTOM_H } : null;
   const usable = { x: GUTTER + SPACE.xs, w: CANVAS_W - (GUTTER + SPACE.xs) * 2 };
 
