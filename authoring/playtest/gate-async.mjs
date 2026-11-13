@@ -9,7 +9,7 @@
 //
 // No Node APIs and no imports outside this folder.
 
-import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize } from './bots.mjs';
+import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize, gateProfile, decisionBase, randomLiveChoice, pickState } from './bots.mjs';
 
 export { DEFAULT_BOTS };
 
@@ -28,18 +28,19 @@ export function yieldToHost() {
   return Promise.resolve();
 }
 
-async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceMs) {
+async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceMs, profile = gateProfile(null), pickKeys = null) {
   const rng = mulberry32(bot.botSeed);
   const gameSeed = seed + bot.seedOffset;
   const errors = [];
   const note = (e) => { const m = String(e?.message ?? e); if (!errors.includes(m)) errors.push(m); };
-  const base = bot.skill >= 0.9 ? 18 : bot.skill >= 0.6 ? 27 : 42;
+  const base = decisionBase(bot, profile);
   const maxSteps = Math.round((maxSeconds * 1000) / DT);
 
   let g = null;
   let steps = 0;
   let last = { phase: 'playing', score: 0, time_ms: 0 };
   const history = [];
+  let picks;
 
   const value = (p) => {
     const st = p.status();
@@ -58,13 +59,15 @@ async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceM
       if (steps >= nextDecision) {
         const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null, sources.text ? textCandidates(g, rng) : null);
         let choice;
-        if (rng() < bot.skill) {
+        if (profile.randomPlay) {
+          choice = randomLiveChoice(g, candidates, rng);
+        } else if (rng() < bot.skill) {
           let best = -Infinity;
           for (const cand of candidates) {
             const probe = g.fork();
             try {
               apply(probe, cand);
-              for (let i = 0; i < LOOKAHEAD_STEPS && probe.phase() === 'playing'; i++) probe.step(DT);
+              for (let i = 0; i < (profile.lookahead ?? LOOKAHEAD_STEPS) && probe.phase() === 'playing'; i++) probe.step(DT);
               const v = value(probe);
               if (v > best) { best = v; choice = cand; }
             } finally {
@@ -82,6 +85,7 @@ async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceM
       steps++;
     }
     last = g.status();
+    if (profile.picks) picks = pickState(g, pickKeys);
     for (const d of g.diagnostics() ?? []) if (d.severity === 'error') note(`${d.code ?? 'runtime'}: ${d.message}`);
   } catch (e) {
     note(e);
@@ -98,22 +102,25 @@ async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceM
     score: Math.round(last.score ?? 0),
     seconds: (last.time_ms ?? steps * DT) / 1000,
     replay: { seed: gameSeed, dt: DT, actions: history },
+    ...(picks ? { picks } : {}),
   };
 }
 
 /**
  * Plays the game with every bot, one at a time, and analyzes the runs like gate.mjs `playtest`.
- * options: {seed = 1, bots = DEFAULT_BOTS, maxSeconds = 180, sliceMs = 12, onRun(run, index)}.
- * Returns {runs, flags, inputProbe, passed, summary, ms}.
+ * options: {seed = 1, bots = DEFAULT_BOTS, maxSeconds = 180, sliceMs = 12, onRun(run, index), profile,
+ * pickKeys} (profile and pickKeys as in gate.mjs). Returns {runs, flags, inputProbe, passed, summary,
+ * profile, ms}.
  */
-export async function playtestAsync(engine, gameJson, { seed = 1, bots = DEFAULT_BOTS, maxSeconds = 180, sliceMs = 12, onRun } = {}) {
+export async function playtestAsync(engine, gameJson, { seed = 1, bots = DEFAULT_BOTS, maxSeconds = 180, sliceMs = 12, onRun, profile: profileName = null, pickKeys = null } = {}) {
   const started = now();
+  const profile = gateProfile(profileName);
   const json = typeof gameJson === 'string' ? gameJson : JSON.stringify(gameJson);
   const sources = inputSources(gameObject(json));
   const runs = [];
   for (const bot of bots) {
     const t0 = now();
-    const run = await playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceMs);
+    const run = await playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceMs, profile, pickKeys);
     run.ms = Math.round(now() - t0);
     runs.push(run);
     if (onRun) onRun(run, runs.length - 1);
@@ -123,6 +130,6 @@ export async function playtestAsync(engine, gameJson, { seed = 1, bots = DEFAULT
   try {
     inputProbe = probeDeadInputs(engine, json, sources, { seed });
   } catch { /* the mash probe is advisory: a failure here never fails the gate */ }
-  const flags = analyze(runs, { maxSeconds, inputProbe, game: gameObject(json) });
-  return { runs, flags, inputProbe, passed: !flags.some((f) => f.blocking), summary: summarize(runs, maxSeconds), ms: Math.round(now() - started) };
+  const flags = analyze(runs, { maxSeconds, inputProbe, game: gameObject(json), profile });
+  return { runs, flags, inputProbe, passed: !flags.some((f) => f.blocking), summary: summarize(runs, maxSeconds), profile: profile.name, ms: Math.round(now() - started) };
 }

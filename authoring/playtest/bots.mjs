@@ -17,6 +17,92 @@ export const DEFAULT_BOTS = [
 
 const isTypical = (bot) => bot.label.startsWith('regular');
 
+// ---------- gate profiles ----------
+
+/**
+ * What the gate expects of a genre (the catalog's `gate_profile`, passed as `profile`). The default,
+ * `arcade`, is the gate as it always was. Fields:
+ * - canLose: whether "can't be lost" blocks (otherwise a warning).
+ * - skill: whether skill should show (too hard, flat, no score); off where every answer is fine.
+ * - timing: whether run length is judged (too short / too long); off where bots set the pace.
+ * - endless: what a typical player still going at the time limit means ('block' or 'warn').
+ * - fastWin: what every bot winning in under FAST_WIN_SECONDS means ('block', 'warn' or null).
+ * - lookScale: how much longer bots wait between inputs (time to read a question or scan a scene).
+ * - lookahead: frames a skilled bot looks ahead per candidate (default LOOKAHEAD_STEPS, 0.75 s). Trivia
+ *   needs longer, to see past a reveal: when no candidate pays off within the look-ahead they all tie.
+ * - randomPlay: bots pick among live inputs at random, without look-ahead (opinions, stories).
+ * - mustFinish: every bot run must end (no run still going at the time limit).
+ * - picks: every run must leave a pick in state, and different bots must not all pick the same.
+ */
+const PROFILE_DEFAULTS = {
+  canLose: true, skill: true, timing: true, endless: 'block', fastWin: null,
+  lookScale: 1, lookahead: LOOKAHEAD_STEPS, randomPlay: false, mustFinish: false, picks: false,
+};
+
+export const GATE_PROFILES = {
+  arcade: { fastWin: 'block' },
+  runner: { fastWin: 'block' },
+  puzzle: { canLose: false, fastWin: 'block' },
+  calm: { canLose: false, endless: 'warn', fastWin: 'warn' },
+  trivia: { canLose: false, fastWin: 'warn', lookScale: 2, lookahead: 120 },
+  search: { canLose: false, fastWin: 'block', lookScale: 4 },
+  opinion: { canLose: false, skill: false, timing: false, fastWin: null, randomPlay: true, mustFinish: true, picks: true },
+  story: { canLose: false, skill: false, timing: false, fastWin: null, randomPlay: true, mustFinish: true },
+};
+
+export const FAST_WIN_SECONDS = 15;
+
+/**
+ * The settings for a profile name. No name (or an unknown one) gets the gate as it was before
+ * profiles: the arcade rules without the fast-win check, which callers such as the story gate
+ * (story-bots.mjs) rely on.
+ */
+export function gateProfile(name) {
+  const key = typeof name === 'string' ? name.trim().toLowerCase() : '';
+  const known = Object.hasOwn(GATE_PROFILES, key);
+  return { name: known ? key : 'arcade', requested: key || null, known: known || !key, ...PROFILE_DEFAULTS, ...(known ? GATE_PROFILES[key] : {}) };
+}
+
+/** Frames between a bot's decisions, for its skill and the profile's look delay. */
+export function decisionBase(bot, profile) {
+  const base = bot.skill >= 0.9 ? 18 : bot.skill >= 0.6 ? 27 : 42;
+  return Math.round(base * (profile?.lookScale ?? 1));
+}
+
+/**
+ * One random choice among the inputs that would change the game right now (isDeadInput), for
+ * profiles where no choice is better than another. Falls back to any input when it can't tell.
+ */
+export function randomLiveChoice(g, candidates, rng) {
+  const acts = candidates.filter((c) => c.kind !== 'noop');
+  if (!acts.length) return candidates[0];
+  const live = acts.filter((c) => isDeadInput(g, c) !== true);
+  const pool = live.length ? live : acts;
+  return pool[Math.floor(rng() * pool.length)];
+}
+
+const PICK_KEY = /pick|choice|chose|rank|tier|rating|vote|answer|select|ending/i;
+
+/**
+ * The pick state at the end of a run: the named keys (`group_play.result.state`) when given, otherwise
+ * every state key that sounds like a pick (pick, choice, rank, tier, rating, vote, answer, select,
+ * ending). Keys starting with `__` are the gate's own. Returns {} when there's nothing to read.
+ */
+export function pickState(g, keys = null) {
+  let state;
+  try { state = asObject(g.state()); } catch { return {}; }
+  if (!state || typeof state !== 'object') return {};
+  const names = Array.isArray(keys) && keys.length
+    ? keys.filter((k) => Object.hasOwn(state, k))
+    : Object.keys(state).filter((k) => !k.startsWith('__') && PICK_KEY.test(k));
+  const out = {};
+  for (const k of names) out[k] = state[k];
+  return out;
+}
+
+const isEmptyPick = (v) => v == null || v === '' || (Array.isArray(v) && v.length === 0)
+  || (typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0);
+
 export function mulberry32(seed) {
   let a = seed >>> 0;
   return () => {
@@ -237,14 +323,23 @@ export function median(values) {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-export function analyze(runs, { maxSeconds = 180, inputProbe = null, game = null } = {}) {
+export function analyze(runs, { maxSeconds = 180, inputProbe = null, game = null, profile = null } = {}) {
+  const p = typeof profile === 'object' && profile ? profile : gateProfile(profile);
   const flags = [];
   const flag = (code, message, blocking) => flags.push({ code, message, blocking });
   const done = runs.filter((r) => r.ok);
 
+  if (!p.known) flag('unknown_profile', `Unknown gate profile \`${p.requested}\`; used the ${p.name} rules. Known: ${Object.keys(GATE_PROFILES).join(', ')}.`, false);
   const broken = runs.find((r) => !r.ok);
   if (broken) flag('runtime_error', `The game crashed in a bot run: ${broken.error ?? 'unknown error'}. Check glue functions and params.`, true);
   if (!done.length) return flags;
+
+  // Opinion and story games: no skill order, no pace; bots must reach an end (and leave picks).
+  if (p.randomPlay || !p.skill || !p.timing) {
+    finishFlags(done, p, maxSeconds, flag);
+    deadInputFlag(inputProbe, game, flag);
+    return flags;
+  }
 
   const med = median(done.map((r) => r.seconds));
   const scores = done.map((r) => r.score);
@@ -285,8 +380,12 @@ export function analyze(runs, { maxSeconds = 180, inputProbe = null, game = null
   }
 
   const typicalTimedOut = regular?.outcome === 'timeout' && regulars.filter((r) => r.outcome === 'timeout').length * 2 > regulars.length;
+  const slowestWin = wins.length ? Math.max(...wins.map((r) => r.seconds)) : Infinity;
+  const tooShort = flags.some((f) => f.code === 'too_short');
   if (timeouts.length !== done.length && (typicalTimedOut || timeouts.length * 2 >= done.length)) {
-    flag('too_easy', `Too easy: a typical player is still going after ${maxSeconds} s (${timeouts.length} of ${done.length} bots never failed). Make it ramp up (faster pace, tighter gaps, a timer) so runs end in 10–120 s.`, true);
+    flag('too_easy', `Too easy: a typical player is still going after ${maxSeconds} s (${timeouts.length} of ${done.length} bots never failed). Make it ramp up (faster pace, tighter gaps, a timer) so runs end in 10–120 s.`, p.endless === 'block');
+  } else if (p.fastWin && !tooShort && done.length > 1 && wins.length === done.length && slowestWin < FAST_WIN_SECONDS) {
+    flag('too_easy', `Too easy: every bot won, the slowest in ${secs(slowestWin)} s, even the weakest. Add more to clear (rounds, items, a harder finish) or ramp up the challenge so a win takes skill.`, p.fastWin === 'block');
   } else if (timeouts.length && timeouts.length !== done.length) {
     flag('long', `Long for strong players: the ${timeouts.map((r) => r.bot.label).join(', ')} bot was still going after ${maxSeconds} s.`, false);
   } else if (med > 120) {
@@ -294,13 +393,50 @@ export function analyze(runs, { maxSeconds = 180, inputProbe = null, game = null
   }
 
   // Handoff rules: ends, can be lost, can be won or scored, lasts 10–120 s.
-  if (!fails.length) flag('cant_lose', 'Can\'t be lost: no bot run ended in a loss.', true);
+  if (!fails.length) {
+    flag('cant_lose', p.canLose
+      ? 'Can\'t be lost: no bot run ended in a loss.'
+      : `No bot run ended in a loss. Fine for a ${p.name} game: don't add lives or a timer just to make it losable.`, p.canLose);
+  }
   if (!wins.length && maxScore <= 0) flag('no_win_or_score', 'No bot won or scored: it can\'t be won or scored.', true);
   if (med > 120) flag('too_long', `Too long: the median run is ${secs(med)} s; a good game lasts 10–120 s.`, true);
 
   deadInputFlag(inputProbe, game, flag);
 
   return flags;
+}
+
+/**
+ * The flags for profiles without a skill order or a pace (opinion, story): every run must end, and
+ * with `picks`, every run must leave a pick in state and the bots' picks must differ. Runs carry their
+ * end-of-run picks as `run.picks` (pickState).
+ */
+function finishFlags(done, p, maxSeconds, flag) {
+  const timeouts = done.filter((r) => r.outcome === 'timeout');
+  if (timeouts.length === done.length) {
+    flag('never_ends', `Never ends: no bot reached an end within ${maxSeconds} s. Every path through a ${p.name} game must lead to an ending.`, true);
+  } else if (p.mustFinish && timeouts.length) {
+    flag('must_finish', `${timeouts.length} of ${done.length} bots didn't reach an end within ${maxSeconds} s (${timeouts.map((r) => r.bot.label).join(', ')}). Every choice must lead on, so no path gets stuck.`, true);
+  }
+  if (!p.picks) return;
+  const withState = done.filter((r) => r.picks && Object.keys(r.picks).length);
+  if (!withState.length) {
+    flag('no_pick_state', 'No pick state to compare: name the state that holds the picks in `group_play.result.state`, or call it pick/choice/rank/rating/vote. Group results compare these.', true);
+    return;
+  }
+  const empty = withState.filter((r) => Object.values(r.picks).every(isEmptyPick));
+  if (empty.length) {
+    flag('no_picks', `${empty.length} of ${withState.length} bot runs ended with no pick recorded (${Object.keys(withState[0].picks).join(', ')} empty). Every prompt must store the player's pick in state.`, true);
+  }
+  const lengths = new Set(withState.flatMap((r) => Object.values(r.picks).filter(Array.isArray).map((a) => a.length)));
+  if (lengths.size > 1 && !empty.length) {
+    flag('uneven_picks', `Runs that reached the end recorded different numbers of picks (${[...lengths].sort((a, b) => a - b).join(', ')}). Check that every prompt stores a pick.`, false);
+  }
+  const finished = withState.filter((r) => r.outcome !== 'timeout' && !empty.includes(r));
+  const keys = new Set(finished.map((r) => JSON.stringify(r.picks)));
+  if (finished.length >= 3 && keys.size === 1) {
+    flag('same_picks', `All ${finished.length} bots made exactly the same picks, though they chose at random. The picks don't depend on what the player chooses, so there's nothing to compare with the group.`, true);
+  }
 }
 
 const KIND_NAMES = { key: ['key press', 'key presses'], swipe: ['swipe', 'swipes'] };

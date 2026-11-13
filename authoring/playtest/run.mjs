@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// node authoring/playtest/run.mjs [games...] [--bots N] [--json]
+// node authoring/playtest/run.mjs [games...] [--bots N] [--profile NAME] [--json]
 // Expands each manifest, validates it in the engine, then runs the bot playtest gate.
 // Default: every authoring/games/*.authoring.json. Writes authoring/playtest/report.json.
 // Needs MG_ENGINE_DIR (see authoring/expander/engine.mjs). Exit 1 if any game fails.
@@ -18,7 +18,9 @@ const args = process.argv.slice(2);
 const asJson = args.includes('--json');
 const botsIdx = args.indexOf('--bots');
 const botCount = botsIdx >= 0 ? Number(args[botsIdx + 1]) : DEFAULT_BOTS.length;
-const files = args.filter((a, i) => !a.startsWith('--') && !(botsIdx >= 0 && i === botsIdx + 1));
+const profileIdx = args.indexOf('--profile');
+const profile = profileIdx >= 0 ? args[profileIdx + 1] : null; // a gate profile (bots.mjs GATE_PROFILES)
+const files = args.filter((a, i) => !a.startsWith('--') && !(botsIdx >= 0 && i === botsIdx + 1) && !(profileIdx >= 0 && i === profileIdx + 1));
 const targets = files.length
   ? files.map((f) => resolve(f))
   : readdirSync(gamesDir).filter((f) => f.endsWith('.authoring.json')).sort().map((f) => join(gamesDir, f));
@@ -54,7 +56,7 @@ for (const file of targets) {
       continue;
     }
     entry.stage = 'gate';
-    const res = await playtest(JSON.stringify(result.playtestGame ?? result.game), { bots: DEFAULT_BOTS.slice(0, botCount) });
+    const res = await playtest(JSON.stringify(result.playtestGame ?? result.game), { bots: DEFAULT_BOTS.slice(0, botCount), profile });
     Object.assign(entry, { runs: res.runs.map((r) => ({ bot: r.bot.label, skill: r.bot.skill, outcome: r.outcome, score: r.score, seconds: Math.round(r.seconds * 10) / 10, ...(r.error ? { error: r.error } : {}) })), flags: res.flags, summary: res.summary, passed: res.passed });
     log(`  ${pad('bot', 18)}${pad('skill', 7)}${pad('outcome', 10)}${pad('score', 8)}seconds`);
     for (const r of entry.runs) log(`  ${pad(r.bot, 18)}${pad(r.skill, 7)}${pad(r.outcome, 10)}${pad(r.score, 8)}${r.seconds}${r.error ? `  ${r.error}` : ''}`);

@@ -9,7 +9,7 @@ Rust/WASM engine, checks it, and has bots play it before it ships. `SPEC.md` def
 | `looks/` | Look presets: tokens, a font and the slot layout |
 | `games/` | 20 authoring manifests: the three engine fixtures (Number Merge now on `tile_slide`) and 17 originals. Action: Fog Dodge, Golden Hour, Tide Taps, Lantern Lane, Meadow Hop, Snail Patrol. Puzzle and words: Lantern Letters, Hangout Words, Postcard Pairs, Daily Garden Pairs, Chime Circle, Picnic Packers, Quiz Night. Story: Kite Day Detour, Firefly Note. Social: Friend Dash (a friend's ghost and target), Bullseye Relay (pass-and-play with a Group total) |
 | `expander/` | The expander, the source map, the engine loader and a command-line tool. `studio.mjs` is the API the app's Studio and the server's generator use; `prompts.mjs` is Muse's prompts, `pipeline.mjs` the whole draft → repair → gate → polish loop, `quality.mjs` the quality check (shared by both paths); `stable.mjs` makes games survive key-sorted JSON (Swift) |
-| `playtest/` | The bot playtest gate, a port of beta's `StudioPlaytest`: `gate.mjs` (Node worker threads), `gate-async.mjs` (one thread, `fork()` look-ahead, for the app), shared bots and analysis in `bots.mjs` |
+| `playtest/` | The bot playtest gate, a port of beta's `StudioPlaytest`: `gate.mjs` (Node worker threads), `gate-async.mjs` (one thread, `fork()` look-ahead, for the app), shared bots, analysis and gate profiles in `bots.mjs` |
 | `tools/` | `make-seeds.mjs` (the `mg-*` seed Bubbles), `make-studio-bundle.mjs` (the app's Studio bundle) and `test-studio-bundle.mjs` |
 | `examples/snake/` | The hand expansion that checked the format against Artem's Snake |
 
@@ -32,6 +32,26 @@ node authoring/playtest/run.mjs                                                 
 
 Engine and authoring diagnostics come back mapped to the manifest. Ones that land inside a fragment or a
 look are marked `library`: they're our bugs, not the model's.
+
+## Gate profiles
+
+The gate judges a game by its genre: `playtest(json, {profile})` and `playtestAsync(engine, json,
+{profile})` take the catalog's `gate_profile` (Studio passes it from the harness context). No profile,
+or an unknown one, means the old rules (an unknown one also warns). `run.mjs --profile <name>` tries one by hand. Rules are in
+`GATE_PROFILES` in `playtest/bots.mjs`; tests in `playtest/test-profiles.mjs`.
+
+| Profile | What changes from no profile |
+|---|---|
+| `arcade`, `runner` | Every bot winning in under 15 s blocks (`too_easy`), as it does for `puzzle` and `search`. Otherwise the same as no profile, which is the gate as it was before profiles (the story gate relies on that) |
+| `puzzle` | "Can't be lost" is a warning |
+| `calm` | "Can't be lost", fast wins and a player still going at the time limit are warnings |
+| `trivia` | "Can't be lost" and fast wins are warnings. Bots wait 2× longer between answers (reading time) and look 2 s ahead, so a quiz that scores after a reveal isn't decided by button position |
+| `search` | "Can't be lost" is a warning. Bots wait 4× longer between taps (scanning time), so spot-the-difference isn't over in 3 s |
+| `story` | Bots choose at random among inputs that do something, with no skill order or pace judged. Every bot must reach an ending (`must_finish`) |
+| `opinion` | Like `story`, plus every run must leave a pick in state (`no_pick_state`, `no_picks`), and the bots' picks must not all be the same (`same_picks`). Picks are the state named in `pickKeys` (`group_play.result.state`), or else any state whose name has pick, choice, rank, tier, rating, vote, answer, select or ending |
+
+Typed answers: bots submit the strings from `playtest.text_candidates` (SPEC 2.6), or strings from the
+game's state.
 
 ## Art, sound and feel
 
