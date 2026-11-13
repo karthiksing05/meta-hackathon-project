@@ -183,17 +183,26 @@ final class Router {
 
     /// Opens the Bubble player full screen, optionally starting with a Burst of `replay`.
     func play(_ bubbleID: String, replay: BubbleInputLog? = nil) {
-        bubblePlayRequest = BubblePlayRequest(bubbleID: bubbleID, replay: replay)
+        play(BubblePlayRequest(bubbleID: bubbleID, replay: replay))
     }
 
     /// Opens the player for a social play: a fixed seed and length, with its context.
+    /// Waits for a sheet or cover that is still closing (`PresentationGate`).
     func play(_ request: BubblePlayRequest) {
-        bubblePlayRequest = request
+        MainActor.assumeIsolated {
+            PresentationGate.whenIdle { [weak self] in
+                self?.bubblePlayRequest = request
+            }
+        }
     }
 
-    /// Opens Muse Studio full screen.
+    /// Opens Muse Studio full screen. Waits for a sheet or cover that is still closing.
     func openStudio(_ launch: StudioLaunch = StudioLaunch()) {
-        studioLaunch = launch
+        MainActor.assumeIsolated {
+            PresentationGate.whenIdle { [weak self] in
+                self?.studioLaunch = launch
+            }
+        }
     }
 
     func path(for tab: AppTab) -> Binding<NavigationPath> {

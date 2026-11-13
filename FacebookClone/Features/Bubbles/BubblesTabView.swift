@@ -289,16 +289,20 @@ struct BubblesTabView: View {
     private func openBoardFromResult(_ bubble: Bubble) {
         model.result = nil
         model.endTakeover()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            router.push(.bubbleBoard(bubble.id))
+        let id = bubble.id
+        PresentationGate.afterDismissal { [router] in
+            router.push(.bubbleBoard(id))
         }
     }
 
+    /// Opens the next level in the player once the result sheet has finished closing (a cover
+    /// presented while the sheet is still moving can be dropped).
     private func playNextLevel(_ next: Bubble) {
         model.result = nil
         model.endTakeover()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            router.play(next.id)
+        let id = next.id
+        PresentationGate.afterDismissal { [router] in
+            router.play(id)
         }
     }
 

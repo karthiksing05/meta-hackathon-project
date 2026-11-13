@@ -33,6 +33,8 @@ struct BubblePlayerView: View {
     @State private var failure: EngineFailure?
     /// Bumped by "Try again": a new web view, so a fresh host lease and a fresh start.
     @State private var attempt = 0
+    /// Leaving for another screen (`exitPlayer`): later taps are ignored.
+    @State private var isExiting = false
 
     init(request: BubblePlayRequest) {
         self.request = request
@@ -353,19 +355,25 @@ struct BubblePlayerView: View {
     }
 
     private func openBoard(_ bubble: Bubble) {
-        result = nil
-        dismiss()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            router.push(.bubbleBoard(bubble.id))
+        let id = bubble.id
+        exitPlayer { [router] in
+            router.push(.bubbleBoard(id))
         }
     }
 
     /// Closes the result sheet and the player, then runs `action` (open Studio, a chat, a page).
+    /// One step at a time: dismissing the player while its sheet is still closing (or presenting
+    /// Studio while the player is) can be dropped by UIKit, which left the button doing nothing.
     private func exitPlayer(_ action: @escaping () -> Void) {
+        guard !isExiting else { return }
+        isExiting = true
         result = nil
-        dismiss()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            action()
+        let dismiss = dismiss
+        PresentationGate.afterDismissal {
+            dismiss()
+            PresentationGate.afterDismissal {
+                action()
+            }
         }
     }
 
