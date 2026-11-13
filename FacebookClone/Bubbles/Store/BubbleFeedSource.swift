@@ -36,6 +36,8 @@ struct BubbleFeedItem: Identifiable, Hashable {
     let team: String?
     /// Set when the server marks this page as a sponsored post.
     var sponsor: RemoteSponsor? = nil
+    /// The server's `baseId`: the game's family (its Group copies, remixes and variants share it).
+    var baseID: String? = nil
     /// Whose run plays as the Burst. The server doesn't send runs yet, so pages play the bot's
     /// demo.
     var runUserID: String? { nil }
@@ -47,8 +49,13 @@ extension BubbleStore {
     /// How many pages to ask for at a time.
     static let feedPageSize = 10
 
-    /// Asks the server for the next feed pages (`GET /v1/feed`). One request at a time; a page with
-    /// nothing new ends the feed until `reloadFeed()`.
+    /// Pages in a row that brought nothing new before the feed counts as ended.
+    static let feedStaleLimit = 2
+
+    /// Asks the server for the next feed pages (`GET /v1/feed`). One request at a time. A game
+    /// already in the feed never goes in again: the server shouldn't send one, and the app checks
+    /// the game's server id, its id here and its family (`baseId`) anyway. Pages with nothing new
+    /// (`feedStaleLimit` in a row, or an empty one) end the feed until `reloadFeed()`.
     func loadMoreFeed() {
         guard !isPreview, feedTask == nil, feedState != .end else { return }
         feedState = .loading
@@ -57,25 +64,37 @@ extension BubbleStore {
         let generation = feedGeneration
         feedTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            // A reload (account change, Try again) starts a newer request; this one then leaves
-            // the feed alone, so a cancelled request never shows as "Couldn't load".
+            // A reload (account change) starts a newer request; this one then leaves the feed
+            // alone, so a cancelled request never shows as "Couldn't load".
             defer { if self.feedGeneration == generation { self.feedTask = nil } }
             _ = await GamesAccount.shared.waitForUser()
             guard !Task.isCancelled, feedGeneration == generation else { return }
             do {
                 let page = try await api.feed(limit: Self.feedPageSize, sessionID: feedSessionID, exclude: exclude)
                 guard !Task.isCancelled, feedGeneration == generation else { return }
-                var added: [BubbleFeedItem] = []
-                for item in page where !feedItems.contains(where: { $0.id == item.feedItemID }) {
+                var candidates: [BubbleFeedItem] = []
+                for item in page {
                     guard let bubble = await adopt(item.game) else { continue }
-                    added.append(BubbleFeedItem(
+                    candidates.append(BubbleFeedItem(
                         id: item.feedItemID, bubbleID: bubble.id, reason: BubbleFeedReason(server: item.reason),
-                        serverReason: item.reason, why: item.why, team: item.team, sponsor: item.sponsor
+                        serverReason: item.reason, why: item.why, team: item.team, sponsor: item.sponsor,
+                        baseID: item.baseID
                     ))
                 }
                 guard feedGeneration == generation else { return }
+                // Checked against the feed as it is now: it can change while games load.
+                var known = feedIdentityKeys(feedItems)
+                var added: [BubbleFeedItem] = []
+                for item in candidates {
+                    let keys = feedIdentityKeys([item])
+                    guard known.isDisjoint(with: keys) else { continue }
+                    known.formUnion(keys)
+                    added.append(item)
+                }
                 feedItems.append(contentsOf: added)
-                feedState = added.isEmpty ? .end : .idle
+                feedStaleStreak = added.isEmpty ? feedStaleStreak + 1 : 0
+                feedState = page.isEmpty || feedStaleStreak >= Self.feedStaleLimit ? .end : .idle
+                debugCheckFeedForDuplicates("load")
             } catch {
                 guard !Task.isCancelled, feedGeneration == generation else { return }
                 feedState = .failed(error.localizedDescription)
@@ -83,12 +102,63 @@ extension BubbleStore {
         }
     }
 
-    /// Starts the feed over (pull to refresh, Try again).
+    /// Loads more after the end or a failure (pull to refresh, Try again). The pages already shown
+    /// stay where they are, so the position holds. A load already running is left to finish: the
+    /// server has counted its games as shown, so dropping it would lose them.
     func reloadFeed() {
-        feedTask?.cancel()
-        feedTask = nil
+        feedStaleStreak = 0
+        guard feedTask == nil else { return }
         feedState = .idle
         loadMoreFeed()
+    }
+
+    /// A different account means a different personalized feed: the request for the old account is
+    /// dropped and so are the pages fetched ahead of the one on screen. The page on screen and the
+    /// ones before it stay, so the pager doesn't jump, and the new account's pages follow them.
+    func restartFeedForNewAccount() {
+        feedTask?.cancel()
+        feedTask = nil
+        feedGeneration += 1
+        if feedItems.indices.contains(feedPosition) {
+            feedItems.removeSubrange((feedPosition + 1)...)
+        } else {
+            feedItems.removeAll()
+            feedPosition = 0
+        }
+        feedStaleStreak = 0
+        feedState = .idle
+        loadMoreFeed()
+    }
+
+    /// What makes two feed items the same game: its id here, its server id, and its family.
+    func feedIdentityKeys(_ items: [BubbleFeedItem]) -> Set<String> {
+        var keys = Set<String>()
+        for item in items {
+            keys.insert("game:\(item.bubbleID)")
+            if let serverID = bubble(id: item.bubbleID)?.serverID, !serverID.isEmpty {
+                keys.insert("server:\(serverID)")
+            }
+            if let base = item.baseID, !base.isEmpty {
+                keys.insert("base:\(base)")
+            }
+        }
+        return keys
+    }
+
+    /// DEBUG builds log any game that is in the feed twice (by id here, server id or family).
+    func debugCheckFeedForDuplicates(_ context: String) {
+        #if DEBUG
+        var seen: [String: Int] = [:]
+        for (index, item) in feedItems.enumerated() {
+            for key in feedIdentityKeys([item]) {
+                if let first = seen[key] {
+                    print("[feed] duplicate after \(context): \(key) at pages \(first) and \(index) (\(item.id))")
+                } else {
+                    seen[key] = index
+                }
+            }
+        }
+        #endif
     }
 
     /// Kept for callers that grew the feed by a count; loads the next server page.
@@ -104,11 +174,20 @@ extension BubbleStore {
         }
     }
 
-    /// A game you just made shows up as the next page.
+    /// A game you just made shows up as the next page. If the feed already holds it, that page
+    /// moves there instead of the game showing twice.
     func insertIntoFeed(_ bubble: Bubble) {
         let item = BubbleFeedItem(id: "made-\(bubble.id)", bubbleID: bubble.id, reason: .yours, serverReason: "yours", why: nil, team: nil)
-        feedItems.removeAll { $0.id == item.id }
-        feedItems.insert(item, at: min(feedPosition + 1, feedItems.count))
+        let keys = feedIdentityKeys([item])
+        let currentID = feedItems.indices.contains(feedPosition) ? feedItems[feedPosition].id : nil
+        feedItems.removeAll { $0.id == item.id || ($0.id != currentID && !feedIdentityKeys([$0]).isDisjoint(with: keys)) }
+        if let currentID, !feedIdentityKeys(feedItems.filter { $0.id == currentID }).isDisjoint(with: keys) {
+            return // it is the page on screen
+        }
+        let current = currentID.flatMap { id in feedItems.firstIndex { $0.id == id } } ?? (feedPosition - 1)
+        feedPosition = max(0, current)
+        feedItems.insert(item, at: min(current + 1, feedItems.count))
+        debugCheckFeedForDuplicates("insert")
     }
 
     /// A game by id (a slug or a server id): the one already fetched, or `GET /v1/games/{id}`.
