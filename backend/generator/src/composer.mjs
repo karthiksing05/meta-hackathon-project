@@ -155,7 +155,8 @@ export async function compose({ request, brief }, { muse, studio, model = 'muse-
     stats.seconds = Math.round((Date.now() - started) / 100) / 10;
     manifest.studio = { models: stats.models, created_at: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), duration_sec: stats.seconds, offline: false };
     emit({ kind: 'done', title: manifest.title ?? title });
-    return { manifest, stats, gate: { passed: !!chosen.report.passed, summary: chosen.report.summary ?? '' } };
+    const bots = (chosen.report.runs ?? []).map((r) => ({ skill: Number(r.bot?.skill ?? 0), score: Math.round(Number(r.score ?? 0)), sec: Math.round(Number(r.seconds ?? 0) * 10) / 10 }));
+    return { manifest, stats, bots, gate: { passed: !!chosen.report.passed, summary: chosen.report.summary ?? '' } };
   } catch (e) {
     stats.seconds = Math.round((Date.now() - started) / 100) / 10;
     emit({ kind: 'failed', reason: e?.message ?? String(e), issues: e?.issues });

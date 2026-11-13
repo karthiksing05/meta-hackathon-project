@@ -21,13 +21,14 @@ type Memory struct {
 	events  []model.Event
 	eventID map[string]bool
 	jobs    map[string]*model.Job
+	recs    map[string]model.RecsRecord
 }
 
 func NewMemory() *Memory {
 	return &Memory{
 		users: map[string]*model.User{}, refresh: map[string]model.RefreshToken{},
 		games: map[string]*model.Game{}, likes: map[string]bool{}, scores: map[string]model.Score{},
-		eventID: map[string]bool{}, jobs: map[string]*model.Job{},
+		eventID: map[string]bool{}, jobs: map[string]*model.Job{}, recs: map[string]model.RecsRecord{},
 	}
 }
 
@@ -249,17 +250,17 @@ func (m *Memory) LikedSet(ctx context.Context, userID string, ids []string) (map
 	return out, nil
 }
 
-func (m *Memory) AddEvents(ctx context.Context, evs []model.Event) (int, error) {
+func (m *Memory) AddEvents(ctx context.Context, evs []model.Event) ([]model.Event, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	added := 0
+	var added []model.Event
 	for _, e := range evs {
 		if m.eventID[e.ID] {
 			continue
 		}
 		m.eventID[e.ID] = true
 		m.events = append(m.events, e)
-		added++
+		added = append(added, e)
 		if g := m.gameFor(e.GameID); g != nil {
 			if e.TookOver {
 				g.Plays++
@@ -507,4 +508,26 @@ func (m *Memory) FailStaleJobs(ctx context.Context, reason string) (int, error) 
 		}
 	}
 	return n, nil
+}
+
+func (m *Memory) GetRecs(ctx context.Context, userID string) (*model.RecsRecord, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	r, ok := m.recs[userID]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	r.Feed = append([]string(nil), r.Feed...)
+	r.FeedKeys = append([]string(nil), r.FeedKeys...)
+	return &r, nil
+}
+
+func (m *Memory) PutRecs(ctx context.Context, r *model.RecsRecord) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	c := *r
+	c.Feed = append([]string(nil), r.Feed...)
+	c.FeedKeys = append([]string(nil), r.FeedKeys...)
+	m.recs[r.UserID] = c
+	return nil
 }

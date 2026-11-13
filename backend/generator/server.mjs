@@ -78,7 +78,7 @@ const server = createServer(async (req, res) => {
         muse, studio, model: MODEL, signal: abort.signal,
         onEvent: (event) => send({ type: 'event', event }),
       });
-      send({ type: 'result', manifest: out.manifest, stats: out.stats, gate: out.gate });
+      send({ type: 'result', manifest: out.manifest, stats: out.stats, gate: out.gate, bots: out.bots });
       log('compose ok', { seconds: (Date.now() - started) / 1000, museCalls: out.stats.museCalls, gate: out.gate.passed });
     } catch (e) {
       send({ type: 'error', message: e?.message ?? String(e), issues: e?.issues ?? [], stats: e?.stats });

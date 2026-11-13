@@ -36,7 +36,14 @@ type Game struct {
 	Slug          string    `bson:"slug,omitempty"` // the manifest's own id, unique when set; apps use it as a stable name
 	GroupID       string    `bson:"groupId,omitempty"`
 	EventID       string    `bson:"eventId,omitempty"`
-	Likes         int64     `bson:"likes"` // "saves are the likes": one counter
+	Mood          []string  `bson:"mood,omitempty"` // from the manifest's brief; what the recommender describes a game by
+	Energy        string    `bson:"energy,omitempty"`
+	Competition   string    `bson:"competition,omitempty"`
+	Look          string    `bson:"look,omitempty"`
+	Scope         string    `bson:"scope,omitempty"` // "everyone", "group" or "event"
+	IsDaily       bool      `bson:"isDaily,omitempty"`
+	Bots          []BotRun  `bson:"bots,omitempty"` // the playtest bots' runs, for the recommender's quality prior
+	Likes         int64     `bson:"likes"`          // "saves are the likes": one counter
 	Plays         int64     `bson:"plays"`
 	Finishes      int64     `bson:"finishes"`
 	CreatedAt     time.Time `bson:"createdAt"`
@@ -188,4 +195,23 @@ type JobUpdate struct {
 	GameID string
 	Error  string
 	Stats  map[string]any
+}
+
+// BotRun is one playtest bot's run of a game: how skilled the bot is, what it scored, how long it played.
+type BotRun struct {
+	Skill float64 `bson:"skill" json:"skill"`
+	Score int     `bson:"score" json:"score"`
+	Sec   float64 `bson:"sec,omitempty" json:"sec,omitempty"`
+}
+
+// RecsRecord is one person's recommender state: the model (game-recs.js's own JSON, kept as text) and the
+// pages the server has shown them in the current session.
+type RecsRecord struct {
+	UserID      string    `bson:"_id"`
+	State       string    `bson:"state"`
+	Feed        []string  `bson:"feed,omitempty"`
+	FeedKeys    []string  `bson:"feedKeys,omitempty"`
+	FeedSession string    `bson:"feedSession,omitempty"`
+	FeedAt      time.Time `bson:"feedAt,omitempty"`
+	UpdatedAt   time.Time `bson:"updatedAt"`
 }

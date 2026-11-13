@@ -41,9 +41,13 @@ type Store interface {
 	SetLike(ctx context.Context, gameID, userID string, liked bool) (int64, error)
 	LikedSet(ctx context.Context, userID string, gameIDs []string) (map[string]bool, error)
 
-	// AddEvents stores events and returns how many were new. Events whose id was already stored
+	// AddEvents stores events and returns the ones that were new. Events whose id was already stored
 	// (a phone resending a batch) are skipped and do not count twice.
-	AddEvents(ctx context.Context, evs []model.Event) (int, error)
+	AddEvents(ctx context.Context, evs []model.Event) ([]model.Event, error)
+
+	// Recommender state, one record per person.
+	GetRecs(ctx context.Context, userID string) (*model.RecsRecord, error)
+	PutRecs(ctx context.Context, r *model.RecsRecord) error
 	// Game generation jobs.
 	InsertJob(ctx context.Context, j *model.Job) error
 	JobByID(ctx context.Context, id string) (*model.Job, error)

@@ -29,6 +29,11 @@ type Config struct {
 	GeneratorURL       string // empty turns generation off
 	GenerateConcurrent int    // jobs running at once, across everyone
 	GeneratePerHour    int    // jobs one person may start per hour
+
+	// Ranking (game-recs.js). RecsRuntimes is how many recommender runtimes run at once (0 turns ranking off).
+	// RecsInterleave is "" (off), "baseline", or a variant name such as "noBait": mixes each feed with a control.
+	RecsRuntimes   int
+	RecsInterleave string
 }
 
 func Load() (*Config, error) {
@@ -48,6 +53,12 @@ func Load() (*Config, error) {
 		GeneratorURL:       strings.TrimRight(os.Getenv("GENERATOR_URL"), "/"),
 		GenerateConcurrent: int(envInt("GENERATE_CONCURRENT", 2)),
 		GeneratePerHour:    int(envInt("GENERATE_PER_HOUR", 6)),
+
+		RecsRuntimes:   int(envInt("RECS_RUNTIMES", 2)),
+		RecsInterleave: os.Getenv("RECS_INTERLEAVE"),
+	}
+	if os.Getenv("RECS_RUNTIMES") == "0" {
+		c.RecsRuntimes = 0
 	}
 	for _, o := range strings.Split(os.Getenv("CORS_ORIGINS"), ",") {
 		if o = strings.TrimSpace(o); o != "" {

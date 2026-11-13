@@ -233,8 +233,12 @@ var (
 )
 
 type manifestMeta struct {
-	ID        string `json:"id"` // optional: kept as the game's slug when it is unique
+	ID    string `json:"id"` // optional: kept as the game's slug when it is unique
+	Style struct {
+		Look string `json:"look"`
+	} `json:"style"`
 	Structure struct {
+		Cadence      string `json:"cadence"`
 		Scope        string `json:"scope"` // "group:<id>" or "event:<id>"
 		GroupID      string `json:"group_id"`
 		GroupIDCamel string `json:"groupID"`
@@ -246,7 +250,9 @@ type manifestMeta struct {
 	Formula string   `json:"formula"`
 	Tags    []string `json:"tags"`
 	Brief   struct {
-		Mood []string `json:"mood"`
+		Mood        []string `json:"mood"`
+		Energy      string   `json:"energy"`
+		Competition string   `json:"competition"`
 	} `json:"brief"`
 	Lineage struct {
 		RemixOf string `json:"remix_of"`
@@ -262,7 +268,7 @@ type publishError struct {
 
 // publishPackage unpacks and validates a game package (a zip with manifest.json), stores it under a
 // new server-generated id and records the game. Uploads and generated games both go through it.
-func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Reader) (*model.Game, *publishError) {
+func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Reader, bots []model.BotRun) (*model.Game, *publishError) {
 	id := auth.NewID(12) // server-generated; clients never choose ids or paths
 	var m manifestMeta
 	pkg, err := s.Packages.Publish(ctx, id, body, func(p *pkgstore.Package) error {
@@ -305,6 +311,16 @@ func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Read
 		g.Slug = slug
 	}
 	g.GroupID, g.EventID = scopeIDs(&m)
+	g.Mood, g.Energy, g.Competition = normTags(m.Brief.Mood), strings.ToLower(strings.TrimSpace(m.Brief.Energy)), strings.ToLower(strings.TrimSpace(m.Brief.Competition))
+	g.Look, g.IsDaily, g.Bots = strings.ToLower(strings.TrimSpace(m.Style.Look)), strings.EqualFold(m.Structure.Cadence, "daily"), bots
+	switch {
+	case strings.HasPrefix(m.Structure.Scope, "group"):
+		g.Scope = "group"
+	case strings.HasPrefix(m.Structure.Scope, "event"):
+		g.Scope = "event"
+	default:
+		g.Scope = "everyone"
+	}
 	if rm := m.Lineage.RemixOf; rm != "" {
 		if _, err := s.Store.GameByID(ctx, rm); err == nil {
 			g.RemixOf = rm
@@ -326,7 +342,7 @@ func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
 	}
 	u := userFrom(r)
 	r.Body = http.MaxBytesReader(w, r.Body, s.MaxUploadMB<<20+1)
-	g, perr := s.publishPackage(r.Context(), u, r.Body)
+	g, perr := s.publishPackage(r.Context(), u, r.Body, nil)
 	if perr != nil {
 		if perr.Err != nil {
 			s.serverErr(w, r, perr.Err)

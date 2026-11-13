@@ -49,6 +49,9 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/games/{id}` | optional | one game; `{id}` may also be the slug from its manifest |
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
 | `GET /v1/games/{id}/leaderboard`, `POST /v1/games/{id}/scores` | none / bearer | best score per user |
+| `POST /v1/me/feed` | bearer | the next pages ranked for me: `{count, sessionID?}`; see [Ranking](#ranking-the-recommender-runs-here) |
+| `GET /v1/me/recs` | bearer | my model's summary and taste profile |
+| `POST /v1/blend` | bearer | games and a game spec for a set of people: `{group, members, count}` |
 | `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; see [Making games](#making-games-muse-lives-here) |
 | `GET /v1/generate/{id}`, `GET /v1/generate` | bearer | a job's status, steps and finished game; my recent jobs |
 | `POST /v1/creations` | bearer | upload a package zip (`Content-Type: application/zip`) |
@@ -103,6 +106,35 @@ loopback), which does what the app's `MicrogameComposer` used to: Muse writes an
 `microgame-studio.js` and `bubble-kit-microgame-engine.js` bundles from `backend/generator/vendor` (copied from `main`; refresh them
 when the engine or authoring layer changes). The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Not built yet: revising a game, Muse-made covers, and the classic (non-microgame) formulas.
+
+## Ranking (the recommender runs here)
+
+Kevin's recommender (`game-recs.js`, vendored in `internal/recs`; `SOURCE_COMMIT` says which commit) runs **unchanged**
+inside the API, on a pure-Go JavaScript engine (goja). The app does no ranking: it asks the server what to show and
+reports what happened. Each signed-in person's model (posteriors, taste, bait lean, calibration history) is kept in
+Mongo (`recs_state`); the pages shown this session are kept with it.
+
+- `POST /v1/me/feed` `{count (1-30, default 10), sessionID?}` -> `{items: [{feedItemID, game, reason, why, score, hook, unproven, team?}], bait}`.
+  Candidates are the newest 300 games: "new" ones get a small push, "popular" ones a push that grows with plays and saves.
+  A new `sessionID`, or 30 minutes idle, starts a new page list (so the repeat window and calibration restart).
+  The app should send `feedItemID` and the game's `id` back in its page events.
+- **Learning:** `POST /v1/feed/events` from a signed-in person also teaches their model. A feed page event
+  (`gameID`, `feedItemID` or `position`, `dwellSec`, `tookOver`, `runsFinished`, `replays`, `saved`, `liked`, `floated`,
+  `openedBoard`, `addedFriend`, `remixed`, `social`, `with`, `quitMidRun`, `endedSession`) becomes `observe`; an off-feed
+  moment (`kind`) becomes `signal`. A resent `eventID` teaches nothing twice. Older `type` events are stored but don't teach.
+- `POST /v1/blend` `{group: {id, name}, members: [{userID, name, isFriend, skill?, bio?, themes?}], count}`: the signed-in
+  person must be a member. Members the server knows (they have played) are blended from what they actually like; others get
+  the recommender's demo profile, steered by `bio` and `themes`. Returns `picks` (each with its `game`), a `spec` Studio can
+  take (`prompt`), `cohesion` and `twins`.
+- `GET /v1/me/recs` shows my model's summary (pages seen, bait lean) and taste profile.
+- Settings: `RECS_RUNTIMES` (default 2, `0` turns ranking off), `RECS_INTERLEAVE` (`baseline` or a variant name mixes each feed
+  with a control; page events then carry `team`, and `/v1/experiments/interleave` tallies it). The optional Muse re-rank term
+  stays off: the backend never turns it on.
+- To update the recommender, copy the new `game-recs.js` over `internal/recs/game-recs.js`, set `SOURCE_COMMIT`, regenerate
+  `internal/recs/testdata/golden.json` with `node internal/recs/testdata/gen_golden.mjs`, and run `go test ./internal/recs`.
+  The golden test replays a fixed call sequence made by Node and fails if the Go engine's answers differ.
+- Games carry what the recommender describes them by (`mood`, `energy`, `competition`, `look`, `scope`, `isDaily`, and the
+  playtest bots' runs for generated games), read from the manifest when a game is published.
 
 ## Event log and recommender support
 

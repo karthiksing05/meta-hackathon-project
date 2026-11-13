@@ -53,6 +53,7 @@ const (
 	cEvents  = "feed_events"
 	cScores  = "scores"
 	cJobs    = "generation_jobs"
+	cRecs    = "recs_state"
 )
 
 func (m *Mongo) coll(n string) *mongo.Collection { return m.db.Collection(n) }
@@ -241,9 +242,9 @@ func (m *Mongo) LikedSet(ctx context.Context, userID string, ids []string) (map[
 	return out, nil
 }
 
-func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) (int, error) {
+func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) ([]model.Event, error) {
 	if len(evs) == 0 {
-		return 0, nil
+		return nil, nil
 	}
 	// Skip events already stored (a phone resending a batch) and repeats inside this batch.
 	ids := make([]string, len(evs))
@@ -253,13 +254,13 @@ func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) (int, error) {
 	cur, err := m.coll(cEvents).Find(ctx, bson.D{{Key: "_id", Value: bson.D{{Key: "$in", Value: ids}}}},
 		options.Find().SetProjection(bson.D{{Key: "_id", Value: 1}}))
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	var have []struct {
 		ID string `bson:"_id"`
 	}
 	if err := cur.All(ctx, &have); err != nil {
-		return 0, err
+		return nil, err
 	}
 	seen := map[string]bool{}
 	for _, h := range have {
@@ -276,10 +277,10 @@ func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) (int, error) {
 		fresh = append(fresh, e)
 	}
 	if len(docs) == 0 {
-		return 0, nil
+		return nil, nil
 	}
 	if _, err := m.coll(cEvents).InsertMany(ctx, docs, options.InsertMany().SetOrdered(false)); err != nil && !mongo.IsDuplicateKeyError(err) {
-		return 0, err
+		return nil, err
 	}
 
 	// Events may name a game by slug; resolve those to ids for the per-game counters.
@@ -294,14 +295,14 @@ func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) (int, error) {
 		gc, err := m.coll(cGames).Find(ctx, bson.D{{Key: "slug", Value: bson.D{{Key: "$in", Value: slugs}}}},
 			options.Find().SetProjection(bson.D{{Key: "slug", Value: 1}}))
 		if err != nil {
-			return len(fresh), err
+			return fresh, err
 		}
 		var rows []struct {
 			ID   string `bson:"_id"`
 			Slug string `bson:"slug"`
 		}
 		if err := gc.All(ctx, &rows); err != nil {
-			return len(fresh), err
+			return fresh, err
 		}
 		for _, r := range rows {
 			idOf[r.Slug] = r.ID
@@ -336,10 +337,10 @@ func (m *Mongo) AddEvents(ctx context.Context, evs []model.Event) (int, error) {
 	}
 	if len(writes) > 0 {
 		if _, err := m.coll(cGames).BulkWrite(ctx, writes); err != nil {
-			return len(fresh), err
+			return fresh, err
 		}
 	}
-	return len(fresh), nil
+	return fresh, nil
 }
 
 func sinceFilter(since time.Time) bson.D {
@@ -550,4 +551,17 @@ func (m *Mongo) FailStaleJobs(ctx context.Context, reason string) (int, error) {
 		return 0, err
 	}
 	return int(r.ModifiedCount), nil
+}
+
+func (m *Mongo) GetRecs(ctx context.Context, userID string) (*model.RecsRecord, error) {
+	var r model.RecsRecord
+	if err := m.coll(cRecs).FindOne(ctx, bson.D{{Key: "_id", Value: userID}}).Decode(&r); err != nil {
+		return nil, mapErr(err)
+	}
+	return &r, nil
+}
+
+func (m *Mongo) PutRecs(ctx context.Context, r *model.RecsRecord) error {
+	_, err := m.coll(cRecs).ReplaceOne(ctx, bson.D{{Key: "_id", Value: r.UserID}}, r, options.Replace().SetUpsert(true))
+	return err
 }

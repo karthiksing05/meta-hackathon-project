@@ -1,0 +1,2939 @@
+{
+ "version": "0.5.0",
+ "steps": [
+  {
+   "method": "load",
+   "input": null,
+   "output": {
+    "ok": true,
+    "version": "0.5.0",
+    "stages": {
+     "reward": true,
+     "bandit": true,
+     "calibration": true,
+     "coldStart": true,
+     "bait": true
+    },
+    "items": 0
+   }
+  },
+  {
+   "method": "rank",
+   "input": {
+    "candidates": [
+     {
+      "gameID": "g00",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g01",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g02",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g03",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g04",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g05",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g06",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g07",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g08",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g09",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g10",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g11",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g12",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g13",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     }
+    ],
+    "summaries": [
+     {
+      "id": "g00",
+      "formula": "dodge",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "glow",
+      "scope": "everyone",
+      "isDaily": true,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 25
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 25
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 25
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 25
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 25
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g01",
+      "formula": "time",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "paper",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g02",
+      "formula": "merge",
+      "mood": [
+       "playful"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "pixel",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 27
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 27
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 27
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 27
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 27
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": null
+     },
+     {
+      "id": "g03",
+      "formula": "guess",
+      "mood": [
+       "hype"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "neon",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": null
+     },
+     {
+      "id": "g04",
+      "formula": "group",
+      "mood": [
+       "calm",
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "ink",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 29
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 29
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 29
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 29
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 29
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g05",
+      "formula": "answer",
+      "mood": [
+       "playful",
+       "hype"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "clay",
+      "scope": "event",
+      "isDaily": true,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": null
+     },
+     {
+      "id": "g06",
+      "formula": "make",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "riso",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 31
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 31
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 31
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 31
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 31
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": null
+     },
+     {
+      "id": "g07",
+      "formula": "dodge",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "chalk",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g08",
+      "formula": "time",
+      "mood": [
+       "playful"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "glow",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 33
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 33
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 33
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 33
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 33
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g09",
+      "formula": "merge",
+      "mood": [
+       "hype"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "paper",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": null
+     },
+     {
+      "id": "g10",
+      "formula": "guess",
+      "mood": [
+       "calm",
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "pixel",
+      "scope": "group",
+      "isDaily": true,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 35
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 35
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 35
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 35
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 35
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g11",
+      "formula": "group",
+      "mood": [
+       "playful",
+       "hype"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "neon",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": null
+     },
+     {
+      "id": "g12",
+      "formula": "answer",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "ink",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 37
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 37
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 37
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 37
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 37
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g13",
+      "formula": "make",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "clay",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": "grp1"
+     }
+    ],
+    "feed": [],
+    "feedKeys": [],
+    "count": 6,
+    "seed": 11,
+    "day": 20800,
+    "now": 1794000000000
+   },
+   "output": {
+    "picks": [
+     {
+      "gameID": "g10",
+      "reason": "popular",
+      "runUserID": null,
+      "score": 7.372880859733924,
+      "rel": 0.9993723379785782,
+      "kl": 6.760510694620907,
+      "grab": 0.23313212447141574,
+      "sat": 0.7499986874533455,
+      "hook": 0.2141650169574414,
+      "tier": "low",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": 6.620689462431968,
+       "taste": 0,
+       "bait": 0.5716699660851172,
+       "slop": -0.042622120097370285,
+       "reason": 0.22314355131420976,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     },
+     {
+      "gameID": "g11",
+      "reason": "popular",
+      "runUserID": null,
+      "score": -0.23544638378428773,
+      "rel": 0.44140882114150665,
+      "kl": 3.9071628824220044,
+      "grab": 0.41319618908325156,
+      "sat": 0.5,
+      "hook": 0.6341355910108007,
+      "tier": "mid",
+      "pSlop": 0.30166579572908525,
+      "unproven": true,
+      "parts": {
+       "quality": 0.2889657936701328,
+       "taste": 0,
+       "bait": -0.2682711820216015,
+       "slop": -0.6616061035409834,
+       "reason": 0.4054651081081644,
+       "muse": 0
+      },
+      "why": "new, still testing · held back: may be low quality",
+      "museWhy": null
+     },
+     {
+      "gameID": "g08",
+      "reason": "new",
+      "runUserID": null,
+      "score": 1.090121187690146,
+      "rel": 0.7484045413523868,
+      "kl": 2.6873367707374833,
+      "grab": 0.4795140644150156,
+      "sat": 0.7499986874533455,
+      "hook": 0.7685247834990178,
+      "tier": "high",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": 1.2643277666773873,
+       "taste": 0,
+       "bait": -0.5370495669980355,
+       "slop": -0.042622120097370285,
+       "reason": 0.4054651081081644,
+       "muse": 0
+      },
+      "why": "new, still testing",
+      "museWhy": null
+     },
+     {
+      "gameID": "g12",
+      "reason": "new",
+      "runUserID": null,
+      "score": 3.6618295948982027,
+      "rel": 0.9749577464988134,
+      "kl": 1.992404716840013,
+      "grab": 0.2044317826201252,
+      "sat": 0.7499986874533455,
+      "hook": 0.13010847436299783,
+      "tier": "low",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": 2.964668663721569,
+       "taste": 0,
+       "bait": 0.7397830512740043,
+       "slop": -0.042622120097370285,
+       "reason": 0,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     },
+     {
+      "gameID": "g07",
+      "reason": "popular",
+      "runUserID": null,
+      "score": 2.0725425660661996,
+      "rel": 0.8882056782815764,
+      "kl": 1.2816103547799735,
+      "grab": 0.3169283053559954,
+      "sat": 0.5,
+      "hook": 0.425557483188341,
+      "tier": "mid",
+      "pSlop": 0.30166579572908525,
+      "unproven": true,
+      "parts": {
+       "quality": 2.3621200846696553,
+       "taste": 0,
+       "bait": 0.14888503362331795,
+       "slop": -0.6616061035409834,
+       "reason": 0.22314355131420976,
+       "muse": 0
+      },
+      "why": "new, still testing · calmer pick · held back: may be low quality",
+      "museWhy": null
+     },
+     {
+      "gameID": "g06",
+      "reason": "popular",
+      "runUserID": null,
+      "score": -0.19474183095104344,
+      "rel": 0.45146782479353914,
+      "kl": 0.43473287743611055,
+      "grab": 0.19768196716906028,
+      "sat": 0.7499986874533455,
+      "hook": 0.10909682119561298,
+      "tier": "low",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": -0.9339260684624472,
+       "taste": 0,
+       "bait": 0.781806357608774,
+       "slop": -0.042622120097370285,
+       "reason": 0,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     }
+    ],
+    "bait": {
+     "lean": -1,
+     "tolerance": 0.2689414213699951,
+     "appetite": 0,
+     "fatigue": 0,
+     "popGrabSlope": 0.25,
+     "popSatSlope": 0
+    },
+    "targets": {
+     "formula": {
+      "dodge": 0.15270085805519343,
+      "time": 0.0972139562221614,
+      "merge": 0.09074252198518068,
+      "guess": 0.14603342466275046,
+      "group": 0.14241362429288776,
+      "answer": 0.14241362429288776,
+      "make": 0.22848199048893847
+     },
+     "mood": {
+      "calm": 0.38563998958413565,
+      "warm": 0.3037532776928117,
+      "playful": 0.1342838834621117,
+      "hype": 0.176322849260941
+     },
+     "hook": {
+      "low": 0.4000000000000001,
+      "high": 0.25,
+      "mid": 0.3499999999999999
+     }
+    },
+    "stages": {
+     "reward": true,
+     "bandit": true,
+     "calibration": true,
+     "coldStart": true,
+     "bait": true
+    },
+    "version": "0.5.0"
+   }
+  },
+  {
+   "method": "observe",
+   "input": {
+    "id": "g02",
+    "dwellSec": 20,
+    "tookOver": true,
+    "runsFinished": 2,
+    "replays": 1,
+    "saved": true,
+    "liked": false,
+    "floated": false,
+    "openedBoard": false,
+    "addedFriend": false,
+    "remixed": false,
+    "social": [],
+    "with": [],
+    "quitMidRun": false,
+    "endedSession": false,
+    "day": 20800
+   },
+   "output": {
+    "g": 1,
+    "s": 0.9894363938544466,
+    "v": 0.9894363938544466,
+    "r": 5.039720770839918,
+    "hook": 0.6899744811276125,
+    "team": null
+   }
+  },
+  {
+   "method": "observe",
+   "input": {
+    "id": "g05",
+    "dwellSec": 0.6,
+    "tookOver": false,
+    "runsFinished": 0,
+    "replays": 0,
+    "saved": false,
+    "liked": false,
+    "floated": false,
+    "openedBoard": false,
+    "addedFriend": false,
+    "remixed": false,
+    "social": [],
+    "with": [],
+    "quitMidRun": false,
+    "endedSession": false,
+    "day": 20800
+   },
+   "output": {
+    "g": 0,
+    "s": null,
+    "v": 0,
+    "r": null,
+    "hook": 0.6341355910108007,
+    "team": null
+   }
+  },
+  {
+   "method": "observe",
+   "input": {
+    "id": "g04",
+    "dwellSec": 12,
+    "tookOver": true,
+    "runsFinished": 1,
+    "replays": 0,
+    "saved": false,
+    "liked": true,
+    "floated": false,
+    "openedBoard": false,
+    "addedFriend": false,
+    "remixed": false,
+    "social": [
+     "challenge_sent"
+    ],
+    "with": [
+     "u7"
+    ],
+    "quitMidRun": false,
+    "endedSession": false,
+    "day": 20800
+   },
+   "output": {
+    "g": 1,
+    "s": 0.9890130573694068,
+    "v": 0.9890130573694068,
+    "r": 5,
+    "hook": 0.13010847436299783,
+    "team": null
+   }
+  },
+  {
+   "method": "observe",
+   "input": {
+    "id": "g07",
+    "dwellSec": 9,
+    "tookOver": true,
+    "runsFinished": 0,
+    "replays": 0,
+    "saved": false,
+    "liked": false,
+    "floated": false,
+    "openedBoard": false,
+    "addedFriend": false,
+    "remixed": false,
+    "social": [],
+    "with": [],
+    "quitMidRun": true,
+    "endedSession": false,
+    "day": 20800
+   },
+   "output": {
+    "g": 1,
+    "s": 0.11920292202211755,
+    "v": 0.11920292202211755,
+    "r": -1.5,
+    "hook": 0.425557483188341,
+    "team": null
+   }
+  },
+  {
+   "method": "observe",
+   "input": {
+    "id": "g02",
+    "dwellSec": 18,
+    "tookOver": true,
+    "runsFinished": 1,
+    "replays": 2,
+    "saved": false,
+    "liked": false,
+    "floated": true,
+    "openedBoard": false,
+    "addedFriend": false,
+    "remixed": false,
+    "social": [],
+    "with": [],
+    "quitMidRun": false,
+    "endedSession": true,
+    "day": 20800
+   },
+   "output": {
+    "g": 1,
+    "s": 0.987846599717838,
+    "v": 0.987846599717838,
+    "r": 4.897918433002165,
+    "hook": 0.6912114636870808,
+    "team": null
+   }
+  },
+  {
+   "method": "signal",
+   "input": {
+    "id": "g09",
+    "kind": "challenge_accepted",
+    "with": [
+     "u3"
+    ],
+    "day": 20800
+   },
+   "output": {
+    "kind": "challenge_accepted",
+    "w": 3,
+    "s": 0.9241418199787566,
+    "mass": 0.5,
+    "item": true,
+    "taste": true
+   }
+  },
+  {
+   "method": "signal",
+   "input": {
+    "id": "g11",
+    "kind": "saved",
+    "with": [],
+    "day": 20800
+   },
+   "output": {
+    "kind": "saved",
+    "w": 3,
+    "s": 0.9241418199787566,
+    "mass": 0.5,
+    "item": true,
+    "taste": true
+   }
+  },
+  {
+   "method": "rank",
+   "input": {
+    "candidates": [
+     {
+      "gameID": "g00",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g01",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g02",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g03",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g04",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g05",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g06",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g07",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g08",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g09",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g10",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g11",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g12",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g13",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     }
+    ],
+    "summaries": [
+     {
+      "id": "g00",
+      "formula": "dodge",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "glow",
+      "scope": "everyone",
+      "isDaily": true,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 25
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 25
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 25
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 25
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 25
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g01",
+      "formula": "time",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "paper",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g02",
+      "formula": "merge",
+      "mood": [
+       "playful"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "pixel",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 27
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 27
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 27
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 27
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 27
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": null
+     },
+     {
+      "id": "g03",
+      "formula": "guess",
+      "mood": [
+       "hype"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "neon",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": null
+     },
+     {
+      "id": "g04",
+      "formula": "group",
+      "mood": [
+       "calm",
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "ink",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 29
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 29
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 29
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 29
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 29
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g05",
+      "formula": "answer",
+      "mood": [
+       "playful",
+       "hype"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "clay",
+      "scope": "event",
+      "isDaily": true,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": null
+     },
+     {
+      "id": "g06",
+      "formula": "make",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "riso",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 31
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 31
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 31
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 31
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 31
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": null
+     },
+     {
+      "id": "g07",
+      "formula": "dodge",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "chalk",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g08",
+      "formula": "time",
+      "mood": [
+       "playful"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "glow",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 33
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 33
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 33
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 33
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 33
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g09",
+      "formula": "merge",
+      "mood": [
+       "hype"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "paper",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": null
+     },
+     {
+      "id": "g10",
+      "formula": "guess",
+      "mood": [
+       "calm",
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "pixel",
+      "scope": "group",
+      "isDaily": true,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 35
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 35
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 35
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 35
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 35
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g11",
+      "formula": "group",
+      "mood": [
+       "playful",
+       "hype"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "neon",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": null
+     },
+     {
+      "id": "g12",
+      "formula": "answer",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "ink",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 37
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 37
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 37
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 37
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 37
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g13",
+      "formula": "make",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "clay",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": "grp1"
+     }
+    ],
+    "feed": [
+     "g10",
+     "g11",
+     "g08",
+     "g12",
+     "g07",
+     "g06"
+    ],
+    "feedKeys": [
+     "g10|popular|-",
+     "g11|popular|-",
+     "g08|popular|-",
+     "g12|popular|-",
+     "g07|popular|-",
+     "g06|popular|-"
+    ],
+    "count": 5,
+    "seed": 12,
+    "day": 20800,
+    "now": 1794000000000
+   },
+   "output": {
+    "picks": [
+     {
+      "gameID": "g09",
+      "reason": "popular",
+      "runUserID": null,
+      "score": 5.155499215079262,
+      "rel": 0.9942654743671615,
+      "kl": 0.6564471540968687,
+      "grab": 0.4523441779770923,
+      "sat": 0.5848283639957513,
+      "hook": 0.52497918747894,
+      "tier": "mid",
+      "pSlop": 0.18631105960516245,
+      "unproven": true,
+      "parts": {
+       "quality": 5.636205361438475,
+       "taste": 0.1475923620013892,
+       "bait": -0.11773453427954916,
+       "slop": -0.5105639740810538,
+       "reason": 0,
+       "muse": 0
+      },
+      "why": "new, still testing · held back: may be low quality",
+      "museWhy": null
+     },
+     {
+      "gameID": "g04",
+      "reason": "new",
+      "runUserID": null,
+      "score": 12.75880314587317,
+      "rel": 0.9999971231252888,
+      "kl": 0.5337394848114122,
+      "grab": 0.454528220359386,
+      "sat": 0.7978015614365578,
+      "hook": 0.14039248478347846,
+      "tier": "low",
+      "pSlop": 0.0031569843248042944,
+      "unproven": true,
+      "parts": {
+       "quality": 10.725265070373274,
+       "taste": 0.12410590362268838,
+       "bait": 1.6949399720522724,
+       "slop": -0.008651351489275792,
+       "reason": 0.22314355131420976,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     },
+     {
+      "gameID": "g00",
+      "reason": "new",
+      "runUserID": null,
+      "score": 4.553384501118089,
+      "rel": 0.989578256469837,
+      "kl": 0.530766286315857,
+      "grab": 0.3310855852684511,
+      "sat": 0.7499986874533455,
+      "hook": 0.2689414213699951,
+      "tier": "low",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": 3.5344605213396916,
+       "taste": -0.0168690562612735,
+       "bait": 1.0890496005618113,
+       "slop": -0.05325656452214052,
+       "reason": 0,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     },
+     {
+      "gameID": "g10",
+      "reason": "popular",
+      "runUserID": null,
+      "score": 5.241488930738917,
+      "rel": 0.9947354907433437,
+      "kl": 0.5485879747911976,
+      "grab": 0.3072873373410757,
+      "sat": 0.7499986874533455,
+      "hook": 0.2141650169574414,
+      "tier": "low",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": 4.219815379313128,
+       "taste": 0.12839151472594496,
+       "bait": 1.3472275124117254,
+       "slop": -0.05325656452214052,
+       "reason": 0.22314355131420976,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     },
+     {
+      "gameID": "g06",
+      "reason": "popular",
+      "runUserID": null,
+      "score": 3.0013803781229687,
+      "rel": 0.9526364487513298,
+      "kl": 0.47530527995607563,
+      "grab": 0.2644495928308373,
+      "sat": 0.7499986874533455,
+      "hook": 0.10909682119561298,
+      "tier": "low",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": 1.7952555940635828,
+       "taste": 0.04076782505283549,
+       "bait": 1.8424459860326414,
+       "slop": -0.05325656452214052,
+       "reason": 0,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     }
+    ],
+    "bait": {
+     "lean": -2.3566526008664477,
+     "tolerance": 0.08653843888269333,
+     "appetite": -0.9566526008664478,
+     "fatigue": 1,
+     "popGrabSlope": 0.2347776545647926,
+     "popSatSlope": 0.0032958609419079794
+    },
+    "targets": {
+     "formula": {
+      "dodge": 0.09262066558535409,
+      "time": 0.025525885452008297,
+      "merge": 0.33991895839623026,
+      "guess": 0.06659736886049407,
+      "group": 0.22044906417507903,
+      "answer": 0.06364325626613,
+      "make": 0.1912448012647042
+     },
+     "mood": {
+      "calm": 0.3574481673001975,
+      "warm": 0.2564731934698587,
+      "playful": 0.3416681229221251,
+      "hype": 0.04441051630781872
+     },
+     "hook": {
+      "low": 0.8186464375197143,
+      "high": 0.06693267923355481,
+      "mid": 0.11442088324673089
+     }
+    },
+    "stages": {
+     "reward": true,
+     "bandit": true,
+     "calibration": true,
+     "coldStart": true,
+     "bait": true
+    },
+    "version": "0.5.0"
+   }
+  },
+  {
+   "method": "rank",
+   "input": {
+    "candidates": [
+     {
+      "gameID": "g00",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g01",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g02",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g03",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g04",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g05",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g06",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g07",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g08",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g09",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g10",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     },
+     {
+      "gameID": "g11",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.5
+     },
+     {
+      "gameID": "g12",
+      "reason": "new",
+      "runUserID": null,
+      "weight": 1
+     },
+     {
+      "gameID": "g13",
+      "reason": "popular",
+      "runUserID": null,
+      "weight": 1.25
+     }
+    ],
+    "summaries": [
+     {
+      "id": "g00",
+      "formula": "dodge",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "glow",
+      "scope": "everyone",
+      "isDaily": true,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 25
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 25
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 25
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 25
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 25
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g01",
+      "formula": "time",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "paper",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g02",
+      "formula": "merge",
+      "mood": [
+       "playful"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "pixel",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 27
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 27
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 27
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 27
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 27
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": null
+     },
+     {
+      "id": "g03",
+      "formula": "guess",
+      "mood": [
+       "hype"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "neon",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": null
+     },
+     {
+      "id": "g04",
+      "formula": "group",
+      "mood": [
+       "calm",
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "ink",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 29
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 29
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 29
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 29
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 29
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g05",
+      "formula": "answer",
+      "mood": [
+       "playful",
+       "hype"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "clay",
+      "scope": "event",
+      "isDaily": true,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": null
+     },
+     {
+      "id": "g06",
+      "formula": "make",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "riso",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 31
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 31
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 31
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 31
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 31
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": null
+     },
+     {
+      "id": "g07",
+      "formula": "dodge",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "chalk",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g08",
+      "formula": "time",
+      "mood": [
+       "playful"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "glow",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 33
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 33
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 33
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 33
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 33
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g09",
+      "formula": "merge",
+      "mood": [
+       "hype"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "paper",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": null
+     },
+     {
+      "id": "g10",
+      "formula": "guess",
+      "mood": [
+       "calm",
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "pixel",
+      "scope": "group",
+      "isDaily": true,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 35
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 35
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 35
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 35
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 35
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g11",
+      "formula": "group",
+      "mood": [
+       "playful",
+       "hype"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "neon",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": null
+     },
+     {
+      "id": "g12",
+      "formula": "answer",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "ink",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 37
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 37
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 37
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 37
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 37
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g13",
+      "formula": "make",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "clay",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": "grp1"
+     }
+    ],
+    "feed": [
+     "g10",
+     "g11",
+     "g08",
+     "g12",
+     "g07",
+     "g06",
+     "g09",
+     "g04",
+     "g00",
+     "g10",
+     "g06"
+    ],
+    "feedKeys": [
+     "g10|popular|-",
+     "g11|popular|-",
+     "g08|popular|-",
+     "g12|popular|-",
+     "g07|popular|-",
+     "g06|popular|-",
+     "g09|popular|-",
+     "g04|popular|-",
+     "g00|popular|-",
+     "g10|popular|-",
+     "g06|popular|-"
+    ],
+    "count": 5,
+    "seed": 13,
+    "day": 20800,
+    "now": 1794000000000
+   },
+   "output": {
+    "picks": [
+     {
+      "gameID": "g02",
+      "reason": "popular",
+      "runUserID": null,
+      "score": 1.9540679391283797,
+      "rel": 0.8758895321249575,
+      "kl": 0.34872067070974844,
+      "grab": 0.7207846839768659,
+      "sat": 0.8295462905642778,
+      "hook": 0.6953141292894591,
+      "tier": "high",
+      "pSlop": 0.000370360882772847,
+      "unproven": true,
+      "parts": {
+       "quality": 2.067858377219376,
+       "taste": 0.40233448664324206,
+       "bait": -0.920575101551939,
+       "slop": -0.0010149312904634059,
+       "reason": 0.4054651081081644,
+       "muse": 0
+      },
+      "why": "new, still testing · like what you play",
+      "museWhy": null
+     },
+     {
+      "gameID": "g04",
+      "reason": "new",
+      "runUserID": null,
+      "score": 5.124256373037861,
+      "rel": 0.9940845598905773,
+      "kl": 0.3565140881277865,
+      "grab": 0.454528220359386,
+      "sat": 0.7978015614365578,
+      "hook": 0.14039248478347846,
+      "tier": "low",
+      "pSlop": 0.0031569843248042944,
+      "unproven": true,
+      "parts": {
+       "quality": 3.714550760041917,
+       "taste": 0.12410590362268838,
+       "bait": 1.6949399720522724,
+       "slop": -0.008651351489275792,
+       "reason": 0.22314355131420976,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     },
+     {
+      "gameID": "g12",
+      "reason": "new",
+      "runUserID": null,
+      "score": 2.8990193689605404,
+      "rel": 0.9477979395346781,
+      "kl": 0.3565140881277865,
+      "grab": 0.2727042938125147,
+      "sat": 0.7499986874533455,
+      "hook": 0.13010847436299783,
+      "tier": "low",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": 1.8400941940517115,
+       "taste": -0.0073974499268786385,
+       "bait": 1.743411651861799,
+       "slop": -0.05325656452214052,
+       "reason": 0,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     },
+     {
+      "gameID": "g11",
+      "reason": "popular",
+      "runUserID": null,
+      "score": 4.547197078651107,
+      "rel": 0.9895142510900126,
+      "kl": 0.31767632867328355,
+      "grab": 0.5067768662770391,
+      "sat": 0.5848283639957513,
+      "hook": 0.6341355910108007,
+      "tier": "mid",
+      "pSlop": 0.18631105960516245,
+      "unproven": true,
+      "parts": {
+       "quality": 5.7330037005425325,
+       "taste": 0.17534668543413692,
+       "bait": -0.6322219788487233,
+       "slop": -0.5105639740810538,
+       "reason": 0.4054651081081644,
+       "muse": 0
+      },
+      "why": "new, still testing · held back: may be low quality",
+      "museWhy": null
+     },
+     {
+      "gameID": "g00",
+      "reason": "new",
+      "runUserID": null,
+      "score": 2.8559411552768346,
+      "rel": 0.9456249773832733,
+      "kl": 0.3846467801615737,
+      "grab": 0.3310855852684511,
+      "sat": 0.7499986874533455,
+      "hook": 0.2689414213699951,
+      "tier": "low",
+      "pSlop": 0.01943397394011099,
+      "unproven": true,
+      "parts": {
+       "quality": 2.4608496380023883,
+       "taste": -0.0168690562612735,
+       "bait": 1.0890496005618113,
+       "slop": -0.05325656452214052,
+       "reason": 0,
+       "muse": 0
+      },
+      "why": "new, still testing · hooky, and hooky works for you",
+      "museWhy": null
+     }
+    ],
+    "bait": {
+     "lean": -2.3566526008664477,
+     "tolerance": 0.08653843888269333,
+     "appetite": -0.9566526008664478,
+     "fatigue": 1,
+     "popGrabSlope": 0.2347776545647926,
+     "popSatSlope": 0.0032958609419079794
+    },
+    "targets": {
+     "formula": {
+      "dodge": 0.09262066558535409,
+      "time": 0.025525885452008297,
+      "merge": 0.33991895839623026,
+      "guess": 0.06659736886049407,
+      "group": 0.22044906417507903,
+      "answer": 0.06364325626613,
+      "make": 0.1912448012647042
+     },
+     "mood": {
+      "calm": 0.3574481673001975,
+      "warm": 0.2564731934698587,
+      "playful": 0.3416681229221251,
+      "hype": 0.04441051630781872
+     },
+     "hook": {
+      "low": 0.8186464375197143,
+      "high": 0.06693267923355481,
+      "mid": 0.11442088324673089
+     }
+    },
+    "stages": {
+     "reward": true,
+     "bandit": true,
+     "calibration": true,
+     "coldStart": true,
+     "bait": true
+    },
+    "version": "0.5.0"
+   }
+  },
+  {
+   "method": "groupBlend",
+   "input": {
+    "group": {
+     "id": "grp1",
+     "name": "New in SF"
+    },
+    "members": [
+     {
+      "id": "me",
+      "name": "You",
+      "isMe": true,
+      "isFriend": true,
+      "skill": {
+       "overall": 0.6,
+       "byFormula": {}
+      }
+     },
+     {
+      "id": "u1",
+      "name": "Maya",
+      "isMe": false,
+      "isFriend": true,
+      "skill": {
+       "overall": 0.62,
+       "byFormula": {
+        "dodge": 0.7
+       }
+      },
+      "hints": {
+       "bio": "coffee walks and trivia"
+      }
+     },
+     {
+      "id": "u2",
+      "name": "Diego",
+      "isMe": false,
+      "isFriend": false,
+      "skill": {
+       "overall": 0.4,
+       "byFormula": {}
+      }
+     }
+    ],
+    "summaries": [
+     {
+      "id": "g00",
+      "formula": "dodge",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "glow",
+      "scope": "everyone",
+      "isDaily": true,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 25
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 25
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 25
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 25
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 25
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g01",
+      "formula": "time",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "paper",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g02",
+      "formula": "merge",
+      "mood": [
+       "playful"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "pixel",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 27
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 27
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 27
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 27
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 27
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": null
+     },
+     {
+      "id": "g03",
+      "formula": "guess",
+      "mood": [
+       "hype"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "neon",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": null
+     },
+     {
+      "id": "g04",
+      "formula": "group",
+      "mood": [
+       "calm",
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "ink",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 29
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 29
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 29
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 29
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 29
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g05",
+      "formula": "answer",
+      "mood": [
+       "playful",
+       "hype"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "clay",
+      "scope": "event",
+      "isDaily": true,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": null
+     },
+     {
+      "id": "g06",
+      "formula": "make",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "riso",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 31
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 31
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 31
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 31
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 31
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": null
+     },
+     {
+      "id": "g07",
+      "formula": "dodge",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "chalk",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g08",
+      "formula": "time",
+      "mood": [
+       "playful"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "glow",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 33
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 33
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 33
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 33
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 33
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g09",
+      "formula": "merge",
+      "mood": [
+       "hype"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "paper",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": null
+     },
+     {
+      "id": "g10",
+      "formula": "guess",
+      "mood": [
+       "calm",
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "pixel",
+      "scope": "group",
+      "isDaily": true,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 35
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 35
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 35
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 35
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 35
+       }
+      ],
+      "creatorID": "u2",
+      "groupID": "grp1"
+     },
+     {
+      "id": "g11",
+      "formula": "group",
+      "mood": [
+       "playful",
+       "hype"
+      ],
+      "energy": "high",
+      "competition": "high",
+      "look": "neon",
+      "scope": "event",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u3",
+      "groupID": null
+     },
+     {
+      "id": "g12",
+      "formula": "answer",
+      "mood": [
+       "calm"
+      ],
+      "energy": "low",
+      "competition": "light",
+      "look": "ink",
+      "scope": "everyone",
+      "isDaily": false,
+      "bots": [
+       {
+        "skill": 0.2,
+        "score": 26,
+        "sec": 37
+       },
+       {
+        "skill": 0.4,
+        "score": 43,
+        "sec": 37
+       },
+       {
+        "skill": 0.6,
+        "score": 60,
+        "sec": 37
+       },
+       {
+        "skill": 0.8,
+        "score": 77,
+        "sec": 37
+       },
+       {
+        "skill": 0.95,
+        "score": 90,
+        "sec": 37
+       }
+      ],
+      "creatorID": "u0",
+      "groupID": null
+     },
+     {
+      "id": "g13",
+      "formula": "make",
+      "mood": [
+       "cozy"
+      ],
+      "energy": "medium",
+      "competition": "friendly",
+      "look": "clay",
+      "scope": "group",
+      "isDaily": false,
+      "bots": [],
+      "creatorID": "u1",
+      "groupID": "grp1"
+     }
+    ],
+    "feed": [],
+    "count": 4,
+    "day": 20800
+   },
+   "output": {
+    "picks": [
+     {
+      "gameID": "g10",
+      "label": "Everyone's pick",
+      "why": "you all lean calm guessing",
+      "score": 0.7139794001618565,
+      "everyone": 0.8255487419714118,
+      "minEnjoy": 0.7848344782733118,
+      "skillPlus": 0.20568637213453883,
+      "fairPlus": 0,
+      "perMember": {
+       "me": 0.8295478345966908,
+       "u1": 0.8641888371428235,
+       "u2": 0.7848344782733118
+      }
+     },
+     {
+      "gameID": "g04",
+      "label": "Everyone's pick",
+      "why": "you all lean calm sorting, and you're evenly matched",
+      "score": 0.5618573903210375,
+      "everyone": 0.8165077534530216,
+      "minEnjoy": 0.7527718765320378,
+      "skillPlus": 0.340950148534362,
+      "fairPlus": 0.023626112441319583,
+      "perMember": {
+       "me": 0.9409438260018653,
+       "u1": 0.7527718765320378,
+       "u2": 0.7685176689238981
+      }
+     },
+     {
+      "gameID": "g02",
+      "label": "Everyone's pick",
+      "why": "you all lean playful merge",
+      "score": 0.1855631294541892,
+      "everyone": 0.7392886301598843,
+      "minEnjoy": 0.6203567649195431,
+      "skillPlus": 0.1513559363957237,
+      "fairPlus": 0.036274058792502985,
+      "perMember": {
+       "me": 0.9041178270127626,
+       "u1": 0.6203567649195431,
+       "u2": 0.7204030221520419
+      }
+     },
+     {
+      "gameID": "g06",
+      "label": "Everyone's pick",
+      "why": "you all lean calm making",
+      "score": 0.21220283397247708,
+      "everyone": 0.8513181905419203,
+      "minEnjoy": 0.8239233449794547,
+      "skillPlus": 0,
+      "fairPlus": 0.07317215233574619,
+      "perMember": {
+       "me": 0.8239233449794547,
+       "u1": 0.8702430571443882,
+       "u2": 0.8604950262400571
+      }
+     }
+    ],
+    "spec": {
+     "formula": "guess",
+     "look": "riso",
+     "mood": [
+      "playful",
+      "calm"
+     ],
+     "energy": "low",
+     "competition": "friendly",
+     "intent": "a game everyone in New in SF can enjoy together",
+     "audience": "group:grp1",
+     "contentSources": [
+      "group:grp1"
+     ],
+     "themes": [],
+     "evenlyMatched": true,
+     "contributions": [
+      {
+       "userID": "me",
+       "name": "you",
+       "brings": {
+        "kind": "formula",
+        "key": "merge",
+        "words": "the strategy"
+       }
+      },
+      {
+       "userID": "u1",
+       "name": "Maya",
+       "brings": {
+        "kind": "formula",
+        "key": "guess",
+        "words": "the guesswork"
+       }
+      },
+      {
+       "userID": "u2",
+       "name": "Diego",
+       "brings": {
+        "kind": "formula",
+        "key": "time",
+        "words": "the timing"
+       }
+      }
+     ],
+     "why": "You all like playful and calm guessing games; you bring the strategy; Diego brings the timing",
+     "prompt": "Make a playful and calm guessing game for everyone in New in SF, in the riso look. You bring the strategy; Diego brings the timing. Keep the energy low and make it a fair head-to-head: they play at a similar level."
+    },
+    "cohesion": 0.6006600768774456,
+    "twins": [],
+    "members": [
+     {
+      "id": "me",
+      "name": "You",
+      "isMe": true,
+      "synthetic": false,
+      "lean": -2.3566526008664477,
+      "topFormula": "merge",
+      "topMood": "playful"
+     },
+     {
+      "id": "u1",
+      "name": "Maya",
+      "isMe": false,
+      "synthetic": true,
+      "lean": -0.989500953548007,
+      "topFormula": "guess",
+      "topMood": "hype"
+     },
+     {
+      "id": "u2",
+      "name": "Diego",
+      "isMe": false,
+      "synthetic": true,
+      "lean": -0.9255876275069929,
+      "topFormula": "time",
+      "topMood": "calm"
+     }
+    ],
+    "aggregate": "geometric",
+    "version": "0.5.0"
+   }
+  },
+  {
+   "method": "profile",
+   "input": null,
+   "output": {
+    "id": "me",
+    "name": "You",
+    "isMe": true,
+    "isFriend": false,
+    "synthetic": false,
+    "n": 5,
+    "formula": {
+     "dodge": 0.0913989706899395,
+     "time": 0.07182193743109254,
+     "merge": 0.3903114968511157,
+     "guess": 0.07182193743109254,
+     "group": 0.23100178273457456,
+     "answer": 0.07182193743109254,
+     "make": 0.07182193743109254
+    },
+    "mood": {
+     "calm": 0.20527831315615294,
+     "warm": 0.22485534641499993,
+     "playful": 0.44417794992443516,
+     "hype": 0.12568839050441197
+    },
+    "look": {
+     "glow": 0.06284419525220598,
+     "paper": 0.06284419525220598,
+     "pixel": 0.3813337546722292,
+     "neon": 0.06284419525220598,
+     "ink": 0.22202404055568797,
+     "clay": 0.06284419525220598,
+     "riso": 0.06284419525220598,
+     "chalk": 0.08242122851105294
+    },
+    "hook": {
+     "low": 0.32676436597603126,
+     "mid": 0.18716155393139625,
+     "high": 0.48607408009257247
+    },
+    "lean": -2.3566526008664477,
+    "taste": [
+     -0.5240718215342586,
+     0,
+     1.271572242031012,
+     0,
+     0.6186030468830478,
+     -0.9030318818883193,
+     0,
+     0.2325410170950252,
+     -0.2915308044392333,
+     0.7432957947403539,
+     -0.22123442190466355,
+     0.1075096737248478,
+     -0.0767605063464987,
+     0,
+     0.1535210126929974,
+     1.1180512293380147,
+     0.1535210126929974,
+     0.4650820341900504,
+     -0.9030318818883193,
+     0,
+     -0.5240718215342586,
+     0.1535210126929974,
+     -0.05898978734420812,
+     0.368540360142693
+    ],
+    "skill": {
+     "overall": 0.5,
+     "byFormula": {
+      "dodge": 0.5,
+      "time": 0.5,
+      "merge": 0.5,
+      "guess": 0.5,
+      "group": 0.5,
+      "answer": 0.5,
+      "make": 0.5
+     }
+    },
+    "themes": []
+   }
+  },
+  {
+   "method": "debugSummary",
+   "input": null,
+   "output": {
+    "version": "0.5.0",
+    "stages": {
+     "reward": true,
+     "bandit": true,
+     "calibration": true,
+     "coldStart": true,
+     "bait": true
+    },
+    "bait": {
+     "lean": -2.3566526008664477,
+     "tolerance": 0.08653843888269333,
+     "appetite": -0.9566526008664478,
+     "fatigue": 1,
+     "popGrabSlope": 0.2347776545647926,
+     "popSatSlope": 0.0032958609419079794
+    },
+    "pages": 5,
+    "items": 6,
+    "interleave": null,
+    "muse": null
+   }
+  }
+ ]
+}

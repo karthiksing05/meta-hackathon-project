@@ -233,6 +233,7 @@ type genLine struct {
 	Manifest json.RawMessage `json:"manifest"` // kept as the exact bytes: the game inside is text whose key order matters
 	Stats    map[string]any  `json:"stats"`
 	Gate     map[string]any  `json:"gate"`
+	Bots     []model.BotRun  `json:"bots"` // the playtest bots' runs, kept for the recommender
 	Message  string          `json:"message"`
 }
 
@@ -353,7 +354,7 @@ func (s *Server) finishJob(ctx context.Context, job model.Job, owner model.User,
 		s.failJob(ctx, job.ID, "Couldn't save the game.")
 		return
 	}
-	g, perr := s.publishPackage(context.WithoutCancel(ctx), &owner, &zb)
+	g, perr := s.publishPackage(context.WithoutCancel(ctx), &owner, &zb, l.Bots)
 	if perr != nil {
 		if perr.Err != nil {
 			log.Error("generate: could not publish", "err", perr.Err)

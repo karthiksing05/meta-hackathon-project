@@ -226,7 +226,10 @@ func (s *Server) feedEvents(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
-	writeJSON(w, 202, map[string]int{"accepted": added, "duplicates": len(evs) - added})
+	if u != nil { // a signed-in person's model learns from what happened
+		s.learnFromEvents(r.Context(), u.ID, added)
+	}
+	writeJSON(w, 202, map[string]int{"accepted": len(added), "duplicates": len(evs) - len(added)})
 }
 
 // parseSince reads ?since= as RFC3339 or unix milliseconds. Empty means the beginning.

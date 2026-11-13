@@ -15,6 +15,7 @@ import (
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/config"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/pkgstore"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/recs"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/store"
 )
 
@@ -53,11 +54,22 @@ func run(log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	var engine *recs.Engine
+	if cfg.RecsRuntimes > 0 {
+		opts := recs.Options{Runtimes: cfg.RecsRuntimes}
+		if cfg.RecsInterleave != "" {
+			opts.Overrides = map[string]any{"interleave": map[string]any{"on": true, "against": cfg.RecsInterleave}}
+		}
+		if engine, err = recs.New(opts); err != nil {
+			return err
+		}
+		log.Info("recommender loaded", "version", engine.Version(), "runtimes", cfg.RecsRuntimes, "interleave", cfg.RecsInterleave)
+	}
 	srv := api.New(api.Options{
 		Store: st, Packages: pk, Signer: auth.NewSigner(cfg.JWTSecret, cfg.AccessTTL),
 		RefreshTTL: cfg.RefreshTTL, GamesBaseURL: cfg.GamesBaseURL, CORSOrigins: cfg.CORSOrigins,
 		MaxUploadMB: cfg.MaxUploadMB, Log: log,
-		GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
+		Recs: engine, GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
 	})
 	if n, err := st.FailStaleJobs(ctx, "The server restarted while this game was being made. Please try again."); err != nil {
 		log.Warn("could not clear stale generation jobs", "err", err)

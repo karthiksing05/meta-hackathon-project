@@ -18,6 +18,7 @@ import (
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/model"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/pkgstore"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/recs"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/store"
 )
 
@@ -31,6 +32,9 @@ type Options struct {
 	MaxUploadMB  int64
 	Log          *slog.Logger
 
+	// Recs runs the recommender (nil turns ranking off).
+	Recs *recs.Engine
+
 	// Game generation: GeneratorURL is the internal generator service (empty turns it off).
 	GeneratorURL       string
 	GenerateConcurrent int
@@ -42,7 +46,11 @@ type Server struct {
 	authLimiter *limiter
 	genSem      chan struct{} // one slot per job running at once
 	genHealth   genHealthCache
+	recsLocks   userLocks
 }
+
+// recsSession is one person's loaded recommender state (see internal/recs).
+type recsSession = *recs.Session
 
 func New(o Options) *Server {
 	if o.Log == nil {
@@ -89,6 +97,11 @@ func (s *Server) Handler() http.Handler {
 			r.Get("/leaderboard", s.leaderboard)
 			r.With(s.requireAuth).Post("/scores", s.submitScore)
 		})
+
+		// Ranking: the recommender runs on the server, so the app asks what to show and reports what happened.
+		r.With(s.requireAuth).Post("/me/feed", s.myFeed)
+		r.With(s.requireAuth).Get("/me/recs", s.myRecs)
+		r.With(s.requireAuth).Post("/blend", s.blend)
 
 		// Making a game: the app sends a request, the backend runs Muse, checks, playtests and stores it.
 		r.Route("/generate", func(r chi.Router) {

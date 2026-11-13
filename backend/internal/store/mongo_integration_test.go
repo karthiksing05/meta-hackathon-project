@@ -137,11 +137,11 @@ func TestMongoEventLog(t *testing.T) {
 		page("4", "u:2", "s1", "B"), // same session name, other person: control wins
 		{ID: "u:2|5", Actor: "u:2", GameID: "fog", Kind: "remix", SocialMoment: true, Credit: true, CreatedAt: now},
 	}
-	if n, err := m.AddEvents(ctx, evs); err != nil || n != 5 {
-		t.Fatalf("add: %d %v", n, err)
+	if n, err := m.AddEvents(ctx, evs); err != nil || len(n) != 5 {
+		t.Fatalf("add: %d %v", len(n), err)
 	}
-	if n, err := m.AddEvents(ctx, evs); err != nil || n != 0 { // a resent batch is a no-op
-		t.Fatalf("resend: %d %v", n, err)
+	if n, err := m.AddEvents(ctx, evs); err != nil || len(n) != 0 { // a resent batch is a no-op
+		t.Fatalf("resend: %d %v", len(n), err)
 	}
 	if g, _ := m.GameByID(ctx, id); g.Plays != 4 || g.Finishes != 4 { // slug events reach the counters once
 		t.Fatalf("counters: plays %d finishes %d", g.Plays, g.Finishes)
@@ -236,5 +236,36 @@ func TestMongoJobs(t *testing.T) {
 	}
 	if err := m.SetJobStatus(ctx, "nope", model.JobDone, model.JobUpdate{}); err != store.ErrNotFound {
 		t.Fatalf("missing job: %v", err)
+	}
+}
+
+// Recommender state: one record per person, replaced as a whole.
+func TestMongoRecsState(t *testing.T) {
+	uri := os.Getenv("MONGO_TEST_URI")
+	if uri == "" {
+		t.Skip("MONGO_TEST_URI not set")
+	}
+	ctx := context.Background()
+	m, err := store.ConnectMongo(ctx, uri, "bubbles_test_recs_"+time.Now().Format("150405"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.Close(ctx)
+	defer m.DropDatabase(ctx)
+	if _, err := m.GetRecs(ctx, "u1"); err != store.ErrNotFound {
+		t.Fatalf("no record yet: %v", err)
+	}
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	r := &model.RecsRecord{UserID: "u1", State: `{"v":1}`, Feed: []string{"a", "b"}, FeedKeys: []string{"a|popular|-", "b|new|-"}, FeedSession: "s1", FeedAt: now, UpdatedAt: now}
+	if err := m.PutRecs(ctx, r); err != nil {
+		t.Fatal(err)
+	}
+	r.State, r.Feed = `{"v":1,"x":2}`, []string{"a", "b", "c"}
+	if err := m.PutRecs(ctx, r); err != nil { // upsert replaces
+		t.Fatal(err)
+	}
+	got, err := m.GetRecs(ctx, "u1")
+	if err != nil || got.State != `{"v":1,"x":2}` || len(got.Feed) != 3 || got.FeedSession != "s1" || len(got.FeedKeys) != 2 {
+		t.Fatalf("record: %+v %v", got, err)
 	}
 }
