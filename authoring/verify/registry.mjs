@@ -12,7 +12,7 @@
 //   L_  layout, measured on drawn frames        (checks/layout.mjs, checks/targets.mjs)
 //   S_  style tokens and the tree, before play  (the UI kit's style-check.mjs, via checks/style.mjs)
 //   R_  the person's requirements               (requirements-check.mjs, via checks/requirements.mjs)
-//   F_  fill: empty or crowded screens          (reserved for the fill check)
+//   F_  fill: bleed bands, background, HUD band (fill-check.mjs, via checks/fill.mjs)
 //   V_  visual identity (V_SPRITE_DUP: two different things drawn with the same sprite)
 //                                               (reserved for the sprite-distinctness check)
 
@@ -27,7 +27,7 @@ export const FAMILIES = {
   L: 'layout on drawn frames',
   S: 'style tokens and tree',
   R: 'requirements',
-  F: 'fill (reserved)',
+  F: 'fill (checks/fill.mjs → playtest/fill-check.mjs)',
   V: 'visual identity (reserved: V_SPRITE_DUP)',
 };
 
