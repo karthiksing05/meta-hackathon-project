@@ -1,11 +1,11 @@
 # Slide outline (draft 6)
 
-*Follows [../narrative.md](../narrative.md) point by point. 5-minute demo plus 3 minutes of Q&A: 10 slides, timed in [notes.md](notes.md) (200 s of talk, 95 s of demo, 5 s of slack).*
+*Follows [../narrative.md](../narrative.md) point by point. 5-minute demo plus 3 minutes of Q&A: 10 slides, timed in [notes.md](notes.md) (190 s of talk, 95 s of demo, 15 s of slack).*
 
 | # | Slide | Narrative point | Demo beat |
 |---|---|---|---|
 | 1 | Title: **Muse** (plain) **Curios** (gradient); tagline "When the world is your muse, how will you create the content of tomorrow?" | — | **Demo 1 starts** |
-| 2 | Definition: cu·rio \ ˈkyu̇r-ē-ˌō \ noun, plural curios. 1. Merriam-Webster's sense; 2. a Muse Curio (ours). ~10 s | — | |
+| 2 | Definition: cu·rio \ ˈkyu̇r-ē-ˌō \ noun, plural curios. 1. Merriam-Webster's sense; 2. Curio (Muse Curios), ours. ~10 s | — | |
 | 3 | Short-form you play: drawings of two Instagram Reel formats (guess what they say; place your finger here), a LinkedIn daily puzzle and an NYT word grid, each with a cited stat; 98% play vs 33% / 9% "gamers" | 1, 2 | |
 | 4 | Anyone can make one: sentence → Muse agrees → 5 bots → share; about a minute to build once planned | 2 | (Demo 1 still building) |
 | 5 | The AI stack: Spark, Ember, Wonder, Image; the harness and the gate; server vs phone | 3 | |

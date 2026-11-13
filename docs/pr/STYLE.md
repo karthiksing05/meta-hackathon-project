@@ -10,9 +10,10 @@
 | One game we make | **a Curio** (capital C) | "Make a Curio", "Fog Chase, a Curio by Dev", "Today's Curio in your Group" |
 | Where only one word fits (a tab, a button, a chip) | **Curios** | the Curios tab |
 | The dictionary word (slide 2 only) | curio (lower case) | "cu·rio, noun" |
+| The definition slide's sense 2 | **Curio** *(Muse Curios)* | "Curio (Muse Curios) : a tiny game anyone makes…" |
 
 - Capitalize **Curio** whenever it means our game. "game" stays fine as the ordinary word for the category: "a Curio is a tiny game".
-- **Don't write** "Whims", "Whim", "Bubbles", "Bubble" or "Muse Games" as the product. They survive only in code names (`Bubble*`, `docs/BUBBLES.md`, `FB_TAB=bubbles`) and in quotes about the naming history. Never "pop in", "blow a bubble" or "on a whim" puns.
+- **Don't write** "Whims", "Whim", "Bubbles", "Bubble", "Muse Games" or a singular "Muse Curio" as the product. They survive only in code names (`Bubble*`, `docs/BUBBLES.md`, `FB_TAB=bubbles`) and in quotes about the naming history. Never "pop in", "blow a bubble" or "on a whim" puns.
 - Meta's models are **Muse Spark**, **Muse Ember**, **Muse Wonder** and **Muse Image**. "Muse" alone means the models, never our feature.
 
 ## Tagline
