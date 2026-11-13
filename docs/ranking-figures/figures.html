@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Games feed ranking: the benchmark in pictures</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface-1: #fcfcfb;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --s-formula: #2a78d6; --s-ctr: #eb6834; --s-eg: #1baf7a; --s-pop: #eda100; --s-today: #e87ba4;
+  --pos: #2a78d6; --neg: #e34948; --alt: #a8a69e; --ns: #a8a69e;
+  --good-text: #006300;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface-1: #1a1a19;
+    --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+    --s-formula: #3987e5; --s-ctr: #d95926; --s-eg: #199e70; --s-pop: #c98500; --s-today: #d55181;
+    --pos: #3987e5; --neg: #e66767; --alt: #6f6e68; --ns: #6f6e68;
+    --good-text: #0ca30c;
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface-1: #1a1a19;
+  --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --s-formula: #3987e5; --s-ctr: #d95926; --s-eg: #199e70; --s-pop: #c98500; --s-today: #d55181;
+  --pos: #3987e5; --neg: #e66767; --alt: #6f6e68; --ns: #6f6e68;
+  --good-text: #0ca30c;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--page); }
+.viz-root { background: var(--page); color: var(--text-primary); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.45; }
+.wrap { max-width: 940px; margin: 0 auto; padding: 32px 20px 64px; }
+h1 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; font-weight: 650; letter-spacing: -0.01em; }
+.lede { color: var(--text-secondary); font-size: 16px; margin: 0 0 24px; max-width: 760px; }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0 0 28px; }
+.tile { background: var(--surface-1); border: 1px solid var(--ring); border-radius: 12px; padding: 14px 16px; }
+.tile .num { font-size: 26px; font-weight: 650; letter-spacing: -0.01em; }
+.tile .num small { font-size: 15px; color: var(--text-secondary); font-weight: 500; }
+.tile .lbl { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+.fig { background: var(--surface-1); border: 1px solid var(--ring); border-radius: 14px; padding: 20px 22px 16px; margin: 0 0 20px; }
+.fig .kicker { color: var(--text-muted); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin: 0 0 4px; }
+.fig h2 { font-size: 19px; line-height: 1.3; margin: 0 0 4px; font-weight: 640; }
+.fig .sub { color: var(--text-secondary); font-size: 14px; margin: 0 0 12px; }
+.fig .note { color: var(--text-secondary); font-size: 13px; margin: 10px 0 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--text-secondary); margin: 0 0 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.t-label { fill: var(--text-primary); font-size: 13px; }
+.t-muted { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.t-value { fill: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
+.t-panel { fill: var(--text-primary); font-size: 13px; font-weight: 600; }
+.gridline { stroke: var(--grid); stroke-width: 1; }
+.axisline { stroke: var(--axis); stroke-width: 1; }
+.refline { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.mark { cursor: default; }
+.mark:hover { opacity: 0.85; }
+.hit { fill: transparent; }
+details { margin-top: 10px; }
+summary { color: var(--text-muted); font-size: 13px; cursor: pointer; }
+table { border-collapse: collapse; font-size: 13px; margin-top: 8px; width: 100%; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--text-secondary); font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.verdict { font-weight: 600; white-space: nowrap; }
+.callout { background: var(--surface-1); border: 1px solid var(--ring); border-left: 4px solid var(--neg); border-radius: 10px; padding: 14px 18px; margin: 0 0 20px; }
+.callout h3 { margin: 0 0 6px; font-size: 16px; }
+.callout ul { margin: 6px 0 0; padding-left: 18px; color: var(--text-secondary); font-size: 14px; }
+.callout li { margin: 4px 0; }
+.foot { color: var(--text-muted); font-size: 12px; margin-top: 28px; }
+#tip { position: fixed; pointer-events: none; background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--ring); border-radius: 8px; padding: 6px 9px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.12); opacity: 0; transition: opacity 80ms; max-width: 280px; z-index: 10; }
+@media (max-width: 760px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <h1>Does the games feed formula work? The benchmark in pictures</h1>
+  <p class="lede">The setup: synthetic people with known tastes (hook-lovers, balanced and bait-averse), 50 games plus 3 new ones a day, 14 days, 3 worlds. No weights were tuned to these tests. The numbers show which way things move, not how much they'd move with real users. Details are in <code>docs/RANKING.md</code>.</p>
+
+  <div class="tiles">
+    <div class="tile"><div class="num">70.3%</div><div class="lbl">of sessions won against today's feed in the on-device test (interleaving)</div></div>
+    <div class="tile"><div class="num">5.2% <small>vs 43.8%</small></div><div class="lbl">slop for bait-averse people: our target vs optimizing clicks</div></div>
+    <div class="tile"><div class="num">19% <small>vs 92%</small></div><div class="lbl">hooky games shown to bait-averse people: the formula vs ε-greedy</div></div>
+    <div class="tile"><div class="num">88.5% <small>vs 67.7%</small></div><div class="lbl">of 10-page windows within the bait guard: with the guard vs without</div></div>
+  </div>
+
+  <section class="fig" id="fig1">
+    <div class="kicker">1 · The target</div>
+    <h2>Optimizing clicks fills the feed with slop. Optimizing grab and satisfaction doesn't.</h2>
+    <p class="sub">The same greedy ranker with the same posteriors. The only change is what it optimizes: clicks (CTR, the usual engagement target) or our reward, which splits <em>grab</em> (did it pull you in) from <em>satisfaction</em> (did it pay off). Week 2.</p>
+    <div class="legend"><span><i style="background:var(--s-ctr)"></i>Clicks only (CTR)</span><span><i style="background:var(--s-formula)"></i>Our reward</span></div>
+    <div id="c1"></div>
+    <p class="note">Bait-averse people's joy per page doubles (0.143 → 0.286), and slop drops from about 42% of pages to about 6% for every kind of person. YouTube and Meta split engagement from satisfaction for the same reason (RANKING.md, section 3).</p>
+  </section>
+
+  <section class="fig" id="fig2">
+    <div class="kicker">2 · Against the standard baselines</div>
+    <h2>The formula beats today's feed, most-popular and click-chasing for everyone, and does best of all for bait-averse people.</h2>
+    <p class="sub">Joy per page in week 2. Each policy runs in its own copy of each world and learns on its own.</p>
+    <div class="legend"><span><i style="background:var(--s-formula)"></i>Formula (ours)</span><span><i style="background:var(--s-eg)"></i>ε-greedy bandit</span><span><i style="background:var(--s-ctr)"></i>Clicks only</span><span><i style="background:var(--s-pop)"></i>Most popular</span><span><i style="background:var(--s-today)"></i>Today's feed</span></div>
+    <div id="c2"></div>
+    <p class="note">The honest exception: a plain ε-greedy bandit on each game's mean value scores higher for hook-lovers and balanced people. It already uses our grab × satisfaction value, and it shows hooky games to everyone; figure 3 shows what that costs.</p>
+  </section>
+
+  <section class="fig" id="fig3">
+    <div class="kicker">3 · Why</div>
+    <h2>It learns who likes hooks. ε-greedy and click-chasing show the same hooky feed to everyone.</h2>
+    <p class="sub">Share of pages that are hooky games (hook strength 0.6 or more), by kind of person. Week 1 and 2.</p>
+    <div class="legend"><span><i style="background:var(--s-formula)"></i>Formula (ours)</span><span><i style="background:var(--s-eg)"></i>ε-greedy bandit</span><span><i style="background:var(--s-ctr)"></i>Clicks only</span></div>
+    <div id="c3"></div>
+    <p class="note">The per-person bait lean is what does this: 60% hooky games for hook-lovers, 19% for bait-averse people. That's where the formula's longer sessions for bait-averse people come from (8.2 pages, against 7.2 for ε-greedy). It's also the most personal feed tested: 21–23% of pages come from each person's favorite kind of game, against 14–19% for ε-greedy.</p>
+  </section>
+
+  <section class="fig" id="fig4">
+    <div class="kicker">4 · The on-device test</div>
+    <h2>Interleaving: the formula wins 70% of sessions against today's feed.</h2>
+    <p class="sub">Team-draft interleaving, the test Netflix and Airbnb run before an A/B test. Each session mixes the formula's picks with a control's; a satisfying page (a finish, replay, save or social moment) earns its side a point. Share of decided sessions, with 95% intervals. 3,780 sessions per control.</p>
+    <div id="c4"></div>
+    <p class="note">The rows below the first compare the formula with itself minus one part. Interleaving can't see longer sessions (where the bait lean pays off) or the value of exploring, since both sides learn from the same pages. So the bait lean and Thompson rows are judged in figures 3 and 5 too.</p>
+  </section>
+
+  <section class="fig" id="fig5">
+    <div class="kicker">5 · Why these parts</div>
+    <h2>What each part adds to joy per page.</h2>
+    <p class="sub">The full formula minus the formula with that part switched off. Week 2. Blue helps; red hurts.</p>
+    <div id="c5"></div>
+    <p class="note">Cold start helps everyone the most. Calibration and the reason prior help a little. The bait lean is a deliberate trade: +0.024 for bait-averse people, −0.024 for balanced people. Thompson sampling costs payoff in this simulator, because 90 people share evidence on each game; it's kept for thinner real catalogs, and listed as an open decision.</p>
+  </section>
+
+  <section class="fig" id="fig6">
+    <div class="kicker">6 · Why satisfaction counts 2.5× grab</div>
+    <h2>Weighting satisfaction 1.5 against grab 0.6 halves slop, at almost no cost to hook-lovers.</h2>
+    <p class="sub">The same ranker with our weights or with equal weights. Calibration, the bait lean and Thompson are switched off, to isolate the weights. Week 2.</p>
+    <div class="legend"><span><i style="background:var(--pos)"></i>1.5 / 0.6 (ours)</span><span><i style="background:var(--alt)"></i>Equal weights</span></div>
+    <div id="c6"></div>
+    <p class="note">Equal weights more than double slop for every kind of person and cost bait-averse people 0.044 joy per page; hook-lovers gain only 0.008. Hooky pages for bait-averse people also rise from 62% to 82%.</p>
+  </section>
+
+  <section class="fig" id="fig7">
+    <div class="kicker">7 · The guards</div>
+    <h2>The guards hold, and the tests catch it when one is switched off.</h2>
+    <p class="sub">Property tests on every page of every session (about 20,000 pages, 2 worlds). Share of pages or windows where the property holds.</p>
+    <div class="legend"><span><i style="background:var(--pos)"></i>As shipped</span><span><i style="background:var(--alt)"></i>That guard switched off</span></div>
+    <div id="c7"></div>
+    <p class="note">The slop property holds even with the bait guard off: the satisfaction posterior alone keeps likely slop out of the top 3. The price is the untested-game cap: a new game waits a median of 51 pages for its first showing, against 20 with the cap off, though every new game is shown. A minimum number of first showings per new game is an open decision.</p>
+  </section>
+
+  <section class="fig" id="fig8">
+    <div class="kicker">8 · The optional Muse term (off for the demo)</div>
+    <h2>Capping Ember at ±0.6 bounds it both ways.</h2>
+    <p class="sub">Stand-in Embers re-rank the formula's top 10, judged by interleaving against the formula alone. Share of decided sessions, with 95% intervals.</p>
+    <div id="c8"></div>
+    <p class="note">Even an Ember that knew everyone's true taste would add little, and one that ordered worst-first does limited harm. Raising the weight would need on-device wins against the formula alone first.</p>
+  </section>
+
+  <section class="fig" id="fig9">
+    <div class="kicker">9 · Group Blend</div>
+    <h2>A Blend lifts the worst-off member's enjoyment from 0.31 to 0.49.</h2>
+    <p class="sub">240 synthetic Groups of 4–6 people, 10 games each, scored with members' true enjoyment.</p>
+    <div id="c9"></div>
+    <p class="note">Every blend rule far beats random games. Ours (geometric mean, a misery floor at 0.12, plus-only fairness) is best on the worst-off member and on games everyone enjoys (32.0%), but only by a margin inside the noise (±0.006). Masthoff's group-viewing study also favors the multiplicative rule.</p>
+  </section>
+
+  <section class="fig" id="fig10">
+    <div class="kicker">10 · Why these numbers</div>
+    <h2>Every parameter, with its evidence and a verdict.</h2>
+    <p class="sub">✓ supported by the tests · ↔ a deliberate trade · ✗ not supported by the simulator (kept for a stated reason)</p>
+    <table>
+      <thead><tr><th>Choice</th><th>Set to</th><th>Evidence</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Target: grab and satisfaction, not clicks</td><td>two Beta posteriors per game</td><td>Slop 42% → 6%; bait-averse joy 0.143 → 0.286 (fig. 1). YouTube's multitask ranker and Meta's "worth your time?" make the same split.</td><td class="verdict">✓ Supported</td></tr>
+        <tr><td>Satisfaction weight against grab</td><td>1.5 vs 0.6 (2.5×)</td><td>Equal weights: bait-averse slop 6.4% → 14.9%, joy −0.044 (fig. 6)</td><td class="verdict">✓ Supported</td></tr>
+        <tr><td>Cold start from the manifest</td><td>hook prior worth 3 pages; 40% from the 5 most similar games</td><td>The biggest single gain: +0.023 to +0.047 (fig. 5); interleaving 53.4%</td><td class="verdict">✓ Supported</td></tr>
+        <tr><td>Calibration (Steck)</td><td>λ = 0.5, last 10 pages</td><td>Interleaving 54.9%, p < 0.001; +0.003 to +0.018 (fig. 5). Spotify runs it in production.</td><td class="verdict">✓ Supported</td></tr>
+        <tr><td>Repeat window</td><td>4 pages</td><td>Holds 100%; 91.8% without (fig. 7)</td><td class="verdict">✓ Supported</td></tr>
+        <tr><td>Muse term cap</td><td>±0.6, off by default</td><td>A perfect Ember wins 52.6%, a hostile one 47.0% (fig. 8)</td><td class="verdict">✓ Supported (safety)</td></tr>
+        <tr><td>Per-person bait lean</td><td>starts at −1, capped at +1</td><td>Bait-averse +0.024, balanced −0.024 (fig. 5); hooky pages 19% vs 92% for ε-greedy (fig. 3); guard 88.5% vs 67.7% (fig. 7)</td><td class="verdict">↔ Trade (Kevin's call)</td></tr>
+        <tr><td>Untested-game cap</td><td>0.15 + 0.25·σ(lean) of any 10 pages</td><td>Protects bait-averse people; new games' median wait 51 vs 20 pages (fig. 7)</td><td class="verdict">↔ Trade</td></tr>
+        <tr><td>Group Blend rule</td><td>geometric mean, misery floor 0.12</td><td>Best worst-off member, within noise (fig. 9); Masthoff favors it</td><td class="verdict">✓ Supported (small)</td></tr>
+        <tr><td>Thompson sampling</td><td>one draw per posterior</td><td>Costs 0.013–0.035 joy; 47% in interleaving (figs. 4–5). Kept because real per-game evidence will be thinner than the simulator's.</td><td class="verdict">✗ Not here (open decision)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="callout">
+    <h3>What these tests don't show</h3>
+    <ul>
+      <li>That the formula beats every standard. A plain ε-greedy bandit on mean value gets more joy per page for hook-lovers (0.515 vs 0.411) and balanced people (0.427 vs 0.323). It uses our grab × satisfaction value, and it shows hooky games to everyone.</li>
+      <li>Anything about real users. The people, the games and the payoff are synthetic, and the simulator rewards grab and satisfaction equally, while the formula deliberately doesn't. On-device interleaving with real people is the test that settles it, and it's built.</li>
+      <li>That calibration's variety matters to people: the simulator has no boredom.</li>
+    </ul>
+  </div>
+
+  <p class="foot">Recommender 0.5.0, 2026-11-12. Scripts: <code>tools/recs-sim/eval-bench.js --ablate --metric</code> (figures 1–3, 5, 6), <code>interleave-sim.js</code> (4, 8), <code>props.js --break</code> (7), <code>groups.js</code> (9). Made by Claude (AI agent for Kevin).</p>
+</div>
+</div>
+<div id="tip"></div>
+
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var tip = document.getElementById("tip");
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function text(parent, x, y, str, cls, anchor) {
+    var t = el("text", { x: x, y: y, "class": cls, "text-anchor": anchor || "start", "dominant-baseline": "middle" }, parent);
+    t.textContent = str;
+    return t;
+  }
+  function hover(node, html) {
+    node.addEventListener("mousemove", function (e) {
+      tip.innerHTML = html; tip.style.opacity = 1;
+      var x = e.clientX + 14, y = e.clientY + 14;
+      if (x + 290 > window.innerWidth) x = e.clientX - 290;
+      tip.style.left = x + "px"; tip.style.top = y + "px";
+    });
+    node.addEventListener("mouseleave", function () { tip.style.opacity = 0; });
+  }
+  // A bar with 4px rounded data-end, square at the baseline (horizontal bars).
+  function hbar(g, x0, y, w, h, fill) {
+    var r = Math.min(4, Math.max(0, w) / 2, h / 2);
+    var x1 = x0 + Math.max(0, w);
+    var d = "M" + x0 + "," + y + " H" + (x1 - r) + " Q" + x1 + "," + y + " " + x1 + "," + (y + r) +
+      " V" + (y + h - r) + " Q" + x1 + "," + (y + h) + " " + (x1 - r) + "," + (y + h) + " H" + x0 + " Z";
+    return el("path", { d: d, fill: fill, "class": "mark" }, g);
+  }
+  function hbarSigned(g, x0, y, w, h, fill) {
+    if (w >= 0) return hbar(g, x0, y, w, h, fill);
+    var r = Math.min(4, -w / 2, h / 2), x1 = x0 + w;
+    var d = "M" + x0 + "," + y + " H" + (x1 + r) + " Q" + x1 + "," + y + " " + x1 + "," + (y + r) +
+      " V" + (y + h - r) + " Q" + x1 + "," + (y + h) + " " + (x1 + r) + "," + (y + h) + " H" + x0 + " Z";
+    return el("path", { d: d, fill: fill, "class": "mark" }, g);
+  }
+  function table(container, head, rows) {
+    var det = document.createElement("details");
+    det.innerHTML = "<summary>Show the numbers</summary>";
+    var t = document.createElement("table");
+    t.innerHTML = "<thead><tr>" + head.map(function (h, i) { return "<th" + (i ? " class=num" : "") + ">" + h + "</th>"; }).join("") + "</tr></thead>" +
+      "<tbody>" + rows.map(function (r) { return "<tr>" + r.map(function (c, i) { return "<td" + (i ? " class=num" : "") + ">" + c + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody>";
+    det.appendChild(t);
+    container.parentNode.insertBefore(det, container.nextSibling);
+  }
+  var css = function (v) { return "var(" + v + ")"; };
+
+  // Small multiples of grouped horizontal bars. panels: [{title, max, fmt, ticks}], groups: [{label, values:[[...per panel...] per series]}]
+  function groupedPanels(id, cfg) {
+    var host = document.getElementById(id);
+    var W = 880, labelW = cfg.labelW || 92, gap = 28, nP = cfg.panels.length;
+    var pw = (W - labelW - gap * (nP - 1)) / nP;
+    var nS = cfg.series.length, bh = cfg.barH || 12, bgap = 2, groupGap = 14;
+    var gh = nS * bh + (nS - 1) * bgap;
+    var top = 34, H = top + cfg.groups.length * (gh + groupGap) - groupGap + 26;
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": cfg.aria }, host);
+    cfg.panels.forEach(function (p, pi) {
+      var px = labelW + pi * (pw + gap);
+      var g = el("g", {}, svg);
+      text(g, px, 12, p.title, "t-panel");
+      var sx = function (v) { return px + (v / p.max) * (pw - 44); };
+      p.ticks.forEach(function (tv) {
+        el("line", { x1: sx(tv), x2: sx(tv), y1: top - 6, y2: H - 22, "class": "gridline" }, g);
+        text(g, sx(tv), H - 10, p.fmt(tv, true), "t-muted", "middle");
+      });
+      el("line", { x1: px, x2: px, y1: top - 6, y2: H - 22, "class": "axisline" }, g);
+      cfg.groups.forEach(function (grp, gi) {
+        var gy = top + gi * (gh + groupGap);
+        if (pi === 0) text(svg, 0, gy + gh / 2, grp.label, "t-label");
+        cfg.series.forEach(function (s, si) {
+          var v = grp.values[si][pi];
+          var y = gy + si * (bh + bgap);
+          var m = hbar(g, px, y, sx(v) - px, bh, s.color);
+          text(g, sx(v) + 5, y + bh / 2, p.fmt(v), "t-value");
+          var hit = el("rect", { x: px, y: y - 1, width: pw, height: bh + 2, "class": "hit" }, g);
+          var html = "<b>" + grp.label + "</b> · " + s.name + "<br>" + p.title + ": <b>" + p.fmt(v) + "</b>";
+          hover(hit, html); hover(m, html);
+        });
+      });
+    });
+    var head = ["Group", ].concat([].concat.apply([], cfg.panels.map(function (p) { return cfg.series.map(function (s) { return p.title + " · " + s.name; }); })));
+    var rows = cfg.groups.map(function (grp) {
+      var r = [grp.label];
+      cfg.panels.forEach(function (p, pi) { cfg.series.forEach(function (s, si) { r.push(p.fmt(grp.values[si][pi])); }); });
+      return r;
+    });
+    table(host, head, rows);
+  }
+
+  // Small multiples where each panel has its own rows (one bar per row, colored per row).
+  function rowPanels(id, cfg) {
+    var host = document.getElementById(id);
+    var W = 880, labelW = cfg.labelW || 150, gap = 26, nP = cfg.panels.length;
+    var pw = (W - labelW - gap * (nP - 1)) / nP;
+    var bh = cfg.barH || 16, rgap = 8, top = 34;
+    var H = top + cfg.rows.length * (bh + rgap) - rgap + 26;
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": cfg.aria }, host);
+    cfg.rows.forEach(function (row, ri) {
+      var y = top + ri * (bh + rgap);
+      var t = text(svg, 0, y + bh / 2, row.label, "t-label");
+      if (row.bold) t.setAttribute("font-weight", "650");
+    });
+    cfg.panels.forEach(function (p, pi) {
+      var px = labelW + pi * (pw + gap), g = el("g", {}, svg);
+      text(g, px, 12, p.title, "t-panel");
+      var zero = p.min < 0 ? px + (-p.min / (p.max - p.min)) * (pw - 40) : px;
+      var sx = function (v) { return px + ((v - p.min) / (p.max - p.min)) * (pw - 40); };
+      p.ticks.forEach(function (tv) {
+        el("line", { x1: sx(tv), x2: sx(tv), y1: top - 6, y2: H - 22, "class": "gridline" }, g);
+        text(g, sx(tv), H - 10, p.fmt(tv, true), "t-muted", "middle");
+      });
+      el("line", { x1: zero, x2: zero, y1: top - 6, y2: H - 22, "class": "axisline" }, g);
+      cfg.rows.forEach(function (row, ri) {
+        var v = row.values[pi], y = top + ri * (bh + rgap);
+        var color = cfg.signed ? (v >= 0 ? css("--pos") : css("--neg")) : row.color;
+        var m = hbarSigned(g, zero, y, sx(v) - zero, bh, color);
+        // Negative values are labeled on the empty side of the zero line, clear of the row labels.
+        text(g, v >= 0 ? sx(v) + 5 : zero + 5, y + bh / 2, p.fmt(v), "t-value", "start");
+        var hit = el("rect", { x: px, y: y - 2, width: pw, height: bh + 4, "class": "hit" }, g);
+        var html = "<b>" + row.label + "</b><br>" + p.title + ": <b>" + p.fmt(v) + "</b>";
+        hover(hit, html); hover(m, html);
+      });
+    });
+    table(host, ["Row"].concat(cfg.panels.map(function (p) { return p.title; })), cfg.rows.map(function (r) { return [r.label].concat(r.values.map(function (v, i) { return cfg.panels[i].fmt(v); })); }));
+  }
+
+  // Dot and 95% interval, with a reference line.
+  function forest(id, cfg) {
+    var host = document.getElementById(id);
+    var W = 880, labelW = 250, right = 70, top = 14, rh = 30;
+    var H = top + cfg.rows.length * rh + 30;
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": cfg.aria }, host);
+    var sx = function (v) { return labelW + ((v - cfg.min) / (cfg.max - cfg.min)) * (W - labelW - right); };
+    cfg.ticks.forEach(function (tv) {
+      el("line", { x1: sx(tv), x2: sx(tv), y1: top - 4, y2: H - 24, "class": "gridline" }, svg);
+      text(svg, sx(tv), H - 10, tv + "%", "t-muted", "middle");
+    });
+    el("line", { x1: sx(cfg.ref), x2: sx(cfg.ref), y1: top - 8, y2: H - 24, "class": "refline" }, svg);
+    text(svg, sx(cfg.ref) + 4, top - 6, cfg.refLabel, "t-muted");
+    cfg.rows.forEach(function (r, i) {
+      var y = top + 12 + i * rh;
+      var color = r.lo > cfg.ref ? css("--pos") : (r.hi < cfg.ref ? css("--neg") : css("--ns"));
+      text(svg, 0, y, r.label, "t-label");
+      el("line", { x1: sx(r.lo), x2: sx(r.hi), y1: y, y2: y, stroke: color, "stroke-width": 2, "stroke-linecap": "round" }, svg);
+      var dot = el("circle", { cx: sx(r.mid), cy: y, r: 6, fill: color, stroke: css("--surface-1"), "stroke-width": 2, "class": "mark" }, svg);
+      text(svg, Math.max(sx(r.hi), sx(cfg.ref) + 4) + 8, y, r.mid.toFixed(1) + "%" + (r.p ? "  " + r.p : ""), "t-value");
+      var hit = el("rect", { x: labelW, y: y - rh / 2, width: W - labelW, height: rh, "class": "hit" }, svg);
+      var html = "<b>" + r.label + "</b><br>Formula's share: <b>" + r.mid.toFixed(1) + "%</b><br>95% interval " + r.lo + "–" + r.hi + "%" + (r.p ? "<br>" + r.p : "");
+      hover(hit, html); hover(dot, html);
+    });
+    table(host, ["Comparison", "Share", "95% low", "95% high", "Test"], cfg.rows.map(function (r) { return [r.label, r.mid.toFixed(1) + "%", r.lo + "%", r.hi + "%", r.p || ""]; }));
+  }
+
+  var pct = function (v, tick) { return (tick ? Math.round(v * 100) : (v * 100).toFixed(1)) + "%"; };
+  var joy = function (v, tick) { return tick ? v.toFixed(1) : v.toFixed(3); };
+  var dj = function (v, tick) { return tick ? (v > 0 ? "+" : "") + v.toFixed(2) : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(3); };
+
+  // 1. The target
+  groupedPanels("c1", {
+    aria: "Slop share and joy per page for clicks-only vs our reward, by kind of person",
+    panels: [{ title: "Slop (share of pages)", max: 0.5, ticks: [0, 0.25, 0.5], fmt: pct }, { title: "Joy per page", max: 0.45, ticks: [0, 0.2, 0.4], fmt: joy }],
+    series: [{ name: "Clicks only (CTR)", color: css("--s-ctr") }, { name: "Our reward", color: css("--s-formula") }],
+    groups: [
+      { label: "Hook-lovers", values: [[0.399, 0.374], [0.064, 0.396]] },
+      { label: "Balanced", values: [[0.421, 0.259], [0.059, 0.355]] },
+      { label: "Bait-averse", values: [[0.438, 0.143], [0.052, 0.286]] }
+    ]
+  });
+
+  // 2. Baselines
+  var P2 = [
+    { label: "Formula (ours)", color: css("--s-formula"), v: [0.411, 0.323, 0.310], bold: true },
+    { label: "ε-greedy bandit", color: css("--s-eg"), v: [0.515, 0.427, 0.257] },
+    { label: "Clicks only (CTR)", color: css("--s-ctr"), v: [0.374, 0.259, 0.143] },
+    { label: "Most popular", color: css("--s-pop"), v: [0.201, 0.201, 0.196] },
+    { label: "Today's feed", color: css("--s-today"), v: [0.239, 0.207, 0.163] }
+  ];
+  rowPanels("c2", {
+    aria: "Joy per page by policy and kind of person", labelW: 140,
+    panels: ["Hook-lovers", "Balanced", "Bait-averse"].map(function (t) { return { title: t, min: 0, max: 0.55, ticks: [0, 0.2, 0.4], fmt: joy }; }),
+    rows: P2.map(function (p) { return { label: p.label, color: p.color, values: p.v, bold: p.bold }; })
+  });
+
+  // 3. Hooky share
+  groupedPanels("c3", {
+    aria: "Share of hooky games shown, by policy and kind of person", labelW: 92, barH: 13,
+    panels: [{ title: "Hooky games (share of pages)", max: 1, ticks: [0, 0.25, 0.5, 0.75, 1], fmt: function (v, t) { return t ? Math.round(v * 100) + "%" : Math.round(v * 100) + "%"; } }],
+    series: [{ name: "Formula (ours)", color: css("--s-formula") }, { name: "ε-greedy bandit", color: css("--s-eg") }, { name: "Clicks only", color: css("--s-ctr") }],
+    groups: [
+      { label: "Hook-lovers", values: [[0.604], [0.925], [0.799]] },
+      { label: "Balanced", values: [[0.385], [0.924], [0.811]] },
+      { label: "Bait-averse", values: [[0.193], [0.924], [0.825]] }
+    ]
+  });
+
+  // 4. Interleaving
+  forest("c4", {
+    aria: "Interleaving win share of the formula against each control",
+    min: 40, max: 80, ref: 50, refLabel: "no difference", ticks: [40, 50, 60, 70, 80],
+    rows: [
+      { label: "vs today's feed", mid: 70.3, lo: 68, hi: 72, p: "p < 0.001" },
+      { label: "vs itself without calibration", mid: 54.9, lo: 53, hi: 57, p: "p < 0.001" },
+      { label: "vs itself without cold start", mid: 53.4, lo: 51, hi: 55, p: "p = 0.001" },
+      { label: "vs itself without the bait lean", mid: 49.8, lo: 48, hi: 52, p: "p = 0.84" },
+      { label: "vs itself without Thompson (greedy)", mid: 47.0, lo: 45, hi: 49, p: "p = 0.005" }
+    ]
+  });
+
+  // 5. Ablations
+  rowPanels("c5", {
+    aria: "What each part of the formula adds to joy per page, by kind of person", signed: true, labelW: 150,
+    panels: ["Hook-lovers", "Balanced", "Bait-averse"].map(function (t) { return { title: t, min: -0.04, max: 0.05, ticks: [-0.04, 0, 0.04], fmt: dj }; }),
+    rows: [
+      { label: "Cold start", values: [0.047, 0.024, 0.023] },
+      { label: "Calibration", values: [0.003, 0.018, 0.012] },
+      { label: "Reason prior", values: [0.014, 0.001, 0.020] },
+      { label: "Bait lean and guards", values: [0.001, -0.024, 0.024] },
+      { label: "Thompson sampling", values: [-0.035, -0.024, -0.013] }
+    ]
+  });
+
+  // 6. Satisfaction weight
+  groupedPanels("c6", {
+    aria: "Slop and joy per page with our weights vs equal weights",
+    panels: [{ title: "Slop (share of pages)", max: 0.22, ticks: [0, 0.1, 0.2], fmt: pct }, { title: "Joy per page", max: 0.55, ticks: [0, 0.2, 0.4], fmt: joy }],
+    series: [{ name: "1.5 / 0.6 (ours)", color: css("--pos") }, { name: "Equal weights", color: css("--alt") }],
+    groups: [
+      { label: "Hook-lovers", values: [[0.104, 0.475], [0.190, 0.483]] },
+      { label: "Balanced", values: [[0.080, 0.402], [0.175, 0.398]] },
+      { label: "Bait-averse", values: [[0.064, 0.325], [0.149, 0.281]] }
+    ]
+  });
+
+  // 7. Guards
+  groupedPanels("c7", {
+    aria: "Property tests with each guard on and off", labelW: 300, barH: 14,
+    panels: [{ title: "Holds", max: 1, ticks: [0, 0.5, 1], fmt: pct }],
+    series: [{ name: "As shipped", color: css("--pos") }, { name: "That guard switched off", color: css("--alt") }],
+    groups: [
+      { label: "Bait-averse: ≤ 5 hooky games in any 10 pages", values: [[0.885], [0.677]] },
+      { label: "No game twice within 4 pages", values: [[1.0], [0.918]] },
+      { label: "A likely-slop game never makes a top 3", values: [[1.0], [1.0]] }
+    ]
+  });
+
+  // 8. Muse cap
+  forest("c8", {
+    aria: "Interleaving win share with stand-in Embers against the formula alone",
+    min: 40, max: 60, ref: 50, refLabel: "no difference", ticks: [40, 45, 50, 55, 60],
+    rows: [
+      { label: "Ember that knows true taste", mid: 52.6, lo: 51, hi: 55, p: "p = 0.014" },
+      { label: "Ember that knows it roughly", mid: 51.3, lo: 49, hi: 53, p: "p = 0.23" },
+      { label: "Ember that orders at random", mid: 50.0, lo: 48, hi: 52, p: "p = 1.0" },
+      { label: "Ember that orders worst-first", mid: 47.0, lo: 45, hi: 49, p: "p = 0.004" }
+    ]
+  });
+
+  // 9. Blend
+  rowPanels("c9", {
+    aria: "Worst-off member's enjoyment and share of games everyone enjoys, by blend rule", labelW: 230,
+    panels: [{ title: "Worst-off member's enjoyment", min: 0, max: 0.55, ticks: [0, 0.2, 0.4], fmt: joy }, { title: "Games everyone enjoys", min: 0, max: 0.4, ticks: [0, 0.2, 0.4], fmt: pct }],
+    rows: [
+      { label: "Geometric + fairness (ours)", color: css("--s-formula"), values: [0.489, 0.320], bold: true },
+      { label: "Average the profiles", color: css("--alt"), values: [0.485, 0.303] },
+      { label: "Average enjoyment", color: css("--alt"), values: [0.483, 0.310] },
+      { label: "Geometric mean alone", color: css("--alt"), values: [0.483, 0.314] },
+      { label: "Least misery", color: css("--alt"), values: [0.481, 0.317] },
+      { label: "Random games", color: css("--alt"), values: [0.309, 0.087] }
+    ]
+  });
+})();
+</script>
+</body>
+</html>

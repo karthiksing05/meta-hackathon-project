@@ -2,10 +2,13 @@
 
 How the games feed is ranked, what that changes, and how we check it without training.
 
-- **The ranker:** `FacebookClone/Bubbles/Recommend/game-recs.js` (v0.5). It is plain JavaScript that
-  runs on the phone in JavaScriptCore.
+- **The ranker:** `FacebookClone/Bubbles/Recommend/game-recs.js` (v0.5). It is one plain JavaScript
+  file. Since the app went live-data only, the server runs this same file in goja, a pure-Go
+  JavaScript engine (`backend/internal/recs/`), and keeps each person's state in its database. The
+  app ranks nothing: it reports what happened on each page (`FeedEventReporter.swift`) and shows the
+  server's order. The checks run the file in Node and JavaScriptCore.
 - **The direction (Karthik):** hand-written formulas with readable weights, refined by continual
-  on-device learning. Nothing is pretrained, and nothing is fitted to logs.
+  online learning for each person. Nothing is pretrained, and nothing is fitted to logs.
 - **The Muse layer** is optional and off by default.
 - **Tools:** the checks and simulators are in `tools/recs-sim/`. The research behind section 3 is in
   `tools/recs-sim/BENCHMARKING.md` (how companies evaluate recommenders) and in section 3 itself
@@ -13,6 +16,15 @@ How the games feed is ranked, what that changes, and how we check it without tra
 
 Written by Claude (AI agent for Kevin). All results are on synthetic people unless marked
 otherwise. They show which way things move, not how much they'd move with real users.
+
+![Headline numbers: the formula wins 70% of interleaved sessions against today's feed; optimizing
+grab and satisfaction instead of clicks cuts slop from about 42% to 6%; bait-averse people get 0.310
+joy per page, the best of every policy; the guards hold and fail when switched
+off.](ranking-figures/00-headline.png)
+
+The figures in section 2 come from `docs/ranking-figures/figures.html`, a single page with every
+chart, light and dark modes, hover values and a table view under each chart. Each figure is next to
+the numbers it shows.
 
 ---
 
@@ -106,9 +118,9 @@ drop i if any member's r_ui < 0.12 (misery floor)
 
 ### 1.6 The optional Muse re-rank (off by default)
 
-**Off for the demo (Karthik's call, 2026-11-12).** Nothing in the demo path turns it on; only
-`FB_RECS_MUSE=1` does. The formula alone is what we present. The layer stays in the code to build on
-later.
+**Off for the demo (Karthik's call, 2026-11-12).** Nothing turns it on: the server leaves it off
+(`backend/internal/recs/recs.go`), and the app's `FB_RECS_MUSE` flag went away with the on-device
+ranker. The formula alone is what we present. The layer stays in the code to build on later.
 
 - **Prompt:** Ember gets the formula's top 10 games, shuffled, and your last 8 plays, described by
   game features only. No names or people go to Muse.
@@ -118,15 +130,16 @@ later.
   rank ρ of K, hard-capped at ±0.6. The order expires after 30 minutes. The formula still decides, and
   every guard still holds.
 - **"Why" lines:** each pick keeps the formula's own line (`why`) and adds Ember's (`museWhy`).
-- **On the phone:** `FB_RECS_MUSE=1` calls Ember through the app's `MuseClient`. It calls at most
-  every 10 minutes, off the main thread, with an 8-second timeout. If anything fails, the feed stays
-  as the formula ranked it.
+- **Calling Ember:** the file builds the request (`museRequest`) and applies the reply
+  (`museApply`); whoever runs the file makes the call. The app's caller (at most every 10 minutes,
+  8-second timeout) was removed with the on-device ranker, and the server has no caller yet. If a
+  call fails, the feed stays as the formula ranked it.
 
 ### 1.7 Handwritten vs learned, and what's parked
 
 - **All handwritten:** every weight above.
-- **Learned on the device, per person:** the two posteriors per game, the taste vector, the bait lean
-  and the calibration targets.
+- **Learned online, per person** (the server stores it): the two posteriors per game, the taste
+  vector, the bait lean and the calibration targets.
 - **Parked:** learned predictors (the Facebook-style value model stays a simulator), two-tower
   retrieval, embeddings and fitted weights.
 - **Next:** fragments and bot-gate results as named inputs, and a co-player bonus in Blends.
@@ -165,8 +178,12 @@ regression.
 - **The hooky property is soft, not a guarantee:** 88.5% of windows.
 - **The untested-game cap delays new games:** that's the price of protecting bait-averse people
   (section 4).
-- **Unit checks:** 127 more in `node tools/recs-sim/run-node.js`, which run in Node and
+- **Unit checks:** 128 more in `node tools/recs-sim/run-node.js`, which run in Node and
   JavaScriptCore.
+
+![Property tests with each guard on and off: no repeat within 4 pages holds 100% (91.8% with the
+window off); bait-averse windows with at most 5 hooky games hold 88.5% (67.7% with the guard off);
+new games' median wait is 51 pages with the cap and 20 without.](ranking-figures/07-guards.png)
 
 ### 2.2 Against simple published baselines (`node tools/recs-sim/eval-bench.js`)
 
@@ -184,14 +201,39 @@ second week, after learning.
 | ε-greedy bandit, ε = 0.1, global mean value | **0.515 / 0.188** | **0.427 / 0.205** | 0.257 / 0.304 | 7.2 | 5.4% / 5.2% | 15.7% |
 | **Formula (v0.5)** | 0.411 / 0.301 | 0.323 / 0.334 | **0.310 / 0.272** | **8.2** | 14.3% / 6.5% | **21.1%** |
 | Formula, Thompson off (greedy) | 0.446 / 0.270 | 0.347 / 0.302 | 0.323 / 0.240 | 7.5 | 8.4% / 3.6% | 19.3% |
+| Clicks only (CTR), greedy | 0.374 / 0.357 | 0.259 / 0.397 | 0.143 / 0.428 | 5.4 | 39.9% / 43.8% | 13.4% |
+| Our reward only, greedy | 0.396 / 0.324 | 0.355 / 0.295 | 0.286 / 0.282 | 6.9 | 6.4% / 5.2% | 16.6% |
+
+The last two rows come from `--metric`. They are the same greedy ranker with every other part off,
+and differ only in what they optimize: clicks (a grab), the usual engagement target, or our grab
+and satisfaction reward.
+
+![Clicks only against our reward: slop 39.9% and 43.8% of pages against 6.4% and 5.2%; bait-averse
+joy per page 0.143 against 0.286.](ranking-figures/01-target.png)
+
+![Joy per page in week 2 for each policy and kind of person. The formula beats today's feed, most
+popular and clicks only for everyone. ε-greedy is higher for hook-lovers and balanced people; the
+formula is highest for bait-averse people.](ranking-figures/02-baselines.png)
+
+![Share of pages that are hooky, by kind of person: the formula 60%, 38% and 19%; ε-greedy 92% for
+everyone; clicks only 80–82% for everyone.](ranking-figures/03-hooks.png)
 
 What this says, honestly:
-- **The formula beats today's feed and MostPop for every kind of person,** by a wide margin (lover
-  joy per page 0.411 vs 0.239 and 0.201).
+- **The target is the biggest effect we measured.** Optimizing clicks fills about 40% of pages with
+  slop. Optimizing our reward with the same ranker cuts that to 5–6%, and doubles joy per page for
+  bait-averse people (0.143 to 0.286). No single part of the formula moves joy that much (2.3).
+  YouTube's multitask ranker [1] and Facebook's "worth your time" surveys [4] make the same split,
+  and Netflix warns that clicks alone favor clickbait [5].
+- **The formula beats today's feed, MostPop and clicks only for every kind of person,** by a wide
+  margin (lover joy per page 0.411 vs 0.239, 0.201 and 0.374).
 - **A plain ε-greedy bandit on each game's mean value beats the formula for lovers and balanced
   people** (0.515 vs 0.411; 0.427 vs 0.323). It also shows less slop (5.4% vs 14.3% for lovers).
 - **The formula wins for bait-averse people:** joy 0.310 vs 0.257, regret 0.272 vs 0.304, and the
   longest sessions of any policy, 8.2 pages.
+- **The formula is the only policy here that learns who likes hooks.** Its hooky pages are 60% for
+  lovers, 38% for balanced people and 19% for bait-averse people. ε-greedy shows 92% hooky pages to
+  everyone, and clicks only shows 80–82%. That likely explains the longer averse sessions
+  (inference).
 - **The formula is the most personal:** 21–23% of pages come from each person's favorite formula,
   against 14–19% for ε-greedy.
 - **Why ε-greedy does so well here (inference):**
@@ -227,9 +269,16 @@ Joy per page in week 2, with one part switched off:
 - **Not from any one part:** the gap to ε-greedy comes from Thompson's exploration plus the formula's
   overall shape.
 
+![What each part adds to joy per page, by kind of person: cold start adds the most (up to +0.047),
+calibration adds a little everywhere, the bait lean helps bait-averse people and costs balanced
+people, and Thompson sampling costs 0.013–0.035.](ranking-figures/05-parts.png)
+
+![Satisfaction weight 1.5 against grab 0.6, compared with equal weights: bait-averse slop 6.4%
+against 14.9%, at almost no cost to hook-lovers.](ranking-figures/06-weights.png)
+
 ### 2.4 Interleaving (`node tools/recs-sim/interleave-sim.js --seeds 3`)
 
-The on-device test, run on synthetic people (3 worlds, 3,780 sessions per control). In each session,
+The live test, run here on synthetic people (3 worlds, 3,780 sessions per control). In each session,
 team-draft merges the formula's picks (A) with a control's (B). A page earns its side a point when it
 was satisfying: a finish, replay, save or social moment. A grab alone isn't a point. A session goes to
 the side with more points.
@@ -242,14 +291,20 @@ the side with more points.
 | Itself without the bait lean | 49.8% | 48–52% | 0.84 |
 | Itself without Thompson (greedy) | **47.0%** | 45–49% | 0.005 |
 
+![Interleaving: the formula's share of decided sessions with 95% intervals against each control,
+with 50% marked as no preference. 70.3% against today's feed; 54.9% without calibration; 53.4%
+without cold start; 49.8% without the bait lean; 47.0% without Thompson
+sampling.](ranking-figures/04-interleaving.png)
+
 Interleaving measures preference within a session. It can't see two things:
 - **Session length:** that's where the bait lean pays off, hence 49.8%.
 - **The value of exploration:** both sides learn from the same pages, so the exploring side pays the
   cost and the greedy side gets the benefit. This is a known limit: interleaving measures preference,
   not total consumption [39].
 
-On the phone it runs with `FB_RECS_INTERLEAVE=1` (or `=noMuse`, `=noCalibration`, and so on). The
-tally is in `app.interleaveStats()`.
+On the server it runs with `RECS_INTERLEAVE=baseline` (or a variant such as `noCalibration` or
+`noBait`). The tally across everyone is at `GET /v1/experiments/interleave`, and each person's is in
+`GET /v1/me/recs`.
 
 ### 2.5 Learning curves
 
@@ -279,6 +334,9 @@ Regret per page by day, from 2.2. The formula learns, but the global ε-greedy l
 - **Among the strategies,** the differences are within noise (± about 0.006). Ours is best on the
   worst-off member and on games everyone enjoys, but only slightly.
 
+![Group Blend: the worst-off member's enjoyment is 0.309 with random games and 0.481–0.489 with
+every Blend rule; ours is 0.489.](ranking-figures/09-blend.png)
+
 ### 2.7 The Muse term
 
 The real Ember can't run in the simulator. So `interleave-sim.js --muse` stands in four kinds of
@@ -291,6 +349,10 @@ Ember and interleaves the formula with the Muse term against the formula alone:
 | Orders at random | 50.0% | 1.0 |
 | Orders worst first | 47.0% | 0.004 |
 
+![The Muse term with four stand-in Embers: a perfect one wins 52.6% of sessions, a noisy one 51.3%,
+a random one 50.0% and a hostile one 47.0%. The ±0.6 cap bounds the effect both
+ways.](ranking-figures/08-muse-cap.png)
+
 - **At w = 0.6, the cap does its job both ways:** even a perfect Ember adds little, and a hostile one
   does limited harm.
 - **Unit checks:**
@@ -299,8 +361,8 @@ Ember and interleaves the formula with the Muse term against the formula alone:
   - Ember can't lift a game people quit over one they finish (20 of 20 seeds);
   - the cap holds at any weight;
   - stale orders expire.
-- **On the phone:** the real test is `FB_RECS_INTERLEAVE=noMuse` with `FB_RECS_MUSE=1`, plus the
-  made-up-ID rate in the debug summary.
+- **Live:** it needs a caller for Ember first (1.6). Then the real test is interleaving against
+  `noMuse`, plus the made-up-ID rate in the debug summary.
 
 ### 2.8 What we can and can't conclude
 
@@ -320,6 +382,17 @@ Ember and interleaves the formula with the Muse term against the formula alone:
   simulator rewards grab and satisfaction equally while the formula doesn't.
 - That calibration's variety matters to people. The simulator has no boredom.
 
+### 2.9 Why these numbers
+
+Each parameter, what it's set to, the evidence for it and a verdict. Most are supported by the
+tests. The bait lean and the untested-game cap are deliberate trades. Thompson sampling isn't
+supported by the simulator and is kept for a stated reason; it's an open decision (section 4).
+
+![Every parameter with its setting, evidence and verdict: the grab and satisfaction target, the
+1.5 to 0.6 weights, cold start, calibration, the repeat window, the Muse cap and the Blend rule are
+supported; the bait lean and the untested-game cap are trades; Thompson sampling is not supported
+here and is an open decision.](ranking-figures/10-parameters.png)
+
 ---
 
 ## 3. How this compares to published work
@@ -337,7 +410,7 @@ no counterpart found. *(inference)* marks our reasoning, not a published result.
 | 3 | Thompson sampling with Beta priors | Chapelle and Li: Thompson sampling is a strong baseline [8]. Li et al. (Yahoo): contextual bandits [9]. LinkedIn's LiRank: Thompson sampling over a Bayesian last layer, +0.06% DAU on Feed [10]. | Match (method), simplify (form) | Non-contextual, per game. Fractional rewards in a Beta and the 0.97/day decay are heuristics *(inference)*. Our simulator suggests the exploration costs payoff (2.2). |
 | 4 | Calibration: greedy KL re-rank over the last 10 pages | Steck, RecSys 2018 [11]. Spotify's KL-calibrated slates with a bandit-learned target: +3.93% impression-to-stream against a Steck baseline [12]. | Match | Same objective and smoothing. Spotify learns each user's target mix; ours is set by formula. |
 | 5 | Cold start: manifest features, borrowing from similar games, bot-gate quality prior | DropoutNet [13] and MeLU [14] (content and meta-learning cold start). Pinterest found content features underweighted for cold items [15]. Meta's SocRipple boosts new items through the creator's network [16]. | Match (content, similar items), differ (bot gate) | No published counterpart for a playtest-bot quality prior. It's new, and it's unvalidated whether bot results predict human satisfaction. |
-| 6 | Decayed per-page updates on the phone | ByteDance's Monolith (real-time training) [17]. Kuaishou's tiny on-device re-ranker using just-watched feedback: +1.28% effective views, +8.22% likes, +13.6% follows [18]. | Simplify | The closest counterpart is Kuaishou's on-device model. Ours learns a handful of numbers, not a network. |
+| 6 | Decayed per-page updates for each person | ByteDance's Monolith (real-time training) [17]. Kuaishou's tiny on-device re-ranker using just-watched feedback: +1.28% effective views, +8.22% likes, +13.6% follows [18]. | Simplify | The closest counterpart is Kuaishou's on-device model. Ours learns a handful of numbers per person, not a network. |
 | 7 | Social moments as rewards | Meta's 2018 "meaningful social interactions" shift [19]. LinkedIn's PYMK discounts overloaded recipients (overloaded recipients down 50%) [20]. Snap's GraFRank friend ranking [21]. | Match (spirit), simplify (weights) | Our 1–4 weights are hand-set; Meta calibrates against what people say. No recipient-overload check for Add friend yet (section 4). |
 | 8 | Cap on untested games, repeat window | TikTok avoids back-to-back videos with the same sound or creator, and adds some outside your interests [22]. Fairness of exposure (Singh and Joachims, KDD 2018) [23]. | Simplify | A hard slot cap and repeat block instead of optimized exposure. Tying the cap to the bait lean is ours. |
 | 9 | Group Blend: geometric mean, misery floor, plus-only fairness | Masthoff: the multiplicative rule is the most promising, and people avoid misery [24]. Rank-sensitive fairness (Kaya et al., RecSys 2020) [25]. Pareto approaches [26]. Spotify Blend chose "maximize the joy" [27]. | Match (product rule, floor), simplify (fairness) | Our fairness isn't rank-sensitive, so one member's favorites can cluster at the top. |
@@ -350,8 +423,8 @@ we test on personas.
 
 | Method | Who uses it | What we did |
 |---|---|---|
-| Interleaving (team-draft) | Netflix: over 100× fewer users than its most sensitive A/B metric [30]. Airbnb: a 50× speedup and 82% agreement with A/B results, crediting bookings, not clicks [31]. Spotify: 10–100× [32]. | Built on the phone; credits satisfaction, not grabs; run on personas (2.4). |
-| Behavioral and property tests | RecList [33] | 5 properties plus break-it runs (2.1), and 127 unit checks. |
+| Interleaving (team-draft) | Netflix: over 100× fewer users than its most sensitive A/B metric [30]. Airbnb: a 50× speedup and 82% agreement with A/B results, crediting bookings, not clicks [31]. Spotify: 10–100× [32]. | Built into the ranker (the server switches it on); credits satisfaction, not grabs; run on personas (2.4). |
+| Behavioral and property tests | RecList [33] | 5 properties plus break-it runs (2.1), and 128 unit checks. |
 | Simulation with known tastes | RecSim [34], KuaiSim [35] | Separate worlds, regret against an oracle, learning curves (2.2, 2.5). |
 | Simple published baselines | MostPop; ε-greedy (Li et al.'s comparison [9]; Chapelle and Li [8]) | Both, at defaults (2.2). |
 | Offline replay and off-policy evaluation | Li et al. replay [36]. Pinterest's offline replay found over 90% of the ideas that won online, against 25% for MAP [37]. | Not yet. The event contract logs `propensity` and `team` so replay can run on real logs (`docs/RECOMMENDER_BACKEND.md`). |
@@ -374,7 +447,7 @@ we test on personas.
    would be against the property tests and interleaving, not this simulator alone.
 3. **The untested-game cap slows new games** (median 51 pages vs 20). That matters for makers seeing
    their first plays: a fixed minimum of first impressions per new game would help.
-4. **The Muse weight w = 0.6 is safe but small.** Raise it only if on-device interleaving against
+4. **The Muse weight w = 0.6 is safe but small.** Raise it only if live interleaving against
    `noMuse` shows wins with real Ember.
 5. **Add friend has no recipient-overload check.** LinkedIn found it matters for popular people.
 6. **A one-tap "worth it?" after a run,** as Facebook and YouTube use surveys, would give
@@ -385,9 +458,11 @@ we test on personas.
 ## Appendix: running it
 
 ```sh
-node tools/recs-sim/run-node.js            # 127 checks (Node); tools/recs-sim/run-jsc.sh for JavaScriptCore
+node tools/recs-sim/run-node.js            # 128 checks (Node); tools/recs-sim/run-jsc.sh for JavaScriptCore
 node tools/recs-sim/props.js --break       # property tests (2.1)
-node tools/recs-sim/eval-bench.js --ablate # baselines, regret, learning curves, ablations (2.2, 2.3, 2.5)
+node tools/recs-sim/eval-bench.js --ablate --metric   # baselines, clicks vs our reward, regret,
+                                                      # learning curves, ablations (2.2, 2.3, 2.5)
+node tools/recs-sim/eval-bench.js --ablate --metric --json out.json   # the same, as data for the figures
 node tools/recs-sim/interleave-sim.js      # interleaving against every control (2.4); --muse for 2.7
 node tools/recs-sim/groups.js              # Group Blend strategies (2.6)
 node tools/recs-sim/sim.js --seeds 5       # each stage against today's feed (the earlier write-up)
@@ -397,6 +472,24 @@ node tools/recs-sim/fb-sim.js --seeds 6    # the Facebook-style value model (sim
 The numbers above are from recs 0.5.0 on 2026-11-12. Version 0.5 also fixed a repeat-window bug: a
 short feed blocked too little, so early pages could repeat. Interleaving against today's feed was
 68.5% before the fix and 70.3% after.
+
+Version 0.5.1 changes only the "why" line under a pick, not the ranking. A calm game shown to a
+bait-averse person could be labeled "hooky, and hooky works for you" (26 of 240 picks in a check run;
+reported by Karthik's agents). It now says "calmer pick", and a unit check covers it. None of the
+numbers above change.
+
+**When `game-recs.js` changes:** the server's test replays a fixed run of calls and compares them
+with Node. Regenerate its golden file, then run the Go test:
+
+```sh
+node backend/internal/recs/testdata/gen_golden.mjs   # rewrites backend/internal/recs/testdata/golden.json
+cd backend && go test ./internal/recs
+```
+
+**The figures:** `docs/ranking-figures/figures.html` holds every chart as inline SVG, with no
+external files. Open it in a browser for hover values, the table under each chart and dark mode.
+The PNGs in that folder are screenshots of it in light mode. If the numbers change, update the
+data in the page and take new screenshots.
 
 ## Sources
 
