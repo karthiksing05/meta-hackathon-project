@@ -238,3 +238,14 @@ type GroupMember struct {
 	Role     string    `bson:"role,omitempty" json:"role,omitempty"` // "owner" or "" for a member
 	JoinedAt time.Time `bson:"joinedAt" json:"joinedAt"`
 }
+
+// Challenge is "beat my score": one person sends a game to friends with their best score on it.
+type Challenge struct {
+	ID        string    `bson:"_id" json:"id"`
+	GameID    string    `bson:"gameId" json:"gameId"`
+	FromID    string    `bson:"fromId" json:"fromId"`
+	FromName  string    `bson:"fromName" json:"fromName"`
+	ToIDs     []string  `bson:"toIds" json:"toIds"`
+	Score     int64     `bson:"score" json:"score"` // the sender's best on the game when they sent it (0 if none)
+	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
+}

@@ -46,6 +46,10 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 				Options: options.Index().SetName("games_search").
 					SetWeights(bson.D{{Key: "title", Value: 10}, {Key: "tags", Value: 5}, {Key: "description", Value: 1}})},
 		},
+		cChallenges: {
+			{Keys: k("fromId", 1, "createdAt", -1), Options: options.Index().SetName("challenges_from")},
+			{Keys: k("toIds", 1, "createdAt", -1), Options: options.Index().SetName("challenges_to")},
+		},
 		// likes (saves)
 		cLikes: {
 			{Keys: k("userId", 1, "createdAt", -1), Options: options.Index().SetName("likes_by_user")},
@@ -54,6 +58,8 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 		// feed events: per-user history for the recommender, per-game aggregates, 90 day retention
 		cEvents: {
 			{Keys: k("userId", 1, "createdAt", -1), Options: options.Index().SetName("events_user")},
+			{Keys: k("with", 1, "createdAt", -1), Options: options.Index().SetName("events_with").
+				SetPartialFilterExpression(bson.D{{Key: "with", Value: bson.D{{Key: "$exists", Value: true}}}})},
 			{Keys: k("gameId", 1, "type", 1, "createdAt", -1), Options: options.Index().SetName("events_game_type")},
 			{Keys: k("createdAt", 1), Options: options.Index().SetExpireAfterSeconds(90 * day).SetName("events_ttl")},
 			// the interleaving summary reads only events that carry a team

@@ -48,7 +48,10 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/events/export?since=&limit=` | bearer | the event log as JSON Lines, for offline benchmarking |
 | `GET /v1/games/{id}` | optional | one game; `{id}` may also be the slug from its manifest |
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
-| `GET /v1/games/{id}/leaderboard`, `POST /v1/games/{id}/scores` | none / bearer | best score per user |
+| `GET /v1/games/{id}/leaderboard?scope=everyone\|friends\|group&groupId=`, `POST /v1/games/{id}/scores` | none (friends and group need a bearer; group needs membership) / bearer | best score per user, optionally only among my friends (and me) or a Group's members |
+| `GET /v1/me/likes`, `GET /v1/games/{id}/likes` | bearer / optional | the games I saved; how many saved a game and which of my friends did |
+| `POST /v1/challenges`, `GET /v1/challenges` | bearer | "beat my score": `{gameId, toUserIds[]}` (friends only, up to 20); the ones I sent and received, with `beaten`/`myScore` or each recipient's `responses` |
+| `GET /v1/me/moments` | bearer | what happened with me on other phones: challenges received plus off-feed moment events that name me in `with`; `{moments: [{momentID, kind, gameID, from, at}], cursor}` |
 | `GET /v1/me/recs` | bearer | my model's summary and taste profile |
 | `GET /v1/users/{id}` | optional | a person's public profile (`isFriend` when signed in) |
 | `GET /v1/me/friends`, `PUT`/`DELETE /v1/me/friends/{id}` | bearer | my friends; add or remove one (mutual, immediate) |

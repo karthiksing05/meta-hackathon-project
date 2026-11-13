@@ -95,12 +95,17 @@ func (s *Server) Handler() http.Handler {
 			r.With(s.optionalAuth).Get("/", s.getGame)
 			r.With(s.requireAuth).Put("/like", s.like(true))
 			r.With(s.requireAuth).Delete("/like", s.like(false))
-			r.Get("/leaderboard", s.leaderboard)
+			r.With(s.optionalAuth).Get("/leaderboard", s.leaderboard)
+			r.With(s.optionalAuth).Get("/likes", s.gameLikes)
 			r.With(s.requireAuth).Post("/scores", s.submitScore)
 		})
 
 		// People, friends and Groups
 		r.With(s.optionalAuth).Get("/users/{id}", s.getUser)
+		r.With(s.requireAuth).Get("/me/likes", s.myLikes)
+		r.With(s.requireAuth).Get("/me/moments", s.myMoments)
+		r.With(s.requireAuth).Post("/challenges", s.createChallenge)
+		r.With(s.requireAuth).Get("/challenges", s.listChallenges)
 		r.With(s.requireAuth).Get("/me/friends", s.listFriends)
 		r.With(s.requireAuth).Put("/me/friends/{id}", s.setFriend(true))
 		r.With(s.requireAuth).Delete("/me/friends/{id}", s.setFriend(false))

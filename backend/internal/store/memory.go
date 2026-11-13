@@ -12,19 +12,20 @@ import (
 
 // Memory is a non-persistent Store for local development and tests (STORE=memory).
 type Memory struct {
-	mu      sync.Mutex
-	users   map[string]*model.User
-	refresh map[string]model.RefreshToken
-	games   map[string]*model.Game
-	likes   map[string]bool // gameID|userID
-	scores  map[string]model.Score
-	events  []model.Event
-	eventID map[string]bool
-	jobs    map[string]*model.Job
-	recs    map[string]model.RecsRecord
-	friends map[string]map[string]bool // user -> friends
-	groups  map[string]*model.Group
-	members map[string]map[string]model.GroupMember // group -> user -> member
+	mu         sync.Mutex
+	users      map[string]*model.User
+	refresh    map[string]model.RefreshToken
+	games      map[string]*model.Game
+	likes      map[string]bool // gameID|userID
+	scores     map[string]model.Score
+	events     []model.Event
+	eventID    map[string]bool
+	jobs       map[string]*model.Job
+	recs       map[string]model.RecsRecord
+	friends    map[string]map[string]bool // user -> friends
+	groups     map[string]*model.Group
+	members    map[string]map[string]model.GroupMember // group -> user -> member
+	challenges []model.Challenge
 }
 
 func NewMemory() *Memory {

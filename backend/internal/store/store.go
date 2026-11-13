@@ -78,6 +78,16 @@ type Store interface {
 	SetJobStatus(ctx context.Context, id, status string, u model.JobUpdate) error
 	FailStaleJobs(ctx context.Context, reason string) (int, error) // queued or running jobs left by a restart
 
+	// Saves seen from the other side: the games a person saved (newest first) and the people who saved a game.
+	LikedGameIDs(ctx context.Context, userID string, limit int) ([]string, error)
+	GameLikers(ctx context.Context, gameID string, limit int) ([]string, error)
+
+	// Challenges ("beat my score"): those a person sent or received, newest first.
+	InsertChallenge(ctx context.Context, c *model.Challenge) error
+	ChallengesFor(ctx context.Context, userID string, limit int) ([]model.Challenge, error)
+	// MomentsWith returns off-feed moment events (events with a kind) that name userID in `with`, newest first.
+	MomentsWith(ctx context.Context, userID string, limit int) ([]model.Event, error)
+
 	GameStats(ctx context.Context, since time.Time) ([]model.GameStats, error)
 	Interleave(ctx context.Context, since time.Time) (model.Interleave, error)
 	ExportEvents(ctx context.Context, since time.Time, limit int) ([]model.Event, error) // oldest first
