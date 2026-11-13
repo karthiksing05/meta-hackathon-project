@@ -537,6 +537,22 @@ Every message the host posts carries `key`, so Swift knows which session sent it
 `perf` message: `{type: "perf", key, prepare_ms, activate_ms, first_frame_ms, fps, heap_mb}`
 (sent after activation and every few seconds while playing).
 
+**Filling the screen (addition).** Phones are about 19.5:9 and the playfield is 9:16, so a game
+fitted inside the player's bars leaves bands around it. Two things fill them, neither of which
+changes the game world, so replays and scores are the same on every device:
+- *Fit box.* A concept may call `sdk.fitBox({x0, y0, x1, y1, safe: {x0, y0, x1, y1}})` in setup
+  (playfield units). The runtime then fits the `safe` area inside the insets instead of the
+  playfield and, within that, centers the whole box on the screen, so the rest of the box runs
+  under the bars to the screen's edges. Without a fit box nothing changes.
+- *Microgames.* A canvas taller than 9:16 (the standard is 360 × 780) keeps its full width: it maps
+  1:1 to the playfield and runs 70 past its top and bottom, and the kit declares that as the fit
+  box with the safe area between the bleed bands (the top 110/780 and bottom 96/780 of the canvas;
+  `authoring/expander/canvas.mjs`). On a 19.5:9 phone it fills the screen; key content (taps, the
+  HUD, text) stays in the safe area, clear of the bars. Every microgame also *bleeds*: past its
+  canvas the kit paints the canvas background color and mirrors the backdrop (an image op covering
+  the canvas among the first four) across each edge, dimmed 14%, so a 360 × 640 game never shows
+  plain bands. Drawing only.
+
 **Insets and posters (additions).** `insets` are `{top, bottom, left, right}` in points (each
 optional): the playfield fits inside them, the look's background still fills the screen, and the
 HUD and cards center inside them (`command({type: "insets", top, bottom, left, right})` updates

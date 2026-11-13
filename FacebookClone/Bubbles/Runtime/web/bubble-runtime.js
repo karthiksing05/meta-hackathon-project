@@ -19,7 +19,8 @@
  *   sdk.botState, sdk.feel {ambient, particles, shake, sound, tempo}, sdk.hud.retry, sdk.hud.note,
  *   sdk.preload(url), sdk.log(msg), sdk.ended, sdk.off(type, fn), fx.sparkle(x, y, color, n),
  *   fx.ring(x, y, r, color), sdk.textField(spec) (a native text field; typed text arrives as
- *   "text.input" events, docs/BUBBLES.md 7.11).
+ *   "text.input" events, docs/BUBBLES.md 7.11), sdk.fitBox(box) (a game taller than the playfield:
+ *   what to fit to the screen, docs/BUBBLES.md 4.6 "Filling the screen").
  * Graphics additions: g.view, g.px, g.reduced, g.poster, g.halo, g.puff, g.spark, g.ring, g.circle,
  *   g.line, g.glowRect, g.rgba, g.mix, g.ease, g.spring, g.wrapText; g.bubble also takes sx, sy, emoji;
  *   g.pill also takes shade, glowColor, strokeWidth; g.palette also has good, near, mid, soft.
@@ -1451,6 +1452,12 @@
     // plays; what the person types arrives as "text.input" {kind: "submit" | "change", value} at the
     // start of a tick, recorded in the replay log like a pointer action. Headless it does nothing.
     textField(spec) { this._run.setTextField(spec); }
+    // Fill (docs/BUBBLES.md 4.6): a game whose canvas is taller than the playfield (360 x 780 on a
+    // 360 x 640 playfield) says which area to fit, {x0, y0, x1, y1, safe: {x0, y0, x1, y1}} in
+    // playfield units. The safe area (taps, HUD, key content) is fitted inside the insets; the rest
+    // of the box may run under them, to the screen's edges. Call it in setup. Rendering only: the
+    // playfield and its coordinates don't change, so replays are the same on every device.
+    fitBox(box) { this._run.setFitBox(box); }
     preload(url) { if (this._run.preload) this._run.preload(url); }
     log(message) { logOnce(this._owner + ":" + message, this._owner + ": " + message); }
     // Length contract (docs/BUBBLES.md 7.9). Every kit honors it:
@@ -1524,6 +1531,7 @@
       this.tickPayload = { tick: 0 };
       this.ptr = { x: 0, y: 0 };
       this.textField = null;
+      this.fitBox = null;
       this.textValue = "";
       this.textEvent = { kind: "change", value: "" };
       this.glueFns = Object.create(null);
@@ -1735,6 +1743,21 @@
       e.kind = kind;
       e.value = value;
       this.emit("text.input", e);
+    }
+
+    setFitBox(box) {
+      const rect = (r) => {
+        if (!isObj(r)) return null;
+        const n = (k) => clamp(Number(r[k]) || 0, -400, Math.max(W, H) + 400);
+        const x0 = n("x0"), y0 = n("y0"), x1 = n("x1"), y1 = n("y1");
+        return x1 - x0 >= 40 && y1 - y0 >= 40 ? { x0, y0, x1, y1 } : null;
+      };
+      const b = rect(box);
+      if (!b) { this.fitBox = null; return; }
+      let safe = rect(box.safe) || b;
+      safe = { x0: Math.max(b.x0, safe.x0), y0: Math.max(b.y0, safe.y0), x1: Math.min(b.x1, safe.x1), y1: Math.min(b.y1, safe.y1) };
+      if (safe.x1 - safe.x0 < 40 || safe.y1 - safe.y0 < 40) safe = b;
+      this.fitBox = Object.freeze(Object.assign(b, { safe: Object.freeze(safe) }));
     }
 
     setTextField(spec) {
@@ -5493,7 +5516,7 @@
       this.cssH = cssH;
       this.dpr = dpr;
       const insets = this.opts ? this.opts.insets : null;
-      this.fit = this.fitFor(cssW, cssH, insets, this.hudRowFor(this.entry, insets));
+      this.fit = this.fitFor(cssW, cssH, insets, this.hudRowFor(this.entry, insets), this.entry ? this.entry.fitBox : null);
       if (d.root.style) {
         const ins = normInsets(this.opts ? this.opts.insets : null);
         d.root.style.setProperty("--inset-top", ins.top + "px");
@@ -5504,16 +5527,28 @@
     },
 
     // The playfield fits inside the insets (top, bottom, left, right in CSS px); the look's
-    // background still fills the whole canvas.
-    fitFor(cssW, cssH, insets, hudRow) {
+    // background still fills the whole canvas. With a fit box (sdk.fitBox), its safe area fits
+    // inside the insets instead, and the box is centered on the screen as far as that allows, so
+    // a 19.5:9 game reaches every edge of a 19.5:9 phone with its key content clear of the bars.
+    fitFor(cssW, cssH, insets, hudRow, box) {
       const ins = normInsets(insets);
       let top = ins.top + (hudRow || 0), bottom = ins.bottom, left = ins.left, right = ins.right;
       if (cssH - top - bottom < 240) { top = 0; bottom = 0; }
       if (cssW - left - right < 180) { left = 0; right = 0; }
       const availW = cssW - left - right, availH = cssH - top - bottom;
-      const scale = Math.min(availW / W, availH / H);
-      const ox = left + (availW - W * scale) / 2;
-      const oy = top + (availH - H * scale) / 2;
+      const b = isObj(box) ? box : { x0: 0, y0: 0, x1: W, y1: H };
+      const S = isObj(b.safe) ? b.safe : b;
+      const sw = S.x1 - S.x0, sh = S.y1 - S.y0;
+      const scale = Math.min(availW / sw, availH / sh);
+      // The safe area stays inside the insets. With no bleed on an axis it is centered there (as
+      // without a box); otherwise the whole box is centered on the screen as far as that allows.
+      const place = (lo, avail, s0, s1, b0, b1, screen) => {
+        const min = lo - s0 * scale, max = lo + avail - s1 * scale;
+        if (s0 === b0 && s1 === b1) return (min + max) / 2;
+        return clamp((screen - (b1 - b0) * scale) / 2 - b0 * scale, Math.min(min, max), Math.max(min, max));
+      };
+      const ox = place(left, availW, S.x0, S.x1, b.x0, b.x1, cssW);
+      const oy = place(top, availH, S.y0, S.y1, b.y0, b.y1, cssH);
       return {
         scale, ox, oy,
         view: { x0: -ox / scale, y0: -oy / scale, x1: (cssW - ox) / scale, y1: (cssH - oy) / scale, w: cssW / scale, h: cssH / scale },
@@ -5701,7 +5736,7 @@
         // Same insets as boot/activate (options.insets wins), so key content clears the overlay.
         const insets = normInsets(isObj(o.insets) ? o.insets : p.insets);
         const run = posterRun(entry.session, { bot_skill: typeof o.bot_skill === "number" ? o.bot_skill : p.bot_skill, player: p.player, preload: (u) => Images.load(u) });
-        const fit = this.fitFor(w, h, insets, o.hud !== false ? this.hudRowFor(entry, insets) : 0);
+        const fit = this.fitFor(w, h, insets, o.hud !== false ? this.hudRowFor(entry, insets) : 0, run.fitBox);
         const g = this.g;
         g.pendingImages = [];
         this.drawFrame(ctx, run, entry.session.style, w, h, scale, fit, { poster: true, t: 0, fx: false, ambientSeed: entry.session.manifest.seed, entry, noCache: true });
@@ -6195,8 +6230,9 @@
       const ctx = this.warmCanvas.getContext("2d");
       const cssW = this.cssW || 390, cssH = this.cssH || 844, ratio = this.dpr || 2;
       entry.hudShown = run.hud.score !== false;
+      entry.fitBox = run.fitBox;
       const insets = entry.payload && isObj(entry.payload.insets) ? entry.payload.insets : this.opts ? this.opts.insets : null;
-      const fit = this.fitFor(cssW, cssH, insets, this.hudRowFor(entry, insets));
+      const fit = this.fitFor(cssW, cssH, insets, this.hudRowFor(entry, insets), entry.fitBox);
       const style = entry.session.style;
       entry.ownScenery = false;
       this.drawFrame(ctx, run, style, cssW, cssH, ratio, fit, { poster: false, t: 0, fx: false, ambientSeed: run.manifest.seed, entry, skipBackdrop: true });

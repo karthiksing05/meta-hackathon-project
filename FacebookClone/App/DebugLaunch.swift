@@ -56,7 +56,12 @@ enum DebugLaunch {
         case "sound": router.push(.sound(arg))
         case "chain": router.push(.bubbleChain(arg))
         case "marketplace": router.push(.marketplace)
-        case "play": router.play(arg)
+        case "play":
+            // A server id or slug the app hasn't fetched yet: load it first (FB_OPEN=play:<server id>).
+            Task { @MainActor in
+                let bubble = await bubbleStore.loadGame(id: arg)
+                router.play(bubble?.id ?? arg)
+            }
         case "burst":
             let replay = bubbleStore.bubble(id: arg)?.featuredRun?.replay
             router.play(arg, replay: replay)

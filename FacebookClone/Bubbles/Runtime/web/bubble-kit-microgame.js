@@ -37,6 +37,11 @@
   const SWIPE_MIN = 28;      // playfield units
   const SWIPE_MAX_TICKS = 30;
   const MAX_LIVE_GAMES = 48; // engine handles kept alive at once (runs are cheap to recreate)
+  // Tall canvases (taller than the 9:16 playfield; the standard is 360 x 780 = 19.5:9) keep their
+  // key content between these bands, as fractions of the canvas height (110 and 96 on 780). The
+  // bands run under the player's top and bottom bars on a phone (docs/BUBBLES.md 4.6, "Filling the
+  // screen"; authoring/SPEC.md, canvas).
+  const SAFE_TOP = 110 / 780, SAFE_BOTTOM = 96 / 780;
 
   const lib = () => (typeof MicrogameEngine !== "undefined" ? MicrogameEngine : null);
   const hasDOM = typeof document !== "undefined" && typeof Image !== "undefined";
@@ -83,10 +88,14 @@
     while (live.length > MAX_LIVE_GAMES) dispose(live[0]);
     const meta = game.meta;
     const cw = meta.canvas.w, ch = meta.canvas.h;
-    const s = Math.min(W / cw, H / ch);
+    // A canvas taller than the playfield keeps its full width and runs past the playfield's top
+    // and bottom (sdk.fitBox shows all of it); others fit inside, as before. Fixed per game, so
+    // pointer coordinates and replays don't depend on the device.
+    const tall = ch * W > cw * H * 1.02;
+    const s = tall ? W / cw : Math.min(W / cw, H / ch);
     const sess = {
       game,
-      cw, ch,
+      cw, ch, tall,
       s, ox: (W - cw * s) / 2, oy: (H - ch * s) / 2,
       assets: hasDOM && meta.assets > 0 ? new L.AssetStore(game.assets(), { audioCtx: () => audioOut(sdk)?.ctx || null }) : null,
       music: hasDOM ? new L.MusicPlayer() : null,
@@ -111,6 +120,72 @@
 
   function audioOut(sdk) {
     return sdk.fx && typeof sdk.fx.audio === "function" ? sdk.fx.audio() : null;
+  }
+
+  // ---- bleed ----------------------------------------------------------------------------
+
+  // The game's own background past its canvas, out to the screen's edges, so no band shows the
+  // look's plain color instead (docs/BUBBLES.md 4.6, "Filling the screen"): the canvas
+  // background color, then the backdrop (an image op covering the canvas, among the first few
+  // ops) mirrored across each edge so it continues without a seam, dimmed a little so the canvas
+  // edge still reads. Drawing only: nothing here touches game state.
+  const BLEED_DIM = 0.14;
+
+  function backdropOp(sess, f) {
+    const n = Math.min(4, f.ops.length);
+    for (let i = 0; i < n; i++) {
+      const op = f.ops[i];
+      if (op.op !== "image" || op.rotation || op.scale !== 1 || !(op.opacity >= 0.99)) continue;
+      if (op.x <= 2 && op.y <= 2 && op.x + op.w >= sess.cw - 2 && op.y + op.h >= sess.ch - 2) return op;
+    }
+    return null;
+  }
+
+  function paintBleed(gfx, sess, f, L) {
+    const v = gfx.view;
+    if (!v) return;
+    const k = sess.s, cx0 = sess.ox, cy0 = sess.oy, cx1 = cx0 + sess.cw * k, cy1 = cy0 + sess.ch * k;
+    if (v.x0 >= cx0 - 0.5 && v.y0 >= cy0 - 0.5 && v.x1 <= cx1 + 0.5 && v.y1 <= cy1 + 0.5) return;
+    const ctx = gfx.ctx;
+    ctx.save();
+    ctx.globalAlpha = 1;
+    if (f.background & 0xff) {
+      ctx.fillStyle = L.rgbaToCss(f.background);
+      ctx.fillRect(v.x0 - 1, v.y0 - 1, v.w + 2, v.h + 2);
+    }
+    const op = backdropOp(sess, f);
+    const a = op && sess.assets && sess.assets.images[op.asset];
+    if (a && a.ok) {
+      const frames = a.frames || 1, cols = a.cols || 1, rows = Math.ceil(frames / cols);
+      const sw = a.img.naturalWidth / cols, sh = a.img.naturalHeight / rows;
+      const fr = (op.frame || 0) % frames;
+      const sx = (fr % cols) * sw, sy = Math.floor(fr / cols) * sh;
+      // Tiles the size of the backdrop around it, mirrored along each axis they're offset on
+      // (odd steps), so every shared edge matches; only the ones the view reaches.
+      const tw = op.w * k, th = op.h * k, bx = cx0 + op.x * k, by = cy0 + op.y * k;
+      const ix0 = Math.floor((v.x0 - bx) / tw), ix1 = Math.floor((v.x1 - bx) / tw);
+      const iy0 = Math.floor((v.y0 - by) / th), iy1 = Math.floor((v.y1 - by) / th);
+      if (ix1 - ix0 <= 6 && iy1 - iy0 <= 6) {
+        for (let iy = iy0; iy <= iy1; iy++) for (let ix = ix0; ix <= ix1; ix++) {
+          if (ix === 0 && iy === 0) continue;
+          const fx = ix % 2 !== 0, fy = iy % 2 !== 0;
+          ctx.save();
+          ctx.translate(bx + ix * tw + (fx ? tw : 0), by + iy * th + (fy ? th : 0));
+          ctx.scale(fx ? -1 : 1, fy ? -1 : 1);
+          // A hair of overlap hides the seam between tiles.
+          ctx.drawImage(a.img, sx, sy, sw, sh, -0.25, -0.25, tw + 0.5, th + 0.5);
+          ctx.restore();
+        }
+      }
+    }
+    // Dim what lies outside the canvas.
+    ctx.globalAlpha = BLEED_DIM;
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.rect(v.x0 - 1, v.y0 - 1, v.w + 2, v.h + 2);
+    ctx.rect(cx0, cy0, cx1 - cx0, cy1 - cy0);
+    ctx.fill("evenodd");
+    ctx.restore();
   }
 
   // Playfield (360x640) <-> engine canvas coordinates.
@@ -145,6 +220,10 @@
         return;
       }
       sdk.state.microgame = { phase: sess.status.phase, score: sess.status.score || 0, time_ms: 0 };
+      if (sess.tall && typeof sdk.fitBox === "function") {
+        const y0 = sess.oy, y1 = sess.oy + sess.ch * sess.s;
+        sdk.fitBox({ x0: 0, y0, x1: W, y1, safe: { x0: 0, y0: y0 + sess.ch * SAFE_TOP * sess.s, x1: W, y1: y1 - sess.ch * SAFE_BOTTOM * sess.s } });
+      }
       const ti = sess.game.meta.text_input;
       if (ti) sdk.textField(textFieldSpec(sess, ti));
 
@@ -165,6 +244,7 @@
         const L = lib();
         if (!L) return;
         const f = sess.game.frame();
+        paintBleed(gfx, sess, f, L);
         L.drawFrame(gfx.ctx, f, sess.assets, { clear: false, k: sess.s, ox: sess.ox, oy: sess.oy });
         // Side effects queued since the last drawn frame. Drawing is presentation-only, so none of
         // this touches game state (bot, poster and replay runs stay deterministic).
