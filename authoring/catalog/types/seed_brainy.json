@@ -197,6 +197,7 @@
     "win": "finish the rounds",
     "lose": "lose all lives",
     "scoring": "points by how few clues you needed",
+    "notes": "Use quiz with four country choices per round (cols 2); each round reveals one more clue on a timer or a \"Next clue\" tap, and the score is the points still on offer when you answer right (500 after clue 1, then 400, 300, 200, 100), shown in the HUD. No clue names the country, its capital or its flag: the last clue is the capital’s first letter at most. Lay the clues out from y 176 as plain lines in one card, and keep the answer tiles in the controls band.",
     "session_seconds": [
       45,
       150

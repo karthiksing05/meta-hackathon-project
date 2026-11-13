@@ -639,7 +639,7 @@
     ],
     "status": "seed",
     "source": "kevin",
-    "notes": "Typed on the iPhone keyboard with typed_answer (one tier per clue: the answer); the drawn keyboard is only for letter-tile games."
+    "notes": "Use the typed_answer fragment (one tier per clue: the answer), never a custom input; the drawn keyboard is only for letter-tile games. Every clue is fair: the definition sits at the start or the end, and the wordplay makes the answer letter for letter (a hidden word appears as consecutive letters across the clue's words; an anagram uses exactly the answer's letters, flagged by a word like 'upset' or 'muddled'). Check each one before writing it, and drop any clue that fails. Mix types: hidden word, anagram, container, charade, double definition."
   },
   {
     "id": "hangman",
