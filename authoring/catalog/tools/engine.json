@@ -30,7 +30,7 @@
     "path": "authoring/SPEC.md"
   },
   {
-    "id": "physics_bodies",
+    "id": "physics_world",
     "kind": "runtime_tool",
     "name": "Physics bodies",
     "aliases": [

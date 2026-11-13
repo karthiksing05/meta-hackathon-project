@@ -1,0 +1,1244 @@
+[
+  {
+    "id": "clue_gated_whodunit",
+    "name": "Clue-gated whodunit",
+    "aliases": [
+      "choose your own mystery",
+      "detective story game",
+      "Clue-style story",
+      "murder mystery story"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "branching investigation",
+    "summary": "A branching mystery where you only have time to visit some places, each visit can add a clue, and the accusation at the end only lands if you gathered enough clues on the right suspect.",
+    "core_loop": "read a short scene → pick one of up to three choices → maybe gain a clue or trust → choose which place to search next → accuse at the finale",
+    "verbs": [
+      "read",
+      "choose",
+      "investigate",
+      "accuse"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scenes",
+      "choice buttons",
+      "clue notebook",
+      "trust meter",
+      "endings"
+    ],
+    "rules": [
+      "only a limited number of locations can be visited before the deadline",
+      "choices add clues or change a trust meter, and some unlock later options",
+      "an accusation needs a clue threshold to win; a wrong or thin accusation is a bad ending",
+      "a hidden best ending needs a specific path and stat"
+    ],
+    "win": "accuse the right suspect with enough clues, or reach the secret ending",
+    "lose": "a bad ending: wrong suspect, too few clues, or a reckless choice",
+    "scoring": "clues × 100 + trust × 50 + ending bonus",
+    "session_seconds": [
+      120,
+      360
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare which ending you reached with friends",
+      "challenge a friend to find the secret ending"
+    ],
+    "content_needs": [
+      "scene text",
+      "choices and links",
+      "clue list",
+      "endings"
+    ],
+    "difficulty_levers": [
+      "number of visits allowed",
+      "clue threshold",
+      "number of bad endings"
+    ],
+    "tools": [
+      "choice_story",
+      "score",
+      "text_wrap"
+    ],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "a spooky wizard school mystery where my roommate gets framed for stealing something and I have to find the real thief before dawn",
+      "a detective game where I question suspects and name the killer",
+      "a sherlock style mystery with clues and a wrong accusation ending"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_stormglass_affair.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_stormglass_affair"
+  },
+  {
+    "id": "meter_tradeoff_story",
+    "name": "Meter trade-off adventure",
+    "aliases": [
+      "choose your own adventure",
+      "branching adventure",
+      "interactive fiction"
+    ],
+    "family": "story_choice",
+    "subfamily": "branching adventure with stats",
+    "summary": "A branching adventure where every choice trades two meters against each other (loyalty against heat, say), and the meters decide which route works at the climax.",
+    "core_loop": "read a scene → pick a choice that moves two meters → meters gate later routes → reach an ending at the climax",
+    "verbs": [
+      "read",
+      "choose",
+      "balance"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scenes",
+      "choice buttons",
+      "two opposing meters",
+      "endings"
+    ],
+    "rules": [
+      "each choice raises one meter and often costs the other",
+      "a climax choice succeeds only if a meter is under or over a threshold",
+      "one character gives deliberately bad advice",
+      "a secret ending needs a specific earlier choice"
+    ],
+    "win": "reach a good ending with the meters in range",
+    "lose": "a bad ending from a trap route or a meter out of range",
+    "scoring": "meter values × points + ending bonus",
+    "session_seconds": [
+      120,
+      360
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share which ending you got",
+      "friends compare their meter totals"
+    ],
+    "content_needs": [
+      "scene text",
+      "choices and links",
+      "meter effects",
+      "endings"
+    ],
+    "difficulty_levers": [
+      "meter thresholds",
+      "how many trap choices"
+    ],
+    "tools": [
+      "choice_story",
+      "score",
+      "text_wrap"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a space opera adventure where I'm a smuggler pulled into a rebellion against an evil empire, with a big escape at the end and maybe a traitor",
+      "a star wars style story where I choose between my crew and getting away clean",
+      "a pirate adventure with choices where reputation and danger change the ending"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_last_run_of_the_magpie.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_last_run_of_the_magpie"
+  },
+  {
+    "id": "bait_the_leaker",
+    "name": "Bait the leaker",
+    "aliases": [
+      "canary trap story",
+      "find the gossip",
+      "who is leaking secrets"
+    ],
+    "family": "mystery_narrative",
+    "subfamily": "social deduction story",
+    "summary": "A branching social drama where you tell different people different fake secrets, see which one leaks, and use that to unmask the anonymous source while keeping your reputation up.",
+    "core_loop": "read a scene → choose who to tell which secret → watch what leaks → collect proof → unmask the source at the finale",
+    "verbs": [
+      "read",
+      "choose",
+      "bait",
+      "deduce"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scenes",
+      "choice buttons",
+      "secrets",
+      "reputation meter",
+      "clues",
+      "endings"
+    ],
+    "rules": [
+      "a planted fake secret that leaks proves who heard it",
+      "tipping off the suspect closes the trap",
+      "unmasking needs enough clues and a reputation above a floor"
+    ],
+    "win": "unmask the right person with enough clues and reputation, or find the secret truce ending",
+    "lose": "a bad ending from accusing the wrong person, thin proof or low reputation",
+    "scoring": "clues × 100 + reputation × 50 + ending bonus",
+    "session_seconds": [
+      120,
+      360
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "dare a friend to find who leaked faster",
+      "compare endings"
+    ],
+    "content_needs": [
+      "scene text",
+      "choices and links",
+      "secrets and who heard them",
+      "endings"
+    ],
+    "difficulty_levers": [
+      "clue threshold",
+      "reputation floor"
+    ],
+    "tools": [
+      "choice_story",
+      "score",
+      "text_wrap"
+    ],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "a messy rich-kid prep school drama where an anonymous gossip account is leaking everyone's secrets and I have to figure out who runs it",
+      "a gossip girl game where I trap the anonymous blogger",
+      "an office drama where someone leaks emails and I set a trap to find them"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_the_hostess_knows.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_the_hostess_knows"
+  },
+  {
+    "id": "heist_crew_story",
+    "name": "Heist crew story",
+    "aliases": [
+      "heist planner",
+      "pick your crew",
+      "caper story"
+    ],
+    "family": "story_choice",
+    "subfamily": "heist",
+    "summary": "A branching heist where you pick a small crew from a few specialists, each opening a different route, then run the job while an alarm meter climbs; one crew member may betray you.",
+    "core_loop": "pick crew → choose a plan and route their skills open → make choices that raise or lower the alarm → escape or get caught",
+    "verbs": [
+      "choose",
+      "plan",
+      "sneak",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scenes",
+      "crew roster",
+      "alarm meter",
+      "gear",
+      "endings"
+    ],
+    "rules": [
+      "each crew member unlocks one route or trick",
+      "risky choices raise the alarm; casing and rehearsal lower it",
+      "one crew member can double-cross you unless you plan for it",
+      "the escape fails if the alarm is too high"
+    ],
+    "win": "get away clean, or pull the secret long con",
+    "lose": "caught or double-crossed",
+    "scoring": "(alarm cap − alarm) × 100 + ending bonus",
+    "session_seconds": [
+      120,
+      360
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your crew and ending",
+      "friends compare who betrayed them"
+    ],
+    "content_needs": [
+      "scene text",
+      "crew members and routes",
+      "alarm effects",
+      "endings"
+    ],
+    "difficulty_levers": [
+      "alarm threshold",
+      "number of crew picks"
+    ],
+    "tools": [
+      "choice_story",
+      "score",
+      "text_wrap"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a heist story game where I pick my crew and plan how to steal back a priceless egg from a crooked collector's masked party, and someone might double-cross me",
+      "an ocean's eleven style game where I plan a casino robbery",
+      "a money heist story where I choose my team and someone betrays us"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_saffron_egg_job.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_saffron_egg_job"
+  },
+  {
+    "id": "orbit_zone_timing",
+    "name": "Orbit timing tap",
+    "aliases": [
+      "tap on beat",
+      "timing ring",
+      "hit the zone",
+      "perfect zone tap"
+    ],
+    "family": "rhythm_music",
+    "subfamily": "timing tap",
+    "summary": "A marker circles a ring; tap when it passes through a target zone, with a smaller perfect slice in the middle. Streaks multiply points, and the zone jumps after each hit.",
+    "core_loop": "watch the marker orbit → tap as it crosses the zone → score clean or perfect × combo → zone moves → repeat until time runs out",
+    "verbs": [
+      "tap",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "ring",
+      "orbiting marker",
+      "target zone",
+      "perfect slice",
+      "combo",
+      "lives",
+      "clock"
+    ],
+    "rules": [
+      "a tap inside the zone scores; inside the perfect slice scores more",
+      "points are multiplied by the combo",
+      "an early tap costs points, breaks the combo and briefly stuns",
+      "letting the marker pass the zone costs a life"
+    ],
+    "win": "survive the clock",
+    "lose": "run out of lives from missed zones",
+    "scoring": "perfect or clean points × combo; rank titles by total",
+    "session_seconds": [
+      30,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "post your rank title",
+      "beat a friend's aura"
+    ],
+    "content_needs": [
+      "rank titles"
+    ],
+    "difficulty_levers": [
+      "orbit speed",
+      "zone width",
+      "perfect slice width"
+    ],
+    "tools": [
+      "lives",
+      "combo",
+      "countdown",
+      "score",
+      "tick_rules",
+      "synth_sound"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a stupid brainrot game where you farm aura by tapping on beat",
+      "a tap on the beat game where streaks multiply your score",
+      "a sigma timing game where you hit the perfect zone"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_aura_farm.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_aura_farm"
+  },
+  {
+    "id": "two_way_speed_sort",
+    "name": "Two-way speed sort",
+    "aliases": [
+      "this or that",
+      "swipe left or right",
+      "yes or no speed game",
+      "npc or main character"
+    ],
+    "family": "reaction",
+    "subfamily": "binary sort",
+    "summary": "Cards flash up one at a time and you call each one of two categories as fast as you can; one draining bar is the clock, right calls refill it and wrong calls drain it.",
+    "core_loop": "read a card → tap or swipe one of two answers → right refills the bar, wrong drains it → bar drains faster over time",
+    "verbs": [
+      "sort",
+      "decide",
+      "swipe"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "scenario cards",
+      "two answer buttons",
+      "draining bar",
+      "streak multiplier"
+    ],
+    "rules": [
+      "right calls add time and score with a speed bonus",
+      "wrong calls take time off",
+      "the drain speeds up over the run",
+      "a streak multiplies points"
+    ],
+    "win": "survive the full run",
+    "lose": "the bar empties",
+    "scoring": "points per right call + speed bonus, × streak multiplier",
+    "session_seconds": [
+      30,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "friends argue over the calls",
+      "beat a friend's clout"
+    ],
+    "content_needs": [
+      "cards with the right category"
+    ],
+    "difficulty_levers": [
+      "drain rate",
+      "refill amount",
+      "penalty size"
+    ],
+    "tools": [
+      "sort_bins",
+      "score",
+      "combo",
+      "timer_bar",
+      "difficulty_curve"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "npc or main character game where weird situations pop up and you have to sort them super fast",
+      "a swipe left or right game sorting red flags and green flags fast",
+      "is it a hotdog or not speed sorting game"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_npc_or_main.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_npc_or_main"
+  },
+  {
+    "id": "dodge_collect_waves",
+    "name": "Dodge and collect waves",
+    "aliases": [
+      "dodge and grab",
+      "catch the good avoid the bad"
+    ],
+    "family": "dodge_survive",
+    "subfamily": "dodge and collect",
+    "summary": "Drag a character around the screen to grab pickups while hazards stream in from two edges in waves; a streak of pickups triggers a short power mode where hazards become food.",
+    "core_loop": "drag to steer → grab pickups → dodge hazards from the top and side → build a streak → power mode → clear the wave",
+    "verbs": [
+      "drag",
+      "dodge",
+      "collect"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "avatar",
+      "pickups",
+      "two hazard streams",
+      "lives",
+      "waves",
+      "power mode"
+    ],
+    "rules": [
+      "touching a hazard costs a life, clears nearby hazards and gives grace",
+      "a streak of pickups without a hit triggers power mode",
+      "in power mode hazards are harmless and worth points",
+      "clearing all waves wins"
+    ],
+    "win": "clear every wave",
+    "lose": "lose all lives",
+    "scoring": "points per pickup, doubled in power mode, plus points per hazard eaten",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's score"
+    ],
+    "content_needs": [
+      "pickup and hazard names"
+    ],
+    "difficulty_levers": [
+      "spawn rate",
+      "hazard speed",
+      "streak length for power mode"
+    ],
+    "tools": [
+      "player_drag",
+      "spawn_wave",
+      "pickups",
+      "collide",
+      "lives",
+      "score",
+      "waves"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "goblin mode game where you grab snacks at 2am and dodge responsibilities",
+      "a game where I catch falling candy and dodge vegetables",
+      "grab coins and avoid bombs coming from everywhere"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_goblin_snack_run.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_goblin_snack_run"
+  },
+  {
+    "id": "judged_reply_quiz",
+    "name": "Judged reply quiz",
+    "aliases": [
+      "pick the best line",
+      "dating show quiz",
+      "say the right thing"
+    ],
+    "family": "party_social",
+    "subfamily": "dialogue choice",
+    "summary": "Someone says a line and you pick the best of four replies before a short timer runs out; a panel of judges reacts with score cards, and the multiplier heats up every few rounds.",
+    "core_loop": "read the line → pick one of four replies fast → judges react and score → heat rises every few rounds",
+    "verbs": [
+      "read",
+      "choose",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "prompt line",
+      "four replies",
+      "timer bar",
+      "judges",
+      "hearts",
+      "heat multiplier"
+    ],
+    "rules": [
+      "one reply per line is the smooth one",
+      "answering faster adds a speed bonus",
+      "wrong picks or timeouts cost a heart",
+      "the multiplier steps up every few rounds"
+    ],
+    "win": "survive every round",
+    "lose": "lose all hearts or run out the clock",
+    "scoring": "points per right reply + speed bonus and streak, × heat; a title by total",
+    "session_seconds": [
+      45,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your title",
+      "challenge a friend"
+    ],
+    "content_needs": [
+      "prompt lines",
+      "one right and three wrong replies each",
+      "judge reactions"
+    ],
+    "difficulty_levers": [
+      "timer length",
+      "how close the wrong replies are"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "rizz or flop quiz where you pick the least cringe thing to say and judges react",
+      "a love island game where I choose the smoothest pickup line",
+      "pick the right thing to say to your boss before time runs out"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_rizz_or_flop.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_rizz_or_flop"
+  },
+  {
+    "id": "lane_dodge_race",
+    "name": "Lane dodge race",
+    "aliases": [
+      "lane racer",
+      "swerve lanes",
+      "near miss racer"
+    ],
+    "family": "racing",
+    "subfamily": "lane racer",
+    "summary": "Tap left or right to swerve one lane at a time across several lanes, dodging falling hazards and grabbing pickups until the finish; passing a hazard in the next lane scores a near miss.",
+    "core_loop": "tap a side to change lane → dodge hazards → grab pickups for a streak → skim near misses for bonus → reach the finish",
+    "verbs": [
+      "swerve",
+      "dodge",
+      "collect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "lanes",
+      "racer",
+      "falling hazards",
+      "pickups",
+      "streak",
+      "lives",
+      "finish clock"
+    ],
+    "rules": [
+      "a hit costs a life, resets the streak and gives grace",
+      "a hazard passing in the adjacent lane is a near miss bonus",
+      "pickups score more with a longer streak",
+      "hazards speed up over the race"
+    ],
+    "win": "survive to the finish",
+    "lose": "lose all lives",
+    "scoring": "pickups × streak plus near-miss bonuses",
+    "session_seconds": [
+      40,
+      70
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "race a friend's ghost score"
+    ],
+    "content_needs": [
+      "hazard and pickup names"
+    ],
+    "difficulty_levers": [
+      "lane count",
+      "hazard speed",
+      "spawn rate"
+    ],
+    "tools": [
+      "lanes",
+      "spawn_wave",
+      "score",
+      "lives",
+      "combo",
+      "collide",
+      "pickups",
+      "difficulty_curve"
+    ],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "a broom racing game at a magic school where I dodge storm clouds and grab sparks",
+      "a quidditch flying race dodging bludgers",
+      "a highway game where I switch lanes to avoid cars"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_moonbroom_derby.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_moonbroom_derby"
+  },
+  {
+    "id": "canyon_shooter_boss",
+    "name": "Narrowing canyon shooter",
+    "aliases": [
+      "vertical shooter",
+      "shmup",
+      "trench run",
+      "auto-fire shooter"
+    ],
+    "family": "arcade_shooter",
+    "subfamily": "vertical shooter with boss",
+    "summary": "Drag an auto-firing ship side to side down a canyon that narrows each wave, shooting enemies and dodging their shots, ending with a boss that has a health bar.",
+    "core_loop": "drag to aim → auto-fire hits enemies → dodge shots and walls → clear the wave → canyon narrows → boss wave",
+    "verbs": [
+      "drag",
+      "shoot",
+      "dodge"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "ship",
+      "auto-fire bolts",
+      "enemies",
+      "enemy shots",
+      "canyon walls",
+      "boss with HP",
+      "lives"
+    ],
+    "rules": [
+      "the ship fires on its own",
+      "walls close in each wave and hurt on contact",
+      "a chain of kills multiplies points and resets on a hit",
+      "the last wave is a boss with HP and volleys"
+    ],
+    "win": "destroy the boss",
+    "lose": "lose all lives",
+    "scoring": "points per kill × chain, per hit on the boss, plus a bonus for lives left",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's score"
+    ],
+    "content_needs": [
+      "enemy and boss names"
+    ],
+    "difficulty_levers": [
+      "wall speed",
+      "enemy fire rate",
+      "boss HP"
+    ],
+    "tools": [
+      "player_drag",
+      "lives",
+      "waves",
+      "collide",
+      "spawn_wave",
+      "score",
+      "timers"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a space fighter flying down a narrow canyon shooting drones, with a big boss target at the end",
+      "an x-wing trench run where I blast tie fighters and hit the exhaust port",
+      "a space invaders style game with a boss at the end"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_rift_run.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_rift_run"
+  },
+  {
+    "id": "endless_gap_jumper",
+    "name": "Endless gap jumper",
+    "aliases": [
+      "endless runner",
+      "auto runner",
+      "one-tap jumper"
+    ],
+    "family": "runner",
+    "subfamily": "side-scrolling jumper",
+    "summary": "The runner moves on its own; tap to jump and tap again to double-jump over obstacles and gaps, while pickups float along the ideal jump arc.",
+    "core_loop": "run automatically → tap to jump obstacles and gaps → double-jump to recover → grab pickups on the arc → go as far as you can",
+    "verbs": [
+      "jump",
+      "time",
+      "collect"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "runner",
+      "obstacles",
+      "gaps",
+      "pickups",
+      "distance",
+      "lives"
+    ],
+    "rules": [
+      "tap to jump, tap in the air to double-jump",
+      "hitting an obstacle or falling into a gap costs a life",
+      "pickups trace the ideal jump line",
+      "speed rises over distance"
+    ],
+    "win": "none; distance and score attack",
+    "lose": "lose all lives",
+    "scoring": "pickups × combo plus points per distance",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's distance"
+    ],
+    "content_needs": [
+      "obstacle and pickup names"
+    ],
+    "difficulty_levers": [
+      "run speed",
+      "gap width",
+      "obstacle density"
+    ],
+    "tools": [
+      "gravity_jump",
+      "score",
+      "lives",
+      "combo",
+      "collide",
+      "difficulty_curve",
+      "endless",
+      "pickups"
+    ],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "an endless runner where I jump across city rooftops at night collecting letters",
+      "a spider-man rooftop runner",
+      "a mario style endless jump game"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_rooftop_courier.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_rooftop_courier"
+  },
+  {
+    "id": "slice_drop_stacker",
+    "name": "Slice-drop stacker",
+    "aliases": [
+      "stack tower",
+      "tower stacker",
+      "stack the blocks"
+    ],
+    "family": "stack_balance",
+    "subfamily": "timing stacker",
+    "summary": "A layer slides back and forth above the stack; tap to drop it, and whatever overhangs the layer below is sliced off, so the stack narrows unless you drop perfectly.",
+    "core_loop": "watch the layer slide → tap to drop → overhang is sliced off → perfect drops grow it back → next layer",
+    "verbs": [
+      "tap",
+      "time",
+      "stack"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "sliding layer",
+      "stack",
+      "sliced overhang",
+      "combo",
+      "lives"
+    ],
+    "rules": [
+      "the part that overhangs is cut away",
+      "a near-perfect drop restores some width",
+      "a drop that misses entirely costs a life",
+      "reaching the target height wins"
+    ],
+    "win": "reach the target height",
+    "lose": "miss the stack too many times",
+    "scoring": "points per layer + combo bonus for perfect drops",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's height"
+    ],
+    "content_needs": [],
+    "difficulty_levers": [
+      "slide speed",
+      "perfect window",
+      "target height"
+    ],
+    "tools": [
+      "lives",
+      "score",
+      "combo",
+      "tick_rules",
+      "camera_scroll"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a cozy one-more-try game where you stack cake layers as high as you can",
+      "a stack the blocks game where misaligned parts get cut off",
+      "build the tallest pancake tower by timing each drop"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_cake_tower.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_cake_tower"
+  },
+  {
+    "id": "weighted_personality_quiz",
+    "name": "Weighted personality quiz",
+    "aliases": [
+      "which one are you quiz",
+      "sorting quiz",
+      "buzzfeed-style quiz",
+      "personality test"
+    ],
+    "family": "party_social",
+    "subfamily": "personality quiz",
+    "summary": "A short quiz with no right answers: each pick adds weighted points to one or two outcomes, a timer rewards answering on instinct, and the result card reveals which outcome you are.",
+    "core_loop": "read a question → tap an answer before the timer → points go to outcomes → after the last question reveal your outcome card",
+    "verbs": [
+      "choose",
+      "reflect",
+      "share"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "questions",
+      "four answers",
+      "outcome tallies",
+      "timer",
+      "result card"
+    ],
+    "rules": [
+      "each answer adds points to one outcome and fewer to another",
+      "faster answers score conviction",
+      "too many timeouts end the quiz",
+      "a near tie between the top two outcomes gives a torn result"
+    ],
+    "win": "finish with a clear top outcome",
+    "lose": "time out too often, or end in a tie",
+    "scoring": "conviction points per answer plus the winning margin",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "group_daily",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "post your result in the group chat",
+      "see which outcome each friend got"
+    ],
+    "content_needs": [
+      "questions",
+      "answers with outcome weights",
+      "outcome descriptions"
+    ],
+    "difficulty_levers": [
+      "timer length"
+    ],
+    "tools": [
+      "quiz",
+      "score",
+      "lives",
+      "rounds"
+    ],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a which-house-are-you quiz for my friends with a magic school vibe, so we can all post our results in the chat",
+      "which avenger are you quiz",
+      "a which pokemon type are you quiz to share with friends"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_which_house.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_which_house"
+  },
+  {
+    "id": "who_said_it_quiz",
+    "name": "Who said it",
+    "aliases": [
+      "guess the author",
+      "who wrote this",
+      "quote attribution quiz"
+    ],
+    "family": "deduction",
+    "subfamily": "attribution quiz",
+    "summary": "Read a line or post and pick which of several characters wrote it, using each character's distinctive voice as the clue, racing a friend's score.",
+    "core_loop": "read a post → pick the author from four suspects before the timer → streak grows → pass the friend's score",
+    "verbs": [
+      "read",
+      "deduce",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "posts",
+      "suspects",
+      "timer",
+      "streak",
+      "lives",
+      "friend target"
+    ],
+    "rules": [
+      "each character has a recognisable voice",
+      "a wrong pick or timeout costs a life",
+      "right picks score more with a streak",
+      "passing the friend's score wins"
+    ],
+    "win": "pass the friend's score",
+    "lose": "lose all lives, run out of posts, or hit the time limit",
+    "scoring": "base + streak bonus per right pick",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat a named friend's score",
+      "quotes from people in a Group"
+    ],
+    "content_needs": [
+      "characters with voices",
+      "posts per character"
+    ],
+    "difficulty_levers": [
+      "timer",
+      "number of suspects",
+      "how subtle the voices are"
+    ],
+    "tools": [
+      "quiz",
+      "score",
+      "combo",
+      "lives",
+      "beat_target"
+    ],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "a gossip trivia game at a fancy prep school where you guess who wrote each anonymous post, so I can challenge my roommate to beat my score",
+      "guess which friends character said the quote",
+      "who tweeted it: guess the celebrity from the post"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_who_posted.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_who_posted"
+  },
+  {
+    "id": "letter_cryptogram",
+    "name": "Letter cryptogram",
+    "aliases": [
+      "cryptogram",
+      "substitution cipher",
+      "decode the message",
+      "cryptoquip"
+    ],
+    "family": "word",
+    "subfamily": "cryptogram",
+    "summary": "A short message is shown in a substitution cipher; guess letters on a keyboard, and each right letter decodes every copy of it in the message. A few wrong guesses per message are allowed.",
+    "core_loop": "study the coded words → guess a letter → every copy decodes → use word shapes to guess more → crack the message → next message",
+    "verbs": [
+      "decode",
+      "guess",
+      "type"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "coded message",
+      "on-screen keyboard",
+      "signal lives",
+      "hint",
+      "message counter"
+    ],
+    "rules": [
+      "every letter maps to another letter, none to itself",
+      "a right letter scores per copy it reveals",
+      "wrong letters cost a life, refilled per message",
+      "everyone gets the same messages each day"
+    ],
+    "win": "crack every message",
+    "lose": "too many wrong letters in one message, or the clock runs out",
+    "scoring": "points per revealed copy plus a bonus for lives left",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "the whole group chat gets the same daily messages",
+      "compare scores"
+    ],
+    "content_needs": [
+      "short themed messages"
+    ],
+    "difficulty_levers": [
+      "message length",
+      "lives per message",
+      "hints"
+    ],
+    "tools": [
+      "score",
+      "rounds",
+      "lives",
+      "keyboard",
+      "hint",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [
+      "share_grid"
+    ],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "a daily space puzzle for our group chat, like decoding a secret message from a rebel ship",
+      "a daily cryptogram for our group",
+      "decode a secret harry potter message one letter at a time"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_driftwood_cipher.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_driftwood_cipher"
+  },
+  {
+    "id": "pass_play_stacker",
+    "name": "Pass-and-play stacker",
+    "aliases": [
+      "pass the phone stacking",
+      "jenga-like party",
+      "build together"
+    ],
+    "family": "party_social",
+    "subfamily": "co-op pass and play",
+    "summary": "Friends take turns on one phone dropping a swinging piece onto a shared tower; every piece keeps its builder's colour, wobbly drops narrow the tower for the next person, and three tumbles end it.",
+    "core_loop": "watch the piece swing → tap to drop → score by how centred it is → pass the phone → next builder",
+    "verbs": [
+      "tap",
+      "time",
+      "stack",
+      "pass"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "swinging piece",
+      "shared tower",
+      "builder colours",
+      "turn overlay",
+      "team lives"
+    ],
+    "rules": [
+      "players alternate turns behind a pass-the-phone screen",
+      "a piece whose middle misses the one below tumbles",
+      "off-centre drops narrow the next piece; perfect drops widen it",
+      "three tumbles end the game for everyone"
+    ],
+    "win": "finish every turn without three tumbles",
+    "lose": "three tumbles",
+    "scoring": "up to 10 per drop by centredness, perfect bonus, team total plus each player's own",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "pass_and_play"
+    ],
+    "social_hooks": [
+      "a sleepover or party on one phone",
+      "everyone sees whose pieces held the tower"
+    ],
+    "content_needs": [
+      "player names"
+    ],
+    "difficulty_levers": [
+      "swing speed",
+      "turns each",
+      "perfect window"
+    ],
+    "tools": [
+      "turns",
+      "lives",
+      "tick_rules",
+      "camera_scroll"
+    ],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a pass-the-phone party game for a sleepover where we all build something together",
+      "a pass the phone tower building game for a party",
+      "take turns stacking blocks without knocking the tower down"
+    ],
+    "status": "reviewed",
+    "source": "gold",
+    "refs": [
+      "authoring/games/gold_pillow_fort.authoring.json"
+    ],
+    "notes": "mechanic of gold game gold_pillow_fort"
+  }
+]

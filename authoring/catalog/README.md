@@ -14,7 +14,13 @@ authoring/catalog/
   schema/eval.schema.json        one retrieval eval case
   types/<family>.json            JSON array of game_type, every entry's family == <family>; one writer per file
   types/seed_*.json, learned_*.json   mixed-family files (seed_gold.json: one type per gold game)
-  tools/*.json                   JSON array of game_tool (fragments.json, builtins.json, looks.json, planned.json)
+  tools/*.json                   JSON array of game_tool:
+                                   fragments.json  one per authoring/fragments/*.fragment.json (kind fragment)
+                                   builtins.json   expression builtins from engine/crates/mg-core/src/builtins.rs
+                                   engine.json     engine features rules can use (physics, camera, timers, input sources)
+                                   looks.json      the look presets in authoring/looks/
+                                   server.json     backend features games plug into (leaderboard, challenges, Groups)
+                                   planned.json    tools being built or planned, and engine gaps (status gap)
   eval/<family>.json             JSON array of eval cases for that family's types (seed_gold.json for gold)
   sample/                        a tiny valid catalog to copy from (not loaded)
   check.mjs                      the checker

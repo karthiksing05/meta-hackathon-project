@@ -139,7 +139,7 @@
     "path": "docs/HARNESS_V2.md"
   },
   {
-    "id": "friend_answers",
+    "id": "friend_answers_store",
     "kind": "server_tool",
     "name": "Friend answers",
     "aliases": [
@@ -168,7 +168,7 @@
     "notes": "needs a backend endpoint; challenges today are score-only"
   },
   {
-    "id": "freehand_draw",
+    "id": "drawing_canvas",
     "kind": "runtime_tool",
     "name": "Freehand drawing",
     "aliases": [
