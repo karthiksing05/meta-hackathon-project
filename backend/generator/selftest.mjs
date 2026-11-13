@@ -6,12 +6,16 @@
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { compose } from './src/composer.mjs';
 import { ScriptedMuse, extractObject } from './src/muse.mjs';
 import { loadStudio } from './src/studio.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
+// The authoring folder sits at ../../authoring in the repository and at ./authoring inside the generator image (which
+// holds only the modules the hooks import, no game fixtures). authoringPath finds a file in either layout.
+const authoringPath = (rel) => join(existsSync(join(here, 'authoring')) ? here : join(here, '..', '..'), 'authoring', rel);
 let failures = 0;
 const check = (name, ok, detail = '') => {
   if (!ok) failures++;
@@ -82,10 +86,14 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
 }
 
 // ---- remix rules (docs/REMIX.md): the core loop and goal are locked; content, format, style, effects are free ----
-{
+// Needs a game fixture from the repository's authoring/games, which the generator image does not carry; the image run
+// skips it (the test job and the deploy gate run it in the repository).
+if (!existsSync(authoringPath('games/gold_kit_trivia_night_market.authoring.json'))) {
+  console.log('SKIP remix rules: the game fixtures are not in this layout (the generator image)');
+} else {
   const R = await import('./src/remix.mjs');
   const fsx = await import('node:fs');
-  const trivia = () => JSON.parse(fsx.readFileSync(join(here, '../../authoring/games/gold_kit_trivia_night_market.authoring.json'), 'utf8'));
+  const trivia = () => JSON.parse(fsx.readFileSync(authoringPath('games/gold_kit_trivia_night_market.authoring.json'), 'utf8'));
   const tBase = (await compose({ request: 'a food trivia night', brief }, { studio, muse: new ScriptedMuse([trivia()]), env: {}, hooks: null })).manifest;
   // A topic swap on a trivia game stays trivia.
   const hp = trivia();
@@ -314,7 +322,7 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
     view.sprites.char_dumbledore.image === png && view.sprites.answer_box.svg && view.tree.slots[2].node.node === 'group', JSON.stringify(r1.codes));
   check('swap: what has no painting is listed to paint, an emoji to remove', r1.missing.some((m) => m.id === 'hermione') && r1.removable.length === 1, JSON.stringify(r1));
   const removed = C.removeLeftovers(view, [...r1.missing, ...r1.removable]);
-  const { artConsistency } = await import('../../authoring/verify/checks/art-consistency.mjs');
+  const { artConsistency } = await import(pathToFileURL(authoringPath('verify/checks/art-consistency.mjs')).href);
   check('after removal nothing mixed is left', removed === 2 && artConsistency({ sprites: view.sprites, tree: view.tree }).length === 0, JSON.stringify(artConsistency({ sprites: view.sprites, tree: view.tree })));
   check('the consistency check is silent on an all-SVG game', artConsistency({ sprites: { a: { svg: '<svg/>' }, hero: { svg: '<svg/>' } }, tree: view.tree }).length === 0);
 
