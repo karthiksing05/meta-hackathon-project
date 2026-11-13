@@ -84,3 +84,45 @@ panels; no recorded audio or video is used.
 ## Results
 
 Filled in after building. Nothing above this line changes.
+
+Built 2026-11-13. Muse use: 14 full builds (the cap) and 8 image calls (cartoon panels for the two story golds).
+Judged by two separate Claude judges on the rendered contact sheets (intro, two mid frames, end): a look judge
+(criterion 3) and a blind engagement judge (criterion 4) that did not know which games were hand-made.
+
+**5 of 14 pass every criterion: The Podium, Purr Earth, First Things First, One Move and Root Words.**
+
+| # | Game | Build | Gate | Verifier | Look | Engaging / funny | Score and group | Result |
+|---|---|---|---|---|---|---|---|---|
+| S1 | The Podium | gold | pass | 0 blocking | 4/4/4/4/4 | funny 4 | unranked, opinion_compare (picks) | **pass** |
+| S2 | Purr Earth | gold | pass | 0 blocking | 4/4/4/5/4 (after the particle fix below) | funny 4 | unranked, opinion_compare (picks) | **pass** |
+| B1 | First Things First | gold | pass | 0 blocking | 5/4/4/4/4 | engaging 4 | ranked, same seed, compare score | **pass** |
+| B2 | One Move | gold | pass | 0 blocking | 5/4/4/5/4 | engaging 4 (three boards checked as valid mates) | ranked, same seed, compare score | **pass** |
+| B4 | Root Words | Muse (b4) | pass | 0 blocking | 4/4/4/4/4 | engaging 4 | ranked (`streak`, higher), compare score | **pass** |
+| B3 | Rarest Spell | Muse (b3) | pass | 0 blocking | 3/3/2/3/2 | engaging 2 ("Open Sesame" and "Annihilare" in the answer list) | ranked | fail: look, engagement |
+| B5 | Fermi Duel | Muse (b5, then rebuild b5r) | pass | b5: 1 blocking (its own panel over the tiles); b5r: 0 | b5r 4/3/3/3/2 | engaging 3 (rice reasoning wrong) | b5r ranked | fail: verifier (b5); look, engagement (b5r) |
+| B6 | Mini Zebra Grid | Muse (b6) | pass | 0 blocking | clue card under the HUD, labels wrap | not judged | `ranked: false` (a weak bot solved fastest) | fail: look, score |
+| B7 | Cryptic Mini | Muse (b7, then rebuild b7r) | b7 pass; b7r **fail** (too short) | b7 0; b7r 1 blocking (text overflow) | b7: card under the HUD | b7: many clues aren't valid cryptics | b7 `ranked: false` | fail: content, gate (b7r) |
+| B8 | Proof Order | Muse (b8) | pass | 0 blocking | 4/4/4/4/2 (picture text spills its frame) | engaging 3 (distractors drop out by form) | ranked | fail: look, engagement |
+| B9 | Capital Clues | Muse (b9, then rebuild b9r) | pass | b9: 1 blocking (contrast); b9r: 0 | b9r 3/2/3/2/2 | engaging 2 (first clues give it away) | b9 flat score; b9r ranked | fail: verifier (b9); look, engagement (b9r) |
+| B10 | Predict the Experiment | Muse (b10) | pass | 0 blocking | 3/3/2/3/2 (white ink on white tiles, auto-outlined) | engaging 3 | `ranked: false` (streak points vary) | fail: look, engagement, score |
+| S3 | Debate Night | Muse (s3) | pass | 0 blocking | 4/4/3/4/3 (buttons over the desk sprites) | funny 2 (generic slapstick); PARODY label on every screen | unranked, opinion_compare | fail: look, funny |
+| S4 | The Interview | Muse (s4, then s4k on the 4-tile type) | pass | 0 blocking | 4/4/3/4/3 (particles on the reveal) | funny 3 (one joke repeated) | unranked, opinion_compare | fail: look, funny |
+
+Look scores are cohesion / hierarchy / restraint / theme fit / polish. Builds b3, s3 and s4k were re-expanded
+from their own Muse authoring after the fragment fixes below (no hand edits); the hand-corrected copies of b5
+and b6 made while testing are not counted.
+
+Source fixes made while building (all in `authoring/`, each in its own commit on `games-content`):
+
+- `story_quiz` fragment: the Kahoot flow (scene, four coloured tiles, a countdown, the reveal, an "in sync with
+  the chaos" end card), a centred lone third tile, and no tap particles (they landed on the punchline).
+- `typed_answer`: the prompt sits below the HUD on the tall canvas and wraps.
+- UI kit answer tiles: fill and text change together (no dark-on-dark flash frozen on the end frame).
+- Prompt: the tall canvas names the HUD bands (playfield from y 176 to 624), and `$bg` and `$surface` stay on the
+  same side so `$ink` reads on both.
+- Catalog: quiz extras go in the HUD or the question card, never a panel over the tiles; notes for the Fermi,
+  logic-grid, cryptic (valid clues, `typed_answer`) and country-clue (500 to 100 by clue, no giveaway) types.
+
+What still fails, and the likely next fix: Muse content quality on recall-heavy brainy games (B3, B9) and on the
+Muse story quizzes (one joke repeated, generic slapstick); score models that the bot check can't rank (B6's
+solve time, B10's variable streak points); and picture text that spills its frame (B8).
