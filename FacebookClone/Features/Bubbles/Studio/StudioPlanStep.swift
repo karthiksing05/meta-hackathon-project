@@ -293,6 +293,12 @@ enum StudioPlanMemory {
         current = (key, plan)
         return plan
     }
+
+    /// The plan for `model` if it's the session on screen; never makes one.
+    static func existing(for model: StudioModel) -> StudioPlanModel? {
+        guard let current, current.owner == ObjectIdentifier(model) else { return nil }
+        return current.plan
+    }
 }
 
 // MARK: - Planning progress
