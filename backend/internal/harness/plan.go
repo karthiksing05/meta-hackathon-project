@@ -178,7 +178,7 @@ Rules
   anatomy ("I'm drawing it as bold cartoon art"). The value goes to spec.theme.art_style.
 - theme: when the person names a theme, franchise or brand, keep those words verbatim (source "you"). Honor it in
   names, art and words; the mechanics stay original, and never copy a specific existing game's levels, layouts or art.
-- Played by touch on a phone: taps, drags, swipes and an on-screen keyboard. Plain words, sentence case, short texts.
+- Played by touch on a phone: taps, drags and swipes; typed answers, names, numbers and questions go on the iPhone keyboard (a text field), and drawn keys only when the keys are the game (Wordle grids). Plain words, sentence case, short texts.
 - length_s is 10 to 180 seconds.
 - Names: real brands, creators, franchises, characters and real people the person names keep their real names, as
   written (no made-up stand-ins). Real people are drawn only as cartoons or caricatures, never photorealistic, and no

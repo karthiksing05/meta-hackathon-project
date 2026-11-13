@@ -105,7 +105,6 @@
     "tools": [
       "typed_answer",
       "fuzzy_match",
-      "keyboard",
       "timer_bar",
       "score"
     ],

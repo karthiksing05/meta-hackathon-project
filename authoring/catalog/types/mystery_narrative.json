@@ -643,7 +643,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "hint",
       "timer_bar",
       "score"

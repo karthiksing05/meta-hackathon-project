@@ -208,7 +208,7 @@
       "forgiving match"
     ],
     "summary": "Pure functions that decide whether typed text matches an accepted answer: ignore case, accents, punctuation, a leading article, word order, plurals and number words; forgive typos by length (4 letters or fewer exact, 5-7 one typo, longer at threshold); optional phonetic match. Deterministic.",
-    "when_to_use": "Custom typed-answer rules: names, titles, spells, open answers. typed_answer already uses it, so do not add it there.",
+    "when_to_use": "Custom typed-answer rules (with a text input: the iPhone keyboard): names, titles, spells, open answers. typed_answer already uses it, so do not add it there.",
     "api": "fuzzy_ok(input, entry) -> bool; fuzzy_best(input, entries: list<string>) -> int (-1 if none); fuzzy_score(input, name) -> float 0..1; fuzzy_passes(input, name, score) -> bool; fuzzy_entry(input, entry) -> float; fuzzy_key(s) -> string (normalized). An entry is an answer plus aliases joined by =, e.g. \"hermione granger=hermione\". Spec: authoring/SPEC.md 2.12",
     "events": [],
     "params": {
@@ -331,9 +331,9 @@
       "letter keys",
       "keypad"
     ],
-    "summary": "A grid of on-screen keys, one per character of a letters string; tapping sends press {letter}. Keys colour by the game's key_state.",
-    "when_to_use": "Any typing: word guessing (with word_check), typed answers (with typed_answer), spelling and code entry.",
-    "api": "game provides function key_state(letter) -> int (0 untouched, 1 good, 2 bad), unless word_check or typed_answer provides it; sends input press {letter}; cols * rows >= letters",
+    "summary": "A grid of drawn on-screen keys, one per character of a letters string; tapping sends press {letter}. Keys colour by the game's key_state.",
+    "when_to_use": "Only when the keys themselves are the game: Wordle-style letter grids with per-key colours (word_check), letter tiles to spell from (hives, wheels, hangman), crossword and cryptogram cells, typing-speed games where key positions matter. NOT for typing an answer, a name, a number or a question: those use the iPhone keyboard (typed_answer, qa_bank, or a text input).",
+    "api": "game provides function key_state(letter) -> int (0 untouched, 1 good, 2 bad), unless word_check provides it; sends input press {letter}; cols * rows >= letters",
     "events": [],
     "params": {
       "letters": "string, default \"abcdefghijklmnopqrstuvwxyz\", max 40 chars",
@@ -819,9 +819,9 @@
       "type the answer",
       "name a"
     ],
-    "summary": "Open-answer prompts the player answers by typing on the keyboard fragment; answers (with aliases joined by =) are matched forgivingly by the fuzzy_match rules and score by rarity tier (common to legendary), with a per-prompt timer.",
+    "summary": "Open-answer prompts the player answers by typing on the iPhone keyboard (a native text field over the answer box; Return submits); answers (with aliases joined by =) are matched forgivingly by the fuzzy_match rules and score by rarity tier (common to legendary), with a per-prompt timer.",
     "when_to_use": "Typed trivia and naming games (\"name a…\", fill-in, guess the word, rarest-answer trivia): anywhere multiple choice would be wrong.",
-    "api": "pair with keyboard (letters include space, < and >); game provides ta_prompts() and ta_answers() (tiers split by |, answers by ,, aliases by =), both list<string>; provides key_state, prompt_text, ta_progress, ta_points, typed, last_result, last_answer; emits answered_right {points, tier}, answered_wrong, prompt_done; matching ignores case, accents, punctuation, articles, word order, plurals and number words and forgives typos by length (threshold, phonetic params); not with quiz or score",
+    "api": "brings its own text field (do not add keyboard); game provides ta_prompts() and ta_answers() (tiers split by |, answers by ,, aliases by =), both list<string>; provides prompt_text, ta_progress, ta_candidates (bot answers), ta_points, typed, last_result, last_answer; inputs ta_enter (Return) and ta_edit (each edit); emits answered_right {points, tier}, answered_wrong, prompt_done; matching ignores case, accents, punctuation, articles, word order, plurals and number words and forgives typos by length (threshold, phonetic params); not with quiz or score; keep the bottom 45% of the screen calm (the iPhone keyboard covers it)",
     "events": [
       "answered_right",
       "answered_wrong",
@@ -840,7 +840,7 @@
     },
     "status": "shipped",
     "path": "authoring/fragments/typed_answer.fragment.json",
-    "notes": "conflicts with quiz, score"
+    "notes": "conflicts with quiz, score; version 2 (native text field); version 1 used the keyboard grid (authoring/tools/convert-native-keyboard.mjs moves old games over)"
   },
   {
     "id": "waves",
@@ -910,9 +910,9 @@
       "interrogate",
       "ask the suspect"
     ],
-    "summary": "The player types free yes/no questions about a mystery and taps Ask; a deterministic matcher maps each question to one of the case's pre-written facts (written by Muse at build time) and answers Yes, No, Doesn't matter or Partly, showing which question it answered. Key facts are clues; typing a theory and tapping Solve checks it against the solutions. Unmatched questions get \"Ask another way\" and cost nothing.",
+    "summary": "The player types free yes/no questions about a mystery on the iPhone keyboard and presses Return; a deterministic matcher maps each question to one of the case's pre-written facts (written by Muse at build time) and answers Yes, No, Doesn't matter or Partly, showing which question it answered. Key facts are clues; after tapping Solve, Return checks a typed theory against the solutions. Unmatched questions get \"Ask another way\" and cost nothing.",
     "when_to_use": "Lateral-thinking and situation puzzles, twenty questions about a hidden thing, interrogating a suspect or witness, \"ask the oracle\" games: anywhere the player asks in their own words and a fixed answer is enough. Not for free conversation or judging creative text (use npc_judge with written replies).",
-    "api": "pair with keyboard (letters include space, < and >); game provides qa_setups(), qa_reveals(), qa_facts(), qa_solves(), all list<string> one entry per case, from the qa_bank_content step (qa-bank/1, authoring/expander/qa-bank.mjs toContent): fact strings \"<y|n|i|p>[*]|<question shown>|<group>|<group>\", words in a group joined by =, facts by ;; provides key_state, case_text(), questions_left(), reply_label(r), qa_progress(), state typed, asked, clues, solved_count, qa_points, last_reply, last_ask, history, locked, revealing, ran_out; inputs qa_ask, qa_solve (its Ask and Solve buttons); set playtest.progress to qa_progress(); not with typed_answer, quiz or score",
+    "api": "brings its own text field (do not add keyboard); game provides qa_setups(), qa_reveals(), qa_facts(), qa_solves(), all list<string> one entry per case, from the qa_bank_content step (qa-bank/1, authoring/expander/qa-bank.mjs toContent): fact strings \"<y|n|i|p>[*]|<question shown>|<group>|<group>\", words in a group joined by =, facts by ;; provides case_text(), questions_left(), reply_label(r), qa_progress(), qa_candidates() (bot questions), state typed, solving, asked, clues, solved_count, qa_points, last_reply, last_ask, history, locked, revealing, ran_out; inputs qa_enter (Return), qa_edit, and the Ask and Solve mode buttons qa_ask, qa_solve; not with typed_answer, quiz or score",
     "events": [
       "question_answered",
       "question_unclear",
@@ -945,7 +945,7 @@
       "ask_the_oracle_yes_no"
     ],
     "path": "authoring/fragments/qa_bank.fragment.json",
-    "notes": "matching is authoring/expander/intent.mjs (generated into the fragment by authoring/tools/make-qa-fragment.mjs); measured 90-93% right on held-out player questions after one refine round (docs/harness-gaps/open-text.md); typing is the keyboard grid until text_input ships"
+    "notes": "matching is authoring/expander/intent.mjs (generated into the fragment by authoring/tools/make-qa-fragment.mjs); measured 90-93% right on held-out player questions after one refine round (docs/harness-gaps/open-text.md); version 2 types on the iPhone keyboard (native text field)"
   },
   {
     "id": "npc_judge",

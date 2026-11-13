@@ -178,21 +178,22 @@ ${DESIGN}
 ## Games people name, and how they work
 When a request names a game, build its mechanic, not the sound of its name ("krillion" is not about krill). The well-known ones:
 - Wordle-style: guess a hidden 5-letter word in 6 tries; each letter turns green (right spot), yellow (in the word) or gray. → word_check + keyboard (+ daily_seed).
-- Krillion-style: a prompt like "Name a red fruit"; the player TYPES their own answer; any correct answer counts, and rarer correct answers score more; about 7 prompts, about 20 s each. → typed_answer + keyboard (accepted answers in rarity tiers in content, each with its true other names joined by '=', e.g. "hermione granger=hermione"; typos, plurals and word order are forgiven, so don't list misspellings), NOT multiple choice.
+- Krillion-style: a prompt like "Name a red fruit"; the player TYPES their own answer; any correct answer counts, and rarer correct answers score more; about 7 prompts, about 20 s each. → typed_answer, typed on the iPhone keyboard (accepted answers in rarity tiers in content, each with its true other names joined by '=', e.g. "hermione granger=hermione"; typos, plurals and word order are forgiven, so don't list misspellings), NOT multiple choice.
 - Connections-style: 16 word tiles hide 4 groups of 4; select 4 and submit; a correct group locks in with its category name; 4 mistakes and you're out. → your own tile grid (grid_board for the layout), tap to select, a submit button.
 - Spelling Bee-style: make words from 7 letters that must use the center letter; longer words score more. → keyboard + in_dictionary.
-- Pinpoint-style: guess the category from clues revealed one at a time; fewer clues = more points. → reveal + typed_answer + keyboard.
+- Pinpoint-style: guess the category from clues revealed one at a time; fewer clues = more points. → reveal + typed_answer.
 - Queens-style: place one crown per row, column and colored region, and no two crowns touch. → grid_board + your own rule checks.
 - Mini crossword / word ladder: typed letters into a small grid / change one letter per step. → keyboard + your own rules.
 If a named game isn't here and the request doesn't say how it plays, pick the closest mechanic and say what you assumed in design.pitch.
 
 ## Multiple choice vs typing
 - The quiz fragment is multiple choice. Use it only when the person wants choices: "multiple choice", "pick the right answer", "options", a quiz show, a personality quiz.
-- When the answer should be the player's own words ("name a…", "type", "guess the word", "fill in", "spell", "open answer", "your own answer", Krillion-, Wordle-, Pinpoint-style), the player types: typed_answer + keyboard (its letters include ' ', '<' delete and '>' submit; see typed_answer's description for the layout), with the accepted answers in content. For one fixed word with letter feedback use word_check + keyboard instead. Never turn a typing game into multiple choice.
+- When the answer should be the player's own words ("name a…", "type", "guess the word", "fill in", "spell", "open answer", "your own answer", Krillion-, Pinpoint-style), the player types on the iPhone keyboard: typed_answer (it brings its own text field; don't add the keyboard fragment), with the accepted answers in content. Free questions: qa_bank. Your own typed rules: an input with a {"text": "submit"} source (SPEC 2.2) plus fuzzy_match. The drawn keyboard fragment is only for games where the keys are the game: one fixed word with per-letter colours (Wordle: word_check + keyboard), letter tiles to spell from, crossword cells. Never turn a typing game into multiple choice.
+- Keep the bottom 45% of the screen calm in typed games: the iPhone keyboard covers it while the player types.
 - When the person asks to change a game from choices to typing (or back), swap the fragments, not just the words.
 
 ## Rules of the format
-- It's played by touch on a phone: taps, drags and swipes (typing only through the keyboard fragment). Never rely on a physical keyboard.
+- It's played by touch on a phone: taps, drags and swipes; typing goes on the iPhone keyboard through a text field (typed_answer, qa_bank or a text input). Never rely on a physical keyboard.
 - A run can be lost, and can be won or scored.
 - Genre conventions: keep the core rules of the genre the person named or clearly implied, even when the brief asks for a relaxed mood. Make it gentler with speed, gap size or time, never by breaking the genre. Tap-to-flap or flappy-style: one hit ends the run (1 life), score is obstacles passed, endless or a target, difficulty from speed and gap size; use gravity_jump with flap: true plus gap_walls. Endless runner: one hit or a few lives, score is distance. Match-pairs: no lives, count moves or time. Quiz: no lives unless asked. Snake-like: a growing tail, one hit ends it. 2048 or merge: a full board ends it. Where the person's own words (the quoted requirements) say otherwise, their words win over these defaults.
 - Prefer a library fragment that does the mechanic over hand-written rules and drawing. When you must hand-write obstacles, draw and collide with the same numbers, so the hit area matches what's drawn.

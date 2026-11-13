@@ -62,7 +62,6 @@
       "drawing_canvas",
       "stroke_recorder",
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "turns",
       "timer_bar",
@@ -134,7 +133,6 @@
       "drawing_canvas",
       "stroke_recorder",
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "score",
       "friend_pairing"
@@ -206,7 +204,6 @@
       "drawing_canvas",
       "stroke_recorder",
       "typed_answer",
-      "keyboard",
       "turns",
       "reveal",
       "group_roster"
@@ -1200,7 +1197,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "vote_tally",
       "rounds",
       "score"
@@ -2099,7 +2095,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "image_generator",
       "image_similarity",
       "score"
@@ -2164,7 +2159,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "vote_tally",
       "gallery"
     ],
@@ -2230,7 +2224,6 @@
     "tools": [
       "sticker_library",
       "typed_answer",
-      "keyboard",
       "gallery"
     ],
     "engine_gaps": [],
@@ -2539,7 +2532,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "turns",
       "group_roster"
     ],

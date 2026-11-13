@@ -388,11 +388,11 @@
       "type a number",
       "estimate"
     ],
-    "summary": "Enter a number as the answer, with a number pad, then compare it to the target (exact, closeness or higher/lower).",
+    "summary": "Enter a number as the answer on the iPhone keyboard, then compare it to the target (exact, closeness or higher/lower).",
     "when_to_use": "Estimation, price guessing, counts and maths answers.",
-    "api": "keyboard fragment with letters \"1234567890<>\"; parse_int on submit; or slider_input for a range",
+    "api": "a text input ({\"text\": \"submit\"}) with parse_int (or your own decimal parse) on the submitted value; or slider_input for a range",
     "status": "shipped",
-    "notes": "keyboard fragment plus parse_int; text_input (building) will add a native number field"
+    "notes": "text_input plus parse_int"
   },
   {
     "id": "dice_roll",

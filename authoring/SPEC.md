@@ -288,9 +288,15 @@ event, because the expander writes fragment rules first (A10: rules run in file 
 **Typed answers.** An input with a `{"text": "submit"}` or `{"text": "change"}` source
 (`engine/SPEC-v0.2.md` 4) gets the app's native text field and keyboard (docs/BUBBLES.md 7.11).
 `presentation.text_field` (`{x, y, w, h, size}` in canvas units) places it. The expander copies it to
-the game as written; without it the field is a bar at the bottom. Keep the bottom of the playfield
-clear for it, and give gate bots the strings to try with `playtest.text_candidates` (2.6). Games that
-spell with on-screen letters (the `keyboard` fragment) are taps and need none of this.
+the game as written; without it, the first fragment that places one (its `presentation.text_field`,
+params allowed) does, else the field is a bar at the bottom. Put it in the top half: the iPhone
+keyboard covers the bottom ~45% while the player types (the app lifts the game when the field would be
+hidden). Give gate bots the strings to try with `playtest.text_candidates` (2.6); a fragment may supply
+`playtest` hints too, which the game's own override. `typed_answer` and `qa_bank` (version 2) bring their
+own field. The drawn `keyboard` fragment is only for games where the keys are the game (Wordle-style
+letter colours, letter tiles, crossword cells); its presses are taps and need none of this.
+`authoring/tools/convert-native-keyboard.mjs` moves a built game's keyboard-typed answer onto a text
+input with the same check and score.
 
 ### 2.3 Objectives
 
@@ -558,7 +564,7 @@ Fragments already add particles, pops, shake, haptics and the sound moments; don
 
 ### 2.12 Typed answers and fuzzy matching
 
-Games where the player types their own answer use `typed_answer` + `keyboard`; games that check typed
+Games where the player types their own answer use `typed_answer` (the iPhone keyboard); games that check typed
 text with their own rules use `fuzzy_match`. Both match with the same deterministic rules
 (`expander/fuzzy.mjs`), run inside the engine, so the phone, the bots and replay checks agree.
 

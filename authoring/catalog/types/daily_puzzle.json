@@ -612,7 +612,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "reveal",
       "rounds",
@@ -990,7 +989,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "rarity_tiers",
       "timer_bar",
@@ -1069,7 +1067,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "reveal",
       "rounds",
@@ -1146,7 +1143,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "reveal",
       "rounds",
@@ -1225,7 +1221,7 @@
     ],
     "tools": [
       "numeric_input",
-      "keyboard",
+      "text_input",
       "reveal",
       "rounds",
       "score",
@@ -1678,7 +1674,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "grid_board",
       "rounds",
@@ -1752,7 +1747,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "semantic_rank",
       "hint",
@@ -1899,7 +1893,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "hint",
       "rounds",
@@ -2197,7 +2190,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "audio_clip_player",
       "reveal",
@@ -2275,7 +2267,6 @@
       "zoom_reveal",
       "picture_quiz",
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "rounds",
       "score",
@@ -2710,7 +2701,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "lives",
       "reveal",
@@ -3410,7 +3400,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "hint",
       "reveal",

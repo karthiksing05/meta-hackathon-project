@@ -203,7 +203,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "lives",
       "rounds",
@@ -346,7 +345,6 @@
     "tools": [
       "tts_audio",
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "rounds",
       "score"
@@ -484,7 +482,6 @@
       "time per fact"
     ],
     "tools": [
-      "keyboard",
       "typed_answer",
       "timer_bar",
       "combo",
@@ -556,7 +553,6 @@
       "speed"
     ],
     "tools": [
-      "keyboard",
       "typed_answer",
       "sequence_memory",
       "score",
@@ -1232,7 +1228,6 @@
     "tools": [
       "quiz",
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "lives",
       "score"
@@ -1367,7 +1362,6 @@
     "tools": [
       "tts_audio",
       "typed_answer",
-      "keyboard",
       "lives",
       "score",
       "rounds"
@@ -1773,7 +1767,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "rubric_grader",
       "score"
     ],
@@ -1904,7 +1897,7 @@
     ],
     "tools": [
       "numeric_input",
-      "keyboard",
+      "text_input",
       "lives",
       "score"
     ],

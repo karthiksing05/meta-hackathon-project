@@ -288,7 +288,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "fuzzy_match",
       "inventory",
       "score"
@@ -1545,7 +1544,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "reveal",
       "turns"
     ],
@@ -2278,7 +2276,7 @@
       "branching_story",
       "choice_story",
       "turns",
-      "keyboard",
+      "text_input",
       "reveal"
     ],
     "engine_gaps": [],

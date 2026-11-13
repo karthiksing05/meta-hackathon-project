@@ -1006,7 +1006,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "song_generator",
       "gallery"
     ],
@@ -1274,7 +1273,6 @@
       "melody_clip",
       "play_clip",
       "typed_answer",
-      "keyboard",
       "fuzzy_match"
     ],
     "engine_gaps": [],

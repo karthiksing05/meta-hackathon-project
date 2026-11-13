@@ -288,7 +288,7 @@
     ],
     "tools": [
       "drawing_canvas",
-      "keyboard",
+      "text_input",
       "turns",
       "reveal",
       "score"
@@ -575,7 +575,7 @@
       "players"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "reveal",
       "turns",
       "rounds",
@@ -651,7 +651,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "rounds",
       "reveal",
       "score"
@@ -724,7 +723,7 @@
       "players"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "rounds",
       "turns",
       "score"
@@ -797,7 +796,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "countdown",
       "lives",
       "score"
@@ -945,7 +943,7 @@
       "word obscurity"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "rounds",
       "reveal",
       "score"
@@ -1166,7 +1164,6 @@
     ],
     "tools": [
       "typed_answer",
-      "keyboard",
       "timer_bar",
       "rounds",
       "score"
@@ -1816,7 +1813,7 @@
       "pair similarity"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "reveal",
       "rounds",
       "score"
@@ -2104,7 +2101,7 @@
       "emoji only"
     ],
     "tools": [
-      "keyboard",
+      "text_input",
       "turns",
       "reveal",
       "score"
