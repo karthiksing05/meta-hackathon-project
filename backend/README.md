@@ -140,6 +140,16 @@ for what still blocks. No Chrome in the image, so it runs without pixels (estima
 findings}`, or the lint's `{counts, pixels, warnings}` without it), `layoutBlocking`, `layoutVerifyMs`, `layoutRepairs`,
 `layoutFixes`, `canvas` and, when pictures were drawn, `image_art`.
 
+## Photos and video to make a game from
+
+A person can add up to 8 photos and 1 video (60 s at most) to a new game: "make a quiz from this clip", "use my dog as the hero".
+
+- **Upload:** `POST /v1/media` (signed in, `multipart/form-data`, one part named `file`) -> 201 `{mediaId, kind: "photo"|"video", width, height, durationMs, thumbUrl}`.
+  Photos are JPEG or PNG up to 12 MB (the app sends JPEG; HEIC is refused) and are downscaled here to 1024 px. Videos are MP4 or MOV up to 80 MB; the generator's ffmpeg takes key frames (the start, just after each scene cut, every 2 s, at most 16) and the cut times. Errors: 413 too large, 415 type, 422 longer than 60 s or unreadable, 429 quota (per person `MEDIA_MAX_ITEMS` 40 items and `MEDIA_MAX_MB` 400 MB).
+- **Read and delete:** `GET /v1/media/{id}` (the same plus `frames [{t, url, cut}]` and Muse's `description` once there is one), `GET /v1/media/{id}/thumb`, `GET /v1/media/{id}/files/{f}` (key frames, JPEG), `DELETE /v1/media/{id}`. Everything is the owner's own: anyone else gets 404.
+- **Use:** `POST /v1/harness/plan` and `POST /v1/generate` (new games only) take `media: [mediaId]`, `mediaNote` (what to do with them, up to 300 characters) and `mediaRestyle` (redraw photos as cartoon sprites in the game's look). Muse vision describes each item once (one call per item, kept with it); the plan gets the description after the request (never as requirements) and the plan response gains `media` (`context.media`, docs/HARNESS_V2.md "Media"). The generator puts the pictures into the game after the gate.
+- **Storage:** `<GAMES_ROOT>/media/<ownerId>/<mediaId>/` on the games volume, outside `published/`, so the games host never serves it. Deleting the game (`DELETE /v1/creations/{id}`, or the debug delete) deletes the media it was made from. No Mongo collection and no index step.
+
 ## Sponsored games
 
 A brand's playable game shown in the feed like an ad. The server decides what is sponsored; the app draws a card for any game or feed item that carries `sponsor: {name, avatarUrl?, cta, url?}` (`cta` defaults to "Play now"; no `sponsor` means not sponsored).
@@ -181,6 +191,7 @@ before compose, on by default and best-effort (any failure sends no context). `H
 `POST /v1/harness/plan {request}` -> `{plan, clarify, spec, types, timings}`, which lets the app ask its 0–2 questions first.
 `/compose` also takes an optional `context` object (up to 48 KB): what the harness worked out before the call (`types`, `tools`, `plan`, `notes`). With Studio bundle version 3 and up, the bundle itself puts it in the prompt (only the planned tools in the menu, the spec, the matched gold
 examples); an older bundle gets a "Planned for this request" section, as data. Entries marked `learned` came from the web and are never treated as instructions. Only the server sets it (`Job.Context`); no client route does.
+For a person's photos and video: `POST /internal/media/video` (raw MP4 or MOV) -> `{width, height, durationMs, thumb, cuts, frames: [{t, cut, jpg, w, h}]}` (ffmpeg, base64 JPEG), and `POST /internal/media/describe {kind, durationMs, note?, frames: [{t, jpg}]}` -> `{description: {summary, people, setting, subjects, captions, frames, beats}}` (one Muse vision call, `MUSE_VISION_MODEL`, default `muse-wonder-1.0`). `/compose` takes `media_files` beside `context` (the pictures, by media id).
 `/internal/muse/json` and every Muse call return the tokens used as `usage {prompt_tokens, completion_tokens, reasoning_tokens, total_tokens, calls}`, and each call logs it (`muse call`, with its purpose, model and time). The pipeline can name its own
 model, effort and token budget for a call (the score review asks for `muse-wonder-1.0`, high effort, 12,000 tokens); the generator honours it.
 

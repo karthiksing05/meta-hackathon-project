@@ -640,6 +640,37 @@ sending.
 - `POST /v1/harness/plan {request}` returns `{plan, clarify, spec, types, timings}`, so the app can ask the 0–2
   questions before the build.
 
+### Media: the person's own photos and video (`context.media`, 2026-11-13)
+
+Karthik: "load videos and pictures into the harness and work off of them, or remix them." The upload routes are in
+`backend/README.md`. For a plan or a job with `media`, the API asks Muse vision to describe each item (once), then:
+
+- the planner's prompts get the description after the request (`harness.Request.Media`); understanding and
+  `spec.requirements` read only the request, so the media's words never become requirements;
+- the generator's `context` gains `media`, one entry per item in order (`ref` m1, m2, ...):
+
+  ```json
+  {"id": "<mediaId>", "ref": "m1", "kind": "video", "width": 640, "height": 360, "durationMs": 13000,
+   "summary": "...", "people": true, "setting": "...", "subjects": ["..."], "captions": ["..."], "note": "make a quiz",
+   "frames": [{"t": 8150, "desc": "...", "thumb": "/v1/media/<id>/files/f04.jpg", "asset": "m1_f5", "cut": true}],
+   "beats":  [{"t": 8000, "end": 9000, "text": "...", "asset": "m1_beat3"}],
+   "assets": {"clip": "m1_clip", "beats": "m1_beats"}, "cuts": [8000]}
+  ```
+
+  A photo has one frame and `assets: {photo: "m2_photo", restyled?: "m2_art"}` (`restyled` with `mediaRestyle`).
+- compose adds a "the person's own photos and video" section to the request naming those sprite names; Muse draws a
+  plain stand-in for each one it uses, and after the gate `backend/generator/src/media.mjs` swaps the real pictures in:
+  `mN_fK` and `mN_photo` are stills, `mN_beatK` and `mN_clip` are **timed-frame slideshows** (an image sprite sheet with
+  `fps`, which the engine animates on the presentation clock), `mN_beats` is one still per beat (frame k = beat k, picked
+  with `"frame"`, e.g. `= get_or(order, qi, 0)` for a picture quiz in beat order), and `mN_art` is the photo's subject
+  redrawn by Muse Image (the photo as the reference image) as a cartoon sprite, cut out. Real video playback in the
+  runtime is not built; the slideshow is the clip. Pictures are presentation only: rules, the seed and replays never
+  depend on them, so the gate isn't rerun.
+- **For fragments that take a picture per beat** (a story quiz): read `context.media[i].beats[k].asset` for a slideshow
+  of that beat, or `assets.beats` with frame k for a still.
+- **Safety:** uploads are the owner's own and never served publicly; a restyle is always a cartoon or caricature (the
+  prompt forbids photoreal, and says so twice when people are visible); deleting the game deletes its media.
+
 ## Open questions
 
 - **Bayan:** which gate profile names do you already have?
