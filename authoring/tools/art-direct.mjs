@@ -6,7 +6,7 @@
 //   node authoring/tools/art-direct.mjs art   --direction d.json --out dir [--only backdrop,sprites,ui]
 //                                                                           # ≤ 3 calls: backdrop, sprite sheet, UI kit sheet
 //   node authoring/tools/art-direct.mjs wordmark --direction d.json --out dir   # 1 image call: the title lettered in the style, keyed, trimmed
-//   node authoring/tools/art-direct.mjs build --prod prod.json --builder authoring/artdir/gold/s3.mjs --direction d.json --out dir [--seeded] [--profile p]
+//   node authoring/tools/art-direct.mjs build --prod prod.json --builder authoring/artdir/gold/s3.mjs --direction d.json --out dir [--seeded] [--new-rules] [--profile p]
 //                                                                           # 0 calls: the game's build script, then finish.mjs
 //   node authoring/tools/art-direct.mjs see   --manifest built.json --out dir [--frame dir/frame.png] [--name s3]
 //
@@ -203,7 +203,9 @@ async function stepBuild() {
   const artRecord = !hasImages ? undefined : { format: 'artdir/1', builtBy: 'harness+opus', imageArt: 'muse-image-1.0', license: 'generated', pictures: Object.keys(game.assets ?? {}).filter((k) => game.assets[k].image) };
   // The app hooks live on the manifest (the engine refuses unknown keys inside game_json's presentation).
   const app = builder.app ? builder.app(art, game) : appHooks(art, { cover: game.assets?.backdrop ? 'backdrop' : null });
-  const { manifest, record } = await finish(prod, game, { kit: art.kit, seeded, seedRuns: Number(opt('--seed-runs', '6')), profile: opt('--profile'), notes: { artRecord, app } });
+  const newRules = argv.includes('--new-rules');
+  if (builder.manifestPatch) Object.assign(prod, builder.manifestPatch(prod));
+  const { manifest, record } = await finish(prod, game, { kit: art.kit, seeded, newRules, seedRuns: Number(opt('--seed-runs', '6')), profile: opt('--profile'), notes: { artRecord, app } });
   writeFileSync(join(out, 'manifest.json'), JSON.stringify(manifest));
   writeFileSync(join(out, 'finish.json'), JSON.stringify(record, null, 1));
   const bytes = JSON.stringify(manifest).length;

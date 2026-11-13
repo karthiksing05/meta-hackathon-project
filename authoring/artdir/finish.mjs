@@ -97,7 +97,7 @@ export function replayEqual(eng, jsonA, jsonB, { seed, actions = [], maxSteps })
   } finally { a.dispose(); b.dispose(); }
 }
 
-export async function finish(prod, game, { kit = null, seeded = false, seedRuns = 6, profile = null, notes = {}, engine = null, budgetMs = 240000 } = {}) {
+export async function finish(prod, game, { kit = null, seeded = false, newRules = false, seedRuns = 6, profile = null, notes = {}, engine = null, budgetMs = 240000 } = {}) {
   const eng = engine ?? (await loadEngine()).engine;
   const old = JSON.parse(prod.content.game_json);
   const record = { ok: true, seeded, rulesHash: { prod: rulesHash(old), built: null, same: null } };
@@ -127,10 +127,14 @@ export async function finish(prod, game, { kit = null, seeded = false, seedRuns 
     record.seededLogs = await seededLogProof(prod.content.game_json, JSON.stringify(built), { n: seedRuns, seed: Number(prod.seed) || 1 });
     if (record.seededLogs.same !== record.seededLogs.runs.length) { record.ok = false; record.why = (record.why ? record.why + '; ' : '') + 'a seeded run log replays differently'; }
   }
-  const prodGate = await playtest(JSON.stringify(old), { seed: 1, maxSeconds: 120, profile });
+  // A game whose loop was rebuilt (unseeded only) can't replay Prod's runs; its own gate runs must
+  // replay to the same state on the built game (the verifier's fixes changed nothing that plays).
+  if (newRules && seeded) { record.ok = false; record.why = (record.why ? record.why + '; ' : '') + 'a seeded game keeps its rules'; }
+  record.newRules = !!newRules;
+  const prodGate = newRules ? { runs: gate.runs } : await playtest(JSON.stringify(old), { seed: 1, maxSeconds: 120, profile });
   const maxSteps = Math.round((120 * 1000) / DT);
-  const runs = [...prodGate.runs.map((r) => ({ from: 'prod', ...r })), { from: 'idle', replay: { seed: 1, actions: [] }, bot: { label: 'idle' } }];
-  const replays = runs.filter((r) => r.replay).map((r) => ({ label: `${r.from}:${r.bot?.label ?? 'run'}`, ...replayEqual(eng, JSON.stringify(old), JSON.stringify(built), { seed: r.replay.seed, actions: r.replay.actions ?? [], maxSteps }) }));
+  const runs = [...prodGate.runs.map((r) => ({ from: newRules ? 'built' : 'prod', ...r })), { from: 'idle', replay: { seed: 1, actions: [] }, bot: { label: 'idle' } }];
+  const replays = runs.filter((r) => r.replay).map((r) => ({ label: `${r.from}:${r.bot?.label ?? 'run'}`, ...replayEqual(eng, newRules ? JSON.stringify(game) : JSON.stringify(old), JSON.stringify(built), { seed: r.replay.seed, actions: r.replay.actions ?? [], maxSteps }) }));
   record.replays = { equal: replays.every((r) => r.equal), runs: replays.map((r) => ({ label: r.label, equal: r.equal, steps: r.steps, ...(r.blockedTap ? { blockedTap: true } : {}) })) };
   if (!record.replays.equal) { record.ok = false; record.why = (record.why ? record.why + '; ' : '') + 'a Prod run plays differently'; }
   if (!gate.passed) { record.ok = false; record.why = (record.why ? record.why + '; ' : '') + 'gate failed'; }
