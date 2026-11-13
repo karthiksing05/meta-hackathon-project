@@ -97,6 +97,16 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         return try decode(data)
     }
 
+    func savedGames() async throws -> [RemoteGame] {
+        let games = (try await get("v1/me/likes", query: [URLQueryItem(name: "limit", value: "100")], auth: .required) as RemoteList<RemoteGame>).items
+        games.forEach(link)
+        return games
+    }
+
+    func saves(gameID: String) async throws -> RemoteGameSaves {
+        try await get("v1/games/\(try serverID(gameID))/likes", auth: .optional)
+    }
+
     func sendFeedEvents(_ events: [FeedEvent]) async throws {
         let wire: [[String: Any]] = events.compactMap { e in
             guard let id = ids.serverID(for: e.gameID) else { return nil }

@@ -9,6 +9,8 @@ import Foundation
 //     let game = try await api.game(id: "hill-hopper")                 // a slug or a 24-hex server id
 //     let board = try await api.scores(gameID: game.id)                // one global board per game
 //     _ = try await api.setSaved(true, gameID: game.id)                // PUT /like; needs an account
+//     let saved = try await api.savedGames()                           // GET /v1/me/likes
+//     let who = try await api.saves(gameID: game.id)                   // {count, friends}
 //     try await api.sendFeedEvents([...])                              // what happened on each page
 //
 // `GamesAPILive` also adopts `GamesAuth`. The app signs in once at launch (`GamesAccount`).
@@ -28,6 +30,11 @@ protocol GamesAPI: Sendable {
     func submitScore(_ score: Int, gameID: String) async throws -> [RemoteScore]
     /// A save is a like on the server.
     func setSaved(_ saved: Bool, gameID: String) async throws -> SaveState
+    /// The games I saved, newest first (`GET /v1/me/likes`); needs an account.
+    func savedGames() async throws -> [RemoteGame]
+    /// How many people saved a game, and which of my friends did (`GET /v1/games/{id}/likes`).
+    /// Signed out, `friends` is empty.
+    func saves(gameID: String) async throws -> RemoteGameSaves
     /// Feed page events and off-feed moments (`POST /v1/feed/events`), in batches of 100.
     func sendFeedEvents(_ events: [FeedEvent]) async throws
 

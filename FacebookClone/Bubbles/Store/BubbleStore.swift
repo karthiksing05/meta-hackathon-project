@@ -26,6 +26,10 @@ final class BubbleStore {
     var feedState: FeedLoadState = .idle
     /// Games whose board is loading, and boards that failed, by game id.
     var boardStates: [String: FeedLoadState] = [:]
+    /// Who saved each game, as far as the server says (`GET /v1/games/{id}/likes`), by game id.
+    var saverStates: [String: BubbleSaversState] = [:]
+    /// Your saved games for the Library (`GET /v1/me/likes`).
+    var savedGamesState: FeedLoadState = .idle
 
     @ObservationIgnored let appStore: AppStore
 

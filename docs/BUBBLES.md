@@ -272,7 +272,7 @@ boards and the Studio service. It keeps nothing of its own and invents nothing (
 | A game | its server object plus the manifest at `manifestUrl` and the cover at `coverUrl`; `GET /v1/games/{id}` when a screen opens one that isn't loaded (`loadGame`) |
 | Boards | `GET /v1/games/{id}/leaderboard` (one global board; Friends and Group tabs say "Not available yet") |
 | Your run | `POST /v1/games/{id}/scores`, then the returned board |
-| Saves (= likes) | `PUT`/`DELETE /v1/games/{id}/like` |
+| Saves (= likes) | `PUT`/`DELETE /v1/games/{id}/like`; your saved games `GET /v1/me/likes` (Library's Saved section, `loadSavedGames`); who saved a game `GET /v1/games/{id}/likes` → `{count, friends}` (`loadSavers`, `saverStates`) |
 | Search | `GET /v1/search?q=` (Facebook Search's Games results) |
 | Your games | `GET /v1/creations` (Library) |
 | Group Blend | `POST /v1/groups/{id}/blend` (Group page, members only) |
@@ -677,8 +677,9 @@ Each look is a skin over the same `g` primitives. Kit code does not change per l
 > `POST /v1/groups/{id}/blend`. What needs server work first shows "Not available yet"
 > (`LiveDataStateView`, copy in `LiveDataCopy`): challenges and group-chat sessions (7.2), making
 > together (7.4), quiz nights (7.7), the Group weekly board (7.3), friends' story paths (7.6), and
-> friends' and Group boards. Saves (7.10) name only you as a saver; the server sends counts, not
-> who. Cards you share still go to the app's Messenger chats, which are Stage 5.
+> friends' and Group boards. Saves (7.10) name you and the friends who saved a game
+> (`GET /v1/games/{id}/likes`); everyone else is a count. Cards you share still go to the app's
+> Messenger chats, which are Stage 5.
 
 Every Bubble should bring specific people closer (friends, a Group, a group chat, people from an
 Event) through Facebook's own surfaces: friends, Groups, Messenger chats, Search, profiles and the
@@ -1502,9 +1503,10 @@ you first when saved, never the creator, never more than `saveCount`),
 **Who saved it.** The feed caption shows one social line: a friend's best to beat (opens the board)
 or, when no friend has a run, 'Saved by …' (opens the list). Long-pressing the feed's Save button
 (or the VoiceOver action 'See everyone who saved it') pushes `feature:saves/stats/<id>`.
-`SavesStatsView` lists savers friends first with Add friend for non-friends
-(`appStore.sendRequest(to:)`, then `BubbleSocialSignals.post(.addFriendFromGame, ...)`). The Bubble
-page shows the top three for your own Bubbles.
+`SavesStatsView` lists you and the friends who saved it (`GET /v1/games/{id}/likes`, loaded once
+per game per session by `BubbleStore.loadSavers`, skipped when nobody but you saved it or you're
+signed out), then "and N more" for savers the server doesn't name. It shows loading and "Try again"
+states. The Bubble page shows the top three for your own Bubbles.
 
 **Seeds.** Every seed's `_seed` block has `save_count` (hill-hopper 1,240 down to 17).
 
