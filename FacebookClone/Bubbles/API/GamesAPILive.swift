@@ -615,3 +615,49 @@ struct GamesKeychain: Sendable {
 }
 
 extension GamesAPILive: GamePlanTransport {}
+
+// MARK: - Notifications (server-owned; docs/notifications/CONTRACT.md)
+
+extension GamesAPILive: GameNotificationsAPI {
+    func gameNotifications(cursor: String? = nil) async throws -> RemoteGameNotificationPage {
+        var query = [URLQueryItem(name: "limit", value: "50")]
+        if let cursor, !cursor.isEmpty { query.append(URLQueryItem(name: "cursor", value: cursor)) }
+        return try await get("v1/me/notifications", query: query, auth: .required)
+    }
+
+    func setGameNotificationRead(id: String, read: Bool) async throws {
+        let body = try JSONSerialization.data(withJSONObject: ["read": read])
+        _ = try await send("PUT", "v1/me/notifications/\(try notificationPathID(id))/read", body: body,
+                           contentType: "application/json", auth: .required)
+    }
+
+    func markAllGameNotificationsRead() async throws {
+        _ = try await send("PUT", "v1/me/notifications/read", auth: .required)
+    }
+
+    func registerGamePushDevice(installationID: String, token: String, environment: String) async throws {
+        let body = try JSONSerialization.data(withJSONObject: ["token": token, "environment": environment])
+        _ = try await send("PUT", "v1/me/push-devices/\(try notificationPathID(installationID))", body: body,
+                           contentType: "application/json", auth: .required)
+    }
+
+    func unregisterGamePushDevice(installationID: String) async throws {
+        _ = try await send("DELETE", "v1/me/push-devices/\(try notificationPathID(installationID))", auth: .required)
+    }
+
+    func shareGameToGroup(gameID: String, groupID: String, eventID: String) async throws {
+        let body = try JSONSerialization.data(withJSONObject: ["gameId": try serverID(gameID), "eventId": eventID])
+        _ = try await send("POST", "v1/groups/\(try notificationPathID(groupID))/game-shares", body: body,
+                           contentType: "application/json", auth: .required)
+    }
+
+    /// IDs occupy a single path component. Reject separators rather than letting a malformed
+    /// server payload or caller escape into another endpoint.
+    private func notificationPathID(_ value: String) throws -> String {
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_"))
+        guard !value.isEmpty, value.count <= 200, value.unicodeScalars.allSatisfy(allowed.contains) else {
+            throw GamesAPIError.decoding("Invalid notification identifier.")
+        }
+        return value
+    }
+}

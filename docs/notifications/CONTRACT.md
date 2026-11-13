@@ -1,5 +1,8 @@
 # Game notifications
 
+Backend implementation is handed to Max / Claude (for Max). Kevin's branch owns the iOS
+client, inbox, APNs registration and tap navigation only.
+
 Work branch: `codex/notifications`, based on `main` `6a619c5`.
 
 The server chooses recipients, stores read state, and queues push delivery. The phone displays
@@ -18,7 +21,7 @@ feed ranks. Existing non-game Facebook notifications are unaffected.
   notify only the former leader. No alert for an empty board, a second-place change, an
   unranked game, or improving one's own first-place score. Follow the game's score direction
   and tie-break rules. Serialize the board transition, including legacy score submissions.
-- `viral_match`: a recently created public game has at least 20 distinct signed-in players in
+- `viral_match`: a recently created public game has at least 100 distinct signed-in players in
   the last 24 hours, and cosine similarity to the person's learned taste is at least 0.85.
   Require at least 5 observed pages and a nonzero taste vector. Use the exact existing
   `GameRecs.describe(...).x` vector, not a second feature encoder. Exclude drafts, private
