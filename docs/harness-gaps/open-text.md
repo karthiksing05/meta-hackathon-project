@@ -165,9 +165,18 @@ can feed a nightly repair of the bank (a new game version), so C's use shrinks o
   group-play agent owns (see the last request).
 - Until then, compose can write a small bank directly from the fragment's `describe`, without the refine round.
 
-**Gate:** see the final report for the bot-gate result on the example. The bots climb `qa_progress()` by spelling a
-fact's or solution's key phrase. They can't type freely, so the pro bot solves by spelling the solution's key words.
-That is a fair skill signal for the gate, but not real play.
+**Gate:** the example passes the bot gate (`node authoring/playtest/run.mjs authoring/games/qa_ask_me_why.authoring.json`).
+
+| Bot | Result | Score | Time |
+|---|---|---|---|
+| new player | lost on the 150 s limit | 50 | 150 s |
+| pro | won | 1025 | 6 s |
+| regulars | won | 900–1025 | 10–81 s |
+
+The first run, with a 240 s limit, was blocked as "can't be lost". The bots climb `qa_progress()` by spelling a
+fact's or solution's key phrase, so a strong bot solves almost at once by spelling the solution's key words. That
+is a fair skill signal for the gate, but not real play. Pro and regular tie at 1025, so the score separates
+weakly. The gate is slow on this game: 773 s, mostly lookahead over 30 keyboard taps.
 
 ## Requests
 
