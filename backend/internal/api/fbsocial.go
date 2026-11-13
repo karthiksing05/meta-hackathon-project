@@ -219,7 +219,11 @@ func (s *Server) fbPeopleByID(ctx context.Context, ids []string, me *model.User)
 				name = u.Username
 			}
 			first, last, _ := strings.Cut(name, " ")
-			out[u.ID] = fbPerson{ID: u.ID, FirstName: first, LastName: last, Kind: "person", AvatarURL: cartoonAvatar(u.Username),
+			avatar := u.AvatarURL
+			if avatar == "" {
+				avatar = cartoonAvatar(u.Username)
+			}
+			out[u.ID] = fbPerson{ID: u.ID, FirstName: first, LastName: last, Kind: "person", AvatarURL: avatar,
 				Bio: u.Bio, IsAccount: true}
 		}
 	}

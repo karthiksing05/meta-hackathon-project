@@ -11,6 +11,10 @@ type User struct {
 	PasswordHash string    `bson:"passwordHash" json:"-"`
 	CreatedAt    time.Time `bson:"createdAt" json:"createdAt"`
 	Bio          string    `bson:"bio,omitempty" json:"bio,omitempty"`
+	// AvatarURL is a picture the person chose (an https URL, a DiceBear cartoon by default); empty means the
+	// app's cartoon from the username. CoverColor is the profile cover's color, "#RRGGBB".
+	AvatarURL  string `bson:"avatarUrl,omitempty" json:"avatarUrl,omitempty"`
+	CoverColor string `bson:"coverColor,omitempty" json:"coverColor,omitempty"`
 }
 
 type RefreshToken struct {
@@ -261,6 +265,33 @@ type Group struct {
 	CoverSeed string    `bson:"coverSeed,omitempty" json:"coverSeed,omitempty"`
 	OwnerID   string    `bson:"ownerId,omitempty" json:"ownerId,omitempty"`
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
+	// JoinPolicy is how people get in: "open" (anyone joins), "request" (ask; the owner approves) or "invite" (a
+	// member adds you). Empty means open, or invite for a private Group; JoinPolicyOf reads it.
+	JoinPolicy string `bson:"joinPolicy,omitempty" json:"joinPolicy,omitempty"`
+	// Recruiting is the Group saying it wants new members (shown on its card and in discovery).
+	Recruiting bool   `bson:"recruiting,omitempty" json:"recruiting"`
+	CoverColor string `bson:"coverColor,omitempty" json:"coverColor,omitempty"` // "#RRGGBB"
+	// Requests are the people waiting to join a "request" Group, oldest first. Only the owner sees them.
+	Requests []string `bson:"requests,omitempty" json:"-"`
+}
+
+// Join policies of a Group.
+const (
+	JoinOpen    = "open"
+	JoinRequest = "request"
+	JoinInvite  = "invite"
+)
+
+// JoinPolicyOf is a Group's effective join policy.
+func JoinPolicyOf(g Group) string {
+	switch g.JoinPolicy {
+	case JoinOpen, JoinRequest, JoinInvite:
+		return g.JoinPolicy
+	}
+	if g.Private {
+		return JoinInvite
+	}
+	return JoinOpen
 }
 
 // GroupDaily is the game a Group plays on one day: everyone gets the same game, so the board is fair. One per Group and
