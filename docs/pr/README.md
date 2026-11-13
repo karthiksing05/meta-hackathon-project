@@ -4,7 +4,8 @@
 
 | File | What it holds |
 |---|---|
-| [01-story.md](01-story.md) | One-liners and the line bank |
+| [hook.md](hook.md) | Options for the first 15 to 30 seconds |
+| [01-story.md](01-story.md) | The story spine, one-liners and the line bank |
 | [02-problem.md](02-problem.md) | The problem |
 | [03-what-we-built.md](03-what-we-built.md) | What a person does; terms |
 | [04-why-ai.md](04-why-ai.md) | Why AI is needed |

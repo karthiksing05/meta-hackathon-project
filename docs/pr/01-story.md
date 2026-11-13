@@ -8,6 +8,8 @@ The spine has seven steps. Each one names the file that backs it. Status is as o
 
 ## 1. The hook: Facebook doesn't appeal to young adults
 
+*The first 15 to 30 seconds, before this, are an opening moment; the options are in [hook.md](hook.md).*
+
 Ask anyone our age why they open Facebook. Most of them don't. Facebook still *reaches* young adults: 69% of US adults aged 18 to 29 use it [52]. But it is the third app in that age group, behind YouTube (95%) and Instagram (79%) [52], and its daily use peaks among people aged 30 to 64 [53]. The next generation is arriving without the habit: teen use fell from 71% in 2014-15 to 32% in 2024 [54].
 
 ## 2. Why: our own experience, and the research
