@@ -218,7 +218,7 @@ extension BubbleStore {
             guard let self else { return }
             do {
                 let rows = try await api.scores(gameID: gameID, scope: scope.rawValue, groupID: group)
-                scopedBoards[key] = rows.map { scoreRow($0) }
+                scopedBoards[key] = rows.map { self.scoreRow($0) }
                 boardStates[key] = .idle
             } catch {
                 boardStates[key] = .failed(error.localizedDescription)
