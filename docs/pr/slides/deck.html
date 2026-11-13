@@ -346,6 +346,40 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .hxval div { border-top: 5px solid; border-image: var(--grad) 1; padding-top: 16px; }
 .hxval b { display: block; font-size: 36px; font-weight: 800; }
 .hxval span { display: block; font-size: 25px; line-height: 1.35; color: var(--sub); margin-top: 6px; }
+
+/* slide 5: the problem */
+.rprob { align-self: stretch; display: flex; flex-direction: column; }
+.rq { font-size: 40px; font-weight: 700; line-height: 1.25; } .rq b { font-weight: 900; }
+.cmts { margin-top: 30px; background: var(--soft); border-radius: 26px; padding: 26px 30px; }
+.cm { display: flex; gap: 16px; align-items: center; padding: 9px 0; }
+.cm i { flex: none; width: 46px; height: 46px; border-radius: 50%; background: #D8DADF; }
+.cm p { font-size: 27px; color: var(--ink); } .cm p b { font-weight: 800; margin-right: 8px; }
+.cmx { font-size: 22px; color: var(--muted); font-weight: 700; margin: 8px 0 0 62px; }
+.rgap { margin-top: 30px; font-size: 38px; font-weight: 800; line-height: 1.25; } .rgap span { display: block; color: var(--blue); }
+/* slide 7: the harness */
+.hx .hxh { font-size: 76px; margin-top: 6px; } .hxsub { font-size: 36px; color: var(--sub); font-weight: 600; margin-top: 8px; }
+.hxrow { display: grid; grid-template-columns: 380px 1fr 380px; gap: 30px; margin-top: 34px; align-items: stretch; }
+.hxc { border-radius: 26px; padding: 26px 28px; } .hxc.you { background: #EEE8FF; } .hxc.fmt { background: #E7F0FF; }
+.hxc em { display: block; font-style: normal; font-size: 20px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+.hxc.you em { color: var(--violet); } .hxc.fmt em { color: var(--blue); }
+.hxc b { display: block; font-size: 34px; font-weight: 800; margin: 6px 0 12px; line-height: 1.15; }
+.hxc p { font-size: 24px; color: var(--sub); padding: 9px 0; border-top: 2px solid rgba(16,24,64,.08); line-height: 1.25; }
+.hxmid { display: flex; flex-direction: column; gap: 8px; }
+.hxst { display: grid; grid-template-columns: 40px 170px auto 1fr; align-items: center; gap: 14px; background: var(--soft); border-radius: 18px; padding: 10px 18px; }
+.hxst.pv { background: #EEE8FF; }
+.hxst i { font-style: normal; font-weight: 800; font-size: 20px; color: #fff; background: var(--grad); border-radius: 50%; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; }
+.hxst b { font-size: 30px; font-weight: 800; }
+.hxst span { font-size: 18px; font-weight: 800; border-radius: 999px; padding: 5px 12px; white-space: nowrap; }
+.hxst span.mu { background: var(--grad); color: #fff; } .hxst span.ou { background: #fff; color: var(--sub); border: 2px solid #E4E6EB; }
+.hxst p { font-size: 20px; color: var(--sub); line-height: 1.25; }
+.hxlp { font-size: 22px; font-weight: 700; color: var(--violet); padding-left: 6px; margin-top: 2px; }
+.hxbot { display: grid; grid-template-columns: 1fr 1fr 1.15fr; gap: 36px; margin-top: 30px; }
+.hxbot > div { border-top: 5px solid; border-image: var(--grad) 1; padding-top: 14px; }
+.hxbot b { display: block; font-size: 28px; font-weight: 800; } .hxbot span { display: block; font-size: 23px; color: var(--sub); line-height: 1.3; margin-top: 4px; }
+.hxmm { display: flex; gap: 14px; align-items: flex-start; } .hxmm figure { margin: 0; width: 84px; flex: none; }
+.hxmm img { flex: none; width: 92px; height: 150px; object-fit: cover; object-position: top; border-radius: 12px; display: block; box-shadow: 0 8px 18px rgba(16,24,64,.16); }
+.hxmm figcaption { font-size: 13px; font-weight: 700; color: var(--sub); margin-top: 6px; line-height: 1.15; }
+.hxmm p { font-size: 21px; color: var(--sub); line-height: 1.3; } .hxmm p b { font-size: 26px; margin-bottom: 4px; color: var(--ink); }
 </style>
 </head>
 <body>
@@ -362,7 +396,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 </section>
 
 <section class="slide why2">
-  <div class="label">Why</div>
+  <div class="label">The problem</div>
   <h2>People open an app for a reason.</h2>
   <div class="why2g">
     <div class="wc"><em>A need</em><b>Something you have to do.</b><p>Reach a friend. Find a place. Meet someone new.</p></div>
@@ -374,7 +408,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 </section>
 
 <section class="slide">
-  <div class="label">Why</div>
+  <div class="label">The problem</div>
   <h2 style="margin-top:10px;font-size:80px">Facebook has the people, but has lost the reason.</h2>
   <div class="tens3">
     <div class="chart">
@@ -403,7 +437,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 </section>
 
 <section class="slide">
-  <div class="label">Why</div>
+  <div class="label">The problem</div>
   <h2 style="margin-top:10px;font-size:80px">At work, play became the icebreaker.</h2>
   <div class="ind">
     <div class="li2"><em>LinkedIn</em><b>Daily puzzles that rank you against your connections, colleagues and alumni.</b><p>A conversation starter at work. 86% of players come back the next day <span>(company-reported)</span>.</p></div>
@@ -424,22 +458,29 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 </section>
 
 <section class="slide">
-  <div class="label">Why</div>
+  <div class="label">The problem</div>
   <h2 style="margin-top:10px;font-size:76px">Short-form is becoming something you play.</h2>
   <div class="reels">
     <div class="reelf"><div class="frame" id="reel1"><span>Reel A<br><small>screenshot from Karthik's Mac</small></span></div><b>"Pause it perfectly"</b><i>@veefriends · one timed tap · 7.5 s · 4.2M views</i></div>
     <div class="reelf"><div class="frame" id="reel2"><span>Reel B<br><small>screenshot from Karthik's Mac</small></span></div><b>A "play along" quiz</b><i>@thefictionexpert · ~640K likes</i></div>
     <div class="reelf"><div class="frame" id="reel3"><span>Reel C<br><small>screenshot from Karthik's Mac</small></span></div><b>"At what speed will you break?"</b><i>@neravik.games · a speed-reading ramp · 137 s · 2.29M views</i></div>
-    <div class="rline">Every one ends the same way:<br><b>"tell me your score"</b><br>in the comments.
-      <div class="musemade"><div class="mmh">The same formats, made by Muse</div>
-        <div class="mmrow"><figure><img src="img/muse-golden-smore.png"><figcaption><b>Golden S'more</b>one tap, stop it at golden</figcaption></figure>
-        <figure><img src="img/muse-biscuit-waiter.png"><figcaption><b>Biscuit's First Day</b>guess what happens next</figcaption></figure></div></div></div>
+    <div class="rprob">
+      <div class="rq">Every one ends the same way: <b>"tell me your score"</b> in the comments.</div>
+      <div class="cmts">
+        <div class="cm"><i></i><p><b>user_4821</b> 7.42 first try 😤</p></div>
+        <div class="cm"><i></i><p><b>jess.k</b> got 3 lol</p></div>
+        <div class="cm"><i></i><p><b>m4rco</b> whats the high score??</p></div>
+        <div class="cm"><i></i><p><b>dee_1999</b> @sam beat this</p></div>
+        <div class="cmx">+ thousands more</div>
+      </div>
+      <div class="rgap">The score scrolls away among strangers. <span>No board. No friends. No rematch.</span></div>
+    </div>
   </div>
-  <div class="foot"><span>© the creators, via Instagram. Views and likes as shown on the Reels.</span><span class="pg"></span></div>
+  <div class="foot"><span>© the creators, via Instagram. Views and likes as shown on the Reels. Comments: illustration.</span><span class="pg"></span></div>
 </section>
 
 <section class="slide bridge">
-  <div class="label">Our answer · Originality</div>
+  <div class="label">Our answer · Muse Curios</div>
   <div class="brow">
     <div class="btxt">
       <h2>A Curio turns "tell me your score" into a real Group score.</h2>
@@ -454,25 +495,28 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 
 <section class="slide hx">
   <div class="label">How · AI integration</div>
-  <h2 class="hxh">Muse doesn't guess a game. <span class="grad">It plans one, then proves it.</span></h2>
-  <div class="hxflow">
-    <div class="hxs"><i>1</i><em>Spark</em><b>Understand</b><p>Any sentence becomes verbs, inputs, theme and named games.</p></div>
-    <div class="hxa">→</div>
-    <div class="hxs"><i>2</i><em>Search + lookup</em><b>Ground</b><p>1,305 game types and 285 tools. A name it doesn't know gets looked up and learned.</p></div>
-    <div class="hxa">→</div>
-    <div class="hxs"><i>3</i><em>Wonder</em><b>Plan</b><p>A spec with every part named: goal, loop, rules, score, how friends play. Your words quoted as requirements.</p></div>
-    <div class="hxa">→</div>
-    <div class="hxs"><i>4</i><em>Wonder + Image</em><b>Compose</b><p>Rules in our engine's language, art painted to match.</p></div>
-    <div class="hxa">→</div>
-    <div class="hxs prove"><i>5</i><em>5 bots + checkers</em><b>Prove</b><p>Bots play it. Layout, text and motion are measured. Every score is replayed.</p></div>
+  <h2 class="hxh">Distilling Virality into a <span class="grad">Harness</span></h2>
+  <div class="hxsub">What does it take to create a successful game?</div>
+  <div class="hxrow">
+    <div class="hxc you"><em>Your creativity</em><b>Anything you can say</b>
+      <p>Any theme, any franchise, by name</p><p>Your own photos or video</p><p>A story with twists and endings</p><p>Your exact words, kept</p></div>
+    <div class="hxmid">
+      <div class="hxst"><i>1</i><b>Understand</b><span class="mu">Muse Spark</span><p>verbs, inputs, theme, named games</p></div>
+      <div class="hxst"><i>2</i><b>Ground</b><span class="ou">our search</span><p>1,305 game types, 285 tools; unknown names looked up</p></div>
+      <div class="hxst"><i>3</i><b>Plan</b><span class="mu">Muse Wonder</span><p>every part named; your words quoted as requirements</p></div>
+      <div class="hxst"><i>4</i><b>Compose</b><span class="mu">Muse Wonder + Muse Image</span><p>rules in our engine, art painted to match</p></div>
+      <div class="hxst pv"><i>5</i><b>Prove</b><span class="ou">5 bots + checkers</span><p>played, measured, every score replayed</p></div>
+      <div class="hxlp">↺ a failed check sends only that part back to Muse</div>
+    </div>
+    <div class="hxc fmt"><em>The Curio format</em><b>Something a Group can play</b>
+      <p>One clear goal, done in a minute</p><p>A fair score that can't be farmed</p><p>Same seed, so friends can compare</p><p>Readable and smooth on a phone</p></div>
   </div>
-  <div class="hxloop"><span>↺ A failed check sends only the failing part back to Muse, on a time limit. What can't be met ships with an honest note, never a fake.</span></div>
-  <div class="hxval">
-    <div><b>Grounded</b><span>All 32 of a teammate's real requests landed on a known game type. The mechanic was right in 28.</span></div>
-    <div><b>Faithful</b><span>Must-haves met went from 94% to 98% once your words were quoted into the plan.</span></div>
-    <div><b>Proven</b><span>On 45 real builds, unreadable text fell from 178 to 2 and motion glitches from 411 to 34. A game a bot wins instantly never ships.</span></div>
+  <div class="hxbot">
+    <div><b>Keeps your idea</b><span>Must-haves met: 94% → 98% once your words were quoted into the plan.</span></div>
+    <div><b>Keeps the format</b><span>45 real builds: motion glitches 411 → 34. A game a bot wins instantly never ships.</span></div>
+    <div class="hxmm"><img src="img/muse-golden-smore.png"><img src="img/muse-biscuit-waiter.png"><p><b>Made by Muse, this way</b>Golden S'more and Biscuit's First Day: the Reel formats, now Curios.</p></div>
   </div>
-  <div class="foot"><span>Harness v2 on our server, 2026-11-13: 32 planning requests; 13 real-Muse builds; checkers on 45 builds.</span><span class="pg"></span></div>
+  <div class="foot"><span>Harness v2 on our server, 2026-11-13: 13 real-Muse builds both ways; checkers on 45 builds.</span><span class="pg"></span></div>
 </section>
 
 <section class="slide collab">
