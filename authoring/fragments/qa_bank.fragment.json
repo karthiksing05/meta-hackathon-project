@@ -158,6 +158,14 @@
     "ran_out": {
       "type": "bool",
       "init": "false"
+    },
+    "_phr": {
+      "type": "list<string>",
+      "init": "[]"
+    },
+    "_sphr": {
+      "type": "list<string>",
+      "init": "[]"
     }
   },
   "functions": {
@@ -214,15 +222,15 @@
     },
     "_on_track": {
       "params": {
-        "its": "list<string>"
+        "ps": "list<string>"
       },
       "returns": "bool",
-      "body": "any(its, it => starts_with(_phrase(it), lower(typed)))"
+      "body": "any(ps, p => starts_with(p, typed))"
     },
     "qa_progress": {
       "params": {},
       "returns": "int",
-      "body": "qa_points * 100 + (if locked then 0 else if _on_track(_solves()) then len(typed) * 3 else if _on_track(_intents()) then len(typed) else -5)"
+      "body": "qa_points * 100 + (if locked or typed == '' then 0 else if _on_track(_sphr) then len(typed) * 3 else if _on_track(_phr) then len(typed) else -5)"
     },
     "key_state": {
       "params": {
@@ -415,6 +423,14 @@
         {
           "set": "ran_out",
           "to": "false"
+        },
+        {
+          "set": "_phr",
+          "to": "map(_intents(), it => _phrase(it))"
+        },
+        {
+          "set": "_sphr",
+          "to": "map(_solves(), it => _phrase(it))"
         },
         {
           "set": "locked",
