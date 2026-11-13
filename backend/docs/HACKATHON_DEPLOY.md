@@ -164,7 +164,14 @@ chmod 600 /etc/game-platform/generator.env
 curl -s http://127.0.0.1:8090/healthz     # {"status":"ok","museConfigured":true,...}
 ```
 
-Never paste the key into the repo, GitHub, Slack or a chat.
+**Or let GitHub do it.** Store the key once as an environment secret and every deploy to `Prod` writes it to that file for you
+(skipped when the secret isn't set). From your PC, in PowerShell; it asks for the key with hidden input:
+
+```powershell
+gh secret set MUSE_API_KEY --env production --repo karthiksing05/meta-hackathon-project
+```
+
+The key then lives only in GitHub's encrypted secrets and the root-only file on the server. Never paste it into the repo, Slack or a chat.
 
 ## 7. Server: create the database indexes (once)
 

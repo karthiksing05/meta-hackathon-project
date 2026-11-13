@@ -103,7 +103,7 @@ jobs:
     permissions:
       contents: read
       packages: read          # lets this job's token pull the images on the server
-    environment: production   # holds VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_KNOWN_HOSTS (and optional API_PUBLIC_URL)
+    environment: production   # holds VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_KNOWN_HOSTS, MUSE_API_KEY (and optional API_PUBLIC_URL)
     steps:
       - uses: actions/checkout@v4
       - name: Prepare SSH
@@ -123,6 +123,20 @@ jobs:
             backend/deploy/docker-compose.prod.yml backend/deploy/mongo-init.js \
             backend/deploy/deploy.sh backend/deploy/dbinit.sh backend/deploy/backup.sh \
             "$USER_@$HOST:/srv/game-platform/app/"
+      - name: Give the generator the Muse key (only if the secret is set)
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_: ${{ secrets.VPS_USER }}
+          MUSE_API_KEY: ${{ secrets.MUSE_API_KEY }}
+        run: |
+          if [ -z "$MUSE_API_KEY" ]; then
+            echo "MUSE_API_KEY is not set in the production environment: leaving /etc/game-platform/generator.env as it is"
+            exit 0
+          fi
+          # The key goes over SSH stdin (never on a command line) into a root-only file on the server, which
+          # the generator container reads when it is recreated by the deploy below. GitHub masks it in logs.
+          printf 'MUSE_API_KEY=%s
+' "$MUSE_API_KEY" | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST"             'umask 077 && cat > /etc/game-platform/generator.env.new && mv /etc/game-platform/generator.env.new /etc/game-platform/generator.env'
       - name: Deploy (rolls back automatically if /readyz fails)
         env:
           HOST: ${{ secrets.VPS_HOST }}
