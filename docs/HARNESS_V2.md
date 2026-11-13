@@ -301,6 +301,11 @@ for games with no right answer, how closely people agree (`opinion_compare`).
 - **Sponsors**: the understanding and `spec.theme` carry `sponsor {name, products, tone}`; compose puts the name in
   the title or intro card and uses the products as pieces. This is the brief's sponsor, not the server's sponsor
   record (`model.Sponsor`, set by brand accounts); the generator can copy one into the other.
+- **Versions** (Studio API 5, docs/harness-gaps/variants.md): `studio.variants(args, ask, onEvent)` wraps
+  `makeVariants` over the same local Studio as `compose`. The plan menu calls out `spec.loop.twist` as "This
+  version's twist" and lists the person's earlier picks (`context.preferences`). `context.notes` stays out of the
+  prompt: they are notes for people. In Go, `Request.preferences` goes into the context; a look pick fills
+  `theme.look` when the request names no style and settles the art style slot (guessed false).
 - **One gold example** when the top type is a confident catalog match (score >= 0.85, not learned), else two. On the
   dodge sample the system prompt drops from 112k to 91k characters (19%).
 
