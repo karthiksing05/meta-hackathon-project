@@ -1009,7 +1009,7 @@
       "h": "float, set by the geo step",
       "ring": "bool, default true: pulsing ring at the lit place"
     },
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no accurate map art",
       "map_pin"
@@ -1049,7 +1049,7 @@
       "grid": "bool, default true: faint 30-degree grid dots",
       "x, y, w, h, ax, ay, kx, ky": "float, set by the geo step"
     },
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no accurate map art",
       "tap position to longitude and latitude"
@@ -1075,7 +1075,7 @@
     "summary": "geo_km(a, b) great-circle km, geo_dir(a, b) 8-point compass direction and geo_closeness(a, b) 0–100 between two vec(lon, lat) points, deterministic in the engine.",
     "when_to_use": "Guess-the-country-by-name puzzles that answer with distance and direction, closest-guess scoring, and any rule that needs how far apart two places are.",
     "api": "provides geo_km(a: vec2, b: vec2): int, geo_dir(a, b): string, geo_closeness(a, b): int; points are vec(lon, lat), usually from geo_target()",
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no trusted distance maths in rules"
     ],
@@ -1102,7 +1102,7 @@
     "params": {
       "x, y, w, h": "float, set by the geo step"
     },
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no accurate map art"
     ],

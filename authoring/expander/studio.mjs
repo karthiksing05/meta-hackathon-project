@@ -13,6 +13,8 @@ import { playtestAsync, DEFAULT_BOTS } from '../playtest/gate-async.mjs';
 import { checkScore } from '../playtest/score-check.mjs';
 import { storyGate as playStoryGate, asScoreRuns } from '../playtest/story-bots.mjs';
 import { validateStoryGraph } from './story-graph.mjs';
+import { applyGeo } from './geo.mjs';
+import { applyScene } from './scene-step.mjs';
 import { normalizeScore } from './score.mjs';
 import { sortSafe } from './stable.mjs';
 import { pickGold, goldPromptText } from './gold.mjs';
@@ -237,7 +239,7 @@ function unwrap(v) {
  * getEngine(): the engine (`MicrogameEngine.getEngine()`), or null with engineError() saying why.
  */
 export function createStudio(data, { getEngine, engineError = () => null } = {}) {
-  const { library, engineCatalog = {}, formatRules = '', examples = [], gold = [], build = {} } = data;
+  const { library, engineCatalog = {}, formatRules = '', examples = [], gold = [], geoPacks = {}, build = {} } = data;
   let catalogCache = null;
   const randomBuiltins = new Set((engineCatalog.builtins || []).filter((b) => b.random).map((b) => b.name));
   const safe = (doc) => sortSafe(doc, { isRandom: (n) => randomBuiltins.has(n) });
@@ -305,9 +307,21 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     let manifest = unwrap(input);
     if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) return fail('A_MALFORMED', 'the authoring manifest must be a JSON object');
     manifest = safe(manifest).doc;
+    // Build-time content steps, before the expander: maps (a `geo` section becomes the map sprite,
+    // place functions and fragment params, docs/harness-gaps/maps.md) and spot-the-difference pairs
+    // (`content.scene` with diff_spots, docs/harness-gaps/images.md). The stored authoring keeps them.
+    let applied = manifest;
+    for (const step of [(m) => (m.geo ? applyGeo(m, geoPacks) : null), applyScene]) {
+      const r = step(applied);
+      if (!r) continue;
+      if (r.diagnostics.some((d) => d.severity === 'error')) {
+        return JSON.stringify({ ok: false, authoring: manifest, game: null, playtest_game: null, diagnostics: r.diagnostics.map((d) => finish({ ...d, audience: 'model', origin: 'game' }, manifest)), authoring_json: JSON.stringify(manifest), game_json: null, playtest_game_json: null, score: null, score_declared: false, ms: { expand: round1(now() - t0), validate: 0 } });
+      }
+      applied = r.manifest;
+    }
     let result;
     try {
-      result = expandManifest(manifest, library);
+      result = expandManifest(applied, library);
     } catch (e) {
       // The expander assumes the manifest's basic shape; anything it trips over is the model's to fix.
       return fail('A_MALFORMED', `the manifest has the wrong shape somewhere (${e?.message ?? e}). Check that uses is a list of {fragment, params, bind}, that rules is a list, and that every section matches the format.`);

@@ -17,7 +17,7 @@
 //               script runs `cargo run --release -q -p mg-cli -- catalog --json` in engine/ (set
 //               CARGO_TARGET_DIR to build elsewhere).
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync, execSync } from 'node:child_process';
@@ -156,8 +156,22 @@ function gold(lib) {
   });
 }
 
+// Map content packs (authoring/content/geo/*.json, geo-pack/1, Natural Earth, public domain) for the
+// expander's geo step (expander/geo.mjs applyGeo).
+function geoPacks() {
+  const dir = join(authoringDir, 'content', 'geo');
+  if (!existsSync(dir)) return {};
+  const out = {};
+  for (const f of readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) {
+    const pack = JSON.parse(readFileSync(join(dir, f), 'utf8'));
+    out[pack.id] = pack;
+  }
+  return out;
+}
+
 const data = {
   library: lib,
+  geoPacks: geoPacks(),
   engineCatalog: cat,
   formatRules: formatRules(),
   examples: examples(lib),

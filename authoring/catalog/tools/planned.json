@@ -503,7 +503,7 @@
     ],
     "summary": "Shows a clue, the player pins a guess on a real map, and the score falls with the great-circle distance from the true place.",
     "when_to_use": "Where-was-this-taken, pin-the-capital, find-the-country and place quizzes. Compose it from geo_map + map_pin + rounds + lives with a `geo` section (target: capital or label).",
-    "status": "building",
+    "status": "shipped",
     "gaps_it_closes": [
       "no accurate map art"
     ],
@@ -534,7 +534,7 @@
     ],
     "summary": "Checked place data built at build time from Natural Earth (public domain): 177 countries and the 51 US states and DC with simplified outlines, label points, bounding boxes, continent and subregion, capitals with coordinates, and aliases. A game names places; coordinates and outlines come only from the pack.",
     "when_to_use": "Any geography game: the `geo` section picks or names places from a pack, and the geo step writes their names, capitals, coordinates and outlines into the game.",
-    "status": "building",
+    "status": "shipped",
     "notes": "Built by tools/make-geo-pack.mjs from ne_110m_admin_0_countries, ne_110m_populated_places_simple and ne_110m_admin_1_states_provinces (v5). world.json 147 KB, us_states.json 25 KB; a game carries only its own places (10–30 KB with the map). No flags (Natural Earth has none; see the request) and no cities beyond capitals yet.",
     "api": "authoring/content/geo/<pack>.json (geo-pack/1); manifest `geo` {pack, places | pick {region, count, min_area, seed}, target: label|capital, map, outline, quiz {choices, ask: name|capital}}; expander/geo.mjs applyGeo(manifest, packs); unknown places are A_GEO_PLACE errors",
     "example_types": [
