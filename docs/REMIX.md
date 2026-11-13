@@ -52,6 +52,7 @@ Anything the person didn't ask to change stays as it was, including the art: a r
 - A rebuilt remix (no authoring source) is a fresh build of the same idea. Its art is newly painted, not the
   original's, and the loop check can't compare end states.
 - Sprite poses are not repainted separately: a repainted character is one picture.
+- A two-cell sheet gets a third cell (a happy pose or a second view), so Muse paints square cells with one figure each.
 - One sheet holds up to 16 repaints. At most 4 image calls run per build.
 - The loop check reads `objectives` and `score`; it can't tell whether two different fragment sets play alike.
 

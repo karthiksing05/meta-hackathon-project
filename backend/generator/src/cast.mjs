@@ -266,10 +266,18 @@ export function startCastArt({ cast, visual = null, spec = null, title = '', mus
   }
   if (cast.length) {
     state.imageCalls++;
+    // Two cells make a 2 × 1 grid of tall cells, and Muse fills each with two figures (seen on a remix's repaint):
+    // a third cell (the first subject's happy pose or a second view) makes it a 2 × 2 grid of square cells.
+    const first = cast[0];
+    const sheetCast = cast.length === 2
+      ? [...cast, first.kind === 'character'
+        ? { ...first, id: `${first.of ?? first.id}`.slice(0, 18) + '_happy', pose: 'happy', of: first.of ?? first.id }
+        : { ...first, id: `${first.id}`.slice(0, 20) + '_alt', text: `${first.text ?? first.name}, a second view`, pose: null }]
+      : cast;
     jobs.push((async () => {
       try {
         const { sheets, prompts } = await loadArtModules(dir);
-        const r = await paintSheet({ muse, sheets, prompts, d: state.d, cast, signal, purpose: 'sheet', state });
+        const r = await paintSheet({ muse, sheets, prompts, d: state.d, cast: sheetCast, signal, purpose: 'sheet', state });
         Object.assign(state.sprites, r.sprites);
         for (const id of Object.keys(r.sprites)) state.own.add(id);
         state.calls.push({ ...r.call, method: r.method, sliced: Object.keys(r.sprites).length });
