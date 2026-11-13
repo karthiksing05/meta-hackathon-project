@@ -166,6 +166,19 @@ replays (every Prod gate run plays the same on the new game: taps go to the same
 nothing stay on nothing unless an input reads raw pointer positions). `finish.json` holds the record;
 `ok: true` needs gate pass, 0 blocking findings and equal replays.
 
+### 5b. Loop critic (0 calls)
+
+```sh
+node authoring/tools/loop-critic.mjs run/<key>/manifest.json [--profile trivia]
+```
+
+Replays the five gate bots and reports, per bot, the input cadence, the share of inputs that change
+the game within 250 ms, the longest dead stretch, run length and end, the score rate per third, the
+pace numbers that move (speed, level, round, mult, ...) and the restart time, then lists what misses
+the bar (goal in 3 s, an action every 1 to 3 s, feedback on every action, rising stakes, a fair end,
+45 to 120 s, restart under 2 s, skill shows). Quiz bots answer at once, so a quiz's run is shorter
+than a person's; read its cadence with that in mind.
+
 ### 6. See and fix (0 calls)
 
 ```sh
