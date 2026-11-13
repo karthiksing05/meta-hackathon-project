@@ -1,6 +1,6 @@
 # Pitch slides
 
-**Current state:** draft 12, 26 slides, on branch `pitch`. The talk runs about 6:25 untrimmed (timing table at the top of `notes.md`); Karthik asked not to trim until he says so.
+**Current state:** draft 13, 29 slides, on branch `pitch`. Section 3 is now "The AI stack" (slides 13–21: the stack and Facebook surfaces, make, check, rank, learn). The talk runs about 7:25 untrimmed (timing table at the top of `notes.md`); Karthik asked not to trim until he says so.
 
 ## Files
 

@@ -687,6 +687,50 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .collab .crow { margin-top: 40px; } .collab .cgrid { row-gap: 16px; } .collab .ccol { gap: 18px; } .collab .ch { font-size: 26px; }
 .collab .cf { padding: 16px 18px; } .collab .cf b { font-size: 27px; line-height: 1.15; } .collab .cf p { font-size: 21px; line-height: 1.3; margin-top: 6px; }
 .collab .bo5 em { font-size: 17px; } .collab .bo5 i { font-size: 16px; } .collab .bo5 .who { font-size: 18px; }
+
+/* section 3: the AI stack (draft 13) */
+.ais h2, .air h2, .aid h2 { font-size: 72px; }
+.aisub { font-size: 30px; color: var(--sub); line-height: 1.35; margin-top: 20px; max-width: 1500px; font-weight: 500; }
+.aiflow { display: flex; align-items: stretch; margin-top: 44px; gap: 0; }
+.aist { flex: 1; background: var(--soft); border-radius: 26px; padding: 26px 26px 28px; position: relative; border-top: 8px solid var(--blue); }
+.aist.ck { border-top-color: #2BAA6E; } .aist.rk { border-top-color: var(--violet); } .aist.ln { border-top-color: #F2994A; }
+.aist i { font-style: normal; position: absolute; top: 22px; right: 24px; font-size: 26px; font-weight: 900; color: var(--muted); }
+.aist b { display: block; font-size: 44px; font-weight: 800; letter-spacing: -.01em; }
+.aich { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.aich span { font-size: 18px; font-weight: 800; padding: 5px 12px; border-radius: 999px; background: #fff; color: var(--blue); border: 2px solid #D7E4FF; }
+.aich span.cd { color: var(--ink); border-color: #DADDE1; }
+.aist p { font-size: 24px; line-height: 1.32; color: var(--sub); margin-top: 16px; }
+.aiar { width: 64px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 44px; font-weight: 800; color: var(--muted); position: relative; }
+.aiar em { position: absolute; top: calc(50% + 34px); width: 150px; font-style: normal; font-size: 15px; font-weight: 700; line-height: 1.2; text-align: center; color: var(--violet); }
+.ailoop { margin-top: 18px; text-align: center; font-size: 24px; font-weight: 800; color: #F2994A; }
+.aifb { margin-top: 34px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; position: relative; padding-top: 44px; }
+.aifb em { position: absolute; top: 0; left: 0; font-style: normal; font-size: 22px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
+.aifb div { background: #fff; border: 2px solid #DADDE1; border-radius: 18px; padding: 16px 16px 18px; }
+.aifb b { display: block; font-size: 24px; font-weight: 800; color: var(--blue); } .aifb span { display: block; font-size: 18px; line-height: 1.3; color: var(--sub); margin-top: 6px; }
+.airow { display: grid; grid-template-columns: 430px 1fr 430px; gap: 32px; margin-top: 44px; flex: 1; align-items: stretch; }
+.airow em { display: block; font-style: normal; font-size: 22px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--violet); margin-bottom: 18px; }
+.airwhy { background: #0E1015; color: #fff; border-radius: 26px; padding: 30px 32px; } .airwhy em { color: #B9A3FF; }
+.airwhy p { font-size: 28px; line-height: 1.38; color: #C9CED8; margin-bottom: 26px; } .airwhy p b { color: #fff; }
+.airhow { background: var(--soft); border-radius: 26px; padding: 30px 32px; }
+.airgm { display: grid; grid-template-columns: 1fr 1.5fr; gap: 14px; margin-bottom: 18px; }
+.airgm div { border-radius: 18px; padding: 16px 18px; background: #fff; border: 3px solid #D7E4FF; position: relative; }
+.airgm .g2 { border-color: #CDB8FF; }
+.airgm b { display: block; font-size: 28px; font-weight: 800; } .airgm span { display: block; font-size: 19px; line-height: 1.3; color: var(--sub); margin-top: 4px; padding-right: 60px; }
+.airgm i { position: absolute; top: 14px; right: 16px; font-style: normal; font-size: 26px; font-weight: 900; color: var(--blue); } .airgm .g2 i { color: var(--violet); }
+.airli { font-size: 22px; line-height: 1.35; color: var(--sub); padding: 9px 0; border-top: 2px solid #E4E6EB; } .airli b { color: var(--ink); }
+.airsv { margin-top: 12px; font-size: 19px; font-weight: 700; color: var(--blue); }
+.airnum div { padding: 14px 0 18px; border-bottom: 2px solid #E4E6EB; }
+.airnum div b { display: block; font-size: 60px; font-weight: 900; letter-spacing: -.02em; line-height: 1.05; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+.airnum div span { display: block; font-size: 22px; line-height: 1.3; color: var(--sub); margin-top: 4px; }
+.airnum p { font-size: 18px; color: var(--muted); margin-top: 14px; line-height: 1.3; }
+.aidg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 40px; }
+.aidc { border-radius: 24px; padding: 26px 26px 20px; background: var(--soft); border-top: 8px solid var(--blue); }
+.aidc.v { border-top-color: var(--violet); } .aidc.g { border-top-color: #2BAA6E; }
+.aidc.n { background: #fff; border: 3px dashed #C9CDD3; border-top: 8px dashed #F2994A; }
+.aidc em { display: block; font-style: normal; font-size: 30px; font-weight: 800; }
+.aidc small { display: block; font-size: 17px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 4px; margin-bottom: 10px; }
+.aidc p { font-size: 22px; line-height: 1.32; color: var(--sub); padding: 10px 0; border-top: 2px solid #E1E4E8; } .aidc p b { color: var(--ink); }
+.aipv { margin-top: 26px; font-size: 22px; font-weight: 700; color: var(--sub); text-align: center; }
 </style>
 </head>
 <body>
@@ -882,11 +926,35 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 
 <section class="slide sech">
   <div class="shn">03</div>
-  <div class="shb"><h2>The harness</h2></div>
+  <div class="shb"><h2>The AI stack</h2></div>
+</section>
+<section class="slide ais">
+  <div class="label">03 · The AI stack</div>
+  <h2>One AI stack, built into Facebook.</h2>
+  <p class="aisub">Facebook already has the people: friends, Groups, chats. Our stack makes the game, checks it, ranks it and learns from every play, all on our server.</p>
+  <div class="aiflow">
+    <div class="aist smk"><i>1</i><b>Make</b><div class="aich"><span>Muse Spark</span><span>Muse Wonder</span><span>Muse Image</span><span>Muse Ember</span></div><p>One sentence becomes a playable Curio, grounded in 1,305 game types.</p></div>
+    <div class="aiar">→</div>
+    <div class="aist ck"><i>2</i><b>Check</b><div class="aich"><span class="cd">code, not an LLM grading itself</span></div><p>Five bots play it. Every frame and every score is replayed before it ships.</p></div>
+    <div class="aiar">→</div>
+    <div class="aist rk"><i>3</i><b>Rank</b><div class="aich"><span class="cd">Kevin's recommender</span></div><p>Orders every feed page for you, and picks Curios a whole Group will enjoy.</p></div>
+    <div class="aiar">→</div>
+    <div class="aist ln"><i>4</i><b>Learn</b><div class="aich"><span class="cd">the event log</span></div><p>Plays, replays, challenges and Add friend teach the ranker what paid off.</p></div>
+  </div>
+  <div class="ailoop">↺ Every play feeds back into what you see next. A new Curio's bot playtest sets where it starts.</div>
+  <div class="aifb"><em>Native to Facebook</em>
+    <div><b>Feed</b><span>full-screen Curios, ranked for you</span></div>
+    <div><b>Groups</b><span>weekly board, rounds, Group Blend</span></div>
+    <div><b>Messenger</b><span>send a Curio: "beat my score?"</span></div>
+    <div><b>Friend requests</b><span>Add friend, right from a board</span></div>
+    <div><b>Notifications</b><span>challenges, friends only</span></div>
+    <div><b>Search</b><span>"Make it with Muse"</span></div>
+    <div><b>Ads</b><span>sponsored Curios for brands</span></div>
+  </div>
 </section>
 
 <section class="slide hx">
-  <div class="label">03 · How Muse powers it</div>
+  <div class="label">03 · The AI stack · make</div>
   <h2 class="hxh">Distilling Virality into a <span class="grad">Harness</span></h2>
   <div class="hxsub">What does it take to create a successful game?</div>
   <div class="hxrow">
@@ -912,7 +980,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 </section>
 
 <section class="slide case">
-  <div class="label">03 · The harness · one request, traced</div>
+  <div class="label">03 · The AI stack · make: one request, traced</div>
   <h2>One request, traced through the harness</h2>
   <p class="csub">Mr. Beast Brainrot Trivia: one of 32 real requests from our team, built by Muse in 143 seconds.</p>
   <div class="cflow">
@@ -932,7 +1000,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 </section>
 
 <section class="slide v1">
-  <div class="label">03 · The harness · is it playable?</div>
+  <div class="label">03 · The AI stack · check: is it playable?</div>
   <h2>Is it playable? Five bots play every game to the end.</h2>
   <div class="bots">
     <div class="bot"><div class="bf" style="--k:.35"></div><b>New player</b><span>skill 0.35</span></div>
@@ -955,7 +1023,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 </section>
 
 <section class="slide v2">
-  <div class="label">03 · The harness · does it feel right?</div>
+  <div class="label">03 · The AI stack · check: does it feel right?</div>
   <h2>Does it feel right? Real difficulty, fair scores.</h2>
   <div class="v2g">
     <div class="ladder"><em>Skill must show in the score</em>
@@ -975,7 +1043,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 </section>
 
 <section class="slide v3">
-  <div class="label">03 · The harness · does it look right?</div>
+  <div class="label">03 · The AI stack · check: does it look right?</div>
   <h2>Does it look right? Every frame, every run.</h2>
   <p class="v3sub">Each bot run is replayed and checked every 100 ms (motion every 50 ms) against 29 failure classes. Fixes may only change how it looks, then they're proven: same rules, same replays.</p>
   <div class="v3g">
@@ -989,6 +1057,39 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
     <div class="vb"><span>Motion glitches</span><div class="bars"><i class="o" style="width:822px"></i><i class="n" style="width:68px"></i></div><em>411 → 34</em></div>
     <div class="vb"><span>Overlaps that block</span><div class="bars"><i class="o" style="width:864px"></i><i class="n" style="width:272px"></i></div><em>432 → 136</em></div>
   </div>
+</section>
+<section class="slide air">
+  <div class="label">03 · The AI stack · rank</div>
+  <h2>Rank: a feed that learns what paid off, not what grabbed.</h2>
+  <div class="airow">
+    <div class="airwhy"><em>Why it matters</em>
+      <p><b>Anyone can make a Curio,</b> so there will be far more Curios than anyone can play. The feed decides which ones you see.</p>
+      <p><b>A feed tuned for clicks fills with bait.</b> A feed tuned for pay-off fills with games worth sending to a friend.</p></div>
+    <div class="airhow"><em>How it works</em>
+      <div class="airgm"><div class="g1"><b>Grab</b><span>Did it pull you in?</span><i>× 0.6</i></div><div class="g2"><b>Pay-off</b><span>Did you finish, replay, save, challenge, add a friend?</span><i>× 1.5</i></div></div>
+      <div class="airli"><b>Taste.</b> 24 features from each Curio's plan: kind of game, mood, energy, competition, look.</div>
+      <div class="airli"><b>Cold start.</b> A new Curio starts from its bot playtest, not from zero.</div>
+      <div class="airli"><b>Guards.</b> Against slop and bait, no repeats within 4 pages, a cap on untested Curios.</div>
+      <div class="airli"><b>Groups.</b> Group Blend scores the chance <i>everyone</i> enjoys it, and drops any Curio one member would hate.</div>
+      <div class="airsv">Runs on our server for every feed page: the exact file Kevin's simulators test.</div></div>
+    <div class="airnum"><em>Simulated</em>
+      <div><b>70.3%</b><span>of decided sessions won against today's feed, side by side</span></div>
+      <div><b>8.7% → 32%</b><span>of Group picks that every member enjoys</span></div>
+      <div><b>6.3 → 8.2</b><span>pages per session for people who dislike bait</span></div>
+      <p>90 synthetic people over 14 days; 240 synthetic Groups.</p></div>
+  </div>
+</section>
+<section class="slide aid">
+  <div class="label">03 · The AI stack · learn</div>
+  <h2>Every Curio is a sensor.</h2>
+  <p class="aisub">A post tells Facebook you looked. A Curio tells it whether you enjoyed it, how good you are and who you played with.</p>
+  <div class="aidg">
+    <div class="aidc b"><em>In a play</em><small>ranks the feed today</small><p>Started it, or skipped it in 1.2 s</p><p>Finished a run</p><p>Played it again, and again</p><p>Quit halfway</p><p>Closed the app on it</p><p>Saved it</p></div>
+    <div class="aidc v"><em>Between people</em><small>ranks the feed today</small><p><b>Added a friend from a board:</b> the strongest signal</p><p>Challenge sent, accepted, won</p><p>Played together in a chat or Group</p><p>Made one together</p><p>Remixed it</p><p>Shared it</p></div>
+    <div class="aidc g"><em>In the Curio itself</em><small>ranks the feed today</small><p>24 features from its plan: kind of game, mood, energy, competition, look</p><p>Five bot playtests: does skill show in the score?</p><p>Same-seed scores, replayed: how good you really are</p></div>
+    <div class="aidc n"><em>What's next</em><small>collected, not used yet</small><p>What people ask Muse for, in their own words: themes, franchises, creators</p><p>The photos people turn into Curios</p><p>The sounds they pick</p><p>The brand Curios they finish</p></div>
+  </div>
+  <div class="aipv">Boards only show Groups you share. Challenges go to friends only. Everything is opt-in.</div>
 </section>
 
 <section class="slide sech">

@@ -34,3 +34,26 @@
 - **24 (harness struggles):** prompt 136,944 chars → 105,608–114,465; must-haves 94% (46/49) → 98% (48/49) on 13 builds; Muse Image 400 on franchise names in 2 of 2; art step undoing layout fixes; Wikipedia timeout 4 s → 12 s; parallel lanes 197 s → 161 s.
 
 - **22 (one shared context):** Slack stats from `.claude/slack-stats/stats.json` (generated 2026-11-13 08:09 PST): 152 channel posts (132 by agents, 20 by people) + 310 thread replies = 462, 64 threads, 5 people; @-mentions received per person 30–44. Commits: `git log --since=2026-11-11` on `pitch` (includes main): 478 commits from all five teammates' accounts, 63 merges. 7×: 158 agent-hours in 22.5 h from transcripts on Karthik's Mac only (scratchpad agentstats.py). Roles from CLAUDE.md, the canvas and memory.
+
+## Draft 13: section 3 is "The AI stack" (29 slides; old slides 13–26 are now 13, 15–19 and 22–29)
+
+Karthik's ask (2026-11-13): section 3 covers the whole AI stack and how it plugs into Facebook, including how the recommender works and the data a Curio gives us. All facts checked against `main` at `7120d21`.
+
+**Slide 14, One AI stack, built into Facebook.**
+- The four Muse models (Spark, Wonder, Image, Ember) and the 1,305 game types: `narrative.md`, `devpost.md`; catalog count from Max's deploy post (`catalog ok: 1305 types, 285 tools`).
+- "Code, not an LLM grading itself": `authoring/verify/verify.mjs` (Karthik's 08:55 verifier note in #meta-closer-together-26).
+- Rank runs on the server for every feed page: `backend/README.md`, "Ranking (the recommender runs here)"; `backend/internal/recs/recs.go` runs Kevin's `game-recs.js` unchanged in goja.
+- A new Curio's bot playtest sets its starting point: `docs/RANKING.md` 1.3 (satisfaction prior from the bot gate).
+- Facebook surfaces: `docs/pr/demo/FEATURES.md` (feed, Groups board and rounds, Group Blend, Messenger cards, Add friend through Facebook's friend request, friends-only challenge notifications, "Make it with Muse" in Search, sponsored Curio card).
+
+**Slide 20, Rank.** All from `docs/RANKING.md` on `main`:
+- Grab × 0.6 and pay-off × 1.5 (pay-off counts 2.5× grab): 1.2.
+- 24 features from the manifest: 1.1. Cold start from the bot gate: 1.3. Slop guard, bait lean, no game twice within 4 pages, untested-game cap: 1.2.
+- Group Blend: geometric mean, misery floor, plus-only fairness: 1.5.
+- **Simulated:** 70.3% of decided sessions against today's feed (team-draft interleaving, 3 worlds): 2.4. Games every member enjoys 8.7% (random) → 32.0%, 240 synthetic Groups: 2.6. Bait-averse people's pages per session 6.3 (today's feed) → 8.2 (formula): 2.2. 90 synthetic people, 14 days: section 2.
+
+**Slide 21, Every Curio is a sensor.**
+- "In a play" signals: `docs/RANKING.md` 1.1 (takeover, preview ≥ 6 s, skip < 1.2 s, finished, replays, quit mid-run, ended the session, saved).
+- "Between people": the app posts `remix`, `share`, `co_make_contribution`, `group_chat_play`, `game_night_play`, `challenge_won` and `add_friend_from_game` (`BubbleSocialSignals.post` calls on `main`); the server records `challenge_sent` and `challenge_accepted` itself (`backend/README.md`, Max's 09:04 audit). Add friend from a game is the strongest single signal (+4, RANKING 1.1). `challenge_rematch` is weighted but never sent, so it's not on the slide.
+- "In the Curio itself": 24 manifest features; bot playtest results; same-seed replayed scores, with skill spread used by Group Blend (RANKING 1.5).
+- "What's next, collected, not used yet": prompts, photos, sounds and sponsored-Curio plays are stored with each game or event but don't feed the ranker today. Creator payouts and ad targeting are proposals (`FEATURES.md` #13).
