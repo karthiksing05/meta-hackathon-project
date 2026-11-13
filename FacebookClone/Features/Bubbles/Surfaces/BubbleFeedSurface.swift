@@ -86,6 +86,7 @@ extension BubbleSurfaceHooks {
         post.bubbleID = bubble.id
         post.bubbleReplay = result?.replay ?? bubble.featuredRun?.replay
         post.isUploading = false
+        GameRecommender.shared.note(.floated, gameID: bubble.id)
         appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
         return post
     }

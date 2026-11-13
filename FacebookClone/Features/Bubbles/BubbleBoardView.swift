@@ -277,12 +277,16 @@ struct BubbleBoardRow: View {
                 .frame(height: 32)
                 .background(FBColor.buttonGray, in: Capsule())
         case .requestReceived:
-            Button("Confirm") { appStore.sendRequest(to: entry.user) }
+            Button("Confirm") {
+                appStore.sendRequest(to: entry.user)
+                GameRecommender.shared.note(.addedFriend, gameID: bubble.id)
+            }
                 .buttonStyle(.fb(.primary, expand: false, height: 32))
         default:
             Button("Add friend") {
                 Haptics.light()
                 withAnimation { appStore.sendRequest(to: entry.user) }
+                GameRecommender.shared.note(.addedFriend, gameID: bubble.id)
             }
             .buttonStyle(.fb(.tinted, expand: false, height: 32))
             .accessibilityLabel("Add \(entry.user.name) as a friend")
