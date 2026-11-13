@@ -41,7 +41,8 @@ function tokenColor(game, v) {
 }
 function paletteCandidates(game) {
   const t = game.presentation?.tokens ?? {};
-  return [...Object.entries(t).filter(([, v]) => typeof v === 'string' && v.startsWith('#')).map(([k, v]) => ({ ref: `$${k}`, hex: v })), { ref: '#FFFFFF', hex: '#FFFFFF' }, { ref: '#111111', hex: '#111111' }];
+  // Solid colors only: a token with alpha (a shadow, a scrim) can't be a plate or a text color.
+  return [...Object.entries(t).filter(([, v]) => typeof v === 'string' && /^#[0-9A-Fa-f]{6}([Ff]{2})?$/.test(v)).map(([k, v]) => ({ ref: `$${k}`, hex: v })), { ref: '#FFFFFF', hex: '#FFFFFF' }, { ref: '#111111', hex: '#111111' }];
 }
 const rgb = (hex) => parseColor(hex)?.slice(0, 3);
 

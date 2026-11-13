@@ -235,7 +235,7 @@ function textWidthAt(scenes, ptr) {
 
 function palette(game) {
   const t = game.presentation?.tokens ?? {};
-  return [...Object.entries(t).filter(([, v]) => typeof v === 'string' && /^#[0-9a-f]{6}/i.test(v)).map(([k, v]) => ({ ref: `$${k}`, hex: v })), { ref: '#FFFFFF', hex: '#FFFFFF' }, { ref: '#111111', hex: '#111111' }];
+  return [...Object.entries(t).filter(([, v]) => typeof v === 'string' && /^#[0-9a-f]{6}(ff)?$/i.test(v)).map(([k, v]) => ({ ref: `$${k}`, hex: v })), { ref: '#FFFFFF', hex: '#FFFFFF' }, { ref: '#111111', hex: '#111111' }];
 }
 
 /**

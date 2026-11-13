@@ -378,7 +378,10 @@ export function lintSample(sample, { measures = null } = {}) {
         const offc = Math.max(Math.abs(ax - (c.x0 + w / 2)) / (w / 2), Math.abs(ay - (c.y0 + h / 2)) / (h / 2));
         if (w <= 140 && h <= 140 && offc > 0.8 && op.align === 'center' && t.n?.inTemplate) add('L_TEXT_OFFCENTER', f, { node: t.node, role: t.role, box: round(ink), container: round(c), detail: `"${clip(op.text)}" is centered on its tile's edge`, dedupe: nodeKey });
       }
-      // Contrast.
+      // Contrast. Text half under an opaque plate drawn after it (a newer badge stacked on an older
+      // one) is hidden, not hard to read.
+      const hidden = items.some((it) => it.i > t.i && it.op.op === 'rect' && (parseColor(it.op.fill)?.[3] ?? 0) * (it.op.opacity ?? 1) > 0.85 && iarea(it.box, ink) >= 0.5 * area(ink));
+      if (hidden) continue;
       let samples = meas ? measByIdx.get(t.i)?.samples ?? null : null;
       if (!samples) {
         samples = [];
