@@ -15,12 +15,16 @@
  *                     replays and bot runs are deterministic), draws its frames, plays its audio
  *                     through the runtime's master gain, and forwards haptics and toasts.
  *   input.microgame   forwards pointer down/move/up to the engine and turns quick flicks into
- *                     swipes (the runtime has no keyboard; games should not rely on keys).
+ *                     swipes (the runtime has no key events; games should not rely on keys). Games
+ *                     with a text input (`{"text": "submit" | "change"}`, game.meta.text_input) get
+ *                     a native text field at presentation.text_field (sdk.textField); typed text
+ *                     reaches the engine through "text.input", so it is in the run's replay log.
  *   score.microgame   mirrors the engine's score and ends the run when the engine says won or lost.
  *
  * State: state.microgame = {phase, score, time_ms} (read-only for bots and HUDs), plus `log` (the
  * run's microgame-log/1 JSON text) once the run is won or lost, for challenges and leaderboards to
- * submit; MicrogameEngine.verify(game_json, log) replays it and recomputes the score.
+ * submit; MicrogameEngine.verify(game_json, log) replays it and recomputes the score. The engine
+ * logs text calls itself, so typed answers verify like taps.
  * Headless hosts without WebAssembly (an iOS JSContext) can't run microgames: validation reports
  * `microgame_unavailable`, and Studio validates microgames in a web view instead.
  */
@@ -95,6 +99,16 @@
     return sess;
   }
 
+  // game.meta.text_input ({placeholder, max_len, x, y, w, h, size} in canvas units, x null for the
+  // default bar at the bottom) as an sdk.textField spec in playfield units. Same defaults as the
+  // engine's shell (engine/web/shell.js placeTextField).
+  function textFieldSpec(sess, ti) {
+    const r = ti.x == null ? { x: 12, y: sess.ch - 60, w: sess.cw - 24, h: 48 } : { x: ti.x, y: ti.y, w: ti.w, h: ti.h };
+    const size = ti.size != null ? ti.size : Math.max(12, Math.min(22, r.h * 0.45));
+    const [x, y] = toField(sess, r.x, r.y);
+    return { x, y, w: r.w * sess.s, h: r.h * sess.s, size: size * sess.s, placeholder: ti.placeholder || "Type here", max_len: ti.max_len || 32 };
+  }
+
   function audioOut(sdk) {
     return sdk.fx && typeof sdk.fx.audio === "function" ? sdk.fx.audio() : null;
   }
@@ -131,6 +145,8 @@
         return;
       }
       sdk.state.microgame = { phase: sess.status.phase, score: sess.status.score || 0, time_ms: 0 };
+      const ti = sess.game.meta.text_input;
+      if (ti) sdk.textField(textFieldSpec(sess, ti));
 
       sdk.on("clock.tick", () => {
         if (sdk.ended) return;
@@ -172,12 +188,12 @@
     id: "input.microgame",
     kind: "input",
     formulas: ["microgame"],
-    describe: "Sends taps, drags and swipes to the microgame engine. Taps and drags hit the game's on_tap / on_drag / on_press nodes; a quick flick is also sent as a swipe.",
-    examples: ["tap a tile", "drag the paddle", "flick to slide the board"],
+    describe: "Sends taps, drags and swipes to the microgame engine. Taps and drags hit the game's on_tap / on_drag / on_press nodes; a quick flick is also sent as a swipe. Games with a text input get a native text field; what the person types (each edit, and Enter or Done) goes to the game's text inputs.",
+    examples: ["tap a tile", "drag the paddle", "flick to slide the board", "type the answer and press Done"],
     params: {
       swipes: { type: "boolean", default: true, describe: "Turn quick flicks into engine swipes" },
     },
-    consumes: ["pointer.down", "pointer.move", "pointer.up"],
+    consumes: ["pointer.down", "pointer.move", "pointer.up", "text.input?"],
     emits: [],
     order: 1,
     setup(sdk, p) {
@@ -211,6 +227,16 @@
         if (Math.abs(dx) > Math.abs(dy)) s.game.swipe(dx > 0 ? "right" : "left");
         else s.game.swipe(dy > 0 ? "down" : "up");
       });
+      // Typed text, only for games with a text input: other games never listen, so their runs log
+      // exactly what they always did.
+      const s0 = sess();
+      if (s0 && s0.game.meta.text_input) {
+        sdk.on("text.input", (e) => {
+          const s = sess();
+          if (!s || sdk.ended) return;
+          s.game.text(e.kind, e.value);
+        });
+      }
     },
   });
 
@@ -252,9 +278,72 @@
 
   // ---- bot -------------------------------------------------------------------------------
 
-  // A generic player: taps the game's real tap targets, drags its drag targets, and sometimes
-  // flicks. Skill sets how often it acts and how precisely. Good enough for posters, demos and
-  // smoke runs; Studio's playtest gate uses the authoring layer's stronger bots.
+  // Strings a bot might type: the game's own words, read from its live state (string values, list
+  // items and record fields: a target word, the words falling, the answers left). Deduped, in
+  // state order, at most 24.
+  function textCandidates(s, maxLen) {
+    let st;
+    try { st = s.game.state(); } catch (e) { return []; }
+    const out = [];
+    const walk = (v, depth) => {
+      if (out.length >= 24 || depth > 4 || v == null) return;
+      if (typeof v === "string") {
+        const w = v.trim();
+        if (w && w.length <= maxLen && w.indexOf("\n") < 0 && out.indexOf(w) < 0) out.push(w);
+      } else if (Array.isArray(v)) {
+        for (let i = 0; i < v.length && i < 64; i++) walk(v[i], depth + 1);
+      } else if (typeof v === "object") {
+        for (const k of Object.keys(v)) if (k.slice(0, 2) !== "__") walk(v[k], depth + 1);
+      }
+    };
+    walk(st, 0);
+    return out;
+  }
+
+  // The candidate that pays off right away: each is submitted to a fork of the game (engine v0.2
+  // mg_fork; the real game is untouched), and the one that wins or raises the score most is kept.
+  // Null when none does better than doing nothing.
+  function bestWord(s, words) {
+    const now = s.game.status();
+    let best = null, bestV = now.score || 0;
+    for (const w of words) {
+      let p = null;
+      try {
+        p = s.game.fork();
+        p.text("submit", w);
+        p.step(STEP_MS);
+        const st = p.status();
+        const v = st.phase === "won" ? 1e12 : st.phase === "lost" ? -1e12 : st.score || 0;
+        if (v > bestV) { bestV = v; best = w; }
+      } catch (e) {
+        /* this candidate can't be judged */
+      } finally {
+        if (p) { try { p.dispose(); } catch (e) { /* already gone */ } }
+      }
+    }
+    return best;
+  }
+
+  // Starts typing a word: one of the game's own (at higher skill, the one that scores), sometimes
+  // (more often at low skill) with a slip.
+  function startTyping(s, bs, skill, rng) {
+    const ti = s.game.meta.text_input;
+    const maxLen = (ti && ti.max_len) || 32;
+    const words = textCandidates(s, maxLen);
+    let word = (rng() < skill && words.length && bestWord(s, words)) || (words.length ? words[Math.floor(rng() * words.length)] : "");
+    if (!word || rng() < 0.3 * (1 - skill)) {
+      const letters = "aeiourstlnmdkpgbh";
+      const base = word || "abc";
+      const i = Math.floor(rng() * base.length);
+      word = (base.slice(0, i) + letters.charAt(Math.floor(rng() * letters.length)) + base.slice(i + 1)).slice(0, maxLen);
+    }
+    bs.typing = { word, i: 0, gap: Math.round(16 - 8 * skill), wait: 0 };
+  }
+
+  // A generic player: taps the game's real tap targets, drags its drag targets, sometimes flicks,
+  // and types words into games with a text field (one letter at a time, then Done). Skill sets how
+  // often it acts and how precisely. Good enough for posters, demos and smoke runs; Studio's
+  // playtest gate uses the authoring layer's stronger bots.
   function decide(sdk) {
     const s = sessions.get(sdk.state);
     if (!s || sdk.ended) return null;
@@ -268,11 +357,26 @@
       if (d.left <= 0) { bs.drag = null; return [{ a: "up", v: toField(s, x, y) }]; }
       return [{ a: "move", v: toField(s, x, y) }];
     }
+    if (bs.typing) {
+      const ty = bs.typing;
+      if (ty.wait > 0) { ty.wait--; return null; }
+      ty.wait = ty.gap;
+      if (ty.i < ty.word.length) {
+        ty.i++;
+        return [{ a: "text", v: ["change", ty.word.slice(0, ty.i)] }];
+      }
+      bs.typing = null;
+      return [{ a: "text", v: ["submit", ty.word] }, { a: "text", v: ["change", ""] }];
+    }
     const skill = sdk.botSkill;
     const every = Math.round(36 - 26 * skill);
     if (bs.wait > 0) { bs.wait--; return null; }
     bs.wait = every + Math.floor(rng() * every);
     const targets = s.game.hitTargets();
+    if (s.game.meta.text_input && (!targets.length || rng() < 0.6)) {
+      startTyping(s, bs, skill, rng);
+      return null;
+    }
     const r = rng();
     if (targets.length && r < 0.8) {
       const tg = targets[Math.floor(rng() * targets.length)];
@@ -381,7 +485,7 @@
   B.defineFormula({
     id: "microgame",
     title: "Microgame",
-    describe: "Any game the microgame engine can run: arcade, physics, puzzles, typing-free word games, stories. The whole game lives in content.game_json (rules, state, presentation, assets), usually expanded from an authoring manifest. Use the three microgame concepts and nothing else.",
+    describe: "Any game the microgame engine can run: arcade, physics, puzzles, word games (tap letters, or type into a text field), stories. The whole game lives in content.game_json (rules, state, presentation, assets), usually expanded from an authoring manifest. Use the three microgame concepts and nothing else.",
     core: ["space.microgame", "input.microgame", "score.microgame"],
     optional: [],
     content: {
@@ -397,12 +501,12 @@
       },
     },
     validateContent,
-    bot: { describe: "Taps the game's real tap targets, drags its drag targets and sometimes flicks; skill sets pace and precision.", decide },
+    bot: { describe: "Taps the game's real tap targets, drags its drag targets and sometimes flicks; types the game's own words into a text field; skill sets pace and precision.", decide },
     share,
     poster_ticks: 120,
     tips: [
       "Write the game with the authoring layer (fragments + params), then expand it; don't hand-write content.game_json.",
-      "Games should be playable by touch only: taps, drags and swipes. The runtime has no keyboard.",
+      "Games should be playable by touch: taps, drags and swipes. The runtime has no key events; a game that needs typed answers uses a text input, which gets a native text field and keyboard.",
     ],
     example: {
       id: "example-microgame-glow-taps", version: 1, engine_version: 1,

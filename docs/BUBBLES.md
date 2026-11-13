@@ -1578,11 +1578,32 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   engine is seeded from the run's RNG.
 - Its frames draw in one `space` layer, scaled to fit the 360×640 playfield. Audio goes through the
   runtime's master gain (`fx.audio()`, new), so mute applies. Haptics and toasts go through `fx`.
-- Taps, drags and holds are forwarded; a quick flick is also sent as a swipe. The runtime has no
-  keyboard, so microgames must be playable by touch.
-- The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. It drives posters,
-  demos and smoke runs. It's generic, so the runtime tests skip the skill checks for microgame seeds;
-  game quality is gated by `authoring/playtest` and the engine's replay tests.
+- Taps, drags and holds are forwarded; a quick flick is also sent as a swipe. The runtime has no key
+  events, so microgames must be playable by touch, apart from typed text (next item).
+- **Text field.** A game with a text input (`{"text": "submit"}` or `{"text": "change"}` sources, so
+  `game.meta.text_input` is set; `engine/SPEC-v0.2.md` 4) gets a native `<input>` over the game at
+  `presentation.text_field` (canvas units; without it, a bar at the bottom like the engine's shell),
+  scaled with the playfield. The kit asks for it with `sdk.textField`, and the host
+  (`BubbleHost.syncTextField`, class `.bubble-text`) shows it only while the run plays. It hides as
+  soon as the run ends, and the keyboard goes with it. Its font is at least 16 px, so iOS doesn't zoom.
+  The field handles its own touches, so a tap on it opens the keyboard. WKWebView only opens the
+  keyboard from a user gesture, so nothing focuses it by script. Every edit sends `change`; Enter or
+  Done sends `submit`, then clears the field and sends an empty `change`, like the shell. Taps on the
+  game keep the keyboard up. In demos and replays the field is read-only and shows the run's last
+  typed value; a tap goes through it to take over. Letter-grid games (the `keyboard` fragment) are
+  unchanged: they're taps.
+- **Typed text in replays.** Text reaches the engine through the runtime's input queue as
+  `text.input`, so it's applied at the start of a tick and logged in the run's replay log as
+  `{t, a: "text", v: ["submit" | "change", value]}`. A replay, a resumed run or `BubbleJSRuntime.verify`
+  re-sends the same text at the same tick. Several edits in one tick keep only the last. `v` is an
+  array, so `BubbleInput` (Swift) keeps it unchanged, and an older runtime ignores the entry.
+- The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. In games with a text
+  field it also types: it reads candidate strings from the game's live state (a target word, the words
+  on screen) and types one a letter at a time, then presses Done. With probability = skill it picks
+  the candidate that scores on a fork of the game (`mg_fork`). Weaker bots slip a letter more often.
+  It drives posters, demos and smoke runs. It's generic, so the runtime tests skip the skill checks
+  for microgame seeds; game quality is gated by `authoring/playtest` and the engine's replay tests.
+  The gate's bots submit `playtest.text_candidates` (`authoring/SPEC.md` 2.6).
 - **Verifiable scores** (for challenges and leaderboards). When a run is won or lost, the kit puts the
   engine's input log in `state.microgame.log`: `microgame-log/1` JSON text with the seed, the game's
   hash, every input and the final `{state_hash, phase, score, time_ms}`. Submit it with the score.
@@ -1590,7 +1611,8 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   recomputed, claimed, problems}`. It runs anywhere the engine bundle loads: the app, a friend's
   phone, or the server's Node generator. An edited score, a removed input or another game file fails.
   `tools/runtime-tests/microgame-verify.js` plays every microgame seed through the real runtime
-  and checks that honest logs verify and raised scores don't.
+  and checks that honest logs verify and raised scores don't. The engine logs text calls itself, so
+  typed answers verify like taps.
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
@@ -1606,8 +1628,13 @@ A bare `JSContext` on iOS has no WebAssembly, so headless validation there repor
 `microgame_unavailable`; microgame validation and playtests run in a web view (Studio, 7.12).
 
 **Tests.** `tools/runtime-tests/run-node.js` and `run-jsc.sh` validate, play and replay the formula's
-example and the `mg-*` seeds. `node tools/runtime-tests/microgame-chrome.mjs` plays seeds in the real
-`bubble-host.html` in headless Chrome with touch input and checks the bridge messages.
+example and the `mg-*` seeds. `node tools/runtime-tests/microgame-text.js` types into
+`mg-ferry-call` (the text-input fixture) through the real runtime. It checks the score, the
+`text` log entries, replays (also after a sorted-key round trip), `MicrogameEngine.verify` and bot
+runs, and that games without a text input never log text. `node tools/runtime-tests/microgame-chrome.mjs`
+plays seeds in the real `bubble-host.html` in headless Chrome with touch input and checks the bridge
+messages. For `mg-ferry-call` it taps the text field, types and presses Enter. It checks the field's
+place, focus and font size, that it hides at the end, and that the result's replay scores the same.
 
 **FB_OPEN.** `play:mg-gust-glider`, `bubble:mg-prism-breaker` (any `mg-*` seed id).
 

@@ -1,0 +1,64 @@
+{
+  "id": "mg-ferry-call",
+  "version": 1,
+  "engine_version": 1,
+  "title": "Ferry Call",
+  "one_line_rule": "Type the word on the ferry sign and press Done to board.",
+  "formula": "microgame",
+  "brief": {
+    "intent": "Type the word on the ferry sign and press Done to board.",
+    "audience": "everyone",
+    "mood": [
+      "playful"
+    ],
+    "energy": "medium",
+    "competition": "friendly"
+  },
+  "structure": {
+    "cadence": "endless",
+    "scope": "everyone",
+    "setter": "ai"
+  },
+  "lineage": {
+    "parent": null,
+    "operators": [],
+    "remix_of": null
+  },
+  "chain": null,
+  "style": {
+    "look": "glow",
+    "palette": "custom",
+    "colors": {
+      "bg_top": "#123B5C",
+      "bg_bottom": "#123B5C",
+      "ink": "#FFFFFF",
+      "primary": "#F4F1EA",
+      "secondary": "#E4572E",
+      "accent": "#FFE08A",
+      "danger": "#FF6B6B"
+    },
+    "font": "rounded",
+    "motif": "none",
+    "emoji": "⛴️",
+    "mood_preset": "playful"
+  },
+  "concepts": [
+    {
+      "use": "space.microgame"
+    },
+    {
+      "use": "input.microgame"
+    },
+    {
+      "use": "score.microgame",
+      "params": {
+        "label": "points"
+      }
+    }
+  ],
+  "glue": {},
+  "content": {
+    "game_json": "{\"format\":\"microgame/0.2\",\"meta\":{\"title\":\"Ferry Call\",\"instructions\":\"Type the word on the ferry sign and press Done to board. Six right answers wins; three wrong ones and the ferry leaves without you.\",\"duration_s\":40},\"state\":{\"words\":{\"type\":\"list<string>\",\"init\":\"split('fog pier gull tide wharf sail kelp buoy dock wave', ' ')\"},\"target\":{\"type\":\"string\",\"init\":\"pick(words)\"},\"typed\":{\"type\":\"string\",\"init\":\"''\"},\"boarded\":{\"type\":\"int\",\"init\":\"0\"},\"misses\":{\"type\":\"int\",\"init\":\"0\"}},\"functions\":{\"clean\":{\"params\":{\"s\":\"string\"},\"returns\":\"string\",\"body\":\"lower(trim(s))\"}},\"events\":{\"boarded\":{},\"wrong\":{}},\"inputs\":{\"edit\":{\"payload\":{\"value\":\"string\"},\"from\":[{\"text\":\"change\",\"with\":{\"value\":\"text.value\"},\"placeholder\":\"Type the word\",\"max_len\":12}]},\"answer\":{\"payload\":{\"value\":\"string\"},\"from\":[{\"text\":\"submit\",\"with\":{\"value\":\"text.value\"}}]}},\"rules\":[{\"id\":\"edit\",\"on\":\"edit\",\"do\":[{\"set\":\"typed\",\"to\":\"clean(event.value)\"}]},{\"id\":\"answer\",\"on\":\"answer\",\"do\":[{\"set\":\"typed\",\"to\":\"''\"},{\"if\":\"clean(event.value) == target\",\"then\":[{\"incr\":\"boarded\"},{\"set\":\"target\",\"to\":\"pick(filter(words, w => w != target))\"},{\"emit\":\"boarded\"}],\"else\":[{\"incr\":\"misses\"},{\"emit\":\"wrong\"}]}]}],\"objectives\":{\"win\":\"boarded >= 6\",\"lose\":\"misses >= 3\",\"score\":\"boarded * 10\",\"time_limit\":\"40s\",\"on_timeout\":\"lose\"},\"presentation\":{\"canvas\":{\"w\":360,\"h\":640,\"background\":\"$bay\"},\"text_field\":{\"x\":40,\"y\":470,\"w\":280,\"h\":48,\"size\":20},\"tokens\":{\"bay\":\"#123B5C\",\"deep\":\"#0B2A44\",\"hull\":\"#F4F1EA\",\"stripe\":\"#E4572E\",\"sign\":\"#FFE08A\",\"ink\":\"#16203F\",\"pale\":\"#BFD7EA\",\"hot\":\"#2E9E6A\",\"heart\":\"#FF6B6B\",\"heart_off\":\"#35506B\"},\"root\":{\"node\":\"group\",\"children\":[{\"node\":\"rect\",\"x\":0,\"y\":360,\"w\":360,\"h\":280,\"fill\":\"$deep\"},{\"node\":\"text\",\"x\":180,\"y\":70,\"anchor\":\"center\",\"text\":\"= 'Boarded ' + str(boarded) + ' / 6'\",\"size\":22,\"weight\":800,\"color\":\"$pale\"},{\"node\":\"repeat\",\"source\":\"range(3)\",\"as\":\"i\",\"template\":{\"node\":\"circle\",\"x\":\"= 158 + i * 22\",\"y\":104,\"r\":8,\"fill\":\"= if i < 3 - misses then $heart else $heart_off\",\"transition\":{\"fill\":{\"ms\":200,\"ease\":\"out\"}}}},{\"node\":\"group\",\"children\":[{\"node\":\"rect\",\"x\":60,\"y\":290,\"w\":240,\"h\":70,\"radius\":18,\"fill\":\"$hull\"},{\"node\":\"rect\",\"x\":60,\"y\":330,\"w\":240,\"h\":10,\"fill\":\"$stripe\"},{\"node\":\"rect\",\"x\":110,\"y\":250,\"w\":140,\"h\":44,\"radius\":10,\"fill\":\"$hull\"},{\"node\":\"rect\",\"anchor\":\"center\",\"x\":180,\"y\":190,\"w\":220,\"h\":76,\"radius\":16,\"fill\":\"$sign\",\"animate_on\":{\"boarded\":{\"prop\":\"scale\",\"keys\":[1,1.12,1],\"ms\":180},\"wrong\":{\"prop\":\"rotation\",\"keys\":[0,-0.06,0.06,0],\"ms\":220}}},{\"node\":\"text\",\"x\":180,\"y\":190,\"anchor\":\"center\",\"text\":\"= upper(target)\",\"size\":34,\"weight\":800,\"color\":\"$ink\"}]},{\"node\":\"text\",\"x\":180,\"y\":430,\"anchor\":\"center\",\"text\":\"= if typed == '' then 'Type it below' else (if starts_with(target, typed) then 'Keep going' else 'Not quite')\",\"size\":16,\"weight\":600,\"color\":\"= if typed != '' and starts_with(target, typed) then $hot else $pale\"}]},\"feedback\":[{\"on\":\"boarded\",\"do\":[{\"particles\":{\"x\":180,\"y\":190,\"count\":18,\"color\":\"#FFE08A\",\"speed\":180,\"size\":4,\"ms\":500,\"gravity\":300}},{\"sound\":{\"wave\":\"triangle\",\"notes\":[\"G5\",\"C6\"],\"step_ms\":50,\"volume\":0.4}},{\"haptic\":\"light\"}]},{\"on\":\"wrong\",\"do\":[{\"sound\":{\"wave\":\"square\",\"note\":\"C3\",\"ms\":90,\"volume\":0.25}},{\"haptic\":\"error\"},{\"shake\":{\"px\":4,\"ms\":180}}]},{\"on\":\"win\",\"do\":[{\"sound\":{\"wave\":\"triangle\",\"notes\":[\"C5\",\"E5\",\"G5\",\"C6\"],\"step_ms\":80}},{\"haptic\":\"success\"}]},{\"on\":\"lose\",\"do\":[{\"sound\":{\"wave\":\"sine\",\"note\":\"E3\",\"slide\":\"A2\",\"ms\":260,\"volume\":0.5}}]}]}}"
+  },
+  "seed": 1100
+}
