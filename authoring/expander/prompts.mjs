@@ -212,6 +212,13 @@ If a named game isn't here and the request doesn't say how it plays, pick the cl
 - Genre conventions: keep the core rules of the genre the person named or clearly implied, even when the brief asks for a relaxed mood. Make it gentler with speed, gap size or time, never by breaking the genre. Tap-to-flap or flappy-style: one hit ends the run (1 life), score is obstacles passed, endless or a target, difficulty from speed and gap size; use gravity_jump with flap: true plus gap_walls. Endless runner: one hit or a few lives, score is distance. Match-pairs: no lives, count moves or time. Quiz: no lives unless asked. Snake-like: a growing tail, one hit ends it. 2048 or merge: a full board ends it. Where the person's own words (the quoted requirements) say otherwise, their words win over these defaults.
 - Prefer a library fragment that does the mechanic over hand-written rules and drawing. When you must hand-write obstacles, draw and collide with the same numbers, so the hit area matches what's drawn.
 - ${context?.canvas === 'tall' ? 'The canvas is 360 × 780 (portrait, tall). Its top 110 and bottom 96 units run under the phone\'s bars: fill them with background only, and keep the HUD, text and everything tapped between y 110 and 684; the HUD sits at the top of that area (hud_top holds 3 nodes, hud_bottom 2).' : 'The canvas is 360 × 640 (portrait); the HUD sits at the top (hud_top holds 3 nodes, hud_bottom 2).'}
+- Screen layout, so words never cross sprites. Counters (score, lives, time, wave, ammo) go in hud_top, as short "Label: n" texts; hud_bottom is for one short line only, and never where the player's character moves (a shooter's ship, a runner's hero live at the bottom: put their counters at the top).
+- Popups ("+10", "JUMP!", "Combo x3"): 12 characters at most, size 15 or 17, starting just above the sprite (y minus its height) and gone within 700 ms. Never write a text that follows a sprite every frame ("airborne", a name under a moving piece): show that state in the HUD, or as the sprite's own picture or color.
+- Labels in the playfield (a lane's name, a line's label, help text) only where nothing moves; otherwise say it in the HUD, the intro or design.how_to_play.
+- One announcement at a time ("Wave 2", "Final wave!", "Wave clear +50"), at the center; don't show a second while one is up.
+- Tap targets are at least 44 units with 8 between: a row fits at most 7 (7 × 44 + 6 × 8 = 356). A board with more columns, or a list of more than 5 options, needs fewer columns, two steps (pick a row, then a cell) or pages. A drawn number pad is 3 × 4, never a 10-key row.
+- Cell captions fit their cell: at most cell width ÷ (0.63 × size) characters at size 11 or more. Prefer a picture or icon in the cell and the name in a detail line under the board.
+- Story text sits in one text panel (at most about 6 lines of body 17) and the choices in a fixed band at the bottom: full-width buttons at least 48 tall.
 ${context?.look === false ? '' : '- Text fonts and sizes are set by the game\'s look: write sizes as caption 13 / label 15 / body 17 / title 22 / display 32 / hero 44 and colours as palette tokens; don\'t set font.\n'}- meta.title is at most 40 characters; meta.duration_s is the expected run length.
 - Put the game's words and lists in content (read them as content_<key>), not inside expressions.
 - Use the standard color tokens ($primary $secondary $accent $ink $bg $danger $surface); define extra tokens in look.tokens if you need them. Pick a look.id from the list below.
@@ -342,12 +349,25 @@ ${lines.map((l) => `- ${l}`).join('\n')}
 Fix each one. This is a polish pass: keep how the game plays (uses, params, rules, objectives) unless an item is about that, and change the art, sound, words and feedback. Reply with the complete authoring manifest, starting with "design".`;
 }
 
+/**
+ * Repair hints for errors the engine's own message doesn't explain well enough for a fix (Muse has
+ * repeated the same one for three rounds). Each: {code, test(diagnostic) → bool, hint}.
+ */
+export const REPAIR_HINTS = [
+  {
+    code: 'E_TYPE_MISMATCH',
+    test: (d) => /\bvec2\b|pointer/.test(`${d.message ?? ''} ${d.at ?? ''}`),
+    hint: "`pointer` is a vec2 (x and y together, canvas units), not a number. Use `pointer.x` or `pointer.y` where a float is wanted (a payload field, a state float, a comparison or arithmetic with numbers), and pass the whole `pointer` only where a vec2 is declared. To build a vec2 from numbers write `vec(x, y)`; to compare two points compare their parts (`abs(a.x - b.x) < r and abs(a.y - b.y) < r`, or `sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y)) < r`), never `a < b`. Example: input payload {\"x\": \"float\"} with `\"with\": {\"x\": \"pointer.x\"}`, or payload {\"at\": \"vec2\"} with `\"with\": {\"at\": \"pointer\"}`. A field declared int needs `floor(pointer.x)`.",
+  },
+];
+
 /** "E_UNKNOWN_NAME at /rules/1/do/0/to: no state named 'x' (did you mean 'y'?)" */
 export function diagnosticLine(d) {
   let text = d.code ?? 'E_UNKNOWN';
   if (d.at) text += ` at ${d.at}`;
   text += `: ${d.message ?? ''}`;
   if (d.hint) text += ` (${d.hint})`;
+  for (const r of REPAIR_HINTS) if (r.code === d.code && r.test(d)) text += ` Fix: ${r.hint}`;
   return text;
 }
 
