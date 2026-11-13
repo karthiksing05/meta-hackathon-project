@@ -169,15 +169,20 @@ nothing stay on nothing unless an input reads raw pointer positions). `finish.js
 ### 5b. Loop critic (0 calls)
 
 ```sh
-node authoring/tools/loop-critic.mjs run/<key>/manifest.json [--profile trivia]
+node authoring/tools/loop-critic.mjs run/<key>/manifest.json [--profile trivia] [--json] [--out run/<key>/loop.json]
 ```
 
-Replays the five gate bots and reports, per bot, the input cadence, the share of inputs that change
-the game within 250 ms, the longest dead stretch, run length and end, the score rate per third, the
-pace numbers that move (speed, level, round, mult, ...) and the restart time, then lists what misses
-the bar (goal in 3 s, an action every 1 to 3 s, feedback on every action, rising stakes, a fair end,
-45 to 120 s, restart under 2 s, skill shows). Quiz bots answer at once, so a quiz's run is shorter
-than a person's; read its cadence with that in mind.
+Runs the five-bot gate, replays each run with a frame every 50 ms, and grades the loop against the bar,
+`ok` or `WARN` per line (JSON with `--json`: `pass`, `warnings`, `issues`, `checks`, per-bot numbers):
+goal (first meaningful input within 3 s), cadence (median and p90 seconds between inputs that change
+the game within 250 ms, and between feedback moments; median at most 3 s), feedback (90 % of those
+inputs answered within 0.3 s by something drawn differently, a sound, toast, haptic, shake or score
+change), fair end, dead time (no stretch over 6 s without either), run length (45 to 120 s, regular
+bots), skill spread (new player ≤ regular ≤ pro, scores differ), escalation (score, feedback or input
+rate, or pace state such as speed, level, round, spawn rising 15 % from the first third to the last, or
+interval, delay, cooldown falling) and restart (engine, under 2 s). Quiz bots answer at once, so a
+quiz's run is shorter than a person's; read its run length with that in mind. Tests:
+`node authoring/tools/test-loop-critic.mjs`.
 
 ### 6. See and fix (0 calls)
 
