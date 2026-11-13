@@ -17,6 +17,9 @@ struct RemixShareSheet: View {
 
     @State private var note = ""
     @State private var failed: String?
+    /// The signed-in account's own friends and Groups on the server, listed before the demo world's.
+    @State private var serverFriends: [User] = []
+    @State private var serverGroups: [FBGroup] = []
 
     private var center: RemixCenter { RemixCenter.shared }
 
@@ -39,6 +42,11 @@ struct RemixShareSheet: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(FBColor.background)
+            .task {
+                async let friends = bubbleStore.loadFriends()
+                async let groups = bubbleStore.loadMyGroups()
+                (serverFriends, serverGroups) = await (friends, groups)
+            }
             .navigationTitle(RemixCopy.shareTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -90,7 +98,17 @@ struct RemixShareSheet: View {
     /// Feed and story, chats (group chats first), Groups, then friends you don't already have a
     /// chat with in the list.
     private var targets: [BubbleShareTarget] {
-        let all = BubbleSocialHub.targets(appStore: appStore, kinds: [.feed, .story, .chat, .group, .friend])
+        var all = BubbleSocialHub.targets(appStore: appStore, kinds: [.feed, .story, .chat, .group, .friend])
+        // Real friends and Groups first: the demo cast alone would hide the people you actually know.
+        let real = serverGroups.map { BubbleShareTarget(kind: .group, targetID: $0.id, title: $0.name) }
+            + serverFriends.map { BubbleShareTarget(kind: .friend, targetID: $0.id, title: $0.name) }
+        let realIDs = Set(real.map(\.targetID))
+        all = all.filter { !realIDs.contains($0.targetID) }
+        if let firstGroup = all.firstIndex(where: { $0.kind == .group || $0.kind == .friend }) {
+            all.insert(contentsOf: real, at: firstGroup)
+        } else {
+            all += real
+        }
         let chatPartners: Set<String> = Set(all.filter { $0.kind == .chat }.compactMap { target in
             guard let chat = appStore.conversations.first(where: { $0.id == target.targetID }), !chat.isGroup else { return nil }
             return chat.participants.first?.id

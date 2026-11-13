@@ -76,7 +76,8 @@ enum BubbleSocialHub {
             start?()
             return true
         case .group, .feed:
-            let group = target.kind == .group ? appStore.group(id: target.targetID) : nil
+            // A server Group lives in BubbleStore, not in the demo world's list.
+            let group = target.kind == .group ? (appStore.group(id: target.targetID) ?? bubbleStore.resolveGroup(target.targetID)) : nil
             if target.kind == .group && group == nil { return false }
             var card = card
             var start: (() -> Void)?
@@ -88,6 +89,14 @@ enum BubbleSocialHub {
             post.bubbleID = card.bubbleID
             post.bubbleCard = card
             post.isUploading = false
+            // A server Group's members hear about it (group_game), as with the feed's own Group share.
+            if let group, GameIDMap.isServerID(card.bubbleID) || bubbleStore.bubble(id: card.bubbleID)?.serverID != nil,
+               bubbleStore.resolveGroup(group.id) != nil {
+                let eventID = post.id // one server event per post, so a retry notifies once
+                Task { @MainActor in
+                    try? await GamesAPILive.shared.shareGameToGroup(gameID: card.bubbleID, groupID: group.id, eventID: eventID)
+                }
+            }
             start?()
             return true
         case .story:

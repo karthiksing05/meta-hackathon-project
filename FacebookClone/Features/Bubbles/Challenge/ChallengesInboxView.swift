@@ -20,6 +20,18 @@ struct ChallengesInboxView: View {
                     }
                 }
             }
+            // A best-of's notification lands here, and it may already be over: keep the latest few
+            // finished matches, so the result is still one tap from the notification.
+            let finished = Array(ServerBracketService.shared.finished.sorted { $0.createdAt > $1.createdAt }.prefix(3))
+            if !finished.isEmpty {
+                Section("Finished matches") {
+                    ForEach(finished) { match in
+                        BracketCardView(bracket: match, opponent: matchOpponent(match))
+                            .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                            .listRowBackground(Color.clear)
+                    }
+                }
+            }
             let rounds = RoundsCenter.shared.list(nil)
             if !rounds.isEmpty {
                 Section(RoundsCopy.rounds) {
@@ -30,7 +42,7 @@ struct ChallengesInboxView: View {
                     }
                 }
             }
-            if inbox.items.isEmpty && matches.isEmpty && rounds.isEmpty {
+            if inbox.items.isEmpty && matches.isEmpty && finished.isEmpty && rounds.isEmpty {
                 Section { emptyState }
             } else {
                 if !inbox.received.isEmpty {

@@ -27,7 +27,7 @@ struct RoundCardView: View {
             if !round.lines.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(lineLimit.map { Array(round.lines.suffix($0)) } ?? round.lines) { line in
-                        Text(line.text)
+                        Text(round.threadText(line))
                             .font(.fbMeta)
                             .foregroundStyle(FBColor.primaryText)
                             .fixedSize(horizontal: false, vertical: true)
@@ -263,7 +263,7 @@ struct RoundDetailView: View {
                 Section(RoundsCopy.thread) {
                     ForEach(round.lines.reversed()) { line in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(line.text)
+                            Text(round.threadText(line))
                                 .font(.fbBody)
                                 .foregroundStyle(FBColor.primaryText)
                             Text(line.at, style: .relative)
@@ -717,5 +717,18 @@ struct GroupRoundsCard: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+    }
+}
+
+extension RemoteRound {
+    /// A thread line as the person looking sees it. A game's share line ends with an invite
+    /// ("… Your turn.") meant for the chat; it's dropped from your own line, once you've played,
+    /// and when the round is over, so nobody is told it's their turn when it isn't.
+    func threadText(_ line: RemoteRoundLine, myID: String? = GamesAccount.shared.userID) -> String {
+        let invite = " Your turn."
+        guard line.text.hasSuffix(invite) else { return line.text }
+        let iPlayed = myID.flatMap { plays[$0]?.played } ?? false
+        guard finished || line.userID == myID || iPlayed else { return line.text }
+        return String(line.text.dropLast(invite.count))
     }
 }

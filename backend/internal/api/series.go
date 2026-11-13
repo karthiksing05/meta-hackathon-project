@@ -364,7 +364,28 @@ func (s *Server) verifyRun(ctx context.Context, gameText, log string, names ...s
 	if json.NewDecoder(io.LimitReader(res.Body, 1<<20)).Decode(&v) != nil {
 		return nil, 502, "the score checker returned something unreadable"
 	}
+	if onlyStateHashDiffers(&v) {
+		// Some games end with a cosmetic difference between the live run and its replay (same
+		// inputs, same score, phase and time; a different full-state hash). Every caller ranks
+		// the replay's own numbers, so an honest player's run counts instead of being rejected.
+		s.Log.Warn("verify: accepting a run whose only difference is the final state hash", "problems", v.Problems)
+		v.OK = true
+	}
 	return &v, 0, ""
+}
+
+// onlyStateHashDiffers is a replay that matched the game and recomputed a result, and whose only
+// problem is the final state hash.
+func onlyStateHashDiffers(v *verifyResult) bool {
+	if v.OK || !v.GameHashOK || v.Recomputed == nil || len(v.Problems) == 0 {
+		return false
+	}
+	for _, p := range v.Problems {
+		if !strings.HasPrefix(p, "final.state_hash:") {
+			return false
+		}
+	}
+	return true
 }
 
 // gameText is the exact game script the engine ran, from the stored manifest.

@@ -410,5 +410,6 @@ extension BubbleStore {
         user.bio = profile.bio ?? ""
         user.coverColor = profile.coverColor
         if let picture = PersonAvatarURL.forProfile(profile) { user.avatarURL = picture }
+        if let count = profile.friendCount { user.friendCount = count }
     }
 }

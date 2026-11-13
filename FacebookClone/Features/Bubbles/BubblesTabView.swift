@@ -23,7 +23,6 @@ struct BubblesTabView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var model = BubbleFeedModel()
-    @State private var floatTarget: Bubble?
     @State private var didApplyDebug = false
     /// "Play again" closes the result sheet without leaving the game.
     @State private var isPlayingAgain = false
@@ -111,9 +110,6 @@ struct BubblesTabView: View {
                 onSeeBoard: openBoardFromResult,
                 onNextLevel: playNextLevel
             )
-        }
-        .confirmationDialog(floatTitle, isPresented: floatDialogBinding, titleVisibility: .visible, presenting: floatTarget) { bubble in
-            floatButtons(for: bubble)
         }
         .onAppear(perform: appear)
         .onChange(of: isVisible) { _, visible in
@@ -244,12 +240,9 @@ struct BubblesTabView: View {
             },
             float: { bubble in
                 Haptics.light()
-                // Only ask where when there's a choice; with no Group to offer, share to the feed.
-                if shareGroup(for: bubble) == nil {
-                    float(bubble, to: nil)
-                } else {
-                    floatTarget = bubble
-                }
+                // The share sheet: your feed, your story, chats, Groups and friends, each as a
+                // playable card (docs/BUBBLES.md 7.5).
+                router.bubbleSheet = BubbleFeatureRoute(.remix, RemixScreens.share, bubble.id)
             },
             save: { bubble in
                 Haptics.light()
@@ -315,14 +308,6 @@ struct BubblesTabView: View {
 
     private var resultBinding: Binding<BubbleResultContext?> {
         Binding(get: { model.result }, set: { model.result = $0 })
-    }
-
-    private var floatDialogBinding: Binding<Bool> {
-        Binding(get: { floatTarget != nil }, set: { if !$0 { floatTarget = nil } })
-    }
-
-    private var floatTitle: String {
-        floatTarget.map { "Share \($0.title)" } ?? "Share"
     }
 
     // MARK: Actions
@@ -433,34 +418,6 @@ struct BubblesTabView: View {
     }
 
     /// The Group a game can be shared to from the feed: its own, or one of yours it's played in.
-    private func shareGroup(for bubble: Bubble) -> FBGroup? {
-        bubble.group ?? bubbleStore.boardGroups(for: bubble).first(where: { $0.isMember })
-    }
-
-    @ViewBuilder
-    private func floatButtons(for bubble: Bubble) -> some View {
-        if let group = shareGroup(for: bubble) {
-            Button("Share to \(group.name)") {
-                float(bubble, to: group)
-            }
-        }
-        Button("Share to your feed") {
-            float(bubble, to: nil)
-        }
-        Button("Cancel", role: .cancel) {}
-    }
-
-    private func float(_ bubble: Bubble, to group: FBGroup?) {
-        let message = "Play \(bubble.title) with me ✨"
-        let post = BubbleSurfaceHooks.float(bubble, result: nil, to: group, message: message, appStore: appStore, bubbleStore: bubbleStore)
-        if post != nil {
-            Haptics.success()
-            // BubbleSurfaceHooks.float shows the "Shared to …" toast itself.
-        } else {
-            appStore.showToast("Couldn't share this \(ProductName.singular) right now", symbol: "exclamationmark.circle")
-        }
-    }
-
     // MARK: Debug
 
     #if DEBUG
