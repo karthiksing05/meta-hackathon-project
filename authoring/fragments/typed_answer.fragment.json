@@ -1,7 +1,7 @@
 {
   "fragment": "typed_answer",
   "version": 2,
-  "describe": "Open-answer prompts the player answers by TYPING on the iPhone keyboard (Krillion-style trivia, \"name a…\", fill-in, guess the word): not multiple choice. It brings its own native text field over the answer box (the app raises the system keyboard when the player taps it; Return submits), so do NOT add the keyboard fragment. The game supplies two functions that read `content` lists: `ta_prompts()` (list<string>, one prompt per entry, e.g. \"Name a red fruit\") and `ta_answers()` (list<string>, entry q holds prompt q's accepted answers in rarity tiers: tiers separated by '|', answers inside a tier by ',', most common tier first; an answer's other accepted names (aliases, nicknames, short forms) follow it joined by '=', e.g. \"apple,strawberry,cherry|raspberry,tomato|pomegranate,lingonberry\" or \"harry potter=harry,hermione granger=hermione|neville longbottom=neville\"). Matching is forgiving and fair (the fuzzy_match rules): it ignores case, accents, punctuation, a leading 'the'/'a'/'an', word order, plurals and number words, and forgives typos by length (4 letters or fewer must be exact, 5-7 letters allow one typo, longer answers pass at `threshold`), so list each real answer once with its true aliases, not misspellings. One answer per prompt: a match scores its tier's points (`common`, `uncommon`, `rare`, `legendary` params), shows the answer as listed, and emits `answered_right {points, tier}`; anything else, or running out of `time_ms`, emits `answered_wrong`. After about 900 ms it emits `prompt_done` (bind rounds' `round_done` to it) and asks the next prompt (shuffled order). It sets the score (`ta_points`), so don't also use the score fragment. End it with rounds (bound to `prompt_done`) and/or lives (bound to `answered_wrong`). The playtest bots get the answers to try from the fragment itself (`ta_candidates()`); \"playtest\": {\"progress\": \"ta_progress()\"} still helps. State: `typed`, `ta_points`, `right_count`, `wrong_count`, `last_result` ('common' | 'uncommon' | 'rare' | 'legendary' | 'miss' | 'time' | ''), `last_points`, `last_answer` (the matched answer as listed, '' otherwise), `locked`. Draws the prompt, a time bar, the answer box (the text field sits on it, at 30,224 300 x 54) and the result line above y 330; keep the rest of the top half clear, and keep the bottom 45% calm: the iPhone keyboard covers it while the player types. With the game's `answer_box` sprite the box draws it.",
+  "describe": "Open-answer prompts the player answers by TYPING on the iPhone keyboard (Krillion-style trivia, \"name a…\", fill-in, guess the word): not multiple choice. It brings its own native text field over the answer box (the app raises the system keyboard when the player taps it; Return submits), so do NOT add the keyboard fragment. The game supplies two functions that read `content` lists: `ta_prompts()` (list<string>, one prompt per entry, e.g. \"Name a red fruit\") and `ta_answers()` (list<string>, entry q holds prompt q's accepted answers in rarity tiers: tiers separated by '|', answers inside a tier by ',', most common tier first; an answer's other accepted names (aliases, nicknames, short forms) follow it joined by '=', e.g. \"apple,strawberry,cherry|raspberry,tomato|pomegranate,lingonberry\" or \"harry potter=harry,hermione granger=hermione|neville longbottom=neville\"). Matching is forgiving and fair (the fuzzy_match rules): it ignores case, accents, punctuation, a leading 'the'/'a'/'an', word order, plurals and number words, and forgives typos by length (4 letters or fewer must be exact, 5-7 letters allow one typo, longer answers pass at `threshold`), so list each real answer once with its true aliases, not misspellings. One answer per prompt: a match scores its tier's points (`common`, `uncommon`, `rare`, `legendary` params), shows the answer as listed, and emits `answered_right {points, tier}`; anything else, or running out of `time_ms`, emits `answered_wrong`. After about 900 ms it emits `prompt_done` (bind rounds' `round_done` to it) and asks the next prompt (shuffled order). It sets the score (`ta_points`), so don't also use the score fragment. End it with rounds (bound to `prompt_done`) and/or lives (bound to `answered_wrong`). The playtest bots get the answers to try from the fragment itself (`ta_candidates()`); \"playtest\": {\"progress\": \"ta_progress()\"} still helps. State: `typed`, `ta_points`, `right_count`, `wrong_count`, `last_result` ('common' | 'uncommon' | 'rare' | 'legendary' | 'miss' | 'time' | ''), `last_points`, `last_answer` (the matched answer as listed, '' otherwise), `locked`. Draws the prompt, a time bar, the answer box (the text field sits on it, at 30,224 300 x 54) and the result line above y 340 (on the tall canvas the prompt sits between the HUD and the box, y 166 to 220, and the bar and result go under the box); keep the rest of the top half clear, and keep the bottom 45% calm: the iPhone keyboard covers it while the player types. With the game's `answer_box` sprite the box draws it.",
   "params": {
     "time_ms": {
       "type": "duration",
@@ -57,7 +57,7 @@
   },
   "art": {
     "answer_box": {
-      "describe": "The box the typed answer sits in, 300 × 54 (keep its middle calm: the text is drawn on top).",
+      "describe": "The box the typed answer sits in, 300 × 54 (keep its middle calm and in the palette’s surface colour: the answer is drawn on top in the ink colour, so a light box under light ink can’t be read).",
       "color": "surface"
     }
   },
@@ -580,12 +580,13 @@
         "node": {
           "node": "text",
           "x": 30,
-          "y": 96,
+          "y": "= if @game.safe_top > 0 then 166 else 96",
           "w": 300,
-          "h": 104,
+          "h": "= if @game.safe_top > 0 then 54 else 104",
+          "wrap": true,
           "align": "center",
           "valign": "middle",
-          "size": 22,
+          "size": "= if @game.safe_top > 0 then 18 else 22",
           "weight": 700,
           "color": "= if last_answer != '' then $primary else $ink",
           "text": "= if last_answer != '' then upper(last_answer) else prompt_text()"
@@ -596,7 +597,7 @@
         "node": {
           "node": "rect",
           "x": 30,
-          "y": 206,
+          "y": "= if @game.safe_top > 0 then 286 else 206",
           "h": 8,
           "radius": 4,
           "w": "= if locked then 0.0 else max(0.0, 300.0 * ((_until - now) * 1.0) / (@time_ms * 1.0))",
@@ -651,7 +652,7 @@
         "node": {
           "node": "text",
           "x": 30,
-          "y": 288,
+          "y": "= if @game.safe_top > 0 then 300 else 288",
           "w": 300,
           "h": 34,
           "align": "center",
