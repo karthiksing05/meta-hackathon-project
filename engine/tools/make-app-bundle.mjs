@@ -109,8 +109,19 @@ ${body}
     return engine;
   }
 
+  /**
+   * Replays a run's input log (microgame-log/1) against the exact game text and checks the result
+   * it claims: {ok, game_hash_ok, steps, recomputed, claimed, problems}.
+   */
+  function verify(gameText, log) {
+    const e = getEngine();
+    if (!e) return { ok: false, game_hash_ok: false, steps: 0, recomputed: null, claimed: null, problems: [engineError || "engine unavailable"] };
+    return e.verify(gameText, log);
+  }
+
   root.MicrogameEngine = Object.freeze({
     getEngine,
+    verify,
     engineError: () => engineError,
     Microgame, Game, MicrogameLoadError, MicrogameCrash,
     decodeFrame, rgbaToCss, rgbaToHex,

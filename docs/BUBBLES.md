@@ -112,11 +112,12 @@ Request ──► Muse Studio (Swift harness) ──► Manifest (JSON) ──�
    timestep we control, the Glow look needs Canvas 2D glow effects, and the runtime has to run
    headless in JavaScriptCore for validation. KAPLAY was a proposal; this keeps the same concept
    model.
-3. **Muse Studio (Swift).** The compositional harness: an agent loop on Wonder with tools, plus
-   Ember for content and Image for covers. Validates and playtests every manifest in JavaScriptCore
-   before it ships, and repairs failures (max 2 rounds). Has an offline composer so the demo never
-   breaks.
-4. **App (SwiftUI).** `BubbleStore` holds Bubbles, scores and boards. Surfaces: Bubbles tab
+3. **Muse Studio (Swift).** The screens for making a game. Since the live-data Stage 3 the app
+   calls no Muse model: a new game is made on the games server (`POST /v1/generate`, 7.12), which
+   runs the Muse harness, validates, repairs and playtests it. There is no offline composer; with
+   no server, Studio says it couldn't reach it.
+4. **App (SwiftUI).** `BubbleStore` holds the games, scores and boards fetched from the games API
+   (4.5). Surfaces: Bubbles tab
    (infinite feed), player, result sheet, Bubble Board, Library, chains, Studio, Group Daily Bubble,
    Event icebreaker, profile, Stories, feed posts, Reels Bursts, notifications.
 5. **CLI.** `tools/bubble-studio` runs the same harness on macOS to pre-generate the seed library
@@ -140,13 +141,14 @@ must be unique across the app.
 ```
 FacebookClone/Bubbles/Models/        Shared Swift types (Foundation only, also compiled by the CLI)
 FacebookClone/Bubbles/Runtime/web/   bubble-runtime.js, bubble-glow.css, bubble-host.html
-FacebookClone/Bubbles/Seeds/         bubble-seed-<slug>.json (one manifest each)
+FacebookClone/Bubbles/API/           Games API client (the only source of games, people, scores, Groups)
+tools/game-fixtures/                 bubble-seed-<slug>.json test manifests (not in the app; see 4.9)
 FacebookClone/Bubbles/Studio/        Muse client + harness + validator (Foundation + JavaScriptCore only)
 FacebookClone/Bubbles/Store/         BubbleStore (SwiftUI app state)
 FacebookClone/Bubbles/UI/            Shared Bubbles UI: Glow tokens, web view, cards
 FacebookClone/Features/Bubbles/      Screens
 tools/bubble-studio/                 macOS CLI
-scripts/sync-muse-config.sh          .env → FacebookClone/Bubbles/Studio/MuseConfig.json (gitignored)
+scripts/sync-muse-config.sh          .env → MuseConfig.json, for the macOS CLI only (the app reads no key)
 ```
 
 ### 4.2 Manifest (JSON, snake_case keys)
@@ -246,24 +248,55 @@ Swift types: `BubbleBridgeMessage`, `BubbleRunResult`, `BubbleInputLog` in
 
 ### 4.4 Studio API (Swift)
 
-`Bubbles/Models/StudioContracts.swift`:
+`Features/Bubbles/Studio/StudioModel.swift` drives the screens; the app talks to no model itself.
 
-- `draftBrief(_ request) async throws -> BubbleBrief`: fast first pass, shown to the creator to
-  edit ("I read this as calm and nostalgic, for New in SF").
-- `compose(_ request) -> AsyncThrowingStream<StudioEvent, Error>`: emits steps
-  (`understand, brief, compose, glue, content, validate, repair, playtest, cover, polish, done`).
-  The `done` event carries the manifest and optional cover image data.
+- **Brief.** `draftBrief()` fills the brief from what the person typed (intent, audience, a default
+  mood and energy); they edit it on the Brief step. The server reads it with Muse when it builds.
+- **Build.** `startCompose(.create)` sends the request and brief to the games server
+  (`GameGeneratorFactory.current`, `POST /v1/generate`, 7.12). `StudioGenerateBridge` turns the job
+  into `StudioEvent`s (`compose, validate, repair, playtest, polish, done`); the `done` event carries
+  the manifest.
+- **Changes.** Tweaks (`startCompose(.tweak)`, "Change the game", the Sound card's free text), a new
+  look (`changeLook(to:)`, `look`), the next level (`startCompose(.nextLevel)`, `nextLevel: true`) and
+  remix, next-level and edit launches go to `POST /v1/generate {baseGameId, change?, look?, nextLevel?,
+  brief?}` as a `GameRevision` (`StudioModel.runRevision`). It is the same job and polling as a new
+  game (`GameGenerator.generate(revision:)`, `StudioGenerateBridge.revise`), so Build shows the same
+  steps; a change can take minutes. The result is always a **new** server game with `remixOf` set to
+  the base: Studio keeps the server's manifest id (it links to the new server id), a tweaked level
+  replaces the one on Try, and saving an edit shares it as a new version. `baseGameId` is the Bubble's
+  `serverID`, or for a level made this session its app id (the client maps it). Only the person's
+  words go as `change` (at most 1,800 characters); the base game already follows its anatomy.
 - Modes: `create`, `edit` (change an existing Bubble), `remix` (fork), `next_level` (new linked
-  Bubble in the chain), `daily` (a Group's Daily Bubble from its opted-in posts).
+  Bubble in the chain), `daily` (a Group's Daily Bubble). `create` and `daily` make a new game; the
+  others change their base game.
 
 ### 4.5 App state
 
-`BubbleStore` (environment object) owns Bubbles, scores, boards and the Studio service.
+`BubbleStore` (environment object) holds the games fetched from the games API this session, their
+boards and the Studio service. It keeps nothing of its own and invents nothing (docs/APP_LIVE_DATA_PLAN.md):
+
+| Data | From |
+|---|---|
+| Games tab feed | `GET /v1/feed?limit=10&sessionID=<per launch>&exclude=` (the server's recommender picks and orders every page; `BubbleFeedItem` keeps `feedItemID`, `reason`, `why`, `team`) |
+| A game | its server object plus the manifest at `manifestUrl` and the cover at `coverUrl`; `GET /v1/games/{id}` when a screen opens one that isn't loaded (`loadGame`) |
+| Boards | `GET /v1/games/{id}/leaderboard` (one global board; Friends and Group tabs say "Not available yet") |
+| Your run | `POST /v1/games/{id}/scores`, then the returned board |
+| Saves (= likes) | `PUT`/`DELETE /v1/games/{id}/like`; your saved games `GET /v1/me/likes` (Library's Saved section, `loadSavedGames`); who saved a game `GET /v1/games/{id}/likes` → `{count, friends}` (`loadSavers`, `saverStates`) |
+| Search | `GET /v1/search?q=` (Facebook Search's Games results) |
+| Your games | `GET /v1/creations` (Library) |
+| Group Blend | `POST /v1/groups/{id}/blend` (Group page, members only) |
+| What happened on each page | `POST /v1/feed/events` (`FeedEventReporter`: page events and off-feed moments) |
+
+The app ranks nothing: `game-recs.js` stays in `Bubbles/Recommend/` only because the API image
+reads it from there. No Bursts play friends' runs yet (the server keeps scores, not replays), so feed
+pages play the bot's demo. Screens show loading, error ("Try again") and empty states from
+`LiveDataStateView`, never stand-in content.
 Routes and covers: `Route.bubble(id)`, `.bubbleBoard(id)`, `.bubbleLibrary`, `.bubbleChain(id)`,
 `.marketplace`; `router.play(...)` opens the player, `router.openStudio(...)` opens Muse Studio.
 
 Surfaces outside the Bubbles screens hook in through `BubbleSurfaceHooks` (called once at launch);
-each surface has its own file in `Features/Bubbles/Surfaces/`. `Post` carries `bubbleID`,
+each surface has its own file in `Features/Bubbles/Surfaces/`. Nothing is added to the home feed,
+Stories, Reels or notifications at launch; games reach them when you share one. `Post` carries `bubbleID`,
 `bubbleReplay` (a Burst) and `allowsBubbles` (opted in as Daily Bubble material).
 
 `BubbleJSRuntime` (`Bubbles/Studio/BubbleJSRuntime.swift`) runs the runtime headless in
@@ -450,10 +483,9 @@ popped" instead of a blank screen.
 
 ### 4.7 Demo world
 
-`Bubbles/Seeds/bubble-demo-world.json` holds the synthetic New in SF Group (`group-newinsf`), the
-newcomers' picnic Event (`event-newcomers-picnic`), ten newcomers with intros and facts, and a list
-of SF words. Mock data (Swift) and seed Bubbles both read it, so names and IDs always match. The
-signed-in user, Alex, just moved to San Francisco and joined New in SF.
+The games feature has no demo world: people, friends and Groups come from the games API (section 7
+note). `Bubbles/Seeds/bubble-demo-world.json` is read only by Studio's offline pieces until Stage 3
+removes them; the wider Facebook clone's mock data (`Data/MockData.swift`) is Stage 5.
 
 ---
 
@@ -568,27 +600,13 @@ content-hashed manifests to object storage behind a CDN. Clients cache them, and
 are served almost entirely from the CDN. Leaderboards verify replays server-side. Gameplay never
 calls the server.
 
-### 4.9 Seed files
+### 4.9 Test fixtures (formerly seed files)
 
-`Bubbles/Seeds/bubble-seed-<id>.json` is a manifest plus keys starting with `_`, which the runtime
-and validator ignore. `_seed` holds demo metadata for `BubbleStore`: `creator_id` (a demo-world
-person id or `me`), `group_id`, `event_id`, `created_hours_ago`, `play_count`, `like_count`, `save_count` (saves are the
-likes, 7.10; defaults to `like_count`).
-`_placeholder: true` marks a stand-in that the runtime owners replace with a real, validated
-manifest under the same id. Seed ids are stable; screens and debug links use them.
-
-| Id | Formula | Notes |
-|---|---|---|
-| `newinsf-daily-fog-words` | guess | New in SF's Daily Bubble (word) |
-| `picnic-icebreaker-whos-coming` | guess | Picnic icebreaker (match facts to newcomers) |
-| `hill-hopper`, `hill-hopper-2` | dodge | A two-level Bubble Chain (`chain-hill-hopper`) |
-| `fog-drift` | dodge | |
-| `moving-day` | dodge | Alex's own Bubble (profile, edit demo) |
-| `newinsf-fog-or-sun` | answer | Consensus: guess what the Group picked |
-| `sort-the-city` | group | |
-| `cable-car-catch`, `sourdough-stack` | time | |
-| `bay-bubbles` | merge | |
-| `mg-*` (8) | microgame | Generated by `authoring/tools/make-seeds.mjs` (see 7.11); don't edit by hand |
+The app bundles no games. The old seed manifests live in `tools/game-fixtures/bubble-seed-<id>.json`
+for the runtime and kit tests (`tools/runtime-tests`, `tools/kits-tests`, `tools/recs-sim`) and the
+preview pages. They are a manifest plus keys starting with `_`, which the runtime and validator
+ignore (`_seed` held the old demo metadata). `mg-*` are written by `authoring/tools/make-seeds.mjs`
+(see 7.11); don't edit them by hand. Demo games belong in the server's database, not the app.
 
 ### 4.10 Looks
 
@@ -659,7 +677,8 @@ Each look is a skin over the same `g` primitives. Kit code does not change per l
 
 - Demo data is synthetic. No real posts, people or brands.
 - Daily Bubbles read only posts marked as opted in, and Studio shows which sources it used.
-- The Muse key lives in `.env` and a gitignored `MuseConfig.json`; it is never committed.
+- The Muse key lives on the games server (and in `.env` for the CLI); the app has none and it is
+  never committed.
 
 ## 6. Demo (5 minutes)
 
@@ -672,6 +691,19 @@ Each look is a skin over the same `g` primitives. Kit code does not change per l
 ---
 
 ## 7. Collaboration: closer together
+
+> **Live data (docs/APP_LIVE_DATA_PLAN.md, Stage 2).** The sections below describe the features as
+> first built on the synthetic New in SF cast. That cast is gone from the app: there is no
+> `BubbleSocialCast`, no roster, no rival "Maya", no seeded chats, notifications or rivalry history,
+> and no bot runs standing in for other people (`simulateRun` is deleted). People are server
+> accounts (`BubbleStore.resolvePerson`, `GET /v1/users/{id}`; friends `GET /v1/me/friends`; Group
+> members `GET /v1/groups/{id}`); a Group's games are `GET /v1/groups/{id}/games`; Blend is
+> `POST /v1/groups/{id}/blend`. What needs server work first shows "Not available yet"
+> (`LiveDataStateView`, copy in `LiveDataCopy`): challenges and group-chat sessions (7.2), making
+> together (7.4), quiz nights (7.7), the Group weekly board (7.3), friends' story paths (7.6), and
+> friends' and Group boards. Saves (7.10) name you and the friends who saved a game
+> (`GET /v1/games/{id}/likes`); everyone else is a count. Cards you share still go to the app's
+> Messenger chats, which are Stage 5.
 
 Every Bubble should bring specific people closer (friends, a Group, a group chat, people from an
 Event) through Facebook's own surfaces: friends, Groups, Messenger chats, Search, profiles and the
@@ -1495,9 +1527,10 @@ you first when saved, never the creator, never more than `saveCount`),
 **Who saved it.** The feed caption shows one social line: a friend's best to beat (opens the board)
 or, when no friend has a run, 'Saved by …' (opens the list). Long-pressing the feed's Save button
 (or the VoiceOver action 'See everyone who saved it') pushes `feature:saves/stats/<id>`.
-`SavesStatsView` lists savers friends first with Add friend for non-friends
-(`appStore.sendRequest(to:)`, then `BubbleSocialSignals.post(.addFriendFromGame, ...)`). The Bubble
-page shows the top three for your own Bubbles.
+`SavesStatsView` lists you and the friends who saved it (`GET /v1/games/{id}/likes`, loaded once
+per game per session by `BubbleStore.loadSavers`, skipped when nobody but you saved it or you're
+signed out), then "and N more" for savers the server doesn't name. It shows loading and "Try again"
+states. The Bubble page shows the top three for your own Bubbles.
 
 **Seeds.** Every seed's `_seed` block has `save_count` (hill-hopper 1,240 down to 17).
 
@@ -1543,6 +1576,14 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
 - The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. It drives posters,
   demos and smoke runs. It's generic, so the runtime tests skip the skill checks for microgame seeds;
   game quality is gated by `authoring/playtest` and the engine's replay tests.
+- **Verifiable scores** (for challenges and leaderboards). When a run is won or lost, the kit puts the
+  engine's input log in `state.microgame.log`: `microgame-log/1` JSON text with the seed, the game's
+  hash, every input and the final `{state_hash, phase, score, time_ms}`. Submit it with the score.
+  `MicrogameEngine.verify(content.game_json, log)` replays it and returns `{ok, game_hash_ok, steps,
+  recomputed, claimed, problems}`. It runs anywhere the engine bundle loads: the app, a friend's
+  phone, or the server's Node generator. An edited score, a removed input or another game file fails.
+  `tools/runtime-tests/microgame-verify.js` plays every microgame seed through the real runtime
+  and checks that honest logs verify and raised scores don't.
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
@@ -1564,6 +1605,13 @@ example and the `mg-*` seeds. `node tools/runtime-tests/microgame-chrome.mjs` pl
 **FB_OPEN.** `play:mg-gust-glider`, `bubble:mg-prism-breaker` (any `mg-*` seed id).
 
 ### 7.12 Making microgames in Studio
+
+> **Live data (Stage 3).** The app no longer runs this pipeline: `MicrogameComposer.swift`,
+> `MicrogamePrompts.swift`, `MuseClient.swift`, the on-device revise path and the offline and
+> scripted services are deleted. New games are made on the server (the **Server path** below); the
+> pieces described here run there and in the CLI. `MicrogameStudio` stays in the app to load and
+> check engine games. The CLI (`tools/bubble-studio`) still lists the deleted files and needs its
+> own copy before it builds again.
 
 Muse writes an **authoring manifest** (`authoring/SPEC.md` 2); Studio expands it into a `game.json`,
 validates it in the engine, sends errors back to Muse, playtests it with the bots and wraps it as a
@@ -1669,15 +1717,19 @@ the events, the title, the validation result and the gate report. It uses real M
 configured; `--fake-muse` replies with a manifest with a misspelled param, then
 `authoring/games/tide_taps.authoring.json` (or `--fake-good FILE`), which exercises the repair loop.
 
-**Server path.** Studio can also make a new microgame on the games server (Max's `POST /v1/generate`,
-which runs this same composer server-side). `GameGenerator` (`Bubbles/API/GameGenerator.swift`; `Live`
-and a `Mock` that replays a recorded real run) polls `GET /v1/generate/{jobId}` every 1–2 s, dedupes
-events by `seq`, and fetches the finished game's manifest from `manifestUrl` without re-encoding it.
-`StudioGenerateBridge` turns the server's events (`kind` + `summary`) into the same `StudioEvent`s as
-`StudioMicrogameBridge`, so Build, Try, Share and "How Muse made it" are unchanged. Optional fields
-(`data` on events, `position`, `code`) are used when present. It's chosen by `FB_API=live` or
-`FB_GENERATE=mock` (`App/DebugLaunch.swift`); otherwise Studio uses the on-device composer. Tweaks and
-next levels stay on-device (`revise` reads the server game's `content.authoring_json`).
+**Server path.** Studio makes new microgames on the games server (Max's `POST /v1/generate`, which runs
+this same composer server-side). `GameGenerator` (`Bubbles/API/GameGenerator.swift`; `GameGeneratorLive`
+is the only implementation) polls `GET /v1/generate/{jobId}` every 1–2 s, dedupes events by `seq`, and
+fetches the finished game's manifest from `manifestUrl` without re-encoding it. `StudioGenerateBridge`
+turns the server's events (`kind` + `summary`) into the same `StudioEvent`s as `StudioMicrogameBridge`,
+so Build, Try, Share and "How Muse made it" are unchanged. Optional fields (`data` on events, `position`,
+`code`) are used when present; the server puts each step's details (`round`, `passed`, `headline`,
+`bots`) on the event itself, and `GenerationEvent.data` falls back to the whole event. Changes to a game
+(`{baseGameId, change?, look?, nextLevel?}`, 4.4) use the same job and polling. `request` may be at
+most 2,000 characters, so when the agreed anatomy would push a new game's request past that, it goes
+in the brief's `notes` instead. The games API client is always the live server (`GamesAPIFactory.current`,
+base URL `https://api.ol4ol.com`, `FB_API_URL` overrides it in DEBUG); the app signs in once at launch
+with a device account (`GamesAccount`). There is no mock client.
 
 **Gold examples.** Muse's prompt shows the two gold games closest to the request (`authoring/gold/`, 16
 hand-made games paired with requests; `expander/gold.mjs` picks them and `MicrogameStudio.examples(for:)`
@@ -1688,6 +1740,15 @@ original.
 `MicrogameComposer.lastStats.examples` records which were used.
 
 ### 7.13 Game anatomy: agreeing how the game works
+
+> **Live data (Stage 4).** The app's Muse call (`GameAnatomyMuse.swift`, `MuseAnatomyPrompts.swift`)
+> and the fixtures are deleted. The server asks Muse instead (`POST /v1/anatomy {request, audience?}`
+> and `POST /v1/anatomy/revise {anatomy, change, request?, afterPlaying?}`, both answered in the reply
+> with the `game-anatomy/0.1` object, about 5 to 10 s; the prompts moved to
+> `backend/generator/src/anatomy.mjs`). The app decodes it (`GameAnatomy.decode`) and calibrates it
+> with the engine's fragment ids from `MicrogameStudio.catalog()`. Errors show the server's words: 503
+> "Muse is not set up on this server yet", 502 "Muse couldn't take this game apart", with Try again
+> (or "Make it as written" on Try).
 
 Studio used to take a person's *style* (mood, look, theme) but not their *function*. The game anatomy is
 Muse's read of how the game works, part by part, agreed with the person before the build and changed
@@ -1719,12 +1780,11 @@ get defaults, unknown familiarity reads as approximate, a `{"anatomy": {...}}` w
 Revisions add top-level `changed` (`"end"`, `"rules.2"`, ...) and `reply` ("This changes rule 2 and how it
 ends."); Studio also diffs the two versions itself when `changed` is missing.
 
-**Muse.** `GameAnatomyMuse` (`draft`, `revise`), one JSON turn on the fast model (about 5 s; the planner
-took 30–55 s for the same reads). Prompts: `MuseAnatomyPrompts.swift` (`MusePrompts.anatomySystem`,
-`anatomyUser`, `anatomyReviseUser`); the system prompt lists the microgame fragments (live catalog,
-or a built-in list) so Muse can judge what it knows. Without a Muse key, or with `FB_STUDIO_ANATOMY`,
-Studio uses `GameAnatomyFixtures` (a word guess, a grid logic puzzle with parts new to Muse, and a dodge
-game in the request's theme).
+**Muse.** On the server (`GamesAPI.anatomy(request:audience:)` and
+`reviseAnatomy(_:change:request:afterPlaying:)`), one JSON turn on the fast model. The server's system
+prompt lists the microgame fragments so Muse can judge what it knows; the answers the person gave
+travel inside the anatomy (`answer` on each part). There are no fixtures: when the server can't answer,
+the card says why.
 
 **In Studio** (`StudioAnatomyThread`, `StudioAnatomyCard`, `StudioAnatomyChat`):
 - *Brief step*: "How the game works" drafts alongside the brief. Summary ("Muse understood 13 parts; 2 are
@@ -1737,8 +1797,9 @@ game in the request's theme).
   formula games, to the brief's `notes`. `MicrogamePrompts` is unchanged.
 - *Try step*: "Change the game" replaces "Tweak it" when there is an anatomy. Each message is first mapped
   onto the anatomy (Muse's reply, the updated parts, anything new to Muse); "Make the change" makes the
-  updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`) with the person's
-  words, what changes and the updated anatomy. The last 6 turns stay visible.
+  updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`, a change on the
+  server, 4.4) with the person's words, what changes and the changed parts' new wording (the game
+  already follows the rest). The last 6 turns stay visible.
 - *Saved with the game*: on share or save, the agreed anatomy goes into the game's make record on this
   device (`MakeRecord.anatomyJSON` and `anatomyRequest`; the manifest is unchanged). Edit, Remix and the
   next level load it (`StudioModel.loadSavedAnatomy`), so they keep "Change the game", and a remix shows
@@ -1749,7 +1810,7 @@ art and words; Muse doesn't add ones they didn't ask for. Mechanics stay origina
 existing game's levels or art are copied, and our own seeded content stays original (`MusePrompts.safety`,
 the content prompt; covers still carry no text or logos).
 
-DEBUG: `FB_STUDIO_ANATOMY=fixture|answered|chat` with `FB_STUDIO_STEP=brief|try`;
+DEBUG: the anatomy fixtures and `FB_STUDIO_ANATOMY`/`FB_STUDIO_STEP` were removed in Stage 4;
 `FB_STUDIO_SCROLL=anatomy|anatomy-rules|anatomy-<part>` (Brief) or `chat` (Try).
 
 ### 7.14 Get-to-know brackets (bracket)
@@ -1770,11 +1831,19 @@ for a bracket that started on a Group board, to the Group as a playable share ca
 **Files** (`Features/Bubbles/Bracket/`): `FriendBracket.swift` (model, `BracketService` protocol,
 `BracketPlanner`), `LocalBracketService.swift` (today's implementation, in memory for the launch),
 `BracketLocalOpponent.swift` (**local stand-in**: the other person's rounds are bot runs of the real
-runtime on the same seed via `BubbleStore.simulateRun`, marked `theirsIsLocalStandIn`),
+runtime on the same seed, through `BubbleStore.runtimeWorker`, marked `theirsIsLocalStandIn`),
 `BracketCardView.swift`, `BracketHooks.swift` (install, `didFinish`, `met`). Shared edits: one line
 each in `BubbleFeatureRouter` (install, didFinish), `BubbleFeatureSlots` (profile header),
 `AppStore` (the friendship notification), `GroupWeeklyBoardActions.addFriend` and `BubbleBoardView`.
 DEBUG: `FB_BRACKET=<userID>[:played]`.
+
+**One offer per Add friend.** A server friendship (Find friends, the Group Blend's Add friend) posts
+`gamesFriendAdded`, and that tap gets the Challenges best-of-5 offer (`BestOfFiveOfferSheet`) and
+nothing from brackets. Brackets never pop up there: they live as the "Getting to know" card on the
+person's profile, start from its button, start quietly from Add friend on a game or Group weekly
+board (which use the local friend request and get no best-of-5 offer), and announce themselves with a
+toast only for friendships made through the local friend requests (`friendshipStarted`). When the
+server serves same-seed series, the bracket's rounds can become that series and the two merge.
 
 **Server endpoints the backend would need** (so `LocalBracketService` and `BracketLocalOpponent`
 can be swapped for a `GamesAPI`-backed service with no screen changes). Picking games, seeds and

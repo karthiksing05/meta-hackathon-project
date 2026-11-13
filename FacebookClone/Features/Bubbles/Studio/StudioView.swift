@@ -7,19 +7,9 @@ import SwiftUI
 ///
 /// DEBUG launch variables (with `FB_OPEN=studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`,
 /// `next:<id>` or `daily:<groupID>`; see `App/DebugLaunch.swift`):
-/// - `FB_STUDIO_STEP=ask|brief|compose|try|float|error`: open on that step with fake data.
-/// - `FB_STUDIO_LOOK=paper` (or glow, pixel, neon, ink, clay, riso, chalk): preselect a look.
-/// - `FB_STUDIO_SERVICE=scripted`: a realistic ~40 s Muse run with no network.
-///   `FB_STUDIO_SPEED=4` plays it 4× faster; `FB_STUDIO_FAIL=1` makes it fail halfway.
-/// - `FB_STUDIO_AUTOPILOT=1`: drives the whole flow (describe → brief → compose → try → tweak →
-///   new look → level 2 → share and challenge) and logs each step as `[Studio autopilot] …`.
-///   `FB_STUDIO_AUTOPILOT=build` stops once the game is on Try (with `FB_STUDIO_STEP=brief`, no
-///   Muse call before the build).
-/// - `FB_STUDIO_ANATOMY=fixture|answered|chat`: "How the game works" from a fixture (no Muse call);
-///   `answered` answers its first question, `chat` adds "Change the game" turns on Try.
-/// - `FB_STUDIO_MICROGAME=1`: build it as a microgame when Muse (or a server generator) is available.
-/// - `FB_GENERATE=mock|mock-plain|mock-fail` (+ `FB_GENERATE_SPEED`): make the microgame as a
-///   server job from a recorded run (see `App/DebugLaunch.swift`).
+/// - `FB_STUDIO_SCROLL=look|sources|anatomy|customize`: scroll a step to that section.
+///
+/// Every game is made on the server (`/v1/generate`); there is no scripted or offline run.
 ///
 /// Narration: `MuseNarrator` speaks what Muse is doing (`StudioNarration`); the top bar's waveform
 /// button turns it off. It follows the app-wide game mute.
@@ -63,9 +53,6 @@ struct StudioView: View {
         }
         .onDisappear {
             model.stopAll()
-        }
-        .onChange(of: model.floatSignal) {
-            float()
         }
         .studioNarration(model)
         .confirmationDialog(closeTitle, isPresented: $isConfirmingClose, titleVisibility: .visible) {

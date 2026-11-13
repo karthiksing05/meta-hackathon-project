@@ -5,7 +5,7 @@ import Foundation
 /// Only microgames have one: it lives in the authoring manifest (`content.authoring_json`), and the
 /// expander turns it into the game's synth notes. A structured change (set, music, volume) edits that
 /// text, then expands and wraps it again through `MicrogameStudio` (no Muse call, no playtest: sound
-/// doesn't change how the game plays). Free-text tweaks go through `MicrogameComposer.revise`.
+/// doesn't change how the game plays).
 enum SoundManifestEditor {
     enum EditError: LocalizedError {
         case notEditable

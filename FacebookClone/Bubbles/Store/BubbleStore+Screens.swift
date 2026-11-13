@@ -19,17 +19,9 @@ extension BubbleStore {
         bubble.creator.id == appStore.me.id
     }
 
-    /// A Bubble Board for `scope`, best first. Daily Bubbles only count today's runs.
+    /// A board for `scope`, best first, as the server sent it (only `.everyone` is served yet).
     func board(for bubble: Bubble, scope: BubbleBoardScope) -> [BubbleScore] {
-        var rows = leaderboard(for: bubble, scope: scope)
-        if scope == .friends {
-            rows = rows.filter { $0.user.isMe || $0.user.isFriend }
-        }
-        if bubble.isDaily {
-            let today = BubbleStore.dayKey(Date())
-            rows = rows.filter { $0.day == nil || $0.day == today }
-        }
-        return rows
+        leaderboard(for: bubble, scope: scope)
     }
 
     /// Scopes worth offering for this Bubble.
@@ -44,7 +36,8 @@ extension BubbleStore {
         return bestScore(of: appStore.me, in: levels[index - 1]) != nil
     }
 
-    /// Library sections for the current search text and formula filter.
+    /// Library sections for the current search text and formula filter, over the games fetched
+    /// this session (your games come from `/v1/creations`).
     func librarySections(query: String, formula: BubbleFormula?) -> [LibrarySection] {
         let me = appStore.me
         let text = query.trimmingCharacters(in: .whitespaces)
@@ -71,7 +64,7 @@ extension BubbleStore {
             LibrarySection(id: "friends", title: "From friends", symbol: "person.2", bubbles: pool.filter { $0.creator.isFriend }),
             LibrarySection(id: "chains", title: "Chains", symbol: "link", bubbles: chainHeads),
             LibrarySection(id: "saved", title: "Saved", symbol: "bookmark", bubbles: pool.filter { $0.isSaved }),
-            LibrarySection(id: "popular", title: "Popular", symbol: "flame", bubbles: Array(pool.sorted { $0.playCount > $1.playCount }.prefix(8)))
+            LibrarySection(id: "seen", title: "From your feed", symbol: "sparkles", bubbles: pool.filter { $0.creator.id != me.id })
         ]
         return sections.filter { !$0.bubbles.isEmpty }
     }
@@ -103,25 +96,3 @@ extension BubbleScore {
         return false
     }
 }
-
-#if DEBUG
-extension BubbleStore {
-    /// DEBUG only: fills an empty board with sample runs so screens can be reviewed. Never called
-    /// from BubbleStore itself.
-    func seedSampleScoresIfNeeded(_ bubble: Bubble) {
-        guard bubble.scores.isEmpty, DebugLaunch.value("FB_SAMPLE_SCORES") != "0" else { return }
-        let day = bubble.isDaily ? BubbleStore.dayKey(Date()) : nil
-        let people = Array(appStore.people.prefix(6))
-        let base = 40 + (bubble.id.count * 7) % 30
-        var scores: [BubbleScore] = people.enumerated().map { index, user in
-            BubbleScore(user: user, score: base * (8 - index) + index * 3, achievedAt: Date().addingTimeInterval(Double(-index * 1800)), day: day,
-                        replay: index < 3 ? BubbleInputLog(seed: bubble.manifest.seed, totalTicks: 600) : nil)
-        }
-        if bubble.id != "moving-day" && (bubble.levelIndex ?? 1) <= 1 {
-            scores.append(BubbleScore(user: appStore.me, score: base * 2, day: day))
-        }
-        bubble.scores = scores
-        if bubble.featuredRun == nil { bubble.featuredRun = scores.first }
-    }
-}
-#endif

@@ -62,7 +62,7 @@ enum GroupsSearchScreens {
     static func open(_ route: BubbleFeatureRoute, router: Router) -> Bool {
         switch route.screen {
         case "gamenight":
-            BubbleFeatureRouter.open(gameNightRoute(for: route.arg.isEmpty ? BubbleDemo.groupID : route.arg), router: router)
+            BubbleFeatureRouter.open(gameNightRoute(for: route.arg), router: router)
             return true
         case "challenge":
             router.bubbleSheet = route
@@ -75,20 +75,13 @@ enum GroupsSearchScreens {
     /// `FB_OPEN=feature:groups-search/...` (DEBUG): stage demo state, then open.
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
-        let groupID = route.arg.isEmpty ? BubbleDemo.groupID : route.arg
+        let groupID = route.arg
         switch route.screen {
         case "challenge":
             guard let group = bubbleStore.resolveGroup(groupID),
                   let bubble = bubbleStore.worldDailyBubble(for: group) ?? bubbleStore.worldBubbles(in: group).first else { return false }
             GroupChallengeComposer.post(bubble: bubble, in: group, appStore: appStore, bubbleStore: bubbleStore)
             router.push(.bubbleFeature(BubbleFeatureRoute(.groupsSearch, "feed", groupID)))
-            return true
-        case "addfriend":
-            let maya = bubbleStore.resolvePerson(BubbleSocialCast.rivalID)
-            if maya.friendship == .none, let group = bubbleStore.resolveGroup(groupID) {
-                GroupWeeklyBoardActions.addFriend(maya, group: group, appStore: appStore, bubbleStore: bubbleStore)
-            }
-            router.push(.bubbleFeature(leaderboardRoute(for: groupID)))
             return true
         case "games", "leaderboard":
             router.push(.bubbleFeature(BubbleFeatureRoute(.groupsSearch, route.screen, groupID)))
@@ -98,7 +91,7 @@ enum GroupsSearchScreens {
         }
     }
 
-    /// Once at launch, after `BubbleSocialCast.install`.
+    /// Once at launch.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
         MainActor.assumeIsolated {
             GroupGamesStore.shared.bubbleStore = bubbleStore
@@ -154,8 +147,8 @@ enum GroupsSearchCopy {
 
     // Weekly board
     static let weeklyTitle = "This week's leaderboard"
-    static let weeklySubtitle = "Last 7 days · every Group game counts"
-    static let pointsRule = "Each Group game, each day: 1st 5 pts · 2nd 3 · 3rd 2 · played 1"
+    static let weeklySubtitle = "This week · every Group game counts"
+    static let pointsRule = "Each Group game this week: 1st 10 pts · 2nd 7 · 3rd 5 · 4th 3 · 5th 2 · played 1"
     static func points(_ value: Int) -> String { value == 1 ? "1 pt" : "\(value) pts" }
     static func leads(_ name: String) -> String { "\(name) leads the Group" }
     static let youLead = "You lead the Group"

@@ -13,7 +13,7 @@ const vm = require("vm");
 
 const repo = path.resolve(__dirname, "..", "..");
 const web = path.join(repo, "FacebookClone", "Bubbles", "Runtime", "web");
-const seedsDir = path.join(repo, "FacebookClone", "Bubbles", "Seeds");
+const seedsDir = path.join(repo, "tools", "game-fixtures");
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };

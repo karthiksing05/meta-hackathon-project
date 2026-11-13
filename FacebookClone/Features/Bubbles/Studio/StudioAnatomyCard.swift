@@ -63,6 +63,7 @@ struct StudioAnatomyCard: View {
             } else if thread.isWorking {
                 loading
             } else if let note = thread.note {
+                // The server's words for what went wrong (503: Muse isn't set up; 502: a bad reply).
                 VStack(alignment: .leading, spacing: FBSpacing.s) {
                     Text(note)
                         .font(.fbBody)

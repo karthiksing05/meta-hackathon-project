@@ -18,8 +18,13 @@ struct FacebookCloneApp: App {
             SettingsKey.showReactionCounts: true,
         ])
         let store = AppStore()
+        // The games server account: every game, score, friend and Group comes from the API.
+        MainActor.assumeIsolated {
+            GamesAccount.shared.signIn()
+            // Loads challenges after each sign-in (the games tab's trophy badge).
+            _ = ChallengeInbox.shared
+        }
         let bubbleStore = BubbleStore(appStore: store)
-        bubbleStore.studio = BubbleStudioFactory.make()
         BubbleSurfaceHooks.install(appStore: store, bubbleStore: bubbleStore)
         // Audio session, the persisted game mute and social cues from notifications.
         GameSound.install(appStore: store)

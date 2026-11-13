@@ -309,7 +309,8 @@ private struct LearnRecapPanel: View {
                 progress.notePlay(bubble, tag: slot.result.result.share.tag)
             }
             if let group {
-                progress.warmUp([bubble], people: progress.learners(in: group, lessons: [bubble], bubbleStore: bubbleStore), bubbleStore: bubbleStore)
+                _ = (progress, group)
+                bubbleStore.loadScores(for: bubble)
             }
         }
     }
@@ -336,7 +337,7 @@ private struct LearnRecapPanel: View {
 
     @ViewBuilder
     private func shareButtons(bubble: Bubble, tag: LearnResultTag?, group: FBGroup?) -> some View {
-        let crew = BubbleSocialCast.conversation(BubbleSocialCast.newInSFCrew, in: appStore)
+        let crew = appStore.conversations.filter { $0.isGroup && !$0.isArchived }.max { $0.lastActivity < $1.lastActivity }
         VStack(spacing: 8) {
             if let group {
                 let target = BubbleShareTarget(kind: .group, targetID: group.id, title: group.name)
@@ -474,16 +475,13 @@ private struct LearnDetailPanel: View {
         .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous).strokeBorder(FBColor.divider, lineWidth: 1))
         .onAppear {
-            let friends = BubbleSocialCast.friendIDs.map { bubbleStore.resolvePerson($0) }
-            var learners = friends
-            if let group { learners += progress.learners(in: group, lessons: [bubble], bubbleStore: bubbleStore) }
-            progress.warmUp([bubble], people: learners, bubbleStore: bubbleStore)
+            bubbleStore.loadScores(for: bubble)
         }
     }
 
-    /// Friends first, then the Group's best learners: who learned it and how well.
+    /// Friends first, then the Group's best learners: who learned it and how well (server boards).
     private func peers(_ progress: LearnProgressStore) -> [(user: User, mastery: Double)] {
-        var people = BubbleSocialCast.friendIDs.map { bubbleStore.resolvePerson($0) }
+        var people = bubble.scores.map(\.user)
         if let group = LearnShare.group(for: bubble, appStore: appStore, bubbleStore: bubbleStore) {
             people += progress.learners(in: group, lessons: [bubble], bubbleStore: bubbleStore)
         }
@@ -492,9 +490,8 @@ private struct LearnDetailPanel: View {
             guard !user.isMe, seen.insert(user.id).inserted, let value = progress.mastery(of: user, in: bubble, bubbleStore: bubbleStore) else { return nil }
             return (user, value)
         }
-        let friendSet = Set(BubbleSocialCast.friendIDs)
         return Array(rows.sorted { a, b in
-            let fa = friendSet.contains(a.user.id), fb = friendSet.contains(b.user.id)
+            let fa = a.user.isFriend, fb = b.user.isFriend
             return fa != fb ? fa : a.mastery > b.mastery
         }.prefix(5))
     }

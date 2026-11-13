@@ -280,57 +280,12 @@ final class StoryProgressStore {
 
     // MARK: Friends' paths
 
-    /// Who plays the other side: the default rival (Maya), then friends and New in SF crew members.
-    static let friendIDs = [BubbleSocialCast.rivalID, "sf-diego-ramirez", "sf-chloe-nguyen"]
-
-    /// Loads friends' paths once per Bubble: each friend's run is a real bot run of this story.
-    /// The runs are chosen to show the range (someone who took the other path, someone who found
-    /// a secret ending) and arrive one by one, so it feels live.
+    /// Friends' paths come from the server's moments inbox (their runs' endings), which isn't
+    /// there yet (docs/APP_LIVE_DATA_PLAN.md, Stage 4). Nobody's path is made up: the list stays
+    /// empty and the endings screen says so.
     func loadFriends(for bubble: Bubble, bubbleStore: BubbleStore) {
-        guard bubble.formula == .story, friends[bubble.id] == nil, !loadingFriends.contains(bubble.id),
-              let story = StoryAdventure(bubble.manifest) else { return }
-        loadingFriends.insert(bubble.id)
-        let myFirst = latestTag(bubble.id)?.first
-        let people = Self.friendIDs.map { bubbleStore.resolvePerson($0) }.filter { !$0.isMe }
-        // What each friend's run should show, in order: Maya took the other path from you, Diego
-        // found a secret ending, Chloe found an ending nobody has shown yet.
-        let wishes: [(StoryRunTag, [StoryFriendPath]) -> Bool] = [
-            { tag, _ in myFirst == nil || tag.first != myFirst },
-            { tag, _ in story.ending(id: tag.ending)?.isSecret == true },
-            { tag, shown in !shown.contains { $0.tag.ending == tag.ending } },
-        ]
-        let skills = [0.8, 0.95, 0.55]
-        let tries = 8
-
-        func next(_ personIndex: Int, _ shown: [StoryFriendPath]) {
-            guard personIndex < people.count else {
-                loadingFriends.remove(bubble.id)
-                friends[bubble.id] = shown
-                return
-            }
-            let user = people[personIndex]
-            let wish = wishes[min(personIndex, wishes.count - 1)]
-            let base = Int(truncatingIfNeeded: StoryStudio.hash("story|\(user.id)|\(bubble.id)") & 0x3FFF_FFFF)
-            var first: StoryFriendPath?
-            func attempt(_ index: Int) {
-                bubbleStore.simulateRun(of: user, on: bubble, manifest: bubble.manifest, skill: skills[min(personIndex, skills.count - 1)], botSeed: base + index * 7919) { [weak self] score in
-                    guard let self else { return }
-                    let path = StoryRunTag(score.share?.tag).map { StoryFriendPath(user: user, tag: $0, score: score.score) }
-                    if first == nil { first = path }
-                    if let path, wish(path.tag, shown) {
-                        self.deliver(shown + [path], of: bubble.id) { next(personIndex + 1, shown + [path]) }
-                    } else if index + 1 < tries {
-                        attempt(index + 1)
-                    } else if let first {
-                        self.deliver(shown + [first], of: bubble.id) { next(personIndex + 1, shown + [first]) }
-                    } else {
-                        next(personIndex + 1, shown)
-                    }
-                }
-            }
-            attempt(0)
-        }
-        next(0, [])
+        guard bubble.formula == .story, friends[bubble.id] == nil else { return }
+        friends[bubble.id] = []
     }
 
     /// Shows friends' paths so far, after a short beat, so each one arrives like a reply.
@@ -366,7 +321,6 @@ final class StoryProgressStore {
     }
 
     /// Sends your path to a chat, a friend or a Group, and reports the moment (`.storyPathShared`).
-    /// A friend in the chat answers a few seconds later with their own path.
     @discardableResult
     func sendPath(of bubble: Bubble, to target: BubbleShareTarget, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
         guard let card = pathCard(for: bubble, appStore: appStore) else { return false }
@@ -377,50 +331,14 @@ final class StoryProgressStore {
         switch target.kind {
         case .friend: recipients = [target.targetID]
         case .chat: recipients = chat?.participants.filter { !$0.isMe }.map(\.id) ?? []
-        case .group: recipients = target.targetID == BubbleDemo.groupID ? BubbleSocialCast.groupMembers(bubbleStore).map(\.id) : []
+        case .group: recipients = bubbleStore.serverGroups[target.targetID]?.memberSample.map(\.id) ?? []
         case .feed, .story: recipients = []
         }
         BubbleSocialSignals.post(.storyPathShared, bubbleID: bubble.id, with: recipients.filter { $0 != appStore.me.id })
-        if let chat {
-            answer(in: chat, about: bubble, appStore: appStore, bubbleStore: bubbleStore)
-        }
         return true
     }
 
     func wasSent(_ bubbleID: String, to target: BubbleShareTarget) -> Bool {
         sentTargets[bubbleID]?.contains(target.id) ?? false
-    }
-
-    /// Someone in the chat plays it (a real bot run) and sends their own path back.
-    private func answer(in chat: Conversation, about bubble: Bubble, appStore: AppStore, bubbleStore: BubbleStore) {
-        guard let friend = chat.participants.first(where: { !$0.isMe }), let story = StoryAdventure(bubble.manifest) else { return }
-        let myFirst = latestTag(bubble.id)?.first
-        let base = Int(truncatingIfNeeded: StoryStudio.hash("reply|\(friend.id)|\(bubble.id)") & 0x3FFF_FFFF)
-        func attempt(_ index: Int) {
-            bubbleStore.simulateRun(of: friend, on: bubble, manifest: bubble.manifest, skill: 0.8, botSeed: base + index * 104_729) { score in
-                guard let tag = StoryRunTag(score.share?.tag) else { return }
-                if tag.first == myFirst && index < 5 {
-                    attempt(index + 1)
-                    return
-                }
-                let choices = story.choices(along: tag)
-                let reply = BubbleChatCard(
-                    kind: .storyPath,
-                    bubbleID: bubble.id,
-                    fromUserID: friend.id,
-                    headline: StoryCopy.replyHeadline(name: friend.firstName, past: choices.first?.pastTense ?? StoryCopy.foundAnEnding),
-                    score: score.score,
-                    extras: [
-                        "ending_id": .string(tag.ending),
-                        "path_choices": .array(choices.map { .string($0.text) }),
-                        "found": .number(1),
-                    ]
-                )
-                DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                    BubbleSocialHub.receive(reply, from: friend, in: chat, text: StoryCopy.replyNote(differentPath: tag.first != myFirst), appStore: appStore)
-                }
-            }
-        }
-        attempt(0)
     }
 }

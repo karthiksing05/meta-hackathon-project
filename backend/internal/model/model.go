@@ -182,6 +182,9 @@ type Job struct {
 	OwnerID    string         `bson:"ownerId"`
 	Request    string         `bson:"request"`
 	Brief      map[string]any `bson:"brief,omitempty"`
+	BaseGameID string         `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)
+	NextLevel  bool           `bson:"nextLevel,omitempty"`
+	Level      int            `bson:"level,omitempty"`
 	Status     string         `bson:"status"`
 	Events     []JobEvent     `bson:"events"`
 	GameID     string         `bson:"gameId,omitempty"`
@@ -237,4 +240,15 @@ type GroupMember struct {
 	UserID   string    `bson:"userId" json:"userId"`
 	Role     string    `bson:"role,omitempty" json:"role,omitempty"` // "owner" or "" for a member
 	JoinedAt time.Time `bson:"joinedAt" json:"joinedAt"`
+}
+
+// Challenge is "beat my score": one person sends a game to friends with their best score on it.
+type Challenge struct {
+	ID        string    `bson:"_id" json:"id"`
+	GameID    string    `bson:"gameId" json:"gameId"`
+	FromID    string    `bson:"fromId" json:"fromId"`
+	FromName  string    `bson:"fromName" json:"fromName"`
+	ToIDs     []string  `bson:"toIds" json:"toIds"`
+	Score     int64     `bson:"score" json:"score"` // the sender's best on the game when they sent it (0 if none)
+	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 }

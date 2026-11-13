@@ -129,9 +129,6 @@ private struct StudioComposeHeader: View {
                 Text(statusText(at: context.date))
                     .monospacedDigit()
                     .lineLimit(1)
-                if model.sawOfflineEvent || !model.isMuseConnected {
-                    StudioModelChip(info: StudioModelInfo(name: "Offline composer", tint: StudioGlow.offline, symbol: "bolt.horizontal.circle"))
-                }
             }
             .font(.fbMetaEmphasized)
             .foregroundStyle(FBColor.secondaryText)
@@ -295,30 +292,11 @@ private struct StudioComposeFailureCard: View {
             }
             Button {
                 Haptics.light()
-                model.retry(offline: false)
+                model.retry()
             } label: {
                 Label("Try again", systemImage: "arrow.clockwise")
             }
             .buttonStyle(.studioPrimary)
-            if model.runIsMicrogame && model.composeKind == .create {
-                // A microgame that won't come together can still be a game today.
-                Button {
-                    Haptics.light()
-                    model.useFormulaInstead()
-                } label: {
-                    Label("Make it with a ready formula", systemImage: "square.stack.3d.up")
-                }
-                .buttonStyle(.studioSecondary(expand: true, height: 44))
-            }
-            if model.canTryOffline && !model.runIsMicrogame {
-                Button {
-                    Haptics.light()
-                    model.retry(offline: true)
-                } label: {
-                    Label("Try the offline composer", systemImage: "bolt.horizontal.circle")
-                }
-                .buttonStyle(.studioSecondary(expand: true, height: 44))
-            }
         }
         .studioCard()
     }

@@ -122,7 +122,10 @@ enum BracketPlanner {
             let pick = theme.formulas.lazy
                 .map { formula in games.filter { $0.manifest.formula == formula && !used.contains($0.id) } }
                 .first { !$0.isEmpty }
-            guard let candidates = pick else { continue }
+            // With live data most games are microgames: fall back to any game not used yet, so a
+            // bracket still has three different games.
+            let fallback = games.filter { !used.contains($0.id) && !$0.isDaily }
+            guard let candidates = pick ?? (fallback.isEmpty ? nil : fallback) else { continue }
             let sorted = candidates.sorted { $0.id < $1.id }
             let game = sorted[Int(SeededGenerator.stableHash("bracket-pick|\(pair)|\(theme.rawValue)") % UInt64(sorted.count))]
             used.insert(game.id)

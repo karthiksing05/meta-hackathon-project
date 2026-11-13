@@ -86,6 +86,10 @@ enum Route: Hashable {
     case bubbleBoard(String)
     /// Every Bubble you can play.
     case bubbleLibrary
+    /// The server's challenges: received and sent (`ChallengesInboxView`).
+    case challengesInbox
+    /// Search people on the games server and add them (`FindFriendsView`).
+    case findFriends
     /// The levels of a Bubble Chain.
     case bubbleChain(String)
     /// Marketplace as a pushed screen (it left the tab bar for Bubbles).
@@ -327,6 +331,10 @@ struct RouteDestination: View {
             BubbleBoardView(bubbleID: id)
         case .bubbleLibrary:
             BubbleLibraryView()
+        case .challengesInbox:
+            ChallengesInboxView()
+        case .findFriends:
+            FindFriendsView()
         case .bubbleChain(let id):
             BubbleChainView(chainID: id)
         case .marketplace:

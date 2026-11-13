@@ -1,48 +1,77 @@
 import Foundation
 
-// The games backend client (Max's Go API; backend/README.md on `backend-api`).
+// The games backend client (Max's Go API; contract in backend/README.md). Every game, person,
+// friend, Group, score and feed page in the games feature comes from here; the app keeps no game
+// data of its own and does no ranking or generating.
 //
-// Not wired into BubbleStore or any screen yet: the app still runs on local data.
+//     let api = GamesAPIFactory.current                              // always the live client
+//     let page = try await api.feed(limit: 10, sessionID: id, exclude: [])   // ranked by the server
+//     let game = try await api.game(id: slugOrServerID)                // a slug or a 24-hex server id
+//     let board = try await api.scores(gameID: game.id)                // one global board per game
+//     _ = try await api.setSaved(true, gameID: game.id)                // PUT /like; needs an account
+//     let saved = try await api.savedGames()                           // GET /v1/me/likes
+//     let who = try await api.saves(gameID: game.id)                   // {count, friends}
+//     try await api.sendFeedEvents([...])                              // what happened on each page
 //
-//     let api = GamesAPIFactory.current(store: bubbleStore)      // FB_API=mock (default) or FB_API=live
-//     let page = try await api.feed(cursor: nil)            // RemoteGamePage: items + next cursor
-//     let more = try await api.feed(cursor: page.next)
-//     let game = try await api.game(id: "hill-hopper")      // a slug or a 24-hex server id
-//     let board = try await api.scores(gameID: game.id, scope: .everyone)
-//     _ = try await api.setSaved(true, gameID: game.id)     // PUT /like; needs a signed-in account
-//     try await api.sendEvents([GameEvent(gameID: game.id, kind: .play)])
-//
-// Live only: `GamesAPILive` also adopts `GamesAuth` (register, login, signInAsDevice, signOut).
-// Errors are `GamesAPIError`. Mock: no network, deterministic, read-only use of BubbleStore.
+// `GamesAPILive` also adopts `GamesAuth`. The app signs in once at launch (`GamesAccount`).
+// Errors are `GamesAPIError`.
 
 protocol GamesAPI: Sendable {
-    /// Newest-first games. Pass `RemoteGamePage.next` to continue; nil starts over.
-    func feed(cursor: String?) async throws -> RemoteGamePage
+    /// The next feed page, chosen by the server's recommender (`GET /v1/feed`).
+    func feed(limit: Int, sessionID: String?, exclude: [String]) async throws -> [RemoteFeedItem]
+    /// `GET /v1/search?q=&tag=&cursor=&limit=`.
+    func search(query: String, tag: String?, cursor: String?) async throws -> RemoteGamePage
     func game(id: String) async throws -> RemoteGame
     /// Uploads a package; returns the server's game (its `id` is the server id).
     func publish(_ package: GamePackage) async throws -> RemoteGame
-    /// The server has one global board per game; `scope` filters only in the mock.
-    func scores(gameID: String, scope: BubbleBoardScope) async throws -> [RemoteScore]
-    /// Trust-only for now: the server keeps the signed-in user's best. Returns the board.
-    func submitScore(_ score: Double, gameID: String) async throws -> [RemoteScore]
+    /// The game's one global board, best first (`GET /v1/games/{id}/leaderboard`).
+    func scores(gameID: String) async throws -> [RemoteScore]
+    /// A board limited to my friends (and me) or a Group's members: `?scope=friends|group&groupId=`.
+    /// Friends needs sign-in; group needs membership.
+    func scores(gameID: String, scope: String, groupID: String?) async throws -> [RemoteScore]
+    /// The server keeps the signed-in person's best. Returns the board.
+    func submitScore(_ score: Int, gameID: String) async throws -> [RemoteScore]
     /// A save is a like on the server.
     func setSaved(_ saved: Bool, gameID: String) async throws -> SaveState
-    /// Batches of at most 100; kinds the server does not accept are dropped.
-    func sendEvents(_ events: [GameEvent]) async throws
-    /// Mock only. Live throws `GamesAPIError.notSupported`.
-    func sendChallenge(_ challenge: ChallengeRequest) async throws -> Challenge
-    /// Mock only. Live throws `GamesAPIError.notSupported`.
-    func challenges() async throws -> [Challenge]
-    /// Mock only. Live throws `GamesAPIError.notSupported`.
-    func blend(groupID: String) async throws -> GroupBlendSummary
+    /// The games I saved, newest first (`GET /v1/me/likes`); needs an account.
+    func savedGames() async throws -> [RemoteGame]
+    /// How many people saved a game, and which of my friends did (`GET /v1/games/{id}/likes`).
+    /// Signed out, `friends` is empty.
+    func saves(gameID: String) async throws -> RemoteGameSaves
+    /// Feed page events and off-feed moments (`POST /v1/feed/events`), in batches of 100.
+    func sendFeedEvents(_ events: [FeedEvent]) async throws
+
+    // People, friends and Groups
+    func user(id: String) async throws -> RemoteProfile
+    func friends() async throws -> [RemoteProfile]
+    func setFriend(_ isFriend: Bool, userID: String) async throws
+    func groups(kind: String?, mine: Bool) async throws -> [RemoteGroup]
+    func group(id: String) async throws -> RemoteGroupDetail
+    func setMember(_ isMember: Bool, groupID: String) async throws
+    func groupGames(id: String) async throws -> [RemoteGame]
+    /// Group Blend from the server's data about the members (`POST /v1/groups/{id}/blend`).
+    func blend(groupID: String, count: Int) async throws -> RemoteBlend
+    /// My own games (`GET /v1/creations`).
+    func creations() async throws -> [RemoteGame]
+
+    // Game anatomy (docs/BUBBLES.md 7.13): the server asks Muse; one short call each (about 5 to
+    // 10 s), answered in the reply as a `game-anatomy/0.1` object. Decode it with
+    // `GameAnatomy.decode`. 503: Muse isn't set up; 502: Muse's reply wasn't an anatomy.
+    /// `POST /v1/anatomy {request, audience?}`: Muse takes an idea apart into its working parts.
+    func anatomy(request: String, audience: String?) async throws -> JSONValue
+    /// `POST /v1/anatomy/revise {anatomy, change, request?, afterPlaying?}`: the anatomy with the
+    /// change (and any answers in it) folded in, plus `changed` and `reply`.
+    func reviseAnatomy(_ anatomy: JSONValue, change: String, request: String?, afterPlaying: Bool) async throws -> JSONValue
 }
 
-/// Accounts. The live client implements it; the mock has no accounts.
+/// Accounts.
 protocol GamesAuth: Sendable {
     func register(email: String, username: String, displayName: String, password: String) async throws -> RemoteUser
     func login(email: String, password: String) async throws -> RemoteUser
     /// Creates (once) and signs in a device account whose password lives in the Keychain.
     func signInAsDevice() async throws -> RemoteUser
+    /// `GET /v1/auth/me`: the signed-in account.
+    func me() async throws -> RemoteUser
     func signOut() async
     var isSignedIn: Bool { get async }
 }
@@ -60,7 +89,7 @@ enum GamesAPIError: LocalizedError, Equatable {
         switch self {
         case .notSupported(let what): return "\(what) is not available on the server yet."
         case .signInRequired: return "Sign in to do that."
-        case .notFound: return "That game was not found."
+        case .notFound: return "That was not found on the server."
         case .unknownGame(let id): return "No server game is linked to \(id)."
         case .server(_, let message): return message
         case .network(let message): return "Could not reach the server: \(message)"
@@ -69,42 +98,21 @@ enum GamesAPIError: LocalizedError, Equatable {
     }
 }
 
-enum GamesAPIMode: String {
-    case mock, live
-}
-
 enum GamesAPIConfig {
     static let defaultBaseURL = URL(string: "https://api.ol4ol.com")!
 
-    /// `FB_API=mock|live` (DEBUG launch variable); anything else, and release builds, use the mock.
-    static var mode: GamesAPIMode {
-        DebugLaunch.value("FB_API").flatMap { GamesAPIMode(rawValue: $0.lowercased()) } ?? .mock
-    }
-
-    /// `FB_API_URL` overrides the live base URL.
+    /// `FB_API_URL` (DEBUG launch variable) overrides the base URL.
     static var baseURL: URL {
         DebugLaunch.value("FB_API_URL").flatMap(URL.init(string:)) ?? defaultBaseURL
     }
 }
 
 enum GamesAPIFactory {
-    /// The client for the current launch mode. Live clients are created once and shared.
-    static func current(store: BubbleStore) -> any GamesAPI {
-        switch GamesAPIConfig.mode {
-        case .mock: return GamesAPIMock(store: store)
-        case .live: return GamesAPILive.shared
-        }
-    }
+    /// The one client: the live server. Created once and shared.
+    static var current: GamesAPILive { GamesAPILive.shared }
 }
 
 // MARK: - Mapping to app types
-
-extension RemoteScore {
-    /// A board row for an app user, e.g. `score.asBoardEntry(user: user)`.
-    func asBoardEntry(user: User) -> BubbleScore {
-        BubbleScore(id: "\(userID)-\(Int(updatedAt.timeIntervalSince1970))", user: user, score: points, achievedAt: updatedAt)
-    }
-}
 
 extension RemoteGame {
     /// The in-app formula, when the server's `formula` names one.

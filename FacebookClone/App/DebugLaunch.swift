@@ -6,22 +6,17 @@ import SwiftUI
 /// `SIMCTL_CHILD_FB_TAB=bubbles SIMCTL_CHILD_FB_OPEN=board:fog-words xcrun simctl launch booted com.karthiksing05.fbclone`
 ///
 /// - `FB_TAB`: `home`, `video`, `bubbles`, `friends`, `notifications`, `menu`
+/// - `FB_BEST_OF_5=<userID>`: show the best-of-5 offer for that friend (as after adding them)
+/// - `FB_AUTH=screen|guest`: force the sign-in screen, or continue as a guest
 /// - `FB_OPEN`: one of
-///   `bubble:<id>`, `board:<id>`, `library`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
+///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `find-friends`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
 ///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
 ///   keys: challenge, groups-search, together, remix, story, nextline, learn, length, saves)
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
-/// - `FB_API`: `mock` (default) or `live`; picks the games API client (`GamesAPIFactory.current`).
-/// - `FB_API_URL`: overrides the live API base URL (default `https://api.ol4ol.com`).
-/// - `FB_GENERATE`: where Studio makes new microgames (`GameGeneratorFactory.current`):
-///   `mock` replays a recorded real run as server jobs (queue, fix rounds, playtest, done; no network),
-///   `mock-plain` the same without the optional fields (`data`, `position`, `code`), `mock-fail` fails
-///   after the second fix round (`FB_GENERATE_FAIL_CODE=gate_failed|muse_timeout|rate_limited|capped|…`
-///   picks the code), `device` forces the on-device composer. Unset: the server with `FB_API=live`,
-///   otherwise on-device (the default until the server's `/v1/generate` is live).
-/// - `FB_GENERATE_SPEED=4`: replays the mock 4× faster (for screenshots).
+/// - `FB_API_URL`: overrides the games API base URL (default `https://api.ol4ol.com`). Point it at an
+///   unreachable host to see the loading and error states.
 /// - `FB_BRACKET=<userID>[:played]`: starts a get-to-know bracket with that person at launch
 ///   (`played` also records your round 1); see it on their profile (`FB_OPEN=profile:<userID>`).
 /// - `FB_RESUME_DEMO=<seconds>` / `FB_RESUME_AUTO=1`: the Resume prompt in the player (see
@@ -58,6 +53,8 @@ enum DebugLaunch {
         case "bubble": router.push(.bubble(arg))
         case "board": router.push(.bubbleBoard(arg))
         case "library": router.push(.bubbleLibrary)
+        case "challenges": router.push(.challengesInbox)
+        case "find-friends": router.push(.findFriends)
         case "chain": router.push(.bubbleChain(arg))
         case "marketplace": router.push(.marketplace)
         case "play": router.play(arg)

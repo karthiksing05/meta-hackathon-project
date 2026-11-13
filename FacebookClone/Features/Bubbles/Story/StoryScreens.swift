@@ -7,16 +7,13 @@ import SwiftUI
 ///   path/<bubbleID>                    send your path to a friend, a chat or the Group
 ///   mystory                            turn your own story ('my first week in SF') into an adventure
 enum StoryScreens {
-    /// The adventure the demo opens by default.
-    static let demoBubbleID = "story-ferry-or-fog"
-
     /// A pushed screen (`Route.bubbleFeature`).
     @MainActor
     @ViewBuilder
     static func destination(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "endings":
-            StoryEndingsView(bubbleID: route.arg.isEmpty ? demoBubbleID : route.arg)
+            StoryEndingsView(bubbleID: route.arg)
         default:
             BubbleFeaturePlaceholder(route: route)
         }
@@ -28,7 +25,7 @@ enum StoryScreens {
     static func sheet(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "path":
-            StoryPathShareSheet(bubbleID: route.arg.isEmpty ? demoBubbleID : route.arg)
+            StoryPathShareSheet(bubbleID: route.arg)
         case "mystory":
             StoryMyStorySheet(model: nil)
         default:
@@ -51,26 +48,16 @@ enum StoryScreens {
     /// `FB_OPEN=feature:story/...` (DEBUG): stage demo state, then open.
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
-        let bubbleID = route.arg.isEmpty ? demoBubbleID : route.arg
-        guard let bubble = bubbleStore.bubble(id: bubbleID) else { return false }
+        // With no id, the first story game the server sent this session.
+        let found = route.arg.isEmpty ? bubbleStore.bubbles.first(where: { $0.formula == .story }) : bubbleStore.bubble(id: route.arg)
+        guard let bubble = found else { return false }
+        let bubbleID = bubble.id
         switch route.screen {
         case "endings":
             StoryProgressStore.shared.loadFriends(for: bubble, bubbleStore: bubbleStore)
             router.push(.bubbleFeature(BubbleFeatureRoute(.story, "endings", bubbleID)))
             return true
         case "path":
-            #if DEBUG
-            if StoryProgressStore.shared.latestTag(bubbleID) == nil {
-                // A real bot run as your path (never recorded as a score), so there's a path to send.
-                bubbleStore.simulateRun(of: appStore.me, on: bubble, manifest: bubble.manifest, skill: 0.9, botSeed: 4242) { score in
-                    if let tag = score.share?.tag {
-                        StoryProgressStore.shared.stageDebugRun(tag, score: score.score, in: bubbleID)
-                    }
-                    router.bubbleSheet = BubbleFeatureRoute(.story, "path", bubbleID)
-                }
-                return true
-            }
-            #endif
             router.bubbleSheet = BubbleFeatureRoute(.story, "path", bubbleID)
             return true
         default:
@@ -78,20 +65,8 @@ enum StoryScreens {
         }
     }
 
-    /// Once at launch: a notification that a friend made an adventure, which opens its endings.
+    /// Once at launch. Nothing is staged.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
-        guard let bubble = bubbleStore.bubble(id: demoBubbleID),
-              !appStore.notifications.contains(where: { $0.bubbleID == bubble.id && $0.bubbleAction?.feature == .story }) else { return }
-        let note = AppNotification(
-            kind: .bubblePlayed,
-            actors: [bubble.creator],
-            message: StoryCopy.madeAdventureNotification(bubble.title),
-            createdAt: Date().addingTimeInterval(-40 * 60),
-            groupID: bubble.group?.id,
-            bubbleID: bubble.id
-        )
-        note.bubbleAction = BubbleFeatureRoute(.story, "endings", bubble.id)
-        appStore.notifications.insert(note, at: min(2, appStore.notifications.count))
     }
 
     /// After the player records one of your runs: the ending joins the endings you've found.

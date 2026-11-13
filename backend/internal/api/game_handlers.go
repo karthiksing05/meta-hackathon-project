@@ -203,9 +203,8 @@ func (s *Server) leaderboard(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	rows, err := s.Store.Leaderboard(r.Context(), g.ID, limitParam(r, 20, 100))
-	if err != nil {
-		s.serverErr(w, r, err)
+	rows, ok := s.scopedBoard(w, r, g.ID, limitParam(r, 20, 100))
+	if !ok {
 		return
 	}
 	if rows == nil {

@@ -25,6 +25,9 @@ RUN apk add --no-cache ca-certificates tzdata \
 FROM base AS api
 LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hackathon-project"
 COPY --from=build /out/api /out/dbinit /app/
+# The one copy of Kevin's recommender, from the app's folder.
+COPY FacebookClone/Bubbles/Recommend/game-recs.js /app/game-recs.js
+ENV RECS_SCRIPT=/app/game-recs.js
 USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["/app/api"]
@@ -32,18 +35,22 @@ ENTRYPOINT ["/app/api"]
 FROM base AS games
 LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hackathon-project"
 COPY --from=build /out/games /app/games
+# The web player runs the app's own game runtime, copied from the app's folder (not kept as a second copy).
+COPY FacebookClone/Bubbles/Runtime/web/ /app/player/runtime/
+ENV PLAYER_RUNTIME_DIR=/app/player/runtime
 USER 10001:10001
 EXPOSE 8081
 ENTRYPOINT ["/app/games"]
 
 # The game generator: Muse writes a game, the engine checks it, bots playtest it. Plain Node, no packages
-# to install; the Studio and engine bundles are vendored in backend/generator/vendor.
+# to install. The Studio and engine bundles are copied from the app's folders (they are not kept twice).
 FROM node:22-alpine AS generator
 LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hackathon-project"
 WORKDIR /app
 COPY backend/generator/ ./
+COPY FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js FacebookClone/Bubbles/Studio/web/microgame-studio.js /app/vendor/
 RUN addgroup -g 10001 app && adduser -D -u 10001 -G app app
 USER 10001:10001
-ENV NODE_ENV=production PORT=8090
+ENV NODE_ENV=production PORT=8090 GENERATOR_VENDOR_DIR=/app/vendor
 EXPOSE 8090
 CMD ["node", "server.mjs"]

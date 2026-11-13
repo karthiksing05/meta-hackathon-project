@@ -276,7 +276,7 @@ struct RemixPeopleRow: View {
     }
 }
 
-/// "Remix of Hill Hopper by Diego", as a pill on light surfaces.
+/// "Remix of <original> by Diego", as a pill on light surfaces.
 struct RemixCreditPill: View {
     let text: String
 

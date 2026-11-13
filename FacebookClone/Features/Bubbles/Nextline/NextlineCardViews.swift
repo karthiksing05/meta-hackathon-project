@@ -259,7 +259,7 @@ struct QuizNightPlacePicker: View {
     }
 
     private var groups: [FBGroup] {
-        appStore.myGroups.sorted { a, b in (a.id == BubbleDemo.groupID ? 0 : 1) < (b.id == BubbleDemo.groupID ? 0 : 1) }
+        appStore.myGroups
     }
 
     private var chats: [Conversation] {

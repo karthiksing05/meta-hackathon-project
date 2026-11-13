@@ -174,12 +174,7 @@ private struct StudioBriefCard: View {
             }
             if model.canBuildMicrogame {
                 field("How Muse builds it") {
-                    StudioOptionRow(options: ["formula", "microgame"], selection: model.buildsMicrogame ? "microgame" : "formula", title: Self.buildTitle) { value in
-                        model.setBuildsMicrogame(value == "microgame")
-                    }
-                    Text(model.buildsMicrogame
-                         ? "From scratch on the game engine: Muse writes the rules, art and sound, then checks and playtests them. Takes a little longer."
-                         : "From Muse's library of tested game types. Quickest.")
+                    Text("On the server, from scratch on the game engine: Muse writes the rules, art and sound, then checks and playtests them.")
                         .font(.fbMeta)
                         .foregroundStyle(FBColor.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
@@ -310,10 +305,6 @@ private struct StudioBriefCard: View {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
             model.addMood(mood)
         }
-    }
-
-    static func buildTitle(_ value: String) -> String {
-        value == "microgame" ? "Microgame, from scratch" : "Ready formula"
     }
 
     /// Length chips: Muse picks, or one of the common shapes (docs/BUBBLES.md 7.9).

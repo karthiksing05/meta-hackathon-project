@@ -1,61 +1,8 @@
 import SwiftUI
 
-// Games in Facebook Search (docs/BUBBLES.md 7.3): matching, playable result rows, the strip of a
-// person's games in People results, and "Make "<query>" with Muse" when nothing matches.
-
-// MARK: - Matching
-
-/// Games for a Search query, best match first. Matches title, rule, creator name, formula title,
-/// category title (Adventure, Quiz night, Learn) and Group name, ignoring case and diacritics.
-/// Every word in the query must match somewhere ("picnic dance-off" needs both). An empty query
-/// returns no games.
-@MainActor
-func gamesMatching(query: String, in store: BubbleStore) -> [Bubble] {
-    gamesMatching(query: query, bubbles: store.bubbles) { bubble in
-        (bubble.group ?? store.resolveGroup(bubble.manifest.structure.groupID))?.name
-    }
-}
-
-/// The pure core of `gamesMatching(query:in:)`: `groupName` looks up a Bubble's Group name.
-func gamesMatching(query: String, bubbles: [Bubble], groupName: (Bubble) -> String?) -> [Bubble] {
-    let phrase = SearchGamesMatch.fold(query.trimmingCharacters(in: .whitespacesAndNewlines))
-    guard !phrase.isEmpty else { return [] }
-    let words = phrase.split(whereSeparator: { $0.isWhitespace }).map(String.init)
-    var scored: [(bubble: Bubble, rank: Int, index: Int)] = []
-    for (index, bubble) in bubbles.enumerated() {
-        let title = SearchGamesMatch.fold(bubble.title)
-        var fields = [
-            title,
-            SearchGamesMatch.fold(bubble.rule),
-            SearchGamesMatch.fold(bubble.creator.name),
-            SearchGamesMatch.fold(bubble.formula.title),
-        ]
-        if bubble.category != .play {
-            fields.append(SearchGamesMatch.fold(bubble.category.title))
-        }
-        if let group = groupName(bubble) {
-            fields.append(SearchGamesMatch.fold(group))
-        }
-        let haystack = fields.joined(separator: " \u{1F} ")
-        guard words.allSatisfy({ haystack.contains($0) }) else { continue }
-        let rank: Int
-        if title.hasPrefix(phrase) {
-            rank = 0
-        } else if title.contains(phrase) {
-            rank = 1
-        } else if words.allSatisfy({ title.contains($0) }) {
-            rank = 2
-        } else if fields[2].contains(phrase) {
-            rank = 3
-        } else {
-            rank = 4
-        }
-        scored.append((bubble, rank, index))
-    }
-    return scored
-        .sorted { lhs, rhs in lhs.rank != rhs.rank ? lhs.rank < rhs.rank : lhs.index < rhs.index }
-        .map(\.bubble)
-}
+// Games in Facebook Search (docs/BUBBLES.md 7.3): playable result rows for the server's matches
+// (`GET /v1/search`, called from `SearchView`), the strip of a person's games in People results,
+// and "Make "<query>" with Muse" when nothing matches.
 
 enum SearchGamesMatch {
     /// Lowercased, accents removed: "Café" and "cafe" match.

@@ -12,8 +12,8 @@ import SwiftUI
 /// ```
 ///
 /// - Microgames Muse built (with `content.authoring_json`) get everything. Set, music and loudness
-///   edit the manifest's `sound` section directly and re-expand it (about a second, no Muse call);
-///   free-text tweaks run `MicrogameComposer.revise`.
+///   edit the manifest's `sound` section directly and re-expand it (about a second, no Muse call).
+///   Free-text tweaks go to `onAsk` (Studio makes them on the server as a tweak).
 /// - Other games show a short note: their sounds follow the game's feel, not a sound set.
 ///
 /// Previews play through `GameSound` with a Swift copy of the engine's synth: the same notes,
@@ -21,16 +21,13 @@ import SwiftUI
 struct SoundCustomizeSection: View {
     let manifest: BubbleManifest
     let onChange: (BubbleManifest) -> Void
-    /// Makes the composer for Muse tweaks. Pass a scripted Muse in tests.
-    let makeComposer: @MainActor () -> MicrogameComposer
+    /// Free-text changes ("make the music calmer"), which Muse makes on the server; Studio runs
+    /// them as a tweak. Nil where nobody can make them.
+    let onAsk: ((String) -> Void)?
 
-    init(
-        manifest: BubbleManifest,
-        makeComposer: @escaping @MainActor () -> MicrogameComposer = { MicrogameComposer() },
-        onChange: @escaping (BubbleManifest) -> Void
-    ) {
+    init(manifest: BubbleManifest, onAsk: ((String) -> Void)? = nil, onChange: @escaping (BubbleManifest) -> Void) {
         self.manifest = manifest
-        self.makeComposer = makeComposer
+        self.onAsk = onAsk
         self.onChange = onChange
     }
 
@@ -439,71 +436,18 @@ struct SoundCustomizeSection: View {
         }
     }
 
+    /// Free-text tweaks go to Muse, which only the server may call: `onAsk` hands them to Studio,
+    /// which changes the game there (`POST /v1/generate {baseGameId, change}`).
     private func ask(_ text: String) {
         let wish = trimmed(text)
         guard !wish.isEmpty, working == nil else { return }
         requestFocused = false
+        guard let onAsk else {
+            errorText = LiveDataCopy.revise
+            return
+        }
         errorText = nil
-        working = "Muse is tuning the sounds"
-        let base = manifest
-        let composer = makeComposer()
-        let prompt = "Change only the game's sound section (sound set, volume, music or single moments), nothing else: \(wish)"
-        task = Task { @MainActor in
-            defer { working = nil }
-            do {
-                let updated = try await composer.revise(base, request: prompt) { event in
-                    switch event {
-                    case .done, .failed: break
-                    default: working = event.summary
-                    }
-                }
-                guard !Task.isCancelled else { return }
-                request = ""
-                onChange(updated)
-                if let tone = SoundManifestEditor.section(of: updated)?.tone(for: .pickup) {
-                    GameSound.preview(tone)
-                }
-            } catch {
-                guard !Task.isCancelled else { return }
-                errorText = "Muse couldn't change the sound: \(error.localizedDescription)"
-            }
-        }
-    }
-}
-
-// MARK: - Preview
-
-private enum SoundCustomizePreviewData {
-    /// A seed microgame with a small authoring manifest attached, so the section is editable.
-    static func manifest() -> BubbleManifest? {
-        guard let url = Bundle.main.url(forResource: "bubble-seed-mg-gust-glider", withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              var manifest = try? BubbleManifest.decode(data) else { return nil }
-        var content = manifest.content.object ?? [:]
-        content["authoring_json"] = .string("""
-        {"title": "Gust Glider", "sound": {"set": "soft", "volume": 0.8, "moments": {"win": "tada"}}}
-        """)
-        manifest.content = .object(content)
-        return manifest
-    }
-}
-
-private struct SoundCustomizePreviewHost: View {
-    @State var manifest: BubbleManifest
-
-    var body: some View {
-        ScrollView {
-            SoundCustomizeSection(manifest: $manifest)
-                .padding()
-        }
-        .background(FBColor.background)
-    }
-}
-
-#Preview("Sounds") {
-    if let manifest = SoundCustomizePreviewData.manifest() {
-        SoundCustomizePreviewHost(manifest: manifest)
-    } else {
-        Text("Seed not found")
+        request = ""
+        onAsk(wish)
     }
 }

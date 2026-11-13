@@ -1,13 +1,12 @@
 import Foundation
 import Observation
 
-/// Runs Challenge Me and group-chat sessions (docs/BUBBLES.md 7.2): 1:1 same-seed challenges,
-/// shared sessions in group chats and Groups, friends' bot runs on short delays, rivalry tallies,
-/// and the live card updates that go with them. Owner: challenge.
+/// Challenge Me and group-chat sessions (docs/BUBBLES.md 7.2): 1:1 same-seed challenges, shared
+/// sessions, rivalry tallies and live card updates. Owner: challenge.
 ///
-/// Every score is a real run on the card's seed and length: yours from the player, friends' from
-/// `BubbleStore.simulateRun` (the formula's bot in the real runtime), so all of them carry a
-/// replay and stay verifiable. Nothing here records a score for you that you didn't play.
+/// The other side of a challenge (their runs, replies, history) needs server endpoints that don't
+/// exist yet (docs/APP_LIVE_DATA_PLAN.md, Stage 4). Until then no challenge or session starts and
+/// nobody's run is simulated; the entry points say "Not available yet".
 @MainActor
 @Observable
 final class ChallengeCenter {
@@ -31,21 +30,18 @@ final class ChallengeCenter {
 
     // MARK: - Setup
 
-    /// Once at launch: seeds Maya's chat, a finished session in New in SF crew, and rivalry history.
+    /// Once at launch. Nothing is staged: no chats, sessions or rivalry history are made up.
     func install(appStore: AppStore, bubbleStore: BubbleStore) {
         self.appStore = appStore
         self.bubbleStore = bubbleStore
-        guard !installed else { return }
         installed = true
-        seedRivalChat(appStore: appStore, bubbleStore: bubbleStore)
-        seedPastSession(appStore: appStore, bubbleStore: bubbleStore)
     }
 
     private var meID: String { appStore?.me.id ?? "me" }
 
     func person(_ id: String) -> User? {
         guard let appStore, let bubbleStore else { return nil }
-        return id == appStore.me.id ? appStore.me : bubbleStore.resolvePerson(id)
+        return id == appStore.me.id ? appStore.me : bubbleStore.serverPeople[id]
     }
 
     // MARK: - Lookups
@@ -149,6 +145,18 @@ final class ChallengeCenter {
         }
         let sent = BubbleSocialHub.send(card, to: target, appStore: appStore, bubbleStore: bubbleStore)
         pendingEntries[card.id] = nil
+        // A friend also gets it on the server ("beat my score"), so it reaches their phone and
+        // shows in Challenges on both sides.
+        if target.kind == .friend, !bubble.serverID.isEmpty {
+            let gameID = bubble.id, friendID = target.targetID
+            Task { @MainActor in
+                do {
+                    try await ChallengeInbox.shared.send(gameIDs: [gameID], to: friendID)
+                } catch {
+                    appStore.showToast("Couldn't send the challenge to the server: \(error.localizedDescription)", symbol: "exclamationmark.circle")
+                }
+            }
+        }
         if sent {
             appStore.showToast(ChallengeCopy.sentToast(target.title), symbol: "flag.checkered")
         } else {
@@ -170,81 +178,12 @@ final class ChallengeCenter {
     /// Called by `BubbleSocialHub.send` for a `.challenge` or `.session` card with no session yet.
     /// Registers the challenge or session, returns the card to deliver (session id and extras
     /// filled in) and a closure to run once it's delivered (bots start). Nil leaves the card as is.
+    ///
+    /// Challenges and sessions need the server (send and list challenges, the other side's runs);
+    /// it has no endpoint yet (docs/APP_LIVE_DATA_PLAN.md, Stage 4), so nothing is started here and
+    /// nobody's run is made up. The card goes out as a plain game card.
     func open(_ card: BubbleChatCard, to target: BubbleShareTarget, chat: Conversation?, group: FBGroup?) -> (BubbleChatCard, () -> Void)? {
-        guard let appStore, let bubbleStore, let bubble = bubbleStore.bubble(id: card.bubbleID) else { return nil }
-        let seed = card.seed ?? bubble.manifest.seed
-        let mine = pendingEntries[card.id] ?? (card.fromUserID == meID ? card.score.map { ChallengeEntry(userID: meID, score: $0) } : nil)
-        let rematchOf = card.extras[ChallengeCardKeys.rematchOf]?.string
-        var card = card
-        card.seed = seed
-        // Shared play is fair play (7.9): with no run of yours to beat yet, lock everyone to the
-        // Bubble's length. A card that carries your run keeps that run's length (nil when it was
-        // unlocked), so the score to beat came from the same game.
-        if card.length == nil && mine == nil {
-            card.length = BubbleLength.locked(for: bubble)
-        }
-
-        if let chat, !chat.isGroup, let opponent = chat.participants.first {
-            // 1:1: a head-to-head challenge.
-            let previous = self.challenge(rematchOf)
-            var created = BubbleChallenge(
-                id: UUID().uuidString, bubbleID: bubble.id, seed: seed, length: card.length,
-                fromUserID: meID, opponentID: opponent.id, conversationID: chat.id, cardID: card.id,
-                rematchOf: rematchOf, round: (previous?.round ?? -1) + 1, mine: mine, theirs: nil,
-                isOpponentPlaying: false, countedOutcome: nil, resultCardID: nil, createdAt: Date()
-            )
-            created.mine?.userID = meID
-            card.kind = .challenge
-            card.sessionID = created.id
-            card.extras[ChallengeCardKeys.role] = .string("invite")
-            card.setChallengeScores(created.mine.map { [$0] } ?? [], members: 2, winnerID: nil)
-            challenges[created.id] = created
-            let id = created.id
-            return (card, { [weak self] in
-                guard let self else { return }
-                BubbleSocialSignals.post(rematchOf == nil ? .challengeSent : .challengeRematch, bubbleID: bubble.id, with: [opponent.id])
-                self.scheduleOpponent(challengeID: id)
-            })
-        }
-
-        // A group chat or a Group: a shared session.
-        let others: [User]
-        let title: String
-        if let chat, chat.isGroup {
-            others = chat.participants.filter { !$0.isMe }
-            title = chat.title
-        } else if let group {
-            others = Array(BubbleSocialCast.groupMembers(bubbleStore).prefix(5))
-            title = group.name
-        } else {
-            return nil
-        }
-        var entries: [String: ChallengeEntry] = [:]
-        if var mine {
-            mine.userID = meID
-            entries[meID] = mine
-        }
-        let session = ChallengeSession(
-            id: UUID().uuidString, bubbleID: bubble.id, seed: seed, length: card.length,
-            fromUserID: meID, memberIDs: [appStore.me.id] + others.map(\.id),
-            conversationID: chat?.id, groupID: chat == nil ? group?.id : nil, title: title,
-            cardID: card.id, rematchOf: rematchOf, entries: entries, createdAt: Date()
-        )
-        card.kind = .session
-        card.sessionID = session.id
-        card.extras[ChallengeCardKeys.role] = .string("invite")
-        card.extras[ChallengeCardKeys.title] = .string(title)
-        card.setChallengeScores(session.standings, members: session.memberIDs.count, winnerID: nil)
-        sessions[session.id] = session
-        let id = session.id
-        let otherIDs = others.map(\.id)
-        let isGroupPost = chat == nil
-        return (card, { [weak self] in
-            guard let self else { return }
-            let kind: BubbleSocialSignalKind = rematchOf != nil ? .challengeRematch : (isGroupPost ? .groupChallenge : .challengeSent)
-            BubbleSocialSignals.post(kind, bubbleID: bubble.id, with: otherIDs)
-            self.scheduleMembers(sessionID: id)
-        })
+        nil
     }
 
     /// The play context for a card (who you're against and the score to beat).
@@ -303,7 +242,6 @@ final class ChallengeCenter {
             challenge.mine = entry
         }
         challenges[challengeID] = challenge
-        let previousOutcome = challenge.countedOutcome
         refreshCards(challengeID: challengeID)
         settleTally(challengeID: challengeID)
         guard let mine = challenge.mine else { return }
@@ -328,18 +266,12 @@ final class ChallengeCenter {
             challenges[challengeID]?.resultCardID = result.id
             BubbleSocialHub.send(result, to: BubbleShareTarget(kind: .chat, targetID: chat.id, title: chat.title), appStore: appStore, bubbleStore: bubbleStore)
         }
-        if challenge.outcome == .won, previousOutcome != .won {
-            if let opponent {
-                say(ChallengeCopy.rivalConcedes(round: challenge.round), from: opponent, in: chat, after: 3.5)
-            }
-        }
     }
 
     private func recordMine(_ entry: ChallengeEntry, sessionID: String) {
         guard var session = sessions[sessionID], let bubbleStore, let bubble = bubbleStore.bubble(id: session.bubbleID) else { return }
         let first = session.entries[meID] == nil
         if let current = session.entries[meID], current.score >= entry.score { return }
-        let wasFinished = session.isFinished
         if !session.memberIDs.contains(meID) {
             // Joining a session you weren't counted in (a finished one from before you arrived).
             session.memberIDs.append(meID)
@@ -349,9 +281,6 @@ final class ChallengeCenter {
         refreshCards(sessionID: sessionID)
         if first {
             BubbleSocialSignals.post(.groupChatPlay, bubbleID: bubble.id, with: session.memberIDs.filter { $0 != meID })
-        }
-        if session.isFinished, !wasFinished {
-            finishSession(sessionID)
         }
     }
 
@@ -398,132 +327,6 @@ final class ChallengeCenter {
     private func rematchSeed(_ id: String, base: Int) -> Int {
         let hash = SeededGenerator.stableHash("rematch|\(id)|\(base)")
         return Int(hash % 900_000) + 1_000
-    }
-
-    // MARK: - Friends' plays (bots)
-
-    /// The opponent plays on the same seed after 3–6 s. When you've played, the bot's skill is
-    /// the one of 0.95, 0.85 and 0.7 whose score lands closest above yours (so the rival is a
-    /// close call); if none beats you, the lowest, and you win.
-    private func scheduleOpponent(challengeID: String) {
-        guard var challenge = challenges[challengeID], let bubbleStore,
-              let bubble = bubbleStore.bubble(id: challenge.bubbleID), let opponent = person(challenge.opponentID) else { return }
-        challenge.isOpponentPlaying = true
-        challenges[challengeID] = challenge
-        let manifest = bubble.manifest.withSeed(challenge.seed).withLength(challenge.length)
-        let delay = 3 + Double(SeededGenerator.stableHash("delay|\(challengeID)") % 300) / 100
-        let fireAt = Date().addingTimeInterval(delay)
-        let botSeed = Int(truncatingIfNeeded: SeededGenerator.stableHash("bot|\(challengeID)") & 0x7FFF_FFFF)
-        let myScore = challenge.mine?.score
-        let skills: [Double] = myScore == nil ? [0.85] : [0.95, 0.85, 0.7]
-        var results: [BubbleScore] = []
-
-        for skill in skills {
-            bubbleStore.simulateRun(of: opponent, on: bubble, manifest: manifest, skill: skill, botSeed: botSeed) { score in
-                MainActor.assumeIsolated {
-                    results.append(score)
-                    guard results.count == skills.count else { return }
-                    let chosen = Self.pick(results, against: myScore)
-                    ChallengeCenter.shared.deliver(chosen, toChallenge: challengeID, at: fireAt)
-                }
-            }
-        }
-    }
-
-    private static func pick(_ results: [BubbleScore], against mine: Int?) -> BubbleScore {
-        guard let mine else { return results[0] }
-        let above = results.filter { $0.score > mine }.min { $0.score < $1.score }
-        return above ?? results.min { $0.score < $1.score } ?? results[0]
-    }
-
-    private func deliver(_ score: BubbleScore, toChallenge challengeID: String, at fireAt: Date) {
-        guard let chat = conversation(for: challengeID), let opponent = person(challenges[challengeID]?.opponentID ?? "") else { return }
-        let wait = max(0, fireAt.timeIntervalSinceNow)
-        after(max(0, wait - 1.4)) {
-            chat.isTyping = true
-        }
-        after(wait) { [weak self] in
-            chat.isTyping = false
-            self?.applyOpponent(score, challengeID: challengeID, opponent: opponent, chat: chat)
-        }
-    }
-
-    private func applyOpponent(_ score: BubbleScore, challengeID: String, opponent: User, chat: Conversation) {
-        guard var challenge = challenges[challengeID], let appStore, let bubbleStore,
-              let bubble = bubbleStore.bubble(id: challenge.bubbleID) else { return }
-        challenge.theirs = ChallengeEntry(userID: opponent.id, score: score.score, replay: score.replay, isVerified: score.isVerified)
-        challenge.isOpponentPlaying = false
-        challenges[challengeID] = challenge
-        refreshCards(challengeID: challengeID)
-        settleTally(challengeID: challengeID)
-
-        let mine = challenge.mine?.score
-        var reply = BubbleChatCard(
-            kind: .challenge, bubbleID: bubble.id, seed: challenge.seed, length: challenge.length,
-            fromUserID: opponent.id, headline: ChallengeCopy.replyHeadline(score.score, mine: mine),
-            sessionID: challenge.id, score: score.score
-        )
-        reply.extras[ChallengeCardKeys.role] = .string("reply")
-        reply.setChallengeScores(entries(of: challenge), members: 2, winnerID: winnerID(of: challenge))
-        BubbleSocialHub.receive(reply, from: opponent, in: chat, text: ChallengeCopy.replyHeadline(score.score, mine: mine), appStore: appStore)
-        BubbleSocialSignals.post(.challengeAccepted, bubbleID: bubble.id, with: [opponent.id])
-
-        let message = ChallengeCopy.opponentNote(score: score.score, mine: mine, bubble: bubble.title)
-        let note = AppNotification(kind: .bubbleScore, actors: [opponent], message: message, bubbleID: bubble.id)
-        note.bubbleAction = BubbleFeatureRoute(.challenge, "chat", challengeID)
-        appStore.notifications.insert(note, at: 0)
-        if appStore.openConversationID != chat.id {
-            appStore.showToast(ChallengeCopy.opponentToast(name: opponent.firstName, score: score.score, mine: mine), symbol: "flag.checkered")
-        }
-    }
-
-    /// Everyone else in a session plays on staggered delays (5–25 s).
-    private func scheduleMembers(sessionID: String) {
-        guard let session = sessions[sessionID], let bubbleStore, let bubble = bubbleStore.bubble(id: session.bubbleID) else { return }
-        let manifest = bubble.manifest.withSeed(session.seed).withLength(session.length)
-        for memberID in session.memberIDs where memberID != meID && session.entries[memberID] == nil {
-            guard let member = person(memberID) else { continue }
-            let delay = 5 + Double(SeededGenerator.stableHash("delay|\(sessionID)|\(memberID)") % 2000) / 100
-            let fireAt = Date().addingTimeInterval(delay)
-            bubbleStore.simulateRun(of: member, on: bubble, manifest: manifest) { score in
-                MainActor.assumeIsolated {
-                    let wait = max(0, fireAt.timeIntervalSinceNow)
-                    ChallengeCenter.shared.after(wait) {
-                        ChallengeCenter.shared.applyMember(score, sessionID: sessionID)
-                    }
-                }
-            }
-        }
-    }
-
-    private func applyMember(_ score: BubbleScore, sessionID: String) {
-        guard var session = sessions[sessionID], session.entries[score.user.id] == nil else { return }
-        session.entries[score.user.id] = ChallengeEntry(userID: score.user.id, score: score.score, replay: score.replay, isVerified: score.isVerified)
-        sessions[sessionID] = session
-        refreshCards(sessionID: sessionID)
-        guard let appStore, let bubbleStore, let bubble = bubbleStore.bubble(id: session.bubbleID) else { return }
-        if session.isFinished {
-            finishSession(sessionID)
-        } else if session.entries[meID] == nil, session.entries.count == session.memberIDs.count - 1 {
-            // Everyone but you: the nudge.
-            let note = AppNotification(kind: .bubbleScore, actors: [score.user], extraActorCount: max(0, session.memberIDs.count - 2), message: ChallengeCopy.everyonePlayedNote(session.title, bubble: bubble.title), bubbleID: bubble.id)
-            note.bubbleAction = BubbleFeatureRoute(.challenge, "chat", sessionID)
-            appStore.notifications.insert(note, at: 0)
-            if appStore.openConversationID != session.conversationID {
-                appStore.showToast(ChallengeCopy.yourTurnToast(session.title), symbol: "hand.point.right.fill")
-            }
-        }
-    }
-
-    private func finishSession(_ sessionID: String) {
-        guard let session = sessions[sessionID], let winner = session.leader, let appStore else { return }
-        refreshCards(sessionID: sessionID)
-        guard let chatID = session.conversationID, let chat = appStore.conversations.first(where: { $0.id == chatID }) else { return }
-        // Someone who didn't win cheers the winner.
-        if let cheerer = session.memberIDs.first(where: { $0 != winner.userID && $0 != meID }).flatMap(person) {
-            let text = winner.userID == meID ? ChallengeCopy.cheerYou(appStore.me.firstName) : ChallengeCopy.cheer(person(winner.userID)?.firstName ?? "")
-            say(text, from: cheerer, in: chat, after: 2.5)
-        }
     }
 
     // MARK: - Cards
@@ -575,7 +378,7 @@ final class ChallengeCenter {
 
     // MARK: - Rivalries
 
-    /// Your record against someone this week: seeded history plus live results.
+    /// Your record against someone: results from this launch.
     func rivalry(with userID: String) -> (wins: Int, losses: Int) {
         let history = self.history(with: userID)
         let wins = history.filter { $0.outcome == .won }.count + (liveWins[userID] ?? 0)
@@ -583,25 +386,9 @@ final class ChallengeCenter {
         return (wins, losses)
     }
 
-    /// Seeded past results for the demo's two rivals (Maya and Diego), from
-    /// `SeededGenerator.stableHash("rivalry|<id>")`, so they're the same every launch.
+    /// Past results with someone. The server keeps no challenge history yet, so none.
     func history(with userID: String) -> [ChallengeHistoryItem] {
-        let pattern: [ChallengeOutcome]
-        switch userID {
-        case BubbleSocialCast.rivalID: pattern = [.won, .lost, .won, .lost, .won]
-        case "sf-diego-ramirez": pattern = [.lost, .won, .won, .lost]
-        default: return []
-        }
-        let games = ["hill-hopper", "fog-drift", "cable-car-catch", "sourdough-stack", "bay-bubbles"]
-        var rng = SeededGenerator(seed: SeededGenerator.stableHash("rivalry|\(userID)"))
-        return pattern.enumerated().map { index, outcome in
-            let game = games[Int(rng.next() % UInt64(games.count))]
-            let low = 18 + Int(rng.next() % 20)
-            let gap = 2 + Int(rng.next() % 9)
-            let mine = outcome == .won ? low + gap : low
-            let theirs = outcome == .won ? low : low + gap
-            return ChallengeHistoryItem(id: "\(userID)-\(index)", bubbleID: game, myScore: mine, theirScore: theirs, daysAgo: 1 + index)
-        }
+        []
     }
 
     /// Counts a finished challenge once, and moves the count if a better run flips it. Posts
@@ -629,18 +416,6 @@ final class ChallengeCenter {
 
     // MARK: - Helpers
 
-    /// A text from someone in a chat (friendly banter around a challenge).
-    private func say(_ text: String, from user: User, in chat: Conversation, after delay: Double) {
-        after(max(0, delay - 1.2)) { chat.isTyping = true }
-        after(delay) { [weak self] in
-            chat.isTyping = false
-            chat.messages.append(Message(senderID: user.id, text: text))
-            if self?.appStore?.openConversationID != chat.id {
-                chat.unreadCount += 1
-            }
-        }
-    }
-
     func after(_ seconds: Double, _ action: @escaping @MainActor () -> Void) {
         Task { @MainActor in
             if seconds > 0 {
@@ -649,105 +424,4 @@ final class ChallengeCenter {
             action()
         }
     }
-
-    // MARK: - Demo staging (DEBUG launch targets and install)
-
-    /// Maya's 1:1 chat: two friendly messages from the New in SF Group.
-    private func seedRivalChat(appStore: AppStore, bubbleStore: BubbleStore) {
-        let maya = BubbleSocialCast.rival(bubbleStore)
-        guard !maya.isMe else { return }
-        let chat = appStore.conversation(with: maya)
-        guard chat.messages.isEmpty else { return }
-        let now = Date()
-        chat.messages = ChallengeCopy.rivalIntro.enumerated().map { index, text in
-            Message(senderID: maya.id, text: text, sentAt: now.addingTimeInterval(-Double(14 - index) * 60))
-        }
-    }
-
-    /// A finished Fog Drift session in New in SF crew, so the chat already shows a winner line.
-    /// Your score is in it only when you've really played Fog Drift.
-    private func seedPastSession(appStore: AppStore, bubbleStore: BubbleStore) {
-        guard let chat = BubbleSocialCast.conversation(BubbleSocialCast.newInSFCrew, in: appStore),
-              let bubble = bubbleStore.bubble(id: "fog-drift") else { return }
-        let others = chat.participants.filter { !$0.isMe }
-        guard let starter = others.first else { return }
-        let startedAt = Date().addingTimeInterval(-125 * 60)
-        var entries: [String: ChallengeEntry] = [:]
-        for (index, member) in others.enumerated() {
-            let score = BubbleStore.syntheticScore(for: bubble, userID: member.id) + Int(SeededGenerator.stableHash("past|\(member.id)") % 7)
-            entries[member.id] = ChallengeEntry(userID: member.id, score: score, playedAt: startedAt.addingTimeInterval(Double(index + 1) * 240))
-        }
-        var memberIDs = others.map(\.id)
-        if let best = bubbleStore.bestScore(of: appStore.me, in: bubble) {
-            memberIDs.insert(appStore.me.id, at: 0)
-            entries[appStore.me.id] = ChallengeEntry(userID: appStore.me.id, score: best.score, replay: best.replay, scoreID: best.id, isVerified: best.isVerified, playedAt: best.achievedAt)
-        }
-        var card = BubbleChatCard(
-            kind: .session, bubbleID: bubble.id, seed: bubble.manifest.seed, length: bubble.manifest.length,
-            fromUserID: starter.id, headline: ChallengeCopy.sameCourse(bubble.title)
-        )
-        let session = ChallengeSession(
-            id: UUID().uuidString, bubbleID: bubble.id, seed: bubble.manifest.seed, length: bubble.manifest.length,
-            fromUserID: starter.id, memberIDs: memberIDs, conversationID: chat.id, groupID: nil, title: chat.title,
-            cardID: card.id, rematchOf: nil, entries: entries, createdAt: startedAt
-        )
-        card.sessionID = session.id
-        card.extras[ChallengeCardKeys.role] = .string("invite")
-        card.extras[ChallengeCardKeys.title] = .string(chat.title)
-        card.setChallengeScores(session.standings, members: memberIDs.count, winnerID: session.leader?.userID)
-        sessions[session.id] = session
-
-        var message = Message(senderID: starter.id, text: ChallengeCopy.pastSessionNote, sentAt: startedAt)
-        message.bubbleCard = card
-        let winnerName = session.leader.flatMap { person($0.userID)?.firstName } ?? ""
-        let cheererID = others.first { $0.id != session.leader?.userID }?.id ?? starter.id
-        let cheer = Message(senderID: cheererID, text: ChallengeCopy.cheer(winnerName), sentAt: startedAt.addingTimeInterval(22 * 60))
-        chat.messages.append(contentsOf: [message, cheer])
-        chat.messages.sort { $0.sentAt < $1.sentAt }
-    }
-
-    #if DEBUG
-    /// FB_OPEN staging: a challenge from you to Maya on `bubble` with your best (or a staged 34).
-    func stageChallengeToRival(on bubble: Bubble) -> Conversation? {
-        guard let appStore, let bubbleStore else { return nil }
-        let maya = BubbleSocialCast.rival(bubbleStore)
-        let best = bestDraft(for: bubble)
-        let draft = best.score != nil ? best : Draft(bubbleID: bubble.id, seed: bubble.manifest.seed, length: bubble.manifest.length, score: 34, replay: nil, scoreID: nil)
-        send(draft, to: BubbleShareTarget(kind: .friend, targetID: maya.id, title: maya.name), bubble: bubble)
-        return appStore.conversation(with: maya)
-    }
-
-    /// FB_OPEN staging: a finished head-to-head (You 45, Maya 41) for the h2h screen.
-    func stageFinishedChallenge(on bubble: Bubble) -> String? {
-        guard let appStore, let bubbleStore else { return nil }
-        let maya = BubbleSocialCast.rival(bubbleStore)
-        let chat = appStore.conversation(with: maya)
-        let id = UUID().uuidString
-        var card = BubbleChatCard(kind: .challenge, bubbleID: bubble.id, seed: bubble.manifest.seed, length: bubble.manifest.length, fromUserID: appStore.me.id, headline: ChallengeCopy.beatMy(45, in: bubble.title), sessionID: id, score: 45)
-        let mine = ChallengeEntry(userID: appStore.me.id, score: 45)
-        let theirs = ChallengeEntry(userID: maya.id, score: 41, isVerified: true)
-        card.extras[ChallengeCardKeys.role] = .string("invite")
-        card.setChallengeScores([mine, theirs], members: 2, winnerID: appStore.me.id)
-        challenges[id] = BubbleChallenge(
-            id: id, bubbleID: bubble.id, seed: bubble.manifest.seed, length: bubble.manifest.length,
-            fromUserID: appStore.me.id, opponentID: maya.id, conversationID: chat.id, cardID: card.id,
-            rematchOf: nil, round: 0, mine: mine, theirs: theirs, isOpponentPlaying: false,
-            countedOutcome: nil, resultCardID: nil, createdAt: Date()
-        )
-        settleTally(challengeID: id, announce: false)
-        var message = Message(senderID: appStore.me.id, status: .seen)
-        message.bubbleCard = card
-        chat.messages.append(message)
-        return id
-    }
-
-    /// FB_OPEN staging: a fresh session in New in SF crew; the bots fill it in over ~20 s.
-    func stageGroupChatSession(on bubble: Bubble) -> Conversation? {
-        guard let appStore, let bubbleStore,
-              let chat = BubbleSocialCast.conversation(BubbleSocialCast.newInSFCrew, in: appStore) else { return nil }
-        let card = BubbleChatCard(kind: .session, bubbleID: bubble.id, seed: bubble.manifest.seed, length: bubble.manifest.length, fromUserID: appStore.me.id, headline: ChallengeCopy.sameCourse(bubble.title))
-        BubbleSocialHub.send(card, to: BubbleShareTarget(kind: .chat, targetID: chat.id, title: chat.title), note: ChallengeCopy.groupNote, appStore: appStore, bubbleStore: bubbleStore)
-        return chat
-    }
-    #endif
 }

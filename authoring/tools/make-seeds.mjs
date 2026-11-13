@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Writes the microgame seed Bubbles for the app (FacebookClone/Bubbles/Seeds/bubble-seed-mg-*.json):
+// Writes the microgame test fixtures (tools/game-fixtures/bubble-seed-mg-*.json; not bundled in the app):
 // a few authoring games (expanded here) and a few engine example games, each wrapped as a
 // `formula: "microgame"` manifest. Every game must validate with zero errors first.
 //
@@ -15,7 +15,7 @@ import { wrapGame } from '../expander/wrap.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..', '..');
-const seedsDir = join(root, 'FacebookClone', 'Bubbles', 'Seeds');
+const seedsDir = join(root, 'tools', 'game-fixtures');
 const check = process.argv.includes('--check');
 
 // All touch-playable (taps, drags, holds, flicks): the app has no keyboard during play.

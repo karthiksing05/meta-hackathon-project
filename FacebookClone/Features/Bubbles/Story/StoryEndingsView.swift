@@ -408,7 +408,7 @@ struct StoryPathShareSheet: View {
     private func list(_ bubble: Bubble, card: BubbleChatCard) -> some View {
         let targets = BubbleSocialHub.targets(appStore: appStore, kinds: [.chat, .group, .friend])
         let chats = targets.filter { $0.kind == .chat }
-        let groups = targets.filter { $0.kind == .group }.sorted { a, _ in a.targetID == BubbleDemo.groupID }
+        let groups = targets.filter { $0.kind == .group }
         let chatIDs = Set(chats.map(\.targetID))
         let friends = targets.filter { target in
             target.kind == .friend && !chatIDs.contains(appStore.conversations.first { !$0.isGroup && $0.participants.first?.id == target.targetID }?.id ?? "")

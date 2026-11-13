@@ -2,6 +2,9 @@ import Foundation
 
 /// Where the app tells brackets what happened (docs/BUBBLES.md 7.14). Small calls from shared
 /// screens, so the feature stays in its own folder.
+///
+/// One offer per Add friend: server friendships (`gamesFriendAdded`) get the Challenges best-of-5
+/// sheet and nothing from here; brackets start quietly (`met`) or from the profile card.
 @MainActor
 enum BracketHooks {
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {

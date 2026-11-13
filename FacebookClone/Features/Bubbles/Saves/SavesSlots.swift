@@ -32,6 +32,7 @@ struct SavesResultAction: View {
                     .lineLimit(1)
             }
         }
+        .task(id: bubble.id) { bubbleStore.loadSavers(for: bubble) }
     }
 }
 
@@ -71,6 +72,7 @@ struct SavesCaptionProof: View {
                 .accessibilityHint(SavesCopy.seeAll)
             }
         }
+        .task(id: bubble.id) { bubbleStore.loadSavers(for: bubble) }
     }
 }
 
@@ -107,6 +109,7 @@ struct SavesDetailStats: View {
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(FBColor.surface, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+            .task(id: bubble.id) { bubbleStore.loadSavers(for: bubble) }
         }
     }
 

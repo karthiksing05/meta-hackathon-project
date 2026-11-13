@@ -66,8 +66,9 @@ enum LearnStudio {
 
     // MARK: - Offline lessons
 
-    /// Fills `manifest.content` from the pasted notes (or note-like prompt) without Muse, or with
-    /// the built-in SF neighborhoods lesson. Returns the timeline line.
+    /// Fills `manifest.content` from the pasted notes (or note-like prompt) without Muse. Returns
+    /// the timeline line, or nil (and leaves the content alone) when there are no usable notes:
+    /// there is no built-in lesson to stand in.
     static func offlineContent(_ manifest: inout BubbleManifest, request: StudioRequest) -> String? {
         let notes = request.social?.lessonNotes?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let source = !notes.isEmpty ? notes : (looksLikeNotes(request.prompt) ? request.prompt : "")
@@ -75,8 +76,7 @@ enum LearnStudio {
             manifest.content = lesson.content
             return "Wrote \(lesson.questions) practice questions from your notes"
         }
-        manifest.content = neighborhoodsLesson(title: manifest.title)
-        return "Used the SF neighborhoods starter lesson (Muse writes one from your topic when it's connected)"
+        return nil
     }
 
     /// Two or more sentences and enough words to quiz on.
@@ -138,41 +138,6 @@ enum LearnStudio {
             "questions": .array(questions),
         ])
         return OfflineLesson(content: content, questions: questions.count)
-    }
-
-    /// The built-in lesson for when Muse isn't connected and there are no notes. Conservative,
-    /// well-known facts about San Francisco's neighborhoods.
-    static func neighborhoodsLesson(title: String) -> JSONValue {
-        func q(_ text: String, _ choices: [String], _ answer: Int, _ explain: String, _ point: Int) -> JSONValue {
-            .object([
-                "q": .string(text),
-                "choices": .array(choices.map { .string($0) }),
-                "answer": .number(Double(answer)),
-                "explain": .string(explain),
-                "point": .number(Double(point)),
-            ])
-        }
-        return .object([
-            "topic": .string("SF neighborhoods"),
-            "subject": .string("the neighborhoods"),
-            "lesson": .object([
-                "title": .string(clip(title.isEmpty ? "SF Neighborhoods 101" : title, 48)),
-                "points": .array([
-                    .string("The Mission is known for its murals and sunny weather."),
-                    .string("Chinatown, next to downtown, is one of the oldest in North America."),
-                    .string("North Beach is the city's historic Italian neighborhood."),
-                    .string("Haight-Ashbury was a center of the 1960s counterculture."),
-                ]),
-            ]),
-            "questions": .array([
-                q("Which neighborhood is known for its murals?", ["The Marina", "The Mission", "Sea Cliff"], 1, "The Mission's alleys and walls are covered in murals.", 0),
-                q("Which neighborhood is often the sunniest?", ["The Mission", "Outer Sunset", "Outer Richmond"], 0, "The Mission sits in a sunny pocket, while the ocean side gets the fog first.", 0),
-                q("Chinatown sits right next to which area?", ["Ocean Beach", "Twin Peaks", "Downtown"], 2, "Chinatown is right beside downtown, a short walk from Union Square.", 1),
-                q("North Beach is the city's historic … neighborhood.", ["Italian", "German", "Irish"], 0, "North Beach grew up as the Italian neighborhood, and its cafes still show it.", 2),
-                q("Which neighborhood was a center of 1960s counterculture?", ["Dogpatch", "Haight-Ashbury", "Financial District"], 1, "Haight-Ashbury drew young people from everywhere in the 1960s.", 3),
-                q("Haight-Ashbury is famous for which decade?", ["The 1890s", "The 1990s", "The 1960s"], 2, "Its fame comes from the 1960s counterculture.", 3),
-            ]),
-        ])
     }
 
     // MARK: Text helpers

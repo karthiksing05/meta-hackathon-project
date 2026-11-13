@@ -49,8 +49,10 @@ enum SavesScreens {
         switch route.screen {
         case "hint":
             // The hint shows in the player (and on the feed caption); play a game so it is in view.
+            // With no id, the first game the server sent; with none, nothing opens.
+            guard let id = route.arg.isEmpty ? bubbleStore.feedBubbles.first?.id : route.arg else { return true }
             SavesHintCenter.shared.reset()
-            router.play(route.arg.isEmpty ? "hill-hopper" : route.arg)
+            router.play(id)
             return true
         case "stats":
             pushStats(bubbleID: route.arg, router: router, bubbleStore: bubbleStore)
@@ -63,31 +65,11 @@ enum SavesScreens {
         }
     }
 
-    /// Once at launch, after `BubbleSocialCast.install` (seed notifications, observers).
+    /// Once at launch: milestone notifications for your own games' saves. Nothing is staged.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
         MainActor.assumeIsolated {
-            installNotification(appStore: appStore, bubbleStore: bubbleStore)
             SavesMilestones.start(appStore: appStore, bubbleStore: bubbleStore)
         }
-    }
-
-    /// '38 people saved Moving Day': Diego and 37 others, in Notifications. Tapping opens who saved it.
-    @MainActor
-    private static func installNotification(appStore: AppStore, bubbleStore: BubbleStore) {
-        let id = "bubble-note-saves-seed"
-        guard !appStore.notifications.contains(where: { $0.id == id }),
-              let bubble = bubbleStore.bubble(id: "moving-day") ?? bubbleStore.bubbles.first(where: { $0.creator.isMe }),
-              bubble.saveCount > 1 else { return }
-        // The same friend the feed caption names ('Saved by Diego and 37 others').
-        let actor = SavesSocialProof.savers(for: bubble, in: bubbleStore, limit: 3).first { !$0.isMe && $0.isFriend }
-            ?? bubbleStore.resolvePerson(BubbleSocialCast.friendIDs[0])
-        let note = AppNotification(
-            id: id, kind: .bubblePlayed, actors: [actor], extraActorCount: bubble.saveCount - 1,
-            message: SavesSocialProof.notificationMessage(for: bubble),
-            createdAt: Date().addingTimeInterval(-25 * 60), isRead: false, bubbleID: bubble.id
-        )
-        note.bubbleAction = BubbleFeatureRoute(.saves, "stats", bubble.id)
-        appStore.notifications.insert(note, at: 0)
     }
 
     /// After the player records one of your runs.
@@ -131,6 +113,7 @@ enum SavesCopy {
     static func savedBy(_ who: String) -> String { "Saved by \(who)" }
     static func savedByCount(_ n: Int) -> String { "Saved by \(n.fbCompact) \(n == 1 ? "person" : "people")" }
     static func andMore(_ n: Int) -> String { "and \(n.fbCompact) more" }
+    static func noFriendsSaved(_ n: Int) -> String { "\(savedByCount(n)). None of your friends have saved it yet." }
     static func mutual(_ n: Int) -> String { n == 1 ? "1 mutual friend" : "\(n) mutual friends" }
     static func libraryWeekly(_ n: Int) -> String { "Your games were saved \(n.fbCompact) \(n == 1 ? "time" : "times") this week" }
     static func milestone(_ title: String, _ n: Int) -> String { "\(title) just passed \(n.fbCompact) saves." }

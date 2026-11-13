@@ -43,6 +43,8 @@ type PackageStore interface {
 	// check, if non-nil, runs on the validated package before anything is published; an error
 	// from it aborts the publish and is returned as an InvalidError.
 	Publish(ctx context.Context, id string, r io.Reader, check func(*Package) error) (*Package, error)
+	// ReadManifest returns a published package's manifest.json, exactly as stored.
+	ReadManifest(ctx context.Context, id string) ([]byte, error)
 	// WriteSourceZip streams the private editable source (the zip's source/ folder) as a zip.
 	WriteSourceZip(ctx context.Context, id string, w io.Writer) error
 	// Ready reports whether the store can accept uploads.

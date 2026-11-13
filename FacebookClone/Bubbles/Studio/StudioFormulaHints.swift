@@ -2,7 +2,7 @@ import Foundation
 
 // Extension points that let each collaboration feature teach Muse Studio about its formula or its
 // social context without editing the shared harness files (docs/BUBBLES.md 7.1). The harness
-// (OfflineComposer, MusePrompts, StudioLookSpecs, StudioRuntime, StudioManifestBuilder) calls
+// (StudioLookSpecs, StudioRuntime, StudioManifestBuilder) calls
 // these registries; each feature fills in only its own enum in its own file:
 //
 //   StoryStudio.swift     (story)      LearnStudio.swift   (learn)     NextlineStudio.swift (nextline)
@@ -46,7 +46,7 @@ enum StudioFormulaHints {
         all.first { $0.formula == formula }
     }
 
-    /// Keyword lists merged into `OfflineComposer.formulaKeywords`.
+    /// Keyword lists, by formula id.
     static var keywords: [String: [String]] {
         var out: [String: [String]] = [:]
         for hint in all where !hint.keywords.isEmpty {
@@ -55,7 +55,7 @@ enum StudioFormulaHints {
         return out
     }
 
-    /// Formula ids appended to `OfflineComposer.formulaPriority`.
+    /// The feature formula ids.
     static var formulas: [String] { all.map(\.formula) }
 
     /// Look leanings merged into `BubbleLookSpec.formulaLeans`.

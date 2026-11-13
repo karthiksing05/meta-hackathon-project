@@ -8,7 +8,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 WEB="$ROOT/FacebookClone/Bubbles/Runtime/web"
-SEEDS="$ROOT/FacebookClone/Bubbles/Seeds"
+SEEDS="$ROOT/tools/game-fixtures"
 JSC="${JSC:-/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc}"
 
 FILES=("$WEB/bubble-runtime.js" "$WEB/bubble-kit-common.js")

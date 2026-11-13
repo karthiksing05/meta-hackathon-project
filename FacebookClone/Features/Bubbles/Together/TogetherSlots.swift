@@ -323,7 +323,7 @@ struct TogetherAboutSection: View {
         }
     }
 
-    /// Your game about you, sent to New in SF crew in one tap.
+    /// Your game about you, sent to your latest group chat in one tap.
     @ViewBuilder
     private func sendButton(_ bubble: Bubble) -> some View {
         let sent = TogetherCenter.shared.sentAboutMeIDs.contains(bubble.id)

@@ -40,6 +40,12 @@ const (
 type generateIn struct {
 	Request string         `json:"request"`
 	Brief   map[string]any `json:"brief"`
+	// Changing an existing game: BaseGameID names it and Change says how. Look and NextLevel are shortcuts for
+	// the two common changes. The result is always a new game that points back at the base game.
+	BaseGameID string `json:"baseGameId"`
+	Change     string `json:"change"`
+	Look       string `json:"look"`
+	NextLevel  bool   `json:"nextLevel"`
 }
 
 // genHealthCache remembers the generator's last health answer for a few seconds.
@@ -85,6 +91,13 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	if !decode(w, r, &in) {
 		return
 	}
+	var base *model.Game
+	if id := strings.TrimSpace(in.BaseGameID); id != "" {
+		var ok bool
+		if base, ok = s.reviseBase(w, r, id, &in); !ok {
+			return
+		}
+	}
 	in.Request = strings.TrimSpace(in.Request)
 	if n := len([]rune(in.Request)); n == 0 || n > maxRequestChars {
 		writeErr(w, 400, fmt.Sprintf("request must be 1 to %d characters", maxRequestChars))
@@ -97,7 +110,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 400, "brief is too large")
 		return
 	}
-	if v, _ := in.Brief["intent"].(string); strings.TrimSpace(v) == "" {
+	if v, _ := in.Brief["intent"].(string); strings.TrimSpace(v) == "" && base == nil {
 		in.Brief["intent"] = in.Request // the brief's intent defaults to the request
 	}
 
@@ -131,6 +144,13 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	now := time.Now().UTC().Truncate(time.Millisecond)
 	job := &model.Job{ID: auth.NewID(12), OwnerID: u.ID, Request: in.Request, Brief: in.Brief,
 		Status: model.JobQueued, Events: []model.JobEvent{}, CreatedAt: now, UpdatedAt: now}
+	if base != nil {
+		job.BaseGameID, job.NextLevel = base.ID, in.NextLevel
+		job.Level = max(base.Level, 1)
+		if in.NextLevel {
+			job.Level++
+		}
+	}
 	if err := s.Store.InsertJob(r.Context(), job); err != nil {
 		s.serverErr(w, r, err)
 		return
@@ -260,7 +280,23 @@ func (s *Server) runJob(job model.Job, owner model.User) {
 		return
 	}
 
-	body, _ := json.Marshal(map[string]any{"request": job.Request, "brief": job.Brief})
+	payload := map[string]any{"request": job.Request, "brief": job.Brief}
+	if job.BaseGameID != "" {
+		if len(job.Brief) == 0 {
+			payload["brief"] = nil // a change keeps the game's own brief
+		}
+		manifest, err := s.Packages.ReadManifest(ctx, s.baseKey(ctx, job.BaseGameID))
+		if err != nil {
+			s.failJob(ctx, job.ID, "The game to change is no longer available.")
+			return
+		}
+		payload["base"] = json.RawMessage(manifest)
+		payload["remixOf"] = job.BaseGameID
+		if job.Level > 1 {
+			payload["level"] = job.Level
+		}
+	}
+	body, _ := json.Marshal(payload)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.GeneratorURL+"/compose", bytes.NewReader(body))
 	if err != nil {
 		s.failJob(ctx, job.ID, "Couldn't start the game maker.")
@@ -379,4 +415,126 @@ func zipManifest(manifest []byte) (*bytes.Buffer, error) {
 		err = zw.Close()
 	}
 	return &zb, err
+}
+
+// reviseBase checks a "change this game" request and folds Look and NextLevel into the request text.
+// It writes the error and returns ok=false when the request can't go ahead.
+func (s *Server) reviseBase(w http.ResponseWriter, r *http.Request, id string, in *generateIn) (*model.Game, bool) {
+	var g *model.Game
+	var err error
+	if store.LooksLikeID(id) {
+		g, err = s.Store.GameByID(r.Context(), id)
+	} else {
+		g, err = s.Store.GameBySlug(r.Context(), id)
+	}
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeErr(w, 404, "the game to change was not found")
+		} else {
+			s.serverErr(w, r, err)
+		}
+		return nil, false
+	}
+	if g.Formula != "microgame" {
+		writeErr(w, 422, "only microgames can be changed this way")
+		return nil, false
+	}
+	parts := []string{}
+	if c := strings.TrimSpace(in.Change); c != "" {
+		parts = append(parts, c)
+	}
+	if l := strings.TrimSpace(in.Look); l != "" {
+		parts = append(parts, fmt.Sprintf("Change the look to %q.", l))
+	}
+	if in.NextLevel {
+		parts = append(parts, fmt.Sprintf("Make the next level of this game (level %d): the same idea, a little harder, with fresh content.", max(g.Level, 1)+1))
+	}
+	if len(parts) == 0 {
+		writeErr(w, 400, "say what to change: change, look or nextLevel")
+		return nil, false
+	}
+	in.Request = strings.Join(parts, " ")
+	return g, true
+}
+
+// baseKey is the package id of a game (its StorageKey).
+func (s *Server) baseKey(ctx context.Context, gameID string) string {
+	if g, err := s.Store.GameByID(ctx, gameID); err == nil {
+		return g.StorageKey
+	}
+	return gameID
+}
+
+// ---- game anatomy ----
+//
+//	POST /v1/anatomy         {request, audience?}                        -> the anatomy (game-anatomy/0.1)
+//	POST /v1/anatomy/revise  {anatomy, change, request?, afterPlaying?}  -> the anatomy, updated
+//
+// Muse takes a person's idea apart into its working parts (docs/BUBBLES.md 7.13). The server asks, the app only
+// shows the result and reads it back. One short call, so the answer comes in the reply.
+
+const anatomyTimeout = 70 * time.Second
+
+func (s *Server) anatomy(path string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if s.GeneratorURL == "" {
+			writeErr(w, 503, "the game maker is not set up on this server")
+			return
+		}
+		raw, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 256<<10))
+		if err != nil {
+			writeErr(w, 413, "request too large")
+			return
+		}
+		if !json.Valid(raw) {
+			writeErr(w, 400, "invalid JSON body")
+			return
+		}
+		reachable, configured := s.generatorStatus(r.Context())
+		switch {
+		case !reachable:
+			writeErr(w, 503, "the game maker is unavailable right now, try again shortly")
+			return
+		case !configured:
+			writeErr(w, 503, "Muse is not set up on this server yet")
+			return
+		}
+		ctx, cancel := context.WithTimeout(r.Context(), anatomyTimeout)
+		defer cancel()
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.GeneratorURL+path, bytes.NewReader(raw))
+		if err != nil {
+			s.serverErr(w, r, err)
+			return
+		}
+		req.Header.Set("Content-Type", "application/json")
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			s.Log.Error("anatomy: generator unreachable", "err", err)
+			writeErr(w, 503, "the game maker is unavailable right now, try again shortly")
+			return
+		}
+		defer res.Body.Close()
+		body, _ := io.ReadAll(io.LimitReader(res.Body, 4<<20))
+		switch res.StatusCode {
+		case 200:
+			var out struct {
+				Anatomy json.RawMessage `json:"anatomy"`
+			}
+			if json.Unmarshal(body, &out) != nil || len(out.Anatomy) == 0 {
+				writeErr(w, 502, "Muse didn't return an anatomy")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(out.Anatomy) // the anatomy itself, exactly as Muse wrote it
+		case 400:
+			writeErr(w, 400, "that request can't be turned into a game anatomy")
+		case 429:
+			writeErr(w, 429, "the game maker is busy, try again in a minute")
+		case 503:
+			writeErr(w, 503, "Muse is not set up on this server yet")
+		default:
+			s.Log.Error("anatomy: generator failed", "status", res.StatusCode, "body", string(body[:min(len(body), 300)]))
+			writeErr(w, 502, "Muse couldn't take this game apart, try again")
+		}
+	}
 }

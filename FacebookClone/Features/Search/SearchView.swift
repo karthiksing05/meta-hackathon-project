@@ -29,6 +29,10 @@ struct SearchView: View {
     @State private var showAllRecents = false
     @State private var confirmClear = false
     @State private var didPrefill = false
+    /// Games from the server's search (`GET /v1/search`) for `gameQuery`.
+    @State private var games: [Bubble] = []
+    @State private var gameQuery = ""
+    @State private var gameSearchError: String?
 
     private let trending = [
         "Weekend getaway ideas",
@@ -55,6 +59,7 @@ struct SearchView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
+        .task(id: trimmedQuery) { await searchGames(trimmedQuery) }
         .background(FBColor.surface)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
@@ -238,11 +243,40 @@ struct SearchView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: Games search
+
+    /// Asks the server for games matching `text` (after a short pause while typing). The server
+    /// matches and orders them; the app shows them as they come.
+    private func searchGames(_ text: String) async {
+        guard !text.isEmpty else {
+            games = []
+            gameQuery = ""
+            return
+        }
+        try? await Task.sleep(nanoseconds: 300_000_000)
+        guard !Task.isCancelled else { return }
+        do {
+            let page = try await GamesAPIFactory.current.search(query: text, tag: nil, cursor: nil)
+            var found: [Bubble] = []
+            for game in page.items {
+                if let bubble = await bubbleStore.adopt(game) { found.append(bubble) }
+            }
+            guard !Task.isCancelled else { return }
+            games = found
+            gameSearchError = nil
+        } catch {
+            guard !Task.isCancelled else { return }
+            games = []
+            gameSearchError = error.localizedDescription
+        }
+        gameQuery = text
+    }
+
     // MARK: Results
 
     private var resultsContent: some View {
         let results = store.search(trimmedQuery)
-        let games = gamesMatching(query: trimmedQuery, in: bubbleStore)
+        let games = gameQuery == trimmedQuery ? self.games : []
         return VStack(alignment: .leading, spacing: 0) {
             chips
             if results.isEmpty && games.isEmpty {

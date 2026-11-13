@@ -2,18 +2,9 @@ import SwiftUI
 
 /// Screens and launch hooks for the "challenge" feature (docs/BUBBLES.md 7.2). Owner: challenge.
 ///
-/// QA targets, `FB_OPEN=feature:challenge/<screen>[/<arg>]` (with `FB_SKIP_SPLASH=1`):
-///   picker/<bubbleID>      the Challenge Me picker (friends, recent chats, Groups) with the preview
-///                          card, using your best score (or a staged 34)
-///   chat/<bubbleID>        stages a challenge from you to Maya and opens your chat; her bot score
-///                          lands about 4 s later, with a notification
-///   h2h/<bubbleID>         the head-to-head result for a staged finished challenge (You 45, Maya 41)
-///   groupchat/<bubbleID>   starts a session in 'New in SF crew' and opens it; the card fills in
-///                          over about 20 s
-///   rivalry/<userID>       that person's profile, with the rivalry line and Challenge button
-///   friend/<userID>        the "pick a game" sheet for challenging that person
-///
-/// Routes it opens at runtime: `chat/<challengeOrSessionID>` (notification taps), `h2h/<challengeID>`.
+/// Challenges need server endpoints (send and list challenges, the other side's runs) that don't
+/// exist yet (docs/APP_LIVE_DATA_PLAN.md, Stage 4), so the picker sheets say "Not available yet"
+/// and nothing is staged or simulated. `FB_OPEN=feature:challenge/picker/<id>` shows that sheet.
 enum ChallengeScreens {
     /// A pushed screen (`Route.bubbleFeature`).
     @MainActor
@@ -32,10 +23,8 @@ enum ChallengeScreens {
     @ViewBuilder
     static func sheet(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
-        case "picker":
-            ChallengePickerSheet(bubbleID: route.arg, draft: nil)
-        case "friend":
-            ChallengeGamePickerSheet(userID: route.arg)
+        case "picker", "friend":
+            LiveDataUnavailableSheet(title: "Challenges", message: LiveDataCopy.challenges)
         default:
             BubbleFeaturePlaceholder(route: route)
         }
@@ -82,24 +71,9 @@ enum ChallengeScreens {
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
         #if DEBUG
-        let center = ChallengeCenter.shared
-        center.install(appStore: appStore, bubbleStore: bubbleStore)
-        let bubble = bubbleStore.bubble(id: route.arg)
         switch route.screen {
-        case "picker":
+        case "picker", "friend":
             router.bubbleSheet = route
-            return true
-        case "chat":
-            guard let bubble, let chat = center.stageChallengeToRival(on: bubble) else { return false }
-            router.openChat(chat)
-            return true
-        case "h2h":
-            guard let bubble, let id = center.stageFinishedChallenge(on: bubble) else { return false }
-            router.push(.bubbleFeature(BubbleFeatureRoute(.challenge, "h2h", id)))
-            return true
-        case "groupchat":
-            guard let bubble, let chat = center.stageGroupChatSession(on: bubble) else { return false }
-            router.openChat(chat)
             return true
         default:
             return false
@@ -109,8 +83,7 @@ enum ChallengeScreens {
         #endif
     }
 
-    /// Once at launch, after `BubbleSocialCast.install`: Maya's chat, a finished session in New in
-    /// SF crew, rivalry history. Runs on the main thread (from the app's init).
+    /// Once at launch. Runs on the main thread (from the app's init).
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
         MainActor.assumeIsolated {
             ChallengeCenter.shared.install(appStore: appStore, bubbleStore: bubbleStore)
@@ -184,11 +157,6 @@ enum ChallengeCopy {
     static func previewLabel(_ text: String) -> String { "Preview: \(text)" }
     static func scoreLabel(_ name: String, _ score: Int) -> String { "\(name): \(score.withCommas)" }
     static func waitingNames(_ names: [String]) -> String { "\(waiting) \(names.joined(separator: ", "))" }
-
-    static let rivalIntro = [
-        "Hey! Maya from New in SF 👋 Loved your picnic idea",
-        "Also heard you're good at Hill Hopper… prove it? 😄",
-    ]
 
     // Headlines
     static func beatMy(_ score: Int, in title: String) -> String { "Beat my \(score.withCommas) in \(title)" }

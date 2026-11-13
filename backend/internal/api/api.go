@@ -95,12 +95,18 @@ func (s *Server) Handler() http.Handler {
 			r.With(s.optionalAuth).Get("/", s.getGame)
 			r.With(s.requireAuth).Put("/like", s.like(true))
 			r.With(s.requireAuth).Delete("/like", s.like(false))
-			r.Get("/leaderboard", s.leaderboard)
+			r.With(s.optionalAuth).Get("/leaderboard", s.leaderboard)
+			r.With(s.optionalAuth).Get("/likes", s.gameLikes)
 			r.With(s.requireAuth).Post("/scores", s.submitScore)
 		})
 
 		// People, friends and Groups
+		r.With(s.requireAuth).Get("/users", s.searchUsers)
 		r.With(s.optionalAuth).Get("/users/{id}", s.getUser)
+		r.With(s.requireAuth).Get("/me/likes", s.myLikes)
+		r.With(s.requireAuth).Get("/me/moments", s.myMoments)
+		r.With(s.requireAuth).Post("/challenges", s.createChallenge)
+		r.With(s.requireAuth).Get("/challenges", s.listChallenges)
 		r.With(s.requireAuth).Get("/me/friends", s.listFriends)
 		r.With(s.requireAuth).Put("/me/friends/{id}", s.setFriend(true))
 		r.With(s.requireAuth).Delete("/me/friends/{id}", s.setFriend(false))
@@ -110,6 +116,7 @@ func (s *Server) Handler() http.Handler {
 			r.Route("/{id}", func(r chi.Router) {
 				r.With(s.optionalAuth).Get("/", s.getGroup)
 				r.With(s.optionalAuth).Get("/games", s.groupGames)
+				r.With(s.requireAuth).Get("/leaderboard", s.groupLeaderboard)
 				r.With(s.requireAuth).Put("/members/me", s.setMembership(true))
 				r.With(s.requireAuth).Delete("/members/me", s.setMembership(false))
 				r.With(s.requireAuth).Post("/blend", s.groupBlend)
@@ -122,6 +129,8 @@ func (s *Server) Handler() http.Handler {
 		r.With(s.requireAuth).Post("/blend", s.blend)
 
 		// Making a game: the app sends a request, the backend runs Muse, checks, playtests and stores it.
+		r.With(s.requireAuth).Post("/anatomy", s.anatomy("/anatomy"))
+		r.With(s.requireAuth).Post("/anatomy/revise", s.anatomy("/anatomy/revise"))
 		r.Route("/generate", func(r chi.Router) {
 			r.Use(s.requireAuth)
 			r.Get("/", s.listJobs)

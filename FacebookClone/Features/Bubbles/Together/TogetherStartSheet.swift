@@ -4,7 +4,7 @@ import SwiftUI
 /// game, and invite a group chat, a friend or a Group. Start sends the invite card and opens the
 /// session, where contributions arrive.
 struct TogetherStartSheet: View {
-    /// A target to preselect: "group:<id>", "chat:<id>" or "friend:<id>" (empty picks New in SF crew).
+    /// A target to preselect: "group:<id>", "chat:<id>" or "friend:<id>" (empty picks the first target).
     var preset: String = ""
     let onStarted: (String) -> Void
 
@@ -272,7 +272,7 @@ struct TogetherStartSheet: View {
             }
         }
         if targetID == nil {
-            targetID = "chat:\(BubbleSocialCast.newInSFCrew.id)"
+            targetID = targets.first?.id
         }
         // editedTitle/editedAsk flip on the first onChange; reset after setup.
         DispatchQueue.main.async {

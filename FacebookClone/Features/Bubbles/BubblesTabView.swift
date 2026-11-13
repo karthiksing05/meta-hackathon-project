@@ -50,6 +50,11 @@ struct BubblesTabView: View {
             ZStack(alignment: .top) {
                 Color.black
                 pager(bottomInset: bottomClearance)
+                if bubbleStore.feedItems.isEmpty {
+                    feedState
+                        .padding(.bottom, bottomClearance)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
                 if model.isTakenOver {
                     BubbleFeedTakeoverBar(
                         title: liveBubble?.title ?? "",
@@ -105,6 +110,9 @@ struct BubblesTabView: View {
         }
         .onChange(of: model.currentID) { _, id in
             model.pageDidChange(to: id)
+        }
+        .onChange(of: bubbleStore.feedItems.count) { _, _ in
+            model.feedDidLoad()
         }
         .onChange(of: router.scrollToTopSignal(for: .bubbles)) { _, _ in
             scrollToTop()
@@ -164,16 +172,16 @@ struct BubblesTabView: View {
                 Haptics.light()
                 bubbleStore.toggleLike(bubble)
                 if bubble.isLiked {
-                    GameRecommender.shared.note(.liked, gameID: bubble.id)
+                    FeedEventReporter.shared.note(.liked, gameID: bubble.id)
                 }
             },
             openBoard: { bubble in
-                GameRecommender.shared.note(.openedBoard, gameID: bubble.id)
+                FeedEventReporter.shared.note(.openedBoard, gameID: bubble.id)
                 router.push(.bubbleBoard(bubble.id))
             },
             remix: { bubble in
                 Haptics.light()
-                GameRecommender.shared.note(.remixed, gameID: bubble.id)
+                FeedEventReporter.shared.note(.remixed, gameID: bubble.id)
                 router.openStudio(StudioLaunch(mode: .remix, baseBubbleID: bubble.id))
             },
             float: { bubble in
@@ -184,7 +192,7 @@ struct BubblesTabView: View {
                 Haptics.light()
                 bubbleStore.toggleSave(bubble)
                 if bubble.isSaved {
-                    GameRecommender.shared.note(.saved, gameID: bubble.id)
+                    FeedEventReporter.shared.note(.saved, gameID: bubble.id)
                 }
                 appStore.showToast(
                     bubble.isSaved ? "Saved to your Library" : "Removed from your Library",
@@ -195,6 +203,19 @@ struct BubblesTabView: View {
                 router.push(.profile(user))
             }
         )
+    }
+
+    /// Before the first page: loading, the server's error, or an empty server.
+    @ViewBuilder
+    private var feedState: some View {
+        switch bubbleStore.feedState {
+        case .failed(let message):
+            LiveDataStateView(kind: .failed(message), title: "Couldn't load \(ProductName.plural)", retry: bubbleStore.reloadFeed, onDark: true)
+        case .end:
+            LiveDataStateView(kind: .empty("The server has no \(ProductName.plural) to show yet. Make one in Studio."), title: "No \(ProductName.plural) yet", retry: bubbleStore.reloadFeed, onDark: true)
+        case .idle, .loading:
+            LiveDataStateView(kind: .loading, title: "Loading \(ProductName.plural)…", onDark: true)
+        }
     }
 
     private func topScrim(height: CGFloat) -> some View {
@@ -295,7 +316,7 @@ struct BubblesTabView: View {
     }
 
     private func openBoardFromResult(_ bubble: Bubble) {
-        GameRecommender.shared.note(.openedBoard, gameID: bubble.id)
+        FeedEventReporter.shared.note(.openedBoard, gameID: bubble.id)
         model.result = nil
         model.endTakeover()
         let id = bubble.id
@@ -346,12 +367,9 @@ struct BubblesTabView: View {
         guard !didApplyDebug else { return }
         didApplyDebug = true
         if let index = DebugLaunch.value("FB_FEED_INDEX").flatMap(Int.init), index > 0 {
-            while bubbleStore.feedItems.count <= index + 3 {
-                bubbleStore.extendFeed(by: 12)
-            }
             // One page at a time: a long jump in a lazy stack lands on estimated heights.
             Task { @MainActor in
-                for step in 1...index {
+                for step in 1...index where step < bubbleStore.feedItems.count {
                     try? await Task.sleep(nanoseconds: 60_000_000)
                     model.currentID = bubbleStore.feedItems[step].id
                 }
@@ -432,6 +450,22 @@ private struct BubbleFeedHeader: View {
             iconButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off", action: onToggleMute)
             iconButton("books.vertical.fill", label: "Library") {
                 router.push(.bubbleLibrary)
+            }
+            iconButton("trophy.fill", label: "Challenges") {
+                router.push(.challengesInbox)
+            }
+            .overlay(alignment: .topTrailing) {
+                let open = ChallengeInbox.shared.openCount
+                if open > 0 {
+                    Text("\(open)")
+                        .font(.fbMicroEmphasized)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 5)
+                        .frame(minWidth: 18, minHeight: 18)
+                        .background(FBColor.notificationRed, in: Capsule())
+                        .offset(x: -2, y: 2)
+                        .accessibilityLabel("\(open) open challenges")
+                }
             }
             ViewThatFits(in: .horizontal) {
                 blowButton(showsTitle: true)

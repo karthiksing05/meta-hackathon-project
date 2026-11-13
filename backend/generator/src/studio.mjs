@@ -3,16 +3,36 @@
 // plain classic scripts with the WebAssembly engine embedded, so nothing is built here.
 // Mirrors MicrogameStudio.swift: JSON text in, JSON text out.
 
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, parse } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
-const FILES = ['bubble-kit-microgame-engine.js', 'microgame-studio.js'];
+// There is one copy of each bundle, in the app's folders. The Docker image copies both into /app/vendor
+// (GENERATOR_VENDOR_DIR); in development they are read from the repository.
+const BUNDLES = [
+  ['bubble-kit-microgame-engine.js', 'FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js'],
+  ['microgame-studio.js', 'FacebookClone/Bubbles/Studio/web/microgame-studio.js'],
+];
 
-export function loadStudio(dir) {
+/** The two bundle files: from GENERATOR_VENDOR_DIR (or ./vendor next to the server) when both are there, else the repo. */
+export function findBundles(env = process.env) {
+  const here = dirname(fileURLToPath(import.meta.url));
+  for (const dir of [env.GENERATOR_VENDOR_DIR, join(here, '..', 'vendor')].filter(Boolean)) {
+    const files = BUNDLES.map(([name]) => join(dir, name));
+    if (files.every(existsSync)) return files;
+  }
+  for (let dir = here; ; dir = dirname(dir)) {
+    const files = BUNDLES.map(([, rel]) => join(dir, rel));
+    if (files.every(existsSync)) return files;
+    if (dir === parse(dir).root) break;
+  }
+  throw new Error('Cannot find the engine and Studio bundles. Set GENERATOR_VENDOR_DIR, or run inside the repository (' + BUNDLES.map(([, r]) => r).join(', ') + ').');
+}
+
+export function loadStudio(files = findBundles()) {
   const context = vm.createContext({ console, setTimeout, clearTimeout, performance });
-  for (const f of FILES) {
-    const file = join(dir, f);
+  for (const file of files) {
     vm.runInContext(readFileSync(file, 'utf8'), context, { filename: file });
   }
   const S = context.MicrogameStudio;
@@ -39,6 +59,15 @@ export function loadStudio(dir) {
     /** The game and its authoring manifest, as exact text, wrapped as a microgame manifest. */
     wrap(options) {
       return JSON.parse(S.wrap(JSON.stringify(options)));
+    },
+    /**
+     * The whole pipeline (draft, repair, gate, quality check, polish, wrap), from the bundle.
+     * args: {request, brief, base?}; ask(system, user, purpose) -> {content, model}; onEvent gets progress events.
+     * Resolves to {manifest, stats, bots, gate, quality}.
+     */
+    async compose(args, ask, onEvent) {
+      if (typeof S.compose !== 'function') throw new Error('microgame-studio.js has no compose(); update the Studio bundle');
+      return JSON.parse(await S.compose(JSON.stringify(args), ask, onEvent));
     },
   };
 }

@@ -65,7 +65,7 @@
 
   async function manifest() {
     if (q.get("formula")) return Bubble.catalog().formulas.find((x) => x.id === q.get("formula")).example;
-    return loadJSON("../../FacebookClone/Bubbles/Seeds/bubble-seed-" + (q.get("seed") || "bay-bubbles") + ".json");
+    return loadJSON("../game-fixtures/bubble-seed-" + (q.get("seed") || "bay-bubbles") + ".json");
   }
 
   async function main() {

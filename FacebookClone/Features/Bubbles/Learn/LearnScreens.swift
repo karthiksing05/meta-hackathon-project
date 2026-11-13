@@ -15,7 +15,7 @@ enum LearnScreens {
         case "lesson":
             BubbleDetailView(bubbleID: route.arg)
         case "group":
-            LearnGroupDestination(groupID: route.arg.isEmpty ? BubbleDemo.groupID : route.arg)
+            LearnGroupDestination(groupID: route.arg)
         default:
             LearnStreaksView()
         }
@@ -45,14 +45,10 @@ enum LearnScreens {
     /// to `open`.
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
-        let progress = LearnProgressStore.shared
-        if let group = appStore.group(id: BubbleDemo.groupID) ?? bubbleStore.resolveGroup(BubbleDemo.groupID) {
-            progress.warmUp(group: group, bubbleStore: bubbleStore)
-        }
-        return false
+        false
     }
 
-    /// Once at launch, after `BubbleSocialCast.install` (seed notifications, observers).
+    /// Once at launch.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
         MainActor.assumeIsolated {
             LearnProgressStore.shared.install()
@@ -82,7 +78,8 @@ enum LearnScreens {
         for bubble in bubbles where bubble.formula == .learn {
             if let group = bubble.group {
                 let progress = LearnProgressStore.shared
-                progress.warmUp([bubble], people: progress.learners(in: group, lessons: [bubble], bubbleStore: bubbleStore), bubbleStore: bubbleStore)
+                _ = (progress, group)
+                bubbleStore.loadScores(for: bubble)
             }
         }
     }
@@ -118,11 +115,9 @@ enum LearnShare {
     static let groupNameKey = "group_name"
     static let learnersKey = "learners"
 
-    /// The Group a lesson belongs to (its own, else New in SF).
+    /// The Group a lesson belongs to, when the server says so.
     static func group(for bubble: Bubble, appStore: AppStore, bubbleStore: BubbleStore) -> FBGroup? {
-        bubble.group
-            ?? bubble.manifest.structure.groupID.flatMap { appStore.group(id: $0) ?? bubbleStore.resolveGroup($0) }
-            ?? appStore.group(id: BubbleDemo.groupID)
+        bubble.group ?? bubbleStore.resolveGroup(bubble.manifest.structure.groupID)
     }
 
     /// A lesson card for `bubble` with your mastery and the Group meter.
@@ -155,8 +150,8 @@ enum LearnShare {
         )
     }
 
-    /// Sends a lesson card to a chat, friend or Group, posts `lesson_shared`, and lets friends in
-    /// a chat learn it too. Returns false when the target can't take a card.
+    /// Sends a lesson card to a chat, friend or Group and posts `lesson_shared`. Returns false
+    /// when the target can't take a card.
     @discardableResult
     static func send(_ bubble: Bubble, tag: LearnResultTag?, seed: Int? = nil, to target: BubbleShareTarget, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
         let card = card(for: bubble, tag: tag, seed: seed, appStore: appStore, bubbleStore: bubbleStore)
@@ -165,9 +160,6 @@ enum LearnShare {
         }
         let people = audience(of: target, appStore: appStore, bubbleStore: bubbleStore)
         BubbleSocialSignals.post(.lessonShared, bubbleID: bubble.id, with: people.map(\.id))
-        if let chat = BubbleSocialHub.conversation(for: target, appStore: appStore, bubbleStore: bubbleStore) {
-            learnAlong(card, bubble: bubble, people: Array(people.prefix(2)), in: chat, appStore: appStore, bubbleStore: bubbleStore)
-        }
         return true
     }
 
@@ -179,42 +171,9 @@ enum LearnShare {
         case .friend:
             return [appStore.user(id: target.targetID) ?? bubbleStore.resolvePerson(target.targetID)].filter { !$0.isMe }
         case .group:
-            return target.targetID == BubbleDemo.groupID ? Array(BubbleSocialCast.groupMembers(bubbleStore).prefix(10)) : []
+            return Array((bubbleStore.serverGroups[target.targetID]?.memberSample ?? []).filter { !$0.isMe }.prefix(10))
         case .feed, .story:
             return []
-        }
-    }
-
-    /// Friends in the chat play the same seed (real bot runs) and reply with their result a few
-    /// seconds apart; each result also joins the card and the Group meter.
-    static func learnAlong(_ card: BubbleChatCard, bubble: Bubble, people: [User], in chat: Conversation, appStore: AppStore, bubbleStore: BubbleStore) {
-        let manifest = bubble.manifest.withSeed(card.seed).withLength(card.length)
-        for (index, user) in people.enumerated() {
-            bubbleStore.simulateRun(of: user, on: bubble, manifest: manifest) { score in
-                let delay = 4.0 + Double(index) * 5.0
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                    let tag = LearnResultTag(score.share?.tag)
-                    if let tag {
-                        LearnProgressStore.shared.noteMember(user, in: bubble, tag: tag)
-                    }
-                    let mastery = tag?.text ?? "✓"
-                    var reply = card
-                    reply.id = UUID().uuidString
-                    reply.fromUserID = user.id
-                    reply.headline = LearnCopy.friendLearned(user.firstName, mastery: mastery, title: bubble.title)
-                    reply.extras[masteryKey] = .string(mastery)
-                    // The reply shows the friend's own result next to yours.
-                    var replyLearners = reply.extras[learnersKey]?.object ?? [:]
-                    replyLearners[user.id] = .string(mastery)
-                    reply.extras[learnersKey] = .object(replyLearners)
-                    BubbleSocialHub.receive(reply, from: user, in: chat, text: LearnCopy.friendReply(streak: LearnProgressStore.shared.streak(of: user)), appStore: appStore)
-                    BubbleSocialHub.update(cardID: card.id, appStore: appStore) { original in
-                        var learners = original.extras[learnersKey]?.object ?? [:]
-                        learners[user.id] = .string(mastery)
-                        original.extras[learnersKey] = .object(learners)
-                    }
-                }
-            }
         }
     }
 

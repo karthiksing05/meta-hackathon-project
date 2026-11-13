@@ -11,7 +11,7 @@ const vm = require("vm");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const WEB = path.join(ROOT, "FacebookClone", "Bubbles", "Runtime", "web");
-const SEEDS = path.join(ROOT, "FacebookClone", "Bubbles", "Seeds");
+const SEEDS = path.join(ROOT, "tools", "game-fixtures");
 
 // Same rule as BubbleJSRuntime.orderedScriptNames in Swift.
 function orderedScriptNames(names) {

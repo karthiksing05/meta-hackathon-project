@@ -6,6 +6,7 @@
 //   const game   = engine.load(json, seed);         // Game, or throws MicrogameLoadError
 //   game.pointer('down', x, y); game.keyEvent(e.code, e.key, true); game.swipe('left');
 //   game.text('submit', 'hello'); game.assets(); game.log();
+//   engine.verify(gameText, game.log())             // replays the log: {ok, recomputed, problems}
 //   game.step(16); const frame = game.frame();      // binary fast path, decoded
 //   game.status(); game.restart(); game.dispose();
 //
@@ -72,6 +73,7 @@ export class Microgame {
 
   static validate(json) { return requireDefault().validate(json); }
   static load(json, seed) { return requireDefault().load(json, seed); }
+  static verify(gameText, log) { return requireDefault().verify(gameText, log); }
 
   constructor(exports) {
     this.x = exports;
@@ -99,6 +101,24 @@ export class Microgame {
   validate(json) {
     const bytes = utf8enc.encode(typeof json === 'string' ? json : JSON.stringify(json));
     const len = this._withBytes(bytes, (p, n) => this.x.mg_validate(p, n));
+    return this._resultJSON(len);
+  }
+
+  /**
+   * Replays an input log (`game.log()`, `microgame-log/1`) against the game and checks the result
+   * it claims: `{ok, game_hash_ok, steps, recomputed, claimed, problems}`. `gameText` must be the
+   * exact game file text the run was loaded from (its hash is in the log). Lets a server or a
+   * friend's phone confirm a challenge score without trusting the player's device.
+   */
+  verify(gameText, log) {
+    const req = JSON.stringify({ game: String(gameText), log: typeof log === 'string' ? log : log });
+    let len;
+    try {
+      len = this._withBytes(utf8enc.encode(req), (p, n) => this.x.mg_verify(p, n));
+    } catch (e) {
+      if (e instanceof WebAssembly.RuntimeError) return { ok: false, game_hash_ok: false, steps: 0, recomputed: null, claimed: null, problems: [`engine crash while replaying: ${this.panicMessage() || e.message}`] };
+      throw e;
+    }
     return this._resultJSON(len);
   }
 

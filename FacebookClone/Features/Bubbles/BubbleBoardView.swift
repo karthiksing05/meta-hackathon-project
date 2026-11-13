@@ -10,14 +10,23 @@ struct BubbleBoardView: View {
 
     @State private var scope: BubbleBoardScope?
     @State private var myRowVisible = false
+    @State private var isLoadingGame = false
 
     var body: some View {
         Group {
             if let bubble = bubbleStore.bubble(id: bubbleID) {
                 content(bubble)
+            } else if isLoadingGame {
+                LiveDataStateView(kind: .loading)
             } else {
                 ContentUnavailableView("\(ProductName.singular) not found", systemImage: "list.number")
             }
+        }
+        .task(id: bubbleID) {
+            guard bubbleStore.bubble(id: bubbleID) == nil else { return }
+            isLoadingGame = true
+            _ = await bubbleStore.loadGame(id: bubbleID)
+            isLoadingGame = false
         }
         .background(FBColor.surface)
         .navigationTitle("Board")
@@ -27,7 +36,7 @@ struct BubbleBoardView: View {
     private func activeScope(_ bubble: Bubble) -> BubbleBoardScope {
         let scopes = bubbleStore.boardScopes(for: bubble)
         if let scope, scopes.contains(scope) { return scope }
-        return bubble.group != nil ? .group : .everyone
+        return .everyone
     }
 
     private func content(_ bubble: Bubble) -> some View {
@@ -76,9 +85,10 @@ struct BubbleBoardView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: myRowVisible)
         .onAppear {
-            #if DEBUG
-            bubbleStore.seedSampleScoresIfNeeded(bubble)
-            #endif
+            bubbleStore.loadScores(for: bubble, scope: current)
+        }
+        .onChange(of: current) { _, scope in
+            bubbleStore.loadScores(for: bubble, scope: scope)
         }
     }
 
@@ -110,10 +120,25 @@ struct BubbleBoardView: View {
         .padding(.top, 8)
     }
 
+    @ViewBuilder
     private func empty(_ bubble: Bubble, scope: BubbleBoardScope) -> some View {
+        let key = scope == .everyone ? bubble.id : BubbleStore.boardKey(bubble.id, scope, groupID: scope == .group ? bubble.group?.id : nil)
+        let state = bubbleStore.boardStates[key] ?? .idle
+        if state.isLoading {
+            LiveDataStateView(kind: .loading, title: "Loading the board…")
+        } else if let failure = state.failure {
+            LiveDataStateView(kind: .failed(failure), title: "Couldn't load the board") {
+                bubbleStore.loadScores(for: bubble, scope: scope)
+            }
+        } else {
+            emptyBoard(bubble, scope: scope)
+        }
+    }
+
+    private func emptyBoard(_ bubble: Bubble, scope: BubbleBoardScope) -> some View {
         VStack(spacing: 12) {
             BubbleOrb(size: 64)
-            Text(scope == .friends ? "None of your friends have played yet" : "Nobody's on the board yet")
+            Text(scope == .friends ? "None of your friends have played yet" : scope == .group ? "Nobody in the Group has played yet" : "Nobody's on the board yet")
                 .font(.fbHeadline)
                 .foregroundStyle(FBColor.primaryText)
                 .multilineTextAlignment(.center)
@@ -279,7 +304,7 @@ struct BubbleBoardRow: View {
         case .requestReceived:
             Button("Confirm") {
                 appStore.sendRequest(to: entry.user)
-                GameRecommender.shared.note(.addedFriend, gameID: bubble.id)
+                FeedEventReporter.shared.note(.addedFriend, gameID: bubble.id)
             }
                 .buttonStyle(.fb(.primary, expand: false, height: 32))
         default:
@@ -287,7 +312,7 @@ struct BubbleBoardRow: View {
                 Haptics.light()
                 withAnimation { appStore.sendRequest(to: entry.user) }
                 BracketHooks.met(entry.user, on: bubble.group.map { .group($0.id) } ?? .newFriend)
-                GameRecommender.shared.note(.addedFriend, gameID: bubble.id)
+                FeedEventReporter.shared.note(.addedFriend, gameID: bubble.id)
             }
             .buttonStyle(.fb(.tinted, expand: false, height: 32))
             .accessibilityLabel("Add \(entry.user.name) as a friend")

@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/repo"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/staticsrv"
 )
 
@@ -14,7 +15,13 @@ func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	dir := getenv("GAMES_PUBLIC_DIR", "./data/games/published")
 	addr := getenv("GAMES_ADDR", ":8081")
-	h, err := staticsrv.New(dir)
+	var opts []staticsrv.Option
+	if rt := playerRuntimeDir(); rt != "" {
+		opts = append(opts, staticsrv.WithPlayerRuntime(rt))
+	} else {
+		log.Warn("the web player has no runtime: set PLAYER_RUNTIME_DIR to FacebookClone/Bubbles/Runtime/web")
+	}
+	h, err := staticsrv.New(dir, opts...)
 	if err != nil {
 		log.Error("cannot open games directory", "dir", dir, "err", err)
 		os.Exit(1)
@@ -29,6 +36,22 @@ func main() {
 		log.Error("fatal", "err", err)
 		os.Exit(1)
 	}
+}
+
+// playerRuntimeDir is where the app's runtime files are: $PLAYER_RUNTIME_DIR, the image's /app/player/runtime,
+// or the repository copy.
+func playerRuntimeDir() string {
+	for _, p := range []string{os.Getenv("PLAYER_RUNTIME_DIR"), "/app/player/runtime"} {
+		if p != "" {
+			if st, err := os.Stat(p); err == nil && st.IsDir() {
+				return p
+			}
+		}
+	}
+	if p, ok := repo.Find("FacebookClone/Bubbles/Runtime/web"); ok {
+		return p
+	}
+	return ""
 }
 
 func getenv(k, d string) string {

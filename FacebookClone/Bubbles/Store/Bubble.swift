@@ -58,6 +58,8 @@ struct BubbleScore: Identifiable, Hashable {
 @Observable
 final class Bubble: Identifiable, Hashable {
     let id: String
+    /// The server's 24-hex id for API calls (the same as `id` unless `id` is the game's slug).
+    var serverID: String
     var manifest: BubbleManifest
     let creator: User
     /// The Group it was made for (Daily Bubbles and Group games).
@@ -72,9 +74,9 @@ final class Bubble: Identifiable, Hashable {
     var isLiked: Bool
     var isSaved: Bool
     /// How many people saved it. Saves are the likes (docs/BUBBLES.md 7.10): show this where likes
-    /// would be. Seeds set it with `_seed.save_count`; `toggleSave` keeps it in step.
+    /// would be. From the server's `likes`; `toggleSave` keeps it in step.
     var saveCount: Int
-    /// Everyone's runs, best first is not guaranteed; use `BubbleStore.leaderboard`.
+    /// The server's board (one best run per person), best first. Use `BubbleStore.leaderboard`.
     var scores: [BubbleScore]
     /// The run shown as a Burst before you take over.
     var featuredRun: BubbleScore?
@@ -98,6 +100,7 @@ final class Bubble: Identifiable, Hashable {
         history: [BubbleManifest] = []
     ) {
         self.id = manifest.id
+        self.serverID = manifest.id
         self.manifest = manifest
         self.creator = creator
         self.group = group

@@ -5,7 +5,6 @@ extension View {
     func previewEnvironment() -> some View {
         let store = AppStore()
         let bubbleStore = BubbleStore(appStore: store)
-        bubbleStore.studio = BubbleStudioFactory.make()
         return environment(store).environment(bubbleStore).environment(Router())
     }
 }

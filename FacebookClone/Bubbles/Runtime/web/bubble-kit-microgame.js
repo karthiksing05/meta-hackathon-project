@@ -18,7 +18,9 @@
  *                     swipes (the runtime has no keyboard; games should not rely on keys).
  *   score.microgame   mirrors the engine's score and ends the run when the engine says won or lost.
  *
- * State: state.microgame = {phase, score, time_ms} (read-only for bots and HUDs).
+ * State: state.microgame = {phase, score, time_ms} (read-only for bots and HUDs), plus `log` (the
+ * run's microgame-log/1 JSON text) once the run is won or lost, for challenges and leaderboards to
+ * submit; MicrogameEngine.verify(game_json, log) replays it and recomputes the score.
  * Headless hosts without WebAssembly (an iOS JSContext) can't run microgames: validation reports
  * `microgame_unavailable`, and Studio validates microgames in a web view instead.
  */
@@ -234,8 +236,16 @@
           sdk.setScore(Math.round(m.score));
         }
         if (sdk.ended) return;
-        if (m.phase === "won") sdk.end("success", { delay: 24 });
-        else if (m.phase === "lost") sdk.end("fail", { delay: 24 });
+        if (m.phase === "won" || m.phase === "lost") {
+          // The run's input log (microgame-log/1: seed, game hash, inputs, final result), so a
+          // challenge or leaderboard can submit it and a server can replay it with
+          // MicrogameEngine.verify(content.game_json, log) instead of trusting the score.
+          const sess = sessions.get(sdk.state);
+          if (sess && m.log == null) {
+            try { m.log = sess.game.log(true); } catch (e) { m.log = null; }
+          }
+          sdk.end(m.phase === "won" ? "success" : "fail", { delay: 24 });
+        }
       });
     },
   });
