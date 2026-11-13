@@ -1,0 +1,32 @@
+[
+  {
+    "request": "whack a mole with my friends faces",
+    "expect": [
+      "whack_a_mole"
+    ]
+  },
+  {
+    "request": "fruit ninja but with veggies",
+    "expect": [
+      "slice_swipe"
+    ]
+  },
+  {
+    "request": "test who has the fastest reaction time",
+    "expect": [
+      "reaction_light_test"
+    ]
+  },
+  {
+    "request": "hot potato party game on one phone",
+    "expect": [
+      "hot_potato_pass"
+    ]
+  },
+  {
+    "request": "find the slightly different color tile",
+    "expect": [
+      "odd_color_tile"
+    ]
+  }
+]

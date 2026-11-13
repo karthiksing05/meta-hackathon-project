@@ -1,0 +1,32 @@
+[
+  {
+    "request": "simon says memory game with colors",
+    "expect": [
+      "simon_sequence_repeat"
+    ]
+  },
+  {
+    "request": "memory game with our vacation photos",
+    "expect": [
+      "concentration_photos"
+    ]
+  },
+  {
+    "request": "chimp test memory challenge",
+    "expect": [
+      "number_order_chimp"
+    ]
+  },
+  {
+    "request": "shell game follow the ball",
+    "expect": [
+      "cup_shuffle_track"
+    ]
+  },
+  {
+    "request": "remember the shopping list game",
+    "expect": [
+      "shopping_list_recall"
+    ]
+  }
+]

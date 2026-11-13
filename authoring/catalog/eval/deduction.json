@@ -1,0 +1,32 @@
+[
+  {
+    "request": "guess who with my friends faces",
+    "expect": [
+      "guess_the_character_yes_no"
+    ]
+  },
+  {
+    "request": "mafia game in our group chat",
+    "expect": [
+      "hidden_role_werewolf"
+    ]
+  },
+  {
+    "request": "spyfall style location game",
+    "expect": [
+      "location_spy"
+    ]
+  },
+  {
+    "request": "battleship against my roommate",
+    "expect": [
+      "battleship_versus"
+    ]
+  },
+  {
+    "request": "clue board game set in our office",
+    "expect": [
+      "mystery_suspect_room_weapon"
+    ]
+  }
+]

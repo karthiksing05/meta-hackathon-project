@@ -24,9 +24,9 @@
     ]
   },
   {
-    "request": "how well do you know me quiz for my best friend",
+    "request": "trivia board game where you collect wedges",
     "expect": [
-      "personal_trivia"
+      "trivia_map_board"
     ]
   }
 ]
