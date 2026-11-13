@@ -162,22 +162,10 @@ struct GroupWeeklyBoardCard: View {
         }
     }
 
+    /// The weekly board needs the server's Group boards (not served yet).
     private var emptyState: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "trophy")
-                .font(.system(size: 30))
-                .foregroundStyle(FBColor.tertiaryText)
-            Text(GroupsSearchCopy.emptyBoardTitle)
-                .font(.fbHeadline)
-                .foregroundStyle(FBColor.primaryText)
-            Text(GroupsSearchCopy.emptyBoardDetail)
-                .font(.fbMeta)
-                .foregroundStyle(FBColor.secondaryText)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 18)
-        .accessibilityElement(children: .combine)
+        LiveDataStateView(kind: .notAvailable(LiveDataCopy.groupBoards), title: "Weekly board")
+            .accessibilityElement(children: .combine)
     }
 }
 

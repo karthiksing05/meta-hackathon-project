@@ -5,9 +5,8 @@ import Foundation
 /// together (invites and contributions), nextline (quiz night), story (send your path), learn
 /// (shared lesson) and groups-search ("Challenge the Group").
 ///
-/// Owner: the "challenge" feature. Challenge and session cards with no session yet start one
-/// through `ChallengeCenter` (same seed for everyone, bot plays on short delays, live card
-/// updates); every other kind is delivered as is.
+/// Owner: the "challenge" feature. Cards are delivered as they are: no reply, run or session is
+/// made up for the other side (challenges and sessions wait for server endpoints).
 @MainActor
 enum BubbleSocialHub {
     /// Everyone you can send a card to: friends (1:1 chats), recent chats (group chats first),
@@ -15,27 +14,18 @@ enum BubbleSocialHub {
     static func targets(appStore: AppStore, kinds: Set<BubbleShareTarget.Kind> = [.friend, .chat, .group]) -> [BubbleShareTarget] {
         var out: [BubbleShareTarget] = []
         if kinds.contains(.friend) {
-            // Friends from the New in SF world first (the demo's people), then everyone else.
-            let castFriends = BubbleSocialCast.friendIDs.compactMap { appStore.user(id: $0) }.filter { $0.isFriend }
-            let rest = appStore.friends.filter { friend in !castFriends.contains { $0.id == friend.id } }
-            out += (castFriends + rest).prefix(12).map { BubbleShareTarget(kind: .friend, targetID: $0.id, title: $0.name) }
+            // Messenger's friends (the app's chats; see docs/APP_LIVE_DATA_PLAN.md, Stage 5).
+            out += appStore.friends.prefix(12).map { BubbleShareTarget(kind: .friend, targetID: $0.id, title: $0.name) }
         }
         if kinds.contains(.chat) {
-            // Group chats first (the shared ones from the demo world lead), then recent 1:1 chats.
+            // Group chats first, then recent 1:1 chats.
             let live = appStore.conversations.filter { !$0.isArchived }
-            let castIDs = BubbleSocialCast.chats.map(\.id)
-            let groups = live.filter(\.isGroup).sorted { a, b in
-                let ai = castIDs.firstIndex(of: a.id) ?? Int.max
-                let bi = castIDs.firstIndex(of: b.id) ?? Int.max
-                return ai != bi ? ai < bi : a.lastActivity > b.lastActivity
-            }
+            let groups = live.filter(\.isGroup).sorted { $0.lastActivity > $1.lastActivity }
             let oneToOne = live.filter { !$0.isGroup && !$0.participants.isEmpty }.sorted { $0.lastActivity > $1.lastActivity }
             out += (Array(groups.prefix(4)) + Array(oneToOne.prefix(6))).map { BubbleShareTarget(kind: .chat, targetID: $0.id, title: $0.title) }
         }
         if kinds.contains(.group) {
-            out += appStore.myGroups.sorted { a, b in
-                a.id == BubbleDemo.groupID ? true : (b.id == BubbleDemo.groupID ? false : a.name < b.name)
-            }.map { BubbleShareTarget(kind: .group, targetID: $0.id, title: $0.name) }
+            out += appStore.myGroups.sorted { $0.name < $1.name }.map { BubbleShareTarget(kind: .group, targetID: $0.id, title: $0.name) }
         }
         if kinds.contains(.feed) {
             out.append(BubbleShareTarget(kind: .feed, title: "Your feed"))

@@ -80,41 +80,9 @@ enum RemixScreens {
         }
     }
 
-    /// Once at launch, after `BubbleSocialCast.install`: the remix notifications.
+    /// Once at launch. No remix notifications are made up; they come from the server's moments
+    /// inbox when it exists.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
-        guard !appStore.notifications.contains(where: { $0.id.hasPrefix("remix-note-") }) else { return }
-        var rows: [AppNotification] = []
-        // Someone remixed your game.
-        if let remix = bubbleStore.bubble(id: "remix-moving-day-diego"),
-           let original = bubbleStore.bubble(id: "moving-day") {
-            let note = AppNotification(
-                id: "remix-note-moving-day",
-                kind: .bubbleRemix,
-                actors: [remix.creator],
-                message: RemixCopy.notificationYourGame(original.title, remix: remix.title),
-                createdAt: Date().addingTimeInterval(-24 * 60),
-                isRead: false,
-                bubbleID: remix.id
-            )
-            note.bubbleAction = route(tree, remix.id)
-            rows.append(note)
-        }
-        // A remix of a friend's game, for the feed.
-        if let remix = bubbleStore.bubble(id: "remix-hill-hopper-night-hop"),
-           let original = bubbleStore.bubble(id: "hill-hopper") {
-            let note = AppNotification(
-                id: "remix-note-night-hop",
-                kind: .bubbleRemix,
-                actors: [remix.creator],
-                message: RemixCopy.notificationFriendsGame(original.title, by: original.creator.firstName, remix: remix.title),
-                createdAt: Date().addingTimeInterval(-95 * 60),
-                isRead: false,
-                bubbleID: remix.id
-            )
-            note.bubbleAction = route(tree, remix.id)
-            rows.append(note)
-        }
-        appStore.notifications.insert(contentsOf: rows, at: 0)
     }
 
     /// After the player records one of your runs. Nothing to do for remixes.
@@ -273,16 +241,14 @@ final class RemixCenter {
             let chat = appStore.conversations.first { $0.id == target.targetID }
             return (chat?.participants ?? []).map(\.id).filter { $0 != me }
         case .group:
-            guard target.targetID == BubbleDemo.groupID else { return [] }
-            return BubbleSocialCast.groupMembers(bubbleStore).map(\.id).filter { $0 != me }
+            return (bubbleStore.serverGroups[target.targetID]?.memberSample ?? []).map(\.id).filter { $0 != me }
         case .feed, .story:
             return []
         }
     }
 
-    /// A friendly reply from the original creator in your 1:1 chat, once per remix.
-    /// `notification`, when set, also lands in Notifications ("Diego played your remix Fog Hopper"),
-    /// opening the remix tree.
+    /// The original creator's reply to a remix. Their replies need the server's moments inbox, so
+    /// nothing is shown in their name.
     func scheduleReply(
         from user: User,
         text: String,
@@ -292,25 +258,9 @@ final class RemixCenter {
         appStore: AppStore,
         bubbleStore: BubbleStore
     ) {
-        let key = "\(user.id)|\(bubble.id)|\(text.hashValue)"
-        guard repliesScheduled.insert(key).inserted else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            MainActor.assumeIsolated {
-                let chat = appStore.conversation(with: user)
-                chat.messages.append(Message(senderID: user.id, text: text))
-                chat.isArchived = false
-                if let index = appStore.conversations.firstIndex(where: { $0.id == chat.id }), index != 0 {
-                    appStore.conversations.remove(at: index)
-                    appStore.conversations.insert(chat, at: 0)
-                }
-                chat.unreadCount += 1
-                if let notification {
-                    let note = AppNotification(kind: .bubblePlayed, actors: [user], message: notification, isRead: false, bubbleID: bubble.id)
-                    note.bubbleAction = RemixScreens.route(RemixScreens.tree, bubble.id)
-                    appStore.notifications.insert(note, at: 0)
-                }
-            }
-        }
+        // The other person's reply comes from them, through the server's moments inbox (not
+        // built yet). Nothing is written in their name here.
+        _ = repliesScheduled.insert("\(user.id)|\(bubble.id)")
     }
 }
 

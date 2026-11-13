@@ -1,16 +1,33 @@
 import SwiftUI
 
-/// The Bubbles block at the top of a Group: Daily Bubble card, "Blow a bubble" entry and the
-/// Group's Bubbles.
+/// The games block at the top of a Group: Daily card, "make one" entry and the Group's games, from
+/// `GET /v1/groups/{id}/games`. A Group the server doesn't know (the app's own Groups) has none.
 struct BubbleGroupSection: View {
     let group: FBGroup
 
     @Environment(BubbleStore.self) private var bubbleStore
+    @State private var state: FeedLoadState = .idle
+    @State private var games: [Bubble] = []
 
     var body: some View {
-        let daily = bubbleStore.worldDailyBubble(for: group)
-        let others = bubbleStore.worldBubbles(in: group).filter { $0.id != daily?.id }
+        let daily = games.first { $0.isDaily }
+        let others = games.filter { $0.id != daily?.id }
         VStack(spacing: 0) {
+            switch state {
+            case .loading:
+                LiveDataStateView(kind: .loading, title: "Loading the Group's \(ProductName.plural)…")
+                    .background(FBColor.surface)
+            case .failed(let message):
+                LiveDataStateView(kind: .failed(message), title: "Couldn't load the Group's \(ProductName.plural)") {
+                    Task { await load() }
+                }
+                .background(FBColor.surface)
+            case .end where games.isEmpty:
+                LiveDataStateView(kind: .empty("Nobody has made one for this Group yet."), title: "No \(ProductName.plural) here yet")
+                    .background(FBColor.surface)
+            default:
+                EmptyView()
+            }
             if let daily {
                 BubbleGroupDailyCard(group: group, bubble: daily)
                     .padding(12)
@@ -23,6 +40,21 @@ struct BubbleGroupSection: View {
             if !others.isEmpty {
                 BubbleGroupBubblesRow(bubbles: others)
             }
+        }
+        .task(id: group.id) { await load() }
+    }
+
+    private func load() async {
+        state = .loading
+        do {
+            games = try await bubbleStore.loadGames(inGroup: group.id)
+            state = .end
+        } catch GamesAPIError.notFound {
+            // Not a Group on the games server.
+            games = []
+            state = .end
+        } catch {
+            state = .failed(error.localizedDescription)
         }
     }
 }

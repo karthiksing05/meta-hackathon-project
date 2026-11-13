@@ -2,9 +2,9 @@ import Foundation
 import Observation
 
 // Quiz nights (docs/BUBBLES.md 7.7): a live-feeling "guess what they say next" night in a Group or
-// a group chat. Everyone plays the same scenes (one seed, one length). Members' sides are real bot
-// runs of the runtime on that exact seed and length (`BubbleStore.simulateRun`), so their scores
-// come with replays; the live strip only paces their answers to your clock, cosmetically.
+// a group chat. Everyone plays the same scenes (one seed, one length). Members' sides need the
+// server to run the night (docs/APP_LIVE_DATA_PLAN.md, Stage 4); nobody's side is simulated, and
+// the lobby says "Not available yet" (NextlineScreens).
 
 /// One answered round, from a run's share tag (`r=1:1.8:1:868|...`).
 struct QuizRound: Hashable, Sendable {
@@ -224,20 +224,15 @@ final class QuizNightCenter {
         return nil
     }
 
-    /// Who's invited: the chat's people, or New in SF's members (Maya, Diego and Chloe first).
+    /// Who's invited: the chat's people, or the Group's members on the server.
     func people(at place: QuizNightPlace, appStore: AppStore, bubbleStore: BubbleStore) -> [User] {
         switch place.kind {
         case .chat:
             let chat = appStore.conversations.first { $0.id == place.id }
             return Array((chat?.participants ?? []).filter { !$0.isMe }.prefix(5))
         case .group:
-            let preferred = [BubbleSocialCast.rivalID, "sf-diego-ramirez", "sf-chloe-nguyen", "sf-priya-natarajan"]
-            let cast = BubbleSocialCast.groupMembers(bubbleStore)
-            var out = preferred.compactMap { id in cast.first { $0.id == id } }
-            if out.count < 3 {
-                out += cast.filter { u in !out.contains { $0.id == u.id } }.prefix(4 - out.count)
-            }
-            return Array(out.prefix(4))
+            let members = bubbleStore.serverGroups[place.id]?.memberSample ?? []
+            return Array(members.filter { !$0.isMe }.prefix(4))
         }
     }
 
@@ -317,25 +312,8 @@ final class QuizNightCenter {
         }
     }
 
-    /// Real bot runs for every member on the night's seed and length.
+    /// Members' runs come from the server once it runs quiz nights; none are made up here.
     private func simulateMembers(_ nightID: String, bubbleStore: BubbleStore) {
-        guard let night = night(id: nightID), let bubble = bubbleStore.bubble(id: night.bubbleID) else { return }
-        let manifest = bubble.manifest.withSeed(night.seed).withLength(night.length)
-        let timeline = QuizTimeline(manifest: manifest, rounds: night.rounds)
-        let bubbleID = night.bubbleID
-        for member in night.members {
-            let botSeed = Int(truncatingIfNeeded: SeededGenerator.stableHash("\(nightID)|\(member.user.id)") & 0x7FFF_FFFF)
-            bubbleStore.simulateRun(of: member.user, on: bubble, manifest: manifest, botSeed: botSeed) { [weak self] score in
-                guard let self, let i = self.index(nightID), self.nights[i].bubbleID == bubbleID,
-                      let m = self.nights[i].members.firstIndex(where: { $0.id == member.id }) else { return }
-                let rounds = QuizTag(score.share?.tag)?.rounds ?? []
-                self.nights[i].members[m].score = score.score
-                self.nights[i].members[m].rounds = rounds
-                self.nights[i].members[m].isVerified = score.isVerified
-                self.nights[i].members[m].duration = Self.introAllowance + (timeline.beats { k in rounds.first { $0.index == k }?.seconds ?? timeline.timer }.last?.end ?? 60)
-                self.scheduleReveal(nightID, memberID: member.id)
-            }
-        }
     }
 
     /// Seconds people spend on the intro card before the first scene.
@@ -492,29 +470,6 @@ final class QuizNightCenter {
     }
 
     // MARK: DEBUG staging
-
-    /// A night that has just finished, with every side a real bot run (yours too, flagged staged
-    /// and never recorded), for `FB_OPEN=feature:nextline/results/<bubbleID>`.
-    func stageFinished(bubbleID: String, placeID: String, appStore: AppStore, bubbleStore: BubbleStore) -> String? {
-        preferredBubble[placeID] = bubbleID
-        guard let night = openLobby(at: placeID, appStore: appStore, bubbleStore: bubbleStore, instant: true),
-              let i = index(night.id), let bubble = bubbleStore.bubble(id: bubbleID) else { return nil }
-        // A lobby reused from earlier may still have people on their way in.
-        for k in nights[i].members.indices where nights[i].members[k].joinedAt == nil {
-            nights[i].members[k].joinedAt = Date()
-        }
-        nights[i].phase = .finished
-        nights[i].isStaged = true
-        nights[i].startedAt = Date().addingTimeInterval(-600)
-        for member in nights[i].members { scheduleReveal(night.id, memberID: member.id) }
-        let manifest = bubble.manifest.withSeed(night.seed).withLength(night.length)
-        bubbleStore.simulateRun(of: appStore.me, on: bubble, manifest: manifest, skill: 0.8, botSeed: 77) { [weak self] score in
-            guard let self, let k = self.index(night.id) else { return }
-            self.nights[k].myScore = score.score
-            self.nights[k].myRounds = QuizTag(score.share?.tag)?.rounds ?? []
-        }
-        return night.id
-    }
 
     // MARK: Helpers
 

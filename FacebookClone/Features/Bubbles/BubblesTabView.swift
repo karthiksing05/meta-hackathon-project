@@ -210,11 +210,11 @@ struct BubblesTabView: View {
     private var feedState: some View {
         switch bubbleStore.feedState {
         case .failed(let message):
-            LiveDataStateView(kind: .failed(message), title: "Couldn't load games", retry: bubbleStore.reloadFeed, onDark: true)
+            LiveDataStateView(kind: .failed(message), title: "Couldn't load \(ProductName.plural)", retry: bubbleStore.reloadFeed, onDark: true)
         case .end:
-            LiveDataStateView(kind: .empty("The server has no games to show yet. Make one in Studio."), title: "No games yet", retry: bubbleStore.reloadFeed, onDark: true)
+            LiveDataStateView(kind: .empty("The server has no \(ProductName.plural) to show yet. Make one in Studio."), title: "No \(ProductName.plural) yet", retry: bubbleStore.reloadFeed, onDark: true)
         case .idle, .loading:
-            LiveDataStateView(kind: .loading, title: "Loading games…", onDark: true)
+            LiveDataStateView(kind: .loading, title: "Loading \(ProductName.plural)…", onDark: true)
         }
     }
 

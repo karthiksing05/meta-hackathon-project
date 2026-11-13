@@ -63,31 +63,11 @@ enum SavesScreens {
         }
     }
 
-    /// Once at launch, after `BubbleSocialCast.install` (seed notifications, observers).
+    /// Once at launch: milestone notifications for your own games' saves. Nothing is staged.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
         MainActor.assumeIsolated {
-            installNotification(appStore: appStore, bubbleStore: bubbleStore)
             SavesMilestones.start(appStore: appStore, bubbleStore: bubbleStore)
         }
-    }
-
-    /// '38 people saved Moving Day': Diego and 37 others, in Notifications. Tapping opens who saved it.
-    @MainActor
-    private static func installNotification(appStore: AppStore, bubbleStore: BubbleStore) {
-        let id = "bubble-note-saves-seed"
-        guard !appStore.notifications.contains(where: { $0.id == id }),
-              let bubble = bubbleStore.bubble(id: "moving-day") ?? bubbleStore.bubbles.first(where: { $0.creator.isMe }),
-              bubble.saveCount > 1 else { return }
-        // The same friend the feed caption names ('Saved by Diego and 37 others').
-        let actor = SavesSocialProof.savers(for: bubble, in: bubbleStore, limit: 3).first { !$0.isMe && $0.isFriend }
-            ?? bubbleStore.resolvePerson(BubbleSocialCast.friendIDs[0])
-        let note = AppNotification(
-            id: id, kind: .bubblePlayed, actors: [actor], extraActorCount: bubble.saveCount - 1,
-            message: SavesSocialProof.notificationMessage(for: bubble),
-            createdAt: Date().addingTimeInterval(-25 * 60), isRead: false, bubbleID: bubble.id
-        )
-        note.bubbleAction = BubbleFeatureRoute(.saves, "stats", bubble.id)
-        appStore.notifications.insert(note, at: 0)
     }
 
     /// After the player records one of your runs.

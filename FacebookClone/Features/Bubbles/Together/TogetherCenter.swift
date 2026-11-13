@@ -5,9 +5,9 @@ import Observation
 // contributions that arrive in a chat or a Group, the hand-off to Muse Studio, and what happens
 // when a co-made game or a game about you is published.
 //
-// With one phone at the demo, friends' contributions and plays are simulated on short delays
-// from canned, original content (deterministic per session), and friends' scores are real bot
-// runs of the published game (BubbleStore.simulateRun), so every score stays verifiable.
+// Friends' contributions and plays need the server to share a session (docs/APP_LIVE_DATA_PLAN.md,
+// Stage 4). Nothing is simulated: no canned contributions, no made-up plays. Starting a session
+// says "Not available yet" (TogetherScreens).
 
 /// What friends add to a co-made game.
 enum TogetherAskKind: String, CaseIterable, Identifiable, Codable, Hashable {
@@ -142,94 +142,25 @@ final class TogetherCenter {
         )
         sessions.insert(session, at: 0)
         BubbleSocialHub.send(card, to: target, note: TogetherCopy.inviteNote(session.ask), appStore: appStore, bubbleStore: bubbleStore)
-        scheduleContributions(for: session, makers: makers, delays: delays, appStore: appStore, bubbleStore: bubbleStore)
         return session
     }
 
-    /// Two people from the target add (one adds twice): your 1:1 friend, the chat's members, or
-    /// the Group's members, rival and friends first.
+    /// Who could add from the target: your 1:1 friend, the chat's members, or the Group's members.
     static func simulatedMakers(for target: BubbleShareTarget, appStore: AppStore, bubbleStore: BubbleStore) -> [User] {
-        let preferred = [BubbleSocialCast.rivalID] + BubbleSocialCast.friendIDs
-        func ranked(_ users: [User]) -> [User] {
-            users.filter { !$0.isMe }.enumerated().sorted { a, b in
-                let ra = preferred.firstIndex(of: a.element.id) ?? 99
-                let rb = preferred.firstIndex(of: b.element.id) ?? 99
-                return ra != rb ? ra < rb : a.offset < b.offset
-            }.map(\.element)
-        }
         switch target.kind {
         case .friend:
             return [appStore.user(id: target.targetID) ?? bubbleStore.resolvePerson(target.targetID)]
         case .chat:
             let chat = appStore.conversations.first { $0.id == target.targetID }
-            let people = chat?.participants ?? []
-            // Keep the chat's own order so the first members (Maya, Diego in New in SF crew) lead.
-            return Array(people.filter { !$0.isMe }.prefix(2))
+            return Array((chat?.participants ?? []).filter { !$0.isMe }.prefix(2))
         case .group:
-            var members = target.targetID == BubbleDemo.groupID ? BubbleSocialCast.groupMembers(bubbleStore) : []
-            if members.isEmpty { members = appStore.group(id: target.targetID)?.memberSample ?? [] }
-            return Array(ranked(members).prefix(2))
+            let members = bubbleStore.serverGroups[target.targetID]?.memberSample ?? appStore.group(id: target.targetID)?.memberSample ?? []
+            return Array(members.filter { !$0.isMe }.prefix(2))
         case .feed, .story:
-            return Array(ranked(appStore.friends).prefix(2))
+            return []
         }
     }
 
-    private func scheduleContributions(for session: TogetherSession, makers: [User], delays: [Double]?, appStore: AppStore, bubbleStore: BubbleStore) {
-        guard let first = makers.first else { return }
-        // One from the first maker, two from the second (or two from a single friend).
-        let order: [User] = makers.count > 1 ? [first, makers[1], makers[1]] : [first, first]
-        let pool = TogetherCopy.cannedContributions(session.kind)
-        let waits = delays ?? [3.5, 7, 10.5]
-        for (index, maker) in order.enumerated() {
-            let text = pool[index % pool.count]
-            let reply = TogetherCopy.contributionReply(session.kind, index: index)
-            let wait = waits[min(index, waits.count - 1)]
-            let isLast = !order[(index + 1)...].contains(maker)
-            Task { @MainActor [weak self] in
-                try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
-                self?.arrive(text: text, from: maker, reply: reply, finishesMaker: isLast, sessionID: session.id, appStore: appStore, bubbleStore: bubbleStore)
-            }
-        }
-    }
-
-    /// A friend's contribution lands: in the session, as a card in the chat (or as live progress
-    /// on the Group post), with a notification and a co-making signal.
-    private func arrive(text: String, from maker: User, reply: String, finishesMaker: Bool, sessionID: String, appStore: AppStore, bubbleStore: BubbleStore) {
-        guard let session = self.session(id: sessionID), session.bubbleID == nil else { return }
-        let card = BubbleChatCard(
-            id: "card-\(sessionID)-\(session.entries.count + 1)",
-            kind: .contribution,
-            bubbleID: "",
-            fromUserID: maker.id,
-            headline: TogetherCopy.addedHeadline(name: maker.firstName, kind: session.kind, title: session.title),
-            sessionID: sessionID,
-            extras: [
-                TogetherCard.sessionKey: .string(sessionID),
-                TogetherCard.stageKey: .string(TogetherCard.Stage.contribution.rawValue),
-                TogetherCard.kindKey: .string(session.kind.rawValue),
-                TogetherCard.textKey: .string(text),
-                TogetherCard.titleKey: .string(session.title),
-            ]
-        )
-        let entry = TogetherEntry(id: card.id, makerID: maker.id, makerName: maker.firstName, kind: session.kind, text: text, arrivedAt: Date(), cardID: card.id)
-        mutate(sessionID) { session in
-            session.entries.append(entry)
-            if finishesMaker { session.pendingIDs.removeAll { $0 == maker.id } }
-        }
-        deliver(card, from: maker, text: reply, session: session, appStore: appStore, bubbleStore: bubbleStore)
-        let notification = AppNotification(
-            kind: .bubblePlayed,
-            actors: [maker],
-            message: TogetherCopy.addedNotification(kind: session.kind, title: session.title),
-            bubbleID: nil
-        )
-        notification.bubbleAction = BubbleFeatureRoute(.together, "session", sessionID)
-        appStore.notifications.insert(notification, at: 0)
-        BubbleSocialSignals.post(.coMakeContribution, bubbleID: session.bubbleID ?? sessionID, with: [maker.id])
-    }
-
-    /// Puts a card from someone else where the session lives: the chat, or live progress on the
-    /// Group or feed post.
     private func deliver(_ card: BubbleChatCard, from user: User, text: String?, session: TogetherSession, appStore: AppStore, bubbleStore: BubbleStore) {
         if let chat = BubbleSocialHub.conversation(for: session.target, appStore: appStore, bubbleStore: bubbleStore) {
             BubbleSocialHub.receive(card, from: user, in: chat, text: text, appStore: appStore)
@@ -308,9 +239,6 @@ final class TogetherCenter {
         if isNewCoMade {
             publishedTogether(bubble, makers: makers, appStore: appStore, bubbleStore: bubbleStore)
         }
-        if let about = bubble.manifest.about, about.subjectID == appStore.me.id || about.subjectID == "me" {
-            scheduleAboutMePlays(bubble, appStore: appStore, bubbleStore: bubbleStore)
-        }
     }
 
     private func publishedTogether(_ bubble: Bubble, makers: [BubbleMaker], appStore: AppStore, bubbleStore: BubbleStore) {
@@ -361,83 +289,15 @@ final class TogetherCenter {
             appStore.notifications.insert(notification, at: 0)
             BubbleSocialSignals.post(.coMakeContribution, bubbleID: bubble.id, with: otherIDs)
         }
-        schedulePlays(of: bubble, by: people, session: session, appStore: appStore, bubbleStore: bubbleStore)
-    }
-
-    /// The makers play the game they made together, on its own seed, and say so in the chat.
-    private func schedulePlays(of bubble: Bubble, by people: [User], session: TogetherSession?, appStore: AppStore, bubbleStore: BubbleStore) {
-        for (index, person) in people.prefix(3).enumerated() {
-            let wait = 6.0 + Double(index) * 5
-            Task { @MainActor [weak self] in
-                try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
-                bubbleStore.simulateRun(of: person, on: bubble, manifest: bubble.manifest) { score in
-                    bubble.scores.append(score)
-                    bubble.playCount += 1
-                    bubbleStore.scheduleSave()
-                    guard let self, let session else { return }
-                    self.announcePlay(score, in: bubble, session: session, appStore: appStore, bubbleStore: bubbleStore)
-                }
-            }
-        }
-    }
-
-    private func announcePlay(_ score: BubbleScore, in bubble: Bubble, session: TogetherSession, appStore: AppStore, bubbleStore: BubbleStore) {
-        guard let chat = BubbleSocialHub.conversation(for: session.target, appStore: appStore, bubbleStore: bubbleStore) else { return }
-        var extras: [String: JSONValue] = [
-            TogetherCard.sessionKey: .string(session.id),
-            TogetherCard.stageKey: .string(TogetherCard.Stage.played.rawValue),
-            TogetherCard.titleKey: .string(bubble.title),
-        ]
-        if let line = score.share?.scoreText { extras[TogetherCard.textKey] = .string(line) }
-        let card = BubbleChatCard(
-            id: "card-\(session.id)-played-\(score.user.id)",
-            kind: .contribution,
-            bubbleID: bubble.id,
-            seed: bubble.manifest.seed,
-            fromUserID: score.user.id,
-            headline: TogetherCopy.playedHeadline(name: score.user.firstName, title: bubble.title, score: score.score),
-            sessionID: session.id,
-            score: score.score,
-            extras: extras
-        )
-        BubbleSocialHub.receive(card, from: score.user, in: chat, text: TogetherCopy.playedReply(index: session.entries.count + score.score), appStore: appStore)
     }
 
     // MARK: - Games about you
 
-    /// Friends play your new game about you over the next few seconds, so "Who knows you best"
-    /// fills in. Diego is the one who knows you best in the demo.
-    func scheduleAboutMePlays(_ bubble: Bubble, appStore: AppStore, bubbleStore: BubbleStore) {
-        guard scheduledAboutMe.insert(bubble.id).inserted else { return }
-        let players: [(String, Double)] = [("sf-diego-ramirez", 0.97), ("sf-aiko-tanaka", 0.6), ("sf-theo-adeyemi", 0.35)]
-        for (index, (id, skill)) in players.enumerated() {
-            let person = bubbleStore.resolvePerson(id)
-            guard !person.isMe else { continue }
-            let wait = 4.0 + Double(index) * 4
-            Task { @MainActor in
-                try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
-                bubbleStore.simulateRun(of: person, on: bubble, manifest: bubble.manifest, skill: skill) { score in
-                    bubble.scores.append(score)
-                    bubble.playCount += 1
-                    bubbleStore.scheduleSave()
-                    let notification = AppNotification(
-                        kind: .bubblePlayed,
-                        actors: [person],
-                        message: TogetherCopy.aboutMePlayedNotification(bubble.title, line: score.share?.scoreText),
-                        bubbleID: bubble.id
-                    )
-                    notification.bubbleAction = BubbleFeatureRoute(.together, "profile", appStore.me.id)
-                    appStore.notifications.insert(notification, at: 0)
-                }
-            }
-        }
-    }
-
-    /// Sends your game about you to New in SF crew ("How well do you know me? Play it"), so the
-    /// people you just met find out who knows you best. Posts a `share` signal with the chat's members.
+    /// Sends your game about you to your most recent group chat ("How well do you know me? Play
+    /// it"). Posts a `share` signal with the chat's members. Their plays come from the server.
     @discardableResult
     func sendAboutMe(_ bubble: Bubble, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
-        guard let chat = BubbleSocialCast.conversation(BubbleSocialCast.newInSFCrew, in: appStore) else { return false }
+        guard let chat = appStore.conversations.filter({ $0.isGroup && !$0.isArchived }).max(by: { $0.lastActivity < $1.lastActivity }) else { return false }
         let me = appStore.me
         let card = BubbleChatCard(
             id: "card-aboutme-\(bubble.id)-\(Int(Date().timeIntervalSince1970))",
@@ -455,26 +315,7 @@ final class TogetherCenter {
         guard BubbleSocialHub.send(card, to: target, note: TogetherCopy.aboutMeSendNote, appStore: appStore, bubbleStore: bubbleStore) else { return false }
         sentAboutMeIDs.insert(bubble.id)
         BubbleSocialSignals.post(.share, bubbleID: bubble.id, with: chat.participants.filter { !$0.isMe }.map(\.id))
-        scheduleAboutMePlays(bubble, appStore: appStore, bubbleStore: bubbleStore)
         return true
-    }
-
-    // MARK: - Demo
-
-    /// The demo session: picnic trivia in "New in SF crew", contributions over about 10 s.
-    func stageDemo(appStore: AppStore, bubbleStore: BubbleStore) -> TogetherSession? {
-        if let existing = session(id: TogetherCopy.demoSessionID) { return existing }
-        guard let chat = BubbleSocialCast.conversation(BubbleSocialCast.newInSFCrew, in: appStore) else { return nil }
-        return start(
-            kind: .question,
-            title: TogetherCopy.defaultTitle(.question),
-            ask: TogetherCopy.defaultAsk(.question),
-            target: BubbleShareTarget(kind: .chat, targetID: chat.id, title: chat.title),
-            appStore: appStore,
-            bubbleStore: bubbleStore,
-            id: TogetherCopy.demoSessionID,
-            delays: [3, 6.5, 10]
-        )
     }
 }
 

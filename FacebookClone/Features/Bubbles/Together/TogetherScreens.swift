@@ -4,12 +4,10 @@ import SwiftUI
 ///
 /// QA targets, `FB_OPEN=feature:together/<screen>[/<arg>]`:
 ///   start[/<group:id | chat:id | friend:id>]   start a co-made game: what friends add, who to invite
-///   session/<sessionID or demo>                 a co-making session filling up with contributions
-///                                               (demo: picnic trivia in New in SF crew, ~10 s)
+///   (start says "Not available yet": co-making sessions need the server)
 ///   aboutme[/<template>]                        'Games about me': the template picker, or a template's
 ///                                               form (how-well, first-month, favorite-spot)
-///   profile/<userID or me>                      'Games about <name>' with who knows them best (me:
-///                                               stages your first-month game and friends' plays)
+///   profile/<userID or me>                      'Games about <name>' with who knows them best
 enum TogetherScreens {
     /// A pushed screen (`Route.bubbleFeature`).
     @MainActor
@@ -32,7 +30,9 @@ enum TogetherScreens {
     @ViewBuilder
     static func sheet(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
-        case "start", "aboutme":
+        case "start":
+            LiveDataUnavailableSheet(title: "Make it together", message: LiveDataCopy.sessions)
+        case "aboutme":
             TogetherRouterSheet(route: route)
         default:
             NavigationStack {
@@ -58,20 +58,8 @@ enum TogetherScreens {
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
         switch route.screen {
-        case "session":
-            let id: String
-            if route.arg.isEmpty || route.arg == "demo" {
-                id = TogetherCenter.shared.stageDemo(appStore: appStore, bubbleStore: bubbleStore)?.id ?? TogetherCopy.demoSessionID
-            } else {
-                id = route.arg
-            }
-            router.push(.bubbleFeature(BubbleFeatureRoute(.together, "session", id)))
-            return true
         case "profile":
             let userID = route.arg.isEmpty || route.arg == "me" ? appStore.me.id : route.arg
-            if userID == appStore.me.id {
-                stageAboutMeDemo(appStore: appStore, bubbleStore: bubbleStore)
-            }
             router.push(.bubbleFeature(BubbleFeatureRoute(.together, "profile", userID)))
             return true
         default:
@@ -79,7 +67,7 @@ enum TogetherScreens {
         }
     }
 
-    /// Once at launch, after `BubbleSocialCast.install`.
+    /// Once at launch.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
     }
 
@@ -95,35 +83,6 @@ enum TogetherScreens {
     @MainActor
     static func didPublish(_ bubbles: [Bubble], appStore: AppStore, bubbleStore: BubbleStore) {
         TogetherCenter.shared.didPublish(bubbles, appStore: appStore, bubbleStore: bubbleStore)
-    }
-
-    /// QA: your "My first month in SF" game, built from the template's sample answers exactly as
-    /// the offline composer would, then friends' plays (Diego knows you best).
-    @MainActor
-    static func stageAboutMeDemo(appStore: AppStore, bubbleStore: BubbleStore) {
-        let me = appStore.me
-        let existing = bubbleStore.bubbles.first { $0.manifest.about?.subjectID == me.id || $0.manifest.about?.subjectID == "me" }
-        if let existing {
-            // A game kept from an earlier launch: replay friends' plays if Diego's run isn't there.
-            if bubbleStore.bestScore(ofUserID: "sf-diego-ramirez", in: existing) == nil {
-                TogetherCenter.shared.scheduleAboutMePlays(existing, appStore: appStore, bubbleStore: bubbleStore)
-            }
-            return
-        }
-        guard let base = bubbleStore.bubble(id: "aboutme-maya-first-month")?.manifest,
-              let template = TogetherStudio.template("first-month") else { return }
-        var manifest = base
-        manifest.id = "aboutme-\(me.id)-first-month"
-        let answers = Dictionary(uniqueKeysWithValues: template.questions.map { ($0.id, $0.sample) })
-        TogetherStudio.configureAnswerKey(&manifest, rounds: TogetherStudio.aboutMeRounds(template: template, answers: answers, subject: me.firstName))
-        manifest.title = template.gameTitle(me.firstName)
-        manifest.oneLineRule = "Pick \(me.firstName)'s real answer each round."
-        manifest.about = BubbleAboutMe(subjectID: me.id, subjectName: me.firstName, template: template.id)
-        manifest.style.palette = "sky-glow"
-        manifest.style.coverPrompt = nil
-        manifest.studio = nil
-        let bubble = bubbleStore.publish(manifest)
-        TogetherCenter.shared.scheduleAboutMePlays(bubble, appStore: appStore, bubbleStore: bubbleStore)
     }
 }
 
@@ -447,7 +406,7 @@ enum TogetherCopy {
     // Sending a game about you
     static let sendToFriends = "Send to friends"
     static let sentToFriends = "Sent"
-    static let sendToFriendsHint = "Sends it to New in SF crew so friends can play"
+    static let sendToFriendsHint = "Sends it to your group chat so friends can play"
     static func aboutMeCardHeadline(_ title: String) -> String { title }
     static let aboutMeSendNote = "Made a game about me. Who knows me best? ✨"
     static let aboutMeCardDetail = "Play to see if you know them best"

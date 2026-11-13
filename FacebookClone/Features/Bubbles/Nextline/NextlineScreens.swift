@@ -8,11 +8,8 @@ import SwiftUI
 ///   podium/<nightID>            a night's podium, round by round, Rematch
 ///   results/<bubbleID>          the latest finished night on that Bubble's podium
 ///
-/// QA targets, `FB_OPEN=feature:nextline/<screen>[/<arg>]`:
-///   night/group-newinsf                 the lobby in New in SF, members joining
-///   night/bubble-chat-newinsf-crew      the lobby in the New in SF crew group chat
-///   live/<bubbleID>                     a staged night in New in SF: the card posts and the player opens with the live strip
-///   results/<bubbleID>                  a staged, finished night's podium (every side a bot run, yours never recorded)
+/// Quiz nights need the server to run the night and collect everyone's answers
+/// (docs/APP_LIVE_DATA_PLAN.md, Stage 4), so `night` says "Not available yet".
 enum NextlineScreens {
     /// A pushed screen (`Route.bubbleFeature`).
     @MainActor
@@ -20,7 +17,9 @@ enum NextlineScreens {
     static func destination(_ route: BubbleFeatureRoute) -> some View {
         switch route.screen {
         case "night", "live":
-            QuizNightLobbyView(placeID: route.arg.isEmpty ? BubbleDemo.groupID : route.arg)
+            LiveDataStateView(kind: .notAvailable(LiveDataCopy.quizNight), title: "Quiz night")
+                .frame(maxHeight: .infinity)
+                .background(FBColor.surface)
         case "podium":
             QuizNightPodiumView(nightID: route.arg)
         case "results":
@@ -48,30 +47,10 @@ enum NextlineScreens {
     /// `FB_OPEN=feature:nextline/...` (DEBUG): stage demo state, then open.
     @MainActor
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
-        let center = QuizNightCenter.shared
-        switch route.screen {
-        case "live":
-            let bubbleID = route.arg.isEmpty ? "nextline-thermostat-wars" : route.arg
-            guard bubbleStore.bubble(id: bubbleID) != nil else { return false }
-            center.preferredBubble[BubbleDemo.groupID] = bubbleID
-            guard let night = center.openLobby(at: BubbleDemo.groupID, appStore: appStore, bubbleStore: bubbleStore, instant: true) else { return false }
-            router.push(.bubbleFeature(BubbleFeatureRoute(.nextline, "night", BubbleDemo.groupID)))
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                center.start(night.id, router: router, appStore: appStore, bubbleStore: bubbleStore)
-            }
-            return true
-        case "results":
-            let bubbleID = route.arg.isEmpty ? "nextline-thermostat-wars" : route.arg
-            guard bubbleStore.bubble(id: bubbleID) != nil,
-                  let nightID = center.stageFinished(bubbleID: bubbleID, placeID: BubbleDemo.groupID, appStore: appStore, bubbleStore: bubbleStore) else { return false }
-            router.push(.bubbleFeature(BubbleFeatureRoute(.nextline, "podium", nightID)))
-            return true
-        default:
-            return false
-        }
+        false
     }
 
-    /// Once at launch, after `BubbleSocialCast.install`.
+    /// Once at launch.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
         MainActor.assumeIsolated {
             QuizNightCenter.appStore = appStore

@@ -30,6 +30,7 @@ The web player is the only browser viewer the backend serves.
 
 | Stage | What changed |
 |---|---|
+| 2 People, friends, Groups | Deleted `BubbleSocialCast.swift`, `BubbleFeedRoster.swift` (cast, skills, synthetic scores), `BubbleOpponentRuns.swift` (`simulateRun`) and every use: Challenge, Together, quiz night, Learn, Story, Saves, Remix, Groups-and-Search, Studio. People are server accounts (`resolvePerson` → `GET /v1/users/{id}`), friends `/v1/me/friends`, Groups and members `/v1/groups`, a Group's games `/v1/groups/{id}/games`, Studio's Group picker uses your server Groups. Removed all made-up chats, notifications, replies, rivalry history, weekly-board history, savers and streaks. Challenges, sessions, quiz nights, the weekly board and friends' paths show "Not available yet". |
 | 1 Games and feed | `BubbleStore` holds fetched games only: the feed is `GET /v1/feed` pages, a game is its server object plus its manifest and cover, boards are `/leaderboard`, runs go to `POST /scores`, saves to `/like`, Search's games to `/v1/search`, the Library loads `/v1/creations`. Deleted: the seed games (moved to `tools/game-fixtures/` for tests), bot-run scores, synthetic scores, the feed generator, the local archive and streak, `GameRecommender.swift`, `StoreRecommendations.swift`, `GroupBlend.swift` (Blend is `POST /v1/groups/{id}/blend`), and the launch-time game posts, stories, reels and notifications. `FeedEventReporter` sends page events and moments to `POST /v1/feed/events`. |
 | 0 Client | `GamesAPIFactory.current` is always `GamesAPILive.shared` (no `FB_API`, no mock). `GamesAccount` signs in once at launch with the device account. The client covers feed, search, game, leaderboard, scores, saves, feed events, users, friends, Groups, Group games, Blend and creations. `GamesAPIMock.swift`, `GameGeneratorMock.swift` and `API/Fixtures/` are deleted; `GameGeneratorFactory.current` is always the server. |
 
@@ -40,7 +41,6 @@ These are in the app and must go; where the server cannot yet serve the data, th
 | App code | Problem | Server replacement |
 |---|---|---|
 | `Data/MockData.swift`, `Data/MockContent.swift` (2,600 lines) | Hardcoded people, posts, Groups | `/v1/users`, `/v1/groups`, `/v1/me/friends` (posts/Events: request to backend) |
-| `Bubbles/Store/BubbleSocialCast.swift`, `BubbleFeedRoster.swift` (now only the cast), `BubbleOpponentRuns.swift`, `Seeds/bubble-demo-world.json` | Hardcoded friends, rival "Maya", chats, opponent runs | Friends/Groups endpoints (Stage 2); challenges and moments inbox are requests to backend |
 | `Studio/StudioDemoWorld.swift`, `OfflineComposer.swift` | Fake world and offline game composer | `/v1/generate`; delete |
 | `Studio/MuseStudioService.swift`, `MuseComposeSession.swift`, `GameAnatomyMuse.swift` etc. (~13 files) | App calls Muse directly | Server only; anatomy endpoint is a request to backend |
 

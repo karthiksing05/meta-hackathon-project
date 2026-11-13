@@ -471,10 +471,9 @@ popped" instead of a blank screen.
 
 ### 4.7 Demo world
 
-`Bubbles/Seeds/bubble-demo-world.json` holds the synthetic New in SF Group (`group-newinsf`), the
-newcomers' picnic Event (`event-newcomers-picnic`), ten newcomers with intros and facts, and a list
-of SF words. Mock data (Swift) and seed Bubbles both read it, so names and IDs always match. The
-signed-in user, Alex, just moved to San Francisco and joined New in SF.
+The games feature has no demo world: people, friends and Groups come from the games API (section 7
+note). `Bubbles/Seeds/bubble-demo-world.json` is read only by Studio's offline pieces until Stage 3
+removes them; the wider Facebook clone's mock data (`Data/MockData.swift`) is Stage 5.
 
 ---
 
@@ -664,6 +663,18 @@ Each look is a skin over the same `g` primitives. Kit code does not change per l
 ---
 
 ## 7. Collaboration: closer together
+
+> **Live data (docs/APP_LIVE_DATA_PLAN.md, Stage 2).** The sections below describe the features as
+> first built on the synthetic New in SF cast. That cast is gone from the app: there is no
+> `BubbleSocialCast`, no roster, no rival "Maya", no seeded chats, notifications or rivalry history,
+> and no bot runs standing in for other people (`simulateRun` is deleted). People are server
+> accounts (`BubbleStore.resolvePerson`, `GET /v1/users/{id}`; friends `GET /v1/me/friends`; Group
+> members `GET /v1/groups/{id}`); a Group's games are `GET /v1/groups/{id}/games`; Blend is
+> `POST /v1/groups/{id}/blend`. What needs server work first shows "Not available yet"
+> (`LiveDataStateView`, copy in `LiveDataCopy`): challenges and group-chat sessions (7.2), making
+> together (7.4), quiz nights (7.7), the Group weekly board (7.3), friends' story paths (7.6), and
+> friends' and Group boards. Saves (7.10) name only you as a saver; the server sends counts, not
+> who. Cards you share still go to the app's Messenger chats, which are Stage 5.
 
 Every Bubble should bring specific people closer (friends, a Group, a group chat, people from an
 Event) through Facebook's own surfaces: friends, Groups, Messenger chats, Search, profiles and the

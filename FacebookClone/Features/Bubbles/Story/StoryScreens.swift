@@ -59,18 +59,6 @@ enum StoryScreens {
             router.push(.bubbleFeature(BubbleFeatureRoute(.story, "endings", bubbleID)))
             return true
         case "path":
-            #if DEBUG
-            if StoryProgressStore.shared.latestTag(bubbleID) == nil {
-                // A real bot run as your path (never recorded as a score), so there's a path to send.
-                bubbleStore.simulateRun(of: appStore.me, on: bubble, manifest: bubble.manifest, skill: 0.9, botSeed: 4242) { score in
-                    if let tag = score.share?.tag {
-                        StoryProgressStore.shared.stageDebugRun(tag, score: score.score, in: bubbleID)
-                    }
-                    router.bubbleSheet = BubbleFeatureRoute(.story, "path", bubbleID)
-                }
-                return true
-            }
-            #endif
             router.bubbleSheet = BubbleFeatureRoute(.story, "path", bubbleID)
             return true
         default:
@@ -78,20 +66,8 @@ enum StoryScreens {
         }
     }
 
-    /// Once at launch: a notification that a friend made an adventure, which opens its endings.
+    /// Once at launch. Nothing is staged.
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
-        guard let bubble = bubbleStore.bubble(id: demoBubbleID),
-              !appStore.notifications.contains(where: { $0.bubbleID == bubble.id && $0.bubbleAction?.feature == .story }) else { return }
-        let note = AppNotification(
-            kind: .bubblePlayed,
-            actors: [bubble.creator],
-            message: StoryCopy.madeAdventureNotification(bubble.title),
-            createdAt: Date().addingTimeInterval(-40 * 60),
-            groupID: bubble.group?.id,
-            bubbleID: bubble.id
-        )
-        note.bubbleAction = BubbleFeatureRoute(.story, "endings", bubble.id)
-        appStore.notifications.insert(note, at: min(2, appStore.notifications.count))
     }
 
     /// After the player records one of your runs: the ending joins the endings you've found.

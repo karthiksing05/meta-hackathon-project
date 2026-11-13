@@ -87,12 +87,9 @@ struct LearnLesson {
 /// Mastery, streaks and Group meters for the learn feature (docs/BUBBLES.md 7.8). Owner: learn.
 ///
 /// - Your learning days (one per day you finish a lesson) make your streak; your best mastery
-///   per lesson persists. Both live in UserDefaults; the demo world gives Alex the two days
-///   before today, so the first lesson today makes a 3-day streak.
-/// - Friends' and Group members' mastery comes from real bot runs of the lesson
-///   (`BubbleStore.simulateRun`, its `mastery` tag), cached for the launch. Until a run lands, a
-///   member's best board score stands in (score / best possible score).
-/// - Friends' streaks are deterministic and synthetic, like the rest of the demo world.
+///   per lesson persists (UserDefaults, your own plays on this phone).
+/// - Other people's mastery is their best on the server's board (score / best possible score).
+/// - Other people's streaks need the server (not served yet), so they show none.
 @MainActor
 @Observable
 final class LearnProgressStore {
@@ -123,19 +120,9 @@ final class LearnProgressStore {
 
     // MARK: Lifecycle
 
-    /// Once at launch: the demo world's learning history for Alex (the two days before today).
-    /// Seeded relative to today on every launch (not once ever), so a demo on a later day still
-    /// opens on a 2-day streak and a lesson today makes it 3.
+    /// Once at launch. Nothing is seeded.
     func install() {
-        guard !seededDemo else { return }
         seededDemo = true
-        let calendar = Calendar.current
-        for offset in [1, 2] {
-            if let day = calendar.date(byAdding: .day, value: -offset, to: Date()) {
-                days.insert(BubbleStore.dayKey(day))
-            }
-        }
-        save()
     }
 
     /// Records one of your lesson runs (idempotent per day). Returns the parsed tag.
@@ -171,40 +158,14 @@ final class LearnProgressStore {
 
     var learnedToday: Bool { days.contains(BubbleStore.dayKey(Date())) }
 
-    /// Someone's learning streak in days: yours from your plays; the demo world's from a
-    /// hand-tuned table; everyone else's from a stable hash (some have none).
+    /// Someone's learning streak in days: yours from your plays. The server keeps no one else's.
     func streak(of user: User) -> Int {
-        if user.isMe { return myStreak }
-        let tuned: [String: Int] = [
-            "sf-aiko-tanaka": 9,
-            "sf-maya-okafor": 6,
-            "sf-diego-ramirez": 4,
-            "sf-lena-fischer": 5,
-            "sf-priya-natarajan": 3,
-            "sf-theo-adeyemi": 2,
-            "sf-jordan-brooks": 2,
-            "sf-chloe-nguyen": 1,
-            "sf-omar-haddad": 1,
-            "sf-sam-whitfield": 0,
-        ]
-        if let value = tuned[user.id] { return value }
-        let unit = BubbleRoster.unit("learn-streak|\(user.id)")
-        return unit < 0.45 ? 0 : Int(unit * 8)
+        user.isMe ? myStreak : 0
     }
 
-    /// You and your friends with a streak, longest first (you always included).
+    /// You, with your streak. Friends' streaks come when the server keeps them.
     func friendsStreaks(appStore: AppStore, bubbleStore: BubbleStore) -> [(user: User, days: Int)] {
-        var people: [User] = BubbleSocialCast.friendIDs.map { bubbleStore.resolvePerson($0) }
-        people += appStore.friends.prefix(8)
-        people += BubbleSocialCast.groupMembers(bubbleStore).prefix(4)
-        var seen = Set<String>()
-        var rows: [(user: User, days: Int)] = []
-        for user in people where !user.isMe && seen.insert(user.id).inserted {
-            let days = streak(of: user)
-            if days > 0 { rows.append((user, days)) }
-        }
-        rows.sort { $0.days != $1.days ? $0.days > $1.days : $0.user.firstName < $1.user.firstName }
-        return [(appStore.me, myStreak)] + rows.prefix(10)
+        [(appStore.me, myStreak)]
     }
 
     // MARK: Mastery
@@ -212,9 +173,8 @@ final class LearnProgressStore {
     /// Someone's best mastery (0–1) in a lesson, or nil when they haven't learned it.
     func mastery(of user: User, in bubble: Bubble, bubbleStore: BubbleStore) -> Double? {
         if user.isMe { return best[bubble.id] }
-        if let simulated = memberMastery[bubble.id]?[user.id] { return simulated }
-        // Only real runs (bot runs with a replay) stand in; synthetic placeholder scores don't.
-        let runs = bubble.scores.filter { $0.user.id == user.id && $0.replay != nil }
+        if let known = memberMastery[bubble.id]?[user.id] { return known }
+        let runs = bubble.scores.filter { $0.user.id == user.id }
         guard let score = runs.map(\.score).max() else { return nil }
         return min(1, max(0, Double(score) / Double(LearnLesson.maxScore(for: bubble))))
     }
@@ -226,10 +186,9 @@ final class LearnProgressStore {
         }
     }
 
-    /// Who counts for a Group's meter: the demo world's members for New in SF, else everyone with
-    /// a run on its lessons, plus you once you've learned one.
+    /// Who counts for a Group's meter: everyone on its lessons' boards (from the server).
     func learners(in group: FBGroup, lessons: [Bubble], bubbleStore: BubbleStore) -> [User] {
-        var people: [User] = group.id == BubbleDemo.groupID ? BubbleSocialCast.groupMembers(bubbleStore) : []
+        var people: [User] = []
         for bubble in lessons {
             people += bubble.scores.map(\.user)
         }
@@ -262,25 +221,11 @@ final class LearnProgressStore {
         return Array(rows.sorted { $0.mastery != $1.mastery ? $0.mastery > $1.mastery : streak(of: $0.user) > streak(of: $1.user) }.prefix(limit))
     }
 
-    /// Plays every learner's run of these lessons with the real runtime's bot (once per launch),
-    /// so the meter shows exact mastery from each run's tag. Results land one by one.
-    func warmUp(_ lessons: [Bubble], people: [User], bubbleStore: BubbleStore) {
-        for bubble in lessons {
-            for user in people where !user.isMe {
-                let key = "\(bubble.id)|\(user.id)"
-                guard memberMastery[bubble.id]?[user.id] == nil, warming.insert(key).inserted else { continue }
-                bubbleStore.simulateRun(of: user, on: bubble, manifest: bubble.manifest) { [weak self] score in
-                    guard let self, let tag = LearnResultTag(score.share?.tag) else { return }
-                    self.memberMastery[bubble.id, default: [:]][user.id] = tag.mastery
-                }
-            }
-        }
-    }
-
-    /// Warms a Group's lessons for its learners.
+    /// Loads a Group's lessons' boards from the server, so the meter has members' bests.
     func warmUp(group: FBGroup, bubbleStore: BubbleStore) {
-        let list = lessons(in: group, bubbleStore: bubbleStore)
-        warmUp(list, people: learners(in: group, lessons: list, bubbleStore: bubbleStore), bubbleStore: bubbleStore)
+        for bubble in lessons(in: group, bubbleStore: bubbleStore) {
+            bubbleStore.loadScores(for: bubble)
+        }
     }
 
     /// Records a friend's run from a lesson card (their bot run's tag).

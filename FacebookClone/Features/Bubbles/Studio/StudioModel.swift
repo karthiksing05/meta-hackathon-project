@@ -282,6 +282,7 @@ final class StudioModel {
         }
         loadSavedAnatomy()
         isReady = true
+        Task { @MainActor in _ = await bubbleStore.loadMyGroups() }
 
         #if DEBUG
         applyDebugLaunch()
@@ -300,10 +301,10 @@ final class StudioModel {
 
     private func initialAudience() -> StudioAudience {
         guard let appStore else { return .everyone }
-        if let id = launch.groupID, appStore.group(id: id) != nil { return .group(id) }
+        if let id = launch.groupID, gameGroup(id) != nil { return .group(id) }
         if let id = launch.eventID, appStore.event(id: id) != nil { return .event(id) }
         if let structure = baseBubble?.manifest.structure {
-            if let id = structure.groupID, appStore.group(id: id) != nil { return .group(id) }
+            if let id = structure.groupID, gameGroup(id) != nil { return .group(id) }
             if let id = structure.eventID, appStore.event(id: id) != nil { return .event(id) }
             if structure.scope == "friends" { return .friends }
         }
@@ -323,13 +324,15 @@ final class StudioModel {
 
     var me: User? { appStore?.me }
 
-    /// Groups I'm in, the demo Group first.
+    /// Groups I'm in on the games server (a game made for one is stored with its id).
     var myGroups: [FBGroup] {
-        guard let appStore else { return [] }
-        let groups = appStore.groups.filter(\.isMember)
-        return groups.sorted { lhs, rhs in
-            (lhs.id == BubbleDemo.groupID ? 0 : 1) < (rhs.id == BubbleDemo.groupID ? 0 : 1)
-        }
+        guard let bubbleStore else { return [] }
+        return bubbleStore.serverGroups.values.filter(\.isMember).sorted { $0.name < $1.name }
+    }
+
+    /// A Group by id: one from the games server, else the app's own.
+    func gameGroup(_ id: String) -> FBGroup? {
+        bubbleStore?.serverGroups[id] ?? appStore?.group(id: id)
     }
 
     /// Events I'm going to or interested in first, then other upcoming ones.
@@ -337,10 +340,10 @@ final class StudioModel {
         guard let appStore else { return [] }
         let now = Date().addingTimeInterval(-6 * 3_600)
         return appStore.events
-            .filter { $0.startDate > now || $0.id == BubbleDemo.eventID }
+            .filter { $0.startDate > now }
             .sorted { lhs, rhs in
-                let l = (lhs.id == BubbleDemo.eventID ? 0 : 2) + (lhs.response == nil ? 1 : 0)
-                let r = (rhs.id == BubbleDemo.eventID ? 0 : 2) + (rhs.response == nil ? 1 : 0)
+                let l = lhs.response == nil ? 1 : 0
+                let r = rhs.response == nil ? 1 : 0
                 return l == r ? lhs.startDate < rhs.startDate : l < r
             }
             .prefix(8)
@@ -348,7 +351,7 @@ final class StudioModel {
     }
 
     var defaultGroup: FBGroup? {
-        if let id = launch.groupID, let group = appStore?.group(id: id) { return group }
+        if let id = launch.groupID, let group = gameGroup(id) { return group }
         return myGroups.first
     }
 
@@ -358,7 +361,7 @@ final class StudioModel {
     }
 
     var audienceGroup: FBGroup? {
-        if case .group(let id) = audience { return appStore?.group(id: id) }
+        if case .group(let id) = audience { return gameGroup(id) }
         return nil
     }
 
@@ -371,7 +374,7 @@ final class StudioModel {
         switch audience {
         case .everyone: return "Everyone"
         case .friends: return "Friends"
-        case .group(let id): return appStore?.group(id: id)?.name ?? "Your group"
+        case .group(let id): return gameGroup(id)?.name ?? "Your group"
         case .event(let id): return appStore?.event(id: id).map(StudioModel.shortTitle(of:)) ?? "Your event"
         }
     }
@@ -380,8 +383,7 @@ final class StudioModel {
 
     /// "the newcomers' picnic" style name for an event, for copy.
     nonisolated static func shortTitle(of event: FBEvent) -> String {
-        if event.id == BubbleDemo.eventID { return "Newcomers' picnic" }
-        return event.title
+        event.title
     }
 
     /// Phrase for "for …" in Muse's voice.
@@ -390,8 +392,7 @@ final class StudioModel {
         case .everyone: return "for everyone"
         case .friends: return "for your friends"
         case .group: return "for \(audienceName)"
-        case .event(let id):
-            if id == BubbleDemo.eventID { return "for the newcomers' picnic" }
+        case .event:
             return "for \(audienceName)"
         }
     }
@@ -486,8 +487,8 @@ final class StudioModel {
         switch audience {
         case .group:
             return ["A daily word game for \(audienceName)", "Guess who wrote each intro", "Sort SF neighborhoods by vibe"]
-        case .event(let id):
-            let first = id == BubbleDemo.eventID ? "Icebreaker for the newcomers' picnic" : "Icebreaker for \(audienceName)"
+        case .event:
+            let first = "Icebreaker for \(audienceName)"
             return [first, "Match fun facts to who's coming", "A quick game for the picnic blanket"]
         case .everyone, .friends:
             return [
@@ -1234,7 +1235,7 @@ final class StudioModel {
     var isEditMode: Bool { mode == .edit }
 
     var destinationGroup: FBGroup? {
-        if case .group(let id) = destination { return appStore?.group(id: id) }
+        if case .group(let id) = destination { return gameGroup(id) }
         return nil
     }
 
@@ -1457,18 +1458,11 @@ extension StudioModel {
 // MARK: - Share: people
 
 extension StudioModel {
-    /// Friends you can challenge from the Share step: the demo cast first, then other friends.
+    /// Friends you can send the game to from the Share step (Messenger's friends).
     var friendChoices: [User] {
         guard let appStore else { return [] }
         let targets = BubbleSocialHub.targets(appStore: appStore, kinds: [.friend])
-        var people = targets.compactMap { appStore.user(id: $0.targetID) }
-        // The default rival (Maya) leads, when she's a friend.
-        if let rival = appStore.user(id: BubbleSocialCast.rivalID), rival.isFriend, !people.contains(where: { $0.id == rival.id }) {
-            people.insert(rival, at: 0)
-        } else if let index = people.firstIndex(where: { $0.id == BubbleSocialCast.rivalID }), index > 0 {
-            people.insert(people.remove(at: index), at: 0)
-        }
-        return Array(people.prefix(12))
+        return Array(targets.compactMap { appStore.user(id: $0.targetID) }.prefix(12))
     }
 
     /// Picks three friends the first time the Share step shows, so "Challenge Maya, Leo and

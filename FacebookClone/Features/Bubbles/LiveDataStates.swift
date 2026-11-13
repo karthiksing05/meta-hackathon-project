@@ -74,3 +74,38 @@ struct LiveDataStateView: View {
     private var primary: Color { onDark ? .white : FBColor.primaryText }
     private var secondary: Color { onDark ? .white.opacity(0.75) : FBColor.secondaryText }
 }
+
+/// A sheet for a feature the server can't serve yet.
+struct LiveDataUnavailableSheet: View {
+    let title: String
+    let message: String
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            LiveDataStateView(kind: .notAvailable(message))
+                .frame(maxHeight: .infinity)
+                .background(FBColor.surface)
+                .navigationTitle(title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") { dismiss() }
+                    }
+                }
+        }
+        .presentationDetents([.medium])
+    }
+}
+
+/// Why a feature is off until the server serves it (docs/APP_LIVE_DATA_PLAN.md, Stage 4).
+enum LiveDataCopy {
+    static let challenges = "Challenges need the server to send them and to bring back your friends' runs. They come when it can."
+    static let sessions = "Playing together needs the server to share the session and everyone's runs. It comes when it can."
+    static let quizNight = "Quiz nights need the server to run the night and collect everyone's answers. They come when it can."
+    static let moments = "Your friends' plays, remixes and replies come from the server's moments inbox, which isn't there yet."
+    static let groupBoards = "The server keeps one board for everyone. Friends and Group boards come when it serves them."
+    static let anatomy = "\"How the game works\" needs the server to ask Muse. It comes when the server has it."
+    static let revise = "Changing a game needs the server to revise it. For now, make a new one."
+}
