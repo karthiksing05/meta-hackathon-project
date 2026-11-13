@@ -5,8 +5,9 @@ import SwiftUI
 /// the game's parts and the person corrects them; on Try, each "Change the game" message is mapped
 /// onto those parts first, then the existing tweak path rebuilds the game with the updated anatomy.
 ///
-/// Uses real Muse when it's configured; otherwise (or with `FB_STUDIO_ANATOMY=fixture`) the
-/// fixtures in `GameAnatomyFixtures`, so the flow works offline and in screenshots.
+/// The app asks no model itself, and the server has no anatomy endpoint yet, so a new game's
+/// anatomy isn't drafted and "Change the game" isn't available (`isAvailable`; the card and the
+/// chat say so). A game's saved anatomy still loads (`load`), and the person's own edits work.
 @MainActor
 @Observable
 final class StudioAnatomyThread {
@@ -51,116 +52,40 @@ final class StudioAnatomyThread {
     private(set) var hasLocalChanges = false
     /// "Change the game" turns, oldest first.
     private(set) var turns: [Turn] = []
-    /// True when this anatomy came from the fixtures (no Muse).
-    private(set) var usesFixtures = false
 
-    @ObservationIgnored private var task: Task<Void, Never>?
-    @ObservationIgnored private var fragments: String?
-    let muse = GameAnatomyMuse()
-
-    /// Fixtures when Muse isn't configured or `FB_STUDIO_ANATOMY` (DEBUG) asks for them.
-    var prefersFixtures: Bool {
-        DebugLaunch.value("FB_STUDIO_ANATOMY") != nil || !muse.isConfigured
-    }
+    /// False until the server can draft and revise an anatomy with Muse (docs/LIVE_DATA_AUDIT.md).
+    static let isAvailable = false
 
     var isMapping: Bool { turns.last?.status == .mapping }
 
     // MARK: Draft (Brief step)
 
-    /// Muse's first read of the request. Replaces any earlier anatomy.
+    /// Muse's first read of the request. Not available yet: the card shows `note`.
     func draft(request: String, audience: String?) {
-        task?.cancel()
         self.request = request
         self.audience = audience
         anatomy = nil
         lastReply = nil
-        note = nil
         highlighted = []
         hasLocalChanges = false
         turns = []
-        isWorking = true
-        usesFixtures = prefersFixtures
-        if usesFixtures {
-            task = Task { [weak self] in
-                try? await Task.sleep(nanoseconds: 700_000_000)
-                guard let self, !Task.isCancelled else { return }
-                self.finishWork(GameAnatomyFixtures.anatomy(for: request))
-            }
-            return
-        }
-        let muse = muse
-        task = Task { [weak self] in
-            guard let self else { return }
-            let fragments = await self.fragmentLines()
-            do {
-                let drafted = try await muse.draft(request: request, audience: audience, fragments: fragments)
-                guard !Task.isCancelled else { return }
-                self.finishWork(drafted)
-            } catch {
-                guard !Task.isCancelled else { return }
-                self.isWorking = false
-                self.note = "Muse couldn't take the game apart just now. You can still make it, or try again."
-            }
-        }
+        isWorking = false
+        note = LiveDataCopy.anatomy
     }
 
-    /// Sets a ready-made anatomy (DEBUG screenshots).
-    /// Sets an anatomy agreed earlier: a saved game's (`fixtures` false) or a DEBUG fixture.
-    func load(_ anatomy: GameAnatomy, request: String, fixtures: Bool = true) {
-        task?.cancel()
+    /// Sets an anatomy agreed earlier (a saved game's).
+    func load(_ anatomy: GameAnatomy, request: String) {
         self.request = request
         self.anatomy = anatomy
         isWorking = false
-        usesFixtures = fixtures || prefersFixtures
         note = nil
     }
 
-    /// Muse rereads the anatomy with the person's words, edits and answers. `change` may be empty
-    /// ("Check my answers").
+    /// Muse rereads the anatomy with the person's words, edits and answers. Not available yet; the
+    /// person's edits are kept.
     func refine(_ change: String) {
-        guard let current = anatomy, !isWorking else { return }
-        task?.cancel()
-        isWorking = true
-        note = nil
-        let request = request
-        if usesFixtures {
-            task = Task { [weak self] in
-                try? await Task.sleep(nanoseconds: 600_000_000)
-                guard let self, !Task.isCancelled else { return }
-                self.finishWork(GameAnatomyFixtures.revised(current, change: change), from: current)
-            }
-            return
-        }
-        let muse = muse
-        task = Task { [weak self] in
-            guard let self else { return }
-            let fragments = await self.fragmentLines()
-            do {
-                let revised = try await muse.revise(current, request: request, change: change, afterPlaying: false, fragments: fragments)
-                guard !Task.isCancelled else { return }
-                self.finishWork(revised, from: current)
-            } catch {
-                guard !Task.isCancelled else { return }
-                self.isWorking = false
-                self.note = "Muse couldn't read that change just now. Your edits are kept."
-            }
-        }
-    }
-
-    private func finishWork(_ new: GameAnatomy, from old: GameAnatomy? = nil) {
-        isWorking = false
-        hasLocalChanges = false
-        if let old {
-            let slots = new.changes(from: old)
-            lastReply = new.reply ?? new.changeSentence(slots)
-            highlighted = Set(slots)
-        } else {
-            lastReply = nil
-            highlighted = []
-        }
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-            anatomy = new
-        }
+        guard anatomy != nil, !isWorking else { return }
+        note = LiveDataCopy.anatomy
     }
 
     // MARK: Local edits
@@ -181,54 +106,16 @@ final class StudioAnatomyThread {
 
     // MARK: Change the game (Try step)
 
-    /// Maps the person's words onto the anatomy. The turn waits for `confirm` to rebuild.
+    /// Maps the person's words onto the anatomy. Not available yet: the turn says so, and the
+    /// change can't be made (a tweak needs a server endpoint too).
     func proposeChange(_ text: String, afterPlaying: Bool = true) {
         let change = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !change.isEmpty, !isMapping else { return }
-        let base = anatomy ?? GameAnatomyFixtures.anatomy(for: request)
         var turn = Turn(ask: change)
-        turn.status = .mapping
+        turn.status = .failed(LiveDataCopy.anatomy)
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
             turns.append(turn)
             if turns.count > 6 { turns.removeFirst(turns.count - 6) }
-        }
-        let id = turn.id
-        let request = request
-        if usesFixtures || anatomy == nil {
-            task = Task { [weak self] in
-                try? await Task.sleep(nanoseconds: 700_000_000)
-                guard let self, !Task.isCancelled else { return }
-                self.finishTurn(id, base: base, revised: GameAnatomyFixtures.revised(base, change: change))
-            }
-            return
-        }
-        let muse = muse
-        task = Task { [weak self] in
-            guard let self else { return }
-            let fragments = await self.fragmentLines()
-            do {
-                let revised = try await muse.revise(base, request: request, change: change, afterPlaying: afterPlaying, fragments: fragments)
-                guard !Task.isCancelled else { return }
-                self.finishTurn(id, base: base, revised: revised)
-            } catch {
-                guard !Task.isCancelled else { return }
-                self.update(id) { $0.status = .failed("Muse couldn't map that just now. You can still make the change as written.") }
-            }
-        }
-    }
-
-    private func finishTurn(_ id: UUID, base: GameAnatomy, revised: GameAnatomy) {
-        let slots = revised.changes(from: base)
-        update(id) { turn in
-            turn.slots = slots
-            turn.proposed = revised
-            var reply = revised.reply ?? revised.changeSentence(slots)
-            let new = revised.unfamiliar(in: slots)
-            if !new.isEmpty, revised.reply == nil {
-                reply += " \(GameAnatomy.sentence(GameAnatomy.list(new.map { revised.label(slot: $0) }))) \(new.count == 1 ? "is" : "are") new to me."
-            }
-            turn.reply = reply
-            turn.status = .proposed
         }
     }
 
@@ -277,40 +164,12 @@ final class StudioAnatomyThread {
     }
 
     func cancel() {
-        task?.cancel()
-        task = nil
         isWorking = false
         if let index = turns.indices.last, turns[index].status == .mapping {
             turns[index].status = .failed("Stopped.")
         }
     }
 
-    private func fragmentLines() async -> String {
-        if let fragments { return fragments }
-        let lines = await GameAnatomyMuse.fragmentLines()
-        fragments = lines
-        return lines
-    }
-
-    // MARK: DEBUG
-
-    /// A finished "Change the game" turn, for screenshots.
-    func debugAddTurn(_ ask: String, status: Turn.Status) {
-        let base = anatomy ?? GameAnatomyFixtures.anatomy(for: request)
-        let revised = GameAnatomyFixtures.revised(base, change: ask)
-        var turn = Turn(ask: ask)
-        turn.slots = revised.changes(from: base)
-        turn.proposed = revised
-        turn.reply = revised.reply
-        turn.status = status
-        if status == .applied {
-            var agreed = revised
-            agreed.reply = nil
-            agreed.changed = []
-            anatomy = agreed
-        }
-        turns.append(turn)
-    }
 }
 
 // MARK: - Studio
@@ -338,15 +197,16 @@ extension StudioModel {
         thread.draft(request: effectivePrompt, audience: audience == .everyone ? nil : audiencePhrase)
     }
 
-    /// The Try step's "Change the game" thread shows once there is an anatomy to change.
-    var showsAnatomyChat: Bool { anatomyThread.anatomy != nil }
+    /// The Try step's "Change the game" card: for new games (it says it isn't available yet) and
+    /// for games with a saved anatomy.
+    var showsAnatomyChat: Bool { usesAnatomy || anatomyThread.anatomy != nil }
 
     /// Edit, Remix and the next level start from the base game's saved anatomy.
     func loadSavedAnatomy() {
         guard let base = baseBubble, let record = MakeRecordStore.shared.record(for: base.id),
               let text = record.anatomyJSON, let value = try? JSONValue.parse(text),
               let anatomy = GameAnatomy.decode(value) else { return }
-        anatomyThread.load(anatomy, request: record.anatomyRequest ?? base.manifest.brief.intent, fixtures: false)
+        anatomyThread.load(anatomy, request: record.anatomyRequest ?? base.manifest.brief.intent)
     }
 
     /// Saves the agreed anatomy with each game Studio just shared or saved (its make record).

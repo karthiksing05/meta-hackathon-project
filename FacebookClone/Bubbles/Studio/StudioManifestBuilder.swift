@@ -614,7 +614,7 @@ struct StudioManifestBuilder {
     static func unwrapDraft(_ value: JSONValue) -> JSONValue {
         if let inner = value["manifest"] {
             if inner.object != nil { return inner }
-            if let text = inner.string, let parsed = MuseJSON.object(in: text) { return parsed }
+            if let text = inner.string, let parsed = try? JSONValue.parse(text), parsed.object != nil { return parsed }
         }
         if let inner = value["draft"], inner.object != nil { return inner }
         return value

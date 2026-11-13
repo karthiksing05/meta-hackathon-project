@@ -112,10 +112,10 @@ Request ──► Muse Studio (Swift harness) ──► Manifest (JSON) ──�
    timestep we control, the Glow look needs Canvas 2D glow effects, and the runtime has to run
    headless in JavaScriptCore for validation. KAPLAY was a proposal; this keeps the same concept
    model.
-3. **Muse Studio (Swift).** The compositional harness: an agent loop on Wonder with tools, plus
-   Ember for content and Image for covers. Validates and playtests every manifest in JavaScriptCore
-   before it ships, and repairs failures (max 2 rounds). Has an offline composer so the demo never
-   breaks.
+3. **Muse Studio (Swift).** The screens for making a game. Since the live-data Stage 3 the app
+   calls no Muse model: a new game is made on the games server (`POST /v1/generate`, 7.12), which
+   runs the Muse harness, validates, repairs and playtests it. There is no offline composer; with
+   no server, Studio says it couldn't reach it.
 4. **App (SwiftUI).** `BubbleStore` holds the games, scores and boards fetched from the games API
    (4.5). Surfaces: Bubbles tab
    (infinite feed), player, result sheet, Bubble Board, Library, chains, Studio, Group Daily Bubble,
@@ -148,7 +148,7 @@ FacebookClone/Bubbles/Store/         BubbleStore (SwiftUI app state)
 FacebookClone/Bubbles/UI/            Shared Bubbles UI: Glow tokens, web view, cards
 FacebookClone/Features/Bubbles/      Screens
 tools/bubble-studio/                 macOS CLI
-scripts/sync-muse-config.sh          .env → FacebookClone/Bubbles/Studio/MuseConfig.json (gitignored)
+scripts/sync-muse-config.sh          .env → MuseConfig.json, for the macOS CLI only (the app reads no key)
 ```
 
 ### 4.2 Manifest (JSON, snake_case keys)
@@ -248,15 +248,18 @@ Swift types: `BubbleBridgeMessage`, `BubbleRunResult`, `BubbleInputLog` in
 
 ### 4.4 Studio API (Swift)
 
-`Bubbles/Models/StudioContracts.swift`:
+`Features/Bubbles/Studio/StudioModel.swift` drives the screens; the app talks to no model itself.
 
-- `draftBrief(_ request) async throws -> BubbleBrief`: fast first pass, shown to the creator to
-  edit ("I read this as calm and nostalgic, for New in SF").
-- `compose(_ request) -> AsyncThrowingStream<StudioEvent, Error>`: emits steps
-  (`understand, brief, compose, glue, content, validate, repair, playtest, cover, polish, done`).
-  The `done` event carries the manifest and optional cover image data.
+- **Brief.** `draftBrief()` fills the brief from what the person typed (intent, audience, a default
+  mood and energy); they edit it on the Brief step. The server reads it with Muse when it builds.
+- **Build.** `startCompose(.create)` sends the request and brief to the games server
+  (`GameGeneratorFactory.current`, `POST /v1/generate`, 7.12). `StudioGenerateBridge` turns the job
+  into `StudioEvent`s (`compose, validate, repair, playtest, polish, done`); the `done` event carries
+  the manifest.
+- **Not available yet.** Tweaks, a new look, next levels and remixes need a server revise endpoint,
+  so they fail with `LiveDataCopy.revise`. The game anatomy is not drafted (7.13).
 - Modes: `create`, `edit` (change an existing Bubble), `remix` (fork), `next_level` (new linked
-  Bubble in the chain), `daily` (a Group's Daily Bubble from its opted-in posts).
+  Bubble in the chain), `daily` (a Group's Daily Bubble). Only `create` and `daily` can build today.
 
 ### 4.5 App state
 
@@ -650,7 +653,8 @@ Each look is a skin over the same `g` primitives. Kit code does not change per l
 
 - Demo data is synthetic. No real posts, people or brands.
 - Daily Bubbles read only posts marked as opted in, and Studio shows which sources it used.
-- The Muse key lives in `.env` and a gitignored `MuseConfig.json`; it is never committed.
+- The Muse key lives on the games server (and in `.env` for the CLI); the app has none and it is
+  never committed.
 
 ## 6. Demo (5 minutes)
 
@@ -1568,6 +1572,13 @@ example and the `mg-*` seeds. `node tools/runtime-tests/microgame-chrome.mjs` pl
 
 ### 7.12 Making microgames in Studio
 
+> **Live data (Stage 3).** The app no longer runs this pipeline: `MicrogameComposer.swift`,
+> `MicrogamePrompts.swift`, `MuseClient.swift`, the on-device revise path and the offline and
+> scripted services are deleted. New games are made on the server (the **Server path** below); the
+> pieces described here run there and in the CLI. `MicrogameStudio` stays in the app to load and
+> check engine games. The CLI (`tools/bubble-studio`) still lists the deleted files and needs its
+> own copy before it builds again.
+
 Muse writes an **authoring manifest** (`authoring/SPEC.md` 2); Studio expands it into a `game.json`,
 validates it in the engine, sends errors back to Muse, playtests it with the bots and wraps it as a
 `formula: "microgame"` Bubble (7.11). Everything runs in **one hidden `WKWebView`** (a bare `JSContext`
@@ -1662,6 +1673,12 @@ returns them). A theme or franchise the person asks for is kept; the gold games 
 
 ### 7.13 Game anatomy: agreeing how the game works
 
+> **Live data (Stage 4).** The app's Muse call (`GameAnatomyMuse.swift`, `MuseAnatomyPrompts.swift`)
+> and the fixtures are deleted. Until the server has an anatomy endpoint, the Brief step's "How the
+> game works" card and Try's "Change the game" card say "Not available yet"
+> (`StudioAnatomyThread.isAvailable`). The format, the model (`GameAnatomy.swift`) and the views
+> stay, and a game's saved anatomy still loads.
+
 Studio used to take a person's *style* (mood, look, theme) but not their *function*. The game anatomy is
 Muse's read of how the game works, part by part, agreed with the person before the build and changed
 with them after it. New games only (`StudioModel.usesAnatomy`: create mode).
@@ -1722,5 +1739,5 @@ art and words; Muse doesn't add ones they didn't ask for. Mechanics stay origina
 existing game's levels or art are copied, and our own seeded content stays original (`MusePrompts.safety`,
 the content prompt; covers still carry no text or logos).
 
-DEBUG: `FB_STUDIO_ANATOMY=fixture|answered|chat` with `FB_STUDIO_STEP=brief|try`;
+DEBUG: the anatomy fixtures and `FB_STUDIO_ANATOMY`/`FB_STUDIO_STEP` were removed in Stage 4;
 `FB_STUDIO_SCROLL=anatomy|anatomy-rules|anatomy-<part>` (Brief) or `chat` (Try).

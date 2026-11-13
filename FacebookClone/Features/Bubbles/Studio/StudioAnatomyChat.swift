@@ -19,6 +19,17 @@ struct StudioAnatomyChatCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.m) {
             StudioSectionTitle(title: "Change the game", detail: "Muse edits the rules", symbol: "bubble.left.and.text.bubble.right")
+            if !StudioAnatomyThread.isAvailable {
+                LiveDataStateView(kind: .notAvailable(LiveDataCopy.revise))
+            } else {
+                chat
+            }
+        }
+        .studioCard()
+    }
+
+    @ViewBuilder
+    private var chat: some View {
             if thread.turns.isEmpty {
                 Text("Say what to change: a rule, how you win or lose, the timing. Muse shows which parts it changes before it rebuilds.")
                     .font(.fbBody)
@@ -56,8 +67,6 @@ struct StudioAnatomyChatCard: View {
                 }
                 .padding(.vertical, 2)
             }
-        }
-        .studioCard()
     }
 }
 

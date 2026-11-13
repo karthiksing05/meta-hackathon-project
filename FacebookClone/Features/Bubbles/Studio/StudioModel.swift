@@ -128,16 +128,11 @@ struct StudioFailure: Equatable {
     var detail: String?
 }
 
-/// Implemented by Studio services that can run their offline composer on request. Studio offers
-/// "Try the offline composer" after a failure only when the service adopts this.
-protocol StudioOfflineComposing: AnyObject {
-    func composeOffline(_ request: StudioRequest) -> AsyncThrowingStream<StudioEvent, Error>
-}
-
 // MARK: - Model
 
 /// Muse Studio's state: the request, the brief, the live compose timeline, the levels Muse made
-/// and where they float. Views read and mutate it; it talks to `BubbleStudioService`.
+/// and where they float. Views read and mutate it. New games are made on the server
+/// (`GameGenerator`, `/v1/generate`); the app calls no Muse model itself.
 @MainActor
 @Observable
 final class StudioModel {
@@ -145,7 +140,6 @@ final class StudioModel {
 
     @ObservationIgnored private(set) var bubbleStore: BubbleStore?
     @ObservationIgnored private(set) var appStore: AppStore?
-    @ObservationIgnored var service: BubbleStudioService = BubbleStudioFactory.make()
     @ObservationIgnored private var composeTask: Task<Void, Never>?
     @ObservationIgnored private var briefTask: Task<Void, Never>?
     @ObservationIgnored private var advanceTask: Task<Void, Never>?
@@ -154,7 +148,8 @@ final class StudioModel {
     var stage: StudioStage = .ask
     /// +1 going forward, -1 going back (for the step transition).
     var direction = 1
-    var isMuseConnected = false
+    /// The server makes every game with Muse, so the Brief always shows the Muse model.
+    let isMuseConnected = true
 
     /// The Bubble being edited, remixed or continued.
     var baseBubble: Bubble?
@@ -210,7 +205,7 @@ final class StudioModel {
     /// applied when the new level floats.
     var pendingBaseChain: BubbleChainLink?
     @ObservationIgnored var lastRequest: StudioRequest?
-    /// True while (or after) the current run goes through `MicrogameComposer`.
+    /// True while (or after) the current run makes a game from scratch (always on the server).
     var runIsMicrogame = false
     /// Real playtest reports from the microgame composer, by the event that carried them.
     var playtestReports: [UUID: StudioPlaytest.Report] = [:]
@@ -238,8 +233,6 @@ final class StudioModel {
     /// Friends to challenge (or send it to) when sharing, by user id, in pick order.
     var challengeIDs: [String] = []
     @ObservationIgnored var didPickDefaultFriendsFlag = false
-    /// Bumped to ask `StudioView` to float (pop, publish, open). The autopilot uses it.
-    var floatSignal = 0
 
     init(launch: StudioLaunch) {
         self.launch = launch
@@ -252,13 +245,6 @@ final class StudioModel {
         guard !isReady else { return }
         self.bubbleStore = bubbleStore
         self.appStore = appStore
-        service = bubbleStore.studio ?? BubbleStudioFactory.make()
-        #if DEBUG
-        if let scripted = StudioScriptedService.fromLaunchEnvironment(store: bubbleStore) {
-            service = scripted
-        }
-        #endif
-        isMuseConnected = service.isMuseConnected
 
         baseBubble = launch.baseBubbleID.flatMap { bubbleStore.bubble(id: $0) }
         prompt = launch.prompt
@@ -283,10 +269,6 @@ final class StudioModel {
         loadSavedAnatomy()
         isReady = true
         Task { @MainActor in _ = await bubbleStore.loadMyGroups() }
-
-        #if DEBUG
-        applyDebugLaunch()
-        #endif
     }
 
     /// The launch mode, downgraded to `.create` when its base Bubble is missing.
@@ -596,33 +578,17 @@ final class StudioModel {
 
     // MARK: Ask → Brief
 
-    /// Asks Muse for the brief, then shows it. Falls back to a local draft if Muse can't answer.
+    /// Shows the brief, drafted from what the person typed. The server reads it with Muse when
+    /// it makes the game; the app asks no model for it.
     func draftBrief() {
         guard canContinueFromAsk else { return }
         briefTask?.cancel()
-        isDraftingBrief = true
+        isDraftingBrief = false
         briefNote = nil
-        let request = makeRequest(mode: mode, prompt: effectivePrompt, base: baseBubble?.manifest, brief: nil, look: lookHint)
         draftAnatomyIfNeeded()
-        let service = service
-        briefTask = Task { [weak self] in
-            var drafted: BubbleBrief?
-            var note: String?
-            do {
-                drafted = try await service.draftBrief(request)
-            } catch is CancellationError where Task.isCancelled {
-                // Replaced by a newer draft or Studio closed; they own `isDraftingBrief`.
-                return
-            } catch {
-                note = "I couldn't reach Muse just now, so I filled in the basics. Change anything you like."
-            }
-            guard let self, !Task.isCancelled else { return }
-            self.isDraftingBrief = false
-            self.brief = self.normalized(drafted ?? self.localBrief())
-            self.briefNote = note
-            self.buildsMicrogame = self.suggestsMicrogame
-            self.go(to: .brief)
-        }
+        brief = normalized(localBrief())
+        buildsMicrogame = suggestsMicrogame
+        go(to: .brief)
     }
 
     private func localBrief() -> BubbleBrief {
@@ -742,7 +708,7 @@ final class StudioModel {
     /// Starts Muse. `.create` uses the reviewed brief; `.tweak` and `.nextLevel` build on the
     /// current level. `newLook` redraws the current level in another look (a tweak).
     /// `text` replaces `tweakText` for a tweak (the "Change the game" thread's mapped change).
-    func startCompose(_ kind: StudioComposeKind, offline: Bool = false, newLook: StudioLook? = nil, text tweak: String? = nil) {
+    func startCompose(_ kind: StudioComposeKind, newLook: StudioLook? = nil, text tweak: String? = nil) {
         // A second tap while the step animates away would restart Muse from scratch.
         guard !isComposing else { return }
         let request: StudioRequest
@@ -763,7 +729,7 @@ final class StudioModel {
             request = makeRequest(mode: .nextLevel, prompt: prompt, base: current.manifest, brief: nil, look: StudioLook(id: current.manifest.style.look))
         }
         runLookChange = kind == .tweak ? newLook : nil
-        run(request, kind: kind, offline: offline)
+        run(request, kind: kind)
     }
 
     /// "Tweak it" with a new look: Muse redraws the current level in `look`.
@@ -785,18 +751,13 @@ final class StudioModel {
         return (nil, "Muse picks", "A look to match the idea and mood")
     }
 
-    /// Retries the last run, optionally with the offline composer.
-    func retry(offline: Bool) {
+    /// Retries the last run.
+    func retry() {
         guard let request = lastRequest else { return }
-        run(request, kind: composeKind, offline: offline)
+        run(request, kind: composeKind)
     }
 
-    var offlineComposer: StudioOfflineComposing? { service as? StudioOfflineComposing }
-
-    /// True when the failure screen should offer the offline composer.
-    var canTryOffline: Bool { offlineComposer != nil && !sawOfflineEvent }
-
-    private func run(_ request: StudioRequest, kind: StudioComposeKind, offline: Bool) {
+    private func run(_ request: StudioRequest, kind: StudioComposeKind) {
         composeTask?.cancel()
         advanceTask?.cancel()
         lastRequest = request
@@ -807,7 +768,7 @@ final class StudioModel {
         draftManifest = nil
         draftCover = nil
         sourcesUsed = nil
-        sawOfflineEvent = offline
+        sawOfflineEvent = false
         playtestReports = [:]
         generationWait = nil
         runIsServer = false
@@ -817,21 +778,14 @@ final class StudioModel {
         composeEndedAt = nil
         go(to: .compose)
 
-        let stream: AsyncThrowingStream<StudioEvent, Error>
-        if offline, let composer = offlineComposer {
+        guard let stream = serverStream(for: request, kind: kind) else {
+            // Only new games can be made on the server for now; tweaks, next levels and remixes
+            // wait for a server endpoint (docs/LIVE_DATA_AUDIT.md).
             runIsMicrogame = false
-            stream = composer.composeOffline(request)
-        } else if let microgame = microgameStream(for: request, kind: kind) {
-            runIsMicrogame = true
-            stream = microgame
-        } else {
-            runIsMicrogame = false
-            var request = request
-            // The formula pipeline doesn't make microgames; "Microgame" in the picker means the
-            // engine path above.
-            if request.formulaHint == .microgame { request.formulaHint = nil }
-            stream = service.compose(request)
+            fail(StudioFailure(message: LiveDataCopy.revise, detail: nil))
+            return
         }
+        runIsMicrogame = true
         composeTask = Task { [weak self] in
             do {
                 for try await event in stream {
@@ -1256,10 +1210,6 @@ final class StudioModel {
         isEditMode && levels.count == 1 ? "Save changes" : "Share"
     }
 
-    func requestFloat() {
-        floatSignal += 1
-    }
-
     /// Publishes (or saves) what Muse made. Returns the Bubble to open and the toast to show.
     func commitFloat() -> (bubbleID: String, toast: String)? {
         guard let bubbleStore, let appStore, !levels.isEmpty else { return nil }
@@ -1368,33 +1318,17 @@ extension StudioModel {
     /// Whether this Studio can build a microgame at all: real Muse is configured, and it's a new
     /// game (edits, remixes and levels of formula games stay on their formula).
     var canBuildMicrogame: Bool {
-        #if DEBUG
-        if service is StudioScriptedService { return false }
-        #endif
-        return mode == .create
+        mode == .create || mode == .daily
     }
 
-    /// The default for `buildsMicrogame` when the brief arrives: the person picked "Microgame", or
-    /// Muse picks and the request reads like arcade or physics play.
-    var suggestsMicrogame: Bool {
-        guard canBuildMicrogame else { return false }
-        #if DEBUG
-        if DebugLaunch.value("FB_STUDIO_MICROGAME") == "1" { return true }
-        #endif
-        if formulaHint == .microgame { return true }
-        return formulaHint == nil && StudioMicrogameBridge.fits(effectivePrompt)
-    }
+    /// The default for `buildsMicrogame` when the brief arrives. The server makes every new game
+    /// from scratch, so it's on whenever this is a new game.
+    var suggestsMicrogame: Bool { canBuildMicrogame }
 
-    /// Switches the brief between a ready formula and a game made from scratch.
+    /// Kept for the Brief step. Ready formulas were made on the device, which is gone, so a new
+    /// game is always made from scratch on the server.
     func setBuildsMicrogame(_ value: Bool) {
-        buildsMicrogame = value && canBuildMicrogame
-        if !buildsMicrogame, formulaHint == .microgame { formulaHint = nil }
-    }
-
-    /// After a microgame run fails: make it again with a ready formula.
-    func useFormulaInstead() {
-        setBuildsMicrogame(false)
-        startCompose(.create)
+        buildsMicrogame = canBuildMicrogame
     }
 
     /// The brief as sent to Muse: the reviewed brief, plus the sound and length picked on it.
@@ -1410,30 +1344,19 @@ extension StudioModel {
         return brief
     }
 
-    /// The microgame composer's stream when this run should use it; nil keeps the formula pipeline.
-    ///
-    /// New games go to the server (`GameGeneratorFactory`). Tweaks and next levels still run on the
-    /// device until Stage 3 of docs/APP_LIVE_DATA_PLAN.md.
-    func microgameStream(for request: StudioRequest, kind: StudioComposeKind) -> AsyncThrowingStream<StudioEvent, Error>? {
-        #if DEBUG
-        if service is StudioScriptedService { return nil }
-        #endif
+    /// The server's stream for this run (`GameGenerator`, `/v1/generate`). Nil for tweaks, next
+    /// levels and remixes, which have no server endpoint yet.
+    func serverStream(for request: StudioRequest, kind: StudioComposeKind) -> AsyncThrowingStream<StudioEvent, Error>? {
+        guard kind == .create, canBuildMicrogame else { return nil }
         let onReport: @MainActor (UUID, StudioPlaytest.Report) -> Void = { [weak self] id, report in
             self?.playtestReports[id] = report
         }
-        switch kind {
-        case .create:
-            guard buildsMicrogame, canBuildMicrogame else { return nil }
-            let brief = request.brief ?? briefForRun ?? BubbleBrief(intent: request.prompt, audience: request.scope)
-            runIsServer = true
-            return StudioGenerateBridge.compose(
-                with: GameGeneratorFactory.current, request: microgameRequestText(request), brief: brief, onReport: onReport,
-                onWait: { [weak self] wait in self?.generationWait = wait }
-            )
-        case .tweak, .nextLevel:
-            guard StudioMicrogameBridge.isAvailable, let base = request.base, StudioMicrogameBridge.canRevise(base) else { return nil }
-            return StudioMicrogameBridge.revise(base, request: request.prompt, onReport: onReport)
-        }
+        let brief = request.brief ?? briefForRun ?? BubbleBrief(intent: request.prompt, audience: request.scope)
+        runIsServer = true
+        return StudioGenerateBridge.compose(
+            with: GameGeneratorFactory.current, request: microgameRequestText(request), brief: brief, onReport: onReport,
+            onWait: { [weak self] wait in self?.generationWait = wait }
+        )
     }
 
     /// The request as Muse reads it for a microgame: what the person typed, plus who it's for.

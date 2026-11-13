@@ -79,13 +79,13 @@ final class StudioTimeline: @unchecked Sendable {
 }
 
 enum StudioAsync {
-    /// Runs `operation`, throwing `MuseError.timedOut` if it takes longer than `seconds`.
+    /// Runs `operation`, throwing `URLError(.timedOut)` if it takes longer than `seconds`.
     static func withTimeout<T: Sendable>(_ seconds: TimeInterval, _ operation: @escaping @Sendable () async throws -> T) async throws -> T {
         try await withThrowingTaskGroup(of: T.self) { group in
             group.addTask { try await operation() }
             group.addTask {
                 try await Task.sleep(nanoseconds: UInt64(max(seconds, 0) * 1_000_000_000))
-                throw MuseError.timedOut(seconds: seconds)
+                throw URLError(.timedOut)
             }
             defer { group.cancelAll() }
             guard let first = try await group.next() else { throw CancellationError() }

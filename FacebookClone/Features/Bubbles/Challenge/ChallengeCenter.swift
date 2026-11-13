@@ -230,7 +230,6 @@ final class ChallengeCenter {
             challenge.mine = entry
         }
         challenges[challengeID] = challenge
-        let previousOutcome = challenge.countedOutcome
         refreshCards(challengeID: challengeID)
         settleTally(challengeID: challengeID)
         guard let mine = challenge.mine else { return }
@@ -261,7 +260,6 @@ final class ChallengeCenter {
         guard var session = sessions[sessionID], let bubbleStore, let bubble = bubbleStore.bubble(id: session.bubbleID) else { return }
         let first = session.entries[meID] == nil
         if let current = session.entries[meID], current.score >= entry.score { return }
-        let wasFinished = session.isFinished
         if !session.memberIDs.contains(meID) {
             // Joining a session you weren't counted in (a finished one from before you arrived).
             session.memberIDs.append(meID)

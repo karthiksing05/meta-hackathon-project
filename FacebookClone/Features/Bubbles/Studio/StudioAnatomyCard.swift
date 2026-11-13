@@ -62,18 +62,9 @@ struct StudioAnatomyCard: View {
                 }
             } else if thread.isWorking {
                 loading
-            } else if let note = thread.note {
-                VStack(alignment: .leading, spacing: FBSpacing.s) {
-                    Text(note)
-                        .font(.fbBody)
-                        .foregroundStyle(FBColor.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Button("Try again") {
-                        Haptics.light()
-                        thread.draft(request: thread.request, audience: thread.audience)
-                    }
-                    .buttonStyle(.studioSecondary(expand: false, height: 40))
-                }
+            } else {
+                // The server has no anatomy endpoint yet, and the app asks no model itself.
+                LiveDataStateView(kind: .notAvailable(thread.note ?? LiveDataCopy.anatomy))
             }
             if thread.isWorking && thread.anatomy != nil {
                 HStack(spacing: FBSpacing.s) {

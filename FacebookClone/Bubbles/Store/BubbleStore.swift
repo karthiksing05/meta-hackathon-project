@@ -28,8 +28,6 @@ final class BubbleStore {
     var boardStates: [String: FeedLoadState] = [:]
 
     @ObservationIgnored let appStore: AppStore
-    /// Studio. Set at launch; nil only in previews.
-    @ObservationIgnored var studio: BubbleStudioService?
 
     @ObservationIgnored let runtimeWorker = BubbleRuntimeWorker()
     /// The page the games tab shows, so the feed loads ahead of it.
