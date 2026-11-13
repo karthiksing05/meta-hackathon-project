@@ -47,10 +47,23 @@ gets it. The CLI's `--microgame` mode can't take one, so it composes with `Bubbl
 `run.mjs` still runs `bubble-studio brief` for each entry and saves the result as `app-brief.json`, so
 you can see what the app's brief carries.
 
+**Anatomy mode** (`run.mjs --anatomy`) runs the Studio's game-anatomy step before each compose:
+1. `anatomy-helper` drafts the anatomy with `GameAnatomyMuse.draft`, using MuseAnatomyPrompts, the fast
+   model, the live fragment catalog and calibration.
+2. It answers each open question with its first option.
+3. The request becomes `<request>\n\n<agreedText(request:)>`, as `StudioModel.microgameRequestText`
+   builds it.
+4. The same `--microgame` pipeline runs.
+
+The judge still scores against the entry's own request. Reported times include the anatomy step.
+Build the helper with `tools/harness-eval/build-anatomy.sh`. It reads the anatomy files from
+`FacebookClone/Bubbles/Studio` when they are there, and from `ANATOMY_SRC=<folder>` otherwise.
+
 Each entry's folder holds:
 - `entry.json`;
 - `app-brief.json`;
 - `manifest.json`, `authoring.json` and `game.json`;
+- `anatomy.json`, in anatomy mode;
 - `cli.log`;
 - `run.json`, with validity, repairs, the gate report with every bot run, timings, bytes and errors;
 - `score.json`.

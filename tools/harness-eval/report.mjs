@@ -38,7 +38,12 @@ export function collect(dir) {
       canLose: score.logic?.canLose ?? null, lengthOK: score.logic?.lengthOK ?? null, spreadOK: score.logic?.spreadOK ?? null,
       blocking: score.logic?.blocking || [],
       firstDraftValid: run.firstDraftValid, repairRounds: run.repairRounds, playtestRepair: run.playtestRepair,
-      timeToFirstValid: run.timeToFirstValidSeconds, seconds: run.composeSeconds ?? run.wallSeconds, wallSeconds: run.wallSeconds,
+      // Time includes the anatomy step in anatomy mode (it runs before compose).
+      anatomySeconds: run.anatomy?.wallSeconds ?? null,
+      anatomyTheme: run.anatomy?.theme?.text ? `${run.anatomy.theme.text} (${run.anatomy.theme.source})` : run.anatomy ? 'no theme part' : null,
+      anatomyAnswered: run.anatomy?.answered?.map((a) => `${a.question} → ${a.answer}`) || [],
+      timeToFirstValid: run.timeToFirstValidSeconds == null ? null : run.timeToFirstValidSeconds + (run.anatomy?.wallSeconds ?? 0),
+      seconds: (run.composeSeconds ?? run.wallSeconds) + (run.anatomy?.wallSeconds ?? 0), wallSeconds: run.wallSeconds,
       museCalls: run.museCalls, authoringBytes: run.authoringBytes, gameBytes: run.gameBytes,
       errors: [...(run.errors || []), ...(run.failed ? [run.failed] : [])],
     });
@@ -121,6 +126,7 @@ export function markdown(name, rows) {
   for (const r of rows) {
     out.push(`**${r.id}** · "${r.request}"`, `> ${r.produced ? `**${r.title}** — ${r.instructions || ''}` : 'no game'}  `,
       `> roles: ${r.roles.join(', ') || '–'} · theme words hit: ${r.keywordHitList.join(', ') || 'none'}  `,
+      ...(r.anatomyTheme ? [`> anatomy theme: ${r.anatomyTheme}${r.anatomyAnswered.length ? ` · auto-answers: ${r.anatomyAnswered.join('; ')}` : ''}  `] : []),
       `> judge: ${r.judgeMissing || '–'}${r.errors.length ? `  \n> errors: ${r.errors.join(' | ')}` : ''}`, '');
   }
   return out.join('\n');
