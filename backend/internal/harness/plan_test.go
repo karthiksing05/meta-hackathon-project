@@ -34,7 +34,7 @@ const planReply = `{
    "constraints": {"items": [{"kind": "time", "value": 10, "enforced_by": "the timer ends each prompt", "hud": "timer bar"}]},
    "progression": {"steps": [{"at": "prompt 1", "change": "broad"}, {"at": "prompt 3", "change": "narrower"}, {"at": "prompt 5", "change": "obscure"}], "levers": ["timer"]},
    "end": {"win": "best total", "lose": "", "ends_when": ["all_prompts_done"], "session_seconds": [60, 120]},
-   "score": {"kind": "points", "measures": "rarity points per answer", "unit": "points", "direction": "lower", "counts_when": "any", "aggregate": "best", "tie_break": "less time", "format": "{n} points", "events": ["answer_scored"], "bounds": {"min": 0, "max": 9}},
+   "score": {"kind": "points", "measures": "rarity points per answer", "unit": "points", "direction": "lower", "counts_when": "any", "aggregate": "best", "tie_break": "fewer mistakes", "format": "{n} points", "events": ["answer_scored"], "bounds": {"min": 0, "max": 9}},
    "social": {"share": "I scored 340 rarity points", "challenge": "same prompts", "same_seed": true, "board": "highest first"},
    "feel": {"juice": ["a gold burst on a rare answer"], "sounds": "chimes", "look": "candlelit gold"}},
  "design": {"pitch": "Name the rarest spell.", "theme": "Harry Potter", "verb": "type", "twist": "rarity", "arc": ["warm up", "hard"]},
@@ -237,7 +237,7 @@ func TestPlanSpec(t *testing.T) {
 	}
 	sc := p.Spec.Score
 	// the type is rare-answer trivia: its default kind is tiered_points, and "points" came with no reason
-	if sc.Kind != "tiered_points" || sc.Direction != "higher" || sc.Bounds != nil {
+	if sc.Kind != "tiered_points" || sc.Direction != "higher" || sc.Bounds != nil || sc.TieBreak != "less time" {
 		t.Errorf("score = %+v", sc)
 	}
 	if len(p.Issues) != 0 {
@@ -316,7 +316,7 @@ func TestSpecValidate(t *testing.T) {
 		Social:      Social{Share: "20 in 1:02"}, Feel: Feel{Juice: []string{"pop"}},
 	}
 	problems, fixed := s.Validate()
-	if s.Score.Direction != "lower" || s.Score.CountsWhen != "finished" || len(fixed) < 2 {
+	if s.Score.Direction != "lower" || s.Score.CountsWhen != "finished" || s.Score.Unit != "ms" || s.Score.Format != "m:ss.t" || len(fixed) < 4 {
 		t.Errorf("direction and counts_when should follow the kind: %+v, fixed %v", s.Score, fixed)
 	}
 	if len(problems) != 1 || !strings.Contains(problems[0], "can finish") {

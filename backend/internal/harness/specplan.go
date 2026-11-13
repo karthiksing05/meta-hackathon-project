@@ -34,11 +34,13 @@ var partSchemas = map[string]string{
    EXACTLY 3 steps of the difficulty arc (what ramps and when); levers are the knobs (speed, timer, prompt breadth).`,
 	"end": `"end": {"win": string, "lose": string, "ends_when": ["time_out"|"lives_gone"|"target_reached"|"all_prompts_done"|"board_full"|"story_end"|"player_stops"], "session_seconds": [min, max]}
    every run ends within session_seconds (5-600). lose is "" when there is no losing.`,
-	"score": `"score": {"kind": KIND, "measures": string, "unit": string, "direction": "higher"|"lower", "counts_when": "finished"|"any", "aggregate": "best"|"latest"|"sum_week", "tie_break": "less time"|"fewer mistakes"|"earlier", "format": string, "events": [string], "reason": string}
-   the score measures the goal under the constraints: measures uses the goal's measure words. Kinds (direction, counts when):
-   points (higher, any); time_to_complete (lower, finished only); count_in_time (higher, any); survival_time (higher, any);
-   accuracy (higher, finished only); distance (higher, any); tiered_points (higher, any: rarity tiers); streak (higher, any).
-   events: the game events that change the score. format: how it is shown ("{n} orders", "m:ss.t", "{n}%"). Leave out bounds.`,
+	"score": `"score": {"kind": KIND, "measures": string, "unit": string, "direction": "higher"|"lower", "counts_when": "finished"|"any", "aggregate": "best"|"latest"|"sum_week", "tie_break": "less time"|"earlier", "format": string, "events": [string], "reason": string}
+   the score measures the goal under the constraints: measures uses the goal's measure words. Every score is an INTEGER.
+   Kinds (direction, counts when, unit): points (higher, any, points); time_to_complete (lower, finished only, whole ms);
+   count_in_time (higher, any, a count); survival_time (higher, any, whole ms); accuracy (higher, finished only, whole percent);
+   distance (higher, any, whole metres or tiles); tiered_points (higher, any: rarity-tier points); streak (higher, any, a count).
+   events: the game events that change the score. format: how it is shown: "m:ss.t" for the ms kinds, "{n}%" for accuracy,
+   otherwise "{n} <unit>" ("{n} orders"). Leave out bounds.`,
 	"social": `"social": {"share": string, "challenge": string, "same_seed": boolean, "board": string}
    share is spoiler-free score text; a challenge replays the same seed; board says how the Group board reads.`,
 	"feel": `"feel": {"juice": [string], "sounds": string, "look": string}

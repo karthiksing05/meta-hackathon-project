@@ -142,7 +142,7 @@ var ScoreKinds = []ScoreKind{
 	{"points", "higher", "any", "{n} points"},
 	{"time_to_complete", "lower", "finished", "m:ss.t"},
 	{"count_in_time", "higher", "any", "{n}"},
-	{"survival_time", "higher", "any", "m:ss"},
+	{"survival_time", "higher", "any", "m:ss.t"},
 	{"accuracy", "higher", "finished", "{n}%"},
 	{"distance", "higher", "any", "{n} m"},
 	{"tiered_points", "higher", "any", "{n} points"},
@@ -151,8 +151,25 @@ var ScoreKinds = []ScoreKind{
 
 var (
 	Aggregates = []string{"best", "latest", "sum_week"}
-	TieBreaks  = []string{"less time", "fewer mistakes", "earlier"}
+	TieBreaks  = []string{"less time", "earlier"}
 )
+
+// Every score is an integer (agreed with Max): time_to_complete and survival_time are whole milliseconds
+// (shown as m:ss.t), accuracy is a whole percent, and the other kinds are counts or points.
+
+// msKinds are the kinds measured in whole milliseconds.
+var msKinds = []string{"time_to_complete", "survival_time"}
+
+// ScoreUnit is the fixed unit of a kind ("ms", "%"), or "" when the game names it (orders, points, metres).
+func ScoreUnit(kind string) string {
+	switch {
+	case oneOf(kind, msKinds):
+		return "ms"
+	case kind == "accuracy":
+		return "%"
+	}
+	return ""
+}
 
 func scoreKind(k string) (ScoreKind, bool) {
 	for _, s := range ScoreKinds {
@@ -235,9 +252,9 @@ func DefaultScore(kind string) Score {
 	}
 	tie := "less time"
 	if k.Kind == "time_to_complete" {
-		tie = "fewer mistakes"
+		tie = "earlier"
 	}
-	return Score{Kind: k.Kind, Direction: k.Direction, CountsWhen: k.CountsWhen, Aggregate: "best", TieBreak: tie, Format: k.Format}
+	return Score{Kind: k.Kind, Direction: k.Direction, CountsWhen: k.CountsWhen, Aggregate: "best", TieBreak: tie, Format: k.Format, Unit: ScoreUnit(k.Kind)}
 }
 
 // ---- validation ----
@@ -343,6 +360,14 @@ func (s *Spec) Validate() (problems, fixed []string) {
 		}
 		if empty(sc.Format) {
 			sc.Format = k.Format
+		}
+		if u := ScoreUnit(k.Kind); u != "" && sc.Unit != u {
+			fix("score", "unit %q set to %q: %s is a whole number of %s", sc.Unit, u, k.Kind, u)
+			sc.Unit = u
+		}
+		if oneOf(k.Kind, msKinds) && sc.Format != "m:ss.t" {
+			fix("score", "format %q set to m:ss.t for milliseconds", sc.Format)
+			sc.Format = "m:ss.t"
 		}
 	}
 	if !oneOf(sc.CountsWhen, []string{"finished", "any"}) {
