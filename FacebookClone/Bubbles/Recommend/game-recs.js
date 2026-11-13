@@ -24,7 +24,7 @@
 (function (root) {
   "use strict";
 
-  var VERSION = "0.5.0";
+  var VERSION = "0.5.1";
 
   // ---------------------------------------------------------------------------------------------
   // Parameters
@@ -941,7 +941,9 @@
     if (v.unproven) bits.push("new, still testing");
     else if (v.sat > 0.6) bits.push("people finish and replay it");
     if (p.taste > 0.3) bits.push("like what you play");
-    if (p.bait > 0.4) bits.push("hooky, and hooky works for you");
+    // The bait term is lean · (2·hook − 1), so it's large and positive for a hooky game when hooks
+    // work on you, and for a calm game when you lean away from them. Say which.
+    if (p.bait > 0.4) bits.push(v.hook >= 0.5 ? "hooky, and hooky works for you" : "calmer pick");
     else if (bait.lean < 0 && v.hook < 0.45) bits.push("calmer pick");
     if (p.slop < -0.5) bits.push("held back: may be low quality");
     return bits.length ? bits.join(" · ") : "a change of pace";

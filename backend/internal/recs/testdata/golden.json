@@ -1,12 +1,12 @@
 {
- "version": "0.5.0",
+ "version": "0.5.1",
  "steps": [
   {
    "method": "load",
    "input": null,
    "output": {
     "ok": true,
-    "version": "0.5.0",
+    "version": "0.5.1",
     "stages": {
      "reward": true,
      "bandit": true,
@@ -534,7 +534,7 @@
        "reason": 0.22314355131420976,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      },
      {
@@ -606,7 +606,7 @@
        "reason": 0,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      },
      {
@@ -654,7 +654,7 @@
        "reason": 0,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      }
     ],
@@ -695,7 +695,7 @@
      "coldStart": true,
      "bait": true
     },
-    "version": "0.5.0"
+    "version": "0.5.1"
    }
   },
   {
@@ -1438,7 +1438,7 @@
        "reason": 0.22314355131420976,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      },
      {
@@ -1462,7 +1462,7 @@
        "reason": 0,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      },
      {
@@ -1486,7 +1486,7 @@
        "reason": 0.22314355131420976,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      },
      {
@@ -1510,7 +1510,7 @@
        "reason": 0,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      }
     ],
@@ -1551,7 +1551,7 @@
      "coldStart": true,
      "bait": true
     },
-    "version": "0.5.0"
+    "version": "0.5.1"
    }
   },
   {
@@ -2119,7 +2119,7 @@
        "reason": 0.22314355131420976,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      },
      {
@@ -2143,7 +2143,7 @@
        "reason": 0,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      },
      {
@@ -2191,7 +2191,7 @@
        "reason": 0,
        "muse": 0
       },
-      "why": "new, still testing · hooky, and hooky works for you",
+      "why": "new, still testing · calmer pick",
       "museWhy": null
      }
     ],
@@ -2232,7 +2232,7 @@
      "coldStart": true,
      "bait": true
     },
-    "version": "0.5.0"
+    "version": "0.5.1"
    }
   },
   {
@@ -2824,7 +2824,7 @@
      }
     ],
     "aggregate": "geometric",
-    "version": "0.5.0"
+    "version": "0.5.1"
    }
   },
   {
@@ -2913,7 +2913,7 @@
    "method": "debugSummary",
    "input": null,
    "output": {
-    "version": "0.5.0",
+    "version": "0.5.1",
     "stages": {
      "reward": true,
      "bandit": true,

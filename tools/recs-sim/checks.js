@@ -609,6 +609,16 @@ function runMuseChecks(R, ok) {
   A.load(null, null);
   ok(R._math.firstJSONObject('x {"a": "}{"} y {"b":1}').a === "}{", "the JSON finder handles braces inside strings");
 
+  // "Why" lines name hooks the right way round (fixed in 0.5: calm picks were called hooky).
+  var whyBad = 0, whyCalm = 0;
+  for (var ws = 0; ws < 30; ws++) {
+    R.rank(R.newState(), R.newUser(), input(200 + ws, 8), R.params()).picks.forEach(function (p) {
+      if (/hooky/.test(p.why) && p.hook < 0.5) whyBad++;
+      if (/calmer pick/.test(p.why)) { whyCalm++; if (p.hook >= 0.5) whyBad++; }
+    });
+  }
+  ok(whyBad === 0 && whyCalm > 0, "why lines call calm games calm and hooky games hooky", "wrong " + whyBad + ", calm " + whyCalm);
+
   // Repeat window early in a session (fixed in 0.5: a short feed used to block too little).
   var fresh = R.rank(R.newState(), R.newUser(), input(31, 5), R.params()).picks.map(function (p) { return p.gameID; });
   var freshBase = R.baseline(input(31, 5)).picks.map(function (p) { return p.gameID; });
