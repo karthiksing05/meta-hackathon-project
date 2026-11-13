@@ -354,7 +354,7 @@ struct BubblesTabView: View {
         let post = BubbleSurfaceHooks.float(bubble, result: nil, to: group, message: message, appStore: appStore, bubbleStore: bubbleStore)
         if post != nil {
             Haptics.success()
-            appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
+            // BubbleSurfaceHooks.float shows the "Shared to …" toast itself.
         } else {
             appStore.showToast("Couldn't share this \(ProductName.singular) right now", symbol: "exclamationmark.circle")
         }
@@ -450,6 +450,22 @@ private struct BubbleFeedHeader: View {
             iconButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off", action: onToggleMute)
             iconButton("books.vertical.fill", label: "Library") {
                 router.push(.bubbleLibrary)
+            }
+            iconButton("trophy.fill", label: "Challenges") {
+                router.push(.challengesInbox)
+            }
+            .overlay(alignment: .topTrailing) {
+                let open = ChallengeInbox.shared.openCount
+                if open > 0 {
+                    Text("\(open)")
+                        .font(.fbMicroEmphasized)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 5)
+                        .frame(minWidth: 18, minHeight: 18)
+                        .background(FBColor.notificationRed, in: Capsule())
+                        .offset(x: -2, y: 2)
+                        .accessibilityLabel("\(open) open challenges")
+                }
             }
             ViewThatFits(in: .horizontal) {
                 blowButton(showsTitle: true)

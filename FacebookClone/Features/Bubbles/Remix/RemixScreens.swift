@@ -62,14 +62,7 @@ enum RemixScreens {
     static func debugOpen(_ route: BubbleFeatureRoute, router: Router, appStore: AppStore, bubbleStore: BubbleStore) -> Bool {
         switch route.screen {
         case sendBack:
-            // Make the Bubble yours, keeping its credit, so 'Send it back' has someone to send to.
-            if let bubble = bubbleStore.bubble(id: route.arg), !bubble.creator.isMe, RemixLineage.isRemix(bubble) {
-                var manifest = bubble.manifest
-                if let original = RemixLineage.original(of: bubble, in: bubbleStore.bubbles) {
-                    RemixLineage.fillCredit(&manifest, base: original, me: appStore.me)
-                }
-                bubbleStore.publish(manifest, cover: bubble.coverImageData, group: bubble.group, event: bubble.event)
-            }
+            // Opens on the game as the server sent it; no local copy is made to stage it.
             router.bubbleSheet = route
             return true
         case tree:
@@ -143,7 +136,7 @@ final class RemixCenter {
         shared.contains("\(bubble.id)|\(target.id)")
     }
 
-    /// The card 'Send it back' sends: "I remixed your Hill Hopper → Fog Hopper".
+    /// The card 'Send it back' sends: "I remixed your <original> → <remix>".
     func sendBackCard(for bubble: Bubble, appStore: AppStore, bubbleStore: BubbleStore) -> BubbleChatCard? {
         guard let originalID = bubble.manifest.lineage.remixOf, RemixLineage.isRemix(bubble) else { return nil }
         let originalTitle = bubble.manifest.lineage.remixOfTitle

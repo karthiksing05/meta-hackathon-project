@@ -127,6 +127,7 @@ struct StudioAskStep: View {
 private struct StudioPromptCard: View {
     @Bindable var model: StudioModel
     var isFocused: FocusState<Bool>.Binding
+    @State private var voice = VoiceInput()
 
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.m) {
@@ -156,6 +157,7 @@ private struct StudioPromptCard: View {
                 }
                 .buttonStyle(.studioSecondary(expand: false, height: 32))
                 Spacer()
+                VoiceInputButton(voice: voice, text: $model.prompt)
                 if !model.prompt.isEmpty {
                     Button {
                         model.prompt = ""
@@ -172,6 +174,7 @@ private struct StudioPromptCard: View {
                 }
             }
             .frame(minHeight: 44)
+            VoiceInputNote(voice: voice)
         }
         .padding(.bottom, -FBSpacing.s)
         .studioCard(highlighted: isFocused.wrappedValue)

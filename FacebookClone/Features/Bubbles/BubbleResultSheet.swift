@@ -3,6 +3,13 @@ import SwiftUI
 /// After a run: the outcome moment in Glow (score, personal best, a "new best" celebration),
 /// your rank among friends or the Group with a three-row board, and what's next: play again,
 /// float the result, share it to your story, or the next level of a chain.
+///
+/// It floats as a card over the game rather than a full sheet, so the final frame stays in view
+/// (dimmed) above and around it. In the player it is an overlay inside the player (`onClose` set):
+/// a partial-height sheet over a full-screen cover lets UIKit drop the cover's view, which showed
+/// the tabs instead of the game. From the feed it stays a sheet with a clear background that rests
+/// below full height on a frosted background (pull it up for everything). Slots keep their own sheets, `exitPlayer` and the
+/// `PresentationGate` sequencing as before.
 struct BubbleResultSheet: View {
     let context: BubbleResultContext
     var onPlayAgain: () -> Void
@@ -12,6 +19,8 @@ struct BubbleResultSheet: View {
     var request: BubblePlayRequest? = nil
     /// Closes the player, then runs the action. Nil outside the player.
     var exitPlayer: ((@escaping () -> Void) -> Void)? = nil
+    /// Set when shown inline over the game (the player): closes the card. Nil when it's a sheet.
+    var onClose: (() -> Void)? = nil
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(AppStore.self) private var appStore
@@ -33,19 +42,29 @@ struct BubbleResultSheet: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
-        .presentationBackground(FBColor.surface)
+        .presentationDetents([ResultCardStyle.restingDetent, .large])
+        .presentationDragIndicator(.hidden)
+        .presentationBackground {
+            // As a sheet (the feed), the sheet itself is the card: frosted, so the page shows through.
+            ZStack {
+                Rectangle().fill(.regularMaterial)
+                FBColor.surface.opacity(0.6)
+            }
+        }
         .overlay(alignment: .bottom) {
-            ToastHost()
-                .padding(.bottom, 16)
+            // Inline, the player's own toast host shows them.
+            if onClose == nil {
+                ToastHost()
+                    .padding(.bottom, 16)
+            }
         }
     }
 
     private func content(_ bubble: Bubble) -> some View {
         let board = BubbleResultBoardModel(context: context, bubble: bubble, store: bubbleStore)
         return ScrollView {
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
+                grabber
                 BubbleResultHero(
                     bubble: bubble,
                     shownScore: shownScore,
@@ -61,12 +80,37 @@ struct BubbleResultSheet: View {
                 }
                 actions(bubble)
             }
-            .padding(.horizontal, FBMetrics.screenPadding)
-            .padding(.top, 24)
-            .padding(.bottom, 24)
+            .padding(.horizontal, FBSpacing.m)
+            .padding(.top, 18)
+            .padding(.bottom, 20)
         }
         .scrollBounceBehavior(.basedOnSize)
+        .resultCard(isInline: onClose != nil)
         .onAppear(perform: playOutcomeMoment)
+    }
+
+    /// The card's handle. Inline, dragging it down (or tapping it) closes the card.
+    @ViewBuilder
+    private var grabber: some View {
+        let handle = Capsule()
+            .fill(FBColor.tertiaryText.opacity(0.5))
+            .frame(width: 36, height: 5)
+            .frame(maxWidth: .infinity, minHeight: 20)
+            .contentShape(Rectangle())
+            .padding(.top, -12)
+        if let onClose {
+            handle
+                .gesture(DragGesture(minimumDistance: 8).onEnded { value in
+                    if value.translation.height > 40 { onClose() }
+                })
+                .onTapGesture(perform: onClose)
+                .accessibilityElement()
+                .accessibilityLabel("Close results")
+                .accessibilityAddTraits(.isButton)
+                .accessibilityAction { onClose() }
+        } else {
+            handle.accessibilityHidden(true)
+        }
     }
 
     // MARK: Outcome
@@ -169,7 +213,7 @@ struct BubbleResultSheet: View {
             withAnimation(.easeInOut(duration: 0.2)) {
                 didFloat = true
             }
-            appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
+            // BubbleSurfaceHooks.float already shows "Shared to <Group>"; a second toast restarted it.
         } else {
             appStore.showToast("Couldn't share this right now", symbol: "exclamationmark.circle")
         }
@@ -217,7 +261,7 @@ private struct BubbleResultHero: View {
                     .foregroundStyle(palette.ink)
                     .lineLimit(1)
                 Text(shownScore.withCommas)
-                    .font(.system(size: 64, weight: .bold, design: .rounded)) // Display text: the run's score
+                    .font(.system(size: 54, weight: .bold, design: .rounded)) // Display text: the run's score
                     .monospacedDigit()
                     .foregroundStyle(palette.ink)
                     .bubbleGlow(palette.glow, radius: 10, opacity: 0.7)
@@ -236,11 +280,11 @@ private struct BubbleResultHero: View {
                         .padding(.top, 4)
                 }
             }
-            .padding(.vertical, 24)
+            .padding(.vertical, 16)
             .padding(.horizontal, 16)
         }
         .frame(maxWidth: .infinity)
-        .frame(minHeight: 250)
+        .frame(minHeight: 168)
         .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous)

@@ -184,6 +184,8 @@ enum BubbleBridgeMessage: Sendable {
     case unknown(String)
     /// Timing from the host (docs/BUBBLES.md, 4.8).
     case perf(BubblePerf)
+    /// A play run's log so far, posted every 2 s and on pause, so it can be resumed (4.8).
+    case checkpoint(BubbleInputLog, score: Int)
 
     /// Parses a WKScriptMessage body (a dictionary with a "type" key).
     init(body: Any) {
@@ -208,6 +210,12 @@ enum BubbleBridgeMessage: Sendable {
             self = .takeover
         case "error":
             self = .error(value["message"]?.string ?? "Unknown runtime error")
+        case "checkpoint":
+            if let log = try? value["replay"]?.decode(BubbleInputLog.self) {
+                self = .checkpoint(log, score: value["score"]?.int ?? 0)
+            } else {
+                self = .unknown(type)
+            }
         case "perf":
             self = .perf(BubblePerf(
                 prepareMs: value["prepare_ms"]?.double,

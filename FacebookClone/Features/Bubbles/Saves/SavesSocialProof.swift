@@ -2,8 +2,9 @@ import Foundation
 
 /// Who saved a game, and how to say it. Saves are the likes (docs/BUBBLES.md 7.10).
 ///
-/// The server sends how many people saved a game (`likes`) and whether you did, but not who, so
-/// the only saver the app can name is you. Naming friends needs `GET /v1/games/{id}/likes`.
+/// The server sends how many people saved a game (`likes`) and whether you did; which of your
+/// friends saved it comes from `GET /v1/games/{id}/likes` (`BubbleStore.loadSavers`). Nobody else
+/// is named, so the rest are a count.
 @MainActor
 enum SavesSocialProof {
     /// A stable hash (Swift's `hashValue` changes every launch).
@@ -16,9 +17,13 @@ enum SavesSocialProof {
         return hash
     }
 
-    /// The people who saved `bubble` that the app knows of: you, when you did.
+    /// The people who saved `bubble` that the app knows of: you, when you did, then your friends
+    /// who did (once `BubbleStore.loadSavers` has heard from the server).
     static func savers(for bubble: Bubble, in bubbleStore: BubbleStore, limit: Int = 12) -> [User] {
-        bubble.isSaved && limit > 0 ? [bubbleStore.appStore.me] : []
+        guard limit > 0 else { return [] }
+        var people: [User] = bubble.isSaved ? [bubbleStore.appStore.me] : []
+        people += bubbleStore.saverStates[bubble.id]?.savers?.friends ?? []
+        return Array(people.prefix(limit))
     }
 
     /// 'Saved by Diego and 37 others', 'Saved by you, Diego and 36 others', 'Saved by Diego',

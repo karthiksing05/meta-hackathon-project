@@ -6,8 +6,14 @@ import SwiftUI
 /// the same seed. Otherwise it starts with the Bubble's intro card. When a run ends the result
 /// sheet shows your score, best and rank, and offers play again, float, story and next level.
 ///
-/// DEBUG: `FB_FAKE_RESULT=1` shows the result sheet without playing; `FB_ENGINE_FAIL=1` shows the
-/// engine error card.
+/// Closing mid-run (or backgrounding the app) keeps the run: the runtime posts `checkpoint`s and
+/// `RunResumeStores.current` saves the latest, so the next open offers Resume or Start over
+/// (`ResumePromptCard`). Resume replays the saved log at full speed and continues it.
+///
+/// DEBUG: `FB_FAKE_RESULT=1` shows the result card without playing (`player` does it only here,
+/// not also on the games tab underneath); `FB_ENGINE_FAIL=1` shows the
+/// engine error card. `FB_RESUME_DEMO=<seconds>` saves a run that many seconds into the game's
+/// featured run (so the Resume prompt shows); `FB_RESUME_AUTO=1` then taps Resume.
 struct BubblePlayerView: View {
     let request: BubblePlayRequest
 
@@ -35,6 +41,11 @@ struct BubblePlayerView: View {
     @State private var attempt = 0
     /// Leaving for another screen (`exitPlayer`): later taps are ignored.
     @State private var isExiting = false
+    /// A run of this game left mid-play: shows the Resume / Start over prompt.
+    @State private var resumeOffer: SavedRun?
+    /// The saved run the next start fast-forwards through (cleared once the runtime resumed it).
+    @State private var resumeLog: BubbleInputLog?
+    private let resumeStore = RunResumeStores.current
 
     init(request: BubblePlayRequest) {
         self.request = request
@@ -73,6 +84,22 @@ struct BubblePlayerView: View {
                     Spacer(minLength: 0)
                     bottomBar(bubble)
                 }
+                // The finished game stays in view behind the result card, dimmed and softened;
+                // tapping it closes the card (Play again stays at the bottom).
+                ResultBackdropScrim(isShown: result != nil, onTap: closeResult)
+                if let context = result {
+                    resultCard(context)
+                }
+                if let offer = resumeOffer {
+                    ResumePromptCard(
+                        saved: offer,
+                        gameTitle: bubble.title,
+                        rival: resumeRival(in: bubble),
+                        onResume: { resume(offer) },
+                        onStartOver: { startOver(bubble) }
+                    )
+                    .transition(.opacity)
+                }
             } else {
                 missing
             }
@@ -81,17 +108,8 @@ struct BubblePlayerView: View {
             ToastHost()
                 .padding(.bottom, 24)
         }
-        .sheet(item: $result) { context in
-            BubbleResultSheet(
-                context: context,
-                onPlayAgain: playAgain,
-                onSeeBoard: openBoard,
-                onNextLevel: playNextLevel,
-                request: request,
-                exitPlayer: exitPlayer
-            )
-        }
         .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: failure)
+        .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: result?.id)
         .onAppear(perform: appear)
         .task(id: "\(bubbleID)#\(attempt)") {
             // A start that never reports `ready` gets the error card and a retry, not an endless loader.
@@ -130,7 +148,8 @@ struct BubblePlayerView: View {
             reducedMotion: reduceMotion,
             restartToken: restartToken,
             insetTop: safeArea.top + Self.topBarHeight,
-            insetBottom: safeArea.bottom + Self.bottomBarHeight
+            insetBottom: safeArea.bottom + Self.bottomBarHeight,
+            resume: resumeLog
         ) { message in
             handle(message, in: bubble)
         }
@@ -225,6 +244,34 @@ struct BubblePlayerView: View {
         }
     }
 
+    /// The result card over the game's final frame (inline, not a sheet: see `BubbleResultSheet`).
+    private func resultCard(_ context: BubbleResultContext) -> some View {
+        GeometryReader { proxy in
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                BubbleResultSheet(
+                    context: context,
+                    onPlayAgain: playAgain,
+                    onSeeBoard: openBoard,
+                    onNextLevel: playNextLevel,
+                    request: request,
+                    exitPlayer: exitPlayer,
+                    onClose: closeResult
+                )
+                .frame(height: proxy.size.height * 0.72)
+            }
+        }
+        .id(context.id)
+        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+        .zIndex(2)
+    }
+
+    private func closeResult() {
+        withAnimation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion)) {
+            result = nil
+        }
+    }
+
     private var missing: some View {
         EngineErrorCard(detail: EngineErrorCard.goneDetail, secondaryTitle: "Close", onSecondary: { dismiss() })
     }
@@ -294,6 +341,12 @@ struct BubblePlayerView: View {
         case .result(let runResult):
             guard !isWatchingBurst else { return }
             finish(runResult, in: bubble)
+        case .checkpoint(let log, let checkpointScore):
+            guard !isWatchingBurst, result == nil else { return }
+            let key = BubbleRuntimeHost.sessionKey(for: effectiveManifest(bubble))
+            resumeStore.save(SavedRun(gameID: bubble.id, sessionKey: key, log: log, score: checkpointScore, savedAt: Date()))
+        case .unknown("resumed"):
+            resumeLog = nil
         default:
             break
         }
@@ -311,6 +364,7 @@ struct BubblePlayerView: View {
             // The replay says which length it was played with, so verification replays it exactly.
             runResult.replay.length = length
         }
+        resumeStore.clear(gameID: bubble.id)
         let entry = bubbleStore.record(runResult, in: bubble)
         BubbleFeatureRouter.didFinish(entry, in: bubble, request: played, appStore: appStore, bubbleStore: bubbleStore)
         let context = BubbleResultContext(bubbleID: bubble.id, result: runResult, previousBest: previous)
@@ -321,12 +375,13 @@ struct BubblePlayerView: View {
     // MARK: Actions
 
     private func appear() {
+        offerResume()
         #if DEBUG
         // FB_ENGINE_FAIL=1 shows the engine error card; "Try again" then starts the game for real.
         if DebugLaunch.value("FB_ENGINE_FAIL") == "1", attempt == 0 {
             failure = EngineFailure(kind: .failed, message: "Simulated by FB_ENGINE_FAIL")
         }
-        if DebugLaunch.value("FB_FAKE_RESULT") == "1", let bubble {
+        if ["1", "player"].contains(DebugLaunch.value("FB_FAKE_RESULT") ?? ""), let bubble {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 showFakeResult(for: bubble)
             }
@@ -344,6 +399,7 @@ struct BubblePlayerView: View {
     }
 
     private func playAgain() {
+        resumeStore.clear(gameID: bubbleID)
         result = nil
         withAnimation(.easeInOut(duration: 0.2)) {
             lastResult = nil
@@ -352,6 +408,60 @@ struct BubblePlayerView: View {
         }
         score = 0
         restartToken += 1
+    }
+
+    // MARK: Resume
+
+    /// Offers the run left mid-play on this exact game (same manifest, seed and length), if any.
+    /// Not over a Burst: watching someone's replay first is its own start.
+    private func offerResume() {
+        guard request.replay == nil, resumeOffer == nil, resumeLog == nil, let bubble else { return }
+        let key = BubbleRuntimeHost.sessionKey(for: effectiveManifest(bubble))
+        #if DEBUG
+        if let seconds = DebugLaunch.value("FB_RESUME_DEMO").flatMap(Double.init) {
+            let manifest = effectiveManifest(bubble)
+            let ticks = Int(seconds * 60)
+            let featured = bubble.featuredRun?.replay
+            let inputs = featured?.seed == manifest.seed ? (featured?.inputs ?? []).filter { $0.t < ticks } : []
+            let log = BubbleInputLog(seed: manifest.seed, totalTicks: ticks, inputs: inputs, length: manifest.length)
+            resumeStore.save(SavedRun(gameID: bubble.id, sessionKey: key, log: log, score: bubble.featuredRun.map { $0.score / 2 } ?? 0, savedAt: Date().addingTimeInterval(-180)))
+        }
+        #endif
+        guard let saved = resumeStore.saved(gameID: bubble.id, sessionKey: key) else { return }
+        resumeOffer = saved
+        #if DEBUG
+        if DebugLaunch.value("FB_RESUME_AUTO") == "1" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { resume(saved) }
+        }
+        #endif
+    }
+
+    /// Starts a fresh web view that fast-forwards through the saved run, then waits for a tap.
+    private func resume(_ saved: SavedRun) {
+        guard resumeOffer != nil else { return }
+        withAnimation(GameMotion.resolved(GameMotion.reveal, reduceMotion: reduceMotion)) {
+            resumeOffer = nil
+        }
+        resumeLog = saved.log
+        score = saved.score
+        failure = nil
+        isLive = false
+        hasStarted = true
+        attempt += 1
+    }
+
+    private func startOver(_ bubble: Bubble) {
+        resumeStore.clear(gameID: bubble.id)
+        withAnimation(GameMotion.resolved(GameMotion.reveal, reduceMotion: reduceMotion)) {
+            resumeOffer = nil
+        }
+    }
+
+    /// The best friend's score on this game, so the prompt is about someone.
+    private func resumeRival(in bubble: Bubble) -> (name: String, score: Int)? {
+        let me = appStore.me.id
+        guard let top = bubbleStore.leaderboard(for: bubble, scope: .friends).first(where: { $0.user.id != me }) else { return nil }
+        return (top.user.firstName, top.score)
     }
 
     private func openBoard(_ bubble: Bubble) {

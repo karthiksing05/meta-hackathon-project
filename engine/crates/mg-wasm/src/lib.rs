@@ -456,6 +456,78 @@ pub extern "C" fn mg_log(h: i32) -> i32 {
     })
 }
 
+/// Replays a `microgame-log/1` input log against a game file and checks the
+/// result it claims, the same check as `microgame verify`, so a server or app
+/// can confirm a submitted score without trusting the client. Input: UTF-8 JSON
+/// `{"game": <the exact game file text>, "log": <the log as JSON text or object>}`.
+/// Result: `{ok, game_hash_ok, steps, recomputed, claimed, problems}`, where
+/// `recomputed` and `claimed` are `{state_hash, phase, score, time_ms}`.
+#[no_mangle]
+pub unsafe extern "C" fn mg_verify(ptr: *const u8, len: u32) -> i32 {
+    let v = match unsafe { input_str(ptr, len) } {
+        Some(text) => verify_json(text),
+        None => serde_json::json!({ "ok": false, "problems": ["request is not valid UTF-8"] }),
+    };
+    result_with(|out| {
+        let _ = serde_json::to_writer(out, &v);
+    })
+}
+
+/// The body of `mg_verify` (also used by tests and native hosts).
+pub fn verify_json(input: &str) -> serde_json::Value {
+    use serde_json::{json, Value as J};
+    let fail = |p: String| json!({ "ok": false, "game_hash_ok": false, "steps": 0, "recomputed": null, "claimed": null, "problems": [p] });
+    let req: J = match serde_json::from_str(input) {
+        Ok(v) => v,
+        Err(e) => return fail(format!("request is not JSON: {e}")),
+    };
+    let Some(game_text) = req.get("game").and_then(J::as_str) else {
+        return fail("missing \"game\": the exact game file text the log was recorded with".into());
+    };
+    let log_text = match req.get("log") {
+        Some(J::String(s)) => s.clone(),
+        Some(J::Null) | None => return fail("missing \"log\": a microgame-log/1 input log".into()),
+        Some(other) => other.to_string(),
+    };
+    let parsed = match log::parse_log(&log_text) {
+        Ok(l) => l,
+        Err(e) => return fail(e),
+    };
+    let compiled = match mg_lang::compile(game_text) {
+        Ok(c) => c,
+        Err(d) => return fail(format!("the game doesn't compile: {}", d.first().map(|x| x.message.as_str()).unwrap_or("unknown error"))),
+    };
+    let mut problems = Vec::new();
+    let want = hex64(log::game_hash(game_text));
+    let game_hash_ok = parsed.game_hash == want;
+    if !game_hash_ok {
+        problems.push(format!("game_hash {} doesn't match this game file ({want})", parsed.game_hash));
+    }
+    let mut player = Player::new(Rc::new(compiled.program), parsed.seed);
+    let steps = match log::replay_calls(&mut player, &parsed.calls) {
+        Ok(n) => n,
+        Err(e) => {
+            problems.push(e);
+            0
+        }
+    };
+    let recomputed = log::final_json(&player);
+    let same = |a: &J, b: &J| match (a.as_f64(), b.as_f64()) {
+        (Some(x), Some(y)) => x == y,
+        _ => a == b,
+    };
+    for key in ["state_hash", "phase", "score", "time_ms"] {
+        let (a, b) = (&parsed.final_[key], &recomputed[key]);
+        if !same(a, b) {
+            problems.push(format!("final.{key}: log says {a}, replay gives {b}"));
+        }
+    }
+    json!({
+        "ok": problems.is_empty(), "game_hash_ok": game_hash_ok, "steps": steps,
+        "recomputed": recomputed, "claimed": parsed.final_, "problems": problems,
+    })
+}
+
 /// v0.2 assets in id order → JSON array
 /// `[{id, name, kind: "image"|"sound", src, svg, w, h, frames, cols, fps}]`.
 /// `svg` is true when `src` is inline SVG markup. Sounds have `null` sizes.
@@ -522,6 +594,10 @@ pub extern "C" fn mg_state_json(h: i32) -> i32 {
 #[no_mangle]
 pub extern "C" fn mg_hit_targets(h: i32) -> i32 {
     let Some(g) = slot(h) else { return ERR_HANDLE };
+    // Reading the targets builds the current layout, which is what the next
+    // pointer hit-tests against. Log it like a frame, so a replay hit-tests
+    // the same layout (the app's runtime calls this before every tap).
+    g.log.frame();
     let targets = g.player.hit_targets();
     result_with(|out| {
         out.push(b'[');

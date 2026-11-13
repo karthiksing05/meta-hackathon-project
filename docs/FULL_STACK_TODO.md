@@ -32,7 +32,7 @@ person has to choose). The app build itself is Karthik's to verify (no Xcode on 
 
 - [ ] **verify live (after deploy):** change a game (tweak, new look, next level, remix), anatomy revise, and a change that takes
   a while (Artem measured 221 s for a revise on real Muse). The app's request timeout is 8 s; confirm it polls and never waits on one call.
-- [ ] **missing (server):** cancel a job. The app client has `generationCancel`; the server has no cancel route.
+- [x] **built:** cancel a job, `DELETE /v1/generate/{id}`.
 - [ ] **verify (app):** the "Muse at work" screen shows each step from `GET /v1/generate/{id}`, the queued, failed and cap
   messages (1 active job per person, 6 an hour), and a finished game opens and plays.
 - [ ] **verify:** the web player at `https://games.ol4ol.com/play/?game=<id>` plays a real generated game (the engine WASM
@@ -50,8 +50,7 @@ person has to choose). The app build itself is Karthik's to verify (no Xcode on 
 - [ ] **decide and build:** the database is empty by design, so the feed says "No Whims yet". Karthik's idea: official studio
   accounts that post generated games. Needs a way to generate N games as a studio account on a schedule (server work), and the
   accounts themselves in the database, not in app code.
-- [ ] **fix (server):** with one game in the catalog `/v1/feed` returned the same game 10 times in a row. A page should not repeat
-  a game; return fewer items instead.
+- [x] **fixed:** a feed page never shows the same game twice.
 - [ ] **verify:** the app sends page events to `POST /v1/feed/events` and the server's per-person model learns (check
   `GET /v1/me/recs` before and after playing); `sessionID` stays the same across pages and changes per visit.
 - [ ] **verify:** scores, saves and the leaderboard from two accounts on two phones; friends' scores show as "from your people".
@@ -60,7 +59,7 @@ person has to choose). The app build itself is Karthik's to verify (no Xcode on 
 
 ## 4. People, friends, Groups
 
-- [ ] **missing (server):** find people (search by name or username). Without it nobody can add a friend; there is no screen or endpoint.
+- [x] **built:** find people, `GET /v1/users?q=`. The front end still has to use it.
 - [ ] **decide:** friending is mutual and instant today (no request and accept). A real friend-request flow needs new endpoints.
 - [ ] **missing:** Group invites, removing a member, transferring ownership; Event fields (date, place, RSVP) on `/v1/groups?kind=event`.
 - [ ] **built, app not wired:** challenges, moments inbox, friends and Group leaderboards, saves from both sides. Wire the
@@ -78,7 +77,8 @@ person has to choose). The app build itself is Karthik's to verify (no Xcode on 
 ## 6. Safety and cleanup
 
 - [ ] **missing (server):** report a game, block a person; Muse-made content has no moderation step beyond the bots.
-- [ ] **missing (server):** delete a game or an account. The test account `test@test.com` and the game "Fog Over the Bay" now on the
+- [x] **built:** delete a game (`DELETE /v1/creations/{id}`). Still missing: delete an account.
+- [ ] **missing (server):** The test account `test@test.com` and the game "Fog Over the Bay" now on the
   live server cannot be removed through the API; they have to be removed in the database before the demo.
 - [ ] **verify:** private fields. Email is returned only to its owner; check that no other endpoint leaks it.
 

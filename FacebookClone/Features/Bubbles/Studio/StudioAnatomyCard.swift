@@ -11,6 +11,7 @@ struct StudioAnatomyCard: View {
     @State private var editingSlot: String?
     @State private var draftText = ""
     @State private var refineText = ""
+    @State private var editVoice = VoiceInput()
     @FocusState private var focus: Field?
 
     private enum Field: Hashable { case edit, refine }
@@ -62,9 +63,19 @@ struct StudioAnatomyCard: View {
                 }
             } else if thread.isWorking {
                 loading
-            } else {
-                // The server has no anatomy endpoint yet, and the app asks no model itself.
-                LiveDataStateView(kind: .notAvailable(thread.note ?? LiveDataCopy.anatomy))
+            } else if let note = thread.note {
+                // The server's words for what went wrong (503: Muse isn't set up; 502: a bad reply).
+                VStack(alignment: .leading, spacing: FBSpacing.s) {
+                    Text(note)
+                        .font(.fbBody)
+                        .foregroundStyle(FBColor.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Try again") {
+                        Haptics.light()
+                        thread.draft(request: thread.request, audience: thread.audience)
+                    }
+                    .buttonStyle(.studioSecondary(expand: false, height: 40))
+                }
             }
             if thread.isWorking && thread.anatomy != nil {
                 HStack(spacing: FBSpacing.s) {
@@ -155,19 +166,24 @@ struct StudioAnatomyCard: View {
 
     private func editor(slot: String) -> some View {
         VStack(alignment: .leading, spacing: FBSpacing.s) {
-            TextField("Say how it works", text: $draftText, axis: .vertical)
-                .font(.fbBody)
-                .lineLimit(1...4)
-                .focused($focus, equals: .edit)
-                .padding(.horizontal, FBSpacing.m)
-                .padding(.vertical, 8)
-                .background(StudioGlow.fieldFill, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+            HStack(alignment: .bottom, spacing: FBSpacing.xs) {
+                TextField("Say how it works", text: $draftText, axis: .vertical)
+                    .font(.fbBody)
+                    .lineLimit(1...4)
+                    .focused($focus, equals: .edit)
+                    .padding(.horizontal, FBSpacing.m)
+                    .padding(.vertical, 8)
+                    .background(StudioGlow.fieldFill, in: RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
+                VoiceInputButton(voice: editVoice, text: $draftText)
+            }
+            VoiceInputNote(voice: editVoice)
             HStack(spacing: FBSpacing.s) {
                 Button("Cancel") {
                     withAnimation(.easeInOut(duration: 0.2)) { editingSlot = nil }
                 }
                 .buttonStyle(.studioSecondary(expand: false, height: 36))
                 Button("Save") {
+                    editVoice.stop()
                     Haptics.light()
                     thread.setText(draftText, slot: slot)
                     withAnimation(.easeInOut(duration: 0.2)) { editingSlot = nil }
@@ -427,11 +443,20 @@ struct StudioAnatomyInput<Field: Hashable>: View {
     let accessibilityLabel: String
     let onSend: () -> Void
 
+    @State private var voice = VoiceInput()
+
     private var canSend: Bool {
         !isBusy && !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: FBSpacing.s) {
+            composer
+            VoiceInputNote(voice: voice)
+        }
+    }
+
+    private var composer: some View {
         HStack(alignment: .bottom, spacing: FBSpacing.s) {
             TextField(placeholder, text: $text, axis: .vertical)
                 .font(.fbBody)
@@ -441,7 +466,10 @@ struct StudioAnatomyInput<Field: Hashable>: View {
                 .onChange(of: text) { _, newValue in
                     if newValue.contains("\n") {
                         text = newValue.replacingOccurrences(of: "\n", with: " ")
-                        if canSend { onSend() }
+                        if canSend {
+                            voice.stop()
+                            onSend()
+                        }
                     }
                 }
                 .padding(.horizontal, FBSpacing.m)
@@ -451,8 +479,10 @@ struct StudioAnatomyInput<Field: Hashable>: View {
                     RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous)
                         .strokeBorder(StudioGlow.cardStroke, lineWidth: 0.75)
                 }
+            VoiceInputButton(voice: voice, text: $text)
             Button {
                 guard canSend else { return }
+                voice.stop()
                 Haptics.light()
                 onSend()
             } label: {

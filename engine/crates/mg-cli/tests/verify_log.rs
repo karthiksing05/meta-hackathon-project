@@ -49,7 +49,18 @@ fn log(h: i32) -> J {
 
 fn verify(game: &str, log: &J) -> mg_cli::verify::Verdict {
     let (program, _) = mg_cli::compile(game).expect("compiles");
-    mg_cli::verify::verify(game, &program, &log.to_string()).expect("log parses")
+    let native = mg_cli::verify::verify(game, &program, &log.to_string()).expect("log parses");
+    // The WASM export (`mg_verify`, what servers and the app call) must agree with the CLI.
+    let req = serde_json::json!({ "game": game, "log": log }).to_string();
+    assert!(unsafe { mg_verify(req.as_ptr(), req.len() as u32) } > 0);
+    let wasm = result_json();
+    assert_eq!(wasm["ok"].as_bool(), Some(native.ok), "mg_verify disagrees with the CLI: {wasm}");
+    assert_eq!(wasm["game_hash_ok"].as_bool(), Some(native.game_hash_ok));
+    assert_eq!(wasm["problems"].as_array().map(|a| a.len()), Some(native.problems.len()), "{wasm}");
+    if native.ok {
+        assert_eq!(wasm["recomputed"]["score"].as_f64(), native.recomputed["score"].as_f64());
+    }
+    native
 }
 
 /// Plays Word Rain by typing the lowest falling word (changes, then submit).

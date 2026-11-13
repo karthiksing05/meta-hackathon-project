@@ -1861,6 +1861,20 @@
     while (!run.ended && !run.ending && run.tick < POSTER_MAX_TICKS && run.tick < posterTickOf(run)) run.step();
     return run;
   }
+  // Resume (docs/BUBBLES.md 4.8): plays a saved partial log (a `checkpoint`) back at full speed to the
+  // tick it was saved at, then stops replaying so live input continues the same run. The run records
+  // the replayed inputs in its own log as it goes, so the finished run is still one seed plus one input
+  // log and replays (and verifies) exactly like a run played in one sitting. Make the run with
+  // `replay: saved` and `seed: saved.seed`. Returns false when the saved run had already ended.
+  function resumeRun(run, saved) {
+    const total = isObj(saved) ? Math.max(0, Math.floor(Number(saved.total_ticks) || 0)) : 0;
+    if (!run.begun) run.begin();
+    while (!run.ended && !run.ending && run.tick < total) run.step();
+    run.replayInputs = null;
+    run.replayIndex = 0;
+    run.replayTotal = 0;
+    return !run.ended && !run.ending;
+  }
   function demoBotSeed(session, loop) {
     return (seedToU32(session.manifest.seed) + (loop || 0) * 7919) >>> 0;
   }
@@ -2019,6 +2033,7 @@
     looks: LOOKS,
     resolveStyle,
     posterRun,
+    resumeRun,
     color: { mix: mixHex, rgba, hexToRgb, contrast: contrastRatio, isHex, hsl: toHsl, fromHsl },
     ease,
     util: { clamp, lerp, hashString, makeRng, rngInt, rngPick, rngShuffle, round1, deepCopy },
@@ -5177,6 +5192,9 @@
   const MAX_SESSIONS = 4;
   const MAX_STEPS_PER_FRAME = 5;
   const DEMO_MAX_TICKS = 60 * 42;
+  // A play run posts a `checkpoint` (its log so far) this often, and when it pauses, so the app can
+  // resume it after the player closes (docs/BUBBLES.md 4.8, "Resume").
+  const CHECKPOINT_TICKS = 60 * 2;
   // With insets, the score HUD (top + 8 px, a 50 px number and its label) gets this much room
   // under the top inset, so it never covers the game's top line.
   const HUD_ROW = 72;
@@ -5213,6 +5231,7 @@
     stopAt: 0,
     demoLoop: 0,
     lastScore: -1,
+    lastCheckpoint: 0,
     lastHaptic: 0,
     lastHapticStyle: "",
     perfState: null,
@@ -5443,6 +5462,9 @@
           reduced: !!pick("reduced_motion", false),
           insets: normInsets(pick("insets", null)),
           botSkill: typeof pick("bot_skill", null) === "number" ? pick("bot_skill", null) : DEMO_BOT_SKILL,
+          // A saved partial run to pick up (play mode only). Read from the activate options, never
+          // the prepared payload, and used once: Play again starts fresh.
+          resume: this.mode === "play" && isObj(o.resume) && Array.isArray(o.resume.inputs) ? o.resume : null,
         };
         // A replay that recorded a locked length (a challenge, a group-chat session) plays on that
         // length even when the prepared manifest has none (docs/BUBBLES.md 7.9).
@@ -5567,6 +5589,7 @@
           case "pause":
             this.paused = true;
             this.stopLoop();
+            this.checkpoint(true);
             break;
           case "resume":
             Sound.unlock();
@@ -5616,7 +5639,13 @@
       const session = entry.session;
       const mode = this.mode;
       const o = { mode, player: this.opts.player, fx: mode === "poster" ? NOOP_FX : this.fx(), preload: (u) => Images.load(u) };
-      if (mode === "replay") {
+      const resume = mode === "play" ? this.opts.resume : null;
+      this.opts.resume = null;
+      this.lastCheckpoint = 0;
+      if (resume) {
+        o.replay = resume;
+        o.seed = resume.seed;
+      } else if (mode === "replay") {
         o.replay = this.opts.replay;
         o.seed = this.opts.replay.seed;
       } else if (mode === "demo" || mode === "poster") {
@@ -5625,6 +5654,28 @@
         o.botSeed = demoBotSeed(session, this.demoLoop);
       }
       this.run = session.newRun(o);
+      if (resume) {
+        // Fast-forward silently to where they left off, then wait on a "Tap to keep going" card.
+        this.ffwd = true;
+        let resumed = false;
+        try { resumed = resumeRun(this.run, resume); } finally { this.ffwd = false; }
+        if (!resumed) {
+          this.startRun(skipIntro, firstTap);
+          return;
+        }
+        Sound.flavor = this.run.feel.sound || "soft";
+        this.acc = 0;
+        this.lastTs = 0;
+        this.lastScore = -1;
+        this.lastCheckpoint = this.run.tick;
+        this.stage = "intro";
+        this.showResumeCard();
+        this.post({ type: "phase", name: "intro" });
+        this.post({ type: "resumed", tick: this.run.tick, score: this.run.score });
+        this.render(0);
+        this.maybeLoop();
+        return;
+      }
       Sound.flavor = this.run.feel.sound || "soft";
       if (mode !== "poster") this.popIn(firstTap);
       this.acc = 0;
@@ -5703,6 +5754,18 @@
       this.startRun(true, { x, y });
     },
 
+    // Posts the live play run's log so far ({type: "checkpoint", tick, score, replay}), so the app can
+    // save it and resume the run later (`resumeRun`). Only mid-run: not before the first tap, not once
+    // the run is ending, and not in the first second (nothing worth keeping yet).
+    checkpoint(force) {
+      const run = this.run;
+      if (!run || this.mode !== "play" || this.stage !== "playing" || !run.begun || run.ending || run.ended) return;
+      if (run.tick < TICK_RATE) return;
+      if (!force && run.tick - this.lastCheckpoint < CHECKPOINT_TICKS) return;
+      this.lastCheckpoint = run.tick;
+      this.post({ type: "checkpoint", tick: run.tick, score: run.score, replay: run.replayLog() });
+    },
+
     // ----- loop -----
 
     maybeLoop() {
@@ -5756,6 +5819,7 @@
         }
         if (steps >= MAX_STEPS_PER_FRAME) this.acc = 0;
         this.updateHud(false);
+        if (run.tick - this.lastCheckpoint >= CHECKPOINT_TICKS) this.checkpoint(false);
         const replayDone = this.mode === "replay" && run.replayTotal > 0 && run.tick >= run.replayTotal && !run.ended;
         const demoDone = this.mode === "demo" && run.tick >= DEMO_MAX_TICKS && !run.ended;
         if (run.ended || replayDone || demoDone) this.onRunEnded(run.ended);
@@ -6286,6 +6350,20 @@
       ]);
       const chip = card.querySelector ? card.querySelector(".card-length") : null;
       if (chip && best !== null && !endlessBest) chip.style.marginRight = "6px";
+      card.className = "bubble-card intro enter";
+      this.dom.hud.classList.add("hidden");
+    },
+
+    // The card over a resumed run's frozen frame: the score so far and "Tap to keep going".
+    showResumeCard() {
+      const run = this.run;
+      const label = run.hud.label || (run.score === 1 ? "point" : "points");
+      const card = this.cardEl([
+        ["card-kicker", "Welcome back"],
+        ["card-score", String(run.score)],
+        ["card-label", label],
+        ["card-cta", "Tap to keep going"],
+      ]);
       card.className = "bubble-card intro enter";
       this.dom.hud.classList.add("hidden");
     },

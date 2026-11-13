@@ -46,6 +46,10 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 				Options: options.Index().SetName("games_search").
 					SetWeights(bson.D{{Key: "title", Value: 10}, {Key: "tags", Value: 5}, {Key: "description", Value: 1}})},
 		},
+		cSeries: {
+			{Keys: k("playerA", 1, "createdAt", -1), Options: options.Index().SetName("series_a")},
+			{Keys: k("playerB", 1, "createdAt", -1), Options: options.Index().SetName("series_b")},
+		},
 		cChallenges: {
 			{Keys: k("fromId", 1, "createdAt", -1), Options: options.Index().SetName("challenges_from")},
 			{Keys: k("toIds", 1, "createdAt", -1), Options: options.Index().SetName("challenges_to")},

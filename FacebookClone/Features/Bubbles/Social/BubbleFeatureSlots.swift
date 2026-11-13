@@ -14,7 +14,7 @@ import SwiftUI
 // BubblePlayerBannerSlots       BubblePlayerView, under the top bar       challenge, nextline
 // BubbleGroupFeaturedSlots      BubbleGroupSection (Featured tab)         groups-search, nextline
 // BubbleGroupGamesTab           GroupDetailView "Games" tab               groups-search hub, nextline, learn, together, groups-search list
-// BubbleProfileHeaderSlots      ProfileView header, under the actions     challenge
+// BubbleProfileHeaderSlots      ProfileView header, under the actions     bracket, challenge
 // BubbleProfileSectionSlots     BubbleProfileSection (Bubbles tab), top   together, learn
 // BubbleFriendRowSlots          AllFriendsView rows, before the menu      challenge
 // BubbleLibraryHeaderSlots      BubbleLibraryView, above the sections     saves, learn
@@ -161,6 +161,8 @@ struct BubbleProfileHeaderSlots: View {
     let user: User
 
     var body: some View {
+        // Someone you just met: the get-to-know bracket comes first.
+        BracketProfileCard(user: user)
         ChallengeProfileRivalry(user: user)
     }
 }

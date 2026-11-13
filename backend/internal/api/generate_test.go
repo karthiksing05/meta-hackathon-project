@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -61,6 +62,26 @@ func newFakeGenerator(t *testing.T) *fakeGenerator {
 			line(`{"type":"event","event":{"kind":"playtested","passed":true,"headline":"5 of 5 bots fine","summary":"Playtested: 5 of 5 bots fine"}}`)
 			line(`{"type":"event","event":{"kind":"done","title":"Fog Walk","summary":"Fog Walk is ready"}}`)
 			line(`{"type":"result","manifest":` + g.manifest + `,"stats":{"museCalls":2,"repairRounds":1},"gate":{"passed":true,"summary":"fine"}}`)
+		case r.URL.Path == "/verify" && r.Method == "POST":
+			// stands in for the engine: trusts the log's own numbers, except for the cases the tests make up
+			var in struct{ Game, Log string }
+			json.NewDecoder(r.Body).Decode(&in)
+			var lg struct {
+				GameHash string `json:"game_hash"`
+				Final    struct {
+					Phase  string  `json:"phase"`
+					Score  float64 `json:"score"`
+					TimeMs float64 `json:"time_ms"`
+				} `json:"final"`
+			}
+			json.Unmarshal([]byte(in.Log), &lg)
+			g.mu.Lock()
+			g.requests = append(g.requests, "/verify game="+in.Game)
+			g.mu.Unlock()
+			ok := lg.Final.Score != 99999
+			fmt.Fprintf(w, `{"ok":%v,"game_hash_ok":%v,"problems":%s,"recomputed":{"phase":%q,"score":%v,"time_ms":%v}}`,
+				ok, lg.GameHash != "other", map[bool]string{true: "[]", false: `["final.score: log says 99999, replay gives 1"]`}[ok],
+				lg.Final.Phase, lg.Final.Score, lg.Final.TimeMs)
 		case (r.URL.Path == "/anatomy" || r.URL.Path == "/anatomy/revise") && r.Method == "POST":
 			body := make([]byte, 1<<16)
 			n, _ := r.Body.Read(body)

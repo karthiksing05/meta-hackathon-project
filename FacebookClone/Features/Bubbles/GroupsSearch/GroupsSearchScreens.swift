@@ -147,8 +147,8 @@ enum GroupsSearchCopy {
 
     // Weekly board
     static let weeklyTitle = "This week's leaderboard"
-    static let weeklySubtitle = "Last 7 days · every Group game counts"
-    static let pointsRule = "Each Group game, each day: 1st 5 pts · 2nd 3 · 3rd 2 · played 1"
+    static let weeklySubtitle = "This week · every Group game counts"
+    static let pointsRule = "Each Group game this week: 1st 10 pts · 2nd 7 · 3rd 5 · 4th 3 · 5th 2 · played 1"
     static func points(_ value: Int) -> String { value == 1 ? "1 pt" : "\(value) pts" }
     static func leads(_ name: String) -> String { "\(name) leads the Group" }
     static let youLead = "You lead the Group"

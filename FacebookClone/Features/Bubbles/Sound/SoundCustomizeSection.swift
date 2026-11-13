@@ -13,7 +13,7 @@ import SwiftUI
 ///
 /// - Microgames Muse built (with `content.authoring_json`) get everything. Set, music and loudness
 ///   edit the manifest's `sound` section directly and re-expand it (about a second, no Muse call).
-///   Free-text tweaks need the server to ask Muse (not built yet), so they say so.
+///   Free-text tweaks go to `onAsk` (Studio makes them on the server as a tweak).
 /// - Other games show a short note: their sounds follow the game's feel, not a sound set.
 ///
 /// Previews play through `GameSound` with a Swift copy of the engine's synth: the same notes,
@@ -21,9 +21,13 @@ import SwiftUI
 struct SoundCustomizeSection: View {
     let manifest: BubbleManifest
     let onChange: (BubbleManifest) -> Void
+    /// Free-text changes ("make the music calmer"), which Muse makes on the server; Studio runs
+    /// them as a tweak. Nil where nobody can make them.
+    let onAsk: ((String) -> Void)?
 
-    init(manifest: BubbleManifest, onChange: @escaping (BubbleManifest) -> Void) {
+    init(manifest: BubbleManifest, onAsk: ((String) -> Void)? = nil, onChange: @escaping (BubbleManifest) -> Void) {
         self.manifest = manifest
+        self.onAsk = onAsk
         self.onChange = onChange
     }
 
@@ -432,10 +436,18 @@ struct SoundCustomizeSection: View {
         }
     }
 
-    /// Free-text tweaks go to Muse, which only the server may call; it has no endpoint for it yet.
+    /// Free-text tweaks go to Muse, which only the server may call: `onAsk` hands them to Studio,
+    /// which changes the game there (`POST /v1/generate {baseGameId, change}`).
     private func ask(_ text: String) {
-        guard !trimmed(text).isEmpty, working == nil else { return }
+        let wish = trimmed(text)
+        guard !wish.isEmpty, working == nil else { return }
         requestFocused = false
-        errorText = LiveDataCopy.revise
+        guard let onAsk else {
+            errorText = LiveDataCopy.revise
+            return
+        }
+        errorText = nil
+        request = ""
+        onAsk(wish)
     }
 }

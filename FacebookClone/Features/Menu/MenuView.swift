@@ -38,7 +38,10 @@ struct MenuView: View {
                 .presentationDragIndicator(.visible)
         }
         .confirmationDialog("Log out of Facebook?", isPresented: $showLogOut, titleVisibility: .visible) {
-            Button("Log out", role: .destructive) { store.logOut() }
+            Button("Log out", role: .destructive) {
+                store.logOut()
+                Task { await GamesAccount.shared.signOut() }
+            }
             Button("Cancel", role: .cancel) {}
         }
     }

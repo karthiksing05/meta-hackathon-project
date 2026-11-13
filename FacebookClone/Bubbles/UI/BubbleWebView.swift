@@ -20,6 +20,8 @@ struct BubbleWebView: UIViewRepresentable {
     var restartToken: Int = 0
     var insetTop: CGFloat = 0
     var insetBottom: CGFloat = 0
+    /// A saved partial run to pick up when the game starts (play mode). Read once, at start.
+    var resume: BubbleInputLog? = nil
     var onMessage: (BubbleBridgeMessage) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator {
@@ -79,7 +81,8 @@ struct BubbleWebView: UIViewRepresentable {
             isMuted: isMuted,
             reducedMotion: reducedMotion,
             insetTop: insetTop,
-            insetBottom: insetBottom
+            insetBottom: insetBottom,
+            resume: resume
         )
     }
 

@@ -114,12 +114,17 @@ func TestRankedFeed(t *testing.T) {
 	}
 	// the next page in the same session doesn't repeat what was just shown
 	_, second := feedPage(t, ts, tok, map[string]any{"count": 2, "sessionID": "s1"})
-	if len(second) != 2 {
+	if len(second) < 1 || len(second) > 2 {
 		t.Fatalf("second page: %v", second)
 	}
+	// Games the person hasn't seen come first. The recommender holds back new, unproven games, so only a few are
+	// eligible: a game already shown may fill the page, but never ahead of one they haven't seen.
+	repeated := false
 	for _, it := range second {
 		if seen[it["id"].(string)] {
-			t.Fatalf("a game came back within the repeat window: %v", it)
+			repeated = true
+		} else if repeated {
+			t.Fatalf("an unseen game came after a repeat: %v", second)
 		}
 	}
 	// a bad count is clamped, not rejected
@@ -307,5 +312,28 @@ func TestSearchUsesTheRecommender(t *testing.T) {
 	publishGames(t, off, mt)
 	if _, res := do(t, "GET", off.URL+"/v1/search?q=game", register(t, off, "viewer2"), nil, ""); res["personalized"] != false {
 		t.Fatalf("with ranking off the order is plain: %v", res)
+	}
+}
+
+// A page never shows one game twice, even when the catalog has only one game.
+func TestFeedNeverRepeatsAGameOnAPage(t *testing.T) {
+	ts := serverWithRecs(t, true)
+	maker := register(t, ts, "maker")
+	if code, out := publish(t, ts.URL, maker, `{"id":"only-game","title":"Only","one_line_rule":"x","formula":"guess","brief":{"mood":["cozy"]}}`); code != 201 {
+		t.Fatalf("publish: %d %v", code, out)
+	}
+	viewer := register(t, ts, "viewer")
+	for _, tok := range []string{"", viewer} {
+		_, items := feedPage(t, ts, tok, map[string]any{"count": 10, "sessionID": "s1"})
+		seen := map[any]bool{}
+		for _, it := range items {
+			if seen[it["id"]] {
+				t.Fatalf("a game came twice on one page (%d items): %v", len(items), items)
+			}
+			seen[it["id"]] = true
+		}
+		if len(items) != 1 {
+			t.Fatalf("one game, one item: %d", len(items))
+		}
 	}
 }

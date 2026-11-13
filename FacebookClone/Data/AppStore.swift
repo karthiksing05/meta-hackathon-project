@@ -605,6 +605,7 @@ final class AppStore {
         user.requestDate = nil
         me.friendCount += 1
         user.friendCount += 1
+        NotificationCenter.default.post(name: .friendshipStarted, object: nil, userInfo: ["userID": user.id])
         for notification in notifications where notification.kind == .friendRequest && notification.actors.first?.id == user.id {
             notification.requestAction = .confirmed
             notification.isRead = true
@@ -636,6 +637,7 @@ final class AppStore {
             user.friendship = .friends
             user.requestDate = nil
             self.me.friendCount += 1
+            NotificationCenter.default.post(name: .friendshipStarted, object: nil, userInfo: ["userID": user.id])
             self.pushNotification(AppNotification(kind: .friendAccepted, actors: [user], message: "accepted your friend request.", userID: user.id))
         }
     }

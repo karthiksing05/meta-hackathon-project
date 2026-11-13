@@ -48,6 +48,8 @@ type Server struct {
 	genSem      chan struct{} // one slot per job running at once
 	genHealth   genHealthCache
 	recsLocks   userLocks
+	jobRuns     sync.Map  // job id -> *jobRun, for the jobs running now
+	seriesLocks userLocks // one series at a time, so two runs can't overwrite each other
 }
 
 // recsSession is one person's loaded recommender state (see internal/recs).
@@ -101,9 +103,14 @@ func (s *Server) Handler() http.Handler {
 		})
 
 		// People, friends and Groups
+		r.With(s.requireAuth).Get("/users", s.searchUsers)
 		r.With(s.optionalAuth).Get("/users/{id}", s.getUser)
 		r.With(s.requireAuth).Get("/me/likes", s.myLikes)
 		r.With(s.requireAuth).Get("/me/moments", s.myMoments)
+		r.With(s.requireAuth).Post("/series", s.createSeries)
+		r.With(s.requireAuth).Get("/series", s.listSeries)
+		r.With(s.requireAuth).Get("/series/{id}", s.getSeries)
+		r.With(s.requireAuth).Post("/series/{id}/rounds/{n}", s.submitRound)
 		r.With(s.requireAuth).Post("/challenges", s.createChallenge)
 		r.With(s.requireAuth).Get("/challenges", s.listChallenges)
 		r.With(s.requireAuth).Get("/me/friends", s.listFriends)
@@ -115,6 +122,7 @@ func (s *Server) Handler() http.Handler {
 			r.Route("/{id}", func(r chi.Router) {
 				r.With(s.optionalAuth).Get("/", s.getGroup)
 				r.With(s.optionalAuth).Get("/games", s.groupGames)
+				r.With(s.requireAuth).Get("/leaderboard", s.groupLeaderboard)
 				r.With(s.requireAuth).Put("/members/me", s.setMembership(true))
 				r.With(s.requireAuth).Delete("/members/me", s.setMembership(false))
 				r.With(s.requireAuth).Post("/blend", s.groupBlend)
@@ -134,6 +142,7 @@ func (s *Server) Handler() http.Handler {
 			r.Get("/", s.listJobs)
 			r.Post("/", s.createJob)
 			r.Get("/{id}", s.getJob)
+			r.Delete("/{id}", s.cancelJob)
 		})
 
 		r.Route("/creations", func(r chi.Router) {
@@ -142,6 +151,8 @@ func (s *Server) Handler() http.Handler {
 			r.Post("/", s.createCreation)
 			r.Get("/{id}", s.getCreation)
 			r.Get("/{id}/source", s.creationSource)
+			r.Post("/{id}/publish", s.publishCreation)
+			r.Delete("/{id}", s.deleteCreation)
 		})
 	})
 	return r

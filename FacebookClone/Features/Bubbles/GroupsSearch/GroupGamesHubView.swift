@@ -66,6 +66,8 @@ struct GroupGamesHubView: View {
                 FeedSeparator()
             }
             GroupWeeklyBoardCard(group: group)
+            FeedSeparator()
+            GroupGameBoardsSection(group: group)
             if hasGames && group.isMember {
                 FeedSeparator()
                 challengeCard

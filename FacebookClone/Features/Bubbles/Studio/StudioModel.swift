@@ -217,6 +217,9 @@ final class StudioModel {
     @ObservationIgnored var makeRecords: [String: MakeRecord] = [:]
     /// The new look a "Tweak it" run asked for (Try it's look menu).
     @ObservationIgnored private var runLookChange: StudioLook?
+    /// Set when the run changes a game the server has (a tweak, a new look, the next level, a
+    /// remix): `POST /v1/generate {baseGameId, ...}`. Nil for a new game.
+    @ObservationIgnored private var runRevision: GameRevision?
 
     // Try it
     var levels: [StudioResult] = []
@@ -708,18 +711,26 @@ final class StudioModel {
     /// Starts Muse. `.create` uses the reviewed brief; `.tweak` and `.nextLevel` build on the
     /// current level. `newLook` redraws the current level in another look (a tweak).
     /// `text` replaces `tweakText` for a tweak (the "Change the game" thread's mapped change).
+    ///
+    /// Everything but a brand-new game is a change to a game the server has (`runRevision`): the
+    /// server makes a new game from it, and the Build step shows that job's steps.
     func startCompose(_ kind: StudioComposeKind, newLook: StudioLook? = nil, text tweak: String? = nil) {
         // A second tap while the step animates away would restart Muse from scratch.
         guard !isComposing else { return }
         let request: StudioRequest
+        let revision: GameRevision?
         switch kind {
         case .create:
             request = makeRequest(mode: mode == .edit ? .create : mode, prompt: effectivePrompt, base: baseBubble?.manifest, brief: briefForRun, look: lookHint)
+            revision = launchRevision(for: request)
         case .tweak:
             guard let current = currentResult else { return }
             let text = (tweak ?? tweakText).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !text.isEmpty else { return }
             request = makeRequest(mode: .edit, prompt: text, base: current.manifest, brief: nil, look: newLook)
+            // A new look goes as `look` alone; the server words the change itself.
+            revision = GameRevision(baseGameID: serverGameID(of: current), change: newLook == nil ? text : nil,
+                                    look: newLook.map(Self.lookChange))
         case .nextLevel:
             guard let current = currentResult else { return }
             let number = (current.manifest.chain?.index ?? max(selectedLevel + 1, 1)) + 1
@@ -727,9 +738,47 @@ final class StudioModel {
             let prompt = text.isEmpty ? "Level \(number) of \(current.manifest.title): same feel, a little harder" : text
             // Next levels keep the chain's look (LOOKS.md).
             request = makeRequest(mode: .nextLevel, prompt: prompt, base: current.manifest, brief: nil, look: StudioLook(id: current.manifest.style.look))
+            revision = GameRevision(baseGameID: serverGameID(of: current), change: text.isEmpty ? nil : text, nextLevel: true)
         }
         runLookChange = kind == .tweak ? newLook : nil
+        runRevision = revision
         run(request, kind: kind)
+    }
+
+    /// The change a remix, next-level or edit launch asks the server for; nil for a new game.
+    private func launchRevision(for request: StudioRequest) -> GameRevision? {
+        guard let base = baseBubble else { return nil }
+        // The base game already follows its agreed anatomy, so only the person's words go.
+        let words = microgameRequestText(request, includesAnatomy: false)
+        switch mode {
+        case .remix:
+            return GameRevision(baseGameID: base.serverID, change: words, brief: briefForRun)
+        case .nextLevel:
+            return GameRevision(baseGameID: base.serverID, change: trimmedPrompt.isEmpty ? nil : words, nextLevel: true)
+        case .edit:
+            return GameRevision(baseGameID: base.serverID, change: words)
+        case .create, .daily:
+            return nil
+        }
+    }
+
+    /// The server game a Studio level is: the Bubble being edited, or the game the server made in
+    /// this session (its app id, which the client linked to the server id).
+    private func serverGameID(of result: StudioResult) -> String {
+        if result.isExisting, let base = baseBubble { return base.serverID }
+        return result.manifest.id
+    }
+
+    /// The `look` sent for a new look: "paper cutout: crafty, warm and tactile".
+    nonisolated static func lookChange(_ look: StudioLook) -> String {
+        "\(look.title.lowercased()): \(look.feel.lowercased())"
+    }
+
+    /// The Sound card's free-text change ("make the music calmer"), as a tweak of the current level.
+    func askSoundChange(_ wish: String) {
+        let text = wish.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        startCompose(.tweak, text: "Change only the game's sound (sound set, volume, music or single moments), nothing else: \(text)")
     }
 
     /// "Tweak it" with a new look: Muse redraws the current level in `look`.
@@ -779,8 +828,7 @@ final class StudioModel {
         go(to: .compose)
 
         guard let stream = serverStream(for: request, kind: kind) else {
-            // Only new games can be made on the server for now; tweaks, next levels and remixes
-            // wait for a server endpoint (docs/LIVE_DATA_AUDIT.md).
+            // Every run is a new game or a change to one on the server; nothing else can build.
             runIsMicrogame = false
             fail(StudioFailure(message: LiveDataCopy.revise, detail: nil))
             return
@@ -868,7 +916,9 @@ final class StudioModel {
         case .tweak:
             guard levels.indices.contains(selectedLevel) else { levels = [result]; break }
             var updated = result
-            updated.isExisting = levels[selectedLevel].isExisting
+            // The server made a new game from the change, so it is shared as a new game, even when
+            // the level was the Bubble being edited.
+            updated.isExisting = false
             // A new look needs a new cover; otherwise keep the old one if Muse didn't paint.
             if updated.cover == nil && runLookChange == nil { updated.cover = levels[selectedLevel].cover }
             levels[selectedLevel] = updated
@@ -972,7 +1022,8 @@ final class StudioModel {
             }
         case .tweak:
             if let current = currentResult?.manifest {
-                manifest.id = current.id
+                // The id stays the server's: the change is a new game there, and scores and saves
+                // go to it by this id.
                 if manifest.version <= current.version { manifest.version = current.version + 1 }
                 if manifest.chain == nil { manifest.chain = current.chain }
                 if manifest.lineage.parent == nil { manifest.lineage = current.lineage }
@@ -1274,7 +1325,9 @@ final class StudioModel {
         let sentTo = isEditMode ? [] : sendToFriends(first, appStore: appStore, bubbleStore: bubbleStore)
         saveMakeRecords(for: published, sentTo: sentTo)
 
-        if isEditMode {
+        if isEditMode, !levels.contains(where: \.isExisting) {
+            toast = "Saved as a new version of \(baseTitle)"
+        } else if isEditMode {
             toast = published.count == 1 ? "Changes saved with a new level" : "Changes saved with \(published.count) new levels"
         } else if isDaily, let group {
             toast = "Today's Daily \(ProductName.singular) is live in \(group.name)"
@@ -1344,23 +1397,37 @@ extension StudioModel {
         return brief
     }
 
-    /// The server's stream for this run (`GameGenerator`, `/v1/generate`). Nil for tweaks, next
-    /// levels and remixes, which have no server endpoint yet.
+    /// The server's stream for this run (`GameGenerator`, `/v1/generate`): a new game, or a change
+    /// to one (`runRevision`). Nil only when there's nothing to build.
     func serverStream(for request: StudioRequest, kind: StudioComposeKind) -> AsyncThrowingStream<StudioEvent, Error>? {
-        guard kind == .create, canBuildMicrogame else { return nil }
         let onReport: @MainActor (UUID, StudioPlaytest.Report) -> Void = { [weak self] id, report in
             self?.playtestReports[id] = report
         }
-        let brief = request.brief ?? briefForRun ?? BubbleBrief(intent: request.prompt, audience: request.scope)
+        let onWait: @MainActor (StudioGenerateBridge.Wait?) -> Void = { [weak self] wait in self?.generationWait = wait }
+        if let revision = runRevision {
+            runIsServer = true
+            return StudioGenerateBridge.revise(with: GameGeneratorFactory.current, revision: revision, onReport: onReport, onWait: onWait)
+        }
+        guard kind == .create, canBuildMicrogame else { return nil }
+        var brief = request.brief ?? briefForRun ?? BubbleBrief(intent: request.prompt, audience: request.scope)
+        var text = microgameRequestText(request)
+        // The server takes up to 2,000 characters of request; a long agreed anatomy goes in the
+        // brief's notes instead (the composer reads both).
+        if text.unicodeScalars.count > Self.maxRequestCharacters, let anatomy = agreedAnatomyText {
+            let words = microgameRequestText(request, includesAnatomy: false)
+            text = String(String.UnicodeScalarView(words.unicodeScalars.prefix(Self.maxRequestCharacters)))
+            brief.notes = [brief.notes, anatomy].compactMap { $0 }.joined(separator: "\n\n")
+        }
         runIsServer = true
-        return StudioGenerateBridge.compose(
-            with: GameGeneratorFactory.current, request: microgameRequestText(request), brief: brief, onReport: onReport,
-            onWait: { [weak self] wait in self?.generationWait = wait }
-        )
+        return StudioGenerateBridge.compose(with: GameGeneratorFactory.current, request: text, brief: brief, onReport: onReport, onWait: onWait)
     }
 
-    /// The request as Muse reads it for a microgame: what the person typed, plus who it's for.
-    private func microgameRequestText(_ request: StudioRequest) -> String {
+    /// `POST /v1/generate` takes a request of 1 to 2,000 characters.
+    nonisolated static let maxRequestCharacters = 2_000
+
+    /// The request as Muse reads it for a microgame: what the person typed, plus who it's for, and
+    /// the agreed anatomy unless `includesAnatomy` is false.
+    private func microgameRequestText(_ request: StudioRequest, includesAnatomy: Bool = true) -> String {
         var text = request.prompt
         let names = request.audienceNames.prefix(6)
         if let scope = request.scopeName {
@@ -1368,7 +1435,7 @@ extension StudioModel {
         } else if audience == .friends, !names.isEmpty {
             text += " (for my friends \(names.joined(separator: ", ")))"
         }
-        if let anatomy = agreedAnatomyText { text += "\n\n" + anatomy }
+        if includesAnatomy, let anatomy = agreedAnatomyText { text += "\n\n" + anatomy }
         return text
     }
 

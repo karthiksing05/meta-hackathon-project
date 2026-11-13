@@ -17,6 +17,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.hackathon.FacebookClone
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Facebook
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Lets you say what game you want instead of typing it."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Turns what you say into text in Studio, on your phone when it can."
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES

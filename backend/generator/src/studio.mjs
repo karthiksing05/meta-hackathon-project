@@ -61,6 +61,17 @@ export function loadStudio(files = findBundles()) {
       return JSON.parse(S.wrap(JSON.stringify(options)));
     },
     /**
+     * Replays a run's input log (microgame-log/1) against the exact game text and checks what it claims:
+     * {ok, game_hash_ok, steps, recomputed: {state_hash, phase, score, time_ms}, claimed, problems}.
+     */
+    /** The engine bundle's global, for tests that play a game to make a log. */
+    engine: () => context.MicrogameEngine,
+    verify(gameText, log) {
+      const E = context.MicrogameEngine;
+      if (!E?.verify) throw new Error('the engine bundle has no verify(); update bubble-kit-microgame-engine.js');
+      return JSON.parse(JSON.stringify(E.verify(String(gameText), typeof log === 'string' ? log : JSON.stringify(log))));
+    },
+    /**
      * The whole pipeline (draft, repair, gate, quality check, polish, wrap), from the bundle.
      * args: {request, brief, base?}; ask(system, user, purpose) -> {content, model}; onEvent gets progress events.
      * Resolves to {manifest, stats, bots, gate, quality}.

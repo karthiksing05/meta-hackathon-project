@@ -6,8 +6,10 @@ import SwiftUI
 /// `SIMCTL_CHILD_FB_TAB=bubbles SIMCTL_CHILD_FB_OPEN=board:fog-words xcrun simctl launch booted com.karthiksing05.fbclone`
 ///
 /// - `FB_TAB`: `home`, `video`, `bubbles`, `friends`, `notifications`, `menu`
+/// - `FB_BEST_OF_5=<userID>`: show the best-of-5 offer for that friend (as after adding them)
+/// - `FB_AUTH=screen|guest`: force the sign-in screen, or continue as a guest
 /// - `FB_OPEN`: one of
-///   `bubble:<id>`, `board:<id>`, `library`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
+///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `find-friends`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
 ///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
@@ -15,6 +17,10 @@ import SwiftUI
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
 /// - `FB_API_URL`: overrides the games API base URL (default `https://api.ol4ol.com`). Point it at an
 ///   unreachable host to see the loading and error states.
+/// - `FB_BRACKET=<userID>[:played]`: starts a get-to-know bracket with that person at launch
+///   (`played` also records your round 1); see it on their profile (`FB_OPEN=profile:<userID>`).
+/// - `FB_RESUME_DEMO=<seconds>` / `FB_RESUME_AUTO=1`: the Resume prompt in the player (see
+///   `BubblePlayerView`). `FB_FAKE_RESULT=player`: the result card in the player only.
 ///
 /// Screens can read their own `FB_*` variables for extra DEBUG-only state (keep them documented
 /// at the top of that screen's file).
@@ -47,6 +53,8 @@ enum DebugLaunch {
         case "bubble": router.push(.bubble(arg))
         case "board": router.push(.bubbleBoard(arg))
         case "library": router.push(.bubbleLibrary)
+        case "challenges": router.push(.challengesInbox)
+        case "find-friends": router.push(.findFriends)
         case "chain": router.push(.bubbleChain(arg))
         case "marketplace": router.push(.marketplace)
         case "play": router.play(arg)

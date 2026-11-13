@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -79,5 +80,132 @@ func TestAnatomy(t *testing.T) {
 	gen.mu.Unlock()
 	if code, _ := do(t, "POST", ts.URL+"/v1/anatomy", tok, js(map[string]any{"request": "x"}), "application/json"); code != 502 {
 		t.Fatalf("when Muse fails: %d", code)
+	}
+}
+
+func TestDraftsAnatomyAndBaseManifest(t *testing.T) {
+	gen := newFakeGenerator(t)
+	ts, _ := serverWithGenerator(t, gen.URL, 20)
+	maker, other := register(t, ts, "maker"), register(t, ts, "other")
+
+	_, out := startJob(t, ts, maker, map[string]any{"request": "a calm fog game"})
+	baseGame := waitJob(t, ts, maker, out["jobId"].(string), "done")["game"].(map[string]any)
+	baseID := baseGame["id"].(string)
+	if baseGame["unlisted"] != nil {
+		t.Fatalf("a new game is public: %v", baseGame)
+	}
+	feedIDs := func() map[string]bool {
+		_, f := do(t, "GET", ts.URL+"/v1/feed", "", nil, "")
+		ids := map[string]bool{}
+		for _, it := range f["items"].([]any) {
+			ids[it.(map[string]any)["id"].(string)] = true
+		}
+		return ids
+	}
+
+	gen.mu.Lock()
+	gen.manifest = strings.Replace(fakeManifest, "mg-fog-walk-k3x9", "mg-fog-walk-v2", 1)
+	gen.mu.Unlock()
+	anatomy := "Agreed game anatomy:\n1. " + strings.Repeat("A long rule. ", 400) // far over the 2,000 character request limit
+	custom := `{"id":"mg-fog-walk-k3x9","title":"My own title","content":{"authoring_json":"{\"edited\":\"on the phone\"}"}}`
+	code, o := do(t, "POST", ts.URL+"/v1/generate", other, js(map[string]any{
+		"baseGameId": baseID, "change": "faster", "anatomy": anatomy, "baseManifest": json.RawMessage(custom),
+	}), "application/json")
+	if code != 202 {
+		t.Fatalf("change: %d %v", code, o)
+	}
+	game := waitJob(t, ts, other, o["jobId"].(string), "done")["game"].(map[string]any)
+	last := gen.requests[len(gen.requests)-1]
+	for _, want := range []string{`"request":"faster\n\nAgreed game anatomy:`, `"base":{"id":"mg-fog-walk-k3x9","title":"My own title"`, `edited`} {
+		if !strings.Contains(last, want) {
+			t.Fatalf("generator request lacks %s:\n%.400s", want, last)
+		}
+	}
+
+	// a change is a draft: not in the feed or search, still reachable by id and in the owner's creations
+	if game["unlisted"] != true || feedIDs()[game["id"].(string)] {
+		t.Fatalf("a change must be unlisted: %v", game)
+	}
+	if _, s := do(t, "GET", ts.URL+"/v1/search?q=fog", "", nil, ""); len(s["items"].([]any)) != 1 {
+		t.Fatalf("search must hold only the public game: %v", s)
+	}
+	if code, g := do(t, "GET", ts.URL+"/v1/games/"+game["id"].(string), "", nil, ""); code != 200 || g["unlisted"] != true {
+		t.Fatalf("by id: %d %v", code, g)
+	}
+	if _, mine := do(t, "GET", ts.URL+"/v1/creations", other, nil, ""); len(mine["items"].([]any)) != 1 {
+		t.Fatalf("my creations include the draft: %v", mine)
+	}
+	// only the owner can publish or delete it
+	pub := ts.URL + "/v1/creations/" + game["id"].(string)
+	if code, _ := do(t, "POST", pub+"/publish", maker, nil, ""); code != 404 {
+		t.Fatalf("someone else publishing: %d", code)
+	}
+	if code, g := do(t, "POST", pub+"/publish", other, nil, ""); code != 200 || g["unlisted"] != nil || !feedIDs()[game["id"].(string)] {
+		t.Fatalf("publish: %d %v", code, g)
+	}
+	if code, _ := do(t, "DELETE", pub, maker, nil, ""); code != 404 {
+		t.Fatalf("someone else deleting: %d", code)
+	}
+	if code, _ := do(t, "DELETE", pub, other, nil, ""); code != 204 {
+		t.Fatalf("delete: %d", code)
+	}
+	if code, _ := do(t, "GET", ts.URL+"/v1/games/"+game["id"].(string), "", nil, ""); code != 404 || feedIDs()[game["id"].(string)] {
+		t.Fatalf("after delete: %d", code)
+	}
+
+	// draft:false publishes a change straight away; draft:true holds a new game back
+	gen.mu.Lock()
+	gen.manifest = strings.Replace(fakeManifest, "mg-fog-walk-k3x9", "mg-fog-walk-v3", 1)
+	gen.mu.Unlock()
+	_, o = do(t, "POST", ts.URL+"/v1/generate", other, js(map[string]any{"baseGameId": baseID, "change": "slower", "draft": false}), "application/json")
+	if g := waitJob(t, ts, other, o["jobId"].(string), "done")["game"].(map[string]any); g["unlisted"] != nil || !feedIDs()[g["id"].(string)] {
+		t.Fatalf("draft:false: %v", g)
+	}
+	gen.mu.Lock()
+	gen.manifest = strings.Replace(fakeManifest, "mg-fog-walk-k3x9", "mg-fog-walk-v4", 1)
+	gen.mu.Unlock()
+	_, o = do(t, "POST", ts.URL+"/v1/generate", other, js(map[string]any{"request": "a secret game", "draft": true}), "application/json")
+	if g := waitJob(t, ts, other, o["jobId"].(string), "done")["game"].(map[string]any); g["unlisted"] != true || feedIDs()[g["id"].(string)] {
+		t.Fatalf("draft:true: %v", g)
+	}
+	// a baseManifest needs a base game and its authoring source
+	for _, body := range []map[string]any{
+		{"request": "x", "baseManifest": json.RawMessage(custom)},
+		{"baseGameId": baseID, "change": "x", "baseManifest": json.RawMessage(`{"title":"no source"}`)},
+	} {
+		if code, _ := do(t, "POST", ts.URL+"/v1/generate", other, js(body), "application/json"); code != 400 {
+			t.Fatalf("%v: %d", body, code)
+		}
+	}
+}
+
+func TestCancelAJob(t *testing.T) {
+	gen := newFakeGenerator(t)
+	gen.hold = make(chan struct{})
+	ts, _ := serverWithGenerator(t, gen.URL, 20)
+	maker, other := register(t, ts, "maker"), register(t, ts, "other")
+
+	_, out := startJob(t, ts, maker, map[string]any{"request": "a calm fog game"})
+	id := out["jobId"].(string)
+	waitJob(t, ts, maker, id, "running")
+	if code, _ := do(t, "DELETE", ts.URL+"/v1/generate/"+id, other, nil, ""); code != 404 {
+		t.Fatalf("someone else cancelling: %d", code)
+	}
+	if code, _ := do(t, "DELETE", ts.URL+"/v1/generate/"+id, maker, nil, ""); code != 204 {
+		t.Fatalf("cancel: %d", code)
+	}
+	job := waitJob(t, ts, maker, id, "failed")
+	if job["error"] != "Cancelled." || job["game"] != nil {
+		t.Fatalf("cancelled job: %v", job)
+	}
+	close(gen.hold)
+	// it frees the person to start another, and cancelling a finished job does nothing
+	_, out = startJob(t, ts, maker, map[string]any{"request": "a calm fog game"})
+	done := waitJob(t, ts, maker, out["jobId"].(string), "done")
+	if code, _ := do(t, "DELETE", ts.URL+"/v1/generate/"+done["jobId"].(string), maker, nil, ""); code != 204 {
+		t.Fatalf("cancelling a finished job: %d", code)
+	}
+	if got := waitJob(t, ts, maker, done["jobId"].(string), "done"); got["game"] == nil {
+		t.Fatalf("a finished job keeps its game: %v", got)
 	}
 }

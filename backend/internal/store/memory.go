@@ -26,6 +26,7 @@ type Memory struct {
 	groups     map[string]*model.Group
 	members    map[string]map[string]model.GroupMember // group -> user -> member
 	challenges []model.Challenge
+	series     map[string]*model.Series
 }
 
 func NewMemory() *Memory {
@@ -34,6 +35,7 @@ func NewMemory() *Memory {
 		games: map[string]*model.Game{}, likes: map[string]bool{}, scores: map[string]model.Score{},
 		eventID: map[string]bool{}, jobs: map[string]*model.Job{}, recs: map[string]model.RecsRecord{},
 		friends: map[string]map[string]bool{}, groups: map[string]*model.Group{}, members: map[string]map[string]model.GroupMember{},
+		series: map[string]*model.Series{},
 	}
 }
 
@@ -143,7 +145,7 @@ func (m *Memory) GameBySlug(ctx context.Context, slug string) (*model.Game, erro
 func (m *Memory) AllGames(ctx context.Context, limit int) ([]model.Game, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return m.sorted(func(*model.Game) bool { return true }, limit, Cursor{}), nil
+	return m.sorted(func(g *model.Game) bool { return !g.Unlisted }, limit, Cursor{}), nil
 }
 
 // gameFor resolves a game key (server id or slug) to the stored game. Callers hold the lock.
@@ -188,7 +190,7 @@ func (m *Memory) GamesByOwner(ctx context.Context, ownerID string, limit int, cu
 func (m *Memory) Feed(ctx context.Context, limit int, cur Cursor) ([]model.Game, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return m.sorted(func(*model.Game) bool { return true }, limit, cur), nil
+	return m.sorted(func(g *model.Game) bool { return !g.Unlisted }, limit, cur), nil
 }
 
 func (m *Memory) Search(ctx context.Context, q, tag string, limit, offset int) ([]model.Game, error) {
@@ -197,6 +199,9 @@ func (m *Memory) Search(ctx context.Context, q, tag string, limit, offset int) (
 	q, tag = strings.ToLower(q), strings.ToLower(tag)
 	words := strings.Fields(q)
 	keep := func(g *model.Game) bool {
+		if g.Unlisted {
+			return false
+		}
 		if tag != "" {
 			found := false
 			for _, t := range g.Tags {
@@ -672,7 +677,7 @@ func (m *Memory) GroupsOfUser(ctx context.Context, userID string) ([]model.Group
 func (m *Memory) GamesByGroup(ctx context.Context, groupID string, limit int) ([]model.Game, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return m.sorted(func(g *model.Game) bool { return g.GroupID == groupID || g.EventID == groupID }, limit, Cursor{}), nil
+	return m.sorted(func(g *model.Game) bool { return !g.Unlisted && (g.GroupID == groupID || g.EventID == groupID) }, limit, Cursor{}), nil
 }
 
 func (m *Memory) RecentScores(ctx context.Context, userIDs []string, limit int) ([]model.Score, error) {

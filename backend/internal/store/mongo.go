@@ -138,7 +138,7 @@ func (m *Mongo) GameBySlug(ctx context.Context, slug string) (*model.Game, error
 }
 
 func (m *Mongo) AllGames(ctx context.Context, limit int) ([]model.Game, error) {
-	return m.findGames(ctx, bson.D{}, options.Find().SetSort(newestFirst).SetLimit(int64(limit)))
+	return m.findGames(ctx, listed(bson.D{}), options.Find().SetSort(newestFirst).SetLimit(int64(limit)))
 }
 
 func cursorFilter(base bson.D, c Cursor) bson.D {
@@ -149,6 +149,11 @@ func cursorFilter(base bson.D, c Cursor) bson.D {
 		bson.D{{Key: "createdAt", Value: bson.D{{Key: "$lt", Value: c.At}}}},
 		bson.D{{Key: "createdAt", Value: c.At}, {Key: "_id", Value: bson.D{{Key: "$lt", Value: c.ID}}}},
 	}})
+}
+
+// listed narrows a games filter to the ones in public lists (drafts are left out).
+func listed(f bson.D) bson.D {
+	return append(f, bson.E{Key: "unlisted", Value: bson.D{{Key: "$ne", Value: true}}})
 }
 
 var newestFirst = bson.D{{Key: "createdAt", Value: -1}, {Key: "_id", Value: -1}}
@@ -171,11 +176,11 @@ func (m *Mongo) GamesByOwner(ctx context.Context, owner string, limit int, c Cur
 }
 
 func (m *Mongo) Feed(ctx context.Context, limit int, c Cursor) ([]model.Game, error) {
-	return m.findGames(ctx, cursorFilter(bson.D{}, c), options.Find().SetSort(newestFirst).SetLimit(int64(limit)))
+	return m.findGames(ctx, cursorFilter(listed(bson.D{}), c), options.Find().SetSort(newestFirst).SetLimit(int64(limit)))
 }
 
 func (m *Mongo) Search(ctx context.Context, q, tag string, limit, offset int) ([]model.Game, error) {
-	f := bson.D{}
+	f := listed(bson.D{})
 	o := options.Find().SetLimit(int64(limit)).SetSkip(int64(offset))
 	if q != "" {
 		f = append(f, bson.E{Key: "$text", Value: bson.D{{Key: "$search", Value: q}}})
@@ -690,7 +695,7 @@ func (m *Mongo) GroupsOfUser(ctx context.Context, userID string) ([]model.Group,
 }
 
 func (m *Mongo) GamesByGroup(ctx context.Context, groupID string, limit int) ([]model.Game, error) {
-	f := bson.D{{Key: "$or", Value: bson.A{bson.D{{Key: "groupId", Value: groupID}}, bson.D{{Key: "eventId", Value: groupID}}}}}
+	f := listed(bson.D{{Key: "$or", Value: bson.A{bson.D{{Key: "groupId", Value: groupID}}, bson.D{{Key: "eventId", Value: groupID}}}}})
 	return m.findGames(ctx, f, options.Find().SetSort(newestFirst).SetLimit(int64(limit)))
 }
 
