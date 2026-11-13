@@ -33,6 +33,8 @@ struct SearchView: View {
     @State private var games: [Bubble] = []
     @State private var gameQuery = ""
     @State private var gameSearchError: String?
+    /// Bumped by Try again to ask the server once more.
+    @State private var gameSearchAttempt = 0
 
     private let trending = [
         "Weekend getaway ideas",
@@ -59,7 +61,7 @@ struct SearchView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
-        .task(id: trimmedQuery) { await searchGames(trimmedQuery) }
+        .task(id: "\(gameSearchAttempt)/\(trimmedQuery)") { await searchGames(trimmedQuery) }
         .background(FBColor.surface)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
@@ -279,7 +281,9 @@ struct SearchView: View {
         let games = gameQuery == trimmedQuery ? self.games : []
         return VStack(alignment: .leading, spacing: 0) {
             chips
-            if results.isEmpty && games.isEmpty {
+            if filter == .games, let state = gamesState {
+                state
+            } else if results.isEmpty && games.isEmpty {
                 if filter == .games {
                     SearchGamesEmptyState(query: trimmedQuery)
                 } else {
@@ -291,6 +295,30 @@ struct SearchView: View {
             }
         }
         .padding(.bottom, 24)
+    }
+
+    /// The Games filter while the server is still answering, or when it couldn't: a spinner
+    /// instead of a premature "No games", and Try again instead of a silent empty list.
+    private var gamesState: LiveDataStateView? {
+        if gameQuery != trimmedQuery {
+            return LiveDataStateView(kind: .loading, title: "Searching games…")
+        }
+        if let failure = gameSearchError {
+            return LiveDataStateView(
+                kind: .failed(failure),
+                title: "Couldn't search games",
+                retry: {
+                    gameSearchError = nil
+                    gameQuery = ""
+                    gameSearchAttempt += 1
+                },
+                action: LiveDataStateView.Action(title: GroupsSearchCopy.makeWithMuse(trimmedQuery)) {
+                    store.addRecentSearch(trimmedQuery)
+                    router.openStudio(StudioLaunch(prompt: trimmedQuery))
+                }
+            )
+        }
+        return nil
     }
 
     private var chips: some View {

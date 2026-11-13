@@ -96,7 +96,7 @@ private struct LearnGroupDestination: View {
         if let group = appStore.group(id: groupID) ?? bubbleStore.resolveGroup(groupID) {
             GroupDetailView(group: group, startsOnGames: true)
         } else {
-            ContentUnavailableView(LearnCopy.groupMissing, systemImage: "person.3", description: Text(LearnCopy.groupMissingDetail))
+            GroupMissingState(groupID: groupID)
         }
     }
 }

@@ -47,7 +47,9 @@ struct GroupGameBoardsSection: View {
                 Task { await load() }
             }
         } else if games.isEmpty {
-            Text("No games in this Group yet. Make one and share it here, and the Group's best scores show up.")
+            // The weekly board card above already offers "Make one for the Group" (or "Join the
+            // Group"), so this stays a quiet line instead of a second button.
+            Text("Each game's best scores show up here once the Group has games.")
                 .font(.fbMeta)
                 .foregroundStyle(FBColor.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
@@ -86,10 +88,18 @@ struct GroupGameBoardsSection: View {
             .accessibilityLabel("\(game.title) Group board")
 
             if rows.isEmpty {
-                Text(bubbleStore.boardStates[key]?.isLoading == true ? "Loading…" : "Nobody in the Group has played yet.")
-                    .font(.fbMeta)
-                    .foregroundStyle(FBColor.secondaryText)
-                    .padding(.leading, 46)
+                HStack(spacing: 8) {
+                    Text(bubbleStore.boardStates[key]?.isLoading == true ? "Loading…" : "Nobody in the Group has played yet.")
+                        .font(.fbMeta)
+                        .foregroundStyle(FBColor.secondaryText)
+                    Spacer(minLength: 0)
+                    if bubbleStore.boardStates[key]?.isLoading != true {
+                        Button("Play first") { router.play(game.id) }
+                            .buttonStyle(.fb(.tinted, expand: false, height: 32))
+                            .accessibilityLabel("Play \(game.title) first")
+                    }
+                }
+                .padding(.leading, 46)
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(rows.prefix(rowsPerGame).enumerated()), id: \.element.id) { index, entry in

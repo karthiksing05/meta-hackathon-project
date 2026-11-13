@@ -313,12 +313,8 @@ struct RemixTreeScreen: View {
     @State private var showSendBack = false
 
     var body: some View {
-        Group {
-            if let bubble = bubbleStore.bubble(id: bubbleID) {
-                content(bubble)
-            } else {
-                ContentUnavailableView(RemixCopy.notFound, systemImage: "sparkles", description: Text(RemixCopy.cardUnavailable))
-            }
+        LoadedBubble(bubbleID: bubbleID) { bubble in
+            content(bubble)
         }
         .background(FBColor.surface)
         .navigationTitle(RemixCopy.treeNavTitle)

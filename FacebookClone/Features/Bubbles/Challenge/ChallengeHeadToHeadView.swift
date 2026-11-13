@@ -21,7 +21,12 @@ struct ChallengeHeadToHeadView: View {
             if let challenge, let bubble = bubbleStore.bubble(id: challenge.bubbleID), let opponent = center.person(challenge.opponentID) {
                 content(challenge, bubble: bubble, opponent: opponent)
             } else {
-                ContentUnavailableView(ChallengeCopy.noGames, systemImage: "flag.checkered", description: Text(ChallengeCopy.noGamesNote))
+                LiveDataStateView(
+                    kind: .empty("Your challenges, sent and received, are all in one place."),
+                    title: "This challenge isn't here",
+                    action: LiveDataStateView.Action(title: "See your challenges", symbol: "flag.checkered") { router.push(.challengesInbox) }
+                )
+                .frame(maxHeight: .infinity)
             }
         }
         .background(FBColor.background)

@@ -50,6 +50,8 @@ final class BubbleStore {
     @ObservationIgnored var remoteGames: [String: RemoteGame] = [:]
     @ObservationIgnored var groupRequests: Set<String> = []
     @ObservationIgnored var feedTask: Task<Void, Never>?
+    /// Bumped for each feed request, so a superseded one can tell it no longer owns the feed.
+    @ObservationIgnored var feedGeneration = 0
     @ObservationIgnored var gameRequests: [String: Task<Bubble?, Never>] = [:]
     @ObservationIgnored private var dayObservers: [NSObjectProtocol] = []
     @ObservationIgnored let isPreview: Bool
