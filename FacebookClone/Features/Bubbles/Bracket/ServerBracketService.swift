@@ -97,7 +97,7 @@ final class ServerBracketService: BracketService {
     /// Starts a best of N with a friend on these games (`POST /v1/series`). Throws the server's message.
     @discardableResult
     func start(with userID: String, games: [Bubble]) async throws -> FriendBracket {
-        let created = try await GamesAPIFactory.current.startSeries(opponentID: userID, gameIDs: games.map(\.id))
+        let created = try await GamesAPIFactory.current.startSeries(opponentID: userID, gameIDs: games.map { $0.serverID.isEmpty ? $0.id : $0.serverID })
         if let bubbleStore { await adoptGames(in: [created], bubbleStore: bubbleStore) }
         series.removeAll { $0.id == created.id }
         series.insert(created, at: 0)
