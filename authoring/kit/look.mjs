@@ -364,7 +364,7 @@ function styleText(n, spec, tokens, addToken) {
   const sizeAt = (s) => {
     const k = stepIn(spec, s, n.font);
     if (numeral) return spec.numerals.sizes[k];
-    if ((textFallback || st.id === spec.ids.text) && spec.steps[k].id === spec.ids.display) return spec.textSizes[k]; // a headline kept in the text font
+    if ((textFallback || st.id === spec.ids.text) && spec.steps[k].id === spec.ids.display) return spec.textSizes[k] ?? spec.steps[k].size; // a headline kept in the text font (one family for both: its own step)
     return spec.steps[k].size;
   };
   n.font = fam;
