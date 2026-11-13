@@ -1,0 +1,508 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Who Posted It?",
+    "instructions": "Someone at Kestrel Hall keeps posting on the anonymous Whisper Wall. Read each post and tap who wrote it. Streaks score more. Beat Jules's 1600 within 12 posts; three wrong calls and you're out of the group chat.",
+    "duration_s": 120
+  },
+  "uses": [
+    {
+      "fragment": "quiz",
+      "params": {
+        "choices": 4,
+        "time_ms": "10s",
+        "goal": 0
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 50,
+        "target": 0,
+        "label": "Score"
+      },
+      "bind": {
+        "point": "answered_right"
+      }
+    },
+    {
+      "fragment": "combo",
+      "params": {
+        "step": 1,
+        "max": 3,
+        "label": "Streak"
+      },
+      "bind": {
+        "hit_good": "answered_right",
+        "hit_bad": "answered_wrong"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "bind": {
+        "hit": "answered_wrong"
+      }
+    },
+    {
+      "fragment": "beat_target",
+      "params": {
+        "friend_name": "Jules",
+        "target": 1600
+      }
+    }
+  ],
+  "state": {
+    "typed_at": {
+      "type": "int",
+      "init": "0"
+    },
+    "streak": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "quiz_questions": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(content_posts, p => '')"
+    },
+    "quiz_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_suspects"
+    },
+    "quiz_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_authors"
+    },
+    "post_text": {
+      "params": {},
+      "returns": "string",
+      "body": "get_or(content_posts, get_or(order, qi, 0), '')"
+    },
+    "typing": {
+      "params": {},
+      "returns": "bool",
+      "body": "now < typed_at + 1200"
+    },
+    "shown_text": {
+      "params": {},
+      "returns": "string",
+      "body": "if typing() then substr(post_text(), 0, floor(len(post_text()) * (now - typed_at) * 1.0 / 1200.0)) + '▍' else post_text()"
+    },
+    "first_name": {
+      "params": {
+        "s": "string"
+      },
+      "returns": "string",
+      "body": "get_or(split(s, ','), 0, s)"
+    },
+    "called_it": {
+      "params": {},
+      "returns": "bool",
+      "body": "picked >= 0 and get_or(opts, picked, '') == correct_answer()"
+    },
+    "posts_seen": {
+      "params": {},
+      "returns": "int",
+      "body": "right_count + wrong_count"
+    }
+  },
+  "events": {},
+  "inputs": {
+    "hold_on": {}
+  },
+  "rules": [
+    {
+      "id": "streak_bonus",
+      "on": "answered_right",
+      "do": [
+        {
+          "incr": "score",
+          "by": "50 * combo"
+        },
+        {
+          "incr": "streak"
+        }
+      ]
+    },
+    {
+      "id": "streak_broken",
+      "on": "answered_wrong",
+      "do": [
+        {
+          "set": "streak",
+          "to": "0"
+        }
+      ]
+    },
+    {
+      "id": "new_post",
+      "on": "question_done",
+      "do": [
+        {
+          "set": "typed_at",
+          "to": "now"
+        }
+      ]
+    },
+    {
+      "id": "out_of_posts",
+      "on": "question_done",
+      "when": "posts_seen() >= 12",
+      "do": [
+        {
+          "end": "lose"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "180s",
+    "on_timeout": "lose"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "image",
+              "asset": "post_card",
+              "x": 18,
+              "y": 76,
+              "w": 324,
+              "h": 146
+            },
+            {
+              "node": "text",
+              "x": 64,
+              "y": 91,
+              "w": 160,
+              "h": 14,
+              "size": 13,
+              "weight": 700,
+              "color": "$secondary",
+              "align": "left",
+              "valign": "middle",
+              "text": "anon  ·  the Whisper Wall"
+            },
+            {
+              "node": "text",
+              "x": 200,
+              "y": 91,
+              "w": 128,
+              "h": 14,
+              "size": 12,
+              "weight": 700,
+              "color": "$accent",
+              "align": "right",
+              "valign": "middle",
+              "text": "= 'POST ' + str(min(posts_seen() + 1, 12)) + ' / 12'"
+            },
+            {
+              "node": "text",
+              "x": 32,
+              "y": 118,
+              "w": 296,
+              "h": 100,
+              "wrap": true,
+              "align": "left",
+              "valign": "top",
+              "size": 16,
+              "weight": 500,
+              "color": "$ink",
+              "text": "= shown_text()"
+            },
+            {
+              "node": "group",
+              "visible": "= locked and not typing()",
+              "children": [
+                {
+                  "node": "text",
+                  "x": 262,
+                  "y": 206,
+                  "anchor": "center",
+                  "rotation": -8,
+                  "size": 17,
+                  "weight": 800,
+                  "color": "= if called_it() then $primary else $danger",
+                  "stroke": "#1A0F24",
+                  "stroke_width": 4,
+                  "text": "= if called_it() then 'CALLED IT' else 'IT WAS ' + upper(first_name(correct_answer()))"
+                }
+              ],
+              "animate_on": {
+                "answered_right": {
+                  "prop": "scale",
+                  "keys": [
+                    1.7,
+                    0.92,
+                    1
+                  ],
+                  "ms": 260,
+                  "ease": "out"
+                },
+                "answered_wrong": {
+                  "prop": "scale",
+                  "keys": [
+                    1.7,
+                    0.92,
+                    1
+                  ],
+                  "ms": 260,
+                  "ease": "out"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 30,
+          "y": 262,
+          "w": 300,
+          "h": 290,
+          "fill": "#00000000",
+          "visible": "= typing()",
+          "on_tap": {
+            "input": "hold_on"
+          }
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "question_done",
+        "when": "posts_seen() < 12",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "notes": [
+                "E6",
+                "B6"
+              ],
+              "step_ms": 60,
+              "volume": 0.35
+            }
+          }
+        ]
+      },
+      {
+        "on": "answered_right",
+        "when": "streak == 3",
+        "do": [
+          {
+            "toast": {
+              "text": "Three in a row! 200 a post now",
+              "ms": 1100
+            }
+          }
+        ]
+      },
+      {
+        "on": "answered_right",
+        "when": "streak == 6",
+        "do": [
+          {
+            "toast": {
+              "text": "Six straight. Jules is sweating.",
+              "ms": 1100
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Prep-school drama after dark: plum velvet, gold lattice, ivy on the arches, a glossy anonymous post card and crown lives.",
+    "palette": {
+      "bg": "#1A0F24",
+      "surface": "#2D1C3D",
+      "primary": "#4FE0B0",
+      "secondary": "#C7A8FF",
+      "accent": "#FF5FA2",
+      "ink": "#FFF2F7",
+      "danger": "#FF4D5E"
+    },
+    "font": "Futura",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#1A0F24'/><stop offset='0.6' stop-color='#22122F'/><stop offset='1' stop-color='#2C1438'/></linearGradient><pattern id='lat' width='36' height='36' patternUnits='userSpaceOnUse'><path d='M18 0 L36 18 L18 36 L0 18Z' fill='none' stroke='#FFD36E' stroke-opacity='0.06' stroke-width='1'/></pattern><radialGradient id='spot' cx='0.5' cy='0.3' r='0.6'><stop offset='0' stop-color='#FF5FA2' stop-opacity='0.16'/><stop offset='1' stop-color='#FF5FA2' stop-opacity='0'/></radialGradient></defs><rect width='360' height='640' fill='url(#bg)'/><rect width='360' height='640' fill='url(#lat)'/><rect width='360' height='640' fill='url(#spot)'/><g fill='#120A1A' stroke='#FFD36E' stroke-opacity='0.25' stroke-width='1.5'><path d='M-20 640 V330 Q-20 290 8 290 Q14 290 14 300 V640Z'/><path d='M346 640 V300 Q346 290 352 290 Q380 290 380 330 V640Z'/></g><g fill='#FFC46B' opacity='0.18'><rect x='-6' y='320' width='14' height='60' rx='7'/><rect x='352' y='320' width='14' height='60' rx='7'/></g><g fill='#2E6B4F' opacity='0.85'><path d='M0 70 q14 6 10 20 q-12 -2 -10 -20z'/><path d='M0 104 q16 2 14 18 q-14 0 -14 -18z'/><path d='M4 140 q14 8 8 22 q-12 -6 -8 -22z'/><path d='M360 150 q-14 6 -10 20 q12 -2 10 -20z'/><path d='M360 184 q-16 2 -14 18 q14 0 14 -18z'/><path d='M356 220 q-14 8 -8 22 q12 -6 8 -22z'/></g><path d='M6 60 C10 100 4 140 8 180' stroke='#2E6B4F' stroke-width='2' fill='none'/><path d='M354 140 C350 180 356 220 352 260' stroke='#2E6B4F' stroke-width='2' fill='none'/><g fill='#FFD36E'><path d='M330 92 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z' opacity='0.8'/><path d='M26 250 l1.5 4 l4 1.5 l-4 1.5 l-1.5 4 l-1.5 -4 l-4 -1.5 l4 -1.5z' opacity='0.6'/><path d='M334 560 l1.5 4 l4 1.5 l-4 1.5 l-1.5 4 l-1.5 -4 l-4 -1.5 l4 -1.5z' opacity='0.6'/></g><g fill='#FF5FA2' opacity='0.5'><path d='M24 586 c-4 -6 -12 -2 -8 4 l8 8 l8 -8 c4 -6 -4 -10 -8 -4z'/><path d='M340 470 c-3 -4 -9 -1 -6 3 l6 6 l6 -6 c3 -4 -3 -7 -6 -3z'/></g><g opacity='0.07' fill='#FFD36E'><path d='M180 520 l40 12 v34 c0 24 -18 38 -40 46 c-22 -8 -40 -22 -40 -46 v-34z'/></g></svg>"
+    },
+    "sprites": {
+      "button": {
+        "svg": "<svg viewBox='0 0 300 60'><defs><linearGradient id='b' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3A2352'/><stop offset='1' stop-color='#2A1A3E'/></linearGradient></defs><rect x='1' y='1' width='298' height='58' rx='29' fill='url(#b)' stroke='#C7A8FF' stroke-opacity='0.55' stroke-width='1.5'/><rect x='8' y='5' width='284' height='14' rx='7' fill='#FFFFFF' opacity='0.05'/></svg>",
+        "color": "#FF5FA2"
+      },
+      "post_card": {
+        "svg": "<svg viewBox='0 0 324 146'><defs><linearGradient id='c' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#33204A'/><stop offset='1' stop-color='#26173A'/></linearGradient><linearGradient id='h' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#FF5FA2'/><stop offset='1' stop-color='#C7A8FF'/></linearGradient></defs><rect x='1' y='1' width='322' height='144' rx='16' fill='url(#c)' stroke='#FF5FA2' stroke-opacity='0.55' stroke-width='1.5'/><rect x='1' y='1' width='322' height='5' rx='2.5' fill='url(#h)'/><circle cx='24' cy='22' r='11' fill='#120A1A' stroke='url(#h)' stroke-width='2'/><path d='M17 21 h14 M18 21 q3 4 6 0 M24 21 q3 4 6 0' stroke='#FFF2F7' stroke-width='1.6' fill='none' stroke-linecap='round'/><path d='M16 17 q8 -6 16 0' stroke='#FFF2F7' stroke-width='1.6' fill='none'/></svg>",
+        "color": "#FF5FA2"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 24 20'><path d='M2 16 L4 5 L9 10 L12 2 L15 10 L20 5 L22 16Z' fill='#FFD36E' stroke='#B8862E' stroke-width='1' stroke-linejoin='round'/><rect x='2' y='15' width='20' height='4' rx='1.5' fill='#E5A93B'/><circle cx='12' cy='11' r='1.8' fill='#FF5FA2'/><circle cx='7' cy='13' r='1.2' fill='#4FE0B0'/><circle cx='17' cy='13' r='1.2' fill='#4FE0B0'/></svg>",
+        "color": "#FFD36E"
+      }
+    }
+  },
+  "sound": {
+    "set": "classic",
+    "volume": 0.9,
+    "moments": {
+      "pickup": "sparkle",
+      "hit": "buzz",
+      "combo": "rise",
+      "level": "levelup",
+      "win": "tada",
+      "lose": "wah"
+    },
+    "music": {
+      "melody": [
+        "E5",
+        null,
+        "G5",
+        "E5",
+        "B5",
+        null,
+        "A5",
+        "G5",
+        "E5",
+        null,
+        "D5",
+        null,
+        "E5",
+        null,
+        null,
+        null
+      ],
+      "bass": [
+        "E3",
+        "E3",
+        "C3",
+        "C3",
+        "A2",
+        "A2",
+        "B2",
+        "B2"
+      ],
+      "bpm": 112,
+      "wave": "triangle",
+      "volume": 0.18
+    }
+  },
+  "content": {
+    "posts": [
+      "Whoever parked a golf cart in MY spot at formal committee: I know your mother. Per my last warning.",
+      "the tide goes out / and so does my shot percentage / coach, I am a poem",
+      "Reminder: the library opens at 6:00, not 6:05. Some of us fit three study blocks in before breakfast.",
+      "Lost: one crate of contraband cheese puffs. Found: my will to live. Reward: also cheese puffs.",
+      "SQUIRREL ON THE QUAD. SQUIRREL ON THE QUAD. WHY IS NOBODY DOING ANYTHING",
+      "If the formal theme is 'Under the Sea' again I will personally drain the ocean. Babe, I'm not kidding.",
+      "Scored twice today. Still thinking about the sunset after practice. Is that weird. Don't answer.",
+      "To whoever borrowed my chem notes: the purple tabs are load-bearing. Return them by 7:45. Sharp.",
+      "The fire drill at 2:00 was not me. The fire drill at 2:15 was me. Learn the difference.",
+      "Someone dropped a whole sandwich under table four. It is gone now. I regret nothing. I am a good girl.",
+      "My sailing coach says I 'lack humility'. Okay, so why did his boat finish behind mine?",
+      "Got a 99. Asked for the missing point back. Got it. Then asked about extra credit. Tell no one.",
+      "Selling gum in the east stairwell, two for one. Ask for 'the dentist'. Teachers: this is a joke. (It is not.)",
+      "Wrote a haiku for my dog, Pancake. He ate it. Honestly? Fair review.",
+      "THE MAIL CARRIER HAS RETURNED. HE IS A TRAITOR. I HAVE WARNED THIS SCHOOL BEFORE."
+    ],
+    "suspects": [
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Duchess, dean's corgi",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Sloane, queen bee",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Sloane, queen bee",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi"
+    ],
+    "authors": [
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Jasper, lacrosse captain",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Duchess, dean's corgi",
+      "Sloane, queen bee",
+      "Wren, overachiever",
+      "Rafi, class clown",
+      "Jasper, lacrosse captain",
+      "Duchess, dean's corgi"
+    ]
+  },
+  "playtest": {
+    "progress": "score"
+  }
+}

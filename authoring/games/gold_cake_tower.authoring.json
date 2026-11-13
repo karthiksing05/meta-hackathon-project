@@ -1,0 +1,847 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Cake Tower",
+    "instructions": "Tap to drop the sliding layer onto the cake. Whatever hangs over the edge gets sliced off, so line it up. Perfect drops grow the cake back a little and build a combo. Stack 24 layers to add the cherry; three layers on the floor and the bakery closes.",
+    "duration_s": 60
+  },
+  "uses": [
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "bind": {
+        "hit": "slip"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Score"
+      }
+    },
+    {
+      "fragment": "combo",
+      "params": {
+        "step": 1,
+        "max": 8,
+        "label": "Combo"
+      },
+      "bind": {
+        "hit_good": "perfect",
+        "hit_bad": "sloppy"
+      }
+    }
+  ],
+  "types": {
+    "Layer": {
+      "id": "int",
+      "x": "float",
+      "w": "float",
+      "flavor": "int",
+      "perfect": "bool"
+    },
+    "Piece": {
+      "id": "int",
+      "x": "float",
+      "y": "float",
+      "w": "float",
+      "vy": "float",
+      "spin": "float",
+      "flavor": "int"
+    },
+    "Pop": {
+      "id": "int",
+      "x": "float",
+      "y": "float",
+      "born": "int",
+      "text": "string"
+    }
+  },
+  "state": {
+    "layers": {
+      "type": "list<Layer>",
+      "init": "[{id: 0, x: 180.0, w: 200.0, flavor: 0, perfect: false}]"
+    },
+    "mx": {
+      "type": "float",
+      "init": "75.0"
+    },
+    "mw": {
+      "type": "float",
+      "init": "200.0"
+    },
+    "mdir": {
+      "type": "float",
+      "init": "1.0"
+    },
+    "pieces": {
+      "type": "list<Piece>",
+      "init": "[]"
+    },
+    "pops": {
+      "type": "list<Pop>",
+      "init": "[]"
+    },
+    "seq": {
+      "type": "int",
+      "init": "1"
+    },
+    "view": {
+      "type": "float",
+      "init": "0.0"
+    },
+    "built": {
+      "type": "bool",
+      "init": "false"
+    },
+    "topped": {
+      "type": "bool",
+      "init": "false"
+    }
+  },
+  "functions": {
+    "slide_speed": {
+      "params": {},
+      "returns": "float",
+      "body": "min(260.0, 110.0 + 6.0 * len(layers))"
+    },
+    "aligned": {
+      "params": {},
+      "returns": "bool",
+      "body": "abs(mx - last(layers).x) <= 7.0"
+    }
+  },
+  "events": {
+    "perfect": {},
+    "sloppy": {},
+    "slip": {},
+    "topper": {}
+  },
+  "inputs": {
+    "drop": {
+      "payload": {},
+      "when": "not built",
+      "from": [
+        {
+          "key": " ",
+          "with": {}
+        }
+      ]
+    }
+  },
+  "rules": [
+    {
+      "id": "slide",
+      "on": "tick",
+      "when": "not built",
+      "do": [
+        {
+          "let": {
+            "nx": "mx + mdir * slide_speed() * event.dt / 1000.0"
+          }
+        },
+        {
+          "set": "mdir",
+          "to": "if nx > 285.0 then -1.0 else if nx < 75.0 then 1.0 else mdir"
+        },
+        {
+          "set": "mx",
+          "to": "clamp(nx, 75.0, 285.0)"
+        }
+      ]
+    },
+    {
+      "id": "camera",
+      "on": "tick",
+      "do": [
+        {
+          "set": "view",
+          "to": "view + (max(0.0, (len(layers) - 10) * 24.0) - view) * min(1.0, event.dt / 220.0)"
+        },
+        {
+          "set": "pieces",
+          "to": "map(pieces, p => {...p, vy: p.vy + 1500.0 * event.dt / 1000.0, y: p.y + p.vy * event.dt / 1000.0, spin: p.spin + (if p.x > 180.0 then 160.0 else -160.0) * event.dt / 1000.0})"
+        },
+        {
+          "remove": "pieces",
+          "where": "p => p.y + view > 700.0"
+        },
+        {
+          "remove": "pops",
+          "where": "p => now - p.born > 800"
+        }
+      ]
+    },
+    {
+      "id": "drop",
+      "on": "drop",
+      "do": [
+        {
+          "let": {
+            "top": "last(layers)"
+          }
+        },
+        {
+          "let": {
+            "n": "len(layers)"
+          }
+        },
+        {
+          "let": {
+            "lo": "max(mx - mw / 2.0, top.x - top.w / 2.0)",
+            "hi": "min(mx + mw / 2.0, top.x + top.w / 2.0)"
+          }
+        },
+        {
+          "let": {
+            "wy": "560.0 - (n + 1) * 24.0"
+          }
+        },
+        {
+          "if": "aligned()",
+          "then": [
+            {
+              "let": {
+                "grown": "min(200.0, top.w + 8.0)"
+              }
+            },
+            {
+              "push": "layers",
+              "value": "{id: seq, x: top.x, w: grown, flavor: n % 5, perfect: true}"
+            },
+            {
+              "set": "mw",
+              "to": "grown"
+            },
+            {
+              "emit": "perfect"
+            },
+            {
+              "emit": "point"
+            }
+          ],
+          "else": [
+            {
+              "if": "hi > lo",
+              "then": [
+                {
+                  "push": "layers",
+                  "value": "{id: seq, x: (lo + hi) / 2.0, w: hi - lo, flavor: n % 5, perfect: false}"
+                },
+                {
+                  "push": "pieces",
+                  "value": "{id: seq, x: if mx > top.x then (hi + mx + mw / 2.0) / 2.0 else (mx - mw / 2.0 + lo) / 2.0, y: wy + 12.0, w: mw - (hi - lo), vy: -120.0, spin: 0.0, flavor: n % 5}"
+                },
+                {
+                  "set": "mw",
+                  "to": "hi - lo"
+                },
+                {
+                  "emit": "sloppy"
+                },
+                {
+                  "emit": "point"
+                }
+              ],
+              "else": [
+                {
+                  "push": "pieces",
+                  "value": "{id: seq, x: mx, y: wy + 12.0, w: mw, vy: -80.0, spin: 0.0, flavor: n % 5}"
+                },
+                {
+                  "push": "pops",
+                  "value": "{id: seq, x: mx, y: wy + view - 10.0, born: now, text: 'Splat!'}"
+                },
+                {
+                  "emit": "sloppy"
+                },
+                {
+                  "emit": "slip"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "incr": "seq"
+        },
+        {
+          "set": "mx",
+          "to": "if n % 2 == 0 then 285.0 else 75.0"
+        },
+        {
+          "set": "mdir",
+          "to": "if n % 2 == 0 then -1.0 else 1.0"
+        },
+        {
+          "if": "len(layers) >= 25",
+          "then": [
+            {
+              "set": "built",
+              "to": "true"
+            },
+            {
+              "after": "900ms",
+              "emit": "topper",
+              "id": "topper_timer"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "perfect_bonus",
+      "on": "perfect",
+      "do": [
+        {
+          "incr": "score",
+          "by": "10 * combo"
+        },
+        {
+          "push": "pops",
+          "value": "{id: seq, x: last(layers).x, y: 560.0 - len(layers) * 24.0 + view - 22.0, born: now, text: 'Perfect! +' + str(10 + 10 * combo)}"
+        },
+        {
+          "incr": "seq"
+        }
+      ]
+    },
+    {
+      "id": "cherry_on_top",
+      "on": "topper",
+      "do": [
+        {
+          "incr": "score",
+          "by": "100 * lives"
+        },
+        {
+          "set": "topped",
+          "to": "true"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "topped"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "w": 360,
+          "h": 640,
+          "fill": "#00000000",
+          "on_tap": {
+            "input": "drop",
+            "with": {}
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(5)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "group",
+            "children": [
+              {
+                "node": "rect",
+                "x": 0,
+                "y": "= 560.0 - (k * 5 + 5) * 24.0 + view",
+                "w": "= if k == 4 then 360.0 else 16.0",
+                "h": 2,
+                "fill": "= if k == 4 then $primary else $ink",
+                "opacity": "= if k == 4 then 0.6 else 0.3"
+              },
+              {
+                "node": "text",
+                "text": "= if k == 4 then 'Cherry line' else str(k * 5 + 5)",
+                "x": 20,
+                "y": "= 560.0 - (k * 5 + 5) * 24.0 + view - 8.0",
+                "size": 13,
+                "weight": 700,
+                "color": "= if k == 4 then $primary else $ink",
+                "opacity": 0.6
+              }
+            ]
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "image",
+          "asset": "stand",
+          "x": 60,
+          "y": "= 557.0 + view",
+          "w": 240,
+          "h": 64
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "layers",
+          "as": "l",
+          "key": "l.id",
+          "template": {
+            "node": "group",
+            "animate_on": {
+              "perfect": {
+                "when": "l.id == last(layers).id",
+                "prop": "scale",
+                "keys": [
+                  1,
+                  1.08,
+                  1
+                ],
+                "ms": 200
+              }
+            },
+            "children": [
+              {
+                "node": "rect",
+                "x": "= l.x - l.w / 2.0",
+                "y": "= 560.0 - (index + 1) * 24.0 + view",
+                "w": "= l.w",
+                "h": 24,
+                "radius": 6,
+                "fill": "= $sponge[l.flavor]",
+                "stroke": "#7A4E3A",
+                "stroke_width": 1.5
+              },
+              {
+                "node": "rect",
+                "x": "= l.x - l.w / 2.0 + 3.0",
+                "y": "= 560.0 - (index + 1) * 24.0 + view + 14.0",
+                "w": "= max(0.0, l.w - 6.0)",
+                "h": 3,
+                "radius": 1.5,
+                "fill": "= $jam[l.flavor]"
+              },
+              {
+                "node": "rect",
+                "x": "= l.x - l.w / 2.0",
+                "y": "= 560.0 - (index + 1) * 24.0 + view",
+                "w": "= l.w",
+                "h": 8,
+                "radius": 4,
+                "fill": "= $cream[l.flavor]"
+              },
+              {
+                "node": "circle",
+                "x": "= l.x - l.w / 2.0 + l.w * 0.2",
+                "y": "= 560.0 - (index + 1) * 24.0 + view + 8.0",
+                "r": 3.5,
+                "fill": "= $cream[l.flavor]",
+                "visible": "= l.w > 36.0"
+              },
+              {
+                "node": "circle",
+                "x": "= l.x - l.w / 2.0 + l.w * 0.5",
+                "y": "= 560.0 - (index + 1) * 24.0 + view + 8.0",
+                "r": 3.5,
+                "fill": "= $cream[l.flavor]",
+                "visible": "= l.w > 36.0"
+              },
+              {
+                "node": "circle",
+                "x": "= l.x - l.w / 2.0 + l.w * 0.8",
+                "y": "= 560.0 - (index + 1) * 24.0 + view + 8.0",
+                "r": 3.5,
+                "fill": "= $cream[l.flavor]",
+                "visible": "= l.w > 36.0"
+              },
+              {
+                "node": "image",
+                "asset": "sparkle",
+                "anchor": "center",
+                "x": "= l.x + l.w / 2.0 - 8.0",
+                "y": "= 560.0 - (index + 1) * 24.0 + view + 4.0",
+                "w": 14,
+                "h": 14,
+                "visible": "= l.perfect",
+                "rotation": "= fmod(now / 12.0 + index * 40.0, 360.0)"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= not built",
+          "children": [
+            {
+              "node": "rect",
+              "x": "= last(layers).x - last(layers).w / 2.0 - 1.0",
+              "y": "= 560.0 - len(layers) * 24.0 + view - 70.0",
+              "w": 2,
+              "h": 70,
+              "fill": "$ink",
+              "opacity": 0.14
+            },
+            {
+              "node": "rect",
+              "x": "= last(layers).x + last(layers).w / 2.0 - 1.0",
+              "y": "= 560.0 - len(layers) * 24.0 + view - 70.0",
+              "w": 2,
+              "h": 70,
+              "fill": "$ink",
+              "opacity": 0.14
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= not built",
+          "children": [
+            {
+              "node": "rect",
+              "x": "= mx - mw / 2.0",
+              "y": "= 560.0 - (len(layers) + 1) * 24.0 + view",
+              "w": "= mw",
+              "h": 24,
+              "radius": 6,
+              "fill": "= $sponge[len(layers) % 5]",
+              "stroke": "= if aligned() then '#FFFFFF' else '#7A4E3A'",
+              "stroke_width": "= if aligned() then 3.0 else 1.5"
+            },
+            {
+              "node": "rect",
+              "x": "= mx - mw / 2.0 + 3.0",
+              "y": "= 560.0 - (len(layers) + 1) * 24.0 + view + 14.0",
+              "w": "= max(0.0, mw - 6.0)",
+              "h": 3,
+              "radius": 1.5,
+              "fill": "= $jam[len(layers) % 5]"
+            },
+            {
+              "node": "rect",
+              "x": "= mx - mw / 2.0",
+              "y": "= 560.0 - (len(layers) + 1) * 24.0 + view",
+              "w": "= mw",
+              "h": 8,
+              "radius": 4,
+              "fill": "= $cream[len(layers) % 5]"
+            },
+            {
+              "node": "circle",
+              "x": "= mx - mw / 2.0 + mw * 0.2",
+              "y": "= 560.0 - (len(layers) + 1) * 24.0 + view + 8.0",
+              "r": 3.5,
+              "fill": "= $cream[len(layers) % 5]",
+              "visible": "= mw > 36.0"
+            },
+            {
+              "node": "circle",
+              "x": "= mx - mw / 2.0 + mw * 0.5",
+              "y": "= 560.0 - (len(layers) + 1) * 24.0 + view + 8.0",
+              "r": 3.5,
+              "fill": "= $cream[len(layers) % 5]",
+              "visible": "= mw > 36.0"
+            },
+            {
+              "node": "circle",
+              "x": "= mx - mw / 2.0 + mw * 0.8",
+              "y": "= 560.0 - (len(layers) + 1) * 24.0 + view + 8.0",
+              "r": 3.5,
+              "fill": "= $cream[len(layers) % 5]",
+              "visible": "= mw > 36.0"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "pieces",
+          "as": "p",
+          "key": "p.id",
+          "template": {
+            "node": "rect",
+            "anchor": "center",
+            "x": "= p.x",
+            "y": "= p.y + view",
+            "w": "= p.w",
+            "h": 24,
+            "radius": 6,
+            "rotation": "= p.spin",
+            "fill": "= $sponge[p.flavor]",
+            "stroke": "#7A4E3A",
+            "stroke_width": 1.5
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "image",
+          "asset": "cherry",
+          "anchor": "center",
+          "x": "= last(layers).x",
+          "y": "= 560.0 - len(layers) * 24.0 + view - 22.0",
+          "w": 48,
+          "h": 56,
+          "visible": "= topped",
+          "animate_on": {
+            "topper": {
+              "prop": "scale",
+              "keys": [
+                0.2,
+                1.3,
+                1
+              ],
+              "ms": 360
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "pops",
+          "as": "p",
+          "key": "p.id",
+          "template": {
+            "node": "text",
+            "text": "= p.text",
+            "anchor": "center",
+            "x": "= clamp(p.x, 70.0, 290.0)",
+            "y": "= p.y - (now - p.born) * 0.04",
+            "size": 18,
+            "weight": 700,
+            "color": "= if p.text == 'Splat!' then $danger else $primary",
+            "stroke": "#FFFFFF",
+            "stroke_width": 4,
+            "opacity": "= 1.0 - (now - p.born) / 800.0"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 10,
+          "y": 28,
+          "w": 340,
+          "h": 40,
+          "radius": 20,
+          "fill": "#FFFFFF",
+          "opacity": 0.75
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 110,
+          "y": 594,
+          "w": 140,
+          "h": 28,
+          "radius": 14,
+          "fill": "#FFFFFF",
+          "opacity": 0.75
+        }
+      },
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "text",
+          "text": "= 'Layer ' + str(min(24, len(layers) - 1)) + ' of 24'",
+          "size": 16,
+          "weight": 700,
+          "color": "$ink",
+          "role": "hud"
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "point",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "= 196.0 + len(layers) * 12.0",
+              "ms": 90,
+              "volume": 0.5
+            }
+          },
+          {
+            "particles": {
+              "x": "= last(layers).x",
+              "y": "= 560.0 - len(layers) * 24.0 + view + 20.0",
+              "count": 10,
+              "color": "#F6D9C0",
+              "speed": 120,
+              "size": 4,
+              "ms": 380,
+              "gravity": 500,
+              "spread": 180
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "perfect",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "= 784.0 * pow(1.0595, min(combo, 10) * 2.0)",
+              "ms": 160,
+              "volume": 0.45
+            }
+          },
+          {
+            "particles": {
+              "x": "= last(layers).x - last(layers).w / 2.0",
+              "y": "= 560.0 - len(layers) * 24.0 + view + 6.0",
+              "count": 12,
+              "color": "#FFFFFF",
+              "speed": 160,
+              "size": 4,
+              "ms": 450
+            }
+          },
+          {
+            "particles": {
+              "x": "= last(layers).x + last(layers).w / 2.0",
+              "y": "= 560.0 - len(layers) * 24.0 + view + 6.0",
+              "count": 12,
+              "color": "#FFB547",
+              "speed": 160,
+              "size": 4,
+              "ms": 450
+            }
+          },
+          {
+            "haptic": "medium"
+          }
+        ]
+      },
+      {
+        "on": "slip",
+        "do": [
+          {
+            "moment": "hit"
+          }
+        ]
+      },
+      {
+        "on": "topper",
+        "do": [
+          {
+            "moment": "level"
+          },
+          {
+            "particles": {
+              "x": "= last(layers).x",
+              "y": "= 560.0 - len(layers) * 24.0 + view - 20.0",
+              "count": 30,
+              "color": "#FF7AA2",
+              "speed": 260,
+              "size": 6,
+              "ms": 900,
+              "gravity": 400
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {
+      "sponge": [
+        "#F9C6CF",
+        "#B9D98C",
+        "#FFE08A",
+        "#9A6A52",
+        "#B8B5F2"
+      ],
+      "cream": [
+        "#FFF6F0",
+        "#FDFCEB",
+        "#FFFFFF",
+        "#F4D9C6",
+        "#F8F2FF"
+      ],
+      "jam": [
+        "#E5486A",
+        "#6E9E4A",
+        "#F2A93B",
+        "#4A2C2A",
+        "#6B5BD6"
+      ]
+    }
+  },
+  "art": {
+    "style": "A cozy morning bakery: peach wallpaper with little diamonds, bunting, jars on shelves, a lilac cake stand and pastel sponge layers (strawberry, matcha, lemon, cocoa, blueberry) with frosting drips and a cherry on top.",
+    "palette": {
+      "bg": "#FFF1E2",
+      "surface": "#F6D9C0",
+      "primary": "#E0457B",
+      "secondary": "#7AC7A8",
+      "accent": "#E58A1F",
+      "ink": "#4A2C2A",
+      "danger": "#D93B3B"
+    },
+    "font": "Chalkboard SE",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='wall' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FFE3D3'/><stop offset='1' stop-color='#FFF1E2'/></linearGradient><linearGradient id='sun' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FFD3B5'/><stop offset='1' stop-color='#FFF4DE'/></linearGradient><pattern id='paper' width='44' height='80' patternUnits='userSpaceOnUse'><path d='M22 15 L26 20 L22 25 L18 20 Z M0 55 L4 60 L0 65 L-4 60 Z M44 55 L48 60 L44 65 L40 60 Z' fill='#F6CDB8'/></pattern><linearGradient id='wood' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#E7B98A'/><stop offset='1' stop-color='#C98E5E'/></linearGradient></defs><rect width='360' height='640' fill='url(#wall)'/><rect width='360' height='640' fill='url(#paper)' opacity='0.7'/><path d='M8 10 Q180 52 352 10' stroke='#B07A6A' stroke-width='1.5' fill='none'/><g opacity='0.9'><path d='M24 14.444444444444443 l12 0 l-6 14 Z' fill='#FF7AA2'/><path d='M50 16.37037037037037 l12 0 l-6 14 Z' fill='#FFB547'/><path d='M76 18.296296296296298 l12 0 l-6 14 Z' fill='#7AC7A8'/><path d='M102 20.22222222222222 l12 0 l-6 14 Z' fill='#B8B5F2'/><path d='M128 22.14814814814815 l12 0 l-6 14 Z' fill='#FF7AA2'/><path d='M154 24.074074074074073 l12 0 l-6 14 Z' fill='#FFB547'/><path d='M180 26.0 l12 0 l-6 14 Z' fill='#7AC7A8'/><path d='M206 24.074074074074073 l12 0 l-6 14 Z' fill='#B8B5F2'/><path d='M232 22.148148148148145 l12 0 l-6 14 Z' fill='#FF7AA2'/><path d='M258 20.22222222222222 l12 0 l-6 14 Z' fill='#FFB547'/><path d='M284 18.296296296296298 l12 0 l-6 14 Z' fill='#7AC7A8'/><path d='M310 16.37037037037037 l12 0 l-6 14 Z' fill='#B8B5F2'/></g><rect x='0' y='150' width='54' height='8' rx='2' fill='#C98E5E'/><g><rect x='2' y='128' width='12' height='22' rx='3' fill='#F9C6CF' stroke='#B07A6A' stroke-width='1'/><rect x='3' y='124' width='10' height='5' rx='1.5' fill='#E7B98A' stroke='#B07A6A' stroke-width='1'/><rect x='17' y='128' width='12' height='22' rx='3' fill='#FFE08A' stroke='#B07A6A' stroke-width='1'/><rect x='18' y='124' width='10' height='5' rx='1.5' fill='#E7B98A' stroke='#B07A6A' stroke-width='1'/><rect x='32' y='128' width='12' height='22' rx='3' fill='#B9D98C' stroke='#B07A6A' stroke-width='1'/><rect x='33' y='124' width='10' height='5' rx='1.5' fill='#E7B98A' stroke='#B07A6A' stroke-width='1'/><rect x='47' y='128' width='12' height='22' rx='3' fill='#B8B5F2' stroke='#B07A6A' stroke-width='1'/><rect x='48' y='124' width='10' height='5' rx='1.5' fill='#E7B98A' stroke='#B07A6A' stroke-width='1'/></g><rect x='306' y='230' width='54' height='8' rx='2' fill='#C98E5E'/><g><rect x='302' y='208' width='12' height='22' rx='3' fill='#F9C6CF' stroke='#B07A6A' stroke-width='1'/><rect x='303' y='204' width='10' height='5' rx='1.5' fill='#E7B98A' stroke='#B07A6A' stroke-width='1'/><rect x='317' y='208' width='12' height='22' rx='3' fill='#FFE08A' stroke='#B07A6A' stroke-width='1'/><rect x='318' y='204' width='10' height='5' rx='1.5' fill='#E7B98A' stroke='#B07A6A' stroke-width='1'/><rect x='332' y='208' width='12' height='22' rx='3' fill='#B9D98C' stroke='#B07A6A' stroke-width='1'/><rect x='333' y='204' width='10' height='5' rx='1.5' fill='#E7B98A' stroke='#B07A6A' stroke-width='1'/><rect x='347' y='208' width='12' height='22' rx='3' fill='#B8B5F2' stroke='#B07A6A' stroke-width='1'/><rect x='348' y='204' width='10' height='5' rx='1.5' fill='#E7B98A' stroke='#B07A6A' stroke-width='1'/></g><rect y='586' width='360' height='54' fill='url(#wood)'/><rect y='586' width='360' height='5' fill='#F3D2AE'/><path d='M0 606 L360 606 M0 624 L360 624' stroke='#B97E50' stroke-width='1' opacity='0.5'/></svg>"
+    },
+    "sprites": {
+      "stand": {
+        "svg": "<svg viewBox='0 0 240 64'><defs><linearGradient id='plate' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#FFFFFF'/><stop offset='1' stop-color='#E3D3F0'/></linearGradient><linearGradient id='stem' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='#D9C6EA'/><stop offset='0.5' stop-color='#FFFFFF'/><stop offset='1' stop-color='#CDB8E2'/></linearGradient></defs><ellipse cx='120' cy='60' rx='56' ry='4' fill='#7A4E3A' opacity='0.25'/><path d='M96 58 Q120 50 144 58 L144 61 L96 61 Z' fill='url(#stem)' stroke='#9A86B8' stroke-width='1.2'/><path d='M108 14 L132 14 L126 52 L114 52 Z' fill='url(#stem)' stroke='#9A86B8' stroke-width='1.2'/><rect x='2' y='3' width='236' height='12' rx='6' fill='url(#plate)' stroke='#9A86B8' stroke-width='1.4'/><path d='M14 15 Q22 22 30 15 Q38 22 46 15 Q54 22 62 15 Q70 22 78 15 Q86 22 94 15 Q102 22 110 15 Q118 22 126 15 Q134 22 142 15 Q150 22 158 15 Q166 22 174 15 Q182 22 190 15 Q198 22 206 15 Q214 22 222 15 Q228 20 232 15' fill='none' stroke='#C9B4E6' stroke-width='2'/></svg>",
+        "w": 480
+      },
+      "sparkle": {
+        "svg": "<svg viewBox='0 0 24 24'><path d='M12 1 Q13.5 10.5 23 12 Q13.5 13.5 12 23 Q10.5 13.5 1 12 Q10.5 10.5 12 1 Z' fill='#FFFFFF' stroke='#FFB547' stroke-width='1.2'/><circle cx='12' cy='12' r='2' fill='#FFB547'/></svg>",
+        "w": 32,
+        "color": "#FFB547"
+      },
+      "cherry": {
+        "svg": "<svg viewBox='0 0 48 56'><defs><radialGradient id='c' cx='0.38' cy='0.35' r='0.7'><stop offset='0' stop-color='#FF8FA3'/><stop offset='0.5' stop-color='#E5374F'/><stop offset='1' stop-color='#9E1B33'/></radialGradient></defs><path d='M8 44 Q4 30 16 26 Q20 16 24 22 Q28 16 32 26 Q44 30 40 44 Z' fill='#FFFFFF' stroke='#E8D4C4' stroke-width='1.5'/><path d='M24 22 Q26 8 36 3' stroke='#5C8A3A' stroke-width='2.4' fill='none' stroke-linecap='round'/><path d='M30 6 Q38 2 42 8 Q34 10 30 6 Z' fill='#7AC7A8' stroke='#3F7A5F' stroke-width='1'/><circle cx='24' cy='28' r='10' fill='url(#c)' stroke='#7A1226' stroke-width='1.2'/><ellipse cx='20.5' cy='24.5' rx='3' ry='2' fill='#FFFFFF' opacity='0.75'/></svg>",
+        "w": 96,
+        "color": "#E5374F"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 24 24'><path d='M4 11 Q4 4 12 4 Q20 4 20 11 Z' fill='#FFF6F0' stroke='#B07A6A' stroke-width='1.2'/><circle cx='12' cy='4' r='2.4' fill='#E5374F'/><path d='M5 11 L19 11 L17 22 L7 22 Z' fill='#FF7AA2' stroke='#B0405F' stroke-width='1.2'/><path d='M9 12 L9.8 21 M12 12 L12 21 M15 12 L14.2 21' stroke='#B0405F' stroke-width='1'/></svg>",
+        "w": 44,
+        "color": "#FF7AA2"
+      }
+    }
+  },
+  "sound": {
+    "set": "cozy",
+    "volume": 0.85,
+    "moments": {
+      "hit": "bonk",
+      "win": "tada"
+    },
+    "music": "lullaby"
+  },
+  "playtest": {
+    "progress": "score + lives * 300 + mw"
+  }
+}

@@ -1,0 +1,751 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Goblin Mode: Snack Run",
+    "instructions": "Drag Grub around the 2 AM kitchen. Grab pizza, dodge alarm clocks and angry emails. Five snacks in a row unlocks GOBLIN MODE: for five seconds you eat your responsibilities. Lose all 3 brain cells and it's bedtime. Clear 5 waves to win.",
+    "duration_s": 60
+  },
+  "uses": [
+    {
+      "fragment": "player_drag",
+      "params": {
+        "axis": "xy",
+        "mode": "follow",
+        "start_x": 180.0,
+        "start_y": 500.0,
+        "margin": 24.0,
+        "size": 19.0
+      },
+      "art": {
+        "avatar": "grub"
+      }
+    },
+    {
+      "fragment": "spawn_wave",
+      "id": "alarms",
+      "params": {
+        "from": "top",
+        "every": "650ms",
+        "speed": 150.0,
+        "radius": 16.0,
+        "jitter": 0.3,
+        "max_alive": 10,
+        "kind": "alarm"
+      },
+      "art": {
+        "hazard": "alarm"
+      }
+    },
+    {
+      "fragment": "spawn_wave",
+      "id": "emails",
+      "params": {
+        "from": "right",
+        "every": "1400ms",
+        "speed": 120.0,
+        "radius": 15.0,
+        "jitter": 0.3,
+        "max_alive": 5,
+        "kind": "email"
+      },
+      "bind": {
+        "spawns": "emails",
+        "spawn_speed": "email_speed",
+        "spawned": "email_sent",
+        "Spawn": "Email"
+      },
+      "art": {
+        "hazard": "email"
+      }
+    },
+    {
+      "fragment": "pickups",
+      "params": {
+        "every": "800ms",
+        "max_alive": 4,
+        "radius": 14.0,
+        "reach": 20.0,
+        "lifetime": "4s",
+        "x_min": 50.0,
+        "x_max": 310.0,
+        "y_min": 170.0,
+        "y_max": 520.0
+      },
+      "art": {
+        "pickup": "snack"
+      }
+    },
+    {
+      "fragment": "collide",
+      "params": {
+        "radius": 32.0,
+        "grace": "1100ms"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "art": {
+        "life": "brain"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Yum"
+      }
+    },
+    {
+      "fragment": "waves",
+      "params": {
+        "end_on": "timer",
+        "wave_ms": "10s",
+        "break_ms": "1800ms",
+        "waves_to_win": 5,
+        "label": "Wave"
+      }
+    }
+  ],
+  "state": {
+    "streak": {
+      "type": "int",
+      "init": "0"
+    },
+    "gm_until": {
+      "type": "int",
+      "init": "0"
+    },
+    "chomp_at": {
+      "type": "vec2",
+      "init": "vec(0.0, 0.0)"
+    },
+    "banner": {
+      "type": "string",
+      "init": "'GET READY, GOBLIN'"
+    },
+    "banner_at": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "colliders": {
+      "params": {},
+      "returns": "list<vec2>",
+      "body": "if now < gm_until or in_break then [] else concat(map(spawns, s => vec(s.x, s.y)), map(emails, e => vec(e.x, e.y)))"
+    },
+    "goblin_on": {
+      "params": {},
+      "returns": "bool",
+      "body": "now < gm_until"
+    },
+    "near": {
+      "params": {
+        "x": "float",
+        "y": "float"
+      },
+      "returns": "bool",
+      "body": "dist(vec(x, y), player) < 38.0"
+    }
+  },
+  "events": {
+    "goblin_mode": {},
+    "chomped": {
+      "n": "int"
+    }
+  },
+  "rules": [
+    {
+      "id": "after_hit",
+      "on": "hit",
+      "do": [
+        {
+          "remove": "spawns",
+          "where": "s => dist(vec(s.x, s.y), hit_at) < 44.0"
+        },
+        {
+          "remove": "emails",
+          "where": "e => dist(vec(e.x, e.y), hit_at) < 44.0"
+        },
+        {
+          "set": "streak",
+          "to": "0"
+        },
+        {
+          "set": "banner",
+          "to": "pick(content_hit_lines)"
+        },
+        {
+          "set": "banner_at",
+          "to": "now"
+        }
+      ]
+    },
+    {
+      "id": "snack_streak",
+      "on": "collected_one",
+      "do": [
+        {
+          "if": "goblin_on()",
+          "then": [
+            {
+              "incr": "score",
+              "by": "10"
+            }
+          ]
+        },
+        {
+          "incr": "streak"
+        },
+        {
+          "if": "streak >= 5 and not goblin_on()",
+          "then": [
+            {
+              "set": "gm_until",
+              "to": "now + 5000"
+            },
+            {
+              "set": "streak",
+              "to": "0"
+            },
+            {
+              "set": "banner",
+              "to": "'GOBLIN MODE ACTIVATED'"
+            },
+            {
+              "set": "banner_at",
+              "to": "now"
+            },
+            {
+              "emit": "goblin_mode"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chomp",
+      "on": "tick",
+      "when": "goblin_on() and (any(spawns, s => near(s.x, s.y)) or any(emails, e => near(e.x, e.y)))",
+      "do": [
+        {
+          "let": {
+            "n": "count(spawns, s => near(s.x, s.y)) + count(emails, e => near(e.x, e.y))"
+          }
+        },
+        {
+          "remove": "spawns",
+          "where": "s => near(s.x, s.y)"
+        },
+        {
+          "remove": "emails",
+          "where": "e => near(e.x, e.y)"
+        },
+        {
+          "incr": "score",
+          "by": "25 * n"
+        },
+        {
+          "set": "chomp_at",
+          "to": "player"
+        },
+        {
+          "emit": "chomped",
+          "with": {
+            "n": "n"
+          }
+        }
+      ]
+    },
+    {
+      "id": "new_wave",
+      "on": "wave_started",
+      "do": [
+        {
+          "set": "spawn_speed",
+          "to": "1.0 + 0.3 * (event.index - 1)"
+        },
+        {
+          "set": "email_speed",
+          "to": "1.0 + 0.3 * (event.index - 1)"
+        },
+        {
+          "set": "banner",
+          "to": "get_or(content_wave_names, event.index - 1, 'ONE MORE WAVE')"
+        },
+        {
+          "set": "banner_at",
+          "to": "now"
+        }
+      ]
+    },
+    {
+      "id": "breather",
+      "on": "tick",
+      "when": "in_break and (len(spawns) > 0 or len(emails) > 0)",
+      "do": [
+        {
+          "set": "spawns",
+          "to": "[]"
+        },
+        {
+          "set": "emails",
+          "to": "[]"
+        }
+      ]
+    },
+    {
+      "id": "wave_done",
+      "on": "wave_cleared",
+      "do": [
+        {
+          "set": "banner",
+          "to": "pick(content_clear_lines)"
+        },
+        {
+          "set": "banner_at",
+          "to": "now"
+        }
+      ]
+    }
+  ],
+  "objectives": {},
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "circle",
+          "x": "= player.x",
+          "y": "= player.y",
+          "fill": "$primary",
+          "r": "= 34.0 + sin(now / 70.0) * 6.0",
+          "opacity": "= if goblin_on() then 0.45 else 0.0",
+          "transition": {
+            "opacity": {
+              "ms": 200,
+              "ease": "out"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "items",
+          "as": "i",
+          "key": "i.id",
+          "template": {
+            "node": "circle",
+            "x": "= i.x",
+            "y": "= i.y",
+            "r": 14,
+            "fill": "#00000000"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": "= 222.0 - min(400, now - banner_at) / 40.0",
+          "anchor": "center",
+          "w": 330,
+          "wrap": true,
+          "size": 24,
+          "weight": 700,
+          "color": "= if goblin_on() then $primary else $accent",
+          "stroke": "#12081F",
+          "stroke_width": 6,
+          "opacity": "= clamp(1.0 - (now - banner_at - 1300) / 400.0, 0.0, 1.0)",
+          "text": "= banner",
+          "animate_on": {
+            "wave_started": {
+              "prop": "scale",
+              "keys": [
+                0.3,
+                1.25,
+                1
+              ],
+              "ms": 320,
+              "ease": "out"
+            },
+            "goblin_mode": {
+              "prop": "scale",
+              "keys": [
+                0.3,
+                1.4,
+                0.95,
+                1
+              ],
+              "ms": 380,
+              "ease": "out"
+            },
+            "hit": {
+              "prop": "scale",
+              "keys": [
+                1.5,
+                1
+              ],
+              "ms": 200
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 276,
+          "anchor": "center",
+          "size": 16,
+          "weight": 700,
+          "color": "$primary",
+          "stroke": "#12081F",
+          "stroke_width": 4,
+          "visible": "= goblin_on()",
+          "text": "= 'EAT YOUR RESPONSIBILITIES  ' + str(max(0, ceil((gm_until - now) / 1000.0))) + 's'",
+          "animate_on": {
+            "chomped": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.3,
+                1
+              ],
+              "ms": 180
+            }
+          }
+        }
+      },
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "repeat",
+              "source": "range(5)",
+              "as": "k",
+              "key": "k",
+              "template": {
+                "node": "circle",
+                "x": "= k * 22",
+                "y": 0,
+                "r": 8,
+                "stroke": "#12081F",
+                "stroke_width": 2,
+                "fill": "= if goblin_on() then $primary else if k < streak then $accent else '#FFFFFF33'",
+                "animate_on": {
+                  "collected_one": {
+                    "when": "k == streak - 1",
+                    "prop": "scale",
+                    "keys": [
+                      1,
+                      1.7,
+                      1
+                    ],
+                    "ms": 220
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "text",
+          "size": 14,
+          "weight": 700,
+          "color": "$ink",
+          "stroke": "#12081F",
+          "stroke_width": 3,
+          "text": "= if goblin_on() then 'GOBLIN MODE' else if in_break then 'breather...' else 'snack streak'"
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "group",
+          "visible": "= status != 'playing'",
+          "animate_on": {
+            "win": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.08,
+                1
+              ],
+              "ms": 420,
+              "ease": "out"
+            },
+            "lose": {
+              "prop": "scale",
+              "keys": [
+                0.6,
+                1.08,
+                1
+              ],
+              "ms": 420,
+              "ease": "out"
+            }
+          },
+          "children": [
+            {
+              "node": "rect",
+              "x": 26,
+              "y": 170,
+              "w": 308,
+              "h": 290,
+              "radius": 22,
+              "fill": "#12081FEE",
+              "stroke": "$primary",
+              "stroke_width": 4
+            },
+            {
+              "node": "image",
+              "asset": "grub",
+              "x": 150,
+              "y": 184,
+              "w": 60,
+              "h": 60,
+              "frame": "= if status == 'won' then 1 else 0"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 266,
+              "anchor": "center",
+              "size": 25,
+              "weight": 700,
+              "color": "$primary",
+              "text": "= if status == 'won' then 'SNACK LEGEND' else 'BRAIN CELLS: 0'"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 320,
+              "anchor": "center",
+              "size": 50,
+              "weight": 700,
+              "color": "$accent",
+              "text": "= str(score)"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 360,
+              "anchor": "center",
+              "size": 15,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= str(collected) + ' snacks  |  made it to wave ' + str(max(1, wave))"
+            },
+            {
+              "node": "text",
+              "x": 46,
+              "y": 382,
+              "w": 268,
+              "wrap": true,
+              "align": "center",
+              "size": 15,
+              "weight": 700,
+              "color": "$ink",
+              "opacity": 0.85,
+              "text": "= if status == 'won' then 'The fridge light is your spotlight now. Go to bed. (You will not.)' else 'Responsibilities: 1. Goblin: 0. Rematch at 2:48 AM?'"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "collected_one",
+        "do": [
+          {
+            "sound": {
+              "wave": "square",
+              "note": "= 523.0 * pow(1.0595, min(streak * 2, 12) * 1.0)",
+              "ms": 70,
+              "volume": 0.3
+            }
+          }
+        ]
+      },
+      {
+        "on": "goblin_mode",
+        "do": [
+          {
+            "moment": "combo"
+          },
+          {
+            "particles": {
+              "x": "= player.x",
+              "y": "= player.y",
+              "count": 48,
+              "color": "$primary",
+              "speed": 340,
+              "size": 7,
+              "ms": 800
+            }
+          },
+          {
+            "shake": {
+              "px": 4,
+              "ms": 200
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      },
+      {
+        "on": "chomped",
+        "do": [
+          {
+            "sound": {
+              "wave": "sawtooth",
+              "note": "C4",
+              "slide": "C5",
+              "ms": 90,
+              "volume": 0.3
+            }
+          },
+          {
+            "particles": {
+              "x": "= chomp_at.x",
+              "y": "= chomp_at.y",
+              "count": 24,
+              "color": "$accent",
+              "speed": 260,
+              "size": 6,
+              "ms": 500,
+              "gravity": 300
+            }
+          },
+          {
+            "haptic": "medium"
+          }
+        ]
+      },
+      {
+        "on": "wave_started",
+        "do": [
+          {
+            "moment": "level"
+          }
+        ]
+      },
+      {
+        "on": "wave_cleared",
+        "do": [
+          {
+            "particles": {
+              "x": 180,
+              "y": 300,
+              "count": 40,
+              "color": "$secondary",
+              "speed": 300,
+              "size": 6,
+              "ms": 700,
+              "gravity": 200
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "pixel",
+    "tokens": {}
+  },
+  "art": {
+    "style": "2 AM kitchen raid: violet wallpaper, a glowing open fridge, a green goblin in a purple hoodie, flying alarm clocks and angry emails, pizza slices.",
+    "palette": {
+      "bg": "#1A0B33",
+      "surface": "#2B1650",
+      "primary": "#7CFF4F",
+      "secondary": "#FF7AE5",
+      "accent": "#FFB703",
+      "ink": "#F4F0FF",
+      "danger": "#FF4757"
+    },
+    "font": "Marker Felt",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='wall' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#1A0B33'/><stop offset='1' stop-color='#2A1150'/></linearGradient><radialGradient id='fridge' cx='0' cy='0.5' r='1'><stop offset='0' stop-color='#BFFFF2' stop-opacity='0.55'/><stop offset='1' stop-color='#BFFFF2' stop-opacity='0'/></radialGradient><radialGradient id='moon' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFF5C2'/><stop offset='1' stop-color='#FFD66B'/></radialGradient></defs><rect width='360' height='640' fill='url(#wall)'/><rect x='18' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='54' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='90' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='126' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='162' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='198' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='234' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='270' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='306' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='342' y='0' width='2' height='560' fill='#3A1D6B' opacity='0.6'/><rect x='262' y='86' width='82' height='82' rx='6' fill='#0B0420' stroke='#5B3A99' stroke-width='5'/><circle cx='312' cy='118' r='18' fill='url(#moon)'/><circle cx='305' cy='112' r='4' fill='#F2D27A'/><rect x='300' y='86' width='4' height='82' fill='#5B3A99'/><rect x='262' y='125' width='82' height='4' fill='#5B3A99'/><circle cx='278' cy='100' r='1.5' fill='#FFFFFF'/><circle cx='334' cy='150' r='1.2' fill='#FFFFFF'/><path d='M0 300 L120 250 L120 560 L0 560Z' fill='url(#fridge)'/><rect x='-10' y='250' width='44' height='310' rx='6' fill='#D9FFF6' stroke='#5B3A99' stroke-width='4'/><rect x='-6' y='300' width='36' height='4' fill='#9AD9CC'/><rect x='-6' y='380' width='36' height='4' fill='#9AD9CC'/><rect x='-6' y='460' width='36' height='4' fill='#9AD9CC'/><rect x='4' y='276' width='14' height='22' rx='3' fill='#FF7AE5'/><rect x='6' y='354' width='20' height='24' rx='4' fill='#FFB703'/><rect x='2' y='434' width='12' height='24' rx='3' fill='#7CFF4F'/><rect x='14' y='92' width='96' height='50' rx='6' fill='#0B0420' stroke='#5B3A99' stroke-width='4'/><text x='62' y='127' font-family='Menlo' font-weight='bold' font-size='24' fill='#7CFF4F' text-anchor='middle'>2:47</text><text x='62' y='158' font-family='Marker Felt' font-size='11' fill='#FF7AE5' text-anchor='middle' opacity='0.85'>AM. bestie. AM.</text><rect x='0' y='548' width='360' height='14' fill='#5B3A99'/><rect x='0' y='546' width='360' height='3' fill='#FF7AE5' opacity='0.8'/><rect x='0' y='560' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='36' y='560' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='72' y='560' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='108' y='560' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='144' y='560' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='180' y='560' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='216' y='560' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='252' y='560' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='288' y='560' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='324' y='560' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='0' y='578' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='36' y='578' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='72' y='578' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='108' y='578' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='144' y='578' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='180' y='578' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='216' y='578' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='252' y='578' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='288' y='578' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='324' y='578' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='0' y='596' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='36' y='596' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='72' y='596' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='108' y='596' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='144' y='596' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='180' y='596' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='216' y='596' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='252' y='596' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='288' y='596' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='324' y='596' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='0' y='614' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='36' y='614' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='72' y='614' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='108' y='614' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='144' y='614' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='180' y='614' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='216' y='614' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='252' y='614' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='288' y='614' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='324' y='614' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='0' y='632' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='36' y='632' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='72' y='632' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='108' y='632' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='144' y='632' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='180' y='632' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='216' y='632' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='252' y='632' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='288' y='632' width='36' height='18' fill='#2B1650' opacity='1'/><rect x='324' y='632' width='36' height='18' fill='#1C0E38' opacity='1'/><rect x='40' y='170' width='4' height='4' fill='#FFB703' opacity='0.7'/><rect x='300' y='160' width='4' height='4' fill='#FF7AE5' opacity='0.7'/><rect x='70' y='300' width='4' height='4' fill='#7CFF4F' opacity='0.7'/><rect x='320' y='330' width='4' height='4' fill='#FFB703' opacity='0.7'/><rect x='28' y='420' width='4' height='4' fill='#FF7AE5' opacity='0.7'/><rect x='338' y='450' width='4' height='4' fill='#7CFF4F' opacity='0.7'/><rect x='110' y='120' width='4' height='4' fill='#FFB703' opacity='0.7'/><rect x='250' y='110' width='4' height='4' fill='#7CFF4F' opacity='0.7'/><rect x='190' y='540' width='4' height='4' fill='#FF7AE5' opacity='0.7'/><rect x='150' y='548' width='4' height='4' fill='#FFB703' opacity='0.7'/><g transform='rotate(6 312 470)'><rect x='284' y='440' width='58' height='54' fill='#FFE066'/><text x='313' y='462' font-family='Marker Felt' font-size='10' fill='#12081F' text-anchor='middle'>TO DO:</text><text x='313' y='478' font-family='Marker Felt' font-size='10' fill='#12081F' text-anchor='middle'>nothing</text><path d='M292 482 L334 482' stroke='#E0303A' stroke-width='2'/></g></svg>"
+    },
+    "sprites": {
+      "grub": {
+        "svg": [
+          "<svg viewBox='0 0 64 64'><path d='M12 24 L0 12 L16 18Z' fill='#5FD12E' stroke='#12081F' stroke-width='2.5' stroke-linejoin='round'/><path d='M52 24 L64 12 L48 18Z' fill='#5FD12E' stroke='#12081F' stroke-width='2.5' stroke-linejoin='round'/><path d='M10 62 Q8 42 20 38 L44 38 Q56 42 54 62Z' fill='#8E44FF' stroke='#12081F' stroke-width='2.5'/><path d='M26 44 L26 54 M38 44 L38 54' stroke='#FFFFFF' stroke-width='2' stroke-linecap='round'/><rect x='22' y='52' width='20' height='8' rx='3' fill='#7433D9'/><ellipse cx='32' cy='26' rx='20' ry='17' fill='#7CFF4F' stroke='#12081F' stroke-width='2.5'/><path d='M12 22 Q14 6 32 6 Q50 6 52 22 Q46 12 32 12 Q18 12 12 22Z' fill='#8E44FF' stroke='#12081F' stroke-width='2.5' stroke-linejoin='round'/><circle cx='24' cy='24' r='5.5' fill='#FFFFFF' stroke='#12081F' stroke-width='1.8'/><circle cx='40' cy='24' r='5.5' fill='#FFFFFF' stroke='#12081F' stroke-width='1.8'/><circle cx='25.5' cy='24.5' r='2.6' fill='#12081F'/><circle cx='38.5' cy='24.5' r='2.6' fill='#12081F'/><circle cx='26.3' cy='23.4' r='0.9' fill='#FFFFFF'/><circle cx='39.3' cy='23.4' r='0.9' fill='#FFFFFF'/><path d='M18 33 L22 31 M46 33 L42 31' stroke='#FF7AE5' stroke-width='2' stroke-linecap='round'/><path d='M23 33 Q32 39 41 33' stroke='#12081F' stroke-width='2.5' fill='none' stroke-linecap='round'/><path d='M34 34.5 L36 38 L38 34' fill='#FFFFFF' stroke='#12081F' stroke-width='1'/><rect x='14' y='44' width='3' height='3' fill='#FFB703'/><rect x='48' y='48' width='3' height='3' fill='#FFB703'/></svg>",
+          "<svg viewBox='0 0 64 64'><path d='M12 24 L0 12 L16 18Z' fill='#5FD12E' stroke='#12081F' stroke-width='2.5' stroke-linejoin='round'/><path d='M52 24 L64 12 L48 18Z' fill='#5FD12E' stroke='#12081F' stroke-width='2.5' stroke-linejoin='round'/><path d='M10 62 Q8 42 20 38 L44 38 Q56 42 54 62Z' fill='#8E44FF' stroke='#12081F' stroke-width='2.5'/><path d='M26 44 L26 54 M38 44 L38 54' stroke='#FFFFFF' stroke-width='2' stroke-linecap='round'/><rect x='22' y='52' width='20' height='8' rx='3' fill='#7433D9'/><ellipse cx='32' cy='26' rx='20' ry='17' fill='#7CFF4F' stroke='#12081F' stroke-width='2.5'/><path d='M12 22 Q14 6 32 6 Q50 6 52 22 Q46 12 32 12 Q18 12 12 22Z' fill='#8E44FF' stroke='#12081F' stroke-width='2.5' stroke-linejoin='round'/><circle cx='24' cy='24' r='5.5' fill='#FFFFFF' stroke='#12081F' stroke-width='1.8'/><circle cx='40' cy='24' r='5.5' fill='#FFFFFF' stroke='#12081F' stroke-width='1.8'/><circle cx='25.5' cy='24.5' r='2.6' fill='#12081F'/><circle cx='38.5' cy='24.5' r='2.6' fill='#12081F'/><circle cx='26.3' cy='23.4' r='0.9' fill='#FFFFFF'/><circle cx='39.3' cy='23.4' r='0.9' fill='#FFFFFF'/><path d='M18 33 L22 31 M46 33 L42 31' stroke='#FF7AE5' stroke-width='2' stroke-linecap='round'/><path d='M22 32 Q32 46 42 32Z' fill='#12081F'/><path d='M25 33 L27 37 L29 33Z M35 33 L37 37 L39 33Z' fill='#FFFFFF'/><path d='M28 40 Q32 37 36 40' fill='#FF5C8A'/><rect x='14' y='44' width='3' height='3' fill='#FFB703'/><rect x='48' y='48' width='3' height='3' fill='#FFB703'/></svg>"
+        ],
+        "fps": 4,
+        "color": "#7CFF4F"
+      },
+      "alarm": {
+        "svg": "<svg viewBox='0 0 48 48'><path d='M8 14 Q6 4 16 6Z' fill='#FFD23F' stroke='#12081F' stroke-width='2'/><path d='M40 14 Q42 4 32 6Z' fill='#FFD23F' stroke='#12081F' stroke-width='2'/><path d='M14 42 L10 47 M34 42 L38 47' stroke='#12081F' stroke-width='3' stroke-linecap='round'/><circle cx='24' cy='26' r='17' fill='#FF4757' stroke='#12081F' stroke-width='2.5'/><circle cx='24' cy='26' r='12.5' fill='#FFF4F0' stroke='#12081F' stroke-width='1.5'/><path d='M15 20 L21 23 M33 20 L27 23' stroke='#12081F' stroke-width='2.4' stroke-linecap='round'/><circle cx='19.5' cy='25.5' r='1.8' fill='#12081F'/><circle cx='28.5' cy='25.5' r='1.8' fill='#12081F'/><path d='M19 33 Q24 29 29 33' stroke='#12081F' stroke-width='2.2' fill='none' stroke-linecap='round'/><path d='M2 22 L6 24 M2 30 L6 28 M46 22 L42 24 M46 30 L42 28' stroke='#FFD23F' stroke-width='2' stroke-linecap='round'/></svg>",
+        "color": "#FF4757"
+      },
+      "email": {
+        "svg": "<svg viewBox='0 0 52 40'><path d='M0 12 L8 12 M0 20 L6 20 M0 28 L8 28' stroke='#FF7AE5' stroke-width='2.5' stroke-linecap='round'/><rect x='10' y='6' width='38' height='28' rx='4' fill='#F4F0FF' stroke='#12081F' stroke-width='2.5'/><path d='M11 8 L29 22 L47 8' stroke='#12081F' stroke-width='2.2' fill='none' stroke-linejoin='round'/><path d='M20 24 L25 26 M38 24 L33 26' stroke='#12081F' stroke-width='2' stroke-linecap='round'/><circle cx='45' cy='7' r='7' fill='#FF4757' stroke='#12081F' stroke-width='2'/><text x='45' y='10.5' font-family='Menlo' font-weight='bold' font-size='10' fill='#FFFFFF' text-anchor='middle'>!</text></svg>",
+        "color": "#F4F0FF"
+      },
+      "snack": {
+        "svg": "<svg viewBox='0 0 44 44'><path d='M6 8 Q22 0 38 8 L22 42Z' fill='#FFC94D' stroke='#12081F' stroke-width='2.5' stroke-linejoin='round'/><path d='M4 7 Q22 -3 40 7 L38 12 Q22 4 6 12Z' fill='#D98A2B' stroke='#12081F' stroke-width='2.2' stroke-linejoin='round'/><circle cx='17' cy='16' r='4' fill='#E8433A'/><circle cx='27' cy='19' r='3.6' fill='#E8433A'/><circle cx='21' cy='27' r='3' fill='#E8433A'/><path d='M12 14 Q12 20 14 22 Q16 20 15 15Z' fill='#FFE38A'/><path d='M30 13 Q31 18 29 20' stroke='#FFE38A' stroke-width='2' fill='none'/><circle cx='18.5' cy='15' r='1' fill='#FFFFFF' opacity='0.7'/></svg>",
+        "color": "#FFC94D"
+      },
+      "brain": {
+        "svg": "<svg viewBox='0 0 26 22'><path d='M13 3 Q8 0 5 4 Q1 5 2 10 Q0 14 4 17 Q6 21 11 19 L13 18 L15 19 Q20 21 22 17 Q26 14 24 10 Q25 5 21 4 Q18 0 13 3Z' fill='#FF8FCB' stroke='#12081F' stroke-width='1.8' stroke-linejoin='round'/><path d='M13 3 L13 18 M7 8 Q10 9 9 12 M19 8 Q16 9 17 12 M6 14 Q9 14 10 16 M20 14 Q17 14 16 16' stroke='#12081F' stroke-width='1.3' fill='none' stroke-linecap='round'/></svg>",
+        "color": "#FF8FCB"
+      }
+    }
+  },
+  "sound": {
+    "set": "retro",
+    "volume": 0.8,
+    "music": "chip",
+    "moments": {
+      "hit": "crunch",
+      "combo": "hooray",
+      "level": "levelup",
+      "win": "tada",
+      "lose": "powerdown"
+    }
+  },
+  "content": {
+    "wave_names": [
+      "WAVE 1: KITCHEN RAID",
+      "WAVE 2: LAUNDRY AVALANCHE",
+      "WAVE 3: INBOX TSUNAMI",
+      "WAVE 4: MONDAY IS COMING",
+      "WAVE 5: THE ALARM BOSS"
+    ],
+    "hit_lines": [
+      "-1 BRAIN CELL",
+      "RESPONSIBILITY HIT",
+      "OOF. ADULTING.",
+      "THE INBOX GOT YOU"
+    ],
+    "clear_lines": [
+      "WAVE CLEARED. SNACK BREAK.",
+      "SURVIVED. BARELY.",
+      "ZERO EMAILS ANSWERED"
+    ]
+  },
+  "playtest": {
+    "progress": "score + lives * 200 + wave * 50"
+  }
+}

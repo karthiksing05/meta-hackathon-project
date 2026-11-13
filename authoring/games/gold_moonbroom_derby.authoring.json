@@ -1,0 +1,623 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Moonbroom Derby",
+    "instructions": "Tap the left or right side to swerve your broom between lanes. Dodge storm clouds and runaway spellbooks, grab sparks to build a streak, and skim past hazards for Whoosh points. Cross the finish lanterns in 50 seconds.",
+    "duration_s": 50
+  },
+  "uses": [
+    {
+      "fragment": "lanes",
+      "params": {
+        "count": 5,
+        "x_min": 52.0,
+        "x_max": 308.0,
+        "y": 520.0,
+        "size": 17.0,
+        "tone": "primary"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Score"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      }
+    },
+    {
+      "fragment": "combo",
+      "params": {
+        "step": 1,
+        "max": 8,
+        "label": "Streak"
+      },
+      "bind": {
+        "hit_good": "point",
+        "hit_bad": "hit"
+      }
+    },
+    {
+      "fragment": "collide",
+      "params": {
+        "radius": 30.0,
+        "grace": "1000ms"
+      }
+    },
+    {
+      "fragment": "pickups",
+      "params": {
+        "every": "900ms",
+        "max_alive": 3,
+        "radius": 13.0,
+        "reach": 18.0,
+        "lifetime": 0,
+        "x_min": 52.0,
+        "x_max": 308.0,
+        "columns": 5,
+        "fall": 210.0
+      }
+    },
+    {
+      "fragment": "difficulty_curve",
+      "params": {
+        "from": 0.0,
+        "to": 1.0,
+        "over": "45s",
+        "curve": "ease_in_out"
+      }
+    }
+  ],
+  "types": {
+    "Hazard": {
+      "id": "int",
+      "x": "float",
+      "y": "float",
+      "lane": "int",
+      "kind": "string",
+      "passed": "bool",
+      "born": "int"
+    },
+    "Pop": {
+      "id": "int",
+      "x": "float",
+      "y": "float",
+      "born": "int",
+      "text": "string"
+    }
+  },
+  "state": {
+    "hazards": {
+      "type": "list<Hazard>",
+      "init": "[]"
+    },
+    "haz_seq": {
+      "type": "int",
+      "init": "0"
+    },
+    "speed": {
+      "type": "float",
+      "init": "240.0"
+    },
+    "travel": {
+      "type": "float",
+      "init": "0.0"
+    },
+    "pops": {
+      "type": "list<Pop>",
+      "init": "[]"
+    },
+    "pop_seq": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "colliders": {
+      "params": {},
+      "returns": "list<vec2>",
+      "body": "map(hazards, h => vec(h.x, h.y))"
+    }
+  },
+  "events": {
+    "spawn_tick": {},
+    "whoosh": {
+      "x": "float",
+      "y": "float"
+    }
+  },
+  "rules": [
+    {
+      "id": "first_gust",
+      "on": "start",
+      "do": [
+        {
+          "after": "700ms",
+          "emit": "spawn_tick",
+          "id": "spawn_timer"
+        }
+      ]
+    },
+    {
+      "id": "spawn",
+      "on": "spawn_tick",
+      "do": [
+        {
+          "let": {
+            "a": "random_int(0, 4)"
+          }
+        },
+        {
+          "let": {
+            "is_book": "difficulty > 0.25 and chance(0.2 + 0.3 * difficulty)"
+          }
+        },
+        {
+          "push": "hazards",
+          "value": "{id: haz_seq, x: lane_x(a), y: -36.0, lane: a, kind: if is_book then 'book' else 'cloud', passed: false, born: now}"
+        },
+        {
+          "incr": "haz_seq"
+        },
+        {
+          "if": "difficulty > 0.4 and chance(0.2 + 0.5 * difficulty)",
+          "then": [
+            {
+              "let": {
+                "b": "(a + random_int(1, 4)) % 5"
+              }
+            },
+            {
+              "push": "hazards",
+              "value": "{id: haz_seq, x: lane_x(b), y: -36.0, lane: b, kind: 'cloud', passed: false, born: now}"
+            },
+            {
+              "incr": "haz_seq"
+            }
+          ]
+        },
+        {
+          "after": "floor(1000.0 - 460.0 * difficulty)",
+          "emit": "spawn_tick",
+          "id": "spawn_timer"
+        }
+      ]
+    },
+    {
+      "id": "fly",
+      "on": "tick",
+      "do": [
+        {
+          "set": "speed",
+          "to": "230.0 + 190.0 * difficulty"
+        },
+        {
+          "set": "travel",
+          "to": "travel + speed * event.dt / 1000.0"
+        },
+        {
+          "set": "hazards",
+          "to": "map(hazards, h => {...h, y: h.y + speed * event.dt / 1000.0, x: if h.kind == 'book' then lane_x(h.lane) + 30.0 * sin((now - h.born) / 240.0) else h.x})"
+        },
+        {
+          "remove": "hazards",
+          "where": "h => h.y > 700.0"
+        },
+        {
+          "remove": "pops",
+          "where": "p => now - p.born > 750"
+        }
+      ]
+    },
+    {
+      "id": "near_miss",
+      "on": "tick",
+      "when": "any(hazards, h => not h.passed and h.y > player.y + 12.0)",
+      "do": [
+        {
+          "let": {
+            "close": "filter(hazards, h => not h.passed and h.y > player.y + 12.0 and abs(h.x - player.x) < 80.0 and now >= safe_until)"
+          }
+        },
+        {
+          "set": "hazards",
+          "to": "map(hazards, h => if not h.passed and h.y > player.y + 12.0 then {...h, passed: true} else h)"
+        },
+        {
+          "for_each": "close",
+          "as": "c",
+          "do": [
+            {
+              "incr": "score",
+              "by": "5"
+            },
+            {
+              "emit": "whoosh",
+              "with": {
+                "x": "(c.x + player.x) / 2.0",
+                "y": "player.y"
+              }
+            },
+            {
+              "push": "pops",
+              "value": "{id: pop_seq, x: (c.x + player.x) / 2.0, y: player.y - 34.0, born: now, text: 'Whoosh +5'}"
+            },
+            {
+              "incr": "pop_seq"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spark_bonus",
+      "on": "point",
+      "do": [
+        {
+          "incr": "score",
+          "by": "5 * combo"
+        },
+        {
+          "push": "pops",
+          "value": "{id: pop_seq, x: player.x, y: player.y - 46.0, born: now, text: '+' + str(10 + 5 * combo)}"
+        },
+        {
+          "incr": "pop_seq"
+        }
+      ]
+    },
+    {
+      "id": "burst",
+      "on": "hit",
+      "do": [
+        {
+          "remove": "hazards",
+          "where": "h => dist(vec(h.x, h.y), hit_at) < 56.0"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "time_limit": "50s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(3)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "image",
+            "asset": "wisp",
+            "x": "= 20.0 + k * 110.0 + 30.0 * sin(k * 2.1)",
+            "y": "= fmod(travel * 0.35 + k * 270.0, 820.0) - 90.0",
+            "w": 150,
+            "h": 50,
+            "opacity": 0.22
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "range(6)",
+          "as": "k",
+          "key": "k",
+          "template": {
+            "node": "rect",
+            "x": "= 30.0 + k * 60.0",
+            "y": "= fmod(travel * 1.4 + hash(k) * 640.0, 760.0) - 80.0",
+            "w": 2,
+            "h": "= 26.0 + 60.0 * difficulty",
+            "radius": 1,
+            "fill": "#E9DFFF",
+            "opacity": "= 0.10 + 0.22 * difficulty"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "hazards",
+          "as": "h",
+          "key": "h.id",
+          "template": {
+            "node": "image",
+            "asset": "= if h.kind == 'book' then 'book' else 'cloud'",
+            "anchor": "center",
+            "x": "= h.x",
+            "y": "= h.y",
+            "w": 62,
+            "h": 50,
+            "rotation": "= if h.kind == 'book' then 10.0 * cos((now - h.born) / 240.0) else sin((now + h.id * 137) / 380.0) * 5.0",
+            "role": "hazard"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "image",
+          "asset": "finish",
+          "anchor": "center",
+          "x": 180,
+          "y": "= -60.0 + 580.0 * clamp((now - 47000) / 3000.0, 0.0, 1.0)",
+          "w": 340,
+          "h": 90,
+          "visible": "= now > 46900"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "repeat",
+          "source": "pops",
+          "as": "p",
+          "key": "p.id",
+          "template": {
+            "node": "text",
+            "text": "= p.text",
+            "anchor": "center",
+            "x": "= p.x",
+            "y": "= p.y - (now - p.born) * 0.05",
+            "size": 16,
+            "weight": 700,
+            "color": "= if starts_with(p.text, 'W') then '#E9DFFF' else $accent",
+            "stroke": "#140C33",
+            "stroke_width": 3,
+            "opacity": "= 1.0 - (now - p.born) / 750.0"
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "x": 348,
+              "y": 110,
+              "w": 5,
+              "h": 380,
+              "radius": 2.5,
+              "fill": "#FFFFFF",
+              "opacity": 0.14
+            },
+            {
+              "node": "rect",
+              "x": 348,
+              "y": "= 490.0 - 380.0 * min(1.0, now / 50000.0)",
+              "w": 5,
+              "h": "= 380.0 * min(1.0, now / 50000.0)",
+              "radius": 2.5,
+              "fill": "$accent",
+              "opacity": 0.8
+            },
+            {
+              "node": "rect",
+              "x": 345,
+              "y": 100,
+              "w": 11,
+              "h": 11,
+              "radius": 2,
+              "rotation": 45,
+              "fill": "#FFC86B"
+            },
+            {
+              "node": "circle",
+              "x": 350.5,
+              "y": "= 490.0 - 380.0 * min(1.0, now / 50000.0)",
+              "r": 6,
+              "fill": "$primary",
+              "stroke": "#140C33",
+              "stroke_width": 2
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "rect",
+          "x": 14,
+          "y": 28,
+          "w": 332,
+          "h": 40,
+          "radius": 20,
+          "fill": "#0B0926",
+          "opacity": 0.6
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "point",
+        "do": [
+          {
+            "sound": {
+              "wave": "triangle",
+              "note": "= 587.0 * pow(1.0595, min(combo, 12) * 2.0)",
+              "ms": 110,
+              "volume": 0.45
+            }
+          }
+        ]
+      },
+      {
+        "on": "whoosh",
+        "do": [
+          {
+            "sound": {
+              "wave": "sine",
+              "note": "E6",
+              "slide": "A5",
+              "ms": 140,
+              "volume": 0.3
+            }
+          },
+          {
+            "particles": {
+              "x": "= event.x",
+              "y": "= event.y",
+              "count": 10,
+              "color": "#E9DFFF",
+              "speed": 200,
+              "size": 3,
+              "ms": 380,
+              "gravity": 600,
+              "spread": 120
+            }
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Wizard-academy night race: indigo sky with a crescent moon, castle spires with warm windows, a plum-cloaked rider with an orange scarf, slate storm clouds with pink lightning, crimson flapping spellbooks and mint sparks.",
+    "palette": {
+      "bg": "#120E33",
+      "surface": "#FFFFFF16",
+      "primary": "#FFB547",
+      "secondary": "#7A4CC4",
+      "accent": "#5CF0E0",
+      "ink": "#F4EEFF",
+      "danger": "#FF5C8A"
+    },
+    "font": "Optima",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#0B0926'/><stop offset='0.5' stop-color='#1C1548'/><stop offset='0.85' stop-color='#33206A'/><stop offset='1' stop-color='#47287A'/></linearGradient><radialGradient id='moonglow' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFF0C8' stop-opacity='0.45'/><stop offset='1' stop-color='#FFF0C8' stop-opacity='0'/></radialGradient><radialGradient id='aurora' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#5CF0E0' stop-opacity='0.16'/><stop offset='1' stop-color='#5CF0E0' stop-opacity='0'/></radialGradient><mask id='crescent'><rect width='360' height='640' fill='#FFFFFF'/><circle cx='301' cy='118' r='22' fill='#000000'/></mask><filter id='haze' x='-20%' y='-50%' width='140%' height='200%'><feGaussianBlur stdDeviation='8'/></filter></defs><rect width='360' height='640' fill='url(#sky)'/><ellipse cx='70' cy='250' rx='150' ry='70' fill='url(#aurora)'/><g fill='#FFFFFF'><circle cx='169' cy='81' r='1.0' opacity='0.35'/><circle cx='41' cy='424' r='1.4' opacity='0.35'/><circle cx='191' cy='302' r='0.6' opacity='0.5'/><circle cx='23' cy='48' r='1.0' opacity='0.9'/><circle cx='39' cy='127' r='0.6' opacity='0.9'/><circle cx='34' cy='427' r='1.4' opacity='0.35'/><circle cx='118' cy='326' r='1.4' opacity='0.35'/><circle cx='299' cy='303' r='1.0' opacity='0.35'/><circle cx='117' cy='27' r='1.4' opacity='0.5'/><circle cx='152' cy='218' r='0.8' opacity='0.35'/><circle cx='296' cy='161' r='1.4' opacity='0.5'/><circle cx='56' cy='301' r='1.4' opacity='0.5'/><circle cx='194' cy='53' r='1.4' opacity='0.35'/><circle cx='292' cy='34' r='1.4' opacity='0.5'/><circle cx='258' cy='352' r='1.4' opacity='0.9'/><circle cx='164' cy='242' r='1.4' opacity='0.9'/><circle cx='189' cy='157' r='0.8' opacity='0.5'/><circle cx='128' cy='45' r='1.4' opacity='0.7'/><circle cx='272' cy='257' r='1.0' opacity='0.9'/><circle cx='151' cy='315' r='0.6' opacity='0.35'/><circle cx='266' cy='218' r='0.8' opacity='0.7'/><circle cx='81' cy='254' r='1.0' opacity='0.35'/><circle cx='346' cy='43' r='1.4' opacity='0.7'/><circle cx='178' cy='359' r='1.0' opacity='0.9'/><circle cx='300' cy='412' r='1.0' opacity='0.35'/><circle cx='51' cy='142' r='1.0' opacity='0.35'/><circle cx='35' cy='378' r='1.0' opacity='0.9'/><circle cx='149' cy='370' r='1.0' opacity='0.7'/><circle cx='15' cy='240' r='1.0' opacity='0.5'/><circle cx='316' cy='63' r='1.0' opacity='0.35'/><circle cx='115' cy='397' r='1.0' opacity='0.5'/><circle cx='130' cy='207' r='1.0' opacity='0.9'/><circle cx='45' cy='89' r='1.0' opacity='0.9'/><circle cx='285' cy='146' r='0.8' opacity='0.9'/><circle cx='285' cy='146' r='1.0' opacity='0.7'/><circle cx='353' cy='456' r='1.0' opacity='0.5'/><circle cx='81' cy='46' r='0.8' opacity='0.5'/><circle cx='122' cy='341' r='0.8' opacity='0.35'/><circle cx='252' cy='429' r='1.4' opacity='0.5'/><circle cx='138' cy='148' r='0.6' opacity='0.5'/><circle cx='218' cy='277' r='1.0' opacity='0.7'/><circle cx='68' cy='357' r='1.4' opacity='0.35'/><circle cx='237' cy='464' r='1.4' opacity='0.9'/><circle cx='207' cy='208' r='1.0' opacity='0.35'/><circle cx='250' cy='328' r='1.0' opacity='0.35'/><circle cx='101' cy='38' r='0.8' opacity='0.9'/></g><circle cx='292' cy='126' r='62' fill='url(#moonglow)'/><circle cx='292' cy='126' r='24' fill='#FFF0C8' mask='url(#crescent)'/><ellipse cx='180' cy='600' rx='260' ry='46' fill='#7A5BC0' opacity='0.35' filter='url(#haze)'/><g fill='#120B2E'><path d='M0 640 L0 520 L10 520 L10 470 L4 470 L18 418 L32 470 L26 470 L26 505 L44 505 L44 455 L38 455 L54 400 L70 455 L64 455 L64 530 L86 530 L86 498 L80 498 L94 462 L108 498 L102 498 L102 560 L130 560 L130 640 Z'/><path d='M360 640 L360 500 L350 500 L350 448 L356 448 L340 392 L324 448 L330 448 L330 512 L312 512 L312 470 L318 470 L302 428 L286 470 L292 470 L292 540 L268 540 L268 515 L274 515 L260 486 L246 515 L252 515 L252 568 L228 568 L228 640 Z'/><path d='M120 640 L120 590 Q180 566 240 590 L240 640 Z'/></g><g fill='#FFC86B' opacity='0.9'><rect x='15' y='482' width='4' height='7' rx='2.0'/><rect x='15' y='496' width='4' height='7' rx='2.0'/><rect x='51' y='470' width='5' height='8' rx='2.5'/><rect x='51' y='486' width='5' height='8' rx='2.5'/><rect x='57' y='512' width='4' height='7' rx='2.0'/><rect x='92' y='508' width='4' height='7' rx='2.0'/><rect x='334' y='460' width='5' height='8' rx='2.5'/><rect x='334' y='476' width='5' height='8' rx='2.5'/><rect x='298' y='480' width='4' height='7' rx='2.0'/><rect x='298' y='496' width='4' height='7' rx='2.0'/><rect x='258' y='526' width='4' height='7' rx='2.0'/><rect x='18' y='540' width='4' height='6' rx='2.0'/><rect x='340' y='520' width='4' height='6' rx='2.0'/></g><g fill='#FFC86B' opacity='0.55'><rect x='140' y='600' width='3' height='5' rx='1.5'/><rect x='160' y='596' width='3' height='5' rx='1.5'/><rect x='198' y='596' width='3' height='5' rx='1.5'/><rect x='218' y='600' width='3' height='5' rx='1.5'/></g></svg>"
+    },
+    "sprites": {
+      "avatar": {
+        "svg": "<svg viewBox='0 0 48 60'><defs><radialGradient id='trail' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE9A8' stop-opacity='0.95'/><stop offset='1' stop-color='#FFB547' stop-opacity='0'/></radialGradient><linearGradient id='cloak' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#7A4CC4'/><stop offset='1' stop-color='#3A1F6E'/></linearGradient><radialGradient id='gem' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFFFFF'/><stop offset='0.45' stop-color='#9FF3FF'/><stop offset='1' stop-color='#9FF3FF' stop-opacity='0'/></radialGradient></defs><ellipse cx='24' cy='54' rx='13' ry='7' fill='url(#trail)'/><path d='M19 42 L29 42 L35 57 Q24 61 13 57 Z' fill='#F0AE45' stroke='#9C5B1C' stroke-width='1'/><path d='M21 45 L17.5 56 M24 45 L24 58 M27 45 L30.5 56' stroke='#B8742A' stroke-width='1' fill='none'/><rect x='17.5' y='39.5' width='13' height='4' rx='2' fill='#7A4A22'/><rect x='22.6' y='4' width='2.8' height='38' rx='1.4' fill='#9A6532'/><circle cx='24' cy='5' r='5.5' fill='url(#gem)'/><circle cx='24' cy='5' r='1.8' fill='#FFFFFF'/><path d='M14 31 Q12 40 8 47 L40 47 Q36 40 34 31 Q24 26 14 31 Z' fill='url(#cloak)' stroke='#24104A' stroke-width='1'/><path d='M19 31 L24 47 M29 31 L24 47' stroke='#5A33A0' stroke-width='1' fill='none'/><path d='M17 30 Q10 37 4 45 Q9 46 12.5 42 Q15.5 37 21 32 Z' fill='#FFB547' stroke='#C9741C' stroke-width='0.8'/><path d='M30 30 Q34 34 33 39 Q30 36 27 33 Z' fill='#FFB547' stroke='#C9741C' stroke-width='0.8'/><circle cx='24' cy='26' r='6.5' fill='#6B4330'/><ellipse cx='24' cy='22' rx='11.5' ry='3.8' fill='#3A1F6E' stroke='#1E0C40' stroke-width='1'/><path d='M17 22 Q19 13 25 9 Q32 5 38 9.5 Q31 10.5 29.5 15 L31 22 Z' fill='#6236B0' stroke='#1E0C40' stroke-width='1'/><path d='M17.6 20.4 Q24 18.4 30.6 20.4 L30.9 22 Q24 20 17.3 22 Z' fill='#FFD36B'/><circle cx='38' cy='9.5' r='1.8' fill='#FFD36B'/></svg>",
+        "w": 96,
+        "color": "#FFB547"
+      },
+      "cloud": {
+        "svg": "<svg viewBox='0 0 64 52'><defs><radialGradient id='body' gradientUnits='userSpaceOnUse' cx='28' cy='16' r='34'><stop offset='0' stop-color='#A79FD6'/><stop offset='1' stop-color='#4A4380'/></radialGradient><filter id='glow' x='-60%' y='-60%' width='220%' height='220%'><feGaussianBlur stdDeviation='2.2'/></filter></defs><polygon points='35,30 26,43 32,42.5 27,52 41,37 34.5,38 39,30' fill='#FF5C8A' filter='url(#glow)'/><polygon points='35,30 26,43 32,42.5 27,52 41,37 34.5,38 39,30' fill='#FFD0DE'/><path d='M12 36 Q2 35 4 26 Q6 18 15 20 Q17 8 30 8 Q40 6 45 15 Q56 13 59 22 Q63 33 52 36 Z' fill='#FF5C8A' opacity='0.55' filter='url(#glow)' transform='translate(0 1)'/><g fill='url(#body)' stroke='#FFB3C9' stroke-width='1.3'><path d='M12 36 Q2 35 4 26 Q6 18 15 20 Q17 8 30 8 Q40 6 45 15 Q56 13 59 22 Q63 33 52 36 Z'/></g><path d='M14 21 Q18 14 26 13' stroke='#B4ADDA' stroke-width='2' fill='none' stroke-linecap='round' opacity='0.7'/><path d='M20 23 L28 26 L21 28.5 Z' fill='#FF8FB0'/><path d='M44 23 L36 26 L43 28.5 Z' fill='#FF8FB0'/><path d='M24 33 Q32 29 40 33' stroke='#FF8FB0' stroke-width='2' fill='none' stroke-linecap='round'/></svg>",
+        "w": 124,
+        "color": "#8A82B8"
+      },
+      "book": {
+        "svg": [
+          "<svg viewBox='0 0 64 52'><defs><radialGradient id='rune' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE38A'/><stop offset='1' stop-color='#FFE38A' stop-opacity='0'/></radialGradient></defs><path d='M32 34 L5 8 L3 28 L30 44 Z' fill='#C22F55' stroke='#5E0F25' stroke-width='1.5' stroke-linejoin='round'/><path d='M32 34 L59 8 L61 28 L34 44 Z' fill='#C22F55' stroke='#5E0F25' stroke-width='1.5' stroke-linejoin='round'/><path d='M32 34 L9 12 L8 27 L31 41 Z' fill='#FFF3DA' stroke='#D8C49C' stroke-width='0.8'/><path d='M32 34 L55 12 L56 27 L33 41 Z' fill='#FFF3DA' stroke='#D8C49C' stroke-width='0.8'/><path d='M14 18 L27 29 M13 22 L27 33 M50 18 L37 29 M51 22 L37 33' stroke='#B9A47C' stroke-width='1' fill='none'/><circle cx='32' cy='38' r='9' fill='url(#rune)'/><path d='M32 33 L36 40 L28 40 Z' fill='none' stroke='#FFE38A' stroke-width='1.6' stroke-linejoin='round'/><circle cx='32' cy='38.2' r='1.5' fill='#FFE38A'/><path d='M32 34 L32 45' stroke='#5E0F25' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 64 52'><defs><radialGradient id='rune' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE38A'/><stop offset='1' stop-color='#FFE38A' stop-opacity='0'/></radialGradient></defs><path d='M32 34 L5 17 L3 37 L30 44 Z' fill='#C22F55' stroke='#5E0F25' stroke-width='1.5' stroke-linejoin='round'/><path d='M32 34 L59 17 L61 37 L34 44 Z' fill='#C22F55' stroke='#5E0F25' stroke-width='1.5' stroke-linejoin='round'/><path d='M32 34 L9 21 L8 36 L31 41 Z' fill='#FFF3DA' stroke='#D8C49C' stroke-width='0.8'/><path d='M32 34 L55 21 L56 36 L33 41 Z' fill='#FFF3DA' stroke='#D8C49C' stroke-width='0.8'/><path d='M14 27 L27 33 M13 31 L27 37 M50 27 L37 33 M51 31 L37 37' stroke='#B9A47C' stroke-width='1' fill='none'/><circle cx='32' cy='38' r='9' fill='url(#rune)'/><path d='M32 33 L36 40 L28 40 Z' fill='none' stroke='#FFE38A' stroke-width='1.6' stroke-linejoin='round'/><circle cx='32' cy='38.2' r='1.5' fill='#FFE38A'/><path d='M32 34 L32 45' stroke='#5E0F25' stroke-width='2'/></svg>"
+        ],
+        "w": 124,
+        "fps": 8,
+        "color": "#FF5C8A"
+      },
+      "pickup": {
+        "svg": [
+          "<svg viewBox='0 0 40 40'><defs><radialGradient id='halo' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#C9FFF4' stop-opacity='0.95'/><stop offset='0.45' stop-color='#5CF0E0' stop-opacity='0.45'/><stop offset='1' stop-color='#5CF0E0' stop-opacity='0'/></radialGradient></defs><circle cx='20' cy='20' r='19' fill='url(#halo)'/><path d='M20 3.0 Q22.5 17.5 37.0 20 Q22.5 22.5 20 37.0 Q17.5 22.5 3.0 20 Q17.5 17.5 20 3.0 Z' fill='#E9FFFB' stroke='#5CF0E0' stroke-width='1.2'/><circle cx='20' cy='20' r='3' fill='#FFFFFF'/></svg>",
+          "<svg viewBox='0 0 40 40'><defs><radialGradient id='halo' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#C9FFF4' stop-opacity='0.95'/><stop offset='0.45' stop-color='#5CF0E0' stop-opacity='0.45'/><stop offset='1' stop-color='#5CF0E0' stop-opacity='0'/></radialGradient></defs><circle cx='20' cy='20' r='16' fill='url(#halo)'/><path d='M20 6.74 Q21.95 18.05 33.26 20 Q21.95 21.95 20 33.26 Q18.05 21.95 6.74 20 Q18.05 18.05 20 6.74 Z' fill='#E9FFFB' stroke='#5CF0E0' stroke-width='1.2'/><circle cx='20' cy='20' r='3' fill='#FFFFFF'/></svg>"
+        ],
+        "w": 72,
+        "fps": 6,
+        "color": "#5CF0E0"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 24 24'><ellipse cx='12' cy='19' rx='11' ry='3.6' fill='#FFB547' stroke='#7A3E0E' stroke-width='1'/><path d='M5.5 19 Q8 9 12 4 Q15 1.5 19.5 3 Q15.5 4.5 15 8 L18.5 19 Z' fill='#FFC96B' stroke='#7A3E0E' stroke-width='1'/><path d='M6.2 16.6 Q12 14.8 17.8 16.6 L18.4 18.6 Q12 16.8 5.6 18.6 Z' fill='#6236B0'/></svg>",
+        "w": 44,
+        "color": "#FFB547"
+      },
+      "wisp": {
+        "svg": "<svg viewBox='0 0 120 40'><defs><filter id='soft' x='-20%' y='-50%' width='140%' height='200%'><feGaussianBlur stdDeviation='3'/></filter></defs><g fill='#B9A8FF' filter='url(#soft)'><ellipse cx='40' cy='24' rx='30' ry='9'/><ellipse cx='70' cy='18' rx='26' ry='10'/><ellipse cx='92' cy='25' rx='20' ry='7'/></g></svg>",
+        "w": 240
+      },
+      "finish": {
+        "svg": "<svg viewBox='0 0 340 90'><defs><radialGradient id='lamp' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFF3C4'/><stop offset='0.4' stop-color='#FFC86B' stop-opacity='0.8'/><stop offset='1' stop-color='#FFC86B' stop-opacity='0'/></radialGradient></defs><rect x='10' y='14' width='6' height='76' rx='3' fill='#3A2A5E'/><rect x='324' y='14' width='6' height='76' rx='3' fill='#3A2A5E'/><path d='M16 22 Q170 52 324 22' stroke='#E9DFFF' stroke-width='1.5' fill='none'/><g stroke='#2A1450' stroke-width='0.8'><path d='M30 26 L44 28.5 L36 44 Z' fill='#FFC86B'/><path d='M58 31 L72 33 L64 49 Z' fill='#5CF0E0'/><path d='M86 34.5 L100 36 L92 52 Z' fill='#FF8FB0'/><path d='M114 36.5 L128 37.5 L120 54 Z' fill='#FFC86B'/><path d='M142 37.5 L156 37.8 L149 55 Z' fill='#5CF0E0'/><path d='M170 37.8 L184 37.5 L177 55 Z' fill='#FF8FB0'/><path d='M198 37.5 L212 36.5 L205 54 Z' fill='#FFC86B'/><path d='M226 36 L240 34.5 L233 52 Z' fill='#5CF0E0'/><path d='M254 33 L268 31 L261 49 Z' fill='#FF8FB0'/><path d='M282 28.5 L296 26 L289 44 Z' fill='#FFC86B'/></g><circle cx='13' cy='12' r='12' fill='url(#lamp)'/><rect x='8' y='6' width='10' height='12' rx='3' fill='#FFD98A' stroke='#3A2A5E' stroke-width='1.5'/><circle cx='327' cy='12' r='12' fill='url(#lamp)'/><rect x='322' y='6' width='10' height='12' rx='3' fill='#FFD98A' stroke='#3A2A5E' stroke-width='1.5'/></svg>",
+        "w": 680,
+        "color": "#FFC86B"
+      }
+    }
+  },
+  "sound": {
+    "set": "chime",
+    "volume": 0.85,
+    "moments": {
+      "hit": "thud",
+      "win": "tada",
+      "lose": "fall"
+    },
+    "music": {
+      "melody": [
+        "D5",
+        "F5",
+        "A5",
+        "F5",
+        "G5",
+        "A5",
+        "C6",
+        "A5",
+        "A#5",
+        "A5",
+        "G5",
+        "F5",
+        "E5",
+        "G5",
+        "A5",
+        null,
+        "D5",
+        "F5",
+        "A5",
+        "D6",
+        "C6",
+        "A5",
+        "G5",
+        "E5",
+        "F5",
+        "E5",
+        "D5",
+        "C5",
+        "D5",
+        null,
+        "A4",
+        null
+      ],
+      "bass": [
+        "D3",
+        "D3",
+        "A#2",
+        "A#2",
+        "C3",
+        "C3",
+        "A2",
+        "A2",
+        "D3",
+        "D3",
+        "A#2",
+        "A#2",
+        "C3",
+        "A2",
+        "D3",
+        "D3"
+      ],
+      "bpm": 152,
+      "wave": "triangle",
+      "volume": 0.22
+    }
+  },
+  "playtest": {
+    "progress": "score + lives * 200"
+  }
+}

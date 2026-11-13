@@ -1,0 +1,879 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Pillow Fort Night",
+    "instructions": "Build one pillow fort together. Pass the phone: on your turn a pillow swings over the fort, so tap to drop it on top. A pillow stays up while its middle is over the one below, and every wobble squishes the fort a little narrower; nail a perfect drop to fluff it back out. 4 pillows each; land all 12 to reach the ceiling for a Sky Fort. Three tumbles and the fort caves in.",
+    "duration_s": 120
+  },
+  "uses": [
+    {
+      "fragment": "turns",
+      "params": {
+        "players": 3,
+        "turns": 4,
+        "p1": "Ana",
+        "p2": "Kofi",
+        "p3": "Mei"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 3
+      },
+      "bind": {
+        "hit": "tumbled"
+      }
+    }
+  ],
+  "types": {
+    "Pillow": {
+      "x": "float",
+      "w": "float",
+      "p": "int"
+    }
+  },
+  "state": {
+    "score": {
+      "type": "int",
+      "init": "0"
+    },
+    "pillows": {
+      "type": "list<Pillow>",
+      "init": "[]"
+    },
+    "swing_start": {
+      "type": "int",
+      "init": "0"
+    },
+    "dropping": {
+      "type": "bool",
+      "init": "false"
+    },
+    "drop_at": {
+      "type": "int",
+      "init": "0"
+    },
+    "drop_x": {
+      "type": "float",
+      "init": "180.0"
+    },
+    "drop_w": {
+      "type": "float",
+      "init": "170.0"
+    },
+    "drop_land_x": {
+      "type": "float",
+      "init": "180.0"
+    },
+    "drop_ok": {
+      "type": "bool",
+      "init": "true"
+    },
+    "drop_pts": {
+      "type": "int",
+      "init": "0"
+    },
+    "drop_by": {
+      "type": "int",
+      "init": "0"
+    },
+    "drop_label": {
+      "type": "string",
+      "init": "''"
+    }
+  },
+  "functions": {
+    "top_x": {
+      "params": {},
+      "returns": "float",
+      "body": "if len(pillows) == 0 then 180.0 else last(pillows).x"
+    },
+    "top_w": {
+      "params": {},
+      "returns": "float",
+      "body": "if len(pillows) == 0 then 170.0 else last(pillows).w"
+    },
+    "stack_top": {
+      "params": {},
+      "returns": "float",
+      "body": "540.0 - len(pillows) * 28.0"
+    },
+    "hover_y": {
+      "params": {},
+      "returns": "float",
+      "body": "134.0"
+    },
+    "pace": {
+      "params": {},
+      "returns": "float",
+      "body": "1.0 + turn_no * 0.09"
+    },
+    "swing_x": {
+      "params": {},
+      "returns": "float",
+      "body": "180.0 + 112.0 * sin((now - swing_start) * pace() / 380.0)"
+    },
+    "pillow_y": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "float",
+      "body": "540.0 - (k + 1) * 28.0"
+    },
+    "fall_t": {
+      "params": {},
+      "returns": "float",
+      "body": "min(1.0, (now - drop_at) * 1.0 / 600.0)"
+    },
+    "falling_y": {
+      "params": {},
+      "returns": "float",
+      "body": "if drop_ok then lerp(hover_y(), stack_top() - 28.0, fall_t() * fall_t()) else lerp(hover_y(), 700.0, fall_t() * fall_t())"
+    },
+    "falling_x": {
+      "params": {},
+      "returns": "float",
+      "body": "if drop_ok then lerp(drop_x, drop_land_x, fall_t()) else drop_x + (if drop_x < top_x() then -90.0 else 90.0) * fall_t()"
+    },
+    "color_of": {
+      "params": {
+        "p": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['#FF8A7A', '#4CC9C0', '#FFC857', '#B69CFF'], p, '#FFFFFF')"
+    },
+    "shade_of": {
+      "params": {
+        "p": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['#C9584B', '#2E8F88', '#C9962A', '#7F64C9'], p, '#000000')"
+    },
+    "initial": {
+      "params": {
+        "p": "int"
+      },
+      "returns": "string",
+      "body": "substr(turn_name(p), 0, 1)"
+    },
+    "pillows_by": {
+      "params": {
+        "p": "int"
+      },
+      "returns": "int",
+      "body": "count(pillows, q => q.p == p)"
+    },
+    "banner_on": {
+      "params": {},
+      "returns": "bool",
+      "body": "drop_at > 0 and now - drop_at < 1300"
+    }
+  },
+  "events": {
+    "turn_done": {
+      "points": "int"
+    },
+    "release": {},
+    "arms_tired": {
+      "turn": "int"
+    },
+    "landed": {},
+    "tumbled": {},
+    "sky_fort": {},
+    "perfect_drop": {},
+    "good_drop": {}
+  },
+  "inputs": {
+    "drop": {}
+  },
+  "rules": [
+    {
+      "id": "new_turn",
+      "on": "turn_started",
+      "do": [
+        {
+          "set": "swing_start",
+          "to": "now"
+        },
+        {
+          "set": "dropping",
+          "to": "false"
+        },
+        {
+          "after": "5000",
+          "emit": "arms_tired",
+          "with": {
+            "turn": "turn_no"
+          },
+          "id": "tired"
+        }
+      ]
+    },
+    {
+      "id": "tap_drop",
+      "on": "drop",
+      "when": "turn_active and not dropping",
+      "do": [
+        {
+          "emit": "release"
+        }
+      ]
+    },
+    {
+      "id": "auto_drop",
+      "on": "arms_tired",
+      "when": "turn_active and not dropping and event.turn == turn_no",
+      "do": [
+        {
+          "emit": "release"
+        }
+      ]
+    },
+    {
+      "id": "let_go",
+      "on": "release",
+      "do": [
+        {
+          "cancel": "tired"
+        },
+        {
+          "let": {
+            "x": "swing_x()",
+            "w": "top_w()",
+            "tx": "top_x()"
+          }
+        },
+        {
+          "let": {
+            "dx": "abs(x - tx)"
+          }
+        },
+        {
+          "set": "dropping",
+          "to": "true"
+        },
+        {
+          "set": "drop_at",
+          "to": "now"
+        },
+        {
+          "set": "drop_x",
+          "to": "x"
+        },
+        {
+          "set": "drop_by",
+          "to": "turn_player"
+        },
+        {
+          "if": "dx <= 6.0",
+          "then": [
+            {
+              "set": "drop_ok",
+              "to": "true"
+            },
+            {
+              "set": "drop_land_x",
+              "to": "tx"
+            },
+            {
+              "set": "drop_w",
+              "to": "min(w + 12.0, 190.0)"
+            },
+            {
+              "set": "drop_pts",
+              "to": "15"
+            },
+            {
+              "set": "drop_label",
+              "to": "'Perfect! +15'"
+            },
+            {
+              "emit": "perfect_drop"
+            }
+          ],
+          "else": [
+            {
+              "if": "dx <= w / 2.0",
+              "then": [
+                {
+                  "set": "drop_ok",
+                  "to": "true"
+                },
+                {
+                  "set": "drop_land_x",
+                  "to": "x"
+                },
+                {
+                  "set": "drop_w",
+                  "to": "max(44.0, w - dx * 0.35)"
+                },
+                {
+                  "set": "drop_pts",
+                  "to": "max(1, round(10.0 * (1.0 - dx / (w / 2.0))))"
+                },
+                {
+                  "set": "drop_label",
+                  "to": "(if drop_pts >= 8 then 'Comfy! +' else if drop_pts >= 4 then 'Wobbly +' else 'Barely! +') + str(drop_pts)"
+                },
+                {
+                  "emit": "good_drop"
+                }
+              ],
+              "else": [
+                {
+                  "set": "drop_ok",
+                  "to": "false"
+                },
+                {
+                  "set": "drop_pts",
+                  "to": "0"
+                },
+                {
+                  "set": "drop_label",
+                  "to": "'Tumble!'"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "incr": "score",
+          "by": "drop_pts"
+        },
+        {
+          "after": "600",
+          "emit": "landed",
+          "id": "fall"
+        }
+      ]
+    },
+    {
+      "id": "settle",
+      "on": "landed",
+      "do": [
+        {
+          "if": "drop_ok",
+          "then": [
+            {
+              "push": "pillows",
+              "value": "{x: drop_land_x, w: drop_w, p: drop_by}"
+            },
+            {
+              "if": "len(pillows) == 12",
+              "then": [
+                {
+                  "incr": "score",
+                  "by": "30"
+                },
+                {
+                  "emit": "sky_fort"
+                }
+              ]
+            }
+          ],
+          "else": [
+            {
+              "emit": "tumbled"
+            }
+          ]
+        },
+        {
+          "set": "dropping",
+          "to": "false"
+        },
+        {
+          "emit": "turn_done",
+          "with": {
+            "points": "drop_pts"
+          }
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "score": "score"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text",
+          "size": 18,
+          "weight": 600,
+          "color": "$accent",
+          "text": "= 'Fort ' + str(score)",
+          "animate_on": {
+            "landed": {
+              "prop": "scale",
+              "keys": [
+                1,
+                1.25,
+                1
+              ],
+              "ms": 180
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "x": 0,
+              "y": 0,
+              "w": 360,
+              "h": 640,
+              "fill": "#00000000",
+              "on_tap": {
+                "input": "drop"
+              }
+            },
+            {
+              "node": "image",
+              "asset": "couch",
+              "x": 60,
+              "y": 530,
+              "w": 240,
+              "h": 84
+            },
+            {
+              "node": "rect",
+              "x": 70,
+              "y": 203,
+              "w": 220,
+              "h": 2,
+              "radius": 1,
+              "fill": "#FFC85766"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 194,
+              "anchor": "center",
+              "size": 11,
+              "weight": 700,
+              "color": "#FFC857AA",
+              "text": "= if len(pillows) >= 12 then 'SKY FORT!' else 'CEILING · SKY FORT +30'"
+            },
+            {
+              "node": "repeat",
+              "source": "range(len(pillows))",
+              "as": "k",
+              "key": "k",
+              "template": {
+                "node": "group",
+                "children": [
+                  {
+                    "node": "rect",
+                    "x": "= pillows[k].x - pillows[k].w / 2.0",
+                    "y": "= pillow_y(k)",
+                    "w": "= pillows[k].w",
+                    "h": "= 26.0",
+                    "radius": 11,
+                    "fill": "= color_of(pillows[k].p)",
+                    "stroke": "= shade_of(pillows[k].p)",
+                    "stroke_width": 2
+                  },
+                  {
+                    "node": "rect",
+                    "x": "= pillows[k].x - pillows[k].w / 2.0 + 5.0",
+                    "y": "= pillow_y(k) + 5.0",
+                    "w": "= max(0.0, pillows[k].w - 10.0)",
+                    "h": "= 26.0 - 10.0",
+                    "radius": 7,
+                    "fill": "#00000000",
+                    "stroke": "#FFFFFF55",
+                    "stroke_width": 1.5
+                  },
+                  {
+                    "node": "text",
+                    "x": "= pillows[k].x",
+                    "y": "= pillow_y(k) + 26.0 / 2.0",
+                    "anchor": "center",
+                    "size": 14,
+                    "weight": 800,
+                    "color": "#2A1F3D",
+                    "opacity": "= if pillows[k].w >= 26.0 then 0.85 else 0.0",
+                    "text": "= initial(pillows[k].p)"
+                  }
+                ],
+                "animate_on": {
+                  "landed": {
+                    "when": "k == len(pillows) - 1",
+                    "prop": "scale",
+                    "keys": [
+                      1.12,
+                      0.94,
+                      1
+                    ],
+                    "ms": 260,
+                    "ease": "out"
+                  }
+                }
+              }
+            },
+            {
+              "node": "group",
+              "visible": "= turn_active and not dropping",
+              "children": [
+                {
+                  "node": "line",
+                  "x1": "= swing_x()",
+                  "y1": "= hover_y() + 28.0",
+                  "x2": "= swing_x()",
+                  "y2": "= stack_top()",
+                  "stroke": "#FFFFFF33",
+                  "stroke_width": 2
+                },
+                {
+                  "node": "rect",
+                  "x": "= top_x() - top_w() / 2.0",
+                  "y": "= stack_top() - 3.0",
+                  "w": "= top_w()",
+                  "h": 3,
+                  "radius": 1.5,
+                  "fill": "#FFFFFF44"
+                },
+                {
+                  "node": "rect",
+                  "x": "= swing_x() - top_w() / 2.0",
+                  "y": "= hover_y()",
+                  "w": "= top_w()",
+                  "h": "= 26.0",
+                  "radius": 11,
+                  "fill": "= color_of(turn_player)",
+                  "stroke": "= shade_of(turn_player)",
+                  "stroke_width": 2
+                },
+                {
+                  "node": "rect",
+                  "x": "= swing_x() - top_w() / 2.0 + 5.0",
+                  "y": "= hover_y() + 5.0",
+                  "w": "= max(0.0, top_w() - 10.0)",
+                  "h": "= 26.0 - 10.0",
+                  "radius": 7,
+                  "fill": "#00000000",
+                  "stroke": "#FFFFFF55",
+                  "stroke_width": 1.5
+                },
+                {
+                  "node": "text",
+                  "x": "= swing_x()",
+                  "y": "= hover_y() + 26.0 / 2.0",
+                  "anchor": "center",
+                  "size": 14,
+                  "weight": 800,
+                  "color": "#2A1F3D",
+                  "opacity": "= if top_w() >= 26.0 then 0.85 else 0.0",
+                  "text": "= initial(turn_player)"
+                }
+              ]
+            },
+            {
+              "node": "group",
+              "visible": "= dropping",
+              "rotation": "= if drop_ok then 0.0 else 70.0 * fall_t() * (if drop_x < top_x() then -1.0 else 1.0)",
+              "children": [
+                {
+                  "node": "rect",
+                  "x": "= falling_x() - (if drop_ok then drop_w else top_w()) / 2.0",
+                  "y": "= falling_y()",
+                  "w": "= (if drop_ok then drop_w else top_w())",
+                  "h": "= 26.0",
+                  "radius": 11,
+                  "fill": "= color_of(drop_by)",
+                  "stroke": "= shade_of(drop_by)",
+                  "stroke_width": 2
+                },
+                {
+                  "node": "rect",
+                  "x": "= falling_x() - (if drop_ok then drop_w else top_w()) / 2.0 + 5.0",
+                  "y": "= falling_y() + 5.0",
+                  "w": "= max(0.0, (if drop_ok then drop_w else top_w()) - 10.0)",
+                  "h": "= 26.0 - 10.0",
+                  "radius": 7,
+                  "fill": "#00000000",
+                  "stroke": "#FFFFFF55",
+                  "stroke_width": 1.5
+                },
+                {
+                  "node": "text",
+                  "x": "= falling_x()",
+                  "y": "= falling_y() + 26.0 / 2.0",
+                  "anchor": "center",
+                  "size": 14,
+                  "weight": 800,
+                  "color": "#2A1F3D",
+                  "opacity": "= if (if drop_ok then drop_w else top_w()) >= 26.0 then 0.85 else 0.0",
+                  "text": "= initial(drop_by)"
+                }
+              ]
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": "= max(150.0, stack_top() - 46.0)",
+              "anchor": "center",
+              "size": 24,
+              "weight": 800,
+              "color": "= color_of(drop_by)",
+              "stroke": "#1A1533",
+              "stroke_width": 5,
+              "opacity": "= if banner_on() then 1.0 else 0.0",
+              "transition": {
+                "opacity": {
+                  "ms": 200,
+                  "ease": "out"
+                }
+              },
+              "text": "= drop_label"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 116,
+              "anchor": "center",
+              "size": 15,
+              "weight": 700,
+              "color": "$secondary",
+              "opacity": "= if turn_active and not dropping and now - swing_start < 1800 then 1.0 else 0.0",
+              "text": "= 'Tap to drop, ' + turn_name(turn_player) + '!'"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "overlay",
+        "node": {
+          "node": "group",
+          "visible": "= not turn_active and turn_no < 12",
+          "children": [
+            {
+              "node": "text",
+              "x": 180,
+              "y": 430,
+              "anchor": "center",
+              "size": 14,
+              "weight": 600,
+              "color": "$secondary",
+              "text": "= if len(pillows) == 0 then 'The fort starts with you.' else 'The fort so far: ' + str(len(pillows)) + ' pillows'"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 226,
+              "anchor": "center",
+              "size": 18,
+              "weight": 800,
+              "color": "= color_of(drop_by)",
+              "opacity": "= if turn_no > 0 then 1.0 else 0.0",
+              "text": "= turn_name(drop_by) + ': ' + drop_label"
+            },
+            {
+              "node": "image",
+              "asset": "life",
+              "anchor": "center",
+              "x": 180,
+              "y": 128,
+              "w": 52,
+              "h": 44
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 170,
+              "anchor": "center",
+              "size": 15,
+              "weight": 800,
+              "color": "$accent",
+              "text": "PILLOW FORT NIGHT"
+            },
+            {
+              "node": "image",
+              "asset": "couch",
+              "x": 139.2,
+              "y": 576.44,
+              "w": 81.6,
+              "h": 28.56
+            },
+            {
+              "node": "repeat",
+              "source": "range(len(pillows))",
+              "as": "k",
+              "key": "k",
+              "template": {
+                "node": "group",
+                "children": [
+                  {
+                    "node": "rect",
+                    "x": "= 180.0 + (pillows[k].x - 180.0) * 0.34 - pillows[k].w * 0.34 / 2.0",
+                    "y": "= 588.0 - (k + 1) * 9.52",
+                    "w": "= pillows[k].w * 0.34",
+                    "h": "= 8.52",
+                    "radius": 4,
+                    "fill": "= color_of(pillows[k].p)",
+                    "stroke": "= shade_of(pillows[k].p)",
+                    "stroke_width": 1
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "release",
+        "do": [
+          {
+            "moment": "tap"
+          },
+          {
+            "haptic": "light"
+          }
+        ]
+      },
+      {
+        "on": "good_drop",
+        "do": [
+          {
+            "moment": "pickup"
+          }
+        ]
+      },
+      {
+        "on": "perfect_drop",
+        "do": [
+          {
+            "moment": "combo"
+          },
+          {
+            "particles": {
+              "x": "= top_x()",
+              "y": "= stack_top()",
+              "count": 30,
+              "color": "#FFE7A3",
+              "speed": 220,
+              "size": 5,
+              "ms": 700,
+              "gravity": 300
+            }
+          },
+          {
+            "haptic": "success"
+          }
+        ]
+      },
+      {
+        "on": "landed",
+        "when": "drop_ok",
+        "do": [
+          {
+            "particles": {
+              "x": "= drop_land_x",
+              "y": "= stack_top() + 28.0",
+              "count": 14,
+              "color": "= color_of(drop_by)",
+              "speed": 160,
+              "size": 5,
+              "ms": 450,
+              "gravity": 400,
+              "spread": 160
+            }
+          }
+        ]
+      },
+      {
+        "on": "tumbled",
+        "do": [
+          {
+            "moment": "hit"
+          }
+        ]
+      },
+      {
+        "on": "sky_fort",
+        "do": [
+          {
+            "moment": "level"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 204,
+              "count": 60,
+              "color": "$accent",
+              "speed": 300,
+              "size": 6,
+              "ms": 1100,
+              "gravity": 350
+            }
+          }
+        ]
+      },
+      {
+        "on": "arms_tired",
+        "when": "turn_active and dropping and event.turn == turn_no",
+        "do": [
+          {
+            "toast": {
+              "text": "Arms got tired!",
+              "ms": 900
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "riso",
+    "tokens": {}
+  },
+  "art": {
+    "style": "A cozy living room at night: striped wallpaper, string lights, a blanket canopy, a teal couch, and pillows in each friend's colour.",
+    "palette": {
+      "bg": "#241D49",
+      "surface": "#3B3170",
+      "primary": "#4CC9C0",
+      "secondary": "#C9B8FF",
+      "accent": "#FFC857",
+      "ink": "#FFF4E8",
+      "danger": "#FF6B6B"
+    },
+    "font": "Avenir Next",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='wall' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#221C45'/><stop offset='0.7' stop-color='#2F2659'/><stop offset='1' stop-color='#3A2C5E'/></linearGradient><linearGradient id='floor' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#4A2F3F'/><stop offset='1' stop-color='#2E1D2A'/></linearGradient><radialGradient id='bulb' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFE7A3' stop-opacity='0.95'/><stop offset='1' stop-color='#FFC857' stop-opacity='0'/></radialGradient><radialGradient id='lamp' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD98A' stop-opacity='0.45'/><stop offset='1' stop-color='#FFD98A' stop-opacity='0'/></radialGradient><pattern id='stripe' width='16' height='16' patternUnits='userSpaceOnUse'><rect width='16' height='16' fill='#2A2253'/><rect width='8' height='16' fill='#2D2558'/></pattern></defs><rect width='360' height='640' fill='url(#wall)'/><rect width='360' height='560' fill='url(#stripe)' opacity='0.5'/><rect y='560' width='360' height='80' fill='url(#floor)'/><path d='M30 600 Q180 640 330 600 L344 628 Q180 668 16 628Z' fill='#7A3E5C' opacity='0.8'/><path d='M50 606 Q180 640 310 606' stroke='#FFC857' stroke-opacity='0.35' stroke-width='2' fill='none'/><rect x='14' y='150' width='62' height='84' rx='6' fill='#14183A' stroke='#5B4A86' stroke-width='4'/><path d='M45 150 V234 M14 192 H76' stroke='#5B4A86' stroke-width='3'/><circle cx='34' cy='170' r='9' fill='#FFF3D1'/><circle cx='38' cy='167' r='8' fill='#14183A'/><circle cx='60' cy='212' r='1' fill='#FFF3D1'/><circle cx='26' cy='218' r='1.2' fill='#FFF3D1'/><circle cx='64' cy='166' r='0.9' fill='#FFF3D1'/><circle cx='326' cy='300' r='60' fill='url(#lamp)'/><path d='M306 296 L346 296 L336 270 L316 270Z' fill='#FFC857'/><path d='M326 296 V556' stroke='#8C7AA8' stroke-width='3'/><path d='M310 558 H342' stroke='#8C7AA8' stroke-width='4' stroke-linecap='round'/><path d='M0 70 Q60 120 120 84 Q90 130 0 150Z' fill='#5C4A9C' opacity='0.9'/><path d='M360 70 Q300 120 240 84 Q270 130 360 150Z' fill='#5C4A9C' opacity='0.9'/><path d='M0 70 Q60 120 120 84' stroke='#8D7BD6' stroke-width='2' fill='none'/><path d='M360 70 Q300 120 240 84' stroke='#8D7BD6' stroke-width='2' fill='none'/><path d='M0 80 Q90 112 180 92 Q270 112 360 80' stroke='#1A1533' stroke-width='1.5' fill='none'/><circle cx='22' cy='88' r='9' fill='url(#bulb)'/><circle cx='22' cy='88' r='3' fill='#FFE7A3'/><circle cx='64' cy='99' r='9' fill='url(#bulb)'/><circle cx='64' cy='99' r='3' fill='#FF8A7A'/><circle cx='106' cy='102' r='9' fill='url(#bulb)'/><circle cx='106' cy='102' r='3' fill='#FFE7A3'/><circle cx='148' cy='96' r='9' fill='url(#bulb)'/><circle cx='148' cy='96' r='3' fill='#4CC9C0'/><circle cx='212' cy='96' r='9' fill='url(#bulb)'/><circle cx='212' cy='96' r='3' fill='#FFE7A3'/><circle cx='254' cy='102' r='9' fill='url(#bulb)'/><circle cx='254' cy='102' r='3' fill='#FFC857'/><circle cx='296' cy='99' r='9' fill='url(#bulb)'/><circle cx='296' cy='99' r='3' fill='#FFE7A3'/><circle cx='338' cy='88' r='9' fill='url(#bulb)'/><circle cx='338' cy='88' r='3' fill='#B69CFF'/></svg>"
+    },
+    "sprites": {
+      "couch": {
+        "svg": "<svg viewBox='0 0 240 84'><rect x='4' y='4' width='232' height='40' rx='16' fill='#2E7D78'/><rect x='0' y='24' width='30' height='50' rx='12' fill='#25665F'/><rect x='210' y='24' width='30' height='50' rx='12' fill='#25665F'/><rect x='24' y='34' width='96' height='34' rx='10' fill='#3BA39B'/><rect x='120' y='34' width='96' height='34' rx='10' fill='#3BA39B'/><path d='M30 40 H114 M126 40 H210' stroke='#5CC4BB' stroke-width='2' stroke-linecap='round'/><rect x='10' y='66' width='220' height='10' rx='5' fill='#1F5752'/><rect x='22' y='74' width='8' height='10' rx='2' fill='#5A3B2A'/><rect x='210' y='74' width='8' height='10' rx='2' fill='#5A3B2A'/></svg>",
+        "color": "#3BA39B"
+      },
+      "life": {
+        "svg": "<svg viewBox='0 0 26 22'><path d='M4 4 Q13 0 22 4 Q26 11 22 18 Q13 22 4 18 Q0 11 4 4Z' fill='#FFE7EC' stroke='#C98AA0' stroke-width='1.2'/><path d='M13 15 C9 12 7.5 10 9 8.2 C10.5 6.6 12.4 7.4 13 8.6 C13.6 7.4 15.5 6.6 17 8.2 C18.5 10 17 12 13 15Z' fill='#FF8A7A'/><circle cx='4' cy='4' r='1.6' fill='#C98AA0'/><circle cx='22' cy='4' r='1.6' fill='#C98AA0'/><circle cx='4' cy='18' r='1.6' fill='#C98AA0'/><circle cx='22' cy='18' r='1.6' fill='#C98AA0'/></svg>",
+        "color": "#FF8A7A"
+      }
+    }
+  },
+  "sound": {
+    "set": "cozy",
+    "moments": {
+      "pickup": "woodblock",
+      "combo": "sparkle",
+      "hit": "bonk",
+      "level": "levelup",
+      "win": "hooray",
+      "lose": "wah"
+    }
+  },
+  "content": {},
+  "playtest": {
+    "progress": "score * 10 + lives * 40 + turn_no * 3 + (if turn_active then 1 else 0)"
+  }
+}

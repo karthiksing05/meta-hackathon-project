@@ -1,0 +1,142 @@
+[
+  {
+    "id": "gold_moonbroom_derby",
+    "file": "authoring/games/gold_moonbroom_derby.authoring.json",
+    "request": "a broom racing game at a magic school where I dodge storm clouds and grab sparks",
+    "brief": {
+      "intent": "Swerve a broom between five lanes through a speeding night race, dodging storm clouds and runaway spellbooks while chaining sparks",
+      "audience": "friends, all ages",
+      "mood": [
+        "whimsical",
+        "magical",
+        "tense"
+      ],
+      "energy": "high",
+      "competition": "high score"
+    },
+    "genre": "lane racer / dodge and collect",
+    "fragments_used": [
+      "lanes",
+      "score",
+      "lives",
+      "combo",
+      "collide",
+      "pickups",
+      "difficulty_curve"
+    ],
+    "why_its_good": [
+      "Fun at once and harder each second: the first hazard falls at 0.7 s, and `difficulty_curve` (ease_in_out over 45 s) drives fall speed from 230 to 420 px/s, halves the spawn gap, brings in spellbooks that sway toward the next lane at 25% and double rows at 40%, before the finish lanterns at 50 s.",
+      "The score rewards nerve: sparks pay 10 + 5 x Streak with a pitch that climbs a whole step per streak (`note: \"= 587.0 * pow(1.0595, min(combo, 12) * 2.0)\"`), and skimming a hazard in the next lane pays a 'Whoosh +5' near-miss bonus with its own swish, particles and haptic.",
+      "A full original art set with depth: a layered night backdrop (crescent moon, aurora haze, castle spires with lit windows), drifting wisps and speed streaks that scroll with `travel`, 2-frame spellbook and spark sprites, a course-progress rail, a finish arch that sweeps down in the last 3 s, floating score pops and its own minor-key music loop."
+    ],
+    "pitfalls_avoided": [
+      "Wires `combo` with `bind` (`hit_good -> point`, `hit_bad -> hit`) instead of new events; the streak bonus rule reads `combo` after the fragment's own rule has already raised it.",
+      "Keeps hazards in the game's own list and hands them to `collide` through `colliders()`; the game's `hit` rule removes the hazard near `hit_at`, so one cloud costs one life.",
+      "The rising-pitch sound is the game's own feedback on `point`, which replaces score's library pickup moment instead of playing both.",
+      "Stays within 3 hud_top nodes (lives, score, combo); course progress is a playfield rail, not a fourth HUD node (`A_SLOT_FULL`)."
+    ]
+  },
+  {
+    "id": "gold_rift_run",
+    "file": "authoring/games/gold_rift_run.authoring.json",
+    "request": "a space fighter flying down a narrow canyon shooting drones, with a big boss target at the end",
+    "brief": {
+      "intent": "Fly a starfighter down a narrowing canyon, shoot four waves of drones and break the Rift Core",
+      "audience": "friends who like arcade shooters",
+      "mood": [
+        "epic",
+        "tense",
+        "heroic"
+      ],
+      "energy": "high",
+      "competition": "high score"
+    },
+    "genre": "vertical shooter / canyon run",
+    "fragments_used": [
+      "player_drag",
+      "lives",
+      "waves",
+      "collide"
+    ],
+    "why_its_good": [
+      "A real campaign in about 30 s: `waves` (end_on 'clear', 4 waves) adds a drone type per wave (weaving scouts, homing divers, gunners firing aimed orbs), speeds the scroll and narrows the canyon. Wave 4 is the Rift Core with an HP bar and 3-orb volleys, and breaking it emits `enemies_gone` to win. Break banners ('Wave 3 incoming', 'Rift Core ahead!') pace the run.",
+      "One finger, plenty of skill: the ship auto-fires and you drag it sideways (glide mode, so it banks). A chain multiplier (+5 per kill up to x10, reset by a hit or an escaped drone) and a lives bonus on the core reward clean, aggressive play; bots scored from 225 to 2,920.",
+      "The canyon is drawn and checked by the same pure functions (`wall_l(y)`, `wall_r(y)`): scrolling `poly` walls with a lit rim and inner shade layer, so what you see is what hits you. Drone variants are frames of one sprite picked with `frame`, and the core is a 2-frame pulsing sprite with a scale pop on each hit."
+    ],
+    "pitfalls_avoided": [
+      "Wall contact reuses `collide`: `colliders()` returns `[player]` while the ship is inside a wall, so walls get the same grace, particles, shake and life loss as drones, with no hand-rolled `hit`.",
+      "Bolt hits are computed with `let` before any `remove`, so the bolts and drones removed come from the same snapshot; each kill emits `drone_down {x, y}` and particles read `event.x`.",
+      "Score is the game's own `score` state plus `objectives.score`, shown as one number in hud_top, because lives + 'Score: N' + 'Wave n of 4' would be wider than the canvas.",
+      "Random rolls (`chance`, `random_float`) live only in rule effects; `canyon_cx`, `colliders` and every presentation expression stay pure."
+    ]
+  },
+  {
+    "id": "gold_rooftop_courier",
+    "file": "authoring/games/gold_rooftop_courier.authoring.json",
+    "request": "an endless runner where I jump across city rooftops at night collecting letters",
+    "brief": {
+      "intent": "Time jumps across night rooftops, hopping vents and leaping alleys, while collecting glowing letters in arcs",
+      "audience": "anyone, quick one-more-run sessions",
+      "mood": [
+        "urban",
+        "dreamy",
+        "energetic"
+      ],
+      "energy": "high",
+      "competition": "high score"
+    },
+    "genre": "endless runner / platformer",
+    "fragments_used": [
+      "gravity_jump",
+      "score",
+      "lives",
+      "combo",
+      "collide",
+      "difficulty_curve"
+    ],
+    "why_its_good": [
+      "Jump timing with depth: vents need a hop, AC stacks a higher one, alleys need you to land past the far edge, and the double jump rescues a late tap. Letters float in arcs that trace the ideal jump over each alley, which teaches the line by rewarding it.",
+      "Endless with a real fail and a real curve: `difficulty_curve` (ease_in over 75 s) takes the run from 250 to 490 px/s and widens the alleys, and three stumbles end it. In the bot gate, runs lasted 7 to 124 s and the best score was 30 times the worst.",
+      "Layered city with motion: a static far skyline in the backdrop, haze bands that drift at 0.12x, brick facades and alleys that scroll at full speed, a 2-frame running courier, `ground` role ledge, a +50 milestone every 100 m with a level sting, and a meter counter in hud_bottom."
+    ],
+    "pitfalls_avoided": [
+      "Alleys go through `collide` too: `colliders()` adds the player's point while it stands over a gap, and the game's `hit` rule (`when: over_gap()`) bounces the runner out through the public `vel_y` and `player`, so a fall costs a life but never strands the run.",
+      "Two obstacle heights become one or two collider points with `fold(blocks, [], (acc, b) => concat(acc, ...))`, instead of a second collide fragment.",
+      "No `time_limit` on an endless game; `lives` is the lose path, and `playtest.progress` (score + lives + meters) tells the bots what doing better means.",
+      "Labels kept short ('Combo', max 6) so lives + score + combo fit the hud_top row at 4-digit scores."
+    ]
+  },
+  {
+    "id": "gold_cake_tower",
+    "file": "authoring/games/gold_cake_tower.authoring.json",
+    "request": "a cozy one-more-try game where you stack cake layers as high as you can",
+    "brief": {
+      "intent": "Drop sliding cake layers onto a growing cake; overhang gets sliced off, perfect drops grow it back, reach 24 layers for the cherry",
+      "audience": "everyone, relaxed solo play",
+      "mood": [
+        "cozy",
+        "sweet",
+        "satisfying"
+      ],
+      "energy": "low",
+      "competition": "light"
+    },
+    "genre": "timing stacker",
+    "fragments_used": [
+      "lives",
+      "score",
+      "combo"
+    ],
+    "why_its_good": [
+      "One tap, understood at a glance: the overhang slices off and tumbles away, so every sloppy drop makes the next one harder. Perfect drops (within 7 px) grow the layer back by 8 px, chain a combo worth 10 more per step and ring a chime that climbs with the combo.",
+      "A gentle curve for a calm game: the slider speeds up 6 px/s per layer (110 to 260), the camera glides up as the cake grows, and a ruler with a 'Cherry line' shows the goal. Three dropped layers end it; at 24 layers a cherry pops on top and lives left pay a bonus.",
+      "Feedback a player can read: the sliding layer's outline turns white when it lines up, guide lines mark the top layer's edges, perfect layers keep a spinning sparkle, crumbs burst on every landing, and five pastel flavors cycle through list tokens (`$sponge[l.flavor]`)."
+    ],
+    "pitfalls_avoided": [
+      "Layers are drawn from engine shapes (`rect`, `circle`) so they can be any width; a stretched sprite would squash the frosting drips.",
+      "The win waits for a `topper` event 900 ms after the 24th layer, so the last point and combo bonus land before the objective is checked.",
+      "The perfect chime is one `note` with a Hz expression; jingle `notes` must be literal note names, or validation fails with E_PRESENTATION.",
+      "The drop input has a guard (`when: not built`) and a Space key source; the tap target is a transparent full-canvas `rect`, so bots and people can always hit it."
+    ]
+  }
+]

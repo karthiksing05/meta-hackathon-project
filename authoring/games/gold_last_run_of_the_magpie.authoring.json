@@ -1,0 +1,886 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Last Run of the Magpie",
+    "instructions": "You fly the Magpie, a smuggler's ship deep in debt. A hooded kid needs a ride to the rebels. Tap a choice; loyalty and heat decide how it ends.",
+    "duration_s": 150
+  },
+  "uses": [
+    {
+      "fragment": "choice_story",
+      "params": {
+        "read_ms": 2200,
+        "good_wins": false,
+        "bad_loses": false,
+        "text_y": 136,
+        "button_y": 392
+      }
+    }
+  ],
+  "state": {
+    "story_lines": {
+      "type": "list<string>",
+      "init": "content_story_lines"
+    },
+    "story_labels": {
+      "type": "list<string>",
+      "init": "content_story_labels"
+    },
+    "story_next": {
+      "type": "list<string>",
+      "init": "content_story_next"
+    },
+    "story_ends": {
+      "type": "list<string>",
+      "init": "content_story_ends"
+    },
+    "flags": {
+      "type": "list<string>",
+      "init": "[]"
+    },
+    "loyalty": {
+      "type": "int",
+      "init": "0"
+    },
+    "heat": {
+      "type": "int",
+      "init": "0"
+    },
+    "last_toks": {
+      "type": "list<string>",
+      "init": "[]"
+    },
+    "toast": {
+      "type": "string",
+      "init": "''"
+    },
+    "toast_at": {
+      "type": "int",
+      "init": "-10000"
+    },
+    "verdict": {
+      "type": "string",
+      "init": "''"
+    }
+  },
+  "functions": {
+    "part": {
+      "params": {
+        "e": "string",
+        "i": "int"
+      },
+      "returns": "string",
+      "body": "trim(get_or(split(e, '|'), i, ''))"
+    },
+    "ckey": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "string",
+      "body": "str(s) + '.' + str(c)"
+    },
+    "stat": {
+      "params": {
+        "name": "string"
+      },
+      "returns": "int",
+      "body": "if name == 'loyalty' then loyalty else if name == 'heat' then heat else 0"
+    },
+    "atom_holds": {
+      "params": {
+        "t": "string"
+      },
+      "returns": "bool",
+      "body": "let p = split(t, '>=') in if len(p) == 2 then stat(trim(get_or(p, 0, ''))) >= or_else(parse_int(get_or(p, 1, '')), 0) else contains(flags, t)"
+    },
+    "holds": {
+      "params": {
+        "cond": "string"
+      },
+      "returns": "bool",
+      "body": "all(split(cond, '&'), a => let t = trim(a) in t == '' or (if starts_with(t, '!') then not atom_holds(substr(t, 1, 64)) else atom_holds(t)))"
+    },
+    "is_open": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "bool",
+      "body": "get_or(content_story_labels, s * 3 + c, '') != '' and all(filter(content_needs, n => part(n, 0) == ckey(s, c)), n => holds(part(n, 1)))"
+    },
+    "shown": {
+      "params": {
+        "s": "int"
+      },
+      "returns": "list<int>",
+      "body": "filter(range(3), c => is_open(s, c))"
+    },
+    "route_of": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "string",
+      "body": "fold(filter(content_routes, r => part(r, 0) == ckey(s, c)), get_or(content_story_next, s * 3 + c, ''), (acc, r) => if holds(part(r, 1)) then part(r, 2) else acc)"
+    },
+    "built_labels": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(range(len(content_story_labels)), i => let o = get_or(shown(i / 3), i % 3, -1) in if o < 0 then '' else get_or(content_story_labels, (i / 3) * 3 + o, ''))"
+    },
+    "built_next": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(range(len(content_story_next)), i => let o = get_or(shown(i / 3), i % 3, -1) in if o < 0 then '' else route_of(i / 3, o))"
+    },
+    "built_lines": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(range(len(content_story_lines)), i => fold(filter(content_callbacks, b => part(b, 0) == ckey(i / 4, i % 4)), get_or(content_story_lines, i, ''), (acc, b) => if holds(part(b, 1)) then part(b, 2) else acc))"
+    },
+    "fx_for": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "list<string>",
+      "body": "filter(content_effects, e => (part(e, 0) == ckey(s, c) or (c < 0 and part(e, 0) == '@' + str(s))) and holds(part(e, 3)))"
+    },
+    "toks_for": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "list<string>",
+      "body": "fold(fx_for(s, c), [], (acc, e) => concat(acc, filter(split(part(e, 1), ' '), t => t != '')))"
+    },
+    "toast_for": {
+      "params": {
+        "s": "int",
+        "c": "int"
+      },
+      "returns": "string",
+      "body": "fold(fx_for(s, c), '', (acc, e) => if part(e, 2) != '' then part(e, 2) else acc)"
+    },
+    "delta": {
+      "params": {
+        "toks": "list<string>",
+        "name": "string"
+      },
+      "returns": "int",
+      "body": "count(toks, t => t == '+' + name) - count(toks, t => t == '-' + name)"
+    },
+    "merged_flags": {
+      "params": {
+        "toks": "list<string>"
+      },
+      "returns": "list<string>",
+      "body": "concat(flags, filter(toks, t => not starts_with(t, '+') and not starts_with(t, '-') and not contains(flags, t)))"
+    },
+    "info": {
+      "params": {
+        "s": "int",
+        "i": "int"
+      },
+      "returns": "string",
+      "body": "part(get_or(content_scene_info, s, ''), i)"
+    },
+    "place": {
+      "params": {},
+      "returns": "int",
+      "body": "or_else(parse_int(info(scene, 0)), 0)"
+    },
+    "ending_value": {
+      "params": {},
+      "returns": "int",
+      "body": "or_else(parse_int(info(scene, 2)), 0)"
+    },
+    "ending_points": {
+      "params": {},
+      "returns": "int",
+      "body": "if verdict == '' then 0 else ending_value()"
+    },
+    "cool": {
+      "params": {},
+      "returns": "int",
+      "body": "max(0, 3 - heat)"
+    },
+    "ledger_says": {
+      "params": {},
+      "returns": "string",
+      "body": "if heat >= 2 then 'LEDGER: We are VERY wanted.' else if contains(flags, 'dace_caught') then 'LEDGER: One traitor down.' else if loyalty >= 2 then 'LEDGER: The kid likes you. Gross.' else 'LEDGER: Debt 9,000 crowns.'"
+    }
+  },
+  "events": {
+    "curtain": {
+      "good": "bool"
+    }
+  },
+  "rules": [
+    {
+      "id": "first_build",
+      "on": "start",
+      "do": [
+        {
+          "set": "story_lines",
+          "to": "built_lines()"
+        },
+        {
+          "set": "story_labels",
+          "to": "built_labels()"
+        },
+        {
+          "set": "story_next",
+          "to": "built_next()"
+        }
+      ]
+    },
+    {
+      "id": "apply_choice",
+      "on": "choice_made",
+      "do": [
+        {
+          "let": {
+            "picked": "get_or(shown(event.scene), event.choice, event.choice)"
+          }
+        },
+        {
+          "let": {
+            "toks": "toks_for(event.scene, picked)"
+          }
+        },
+        {
+          "let": {
+            "msg": "toast_for(event.scene, picked)"
+          }
+        },
+        {
+          "set": "loyalty",
+          "to": "clamp(loyalty + delta(toks, 'loyalty'), 0, 5)"
+        },
+        {
+          "set": "heat",
+          "to": "clamp(heat + delta(toks, 'heat'), 0, 5)"
+        },
+        {
+          "set": "flags",
+          "to": "merged_flags(toks)"
+        },
+        {
+          "if": "msg != ''",
+          "then": [
+            {
+              "set": "toast",
+              "to": "msg"
+            },
+            {
+              "set": "toast_at",
+              "to": "now"
+            }
+          ]
+        },
+        {
+          "let": {
+            "arrive": "toks_for(scene, -1)"
+          }
+        },
+        {
+          "let": {
+            "arrive_msg": "toast_for(scene, -1)"
+          }
+        },
+        {
+          "set": "loyalty",
+          "to": "clamp(loyalty + delta(arrive, 'loyalty'), 0, 5)"
+        },
+        {
+          "set": "heat",
+          "to": "clamp(heat + delta(arrive, 'heat'), 0, 5)"
+        },
+        {
+          "set": "flags",
+          "to": "merged_flags(arrive)"
+        },
+        {
+          "if": "arrive_msg != ''",
+          "then": [
+            {
+              "set": "toast",
+              "to": "arrive_msg"
+            },
+            {
+              "set": "toast_at",
+              "to": "now"
+            }
+          ]
+        },
+        {
+          "set": "last_toks",
+          "to": "concat(toks, arrive)"
+        }
+      ]
+    },
+    {
+      "id": "rebuild",
+      "on": "choice_made",
+      "do": [
+        {
+          "set": "story_lines",
+          "to": "built_lines()"
+        },
+        {
+          "set": "story_labels",
+          "to": "built_labels()"
+        },
+        {
+          "set": "story_next",
+          "to": "built_next()"
+        }
+      ]
+    },
+    {
+      "id": "hold_the_ending",
+      "on": "ending_reached",
+      "do": [
+        {
+          "after": "5000ms",
+          "emit": "curtain",
+          "with": {
+            "good": "event.good"
+          }
+        }
+      ]
+    },
+    {
+      "id": "curtain_falls",
+      "on": "curtain",
+      "do": [
+        {
+          "set": "verdict",
+          "to": "if event.good then 'good' else 'bad'"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "win": "verdict == 'good'",
+    "lose": "verdict == 'bad'",
+    "score": "loyalty * 100 + cool() * 50 + ending_points()"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "w": 112,
+              "h": 28,
+              "radius": 6,
+              "fill": "$surface",
+              "stroke": "$accent",
+              "stroke_width": 1
+            },
+            {
+              "node": "text",
+              "x": 56,
+              "y": 14,
+              "anchor": "center",
+              "size": 14,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= 'Loyalty ' + str(loyalty)",
+              "animate_on": {
+                "choice_made": {
+                  "when": "contains(last_toks, '+loyalty') or contains(last_toks, '-loyalty')",
+                  "prop": "scale",
+                  "keys": [1, 1.25, 1],
+                  "ms": 320
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "group",
+          "children": [
+            {
+              "node": "rect",
+              "w": 92,
+              "h": 28,
+              "radius": 6,
+              "fill": "$surface",
+              "stroke": "$accent",
+              "stroke_width": 1
+            },
+            {
+              "node": "text",
+              "x": 46,
+              "y": 14,
+              "anchor": "center",
+              "size": 14,
+              "weight": 700,
+              "color": "$ink",
+              "text": "= 'Heat ' + str(heat)",
+              "animate_on": {
+                "choice_made": {
+                  "when": "contains(last_toks, '+heat') or contains(last_toks, '-heat')",
+                  "prop": "scale",
+                  "keys": [1, 1.25, 1],
+                  "ms": 320
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 88,
+          "anchor": "center",
+          "size": 13,
+          "weight": 700,
+          "color": "$accent",
+          "text": "= upper(info(scene, 1))",
+          "opacity": "= if now - toast_at < 2600 then 0.0 else 1.0",
+          "transition": {
+            "opacity": {
+              "ms": 250,
+              "ease": "out"
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "text",
+          "x": 180,
+          "y": 88,
+          "anchor": "center",
+          "size": 15,
+          "weight": 700,
+          "color": "$primary",
+          "text": "= toast",
+          "opacity": "= if now - toast_at < 2600 then 1.0 else 0.0",
+          "transition": {
+            "opacity": {
+              "ms": 250,
+              "ease": "out"
+            }
+          },
+          "animate_on": {
+            "choice_made": {
+              "when": "toast_at == now",
+              "prop": "scale",
+              "keys": [0.8, 1.08, 1],
+              "ms": 300
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "image",
+          "asset": "place",
+          "frame": "= place()",
+          "anchor": "center",
+          "x": 180,
+          "y": 308,
+          "w": 300,
+          "h": 120,
+          "animate_on": {
+            "choice_made": {
+              "prop": "opacity",
+              "keys": [0, 1],
+              "ms": 500
+            }
+          }
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "visible": "= get_or(story_ends, scene, '') != ''",
+          "animate_on": {
+            "ending_reached": {
+              "prop": "opacity",
+              "keys": [0, 0, 1],
+              "ms": 1200
+            }
+          },
+          "children": [
+            {
+              "node": "text",
+              "x": 180,
+              "y": 422,
+              "anchor": "center",
+              "size": 26,
+              "weight": 700,
+              "color": "$primary",
+              "text": "= if get_or(story_ends, scene, '') == 'good' then 'THE END' else 'THE END?'"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 460,
+              "anchor": "center",
+              "size": 14,
+              "weight": 600,
+              "color": "$ink",
+              "text": "= 'Loyalty ' + str(loyalty) + '×100 + Cool ' + str(cool()) + '×50 + Ending ' + str(ending_value())"
+            },
+            {
+              "node": "text",
+              "x": 180,
+              "y": 488,
+              "anchor": "center",
+              "size": 13,
+              "weight": 500,
+              "color": "$accent",
+              "text": "One of 5 endings. Try another path."
+            }
+          ]
+        }
+      },
+      {
+        "slot": "hud_bottom",
+        "node": {
+          "node": "text",
+          "text": "= ledger_says()",
+          "size": 13,
+          "weight": 500,
+          "color": "$accent",
+          "opacity": 0.9
+        }
+      }
+    ],
+    "feedback": [
+      {
+        "on": "choice_made",
+        "when": "contains(last_toks, '+loyalty')",
+        "do": [
+          {
+            "moment": "combo"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 88,
+              "count": 14,
+              "color": "$primary",
+              "speed": 140,
+              "size": 4,
+              "ms": 650
+            }
+          }
+        ]
+      },
+      {
+        "on": "choice_made",
+        "when": "contains(last_toks, '+heat')",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "shake": {
+              "px": 6,
+              "ms": 220
+            }
+          },
+          {
+            "haptic": "warning"
+          }
+        ]
+      },
+      {
+        "on": "choice_made",
+        "when": "contains(last_toks, 'knows_heir') or contains(last_toks, 'found_bug')",
+        "do": [
+          {
+            "moment": "pickup"
+          },
+          {
+            "particles": {
+              "x": 180,
+              "y": 88,
+              "count": 16,
+              "color": "$accent",
+              "speed": 160,
+              "size": 3,
+              "ms": 700
+            }
+          }
+        ]
+      },
+      {
+        "on": "ending_reached",
+        "when": "event.good",
+        "do": [
+          {
+            "particles": {
+              "x": 180,
+              "y": 308,
+              "count": 48,
+              "color": "$primary",
+              "speed": 260,
+              "size": 4,
+              "ms": 1100
+            }
+          }
+        ]
+      },
+      {
+        "on": "ending_reached",
+        "when": "not event.good",
+        "do": [
+          {
+            "shake": {
+              "px": 8,
+              "ms": 400
+            }
+          },
+          {
+            "haptic": "error"
+          }
+        ]
+      }
+    ]
+  },
+  "look": {
+    "id": "neon",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Space opera at night: deep navy starfield with pink and blue nebula, cyan cockpit brackets, ember-orange rebels against an empire of gold.",
+    "palette": {
+      "bg": "#090C1D",
+      "surface": "#171C3A",
+      "primary": "#FF9F43",
+      "secondary": "#5C6BC0",
+      "accent": "#66E0FF",
+      "ink": "#EEF1FF",
+      "danger": "#FF5A6E"
+    },
+    "font": "Futura",
+    "backdrop": {
+      "svg": "<svg viewBox='0 0 360 640'><defs><linearGradient id='s' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#05071A'/><stop offset='0.5' stop-color='#0C1030'/><stop offset='1' stop-color='#06081A'/></linearGradient><radialGradient id='n1' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#C2408A' stop-opacity='0.35'/><stop offset='1' stop-color='#C2408A' stop-opacity='0'/></radialGradient><radialGradient id='n2' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#3D6FD6' stop-opacity='0.35'/><stop offset='1' stop-color='#3D6FD6' stop-opacity='0'/></radialGradient><linearGradient id='dash' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#1A1F42'/><stop offset='1' stop-color='#0A0C20'/></linearGradient></defs><rect width='360' height='640' fill='url(#s)'/><ellipse cx='20' cy='420' rx='160' ry='120' fill='url(#n1)'/><ellipse cx='350' cy='150' rx='150' ry='120' fill='url(#n2)'/><g fill='#FFFFFF'><circle cx='24' cy='30' r='1' opacity='0.7'/><circle cx='80' cy='70' r='0.8' opacity='0.5'/><circle cx='300' cy='26' r='1.1' opacity='0.8'/><circle cx='340' cy='90' r='0.7' opacity='0.5'/><circle cx='14' cy='160' r='0.9' opacity='0.6'/><circle cx='346' cy='240' r='1' opacity='0.6'/><circle cx='20' cy='300' r='0.7' opacity='0.5'/><circle cx='338' cy='360' r='0.9' opacity='0.6'/><circle cx='30' cy='460' r='1.1' opacity='0.7'/><circle cx='330' cy='470' r='0.8' opacity='0.5'/><circle cx='18' cy='540' r='0.9' opacity='0.6'/><circle cx='344' cy='560' r='1' opacity='0.6'/><circle cx='120' cy='24' r='0.7' opacity='0.4'/><circle cx='240' cy='64' r='0.8' opacity='0.5'/><circle cx='60' cy='250' r='0.6' opacity='0.35'/><circle cx='300' cy='300' r='0.6' opacity='0.35'/><circle cx='90' cy='380' r='0.5' opacity='0.3'/><circle cx='270' cy='390' r='0.5' opacity='0.3'/></g><g fill='none' stroke='#66E0FF' stroke-opacity='0.55' stroke-width='2'><path d='M12 96V76H32M348 96V76H328M12 560V580H32M348 560V580H328'/></g><g stroke='#66E0FF' stroke-opacity='0.4'><path d='M118 106H170M190 106H242'/></g><path d='M174 106l6-4l6 4l-6 4z' fill='#FF9F43'/><path d='M0 640V596Q180 572 360 596V640Z' fill='url(#dash)'/><path d='M0 596Q180 572 360 596' fill='none' stroke='#66E0FF' stroke-opacity='0.35'/><g><circle cx='40' cy='616' r='3' fill='#FF9F43'/><circle cx='54' cy='616' r='3' fill='#66E0FF' opacity='0.7'/><circle cx='306' cy='616' r='3' fill='#FF5A6E' opacity='0.8'/><circle cx='320' cy='616' r='3' fill='#66E0FF' opacity='0.7'/></g></svg>"
+    },
+    "sprites": {
+      "place": {
+        "svg": [
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><g stroke='#2C3566' stroke-width='3' fill='none'><path d='M20 120Q20 10 150 8Q280 10 280 120'/><path d='M60 120Q60 40 150 36Q240 40 240 120'/></g><rect x='0' y='96' width='300' height='24' fill='#1C2246'/><path d='M0 96H300' stroke='#66E0FF' stroke-opacity='0.4'/><use href='#m' transform='translate(104 70) scale(1.9)'/><g fill='#3A2E52'><rect x='18' y='80' width='22' height='16'/><rect x='24' y='66' width='16' height='14'/></g><path d='M206 96l8-26q4-6 8 0l8 26z' fill='#5C6BC0'/><circle cx='218' cy='66' r='6' fill='#5C6BC0'/><circle cx='218' cy='67' r='3.5' fill='#0B0D1F'/><path d='M254 96v-30h16v30z' fill='#2A2F4A'/><rect x='252' y='50' width='20' height='16' rx='5' fill='#2A2F4A'/><rect x='254' y='55' width='16' height='5' rx='2' fill='#F4C542'/></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><circle cx='150' cy='300' r='210' fill='#2B5C8F'/><circle cx='150' cy='300' r='210' fill='none' stroke='#66E0FF' stroke-width='3' stroke-opacity='0.6'/><path d='M20 104q60-14 120-4q70 8 140-6' stroke='#8FD3F5' stroke-opacity='0.35' stroke-width='6' fill='none'/><use href='#m' transform='translate(70 52) scale(1.2)'/><use href='#c' transform='translate(196 36) scale(1.3)'/><use href='#c' transform='translate(226 58) scale(1.5)'/><use href='#c' transform='translate(196 80) scale(1.3)'/><g stroke='#F4C542' stroke-opacity='0.35' stroke-dasharray='3 4'><path d='M184 36H120M210 58H110M184 80H120'/></g></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><g stroke-linecap='round'><path d='M0 30L300 70' stroke='#FF5A6E' stroke-width='2.5'/><path d='M20 110L280 20' stroke='#FF9F43' stroke-width='2'/><path d='M60 0L240 120' stroke='#FF5A6E' stroke-width='1.5' stroke-opacity='0.6'/></g><circle cx='206' cy='44' r='18' fill='url(#w)'/><path d='M206 34l3 7l7 3l-7 3l-3 7l-3-7l-7-3l7-3z' fill='#FFF1C9'/><use href='#m' transform='translate(120 64) rotate(-14) scale(1.8)'/><use href='#c' transform='translate(250 86) scale(-1.4 1.4)'/></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><defs><linearGradient id='t' x1='1' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#BDF3FF' stop-opacity='0.9'/><stop offset='1' stop-color='#66E0FF' stop-opacity='0'/></linearGradient></defs><path d='M250 24Q160 30 0 120H70Q170 60 262 40Z' fill='url(#t)'/><circle cx='256' cy='30' r='16' fill='#E6FBFF'/><circle cx='256' cy='30' r='24' fill='#BDF3FF' opacity='0.3'/><use href='#m' transform='translate(118 82) rotate(-24) scale(1)' opacity='0.85'/><rect x='20' y='14' width='34' height='22' rx='3' fill='#1B2147' stroke='#66E0FF' stroke-opacity='0.6'/><circle cx='46' cy='21' r='3' fill='#FF5A6E'/><path d='M26 30h14M26 25h10' stroke='#66E0FF' stroke-opacity='0.6'/></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><path d='M110 112L130 92H170L190 112Z' fill='#2A3160'/><path d='M130 92L100 6H200L170 92Z' fill='#66E0FF' opacity='0.12'/><g fill='none' stroke='#66E0FF' stroke-width='2' opacity='0.9'><path d='M126 74V42Q126 18 150 16Q174 18 174 42V74Q160 84 150 84Q140 84 126 74Z'/><path d='M132 44H168V54Q150 62 132 54Z' fill='#66E0FF' fill-opacity='0.35'/><path d='M150 16V8M142 70h16'/></g><g stroke='#66E0FF' stroke-opacity='0.25'><path d='M110 24H190M106 36H194M104 48H196M104 60H196M106 72H194M110 84H190'/></g><path d='M30 30l20 0M30 38l12 0M250 82l20 0M258 90l12 0' stroke='#F4C542' stroke-opacity='0.6' stroke-width='2'/></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><defs><radialGradient id='n1' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#C2408A' stop-opacity='0.75'/><stop offset='1' stop-color='#C2408A' stop-opacity='0'/></radialGradient><radialGradient id='n2' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#5C6BC0' stop-opacity='0.8'/><stop offset='1' stop-color='#5C6BC0' stop-opacity='0'/></radialGradient></defs><ellipse cx='90' cy='60' rx='110' ry='60' fill='url(#n1)'/><ellipse cx='220' cy='50' rx='110' ry='60' fill='url(#n2)'/><g fill='#2A3160'><path d='M60 44l30-6v12zM180 82l36-8v16zM236 30l24-5v10z'/></g><g fill='#FF9F43'><circle cx='90' cy='44' r='2.5'/><circle cx='216' cy='82' r='2.5'/><circle cx='260' cy='30' r='2'/></g><use href='#m' transform='translate(140 64) scale(1.2)'/><g fill='#FFD08A'><path d='M112 22v14a4 3 0 1 1-2-3V22h8v3z'/><path d='M190 40v12a4 3 0 1 1-2-3V40z'/><path d='M40 84v12a4 3 0 1 1-2-3V84z'/></g></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><g fill='none' stroke='#5C6BC0' stroke-width='1.2' stroke-dasharray='4 3'><path d='M40 80L100 40L160 70L220 34L268 78'/><path d='M100 40L120 96M160 70L196 98'/></g><g fill='none' stroke='#66E0FF' stroke-width='3'><circle cx='40' cy='80' r='9'/><circle cx='100' cy='40' r='9'/><circle cx='220' cy='34' r='9'/><circle cx='268' cy='78' r='9'/><circle cx='120' cy='96' r='7'/><circle cx='196' cy='98' r='7'/></g><circle cx='160' cy='70' r='16' fill='url(#w)'/><circle cx='160' cy='70' r='10' fill='none' stroke='#FF9F43' stroke-width='3.5'/><g fill='#F4C542'><rect x='35' y='76' width='10' height='8' rx='1'/><rect x='95' y='36' width='10' height='8' rx='1'/><rect x='215' y='30' width='10' height='8' rx='1'/><rect x='263' y='74' width='10' height='8' rx='1'/></g></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><path d='M10 60Q150-14 290 60Q150 134 10 60Z' fill='#3A3010'/><path d='M30 60Q150 0 270 60Q150 120 30 60Z' fill='#F4C542'/><path d='M30 60Q150 0 270 60' stroke='#FFF1C9' stroke-width='2' fill='none' opacity='0.7'/><circle cx='150' cy='60' r='26' fill='#7A1E2B'/><circle cx='150' cy='60' r='12' fill='#FF5A6E'/><circle cx='150' cy='60' r='5' fill='#FFFFFF'/><g stroke='#3A3010' stroke-width='2'><path d='M70 44l8 6M230 44l-8 6M70 76l8-6M230 76l-8-6'/></g></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><path d='M0 0H90L70 40L96 80L76 120H0Z' fill='#3B2F4F'/><path d='M300 0H210L232 44L206 84L226 120H300Z' fill='#3B2F4F'/><path d='M150 120L138 70L150 36L162 70Z' fill='#4E3F66'/><path d='M0 0H70L54 40L74 80L56 120H0Z' fill='#2A2140'/><path d='M300 0H232L248 44L228 84L244 120H300Z' fill='#2A2140'/><circle cx='150' cy='26' r='16' fill='none' stroke='#F4C542' stroke-width='4'/><circle cx='150' cy='26' r='10' fill='#66E0FF' opacity='0.35'/><use href='#m' transform='translate(150 98) rotate(-90) scale(0.9)'/><g fill='none' stroke='#FF9F43' stroke-dasharray='3 3'><path d='M140 84Q112 66 112 40'/><path d='M160 84Q188 66 188 40'/></g></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><g fill='none' stroke='#66E0FF' stroke-opacity='0.5'><circle cx='150' cy='60' r='30'/><circle cx='150' cy='60' r='46'/><circle cx='150' cy='60' r='62'/></g><path d='M122 112q4-34 28-36q24 2 28 36z' fill='#5C6BC0'/><circle cx='150' cy='60' r='16' fill='#C98F6B'/><path d='M132 58q2-22 18-22q16 0 18 22q-6-12-18-12q-12 0-18 12z' fill='#5C6BC0'/><path d='M141 62h4M155 62h4' stroke='#1B2147' stroke-width='2' stroke-linecap='round'/><rect x='170' y='70' width='8' height='18' rx='4' fill='#EEF1FF'/><path d='M174 88v8' stroke='#EEF1FF' stroke-width='2'/><path d='M146 44l4-6l4 6l-4-2z' fill='#F4C542'/></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><defs><linearGradient id='d' x1='0' y1='1' x2='0' y2='0'><stop offset='0' stop-color='#FF9F43' stop-opacity='0.8'/><stop offset='1' stop-color='#FF9F43' stop-opacity='0'/></linearGradient></defs><rect x='0' y='40' width='300' height='80' fill='url(#d)'/><circle cx='150' cy='126' r='40' fill='#FFD08A'/><g fill='none' stroke='#F4C542' stroke-width='3'><path d='M50 40a14 14 0 0 1 0 28'/><path d='M44 40a14 14 0 0 0 0 28' stroke-opacity='0.5'/><path d='M156 20a14 14 0 0 1 0 28'/><path d='M150 20a14 14 0 0 0 0 28' stroke-opacity='0.5'/><path d='M256 40a14 14 0 0 1 0 28'/><path d='M250 40a14 14 0 0 0 0 28' stroke-opacity='0.5'/></g><use href='#m' transform='translate(104 60) scale(1.1)'/><g fill='#2A3160'><path d='M190 72l26-5v10zM220 88l20-4v8zM60 92l20-4v8z'/></g><g fill='#FFF1C9'><path d='M250 92l2 5l5 2l-5 2l-2 5l-2-5l-5-2l5-2z'/><path d='M30 22l2 4l4 2l-4 2l-2 4l-2-4l-4-2l4-2z'/></g></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>",
+          "<svg viewBox='0 0 300 120'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#141A3A'/><stop offset='1' stop-color='#070A18'/></linearGradient><clipPath id='k'><path d='M14 2H286L298 14V106L286 118H14L2 106V14Z'/></clipPath><radialGradient id='w' cx='0.5' cy='0.5' r='0.5'><stop offset='0' stop-color='#FFD08A' stop-opacity='0.9'/><stop offset='1' stop-color='#FFD08A' stop-opacity='0'/></radialGradient><g id='m'><path d='M-20-4L8-8Q20-6 22 0Q20 6 8 8L-20 4Z' fill='#EEF1FF'/><path d='M-12-6L-4-16L4-7ZM-12 6L-4 16L4 7Z' fill='#2A3160'/><circle cx='12' cy='-1' r='3' fill='#66E0FF'/><path d='M-20-3L-31 0L-20 3Z' fill='#FF9F43'/></g><g id='c'><path d='M14 0L-10-9L-4 0L-10 9Z' fill='#F4C542'/><circle cx='3' cy='0' r='2' fill='#FF5A6E'/></g></defs><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='url(#g)'/><g clip-path='url(#k)'><g fill='#FFFFFF'><circle cx='22' cy='18' r='0.9'/><circle cx='70' cy='60' r='0.7'/><circle cx='120' cy='12' r='1'/><circle cx='180' cy='94' r='0.8'/><circle cx='240' cy='22' r='0.9'/><circle cx='276' cy='70' r='0.7'/><circle cx='40' cy='100' r='0.8'/><circle cx='210' cy='52' r='0.6'/></g><path d='M40 120V70q0-20 30-20h20q20 0 20 20v50z' fill='#2A3160'/><path d='M50 70q0-12 20-12h18q12 0 12 12v6H50z' fill='#3A4280'/><g fill='#F4C542' stroke='#8A6A12'><ellipse cx='200' cy='108' rx='60' ry='10'/><ellipse cx='190' cy='96' rx='44' ry='9'/><ellipse cx='204' cy='84' rx='30' ry='8'/><ellipse cx='196' cy='73' rx='18' ry='6'/></g><g fill='#FFF1C9'><circle cx='178' cy='94' r='2'/><circle cx='214' cy='82' r='2'/></g><path d='M240 20l20 0l0 20' fill='none' stroke='#66E0FF' stroke-opacity='0.4' stroke-width='2'/></g><path d='M14 1H286L299 14V106L286 119H14L1 106V14Z' fill='none' stroke='#66E0FF' stroke-opacity='0.75' stroke-width='1.5'/><path d='M6 10L10 6M290 6L294 10M6 110L10 114M290 114L294 110' stroke='#FF9F43' stroke-width='2'/></svg>"
+        ],
+        "color": "#66E0FF"
+      },
+      "button": {
+        "svg": "<svg viewBox='0 0 300 52'><defs><linearGradient id='b' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#1E2650'/><stop offset='1' stop-color='#111633'/></linearGradient></defs><path d='M12 4H296V40L284 51H4V16Z' fill='#03040C' opacity='0.6'/><path d='M12 1H298V38L286 49H2V13Z' fill='url(#b)' stroke='#66E0FF' stroke-width='1.5'/><path d='M12 1H60' stroke='#FF9F43' stroke-width='3'/><path d='M240 49H286' stroke='#FF9F43' stroke-width='3'/><path d='M14 20l6 5l-6 5' fill='none' stroke='#66E0FF' stroke-width='2'/></svg>",
+        "color": "#66E0FF"
+      }
+    }
+  },
+  "sound": {
+    "set": "arcade",
+    "volume": 0.7,
+    "music": {
+      "melody": [
+        "D4",
+        null,
+        "A4",
+        null,
+        "G4",
+        "F4",
+        "E4",
+        "F4",
+        "D4",
+        null,
+        null,
+        null,
+        "A3",
+        null,
+        "D4",
+        "E4",
+        "F4",
+        null,
+        "C5",
+        null,
+        "A#4",
+        "A4",
+        "G4",
+        "A4",
+        "F4",
+        null,
+        "E4",
+        null,
+        "D4",
+        null,
+        null,
+        null
+      ],
+      "bass": ["D2", "D2", "A#1", "A#1", "F2", "F2", "C2", "A1"],
+      "bpm": 104,
+      "wave": "triangle",
+      "volume": 0.3
+    },
+    "moments": {
+      "tap": "blip",
+      "hit": "zap",
+      "pickup": "chirp",
+      "level": "levelup",
+      "win": "fanfare",
+      "lose": "powerdown"
+    }
+  },
+  "content": {
+    "scene_names": [
+      "0 dock",
+      "1 launch",
+      "2 dogfight",
+      "3 comet",
+      "4 bluff",
+      "5 fleet",
+      "6 dace",
+      "7 okoro",
+      "8 sellout",
+      "9 needle",
+      "10 heir",
+      "11 free",
+      "12 shot",
+      "13 betrayed",
+      "14 rich",
+      "15 lasttoll"
+    ],
+    "story_lines": [
+      "The Magpie owes 9,000", "crowns. A hooded kid offers", "triple pay for a ride to the", "rebels. A Warden watches.",
+      "Three Warden cutters block", "the lane. LEDGER, your ship", "AI: ‘Survival odds: rude.’", "Nim grips the armrest.",
+      "Lasers stitch the dark. A", "cutter locks on. Nim slides", "into the gunner’s seat:", "‘Let me. I’ve had lessons.’",
+      "Ice hisses on the hull. In", "the quiet, LEDGER finds a", "blinking chip under your", "console. Someone bugged you.",
+      "‘Medical cargo,’ you say.", "The Warden’s hologram", "squints. ‘Then you won’t", "mind a scan.’ Nim freezes.",
+      "The rebels hide in a nebula,", "singing on every channel.", "Your old wingmate Dace waves", "you in. ‘Partner! Miss me?’",
+      "‘A tracker? Wild,’ says", "Dace. He laughs too long.", "His wrist-comm blinks", "Concordance gold. Oh, Dace.",
+      "Admiral Okoro kneels to Nim.", "‘This child’s codes open", "every toll gate in the", "empire. Will you fly them?’",
+      "The Concordance answers in", "one ring. ‘Deliver the", "child,’ purrs a velvet", "voice. Nim stares at you.",
+      "The Needle: a gate inside a", "canyon of rock. The flagship", "Verdict blots out the stars.", "Dace radios: ‘Go left!’",
+      "Nim takes the comm. ‘This is", "Nim Aurelian, heir to the", "Concordance.’ The Verdict’s", "guns pause. All listen.",
+      "You thread the Needle with", "paint to spare. Nim’s codes", "open every gate. The Choir", "sings all night. Debt? Paid.",
+      "Every Warden in the sector", "knows the Magpie now. The", "Verdict’s tractor beam hums.", "LEDGER: ‘Told you. Rude.’",
+      "The left fork ends in the", "Verdict’s hangar. Dace’s", "voice: ‘Sorry, partner.", "Debts.’ The doors close.",
+      "Nine thousand crowns. Debt", "paid. The Magpie has never", "been so quiet. LEDGER stops", "talking to you.",
+      "‘I abdicate,’ says Nim. One", "by one, the Verdict’s guns", "go dark. Every toll gate", "swings open. Free skies."
+    ],
+    "story_labels": [
+      "Take the kid aboard", "Scan the kid first", "Ask for quadruple pay",
+      "Punch straight through", "Hide in a comet’s tail", "Bluff: ‘Medical cargo!’",
+      "Let Nim shoot", "Barrel-roll and pray", "",
+      "Smash the tracker", "Glue it to a comet chunk", "",
+      "Allow the scan", "Gun it", "",
+      "Hug Dace", "Report to the Admiral", "Ask Dace about the bug",
+      "Throw him in the brig", "Pretend you saw nothing", "",
+      "Yes. For Nim", "For 20,000 crowns", "Sell Nim to the empire",
+      "Deliver Nim", "Double-cross the empire", "",
+      "Take the left fork", "Take the right fork", "Let Nim take the comm",
+      "Let Nim abdicate on air", "Grab the mic: ransom!", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", ""
+    ],
+    "story_next": [
+      "1", "1", "1",
+      "2", "3", "4",
+      "5", "5", "",
+      "5", "5", "",
+      "5", "2", "",
+      "7", "7", "6",
+      "7", "7", "",
+      "9", "9", "8",
+      "14", "9", "",
+      "13", "11", "10",
+      "15", "14", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", "",
+      "", "", ""
+    ],
+    "story_ends": ["", "", "", "", "", "", "", "", "", "", "", "good", "bad", "bad", "bad", "good"],
+    "scene_info": [
+      "0|Brightwater Docks",
+      "1|Brightwater Orbit",
+      "2|Brightwater Orbit",
+      "3|Inside a Comet’s Tail",
+      "4|Incoming Hail",
+      "5|The Ember Choir Fleet",
+      "5|The Ember Choir Fleet",
+      "6|Admiral Okoro’s Bridge",
+      "7|A Private Channel",
+      "8|The Needle Gate",
+      "9|Every Channel",
+      "10|Ending: Through the Needle|500",
+      "7|Ending: Too Hot to Hide",
+      "7|Ending: The Left Fork",
+      "11|Ending: Rich and Alone",
+      "10|Secret ending: The Last Toll|900"
+    ],
+    "effects": [
+      "0.0|+loyalty|Nim climbs aboard. Loyalty up",
+      "0.1|knows_heir|Scan says: Concordance royal?!",
+      "0.2|greedy|LEDGER: ‘Debt down. Morals?’",
+      "1.0|+heat|Heat up: they know the Magpie",
+      "2.0|+loyalty|Nim never misses. Who IS this?",
+      "2.1|+heat|You lose them. Loudly. Heat up",
+      "3.0|found_bug|Tracker smashed. Who planted it?",
+      "3.1|found_bug decoy -heat|Decoy set. Let them chase ice",
+      "4.0|knows_heir|The Warden SALUTES Nim. What?",
+      "4.1|+heat|So much for bluffing. Heat up",
+      "5.0|hugged_dace|Dace hugs back. A bit too long",
+      "6.0|dace_caught +loyalty|Dace is in the brig. Ouch.",
+      "6.1||You keep smiling. So does he.",
+      "7.0|+loyalty|The fleet sings your name",
+      "7.1|greedy|Okoro pays. Nobody sings.",
+      "7.2|-loyalty -loyalty|You open a channel to the Verdict",
+      "8.1|+heat +loyalty|Fake handoff. Bold. Heat up"
+    ],
+    "needs": [
+      "5.2|found_bug",
+      "9.2|knows_heir&loyalty>=2"
+    ],
+    "routes": [
+      "9.1|heat>=2|12"
+    ],
+    "callbacks": [
+      "8.1|knows_heir|one ring. ‘Return our heir,’",
+      "8.2|knows_heir|purrs a velvet voice. Nim",
+      "8.3|knows_heir|stares at you. ‘You knew.’",
+      "9.2|decoy|Verdict is chasing a comet.",
+      "9.3|hugged_dace|Dace: ‘Left! Trust me, pal!’",
+      "9.3|dace_caught|Dace, from the brig: ‘Left!’",
+      "11.3|greedy|sings. You count crowns.",
+      "13.3|hugged_dace|Debts. Thanks for the hug.’"
+    ]
+  }
+}
