@@ -289,6 +289,20 @@ for games with no right answer, how closely people agree (`opinion_compare`).
   ranked.
 - **The spam check** compares the best one-input spam run with the median of the regular or random players. A tie,
   or a win within 10% of the score range, is a warning for the review; a clear win fails.
+- **Content steps before expand** (`studio.expand`): `applyGeo` turns a manifest's `geo` block into map pictures and
+  answers from `authoring/content/geo/` (A_GEO_* errors), and `applyScene` turns `content.scene` into the two
+  pictures and spot lists of `diff_spots` (A_SCENE errors). The authoring keeps both blocks.
+- **The plan's score wins** (Kevin 47): when the manifest's score disagrees with `plan.spec.score`, compose keeps the
+  plan's and records `stats.scoreDrift`. A repair never moves a points game to `counts_when: finished`. When no bot
+  finishes a run, the bots can't judge the score: it ships unranked with that reason, without a repair. The score
+  review is capped at 60 s (`options.timeout_s`).
+- **`structure`** follows group play: `daily` when the game uses or plans `daily_seed` or plays as a weekly board,
+  scoped to `group:<id>` or `event:<id>` when the context names one (`context.group`, `context.scope`).
+- **Sponsors**: the understanding and `spec.theme` carry `sponsor {name, products, tone}`; compose puts the name in
+  the title or intro card and uses the products as pieces. This is the brief's sponsor, not the server's sponsor
+  record (`model.Sponsor`, set by brand accounts); the generator can copy one into the other.
+- **One gold example** when the top type is a confident catalog match (score >= 0.85, not learned), else two. On the
+  dodge sample the system prompt drops from 112k to 91k characters (19%).
 
 ## The catalog
 

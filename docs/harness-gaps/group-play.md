@@ -256,6 +256,15 @@ when the other gap agents add `map_pin`, the alias check flags it.
 >
 > The score step already skips games with `ranked: false`.
 
+## Later changes (2026-11-12 to 11-13)
+
+- The manifest's `structure` now follows group play (`structureFor` in `group-play.mjs`): a weekly board or a game
+  with `daily_seed` is `daily`, and a job for a Group or Event is scoped to it. Before, every game shipped
+  `{endless, everyone, ai}`. A weekly board's compose rules ask for `daily_seed`.
+- Stories compare endings from the compiled story graph (HARNESS_V2, "Stories take their own branch").
+- Catalog: `server_aggregate` and `free_text_question` are gaps, `persistent_progress` is planned, and
+  `opinion_aggregate` has more multi-word aliases ("compares to everyone"), so requests that need them are flagged.
+
 ## What's left
 
 - Server rounds, the agreement endpoints and series direction (Max); `verify` returning result state and the send
