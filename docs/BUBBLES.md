@@ -1547,6 +1547,13 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   runtime's master gain (`fx.audio()`, new), so mute applies. Haptics and toasts go through `fx`.
 - Taps, drags and holds are forwarded; a quick flick is also sent as a swipe. The runtime has no
   keyboard, so microgames must be playable by touch.
+- **Typed answers** (`typed_answer` + `keyboard`, `fuzzy_match`; `authoring/SPEC.md` 2.12) are
+  matched by engine functions the fragments carry, generated from `authoring/expander/fuzzy.mjs`:
+  case, accents, punctuation, articles, word order, plurals and length-aware typos are forgiven,
+  aliases come from the answer bank (`answer=alias`). Nothing runs outside the engine, so live play,
+  bots and replays score the same answer the same way. Typing is through the on-screen keyboard
+  fragment for now (letters and space); the engine's native text field (`{"text": "submit"}`) isn't
+  wired into this kit yet.
 - The formula's bot taps the game's real targets (`mg_hit_targets`) and flicks. It drives posters,
   demos and smoke runs. It's generic, so the runtime tests skip the skill checks for microgame seeds;
   game quality is gated by `authoring/playtest` and the engine's replay tests.

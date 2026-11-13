@@ -52,7 +52,7 @@ ${DESIGN}
 ## Games people name, and how they work
 When a request names a game, build its mechanic, not the sound of its name ("krillion" is not about krill). The well-known ones:
 - Wordle-style: guess a hidden 5-letter word in 6 tries; each letter turns green (right spot), yellow (in the word) or gray. → word_check + keyboard (+ daily_seed).
-- Krillion-style: a prompt like "Name a red fruit"; the player TYPES their own answer; any correct answer counts, and rarer correct answers score more; about 7 prompts, about 20 s each. → typed_answer + keyboard (accepted answers in rarity tiers in content), NOT multiple choice.
+- Krillion-style: a prompt like "Name a red fruit"; the player TYPES their own answer; any correct answer counts, and rarer correct answers score more; about 7 prompts, about 20 s each. → typed_answer + keyboard (accepted answers in rarity tiers in content, each with its true other names joined by '=', e.g. "hermione granger=hermione"; typos, plurals and word order are forgiven, so don't list misspellings), NOT multiple choice.
 - Connections-style: 16 word tiles hide 4 groups of 4; select 4 and submit; a correct group locks in with its category name; 4 mistakes and you're out. → your own tile grid (grid_board for the layout), tap to select, a submit button.
 - Spelling Bee-style: make words from 7 letters that must use the center letter; longer words score more. → keyboard + in_dictionary.
 - Pinpoint-style: guess the category from clues revealed one at a time; fewer clues = more points. → reveal + typed_answer + keyboard.

@@ -505,6 +505,34 @@ Fragments already add particles, pops, shake, haptics and the sound moments; don
 
 <!-- for-the-prompt: end -->
 
+### 2.12 Typed answers and fuzzy matching
+
+Games where the player types their own answer use `typed_answer` + `keyboard`; games that check typed
+text with their own rules use `fuzzy_match`. Both match with the same deterministic rules
+(`expander/fuzzy.mjs`), run inside the engine, so the phone, the bots and replay checks agree.
+
+- **Answer bank** (`ta_answers()`, one string per prompt): tiers split by `|` (most common first),
+  answers in a tier by `,`, and an answer's other accepted names after it, joined by `=`:
+  `"harry potter=harry,hermione granger=hermione|neville longbottom=neville"`. The first name is the one
+  shown after a match (state `last_answer`). Aliases are true other names (nicknames, short forms,
+  translations), never misspellings: typos are handled for you. Strings without `=` are the original
+  format and still work.
+- **Matching:** case, accents, punctuation, a leading `the`/`a`/`an`, word order, plurals and number
+  words (`three` = `3`) are ignored. Typos are forgiven by length: names of 4 letters or fewer must be
+  exact, 5–7 letters allow one typo, longer names pass at `threshold` (0.82 by default; Damerau-
+  Levenshtein and token-set ratios). So `cat` never matches `car`, `zebar` matches `zebra`, and
+  `wingardium leviosaa` matches `Wingardium Leviosa`. `phonetic: true` also accepts names of 5+ letters
+  that sound alike. The best-scoring name wins; ties go to the more common tier.
+- **Params** (both fragments): `threshold` (float 0.5–1.0, 1.0 = exact after normalizing) and
+  `phonetic` (bool).
+- **fuzzy_match functions:** `fuzzy_ok(input, entry)`, `fuzzy_best(input, entries)` (index or -1),
+  `fuzzy_score(input, name)` (0..1), `fuzzy_key(s)` (normalized text), `fuzzy_passes(input, name, score)`,
+  `fuzzy_entry(input, entry)` (best passing score or -1.0). An entry is `"answer=alias=…"`.
+- **Generated code:** the matching functions in both fragment files are written by
+  `tools/make-fuzzy-fragments.mjs` from `expander/fuzzy.mjs`; edit the JS and rerun it.
+  `tools/test-fuzzy.mjs` checks the JS rules, that the fragments are current, and (with an engine)
+  that the engine agrees with the JS on every case.
+
 ## 3. Expander
 
 The expander is deterministic: the same manifest and library versions give byte-identical output.
