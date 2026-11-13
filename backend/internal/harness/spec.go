@@ -123,6 +123,8 @@ type Score struct {
 	Bounds     *ScoreBounds `json:"bounds,omitempty"` // set from the bots by the gate, never by Muse
 	Events     []string     `json:"events"`
 	Reason     string       `json:"reason,omitempty"` // why Muse chose a kind other than the type's default
+	// Ranked false: no fair ranking (an opinion game compares agreement instead; docs/harness-gaps/group-play.md).
+	Ranked *bool `json:"ranked,omitempty"`
 }
 
 // ScoreBounds are the reachable range, recorded from bot runs.
@@ -178,14 +180,6 @@ func scoreKind(k string) (ScoreKind, bool) {
 		}
 	}
 	return ScoreKind{}, false
-}
-
-// Social is what is shared and how challenges and the Group board work.
-type Social struct {
-	Share     string `json:"share"`     // the share text, spoiler-free
-	Challenge string `json:"challenge"` // the challenge shape
-	SameSeed  bool   `json:"same_seed"` // a challenge replays the same seed
-	Board     string `json:"board"`     // how the Group board reads
 }
 
 // Feel is the juice, sound and look.
@@ -397,10 +391,8 @@ func (s *Spec) Validate() (problems, fixed []string) {
 	if sc.Kind == "time_to_complete" && !oneOf("target_reached", s.End.EndsWhen) && !oneOf("all_prompts_done", s.End.EndsWhen) && !oneOf("board_full", s.End.EndsWhen) {
 		bad("score", "a time to complete needs a run that can finish (end.ends_when target_reached or all_prompts_done)")
 	}
-	// social and feel
-	if empty(s.Social.Share) {
-		bad("social", "share is empty")
-	}
+	// social (group play) and feel
+	s.validateSocial(bad, fix)
 	if len(s.Feel.Juice) == 0 {
 		bad("feel", "no juice moments")
 	}

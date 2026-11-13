@@ -23,7 +23,7 @@ var partSchemas = map[string]string{
 	"theme": `"theme": {"world": string, "named": [string], "tone": string, "look": string, "terms": [string]}
    named: the franchise, characters and places the person named, verbatim (real names are fine when asked). terms: 3-8 words players must see.`,
 	"goal": `"goal": {"text": string, "target": string, "measure": string}
-   target is MEASURABLE: a number ("clear 20 orders", "50 points") or a clear end ("survive", "find the rarest answer", "clear every tile"). measure names the quantity that tracks it ("orders completed", "seconds alive").`,
+   target is MEASURABLE, in THIS game's own words: a number ("<verb> <N> <things>") or a clear end ("survive to <end>", "<verb> every <thing>", "reach <ending>"). measure names the quantity that tracks it ("<things> <verbed>", "seconds alive"). The <...> patterns are placeholders, not content: never copy them or any example from another game.`,
 	"loop": `"loop": {"verb": string, "sees": string, "input": "tap"|"drag"|"swipe"|"hold"|"type"|"tilt"|"draw"|"voice"|"multi_touch", "feedback": string, "cycle_seconds": number}
    one cycle of play: what the player sees, does and gets back, and how long it takes (0.3-60 s).`,
 	"pieces": `"pieces": {"items": [{"name": string, "role": string, "count": string, "content": string}]}
@@ -40,15 +40,28 @@ var partSchemas = map[string]string{
    count_in_time (higher, any, a count); survival_time (higher, any, whole ms); accuracy (higher, finished only, whole percent);
    distance (higher, any, whole metres or tiles); tiered_points (higher, any: rarity-tier points); streak (higher, any, a count).
    events: the game events that change the score. format: how it is shown: "m:ss.t" for the ms kinds, "{n}%" for accuracy,
-   otherwise "{n} <unit>" ("{n} orders"). Leave out bounds.`,
-	"social": `"social": {"share": string, "challenge": string, "same_seed": boolean, "board": string}
-   share is spoiler-free score text; a challenge replays the same seed; board says how the Group board reads.`,
+   otherwise "{n} <unit>". Leave out bounds. A goal that caps something ("in N <things> or less") never scores each <thing> used:
+   score what is left under the cap, or the ending reached. A game with no right answer (ratings, tier lists, taste) sets
+   "ranked": false and compares agreement in social.`,
+	"social": `"social": {"mode": "same_seed_async"|"series"|"group_round"|"weekly_board"|"opinion_compare", "round_seconds": number,
+   "result": {"kind": "score"|"ending"|"picks"|"creation", "compare": "score"|"ending"|"agreement"|"none", "display": string, "endings": [string], "state": [string]},
+   "share_line": string, "best_of": 3|5, "board": string, "same_seed": true, "reason": string}
+   Group play: no live multiplayer. Each person plays this single-player run on the SAME seed, whenever they like, in a chat
+   or a Group; results are compared after. mode is what sending it starts: same_seed_async (head-to-head in a thread),
+   series (best_of 3 or 5), group_round (everyone in the chat or Group ranked), opinion_compare (no right answer).
+   round_seconds: one turn, 30-90 s, inside end.session_seconds. result: what a run leaves and how two runs compare:
+   score (the score ranks), ending (story games: endings named best first in endings; then fewer choices or the score),
+   picks + agreement (ratings, ranks, tier lists, this-or-that: % of picks that match a friend's or the group's; score.ranked false),
+   creation + none (something made, shown side by side). display is the result line ("{score}", "{ending} in {choices} choices",
+   "{agreement}% in sync"). state names the game state that holds the result at the end. share_line is one spoiler-free
+   line posted back to the thread with {name} and {result} (never an answer or an ending's name). board says how the
+   Group board reads.`,
 	"feel": `"feel": {"juice": [string], "sounds": string, "look": string}
    2-4 juice moments (what flashes, pops or buzzes and when), the sound set and the look in a few words.`,
 }
 
 // specSchema is the prompt section for the given parts, with the default score.
-func specSchema(parts []string, def Score) string {
+func specSchema(parts []string, def Score, social Social) string {
 	var sb strings.Builder
 	sb.WriteString(`SPEC is {"spec": "game-spec/1", PARTS}, where PARTS are, filled in this order (each part must agree with the ones before it):` + "\n")
 	for _, p := range parts {
@@ -56,6 +69,9 @@ func specSchema(parts []string, def Score) string {
 	}
 	if oneOf("score", parts) {
 		fmt.Fprintf(&sb, "Default score for this game's type: kind %q (direction %s, counts when %s). Use it unless the goal needs another kind; then say why in score.reason.\n", def.Kind, def.Direction, def.CountsWhen)
+	}
+	if oneOf("social", parts) && social.Mode != "" {
+		fmt.Fprintf(&sb, "Default social for this game: mode %q, result {kind %q, compare %q}. Use it unless the game needs another; then say why in social.reason.\n", social.Mode, social.Result.Kind, social.Result.Compare)
 	}
 	return strings.TrimRight(sb.String(), "\n")
 }
@@ -77,7 +93,7 @@ SPECSCHEMA`
 
 // finishSpec decodes the spec from the plan reply, fills the remaining stages in chained mode, applies the
 // score default rule, validates every part, and runs one repair round on the parts that fail.
-func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessage, in PlanInput, def Score) error {
+func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessage, in PlanInput, def Score, sdef Social) error {
 	var r struct {
 		Spec json.RawMessage `json:"spec"`
 	}
@@ -89,7 +105,7 @@ func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessag
 	if p.Chain {
 		for _, stage := range specStages[1:] {
 			t := time.Now()
-			got, err := p.Muse.JSON(ctx, strings.Replace(stageSystem, "SPECSCHEMA", specSchema(stage, def), 1), stageUser(in, parts, stage))
+			got, err := p.Muse.JSON(ctx, strings.Replace(stageSystem, "SPECSCHEMA", specSchema(stage, def, sdef), 1), stageUser(in, parts, stage))
 			plan.Calls = append(plan.Calls, CallTiming{Step: strings.Join(stage, "+"), Ms: ms(time.Since(t))})
 			if err != nil {
 				return err
@@ -99,20 +115,22 @@ func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessag
 	}
 	spec, decodeProblems := decodeSpec(parts)
 	applyScoreDefault(spec, def, plan)
+	applySocialDefault(spec, sdef, plan)
 	problems, fixed := spec.Validate()
-	problems = append(decodeProblems, problems...)
+	problems = append(append(decodeProblems, problems...), requestChecks(spec, in)...)
 	plan.Notes = append(plan.Notes, fixed...)
 	if len(problems) > 0 {
 		failing := failingParts(problems)
 		t := time.Now()
-		got, err := p.Muse.JSON(ctx, strings.Replace(repairSystem, "SPECSCHEMA", specSchema(failing, def), 1), repairUser(in, parts, problems, failing))
+		got, err := p.Muse.JSON(ctx, strings.Replace(repairSystem, "SPECSCHEMA", specSchema(failing, def, sdef), 1), repairUser(in, parts, problems, failing))
 		plan.Calls = append(plan.Calls, CallTiming{Step: "repair:" + strings.Join(failing, "+"), Ms: ms(time.Since(t))})
 		if err == nil {
 			mergeParts(parts, got)
 			s2, dp := decodeSpec(parts)
 			applyScoreDefault(s2, def, plan)
+			applySocialDefault(s2, sdef, plan)
 			problems, fixed = s2.Validate()
-			problems = append(dp, problems...)
+			problems = append(append(dp, problems...), requestChecks(s2, in)...)
 			plan.Notes = append(plan.Notes, fixed...)
 			spec = s2
 		} else {

@@ -39,6 +39,7 @@ type ContextUnder struct {
 	Theme     []string `json:"theme"`
 	Keywords  []string `json:"keywords"`
 	Players   string   `json:"players"`
+	By        string   `json:"by,omitempty"` // which understander ran: muse, keywords (and why), given
 }
 
 // ContextType is a type card: the fields the composer needs, plus why it matched.
@@ -60,6 +61,7 @@ type ContextType struct {
 	Status           string       `json:"status"`
 	Source           string       `json:"source"`
 	Refs             []string     `json:"refs"`
+	SocialHooks      []string     `json:"social_hooks,omitempty"`
 	Match            ContextMatch `json:"match"`
 }
 
@@ -105,6 +107,10 @@ func BuildContext(p ContextPack) (GenContext, error) {
 		GoldIDs: []string{},
 		Learned: []ContextType{},
 		Notes:   append([]string{}, p.Notes...),
+	}
+	if p.Understood != "" {
+		c.Understanding.By = p.Understood
+		c.Notes = append(c.Notes, "understood by "+p.Understood)
 	}
 	for _, l := range p.Lookups {
 		switch {
@@ -186,7 +192,8 @@ func typeCard(t GameType, score float64, reasons []string, k fieldCaps) ContextT
 		Scoring: clip(t.Scoring, k.item), Pieces: clipList(t.Pieces, k.list, k.item),
 		ContentNeeds: clipList(t.ContentNeeds, k.list, k.item), DifficultyLevers: clipList(t.DifficultyLevers, k.list, k.item),
 		Tools: nonNil(t.Tools), GateProfile: t.GateProfile, Status: t.Status, Source: t.Source, Refs: nonNil(t.Refs),
-		Match: ContextMatch{Score: score, Reasons: clipList(reasons, k.reasons, k.item)},
+		SocialHooks: clipList(t.SocialHooks, k.reasons, k.item),
+		Match:       ContextMatch{Score: score, Reasons: clipList(reasons, k.reasons, k.item)},
 	}
 }
 
