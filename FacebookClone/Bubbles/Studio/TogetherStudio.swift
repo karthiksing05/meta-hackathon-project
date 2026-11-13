@@ -29,7 +29,8 @@ enum TogetherStudio {
             gave fewer. Words become the word list, with a short clue each. Scenes become scenes in their order. A level is a \
             description: turn it into params and content for the formula. The content must fit the formula's content schema \
             exactly. If there are fewer than 5 rounds, add your own short rounds on the same theme after theirs to reach 5; \
-            give those the note "Added by Muse" and never credit a maker for them. No real brands, teams or businesses.
+            give those the note "Added by Muse" and never credit a maker for them. A theme, franchise or brand the makers ask \
+            for is welcome; never add one they didn't ask for.
             """)
         }
         if let templateID = social.aboutMeTemplate {
@@ -46,7 +47,7 @@ enum TogetherStudio {
             lines.append("""
             Rules: use the answer formula with an answer key. Each answer above is the right choice of one round, asked about \
             \(subject) in the third person ("What's \(subject)'s favorite food?"). Decoys are plausible but clearly not \
-            \(subject)'s, and never real brands, teams or businesses. Keep the rounds in the order given\(templateID == "first-month" ? " (they tell the month in order)" : ""). \
+            \(subject)'s, and never add brands, teams or businesses that aren't in the answers above. Keep the rounds in the order given\(templateID == "first-month" ? " (they tell the month in order)" : ""). \
             Nothing private beyond what's given here. Title it like "\(template?.gameTitle(subject) ?? "About \(subject)")".
             """)
         }

@@ -30,7 +30,8 @@ enum LearnStudio {
     answer is X".
     - topic names the lesson ("SF hills"); subject is a short noun phrase for the Group meter ("the hills": "New in SF \
     knows 82% of the hills").
-    - No medical, legal or financial advice. Generic, non-brand content: no real businesses, products or celebrities.
+    - No medical, legal or financial advice. No real people or celebrities. A theme, franchise or brand the person asks \
+    for is welcome; never add one they didn't ask for.
     - When the request includes notes, use only facts from those notes.
     - Keep the default length (rounds, one per question); use space.lesson_desk, input.select, rule.lesson_practice and \
     score.mastery. Chalk, paper and riso looks suit lessons.

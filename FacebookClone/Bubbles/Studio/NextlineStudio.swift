@@ -41,8 +41,9 @@ enum NextlineStudio {
     answer (the real next line: funny, surprising and in character, ≤ 60) and exactly 3 decoys \
     (plausible next lines of similar length and tone that are clearly wrong in context; never repeat \
     the answer). Add reveal_emoji (one emoji for the reveal). The last line before the freeze should \
-    set up the punchline so a sharp player can guess it. Keep it family-friendly. No real people, \
-    shows, movies, quotes, brands, songs or celebrities. Use rule.next_line (round_seconds 8; 10 for \
+    set up the punchline so a sharp player can guess it. Keep it family-friendly. No real people or \
+    celebrities, and no real quotes or song lyrics. A theme, franchise or brand the person asks for \
+    is welcome (keep its feel, write original lines); never add one unasked. Use rule.next_line (round_seconds 8; 10 for \
     long lines) and score.quick_answer. Pick a look that fits: riso for zine-like comedy, paper for \
     cozy, clay for cute.
     """
