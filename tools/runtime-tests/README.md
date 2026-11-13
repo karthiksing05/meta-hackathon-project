@@ -27,6 +27,7 @@ and loads the files in `BubbleJSRuntime.orderedScriptNames` order, with no DOM, 
 | `run-jsc.sh`, `jsc-main.js` | `checks.js` inside JavaScriptCore |
 | `microgame-verify.js` | Every `mg-*` seed's bot runs pass `MicrogameEngine.verify`; raised scores don't |
 | `microgame-text.js` | Typed text (the native text field, docs/BUBBLES.md 7.11) through the real runtime on `mg-ferry-call`: score, `text` log entries, replays, verify, bots |
+| `microgame-text-fit.js` | The renderer's text safety net (`fitText`): wrap in the box, shrink to 70 %, ellipsis, 12-unit canvas margin, and `drawFrame` drawing through it |
 | `microgame-chrome.mjs` | Plays `mg-*` seeds in `bubble-host.html` in headless Chrome, including typing into the text field |
 
 `checks.js` covers:
