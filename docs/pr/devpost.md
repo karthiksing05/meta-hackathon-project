@@ -58,7 +58,7 @@ Muse Curios is a new feature in Facebook: short-form content created by your fri
 
 The five of us built Muse Curios around a single API, with each of us working alongside AI coding agents. At a high level, the phone only shows the experience, and everything that needs to be trusted or shared lives on our server.
 
-**How we worked with AI.** Each of us ran our own Claude and Codex agents, and they stayed in sync the way a team does: one Slack channel for updates and handoffs, a shared canvas of who's working on what, and a `CLAUDE.md` file every agent reads before it starts (claim work before you begin, hand off in writing, never push to `main` without an OK). That gave us 489 commits on `main` in two days across 30 branches, 88% of them co-written with an agent. The agents moved fast, but the design philosophy, the decisions and the memory of how the pieces fit together stayed ours.
+**How we worked with AI.** Each of us ran our own Claude and Codex agents, and they stayed in sync the way a team does: one Slack channel for updates and handoffs, a shared canvas of who's working on what, and a `CLAUDE.md` file every agent reads before it starts (claim work before you begin, hand off in writing, never push to `main` without an OK). That gave us 624 commits on `main` in 35 hours, 87% of them co-written with an agent. The agents moved fast, but the design philosophy, the decisions and the memory of how the pieces fit together stayed ours.
 
 
 - **The app:** a SwiftUI recreation of the Facebook iPhone app, with Muse Curios built into the feed, Groups, profiles and a Studio for making games. It shows screens and calls our API, and nothing else.

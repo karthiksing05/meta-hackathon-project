@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 rm -rf frames && mkdir frames
-N=78   # 6.5 s at 12 fps
+N=102  # 8.5 s at 12 fps: talk 0-2.4 s, answers held 2.5-6.0 s, result 6.0-7.0 s, reveal 7.0-8.5 s
 i=0
 while [ $i -lt $N ]; do
   t=$(python3 -c "print(round($i/12,3))")

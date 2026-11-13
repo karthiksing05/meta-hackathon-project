@@ -50,18 +50,18 @@ const line = 'The bridge opened two hours late because…';
 const ans = ['…the ribbon was too pretty', '…a goose was in charge', '…we lost the giant scissors', '…I took the scenic route'];
 const WIN = 2, PICK = 2;
 const $ = (id) => document.getElementById(id);
-const talk = T < 2.4 || T > 4.9;
+const talk = T < 2.4 || T > 7.0;
 $('mouth').setAttribute('ry', talk ? (8 + 14 * Math.abs(Math.sin(T * 11))) : 6);
 $('pip').setAttribute('transform', `translate(0 ${talk ? Math.sin(T * 5) * 3 : 0})`);
 const typed = Math.min(line.length, Math.floor(T / 2.2 * line.length));
-$('cap').textContent = T > 4.9 ? '…we lost the giant scissors.' : line.slice(0, typed);
-if (T >= 2.4 && T <= 4.9) {
+$('cap').textContent = T > 7.0 ? '…we lost the giant scissors.' : line.slice(0, typed);
+if (T >= 2.4 && T <= 7.0) {
   $('dim').style.display = 'block'; $('pause').style.display = 'block';
-  $('q').style.display = T < 4.2 ? 'block' : 'none';
-  $('pct').style.display = T >= 4.2 ? 'block' : 'none';
+  $('q').style.display = T < 6.0 ? 'block' : 'none';
+  $('pct').style.display = T >= 6.0 ? 'block' : 'none';
   const shown = Math.min(4, Math.floor((T - 2.5) / 0.22) + 1);
   $('opts').innerHTML = ans.slice(0, Math.max(0, shown)).map((a, i) => {
-    const cls = T >= 4.2 ? (i === WIN ? 'win' : 'lose') : (T >= 3.8 && i === PICK ? 'win' : '');
+    const cls = T >= 6.0 ? (i === WIN ? 'win' : 'lose') : (T >= 5.3 && i === PICK ? 'win' : '');
     return `<div class="opt ${cls}">${String.fromCharCode(65 + i)}. ${a}</div>`; }).join('');
 }
 </script></body></html>

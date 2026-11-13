@@ -1,4 +1,4 @@
-# Speaker notes and timing (draft 8: Karthik's story arc)
+# Speaker notes and timing (draft 9: Karthik's story arc, graphics not numbers)
 
 *Three acts: why, how, what it does for people. Thesis: people don't grow close by watching the same thing; they grow close by doing something together, or against each other. Blue = competing, violet = collaborating. The budget is 265 s (170 s of talk and 95 s of demo), leaving 35 s of slack. Demo 1 starts on slide 1 and pays off after slide 7, at about 1:50. The video voice-over reads these and ends on the tagline. Claims follow [../narrative.md](../narrative.md); words follow [../STYLE.md](../STYLE.md).*
 
@@ -15,7 +15,7 @@
 | 8 Compete → collaborate | What it does | 15 s | **Demo 3, 30 s:** a Group's weekly board → Add friend → best of 5 | 3:15 |
 | 9 Play becomes a signal | What it does | 15 s | **Demo 2, 25 s:** scroll the feed, a Curio plays inline with a sound | 3:55 |
 | 10 Built the way it works | Execution | 10 s | | 4:05 |
-| 11 A ritual + the tagline | Close | 20 s | | 4:25 |
+| 11 The tagline (ritual line spoken, no chart) | Close | 20 s | | 4:25 |
 
 **Pre-show checklist (the morning of the demo, on the presenting phone):**
 1. Signed in as the presenter's own account, member of the demo Group.
@@ -30,10 +30,10 @@
 People have always gathered around small, strange, delightful things: curios. Muse Curios is a new feature in Facebook: tiny games anyone makes with Muse, and plays with their people. *(Say "dodge the fog over Twin Peaks", tap Make, agree the plan.)*
 
 ## 2
-Here's what we believe. People don't grow close by watching the same thing. They grow close by doing something together, or against each other. Players who depend on each other form real ties. In a trial, groups of three on a weekly leaderboard walked 920 more steps a day. Friends who just moved grew closer playing games, not working side by side.
+Here's what we believe. People don't grow close by watching the same thing. They grow close by doing something together, or against each other. In one trial, groups of three on a weekly leaderboard walked more than people given support or teamwork: 920 extra steps a day.
 
 ## 3
-Facebook has the people, but it's lost the reason. Teen use fell from 71% to 32%, and young adults are the loneliest age group, while 98% of them play games.
+Facebook has the people, but it's lost the reason: teen use fell from 71% to 32%. Meanwhile almost everyone plays games, and few call themselves gamers.
 
 ## 4
 And short-form is turning into something you play: Reels that pause for you to guess the line, LinkedIn's daily puzzles, the NYT's friends tab. The ones that last are shared.
@@ -54,7 +54,7 @@ This is where it brings people closer. A Group's weekly board. "How did you get 
 And play becomes a signal for the feed: finished runs, rematches, friends added. In simulation, our ranker beat today's feed in 70% of sessions, and Group Blend found games a whole Group enjoys four times as often. *(Demo 2, 25 s.)*
 
 ## 10
-We built a collaborative product collaboratively: five people, each with our own AI agents, one channel, 489 commits in two days. The decisions stayed ours.
+And we built a collaborative product collaboratively: five people, each with our own AI agents, one channel. That's 624 commits in 35 hours; the decisions stayed ours.
 
 ## 11
-Endless loops lose people; only 3% still play a month later. A ritual you share keeps them. So: When the world is your muse, how will you create the content of tomorrow? Thank you.
+Endless loops lose people; only 3% still play a month later. A ritual you share brings them back. *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.

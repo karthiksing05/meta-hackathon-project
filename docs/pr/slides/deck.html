@@ -137,14 +137,14 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .cshot { width: 560px; height: 715px; object-fit: cover; border-radius: 36px; box-shadow: 0 30px 60px rgba(16,24,64,.16); }
 .mcap { font-size: 40px; font-weight: 700; margin-top: 30px; }
 .make + .mcap { position: absolute; left: 150px; bottom: 120px; }
-.pipe2 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; margin-top: 90px; position: relative; }
+.pipe2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; margin-top: 90px; position: relative; }
 .pipe2::before { content: ""; position: absolute; left: 4%; right: 4%; top: 46px; height: 8px; background: var(--grad); border-radius: 4px; }
 .pipe2 .st { position: relative; padding-top: 110px; text-align: center; }
 .pipe2 .st::before { content: ""; position: absolute; top: 26px; left: calc(50% - 24px); width: 48px; height: 48px; border-radius: 50%; background: #fff; border: 8px solid var(--blue); }
 .pipe2 .st:nth-child(n+4)::before { border-color: var(--violet); }
 .pipe2 .st.gt::before { background: var(--violet); }
 .pipe2 i { display: block; font-style: normal; font-size: 24px; font-weight: 700; color: var(--muted); }
-.pipe2 b { display: block; font-size: 36px; font-weight: 800; margin-top: 8px; line-height: 1.15; padding: 0 10px; }
+.pipe2 b { display: block; font-size: 32px; font-weight: 800; margin-top: 8px; line-height: 1.15; padding: 0 10px; }
 .pipe2 small { display: block; font-size: 22px; color: var(--sub); margin-top: 8px; }
 .pcap { font-size: 34px; color: var(--sub); margin-top: 90px; font-weight: 500; }
 .eflow { display: flex; align-items: center; gap: 50px; margin-top: 70px; }
@@ -180,7 +180,36 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .rt { height: 40px; background: rgba(255,255,255,.2); border-radius: 12px; overflow: hidden; }
 .rf { height: 100%; background: #fff; color: #5B3FE0; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: flex-end; padding-right: 14px; border-radius: 12px; }
 .rs { font-size: 20px; color: rgba(255,255,255,.75); margin-top: 6px; }
-.close h2 { margin-top: 160px; }
+
+
+/* draft 9 */
+.phrow { display: flex; align-items: center; gap: 70px; }
+.stepup { flex: 1; }
+.sbars { display: flex; align-items: flex-end; gap: 28px; height: 360px; border-bottom: 4px solid #E4E6EB; }
+.sb { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; }
+.sbc { width: 100%; border-radius: 16px 16px 0 0; }
+.sbv { font-size: 38px; font-weight: 800; margin-bottom: 8px; }
+.sbl { position: absolute; bottom: -44px; font-size: 22px; color: var(--sub); white-space: nowrap; }
+.scap { font-size: 24px; color: var(--sub); margin-top: 64px; line-height: 1.3; }
+.phil .phcap { margin-top: 40px; }
+.tens2 { display: grid; grid-template-columns: 1fr 1fr; gap: 110px; margin-top: 50px; }
+.ccap { font-size: 30px; font-weight: 700; margin-top: 18px; }
+.ccap small { font-size: 20px; color: var(--muted); font-weight: 500; margin-left: 8px; }
+.pbars { display: flex; align-items: flex-end; gap: 36px; height: 400px; border-bottom: 4px solid #E4E6EB; margin-top: 40px; }
+.pb { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; }
+.pc { width: 100%; border-radius: 16px 16px 0 0; }
+.pv { font-size: 44px; font-weight: 800; margin-bottom: 8px; }
+.pl { position: absolute; bottom: -70px; text-align: center; font-size: 22px; color: var(--sub); line-height: 1.2; }
+.pl small { color: var(--muted); }
+.tens2 .chart:last-child .ccap { margin-top: 84px; }
+.cc { gap: 60px; }
+.cc .flowv { flex: none; width: 560px; }
+.cc .fs b { font-size: 40px; } .cc .fs { padding: 20px 0 20px 76px; flex-direction: column; gap: 4px; }
+.cc .fs .dot { top: 26px; }
+.map { flex: none; }
+.mapt { font-size: 26px; font-weight: 800; margin-bottom: 6px; text-align: center; }
+.cc .ccr .lp { width: 340px; height: 700px; }
+.cph { margin-top: 40px; }
 </style>
 </head>
 <body>
@@ -202,38 +231,57 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 <!-- 2. The philosophy: together and against both lead to closer -->
 <section class="slide phil">
   <div class="label">Why</div>
-  <svg class="arrows" viewBox="0 0 1620 470" width="1620" height="470">
-    <defs>
-      <marker id="hb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0866FF"/></marker>
-      <marker id="hv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8A3FFC"/></marker>
-    </defs>
-    <path d="M330 90 C 760 90, 900 235, 1150 235" stroke="#0866FF" stroke-width="22" fill="none" stroke-linecap="round" marker-end="url(#hb)"/>
-    <path d="M330 380 C 760 380, 900 235, 1150 235" stroke="#8A3FFC" stroke-width="22" fill="none" stroke-linecap="round" marker-end="url(#hv)"/>
-    <text x="300" y="108" text-anchor="end" font-size="64" font-weight="800" fill="#0866FF" font-family="Figtree">against</text>
-    <text x="300" y="398" text-anchor="end" font-size="64" font-weight="800" fill="#8A3FFC" font-family="Figtree">together</text>
-    <text x="1200" y="258" font-size="80" font-weight="800" fill="#1C1E21" font-family="Figtree">closer</text>
-  </svg>
-  <div class="phcap">We grow close by playing with each other, and against each other.</div>
-  <div class="ev">
-    <div><b>.45 / .30</b> Interdependent play predicts bridging and bonding ties between players [72]</div>
-    <div><b>+920</b> steps a day for groups of three on a weekly leaderboard (STEP UP trial) [127]</div>
-    <div><b>Play</b> went with closeness among adults who had just moved; time at work did not [66]</div>
-  </div>
-  <div class="foot"><span>Blue = competing. Violet = collaborating. [n] = docs/pr/sources.md</span><span class="pg"></span></div>
-</section>
-
-<!-- 3. The tension -->
-<section class="slide">
-  <div class="label">Why</div>
-  <div class="tension">
-    <div class="tc"><div class="bar98"><div style="height:98%"><span>98%</span></div></div><div class="tl">of Americans 13–39 play games<br><small>YPulse, 2026</small></div></div>
-    <div class="tc"><div class="drop"><div class="b1" style="height:71%"><span>71%</span></div><div class="b2" style="height:32%"><span>32%</span></div></div><div class="tl">of US teens on Facebook, 2014-15 → 2024<br><small>Pew [54]</small></div></div>
-    <div class="side">
-      <h2 class="tsh">Facebook has the people, but not the reason to open it.</h2>
-      <div class="line">19–29-year-olds are the loneliest age group: 27% [60].</div>
+  <div class="phrow">
+    <svg class="arrows" viewBox="0 0 980 470" width="980" height="470">
+      <defs>
+        <marker id="hb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0866FF"/></marker>
+        <marker id="hv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8A3FFC"/></marker>
+      </defs>
+      <path d="M290 90 C 560 90, 620 235, 760 235" stroke="#0866FF" stroke-width="20" fill="none" stroke-linecap="round" marker-end="url(#hb)"/>
+      <path d="M290 380 C 560 380, 620 235, 760 235" stroke="#8A3FFC" stroke-width="20" fill="none" stroke-linecap="round" marker-end="url(#hv)"/>
+      <text x="265" y="108" text-anchor="end" font-size="58" font-weight="800" fill="#0866FF" font-family="Figtree">against</text>
+      <text x="265" y="398" text-anchor="end" font-size="58" font-weight="800" fill="#8A3FFC" font-family="Figtree">together</text>
+      <text x="790" y="256" font-size="66" font-weight="800" fill="#1C1E21" font-family="Figtree">closer</text>
+    </svg>
+    <div class="stepup">
+      <div class="sbars"><div class="sb"><div class="sbv">+920</div><div class="sbc" style="height:100%;background:#0866FF"></div><div class="sbl">Weekly leaderboard</div></div><div class="sb"><div class="sbv">+689</div><div class="sbc" style="height:75%;background:#9AA0AA"></div><div class="sbl">Support</div></div><div class="sb"><div class="sbv">+637</div><div class="sbc" style="height:69%;background:#8A3FFC"></div><div class="sbl">Collaboration</div></div></div>
+      <div class="scap">Extra steps a day, by trial arm. Groups of three on a weekly leaderboard did best [127].</div>
     </div>
   </div>
-  <div class="foot"><span></span><span class="pg"></span></div>
+  <div class="phcap">We grow close by playing with each other, and against each other.</div>
+  <div class="foot"><span>STEP UP trial (JAMA Intern. Med., 2019) [127]. Also: interdependent play predicts ties between players [72]; play went with closeness after a move [66].</span><span class="pg"></span></div>
+</section>
+
+<!-- 3. The tension: two charts, two populations -->
+<section class="slide">
+  <div class="label">Why</div>
+  <h2 style="margin-top:10px;font-size:80px">Facebook has the people, but not the reason.</h2>
+  <div class="tens2">
+    <div class="chart">
+      <svg viewBox="0 0 700 460" width="700" height="460">
+        <line x1="70" y1="400" x2="660" y2="400" stroke="#E4E6EB" stroke-width="4"/>
+        <line x1="70" y1="40" x2="70" y2="400" stroke="#E4E6EB" stroke-width="4"/>
+        <text x="58" y="48" text-anchor="end" font-size="22" fill="#8A8D91" font-family="Figtree">100%</text>
+        <text x="58" y="404" text-anchor="end" font-size="22" fill="#8A8D91" font-family="Figtree">0</text>
+        <line x1="150" y1="144.4" x2="580" y2="284.8" stroke="#0866FF" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="150" cy="144.4" r="16" fill="#0866FF"/><circle cx="580" cy="284.8" r="16" fill="#0866FF"/>
+        <text x="150" y="112" text-anchor="middle" font-size="44" font-weight="800" fill="#1C1E21" font-family="Figtree">71%</text>
+        <text x="580" y="252" text-anchor="middle" font-size="44" font-weight="800" fill="#1C1E21" font-family="Figtree">32%</text>
+        <text x="150" y="440" text-anchor="middle" font-size="26" fill="#65676B" font-family="Figtree">2014–15</text>
+        <text x="580" y="440" text-anchor="middle" font-size="26" fill="#65676B" font-family="Figtree">2024</text>
+      </svg>
+      <div class="ccap">US teens who use Facebook <small>Pew [54]</small></div>
+    </div>
+    <div class="chart">
+      <div class="pbars">
+        <div class="pb"><div class="pv">98%</div><div class="pc" style="height:98%;background:var(--grad)"></div><div class="pl">play games<br><small>13–39</small></div></div>
+        <div class="pb"><div class="pv">33%</div><div class="pc" style="height:33%;background:#BCC0C4"></div><div class="pl">men who say "gamer"<br><small>18–29</small></div></div>
+        <div class="pb"><div class="pv">9%</div><div class="pc" style="height:9%;background:#BCC0C4"></div><div class="pl">women who say "gamer"<br><small>18–29</small></div></div>
+      </div>
+      <div class="ccap">Almost everyone plays; few call themselves gamers <small>YPulse 2026; Pew 2015</small></div>
+    </div>
+  </div>
+  <div class="foot"><span>19–29-year-olds are the loneliest age group: 27% very or fairly lonely [60]. Two charts, two different surveys.</span><span class="pg"></span></div>
 </section>
 
 <!-- 4. The shift -->
@@ -282,7 +330,8 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
     <div class="st"><i>Muse Ember</i><b>writes the brief</b></div>
     <div class="st"><i>Muse Wonder</i><b>writes the game</b></div>
     <div class="st"><i>Compose</i><b>+ up to 3 repairs</b></div>
-    <div class="st gt"><i>Gate</i><b>5 bots play it</b><small>+ score check</small></div>
+    <div class="st gt"><i>Gate</i><b>5 bots play it</b></div>
+    <div class="st gt"><i>Check</i><b>score check</b></div>
   </div>
   <div class="pcap">Muse Image paints the art. About 75% of games pass the gate; the rest are repaired or never shown.</div>
   <div class="foot"><span>Retrieval: 523 test requests. docs/pr/09-evidence.md</span><span class="pg"></span></div>
@@ -308,20 +357,23 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 
 <!-- ACT III · WHAT IT DOES FOR PEOPLE -->
 
-<!-- 8. Compete → collaborate. Demo 3. -->
+<!-- 8. Compete → collaborate, on an illustrative map. Demo 3. -->
 <section class="slide cc">
   <div class="label">What it does · Originality</div>
   <div class="flowv">
-    <div class="fs c"><span class="dot"></span><b>A Group's weekly board</b><em>in the app</em></div>
+    <div class="fs c"><span class="dot"></span><b>Weekly board</b><em>in the app</em></div>
     <div class="fs c"><span class="dot"></span><b>"How did you get 44?"</b></div>
     <div class="fs c"><span class="dot"></span><b>Add friend</b><em>in the app</em></div>
     <div class="fs m"><span class="dot"></span><b>Best of 5</b><em>in the app</em></div>
-    <div class="fs v"><span class="dot"></span><b>Make one together, or remix it</b><em>on the server, app next</em></div>
+    <div class="fs v"><span class="dot"></span><b>Make one together</b><em>server, app next</em></div>
   </div>
-  <div class="ccr">
-    <div class="lp"><div class="scr">Live phone<br><small>Demo 3</small></div></div>
-  </div>
-  <div class="foot"><span><b style="color:#0866FF">Blue</b> = competing · <b style="color:#8A3FFC">violet</b> = collaborating</span><span class="pg"></span></div>
+  <div class="map"><div class="mapt">New in SF: strangers become friends</div><svg viewBox="0 0 560 680" width="520" height="632">
+      <path d="M40 120 Q 60 60 150 48 L 300 40 Q 420 44 470 90 Q 520 150 520 260 L 540 420 Q 548 560 510 650 L 60 660 Q 34 500 40 330 Z" fill="#F0F2F5" stroke="#D5D9E0" stroke-width="4"/>
+      <text x="290" y="30" text-anchor="middle" font-size="20" fill="#8A8D91" font-family="Figtree">San Francisco</text>
+      <line x1="250" y1="92" x2="108" y2="210" stroke="#0866FF" stroke-width="6" stroke-linecap="round"/><line x1="250" y1="92" x2="400" y2="170" stroke="#0866FF" stroke-width="6" stroke-linecap="round"/><line x1="108" y1="210" x2="110" y2="440" stroke="#0866FF" stroke-width="6" stroke-linecap="round"/><line x1="400" y1="170" x2="470" y2="300" stroke="#0866FF" stroke-width="6" stroke-linecap="round"/><line x1="296" y1="350" x2="372" y2="430" stroke="#0866FF" stroke-width="6" stroke-linecap="round"/><line x1="250" y1="92" x2="296" y2="350" stroke="#8A3FFC" stroke-width="9" stroke-linecap="round"/><line x1="296" y1="350" x2="230" y2="560" stroke="#8A3FFC" stroke-width="9" stroke-linecap="round"/><line x1="372" y1="430" x2="470" y2="300" stroke="#8A3FFC" stroke-width="9" stroke-linecap="round"/><circle cx="250" cy="92" r="20" fill="#fff" stroke="#1C1E21" stroke-width="5"/><text x="250" y="144" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1E21" font-family="Figtree">Alex</text><circle cx="108" cy="210" r="20" fill="#fff" stroke="#1C1E21" stroke-width="5"/><text x="108" y="262" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1E21" font-family="Figtree">Maya</text><circle cx="400" cy="170" r="20" fill="#fff" stroke="#1C1E21" stroke-width="5"/><text x="400" y="222" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1E21" font-family="Figtree">Diego</text><circle cx="110" cy="440" r="20" fill="#fff" stroke="#1C1E21" stroke-width="5"/><text x="110" y="492" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1E21" font-family="Figtree">Lena</text><circle cx="372" cy="430" r="20" fill="#fff" stroke="#1C1E21" stroke-width="5"/><text x="372" y="482" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1E21" font-family="Figtree">Sam</text><circle cx="296" cy="350" r="20" fill="#fff" stroke="#1C1E21" stroke-width="5"/><text x="296" y="402" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1E21" font-family="Figtree">Theo</text><circle cx="470" cy="300" r="20" fill="#fff" stroke="#1C1E21" stroke-width="5"/><text x="470" y="352" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1E21" font-family="Figtree">Aiko</text><circle cx="230" cy="560" r="20" fill="#fff" stroke="#1C1E21" stroke-width="5"/><text x="230" y="612" text-anchor="middle" font-size="22" font-weight="700" fill="#1C1E21" font-family="Figtree">Priya</text>
+    </svg></div>
+  <div class="ccr"><div class="lp"><div class="scr">Live phone<br><small>Demo 3</small></div></div></div>
+  <div class="foot"><span>Map and members are illustrative (synthetic). <b style="color:#0866FF">Blue</b> = met by competing · <b style="color:#8A3FFC">violet</b> = collaborating</span><span class="pg"></span></div>
 </section>
 
 <!-- 9. Play becomes a signal. Demo 2. -->
@@ -343,21 +395,19 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
   <div class="foot"><span>The feed learns from finished runs, rematches and friends added. Simulated people; ranker 95% CI 68–72%. docs/RANKING.md</span><span class="pg"></span></div>
 </section>
 
-<!-- 10. Built the way it works -->
-<section class="slide stmt">
+<!-- 10. Built the way it works: commits per hour on main (real data) -->
+<section class="slide">
   <div class="label">Execution</div>
-  <h2>We built a collaborative product collaboratively.</h2>
-  <div class="line">489 commits in two days. Five people, each running their own AI agents, synced through one channel. The decisions stayed ours.</div>
-  <div class="foot"><span>Counted from git on main; 430 of 489 commits credit Claude or Codex.</span><span class="pg"></span></div>
+  <h2 style="margin-top:10px;font-size:80px">We built a collaborative product collaboratively.</h2>
+  <div class="cph"><svg viewBox="0 0 1500 450" width="1620" height="486"><defs><linearGradient id="cg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0866FF"/><stop offset="1" stop-color="#8A3FFC"/></linearGradient></defs>
+      <line x1="0" y1="400" x2="1500" y2="400" stroke="#E4E6EB" stroke-width="3"/><rect x="3.0" y="394.4" width="36.9" height="5.6" rx="4" fill="url(#cg)"/><rect x="45.9" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="88.7" y="360.9" width="36.9" height="39.1" rx="4" fill="url(#cg)"/><rect x="131.6" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="174.4" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="217.3" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="260.1" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="303.0" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="345.9" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="388.7" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="431.6" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="474.4" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="517.3" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="560.1" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="603.0" y="400.0" width="36.9" height="0.0" rx="4" fill="url(#cg)"/><rect x="645.9" y="349.7" width="36.9" height="50.3" rx="4" fill="url(#cg)"/><rect x="688.7" y="377.6" width="36.9" height="22.4" rx="4" fill="url(#cg)"/><rect x="731.6" y="388.8" width="36.9" height="11.2" rx="4" fill="url(#cg)"/><rect x="774.4" y="176.5" width="36.9" height="223.5" rx="4" fill="url(#cg)"/><rect x="817.3" y="137.4" width="36.9" height="262.6" rx="4" fill="url(#cg)"/><rect x="860.1" y="338.5" width="36.9" height="61.5" rx="4" fill="url(#cg)"/><rect x="903.0" y="187.6" width="36.9" height="212.4" rx="4" fill="url(#cg)"/><rect x="945.9" y="265.9" width="36.9" height="134.1" rx="4" fill="url(#cg)"/><rect x="988.7" y="260.3" width="36.9" height="139.7" rx="4" fill="url(#cg)"/><rect x="1031.6" y="372.1" width="36.9" height="27.9" rx="4" fill="url(#cg)"/><rect x="1074.4" y="383.2" width="36.9" height="16.8" rx="4" fill="url(#cg)"/><rect x="1117.3" y="120.6" width="36.9" height="279.4" rx="4" fill="url(#cg)"/><rect x="1160.1" y="193.2" width="36.9" height="206.8" rx="4" fill="url(#cg)"/><rect x="1203.0" y="237.9" width="36.9" height="162.1" rx="4" fill="url(#cg)"/><rect x="1245.9" y="20.0" width="36.9" height="380.0" rx="4" fill="url(#cg)"/><rect x="1288.7" y="59.1" width="36.9" height="340.9" rx="4" fill="url(#cg)"/><rect x="1331.6" y="170.9" width="36.9" height="229.1" rx="4" fill="url(#cg)"/><rect x="1374.4" y="210.0" width="36.9" height="190.0" rx="4" fill="url(#cg)"/><rect x="1417.3" y="20.0" width="36.9" height="380.0" rx="4" fill="url(#cg)"/><rect x="1460.1" y="321.8" width="36.9" height="78.2" rx="4" fill="url(#cg)"/><text x="21.4" y="440" text-anchor="start" font-size="24" fill="#65676B" font-family="Figtree">Wed 6 pm</text><text x="664.3" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Thu 9 am</text><text x="1050.0" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Thu 6 pm</text><text x="1307.1" y="440" text-anchor="middle" font-size="24" fill="#65676B" font-family="Figtree">Fri midnight</text><text x="1478.6" y="440" text-anchor="end" font-size="24" fill="#65676B" font-family="Figtree">Fri 4 am</text>
+      <text x="0" y="16" font-size="22" fill="#8A8D91" font-family="Figtree">68 commits</text></svg></div>
+  <div class="ccap" style="margin-top:6px">Commits per hour on main: 624 in 35 hours, 87% co-written with an AI agent. Five people, one channel.</div>
+  <div class="foot"><span>git log on main, PST, counted 2026-11-13 04:30 (541 of 624 commits credit Claude or Codex).</span><span class="pg"></span></div>
 </section>
 
-<!-- 11. A ritual, not a loop + the tagline (its only appearance) -->
+<!-- 11. The tagline, and nothing else -->
 <section class="slide close">
-  <div class="rit">
-    <div class="rr"><span>Endless games, day 30</span><div class="rt"><div class="rf" style="width:20%">3%</div></div></div>
-    <div class="rr"><span>Sports, racing, tabletop</span><div class="rt"><div class="rf" style="width:73%">8–11%</div></div></div>
-    <div class="rs">A ritual you share keeps people coming back; a loop doesn't. Appodeal, 2025 (scale 0–15%)</div>
-  </div>
   <h2>When the world is your muse, how will you create the content of tomorrow?</h2>
   <div class="foot"><span>Muse Curios, a new feature in Facebook · made with Muse Spark, Ember, Wonder and Image</span><span>Thank you</span></div>
 </section>

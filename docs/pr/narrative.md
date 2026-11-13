@@ -12,7 +12,7 @@
 
 - **Act I · Why.** 1 Curio (the definition). 2 The philosophy: together and against both lead to closer (interdependence predicts ties, .45 bridging / .30 bonding [72]; STEP UP, +920 steps a day for groups of three on a weekly leaderboard [127]; play went with closeness after a move [66]). 3 The tension: teens on Facebook 71% → 32% [54], 19–29 the loneliest at 27% [60], while 98% play games. 4 The shift: short-form you play (the mock clip, LinkedIn 86% [79], the NYT friends tab [84]); the ones that last are shared (Wordle 5.3B → 4.2B [83]).
 - **Act II · How** (AI gets the most room). 5 Anyone can make one (every Instant Game was made by a developer [34][35]). 6 The harness as one pipeline. 7 The engine and fair play: competition only brings people together if it's fair.
-- **Act III · What it does for people.** 8 Compete → collaborate (board → "How did you get 44?" → Add friend → best of 5 → make together / remix). Guardrail line: boards are scoped to Groups you share, seeds are fair, everything's opt-in (competition can divide: Robbers Cave [130]). 9 Play becomes a signal (simulated). 10 Built the way it works: a collaborative product, built collaboratively. 11 A ritual, not a loop (3% vs 8–11%, Appodeal 2025), then the tagline, its only appearance.
+- **Act III · What it does for people.** 8 Compete → collaborate (board → "How did you get 44?" → Add friend → best of 5 → make together / remix). Guardrail line: boards are scoped to Groups you share, seeds are fair, everything's opt-in (competition can divide: Robbers Cave [130]). 9 Play becomes a signal (simulated). 10 Built the way it works: a collaborative product, built collaboratively (commits per hour, real). 11 The tagline, its only appearance, on its own; the ritual point (3% vs 8–11% day-30, Appodeal 2025) is spoken over it and kept for Q&A.
 
 ## 1. The next form of short-form content
 
@@ -58,7 +58,7 @@ The friction is gone: everyone can make and share a game, not just developers.
 
 Our agents (several per person, Claude and Codex) stayed in sync through one Slack channel, a shared canvas of who's working on what, and a `CLAUDE.md` every agent reads first, all under one design philosophy. We still relied on our own judgment and our own memory of how things work.
 
-- **489** commits on `main` in two days (2026-11-11 to 11-13), **430** of them credit Claude or Codex (88%); **30** branches, each with an owner on the canvas. Counted from git at 02:50 PST on 2026-11-13; recount before the final export.
+- **624** commits on `main` in 35 hours (Wed 6 pm to Fri 4 am PST), **541** of them credit Claude or Codex (87%); slide 10 charts commits per hour. Counted from git at 04:30 PST on 2026-11-13; recount before the final export.
 
 ## 5. The engine (emphasize)
 
