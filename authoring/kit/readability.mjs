@@ -81,6 +81,11 @@ export function readabilityFindings(game, sample, { measures = null, inflate = n
   const ids = (sample.assets ?? []).map((a) => a.name ?? a.id);
   const bitmaps = assetBitmaps(game, { inflate });
   const byNode = new Map();
+  const inkMax = new Map(); // node → widest and tallest ink box seen in any frame
+  const seen = new Map(); // node → a sample of its backgrounds in every frame, failing or not
+  const states = new Map(); // node → {piece fill as #RRGGBB, or 'clear' when see-through: backgrounds in those frames}
+  const pieces = new Map();
+  const pieceFor = (ptr) => { if (!pieces.has(ptr)) pieces.set(ptr, pieceOf(game, ptr)?.ptr ?? null); return pieces.get(ptr); };
   for (const s of scene) {
     if (!picked.has(s.f.key)) continue;
     const texts = s.items.filter((it) => it.op.op === 'text' && it.op.text && String(it.op.text).trim());
@@ -92,7 +97,28 @@ export function readabilityFindings(game, sample, { measures = null, inflate = n
       if (!fill) continue;
       const sw = op.stroke_width ?? 0;
       const st = sw >= 2 ? opRGBA(op.stroke) : null;
-      const box = it.box;
+      let box = it.box;
+      // Text half under an opaque shape drawn after it (an end card over the play screen, a newer
+      // badge on an older one) is hidden, not hard to read: the composite left it out with its cover on.
+      const area = (b) => Math.max(0, b.x1 - b.x0) * Math.max(0, b.y1 - b.y0);
+      const cover = (b) => area({ x0: Math.max(b.x0, box.x0), y0: Math.max(b.y0, box.y0), x1: Math.min(b.x1, box.x1), y1: Math.min(b.y1, box.y1) });
+      if (s.items.some((o) => o.i > it.i && ((o.op.op === 'rect' && (opRGBA(o.op.fill)?.[3] ?? 0) * (o.op.opacity ?? 1) > 0.85) || (o.op.op === 'image' && (o.op.opacity ?? 1) > 0.95 && o.role !== 'actor')) && cover(o.box) >= 0.5 * area(box))) continue;
+      // Text under a scrim drawn after it (a dimmed play screen behind an end card or a pause) is
+      // put back on purpose: it isn't there to be read.
+      const W = s.f.frame?.width ?? 360, H = s.f.frame?.height ?? 640;
+      if (s.items.some((o) => o.i > it.i && o.op.op === 'rect' && (opRGBA(o.op.fill)?.[3] ?? 0) * (o.op.opacity ?? 1) >= 0.3 && area(o.box) >= 0.25 * W * H && cover(o.box) >= 0.5 * area(box))) continue;
+      // Something small drawn over the words (particles, a sprite passing): a moment, and the
+      // layout checks' business (L_TEXT_ON_SPRITE), not the text's ground.
+      if (s.items.some((o) => o.i > it.i && o.op.op !== 'text' && o.box && cover(o.box) > 0 && area(o.box) < area(box))) continue;
+      // An opaque cover across the whole width over the top or bottom of the box (the edge of a
+      // card): measure the lines still showing.
+      for (const o of s.items) {
+        if (o.i <= it.i || !o.box || o.op.op !== 'rect' || (opRGBA(o.op.fill)?.[3] ?? 0) * (o.op.opacity ?? 1) <= 0.85) continue;
+        if (o.box.x0 > box.x0 || o.box.x1 < box.x1 || o.box.y1 <= box.y0 || o.box.y0 >= box.y1) continue;
+        if (o.box.y0 <= box.y0) box = { ...box, y0: o.box.y1 };
+        else if (o.box.y1 >= box.y1) box = { ...box, y1: o.box.y0 };
+      }
+      if (box.y1 - box.y0 < 0.3 * (it.box.y1 - it.box.y0)) continue;
       const px = pixelsIn(r, box, box.x1 - box.x0 > 160 ? 2 : 1);
       if (!px.length) continue;
       // A fade in or out (the op is fainter than its node's own opacity) is a moment, not the look.
@@ -104,23 +130,46 @@ export function readabilityFindings(game, sample, { measures = null, inflate = n
       const { p10, spread } = legibility(fill.slice(0, 3), px, { alpha, outline });
       const need = needFor(op.size, op.weight);
       const busy = !outline && op.size < 22 && spread > BUSY_SPREAD && p10 < 7;
+      if (it.node && pieceFor(it.node)) {
+        const pp = pieceFor(it.node);
+        let po = null;
+        for (const o of s.items) { if (o.i >= it.i) break; if (o.node === pp && o.i >= it.i - 3) po = o; }
+        const pf = po ? opRGBA(po.op.fill) : [0, 0, 0, 0]; // no op: the engine leaves out a see-through shape
+        {
+          const key = !po || pf[3] * (po.op.opacity ?? 1) < 0.5 ? 'clear' : rgbHex(pf.slice(0, 3));
+          const m = states.get(it.node) ?? {};
+          const b = (m[key] ??= []);
+          if (b.length < 2400) for (let i = 0; i < px.length; i += Math.max(1, Math.floor(px.length / 60))) b.push(px[i]);
+          states.set(it.node, m);
+        }
+      }
+      if (it.node) {
+        const all = seen.get(it.node) ?? [];
+        if (all.length < 2400) for (let i = 0; i < px.length; i += Math.max(1, Math.floor(px.length / 60))) all.push(px[i]);
+        seen.set(it.node, all);
+      }
+      if (it.node) { const m = inkMax.get(it.node) ?? [0, 0]; inkMax.set(it.node, [Math.max(m[0], it.box.x1 - it.box.x0), Math.max(m[1], it.box.y1 - it.box.y0)]); }
       if (p10 >= need && !busy) continue;
       const k = it.node ?? `op:${s.f.key}:${it.i}`;
       const prev = byNode.get(k);
       const worse = !prev || p10 < prev.p10;
       const keep = prev?.pixels ?? [];
-      // Keep a sample of failing backgrounds for the fixer (from up to 6 frames).
-      if (!prev || prev.samples < 6) for (let i = 0; i < px.length; i += Math.max(1, Math.floor(px.length / 300))) keep.push(px[i]);
+      // Keep a sample of failing backgrounds for the fixer: from the first 6 frames, and always
+      // from a new worst frame (a fix that passes on the samples must pass where it was worst).
+      if (!prev || prev.samples < 6 || worse) for (let i = 0; i < px.length; i += Math.max(1, Math.floor(px.length / 300))) keep.push(px[i]);
       byNode.set(k, {
         code: READABILITY_CODE, severity: 'block', node: it.node, frame: worse ? s.f.key : prev.frame, frames: (prev?.frames ?? 0) + 1,
         p10: worse ? p10 : prev.p10, need, size: op.size, weight: op.weight, busy: (prev?.busy ?? false) || busy, spread: Math.max(spread, prev?.spread ?? 0),
         color: normHex(typeof op.color === 'string' ? op.color.slice(0, 7) : null), text: String(op.text).slice(0, 28), pixels: keep, samples: (prev?.samples ?? 0) + 1,
         box: worse ? box : prev.box,
+        // The worst frame's backgrounds on their own: a fix must pass there, not only on the mix.
+        // (and a frame that first made it busy, which isn't always the one with the lowest contrast).
+        worst: worse || (busy && !prev?.busy) ? [...(worse ? [] : prev?.worst ?? []), ...px.filter((_, i) => i % Math.max(1, Math.floor(px.length / 300)) === 0)] : prev.worst,
       });
     }
   }
   return [...byNode.values()].map((f) => ({
-    ...f,
+    ...f, ink: f.node ? inkMax.get(f.node) : undefined, seen: f.node ? seen.get(f.node) : undefined, states: f.node ? states.get(f.node) : undefined,
     message: `"${f.text}" ${f.busy && f.p10 >= f.need ? `on a busy background (spread ${f.spread.toFixed(2)})` : `reads at ${f.p10.toFixed(2)}:1 in its worst 10 % (needs ${f.need}:1)`}`,
   }));
 }
@@ -139,6 +188,20 @@ function parentOf(game, ptr) {
   return { parent: getAt(game, parts.join('/')), key: last, parentPtr: parts.join('/') };
 }
 const isExpr = (v) => typeof v === 'string' && v.startsWith('=');
+
+/** The piece a text sits on: in a small group (≤ 4 children), the nearest shape before it, when that shape's fill is an expression (it changes with state). */
+function pieceOf(game, ptr, depth = 0) {
+  const { parent, key, parentPtr } = parentOf(game, ptr);
+  const i = Number(key);
+  if (!Array.isArray(parent) || !Number.isInteger(i) || parent.length > 4) return null;
+  for (let j = i - 1; j >= 0; j--) {
+    const s = parent[j];
+    if (s?.node === 'rect' || s?.node === 'circle') return isExpr(s.fill) ? { node: s, ptr: `${parentPtr}/${j}` } : null;
+  }
+  // A text alone in a group (a kit cell, a padded label): its piece is the group's sibling.
+  if (parent.length === 1 && depth < 2 && parentPtr.endsWith('/children')) return pieceOf(game, parentPtr.slice(0, -'/children'.length), depth + 1);
+  return null;
+}
 
 /** Palette tokens usable as text colours: opaque hex, best first for a given current colour. */
 function candidates(tokens, current, big) {
@@ -181,6 +244,9 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
   const plateStyle = (fillRgb) => {
     if (plate) return plate;
     const grounds = ['surface', 'bg', 'ink'].filter((n) => tok(n));
+    // A game that already has plates (an earlier round) keeps their colour.
+    const had = grounds.find((n) => tokens.plate_solid && tok(n) === normHex(tokens.plate_solid));
+    if (had) return (plate = { ground: had, radius: plateRadius(spec) });
     const best = grounds.reduce((b, n) => (contrast(tok(n), rgbHex(fillRgb)) > contrast(tok(b), rgbHex(fillRgb)) ? n : b), grounds[0]);
     plate = { ground: best, radius: plateRadius(spec) };
     tokens.plate = `${tok(best)}D9`;
@@ -192,12 +258,81 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
     if (!node || node.node !== 'text') continue;
     const big = f.need === 3;
     const alpha = typeof node.opacity === 'number' ? node.opacity : 1;
-    const passes = (hex, outline = null, px = f.pixels) => {
-      if (!hex) return false;
+    // On the text's own backgrounds (no plate) a busy ground stays busy whatever the colour: only
+    // a colour that reads at 7:1 everywhere, or an outline, gets past it.
+    const passOn = (hex, outline, px, own = false) => {
       const r = legibility(hexRgb(hex), px, { alpha, outline: outline ? hexRgb(outline) : null });
-      return r.p10 >= f.need + 0.15 && !(f.busy && !outline && r.spread > BUSY_SPREAD && r.p10 < 7);
+      return r.p10 >= f.need + 0.15 && !(f.busy && !outline && (own || r.spread > BUSY_SPREAD) && r.p10 < 7);
+    };
+    // Muted text (opacity under 1) that reads at full strength: drop the mute first.
+    if (typeof node.opacity === 'number' && node.opacity < 1 && !isExpr(node.color)) {
+      const hex = resolve(tokens, node.color ?? '$ink');
+      const full = (px) => !px?.length || legibility(hexRgb(hex), px).p10 >= f.need + 0.15;
+      if (hex && !f.busy && full(f.pixels) && full(f.worst) && full(f.seen)) {
+        fixes.push({ node: f.node, kind: 'opacity', detail: `${node.opacity} → 1` });
+        node.opacity = 1;
+        continue;
+      }
+    }
+    const passes = (hex, outline = null, px = null) => {
+      if (!hex) return false;
+      if (px) return passOn(hex, outline, px);
+      // A new colour must also read everywhere else the text shows (a label repeated over lanes of
+      // different colours), or the next round just flips it back.
+      return passOn(hex, outline, f.pixels, true) && (!f.worst?.length || passOn(hex, outline, f.worst, true)) && (!f.seen?.length || passOn(hex, outline, f.seen, true));
     };
     const cands = candidates(tokens, node.color, big);
+    // 0. Text on its own piece (a key or button drawn just before it) whose fill changes with state:
+    // one ink can't read on every state, so the ink follows the fill, a palette ink per fill colour.
+    const pieceAt = pieceOf(g, f.node);
+    const piece = pieceAt?.node;
+    // A colour expression already keyed to state: its last branch is the ink on the bare piece.
+    const lastInk = isExpr(node.color) ? /\belse\s+(\$[A-Za-z_][A-Za-z0-9_]*)\s*\)*\s*$/.exec(node.color)?.[1] : null;
+    if (piece && (!isExpr(node.color) || lastInk)) {
+      const cur = lastInk ?? node.color ?? '$ink';
+      const curHex = typeof cur === 'string' && cur.startsWith('$') ? tok(cur.slice(1)) : normHex(cur);
+      const refs0 = [...new Set(piece.fill.match(/\$[A-Za-z_][A-Za-z0-9_]*|'#[0-9A-Fa-f]{6,8}'/g) ?? [])];
+      const map = {};
+      for (const ref of refs0) {
+        const lit = ref.startsWith("'");
+        const raw = lit ? ref.slice(1, -1) : tokens[ref.slice(1)];
+        if (typeof raw !== 'string') { map.__fail = true; break; }
+        if (raw.length === 9 && parseInt(raw.slice(7), 16) < 0x80) {
+          // See-through: the text reads on what's under the piece, where it failed: the first ink that passes there.
+          const under = [cur.startsWith?.('$') ? cur.slice(1) : null, 'on_bg', 'ink', 'on_surface', ...cands].filter((n) => n && tok(n));
+          const bare = f.states?.clear?.length ? [f.states.clear] : [f.pixels, f.worst].filter((x) => x?.length);
+          const ink = under.find((n) => bare.every((px) => passOn(tok(n), null, px)));
+          if (!ink) { map.__fail = true; break; }
+          map[ref] = ink === cur.slice?.(1) ? null : ink;
+          continue;
+        }
+        const fillHex = normHex(raw.slice(0, 7));
+        const role = lit ? null : ref.slice(1);
+        const order = [cur.startsWith?.('$') ? cur.slice(1) : null, role && `on_${role}`, role && `${role}_ink`, 'ink', 'on_surface', 'bg', 'surface', ...cands].filter((n) => n && tok(n));
+        // Judged on the frames where the piece shows this colour (its opacity and what's under it
+        // included), else against the flat colour.
+        const shown = fillHex && f.states?.[fillHex.toUpperCase()];
+        const ok = (hex) => hex && fillHex && (shown?.length ? passOn(hex, null, shown) : contrast(hex, fillHex) >= f.need + 0.15);
+        const pick = ok(curHex) ? (cur.startsWith('$') ? cur.slice(1) : null) : order.find((n) => !(big && isNeon(tok(n))) && ok(tok(n)));
+        if (pick === undefined) { map.__fail = true; break; }
+        map[ref] = pick;
+      }
+      const keepInk = cur.startsWith('$') ? cur : `'${cur}'`;
+      const follow = map.__fail ? null : piece.fill.replace(/\$[A-Za-z_][A-Za-z0-9_]*|'#[0-9A-Fa-f]{6,8}'/g, (m) => (m in map ? (map[m] ? `$${map[m]}` : keepInk) : m));
+      if (follow && follow !== node.color && (lastInk || refs0.some((r) => map[r] && `$${map[r]}` !== cur))) {
+        const before = node.color ?? '$ink';
+        node.color = follow;
+        fixes.push({ node: f.node, kind: 'color', detail: `${isExpr(before) ? 'its state colours' : before} → ink that follows its piece` });
+        continue;
+      }
+    }
+    // A small centred line with no box: give it the box it draws in, so it can take a soft plate
+    // (outlines look cramped on small type).
+    if (!big && !(typeof node.w === 'number' && typeof node.h === 'number') && node.anchor === 'center' && f.ink && !node.wrap
+      && !node.transition && !node.animate_on && typeof node.size === 'number' && typeof node.text === 'string') {
+      node.w = Math.ceil(f.ink[0]) + 2;
+      node.h = Math.ceil(Math.max(f.ink[1], node.size * 1.25));
+    }
     // 1. A palette colour (for a colour expression: one for every token it can pick).
     const refs = isExpr(node.color) ? [...new Set(node.color.match(/\$[A-Za-z_][A-Za-z0-9_]*/g) ?? [])] : [node.color ?? '$ink'];
     const literalInExpr = isExpr(node.color) && /'#[0-9A-Fa-f]{6}/.test(node.color);
@@ -206,8 +341,10 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
       for (const ref of refs) {
         const roleKey = `${ref}|${stepOf(f.size)}`;
         const prior = roleChoice.get(roleKey);
-        const own = typeof ref === 'string' && ref.startsWith('$') && passes(tok(ref.slice(1))) ? ref.slice(1) : null;
-        const pick = own ?? (prior && passes(tok(prior)) ? prior : candidates(tokens, ref, big).find((n) => passes(tok(n))));
+        // A plain colour failed where it was measured: only an expression's other branches can keep theirs.
+        const own = isExpr(node.color) && typeof ref === 'string' && ref.startsWith('$') && passes(tok(ref.slice(1))) ? ref.slice(1) : null;
+        const curHex = !isExpr(node.color) ? resolve(tokens, node.color ?? '$ink') : null;
+        const pick = own ?? (prior && tok(prior) !== curHex && passes(tok(prior)) ? prior : candidates(tokens, ref, big).find((n) => tok(n) !== curHex && passes(tok(n))));
         if (!pick) { map.__fail = true; break; }
         map[ref] = pick;
       }
@@ -248,7 +385,7 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
       const ps = plateStyle(hexRgb(fills[0]));
       const groundHex = tok(ps.ground);
       const gc = hexRgb(groundHex);
-      const over = (k) => f.pixels.map(([r, gg, b]) => [gc[0] * k + r * (1 - k), gc[1] * k + gg * (1 - k), gc[2] * k + b * (1 - k)]);
+      const over = (k) => [...f.pixels, ...(f.worst ?? []), ...(f.seen ?? [])].map(([r, gg, b]) => [gc[0] * k + r * (1 - k), gc[1] * k + gg * (1 - k), gc[2] * k + b * (1 - k)]);
       const soft = over(0.85), solid = over(1);
       let kind = null;
       if (fills.every((h) => passes(h, null, soft))) kind = 'plate';
@@ -258,6 +395,15 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
         if (n) { node.color = `$${n}`; kind = passes(tok(n), null, soft) ? 'plate' : 'solid plate'; }
       }
       if (!kind) continue;
+      // Already on a plate (an earlier round): make that plate solid rather than stack another.
+      const { parent: sibs } = parentOf(g, f.node);
+      const own = Array.isArray(sibs) && sibs.length === 2 && sibs[0]?.node === 'rect' && /^\$plate/.test(String(sibs[0].fill)) ? sibs[0] : null;
+      if (own) {
+        if (own.fill === '$plate_solid') continue;
+        own.fill = '$plate_solid';
+        fixes.push({ node: f.node, kind: 'solid plate', detail: `$${ps.ground}` });
+        continue;
+      }
       wrapWithPlate(g, f.node, node, kind === 'plate' ? '$plate' : '$plate_solid', ps.radius);
       fixes.push({ node: f.node, kind, detail: `$${ps.ground}` });
     }
@@ -298,6 +444,12 @@ function wrapWithPlate(g, ptr, node, fill, radius) {
   const px = align === 'left' ? -padX : align === 'right' ? node.w + padX - pw : (node.w - pw) / 2;
   const plateNode = { node: 'rect', x: Math.round(px), y: -padY, w: Math.round(pw), h: node.h + 2 * padY, radius, fill };
   const { x, y, anchor, visible, opacity, ...rest } = node;
+  if (anchor === 'center') {
+    // Groups take no box: the text keeps its anchor at the group's origin, the plate goes round it.
+    plateNode.x = Math.round(px - node.w / 2); plateNode.y = Math.round(-padY - node.h / 2);
+    parent[key] = { node: 'group', x: x ?? 0, y: y ?? 0, ...(visible !== undefined ? { visible } : {}), ...(opacity !== undefined ? { opacity } : {}), children: [plateNode, { ...rest, anchor, x: 0, y: 0 }] };
+    return;
+  }
   const group = { node: 'group', x: x ?? 0, y: y ?? 0, ...(anchor ? { anchor, w: node.w, h: node.h } : {}), ...(visible !== undefined ? { visible } : {}), ...(opacity !== undefined ? { opacity } : {}), children: [plateNode, { ...rest, x: 0, y: 0 }] };
   parent[key] = group;
 }

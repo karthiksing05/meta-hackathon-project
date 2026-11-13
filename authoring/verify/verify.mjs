@@ -213,7 +213,7 @@ export async function verifyAndFix(input, opts = {}) {
       const { inflateSync } = await import('node:zlib');
       const inflate = (b) => new Uint8Array(inflateSync(b));
       for (let round = 0; round < 2 && !over(); round++) {
-        const f = readabilityFindings(game, await sampleDense(game, { engine, maxSeconds: 60, ref: original }), { inflate });
+        const f = readabilityFindings(game, await sampleDense(game, { engine, maxSeconds: opts.maxSeconds ?? 120, ref: original }), { inflate });
         if (!f.length) break;
         const r = readabilityFix(game, f, { spec: lookSpec });
         if (!r.fixes?.length) break;
