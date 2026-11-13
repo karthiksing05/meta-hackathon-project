@@ -87,7 +87,7 @@
     "heading" : "Who is it?",
     "people" : [
       {
-        "avatar" : "https://randomuser.me/api/portraits/women/44.jpg",
+        "avatar" : "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Maya",
         "facts" : [
           "Runs the Lands End trail every Saturday",
           "Moved from Austin three weeks ago",
@@ -97,7 +97,7 @@
         "name" : "Maya"
       },
       {
-        "avatar" : "https://randomuser.me/api/portraits/men/32.jpg",
+        "avatar" : "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Maya",
         "facts" : [
           "Bakes too much sourdough",
           "Lives in the Mission",
@@ -107,7 +107,7 @@
         "name" : "Diego"
       },
       {
-        "avatar" : "https://randomuser.me/api/portraits/women/65.jpg",
+        "avatar" : "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Diego",
         "facts" : [
           "Works night shifts as a nurse",
           "Moved from Toronto",
@@ -117,7 +117,7 @@
         "name" : "Priya"
       },
       {
-        "avatar" : "https://randomuser.me/api/portraits/women/21.jpg",
+        "avatar" : "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Priya",
         "facts" : [
           "Swims in the cold water at Aquatic Park",
           "Arrived from Berlin last week",
@@ -127,7 +127,7 @@
         "name" : "Lena"
       },
       {
-        "avatar" : "https://randomuser.me/api/portraits/men/57.jpg",
+        "avatar" : "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Lena",
         "facts" : [
           "Cooks in a restaurant kitchen",
           "Wants to learn to surf at Ocean Beach",
@@ -137,7 +137,7 @@
         "name" : "Jordan"
       },
       {
-        "avatar" : "https://randomuser.me/api/portraits/men/71.jpg",
+        "avatar" : "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Jordan",
         "facts" : [
           "Bikes up every hill",
           "Plays pickup soccer on Sundays",
@@ -147,7 +147,7 @@
         "name" : "Omar"
       },
       {
-        "avatar" : "https://randomuser.me/api/portraits/women/9.jpg",
+        "avatar" : "https://api.dicebear.com/9.x/notionists/png?size=256&backgroundColor=c0aede,b6e3f4,d1d4f9&seed=Omar",
         "facts" : [
           "Runs a Thursday trivia team",
           "Is still getting used to the fog",

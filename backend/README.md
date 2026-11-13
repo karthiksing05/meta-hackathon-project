@@ -294,7 +294,7 @@ Authors and chat members are Personas or server accounts; the reply's `author` /
 | `PUT /v1/fb/threads/{id}/read` | bearer (member) | 204 |
 
 Collections: `fb_personas`, `fb_posts`, `fb_stories`, `fb_threads`, `fb_messages`; run `deploy/dbinit.sh` after deploying for their
-indexes (the routes work without them). To reseed, drop `fb_personas`, `fb_posts` and `fb_stories` and restart the API.
+indexes (the routes work without them). To reseed, drop `fb_personas`, `fb_posts` and `fb_stories` and restart the API. The demo world stays recent on its own: every 10 minutes the API checks it, and when it has drifted more than an hour from "N minutes ago" it moves all its posts, comments and stories forward together (reactions, comments and people's own posts are kept). Each person's copied demo chats keep the times they were copied with.
 
 ## People, friends and Groups
 

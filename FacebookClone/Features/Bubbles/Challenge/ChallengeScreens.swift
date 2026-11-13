@@ -12,6 +12,15 @@ enum ChallengeScreens {
         switch route.screen {
         case "h2h":
             ChallengeHeadToHeadView(challengeID: route.arg)
+        case "round":
+            RoundDetailView(roundID: route.arg)
+        case "rounds":
+            // `group:<id>` or `chat:<id>` (`BubbleFeatureRoute(.challenge, "rounds", target.wire)`).
+            if let target = RoundTarget(wire: route.arg) {
+                RoundsListView(target: target, placeName: RoundsCopy.title)
+            } else {
+                BubbleFeaturePlaceholder(route: route)
+            }
         default:
             BubbleFeaturePlaceholder(route: route)
         }
@@ -76,6 +85,18 @@ enum ChallengeScreens {
         case "picker", "friend":
             router.bubbleSheet = route
             return true
+        case "play-round":
+            // `feature:challenge/play-round/<roundID>`: open the player on a server round, as its Play button does.
+            Task { @MainActor in
+                guard await GamesAccount.shared.waitForUser() != nil else { return }
+                do {
+                    let round = try await RoundsCenter.shared.refresh(id: route.arg)
+                    await RoundsCenter.shared.play(round, placeName: nil, router: router)
+                } catch {
+                    appStore.showToast("Round: \(error.localizedDescription)", symbol: "exclamationmark.circle")
+                }
+            }
+            return true
         default:
             return false
         }
@@ -88,6 +109,7 @@ enum ChallengeScreens {
     static func install(appStore: AppStore, bubbleStore: BubbleStore) {
         MainActor.assumeIsolated {
             ChallengeCenter.shared.install(appStore: appStore, bubbleStore: bubbleStore)
+            RoundsCenter.shared.install(appStore: appStore, bubbleStore: bubbleStore)
         }
     }
 
@@ -95,6 +117,12 @@ enum ChallengeScreens {
     @MainActor
     static func didFinish(_ score: BubbleScore, in bubble: Bubble, request: BubblePlayRequest, appStore: AppStore, bubbleStore: BubbleStore) {
         ChallengeCenter.shared.didFinish(score, in: bubble, request: request)
+        RoundsCenter.shared.didFinish(score, in: bubble, request: request)
+        // A run may beat a friend's challenge: the server says so in the list once the score lands.
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            ChallengeInbox.shared.reload()
+        }
     }
 
     /// After Muse Studio publishes new Bubbles. Challenge plays existing Bubbles as they are.

@@ -188,6 +188,8 @@ struct BubblePlayContext: Codable, Hashable, Sendable {
         case gameNight
         case contribution
         case lesson
+        /// A same-seed round on the server (`/v1/rounds`); `id` is the round id.
+        case round
     }
 
     var kind: Kind

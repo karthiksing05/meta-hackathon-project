@@ -68,9 +68,10 @@ struct GroupGamesHubView: View {
             GroupWeeklyBoardCard(group: group)
             FeedSeparator()
             GroupGameBoardsSection(group: group)
-            if hasGames && group.isMember {
+            if group.isMember {
+                // "Challenge the Group" is a server round now: same seed for everyone, replayed runs.
                 FeedSeparator()
-                challengeCard
+                GroupRoundsCard(group: group)
             }
             FeedSeparator()
         }

@@ -46,9 +46,10 @@ func (s *Server) fbRoutes(r chi.Router) {
 // ---- seeding ----
 
 type fbSeedState struct {
-	mu    sync.Mutex
-	done  bool
-	world *fbseed.World
+	mu      sync.Mutex
+	done    bool
+	checked time.Time // last freshenFB check
+	world   *fbseed.World
 }
 
 var fbSeeds sync.Map // *Server -> *fbSeedState
@@ -82,9 +83,50 @@ func (s *Server) fbReady(next http.Handler) http.Handler {
 			}
 			st.done = true
 		}
+		if now := time.Now(); now.Sub(st.checked) >= fbFreshenEvery {
+			st.checked = now
+			if err := s.freshenFB(r.Context(), f, st.world, now.UTC()); err != nil {
+				s.Log.Warn("fb: keeping the demo world recent", "err", err) // not fatal: older times are still correct
+			}
+		}
 		st.mu.Unlock()
 		next.ServeHTTP(w, r)
 	})
+}
+
+// The demo world's times are "N minutes before seeding". When the server has run (or the database has sat) for
+// longer than fbMaxDrift, the whole world moves forward together so the feed reads as recent during a demo.
+// Reactions, comments and people's own posts are kept.
+const (
+	fbFreshenEvery = 10 * time.Minute
+	fbMaxDrift     = time.Hour
+)
+
+func (s *Server) freshenFB(ctx context.Context, f store.FBStore, world *fbseed.World, now time.Time) error {
+	if world == nil {
+		return nil
+	}
+	id, minutesAgo, ok := world.Anchor()
+	if !ok {
+		return nil
+	}
+	p, err := f.FBPostByID(ctx, id)
+	if errors.Is(err, store.ErrNotFound) {
+		return nil
+	} else if err != nil {
+		return err
+	}
+	want := now.Add(-time.Duration(minutesAgo) * time.Minute)
+	drift := want.Sub(p.CreatedAt).Truncate(time.Millisecond)
+	if drift < fbMaxDrift {
+		return nil
+	}
+	posts, stories := world.IDs()
+	if err := f.FBShiftTimes(ctx, posts, stories, drift); err != nil {
+		return err
+	}
+	s.Log.Info("fb: moved the demo world forward", "by", drift.String())
+	return nil
 }
 
 func (s *Server) seedFB(ctx context.Context, f store.FBStore, st *fbSeedState) error {

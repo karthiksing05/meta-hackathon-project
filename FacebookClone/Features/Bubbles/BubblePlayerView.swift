@@ -425,6 +425,13 @@ struct BubblePlayerView: View {
         guard request.replay == nil, resumeOffer == nil, resumeLog == nil, let bubble else { return }
         let key = BubbleRuntimeHost.sessionKey(for: effectiveManifest(bubble))
         #if DEBUG
+        // `FB_AUTOPLAY=1`: start the run without the intro tap (simulator tests with no touch).
+        if DebugLaunch.value("FB_AUTOPLAY") == "1" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                hasStarted = true
+                restartToken += 1
+            }
+        }
         if let seconds = DebugLaunch.value("FB_RESUME_DEMO").flatMap(Double.init) {
             let manifest = effectiveManifest(bubble)
             let ticks = Int(seconds * 60)

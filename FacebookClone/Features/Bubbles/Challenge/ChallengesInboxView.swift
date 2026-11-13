@@ -20,7 +20,17 @@ struct ChallengesInboxView: View {
                     }
                 }
             }
-            if inbox.items.isEmpty && matches.isEmpty {
+            let rounds = RoundsCenter.shared.list(nil)
+            if !rounds.isEmpty {
+                Section(RoundsCopy.rounds) {
+                    ForEach(rounds) { round in
+                        RoundCardView(round: round, placeName: nil, lineLimit: 1)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 6, trailing: 8))
+                            .listRowBackground(Color.clear)
+                    }
+                }
+            }
+            if inbox.items.isEmpty && matches.isEmpty && rounds.isEmpty {
                 Section { emptyState }
             } else {
                 if !inbox.received.isEmpty {
@@ -48,8 +58,8 @@ struct ChallengesInboxView: View {
                 .accessibilityLabel("Find friends")
             }
         }
-        .refreshable { inbox.reload(); ServerBracketService.shared.reload() }
-        .onAppear { inbox.reload(); ServerBracketService.shared.reload() }
+        .refreshable { inbox.reload(); ServerBracketService.shared.reload(); RoundsCenter.shared.load(nil, quiet: true) }
+        .onAppear { inbox.reload(); ServerBracketService.shared.reload(); RoundsCenter.shared.load(nil, quiet: true) }
     }
 
     @ViewBuilder
