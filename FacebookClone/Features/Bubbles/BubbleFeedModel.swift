@@ -70,6 +70,15 @@ final class BubbleFeedModel {
     @ObservationIgnored private var isPausedForScroll = false
     /// The last page reported to the recommender as shown, so a page passed mid-fling isn't.
     @ObservationIgnored private var lastShownID: String?
+    /// Bumped whenever you start moving the pager yourself, so a delayed re-anchor (after a game
+    /// closes) never pulls you back to the page you just left. That was the swipe that seemed to
+    /// be eaten after a game: the pager moved, then snapped back.
+    @ObservationIgnored private(set) var scrollGeneration = 0
+    /// You swiped away from a game you were playing (or its result): the page it was on starts
+    /// its Burst again if the pager settles back on it.
+    @ObservationIgnored private var restartOnSettle = false
+    /// Pages the pager by one page (+1 next, -1 previous). Set by `FeedPagerScrollObserver`.
+    @ObservationIgnored var pageBy: ((Int) -> Void)?
 
     func configure(store: BubbleStore) {
         guard self.store == nil else { return }
@@ -120,6 +129,7 @@ final class BubbleFeedModel {
     func setVisible(_ visible: Bool) {
         guard visible != isVisible else { return }
         isVisible = visible
+        FeedScrollLog.log("visible=\(visible) current=\(currentID ?? "-") live=\(liveItemID ?? "-")")
         noteVisibility(visible)
         if visible {
             releaseTask?.cancel()
@@ -159,14 +169,22 @@ final class BubbleFeedModel {
     }
 
     /// The pager started moving: hold the live game and its sound where they are.
-    func scrollDidBegin() {
+    func scrollDidBegin(byUser: Bool = false) {
         guard !isScrolling else { return }
         isScrolling = true
         settleTask?.cancel()
+        if byUser {
+            scrollGeneration += 1
+            if isTakenOver && result != nil {
+                // A swipe on the feed above the result card: one swipe moves on.
+                leaveTakeoverForSwipe()
+            }
+        }
         guard isVisible, !isTakenOver, let host, liveItemID != nil, !isPausedForScroll else { return }
         host.command("pause")
         LibrarySoundPlayer.shared.hold(.feed)
         isPausedForScroll = true
+        FeedScrollLog.log("pause live=\(liveItemID ?? "-") for scroll")
     }
 
     /// The pager stopped on page `index` (the one more than half on screen). The scroll position
@@ -175,6 +193,7 @@ final class BubbleFeedModel {
         isScrolling = false
         settleTask?.cancel()
         if let items = store?.feedItems, items.indices.contains(index), currentID != items[index].id {
+            FeedScrollLog.log("resync position \(currentID ?? "-") -> \(items[index].id) (index \(index))")
             var transaction = Transaction()
             transaction.disablesAnimations = true
             withTransaction(transaction) {
@@ -192,13 +211,21 @@ final class BubbleFeedModel {
             lastShownID = id
             FeedEventReporter.shared.pageShown(store.feedItems[index], position: index, sessionID: store.feedSessionID)
         }
-        if liveItemID == id, let host {
+        if liveItemID == id, host != nil, restartOnSettle {
+            FeedScrollLog.log("restart \(id) after leaving its game")
+            restartOnSettle = false
+            isPausedForScroll = false
+            activateCurrent()
+        } else if liveItemID == id, let host {
             if isPausedForScroll {
+                FeedScrollLog.log("resume live=\(id) (settled back on it)")
                 isPausedForScroll = false
                 host.command("resume")
                 LibrarySoundPlayer.shared.resume(.feed)
             }
         } else {
+            FeedScrollLog.log("activate \(id) (was live=\(liveItemID ?? "-"))")
+            restartOnSettle = false
             isPausedForScroll = false
             activateCurrent()
         }
@@ -229,6 +256,62 @@ final class BubbleFeedModel {
         host.restartInPlay()
         noteRecs(.runStarted)
         Haptics.light()
+    }
+
+    /// Whether a clearly vertical swipe on the live game pages the feed while you play. False when
+    /// the game itself uses drags (aiming, launching, sorting, steering, microgame swipes), so
+    /// those keep every vertical drag.
+    var allowsSwipeWhilePlaying: Bool {
+        guard let item = item(id: liveItemID), let bubble = store?.bubble(id: item.bubbleID) else { return false }
+        return Self.allowsSwipePaging(bubble.manifest)
+    }
+
+    /// Inputs that are only taps, choices or typing. Anything else (or an input we don't know) is
+    /// treated as needing drags.
+    private static let tapOnlyInputs: Set<String> = [
+        "input.tap", "input.action", "input.select", "input.type", "input.key", "input.submit",
+        "input.pick", "input.hold", "input.release",
+    ]
+
+    static func allowsSwipePaging(_ manifest: BubbleManifest) -> Bool {
+        let inputs = manifest.concepts.filter { $0.use.hasPrefix("input.") }
+        guard !inputs.isEmpty else { return true }
+        return inputs.allSatisfy { use in
+            if use.use == "input.microgame" {
+                // Microgames page unless they declare swipes.
+                switch use.params?["swipes"] {
+                case nil, .null?, .bool(false)?: return true
+                case .array(let list)?: return list.isEmpty
+                default: return false
+                }
+            }
+            return tapOnlyInputs.contains(use.use)
+        }
+    }
+
+    /// A clearly vertical swipe on the game you're playing: leave it and turn the page in one go.
+    func swipeWhilePlaying(_ direction: Int) {
+        guard isTakenOver, let pageBy else { return }
+        FeedScrollLog.log("swipe while playing dir=\(direction) live=\(liveItemID ?? "-")")
+        scrollGeneration += 1
+        leaveTakeoverForSwipe()
+        pageBy(direction)
+    }
+
+    /// Ends the game (and closes its result) without restarting the page's Burst: the page you
+    /// land on starts instead, or this one again if you come back to it.
+    private func leaveTakeoverForSwipe() {
+        scrollGeneration += 1
+        result = nil
+        guard isTakenOver else { return }
+        host?.command("pause")
+        restartOnSettle = true
+        pendingTakeover = false
+        liveScore = 0
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+            isTakenOver = false
+        }
+        FeedScrollLog.log("left takeover for a swipe live=\(liveItemID ?? "-")")
     }
 
     /// Back to watching: chrome returns and the page plays its Burst again.
@@ -310,6 +393,7 @@ final class BubbleFeedModel {
     private func activate(_ item: BubbleFeedItem) {
         guard let store, let bubble = store.bubble(id: item.bubbleID) else { return }
         let host = ensureHost()
+        FeedScrollLog.log("activate start \(item.id) host=\(host.serial) loaded=\(host.isLoaded)")
         activationToken += 1
         let token = activationToken
         let key = BubbleRuntimeHost.sessionKey(for: bubble.manifest)
@@ -343,6 +427,7 @@ final class BubbleFeedModel {
             let outcome = await host.start(key: key, manifest: manifest, options: options)
             guard let self, token == self.activationToken, self.host === host, !outcome.superseded else { return }
             BubbleRuntimePerf.shared.recordSwitch(title: title, outcome: outcome, runtime: host.runtimeVersion)
+            FeedScrollLog.log("start \(itemID) ok=\(outcome.ok) \(outcome.error ?? "")")
             self.stallTask?.cancel()
             guard outcome.ok else {
                 let kind: EngineFailure.Kind = host.capability == .sessions || host.capability == .bootOnly ? .failed : .unavailable
@@ -357,6 +442,11 @@ final class BubbleFeedModel {
                 LibrarySoundPlayer.shared.hold(.feed)
                 self.isPausedForScroll = true
             }
+            // Show the web view only once the page has painted this session, so it never fades in
+            // on the previous game's frame.
+            await host.waitForPaint()
+            guard token == self.activationToken, self.host === host else { return }
+            FeedScrollLog.log("revealed \(itemID) \(outcome.wasPrepared ? "warm" : "cold") \(Int(outcome.totalMs))ms")
             self.isLiveRevealed = true
             if self.pendingTakeover {
                 self.pendingTakeover = false

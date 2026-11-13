@@ -15,8 +15,11 @@ import UIKit
 /// Placed in the background of the pager's content, so the first `UIScrollView` above it is the
 /// pager.
 struct FeedPagerScrollObserver: UIViewRepresentable {
-    var onBegin: () -> Void
+    /// True when a finger moved it (a drag), false for a programmatic scroll.
+    var onBegin: (Bool) -> Void
     var onSettle: (Int) -> Void
+    /// Hands the feed a way to turn one page (+1 next, -1 previous), once the pager is found.
+    var onAttach: (@escaping (Int) -> Void) -> Void = { _ in }
 
     func makeUIView(context: Context) -> ObserverView {
         let view = ObserverView()
@@ -24,12 +27,14 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
         view.backgroundColor = .clear
         view.onBegin = onBegin
         view.onSettle = onSettle
+        view.onAttach = onAttach
         return view
     }
 
     func updateUIView(_ view: ObserverView, context: Context) {
         view.onBegin = onBegin
         view.onSettle = onSettle
+        view.onAttach = onAttach
     }
 
     static func dismantleUIView(_ view: ObserverView, coordinator: ()) {
@@ -37,8 +42,9 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
     }
 
     final class ObserverView: UIView {
-        var onBegin: () -> Void = {}
+        var onBegin: (Bool) -> Void = { _ in }
         var onSettle: (Int) -> Void = { _ in }
+        var onAttach: (@escaping (Int) -> Void) -> Void = { _ in }
 
         private weak var scrollView: UIScrollView?
         private var observation: NSKeyValueObservation?
@@ -76,6 +82,11 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
             observation?.invalidate()
             scrollView = found
             lastOffset = found.contentOffset.y
+            FeedScrollLog.log("observer attached height=\(Int(found.bounds.height)) offset=\(Int(found.contentOffset.y))")
+            FeedScrollLog.watchMemoryWarnings()
+            onAttach { [weak self] direction in
+                self?.page(by: direction)
+            }
             observation = found.observe(\.contentOffset, options: [.new]) { [weak self] scrollView, _ in
                 let y = scrollView.contentOffset.y
                 MainActor.assumeIsolated {
@@ -89,9 +100,28 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
             lastOffset = y
             if !isMoving {
                 isMoving = true
-                onBegin()
+                FeedScrollLog.log("move began offset=\(Int(y)) tracking=\(scrollView?.isTracking ?? false)")
+                onBegin(scrollView?.isTracking ?? false)
             }
             scheduleSettleCheck()
+        }
+
+        /// Turns one page from the nearest whole page, animated. The move settles like a drag.
+        func page(by direction: Int) {
+            guard let scrollView else { return }
+            let height = scrollView.bounds.height
+            guard height > 1 else { return }
+            let top = scrollView.adjustedContentInset.top
+            let maxIndex = max(0, Int(((scrollView.contentSize.height - height) / height).rounded()))
+            let current = Int(((scrollView.contentOffset.y + top) / height).rounded())
+            let index = min(max(0, current + direction), maxIndex)
+            FeedScrollLog.log("page by \(direction): \(current) -> \(index)")
+            guard index != current else {
+                // Already at the end: nothing moves, so settle here (the page starts again).
+                onSettle(index)
+                return
+            }
+            scrollView.setContentOffset(CGPoint(x: scrollView.contentOffset.x, y: CGFloat(index) * height - top), animated: true)
         }
 
         private func scheduleSettleCheck() {
@@ -122,11 +152,13 @@ struct FeedPagerScrollObserver: UIViewRepresentable {
             let target = CGFloat(index) * height - top
             if abs(scrollView.contentOffset.y - target) > 1 {
                 // Resting between pages: snap onto the nearest one; that scroll settles again.
+                FeedScrollLog.log("snap offset=\(Int(scrollView.contentOffset.y)) -> \(Int(target)) index=\(index)")
                 scrollView.setContentOffset(CGPoint(x: scrollView.contentOffset.x, y: target), animated: true)
                 scheduleSettleCheck()
                 return
             }
             isMoving = false
+            FeedScrollLog.log("settled index=\(index) offset=\(Int(scrollView.contentOffset.y)) height=\(Int(height))")
             onSettle(index)
         }
     }
@@ -174,5 +206,40 @@ struct FeedPagingBehavior: ScrollTargetBehavior {
         }
         #endif
         target.rect.origin.y = min(max(0, page * height), maxY)
+    }
+}
+
+/// DEBUG-only log of the feed's scrolling and web view lifecycle (begin, settle, snap, activate,
+/// reveal, host moves, web process crashes, memory warnings). On with `FB_SCROLL_LOG=1`; written
+/// to stderr so `devicectl device process launch --console` shows it.
+enum FeedScrollLog {
+    static let isEnabled: Bool = {
+        #if DEBUG
+        return ProcessInfo.processInfo.environment["FB_SCROLL_LOG"] == "1"
+        #else
+        return false
+        #endif
+    }()
+
+    private static var memoryObserver: NSObjectProtocol?
+
+    @MainActor
+    static func watchMemoryWarnings() {
+        #if DEBUG
+        guard isEnabled, memoryObserver == nil else { return }
+        memoryObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: .main
+        ) { _ in
+            log("MEMORY WARNING")
+        }
+        #endif
+    }
+
+    static func log(_ text: @autoclosure () -> String) {
+        #if DEBUG
+        guard isEnabled else { return }
+        let line = String(format: "[FeedScroll %.3f] ", CACurrentMediaTime()) + text() + "\n"
+        FileHandle.standardError.write(Data(line.utf8))
+        #endif
     }
 }

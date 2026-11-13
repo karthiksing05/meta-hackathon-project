@@ -167,15 +167,18 @@ struct BubblesTabView: View {
                     // Pauses the live page while the pager moves and activates only the page
                     // it settles on (iOS 17 and 18; see FeedPagerScrollObserver).
                     FeedPagerScrollObserver(
-                        onBegin: { model.scrollDidBegin() },
-                        onSettle: { index in model.scrollDidSettle(at: index) }
+                        onBegin: { byUser in model.scrollDidBegin(byUser: byUser) },
+                        onSettle: { index in model.scrollDidSettle(at: index) },
+                        onAttach: { pageBy in model.pageBy = pageBy }
                     )
                 }
             }
             .scrollIndicators(.hidden)
             .scrollTargetBehavior(FeedPagingBehavior())
             .scrollPosition(id: $model.currentID, anchor: .top)
-            .scrollDisabled(model.isTakenOver)
+            // While you play, the game keeps its touches (a clearly vertical swipe on it still pages,
+            // see `swipeWhilePlaying`). With its result card up, the feed above the card scrolls.
+            .scrollDisabled(model.isTakenOver && model.result == nil)
             .onChange(of: realignToken) { _, _ in
                 // Puts the page's top back at the top, even when the pager kept the page id but
                 // was left between pages.
@@ -338,8 +341,14 @@ struct BubblesTabView: View {
     private func realignPager() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         guard let id = returnPageID ?? model.currentID else { return }
+        // A swipe after this was asked for wins: never pull the pager back to the page you left.
+        let generation = model.scrollGeneration
         let snap = {
-            guard !model.isTakenOver, bubbleStore.feedItems.contains(where: { $0.id == id }) else { return }
+            guard !model.isTakenOver, model.scrollGeneration == generation,
+                  bubbleStore.feedItems.contains(where: { $0.id == id }) else {
+                FeedScrollLog.log("realign skipped (scrolled since, or playing)")
+                return
+            }
             if model.currentID != id {
                 var transaction = Transaction()
                 transaction.disablesAnimations = true

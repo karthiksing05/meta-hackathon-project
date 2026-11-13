@@ -44,6 +44,10 @@ struct BubbleResultSheet: View {
         }
         .presentationDetents([ResultCardStyle.restingDetent, .large])
         .presentationDragIndicator(.hidden)
+        // The game above the resting card takes touches: one swipe up there turns the feed's page
+        // (BubbleFeedModel.scrollDidBegin closes this card), instead of a first swipe that only
+        // dismissed the card.
+        .presentationBackgroundInteraction(.enabled(upThrough: ResultCardStyle.restingDetent))
         .presentationBackground {
             // As a sheet (the feed), the sheet itself is the card: frosted, so the page shows through.
             ZStack {

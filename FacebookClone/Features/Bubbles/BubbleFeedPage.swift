@@ -35,11 +35,19 @@ struct BubbleFeedPage: View {
     /// This page is settled, its game has drawn, and nobody is playing yet.
     private var isSettled: Bool { isLive && model.isLiveRevealed && !model.isTakenOver && failure == nil }
 
+    /// While you play a game that only taps: a clearly vertical swipe on it turns the page.
+    private var swipeWhilePlaying: ((Int) -> Void)? {
+        guard isTakenOver, model.allowsSwipeWhilePlaying else { return nil }
+        let model = model
+        return { direction in model.swipeWhilePlaying(direction) }
+    }
+
     var body: some View {
         ZStack {
             backdrop
             if isLive, let host = model.host {
-                BubbleRuntimeHostView(host: host, isRevealed: model.isLiveRevealed, isInteractive: isTakenOver)
+                BubbleRuntimeHostView(host: host, isRevealed: model.isLiveRevealed, isInteractive: isTakenOver,
+                                      onVerticalSwipe: swipeWhilePlaying)
                     .accessibilityHidden(true)
                 // The poster stays over the live game until its session has drawn, then fades, so
                 // the page never pops from the poster to the game (or shows a failed runtime page).
