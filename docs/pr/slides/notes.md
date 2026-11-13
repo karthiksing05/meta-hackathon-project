@@ -43,7 +43,7 @@ Play is filling that gap: LinkedIn puzzles at work, 11 billion NYT puzzles a yea
 And on Reels, every game ends with "tell me your score" in the comments, where it scrolls away among strangers.
 
 ## 7
-So here's our thesis. People connect best by playing together. Facebook still has the people, but lost the reason to come back. And play is already everywhere, but the score goes nowhere. So: put the game inside Facebook, played with the people you know and the ones you're about to meet, and let anyone make one with Muse.
+So here's our thesis. People connect best by playing together. Facebook still has the people, but lost the reason to come back. And play is already everywhere, but the score goes nowhere. So: put the game inside Facebook, played with the people you know and the ones you're about to meet, and let anyone make one with Muse. And a Curio asks so little of you: "beat my score?" needs no catch-up and no small talk. It's the simplest way to spark a connection. Other services are feature-first; Curios are fun-first, and the connection comes with the play.
 
 ## 8
 *(Section header: "The demo". Click straight on.)*
@@ -97,7 +97,7 @@ AI fell short when Muse guessed from one giant prompt, when Muse Image refused f
 And the harness itself taught us the most. One giant prompt of 137,000 characters missed what people asked for, so now we search the catalog first and send Muse only what the plan picked: must-haves met went from 94 to 98 percent. Muse Image refused franchise names, so we retry once with a plain description, then fall back to drawn art. Muse's own art step undid the verifier's layout fixes, so we keep the verified layout and check again. Wikipedia timed out, so we waited longer and built without it if needed. Parallel steps took a build from 197 to 161 seconds. And people missed unreadable text, so code checks every frame.
 
 ## 25
-Through Curios, we'll end the awkward first conversation, create a new kind of short-form media you play, and make everyone a creator. So tonight: make a Curio, and send it to someone you want to know better.
+Through Curios, we'll end the awkward first conversation, with someone new or an old friend, create a new kind of short-form media you play, and make everyone a creator. Sending one is its own love language: "I played this and thought of you." So tonight: make a Curio, and send it to someone you want to know better.
 
 ## 26
 *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.

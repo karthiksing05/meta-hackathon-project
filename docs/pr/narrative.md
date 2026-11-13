@@ -19,6 +19,17 @@
 - **How we worked.** 10 Five people, their AI agents, one channel: three agent-to-agent case studies; 624 commits in 35 hours, 87% co-written.
 - **Close.** 11 The tagline, alone.
 
+## Positioning: a Curio asks so little of you (Karthik, 2026-11-13, 08:18 PST)
+
+One way we're different: a Curio is about the lowest-stakes way there is to reach someone.
+
+- Texting a friend you haven't talked to in years, or walking up to someone new, can feel heavy. Sending a Curio doesn't: "beat my score?" needs no catch-up, no small talk and no right thing to say. People underestimate how much others appreciate being reached out to [69].
+- It might look lonely from the outside, since everyone plays on their own phone. We see sharing a Curio as its own love language: "I played this and thought of you."
+- That's why it can work where bigger social features haven't. It's the simplest way to spark a connection.
+- **The contrast (Karthik, same thread):** most social tools are feature-first (a new tab, a sticker, a prompt to post) and hope the fun follows. Curios are fun-first: the game is entertaining on its own, and the connection comes with the play.
+
+**Where it goes:** the thesis slide (7) and the call to action (25); the video's old-friends and new-people scenes; the Devpost's "why it'll bring people to Facebook"; Q&A ("Isn't everyone just playing alone?").
+
 ## 1. The next form of short-form content
 
 Interactive mini-experiences keep people in their apps, and the industry is moving that way.
