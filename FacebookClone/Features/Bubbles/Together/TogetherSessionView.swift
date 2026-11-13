@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// A co-making session (`together/session/<id>`): the game being made, contributions arriving
-/// with avatars, your own, and "Stitch with Muse". Once published it shows the finished game
-/// with every maker credited.
+/// A co-making session (`together/session/<id>`), from the server: the game being made, everyone's
+/// entries with avatars, your own, and (for the starter) "Make it with Muse". Once made it shows
+/// the finished game with every maker credited.
 struct TogetherSessionView: View {
     let sessionID: String
 
@@ -16,6 +16,8 @@ struct TogetherSessionView: View {
     @State private var decoys = ""
     @State private var freeText = ""
     @FocusState private var focused: Bool
+    @State private var loaded = false
+    @State private var failure: String?
 
     private var center: TogetherCenter { TogetherCenter.shared }
 
@@ -23,11 +25,15 @@ struct TogetherSessionView: View {
         Group {
             if let session = center.session(id: sessionID) {
                 content(session)
+            } else if !loaded {
+                LiveDataStateView(kind: .loading, title: TogetherCopy.loadingSession)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(FBColor.background)
             } else {
                 ContentUnavailableView(
                     TogetherCopy.sessionGone,
                     systemImage: "person.3.sequence",
-                    description: Text(TogetherCopy.startSubtitle)
+                    description: Text(failure ?? TogetherCopy.sessionGoneDetail)
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(FBColor.background)
@@ -35,6 +41,24 @@ struct TogetherSessionView: View {
         }
         .navigationTitle(center.session(id: sessionID)?.title ?? TogetherCopy.startTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .task(id: sessionID) { await keepFresh() }
+    }
+
+    /// Reads the session now, then again every few seconds while the screen is open: others'
+    /// entries arrive, and a game being made turns into the game.
+    private func keepFresh() async {
+        do {
+            try await center.refresh(id: sessionID, bubbleStore: bubbleStore)
+        } catch {
+            failure = error.localizedDescription
+        }
+        loaded = true
+        while !Task.isCancelled {
+            let making = center.session(id: sessionID)?.isMaking ?? false
+            try? await Task.sleep(nanoseconds: making ? 3_000_000_000 : 8_000_000_000)
+            guard !Task.isCancelled, let current = center.session(id: sessionID), current.bubbleID == nil else { return }
+            _ = try? await center.refresh(id: sessionID, bubbleStore: bubbleStore)
+        }
     }
 
     private func content(_ session: TogetherSession) -> some View {
@@ -45,11 +69,13 @@ struct TogetherSessionView: View {
                     liveCard(bubble)
                 }
                 contributions(session)
-                if session.bubbleID == nil {
-                    // Stitch sits right under the contributions, inside the scroll view: pinned
+                if !session.isMade {
+                    // Make sits right under the contributions, inside the scroll view: pinned
                     // to the bottom of a pushed tab screen it slid under the tab bar.
                     stitchBar(session)
-                    composer(session)
+                    if !session.isMaking {
+                        composer(session)
+                    }
                 }
             }
             .padding(.vertical, 12)
@@ -266,7 +292,7 @@ struct TogetherSessionView: View {
                 Label(TogetherCopy.addButton, systemImage: "plus")
             }
             .buttonStyle(.fb(.tinted, height: 36))
-            .disabled(!canAdd(session))
+            .disabled(!canAdd(session) || center.busy.contains(session.id))
         }
         .padding(FBMetrics.screenPadding)
         .background(FBColor.surface)
@@ -303,18 +329,60 @@ struct TogetherSessionView: View {
         default:
             text = freeText
         }
-        Haptics.success()
-        center.addMine(text, to: session.id, appStore: appStore, bubbleStore: bubbleStore)
-        question = ""; answer = ""; decoys = ""; freeText = ""
         focused = false
+        Task { @MainActor in
+            do {
+                try await center.addMine(text, to: session.id, bubbleStore: bubbleStore)
+                Haptics.success()
+                question = ""; answer = ""; decoys = ""; freeText = ""
+            } catch {
+                appStore.showToast(TogetherCopy.couldNot(error.localizedDescription), symbol: "exclamationmark.circle")
+            }
+        }
     }
 
     // MARK: Stitch
 
+    @ViewBuilder
     private func stitchBar(_ session: TogetherSession) -> some View {
-        let ready = !session.friendEntries.isEmpty
+        if session.isMaking {
+            VStack(spacing: 6) {
+                HStack(spacing: 10) {
+                    ProgressView()
+                    Text(TogetherCopy.makingIt)
+                        .font(.fbName)
+                        .foregroundStyle(FBColor.primaryText)
+                    Spacer(minLength: 0)
+                }
+                Text(TogetherCopy.makingItDetail)
+                    .font(.fbCaption)
+                    .foregroundStyle(FBColor.secondaryText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(FBMetrics.screenPadding)
+            .background(FBColor.surface)
+        } else if center.isStarter(session) {
+            makeButton(session)
+        } else {
+            Text(TogetherCopy.waitingForStarter(session.starterName))
+                .font(.fbMeta)
+                .foregroundStyle(FBColor.secondaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(FBMetrics.screenPadding)
+                .background(FBColor.surface)
+        }
+    }
+
+    private func makeButton(_ session: TogetherSession) -> some View {
+        let ready = !session.entries.isEmpty && !center.busy.contains(session.id)
         return VStack(spacing: 6) {
             HairlineDivider()
+            if let error = session.error, session.status == "failed" {
+                Label(TogetherCopy.makeFailed(error), systemImage: "exclamationmark.circle")
+                    .font(.fbMeta)
+                    .foregroundStyle(FBColor.secondaryText)
+                    .padding(.horizontal, FBMetrics.screenPadding)
+            }
             Button {
                 stitch(session)
             } label: {
@@ -335,7 +403,7 @@ struct TogetherSessionView: View {
             .padding(.top, 6)
             .accessibilityLabel(TogetherCopy.stitchButton)
             .accessibilityHint(ready ? TogetherCopy.stitchHint : TogetherCopy.stitchNeedsMore)
-            Text(ready ? TogetherCopy.stitchHint : TogetherCopy.stitchNeedsMore)
+            Text(session.entries.isEmpty ? TogetherCopy.stitchNeedsMore : TogetherCopy.stitchHint)
                 .font(.fbCaption)
                 .foregroundStyle(FBColor.secondaryText)
                 .padding(.bottom, 8)
@@ -343,11 +411,15 @@ struct TogetherSessionView: View {
         .background(FBColor.surface)
     }
 
+    /// The server makes the game from every entry; the screen follows it until it's out.
     private func stitch(_ session: TogetherSession) {
-        guard let launch = center.stitchLaunch(session.id, appStore: appStore) else { return }
         Haptics.medium()
-        TogetherNav.afterCovers(router) {
-            router.openStudio(launch)
+        Task { @MainActor in
+            do {
+                try await center.make(session.id, bubbleStore: bubbleStore)
+            } catch {
+                appStore.showToast(TogetherCopy.couldNot(error.localizedDescription), symbol: "exclamationmark.circle")
+            }
         }
     }
 }

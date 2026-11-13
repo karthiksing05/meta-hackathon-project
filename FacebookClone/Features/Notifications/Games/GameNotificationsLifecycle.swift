@@ -60,6 +60,8 @@ enum GameNotificationNavigation {
         case .leaderboard(let id): router.push(.bubbleBoard(id))
         case .game(let id): router.push(.bubble(id))
         case .group(let id): router.push(.bubbleFeature(GroupsSearchScreens.gamesRoute(for: id)))
+        case .round(let id): router.push(.bubbleFeature(BubbleFeatureRoute(.challenge, "round", id)))
+        case .session(let id): router.push(.bubbleFeature(BubbleFeatureRoute(.together, "session", id)))
         case .inbox: break
         }
     }

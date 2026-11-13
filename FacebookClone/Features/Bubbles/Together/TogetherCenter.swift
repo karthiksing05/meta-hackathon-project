@@ -5,9 +5,9 @@ import Observation
 // contributions that arrive in a chat or a Group, the hand-off to Muse Studio, and what happens
 // when a co-made game or a game about you is published.
 //
-// Friends' contributions and plays need the server to share a session (docs/APP_LIVE_DATA_PLAN.md,
-// Stage 4). Nothing is simulated: no canned contributions, no made-up plays. Starting a session
-// says "Not available yet" (TogetherScreens).
+// Sessions live on the server (`/v1/sessions`, backend/README.md "Making a game together"): who is
+// in one, every entry, and making the game (the server runs Muse through the same path as
+// `/v1/generate`). This keeps only what the server last sent. Nothing is simulated.
 
 /// What friends add to a co-made game.
 enum TogetherAskKind: String, CaseIterable, Identifiable, Codable, Hashable {
@@ -52,13 +52,22 @@ struct TogetherSession: Identifiable, Hashable {
     var target: BubbleShareTarget
     /// People invited to add (user ids, not you).
     var invitedIDs: [String]
-    /// People who are still "typing" a contribution (simulated), for the waiting row.
+    /// Always empty: the server has no "typing" state. Kept for the waiting row.
     var pendingIDs: [String]
     var entries: [TogetherEntry]
     var inviteCardID: String
     var createdAt: Date
-    /// The published game, once stitched.
+    /// The published game, once made.
     var bubbleID: String?
+    /// The server's state: open, making, made or failed.
+    var status: String = "open"
+    /// Why the last make failed.
+    var error: String?
+    /// The server's game, once made (adopted into `bubbleID`).
+    var gameID: String?
+
+    var isMaking: Bool { status == "making" }
+    var isMade: Bool { status == "made" || bubbleID != nil }
 
     /// Everyone who added something, the starter first.
     var makerIDs: [String] {
@@ -101,127 +110,145 @@ final class TogetherCenter {
         change(&sessions[index])
     }
 
+    // MARK: - Server
+
+    /// Session ids by target (`chat:<id>` or `group:<id>`), newest first.
+    private(set) var lists: [String: [String]] = [:]
+    /// Sessions being added to or made, so a button can't fire twice.
+    private(set) var busy: Set<String> = []
+
+    func sessions(at target: RoundTarget) -> [TogetherSession] {
+        (lists[target.wire] ?? []).compactMap { session(id: $0) }
+    }
+
+    /// Fetches the sessions at a chat or a Group. Failures keep what's on screen.
+    func load(_ target: RoundTarget, bubbleStore: BubbleStore) {
+        Task { @MainActor in
+            guard await GamesAccount.shared.waitForUser() != nil,
+                  let items = try? await GamesAPIFactory.current.sessions(target: target) else { return }
+            items.forEach { apply($0, bubbleStore: bubbleStore) }
+            lists[target.wire] = items.map(\.id)
+        }
+    }
+
+    /// Fetches one session again. Throws the server's message.
+    @discardableResult
+    func refresh(id: String, bubbleStore: BubbleStore) async throws -> TogetherSession? {
+        guard await GamesAccount.shared.waitForUser() != nil else { throw GamesAPIError.signInRequired }
+        let remote = try await GamesAPIFactory.current.session(id: id)
+        return apply(remote, bubbleStore: bubbleStore)
+    }
+
+    /// Takes the server's session as it is now. A made game is adopted so it can be played.
+    @discardableResult
+    func apply(_ remote: RemoteSession, bubbleStore: BubbleStore) -> TogetherSession {
+        let kind = TogetherAskKind(rawValue: remote.kind) ?? .question
+        let people = (remote.members + [remote.starter] + remote.entries.map(\.maker))
+        for p in people { _ = bubbleStore.person(id: p.id, name: p.shownName, isFriend: p.isFriend) }
+        let meID = GamesAccount.shared.userID
+        let target: BubbleShareTarget
+        switch remote.target?.kind {
+        case .group?:
+            let id = remote.target?.id ?? ""
+            target = BubbleShareTarget(kind: .group, targetID: id, title: bubbleStore.serverGroups[id]?.name ?? TogetherCopy.theGroup)
+        default:
+            let names = remote.members.filter { $0.id != meID }.map(\.shownName)
+            target = BubbleShareTarget(kind: .chat, targetID: remote.target?.id ?? "", title: TogetherStudio.names(names))
+        }
+        let old = session(id: remote.id)
+        let updated = TogetherSession(
+            id: remote.id,
+            kind: kind,
+            title: remote.title,
+            ask: remote.ask.isEmpty ? TogetherCopy.defaultAsk(kind) : remote.ask,
+            starterID: remote.starter.id,
+            starterName: remote.starter.shownName,
+            target: target,
+            invitedIDs: remote.members.map(\.id).filter { $0 != meID && $0 != remote.starter.id },
+            pendingIDs: [],
+            entries: remote.entries.map {
+                TogetherEntry(id: $0.id, makerID: $0.maker.id, makerName: $0.maker.shownName, kind: kind, text: $0.text, arrivedAt: $0.at, cardID: nil)
+            },
+            inviteCardID: old?.inviteCardID ?? "card-\(remote.id)-invite",
+            createdAt: remote.createdAt,
+            bubbleID: old?.bubbleID,
+            status: remote.status,
+            error: remote.error,
+            gameID: remote.gameID
+        )
+        if let index = sessions.firstIndex(where: { $0.id == remote.id }) {
+            sessions[index] = updated
+        } else {
+            sessions.insert(updated, at: 0)
+        }
+        if updated.bubbleID == nil, let game = remote.game {
+            Task { @MainActor in
+                if let bubble = await bubbleStore.adopt(game) {
+                    mutate(remote.id) { $0.bubbleID = bubble.id }
+                }
+            }
+        }
+        return updated
+    }
+
+    /// Whether I started a session (only the starter can make the game).
+    func isStarter(_ session: TogetherSession) -> Bool {
+        session.starterID == GamesAccount.shared.userID
+    }
+
     // MARK: - Start
 
-    /// Starts a session: sends the invite card to the target and schedules friends' contributions.
-    @discardableResult
-    func start(kind: TogetherAskKind, title: String, ask: String, target: BubbleShareTarget, appStore: AppStore, bubbleStore: BubbleStore,
-               id: String = "together-" + UUID().uuidString.prefix(8).lowercased(), delays: [Double]? = nil) -> TogetherSession {
-        let me = appStore.me
+    /// Starts a session on the server (`POST /v1/sessions`): a chat names its members (friends);
+    /// a Group with no members invites the whole Group. The server notifies everyone invited.
+    func start(kind: TogetherAskKind, title: String, ask: String, target: RoundTarget, members: [String],
+               bubbleStore: BubbleStore) async throws -> TogetherSession {
         let cleanTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let cleanAsk = ask.trimmingCharacters(in: .whitespacesAndNewlines)
-        let makers = Self.simulatedMakers(for: target, appStore: appStore, bubbleStore: bubbleStore)
-        let card = BubbleChatCard(
-            id: "card-\(id)-invite",
-            kind: .contribution,
-            bubbleID: "",
-            fromUserID: me.id,
-            headline: TogetherCopy.inviteHeadline(name: me.firstName, title: cleanTitle),
-            sessionID: id,
-            extras: [
-                TogetherCard.sessionKey: .string(id),
-                TogetherCard.stageKey: .string(TogetherCard.Stage.invite.rawValue),
-                TogetherCard.kindKey: .string(kind.rawValue),
-                TogetherCard.askKey: .string(cleanAsk),
-                TogetherCard.titleKey: .string(cleanTitle),
-            ]
-        )
-        let session = TogetherSession(
-            id: id,
-            kind: kind,
+        guard await GamesAccount.shared.waitForUser() != nil else { throw GamesAPIError.signInRequired }
+        let remote = try await GamesAPIFactory.current.startSession(
+            kind: kind.rawValue,
             title: cleanTitle.isEmpty ? TogetherCopy.defaultTitle(kind) : cleanTitle,
             ask: cleanAsk.isEmpty ? TogetherCopy.defaultAsk(kind) : cleanAsk,
-            starterID: me.id,
-            starterName: me.firstName,
-            target: target,
-            invitedIDs: makers.map(\.id),
-            pendingIDs: makers.map(\.id),
-            entries: [],
-            inviteCardID: card.id,
-            createdAt: Date()
-        )
-        sessions.insert(session, at: 0)
-        BubbleSocialHub.send(card, to: target, note: TogetherCopy.inviteNote(session.ask), appStore: appStore, bubbleStore: bubbleStore)
+            target: target, members: members)
+        let session = apply(remote, bubbleStore: bubbleStore)
+        var ids = lists[target.wire] ?? []
+        ids.removeAll { $0 == session.id }
+        lists[target.wire] = [session.id] + ids
         return session
-    }
-
-    /// Who could add from the target: your 1:1 friend, the chat's members, or the Group's members.
-    static func simulatedMakers(for target: BubbleShareTarget, appStore: AppStore, bubbleStore: BubbleStore) -> [User] {
-        switch target.kind {
-        case .friend:
-            return [appStore.user(id: target.targetID) ?? bubbleStore.resolvePerson(target.targetID)]
-        case .chat:
-            let chat = appStore.conversations.first { $0.id == target.targetID }
-            return Array((chat?.participants ?? []).filter { !$0.isMe }.prefix(2))
-        case .group:
-            let members = bubbleStore.serverGroups[target.targetID]?.memberSample ?? appStore.group(id: target.targetID)?.memberSample ?? []
-            return Array(members.filter { !$0.isMe }.prefix(2))
-        case .feed, .story:
-            return []
-        }
-    }
-
-    private func deliver(_ card: BubbleChatCard, from user: User, text: String?, session: TogetherSession, appStore: AppStore, bubbleStore: BubbleStore) {
-        if let chat = BubbleSocialHub.conversation(for: session.target, appStore: appStore, bubbleStore: bubbleStore) {
-            BubbleSocialHub.receive(card, from: user, in: chat, text: text, appStore: appStore)
-        }
-        let count = (self.session(id: session.id)?.friendEntries.count ?? 0)
-        BubbleSocialHub.update(cardID: session.inviteCardID, appStore: appStore) { invite in
-            invite.extras[TogetherCard.addedKey] = .number(Double(count))
-        }
     }
 
     // MARK: - Your own contribution
 
-    /// Adds your contribution and sends it to the chat (a Group post just counts it).
-    func addMine(_ text: String, to sessionID: String, appStore: AppStore, bubbleStore: BubbleStore) {
+    /// Adds your entry on the server. Throws the server's message.
+    func addMine(_ text: String, to sessionID: String, bubbleStore: BubbleStore) async throws {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, let session = session(id: sessionID), session.bubbleID == nil else { return }
-        let me = appStore.me
-        let card = BubbleChatCard(
-            id: "card-\(sessionID)-me-\(session.entries.count + 1)",
-            kind: .contribution,
-            bubbleID: "",
-            fromUserID: me.id,
-            headline: TogetherCopy.addedHeadline(name: me.firstName, kind: session.kind, title: session.title),
-            sessionID: sessionID,
-            extras: [
-                TogetherCard.sessionKey: .string(sessionID),
-                TogetherCard.stageKey: .string(TogetherCard.Stage.contribution.rawValue),
-                TogetherCard.kindKey: .string(session.kind.rawValue),
-                TogetherCard.textKey: .string(trimmed),
-                TogetherCard.titleKey: .string(session.title),
-            ]
-        )
-        mutate(sessionID) { session in
-            session.entries.append(TogetherEntry(id: card.id, makerID: me.id, makerName: me.firstName, kind: session.kind, text: trimmed, arrivedAt: Date(), cardID: card.id))
-        }
-        if session.target.kind == .chat || session.target.kind == .friend {
-            BubbleSocialHub.send(card, to: session.target, appStore: appStore, bubbleStore: bubbleStore)
-        }
+        guard !trimmed.isEmpty, !busy.contains(sessionID) else { return }
+        busy.insert(sessionID)
+        defer { busy.remove(sessionID) }
+        let remote = try await GamesAPIFactory.current.addSessionEntry(id: sessionID, text: trimmed)
+        apply(remote, bubbleStore: bubbleStore)
     }
 
-    // MARK: - Stitch
+    // MARK: - Make
 
-    /// Muse Studio, set up to stitch this session: every maker and contribution in `social`, the
-    /// title in the prompt, and the Group as the audience when the session lives in one.
-    func stitchLaunch(_ sessionID: String, appStore: AppStore) -> StudioLaunch? {
-        guard let session = session(id: sessionID) else { return nil }
-        stitchingSessionID = sessionID
-        let makers = session.makerIDs.map { id -> BubbleMaker in
-            let name = id == session.starterID ? session.starterName : (session.entries.first { $0.makerID == id }?.makerName ?? "")
-            return BubbleMaker(id: id, name: name, role: id == session.starterID ? "starter" : "contributor")
+    /// Has the server make the game from every entry (`POST /v1/sessions/{id}/make`, the starter
+    /// only), then follows the session until the game is made or the job fails.
+    func make(_ sessionID: String, bubbleStore: BubbleStore) async throws {
+        guard !busy.contains(sessionID) else { return }
+        busy.insert(sessionID)
+        defer { busy.remove(sessionID) }
+        _ = try await GamesAPIFactory.current.makeSession(id: sessionID)
+        mutate(sessionID) { $0.status = "making"; $0.error = nil }
+        try await follow(sessionID, bubbleStore: bubbleStore)
+    }
+
+    /// Reads the session every few seconds while its game is being made (up to 15 minutes).
+    func follow(_ sessionID: String, bubbleStore: BubbleStore) async throws {
+        for _ in 0..<300 {
+            guard let current = session(id: sessionID), current.isMaking else { return }
+            try await Task.sleep(nanoseconds: 3_000_000_000)
+            _ = try? await refresh(id: sessionID, bubbleStore: bubbleStore)
         }
-        let contributions = session.entries.map {
-            StudioContribution(makerID: $0.makerID, makerName: $0.makerName, kind: $0.kind.rawValue, text: $0.text)
-        }
-        let friends = makers.dropFirst().map(\.name)
-        return StudioLaunch(
-            mode: .create,
-            groupID: session.target.kind == .group ? session.target.targetID : nil,
-            prompt: TogetherCopy.stitchPrompt(title: session.title, kind: session.kind, ask: session.ask, friends: Array(friends)),
-            social: StudioSocialContext(makers: makers, contributions: contributions)
-        )
     }
 
     // MARK: - Published
