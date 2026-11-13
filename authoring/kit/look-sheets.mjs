@@ -10,7 +10,7 @@
 // that two games with one vibe still get different looks.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { applyLook, lookCheck, lookForBuilt, chooseLook, gameIdentity } from './look.mjs';
 import { readBuilt } from '../playtest/requirements-check.mjs';
@@ -68,8 +68,16 @@ async function shots(game, ref = null) {
 function snapshot(html, png, w, h) {
   const file = png.replace(/\.png$/, '.html');
   writeFileSync(file, html);
-  execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files', `--user-data-dir=${join(dirname(png), '.chrome')}`,
-    `--window-size=${w},${h}`, `--screenshot=${png}`, '--virtual-time-budget=8000', 'file://' + file], { stdio: 'ignore', timeout: 120000 });
+  // Chrome sometimes exits non-zero in teardown after writing the file: keep the file, retry otherwise.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try { rmSync(png, { force: true }); } catch { /* none */ }
+    try {
+      execFileSync(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files', `--user-data-dir=${join(dirname(png), `.chrome-${attempt}`)}`,
+        `--window-size=${w},${h}`, `--screenshot=${png}`, '--virtual-time-budget=8000', 'file://' + file], { stdio: 'ignore', timeout: 120000 });
+    } catch { /* checked below */ }
+    if (existsSync(png)) return;
+  }
+  console.log(`  (no screenshot for ${png})`);
 }
 
 const fontsCss = () => readFileSync(new URL('../../FacebookClone/Bubbles/Runtime/web/game-fonts.css', import.meta.url), 'utf8')
