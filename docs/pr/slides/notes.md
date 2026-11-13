@@ -59,7 +59,7 @@ This is where it brings people closer. Against: best of 5 when you meet someone,
 It works for creators and brands too. A creator turns their persona into a Curio their audience plays and ranks on, and "tell me your score" becomes a real board. A brand gets a sponsored Curio in the feed, which is in the app today; a brand challenge a Group plays together is next.
 
 ## 10
-And we built a collaborative product collaboratively: five people, each with our own AI agents, synced through one Slack channel. Agents fact-checked each other, sessions answered each other in minutes, and work moved through handoff threads. 624 commits in 35 hours; the decisions stayed ours.
+Here's the part we didn't plan: our agents ended up working the way we want people to, together, and keeping each other honest. One agent reviewed every slide draft against the code and caught our own mistakes. Two sessions answered each other's questions in minutes. And when one of us was swamped, the work moved through one handoff thread and came back ten drafts later. 624 commits in 35 hours, and the decisions stayed ours.
 
 ## 11
 *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.
