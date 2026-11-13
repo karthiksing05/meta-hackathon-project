@@ -43,6 +43,8 @@ type Theme struct {
 	Terms []string `json:"terms,omitempty"` // words the players must see (checked by quality.mjs)
 	// Sponsor presents the game: its name goes in the title or intro card, its products become pieces.
 	Sponsor *Sponsor `json:"sponsor,omitempty"`
+	// ArtStyle is the style muse-image draws every picture in (the art_style slot): "80s anime", "pixel art".
+	ArtStyle string `json:"art_style,omitempty"`
 }
 
 // Goal is what the player tries to do and the measurable target.

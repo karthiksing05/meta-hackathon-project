@@ -92,6 +92,7 @@ func LoadChecklists(catalogDir string) (Checklists, []string, error) {
 		}
 		out[fc.Family] = fc
 	}
+	skipped = append(skipped, loadSharedSlots(catalogDir, out)...)
 	return out, skipped, nil
 }
 

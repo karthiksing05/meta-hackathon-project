@@ -35,7 +35,9 @@ type Plan struct {
 	Spec    *Spec           `json:"spec"`                  // game-spec/1
 	Issues  []string        `json:"spec_issues,omitempty"` // spec problems left after the repair round
 	Notes   []string        `json:"notes,omitempty"`       // what Go corrected
-	Calls   []CallTiming    `json:"calls,omitempty"`       // each Muse call the plan took
+	// Art is "image" when muse-image draws the pictures (an art-heavy plan: a story, or 3+ drawn pieces).
+	Art   string       `json:"art,omitempty"`
+	Calls []CallTiming `json:"calls,omitempty"` // each Muse call the plan took
 }
 
 // CallTiming is one Muse call of the planner.
@@ -161,6 +163,10 @@ Rules
   look): guessed=false. A slot nothing speaks to takes its default (or a better guess): guessed=true. Ask only when a
   "required" slot's ask_when holds, using the slot's ask and choices, and AT MOST 2 questions in total; when you ask,
   still give your best guess as value. Put the same questions on the matching anatomy parts.
+- art_style (when listed): the request's own style words win (guessed false). When the game is art-heavy (a story
+  with characters, or 3 or more drawn things) and nothing names a style, you may ask it (it counts toward the 2) with
+  3-4 styles that fit this theme as choices; the app adds Other. Otherwise guess one that fits and say it in the
+  anatomy ("I'm drawing it as bold cartoon art"). The value goes to spec.theme.art_style.
 - theme: when the person names a theme, franchise or brand, keep those words verbatim (source "you"). Honor it in
   names, art and words; the mechanics stay original, and never copy a specific existing game's levels, layouts or art.
 - Played by touch on a phone: taps, drags, swipes and an on-screen keyboard. Plain words, sentence case, short texts.
@@ -181,7 +187,7 @@ func (p *Planner) Plan(ctx context.Context, in PlanInput) (*Plan, error) {
 	if len(in.Context.Types) == 0 {
 		return nil, errors.New("harness: nothing retrieved to plan from")
 	}
-	lists := p.checklistsFor(in.Context.Types)
+	lists := p.Checklists.withArtStyle(p.checklistsFor(in.Context.Types), in.Context.Types)
 	parts := SpecParts
 	if p.Chain {
 		parts = specStages[0]

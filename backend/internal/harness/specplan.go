@@ -147,6 +147,7 @@ func (p *Planner) finishSpec(ctx context.Context, plan *Plan, raw json.RawMessag
 	}
 	applyLookPreference(spec, plan, in)
 	plan.Spec = spec
+	finishArt(plan, in)
 	plan.Issues = uniq(problems)
 	return nil
 }
