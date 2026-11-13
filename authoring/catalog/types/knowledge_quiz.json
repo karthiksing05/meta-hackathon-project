@@ -1,0 +1,2680 @@
+[
+  {
+    "id": "map_click_quiz",
+    "name": "Click the place on the map",
+    "aliases": [
+      "Seterra",
+      "map quiz",
+      "Sporcle map"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "A place name appears; tap where it is on a blank map before time runs out.",
+    "core_loop": "read the name → tap the map → it highlights right or wrong → next name",
+    "verbs": [
+      "locate",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong taps cost points",
+      "three tries per name, then it's shown"
+    ],
+    "win": "place every name",
+    "lose": "none",
+    "scoring": "points for first-try taps",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends on the same map",
+      "a Group's home-region map"
+    ],
+    "difficulty_levers": [
+      "map region",
+      "tries per name",
+      "labels shown"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "score",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "quiz me on the countries of africa",
+      "click the US states on a map",
+      "seterra but for europe"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "label_the_diagram",
+    "name": "Label the diagram",
+    "aliases": [
+      "anatomy labeling",
+      "diagram quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Drag labels onto the right parts of a diagram (a cell, an engine, a skeleton).",
+    "core_loop": "pick a label → drag it to a part → it snaps if right → finish the diagram",
+    "verbs": [
+      "label",
+      "drag",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each label fits exactly one spot"
+    ],
+    "win": "label every part",
+    "lose": "none",
+    "scoring": "mistakes and time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "study buddies race on the same diagram"
+    ],
+    "difficulty_levers": [
+      "number of labels",
+      "distractor labels"
+    ],
+    "tools": [
+      "player_drag",
+      "sort_bins",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "label the parts of a cell",
+      "anatomy quiz for my bio class",
+      "label the parts of a guitar"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "periodic_table_fill",
+    "name": "Fill the table",
+    "aliases": [
+      "periodic table quiz",
+      "fill the grid"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Type items into a fixed table layout (elements, presidents by term, planets by order) until every cell is full.",
+    "core_loop": "type an answer → it drops into its cell → keep going → the table fills",
+    "verbs": [
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "answers are fuzzy-matched",
+      "each cell once"
+    ],
+    "win": "fill every cell",
+    "lose": "timer runs out",
+    "scoring": "cells filled",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "co-op fill with your study group"
+    ],
+    "difficulty_levers": [
+      "table size",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "grid_board",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "name every element in the periodic table",
+      "fill in the presidents in order",
+      "planets in order quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "capital_match",
+    "name": "Countries and capitals",
+    "aliases": [
+      "capitals quiz",
+      "geography quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Match each country to its capital as fast as possible.",
+    "core_loop": "see a country → pick or type its capital → next",
+    "verbs": [
+      "recall",
+      "match"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "one capital per country"
+    ],
+    "win": "match every pair",
+    "lose": "three misses",
+    "scoring": "right answers and time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "geography streak battles"
+    ],
+    "difficulty_levers": [
+      "region",
+      "options vs typed"
+    ],
+    "tools": [
+      "quiz",
+      "match_pairs",
+      "typed_answer",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "capitals of europe quiz",
+      "match the country to the capital",
+      "capitals game for my kid"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "vocab_flashcard_quiz",
+    "name": "Vocabulary cards",
+    "aliases": [
+      "vocab quiz",
+      "SAT words",
+      "Quizlet"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "A word appears; pick or type its meaning; missed words come back sooner.",
+    "core_loop": "see a word → answer its meaning → missed words return → master the set",
+    "verbs": [
+      "recall",
+      "learn"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "missed cards repeat sooner",
+      "a card is mastered after two right in a row"
+    ],
+    "win": "master every card",
+    "lose": "none",
+    "scoring": "cards mastered",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share a deck with your class"
+    ],
+    "difficulty_levers": [
+      "deck size",
+      "repetition spacing"
+    ],
+    "tools": [
+      "quiz",
+      "typed_answer",
+      "sequence_memory",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "sat vocab quiz",
+      "quizlet style flashcards for spanish",
+      "learn 20 new words"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "translate_phrase",
+    "name": "Translate the phrase",
+    "aliases": [
+      "Duolingo translate",
+      "language quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Translate short phrases between two languages by tapping word tiles in order.",
+    "core_loop": "read the phrase → tap word tiles in order → check → next",
+    "verbs": [
+      "translate",
+      "order"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "word order must be right",
+      "extra tiles are decoys"
+    ],
+    "win": "translate every phrase",
+    "lose": "out of hearts",
+    "scoring": "phrases right",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "streaks with friends learning the same language"
+    ],
+    "difficulty_levers": [
+      "phrase length",
+      "decoy tiles"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "lives",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "duolingo style spanish practice",
+      "translate phrases into french",
+      "japanese word order game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "listen_and_pick",
+    "name": "Listen and pick",
+    "aliases": [
+      "listening quiz",
+      "bird call quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Hear a sound (a word, a bird call, an instrument) and pick what it is.",
+    "core_loop": "play the sound → pick an answer → next",
+    "verbs": [
+      "listen",
+      "recognize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one replay per item"
+    ],
+    "win": "name every sound",
+    "lose": "three misses",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "family listening challenge"
+    ],
+    "difficulty_levers": [
+      "options",
+      "replays"
+    ],
+    "tools": [
+      "audio_clip",
+      "quiz",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the bird by its call",
+      "identify the instrument",
+      "listening quiz for spanish words"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "equation_balance_quiz",
+    "name": "Balance the equation",
+    "aliases": [
+      "chemistry balancing",
+      "balance equations"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Adjust coefficients until both sides of a chemical equation balance.",
+    "core_loop": "see the equation → tap coefficients up or down → check → next",
+    "verbs": [
+      "balance",
+      "calculate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "atoms of each element must match on both sides"
+    ],
+    "win": "balance every equation",
+    "lose": "none",
+    "scoring": "fewer checks",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "class leaderboard"
+    ],
+    "difficulty_levers": [
+      "equation size"
+    ],
+    "tools": [
+      "grid_board",
+      "score",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "balance chemical equations game",
+      "chemistry practice for my class",
+      "stoichiometry puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "history_date_pin",
+    "name": "Date the event",
+    "aliases": [
+      "history dates quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Slide a year marker to when an event happened; closer is better.",
+    "core_loop": "read the event → slide to a year → see the real date → next",
+    "verbs": [
+      "estimate",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "answers are years"
+    ],
+    "win": "most points after rounds",
+    "lose": "none",
+    "scoring": "points by years off",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "history buffs compare scores"
+    ],
+    "difficulty_levers": [
+      "era range",
+      "tolerance"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "when did these events happen",
+      "history timeline quiz for ap us history",
+      "guess the year of the battle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "painting_identify",
+    "name": "Who painted it",
+    "aliases": [
+      "art quiz",
+      "art history"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See an artwork and pick the artist or movement.",
+    "core_loop": "see the artwork → pick the artist → reveal facts → next",
+    "verbs": [
+      "recognize",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one artist per work"
+    ],
+    "win": "most right answers",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "museum trip group quiz"
+    ],
+    "difficulty_levers": [
+      "options",
+      "era"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "art history quiz",
+      "guess the painter",
+      "impressionist or not"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "constellation_connect",
+    "name": "Connect the stars",
+    "aliases": [
+      "constellation quiz",
+      "star map"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Draw lines between stars to form the named constellation.",
+    "core_loop": "read the name → connect stars in order → check → next",
+    "verbs": [
+      "connect",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "lines must match the known pattern"
+    ],
+    "win": "draw every constellation",
+    "lose": "none",
+    "scoring": "accuracy and time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "stargazing night with friends"
+    ],
+    "difficulty_levers": [
+      "stars shown",
+      "guides"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "constellations quiz",
+      "draw the big dipper",
+      "learn the zodiac constellations"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spell_the_country",
+    "name": "Type the name from the outline",
+    "aliases": [
+      "country outline typing"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See an outline or flag; type the name with fuzzy spelling.",
+    "core_loop": "see the outline → type the name → reveal → next",
+    "verbs": [
+      "recognize",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spelling is fuzzy-matched"
+    ],
+    "win": "name every place",
+    "lose": "out of lives",
+    "scoring": "right names",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily outline shared in a Group"
+    ],
+    "difficulty_levers": [
+      "region",
+      "hints"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "lives",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "type the country from its shape",
+      "worldle but typing",
+      "name the state outlines"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "timeline_drag_learning",
+    "name": "Build the timeline",
+    "aliases": [
+      "history timeline",
+      "chronology"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Drag a full set of events into chronological order, then check.",
+    "core_loop": "drag events into order → check → wrong ones flash → fix and recheck",
+    "verbs": [
+      "order",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the whole order is checked at once"
+    ],
+    "win": "get the whole order right",
+    "lose": "none",
+    "scoring": "checks used",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "study groups race the same set"
+    ],
+    "difficulty_levers": [
+      "events count",
+      "date closeness"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "put world war 2 events in order",
+      "order the kings of england",
+      "chronology quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "science_sort",
+    "name": "Sort into categories",
+    "aliases": [
+      "classification quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Sort items into the right category (mammal vs reptile, metal vs nonmetal).",
+    "core_loop": "an item appears → drag it to a bin → right or wrong → next",
+    "verbs": [
+      "classify",
+      "sort"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "each item belongs to one bin"
+    ],
+    "win": "sort every item",
+    "lose": "three misses",
+    "scoring": "right sorts",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "class leaderboard"
+    ],
+    "difficulty_levers": [
+      "bins",
+      "ambiguity"
+    ],
+    "tools": [
+      "sort_bins",
+      "lives",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "sort animals into mammals and reptiles",
+      "metal or nonmetal game",
+      "classify the rocks"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "fill_blank_textbook",
+    "name": "Fill in the blank",
+    "aliases": [
+      "cloze quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Read a sentence from a lesson and fill the missing key term.",
+    "core_loop": "read the sentence → type the missing term → next",
+    "verbs": [
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spelling is fuzzy-matched"
+    ],
+    "win": "finish the set",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share a set from your notes"
+    ],
+    "difficulty_levers": [
+      "blanks per sentence",
+      "word bank"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "fill in the blanks from my biology notes",
+      "cloze quiz for history",
+      "turn my notes into a quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "adaptive_quiz",
+    "name": "Adaptive difficulty quiz",
+    "aliases": [
+      "adaptive test",
+      "placement quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Each right answer makes the next question harder; wrong answers ease off; ends with a level.",
+    "core_loop": "answer → difficulty adjusts → repeat → see your level",
+    "verbs": [
+      "answer",
+      "learn"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "difficulty moves with each answer"
+    ],
+    "win": "reach the highest level",
+    "lose": "none",
+    "scoring": "final level",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare levels with classmates"
+    ],
+    "difficulty_levers": [
+      "step size",
+      "question pool"
+    ],
+    "tools": [
+      "quiz",
+      "difficulty_curve",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "test my spanish level",
+      "adaptive math quiz",
+      "how good am I at geography"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "anatomy_point",
+    "name": "Point to the body part",
+    "aliases": [
+      "anatomy point quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "A part is named; tap it on the body diagram.",
+    "core_loop": "read the part → tap the diagram → feedback → next",
+    "verbs": [
+      "locate",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "taps must land inside the part"
+    ],
+    "win": "find every part",
+    "lose": "three misses",
+    "scoring": "right taps",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "nursing class practice together"
+    ],
+    "difficulty_levers": [
+      "detail level"
+    ],
+    "tools": [
+      "grid_board",
+      "reveal",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "point to the bones in the hand",
+      "anatomy quiz for nursing school",
+      "find the muscles"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "music_theory_quiz",
+    "name": "Name the note or chord",
+    "aliases": [
+      "music theory quiz",
+      "ear training"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See or hear a note, interval or chord and name it.",
+    "core_loop": "play or show it → pick the name → next",
+    "verbs": [
+      "listen",
+      "recognize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one answer per item"
+    ],
+    "win": "name every item",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "band mates compare ear-training scores"
+    ],
+    "difficulty_levers": [
+      "intervals vs chords",
+      "tempo"
+    ],
+    "tools": [
+      "audio_clip",
+      "quiz",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "ear training for intervals",
+      "name the chord",
+      "music theory quiz for beginners"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "code_output_quiz",
+    "name": "What does this code print",
+    "aliases": [
+      "programming quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Read a short code snippet and pick what it outputs.",
+    "core_loop": "read the code → pick the output → see why → next",
+    "verbs": [
+      "read",
+      "reason"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one correct output"
+    ],
+    "win": "answer every snippet",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "CS study group duel"
+    ],
+    "difficulty_levers": [
+      "language",
+      "snippet length"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "python quiz what does this print",
+      "javascript gotcha quiz",
+      "coding interview practice game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "unit_conversion_quiz",
+    "name": "Convert the unit",
+    "aliases": [
+      "conversion quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Convert a measurement into another unit within a tolerance.",
+    "core_loop": "read the value → type the conversion → check → next",
+    "verbs": [
+      "calculate",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "answers within 2% count"
+    ],
+    "win": "convert every item",
+    "lose": "timer runs out",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "class race"
+    ],
+    "difficulty_levers": [
+      "unit types",
+      "tolerance"
+    ],
+    "tools": [
+      "typed_answer",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "metric conversion quiz",
+      "cooking unit conversions",
+      "convert miles to km game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "grammar_fix",
+    "name": "Fix the sentence",
+    "aliases": [
+      "grammar quiz",
+      "proofreading"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Tap the error in a sentence and choose the fix.",
+    "core_loop": "read the sentence → tap the mistake → pick the fix → next",
+    "verbs": [
+      "spot",
+      "correct"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one error per sentence"
+    ],
+    "win": "fix every sentence",
+    "lose": "three misses",
+    "scoring": "right fixes",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "teacher shares a set with the class"
+    ],
+    "difficulty_levers": [
+      "error subtlety"
+    ],
+    "tools": [
+      "quiz",
+      "lives",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "grammar quiz for esl",
+      "find the mistake in the sentence",
+      "proofreading game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "true_false_science",
+    "name": "Science myth or fact",
+    "aliases": [
+      "myth busters quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Decide if a science claim is true; see the explanation.",
+    "core_loop": "read the claim → true or false → read why → next",
+    "verbs": [
+      "judge",
+      "learn"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "half are myths"
+    ],
+    "win": "most right calls",
+    "lose": "none",
+    "scoring": "right calls",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share surprising facts with friends"
+    ],
+    "difficulty_levers": [
+      "claim subtlety"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "science myth or fact",
+      "is this true about space",
+      "health myths quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "picture_vocab",
+    "name": "Name the picture in another language",
+    "aliases": [
+      "picture vocab"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See a picture; type or pick its word in the language you're learning.",
+    "core_loop": "see the picture → answer the word → next",
+    "verbs": [
+      "recall",
+      "translate"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "spelling is fuzzy-matched"
+    ],
+    "win": "name every picture",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "family language practice"
+    ],
+    "difficulty_levers": [
+      "options vs typed"
+    ],
+    "tools": [
+      "quiz",
+      "typed_answer",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "learn french food words with pictures",
+      "picture vocabulary for kids",
+      "japanese animals quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "match_term_definition",
+    "name": "Match term to definition",
+    "aliases": [
+      "glossary match"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Match each term to its definition by dragging lines.",
+    "core_loop": "pick a term → drag to a definition → lock in → finish the set",
+    "verbs": [
+      "match",
+      "recall"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "rules": [
+      "each term has one definition"
+    ],
+    "win": "match all",
+    "lose": "none",
+    "scoring": "time and mistakes",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share a glossary set with classmates"
+    ],
+    "difficulty_levers": [
+      "set size",
+      "similar definitions"
+    ],
+    "tools": [
+      "match_pairs",
+      "player_drag",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "match the vocab to definitions",
+      "economics terms matching",
+      "glossary quiz from my notes"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "flag_parts_build",
+    "name": "Build the flag",
+    "aliases": [
+      "flag builder"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Assemble a flag from colors and shapes to match a country.",
+    "core_loop": "read the country → pick colors and layout → check → next",
+    "verbs": [
+      "build",
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "colors and layout must match"
+    ],
+    "win": "build every flag",
+    "lose": "none",
+    "scoring": "right flags",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "geography club challenges"
+    ],
+    "difficulty_levers": [
+      "pieces offered"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "build the flag of each country",
+      "flag construction quiz",
+      "recreate the flag from memory"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spelling_by_sound_bee",
+    "name": "Hear it, spell it",
+    "aliases": [
+      "spelling bee practice"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Hear a word with its sentence, then type its spelling.",
+    "core_loop": "hear the word → type it → check → next",
+    "verbs": [
+      "listen",
+      "spell"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "exact spelling"
+    ],
+    "win": "spell the list",
+    "lose": "three misses",
+    "scoring": "words right",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "class bee practice"
+    ],
+    "difficulty_levers": [
+      "word level"
+    ],
+    "tools": [
+      "audio_clip",
+      "keyboard",
+      "word_check",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "spelling bee practice for 5th grade",
+      "hear the word and spell it",
+      "spelling list game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "chem_formula_build",
+    "name": "Build the formula",
+    "aliases": [
+      "chemistry formula"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Combine element tiles with subscripts to build a named compound.",
+    "core_loop": "read the compound → place elements and counts → check",
+    "verbs": [
+      "build",
+      "calculate"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "charges must balance"
+    ],
+    "win": "build every compound",
+    "lose": "none",
+    "scoring": "right builds",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "chem class duel"
+    ],
+    "difficulty_levers": [
+      "compound complexity"
+    ],
+    "tools": [
+      "player_drag",
+      "grid_board",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "build chemical formulas game",
+      "ionic compounds practice",
+      "chemistry naming quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "math_fact_drill",
+    "name": "Math facts drill",
+    "aliases": [
+      "times tables",
+      "math facts"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Answer arithmetic facts as fast as you can.",
+    "core_loop": "see a fact → type the answer → next, faster",
+    "verbs": [
+      "calculate",
+      "react"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "one answer per fact"
+    ],
+    "win": "answer them all",
+    "lose": "timer runs out",
+    "scoring": "right answers per minute",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "family speed battles"
+    ],
+    "difficulty_levers": [
+      "operation",
+      "number range"
+    ],
+    "tools": [
+      "keyboard",
+      "timer_bar",
+      "speed_ramp",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "times tables practice game",
+      "math facts race for kids",
+      "speed arithmetic"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "landmark_identify",
+    "name": "Name the landmark",
+    "aliases": [
+      "landmark quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See a landmark photo and name it or its city.",
+    "core_loop": "see the landmark → name it → reveal → next",
+    "verbs": [
+      "recognize",
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "answers are fuzzy-matched"
+    ],
+    "win": "name every landmark",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "travel friends compare scores"
+    ],
+    "difficulty_levers": [
+      "obscurity"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "name the famous landmark",
+      "where is this building",
+      "landmark quiz for my trip"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mnemonic_builder",
+    "name": "Make a memory hook",
+    "aliases": [
+      "mnemonic quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Build a silly sentence to remember a list, then recall the list from it.",
+    "core_loop": "read the list → write a hook sentence → later recall the list → check",
+    "verbs": [
+      "create",
+      "recall"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "the hook's first letters match the list"
+    ],
+    "win": "recall the full list",
+    "lose": "none",
+    "scoring": "items recalled",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your best mnemonics"
+    ],
+    "difficulty_levers": [
+      "list length",
+      "delay"
+    ],
+    "tools": [
+      "typed_answer",
+      "sequence_memory",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "help me memorize the planets",
+      "mnemonic for the cranial nerves",
+      "memory trick game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "case_study_quiz",
+    "name": "Pick the best decision",
+    "aliases": [
+      "scenario quiz",
+      "case study"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Read a short scenario and pick the best next step; see the reasoning.",
+    "core_loop": "read the scenario → choose an action → see the outcome → next",
+    "verbs": [
+      "decide",
+      "reason"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one best answer, others explained"
+    ],
+    "win": "answer every case",
+    "lose": "none",
+    "scoring": "best choices",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "study group discussions"
+    ],
+    "difficulty_levers": [
+      "scenario length"
+    ],
+    "tools": [
+      "choice_story",
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "first aid scenarios quiz",
+      "customer service practice game",
+      "ethics case study quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "diagram_order_process",
+    "name": "Order the process steps",
+    "aliases": [
+      "process quiz",
+      "lifecycle order"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Drag the steps of a process (mitosis, the water cycle) into order.",
+    "core_loop": "read the process → order the steps → check",
+    "verbs": [
+      "order",
+      "recall"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "every step has one place"
+    ],
+    "win": "order every step",
+    "lose": "none",
+    "scoring": "checks used",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "study duo races"
+    ],
+    "difficulty_levers": [
+      "steps",
+      "distractors"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "order the steps of mitosis",
+      "water cycle order game",
+      "steps to make bread in order"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "reading_comprehension",
+    "name": "Read and answer",
+    "aliases": [
+      "reading quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Read a short passage, then answer questions about it.",
+    "core_loop": "read the passage → answer questions → see score",
+    "verbs": [
+      "read",
+      "answer"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "answers come from the passage"
+    ],
+    "win": "answer all questions",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "book club quizzes each other"
+    ],
+    "difficulty_levers": [
+      "passage length"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "reading comprehension game",
+      "quiz me on this chapter",
+      "book club quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "geo_distance_guess",
+    "name": "How far apart",
+    "aliases": [
+      "distance quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Guess the distance between two places; closer is better.",
+    "core_loop": "see two places → slide a distance → reveal → next",
+    "verbs": [
+      "estimate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "answers within 10% get full points"
+    ],
+    "win": "most points",
+    "lose": "none",
+    "scoring": "points by closeness",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "travel buddies"
+    ],
+    "difficulty_levers": [
+      "units",
+      "tolerance"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "how far is paris from rome",
+      "distance guessing game",
+      "guess the miles between cities"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "nutrition_compare",
+    "name": "Which has more",
+    "aliases": [
+      "nutrition quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Pick which of two foods has more calories, sugar or protein.",
+    "core_loop": "see two foods → pick the higher one → reveal → next",
+    "verbs": [
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one correct pick"
+    ],
+    "win": "longest streak",
+    "lose": "a wrong pick",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "friends compare streaks"
+    ],
+    "difficulty_levers": [
+      "closeness"
+    ],
+    "tools": [
+      "quiz",
+      "reveal",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "which has more sugar game",
+      "calorie higher lower",
+      "protein quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "road_sign_quiz",
+    "name": "Road signs and rules",
+    "aliases": [
+      "driving test quiz",
+      "DMV practice"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See a road sign or driving situation and pick what it means.",
+    "core_loop": "see the sign → pick its meaning → next",
+    "verbs": [
+      "recognize",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one meaning per sign"
+    ],
+    "win": "pass with 80%",
+    "lose": "fail under 80%",
+    "scoring": "right answers",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "friends studying for the permit test"
+    ],
+    "difficulty_levers": [
+      "sign set"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "dmv practice test game",
+      "road signs quiz",
+      "drivers ed quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stock_ticker_quiz",
+    "name": "Name the company",
+    "aliases": [
+      "ticker quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See a stock ticker or logo and name the company.",
+    "core_loop": "see the ticker → type or pick the company → next",
+    "verbs": [
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "answers are fuzzy-matched"
+    ],
+    "win": "name every company",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "finance club duel"
+    ],
+    "difficulty_levers": [
+      "obscurity"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "quiz"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "stock ticker quiz",
+      "guess the company from the ticker",
+      "finance trivia for my club"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "sign_language_match",
+    "name": "Match the sign",
+    "aliases": [
+      "sign language quiz",
+      "ASL"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See a hand sign and pick the letter or word.",
+    "core_loop": "see the sign → pick its meaning → next",
+    "verbs": [
+      "recognize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one meaning per sign"
+    ],
+    "win": "name every sign",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "practice with a friend learning ASL"
+    ],
+    "difficulty_levers": [
+      "letters vs words"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "asl alphabet quiz",
+      "learn sign language game",
+      "match the sign to the word"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "morse_decode",
+    "name": "Decode Morse",
+    "aliases": [
+      "morse code quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Hear or see Morse code and type the letters.",
+    "core_loop": "play the code → type the letters → check → next",
+    "verbs": [
+      "decode",
+      "listen"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spacing marks letter gaps"
+    ],
+    "win": "decode every message",
+    "lose": "none",
+    "scoring": "letters right",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "send Morse messages to friends"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "message length"
+    ],
+    "tools": [
+      "audio_clip",
+      "keyboard",
+      "word_check"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "learn morse code game",
+      "decode the morse message",
+      "morse code practice"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "plant_identify",
+    "name": "Name the plant",
+    "aliases": [
+      "plant ID quiz",
+      "botany"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See a plant or leaf and pick its name.",
+    "core_loop": "see the plant → pick the name → reveal → next",
+    "verbs": [
+      "recognize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one name per plant"
+    ],
+    "win": "name every plant",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "garden club challenges"
+    ],
+    "difficulty_levers": [
+      "region",
+      "detail"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "identify the houseplant",
+      "tree leaf quiz",
+      "garden plants quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coin_count_learning",
+    "name": "Count the coins",
+    "aliases": [
+      "money counting"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Count the coins and bills shown and type the total.",
+    "core_loop": "see the coins → type the total → check → next",
+    "verbs": [
+      "count",
+      "calculate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "exact total only"
+    ],
+    "win": "count every set",
+    "lose": "none",
+    "scoring": "right totals",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "parents and kids play together"
+    ],
+    "difficulty_levers": [
+      "coin types",
+      "amount range"
+    ],
+    "tools": [
+      "keyboard",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "count the money game for kids",
+      "coin counting practice",
+      "make change game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "time_reading",
+    "name": "Read the clock",
+    "aliases": [
+      "clock quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Read an analog clock and type or pick the time.",
+    "core_loop": "see the clock → enter the time → check → next",
+    "verbs": [
+      "read"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "exact minute"
+    ],
+    "win": "read every clock",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "family practice"
+    ],
+    "difficulty_levers": [
+      "minute precision"
+    ],
+    "tools": [
+      "quiz",
+      "keyboard",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "telling time game for kids",
+      "analog clock practice",
+      "read the clock quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "current_events_quiz",
+    "name": "This week's news quiz",
+    "aliases": [
+      "news quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Answer questions about this week's headlines.",
+    "core_loop": "read the question → pick the answer → next",
+    "verbs": [
+      "recall",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "questions from the past week"
+    ],
+    "win": "most right",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "weekly quiz in a Group"
+    ],
+    "difficulty_levers": [
+      "recency"
+    ],
+    "tools": [
+      "quiz",
+      "daily_seed",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "weekly news quiz",
+      "did you follow the news this week",
+      "current events trivia for class"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "famous_speech_finish",
+    "name": "Finish the famous quote",
+    "aliases": [
+      "quote completion"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Complete famous historical quotes or speeches.",
+    "core_loop": "read the start → type or pick the ending → next",
+    "verbs": [
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "answers are fuzzy-matched"
+    ],
+    "win": "finish every quote",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "history class challenge"
+    ],
+    "difficulty_levers": [
+      "quote obscurity"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "quiz"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "finish the famous quote",
+      "historical speeches quiz",
+      "who said it and finish it"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "recipe_ingredient_quiz",
+    "name": "Name the missing ingredient",
+    "aliases": [
+      "cooking quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "See a dish and its ingredients with one missing; name it.",
+    "core_loop": "see the dish → name the missing ingredient → next",
+    "verbs": [
+      "recall"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "answers are fuzzy-matched"
+    ],
+    "win": "name every missing ingredient",
+    "lose": "none",
+    "scoring": "right answers",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "foodie friends duel"
+    ],
+    "difficulty_levers": [
+      "dish obscurity"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "quiz"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the missing ingredient",
+      "cooking trivia",
+      "what's in a carbonara quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rules_of_the_game_quiz",
+    "name": "Know the rules",
+    "aliases": [
+      "sports rules quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Read a game situation and pick the correct ruling.",
+    "core_loop": "read the play → pick the ruling → see the rule → next",
+    "verbs": [
+      "judge",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one correct ruling"
+    ],
+    "win": "answer every play",
+    "lose": "none",
+    "scoring": "right rulings",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "fans argue it out in a Group"
+    ],
+    "difficulty_levers": [
+      "sport",
+      "edge-case rate"
+    ],
+    "tools": [
+      "quiz",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "is it offside quiz",
+      "nfl rules quiz",
+      "referee decision game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dino_era_sort",
+    "name": "Sort into eras",
+    "aliases": [
+      "era sort"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Sort creatures, inventions or artworks into the right era.",
+    "core_loop": "an item appears → drop it into its era → next",
+    "verbs": [
+      "classify"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each item belongs to one era"
+    ],
+    "win": "sort them all",
+    "lose": "three misses",
+    "scoring": "right sorts",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "museum trip game"
+    ],
+    "difficulty_levers": [
+      "eras",
+      "ambiguity"
+    ],
+    "tools": [
+      "sort_bins",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "sort dinosaurs by period",
+      "which era is this invention from",
+      "art movements sort"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "planet_facts_order",
+    "name": "Rank by a fact",
+    "aliases": [
+      "ranking quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Rank items by a fact (planets by size, countries by population).",
+    "core_loop": "drag items into rank order → check → fix",
+    "verbs": [
+      "order",
+      "compare"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "the full order is checked"
+    ],
+    "win": "get the order right",
+    "lose": "none",
+    "scoring": "checks used",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "friends compare ranks"
+    ],
+    "difficulty_levers": [
+      "items",
+      "value closeness"
+    ],
+    "tools": [
+      "sort_bins",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rank the planets by size",
+      "order countries by population",
+      "rank the tallest buildings"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "first_aid_steps",
+    "name": "Do the steps in order",
+    "aliases": [
+      "procedure drill"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Tap the steps of a procedure (CPR, recovery position) in order under time.",
+    "core_loop": "read the situation → tap steps in order → feedback",
+    "verbs": [
+      "order",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong order resets"
+    ],
+    "win": "finish the procedure",
+    "lose": "timer runs out",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "workplace training challenge"
+    ],
+    "difficulty_levers": [
+      "steps",
+      "time"
+    ],
+    "tools": [
+      "sequence_memory",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cpr steps game",
+      "first aid procedure quiz",
+      "fire safety steps"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bill_of_rights_match",
+    "name": "Match the number to the rule",
+    "aliases": [
+      "numbered list quiz"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Match numbered items (amendments, commandments, laws) to what they say.",
+    "core_loop": "see a number → pick what it says → next",
+    "verbs": [
+      "recall",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each number has one rule"
+    ],
+    "win": "match all",
+    "lose": "none",
+    "scoring": "right matches",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "civics class review"
+    ],
+    "difficulty_levers": [
+      "list size"
+    ],
+    "tools": [
+      "quiz",
+      "match_pairs"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "match the amendments to their rights",
+      "civics test practice",
+      "citizenship test quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "element_guess_clues",
+    "name": "Guess the element from clues",
+    "aliases": [
+      "element clues"
+    ],
+    "family": "knowledge_quiz",
+    "summary": "Clues reveal one at a time (atomic number range, state at room temp); guess early.",
+    "core_loop": "read a clue → guess or ask for more → solve",
+    "verbs": [
+      "infer",
+      "recall"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "earlier guesses score more"
+    ],
+    "win": "name the element",
+    "lose": "out of clues",
+    "scoring": "points by clues used",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "chem class duel"
+    ],
+    "difficulty_levers": [
+      "clues",
+      "obscurity"
+    ],
+    "tools": [
+      "reveal",
+      "typed_answer",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the element from clues",
+      "chemistry 20 questions",
+      "element of the day"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

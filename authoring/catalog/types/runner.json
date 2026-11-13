@@ -1,0 +1,2599 @@
+[
+  {
+    "id": "lane_runner",
+    "name": "Three-lane endless runner",
+    "aliases": [
+      "Subway Surfers",
+      "Temple Run",
+      "Minion Rush"
+    ],
+    "family": "runner",
+    "summary": "Run forward forever down three lanes; swipe to switch lanes, jump and slide past obstacles, and grab coins.",
+    "core_loop": "swipe left or right to change lanes → swipe up to jump, down to slide → grab coins → speed rises → crash ends the run",
+    "verbs": [
+      "swipe",
+      "dodge",
+      "collect"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "three lanes",
+      "hitting a barrier ends the run",
+      "speed rises over time"
+    ],
+    "win": "none; endless",
+    "lose": "crashing into an obstacle",
+    "scoring": "distance plus coins",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's distance on the same seed",
+      "Group weekly high score"
+    ],
+    "difficulty_levers": [
+      "starting speed",
+      "obstacle density",
+      "lane count"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "speed_ramp",
+      "pickups",
+      "collide",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "subway surfers but in hogwarts",
+      "like temple run but in space",
+      "endless runner where you dodge trains"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "one_tap_auto_runner",
+    "name": "One-tap jump runner",
+    "aliases": [
+      "Chrome Dino",
+      "Canabalt",
+      "Geometry Dash"
+    ],
+    "family": "runner",
+    "summary": "The character runs automatically on one line; tap to jump over gaps and obstacles.",
+    "core_loop": "run automatically → tap to jump → clear obstacles → go as far as you can",
+    "verbs": [
+      "jump",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "one button: jump",
+      "any hit ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "hitting an obstacle",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "ghost race against friends on the daily seed"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "gap spacing"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "speed_ramp",
+      "collide",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "chrome dino game but with my dog",
+      "one tap jumping runner",
+      "canabalt style rooftop run"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rhythm_auto_runner",
+    "name": "Beat-synced runner",
+    "aliases": [
+      "Geometry Dash",
+      "Bit.Trip Runner"
+    ],
+    "family": "runner",
+    "summary": "Obstacles are placed on the beat of the music; jump, slide and kick in rhythm to clear the level.",
+    "core_loop": "the run follows the song → act on the beat → reach the end of the track",
+    "verbs": [
+      "jump",
+      "time",
+      "listen"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "obstacles land on beats",
+      "one hit restarts from a checkpoint"
+    ],
+    "win": "reach the end of the song",
+    "lose": "none with checkpoints; attempts count",
+    "scoring": "attempts and collected items",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your attempt count"
+    ],
+    "difficulty_levers": [
+      "tempo",
+      "obstacle mix"
+    ],
+    "tools": [
+      "beat_target",
+      "gravity_jump",
+      "checkpoint",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "geometry dash with a taylor swift song",
+      "runner where you jump to the beat",
+      "music runner level"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "gravity_flip_runner",
+    "name": "Gravity flip runner",
+    "aliases": [
+      "VVVVVV",
+      "Gravity Guy"
+    ],
+    "family": "runner",
+    "summary": "Tap to flip gravity and run along the ceiling or floor to avoid gaps and spikes.",
+    "core_loop": "run automatically → tap to flip between floor and ceiling → avoid gaps → keep going",
+    "verbs": [
+      "flip",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "tapping flips gravity",
+      "falling off-screen ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "falling or hitting spikes",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "friends race the same course"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "flip gap frequency"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "speed_ramp",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "gravity flip runner",
+      "run on the ceiling game",
+      "gravity guy style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "jetpack_hold_runner",
+    "name": "Hold-to-fly runner",
+    "aliases": [
+      "Jetpack Joyride"
+    ],
+    "family": "runner",
+    "summary": "Hold to fly up and release to fall while the run auto-scrolls past lasers and missiles.",
+    "core_loop": "hold to rise → release to fall → thread gaps → grab coins",
+    "verbs": [
+      "fly",
+      "dodge",
+      "collect"
+    ],
+    "inputs": [
+      "hold"
+    ],
+    "rules": [
+      "holding thrusts up, releasing falls",
+      "any hit ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "hitting a hazard",
+    "scoring": "distance plus coins",
+    "session_seconds": [
+      30,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "weekly distance board in a Group"
+    ],
+    "difficulty_levers": [
+      "hazard density",
+      "speed"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "collide",
+      "pickups",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "jetpack joyride with a cat",
+      "hold to fly runner",
+      "dodge lasers with a jetpack"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "flappy_tap_flyer",
+    "name": "Tap-to-flap flyer",
+    "aliases": [
+      "Flappy Bird"
+    ],
+    "family": "runner",
+    "summary": "Tap to flap upward through gaps in pipes; gravity pulls you down between taps.",
+    "core_loop": "tap to flap → pass a gap → score a point → repeat",
+    "verbs": [
+      "flap",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tap gives a fixed upward push",
+      "touching anything ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "hitting a pipe or the ground",
+    "scoring": "gaps passed",
+    "session_seconds": [
+      10,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's best"
+    ],
+    "difficulty_levers": [
+      "gap size",
+      "pipe spacing",
+      "speed"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "collide",
+      "score",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "flappy bird but it's my professor",
+      "tap to flap game",
+      "flappy bird with a goose"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "road_crossing_hopper",
+    "name": "Endless crossing hopper",
+    "aliases": [
+      "Crossy Road",
+      "Frogger"
+    ],
+    "family": "runner",
+    "summary": "Hop forward across endless lanes of traffic, rivers and trains; stand still too long and you're caught.",
+    "core_loop": "tap to hop forward → swipe to sidestep → time gaps in traffic → keep moving",
+    "verbs": [
+      "hop",
+      "time",
+      "dodge"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "each tap moves one tile",
+      "waiting too long ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "hit by traffic, drowning or waiting too long",
+    "scoring": "rows crossed",
+    "session_seconds": [
+      30,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare best hops with friends"
+    ],
+    "difficulty_levers": [
+      "traffic speed",
+      "lane mix"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "collide",
+      "speed_ramp",
+      "spawn_wave"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "crossy road but in new york",
+      "frogger style crossing game",
+      "cross the road with a duck"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "downhill_slalom_runner",
+    "name": "Downhill slalom",
+    "aliases": [
+      "Ski Safari",
+      "Alto's Adventure",
+      "SkiFree"
+    ],
+    "family": "runner",
+    "summary": "Ski or board downhill automatically; tilt or tap to steer through gates and around trees.",
+    "core_loop": "steer left and right → pass through gates → avoid trees → go faster",
+    "verbs": [
+      "steer",
+      "dodge"
+    ],
+    "inputs": [
+      "tap",
+      "tilt",
+      "drag"
+    ],
+    "rules": [
+      "missing a gate costs time",
+      "hitting a tree ends the run"
+    ],
+    "win": "reach the bottom",
+    "lose": "hitting an obstacle",
+    "scoring": "time plus gates",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends race the same slope"
+    ],
+    "difficulty_levers": [
+      "slope speed",
+      "gate width"
+    ],
+    "tools": [
+      "lanes",
+      "collide",
+      "speed_ramp",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "ski down a mountain dodging trees",
+      "snowboarding game like alto",
+      "slalom race"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "wall_jump_climber",
+    "name": "Wall-jump climber",
+    "aliases": [
+      "Mega Jump",
+      "Wall Kickers"
+    ],
+    "family": "runner",
+    "summary": "Bounce between two walls going upward; tap to jump to the other wall, avoiding spikes.",
+    "core_loop": "tap to leap to the other wall → avoid spikes → climb higher",
+    "verbs": [
+      "jump",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tap jumps to the opposite wall",
+      "spikes end the run"
+    ],
+    "win": "none; endless",
+    "lose": "hitting spikes or falling",
+    "scoring": "height reached",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "height leaderboard"
+    ],
+    "difficulty_levers": [
+      "spike density",
+      "climb speed"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "wall jump climbing game",
+      "ninja climbing up a tower",
+      "bounce between walls"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "vertical_jumper",
+    "name": "Endless upward jumper",
+    "aliases": [
+      "Doodle Jump",
+      "Icy Tower"
+    ],
+    "family": "runner",
+    "summary": "Bounce up on platforms forever; tilt or tap to move sideways and land on the next platform.",
+    "core_loop": "bounce automatically → move sideways → land on platforms → climb",
+    "verbs": [
+      "jump",
+      "steer"
+    ],
+    "inputs": [
+      "tilt",
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "landing on a platform bounces you up",
+      "falling below the screen ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "falling off the bottom",
+    "scoring": "height",
+    "session_seconds": [
+      30,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "group best height board"
+    ],
+    "difficulty_levers": [
+      "platform gaps",
+      "moving platforms"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "pickups",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "doodle jump but my cat",
+      "jump up platforms forever",
+      "icy tower style climbing"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "snake_runner_grow",
+    "name": "Growing snake runner",
+    "aliases": [
+      "Snake.io",
+      "Slither.io",
+      "Snake"
+    ],
+    "family": "runner",
+    "summary": "Steer a snake that grows as it eats; don't hit walls or yourself.",
+    "core_loop": "steer → eat food → grow longer → avoid your own tail",
+    "verbs": [
+      "steer",
+      "collect"
+    ],
+    "inputs": [
+      "swipe",
+      "drag"
+    ],
+    "rules": [
+      "the snake never stops",
+      "hitting yourself or a wall ends it"
+    ],
+    "win": "none; score attack",
+    "lose": "crashing",
+    "scoring": "length",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat your friends' longest snake"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "arena size"
+    ],
+    "tools": [
+      "player_drag",
+      "pickups",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "snake game with emojis",
+      "slither io with friends",
+      "classic snake"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tunnel_spin_runner",
+    "name": "Spinning tunnel runner",
+    "aliases": [
+      "Tunnel Rush",
+      "Run 3",
+      "Tempest"
+    ],
+    "family": "runner",
+    "summary": "Fly down a tunnel and rotate around its walls to dodge gaps and blockers.",
+    "core_loop": "rotate around the tunnel → line up with the open path → keep flying",
+    "verbs": [
+      "rotate",
+      "dodge"
+    ],
+    "inputs": [
+      "swipe",
+      "tilt"
+    ],
+    "rules": [
+      "the tunnel spins with you",
+      "any hit ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "hitting a blocker",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily tunnel shared in a Group"
+    ],
+    "difficulty_levers": [
+      "rotation speed",
+      "blocker density"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "speed_ramp",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "tunnel rush game",
+      "spin through a tunnel",
+      "run 3 in space"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "boost_pad_runner",
+    "name": "Boost pad sprint",
+    "aliases": [
+      "Boost runner",
+      "Sonic"
+    ],
+    "family": "runner",
+    "summary": "Run a fixed course hitting boost pads and avoiding slowdowns to set the fastest time.",
+    "core_loop": "run → hit boost pads → avoid mud and spikes → reach the finish fast",
+    "verbs": [
+      "run",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "boosts stack briefly",
+      "slowdowns cost time"
+    ],
+    "win": "reach the finish",
+    "lose": "none",
+    "scoring": "finish time",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race your friend's best time"
+    ],
+    "difficulty_levers": [
+      "course length",
+      "pad spacing"
+    ],
+    "tools": [
+      "lanes",
+      "pickups",
+      "checkpoint",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "sonic style speed run",
+      "run fast and hit boost pads",
+      "sprint course with friends ghosts"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "zigzag_path_runner",
+    "name": "Zigzag path",
+    "aliases": [
+      "ZigZag",
+      "Dancing Line"
+    ],
+    "family": "runner",
+    "summary": "A ball runs along a narrow zigzag path; tap to switch direction at each corner.",
+    "core_loop": "tap to turn at each corner → stay on the path → collect gems",
+    "verbs": [
+      "turn",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each tap flips direction 90 degrees",
+      "leaving the path ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "falling off the path",
+    "scoring": "distance plus gems",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily path ghosts"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "corner frequency"
+    ],
+    "tools": [
+      "endless",
+      "speed_ramp",
+      "pickups"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "zigzag tap game",
+      "dancing line with my song",
+      "stay on the path game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "color_switch_runner",
+    "name": "Color gate runner",
+    "aliases": [
+      "Color Switch"
+    ],
+    "family": "runner",
+    "summary": "Move through obstacles that rotate; you can only pass through parts that match your color.",
+    "core_loop": "tap to move up → time your pass through your color → color changes at switches",
+    "verbs": [
+      "time",
+      "match"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "you can only cross your own color",
+      "switches change your color"
+    ],
+    "win": "none; endless",
+    "lose": "touching the wrong color",
+    "scoring": "gates passed",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat friends' best"
+    ],
+    "difficulty_levers": [
+      "rotation speed",
+      "colors"
+    ],
+    "tools": [
+      "gravity_jump",
+      "collide",
+      "endless",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "color switch game",
+      "only pass through your color",
+      "color gate tap game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shape_shift_runner",
+    "name": "Shape-shift runner",
+    "aliases": [
+      "Hole in the wall runner"
+    ],
+    "family": "runner",
+    "summary": "Walls with cutouts approach; switch your shape to fit through each hole.",
+    "core_loop": "see the wall → pick the matching shape → pass through → speed rises",
+    "verbs": [
+      "match",
+      "react"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "wrong shape ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "wrong shape",
+    "scoring": "walls passed",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "party mode passing the phone"
+    ],
+    "difficulty_levers": [
+      "shape count",
+      "speed"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "speed_ramp",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "hole in the wall game",
+      "change shape to fit through walls",
+      "shape shifting runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cliff_jump_runner",
+    "name": "Gap jumping with charge",
+    "aliases": [
+      "Stick Hero",
+      "Ninja Rope"
+    ],
+    "family": "runner",
+    "summary": "Hold to charge a jump or a bridge the right length to reach the next platform.",
+    "core_loop": "hold to charge → release → land on the next platform → repeat",
+    "verbs": [
+      "judge",
+      "time"
+    ],
+    "inputs": [
+      "hold"
+    ],
+    "rules": [
+      "too short or too long and you fall"
+    ],
+    "win": "none; endless",
+    "lose": "falling",
+    "scoring": "platforms reached",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "streak sharing"
+    ],
+    "difficulty_levers": [
+      "gap variance",
+      "platform width"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "stick hero bridge game",
+      "hold to jump the right distance",
+      "ninja bridge game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "grapple_swing_runner",
+    "name": "Grapple swing",
+    "aliases": [
+      "Stickman Hook",
+      "Spider-Man swing"
+    ],
+    "family": "runner",
+    "summary": "Tap to grapple an anchor and swing forward; release at the right moment to fly.",
+    "core_loop": "tap to grab → swing → release to fly → grab the next",
+    "verbs": [
+      "swing",
+      "time"
+    ],
+    "inputs": [
+      "hold",
+      "tap"
+    ],
+    "rules": [
+      "you only fly while released",
+      "falling to the ground ends the run"
+    ],
+    "win": "reach the finish",
+    "lose": "falling",
+    "scoring": "time and style",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race friends"
+    ],
+    "difficulty_levers": [
+      "anchor spacing"
+    ],
+    "tools": [
+      "gravity_jump",
+      "collide",
+      "checkpoint",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "spiderman swinging game",
+      "stickman hook levels",
+      "swing on ropes runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mount_rider_runner",
+    "name": "Rider with lasso",
+    "aliases": [
+      "Rodeo Stampede"
+    ],
+    "family": "runner",
+    "summary": "Ride animals at a gallop; leap to a new animal before your current one bucks you off.",
+    "core_loop": "ride → avoid obstacles → leap to another animal → tame new animals",
+    "verbs": [
+      "ride",
+      "jump",
+      "dodge"
+    ],
+    "inputs": [
+      "swipe",
+      "hold"
+    ],
+    "rules": [
+      "each animal stays tame for limited time",
+      "falling ends the run"
+    ],
+    "win": "none; endless",
+    "lose": "falling off",
+    "scoring": "distance and animals tamed",
+    "session_seconds": [
+      30,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "collect and compare zoos"
+    ],
+    "difficulty_levers": [
+      "buck timer",
+      "animal mix"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "collide",
+      "pickups"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "rodeo stampede game",
+      "ride animals across the savanna",
+      "jump between horses"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "city_rooftop_runner",
+    "name": "Rooftop parkour",
+    "aliases": [
+      "Vector",
+      "Mirror's Edge style"
+    ],
+    "family": "runner",
+    "summary": "Run across rooftops and swipe to vault, slide and wall-run past a chaser.",
+    "core_loop": "swipe for moves → clear gaps → keep ahead of the chaser",
+    "verbs": [
+      "run",
+      "vault",
+      "dodge"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "the chaser catches you if you slow down"
+    ],
+    "win": "escape to the finish",
+    "lose": "caught or fall",
+    "scoring": "time and tricks",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "chaser speed"
+    ],
+    "tools": [
+      "gravity_jump",
+      "lanes",
+      "collide",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "parkour across rooftops",
+      "vector style escape",
+      "free running game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "mine_cart_runner",
+    "name": "Mine cart track switcher",
+    "aliases": [
+      "Donkey Kong cart",
+      "minecart rush"
+    ],
+    "family": "runner",
+    "summary": "Ride a cart on rails; tap to jump gaps and switch tracks at junctions.",
+    "core_loop": "ride → switch tracks at forks → jump broken rails → collect gems",
+    "verbs": [
+      "switch",
+      "jump"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "rules": [
+      "only one track at a time",
+      "gaps must be jumped"
+    ],
+    "win": "reach the end",
+    "lose": "falling or crashing",
+    "scoring": "gems and distance",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share best runs"
+    ],
+    "difficulty_levers": [
+      "rail speed",
+      "fork frequency"
+    ],
+    "tools": [
+      "lanes",
+      "gravity_jump",
+      "pickups",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "mine cart game",
+      "switch tracks on a roller coaster",
+      "rail rider"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pursuit_runner",
+    "name": "Escape the chaser",
+    "aliases": [
+      "Temple Run monkeys",
+      "Running from a boulder"
+    ],
+    "family": "runner",
+    "summary": "A chaser follows; stumbles bring it closer and two stumbles end the run.",
+    "core_loop": "dodge obstacles → avoid stumbles → keep the chaser behind",
+    "verbs": [
+      "dodge",
+      "run"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "each stumble lets the chaser gain",
+      "two stumbles in a row end the run"
+    ],
+    "win": "none; endless",
+    "lose": "caught by the chaser",
+    "scoring": "distance",
+    "session_seconds": [
+      30,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare escapes"
+    ],
+    "difficulty_levers": [
+      "stumble recovery time"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "lives",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "run from a giant boulder",
+      "escape the dinosaur runner",
+      "get chased by my dog"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "dash_dodge_runner",
+    "name": "Dash runner",
+    "aliases": [
+      "Dash",
+      "dash through hazards"
+    ],
+    "family": "runner",
+    "summary": "Tap to dash forward with brief invulnerability; time dashes through hazards.",
+    "core_loop": "run → tap to dash → pass through hazards while invulnerable → recharge",
+    "verbs": [
+      "dash",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "dash has a cooldown",
+      "you're invulnerable only while dashing"
+    ],
+    "win": "reach the finish",
+    "lose": "hitting a hazard outside a dash",
+    "scoring": "time",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "ghost race"
+    ],
+    "difficulty_levers": [
+      "cooldown",
+      "hazard timing"
+    ],
+    "tools": [
+      "collide",
+      "checkpoint",
+      "ghost_score",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "dash through lasers game",
+      "time your dash runner",
+      "ninja dash game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "underwater_swimmer",
+    "name": "Swim runner",
+    "aliases": [
+      "Fishing Frenzy",
+      "swim runner"
+    ],
+    "family": "runner",
+    "summary": "Swim forward through currents; tap to rise, release to sink, eat small fish, avoid big ones.",
+    "core_loop": "rise and sink → eat smaller fish → avoid bigger → grow",
+    "verbs": [
+      "swim",
+      "eat",
+      "dodge"
+    ],
+    "inputs": [
+      "hold",
+      "tap"
+    ],
+    "rules": [
+      "you can eat anything smaller",
+      "bigger things end the run"
+    ],
+    "win": "none; endless",
+    "lose": "eaten",
+    "scoring": "size and distance",
+    "session_seconds": [
+      30,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "aquarium leaderboard"
+    ],
+    "difficulty_levers": [
+      "growth rate"
+    ],
+    "tools": [
+      "gravity_jump",
+      "pickups",
+      "collide",
+      "endless"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "fish eats smaller fish runner",
+      "swim through the ocean game",
+      "shark escape"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "paper_plane_glider",
+    "name": "Glider",
+    "aliases": [
+      "Paper plane",
+      "Gust glider"
+    ],
+    "family": "runner",
+    "summary": "Glide forward; tap to catch updrafts and keep altitude, avoiding obstacles.",
+    "core_loop": "glide → tap for lift → ride updrafts → don't touch the ground",
+    "verbs": [
+      "glide",
+      "steer"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "lift is limited",
+      "touching the ground ends the flight"
+    ],
+    "win": "none; endless",
+    "lose": "crashing",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "longest flight in the group"
+    ],
+    "difficulty_levers": [
+      "lift strength"
+    ],
+    "tools": [
+      "gravity_jump",
+      "pickups",
+      "collide",
+      "endless"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "paper airplane game",
+      "glide on the wind",
+      "bird glider runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "car_lane_dodger",
+    "name": "Traffic dodger",
+    "aliases": [
+      "Traffic Racer",
+      "Road Fighter"
+    ],
+    "family": "runner",
+    "summary": "Drive down a highway, swiping between lanes to pass slower cars.",
+    "core_loop": "swipe lanes → pass cars → speed rises → near misses score more",
+    "verbs": [
+      "steer",
+      "dodge"
+    ],
+    "inputs": [
+      "swipe",
+      "tilt"
+    ],
+    "rules": [
+      "crashing ends the run",
+      "near misses give bonus"
+    ],
+    "win": "none; endless",
+    "lose": "crashing",
+    "scoring": "distance plus near-miss bonus",
+    "session_seconds": [
+      30,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "weekly highway board"
+    ],
+    "difficulty_levers": [
+      "traffic density",
+      "speed"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "speed_ramp",
+      "collide",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "traffic racer game",
+      "dodge cars on the highway",
+      "drive through rush hour"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ball_roll_runner",
+    "name": "Rolling ball path",
+    "aliases": [
+      "Ballz run",
+      "Rolling Sky"
+    ],
+    "family": "runner",
+    "summary": "Roll a ball down a winding course; drag to steer and avoid falling off edges.",
+    "core_loop": "drag to steer → stay on the path → avoid holes → reach the end",
+    "verbs": [
+      "steer",
+      "balance"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "rules": [
+      "falling off the edge ends it"
+    ],
+    "win": "reach the end",
+    "lose": "falling",
+    "scoring": "time and gems",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "race friends' ghosts"
+    ],
+    "difficulty_levers": [
+      "path width",
+      "speed"
+    ],
+    "tools": [
+      "player_drag",
+      "collide",
+      "checkpoint",
+      "pickups"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "rolling sky game",
+      "roll a ball down the course",
+      "ball run levels"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hover_altitude_runner",
+    "name": "Keep your altitude",
+    "aliases": [
+      "Helicopter game"
+    ],
+    "family": "runner",
+    "summary": "Hold to rise and release to fall through a cave that narrows.",
+    "core_loop": "hold to rise → release to fall → stay in the cave → go far",
+    "verbs": [
+      "hold",
+      "steer"
+    ],
+    "inputs": [
+      "hold"
+    ],
+    "rules": [
+      "the cave narrows over time"
+    ],
+    "win": "none; endless",
+    "lose": "touching a wall",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "classic helicopter high scores"
+    ],
+    "difficulty_levers": [
+      "narrowing rate"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "helicopter game",
+      "fly through a cave",
+      "hold to rise game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bubble_trail_runner",
+    "name": "Collect the trail",
+    "aliases": [
+      "Coin trail runner"
+    ],
+    "family": "runner",
+    "summary": "Follow a trail of collectibles; staying on the trail builds a multiplier.",
+    "core_loop": "follow the trail → collect in a row → keep the multiplier → avoid hazards",
+    "verbs": [
+      "collect",
+      "steer"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "missing a collectible resets the multiplier"
+    ],
+    "win": "none; endless",
+    "lose": "hitting a hazard",
+    "scoring": "collectibles times multiplier",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "multiplier bragging"
+    ],
+    "difficulty_levers": [
+      "trail complexity"
+    ],
+    "tools": [
+      "pickups",
+      "combo",
+      "lanes",
+      "endless"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "collect the coin trail",
+      "follow the stars runner",
+      "combo collect runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "switchback_stairs",
+    "name": "Stairs turn runner",
+    "aliases": [
+      "Stairs",
+      "Tap Tap Dash"
+    ],
+    "family": "runner",
+    "summary": "Climb stairs that turn left or right; tap the correct direction before the step crumbles.",
+    "core_loop": "see the next step → tap left or right → climb → speed rises",
+    "verbs": [
+      "turn",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "wrong direction ends the run",
+      "steps crumble behind you"
+    ],
+    "win": "none; endless",
+    "lose": "wrong turn or crumble",
+    "scoring": "steps climbed",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "daily stairs ghost"
+    ],
+    "difficulty_levers": [
+      "crumble speed"
+    ],
+    "tools": [
+      "endless",
+      "speed_ramp",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "infinite stairs game",
+      "climb stairs left or right",
+      "tap tap dash style"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "two_character_split",
+    "name": "Two-runner split control",
+    "aliases": [
+      "Dual runner",
+      "2 Cars"
+    ],
+    "family": "runner",
+    "summary": "Control two runners at once, one with each thumb, each in its own lanes.",
+    "core_loop": "left thumb steers one → right thumb steers the other → both survive",
+    "verbs": [
+      "split",
+      "dodge"
+    ],
+    "inputs": [
+      "tap",
+      "multi_touch"
+    ],
+    "rules": [
+      "each side has its own lanes",
+      "either crash ends it"
+    ],
+    "win": "none; endless",
+    "lose": "either runner crashes",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "challenge friends to multitask"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "obstacle sync"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "2 cars game",
+      "control two runners at once",
+      "split brain runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "reverse_controls_runner",
+    "name": "Mirror-control runner",
+    "aliases": [
+      "Mirror runner"
+    ],
+    "family": "runner",
+    "summary": "Controls periodically flip; adapt to inverted steering while running.",
+    "core_loop": "run → steer → controls flip → adapt",
+    "verbs": [
+      "steer",
+      "adapt"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "flips are announced one second ahead"
+    ],
+    "win": "none; endless",
+    "lose": "crashing",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "party challenge"
+    ],
+    "difficulty_levers": [
+      "flip frequency"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "runner where controls flip",
+      "confusing mirror game",
+      "backwards controls challenge"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "shrink_grow_runner",
+    "name": "Size-change runner",
+    "aliases": [
+      "Size runner"
+    ],
+    "family": "runner",
+    "summary": "Tap to shrink under gaps or hold to grow to break barriers.",
+    "core_loop": "read the obstacle → shrink or grow → pass → continue",
+    "verbs": [
+      "resize",
+      "react"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "small fits low gaps; big breaks thin walls"
+    ],
+    "win": "none; endless",
+    "lose": "wrong size",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat friends"
+    ],
+    "difficulty_levers": [
+      "obstacle mix"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "shrink and grow runner",
+      "size changing game",
+      "tiny or giant runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "crowd_gate_runner",
+    "name": "Crowd gate runner",
+    "aliases": [
+      "Count Masters",
+      "Crowd City"
+    ],
+    "family": "runner",
+    "summary": "Steer a crowd through math gates (x2, +10, -5) to grow it before a final battle.",
+    "core_loop": "steer → pick the better gate → grow the crowd → beat the boss crowd",
+    "verbs": [
+      "steer",
+      "choose",
+      "count"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "gates add, subtract or multiply",
+      "the bigger crowd wins the battle"
+    ],
+    "win": "win the final battle",
+    "lose": "your crowd hits zero",
+    "scoring": "crowd size",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share final crowd size"
+    ],
+    "difficulty_levers": [
+      "gate values"
+    ],
+    "tools": [
+      "lanes",
+      "player_drag",
+      "collide",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "count masters game",
+      "math gates crowd runner",
+      "grow your army runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "stack_carry_runner",
+    "name": "Stack-carrying runner",
+    "aliases": [
+      "Stack runner",
+      "Cake rush"
+    ],
+    "family": "runner",
+    "summary": "Collect blocks on your head while running; obstacles knock some off; spend the stack at the end.",
+    "core_loop": "run → collect blocks → protect the stack → bank at the finish",
+    "verbs": [
+      "collect",
+      "steer"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "obstacles knock blocks off",
+      "the stack multiplies at the end"
+    ],
+    "win": "reach the finish",
+    "lose": "lose the whole stack",
+    "scoring": "stack size at finish",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "stack size bragging"
+    ],
+    "difficulty_levers": [
+      "obstacle density"
+    ],
+    "tools": [
+      "pickups",
+      "lanes",
+      "player_drag",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "stack runner game",
+      "collect pancakes while running",
+      "carry a tall stack"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "paint_trail_runner",
+    "name": "Paint the path",
+    "aliases": [
+      "Paint run"
+    ],
+    "family": "runner",
+    "summary": "Run and leave a color trail; cover the most of the floor before time ends.",
+    "core_loop": "run → paint tiles → avoid painted-over zones → cover more",
+    "verbs": [
+      "paint",
+      "steer"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "rivals can paint over your tiles"
+    ],
+    "win": "most coverage",
+    "lose": "none",
+    "scoring": "percentage painted",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "color battle with friends"
+    ],
+    "difficulty_levers": [
+      "rival count",
+      "time"
+    ],
+    "tools": [
+      "player_drag",
+      "grid_board",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "paint the floor runner",
+      "splatoon style runner",
+      "cover the most tiles"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bridge_builder_runner",
+    "name": "Collect and bridge",
+    "aliases": [
+      "Bridge race"
+    ],
+    "family": "runner",
+    "summary": "Collect planks while running and spend them to build bridges across gaps.",
+    "core_loop": "collect planks → reach a gap → build → keep running",
+    "verbs": [
+      "collect",
+      "build"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "each gap needs enough planks"
+    ],
+    "win": "reach the finish",
+    "lose": "falling",
+    "scoring": "planks left",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "race friends"
+    ],
+    "difficulty_levers": [
+      "gap size"
+    ],
+    "tools": [
+      "pickups",
+      "lanes",
+      "collide",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "bridge race game",
+      "collect planks to cross",
+      "build bridges while running"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "time_trial_obstacle",
+    "name": "Obstacle course time trial",
+    "aliases": [
+      "Fall Guys course",
+      "Wipeout"
+    ],
+    "family": "runner",
+    "summary": "Run a fixed obstacle course against the clock with swinging and moving hazards.",
+    "core_loop": "run → jump and dodge hazards → reach checkpoints → beat the time",
+    "verbs": [
+      "run",
+      "jump",
+      "dodge"
+    ],
+    "inputs": [
+      "tap",
+      "swipe",
+      "drag"
+    ],
+    "rules": [
+      "hazards knock you back to the last checkpoint"
+    ],
+    "win": "finish under the target time",
+    "lose": "none",
+    "scoring": "finish time",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "race friends' ghosts on the same course"
+    ],
+    "difficulty_levers": [
+      "hazard speed",
+      "checkpoints"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint",
+      "collide",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "fall guys obstacle course",
+      "wipeout style course",
+      "obstacle race against friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "treasure_dash_runner",
+    "name": "Dash for treasure",
+    "aliases": [
+      "Treasure runner"
+    ],
+    "family": "runner",
+    "summary": "Run a short course grabbing treasures; the more you carry, the slower you go.",
+    "core_loop": "grab treasure → slow down → decide when to bank → beat the clock",
+    "verbs": [
+      "collect",
+      "risk"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "each treasure slows you",
+      "banking resets speed"
+    ],
+    "win": "bank the most before time",
+    "lose": "none",
+    "scoring": "treasure banked",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "risk-takers compare"
+    ],
+    "difficulty_levers": [
+      "slow factor"
+    ],
+    "tools": [
+      "pickups",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "greedy treasure runner",
+      "grab gold but get slower",
+      "risk reward runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "bounce_ball_runner",
+    "name": "Bouncing ball runner",
+    "aliases": [
+      "Bounce",
+      "Red Ball"
+    ],
+    "family": "runner",
+    "summary": "A ball bounces automatically; tap to bounce higher or lower to clear obstacles.",
+    "core_loop": "ball bounces → adjust the bounce → clear gaps and spikes → go far",
+    "verbs": [
+      "bounce",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "every landing bounces automatically"
+    ],
+    "win": "none; endless",
+    "lose": "hitting spikes",
+    "scoring": "distance",
+    "session_seconds": [
+      20,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "friends race"
+    ],
+    "difficulty_levers": [
+      "bounce height",
+      "spacing"
+    ],
+    "tools": [
+      "gravity_jump",
+      "endless",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "bouncing ball runner",
+      "red ball game",
+      "bounce over spikes"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "side_scroll_shooter_runner",
+    "name": "Run and gun",
+    "aliases": [
+      "Metal Slug runner",
+      "Run and gun"
+    ],
+    "family": "runner",
+    "summary": "Run automatically while tapping to shoot obstacles and enemies ahead.",
+    "core_loop": "run → tap to shoot → clear the path → collect power-ups",
+    "verbs": [
+      "shoot",
+      "run"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "unshot enemies block you"
+    ],
+    "win": "none; endless",
+    "lose": "hit by an enemy",
+    "scoring": "distance and kills",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "kill count board"
+    ],
+    "difficulty_levers": [
+      "enemy density"
+    ],
+    "tools": [
+      "spawn_wave",
+      "endless",
+      "collide",
+      "pickups"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "run and shoot runner",
+      "endless runner with a gun",
+      "shoot zombies while running"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "night_light_runner",
+    "name": "Run in the dark",
+    "aliases": [
+      "Lantern runner"
+    ],
+    "family": "runner",
+    "summary": "Run in darkness with a light that shrinks; collect lights to see further.",
+    "core_loop": "run → collect lights → your view grows → avoid unseen obstacles",
+    "verbs": [
+      "run",
+      "collect"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "rules": [
+      "your light radius shrinks over time"
+    ],
+    "win": "none; endless",
+    "lose": "hitting an obstacle",
+    "scoring": "distance",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "spooky night runs with friends"
+    ],
+    "difficulty_levers": [
+      "shrink rate"
+    ],
+    "tools": [
+      "pickups",
+      "endless",
+      "collide",
+      "lanes"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "runner in the dark with a lantern",
+      "spooky night run",
+      "collect lights to see"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "weather_runner",
+    "name": "Shifting weather runner",
+    "aliases": [
+      "Weather run"
+    ],
+    "family": "runner",
+    "summary": "Wind, rain and ice change how you move as the run goes on.",
+    "core_loop": "run → weather shifts → adjust timing → keep going",
+    "verbs": [
+      "adapt",
+      "dodge"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "ice slides, wind pushes, rain slows"
+    ],
+    "win": "none; endless",
+    "lose": "crashing",
+    "scoring": "distance",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "daily weather seed"
+    ],
+    "difficulty_levers": [
+      "change frequency"
+    ],
+    "tools": [
+      "lanes",
+      "endless",
+      "collide",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "runner with changing weather",
+      "run through a storm",
+      "ice and wind runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "relay_runner",
+    "name": "Relay runner",
+    "aliases": [
+      "Relay race"
+    ],
+    "family": "runner",
+    "summary": "Each lap a different teammate's runner takes over, each with a different move set.",
+    "core_loop": "run your leg → hand off → next runner's move → finish the relay",
+    "verbs": [
+      "run",
+      "cooperate"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "hand-offs must be timed"
+    ],
+    "win": "finish the relay",
+    "lose": "crashing",
+    "scoring": "total time",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Group relay where each friend runs a leg"
+    ],
+    "difficulty_levers": [
+      "leg length"
+    ],
+    "tools": [
+      "lanes",
+      "turns",
+      "shared_progress",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "relay race with my friends",
+      "team runner each person runs a leg",
+      "pass the baton runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "coin_magnet_runner",
+    "name": "Magnet collector",
+    "aliases": [
+      "Magnet run"
+    ],
+    "family": "runner",
+    "summary": "Toggle a magnet that pulls coins but also pulls hazards.",
+    "core_loop": "run → turn the magnet on near coins → off near hazards → collect",
+    "verbs": [
+      "toggle",
+      "collect"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "the magnet pulls everything metal"
+    ],
+    "win": "none; endless",
+    "lose": "hit by a pulled hazard",
+    "scoring": "coins collected",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "coin board"
+    ],
+    "difficulty_levers": [
+      "hazard ratio"
+    ],
+    "tools": [
+      "pickups",
+      "lanes",
+      "endless",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "magnet runner",
+      "pull coins but not bombs",
+      "magnetic runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "platform_auto_scroller",
+    "name": "Auto-scroll platformer",
+    "aliases": [
+      "Super Mario Run"
+    ],
+    "family": "runner",
+    "summary": "Run automatically across platforms; tap to jump, hold for higher, and vault enemies.",
+    "core_loop": "run → tap to jump → hold for high jumps → reach the flag",
+    "verbs": [
+      "jump",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "rules": [
+      "stopping is not possible",
+      "pits end the run"
+    ],
+    "win": "reach the flag",
+    "lose": "falling into a pit",
+    "scoring": "coins and time",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "race friends' coins"
+    ],
+    "difficulty_levers": [
+      "level length"
+    ],
+    "tools": [
+      "gravity_jump",
+      "checkpoint",
+      "pickups",
+      "collide"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "super mario run style",
+      "auto run platform levels",
+      "mario but it runs by itself"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "ghost_race_runner",
+    "name": "Race your friend's ghost",
+    "aliases": [
+      "Ghost race"
+    ],
+    "family": "runner",
+    "summary": "Run the same course as a friend's recorded ghost and try to beat it.",
+    "core_loop": "run → see the friend's ghost → beat it to the finish",
+    "verbs": [
+      "run",
+      "race"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "same seed as the friend's run"
+    ],
+    "win": "finish before the ghost",
+    "lose": "the ghost finishes first",
+    "scoring": "time difference",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "made for sending to a specific friend"
+    ],
+    "difficulty_levers": [
+      "course"
+    ],
+    "tools": [
+      "ghost_score",
+      "daily_seed",
+      "lanes",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "runner",
+    "example_prompts": [
+      "race my friend's ghost",
+      "beat my brother's run",
+      "ghost race runner"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]
