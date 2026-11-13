@@ -220,6 +220,7 @@ sprite, or at `false` to keep the shape, with `"art": { "hazard": "fogbank" }` (
 | `gravity_jump` | `avatar`, `ground` (a strip along the top of the floor) |
 | `spawn_wave` | `hazard` |
 | `pickups` | `pickup` |
+| `gap_walls` | `wall` (stretched to each wall part), `wall_cap` (at the gap edge, as wide as the wall) |
 | `lives` | `life` (one HUD icon per life) |
 | `grid_board` | `cell` (a plain cell, such as a card back) |
 | `match_pairs` | `card` (one frame per symbol) |

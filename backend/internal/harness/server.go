@@ -3,6 +3,7 @@ package harness
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -30,7 +31,7 @@ func NewForServer(ctx context.Context, db *mongo.Database, generatorURL string) 
 	if err != nil {
 		return nil, nil, err
 	}
-	planner := &Planner{Muse: PlanMuse(generatorURL)}
+	planner := &Planner{Muse: PlanMuse(generatorURL), Visual: VisualOn(os.Getenv("HARNESS_VISUAL"))}
 	if dir, ok := FindCatalogDir(); ok {
 		lists, _, err := LoadChecklists(dir)
 		if err != nil {

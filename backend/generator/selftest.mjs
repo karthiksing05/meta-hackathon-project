@@ -76,6 +76,82 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   check("a game without its authoring source can't be changed", !!err && /authoring_json/.test(err.message), err?.message);
 }
 
+// ---- the art step: the plan's visual stage marks assets "image", and Muse Image paints them after the gate ----
+{
+  const { encodePNG, decodePNG } = await import('./src/pixels.mjs');
+  const painting = (w, h, sprite) => {
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const inside = Math.hypot(x - w / 2, y - h / 2) < w / 4;
+      if (sprite && !inside) { data[i] = 0; data[i + 1] = 255; data[i + 2] = 0; } else { data[i] = 200; data[i + 1] = (x * 3) & 255; data[i + 2] = (y * 5) & 255; }
+      data[i + 3] = 255;
+    }
+    return encodePNG({ w, h, data });
+  };
+  class PaintingMuse extends ScriptedMuse {
+    constructor(replies, { fail = [] } = {}) { super(replies); this.images = []; this.fail = fail; }
+    async image({ prompt, size }) {
+      this.images.push({ prompt, size });
+      if (this.fail.some((f) => prompt.includes(f))) throw new Error('image call failed');
+      const [w, h] = size.split('x').map((n) => Math.round(Number(n) / 4));
+      return { png: painting(w, h, size === '1024x1024'), model: 'muse-image-1.0', seconds: 0.1 };
+    }
+  }
+  const withSprites = () => structuredClone(catalog.examples.find((e) => e.manifest?.art?.sprites?.avatar).manifest);
+  const sprite = 'avatar';
+  check('an example game has an avatar sprite to paint', !!withSprites());
+  const visual = {
+    style: 'cut paper', scene: 'a foggy bay at dawn', palette: { colors: { bg: '#E8EEF2', ink: '#1B2430' } },
+    layout: { hud: 'top bar', play: 'middle', controls: 'bottom', quiet: ['the top 80 px', 'the middle'] },
+    backdrop: { id: 'backdrop', render: 'image', prompt: 'A misty bay with piers at the edges.' },
+    assets: [
+      { id: sprite, piece: 'player', depicts: 'small boat', play_px: 48, render: 'image', prompt: 'A small wooden boat, three-quarter view.' },
+      { id: 'not_in_game', piece: 'x', depicts: 'gull', render: 'image', prompt: 'A gull.' },
+      { id: 'cell', piece: 'board cell', depicts: 'tile', render: 'svg', reads_as: 'a pale square' },
+    ],
+    readability: ['the HUD sits on a solid surface'],
+  };
+  const context = { version: 'harness-context/1', types: [], tools: [], plan: { spec: { spec: 'game-spec/1', theme: { world: 'a foggy bay' }, visual } } };
+
+  const muse = new PaintingMuse([withSprites()]);
+  const events = [];
+  const out = await compose({ request: 'a calm fog game', brief, context }, { studio, muse, onEvent: (e) => events.push(e), env: {} });
+  const a = JSON.parse(out.manifest.content.authoring_json);
+  check('the art step paints the backdrop and the named sprite', out.stats.art?.applied === true && out.stats.art.painted.includes('backdrop') && out.stats.art.painted.includes(sprite), JSON.stringify(out.stats.art));
+  check('the backdrop is a 360x640 JPEG and the sprite a PNG with alpha', a.art.backdrop?.image?.startsWith('data:image/jpeg;base64,') && a.art.sprites[sprite]?.image?.startsWith('data:image/png;base64,') && a.art.sprites[sprite].w <= 128,
+    JSON.stringify({ b: a.art.backdrop?.image?.slice(0, 30), s: a.art.sprites[sprite] && { ...a.art.sprites[sprite], image: a.art.sprites[sprite].image?.slice(0, 30) } }));
+  const cut = decodePNG(Buffer.from(a.art.sprites[sprite].image.split(',')[1], 'base64'));
+  check('the green background is keyed out', cut.data[3] === 0 && cut.data[((cut.h >> 1) * cut.w + (cut.w >> 1)) * 4 + 3] === 255);
+  check('the game still validates and is rewrapped', studio.expand(out.manifest.content.authoring_json).ok && out.manifest.content.game_json.includes('data:image/jpeg'));
+  check('an asset the game never named is skipped, not painted', out.stats.art.kept.some((k) => k.id === 'not_in_game') && !muse.images.some((i) => i.prompt.includes('A gull')), JSON.stringify(out.stats.art.kept));
+  check('sprite prompts ask for one subject on flat green', muse.images.some((i) => i.size === '1024x1024' && /pure green \(#00FF00\)/.test(i.prompt) && i.prompt.includes('A small wooden boat')));
+  check('the backdrop prompt carries the quiet areas and no pieces', muse.images.some((i) => i.size === '1024x1536' && i.prompt.includes('the top 80 px') && /no characters/.test(i.prompt)));
+  check('painting events have summaries', events.some((e) => e.kind === 'painting' && /painting 2 pieces/.test(e.summary)));
+  check('the art is within the budget', out.stats.art.bytes <= 192 * 1024, out.stats.art.bytes);
+
+  const failing = new PaintingMuse([withSprites()], { fail: ['A misty bay'] });
+  const half = await compose({ request: 'a calm fog game', brief, context }, { studio, muse: failing, env: {} });
+  const ha = JSON.parse(half.manifest.content.authoring_json);
+  check('a failed painting keeps that asset\'s own art', half.stats.art.applied && !half.stats.art.painted.includes('backdrop') && half.stats.art.kept.some((k) => k.id === 'backdrop') && !String(ha.art.backdrop?.image ?? '').startsWith('data:image/jpeg'), JSON.stringify(half.stats.art));
+
+  const off = new PaintingMuse([withSprites()]);
+  const offOut = await compose({ request: 'a calm fog game', brief, context }, { studio, muse: off, env: { GENERATOR_IMAGE_ART: '0' } });
+  check('GENERATOR_IMAGE_ART=0 turns the art step off', off.images.length === 0 && !offOut.stats.art);
+
+  const rev = new PaintingMuse([withSprites()]);
+  await compose({ request: 'make it faster', brief, base: out.manifest, context }, { studio, muse: rev, env: {} });
+  check('a revision is not repainted', rev.images.length === 0);
+}
+
+{
+  const { contextSection } = await import('./src/composer.mjs');
+  const text = contextSection({ plan: { spec: { spec: 'game-spec/1', goal: { text: 'catch 20 moths' }, visual: {
+    style: 'cut paper', palette: { colors: { bg: '#101826', ink: '#FAFAFA' } }, layout: { hud: 'top', play: 'middle', controls: 'bottom' },
+    backdrop: { prompt: 'SECRET BACKDROP PROMPT' }, assets: [{ id: 'moth', piece: 'pickup', depicts: 'pale moth', render: 'image', prompt: 'SECRET SPRITE PROMPT' }, { id: 'cell', depicts: 'tile', render: 'svg' }] } } } });
+  check('compose sees the spec and the sprite names, not the image prompts', text.includes('catch 20 moths') && text.includes('- moth (pickup)') && text.includes('#101826') && /cell .*\[svg/.test(text) && !text.includes('SECRET'), text.slice(-600));
+}
+
 check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a":1}\n```')?.a === 1 && extractObject('hi {"a":2} bye')?.a === 2 && extractObject('nope') === null);
 
 // ---- end to end: the real server and MuseClient against a fake Muse API ----

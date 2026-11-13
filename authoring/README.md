@@ -5,7 +5,7 @@ Rust/WASM engine, checks it, and has bots play it before it ships. `SPEC.md` def
 
 | Folder | What's in it |
 |---|---|
-| `fragments/` | 33 reusable game pieces. Core: lives, score, countdown. Movement: player_drag, lanes, gravity_jump, collide, pickups. Action: spawn_wave, speed_ramp, combo, timer_bar. Pacing: rounds (finite play), endless (endless play), waves, difficulty_curve, checkpoint, daily_seed. Boards and words: grid_board, match_pairs, hint, keyboard, word_check, tile_slide, sequence_memory, sort_bins, quiz. Story: choice_story, reveal. Social: ghost_score, beat_target, turns, shared_progress |
+| `fragments/` | 36 reusable game pieces. Core: lives, score, countdown. Movement: player_drag, lanes, gravity_jump, gap_walls, collide, pickups. Action: spawn_wave, speed_ramp, combo, timer_bar. Pacing: rounds (finite play), endless (endless play), waves, difficulty_curve, checkpoint, daily_seed. Boards and words: grid_board, match_pairs, hint, keyboard, word_check, tile_slide, sequence_memory, sort_bins, quiz. Story: choice_story, reveal. Social: ghost_score, beat_target, turns, shared_progress |
 | `looks/` | Look presets: tokens, a font and the slot layout |
 | `games/` | 20 authoring manifests: the three engine fixtures (Number Merge now on `tile_slide`) and 17 originals. Action: Fog Dodge, Golden Hour, Tide Taps, Lantern Lane, Meadow Hop, Snail Patrol. Puzzle and words: Lantern Letters, Hangout Words, Postcard Pairs, Daily Garden Pairs, Chime Circle, Picnic Packers, Quiz Night. Story: Kite Day Detour, Firefly Note. Social: Friend Dash (a friend's ghost and target), Bullseye Relay (pass-and-play with a Group total) |
 | `expander/` | The expander, the source map, the engine loader and a command-line tool. `studio.mjs` is the API the app's Studio and the server's generator use; `prompts.mjs` is Muse's prompts, `pipeline.mjs` the whole draft → repair → gate → polish loop, `quality.mjs` the quality check (shared by both paths); `stable.mjs` makes games survive key-sorted JSON (Swift) |
@@ -66,3 +66,18 @@ node authoring/tools/test-studio-bundle.mjs      # loads the bundle in a Node vm
 
 `gold/` holds 16 hand-made example games paired with requests: the quality bar for Muse. Studio picks the
 two closest to each request for Muse's prompt (`expander/gold.mjs`). See `gold/README.md`.
+
+## Muse harness
+
+See [the Emberpost sprite experiment](MUSE_HARNESS.md) for the structured prompt, the comparison
+with a plain prompt, and the checks to repeat on future sprite packs.
+
+## Muse token budgets
+
+For complex prompts that ask Muse Wonder to write a full manifest, consider a higher per-call
+output allowance if the experiment has spend headroom. In the Midnight Ward pilot, the API
+returned `finish_reason: length` with no manifest after using 9,998 of 10,000 completion tokens
+for reasoning. Log completion and reasoning tokens separately so this failure is visible. A retry
+with a higher allowance should still reserve its estimated cost against the experiment budget.
+For branching stories, a compact scene graph is another option. Muse produced the graph in a
+separate call, and local code expanded it into a manifest we could validate and replay.

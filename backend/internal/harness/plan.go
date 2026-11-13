@@ -97,6 +97,8 @@ type Planner struct {
 	// Chain fills the spec in three calls (theme–pieces with the plan; constraints, progression and end;
 	// then score, social and feel), each seeing the parts before it. Off: one call writes everything.
 	Chain bool
+	// Visual runs the art-direction stage after the spec (visual.go). A failure there only adds a note.
+	Visual bool
 }
 
 // PlanInput is everything the planner reads.
@@ -183,6 +185,9 @@ func (p *Planner) Plan(ctx context.Context, in PlanInput) (*Plan, error) {
 	plan.Calls = calls
 	if err := p.finishSpec(ctx, plan, raw, in, def); err != nil {
 		return nil, err
+	}
+	if p.Visual {
+		p.planVisual(ctx, plan, in)
 	}
 	return plan, nil
 }
