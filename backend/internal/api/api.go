@@ -134,6 +134,7 @@ func (s *Server) Handler() http.Handler {
 		// People, friends and Groups
 		r.With(s.requireAuth).Get("/users", s.searchUsers)
 		r.With(s.optionalAuth).Get("/users/{id}", s.getUser)
+		r.With(s.requireAuth).Patch("/me/profile", s.updateProfile)
 		r.With(s.requireAuth).Get("/me/notifications", s.listNotifications)
 		r.With(s.requireAuth).Put("/me/notifications/read", s.readAllNotifications)
 		r.With(s.requireAuth).Put("/me/notifications/{id}/read", s.readNotification)
@@ -180,6 +181,9 @@ func (s *Server) Handler() http.Handler {
 				r.With(s.requireAuth).Post("/game-shares", s.shareGameToGroup)
 				r.With(s.requireAuth).Put("/members/me", s.setMembership(true))
 				r.With(s.requireAuth).Delete("/members/me", s.setMembership(false))
+				r.With(s.requireAuth).Patch("/", s.updateGroup)
+				r.With(s.requireAuth).Put("/members/{uid}", s.addGroupMember)
+				r.With(s.requireAuth).Get("/requests", s.groupRequests)
 				r.With(s.requireAuth).Post("/blend", s.groupBlend)
 				r.With(s.requireAuth).Get("/blend-inputs", s.groupBlendInputs)
 			})

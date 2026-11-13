@@ -26,7 +26,10 @@ import (
 //	GET    /v1/groups                      Groups and Events (kind=group|event, mine=1)
 //	POST   /v1/groups                      create one
 //	GET    /v1/groups/{id}                 one, with its members
-//	PUT    /v1/groups/{id}/members/me      join; DELETE leaves
+//	PATCH  /v1/groups/{id}                 the owner changes its settings (groupjoin.go)
+//	PUT    /v1/groups/{id}/members/me      join (open), or ask to (request); DELETE leaves or withdraws
+//	PUT    /v1/groups/{id}/members/{uid}   a member adds someone; the owner approves a request (groupjoin.go)
+//	GET    /v1/groups/{id}/requests        the owner's list of people asking to join (groupjoin.go)
 //	GET    /v1/groups/{id}/games           games made for it
 //	POST   /v1/groups/{id}/blend           Blend for the group's members
 //	GET    /v1/groups/{id}/blend-inputs    each member's skill, taste and recent games
@@ -36,11 +39,14 @@ type profile struct {
 	Username    string `json:"username"`
 	DisplayName string `json:"displayName"`
 	Bio         string `json:"bio,omitempty"`
+	AvatarURL   string `json:"avatarUrl,omitempty"`  // only when the person set one
+	CoverColor  string `json:"coverColor,omitempty"` // "#RRGGBB"
 	IsFriend    bool   `json:"isFriend,omitempty"`
 }
 
 func profileOf(u model.User, friends map[string]bool) profile {
-	return profile{ID: u.ID, Username: u.Username, DisplayName: u.DisplayName, Bio: u.Bio, IsFriend: friends[u.ID]}
+	return profile{ID: u.ID, Username: u.Username, DisplayName: u.DisplayName, Bio: u.Bio, AvatarURL: u.AvatarURL,
+		CoverColor: u.CoverColor, IsFriend: friends[u.ID]}
 }
 
 func idSet(ids []string) map[string]bool {
@@ -125,8 +131,10 @@ func (s *Server) setFriend(add bool) http.HandlerFunc {
 
 type groupView struct {
 	model.Group
-	MemberCount int  `json:"memberCount"`
-	IsMember    bool `json:"isMember"`
+	MemberCount  int  `json:"memberCount"`
+	IsMember     bool `json:"isMember"`
+	Requested    bool `json:"requested,omitempty"`    // I asked to join and wait for the owner
+	RequestCount int  `json:"requestCount,omitempty"` // for the owner: people waiting
 }
 
 func (s *Server) groupViews(ctx context.Context, groups []model.Group, me *model.User) ([]groupView, error) {
@@ -146,7 +154,15 @@ func (s *Server) groupViews(ctx context.Context, groups []model.Group, me *model
 		if err != nil {
 			return nil, err
 		}
-		out[i] = groupView{Group: g, MemberCount: len(ms), IsMember: mine[g.ID]}
+		g.JoinPolicy = model.JoinPolicyOf(g)
+		v := groupView{Group: g, MemberCount: len(ms), IsMember: mine[g.ID]}
+		if me != nil {
+			v.Requested = !v.IsMember && fbHas(g.Requests, me.ID)
+			if g.OwnerID == me.ID {
+				v.RequestCount = len(g.Requests)
+			}
+		}
+		out[i] = v
 	}
 	return out, nil
 }
@@ -196,8 +212,8 @@ func (s *Server) groupOr404(w http.ResponseWriter, r *http.Request) (*model.Grou
 
 func (s *Server) createGroup(w http.ResponseWriter, r *http.Request) {
 	var in struct {
-		ID, Kind, Name, Category, About, CoverSeed string
-		Private                                    bool
+		ID, Kind, Name, Category, About, CoverSeed, CoverColor, JoinPolicy string
+		Private, Recruiting                                                bool
 	}
 	if !decode(w, r, &in) {
 		return
@@ -209,6 +225,10 @@ func (s *Server) createGroup(w http.ResponseWriter, r *http.Request) {
 	}
 	if in.Kind != "event" {
 		in.Kind = "group"
+	}
+	if !validJoinPolicy(in.JoinPolicy) || !validColor(in.CoverColor) {
+		writeErr(w, 400, `joinPolicy must be "open", "request" or "invite", and coverColor "#RRGGBB"`)
+		return
 	}
 	id := "grp_" + auth.NewID(8)
 	if in.ID != "" {
@@ -228,7 +248,8 @@ func (s *Server) createGroup(w http.ResponseWriter, r *http.Request) {
 	}
 	me := userFrom(r)
 	now := time.Now().UTC().Truncate(time.Millisecond)
-	g := &model.Group{ID: id, Kind: in.Kind, Name: in.Name, Category: in.Category, About: in.About, CoverSeed: in.CoverSeed, Private: in.Private, OwnerID: me.ID, CreatedAt: now}
+	g := &model.Group{ID: id, Kind: in.Kind, Name: in.Name, Category: in.Category, About: in.About, CoverSeed: in.CoverSeed, Private: in.Private, OwnerID: me.ID, CreatedAt: now,
+		JoinPolicy: in.JoinPolicy, Recruiting: in.Recruiting, CoverColor: in.CoverColor}
 	if err := s.Store.UpsertGroup(r.Context(), g); err != nil {
 		s.serverErr(w, r, err)
 		return
@@ -304,13 +325,32 @@ func (s *Server) setMembership(join bool) http.HandlerFunc {
 		me := userFrom(r)
 		var err error
 		if join {
-			if g.Private {
-				writeErr(w, 403, "this group is private")
+			if s.isMember(r.Context(), g.ID, me.ID) {
+				writeJSON(w, 200, map[string]any{"groupID": g.ID, "isMember": true})
+				return
+			}
+			switch model.JoinPolicyOf(*g) {
+			case model.JoinInvite:
+				if g.Private {
+					writeErr(w, 403, "this group is private")
+				} else {
+					writeJSON(w, 403, apiError{Error: "this group is invite only: a member can add you", Code: "invite_only"})
+				}
+				return
+			case model.JoinRequest:
+				if err := s.addJoinRequest(r.Context(), g.ID, me.ID); err != nil {
+					s.serverErr(w, r, err)
+					return
+				}
+				writeJSON(w, 202, map[string]any{"groupID": g.ID, "isMember": false, "requested": true})
 				return
 			}
 			err = s.Store.AddGroupMember(r.Context(), model.GroupMember{GroupID: g.ID, UserID: me.ID, JoinedAt: time.Now().UTC().Truncate(time.Millisecond)})
 		} else {
-			err = s.Store.RemoveGroupMember(r.Context(), g.ID, me.ID)
+			err = s.dropJoinRequest(r.Context(), g.ID, me.ID)
+			if err == nil {
+				err = s.Store.RemoveGroupMember(r.Context(), g.ID, me.ID)
+			}
 		}
 		if err != nil {
 			s.serverErr(w, r, err)
