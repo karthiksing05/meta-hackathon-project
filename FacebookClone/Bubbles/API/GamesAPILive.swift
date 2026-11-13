@@ -83,7 +83,8 @@ actor GamesAPILive: GamesAPI, GamesAuth {
     }
 
     func scores(gameID: String) async throws -> [RemoteScore] {
-        let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", auth: .none)
+        // Signed in, the server marks the rows whose runs I may watch (`replayAvailable`).
+        let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", auth: .optional)
         return board.items
     }
 
@@ -91,7 +92,7 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         var query = [URLQueryItem(name: "scope", value: scope)]
         if let groupID { query.append(URLQueryItem(name: "groupId", value: groupID)) }
         let board: RemoteScoreboard = try await get("v1/games/\(try serverID(gameID))/leaderboard", query: query,
-                                                    auth: scope == "everyone" ? .none : .required)
+                                                    auth: scope == "everyone" ? .optional : .required)
         return board.items
     }
 
