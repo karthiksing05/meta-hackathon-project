@@ -1682,9 +1682,10 @@ game in the request's theme).
   updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`) with the person's
   words, what changes and the updated anatomy. The last 6 turns stay visible.
 
-**Themes.** A theme or franchise the person asks for ("Star Wars") is honored in names, art and words;
-mechanics stay original to their idea, and no specific existing game's levels or art are copied
-(`MusePrompts.safety`).
+**Themes and brands.** A theme, franchise or brand the person asks for ("Star Wars") is honored in names,
+art and words; Muse doesn't add ones they didn't ask for. Mechanics stay original to their idea, no specific
+existing game's levels or art are copied, and our own seeded content stays original (`MusePrompts.safety`,
+the content prompt; covers still carry no text or logos).
 
 DEBUG: `FB_STUDIO_ANATOMY=fixture|answered|chat` with `FB_STUDIO_STEP=brief|try`;
 `FB_STUDIO_SCROLL=anatomy|anatomy-rules|anatomy-<part>` (Brief) or `chat` (Try).

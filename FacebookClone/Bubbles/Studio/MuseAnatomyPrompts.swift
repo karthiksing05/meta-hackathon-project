@@ -77,7 +77,7 @@ extension MusePrompts {
         - end: say how a run is won, how it's lost, and how it scores. Use null for one that doesn't apply.
         - structure.length_s: the expected run length in seconds, 10 to 120.
         - theme: a short phrase (at most 6 words) for the setting and feel, never the whole request. When the person \
-        names a theme or franchise (for example "Star Wars"), copy just those words verbatim into theme.text with \
+        names a theme, franchise or brand (for example "Star Wars"), copy just those words verbatim into theme.text with \
         source "you"; otherwise pick one that fits and mark it "guess". Requested themes are honored in names, art and words so the game keeps their \
         feel; the mechanics stay original to the person's idea, and you never copy a specific existing game's levels, \
         layouts or art.

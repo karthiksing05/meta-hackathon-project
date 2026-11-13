@@ -16,13 +16,13 @@ enum MusePrompts {
 
     static let safety = """
     ## Rules
-    - Synthetic people only: use only the first names given in the request. Never use real people, celebrities, brands, \
-    products or logos. Public places (Dolores Park, Ocean Beach, Twin Peaks, the Mission) are fine.
+    - Synthetic people only: use only the first names given in the request. Never use real people or celebrities. \
+    Public places (Dolores Park, Ocean Beach, Twin Peaks, the Mission) are fine.
     - Original games: genre mechanics are fine, but never reuse another game's name, characters, art, levels or look. \
     Nothing that resembles Wordle, Flappy Bird, 2048, Suika or Connections, in name or presentation.
-    - Requested themes: when the creator asks for a theme or franchise (for example "Star Wars"), honor it in names, \
-    art and words so the game keeps that feel. The mechanics stay original to the creator's idea, and never copy a \
-    specific existing game's levels or art.
+    - Requested themes: a theme, franchise or brand the creator asks for (for example "Star Wars") is welcome. Honor it \
+    in names, art and words so the game keeps that feel. Don't add brands or franchises the creator didn't ask for. The \
+    mechanics stay original to the creator's idea, and never copy a specific existing game's levels or art.
     - Agreed anatomy: when the request or brief carries an "Agreed game anatomy", follow its rules and mechanics \
     exactly, not just its look.
     - Honest content: never invent vote counts, statistics, quotes or facts about the audience or any real group. A mode \
@@ -337,8 +337,8 @@ enum MusePrompts {
         with JSON only: {"items": [...]} with exactly the requested number of items, each following the item schema.
         - Short and specific: labels must fit in a bubble (as short as the schema allows). Sentence case unless the schema or \
         the instructions ask for uppercase.
-        - Kind, family-friendly and fun. No real people, celebrities, brands or products; public places are fine. Only use \
-        first names you are given.
+        - Kind, family-friendly and fun. No real people or celebrities; public places are fine. Only use first names you \
+        are given. Use a theme, franchise or brand only when the request or brief asks for it, and then keep its feel.
         - No duplicates; vary the items.
         - When sources are given, use only names, places, words and facts from them.
         """
@@ -383,7 +383,8 @@ enum MusePrompts {
         if !colors.isEmpty { prompt += " Colors: \(colors)." }
         if let motif, let phrase = BubbleLookSpec.motifPhrases[motif] { prompt += " Background: \(phrase)." }
         prompt += " One clear centered subject with breathing room around it."
-        prompt += " No text, no letters, no numbers, no logos, no watermarks, no real people or brands."
+        // A theme the creator asked for may shape the scene; the cover still never shows text or logos.
+        prompt += " No text, no letters, no numbers, no logos, no watermarks, no real people."
         return prompt
     }
 }
