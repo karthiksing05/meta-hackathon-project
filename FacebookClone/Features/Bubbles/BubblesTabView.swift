@@ -210,9 +210,12 @@ struct BubblesTabView: View {
     private var feedState: some View {
         switch bubbleStore.feedState {
         case .failed(let message):
-            LiveDataStateView(kind: .failed(message), title: "Couldn't load \(ProductName.plural)", retry: bubbleStore.reloadFeed, onDark: true)
+            LiveDataStateView(kind: .failed(message), title: "Couldn't load \(ProductName.plural)", retry: bubbleStore.reloadFeed, onDark: true,
+                              action: LiveDataStateView.Action(title: "Make one instead") { router.openStudio() })
         case .end:
-            LiveDataStateView(kind: .empty("The server has no \(ProductName.plural) to show yet. Make one in Studio."), title: "No \(ProductName.plural) yet", retry: bubbleStore.reloadFeed, onDark: true)
+            LiveDataStateView(kind: .empty("Be the first. Describe a game and Muse makes it in about a minute."), title: "No \(ProductName.plural) yet",
+                              retry: bubbleStore.reloadFeed, onDark: true,
+                              action: LiveDataStateView.Action(title: "Make \(ProductName.withArticle)", symbol: "sparkles") { router.openStudio() })
         case .idle, .loading:
             LiveDataStateView(kind: .loading, title: "Loading \(ProductName.plural)…", onDark: true)
         }

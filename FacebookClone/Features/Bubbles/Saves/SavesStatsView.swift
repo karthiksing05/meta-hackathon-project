@@ -9,13 +9,9 @@ struct SavesStatsView: View {
     @Environment(BubbleStore.self) private var bubbleStore
 
     var body: some View {
-        Group {
-            if let bubble = bubbleStore.bubble(id: bubbleID) {
-                content(bubble)
-                    .task(id: bubble.id) { bubbleStore.loadSavers(for: bubble) }
-            } else {
-                ContentUnavailableView("This \(ProductName.singular) didn't load", systemImage: "sparkles", description: Text("It isn't available anymore."))
-            }
+        LoadedBubble(bubbleID: bubbleID) { bubble in
+            content(bubble)
+                .task(id: bubble.id) { bubbleStore.loadSavers(for: bubble) }
         }
         .background(FBColor.background)
         .navigationTitle(SavesCopy.statsTitle)

@@ -16,6 +16,8 @@ struct ChallengePickerSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var sentIDs: Set<String> = []
+    @State private var isLoadingGame = false
+    @State private var loadAttempt = 0
 
     private var center: ChallengeCenter { ChallengeCenter.shared }
 
@@ -24,9 +26,19 @@ struct ChallengePickerSheet: View {
             Group {
                 if let bubble = bubbleStore.bubble(id: bubbleID) {
                     content(bubble, draft: resolvedDraft(bubble))
+                } else if isLoadingGame {
+                    LiveDataStateView(kind: .loading)
                 } else {
-                    ContentUnavailableView(ChallengeCopy.bubbleGone, systemImage: "sparkles", description: Text(ChallengeCopy.bubbleGoneNote))
+                    LiveDataStateView(kind: .failed(ChallengeCopy.bubbleGoneNote), title: ChallengeCopy.bubbleGone) {
+                        loadAttempt += 1
+                    }
                 }
+            }
+            .task(id: loadAttempt) {
+                guard bubbleStore.bubble(id: bubbleID) == nil else { return }
+                isLoadingGame = true
+                _ = await bubbleStore.loadGame(id: bubbleID)
+                isLoadingGame = false
             }
             .background(FBColor.surface)
             .navigationTitle(ChallengeCopy.pickerTitle)
