@@ -1,14 +1,24 @@
 {
   "fragment": "story_vars",
   "version": 1,
-  "describe": "Stats, items, conditions, effects, a choice limit, ranked endings and a share line on top of `choice_story`. Normally written by the story-graph compiler (authoring/expander/story-graph.mjs) from a `story-graph/1`, not by hand. The game supplies the source lists as state from content: `sg_src_labels` and `sg_src_next` (3 per scene, like choice_story's), and per choice (index s*3+c) `sg_need` (a condition: atoms `<var index>>=<n>` or `<var index><=<n>` joined by '&', alternatives by '|'; '' = always open), `sg_do` (effects: space-separated `<var index>:<delta>` or `<var index>:=<value>`), `sg_route` (`<condition>~<scene>` alternatives joined by ';', checked after the choice's effects, first match wins), `sg_note` (a toast); per scene `sg_enter` (effects on arrival), `sg_place` (a small label over the text), `sg_end_title`, `sg_end_id`, `sg_end_tag` ('Ending 2 of 5'), `sg_end_points` (digits) and `sg_share` (a share template with {choices}, {limit}, {ending} and {<var id>}); per variable `sg_var` (ids), `sg_label`, `sg_kind` ('stat', 'item' or 'flag'), `sg_init`, `sg_lo`, `sg_hi` and `sg_weight` (score points per unit, digits). Only open choices are shown, packed into the first buttons. With `limit` > 0, the limit-th choice that doesn't reach an ending goes to scene `limit_to`. The run is won or lost `curtain_ms` after the ending appears (good endings win), so the ending can be read. Score: the ending's points, plus `bonus` per unused choice on a good ending, plus each variable times its weight; it changes only on `ending_reached`. Provides `ending` (the ending's id, '' before) and `choices_used` (the group-play story result, HARNESS_V2 social.result kind ending), `sg_vals` (list<int>), `sg_used`, `sg_end` (scene index of the ending, -1 before), `sg_share_line` and `sg_path` (choice indices taken, dot-separated).",
+  "describe": "Stats, items, conditions, effects, a choice limit, ranked endings and a share line on top of `choice_story`. Normally written by the story-graph compiler (authoring/expander/story-graph.mjs) from a `story-graph/1`, not by hand. The game supplies the source lists as state from content: `sg_src_labels` and `sg_src_next` (3 per scene, like choice_story's), and per choice (index s*3+c) `sg_need` (a condition: atoms `<var index>>=<n>` or `<var index><=<n>` joined by '&', alternatives by '|'; '' = always open), `sg_do` (effects: space-separated `<var index>:<delta>` or `<var index>:=<value>`), `sg_route` (`<condition>~<scene>` alternatives joined by ';', checked after the choice's effects, first match wins), `sg_note` (a toast); per scene `sg_enter` (effects on arrival), `sg_place` (a small label over the text), `sg_end_title`, `sg_end_id`, `sg_end_tag` ('Ending 2 of 5'), `sg_end_points` (digits) and `sg_share` (a share template with {choices}, {limit}, {ending} and {<var id>}); per variable `sg_var` (ids), `sg_label`, `sg_kind` ('stat', 'item' or 'flag'), `sg_init`, `sg_lo`, `sg_hi` and `sg_weight` (score points per unit, digits). Only open choices are shown, packed into the first buttons. With `limit` > 0, the limit-th choice that doesn't reach an ending goes to scene `limit_to`. The run is won or lost `curtain_ms` after the ending appears (good endings win), so the ending can be read. Score: the ending's points, plus `bonus` per unused choice on a good ending, plus each variable times its weight; it changes only on `ending_reached`. Provides `ending` (the ending's id, '' before) and `choices_used` (the group-play story result, HARNESS_V2 social.result kind ending), `sg_vals` (list<int>), `sg_used`, `sg_end` (scene index of the ending, -1 before), `sg_share_line` and `sg_path` (choice indices taken, dot-separated). Pictures (optional, made at build time by authoring/expander/image-art.mjs): with the game's `still` sprite (one frame per key scene) it draws a scene picture at the top, 320 × 164 centred on (180, `still_y`); `stills` names each scene's frame ('.'-separated, one per scene, -1 for none). With a `portrait` sprite (one frame per main character) it draws that character's portrait in a ring at (`portrait_x`, `portrait_y`); `cast_at` names each scene's character the same way. Move the text and buttons down (choice_story text_y 292, button_y 418; place_y 262, card_y 424) to make room.",
   "params": {
     "limit": { "type": "int", "default": 0, "min": 0, "max": 30 },
     "limit_to": { "type": "int", "default": -1, "min": -1, "max": 59 },
     "bonus": { "type": "int", "default": 25, "min": 0, "max": 100 },
     "curtain_ms": { "type": "duration", "default": 3500, "min": 500, "max": 10000 },
     "place_y": { "type": "int", "default": 112, "min": 40, "max": 400 },
-    "card_y": { "type": "int", "default": 404, "min": 200, "max": 560 }
+    "card_y": { "type": "int", "default": 404, "min": 200, "max": 560 },
+    "stills": { "type": "string", "default": "", "max_len": 240 },
+    "cast_at": { "type": "string", "default": "", "max_len": 240 },
+    "still_y": { "type": "int", "default": 160, "min": 60, "max": 560 },
+    "portrait_x": { "type": "int", "default": 64, "min": 20, "max": 340 },
+    "portrait_y": { "type": "int", "default": 122, "min": 40, "max": 600 },
+    "portrait_size": { "type": "int", "default": 84, "min": 32, "max": 200 }
+  },
+  "art": {
+    "still": { "describe": "Scene pictures: one frame per key scene, 320 × 164 (wide), a moment of the story in the game's style. Which scene shows which frame is the `stills` param.", "color": "accent" },
+    "portrait": { "describe": "Character portraits: one frame per main character, a square head-and-shoulders bust on a clear background. Which scene shows whom is the `cast_at` param.", "color": "primary" }
   },
   "requires": {
     "state": {
@@ -56,6 +66,7 @@
   },
   "functions": {
     "sg_int": { "params": { "txt": "string" }, "returns": "int", "body": "or_else(parse_int(trim(txt)), 0)" },
+    "sg_pic": { "params": { "txt": "string", "k": "int" }, "returns": "int", "body": "or_else(parse_int(trim(get_or(split(txt, '.'), k, ''))), -1)" },
     "sg_part": { "params": { "txt": "string", "sep": "string", "k": "int" }, "returns": "string", "body": "trim(get_or(split(txt, sep), k, ''))" },
     "sg_atom": {
       "params": { "atom": "string", "vs": "list<int>" },
@@ -174,6 +185,32 @@
   },
   "presentation": {
     "slots": [
+      {
+        "slot": "playfield",
+        "include": "@art.still",
+        "node": {
+          "node": "group",
+          "visible": "= sg_pic(@stills, scene) >= 0",
+          "animate_on": { "choice_made": { "prop": "opacity", "keys": [0, 1], "ms": 450 } },
+          "children": [
+            { "node": "rect", "x": 17, "y": "= @still_y - 85", "w": 326, "h": 170, "radius": 14, "fill": "$surface", "stroke": "$accent", "stroke_width": 3 },
+            { "node": "image", "asset": "@art.still.id", "frame": "= max(0, sg_pic(@stills, scene))", "anchor": "center", "x": 180, "y": "@still_y", "w": 320, "h": 164 }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.portrait",
+        "node": {
+          "node": "group",
+          "visible": "= sg_pic(@cast_at, scene) >= 0",
+          "animate_on": { "choice_made": { "prop": "scale", "keys": [0.85, 1.08, 1], "ms": 380 } },
+          "children": [
+            { "node": "circle", "x": "@portrait_x", "y": "@portrait_y", "r": "= @portrait_size / 2.0 + 4.0", "fill": "$surface", "stroke": "$primary", "stroke_width": 3 },
+            { "node": "image", "asset": "@art.portrait.id", "frame": "= max(0, sg_pic(@cast_at, scene))", "anchor": "center", "x": "@portrait_x", "y": "@portrait_y", "w": "@portrait_size", "h": "@portrait_size" }
+          ]
+        }
+      },
       {
         "slot": "hud_top",
         "include": "@limit > 0",
