@@ -32,6 +32,9 @@ final class FacebookLiveState {
     var knownMessageIDs: Set<String> = []
     /// Messages sent from this phone that the server has confirmed (by the send or by a poll).
     var confirmedLocalIDs: Set<String> = []
+    /// Game cards sent from this phone: local message id -> the game id sent to the server, so the
+    /// server's copy of a card pairs with the one already on screen.
+    var cardGameIDs: [String: String] = [:]
     /// Polls the server for new messages while the app is in front.
     var messengerPoll: Task<Void, Never>?
     var isRefreshingThreads = false
@@ -90,6 +93,7 @@ extension AppStore {
             // Another account: none of the last one's messages count as seen here.
             live.knownMessageIDs = []
             live.confirmedLocalIDs = []
+            live.cardGameIDs = [:]
             live.threadIDs = [:]
         }
         live.accountID = accountID
@@ -261,8 +265,26 @@ extension AppStore {
 
     private func liveMessage(_ m: RemoteFBMessage) -> Message {
         let sender = m.senderId == live.accountID ? me.id : m.senderId
+        if let gameID = m.gameId, !gameID.isEmpty {
+            // A Curio shared or challenged into the chat: the same playable card the sender sees. The card
+            // view loads the game (`BubbleStore.loadGame`), and Play opens it.
+            let isChallenge = m.kind == "challenge"
+            let headline = m.text.flatMap { $0.isEmpty ? nil : $0 }
+                ?? (isChallenge ? (m.score.map { "Beat my \($0.withCommas)" } ?? "Can you beat me?") : "Play this with me")
+            let card = BubbleChatCard(id: m.id, kind: isChallenge ? .challenge : .share, bubbleID: gameID,
+                                      fromUserID: sender, headline: headline, score: isChallenge ? m.score : nil)
+            var message = Message(id: m.id, senderID: sender, sentAt: m.sentAt, status: .seen)
+            message.bubbleCard = card
+            return message
+        }
         return Message(id: m.id, senderID: sender, text: m.text, imageURL: m.imageUrl.flatMap(URL.init(string:)),
                        bigEmoji: m.emoji, sentAt: m.sentAt, status: .seen)
+    }
+
+    /// A game card on this phone the server doesn't have (yet): not sent, refused, or a chat that
+    /// isn't on the server (mock people). Those stay when the server's chats load.
+    private func isLocalOnlyCard(_ message: Message) -> Bool {
+        message.bubbleCard != nil && !live.knownMessageIDs.contains(message.id) && !live.confirmedLocalIDs.contains(message.id)
     }
 
     /// A chat for a server thread, with the given messages.
@@ -282,8 +304,10 @@ extension AppStore {
         )
     }
 
-    /// Server chats replace the mock ones. Chats carrying game cards (made on this phone) stay. A chat
-    /// already on screen keeps its object (screens hold on to it) and takes the server's messages.
+    /// Server chats replace the mock ones. Game cards now live on the server like any message; cards
+    /// only this phone has (a chat with mock people, or a send the server refused) stay, and so do
+    /// chats holding them. A chat already on screen keeps its object (screens hold on to it) and
+    /// takes the server's messages.
     @MainActor
     private func applyLiveThreads(_ threads: [RemoteFBThread]) {
         let fresh = threads.map { t -> Conversation in
@@ -292,12 +316,14 @@ extension AppStore {
                 return liveConversation(for: t, messages: messages)
             }
             live.threadIDs[t.id] = t.id
+            let localCards = existing.messages.filter(isLocalOnlyCard)
             live.knownMessageIDs.formUnion(messages.map(\.id))
-            existing.messages = messages.map(liveMessage)
+            existing.messages = (messages.map(liveMessage) + localCards).sorted { $0.sentAt < $1.sentAt }
             existing.unreadCount = openConversationID == t.id ? 0 : t.unread
             return existing
         }
-        let kept = conversations.filter { chat in chat.messages.contains { $0.bubbleCard != nil } }
+        let freshIDs = Set(fresh.map(\.id))
+        let kept = conversations.filter { chat in !freshIDs.contains(chat.id) && chat.messages.contains(where: isLocalOnlyCard) }
         conversations = (fresh + kept).sorted { $0.lastActivity > $1.lastActivity }
     }
 
@@ -386,12 +412,18 @@ extension AppStore {
 
     /// A message of mine the server has and this phone shows under its own id (the poll arrived
     /// before the send finished): mark the local one confirmed instead of adding a second copy.
+    /// Game cards pair by game id, text by text and emoji.
     @MainActor
     private func adoptEcho(of m: RemoteFBMessage, in chat: Conversation) -> Bool {
-        guard let local = chat.messages.first(where: {
-            $0.senderID == me.id && $0.bubbleCard == nil && !$0.isImage
-                && !live.confirmedLocalIDs.contains($0.id) && !live.knownMessageIDs.contains($0.id)
-                && $0.text == m.text && $0.bigEmoji == m.emoji
+        let gameID = m.gameId.flatMap { $0.isEmpty ? nil : $0 }
+        guard let local = chat.messages.first(where: { local in
+            guard local.senderID == me.id, !local.isImage,
+                  !live.confirmedLocalIDs.contains(local.id), !live.knownMessageIDs.contains(local.id) else { return false }
+            if let gameID {
+                guard let card = local.bubbleCard else { return false }
+                return live.cardGameIDs[local.id] == gameID || card.bubbleID == gameID
+            }
+            return local.bubbleCard == nil && local.text == m.text && local.bigEmoji == m.emoji
         }) else { return false }
         live.confirmedLocalIDs.insert(local.id)
         return true
@@ -524,6 +556,60 @@ extension AppStore {
                     conversation.messages[index].status = .sent
                 }
                 self.showToast("Message not sent. Check your connection.", symbol: "exclamationmark.circle")
+            }
+        }
+        return true
+    }
+
+    /// The server's name for a card sent into a chat: "share" or "challenge". Nil for cards that stay on
+    /// this phone (co-making, quiz nights, story paths, lessons, and challenge results, which belong to
+    /// this phone's challenge).
+    static func serverCardKind(_ card: BubbleChatCard) -> String? {
+        switch card.kind {
+        case .share, .remix: return "share"
+        case .challenge, .session: return card.challengeRole == "result" ? nil : "challenge"
+        case .contribution, .gameNight, .storyPath, .lesson: return nil
+        }
+    }
+
+    /// Sends a game card (a Curio shared or challenged into the chat) to the server, so it reaches the
+    /// other people's phones. Same chat rules as `sendLive`. If the server can't take it (mock mode, a
+    /// chat with mock people, or a game it doesn't have), the card stays on this phone only.
+    /// Returns false when the card stays local.
+    @MainActor
+    @discardableResult
+    func sendLiveCard(_ message: Message, gameID: String, in conversation: Conversation) -> Bool {
+        guard live.messengerIsLive, let card = message.bubbleCard, let kind = Self.serverCardKind(card),
+              !gameID.isEmpty else { return false }
+        let threadID = live.threadIDs[conversation.id]
+        let members = conversation.participants.map(\.id)
+        guard threadID != nil || (!members.isEmpty && members.allSatisfy { live.serverPeople.contains($0) }) else { return false }
+        let localID = message.id, groupName = conversation.groupName
+        let score = kind == "challenge" ? card.score : nil
+        live.cardGameIDs[localID] = gameID
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let api = FacebookAPILive.shared
+            do {
+                var id = threadID
+                if id == nil {
+                    id = try await api.createThread(memberIDs: members, name: groupName).id
+                    self.live.threadIDs[conversation.id] = id
+                }
+                guard let id else { return }
+                let sent = try await api.sendMessage(threadID: id, text: card.headline, emoji: nil, gameID: gameID, kind: kind, score: score)
+                // The server's copy is the card already on screen. A Persona's reply arrives with the next poll.
+                self.live.knownMessageIDs.insert(sent.message.id)
+                self.live.confirmedLocalIDs.insert(localID)
+                if conversation.messages.contains(where: { $0.id == sent.message.id }) {
+                    // A poll already added the server's copy (sent by slug, stored by id): keep that one.
+                    conversation.messages.removeAll { $0.id == localID }
+                } else if let index = conversation.messages.firstIndex(where: { $0.id == localID }) {
+                    conversation.messages[index].status = .delivered
+                }
+            } catch {
+                // The card stays here (on this phone only), as it did before cards reached the server.
+                print("[facebook-live] game card kept on this phone: \(error.localizedDescription)")
             }
         }
         return true

@@ -806,7 +806,7 @@ seed, length, from_user_id, headline, session_id, score, extras`) rides on `Mess
 | Call | Does |
 |---|---|
 | `targets(appStore:kinds:)` | Friends, recent chats (group chats first), your Groups, feed, story, as `BubbleShareTarget` |
-| `send(_:to:note:appStore:bubbleStore:)` | Chat or friend: a message carrying the card. Group or feed: a post carrying it |
+| `send(_:to:note:appStore:bubbleStore:)` | Chat or friend: a message carrying the card. Group or feed: a post carrying it. With live Messenger, `share`/`remix` cards go to the server as `kind: "share"` and `challenge`/`session` cards (not result cards) as `kind: "challenge"` with the score, on `POST /v1/fb/threads/{id}/messages` with the game's server id (`AppStore.sendLiveCard`); other phones get them as `share` or `challenge` cards (headline, game, score; no seed). A card the server can't take stays on this phone |
 | `receive(_:from:in:text:appStore:)` | A card from someone else lands in a chat (a friend's simulated score) |
 | `update(cardID:appStore:_:)` | Changes a card wherever it is ("3 of 5 played", the winner line) |
 | `play(_:router:context:)` | Plays the card's seed and length |

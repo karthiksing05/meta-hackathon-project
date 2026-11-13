@@ -274,7 +274,10 @@ struct BubbleChatCardFallback: View {
                     .fixedSize(horizontal: false, vertical: true)
                 Button {
                     Haptics.light()
-                    BubbleSocialHub.play(card, router: router)
+                    // The app's id for the game (a card from another phone names its server id).
+                    var played = card
+                    if let bubble { played.bubbleID = bubble.id }
+                    BubbleSocialHub.play(played, router: router)
                 } label: {
                     Label("Play", systemImage: "play.fill")
                 }
@@ -283,6 +286,8 @@ struct BubbleChatCardFallback: View {
             }
             .padding(12)
         }
+        // A card from another phone may name a game this phone hasn't fetched yet.
+        .task(id: card.bubbleID) { _ = await bubbleStore.loadGame(id: card.bubbleID) }
         .frame(width: placement.isPost ? nil : 260)
         .background(FBColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))

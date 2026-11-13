@@ -68,7 +68,11 @@ enum BubbleSocialHub {
                 card = opened.0
                 start = opened.1
             }
-            append(card, from: appStore.me.id, text: note, in: chat, appStore: appStore)
+            let message = append(card, from: appStore.me.id, text: note, in: chat, appStore: appStore)
+            // Live Messenger: the card goes to the server too, so it reaches the other phones.
+            let bubble = bubbleStore.bubble(id: card.bubbleID)
+            let gameID = bubble.flatMap { $0.serverID.isEmpty ? nil : $0.serverID } ?? card.bubbleID
+            appStore.sendLiveCard(message, gameID: gameID, in: chat)
             start?()
             return true
         case .group, .feed:
@@ -141,7 +145,8 @@ enum BubbleSocialHub {
 
     // MARK: Helpers
 
-    private static func append(_ card: BubbleChatCard, from senderID: String, text: String?, in chat: Conversation, appStore: AppStore) {
+    @discardableResult
+    private static func append(_ card: BubbleChatCard, from senderID: String, text: String?, in chat: Conversation, appStore: AppStore) -> Message {
         var message = Message(senderID: senderID, text: text, status: senderID == appStore.me.id ? .sent : .seen)
         message.bubbleCard = card
         chat.messages.append(message)
@@ -150,5 +155,6 @@ enum BubbleSocialHub {
             appStore.conversations.remove(at: index)
             appStore.conversations.insert(chat, at: 0)
         }
+        return message
     }
 }

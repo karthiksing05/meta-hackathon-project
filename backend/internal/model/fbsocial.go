@@ -99,11 +99,17 @@ type FBThread struct {
 }
 
 type FBMessage struct {
-	ID       string    `bson:"_id" json:"id"`
-	ThreadID string    `bson:"threadId" json:"threadId"`
-	SenderID string    `bson:"senderId" json:"senderId"`
-	Text     string    `bson:"text,omitempty" json:"text,omitempty"`
-	ImageURL string    `bson:"imageUrl,omitempty" json:"imageUrl,omitempty"`
-	Emoji    string    `bson:"emoji,omitempty" json:"emoji,omitempty"` // a big emoji
-	SentAt   time.Time `bson:"sentAt" json:"sentAt"`
+	ID       string `bson:"_id" json:"id"`
+	ThreadID string `bson:"threadId" json:"threadId"`
+	SenderID string `bson:"senderId" json:"senderId"`
+	Text     string `bson:"text,omitempty" json:"text,omitempty"`
+	ImageURL string `bson:"imageUrl,omitempty" json:"imageUrl,omitempty"`
+	Emoji    string `bson:"emoji,omitempty" json:"emoji,omitempty"` // a big emoji
+	// GameID is a game the message carries as a playable card (a Curio shared or challenged into the chat).
+	GameID string `bson:"gameId,omitempty" json:"gameId,omitempty"`
+	// Kind is what the card is for: "share" or "challenge" (only with GameID).
+	Kind string `bson:"kind,omitempty" json:"kind,omitempty"`
+	// Score is the sender's score to beat on a challenge card.
+	Score  *int      `bson:"score,omitempty" json:"score,omitempty"`
+	SentAt time.Time `bson:"sentAt" json:"sentAt"`
 }

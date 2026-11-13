@@ -75,7 +75,10 @@ final class BubbleStore {
     // MARK: - Queries
 
     func bubble(id: String) -> Bubble? {
-        bubbles.first { $0.id == id } ?? remoteGames[id].flatMap { game in bubbles.first { $0.serverID == game.id } }
+        bubbles.first { $0.id == id }
+            ?? remoteGames[id].flatMap { game in bubbles.first { $0.serverID == game.id } }
+            // A server game id for a game the app keeps under its slug (a card from another phone).
+            ?? bubbles.first { !$0.serverID.isEmpty && $0.serverID == id }
     }
 
     /// Games in the order the feed shows them first, then everything else, without repeats.

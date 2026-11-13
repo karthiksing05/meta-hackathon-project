@@ -369,8 +369,8 @@ Authors and chat members are Personas or server accounts; the reply's `author` /
 | `GET /v1/fb/people?ids=a,b` | optional | `{items: [person]}`; no `ids`: every Persona |
 | `GET /v1/fb/threads?messages=20` | bearer | my chats, most recent first: `{items: [{id, members (not me), name?, theme?, emoji?, lastAt, lastText, unread, messages (latest, oldest first)}]}` |
 | `POST /v1/fb/threads` `{memberIds, name?}` | bearer | 201 thread; a one-to-one chat that exists comes back with 200 |
-| `GET /v1/fb/threads/{id}/messages?before=&limit=` | bearer (member) | `{items: [{id, threadId, senderId, text?, imageUrl?, emoji?, sentAt}]}` oldest first |
-| `POST /v1/fb/threads/{id}/messages` `{text?, emoji?, imageUrl?}` | bearer (member) | 201 `{message, reply}`: in a chat with Personas one of them answers 2.5 s later (stored with that time) |
+| `GET /v1/fb/threads/{id}/messages?before=&limit=` | bearer (member) | `{items: [{id, threadId, senderId, text?, imageUrl?, emoji?, gameId?, kind?, score?, sentAt}]}` oldest first; a message with `gameId` is a playable game card |
+| `POST /v1/fb/threads/{id}/messages` `{text?, emoji?, imageUrl?, gameId?, kind?, score?}` | bearer (member) | 201 `{message, reply}`: in a chat with Personas one of them answers 2.5 s later (stored with that time). `gameId` (a game id or slug, stored as the game's id) attaches a game as a playable card; it must exist, and an unlisted game only goes out from its owner (404 otherwise). `kind` is `"share"` (the default) or `"challenge"`; `score` (0 or more) is the sender's score to beat and only goes on a challenge. A card with no text shows "Sent a game" as the chat's `lastText` |
 | `PUT /v1/fb/threads/{id}/read` | bearer (member) | 204 |
 
 Collections: `fb_personas`, `fb_posts`, `fb_stories`, `fb_threads`, `fb_messages`; run `deploy/dbinit.sh` after deploying for their

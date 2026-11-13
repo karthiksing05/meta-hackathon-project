@@ -811,7 +811,9 @@ var fbReplies = []string{
 	"Tell me more", "😂😂", "Perfect, see you then", "Can't wait!", "Good call",
 }
 
-// POST /v1/fb/threads/{id}/messages {text?, emoji?, imageUrl?}: sends a message. In a chat with demo people, one
+// POST /v1/fb/threads/{id}/messages {text?, emoji?, imageUrl?, gameId?, kind?, score?}: sends a message. gameId
+// attaches a game (id or slug) the sender can see as a playable card; kind is "share" (the default) or
+// "challenge", and a challenge may carry the sender's score. In a chat with demo people, one
 // of them answers a moment later (the reply is stored with that time and returned as `reply`).
 func (s *Server) fbSend(w http.ResponseWriter, r *http.Request) {
 	f, _ := s.fb()
@@ -824,21 +826,60 @@ func (s *Server) fbSend(w http.ResponseWriter, r *http.Request) {
 		Text     string `json:"text"`
 		Emoji    string `json:"emoji"`
 		ImageURL string `json:"imageUrl"`
+		GameID   string `json:"gameId"`
+		Kind     string `json:"kind"`
+		Score    *int   `json:"score"`
 	}
 	if !decode(w, r, &in) {
 		return
 	}
 	in.Text = strings.TrimSpace(in.Text)
-	if in.Text == "" && in.Emoji == "" && in.ImageURL == "" {
-		writeErr(w, 400, "send text, emoji or imageUrl")
+	in.GameID = strings.TrimSpace(in.GameID)
+	if in.Text == "" && in.Emoji == "" && in.ImageURL == "" && in.GameID == "" {
+		writeErr(w, 400, "send text, emoji, imageUrl or gameId")
 		return
 	}
-	if len([]rune(in.Text)) > 4000 || len([]rune(in.Emoji)) > 8 || (in.ImageURL != "" && !validPhotoURL(in.ImageURL)) {
+	if len([]rune(in.Text)) > 4000 || len([]rune(in.Emoji)) > 8 || (in.ImageURL != "" && !validPhotoURL(in.ImageURL)) || len(in.GameID) > 80 {
 		writeErr(w, 400, "message too long or bad imageUrl")
 		return
 	}
+	var gameID string
+	if in.GameID == "" {
+		if in.Kind != "" || in.Score != nil {
+			writeErr(w, 400, "kind and score need a gameId")
+			return
+		}
+	} else {
+		switch in.Kind {
+		case "":
+			in.Kind = "share"
+		case "share", "challenge":
+		default:
+			writeErr(w, 400, `kind must be "share" or "challenge"`)
+			return
+		}
+		if in.Score != nil && (in.Kind != "challenge" || *in.Score < 0 || *in.Score > 1_000_000_000) {
+			writeErr(w, 400, "score goes on a challenge, from 0 to 1000000000")
+			return
+		}
+		// The same check as sharing a game to a Group: the game exists, and an unlisted one is its owner's.
+		g, err := s.roundGame(r.Context(), in.GameID)
+		if err != nil && !errors.Is(err, store.ErrNotFound) {
+			s.serverErr(w, r, err)
+			return
+		}
+		if err != nil || (g.Unlisted && g.OwnerID != me.ID) {
+			writeErr(w, 404, "game not found")
+			return
+		}
+		gameID = g.ID
+	}
 	now := time.Now().UTC().Truncate(time.Millisecond)
-	msg := model.FBMessage{ID: "m_" + auth.NewID(10), ThreadID: t.ID, SenderID: me.ID, Text: in.Text, Emoji: in.Emoji, ImageURL: in.ImageURL, SentAt: now}
+	msg := model.FBMessage{ID: "m_" + auth.NewID(10), ThreadID: t.ID, SenderID: me.ID, Text: in.Text, Emoji: in.Emoji, ImageURL: in.ImageURL,
+		GameID: gameID, SentAt: now}
+	if gameID != "" {
+		msg.Kind, msg.Score = in.Kind, in.Score
+	}
 	batch := []model.FBMessage{msg}
 	var reply *model.FBMessage
 	// someone in the chat who is a Persona (not an account) answers
