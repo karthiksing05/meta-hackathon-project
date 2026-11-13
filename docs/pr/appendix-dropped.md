@@ -2,7 +2,7 @@
 
 *Claims and items we dropped or held back, and why. Part of the pitch docs; start at [README.md](README.md).*
 
-## Appendix: what we dropped or held back, and why
+## What we dropped or held back, and why
 
 | Item | Why it is not in the main argument |
 |---|---|
@@ -35,3 +35,12 @@
 | A separate "proven daily-games playbook" value proposition | Merged into VP-06 and VP-18; the LinkedIn and NYT evidence is cited there. |
 | A separate "new creator class" and "interactive supply for Reels" | Merged into VP-05, VP-23, VP-13 and VP-39. |
 | Using game data for ads | Dropped on purpose. VP-31 limits data use to content ranking. |
+| "Our case does not rest on the generator" (earlier thesis) | Reversed at `6b1cc85`: the harness and anatomy make the generator half the case ([04-why-ai.md](04-why-ai.md)). Kept, corrected, in [06](06-closer-together-and-engagement.md) |
+| "Say any idea that fits six types" as the Q&A hedge | Muse now writes new mechanics on the microgame engine. Replaced by "most ideas you can describe, and Muse tells you which parts are new to it" |
+| 68.5% interleaving win | Superseded by 70.3% after a repeat-window bug fix (D27) |
+| "Muse is told never to copy a game's name" | Superseded for requested themes: names a person asks for are honored; copying a specific game's levels or art is still out |
+| Three "Coming" frames (95 s) in the demo | Replaced by one spoken "planned" line; most of what they showed is now in the app on one device |
+| "About thirty seconds" for every game | True only for ready formulas (D2); games from scratch take a median 99 s (D30) |
+| A number for "share of young adults whose friends are on Facebook" | We found no source; the story uses Pew reach, the 2018 deletion figure and a peer-reviewed study on peers instead [52][131][132] |
+| A quote from *The Social Network* | Paraphrased instead; we did not check the script |
+| The pages-per-session rise (5.9 to 7.2) as a selling point | Kept only as a simulated side effect with its caveat (D21); our goal is not minutes |

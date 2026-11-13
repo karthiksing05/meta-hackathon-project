@@ -2,8 +2,6 @@
 
 *Every public source cited in docs/pr, numbered. Part of the pitch docs; start at [README.md](README.md).*
 
-## 12. Sources
-
 ### Meta primary sources
 
 1. Meta, Q4 2025 earnings call transcript, 2026-01-28. https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Earnings-Call-Transcript.pdf
@@ -142,3 +140,9 @@
 128. Pettigrew and Tropp, "How does intergroup contact reduce prejudice? Meta-analytic tests of three mediators", European Journal of Social Psychology 38, 2008 (515 studies, mean r = .21; anxiety reduction a main mediator). https://courses.washington.edu/pbafhall/563/Readings/pettigrew.pdf
 129. Puurtinen and Mappes, "Between-group competition and human cooperation", Proceedings of the Royal Society B 276, 2009 (192 students; public goods game with and without group competition). https://jyx.jyu.fi/bitstreams/0e6bae43-1edd-4985-a137-e2bf1048a1b7/download
 130. Sherif, Harvey, White, Hood and Sherif, Intergroup Conflict and Cooperation: The Robbers Cave Experiment, 1954/1961, chapter 7 (out-group friendship choices after competition and after shared goals). https://psychclassics.yorku.ca/Sherif/chap7.htm
+
+### Added for the story spine (2026-11-12, evening)
+
+131. Lin, K.-Y. and Lu, H.-P., "Why people use social networking sites: An empirical study integrating network externalities and motivation theory", Computers in Human Behavior 27(3), 1152 to 1161, 2011 (peer-reviewed; online survey, n = 402; enjoyment, then number of peers, then usefulness drive continued use; number of peers mattered more than total members; the peer effect was significant for women, not men; checked from the abstract and listings, not the full text). https://doi.org/10.1016/j.chb.2010.12.009
+132. Pew Research Center, "Americans are changing their relationship with Facebook", 2018-09-05 (survey May 29 to June 11, 2018; sample size in Pew's methodology note, not checked; 44% of users aged 18 to 29 deleted the Facebook app from their phone in the past year, against 12% of users 65 and older; reputable survey, not peer-reviewed). https://www.pewresearch.org/short-reads/2018/09/05/americans-are-changing-their-relationship-with-facebook/
+133. Baumer, E. P. S. et al., "Limiting, Leaving, and (Re)lapsing: An Exploration of Facebook Non-Use Practices and Experiences", Proceedings of CHI 2013, 3257 to 3266 (peer-reviewed; finds no clear binary between use and non-use, and mixed motivations both for leaving and for keeping some connection; checked from the abstract and the authors' summary). https://doi.org/10.1145/2470654.2466446
