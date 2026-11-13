@@ -86,6 +86,10 @@ struct BubblesTabView: View {
                 }
                 #endif
             }
+            // Exactly the screen's width: nothing inside (an overflowing row) can widen the tab
+            // and push the right side of the pages off screen.
+            .frame(width: geometry.size.width)
+            .clipped()
             .ignoresSafeArea(edges: [.top, .bottom])
             .onAppear {
                 updateLayout(geometry)
@@ -554,20 +558,33 @@ private struct BubbleFeedHeader: View {
 
     @Environment(Router.self) private var router
 
+    /// The header never grows wider than the screen: an overflowing row widened the whole tab
+    /// (anchored at the leading edge), which cut off the right side of every page on a 393 pt
+    /// iPhone. It tightens step by step to fit any width.
     var body: some View {
-        HStack(spacing: 8) {
-            BubbleWordmark(size: 24, lead: .white)
+        ViewThatFits(in: .horizontal) {
+            row(wordmark: 24, spacing: 8, button: 44)
+            row(wordmark: 21, spacing: 2, button: 42)
+            row(wordmark: 18, spacing: 0, button: 38)
+        }
+        .padding(.horizontal, FBMetrics.screenPadding)
+        .frame(maxWidth: .infinity)
+    }
+
+    private func row(wordmark: CGFloat, spacing: CGFloat, button: CGFloat) -> some View {
+        HStack(spacing: spacing) {
+            BubbleWordmark(size: wordmark, lead: .white)
                 // Stays legible over light looks (paper, glow) as well as dark ones.
                 .shadow(color: Color.black.opacity(0.3), radius: 6, y: 1)
                 .padding(.leading, 2)
                 .fixedSize()
                 .layoutPriority(1)
             Spacer(minLength: 4)
-            iconButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off", action: onToggleMute)
-            iconButton("books.vertical.fill", label: "Library") {
+            iconButton(isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill", label: isMuted ? "Turn sound on" : "Turn sound off", width: button, action: onToggleMute)
+            iconButton("books.vertical.fill", label: "Library", width: button) {
                 router.push(.bubbleLibrary)
             }
-            iconButton("trophy.fill", label: "Challenges") {
+            iconButton("trophy.fill", label: "Challenges", width: button) {
                 router.push(.challengesInbox)
             }
             .overlay(alignment: .topTrailing) {
@@ -588,10 +605,9 @@ private struct BubbleFeedHeader: View {
                 blowButton(showsTitle: false)
             }
         }
-        .padding(.horizontal, FBMetrics.screenPadding)
     }
 
-    private func iconButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
+    private func iconButton(_ symbol: String, label: String, width: CGFloat = 44, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: FBIconSize.medium, weight: .semibold))
@@ -599,7 +615,7 @@ private struct BubbleFeedHeader: View {
                 .frame(width: 36, height: 36)
                 .background(Color.black.opacity(0.28), in: Circle())
                 .overlay(Circle().strokeBorder(Color.white.opacity(0.25), lineWidth: 0.5))
-                .frame(width: 44, height: 44)
+                .frame(width: width, height: 44)
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
