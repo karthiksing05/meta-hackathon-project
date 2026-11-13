@@ -1,0 +1,23 @@
+export const shared = 'Use a 360×640 portrait canvas. Keep the top 104 px reserved for a title and HUD. Put the main control or board below y=170. Use the exact inputs, state names, and coordinates below so independent tests can inspect the game. All coordinates are logical canvas units.';
+export const cases = [
+  {id:'grove', title:'Glow Grove', fixture:'fog_dodge',
+   brief:'A moth collects three lights in a garden. On tap, it walks smoothly toward that point. State px and py (floats) start at (60,520). Tap coordinates come from input seek with x,y; give the whole board a transparent on_tap rectangle. A wall covers x=120–240,y=330–370. Stop at the wall; the player can go around it with subsequent taps. Three lights at (60,430), (300,415), (300,245), in any order. Each counts only once, in int count. Win near (290,195) only with all three. Lose after 45 seconds. Visually mark the wall and finish. Use a generously sized pickup radius. Make it possible to go to the first light without grazing the wall.',
+   art:'Nocturnal botanical print, midnight green and orchid. Visual anchor is a pale moth with distinctive spread wings, seen in silhouette. Keep the navigation field quiet and pickups readable.',
+   cue:{x:60,y:520,size:38}},
+  {id:'signal', title:'Signal Forge', fixture:'golden_hour',
+   brief:'A pulse-timing game. Tap one button centered at (180,480) to try. The first target is at engine time 2000 ms; valid window is exactly ±150 ms inclusive, measured at tap time. No input lockout. Each tap counts as exactly one hit or miss and then advances the next target by 2000 ms from its previous scheduled time. Start int hits=0 and misses=0. Win on 3 hits; lose on 2 misses or after 20 seconds. Show an approaching visual cue and feedback readable with sound off. Use input strike for the button.',
+   art:'Industrial signal lamp, indigo and hot copper. Visual anchor is a compact faceted spark or signal emblem, easy to read at 40px. Keep the timing cue area open.',
+   cue:{x:180,y:430,size:36}},
+  {id:'prism', title:'Prism Lock', fixture:'lights_out',
+   brief:'A 3×3 toggle puzzle. board is a grid<bool>; lit=true. Initial rows are false,true,false / true,true,true / false,true,false. moves starts at 0. Tap any cell to flip it and only its orthogonal neighbors. Cell centers are (100+80*column, 260+80*row); indices start at zero. Use at least 56×56 hit regions. Count every valid tap as one move. Win if all nine are lit within exactly four moves. The fourth move can win; lose on move four only if still unsolved. Also lose after 60 seconds. Use shape or icon as well as color to distinguish states.',
+   art:'Stained-glass observatory, deep cobalt and honey gold. Visual anchor is a faceted prism emblem. Keep the nine-tile board and state markers visually distinct.',
+   cue:{x:180,y:179,size:42}},
+  {id:'harbor', title:'Harbor Run', fixture:'kite_day_detour',
+   brief:'A branching strategy game. State int stage starts 0, int fuel=2, int time_left=5. At each of stages 0 and 1 show two tap choices centered at (180,385) and (180,465). At stage 0 the top choice is Take the shoals, costs one fuel and one time; bottom is Take the channel, costs no fuel and two time. At stage 1 top is Use the engine, costs one fuel and one time; bottom is Drift, costs no fuel and three time. At stage 2 both paths offer Dock at (180,385), costing one fuel and one time. At any step lose when fuel or time is negative. At stage 3 win if both are nonnegative. Thus shoals+drift and channel+engine should win, shoals+engine and channel+drift should lose. Time is only a choice cost, never a live countdown. Show both resources and each choice cost.',
+   art:'Storm harbor, woodcut silhouettes and sea-green ink. Visual anchor is a small striped lighthouse above a dark headland. Keep the choices and resource counts easy to scan.',
+   cue:{x:180,y:153,size:56}},
+  {id:'relay', title:'Twin Lanterns', fixture:'bullseye_relay',
+   brief:'Two players share one device. State int player starts 1, throws starts 0, p1 and p2 start 0. On each turn tap the gold lantern at (106,340) for 2 points, or the blue lantern at (254,340) for 1. After any valid tap add points only to the current player, increment throws, then swap players. End immediately after four throws (two each). Win if combined score is at least 6, otherwise lose. A tap outside both targets changes nothing. Keep target hit regions at least 50×50 and separated. Display whose turn it is and each score. Give both players the same choices.',
+   art:'Festival lantern screenprint, dusk plum, gold and cyan. Visual anchor is a small hanging festival knot. Keep the two scoring lanterns and turn indicator easy to identify.',
+   cue:{x:180,y:215,size:54}},
+];
