@@ -163,6 +163,17 @@ type MuseClient struct {
 	ReasoningEffort string        // default "minimal" (see UnderstandMuse)
 	Timeout         time.Duration // per call; default 25 s
 	HTTP            *http.Client
+	// OnUsage, if set, receives each answered call's token usage and wall time (for cost measurements).
+	OnUsage func(Usage)
+}
+
+// Usage is one Muse call's token usage, as the API reports it, and its wall time.
+type Usage struct {
+	Model            string `json:"model"`
+	PromptTokens     int    `json:"prompt_tokens"`
+	CompletionTokens int    `json:"completion_tokens"`
+	ReasoningTokens  int    `json:"reasoning_tokens"`
+	Ms               int64  `json:"ms"`
 }
 
 // JSON implements MuseJSON.
@@ -205,6 +216,7 @@ func (c *MuseClient) JSON(ctx context.Context, system, user string) (json.RawMes
 			body["reasoning_effort"] = effort
 		}
 		b, _ := json.Marshal(body)
+		started := time.Now()
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, base+"/chat/completions", bytes.NewReader(b))
 		if err != nil {
 			return nil, err
@@ -241,9 +253,20 @@ func (c *MuseClient) JSON(ctx context.Context, system, user string) (json.RawMes
 				} `json:"message"`
 				FinishReason string `json:"finish_reason"`
 			} `json:"choices"`
+			Usage struct {
+				PromptTokens            int `json:"prompt_tokens"`
+				CompletionTokens        int `json:"completion_tokens"`
+				CompletionTokensDetails struct {
+					ReasoningTokens int `json:"reasoning_tokens"`
+				} `json:"completion_tokens_details"`
+			} `json:"usage"`
 		}
 		if err := json.Unmarshal(data, &reply); err != nil || len(reply.Choices) == 0 {
 			return nil, errors.New("harness: Muse sent no choices")
+		}
+		if c.OnUsage != nil {
+			c.OnUsage(Usage{Model: model, PromptTokens: reply.Usage.PromptTokens, CompletionTokens: reply.Usage.CompletionTokens,
+				ReasoningTokens: reply.Usage.CompletionTokensDetails.ReasoningTokens, Ms: ms(time.Since(started))})
 		}
 		ch := reply.Choices[0]
 		if strings.TrimSpace(ch.Message.Content) == "" && ch.FinishReason == "length" {

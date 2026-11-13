@@ -21,12 +21,42 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
 )
 
+// usage collects every Muse call's token usage by step, printed at the end (one USAGE line per call).
+var (
+	usageMu sync.Mutex
+	usage   []stepUsage
+)
+
+type stepUsage struct {
+	Step string `json:"step"`
+	harness.Usage
+}
+
+func record(step string) func(harness.Usage) {
+	return func(u harness.Usage) {
+		usageMu.Lock()
+		usage = append(usage, stepUsage{step, u})
+		usageMu.Unlock()
+	}
+}
+
+func printUsage() {
+	usageMu.Lock()
+	defer usageMu.Unlock()
+	for _, u := range usage {
+		b, _ := json.Marshal(u)
+		fmt.Fprintf(os.Stderr, "USAGE %s\n", b)
+	}
+}
+
 func main() {
+	defer printUsage()
 	var (
 		useMuse  = flag.Bool("muse", false, "understand with Muse and allow the web lookup (needs MUSE_API_KEY)")
 		asJSON   = flag.Bool("json", false, "print the whole context pack as JSON")
@@ -46,7 +76,7 @@ func main() {
 	req := strings.TrimSpace(strings.Join(flag.Args(), " "))
 	if req == "" {
 		flag.Usage()
-		os.Exit(2)
+		exit(2)
 	}
 	ctx := context.Background()
 	src := &harness.DirSource{Dir: *catalog}
@@ -56,12 +86,14 @@ func main() {
 		key := strings.TrimSpace(os.Getenv("MUSE_API_KEY"))
 		if key == "" {
 			fmt.Fprintln(os.Stderr, "harness-query: --muse needs MUSE_API_KEY in the environment")
-			os.Exit(2)
+			exit(2)
 		}
-		muse := &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"), Model: os.Getenv("MUSE_MODEL"),
-			ReasoningEffort: os.Getenv("MUSE_EFFORT"), Timeout: *museWait}
-		cfg.Understander = harness.MuseUnderstander{Muse: muse}
-		lk := harness.NewLookup(muse)
+		client := func(step string) *harness.MuseClient {
+			return &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"), Model: os.Getenv("MUSE_MODEL"),
+				ReasoningEffort: os.Getenv("MUSE_EFFORT"), Timeout: *museWait, OnUsage: record(step)}
+		}
+		cfg.Understander = harness.MuseUnderstander{Muse: client("understand")}
+		lk := harness.NewLookup(client("lookup"))
 		lk.FetchBudget = *budget
 		cfg.Lookup = lk
 		if *withPlan {
@@ -72,30 +104,30 @@ func main() {
 			lists, _, err := harness.LoadChecklists(dir)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "harness-query: checklists:", err)
-				os.Exit(1)
+				exit(1)
 			}
 			effort := os.Getenv("MUSE_PLAN_EFFORT")
 			if effort == "" {
 				effort = harness.PlanEffort
 			}
 			planner = &harness.Planner{Checklists: lists, Chain: *chain, Muse: &harness.MuseClient{APIKey: key, BaseURL: os.Getenv("MUSE_BASE_URL"),
-				Model: harness.ModelWonder, MaxTokens: 12000, ReasoningEffort: effort, Timeout: 90 * time.Second}}
+				Model: harness.ModelWonder, MaxTokens: 12000, ReasoningEffort: effort, Timeout: 90 * time.Second, OnUsage: record("plan")}}
 		}
 	}
 	h, err := harness.New(ctx, cfg)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "harness-query:", err)
-		os.Exit(1)
+		exit(1)
 	}
 	if *withPlan {
 		if planner == nil {
 			fmt.Fprintln(os.Stderr, "harness-query: --plan needs --muse")
-			os.Exit(2)
+			exit(2)
 		}
 		b, err := h.Build(ctx, harness.Request{Text: req, NoLookup: *noLookup}, planner)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "harness-query: plan:", err)
-			os.Exit(1)
+			exit(1)
 		}
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
@@ -114,7 +146,7 @@ func main() {
 	pack, err := h.Context(ctx, harness.Request{Text: req, NoLookup: *noLookup})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "harness-query:", err)
-		os.Exit(1)
+		exit(1)
 	}
 	if *asJSON {
 		enc := json.NewEncoder(os.Stdout)
@@ -234,4 +266,10 @@ func printPlan(p *harness.Plan, planMs int64) {
 	for _, n := range p.Notes {
 		fmt.Printf("  note: %s\n", n)
 	}
+}
+
+// exit prints the usage collected so far, then exits.
+func exit(code int) {
+	printUsage()
+	os.Exit(code)
 }
