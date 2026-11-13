@@ -9,6 +9,8 @@
 !FacebookClone/Bubbles/Recommend/game-recs.js
 !FacebookClone/Bubbles/Runtime/web
 !FacebookClone/Bubbles/Studio/web/microgame-studio.js
+# the game catalog the harness and dbinit read
+!authoring/catalog
 **/*_test.go
 **/node_modules
 **/*.env
