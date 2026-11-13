@@ -30,6 +30,8 @@ const PORT = Number(env.PORT ?? 8090);
 const MAX_CONCURRENT = Number(env.GENERATOR_MAX_CONCURRENT ?? 2);
 const JOB_TIMEOUT_MS = Number(env.GENERATOR_JOB_TIMEOUT_SECONDS ?? 540) * 1000;
 const MODEL = env.MUSE_MODEL || 'muse-wonder-1.0';
+// A change to a game sends the whole stored manifest (the game script alone can be 150 KB or more).
+const COMPOSE_BODY_LIMIT = 8 * 1024 * 1024;
 const FAST_MODEL = env.MUSE_FAST_MODEL || 'muse-ember-1.0';
 const ANATOMY_TIMEOUT_S = Number(env.GENERATOR_ANATOMY_TIMEOUT_SECONDS ?? 40);
 
@@ -102,7 +104,7 @@ const server = createServer(async (req, res) => {
 
     let input;
     try {
-      input = await readBody(req);
+      input = await readBody(req, COMPOSE_BODY_LIMIT);
     } catch {
       return json(res, 400, { error: 'invalid JSON body' });
     }
