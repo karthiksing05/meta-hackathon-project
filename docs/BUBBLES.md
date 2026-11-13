@@ -218,14 +218,20 @@ Swift to call `BubbleHost.boot(payloadJSON)`:
 ```json
 { "manifest": { }, "mode": "play" | "replay" | "demo" | "poster",
   "replay": { "seed": 1, "tick_rate": 60, "total_ticks": 600, "inputs": [{ "t": 12, "a": "tap" }] },
-  "player": { "name": "Alex", "best": 42 }, "muted": true, "reduced_motion": false,
+  "player": { "name": "Alex", "best": 42 }, "muted": true, "backing": false, "reduced_motion": false,
   "insets": { "top": 0, "bottom": 0 } }
 ```
+
+- `backing: true` means a sound from the server's library (`/v1/sounds`, TikTok-style) is playing
+  behind the game, natively in the app. The game's own music stays off, and its effects play a
+  little quieter (master gain 0.24 instead of 0.32). It's presentation only: replays and score checks
+  don't change. `BubbleHost.command({"type": "backing", "on": true|false})` switches it on a live
+  session.
 
 - `replay` plays an input log exactly (seeded, fixed timestep). `demo` lets the built-in bot play.
   `poster` draws one still frame. Tapping during `replay` or `demo` **takes over**: the runtime
   restarts the same seed in `play` mode and posts `takeover`.
-- Swift → JS: `BubbleHost.command({"type": "pause" | "resume" | "restart" | "mute" | "unmute"})`.
+- Swift → JS: `BubbleHost.command({"type": "pause" | "resume" | "restart" | "mute" | "unmute" | "backing"})`.
   `unmute`, `resume`, a tap and the page becoming visible again all resume the Web Audio context
   when it is `suspended` or `interrupted` (iOS interrupts it for calls, Siri and other apps).
   While a session is unmuted and not paused, the host holds the app's audio session in

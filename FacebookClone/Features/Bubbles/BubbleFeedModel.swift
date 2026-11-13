@@ -118,11 +118,13 @@ final class BubbleFeedModel {
             releaseTask?.cancel()
             if host != nil, liveItemID != nil, liveItemID == currentID {
                 host?.command("resume")
+                playSound(for: currentItem)
             } else {
                 activateCurrent()
             }
         } else {
             host?.command("pause")
+            LibrarySoundPlayer.shared.hold(.feed)
             guard !isTakenOver else { return }
             releaseTask?.cancel()
             releaseTask = Task { @MainActor [weak self] in
@@ -277,7 +279,12 @@ final class BubbleFeedModel {
             guard let self, !Task.isCancelled, token == self.activationToken, !self.isLiveRevealed else { return }
             self.fail(itemID, EngineFailure(kind: .timedOut))
         }
-        let options = sessionOptions(for: bubble, mode: burstMode(for: item, in: bubble))
+        var options = sessionOptions(for: bubble, mode: burstMode(for: item, in: bubble))
+        // The page's sound starts as the page settles (crossfading from the last one), and the
+        // game's own music stays off under it.
+        let sound = store.librarySound(for: bubble)
+        options.hasBacking = sound != nil
+        LibrarySoundPlayer.shared.play(sound, for: .feed)
         let manifest = bubble.manifest
         let title = bubble.title
         Task { @MainActor [weak self] in
@@ -370,7 +377,14 @@ final class BubbleFeedModel {
         return leased
     }
 
+    /// The settled page's library sound, if it has one.
+    private func playSound(for item: BubbleFeedItem?) {
+        guard let store, let item, let bubble = store.bubble(id: item.bubbleID) else { return }
+        LibrarySoundPlayer.shared.play(store.librarySound(for: bubble), for: .feed)
+    }
+
     private func releaseHost() {
+        LibrarySoundPlayer.shared.stop(.feed)
         guard let host else { return }
         windowTask?.cancel()
         if let liveKey {

@@ -59,9 +59,11 @@ type generateIn struct {
 	Draft *bool `json:"draft"`
 	// A sound to put behind the finished game (a sound id from /v1/sounds), where in the loop to start, and how loud it
 	// is against the game's own sound effects (0 to 1). A change to a game keeps the original's sound unless this names another.
-	SoundID  string   `json:"soundId"`
-	OffsetMs *int64   `json:"offsetMs"`
-	Mix      *float64 `json:"mix"`
+	// Sponsor makes the finished game a brand's ad. Only a brand account may send it.
+	Sponsor  *sponsorIn `json:"sponsor"`
+	SoundID  string     `json:"soundId"`
+	OffsetMs *int64     `json:"offsetMs"`
+	Mix      *float64   `json:"mix"`
 }
 
 // genHealthCache remembers the generator's last health answer for a few seconds.
@@ -134,6 +136,18 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		in.Brief["intent"] = in.Request // the brief's intent defaults to the request
 	}
 
+	var sponsor *model.Sponsor
+	if in.Sponsor != nil {
+		if !s.isBrand(userFrom(r)) {
+			writeErr(w, 403, "only a brand account can sponsor a game")
+			return
+		}
+		var msg string
+		if sponsor, msg = sponsorFrom(in.Sponsor); sponsor == nil {
+			writeErr(w, 400, msg)
+			return
+		}
+	}
 	var sound *model.GameSound
 	switch {
 	case strings.TrimSpace(in.SoundID) != "":
@@ -207,6 +221,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		job.Anatomy = a
 	}
 	job.Sound = sound
+	job.Sponsor = sponsor
 	job.Draft = base != nil // a change stays a draft until it is published
 	if in.Draft != nil {
 		job.Draft = *in.Draft
@@ -498,6 +513,12 @@ func (s *Server) finishJob(ctx context.Context, job model.Job, owner model.User,
 		}
 		s.failJob(ctx, job.ID, "Couldn't save the game: "+perr.Msg)
 		return
+	}
+	if job.Sponsor != nil {
+		if err := s.Store.SetGameSponsor(context.WithoutCancel(ctx), g.ID, job.Sponsor); err != nil {
+			log.Warn("generate: could not mark the game sponsored", "err", err)
+		}
+		g.Sponsor = job.Sponsor
 	}
 	if job.Sound != nil {
 		if err := s.attachSound(context.WithoutCancel(ctx), g, job.Sound.ID, job.Sound.OffsetMs, job.Sound.Mix); err != nil {

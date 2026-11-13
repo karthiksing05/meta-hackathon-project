@@ -175,7 +175,8 @@
           if (t.text) sdk.fx.float(t.text, W / 2, H * 0.28);
         }
         if (sess.music) {
-          sess.music.sync(out, f.music, sess.assets);
+          // A library sound playing behind the game (`backing`) replaces the game's own music.
+          sess.music.sync(out && !out.backing ? out : null, f.music, sess.assets);
           // Stop the music if this run stops being drawn (scrolled away, paused, evicted).
           if (sess.musicTimer) clearTimeout(sess.musicTimer);
           if (sess.music.cur) sess.musicTimer = setTimeout(() => sess.music.stop(), 350);

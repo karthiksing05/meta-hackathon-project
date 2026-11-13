@@ -122,6 +122,12 @@ loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, s
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
 and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
 
+## Sponsored games
+
+A brand's playable game shown in the feed like an ad. The server decides what is sponsored; the app draws a card for any game or feed item that carries `sponsor: {name, avatarUrl?, cta, url?}` (`cta` defaults to "Play now"; no `sponsor` means not sponsored).
+`PUT /v1/games/{id}/sponsor {name, avatarUrl?, cta?, url?}` (its owner, and only a **brand account**) marks a game; `DELETE` takes it off; `POST /v1/generate` takes `sponsor` too. Brand accounts are the usernames in `SPONSOR_USERS` (api.env, comma separated;
+none by default), so a person can't pass their own game off as an ad. Avatar and link must be http(s). Tapping a card is a feed moment event, `{kind: "sponsor_tap", gameID}`. Demo brands must be fictional (CLAUDE.md); the server doesn't check names.
+
 ## Sounds
 
 Loops that play behind games in the feed, like TikTok sounds. A sound is a published package, stored and served like a game (`https://games.<domain>/<soundId>/<file>`): a zip with a `manifest.json`
@@ -217,7 +223,7 @@ back to its own neutral defaults. The server holds no cast, seed games or invent
 The games host serves a small player at **`https://games.<domain>/play/`** (`/play/?game=<24-character id or slug>`). It runs the
 app's own game runtime in the browser (read from `FacebookClone/Bubbles/Runtime/web`; the games image copies that folder to `/app/player/runtime`), loads the game's `manifest.json` from the games host, and boots it, so a game looks and plays as it does in the
 app. A microgame runs on Artem's Rust engine (WebAssembly) with its game script from `content.game_json`. The page lists the games
-from `GET /v1/feed`, can watch a bot play, and logs the runtime's messages. A red **Delete this game** button removes the open game (and its saves and scores) after a confirmation: it asks the owner to sign in (the page keeps the token for the tab only) and calls `DELETE /v1/creations/{id}`; anyone else gets "only the game's owner can delete it". The API allows the games host's origin for CORS.
+from `GET /v1/feed`, can watch a bot play, and logs the runtime's messages. A red **Delete this game** button removes the open game (and its saves and scores) after a confirmation. It is for debugging, so there is no login: it calls `DELETE /v1/debug/games/{id}`, which does nothing (403) unless the server runs with `DEBUG_DELETE=1` in `api.env` (then `deploy.sh restart-api`). While that is on, anyone who can reach the API can delete any game, so turn it on only while cleaning up and remove it afterwards. The API allows the games host's origin for CORS.
 Refresh the runtime copy from `main` when the app's runtime changes.
 
 ## Event log and recommender support
