@@ -18,6 +18,10 @@ impossible to ship. No Muse calls: everything here is code.
 | `checks/fill.mjs` | Adapter for `playtest/fill-check.mjs` (`F_*`): aspect, background coverage, HUD band, bleed bands, score owner. |
 | `solve.mjs` | The layout solver, the last resort. |
 | `prove.mjs` | Proof that a fix is presentation only: same rules, same replay state hashes. |
+| `motion-track.mjs` | Motion sampling: a frame every 50 ms of each bot run (none dropped), per-node tracks, and the old shell's toasts and shake. |
+| `motion.mjs`, `motion-fix.mjs`, `checks/motion.mjs` | The motion classes (`M_*`), their fixes and the check. |
+| `motion-strips.mjs` | 50 ms strips around transitions, drawn as the old (`--shell old`) or current (`--shell new`) shell shows them. |
+| `test-motion.mjs` | Motion tests on the Guess the Decade fixture (33). Needs `MG_ENGINE_DIR`. |
 | `test-verify.mjs` | Tests (28). Needs `MG_ENGINE_DIR`. |
 
 ```sh
@@ -90,6 +94,8 @@ Every code belongs to a failure class in `docs/games/FAILURE_CLASSES.md`, the on
 | `R_*` | a failed must blocks; others warn | the person's requirements | `requirements.mjs` repair |
 | `F_BG_GAP`, `F_BACKDROP_SHORT`, `F_KEY_IN_BLEED`, `F_DOUBLE_HUD` | block | fill (`fill-check.mjs`): background gaps, key content under the phone's bars, two score HUDs | the fill fix |
 | `F_ASPECT`, `F_HUD_OUT_OF_BAND`, `F_SCORE_HIDDEN` | warn | fill: canvas aspect, HUD outside its band, no score shown | the fill fix |
+| `M_SHAKE`, `M_TEXT_UNSTABLE`, `M_PULSE`, `M_POP`, `M_TRANSITION_OVERLAP`, `M_TRANSITION_STYLE` | block | motion over contiguous frames (`checks/motion.mjs`, `motion.mjs`): excess or stacked shake, text that jumps, slides or over-pulses, icon over-pulse, pops and flicker, next labels on the last state's colours or particles over text, inconsistent fades (docs/games/FAILURE_CLASSES.md FC-50 to FC-55) | `motion-fix.mjs`, the motion stage of `verifyAndFix`: one 3-unit shake on the fail moment, fixed HUD slots, pulses capped, the look's fade on the events that change words, reveal transitions dropped, short bursts |
+| `M_TEXT_HOLD` | warn | words up for less time than reading them takes (FC-56) | – (rules) |
 | `V_SPRITE_DUP` | reserved (drop `checks/sprite-dup.mjs`) | two different things drawn with one sprite | (the sprite-distinctness check) |
 
 Units: the canvas is 360 units wide and drawn about 390 pt wide, so 1 unit ≈ 1.08 pt.
@@ -98,6 +104,7 @@ Units: the canvas is 360 units wide and drawn about 390 pt wide, so 1 unit ≈ 1
 
 `verifyAndFix(game, opts)`:
 
+0. **Motion** (`motion-fix.mjs`, up to 2 rounds, before the look and readability stages): the `M_*` fixes.
 1. **Verify** the built game.
 2. **Code fixes** (`expander/layout-fix.mjs`): fit and center labels, target gaps, shrink, HUD panel,
    contrast. Kept only if blocking findings don't rise.
@@ -114,7 +121,7 @@ Units: the canvas is 360 units wide and drawn about 390 pt wide, so 1 unit ≈ 1
      shrinks (to 11 at the least) when nothing fits at full size;
    - outlines for text still under 3:1;
    - grow small targets and widen gaps where the canvas has room.
-5. **Prove** (`prove.mjs`): everything outside `presentation`, every handler and the feedback block
+5. **Prove** (`prove.mjs`): everything outside `presentation`, every handler and the feedback block's sounds and haptics (shakes, toasts and particles may change)
    are identical; every bot run and an idle run replay to the same state hash after every input and
    at the end. If the proof fails, the original game ships with its findings (`reverted: true`).
    One exception is reported, not failed: a recorded tap that reached a target the fix hides under

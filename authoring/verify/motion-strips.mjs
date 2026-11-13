@@ -97,7 +97,7 @@ function playFramesNew(engine, json, run, { every = 3, maxSeconds = 120, tailMs 
   let toast = null, lastInput = null, step = 0, k = 0, endAt = null;
   const maxSteps = Math.round((maxSeconds * 1000) / DT);
   const tall = (f) => f.height * 360 > f.width * 640 * 1.02;
-  const sig = (ops) => ops.filter((o) => o.op === 'text' && o.text && (o.opacity ?? 1) > 0.05).map((o) => String(o.text).replace(/\b\d+\b/g, '#')).join('|');
+  const sig = (ops) => ops.filter((o) => o.op === 'text' && o.text).map((o) => String(o.text).replace(/\b\d+\b/g, '#')).join('|');
   try {
     while (step < maxSteps) {
       const playing = g.phase() === 'playing';
@@ -121,7 +121,8 @@ function playFramesNew(engine, json, run, { every = 3, maxSeconds = 120, tailMs 
           if (y != null) toast = { text, y, w, h, size, born: now, life: Math.min(MM.TOAST_MAX_MS, f.toasts.at(-1).ms > 0 ? f.toasts.at(-1).ms : MM.TOAST_MAX_MS), sig: sig(f.ops), cleared: null };
         }
       }
-      if (toast && toast.cleared == null && sig(f.ops) !== toast.sig) toast.cleared = now;
+      if (toast && toast.cleared == null && now - toast.born > 200 && sig(f.ops) !== toast.sig) toast.cleared = now;
+      else if (toast && now - toast.born <= 200) toast.sig = sig(f.ops);
       if (step % every) continue;
       let ops = MM.clampTextScale({ ops: f.ops.map((o) => ({ ...o, scale: o.scale ?? 1 })) }).ops;
       let tinted = false;

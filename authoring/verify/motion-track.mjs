@@ -51,9 +51,11 @@ const round2 = (v) => Math.round(v * 100) / 100;
 function compact(frame, nodes) {
   const items = [];
   const ord = new Map();
+  const particleBoxes = [];
   frame.ops.forEach((op, i) => {
     const n = decodeTag(op, nodes);
-    if (!n) return;
+    // Untagged circles are the engine's feedback particles.
+    if (!n) { if (op.op === 'circle' && (op.opacity ?? 1) > 0.2) particleBoxes.push({ x: round2(op.x), y: round2(op.y) }); return; }
     const k = ord.get(n.id) ?? 0;
     ord.set(n.id, k + 1);
     const box = op.op === 'text' ? (op.text ? textInk(op) : null) : opBox(op);
@@ -65,7 +67,7 @@ function compact(frame, nodes) {
     });
   });
   const shake = typeof frame.shake === 'number' ? frame.shake : frame.shake?.px ?? frame.shake_px ?? 0;
-  return { W: frame.width, H: frame.height, items, shake: round2(shake), toasts: (frame.toasts ?? []).map((t) => ({ text: String(t.text ?? ''), ms: t.ms ?? null })) };
+  return { W: frame.width, H: frame.height, items, particles: particleBoxes.length, particleBoxes, shake: round2(shake), toasts: (frame.toasts ?? []).map((t) => ({ text: String(t.text ?? ''), ms: t.ms ?? null })) };
 }
 
 /**
