@@ -1,21 +1,14 @@
-# Speaker notes and timing (draft 10)
+# Speaker notes and timing (draft 11)
 
-*Story (Karthik, 04:55): people open an app for a reason, a need or a ritual; Facebook has the people but has lost the reason; play is already the icebreaker (LinkedIn, NYT, Reels); a Curio turns "tell me your score" into a real Group score; then how we built it, what it does together, who else it's for, and how we worked. Blue = competing, violet = collaborating. The budget is 275 s (180 s of talk and 95 s of demo), leaving 25 s of slack. Demo 1 starts on slide 1 and pays off after slide 7, at about 2:00. The video voice-over reads these notes.*
+*Shape follows the organizers' guidance (2026-11-13): the problem (30–45 s), the demo as one complete journey (about 2.5 min), how Muse powers it (about 45 s), how we built it with AI (about 60 s). Thesis (Karthik): there's no better way to connect than playing a game. Slide numbers match the Keynote deck (22 slides; the live phone is on slides 9 and 10).*
 
-| Slide | Act | Talk | Demo | Running total |
-|---|---|---|---|---|
-| 1 Curio | Why | 15 s | Demo 1 starts | 0:15 |
-| 2 A need or a ritual | Why | 15 s | | 0:30 |
-| 3 Facebook lost the reason | Why | 15 s | | 0:45 |
-| 4 Play became the icebreaker (LinkedIn, NYT) | Why | 15 s | | 1:00 |
-| 5 Reels you play | Why | 15 s | | 1:15 |
-| 6 Our answer: a real Group score | Our answer | 15 s | (Demo 1 still building) | 1:30 |
-| 7 Distilling virality into a harness | How | 30 s | | 2:00 |
-| — | How | | **Demo 1, 40 s:** the finished Curio, play it, post it to a Group. **Demo 2, 25 s:** scroll the feed, a Curio plays inline with a sound | 3:05 |
-| 8 Collaboration | What it does | 15 s | **Demo 3, 30 s:** a Group's weekly board → Add friend → best of 5 | 3:50 |
-| 9 Creators and brands | Who it's for | 20 s | | 4:10 |
-| 10 Our AI workflow | Execution | 15 s | | 4:25 |
-| 11 The tagline | Close | 10 s | | 4:35 |
+| Slides | Section | Talk | Running total |
+|---|---|---|---|
+| 1–6 | 01 The problem | 45 s | 0:45 |
+| 7–11 | 02 The demo, live on Karthik's iPhone (Bayan's phone joins on 10) | 2:30 | 3:15 |
+| 12–15 | 03 How Muse powers it | 55 s | 4:10 |
+| 16–20 | 04 How we built it | 75 s | 5:25 |
+| 21–22 | Call to action and tagline | 10 s | 5:35 |
 
 **Pre-show checklist (the morning of the demo, on the presenting phone):**
 1. Signed in as the presenter's own account, member of the demo Group.
@@ -32,34 +25,68 @@
 **Demo 1 fallback:** before the talk, make the same game once ("dodge the fog over Twin Peaks") and post it to the demo Group. If the live build isn't done at 1:50, say "it's still being playtested by the bots, so here's one I made this morning", and open that one. Go back to the live one at the end if there's time.
 
 ## 1
-People have always gathered around small, strange, delightful things: curios. Muse Curios is a new feature in Facebook: an interactive short-form experience with infinite possibility, meant to breed collaboration through friendly competitiveness. *(Start Demo 1: say the sentence, tap Make, agree the plan.)*
+Curio: something small and delightful. Muse Curios is a new feature in Facebook: tiny games anyone can make, built to bring people together.
 
 ## 2
-Why do people open an app? For a reason. A need: you just moved, and you want a climbing gym and someone to go with. Or a ritual: the puzzle grid your mom posts every morning. Apps spread when they give you one of these. The ones that last give you both, with friends.
+*(Section header, no talk; click straight on.)*
 
 ## 3
-Facebook has the people, but it's lost that reason for people our age: teen use fell from 71% to 32%. And the need is still there: 19-to-29-year-olds are the loneliest age group, and a quarter of 18-to-24s moved last year.
+There's no better way to connect than playing a game. It's how families keep up, how strangers break the ice, and how a big, mixed group finds common ground over Monopoly or a deck of cards.
 
 ## 4
-Play is already filling that gap. At work, LinkedIn's daily puzzles rank you against colleagues, and 86% come back the next day. NYT Games went from about 4 billion puzzles a year to over 11 billion. And new ones keep appearing: Krillion, made by one person, rewards the answer nobody else gave.
+Facebook still has the people, but young adults have lost their reason to open it: teen use fell from 71% to 31%. And they're the loneliest age group.
 
 ## 5
-On Reels, short-form is becoming something you play: pause it perfectly, play along, find where you break. Millions of views, and every one ends with "tell me your score" in the comments, where it scrolls away among strangers. No board, no friends, no rematch.
+Play is filling that gap: LinkedIn puzzles at work, 11 billion NYT puzzles a year, and new hits like Krillion, made by one person.
 
 ## 6
-Our answer: a Curio turns "tell me your score" into a real Group score. A ritual you share: same Curio, same seed, one board. A need it meets: a stranger's score next to yours is an introduction. And anyone can make one. Mine is building now.
+And on Reels, every game ends with "tell me your score" in the comments, where it scrolls away among strangers.
 
 ## 7
-So what does it take to make a game that spreads? Your creativity on one side: any theme, any franchise, your photos, your words. On the other, what a Curio needs: one goal, a minute long, a fair score, the same seed for everyone. Our harness gives you both. Muse Spark reads the idea, we ground it in 1,300 game types, Muse Wonder plans it with your words as requirements, Muse Image paints it, and five bots prove it before anyone plays. *(Demo 1, 40 s: the finished Curio. Then Demo 2, 25 s: the feed, where what you play and rematch shapes what you see next.)*
+*(Section header; click straight on.)*
 
 ## 8
-This is where it brings people closer. Against: best of 5 when you meet someone, a weekly Group board with Add friend, challenges. Together: Group Blend, making one together, remixing with credit. Fair seeds, shared Groups only, all opt-in. *(Demo 3, 30 s.)*
+A Curio turns that into a real Group score. Here's the journey.
 
 ## 9
-Creators and brands get one too. A creator's persona becomes a Curio their audience ranks on. A brand gets a sponsored Curio in the feed, in the app today.
+*(Live, about 1:40.)* I open Facebook and go to Curios: my friends' Curios come first, with their scores. *(Scroll; one plays with its sound.)* I'll make one: "dodge the fog over Twin Peaks". Muse shows me its plan, I agree, and it builds while I keep going. Max challenged our Harry Potter fans Group to beat his 44. *(Play it.)* Here's our weekly board, and someone I haven't met yet, so: Add friend.
 
 ## 10
-And the part we didn't plan: our agents worked the way we want people to. They reviewed each other's drafts against the code, answered each other in minutes, and handed work off when one of us was swamped. On one Mac alone, 643 agents did about 158 hours of work in 22. Reviewing every screen we merged took 3 hours instead of 28.
+*(Live, about 40 s; Bayan's phone joins.)* And when you meet someone, a best of 5 settles it. Bayan and I play the same Curios on the same seeds, so it's fair. *(Round 1.)* Every Curio is better with someone else.
 
 ## 11
+*(10 s.)* Brands and creators get one too: this sponsored Curio is in the feed today. *(Back on the phone: the Curio Muse just made is ready; post it to the Group.)*
+
+## 12
+*(Section header.)* How does Muse make that game in about a minute, and make it good?
+
+## 13
+The design problem: your creativity on one side, the format a Group needs on the other. Muse Spark reads the idea, we ground it in 1,300 game types, Muse Wonder plans it with your words as requirements, Muse Image paints it. Personalization nothing else can do.
+
+## 14
+Here's everything inside it. Muse does the creative work: Spark reads, Wonder plans and writes, Image paints. Code does the rest: it searches the catalog, quotes your words, and proves the game.
+
+## 15
+Then code proves it: five bots play it, the score must be fair and replay exactly, and every frame is checked against 29 failure classes. Unreadable text on 45 builds: 178 down to 2.
+
+## 16
+*(Section header.)* And how we built it.
+
+## 17
+We started with two hours away from Claude: whiteboards and arguments, so the ideas could grow first. Then we treated agents as teammates, with rules: one channel, a canvas where they claim work, CLAUDE.md that every agent reads first. People decide; agents ask. Every draft gets checked by another agent. And we say it as it is.
+
+## 18
+Here's what that looks like. Kevin's agent asked for a sound library at 1:26 in the morning. Artem's agent claimed it, researched 178 trending sounds, refused to copy the commercial ones, and asked my agent to merge. The only human step was my OK. By 5:03, 103 credited tracks were live in the app.
+
+## 19
+Our agents worked like a team: 643 of them on one Mac, 158 hours of work in 22. A full review took 3 hours, not 28.
+
+## 20
+AI fell short when Muse guessed from one giant prompt, when Muse Image refused franchise names, and when agents stated wrong facts confidently. So we built the harness, retries and budgets, and let code check our work.
+
+## 21
+Through Curios, we'll end the awkward first conversation, create a new kind of short-form media you play, and make everyone a creator. So tonight: make a Curio, and send it to someone you want to know better.
+
+## 22
 *(Pause.)* When the world is your muse, how will you create the content of tomorrow? Thank you.
+

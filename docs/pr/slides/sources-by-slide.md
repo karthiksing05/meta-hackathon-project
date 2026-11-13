@@ -1,5 +1,13 @@
 # Sources by slide
 
+*Draft 11 numbering differs; see notes.md. Added 2026-11-13:*
+
+- **Teens chart:** Pew Research Center, Teens, Social Media and AI Chatbots 2025, topline (PI_2025.12.09), "Do you ever use any of the following apps or sites?", US teens 13–17. Facebook 71 (2014-15), 32 (2022), 33 (2023), 32 (2024), 31 (2025); Instagram 52, 62, 59, 61, 63; Snapchat 41, 59, 60, 55, 55; TikTok –, 67, 63, 63, 68; YouTube –, 95, 93, 90, 92.
+- **Krillion:** observed on krillion.io, 2026-11-13: Daily Dive #121; "15,362 playing" on its live event banner. Launch July 2026 (Streams Charts / guide pages). No published player count exists.
+- **Verifiers:** authoring/verify/README.md, docs/games/FAILURE_CLASSES.md (29 classes, 36 codes), authoring/playtest/bots.mjs (5 bots, 8 profiles, fast win under 15 s), authoring/playtest/score-check.mjs. Results on 45 builds from the Harness Evolution session.
+- **Fell short:** Harness Evolution session, 2026-11-13: Muse Image 400 on franchise names (2 of 2), Windowsill Defense 33 blocking, "Wave 1 of 5" at 1.48:1, Muse's art step dropping layout fixes.
+
+
 *The slides carry no footers (Karthik, 2026-11-13). Each slide's sources and labels are kept here for Q&A and the Devpost.*
 
 - **Slide 1:** Karthik · Kevin · Max · Bayan · Artem
