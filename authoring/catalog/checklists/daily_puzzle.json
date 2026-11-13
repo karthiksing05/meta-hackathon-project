@@ -18,8 +18,8 @@
         {
           "id": "audience",
           "ask": "Who plays it: one Group every day, or anyone?",
-          "why": "A Group daily needs the same seed for every member and a shared result to compare.",
-          "need": "required",
+          "why": "A Group daily needs the same seed for every member and a shared result to compare. The person picks the chat or Group when they send it, so this is a default, never a question.",
+          "need": "nice",
           "extrapolate_from": "'for our group', 'group chat', 'friends', 'daily' in the request, or the Studio target",
           "default": "one Group every day",
           "choices": ["one Group every day", "anyone", "me and one friend"],

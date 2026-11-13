@@ -134,11 +134,19 @@
       "turn-based with friends",
       "correspondence play"
     ],
-    "summary": "Turn-based play between friends on their own phones: the server stores the game state and whose move it is, and notifies the next player.",
-    "when_to_use": "Board, word and strategy games played move by move over hours, not on one phone (that is the turns fragment).",
-    "api": "create match {gameId, players}; submit move; get match state",
+    "summary": "Turn-based play between friends on their own phones, move by move: the server stores the game state and whose move it is, and tells the next player. Unlike group play, the players share one board.",
+    "when_to_use": "Board, word and strategy games where each move depends on the other player's last move (a correspondence match). Most games don't need it: same-seed rounds (chat_round) compare separate runs.",
+    "api": "planned: POST /v1/matches {gameId, players[]}; POST /v1/matches/{id}/moves {move, log}; GET /v1/matches/{id} -> {state, turn, moves}",
     "status": "planned",
-    "notes": "needs a backend endpoint; challenges today are score-only"
+    "notes": "Needs Max (match store) and Artem (a game that resumes from a stored state and a move list, replay-verified move by move). Until then, approximate with the turns fragment on one phone, or a same-seed round.",
+    "params": {
+      "players": "2-4",
+      "turn_timeout_hours": "default 24"
+    },
+    "events": [
+      "match.your_turn",
+      "match.finished"
+    ]
   },
   {
     "id": "drawing_canvas",

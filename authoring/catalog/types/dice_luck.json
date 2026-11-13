@@ -299,10 +299,12 @@
       120
     ],
     "players": [
-      "solo"
+      "solo",
+      "async_friends"
     ],
     "social_hooks": [
-      "none"
+      "same seed in a group chat: who ends with the most chips",
+      "best of 3 with a friend"
     ],
     "difficulty_levers": [
       "symbols",
@@ -403,10 +405,12 @@
       300
     ],
     "players": [
-      "solo"
+      "solo",
+      "async_friends"
     ],
     "social_hooks": [
-      "none"
+      "same seed in a group chat: who ends with the most chips",
+      "best of 3 with a friend"
     ],
     "difficulty_levers": [
       "table limits",
@@ -559,10 +563,12 @@
       300
     ],
     "players": [
-      "solo"
+      "solo",
+      "async_friends"
     ],
     "social_hooks": [
-      "none"
+      "same seed in a group chat: who ends with the most chips",
+      "best of 3 with a friend"
     ],
     "difficulty_levers": [
       "odds bets",
