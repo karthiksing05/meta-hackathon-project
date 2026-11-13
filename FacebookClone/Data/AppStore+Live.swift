@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 /// Where the Home feed, Reels, Stories and Messenger come from right now.
 enum FacebookSource: Equatable {
@@ -26,6 +27,15 @@ final class FacebookLiveState {
     /// The signed-in account's server id: its posts and messages are "me" in the app.
     var accountID: String?
     var started = false
+    /// Server message ids already in a chat (loaded, merged, or the server's copy of one sent here),
+    /// so polling never adds a message twice.
+    var knownMessageIDs: Set<String> = []
+    /// Messages sent from this phone that the server has confirmed (by the send or by a poll).
+    var confirmedLocalIDs: Set<String> = []
+    /// Polls the server for new messages while the app is in front.
+    var messengerPoll: Task<Void, Never>?
+    var isRefreshingThreads = false
+    var isLoadingMessenger = false
 }
 
 // MARK: - Loading
@@ -39,6 +49,7 @@ extension AppStore {
         Task { @MainActor [weak self] in
             await self?.loadLiveContent()
             await self?.loadLiveMessenger()
+            self?.startMessengerPolling()
         }
     }
 
@@ -59,24 +70,36 @@ extension AppStore {
         }
     }
 
+    /// Loads the signed-in account's chats. At launch it waits (up to a minute) for the sign-in and
+    /// reports a failure; later (a log in, or another account) it runs from the poll and stays quiet.
     @MainActor
-    private func loadLiveMessenger() async {
-        // Messenger needs an account: wait (up to a minute) for the launch sign-in.
-        for _ in 0..<60 {
+    private func loadLiveMessenger(atLaunch: Bool = true) async {
+        // One load at a time (the launch load and a refresh can overlap).
+        guard !live.isLoadingMessenger else { return }
+        live.isLoadingMessenger = true
+        defer { live.isLoadingMessenger = false }
+        for _ in 0..<(atLaunch ? 60 : 0) {
             if GamesAccount.shared.state == .signedIn { break }
             if case .failed = GamesAccount.shared.state { return }
             if GamesAccount.shared.state == .signedOut { return }
             try? await Task.sleep(nanoseconds: 1_000_000_000)
         }
         guard GamesAccount.shared.state == .signedIn else { return }
-        live.accountID = GamesAccount.shared.userID
+        let accountID = GamesAccount.shared.userID
+        if live.accountID != accountID {
+            // Another account: none of the last one's messages count as seen here.
+            live.knownMessageIDs = []
+            live.confirmedLocalIDs = []
+            live.threadIDs = [:]
+        }
+        live.accountID = accountID
         await applyLiveIdentity()
         do {
             let threads = try await FacebookAPILive.shared.threads(messages: 30)
             applyLiveThreads(threads)
             live.messengerIsLive = true
         } catch {
-            fellBackToMock(error)
+            if atLaunch { fellBackToMock(error) }
         }
     }
 
@@ -242,27 +265,136 @@ extension AppStore {
                        bigEmoji: m.emoji, sentAt: m.sentAt, status: .seen)
     }
 
-    /// Server chats replace the mock ones. Chats carrying game cards (made on this phone) stay.
+    /// A chat for a server thread, with the given messages.
+    @MainActor
+    private func liveConversation(for t: RemoteFBThread, messages: [RemoteFBMessage]) -> Conversation {
+        let theme = t.theme.flatMap { UInt32($0, radix: 16) } ?? 0x0A7CFF
+        live.threadIDs[t.id] = t.id
+        live.knownMessageIDs.formUnion(messages.map(\.id))
+        return Conversation(
+            id: t.id,
+            participants: t.members.map(liveUser),
+            groupName: t.name,
+            messages: messages.map(liveMessage),
+            unreadCount: t.unread,
+            themeHex: theme,
+            quickEmoji: t.emoji ?? "👍"
+        )
+    }
+
+    /// Server chats replace the mock ones. Chats carrying game cards (made on this phone) stay. A chat
+    /// already on screen keeps its object (screens hold on to it) and takes the server's messages.
     @MainActor
     private func applyLiveThreads(_ threads: [RemoteFBThread]) {
-        var fresh: [Conversation] = []
-        for t in threads {
-            let members = t.members.map(liveUser)
-            let theme = t.theme.flatMap { UInt32($0, radix: 16) } ?? 0x0A7CFF
-            let chat = Conversation(
-                id: t.id,
-                participants: members,
-                groupName: t.name,
-                messages: (t.messages ?? []).map(liveMessage),
-                unreadCount: t.unread,
-                themeHex: theme,
-                quickEmoji: t.emoji ?? "👍"
-            )
+        let fresh = threads.map { t -> Conversation in
+            let messages = t.messages ?? []
+            guard let existing = conversations.first(where: { $0.id == t.id }) else {
+                return liveConversation(for: t, messages: messages)
+            }
             live.threadIDs[t.id] = t.id
-            fresh.append(chat)
+            live.knownMessageIDs.formUnion(messages.map(\.id))
+            existing.messages = messages.map(liveMessage)
+            existing.unreadCount = openConversationID == t.id ? 0 : t.unread
+            return existing
         }
         let kept = conversations.filter { chat in chat.messages.contains { $0.bubbleCard != nil } }
         conversations = (fresh + kept).sorted { $0.lastActivity > $1.lastActivity }
+    }
+
+    // MARK: Messenger: messages from other phones
+
+    /// Checks the server for new messages while the app is in front: every 2 s with a chat open,
+    /// every 5 s otherwise, and right away when the app comes back to the foreground. Started once.
+    @MainActor
+    private func startMessengerPolling() {
+        guard live.messengerPoll == nil else { return }
+        live.messengerPoll = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                let chatOpen = self?.openConversationID != nil
+                try? await Task.sleep(nanoseconds: chatOpen ? 2_000_000_000 : 5_000_000_000)
+                guard let self, !Task.isCancelled else { return }
+                guard UIApplication.shared.applicationState == .active else { continue }
+                await self.refreshLiveThreads()
+            }
+        }
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in await self?.refreshLiveThreads() }
+        }
+    }
+
+    /// Pulls the latest messages and merges them in: new chats appear, new messages land at the end
+    /// of their chat, and nothing already on screen (including messages sent from this phone) is
+    /// added twice. After a log in or a switch of account it loads that account's chats first.
+    /// Returns false when Messenger can't be live (mock mode, or nobody signed in).
+    @MainActor
+    @discardableResult
+    func refreshLiveThreads() async -> Bool {
+        guard FacebookDataMode.current == .live, GamesAccount.shared.state == .signedIn else { return false }
+        guard !live.isRefreshingThreads else { return true }
+        live.isRefreshingThreads = true
+        defer { live.isRefreshingThreads = false }
+        if !live.messengerIsLive || live.accountID != GamesAccount.shared.userID {
+            await loadLiveMessenger(atLaunch: false)
+            return live.messengerIsLive
+        }
+        guard let threads = try? await FacebookAPILive.shared.threads(messages: 20) else { return true }
+        // A Persona's reply is stored a few seconds ahead; the send shows it after a typing pause.
+        let now = Date().addingTimeInterval(1)
+        for t in threads {
+            let incoming = (t.messages ?? [])
+                .filter { !live.knownMessageIDs.contains($0.id) && $0.sentAt <= now }
+                .sorted { $0.sentAt < $1.sentAt }
+            if let chat = conversations.first(where: { $0.id == t.id || live.threadIDs[$0.id] == t.id }) {
+                mergeLive(incoming, into: chat, serverUnread: t.unread)
+            } else if !incoming.isEmpty {
+                let chat = liveConversation(for: t, messages: incoming)
+                if openConversationID == chat.id { chat.unreadCount = 0 }
+                conversations.insert(chat, at: 0)
+            }
+        }
+        return true
+    }
+
+    /// Adds a chat's new server messages, pairing my own with the copy this phone already shows.
+    @MainActor
+    private func mergeLive(_ incoming: [RemoteFBMessage], into chat: Conversation, serverUnread: Int) {
+        var changed = false
+        var fromOthers = 0
+        for m in incoming {
+            live.knownMessageIDs.insert(m.id)
+            if chat.messages.contains(where: { $0.id == m.id }) { continue }
+            if m.senderId == live.accountID, adoptEcho(of: m, in: chat) { continue }
+            chat.messages.append(liveMessage(m))
+            changed = true
+            if m.senderId != live.accountID { fromOthers += 1 }
+        }
+        guard changed else { return }
+        chat.isArchived = false
+        if fromOthers > 0 {
+            chat.isTyping = false
+            if openConversationID == chat.id {
+                liveMarkRead(chat)
+            } else {
+                chat.unreadCount = max(serverUnread, chat.unreadCount + fromOthers)
+            }
+        }
+        if let index = conversations.firstIndex(where: { $0.id == chat.id }), index != 0 {
+            conversations.remove(at: index)
+            conversations.insert(chat, at: 0)
+        }
+    }
+
+    /// A message of mine the server has and this phone shows under its own id (the poll arrived
+    /// before the send finished): mark the local one confirmed instead of adding a second copy.
+    @MainActor
+    private func adoptEcho(of m: RemoteFBMessage, in chat: Conversation) -> Bool {
+        guard let local = chat.messages.first(where: {
+            $0.senderID == me.id && $0.bubbleCard == nil && !$0.isImage
+                && !live.confirmedLocalIDs.contains($0.id) && !live.knownMessageIDs.contains($0.id)
+                && $0.text == m.text && $0.bigEmoji == m.emoji
+        }) else { return false }
+        live.confirmedLocalIDs.insert(local.id)
+        return true
     }
 
     // MARK: Feed paging and refresh
@@ -364,10 +496,14 @@ extension AppStore {
                 }
                 guard let id else { return }
                 let sent = try await api.sendMessage(threadID: id, text: text, emoji: emoji)
+                // The server's copies are already on screen: this message, and the reply shown below.
+                self.live.knownMessageIDs.insert(sent.message.id)
+                self.live.confirmedLocalIDs.insert(localID)
+                if let reply = sent.reply { self.live.knownMessageIDs.insert(reply.id) }
                 if let index = conversation.messages.firstIndex(where: { $0.id == localID }) {
                     conversation.messages[index].status = .delivered
                 }
-                guard let reply = sent.reply else { return }
+                guard let reply = sent.reply, !conversation.messages.contains(where: { $0.id == reply.id }) else { return }
                 try? await Task.sleep(nanoseconds: 900_000_000)
                 for index in conversation.messages.indices where conversation.messages[index].senderID == self.me.id {
                     conversation.messages[index].status = .seen
