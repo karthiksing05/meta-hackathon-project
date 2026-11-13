@@ -1,7 +1,7 @@
 {
   "fragment": "picture_quiz",
   "version": 1,
-  "describe": "Multiple-choice questions about a picture, one at a time: the same rules, state and events as `quiz`, with a layout that leaves the top of the screen (y 70 to 350) for the picture, a short question line under it and the answers in a 2 x 2 grid. Pair it with `zoom_reveal` (listed before it in `uses`; its `zoom_index()` is `get_or(order, qi, 0)` and its `zoom_hold()` is `locked`) or draw a still picture there. The game supplies three functions that read `content` lists: `quiz_questions()` (list<string>, one entry per question), `quiz_choices()` (list<string>, all the answer choices flattened: question q owns the entries from q * `choices` up to (q + 1) * `choices`, exactly `choices` per question) and `quiz_answers()` (list<string>, entry q is the exact text of the correct choice of question q, so it must also appear among that question's choices). Questions are asked in a shuffled order (reshuffled when used up) and each question's choices are shuffled on screen. Tapping a choice (input `answer {index}`) emits `answered_right` or `answered_wrong`, shows the right choice for about 700 ms, then emits `question_done` and asks the next one. Each question has `time_ms` (a bar drains); running out counts as `answered_wrong`. `question_done` is the event the `rounds` fragment counts: bind rounds' `round_done` to it. State: `right_count`, `wrong_count`, `opts` (choices on screen), `locked`. With `goal` above 0, `goal` right answers win; with 0 the quiz never wins on its own, so end it with rounds or a lose path (lives bound to `answered_wrong`). Sets no score; bind score's `point` to `answered_right`. With the game's `button` sprite the answers draw it (156 x 64). Keep questions short (under 40 characters), e.g. \"Who is hiding here?\".",
+  "describe": "Multiple-choice questions about a picture, one at a time: the same rules, state and events as `quiz`, with a layout that leaves the top of the screen (y 70 to 350) for the picture, a short question line under it and the answers in a 2 x 2 grid. Pair it with `zoom_reveal` (listed before it in `uses`; its `zoom_index()` is `get_or(order, qi, 0)` and its `zoom_hold()` is `locked`) or draw a still picture there. The game supplies three functions that read `content` lists: `quiz_questions()` (list<string>, one entry per question), `quiz_choices()` (list<string>, all the answer choices flattened: question q owns the entries from q * `choices` up to (q + 1) * `choices`, exactly `choices` per question) and `quiz_answers()` (list<string>, entry q is the exact text of the correct choice of question q, so it must also appear among that question's choices). Questions are asked in a shuffled order (reshuffled when used up) and each question's choices are shuffled on screen. Tapping a choice (input `answer {index}`) emits `answered_right` or `answered_wrong`, shows the right choice for `reveal_ms` (700 ms by default; longer when the game shows an explanation, e.g. a `quiz_questions()` that returns the notes while `locked` is true), then emits `question_done` and asks the next one. Each question has `time_ms` (a bar drains); running out counts as `answered_wrong`. `question_done` is the event the `rounds` fragment counts: bind rounds' `round_done` to it. State: `right_count`, `wrong_count`, `opts` (choices on screen), `locked`. With `goal` above 0, `goal` right answers win; with 0 the quiz never wins on its own, so end it with rounds or a lose path (lives bound to `answered_wrong`). Sets no score; bind score's `point` to `answered_right`. With the game's `button` sprite the answers draw it (156 x 64). Keep questions short (under 40 characters), e.g. \"Who is hiding here?\".",
   "params": {
     "choices": {
       "type": "int",
@@ -20,6 +20,12 @@
       "default": 0,
       "min": 0,
       "max": 200
+    },
+    "reveal_ms": {
+      "type": "duration",
+      "default": 700,
+      "min": 300,
+      "max": 8000
     }
   },
   "art": {
@@ -222,7 +228,7 @@
           ]
         },
         {
-          "after": "700ms",
+          "after": "@reveal_ms",
           "emit": "_reveal_end",
           "id": "_t_reveal"
         }
@@ -244,7 +250,7 @@
           "emit": "answered_wrong"
         },
         {
-          "after": "700ms",
+          "after": "@reveal_ms",
           "emit": "_reveal_end",
           "id": "_t_reveal"
         }
@@ -280,10 +286,62 @@
   },
   "presentation": {
     "slots": [
-      {"slot":"playfield","node":{"ui":"text","region":"controls","step":"title","lines":2,"text":"= question_text()"}},
-      {"slot":"playfield","node":{"ui":"meter","region":"controls","value":"= if locked then 0.0 else max(0.0, ((_until - now) * 1.0) / (@time_ms * 1.0))","warn":"= _until - now < @time_ms / 4"}},
-      {"slot":"playfield","include":"@art.button","node":{"ui":"answer_grid","count":"@choices","as":"k","text":"= get_or(opts, k, '')","state":"= _opt_fill(k)","on_tap":{"input":"answer","with":{"index":"k"}},"cols":2,"sprite":"@art.button.id"}},
-      {"slot":"playfield","include":"not @art.button","node":{"ui":"answer_grid","count":"@choices","as":"k","text":"= get_or(opts, k, '')","state":"= _opt_fill(k)","on_tap":{"input":"answer","with":{"index":"k"}},"cols":2}}
+      {
+        "slot": "playfield",
+        "node": {
+          "ui": "text",
+          "region": "controls",
+          "step": "title",
+          "lines": 2,
+          "text": "= question_text()"
+        }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "ui": "meter",
+          "region": "controls",
+          "value": "= if locked then 0.0 else max(0.0, ((_until - now) * 1.0) / (@time_ms * 1.0))",
+          "warn": "= _until - now < @time_ms / 4"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "@art.button",
+        "node": {
+          "ui": "answer_grid",
+          "count": "@choices",
+          "as": "k",
+          "text": "= get_or(opts, k, '')",
+          "state": "= _opt_fill(k)",
+          "on_tap": {
+            "input": "answer",
+            "with": {
+              "index": "k"
+            }
+          },
+          "cols": 2,
+          "sprite": "@art.button.id"
+        }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.button",
+        "node": {
+          "ui": "answer_grid",
+          "count": "@choices",
+          "as": "k",
+          "text": "= get_or(opts, k, '')",
+          "state": "= _opt_fill(k)",
+          "on_tap": {
+            "input": "answer",
+            "with": {
+              "index": "k"
+            }
+          },
+          "cols": 2
+        }
+      }
     ],
     "feedback": [
       {
