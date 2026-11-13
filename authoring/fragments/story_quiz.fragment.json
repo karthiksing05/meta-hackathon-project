@@ -1,11 +1,11 @@
 {
   "fragment": "story_quiz",
   "version": 1,
-  "describe": "A story told as a quiz (a press conference that goes badly, a job interview gone wrong, a documentary narrated by a cat): a scripted clip cut into beats, played IN ORDER (never shuffled). Each beat shows a quote card (who speaks and the setup line), a short ask ('What does he say next?') and `choices` answer buttons. After a pick, a reveal panel shows the real line and the punchline, with `hit_label` or `miss_label` ('CALLED IT' / 'PLOT TWIST'; for an ordered puzzle such as proof steps use e.g. 'CORRECT' / 'NOT YET' and a ranked score), and a Next button (it also moves on by itself after `reveal_ms`). The real line is the funny one: the joke, the twist, the disaster. There are no lives, no timer and no right-or-wrong scoring: the score is `called` (beats where the player picked the real line), shown as story ('Beat 3 of 8', 'You called 5 of 8'), and the game should declare `\"score\": {\"kind\": \"points\", \"ranked\": false, \"format\": \"{n} called\"}`. The game supplies six functions that read `content` lists, one entry per beat: `sq_speakers()` (who is talking, <= 24 chars, e.g. 'Mayor Pemberton'), `sq_lines()` (the setup line on the quote card, <= 120 chars), `sq_asks()` (the question, <= 34 chars, e.g. 'What does he say next?'), `sq_choices()` (all choices flattened, exactly `choices` per beat: beat b owns entries b * `choices` to (b + 1) * `choices` - 1; each <= 56 chars), `sq_answers()` (entry b: the exact text of beat b's real line, one of its choices) and `sq_reveals()` (entry b: the punchline or what happened next, <= 110 chars). Choices are shuffled on screen with the run seed. Optional media per beat: give the game a `panel` sprite (one frame per picture, about 2:1, a cartoon frame of the clip; uploaded photos work the same way) and the beat's picture sits above the quote card; the `media` param maps beats to frames ('0,1,-1,2': beat 2 has no picture), '' means frame = beat. Taps are ignored for `read_ms` after a beat appears. Input `pick {index}` (index on screen) and `next`. Emits `called_it` or `plot_twist` on a pick, `beat_done` after each reveal, and `story_done` after the last beat (with `finish_wins`, the game is won then: every run reaches the end). State: `beat`, `called`, `picks` (list<int>: per beat, the index of the picked choice in the content order, for comparing friends' runs; name `picks` in group_play.result.state), `revealing`, `finished`, `opts`. Draws everything inside the safe area; put the pace and a 'PARODY' tag (when real people appear) in the HUD with the `tag` param.",
+  "describe": "A story told as a quiz (a press conference that goes badly, a job interview gone wrong, a documentary narrated by a cat): a scripted clip cut into beats, played IN ORDER (never shuffled). Each beat shows the scene (an optional picture), a quote card (who speaks and the setup line), a short ask ('What does he say next?'), a countdown (`time_ms`, 0 for none) and up to 4 Kahoot-coloured answer tiles in a 2 x 2 grid. After a pick, a reveal panel shows the real line and the punchline, with `hit_label` or `miss_label` ('CALLED IT' / 'PLOT TWIST'; for an ordered puzzle such as proof steps use e.g. 'CORRECT' / 'NOT YET' and a ranked score), and a Next button (it also moves on by itself after `reveal_ms`). The real line is the funny one: the joke, the twist, the disaster. Running out of time reveals the real line with no pick (picks gets -1). There are no lives and no right-or-wrong scoring: the score is `called` (beats where the player picked the real line), shown as story ('Beat 3 of 8', the end card 'In sync with the chaos: 5 of 8'), and the game should declare `\"score\": {\"kind\": \"points\", \"ranked\": false, \"format\": \"{n} called\"}`. The game supplies six functions that read `content` lists, one entry per beat: `sq_speakers()` (who is talking, <= 24 chars, e.g. 'Mayor Pemberton'), `sq_lines()` (the setup line on the quote card, <= 120 chars), `sq_asks()` (the question, <= 34 chars, e.g. 'What does he say next?'), `sq_choices()` (all choices flattened, exactly `choices` per beat: beat b owns entries b * `choices` to (b + 1) * `choices` - 1; each <= 48 chars), `sq_answers()` (entry b: the exact text of beat b's real line, one of its choices) and `sq_reveals()` (entry b: the punchline or what happened next, <= 110 chars). Choices are shuffled on screen with the run seed. Optional media per beat: give the game a `panel` sprite (one frame per picture, about 2:1, a cartoon frame of the clip; uploaded photos work the same way) and the beat's picture sits above the quote card; the `media` param maps beats to frames ('0,1,-1,2': beat 2 has no picture), '' means frame = beat. Taps are ignored for `read_ms` after a beat appears. Input `pick {index}` (index on screen) and `next`. Emits `called_it` or `plot_twist` on a pick, `beat_done` after each reveal, and `story_done` after the last beat (with `finish_wins`, the game is won then: every run reaches the end). State: `beat`, `called`, `picks` (list<int>: per beat, the index of the picked choice in the content order, for comparing friends' runs; name `picks` in group_play.result.state), `revealing`, `finished`, `opts`. Draws everything inside the safe area; put the pace and a 'PARODY' tag (when real people appear) in the HUD with the `tag` param.",
   "params": {
     "choices": {
       "type": "int",
-      "default": 3,
+      "default": 4,
       "min": 2,
       "max": 4
     },
@@ -14,6 +14,12 @@
       "default": 900,
       "min": 0,
       "max": 5000
+    },
+    "time_ms": {
+      "type": "duration",
+      "default": 15000,
+      "min": 0,
+      "max": 60000
     },
     "reveal_ms": {
       "type": "duration",
@@ -51,10 +57,10 @@
       "default": "That’s a wrap",
       "max_len": 20
     },
-    "end_line": {
+    "sync_label": {
       "type": "string",
-      "default": "You called",
-      "max_len": 20
+      "default": "In sync with the chaos:",
+      "max_len": 32
     },
     "finish_wins": {
       "type": "bool",
@@ -131,6 +137,10 @@
     "_serial": {
       "type": "int",
       "init": "0"
+    },
+    "_until": {
+      "type": "int",
+      "init": "0"
     }
   },
   "functions": {
@@ -197,7 +207,7 @@
     "opts_y": {
       "params": {},
       "returns": "float",
-      "body": "card_y() + card_h() + 34.0"
+      "body": "card_y() + card_h() + 44.0"
     },
     "reveal_y": {
       "params": {},
@@ -220,6 +230,18 @@
       },
       "returns": "string",
       "body": "if not revealing then '' else if get_or(opts, k, '') == real_line() then 'real' else if k == picked then 'mine' else ''"
+    },
+    "timer_left": {
+      "params": {},
+      "returns": "float",
+      "body": "if revealing or finished or @time_ms <= 0 then 0.0 else max(0.0, min(1.0, ((_until - now) * 1.0) / (@time_ms * 1.0)))"
+    },
+    "tile_fill": {
+      "params": {
+        "k": "int"
+      },
+      "returns": "string",
+      "body": "get_or(['#D01937', '#1368CE', '#9A6B00', '#1F7A0A'], k, '#1368CE')"
     }
   },
   "events": {
@@ -230,7 +252,11 @@
     "_open": {},
     "_auto_next": {
       "serial": "int"
-    }
+    },
+    "_timeout": {
+      "serial": "int"
+    },
+    "timed_out": {}
   },
   "inputs": {
     "pick": {
@@ -274,6 +300,25 @@
         },
         {
           "incr": "_serial"
+        },
+        {
+          "set": "_until",
+          "to": "now + @time_ms"
+        }
+      ]
+    },
+    {
+      "id": "arm",
+      "on": "_open",
+      "include": "@time_ms > 0",
+      "do": [
+        {
+          "after": "@time_ms",
+          "emit": "_timeout",
+          "with": {
+            "serial": "_serial"
+          },
+          "id": "_t_beat"
         }
       ]
     },
@@ -309,6 +354,37 @@
               "emit": "plot_twist"
             }
           ]
+        },
+        {
+          "after": "@reveal_ms",
+          "emit": "_auto_next",
+          "with": {
+            "serial": "_serial"
+          },
+          "id": "_t_auto"
+        }
+      ]
+    },
+    {
+      "id": "run_out",
+      "on": "_timeout",
+      "include": "@time_ms > 0",
+      "when": "not revealing and not finished and event.serial == _serial",
+      "do": [
+        {
+          "set": "picked",
+          "to": "-1"
+        },
+        {
+          "set": "revealing",
+          "to": "true"
+        },
+        {
+          "push": "picks",
+          "value": "-1"
+        },
+        {
+          "emit": "timed_out"
         },
         {
           "after": "@reveal_ms",
@@ -501,6 +577,34 @@
       },
       {
         "slot": "playfield",
+        "include": "@time_ms > 0",
+        "node": {
+          "node": "group",
+          "visible": "= not revealing and not finished",
+          "children": [
+            {
+              "node": "rect",
+              "x": 20,
+              "y": "= card_y() + card_h() + 30.0",
+              "w": 320,
+              "h": 6,
+              "radius": 3,
+              "fill": "$surface"
+            },
+            {
+              "node": "rect",
+              "x": 20,
+              "y": "= card_y() + card_h() + 30.0",
+              "w": "= 320.0 * timer_left()",
+              "h": 6,
+              "radius": 3,
+              "fill": "= if timer_left() < 0.25 then $danger else $primary"
+            }
+          ]
+        }
+      },
+      {
+        "slot": "playfield",
         "node": {
           "node": "repeat",
           "source": "range(@choices)",
@@ -512,15 +616,13 @@
             "children": [
               {
                 "node": "rect",
-                "x": 20,
-                "y": "= opts_y() + k * 56.0",
-                "w": 320,
-                "h": 50,
+                "x": "= 20.0 + (k % 2) * 164.0",
+                "y": "= opts_y() + (k / 2) * 84.0",
+                "w": 156,
+                "h": 76,
                 "radius": 14,
                 "role": "tile",
-                "fill": "$surface",
-                "stroke": "$primary",
-                "stroke_width": 1.5,
+                "fill": "= tile_fill(k)",
                 "on_tap": {
                   "input": "pick",
                   "with": {
@@ -530,17 +632,17 @@
               },
               {
                 "node": "text",
-                "x": 180,
-                "y": "= opts_y() + 25.0 + k * 56.0",
-                "w": 296,
+                "x": "= 98.0 + (k % 2) * 164.0",
+                "y": "= opts_y() + 38.0 + (k / 2) * 84.0",
+                "w": 140,
                 "wrap": true,
                 "anchor": "center",
                 "align": "center",
                 "valign": "middle",
                 "text": "= get_or(opts, k, '')",
-                "size": 15,
+                "size": 13,
                 "weight": 600,
-                "color": "$ink"
+                "color": "#FFFFFF"
               }
             ],
             "animate_on": {
@@ -677,7 +779,7 @@
               "x": 180,
               "y": "= sq_top() + 236.0",
               "anchor": "center",
-              "text": "= @end_line + ' ' + str(called) + ' of ' + str(beat_count())",
+              "text": "= @sync_label + ' ' + str(called) + ' of ' + str(beat_count())",
               "size": 17,
               "weight": 600,
               "color": "$bg"
@@ -739,6 +841,17 @@
         "do": [
           {
             "moment": "win"
+          }
+        ]
+      },
+      {
+        "on": "timed_out",
+        "do": [
+          {
+            "moment": "hit"
+          },
+          {
+            "haptic": "warning"
           }
         ]
       }

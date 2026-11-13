@@ -50,12 +50,12 @@ if (engine) {
     g.step(16);
     const tapAt = (t) => { g.frame(); g.pointer('down', t.x + t.w / 2, t.y + t.h / 2); g.pointer('up', t.x + t.w / 2, t.y + t.h / 2); g.step(16); };
     // The pick buttons are the three targets of equal size stacked under the card, top to bottom.
-    const choiceTargets = () => { g.frame(); return g.hitTargets().filter((t) => t.w >= 300 && t.h >= 44 && t.h <= 60).sort((a, b) => a.y - b.y); };
+    const choiceTargets = () => { g.frame(); return g.hitTargets().filter((t) => t.w >= 150 && t.w <= 160 && t.h >= 70).sort((a, b) => a.y - b.y || a.x - b.x); };
     let st = g.state();
     ok(st.beat === 0 && !st.revealing, `${id} starts on beat 0`);
     // A tap inside read_ms does nothing.
     const early = choiceTargets();
-    ok(early.length === 3, `${id} shows 3 choices (${early.length})`);
+    ok(early.length === 4, `${id} shows 4 tiles (${early.length})`);
     if (early.length) tapAt(early[0]);
     ok(!g.state().revealing, `${id} ignores a pick during read_ms`);
     let expectCalled = 0;
@@ -64,7 +64,7 @@ if (engine) {
       g.step(1000);
       st = g.state();
       ok(st.beat === b, `${id} beat ${b} comes in order (state beat ${st.beat})`);
-      ok(st.opts.length === 3 && st.opts.every((o) => m.content.choices.slice(b * 3, b * 3 + 3).includes(o)), `${id} beat ${b} shows its own choices`);
+      ok(st.opts.length === 4 && st.opts.every((o) => m.content.choices.slice(b * 4, b * 4 + 4).includes(o)), `${id} beat ${b} shows its own choices`);
       // Alternate: pick the real line on even beats, a tame one on odd beats.
       const want = b % 2 === 0 ? m.content.answers[b] : st.opts.find((o) => o !== m.content.answers[b]);
       const k = st.opts.indexOf(want);
@@ -72,7 +72,7 @@ if (engine) {
       tapAt(targets[k]);
       st = g.state();
       ok(st.revealing, `${id} beat ${b}: a pick reveals`);
-      expectPicks.push(m.content.choices.slice(b * 3, b * 3 + 3).indexOf(want));
+      expectPicks.push(m.content.choices.slice(b * 4, b * 4 + 4).indexOf(want));
       if (b % 2 === 0) expectCalled++;
       ok(st.called === expectCalled, `${id} beat ${b}: called ${st.called}, want ${expectCalled}`);
       ok(JSON.stringify(st.picks) === JSON.stringify(expectPicks), `${id} beat ${b}: picks ${JSON.stringify(st.picks)}, want ${JSON.stringify(expectPicks)}`);
@@ -82,17 +82,21 @@ if (engine) {
       if (frame?.ops) ok((media[b] >= 0) === frame.ops.some((o) => o.op === 'image' && o.w < frame.width), `${id} beat ${b}: picture ${media[b] >= 0 ? 'shown' : 'hidden'}`);
       // Next is the one small target left on screen.
       g.frame();
-      const next = g.hitTargets().filter((t) => t.w < 200 && t.h >= 40);
+      const next = g.hitTargets().filter((t) => t.w === 100 && t.h === 44);
       ok(next.length === 1, `${id} beat ${b}: one Next button (${next.length})`);
       if (next.length) tapAt(next[0]);
     }
     ok(g.phase() === 'won' && g.state().finished, `${id}: the last beat wins (phase ${g.phase()})`);
     const v = engine.verify(json, g.log());
     ok(v.ok !== false && (v.problems ?? []).length === 0, `${id}: the run replays (${JSON.stringify(v.problems ?? [])})`);
-    // Left alone, a beat moves on by itself after reveal_ms once picked; unpicked, it waits.
+    // Left alone, the countdown runs out: the real line is revealed with no pick (-1), then the next beat comes.
     const g2 = engine.load(json, 7);
-    g2.step(20000);
-    ok(g2.state().beat === 0 && !g2.state().revealing, `${id}: an unpicked beat waits`);
+    g2.step(16000);
+    ok(g2.state().beat === 0 && g2.state().revealing && JSON.stringify(g2.state().picks) === '[-1]' && g2.state().called === 0, `${id}: the countdown runs out into the reveal (${JSON.stringify(g2.state().picks)})`);
+    g2.step(10000);
+    ok(g2.state().beat === 1, `${id}: then the next beat comes by itself`);
+    g2.step(30 * 26000);
+    ok(g2.phase() === 'won', `${id}: an idle run still ends (phase ${g2.phase()})`);
   }
 }
 

@@ -520,7 +520,7 @@
     ],
     "summary": "Multiple-choice questions (2 to 4 choices) one at a time with a draining time bar; shows the right answer after each pick.",
     "when_to_use": "Trivia and knowledge quizzes where picking from choices is right. For typed or open answers use typed_answer instead.",
-    "api": "game provides functions quiz_questions(), quiz_choices() (choices per question, flattened) and quiz_answers() (exact correct text), all list<string>; provides question_text, correct_answer, right_count, wrong_count; bind rounds' round_done to question_done and score's point to answered_right; quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+)",
+    "api": "game provides functions quiz_questions(), quiz_choices() (choices per question, flattened) and quiz_answers() (exact correct text), all list<string>; provides question_text, correct_answer, right_count, wrong_count; bind rounds' round_done to question_done and score's point to answered_right; quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+); quiz_questions() may read `locked` to show an explanation during the reveal (give reveal_ms 2500+)",
     "events": [
       "answered_right",
       "answered_wrong",
@@ -1234,7 +1234,7 @@
       "press conference gone wrong",
       "parody interview"
     ],
-    "summary": "A scripted clip cut into beats played in order: a quote card (speaker and line, optional picture per beat), 2 to 4 guesses, then a reveal panel with the real line and the punchline. Unranked by default: the score counts lines called.",
+    "summary": "A scripted clip cut into beats played in order: a quote card (speaker and line, optional picture per beat), a countdown and up to 4 Kahoot-coloured tiles, then a reveal panel with the real line and the punchline. Unranked by default: the score counts lines called.",
     "when_to_use": "Funny or story-first quizzes where the real answer is the joke or twist (a press conference that goes badly, a job interview gone wrong, a documentary narrated by a cat), and ordered step-by-step quizzes where each beat follows the last (proof steps, a recipe, a timeline). Not for shuffled trivia (quiz) or branching stories (choice_story).",
     "api": "game provides sq_speakers(), sq_lines(), sq_asks(), sq_choices() (choices per beat, flattened), sq_answers() (the real line, one of its choices) and sq_reveals(), all list<string> read from content; provides beat, called, picks (list<int>, the picked choice per beat in content order: put it in group_play.result.state), revealing, finished; inputs pick {index} and next; declare score {kind: points, ranked: false} for a story; params media (frames per beat, -1 none), tag (a PARODY label in the HUD), pace_label, hit_label, miss_label",
     "events": [
@@ -1244,8 +1244,9 @@
       "story_done"
     ],
     "params": {
-      "choices": "int, default 3, 2..4",
+      "choices": "int, default 4, 2..4 (Kahoot-coloured tiles, 2 x 2)",
       "read_ms": "duration, default 900, 0..5000",
+      "time_ms": "duration, default 15000, 0..60000 (countdown per beat; 0 for none; running out reveals with no pick)",
       "reveal_ms": "duration, default 9000, 2000..30000",
       "media": "string, default '', per-beat frame list like '0,1,-1'",
       "tag": "string, default '', up to 14 chars",
@@ -1253,6 +1254,7 @@
       "hit_label": "string, default 'CALLED IT'",
       "miss_label": "string, default 'PLOT TWIST'",
       "end_title": "string, default 'That’s a wrap'",
+      "sync_label": "string, default 'In sync with the chaos:'",
       "finish_wins": "bool, default true"
     },
     "status": "shipped",
