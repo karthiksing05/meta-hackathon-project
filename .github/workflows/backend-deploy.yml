@@ -196,6 +196,18 @@ jobs:
         run: |
           [ -z "$GEN" ] || ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" "/srv/game-platform/app/deploy.sh restart-generator"
           [ -z "$API" ] || ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" "/srv/game-platform/app/deploy.sh restart-api"
+      - name: Create new database indexes and load the game catalog (dbinit)
+        # Idempotent: it only adds what is missing (indexes from internal/store/indexes.go) and upserts the planner
+        # catalog, never touching games, users or scores. Runs on every deploy so a release that adds an index needs
+        # no hand step. A failure here is a warning, not a failed deploy or a rollback: the release is already running.
+        continue-on-error: true
+        timeout-minutes: 4
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_: ${{ secrets.VPS_USER }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" "/srv/game-platform/app/dbinit.sh" \
+            || echo "::warning::dbinit failed; run /srv/game-platform/app/dbinit.sh by hand and read its output"
       - name: Verify public readiness (optional)
         id: verify
         if: ${{ vars.API_PUBLIC_URL != '' }}

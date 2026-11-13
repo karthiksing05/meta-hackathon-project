@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Creates/updates MongoDB indexes. Run by hand on the server after the first deploy and whenever a
-# release changes internal/store/indexes.go. It is idempotent and is NOT part of routine deploys.
+# Creates/updates MongoDB indexes and loads the game catalog. The deploy workflow runs it after every deploy (it is
+# idempotent: it only adds what is missing). You can also run it by hand on the server, for example after a release
+# that changes internal/store/indexes.go if the workflow step failed.
 #
 #   /srv/game-platform/app/dbinit.sh
 set -euo pipefail

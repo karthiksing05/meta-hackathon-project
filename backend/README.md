@@ -437,7 +437,7 @@ Roll-ups (all count only events from `since`, RFC 3339 or unix ms, when it is gi
   phone's own `userID` when it sent one, else the account id, else `device:<id>`. The response header `X-Next-Since`
   is the last timestamp; pass it as `since` for the next page (the last event may repeat; dedupe on `eventID`).
 
-Not built yet: shared sessions, replays, streaks and a Group weekly board, and the optional re-rank proxy and recs-state backup. After deploying a release that adds indexes, run `deploy/dbinit.sh` once.
+Not built yet: shared sessions, replays, streaks and a Group weekly board, and the optional re-rank proxy and recs-state backup. The deploy workflow runs `deploy/dbinit.sh` after every deploy (it only adds missing indexes and upserts the catalog); run it by hand if that step shows a warning.
 
 ## Notes and limits
 
