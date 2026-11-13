@@ -1,0 +1,2604 @@
+[
+  {
+    "id": "rps_read_the_opponent",
+    "name": "Best-of read duel",
+    "aliases": [
+      "Rock Paper Scissors",
+      "Roshambo",
+      "Shoot Block Reload",
+      "Yomi",
+      "Bluff duel"
+    ],
+    "family": "duel_battle",
+    "subfamily": "mind games",
+    "summary": "Both sides pick one of three moves in secret; a cycle of counters decides each round, and patterns give you away.",
+    "core_loop": "pick a move → opponent picks → reveal → winner scores → best of N",
+    "verbs": [
+      "predict",
+      "bluff"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "three move buttons",
+      "reveal",
+      "score",
+      "opponent history"
+    ],
+    "rules": [
+      "rock beats scissors, scissors beats paper, paper beats rock",
+      "ties replay",
+      "the AI or friend follows a pattern"
+    ],
+    "win": "win best of 5",
+    "lose": "opponent wins first",
+    "scoring": "rounds won",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "challenge a friend async",
+      "Group tournament"
+    ],
+    "content_needs": [
+      "opponent patterns",
+      "theme for the three moves"
+    ],
+    "difficulty_levers": [
+      "rounds",
+      "opponent pattern"
+    ],
+    "tools": [
+      "rounds",
+      "score",
+      "turns"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "rock paper scissors but wizard spells",
+      "best of five against my cat",
+      "rps with pizza ninja pirate",
+      "read my friend's pattern"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "quick_draw_reaction_duel",
+    "name": "Quick-draw duel",
+    "aliases": [
+      "Western quick draw",
+      "Wii Play Fast Draw",
+      "Samurai Gunn",
+      "Duel of Honor",
+      "Reaction Test"
+    ],
+    "family": "duel_battle",
+    "subfamily": "reaction",
+    "summary": "Wait for the signal then tap faster than the opponent; tapping early loses the round.",
+    "core_loop": "stare at idle screen → signal appears at a random time → tap → compare times",
+    "verbs": [
+      "wait",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "duelists",
+      "signal",
+      "reaction timers"
+    ],
+    "rules": [
+      "signal time is random",
+      "early tap loses",
+      "best of 5"
+    ],
+    "win": "win more rounds",
+    "lose": "lose more rounds",
+    "scoring": "reaction time and rounds",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's reaction time",
+      "Group leaderboard"
+    ],
+    "content_needs": [
+      "opponent reaction times",
+      "theme"
+    ],
+    "difficulty_levers": [
+      "opponent speed",
+      "random delay"
+    ],
+    "tools": [
+      "beat_target",
+      "timer_bar",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "western quick draw duel with cats",
+      "samurai standoff reaction game",
+      "tap faster than my friend after the signal"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "fighting_lite_combo_block",
+    "name": "Fighting-lite",
+    "aliases": [
+      "Street Fighter",
+      "Mortal Kombat",
+      "Super Smash Bros",
+      "Tekken",
+      "Brawlhalla"
+    ],
+    "family": "duel_battle",
+    "subfamily": "combos and blocks",
+    "summary": "Two fighters with simple moves: tap to attack, hold to block, swipe for a special; spacing and timing beat button mashing.",
+    "core_loop": "step in → tap attack → opponent blocks or hits → special meter fills → finish",
+    "verbs": [
+      "attack",
+      "block",
+      "special"
+    ],
+    "inputs": [
+      "tap",
+      "hold",
+      "swipe"
+    ],
+    "pieces": [
+      "two fighters",
+      "HP bars",
+      "special meter",
+      "controls"
+    ],
+    "rules": [
+      "blocking reduces damage",
+      "specials need meter",
+      "attacks have recovery frames"
+    ],
+    "win": "knock out the opponent",
+    "lose": "HP zero",
+    "scoring": "KO speed and HP left",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "challenge a friend's ghost fighter",
+      "weekly bracket"
+    ],
+    "content_needs": [
+      "fighters with move sets",
+      "AI"
+    ],
+    "difficulty_levers": [
+      "opponent aggression",
+      "fighter speed"
+    ],
+    "tools": [
+      "tap",
+      "hold",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "street fighter with pizzas",
+      "mini fighting game with hamsters",
+      "smash bros with school teachers",
+      "one button fighting duel"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "turn_menu_duel_friend",
+    "name": "Turn-menu friend duel",
+    "aliases": [
+      "Pokémon battle",
+      "Final Fantasy duel",
+      "Dragon Quest versus",
+      "Fire Emblem versus",
+      "Battle Cats"
+    ],
+    "family": "duel_battle",
+    "subfamily": "alternating turns",
+    "summary": "Two creatures or heroes exchange turns choosing attack, defend or heal; the winner is who manages HP and cooldowns better.",
+    "core_loop": "pick an action → opponent picks → resolve → HP updates → repeat",
+    "verbs": [
+      "choose",
+      "manage"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "two fighters",
+      "action menu",
+      "HP bars",
+      "cooldown"
+    ],
+    "rules": [
+      "actions have cooldowns",
+      "defend halves damage",
+      "heal has limited uses"
+    ],
+    "win": "opponent HP zero",
+    "lose": "your HP zero",
+    "scoring": "HP margin",
+    "session_seconds": [
+      60,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "async friend battle",
+      "league of friends"
+    ],
+    "content_needs": [
+      "fighter stats",
+      "AI personality"
+    ],
+    "difficulty_levers": [
+      "stats",
+      "cooldown"
+    ],
+    "tools": [
+      "turns",
+      "meters",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pokemon battle against my best friend with school mascots",
+      "turn based duel with wizard cats",
+      "final fantasy duel but we are bakers"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "card_clash_compare",
+    "name": "Card clash",
+    "aliases": [
+      "War",
+      "Top Trumps",
+      "Triple Triad",
+      "Snap",
+      "Yu-Gi-Oh duel"
+    ],
+    "family": "duel_battle",
+    "subfamily": "compare stats",
+    "summary": "Each round both play a card and the higher relevant stat wins; choose which card to spend each round.",
+    "core_loop": "pick a card → opponent picks → compare chosen stat → winner takes round → best of N",
+    "verbs": [
+      "pick",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "hand",
+      "played cards",
+      "stat compare",
+      "score"
+    ],
+    "rules": [
+      "each card is used once",
+      "stat to compare is chosen by the round",
+      "ties redraw"
+    ],
+    "win": "win most rounds",
+    "lose": "lose most rounds",
+    "scoring": "rounds won",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "challenge a friend's deck",
+      "trade cards"
+    ],
+    "content_needs": [
+      "card set with stats"
+    ],
+    "difficulty_levers": [
+      "deck size",
+      "stat spread"
+    ],
+    "tools": [
+      "quiz",
+      "turns",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "top trumps with my teachers",
+      "card duel with dragons and unicorns",
+      "triple triad but the cards are pizza toppings"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rhythm_battle_alternate",
+    "name": "Rhythm rap battle",
+    "aliases": [
+      "PaRappa the Rapper",
+      "Friday Night Funkin'",
+      "Rhythm Heaven",
+      "Guitar Hero battle",
+      "Beat Saber battle"
+    ],
+    "family": "duel_battle",
+    "subfamily": "call and response",
+    "summary": "The opponent plays a note pattern and you repeat it on beat; a crowd meter swings between you.",
+    "core_loop": "opponent pattern → your turn to repeat → beats scored → meter shifts → next phrase",
+    "verbs": [
+      "listen",
+      "repeat"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "note lanes",
+      "opponent phrase",
+      "crowd meter"
+    ],
+    "rules": [
+      "patterns get longer",
+      "perfect hits swing the meter",
+      "misses hand it back"
+    ],
+    "win": "win the crowd",
+    "lose": "crowd meter empties",
+    "scoring": "crowd margin",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "challenge friend's phrase",
+      "rap battle ladder"
+    ],
+    "content_needs": [
+      "songs and phrases"
+    ],
+    "difficulty_levers": [
+      "BPM",
+      "phrase length"
+    ],
+    "tools": [
+      "beat_target",
+      "sequence_memory",
+      "meters",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "friday night funkin style battle with my teacher",
+      "parappa rap against a dragon",
+      "rhythm duel with my friend"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "quiz_battle_damage",
+    "name": "Quiz duel",
+    "aliases": [
+      "QuizUp",
+      "Trivia Crack",
+      "Kahoot battle",
+      "Quiz Duel",
+      "Questions Duel"
+    ],
+    "family": "duel_battle",
+    "subfamily": "answer to attack",
+    "summary": "Both answer the same question; a correct faster answer damages the opponent's HP, and wrong answers hurt you.",
+    "core_loop": "question appears → both answer → faster correct deals damage → HP updates → next",
+    "verbs": [
+      "answer",
+      "race"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "question",
+      "two HP bars",
+      "timer"
+    ],
+    "rules": [
+      "correct and fast = bonus damage",
+      "wrong answer damages self",
+      "same question for both"
+    ],
+    "win": "opponent HP zero",
+    "lose": "your HP zero",
+    "scoring": "HP margin",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "async quiz duel with a friend",
+      "Group tournament"
+    ],
+    "content_needs": [
+      "question bank",
+      "difficulty"
+    ],
+    "difficulty_levers": [
+      "HP",
+      "time per question"
+    ],
+    "tools": [
+      "quiz",
+      "timer_bar",
+      "rounds",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "harry potter quiz duel with my friend",
+      "quizup battle on dinosaurs",
+      "trivia duel where right answers deal damage"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "typing_race_duel",
+    "name": "Typing duel",
+    "aliases": [
+      "TypeRacer",
+      "Nitro Type",
+      "Typing of the Dead",
+      "ZType",
+      "Keyboard Cat Wars"
+    ],
+    "family": "duel_battle",
+    "subfamily": "speed text",
+    "summary": "Both players type the same phrase; progress shows live and the first accurate finish wins.",
+    "core_loop": "phrase shown → both type → progress bars race → first correct wins",
+    "verbs": [
+      "type",
+      "race"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "phrase",
+      "two progress bars",
+      "keyboard",
+      "accuracy"
+    ],
+    "rules": [
+      "typos must be fixed",
+      "speed bonus for accuracy",
+      "best of 3"
+    ],
+    "win": "finish first",
+    "lose": "opponent finishes first",
+    "scoring": "words per minute",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's wpm",
+      "Group typing board"
+    ],
+    "content_needs": [
+      "phrase pool",
+      "opponent speeds"
+    ],
+    "difficulty_levers": [
+      "phrase length",
+      "opponent speed"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "word_check",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "typeracer with harry potter quotes",
+      "type faster than my friend",
+      "typing duel with spells"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tap_tug_of_war",
+    "name": "Tap tug-of-war",
+    "aliases": [
+      "Tug of War",
+      "Tap Battle",
+      "Mario Party tug",
+      "Wii Sports tug",
+      "Button Mashers"
+    ],
+    "family": "duel_battle",
+    "subfamily": "mash balance",
+    "summary": "Both tap as fast as possible to pull a marker toward their side; surges and pauses matter.",
+    "core_loop": "tap to pull → marker moves → hit power-ups → pull to opponent's line",
+    "verbs": [
+      "tap",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "rope marker",
+      "power-ups",
+      "stamina"
+    ],
+    "rules": [
+      "every tap pulls a bit",
+      "stamina limits tapping bursts",
+      "power-ups appear mid-rope"
+    ],
+    "win": "pull marker over line",
+    "lose": "opponent pulls first",
+    "scoring": "pull margin",
+    "session_seconds": [
+      15,
+      45
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat friends on the same rope",
+      "Group bracket"
+    ],
+    "content_needs": [
+      "opponent speed"
+    ],
+    "difficulty_levers": [
+      "opponent tap rate",
+      "stamina"
+    ],
+    "tools": [
+      "tap",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tug of war but with cats",
+      "tap as fast as you can to beat my friend",
+      "mash to pull the rope"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sword_parry_timing",
+    "name": "Parry and riposte",
+    "aliases": [
+      "For Honor",
+      "Sekiro",
+      "Absolver",
+      "Nioh",
+      "Samurai Shodown"
+    ],
+    "family": "duel_battle",
+    "subfamily": "block timing",
+    "summary": "The opponent telegraphs high, mid or low swings; match your guard and parry on time to counter.",
+    "core_loop": "opponent swings → swipe guard direction → parry window → riposte hits",
+    "verbs": [
+      "guard",
+      "counter"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "pieces": [
+      "fighter",
+      "opponent",
+      "guard directions",
+      "stamina"
+    ],
+    "rules": [
+      "wrong guard costs stamina",
+      "perfect parry opens riposte",
+      "stamina zero stuns you"
+    ],
+    "win": "defeat opponent",
+    "lose": "stamina zero and HP zero",
+    "scoring": "HP margin and parries",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "friend's ghost duelist",
+      "weekly dojo"
+    ],
+    "content_needs": [
+      "opponent patterns",
+      "stamina rules"
+    ],
+    "difficulty_levers": [
+      "telegraph time",
+      "opponent speed"
+    ],
+    "tools": [
+      "swipe_zones",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "sekiro parry duel against my gym teacher",
+      "samurai duel on a bridge",
+      "block and counter swordfight"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "artillery_duel_turns",
+    "name": "Artillery duel",
+    "aliases": [
+      "Worms",
+      "Scorched Earth",
+      "Angry Birds Friends",
+      "Tank Stars",
+      "Pocket Tanks"
+    ],
+    "family": "duel_battle",
+    "subfamily": "angle and power",
+    "summary": "Two tanks on terrain take turns choosing angle and power; hits destroy terrain and reduce HP.",
+    "core_loop": "wait for turn → aim → shoot → shell arcs → terrain changes → opponent shoots",
+    "verbs": [
+      "aim",
+      "fire"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "terrain",
+      "two tanks",
+      "angle/power",
+      "wind"
+    ],
+    "rules": [
+      "gravity arc",
+      "wind shifts each turn",
+      "shells carve craters"
+    ],
+    "win": "opponent HP zero",
+    "lose": "your HP zero",
+    "scoring": "damage dealt",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "friend duels async",
+      "Group ladder"
+    ],
+    "content_needs": [
+      "terrains",
+      "wind sets"
+    ],
+    "difficulty_levers": [
+      "terrain",
+      "HP"
+    ],
+    "tools": [
+      "drag",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "worms but with school mascots",
+      "tank duel on a hill with my cat",
+      "artillery duel with pizza cannons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "simultaneous_prediction_charge",
+    "name": "Attack-block-charge",
+    "aliases": [
+      "Shoot Block Reload",
+      "Rock Paper Scissors+",
+      "Bang!",
+      "Hanabi duel",
+      "Coin Duel"
+    ],
+    "family": "duel_battle",
+    "subfamily": "charge economy",
+    "summary": "Each round choose Charge, Block or Attack; attacks need charges, blocks stop one attack, and bluffing wins.",
+    "core_loop": "secretly choose → reveal → resolve → charges update → repeat",
+    "verbs": [
+      "predict",
+      "bluff"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "three buttons",
+      "charge count",
+      "reveal",
+      "HP"
+    ],
+    "rules": [
+      "attacks cost a charge",
+      "blocks stop attacks",
+      "mutual charge builds both"
+    ],
+    "win": "first to land a hit",
+    "lose": "opponent hits first",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's habits",
+      "async rounds"
+    ],
+    "content_needs": [
+      "AI patterns"
+    ],
+    "difficulty_levers": [
+      "charges to win",
+      "number of lives"
+    ],
+    "tools": [
+      "rounds",
+      "lives",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "shoot block reload but with wizards",
+      "charge block attack duel with my friend",
+      "bang bang duel but cute"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "boxing_dodge_punch",
+    "name": "Boxing dodge-punch",
+    "aliases": [
+      "Punch-Out",
+      "Fight Night",
+      "Rocky",
+      "Boxing Champ",
+      "Ring Fighter"
+    ],
+    "family": "duel_battle",
+    "subfamily": "telegraphs and counters",
+    "summary": "Opponent boxer shows tells; dodge left/right then counter when they are open, while stamina limits punches.",
+    "core_loop": "watch tell → dodge direction → counter punch → stamina → knockout",
+    "verbs": [
+      "dodge",
+      "punch"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "pieces": [
+      "boxer",
+      "opponent",
+      "tells",
+      "stamina"
+    ],
+    "rules": [
+      "each opponent has patterns",
+      "star punch needs perfect counters",
+      "stamina drains from missing"
+    ],
+    "win": "knockout opponent",
+    "lose": "knocked out",
+    "scoring": "rounds and HP",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share your ko time",
+      "ghost bouts"
+    ],
+    "content_needs": [
+      "opponent move sets"
+    ],
+    "difficulty_levers": [
+      "opponent speed",
+      "tells"
+    ],
+    "tools": [
+      "swipe_zones",
+      "combo",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "punch out but the boxers are cats",
+      "boxing dodge game with a dragon champion",
+      "ring fighter with my cousin"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "jousting_charge",
+    "name": "Jousting charge",
+    "aliases": [
+      "Jousting",
+      "Joust arcade",
+      "Mount and Blade lance",
+      "Kingdom Come tournament",
+      "Ice Climbers"
+    ],
+    "family": "duel_battle",
+    "subfamily": "timing aim",
+    "summary": "Gallop toward each other; tilt your lance height and tap at the right moment to hit while the opponent adjusts.",
+    "core_loop": "pick lance height → gallop → tap to strike → hit or miss → next pass",
+    "verbs": [
+      "aim",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "knights",
+      "lance height",
+      "timing meter",
+      "score"
+    ],
+    "rules": [
+      "height must match opponent's guard",
+      "strike timing meter",
+      "three passes"
+    ],
+    "win": "unhorse the opponent",
+    "lose": "unhorsed",
+    "scoring": "passes won",
+    "session_seconds": [
+      30,
+      75
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "friend as opponent",
+      "weekly tournament"
+    ],
+    "content_needs": [
+      "opponent patterns"
+    ],
+    "difficulty_levers": [
+      "opponent adaptivity",
+      "meter speed"
+    ],
+    "tools": [
+      "slider",
+      "beat_target",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "jousting but my horse is a goat",
+      "knight tournament with school mascots",
+      "lance duel for a pizza crown"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dodgeball_duel",
+    "name": "Dodgeball duel",
+    "aliases": [
+      "Dodgeball",
+      "Super Dodge Ball",
+      "Rocket League ball dodge",
+      "Mario Party",
+      "Disc Wars"
+    ],
+    "family": "duel_battle",
+    "subfamily": "throw and dodge",
+    "summary": "Throw balls at the opponent and dodge theirs; catching a ball reverses it.",
+    "core_loop": "move → throw → opponent dodges → catch to counter → HP",
+    "verbs": [
+      "throw",
+      "dodge",
+      "catch"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "court",
+      "players",
+      "balls",
+      "HP"
+    ],
+    "rules": [
+      "catching in time nets a free throw",
+      "balls bounce off walls",
+      "HP loss on hit"
+    ],
+    "win": "opponent HP zero",
+    "lose": "your HP zero",
+    "scoring": "hits landed",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "duel a friend",
+      "Group tournament"
+    ],
+    "content_needs": [
+      "opponent AI"
+    ],
+    "difficulty_levers": [
+      "AI accuracy",
+      "ball speed"
+    ],
+    "tools": [
+      "player_drag",
+      "collide",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dodgeball with cats",
+      "throw and dodge duel in a gym",
+      "dodgeball but with water balloons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "wizard_spell_duel",
+    "name": "Wizard spell duel",
+    "aliases": [
+      "Harry Potter duels",
+      "Magic duel",
+      "Hogwarts Legacy duels",
+      "Wizard101",
+      "Magicka"
+    ],
+    "family": "duel_battle",
+    "subfamily": "spell sequences",
+    "summary": "Each wizard casts spell sequences (swipes or typed incantations); the faster correct cast hits first.",
+    "core_loop": "spell prompt → cast by drawing or typing → faster correct hits → shield blocks → repeat",
+    "verbs": [
+      "cast",
+      "block"
+    ],
+    "inputs": [
+      "drag",
+      "type"
+    ],
+    "pieces": [
+      "two wizards",
+      "spell prompts",
+      "shield",
+      "HP"
+    ],
+    "rules": [
+      "wrong spell fizzles",
+      "certain spells counter others",
+      "shield timing blocks"
+    ],
+    "win": "defeat the other wizard",
+    "lose": "your HP zero",
+    "scoring": "damage dealt",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "duel a friend",
+      "house duel rankings"
+    ],
+    "content_needs": [
+      "spell lists",
+      "counter table"
+    ],
+    "difficulty_levers": [
+      "spell count",
+      "time per prompt"
+    ],
+    "tools": [
+      "draw_gesture",
+      "typed_answer",
+      "timer_bar",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "harry potter duel with my friend",
+      "wizard duel with spell drawing",
+      "wand duel with counters"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "insult_comeback_swordfight",
+    "name": "Insult swordfight",
+    "aliases": [
+      "Monkey Island insult sword fighting",
+      "Rap Battle",
+      "Roast Battle",
+      "Dozens",
+      "Yo Mama"
+    ],
+    "family": "duel_battle",
+    "subfamily": "verbal duel",
+    "summary": "Trade insults; the right comeback answers the insult and wins the exchange, and you learn new insults by losing.",
+    "core_loop": "opponent insults → pick comeback → right one wins exchange → exchanges counted → bout",
+    "verbs": [
+      "listen",
+      "retort"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "two duelists",
+      "insult line",
+      "comeback choices",
+      "score"
+    ],
+    "rules": [
+      "each insult has a matching comeback",
+      "you learn new ones from losses",
+      "first to 3"
+    ],
+    "win": "win 3 exchanges",
+    "lose": "lose 3",
+    "scoring": "exchanges won",
+    "session_seconds": [
+      45,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "share a roast",
+      "rematch ladder"
+    ],
+    "content_needs": [
+      "insult/comeback pairs"
+    ],
+    "difficulty_levers": [
+      "pool size",
+      "distractor strength"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "monkey island insult fighting but with cats",
+      "rap battle comeback duel",
+      "roast duel with my friend"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pet_stat_battle",
+    "name": "Pet stat battle",
+    "aliases": [
+      "Neopets Battledome",
+      "Pokémon",
+      "Tamagotchi battles",
+      "Digimon",
+      "Monster Rancher"
+    ],
+    "family": "duel_battle",
+    "subfamily": "raised stats duel",
+    "summary": "Your pet's raised stats and chosen moves duke it out against a friend's pet; strategy is the build, not the fight.",
+    "core_loop": "pick 3 moves → pets battle automatically → damage replay → result",
+    "verbs": [
+      "choose build"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "pet cards",
+      "move picker",
+      "auto-battle replay"
+    ],
+    "rules": [
+      "raised stats feed damage",
+      "moves have types",
+      "3 moves per fight"
+    ],
+    "win": "win the battle",
+    "lose": "lose",
+    "scoring": "HP margin",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "fight friends' pets",
+      "pet league"
+    ],
+    "content_needs": [
+      "pet stat blocks",
+      "move list"
+    ],
+    "difficulty_levers": [
+      "stat ranges",
+      "move count"
+    ],
+    "tools": [
+      "choice_story",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "battle my pet dragon against my friend's pet cat",
+      "neopets battledome for hamsters",
+      "build moves and watch the pets fight"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "puzzle_garbage_battle",
+    "name": "Puzzle battle",
+    "aliases": [
+      "Puyo Puyo",
+      "Tetris 99",
+      "Tetris Battle",
+      "Puzzle Fighter",
+      "Dr. Mario versus"
+    ],
+    "family": "duel_battle",
+    "subfamily": "send garbage",
+    "summary": "Solve a falling-block or match puzzle; clearing sends garbage blocks to the opponent's board.",
+    "core_loop": "play puzzle → clear lines → send garbage → opponent's board fills → topout",
+    "verbs": [
+      "clear",
+      "send"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "two boards",
+      "garbage meter",
+      "next piece"
+    ],
+    "rules": [
+      "bigger clears send more garbage",
+      "topping out loses",
+      "garbage can be offset"
+    ],
+    "win": "opponent tops out",
+    "lose": "you top out",
+    "scoring": "garbage sent",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "race a friend on the same piece sequence",
+      "Group ladder"
+    ],
+    "content_needs": [
+      "piece sequence",
+      "AI behaviors"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "garbage ratio"
+    ],
+    "tools": [
+      "tile_slide",
+      "match_pairs",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "puyo puyo against my sister",
+      "tetris battle with cat blocks",
+      "puzzle duel where clears send garbage"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mech_build_and_fight",
+    "name": "Build-and-fight mech",
+    "aliases": [
+      "Armored Core",
+      "Robot Wars",
+      "Mechwarrior",
+      "Gundam",
+      "BattleBots"
+    ],
+    "family": "duel_battle",
+    "subfamily": "loadout duel",
+    "summary": "Spend a budget on weapons, armor and legs; the robot auto-fights an opponent's build and result depends on matchup.",
+    "core_loop": "pick parts → total weight/cost → fight resolves → result shows why → tweak",
+    "verbs": [
+      "build",
+      "tune"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "parts shop",
+      "robot",
+      "budget",
+      "fight replay"
+    ],
+    "rules": [
+      "heavy armor slows",
+      "weapons have range",
+      "matchups matter"
+    ],
+    "win": "defeat opponent robot",
+    "lose": "robot destroyed",
+    "scoring": "win margin",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "fight friends' builds",
+      "weekly arena"
+    ],
+    "content_needs": [
+      "parts list",
+      "opponent builds"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "part variety"
+    ],
+    "tools": [
+      "meters",
+      "choice_story",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "robot wars but kitchen appliances",
+      "build a mech to beat my friend's mech",
+      "battlebots with cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "stamina_trade_blows",
+    "name": "Stamina brawl",
+    "aliases": [
+      "Punch Club",
+      "Boxing Manager",
+      "UFC Mobile",
+      "Karate Champ",
+      "Gladiator"
+    ],
+    "family": "duel_battle",
+    "subfamily": "resource brawl",
+    "summary": "Each exchange costs stamina; choose between a heavy strike, a light combo or resting, and the opponent chooses too.",
+    "core_loop": "choose attack weight → stamina deducted → damage → recover → knockout",
+    "verbs": [
+      "decide",
+      "manage"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "two fighters",
+      "stamina bars",
+      "HP",
+      "action menu"
+    ],
+    "rules": [
+      "heavy hits cost more stamina",
+      "resting recovers but opens you up",
+      "out of stamina = helpless"
+    ],
+    "win": "KO the opponent",
+    "lose": "KO'd",
+    "scoring": "HP margin",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "async brawl vs friend",
+      "Group dojo"
+    ],
+    "content_needs": [
+      "fighter archetypes"
+    ],
+    "difficulty_levers": [
+      "stamina costs",
+      "opponent AI"
+    ],
+    "tools": [
+      "turns",
+      "meters",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "brawl where stamina is the real health bar",
+      "gladiator match against my cousin",
+      "boxing manager duel for cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "snowball_peek_fight",
+    "name": "Peek-and-throw snowball",
+    "aliases": [
+      "Snow Brawl",
+      "Club Penguin snowball",
+      "Calvin and Hobbes snowball",
+      "Splatoon",
+      "Fort Wars"
+    ],
+    "family": "duel_battle",
+    "subfamily": "cover shooting",
+    "summary": "Duck behind a fort and peek to throw; the opponent does the same, and timing the peek is everything.",
+    "core_loop": "duck → peek → throw → opponent peeks → hit or miss",
+    "verbs": [
+      "peek",
+      "throw"
+    ],
+    "inputs": [
+      "tap",
+      "hold"
+    ],
+    "pieces": [
+      "two forts",
+      "snowballs",
+      "peek meter"
+    ],
+    "rules": [
+      "peeking exposes you",
+      "throw while exposed",
+      "ammo is limited"
+    ],
+    "win": "tag the opponent first",
+    "lose": "tagged",
+    "scoring": "hits landed",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "duel a friend",
+      "Group snowball tournament"
+    ],
+    "content_needs": [
+      "fort layouts"
+    ],
+    "difficulty_levers": [
+      "ammo",
+      "peek time"
+    ],
+    "tools": [
+      "tap",
+      "hold",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "snowball fight with cats",
+      "peek and throw duel behind a fort",
+      "club penguin snowball fight"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ghost_replay_duel",
+    "name": "Ghost duel",
+    "aliases": [
+      "Mario Kart ghosts",
+      "Trackmania ghosts",
+      "Time Trial ghosts",
+      "Forza Drivatars",
+      "Chess.com friend moves"
+    ],
+    "family": "duel_battle",
+    "subfamily": "async run duel",
+    "summary": "Play the same short challenge as a friend's recorded run; beat their ghost's score or time.",
+    "core_loop": "open friend's ghost → play same seed → compare score → send back",
+    "verbs": [
+      "play",
+      "beat"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "ghost avatar",
+      "run",
+      "comparison"
+    ],
+    "rules": [
+      "same seed for both",
+      "ghost plays exactly what they did",
+      "tie goes to the earlier run"
+    ],
+    "win": "beat the ghost",
+    "lose": "fall short",
+    "scoring": "score margin",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "async_friends"
+    ],
+    "social_hooks": [
+      "beat friends' ghosts in the feed",
+      "post a ghost to your Group"
+    ],
+    "content_needs": [
+      "challenge seed",
+      "ghost storage"
+    ],
+    "difficulty_levers": [
+      "challenge length",
+      "score rules"
+    ],
+    "tools": [
+      "ghost_score",
+      "daily_seed",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "beat my friend's ghost run",
+      "ghost duel in a runner",
+      "send a ghost challenge to my group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tournament_bracket_ladder",
+    "name": "Bracket ladder",
+    "aliases": [
+      "March Madness bracket",
+      "Tekken tournament",
+      "Smash tournament",
+      "Chess tournament",
+      "Mario Kart bracket"
+    ],
+    "family": "duel_battle",
+    "subfamily": "elimination rounds",
+    "summary": "A mini-tournament of 8 duels in a bracket; you advance by winning short duels, with brackets shared with friends.",
+    "core_loop": "play match → advance → next opponent harder → final → trophy",
+    "verbs": [
+      "play",
+      "advance"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "bracket tree",
+      "match screen",
+      "trophy"
+    ],
+    "rules": [
+      "single elimination",
+      "each match is a 30-second duel",
+      "opponents may be friends' ghosts"
+    ],
+    "win": "win the final",
+    "lose": "lose a match",
+    "scoring": "matches won",
+    "session_seconds": [
+      120,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Group bracket night",
+      "share your bracket"
+    ],
+    "content_needs": [
+      "duel minigame",
+      "bracket data"
+    ],
+    "difficulty_levers": [
+      "bracket size",
+      "opponent difficulty"
+    ],
+    "tools": [
+      "rounds",
+      "ghost_score",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a bracket tournament of my friends",
+      "mini smash tournament with school mascots",
+      "march madness brackets for fighters"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "air_hockey_pong_duel",
+    "name": "Pong duel",
+    "aliases": [
+      "Pong",
+      "Air Hockey",
+      "Ping Pong",
+      "Rocket League 2D",
+      "Breakout versus"
+    ],
+    "family": "duel_battle",
+    "subfamily": "bounce duel",
+    "summary": "Two paddles bounce a puck; angle and spin decide, with the speed ramping each volley.",
+    "core_loop": "serve → paddle drag → puck bounces → score at goal → first to 7",
+    "verbs": [
+      "position",
+      "time"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "table",
+      "paddles",
+      "puck",
+      "score"
+    ],
+    "rules": [
+      "puck speeds up each hit",
+      "angle depends on paddle contact",
+      "walls bounce"
+    ],
+    "win": "first to 7",
+    "lose": "opponent first",
+    "scoring": "goal difference",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's score",
+      "Group league"
+    ],
+    "content_needs": [
+      "AI paddle behavior"
+    ],
+    "difficulty_levers": [
+      "AI speed",
+      "puck speed"
+    ],
+    "tools": [
+      "player_drag",
+      "collide",
+      "speed_ramp",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "air hockey against my cat",
+      "pong but with pizza",
+      "bounce duel on a phone"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "samurai_standoff_wait",
+    "name": "Standoff patience",
+    "aliases": [
+      "Way of the Samurai",
+      "Samurai Gunn",
+      "Ghost of Tsushima standoff",
+      "Red Dead duel",
+      "Kurosawa"
+    ],
+    "family": "duel_battle",
+    "subfamily": "wait for the opening",
+    "summary": "Both samurai stare and shift; strike during the instant the opponent flinches, but striking too soon is fatal.",
+    "core_loop": "watch opponent → flinch cue → strike swipe → cut or be cut → next bout",
+    "verbs": [
+      "wait",
+      "strike"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "pieces": [
+      "duelists",
+      "tension meter",
+      "flinch cue"
+    ],
+    "rules": [
+      "flinch cues are subtle",
+      "false strikes lose the bout",
+      "opponent patience varies"
+    ],
+    "win": "win bouts",
+    "lose": "lose bout",
+    "scoring": "bouts won",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's patience",
+      "weekly dojo"
+    ],
+    "content_needs": [
+      "cue patterns",
+      "opponent patience"
+    ],
+    "difficulty_levers": [
+      "cue subtlety",
+      "speed"
+    ],
+    "tools": [
+      "beat_target",
+      "lives",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "samurai standoff with cats",
+      "wait for the flinch and strike",
+      "duel where whoever moves first loses"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "memory_pattern_battle",
+    "name": "Pattern battle",
+    "aliases": [
+      "Simon",
+      "Bop It",
+      "Memory Match duel",
+      "Rhythm Tengoku",
+      "Simon Says"
+    ],
+    "family": "duel_battle",
+    "subfamily": "repeat or lose",
+    "summary": "Players alternate extending a pattern; the first to fail to repeat the full pattern loses.",
+    "core_loop": "see pattern → repeat it → add a step → pass → repeat",
+    "verbs": [
+      "memorize",
+      "extend"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "pattern pad",
+      "pattern length",
+      "turn indicator"
+    ],
+    "rules": [
+      "each turn adds one step",
+      "a mistake ends your run",
+      "last standing wins"
+    ],
+    "win": "outlast the opponent",
+    "lose": "make a mistake",
+    "scoring": "pattern length",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's pattern length",
+      "Group chain"
+    ],
+    "content_needs": [
+      "opponent memory"
+    ],
+    "difficulty_levers": [
+      "pad count",
+      "speed"
+    ],
+    "tools": [
+      "sequence_memory",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "simon duel with my friend",
+      "pattern memory battle",
+      "extend the pattern until someone slips"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "shooting_gallery_race",
+    "name": "Shooting gallery duel",
+    "aliases": [
+      "Duck Hunt",
+      "Carnival shooting gallery",
+      "Shooting Range",
+      "Time Crisis",
+      "Operation Wolf"
+    ],
+    "family": "duel_battle",
+    "subfamily": "target race",
+    "summary": "Both shoot the same targets; the faster tap scores the target, so priority and speed matter.",
+    "core_loop": "targets appear → tap fastest → score claims → next target → 20 targets",
+    "verbs": [
+      "aim",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "targets",
+      "crosshair",
+      "score race"
+    ],
+    "rules": [
+      "each target scores for the first shooter",
+      "decoys cost points",
+      "combo for streaks"
+    ],
+    "win": "most points",
+    "lose": "fewer points",
+    "scoring": "points margin",
+    "session_seconds": [
+      30,
+      75
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's score",
+      "Group league"
+    ],
+    "content_needs": [
+      "target patterns",
+      "decoys"
+    ],
+    "difficulty_levers": [
+      "target speed",
+      "decoys"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "combo",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "carnival shooting gallery against my friend",
+      "duck hunt race",
+      "shoot the dragons faster than my buddy"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hide_and_seek_duel",
+    "name": "Hide and seek",
+    "aliases": [
+      "Hide and Seek",
+      "Hitman Hide",
+      "Prop Hunt",
+      "Hide Online",
+      "Spyfall hiding"
+    ],
+    "family": "duel_battle",
+    "subfamily": "hiding spot guess",
+    "summary": "One player picks a hiding spot; the other searches with limited guesses, getting hints along the way.",
+    "core_loop": "hider picks a spot → seeker guesses → hint reveals proximity → guess again → found or not",
+    "verbs": [
+      "hide",
+      "seek"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "map of spots",
+      "hint indicator",
+      "guess count"
+    ],
+    "rules": [
+      "hints give warmer or colder",
+      "guesses are limited",
+      "roles swap each round"
+    ],
+    "win": "find the hider or survive",
+    "lose": "guesses run out",
+    "scoring": "guesses used",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "hide a spot for a friend async",
+      "Group hide and seek"
+    ],
+    "content_needs": [
+      "spot maps"
+    ],
+    "difficulty_levers": [
+      "spot count",
+      "guesses"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hide and seek in a haunted house with friends",
+      "pick a spot and my friend guesses",
+      "hot and cold seek game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "territory_tap_war",
+    "name": "Territory tap war",
+    "aliases": [
+      "Splatoon tap",
+      "Tap Titans clan",
+      "Territory War",
+      "Pixel Wars",
+      "r/place"
+    ],
+    "family": "duel_battle",
+    "subfamily": "claim-by-tapping",
+    "summary": "Tap squares to claim them; an opponent can re-tap them, and the most squares after the timer wins.",
+    "core_loop": "tap squares → claim → opponent re-claims → timer ends → count",
+    "verbs": [
+      "claim",
+      "defend"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "board",
+      "colors",
+      "timer"
+    ],
+    "rules": [
+      "each tap claims one square",
+      "held squares tick a small bonus",
+      "claiming costs stamina"
+    ],
+    "win": "most squares at time up",
+    "lose": "fewer squares",
+    "scoring": "square count",
+    "session_seconds": [
+      30,
+      60
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "team up Groups on one canvas",
+      "rival Group ladder"
+    ],
+    "content_needs": [
+      "board sizes"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "opponent speed"
+    ],
+    "tools": [
+      "grid_board",
+      "timer_bar",
+      "score",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "r/place mini war with my friends",
+      "claim squares before time ends",
+      "team color war for our groups"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mirror_match_ghost_build",
+    "name": "Mirror build duel",
+    "aliases": [
+      "Mirror Match",
+      "Auto Chess friend",
+      "Super Auto Pets versus",
+      "Backpack Hero",
+      "Teamfight Tactics"
+    ],
+    "family": "duel_battle",
+    "subfamily": "async build",
+    "summary": "Build a team within a budget; it battles other players' stored teams automatically, with results shown.",
+    "core_loop": "draft a team → submit → fight stored team → result → next",
+    "verbs": [
+      "build",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "draft shop",
+      "team slots",
+      "battle replay"
+    ],
+    "rules": [
+      "opponent teams come from friends",
+      "a fixed budget",
+      "replay explains outcomes"
+    ],
+    "win": "win rounds",
+    "lose": "lose lives",
+    "scoring": "rounds won",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "async_friends"
+    ],
+    "social_hooks": [
+      "fight friends' teams",
+      "Group meta"
+    ],
+    "content_needs": [
+      "unit list",
+      "battle sim"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "unit count"
+    ],
+    "tools": [
+      "choice_story",
+      "lives",
+      "rounds",
+      "score",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "super auto pets with my friend's teams",
+      "build a team to fight friends' lineups",
+      "auto battler against ghosts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "arm_wrestle_rhythm",
+    "name": "Arm wrestle rhythm",
+    "aliases": [
+      "Arm Wrestling",
+      "Wii Sports Resort arm",
+      "Power Slap",
+      "Mario Party arm wrestle",
+      "Tap Arm"
+    ],
+    "family": "duel_battle",
+    "subfamily": "rhythm tap",
+    "summary": "Tap in rhythm to charge, then burst to push the arm over; mistimed taps lose ground.",
+    "core_loop": "tap to charge on rhythm → burst when meter full → arms move → opponent resists",
+    "verbs": [
+      "tap rhythmically",
+      "burst"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "arms",
+      "power meter",
+      "rhythm marker"
+    ],
+    "rules": [
+      "rhythm taps build power",
+      "burst releases it",
+      "mistimed taps drain"
+    ],
+    "win": "pin the arm",
+    "lose": "pinned",
+    "scoring": "pin time",
+    "session_seconds": [
+      20,
+      45
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "beat a friend's time",
+      "Group arm wrestling"
+    ],
+    "content_needs": [
+      "opponent power"
+    ],
+    "difficulty_levers": [
+      "opponent power",
+      "rhythm window"
+    ],
+    "tools": [
+      "beat_target",
+      "meters",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "arm wrestling with a gorilla",
+      "tap rhythm arm wrestle",
+      "cats arm wrestling tournament"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spaceship_gravity_duel",
+    "name": "Gravity-well spaceship duel",
+    "aliases": [
+      "Spacewar!",
+      "Gravity Wars",
+      "Star Control melee",
+      "Asteroids versus",
+      "Wii Sports Space"
+    ],
+    "family": "duel_battle",
+    "subfamily": "orbital dogfight",
+    "summary": "Two ships circle a gravity well, rotating and thrusting to line up shots while avoiding the star.",
+    "core_loop": "thrust and rotate → fire → gravity bends paths → hit or crash → respawn",
+    "verbs": [
+      "steer",
+      "shoot"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "star",
+      "two ships",
+      "bullets"
+    ],
+    "rules": [
+      "gravity pulls ships and bullets",
+      "fuel limits thrust",
+      "crashing counts as a loss"
+    ],
+    "win": "first to 5 kills",
+    "lose": "opponent first",
+    "scoring": "kills",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "duel a friend",
+      "Group league"
+    ],
+    "content_needs": [
+      "AI aggression"
+    ],
+    "difficulty_levers": [
+      "gravity strength",
+      "fuel"
+    ],
+    "tools": [
+      "player_drag",
+      "collide",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "spacewar with cats",
+      "gravity well dogfight",
+      "orbit duel against my cousin"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tank_maze_duel",
+    "name": "Tank maze duel",
+    "aliases": [
+      "Tank Trouble",
+      "Combat (Atari)",
+      "Battle City",
+      "Tanks!",
+      "Wii Play Tanks"
+    ],
+    "family": "duel_battle",
+    "subfamily": "bounce shots",
+    "summary": "Two tanks in a maze fire bouncing bullets; use ricochets to hit around corners while avoiding your own shots.",
+    "core_loop": "drive → aim → fire a bouncing bullet → opponent dodges → hit",
+    "verbs": [
+      "drive",
+      "ricochet"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "maze",
+      "tanks",
+      "bouncing bullets"
+    ],
+    "rules": [
+      "bullets bounce off walls",
+      "only 5 bullets at a time",
+      "hits remove the tank for the round"
+    ],
+    "win": "first to 5",
+    "lose": "opponent first",
+    "scoring": "rounds won",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "duel friends",
+      "Group tournament"
+    ],
+    "content_needs": [
+      "maze sets"
+    ],
+    "difficulty_levers": [
+      "maze size",
+      "bullet life"
+    ],
+    "tools": [
+      "player_drag",
+      "collide",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tank trouble with cats",
+      "bouncing bullet maze duel",
+      "tank game with my friend"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "trick_shot_copycat",
+    "name": "Copy-the-shot duel",
+    "aliases": [
+      "H-O-R-S-E",
+      "Basketball Stars",
+      "Golf Clash",
+      "Bowling copycat",
+      "Basketball HORSE"
+    ],
+    "family": "duel_battle",
+    "subfamily": "follow the leader",
+    "summary": "One player makes a trick shot; the other must replicate the same angle and power, or collect a letter.",
+    "core_loop": "leader aims a shot → make it → follower copies → miss gives a letter → swap",
+    "verbs": [
+      "aim",
+      "copy"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "court",
+      "hoop",
+      "aim arc",
+      "letters"
+    ],
+    "rules": [
+      "followers must match within tolerance",
+      "missed copies add letters",
+      "spelling the word eliminates"
+    ],
+    "win": "opponent spells the word",
+    "lose": "you spell it",
+    "scoring": "letters",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "pass_and_play"
+    ],
+    "social_hooks": [
+      "challenge a friend with a trick shot",
+      "Group HORSE night"
+    ],
+    "content_needs": [
+      "court layouts",
+      "target tolerance"
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "distance"
+    ],
+    "tools": [
+      "drag",
+      "turns",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "horse basketball trick shot duel",
+      "copy my trick shot to avoid letters",
+      "golf copycat challenge"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dance_off_copycat",
+    "name": "Dance-off copycat",
+    "aliases": [
+      "Just Dance",
+      "Dance Dance Revolution",
+      "Michael Jackson Experience",
+      "Simon Says",
+      "Hip Hop Dance Experience"
+    ],
+    "family": "duel_battle",
+    "subfamily": "pose or move match",
+    "summary": "One dancer shows a short move sequence; the other copies the moves by tap or swipe on beat, scoring accuracy.",
+    "core_loop": "watch moves → copy with taps/swipes on beat → accuracy shown → swap",
+    "verbs": [
+      "watch",
+      "copy"
+    ],
+    "inputs": [
+      "tap",
+      "swipe"
+    ],
+    "pieces": [
+      "dancers",
+      "move arrows",
+      "beat bar",
+      "score"
+    ],
+    "rules": [
+      "moves are arrows or poses",
+      "accuracy by timing",
+      "swap each round"
+    ],
+    "win": "higher accuracy",
+    "lose": "lower accuracy",
+    "scoring": "accuracy percent",
+    "session_seconds": [
+      45,
+      90
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live_friends"
+    ],
+    "social_hooks": [
+      "send a dance routine to friends",
+      "copycat chain"
+    ],
+    "content_needs": [
+      "move sets",
+      "songs"
+    ],
+    "difficulty_levers": [
+      "sequence length",
+      "BPM"
+    ],
+    "tools": [
+      "beat_target",
+      "sequence_memory",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "just dance duel with my cat",
+      "copy my moves on the beat",
+      "dance off with a robot"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

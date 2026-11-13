@@ -1,0 +1,32 @@
+[
+  {
+    "request": "bloons td but the balloons are pizzas",
+    "expect": [
+      "path_tower_defense"
+    ]
+  },
+  {
+    "request": "plants vs zombies with school snacks",
+    "expect": [
+      "lane_row_plants_defense"
+    ]
+  },
+  {
+    "request": "desktop tower defense maze for goblins",
+    "expect": [
+      "maze_building_defense"
+    ]
+  },
+  {
+    "request": "merge towers to beat a boss",
+    "expect": [
+      "merge_tower_upgrade"
+    ]
+  },
+  {
+    "request": "our group chat defends a castle together",
+    "expect": [
+      "shared_group_base_defense"
+    ]
+  }
+]

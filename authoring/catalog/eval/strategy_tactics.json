@@ -1,0 +1,32 @@
+[
+  {
+    "request": "fire emblem but my squad is hamsters",
+    "expect": [
+      "grid_squad_tactics"
+    ]
+  },
+  {
+    "request": "into the breach but the mechs are cats",
+    "expect": [
+      "telegraphed_enemy_puzzle"
+    ]
+  },
+  {
+    "request": "super auto pets with food",
+    "expect": [
+      "auto_battler_lineup"
+    ]
+  },
+  {
+    "request": "clash royale but everything is pizza",
+    "expect": [
+      "tug_of_war_lane_push"
+    ]
+  },
+  {
+    "request": "stratego with cats",
+    "expect": [
+      "hidden_rank_capture"
+    ]
+  }
+]

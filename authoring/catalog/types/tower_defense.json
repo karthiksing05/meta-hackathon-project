@@ -1,0 +1,2578 @@
+[
+  {
+    "id": "path_tower_defense",
+    "name": "Path tower defense",
+    "aliases": [
+      "Bloons TD",
+      "Kingdom Rush",
+      "Fieldrunners",
+      "Defense Grid",
+      "Tower Defense classic"
+    ],
+    "family": "tower_defense",
+    "subfamily": "build beside a path",
+    "summary": "Place towers beside a fixed enemy path; enemies walk it in waves and leaking enemies cost lives.",
+    "core_loop": "spend gold on towers → wave walks the path → towers auto-fire → earn gold → next wave",
+    "verbs": [
+      "place",
+      "upgrade"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "path",
+      "build spots",
+      "towers",
+      "gold",
+      "lives"
+    ],
+    "rules": [
+      "towers auto-fire at range",
+      "kills pay gold",
+      "each leak costs a life"
+    ],
+    "win": "survive all waves",
+    "lose": "lives hit zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare waves cleared",
+      "daily map"
+    ],
+    "content_needs": [
+      "maps",
+      "tower types",
+      "enemy waves"
+    ],
+    "difficulty_levers": [
+      "build spots",
+      "enemy HP",
+      "gold per kill"
+    ],
+    "tools": [
+      "waves",
+      "spawn_wave",
+      "lives",
+      "pickups",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "bloons td but the balloons are pizzas",
+      "kingdom rush style defense for my school",
+      "tower defense where the towers are cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "lane_row_plants_defense",
+    "name": "Row-lane plant defense",
+    "aliases": [
+      "Plants vs. Zombies",
+      "Kingdom Rush Frontiers",
+      "Zombie Catchers",
+      "Bloons lane",
+      "Garden Warfare"
+    ],
+    "family": "tower_defense",
+    "subfamily": "lane rows",
+    "summary": "Place defenders in rows on a lawn; enemies walk along rows toward the house and each defender fights only its row.",
+    "core_loop": "collect sun → place defender in a row → enemies approach → defenders shoot → survive",
+    "verbs": [
+      "plant",
+      "choose lane"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "lawn grid",
+      "defenders",
+      "seed bank",
+      "sun counter"
+    ],
+    "rules": [
+      "defenders cost sun that falls over time",
+      "each fights its row",
+      "special defenders hit rows or area"
+    ],
+    "win": "survive the final wave",
+    "lose": "an enemy reaches the house",
+    "scoring": "waves survived",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare survival",
+      "same lawn for a Group"
+    ],
+    "content_needs": [
+      "defender catalog",
+      "enemy types",
+      "waves"
+    ],
+    "difficulty_levers": [
+      "sun rate",
+      "enemy speed"
+    ],
+    "tools": [
+      "grid_board",
+      "lanes",
+      "waves",
+      "pickups",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "plants vs zombies but the plants are school snacks",
+      "lane defense game where my cats protect the house",
+      "pvz with pirates"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "maze_building_defense",
+    "name": "Maze-building defense",
+    "aliases": [
+      "Desktop Tower Defense",
+      "Gem TD",
+      "Fieldrunners",
+      "Bloons Maze",
+      "Vector TD"
+    ],
+    "family": "tower_defense",
+    "subfamily": "path shaping",
+    "summary": "Enemies pathfind across an open field; towers also act as walls, so you build a long maze for them to wander through.",
+    "core_loop": "place a tower/wall → enemy path recalculates → wave spawns → towers fire as the enemies walk the maze",
+    "verbs": [
+      "build",
+      "shape"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "open grid",
+      "towers as walls",
+      "enemy path",
+      "gold"
+    ],
+    "rules": [
+      "enemies always take the shortest open path",
+      "you cannot fully block",
+      "longer path = more shooting time"
+    ],
+    "win": "survive all waves",
+    "lose": "lives hit zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a maze design",
+      "daily field"
+    ],
+    "content_needs": [
+      "tower types",
+      "enemy waves"
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "enemy speed"
+    ],
+    "tools": [
+      "grid_board",
+      "waves",
+      "lives",
+      "pickups",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "desktop tower defense but the enemies are pizza rats",
+      "maze defense for my phone",
+      "build the longest path for goblins"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tap_plus_towers_core",
+    "name": "Active-tap defense",
+    "aliases": [
+      "Cut the Rope tap?",
+      "Kingdom Rush heroes",
+      "Clicker Heroes defense",
+      "Bloons pop",
+      "Fruit Ninja defense"
+    ],
+    "family": "tower_defense",
+    "subfamily": "active hybrid",
+    "summary": "Towers help, but your taps do the real damage on dangerous enemies; tapping must be fast to protect the core.",
+    "core_loop": "enemies advance → tap them to damage → towers help → gold from kills → buy towers",
+    "verbs": [
+      "tap",
+      "build"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "core",
+      "enemies",
+      "towers",
+      "tap damage"
+    ],
+    "rules": [
+      "tap damage scales with upgrades",
+      "some enemies only die to taps",
+      "towers handle swarms"
+    ],
+    "win": "protect the core",
+    "lose": "core HP zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare tap speed",
+      "co-defend with Group"
+    ],
+    "content_needs": [
+      "enemy list",
+      "upgrade tree"
+    ],
+    "difficulty_levers": [
+      "tap damage",
+      "enemy mix"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "waves",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tap to defend a cake from ants",
+      "clicker defense with a dragon core",
+      "tap heroes defend a castle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "draw_the_defense_line",
+    "name": "Draw the defense",
+    "aliases": [
+      "Fieldrunners draw",
+      "Flight Control",
+      "Doodle Defense",
+      "Line Rider defense",
+      "Draw Defender"
+    ],
+    "family": "tower_defense",
+    "subfamily": "draw barriers",
+    "summary": "Draw barrier lines with ink that last a few seconds; enemies must go around, and drawn lines can funnel them into hazards.",
+    "core_loop": "draw a barrier line → enemies redirect → traps hit them → ink refills → next wave",
+    "verbs": [
+      "draw",
+      "funnel"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "field",
+      "ink bar",
+      "barriers",
+      "hazards",
+      "enemies"
+    ],
+    "rules": [
+      "lines vanish after a few seconds",
+      "ink is limited",
+      "enemies path around lines"
+    ],
+    "win": "no enemy reaches the goal",
+    "lose": "five leaks",
+    "scoring": "enemies stopped",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare leaks",
+      "share a clever funnel"
+    ],
+    "content_needs": [
+      "enemy waves",
+      "hazards",
+      "goals"
+    ],
+    "difficulty_levers": [
+      "ink amount",
+      "line life"
+    ],
+    "tools": [
+      "draw_gesture",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "draw lines to keep ants away from my picnic",
+      "ink barriers to protect a wizard tower",
+      "draw to funnel zombies into traps"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "merge_tower_upgrade",
+    "name": "Merge-tower defense",
+    "aliases": [
+      "Merge Tower",
+      "Merge Dragons towers",
+      "Random Dice",
+      "Bloons merge",
+      "Mergical"
+    ],
+    "family": "tower_defense",
+    "subfamily": "combine to upgrade",
+    "summary": "Spawn random towers on a small grid; merge two of the same level into one stronger tower while waves approach.",
+    "core_loop": "spawn tower → merge two same → tower levels up → wave attacks → repeat",
+    "verbs": [
+      "merge",
+      "place"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "grid slots",
+      "towers by level",
+      "spawn button",
+      "waves"
+    ],
+    "rules": [
+      "spawning costs rise",
+      "only same level merges",
+      "slots are limited"
+    ],
+    "win": "survive all waves",
+    "lose": "enemies break through",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare waves",
+      "co-op boss in a Group"
+    ],
+    "content_needs": [
+      "tower levels",
+      "enemy waves"
+    ],
+    "difficulty_levers": [
+      "slot count",
+      "spawn cost"
+    ],
+    "tools": [
+      "grid_board",
+      "combo",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "merge defense game with cats in a castle",
+      "random dice style merge towers",
+      "merge cannons to beat a boss"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "single_tower_branching",
+    "name": "One-tower upgrade tree",
+    "aliases": [
+      "Kingdom Rush heroes",
+      "Defense of the Ancients",
+      "Hero Defense",
+      "Tiny Tower upgrades",
+      "Realm Defense"
+    ],
+    "family": "tower_defense",
+    "subfamily": "deep upgrade",
+    "summary": "Defend with one big tower you keep upgrading down a branching tree; choices change how it fights.",
+    "core_loop": "wave attacks → earn gold → pick an upgrade branch → tower changes → next wave",
+    "verbs": [
+      "upgrade",
+      "commit"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "central tower",
+      "upgrade tree",
+      "waves",
+      "gold"
+    ],
+    "rules": [
+      "branches lock others out",
+      "upgrades are permanent",
+      "different enemies favor different branches"
+    ],
+    "win": "survive N waves",
+    "lose": "tower HP zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare branches",
+      "share a build"
+    ],
+    "content_needs": [
+      "upgrade tree",
+      "enemy types"
+    ],
+    "difficulty_levers": [
+      "branch effects",
+      "gold flow"
+    ],
+    "tools": [
+      "meters",
+      "waves",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "defend a lighthouse with one tower and choose upgrades",
+      "one big tower upgrade tree like a roguelike",
+      "defend the school with a single cannon"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "reverse_td_send_creeps",
+    "name": "Reverse tower defense",
+    "aliases": [
+      "Creeps (Bloons Reverse)",
+      "Cannon Fodder",
+      "Dungeon Keeper",
+      "Plants vs Zombies attack",
+      "Anti-Tower"
+    ],
+    "family": "tower_defense",
+    "subfamily": "attack mode",
+    "summary": "You send creeps down the path against defenses; choose the creep mix that gets the most through.",
+    "core_loop": "see towers → choose creep types → send wave → watch → spend earnings → repeat",
+    "verbs": [
+      "send",
+      "mix"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tower layout",
+      "creep shop",
+      "wave replay"
+    ],
+    "rules": [
+      "creeps differ in speed, armor and range",
+      "towers have strengths",
+      "a gold budget per wave"
+    ],
+    "win": "get N creeps through",
+    "lose": "all waves wiped",
+    "scoring": "creeps through",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's tower layout",
+      "design a layout for friends"
+    ],
+    "content_needs": [
+      "tower layouts",
+      "creep list"
+    ],
+    "difficulty_levers": [
+      "budget",
+      "layout strength"
+    ],
+    "tools": [
+      "choice_story",
+      "waves",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "send zombies against a pizza defender",
+      "reverse tower defense where i'm the monster",
+      "send ants through a picnic defense"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "slow_and_trap_defense",
+    "name": "Trap defense",
+    "aliases": [
+      "Dungeon Keeper traps",
+      "Orcs Must Die",
+      "Rock of Ages",
+      "Clash traps",
+      "Home Alone"
+    ],
+    "family": "tower_defense",
+    "subfamily": "traps and funnels",
+    "summary": "Place traps (spike, freeze, push) on tiles of the path instead of turrets; combos stall and then finish enemies.",
+    "core_loop": "place trap on path → enemies trigger it → trap recharges → combos",
+    "verbs": [
+      "place",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "path",
+      "traps",
+      "trap cooldowns",
+      "enemies"
+    ],
+    "rules": [
+      "each trap fires once then recharges",
+      "freezing sets up spikes",
+      "no ranged towers"
+    ],
+    "win": "survive the wave",
+    "lose": "enemies pass the exit",
+    "scoring": "enemies stopped",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share trap combos",
+      "daily gauntlet"
+    ],
+    "content_needs": [
+      "trap catalog",
+      "enemy waves"
+    ],
+    "difficulty_levers": [
+      "trap cooldown",
+      "enemy speed"
+    ],
+    "tools": [
+      "tap",
+      "waves",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "home alone traps against burglars",
+      "orcs must die style trap placement",
+      "set traps for goblins in my attic"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "balloon_pop_tower",
+    "name": "Armor-type popping",
+    "aliases": [
+      "Bloons TD",
+      "Cut the Rope pops",
+      "Pokémon pop",
+      "Zuma pop",
+      "Crossy defenders"
+    ],
+    "family": "tower_defense",
+    "subfamily": "damage types",
+    "summary": "Enemies come in layers with immunities (lead, camo, ice); you must match tower damage type to the layer.",
+    "core_loop": "wave arrives with immunities → buy matching tower → pop layer by layer → leaks cost lives",
+    "verbs": [
+      "match",
+      "buy"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "enemy layers",
+      "tower catalog",
+      "immunities",
+      "gold"
+    ],
+    "rules": [
+      "some enemies need certain damage types",
+      "upgrades unlock detection",
+      "fast enemies arrive in groups"
+    ],
+    "win": "pop everything",
+    "lose": "lives zero",
+    "scoring": "popped count",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare popped",
+      "co-op map"
+    ],
+    "content_needs": [
+      "immunity table",
+      "wave composition"
+    ],
+    "difficulty_levers": [
+      "layer depth",
+      "wave speed"
+    ],
+    "tools": [
+      "waves",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "bloons td but the balloons have armor",
+      "match the tower to the balloon layer",
+      "pop balloons with different darts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "circular_core_defense",
+    "name": "360-degree core defense",
+    "aliases": [
+      "Vampire Survivors",
+      "Mindustry",
+      "Bad North",
+      "Dome Keeper",
+      "Hero Siege"
+    ],
+    "family": "tower_defense",
+    "subfamily": "rotate and aim",
+    "summary": "Defend a central core with rotating turret arcs against enemies from all directions.",
+    "core_loop": "rotate turret → fire arcs → enemies hit from the edge → upgrade → boss",
+    "verbs": [
+      "aim",
+      "rotate"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "core",
+      "turret",
+      "enemies from edges",
+      "upgrades"
+    ],
+    "rules": [
+      "firing arc is limited",
+      "enemies come from random edges",
+      "upgrades change arc and rate"
+    ],
+    "win": "survive N waves",
+    "lose": "core HP zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare waves",
+      "ghost run"
+    ],
+    "content_needs": [
+      "enemy waves",
+      "upgrade list"
+    ],
+    "difficulty_levers": [
+      "arc width",
+      "enemy speed"
+    ],
+    "tools": [
+      "player_drag",
+      "waves",
+      "lives",
+      "score",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dome keeper but cute",
+      "defend a core from all sides with a rotating cannon",
+      "360 defense game with dragons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "gem_td_keep_one",
+    "name": "Draft-and-keep defense",
+    "aliases": [
+      "Gem TD",
+      "Legion TD",
+      "Bloons draft",
+      "Random Dice",
+      "Hearthstone draft"
+    ],
+    "family": "tower_defense",
+    "subfamily": "random picks",
+    "summary": "Each round place five random towers; keep only one and turn the rest into rocks that shape the maze.",
+    "core_loop": "place five random towers → choose one to keep → others become walls → wave runs",
+    "verbs": [
+      "place",
+      "keep"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid",
+      "random towers",
+      "keep selection",
+      "waves"
+    ],
+    "rules": [
+      "quality of towers improves with combos",
+      "discarded ones still act as walls",
+      "board fills over rounds"
+    ],
+    "win": "survive all waves",
+    "lose": "lives zero",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare keeps on same seed",
+      "share best combo"
+    ],
+    "content_needs": [
+      "tower pool",
+      "combination rules"
+    ],
+    "difficulty_levers": [
+      "board size",
+      "rolls"
+    ],
+    "tools": [
+      "grid_board",
+      "waves",
+      "lives",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "gem td with cats and wizards",
+      "keep one of five random towers each round",
+      "roguelike tower draft"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "air_defense_flyers",
+    "name": "Air defense",
+    "aliases": [
+      "Galaga defenders",
+      "Missile Command",
+      "Fruit Ninja air",
+      "Skyforce",
+      "Anti-Air"
+    ],
+    "family": "tower_defense",
+    "subfamily": "anti-air",
+    "summary": "Flying enemies ignore the path and dive at the base; deploy anti-air towers with arcs and ammunition.",
+    "core_loop": "flyers appear → tap tower or place AA → intercept → ammo management → next wave",
+    "verbs": [
+      "aim",
+      "intercept"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "sky",
+      "AA towers",
+      "flyers",
+      "base HP",
+      "ammo"
+    ],
+    "rules": [
+      "flyers fly straight lines",
+      "AA has limited ammo",
+      "different flyers need different AA"
+    ],
+    "win": "base survives",
+    "lose": "base HP zero",
+    "scoring": "flyers downed",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "co-defend with a friend",
+      "compare kills"
+    ],
+    "content_needs": [
+      "flyer types",
+      "AA catalog"
+    ],
+    "difficulty_levers": [
+      "flyer speed",
+      "ammo"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "bloons style anti-air",
+      "missile command with pigeons",
+      "defend the school roof from drones"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "choke_point_knight",
+    "name": "Chokepoint line",
+    "aliases": [
+      "300",
+      "Kingdom Rush barracks",
+      "Helm's Deep",
+      "Warhammer chokepoint",
+      "Castle Crashers"
+    ],
+    "family": "tower_defense",
+    "subfamily": "hold position",
+    "summary": "Deploy defenders into a chokepoint; positioning melee, ranged and support units correctly holds back a huge horde.",
+    "core_loop": "place defenders at choke → horde arrives → melee holds → ranged hit → support heals",
+    "verbs": [
+      "place",
+      "hold"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "choke map",
+      "defender slots",
+      "horde",
+      "HP"
+    ],
+    "rules": [
+      "frontline blocks pathing",
+      "ranged need range lines",
+      "healers must survive"
+    ],
+    "win": "hold N waves",
+    "lose": "line breaks",
+    "scoring": "waves held",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share formation",
+      "co-op holding the line"
+    ],
+    "content_needs": [
+      "formations",
+      "horde types"
+    ],
+    "difficulty_levers": [
+      "slots",
+      "horde size"
+    ],
+    "tools": [
+      "grid_board",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "helm's deep style choke point for cats",
+      "hold the bridge against skeletons",
+      "300 chokepoint with hamsters"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ability_only_defense",
+    "name": "Ability-only defense",
+    "aliases": [
+      "Heroes of Newerth",
+      "Warcraft 3 hero",
+      "Angry Birds Epic",
+      "Clash Royale spells",
+      "Plants vs Zombies power-ups"
+    ],
+    "family": "tower_defense",
+    "subfamily": "cooldown skills",
+    "summary": "Defenders are fixed; your only inputs are limited-use abilities (freeze, nuke, heal) fired at the right moment.",
+    "core_loop": "watch wave → tap ability → ability cooldown → time the next one → survive",
+    "verbs": [
+      "time",
+      "save"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "auto defenders",
+      "ability buttons",
+      "cooldown rings",
+      "waves"
+    ],
+    "rules": [
+      "abilities have long cooldowns",
+      "wasted abilities are costly",
+      "bosses need specific abilities"
+    ],
+    "win": "survive all waves",
+    "lose": "base HP zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare ability timing",
+      "ghost play"
+    ],
+    "content_needs": [
+      "ability set",
+      "waves"
+    ],
+    "difficulty_levers": [
+      "cooldowns",
+      "boss traits"
+    ],
+    "tools": [
+      "tap",
+      "countdown",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "use only freeze and nuke to survive a zombie night",
+      "defense game where abilities are my only control",
+      "time your spells against a dragon horde"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "farm_crop_defense",
+    "name": "Farm crop defense",
+    "aliases": [
+      "Plants vs Zombies farm",
+      "Stardew scarecrow",
+      "Farm Heroes",
+      "Don't Starve crops",
+      "Kingdom Hearts farm"
+    ],
+    "family": "tower_defense",
+    "subfamily": "protect resources",
+    "summary": "Pests raid your crops; place scarecrows, fences and dogs, and harvest before they eat everything.",
+    "core_loop": "pests arrive from edges → place scarecrow or fence → harvest crops → pests eat unprotected",
+    "verbs": [
+      "place",
+      "harvest"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "farm grid",
+      "crops",
+      "pests",
+      "defense items"
+    ],
+    "rules": [
+      "crops ripen over time",
+      "pests target the ripest",
+      "items have limited range"
+    ],
+    "win": "harvest most of the crop",
+    "lose": "all crops eaten",
+    "scoring": "crops harvested",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare harvests",
+      "Group farm"
+    ],
+    "content_needs": [
+      "pest types",
+      "defense items"
+    ],
+    "difficulty_levers": [
+      "pests",
+      "crops"
+    ],
+    "tools": [
+      "grid_board",
+      "pickups",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "farm defense against hungry crows",
+      "plants vs zombies on a farm for my phone",
+      "scarecrows against raccoons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sandcastle_tide_defense",
+    "name": "Sandcastle tide",
+    "aliases": [
+      "Sandcastle Builder",
+      "Flood It",
+      "Kingdom Rush waves",
+      "Frostpunk walls",
+      "Castle Clash"
+    ],
+    "family": "tower_defense",
+    "subfamily": "rising threat",
+    "summary": "Build sand walls to hold back incoming waves that erode and wash away; reinforce the weakest section.",
+    "core_loop": "tide rises → wall HP drops → tap to rebuild or reinforce → keep the castle dry",
+    "verbs": [
+      "repair",
+      "prioritize"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "beach",
+      "castle",
+      "wall segments",
+      "wave timers"
+    ],
+    "rules": [
+      "waves come on a visible schedule",
+      "repair costs sand",
+      "stronger walls need more time"
+    ],
+    "win": "survive N waves",
+    "lose": "castle destroyed",
+    "scoring": "waves survived",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare survival",
+      "Group seaside"
+    ],
+    "content_needs": [
+      "wave schedule",
+      "wall layouts"
+    ],
+    "difficulty_levers": [
+      "wave strength",
+      "sand supply"
+    ],
+    "tools": [
+      "meters",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "sandcastle defense versus the tide",
+      "build up walls against waves",
+      "defend the beach castle with my cat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spawner_demolition",
+    "name": "Spawner demolition",
+    "aliases": [
+      "Kingdom Rush spawners",
+      "Orcs Must Die",
+      "Warcraft rush",
+      "Dungeon Keeper",
+      "Tiny Defense"
+    ],
+    "family": "tower_defense",
+    "subfamily": "offense and defense",
+    "summary": "Defend while pushing out to destroy enemy spawn gates, since destroying them ends the waves early.",
+    "core_loop": "defend lane → spend gold to extend line → attack spawn gate → gate falls → waves end",
+    "verbs": [
+      "defend",
+      "push"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "lanes",
+      "towers",
+      "units",
+      "spawn gate"
+    ],
+    "rules": [
+      "gates are heavily defended",
+      "extending costs gold",
+      "destroying all gates wins"
+    ],
+    "win": "destroy all gates",
+    "lose": "base HP zero",
+    "scoring": "gates destroyed",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race to kill gates",
+      "co-op push"
+    ],
+    "content_needs": [
+      "gate layouts",
+      "enemy AI"
+    ],
+    "difficulty_levers": [
+      "gates",
+      "enemy strength"
+    ],
+    "tools": [
+      "grid_board",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tower defense where i have to destroy the spawn caves",
+      "defend and push forward against goblin gates",
+      "take out the dragon eggs while defending"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "shared_group_base_defense",
+    "name": "Group base defense",
+    "aliases": [
+      "Destiny strikes",
+      "Clash of Clans war base",
+      "Kingdom Rush co-op",
+      "Fortnite Save the World",
+      "Dungeon Defenders"
+    ],
+    "family": "tower_defense",
+    "subfamily": "shared base",
+    "summary": "A base shared by a Group is attacked in waves over the week; each member places one defender per day.",
+    "core_loop": "each member places a defender → wave attacks overnight → damage report → repair → repeat",
+    "verbs": [
+      "place",
+      "repair"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "shared base",
+      "defender slots",
+      "daily wave",
+      "damage report"
+    ],
+    "rules": [
+      "each member has one action per day",
+      "waves grow",
+      "base HP persists"
+    ],
+    "win": "base survives the week",
+    "lose": "base HP zero",
+    "scoring": "wave number reached",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "group_daily"
+    ],
+    "social_hooks": [
+      "the Group builds a base together",
+      "nightly attack report"
+    ],
+    "content_needs": [
+      "defender catalog",
+      "wave schedule"
+    ],
+    "difficulty_levers": [
+      "wave growth",
+      "slots"
+    ],
+    "tools": [
+      "shared_progress",
+      "daily_seed",
+      "waves",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "our group chat defends a castle",
+      "everyone places one defender a day",
+      "co-op tower defense with my class"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "armor_break_priority_target",
+    "name": "Priority targeting",
+    "aliases": [
+      "Clash of Clans heroes",
+      "Hades targeting",
+      "Arknights",
+      "Fire Emblem aggro",
+      "Overwatch focus"
+    ],
+    "family": "tower_defense",
+    "subfamily": "target switching",
+    "summary": "Towers fire at the front enemy by default; you tap to focus on shielded, healing or buffing enemies first.",
+    "core_loop": "enemies arrive in a mixed group → tap to focus the key enemy → kill it → rest becomes easy",
+    "verbs": [
+      "prioritize",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "enemy group",
+      "tower focus",
+      "key enemies"
+    ],
+    "rules": [
+      "healers heal others",
+      "shields absorb damage",
+      "focusing is tap-and-hold"
+    ],
+    "win": "survive all waves",
+    "lose": "lives zero",
+    "scoring": "waves cleared",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare focus decisions",
+      "ghost replays"
+    ],
+    "content_needs": [
+      "enemy roles",
+      "wave mixes"
+    ],
+    "difficulty_levers": [
+      "roles",
+      "group size"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "waves",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "arknights style focus fire for cats",
+      "kill the healer first game",
+      "priority target defense against skeletons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "timed_rhythm_towers",
+    "name": "Rhythm towers",
+    "aliases": [
+      "Crypt of the NecroDancer",
+      "BPM Bullets",
+      "Metal Hellsinger",
+      "Thumper",
+      "Rhythm Heaven towers"
+    ],
+    "family": "tower_defense",
+    "subfamily": "beat-timed",
+    "summary": "Towers fire only on the beat; you tap to time boosts, and enemies march in sync with the music.",
+    "core_loop": "enemies march on beat → tap on beat to boost towers → perfect beats chain → waves",
+    "verbs": [
+      "tap on beat"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "beat track",
+      "towers",
+      "enemies",
+      "combo"
+    ],
+    "rules": [
+      "towers boosted on perfect taps",
+      "missing the beat drops combo",
+      "enemy waves match song sections"
+    ],
+    "win": "survive the song",
+    "lose": "base HP zero",
+    "scoring": "combo and survival",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare combo",
+      "ghost run"
+    ],
+    "content_needs": [
+      "song structure",
+      "waves"
+    ],
+    "difficulty_levers": [
+      "BPM",
+      "tower count"
+    ],
+    "tools": [
+      "beat_target",
+      "combo",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "rhythm tower defense like necrodancer",
+      "towers that fire on the beat to a pop song",
+      "beat-synced defense against ghosts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hold_the_door_barricade",
+    "name": "Barricade the door",
+    "aliases": [
+      "Left 4 Dead safe room",
+      "Dead Rising",
+      "Hold the Door",
+      "Zombie Hunter",
+      "Night of the Living Dead"
+    ],
+    "family": "tower_defense",
+    "subfamily": "repair under pressure",
+    "summary": "Enemies bash at doors and windows; tap to nail boards back before each barricade breaks.",
+    "core_loop": "enemies hit a barricade → HP drops → tap to repair → boards run out → hold until dawn",
+    "verbs": [
+      "repair",
+      "prioritize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "doors and windows",
+      "barricade HP",
+      "board stock",
+      "enemies"
+    ],
+    "rules": [
+      "each opening has its own HP",
+      "repairs use boards",
+      "boards are limited and found over time"
+    ],
+    "win": "survive until dawn",
+    "lose": "all barricades fall",
+    "scoring": "time held",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare dawn times",
+      "co-op barricading"
+    ],
+    "content_needs": [
+      "enemy patterns",
+      "opening layout"
+    ],
+    "difficulty_levers": [
+      "openings",
+      "bash rate"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "pickups",
+      "lives",
+      "countdown",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hold the door against zombies in my school",
+      "barricade the windows against a monster night",
+      "left 4 dead safe room on my phone"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hero_and_minions_defense",
+    "name": "Hero-led defense",
+    "aliases": [
+      "Kingdom Rush Heroes",
+      "Warcraft 3 defense",
+      "Dota auto",
+      "Hero Wars",
+      "Clash of Heroes"
+    ],
+    "family": "tower_defense",
+    "subfamily": "move the hero",
+    "summary": "One controllable hero walks the field to fight and rally spawned minions; positioning the hero decides which front holds.",
+    "core_loop": "tap to move hero → hero fights → rally point for minions → hero abilities → next wave",
+    "verbs": [
+      "move",
+      "rally"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "hero",
+      "minion barracks",
+      "fronts",
+      "abilities"
+    ],
+    "rules": [
+      "hero fights better near allies",
+      "minions respawn at the barracks",
+      "two fronts compete for attention"
+    ],
+    "win": "survive all waves",
+    "lose": "base HP zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare waves",
+      "hero builds"
+    ],
+    "content_needs": [
+      "hero abilities",
+      "enemy fronts"
+    ],
+    "difficulty_levers": [
+      "fronts",
+      "enemy strength"
+    ],
+    "tools": [
+      "player_drag",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "kingdom rush heroes with a cat paladin",
+      "defend with one hero and barracks",
+      "hero tower defense in a haunted castle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "aim_cannon_fortress",
+    "name": "Angle-and-power cannon",
+    "aliases": [
+      "Angry Birds",
+      "Worms",
+      "Bowmasters",
+      "Warlords",
+      "Pocket Tanks"
+    ],
+    "family": "tower_defense",
+    "subfamily": "ballistic defense",
+    "summary": "Aim a fortress cannon by angle and power at advancing enemies; arcs and wind decide hits.",
+    "core_loop": "drag to set angle and power → release → shot arcs → hit or miss → enemies advance",
+    "verbs": [
+      "aim",
+      "fire"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "cannon",
+      "aim arc",
+      "enemies",
+      "wind",
+      "base"
+    ],
+    "rules": [
+      "shots follow gravity arcs",
+      "wind pushes projectiles",
+      "enemies approach at different speeds"
+    ],
+    "win": "destroy all enemies",
+    "lose": "base HP zero",
+    "scoring": "enemies defeated",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare scores",
+      "pass the cannon"
+    ],
+    "content_needs": [
+      "enemy waves",
+      "wind patterns"
+    ],
+    "difficulty_levers": [
+      "enemy speed",
+      "wind strength"
+    ],
+    "tools": [
+      "drag",
+      "gravity_jump",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "angry birds style cannon defense of a pizza fortress",
+      "aim the cannon to stop viking boats",
+      "artillery defense against dragons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dome_shield_deflect",
+    "name": "Shield deflection",
+    "aliases": [
+      "Breakout dome",
+      "Pong defender",
+      "Missile Command",
+      "Dome Defender",
+      "Space Invaders shield"
+    ],
+    "family": "tower_defense",
+    "subfamily": "rotate shield",
+    "summary": "Rotate a shield arc around a core to deflect incoming projectiles; some bounce back to hit enemies.",
+    "core_loop": "rotate shield → projectile hits shield → deflects → bounces damage enemy → survive",
+    "verbs": [
+      "rotate",
+      "time"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "core",
+      "shield arc",
+      "projectiles",
+      "enemies"
+    ],
+    "rules": [
+      "shield blocks only its arc",
+      "deflected shots can hit enemies",
+      "larger waves fire from multiple sides"
+    ],
+    "win": "survive all rounds",
+    "lose": "core HP zero",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare rounds",
+      "ghost run"
+    ],
+    "content_needs": [
+      "projectile patterns",
+      "enemy shooters"
+    ],
+    "difficulty_levers": [
+      "shooters",
+      "shot speed"
+    ],
+    "tools": [
+      "player_drag",
+      "spawn_wave",
+      "lives",
+      "score",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dome shield deflect lasers from aliens",
+      "rotating shield game",
+      "defend a core with a paddle shield"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "power_grid_turrets",
+    "name": "Power-grid turrets",
+    "aliases": [
+      "Mindustry",
+      "Factorio defense",
+      "Oxygen Not Included",
+      "They Are Billions",
+      "Frostpunk generators"
+    ],
+    "family": "tower_defense",
+    "subfamily": "network energy",
+    "summary": "Turrets need power; place generators and cables to keep turrets running while enemies approach.",
+    "core_loop": "place generator → connect cables → turrets draw power → enemies attack lines → reroute",
+    "verbs": [
+      "connect",
+      "balance"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "grid",
+      "generators",
+      "turrets",
+      "cables",
+      "power bar"
+    ],
+    "rules": [
+      "turrets stop if power drops",
+      "enemies target generators",
+      "cables are fragile"
+    ],
+    "win": "survive all waves",
+    "lose": "core destroyed",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare layouts",
+      "shared build"
+    ],
+    "content_needs": [
+      "tower/generator catalog",
+      "waves"
+    ],
+    "difficulty_levers": [
+      "power",
+      "enemy aggression"
+    ],
+    "tools": [
+      "grid_board",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "mindustry for phone",
+      "keep your lasers powered against goblins",
+      "power grid defense with hamster engineers"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "conversion_defense_tame",
+    "name": "Convert-and-defend",
+    "aliases": [
+      "Pikmin",
+      "Plants vs Zombies charm",
+      "Monster Sanctuary",
+      "Pocket Tower",
+      "Overlord"
+    ],
+    "family": "tower_defense",
+    "subfamily": "turn foes into defenders",
+    "summary": "Defeated enemies can be tamed into your defenders when you use a charm; build an army from the wave's survivors.",
+    "core_loop": "enemy weakened → tap charm → it joins defense → next wave with new allies",
+    "verbs": [
+      "charm",
+      "build"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "charm button",
+      "allies",
+      "enemies",
+      "HP"
+    ],
+    "rules": [
+      "only weakened enemies can be charmed",
+      "allies keep their abilities",
+      "charmed allies get tired"
+    ],
+    "win": "survive all waves",
+    "lose": "base HP zero",
+    "scoring": "allies tamed",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share a favorite ally",
+      "co-op taming"
+    ],
+    "content_needs": [
+      "enemy list with charm ratings"
+    ],
+    "difficulty_levers": [
+      "charm limit",
+      "ally strength"
+    ],
+    "tools": [
+      "tap",
+      "waves",
+      "pickups",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "pikmin tower defense",
+      "tame the zombies to defend my house",
+      "charm monsters and let them fight for me"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "split_swarm_defense",
+    "name": "Splitting swarm",
+    "aliases": [
+      "Bloons splitters",
+      "Slime Rancher",
+      "Cell to Singularity",
+      "Slither defense",
+      "Splitting Slimes"
+    ],
+    "family": "tower_defense",
+    "subfamily": "area control",
+    "summary": "Enemies split into smaller ones when hit; choose between area damage towers and focused ones to avoid being swamped.",
+    "core_loop": "big slimes advance → hit splits them → area damage clears splits → spacing matters",
+    "verbs": [
+      "choose tower",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "path",
+      "slimes of sizes",
+      "tower choices"
+    ],
+    "rules": [
+      "each hit splits an enemy into two smaller ones",
+      "area towers kill small fry",
+      "focus towers kill big ones"
+    ],
+    "win": "survive all waves",
+    "lose": "lives hit zero",
+    "scoring": "slimes cleared",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare totals",
+      "co-op"
+    ],
+    "content_needs": [
+      "slime sizes",
+      "waves"
+    ],
+    "difficulty_levers": [
+      "split count",
+      "speed"
+    ],
+    "tools": [
+      "waves",
+      "lives",
+      "combo",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "slime defense where hits split them",
+      "tower defense with splitting enemies",
+      "clear slimes before they swarm"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "card_hand_tower_draw",
+    "name": "Tower cards",
+    "aliases": [
+      "Slay the Spire towers",
+      "Hearthstone deck",
+      "Monster Train",
+      "Clash Royale",
+      "Star Realms"
+    ],
+    "family": "tower_defense",
+    "subfamily": "draw to build",
+    "summary": "Each turn draw a hand of tower cards; place the cards you can afford, knowing the deck cycles.",
+    "core_loop": "draw hand → pick tower cards → place → wave → discard cycles",
+    "verbs": [
+      "draw",
+      "place"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "hand",
+      "deck",
+      "board",
+      "waves"
+    ],
+    "rules": [
+      "hand of 4 each turn",
+      "unspent cards discard",
+      "strong cards are scarce"
+    ],
+    "win": "survive waves",
+    "lose": "lives zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare decks",
+      "daily deck"
+    ],
+    "content_needs": [
+      "tower card pool",
+      "enemy waves"
+    ],
+    "difficulty_levers": [
+      "hand size",
+      "card pool"
+    ],
+    "tools": [
+      "choice_story",
+      "waves",
+      "lives",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "monster train style tower cards for a school",
+      "deck of towers that cycles",
+      "tower defense card game with cats"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "slot_swap_reposition_td",
+    "name": "Reposition defense",
+    "aliases": [
+      "Hoplite",
+      "Chess defense",
+      "Tetris towers",
+      "Mini Metro defense",
+      "Auto Chess"
+    ],
+    "family": "tower_defense",
+    "subfamily": "move towers",
+    "summary": "Few tower slots exist; you can sell and reposition towers between waves, trading refund loss for better coverage.",
+    "core_loop": "see next wave preview → rearrange towers → wave runs → earn gold",
+    "verbs": [
+      "rearrange",
+      "plan"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "grid",
+      "tower slots",
+      "wave preview",
+      "refund bar"
+    ],
+    "rules": [
+      "selling refunds 70 percent",
+      "preview shows next wave path",
+      "slots limited"
+    ],
+    "win": "survive waves",
+    "lose": "lives zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share layouts",
+      "daily layout"
+    ],
+    "content_needs": [
+      "tower catalog",
+      "preview data"
+    ],
+    "difficulty_levers": [
+      "slots",
+      "refund",
+      "wave size"
+    ],
+    "tools": [
+      "grid_board",
+      "drag",
+      "waves",
+      "lives",
+      "score",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tower defense where i get a preview of each wave and rearrange",
+      "chess defense with moving cats",
+      "reposition my archers between waves"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "stick_wall_archers",
+    "name": "Wall archers",
+    "aliases": [
+      "Stick War",
+      "Castle Defense",
+      "Kingdom Rush archers",
+      "Age of War",
+      "Siege Castles"
+    ],
+    "family": "tower_defense",
+    "subfamily": "upgrade the wall",
+    "summary": "Archers stand on a wall and loose arrows automatically; upgrade wall height, archers and special arrows while attackers climb.",
+    "core_loop": "gather coins → upgrade wall or archers → attackers hit the wall → wall HP drops → next wave",
+    "verbs": [
+      "upgrade",
+      "repair"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "wall",
+      "archers",
+      "attackers",
+      "coins"
+    ],
+    "rules": [
+      "wall HP absorbs attacks",
+      "tall walls delay climbers",
+      "special arrows have limited uses"
+    ],
+    "win": "survive N waves",
+    "lose": "wall breaks",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare waves",
+      "co-op wall"
+    ],
+    "content_needs": [
+      "attacker types",
+      "upgrade list"
+    ],
+    "difficulty_levers": [
+      "attacker mix",
+      "wall HP"
+    ],
+    "tools": [
+      "meters",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "castle wall defense with cat archers",
+      "stick war defense on my phone",
+      "keep the wall up against dragons"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "terrain_shaping_defense",
+    "name": "Terrain shaping",
+    "aliases": [
+      "Dungeon Keeper dig",
+      "Minecraft trenches",
+      "Little Big Planet floods",
+      "Flood Control",
+      "Lemmings"
+    ],
+    "family": "tower_defense",
+    "subfamily": "alter the field",
+    "summary": "Dig channels, raise walls or flood sections to reroute and slow enemies before they reach the base.",
+    "core_loop": "tap to dig or raise tiles → enemies re-path → floods delay them → wave passes",
+    "verbs": [
+      "dig",
+      "raise"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "terrain grid",
+      "tools",
+      "enemy paths",
+      "base"
+    ],
+    "rules": [
+      "water slows enemies",
+      "walls block",
+      "tools are limited per wave"
+    ],
+    "win": "survive all waves",
+    "lose": "base hit three times",
+    "scoring": "waves survived",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare solutions",
+      "daily terrain"
+    ],
+    "content_needs": [
+      "terrain maps",
+      "enemy paths"
+    ],
+    "difficulty_levers": [
+      "tools",
+      "enemy count"
+    ],
+    "tools": [
+      "grid_board",
+      "lives",
+      "waves",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "dig trenches to protect a sandcastle",
+      "flood the path to stop invaders",
+      "shape terrain to defend the village"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "day_night_tower_cycle",
+    "name": "Day-night defense",
+    "aliases": [
+      "Minecraft nights",
+      "Kingdom Two Crowns",
+      "They Are Billions",
+      "Terraria blood moon",
+      "Frostpunk"
+    ],
+    "family": "tower_defense",
+    "subfamily": "prepare then defend",
+    "summary": "By day, gather and build; at night, enemies attack. The cycle repeats with escalating nights.",
+    "core_loop": "day: gather and build → night: enemies attack → dawn: repair → repeat",
+    "verbs": [
+      "gather",
+      "build",
+      "defend"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "day map",
+      "resources",
+      "build menu",
+      "night defense"
+    ],
+    "rules": [
+      "daytime has a short timer",
+      "night strength escalates",
+      "buildings carry over"
+    ],
+    "win": "survive N nights",
+    "lose": "base falls",
+    "scoring": "nights survived",
+    "session_seconds": [
+      90,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare nights survived",
+      "Group nights"
+    ],
+    "content_needs": [
+      "build catalog",
+      "night strengths"
+    ],
+    "difficulty_levers": [
+      "day length",
+      "night scaling"
+    ],
+    "tools": [
+      "pickups",
+      "countdown",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "kingdom two crowns style day night defense for cats",
+      "build all day and survive the night",
+      "they are billions on a phone"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "bomb_barrel_chain_defense",
+    "name": "Chain-reaction barrels",
+    "aliases": [
+      "Worms barrels",
+      "Bomberman",
+      "Crayon Physics defense",
+      "Angry Birds explosions",
+      "Crush the Castle"
+    ],
+    "family": "tower_defense",
+    "subfamily": "triggered explosions",
+    "summary": "Place explosive barrels and traps along the path; one trigger sets a chain that clears the horde.",
+    "core_loop": "place barrels → enemies approach → tap to detonate at the right time → chain clears",
+    "verbs": [
+      "place",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "path",
+      "barrels",
+      "detonator",
+      "enemies"
+    ],
+    "rules": [
+      "explosions chain to adjacent barrels",
+      "barrel count is limited",
+      "detonate before they reach the base"
+    ],
+    "win": "clear the wave",
+    "lose": "enemies reach the base",
+    "scoring": "enemies cleared per barrel",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "share the biggest chain",
+      "compare clears"
+    ],
+    "content_needs": [
+      "barrel layouts",
+      "horde sizes"
+    ],
+    "difficulty_levers": [
+      "barrel count",
+      "blast radius"
+    ],
+    "tools": [
+      "tap_hotspots",
+      "combo",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "set barrels along the road and blow up the zombies",
+      "chain reaction defense with fireworks",
+      "crush the castle but defending"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "supply_ammo_defense",
+    "name": "Ammo logistics defense",
+    "aliases": [
+      "Mindustry ammo",
+      "Space Invaders",
+      "Missile Command",
+      "Frostpunk fuel",
+      "Tower defense ammo"
+    ],
+    "family": "tower_defense",
+    "subfamily": "refill under fire",
+    "summary": "Turrets run out of ammo; drag ammo crates to the right ones in time while enemies keep coming.",
+    "core_loop": "turrets fire and drain → drag crate to refill → prioritize busiest turrets",
+    "verbs": [
+      "resupply",
+      "prioritize"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "turrets with ammo bars",
+      "crates",
+      "enemies"
+    ],
+    "rules": [
+      "each turret has a different fire rate",
+      "crates restock slowly",
+      "empty turrets stop"
+    ],
+    "win": "survive all waves",
+    "lose": "base HP zero",
+    "scoring": "waves survived",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "compare waves",
+      "co-op resupply"
+    ],
+    "content_needs": [
+      "turret set",
+      "wave data"
+    ],
+    "difficulty_levers": [
+      "ammo capacity",
+      "restock rate"
+    ],
+    "tools": [
+      "drag",
+      "pickups",
+      "waves",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "feed cannons while goblins attack",
+      "ammo resupply defense in a space station",
+      "resupply the archers under attack"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "request": "slay the spire but i'm a baker",
+    "expect": [
+      "deck_dungeon_cards"
+    ]
+  },
+  {
+    "request": "pokemon but the monsters are vegetables",
+    "expect": [
+      "monster_catch_party"
+    ]
+  },
+  {
+    "request": "a pixel dungeon crawl set in a haunted mall",
+    "expect": [
+      "tile_dungeon_crawl"
+    ]
+  },
+  {
+    "request": "dicey dungeons with kitchen tools",
+    "expect": [
+      "dice_dungeon_assign"
+    ]
+  },
+  {
+    "request": "our whole group chat fights a giant dragon boss every day",
+    "expect": [
+      "cooperative_raid_boss"
+    ]
+  }
+]
