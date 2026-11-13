@@ -256,7 +256,7 @@ enum GroupsSearchCopy {
     static func personGames(_ firstName: String) -> String { "\(firstName)'s games" }
     static let yourGames = "Your games"
     static func makeWithMuse(_ query: String) -> String { "Make \u{201C}\(query)\u{201D} with Muse" }
-    static let makeWithMuseDetail = "No game like that yet. Describe it and Muse builds it in about a minute."
+    static let makeWithMuseDetail = "No game like that yet. Describe it and Muse builds it in a few minutes."
     static func noGames(_ query: String) -> String { "No games for \u{201C}\(query)\u{201D}" }
     static func playA11y(_ title: String) -> String { "Play \(title)" }
     static let openGameHint = "Opens the game's page"
