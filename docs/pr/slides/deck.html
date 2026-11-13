@@ -569,7 +569,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .cn { flex: 1; background: var(--soft); border-radius: 20px; padding: 14px 14px 16px; display: flex; flex-direction: column; } .cn.ok { background: #E9F7EE; } .cn.you { background: #EEE8FF; }
 .cn > b { font-size: 26px; font-weight: 900; margin: 8px 0 10px; } .ca { align-self: center; font-size: 34px; font-weight: 900; color: var(--muted); }
 .art { flex: 1; font-size: 17px; color: var(--sub); line-height: 1.3; }
-.art.bub { background: #fff; border-radius: 16px 16px 16px 4px; padding: 12px; font-size: 17px; color: var(--ink); }
+.art.cbub { background: #fff; border-radius: 16px 16px 16px 4px; padding: 12px; font-size: 17px; color: var(--ink); }
 .art.chips { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; } .art.chips i { font-style: normal; background: #fff; border: 2px solid #E4E6EB; border-radius: 999px; padding: 4px 10px; font-size: 16px; font-weight: 700; color: var(--ink); }
 .hit { font-family: ui-monospace, Menlo, monospace; font-size: 20px; font-weight: 800; background: #fff; border: 3px solid var(--blue); border-radius: 12px; padding: 10px; text-align: center; color: var(--blue); } .art small { display: block; font-size: 15px; margin-top: 8px; }
 .art.spec p { background: #fff; border-radius: 10px; padding: 7px 9px; margin-bottom: 6px; font-size: 15px; color: var(--ink); } .art.spec i { display: block; font-style: normal; font-size: 12px; font-weight: 900; text-transform: uppercase; color: var(--violet); letter-spacing: .04em; }
@@ -607,7 +607,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 /* draft 12b: roomier case + verifier slides */
 .case .cflow { margin-top: 30px; height: 600px; } .cn { padding: 18px 16px 18px; flex: 1 1 0; min-width: 0; }
 .art { display: block !important; font-size: 21px; } .art p { display: block !important; }
-.art.bub { font-size: 21px; } .art.chips { display: flex !important; } .art.chips i { font-size: 20px; padding: 6px 12px; }
+.art.cbub { font-size: 21px; } .art.chips { display: flex !important; } .art.chips i { font-size: 20px; padding: 6px 12px; }
 .hit { font-size: 24px; padding: 16px 8px; } .art small { font-size: 19px; }
 .art.spec p { font-size: 19px; padding: 10px 12px; margin-bottom: 10px; } .art.spec i { font-size: 14px; }
 .art.cshot img { height: 420px; }
@@ -629,6 +629,14 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .cn { overflow: hidden; } .art.cshot { width: 100%; } .art.cshot img { position: static !important; width: 100% !important; max-width: 100% !important; height: 400px !important; transform: none !important; box-shadow: none !important; margin: 0 !important; }
 .v2 h2 { font-size: 60px; } .v1 .vcases { margin-top: 44px; } .v1 .vcs p { font-size: 28px; }
 .art.cshot small { padding-left: 6px; }
+.asm { display:block; font-size: 19px; color: var(--muted); margin-top: 10px; }
+.art.proof p { font-size: 18px !important; line-height: 1.25; } .art.proof p b { display: block; font-size: 24px !important; } .art.proof p.bad b { color: #E41E3F; } .art.proof p.fixr b { color: var(--violet); } .art.proof .pub { font-size: 22px !important; }
+.art.cshot img { object-position: top center; }
+.art.cbub { flex: none !important; font-size: 26px !important; } .cn.you .art { flex: none; }
+.art.cshot small { padding-left: 10px !important; }
+.art.cbub { height: fit-content !important; min-height: 0 !important; align-self: stretch; }
+.ovf { font-size: 24px !important; max-width: none !important; width: 220px; overflow: visible; white-space: nowrap; display: inline-block; }
+.ovf { width: 170px !important; }
 </style>
 </head>
 <body>
@@ -847,7 +855,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
   <div class="hxbot">
     <div><b>Keeps your idea</b><span>Must-haves met: 94% → 98% once your words were quoted into the plan.</span></div>
     <div><b>Keeps the format</b><span>45 real builds: motion glitches 411 → 34. A game a bot wins instantly never ships.</span></div>
-    <div class="hxmm"><img src="img/muse-golden-smore.png"><img src="img/muse-biscuit-waiter.png"><p><b>Made by Muse, this way</b>Golden S'more and Biscuit's First Day: the Reel formats, now Curios.</p></div>
+    <div class="hxmm"><img src="img/muse-golden-smore.png"><img src="img/muse-mrbeast-trivia.png"><p><b>Made by Muse, this way</b>Golden S'more, a Reel format turned Curio, and Mr. Beast Brainrot Trivia, made from one line.</p></div>
   </div>
   <div class="foot"><span>Harness v2 on our server, 2026-11-13: 13 real-Muse builds both ways; checkers on 45 builds.</span><span class="pg"></span></div>
 </section>
@@ -855,19 +863,19 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 <section class="slide case">
   <div class="label">03 · The harness · one request, traced</div>
   <h2>One request, traced through the harness</h2>
-  <p class="csub">Biscuit's First Day as a Waiter: a real build on our server (job a564a35d), made by Muse.</p>
+  <p class="csub">Mr. Beast Brainrot Trivia: one of 32 real requests from our team, built by Muse in 143 seconds.</p>
   <div class="cflow">
-    <div class="cn you"><span class="mk cd">you</span><b>Ask</b><div class="art bub">"A golden retriever's disastrous first shift as a waiter. 5 beats, 'What happens next?', 4 answers, an 8-second countdown, a punchline, 'You called N of 5'."</div></div>
+    <div class="cn you"><span class="mk cd">you</span><b>Ask</b><div class="art cbub">"Brainrot trivia game with Mr. Beast as the host"</div><small class="asm">That's the whole request.</small></div>
     <div class="ca">→</div>
-    <div class="cn"><span class="mk mu">Muse Spark</span><b>Understand</b><div class="art chips"><i>story</i><i>5 beats</i><i>4 choices</i><i>8 s timer</i><i>dog · restaurant</i></div></div>
+    <div class="cn"><span class="mk mu">Muse Spark</span><b>Understand</b><div class="art chips"><i>trivia</i><i>tap</i><i>answer · recall</i><i>Mr. Beast</i><i>brainrot</i><i>solo</i></div></div>
     <div class="ca">→</div>
-    <div class="cn"><span class="mk cd">code</span><b>Ground</b><div class="art"><div class="hit">story_quiz</div><small>matched out of 1,305 game types</small></div></div>
+    <div class="cn"><span class="mk cd">code</span><b>Ground</b><div class="art"><div class="hit" style="font-size:19px">multiple_choice<br>_trivia</div><small>picked from 1,305 game types; tools: quiz, timer bar, rounds, question bank</small></div></div>
     <div class="ca">→</div>
-    <div class="cn"><span class="mk mu">Muse Wonder</span><b>Plan</b><div class="art spec"><p><i>score</i>ranked, highest first</p><p><i>friends</i>same seed, picks kept</p><p><i>must</i>5 beats · 4 answers · 8 s · "You called N of 5"</p></div></div>
+    <div class="cn"><span class="mk mu">Muse Wonder</span><b>Plan</b><div class="art spec"><p><i>world</i>a loud studio game show for a pile of fake cash</p><p><i>score</i>points + speed bonus, ranked</p><p><i>friends</i>same seed, same 10 of 30 questions</p></div></div>
     <div class="ca">→</div>
-    <div class="cn"><span class="mk mu">Wonder + Image</span><b>Compose</b><div class="art cshot"><img src="img/muse-biscuit-waiter.png"><small>2 text calls, 1 painted backdrop</small></div></div>
+    <div class="cn"><span class="mk mu">Muse Wonder</span><b>Compose</b><div class="art cshot"><img src="img/muse-mrbeast-trivia.png"><small>30 original questions, written in 76 s</small></div></div>
     <div class="ca">→</div>
-    <div class="cn ok"><span class="mk cd">code</span><b>Prove</b><div class="art proof"><p><b>5 / 5</b> bots reached an ending</p><p><b>2–5</b> answers right, 22–33 s</p><p><b>0</b> blocking findings</p><p class="pub">✓ published</p></div></div>
+    <div class="cn ok"><span class="mk cd">code</span><b>Prove</b><div class="art proof"><p class="bad"><b>✗ Draft 1</b>all 5 bots won in 9–17 s: "can't be lost"</p><p class="fixr"><b>↻ Muse repairs</b>"last one to answer loses the cash", 3 strikes</p><p><b>✓ Draft 2</b>2 lost, 3 won · 320–1,390 points</p><p class="pub">6 / 6 score checks</p></div></div>
   </div>
   <div class="ccase2"><b>A second case: a game we'd never seen.</b> "Krillion-like, but Greek mythology" matched <i>rare_answer_daily</i> with typed answers, fuzzy matching and tiered points. For a Harry Potter version, the harness read 3 Wikipedia pages and 400 candidates, and kept a 52-answer tiered bank.</div>
 </section>
@@ -891,7 +899,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
   </div>
   <div class="vcases">
     <div class="vcs bad"><em>Case · blocked</em><p><b>A speed-reading game, built 3 times on our server, blocked 3 times.</b> A bot could win instantly, so there was nothing to get better at. It never reached the feed.</p></div>
-    <div class="vcs good"><em>Case · shipped</em><p><b>Biscuit's First Day: all 5 bots reached an ending.</b> The story profile requires every run to finish, whatever the picks.</p></div>
+    <div class="vcs good"><em>Case · fixed, then shipped</em><p><b>Mr. Beast Brainrot Trivia: every bot won the first draft</b> in 9–17 s, so it was blocked as "can't be lost". Muse added stakes and 3 strikes; in draft 2, 2 bots lost.</p></div>
   </div>
 </section>
 
@@ -910,7 +918,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
       <div class="vck"><b>No mashing to win.</b> A bot that repeats one input 10 times a second can't clearly beat a regular player.</div>
       <div class="vck"><b>No impossible scores.</b> Every run is checked against the fastest a person could really score.</div>
       <div class="vck"><b>Same inputs, same score.</b> Every bot run is replayed from its inputs; the server does the same for every real player before a score counts.</div>
-      <div class="vcs good"><em>Case · perceived difficulty</em><p><b>Biscuit's First Day:</b> the five bots called 2 to 5 of the 5 beats right, in 22 to 33 seconds. A spread like that means there's room to get better, and a reason to rematch.</p></div>
+      <div class="vcs good"><em>Case · perceived difficulty</em><p><b>Mr. Beast Brainrot Trivia:</b> pro 1,390 ≥ regular 1,200 ≥ new player 320; doing nothing scores 0, and mashing one answer tops out at 480. That spread is room to get better, and a reason to rematch.</p></div>
     </div>
   </div>
 </section>
