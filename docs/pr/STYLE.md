@@ -26,7 +26,7 @@ It goes on the last slide only (never slide 1), in the Devpost tagline field and
 
 ## Words
 
-- **Use:** Curio, make (a Curio), play, share to a Group, challenge, best of 5, weekly board, remix, your people.
+- **Use:** Curio, make (a Curio), play, share to a Group, challenge, best of 5, weekly board, remix, your friends, your Group, the people you play with. Never "your people".
 - **Avoid:** "Game" capitalized as a product noun, "user" (say "people"), "engagement" without saying what kind, "viral", "addictive", "AI-generated content" (say "made with Muse").
 - **Status words:** "in the app", "on the server, app next", "simulated". Never "live" for group play: it's async (same seed, each person in their own time).
 

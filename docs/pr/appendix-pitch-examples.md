@@ -166,7 +166,7 @@ Count: 17 logged Muse games (10 bench, 5 CLI samples, 2 in-app records), plus th
 |---|---|---|---|
 | Fog Words (New in SF Daily Curio) | "Guess today's San Francisco word in six tries." Ink look, 15 SF words with clues (DOLORES: "The park where Saturday's newcomers' picnic is"). One run a day | The daily ritual | VP-02, VP-06 |
 | Who's coming Saturday? (picnic icebreaker) | "Read a fact, pick the newcomer it belongs to. Quick picks score more." Paper look, 7 attendees, facts like "Has a cat named Biscuit" | Event icebreaker | VP-03 |
-| This or That: Picnic | "Pick your side, then see who's with you." Rounds: sourdough and cheese or fruit salad; tacos, ice cream, open mic or nap | Finding your people | VP-03 |
+| This or That: Picnic | "Pick your side, then see who's with you." Rounds: sourdough and cheese or fruit salad; tacos, ice cream, open mic or nap | Finding your friends | VP-03 |
 | Fog or Sun? | "Guess what most of New in SF picked." Rounds from opted-in polls: Ocean Beach or Dolores Park, best way up a hill, burrito order, sunset spot | Read the Group | VP-01, VP-02 |
 | Trivia Thursday: SF | "Pop the right answer before the bar runs out." Neon. Warms up Chloe's trivia team, which needs two more | A game that recruits people | VP-19 |
 | Hill Hopper and Hill Hopper: Twin Peaks | "Tap to float over the hills. Don't touch the fog." Level 1 paper; level 2 neon at night with wind and a peak-skim bonus | Chains | VP-23 |
@@ -186,7 +186,7 @@ Count: 17 logged Muse games (10 bench, 5 CLI samples, 2 in-app records), plus th
 | **(K)** New categories: choose-your-own-adventure, Learn (education), and guess what they say next. Not built. | Range beyond arcade | VP-09, VP-12, VP-37 | Slack, Nov 12 10:36, 10:42, 10:47 |
 | **Blends (K, new):** a game made from two people's play histories, with a bracket for several. Not built. | A new format made for two | VP-40 | Karthik, Nov 12 |
 | **(K)** Endless and finite games as a primitive: every game honors one length setting (endless, rounds, timed or lives), with a Customize panel in Studio. Bayan's authoring layer uses the same names. Not built. | Lots of customizability | VP-10, VP-16 | Slack, Nov 12 10:43, 11:49 |
-| Read the Room: give the answer most of your Group will give. Krillion inverted, scoped to a Group, AI writes the prompts. Share: "matched the Group on 5 of 7". Results unlock once everyone answers. Design. | How well you know your people | VP-02, VP-01 | Taxonomy canvas §9 part 8 |
+| Read the Room: give the answer most of your Group will give. Krillion inverted, scoped to a Group, AI writes the prompts. Share: "matched the Group on 5 of 7". Results unlock once everyone answers. Design. | How well you know your friends | VP-02, VP-01 | Taxonomy canvas §9 part 8 |
 | Daily Photo Course: a Flappy-style course built from a Group photo; beat friends' ghosts; share a ghost replay plus a challenge link. Design. | Group content as a level | VP-01, VP-14 | Taxonomy canvas §9 part 8 |
 | Group Week Word: guess the word that sums up your Group's week, with feedback on closeness in meaning; weekly; AI picks the word. Design. | A Group's week as a puzzle | VP-18 | Taxonomy canvas §9 part 8 |
 | All three worked examples need AI to make content for each Group. | AI is load-bearing | VP-34 | Taxonomy canvas §9 part 8 |

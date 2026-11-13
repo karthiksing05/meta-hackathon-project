@@ -81,7 +81,7 @@ The game is only as good as who you play it with, and only Facebook has that: **
 
 **Lead line (K):** People are brought closer together through friendly competition.
 
-**Product one-liner:** Tiny games your people make with Muse, inside Facebook.
+**Product one-liner:** Tiny games your friends make with Muse, inside Facebook.
 
 Alternates:
 
@@ -99,11 +99,11 @@ Alternates:
 >
 > Now press one button. About thirty seconds later, that sentence is a game. Nobody has ever played it, because a minute ago it didn't exist. Muse wrote the rules, built the world, sent bots through it to make sure it works, and painted its cover.
 >
-> Send it to your people. Priya beats your score before you've put your phone down. Theo remixes it so the fog is now lava. By tonight there are four versions and a rivalry.
+> Send it to your friends. Priya beats your score before you've put your phone down. Theo remixes it so the fog is now lava. By tonight there are four versions and a rivalry.
 >
-> Every Group wakes up to a new game every morning. Every Event gets its own game night. Every inside joke can become something your friends play. There's no catalog to run out of, because the catalog is everything you and your people can imagine.
+> Every Group wakes up to a new game every morning. Every Event gets its own game night. Every inside joke can become something your friends play. There's no catalog to run out of, because the catalog is everything you and your friends can imagine.
 >
-> Facebook already knows who your people are. Now it can give them something to play together: made from one sentence, any sentence, as many as you want.
+> Facebook already knows who your friends are. Now it can give them something to play together: made from one sentence, any sentence, as many as you want.
 
 *What's real in it, at `6b1cc85`.* "About thirty seconds" is true only for a ready-formula game: a median of 28.0 s over 10 real Muse runs, each bot-tested (D2, D5). A game made from scratch on the microgame engine took a median of 99 s in the harness baseline (D30), so for the cable car or the heist say "a minute or two". Challenge Me, group-chat play, quiz night and remixing are in the app, with synthetic friends whose runs are bots on the same seed; nothing crosses phones yet. "Every Group wakes up to a new game every morning" is the design: the in-app Daily is a hand-made seed, and making a Daily from posts runs only through the CLI or a debug launch. The sample sentences, the lava remix and "four versions by tonight" are illustrations, not data. On "any idea": Muse now writes new mechanics, and 9 of 10 test ideas (Wordle-style, Connections-style and others) fit the format, but none of those 9 has been built and played, and calm or puzzle games are blocked by a gate that expects a run to be losable (D32). Say it big and true: "if you can describe it in 2D, Muse can write it", then name the short list of engine gaps as what's next ([04-why-ai.md](04-why-ai.md#3-what-we-measured-and-how-much-to-trust-it)).
 

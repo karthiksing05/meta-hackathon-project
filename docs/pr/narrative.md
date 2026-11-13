@@ -6,7 +6,7 @@
 
 ## Story arc (Karthik, 2026-11-13, ~04:15 PST)
 
-**Thesis:** people don't grow close by watching the same thing. They grow close by doing something together, or against each other. Short-form taught a generation to watch alone; Muse Curios, a new feature in Facebook, turns short-form into something you play *with* your people, and Facebook is where your people are.
+**Thesis:** people don't grow close by watching the same thing. They grow close by doing something together, or against each other. Short-form taught a generation to watch alone; Muse Curios, a new feature in Facebook, turns short-form into something you play *with* your friends, and Facebook is where your friends are.
 
 **Visual motif:** blue = competing (boards, best of 5, challenges); violet = collaborating (making together, remixes, Group play). The brand gradient runs from competition into collaboration.
 
@@ -30,6 +30,11 @@ Interactive mini-experiences keep people in their apps, and the industry is movi
 *Open:* a cited stat for Instagram's interactive formats (polls, quizzes, stickers). Bayan's review doesn't have one.
 
 **Don't claim spillover.** The review finds games build a daily habit and retention, but not that they send people to the rest of the app (NYT news reading went 15.3% → 22.4% → 16% around a first NYT Games visit; Datos). We pitch coming back (point 8), not traffic. How *making* a game affects engagement is an open question in the research, and that's exactly our new part.
+
+**Reference pack (Karthik's lead session, 2026-11-13):**
+- NYT Games: 11.2B+ puzzles solved in 2025, up from ~4B in 2022 and 8B+ in 2023 [135][82]; 46 Wordle scores shared every second (2025 average) and the top Connections puzzle shared 3M times [135]; 10M+ daily players [136]; subscribers spend more time in Games than in the news app (YipitData, via AP [82]); a friends-only leaderboard (up to 100 friends, no global board) [137] and the first 2-player game, Crossplay [82]. Jonathan Knight: "We're not trying to get you in the app all day." [82]. Don't use "more than half of weekly users play more than one puzzle a day" (search summary only).
+- Three Reels [138]: A "Pause it perfectly" (@veefriends, 7.5 s, 4.2M views, one timed tap); B a "play along" quiz (@thefictionexpert, ~640K likes; don't describe its mechanics); C "At what speed will you break?" (@neravik.games, 137 s, 2.29M views, a speed-reading ramp). All three end with "tell me your score" in the comments. **Line:** "A Curio turns 'tell me your score' in the comments into a real, comparable Group score."
+- Story quiz: The Podium and Purr Earth are hand-made with the story-quiz fragment; never "made by Muse". Root Words is made by Muse.
 
 ## 2. Anyone can make one
 
