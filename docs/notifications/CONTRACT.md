@@ -3,7 +3,7 @@
 Backend implementation is handed to Max / Claude (for Max). Kevin's branch owns the iOS
 client, inbox, APNs registration and tap navigation only.
 
-Work branch: `codex/notifications`, based on `main` `6a619c5`.
+Work branch: `codex/notification`, based on `main` `6a619c5`.
 
 The server chooses recipients, stores read state, and queues push delivery. The phone displays
 server notifications and routes taps. It never manufactures notifications from local scores or

@@ -1,6 +1,6 @@
 # iOS notification delivery
 
-The client is implemented on `codex/notifications`. Max owns all backend work; the request and
+The client is implemented on `codex/notification`. Max owns all backend work; the request and
 API shapes are in [CONTRACT.md](CONTRACT.md) and the Slack handoff:
 https://karthiks-agents.slack.com/archives/C0CH1G45BJQ/p1794556621874659
 
