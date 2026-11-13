@@ -24,6 +24,11 @@ type Config struct {
 	CORSOrigins  []string
 	MaxUploadMB  int64
 	MaxUnpackMB  int64
+
+	// Game generation. The API never talks to Muse: it calls the generator service, which holds the key.
+	GeneratorURL       string // empty turns generation off
+	GenerateConcurrent int    // jobs running at once, across everyone
+	GeneratePerHour    int    // jobs one person may start per hour
 }
 
 func Load() (*Config, error) {
@@ -39,6 +44,10 @@ func Load() (*Config, error) {
 		GamesBaseURL: strings.TrimRight(env("GAMES_BASE_URL", "http://localhost:8081"), "/"),
 		MaxUploadMB:  envInt("MAX_UPLOAD_MB", 50),
 		MaxUnpackMB:  envInt("MAX_UNPACKED_MB", 200),
+
+		GeneratorURL:       strings.TrimRight(os.Getenv("GENERATOR_URL"), "/"),
+		GenerateConcurrent: int(envInt("GENERATE_CONCURRENT", 2)),
+		GeneratePerHour:    int(envInt("GENERATE_PER_HOUR", 6)),
 	}
 	for _, o := range strings.Split(os.Getenv("CORS_ORIGINS"), ",") {
 		if o = strings.TrimSpace(o); o != "" {

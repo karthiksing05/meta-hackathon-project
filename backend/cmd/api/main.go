@@ -57,7 +57,13 @@ func run(log *slog.Logger) error {
 		Store: st, Packages: pk, Signer: auth.NewSigner(cfg.JWTSecret, cfg.AccessTTL),
 		RefreshTTL: cfg.RefreshTTL, GamesBaseURL: cfg.GamesBaseURL, CORSOrigins: cfg.CORSOrigins,
 		MaxUploadMB: cfg.MaxUploadMB, Log: log,
+		GeneratorURL: cfg.GeneratorURL, GenerateConcurrent: cfg.GenerateConcurrent, GeneratePerHour: cfg.GeneratePerHour,
 	})
+	if n, err := st.FailStaleJobs(ctx, "The server restarted while this game was being made. Please try again."); err != nil {
+		log.Warn("could not clear stale generation jobs", "err", err)
+	} else if n > 0 {
+		log.Info("marked generation jobs left by a restart as failed", "count", n)
+	}
 	hs := &http.Server{
 		Addr: cfg.Addr, Handler: srv.Handler(),
 		ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 2 * time.Minute, WriteTimeout: 2 * time.Minute,

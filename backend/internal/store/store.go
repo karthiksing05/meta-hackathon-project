@@ -44,6 +44,16 @@ type Store interface {
 	// AddEvents stores events and returns how many were new. Events whose id was already stored
 	// (a phone resending a batch) are skipped and do not count twice.
 	AddEvents(ctx context.Context, evs []model.Event) (int, error)
+	// Game generation jobs.
+	InsertJob(ctx context.Context, j *model.Job) error
+	JobByID(ctx context.Context, id string) (*model.Job, error)
+	JobsByOwner(ctx context.Context, ownerID string, limit int) ([]model.Job, error) // newest first
+	CountJobsSince(ctx context.Context, ownerID string, since time.Time) (int, error)
+	HasActiveJob(ctx context.Context, ownerID string) (bool, error)
+	AppendJobEvent(ctx context.Context, id string, e model.JobEvent) error
+	SetJobStatus(ctx context.Context, id, status string, u model.JobUpdate) error
+	FailStaleJobs(ctx context.Context, reason string) (int, error) // queued or running jobs left by a restart
+
 	GameStats(ctx context.Context, since time.Time) ([]model.GameStats, error)
 	Interleave(ctx context.Context, since time.Time) (model.Interleave, error)
 	ExportEvents(ctx context.Context, since time.Time, limit int) ([]model.Event, error) // oldest first

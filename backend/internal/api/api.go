@@ -30,18 +30,31 @@ type Options struct {
 	CORSOrigins  []string
 	MaxUploadMB  int64
 	Log          *slog.Logger
+
+	// Game generation: GeneratorURL is the internal generator service (empty turns it off).
+	GeneratorURL       string
+	GenerateConcurrent int
+	GeneratePerHour    int
 }
 
 type Server struct {
 	Options
 	authLimiter *limiter
+	genSem      chan struct{} // one slot per job running at once
+	genHealth   genHealthCache
 }
 
 func New(o Options) *Server {
 	if o.Log == nil {
 		o.Log = slog.Default()
 	}
-	return &Server{Options: o, authLimiter: newLimiter(10, time.Minute)}
+	if o.GenerateConcurrent < 1 {
+		o.GenerateConcurrent = 2
+	}
+	if o.GeneratePerHour < 1 {
+		o.GeneratePerHour = 6
+	}
+	return &Server{Options: o, authLimiter: newLimiter(10, time.Minute), genSem: make(chan struct{}, o.GenerateConcurrent)}
 }
 
 func (s *Server) Handler() http.Handler {
@@ -75,6 +88,14 @@ func (s *Server) Handler() http.Handler {
 			r.With(s.requireAuth).Delete("/like", s.like(false))
 			r.Get("/leaderboard", s.leaderboard)
 			r.With(s.requireAuth).Post("/scores", s.submitScore)
+		})
+
+		// Making a game: the app sends a request, the backend runs Muse, checks, playtests and stores it.
+		r.Route("/generate", func(r chi.Router) {
+			r.Use(s.requireAuth)
+			r.Get("/", s.listJobs)
+			r.Post("/", s.createJob)
+			r.Get("/{id}", s.getJob)
 		})
 
 		r.Route("/creations", func(r chi.Router) {

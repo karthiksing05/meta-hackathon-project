@@ -34,3 +34,28 @@ jobs:
         run: test -z "$(gofmt -l .)"
       - run: go vet ./...
       - run: go test -race ./...
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generator self-test (a scripted Muse, no key)
+        run: node generator/selftest.mjs
+
+  images:   # the three images must build (nothing is pushed); the deploy workflow builds and pushes them
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [api, games, generator]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          target: ${{ matrix.target }}
+          push: false
+          load: true
+          tags: check-${{ matrix.target }}
+      - name: Generator image runs its self-test
+        if: matrix.target == 'generator'
+        run: docker run --rm check-generator node selftest.mjs

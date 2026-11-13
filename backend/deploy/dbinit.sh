@@ -7,5 +7,5 @@ set -euo pipefail
 APP=/srv/game-platform/app
 PREFIX=$(tr -d '[:space:]' < /etc/game-platform/registry)
 TAG=${1:-$(cat /srv/game-platform/state/current_tag)}
-export API_IMAGE="$PREFIX/bubbles-api:$TAG" GAMES_IMAGE="$PREFIX/bubbles-games:$TAG"
+export API_IMAGE="$PREFIX/bubbles-api:$TAG" GAMES_IMAGE="$PREFIX/bubbles-games:$TAG" GENERATOR_IMAGE="$PREFIX/bubbles-generator:$TAG"
 docker compose -f "$APP/docker-compose.prod.yml" run --rm --no-deps --entrypoint /app/dbinit api

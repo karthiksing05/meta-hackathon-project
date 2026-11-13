@@ -1,0 +1,12 @@
+{
+  "name": "game-generator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Makes a game from a request: Muse writes it, the engine checks it, bots playtest it. Internal service; the Go API is its only client.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node selftest.mjs"
+  }
+}

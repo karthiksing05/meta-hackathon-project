@@ -1,8 +1,10 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"math"
 	"net/http"
 	"regexp"
@@ -251,16 +253,19 @@ type manifestMeta struct {
 	} `json:"lineage"`
 }
 
-func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
-	if ct := r.Header.Get("Content-Type"); !strings.HasPrefix(ct, "application/zip") {
-		writeErr(w, 415, "send the game package as application/zip")
-		return
-	}
-	u := userFrom(r)
-	r.Body = http.MaxBytesReader(w, r.Body, s.MaxUploadMB<<20+1)
+// publishError is a failed publish: Status and Msg are safe to show; Err (when set) is an internal failure.
+type publishError struct {
+	Status int
+	Msg    string
+	Err    error
+}
+
+// publishPackage unpacks and validates a game package (a zip with manifest.json), stores it under a
+// new server-generated id and records the game. Uploads and generated games both go through it.
+func (s *Server) publishPackage(ctx context.Context, u *model.User, body io.Reader) (*model.Game, *publishError) {
 	id := auth.NewID(12) // server-generated; clients never choose ids or paths
 	var m manifestMeta
-	pkg, err := s.Packages.Publish(r.Context(), id, r.Body, func(p *pkgstore.Package) error {
+	pkg, err := s.Packages.Publish(ctx, id, body, func(p *pkgstore.Package) error {
 		if json.Unmarshal(p.Manifest, &m) != nil {
 			return errors.New("manifest.json has the wrong shape")
 		}
@@ -269,7 +274,7 @@ func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
 			return errors.New("manifest needs a title (max 80 characters) and a one_line_rule (max 300)")
 		}
 		if slug := strings.ToLower(strings.TrimSpace(m.ID)); slugRE.MatchString(slug) {
-			if _, err := s.Store.GameBySlug(r.Context(), slug); err == nil {
+			if _, err := s.Store.GameBySlug(ctx, slug); err == nil {
 				return errors.New("a game with this manifest id already exists; use a different id")
 			}
 		}
@@ -280,13 +285,12 @@ func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
 		var tooBig *http.MaxBytesError
 		switch {
 		case errors.As(err, &inv):
-			writeErr(w, 422, inv.Msg)
+			return nil, &publishError{Status: 422, Msg: inv.Msg}
 		case errors.As(err, &tooBig):
-			writeErr(w, 413, "upload too large")
+			return nil, &publishError{Status: 413, Msg: "upload too large"}
 		default:
-			s.serverErr(w, r, err)
+			return nil, &publishError{Status: 500, Msg: "internal error", Err: err}
 		}
-		return
 	}
 	g := &model.Game{
 		ID: id, OwnerID: u.ID, OwnerUsername: u.Username,
@@ -302,12 +306,33 @@ func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
 	}
 	g.GroupID, g.EventID = scopeIDs(&m)
 	if rm := m.Lineage.RemixOf; rm != "" {
-		if _, err := s.Store.GameByID(r.Context(), rm); err == nil {
+		if _, err := s.Store.GameByID(ctx, rm); err == nil {
 			g.RemixOf = rm
 		}
 	}
-	if err := s.Store.InsertGame(r.Context(), g); err != nil {
-		s.serverErr(w, r, err)
+	if err := s.Store.InsertGame(ctx, g); err != nil {
+		if errors.Is(err, store.ErrConflict) {
+			return nil, &publishError{Status: 409, Msg: "a game with this id already exists"}
+		}
+		return nil, &publishError{Status: 500, Msg: "internal error", Err: err}
+	}
+	return g, nil
+}
+
+func (s *Server) createCreation(w http.ResponseWriter, r *http.Request) {
+	if ct := r.Header.Get("Content-Type"); !strings.HasPrefix(ct, "application/zip") {
+		writeErr(w, 415, "send the game package as application/zip")
+		return
+	}
+	u := userFrom(r)
+	r.Body = http.MaxBytesReader(w, r.Body, s.MaxUploadMB<<20+1)
+	g, perr := s.publishPackage(r.Context(), u, r.Body)
+	if perr != nil {
+		if perr.Err != nil {
+			s.serverErr(w, r, perr.Err)
+		} else {
+			writeErr(w, perr.Status, perr.Msg)
+		}
 		return
 	}
 	v, _ := s.views(r, []model.Game{*g})

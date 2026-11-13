@@ -148,3 +148,44 @@ type Score struct {
 	Score     int64     `bson:"score" json:"score"`
 	UpdatedAt time.Time `bson:"updatedAt" json:"updatedAt"`
 }
+
+// Job statuses for game generation.
+const (
+	JobQueued  = "queued"
+	JobRunning = "running"
+	JobDone    = "done"
+	JobFailed  = "failed"
+)
+
+// JobEvent is one step of a generation job, as the generator reported it. Summary is a short
+// human-readable line for "Muse at work" screens; Detail holds the rest (issues, round, headline).
+type JobEvent struct {
+	Seq     int            `bson:"seq" json:"seq"`
+	Kind    string         `bson:"kind" json:"kind"`
+	Summary string         `bson:"summary" json:"summary"`
+	At      time.Time      `bson:"at" json:"at"`
+	Detail  map[string]any `bson:"detail,omitempty" json:"-"`
+}
+
+// Job is one request to make a game. The app creates it, then polls it.
+type Job struct {
+	ID         string         `bson:"_id"`
+	OwnerID    string         `bson:"ownerId"`
+	Request    string         `bson:"request"`
+	Brief      map[string]any `bson:"brief,omitempty"`
+	Status     string         `bson:"status"`
+	Events     []JobEvent     `bson:"events"`
+	GameID     string         `bson:"gameId,omitempty"`
+	Error      string         `bson:"error,omitempty"`
+	Stats      map[string]any `bson:"stats,omitempty"`
+	CreatedAt  time.Time      `bson:"createdAt"`
+	UpdatedAt  time.Time      `bson:"updatedAt"`
+	FinishedAt *time.Time     `bson:"finishedAt,omitempty"`
+}
+
+// JobUpdate is what finishing a job records.
+type JobUpdate struct {
+	GameID string
+	Error  string
+	Stats  map[string]any
+}

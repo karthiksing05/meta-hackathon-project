@@ -60,6 +60,12 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			{Keys: k("team", 1, "createdAt", 1), Options: options.Index().SetName("events_team").
 				SetPartialFilterExpression(bson.D{{Key: "team", Value: bson.D{{Key: "$exists", Value: true}}}})},
 		},
+		// generation jobs: a person's recent jobs and rate limits; removed after 30 days
+		cJobs: {
+			{Keys: k("ownerId", 1, "createdAt", -1), Options: options.Index().SetName("jobs_owner")},
+			{Keys: k("status", 1), Options: options.Index().SetName("jobs_status")},
+			{Keys: k("createdAt", 1), Options: options.Index().SetExpireAfterSeconds(30 * day).SetName("jobs_ttl")},
+		},
 		// leaderboards
 		cScores: {
 			{Keys: k("gameId", 1, "score", -1, "updatedAt", 1), Options: options.Index().SetName("leaderboard")},

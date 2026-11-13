@@ -4,6 +4,9 @@ Go + Chi API, a small static server for published game packages, MongoDB 8 for m
 Production runs on one Vultr server behind a Cloudflare Tunnel: the API is at https://api.ol4ol.com and the
 published games are at https://games.ol4ol.com. Setup steps: [docs/HACKATHON_DEPLOY.md](docs/HACKATHON_DEPLOY.md)
 (copy and paste) and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (the longer version).
+**The backend owns Muse and all data; the iOS app only makes API calls to it.** The app never talks to Muse, never
+holds the Muse key, and keeps no game data of its own. If the app needs something that isn't here, it asks Claude
+(for Max) to add it instead of building it into the app (see `CLAUDE.md`).
 **A push or merge to the `Prod` branch deploys to production automatically**, so only do that when the code is
 ready. This folder is self-contained; the iOS app does not call the API yet (the front end builds against a
 mock first).
@@ -46,6 +49,8 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/games/{id}` | optional | one game; `{id}` may also be the slug from its manifest |
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
 | `GET /v1/games/{id}/leaderboard`, `POST /v1/games/{id}/scores` | none / bearer | best score per user |
+| `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; see [Making games](#making-games-muse-lives-here) |
+| `GET /v1/generate/{id}`, `GET /v1/generate` | bearer | a job's status, steps and finished game; my recent jobs |
 | `POST /v1/creations` | bearer | upload a package zip (`Content-Type: application/zip`) |
 | `GET /v1/creations`, `GET /v1/creations/{id}`, `GET /v1/creations/{id}/source` | bearer | the caller's games; private editable source as a zip |
 
@@ -69,6 +74,35 @@ Publishing is validated and atomic: the upload is spooled to a private temp dir,
 symlink, hidden-file, extension, count and size (including zip-bomb) checks, then moved into place by a
 single rename. The id is server-generated (24 hex), is claimed exclusively so it can never be overwritten, and
 clients never supply paths.
+
+## Making games (Muse lives here)
+
+The app sends one request and the backend does the rest. Muse's key is only in the `generator` container
+(`/etc/game-platform/generator.env`); the API, the games server and the app never see it.
+
+```
+app -> POST /v1/generate {request, brief}  -> 202 {"jobId": "..."}
+app -> GET  /v1/generate/{jobId}  (poll every 1-2 s)
+        {"status": "queued|running|done|failed", "request": "...", "events": [...], "game": {...}, "error": "...", "stats": {...}}
+```
+
+- `brief` is the app's `BubbleBrief`: `intent`, `audience`, `mood: []`, `energy`, `competition`, optional `occasion`,
+  `content_sources`, `notes`. Missing fields get defaults; `intent` defaults to `request`. `request` is 1 to 2000 characters.
+- `events` are the steps so far, oldest first: `{seq, kind, summary, at, ...}`. `kind` is `drafting`, `expanding`, `repairing`
+  (`round`, `issues`), `playtesting` (`bots`), `playtested` (`passed`, `headline`, `blocking`), `done` (`title`) or `failed`
+  (`reason`). `summary` is a short sentence for "Muse at work" screens, so the app never words a step itself.
+- When `status` is `done`, `game` is the normal game object (`id`, `slug`, `title`, `formula: "microgame"`, `manifestUrl`, ...).
+  The manifest at `manifestUrl` is stored exactly as generated: `content.game_json` is byte for byte what passed the playtest.
+- `failed` carries a plain-language `error`. Errors on `POST`: 400 bad request, 401 signed out, 429 (one running job per person,
+  6 an hour; see `Retry-After`), 503 (generator down, or Muse not set up yet).
+- A job survives the app closing: poll it again later. After a server restart, unfinished jobs are marked failed.
+
+How it runs: the Go API stores the job and streams it through the internal `generator` service (Node, no published port beyond
+loopback), which does what the app's `MicrogameComposer` used to: Muse writes an authoring manifest (`api.meta.ai/v1`, model
+`muse-wonder-1.0`), the expander and engine check it, up to 3 repair rounds, five bots playtest it, then `wrap`. It runs the committed
+`microgame-studio.js` and `bubble-kit-microgame-engine.js` bundles from `backend/generator/vendor` (copied from `main`; refresh them
+when the engine or authoring layer changes). The API then publishes the result like any upload, so it appears in `/v1/feed`
+and under the owner's `/v1/creations`. Not built yet: revising a game, Muse-made covers, and the classic (non-microgame) formulas.
 
 ## Event log and recommender support
 

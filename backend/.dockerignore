@@ -1,7 +1,0 @@
-.env
-*.env
-.git
-data/
-deploy/
-docs/
-**/*_test.go

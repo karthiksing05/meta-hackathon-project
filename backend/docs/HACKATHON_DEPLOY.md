@@ -152,6 +152,20 @@ It runs the tests, builds and pushes the two images to GitHub's registry, copies
 starts `api` and `games`, waits for them to become healthy, and then checks the public URL. If a check fails
 it rolls back by itself.
 
+## 6b. Server: give the generator the Muse key
+
+Making games is done by the `generator` container, which is the only place the Muse key lives. Without the key
+everything else works and `POST /v1/generate` answers 503 "Muse is not set up on this server yet".
+
+```bash
+nano /etc/game-platform/generator.env     # one line: MUSE_API_KEY=<the key>; save and close
+chmod 600 /etc/game-platform/generator.env
+/srv/game-platform/app/deploy.sh restart-generator
+curl -s http://127.0.0.1:8090/healthz     # {"status":"ok","museConfigured":true,...}
+```
+
+Never paste the key into the repo, GitHub, Slack or a chat.
+
 ## 7. Server: create the database indexes (once)
 
 ```bash

@@ -3,6 +3,7 @@
 #
 #   deploy.sh deploy <image-tag>    deploy a commit SHA; roll back automatically if /readyz fails
 #   deploy.sh rollback              redeploy the previously deployed tag
+#   deploy.sh restart-generator     recreate the generator (after changing generator.env)
 #   deploy.sh status                show the running tags
 #
 # Only the api and games containers are touched. Mongo, the data directories and cloudflared are
@@ -16,6 +17,8 @@ REGISTRY_PREFIX_FILE=/etc/game-platform/registry   # e.g. ghcr.io/your-github-ow
 COMPOSE=(docker compose -f "$APP/docker-compose.prod.yml")
 READY_URL=http://127.0.0.1:8080/readyz
 GAMES_URL=http://127.0.0.1:8081/healthz
+GENERATOR_URL=http://127.0.0.1:8090/healthz
+CHECK_GENERATOR=0
 WAIT_SECONDS=${WAIT_SECONDS:-90}
 
 mkdir -p "$STATE"
@@ -25,7 +28,8 @@ PREFIX=$(tr -d '[:space:]' < "$REGISTRY_PREFIX_FILE")
 wait_ready() {
   local deadline=$((SECONDS + WAIT_SECONDS))
   while [ $SECONDS -lt $deadline ]; do
-    if curl -fsS --max-time 3 "$READY_URL" >/dev/null 2>&1 && curl -fsS --max-time 3 "$GAMES_URL" >/dev/null 2>&1; then
+    if curl -fsS --max-time 3 "$READY_URL" >/dev/null 2>&1 && curl -fsS --max-time 3 "$GAMES_URL" >/dev/null 2>&1 \
+       && { [ "$CHECK_GENERATOR" != 1 ] || curl -fsS --max-time 3 "$GENERATOR_URL" >/dev/null 2>&1; }; then
       return 0
     fi
     sleep 2
@@ -33,12 +37,22 @@ wait_ready() {
   return 1
 }
 
-# up_tag <tag> [--pull]: point api and games at <tag> and (re)create only those two services.
+# up_tag <tag> [--pull]: point api, games and the generator at <tag> and (re)create only those services.
+# Tags from before the generator existed have no generator image: then it is left as it is.
 up_tag() {
   local tag=$1
-  export API_IMAGE="$PREFIX/bubbles-api:$tag" GAMES_IMAGE="$PREFIX/bubbles-games:$tag"
-  if [ "${2:-}" = "--pull" ]; then "${COMPOSE[@]}" pull api games; fi
-  "${COMPOSE[@]}" up -d --no-deps api games
+  local services=(api games)
+  export API_IMAGE="$PREFIX/bubbles-api:$tag" GAMES_IMAGE="$PREFIX/bubbles-games:$tag" GENERATOR_IMAGE="$PREFIX/bubbles-generator:$tag"
+  if [ "${2:-}" = "--pull" ]; then
+    "${COMPOSE[@]}" pull api games
+    "${COMPOSE[@]}" pull generator || echo "no generator image for $tag" >&2
+  fi
+  CHECK_GENERATOR=0
+  if docker image inspect "$GENERATOR_IMAGE" >/dev/null 2>&1; then
+    services+=(generator)
+    CHECK_GENERATOR=1
+  fi
+  "${COMPOSE[@]}" up -d --no-deps "${services[@]}"
 }
 
 cmd=${1:-}
@@ -75,6 +89,19 @@ case "$cmd" in
     echo "$prev" > "$STATE/current_tag"
     [ -n "$cur" ] && echo "$cur" > "$STATE/previous_tag"
     echo "rolled back to $prev"
+    ;;
+  restart-generator)
+    # Recreate the generator so it re-reads /etc/game-platform/generator.env (e.g. after adding the Muse key).
+    tag=$(cat "$STATE/current_tag" 2>/dev/null || true)
+    [ -n "$tag" ] || { echo "no deployed tag recorded" >&2; exit 1; }
+    export API_IMAGE="$PREFIX/bubbles-api:$tag" GAMES_IMAGE="$PREFIX/bubbles-games:$tag" GENERATOR_IMAGE="$PREFIX/bubbles-generator:$tag"
+    "${COMPOSE[@]}" up -d --no-deps --force-recreate generator
+    for _ in $(seq 1 30); do
+      curl -fsS --max-time 3 "$GENERATOR_URL" && { echo; exit 0; }
+      sleep 2
+    done
+    echo "generator did not become healthy" >&2
+    exit 1
     ;;
   status)
     echo "current:  $(cat "$STATE/current_tag" 2>/dev/null || echo none)"

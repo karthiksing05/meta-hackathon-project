@@ -52,6 +52,7 @@ const (
 	cLikes   = "likes"
 	cEvents  = "feed_events"
 	cScores  = "scores"
+	cJobs    = "generation_jobs"
 )
 
 func (m *Mongo) coll(n string) *mongo.Collection { return m.db.Collection(n) }
@@ -464,4 +465,89 @@ func (m *Mongo) Leaderboard(ctx context.Context, gameID string, limit int) ([]mo
 	}
 	var out []model.Score
 	return out, cur.All(ctx, &out)
+}
+
+func (m *Mongo) InsertJob(ctx context.Context, j *model.Job) error {
+	if j.Events == nil {
+		j.Events = []model.JobEvent{}
+	}
+	_, err := m.coll(cJobs).InsertOne(ctx, j)
+	return mapErr(err)
+}
+
+func (m *Mongo) JobByID(ctx context.Context, id string) (*model.Job, error) {
+	var j model.Job
+	if err := m.coll(cJobs).FindOne(ctx, bson.D{{Key: "_id", Value: id}}).Decode(&j); err != nil {
+		return nil, mapErr(err)
+	}
+	return &j, nil
+}
+
+func (m *Mongo) JobsByOwner(ctx context.Context, ownerID string, limit int) ([]model.Job, error) {
+	cur, err := m.coll(cJobs).Find(ctx, bson.D{{Key: "ownerId", Value: ownerID}},
+		options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}}).SetLimit(int64(limit)))
+	if err != nil {
+		return nil, err
+	}
+	var out []model.Job
+	return out, cur.All(ctx, &out)
+}
+
+func (m *Mongo) CountJobsSince(ctx context.Context, ownerID string, since time.Time) (int, error) {
+	n, err := m.coll(cJobs).CountDocuments(ctx, bson.D{
+		{Key: "ownerId", Value: ownerID}, {Key: "createdAt", Value: bson.D{{Key: "$gte", Value: since}}}})
+	return int(n), err
+}
+
+func (m *Mongo) HasActiveJob(ctx context.Context, ownerID string) (bool, error) {
+	n, err := m.coll(cJobs).CountDocuments(ctx, bson.D{
+		{Key: "ownerId", Value: ownerID},
+		{Key: "status", Value: bson.D{{Key: "$in", Value: bson.A{model.JobQueued, model.JobRunning}}}}},
+		options.Count().SetLimit(1))
+	return n > 0, err
+}
+
+func (m *Mongo) AppendJobEvent(ctx context.Context, id string, e model.JobEvent) error {
+	r, err := m.coll(cJobs).UpdateOne(ctx, bson.D{{Key: "_id", Value: id}}, bson.D{
+		{Key: "$push", Value: bson.D{{Key: "events", Value: e}}},
+		{Key: "$set", Value: bson.D{{Key: "updatedAt", Value: time.Now().UTC()}}},
+	})
+	if err == nil && r.MatchedCount == 0 {
+		return ErrNotFound
+	}
+	return err
+}
+
+func (m *Mongo) SetJobStatus(ctx context.Context, id, status string, u model.JobUpdate) error {
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	set := bson.D{{Key: "status", Value: status}, {Key: "updatedAt", Value: now}}
+	if u.GameID != "" {
+		set = append(set, bson.E{Key: "gameId", Value: u.GameID})
+	}
+	if u.Error != "" {
+		set = append(set, bson.E{Key: "error", Value: u.Error})
+	}
+	if u.Stats != nil {
+		set = append(set, bson.E{Key: "stats", Value: u.Stats})
+	}
+	if status == model.JobDone || status == model.JobFailed {
+		set = append(set, bson.E{Key: "finishedAt", Value: now})
+	}
+	r, err := m.coll(cJobs).UpdateOne(ctx, bson.D{{Key: "_id", Value: id}}, bson.D{{Key: "$set", Value: set}})
+	if err == nil && r.MatchedCount == 0 {
+		return ErrNotFound
+	}
+	return err
+}
+
+func (m *Mongo) FailStaleJobs(ctx context.Context, reason string) (int, error) {
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	r, err := m.coll(cJobs).UpdateMany(ctx,
+		bson.D{{Key: "status", Value: bson.D{{Key: "$in", Value: bson.A{model.JobQueued, model.JobRunning}}}}},
+		bson.D{{Key: "$set", Value: bson.D{{Key: "status", Value: model.JobFailed}, {Key: "error", Value: reason},
+			{Key: "updatedAt", Value: now}, {Key: "finishedAt", Value: now}}}})
+	if err != nil {
+		return 0, err
+	}
+	return int(r.ModifiedCount), nil
 }

@@ -20,13 +20,14 @@ type Memory struct {
 	scores  map[string]model.Score
 	events  []model.Event
 	eventID map[string]bool
+	jobs    map[string]*model.Job
 }
 
 func NewMemory() *Memory {
 	return &Memory{
 		users: map[string]*model.User{}, refresh: map[string]model.RefreshToken{},
 		games: map[string]*model.Game{}, likes: map[string]bool{}, scores: map[string]model.Score{},
-		eventID: map[string]bool{},
+		eventID: map[string]bool{}, jobs: map[string]*model.Job{},
 	}
 }
 
@@ -390,4 +391,120 @@ func (m *Memory) EventCount() int {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return len(m.events)
+}
+
+func cloneJob(j *model.Job) model.Job {
+	c := *j
+	c.Events = append([]model.JobEvent(nil), j.Events...)
+	return c
+}
+
+func (m *Memory) InsertJob(ctx context.Context, j *model.Job) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, ok := m.jobs[j.ID]; ok {
+		return ErrConflict
+	}
+	c := cloneJob(j)
+	m.jobs[j.ID] = &c
+	return nil
+}
+
+func (m *Memory) JobByID(ctx context.Context, id string) (*model.Job, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if j, ok := m.jobs[id]; ok {
+		c := cloneJob(j)
+		return &c, nil
+	}
+	return nil, ErrNotFound
+}
+
+func (m *Memory) JobsByOwner(ctx context.Context, ownerID string, limit int) ([]model.Job, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []model.Job
+	for _, j := range m.jobs {
+		if j.OwnerID == ownerID {
+			out = append(out, cloneJob(j))
+		}
+	}
+	sort.Slice(out, func(i, k int) bool { return out[i].CreatedAt.After(out[k].CreatedAt) })
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
+}
+
+func (m *Memory) CountJobsSince(ctx context.Context, ownerID string, since time.Time) (int, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	n := 0
+	for _, j := range m.jobs {
+		if j.OwnerID == ownerID && !j.CreatedAt.Before(since) {
+			n++
+		}
+	}
+	return n, nil
+}
+
+func (m *Memory) HasActiveJob(ctx context.Context, ownerID string) (bool, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, j := range m.jobs {
+		if j.OwnerID == ownerID && (j.Status == model.JobQueued || j.Status == model.JobRunning) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (m *Memory) AppendJobEvent(ctx context.Context, id string, e model.JobEvent) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	j, ok := m.jobs[id]
+	if !ok {
+		return ErrNotFound
+	}
+	j.Events = append(j.Events, e)
+	j.UpdatedAt = time.Now().UTC()
+	return nil
+}
+
+func (m *Memory) SetJobStatus(ctx context.Context, id, status string, u model.JobUpdate) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	j, ok := m.jobs[id]
+	if !ok {
+		return ErrNotFound
+	}
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	j.Status, j.UpdatedAt = status, now
+	if u.GameID != "" {
+		j.GameID = u.GameID
+	}
+	if u.Error != "" {
+		j.Error = u.Error
+	}
+	if u.Stats != nil {
+		j.Stats = u.Stats
+	}
+	if status == model.JobDone || status == model.JobFailed {
+		j.FinishedAt = &now
+	}
+	return nil
+}
+
+func (m *Memory) FailStaleJobs(ctx context.Context, reason string) (int, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	n := 0
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	for _, j := range m.jobs {
+		if j.Status == model.JobQueued || j.Status == model.JobRunning {
+			j.Status, j.Error, j.UpdatedAt, j.FinishedAt = model.JobFailed, reason, now, &now
+			n++
+		}
+	}
+	return n, nil
 }

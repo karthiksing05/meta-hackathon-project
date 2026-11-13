@@ -172,3 +172,69 @@ func TestMongoEventLog(t *testing.T) {
 		t.Fatalf("export limit: %d %v", len(out), err)
 	}
 }
+
+// Generation jobs: pushed events, status changes, rate-limit counts and the restart sweep.
+func TestMongoJobs(t *testing.T) {
+	uri := os.Getenv("MONGO_TEST_URI")
+	if uri == "" {
+		t.Skip("MONGO_TEST_URI not set")
+	}
+	ctx := context.Background()
+	m, err := store.ConnectMongo(ctx, uri, "bubbles_test_jobs_"+time.Now().Format("150405"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer m.Close(ctx)
+	defer m.DropDatabase(ctx)
+	if err := m.EnsureIndexes(ctx); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().UTC().Truncate(time.Millisecond)
+	j := &model.Job{ID: "j1", OwnerID: "u1", Request: "a game", Brief: map[string]any{"intent": "x"}, Status: model.JobQueued, CreatedAt: now, UpdatedAt: now}
+	if err := m.InsertJob(ctx, j); err != nil {
+		t.Fatal(err)
+	}
+	if active, err := m.HasActiveJob(ctx, "u1"); err != nil || !active {
+		t.Fatalf("active job: %v %v", active, err)
+	}
+	if err := m.SetJobStatus(ctx, "j1", model.JobRunning, model.JobUpdate{}); err != nil {
+		t.Fatal(err)
+	}
+	for i, k := range []string{"drafting", "expanding", "done"} {
+		if err := m.AppendJobEvent(ctx, "j1", model.JobEvent{Seq: i + 1, Kind: k, Summary: k, At: now, Detail: map[string]any{"round": 1}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := m.JobByID(ctx, "j1")
+	if err != nil || len(got.Events) != 3 || got.Events[2].Kind != "done" || got.Events[0].Detail["round"] == nil || got.Status != model.JobRunning {
+		t.Fatalf("job: %+v %v", got, err)
+	}
+	if err := m.SetJobStatus(ctx, "j1", model.JobDone, model.JobUpdate{GameID: "g1", Stats: map[string]any{"museCalls": 2}}); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := m.JobByID(ctx, "j1"); got.GameID != "g1" || got.FinishedAt == nil || got.Stats["museCalls"] == nil {
+		t.Fatalf("finished job: %+v", got)
+	}
+	if active, _ := m.HasActiveJob(ctx, "u1"); active {
+		t.Fatal("a finished job is not active")
+	}
+	if n, _ := m.CountJobsSince(ctx, "u1", now.Add(-time.Hour)); n != 1 {
+		t.Fatalf("count: %d", n)
+	}
+	if n, _ := m.CountJobsSince(ctx, "u1", now.Add(time.Hour)); n != 0 {
+		t.Fatalf("count in the future: %d", n)
+	}
+	m.InsertJob(ctx, &model.Job{ID: "j2", OwnerID: "u2", Status: model.JobRunning, CreatedAt: now, UpdatedAt: now})
+	if n, err := m.FailStaleJobs(ctx, "restarted"); err != nil || n != 1 {
+		t.Fatalf("stale sweep: %d %v", n, err)
+	}
+	if got, _ := m.JobByID(ctx, "j2"); got.Status != model.JobFailed || got.Error != "restarted" {
+		t.Fatalf("stale job: %+v", got)
+	}
+	if list, err := m.JobsByOwner(ctx, "u1", 10); err != nil || len(list) != 1 {
+		t.Fatalf("list: %v %v", list, err)
+	}
+	if err := m.SetJobStatus(ctx, "nope", model.JobDone, model.JobUpdate{}); err != store.ErrNotFound {
+		t.Fatalf("missing job: %v", err)
+	}
+}
