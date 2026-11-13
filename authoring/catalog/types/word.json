@@ -1,0 +1,2808 @@
+[
+  {
+    "id": "five_letter_deduction",
+    "name": "Five-letter word deduction",
+    "aliases": [
+      "Wordle",
+      "Lingo",
+      "Jotto"
+    ],
+    "family": "word",
+    "summary": "Guess a hidden 5-letter word in 6 tries; each guess colors letters green (right spot), yellow (in word) or grey (absent).",
+    "core_loop": "type a 5-letter guess → letters color green, yellow or grey → narrow the word → solve within 6",
+    "verbs": [
+      "deduce",
+      "type",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "each guess must be a real word",
+      "green = right letter right spot, yellow = in word elsewhere, grey = not in word"
+    ],
+    "win": "solve the word within 6 guesses",
+    "lose": "use all 6 guesses without solving",
+    "scoring": "fewer guesses is better; streaks",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Everyone gets the same daily word; post your color grid to the group chat and compare guess counts."
+    ],
+    "difficulty_levers": [
+      "word length",
+      "number of guesses",
+      "hard mode (must reuse hints)",
+      "word list obscurity"
+    ],
+    "tools": [
+      "word_check",
+      "keyboard",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "like wordle but for movies",
+      "a wordle about our group's inside jokes",
+      "harry potter wordle",
+      "daily 5 letter word game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "multi_board_deduction",
+    "name": "Several boards at once",
+    "aliases": [
+      "Quordle",
+      "Dordle",
+      "Octordle"
+    ],
+    "family": "word",
+    "summary": "One guess fills 2–8 hidden-word boards at the same time; solve them all within a shared guess budget.",
+    "core_loop": "type one guess → it scores on every unsolved board → solve boards one by one → finish all within the budget",
+    "verbs": [
+      "deduce",
+      "type",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "each guess applies to all boards at once",
+      "a solved board stops taking letters"
+    ],
+    "win": "solve every board within the guess budget",
+    "lose": "run out of guesses with boards unsolved",
+    "scoring": "guesses left over",
+    "session_seconds": [
+      120,
+      480
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Race a friend on the same set of boards; fewest total guesses wins."
+    ],
+    "difficulty_levers": [
+      "number of boards",
+      "guess budget",
+      "word length"
+    ],
+    "tools": [
+      "word_check",
+      "keyboard",
+      "grid_board",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "wordle with 4 boards",
+      "a harder wordle where you solve two words at once",
+      "quordle but space themed"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "letter_honeycomb",
+    "name": "Letter honeycomb",
+    "aliases": [
+      "Spelling Bee",
+      "Word Wheel"
+    ],
+    "family": "word",
+    "summary": "Make as many words as you can from 7 letters; every word must use the center letter. A pangram uses all seven.",
+    "core_loop": "type a word from the 7 letters → it must use the center letter → points by length → climb ranks",
+    "verbs": [
+      "type",
+      "find",
+      "spell"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "words must include the center letter",
+      "letters can repeat",
+      "minimum length 4"
+    ],
+    "win": "reach the top rank",
+    "lose": "none; score attack",
+    "scoring": "points by word length, pangram bonus",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Group shares one puzzle and climbs rank titles together; shared found-words list."
+    ],
+    "difficulty_levers": [
+      "min word length",
+      "rank thresholds",
+      "letter rarity"
+    ],
+    "tools": [
+      "keyboard",
+      "word_check",
+      "score",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "spelling bee but with taylor swift words",
+      "make words from 7 letters",
+      "nyt spelling bee clone for my book club"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "anagram_unscramble",
+    "name": "Anagram unscramble",
+    "aliases": [
+      "Jumble",
+      "Text Twist",
+      "Word Scramble"
+    ],
+    "family": "word",
+    "summary": "Unscramble jumbled letters into a word before the timer runs out.",
+    "core_loop": "see scrambled letters → type the word → next scramble faster",
+    "verbs": [
+      "unscramble",
+      "type"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "only the one intended word counts",
+      "timer per word"
+    ],
+    "win": "clear every word in the round",
+    "lose": "timer runs out on a word",
+    "scoring": "points per word plus time bonus",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Head-to-head: same scrambles, fastest solver gets the point."
+    ],
+    "difficulty_levers": [
+      "word length",
+      "time per word",
+      "hint letters revealed"
+    ],
+    "tools": [
+      "keyboard",
+      "word_check",
+      "timer_bar",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "unscramble pokemon names",
+      "a fast anagram game",
+      "jumble but every word is a food"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "anagram_find_all",
+    "name": "Find every word in a rack",
+    "aliases": [
+      "Text Twist",
+      "Word Cookies",
+      "Wordscapes"
+    ],
+    "family": "word",
+    "summary": "Given 6–7 letters, find all words that can be made; a full-length word clears the round.",
+    "core_loop": "see a letter rack → type every word it makes → fill the slots → round clears",
+    "verbs": [
+      "find",
+      "type",
+      "spell"
+    ],
+    "inputs": [
+      "type",
+      "swipe"
+    ],
+    "rules": [
+      "words must use only rack letters",
+      "slots show how many words of each length remain"
+    ],
+    "win": "fill every slot, or the required ones",
+    "lose": "none; round continues",
+    "scoring": "points per word, bonus for the longest",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Co-op: friends split the word list and fill one shared board."
+    ],
+    "difficulty_levers": [
+      "rack size",
+      "min word length",
+      "required words to pass"
+    ],
+    "tools": [
+      "keyboard",
+      "word_check",
+      "reveal",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "find all the words in these letters",
+      "wordscapes but cozy fall vibes",
+      "text twist for my grandma"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "letter_grid_search",
+    "name": "Boggle-style grid search",
+    "aliases": [
+      "Boggle",
+      "Word Hunt",
+      "Wordament"
+    ],
+    "family": "word",
+    "summary": "Trace adjacent letters in a 4x4 grid to spell words before time runs out; longer words score more.",
+    "core_loop": "trace adjacent letters → submit a word → keep hunting until time",
+    "verbs": [
+      "trace",
+      "find",
+      "spell"
+    ],
+    "inputs": [
+      "drag",
+      "swipe"
+    ],
+    "rules": [
+      "letters must touch, including diagonals",
+      "each tile once per word"
+    ],
+    "win": "most points when the timer ends",
+    "lose": "none; score attack",
+    "scoring": "longer words score more",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Same grid for everyone; compare lists after the timer and cancel shared words."
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "time limit",
+      "min word length"
+    ],
+    "tools": [
+      "grid_board",
+      "word_check",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "boggle against my roommates",
+      "word hunt like game pigeon",
+      "a 4x4 letter grid game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_search",
+    "name": "Word search",
+    "aliases": [
+      "Word Search",
+      "Word Find"
+    ],
+    "family": "word",
+    "summary": "Find hidden words in a letter grid, horizontally, vertically or diagonally.",
+    "core_loop": "scan the grid → drag across a hidden word → it locks in → find them all",
+    "verbs": [
+      "find",
+      "scan",
+      "drag"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "words can run in any straight line",
+      "letters can be shared between words"
+    ],
+    "win": "find every listed word",
+    "lose": "none",
+    "scoring": "time to finish",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Make a word search out of your friends' names and send it to them."
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "directions allowed",
+      "backwards words",
+      "number of words"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "word search with our friends names",
+      "a christmas word search",
+      "word search of star wars characters"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "themed_word_search",
+    "name": "Themed word search with a hidden phrase",
+    "aliases": [
+      "Strands"
+    ],
+    "family": "word",
+    "summary": "Find theme words that fill the whole grid; a spanning word reveals the theme.",
+    "core_loop": "find a theme word → it fills tiles → the spanning word reveals the theme → every tile used",
+    "verbs": [
+      "find",
+      "trace",
+      "deduce"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "theme words use every tile exactly once",
+      "one word spans the board"
+    ],
+    "win": "use every tile",
+    "lose": "none",
+    "scoring": "hints used",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Daily shared puzzle; post how many hints you used."
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "theme obscurity",
+      "hint cost"
+    ],
+    "tools": [
+      "grid_board",
+      "player_drag",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "like nyt strands",
+      "strands but about the office",
+      "find the theme words that fill the board"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "group_four_by_four",
+    "name": "Four groups of four",
+    "aliases": [
+      "Connections",
+      "Only Connect wall"
+    ],
+    "family": "word",
+    "summary": "Sort 16 words into 4 hidden groups of 4; 4 mistakes and you're out.",
+    "core_loop": "pick 4 words you think share a link → submit → right groups lock, wrong ones cost a life → find all 4",
+    "verbs": [
+      "sort",
+      "deduce",
+      "group"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "exactly 4 groups of 4",
+      "4 mistakes ends the game"
+    ],
+    "win": "find all 4 groups",
+    "lose": "4 mistakes",
+    "scoring": "mistakes made; groups found",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Make a Connections board from your group's inside jokes and send it to them."
+    ],
+    "difficulty_levers": [
+      "red-herring overlap",
+      "category difficulty",
+      "mistakes allowed"
+    ],
+    "tools": [
+      "sort_bins",
+      "lives",
+      "reveal",
+      "daily_seed",
+      "share_grid"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "connections but for anime",
+      "nyt connections about our friend group",
+      "group 16 words into 4 categories"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "odd_one_out",
+    "name": "Odd one out",
+    "aliases": [
+      "Odd One Out",
+      "Which One Doesn't Belong"
+    ],
+    "family": "word",
+    "summary": "Pick the word that doesn't belong in each set.",
+    "core_loop": "see a set → tap the one that doesn't fit → see the link → next set",
+    "verbs": [
+      "spot",
+      "compare"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "exactly one item breaks the shared link"
+    ],
+    "win": "survive all rounds",
+    "lose": "wrong pick or timer",
+    "scoring": "streak length",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Streak challenge: send your streak to a friend to beat."
+    ],
+    "difficulty_levers": [
+      "set size",
+      "subtlety of the link",
+      "time per round"
+    ],
+    "tools": [
+      "quiz",
+      "rounds",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "which word doesn't belong",
+      "odd one out with movie titles",
+      "quick odd-one-out rounds"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "crossword_mini",
+    "name": "Mini crossword",
+    "aliases": [
+      "NYT Mini",
+      "Crossword"
+    ],
+    "family": "word",
+    "summary": "Fill a 5x5 crossword from short clues.",
+    "core_loop": "pick a clue → type the answer into the grid → crossings help → fill the grid",
+    "verbs": [
+      "type",
+      "solve",
+      "recall"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "across and down answers share letters"
+    ],
+    "win": "fill the grid correctly",
+    "lose": "none",
+    "scoring": "solve time",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Fastest solve time leaderboard in the group."
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "clue difficulty",
+      "black squares"
+    ],
+    "tools": [
+      "grid_board",
+      "keyboard",
+      "word_check",
+      "timer_bar",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "a mini crossword about my dog",
+      "5x5 crossword daily",
+      "crossword with clues about our trip"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cryptic_clue",
+    "name": "Cryptic clues",
+    "aliases": [
+      "Cryptic Crossword",
+      "Minute Cryptic"
+    ],
+    "family": "word",
+    "summary": "Solve one cryptic clue at a time where wordplay and a definition both point to the answer.",
+    "core_loop": "read the clue → split definition from wordplay → type the answer → reveal the parse",
+    "verbs": [
+      "decode",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "the answer satisfies both the definition and the wordplay"
+    ],
+    "win": "solve the clue",
+    "lose": "none",
+    "scoring": "time and hints used",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Share solve time and hints used; groups trade their own clues."
+    ],
+    "difficulty_levers": [
+      "hint depth",
+      "clue type",
+      "answer length shown"
+    ],
+    "tools": [
+      "keyboard",
+      "word_check",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "daily cryptic clue",
+      "cryptic crossword clues for beginners",
+      "one cryptic a day"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hangman",
+    "name": "Guess the letters",
+    "aliases": [
+      "Hangman",
+      "Wheel of Fortune"
+    ],
+    "family": "word",
+    "summary": "Guess letters of a hidden word or phrase; too many misses and you lose.",
+    "core_loop": "guess a letter → it fills in or costs a miss → guess the phrase before misses run out",
+    "verbs": [
+      "guess",
+      "type"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "each wrong letter costs a miss"
+    ],
+    "win": "reveal the phrase",
+    "lose": "too many misses",
+    "scoring": "misses left",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play"
+    ],
+    "social_hooks": [
+      "One friend writes the phrase, the other guesses."
+    ],
+    "difficulty_levers": [
+      "phrase length",
+      "misses allowed",
+      "vowel cost"
+    ],
+    "tools": [
+      "keyboard",
+      "lives",
+      "reveal",
+      "word_check"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "hangman with movie quotes",
+      "wheel of fortune style phrase guessing",
+      "hangman but not dark, like a balloon popping"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "category_letter",
+    "name": "Category + starting letter",
+    "aliases": [
+      "Scattergories",
+      "Stop",
+      "Categories"
+    ],
+    "family": "word",
+    "summary": "Name a thing in each category that starts with the rolled letter before time runs out.",
+    "core_loop": "see a letter and categories → type an answer for each → unique answers score",
+    "verbs": [
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "answers must start with the letter",
+      "answers shared with others score zero"
+    ],
+    "win": "most points after rounds",
+    "lose": "none",
+    "scoring": "unique answers score",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "async_friends",
+      "group_daily",
+      "live"
+    ],
+    "social_hooks": [
+      "Unique answers score; duplicates across friends cancel out."
+    ],
+    "difficulty_levers": [
+      "number of categories",
+      "letter difficulty",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "timer_bar",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "scattergories online with friends",
+      "name a fruit starting with B",
+      "categories game for a party"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "typing_race",
+    "name": "Typing race",
+    "aliases": [
+      "TypeRacer",
+      "Monkeytype",
+      "Nitro Type"
+    ],
+    "family": "word",
+    "summary": "Type the shown text as fast and accurately as you can.",
+    "core_loop": "read the passage → type it → speed and accuracy count → finish the passage",
+    "verbs": [
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "mistakes must be fixed before moving on"
+    ],
+    "win": "finish first or beat the ghost",
+    "lose": "none",
+    "scoring": "words per minute times accuracy",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Race friends' ghosts on the same passage."
+    ],
+    "difficulty_levers": [
+      "passage length",
+      "punctuation",
+      "speed target"
+    ],
+    "tools": [
+      "keyboard",
+      "timer_bar",
+      "ghost_score",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "typing race with lyrics",
+      "typeracer against my friends",
+      "type fast to make the car go"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "falling_words",
+    "name": "Falling words",
+    "aliases": [
+      "Typing of the Dead",
+      "ZType",
+      "Word Rain"
+    ],
+    "family": "word",
+    "summary": "Words fall from the top; type each before it lands.",
+    "core_loop": "words fall → type one to destroy it → speed rises → keep the bottom clear",
+    "verbs": [
+      "type",
+      "react"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "a word that reaches the ground costs a life"
+    ],
+    "win": "survive all waves",
+    "lose": "out of lives",
+    "scoring": "words destroyed, combo bonus",
+    "session_seconds": [
+      45,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Score attack with a group leaderboard."
+    ],
+    "difficulty_levers": [
+      "fall speed",
+      "word length",
+      "spawn rate"
+    ],
+    "tools": [
+      "keyboard",
+      "spawn_wave",
+      "speed_ramp",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "type the zombies' words to stop them",
+      "falling word typing game",
+      "ztype but cute"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_chain",
+    "name": "Word chain",
+    "aliases": [
+      "Shiritori",
+      "Word Chain"
+    ],
+    "family": "word",
+    "summary": "Each new word must start with the last letter of the previous word; no repeats.",
+    "core_loop": "read the last word → type one that starts with its last letter → pass the turn",
+    "verbs": [
+      "type",
+      "recall"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "no repeated words",
+      "must start with the last letter"
+    ],
+    "win": "last player standing",
+    "lose": "timer runs out on your turn",
+    "scoring": "chain length",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Turn-based with friends in a group chat; the chain grows with each message."
+    ],
+    "difficulty_levers": [
+      "category restriction",
+      "time per turn",
+      "min length"
+    ],
+    "tools": [
+      "typed_answer",
+      "turns",
+      "timer_bar",
+      "word_check"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "shiritori with friends",
+      "word chain with animals",
+      "last letter first letter game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_ladder",
+    "name": "Word ladder",
+    "aliases": [
+      "Doublets",
+      "Weaver",
+      "Word Ladder"
+    ],
+    "family": "word",
+    "summary": "Change one letter at a time to turn a start word into an end word.",
+    "core_loop": "change one letter → it must be a real word → step toward the target",
+    "verbs": [
+      "change",
+      "spell",
+      "plan"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "one letter changes per step",
+      "every step is a real word"
+    ],
+    "win": "reach the target word",
+    "lose": "none",
+    "scoring": "fewer steps is better",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Share your step count; fewest steps wins."
+    ],
+    "difficulty_levers": [
+      "word length",
+      "required steps",
+      "dictionary size"
+    ],
+    "tools": [
+      "keyboard",
+      "word_check",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "turn cold into warm one letter at a time",
+      "weaver word game",
+      "word ladder puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "letter_tile_board",
+    "name": "Letter tiles on a bonus board",
+    "aliases": [
+      "Scrabble",
+      "Words With Friends",
+      "Bananagrams"
+    ],
+    "family": "word",
+    "summary": "Place letter tiles on a board with bonus squares, crossing existing words to score.",
+    "core_loop": "pick tiles from your rack → place them crossing a word → score with bonus squares → refill",
+    "verbs": [
+      "place",
+      "spell",
+      "plan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "new words must connect to the board",
+      "bonus squares multiply letters or words"
+    ],
+    "win": "highest score when tiles run out",
+    "lose": "none",
+    "scoring": "letter values times bonus squares",
+    "session_seconds": [
+      300,
+      1800
+    ],
+    "players": [
+      "async_friends",
+      "pass_and_play"
+    ],
+    "social_hooks": [
+      "Async turns with friends, like Words With Friends."
+    ],
+    "difficulty_levers": [
+      "rack size",
+      "board size",
+      "bonus layout"
+    ],
+    "tools": [
+      "grid_board",
+      "word_check",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "scrabble with my sister",
+      "words with friends but faster",
+      "letter tiles with double word squares"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "letter_merge",
+    "name": "Letter merge",
+    "aliases": [
+      "Letris",
+      "Word Crush"
+    ],
+    "family": "word",
+    "summary": "Slide letter tiles together to form words that clear the board.",
+    "core_loop": "letters drop → slide them into place → spell a word in a row → it clears",
+    "verbs": [
+      "slide",
+      "spell"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "a valid word in a line clears",
+      "the board fills if you're slow"
+    ],
+    "win": "survive and score",
+    "lose": "board overflows",
+    "scoring": "letters cleared",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Score attack with a weekly group board."
+    ],
+    "difficulty_levers": [
+      "fall speed",
+      "letter mix",
+      "min word length"
+    ],
+    "tools": [
+      "tile_slide",
+      "word_check",
+      "gravity_jump",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tetris but you make words",
+      "letter blocks fall and you spell words",
+      "merge letters into words"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "missing_letters",
+    "name": "Fill the missing letters",
+    "aliases": [
+      "Fill in the Blank",
+      "Missing Vowels"
+    ],
+    "family": "word",
+    "summary": "Fill blanks in a word or phrase where some letters are hidden.",
+    "core_loop": "see the gapped word → type the full answer → next",
+    "verbs": [
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "the shown letters stay in place"
+    ],
+    "win": "answer every item",
+    "lose": "timer runs out",
+    "scoring": "points per answer",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Make a set about your friends and send it."
+    ],
+    "difficulty_levers": [
+      "letters hidden",
+      "category",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "rounds",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the band with no vowels",
+      "missing letters in famous quotes",
+      "fill in the blanks movie titles"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "emoji_rebus",
+    "name": "Emoji rebus",
+    "aliases": [
+      "Guess the Emoji",
+      "Rebus puzzles"
+    ],
+    "family": "word",
+    "summary": "Guess the phrase, title or name from a row of emoji or picture clues.",
+    "core_loop": "read the emoji clue → type the phrase → reveal a letter if stuck",
+    "verbs": [
+      "decode",
+      "type",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spelling is fuzzy-matched",
+      "hints cost points"
+    ],
+    "win": "solve the set",
+    "lose": "none",
+    "scoring": "points minus hints",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Write emoji clues for friends; they guess."
+    ],
+    "difficulty_levers": [
+      "clue count",
+      "hint letters",
+      "category"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "hint",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "guess the movie from emojis",
+      "emoji puzzles about our friend group",
+      "rebus puzzles"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_association",
+    "name": "Word association",
+    "aliases": [
+      "Word Association",
+      "Password"
+    ],
+    "family": "word",
+    "summary": "Say a word linked to the last one; the chain must stay connected or you're out.",
+    "core_loop": "read the last word → type a linked word → group can challenge weak links",
+    "verbs": [
+      "associate",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "links must be explainable",
+      "no repeats"
+    ],
+    "win": "last player in",
+    "lose": "timer or a lost challenge",
+    "scoring": "turns survived",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Pass-and-play or group chat turns; group votes on weak links."
+    ],
+    "difficulty_levers": [
+      "time per turn",
+      "link strictness"
+    ],
+    "tools": [
+      "typed_answer",
+      "turns",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "word association game",
+      "link words to get from cat to rocket",
+      "password game show"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "codename_clues",
+    "name": "One-word team clues",
+    "aliases": [
+      "Codenames",
+      "Decrypto"
+    ],
+    "family": "word",
+    "summary": "A clue giver says one word and a number to point teammates at their words on a grid while avoiding the bad ones.",
+    "core_loop": "clue giver gives one word and a number → teammates tap words → avoid the other team's and the trap",
+    "verbs": [
+      "clue",
+      "guess",
+      "deduce"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "one-word clues only",
+      "tapping the trap word loses"
+    ],
+    "win": "find all your team's words first",
+    "lose": "tap the trap word",
+    "scoring": "words found",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Team play across a group: two sides, shared board."
+    ],
+    "difficulty_levers": [
+      "grid size",
+      "assassin count",
+      "clue limit"
+    ],
+    "tools": [
+      "grid_board",
+      "turns",
+      "reveal",
+      "shared_progress"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "codenames with my friends online",
+      "one word clue game",
+      "codenames but pictures"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "contact_guess",
+    "name": "Guess the secret word together",
+    "aliases": [
+      "Contact",
+      "Taboo"
+    ],
+    "family": "word",
+    "summary": "Players try to guess a defender's secret word letter by letter by making contact on other words.",
+    "core_loop": "describe the word without the forbidden words → teammates type guesses → beat the timer",
+    "verbs": [
+      "describe",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "forbidden words can't be used"
+    ],
+    "win": "most words guessed",
+    "lose": "none",
+    "scoring": "words guessed per round",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Party game for a Group; teams take turns."
+    ],
+    "difficulty_levers": [
+      "forbidden list size",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "turns",
+      "timer_bar",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "taboo without saying the forbidden words",
+      "describe the word without saying it",
+      "taboo party game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spelling_bee_audio",
+    "name": "Spell what you hear",
+    "aliases": [
+      "Spelling Bee contest",
+      "Spelling test"
+    ],
+    "family": "word",
+    "summary": "Hear or see a definition and spell the word correctly.",
+    "core_loop": "hear or read the word → type its spelling → harder words follow",
+    "verbs": [
+      "spell",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "exact spelling only"
+    ],
+    "win": "spell every word",
+    "lose": "out of lives",
+    "scoring": "words spelled",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Class or family leaderboard."
+    ],
+    "difficulty_levers": [
+      "word difficulty",
+      "lives",
+      "definition clarity"
+    ],
+    "tools": [
+      "keyboard",
+      "word_check",
+      "lives",
+      "difficulty_curve"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "spelling test for my kid",
+      "spell the hard words",
+      "school spelling bee practice"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "cipher_decode",
+    "name": "Decode the cipher",
+    "aliases": [
+      "Cryptogram",
+      "Cryptoquote"
+    ],
+    "family": "word",
+    "summary": "Crack a substitution cipher to reveal a quote by mapping letters.",
+    "core_loop": "guess a letter mapping → the quote updates everywhere → reveal the quote",
+    "verbs": [
+      "decode",
+      "deduce",
+      "type"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "one letter always stands for the same letter"
+    ],
+    "win": "reveal the quote",
+    "lose": "none",
+    "scoring": "time and hints",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Encode a message for friends to crack."
+    ],
+    "difficulty_levers": [
+      "quote length",
+      "starting hints",
+      "cipher type"
+    ],
+    "tools": [
+      "keyboard",
+      "grid_board",
+      "hint",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "cryptogram with movie quotes",
+      "decode the secret message",
+      "letter substitution puzzle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_stack",
+    "name": "Stack words to build a tower",
+    "aliases": [
+      "Word Tower"
+    ],
+    "family": "word",
+    "summary": "Type words that connect to the top word to add floors; the tower falls if you're too slow.",
+    "core_loop": "read the top word → type a connected word → the tower grows → speed up",
+    "verbs": [
+      "type",
+      "associate"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "each word must link to the one below"
+    ],
+    "win": "build the tallest tower",
+    "lose": "the timer empties",
+    "scoring": "floors built",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Height leaderboard among friends."
+    ],
+    "difficulty_levers": [
+      "time per word",
+      "link rule"
+    ],
+    "tools": [
+      "typed_answer",
+      "timer_bar",
+      "speed_ramp",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "build a tower with words",
+      "connect words to stack higher",
+      "word stacking game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "rhyme_time",
+    "name": "Rhyme time",
+    "aliases": [
+      "Rhyme Time",
+      "Rhymes"
+    ],
+    "family": "word",
+    "summary": "Find words that rhyme with a prompt before time runs out.",
+    "core_loop": "see the prompt word → type rhymes → each rhyme scores",
+    "verbs": [
+      "rhyme",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "near rhymes count less"
+    ],
+    "win": "most rhymes when time ends",
+    "lose": "none",
+    "scoring": "points per rhyme",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Rhyme-off battles between two friends."
+    ],
+    "difficulty_levers": [
+      "prompt difficulty",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "how many words rhyme with cat",
+      "rap battle rhyme game",
+      "rhyming game for kids"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "hidden_word_in_sentence",
+    "name": "Hidden words in a sentence",
+    "aliases": [
+      "Hidden Words"
+    ],
+    "family": "word",
+    "summary": "Find words hidden across the spaces of a sentence.",
+    "core_loop": "read the sentence → drag across a hidden word spanning spaces → find them all",
+    "verbs": [
+      "find",
+      "scan"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "hidden words cross word boundaries"
+    ],
+    "win": "find every hidden word",
+    "lose": "none",
+    "scoring": "time to finish",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Write sentences hiding your friends' names."
+    ],
+    "difficulty_levers": [
+      "hidden count",
+      "sentence length"
+    ],
+    "tools": [
+      "player_drag",
+      "reveal",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "find the hidden animal in each sentence",
+      "hidden word puzzles",
+      "spot the hidden country names"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "letter_boxed",
+    "name": "Letter box",
+    "aliases": [
+      "Letter Boxed"
+    ],
+    "family": "word",
+    "summary": "Use letters around the sides of a square; consecutive letters must come from different sides; use all letters in few words.",
+    "core_loop": "pick letters from alternating sides → spell words that chain → use every letter",
+    "verbs": [
+      "spell",
+      "plan"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "consecutive letters from different sides",
+      "each word starts with the last letter of the one before"
+    ],
+    "win": "use every letter within the word target",
+    "lose": "none",
+    "scoring": "fewer words",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Compare how few words each friend needed."
+    ],
+    "difficulty_levers": [
+      "word target",
+      "letter set"
+    ],
+    "tools": [
+      "keyboard",
+      "word_check",
+      "grid_board",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "letter boxed puzzle",
+      "nyt letter boxed but easier",
+      "use all the letters on the square"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "syllable_combine",
+    "name": "Combine syllables",
+    "aliases": [
+      "Syllacrostic",
+      "7 Little Words"
+    ],
+    "family": "word",
+    "summary": "Join syllable tiles into words; every tile must be used.",
+    "core_loop": "read a clue → combine syllable tiles into the answer → use every tile",
+    "verbs": [
+      "combine",
+      "solve"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "rules": [
+      "every tile used exactly once"
+    ],
+    "win": "solve all clues",
+    "lose": "none",
+    "scoring": "time and hints",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Daily shared puzzle with group times."
+    ],
+    "difficulty_levers": [
+      "word count",
+      "clue difficulty"
+    ],
+    "tools": [
+      "match_pairs",
+      "word_check",
+      "hint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "7 little words",
+      "combine syllables into words",
+      "syllable puzzle with clues"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "compound_word_chain",
+    "name": "Compound word chain",
+    "aliases": [
+      "Chain Reaction",
+      "Compound chains"
+    ],
+    "family": "word",
+    "summary": "Each word joins the next into a compound word (sun → flower → pot).",
+    "core_loop": "see a gap in the chain → guess the word that joins both neighbors → letters reveal over time",
+    "verbs": [
+      "guess",
+      "link"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "each word forms a compound with its neighbors"
+    ],
+    "win": "complete the chain",
+    "lose": "none",
+    "scoring": "points per word, fewer letters revealed is better",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Head-to-head reveal-a-letter race."
+    ],
+    "difficulty_levers": [
+      "chain length",
+      "letters revealed"
+    ],
+    "tools": [
+      "typed_answer",
+      "reveal",
+      "sequence_memory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "fire truck stop sign word chain",
+      "compound word puzzle",
+      "chain reaction game show"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "prefix_suffix",
+    "name": "Shared prefix or suffix",
+    "aliases": [
+      "Common Ground"
+    ],
+    "family": "word",
+    "summary": "Find the letters that complete every word in a set.",
+    "core_loop": "see word fragments → type the letters that complete them all → next set",
+    "verbs": [
+      "deduce",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "the same letters complete every word"
+    ],
+    "win": "solve every set",
+    "lose": "timer runs out",
+    "scoring": "points per set",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Streak sharing."
+    ],
+    "difficulty_levers": [
+      "set size",
+      "affix length"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "what letters complete all these words",
+      "find the shared ending",
+      "fill in the shared prefix"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "blanked_lyrics",
+    "name": "Finish the lyric",
+    "aliases": [
+      "Finish the Lyrics",
+      "Don't Forget the Lyrics"
+    ],
+    "family": "word",
+    "summary": "Complete the missing words in a familiar line of a song or quote.",
+    "core_loop": "read the line with blanks → type the missing words → next line",
+    "verbs": [
+      "recall",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "wording is fuzzy-matched"
+    ],
+    "win": "finish every line",
+    "lose": "timer runs out",
+    "scoring": "words right",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Party mode: pass the phone, sing the answer."
+    ],
+    "difficulty_levers": [
+      "words missing",
+      "era",
+      "time"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "timer_bar",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "finish the lyric game",
+      "complete the movie quote",
+      "fill in the missing words of the song"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "definition_guess",
+    "name": "Fake definitions",
+    "aliases": [
+      "Balderdash",
+      "Fibbage",
+      "Dictionary"
+    ],
+    "family": "word",
+    "summary": "Write a fake definition for an obscure word; others vote for which definition is real.",
+    "core_loop": "see an obscure word → write a convincing fake definition → vote for the real one",
+    "verbs": [
+      "write",
+      "bluff",
+      "vote"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "you can't vote for your own",
+      "points for fooling others and for finding the truth"
+    ],
+    "win": "most points after rounds",
+    "lose": "none",
+    "scoring": "points for correct votes and for fooling others",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Group party game: everyone writes, everyone votes."
+    ],
+    "difficulty_levers": [
+      "word obscurity",
+      "voting time"
+    ],
+    "tools": [
+      "typed_answer",
+      "turns",
+      "choice_story",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "balderdash with friends",
+      "make up fake definitions",
+      "fibbage style bluffing game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "acrophobia",
+    "name": "Acronym backronyms",
+    "aliases": [
+      "Acrophobia",
+      "Quiplash"
+    ],
+    "family": "word",
+    "summary": "Write a funny phrase for a random acronym; the group votes on the best one.",
+    "core_loop": "see random letters → write a phrase using them as initials → vote on the best",
+    "verbs": [
+      "write",
+      "vote"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "rules": [
+      "words must start with the given letters in order"
+    ],
+    "win": "most votes",
+    "lose": "none",
+    "scoring": "votes received",
+    "session_seconds": [
+      180,
+      600
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Group voting each round."
+    ],
+    "difficulty_levers": [
+      "acronym length",
+      "theme"
+    ],
+    "tools": [
+      "typed_answer",
+      "turns",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "quiplash with my friends",
+      "funny acronym game",
+      "make a phrase from these letters"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_golf",
+    "name": "Word golf",
+    "aliases": [
+      "Word Golf",
+      "Six Degrees"
+    ],
+    "family": "word",
+    "summary": "Reach a target word in as few word associations or letter changes as possible.",
+    "core_loop": "start at a word → make a linked step → reach the target in few steps",
+    "verbs": [
+      "link",
+      "plan",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "each step must follow the link rule"
+    ],
+    "win": "reach the target at or under par",
+    "lose": "none",
+    "scoring": "strokes versus par",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Compare par with friends."
+    ],
+    "difficulty_levers": [
+      "par",
+      "link rule"
+    ],
+    "tools": [
+      "typed_answer",
+      "sequence_memory",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "get from apple to rocket in fewest steps",
+      "word golf",
+      "six degrees of words"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "vowel_drop",
+    "name": "Add the vowels",
+    "aliases": [
+      "Missing Vowels",
+      "Only Connect"
+    ],
+    "family": "word",
+    "summary": "Read phrases with all vowels removed and guess them.",
+    "core_loop": "read a phrase with vowels removed → type the full phrase → next",
+    "verbs": [
+      "decode",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spacing can be misleading"
+    ],
+    "win": "solve every phrase",
+    "lose": "timer runs out",
+    "scoring": "phrases solved",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Buzzer race among friends."
+    ],
+    "difficulty_levers": [
+      "spacing hints",
+      "category"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "missing vowels round",
+      "guess the phrase without vowels",
+      "only connect missing vowels"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "letter_count_constraint",
+    "name": "Write within a constraint",
+    "aliases": [
+      "Lipogram",
+      "Constrained writing"
+    ],
+    "family": "word",
+    "summary": "Write a sentence or word that meets a rule (no letter E, exactly 10 letters, alliteration).",
+    "core_loop": "read the rule → write a word or sentence that follows it → it's checked or voted on",
+    "verbs": [
+      "write",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "the rule is checked automatically when possible"
+    ],
+    "win": "meet the rule",
+    "lose": "breaking the rule",
+    "scoring": "length or votes",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Friends rate each other's entries."
+    ],
+    "difficulty_levers": [
+      "rule strictness",
+      "length"
+    ],
+    "tools": [
+      "typed_answer",
+      "word_check",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "write a sentence without the letter e",
+      "alliteration challenge",
+      "word game with weird rules"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "tiles_to_phrase",
+    "name": "Tiles into a quote",
+    "aliases": [
+      "Quote Falls",
+      "Phrase Builder"
+    ],
+    "family": "word",
+    "summary": "Rearrange chunks of letters into a hidden quote or phrase.",
+    "core_loop": "drag letter chunks into columns → the quote forms → solve it",
+    "verbs": [
+      "arrange",
+      "deduce"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "rules": [
+      "each column's letters only fall into that column"
+    ],
+    "win": "complete the quote",
+    "lose": "none",
+    "scoring": "moves and time",
+    "session_seconds": [
+      120,
+      600
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Send a quote from your group chat as a puzzle."
+    ],
+    "difficulty_levers": [
+      "tile size",
+      "quote length"
+    ],
+    "tools": [
+      "tile_slide",
+      "player_drag",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "rearrange the pieces into a quote",
+      "drop quotes puzzle",
+      "build the movie quote from tiles"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_guess_hot_cold",
+    "name": "Semantic hot and cold",
+    "aliases": [
+      "Contexto",
+      "Semantle"
+    ],
+    "family": "word",
+    "summary": "Guess a secret word; each guess is ranked by how close in meaning it is.",
+    "core_loop": "guess a word → see its closeness rank → guess closer → find the word",
+    "verbs": [
+      "guess",
+      "infer",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "rank is by closeness in meaning, not spelling"
+    ],
+    "win": "find the secret word",
+    "lose": "none",
+    "scoring": "fewer guesses",
+    "session_seconds": [
+      120,
+      900
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Daily shared word; compare guess counts."
+    ],
+    "difficulty_levers": [
+      "hint frequency",
+      "word commonness"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "contexto game",
+      "semantle but easier",
+      "guess the word, see how close in meaning"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pictionary_guess",
+    "name": "Draw and guess",
+    "aliases": [
+      "Pictionary",
+      "Skribbl",
+      "Draw Something"
+    ],
+    "family": "word",
+    "summary": "One player draws a word, others guess it by typing.",
+    "core_loop": "drawer draws the prompt → guessers type answers → first right answer scores both",
+    "verbs": [
+      "draw",
+      "guess"
+    ],
+    "inputs": [
+      "draw",
+      "type"
+    ],
+    "rules": [
+      "no letters or numbers in the drawing"
+    ],
+    "win": "most points after everyone draws",
+    "lose": "none",
+    "scoring": "faster guesses score more",
+    "session_seconds": [
+      300,
+      900
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "Group party game: take turns drawing for each other."
+    ],
+    "difficulty_levers": [
+      "time",
+      "word difficulty",
+      "hint letters"
+    ],
+    "tools": [
+      "player_drag",
+      "typed_answer",
+      "turns",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "skribbl with friends",
+      "draw something game",
+      "pictionary for my group"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_slot_machine",
+    "name": "Word slot machine",
+    "aliases": [
+      "Word Slots"
+    ],
+    "family": "word",
+    "summary": "Spin letter reels and stop them to make the highest-scoring word.",
+    "core_loop": "spin the letter reels → stop each reel → make the best word → score",
+    "verbs": [
+      "time",
+      "spell"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "each reel stops on one letter",
+      "the word must use the reels in order"
+    ],
+    "win": "best score after spins",
+    "lose": "none",
+    "scoring": "letter values",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Best word of the day in the group."
+    ],
+    "difficulty_levers": [
+      "reel count",
+      "spin speed"
+    ],
+    "tools": [
+      "reveal",
+      "word_check",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "slot machine that spells words",
+      "spin letters to make words",
+      "word slots"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "riddle",
+    "name": "Riddles",
+    "aliases": [
+      "Riddles",
+      "What am I?"
+    ],
+    "family": "word",
+    "summary": "Answer a riddle by typing the answer.",
+    "core_loop": "read the riddle → type your answer → take a hint if stuck",
+    "verbs": [
+      "think",
+      "type"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "answers are fuzzy-matched",
+      "hints cost points"
+    ],
+    "win": "solve the riddle",
+    "lose": "none",
+    "scoring": "points minus hints",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Send a riddle to a friend; see who solved it first."
+    ],
+    "difficulty_levers": [
+      "hint count",
+      "difficulty"
+    ],
+    "tools": [
+      "typed_answer",
+      "fuzzy_match",
+      "hint",
+      "daily_seed"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "riddle a day",
+      "what am i riddles for kids",
+      "hard riddles game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "pun_finish",
+    "name": "Finish the pun",
+    "aliases": [
+      "Dad jokes",
+      "Pun game"
+    ],
+    "family": "word",
+    "summary": "Pick or type the punchline that completes a pun.",
+    "core_loop": "read the setup → pick or type the punchline → group votes",
+    "verbs": [
+      "complete",
+      "vote"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "rules": [
+      "punchlines must be a pun"
+    ],
+    "win": "most votes or right answers",
+    "lose": "none",
+    "scoring": "points per right answer or vote",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "Group votes on the best punchlines."
+    ],
+    "difficulty_levers": [
+      "choices",
+      "time"
+    ],
+    "tools": [
+      "quiz",
+      "typed_answer",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "dad joke game",
+      "finish the pun",
+      "pun battle"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "word_bomb",
+    "name": "Word bomb",
+    "aliases": [
+      "BombParty",
+      "Word Bomb"
+    ],
+    "family": "word",
+    "summary": "Type a word containing the shown letter cluster before the bomb goes off; pass it on.",
+    "core_loop": "see a letter cluster → type a word containing it → pass the bomb before it blows",
+    "verbs": [
+      "type",
+      "react"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "no repeated words",
+      "the fuse is hidden"
+    ],
+    "win": "last player standing",
+    "lose": "the bomb blows on your turn",
+    "scoring": "lives left",
+    "session_seconds": [
+      60,
+      600
+    ],
+    "players": [
+      "pass_and_play",
+      "live"
+    ],
+    "social_hooks": [
+      "Pass-the-bomb in a group; last one standing wins."
+    ],
+    "difficulty_levers": [
+      "cluster rarity",
+      "fuse length"
+    ],
+    "tools": [
+      "typed_answer",
+      "word_check",
+      "timer_bar",
+      "turns",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "bomb party word game",
+      "type a word with 'ing' before it explodes",
+      "word bomb with friends"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "palindrome_builder",
+    "name": "Palindromes",
+    "aliases": [
+      "Palindromes"
+    ],
+    "family": "word",
+    "summary": "Build or spot words and phrases that read the same both ways.",
+    "core_loop": "see letters or a prompt → build a word or phrase that reads the same both ways → it's checked",
+    "verbs": [
+      "build",
+      "spell"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "rules": [
+      "spaces and punctuation are ignored"
+    ],
+    "win": "make a valid palindrome",
+    "lose": "none",
+    "scoring": "length of palindrome",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Group wall of best palindromes."
+    ],
+    "difficulty_levers": [
+      "length",
+      "phrase vs word"
+    ],
+    "tools": [
+      "typed_answer",
+      "word_check",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "find the palindromes",
+      "make a palindrome",
+      "racecar word game"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "spot_the_typo",
+    "name": "Spot the misspelling",
+    "aliases": [
+      "Spelling Check",
+      "Which is spelled right"
+    ],
+    "family": "word",
+    "summary": "Find the misspelled word in each list or sentence.",
+    "core_loop": "read the list → tap the misspelled word → next, faster",
+    "verbs": [
+      "spot",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "rules": [
+      "exactly one word per round is wrong"
+    ],
+    "win": "survive all rounds",
+    "lose": "wrong tap or timer",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends"
+    ],
+    "social_hooks": [
+      "Streak challenge."
+    ],
+    "difficulty_levers": [
+      "subtlety",
+      "time"
+    ],
+    "tools": [
+      "quiz",
+      "timer_bar",
+      "rounds",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "trivia",
+    "example_prompts": [
+      "which word is spelled wrong",
+      "spot the typo fast",
+      "spelling quiz"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  },
+  {
+    "id": "letter_lock",
+    "name": "Word lock",
+    "aliases": [
+      "WordLock",
+      "Word Wheels"
+    ],
+    "family": "word",
+    "summary": "Spin letter dials on a lock to form the one valid word that opens it.",
+    "core_loop": "spin letter dials → line up a real word → the lock opens",
+    "verbs": [
+      "spin",
+      "spell"
+    ],
+    "inputs": [
+      "swipe",
+      "tap"
+    ],
+    "rules": [
+      "exactly one valid word opens the lock"
+    ],
+    "win": "open every lock",
+    "lose": "none",
+    "scoring": "time per lock",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Daily lock with group times."
+    ],
+    "difficulty_levers": [
+      "dial count",
+      "letters per dial"
+    ],
+    "tools": [
+      "tile_slide",
+      "word_check",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "puzzle",
+    "example_prompts": [
+      "word lock puzzle",
+      "spin the dials to make a word",
+      "combination lock with letters"
+    ],
+    "status": "seed",
+    "source": "kevin"
+  }
+]

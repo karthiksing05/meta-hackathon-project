@@ -1,0 +1,32 @@
+[
+  {
+    "request": "make krillion",
+    "expect": [
+      "rare_answer_trivia"
+    ]
+  },
+  {
+    "request": "a family feud game for our thanksgiving",
+    "expect": [
+      "survey_says"
+    ]
+  },
+  {
+    "request": "heardle but for k-pop",
+    "expect": [
+      "audio_name_that_tune"
+    ]
+  },
+  {
+    "request": "jeopardy board about our road trip",
+    "expect": [
+      "category_board"
+    ]
+  },
+  {
+    "request": "how well do you know me quiz for my best friend",
+    "expect": [
+      "personal_trivia"
+    ]
+  }
+]
