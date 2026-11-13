@@ -3,11 +3,11 @@
 //
 //   node authoring/tools/make-image-art.mjs --manifest games/3/manifest.json --out out/3 \
 //        [--plan plans/3.json] [--request "..."] [--style "80s anime"] [--strategy sheet|each]
-//        [--no-direction] [--cache dir] [--budget 196608]
+//        [--no-direction] [--cache dir] [--budget 196608] [--max-redraws 4]
 //   node authoring/tools/make-image-art.mjs --story authoring/stories/kevin_01_leia_escape.story.json --out out/s1 [--style ...]
 //
 // Writes <out>/manifest.json (the game with its new pictures), <out>/art.json (record, stats,
-// direction) and <out>/preview-*.png. `--cache` keeps every image reply by prompt hash, so a rerun
+// direction, sprite check) and <out>/preview-*.png (preview-set-<id>.png: a set asset's frames in order). `--cache` keeps every image reply by prompt hash, so a rerun
 // makes no calls and gives the same bytes. The Muse key is read into memory only and never printed.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
@@ -20,6 +20,7 @@ import zlib from 'node:zlib';
 import { makeImageArt, applyImageArt, makeStoryArt, applyStoryArt } from '../expander/image-art.mjs';
 import { decodePNG, encodePNG, isPNG } from '../expander/image-codec.mjs';
 import * as X from '../expander/image-pixels.mjs';
+import { splitFrames } from '../expander/sprite-check.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
@@ -186,12 +187,18 @@ async function main() {
   const game = JSON.parse(manifest.content.game_json);
   const authoring = manifest.content.authoring_json ? JSON.parse(manifest.content.authoring_json) : null;
   const request = opt('--request', manifest.brief?.intent ?? '');
-  const art = await makeImageArt({ game, authoring, request, spec, style }, deps, { strategy: opt('--strategy', 'sheet'), budget: Number(opt('--budget', 192 * 1024)) });
+  const art = await makeImageArt({ game, authoring, request, spec, style }, deps, { strategy: opt('--strategy', 'sheet'), budget: Number(opt('--budget', 192 * 1024)), ...(opt('--max-redraws') !== null ? { max_redraws: Number(opt('--max-redraws')) } : {}) });
   const next = applyImageArt(manifest, art);
   writeFileSync(join(out, 'manifest.json'), JSON.stringify(next, null, 1));
   writeFileSync(join(out, 'art.json'), JSON.stringify({ record: art.record, stats: art.stats, direction: art.direction, sheet: art.sheet, fits: art.fits, log }, null, 1));
   writeFileSync(join(out, 'preview-sprites.png'), previewSheet(Object.values(art.keyed)));
-  console.log(JSON.stringify({ out, strategy: art.stats.strategy, image_calls: art.stats.image_calls, text_calls: art.stats.text_calls, tokens: art.stats.tokens, ms: art.stats.ms, budget: art.stats.budget, slice: art.stats.slice, retried: art.stats.retried ?? [] }));
+  // One contact sheet per set asset: its frames as the game will show them, in frame order.
+  for (const [id, a] of Object.entries(art.assets)) {
+    if (!(a.frames > 1) || a.fps !== undefined || !art.record.pictures.find((p) => p.id === id)?.frames) continue;
+    const img = decodePNG(new Uint8Array(Buffer.from(a.image.split(',')[1], 'base64')), inflate);
+    writeFileSync(join(out, `preview-set-${id}.png`), previewSheet(splitFrames(img, a.frames, a.cols ?? a.frames), 192));
+  }
+  console.log(JSON.stringify({ out, strategy: art.stats.strategy, image_calls: art.stats.image_calls, text_calls: art.stats.text_calls, tokens: art.stats.tokens, ms: art.stats.ms, budget: art.stats.budget, slice: art.stats.slice, retried: art.stats.retried ?? [], variants: art.stats.variants ?? {}, sprite_check: art.stats.sprite_check }));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

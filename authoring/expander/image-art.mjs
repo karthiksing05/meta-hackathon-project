@@ -4,11 +4,15 @@
 // hitboxes and replays are untouched. Nothing here runs while someone plays.
 //
 //   style sheet (one per game: style, palette, line, lighting, framing, background key)
-//   → art direction (optional Muse text call: what each role looks like, real people named)
+//   → pictures: one per sprite role, and one per item for a set asset (several frames, no fps, the
+//     frame picked by the game: nine Labubu figures each get their own named, described picture)
+//   → art direction (optional Muse text call: what each role looks like, each set item's own color,
+//     outfit and pose, real people named)
 //   → image calls (one sheet call for all sprite roles on a flat chroma background, or one call per
 //     role; one backdrop call; for stories a character lineup, then scene stills drawn with the
 //     lineup as a reference image so faces and outfits stay the same)
 //   → key out the background, slice, trim, fit to the asset box, downscale to play size, sharpen
+//   → sprite check (sprite-check.mjs): look-alikes, empty slices, cut or doubled figures are redrawn
 //   → encode: sprites as 8-bit palette PNG, backdrops and stills as JPEG, within the art budget
 //   → assets for content.game_json, the same pictures in content.authoring_json's art, and a
 //     `license: "generated"` record per picture.
@@ -23,6 +27,7 @@
 
 import { encodePNG, encodeJPEG, quantize, dataUri } from './image-codec.mjs';
 import * as X from './image-pixels.mjs';
+import { checkSprites, redrawKeys } from './sprite-check.mjs';
 
 export const IMAGE_ART_FORMAT = 'image-art/1';
 export const IMAGE_ART_LIMITS = Object.freeze({
@@ -30,7 +35,9 @@ export const IMAGE_ART_LIMITS = Object.freeze({
   image_bytes: 512 * 1024, // one image (SVG_LIMITS.image_bytes)
   max_sprites: 32,
   sprite_px: [48, 128], // longest side of one frame, in pixels
-  sheet_max: 9, // roles per sheet call (3 × 3)
+  sheet_max: 16, // pictures per sheet call (4 × 4); more go on a second sheet
+  max_variants: 32, // pictures drawn for one many-item asset (one per frame)
+  max_redraws: 4, // single-picture calls to redraw slices the sprite check flags
   backdrop_w: [270, 540], // pixels across for a 360-wide canvas
   concurrency: 3,
 });
@@ -142,14 +149,135 @@ const SOUND = (a) => a && typeof a === 'object' && 'sound' in a;
 /**
  * The picture roles of an expanded game: every image asset (svg or image), with its frame size and
  * animation, and what the game says about it. The backdrop is the asset called `backdrop`.
+ * A many-frame asset with no fps whose frame is picked by the game (`frame: "= last_idx"`), not by the
+ * clock, is a set of different things, one per frame (nine Labubu figures, five fruits): it gets
+ * `variants: [name per frame]`, from the content list of that length when the game has one.
  */
 export function spriteRoles(game, authoring = null) {
   const roles = [];
   for (const [id, a] of Object.entries(game?.assets ?? {})) {
     if (!a || SOUND(a) || !(a.svg || a.image)) continue;
-    roles.push({ id, kind: id === 'backdrop' ? 'backdrop' : 'sprite', w: a.w, h: a.h, frames: a.frames ?? 1, cols: a.cols ?? a.frames ?? 1, ...(a.fps !== undefined ? { fps: a.fps } : {}), describe: describeRole(id, authoring) });
+    const role = { id, kind: id === 'backdrop' ? 'backdrop' : 'sprite', w: a.w, h: a.h, frames: a.frames ?? 1, cols: a.cols ?? a.frames ?? 1, ...(a.fps !== undefined ? { fps: a.fps } : {}), describe: describeRole(id, authoring) };
+    const names = role.kind === 'sprite' ? variantNames(game, authoring, id, a) : null;
+    if (names) role.variants = names;
+    roles.push(role);
   }
   return roles;
+}
+
+// Frame expressions that move with the clock are animation, not a choice of item.
+const CLOCK = /\b(time|now|elapsed|tick|ticks|t|age|clock|anim\w*)\b/;
+
+function frameExprs(game, id) {
+  const out = [];
+  const walk = (n) => {
+    if (Array.isArray(n)) { n.forEach(walk); return; }
+    if (!n || typeof n !== 'object') return;
+    if (n.asset === id && n.frame !== undefined) out.push(String(n.frame));
+    for (const [k, v] of Object.entries(n)) if (k !== 'assets' && v && typeof v === 'object') walk(v);
+  };
+  walk(game?.presentation);
+  return out;
+}
+
+// The string items of a list literal such as "['Coco Labubu', 'Berry Labubu']".
+function listLiteral(init) {
+  if (Array.isArray(init)) return init.every((x) => typeof x === 'string') ? init : null;
+  const s = String(init ?? '').trim();
+  if (!s.startsWith('[')) return null;
+  const items = [...s.matchAll(/'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"/g)].map((m) => (m[1] ?? m[2]).replace(/\\(.)/g, '$1'));
+  return items;
+}
+
+/**
+ * Names for the frames of a many-item asset, or null when its frames are an animation. Candidates are
+ * the game's string lists with one entry per frame (authoring content, then content_* state); names
+ * that mention the asset ("Coco Labubu" for `labubu`) and read like names (not sentences) win.
+ */
+export function variantNames(game, authoring, id, a) {
+  const frames = a?.frames ?? 1;
+  if (frames < 2 || a.fps !== undefined) return null;
+  const exprs = frameExprs(game, id);
+  if (exprs.some((e) => CLOCK.test(e.replace(/^=\s*/, '')))) return null;
+  const lists = [];
+  for (const [k, v] of Object.entries(authoring?.content ?? {})) if (Array.isArray(v)) lists.push({ k, items: v });
+  for (const [k, v] of Object.entries(game?.state ?? {})) if (/^list<string>/.test(String(v?.type ?? ''))) { const items = listLiteral(v.init); if (items) lists.push({ k: k.replace(/^content_/, ''), items }); }
+  const word = id.toLowerCase().split('_').filter((w) => w.length > 2);
+  let best = null, bestScore = -Infinity;
+  for (const { k, items } of lists) {
+    if (items.length !== frames || !items.every((x) => typeof x === 'string' && x.trim())) continue;
+    if (new Set(items.map((x) => x.toLowerCase())).size !== items.length) continue;
+    const avg = items.reduce((s, x) => s + x.length, 0) / items.length;
+    if (avg > 40) continue;
+    const mentions = items.filter((x) => word.some((w) => x.toLowerCase().includes(w))).length / items.length;
+    const score = mentions * 2 + Math.min(avg, 24) / 24 + (word.some((w) => k.toLowerCase().includes(w)) ? 1 : 0);
+    if (score > bestScore) { bestScore = score; best = items; }
+  }
+  if (best) return best.map((x) => String(x).trim().slice(0, 60));
+  const name = id.replace(/_/g, ' ');
+  return Array.from({ length: frames }, (_, k) => `${name} ${k + 1}`);
+}
+
+// Distinguishing looks for set items that have no art direction: a main color (from the item's name
+// when it names one), an outfit and a pose, all different within a set of up to 16.
+const COLOR_WORDS = [
+  [/\b(coco|cocoa|choco\w*|brown|mocha|coffee)\b/i, 'cocoa brown'], [/\b(berry|cherry|ruby|red|crimson)\b/i, 'berry red'],
+  [/\b(mint|green|lime|matcha|jade)\b/i, 'mint green'], [/\b(lilac|lavender|purple|violet|grape)\b/i, 'lilac purple'],
+  [/\b(peach|apricot)\b/i, 'peach orange'], [/\b(sky|blue|azure|ocean|navy)\b/i, 'sky blue'],
+  [/\b(rose|pink|blush|sakura)\b/i, 'rose pink'], [/\b(coral|salmon)\b/i, 'coral'], [/\b(gold|golden|honey)\b/i, 'shiny metallic gold'],
+  [/\b(silver|chrome)\b/i, 'shiny silver'], [/\b(lemon|yellow|banana|sunny)\b/i, 'lemon yellow'], [/\b(orange|tangerine|pumpkin)\b/i, 'tangerine orange'],
+  [/\b(snow|white|cream|vanilla|milk)\b/i, 'snow white'], [/\b(black|shadow|night|midnight|ink)\b/i, 'midnight black'], [/\b(teal|aqua|turquoise)\b/i, 'teal'],
+];
+const SET_COLORS = ['cherry red', 'sky blue', 'mint green', 'lemon yellow', 'lilac purple', 'tangerine orange', 'rose pink', 'cocoa brown', 'teal', 'snow white', 'midnight black', 'shiny gold', 'coral', 'navy blue', 'lime green', 'silver'];
+const SET_OUTFITS = ['striped overalls', 'a hooded raincoat', 'a tiny crown and cape', 'a sailor suit', 'a knitted sweater', 'a fruit costume hood', 'a tutu and bow', 'a puffer jacket', 'a chef apron and hat', 'pajamas and a nightcap', 'a sports jersey', 'a wizard robe', 'a flower wreath and dress', 'a space suit', 'a scarf and beanie', 'a tuxedo and bow tie'];
+const SET_POSES = ['waving', 'jumping with arms up', 'sitting and hugging its knees', 'winking with a peace sign', 'holding a balloon', 'running', 'dancing on one foot', 'hands on hips', 'blowing a kiss', 'peeking shyly', 'cheering with fists up', 'holding a lollipop', 'reading a tiny book', 'skateboarding', 'curtsying', 'striking a superhero pose'];
+
+/** A deterministic, distinct look for item k of a set (used when there's no art direction for it). */
+export function variantLook(name, k, used = new Set()) {
+  let color = COLOR_WORDS.find(([re]) => re.test(name))?.[1];
+  if (!color || used.has(color)) color = SET_COLORS.find((c, i) => i >= k % SET_COLORS.length && !used.has(c)) ?? SET_COLORS.find((c) => !used.has(c)) ?? SET_COLORS[k % SET_COLORS.length];
+  used.add(color);
+  return `${name}: ${color} all over, wearing ${SET_OUTFITS[k % SET_OUTFITS.length]}, ${SET_POSES[k % SET_POSES.length]}`;
+}
+
+/**
+ * The pictures to draw: one per sprite role, and one per frame for a role with variants. Each has a
+ * `key` (the role id, or "<id>#<frame>"), the role, its frame and its name.
+ */
+export function pictureItems(roles, direction) {
+  const items = [];
+  for (const role of roles) {
+    if (role.kind !== 'sprite') continue;
+    if (!role.variants) { items.push({ key: role.id, role, name: role.describe.name, text: String(direction?.roles?.[role.id] ?? role.describe.name).slice(0, 220) }); continue; }
+    // The role's one-line description ("waving, cream fur") would pull every item toward the same
+    // look, so set items carry only their own description.
+    const given = Array.isArray(direction?.variants?.[role.id]) ? direction.variants[role.id] : [];
+    const used = new Set();
+    role.variants.slice(0, IMAGE_ART_LIMITS.max_variants).forEach((name, k) => {
+      const d = given[k] ? String(given[k]).trim() : '';
+      const look = d ? (d.toLowerCase().includes(name.toLowerCase()) ? d : `${name}: ${d}`) : variantLook(name, k, used);
+      items.push({ key: `${role.id}#${k}`, role, frame: k, name, text: look.slice(0, 240) });
+    });
+  }
+  return items;
+}
+
+/** Sheets of at most `max` pictures; a role's set stays on one sheet when it fits. */
+export function packSheets(items, max = IMAGE_ART_LIMITS.sheet_max) {
+  const byRole = [];
+  for (const it of items) { const last = byRole[byRole.length - 1]; if (last && last[0].role === it.role) last.push(it); else byRole.push([it]); }
+  const groups = [];
+  let cur = [];
+  for (const set of byRole) {
+    // A set that fits one sheet moves to a fresh sheet rather than split; a bigger one fills sheets in turn.
+    if (set.length <= max && cur.length + set.length > max) { groups.push(cur); cur = []; }
+    for (const it of set) {
+      if (cur.length === max) { groups.push(cur); cur = []; }
+      cur.push(it);
+    }
+  }
+  if (cur.length) groups.push(cur);
+  return groups.filter((g) => g.length);
 }
 
 // What the authoring manifest says about a role: the fragment's art header text, if one names it.
@@ -171,6 +299,7 @@ export function artDirectionPrompt({ request, title, instructions, spec, roles, 
     'Real people are drawn as stylised cartoon caricatures, so list every real person in real_people. Fictional characters are not real people.',
     'Every role is one isolated subject drawn at 64 pixels, so describe a bold, simple silhouette with big readable shapes; no tiny text.',
     'Pick "key": the flat background color the image model paints around the sprites. It must not appear in any sprite: magenta unless something is pink or purple, then green unless something is green, else blue.',
+    ...(roles.some((r) => r.variants) ? ['Some roles are a set of different items, listed in "items" (one picture each). For each such role add "variants": {"<role id>": ["<one entry per item, same order: the item name as written, then 10-25 words: its main color, outfit, pose and one prop>"]}. Every item in a set must look clearly different from the others: its own main color, its own outfit, its own pose. Keep the names exactly as listed.'] : []),
   ].join('\n');
   const user = JSON.stringify({
     request: String(request ?? '').slice(0, 400),
@@ -179,7 +308,7 @@ export function artDirectionPrompt({ request, title, instructions, spec, roles, 
     theme: spec?.theme ?? null,
     look: spec?.feel?.look ?? null,
     style: sheet ? `${sheet.name}: ${sheet.look}` : null,
-    roles: roles.filter((r) => r.kind === 'sprite').map((r) => ({ id: r.id, box: `${r.w}x${r.h}`, ...(r.frames > 1 ? { frames: r.frames } : {}) })),
+    roles: roles.filter((r) => r.kind === 'sprite').map((r) => ({ id: r.id, box: `${r.w}x${r.h}`, ...(r.variants ? { items: r.variants.slice(0, IMAGE_ART_LIMITS.max_variants) } : r.frames > 1 ? { frames: r.frames } : {}) })),
     has_backdrop: roles.some((r) => r.kind === 'backdrop'),
   });
   return { system, user };
@@ -210,12 +339,16 @@ export function fallbackDirection({ title, spec, roles }) {
 
 const KEY_TEXT = { magenta: 'pure magenta (#FF00FF)', green: 'pure green (#00FF00)', blue: 'pure blue (#0000FF)' };
 
-/** The chroma key: the direction's pick, unless a role description names that color. */
-export function pickKey(direction) {
-  const text = Object.values(direction?.roles ?? {}).join(' ').toLowerCase();
-  const avoid = { magenta: /\b(pink|magenta|purple|violet|fuchsia|lilac)/, green: /\b(green|lime|frog|crocodile|plant|leaf|leaves|cactus|grass|zombie)/, blue: /\b(blue|navy|sky)\b/ };
-  const order = [direction?.key, 'magenta', 'green', 'blue'].filter((k) => KEY_TEXT[k]);
-  return order.find((k) => !avoid[k].test(text)) ?? 'magenta';
+/**
+ * The chroma key: the direction's pick, unless a picture description names that color. When every key
+ * color is named somewhere (a rainbow set), the one named least.
+ */
+export function pickKey(direction, extra = []) {
+  const text = [...Object.values(direction?.roles ?? {}), ...Object.values(direction?.variants ?? {}).flat(), ...extra].join(' ').toLowerCase();
+  const avoid = { magenta: /\b(pink|magenta|purple|violet|fuchsia|lilac)/g, green: /\b(green|lime|frog|crocodile|plant|leaf|leaves|cactus|grass|zombie|mint)/g, blue: /\b(blue|navy|sky)\b/g };
+  const order = [direction?.key, 'magenta', 'green', 'blue'].filter((k, i, a) => KEY_TEXT[k] && a.indexOf(k) === i);
+  const count = (k) => (text.match(avoid[k]) ?? []).length;
+  return order.find((k) => !count(k)) ?? [...order].sort((a, b) => count(a) - count(b))[0] ?? 'magenta';
 }
 
 const BG_RULES = (key) => `Background: one flat solid ${KEY_TEXT[key]} everywhere, no gradient, no floor, no cast shadows on the background, no text, no labels, no borders, no grid lines, no frames.`;
@@ -224,7 +357,11 @@ const shapeHint = (r) => (r.h > r.w * 1.25 ? 'tall composition' : r.w > r.h * 1.
 
 export function sheetPrompt(sheet, items, cols, rows, key) {
   const list = items.map((it, i) => `(${i + 1}) ${it.text} [${shapeHint(it.role)}]`).join('; ');
-  return `Game sprite sheet for "${sheet.title}": ${items.length} separate subjects arranged in a ${cols} columns x ${rows} rows grid, reading order left to right then top to bottom, each one centered in its own cell with wide empty space around it, nothing touching or overlapping. ${list}. ${styleText(sheet)} Each subject: ${sheet.framing}. ${BG_RULES(key)}`;
+  // A set (nine Labubu figures) is named as one, so the model draws each item differently.
+  const sets = [];
+  for (const it of items) if (it.frame !== undefined) { const s = sets.find((x) => x.role === it.role); if (s) s.to = items.indexOf(it) + 1; else sets.push({ role: it.role, from: items.indexOf(it) + 1, to: items.indexOf(it) + 1 }); }
+  const setText = sets.filter((s) => s.to > s.from).map((s) => ` Subjects ${s.from} to ${s.to} are ${s.to - s.from + 1} different figures of one collectible set: same character type, but each has its own main color, outfit and pose exactly as described; no two alike, never repeat the same figure.`).join('');
+  return `Game sprite sheet for "${sheet.title}": ${items.length} separate subjects arranged in a ${cols} columns x ${rows} rows grid, reading order left to right then top to bottom, each one centered in its own cell with wide empty space around it, nothing touching or overlapping. ${list}.${setText} ${styleText(sheet)} Each subject: ${sheet.framing}. ${BG_RULES(key)}`;
 }
 
 export function rolePrompt(sheet, item, key) {
@@ -438,39 +575,45 @@ export async function makeImageArt(input, deps, opts = {}) {
   const fb = fallbackDirection({ title, spec, roles });
   direction = { ...fb, ...(direction ?? {}), roles: { ...fb.roles, ...(direction?.roles ?? {}) } };
   const people = [...new Set([...(Array.isArray(direction.real_people) ? direction.real_people.map(String) : []), ...findPeople(`${request} ${title}`)])];
-  const key = pickKey(direction);
-  const keyRGB = X.KEYS[key];
   const guarded = (p) => { const g = guardPrompt(p, people); if (g.changed) stats.guarded = (stats.guarded ?? 0) + 1; return g.prompt; };
-  const items = sprites.map((role) => ({ role, text: String(direction.roles[role.id] ?? role.describe.name).slice(0, 220) }));
+  // One picture per sprite role, and one per item for a role that shows a set of different things.
+  const items = pictureItems(sprites, direction);
+  const key = pickKey(direction, items.map((it) => it.text));
+  const keyRGB = X.KEYS[key];
+  const variantRoles = sprites.filter((r) => r.variants);
+  if (variantRoles.length) stats.variants = Object.fromEntries(variantRoles.map((r) => [r.id, r.variants.length]));
 
   // Image calls.
   const imageCall = makeImageCall({ image, ask }, stats, [...people, ...(spec?.theme?.named ?? []).map(String)]);
   const call = async (purpose, prompt, reference) => decode((await imageCall(purpose, prompt, reference)).bytes);
   const tasks = [];
-  const groups = [];
-  if (strategy === 'sheet') {
-    for (let i = 0; i < items.length; i += IMAGE_ART_LIMITS.sheet_max) groups.push(items.slice(i, i + IMAGE_ART_LIMITS.sheet_max));
-  } else for (const it of items) groups.push([it]);
+  const groups = strategy === 'sheet' ? packSheets(items, opts.sheet_max ?? IMAGE_ART_LIMITS.sheet_max) : items.map((it) => [it]);
   const cut = {};
+  const cells = {};
   const prompts = {};
+  const single = async (it, label) => {
+    const p = guarded(rolePrompt(sheet, it, key));
+    prompts[it.key] = p;
+    const img = await call(label, p);
+    cut[it.key] = largest(X.chromaKey(halve(img), X.detectKey(img, keyRGB)));
+    delete cells[it.key];
+  };
   groups.forEach((g, gi) => {
     tasks.push(async () => {
-      if (g.length === 1) {
-        const p = guarded(rolePrompt(sheet, g[0], key));
-        prompts[g[0].role.id] = p;
-        const img = await call(`sprite ${g[0].role.id}`, p);
-        const keyed = X.chromaKey(halve(img), X.detectKey(img, keyRGB));
-        cut[g[0].role.id] = largest(keyed);
-        return;
-      }
+      if (g.length === 1) return single(g[0], `sprite ${g[0].key}`);
       const cols = Math.ceil(Math.sqrt(g.length)), rows = Math.ceil(g.length / cols);
       const p = guarded(sheetPrompt(sheet, g, cols, rows, key));
-      for (const it of g) prompts[it.role.id] = p;
+      for (const it of g) prompts[it.key] = p;
       const img = await call(`sheet ${gi + 1}`, p);
       const keyed = X.chromaKey(halve(img), X.detectKey(img, keyRGB));
       const s = X.sliceSheet(keyed, g.length, cols, rows);
       stats.slice = [...(stats.slice ?? []), s.method];
-      g.forEach((it, i) => { cut[it.role.id] = s.sprites[i]; });
+      const cw = keyed.w / cols, ch = keyed.h / rows;
+      g.forEach((it, i) => {
+        cut[it.key] = s.sprites[i];
+        // The grid cell, so the sprite check can tell a slice that cuts through a figure.
+        if (s.method !== 'regions') cells[it.key] = X.crop(keyed, (i % cols) * cw, Math.floor(i / cols) * ch, cw, ch);
+      });
     });
   });
   let backdropImg = null;
@@ -485,25 +628,36 @@ export async function makeImageArt(input, deps, opts = {}) {
   await pool(tasks, IMAGE_ART_LIMITS.concurrency);
   stats.ms.images = Date.now() - tImg;
 
-  // A sheet slice that came back empty gets its own call.
-  const missing = items.filter((it) => !cut[it.role.id] || !X.alphaBox(cut[it.role.id]) || X.coverage(cut[it.role.id]) < 0.02);
-  if (missing.length && strategy === 'sheet' && opts.retry !== false) {
-    await pool(missing.map((it) => async () => {
-      const p = guarded(rolePrompt(sheet, it, key));
-      prompts[it.role.id] = p;
-      const img = await call(`sprite ${it.role.id} (retry)`, p);
-      cut[it.role.id] = largest(X.chromaKey(halve(img), X.detectKey(img, keyRGB)));
-    }), IMAGE_ART_LIMITS.concurrency);
-    stats.retried = missing.map((it) => it.role.id);
+  // The sprite check: every picture must differ from the others and hold one whole figure. Flagged
+  // slices (empty, cut, two figures, or the later of two look-alikes) are redrawn one by one.
+  const check = () => checkSprites(items.map((it) => ({ key: it.key, img: cut[it.key] ?? null, ...(cells[it.key] ? { cell: cells[it.key] } : {}) })));
+  let checked = check();
+  stats.sprite_check = { issues: summarize(checked) };
+  const redraw = redrawKeys(checked).slice(0, opts.max_redraws ?? IMAGE_ART_LIMITS.max_redraws);
+  if (redraw.length && strategy === 'sheet' && opts.retry !== false) {
+    await pool(redraw.map((k) => async () => single(items.find((it) => it.key === k), `sprite ${k} (redraw)`)), IMAGE_ART_LIMITS.concurrency);
+    stats.retried = redraw;
+    checked = check();
+    stats.sprite_check.after = summarize(checked);
   }
+  stats.sprite_check.ok = checked.ok;
 
   // Encode within the budget.
   const tEnc = Date.now();
   const pieces = [];
-  for (const it of items) {
-    const src = cut[it.role.id];
+  for (const role of sprites) {
+    if (role.variants) {
+      // One frame per item, in the asset's own frame grid, so frame k is item k.
+      const mine = items.filter((it) => it.role === role);
+      const srcs = mine.map((it) => cut[it.key]).map((s) => (s && X.alphaBox(s) ? s : null));
+      if (!srcs.some(Boolean)) continue;
+      const near = (k) => srcs[k] ?? srcs.find(Boolean);
+      pieces.push({ id: role.id, kind: 'sprite', pixel: sheet.pixel, render: ({ px }) => setFrames(Array.from({ length: role.frames }, (_, k) => near(Math.min(k, srcs.length - 1))), role, px, sheet) });
+      continue;
+    }
+    const src = cut[role.id];
     if (!src || !X.alphaBox(src)) continue;
-    pieces.push({ id: it.role.id, kind: 'sprite', pixel: sheet.pixel, render: ({ px }) => finishSprite(src, it.role, px, sheet) });
+    pieces.push({ id: role.id, kind: 'sprite', pixel: sheet.pixel, render: ({ px }) => finishSprite(src, role, px, sheet) });
   }
   if (backdropImg && backdrop) {
     const aspect = backdrop.w / backdrop.h;
@@ -535,11 +689,24 @@ export async function makeImageArt(input, deps, opts = {}) {
     if (role.frames > 1) { a.frames = role.frames; a.cols = role.cols; }
     if (role.fps !== undefined) a.fps = role.fps;
     assets[role.id] = a;
-    record.pictures.push({ id: role.id, license: 'generated', source: 'muse-image-1.0', mime: e.mime, px: e.size, bytes: e.bytes.length, uri_bytes: e.uri, prompt: prompts[role.id] ?? null });
+    const first = role.variants ? `${role.id}#0` : role.id;
+    record.pictures.push({ id: role.id, license: 'generated', source: 'muse-image-1.0', mime: e.mime, px: e.size, bytes: e.bytes.length, uri_bytes: e.uri, prompt: prompts[first] ?? null, ...(role.variants ? { frames: role.variants.slice(0, role.frames) } : {}) });
   }
   stats.ms.total = Date.now() - t0;
   stats.bytes = { uri_total: fit.total, pictures: record.pictures.length };
-  return { assets, record, stats, direction, sheet, keyed: cut, fits: fit.fits };
+  return { assets, record, stats, direction, sheet, keyed: cut, items: items.map(({ key, name, text }) => ({ key, name, text })), check: checked, fits: fit.fits };
+}
+
+const summarize = (c) => c.issues.map((i) => `${i.code} ${i.keys.join(' ')}`);
+
+/** A set's frames: each item's own picture fitted to the frame box, laid out in the asset's frame grid. */
+export function setFrames(srcs, role, px, sheet) {
+  const one = { ...role, frames: 1, cols: 1 };
+  const frames = srcs.map((s) => finishSprite(s, one, px, sheet));
+  const fw = frames[0].w, fh = frames[0].h, cols = role.cols ?? frames.length, rows = Math.ceil(frames.length / cols);
+  const out = X.blank(fw * cols, fh * rows);
+  frames.forEach((f, k) => X.paste(out, f, (k % cols) * fw, Math.floor(k / cols) * fh));
+  return out;
 }
 
 function resolveColor(game, v) {

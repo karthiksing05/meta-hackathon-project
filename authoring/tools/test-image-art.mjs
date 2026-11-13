@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Tests for build-time picture art (authoring/expander/image-art.mjs, image-pixels.mjs, image-codec.mjs).
+// Tests for build-time picture art (authoring/expander/image-art.mjs, image-pixels.mjs, image-codec.mjs,
+// sprite-check.mjs).
 // No network: a fake image model paints sheets from the prompt. Run: node authoring/tools/test-image-art.mjs
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -11,6 +12,7 @@ import zlib from 'node:zlib';
 import * as C from '../expander/image-codec.mjs';
 import * as X from '../expander/image-pixels.mjs';
 import * as A from '../expander/image-art.mjs';
+import * as SC from '../expander/sprite-check.mjs';
 import { validateStoryGraph, compileStoryGraph } from '../expander/story-graph.mjs';
 import { expand, loadLibrary } from '../expander/expand.mjs';
 
@@ -24,7 +26,7 @@ const px = (img, x, y) => Array.from(img.data.subarray((y * img.w + x) * 4, (y *
 
 // ---------- a fake image model ----------
 
-const PALETTE = [[220, 40, 40], [40, 160, 60], [40, 80, 220], [240, 200, 30], [30, 30, 30], [250, 140, 20], [120, 70, 30], [0, 170, 170], [200, 200, 200]];
+const PALETTE = [[220, 40, 40], [40, 160, 60], [40, 80, 220], [240, 200, 30], [30, 30, 30], [250, 140, 20], [120, 70, 30], [0, 170, 170], [200, 200, 200], [255, 120, 200], [120, 20, 140], [0, 90, 20], [255, 255, 255], [110, 210, 255], [150, 0, 30], [70, 70, 150]];
 function paint(w, h, bg) { const im = X.blank(w, h); for (let i = 0; i < w * h; i++) im.data.set([...bg, 255], i * 4); return im; }
 function disc(im, cx, cy, r, rgb) {
   for (let y = Math.max(0, cy - r - 2); y < Math.min(im.h, cy + r + 2); y++) for (let x = Math.max(0, cx - r - 2); x < Math.min(im.w, cx + r + 2); x++) {
@@ -36,7 +38,7 @@ function disc(im, cx, cy, r, rgb) {
   }
 }
 const KEYRGB = (prompt) => (/pure green/.test(prompt) ? [2, 250, 4] : /pure blue/.test(prompt) ? [3, 2, 250] : [250, 3, 248]);
-function fakeImage(calls) {
+function fakeImage(calls, { sameSet = false } = {}) {
   return async ({ prompt, purpose, reference }) => {
     calls?.push({ purpose, prompt, reference: !!reference });
     if (/Leia/.test(prompt)) throw new Error('400 {"error":{"code":"content_policy_violation","message":"The response was filtered"}}');
@@ -47,7 +49,7 @@ function fakeImage(calls) {
       const [n, cols, rows] = grid.slice(1).map(Number);
       im = paint(960, 640, KEYRGB(prompt));
       const cw = 960 / cols, ch = 640 / rows;
-      for (let k = 0; k < n; k++) disc(im, Math.round((k % cols) * cw + cw / 2), Math.round(Math.floor(k / cols) * ch + ch / 2), Math.round(Math.min(cw, ch) * 0.3), PALETTE[k % PALETTE.length]);
+      for (let k = 0; k < n; k++) disc(im, Math.round((k % cols) * cw + cw / 2), Math.round(Math.floor(k / cols) * ch + ch / 2), Math.round(Math.min(cw, ch) * 0.3), sameSet && /different figures of one collectible set/.test(prompt) && k >= 2 ? PALETTE[2] : PALETTE[k % PALETTE.length]);
     } else if (lineup) {
       const n = Number(lineup[1]);
       im = paint(960, 480, KEYRGB(prompt));
@@ -231,6 +233,111 @@ const manifest = { id: 'mg-x', title: 'x', content: { game_json: JSON.stringify(
   await A.makeImageArt({ game, authoring, request: 'Jensen Huang simulator' }, { image: fakeImage(seen), decode, deflate, ask });
   const named = seen.filter((c) => /Jensen Huang/.test(c.prompt));
   ok(named.length > 0 && named.every((c) => /caricature of Jensen Huang/.test(c.prompt) && /never photorealistic/.test(c.prompt)), 'real people in prompts are caricatures');
+}
+
+// ---------- the sprite check ----------
+
+{
+  const onGrey = (rgb, r = 30, size = 80) => { const p = paint(size, size, [250, 3, 248]); disc(p, size >> 1, size >> 1, r, rgb); return X.chromaKey(p, [250, 3, 248]); };
+  const red = onGrey(PALETTE[0]), red2 = onGrey(PALETTE[0]), blue = onGrey(PALETTE[2]), green = onGrey(PALETTE[1]);
+  const c1 = SC.checkSprites([{ key: 'a', img: red }, { key: 'b', img: red2 }, { key: 'c', img: blue }]);
+  ok(c1.issues.length === 1 && c1.issues[0].code === 'V_SPRITE_DUP' && c1.issues[0].keys.join() === 'a,b', 'V_SPRITE_DUP: two copies of one figure', JSON.stringify(c1.issues));
+  ok(SC.checkSprites([{ key: 'r', img: red }, { key: 'g', img: green }, { key: 'b', img: blue }]).ok, 'figures in different colors pass');
+  ok(SC.redrawKeys(c1).join() === 'b', 'the later of a duplicate pair is redrawn');
+  const tiny = onGrey(PALETTE[0], 3);
+  const c2 = SC.checkSprites([{ key: 'e', img: X.blank(40, 40) }, { key: 't', img: tiny, cell: tiny }]);
+  ok(c2.issues.filter((i) => i.code === 'V_SPRITE_EMPTY').length === 2, 'V_SPRITE_EMPTY: empty and near-empty slices', JSON.stringify(c2.issues));
+  // A cell that a figure runs off: opaque pixels along its edge.
+  const cutCell = X.crop(onGrey(PALETTE[0], 30, 80), 0, 0, 50, 80);
+  const c3 = SC.checkSprites([{ key: 'cut', img: X.trim(cutCell), cell: cutCell }, { key: 'whole', img: X.trim(blue), cell: blue }]);
+  ok(c3.issues.some((i) => i.code === 'V_SPRITE_CUT' && i.keys[0] === 'cut') && !c3.issues.some((i) => i.keys.includes('whole')), 'V_SPRITE_CUT: a slice cut across a figure', JSON.stringify(c3.issues));
+  const two = paint(160, 80, [250, 3, 248]); disc(two, 40, 40, 30, PALETTE[0]); disc(two, 120, 40, 30, PALETTE[2]);
+  const c4 = SC.checkSprites([{ key: 'two', img: X.chromaKey(two, [250, 3, 248]) }]);
+  ok(c4.issues.some((i) => i.code === 'V_SPRITE_MULTI'), 'V_SPRITE_MULTI: two figures in one slice', JSON.stringify(c4.issues));
+  ok(SC.checkSprites([{ key: 'one', img: red }]).issues.length === 0, 'one whole figure passes');
+  const strip = X.blank(160, 40); X.paste(strip, X.fitInto(red, 40, 40), 0, 0); X.paste(strip, X.fitInto(blue, 40, 40), 40, 0); X.paste(strip, X.fitInto(red, 40, 40), 80, 0); X.paste(strip, X.fitInto(green, 40, 40), 120, 0);
+  const fr = SC.splitFrames(strip, 4, 4);
+  ok(fr.length === 4 && fr[1].w === 40, 'splitFrames cuts a frame strip');
+  const sc = SC.checkSprites(fr.map((f, k) => ({ key: k, img: f })));
+  ok(sc.issues.length === 1 && sc.issues[0].keys.join() === '0,2', 'frame check finds the repeated frame', JSON.stringify(sc.issues));
+}
+
+// ---------- one picture per item: a set asset (nine figures, frame chosen by the game) ----------
+
+const NAMES = ['Coco Labubu', 'Berry Labubu', 'Mint Labubu', 'Lilac Labubu', 'Peach Labubu', 'Sky Labubu', 'Rose Labubu', 'Coral Labubu', 'Golden Labubu'];
+const setGame = {
+  meta: { title: 'Blind Box Set', instructions: 'Tap the box to open it.' },
+  assets: {
+    backdrop: { svg: '<svg viewBox="0 0 360 640"/>', w: 360, h: 640 },
+    blind_box: { svg: '<svg/>', w: 64, h: 55 },
+    book_slot: { svg: '<svg/>', w: 64, h: 64 },
+    labubu: { svg: '<svg/>', w: 64, h: 64, frames: 9, cols: 9 },
+    runner: { svg: '<svg/>', w: 64, h: 64, frames: 4, cols: 4, fps: 8 },
+  },
+  state: {
+    content_figures: { type: 'list<string>', init: `[${NAMES.map((n) => `'${n}'`).join(', ')}]` },
+    content_short: { type: 'list<string>', init: "['COCO', 'BERRY', 'MINT', 'LILAC', 'PEACH', 'SKY', 'ROSE', 'CORAL', 'GOLD']" },
+    content_end_lines: { type: 'list<string>', init: "['One lonely silhouette left in the book. So close!', 'b']" },
+    last_idx: { type: 'int', init: '-1' },
+  },
+  presentation: { tokens: { primary: '#E0457B' }, canvas: { background: '#FFF4E8' }, root: { node: 'group', children: [{ node: 'image', asset: 'backdrop' }, { node: 'image', asset: 'labubu', frame: '= last_idx', w: 104, h: 104 }, { node: 'image', asset: 'runner' }] } },
+  rules: [{ id: 'open', on: 'tap_box', do: [] }],
+};
+{
+  const roles = A.spriteRoles(setGame);
+  const lab = roles.find((r) => r.id === 'labubu');
+  ok(lab.variants?.join() === NAMES.join(), 'a set asset gets one name per frame from the content list', JSON.stringify(lab.variants));
+  ok(!roles.find((r) => r.id === 'runner').variants && !roles.find((r) => r.id === 'blind_box').variants, 'animations (fps) and single pictures are not sets');
+  const clock = { ...setGame, presentation: { root: { node: 'image', asset: 'labubu', frame: '= floor(time * 6) % 9' } } };
+  ok(!A.variantNames(clock, null, 'labubu', setGame.assets.labubu), 'a frame driven by the clock is an animation');
+  ok(A.variantNames({ assets: {} }, null, 'gem', { frames: 3 }).join() === 'gem 1,gem 2,gem 3', 'a set with no names gets numbered names');
+  const looks = NAMES.map((n, k) => A.variantLook(n, k, new Set()));
+  ok(/mint green/.test(looks[2]) && /sky blue/.test(looks[5]) && /gold/.test(looks[8]), 'fallback looks take the color from the name', looks[2]);
+  const used = new Set();
+  const colors = Array.from({ length: 16 }, (_, k) => A.variantLook(`gem ${k + 1}`, k, used).split(': ')[1].split(' all over')[0]);
+  ok(new Set(colors).size === 16, 'sixteen fallback looks, sixteen colors', colors.join('|'));
+  const pack = A.packSheets(Array.from({ length: 20 }, (_, k) => ({ key: k, role: k < 2 ? 'a' : 'set' })));
+  ok(pack.length === 2 && pack.every((g) => g.length <= 16), 'at most 16 pictures per sheet, the rest on a second sheet', pack.map((g) => g.length).join());
+  ok(A.packSheets(Array.from({ length: 11 }, (_, k) => ({ key: k, role: k < 2 ? k : 'set' }))).length === 1, 'eleven pictures fit one sheet');
+}
+{
+  const calls = [];
+  const dir = { roles: { blind_box: 'a sealed box', book_slot: 'an empty book slot', labubu: 'cream Labubu waving' }, variants: { labubu: NAMES.map((n, k) => `${n}: ${['brown', 'red', 'mint', 'lilac', 'peach', 'blue', 'pink', 'coral', 'gold'][k]} fur, outfit ${k}, pose ${k}`) }, backdrop: 'a toy shop', real_people: [], key: 'green' };
+  const ask = async () => ({ content: JSON.stringify(dir), usage: { prompt_tokens: 10, completion_tokens: 5 } });
+  const asked = [];
+  const askSpy = async (s, u) => { asked.push({ s, u }); return ask(); };
+  const art = await A.makeImageArt({ game: setGame, request: 'Pop Mart blind box game to finish the Labubu set' }, { image: fakeImage(calls), decode, deflate, ask: askSpy });
+  ok(/"variants"/.test(asked[0].s) && NAMES.every((n) => asked[0].u.includes(n)), 'art direction asks for one look per item, by name');
+  const sheetCall = calls.find((c) => c.purpose === 'sheet 1');
+  ok(calls.filter((c) => c.purpose.startsWith('sheet')).length === 1 && /12 separate subjects arranged in a 4 columns x 3 rows/.test(sheetCall.prompt), 'one sheet: 2 pictures, 9 figures and the runner', calls.map((c) => c.purpose).join());
+  ok(NAMES.every((n) => sheetCall.prompt.includes(n)) && /different figures of one collectible set/.test(sheetCall.prompt) && /Lilac Labubu: lilac fur/.test(sheetCall.prompt), 'the sheet prompt lists every figure by name with its look');
+  ok(!/cream Labubu waving/.test(sheetCall.prompt), "the role's single look does not pull the set together");
+  ok(art.stats.sprite_check.ok && !art.stats.retried, 'the sprite check passes a sheet of different figures', JSON.stringify(art.stats.sprite_check));
+  ok(art.assets.labubu.frames === 9 && art.assets.labubu.cols === 9 && art.assets.labubu.w === 64 && art.assets.labubu.h === 64, 'the set asset keeps its frames and size');
+  const png = C.decodePNG(new Uint8Array(Buffer.from(art.assets.labubu.image.split(',')[1], 'base64')), inflate);
+  const frames = SC.splitFrames(png, 9, 9);
+  const fc = SC.checkSprites(frames.map((f, k) => ({ key: k, img: f })));
+  ok(fc.ok, 'every frame of the set is a different figure', JSON.stringify(fc.issues.slice(0, 2)));
+  ok(frames.every((f, k) => { const c = px(f, f.w >> 1, f.h >> 1); const want = PALETTE[(k + 2) % PALETTE.length]; return Math.abs(c[0] - want[0]) < 30 && Math.abs(c[2] - want[2]) < 30; }), 'frame k is item k (sheet order)');
+  ok(SC.checkGameSets(JSON.parse(A.applyImageArt({ content: { game_json: JSON.stringify(setGame) } }, art).content.game_json), (b) => C.decodePNG(b, inflate)).ok, 'checkGameSets passes the made game');
+  ok(art.record.pictures.find((p) => p.id === 'labubu').frames.join() === NAMES.join(), 'the art record names each frame');
+  const next = JSON.parse(A.applyImageArt({ content: { game_json: JSON.stringify(setGame) } }, art).content.game_json);
+  const strip = (g) => { const { assets: _, ...r } = g; return JSON.stringify(r); };
+  ok(strip(next) === strip(setGame), 'pictures per item change no rules, state or presentation');
+
+  // The model draws the same figure for the whole set: the check flags it and redraws at most 4.
+  const same = [];
+  const bad = await A.makeImageArt({ game: setGame, request: 'x' }, { image: fakeImage(same, { sameSet: true }), decode, deflate, ask });
+  ok(bad.stats.sprite_check.issues.some((i) => i.startsWith('V_SPRITE_DUP labubu#')), 'look-alike figures are flagged V_SPRITE_DUP', JSON.stringify(bad.stats.sprite_check.issues.slice(0, 3)));
+  ok(same.filter((c) => /redraw/.test(c.purpose)).length === A.IMAGE_ART_LIMITS.max_redraws && bad.stats.retried.length === A.IMAGE_ART_LIMITS.max_redraws, 'flagged figures are redrawn one by one, capped', String(same.length));
+  // A live manifest with one picture in every frame (the bug) fails checkGameSets.
+  const oldStyle = { ...art.assets.labubu };
+  const one = frames[0];
+  const rep = X.blank(one.w * 9, one.h); for (let k = 0; k < 9; k++) X.paste(rep, one, k * one.w, 0);
+  oldStyle.image = 'data:image/png;base64,' + Buffer.from(C.encodePNG(rep, deflate)).toString('base64');
+  const g3 = { assets: { labubu: oldStyle } };
+  const gc = SC.checkGameSets(g3, (b) => C.decodePNG(b, inflate));
+  ok(!gc.ok && gc.assets.labubu.issues.filter((i) => i.code === 'V_SPRITE_DUP').length === 36, 'checkGameSets flags a set drawn as one figure nine times', String(gc.assets.labubu.issues.length));
 }
 
 // ---------- stories ----------
