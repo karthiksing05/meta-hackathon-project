@@ -56,31 +56,13 @@ struct GroupsSearchGamesList: View {
         Set(bubble.scores.map(\.user.id)).intersection(members).count
     }
 
+    /// The Group leaderboards card at the top of the tab already offers "Make one" or "Join the
+    /// Group" when there are no games, so this stays a quiet line instead of a second button.
     private var emptyState: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "gamecontroller")
-                .font(.system(size: 32))
-                .foregroundStyle(FBColor.tertiaryText)
-            Text(GroupsSearchCopy.noGamesTitle)
-                .font(.fbHeadline)
-                .foregroundStyle(FBColor.primaryText)
-            Text(GroupsSearchCopy.noGamesDetail)
-                .font(.fbMeta)
-                .foregroundStyle(FBColor.secondaryText)
-                .multilineTextAlignment(.center)
-            if group.isMember {
-                Button {
-                    Haptics.light()
-                    router.openStudio(StudioLaunch(mode: .create, groupID: group.id))
-                } label: {
-                    Label(GroupsSearchCopy.makeOne, systemImage: "sparkles")
-                }
-                .buttonStyle(.fb(.tinted, expand: false, height: 36))
-                .padding(.top, 4)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
+        Text(GroupsSearchCopy.noGamesDetail)
+            .font(.fbMeta)
+            .foregroundStyle(FBColor.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

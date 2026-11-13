@@ -47,10 +47,17 @@ struct GroupGameBoardsSection: View {
                 Task { await load() }
             }
         } else if games.isEmpty {
-            Text("No games in this Group yet. Make one and share it here, and the Group's best scores show up.")
-                .font(.fbMeta)
-                .foregroundStyle(FBColor.secondaryText)
-                .fixedSize(horizontal: false, vertical: true)
+            LiveDataStateView(
+                kind: .empty(group.isMember ? "Make one for the Group and its best scores show up here." : "Join the Group to play its games and get on the boards."),
+                title: "No boards yet",
+                action: group.isMember
+                    ? LiveDataStateView.Action(title: "Make one for the Group", symbol: "sparkles") {
+                        router.openStudio(StudioLaunch(mode: .create, groupID: group.id))
+                    }
+                    : LiveDataStateView.Action(title: "Join the Group", symbol: "person.3.fill") {
+                        bubbleStore.join(group) { Task { await load() } }
+                    }
+            )
         } else {
             VStack(spacing: 14) {
                 ForEach(games.prefix(maxGames)) { game in
@@ -86,10 +93,18 @@ struct GroupGameBoardsSection: View {
             .accessibilityLabel("\(game.title) Group board")
 
             if rows.isEmpty {
-                Text(bubbleStore.boardStates[key]?.isLoading == true ? "Loading…" : "Nobody in the Group has played yet.")
-                    .font(.fbMeta)
-                    .foregroundStyle(FBColor.secondaryText)
-                    .padding(.leading, 46)
+                HStack(spacing: 8) {
+                    Text(bubbleStore.boardStates[key]?.isLoading == true ? "Loading…" : "Nobody in the Group has played yet.")
+                        .font(.fbMeta)
+                        .foregroundStyle(FBColor.secondaryText)
+                    Spacer(minLength: 0)
+                    if bubbleStore.boardStates[key]?.isLoading != true {
+                        Button("Play first") { router.play(game.id) }
+                            .buttonStyle(.fb(.tinted, expand: false, height: 32))
+                            .accessibilityLabel("Play \(game.title) first")
+                    }
+                }
+                .padding(.leading, 46)
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(rows.prefix(rowsPerGame).enumerated()), id: \.element.id) { index, entry in
