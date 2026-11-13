@@ -81,6 +81,20 @@ pub enum DrawOp {
     Line(LineOp),
     /// v0.2
     Poly(PolyOp),
+    /// v0.2.2: clip the following ops to a rectangle until the matching
+    /// `Unclip`. Pairs nest; a nested clip intersects with the outer one.
+    Clip(ClipOp),
+    /// v0.2.2: ends the innermost `Clip`.
+    Unclip,
+}
+
+/// v0.2.2. Axis-aligned clip rectangle (top-left, camera applied).
+#[derive(Clone, Debug, PartialEq)]
+pub struct ClipOp {
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
 }
 
 /// v0.2. Draws frame `frame` of asset `asset` into the box.
@@ -98,6 +112,10 @@ pub struct ImageOp {
     pub rotation: f64,
     pub scale: f64,
     pub opacity: f64,
+    /// v0.2.2: `[x, y, w, h]` of the part of the frame drawn into the box,
+    /// in the asset's units (its declared frame `w`/`h`); `w`, `h` > 0.
+    /// `None` = the whole frame. Parts outside the frame draw nothing.
+    pub src: Option<[f64; 4]>,
 }
 
 /// v0.2. Absolute endpoints (camera applied).

@@ -18,7 +18,8 @@ New in v0.2:
 
 Since then, [v0.2.1](#v021-additions) added hold buttons (`on_press`, `on_release`), text
 wrapping, text outlines, conditional feedback, a compile-time poly limit, and documents a few
-physics, particle and step details. The format string stays `"microgame/0.2"`.
+physics, particle and step details. [v0.2.2](#v022-additions) added clipping groups, image
+crops and shape hit-testing for polys. The format string stays `"microgame/0.2"`.
 
 ---
 
@@ -56,9 +57,9 @@ something too big). Limits: 256 assets per game, 256 KB per inline `svg`, 4 MB p
 
 | Node | Specific props | Notes |
 |---|---|---|
-| `image` | `asset` (an id, literal or `=` expression giving a string), `w`, `h` (default: the asset's size), `frame` (int; default `floor(t * fps / 1000) % frames` on the presentation clock), `flip_x`, `flip_y` (bool) | Box = `w` × `h`. Common props apply |
+| `image` | `asset` (an id, literal or `=` expression giving a string), `w`, `h` (default: the asset's size), `frame` (int; default `floor(t * fps / 1000) % frames` on the presentation clock), `flip_x`, `flip_y` (bool); v0.2.2: `src_x`, `src_y`, `src_w`, `src_h` (a crop, see [v0.2.2](#v022-additions)) | Box = `w` × `h`. Common props apply |
 | `line` | `x1 y1 x2 y2` (relative to the node's origin), `stroke`, `stroke_width` (default 2) | Box = the bounding box of both ends |
-| `poly` | `points` (`list<vec2>` or `list<ivec2>`, relative to the node's origin), `closed` (default true), `fill`, `stroke`, `stroke_width` | Box = the bounding box of the points. Max 256 points (see v0.2.1) |
+| `poly` | `points` (`list<vec2>` or `list<ivec2>`, relative to the node's origin), `closed` (default true), `fill`, `stroke`, `stroke_width`; v0.2.2: `hit` (`box` or `shape`) | Box = the bounding box of the points. Max 256 points (see v0.2.1) |
 
 ## 3. Camera and `fixed`
 
@@ -341,3 +342,74 @@ These already worked this way in v0.2; now they're written down.
   the step's events.
 * **`tick` always runs once per step**, even when the 256-events-per-step budget overflows and
   the remaining queued events are dropped.
+
+---
+
+## v0.2.2 additions
+
+For picture games (zoom reveals, spot the difference). All additive: every v0.2 file means the
+same as before, and frames from games that don't use these are byte-for-byte unchanged. The
+format string stays `"microgame/0.2"`. `microgame catalog` lists each addition.
+
+### Group boxes and `clip`
+
+A `group` may set `w` and `h` (numbers, literal or `=` bound, both or neither). They give the
+group an explicit box `(0, 0, w, h)` from its origin, used instead of the union of its children
+for layout (`anchor: center`, stacks) and for the group's own hit box when it's a target. `w`
+and `h` can have transitions and animations like any `w`/`h`.
+
+`"clip": true` (a literal bool, default false) draws the children only inside that box and
+hit-tests them only inside it: a tap outside the box never reaches a child, even one drawn
+there without the clip. `clip` needs `w` and `h`.
+
+```json
+{ "node": "group", "x": 30, "y": 120, "w": 300, "h": 300, "clip": true, "children": [
+  { "node": "image", "asset": "photo", "w": 300, "h": 300,
+    "src_x": "= zoom_x", "src_y": "= zoom_y", "src_w": "= 320 / zoom", "src_h": "= 320 / zoom" }
+] }
+```
+
+* Clips nest: a clipped group inside another is clipped to both boxes.
+* The box ignores the group's own `rotation`/`scale` (groups don't pass those to children).
+* A `fixed` (HUD) child of a group that isn't fixed is drawn in the HUD layer, outside the
+  clip, and isn't clipped. A clipped group that is `fixed` clips its fixed children normally.
+* Errors (`E_PRESENTATION`): `clip` without `w`/`h`, `w` without `h` (or the reverse), a
+  non-bool `clip`, and `clip` on any other node kind.
+
+### Image crops: `src_x`, `src_y`, `src_w`, `src_h`
+
+An `image` node may draw part of its frame. The four props (numbers, literal or `=` bound) are a
+rectangle in the asset's units: the frame's declared `w` × `h` from `assets`, whatever the
+bitmap's pixel size. `src_x` and `src_y` default to 0, `src_w` and `src_h` to the rest of the
+frame (`w - src_x`, `h - src_y`). Without any of them the whole frame is drawn, as before.
+
+* The crop is stretched to the node's box (`w` × `h`, which still default to the asset's
+  size), so a small crop in a big box is a zoom. Pair it with a clipping group to keep the
+  zoomed picture inside a frame on screen.
+* Sprite frames are respected: the rectangle is inside the current `frame`. Parts of the
+  rectangle outside the frame are transparent (they never show the neighbouring frame).
+* `flip_x`, `flip_y`, `rotation` and `scale` apply to the box as before.
+* `src_w` and `src_h` must be greater than 0. A literal that isn't is an `E_PRESENTATION`
+  error at validation; a bound value that isn't (or any non-finite value) skips drawing the
+  image that frame and reports one runtime diagnostic. The box still lays out and takes taps.
+
+### Shape hits on polys: `"hit": "shape"`
+
+A `poly` node with an input binding (`on_tap`, `on_drag`, `on_press`, `on_release`) hit-tests
+its bounding box by default (`"hit": "box"`). With `"hit": "shape"` a tap hits it only inside
+the polygon, using the **nonzero winding rule**, the canvas's default fill rule, so the hit area
+is exactly the filled area (a self-crossing star's middle counts). The polygon is closed for
+the test even with `"closed": false`; fewer than 3 points never hit. Points exactly on an edge
+may go either way. Inside a clipping group the hit area is the polygon cut to the clip.
+Any other value of `hit` is an `E_PRESENTATION` error; other node kinds don't take `hit`.
+
+### Frames
+
+Two new ops and four optional image fields; see `web/FRAME_FORMAT.md` for the binary words.
+
+* `{"op": "clip", "x", "y", "w", "h"}` starts clipping the ops after it to that rectangle
+  (canvas units, camera applied); `{"op": "unclip"}` ends the innermost clip. They always come
+  in pairs and nest; a shell draws `clip` as `save(); beginPath(); rect(...); clip()` and
+  `unclip` as `restore()`. A group whose children drew nothing emits neither.
+* An image op from a node with a crop has `src_x`, `src_y`, `src_w`, `src_h` (asset units).
+  Ops without a crop don't have the fields.
