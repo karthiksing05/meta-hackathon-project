@@ -348,6 +348,19 @@ Every explicit number, name and rule in a request becomes a requirement, and the
   pictures behind the same asset ids (`makeImageArt`, or `makeStoryArt` plus a re-expand for stories), with a
   512 KB art budget (`SVG_LIMITS.image_art_bytes`, for art that holds pictures). Any failure keeps the SVG art;
   `stats.image_art` says what happened. No re-gate: rules and replays don't change.
+- **Requirements wired in** (`requirements.mjs`, `requirements-check.mjs`):
+  - Go's first planner stage runs the code pass (`seedRequirements`) and one Muse call (`REQUIREMENTS_SYSTEM`,
+    muse-spark-1.3 low), merged with `mergeRequirements`. The backend runs requirements.mjs itself in goja, like
+    internal/recs; the script is found at `$HARNESS_REQUIREMENTS_SCRIPT`, `/app/requirements.mjs`, or in the repo.
+  - `HARNESS_REQUIREMENTS=0` turns the Muse call off and keeps the code pass; a failed call falls back to it.
+  - Go fills `spec.requirements`, the plan prompt quotes them, and `planContradictions` become problems on the
+    part that says the wrong number. The repair round fixes them; what's left goes to `spec_issues`.
+  - Compose quotes them once ("Requirements you must meet, quoted"), outside the spec JSON.
+  - After the score step, every game gets the code checks and the gate's runs replayed with a state trace
+    (`studio.requirementsCheck`, no Muse). `stats.requirements` is `{must_passed, must_total, note, gaps}`, and a
+    `requirements_checked` event is emitted.
+  - The Muse judge and one targeted revise run only with `context.requirements_repair: true` (off by default).
+  - Default cost: one extra Muse call per game, the extraction.
 - **One gold example** when the top type is a confident catalog match (score >= 0.85, not learned), else two. On the
   dodge sample the system prompt drops from 112k to 91k characters (19%).
 
