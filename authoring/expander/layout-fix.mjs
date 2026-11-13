@@ -651,10 +651,34 @@ export function hudToTop(game, geometry) {
   const target = (tb ? tb.y1 : safeTop) + 8;
   const dy = Math.round(target - bb.y0);
   if (dy >= 0) return fixes;
+  // The row's own bar (a sibling group of plain rects in the same band, like the kit's bottom HUD
+  // panel) moves with it, so no empty bar is left behind.
+  const ys = (n, oy = 0) => {
+    const out = [];
+    const y = oy + (isNum(n?.y) ? n.y : 0);
+    if (n?.node === 'text' && isNum(n.y)) out.push([y, y + (isNum(n.h) ? n.h : 20)]);
+    if (n?.node === 'rect' && isNum(n.y) && isNum(n.h)) out.push([y, y + n.h]);
+    for (const k of n?.children ?? []) out.push(...ys(k, n.node === 'group' ? y : oy));
+    return out;
+  };
+  const onlyRects = (n) => n?.node === 'rect' || (n?.node === 'group' && (n.children ?? []).length > 0 && n.children.every(onlyRects));
+  const moved = new Set();
   for (const p of layers) {
     const n = getAt(game, p);
+    const band = ys(n).reduce((b, [a, z]) => [Math.min(b[0], a), Math.max(b[1], z)], [Infinity, -Infinity]);
     n.y += dy;
     fixes.push({ kind: 'hud_top', node: p, detail: `bottom HUD row moved up ${-dy} under the top HUD (play crossed it)` });
+    const parent = getAt(game, p.slice(0, p.lastIndexOf('/')));
+    if (!Array.isArray(parent) || !Number.isFinite(band[0])) continue;
+    parent.forEach((sib, i) => {
+      const sp = `${p.slice(0, p.lastIndexOf('/'))}/${i}`;
+      if (sp === p || moved.has(sp) || !onlyRects(sib) || (sib.y !== undefined && !isNum(sib.y))) return;
+      const sb = ys(sib).reduce((b, [a, z]) => [Math.min(b[0], a), Math.max(b[1], z)], [Infinity, -Infinity]);
+      if (!(sb[0] <= band[0] + 2 && sb[1] >= band[1] - 2 && sb[1] - sb[0] <= band[1] - band[0] + 40)) return;
+      sib.y = (sib.y ?? 0) + dy;
+      moved.add(sp);
+      fixes.push({ kind: 'hud_top', node: sp, detail: `its bar moved up ${-dy} with it` });
+    });
   }
   return fixes;
 }

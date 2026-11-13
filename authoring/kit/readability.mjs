@@ -326,13 +326,10 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
         continue;
       }
     }
-    // A small centred line with no box: give it the box it draws in, so it can take a soft plate
-    // (outlines look cramped on small type).
-    if (!big && !(typeof node.w === 'number' && typeof node.h === 'number') && node.anchor === 'center' && f.ink && !node.wrap
-      && !node.transition && !node.animate_on && typeof node.size === 'number' && typeof node.text === 'string') {
-      node.w = Math.ceil(f.ink[0]) + 2;
-      node.h = Math.ceil(Math.max(f.ink[1], node.size * 1.25));
-    }
+    // A small centred line with no box can take a soft plate in the box it draws in (outlines look
+    // cramped on small type); it gets that box only if it comes to a plate.
+    const canBox = !big && !(typeof node.w === 'number' && typeof node.h === 'number') && node.anchor === 'center' && f.ink && !node.wrap
+      && !node.transition && !node.animate_on && typeof node.size === 'number' && typeof node.text === 'string';
     // 1. A palette colour (for a colour expression: one for every token it can pick).
     const refs = isExpr(node.color) ? [...new Set(node.color.match(/\$[A-Za-z_][A-Za-z0-9_]*/g) ?? [])] : [node.color ?? '$ink'];
     const literalInExpr = isExpr(node.color) && /'#[0-9A-Fa-f]{6}/.test(node.color);
@@ -364,7 +361,7 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
     // 2a. Display text (and text with no box to put a plate in): the look's outline, in the
     // palette ground that contrasts most with every colour the text can take; if none does, the
     // text moves to the palette colour that does.
-    if (big || !boxed) {
+    if (big || (!boxed && !canBox)) {
       const groundFor = (hexes) => grounds.map((n) => [n, Math.min(...hexes.map((h) => contrast(tok(n), h)))]).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0];
       let [ground, c] = groundFor(fills);
       let recolor = null;
@@ -378,6 +375,10 @@ export function readabilityFix(game, findings, { spec = null } = {}) {
         fixes.push({ node: f.node, kind: 'outline', detail: `${recolor ? `$${recolor} ` : ''}on $${ground} ${node.stroke_width}` });
         continue;
       }
+    }
+    if (canBox) {
+      node.w = Math.ceil(f.ink[0]) + 2;
+      node.h = Math.ceil(Math.max(f.ink[1], node.size * 1.25));
     }
     // 2b/3. A plate behind body text: soft first, then solid; the text takes the palette colour
     // that reads on the plate if its own doesn't.
@@ -443,7 +444,10 @@ function wrapWithPlate(g, ptr, node, fill, radius) {
   const align = node.align ?? 'center';
   const px = align === 'left' ? -padX : align === 'right' ? node.w + padX - pw : (node.w - pw) / 2;
   const plateNode = { node: 'rect', x: Math.round(px), y: -padY, w: Math.round(pw), h: node.h + 2 * padY, radius, fill };
-  const { x, y, anchor, visible, opacity, ...rest } = node;
+  const { x, y, anchor, visible: vis0, opacity, ...rest } = node;
+  // A plate behind text that can be empty shows only while there are words on it.
+  const words = isExpr(node.text) ? `len(${node.text.slice(1).trim()}) > 0` : null;
+  const visible = !words ? vis0 : vis0 === undefined ? `= ${words}` : isExpr(vis0) ? `= (${vis0.slice(1).trim()}) and ${words}` : vis0;
   if (anchor === 'center') {
     // Groups take no box: the text keeps its anchor at the group's origin, the plate goes round it.
     plateNode.x = Math.round(px - node.w / 2); plateNode.y = Math.round(-padY - node.h / 2);
