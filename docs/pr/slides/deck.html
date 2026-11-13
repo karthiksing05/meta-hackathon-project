@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Whims: pitch deck (draft)</title>
+<title>Muse Games: pitch deck (draft)</title>
 <style>
 @font-face { font-family: "Figtree"; src: url("fonts/Figtree.ttf") format("truetype"); font-weight: 300 900; }
 :root {
@@ -173,16 +173,24 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
 .reel .opts b.win { background: #B8F0C8; }
 .reel .lbl { color: #fff; font-size: 13px; font-weight: 800; text-align: center; }
 .finger .ring { width: 74px; height: 74px; border-radius: 50%; border: 4px dashed #fff; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 34px; }
+/* title slide: white, "Muse" plain and "Games" in the gradient (Karthik, 2026-11-13) */
+.title2 { justify-content: center; background: #fff; }
+.title2 .orb { position: absolute; border-radius: 50%; filter: blur(40px); opacity: .22; background: var(--grad); }
+.title2 h1 { font-size: 190px; letter-spacing: -.04em; line-height: 1; }
+.title2 h1 .plain { color: var(--ink); }
+.title2 .tag { font-size: 54px; font-weight: 700; margin-top: 22px; }
+.title2 .lede { font-size: 36px; }
+.title2 .bar2 { position: absolute; left: 0; bottom: 0; height: 14px; width: 100%; background: var(--grad); }
 </style>
 </head>
 <body>
 
 <!-- 1. Title. Demo 1 starts here: type the sentence, let the game build while we talk. -->
-<section class="slide title">
+<section class="slide title2">
   <div class="orb" style="width:900px;height:900px;right:-260px;top:-320px"></div>
   <div class="orb" style="width:520px;height:520px;right:320px;bottom:-300px;opacity:.18"></div>
-  <h1>Whims</h1>
-  <div class="tag">Make a game on a whim. Play it together.</div>
+  <h1><span class="plain">Muse</span> <span class="grad">Games</span></h1>
+  <div class="tag">Make a game in a sentence. Play it together.</div>
   <div class="lede">Tiny games anyone makes from one sentence with Meta's Muse models, played with your friends and Groups, right inside Facebook.</div>
   <div class="foot"><span>Closer Together '26 · Karthik, Kevin, Max, Bayan, Artem</span><span></span></div>
 </section>
@@ -387,7 +395,7 @@ h2 { font-size: 76px; line-height: 1.06; font-weight: 800; letter-spacing: -.02e
     <div class="mrow"><span>Sports, racing, tabletop, day 30</span><div class="mt"><div class="mf" style="width:73%">8–11%</div></div></div>
     <div class="msrc">Players still playing a month later; bars on a 0–15% scale. Appodeal, Mobile Casual Benchmarks 2025. A loop alone doesn't make a habit; a shared ritual does.</div>
   </div>
-  <div class="foot"><span>Made with Muse Spark, Ember, Wonder and Image · Karthik · Kevin · Max · Bayan · Artem</span><span>Thank you</span></div>
+  <div class="foot"><span>Muse Games · made with Muse Spark, Ember, Wonder and Image · Karthik · Kevin · Max · Bayan · Artem</span><span>Thank you</span></div>
 </section>
 
 <script>

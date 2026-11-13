@@ -4,7 +4,7 @@
 
 | # | Slide | Narrative point | Demo beat |
 |---|---|---|---|
-| 1 | Title: Whims, "Make a game on a whim. Play it together." | — | **Demo 1 starts:** type the sentence, it builds while we talk |
+| 1 | Title: **Muse** (plain) **Games** (gradient), "Make a game in a sentence. Play it together." | — | **Demo 1 starts:** type the sentence, it builds while we talk |
 | 2 | Short-form you play: illustrations of an Instagram poll, a LinkedIn daily puzzle and an NYT word grid, each with a cited stat; 98% play vs 33% / 9% "gamers" | 1, 2 | |
 | 3 | Anyone can make one: sentence → Muse agrees → 5 bots → share; about a minute to build once planned | 2 | (Demo 1 still building) |
 | 4 | The AI stack: Spark, Ember, Wonder, Image; the harness and the gate; server vs phone | 3 | |

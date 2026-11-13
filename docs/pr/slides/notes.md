@@ -25,7 +25,7 @@
 **Demo 1 fallback:** before the talk, make the same game once ("dodge the fog over Twin Peaks") and post it to the demo Group. If the live build isn't done at 1:50, say "it's still being playtested by the bots, so here's one I made this morning", and open that one. Go back to the live one at the end if there's time.
 
 ## 1
-Hi, we're Whims. Make a game on a whim, and play it together, right inside Facebook. *(Say "dodge the fog over Twin Peaks", tap Make, agree the plan.)*
+Hi, we're Muse Games. Make a game in a sentence, and play it together, right inside Facebook. *(Say "dodge the fog over Twin Peaks", tap Make, agree the plan.)*
 
 ## 2
 Short-form is becoming something you play. LinkedIn's daily players come back the next day 86% of the time; NYT puzzles were played 11 billion times last year. And nearly everyone plays, but almost nobody calls themselves a gamer. We build for everyone else.
