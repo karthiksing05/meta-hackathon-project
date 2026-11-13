@@ -9,7 +9,7 @@
 //
 // No Node APIs and no imports outside this folder.
 
-import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize, gateProfile, decisionBase, randomLiveChoice, pickState } from './bots.mjs';
+import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, probeDeadInputs, analyze, summarize, gateProfile, decisionBase, randomLiveChoice, pickState, typingSteps } from './bots.mjs';
 
 export { DEFAULT_BOTS };
 
@@ -78,7 +78,7 @@ async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceM
           choice = candidates[Math.floor(rng() * candidates.length)];
         }
         if (choice.kind !== 'noop') { apply(g, choice); history.push({ step: steps, action: choice }); }
-        nextDecision = steps + Math.max(1, base + Math.round((rng() * 2 - 1) * base * 0.15));
+        nextDecision = steps + Math.max(1, base + Math.round((rng() * 2 - 1) * base * 0.15)) + typingSteps(choice);
         if (now() - sliceStart >= sliceMs) { await yieldToHost(); sliceStart = now(); }
       }
       g.step(DT);

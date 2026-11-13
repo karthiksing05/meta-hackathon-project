@@ -517,6 +517,10 @@ export function expand(manifest, lib, options = {}) {
     (frag.presentation?.slots || []).forEach((e, i) => {
       if (keep(e)) u.out.slots.push({ slot: e.slot, node: walkNode(pruneNode(e.node), fns, `/presentation/slots/${i}/node`), origin, pointer: `/presentation/slots/${i}/node` });
     });
+    // A fragment with a text input may say where the app's text field goes (canvas units, params
+    // allowed) and what the playtest bots should type; the game's own settings win (SPEC 2.2, 2.6).
+    if (frag.presentation?.text_field) u.out.textField = Object.fromEntries(Object.entries(frag.presentation.text_field).map(([k, v]) => [k, fns.literal(v, `/presentation/text_field/${k}`)]));
+    if (frag.playtest) u.out.playtest = Object.fromEntries(Object.entries(frag.playtest).map(([k, v]) => [k, fns.expr(v, `/playtest/${k}`)]));
     u.out.feedback = [];
     (frag.presentation?.feedback || []).forEach((f, i) => {
       if (keep(f)) u.out.feedback.push({ item: walkFeedback([{ ...strip(f), do: (f.do || []).filter(keep).map(strip) }], fns, '/presentation/feedback')[0], origin, pointer: `/presentation/feedback/${i}` });
@@ -680,8 +684,10 @@ export function expand(manifest, lib, options = {}) {
     root,
     feedback: feedback.map((f) => f.item),
     ...(sound.music ? { music: sound.music.presentation } : {}),
-    // Where the app's text field goes for games with a text input (SPEC 2.2), as written.
-    ...(manifest.presentation?.text_field ? { text_field: clone(manifest.presentation.text_field) } : {}),
+    // Where the app's text field goes for games with a text input (SPEC 2.2): as the game wrote it,
+    // else where the first fragment that places one says.
+    ...(manifest.presentation?.text_field ? { text_field: clone(manifest.presentation.text_field) }
+      : uses.find((u) => u.out.textField) ? { text_field: clone(uses.find((u) => u.out.textField).out.textField) } : {}),
   };
   if (sound.music) map('/presentation/music', 'game', '/sound/music');
 
@@ -696,9 +702,11 @@ export function expand(manifest, lib, options = {}) {
   // ---- playtest probe (SPEC 2.6): a copy of the game with hidden values for bots: a progress
   // number, and the strings worth submitting to a text input ----
   let playtestGame;
-  const pt = manifest.playtest;
-  const textCandidates = pt?.text_candidates ?? pt?.texts; // `texts` is accepted as another name
-  if (pt?.progress || textCandidates) {
+  // Fragment hints (the first use that has one) fill what the game's own playtest hint leaves out.
+  const fragHint = (k) => uses.find((u) => u.out.playtest?.[k])?.out.playtest[k];
+  const pt = { ...(fragHint('progress') ? { progress: fragHint('progress') } : {}), ...(fragHint('text_candidates') ? { text_candidates: fragHint('text_candidates') } : {}), ...(manifest.playtest || {}) };
+  const textCandidates = pt.text_candidates ?? pt.texts; // `texts` is accepted as another name
+  if (pt.progress || textCandidates) {
     playtestGame = clone(out);
     if (textCandidates) {
       playtestGame.state = { ...(playtestGame.state || {}), __text_candidates: { type: 'list<string>', init: '[]' } };
