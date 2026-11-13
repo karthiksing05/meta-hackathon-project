@@ -26,6 +26,8 @@ type Store interface {
 	UserByID(ctx context.Context, id string) (*model.User, error)
 	UserByUsername(ctx context.Context, username string) (*model.User, error)
 	UsersByIDs(ctx context.Context, ids []string) ([]model.User, error)
+	// SearchUsers finds people whose username starts with q, or a word of whose display name does (q lowercase).
+	SearchUsers(ctx context.Context, q string, limit int) ([]model.User, error)
 
 	// Friendships are mutual: adding one adds both directions.
 	AddFriend(ctx context.Context, a, b string) error
