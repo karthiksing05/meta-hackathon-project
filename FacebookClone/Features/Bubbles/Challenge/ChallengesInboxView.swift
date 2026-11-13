@@ -169,6 +169,12 @@ struct ChallengesInboxView: View {
                 Image(systemName: "gamecontroller.fill")
                     .foregroundStyle(.white)
             }
+            .overlay {
+                if let cover = c.game?.coverURL {
+                    RemoteImage(url: cover, placeholder: .clear)
+                        .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusSmall, style: .continuous))
+                }
+            }
             .accessibilityHidden(true)
     }
 
