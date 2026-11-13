@@ -316,8 +316,16 @@ Mongo (`recs_state`); the pages shown this session are kept with it.
   - **Ads at fixed positions.** Sponsored games go only in every fifth card of a session (positions 4, 9, 14, ... from 0);
     an ad slot with no ad left takes a regular game, and once the regular games run out the remaining ads fill the end.
 
+  - **Exploration.** On top of the recommender's order, each page gets a small per-session jitter (a game moves at most one
+    place, from a hash of the session and the game, so a retried page is identical) and each regular slot has a
+    `FEED_EXPLORE` chance (default 0.15, `0` turns it off) of going to a random unseen family the recommender didn't pick.
+    Those items carry `explore: true` and their usual `reason`. Ads keep their slots; the rules above still hold.
+  - **Popularity.** The `popular` reason's weight scales from 0.6 (untouched) to 1.8 with everyone's plays, finishes and
+    likes (log scale), since each person's model only sees their own history.
+
   Only if ranking is switched off on the server does the order fall back to newest first (`reason: "newest"`), under the same
-  rules. Candidates are the newest 300 games, all offered on equal terms. The app should send `feedItemID` and the game's
+  rules. Candidates are the newest 300 games. `go test ./internal/api -run TestRecsSimulation -v` runs the ranker over a
+  synthetic population and prints personalisation, quality, popularity, freshness and page-rule metrics. The app should send `feedItemID` and the game's
   `id` back in its page events.
 - **Learning:** `POST /v1/feed/events` from a signed-in person also teaches their model. A feed page event
   (`gameID`, `feedItemID` or `position`, `dwellSec`, `tookOver`, `runsFinished`, `replays`, `saved`, `liked`, `floated`,
@@ -328,7 +336,7 @@ Mongo (`recs_state`); the pages shown this session are kept with it.
   the recommender's demo profile, steered by `bio` and `themes`. Returns `picks` (each with its `game`), a `spec` Studio can
   take (`prompt`), `cohesion` and `twins`.
 - `GET /v1/me/recs` shows my model's summary (pages seen, bait lean) and taste profile.
-- Settings: `RECS_RUNTIMES` (default 2, `0` turns ranking off), `RECS_INTERLEAVE` (`baseline` or a variant name mixes each feed
+- Settings: `FEED_EXPLORE` (default 0.15, `0` off), `RECS_RUNTIMES` (default 2, `0` turns ranking off), `RECS_INTERLEAVE` (`baseline` or a variant name mixes each feed
   with a control; page events then carry `team`, and `/v1/experiments/interleave` tallies it). The optional Muse re-rank term
   stays off: the backend never turns it on.
 - To update the recommender, change `game-recs.js` in the app's folder (nothing to copy), regenerate

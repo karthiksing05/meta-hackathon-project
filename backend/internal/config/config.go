@@ -62,6 +62,9 @@ type Config struct {
 	// RecsInterleave is "" (off), "baseline", or a variant name such as "noBait": mixes each feed with a control.
 	RecsRuntimes   int
 	RecsInterleave string
+	// FeedExplore (FEED_EXPLORE, 0 to 1, default 0.15) is the share of regular feed slots given to a random
+	// eligible game. Set to 0 to turn exploration off (stored as -1, since the API reads 0 as the default).
+	FeedExplore float64
 }
 
 func Load() (*Config, error) {
@@ -102,6 +105,7 @@ func Load() (*Config, error) {
 		RecsRuntimes:   int(envInt("RECS_RUNTIMES", 2)),
 		RecsInterleave: os.Getenv("RECS_INTERLEAVE"),
 	}
+	c.FeedExplore = feedExplore(os.Getenv("FEED_EXPLORE"))
 	if os.Getenv("RECS_RUNTIMES") == "0" {
 		c.RecsRuntimes = 0
 	}
@@ -201,4 +205,16 @@ func harnessOn(v string) bool {
 		return false
 	}
 	return true
+}
+
+// feedExplore reads FEED_EXPLORE: "" or a bad value gives the default 0.15, 0 turns exploration off (-1).
+func feedExplore(v string) float64 {
+	f, err := strconv.ParseFloat(strings.TrimSpace(v), 64)
+	switch {
+	case err != nil || f < 0 || f > 1:
+		return 0.15
+	case f == 0:
+		return -1
+	}
+	return f
 }
