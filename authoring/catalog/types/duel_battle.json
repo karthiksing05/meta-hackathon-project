@@ -41,7 +41,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "challenge a friend async",
@@ -113,7 +113,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's reaction time",
@@ -189,7 +189,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "challenge a friend's ghost fighter",
@@ -204,8 +204,7 @@
       "fighter speed"
     ],
     "tools": [
-      "tap",
-      "hold",
+      "hold_buttons",
       "lives",
       "combo",
       "score"
@@ -264,7 +263,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "async friend battle",
@@ -337,7 +336,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "challenge a friend's deck",
@@ -408,7 +407,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "challenge friend's phrase",
@@ -480,7 +479,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "async quiz duel with a friend",
@@ -554,7 +553,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's wpm",
@@ -627,7 +626,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat friends on the same rope",
@@ -641,7 +640,6 @@
       "stamina"
     ],
     "tools": [
-      "tap",
       "meters",
       "score"
     ],
@@ -699,7 +697,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "friend's ghost duelist",
@@ -772,7 +770,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "friend duels async",
@@ -787,7 +785,7 @@
       "HP"
     ],
     "tools": [
-      "drag",
+      "player_drag",
       "turns",
       "lives",
       "score"
@@ -845,7 +843,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's habits",
@@ -990,7 +988,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "friend as opponent",
@@ -1004,7 +1002,7 @@
       "meter speed"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "beat_target",
       "rounds",
       "score"
@@ -1064,7 +1062,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "duel a friend",
@@ -1137,7 +1135,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "duel a friend",
@@ -1152,7 +1150,7 @@
       "time per prompt"
     ],
     "tools": [
-      "draw_gesture",
+      "drawing_canvas",
       "typed_answer",
       "timer_bar",
       "lives",
@@ -1211,7 +1209,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "share a roast",
@@ -1280,7 +1278,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "fight friends' pets",
@@ -1352,7 +1350,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "race a friend on the same piece sequence",
@@ -1426,7 +1424,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "fight friends' builds",
@@ -1498,7 +1496,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "async brawl vs friend",
@@ -1570,7 +1568,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "duel a friend",
@@ -1584,8 +1582,7 @@
       "peek time"
     ],
     "tools": [
-      "tap",
-      "hold",
+      "hold_buttons",
       "lives",
       "score"
     ],
@@ -1781,7 +1778,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's score",
@@ -1854,7 +1851,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's patience",
@@ -1926,7 +1923,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's pattern length",
@@ -1996,7 +1993,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's score",
@@ -2068,7 +2065,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "hide a spot for a friend async",
@@ -2139,7 +2136,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "team up Groups on one canvas",
@@ -2281,7 +2278,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's time",
@@ -2352,7 +2349,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "duel a friend",
@@ -2424,7 +2421,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "duel friends",
@@ -2511,7 +2508,7 @@
       "distance"
     ],
     "tools": [
-      "drag",
+      "player_drag",
       "turns",
       "lives",
       "score"
@@ -2570,7 +2567,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "send a dance routine to friends",

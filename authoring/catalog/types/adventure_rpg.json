@@ -291,8 +291,8 @@
       "enemy HP"
     ],
     "tools": [
-      "dice_roll",
-      "drag",
+      "random_int",
+      "player_drag",
       "lives",
       "turns",
       "score",
@@ -626,7 +626,7 @@
     "core_loop": "wander → wild monster appears → weaken or choose a catch tool → try to catch → build team → trainer battle",
     "verbs": [
       "catch",
-      "team-build"
+      "team build"
     ],
     "inputs": [
       "tap"
@@ -1190,7 +1190,7 @@
     "tools": [
       "pickups",
       "countdown",
-      "drag",
+      "player_drag",
       "score"
     ],
     "engine_gaps": [],
@@ -1336,7 +1336,7 @@
       "time per enemy"
     ],
     "tools": [
-      "draw_gesture",
+      "drawing_canvas",
       "waves",
       "lives",
       "combo",
@@ -1558,7 +1558,7 @@
       "rerolls"
     ],
     "tools": [
-      "dice_roll",
+      "random_int",
       "choice_story",
       "lives",
       "score"
@@ -2226,7 +2226,7 @@
       "price sensitivity"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "pickups",
       "meters",
       "score"
@@ -2502,7 +2502,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "pass-and-play with friends",
@@ -2517,7 +2517,7 @@
       "event harshness"
     ],
     "tools": [
-      "dice_roll",
+      "random_int",
       "turns",
       "lives",
       "score"

@@ -1234,7 +1234,7 @@
       "merchant stubbornness"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "meters",
       "rounds",
       "score"

@@ -731,7 +731,7 @@
     ],
     "tools": [
       "grid_board",
-      "drag",
+      "player_drag",
       "lives",
       "score"
     ],
@@ -787,7 +787,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "beat a friend's hidden split",
@@ -802,7 +802,7 @@
       "pool size"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "rounds",
       "score"
     ],
@@ -1075,7 +1075,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "friend plays pursuer asynchronously",
@@ -1126,7 +1126,7 @@
     ],
     "inputs": [
       "tap",
-      "slider"
+      "drag"
     ],
     "pieces": [
       "item card",
@@ -1163,7 +1163,7 @@
       "budget"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "turns",
       "rounds",
       "score"
@@ -1221,7 +1221,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "challenge a friend to the same game async",
@@ -1310,7 +1310,7 @@
     ],
     "tools": [
       "grid_board",
-      "drag",
+      "player_drag",
       "lives",
       "score"
     ],
@@ -1367,7 +1367,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "async orders against friends",
@@ -1893,7 +1893,7 @@
       "dice per turn"
     ],
     "tools": [
-      "dice_roll",
+      "random_int",
       "grid_board",
       "turns",
       "score"
@@ -1951,7 +1951,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "async duel with a friend",
@@ -2224,7 +2224,7 @@
     ],
     "inputs": [
       "tap",
-      "slider"
+      "drag"
     ],
     "pieces": [
       "island",
@@ -2262,7 +2262,7 @@
       "events"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "meters",
       "lives",
       "score"
@@ -2335,7 +2335,7 @@
       "timers"
     ],
     "tools": [
-      "drag",
+      "player_drag",
       "countdown",
       "lives",
       "score"
@@ -2465,7 +2465,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "duel friends async",
@@ -2538,7 +2538,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "friend as opposing side",

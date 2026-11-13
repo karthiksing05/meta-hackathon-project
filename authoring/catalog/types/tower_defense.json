@@ -359,7 +359,7 @@
       "line life"
     ],
     "tools": [
-      "draw_gesture",
+      "drawing_canvas",
       "waves",
       "lives",
       "score"
@@ -649,7 +649,6 @@
       "enemy speed"
     ],
     "tools": [
-      "tap",
       "waves",
       "lives",
       "combo",
@@ -1090,7 +1089,6 @@
       "boss traits"
     ],
     "tools": [
-      "tap",
       "countdown",
       "waves",
       "lives",
@@ -1749,7 +1747,7 @@
       "wind strength"
     ],
     "tools": [
-      "drag",
+      "player_drag",
       "gravity_jump",
       "waves",
       "lives",
@@ -1970,7 +1968,6 @@
       "ally strength"
     ],
     "tools": [
-      "tap",
       "waves",
       "pickups",
       "lives",
@@ -2193,7 +2190,7 @@
     ],
     "tools": [
       "grid_board",
-      "drag",
+      "player_drag",
       "waves",
       "lives",
       "score",
@@ -2558,7 +2555,7 @@
       "restock rate"
     ],
     "tools": [
-      "drag",
+      "player_drag",
       "pickups",
       "waves",
       "lives",

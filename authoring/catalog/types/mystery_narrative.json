@@ -352,7 +352,7 @@
     ],
     "tools": [
       "sort_bins",
-      "drag",
+      "player_drag",
       "hint",
       "score"
     ],
@@ -710,7 +710,7 @@
       "decoy cards"
     ],
     "tools": [
-      "drag",
+      "player_drag",
       "hint",
       "score"
     ],
@@ -1146,7 +1146,7 @@
       "timer"
     ],
     "tools": [
-      "drag",
+      "player_drag",
       "match_pairs",
       "timer_bar",
       "lives",
@@ -1393,7 +1393,7 @@
     "summary": "A museum item vanishes; read guard schedules, badge logs and camera gaps to find the one person who could have taken it.",
     "core_loop": "read schedules → check badge logs → find gaps → eliminate → accuse",
     "verbs": [
-      "cross-reference",
+      "cross reference",
       "eliminate"
     ],
     "inputs": [
@@ -1646,7 +1646,6 @@
       "speed"
     ],
     "tools": [
-      "tap",
       "combo",
       "timer_bar",
       "score"
@@ -1933,7 +1932,7 @@
       "timer"
     ],
     "tools": [
-      "drag",
+      "player_drag",
       "timer_bar",
       "reveal",
       "score"
@@ -1963,7 +1962,7 @@
     "summary": "Each suspect claims where they were at each hour; overlapping alibis and locations expose who couldn't have been where they claim.",
     "core_loop": "read alibi table → mark conflicts → eliminate → accuse",
     "verbs": [
-      "cross-check"
+      "cross check"
     ],
     "inputs": [
       "tap"
@@ -2172,7 +2171,7 @@
     "summary": "Compare receipts, call logs and photos across people to find the single inconsistency that cracks the case.",
     "core_loop": "open item → check against statement → mark mismatch → build theory → submit",
     "verbs": [
-      "cross-check"
+      "cross check"
     ],
     "inputs": [
       "tap"
@@ -2424,7 +2423,7 @@
       "evidence ambiguity"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "hint",
       "score"
     ],
@@ -2567,7 +2566,7 @@
     ],
     "tools": [
       "tap_hotspots",
-      "drag",
+      "player_drag",
       "countdown",
       "score"
     ],

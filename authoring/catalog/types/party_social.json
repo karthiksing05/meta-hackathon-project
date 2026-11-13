@@ -40,7 +40,7 @@
       180
     ],
     "players": [
-      "live_friends",
+      "live",
       "async_friends",
       "group_daily"
     ],
@@ -118,7 +118,7 @@
     ],
     "players": [
       "pass_and_play",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "pass the phone",
@@ -193,7 +193,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "draw for friends async",
@@ -210,7 +210,7 @@
       "players"
     ],
     "tools": [
-      "draw_gesture",
+      "drawing_canvas",
       "typed_answer",
       "fuzzy_match",
       "rounds",
@@ -287,7 +287,7 @@
       "chain length"
     ],
     "tools": [
-      "draw_gesture",
+      "drawing_canvas",
       "keyboard",
       "turns",
       "reveal",
@@ -346,7 +346,7 @@
     ],
     "players": [
       "pass_and_play",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "pass in real life",
@@ -417,7 +417,7 @@
     ],
     "players": [
       "pass_and_play",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "play at parties",
@@ -432,7 +432,6 @@
       "prompt spice"
     ],
     "tools": [
-      "tap",
       "turns",
       "rounds",
       "score"
@@ -449,7 +448,7 @@
     "refs": []
   },
   {
-    "id": "never_have_i_ever_tally",
+    "id": "group_confession_tally",
     "name": "Never have I ever",
     "aliases": [
       "Never Have I Ever",
@@ -489,7 +488,7 @@
     "players": [
       "async_friends",
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "see how many friends match",
@@ -636,7 +635,7 @@
     "players": [
       "async_friends",
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "write bluffs for friends",
@@ -782,7 +781,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "fast chain with friends",
@@ -857,7 +856,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "team vs team on a call",
@@ -931,7 +930,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "party night",
@@ -1004,7 +1003,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "team up with friends",
@@ -1019,7 +1018,7 @@
       "zone size"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "reveal",
       "turns",
       "rounds",
@@ -1078,7 +1077,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "team with friends in a chat",
@@ -1152,7 +1151,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "everyone fills async",
@@ -1202,7 +1201,7 @@
       "bid"
     ],
     "inputs": [
-      "slider",
+      "drag",
       "type"
     ],
     "pieces": [
@@ -1240,7 +1239,7 @@
       "rule variant"
     ],
     "tools": [
-      "slider",
+      "slider_input",
       "rounds",
       "reveal",
       "score"
@@ -1369,7 +1368,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "read the text aloud with friends",
@@ -1441,7 +1440,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "team feud with friends",
@@ -1494,7 +1493,7 @@
     "inputs": [
       "tap",
       "hold",
-      "shake"
+      "tilt"
     ],
     "pieces": [
       "challenge card",
@@ -1517,7 +1516,7 @@
       "pass_and_play",
       "async_friends",
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "pass the phone or share scores",
@@ -1589,7 +1588,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "pirate night with friends",
@@ -1603,7 +1602,7 @@
       "dice count"
     ],
     "tools": [
-      "dice_roll",
+      "random_int",
       "turns",
       "lives",
       "score"
@@ -1661,7 +1660,7 @@
     "players": [
       "async_friends",
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "see how in sync friends are",
@@ -1732,7 +1731,7 @@
     ],
     "players": [
       "pass_and_play",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "play on a call",
@@ -1804,7 +1803,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "Group night",
@@ -1875,7 +1874,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "tell stories at a party",
@@ -1889,7 +1888,7 @@
       "time"
     ],
     "tools": [
-      "dice_roll",
+      "random_int",
       "countdown",
       "turns",
       "score"
@@ -1945,7 +1944,7 @@
     ],
     "players": [
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "vote in the Group",
@@ -2019,7 +2018,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "pairs on a call",
@@ -2033,7 +2032,7 @@
       "time"
     ],
     "tools": [
-      "draw_gesture",
+      "drawing_canvas",
       "countdown",
       "reveal",
       "score"
@@ -2162,7 +2161,7 @@
     "players": [
       "async_friends",
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "send kind or silly notes",
@@ -2231,7 +2230,7 @@
     ],
     "players": [
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "do it together in person",
@@ -2302,7 +2301,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "pass the phone",
@@ -2374,7 +2373,7 @@
     "players": [
       "async_friends",
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "guess how the Group ranks things",
@@ -2389,7 +2388,7 @@
     ],
     "tools": [
       "sort_bins",
-      "drag",
+      "player_drag",
       "reveal",
       "score"
     ],
@@ -2424,7 +2423,7 @@
     ],
     "inputs": [
       "tap",
-      "slider"
+      "drag"
     ],
     "pieces": [
       "question",
@@ -2447,7 +2446,7 @@
     "players": [
       "pass_and_play",
       "async_friends",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "bluff friends on confidence",
@@ -2462,7 +2461,7 @@
     ],
     "tools": [
       "quiz",
-      "slider",
+      "slider_input",
       "rounds",
       "score"
     ],
@@ -2519,7 +2518,7 @@
       "pass_and_play",
       "async_friends",
       "group_daily",
-      "live_friends"
+      "live"
     ],
     "social_hooks": [
       "white elephant party",
