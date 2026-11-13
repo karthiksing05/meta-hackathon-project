@@ -176,7 +176,7 @@ private struct BubbleBurstCard: View {
         .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Replay of \(bubble?.title ?? "a Bubble") by \(burst.author.name)")
+        .accessibilityLabel("Replay of \(bubble?.title ?? ProductName.withArticle) by \(burst.author.name)")
         .accessibilityHint("Opens Reels")
     }
 }

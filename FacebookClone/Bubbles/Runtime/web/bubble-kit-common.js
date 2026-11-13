@@ -470,10 +470,10 @@
     id: "flow.daily_gate",
     kind: "flow",
     formulas: ["*"],
-    describe: "A Daily Bubble: one run a day, the same seed and content for everyone in the Group today. No instant retry; the share text names the day (the app keeps one score per person per day). The day comes from the day param, a YYYYMMDD seed, or a date in the id.",
+    describe: "A Daily Curio: one run a day, the same seed and content for everyone in the Group today. No instant retry; the share text names the day (the app keeps one score per person per day). The day comes from the day param, a YYYYMMDD seed, or a date in the id.",
     examples: ["today's word for New in SF", "a daily puzzle for the running club"],
     params: {
-      label: { type: "string", default: "Daily Bubble", max_length: 24, describe: "Chip text at the top" },
+      label: { type: "string", default: "Daily Curio", max_length: 24, describe: "Chip text at the top" },
       day: { type: "string", default: "", max_length: 10, describe: "YYYY-MM-DD; empty: read it from the seed or id" },
       note: { type: "string", default: "A new one tomorrow", max_length: 32, describe: "What the end card says" },
     },

@@ -227,7 +227,7 @@ struct StudioBaseBubbleCard: View {
                 .frame(width: 56, height: 70)
                 .clipShape(RoundedRectangle(cornerRadius: FBMetrics.radiusMedium, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
-                Text(isRemix ? "Remixing \(bubble.creator.isMe ? "your bubble" : "\(bubble.creator.firstName)'s bubble")" : "Continuing")
+                Text(isRemix ? "Remixing \(bubble.creator.isMe ? "your \(ProductName.singular)" : "\(bubble.creator.firstName)'s \(ProductName.singular)")" : "Continuing")
                     .font(.fbMeta)
                     .foregroundStyle(FBColor.secondaryText)
                 Text(bubble.title)

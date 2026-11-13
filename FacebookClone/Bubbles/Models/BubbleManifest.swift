@@ -426,7 +426,7 @@ struct BubbleManifest: Codable, Hashable, Identifiable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString.lowercased()
         version = (try? c.decodeIfPresent(Int.self, forKey: .version)) ?? 1
-        title = try c.decodeIfPresent(String.self, forKey: .title) ?? "Untitled bubble"
+        title = try c.decodeIfPresent(String.self, forKey: .title) ?? "Untitled \(ProductName.singular)"
         oneLineRule = try c.decodeIfPresent(String.self, forKey: .oneLineRule) ?? ""
         formula = try c.decode(BubbleFormula.self, forKey: .formula)
         brief = (try? c.decodeIfPresent(BubbleBrief.self, forKey: .brief)) ?? BubbleBrief(intent: "")

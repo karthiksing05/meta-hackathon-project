@@ -453,7 +453,7 @@ private struct BubbleFeedHeader: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            BubbleWordmark(size: 26)
+            BubbleWordmark(size: 24, lead: .white)
                 // Stays legible over light looks (paper, glow) as well as dark ones.
                 .shadow(color: Color.black.opacity(0.3), radius: 6, y: 1)
                 .padding(.leading, 2)

@@ -565,9 +565,9 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
             outcome = await prepareAndActivate(key: key, manifest: manifest, options: options)
         case .bootOnly:
             let booted = await boot(manifest: manifest, options: options)
-            outcome = BubbleStartOutcome(ok: booted, error: booted ? nil : "The Bubble runtime didn't load", usedBoot: true)
+            outcome = BubbleStartOutcome(ok: booted, error: booted ? nil : "The game runtime didn't load", usedBoot: true)
         case .missing, .unknown:
-            outcome = BubbleStartOutcome(ok: false, error: "The Bubble runtime didn't load")
+            outcome = BubbleStartOutcome(ok: false, error: "The game runtime didn't load")
         }
         outcome.totalMs = (CACurrentMediaTime() - began) * 1000
         return outcome
@@ -579,7 +579,7 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
         if !wasPrepared {
             let prepared = await prepare(key: key, manifest: manifest, options: options)
             guard prepared.ok else {
-                return BubbleStartOutcome(ok: false, error: prepared.error ?? "This bubble couldn't start")
+                return BubbleStartOutcome(ok: false, error: prepared.error ?? "This \(ProductName.singular) couldn't start")
             }
             prepareMs = prepared.ms
         }
@@ -589,7 +589,7 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
             forget(key)
             let prepared = await prepare(key: key, manifest: manifest, options: options)
             guard prepared.ok else {
-                return BubbleStartOutcome(ok: false, error: prepared.error ?? "This bubble couldn't start")
+                return BubbleStartOutcome(ok: false, error: prepared.error ?? "This \(ProductName.singular) couldn't start")
             }
             prepareMs = prepared.ms
             activated = await activate(key: key, options: options)
@@ -597,7 +597,7 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
         touch(key)
         return BubbleStartOutcome(
             ok: activated.ok,
-            error: activated.ok ? nil : (activated.error ?? "This bubble couldn't start"),
+            error: activated.ok ? nil : (activated.error ?? "This \(ProductName.singular) couldn't start"),
             wasPrepared: wasPrepared,
             prepareMs: prepareMs,
             activateMs: activated.ms

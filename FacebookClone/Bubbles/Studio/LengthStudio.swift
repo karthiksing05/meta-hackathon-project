@@ -15,7 +15,7 @@ enum LengthStudio {
         if let length = request.length?.normalized {
             lines.append("Length is locked: \(length.label). Set \"length\" in the draft to exactly this: \(length.json.jsonString()).")
         } else {
-            let kept = request.base?.length.map { " The base Bubble's length is \($0.label) (\($0.json.jsonString())); keep it unless the request changes how long a run is." } ?? ""
+            let kept = request.base?.length.map { " The base game's length is \($0.label) (\($0.json.jsonString())); keep it unless the request changes how long a run is." } ?? ""
             lines.append("""
             Length: pick "length" from the formula's length.modes to fit the brief, as {"mode": "endless"}, \
             {"mode": "rounds", "rounds": 8}, {"mode": "timed", "seconds": 60} or {"mode": "lives", "lives": 3} \
