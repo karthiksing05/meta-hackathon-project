@@ -89,7 +89,7 @@
     {
       "use": "flow.daily_gate",
       "params": {
-        "label": "Daily Bubble"
+        "label": "Daily Curio"
       }
     },
     {

@@ -156,7 +156,7 @@ func (s *Server) setGroupDaily(w http.ResponseWriter, r *http.Request) {
 		// one per member, date and game: setting the same Daily again (a retry) notifies nobody twice
 		s.notify(ctx, model.Notification{
 			UserID: m.UserID, Kind: model.NotifDailyReady, GameID: g.ID, GroupID: grp.ID, Source: "daily:" + grp.ID + ":" + date + ":" + g.ID,
-			Title: "Today's Daily in " + grp.Name + " is ready", Body: g.Title + ": everyone in the Group plays the same game today.",
+			Title: "Today's Curio in " + grp.Name + " is ready", Body: g.Title + ": everyone in the Group plays the same Curio today.",
 		})
 		notified++
 	}

@@ -173,7 +173,7 @@ func (s *Server) ScanViral(ctx context.Context, now time.Time) (int, error) {
 			}
 			s.notify(ctx, model.Notification{
 				UserID: uid, Kind: model.NotifViralMatch, GameID: h.game.ID, Source: "viral:" + h.game.ID,
-				Title: "Everyone's playing " + h.game.Title, Body: "A lot of people are playing it today, and it looks like your kind of game.",
+				Title: "Everyone's playing " + h.game.Title, Body: "A lot of people are playing it today, and it looks like your kind of Curio.",
 			})
 			notified++
 			break // one a day

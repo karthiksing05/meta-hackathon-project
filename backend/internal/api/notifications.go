@@ -455,10 +455,10 @@ func (s *Server) pushOne(ctx context.Context, n model.Notification, attempts int
 	}
 }
 
-// seriesBody: "1 game: Ferry Words" or "5 games, starting with Ferry Words".
+// seriesBody: "1 Curio: Ferry Words" or "5 Curios, starting with Ferry Words".
 func seriesBody(n int, first string) string {
 	if n == 1 {
-		return "1 game: " + first
+		return "1 Curio: " + first
 	}
-	return fmt.Sprintf("%d games, starting with %s", n, first)
+	return fmt.Sprintf("%d Curios, starting with %s", n, first)
 }
