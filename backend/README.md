@@ -246,6 +246,10 @@ An uploaded or replaced game may carry `bots` at the top of its `manifest.json`:
 
 The generator service also has `POST /internal/muse/image {prompt, size?, guide?: base64 PNG}` -> `{png_base64, model, seconds}` (one `muse-image-1.0` picture, 13-18 s, private network only, sizes 512 to 1536). It is the building block for picture games; nothing in the API calls it yet.
 
+**Saves are the likes.** The app has one Save button and no separate like. It calls `PUT`/`DELETE /v1/games/{id}/like` to save, `GET /v1/me/likes` for the saved library and `GET /v1/games/{id}/likes` for "friends who saved"; the names are old, the meaning is a save, and `likes` on a game is its save count. In the feed events the app sends `saved` and `liked` together for one tap, so the server reads `liked` as `saved` and the recommender sees one save, not two.
+
+**What the server teaches the recommender itself.** `game-recs.js` weighs `challenge_sent` and `challenge_accepted`, but the app posts neither. The server records them from what it knows: `challenge_sent` when `POST /v1/challenges` or `POST /v1/series` creates one, and `challenge_accepted` when a person plays a game they were challenged on (a score on it, or a round of a series started with them), once per challenge, under a stable event id. They carry no `with`, so they don't appear as extra moments for the other person.
+
 ## Notifications
 
 A per-person inbox that doubles as the push outbox. `GET /v1/me/notifications?limit=&cursor=` returns `{items: [{id, kind, title, body, gameId?, groupId?, challengeId?, seriesId?, roundId?, sessionId?, createdAt, readAt?}], nextCursor?, unreadCount}` (newest first; `nextCursor` is opaque). `PUT /v1/me/notifications/{id}/read {read}` (`read` defaults to true) and `PUT /v1/me/notifications/read` (all) return `{unreadCount}`.

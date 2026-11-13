@@ -262,6 +262,7 @@ func (s *Server) submitScored(w http.ResponseWriter, r *http.Request, g *model.G
 		s.serverErr(w, r, err)
 		return
 	}
+	s.noteChallengeAccepted(r.Context(), u.ID, g.ID)
 	s.keepRunLog(r.Context(), neu, replay, logText)
 	s.writeBoard(w, r, g, extra)
 }

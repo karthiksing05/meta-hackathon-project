@@ -267,6 +267,7 @@ func (s *Server) createSeries(w http.ResponseWriter, r *http.Request) {
 	}
 	if first, err := s.Store.GameByID(ctx, se.Rounds[0].GameID); err == nil {
 		s.notifySeries(ctx, se, first, *me)
+		s.teach(ctx, me.ID, "challenge_sent", first.ID, "series_sent:"+se.ID)
 	}
 	v, err := s.seriesFor(r, se)
 	if err != nil {
@@ -462,6 +463,9 @@ func (s *Server) submitRound(w http.ResponseWriter, r *http.Request) {
 	if err := s.Store.ReplaceSeries(ctx, se); err != nil {
 		s.serverErr(w, r, err)
 		return
+	}
+	if me.ID != se.PlayerA { // the friend who was invited has taken it up
+		s.teach(ctx, me.ID, "challenge_accepted", rd.GameID, "series_accepted:"+se.ID+":"+me.ID)
 	}
 	v, err := s.seriesFor(r, se)
 	if err != nil {

@@ -406,7 +406,7 @@ func (s *Server) learnFromEvents(ctx context.Context, userID string, evs []model
 		} else if e.Impression {
 			b, _ := json.Marshal(map[string]any{
 				"id": id, "dwellSec": e.DwellSec, "tookOver": e.TookOver, "runsFinished": e.RunsFinished, "replays": e.Replays,
-				"saved": e.Saved, "liked": e.Liked, "floated": e.Floated, "openedBoard": e.OpenedBoard, "addedFriend": e.AddedFriend,
+				"saved": e.Saved || e.Liked, "liked": false, "floated": e.Floated, "openedBoard": e.OpenedBoard, "addedFriend": e.AddedFriend,
 				"remixed": e.Remixed, "social": nonNil(e.Social), "with": nonNil(e.With), "quitMidRun": e.QuitMidRun,
 				"endedSession": e.EndedSession, "day": day,
 			})

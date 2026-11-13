@@ -130,6 +130,11 @@ func buildEvent(in eventIn, actor, userID, deviceID string, now time.Time) (mode
 		OpenedBoard: in.OpenedBoard, AddedFriend: in.AddedFriend, Remixed: in.Remixed, QuitMidRun: in.QuitMidRun,
 		EndedSession: in.EndedSession, Social: in.Social, With: in.With, CreatedAt: now,
 	}
+	// The app has no separate like: its Save button is the only one, and it reports both flags for the one tap. Counting
+	// liked on top of saved would weigh a single save twice, so a like is read as a save.
+	if e.Liked {
+		e.Saved, e.Liked = true, false
+	}
 	if in.EventID != "" {
 		e.ID = actor + "|" + in.EventID // sending the same eventID again is a no-op
 	} else {
@@ -179,7 +184,7 @@ func buildEvent(in eventIn, actor, userID, deviceID string, now time.Time) (mode
 	case in.FeedItemID != "" || in.Position != nil: // a feed page
 		e.Impression = true
 		e.SocialMoment = len(in.Social) > 0
-		e.Credit = in.RunsFinished > 0 || in.Replays > 0 || in.Saved || in.Floated || in.AddedFriend || in.Remixed || len(in.Social) > 0
+		e.Credit = in.RunsFinished > 0 || in.Replays > 0 || in.Saved || in.Liked || in.Floated || in.AddedFriend || in.Remixed || len(in.Social) > 0
 	default:
 		return model.Event{}, "an event needs a type, a kind, or a feedItemID or position"
 	}

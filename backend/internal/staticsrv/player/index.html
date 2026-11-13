@@ -266,7 +266,7 @@
     a.dataset.ref = g.slug || g.id;
     a.dataset.id = g.id;
     a.appendChild(el("b", "", g.title || g.id));
-    const bits = [g.formula, g.ownerUsername && "by " + g.ownerUsername, g.likes ? "♥ " + g.likes : ""].filter(Boolean);
+    const bits = [g.formula, g.ownerUsername && "by " + g.ownerUsername, g.likes ? g.likes + (g.likes === 1 ? " save" : " saves") : ""].filter(Boolean);
     if (g.sponsor) bits.unshift("Ad");
     a.appendChild(el("small", "", bits.join(" · ")));
     if (isCurrent(g)) a.classList.add("current");
@@ -351,7 +351,7 @@
     fact(dl, "By", g && g.ownerUsername);
     fact(dl, "Type", (g && g.formula) || m.formula);
     fact(dl, "Level", g && g.level > 1 ? g.level : "");
-    fact(dl, "Likes", g && g.likes);
+    fact(dl, "Saves", g && g.likes); // the API calls a save a like
     fact(dl, "Plays", g && g.plays);
     if (g && g.score) fact(dl, "Ranks", (g.score.ranked === false ? "unranked" : (g.score.direction === "lower" ? "lowest" : "highest") + " " + (g.score.measures || g.score.kind || "score")));
     if (g && g.group_play) fact(dl, "Group play", g.group_play.mode + " · " + (g.group_play.result && g.group_play.result.compare));

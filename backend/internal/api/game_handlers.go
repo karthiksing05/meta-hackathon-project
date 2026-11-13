@@ -252,6 +252,7 @@ func (s *Server) submitScore(w http.ResponseWriter, r *http.Request) {
 	if errors.Is(oldErr, store.ErrNotFound) || (oldErr == nil && neu.Score > old.Score) {
 		s.keepRunLog(r.Context(), neu, replay, "")
 	}
+	s.noteChallengeAccepted(r.Context(), u.ID, g.ID)
 	s.leaderboard(w, r)
 }
 
