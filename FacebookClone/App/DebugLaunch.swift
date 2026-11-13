@@ -15,6 +15,9 @@ import SwiftUI
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
 ///   keys: challenge, groups-search, together, remix, story, nextline, learn, length, saves)
+///   `messenger`, `chat:<id prefix>` (or `chat:` for the latest chat)
+/// - `FB_API=mock|live`: the feed, Reels, Stories and Messenger from the built-in mock world or the
+///   server (`/v1/fb`, the default). See `FacebookAPI.swift`.
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
 /// - `FB_STUDIO_PLAN=normal|questions|gap|opinion|story|loading|failed|off`: Studio's Plan step answers
 ///   with a preview plan (`GamePlanFixtures`) instead of the server, for screenshots.
@@ -84,6 +87,13 @@ enum DebugLaunch {
         case "profile":
             if let user = arg == "me" ? appStore.me : appStore.user(id: arg) { router.push(.profile(user)) }
         case "reels": router.openReels()
+        case "messenger": router.openMessenger()
+        case "chat":
+            // A chat by id, or the most recent one ("chat:" alone). Waits for the live chats to load.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                let chat = arg.isEmpty ? appStore.inboxConversations.first : appStore.conversations.first { $0.id.hasPrefix(arg) }
+                if let chat { router.openChat(chat) }
+            }
         case "story":
             break // Stories: the stories surface reads FB_OPEN=story:<userID> itself.
         case "feature":
