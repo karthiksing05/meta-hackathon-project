@@ -63,6 +63,13 @@ final class BubbleFeedModel {
     @ObservationIgnored private var lastResultAt = Date.distantPast
     @ObservationIgnored private var didPrewarm = false
     @ObservationIgnored private var stallTask: Task<Void, Never>?
+    /// The pager is moving (a drag, a fling or a programmatic scroll). Nothing activates until it
+    /// settles; the live page stays paused in place, so a partial drag never reloads it.
+    @ObservationIgnored private var isScrolling = false
+    /// The live game (and its sound) was paused because the pager started moving.
+    @ObservationIgnored private var isPausedForScroll = false
+    /// The last page reported to the recommender as shown, so a page passed mid-fling isn't.
+    @ObservationIgnored private var lastShownID: String?
 
     func configure(store: BubbleStore) {
         guard self.store == nil else { return }
@@ -116,6 +123,7 @@ final class BubbleFeedModel {
         noteVisibility(visible)
         if visible {
             releaseTask?.cancel()
+            isPausedForScroll = false
             if host != nil, liveItemID != nil, liveItemID == currentID {
                 host?.command("resume")
                 playSound(for: currentItem)
@@ -135,20 +143,64 @@ final class BubbleFeedModel {
         }
     }
 
-    /// The pager moved. The live session follows once the page settles.
+    /// The pager's position id changed. `scrollPosition` flips it mid-drag, as soon as another
+    /// page passes the anchor, so this only notes it: the live session follows once the pager has
+    /// stopped (`scrollDidSettle`). A change with no scroll behind it (a jump that lands where the
+    /// pager already is) settles here after a short wait.
     func pageDidChange(to id: String?) {
         guard let store, let id, let index = store.feedItems.firstIndex(where: { $0.id == id }) else { return }
         store.noteFeedPosition(index)
-        if isVisible {
-            FeedEventReporter.shared.pageShown(store.feedItems[index], position: index, sessionID: store.feedSessionID)
-        }
         settleTask?.cancel()
         settleTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: 90_000_000)
-            guard let self, !Task.isCancelled, self.currentID == id else { return }
-            if self.liveItemID != id || self.host == nil {
-                self.activateCurrent()
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            guard let self, !Task.isCancelled, !self.isScrolling, self.currentID == id else { return }
+            self.settle()
+        }
+    }
+
+    /// The pager started moving: hold the live game and its sound where they are.
+    func scrollDidBegin() {
+        guard !isScrolling else { return }
+        isScrolling = true
+        settleTask?.cancel()
+        guard isVisible, !isTakenOver, let host, liveItemID != nil, !isPausedForScroll else { return }
+        host.command("pause")
+        LibrarySoundPlayer.shared.hold(.feed)
+        isPausedForScroll = true
+    }
+
+    /// The pager stopped on page `index` (the one more than half on screen). The scroll position
+    /// is corrected if it drifted, then that page becomes (or stays) the live one.
+    func scrollDidSettle(at index: Int) {
+        isScrolling = false
+        settleTask?.cancel()
+        if let items = store?.feedItems, items.indices.contains(index), currentID != items[index].id {
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                currentID = items[index].id
             }
+        }
+        settle()
+    }
+
+    /// The settled page: resume it when it's already live (a partial drag that came back),
+    /// otherwise make it live. Reports it to the recommender once.
+    private func settle() {
+        guard isVisible, !isTakenOver, let store, let id = currentID else { return }
+        if lastShownID != id, let index = store.feedItems.firstIndex(where: { $0.id == id }) {
+            lastShownID = id
+            FeedEventReporter.shared.pageShown(store.feedItems[index], position: index, sessionID: store.feedSessionID)
+        }
+        if liveItemID == id, let host {
+            if isPausedForScroll {
+                isPausedForScroll = false
+                host.command("resume")
+                LibrarySoundPlayer.shared.resume(.feed)
+            }
+        } else {
+            isPausedForScroll = false
+            activateCurrent()
         }
     }
 
@@ -299,6 +351,11 @@ final class BubbleFeedModel {
             }
             if !self.isVisible {
                 host.command("pause")
+            } else if self.isScrolling {
+                // The pager started moving while this page was starting: hold it until it settles.
+                host.command("pause")
+                LibrarySoundPlayer.shared.hold(.feed)
+                self.isPausedForScroll = true
             }
             self.isLiveRevealed = true
             if self.pendingTakeover {

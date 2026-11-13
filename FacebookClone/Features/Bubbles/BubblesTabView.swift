@@ -163,9 +163,17 @@ struct BubblesTabView: View {
                     }
                 }
                 .scrollTargetLayout()
+                .background {
+                    // Pauses the live page while the pager moves and activates only the page
+                    // it settles on (iOS 17 and 18; see FeedPagerScrollObserver).
+                    FeedPagerScrollObserver(
+                        onBegin: { model.scrollDidBegin() },
+                        onSettle: { index in model.scrollDidSettle(at: index) }
+                    )
+                }
             }
             .scrollIndicators(.hidden)
-            .scrollTargetBehavior(.paging)
+            .scrollTargetBehavior(FeedPagingBehavior())
             .scrollPosition(id: $model.currentID, anchor: .top)
             .scrollDisabled(model.isTakenOver)
             .onChange(of: realignToken) { _, _ in
