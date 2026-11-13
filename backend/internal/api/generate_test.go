@@ -61,6 +61,18 @@ func newFakeGenerator(t *testing.T) *fakeGenerator {
 			line(`{"type":"event","event":{"kind":"playtested","passed":true,"headline":"5 of 5 bots fine","summary":"Playtested: 5 of 5 bots fine"}}`)
 			line(`{"type":"event","event":{"kind":"done","title":"Fog Walk","summary":"Fog Walk is ready"}}`)
 			line(`{"type":"result","manifest":` + g.manifest + `,"stats":{"museCalls":2,"repairRounds":1},"gate":{"passed":true,"summary":"fine"}}`)
+		case (r.URL.Path == "/anatomy" || r.URL.Path == "/anatomy/revise") && r.Method == "POST":
+			body := make([]byte, 1<<16)
+			n, _ := r.Body.Read(body)
+			g.mu.Lock()
+			g.requests = append(g.requests, r.URL.Path+" "+string(body[:n]))
+			g.mu.Unlock()
+			if fail {
+				w.WriteHeader(502)
+				fmt.Fprint(w, `{"error":"muse_failed"}`)
+				return
+			}
+			fmt.Fprint(w, `{"anatomy":{"anatomy":"game-anatomy/0.1","title":"Fog Garden","genre":"puzzle","parts":{}},"model":"fake"}`)
 		default:
 			http.NotFound(w, r)
 		}

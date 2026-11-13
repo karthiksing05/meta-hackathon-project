@@ -241,6 +241,17 @@ func freeze(dir string) error {
 	})
 }
 
+func (s *Local) ReadManifest(ctx context.Context, id string) ([]byte, error) {
+	if !ValidID(id) {
+		return nil, ErrNotFound
+	}
+	b, err := os.ReadFile(s.sub("published", id, "manifest.json"))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, ErrNotFound
+	}
+	return b, err
+}
+
 func (s *Local) WriteSourceZip(ctx context.Context, id string, w io.Writer) error {
 	if !ValidID(id) {
 		return ErrNotFound

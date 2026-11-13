@@ -60,5 +60,14 @@ export function loadStudio(files = findBundles()) {
     wrap(options) {
       return JSON.parse(S.wrap(JSON.stringify(options)));
     },
+    /**
+     * The whole pipeline (draft, repair, gate, quality check, polish, wrap), from the bundle.
+     * args: {request, brief, base?}; ask(system, user, purpose) -> {content, model}; onEvent gets progress events.
+     * Resolves to {manifest, stats, bots, gate, quality}.
+     */
+    async compose(args, ask, onEvent) {
+      if (typeof S.compose !== 'function') throw new Error('microgame-studio.js has no compose(); update the Studio bundle');
+      return JSON.parse(await S.compose(JSON.stringify(args), ask, onEvent));
+    },
   };
 }

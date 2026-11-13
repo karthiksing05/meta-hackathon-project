@@ -466,7 +466,9 @@ game's. Unknown keys are `A_FEEL_FIELD`.
 <!-- for-the-prompt: start. The Studio composer pastes this block into Muse's prompt as is. -->
 
 ```text
-ART AND SOUND. Your manifest may add three sections. Leave out any of them to keep the defaults.
+ART AND SOUND. A new game always has "art" (palette, font, backdrop, and a sprite for every role
+its fragments draw and every piece it draws itself) and "sound". "feel" is optional. When you change
+an existing game, keep its art and sound unless the request is about them.
 
 "art": { "style": "<one line>", "palette": {...}, "font": "<font>", "backdrop": {"svg": "..."}, "sprites": {...} }
 - palette: #RRGGBB for primary secondary accent ink bg danger surface. ink must read on bg and surface.
@@ -487,8 +489,9 @@ ART AND SOUND. Your manifest may add three sections. Leave out any of them to ke
   up to 24 KB, the backdrop up to 64 KB. Write attributes with single quotes so the JSON stays
   readable.
 - Make the player stand out from hazards (shape and color), and keep HUD icons and numbered
-  tiles simple in the middle: text is drawn on top. Original designs only: no characters, logos
-  or looks copied from existing games or brands.
+  tiles simple in the middle: text is drawn on top. Draw your own designs: when the person asked
+  for a franchise or theme, draw its world and characters in your own style, but never trace a
+  logo or copy another game's art.
 
 "sound": { "set": "<classic|soft|arcade|chime|retro|cozy>", "volume": 0..1, "music": true|false|"<lullaby|drift|bounce|chip>", "moments": {...} }
 - Pick the set from the mood and energy of the brief: soft or cozy for calm, arcade or retro for

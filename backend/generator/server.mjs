@@ -2,20 +2,26 @@
 // to Muse. It listens on the private Docker network (no published port) and streams one job's
 // progress as JSON Lines:
 //
-//   POST /compose  {request, brief}
+//   POST /compose  {request, brief, base?, remixOf?, level?}
+//        base is the stored manifest of a game being changed (a tweak, a new look, a next level, a remix);
+//        the result is always a new game whose lineage points at remixOf.
 //     -> 200 application/x-ndjson, one object per line:
 //        {"type":"event","event":{"kind","summary",...}}  ... then one of
 //        {"type":"result","manifest":{...},"stats":{...},"gate":{...}}
 //        {"type":"error","message":"...","issues":[...],"stats":{...}}
 //     -> 503 {"error":"muse_not_configured"} when MUSE_API_KEY isn't set
 //     -> 429 {"error":"busy"} when GENERATOR_MAX_CONCURRENT jobs are already running
+//   POST /anatomy         {request, audience?}                      -> 200 {anatomy: game-anatomy/0.1 ...}
+//   POST /anatomy/revise  {anatomy, change, request?, afterPlaying?} -> 200 {anatomy: ...}  (the same shape)
+//        one JSON turn on the fast model; 503 muse_not_configured, 429 busy, 502 when Muse's reply isn't an anatomy
 //   GET /healthz -> {"status":"ok","museConfigured":bool,"fragments":n}
 
 import { createServer } from 'node:http';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compose } from './src/composer.mjs';
-import { MuseClient } from './src/muse.mjs';
+import { MuseClient, extractObject } from './src/muse.mjs';
+import * as Anatomy from './src/anatomy.mjs';
 import { loadStudio } from './src/studio.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -24,6 +30,8 @@ const PORT = Number(env.PORT ?? 8090);
 const MAX_CONCURRENT = Number(env.GENERATOR_MAX_CONCURRENT ?? 2);
 const JOB_TIMEOUT_MS = Number(env.GENERATOR_JOB_TIMEOUT_SECONDS ?? 540) * 1000;
 const MODEL = env.MUSE_MODEL || 'muse-wonder-1.0';
+const FAST_MODEL = env.MUSE_FAST_MODEL || 'muse-ember-1.0';
+const ANATOMY_TIMEOUT_S = Number(env.GENERATOR_ANATOMY_TIMEOUT_SECONDS ?? 40);
 
 const studio = loadStudio();
 const fragments = studio.catalog().fragments.length;
@@ -48,11 +56,48 @@ async function readBody(req, limit = 64 * 1024) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
 }
 
+/** One anatomy turn: the draft from a request, or a revision of an agreed anatomy. */
+async function anatomy(req, res) {
+  let input;
+  try {
+    input = await readBody(req, 256 * 1024);
+  } catch {
+    return json(res, 400, { error: 'invalid JSON body' });
+  }
+  const revise = req.url === '/anatomy/revise';
+  const request = String(input.request ?? '').trim();
+  if (!revise && (!request || request.length > 2000)) return json(res, 400, { error: 'request must be 1 to 2000 characters' });
+  if (revise && (!input.anatomy || typeof input.anatomy !== 'object')) return json(res, 400, { error: 'anatomy is required' });
+  if (revise && String(input.change ?? '').length > 2000) return json(res, 400, { error: 'change is too long' });
+  if (!muse.isConfigured) return json(res, 503, { error: 'muse_not_configured' });
+  if (running >= MAX_CONCURRENT + 2) return json(res, 429, { error: 'busy' }); // anatomy turns are short: a little extra room
+
+  running++;
+  const started = Date.now();
+  try {
+    const catalog = studio.catalog();
+    const sys = Anatomy.system(Anatomy.fragmentLines(catalog));
+    const user = revise
+      ? Anatomy.userRevise({ anatomy: input.anatomy, request: request || input.anatomy.title || '', change: input.change, afterPlaying: input.afterPlaying === true })
+      : Anatomy.userCreate(request, input.audience);
+    const r = await muse.chatJSON({ model: FAST_MODEL, system: sys, user, maxTokens: 12000, reasoningEffort: 'low', timeout: ANATOMY_TIMEOUT_S, maxAttempts: 2 });
+    const value = Anatomy.validate(extractObject(r.content));
+    log('anatomy ok', { revise, seconds: (Date.now() - started) / 1000, model: r.model });
+    return json(res, 200, { anatomy: value, model: r.model });
+  } catch (e) {
+    log('anatomy failed', { revise, seconds: (Date.now() - started) / 1000, error: String(e?.message ?? e).slice(0, 200) });
+    return json(res, 502, { error: 'muse_failed', message: String(e?.message ?? e).slice(0, 300) });
+  } finally {
+    running--;
+  }
+}
+
 const server = createServer(async (req, res) => {
   try {
     if (req.method === 'GET' && req.url === '/healthz') {
       return json(res, 200, { status: 'ok', museConfigured: muse.isConfigured, fragments });
     }
+    if (req.method === 'POST' && (req.url === '/anatomy' || req.url === '/anatomy/revise')) return anatomy(req, res);
     if (req.method !== 'POST' || req.url !== '/compose') return json(res, 404, { error: 'not found' });
 
     let input;
@@ -74,7 +119,8 @@ const server = createServer(async (req, res) => {
     const send = (obj) => { if (!res.writableEnded) res.write(JSON.stringify(obj) + '\n'); };
     const started = Date.now();
     try {
-      const out = await compose({ request, brief: input.brief ?? {} }, {
+      const base = input.base && typeof input.base === 'object' ? input.base : null;
+      const out = await compose({ request, brief: input.brief ?? null, base, remixOf: input.remixOf ?? null, level: Number(input.level) || null }, {
         muse, studio, model: MODEL, signal: abort.signal,
         onEvent: (event) => send({ type: 'event', event }),
       });

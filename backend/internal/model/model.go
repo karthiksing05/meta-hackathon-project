@@ -182,6 +182,9 @@ type Job struct {
 	OwnerID    string         `bson:"ownerId"`
 	Request    string         `bson:"request"`
 	Brief      map[string]any `bson:"brief,omitempty"`
+	BaseGameID string         `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)
+	NextLevel  bool           `bson:"nextLevel,omitempty"`
+	Level      int            `bson:"level,omitempty"`
 	Status     string         `bson:"status"`
 	Events     []JobEvent     `bson:"events"`
 	GameID     string         `bson:"gameId,omitempty"`

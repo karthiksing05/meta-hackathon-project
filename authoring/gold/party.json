@@ -3,15 +3,54 @@
     "id": "gold_aura_farm",
     "file": "authoring/games/gold_aura_farm.authoring.json",
     "request": "a stupid brainrot game where you farm aura by tapping on beat",
+    "design": {
+      "pitch": "Tap when a golden spark hits the glowing zone to farm aura for a smug lime bean in shades, and climb from Certified NPC to Aura Deity in 45 seconds.",
+      "theme": [
+        "aura",
+        "Certified NPC",
+        "Main Character",
+        "Aura Deity",
+        "shades",
+        "gold chain",
+        "golden spark",
+        "glow ring",
+        "magenta grid floor",
+        "SIGMA?"
+      ],
+      "verb": "Tap anywhere as the golden spark orbiting the glow ring passes through the lime zone; the gold slice in its middle is a PERFECT.",
+      "twist": "Every tap is multiplied by your combo (PERFECT pays 300 x the multiplier, CLEAN 100 x, up to x9), and after each zone the target jumps to a new random spot ahead of the spark, so one early tap (-500 aura and a 350 ms stun) wipes out a big streak.",
+      "arc": [
+        "0–10 s: the spark circles at 0.36 laps a second, the hint reads TAP WHEN THE SPARK HITS THE GLOW for the first 6 s, and the first CLEAN and PERFECT taps push past 1000 aura to Background Extra.",
+        "10–40 s: each zone you hit or let slip makes the spark faster (up to 0.62 laps a second) and the zone thinner (down to 0.085 of the ring), the gold glow behind the bean swells with the combo, and the bar under the rank counts to the next rank at 3000, 6000, 10000 and up.",
+        "40 s+: the clock turns red and ticks through the last 5 s; reach 45 s for AURA ASCENDED, with the final aura, rank title, end line and best combo on the card."
+      ],
+      "lose": "Let the spark slip past the zone 3 times: each slip costs 1000 aura and one of 3 pairs of shades, and with none left the card reads SHADES SHATTERED. Early taps cost 500 aura and break the combo but not a life.",
+      "win": "Survive the full 45 seconds to win. The score is your aura, and it sets one of 8 ranks: Certified NPC, Background Extra (1000), Side Quest Enjoyer (3000), Lowkey Legendary (6000), Aura Merchant (10000), Main Character (16000), Final Boss Energy (24000) and Aura Deity (35000).",
+      "juice": [
+        "PERFECT: a square-wave zip that climbs a semitone with every combo step, 26 gold particles bursting from the spark and 14 lime ones from the bean, PERFECT +N popping in gold, and the bean throwing its arms up.",
+        "Rank up: the levelup sting, 40 gold and 24 lime particles raining from the rank title as it scales up to 1.7x, and a success haptic.",
+        "Flop: the wah sound, 20 pink particles falling from the spark, a 9 px shake, an error haptic, the bean wobbling with its shades slipped down, and a pink line like CRINGE -500 or GHOSTED IT -1000."
+      ],
+      "look": "A synthwave aura shrine: a purple sunburst over a magenta grid floor with faint +1000 AURA and SIGMA? scrawls, in a night-purple palette (#1A0838) lit by lime #B6FF3B and gold #FFD23F. The bean in shades and a gold chain sits in the middle of a dark ring; the target is a pulsing lime arc with a gold centre, the spark trails four fading dots, and hot pink #FF3D7F is kept for losses. Heavy Futura with dark outlines.",
+      "voice": "A brainrot hype-man: all caps, internet slang and grand titles. \"GHOSTED IT -1000\", \"Your aura is on airplane mode.\", \"Scientists cannot measure you.\""
+    },
     "brief": {
       "intent": "Tap when an orbiting spark crosses a glowing zone to stack aura and climb absurd rank titles",
       "audience": "group chat, teens and twenty-somethings",
-      "mood": ["absurd", "smug", "hype"],
+      "mood": [
+        "absurd",
+        "smug",
+        "hype"
+      ],
       "energy": "high",
       "competition": "high score"
     },
     "genre": "timing / rhythm tap",
-    "fragments_used": ["lives", "combo", "countdown"],
+    "fragments_used": [
+      "lives",
+      "combo",
+      "countdown"
+    ],
     "why_its_good": [
       "One verb (tap) with three readable outcomes: PERFECT, CLEAN or -500/-1000 aura, each with its own pop text, particles, mascot frame and a combo sound that climbs a semitone per streak (`note: \"= 659.0 * pow(1.0595, combo)\"`).",
       "Skill curve built from the game's own state: each rep speeds the spark and narrows the zone toward a floor, while 8 rank titles from Certified NPC to Aura Deity give a reason to keep going and a ranked_up burst on every step.",
@@ -22,21 +61,62 @@
       "Binds fragment events to game events (`lives.hit -> ghosted`, `combo.hit_good -> nailed`) instead of re-declaring `lives` or `combo` state.",
       "Early taps only cost aura and stun for 350 ms; only letting the spark slip costs a life, so spam taps are punished but one fat-finger never ends the run.",
       "Every content key (ranks, miss_lines, ghost_lines, end_lines) is read by an expression; nothing is dead."
-    ]
+    ],
+    "themes": "brainrot aura sigma skibidi rizz gyatt rhythm beat music tiktok meme"
   },
   {
     "id": "gold_npc_or_main",
     "file": "authoring/games/gold_npc_or_main.authoring.json",
     "request": "npc or main character game where weird situations pop up and you have to sort them super fast",
+    "design": {
+      "pitch": "Rapid-fire cards of everyday behavior: call each one NPC or main character energy before your plot armor runs out.",
+      "theme": [
+        "NPC",
+        "MAIN CHARACTER",
+        "PLOT ARMOR",
+        "Clout",
+        "season finale",
+        "scenario card",
+        "sleepy robot NPC button",
+        "spotlit main-character button",
+        "CINEMA",
+        "DEFAULT SKIN"
+      ],
+      "verb": "Read the scenario card and tap the NPC or MAIN CHARACTER button, or swipe left for NPC and right for main character.",
+      "twist": "One draining plot armor bar is the whole clock: it holds 8 s, each right call puts 0.7 s back, each wrong call rips 1.5 s off, and it drains up to 2.3x faster over the first 50 s, so you have to be quick and right at once.",
+      "arc": [
+        "0–10 s: the bar drains at normal speed, the footer says tap a side, or swipe left or right, and easy cards like Pushes the door that clearly says pull. Twice. teach the two piles.",
+        "10–40 s: the drain picks up on an ease-in curve, right calls refill it and build the streak multiplier, and every 5 in a row fires a sting and a teal burst.",
+        "40 s+: the bar drains at up to 2.3x by 50 s, the label flashes PLOT ARMOR: CRITICAL under 2 s, and the footer counts down the seconds until the season finale at 60 s."
+      ],
+      "lose": "The plot armor bar empties: it drains all the time, wrong calls take 1.5 s off it, and at zero the card reads PLOT ARMOR: GONE.",
+      "win": "Survive 60 seconds to win MAIN CHARACTER. Clout is 100 per right call plus a speed bonus of up to 50 for answering within 2 s, multiplied by the streak multiplier (up to x10).",
+      "juice": [
+        "Right call: the card flies off toward the side you chose, a stamp like MAIN CHARACTER ENERGY or NPC BEHAVIOR slams in, a +N floats up over that button with 20 particles in its color, and a square-wave chirp rises a semitone per streak step.",
+        "Every 5 in a row: the arpeggio sting, 48 teal particles raining from the card and a success haptic.",
+        "Wrong call: the buzz sound, a red stamp like WRONG. PLOT HOLE. or THE AUDIENCE GASPED, 22 red particles, a 10 px shake and the PLOT ARMOR label jolting."
+      ],
+      "look": "Tabloid sticker pop: sunny halftone yellow (#FFD84A) with pink candy stripes and comic bursts. A white scenario card fills the middle, a periwinkle sleepy robot NPC button sits on the left (its stamps in blue #3D5AFE) and a pink spotlit main-character button on the right (#FF3D8B); red #E8282B is only for wrong calls. Dark ink #1B1036 in heavy Avenir Next.",
+      "voice": "A deadpan reality-show narrator roasting tiny everyday habits: \"Replies “lol” to a nine-paragraph text\", \"Rides a bike with no hands and a baguette\", \"You are the plot. Everyone else is a cameo.\""
+    },
     "brief": {
       "intent": "Rapid two-way sorting of absurd everyday scenarios, against a draining plot-armor meter",
       "audience": "friends sending it to the group chat",
-      "mood": ["chaotic", "funny", "relatable"],
+      "mood": [
+        "chaotic",
+        "funny",
+        "relatable"
+      ],
       "energy": "high",
       "competition": "high score"
     },
     "genre": "swipe / tap sorting",
-    "fragments_used": ["score", "combo", "timer_bar", "difficulty_curve"],
+    "fragments_used": [
+      "score",
+      "combo",
+      "timer_bar",
+      "difficulty_curve"
+    ],
     "why_its_good": [
       "Fun in the first second: a big readable card, two huge buttons and swipe left or right as an alternative; the old card flies off in the direction you chose and a stamp slams in (MAIN CHARACTER ENERGY, WRONG. PLOT HOLE.).",
       "One shared timer_bar is the whole tension: right calls refill it, wrong calls rip 1.5 s off, and `difficulty_curve` raises `drain_mult` over 50 s, so the run escalates without any new rules for the player to learn.",
@@ -46,21 +126,65 @@
       "Uses its own wrapped card text (`w` + `wrap: true`) instead of sort_bins, whose single 34 px line can't hold a joke-length scenario.",
       "Two inputs (`tap_call` with no source, `swipe_call` with swipe sources) feed one `called` event, so buttons and swipes share one judging rule and the bots test both.",
       "Content stays content: two lists of scenarios become a typed deck with `map(content_npc, s => {text: s, main: false})`, not hard-coded strings in rules."
-    ]
+    ],
+    "themes": "npc main character brainrot tiktok meme sort swipe vibes"
   },
   {
     "id": "gold_goblin_snack_run",
     "file": "authoring/games/gold_goblin_snack_run.authoring.json",
     "request": "goblin mode game where you grab snacks at 2am and dodge responsibilities",
+    "design": {
+      "pitch": "Drag a goblin in a hoodie around a 2 AM kitchen grabbing pizza and dodging alarm clocks and angry emails, then chain five snacks to go GOBLIN MODE and eat your responsibilities.",
+      "theme": [
+        "Grub",
+        "2 AM kitchen",
+        "open fridge",
+        "pizza",
+        "alarm clocks",
+        "angry emails",
+        "brain cells",
+        "GOBLIN MODE",
+        "LAUNDRY AVALANCHE",
+        "INBOX TSUNAMI"
+      ],
+      "verb": "Drag Grub around the kitchen (he follows your finger) to grab pizza slices while slipping between alarm clocks falling from the top and emails flying in from the right.",
+      "twist": "Five snacks without getting hit turns on GOBLIN MODE for 5 s: hazards can't hurt you, each snack is worth double, and every alarm clock or email Grub touches gets eaten for +25.",
+      "arc": [
+        "0–10 s: GET READY, GOBLIN during a 1.8 s breather, then WAVE 1: KITCHEN RAID: an alarm clock every 0.65 s, an email every 1.4 s, a pizza slice every 0.8 s, and the five streak pips filling up.",
+        "10–40 s: each wave lasts 10 s, is followed by a 1.8 s hazard-free breather, and comes back 0.3x faster: WAVE 2: LAUNDRY AVALANCHE, WAVE 3: INBOX TSUNAMI, then WAVE 4: MONDAY IS COMING.",
+        "40 s+: WAVE 5: THE ALARM BOSS throws hazards at 2.2x speed; survive it, about 59 s in, to win."
+      ],
+      "lose": "Each touch from an alarm clock or email costs one of 3 brain cells (then 1.1 s of grace), clears the hazards near you and resets the snack streak; with none left it's bedtime and the card reads BRAIN CELLS: 0.",
+      "win": "Clear all 5 waves to win SNACK LEGEND. Yum counts 10 per snack (20 in GOBLIN MODE) plus 25 for each responsibility eaten.",
+      "juice": [
+        "Each pizza grabbed plays a square-wave blip that climbs with the streak, and the next of the 5 streak pips pops.",
+        "GOBLIN MODE ACTIVATED: a hooray, 48 green particles bursting from Grub, a green glow pulsing around him, a small shake, a success haptic and EAT YOUR RESPONSIBILITIES with a 5 s countdown.",
+        "Chomp: a sawtooth slide from C4 to C5, 24 amber crumbs falling where he ate and a medium haptic."
+      ],
+      "look": "A 2 AM kitchen raid: violet wallpaper and a glowing open fridge in a midnight-purple palette (#1A0B33) with goblin green #7CFF4F, amber and pink. Grub is a green goblin in a purple hoodie; the hazards are red alarm clocks and white angry emails, the pickups are golden pizza slices, and the lives are pink brain cells. Marker Felt with dark purple outlines.",
+      "voice": "Chaotic, self-roasting jokes about adulting: \"OOF. ADULTING.\", \"THE INBOX GOT YOU\", \"ZERO EMAILS ANSWERED\""
+    },
     "brief": {
       "intent": "Drag a goblin around a 2 AM kitchen, grabbing pizza and dodging alarm clocks and emails across 5 named waves",
       "audience": "anyone who has ever raided the fridge at 2 AM",
-      "mood": ["chaotic", "cozy-gremlin", "silly"],
+      "mood": [
+        "chaotic",
+        "cozy-gremlin",
+        "silly"
+      ],
       "energy": "high",
       "competition": "survive and score"
     },
     "genre": "arcade dodge and collect",
-    "fragments_used": ["player_drag", "spawn_wave (x2)", "pickups", "collide", "lives", "score", "waves"],
+    "fragments_used": [
+      "player_drag",
+      "spawn_wave (x2)",
+      "pickups",
+      "collide",
+      "lives",
+      "score",
+      "waves"
+    ],
     "why_its_good": [
       "A twist that flips the rules: 5 snacks in a row triggers GOBLIN MODE, and for 5 s `colliders()` returns [] while a game rule lets you eat the hazards for +25 each.",
       "Clear structure and escalation: waves with joke names (LAUNDRY AVALANCHE, INBOX TSUNAMI), hazards that speed up each wave, a hazard-free breather between waves, and a win at wave 5.",
@@ -70,21 +194,62 @@
       "The second spawn_wave use binds every public name (`spawns -> emails`, `spawn_speed -> email_speed`, `spawned -> email_sent`, `Spawn -> Email`) instead of relying on auto-renames.",
       "Keeps the HUD within the 3-node `hud_top` limit (lives, score, waves) and puts the custom snack-streak pips in `hud_bottom` rather than overflowing a slot.",
       "Adds transparent circles under the pickup sprites so the bots, which only see rect and circle ops, can find the snacks."
-    ]
+    ],
+    "themes": "goblin mode 2am snacks junk food chaos lazy procrastinate"
   },
   {
     "id": "gold_rizz_or_flop",
     "file": "authoring/games/gold_rizz_or_flop.authoring.json",
     "request": "rizz or flop quiz where you pick the least cringe thing to say and judges react",
+    "design": {
+      "pitch": "A dating game show where your crush says something, you pick the least cringe of four replies in 5 seconds, and a frog, a DJ cat and a robot nana hold up score cards.",
+      "theme": [
+        "The Rizz Tribunal",
+        "DJ Whiskers",
+        "monocled frog",
+        "robot nana",
+        "crush",
+        "judges' desk",
+        "chat-bubble prompt",
+        "marquee of bulbs",
+        "magenta curtains",
+        "Unspoken Rizz Deity"
+      ],
+      "verb": "Read your crush's line and tap one of four shuffled replies before the 5 s bar runs out.",
+      "twist": "The judges are the scoreboard: after every answer the frog, DJ Whiskers and Nana switch to hype or cringe faces and hold up cards (Nana gives an 11 for a smooth answer inside 1.5 s, and a negative card for a flop) with a reaction line, while the heat doubles, then triples the points every 4 rounds.",
+      "arc": [
+        "Rounds 1–4: LOW STAKES ROUND at x1, openers like They text: “wyd”, and the RIZZ STREAK tag appears after 2 smooth answers in a row.",
+        "Rounds 5–8: the banner pops to HEAT x2: THEY ARE INTERESTED with a levelup sting, and every answer pays double.",
+        "Rounds 9–12: HEAT x3: FINAL BOSS DATE in gold, triple points, and with 2 hearts one more flop can end the date."
+      ],
+      "lose": "A wrong pick, or letting the 5 s bar run out, costs one of 2 hearts; losing both (or running out the 75 s clock) ends it with THE DATE IS OVER.",
+      "win": "Survive all 12 rounds to win IT IS GIVING RIZZ. Rizz is 100 per smooth answer plus, times the heat, a speed bonus (up to 350, gone after 3.5 s) and 50 for each answer already in your streak; the total earns a title from Certified Flop to Unspoken Rizz Deity.",
+      "juice": [
+        "Smooth answer: a triangle-wave whoop that climbs a semitone per streak step, 30 gold particles spraying from the judges' desk, all three judges hopping with hype faces as their cards pop up, and a gold +N floating up.",
+        "Every 3 in a row: a hooray and 40 pink particles raining from the top of the stage.",
+        "Flop: a 10 px shake, an error haptic, the judges wobbling with cringe faces and low or negative cards, and a line like Nana unplugged herself."
+      ],
+      "look": "A late-night dating game show: a hot-pink stage (#E255B0) with magenta curtains and a marquee of bulbs, gold #FFC233 for points and heat and violet for the final score. Your crush's line sits in a chat bubble, the four replies are pink bubble buttons, the judges' desk runs along the bottom, and red is only for flops. Chalkboard SE with deep plum outlines.",
+      "voice": "Game-show host meets group chat, flirty and self-owning: \"I know. I'm him.\", \"Nana is kicking her feet.\", \"Buffering... still buffering...\""
+    },
     "brief": {
       "intent": "A speed quiz where you pick the least cringe of four replies and a panel of absurd judges scores every line",
       "audience": "group chat, dating-show fans",
-      "mood": ["cringe-comedy", "flirty", "silly"],
+      "mood": [
+        "cringe-comedy",
+        "flirty",
+        "silly"
+      ],
       "energy": "medium",
       "competition": "high score over 12 rounds"
     },
     "genre": "speed quiz / dialogue choice",
-    "fragments_used": ["quiz", "rounds", "lives", "score"],
+    "fragments_used": [
+      "quiz",
+      "rounds",
+      "lives",
+      "score"
+    ],
     "why_its_good": [
       "The scoreboard is the joke: three original judges (a monocled frog, a DJ cat, a robot nana) switch between neutral, hype and cringe frames and hold up score cards, with a pick from lists of reaction lines (a separate set for timeouts, using the quiz's `picked == -1`).",
       "Escalating stakes in the game's own rules: a speed bonus from `asked_at` plus a streak bonus, multiplied by heat (x1, x2, x3 every 4 rounds), with a banner that pops on each heat change.",
@@ -94,6 +259,7 @@
       "Every answer appears exactly once among its question's 4 choices, in content order; prompts are 23 characters or fewer because the quiz's question text doesn't wrap.",
       "Static framing (the chat bubble behind the question, the judges' desk) goes in the backdrop, because the game's playfield nodes draw on top of the fragment's.",
       "Hooks the heat-change sting to the public `round_started {index}` event instead of reaching for the quiz's private `_ask`."
-    ]
+    ],
+    "themes": "rizz dating flirt pickup lines cringe love island bachelor dialogue"
   }
 ]

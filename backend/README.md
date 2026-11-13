@@ -60,7 +60,8 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/groups/{id}/games` | optional | games made for it |
 | `POST /v1/groups/{id}/blend`, `GET /v1/groups/{id}/blend-inputs` | bearer (members) | Blend for the group's members, taken from the server's data; each member's skill, taste and recent games |
 | `POST /v1/blend` | bearer | games and a game spec for a set of people: `{group, members, count}` |
-| `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; see [Making games](#making-games-muse-lives-here) |
+| `POST /v1/generate` | bearer | make a game: `{request, brief}` -> 202 `{jobId}`; or change one: `{baseGameId, change?, look?, nextLevel?}` (a tweak, a new look, a next level or a remix; always a new game with `remixOf` set); see [Making games](#making-games-muse-lives-here) |
+| `POST /v1/anatomy`, `POST /v1/anatomy/revise` | bearer | Muse takes an idea apart into its working parts: `{request, audience?}`, then `{anatomy, change, request?, afterPlaying?}`; both return `game-anatomy/0.1` (docs/BUBBLES.md 7.13) |
 | `GET /v1/generate/{id}`, `GET /v1/generate` | bearer | a job's status, steps and finished game; my recent jobs |
 | `POST /v1/creations` | bearer | upload a package zip (`Content-Type: application/zip`) |
 | `GET /v1/creations`, `GET /v1/creations/{id}`, `GET /v1/creations/{id}/source` | bearer | the caller's games; private editable source as a zip |
@@ -109,11 +110,11 @@ app -> GET  /v1/generate/{jobId}  (poll every 1-2 s)
 - A job survives the app closing: poll it again later. After a server restart, unfinished jobs are marked failed.
 
 How it runs: the Go API stores the job and streams it through the internal `generator` service (Node, no published port beyond
-loopback), which does what the app's `MicrogameComposer` used to: Muse writes an authoring manifest (`api.meta.ai/v1`, model
-`muse-wonder-1.0`), the expander and engine check it, up to 3 repair rounds, five bots playtest it, then `wrap`. It runs the committed
+loopback), which runs the Studio bundle's pipeline (`MicrogameStudio.compose`, shared with the app's Studio and written by Artem, so prompts and gold examples live in one place): Muse writes an authoring manifest (`api.meta.ai/v1`, model
+`muse-wonder-1.0`), the expander and engine check it, up to 3 repair rounds, five bots playtest it, a quality check and one polish round, then `wrap`. It runs the committed
 `microgame-studio.js` and `bubble-kit-microgame-engine.js` bundles from the app's folders (`FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js`,
 `FacebookClone/Bubbles/Studio/web/microgame-studio.js`); there is one copy of each, and the generator image copies them to `/app/vendor`. The API then publishes the result like any upload, so it appears in `/v1/feed`
-and under the owner's `/v1/creations`. Not built yet: revising a game, Muse-made covers, and the classic (non-microgame) formulas.
+and under the owner's `/v1/creations`. Changing a game sends the stored manifest as the base, so the job continues from its authoring source. Not built yet: Muse-made covers and the classic (non-microgame) formulas.
 
 ## Ranking (the recommender runs here)
 
@@ -201,9 +202,7 @@ Roll-ups (all count only events from `since`, RFC 3339 or unix ms, when it is gi
   phone's own `userID` when it sent one, else the account id, else `device:<id>`. The response header `X-Next-Since`
   is the last timestamp; pass it as `since` for the next page (the last event may repeat; dedupe on `eventID`).
 
-Not built yet: the social-moments inbox (`/v1/me/moments`) and Group Blend inputs (`/v1/groups/{id}/blend-inputs`),
-which need the challenge, session and Group data first, and the optional re-rank proxy, recs-state backup and
-generation queue. After deploying a release that adds indexes, run `deploy/dbinit.sh` once.
+Not built yet: shared sessions, replays, streaks and a Group weekly board, and the optional re-rank proxy and recs-state backup. After deploying a release that adds indexes, run `deploy/dbinit.sh` once.
 
 ## Notes and limits
 

@@ -3,15 +3,52 @@
     "id": "gold_stormglass_affair",
     "file": "authoring/games/gold_stormglass_affair.authoring.json",
     "request": "a spooky wizard school mystery where my roommate gets framed for stealing something and I have to find the real thief before dawn",
+    "design": {
+      "pitch": "A snowy wizard-school whodunit: your bunkmate Wren is framed for stealing the Stormglass, and you have two bells before dawn to find the real thief.",
+      "theme": [
+        "Fernhallow",
+        "the Stormglass",
+        "Prefect Finch",
+        "Wren",
+        "Professor Thistlewood",
+        "Headmistress Ravel",
+        "the Weather Tower",
+        "Gloam’s boot room",
+        "a silver-stitched glove",
+        "lantern-fish"
+      ],
+      "verb": "Read each scene’s four short lines, then tap one of up to three choices; a choice can add a clue to your notebook, raise or lower Trust, or unlock a later option.",
+      "twist": "Midnight only lets you visit two of three places (the Weather Tower, Wren in the Infirmary, the Prefects’ Study), your house (Cinder, Quill or Moss) unlocks its own moves, and the ‘theft’ turns out to be a cracked glass leaking winter.",
+      "arc": [
+        "Scenes 1–2: in the Great Hall you pick a house, then CRACK, the Stormglass is gone and Prefect Finch blames Wren; stand up for her, study the frost, or nod along.",
+        "Scenes 3–7: from the Midnight Corridor you visit two of three places, collecting clues (glove, crack, ledger, lantern, alibi, flinch, match); Quill can read the ward-runes and follow the meltwater to the Stormglass in the Gloam Boot Room.",
+        "Final scenes: at the Dawn Tribunal, Headmistress Ravel says ‘Name the thief’ (Prefect Finch, Wren or Professor Thistlewood), or, in the boot room, you take the glass to the tribunal, mend it yourself, or fetch Wren to mend it."
+      ],
+      "lose": "Five of the 7 endings are bad and end the run 5 seconds after they appear: accuse Finch with fewer than 3 clues (All Hunch, No Proof), accuse Wren (The Wrong Friend) or Thistlewood (Slander in the Staffroom), mend the glass yourself (The Snowman), or keep a pocket summer (Pocket Summer).",
+      "win": "Accuse Finch with 3 or more clues for Case Closed (+500), or reach the secret Weather Menders ending (+900): Quill reads the runes, Trust is 2 or more so Wren can mend the glass, and you return it before dawn. Score = Clues × 100 + Trust × 50 + Ending, shown on the end card.",
+      "juice": [
+        "A clue: the sparkle sound, 18 frost-blue particles burst from the toast line, the Clues pill pops and a gold toast names it: ‘Clue: a silver-stitched glove’.",
+        "Trust gained: a chime, 10 gold particles and the Trust pill pops with ‘Wren will remember that’ (losing Trust bonks, shakes 4 px and buzzes a warning haptic).",
+        "A good ending: 40 frost-blue particles drift up from the vignette as ‘THE END’ fades in over the score line and ‘One of 7 endings. Try another path.’"
+      ],
+      "look": "A candlelit gothic academy at midnight: a gold-traced pointed arch over deep indigo stone with drifting frost-blue snow; indigo, candle gold and frost blue feel mysterious but cozy. Each scene shows one of eight gold-framed storybook vignettes, choices sit on gold-edged indigo plaques with diamond studs, gains toast in gold and losses shake the screen. Font: Baskerville.",
+      "voice": "Wry, cozy-gothic boarding-school mystery with dry jokes at the first-year’s expense: “Her notes: ‘Storm loose! Data!’”, “Wren sniffs: ‘Apology noted.’”, “Clue: Finch flinched. Gotcha.”"
+    },
     "brief": {
       "intent": "Investigate a theft in your first term at a magic academy, gather clues and name the thief at a dawn tribunal",
       "audience": "teens and adults who like cozy fantasy and whodunits",
-      "mood": ["mysterious", "cozy", "witty"],
+      "mood": [
+        "mysterious",
+        "cozy",
+        "witty"
+      ],
       "energy": "low",
       "competition": "light"
     },
     "genre": "branching mystery / choose your own adventure",
-    "fragments_used": ["choice_story"],
+    "fragments_used": [
+      "choice_story"
+    ],
     "why_its_good": [
       "State drives the plot: your house unlocks its own options (Quill reads the runes, Cinder asks the hard question, Moss starts with trust), clues are `clue_*` flags counted for the accusation, and a midnight hub lets you visit only two of three places (`visits>=2` routes every exit to dawn), so each run is a real trade-off.",
       "Seven endings, each earned: accusing Finch routes to Case Closed only with `clues>=3` (else All Hunch, No Proof), the wrong suspect or a red herring loses, and the secret Weather Menders ending needs Quill's runes plus `trust>=2` with the friend you defended. Callbacks pay off earlier choices (nod along with Finch and Wren turns to the wall; bluff with her testimony and Finch flinches).",
@@ -21,21 +58,59 @@
       "No made-up syntax: every reaction is a real feedback entry with `when` (clue gained, trust lost), using `moment`, `particles`, `shake` and `haptic`, and every builtin is called with its real arity (`get_or(list, i, default)`, `or_else(parse_int(s), 0)`, `fold(list, init, (acc, x) => ...)`).",
       "Content keys are only ones the game's own functions read (`content_effects`, `content_needs`, `content_routes`, `content_callbacks`, `content_scene_info`), each story line fits about 28 characters and each label about 24, so no text overflows the 360-wide canvas.",
       "The ending holds for five seconds before the win or lose screen (the fragment's `good_wins`/`bad_loses` are off and a `curtain` timer sets `verdict`), so players can read how the story ends."
-    ]
+    ],
+    "themes": "harry potter hogwarts wizard magic school mystery detective whodunit clue sherlock"
   },
   {
     "id": "gold_last_run_of_the_magpie",
     "file": "authoring/games/gold_last_run_of_the_magpie.authoring.json",
     "request": "a space opera adventure where I'm a smuggler pulled into a rebellion against an evil empire, with a big escape at the end and maybe a traitor",
+    "design": {
+      "pitch": "You fly the Magpie, a smuggler ship 9,000 crowns in debt, carrying a hooded kid to the rebels, and your old wingmate is selling you out.",
+      "theme": [
+        "the Magpie",
+        "LEDGER",
+        "Nim",
+        "Dace",
+        "Admiral Okoro",
+        "the Concordance",
+        "the Verdict",
+        "the Needle",
+        "the Ember Choir Fleet",
+        "Brightwater Docks"
+      ],
+      "verb": "Read each scene, then tap one of two or three choices, trading Loyalty (to Nim and the rebels) against Heat (how wanted the Magpie is).",
+      "twist": "Heat decides the escape: at the Needle the right fork is the way out unless Heat is 2 or more, and Dace always radios ‘Go left!’, a trap into the Verdict’s hangar; Nim is secretly the Concordance’s heir.",
+      "arc": [
+        "Scenes 1–2: at Brightwater Docks you take the kid aboard, scan them first, or ask for quadruple pay; then three Warden cutters block the lane: punch through, hide in a comet’s tail, or bluff ‘Medical cargo!’",
+        "Scenes 3–6: a dogfight, the comet (where LEDGER finds a tracker) or the Warden’s scan (which salutes Nim), then the Ember Choir Fleet, where Dace waves you in and his wrist-comm blinks Concordance gold.",
+        "Final scenes: Admiral Okoro asks you to fly Nim (yes, for 20,000 crowns, or sell Nim to the empire), then the Needle Gate: the left fork, the right fork, or, if you know Nim is the heir and Loyalty is 2 or more, let Nim take the comm."
+      ],
+      "lose": "Three of the 5 endings are bad and end the run 5 seconds after they appear: take Dace’s left fork (The Left Fork), take the right fork with Heat 2 or more (Too Hot to Hide), or deliver Nim or ransom the heir (Rich and Alone).",
+      "win": "Take the right fork with Heat under 2 for Through the Needle (+500), or let Nim abdicate on air for the secret The Last Toll (+900). Score = Loyalty × 100 + Cool × 50 + Ending, where Cool is 3 minus Heat (never below 0); ending points land only when the curtain falls.",
+      "juice": [
+        "Loyalty up: a combo sound, 14 ember-orange particles and the Loyalty pill pops with ‘Nim never misses. Who IS this?’",
+        "A discovery (the tracker or the heir): a chirp, 16 cyan sparks and ‘The Warden SALUTES Nim. What?’ (Heat rising zaps, shakes 6 px and buzzes a warning haptic).",
+        "A good ending: 48 ember particles burst from the vignette as ‘THE END’ fades in; a bad one shakes 8 px with an error haptic instead."
+      ],
+      "look": "Space opera at night: a deep navy starfield with pink and blue nebulae and cyan cockpit brackets; ember-orange rebels against an empire of gold, with cyan HUD text, feels epic and tense. Each scene shows one of twelve vignettes, choices are chamfered navy cockpit panels with a cyan outline, ember corner bars and a chevron, and Heat rises shake the screen. Font: Futura.",
+      "voice": "Breezy space-opera banter with a sarcastic ship AI: “LEDGER: ‘Debt down. Morals?’”, “Dace hugs back. A bit too long”, “Fake handoff. Bold. Heat up”."
+    },
     "brief": {
       "intent": "Fly a debt-ridden smuggler ship through a blockade, choose loyalty or money, spot the traitor and survive the final escape",
       "audience": "sci-fi fans, teens and adults",
-      "mood": ["epic", "tense", "funny"],
+      "mood": [
+        "epic",
+        "tense",
+        "funny"
+      ],
       "energy": "medium",
       "competition": "light"
     },
     "genre": "branching space opera / choose your own adventure",
-    "fragments_used": ["choice_story"],
+    "fragments_used": [
+      "choice_story"
+    ],
     "why_its_good": [
       "Two stats that pull against each other: loyalty (to the kid and the rebels) and heat (how wanted you are). Heat decides the final escape (`heat>=2` routes the right fork to Too Hot to Hide), a decoy you plant earlier lowers it, and the HUD and the ship AI's status line (`ledger_says()`) react as they change.",
       "Betrayal both ways: you can sell the kid to the empire or fake the handoff, and your old wingmate is the traitor. Finding the tracker unlocks a confrontation, and at the Needle he always says 'go left', a trap you can only read right if you were paying attention. The secret Last Toll ending needs the heir reveal (scan the kid, or let the Warden scan) plus `loyalty>=2`.",
@@ -45,21 +120,59 @@
       "Score means something and isn't leaked early: Loyalty x 100 + Cool x 50, plus ending points that land only when the curtain falls (`ending_points()` is 0 until `verdict` is set), so bots and players can't read the ending's worth before it plays.",
       "Conditional choices never leave gaps or dead ends: `needs` hides a choice, the glue packs the visible ones to the top, and a path simulation confirms that every scene has 2 or more choices and that every path has 6 to 8 decisions.",
       "Feedback stays in proportion for a story: shake and a warning haptic only when heat rises, sparkles for loyalty and discoveries, and no custom `{\"action\": ...}` or unknown node kinds."
-    ]
+    ],
+    "themes": "star wars han solo smuggler rebellion empire jedi space opera galaxy escape"
   },
   {
     "id": "gold_the_hostess_knows",
     "file": "authoring/games/gold_the_hostess_knows.authoring.json",
     "request": "a messy rich-kid prep school drama where an anonymous gossip account is leaking everyone's secrets and I have to figure out who runs it",
+    "design": {
+      "pitch": "New kid at Ashcombe Prep, and an anonymous account called The Hostess is posting everyone’s secrets, so feed her a fake one and see who leaks it.",
+      "theme": [
+        "Ashcombe Prep",
+        "The Hostess",
+        "Margo Bell",
+        "Dev Kapoor",
+        "Celeste Varga-Whitlock",
+        "the Winter Gala",
+        "the Courtyard Café",
+        "the Roof Garden",
+        "pearls",
+        "the Alps"
+      ],
+      "verb": "Read each scene, then tap one of up to three choices to protect your Rep, bank Secrets and collect receipts (clues).",
+      "twist": "Secrets are bait: tell Margo a fake secret (a pearl allergy), and when The Hostess posts it you get the clue that only Margo heard it; a trap (you’ll wear green) can prove it, but texting her ‘Gotcha’ tips her off.",
+      "arc": [
+        "Scenes 1–3: on day one The Hostess posts your bowl cut; at lunch Margo Bell asks for a secret (fake, real, or none), and that night The Hostess posts Dev Kapoor’s ballet, or the secret you told Margo.",
+        "Scenes 4–7: check on Dev on the Roof Garden, make a truce with Celeste Varga-Whitlock, or confront Margo (her phone shows DRAFTS (3)); then Gala Week: set a trap for Margo, skip the gala, or go and face it.",
+        "Final scene: midnight at the Winter Gala, where you unmask Margo, unmask Celeste, or, with Dev and Celeste as allies and Secrets at 2 or more, have everyone confess at once."
+      ],
+      "lose": "Five of the 7 endings are bad and end the run 5 seconds after they appear: skip the gala (The Empty Chair), unmask Margo with fewer than 3 clues (All Gossip, No Proof) or with 3 clues but Rep below 1 (Right, but Unpopular), warn her first (Logged Off Early), or accuse Celeste (Off to the Alps).",
+      "win": "Unmask Margo with 3 or more clues and Rep 1 or more for Unmasked (+500), or confess together for the secret The Truce (+900). Score = Clues × 100 + Rep × 50 + Ending; Rep starts at 1.",
+      "juice": [
+        "A clue: a ding, 18 champagne particles burst from the toast line, the Clues pill pops and ‘Clue: the trap snapped shut’ appears.",
+        "Rep up: a combo sound, 12 blush-pink particles and ‘Dev’s in your corner now’ (Rep down buzzes, shakes 4 px and fires a warning haptic).",
+        "A good ending: 50 blush-pink particles shower down over the vignette as ‘THE END’ fades in over the score line."
+      ],
+      "look": "The Upper East Side after dark: plum-black lacquer under a blush-and-black striped café awning, with lit townhouse windows; blush pink, champagne gold and pearl white feel glamorous and scheming. Each scene shows one of nine vignettes, choices are plum pill buttons with a champagne outline and a pearl at each end, and Rep losses shake the screen. Font: Optima.",
+      "voice": "Arch, gossipy teen drama with deadpan punchlines: “Rep down: nobody likes a narc”, “Celeste: ‘Cute. No.’ Rep down”, “Her secret: she’s scared of horses”."
+    },
     "brief": {
       "intent": "Survive your first week at an elite prep school, protect your reputation, collect receipts and unmask the anonymous gossip account",
       "audience": "teens and young adults who love teen drama",
-      "mood": ["glamorous", "scheming", "witty"],
+      "mood": [
+        "glamorous",
+        "scheming",
+        "witty"
+      ],
       "energy": "medium",
       "competition": "light"
     },
     "genre": "branching social drama / choose your own adventure",
-    "fragments_used": ["choice_story"],
+    "fragments_used": [
+      "choice_story"
+    ],
     "why_its_good": [
       "Secrets are the mechanic: tell your new best friend a fake secret, and when The Hostess posts it, an entry effect (`@2`, gated on `bait`) hands you the clue that only she could have leaked it. Rep and Secrets are stats, allies are flags, and a trap scene lets you prove it, or tip her off.",
       "A real twist with consequences: unmasking Margo needs `clues>=3`, and also `rep>=1` or nobody cares (Right, but Unpopular). Warning her lets her vanish to Geneva first. The secret Truce ending needs both allies plus `secrets>=2`, so the patient path, not the loud one, wins big. Seven endings in all, from Unmasked to Off to the Alps (with goats).",
@@ -69,21 +182,59 @@
       "Callbacks use data, not duplicated scenes: `callbacks` swap single lines by flag (the post shows your own fake secret, and Celeste softens if Dev vouched for you), so one scene shows three versions without copying it.",
       "No real people: the account, the school, its sign-off and every character are original, because the request names a genre (prep-school gossip), not a show. When a request does name one, keep its names and world.",
       "List lengths stay in step: 4 lines, 3 labels and 3 targets per scene, written one scene per row, with a `scene_names` key that maps each number to its scene id."
-    ]
+    ],
+    "themes": "gossip girl xoxo upper east side rich kids prep school drama scandal secrets mean girls"
   },
   {
     "id": "gold_saffron_egg_job",
     "file": "authoring/games/gold_saffron_egg_job.authoring.json",
     "request": "a heist story game where I pick my crew and plan how to steal back a priceless egg from a crooked collector's masked party, and someone might double-cross me",
+    "design": {
+      "pitch": "Pick two of three crooks, plan one night, and steal the Saffron Egg back from Augustin Vole’s masquerade, knowing one of your crew has sold out before.",
+      "theme": [
+        "Augustin Vole",
+        "the Saffron Egg",
+        "Nell",
+        "Osric",
+        "Bea",
+        "the masquerade",
+        "a peacock mask",
+        "soufflés",
+        "red lasers",
+        "the village bakery window"
+      ],
+      "verb": "Read each scene, then tap one of up to three choices to hire crew, gather kit and slip past guards while keeping the Alarm meter low.",
+      "twist": "Your crew is both your toolkit and your risk: Bea opens the ivy route to the roof, Nell rehearses the getaway, Osric forges a fake egg for a quiet swap, but if you hire Osric he is waiting at the getaway to take the egg.",
+      "arc": [
+        "Scenes 1–3: at Monday’s briefing you hire two of Nell, Osric and Bea, then on Thursday night you case the museum, visit Osric’s workshop, or rehearse the getaway.",
+        "Scenes 4–6: Friday’s masquerade, through the front door past Vole in a peacock mask, the kitchen as waiters, or up the ivy to the roof; then the top floor: smash the glass, swap in the fake egg, or work the lock.",
+        "Final scenes: the getaway, where you sprint for the van or stroll out the front, or, if Osric is on the crew, he steps out of a doorway: hand him the egg, shove past, or give him the second fake."
+      ],
+      "lose": "Three of the 5 endings are bad and end the run 5 seconds after they appear: rope down past the lasers without casing the place (The Laser Harp), reach the getaway with Alarm 3 or more and no rehearsal, or stroll out without ever getting inside (Caught Red-Gloved), or hand Osric the egg (Double-Crossed).",
+      "win": "Get the egg home for Clean Getaway (+500), or give Osric the second fake for the secret The Long Con (+900). Score = Stealth × 100 + Ending, where Stealth is 4 minus Alarm (never below 0); Alarm starts at 1 and stays between 0 and 5.",
+      "juice": [
+        "New kit or a plan: a coin sound, 16 mustard particles and a toast like ‘Mid-twirl, you lift his keycard’, while the bottom line lists your kit.",
+        "Alarm down: a chirp, 10 mint particles and the ●○○○○ meter pops with ‘The dog adores you. Alarm down’ (Alarm up buzzes, shakes 5 px and fires a warning haptic).",
+        "A good ending: 50 mustard particles shower down over the vignette as ‘THE END’ fades in over the Stealth score."
+      ],
+      "look": "A 1960s caper: deep teal night over a faint blueprint grid with a coral, mustard and mint stripe across the top; mustard and coral on teal feel playful and stylish. Each scene shows one of twelve vignettes, choices are teal index cards with a mustard outline, coral corner brackets and a paperclip, and Alarm rises shake the screen. Font: American Typewriter.",
+      "voice": "Breezy caper narration with slapstick payoffs: “Nell: never been caught. Yet.”, “Bea: climbs anything. Twice.”, “It falls. The chef SCREAMS.”"
+    },
     "brief": {
       "intent": "Assemble a two-person crew, prep the night before, then pull off a masquerade heist and the getaway",
       "audience": "adults and teens who like caper movies",
-      "mood": ["playful", "suspenseful", "stylish"],
+      "mood": [
+        "playful",
+        "suspenseful",
+        "stylish"
+      ],
       "energy": "medium",
       "competition": "light"
     },
     "genre": "branching heist caper / choose your own adventure",
-    "fragments_used": ["choice_story"],
+    "fragments_used": [
+      "choice_story"
+    ],
     "why_its_good": [
       "Planning pays off later: the two crew you hire decide what opens up (Bea unlocks the roof, Nell a rehearsed getaway, Osric a fake egg and a workshop visit), prep choices set `cased` and `two_fakes`, and the vault and getaway read them. Rope past the lasers without casing the place and you play The Laser Harp.",
       "The double-cross is foreshadowed and beatable: the briefing warns that one of the three has sold out before, Osric appears at the getaway only if you hired him (a route to a separate scene), and the secret Long Con ending needs you to have seen his second fake. The alarm meter (`Alarm ●○○○○`) and the getaway routes (`alarm>=3&!rehearsed`) make stealth matter.",
@@ -93,6 +244,7 @@
       "Conditional effects instead of copied scenes: 'Work the lock' is always shown, and `effects` entries with a condition make it quiet if you got inside (`inside`) and noisy if not, so no scene is left with a single button.",
       "Stats are clamped where they change (`clamp(alarm + delta(...), 0, 5)`), so the meter and the score (Stealth x 100 + Ending) can't run out of range.",
       "Text is written for a wide typewriter font: lines of about 26 characters and labels of 24 or fewer, checked in screenshots, so nothing clips at the canvas edge."
-    ]
+    ],
+    "themes": "oceans eleven heist money heist crew robbery caper steal vault"
   }
 ]

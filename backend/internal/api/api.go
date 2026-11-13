@@ -127,6 +127,8 @@ func (s *Server) Handler() http.Handler {
 		r.With(s.requireAuth).Post("/blend", s.blend)
 
 		// Making a game: the app sends a request, the backend runs Muse, checks, playtests and stores it.
+		r.With(s.requireAuth).Post("/anatomy", s.anatomy("/anatomy"))
+		r.With(s.requireAuth).Post("/anatomy/revise", s.anatomy("/anatomy/revise"))
 		r.Route("/generate", func(r chi.Router) {
 			r.Use(s.requireAuth)
 			r.Get("/", s.listJobs)
