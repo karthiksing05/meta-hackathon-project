@@ -1,8 +1,8 @@
 # Why AI is needed
 
-*Why Whims does not work without Muse: the interactivity and customizability of the games, what we measured and what we didn't. Part of the pitch docs; start at [README.md](README.md).*
+*Why Muse Curios does not work without Muse: the interactivity and customizability of the games, what we measured and what we didn't. Part of the pitch docs; start at [README.md](README.md).*
 
-**The short answer.** A Whim is whatever a person can describe. Turning "a game where gravity flips every time I tap" or "a Wordle about our Group" into a game that plays the way they meant needs a model that can design rules, write them, check them and fix them, then talk the result through with the person. Templates can only reskin. Without Muse there is no game, no anatomy, no daily content and no cover. And without Muse there is no supply: tens of millions of Groups and Events cannot each get a hand-made daily game or icebreaker.
+**The short answer.** A Curio is whatever a person can describe. Turning "a game where gravity flips every time I tap" or "a Wordle about our Group" into a game that plays the way they meant needs a model that can design rules, write them, check them and fix them, then talk the result through with the person. Templates can only reskin. Without Muse there is no game, no anatomy, no daily content and no cover. And without Muse there is no supply: tens of millions of Groups and Events cannot each get a hand-made daily game or icebreaker.
 
 ## 1. Any idea becomes a game that plays (the microgame harness)
 
@@ -85,7 +85,7 @@ Familiarity is mechanical, not the model's mood: Studio recalibrates Muse's repl
 
 ## 5. The brief's four kinds of AI work, mapped
 
-| What the brief names | What Muse does in Whims | Honest strength |
+| What the brief names | What Muse does in Muse Curios | Honest strength |
 |---|---|---|
 | Understand what you're looking for better than a search box | Ember writes an editable brief in about 2 s (D4). The game anatomy turns a sentence into parts, rules and checks, and says what's new to Muse. Search offers "Make it with Muse" when nothing matches. | Strong for games: the anatomy is real understanding with a visible result. Search itself is a list of games, not an AI search. |
 | Match you with the right people or communities | The feed ranks by relationship and the board offers Add friend. Group Blend picks games for everyone in a Group and shows a "taste twin". | Moderate. Matching comes from the recommender and the graph, not from Muse; two-person Blends are not built. |

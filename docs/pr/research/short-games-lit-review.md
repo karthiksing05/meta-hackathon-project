@@ -17,7 +17,7 @@ Short, repeatable games are among the most common ways young adults play, but th
 - **The pull is psychological, not just habit.** Quick proof of competence, bursts of flow, relief from boredom and stress, and small shared rituals explain why people come back.
 - **Sharing drives growth.** Wordle went from under 100 to millions of daily players in about three months on shared results; comparing scores predicts continued play.
 - **Churn and manipulation are the risks.** Hyper-casual games keep about 3% of players by day 30, and dark patterns are common even in harmless-looking games.
-- **For Bubbles:** keep rounds tiny, make results shareable, favour friend challenges and daily prompts, and skip manipulative hooks.
+- **For Muse Curios:** keep rounds tiny, make results shareable, favour friend challenges and daily prompts, and skip manipulative hooks.
 
 ## Scope and method
 
@@ -129,20 +129,20 @@ How LinkedIn set this up: leaderboards rank you against your connections, collea
 
 What this means: the proven benefit is a daily habit and retention, not sending players elsewhere. People who play daily seem to stay engaged across the app. But a game alone has not been shown to lead players into the core product for long.
 
-## Implications for Bubbles
+## Implications for Muse Curios
 
-The evidence supports Bubbles' core bet of tiny games inside Facebook, with three conditions: rounds must be very short, results must be easy to share, and there has to be a reason to come back that isn't a manipulative hook.
+The evidence supports Muse Curios' core bet of tiny games inside Facebook, with three conditions: rounds must be very short, results must be easy to share, and there has to be a reason to come back that isn't a manipulative hook.
 
-| Lesson | Evidence | What it means for Bubbles |
+| Lesson | Evidence | What it means for Muse Curios |
 |---|---|---|
-| Keep a round under about 3 minutes | Hyper-casual sessions average about 170 s; play fills gaps in the day | Every Bubble should be playable in one short gap, with an instant restart |
+| Keep a round under about 3 minutes | Hyper-casual sessions average about 170 s; play fills gaps in the day | Every Curio should be playable in one short gap, with an instant restart |
 | Make results shareable without spoilers | Wordle's emoji grid; comparison predicts continued play | A results card that posts to the feed or a chat, showing how you did, not the answer |
 | Prefer challenges between friends to global rankings | 79% of Gen Z play with friends; comparing upward can hurt | Friends-only leaderboards and "beat my score" challenges in Messenger and Groups |
 | Add a light reason to return | Hyper-casual keeps about 3% at day 30; Wordle's daily limit built a habit | Daily or shared prompts (one challenge a day per Group), not energy timers |
 | Make sure players feel more skilled each round | Competence predicts enjoyment and future play (Ryan et al., 2006) | Fair difficulty, clear scoring and quick feedback in what Muse generates |
 | Leave out dark patterns | Found widely, even in harmless-looking games; young players accept them as normal | No loot boxes, virtual currencies or loss-based streak pressure; consider an optional play-time limit |
 
-One open question for the team: no study here measures how creating a game, rather than playing one, affects engagement. That is the new part of Bubbles and would need its own testing.
+One open question for the team: no study here measures how creating a game, rather than playing one, affects engagement. That is the new part of Muse Curios and would need its own testing.
 
 ## References
 

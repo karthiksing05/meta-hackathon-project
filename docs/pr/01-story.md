@@ -2,7 +2,7 @@
 
 *The story spine of the pitch, in Karthik's order, plus the one-liners and the line bank. Part of the pitch docs; start at [README.md](README.md).*
 
-**One line.** Facebook has lost young adults because their friends aren't there, so we built Whims: tiny games anyone makes from one sentence with Meta's Muse models, made to be played together in Groups, Events and chats. Create on a whim, play on a whim.
+**One line.** Facebook has lost young adults because their friends aren't there, so we built Muse Curios: tiny games anyone makes from one sentence with Meta's Muse models, made to be played together in Groups, Events and chats. When the world is your muse, how will you create the content of tomorrow?
 
 The spine has seven steps. Each one names the file that backs it. Status is as of commit `6b1cc85` on `main` (see [README.md](README.md#status-at-6b1cc85)).
 
@@ -34,7 +34,7 @@ Facebook does not need another feed of things to watch. It needs a reason for a 
 Two ways to seed it (planned, Karthik's decision at 18:00 on Nov 12; nothing below is built):
 
 - **Meta "studio" accounts.** Meta-run accounts that each own one kind of game and post a new one every day: **Daily Word, Party Night, Story Club, Quick Arcade and Group Trivia**. The feed is never empty, and there is always something to play, remix and challenge friends on. The accounts and their games would live in the backend database, not in app code.
-- **Games inspired by famous creators.** "What game would MrBeast make?" Real names are allowed (Karthik's call, logged as an exception to our synthetic-people rule for these accounts only). Each game is labeled as *inspired by* the creator ("A Whim inspired by MrBeast"), never as a post *by* them, and its mechanics are original. Starter ideas:
+- **Games inspired by famous creators.** "What game would MrBeast make?" Real names are allowed (Karthik's call, logged as an exception to our synthetic-people rule for these accounts only). Each game is labeled as *inspired by* the creator ("A Curio inspired by MrBeast"), never as a post *by* them, and its mechanics are original. Starter ideas:
   - MrBeast, "Last One Standing": 100 players, one tap a round, half are out each round; the last one wins a (fake) giant check, and the whole Group sees who lasted.
   - Gordon Ramsay, "Service!": plate 5 dishes before the ticket times out; raw food gets you yelled at.
   - Markiplier, "Don't Look Behind You": a jump-scare survival run with a commentary line every time you flinch.
@@ -45,21 +45,21 @@ Two ways to seed it (planned, Karthik's decision at 18:00 on Nov 12; nothing bel
 
 ## 4. What we designed: short-form content you play *with* people
 
-**This is the part to market hardest: Whims is collaborative.** Short-form video is made to be watched alone. We designed a short-form format made to be shared: a game that takes seconds to start and under a couple of minutes to play, built for people to **collaborate, connect, compete and get excited together**. Every game is played on the same seed by everyone it's sent to, so a score is a fair comparison and a reason to talk. Four ways to play together, each with a named surface:
+**This is the part to market hardest: Muse Curios is collaborative.** Short-form video is made to be watched alone. We designed a short-form format made to be shared: a game that takes seconds to start and under a couple of minutes to play, built for people to **collaborate, connect, compete and get excited together**. Every game is played on the same seed by everyone it's sent to, so a score is a fair comparison and a reason to talk. Four ways to play together, each with a named surface:
 
 - **Make together.** Make it together: a chat, a friend or a Group adds a question, words, a scene or a level, and Muse stitches them into one game whose credits name every maker (live on one device).
 - **Play together.** One card in a group chat becomes a shared session everyone plays ("3 of 5 played"); a Group's quiz night fills a lobby (live on one device).
 - **Compete together.** Challenge Me, Challenge back and a weekly Group board with Most improved (live on one device).
-- **Get to know someone new.** Meet someone new, and Whims sets up a **3-game get-to-know-you bracket** for the two of you. *In progress* on branch `fe-qol`, not merged and not built on `main`. The Group Blend's "taste twin" with Add friend is the live first step.
+- **Get to know someone new.** Meet someone new, and Muse Curios sets up a **3-game get-to-know-you bracket** for the two of you. *In progress* on branch `fe-qol`, not merged and not built on `main`. The Group Blend's "taste twin" with Add friend is the live first step.
 
 See [06-closer-together-and-engagement.md](06-closer-together-and-engagement.md).
 
-## 5. What we built: Whims
+## 5. What we built: Muse Curios
 
-**Low pressure by design. Create on a whim, play on a whim.** Making one takes a sentence. Playing one takes a tap. Losing costs nothing.
+**Low pressure by design.** Making one takes a sentence. Playing one takes a tap. Losing costs nothing.
 
-- **Meaningful moments, not minutes.** A newcomer in the New in SF Group plays the Group's Daily Whim and lands on the board next to members' names, one tap from Add friend. Guests of the Saturday picnic play an icebreaker made from each other's intros. A run becomes Challenge Me in a group chat. The Group page shows a **Group Blend**: games picked for everyone in it, a Blend game Muse makes for all of them, and a "taste twin" to add as a friend. All of these are in the app on `main`; the other people are synthetic and their runs are bot runs on the same seed. See [03-what-we-built.md](03-what-we-built.md).
-- **Our engagement story.** A hand-written, explainable recommender ranks the Whims feed on the phone and on the server. It rewards finished runs, saves, shares and Add friend, and keeps clickbait down for people who don't want it. In a simulation with synthetic people, it won **70.3%** of decided sessions against today's feed (95% CI 68 to 72%) [D27]. That is a simulation, not users, and it *loses* to its own greedy version (47.0%) [D27]. The return loop: a new Daily tomorrow, a friend who passed your score, an Event this weekend, a rematch. See [06](06-closer-together-and-engagement.md#the-engagement-story) and [09-evidence.md](09-evidence.md).
+- **Meaningful moments, not minutes.** A newcomer in the New in SF Group plays the Group's Daily Curio and lands on the board next to members' names, one tap from Add friend. Guests of the Saturday picnic play an icebreaker made from each other's intros. A run becomes Challenge Me in a group chat. The Group page shows a **Group Blend**: games picked for everyone in it, a Blend game Muse makes for all of them, and a "taste twin" to add as a friend. All of these are in the app on `main`; the other people are synthetic and their runs are bot runs on the same seed. See [03-what-we-built.md](03-what-we-built.md).
+- **Our engagement story.** A hand-written, explainable recommender ranks the Muse Curios feed on the phone and on the server. It rewards finished runs, saves, shares and Add friend, and keeps clickbait down for people who don't want it. In a simulation with synthetic people, it won **70.3%** of decided sessions against today's feed (95% CI 68 to 72%) [D27]. That is a simulation, not users, and it *loses* to its own greedy version (47.0%) [D27]. The return loop: a new Daily tomorrow, a friend who passed your score, an Event this weekend, a rematch. See [06](06-closer-together-and-engagement.md#the-engagement-story) and [09-evidence.md](09-evidence.md).
 
 ## 6. Why AI is needed: any idea, made playable, made with you
 
@@ -88,10 +88,10 @@ Alternates:
 1. **(K)** An interactive platform where anyone can quickly create, build and scroll through games in a feed, powered by the Muse models.
 2. **(K)** A space where people express themselves and share that expression with others through Facebook.
 3. Describe a game in a sentence and Muse builds it, for a Group, an Event or everyone. (The in-app copy says "Describe a game and Muse makes it in about a minute." That fits neither path: a ready-formula game takes a median of 28 s and a game made from scratch a median of 99 s. See [open-items.md](open-items.md#proposed-app-fixes).)
-4. Create on a whim, play on a whim.
-5. Facebook lost young adults because their friends left. Whims gives a whole friend group a reason to come back together.
+4. When the world is your muse, how will you create the content of tomorrow?
+5. Facebook lost young adults because their friends left. Muse Curios gives a whole friend group a reason to come back together.
 
-"Whims" is the name for now; check the build tracker before writing new user-facing copy.
+"Muse Curios" is the name for now; check the build tracker before writing new user-facing copy.
 
 **The 45-second version (from the earlier draft; kept).** For the project page, or the opening if the slot is cut short. Read aloud, it runs about 45 seconds.
 
@@ -131,22 +131,22 @@ Every line we have, for slides, voice-over and the project page. Lines are for u
 | None of the viral one-off games use your friends as content. Facebook has your friends, Groups and Events. | Why Facebook | VP-01 | Slack, Nov 11 19:42; Taxonomy canvas §5, §8 |
 | Remove Muse and nothing gets made: no briefs, no anatomy, no games, no daily content, no covers. | AI test | VP-34 | docs/BUBBLES.md §1 |
 | A standalone app has none of these: Groups, Events, the friend graph, Stories, Reels, Messenger. | Why Facebook (chats in the app are the clone's Messenger, with synthetic friends) | VP-08, VP-28 | docs/BUBBLES.md §1 |
-| A new Daily Whim every day, streaks, and friends beating your score. | Reason to come back | VP-06 | docs/BUBBLES.md §1 |
+| A new Daily Curio every day, streaks, and friends beating your score. | Reason to come back | VP-06 | docs/BUBBLES.md §1 |
 | Walk into the picnic already knowing three people's names. | Event icebreaker | VP-03 | docs/BUBBLES.md §1 |
-| The Group leaderboard puts names to faces before you meet. | Daily Whim and board | VP-04 | docs/BUBBLES.md §1 |
+| The Group leaderboard puts names to faces before you meet. | Daily Curio and board | VP-04 | docs/BUBBLES.md §1 |
 | Muse writes the brief, composes the game from our library, writes the small custom code, playtests it and paints the cover. | AI beat in one sentence | VP-34 | docs/BUBBLES.md §1 |
-| Every bubble is playtested before anyone pops in. | Old Studio loading copy, from before the rename; say "Every Whim is playtested before anyone plays it" | VP-05, VP-18 | StudioComposeStep.swift |
-| The same game for everyone in the group today. | Daily Whim | VP-02, VP-16 | StudioAskStep.swift, StudioFloatStep.swift |
+| Every bubble is playtested before anyone pops in. | Old Studio loading copy, from before the rename; say "Every Curio is playtested before anyone plays it" | VP-05, VP-18 | StudioComposeStep.swift |
+| The same game for everyone in the group today. | Daily Curio | VP-02, VP-16 | StudioAskStep.swift, StudioFloatStep.swift |
 | Replays you can take over. | Bursts | VP-13 | BubbleBurstReelLayer.swift |
 | The feed ranks for friendships made, not just time spent. | Recommender (in the app on `main`; Add friend and shares are in its reward) | VP-10 | Slack, Nov 12 11:37 (Kevin's agent) |
 | A non-designer never has to pick a gravity value. | Creation is easy | VP-05 | Taxonomy canvas §9 part 3 |
 | Muse can't set gravity to an unplayable value. | Safe composition | VP-34 | Concept library canvas §3 |
 | Most hits are an older game with one twist applied. | Originality | VP-37 | Taxonomy canvas §9 part 4 |
 | The library grows from what people actually make. | A system that compounds | VP-34 | Concept library canvas §6 |
-| Tomorrow's Daily Whim is the reason to come back. | Close | VP-06 | Build tracker "Demo" step 5 |
+| Tomorrow's Daily Curio is the reason to come back. | Close | VP-06 | Build tracker "Demo" step 5 |
 | Why this belongs on Facebook and nowhere else. | Framing of this whole document | VP-01 (section 3) | Slack, Nov 12 11:49 |
 | Warm competition words: "your move", "beat my 34", "rematch", "You and Maya: 12 games together". | Copy on challenge and board screens | VP-04, VP-14 | Brand ideas, Nov 12 11:52 |
-| Create on a whim, play on a whim. | Tagline; the "what we built" beat | VP-05, VP-06 | Karthik, Nov 12 |
+| When the world is your muse, how will you create the content of tomorrow? | Tagline (replaces "Create on a whim, play on a whim"); the title slide and the close | VP-05, VP-06 | Karthik, Nov 13 |
 | Short-form content you play with people, not just watch. | What we designed | VP-39, VP-25 | Karthik, Nov 12 |
 | Muse tells you which parts of your game are new to it. | The AI beat | VP-34 | docs/BUBBLES.md 7.13 |
 | What game would MrBeast make? (planned; inspired-by label) | Seeding the feed | VP-41 | Karthik, Nov 12 18:00 |

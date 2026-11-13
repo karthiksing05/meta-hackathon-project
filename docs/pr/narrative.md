@@ -2,7 +2,7 @@
 
 *Karthik's eight points (2026-11-13, 02:35 PST, via Claude for Karthik), each with the claims we make, the numbers and where they come from. Change a claim here first, then in the slides (`slides/`), `devpost.md` and the video script. Numbers in [brackets] are entries in [sources.md](sources.md); D-numbers are rows in [09-evidence.md](09-evidence.md). "Simulated" means simulated people, and we say so every time.*
 
-**Name:** "Muse Games" (Karthik's decision, 2026-11-13). Where one word fits (a tab, a button, a single game), use "Games". Never "Whims" or "Bubbles" in pitch materials; app code and `Bubble*` type names stay as they are.
+**Name:** "Muse Curios"; one game is "a Curio" (Karthik's decision, 2026-11-13). **Tagline:** "When the world is your muse, how will you create the content of tomorrow?" Rules in [STYLE.md](STYLE.md).
 
 ## 1. The next form of short-form content
 

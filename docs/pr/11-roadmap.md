@@ -26,7 +26,7 @@ The feed is never empty, and there is always something to play, remix and challe
 
 "What game would MrBeast make?" Real creators' names are allowed. That is Karthik's call, logged in the build tracker's Decisions table as an exception to the synthetic-people rule for these accounts only. The guardrails:
 
-- **Label each game "inspired by" the creator** ("A Whim inspired by MrBeast"), never as a post *by* them.
+- **Label each game "inspired by" the creator** ("A Curio inspired by MrBeast"), never as a post *by* them.
 - **Mechanics stay original.**
 - No face, voice, logo or quotes (our recommendation; see [08-qa.md](08-qa.md#creators-names-and-likeness)).
 - Muse's prompts ban real people today, so these games need a reviewed prompt exception, and should be made and checked by the team, not generated on request.
@@ -54,7 +54,7 @@ The starter list (one game per creator, from the team thread; ideas, not built):
 | David Dobrik | Surprise Box | A guess-the-prize game where friends vote on what's in the box |
 | Alix Earle | Get Ready With Me | A timed outfit-and-routine pick, scored by your friends |
 
-Notes on the list: Ms Rachel's audience is small children, which conflicts with Whims being adults-only (Meta limits Muse to 18 and over [6]); flag it before building. "Sing-Along Shapes" is also a no-fail game, which today's gate blocks. Song titles in "Era Sort" are themselves copyrighted names; treat it like any franchise request ([08-qa.md](08-qa.md#where-the-ip-line-sits)).
+Notes on the list: Ms Rachel's audience is small children, which conflicts with Muse Curios being adults-only (Meta limits Muse to 18 and over [6]); flag it before building. "Sing-Along Shapes" is also a no-fail game, which today's gate blocks. Song titles in "Era Sort" are themselves copyrighted names; treat it like any franchise request ([08-qa.md](08-qa.md#where-the-ip-line-sits)).
 
 ## Make the core thesis real
 
@@ -121,7 +121,7 @@ The engine can express almost any 2D game idea today (9 of 10 hard ideas in the 
 
 ## Trust, safety and privacy (needed before any launch)
 
-- An opt-in toggle in the post composer for "use in Whims" (opt-ins are set in demo data today).
+- An opt-in toggle in the post composer for "use in Muse Curios" (opt-ins are set in demo data today).
 - Admin opt-in for Dailies, with preview and veto.
 - A moderation step for briefs and content, and "remove me from this game".
 - Games about a named person made only by that person or with consent.

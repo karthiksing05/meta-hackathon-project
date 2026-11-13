@@ -1,14 +1,14 @@
 # Closer together, and why people come back
 
-*How Whims brings specific people closer, why friendly competition makes friends, and the return loop. Part of the pitch docs; start at [README.md](README.md).*
+*How Muse Curios brings specific people closer, why friendly competition makes friends, and the return loop. Part of the pitch docs; start at [README.md](README.md).*
 
 ## The thesis (from the earlier draft, corrected)
 
 *The lead story is now [01-story.md](01-story.md); this is the same idea told from the Group's side.*
 
-**Facebook has many of young adults' Groups and Events but has stopped giving them a reason to open it, or to come back. Whims makes a daily ritual collaborative: every Group, Event and group chat gets games its own members make with Muse, about themselves, played on one seed, so making one is a reason to open Facebook, and a new Daily, a challenge and a rematch are reasons to return.**
+**Facebook has many of young adults' Groups and Events but has stopped giving them a reason to open it, or to come back. Muse Curios makes a daily ritual collaborative: every Group, Event and group chat gets games its own members make with Muse, about themselves, played on one seed, so making one is a reason to open Facebook, and a new Daily, a challenge and a rematch are reasons to return.**
 
-Whims is about bringing people closer together, which is the mission Facebook has stated since 2017: to "build community and bring the world closer together" [12][50]. It does that in three ways:
+Muse Curios is about bringing people closer together, which is the mission Facebook has stated since 2017: to "build community and bring the world closer together" [12][50]. It does that in three ways:
 
 - **Play together.** Everyone in a Group or at an Event gets the same game.
 - **Compete together.** Same-seed scores are fair, so a board row next to a stranger is a reason to say hello.
@@ -28,7 +28,7 @@ Prompt-to-game generation is no longer rare (YouTube, Roblox and Meta's own Pock
 
 The pitch itself is in [01-story.md](01-story.md), [07-demo-script.md](07-demo-script.md) and [08-qa.md](08-qa.md).
 
-## How Whims brings people closer together
+## How Muse Curios brings people closer together
 
 Each step of the ladder is a value proposition. Each one names the relationship it builds.
 
@@ -76,11 +76,11 @@ The board with Add friend is Live, with bot runs by synthetic people. Challenge 
 
 | Problem point | Feature | Facebook surface | Status |
 |---|---|---|---|
-| 1, 3. A reason to open the Group, and a first move that isn't a post | Daily Whim from members' opted-in posts (VP-02, VP-01) | Groups | Live (Daily generation: Debug/CLI only) |
+| 1, 3. A reason to open the Group, and a first move that isn't a post | Daily Curio from members' opted-in posts (VP-02, VP-01) | Groups | Live (Daily generation: Debug/CLI only) |
 | 3, 4. Meeting strangers in person, cold | Event icebreaker made from guests' intros (VP-03) | Events | Live |
 | 3, 4. No path from stranger to friend | board with fair, same-seed scores and Add friend (VP-04, VP-16) | Groups, Events, profiles | Live (rows are synthetic people) |
 | 1, 2. No daily ritual that brings people back | One Daily per Group, and a playable feed of replays (VP-06, VP-39) | Groups, feed, Stories, Reels | Live |
-| All. A game about your people would otherwise need a developer | Muse Studio: one sentence to a game (VP-05, VP-34) | Whims tab, Groups, Events | Live |
+| All. A game about your people would otherwise need a developer | Muse Studio: one sentence to a game (VP-05, VP-34) | Curios tab, Groups, Events | Live |
 | 2, 5. Group chats and old friendships go quiet | Challenge Me and one card the whole chat plays (VP-14, VP-15) | Messenger | Live on one device |
 | 4. Time together is scarce | Make a game together; weekly boards and game night (VP-38, VP-19) | Groups, Events | Live on one device (synthetic members) |
 | 4. Strangers you just met stay strangers | Group Blend (Live); two-person Blends and an Event bracket (VP-40) | Groups, Events, profiles | Partly Live |
@@ -117,7 +117,7 @@ The loop: Daily, then board, then Add friend, then Event, then rematch, then the
 
 ## Marketing the collaboration
 
-Karthik's note: "Need to market the collaborative aspect of the app!" Most AI game makers stop at "you made a game". Whims is about what happens *between people* around the game, and that is what the pitch should sell. The collaborative features, with their real status:
+Karthik's note: "Need to market the collaborative aspect of the app!" Most AI game makers stop at "you made a game". Muse Curios is about what happens *between people* around the game, and that is what the pitch should sell. The collaborative features, with their real status:
 
 | Together, how | What happens | Surface | Status |
 |---|---|---|---|
@@ -131,11 +131,11 @@ Karthik's note: "Need to market the collaborative aspect of the app!" Most AI ga
 | Meet someone new | **A 3-game get-to-know-you bracket** for two people who just met | Profiles, Events | **In progress** on `fe-qol`, not merged |
 | A game from two people | Two-person Blends and an Event bracket for everyone you met | Profiles, Events | Not built |
 
-**How to say it.** "Games are better with people. So in Whims you make them together, play them together, compete, and meet people through them." Lead with a moment between two people (see [hook.md](hook.md) option 12), not with the generator.
+**How to say it.** "Games are better with people. So in Muse Curios you make them together, play them together, compete, and meet people through them." Lead with a moment between two people (see [hook.md](hook.md) option 12), not with the generator.
 
 ## The engagement story
 
-**What we want more of: moments with people, not minutes.** Whims is short-form and low pressure on purpose: a run takes seconds, a Daily allows one scored run, and every result sheet ends in a person (challenge, board, Add friend), not autoplay. The recommender is built to match.
+**What we want more of: moments with people, not minutes.** Muse Curios is short-form and low pressure on purpose: a run takes seconds, a Daily allows one scored run, and every result sheet ends in a person (challenge, board, Add friend), not autoplay. The recommender is built to match.
 
 **The recommender** (`game-recs.js` 0.5, by Kevin; in the app on `main` and running on the Prod server in Go):
 

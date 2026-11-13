@@ -6,7 +6,7 @@ The story spine is in [01-story.md](01-story.md) and the timed script in [07-dem
 
 **What is real in the app for these openings** (commit `6b1cc85`):
 
-- The app's **Notifications tab** has Whims entries: "Today's Daily Whim in New in SF is ready. Play before the fog lifts.", "Diego beat your score in Hill Hopper. Take it back?", "You passed Maya in Fog Words." They are synthetic and already in the list when the app opens. **There is no real iOS push notification or lock-screen banner**: nothing in the app sends one. Any buzzing-phone moment is staged.
+- The app's **Notifications tab** has Muse Curios entries: "Today's Daily Curio in New in SF is ready. Play before the fog lifts.", "Diego beat your score in Hill Hopper. Take it back?", "You passed Maya in Fog Words." They are synthetic and already in the list when the app opens. **There is no real iOS push notification or lock-screen banner**: nothing in the app sends one. Any buzzing-phone moment is staged.
 - **Group chats** "New in SF crew" and "Picnic planners" exist with synthetic friends, and Challenge Me cards land in them, with the friend's score arriving 2 to 6 s later as a bot run.
 - **Sound** is on by default, with synthesized cues for ready, publish and a new best.
 - **Studio** makes games from a sentence with real Muse (median 28 s for a ready formula, 99 s from scratch).
@@ -43,7 +43,7 @@ The story spine is in [01-story.md](01-story.md) and the timed script in [07-dem
 - 0:06. "Sorry, I have to take this." They tap. The Notifications tab opens: "You passed Maya in Fog Words." "Diego beat your score in Hill Hopper. Take it back?" They tap through to the game, and its first second plays.
 - 0:14. "That's the first time Facebook has made me *want* to open it in years. Let me explain why."
 
-**What it needs.** The demo phone on the Notifications tab (live, synthetic entries). The buzz and banner are **staged**: a second team phone sends a message or a timer goes off at 0:00 so the demo phone vibrates, and the "banner" the room sees is the in-app Notifications tab, not a real push. Say nothing that claims Whims sends push notifications.
+**What it needs.** The demo phone on the Notifications tab (live, synthetic entries). The buzz and banner are **staged**: a second team phone sends a message or a timer goes off at 0:00 so the demo phone vibrates, and the "banner" the room sees is the in-app Notifications tab, not a real push. Say nothing that claims Muse Curios sends push notifications.
 
 **Rubric.** Product Thinking and User Impact (25%): the reason to come back is shown, not claimed. Also cohesion: it opens on a friend, not on a feature.
 
@@ -75,7 +75,7 @@ The story spine is in [01-story.md](01-story.md) and the timed script in [07-dem
 **Script (20 s).**
 - 0:00. Big screen, split in two. Left: a Facebook home feed with a birthday reminder and an ad, last friend post 3 weeks ago. Right: a busy group chat, 214 unread.
 - 0:06. Silence for two seconds.
-- 0:08. "Left is where our Groups and Events live. Right is where our friends are. We think Whims can move the right side onto the left."
+- 0:08. "Left is where our Groups and Events live. Right is where our friends are. We think Muse Curios can move the right side onto the left."
 
 **What it needs.** Two screenshots or two phones. The left can be the clone with a quiet account; the right must be **our own mock**, with no real app's logo or branding, and synthetic names.
 
@@ -94,7 +94,7 @@ The story spine is in [01-story.md](01-story.md) and the timed script in [07-dem
 - 0:06. Slide: "Last One Standing. 100 players, one tap a round, half are out each round." A short animatic of the elimination.
 - 0:14. "Now imagine his whole audience playing it together, inside a Facebook Group. That's what we want to bring back to Facebook: everyone, together."
 
-**What it needs.** A slide and a short animatic. **The creator games are planned, not built**: label it "A Whim inspired by MrBeast (planned)", never as his post. Do not try it live: Muse's prompt bans real people today.
+**What it needs.** A slide and a short animatic. **The creator games are planned, not built**: label it "A Curio inspired by MrBeast (planned)", never as his post. Do not try it live: Muse's prompt bans real people today.
 
 **Rubric.** Originality (20%) and the "way back" story (Product, 25%).
 
@@ -126,7 +126,7 @@ The story spine is in [01-story.md](01-story.md) and the timed script in [07-dem
 **Script (25 s).**
 - 0:00. The mirrored phone shows the "New in SF crew" chat. Scroll up to an old message: "we should all hang out sometime!!", with no replies.
 - 0:07. "Every group chat has this message."
-- 0:10. The presenter sends Challenge Me from a Whim into the chat. The card appears; 3 s later "Maya played: 41". "Beat Maya's 41."
+- 0:10. The presenter sends Challenge Me from a Curio into the chat. The card appears; 3 s later "Maya played: 41". "Beat Maya's 41."
 - 0:18. "This one got a reply in three seconds. Here's why we built it."
 
 **What it needs.** The live app. The chat and Maya are synthetic, and her score is a bot run on the same seed. The "we should hang out" message would need to be added to the demo chat (not there today), or shown as a slide first.
@@ -161,7 +161,7 @@ The story spine is in [01-story.md](01-story.md) and the timed script in [07-dem
 
 **Script (20 s).**
 - 0:00. Lights down (or the big screen goes black). From the speakers: the pop of a run, a rising "new best" chime, a friend's "your move" (the app's synthesized cues).
-- 0:08. The mirrored phone lights up: a Whim mid-run, the score counting up.
+- 0:08. The mirrored phone lights up: a Curio mid-run, the score counting up.
 - 0:12. "That sound used to be what Facebook felt like on a Friday night: your friends, playing something together. It doesn't anymore."
 
 **What it needs.** Venue audio through the phone or laptop, and the app's own sounds (sound is on by default; the silent-switch fix still has to be confirmed by ear on a phone). Lighting control helps but isn't required.

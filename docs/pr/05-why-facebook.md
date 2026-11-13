@@ -1,10 +1,10 @@
 # Why Facebook is needed
 
-*Why only Facebook has what Whims needs, and how it compares with the alternatives. Part of the pitch docs; start at [README.md](README.md).*
+*Why only Facebook has what Muse Curios needs, and how it compares with the alternatives. Part of the pitch docs; start at [README.md](README.md).*
 
-**The short answer.** Whims is only as good as who you play with, and Facebook is where the people and the places are: Groups with members and posts, Events with guest lists, friends under everyday names, Messenger group chats and a feed where friends already look. A game about "who's coming Saturday" needs an Event; a Daily about "our Group" needs a Group; a Group Blend needs the Group's members and what they play. The table "What breaks without Facebook" below is the one to show.
+**The short answer.** Muse Curios is only as good as who you play with, and Facebook is where the people and the places are: Groups with members and posts, Events with guest lists, friends under everyday names, Messenger group chats and a feed where friends already look. A game about "who's coming Saturday" needs an Event; a Daily about "our Group" needs a Group; a Group Blend needs the Group's members and what they play. The table "What breaks without Facebook" below is the one to show.
 
-**And Facebook needs it.** The way back for young adults ([01-story.md](01-story.md)) is a reason for a whole friend group to show up together. Whims is built on exactly the objects that only Facebook has, so every game played is also a Group visited, an Event seen or a friend added.
+**And Facebook needs it.** The way back for young adults ([01-story.md](01-story.md)) is a reason for a whole friend group to show up together. Muse Curios is built on exactly the objects that only Facebook has, so every game played is also a Group visited, an Event seen or a friend added.
 
 ## 3. The short answer: why Facebook
 
@@ -19,13 +19,13 @@
    - Meta's own 2024 guide for people in their 20s points movers to "thousands of Facebook Groups that can help you meet new people in your city" [15].
    - Meta tested a Local tab pulling together Marketplace, Groups and Events in 10 US cities, including San Francisco (2024) [14].
    - Older figures show the scale but are likely stale: more than 70 million people helped run Groups (2020, latest public figure) [16], and more than 700 million people used Events monthly (2017, latest public figure) [17].
-3. **The strongest identity baseline among major social networks.** Facebook asks people to use "the name that your friends call you in everyday life" [30], and opt-in Facebook Verified badges launched on Profiles and Groups in July 2026 [21]. That is a norm, not a guarantee: Meta estimated that in Q4 2024 "less than 3% of our worldwide DAP consisted solely of violating accounts" (bots and spam among them; family-wide, not Facebook alone) [12]. Whims adds its own layers: board rows only appear for people in a Group or Event you both joined, and contact goes through Facebook's normal friend-request flow (VP-07).
+3. **The strongest identity baseline among major social networks.** Facebook asks people to use "the name that your friends call you in everyday life" [30], and opt-in Facebook Verified badges launched on Profiles and Groups in July 2026 [21]. That is a norm, not a guarantee: Meta estimated that in Q4 2024 "less than 3% of our worldwide DAP consisted solely of violating accounts" (bots and spam among them; family-wide, not Facebook alone) [12]. Muse Curios adds its own layers: board rows only appear for people in a Group or Event you both joined, and contact goes through Facebook's normal friend-request flow (VP-07).
 4. **The friend graph is the moat for the second persona.** The mover's hometown and college friends are already on Facebook. Keeping in touch with a community you used to live in is a known benefit of Facebook ("maintained social capital") [71], and same-seed challenges give those friends a reason to reach out (VP-14).
 5. **Young adults are already there, and newcomers' life moments live here.**
    - 69% of US adults aged 18 to 29 use Facebook (Pew, 2026) [52], and 49% of all 18-to-29-year-olds use it daily (Pew, Feb to Mar 2025) [53].
    - Meta reported more than 40 million young-adult daily users in the US and Canada in 2024 [13].
    - Meta says young adults arrive at life moments, "moving, going to college, getting their first job or apartment" [13]. One in three young adults on Facebook in the US uses Marketplace daily (2026) [22].
-6. **Distribution in one app.** Whims runs on 6 distribution surfaces (feed, Stories, Reels and Video, Groups, Events, profiles) plus 3 entry points (the Whims tab, Notifications and the Library in the Menu) (D19). Since the collaboration batch, games also travel through the clone's Messenger chats (Challenge Me, group-chat sessions) and Search, though on one device with synthetic friends. A Wordle grid had to leave the game for Twitter; a Burst lands where friends can tap and play.
+6. **Distribution in one app.** Muse Curios runs on 6 distribution surfaces (feed, Stories, Reels and Video, Groups, Events, profiles) plus 3 entry points (the Curios tab, Notifications and the Library in the Menu) (D19). Since the collaboration batch, games also travel through the clone's Messenger chats (Challenge Me, group-chat sessions) and Search, though on one device with synthetic friends. A Wordle grid had to leave the game for Twitter; a Burst lands where friends can tap and play.
 
 ### 3.2 Why Meta can build it: strategy and models
 
@@ -34,7 +34,7 @@ These reasons apply to any Meta app, not only Facebook. They explain why Meta wo
 - **First-party models.** Muse is Meta's model family, and a Group's game is made without its data leaving Meta, which matches Meta's own "Zero Permissions" standard for games [32].
 - **It is Meta's stated strategy.** On the Q4 2025 call, Zuckerberg described this loop: create a game "easily through a prompt" and "share that with people who they care about and you see it in your feed and you can jump right into it" [1]. Meta says Muse Spark makes "mini-games straight from a prompt" you can "share ... with friends", and that Muse is coming to "places like search bars, group chats, posts, and more" [2].
 - **Meta has the pieces but not the social layer.** Per Business Insider (as reported by Digital Trends), Pocket has no direct messages and Meta has no plans to integrate it with its other apps [44] (secondary source). Horizon Create puts creator games in feeds [42]. None of them puts a game inside a Group, an Event or a chat (VP-28).
-- **A lesson from Facebook's games history, not an advantage.** FarmVille reached 32 million daily players through the graph [38], then lost players when Facebook limited spammy notifications [39]. Instant Games reached 20 billion sessions [34] but needed studios. Whims keeps the graph and drops the spam and the studio bottleneck (VP-29).
+- **A lesson from Facebook's games history, not an advantage.** FarmVille reached 32 million daily players through the graph [38], then lost players when Facebook limited spammy notifications [39]. Instant Games reached 20 billion sessions [34] but needed studios. Muse Curios keeps the graph and drops the spam and the studio bottleneck (VP-29).
 
 ### 3.3 Why Facebook, not Instagram
 
@@ -51,18 +51,18 @@ A game about "who's coming Saturday" needs an Event, and a Daily about "our Grou
 
 **Instagram is a channel, not a rival.** We propose that Bursts can be shared to Instagram Stories and challenges sent into WhatsApp chats (proposal, not built). The family of apps then becomes the distribution channel, and Facebook is the home because the community lives there.
 
-**Does this pull usage from Instagram?** We expect it to be complementary, not a substitute. The sessions Whims adds start from a Group or an Event, which Instagram doesn't host. This is a hypothesis: a pilot would track Instagram time for Whims players against matched non-players.
+**Does this pull usage from Instagram?** We expect it to be complementary, not a substitute. The sessions Muse Curios adds start from a Group or an Event, which Instagram doesn't host. This is a hypothesis: a pilot would track Instagram time for Muse Curios players against matched non-players.
 
 **What breaks without Facebook.** Each feature depends on a Facebook primitive.
 
 | Remove this | And you lose |
 |---|---|
-| Groups (membership and posts) | The Daily Whim, the Group board scope, games made from members' intros, the Group Blend, weekly boards and game night |
+| Groups (membership and posts) | The Daily Curio, the Group board scope, games made from members' intros, the Group Blend, weekly boards and game night |
 | Events (RSVP list) | The icebreaker, "who's coming", and Add friend between attendees |
 | The everyday-name friend graph | The Friends board, friends' Bursts first in the feed, rivalries, Games about me, hometown challenges |
 | Feed, Stories, Reels | Floats, story shares, and Bursts as playable clips |
 | Messenger | Challenge Me, Challenge back and group-chat sessions (in the app on one device; friends are synthetic) |
-| Notifications and profiles | "Someone beat your score", "remixed your Whim", and a maker's body of work |
+| Notifications and profiles | "Someone beat your score", "remixed your Curio", and a maker's body of work |
 | Search | Finding games and "Make it with Muse" (in the app) |
 
 **Where Facebook is not the strongest, stated plainly.**
@@ -76,7 +76,7 @@ Our claim is the combination, not any single feature.
 
 ## 7. Facebook against the alternatives
 
-Could another platform run Whims as well? The test is the combination Whims needs:
+Could another platform run Muse Curios as well? The test is the combination Muse Curios needs:
 
 - everyday identity;
 - standing communities;
@@ -88,7 +88,7 @@ Could another platform run Whims as well? The test is the combination Whims need
 
 Percentages are the share of US adults aged 18 to 29 who use each platform (Pew, 2026) [52], where Pew tracks it.
 
-| Platform | Graph and identity | Communities / Events | Games and AI creation | Where it is stronger than Facebook | What it lacks for Whims |
+| Platform | Graph and identity | Communities / Events | Games and AI creation | Where it is stronger than Facebook | What it lacks for Muse Curios |
 |---|---|---|---|---|---|
 | **Facebook** (69%) | Everyday-name friend graph [30], opt-in Verified badges [21] | Groups (almost 1.8B monthly, 2024 [14]); Events (700M monthly in 2017, latest public figure, likely stale [17]); Messenger | Instant Games history [34]; Muse models [2] | (reference) | Not the youngest or most used daily app among 18-29s [52][53] |
 | Discord (not tracked by Pew) | Pseudonymous servers | Interest servers with scheduled events, in voice channels or at outside locations [123] | Activities in voice channels; an AI party game reached nearly 7M players [98] | Live group play, gaming culture, community plus events plus chat | Everyday identity (age checks added in 2026 [99]), a local layer, feed distribution, a first-party model |

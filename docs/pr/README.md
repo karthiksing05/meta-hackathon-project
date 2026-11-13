@@ -1,10 +1,10 @@
 # The pitch docs
 
-*Index of the pitch and value-proposition writing for Whims, how to read it, and its status. Moved here from `docs/VALUE_PROPOSITION.md`, which now points to this file.*
+*Index of the pitch and value-proposition writing for Muse Curios, how to read it, and its status. Moved here from `docs/VALUE_PROPOSITION.md`, which now points to this file.*
 
 ## In one paragraph
 
-Facebook doesn't appeal to young adults: their friends are on Instagram, and people join a network because their friends are there. The way back is a reason for a whole friend group to show up on Facebook *together*. We designed a short-form format you play *with* people, not just watch, and built it as **Whims**: tiny, low-pressure games anyone makes from one sentence with Meta's Muse models, then plays with their friends, Groups and Events. Create on a whim, play on a whim. Muse is essential because it turns any described idea into a game that plays the way the person meant: it agrees how the game works with them, says which parts are new to it, writes it, fixes it and has bots play it first. Facebook is essential because only Facebook has the Groups, Events, friends, chats and feed that make the games mean something.
+Facebook doesn't appeal to young adults: their friends are on Instagram, and people join a network because their friends are there. The way back is a reason for a whole friend group to show up on Facebook *together*. We designed a short-form format you play *with* people, not just watch, and built it as **Muse Curios**: tiny, low-pressure games anyone makes from one sentence with Meta's Muse models, then plays with their friends, Groups and Events. When the world is your muse, how will you create the content of tomorrow? Muse is essential because it turns any described idea into a game that plays the way the person meant: it agrees how the game works with them, says which parts are new to it, writes it, fixes it and has bots play it first. Facebook is essential because only Facebook has the Groups, Events, friends, chats and feed that make the games mean something.
 
 ## How to read it
 
@@ -12,13 +12,14 @@ Read [01-story.md](01-story.md) first; it is the pitch in seven steps, and each 
 
 | File | What it holds |
 |---|---|
+| [STYLE.md](STYLE.md) | The name (Muse Curios, a Curio), the tagline, words, colors, font, numbers and citations |
 | [hook.md](hook.md) | Options for the first 15 to 30 seconds, with a recommended pick |
 | [01-story.md](01-story.md) | The story spine in Karthik's order, the one-liners and the line bank |
 | [02-problem.md](02-problem.md) | The problem, who has it, and why it isn't solved today |
 | [03-what-we-built.md](03-what-we-built.md) | What a person does, what is live, local or coming at `6b1cc85`, and the terms |
 | [04-why-ai.md](04-why-ai.md) | Why Muse is needed: the harness, the game anatomy, the eval numbers and their limits |
 | [05-why-facebook.md](05-why-facebook.md) | Why only Facebook, Instagram, and every alternative compared |
-| [06-closer-together-and-engagement.md](06-closer-together-and-engagement.md) | How Whims brings people closer, why friendly competition makes friends, the engagement story and the return loop |
+| [06-closer-together-and-engagement.md](06-closer-together-and-engagement.md) | How Muse Curios brings people closer, why friendly competition makes friends, the engagement story and the return loop |
 | [07-demo-script.md](07-demo-script.md) | The 5-minute script on the spine, with fallbacks; the earlier 9-beat version below it |
 | [08-qa.md](08-qa.md) | Q&A: the hardest questions first, the IP line, creators, then everything else |
 | [09-evidence.md](09-evidence.md) | Our data, D1 to D39, with each number's source and label |
@@ -36,7 +37,7 @@ Read [01-story.md](01-story.md) first; it is the pitch in seven steps, and each 
 - Our own data is always labeled **measured**, **bot-run**, **simulated** (synthetic people, never real users), **teammate-reported** or **estimate**.
 - Every person, Group, Event and score in the demo is synthetic. We have no real-user data. The planned creator-inspired games are the one place real names appear, by Karthik's decision, labeled "inspired by".
 - **(K)** marks something Karthik asked for himself.
-- The product is called **Whims** in prose. "Bubble" survives in code names and in quotes about the naming history.
+- The product is called **Muse Curios** in prose, and one game is **a Curio** ([STYLE.md](STYLE.md)). "Bubble" and "Whim" survive only in code names and in quotes about the naming history.
 
 **Old section numbers.** Some entries still say "see section 3.3" or "section 11". They refer to the old document's numbering, which maps to these files:
 
@@ -80,4 +81,4 @@ The short version:
 
 ## Where this came from
 
-These files were one document, `docs/VALUE_PROPOSITION.md` (about 1,930 lines, last updated at 13:52 on Nov 12). Karthik asked to keep all of the writing, split it by topic, rename it to Whims and correct it. Nothing substantive was deleted: superseded material is kept and marked (for example the earlier 9-beat demo in [07](07-demo-script.md), and retired claims in [appendix-dropped.md](appendix-dropped.md)). Work credited to teammates: the engine and the harness up to the 17:19 handoff (Artem; Karthik owns the agentic harness since then, and Artem takes the front-end handoff next), the recommender and Group Blend (Kevin), the backend (Max), the style kit and authoring layer (Bayan), and the front end and story (Karthik).
+These files were one document, `docs/VALUE_PROPOSITION.md` (about 1,930 lines, last updated at 13:52 on Nov 12). Karthik asked to keep all of the writing, split it by topic, rename it to Muse Curios and correct it. Nothing substantive was deleted: superseded material is kept and marked (for example the earlier 9-beat demo in [07](07-demo-script.md), and retired claims in [appendix-dropped.md](appendix-dropped.md)). Work credited to teammates: the engine and the harness up to the 17:19 handoff (Artem; Karthik owns the agentic harness since then, and Artem takes the front-end handoff next), the recommender and Group Blend (Kevin), the backend (Max), the style kit and authoring layer (Bayan), and the front end and story (Karthik).

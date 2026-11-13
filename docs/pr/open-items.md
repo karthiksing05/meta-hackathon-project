@@ -14,7 +14,7 @@ Things that are built but say something untrue, or that the pitch leans on. Each
 | 2 | **"About a minute" copy.** Studio says "Describe a game and Muse makes it in about a minute." Search's empty state says "Muse builds it in about a minute." | `StudioModel.swift` (around line 429); `GroupsSearchScreens.swift` `makeWithMuseDetail` | Matches neither path: ready formulas take a median 28 s, games from scratch a median 99 s (D2, D30) | Drop the number ("Describe a game and Muse makes it") or say "in a minute or two", and let Studio's live steps show the time |
 | 3 | **Daily generation isn't in the Group UI.** Making a Daily from members' opted-in posts runs only through the CLI or Studio's daily mode via a debug launch; the in-app Daily is a hand-made seed | Group page; Studio daily mode | The Daily is the core of the Group story (VP-01, VP-18) | Add an admin-only "Make today's Daily" on the Group page that opens Studio in daily mode; or import the logged First Hellos run as today's Daily and say so |
 | 4 | **Add friend goes to bot rows.** Board rows and challenge opponents are bot runs by synthetic people (Maya plays at skill 0.9) | Board, head-to-head, Group Blend "taste twin" | The closer-together moment is a tap on a bot. Fine for a demo if we say so; bad if a judge finds out | Say "demo person" on stage; in the app, a small "demo" tag on synthetic rows; later, real accounts from the server |
-| 5 | **"Blow a bubble" in code comments** | `BubbleGroupSection.swift` lines 3 and 172 | User-facing copy is already "Make a Whim for this group"; only comments remain | Update the comments when someone next touches the file |
+| 5 | **"Blow a bubble" in code comments** | `BubbleGroupSection.swift` lines 3 and 172 | User-facing copy is already "Make a Curio for this group"; only comments remain | Update the comments when someone next touches the file |
 | 6 | **Old brand colors in the docs** | `docs/BUBBLES.md` §2 (lilac, pink and peach gradient) | Contradicts the blue-to-violet brand the app now uses | Update BUBBLES.md §2 in a docs commit, announced (shared file) |
 | 7 | **No real push notification** | The app has in-app notifications only | Any "your phone buzzes" opening is staged ([hook.md](hook.md)) | Optional: a local notification for "Maya beat your score" in debug builds, for the demo |
 | 8 | **Recommender off means an empty Group Blend** | `GroupBlendSection` shows nothing when the recommender is off or the Group is too small | Beat 5 of the script relies on it | Leave `FB_RECS` unset on the demo phone; check the section on the phone build |
@@ -57,7 +57,7 @@ Karthik's notes from the evening of Nov 12, recorded here so they aren't lost. N
 
 **Decisions pending.**
 
-- **The name.** "Whims" is the name for now (Slack 14:06, 14:19; `ProductName.display`). The Group card's "Blow a bubble for this group" is fixed in the app; the tracker may still call Studio "Blow your own".
+- **The name.** "Muse Curios" is the name for now (Slack 14:06, 14:19; `ProductName.display`). The Group card's "Blow a bubble for this group" is fixed in the app; the tracker may still call Studio "Blow your own".
 - **The one moment judges remember.** Candidates: the Add friend tap on the board, the live Muse build, a rematch landing in the group chat, or the Blend.
 - **Story order:** decided by Karthik: the seven-step spine in [01-story.md](01-story.md). Still open: which opening ([hook.md](hook.md) recommends the notification opening).
 - **Whether to mention the AI-agent build story,** since judges score Muse use.
@@ -71,7 +71,7 @@ Karthik's notes from the evening of Nov 12, recorded here so they aren't lost. N
 **Must land before the pitch, or drop the claim.**
 
 - ~~Messenger group-chat play and Challenge Me~~: in the app on one device since the collaboration batch.
-- ~~Whims in Facebook Search and "Make it with Muse"~~: in the app.
+- ~~Muse Curios in Facebook Search and "Make it with Muse"~~: in the app.
 - ~~The collaboration batch~~: merged at 13:08.
 - Import the real Muse games we demo (First Hellos, Picnic Pals, Hill Drift, Send It, the fog pinball); check whether any are in the build at `6b1cc85` (none were at `0a3e8f7`).
 - A phone build at `6b1cc85` or later, played through once: nothing after `ee12c04` is confirmed on a phone (D38).
@@ -80,7 +80,7 @@ Karthik's notes from the evening of Nov 12, recorded here so they aren't lost. N
 - Rework the tracker's demo around closer together (still open on the tracker).
 - An opt-in switch on posts, or a clear answer for how authors opt in.
 - The blue-to-purple rebrand: done in the app (30 of 32 seed covers use the brand gradient); BUBBLES.md §2 still shows lilac, pink and peach (fix 6 above).
-- The public README and docs: the README doesn't mention Whims, lists a Marketplace tab and says the code has never been compiled; FEATURE_PARITY.md shows the old tab bar; the BUBBLES.md seed table leaves out This or That: Picnic and Trivia Thursday: SF.
+- The public README and docs: the README doesn't mention Muse Curios, lists a Marketplace tab and says the code has never been compiled; FEATURE_PARITY.md shows the old tab bar; the BUBBLES.md seed table leaves out This or That: Picnic and Trivia Thursday: SF.
 - Confirm the backups exist: offline composer, pre-made real Muse games, the paused seed library.
 - Don't claim Muse reads photos: Spark 1.3 is listed for photos, but photo input isn't built.
 - Fix or stop citing the seeds' "Made with Muse" stamps and invented times (fix 1 above).
