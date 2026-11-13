@@ -1,0 +1,409 @@
+{
+  "about": "Karthik's friend world for the Muse Curios demo, for tools/friend-world/seed.mjs. Team people are referred to by their team-world keys (karthik, max, bayan, artem, kevin); their names, avatars and logins stay in game-backups/team-world. Everyone else here is synthetic, with DiceBear cartoon avatars and @example.com emails.",
+  "me": "karthik",
+  "friends": [
+    "max",
+    "bayan",
+    "artem",
+    "kevin"
+  ],
+  "people": [
+    {
+      "key": "nadia",
+      "first": "Nadia",
+      "last": "Okoro",
+      "username": "nadia_okoro",
+      "bio": "Ravenclaw, obviously. Rereading the series for the fourth time.",
+      "avatarUrl": "https://api.dicebear.com/9.x/lorelei/png?size=256&seed=fw-reader-11&backgroundColor=c0aede"
+    },
+    {
+      "key": "owen",
+      "first": "Owen",
+      "last": "Castellano",
+      "username": "owen_castellano",
+      "bio": "Hufflepuff and proud. Quidditch league on Sundays.",
+      "avatarUrl": "https://api.dicebear.com/9.x/adventurer/png?size=256&seed=fw-keeper-7&backgroundColor=b6e3f4"
+    },
+    {
+      "key": "leo",
+      "first": "Leo",
+      "last": "Brandt",
+      "username": "leo_brandt",
+      "bio": "Reads every keynote transcript so you don't have to.",
+      "avatarUrl": "https://api.dicebear.com/9.x/avataaars/png?size=256&seed=fw-keynote-3&backgroundColor=d1d4f9"
+    },
+    {
+      "key": "marcus",
+      "first": "Marcus",
+      "last": "Bell",
+      "username": "marcus_bell",
+      "bio": "Hardware nerd. Benchmarks first, opinions later.",
+      "avatarUrl": "https://api.dicebear.com/9.x/big-smile/png?size=256&seed=fw-bench-5&backgroundColor=a5b4fc"
+    },
+    {
+      "key": "hana",
+      "first": "Hana",
+      "last": "Sato",
+      "username": "hana_sato",
+      "bio": "Night owl, cold brew, crosswords.",
+      "avatarUrl": "https://api.dicebear.com/9.x/lorelei/png?size=256&seed=fw-owl-2&backgroundColor=b6e3f4"
+    },
+    {
+      "key": "sofia",
+      "first": "Sofia",
+      "last": "Lindqvist",
+      "username": "sofia_lindqvist",
+      "bio": "Illustrator. Draws cats on everything.",
+      "avatarUrl": "https://api.dicebear.com/9.x/adventurer/png?size=256&seed=fw-sketch-9&backgroundColor=d1d4f9"
+    },
+    {
+      "key": "jules",
+      "first": "Jules",
+      "last": "Moreau",
+      "username": "jules_moreau",
+      "bio": "Trivia night captain. We lose with dignity.",
+      "avatarUrl": "https://api.dicebear.com/9.x/avataaars/png?size=256&seed=fw-trivia-4&backgroundColor=c0aede"
+    },
+    {
+      "key": "ravi",
+      "first": "Ravi",
+      "last": "Menon",
+      "username": "ravi_menon",
+      "bio": "Climbing, chess and too many podcasts.",
+      "avatarUrl": "https://api.dicebear.com/9.x/big-smile/png?size=256&seed=fw-climb-6&backgroundColor=b6e3f4"
+    }
+  ],
+  "notFriendsOfMe": [
+    "nadia",
+    "owen"
+  ],
+  "friendships": [
+    [
+      "max",
+      "hana"
+    ],
+    [
+      "max",
+      "marcus"
+    ],
+    [
+      "max",
+      "ravi"
+    ],
+    [
+      "bayan",
+      "nadia"
+    ],
+    [
+      "bayan",
+      "sofia"
+    ],
+    [
+      "bayan",
+      "ravi"
+    ],
+    [
+      "artem",
+      "leo"
+    ],
+    [
+      "artem",
+      "marcus"
+    ],
+    [
+      "artem",
+      "jules"
+    ],
+    [
+      "kevin",
+      "owen"
+    ],
+    [
+      "kevin",
+      "sofia"
+    ],
+    [
+      "kevin",
+      "jules"
+    ],
+    [
+      "nadia",
+      "owen"
+    ],
+    [
+      "leo",
+      "marcus"
+    ],
+    [
+      "hana",
+      "sofia"
+    ]
+  ],
+  "groups": [
+    {
+      "id": "group-harry-potter-fans",
+      "name": "Harry Potter fans",
+      "category": "Fandom",
+      "owner": "max",
+      "about": "Sorting hat arguments, rereads and a weekly board. Play the Group's Curios to climb it.",
+      "coverColor": "#6C7BEA",
+      "coverSeed": "harry-potter-fans",
+      "joinPolicy": "open",
+      "recruiting": true,
+      "members": [
+        "max",
+        "karthik",
+        "bayan",
+        "artem",
+        "kevin",
+        "nadia",
+        "owen"
+      ],
+      "games": [
+        {
+          "key": "rare-answers",
+          "source": "56bd48b4d121c5054b8d812b",
+          "by": "max",
+          "sound": "Arcadia",
+          "order": [
+            "max",
+            "karthik",
+            "owen",
+            "nadia",
+            "bayan",
+            "artem",
+            "kevin"
+          ]
+        },
+        {
+          "key": "rarest-spell",
+          "source": "84991dfae056a099ce2ee198",
+          "by": "bayan",
+          "order": [
+            "artem",
+            "bayan",
+            "nadia",
+            "kevin",
+            "max",
+            "owen"
+          ],
+          "challenge": {
+            "from": "max",
+            "to": [
+              "karthik"
+            ]
+          },
+          "round": {
+            "from": "max"
+          }
+        }
+      ]
+    },
+    {
+      "id": "group-tech-news",
+      "name": "Tech News",
+      "category": "Technology",
+      "owner": "artem",
+      "about": "Keynotes, launches and chip gossip. Curios about the week's news.",
+      "coverColor": "#7A8CFF",
+      "coverSeed": "tech-news",
+      "joinPolicy": "open",
+      "recruiting": false,
+      "members": [
+        "artem",
+        "karthik",
+        "max",
+        "bayan",
+        "kevin",
+        "leo",
+        "marcus"
+      ],
+      "games": [
+        {
+          "key": "lemonade-ipo",
+          "source": "ade7ace60d29f4ea4181d354",
+          "by": "artem",
+          "order": [
+            "leo",
+            "artem",
+            "marcus"
+          ]
+        },
+        {
+          "key": "gpu-honeypot",
+          "source": "e120b3f816da36fdf8fc70fd",
+          "by": "kevin",
+          "order": [
+            "max",
+            "kevin",
+            "artem",
+            "bayan"
+          ]
+        }
+      ]
+    }
+  ],
+  "publicGames": [
+    {
+      "source": "aceba181c0fd7fa0b19e60c1",
+      "why": "Golden S'more (made by Muse)",
+      "players": [
+        "bayan",
+        "artem"
+      ],
+      "likes": [
+        "bayan",
+        "max"
+      ]
+    },
+    {
+      "source": "d66dcc5aa55f323b557f5105",
+      "why": "Root Words (made by Muse)",
+      "players": [
+        "artem",
+        "kevin"
+      ],
+      "likes": [
+        "artem"
+      ]
+    },
+    {
+      "source": "ed793361a7b4f6fce5a0c5b7",
+      "why": "Biscuit's First Day as a Waiter (made by Muse)",
+      "players": [
+        "max",
+        "bayan"
+      ],
+      "likes": [
+        "max",
+        "kevin"
+      ]
+    },
+    {
+      "source": "001d6be7788920282ba07d11",
+      "why": "Max Verstappen: Lights Out (melody)",
+      "players": [
+        "artem",
+        "max",
+        "kevin"
+      ],
+      "likes": [
+        "artem",
+        "kevin",
+        "bayan"
+      ]
+    }
+  ],
+  "copyLikes": {
+    "rare-answers": [
+      "bayan",
+      "kevin",
+      "nadia"
+    ],
+    "rarest-spell": [
+      "artem",
+      "max",
+      "owen"
+    ],
+    "gpu-honeypot": [
+      "max",
+      "artem",
+      "bayan",
+      "leo"
+    ]
+  },
+  "posts": [
+    {
+      "key": "hp-max-spell",
+      "by": "max",
+      "group": "group-harry-potter-fans",
+      "text": "new one in here: Rarest Spell. got {rarest-spell:max}, someone beat it before the weekend"
+    },
+    {
+      "key": "hp-bayan-answers",
+      "by": "bayan",
+      "group": "group-harry-potter-fans",
+      "text": "who keeps typing Wingardium Leviosa on Rare Answers lol. that's not rare"
+    },
+    {
+      "key": "tech-kevin-gpu",
+      "by": "kevin",
+      "group": "group-tech-news",
+      "text": "made a Curio for GPU keynote week. don't get honeypotted"
+    },
+    {
+      "key": "home-artem-notes",
+      "by": "artem",
+      "text": "Max Verstappen: Lights Out has a whole melody in it. turn your sound on"
+    }
+  ],
+  "comments": [
+    {
+      "post": "hp-max-spell",
+      "by": "artem",
+      "text": "already did :)"
+    },
+    {
+      "post": "hp-max-spell",
+      "by": "nadia",
+      "text": "give me 5 min"
+    },
+    {
+      "post": "hp-bayan-answers",
+      "by": "kevin",
+      "text": "guilty"
+    },
+    {
+      "post": "hp-bayan-answers",
+      "by": "owen",
+      "text": "Expelliarmus every time"
+    },
+    {
+      "post": "tech-kevin-gpu",
+      "by": "max",
+      "text": "the leather jacket is perfect"
+    },
+    {
+      "post": "tech-kevin-gpu",
+      "by": "leo",
+      "text": "too real"
+    },
+    {
+      "post": "home-artem-notes",
+      "by": "bayan",
+      "text": "the start lights got me every time"
+    }
+  ],
+  "reactions": [
+    {
+      "post": "hp-max-spell",
+      "by": "bayan",
+      "type": "haha"
+    },
+    {
+      "post": "hp-max-spell",
+      "by": "kevin",
+      "type": "like"
+    },
+    {
+      "post": "hp-bayan-answers",
+      "by": "max",
+      "type": "haha"
+    },
+    {
+      "post": "tech-kevin-gpu",
+      "by": "artem",
+      "type": "love"
+    },
+    {
+      "post": "tech-kevin-gpu",
+      "by": "bayan",
+      "type": "like"
+    },
+    {
+      "post": "home-artem-notes",
+      "by": "kevin",
+      "type": "like"
+    }
+  ]
+}
