@@ -1,11 +1,11 @@
 import SwiftUI
 
 // A sponsored feed page, Instagram-ad style: the brand's name and avatar at the top, the live game
-// in the middle (the page itself), and a call-to-action bar with a small "Sponsored" tag at the
+// in the middle (the page itself), and a call-to-action bar with a yellow "Ad" tag at the
 // bottom. Only the server decides a page is sponsored (`sponsor` on the feed item); the app has no
 // brands of its own.
 
-/// Top of a sponsored page: the brand's avatar and name, "Sponsored" under it.
+/// Top of a sponsored page: the brand's avatar and name, a yellow "Ad" tag under it.
 struct SponsoredHeader: View {
     let sponsor: RemoteSponsor
 
@@ -17,9 +17,7 @@ struct SponsoredHeader: View {
                     .font(.fbName)
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
-                Text("Sponsored")
-                    .font(.fbMicro)
-                    .foregroundStyle(Color.white.opacity(0.8))
+                AdBadge()
             }
         }
         .padding(.leading, 4)
@@ -28,12 +26,12 @@ struct SponsoredHeader: View {
         .background(Color.black.opacity(0.32), in: Capsule())
         .shadow(color: Color.black.opacity(0.25), radius: 2, y: 1)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Sponsored by \(sponsor.name)")
+        .accessibilityLabel("Ad by \(sponsor.name)")
     }
 }
 
 /// Bottom of a sponsored page: the CTA ("Play now" unless the server says otherwise), "Learn more"
-/// when the sponsor has a page, and the small "Sponsored" tag.
+/// when the sponsor has a page, and the yellow "Ad" tag.
 struct SponsoredFooter: View {
     let sponsor: RemoteSponsor
     /// The game's id, for the `sponsor_tap` event.
@@ -82,10 +80,8 @@ struct SponsoredFooter: View {
                         .background(Color.white.opacity(0.18), in: RoundedRectangle(cornerRadius: FBMetrics.radiusSmall, style: .continuous))
                 }
             }
-            Text("Sponsored")
-                .font(.fbMicroEmphasized)
-                .foregroundStyle(Color.white.opacity(0.75))
-                .accessibilityLabel("Sponsored by \(sponsor.name)")
+            AdBadge()
+                .accessibilityLabel("Ad by \(sponsor.name)")
         }
     }
 }
