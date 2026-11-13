@@ -691,11 +691,12 @@ export function expand(manifest, lib, options = {}) {
   // number, and the strings worth submitting to a text input ----
   let playtestGame;
   const pt = manifest.playtest;
-  if (pt?.progress || pt?.text_candidates) {
+  const textCandidates = pt?.text_candidates ?? pt?.texts; // `texts` is accepted as another name
+  if (pt?.progress || textCandidates) {
     playtestGame = clone(out);
-    if (pt.text_candidates) {
+    if (textCandidates) {
       playtestGame.state = { ...(playtestGame.state || {}), __text_candidates: { type: 'list<string>', init: '[]' } };
-      playtestGame.rules = [...playtestGame.rules, { id: '__text_candidates', on: 'tick', do: [{ set: '__text_candidates', to: pt.text_candidates }] }];
+      playtestGame.rules = [...playtestGame.rules, { id: '__text_candidates', on: 'tick', do: [{ set: '__text_candidates', to: textCandidates }] }];
     }
     if (pt.progress) {
       playtestGame.state = { ...(playtestGame.state || {}), __progress: { type: 'float', init: '0.0' } };

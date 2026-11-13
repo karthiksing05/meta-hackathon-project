@@ -340,6 +340,8 @@ requirement kind is a possible later addition.
 The expander writes a second copy of the game for the gate. It has a hidden `__progress` (float) and
 `__text_candidates` (`list<string>`) state, which `tick` rules update. The shipped `game.json` never
 contains them. Errors in either expression point at `/playtest/progress` or `/playtest/text_candidates`.
+`playtest.texts` is accepted as another name for `text_candidates` (errors still point at
+`/playtest/text_candidates`).
 
 ### 2.7 Inside Bubbles
 
