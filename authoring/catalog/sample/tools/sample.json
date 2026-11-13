@@ -1,0 +1,15 @@
+[
+  {
+    "id": "fuzzy_match",
+    "kind": "runtime_tool",
+    "summary": "Does a typed answer match an accepted one? Tolerates case, accents, plurals, typos and word order, and knows aliases.",
+    "when_to_use": "any typed or open answer: trivia, naming, spelling with tolerance",
+    "api": "fuzzy.match(input, accepted[], {threshold}) -> {ok, best, score, tier}",
+    "events": [],
+    "params": {"threshold": "0..1, default 0.82"},
+    "status": "building",
+    "gaps_it_closes": [],
+    "example_types": ["rare_answer_trivia", "name_all_x", "guess_the_character"]
+  },
+  {"id": "typed_answer", "kind": "fragment", "summary": "Open-answer prompts answered by typing, scored by rarity tier.", "when_to_use": "typed trivia", "status": "shipped"}
+]
