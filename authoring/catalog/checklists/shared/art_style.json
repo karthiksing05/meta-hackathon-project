@@ -1,0 +1,41 @@
+{
+  "slot": {
+    "id": "art_style",
+    "ask": "What should it look like?",
+    "why": "One style sheet drives every picture Muse Image draws for the game (sprites, backdrop, portraits, scene pictures), so they all match: palette, line, lighting and framing.",
+    "need": "nice",
+    "extrapolate_from": "an art-style word in the request (pixel art, 8-bit, retro RPG, watercolor, Ghibli, LEGO, claymation, anime, 80s anime, comic, low poly, papercraft, neon, crayon), else the franchise's own look",
+    "default": "bold cartoon",
+    "ask_when": "the request names no art style and the game is art-heavy (the plan has art: \"image\": a story with characters, or three or more sprite roles); otherwise Muse picks one and says so in the anatomy (\"I'm drawing it as bold cartoon art\")",
+    "choices": [
+      "bold cartoon",
+      "pixel art",
+      "watercolor storybook",
+      "anime"
+    ],
+    "affects": [
+      "art"
+    ],
+    "notes": "The planner replaces the choices with 3-4 styles that fit the theme, and the app adds Other (free text). Examples: Star Wars escape -> 80s anime, comic book, pixel art; medieval peasant -> illuminated storybook, claymation, pixel art; Labubu blind box -> soft vinyl toy, kawaii cartoon, claymation; brainrot runner -> bold cartoon, 3D cartoon, pixel art. The answer goes to the image art step as `style` (authoring/expander/image-art.mjs STYLE_PRESETS, or free text). It counts toward the 2-question limit, so ask it only when nothing more important is open."
+  },
+  "applies_to_families": [
+    "story_choice",
+    "adventure_rpg",
+    "mystery_narrative",
+    "runner",
+    "platformer",
+    "arcade_shooter",
+    "dodge_survive",
+    "aim_throw",
+    "physics_toy",
+    "tower_defense",
+    "catch_collect",
+    "duel_battle",
+    "nurture_pet",
+    "cooking_crafting",
+    "management_sim",
+    "racing",
+    "sports"
+  ],
+  "notes": "A cross-family slot. It lives outside the per-family files (checklists/*.json, which allow at most 6 slots each and are loaded one family per file), so the planner adds it to the retrieved checklist when the plan sets art: \"image\". adventure_rpg and mystery_narrative carry it directly as well."
+}

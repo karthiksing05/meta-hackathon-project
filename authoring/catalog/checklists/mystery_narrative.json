@@ -93,6 +93,25 @@
             "content",
             "art"
           ]
+        },
+        {
+          "id": "art_style",
+          "ask": "What should it look like?",
+          "why": "One style sheet drives every picture Muse Image draws for the game (sprites, backdrop, portraits, scene pictures), so they all match: palette, line, lighting and framing.",
+          "need": "nice",
+          "extrapolate_from": "an art-style word in the request (pixel art, 8-bit, retro RPG, watercolor, Ghibli, LEGO, claymation, anime, 80s anime, comic, low poly, papercraft, neon, crayon), else the franchise's own look",
+          "default": "bold cartoon",
+          "ask_when": "the request names no art style and the game is art-heavy (the plan has art: \"image\": a story with characters, or three or more sprite roles); otherwise Muse picks one and says so in the anatomy (\"I'm drawing it as bold cartoon art\")",
+          "choices": [
+            "bold cartoon",
+            "pixel art",
+            "watercolor storybook",
+            "anime"
+          ],
+          "affects": [
+            "art"
+          ],
+          "notes": "The planner fits the choices to the theme (3-4, plus Other). Shared definition: checklists/shared/art_style.json."
         }
       ]
     }
