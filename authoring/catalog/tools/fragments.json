@@ -456,6 +456,32 @@
     "path": "authoring/fragments/pickups.fragment.json"
   },
   {
+    "id": "play_clip",
+    "kind": "fragment",
+    "name": "Play the clip",
+    "aliases": [
+      "hear a clip",
+      "listen and answer",
+      "play again button",
+      "replay the tune"
+    ],
+    "summary": "Hear a clip, then pick an answer: plays the game's melody clip for each quiz question shortly after it appears and draws a Play again button (limited replays, not while playing) above the question.",
+    "when_to_use": "Any listen-then-answer quiz with melody_clip content: guess the decade, which instrument, name the jingle. Pair with quiz (clip i = question i, in content order), rounds, score and lives. Give quiz a time_ms of at least (replays + 1) x clip_ms + delay_ms + 3000.",
+    "api": "requires quiz (state order, qi, locked; event question_done); game writes sound.clips; sends input replay_clip; provides clip_now, replays_left, current_clip(); emits clip_play {clip}",
+    "events": [
+      "clip_play"
+    ],
+    "params": {
+      "clips": "int, default 4, 1..12 (the number of clips; question indexes wrap)",
+      "replays": "int, default 2, 0..5",
+      "delay_ms": "duration, default 600, 100..3000",
+      "clip_ms": "duration, default 6000, 500..10000 (the longest clip)",
+      "label": "string, default \"Play again\", max 14 chars"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/play_clip.fragment.json"
+  },
+  {
     "id": "player_drag",
     "kind": "fragment",
     "name": "Drag to steer",
@@ -870,5 +896,325 @@
     },
     "status": "shipped",
     "path": "authoring/fragments/word_check.fragment.json"
+  },
+  {
+    "id": "qa_bank",
+    "kind": "fragment",
+    "name": "Ask yes/no questions",
+    "aliases": [
+      "yes no questions",
+      "ask questions to solve",
+      "lateral thinking",
+      "situation puzzle",
+      "twenty questions",
+      "interrogate",
+      "ask the suspect"
+    ],
+    "summary": "The player types free yes/no questions about a mystery and taps Ask; a deterministic matcher maps each question to one of the case's pre-written facts (written by Muse at build time) and answers Yes, No, Doesn't matter or Partly, showing which question it answered. Key facts are clues; typing a theory and tapping Solve checks it against the solutions. Unmatched questions get \"Ask another way\" and cost nothing.",
+    "when_to_use": "Lateral-thinking and situation puzzles, twenty questions about a hidden thing, interrogating a suspect or witness, \"ask the oracle\" games: anywhere the player asks in their own words and a fixed answer is enough. Not for free conversation or judging creative text (use npc_judge with written replies).",
+    "api": "pair with keyboard (letters include space, < and >); game provides qa_setups(), qa_reveals(), qa_facts(), qa_solves(), all list<string> one entry per case, from the qa_bank_content step (qa-bank/1, authoring/expander/qa-bank.mjs toContent): fact strings \"<y|n|i|p>[*]|<question shown>|<group>|<group>\", words in a group joined by =, facts by ;; provides key_state, case_text(), questions_left(), reply_label(r), qa_progress(), state typed, asked, clues, solved_count, qa_points, last_reply, last_ask, history, locked, revealing, ran_out; inputs qa_ask, qa_solve (its Ask and Solve buttons); set playtest.progress to qa_progress(); not with typed_answer, quiz or score",
+    "events": [
+      "question_answered",
+      "question_unclear",
+      "clue_found",
+      "case_solved",
+      "solve_wrong",
+      "out_of_questions",
+      "case_done"
+    ],
+    "params": {
+      "questions": "int, default 20, 3..60",
+      "clue_points": "int, default 50, 0..1000",
+      "solve_points": "int, default 500, 0..5000",
+      "question_points": "int, default 25, 0..1000 (per question left on a solve)",
+      "wrong_solve_cost": "int, default 2, 0..10 (questions)",
+      "unclear_costs": "bool, default false",
+      "goal": "int, default 1, 0..20 (cases solved to win; 0 never wins on its own)",
+      "out_loses": "bool, default true",
+      "max_len": "int, default 40, 10..60",
+      "placeholder": "string, default \"Ask a yes or no question\", max 30 chars"
+    },
+    "status": "shipped",
+    "gaps_it_closes": [
+      "free-typed questions answered without an LLM at play time"
+    ],
+    "example_types": [
+      "lateral_thinking_yes_no",
+      "twenty_questions",
+      "interrogate_typed_questions",
+      "ask_the_oracle_yes_no"
+    ],
+    "path": "authoring/fragments/qa_bank.fragment.json",
+    "notes": "matching is authoring/expander/intent.mjs (generated into the fragment by authoring/tools/make-qa-fragment.mjs); measured 90-93% right on held-out player questions after one refine round (docs/harness-gaps/open-text.md); typing is the keyboard grid until text_input ships"
+  },
+  {
+    "id": "npc_judge",
+    "kind": "fragment",
+    "name": "Character judges your reply",
+    "aliases": [
+      "rizz simulator",
+      "rate my pickup line",
+      "convince the bouncer",
+      "roast judge",
+      "debate judge",
+      "npc rates"
+    ],
+    "summary": "Each round a character says a line and the player picks one of 2-4 replies; the character rates it 0-100 into named bands (\"cringe\" to \"W rizz\") with a reaction line. Ratings and reactions are written by Muse at build time, so play is deterministic and replays.",
+    "when_to_use": "Rizz and pickup-line simulators, convince-the-bouncer or the boss, a debate or roast judge, caption contests judged by a character, interview and negotiation games where a character scores what you say. The honest stand-in for \"type anything and an AI judges it\".",
+    "api": "game provides nj_lines() (line per round), nj_options(), nj_ratings() (whole numbers 0-100 as strings), nj_reactions(), the last three flattened with `choices` entries per round; provides judge_line(), option_text(k), option_rating(k), band_label(r), state nj_points, last_rating, last_label, last_reaction, high_count, low_count, picked, locked; input nj_pick {index}; bind rounds round_done to line_done and lives hit to judged_low; art roles judge (a drawn character; real names as written, never photorealistic) and button; not with quiz, score or choice_story",
+    "events": [
+      "judged",
+      "judged_high",
+      "judged_low",
+      "line_done"
+    ],
+    "params": {
+      "choices": "int, default 3, 2..4",
+      "time_ms": "duration, default 12000, 0..60000 (0 = no timer)",
+      "reveal_ms": "duration, default 1800, 600..5000",
+      "labels": "string, default \"Cringe|Meh|Smooth|Legendary\", the bands low to high split by |",
+      "high_at": "int, default 75, 1..100",
+      "low_at": "int, default 25, 0..99"
+    },
+    "status": "shipped",
+    "gaps_it_closes": [
+      "a character that judges what the player says, without an LLM at play time"
+    ],
+    "example_types": [
+      "npc_rates_your_line",
+      "convince_the_gatekeeper",
+      "judged_reply_quiz"
+    ],
+    "path": "authoring/fragments/npc_judge.fragment.json",
+    "notes": "content comes from the npc_lines content step; a typed version (player writes the line) needs live_judge, which is a gap"
+  },
+  {
+    "id": "geo_map",
+    "kind": "fragment",
+    "name": "Real map with a lit-up place",
+    "aliases": [
+      "world map",
+      "map on screen",
+      "show the country on a map",
+      "highlight a country",
+      "country lit up on a map"
+    ],
+    "summary": "A geographically accurate map (world, a continent, a subregion or the US states) drawn from Natural Earth outlines, with one place filled in the accent colour and a pulsing ring at its label point so small countries still show.",
+    "when_to_use": "Any game that shows a map: which-country-is-this quizzes, showing the country after an answer, a map behind a pin game, a Group's countries or states. Never ask the model to draw a map; write a `geo` section and use this.",
+    "api": "manifest `geo` {pack: world|us_states, places: [names] or pick: {region, count, min_area, seed}, map: {x, y, w, h, view: world|fit|<continent>|<subregion>|[w,s,e,n]}}; game provides map_focus(): int (index into the geo places, -1 for none); the geo step provides geo_names(), geo_ids(), geo_capitals(), geo_continents(), geo_target() (list<vec2> lon/lat), geo_rings(), geo_ring_place(), geo_label() and the sprite `map`",
+    "params": {
+      "x": "float, set by the geo step",
+      "y": "float, set by the geo step",
+      "w": "float, set by the geo step",
+      "h": "float, set by the geo step",
+      "ring": "bool, default true: pulsing ring at the lit place"
+    },
+    "status": "shipped",
+    "gaps_it_closes": [
+      "no accurate map art",
+      "map_pin"
+    ],
+    "example_types": [
+      "map_reveal_trivia",
+      "lit_country_quiz",
+      "map_place_pin_quiz",
+      "geo_guess",
+      "capital_match"
+    ],
+    "path": "authoring/fragments/geo_map.fragment.json",
+    "notes": "Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md)."
+  },
+  {
+    "id": "map_pin",
+    "kind": "fragment",
+    "name": "Map pin",
+    "aliases": [
+      "drop a pin",
+      "tap the map",
+      "pin on map",
+      "where in the world"
+    ],
+    "summary": "Tap the map to drop a pin; the great-circle distance to the answer in whole km sets the round's points (1000 falling to 0 at zero_km), a pin past far_km emits pin_far, and the pin, a line to the answer and the distance show before the next round.",
+    "when_to_use": "Pin-the-city, where-in-the-world and closest-guess-wins geography games, with geo_map underneath. Bind rounds' round_done to pin_done and lives' hit to pin_far.",
+    "api": "game provides map_target(): vec2 (vec(lon, lat), usually get_or(geo_target(), i, vec(0.0, 0.0))) and map_can_pin(): bool; provides state pin_at, pin_km, pin_shown, functions map_lonlat(p), map_screen(ll), pin_points(km), input map_tap {at: vec2}; the geo step sets x, y, w, h, ax, ay, kx, ky",
+    "events": [
+      "pinned",
+      "pin_far",
+      "pin_done"
+    ],
+    "params": {
+      "far_km": "int, default 2500, 50..20000",
+      "zero_km": "int, default 5000, 100..20000",
+      "reveal_ms": "duration, default 1500, 300..5000",
+      "grid": "bool, default true: faint 30-degree grid dots",
+      "x, y, w, h, ax, ay, kx, ky": "float, set by the geo step"
+    },
+    "status": "shipped",
+    "gaps_it_closes": [
+      "no accurate map art",
+      "tap position to longitude and latitude"
+    ],
+    "example_types": [
+      "map_place_pin_quiz",
+      "geo_guess",
+      "where_was_this_taken"
+    ],
+    "path": "authoring/fragments/map_pin.fragment.json",
+    "notes": "Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md). Distance uses only arithmetic, sin, cos and sqrt (an asin series, no atan2 or pow), so replays match; the engine agrees with a JS great circle within 0.5 km in tools/test-geo.mjs."
+  },
+  {
+    "id": "geo_distance",
+    "kind": "fragment",
+    "name": "Distance and direction on the globe",
+    "aliases": [
+      "geo distance score",
+      "how far and which way",
+      "hot and cold on a map",
+      "geo_distance_score"
+    ],
+    "summary": "geo_km(a, b) great-circle km, geo_dir(a, b) 8-point compass direction and geo_closeness(a, b) 0–100 between two vec(lon, lat) points, deterministic in the engine.",
+    "when_to_use": "Guess-the-country-by-name puzzles that answer with distance and direction, closest-guess scoring, and any rule that needs how far apart two places are.",
+    "api": "provides geo_km(a: vec2, b: vec2): int, geo_dir(a, b): string, geo_closeness(a, b): int; points are vec(lon, lat), usually from geo_target()",
+    "status": "shipped",
+    "gaps_it_closes": [
+      "no trusted distance maths in rules"
+    ],
+    "example_types": [
+      "geo_silhouette_distance_guess",
+      "geo_guess"
+    ],
+    "path": "authoring/fragments/geo_distance.fragment.json",
+    "notes": "Pure maths: works on today's engine with any vec(lon, lat) points. The coordinates themselves must come from the geo section (map_geometry), never from Muse."
+  },
+  {
+    "id": "country_outline",
+    "kind": "fragment",
+    "name": "Country or state outline",
+    "aliases": [
+      "country silhouette",
+      "guess the shape",
+      "outline of a country",
+      "state shapes"
+    ],
+    "summary": "One country's or US state's outline drawn big and alone, its main land mass fitted to a rect, from Natural Earth: guess the place from its shape.",
+    "when_to_use": "Guess-the-country (or state) from its outline, silhouette dailies, and shape rounds in geography trivia.",
+    "api": "manifest `geo` with `outline: {x, y, w, h}`; game provides outline_focus(): int; the geo step provides geo_outline(), geo_outline_place() and sets the rect",
+    "params": {
+      "x, y, w, h": "float, set by the geo step"
+    },
+    "status": "shipped",
+    "gaps_it_closes": [
+      "no accurate map art"
+    ],
+    "example_types": [
+      "spell_the_country",
+      "flag_and_shape",
+      "geo_silhouette_distance_guess",
+      "outline_pick_quiz"
+    ],
+    "path": "authoring/fragments/country_outline.fragment.json",
+    "notes": "Needs the manifest's `geo` section, which expander/geo.mjs turns into the map sprite, the geo_* functions and the rect and projection params. Example games pass the gate (authoring/content/geo/examples, built by tools/make-geo-games.mjs). Status building until the Studio pipeline calls applyGeo before expand and the bundle carries the packs and fragments (request in docs/harness-gaps/maps.md)."
+  },
+  {
+    "id": "zoom_reveal",
+    "kind": "fragment",
+    "name": "Zoom-out picture",
+    "aliases": [
+      "zoom out reveal",
+      "close-up guess",
+      "tiny crop",
+      "what is this close-up",
+      "zoomed in picture"
+    ],
+    "summary": "A picture in a square window that starts zoomed in on a small crop and zooms out to the whole picture over a set time, driven by the game clock so replays match. The pictures are frames of the game's picture sprite, one per round.",
+    "when_to_use": "Guess-the-picture games where seeing less is harder: wildlife close-ups, what is this object, zoomed-in characters or places. Pair with picture_quiz (choices) or typed_answer (type it). Pay more for early answers with zoom_left().",
+    "api": "requires functions zoom_index(): int (which frame) and zoom_hold(): bool (show it whole, e.g. locked), event zoom_restart (bind to question_done); provides zoom_left(): int 100..0 by the clock, zoom_scale(): float; art role picture (frames, w and h 512 so it stays sharp). List it FIRST in uses: there is no clipping, so it masks around the window with $bg and later fragments draw on top",
+    "params": {
+      "x": "int, default 40, 0..340",
+      "y": "int, default 76, 0..620",
+      "size": "int, default 280, 80..360",
+      "zoom_from": "float, default 6.0, 1..16",
+      "zoom_ms": "duration, default 8000, 500..60000",
+      "focus_x": "float, default 0.5, 0..1",
+      "focus_y": "float, default 0.5, 0..1",
+      "jitter": "bool, default true (the crop point shifts per picture)",
+      "frame": "bool, default true (a border)"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/zoom_reveal.fragment.json",
+    "example_types": [
+      "zoomed_image_guess",
+      "zoom_out_picture_trivia",
+      "picture_reveal"
+    ],
+    "notes": "masks with four $bg rects, so the backdrop is hidden around the window; an engine clip (image_clip) would remove that. Reaches the server with the next Studio bundle rebuild"
+  },
+  {
+    "id": "picture_quiz",
+    "kind": "fragment",
+    "name": "Picture quiz",
+    "aliases": [
+      "picture multiple choice",
+      "what is in the picture",
+      "name the picture"
+    ],
+    "summary": "The quiz fragment's rules (shuffled questions, shuffled choices, a timer per question, right and wrong events) with a layout that leaves the top of the screen for a picture: a short question line under it and the answers in a 2 x 2 grid.",
+    "when_to_use": "Any multiple-choice round about a picture: zoom-out guessing, which animal, whose cartoon, what is this close-up, emoji or picture rebus with choices. Use quiz instead when there is no picture.",
+    "api": "requires quiz_questions(), quiz_choices(), quiz_answers() like quiz; provides order, qi, opts, picked, locked, right_count, wrong_count, question_text(), correct_answer(); emits answered_right, answered_wrong, question_done. The picture goes in y 70..350 (zoom_reveal, or the game's own image node with frame get_or(order, qi, 0)). Conflicts with quiz",
+    "events": [
+      "answered_right",
+      "answered_wrong",
+      "question_done"
+    ],
+    "params": {
+      "choices": "int, default 3, 2..4",
+      "time_ms": "duration, default 8000, 1000..30000",
+      "goal": "int, default 0, 0..200"
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/picture_quiz.fragment.json",
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "cartoon_quote_guess",
+      "picture_reveal"
+    ],
+    "notes": "derived from quiz.fragment.json; keep the rules in step if quiz changes"
+  },
+  {
+    "id": "diff_spots",
+    "kind": "fragment",
+    "name": "Spot the difference board",
+    "aliases": [
+      "spot the difference",
+      "find the differences",
+      "two pictures"
+    ],
+    "summary": "Two pictures one above the other; tapping where they differ (in either picture) finds that difference and rings it in both, tapping anywhere else is a miss. The answer key is data written by the spot-difference generator, never guessed from pixels.",
+    "when_to_use": "Spot-the-difference and find-what-changed games: chaotic group-chat screenshots, rooms, scenes, outfits. Build the pictures and the key with anomaly_generator (authoring/expander/spot-diff.mjs) from one scene.",
+    "api": "requires functions diff_points(): list<ivec2>, diff_radii(): list<int>, diff_decoys(): list<ivec2> (written by spot-diff.mjs toAuthoring); art roles picture_a, picture_b; provides found, found_count, last_spot, spot_total(); emits spot_found, spot_missed, all_spots_found; wins when all are found (wins param). Bind score point to spot_found and lives hit to spot_missed",
+    "events": [
+      "spot_found",
+      "spot_missed",
+      "all_spots_found"
+    ],
+    "params": {
+      "x": "int, default 20",
+      "y_a": "int, default 84",
+      "y_b": "int, default 340",
+      "w": "int, default 320, 120..360",
+      "h": "int, default 240, 80..320",
+      "scene_w": "int, default 320 (the scene's own width)",
+      "pad": "int, default 6 (extra tap radius)",
+      "wins": "bool, default true",
+      "label": "string, default \"Found\""
+    },
+    "status": "shipped",
+    "path": "authoring/fragments/diff_spots.fragment.json",
+    "example_types": [
+      "spot_difference",
+      "what_changed_scene",
+      "mirror_double_difference"
+    ],
+    "notes": "the bot gate finds differences in about 3 s (it taps every object), so it flags too_short for one pair; people take 20-60 s. A gate profile for search games is requested from Bayan"
   }
 ]

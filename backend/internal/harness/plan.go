@@ -107,6 +107,9 @@ type PlanInput struct {
 	Pack      ContextPack
 	Context   GenContext // the cards the generator will get (BuildContext)
 	Fragments []GameTool // the engine's fragments, for the anatomy's familiarity
+	// Unbuilt are the catalog's planned and gap tools. A request whose words hit one's name or aliases gets a
+	// gap entry even when retrieval didn't send that tool, so a need is never dropped silently.
+	Unbuilt []GameTool
 }
 
 const planSystem = `You are Muse Studio's game planner. A person asked for a tiny phone game. A search of our game catalog found
@@ -142,20 +145,32 @@ SPECSCHEMA
 Rules
 - type_ids and tool_ids: only ids from the cards below. Prefer the first types; blend two only when the request needs both.
 - gaps: every tool you rely on whose status is "planned" or "gap", each with the approximation the game uses instead
-  (built from shipped tools or plain rules) and its familiarity.
+  (built from shipped tools or plain rules) and its familiarity. When the REQUEST asks for something only an unbuilt
+  tool does (a map, a sound to hear, a photo, typed questions, comparing with everyone), list that tool in gaps with an
+  honest approximation. Never drop a request's feature silently, and never promise content nothing can supply.
 - Anatomy familiarity is mechanical: "known" = plan "fragment:<id>" with an id from the fragment list; "approximate" =
   custom rules from engine builtins; "unfamiliar" = needs an engine gap ("engine-gap:<name>"). Use "gate:<check>" for a
   rule a playtest must confirm. rules are numbered, one testable sentence each, with a "check".
 - source: "you" when the person's words say it, "guess" when you chose it. Vague requests get concrete picks marked
   "guess" ("6 tries, picked by Muse").
-- Clarification: work through every checklist slot below. Fill each from the request (extrapolate_from says where to
+- Clarification: ask only when the answer changes the rules or the content in a way a wrong guess would spoil. Never
+  ask who plays (the person picks the chat or Group when they send it) and never ask for a theme when the game's
+  content isn't themed (numbers, shapes, reflexes). A named game with a clear mechanic usually needs no question.
+  Work through every checklist slot below. Fill each from the request (extrapolate_from says where to
   look): guessed=false. A slot nothing speaks to takes its default (or a better guess): guessed=true. Ask only when a
   "required" slot's ask_when holds, using the slot's ask and choices, and AT MOST 2 questions in total; when you ask,
   still give your best guess as value. Put the same questions on the matching anatomy parts.
 - theme: when the person names a theme, franchise or brand, keep those words verbatim (source "you"). Honor it in
   names, art and words; the mechanics stay original, and never copy a specific existing game's levels, layouts or art.
 - Played by touch on a phone: taps, drags, swipes and an on-screen keyboard. Plain words, sentence case, short texts.
-- length_s is 10 to 180 seconds. Synthetic people only.`
+- length_s is 10 to 180 seconds.
+- Names: real brands, creators, franchises, characters and real people the person names keep their real names, as
+  written (no made-up stand-ins). Real people are drawn only as cartoons or caricatures, never photorealistic, and no
+  recorded song or audio is copied.
+- Group play: every game is a single-player run that friends play on the same seed, each on their own turn, in a chat or
+  a Group, and compare after. So it must be fair on a shared seed (every random draw from the seed, nothing from the
+  device or the clock), a round fits a chat (30-90 s), and the run ends on one clear result line. A game with no right
+  answer (rating, ranking taste, tier lists, this-or-that) compares agreement, not a score.`
 
 // Plan asks Muse for a plan and validates it against the input. An error means no usable plan.
 func (p *Planner) Plan(ctx context.Context, in PlanInput) (*Plan, error) {
@@ -171,7 +186,8 @@ func (p *Planner) Plan(ctx context.Context, in PlanInput) (*Plan, error) {
 		parts = specStages[0]
 	}
 	def := defaultScoreFor(in.Context.Types[0])
-	system := strings.Replace(planSystem, "SPECSCHEMA", specSchema(parts, def), 1)
+	sdef := DefaultSocial(in.Context.Types[0], in.Request)
+	system := strings.Replace(planSystem, "SPECSCHEMA", specSchema(parts, def, sdef), 1)
 	t := time.Now()
 	raw, err := p.Muse.JSON(ctx, system, planUser(in, lists))
 	if err != nil {
@@ -183,7 +199,7 @@ func (p *Planner) Plan(ctx context.Context, in PlanInput) (*Plan, error) {
 		return nil, err
 	}
 	plan.Calls = calls
-	if err := p.finishSpec(ctx, plan, raw, in, def); err != nil {
+	if err := p.finishSpec(ctx, plan, raw, in, def, sdef); err != nil {
 		return nil, err
 	}
 	if p.Visual {
@@ -325,6 +341,10 @@ func ValidatePlan(raw json.RawMessage, in PlanInput, lists []checklistFor) (*Pla
 	for _, t := range in.Context.Tools {
 		toolStatus[t.ID] = t.Status
 	}
+	unbuilt := map[string]string{}
+	for _, t := range in.Unbuilt {
+		unbuilt[t.ID] = t.Status
+	}
 	p.ToolIDs = []string{}
 	for _, id := range uniq(r.ToolIDs) {
 		if _, ok := toolStatus[id]; ok {
@@ -339,6 +359,9 @@ func ValidatePlan(raw json.RawMessage, in PlanInput, lists []checklistFor) (*Pla
 	gapSeen := map[string]bool{}
 	for _, g := range r.Gaps {
 		st, ok := toolStatus[g.Tool]
+		if !ok {
+			st, ok = unbuilt[g.Tool]
+		}
 		switch {
 		case !ok:
 			note("dropped gap %q: not a tool in the context", g.Tool)
@@ -359,9 +382,17 @@ func ValidatePlan(raw json.RawMessage, in PlanInput, lists []checklistFor) (*Pla
 			note("gap %q had no approximation", g.Tool)
 		}
 		p.Gaps = append(p.Gaps, g)
-		if !oneOf(g.Tool, p.ToolIDs) {
+		if _, inContext := toolStatus[g.Tool]; inContext && !oneOf(g.Tool, p.ToolIDs) {
 			p.ToolIDs = append(p.ToolIDs, g.Tool)
 		}
+	}
+	for _, t := range requestNeeds(in.Request, in.Unbuilt) {
+		if gapSeen[t.ID] || oneOf(t.ID, p.ToolIDs) {
+			continue
+		}
+		gapSeen[t.ID] = true
+		p.Gaps = append(p.Gaps, Gap{Tool: t.ID, Status: t.Status, Approximation: "not built yet: approximate it with shipped tools and say so in the game's text; " + clip(t.Notes, 160), Familiarity: "unfamiliar"})
+		note("added gap %q: the request asks for it (%s) and the plan dropped it", t.ID, t.Status)
 	}
 	for _, id := range p.ToolIDs {
 		if st := toolStatus[id]; (st == "planned" || st == "gap") && !gapSeen[id] {
@@ -407,6 +438,9 @@ func ValidatePlan(raw json.RawMessage, in PlanInput, lists []checklistFor) (*Pla
 			case s.Need != "required":
 				note("question on %q dropped: only required slots are asked", s.ID)
 				c.Question, c.Choices = "", nil
+			case slots.borrowed:
+				note("question on %q dropped: the chosen type has no checklist, so borrowed slots are defaults only", s.ID)
+				c.Question, c.Choices = "", nil
 			case questions >= MaxQuestions:
 				note("question on %q dropped: at most %d questions", s.ID, MaxQuestions)
 				c.Question, c.Choices = "", nil
@@ -427,8 +461,9 @@ func ValidatePlan(raw json.RawMessage, in PlanInput, lists []checklistFor) (*Pla
 }
 
 type slotSet struct {
-	order []Slot
-	byID  map[string]Slot
+	order    []Slot
+	byID     map[string]Slot
+	borrowed bool // the slots come from a type the plan didn't choose
 }
 
 // planSlots are the slots of the checklists that apply to the chosen types; if none of them has one, the
@@ -459,7 +494,32 @@ func planSlots(lists []checklistFor, typeIDs []string) slotSet {
 	if ss := pick(true); len(ss.order) > 0 {
 		return ss
 	}
-	return pick(false)
+	ss := pick(false)
+	ss.borrowed = true
+	return ss
+}
+
+// requestNeeds are the unbuilt tools whose name or an alias appears in the request as whole words.
+func requestNeeds(request string, tools []GameTool) []GameTool {
+	req := " " + Fold(request) + " " // whole words, no stemming or stopwords: "say it" must not match "saying"
+	var out []GameTool
+	for _, t := range tools {
+		if t.Status != "planned" && t.Status != "gap" {
+			continue
+		}
+		for _, a := range append([]string{t.Name}, t.Aliases...) {
+			words := strings.Fields(Fold(a))
+			if len(words) == 0 || (len(words) == 1 && len(words[0]) < 3) {
+				continue
+			}
+			phrase := " " + strings.Join(words, " ")
+			if strings.Contains(req, phrase+" ") || strings.Contains(req, phrase+"s ") {
+				out = append(out, t)
+				break
+			}
+		}
+	}
+	return out
 }
 
 func anyString(v any) string {

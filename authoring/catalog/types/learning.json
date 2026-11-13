@@ -1160,11 +1160,12 @@
       "tolerance"
     ],
     "tools": [
-      "map_pin_guess",
+      "geo_map",
+      "map_pin",
+      "map_geometry",
       "rounds",
-      "score",
-      "timer_bar",
-      "reveal"
+      "lives",
+      "score"
     ],
     "engine_gaps": [],
     "gate_profile": "trivia",
@@ -1175,7 +1176,8 @@
     ],
     "status": "seed",
     "source": "seed-karthik",
-    "refs": []
+    "refs": [],
+    "notes": "Example game: authoring/content/geo/examples/pin_the_capital.json. Example game: authoring/content/geo/examples/pin_the_capital.json."
   },
   {
     "id": "cloze_fill_blank",

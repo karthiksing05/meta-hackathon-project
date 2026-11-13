@@ -1,0 +1,367 @@
+{
+  "format": "story-graph/1",
+  "request": "Choose your own adventure where I'm a medieval peasant trying to become king in 10 choices or less",
+  "made_by": "muse-wonder-1.0 (effort low) via authoring/tools/story-muse.mjs, 1 repair round(s), 2026-11-12",
+  "title": "Turnip King",
+  "premise": "You are a medieval peasant who wants to become king before your chance passes.",
+  "start": "field",
+  "max_choices": 10,
+  "on_limit": "old_age",
+  "vars": [
+    {
+      "id": "coin",
+      "label": "Coin",
+      "kind": "stat",
+      "init": 0,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "id": "fame",
+      "label": "Fame",
+      "kind": "stat",
+      "init": 0,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "id": "sword",
+      "label": "Sword",
+      "kind": "item"
+    },
+    {
+      "id": "heir_ring",
+      "label": "Heir Ring",
+      "kind": "item"
+    },
+    {
+      "id": "mercy",
+      "kind": "flag"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "field",
+      "place": "Turnip Field",
+      "text": "You haul turnips, watching the heirless king's castle mock you from the hill.",
+      "choices": [
+        {
+          "label": "Sell turnips in town",
+          "to": "market",
+          "do": "coin+2",
+          "note": "+2 Coin"
+        },
+        {
+          "label": "Train with a stick",
+          "to": "yard",
+          "do": "fame+1",
+          "note": "+1 Fame"
+        },
+        {
+          "label": "Search the old well",
+          "to": "well"
+        }
+      ]
+    },
+    {
+      "id": "market",
+      "place": "Market Square",
+      "text": "Stalls crowd the square. A dented sword and a loud bard catch your eye.",
+      "choices": [
+        {
+          "label": "Buy the dented sword",
+          "to": "tourney",
+          "if": "coin>=2",
+          "do": "coin-2 sword",
+          "note": "-2 Coin, gain Sword"
+        },
+        {
+          "label": "Hire the bard",
+          "to": "tavern",
+          "if": "coin>=1",
+          "do": "coin-1 fame+2",
+          "note": "-1 Coin, +2 Fame"
+        },
+        {
+          "label": "Walk to the castle",
+          "to": "gate"
+        }
+      ]
+    },
+    {
+      "id": "yard",
+      "place": "Training Yard",
+      "text": "You swing your stick at a scarecrow while real knights laugh nearby.",
+      "choices": [
+        {
+          "label": "Spar with a knight",
+          "to": "yard",
+          "do": "fame+1",
+          "note": "+1 Fame"
+        },
+        {
+          "label": "Head to market",
+          "to": "market"
+        },
+        {
+          "label": "Rest at the tavern",
+          "to": "tavern"
+        }
+      ]
+    },
+    {
+      "id": "well",
+      "place": "The Old Well",
+      "text": "Your bucket snags below. Something gold glints in the wet dark.",
+      "choices": [
+        {
+          "label": "Grab the glinting ring",
+          "to": "gate",
+          "do": "heir_ring",
+          "note": "Gain Heir Ring"
+        },
+        {
+          "label": "Leave for the road",
+          "to": "road"
+        }
+      ]
+    },
+    {
+      "id": "tavern",
+      "place": "The Crowded Tavern",
+      "text": "The bard sings your name badly, but the whole room learns it fast.",
+      "choices": [
+        {
+          "label": "Buy the room ale",
+          "to": "feast",
+          "if": "coin>=1",
+          "do": "coin-1 fame+1",
+          "note": "-1 Coin, +1 Fame"
+        },
+        {
+          "label": "Tell your story",
+          "to": "road",
+          "do": "fame+1",
+          "note": "+1 Fame"
+        },
+        {
+          "label": "Go to the castle gate",
+          "to": "gate"
+        }
+      ]
+    },
+    {
+      "id": "road",
+      "place": "Castle Road",
+      "text": "A brigand leaps out, then trips over his own rusty spear.",
+      "choices": [
+        {
+          "label": "Spare the brigand",
+          "to": "tourney",
+          "do": "mercy fame+1",
+          "note": "+1 Fame, mercy remembered"
+        },
+        {
+          "label": "Rob the brigand",
+          "to": "market",
+          "do": "coin+2",
+          "note": "+2 Coin"
+        },
+        {
+          "label": "Visit the chapel",
+          "to": "chapel"
+        }
+      ]
+    },
+    {
+      "id": "chapel",
+      "place": "Roadside Chapel",
+      "text": "A monk tends wounded soldiers and eyes your turnip-stained hands.",
+      "choices": [
+        {
+          "label": "Tend the wounded",
+          "to": "gate",
+          "do": "mercy fame+1",
+          "note": "+1 Fame, mercy remembered"
+        },
+        {
+          "label": "Pray for guidance",
+          "to": "gate"
+        },
+        {
+          "label": "Steal the silver offerings",
+          "to": "dungeon",
+          "do": "coin+2",
+          "note": "+2 Coin, but guards saw you"
+        }
+      ]
+    },
+    {
+      "id": "gate",
+      "place": "Castle Gate",
+      "text": "Guards block the castle gate. The king seeks an heir by trial today.",
+      "choices": [
+        {
+          "label": "Show the heir ring",
+          "to": "hall",
+          "if": "heir_ring"
+        },
+        {
+          "label": "Bribe the guards",
+          "to": "hall",
+          "if": "coin>=2",
+          "do": "coin-2",
+          "note": "-2 Coin"
+        },
+        {
+          "label": "Ask for the trial",
+          "to": "tourney"
+        }
+      ]
+    },
+    {
+      "id": "tourney",
+      "place": "The Tourney",
+      "text": "Trumpets blare. The champion waits, huge and bored, in the dust.",
+      "choices": [
+        {
+          "label": "Fight the champion",
+          "to": "feast",
+          "if": "sword",
+          "do": "fame+1",
+          "note": "+1 Fame",
+          "routes": [
+            {
+              "if": "fame>=3",
+              "to": "hall"
+            }
+          ]
+        },
+        {
+          "label": "Shout your claim",
+          "to": "feast"
+        },
+        {
+          "label": "Rush him barehanded",
+          "to": "dungeon",
+          "note": "Clearly a terrible idea"
+        }
+      ]
+    },
+    {
+      "id": "feast",
+      "place": "The Great Feast",
+      "text": "Nobles feast while the king studies you over a golden cup.",
+      "choices": [
+        {
+          "label": "Appeal to the king",
+          "to": "servant",
+          "routes": [
+            {
+              "if": "fame>=3|mercy",
+              "to": "hall"
+            }
+          ]
+        },
+        {
+          "label": "Toast the champion",
+          "to": "hall",
+          "if": "mercy",
+          "note": "Your mercy is remembered"
+        },
+        {
+          "label": "Sit with the servants",
+          "to": "servant"
+        }
+      ]
+    },
+    {
+      "id": "hall",
+      "place": "The Throne Hall",
+      "text": "The dying king rises. The crown sits between you and the court.",
+      "choices": [
+        {
+          "label": "Claim the crown",
+          "to": "king",
+          "if": "sword & fame>=4",
+          "note": "Needs Sword and 4+ Fame"
+        },
+        {
+          "label": "Reveal the heir ring",
+          "to": "secret_king",
+          "if": "heir_ring"
+        },
+        {
+          "label": "Kneel before the king",
+          "to": "servant",
+          "routes": [
+            {
+              "if": "fame>=2",
+              "to": "knight"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "king",
+      "text": "Sword in hand and name on every tongue, you take the crown.",
+      "ending": {
+        "title": "Long Live the King",
+        "tone": "good",
+        "rank": 1,
+        "share": "I became king in {choices} choices with {fame} Fame"
+      }
+    },
+    {
+      "id": "secret_king",
+      "text": "The ring matches the royal seal. The court bows to its lost heir.",
+      "ending": {
+        "title": "The Lost Heir",
+        "tone": "secret",
+        "rank": 2,
+        "share": "I found a secret crown in {choices} choices"
+      }
+    },
+    {
+      "id": "knight",
+      "text": "The king knights you before the court. Close, but no crown.",
+      "ending": {
+        "title": "Knight of Turnips",
+        "tone": "neutral",
+        "rank": 3,
+        "share": "I became a knight in {choices} choices with {fame} Fame"
+      }
+    },
+    {
+      "id": "servant",
+      "text": "You gain warm meals, a castle broom, and a very distant throne.",
+      "ending": {
+        "title": "Castle Servant",
+        "tone": "neutral",
+        "rank": 4,
+        "share": "I ended as a servant in {choices} choices"
+      }
+    },
+    {
+      "id": "dungeon",
+      "text": "The guards drag you below. Rats now rule your tiny kingdom.",
+      "ending": {
+        "title": "King of the Rats",
+        "tone": "bad",
+        "rank": 5,
+        "share": "I ended in a dungeon in {choices} choices"
+      }
+    },
+    {
+      "id": "old_age",
+      "text": "Years pass in the turnip rows. The castle chooses another heir.",
+      "ending": {
+        "title": "Too Late",
+        "tone": "bad",
+        "rank": 6,
+        "share": "I ran out of time after {limit} choices"
+      }
+    }
+  ]
+}

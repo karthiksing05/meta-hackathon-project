@@ -1152,7 +1152,9 @@
       "rounds",
       "daily_seed",
       "share_grid",
-      "map_geometry"
+      "map_geometry",
+      "country_outline",
+      "geo_distance"
     ],
     "engine_gaps": [],
     "gate_profile": "puzzle",
@@ -2261,7 +2263,8 @@
       "Group daily"
     ],
     "content_needs": [
-      "images and answers"
+      "one picture per round, detailed all the way in (SVG frames today; generated_image or picture_pack for photos)",
+      "the answer and 3 near-miss choices per picture"
     ],
     "difficulty_levers": [
       "reveal steps",
@@ -2269,14 +2272,16 @@
       "blur type"
     ],
     "tools": [
+      "zoom_reveal",
+      "picture_quiz",
       "typed_answer",
       "keyboard",
       "fuzzy_match",
-      "reveal",
       "rounds",
       "score",
       "daily_seed",
-      "image_gallery"
+      "image_gallery",
+      "generated_image"
     ],
     "engine_gaps": [],
     "gate_profile": "puzzle",

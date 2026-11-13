@@ -26,6 +26,17 @@ func (ix *Index) Fragments() []GameTool {
 	return out
 }
 
+// Unbuilt are the catalog's planned and gap tools.
+func (ix *Index) Unbuilt() []GameTool {
+	var out []GameTool
+	for _, t := range ix.tools {
+		if t.Status == "planned" || t.Status == "gap" {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
 // Build runs understand → retrieve → look up → plan. Any failure is an error and no context: the caller
 // then makes the game the old way.
 func (h *Harness) Build(ctx context.Context, req Request, planner *Planner) (*Built, error) {
@@ -41,7 +52,7 @@ func (h *Harness) Build(ctx context.Context, req Request, planner *Planner) (*Bu
 		return nil, err
 	}
 	t := time.Now()
-	plan, err := planner.Plan(ctx, PlanInput{Request: req.Text, Pack: pack, Context: gc, Fragments: h.Index().Fragments()})
+	plan, err := planner.Plan(ctx, PlanInput{Request: req.Text, Pack: pack, Context: gc, Fragments: h.Index().Fragments(), Unbuilt: h.Index().Unbuilt()})
 	if err != nil {
 		return nil, err
 	}

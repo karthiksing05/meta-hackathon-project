@@ -28,5 +28,24 @@
     "expect": [
       "mad_libs_story"
     ]
+  },
+  {
+    "request": "medieval peasant becomes king in 10 choices or less",
+    "expect": [
+      "choice_limit_quest",
+      "branching_story_endings"
+    ]
+  },
+  {
+    "request": "office survival dodging my manager at 4:59 on a friday",
+    "expect": [
+      "survive_the_day_story"
+    ]
+  },
+  {
+    "request": "choose your path adventure starring the people in our group",
+    "expect": [
+      "group_cast_story"
+    ]
   }
 ]

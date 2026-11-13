@@ -1,0 +1,156 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "State Shapes",
+    "instructions": "A US state's outline appears. Tap its name before the bar runs out. Twelve states; the second miss ends the run.",
+    "duration_s": 90
+  },
+  "uses": [
+    {
+      "fragment": "country_outline",
+      "params": {
+        "x": 40,
+        "y": 96,
+        "w": 280,
+        "h": 130
+      }
+    },
+    {
+      "fragment": "quiz",
+      "params": {
+        "choices": 4,
+        "time_ms": 3000,
+        "goal": 0
+      }
+    },
+    {
+      "fragment": "rounds",
+      "params": {
+        "count": 12,
+        "label": "State"
+      },
+      "bind": {
+        "round_done": "question_done"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 2
+      },
+      "bind": {
+        "hit": "answered_wrong"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 10,
+        "label": "Score"
+      },
+      "bind": {
+        "point": "answered_right"
+      }
+    }
+  ],
+  "functions": {
+    "quiz_questions": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "map(geo_names(), n => '')"
+    },
+    "quiz_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "geo_choices()"
+    },
+    "quiz_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "geo_names()"
+    },
+    "outline_focus": {
+      "params": {},
+      "returns": "int",
+      "body": "get_or(order, qi, -1)"
+    },
+    "geo_names": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "['Arkansas', 'Rhode Island', 'Indiana', 'Idaho', 'Louisiana', 'Illinois', 'Kansas', 'Maine', 'Utah', 'Delaware', 'Michigan', 'Wyoming', 'Nevada', 'Iowa']"
+    },
+    "geo_ids": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "['US_AR', 'US_RI', 'US_IN', 'US_ID', 'US_LA', 'US_IL', 'US_KS', 'US_ME', 'US_UT', 'US_DE', 'US_MI', 'US_WY', 'US_NV', 'US_IA']"
+    },
+    "geo_capitals": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "['', '', '', '', '', '', '', '', '', '', '', '', '', '']"
+    },
+    "geo_continents": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "['North America', 'North America', 'North America', 'North America', 'North America', 'North America', 'North America', 'North America', 'North America', 'North America', 'North America', 'North America', 'North America', 'North America']"
+    },
+    "geo_target": {
+      "params": {},
+      "returns": "list<vec2>",
+      "body": "[vec(-92.1, 34.8), vec(-71.5, 41.6), vec(-86.1, 39.9), vec(-114.1, 43.8), vec(-92.0, 30.5), vec(-89.2, 40.0), vec(-98.3, 38.5), vec(-69.2, 45.2), vec(-111.5, 39.5), vec(-75.4, 38.9), vec(-84.9, 43.4), vec(-107.5, 43.0), vec(-117.0, 39.4), vec(-93.4, 42.0)]"
+    },
+    "geo_outline": {
+      "params": {},
+      "returns": "list<list<vec2>>",
+      "body": "[[vec(207.6, 23.8), vec(194.2, 44.3), vec(194.8, 53.9), vec(191.0, 59.5), vec(186.1, 61.9), vec(182.5, 75.8), vec(174.4, 82.0), vec(165.7, 100.3), vec(165.1, 108.2), vec(168.1, 116.8), vec(166.8, 123.4), vec(87.9, 123.4), vec(89.6, 104.6), vec(77.9, 104.9), vec(76.5, 102.6), vec(77.9, 41.7), vec(72.4, 6.6), vec(195.3, 9.2), vec(197.5, 13.2), vec(189.6, 23.8)], [vec(93.3, 125.0), vec(99.7, 6.7), vec(153.4, 5.0), vec(186.7, 95.9)], [vec(102.3, 124.0), vec(106.3, 109.8), vec(114.7, 96.2), vec(113.7, 87.1), vec(111.9, 85.0), vec(114.4, 76.5), vec(114.7, 4.8), vec(177.7, 4.8), vec(177.0, 94.9), vec(169.3, 97.7), vec(163.9, 96.5), vec(163.2, 102.2), vec(157.0, 109.8), vec(153.7, 110.7), vec(148.6, 119.7), vec(144.0, 117.0), vec(142.3, 113.4), vec(135.8, 122.8), vec(130.7, 119.1), vec(123.7, 125.2), vec(116.5, 120.3), vec(111.6, 123.7), vec(105.6, 121.6), vec(105.4, 124.9)], [vec(116.7, 4.8), vec(117.7, 22.9), vec(121.0, 27.5), vec(121.0, 30.6), vec(125.9, 34.9), vec(131.3, 42.8), vec(134.3, 45.4), vec(138.1, 45.6), vec(135.5, 53.8), vec(136.5, 58.3), vec(135.2, 59.3), vec(135.3, 63.8), vec(137.3, 65.5), vec(141.0, 61.0), vec(142.5, 61.6), vec(145.3, 69.3), vec(147.5, 71.5), vec(148.2, 76.0), vec(151.5, 77.6), vec(155.1, 84.6), vec(157.2, 82.2), vec(161.2, 82.9), vec(161.5, 81.2), vec(171.1, 81.7), vec(172.8, 78.2), vec(177.0, 82.4), vec(177.0, 125.2), vec(104.9, 125.2), vec(106.1, 89.4), vec(103.0, 86.0), vec(103.0, 83.2), vec(111.8, 63.8), vec(111.2, 61.0), vec(106.3, 56.4), vec(105.3, 50.7), vec(104.9, 4.8)], [vec(77.0, 5.9), vec(152.5, 5.9), vec(154.6, 7.7), vec(152.0, 12.0), vec(158.2, 27.2), vec(148.3, 40.8), vec(143.6, 54.5), vec(140.5, 57.9), vec(141.6, 65.5), vec(188.9, 66.7), vec(186.6, 76.7), vec(191.5, 84.0), vec(193.1, 91.9), vec(198.1, 100.7), vec(197.5, 112.9), vec(203.0, 118.9), vec(198.1, 122.9), vec(188.4, 118.3), vec(178.8, 124.1), vec(159.8, 123.2), vec(140.3, 107.1), vec(117.6, 111.0), vec(98.6, 104.1), vec(82.5, 106.2), vec(80.6, 102.8), vec(87.1, 94.3), vec(87.4, 88.3), vec(85.3, 86.1), vec(91.8, 64.5), vec(83.0, 41.7), vec(78.6, 38.4)], [vec(104.2, 51.1), vec(104.5, 47.2), vec(108.9, 44.0), vec(112.0, 37.1), vec(111.4, 33.6), vec(109.4, 31.9), vec(110.9, 28.2), vec(120.4, 25.8), vec(124.5, 19.5), vec(125.3, 13.7), vec(117.4, 4.8), vec(177.3, 5.2), vec(174.3, 21.1), vec(169.3, 21.1), vec(169.1, 72.4), vec(167.3, 78.4), vec(169.3, 86.4), vec(161.0, 102.0), vec(160.6, 108.1), vec(158.6, 110.9), vec(160.1, 113.1), vec(153.5, 116.5), vec(154.0, 121.1), vec(151.8, 123.0), vec(143.5, 119.8), vec(142.3, 121.9), vec(143.0, 125.2), vec(140.0, 121.7), vec(138.2, 122.4), vec(136.0, 117.0), vec(135.5, 108.5), vec(127.5, 103.1), vec(121.9, 96.8), vec(125.3, 85.8), vec(122.2, 82.3), vec(119.0, 83.6), vec(117.2, 82.8), vec(115.5, 75.0), vec(110.2, 71.1), vec(104.2, 63.1), vec(102.7, 56.6)], [vec(35.2, 119.3), vec(34.9, 10.7), vec(224.8, 10.7), vec(234.9, 15.4), vec(235.8, 20.5), vec(231.8, 27.3), vec(237.5, 38.5), vec(245.1, 41.7), vec(244.5, 118.9)], [vec(108.4, 124.9), vec(106.5, 125.2), vec(105.5, 121.3), vec(102.0, 117.2), vec(100.1, 63.8), vec(108.2, 59.6), vec(115.2, 47.2), vec(121.0, 25.7), vec(135.7, 4.8), vec(142.3, 12.3), vec(155.3, 7.6), vec(163.8, 15.3), vec(163.8, 53.0), vec(176.4, 68.4), vec(179.9, 77.5), vec(159.2, 90.8), vec(118.7, 108.7)], [vec(93.8, 5.1), vec(149.1, 4.8), vec(149.1, 28.1), vec(186.2, 28.8), vec(186.2, 124.9), vec(93.8, 125.2)], [vec(164.7, 125.2), vec(120.7, 125.2), vec(115.3, 16.0), vec(126.7, 4.8), vec(140.7, 9.1), vec(131.3, 18.6), vec(132.7, 34.9), vec(146.7, 81.3), vec(163.3, 96.8)], [vec(93.4, 24.0), vec(99.4, 10.9), vec(113.4, 5.9), vec(157.6, 30.9), vec(158.9, 35.6), vec(161.9, 37.4), vec(161.2, 39.2), vec(164.5, 39.7), vec(167.0, 37.9), vec(167.6, 42.0), vec(170.2, 44.9), vec(173.6, 44.9), vec(175.5, 47.2), vec(173.9, 50.3), vec(187.1, 58.7), vec(192.3, 90.5), vec(188.6, 101.0), vec(179.6, 118.9), vec(175.6, 124.1), vec(128.1, 122.8), vec(130.3, 109.8), vec(128.8, 94.8), vec(130.5, 81.2), vec(134.5, 67.6), vec(140.2, 60.8), vec(133.7, 56.9), vec(129.3, 56.9), vec(125.0, 63.7), vec(123.1, 62.9), vec(121.4, 60.8), vec(122.4, 57.9), vec(119.6, 57.8), vec(120.8, 53.5), vec(119.7, 51.0), vec(116.8, 49.9), vec(116.0, 46.9), vec(110.1, 46.7), vec(91.6, 40.2), vec(90.6, 37.0), vec(87.7, 36.7)], [vec(67.5, 23.2), vec(67.9, 7.9), vec(211.9, 8.2), vec(212.5, 122.1), vec(68.3, 121.2)], [vec(139.7, 4.8), vec(180.4, 5.0), vec(180.5, 105.4), vec(179.0, 108.7), vec(171.7, 106.8), vec(170.8, 108.9), vec(172.9, 121.7), vec(172.1, 125.2), vec(99.5, 56.8), vec(99.5, 5.0)], [vec(58.9, 9.2), vec(197.3, 9.2), vec(201.3, 16.7), vec(198.9, 19.5), vec(198.9, 27.0), vec(201.8, 35.9), vec(210.3, 39.2), vec(218.8, 53.1), vec(225.7, 59.1), vec(224.3, 68.7), vec(217.7, 79.1), vec(202.6, 83.0), vec(200.2, 89.1), vec(203.4, 91.9), vec(204.4, 97.6), vec(199.4, 109.0), vec(192.5, 114.4), vec(192.0, 120.8), vec(183.2, 112.2), vec(76.1, 113.3), vec(74.5, 94.1), vec(68.1, 78.4), vec(66.3, 64.5), vec(61.5, 57.7), vec(58.9, 42.0), vec(54.3, 38.1), vec(58.6, 22.8), vec(55.1, 17.8), vec(55.1, 9.2)]]"
+    },
+    "geo_outline_place": {
+      "params": {},
+      "returns": "list<int>",
+      "body": "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]"
+    },
+    "geo_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "['Arkansas', 'Mississippi', 'Missouri', 'Louisiana', 'Massachusetts', 'Rhode Island', 'Connecticut', 'New Hampshire', 'Kentucky', 'Illinois', 'Indiana', 'Ohio', 'Utah', 'Montana', 'Nevada', 'Idaho', 'Louisiana', 'Mississippi', 'Arkansas', 'Alabama', 'Indiana', 'Illinois', 'Missouri', 'Kentucky', 'Oklahoma', 'Nebraska', 'Kansas', 'Missouri', 'New Hampshire', 'Vermont', 'Massachusetts', 'Maine', 'Utah', 'Idaho', 'Arizona', 'Wyoming', 'New Jersey', 'Delaware', 'District of Columbia', 'Maryland', 'Indiana', 'Ohio', 'Michigan', 'Wisconsin', 'Colorado', 'Montana', 'Utah', 'Wyoming', 'Nevada', 'California', 'Idaho', 'Utah', 'Missouri', 'Iowa', 'Minnesota', 'Wisconsin']"
+    }
+  },
+  "objectives": {
+    "time_limit": "90s",
+    "on_timeout": "lose"
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Road-trip postcard: warm cream paper, a teal state shape with a dark outline.",
+    "palette": {
+      "bg": "#FBF6EC",
+      "surface": "#EFE6D2",
+      "primary": "#2A9D8F",
+      "secondary": "#6D5BD0",
+      "accent": "#E9A23B",
+      "ink": "#24323F",
+      "danger": "#D1495B"
+    },
+    "font": "Avenir Next"
+  },
+  "sound": {
+    "set": "chime",
+    "music": false
+  },
+  "score": {
+    "kind": "points",
+    "measures": "states named from their shape",
+    "unit": "points",
+    "direction": "higher",
+    "counts_when": "any",
+    "aggregate": "best",
+    "tie_break": "less time",
+    "format": "{n}",
+    "events": [
+      "answered_right"
+    ]
+  }
+}

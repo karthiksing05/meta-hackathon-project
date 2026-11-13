@@ -135,7 +135,17 @@ jobs:
           MUSE_API_KEY: ${{ secrets.MUSE_API_KEY }}
           API_ENV: ${{ vars.API_ENV }}
           GENERATOR_ENV: ${{ vars.GENERATOR_ENV }}
+          # Single settings can also be their own variable or secret with the setting's name (this is what people try first).
+          DEBUG_DELETE: ${{ vars.DEBUG_DELETE || secrets.DEBUG_DELETE }}
+          SPONSOR_USERS: ${{ vars.SPONSOR_USERS || secrets.SPONSOR_USERS }}
+          HARNESS_CONTEXT: ${{ vars.HARNESS_CONTEXT || secrets.HARNESS_CONTEXT }}
+          GENERATOR_IMAGE_ART: ${{ vars.GENERATOR_IMAGE_ART || secrets.GENERATOR_IMAGE_ART }}
         run: |
+          [ -z "$DEBUG_DELETE" ] || API_ENV=$(printf '%s\nDEBUG_DELETE=%s' "$API_ENV" "$DEBUG_DELETE")
+          [ -z "$SPONSOR_USERS" ] || API_ENV=$(printf '%s\nSPONSOR_USERS=%s' "$API_ENV" "$SPONSOR_USERS")
+          [ -z "$HARNESS_CONTEXT" ] || API_ENV=$(printf '%s\nHARNESS_CONTEXT=%s' "$API_ENV" "$HARNESS_CONTEXT")
+          [ -z "$GENERATOR_IMAGE_ART" ] || GENERATOR_ENV=$(printf '%s\nGENERATOR_IMAGE_ART=%s' "$GENERATOR_ENV" "$GENERATOR_IMAGE_ART")
+          API_ENV=$(printf '%s' "$API_ENV" | sed '/^$/d'); GENERATOR_ENV=$(printf '%s' "$GENERATOR_ENV" | sed '/^$/d')
           S="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes $USER_@$HOST"
           api=""; gen=""
           if [ -n "$API_ENV" ]; then

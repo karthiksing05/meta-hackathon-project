@@ -1,0 +1,56 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Pin the Capital",
+    "instructions": "A capital city is named. Tap where it is on the world map; the closer your pin, the more points. Eight cities; a pin more than 2,500 km off costs a life, and three lost lives end the trip.",
+    "duration_s": 120
+  },
+  "geo": {
+    "pack": "world",
+    "pick": { "region": "world", "count": 12, "min_area": 8, "seed": 3 },
+    "target": "capital",
+    "map": { "x": 0, "y": 150, "w": 360, "h": 150, "view": "world" }
+  },
+  "uses": [
+    { "fragment": "geo_map", "params": { "ring": false } },
+    { "fragment": "map_pin", "params": { "far_km": 2500, "zero_km": 5000, "reveal_ms": "1500ms" } },
+    { "fragment": "rounds", "params": { "count": 8, "label": "City" }, "bind": { "round_done": "pin_done" } },
+    { "fragment": "lives", "params": { "count": 3 }, "bind": { "hit": "pin_far" } },
+    { "fragment": "score", "params": { "label": "Score" } }
+  ],
+  "state": {
+    "order": { "type": "list<int>", "init": "[]" }
+  },
+  "functions": {
+    "current": { "params": {}, "returns": "int", "body": "get_or(order, round, 0)" },
+    "map_target": { "params": {}, "returns": "vec2", "body": "get_or(geo_target(), current(), vec(0.0, 0.0))" },
+    "map_can_pin": { "params": {}, "returns": "bool", "body": "len(order) > 0" },
+    "map_focus": { "params": {}, "returns": "int", "body": "if pin_shown then current() else -1" }
+  },
+  "rules": [
+    { "id": "deal", "on": "start", "do": [ { "set": "order", "to": "shuffle(range(len(geo_names())))" } ] },
+    { "id": "award", "on": "pinned", "do": [ { "incr": "score", "by": "pin_points(event.km)" } ] }
+  ],
+  "objectives": { "time_limit": "120s", "on_timeout": "lose" },
+  "presentation": {
+    "slots": [
+      { "slot": "playfield", "node": { "node": "text", "x": 180, "y": 100, "anchor": "center", "size": 26, "weight": 700, "color": "$ink",
+        "text": "= 'Where is ' + get_or(geo_capitals(), current(), '') + '?'" } },
+      { "slot": "playfield", "node": { "node": "text", "x": 180, "y": 130, "anchor": "center", "size": 16, "color": "$secondary",
+        "text": "= 'the capital of ' + get_or(geo_names(), current(), '')" } },
+      { "slot": "playfield", "node": { "node": "text", "x": 180, "y": 345, "anchor": "center", "size": 20, "weight": 700, "color": "$primary",
+        "visible": "= pin_shown", "text": "= '+' + str(pin_points(pin_km))" } }
+    ],
+    "feedback": [
+      { "on": "pinned", "when": "event.km <= 500", "do": [ { "moment": "pickup" }, { "haptic": "success" } ] }
+    ]
+  },
+  "look": { "id": "paper", "tokens": {} },
+  "art": {
+    "style": "A calm paper atlas: pale sea, cream land, slate borders, a red pin.",
+    "palette": { "bg": "#F3F6FB", "surface": "#E3EAF5", "primary": "#2F7A5B", "secondary": "#5B6B85", "accent": "#F08A3C", "ink": "#1E2A3D", "danger": "#D9485F" },
+    "font": "Avenir Next"
+  },
+  "sound": { "set": "chime", "music": false },
+  "score": { "kind": "points", "measures": "points for pins close to each capital", "unit": "points", "direction": "higher", "counts_when": "any", "aggregate": "best", "tie_break": "less time", "format": "{n}", "events": ["pinned"] }
+}

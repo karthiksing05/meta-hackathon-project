@@ -1,0 +1,251 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Guess the Decade",
+    "instructions": "Listen to each short tune and tap the decade it sounds like. Tap Play again to hear it twice more. Two wrong guesses and the show is over; name all ten to win.",
+    "duration_s": 240
+  },
+  "uses": [
+    {
+      "fragment": "quiz",
+      "params": {
+        "choices": 4,
+        "time_ms": "20s",
+        "goal": 0
+      }
+    },
+    {
+      "fragment": "play_clip",
+      "params": {
+        "clips": 10,
+        "replays": 2,
+        "delay_ms": "600ms",
+        "clip_ms": 4898
+      }
+    },
+    {
+      "fragment": "rounds",
+      "params": {
+        "count": 10,
+        "label": "Tune"
+      },
+      "bind": {
+        "round_done": "question_done"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 2
+      },
+      "bind": {
+        "hit": "answered_wrong"
+      }
+    },
+    {
+      "fragment": "score",
+      "params": {
+        "points": 100,
+        "label": "Score"
+      },
+      "bind": {
+        "point": "answered_right"
+      }
+    }
+  ],
+  "functions": {
+    "quiz_questions": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_questions"
+    },
+    "quiz_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_choices"
+    },
+    "quiz_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_answers"
+    }
+  },
+  "objectives": {
+    "time_limit": "240s",
+    "on_timeout": "lose"
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "art": {
+    "style": "A late-night radio booth: deep indigo, a warm amber dial glow, lavender accents.",
+    "palette": {
+      "bg": "#1B1838",
+      "surface": "#2C2752",
+      "primary": "#9C8CFF",
+      "accent": "#FFC46B",
+      "ink": "#F1EEFF",
+      "secondary": "#6F86E8",
+      "danger": "#FF7A8A"
+    },
+    "font": "Avenir Next"
+  },
+  "sound": {
+    "set": "soft",
+    "music": false,
+    "clips": [
+      {
+        "style": "50s",
+        "bpm": 150,
+        "bars": 2,
+        "lead": "C5/8. E5/16 G5/8 A5 G5/8. E5/16 D5/8 C5 A4/8. C5/16 D5/8 E5 G5/4 E5/8 D5",
+        "chords": "C6 G7",
+        "label": "Dotted-eighth/sixteenth shuffle phrasing and blues-pentatonic licks over 6th and dominant-7th chords."
+      },
+      {
+        "style": "60s",
+        "bpm": 128,
+        "bars": 2,
+        "lead": "D5/8 B4 G4 B4 D5/4 B4/8 G4 A4 B4 G4 B4 D5/4. r/8",
+        "chords": "G Em",
+        "label": "Bright, jangly beat-group melody in straight eighths over a simple I-vi pop progression."
+      },
+      {
+        "style": "70s",
+        "bpm": 120,
+        "bars": 2,
+        "lead": "E5/16 r E5 r G5/8 A5/16 G5 E5/8. D5/16 E5/8 C5 D5/16 E5 G5/8 A5/4 G5/16 E5 D5/8 E5/4",
+        "chords": "Am7 Dm7",
+        "label": "Syncopated sixteenth-note disco hook with rests, anticipations and minor-7th soul chords."
+      },
+      {
+        "style": "80s",
+        "bpm": 112,
+        "bars": 2,
+        "lead": "A4/8 A4 C5 A4 E5/4 D5/8 C5 D5 D5 F5 D5 E5/2",
+        "chords": "Am F",
+        "label": "Repeated eighth-note synth pulses opening into a long held note over a minor-key synth-pop loop."
+      },
+      {
+        "style": "90s",
+        "bpm": 126,
+        "bars": 2,
+        "lead": "r/8 E5 r G5 r E5 r D5 r E5 r G5 r A5 E5/4",
+        "chords": "Am Em",
+        "label": "Repeated piano-style riff placed entirely on offbeats for a four-on-the-floor dance feel."
+      },
+      {
+        "style": "00s",
+        "bpm": 98,
+        "bars": 2,
+        "lead": "A4/16 C5 D5 E5 G5/8 E5/16 D5 C5/8. D5/16 E5/4 G4/16 A4 C5 D5 E5/8. G5/16 A5/4 G5/8 E5",
+        "chords": "Fmaj7 Em7",
+        "label": "Smooth sixteenth-note R&B runs, dotted pushes and melismatic turns over lush maj7 and minor-7th chords."
+      },
+      {
+        "style": "10s",
+        "bpm": 140,
+        "bars": 2,
+        "lead": "D5/16 r D5 r D5 r F5/8 D5/16 r D5 r A5/8 G5/16 F5 F5 r F5 r F5 r D5/8 A4/16 r C5 r D5/4",
+        "chords": "Dm F",
+        "label": "Short repeated EDM-trap plucks separated by tight rests over a minor four-chord-loop sound."
+      },
+      {
+        "style": "70s",
+        "bpm": 108,
+        "bars": 2,
+        "lead": "B4/16 r B4 D5/8 B4/16 r G4/8. A4/16 B4/8 D5/16 B4 A4 G4 A4 B4/8 E5/4 D5/16 B4 A4/8 B4/8. G4/16",
+        "chords": "Em7 A7",
+        "label": "Funkier second hook with clipped sixteenths, anticipations and a minor-7th to dominant-7th groove."
+      },
+      {
+        "style": "80s",
+        "bpm": 104,
+        "bars": 2,
+        "lead": "F#4/8 F#4 A4 F#4 D5/4. C#5/8 B4 B4 D5 B4 A4/2",
+        "chords": "Bm A",
+        "label": "Slower minor-key synth pulse with repeated notes and a sustained final tone, distinct from the first 80s hook."
+      },
+      {
+        "style": "90s",
+        "bpm": 132,
+        "bars": 2,
+        "lead": "r/8 B4 r D5 r B4 r G4 r B4 r E5 r D5 B4/4",
+        "chords": "Em G",
+        "label": "Faster house riff built from repeated offbeat stabs and a new minor-key piano-hook contour."
+      }
+    ]
+  },
+  "content": {
+    "questions": [
+      "Which decade is this tune from?",
+      "Name the era of this hook!",
+      "When was this one on the radio?",
+      "Which decade does this groove belong to?",
+      "Guess the era of this melody!",
+      "What decade is this sound?",
+      "Which decade? Trust your ears.",
+      "Place this tune in time!",
+      "Which era is this beat from?",
+      "Last call: which decade?"
+    ],
+    "choices": [
+      "1950s",
+      "1960s",
+      "1970s",
+      "1980s",
+      "1950s",
+      "1960s",
+      "1970s",
+      "1980s",
+      "1950s",
+      "1960s",
+      "1970s",
+      "1980s",
+      "1960s",
+      "1970s",
+      "1980s",
+      "1990s",
+      "1970s",
+      "1980s",
+      "1990s",
+      "2000s",
+      "1980s",
+      "1990s",
+      "2000s",
+      "2010s",
+      "1980s",
+      "1990s",
+      "2000s",
+      "2010s",
+      "1950s",
+      "1960s",
+      "1970s",
+      "1980s",
+      "1960s",
+      "1970s",
+      "1980s",
+      "1990s",
+      "1970s",
+      "1980s",
+      "1990s",
+      "2000s"
+    ],
+    "answers": [
+      "1950s",
+      "1960s",
+      "1970s",
+      "1980s",
+      "1990s",
+      "2000s",
+      "2010s",
+      "1970s",
+      "1980s",
+      "1990s"
+    ]
+  },
+  "playtest": {
+    "progress": "score + lives * 300 + round * 50"
+  }
+}
