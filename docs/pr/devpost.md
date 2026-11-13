@@ -1,0 +1,105 @@
+# Whims — Devpost draft (Closer Together '26)
+
+*The project page text for the Devpost submission. Drafted by Claude (AI agent for Kevin), reviewed by Kevin, 2026-11-13. Name and tagline are still open.*
+
+**Whims** *(working name)*
+
+**Tagline:** \[TBD. Options from our line bank: "People are brought closer together through friendly competition." · "Short-form you play with people, not just watch." · "If you can say it, your friends can play it."\]
+
+> Tiny games anyone makes from one sentence with Meta's Muse, made to be played with your friends, Groups and Events, so a score becomes a rematch and a stranger on your Group's board becomes a friend.
+
+## Inspiration
+
+**Some of the best habits on the internet are tiny games played with people you know.**
+
+Think about how Wordle spread. It wasn't the puzzle itself. It was the grid of colored squares that showed up in every group chat each morning, and the quiet competition of seeing who got it in three. LinkedIn saw the same thing when it added daily games, and reported 86% of players returning the next day and 82% still playing after seven days ([LinkedIn](https://news.linkedin.com/2026/LinkedIn-AnnouncesWend)). A small, shared, slightly competitive game is one of the most reliable reasons people open an app every day, and it's a reason they keep coming back to with their friends rather than alone.
+
+Facebook already has the thing those games are missing: the people. Your friends, your Groups and your Events are all in one place, under real names, which makes it the natural home for a daily game that's about the people you play it with. It also matters to the people we built this for. Adults aged 19 to 29 report feeling lonely more than any other age group, with 27% saying they feel very or fairly lonely ([Gallup and Meta](https://news.gallup.com/opinion/gallup/512618/almost-quarter-world-feels-lonely.aspx)), and a quick game with someone is one of the lowest-pressure ways to start talking.
+
+So we asked a simple question: **what if short-form content were something you play *with* your friends, made by your friends, and a new one were waiting for you every time you opened Facebook?** Every game becomes a reason to open the app, every score becomes a reason to message someone, and every new game anyone makes adds to a feed that never runs out.
+
+## What it does
+
+Whims is short-form content created by your friends and designed to be played with your friends. Anyone can turn one sentence into a tiny game with Meta's Muse, whether that's a geography trivia game for their study group or Triple-T getting chased through the streets of Paris, and every game they post lands in a scrolling feed where you play it with a tap instead of just watching it. Each game has its own leaderboards for everyone, your friends and your Groups, so every game you play is also a quiet competition with people you know, and every time a friend beats your score you have a reason to open Facebook and take the spot back.
+
+**A week with Whims.** Artem just joined a boba enthusiasts' Group and doesn't know anyone in it yet. On Tuesday night he types "a game where you catch falling tapioca pearls before they hit the table," tweaks it once so the pearls fall a little faster, and posts it to the Group. By Thursday a dozen members have played it, and someone named Sam sits one spot above him on the Group's board, so Artem taps Add friend and Whims offers the two of them a best-of-5, which Artem takes 3–2. On Saturday the Group meets up at a tea shop, and Artem walks in already knowing someone, with a rematch to settle.
+
+### Compete together
+
+- **Same game, same seed, fair score.** Everyone who plays a game plays the exact same run, and every score is saved as a replay that can be re-run and checked, so a rivalry with your friends is always a fair one.
+- **Challenges.** When you finish a game you can send it to a friend with your score attached, and it lands in their Challenges inbox so they can try to beat you and you both see who came out on top.
+- **Boards at every size.** Every game has a leaderboard for everyone, for your friends and for each of your Groups, and Groups also get a weekly board that resets every week, so there's always a fresh race to win and a reason to come back the next day.
+
+### Get closer
+
+- **A score is an introduction.** On a Group's board, the people you don't know yet have an Add friend button next to their name, because "how did you get 214?" is a much easier first message to send than "want to be friends?"
+- **New friend, first rematch.** When you add someone, Whims offers the two of you a best-of-5, so a new friendship starts with something fun to do together instead of an empty chat.
+- **Games the whole Group will like.** Group Blend looks at what every member of a Group enjoys and picks games the whole Group is likely to have fun with, rather than whatever the best player wants, and it points out a "taste twin" in the Group you might want to add.
+- **A feed ranked for friendships, not minutes.** Our ranking rewards the moments that happen between people, like finishing a friend's game, rematching, sending a challenge or adding a friend, over games that only grab a quick tap and lose you.
+
+### Make anything, with Muse
+
+- **One sentence in, a game out.** Muse doesn't pick from a list of templates; it writes the game's rules itself, so a pun, an inside joke or a half-formed idea can become a game that nobody has ever played before.
+- **It agrees the game with you first.** Before it builds anything, Muse lays out "How the game works" (the loop, the rules and how you win or lose) and asks you only about the parts it isn't sure of.
+- **Refine it before you post it.** While you're making a game you can keep shaping it in plain words, like "slower" or "make the pearls bigger," and Muse changes just that part. Once a game is posted it stays as it is, and anyone who wants a different version can remix it and post their own.
+- **Facebook-quality by default.** Before anyone sees a game, test bots play it, a quality check catches anything unfinished or unfair, and Muse fixes whatever fails, so the feed stays fun without limiting what people can ask for.
+
+## Built for the brief
+
+**AI Integration (30%): take Muse out and there are no games.** Muse is the creator in Whims, not a feature added on top. It turns any idea someone describes into a game with rules of its own, talks through how the game should work with the maker before building it, and then fixes whatever our test bots manage to break. Muse Wonder plans and writes each game and Muse Ember handles the quick steps, which is how someone with no coding experience can go from a sentence to a playable game in about a minute. A template could reskin an existing game, but it could never turn "catch tapioca pearls before they hit the table" into a game that plays the way the maker imagined. The creativity comes from Muse, and the quality bar comes from us: every game is playtested, checked against known kinds of games and checked for a fair scoreboard before anyone sees it.
+
+**Product Thinking & User Impact (25%): a daily reason to open Facebook, shared with your friends.** Daily games already prove that a small, competitive habit brings people back every morning. Whims makes that habit social and endless: there's always a challenge waiting in your inbox, a friend who just passed your score, a new week starting on your Group's board, and a new game from someone you know at the top of your feed. Because anyone can make a game, the people playing are also the people creating, so the feed keeps growing on its own. It belongs on Facebook because a game is only as good as the people you play it with, and Facebook is the one place where your friends, your Groups and your Events already live together.
+
+**Execution & Demo (25%): it runs on our live server today.** Every game is made by Muse on our own server, taking about 7 seconds to agree how the game works, about a minute to build a new game and about 18 seconds for each refinement. Challenges, leaderboards and friends are all real server data rather than mockups, and anyone can play the games in a browser, signed out, at [games.ol4ol.com/play](https://games.ol4ol.com/play/).
+
+**Originality & Cohesion (20%): short-form you play with people.** Prompt-to-game tools already exist, but the games they make usually travel from one creator to an audience of strangers. Whims makes games for and with the specific people in your life, and then turns the score into something social. Every part of the product serves the same goal: making a game gives your friends something to open, competing gives you a reason to talk, and the leaderboard turns that conversation into a friendship.
+
+## How we built it
+
+The five of us built Whims around a single API, with each of us working alongside AI coding agents that kept each other in sync through our team Slack. At a high level, the phone only shows the experience, and everything that needs to be trusted or shared lives on our server.
+
+
+- **The app:** a SwiftUI recreation of the Facebook iPhone app, with Whims built into the feed, Groups, profiles and a Studio for making games. It shows screens and calls our API, and nothing else.
+- **The server:** a Go API backed by MongoDB that holds friends, Groups, leaderboards, challenges and the feed. Muse runs only on the server, so the key never touches anyone's phone.
+- **Making a game:** Muse plans the game with the maker, then writes it as a short file of its own rules built on top of tested building blocks. Our quality bar wraps around that creativity: Muse checks its plan against a catalog of known game types, our engine validates the file, five bots playtest it, and a final check makes sure the scoreboard is fair. Anything that fails goes back to Muse to fix before it's posted.
+- **Fair play:** our game engine, written in Rust and compiled to WebAssembly, runs every game exactly the same way from the same seed, which is what lets every score be replayed and verified.
+- **The feed:** a ranking model that learns from the moments that happen between people, like finishes, rematches, challenges and new friends, rather than from taps alone. Its sibling, Group Blend, uses the same signals to pick games for an entire Group.
+
+## Challenges we ran into
+
+- **Making competition feel friendly.** A leaderboard full of strangers can feel more like a wall than an invitation, so we designed every part of it to be welcoming. Boards only show people from Groups you share, reaching out always goes through Facebook's normal friend request, every score comes from the same fair run, the weekly board gives everyone a fresh start, and Group Blend favors games where members are evenly matched so nobody gets left behind.
+- **Keeping creativity high and quality higher.** We wanted Muse to be free to make anything, but our earliest games often felt unfinished next to the ones we built by hand, and some passed our bots without actually being fun. Instead of limiting what people could ask for, we raised the bar that every game has to clear: a plan agreed with the maker, a check against known kinds of games, bot playtests, a quality check and a fair-scoreboard check.
+- **Making sure Muse builds what was asked for.** Early on, a request themed around a famous movie came back with none of the movie in it, because Muse had quietly dropped the theme. Now Muse writes the request's theme, characters and rules into its plan before building anything, and the finished game is checked against that plan at the end.
+
+## Accomplishments that we're proud of
+
+- **Friends can really play against each other, across phones.** When you send a challenge from your phone, it shows up in your friend's Challenges inbox on theirs, and their score comes back to you when they play. The same is true of everything around it: the leaderboards for everyone, friends and Groups, the weekly Group board, Add friend and the best-of-5 offer all run on our live server with real accounts, so nothing a judge sees on those screens is mocked.
+- **A feed built to bring you back for people, not for clickbait.** Our recommender treats "did this game grab you" and "were you glad you played it" as two separate signals, and it weighs the second one 2.5 times more heavily, counting finishes, rematches, challenges and new friends as the real wins. In a simulation with synthetic users, it beat a standard feed in 70.3% of the sessions that had a clear winner, and the people who dislike clickbait ended up with the longest sessions of anyone. That's a simulation rather than real users, but it shows the feed pulling in the direction we want.
+- **Matching games to whole Groups, fairly.** Group Blend picks games by the chance that *everyone* in a Group enjoys them rather than the average, drops any game that one member would hate, and gives a boost to members it has served least without pushing anyone else down. Across 240 simulated Groups, the share of picks that every member enjoyed rose from 8.7% for random picks to 32.0%.
+- **Any idea becomes a polished game in about a minute.** Muse builds every game live on our server from a sentence that no one wrote a template for, and every game clears the same quality bar before anyone plays it: a plan agreed with the maker, bot playtests, a quality check and a fair-scoreboard check.
+- **Every score is fair by construction.** Our engine runs every game identically from the same seed and saves every run as a replay, so any score on any leaderboard can be re-run and checked, and a high score on Whims actually means something.
+
+## What we learned
+
+- **Friendly competition is one of the best icebreakers there is.** A score sitting next to a stranger's is low stakes, because it's about the game rather than about you, and it gives two people something easy to talk about. Once we saw that, it reshaped the whole product: every game needed a leaderboard, a way to rematch and a way to say hi.
+- **The magic happens after the game is made.** Most AI game makers stop at "you made a game." We found that the most exciting part is what happens next between people, like the rematch, the trash talk in the group chat and the friend request that follows, so we built Whims around those moments.
+- **Creativity needs a floor, not a fence.** Our first instinct was to limit what people could ask for so that games would come out well, but that only made the games blander. Holding every game to the same quality bar, and letting Muse be as creative as it wanted inside it, gave us games that were both surprising and reliable.
+- **People still decide what's fun.** In a small blind test of game art with one human judge, Muse's own judge agreed with the person only 44% of the time, which taught us to keep real people in the loop whenever we decide what "good" looks like.
+
+## What's next for Whims
+
+- **Make it together, play it together.** Friends will be able to each add a level, a question or a scene and have Muse stitch them into one game that credits every maker, and a game posted in a group chat will become a shared session the whole chat plays. Both already work in the app on a single device, and moving them onto the server so they work across phones is next.
+- **Get-to-know-you brackets.** When you meet someone at an event, Whims will set up a best-of-3 of quick games for the two of you, so a new connection turns into a friendly rivalry right away.
+- **Tap-to-refine while you create.** Today you refine a new game by describing changes in words. Next, while you're still making it, you'll be able to tap a part of the game, like an enemy or the timer, and say "faster" or "make this a dragon" to change just that piece. Once a game is posted it stays as it is, and anyone can remix it into their own version.
+- **Painted art.** Early tests of Muse-painted backdrops and characters look far better than drawn shapes, and bringing them into every game would make the feed even more fun to scroll.
+- **Real Groups.** We'd like to pilot Whims with real Groups and measure what we actually care about: the share of new Group members who make their first friend there within two weeks.
+
+## Built with
+
+meta, muse-wonder, muse-ember, swift, swiftui, ios, go, mongodb, rust, webassembly, javascript, node.js
+
+## Try it
+
+- **Play in your browser:** [games.ol4ol.com/play](https://games.ol4ol.com/play/)
+- **Code:** [github.com/karthiksing05/meta-hackathon-project](https://github.com/karthiksing05/meta-hackathon-project)
+- **Demo video:** \[TBD\]
