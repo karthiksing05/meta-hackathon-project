@@ -4,6 +4,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppStore.self) private var store
     @State private var showSplash = DebugLaunch.value("FB_SKIP_SPLASH") == nil
+    @State private var bestOfFive: BestOfFiveOffer?
 
     init() {
         // Before the first NavigationStack exists: Facebook's white bars on iOS 17 and 18.
@@ -31,6 +32,20 @@ struct RootView: View {
         .overlay(alignment: .bottom) {
             ToastHost()
                 .padding(.bottom, 72)
+        }
+        // A new friend gets a best-of-5 offer (BestOfFiveOfferSheet).
+        .sheet(item: $bestOfFive) { offer in
+            BestOfFiveOfferSheet(offer: offer)
+        }
+        .task {
+            // FB_BEST_OF_5=<userID> (debug): show the offer as if that friend was just added.
+            if let id = DebugLaunch.value("FB_BEST_OF_5"), !id.isEmpty {
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                bestOfFive = BestOfFiveOffer(friendID: id)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .gamesFriendAdded)) { note in
+            if let id = note.object as? String, !id.isEmpty { bestOfFive = BestOfFiveOffer(friendID: id) }
         }
         .task {
             try? await Task.sleep(nanoseconds: 900_000_000)

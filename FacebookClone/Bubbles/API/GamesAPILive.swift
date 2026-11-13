@@ -125,6 +125,20 @@ actor GamesAPILive: GamesAPI, GamesAuth {
         try await get("v1/users/\(id)", auth: .optional)
     }
 
+    /// The challenges I sent and received, newest first (`GET /v1/challenges`).
+    func challenges() async throws -> [RemoteChallenge] {
+        let items = (try await get("v1/challenges", auth: .required) as RemoteList<RemoteChallenge>).items
+        for item in items { if let game = item.game { link(game) } }
+        return items
+    }
+
+    /// "Beat my score" to friends (`POST /v1/challenges {gameId, toUserIds}`). The server takes my
+    /// best on the game as the score to beat.
+    func sendChallenge(gameID: String, toUserIDs: [String]) async throws {
+        let body = try JSONSerialization.data(withJSONObject: ["gameId": try serverID(gameID), "toUserIds": toUserIDs])
+        _ = try await send("POST", "v1/challenges", body: body, contentType: "application/json", auth: .required)
+    }
+
     func friends() async throws -> [RemoteProfile] {
         (try await get("v1/me/friends", auth: .required) as RemoteList<RemoteProfile>).items
     }

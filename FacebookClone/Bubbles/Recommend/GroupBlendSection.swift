@@ -168,6 +168,7 @@ struct GroupBlendSection: View {
                     do {
                         try await GamesAPIFactory.current.setFriend(true, userID: user.id)
                         withAnimation { user.friendship = .friends }
+                        NotificationCenter.default.post(name: .gamesFriendAdded, object: user.id)
                     } catch {
                         appStore.showToast("Couldn't add \(user.firstName): \(error.localizedDescription)", symbol: "exclamationmark.circle")
                     }

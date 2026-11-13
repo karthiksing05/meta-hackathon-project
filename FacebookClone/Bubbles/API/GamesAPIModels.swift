@@ -465,3 +465,42 @@ enum GamesAPICoding {
 
     static func encoder() -> JSONEncoder { JSONEncoder() }
 }
+
+// MARK: - Challenges (`GET`/`POST /v1/challenges`)
+
+/// A friend's best on a challenged game (sent challenges).
+struct RemoteChallengeResponse: Decodable, Hashable, Sendable {
+    var userID: String
+    var username: String
+    var score: Double
+    var beat: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case userID = "userId", username, score, beat
+    }
+}
+
+/// "Beat my score": one game, the sender's best when sent, and how each side is doing.
+struct RemoteChallenge: Decodable, Identifiable, Hashable, Sendable {
+    var id: String
+    /// `sent` or `received`.
+    var direction: String
+    var game: RemoteGame?
+    var from: RemoteProfile
+    var toIDs: [String]
+    /// The score to beat.
+    var score: Double
+    /// Received: my best on the game, if I've played it.
+    var myScore: Double?
+    /// Received: I've beaten it.
+    var beaten: Bool
+    /// Sent: the friends who have played, and how they did.
+    var responses: [RemoteChallengeResponse]
+    var createdAt: Date
+
+    var isReceived: Bool { direction == "received" }
+
+    enum CodingKeys: String, CodingKey {
+        case id, direction, game, from, toIDs = "toIds", score, myScore, beaten, responses, createdAt
+    }
+}

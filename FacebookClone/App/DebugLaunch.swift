@@ -6,8 +6,10 @@ import SwiftUI
 /// `SIMCTL_CHILD_FB_TAB=bubbles SIMCTL_CHILD_FB_OPEN=board:fog-words xcrun simctl launch booted com.karthiksing05.fbclone`
 ///
 /// - `FB_TAB`: `home`, `video`, `bubbles`, `friends`, `notifications`, `menu`
+/// - `FB_BEST_OF_5=<userID>`: show the best-of-5 offer for that friend (as after adding them)
+/// - `FB_AUTH=screen|guest`: force the sign-in screen, or continue as a guest
 /// - `FB_OPEN`: one of
-///   `bubble:<id>`, `board:<id>`, `library`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
+///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
 ///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
@@ -47,6 +49,7 @@ enum DebugLaunch {
         case "bubble": router.push(.bubble(arg))
         case "board": router.push(.bubbleBoard(arg))
         case "library": router.push(.bubbleLibrary)
+        case "challenges": router.push(.challengesInbox)
         case "chain": router.push(.bubbleChain(arg))
         case "marketplace": router.push(.marketplace)
         case "play": router.play(arg)

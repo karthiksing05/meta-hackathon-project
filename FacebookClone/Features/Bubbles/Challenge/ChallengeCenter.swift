@@ -145,6 +145,18 @@ final class ChallengeCenter {
         }
         let sent = BubbleSocialHub.send(card, to: target, appStore: appStore, bubbleStore: bubbleStore)
         pendingEntries[card.id] = nil
+        // A friend also gets it on the server ("beat my score"), so it reaches their phone and
+        // shows in Challenges on both sides.
+        if target.kind == .friend, !bubble.serverID.isEmpty {
+            let gameID = bubble.id, friendID = target.targetID
+            Task { @MainActor in
+                do {
+                    try await ChallengeInbox.shared.send(gameIDs: [gameID], to: friendID)
+                } catch {
+                    appStore.showToast("Couldn't send the challenge to the server: \(error.localizedDescription)", symbol: "exclamationmark.circle")
+                }
+            }
+        }
         if sent {
             appStore.showToast(ChallengeCopy.sentToast(target.title), symbol: "flag.checkered")
         } else {
