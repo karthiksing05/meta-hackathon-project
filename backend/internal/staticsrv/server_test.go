@@ -138,6 +138,14 @@ func TestWebPlayer(t *testing.T) {
 	if !strings.Contains(body, `id="del"`) || !strings.Contains(body, "/v1/debug/games/") || !strings.Contains(body, "confirm(") {
 		t.Fatal("the player page has no delete button for the open game")
 	}
+	for _, want := range []string{"/v1/search", "runtime/game-fonts.css", "g.manifestUrl", `id="search"`, `id="more"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("the player page is missing %q (the games list, the fonts, or finding a game's files through the API)", want)
+		}
+	}
+	if code, _, _ := get("/play/runtime/game-fonts.css"); code != 200 {
+		t.Errorf("game-fonts.css: %d", code)
+	}
 	if strings.Contains(body, `id="signin"`) || strings.Contains(body, "Authorization") {
 		t.Fatal("the debug viewer must not have a login")
 	}
