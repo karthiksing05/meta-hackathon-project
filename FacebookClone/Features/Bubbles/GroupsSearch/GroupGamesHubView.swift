@@ -159,7 +159,7 @@ struct GroupChallengeSheetLoader: View {
         if let group = appStore.group(id: groupID) ?? bubbleStore.resolveGroup(groupID) {
             GroupChallengePickerSheet(group: group)
         } else {
-            ContentUnavailableView(GroupsSearchCopy.groupMissing, systemImage: "person.3", description: Text(GroupsSearchCopy.groupMissingDetail))
+            GroupMissingState(groupID: groupID)
         }
     }
 }

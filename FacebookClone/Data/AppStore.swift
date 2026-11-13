@@ -99,6 +99,9 @@ final class AppStore {
     // MARK: Shared UI state
 
     var toast: Toast? = nil
+    /// The post you just made in a Group (a shared game, a challenge, a composer post), so the
+    /// Group page scrolls to it and highlights it once instead of leaving it below the fold.
+    var groupPostReveal: GroupPostReveal? = nil
     /// True for a moment at launch so the feed shows loading placeholders.
     var isFeedLoading = true
     var isRefreshingFeed = false
@@ -502,6 +505,9 @@ final class AppStore {
         post.isUploading = true
         posts.insert(post, at: 0)
         simulateUpload(post)
+        if let group {
+            groupPostReveal = GroupPostReveal(postID: post.id, groupID: group.id)
+        }
         return post
     }
 
@@ -1133,4 +1139,14 @@ final class AppStore {
             break
         }
     }
+}
+
+/// A post to bring into view the next time its Group's page is on screen (`AppStore.groupPostReveal`).
+struct GroupPostReveal: Equatable {
+    let postID: String
+    let groupID: String
+    var createdAt = Date()
+
+    /// Older than this, opening the Group just opens it at the top.
+    var isFresh: Bool { Date().timeIntervalSince(createdAt) < 120 }
 }

@@ -7,6 +7,8 @@ struct BubbleProfileSection: View {
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(Router.self) private var router
 
+    @State private var isChallenging = false
+
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
 
     var body: some View {
@@ -59,6 +61,9 @@ struct BubbleProfileSection: View {
                 }
             }
         }
+        .sheet(isPresented: $isChallenging) {
+            ChallengeGamePickerSheet(userID: user.id)
+        }
     }
 
     private func card<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -109,10 +114,21 @@ struct BubbleProfileSection: View {
                 .font(.fbHeadline)
                 .foregroundStyle(FBColor.primaryText)
                 .multilineTextAlignment(.center)
-            Text(user.isMe ? "Describe a game in a sentence and Muse builds it." : "Their \(ProductName.plural) and best scores will show up here.")
+            Text(user.isMe ? "Describe a game in a sentence and Muse builds it." : "Challenge \(user.firstName) to one of yours and see who scores higher.")
                 .font(.fbBody)
                 .foregroundStyle(FBColor.secondaryText)
                 .multilineTextAlignment(.center)
+            // Yours: "Make a Whim" is the row right above.
+            if !user.isMe {
+                Button {
+                    Haptics.light()
+                    isChallenging = true
+                } label: {
+                    Label("Challenge \(user.firstName)", systemImage: "flag.checkered")
+                }
+                .buttonStyle(.fb(.primary, expand: false, height: 36))
+                .padding(.top, 4)
+            }
         }
         .padding(32)
         .frame(maxWidth: .infinity)

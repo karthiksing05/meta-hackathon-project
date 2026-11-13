@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// "Challenge Me": who to challenge with this run. Friends, recent chats (group chats first) and
-/// your Groups, with a preview of the card they'll get. Each row sends on its own, like
+/// "Challenge Me": who to challenge with this run. Your Groups, friends, then recent chats (group
+/// chats first), with a preview of the card they'll get. Each row sends on its own, like
 /// Messenger's share sheet, so you can challenge Maya and the crew in one go.
 ///
 /// A friend or 1:1 chat gets a same-seed challenge; a group chat or a Group gets a shared session
@@ -16,6 +16,8 @@ struct ChallengePickerSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var sentIDs: Set<String> = []
+    @State private var isLoadingGame = false
+    @State private var loadAttempt = 0
 
     private var center: ChallengeCenter { ChallengeCenter.shared }
 
@@ -24,9 +26,19 @@ struct ChallengePickerSheet: View {
             Group {
                 if let bubble = bubbleStore.bubble(id: bubbleID) {
                     content(bubble, draft: resolvedDraft(bubble))
+                } else if isLoadingGame {
+                    LiveDataStateView(kind: .loading)
                 } else {
-                    ContentUnavailableView(ChallengeCopy.bubbleGone, systemImage: "sparkles", description: Text(ChallengeCopy.bubbleGoneNote))
+                    LiveDataStateView(kind: .failed(ChallengeCopy.bubbleGoneNote), title: ChallengeCopy.bubbleGone) {
+                        loadAttempt += 1
+                    }
                 }
+            }
+            .task(id: loadAttempt) {
+                guard bubbleStore.bubble(id: bubbleID) == nil else { return }
+                isLoadingGame = true
+                _ = await bubbleStore.loadGame(id: bubbleID)
+                isLoadingGame = false
             }
             .background(FBColor.surface)
             .navigationTitle(ChallengeCopy.pickerTitle)
@@ -59,23 +71,25 @@ struct ChallengePickerSheet: View {
 
     private func content(_ bubble: Bubble, draft: ChallengeCenter.Draft) -> some View {
         let targets = BubbleSocialHub.targets(appStore: appStore, kinds: [.friend, .chat, .group])
-        let chats = targets.filter { $0.kind == .chat }
-        let friends = targets.filter { target in
-            // A friend you already have a chat with shows once, under Recent chats.
-            target.kind == .friend && !chats.contains { chat in
-                appStore.conversations.first { $0.id == chat.targetID }.map { !$0.isGroup && $0.participants.first?.id == target.targetID } ?? false
-            }
-        }
         let groups = targets.filter { $0.kind == .group }
+        let friends = targets.filter { $0.kind == .friend }
+        let friendIDs = Set(friends.map(\.targetID))
+        let chats = targets.filter { target in
+            // A friend you already have a 1:1 chat with shows once, under Friends.
+            target.kind == .chat && !(appStore.conversations.first { $0.id == target.targetID }.map {
+                !$0.isGroup && friendIDs.contains($0.participants.first?.id ?? "")
+            } ?? false)
+        }
         return ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 ChallengePreviewCard(bubble: bubble, score: draft.score, me: appStore.me)
                     .padding(.horizontal, FBMetrics.screenPadding)
                     .padding(.top, 8)
                     .padding(.bottom, 12)
-                section(ChallengeCopy.recentChats, chats, bubble: bubble, draft: draft)
-                section(ChallengeCopy.friends, friends, bubble: bubble, draft: draft)
+                // Groups and friends first, so a Group is never below every chat.
                 section(ChallengeCopy.yourGroups, groups, bubble: bubble, draft: draft)
+                section(ChallengeCopy.friends, friends, bubble: bubble, draft: draft)
+                section(ChallengeCopy.recentChats, chats, bubble: bubble, draft: draft)
             }
             .padding(.bottom, 32)
         }

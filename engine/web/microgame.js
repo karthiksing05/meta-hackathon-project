@@ -371,6 +371,15 @@ export function decodeFrame(view, strings, out = newFrame()) {
       op.asset = af & 0xffff; op.frame = af >>> 16;
       op.flip_x = (head & 0x100) !== 0; op.flip_y = (head & 0x200) !== 0;
       op.rotation = f32(); op.scale = f32(); op.opacity = f32();
+      // v0.2.2 head bit 10: a source rectangle within the frame (asset units).
+      if (head & 0x400) { op.src_x = f32(); op.src_y = f32(); op.src_w = f32(); op.src_h = f32(); }
+      else if (op.src_w !== undefined) { op.src_x = op.src_y = op.src_w = op.src_h = undefined; }
+    } else if (tag === 7) {
+      // v0.2.2: clip the following ops to a rectangle until the matching unclip.
+      op.op = 'clip';
+      op.x = f32(); op.y = f32(); op.w = f32(); op.h = f32();
+    } else if (tag === 8) {
+      op.op = 'unclip';
     } else if (tag === 5) {
       op.op = 'line';
       op.x1 = f32(); op.y1 = f32(); op.x2 = f32(); op.y2 = f32();

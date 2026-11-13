@@ -8,6 +8,7 @@ struct ChallengeGamePickerSheet: View {
 
     @Environment(AppStore.self) private var appStore
     @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(Router.self) private var router
     @Environment(\.dismiss) private var dismiss
 
     @State private var sentIDs: Set<String> = []
@@ -44,10 +45,16 @@ struct ChallengeGamePickerSheet: View {
         return ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 header(person)
-                if played.isEmpty {
-                    ContentUnavailableView(ChallengeCopy.noGames, systemImage: "gamecontroller", description: Text(ChallengeCopy.noGamesNote))
-                        .frame(minHeight: 160)
-                } else {
+                if played.isEmpty && others.isEmpty {
+                    LiveDataStateView(
+                        kind: .empty(ChallengeCopy.noGamesNote),
+                        title: ChallengeCopy.noGames,
+                        action: LiveDataStateView.Action(title: "Play something", symbol: "play.fill") {
+                            dismiss()
+                            router.select(.bubbles)
+                        }
+                    )
+                } else if !played.isEmpty {
                     sectionTitle(ChallengeCopy.gamesYouPlayed, note: nil)
                     ForEach(played, id: \.0.id) { bubble, best in
                         row(bubble, detail: ChallengeCopy.yourBest(best), person: person)

@@ -537,11 +537,11 @@ fn presentation_lowering() {
     assert!(matches!(&pres.canvas.background, Prop::Const(Value::Str(s)) if &**s == "#F3F1FA"));
     let NodeKind::Stack { children, gap, .. } = &pres.root.kind else { panic!() };
     assert_eq!(*gap, 24.0);
-    let NodeKind::Group { children: g } = &children[1].kind else { panic!() };
+    let NodeKind::Group { children: g, .. } = &children[1].kind else { panic!() };
     let NodeKind::Grid { cell, cell_slot, value_slot, cell_size, .. } = &g[1].kind else { panic!() };
     assert_eq!(*cell_size, 76.0);
     assert!(value_slot.is_some() && *cell_slot != pres.pointer_slot);
-    let NodeKind::Group { children: cc } = &cell.kind else { panic!() };
+    let NodeKind::Group { children: cc, .. } = &cell.kind else { panic!() };
     // `fill` with $tiles stays an expression; the token list is a constant.
     assert!(matches!(&cc[0].fill, Some(Prop::Expr(_))));
     assert_eq!(cc[0].animate_on.len(), 1);

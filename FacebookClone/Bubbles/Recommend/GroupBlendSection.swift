@@ -18,12 +18,17 @@ struct GroupBlendSection: View {
             if let blend, !blend.picks.isEmpty {
                 content(blend)
             } else if let failure {
-                Text("\(group.name) Blend isn't available: \(failure)")
-                    .font(.fbMeta)
-                    .foregroundStyle(FBColor.secondaryText)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack(spacing: 8) {
+                    Text("Couldn't make \(group.name) Blend. \(LiveDataStateView.friendly(failure))")
+                        .font(.fbMeta)
+                        .foregroundStyle(FBColor.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    Button("Try again") { Task { await load() } }
+                        .buttonStyle(.fb(.secondary, expand: false, height: 32))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
             }
         }
         .task(id: group.id) { await load() }

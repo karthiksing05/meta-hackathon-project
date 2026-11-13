@@ -11,6 +11,7 @@ struct BubbleBoardView: View {
     @State private var scope: BubbleBoardScope?
     @State private var myRowVisible = false
     @State private var isLoadingGame = false
+    @State private var loadAttempt = 0
 
     var body: some View {
         Group {
@@ -19,10 +20,10 @@ struct BubbleBoardView: View {
             } else if isLoadingGame {
                 LiveDataStateView(kind: .loading)
             } else {
-                ContentUnavailableView("\(ProductName.singular) not found", systemImage: "list.number")
+                BubbleMissingState(retry: { loadAttempt += 1 })
             }
         }
-        .task(id: bubbleID) {
+        .task(id: "\(bubbleID)/\(loadAttempt)") {
             guard bubbleStore.bubble(id: bubbleID) == nil else { return }
             isLoadingGame = true
             _ = await bubbleStore.loadGame(id: bubbleID)

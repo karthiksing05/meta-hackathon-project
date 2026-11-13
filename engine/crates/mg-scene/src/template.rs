@@ -137,7 +137,8 @@ pub struct TAnim {
 
 #[derive(Clone, Debug)]
 pub enum TKind {
-    Group { children: Vec<u32> },
+    /// v0.2.2: `w`/`h` set together (an explicit box); `clip` implies them.
+    Group { children: Vec<u32>, w: Option<P<f64>>, h: Option<P<f64>>, clip: bool },
     Stack { dir: Dir, gap: f64, align: Align, children: Vec<u32> },
     Grid {
         source: Option<Expr>,
@@ -171,9 +172,11 @@ pub enum TKind {
         frame: Option<P<f64>>,
         flip_x: Option<P<bool>>,
         flip_y: Option<P<bool>>,
+        /// v0.2.2: `[src_x, src_y, src_w, src_h]`; `None` when none is set.
+        src: Option<Box<[Option<P<f64>>; 4]>>,
     },
     Line { x1: P<f64>, y1: P<f64>, x2: P<f64>, y2: P<f64> },
-    Poly { points: P<Points>, closed: bool },
+    Poly { points: P<Points>, closed: bool, hit_shape: bool },
 }
 
 #[derive(Clone, Debug)]
@@ -315,7 +318,7 @@ impl Compiler<'_> {
         // Placeholder so children get later ids (pre-order).
         self.nodes.push(TNode {
             at: n.at.clone(),
-            kind: TKind::Group { children: Vec::new() },
+            kind: TKind::Group { children: Vec::new(), w: None, h: None, clip: false },
             x: None,
             y: None,
             anchor: n.anchor,
@@ -346,7 +349,18 @@ impl Compiler<'_> {
         let stroke = self.opt(&n.stroke, at, "stroke");
         let stroke_width = self.opt(&n.stroke_width, at, "stroke_width");
         let kind = match &n.kind {
-            NodeKind::Group { children } => TKind::Group { children: children.iter().map(|c| self.node(c, fixed)).collect() },
+            NodeKind::Group { children, w, h, clip } => {
+                let w = self.opt(w, at, "w");
+                let h = self.opt(h, at, "h");
+                // Both or neither (mg-lang reports a lone one).
+                let (w, h) = if w.is_some() && h.is_some() { (w, h) } else { (None, None) };
+                TKind::Group {
+                    clip: *clip && w.is_some(),
+                    w,
+                    h,
+                    children: children.iter().map(|c| self.node(c, fixed)).collect(),
+                }
+            }
             NodeKind::Stack { dir, gap, align, children } => TKind::Stack {
                 dir: *dir,
                 gap: *gap,
@@ -392,21 +406,33 @@ impl Compiler<'_> {
                 valign: *valign,
                 wrap: *wrap,
             },
-            NodeKind::Image { asset, w, h, frame, flip_x, flip_y } => TKind::Image {
-                asset: self.asset(asset, at, true),
-                w: self.opt(w, at, "w"),
-                h: self.opt(h, at, "h"),
-                frame: self.opt(frame, at, "frame"),
-                flip_x: self.opt(flip_x, at, "flip_x"),
-                flip_y: self.opt(flip_y, at, "flip_y"),
-            },
+            NodeKind::Image { asset, w, h, frame, flip_x, flip_y, src_x, src_y, src_w, src_h } => {
+                let any_src = src_x.is_some() || src_y.is_some() || src_w.is_some() || src_h.is_some();
+                let src = any_src.then(|| {
+                    Box::new([
+                        self.opt(src_x, at, "src_x"),
+                        self.opt(src_y, at, "src_y"),
+                        self.opt(src_w, at, "src_w"),
+                        self.opt(src_h, at, "src_h"),
+                    ])
+                });
+                TKind::Image {
+                    asset: self.asset(asset, at, true),
+                    w: self.opt(w, at, "w"),
+                    h: self.opt(h, at, "h"),
+                    frame: self.opt(frame, at, "frame"),
+                    flip_x: self.opt(flip_x, at, "flip_x"),
+                    flip_y: self.opt(flip_y, at, "flip_y"),
+                    src,
+                }
+            }
             NodeKind::Line { x1, y1, x2, y2 } => TKind::Line {
                 x1: self.req(x1, at, "x1", 0.0),
                 y1: self.req(y1, at, "y1", 0.0),
                 x2: self.req(x2, at, "x2", 0.0),
                 y2: self.req(y2, at, "y2", 0.0),
             },
-            NodeKind::Poly { points, closed } => {
+            NodeKind::Poly { points, closed, hit_shape } => {
                 let mut points = self.req(points, at, "points", Points(Rc::from(Vec::new())));
                 if let P::C(Points(pts)) = &mut points {
                     if pts.len() > MAX_POLY_POINTS {
@@ -418,7 +444,7 @@ impl Compiler<'_> {
                         *pts = Rc::from(&pts[..MAX_POLY_POINTS]);
                     }
                 }
-                TKind::Poly { points, closed: *closed }
+                TKind::Poly { points, closed: *closed, hit_shape: *hit_shape }
             }
         };
         let mut animate_on = Vec::with_capacity(n.animate_on.len());
@@ -550,7 +576,11 @@ fn presentation_uses_now(
         p(&n.fill, &mut check);
         p(&n.stroke, &mut check);
         match &n.kind {
-            TKind::Group { .. } | TKind::Stack { .. } => {}
+            TKind::Group { w, h, .. } => {
+                p(w, &mut check);
+                p(h, &mut check);
+            }
+            TKind::Stack { .. } => {}
             TKind::Grid { source, cols, rows, .. } => {
                 if let Some(s) = source {
                     check(s);
@@ -583,9 +613,14 @@ fn presentation_uses_now(
                 p(w, &mut check);
                 p(h, &mut check);
             }
-            TKind::Image { asset, w, h, frame, flip_x, flip_y } => {
+            TKind::Image { asset, w, h, frame, flip_x, flip_y, src } => {
                 if let AssetRef::Expr(e) = asset {
                     check(e);
+                }
+                if let Some(src) = src {
+                    for q in src.iter() {
+                        p(q, &mut check);
+                    }
                 }
                 p(w, &mut check);
                 p(h, &mut check);

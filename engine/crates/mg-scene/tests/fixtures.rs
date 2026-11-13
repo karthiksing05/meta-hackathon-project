@@ -43,6 +43,7 @@ fn op_bounds(f: &Frame) -> (f64, f64, f64, f64) {
                 (f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY),
                 |b, &(x, y)| (b.0.min(x), b.1.min(y), b.2.max(x), b.3.max(y)),
             ),
+            DrawOp::Clip(_) | DrawOp::Unclip => continue,
         };
         b = (b.0.min(x0), b.1.min(y0), b.2.max(x1), b.3.max(y1));
     }

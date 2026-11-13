@@ -122,8 +122,44 @@ struct GroupsSearchGroupScreen: View {
         if let group = appStore.group(id: groupID) ?? bubbleStore.resolveGroup(groupID) {
             GroupDetailView(group: group, startsOnGames: startsOnGames)
         } else {
-            ContentUnavailableView(GroupsSearchCopy.groupMissing, systemImage: "person.3", description: Text(GroupsSearchCopy.groupMissingDetail))
-                .background(FBColor.surface)
+            GroupMissingState(groupID: groupID)
+        }
+    }
+}
+
+/// A Group that isn't here yet: the server fetch (`resolveGroup`) is still out, so it shows
+/// "Opening the Group…" first, and only then, if nothing came, Try again or your Groups.
+struct GroupMissingState: View {
+    let groupID: String
+
+    @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(Router.self) private var router
+
+    @State private var gaveUp = false
+    @State private var attempt = 0
+
+    var body: some View {
+        Group {
+            if gaveUp {
+                LiveDataStateView(
+                    kind: .failed(GroupsSearchCopy.groupMissingDetail),
+                    title: GroupsSearchCopy.groupMissing,
+                    retry: {
+                        gaveUp = false
+                        attempt += 1
+                        bubbleStore.loadGroup(id: groupID)
+                    },
+                    action: LiveDataStateView.Action(title: "See your Groups") { router.push(.groups) }
+                )
+            } else {
+                LiveDataStateView(kind: .loading, title: "Opening the Group…")
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(FBColor.surface)
+        .task(id: attempt) {
+            try? await Task.sleep(nanoseconds: 6_000_000_000)
+            if !Task.isCancelled { gaveUp = true }
         }
     }
 }
@@ -142,7 +178,7 @@ enum GroupsSearchCopy {
         }
     }
     static let noGamesTitle = "No games here yet"
-    static let noGamesDetail = "Make the first game for this Group. Describe it and Muse builds it."
+    static let noGamesDetail = "Games made for this Group show up here."
     static let makeOne = "Make a game"
 
     // Weekly board
@@ -171,8 +207,8 @@ enum GroupsSearchCopy {
     static func up(_ places: Int) -> String { "Up \(places)" }
     static func down(_ places: Int) -> String { "Down \(places)" }
     static let new = "New"
-    static let groupMissing = "Group not found"
-    static let groupMissingDetail = "This Group isn't available right now."
+    static let groupMissing = "Couldn't open this Group"
+    static let groupMissingDetail = "It may be private, or the connection dropped."
 
     // Featured teaser
     static func teaser(leader: String, you: Int?) -> String {
