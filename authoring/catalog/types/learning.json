@@ -1041,7 +1041,7 @@
     "refs": []
   },
   {
-    "id": "label_the_diagram",
+    "id": "label_diagram_drag_labels",
     "name": "Label the diagram",
     "aliases": [
       "Anatomy labels",

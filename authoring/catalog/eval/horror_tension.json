@@ -1,0 +1,32 @@
+[
+  {
+    "request": "five nights at freddy's but at my school",
+    "expect": [
+      "camera_watch_night_shift"
+    ]
+  },
+  {
+    "request": "exit 8 style anomaly game",
+    "expect": [
+      "spot_the_anomaly"
+    ]
+  },
+  {
+    "request": "red light green light with a ghost",
+    "expect": [
+      "red_light_creep"
+    ]
+  },
+  {
+    "request": "among us but spooky for my group chat",
+    "expect": [
+      "impostor_among_us_friends"
+    ]
+  },
+  {
+    "request": "choose your own horror story about a haunted dorm",
+    "expect": [
+      "creepy_choice_branch"
+    ]
+  }
+]

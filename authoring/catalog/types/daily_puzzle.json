@@ -3423,7 +3423,7 @@
     "refs": []
   },
   {
-    "id": "compound_word_chain",
+    "id": "compound_phrase_word_chain",
     "name": "Compound word chain",
     "aliases": [
       "Chain words",

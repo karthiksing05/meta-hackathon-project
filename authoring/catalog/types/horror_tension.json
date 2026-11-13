@@ -1,0 +1,2541 @@
+[
+  {
+    "id": "camera_watch_night_shift",
+    "name": "Camera watch night shift",
+    "aliases": [
+      "Five Nights at Freddy's",
+      "FNAF",
+      "security camera game",
+      "Night shift survival",
+      "Observation Duty"
+    ],
+    "family": "horror_tension",
+    "subfamily": "monitoring",
+    "summary": "Flip between camera feeds to track roaming threats, closing doors or lights to survive until morning while power drains.",
+    "core_loop": "check camera → spot a threat approaching → shut the door or flash the light → power drops → survive until 6 AM",
+    "verbs": [
+      "monitor",
+      "react",
+      "ration"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "camera feeds",
+      "door and light buttons",
+      "power meter",
+      "clock"
+    ],
+    "rules": [
+      "each threat has its own route and tell",
+      "every action drains power",
+      "running out of power leaves you exposed"
+    ],
+    "win": "survive until the clock hits 6 AM",
+    "lose": "a threat reaches you",
+    "scoring": "nights survived and power left",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare which night they reached",
+      "one Group member designs the roaming monsters"
+    ],
+    "content_needs": [
+      "monster routes",
+      "floor map"
+    ],
+    "difficulty_levers": [
+      "night length",
+      "threat count",
+      "power drain"
+    ],
+    "tools": [
+      "timer_bar",
+      "lives",
+      "countdown",
+      "difficulty_curve",
+      "camera_feed_switcher",
+      "power_meter"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "five nights at freddy's but at a pizza place run by my friend group",
+      "security camera survival game with ghosts",
+      "night shift at a haunted school where I watch cameras"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hide_and_hold_breath",
+    "name": "Hide and hold breath",
+    "aliases": [
+      "Hide in the closet",
+      "Outlast hiding",
+      "Hello Neighbor",
+      "Alien Isolation locker"
+    ],
+    "family": "horror_tension",
+    "subfamily": "hiding",
+    "summary": "A seeker patrols near the hiding spot and the player holds a button to hold breath, releasing only when it is safe.",
+    "core_loop": "hide → hear footsteps → hold to stay silent → breath meter drains → release when it leaves",
+    "verbs": [
+      "hide",
+      "hold",
+      "listen"
+    ],
+    "inputs": [
+      "hold"
+    ],
+    "pieces": [
+      "hiding spot",
+      "breath meter",
+      "footstep audio",
+      "seeker shadow"
+    ],
+    "rules": [
+      "holding drains breath",
+      "releasing too early makes noise",
+      "breath refills when you breathe"
+    ],
+    "win": "seeker leaves and you escape",
+    "lose": "breath runs out while it is near",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compete on how many rounds they survive",
+      "share your closest call"
+    ],
+    "content_needs": [
+      "patrol timings",
+      "audio cues"
+    ],
+    "difficulty_levers": [
+      "seeker speed",
+      "breath capacity"
+    ],
+    "tools": [
+      "hold_input",
+      "timer_bar",
+      "lives",
+      "difficulty_curve",
+      "audio_synth"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hide in a closet while a monster walks past",
+      "outlast style hiding game",
+      "a game where I have to hold my breath so the ghost doesn't find me"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "flashlight_dark_exploration",
+    "name": "Flashlight exploration",
+    "aliases": [
+      "Dark room flashlight",
+      "Phasmophobia flashlight",
+      "Darkwood",
+      "Dead Space light"
+    ],
+    "family": "horror_tension",
+    "subfamily": "exploration",
+    "summary": "Only a small beam of light reveals the room, and the player sweeps it to find items and keep dangers back.",
+    "core_loop": "sweep beam → find items in the dark → creatures freeze in light → battery drains → reach the exit",
+    "verbs": [
+      "explore",
+      "sweep"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "dark room",
+      "flashlight cone",
+      "battery",
+      "items"
+    ],
+    "rules": [
+      "creatures freeze or retreat in light",
+      "battery drains faster while lit",
+      "collect keys to exit"
+    ],
+    "win": "reach the exit with a key",
+    "lose": "battery dies or a creature touches you",
+    "scoring": "items found and time",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends race the same house",
+      "Group designs rooms"
+    ],
+    "content_needs": [
+      "room layouts",
+      "item placement"
+    ],
+    "difficulty_levers": [
+      "battery life",
+      "creature count",
+      "room size"
+    ],
+    "tools": [
+      "player_drag",
+      "pickups",
+      "collide",
+      "timer_bar",
+      "lives",
+      "flashlight_mask"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a haunted house with a flashlight and ghosts",
+      "explore a dark mansion with only a beam of light",
+      "harry potter forbidden forest at night with a lantern"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "stealth_sneak_past_patrol",
+    "name": "Sneak past the patrol",
+    "aliases": [
+      "Metal Gear lite",
+      "stealth game",
+      "Hello Neighbor",
+      "sneak past the guard"
+    ],
+    "family": "horror_tension",
+    "subfamily": "stealth",
+    "summary": "Move between cover as patrols walk set routes and vision cones, reaching the goal unseen.",
+    "core_loop": "watch patrol pattern → move when the cone looks away → duck into cover → reach the goal",
+    "verbs": [
+      "sneak",
+      "time"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "patrols with vision cones",
+      "cover spots",
+      "goal"
+    ],
+    "rules": [
+      "being in a cone fills a detection bar",
+      "moving fast makes noise"
+    ],
+    "win": "reach the exit unseen",
+    "lose": "detection bar fills",
+    "scoring": "time and times spotted",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race the same level",
+      "friends build patrol routes for each other"
+    ],
+    "content_needs": [
+      "patrol routes",
+      "level layouts"
+    ],
+    "difficulty_levers": [
+      "patrol speed",
+      "cone angle",
+      "cover count"
+    ],
+    "tools": [
+      "player_drag",
+      "collide",
+      "lives",
+      "checkpoint",
+      "timer_bar",
+      "vision_cone"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "sneak past the monster to the exit",
+      "stealth game where a ghost patrols the halls",
+      "sneak out of the school after dark"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sound_cue_locate",
+    "name": "Locate by sound",
+    "aliases": [
+      "Binaural horror",
+      "audio horror",
+      "where is it coming from",
+      "Papa's Games blindfold"
+    ],
+    "family": "horror_tension",
+    "subfamily": "audio tension",
+    "summary": "Spatial audio plays a creeping sound and the player must tap the direction it comes from before it arrives.",
+    "core_loop": "hear sound pan → tap its direction → creature retreats if right → closer if wrong",
+    "verbs": [
+      "listen",
+      "locate"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "audio source",
+      "direction ring",
+      "distance meter"
+    ],
+    "rules": [
+      "sound pans left or right and fades with distance",
+      "late taps let it close in"
+    ],
+    "win": "survive the set of approaches",
+    "lose": "creature reaches you",
+    "scoring": "correct directions",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "headphones challenge with a friend"
+    ],
+    "content_needs": [
+      "audio cues"
+    ],
+    "difficulty_levers": [
+      "speed of approach",
+      "number of directions"
+    ],
+    "tools": [
+      "audio_synth",
+      "rounds",
+      "lives",
+      "score",
+      "spatial_audio"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a horror game you play with headphones",
+      "tap where the sound is coming from",
+      "monster behind me game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "spot_the_anomaly",
+    "name": "Spot the anomaly",
+    "aliases": [
+      "Exit 8",
+      "Observation Duty",
+      "Is this normal",
+      "Spot what changed"
+    ],
+    "family": "horror_tension",
+    "subfamily": "observation",
+    "summary": "Each round shows a familiar corridor or room, and the player decides whether anything is different, escaping only after enough correct calls.",
+    "core_loop": "look at the scene → decide normal or anomaly → report or continue → go deeper",
+    "verbs": [
+      "observe",
+      "decide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene",
+      "report button",
+      "progress counter",
+      "anomaly list"
+    ],
+    "rules": [
+      "each round has zero or one subtle anomaly",
+      "a false report resets progress"
+    ],
+    "win": "clear all rounds",
+    "lose": "a missed anomaly sends you back",
+    "scoring": "rounds cleared in a row",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends try to find the anomaly you hid",
+      "Group streak"
+    ],
+    "content_needs": [
+      "scene sets",
+      "anomaly variants"
+    ],
+    "difficulty_levers": [
+      "anomaly subtlety",
+      "scene count"
+    ],
+    "tools": [
+      "image_gallery",
+      "rounds",
+      "lives",
+      "score",
+      "reveal",
+      "anomaly_generator"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "exit 8 but in our school hallway",
+      "spot the anomaly in a creepy corridor",
+      "find what changed in the haunted house"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ritual_sequence_under_pressure",
+    "name": "Ritual sequence",
+    "aliases": [
+      "Simon horror",
+      "occult sequence",
+      "Phasmophobia ritual",
+      "Ghost summoning sequence"
+    ],
+    "family": "horror_tension",
+    "subfamily": "memory under pressure",
+    "summary": "A sequence of symbols flashes while the room darkens and the player repeats it before a threat arrives.",
+    "core_loop": "watch symbols → repeat sequence on the circle → timer and creature advance → complete the ritual",
+    "verbs": [
+      "memorize",
+      "repeat"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "symbol circle",
+      "sequence flash",
+      "approaching shadow"
+    ],
+    "rules": [
+      "sequence grows each round",
+      "the shadow advances each second"
+    ],
+    "win": "complete the final ritual",
+    "lose": "shadow reaches you",
+    "scoring": "rounds complete",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's round count"
+    ],
+    "content_needs": [
+      "symbol sets"
+    ],
+    "difficulty_levers": [
+      "sequence length",
+      "shadow speed"
+    ],
+    "tools": [
+      "sequence_memory",
+      "timer_bar",
+      "lives",
+      "rounds",
+      "score",
+      "difficulty_curve"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a summoning ritual memory game",
+      "occult symbols sequence while a shadow approaches",
+      "ouija memory sequence"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "barricade_the_night",
+    "name": "Barricade the night",
+    "aliases": [
+      "Home defense horror",
+      "board up the windows",
+      "Night survival",
+      "Five nights in the cabin"
+    ],
+    "family": "horror_tension",
+    "subfamily": "defense",
+    "summary": "Windows and doors fail one by one as unseen things push in, and the player boards them up with limited planks.",
+    "core_loop": "tap a weakening window → board it up → planks run out → hold until dawn",
+    "verbs": [
+      "repair",
+      "prioritize"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "windows",
+      "planks",
+      "pressure meters",
+      "clock"
+    ],
+    "rules": [
+      "each opening weakens at its own pace",
+      "planks are scarce and restock slowly"
+    ],
+    "win": "survive until dawn",
+    "lose": "a barrier fails",
+    "scoring": "how many planks left at dawn",
+    "session_seconds": [
+      60,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends take turns defending the same cabin"
+    ],
+    "content_needs": [
+      "building layouts"
+    ],
+    "difficulty_levers": [
+      "openings",
+      "plank supply",
+      "pressure speed"
+    ],
+    "tools": [
+      "timer_bar",
+      "lives",
+      "waves",
+      "spawn_wave",
+      "countdown",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "board up the cabin windows against zombies",
+      "survive the night in a house under siege",
+      "a night of defending against ghosts"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dont_blink_freeze",
+    "name": "Don't look away",
+    "aliases": [
+      "Weeping Angels",
+      "Statues",
+      "SCP-173",
+      "Don't blink"
+    ],
+    "family": "horror_tension",
+    "subfamily": "reaction",
+    "summary": "Threats only move when the player isn't looking, so the player rotates view or holds eyes on them while doing tasks.",
+    "core_loop": "look at one threat to freeze it → turn to another → it moves → keep all in check",
+    "verbs": [
+      "watch",
+      "multitask"
+    ],
+    "inputs": [
+      "drag",
+      "hold"
+    ],
+    "pieces": [
+      "statues",
+      "view cone",
+      "task bar"
+    ],
+    "rules": [
+      "a threat moves only when out of view",
+      "staying on one for too long lets others approach"
+    ],
+    "win": "finish the task bar",
+    "lose": "a statue reaches you",
+    "scoring": "tasks done",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compete to hold longest"
+    ],
+    "content_needs": [
+      "statue positions"
+    ],
+    "difficulty_levers": [
+      "statue count",
+      "speed"
+    ],
+    "tools": [
+      "collide",
+      "timer_bar",
+      "lives",
+      "spawn_wave",
+      "gaze_check"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "weeping angel game",
+      "statues that only move when I look away",
+      "scp 173 survival"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "red_light_creep",
+    "name": "Creep when it's blind",
+    "aliases": [
+      "Red Light Green Light",
+      "Grandmother's Footsteps",
+      "Squid Game doll",
+      "Granny"
+    ],
+    "family": "horror_tension",
+    "subfamily": "stealth",
+    "summary": "A watcher turns around at random, and the player moves forward only while it faces away.",
+    "core_loop": "hold to creep → watcher turns around → release to freeze → advance when it turns back",
+    "verbs": [
+      "time",
+      "hold"
+    ],
+    "inputs": [
+      "hold"
+    ],
+    "pieces": [
+      "player",
+      "watcher",
+      "distance bar"
+    ],
+    "rules": [
+      "moving while watched is caught",
+      "the watcher's tells shrink as levels go up"
+    ],
+    "win": "reach the end",
+    "lose": "caught moving",
+    "scoring": "time to cross",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends on the same watcher pattern"
+    ],
+    "content_needs": [
+      "watcher timing patterns"
+    ],
+    "difficulty_levers": [
+      "turn speed",
+      "tell length",
+      "distance"
+    ],
+    "tools": [
+      "hold_input",
+      "timer_bar",
+      "lives",
+      "difficulty_curve",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "red light green light but the doll is a ghost",
+      "grandma is turning around game",
+      "creep up on the monster"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dark_escape_room_puzzles",
+    "name": "Dark escape room",
+    "aliases": [
+      "Escape room horror",
+      "Haunted house escape",
+      "The Room",
+      "Rusty Lake"
+    ],
+    "family": "horror_tension",
+    "subfamily": "puzzle exploration",
+    "summary": "Inspect objects in a dim room, combine clues and solve small puzzles to unlock the door before a threat grows.",
+    "core_loop": "tap objects → find clues → solve a lock puzzle → door opens → next room",
+    "verbs": [
+      "inspect",
+      "combine"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "room",
+      "inventory",
+      "locks",
+      "clues"
+    ],
+    "rules": [
+      "clues combine into codes",
+      "hints unlock after time"
+    ],
+    "win": "escape the last room",
+    "lose": "time or sanity runs out",
+    "scoring": "rooms cleared and time",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "a Group solves the same room together"
+    ],
+    "content_needs": [
+      "room and puzzle sets"
+    ],
+    "difficulty_levers": [
+      "room count",
+      "hint timer"
+    ],
+    "tools": [
+      "grid_board",
+      "hint",
+      "reveal",
+      "timer_bar",
+      "lives",
+      "inventory"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a haunted mansion escape room",
+      "rusty lake style puzzle room",
+      "escape the cabin before midnight"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ghost_photo_hunt",
+    "name": "Ghost photo hunt",
+    "aliases": [
+      "Fatal Frame",
+      "Camera ghost hunt",
+      "Haunted photo",
+      "Ghost hunter camera"
+    ],
+    "family": "horror_tension",
+    "subfamily": "search",
+    "summary": "Scan a scene with a camera view to find a hidden apparition and snap it at the right moment.",
+    "core_loop": "pan the viewfinder → spot flicker → focus → snap the ghost",
+    "verbs": [
+      "search",
+      "aim"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "viewfinder",
+      "film count",
+      "ghost flicker"
+    ],
+    "rules": [
+      "film is limited",
+      "ghost appears briefly"
+    ],
+    "win": "photograph the ghost",
+    "lose": "film runs out",
+    "scoring": "ghosts photographed",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share the best ghost photo with a friend"
+    ],
+    "content_needs": [
+      "scenes",
+      "ghost flicker points"
+    ],
+    "difficulty_levers": [
+      "film count",
+      "flicker rate"
+    ],
+    "tools": [
+      "image_gallery",
+      "collide",
+      "timer_bar",
+      "score",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ghost hunting camera game",
+      "photograph the haunted house ghost",
+      "fatal frame style camera horror"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ouija_spell_the_message",
+    "name": "Ouija message",
+    "aliases": [
+      "Ouija board",
+      "spirit board",
+      "Ghost speaks",
+      "talking board"
+    ],
+    "family": "horror_tension",
+    "subfamily": "word puzzle",
+    "summary": "A planchette slides over letters to spell a hidden message, and the player guides it letter by letter to decode what the spirit is saying.",
+    "core_loop": "move planchette → letters light → build the hidden message → guess the word",
+    "verbs": [
+      "guide",
+      "decode"
+    ],
+    "inputs": [
+      "drag",
+      "type"
+    ],
+    "pieces": [
+      "board of letters",
+      "planchette",
+      "partial message"
+    ],
+    "rules": [
+      "moves follow the planchette's path",
+      "a guess unlocks only with enough letters"
+    ],
+    "win": "reveal the message",
+    "lose": "too many wrong guesses",
+    "scoring": "fewer guesses",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "Group guesses what the spirit says"
+    ],
+    "content_needs": [
+      "messages"
+    ],
+    "difficulty_levers": [
+      "message length",
+      "guess limit"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match",
+      "word_check",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ouija board game that spells a secret message",
+      "talking board decoding game",
+      "spirit board with my group chat's secrets"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "creepy_choice_branch",
+    "name": "Creepy choice story",
+    "aliases": [
+      "Choose your own adventure horror",
+      "Until Dawn",
+      "Creepypasta",
+      "Telltale horror"
+    ],
+    "family": "horror_tension",
+    "subfamily": "story choice",
+    "summary": "A short scary story pauses at key moments and the player chooses what to do, with deaths and survivals that branch.",
+    "core_loop": "read scene → choose → consequence → next scene → ending",
+    "verbs": [
+      "read",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "story text",
+      "choice buttons",
+      "fear meter"
+    ],
+    "rules": [
+      "choices carry consequences",
+      "some choices are timed"
+    ],
+    "win": "reach a survival ending",
+    "lose": "a fatal choice",
+    "scoring": "ending reached",
+    "session_seconds": [
+      90,
+      240
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare endings",
+      "Group votes choices"
+    ],
+    "content_needs": [
+      "branching scenes"
+    ],
+    "difficulty_levers": [
+      "branches",
+      "timers"
+    ],
+    "tools": [
+      "choice_story",
+      "timer_bar",
+      "lives",
+      "checkpoint",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "until dawn style story about my friends at a cabin",
+      "choose your own horror about a haunted dorm",
+      "creepypasta game where I choose what to do"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "silence_mic_quiet",
+    "name": "Stay silent",
+    "aliases": [
+      "Don't breathe",
+      "A Quiet Place",
+      "Mic horror",
+      "Shush game"
+    ],
+    "family": "horror_tension",
+    "subfamily": "voice input",
+    "summary": "A monster listens for noise, and the player must stay quiet while the mic level meter shows noise; loud sounds make it come closer.",
+    "core_loop": "monster nears → stay quiet → mic meter stays low → it leaves → round ends",
+    "verbs": [
+      "stay quiet",
+      "control volume"
+    ],
+    "inputs": [
+      "voice"
+    ],
+    "pieces": [
+      "mic level meter",
+      "monster distance"
+    ],
+    "rules": [
+      "noise above threshold advances the monster",
+      "a sound budget allows a short whisper"
+    ],
+    "win": "survive all rounds",
+    "lose": "monster reaches you",
+    "scoring": "rounds survived",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "play with friends in the room to see who laughs first"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "threshold",
+      "monster speed"
+    ],
+    "tools": [
+      "mic_input",
+      "timer_bar",
+      "lives",
+      "rounds",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a quiet place style mic game",
+      "stay silent or the monster finds you",
+      "don't make a sound game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "countdown_ritual_complete",
+    "name": "Beat midnight",
+    "aliases": [
+      "Finish before midnight",
+      "ritual deadline",
+      "Outwit the clock",
+      "Clock tower"
+    ],
+    "family": "horror_tension",
+    "subfamily": "time pressure",
+    "summary": "Perform several small ritual steps in any order before a clock chimes, while the room gets scarier as time shrinks.",
+    "core_loop": "read steps → do each (light candle, draw a circle, read) → clock ticks → complete before midnight",
+    "verbs": [
+      "multitask",
+      "time"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "ritual steps",
+      "clock",
+      "room"
+    ],
+    "rules": [
+      "some steps unlock others",
+      "each step takes a short time"
+    ],
+    "win": "finish all steps before midnight",
+    "lose": "clock strikes",
+    "scoring": "time left",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race a friend's time on the same ritual"
+    ],
+    "content_needs": [
+      "ritual sets"
+    ],
+    "difficulty_levers": [
+      "step count",
+      "clock speed"
+    ],
+    "tools": [
+      "countdown",
+      "timer_bar",
+      "checklist",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "do a ritual before midnight to banish the ghost",
+      "beat the clock and light all the candles",
+      "a haunted clock tower timer game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "radio_tune_static",
+    "name": "Tune the radio",
+    "aliases": [
+      "Radio static",
+      "Tune in",
+      "Signal hunting",
+      "Numbers station"
+    ],
+    "family": "horror_tension",
+    "subfamily": "search",
+    "summary": "Tune a dial through static to find a hidden voice or message and decode it before a presence nears.",
+    "core_loop": "rotate dial → static changes → find clear signal → read message",
+    "verbs": [
+      "tune",
+      "listen"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "dial",
+      "static",
+      "signal meter",
+      "transcript"
+    ],
+    "rules": [
+      "signal peaks at hidden frequencies",
+      "static grows when off tune",
+      "a transcript appears when clear"
+    ],
+    "win": "decode the message",
+    "lose": "presence reaches you",
+    "scoring": "messages decoded",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends hunt for the signal you hid"
+    ],
+    "content_needs": [
+      "frequency maps",
+      "messages"
+    ],
+    "difficulty_levers": [
+      "dial sensitivity",
+      "presence speed"
+    ],
+    "tools": [
+      "slider_input",
+      "audio_synth",
+      "reveal",
+      "timer_bar",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tune the radio to find the voice",
+      "numbers station horror",
+      "a haunted radio that says my friend's name"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mirror_double_difference",
+    "name": "Mirror double",
+    "aliases": [
+      "Mirror horror",
+      "What's different in the reflection",
+      "Doppelganger"
+    ],
+    "family": "horror_tension",
+    "subfamily": "observation",
+    "summary": "A reflection in a mirror differs slightly from the room, and the player finds the differences before the double acts.",
+    "core_loop": "compare reflection → tap differences → double steps closer → clear before it arrives",
+    "verbs": [
+      "compare",
+      "observe"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "room",
+      "mirror",
+      "differences list"
+    ],
+    "rules": [
+      "the reflection contains subtle differences",
+      "tapping a wrong spot costs time",
+      "the double advances as time passes"
+    ],
+    "win": "find all differences",
+    "lose": "the double arrives",
+    "scoring": "differences found",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends build mirror differences for you"
+    ],
+    "content_needs": [
+      "scene pairs"
+    ],
+    "difficulty_levers": [
+      "difference count",
+      "time"
+    ],
+    "tools": [
+      "image_gallery",
+      "collide",
+      "timer_bar",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "mirror game where the reflection is wrong",
+      "doppelganger spotting game",
+      "find what is off in the mirror"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sanity_hallucination_filter",
+    "name": "Sanity and hallucination",
+    "aliases": [
+      "Sanity meter",
+      "Eternal Darkness",
+      "Amnesia",
+      "Hallucination detector"
+    ],
+    "family": "horror_tension",
+    "subfamily": "perception",
+    "summary": "As sanity falls, fake threats appear, and the player must act only on real ones while keeping sanity up.",
+    "core_loop": "see a threat → tap if real or ignore if fake → sanity changes → survive",
+    "verbs": [
+      "discern",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "sanity meter",
+      "real and fake threats",
+      "calm button"
+    ],
+    "rules": [
+      "fake ones vanish when touched",
+      "real ones need a response"
+    ],
+    "win": "survive until sanity is stable",
+    "lose": "sanity reaches zero",
+    "scoring": "threats handled",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share runs"
+    ],
+    "content_needs": [
+      "threat spawn tables"
+    ],
+    "difficulty_levers": [
+      "fake ratio",
+      "sanity drain"
+    ],
+    "tools": [
+      "spawn_wave",
+      "collide",
+      "lives",
+      "timer_bar",
+      "score",
+      "difficulty_curve"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a game where you cannot trust what you see",
+      "sanity meter horror",
+      "hallucination spotting under pressure"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "matchstick_light_rationing",
+    "name": "Matchstick rationing",
+    "aliases": [
+      "Don't let the light go out",
+      "Candle survival",
+      "Matches in the dark",
+      "Darkness falls"
+    ],
+    "family": "horror_tension",
+    "subfamily": "resource management",
+    "summary": "A limited supply of light must be spent wisely as the player explores and reveals dangers.",
+    "core_loop": "light a match → see the room → move to the next spot → match burns out → decide when to light the next",
+    "verbs": [
+      "ration",
+      "explore"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "matches",
+      "room",
+      "shadows"
+    ],
+    "rules": [
+      "each match lights a small area briefly",
+      "shadows advance in darkness",
+      "matches can be found in the room"
+    ],
+    "win": "reach the exit",
+    "lose": "matches run out with a shadow near",
+    "scoring": "matches left",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare matches used"
+    ],
+    "content_needs": [
+      "room layouts"
+    ],
+    "difficulty_levers": [
+      "match count",
+      "burn time"
+    ],
+    "tools": [
+      "player_drag",
+      "pickups",
+      "timer_bar",
+      "lives",
+      "score",
+      "light_mask"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "survive the dark with only five matches",
+      "matchstick light game",
+      "candle in the cellar"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "glass_bridge_safe_tiles",
+    "name": "Safe tiles crossing",
+    "aliases": [
+      "Squid Game glass bridge",
+      "Trapdoor tiles",
+      "Don't step on the wrong tile"
+    ],
+    "family": "horror_tension",
+    "subfamily": "memory risk",
+    "summary": "Choose between two tiles at each step of a path, where one is safe and one gives way, using memory from others' failures.",
+    "core_loop": "see next pair → pick one → wrong one falls → try again with knowledge",
+    "verbs": [
+      "choose",
+      "remember"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tile pairs",
+      "path",
+      "lives"
+    ],
+    "rules": [
+      "each pair has one safe tile",
+      "a wrong choice drops the tile and a life",
+      "players learn from fallen tiles"
+    ],
+    "win": "reach the end",
+    "lose": "lose all lives",
+    "scoring": "steps crossed",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends try one after another to reveal the safe path"
+    ],
+    "content_needs": [
+      "path patterns"
+    ],
+    "difficulty_levers": [
+      "path length",
+      "lives"
+    ],
+    "tools": [
+      "lives",
+      "checkpoint",
+      "grid_board",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "glass bridge game with friends going one at a time",
+      "choose the safe tile",
+      "trapdoor crossing"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tiptoe_steady_hand",
+    "name": "Tiptoe steady hand",
+    "aliases": [
+      "Don't wake the baby",
+      "Steady hand",
+      "Operation horror",
+      "Hold still"
+    ],
+    "family": "horror_tension",
+    "subfamily": "motor control",
+    "summary": "The player keeps a finger or tilt steady as a sleeper stirs, moving only when it is quiet.",
+    "core_loop": "move slowly → sleeper stirs → hold still → continue",
+    "verbs": [
+      "steady",
+      "time"
+    ],
+    "inputs": [
+      "drag",
+      "tilt"
+    ],
+    "pieces": [
+      "path",
+      "noise meter",
+      "sleeper"
+    ],
+    "rules": [
+      "moving faster raises noise",
+      "the sleeper stirs periodically",
+      "staying still lowers noise"
+    ],
+    "win": "reach the goal",
+    "lose": "noise meter fills",
+    "scoring": "noise left",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race friends"
+    ],
+    "content_needs": [
+      "paths"
+    ],
+    "difficulty_levers": [
+      "path width",
+      "noise sensitivity"
+    ],
+    "tools": [
+      "player_drag",
+      "timer_bar",
+      "lives",
+      "score",
+      "tilt_input"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "tiptoe past the sleeping monster",
+      "don't wake the baby",
+      "steady hand game with a creepy twist"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "ghost_hunt_emf_scanner",
+    "name": "Ghost scanner",
+    "aliases": [
+      "Phasmophobia",
+      "Ghost hunt",
+      "EMF reader",
+      "Ghostbusters scanner"
+    ],
+    "family": "horror_tension",
+    "subfamily": "search",
+    "summary": "Sweep a scanner across a room, following rising signal to locate the ghost's hiding spot.",
+    "core_loop": "sweep → meter rises → narrow down → tap the spot",
+    "verbs": [
+      "scan",
+      "locate"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "scanner",
+      "signal meter",
+      "room"
+    ],
+    "rules": [
+      "the signal rises as the scanner nears the ghost",
+      "tapping the wrong spot costs time",
+      "a hint narrows the room"
+    ],
+    "win": "find the ghost",
+    "lose": "time runs out",
+    "scoring": "time",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends hide a ghost for each other"
+    ],
+    "content_needs": [
+      "room maps"
+    ],
+    "difficulty_levers": [
+      "room size",
+      "noise"
+    ],
+    "tools": [
+      "image_gallery",
+      "hint",
+      "timer_bar",
+      "score",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "ghost scanner game",
+      "hunt the ghost in the house",
+      "ghostbusters emf reader style search"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "blackout_map_memory",
+    "name": "Blackout map memory",
+    "aliases": [
+      "Memorize the room then the lights go out",
+      "Dark memory",
+      "Escape in the dark"
+    ],
+    "family": "horror_tension",
+    "subfamily": "memory",
+    "summary": "The player memorizes a room layout in a brief glimpse, then navigates it in darkness.",
+    "core_loop": "see the room → lights out → move through memory → reach the door",
+    "verbs": [
+      "memorize",
+      "navigate"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "room",
+      "lights",
+      "hazards"
+    ],
+    "rules": [
+      "the room is shown for a short glimpse",
+      "after lights out hazards remain",
+      "touching a hazard ends the run"
+    ],
+    "win": "reach the door",
+    "lose": "hit a hazard",
+    "scoring": "time",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare times"
+    ],
+    "content_needs": [
+      "room layouts"
+    ],
+    "difficulty_levers": [
+      "glimpse time",
+      "hazard count"
+    ],
+    "tools": [
+      "player_drag",
+      "sequence_memory",
+      "lives",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "memorize the room before the lights go out",
+      "navigate a dark room from memory",
+      "blind escape through my own house layout"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hide_and_seek_friends_live",
+    "name": "Live hide and seek",
+    "aliases": [
+      "Hide and seek",
+      "Among Us lite",
+      "Prop hunt",
+      "Hunt in the dark"
+    ],
+    "family": "horror_tension",
+    "subfamily": "social",
+    "summary": "One friend seeks while the others hide among props or rooms, sending clues, until all are found.",
+    "core_loop": "hide → seeker searches → tap suspects → winner",
+    "verbs": [
+      "hide",
+      "seek"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "map",
+      "hide spots",
+      "clues"
+    ],
+    "rules": [
+      "one player seeks and the rest hide",
+      "hiding spots are limited and can hold one player",
+      "the seeker has a limited number of guesses"
+    ],
+    "win": "seeker finds everyone",
+    "lose": "seeker runs out of guesses",
+    "scoring": "found count",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "friends fight for the last hiding spot"
+    ],
+    "content_needs": [
+      "maps"
+    ],
+    "difficulty_levers": [
+      "guess limit",
+      "map size"
+    ],
+    "tools": [
+      "group_roster",
+      "realtime_room",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "hide and seek with friends in a haunted house",
+      "prop hunt game",
+      "live hide and seek in the group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "impostor_among_us_friends",
+    "name": "The impostor among us",
+    "aliases": [
+      "Among Us",
+      "Werewolf",
+      "Mafia",
+      "Spy hunt"
+    ],
+    "family": "horror_tension",
+    "subfamily": "social deduction",
+    "summary": "One friend secretly becomes the monster, while the others complete tasks and vote on who it is.",
+    "core_loop": "do tasks → someone vanishes → discuss → vote",
+    "verbs": [
+      "deduce",
+      "vote"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tasks",
+      "chat",
+      "vote"
+    ],
+    "rules": [
+      "one player is secretly the monster",
+      "everyone else completes tasks",
+      "a discussion and vote can remove a suspect"
+    ],
+    "win": "voted correctly",
+    "lose": "monster wins",
+    "scoring": "win rate",
+    "session_seconds": [
+      180,
+      600
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "bluffing among friends"
+    ],
+    "content_needs": [
+      "role sets"
+    ],
+    "difficulty_levers": [
+      "player count"
+    ],
+    "tools": [
+      "group_roster",
+      "realtime_room",
+      "vote_tally",
+      "timer_bar"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "werewolf with my friends but spooky",
+      "among us style game for my group chat",
+      "mafia horror night"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "obey_the_rules_strange_place",
+    "name": "Obey the rules",
+    "aliases": [
+      "Rules horror",
+      "Elevator game",
+      "SCP rules",
+      "Backrooms rules"
+    ],
+    "family": "horror_tension",
+    "subfamily": "rule following",
+    "summary": "Posted rules are given for a strange place, and the player follows them while spotting the one that must be broken.",
+    "core_loop": "read rules → act in situations → some rules conflict → decide",
+    "verbs": [
+      "read",
+      "decide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "rule list",
+      "situations",
+      "sanity"
+    ],
+    "rules": [
+      "a rule list is posted at the start",
+      "situations test each rule",
+      "some rules contradict and must be weighed"
+    ],
+    "win": "finish the shift",
+    "lose": "sanity zero",
+    "scoring": "rules followed",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends write rules for each other"
+    ],
+    "content_needs": [
+      "rule sets"
+    ],
+    "difficulty_levers": [
+      "rule count",
+      "conflicts"
+    ],
+    "tools": [
+      "quiz",
+      "lives",
+      "rounds",
+      "score",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "rules horror game for a strange hotel",
+      "elevator game with rules",
+      "follow the rules or else"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "cursed_loot_push_luck",
+    "name": "Cursed loot",
+    "aliases": [
+      "Push your luck",
+      "Loot or flee",
+      "Risk reward",
+      "Don't be greedy"
+    ],
+    "family": "horror_tension",
+    "subfamily": "risk",
+    "summary": "Each room offers loot with a rising curse, and the player chooses when to flee with it before the curse takes it all.",
+    "core_loop": "enter room → take loot → curse grows → flee with score or go deeper",
+    "verbs": [
+      "gamble",
+      "decide"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "loot",
+      "curse meter",
+      "rooms"
+    ],
+    "rules": [
+      "each take raises the curse",
+      "fleeing banks the loot you hold",
+      "triggering the curse loses unbanked loot"
+    ],
+    "win": "bank the most",
+    "lose": "curse triggers",
+    "scoring": "banked loot",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare banked totals"
+    ],
+    "content_needs": [
+      "loot tables"
+    ],
+    "difficulty_levers": [
+      "curse growth"
+    ],
+    "tools": [
+      "rounds",
+      "score",
+      "lives",
+      "difficulty_curve"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "cursed treasure vault push your luck game",
+      "take loot or flee game",
+      "greedy ghost room"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "phone_call_dread_dialogue",
+    "name": "Dread phone call",
+    "aliases": [
+      "Phone call horror",
+      "Voice message",
+      "Dialogue tree",
+      "Her Story"
+    ],
+    "family": "horror_tension",
+    "subfamily": "dialogue",
+    "summary": "A phone call reveals a creeping situation, and the player's choices change the voice's responses.",
+    "core_loop": "answer → read replies → choose responses → call ends",
+    "verbs": [
+      "read",
+      "choose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "chat bubbles",
+      "replies",
+      "voice"
+    ],
+    "rules": [
+      "replies change the voice's tone",
+      "some information appears only after certain choices",
+      "hanging up early ends the call"
+    ],
+    "win": "learn the secret",
+    "lose": "hang up too soon",
+    "scoring": "ending",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends write calls"
+    ],
+    "content_needs": [
+      "scripts"
+    ],
+    "difficulty_levers": [
+      "branch count"
+    ],
+    "tools": [
+      "choice_story",
+      "reveal",
+      "lives",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "creepy phone call game",
+      "voice message that knows my name",
+      "dialogue horror over a phone line"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "found_footage_scrub",
+    "name": "Found footage scrub",
+    "aliases": [
+      "Found footage",
+      "Her Story",
+      "Scrub the tape",
+      "VHS horror"
+    ],
+    "family": "horror_tension",
+    "subfamily": "investigation",
+    "summary": "Scrub through a tape to find the frame that reveals what happened.",
+    "core_loop": "scrub → spot clue → tap the frame → report",
+    "verbs": [
+      "investigate"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "timeline",
+      "clue markers"
+    ],
+    "rules": [
+      "the tape is scrubbed on a timeline",
+      "a clue shows for a few frames",
+      "reporting needs the clue frame"
+    ],
+    "win": "find the clue",
+    "lose": "time runs out",
+    "scoring": "clues found",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends hide clues"
+    ],
+    "content_needs": [
+      "tapes"
+    ],
+    "difficulty_levers": [
+      "clue count"
+    ],
+    "tools": [
+      "image_gallery",
+      "hint",
+      "timer_bar",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "found footage game",
+      "find what happened in the tape",
+      "vhs horror investigation"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "pursued_maze_chase",
+    "name": "Pursued in the maze",
+    "aliases": [
+      "Pac-Man horror",
+      "Maze chase",
+      "Slender",
+      "Pacman with a monster",
+      "Chased by the thing"
+    ],
+    "family": "horror_tension",
+    "subfamily": "chase",
+    "summary": "A pursuer follows the player through a maze at a slightly slower pace, and the player gathers keys and finds doors before being cornered.",
+    "core_loop": "run the corridors → collect keys → pursuer closes in on dead ends → open the exit",
+    "verbs": [
+      "flee",
+      "collect"
+    ],
+    "inputs": [
+      "swipe"
+    ],
+    "pieces": [
+      "maze",
+      "pursuer",
+      "keys",
+      "exit door"
+    ],
+    "rules": [
+      "the pursuer picks the shortest path",
+      "dead ends are dangerous",
+      "keys are needed for the door"
+    ],
+    "win": "escape through the exit",
+    "lose": "caught by the pursuer",
+    "scoring": "keys collected and time",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "race the same maze",
+      "Group designs mazes"
+    ],
+    "content_needs": [
+      "maze layouts"
+    ],
+    "difficulty_levers": [
+      "pursuer speed",
+      "key count",
+      "maze size"
+    ],
+    "tools": [
+      "player_drag",
+      "pickups",
+      "collide",
+      "lives",
+      "checkpoint",
+      "speed_ramp"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "slender style maze where something is chasing me",
+      "pac man but the ghosts are scary",
+      "escape a haunted maze with keys"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dread_wait_and_tap",
+    "name": "Dread timing tap",
+    "aliases": [
+      "Jump scare timing",
+      "Wait for it",
+      "Tension tap",
+      "Don't flinch"
+    ],
+    "family": "horror_tension",
+    "subfamily": "timing",
+    "summary": "A creeping scene builds with no clear cue, and the player must tap to act at the instant a hidden event happens or hold their nerve when nothing does.",
+    "core_loop": "watch the scene → tension builds → tap on the true event → or stay still on a fake → next scene",
+    "verbs": [
+      "wait",
+      "react"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "scene",
+      "tension meter",
+      "event flash"
+    ],
+    "rules": [
+      "some scenes have a real event and some are fakes",
+      "tapping on a fake loses a life"
+    ],
+    "win": "react to every real event",
+    "lose": "three false taps or one missed event",
+    "scoring": "correct reads in a row",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare nerve"
+    ],
+    "content_needs": [
+      "scene sets"
+    ],
+    "difficulty_levers": [
+      "fake ratio",
+      "cue subtlety"
+    ],
+    "tools": [
+      "timer_bar",
+      "lives",
+      "rounds",
+      "score",
+      "difficulty_curve"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a game that tests how calm I stay when the monster appears",
+      "dread timing game with fake scares",
+      "hold your nerve horror"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "heartbeat_calm_tap",
+    "name": "Heartbeat calm tap",
+    "aliases": [
+      "Heartbeat",
+      "Keep calm",
+      "Pulse game",
+      "Fear meter"
+    ],
+    "family": "horror_tension",
+    "subfamily": "rhythm tension",
+    "summary": "A heartbeat pulses faster as danger nears, and the player taps in time with a slower calming rhythm to keep fear down while hiding.",
+    "core_loop": "heartbeat speeds up → tap the slow calming beat → fear meter drops → danger passes",
+    "verbs": [
+      "tap",
+      "time"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "heartbeat pulse",
+      "calm ring",
+      "fear meter"
+    ],
+    "rules": [
+      "tapping off beat adds fear",
+      "danger pauses when fear is low"
+    ],
+    "win": "survive until the danger leaves",
+    "lose": "fear meter fills",
+    "scoring": "time survived",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare calm"
+    ],
+    "content_needs": [
+      "danger timelines"
+    ],
+    "difficulty_levers": [
+      "pulse speed",
+      "ring size"
+    ],
+    "tools": [
+      "beat_target",
+      "timer_bar",
+      "lives",
+      "score",
+      "audio_synth"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "a game where I tap along to keep my heartbeat calm",
+      "fear meter rhythm game",
+      "calm down while a ghost walks by"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "distraction_throw_lure",
+    "name": "Throw to lure away",
+    "aliases": [
+      "Throw a rock to distract",
+      "Lure the guard",
+      "Hitman distraction",
+      "Alien lure"
+    ],
+    "family": "horror_tension",
+    "subfamily": "stealth puzzle",
+    "summary": "The player throws noisemakers to pull a patrolling monster away from the path, then slips past it.",
+    "core_loop": "aim a throw → noise draws the monster → slip past → reach the door",
+    "verbs": [
+      "aim",
+      "lure"
+    ],
+    "inputs": [
+      "drag",
+      "tap"
+    ],
+    "pieces": [
+      "monster",
+      "noisemakers",
+      "path",
+      "noise radius"
+    ],
+    "rules": [
+      "the monster investigates the loudest recent noise",
+      "noisemakers are limited"
+    ],
+    "win": "reach the door unseen",
+    "lose": "monster notices you",
+    "scoring": "noisemakers left",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends solve each other's levels"
+    ],
+    "content_needs": [
+      "level layouts"
+    ],
+    "difficulty_levers": [
+      "noisemakers",
+      "monster perception"
+    ],
+    "tools": [
+      "player_drag",
+      "collide",
+      "pickups",
+      "lives",
+      "checkpoint"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "throw a bottle to lure the monster away",
+      "distract the guard and sneak out",
+      "lure the ghost into the other room"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "night_drive_headlights",
+    "name": "Night drive",
+    "aliases": [
+      "Night drive",
+      "Dark road",
+      "Headlights horror",
+      "Lost Highway game"
+    ],
+    "family": "horror_tension",
+    "subfamily": "driving tension",
+    "summary": "Steer along a dark road lit only by headlights, avoiding shapes that appear at the edge of the beam.",
+    "core_loop": "steer lane to lane → shapes appear in the headlight → avoid or brake → reach the gas station",
+    "verbs": [
+      "steer",
+      "react"
+    ],
+    "inputs": [
+      "tilt",
+      "swipe"
+    ],
+    "pieces": [
+      "road",
+      "headlight cone",
+      "shapes",
+      "fuel"
+    ],
+    "rules": [
+      "figures stand still or lurch",
+      "low fuel raises dread"
+    ],
+    "win": "reach the next stop",
+    "lose": "crash into a figure",
+    "scoring": "distance driven",
+    "session_seconds": [
+      45,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare distance"
+    ],
+    "content_needs": [
+      "road patterns"
+    ],
+    "difficulty_levers": [
+      "speed",
+      "figure frequency"
+    ],
+    "tools": [
+      "lanes",
+      "collide",
+      "lives",
+      "speed_ramp",
+      "score",
+      "endless"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "night drive horror where things step into the road",
+      "headlights game with ghosts",
+      "driving through a haunted forest"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "scary_story_vote_circle",
+    "name": "Scary story vote",
+    "aliases": [
+      "Scary story night",
+      "Campfire horror",
+      "Creepypasta contest",
+      "Pass the flashlight"
+    ],
+    "family": "horror_tension",
+    "subfamily": "social",
+    "summary": "Friends each tell a two-sentence scary story and vote on the scariest, with a spooky reveal at the end.",
+    "core_loop": "prompt appears → everyone writes a story → stories shown anonymously → vote → reveal authors",
+    "verbs": [
+      "write",
+      "vote"
+    ],
+    "inputs": [
+      "type",
+      "tap"
+    ],
+    "pieces": [
+      "prompt",
+      "story cards",
+      "votes"
+    ],
+    "rules": [
+      "two sentences max",
+      "no voting for your own story"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "friends scare each other",
+      "weekly Group scary night"
+    ],
+    "content_needs": [
+      "prompts"
+    ],
+    "difficulty_levers": [
+      "time to write"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "vote_tally",
+      "anonymous_submit",
+      "group_roster",
+      "reveal"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "arcade",
+    "example_prompts": [
+      "two sentence horror contest with my friends",
+      "scary story night with my roommates",
+      "campfire creepypasta vote"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]
