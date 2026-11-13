@@ -5282,6 +5282,8 @@
   // With insets, the score HUD (top + 8 px, a 50 px number and its label) gets this much room
   // under the top inset, so it never covers the game's top line.
   const HUD_ROW = 72;
+  // How far past a contain fit the playfield may scale to fill the screen's width (fitFor).
+  const FILL_MAX = 1.12;
   const PARTICLES = 320;
   const RINGS = 24;
   const FLOATS = 24;
@@ -5581,7 +5583,13 @@
       const b = isObj(box) ? box : { x0: 0, y0: 0, x1: W, y1: H };
       const S = isObj(b.safe) ? b.safe : b;
       const sw = S.x1 - S.x0, sh = S.y1 - S.y0;
-      const scale = Math.min(availW / sw, availH / sh);
+      // Full width (no side bands): the playfield never draws narrower than the screen. A phone
+      // a little taller than 9:16 (with the feed's header and tab bar) would otherwise show the
+      // game as an inset card with bleed strips down both sides. The extra height runs under the
+      // insets, split evenly; past FILL_MAX (a much taller or wider screen) it fits as before.
+      const fitScale = Math.min(availW / sw, availH / sh);
+      const widthScale = cssW / (b.x1 - b.x0);
+      const scale = widthScale > fitScale && widthScale <= fitScale * FILL_MAX ? widthScale : fitScale;
       // The safe area stays inside the insets. With no bleed on an axis it is centered there (as
       // without a box); otherwise the whole box is centered on the screen as far as that allows.
       const place = (lo, avail, s0, s1, b0, b1, screen) => {

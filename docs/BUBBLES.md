@@ -565,6 +565,14 @@ changes the game world, so replays and scores are the same on every device:
   On an iPhone 14 Pro (393 × 852 pt) a 360 × 640 game so takes the full width (393 × 699, from
   y 118), with the bleed under the status bar and top bar, and a 360 × 780 game fills every edge
   with its safe area between the bars.
+- *Full width, everywhere.* The playfield (or the fit box) never draws narrower than the screen:
+  when a fit inside the insets would leave side bands, it scales up to the screen's width instead,
+  and the extra height runs evenly under the top and bottom insets. So the games feed (header
+  plus tab bar, iPhone 17: 402 × 791 pt page) shows the game edge to edge like Reels, at the same
+  size before and after the tap, instead of an inset card with the dimmed bleed down both sides.
+  Only when that would scale more than 12% past the fit (an iPad, landscape, a small phone) does
+  it fit inside as before. Drawing and pointer mapping only; the game world doesn't change.
+  `tools/screen-audit/` checks every published Curio for bands on a simulator.
 
 **Insets and posters (additions).** `insets` are `{top, bottom, left, right}` in points (each
 optional): the playfield fits inside them, the look's background still fills the screen, and the

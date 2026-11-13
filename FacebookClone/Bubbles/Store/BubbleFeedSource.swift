@@ -81,6 +81,14 @@ extension BubbleStore {
                         baseID: item.baseID
                     ))
                 }
+                #if DEBUG
+                // FB_FEED_GAME=<id>: that game is the first page (screen audits, screenshots).
+                if feedItems.isEmpty, let pinned = DebugLaunch.value("FB_FEED_GAME"), let bubble = await loadGame(id: pinned) {
+                    candidates.removeAll { $0.bubbleID == bubble.id }
+                    candidates.insert(BubbleFeedItem(id: "debug-\(bubble.id)", bubbleID: bubble.id, reason: .popular,
+                                                     serverReason: "popular", why: nil, team: nil), at: 0)
+                }
+                #endif
                 guard feedGeneration == generation else { return }
                 // Checked against the feed as it is now: it can change while games load.
                 var known = feedIdentityKeys(feedItems)
