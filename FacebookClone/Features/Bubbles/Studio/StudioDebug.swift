@@ -4,7 +4,7 @@ import SwiftUI
 
 // DEBUG-only Studio helpers for screenshots and end-to-end runs (documented in StudioView.swift):
 // `FB_STUDIO_STEP`, `FB_STUDIO_LOOK`, `FB_STUDIO_SERVICE=scripted`, `FB_STUDIO_SPEED`,
-// `FB_STUDIO_FAIL`, `FB_STUDIO_AUTOPILOT`.
+// `FB_STUDIO_FAIL`, `FB_STUDIO_AUTOPILOT` (`=build` stops on Try).
 
 extension StudioModel {
     /// Applies `FB_STUDIO_STEP` and `FB_STUDIO_AUTOPILOT`. Called once from `attach`.
@@ -114,12 +114,21 @@ extension StudioModel {
                 await pause(2.5)
             }
             if model.stage == .brief {
-                log("brief: \(model.museReading) \(model.musePlan)")
+                // FB_STUDIO_STEP=brief skips the brief's arrival, where this is normally set.
+                if !model.buildsMicrogame { model.buildsMicrogame = model.suggestsMicrogame }
+                log("brief: \(model.museReading) \(model.musePlan) microgame=\(model.buildsMicrogame)")
                 model.startCompose(.create)
-                guard await wait(for: { model.stage == .tryIt || model.failure != nil }) else { return log("FAILED waiting for compose") }
+                guard await wait(for: { model.stage == .tryIt || model.failure != nil }, timeout: 720) else { return log("FAILED waiting for compose") }
                 if let failure = model.failure { return log("compose failed: \(failure.message)") }
             }
-            log("try: \(model.currentResult?.manifest.title ?? "?") id=\(model.currentResult?.id ?? "?") look=\(model.currentResult?.manifest.style.look ?? "?") events=\(model.events.count)")
+            log("try: \(model.currentResult?.manifest.title ?? "?") id=\(model.currentResult?.id ?? "?") look=\(model.currentResult?.manifest.style.look ?? "?") events=\(model.events.count) server=\(model.runIsServer)")
+            if DebugLaunch.value("FB_STUDIO_AUTOPILOT") == "build" {
+                // Stop on Try: only the Build step was asked for.
+                if let id = model.currentResult?.id, let record = model.makeRecords[id] {
+                    log("make record: microgame=\(record.isMicrogame) blocks=\(record.concepts) repairs=\(record.repairs.count) playtest=\(record.playtest?.title ?? "-") lanes=\(record.playtest?.lanes.count ?? 0) models=\(record.models) steps=\(record.trail.count)")
+                }
+                return log("done (build only)")
+            }
             await pause(4)
 
             model.tweakText = "Make it a little slower"

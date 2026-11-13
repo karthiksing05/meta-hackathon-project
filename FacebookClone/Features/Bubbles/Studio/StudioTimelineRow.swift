@@ -31,6 +31,8 @@ struct StudioTimelineRow: View {
     let event: StudioEvent
     let state: StudioRowState
     let showsConnector: Bool
+    /// The run is made on the game server: engine steps say "On the server", not "On device".
+    var onServer = false
 
     var body: some View {
         HStack(alignment: .top, spacing: FBSpacing.m) {
@@ -54,7 +56,9 @@ struct StudioTimelineRow: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 // Offline steps aren't labeled one by one; the header says "Offline composer".
-                if let info = StudioModelInfo(model: event.model, isOffline: false, step: event.step) {
+                if onServer, event.model == nil, event.step == .validate || event.step == .playtest {
+                    StudioModelChip(info: StudioModelInfo(name: "On the server", tint: StudioGlow.device, symbol: "server.rack"))
+                } else if let info = StudioModelInfo(model: event.model, isOffline: false, step: event.step) {
                     StudioModelChip(info: info)
                 }
                 if let concepts = event.concepts, !concepts.isEmpty {

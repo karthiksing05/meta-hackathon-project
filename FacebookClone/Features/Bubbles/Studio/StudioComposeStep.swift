@@ -143,6 +143,7 @@ private struct StudioComposeHeader: View {
         let clock = model.clockText(at: date)
         if model.isFinished { return "Made in \(clock)" }
         if model.failure != nil { return "Stopped at \(clock)" }
+        if model.generationWait != nil { return "\(clock) · Waiting for a free slot" }
         // Microgame events carry the composer's own words; formula steps use the step's name.
         let step = model.runIsMicrogame ? (model.currentEvent?.title ?? "Getting started") : (model.currentEvent?.step.title ?? "Getting started")
         return "\(clock) · \(step)"
@@ -177,14 +178,15 @@ private struct StudioComposeTimeline: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 2) {
                     if model.events.isEmpty && model.isComposing {
-                        StudioStartingRow()
+                        StudioStartingRow(wait: model.generationWait, isServer: model.runIsServer)
                     }
                     ForEach(Array(model.events.enumerated()), id: \.element.id) { index, event in
                         VStack(alignment: .leading, spacing: 0) {
                             StudioTimelineRow(
                                 event: event,
                                 state: state(at: index),
-                                showsConnector: index < model.events.count - 1
+                                showsConnector: index < model.events.count - 1,
+                                onServer: model.runIsServer
                             )
                             if let report = model.playtestReports[event.id], !report.runs.isEmpty {
                                 // The bots' real runs, under the playtest result that carried them.
@@ -242,14 +244,28 @@ private struct StudioComposeTimeline: View {
     }
 }
 
-/// Shown until Muse's first step arrives.
+/// Shown until Muse's first step arrives; for a server job still in line, where it stands.
 private struct StudioStartingRow: View {
+    var wait: StudioGenerateBridge.Wait?
+    var isServer = false
+
     var body: some View {
-        StudioTimelineRow(
-            event: StudioEvent(step: .understand, title: "Waking up Muse", detail: "Sending your brief to Muse Studio"),
-            state: .active,
-            showsConnector: false
-        )
+        StudioTimelineRow(event: event, state: .active, showsConnector: false)
+            .animation(.easeInOut(duration: 0.3), value: wait)
+    }
+
+    private var event: StudioEvent {
+        if let wait {
+            let detail: String
+            switch wait.position {
+            case 1?: detail = "You're next in line"
+            case let n? where n > 1: detail = "\(n - 1) ahead of you in line"
+            default: detail = "Games are made one at a time. Yours starts soon"
+            }
+            return StudioEvent(step: .understand, title: "Waiting for a free slot", detail: detail)
+        }
+        return StudioEvent(step: .understand, title: "Waking up Muse",
+                           detail: isServer ? "Sending your brief to the game server" : "Sending your brief to Muse Studio")
     }
 }
 
@@ -327,6 +343,9 @@ extension StudioModel {
 
     /// What Muse is doing right now, rotating every few seconds during long steps.
     func tip(at date: Date) -> String {
+        if generationWait != nil {
+            return "Each person gets one game at a time on the server. Yours starts as soon as a slot opens."
+        }
         let step = currentEvent?.step ?? .understand
         let tips = (runIsMicrogame ? StudioModel.microgameTips(for: step) : StudioModel.tips(for: step)) + StudioModel.generalTips
         let waited = max(0, date.timeIntervalSince(lastEventAt ?? date))

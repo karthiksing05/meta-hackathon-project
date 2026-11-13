@@ -13,7 +13,11 @@ import SwiftUI
 ///   `FB_STUDIO_SPEED=4` plays it 4× faster; `FB_STUDIO_FAIL=1` makes it fail halfway.
 /// - `FB_STUDIO_AUTOPILOT=1`: drives the whole flow (describe → brief → compose → try → tweak →
 ///   new look → level 2 → share and challenge) and logs each step as `[Studio autopilot] …`.
-/// - `FB_STUDIO_MICROGAME=1`: build it as a microgame when Muse is configured.
+///   `FB_STUDIO_AUTOPILOT=build` stops once the game is on Try (with `FB_STUDIO_STEP=brief`, no
+///   Muse call before the build).
+/// - `FB_STUDIO_MICROGAME=1`: build it as a microgame when Muse (or a server generator) is available.
+/// - `FB_GENERATE=mock|mock-plain|mock-fail` (+ `FB_GENERATE_SPEED`): make the microgame as a
+///   server job from a recorded run (see `App/DebugLaunch.swift`).
 struct StudioView: View {
     let launch: StudioLaunch
 

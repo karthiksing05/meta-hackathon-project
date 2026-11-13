@@ -211,6 +211,10 @@ final class StudioModel {
     var runIsMicrogame = false
     /// Real playtest reports from the microgame composer, by the event that carried them.
     var playtestReports: [UUID: StudioPlaytest.Report] = [:]
+    /// True while (or after) the current run is made on the server (`StudioGenerateBridge`).
+    var runIsServer = false
+    /// Set while a server job waits for a free slot; nil once it runs (or on the device).
+    var generationWait: StudioGenerateBridge.Wait?
     /// What each finished run did, by game id, for "How Muse made it" (saved on share).
     @ObservationIgnored var makeRecords: [String: MakeRecord] = [:]
     /// The new look a "Tweak it" run asked for (Try it's look menu).
@@ -798,6 +802,8 @@ final class StudioModel {
         sourcesUsed = nil
         sawOfflineEvent = offline
         playtestReports = [:]
+        generationWait = nil
+        runIsServer = false
         isComposing = true
         composeStartedAt = Date()
         lastEventAt = composeStartedAt
@@ -948,6 +954,7 @@ final class StudioModel {
         composeTask = nil
         advanceTask?.cancel()
         isComposing = false
+        generationWait = nil
         failure = nil
         if composeKind == .create {
             go(to: brief == nil ? .ask : .brief, direction: -1)
@@ -1356,7 +1363,7 @@ extension StudioModel {
         #if DEBUG
         if service is StudioScriptedService { return false }
         #endif
-        return StudioMicrogameBridge.isAvailable && mode == .create
+        return (StudioMicrogameBridge.isAvailable || GameGeneratorFactory.current != nil) && mode == .create
     }
 
     /// The default for `buildsMicrogame` when the brief arrives: the person picked "Microgame", or
@@ -1394,8 +1401,11 @@ extension StudioModel {
     }
 
     /// The microgame composer's stream when this run should use it; nil keeps the formula pipeline.
+    ///
+    /// New games go to the server when there is a generator for this launch (`GameGeneratorFactory`:
+    /// `FB_API=live`, or `FB_GENERATE=mock`), otherwise to the on-device composer. Tweaks and next
+    /// levels always run on-device (server v1 makes new games only).
     func microgameStream(for request: StudioRequest, kind: StudioComposeKind) -> AsyncThrowingStream<StudioEvent, Error>? {
-        guard StudioMicrogameBridge.isAvailable else { return nil }
         #if DEBUG
         if service is StudioScriptedService { return nil }
         #endif
@@ -1406,9 +1416,17 @@ extension StudioModel {
         case .create:
             guard buildsMicrogame, canBuildMicrogame else { return nil }
             let brief = request.brief ?? briefForRun ?? BubbleBrief(intent: request.prompt, audience: request.scope)
+            if let generator = GameGeneratorFactory.current {
+                runIsServer = true
+                return StudioGenerateBridge.compose(
+                    with: generator, request: microgameRequestText(request), brief: brief, onReport: onReport,
+                    onWait: { [weak self] wait in self?.generationWait = wait }
+                )
+            }
+            guard StudioMicrogameBridge.isAvailable else { return nil }
             return StudioMicrogameBridge.compose(request: microgameRequestText(request), brief: brief, onReport: onReport)
         case .tweak, .nextLevel:
-            guard let base = request.base, StudioMicrogameBridge.canRevise(base) else { return nil }
+            guard StudioMicrogameBridge.isAvailable, let base = request.base, StudioMicrogameBridge.canRevise(base) else { return nil }
             return StudioMicrogameBridge.revise(base, request: request.prompt, onReport: onReport)
         }
     }

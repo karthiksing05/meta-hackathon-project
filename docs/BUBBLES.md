@@ -1626,3 +1626,13 @@ It runs `MicrogameComposer` in a hidden macOS `WKWebView` (WebKit runs the WebAs
 the events, the title, the validation result and the gate report. It uses real Muse when a key is
 configured; `--fake-muse` replies with a manifest with a misspelled param, then
 `authoring/games/tide_taps.authoring.json` (or `--fake-good FILE`), which exercises the repair loop.
+
+**Server path.** Studio can also make a new microgame on the games server (Max's `POST /v1/generate`,
+which runs this same composer server-side). `GameGenerator` (`Bubbles/API/GameGenerator.swift`; `Live`
+and a `Mock` that replays a recorded real run) polls `GET /v1/generate/{jobId}` every 1–2 s, dedupes
+events by `seq`, and fetches the finished game's manifest from `manifestUrl` without re-encoding it.
+`StudioGenerateBridge` turns the server's events (`kind` + `summary`) into the same `StudioEvent`s as
+`StudioMicrogameBridge`, so Build, Try, Share and "How Muse made it" are unchanged. Optional fields
+(`data` on events, `position`, `code`) are used when present. It's chosen by `FB_API=live` or
+`FB_GENERATE=mock` (`App/DebugLaunch.swift`); otherwise Studio uses the on-device composer. Tweaks and
+next levels stay on-device (`revise` reads the server game's `content.authoring_json`).
