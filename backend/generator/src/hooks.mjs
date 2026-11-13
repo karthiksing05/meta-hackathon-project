@@ -30,7 +30,7 @@ export const AUTHORING_FILES = [
   'kit/look.mjs', 'kit/font-data.mjs', 'kit/vibes.mjs', 'kit/readability.mjs', 'kit/raster.mjs', 'kit/jpeg.mjs',
   'playtest/layout-check.mjs', 'playtest/bots.mjs', 'playtest/frame-render.mjs', 'playtest/fill-check.mjs', 'playtest/requirements-check.mjs',
   'verify/verify.mjs', 'verify/registry.mjs', 'verify/frames.mjs', 'verify/scene.mjs', 'verify/solve.mjs', 'verify/prove.mjs',
-  'verify/checks/fill.mjs', 'verify/checks/layout.mjs', 'verify/checks/look.mjs', 'verify/checks/readability.mjs', 'verify/checks/requirements.mjs', 'verify/checks/style.mjs', 'verify/checks/targets.mjs',
+  'verify/checks/fill.mjs', 'verify/checks/hud.mjs', 'verify/checks/layout.mjs', 'verify/checks/look.mjs', 'verify/checks/readability.mjs', 'verify/checks/requirements.mjs', 'verify/checks/shapes.mjs', 'verify/checks/style.mjs', 'verify/checks/targets.mjs',
 ];
 
 const off = (v) => ['0', 'off', 'false', 'no'].includes(String(v ?? '').trim().toLowerCase());
