@@ -82,13 +82,22 @@ export function contextSection(ctx) {
  * Throws GenerationError when the game never validates, or whatever Muse or the page threw.
  */
 export async function compose({ request, brief, base = null, remixOf = null, level = null, context = null }, { muse, studio, model = 'muse-wonder-1.0', onEvent = () => {}, signal }) {
-  const planned = contextSection(context);
-  const ask = async (system, user) => {
+  // Studio bundle version 3 and up put the harness context into the prompt themselves (only the planned tools in the
+  // menu, plus the spec and the matched gold examples). An older bundle only gets the additive section, and only on
+  // compose calls, not on the score review or repair that name their own model.
+  const bundled = (studio.version ?? 0) >= 3;
+  const planned = bundled ? '' : contextSection(context);
+  const ask = async (system, user, purpose = '', options = null) => {
     if (signal?.aborted) throw new GenerationError('The job was cancelled or ran out of time.');
-    const r = await muse.chatJSON({ model, system: planned ? system + '\n' + planned : system, user });
-    return { content: r.content, model: r.model };
+    const body = { model: options?.model || model, system: planned && !options?.model ? system + '\n' + planned : system, user };
+    if (options?.max_tokens) body.maxTokens = Number(options.max_tokens);
+    if (options?.effort !== undefined) body.reasoningEffort = options.effort;
+    const started = Date.now();
+    const r = await muse.chatJSON(body);
+    console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'muse call', purpose, model: r.model, ms: Date.now() - started, usage: r.usage }));
+    return { content: r.content, model: r.model, usage: r.usage };
   };
-  const out = await studio.compose({ request, brief, base }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))));
+  const out = await studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))));
   const m = out.manifest;
   if (base) {
     m.id = `mg-${slug(m.title ?? base.title ?? 'game') || 'game'}-${suffix()}`; // never the base game's own id

@@ -20,11 +20,13 @@ type SeriesRound struct {
 	Seed    int64                `bson:"seed" json:"seed"`                           // picked by the server
 	LogSeed string               `bson:"logSeed,omitempty" json:"logSeed,omitempty"` // the seed the engine ran on, set by the first run
 	Plays   map[string]RoundPlay `bson:"plays" json:"plays"`                         // by user id
+	Lower   bool                 `bson:"lower,omitempty" json:"lower,omitempty"`     // a smaller score wins (a time trial)
 }
 
 // RoundPlay is one person's checked run of a round: what the replay computed, not what the phone claimed.
 type RoundPlay struct {
 	Score  int64     `bson:"score" json:"score"`
 	TimeMs int64     `bson:"timeMs" json:"timeMs"`
+	DNF    bool      `bson:"dnf,omitempty" json:"dnf,omitempty"` // the run didn't finish, on a game where only finished runs count
 	At     time.Time `bson:"at" json:"at"`
 }

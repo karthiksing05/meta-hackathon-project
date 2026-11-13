@@ -80,6 +80,14 @@ export class MuseClient {
   /** One system + user turn in JSON mode. Returns the reply text and the model that answered.
    *  Asks again once if the reply holds no JSON object. */
   async chatJSON({ model, system, user, maxTokens = 16000, reasoningEffort = 'medium', timeout = 150, maxAttempts = 2 }) {
+    const usage = { prompt_tokens: 0, completion_tokens: 0, reasoning_tokens: 0, total_tokens: 0, calls: 0 };
+    const tally = (u) => {
+      usage.calls++;
+      usage.prompt_tokens += Number(u?.prompt_tokens) || 0;
+      usage.completion_tokens += Number(u?.completion_tokens) || 0;
+      usage.reasoning_tokens += Number(u?.completion_tokens_details?.reasoning_tokens ?? u?.reasoning_tokens) || 0;
+      usage.total_tokens += Number(u?.total_tokens) || (Number(u?.prompt_tokens) || 0) + (Number(u?.completion_tokens) || 0);
+    };
     if (!this.isConfigured) throw new MuseError('Muse is not configured on this server.');
     let budget = Math.max(maxTokens, 4000); // the text models reason first; small budgets come back empty
     let last;
@@ -95,6 +103,7 @@ export class MuseClient {
         };
         if (reasoningEffort) body.reasoning_effort = reasoningEffort;
         const data = await this.#send('chat/completions', body, { timeout, maxAttempts });
+        tally(data?.usage);
         const choice = data?.choices?.[0];
         if (!choice) throw new MuseError('Muse sent no choices.');
         content = String(choice.message?.content ?? '').trim();
@@ -106,7 +115,7 @@ export class MuseClient {
         }
         throw new MuseError(`${answered} sent an empty reply (${choice.finish_reason ?? 'no reason given'}).`);
       }
-      last = { content, model: answered };
+      last = { content, model: answered, usage: { ...usage } };
       if (extractObject(content)) return last;
     }
     throw new MuseError(`${last?.model ?? model} didn't return a JSON object.`);
@@ -126,6 +135,6 @@ export class ScriptedMuse {
   async chatJSON({ user }) {
     this.prompts.push(user);
     const r = this.replies[Math.min(this.prompts.length - 1, this.replies.length - 1)];
-    return { content: typeof r === 'string' ? r : JSON.stringify(r), model: this.model };
+    return { content: typeof r === 'string' ? r : JSON.stringify(r), model: this.model, usage: { prompt_tokens: 0, completion_tokens: 0, reasoning_tokens: 0, total_tokens: 0, calls: 1 } };
   }
 }

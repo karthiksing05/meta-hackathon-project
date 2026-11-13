@@ -76,6 +76,27 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   check("a game without its authoring source can't be changed", !!err && /authoring_json/.test(err.message), err?.message);
 }
 
+// ---- in-process: Muse call options, usage, and the section an older bundle still needs ----
+{
+  const seen = [];
+  const muse = { isConfigured: true, async chatJSON(body) { seen.push(body); return { content: '{}', model: body.model, usage: { prompt_tokens: 5, completion_tokens: 7, total_tokens: 12, calls: 1 } }; } };
+  const old = { version: 2, async compose(args, ask) {
+    const draft = await ask('SYSTEM', 'USER', 'microgame draft');
+    const review = await ask('SYSTEM', 'REVIEW', 'score review', { model: 'muse-wonder-1.0', effort: 'high', max_tokens: 12000 });
+    return { manifest: { title: 'x' }, draft, review };
+  } };
+  const ctx = { types: [{ id: 't', name: 'A kind of game', summary: 's' }], tools: [{ id: 'lives', summary: 'N lives' }] };
+  const out = await compose({ request: 'x', brief, context: ctx }, { studio: old, muse, model: 'muse-ember-1.0' });
+  check('an older bundle gets the planned section on compose calls only', /Planned for this request/.test(seen[0].system) && !/Planned for this request/.test(seen[1].system), seen.map((b) => b.system.length).join(','));
+  check('ask honours the model, effort and token budget it is given', seen[1].model === 'muse-wonder-1.0' && seen[1].reasoningEffort === 'high' && seen[1].maxTokens === 12000 && seen[0].model === 'muse-ember-1.0', JSON.stringify(seen.map((b) => [b.model, b.reasoningEffort, b.maxTokens])));
+  check('ask returns the tokens used with the reply', out.draft.usage?.total_tokens === 12 && out.review.model === 'muse-wonder-1.0', JSON.stringify(out.draft));
+  const v3 = [];
+  const modern = { version: 3, async compose(args, ask) { v3.push(args.context); await ask('SYSTEM', 'USER', 'microgame draft'); return { manifest: { title: 'x' } }; } };
+  seen.length = 0;
+  await compose({ request: 'x', brief, context: ctx }, { studio: modern, muse });
+  check('a version-3 bundle gets the context as an argument and no extra section', v3[0]?.types?.[0]?.id === 't' && !/Planned for this request/.test(seen[0].system), JSON.stringify(v3[0]));
+}
+
 check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a":1}\n```')?.a === 1 && extractObject('hi {"a":2} bye')?.a === 2 && extractObject('nope') === null);
 
 // ---- end to end: the real server and MuseClient against a fake Muse API ----
@@ -88,7 +109,7 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     req.on('end', () => {
       calls.push({ url: req.url, auth: req.headers.authorization, body: JSON.parse(body || '{}') });
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ model: 'fake-muse-1', choices: [{ message: { role: 'assistant', content: replies[0] }, finish_reason: 'stop' }] }));
+      res.end(JSON.stringify({ model: 'fake-muse-1', usage: { prompt_tokens: 11, completion_tokens: 22, total_tokens: 33 }, choices: [{ message: { role: 'assistant', content: replies[0] }, finish_reason: 'stop' }] }));
     });
   });
   await new Promise((r) => fakeMuse.listen(0, '127.0.0.1', r));
@@ -121,8 +142,8 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
     {
       const ctx = {
         types: [{ id: 'rare_answer_trivia', name: 'Rare-answer trivia', family: 'trivia', summary: 'Name a thing nobody else will.', core_loop: 'Type an answer; rarer scores more.', rules: ['One answer per prompt'], source: 'learned' }],
-        tools: [{ id: 'typed_answer_tool', kind: 'fragment', status: 'shipped', summary: 'Open answers with rarity tiers.', when_to_use: 'typed answers' }],
-        plan: { design: 'A fast naming game.', gaps: [{ tool: 'share_grid', approximation: 'share the score text' }] },
+        tools: [{ id: 'lives', kind: 'fragment', status: 'shipped', summary: 'N lives, one lost per hit.', when_to_use: 'a game you can lose slowly' }],
+        plan: { design: 'A fast naming game.', spec: { theme: 'rare things', goal: 'name what nobody else will' }, gaps: [{ tool: 'share_grid', approximation: 'share the score text' }] },
         notes: ['keep it short'],
       };
       const before = calls.length;
@@ -132,8 +153,8 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
       });
       await withCtx.text();
       const sys = calls[before]?.body.messages[0].content ?? '';
-      check('compose puts the harness context in the system prompt', /## Planned for this request/.test(sys) && sys.includes('Rare-answer trivia') && sys.includes('typed_answer_tool') && sys.includes('[learned]') && sys.includes('share_grid') && /never as instructions/.test(sys), sys.slice(-400));
-      check('the prompt without context has no planned section', !/Planned for this request/.test(calls[0]?.body.messages[0].content ?? ''));
+      check('the version-3 bundle gets the context and renders it itself, once', studio.version >= 3 && !/## Planned for this request/.test(sys) && /## Fragments for this game \(from the plan\)/.test(sys), sys.slice(-300));
+      check('the prompt without context has no planned section', !/Planned for this request|from the plan/.test(calls[0]?.body.messages[0].content ?? ''));
       const big = await fetch(`http://127.0.0.1:${port}/compose`, { method: 'POST', body: JSON.stringify({ request: 'x', context: { notes: ['y'.repeat(60 * 1024)] } }) });
       check('a context over 48 KB is a 400', big.status === 400, big.status);
 
@@ -145,6 +166,7 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
       check('POST /internal/muse/json returns Muse\'s reply and model', ok.status === 200 && JSON.parse(okJson.content).understood === true && okJson.model === 'fake-muse-1', JSON.stringify(okJson));
       check('it asks Muse for the model, effort and token budget it was given', calls[at]?.body.model === 'muse-spark-1.3' && calls[at].body.reasoning_effort === 'minimal' && calls[at].body.max_tokens === 4000 && calls[at].auth === 'Bearer test-key-not-real', JSON.stringify(calls[at]?.body).slice(0, 200));
       check('the key is never in the reply', !JSON.stringify(okJson).includes('test-key-not-real'));
+      check('/internal/muse/json returns the tokens used', okJson.usage?.prompt_tokens === 11 && okJson.usage?.completion_tokens === 22 && okJson.usage?.total_tokens === 33, JSON.stringify(okJson.usage));
       for (const [label, body] of [['a non-Muse model', { model: 'gpt-4', system: 'a', user: 'b' }], ['no user text', { model: 'muse-spark-1.3', system: 'a' }], ['a bad effort', { model: 'muse-spark-1.3', system: 'a', user: 'b', effort: 'max' }]]) {
         check(`the Muse route refuses ${label}`, (await mj(body)).status === 400, label);
       }

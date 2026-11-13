@@ -57,6 +57,7 @@ type Server struct {
 	recsLocks   userLocks
 	jobRuns     sync.Map  // job id -> *jobRun, for the jobs running now
 	seriesLocks userLocks // one series at a time, so two runs can't overwrite each other
+	scoreLocks  userLocks // one person's score on one game: read the old, write the new
 }
 
 // recsSession is one person's loaded recommender state (see internal/recs).

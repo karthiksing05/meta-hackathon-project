@@ -26,11 +26,12 @@ const boardScan = 500 // how many board rows a scoped board filters from
 
 // scopedBoard returns a game's board limited to people the caller shares a scope with.
 // ok is false when it has already written an error.
-func (s *Server) scopedBoard(w http.ResponseWriter, r *http.Request, gameID string, limit int) (rows []model.Score, ok bool) {
+func (s *Server) scopedBoard(w http.ResponseWriter, r *http.Request, g *model.Game, limit int) (rows []model.Score, ok bool) {
 	ctx := r.Context()
+	gameID, order := g.ID, model.OrderOf(g.Score)
 	scope := r.URL.Query().Get("scope")
 	if scope == "" || scope == "everyone" {
-		rows, err := s.Store.Leaderboard(ctx, gameID, limit)
+		rows, err := s.Store.Board(ctx, gameID, limit, order)
 		if err != nil {
 			s.serverErr(w, r, err)
 			return nil, false
@@ -77,7 +78,7 @@ func (s *Server) scopedBoard(w http.ResponseWriter, r *http.Request, gameID stri
 		writeErr(w, 400, "scope must be everyone, friends or group")
 		return nil, false
 	}
-	all, err := s.Store.Leaderboard(ctx, gameID, boardScan)
+	all, err := s.Store.Board(ctx, gameID, boardScan, order)
 	if err != nil {
 		s.serverErr(w, r, err)
 		return nil, false
@@ -90,17 +91,21 @@ func (s *Server) scopedBoard(w http.ResponseWriter, r *http.Request, gameID stri
 	return rows, true
 }
 
-func (s *Server) myBest(ctx context.Context, gameID, userID string) int64 {
-	rows, err := s.Store.Leaderboard(ctx, gameID, boardScan)
+// myBest is a person's score on a game, and whether they have one.
+func (s *Server) myBest(ctx context.Context, gameID, userID string) (int64, bool) {
+	sc, err := s.Store.ScoreOf(ctx, gameID, userID)
 	if err != nil {
-		return 0
+		return 0, false
 	}
-	for _, row := range rows {
-		if row.UserID == userID {
-			return row.Score
-		}
+	return sc.Score, true
+}
+
+// beats says whether score a is better than score b for a game: higher, or lower when a smaller score is better.
+func beats(sm *model.ScoreModel, a, b int64) bool {
+	if sm.Lower() {
+		return a < b
 	}
-	return 0
+	return a > b
 }
 
 func (s *Server) myLikes(w http.ResponseWriter, r *http.Request) {
@@ -206,9 +211,14 @@ func (s *Server) createChallenge(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, 400, "pick at least one friend")
 		return
 	}
+	best, played := s.myBest(r.Context(), g.ID, me.ID)
+	if !played && g.Score.Lower() {
+		writeErr(w, 422, "play it first, so there is a score to beat")
+		return
+	}
 	c := &model.Challenge{
 		ID: auth.NewID(12), GameID: g.ID, FromID: me.ID, FromName: me.DisplayName, ToIDs: to,
-		Score: s.myBest(r.Context(), g.ID, me.ID), CreatedAt: time.Now().UTC().Truncate(time.Millisecond),
+		Score: best, CreatedAt: time.Now().UTC().Truncate(time.Millisecond),
 	}
 	if c.FromName == "" {
 		c.FromName = me.Username
@@ -262,7 +272,7 @@ func (s *Server) listChallenges(w http.ResponseWriter, r *http.Request) {
 		} else {
 			v.From = profile{ID: c.FromID, DisplayName: c.FromName}
 		}
-		board, _ := s.Store.Leaderboard(ctx, c.GameID, boardScan)
+		board, _ := s.Store.Board(ctx, c.GameID, boardScan, model.OrderOf(g.Score))
 		if c.FromID == me.ID {
 			v.Direction = "sent"
 			to := map[string]bool{}
@@ -271,7 +281,7 @@ func (s *Server) listChallenges(w http.ResponseWriter, r *http.Request) {
 			}
 			for _, row := range board {
 				if to[row.UserID] {
-					v.Responses = append(v.Responses, challengeResponse{row.UserID, row.Username, row.Score, row.Score > c.Score})
+					v.Responses = append(v.Responses, challengeResponse{row.UserID, row.Username, row.Score, beats(g.Score, row.Score, c.Score)})
 				}
 			}
 		} else {
@@ -280,7 +290,7 @@ func (s *Server) listChallenges(w http.ResponseWriter, r *http.Request) {
 				if row.UserID == me.ID {
 					best := row.Score
 					v.MyScore = &best
-					v.Beaten = best > c.Score
+					v.Beaten = beats(g.Score, best, c.Score)
 				}
 			}
 		}

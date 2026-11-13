@@ -104,7 +104,12 @@ type Store interface {
 	Interleave(ctx context.Context, since time.Time) (model.Interleave, error)
 	ExportEvents(ctx context.Context, since time.Time, limit int) ([]model.Event, error) // oldest first
 
-	SubmitScore(ctx context.Context, s model.Score) error // keeps the user's best
+	SubmitScore(ctx context.Context, s model.Score) error // keeps the user's best (a plain game: points, higher first)
+	// Board, ScoreOf and PutScore are for games with a score model: sorted by its direction and tie-break, one person's
+	// score, and writing it as the API decided (best, latest, lower is better).
+	Board(ctx context.Context, gameID string, limit int, order model.BoardOrder) ([]model.Score, error)
+	ScoreOf(ctx context.Context, gameID, userID string) (*model.Score, error)
+	PutScore(ctx context.Context, s model.Score) error
 	Leaderboard(ctx context.Context, gameID string, limit int) ([]model.Score, error)
 }
 

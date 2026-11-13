@@ -22,57 +22,59 @@ type RefreshToken struct {
 // Game is the stored metadata. Package files live in the PackageStore under StorageKey;
 // only relative paths are stored, the public hostname is applied when responding.
 type Game struct {
-	ID            string    `bson:"_id"`
-	OwnerID       string    `bson:"ownerId"`
-	OwnerUsername string    `bson:"ownerUsername"`
-	Title         string    `bson:"title"`
-	Description   string    `bson:"description"`
-	Tags          []string  `bson:"tags"`
-	Formula       string    `bson:"formula"`
-	StorageKey    string    `bson:"storageKey"`   // = game id; directory under published/
-	ManifestPath  string    `bson:"manifestPath"` // relative to StorageKey
-	CoverPath     string    `bson:"coverPath,omitempty"`
-	HasSource     bool      `bson:"hasSource"`
-	RemixOf       string    `bson:"remixOf,omitempty"`
-	Slug          string    `bson:"slug,omitempty"` // the manifest's own id, unique when set; apps use it as a stable name
-	GroupID       string    `bson:"groupId,omitempty"`
-	EventID       string    `bson:"eventId,omitempty"`
-	Mood          []string  `bson:"mood,omitempty"` // from the manifest's brief; what the recommender describes a game by
-	Energy        string    `bson:"energy,omitempty"`
-	Competition   string    `bson:"competition,omitempty"`
-	Look          string    `bson:"look,omitempty"`
-	Scope         string    `bson:"scope,omitempty"` // "everyone", "group" or "event"
-	Level         int       `bson:"level,omitempty"` // position in a chain of levels (2 and up are later levels)
-	IsDaily       bool      `bson:"isDaily,omitempty"`
-	Bots          []BotRun  `bson:"bots,omitempty"` // the playtest bots' runs, for the recommender's quality prior
-	Likes         int64     `bson:"likes"`          // "saves are the likes": one counter
-	Plays         int64     `bson:"plays"`
-	Finishes      int64     `bson:"finishes"`
-	CreatedAt     time.Time `bson:"createdAt"`
-	Unlisted      bool      `bson:"unlisted,omitempty"` // a draft: reachable by id and in its owner's creations, but not in the feed, search or Group lists
+	ID            string      `bson:"_id"`
+	OwnerID       string      `bson:"ownerId"`
+	OwnerUsername string      `bson:"ownerUsername"`
+	Title         string      `bson:"title"`
+	Description   string      `bson:"description"`
+	Tags          []string    `bson:"tags"`
+	Formula       string      `bson:"formula"`
+	StorageKey    string      `bson:"storageKey"`   // = game id; directory under published/
+	ManifestPath  string      `bson:"manifestPath"` // relative to StorageKey
+	CoverPath     string      `bson:"coverPath,omitempty"`
+	HasSource     bool        `bson:"hasSource"`
+	RemixOf       string      `bson:"remixOf,omitempty"`
+	Slug          string      `bson:"slug,omitempty"` // the manifest's own id, unique when set; apps use it as a stable name
+	GroupID       string      `bson:"groupId,omitempty"`
+	EventID       string      `bson:"eventId,omitempty"`
+	Mood          []string    `bson:"mood,omitempty"` // from the manifest's brief; what the recommender describes a game by
+	Energy        string      `bson:"energy,omitempty"`
+	Competition   string      `bson:"competition,omitempty"`
+	Look          string      `bson:"look,omitempty"`
+	Scope         string      `bson:"scope,omitempty"` // "everyone", "group" or "event"
+	Level         int         `bson:"level,omitempty"` // position in a chain of levels (2 and up are later levels)
+	IsDaily       bool        `bson:"isDaily,omitempty"`
+	Bots          []BotRun    `bson:"bots,omitempty"` // the playtest bots' runs, for the recommender's quality prior
+	Likes         int64       `bson:"likes"`          // "saves are the likes": one counter
+	Plays         int64       `bson:"plays"`
+	Finishes      int64       `bson:"finishes"`
+	CreatedAt     time.Time   `bson:"createdAt"`
+	Score         *ScoreModel `bson:"score,omitempty"`    // what the board ranks and how (nil: points, higher first)
+	Unlisted      bool        `bson:"unlisted,omitempty"` // a draft: reachable by id and in its owner's creations, but not in the feed, search or Group lists
 }
 
 type GameView struct {
-	ID            string    `json:"id"`
-	Slug          string    `json:"slug,omitempty"`
-	GroupID       string    `json:"groupId,omitempty"`
-	EventID       string    `json:"eventId,omitempty"`
-	Title         string    `json:"title"`
-	Description   string    `json:"description"`
-	Tags          []string  `json:"tags"`
-	Formula       string    `json:"formula"`
-	OwnerID       string    `json:"ownerId"`
-	OwnerUsername string    `json:"ownerUsername"`
-	Likes         int64     `json:"likes"`
-	Plays         int64     `json:"plays"`
-	Finishes      int64     `json:"finishes"`
-	LikedByMe     bool      `json:"likedByMe"`
-	RemixOf       string    `json:"remixOf,omitempty"`
-	PackageURL    string    `json:"packageUrl"`
-	ManifestURL   string    `json:"manifestUrl"`
-	CoverURL      string    `json:"coverUrl,omitempty"`
-	Unlisted      bool      `json:"unlisted,omitempty"`
-	CreatedAt     time.Time `json:"createdAt"`
+	ID            string     `json:"id"`
+	Slug          string     `json:"slug,omitempty"`
+	GroupID       string     `json:"groupId,omitempty"`
+	EventID       string     `json:"eventId,omitempty"`
+	Title         string     `json:"title"`
+	Description   string     `json:"description"`
+	Tags          []string   `json:"tags"`
+	Formula       string     `json:"formula"`
+	OwnerID       string     `json:"ownerId"`
+	OwnerUsername string     `json:"ownerUsername"`
+	Likes         int64      `json:"likes"`
+	Plays         int64      `json:"plays"`
+	Finishes      int64      `json:"finishes"`
+	LikedByMe     bool       `json:"likedByMe"`
+	RemixOf       string     `json:"remixOf,omitempty"`
+	PackageURL    string     `json:"packageUrl"`
+	ManifestURL   string     `json:"manifestUrl"`
+	CoverURL      string     `json:"coverUrl,omitempty"`
+	Unlisted      bool       `json:"unlisted,omitempty"`
+	Score         *ScoreView `json:"score,omitempty"`
+	CreatedAt     time.Time  `json:"createdAt"`
 }
 
 // Event is one row of the feed event log. Three shapes share the collection:
@@ -157,6 +159,7 @@ type Score struct {
 	UserID    string    `bson:"userId" json:"userId"`
 	Username  string    `bson:"username" json:"username"`
 	Score     int64     `bson:"score" json:"score"`
+	TimeMs    int64     `bson:"timeMs,omitempty" json:"timeMs,omitempty"` // the run's time, for games whose board reads it
 	UpdatedAt time.Time `bson:"updatedAt" json:"updatedAt"`
 }
 
