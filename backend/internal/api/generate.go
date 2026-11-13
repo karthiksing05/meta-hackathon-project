@@ -353,6 +353,9 @@ func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMe
 		request += "\n\n" + job.Anatomy
 	}
 	payload := map[string]any{"request": request, "brief": job.Brief}
+	if len(job.Context) > 0 {
+		payload["context"] = job.Context
+	}
 	if job.BaseGameID != "" {
 		if len(job.Brief) == 0 {
 			payload["brief"] = nil // a change keeps the game's own brief
