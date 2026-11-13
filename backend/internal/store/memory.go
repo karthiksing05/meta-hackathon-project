@@ -31,7 +31,8 @@ type Memory struct {
 	notifs     map[string]*model.Notification
 	devices    map[string]model.PushDevice
 	sounds     map[string]*model.Sound
-	soundSaves map[string]bool // soundID|userID
+	soundSaves map[string]bool         // soundID|userID
+	runLogs    map[string]model.RunLog // gameID:userID (runlog_stores.go)
 }
 
 func NewMemory() *Memory {

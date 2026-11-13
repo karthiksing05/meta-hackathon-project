@@ -123,6 +123,7 @@ func (s *Server) Handler() http.Handler {
 			r.With(s.optionalAuth).Get("/leaderboard", s.leaderboard)
 			r.With(s.optionalAuth).Get("/likes", s.gameLikes)
 			r.With(s.requireAuth).Post("/scores", s.submitScore)
+			r.With(s.requireAuth).Get("/runs/{userId}/log", s.runLog)
 		})
 
 		// People, friends and Groups

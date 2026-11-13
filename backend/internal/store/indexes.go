@@ -112,6 +112,10 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 			{Keys: k("userId", 1), Options: options.Index().SetName("scores_user")},
 			{Keys: k("userId", 1, "updatedAt", -1), Options: options.Index().SetName("scores_user_recent")},
 		},
+		// run logs behind counted scores (_id is gameId:userId); deleting a game removes its logs
+		cRunLogs: {
+			{Keys: k("gameId", 1), Options: options.Index().SetName("runlogs_game")},
+		},
 		// the game-making catalog (internal/harness; _id is the entry id). Seeded by cmd/dbinit.
 		"game_types": {
 			{Keys: k("family", 1), Options: options.Index().SetName("types_family")},

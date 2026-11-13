@@ -49,6 +49,7 @@ treat the exact shapes as the first version and change them together with the cl
 | `GET /v1/games/{id}` | optional | one game; `{id}` may also be the slug from its manifest |
 | `PUT/DELETE /v1/games/{id}/like` | bearer | like or unlike (a "save"; idempotent) |
 | `GET /v1/games/{id}/leaderboard?scope=everyone\|friends\|group&groupId=`, `POST /v1/games/{id}/scores` (`{score}`, or `{log}` for a game with a score model) | none (friends and group need a bearer; group needs membership) / bearer | best score per user, optionally only among my friends (and me) or a Group's members |
+| `GET /v1/games/{id}/runs/{userId}/log` | bearer (that person, their friends or a Group-mate) | the run behind their board score, to watch as a Burst: `{gameId, userId, username, score, display, updatedAt, replay}` (see [Watching a friend's run](#watching-a-friends-run)) |
 | `GET /v1/me/likes`, `GET /v1/games/{id}/likes` | bearer / optional | the games I saved; how many saved a game and which of my friends did |
 | `POST /v1/challenges`, `GET /v1/challenges` | bearer | "beat my score": `{gameId, toUserIds[]}` (friends only, up to 20); the ones I sent and received, with `beaten`/`myScore` or each recipient's `responses` |
 | `GET /v1/me/moments` | bearer | what happened with me on other phones: challenges received plus off-feed moment events that name me in `with`; `{moments: [{momentID, kind, gameID, from, at}], cursor}` |
@@ -163,6 +164,18 @@ game as `score {kind, direction, countsWhen, aggregate, tieBreak, format, bounds
 - **`aggregate`**: `best` keeps a person's best by the direction and tie-break; `latest` their newest run. `sum_week` ranks as `best` for now.
 - **`bounds`**: a score below `min` or above `max`, or earned faster than `max_rate_per_s`, is refused (422).
 - **`ranked: false`**: the board is a plain list, newest first, and it awards no points on the Group weekly board.
+
+## Watching a friend's run
+
+- A score may carry `replay`, the runtime's replay log of the same run (`{seed, tick_rate, total_ticks, inputs, length?}`, what the
+  player plays as a Burst): `POST /v1/games/{id}/scores {log, replay}` (or `{score, replay}` for a game without a score model). Up to
+  256 KB and 40,000 inputs; a malformed one is refused (400) before anything is counted.
+- The server keeps one run per person and game (`run_logs`, with the verified `log` beside it), replaced only when that run sets the
+  person's board score. A run that isn't counted keeps the old one; a counted run without a replay leaves the row with none.
+- Board rows (every scope, and the reply to a score) carry `replayAvailable: true` and `replayUrl` when the caller may watch that run:
+  it is their own, a friend's, or a Group-mate's, and the kept run still matches the score on the board. Signed out, no row has one.
+- `GET /v1/games/{id}/runs/{userId}/log` returns it (403 for anyone else, 404 when none is kept). The engine log stays on the server.
+- Deleting a game deletes its runs. The `run_logs` index comes from `cmd/dbinit`.
 
 ## The generator's internal routes (private network only)
 
