@@ -2,6 +2,10 @@
 
 *Why only Facebook has what Whims needs, and how it compares with the alternatives. Part of the pitch docs; start at [README.md](README.md).*
 
+**The short answer.** Whims is only as good as who you play with, and Facebook is where the people and the places are: Groups with members and posts, Events with guest lists, friends under everyday names, Messenger group chats and a feed where friends already look. A game about "who's coming Saturday" needs an Event; a Daily about "our Group" needs a Group; a Group Blend needs the Group's members and what they play. The table "What breaks without Facebook" below is the one to show.
+
+**And Facebook needs it.** The way back for young adults ([01-story.md](01-story.md)) is a reason for a whole friend group to show up together. Whims is built on exactly the objects that only Facebook has, so every game played is also a Group visited, an Event seen or a friend added.
+
 ## 3. The short answer: why Facebook
 
 ### 3.1 Why Facebook: only Facebook has these objects
@@ -21,7 +25,7 @@
    - 69% of US adults aged 18 to 29 use Facebook (Pew, 2026) [52], and 49% of all 18-to-29-year-olds use it daily (Pew, Feb to Mar 2025) [53].
    - Meta reported more than 40 million young-adult daily users in the US and Canada in 2024 [13].
    - Meta says young adults arrive at life moments, "moving, going to college, getting their first job or apartment" [13]. One in three young adults on Facebook in the US uses Marketplace daily (2026) [22].
-6. **Distribution in one app.** Whims runs on 6 distribution surfaces (feed, Stories, Reels and Video, Groups, Events, profiles) plus 3 entry points (the Whims tab, Notifications and the Library in the Menu) (D19). A Wordle grid had to leave the game for Twitter; a Burst lands where friends can tap and play.
+6. **Distribution in one app.** Whims runs on 6 distribution surfaces (feed, Stories, Reels and Video, Groups, Events, profiles) plus 3 entry points (the Whims tab, Notifications and the Library in the Menu) (D19). Since the collaboration batch, games also travel through the clone's Messenger chats (Challenge Me, group-chat sessions) and Search, though on one device with synthetic friends. A Wordle grid had to leave the game for Twitter; a Burst lands where friends can tap and play.
 
 ### 3.2 Why Meta can build it: strategy and models
 
@@ -53,13 +57,13 @@ A game about "who's coming Saturday" needs an Event, and a Daily about "our Grou
 
 | Remove this | And you lose |
 |---|---|
-| Groups (membership and posts) | The Daily Whim, the Group board scope, games made from members' intros, weekly boards and game night |
+| Groups (membership and posts) | The Daily Whim, the Group board scope, games made from members' intros, the Group Blend, weekly boards and game night |
 | Events (RSVP list) | The icebreaker, "who's coming", and Add friend between attendees |
 | The everyday-name friend graph | The Friends board, friends' Bursts first in the feed, rivalries, Games about me, hometown challenges |
 | Feed, Stories, Reels | Floats, story shares, and Bursts as playable clips |
-| Messenger | Challenge Me and group-chat play (not built) |
+| Messenger | Challenge Me, Challenge back and group-chat sessions (in the app on one device; friends are synthetic) |
 | Notifications and profiles | "Someone beat your score", "remixed your Whim", and a maker's body of work |
-| Search | Finding games and "Make it with Muse" (not built) |
+| Search | Finding games and "Make it with Muse" (in the app) |
 
 **Where Facebook is not the strongest, stated plainly.**
 
