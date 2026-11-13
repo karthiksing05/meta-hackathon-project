@@ -249,6 +249,20 @@ async function compose(args, reply) {
   const askB = async (s, u, purpose) => { users.push({ u, purpose }); return ask(s, u, purpose); };
   const shipped = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), askB, () => {}, blocker));
   ok(shipped.stats.layoutBlocking === 2 && shipped.stats.layoutRepairs >= 1 && users.some((x) => /layout repair/.test(x.purpose) && x.u.includes('move the label off the sprite')), `layout repair rounds carry the hints, then it ships with layout_block off (${shipped.stats.layoutRepairs} rounds)`);
+  // Time: the first run gets 75 s and every stage; reruns 30 s without readability; a job's runs stay under 4 min.
+  const seen = [];
+  const recording = { verifyLayout: async (g, o) => { seen.push({ budgetMs: o.budgetMs, readability: o.readability }); return blocker.verifyLayout(g); } };
+  await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), ask, () => {}, recording);
+  ok(seen.length >= 2 && seen[0].budgetMs === 75000 && seen[0].readability === undefined && seen.slice(1).every((s) => s.budgetMs === 30000 && s.readability === false), `verifier budgets: first 75 s with readability, reruns 30 s without (${JSON.stringify(seen)})`);
+  let slowRuns = 0;
+  const slow = { verifyLayout: async (g, o) => { slowRuns++; await new Promise((r) => setTimeout(r, 0)); return blocker.verifyLayout(g, o); } };
+  const VDate = vm.runInContext("Date", context);
+  const realNow = VDate.now;
+  let fake = realNow();
+  VDate.now = () => (fake += 60000); // every reading of the clock moves a minute: the job cap and the 9-minute stop kick in
+  let capped;
+  try { capped = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), ask, () => {}, slow)); } finally { VDate.now = realNow; }
+  ok(slowRuns <= 2 && capped.stats.layoutVerifyMs <= 240000 && (capped.stats.layoutRepairs ?? 0) <= 1 && capped.stats.layoutBlocking === 2, `the job cap and the 9-minute stop hold (${slowRuns} runs, ${capped.stats.layoutVerifyMs} ms, ${capped.stats.layoutVerifySkipped ?? 0} skipped, ${capped.stats.layoutRepairs ?? 0} repairs)`);
   let refused = null;
   try { await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: { ...SAMPLES.dodge, layout_block: true } }), ask, () => {}, blocker); } catch (e) { refused = e; }
   ok(refused && /blocking/.test(String(refused.message)), `layout_block true refuses it (${refused?.message})`);
