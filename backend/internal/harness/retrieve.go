@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -125,6 +126,9 @@ type Request struct {
 	// Preferences are the person's earlier picks between versions (docs/harness-gaps/variants.md), from the
 	// server's profile store. They go into the context and the planner prompt.
 	Preferences []Preference `json:"preferences,omitempty"`
+	// Sponsor is the server's sponsor record for this job (a brand account's game, model.Sponsor): when the request
+	// doesn't name a sponsor itself, the understanding carries this one, so the plan's spec.theme gets it.
+	Sponsor *Sponsor `json:"sponsor,omitempty"`
 }
 
 // Timings are in milliseconds.
@@ -174,6 +178,11 @@ func (h *Harness) Context(ctx context.Context, req Request) (ContextPack, error)
 			pack.Understood = "keywords (muse failed: " + err.Error() + ")"
 		}
 		pack.Understanding = u
+	}
+	if req.Sponsor != nil && strings.TrimSpace(req.Sponsor.Name) != "" && pack.Understanding.Sponsor == nil {
+		sp := *req.Sponsor
+		sp.Name = strings.TrimSpace(sp.Name)
+		pack.Understanding.Sponsor = &sp
 	}
 	pack.Timings.Understand = ms(time.Since(t0))
 	pack.Timings.UnderstoodBy = pack.Understood

@@ -76,6 +76,7 @@ func (h *Harness) BuildGiven(ctx context.Context, req Request, spec *Spec) (*Bui
 	if err != nil {
 		return nil, err
 	}
+	gc.Preferences = req.Preferences
 	plan := &Plan{Spec: spec, Notes: []string{"the person agreed this spec: it was not planned again"}}
 	for _, t := range gc.Types {
 		if len(plan.TypeIDs) < 3 {

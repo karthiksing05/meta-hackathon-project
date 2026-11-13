@@ -18,6 +18,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/auth"
+	"github.com/karthiksing05/meta-hackathon-project/backend/internal/harness"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/model"
 	"github.com/karthiksing05/meta-hackathon-project/backend/internal/store"
 )
@@ -65,10 +66,15 @@ type generateIn struct {
 	// A sound to put behind the finished game (a sound id from /v1/sounds), where in the loop to start, and how loud it
 	// is against the game's own sound effects (0 to 1). A change to a game keeps the original's sound unless this names another.
 	// Sponsor makes the finished game a brand's ad. Only a brand account may send it.
-	Sponsor  *sponsorIn `json:"sponsor"`
-	SoundID  string     `json:"soundId"`
-	OffsetMs *int64     `json:"offsetMs"`
-	Mix      *float64   `json:"mix"`
+	Sponsor *sponsorIn `json:"sponsor"`
+	SoundID string     `json:"soundId"`
+	// GroupID makes the game for a Group or Event the person belongs to: the generator scopes it there
+	// (structure.scope "group:<id>" or "event:<id>", from context.group).
+	GroupID string `json:"groupId"`
+	// Preferences are the person's earlier picks between versions (docs/harness-gaps/variants.md applyPick), for the plan.
+	Preferences []harness.Preference `json:"preferences"`
+	OffsetMs    *int64               `json:"offsetMs"`
+	Mix         *float64             `json:"mix"`
 }
 
 // genHealthCache remembers the generator's last health answer for a few seconds.
@@ -158,6 +164,27 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if len(in.Preferences) > maxPreferences {
+		writeErr(w, 400, fmt.Sprintf("preferences can hold up to %d picks", maxPreferences))
+		return
+	}
+	var group *model.Group
+	if id := strings.TrimSpace(in.GroupID); id != "" {
+		g, err := s.Store.GroupByID(r.Context(), id)
+		if err != nil {
+			if errors.Is(err, store.ErrNotFound) {
+				writeErr(w, 404, "group not found")
+			} else {
+				s.serverErr(w, r, err)
+			}
+			return
+		}
+		if !s.isMember(r.Context(), g.ID, userFrom(r).ID) {
+			writeErr(w, 403, "only members can make a game for this group")
+			return
+		}
+		group = g
+	}
 	var sound *model.GameSound
 	switch {
 	case strings.TrimSpace(in.SoundID) != "":
@@ -233,6 +260,13 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	job.Spec, job.Answers = specJSON, answers
 	job.Sound = sound
 	job.Sponsor = sponsor
+	if group != nil {
+		job.GroupID, job.GroupKind = group.ID, group.Kind
+	}
+	if len(in.Preferences) > 0 {
+		raw, _ := json.Marshal(in.Preferences)
+		job.Preferences = string(raw)
+	}
 	job.Draft = base != nil // a change stays a draft until it is published
 	if in.Draft != nil {
 		job.Draft = *in.Draft
@@ -410,6 +444,16 @@ func (s *Server) runJob(job model.Job, owner model.User, baseManifest json.RawMe
 		request += "\n\n" + job.Anatomy
 	}
 	payload := map[string]any{"request": request, "brief": job.Brief}
+	if job.GroupID != "" { // the generator scopes the game to it (group-play.mjs structureFor), with or without a plan
+		if job.Context == nil {
+			job.Context = map[string]any{}
+		}
+		kind := "group"
+		if job.GroupKind == "event" {
+			kind = "event"
+		}
+		job.Context["group"] = map[string]any{"id": job.GroupID, "kind": kind}
+	}
 	if len(job.Context) > 0 {
 		payload["context"] = job.Context
 	}

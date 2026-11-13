@@ -74,6 +74,8 @@ const brief = { intent: 'a calm game about fog over the bay', audience: 'friends
   const grouped = { ...first.manifest, group_play: { mode: 'group_round', same_seed: true, result: { kind: 'score', compare: 'score' } }, structure: { cadence: 'daily', scope: 'group:g123', setter: 'ai' } };
   const kept = (await compose({ request: 'make it faster', brief, base: grouped, remixOf: 'bbbbbbbbbbbbbbbbbbbbbbbb' }, { studio, muse: new ScriptedMuse([example()]) })).manifest;
   check('a change keeps the base game\'s group_play and its Group scope', kept.group_play?.mode === 'group_round' && kept.structure?.scope === 'group:g123', JSON.stringify({ gp: kept.group_play, st: kept.structure }));
+  const forGroup = (await compose({ request: 'a calm fog game', brief, context: { group: { id: 'grp_fog', kind: 'group' } } }, { studio, muse: new ScriptedMuse([example()]) })).manifest;
+  check('context.group alone (no plan) scopes the game to that Group', forGroup.structure?.scope === 'group:grp_fog', JSON.stringify(forGroup.structure));
   let err;
   try { await compose({ request: 'x', brief, base: { title: 'x', content: {} } }, { studio, muse: new ScriptedMuse([example()]) }); } catch (e) { err = e; }
   check("a game without its authoring source can't be changed", !!err && /authoring_json/.test(err.message), err?.message);

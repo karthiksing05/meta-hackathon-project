@@ -217,6 +217,11 @@ Group play has no live multiplayer and no server chats. Someone sends a game int
 `GET /v1/games/{id}/agreement` compares picks in an opinion game: `?with=<friendId>`, `?scope=friends` or `?scope=group&groupId=<id>`. It returns `{agreement: 0-100, players, items: [{item, mine, group, share}]}`, built from each person's latest replay-checked `picks` in their rounds. `group` is the most common pick among the others and `share` the share of the others who picked what you did. It answers 409 until you and someone else have each played a round of the game, 422 for a game whose result is not picks.
 
 `POST /v1/generate` also takes `spec` (a game-spec/1 from `POST /v1/harness/plan`: the server uses it as the plan and does not plan again) and `answers` (`{slot: answer}` for the plan's clarifying questions; they replace the planner's guesses). Both are for new games only.
+It also takes `preferences` (up to 20 earlier picks between versions, `[{axis, chosen: {label, value?}, rejected?, at?}]`,
+docs/harness-gaps/variants.md; `POST /v1/harness/plan` takes them too) and `groupId` (a Group or Event the caller belongs to:
+the generator gets `context.group {id, kind}` and scopes the game there, `structure.scope` `group:<id>` or `event:<id>`;
+403 for a non-member, 404 for an unknown id). A brand's `sponsor` also goes into the plan's understanding when the request
+doesn't name one, so `spec.theme.sponsor` carries the brand's name.
 
 ## Ranking (the recommender runs here)
 

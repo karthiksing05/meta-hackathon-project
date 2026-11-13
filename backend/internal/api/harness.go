@@ -38,6 +38,13 @@ func (s *Server) harnessContext(ctx context.Context, job model.Job) map[string]a
 		return nil
 	}
 	var given *harness.Spec
+	req := harness.Request{Text: job.Request}
+	if job.Preferences != "" {
+		_ = json.Unmarshal([]byte(job.Preferences), &req.Preferences)
+	}
+	if job.Sponsor != nil { // a brand's game: the plan puts the sponsor in spec.theme even when the request doesn't name it
+		req.Sponsor = &harness.Sponsor{Name: job.Sponsor.Name}
+	}
 	if job.Spec != "" {
 		given = new(harness.Spec)
 		if json.Unmarshal([]byte(job.Spec), given) != nil {
@@ -50,9 +57,9 @@ func (s *Server) harnessContext(ctx context.Context, job model.Job) map[string]a
 	var b *harness.Built
 	var err error
 	if given != nil {
-		b, err = s.Harness.BuildGiven(ctx, harness.Request{Text: job.Request}, given)
+		b, err = s.Harness.BuildGiven(ctx, req, given)
 	} else {
-		b, err = s.Harness.Build(ctx, harness.Request{Text: job.Request}, s.Planner)
+		b, err = s.Harness.Build(ctx, req, s.Planner)
 	}
 	if err == nil && len(job.Answers) > 0 && b.Plan != nil {
 		foldAnswers(b.Plan, job.Answers)
@@ -78,8 +85,12 @@ func (s *Server) harnessContext(ctx context.Context, job model.Job) map[string]a
 }
 
 type harnessPlanIn struct {
-	Request string `json:"request"`
+	Request     string               `json:"request"`
+	Preferences []harness.Preference `json:"preferences"` // the person's earlier picks between versions
 }
+
+// maxPreferences caps the picks a request may carry (one per axis is the usual; variants.md keeps the latest per axis).
+const maxPreferences = 20
 
 func (s *Server) harnessPlan(w http.ResponseWriter, r *http.Request) {
 	if !s.HarnessContext || s.Harness == nil || s.Planner == nil {
@@ -97,7 +108,11 @@ func (s *Server) harnessPlan(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(r.Context()), planEndpointBudget)
 	defer cancel()
-	b, err := s.Harness.Build(ctx, harness.Request{Text: in.Request}, s.Planner)
+	if len(in.Preferences) > maxPreferences {
+		writeErr(w, 400, fmt.Sprintf("preferences can hold up to %d picks", maxPreferences))
+		return
+	}
+	b, err := s.Harness.Build(ctx, harness.Request{Text: in.Request, Preferences: in.Preferences}, s.Planner)
 	switch {
 	case errors.Is(err, harness.ErrMuseNotConfigured):
 		writeErr(w, 503, "Muse is not set up on this server yet")

@@ -195,24 +195,29 @@ type Job struct {
 	Brief   map[string]any `bson:"brief,omitempty"`
 	// Context is what the harness worked out before the call (kinds of game, tools, plan). Only the server sets it,
 	// never a client: it goes into the generator's system prompt.
-	Context    map[string]any    `bson:"context,omitempty"`
-	Spec       string            `bson:"spec,omitempty"`       // a game-spec/1 the person already agreed (JSON): the plan is not made again
-	Answers    map[string]string `bson:"answers,omitempty"`    // the person's answers to the plan's clarifying questions, by slot
-	Anatomy    string            `bson:"anatomy,omitempty"`    // the agreed game anatomy, kept apart from the 2,000 character request
-	Sound      *GameSound        `bson:"sound,omitempty"`      // put behind the finished game
-	Sponsor    *Sponsor          `bson:"sponsor,omitempty"`    // set on the finished game (brand accounts only)
-	Draft      bool              `bson:"draft,omitempty"`      // the finished game starts unlisted
-	BaseGameID string            `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)
-	NextLevel  bool              `bson:"nextLevel,omitempty"`
-	Level      int               `bson:"level,omitempty"`
-	Status     string            `bson:"status"`
-	Events     []JobEvent        `bson:"events"`
-	GameID     string            `bson:"gameId,omitempty"`
-	Error      string            `bson:"error,omitempty"`
-	Stats      map[string]any    `bson:"stats,omitempty"`
-	CreatedAt  time.Time         `bson:"createdAt"`
-	UpdatedAt  time.Time         `bson:"updatedAt"`
-	FinishedAt *time.Time        `bson:"finishedAt,omitempty"`
+	Context map[string]any    `bson:"context,omitempty"`
+	Spec    string            `bson:"spec,omitempty"`    // a game-spec/1 the person already agreed (JSON): the plan is not made again
+	Answers map[string]string `bson:"answers,omitempty"` // the person's answers to the plan's clarifying questions, by slot
+	// Preferences are the person's earlier picks between versions (harness.Preference list, as JSON text).
+	Preferences string `bson:"preferences,omitempty"`
+	// GroupID and GroupKind: the Group or Event the game is made for (the generator's context.group).
+	GroupID    string         `bson:"groupId,omitempty"`
+	GroupKind  string         `bson:"groupKind,omitempty"`
+	Anatomy    string         `bson:"anatomy,omitempty"`    // the agreed game anatomy, kept apart from the 2,000 character request
+	Sound      *GameSound     `bson:"sound,omitempty"`      // put behind the finished game
+	Sponsor    *Sponsor       `bson:"sponsor,omitempty"`    // set on the finished game (brand accounts only)
+	Draft      bool           `bson:"draft,omitempty"`      // the finished game starts unlisted
+	BaseGameID string         `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)
+	NextLevel  bool           `bson:"nextLevel,omitempty"`
+	Level      int            `bson:"level,omitempty"`
+	Status     string         `bson:"status"`
+	Events     []JobEvent     `bson:"events"`
+	GameID     string         `bson:"gameId,omitempty"`
+	Error      string         `bson:"error,omitempty"`
+	Stats      map[string]any `bson:"stats,omitempty"`
+	CreatedAt  time.Time      `bson:"createdAt"`
+	UpdatedAt  time.Time      `bson:"updatedAt"`
+	FinishedAt *time.Time     `bson:"finishedAt,omitempty"`
 }
 
 // JobUpdate is what finishing a job records.
