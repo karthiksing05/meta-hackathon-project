@@ -1,0 +1,55 @@
+{
+  "fragment": "country_outline",
+  "version": 1,
+  "describe": "One place's outline drawn big, alone, filling the rect (`x`, `y`, `w`, `h`): guess the country (or US state) from its shape. The outlines come from the manifest's `geo` section with an `outline` rect (authoring/expander/geo.mjs, built from Natural Earth), never from the model: write `geo` and leave the geo_outline functions to it; the geo step also sets this use's rect. The game supplies `outline_focus()` (int): the index into the `geo` places to draw, or -1 for none. The main land mass fills the rect; far-off parts (overseas islands) are cut at the rect's edge. Filled with $primary and outlined in $ink. Draws nothing interactive.",
+  "params": {
+    "x": { "type": "float", "default": 40.0, "min": 0.0, "max": 360.0 },
+    "y": { "type": "float", "default": 100.0, "min": 0.0, "max": 640.0 },
+    "w": { "type": "float", "default": 280.0, "min": 40.0, "max": 360.0 },
+    "h": { "type": "float", "default": 150.0, "min": 40.0, "max": 640.0 }
+  },
+  "requires": {
+    "functions": {
+      "outline_focus": { "params": {}, "returns": "int" },
+      "geo_outline": { "params": {}, "returns": "list<list<vec2>>" },
+      "geo_outline_place": { "params": {}, "returns": "list<int>" }
+    }
+  },
+  "functions": {
+    "_rings": {
+      "params": {},
+      "returns": "list<int>",
+      "body": "filter(range(len(geo_outline_place())), r => get_or(geo_outline_place(), r, -1) == outline_focus())"
+    }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": "@x",
+          "y": "@y",
+          "children": [
+            {
+              "node": "repeat",
+              "source": "_rings()",
+              "as": "r",
+              "key": "r",
+              "template": {
+                "node": "poly",
+                "points": "= get_or(geo_outline(), r, [])",
+                "fill": "$primary",
+                "stroke": "$ink",
+                "stroke_width": 2
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "tags": { "mood": ["any"], "energy": ["low", "medium"] },
+  "conflicts": []
+}

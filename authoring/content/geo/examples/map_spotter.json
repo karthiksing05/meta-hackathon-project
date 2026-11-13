@@ -1,0 +1,36 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Map Spotter",
+    "instructions": "A country lights up on the world map. Tap its name before the bar runs out. Ten countries; the second miss ends the trip.",
+    "duration_s": 90
+  },
+  "geo": {
+    "pack": "world",
+    "pick": { "region": "world", "count": 12, "min_area": 20, "seed": 7 },
+    "map": { "x": 5, "y": 92, "w": 350, "h": 136, "view": "world" },
+    "quiz": { "choices": 4, "ask": "name" }
+  },
+  "uses": [
+    { "fragment": "geo_map" },
+    { "fragment": "quiz", "params": { "choices": 4, "time_ms": 3000, "goal": 0 } },
+    { "fragment": "rounds", "params": { "count": 10, "label": "Country" }, "bind": { "round_done": "question_done" } },
+    { "fragment": "lives", "params": { "count": 2 }, "bind": { "hit": "answered_wrong" } },
+    { "fragment": "score", "params": { "points": 10, "label": "Score" }, "bind": { "point": "answered_right" } }
+  ],
+  "functions": {
+    "quiz_questions": { "params": {}, "returns": "list<string>", "body": "map(geo_names(), n => '')" },
+    "quiz_choices": { "params": {}, "returns": "list<string>", "body": "geo_choices()" },
+    "quiz_answers": { "params": {}, "returns": "list<string>", "body": "geo_names()" },
+    "map_focus": { "params": {}, "returns": "int", "body": "get_or(order, qi, -1)" }
+  },
+  "objectives": { "time_limit": "90s", "on_timeout": "lose" },
+  "look": { "id": "paper", "tokens": {} },
+  "art": {
+    "style": "A calm paper atlas: pale sea, cream land, slate borders, a warm orange highlight.",
+    "palette": { "bg": "#F3F6FB", "surface": "#E3EAF5", "primary": "#4C7DD9", "secondary": "#7B6FD6", "accent": "#F08A3C", "ink": "#1E2A3D", "danger": "#D9485F" },
+    "font": "Avenir Next"
+  },
+  "sound": { "set": "chime", "music": false },
+  "score": { "kind": "points", "measures": "countries named", "unit": "points", "direction": "higher", "counts_when": "any", "aggregate": "best", "tie_break": "less time", "format": "{n}", "events": ["answered_right"] }
+}

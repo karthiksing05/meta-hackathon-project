@@ -1,0 +1,104 @@
+{
+  "fragment": "geo_map",
+  "version": 1,
+  "describe": "A real map in a rect (`x`, `y`, `w`, `h`) with one place lit up. The map picture and the place outlines come from the manifest's `geo` section (authoring/expander/geo.mjs, built from Natural Earth), never from the model: write `geo` and leave the art role `map` and the geo_* functions to it. The game supplies `map_focus()` (int): the index into the `geo` places to light up, or -1 for none. For example `get_or(order, qi, -1)` to show the asked country, or `if locked then get_or(order, qi, -1) else -1` to show it only after the answer. The lit place is filled with $accent and gets a pulsing ring at its label point, so small countries still show. `geo_place_at(p)` (p: a canvas vec2, such as a tap's pointer) gives the index of the game's place whose outline contains p, or -1: use it for tap-the-country games. Draws nothing interactive; add map_pin (or your own transparent rect with on_tap) for taps.",
+  "params": {
+    "x": { "type": "float", "default": 5.0, "min": 0.0, "max": 360.0 },
+    "y": { "type": "float", "default": 92.0, "min": 0.0, "max": 640.0 },
+    "w": { "type": "float", "default": 350.0, "min": 40.0, "max": 360.0 },
+    "h": { "type": "float", "default": 136.0, "min": 40.0, "max": 640.0 },
+    "ring": { "type": "bool", "default": true }
+  },
+  "art": {
+    "map": {
+      "describe": "The map picture, made by the geo step from Natural Earth outlines. Don't draw it yourself.",
+      "color": "surface"
+    }
+  },
+  "requires": {
+    "functions": {
+      "map_focus": { "params": {}, "returns": "int" },
+      "geo_rings": { "params": {}, "returns": "list<list<vec2>>" },
+      "geo_ring_place": { "params": {}, "returns": "list<int>" },
+      "geo_label": { "params": {}, "returns": "list<vec2>" }
+    }
+  },
+  "functions": {
+    "_focus_rings": {
+      "params": {},
+      "returns": "list<int>",
+      "body": "filter(range(len(geo_ring_place())), r => get_or(geo_ring_place(), r, -1) == map_focus())"
+    },
+    "_cross": {
+      "params": { "p": "vec2", "a": "vec2", "b": "vec2" },
+      "returns": "bool",
+      "body": "if (a.y > p.y) == (b.y > p.y) then false else p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x"
+    },
+    "_inside": {
+      "params": { "p": "vec2", "ring": "list<vec2>" },
+      "returns": "bool",
+      "body": "fold(range(len(ring)), false, (acc, i) => if _cross(p, get_or(ring, i, vec(0.0, 0.0)), get_or(ring, (i + len(ring) - 1) % len(ring), vec(0.0, 0.0))) then not acc else acc)"
+    },
+    "geo_place_at": {
+      "params": { "p": "vec2" },
+      "returns": "int",
+      "body": "fold(range(len(geo_ring_place())), -1, (acc, r) => if acc < 0 and _inside(vec(p.x - @x, p.y - @y), get_or(geo_rings(), r, [])) then get_or(geo_ring_place(), r, -1) else acc)"
+    },
+    "_focus_at": {
+      "params": {},
+      "returns": "vec2",
+      "body": "get_or(geo_label(), map_focus(), vec(-100.0, -100.0))"
+    }
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "playfield",
+        "include": "@art.map",
+        "node": { "node": "image", "asset": "@art.map.id", "x": "@x", "y": "@y", "w": "@w", "h": "@h" }
+      },
+      {
+        "slot": "playfield",
+        "include": "not @art.map",
+        "node": { "node": "rect", "x": "@x", "y": "@y", "w": "@w", "h": "@h", "radius": 10, "fill": "$surface" }
+      },
+      {
+        "slot": "playfield",
+        "node": {
+          "node": "group",
+          "x": "@x",
+          "y": "@y",
+          "children": [
+            {
+              "node": "repeat",
+              "source": "_focus_rings()",
+              "as": "r",
+              "key": "r",
+              "template": {
+                "node": "poly",
+                "points": "= get_or(geo_rings(), r, [])",
+                "fill": "$accent",
+                "stroke": "$ink",
+                "stroke_width": 1
+              }
+            },
+            {
+              "include": "@ring",
+              "node": "circle",
+              "x": "= _focus_at().x",
+              "y": "= _focus_at().y",
+              "r": "= 7.0 + 3.0 * sin(now * 1.0 / 140.0)",
+              "fill": "#00000000",
+              "stroke": "$accent",
+              "stroke_width": 2,
+              "visible": "= map_focus() >= 0"
+            }
+          ]
+        }
+      }
+    ],
+    "feedback": []
+  },
+  "tags": { "mood": ["any"], "energy": ["low", "medium"] },
+  "conflicts": []
+}
