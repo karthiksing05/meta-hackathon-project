@@ -27,7 +27,8 @@ struct StudioView: View {
 
     init(launch: StudioLaunch) {
         self.launch = launch
-        _model = State(initialValue: StudioModel(launch: launch))
+        // Reopened from the build dock: the same Studio session, on the step it reached.
+        _model = State(initialValue: GameBuildTracker.shared.model(for: launch) ?? StudioModel(launch: launch))
     }
 
     var body: some View {
@@ -35,18 +36,20 @@ struct StudioView: View {
             StudioBackdrop(palette: model.backdropPalette)
             if model.isReady {
                 VStack(spacing: 0) {
-                    StudioTopBar(model: model, onClose: requestClose)
+                    StudioTopBar(model: model, onClose: requestClose, onMinimize: canMinimize ? minimize : nil)
                     stageContent
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
         }
+        .modifier(GameBuildMinimizeGesture(isEnabled: canMinimize, onMinimize: minimize))
         .overlay(alignment: .bottom) {
             ToastHost()
                 .padding(.bottom, 96)
         }
         .onAppear {
             model.attach(bubbleStore: bubbleStore, appStore: appStore)
+            GameBuildTracker.shared.studioDidAppear(model)
             // Back after `onDisappear` stopped the auto-advance: don't strand a finished build on
             // the compose step, which has no buttons once Muse is done.
             if model.stage == .compose && model.isFinished {
@@ -54,7 +57,10 @@ struct StudioView: View {
             }
         }
         .onDisappear {
-            model.stopAll()
+            // Minimized: Muse keeps building, and the dock shows it.
+            if GameBuildTracker.shared.studioDidDisappear(model) {
+                model.stopAll()
+            }
         }
         #if DEBUG
         .task { await debugAutoBuild() }
@@ -154,6 +160,16 @@ struct StudioView: View {
         dismiss()
     }
 
+    /// Minimize while Muse builds: Studio closes, the build goes on in the dock above the tab bar.
+    private var canMinimize: Bool { model.stage == .compose && model.isComposing }
+
+    private func minimize() {
+        guard canMinimize else { return }
+        Haptics.light()
+        GameBuildTracker.shared.minimize(model)
+        dismiss()
+    }
+
     /// Shares it: shows the pending state, publishes, sends the challenges, then opens the game
     /// page. The pending state lasts exactly as long as the work (no fixed wait).
     private func float() {
@@ -187,6 +203,7 @@ struct StudioView: View {
 private struct StudioTopBar: View {
     let model: StudioModel
     let onClose: () -> Void
+    var onMinimize: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: FBSpacing.s) {
@@ -207,6 +224,10 @@ private struct StudioTopBar: View {
                 HStack {
                     StudioCircleButton(symbol: "xmark", accessibilityLabel: "Close", action: onClose)
                         .disabled(model.isPopping)
+                    if let onMinimize {
+                        GameBuildMinimizeButton(action: onMinimize)
+                            .transition(.opacity)
+                    }
                     Spacer()
                     status
                         .padding(.trailing, FBSpacing.s)
